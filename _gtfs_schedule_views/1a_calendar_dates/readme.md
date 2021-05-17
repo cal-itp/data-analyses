@@ -10,7 +10,7 @@
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -23,7 +23,7 @@
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -38,7 +38,7 @@ pk_col = (_.calitp_itp_id, _.calitp_url_number)
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -151,7 +151,7 @@ tbl_schedule_daily
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -172,7 +172,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -228,7 +228,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -261,7 +261,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -319,7 +319,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -424,7 +424,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -471,7 +471,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -528,7 +528,7 @@ tbl_schedule_daily >> filter(_.service_indicator.isna()) >> head(1)
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -656,7 +656,7 @@ It looks like there are more weekday entries, but seem fairly evenly spread out.
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -734,7 +734,7 @@ exception_dates = (
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -772,7 +772,7 @@ join_cols = [_[k] for k in join_keys]
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -842,7 +842,7 @@ join_cols = [_[k] for k in join_keys]
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -880,7 +880,7 @@ Note that they also have a `calendar.txt`, with 4 entries:
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -916,7 +916,7 @@ However, it does not have any corresponding trips. In this case, it looks like t
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
@@ -960,7 +960,7 @@ However, it does not have any corresponding trips. In this case, it looks like t
 
 <details>
 
-<summary>show code</summary>
+<summary><button>show code</button></summary>
 
 
 
