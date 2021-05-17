@@ -403,6 +403,50 @@ tbl_schedule_daily >> filter(_.service_indicator.isna()) >> head(1)
 ```
 
 
+
+
+<div><pre># Source: lazy query
+# DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
+# Preview:
+</pre><table border="0" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>calitp_itp_id</th>
+      <th>calitp_url_number</th>
+      <th>service_id</th>
+      <th>service_cal_start_date</th>
+      <th>service_cal_end_date</th>
+      <th>calitp_extracted_at</th>
+      <th>service_indicator</th>
+      <th>service_date</th>
+      <th>service_inclusion</th>
+      <th>service_exclusion</th>
+      <th>is_in_service</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>4</td>
+      <td>FEB21-Weekday-72-FEB21-1111100-</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>2021-05-27</td>
+      <td>True</td>
+      <td>None</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 11 columns</p><p># .. may have more rows</p></div>
+
+
+
+
 ```python
 exception_schedules = (
     tbl_schedule_daily
@@ -420,6 +464,103 @@ exception_counts = (
 df_exception_counts = exception_counts >> collect()
 df_exception_counts
 ```
+
+
+
+
+<table border="0" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>calitp_itp_id</th>
+      <th>calitp_url_number</th>
+      <th>service_id</th>
+      <th>n</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>278</td>
+      <td>0</td>
+      <td>73346-1111111-0</td>
+      <td>126</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>278</td>
+      <td>0</td>
+      <td>72987-1111100-0</td>
+      <td>90</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>278</td>
+      <td>0</td>
+      <td>72952-1111100-0</td>
+      <td>88</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>278</td>
+      <td>0</td>
+      <td>72965-1111100-0</td>
+      <td>88</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>278</td>
+      <td>0</td>
+      <td>72954-1111100-0</td>
+      <td>88</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>218</th>
+      <td>278</td>
+      <td>0</td>
+      <td>72982-0000010-0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>219</th>
+      <td>343</td>
+      <td>0</td>
+      <td>c_21375_b_29794_d_64</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>220</th>
+      <td>48</td>
+      <td>0</td>
+      <td>108699a6-0536-4926-bab1-56d4547e77c9</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>221</th>
+      <td>278</td>
+      <td>0</td>
+      <td>72976-0000001-0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>222</th>
+      <td>182</td>
+      <td>0</td>
+      <td>DSE-PP-1615</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<p>223 rows × 4 columns</p>
+
+
 
 ### Do they occur on specific days?
 
@@ -440,6 +581,59 @@ exception_dates = (
 )
 ```
 
+
+
+
+<table border="0" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>day_name</th>
+      <th>n</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Friday</td>
+      <td>933</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Monday</td>
+      <td>898</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Thursday</td>
+      <td>863</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Tuesday</td>
+      <td>830</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Wednesday</td>
+      <td>821</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>Saturday</td>
+      <td>698</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>Sunday</td>
+      <td>626</td>
+    </tr>
+  </tbody>
+</table>
+<p>7 rows × 2 columns</p>
+
+
+
 ### Do they occur on specific dates?
 
 
@@ -457,6 +651,19 @@ join_cols = [_[k] for k in join_keys]
 )
 ```
 
+
+    
+![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_20_0.png)
+    
+
+
+
+
+
+    <ggplot: (324531229)>
+
+
+
 ### Use 1: regular service
 
 
@@ -468,6 +675,58 @@ join_cols = [_[k] for k in join_keys]
     >> head()
 )
 ```
+
+
+
+
+<div><pre># Source: lazy query
+# DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
+# Preview:
+</pre><table border="0" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>calitp_itp_id</th>
+      <th>calitp_url_number</th>
+      <th>n</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>8</td>
+      <td>1</td>
+      <td>109</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>278</td>
+      <td>0</td>
+      <td>36</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>182</td>
+      <td>0</td>
+      <td>16</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>310</td>
+      <td>1</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>343</td>
+      <td>0</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 3 columns</p><p># .. may have more rows</p></div>
+
+
 
 
 ```python
@@ -484,12 +743,46 @@ filter_itp8 = filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
 )
 ```
 
+
+    
+![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_23_0.png)
+    
+
+
+
+
+
+    <ggplot: (-9223372036530171441)>
+
+
+
 Note that they also have a `calendar.txt`, with 4 entries:
 
 
 ```python
 tbl.gtfs_schedule_calendar() >> filter_itp8 >> count() >> collect()
 ```
+
+
+
+
+<table border="0" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>n</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>4</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 1 columns</p>
+
+
 
 However, it does not have any corresponding trips. In this case, it looks like they rely purely on their `calendar_dates.txt` file!
 
@@ -502,6 +795,30 @@ However, it does not have any corresponding trips. In this case, it looks like t
     >> count()
 )
 ```
+
+
+
+
+<div><pre># Source: lazy query
+# DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
+# Preview:
+</pre><table border="0" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>n</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 1 columns</p><p># .. may have more rows</p></div>
+
+
 
 ### Use 2: rare schedules
 
@@ -523,3 +840,31 @@ However, it does not have any corresponding trips. In this case, it looks like t
     >> head(1)
 )
 ```
+
+
+
+
+<div><pre># Source: lazy query
+# DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
+# Preview:
+</pre><table border="0" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>route_long_name</th>
+      <th>route_url</th>
+      <th>route_type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>The Link - Baldwin Hills Parklands</td>
+      <td>https://dpw.lacounty.gov/transit/TheLinkBaldwin.aspx</td>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 3 columns</p><p># .. may have more rows</p></div>
+
+
