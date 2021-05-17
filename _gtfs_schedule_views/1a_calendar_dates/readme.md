@@ -10,27 +10,17 @@
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
 ```python
+# initial setup
+
 %run 0_data_model.ipynb
-```
 
-
-</details>
-
-<details>
-
-<summary><button>show code</button></summary>
-
-
-
-```python
 pk_str = ["calitp_itp_id", "calitp_url_number"]
 pk_col = (_.calitp_itp_id, _.calitp_url_number)
-
 ```
 
 
@@ -38,7 +28,7 @@ pk_col = (_.calitp_itp_id, _.calitp_url_number)
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -151,7 +141,7 @@ tbl_schedule_daily
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -172,7 +162,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -228,7 +218,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -246,14 +236,14 @@ DATE_END = str(datetime.date.today())
 
 
     
-![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_8_0.png)
+![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_7_0.png)
     
 
 
 
 
 
-    <ggplot: (311992766)>
+    <ggplot: (-9223372036554963305)>
 
 
 
@@ -261,7 +251,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -319,7 +309,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -424,7 +414,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -471,7 +461,7 @@ DATE_END = str(datetime.date.today())
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -528,7 +518,7 @@ tbl_schedule_daily >> filter(_.service_indicator.isna()) >> head(1)
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -656,7 +646,7 @@ It looks like there are more weekday entries, but seem fairly evenly spread out.
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -734,7 +724,7 @@ exception_dates = (
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -757,14 +747,14 @@ join_cols = [_[k] for k in join_keys]
 
 
     
-![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_20_0.png)
+![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_19_0.png)
     
 
 
 
 
 
-    <ggplot: (324531229)>
+    <ggplot: (299865457)>
 
 
 
@@ -772,7 +762,7 @@ join_cols = [_[k] for k in join_keys]
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -842,7 +832,7 @@ join_cols = [_[k] for k in join_keys]
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -865,14 +855,14 @@ filter_itp8 = filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
 
 
     
-![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_23_0.png)
+![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_22_0.png)
     
 
 
 
 
 
-    <ggplot: (-9223372036530171441)>
+    <ggplot: (-9223372036525444818)>
 
 
 
@@ -880,7 +870,7 @@ Note that they also have a `calendar.txt`, with 4 entries:
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -916,7 +906,7 @@ However, it does not have any corresponding trips. In this case, it looks like t
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
@@ -960,7 +950,7 @@ However, it does not have any corresponding trips. In this case, it looks like t
 
 <details>
 
-<summary><button>show code</button></summary>
+<summary>show code</summary>
 
 
 
