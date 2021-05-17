@@ -8,10 +8,23 @@
 * how many stops scheduled?
   - stops vs stop times?
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 %run 0_data_model.ipynb
 ```
+
+
+</details>
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -21,9 +34,20 @@ pk_col = (_.calitp_itp_id, _.calitp_url_number)
 ```
 
 
+</details>
+
+<details>
+
+<summary>show code</summary>
+
+
+
 ```python
 tbl_schedule_daily
 ```
+
+
+</details>
 
 
 
@@ -125,6 +149,11 @@ tbl_schedule_daily
 
 
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 from plotnine import *
@@ -134,9 +163,17 @@ DATE_START = str(datetime.date.today() - datetime.timedelta(weeks = 2))
 DATE_END = str(datetime.date.today())
 ```
 
+
+</details>
+
 # Daily schedules
 
 ## Total counts and date ranges
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -154,6 +191,9 @@ DATE_END = str(datetime.date.today())
     >> collect()
 )
 ```
+
+
+</details>
 
 
 
@@ -186,6 +226,11 @@ DATE_END = str(datetime.date.today())
 
 
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 (
@@ -195,6 +240,9 @@ DATE_END = str(datetime.date.today())
     >> ggplot(aes("year", "n", fill="is_in_service")) + geom_col()
 )
 ```
+
+
+</details>
 
 
     
@@ -210,6 +258,11 @@ DATE_END = str(datetime.date.today())
 
 
 ## How many daily schedules are active for the past week?
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -227,6 +280,9 @@ DATE_END = str(datetime.date.today())
     >> collect()
 )
 ```
+
+
+</details>
 
 
 
@@ -261,6 +317,11 @@ DATE_END = str(datetime.date.today())
 
 ## How does calendar_dates affect daily schedules?
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 (
@@ -272,6 +333,9 @@ DATE_END = str(datetime.date.today())
     >> arrange(_.service_indicator, _.service_inclusion, _.service_exclusion)
 )
 ```
+
+
+</details>
 
 
 
@@ -358,6 +422,11 @@ DATE_END = str(datetime.date.today())
 
 
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 (
@@ -368,6 +437,9 @@ DATE_END = str(datetime.date.today())
     )
 )
 ```
+
+
+</details>
 
 
 
@@ -397,10 +469,18 @@ DATE_END = str(datetime.date.today())
 
 ## Which schedules use only `calendar_dates.txt`?
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 tbl_schedule_daily >> filter(_.service_indicator.isna()) >> head(1)
 ```
+
+
+</details>
 
 
 
@@ -446,6 +526,11 @@ tbl_schedule_daily >> filter(_.service_indicator.isna()) >> head(1)
 
 
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 exception_schedules = (
@@ -464,6 +549,9 @@ exception_counts = (
 df_exception_counts = exception_counts >> collect()
 df_exception_counts
 ```
+
+
+</details>
 
 
 
@@ -566,6 +654,11 @@ df_exception_counts
 
 It looks like there are more weekday entries, but seem fairly evenly spread out.
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 exception_dates = (
@@ -580,6 +673,9 @@ exception_dates = (
 #     >> ggplot(aes("service_date", "n")) + geom_col()
 )
 ```
+
+
+</details>
 
 
 
@@ -636,6 +732,11 @@ exception_dates = (
 
 ### Do they occur on specific dates?
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 join_keys = ["calitp_itp_id", "calitp_url_number", "service_id"]
@@ -652,6 +753,9 @@ join_cols = [_[k] for k in join_keys]
 ```
 
 
+</details>
+
+
     
 ![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_20_0.png)
     
@@ -666,6 +770,11 @@ join_cols = [_[k] for k in join_keys]
 
 ### Use 1: regular service
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 (
@@ -675,6 +784,9 @@ join_cols = [_[k] for k in join_keys]
     >> head()
 )
 ```
+
+
+</details>
 
 
 
@@ -728,6 +840,11 @@ join_cols = [_[k] for k in join_keys]
 
 
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 filter_itp8 = filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
@@ -744,6 +861,9 @@ filter_itp8 = filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
 ```
 
 
+</details>
+
+
     
 ![png](../1a_calendar_dates/readme_files/../1a_calendar_dates/readme_23_0.png)
     
@@ -758,10 +878,18 @@ filter_itp8 = filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
 
 Note that they also have a `calendar.txt`, with 4 entries:
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 tbl.gtfs_schedule_calendar() >> filter_itp8 >> count() >> collect()
 ```
+
+
+</details>
 
 
 
@@ -786,6 +914,11 @@ tbl.gtfs_schedule_calendar() >> filter_itp8 >> count() >> collect()
 
 However, it does not have any corresponding trips. In this case, it looks like they rely purely on their `calendar_dates.txt` file!
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 (
@@ -795,6 +928,9 @@ However, it does not have any corresponding trips. In this case, it looks like t
     >> count()
 )
 ```
+
+
+</details>
 
 
 
@@ -822,6 +958,11 @@ However, it does not have any corresponding trips. In this case, it looks like t
 
 ### Use 2: rare schedules
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 (
@@ -840,6 +981,9 @@ However, it does not have any corresponding trips. In this case, it looks like t
     >> head(1)
 )
 ```
+
+
+</details>
 
 
 
