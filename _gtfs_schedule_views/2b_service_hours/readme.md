@@ -1,6 +1,20 @@
+<details>
+
+<summary>show code</summary>
+
+
+
 ```python
 %run 0_data_model.ipynb
 ```
+
+
+</details>
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -10,6 +24,14 @@ pk_col = (_.calitp_itp_id, _.calitp_url_number)
 DATE_START = "2021-04-01"
 DATE_END = "2021-05-01"
 ```
+
+
+</details>
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -36,6 +58,9 @@ agency_trip_routes = (
 trip_stop_times = tbl_stops_and_times
 ```
 
+
+</details>
+
 * 30:01:01 is not a time in most data systems
 * we may want to know which times occur after midnight
 
@@ -44,6 +69,11 @@ trip_stop_times = tbl_stops_and_times
 ## Modelling time in transit, midnight switchpoint
 
 ### Maximum hour part in stop_times data
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -63,6 +93,9 @@ hour_extracted = trip_stop_times >> mutate(
     >> collect()
 )
 ```
+
+
+</details>
 
 
 
@@ -88,6 +121,11 @@ hour_extracted = trip_stop_times >> mutate(
 
 
 ### Converting to a TIME type
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -119,6 +157,9 @@ df_hour_counts = (hour_extracted >>
 with pd.option_context("display.max_rows", 999):
     display(df_hour_counts >> filter(_.arrival_hour != _.new_arrival_hour))
 ```
+
+
+</details>
 
 
 <table border="0" class="dataframe">
@@ -249,6 +290,11 @@ with pd.option_context("display.max_rows", 999):
 * is_midnight_point
 * arrives_after_midnight
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 from siuba.dply.vector import lag
@@ -301,9 +347,20 @@ stop_times_enhanced = (
 ```
 
 
+</details>
+
+<details>
+
+<summary>show code</summary>
+
+
+
 ```python
 stop_times_enhanced >> count(_.arrives_after_midnight)
 ```
+
+
+</details>
 
 
 
@@ -336,6 +393,11 @@ stop_times_enhanced >> count(_.arrives_after_midnight)
 
 
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 from plotnine import *
@@ -353,6 +415,9 @@ from plotnine import *
     + labs(y = "Proportion")
 )
 ```
+
+
+</details>
 
 
     
@@ -375,6 +440,11 @@ Trips can begin after midnight. As far as I can tell, what this means is that a 
 * some agencies prefer in cases to present it like this to users (e.g. a Monday route service with a 2am trip matches a "waking day").
 
 Below is a count of trips starting at or after midnight:
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -403,6 +473,9 @@ midnight_edge_cases = (
 ```
 
 
+</details>
+
+
 
 
 <table border="0" class="dataframe">
@@ -427,6 +500,11 @@ midnight_edge_cases = (
 
 One maybe ambiguous case is when a trip leaves at midnight. This is shown for one specific trip below.
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 (
@@ -437,6 +515,9 @@ One maybe ambiguous case is when a trip leaves at midnight. This is shown for on
     >> arrange(_.stop_sequence_rank)
 )
 ```
+
+
+</details>
 
 
 
@@ -563,6 +644,11 @@ It could be interpreted as follows:
 
 * The Mission route will be in service Monday, with a trip leaving at 2am Tuesday.
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 (
@@ -579,6 +665,9 @@ It could be interpreted as follows:
     )
 )
 ```
+
+
+</details>
 
 
 
@@ -714,6 +803,11 @@ It could be interpreted as follows:
 
 One issue
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 qa_neg_transit_time = (
@@ -734,9 +828,17 @@ qa_neg_transit_time = (
 )
 ```
 
+
+</details>
+
 ### Range of negative times
 
 Basically, we don't want these times to be less that 60 seconds * 60 minutes * 24 hours = 86400.
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -749,6 +851,9 @@ Basically, we don't want these times to be less that 60 seconds * 60 minutes * 2
     )
 )
 ```
+
+
+</details>
 
 
 
@@ -780,6 +885,11 @@ Basically, we don't want these times to be less that 60 seconds * 60 minutes * 2
 
 Looks like a paratransit bus, called dial-a-ride from Tulare County Area Transit.
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 (
@@ -790,6 +900,9 @@ Looks like a paratransit bus, called dial-a-ride from Tulare County Area Transit
     >> inner_join(_, agency_trip_routes, [*pk_str, "trip_id"])
 )
 ```
+
+
+</details>
 
 
 
@@ -827,6 +940,11 @@ Looks like a paratransit bus, called dial-a-ride from Tulare County Area Transit
 
 
 
+<details>
+
+<summary>show code</summary>
+
+
 
 ```python
 transit_minutes = (
@@ -838,6 +956,14 @@ transit_minutes = (
     >> mutate(ttl_transit_minutes = _.ttl_transit_seconds // 60)
 )
 ```
+
+
+</details>
+
+<details>
+
+<summary>show code</summary>
+
 
 
 ```python
@@ -857,6 +983,9 @@ transit_minutes = (
 ```
 
 
+</details>
+
+
     
 ![png](../2b_service_hours/readme_files/../2b_service_hours/readme_28_0.png)
     
@@ -867,6 +996,11 @@ transit_minutes = (
 
     <ggplot: (281090985)>
 
+
+
+<details>
+
+<summary>show code</summary>
 
 
 
@@ -882,6 +1016,9 @@ transit_minutes = (
     + labs(y="number of trips", x="trip transit hours")
 )
 ```
+
+
+</details>
 
 
     
