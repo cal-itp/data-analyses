@@ -363,7 +363,7 @@ from plotnine import *
 
 
 
-    <ggplot: (317711680)>
+    <ggplot: (-9223372036537777860)>
 
 
 
@@ -629,35 +629,33 @@ It could be interpreted as follows:
       <th>prev_departure</th>
       <th>arrives_after_midnight</th>
       <th>arrival_hour</th>
-      <th>agency_url</th>
-      <th>route_type</th>
-      <th>route_color</th>
-      <th>agency_id</th>
-      <th>calitp_extracted_at</th>
-      <th>direction_id</th>
-      <th>shape_id</th>
-      <th>agency_timezone</th>
-      <th>wheelchair_accessible</th>
-      <th>calitp_extracted_at_y</th>
-      <th>route_short_name</th>
-      <th>agency_fare_url</th>
-      <th>agency_phone</th>
-      <th>trip_short_name</th>
-      <th>agency_lang</th>
-      <th>route_desc</th>
-      <th>route_text_color</th>
-      <th>bikes_allowed</th>
-      <th>calitp_extracted_at_x</th>
-      <th>agency_email</th>
-      <th>continuous_pickup</th>
-      <th>route_url</th>
       <th>agency_name</th>
-      <th>block_id</th>
-      <th>service_id</th>
-      <th>trip_headsign</th>
+      <th>agency_timezone</th>
+      <th>agency_email</th>
+      <th>wheelchair_accessible</th>
+      <th>calitp_extracted_at</th>
       <th>continuous_drop_off</th>
+      <th>bikes_allowed</th>
+      <th>agency_id</th>
+      <th>block_id</th>
+      <th>trip_short_name</th>
+      <th>route_short_name</th>
+      <th>agency_url</th>
+      <th>agency_lang</th>
+      <th>trip_headsign</th>
+      <th>route_color</th>
+      <th>route_desc</th>
+      <th>direction_id</th>
+      <th>route_type</th>
       <th>route_sort_order</th>
+      <th>continuous_pickup</th>
+      <th>shape_id</th>
+      <th>agency_fare_url</th>
+      <th>route_text_color</th>
+      <th>agency_phone</th>
+      <th>service_id</th>
       <th>route_id</th>
+      <th>route_url</th>
     </tr>
   </thead>
   <tbody>
@@ -678,35 +676,33 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>25</td>
-      <td>https://SFMTA.com</td>
-      <td>3</td>
-      <td></td>
-      <td>SFMTA</td>
-      <td>2021-04-16</td>
-      <td>0</td>
-      <td>184123</td>
+      <td>San Francisco Municipal Transportation Agency</td>
       <td>America/Los_Angeles</td>
       <td>None</td>
-      <td>2021-04-16</td>
-      <td>14</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>en</td>
-      <td></td>
-      <td></td>
       <td>None</td>
       <td>2021-04-16</td>
       <td>None</td>
       <td>None</td>
-      <td>https://SFMTA.com/14</td>
-      <td>San Francisco Municipal Transportation Agency</td>
+      <td>SFMTA</td>
       <td>1493</td>
-      <td>1</td>
+      <td>None</td>
+      <td>14</td>
+      <td>https://SFMTA.com</td>
+      <td>en</td>
       <td>Daly City</td>
+      <td></td>
+      <td></td>
+      <td>0</td>
+      <td>3</td>
       <td>None</td>
       <td>None</td>
+      <td>184123</td>
+      <td>None</td>
+      <td></td>
+      <td>None</td>
+      <td>1</td>
       <td>16283</td>
+      <td>https://SFMTA.com/14</td>
     </tr>
     <tr>
       <th>1</th>
@@ -725,35 +721,33 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>27</td>
-      <td>https://SFMTA.com</td>
-      <td>3</td>
-      <td></td>
-      <td>SFMTA</td>
-      <td>2021-04-16</td>
-      <td>0</td>
-      <td>184123</td>
+      <td>San Francisco Municipal Transportation Agency</td>
       <td>America/Los_Angeles</td>
       <td>None</td>
-      <td>2021-04-16</td>
-      <td>14</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>en</td>
-      <td></td>
-      <td></td>
       <td>None</td>
       <td>2021-04-16</td>
       <td>None</td>
       <td>None</td>
-      <td>https://SFMTA.com/14</td>
-      <td>San Francisco Municipal Transportation Agency</td>
+      <td>SFMTA</td>
       <td>1496</td>
-      <td>1</td>
+      <td>None</td>
+      <td>14</td>
+      <td>https://SFMTA.com</td>
+      <td>en</td>
       <td>Daly City</td>
+      <td></td>
+      <td></td>
+      <td>0</td>
+      <td>3</td>
       <td>None</td>
       <td>None</td>
+      <td>184123</td>
+      <td>None</td>
+      <td></td>
+      <td>None</td>
+      <td>1</td>
       <td>16283</td>
+      <td>https://SFMTA.com/14</td>
     </tr>
     <tr>
       <th>2</th>
@@ -772,35 +766,33 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>29</td>
-      <td>https://SFMTA.com</td>
-      <td>3</td>
-      <td></td>
-      <td>SFMTA</td>
-      <td>2021-04-16</td>
-      <td>0</td>
-      <td>184123</td>
+      <td>San Francisco Municipal Transportation Agency</td>
       <td>America/Los_Angeles</td>
       <td>None</td>
-      <td>2021-04-16</td>
-      <td>14</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>en</td>
-      <td></td>
-      <td></td>
       <td>None</td>
       <td>2021-04-16</td>
       <td>None</td>
       <td>None</td>
-      <td>https://SFMTA.com/14</td>
-      <td>San Francisco Municipal Transportation Agency</td>
+      <td>SFMTA</td>
       <td>1493</td>
-      <td>1</td>
+      <td>None</td>
+      <td>14</td>
+      <td>https://SFMTA.com</td>
+      <td>en</td>
       <td>Daly City</td>
+      <td></td>
+      <td></td>
+      <td>0</td>
+      <td>3</td>
       <td>None</td>
       <td>None</td>
+      <td>184123</td>
+      <td>None</td>
+      <td></td>
+      <td>None</td>
+      <td>1</td>
       <td>16283</td>
+      <td>https://SFMTA.com/14</td>
     </tr>
     <tr>
       <th>3</th>
@@ -819,35 +811,33 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>27</td>
-      <td>https://SFMTA.com</td>
-      <td>3</td>
-      <td></td>
-      <td>SFMTA</td>
-      <td>2021-04-16</td>
-      <td>0</td>
-      <td>184123</td>
+      <td>San Francisco Municipal Transportation Agency</td>
       <td>America/Los_Angeles</td>
       <td>None</td>
-      <td>2021-04-16</td>
-      <td>14</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>en</td>
-      <td></td>
-      <td></td>
       <td>None</td>
       <td>2021-04-16</td>
       <td>None</td>
       <td>None</td>
-      <td>https://SFMTA.com/14</td>
-      <td>San Francisco Municipal Transportation Agency</td>
+      <td>SFMTA</td>
       <td>1493</td>
-      <td>1</td>
+      <td>None</td>
+      <td>14</td>
+      <td>https://SFMTA.com</td>
+      <td>en</td>
       <td>Daly City</td>
+      <td></td>
+      <td></td>
+      <td>0</td>
+      <td>3</td>
       <td>None</td>
       <td>None</td>
+      <td>184123</td>
+      <td>None</td>
+      <td></td>
+      <td>None</td>
+      <td>1</td>
       <td>16283</td>
+      <td>https://SFMTA.com/14</td>
     </tr>
     <tr>
       <th>4</th>
@@ -866,39 +856,37 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>26</td>
-      <td>https://SFMTA.com</td>
-      <td>3</td>
-      <td></td>
-      <td>SFMTA</td>
-      <td>2021-04-16</td>
-      <td>0</td>
-      <td>184123</td>
+      <td>San Francisco Municipal Transportation Agency</td>
       <td>America/Los_Angeles</td>
       <td>None</td>
-      <td>2021-04-16</td>
-      <td>14</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>en</td>
-      <td></td>
-      <td></td>
       <td>None</td>
       <td>2021-04-16</td>
       <td>None</td>
       <td>None</td>
-      <td>https://SFMTA.com/14</td>
-      <td>San Francisco Municipal Transportation Agency</td>
+      <td>SFMTA</td>
       <td>1495</td>
-      <td>1</td>
+      <td>None</td>
+      <td>14</td>
+      <td>https://SFMTA.com</td>
+      <td>en</td>
       <td>Daly City</td>
+      <td></td>
+      <td></td>
+      <td>0</td>
+      <td>3</td>
       <td>None</td>
       <td>None</td>
+      <td>184123</td>
+      <td>None</td>
+      <td></td>
+      <td>None</td>
+      <td>1</td>
       <td>16283</td>
+      <td>https://SFMTA.com/14</td>
     </tr>
   </tbody>
 </table>
-<p>5 rows × 44 columns</p><p># .. may have more rows</p></div>
+<p>5 rows × 42 columns</p><p># .. may have more rows</p></div>
 
 
 
@@ -1022,36 +1010,34 @@ Looks like a paratransit bus, called dial-a-ride from Tulare County Area Transit
       <th>trip_id</th>
       <th>ttl_transit_seconds</th>
       <th>ttl_transit_hours</th>
-      <th>agency_url</th>
-      <th>route_type</th>
-      <th>route_color</th>
-      <th>agency_id</th>
-      <th>calitp_extracted_at</th>
-      <th>direction_id</th>
-      <th>route_long_name</th>
-      <th>shape_id</th>
-      <th>agency_timezone</th>
-      <th>wheelchair_accessible</th>
-      <th>calitp_extracted_at_y</th>
-      <th>route_short_name</th>
-      <th>agency_fare_url</th>
-      <th>agency_phone</th>
-      <th>trip_short_name</th>
-      <th>agency_lang</th>
-      <th>route_desc</th>
-      <th>route_text_color</th>
-      <th>bikes_allowed</th>
-      <th>calitp_extracted_at_x</th>
-      <th>agency_email</th>
-      <th>continuous_pickup</th>
-      <th>route_url</th>
       <th>agency_name</th>
-      <th>block_id</th>
-      <th>service_id</th>
-      <th>trip_headsign</th>
+      <th>agency_timezone</th>
+      <th>agency_email</th>
+      <th>wheelchair_accessible</th>
+      <th>calitp_extracted_at</th>
       <th>continuous_drop_off</th>
+      <th>bikes_allowed</th>
+      <th>agency_id</th>
+      <th>block_id</th>
+      <th>trip_short_name</th>
+      <th>route_short_name</th>
+      <th>agency_url</th>
+      <th>agency_lang</th>
+      <th>trip_headsign</th>
+      <th>route_color</th>
+      <th>route_desc</th>
+      <th>direction_id</th>
+      <th>route_type</th>
       <th>route_sort_order</th>
+      <th>route_long_name</th>
+      <th>continuous_pickup</th>
+      <th>shape_id</th>
+      <th>agency_fare_url</th>
+      <th>route_text_color</th>
+      <th>agency_phone</th>
+      <th>service_id</th>
       <th>route_id</th>
+      <th>route_url</th>
     </tr>
   </thead>
   <tbody>
@@ -1062,40 +1048,38 @@ Looks like a paratransit bus, called dial-a-ride from Tulare County Area Transit
       <td>t_554230_b_17398_tn_0</td>
       <td>79200</td>
       <td>22.0</td>
-      <td>http://tularecounty.ca.gov/rma/index.cfm/public-works/tulare-county-area-transit-tcat/</td>
-      <td>3</td>
-      <td>None</td>
-      <td>937</td>
-      <td>2021-04-29</td>
-      <td>0</td>
-      <td>Dial-a-Ride</td>
-      <td>None</td>
+      <td>Tulare County Area Transit</td>
       <td>America/Los_Angeles</td>
       <td>None</td>
+      <td>None</td>
       <td>2021-04-29</td>
+      <td>1</td>
       <td>None</td>
-      <td>http://www.tularecounty.ca.gov/rma/index.cfm/public-works/tulare-county-area-transit-tcat/tcat-systemwide-area-map/</td>
-      <td>877-404-6473</td>
+      <td>937</td>
       <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>http://tularecounty.ca.gov/rma/index.cfm/public-works/tulare-county-area-transit-tcat/</td>
       <td>en</td>
       <td>None</td>
       <td>None</td>
       <td>None</td>
-      <td>2021-04-29</td>
-      <td>None</td>
-      <td>1</td>
-      <td>None</td>
-      <td>Tulare County Area Transit</td>
-      <td>None</td>
-      <td>c_15968_b_17398_d_31</td>
-      <td>None</td>
-      <td>1</td>
+      <td>0</td>
+      <td>3</td>
       <td>9</td>
+      <td>Dial-a-Ride</td>
+      <td>1</td>
+      <td>None</td>
+      <td>http://www.tularecounty.ca.gov/rma/index.cfm/public-works/tulare-county-area-transit-tcat/tcat-systemwide-area-map/</td>
+      <td>None</td>
+      <td>877-404-6473</td>
+      <td>c_15968_b_17398_d_31</td>
       <td>12496</td>
+      <td>None</td>
     </tr>
   </tbody>
 </table>
-<p>1 rows × 35 columns</p><p># .. may have more rows</p></div>
+<p>1 rows × 33 columns</p><p># .. may have more rows</p></div>
 
 
 
@@ -1157,7 +1141,7 @@ In general, most trips tend to be under 3 hours. The graph below shows total tra
 
 
 
-    <ggplot: (-9223372036577937541)>
+    <ggplot: (-9223372036567190605)>
 
 
 
@@ -1194,6 +1178,6 @@ In general, most trips tend to be under 3 hours. The graph below shows total tra
 
 
 
-    <ggplot: (317957896)>
+    <ggplot: (329253191)>
 
 

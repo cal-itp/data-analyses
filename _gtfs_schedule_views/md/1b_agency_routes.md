@@ -237,10 +237,11 @@ active_route_names = active_route_metrics >> inner_join(
     _, route_names, [*pk_str, "route_id"]
 )
 
+unique_route_names = tbl.gtfs_schedule_routes() >> distinct(_.calitp_itp_id, _.calitp_url_number, _.route_long_name)
+
 duplicate_route_names = (
     active_route_names
-    >> inner_join(_, active_route_names, [*pk_str, "route_long_name"])
-    >> filter(_.route_id_x != _.route_id_y)
+    >> inner_join(_, unique_route_names, [*pk_str, "route_long_name"])
 )
 
 duplicate_route_names >> count(_.calitp_itp_id, _.calitp_url_number)

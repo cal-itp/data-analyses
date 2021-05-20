@@ -75,9 +75,15 @@ expr_fill_id = _.agency_id.fillna(_.calitp_itp_id.astype(str))
 
 tbl_agency_trips = (
     tbl_trips
-    >> left_join(_, tbl_routes >> mutate(agency_id=expr_fill_id), [*pk_str, "route_id"])
     >> left_join(
-        _, tbl_agency >> mutate(agency_id=expr_fill_id), [*pk_str, "agency_id"]
+        _,
+        tbl_routes >> mutate(agency_id=expr_fill_id) >> select(-_.calitp_extracted_at),
+        [*pk_str, "route_id"],
+    )
+    >> left_join(
+        _,
+        tbl_agency >> mutate(agency_id=expr_fill_id) >> select(-_.calitp_extracted_at),
+        [*pk_str, "agency_id"],
     )
 )
 ```
@@ -97,7 +103,7 @@ tbl_stops_and_times = (
     #       arrival_time = sql_raw('PARSE_TIME("%T", arrival_time)'),
     #       departure_time =sql_raw('PARSE_TIME("%T", departure_time)')
     #   )
-    >> left_join(_, tbl.gtfs_schedule_stops(), [*pk_str, "stop_id"])
+    >> left_join(_, tbl.gtfs_schedule_stops() >> select(-_.calitp_extracted_at), [*pk_str, "stop_id"])
     >> group_by(_.trip_id)
     >> mutate(
         stop_sequence=_.stop_sequence.astype(int),
