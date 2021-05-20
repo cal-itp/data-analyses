@@ -346,189 +346,189 @@ tbl_stops_and_times
       <th>continuous_drop_off</th>
       <th>shape_dist_traveled</th>
       <th>timepoint</th>
-      <th>calitp_extracted_at_x</th>
-      <th>parent_station</th>
-      <th>stop_code</th>
-      <th>zone_id</th>
-      <th>stop_lat</th>
-      <th>stop_url</th>
-      <th>level_id</th>
+      <th>calitp_extracted_at</th>
       <th>stop_timezone</th>
-      <th>stop_lon</th>
+      <th>stop_code</th>
       <th>stop_desc</th>
-      <th>calitp_extracted_at_y</th>
-      <th>wheelchair_boarding</th>
-      <th>platform_code</th>
-      <th>tts_stop_name</th>
+      <th>stop_lat</th>
+      <th>stop_lon</th>
       <th>stop_name</th>
       <th>location_type</th>
+      <th>parent_station</th>
+      <th>level_id</th>
+      <th>zone_id</th>
+      <th>wheelchair_boarding</th>
+      <th>platform_code</th>
+      <th>stop_url</th>
+      <th>tts_stop_name</th>
+      <th>stop_sequence_rank</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>111</td>
+      <td>372</td>
       <td>0</td>
-      <td>781444</td>
-      <td>11064</td>
-      <td>68</td>
-      <td>16:10:00</td>
-      <td>16:10:00</td>
+      <td>009e81cc-688d-4a96-9049-9b008afb4306</td>
+      <td>688a134e-8c33-4776-b276-d03da1dd587c</td>
+      <td>0</td>
+      <td>14:07:00</td>
+      <td>14:07:00</td>
+      <td>None</td>
+      <td>0</td>
+      <td>0</td>
       <td>None</td>
       <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
+      <td>0</td>
       <td>None</td>
       <td>2021-04-16</td>
       <td>None</td>
-      <td>11064</td>
+      <td>23358</td>
+      <td>"Cache Creek Casino"</td>
+      <td>38.733355</td>
+      <td>-122.142352</td>
+      <td>Cache Creek Casino Resort</td>
       <td>0</td>
-      <td>38.688547</td>
       <td>None</td>
       <td>None</td>
       <td>None</td>
-      <td>-121.186693</td>
-      <td>Buses head NB</td>
-      <td>2021-04-16</td>
       <td>None</td>
       <td>None</td>
       <td>None</td>
-      <td>AMERICAN RIVER CANYON DR &amp; GREY CANYON DR (NB)</td>
-      <td>0</td>
+      <td>None</td>
+      <td>1</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>111</td>
+      <td>372</td>
       <td>0</td>
-      <td>781449</td>
-      <td>11160</td>
-      <td>63</td>
-      <td>11:05:00</td>
-      <td>11:05:00</td>
+      <td>009e81cc-688d-4a96-9049-9b008afb4306</td>
+      <td>4fb90529-df3d-4817-b289-7913bab8e803</td>
+      <td>100</td>
+      <td>14:16:00</td>
+      <td>14:16:00</td>
+      <td>None</td>
+      <td>0</td>
+      <td>0</td>
       <td>None</td>
       <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
+      <td>11067.33</td>
       <td>None</td>
       <td>2021-04-16</td>
       <td>None</td>
-      <td>11160</td>
+      <td>23526</td>
+      <td>None</td>
+      <td>38.707340</td>
+      <td>-122.048604</td>
+      <td>Hwy. 16 at Rd. 85 (Capay) EB</td>
       <td>0</td>
-      <td>38.672938</td>
       <td>None</td>
       <td>None</td>
       <td>None</td>
-      <td>-121.202331</td>
-      <td>Buses head NB</td>
-      <td>2021-04-16</td>
       <td>None</td>
       <td>None</td>
       <td>None</td>
-      <td>MAIN AVE &amp; MADISON AVE (NB)</td>
-      <td>0</td>
+      <td>None</td>
+      <td>2</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>111</td>
+      <td>372</td>
       <td>0</td>
-      <td>781375</td>
-      <td>11065</td>
-      <td>67</td>
-      <td>11:09:00</td>
-      <td>11:09:00</td>
+      <td>009e81cc-688d-4a96-9049-9b008afb4306</td>
+      <td>7b7a754a-71f2-4796-b7c9-c9bfda47d8e6</td>
+      <td>140</td>
+      <td>14:20:00</td>
+      <td>14:20:00</td>
+      <td>None</td>
+      <td>0</td>
+      <td>0</td>
       <td>None</td>
       <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
+      <td>14827.6</td>
       <td>None</td>
       <td>2021-04-16</td>
       <td>None</td>
-      <td>11065</td>
+      <td>23355</td>
+      <td>None</td>
+      <td>38.692962</td>
+      <td>-122.016728</td>
+      <td>Yolo at Grafton (Esparto) SB</td>
       <td>0</td>
-      <td>38.684880</td>
       <td>None</td>
       <td>None</td>
       <td>None</td>
-      <td>-121.188730</td>
-      <td>Buses head NB</td>
-      <td>2021-04-16</td>
       <td>None</td>
       <td>None</td>
       <td>None</td>
-      <td>AMERICAN RIVER CANYON DR &amp; BOULDER CANYON WAY (NB)</td>
-      <td>0</td>
+      <td>None</td>
+      <td>3</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>350</td>
-      <td>1</td>
-      <td>40090</td>
-      <td>79013</td>
+      <td>372</td>
       <td>0</td>
-      <td>11:44:00</td>
-      <td>11:44:00</td>
+      <td>009e81cc-688d-4a96-9049-9b008afb4306</td>
+      <td>14989d21-0e8e-43d1-93f9-fbd511ed63fd</td>
+      <td>168</td>
+      <td>14:26:00</td>
+      <td>14:26:00</td>
       <td>None</td>
       <td>0</td>
       <td>0</td>
       <td>None</td>
       <td>None</td>
-      <td>0.00000000</td>
-      <td>1</td>
-      <td>2021-04-29</td>
+      <td>20391.6</td>
       <td>None</td>
-      <td>79013</td>
+      <td>2021-04-16</td>
       <td>None</td>
-      <td>37.598792</td>
-      <td>None</td>
-      <td>None</td>
-      <td>America/Los_Angeles</td>
-      <td>-122.065656</td>
-      <td>Terminal</td>
-      <td>2021-04-29</td>
-      <td>1</td>
-      <td>None</td>
-      <td>None</td>
-      <td>Union Landing Transit Center</td>
+      <td>23353</td>
+      <td>""</td>
+      <td>38.679074</td>
+      <td>-121.968471</td>
+      <td>Railroad at Main (Madison)</td>
       <td>0</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>4</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>2</td>
+      <td>372</td>
       <td>0</td>
-      <td>BCT109 NB_SAT.T10</td>
-      <td>163</td>
-      <td>67</td>
-      <td>16:35:30</td>
-      <td>16:35:30</td>
+      <td>009e81cc-688d-4a96-9049-9b008afb4306</td>
+      <td>ce57f7f5-4110-40e8-a062-fb58b27e5dfa</td>
+      <td>242</td>
+      <td>14:39:00</td>
+      <td>14:39:00</td>
+      <td>None</td>
+      <td>0</td>
+      <td>0</td>
       <td>None</td>
       <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>2021-04-16</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>33.930741</td>
-      <td>None</td>
-      <td>None</td>
-      <td>None</td>
-      <td>-118.387028</td>
+      <td>35749.63</td>
       <td>None</td>
       <td>2021-04-16</td>
       <td>None</td>
+      <td>23293</td>
+      <td>None</td>
+      <td>38.675253</td>
+      <td>-121.801838</td>
+      <td>W. Lincoln at Rd 98 EB</td>
+      <td>0</td>
       <td>None</td>
       <td>None</td>
-      <td>Imperial Hwy. / Nash St.</td>
       <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>5</td>
     </tr>
   </tbody>
 </table>
