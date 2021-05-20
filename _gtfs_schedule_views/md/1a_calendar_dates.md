@@ -184,9 +184,11 @@ join_cols = [_[k] for k in join_keys]
 ```
 
 ```python
+filter_itp8 = filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
+
 (
     exception_schedules
-    >> filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
+    >> filter_itp8
     >> filter(_.service_date.dt.year.isin([2020, 2021]))
     >> collect()
     >> count(_.service_date)
@@ -207,7 +209,7 @@ However, it does not have any corresponding trips. In this case, it looks like t
 (
     tbl.gtfs_schedule_calendar()
     >> filter_itp8
-    >> inner_join(_, trip_routes, [*pk_str, "service_id"])
+    >> inner_join(_, tbl_agency_trips, [*pk_str, "service_id"])
 )
 ```
 

@@ -65,27 +65,25 @@ tbl_agency_trips
       <th>block_id</th>
       <th>wheelchair_accessible</th>
       <th>bikes_allowed</th>
-      <th>calitp_extracted_at_x</th>
-      <th>route_short_name</th>
-      <th>continuous_drop_off</th>
-      <th>continuous_pickup</th>
-      <th>route_color</th>
-      <th>route_text_color</th>
-      <th>route_sort_order</th>
-      <th>calitp_extracted_at_y</th>
-      <th>route_long_name</th>
-      <th>route_desc</th>
-      <th>route_url</th>
-      <th>route_type</th>
-      <th>agency_id</th>
-      <th>agency_timezone</th>
-      <th>agency_name</th>
-      <th>agency_lang</th>
       <th>calitp_extracted_at</th>
-      <th>agency_email</th>
+      <th>route_desc</th>
+      <th>route_sort_order</th>
+      <th>route_color</th>
+      <th>continuous_drop_off</th>
+      <th>route_url</th>
+      <th>continuous_pickup</th>
+      <th>route_short_name</th>
+      <th>route_long_name</th>
+      <th>agency_id</th>
+      <th>route_text_color</th>
+      <th>route_type</th>
+      <th>agency_lang</th>
+      <th>agency_name</th>
       <th>agency_fare_url</th>
-      <th>agency_url</th>
+      <th>agency_email</th>
       <th>agency_phone</th>
+      <th>agency_url</th>
+      <th>agency_timezone</th>
     </tr>
   </thead>
   <tbody>
@@ -104,26 +102,24 @@ tbl_agency_trips
       <td>None</td>
       <td>None</td>
       <td>2021-04-16</td>
-      <td>King East</td>
-      <td>None</td>
-      <td>None</td>
-      <td>4B63AD</td>
-      <td>FFFFFF</td>
-      <td>None</td>
-      <td>2021-04-16</td>
-      <td>DASH King East Clockwise</td>
       <td>King East Clockwise</td>
       <td>None</td>
-      <td>3</td>
-      <td>30</td>
-      <td>America/Los_Angeles</td>
-      <td>LADOT</td>
-      <td>en</td>
-      <td>2021-04-16</td>
+      <td>4B63AD</td>
       <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>King East</td>
+      <td>DASH King East Clockwise</td>
+      <td>30</td>
+      <td>FFFFFF</td>
+      <td>3</td>
+      <td>en</td>
+      <td>LADOT</td>
       <td>https://store.ladottransit.com/</td>
-      <td>https://www.ladottransit.com/</td>
+      <td>None</td>
       <td>213-808-2273</td>
+      <td>https://www.ladottransit.com/</td>
+      <td>America/Los_Angeles</td>
     </tr>
     <tr>
       <th>1</th>
@@ -140,26 +136,24 @@ tbl_agency_trips
       <td>None</td>
       <td>None</td>
       <td>2021-04-16</td>
-      <td>King East</td>
-      <td>None</td>
-      <td>None</td>
-      <td>4B63AD</td>
-      <td>FFFFFF</td>
-      <td>None</td>
-      <td>2021-04-16</td>
-      <td>DASH King East Clockwise</td>
       <td>King East Clockwise</td>
       <td>None</td>
-      <td>3</td>
-      <td>30</td>
-      <td>America/Los_Angeles</td>
-      <td>LADOT</td>
-      <td>en</td>
-      <td>2021-04-16</td>
+      <td>4B63AD</td>
       <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>King East</td>
+      <td>DASH King East Clockwise</td>
+      <td>30</td>
+      <td>FFFFFF</td>
+      <td>3</td>
+      <td>en</td>
+      <td>LADOT</td>
       <td>https://store.ladottransit.com/</td>
-      <td>https://www.ladottransit.com/</td>
+      <td>None</td>
       <td>213-808-2273</td>
+      <td>https://www.ladottransit.com/</td>
+      <td>America/Los_Angeles</td>
     </tr>
     <tr>
       <th>2</th>
@@ -176,26 +170,24 @@ tbl_agency_trips
       <td>None</td>
       <td>None</td>
       <td>2021-04-16</td>
-      <td>King East</td>
-      <td>None</td>
-      <td>None</td>
-      <td>4B63AD</td>
-      <td>FFFFFF</td>
-      <td>None</td>
-      <td>2021-04-16</td>
-      <td>DASH King East Clockwise</td>
       <td>King East Clockwise</td>
       <td>None</td>
-      <td>3</td>
-      <td>30</td>
-      <td>America/Los_Angeles</td>
-      <td>LADOT</td>
-      <td>en</td>
-      <td>2021-04-16</td>
+      <td>4B63AD</td>
       <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>King East</td>
+      <td>DASH King East Clockwise</td>
+      <td>30</td>
+      <td>FFFFFF</td>
+      <td>3</td>
+      <td>en</td>
+      <td>LADOT</td>
       <td>https://store.ladottransit.com/</td>
-      <td>https://www.ladottransit.com/</td>
+      <td>None</td>
       <td>213-808-2273</td>
+      <td>https://www.ladottransit.com/</td>
+      <td>America/Los_Angeles</td>
     </tr>
     <tr>
       <th>3</th>
@@ -212,26 +204,24 @@ tbl_agency_trips
       <td>None</td>
       <td>None</td>
       <td>2021-04-16</td>
-      <td>King East</td>
-      <td>None</td>
-      <td>None</td>
-      <td>4B63AD</td>
-      <td>FFFFFF</td>
-      <td>None</td>
-      <td>2021-04-16</td>
-      <td>DASH King East Clockwise</td>
       <td>King East Clockwise</td>
       <td>None</td>
-      <td>3</td>
-      <td>30</td>
-      <td>America/Los_Angeles</td>
-      <td>LADOT</td>
-      <td>en</td>
-      <td>2021-04-16</td>
+      <td>4B63AD</td>
       <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>King East</td>
+      <td>DASH King East Clockwise</td>
+      <td>30</td>
+      <td>FFFFFF</td>
+      <td>3</td>
+      <td>en</td>
+      <td>LADOT</td>
       <td>https://store.ladottransit.com/</td>
-      <td>https://www.ladottransit.com/</td>
+      <td>None</td>
       <td>213-808-2273</td>
+      <td>https://www.ladottransit.com/</td>
+      <td>America/Los_Angeles</td>
     </tr>
     <tr>
       <th>4</th>
@@ -248,30 +238,28 @@ tbl_agency_trips
       <td>None</td>
       <td>None</td>
       <td>2021-04-16</td>
-      <td>King East</td>
-      <td>None</td>
-      <td>None</td>
-      <td>4B63AD</td>
-      <td>FFFFFF</td>
-      <td>None</td>
-      <td>2021-04-16</td>
-      <td>DASH King East Clockwise</td>
       <td>King East Clockwise</td>
       <td>None</td>
-      <td>3</td>
-      <td>30</td>
-      <td>America/Los_Angeles</td>
-      <td>LADOT</td>
-      <td>en</td>
-      <td>2021-04-16</td>
+      <td>4B63AD</td>
       <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>King East</td>
+      <td>DASH King East Clockwise</td>
+      <td>30</td>
+      <td>FFFFFF</td>
+      <td>3</td>
+      <td>en</td>
+      <td>LADOT</td>
       <td>https://store.ladottransit.com/</td>
-      <td>https://www.ladottransit.com/</td>
+      <td>None</td>
       <td>213-808-2273</td>
+      <td>https://www.ladottransit.com/</td>
+      <td>America/Los_Angeles</td>
     </tr>
   </tbody>
 </table>
-<p>5 rows × 33 columns</p><p># .. may have more rows</p></div>
+<p>5 rows × 31 columns</p><p># .. may have more rows</p></div>
 
 
 
@@ -326,17 +314,17 @@ case_expr = case_when(_, {**main_case_expr, True: "Other"})
     <tr>
       <th>0</th>
       <td>Bus</td>
-      <td>2643</td>
+      <td>2789</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>Tram, Streetcar, Light rail</td>
-      <td>18</td>
+      <td>Ferry</td>
+      <td>29</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>Ferry</td>
-      <td>17</td>
+      <td>Tram, Streetcar, Light rail</td>
+      <td>18</td>
     </tr>
     <tr>
       <th>3</th>
@@ -346,7 +334,7 @@ case_expr = case_when(_, {**main_case_expr, True: "Other"})
     <tr>
       <th>4</th>
       <td>Rail</td>
-      <td>14</td>
+      <td>15</td>
     </tr>
   </tbody>
 </table>
@@ -799,8 +787,8 @@ n_trip_stop_times = (
       <th>n_stop_times</th>
       <th>first_departure</th>
       <th>last_arrival</th>
-      <th>n_min_trip_stops</th>
       <th>n_max_trip_stops</th>
+      <th>n_min_trip_stops</th>
       <th>n_max_trip_stop_times</th>
       <th>n_min_trip_stop_times</th>
     </tr>
@@ -816,8 +804,8 @@ n_trip_stop_times = (
       <td>19118</td>
       <td>05:06:00</td>
       <td>24:24:00</td>
-      <td>68</td>
       <td>136</td>
+      <td>68</td>
       <td>136</td>
       <td>68</td>
     </tr>
@@ -915,12 +903,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <th>n_stop_times</th>
       <th>first_departure_x</th>
       <th>last_arrival_x</th>
+      <th>route_id_y</th>
       <th>first_departure_y</th>
       <th>last_arrival_y</th>
-      <th>route_id_y</th>
       <th>n_unique_stops_y</th>
-      <th>route_long_name</th>
       <th>route_short_name</th>
+      <th>route_long_name</th>
     </tr>
   </thead>
   <tbody>
@@ -934,12 +922,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>3850</td>
       <td>10:00:00</td>
       <td>9:59:00</td>
+      <td>BCT109 NB</td>
       <td>10:00:00</td>
       <td>9:59:00</td>
-      <td>BCT109 NB</td>
       <td>77</td>
-      <td>Beach Cities Transit 109 Southbound</td>
       <td>None</td>
+      <td>Beach Cities Transit 109 Southbound</td>
     </tr>
     <tr>
       <th>2</th>
@@ -951,12 +939,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>3850</td>
       <td>10:00:00</td>
       <td>9:59:00</td>
+      <td>BCT109 SB</td>
       <td>10:00:00</td>
       <td>9:59:00</td>
-      <td>BCT109 SB</td>
       <td>77</td>
-      <td>Beach Cities Transit 109 Northbound</td>
       <td>None</td>
+      <td>Beach Cities Transit 109 Northbound</td>
     </tr>
     <tr>
       <th>10</th>
@@ -968,12 +956,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>2880</td>
       <td>06:00:00</td>
       <td>19:38:00</td>
+      <td>573</td>
       <td>06:00:00</td>
       <td>19:35:00</td>
-      <td>573</td>
       <td>29</td>
-      <td>DASH Wilshire Center/Koreatown Counterclockwise</td>
       <td>Wilshire Center/Koreatown Counterclockwise</td>
+      <td>DASH Wilshire Center/Koreatown Counterclockwise</td>
     </tr>
     <tr>
       <th>11</th>
@@ -985,12 +973,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>2880</td>
       <td>06:00:00</td>
       <td>19:35:00</td>
+      <td>572</td>
       <td>06:00:00</td>
       <td>19:38:00</td>
-      <td>572</td>
       <td>29</td>
-      <td>DASH Crenshaw Clockwise</td>
       <td>Crenshaw</td>
+      <td>DASH Crenshaw Clockwise</td>
     </tr>
     <tr>
       <th>14</th>
@@ -1002,12 +990,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>2880</td>
       <td>06:00:00</td>
       <td>19:38:00</td>
+      <td>573</td>
       <td>06:00:00</td>
       <td>19:35:00</td>
-      <td>573</td>
       <td>29</td>
-      <td>DASH Wilshire Center/Koreatown Counterclockwise</td>
       <td>Wilshire Center/Koreatown Counterclockwise</td>
+      <td>DASH Wilshire Center/Koreatown Counterclockwise</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1036,12 +1024,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>496</td>
       <td>08:50:00</td>
       <td>20:40:00</td>
+      <td>045</td>
       <td>08:15:00</td>
       <td>17:44:00</td>
-      <td>045</td>
       <td>60</td>
-      <td>East Salinas-Westridge</td>
       <td>42</td>
+      <td>East Salinas-Westridge</td>
     </tr>
     <tr>
       <th>82</th>
@@ -1053,12 +1041,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>496</td>
       <td>08:15:00</td>
       <td>17:44:00</td>
+      <td>042</td>
       <td>08:50:00</td>
       <td>20:40:00</td>
-      <td>042</td>
       <td>61</td>
-      <td>East Market-Creekbridge</td>
       <td>45</td>
+      <td>East Market-Creekbridge</td>
     </tr>
     <tr>
       <th>83</th>
@@ -1070,12 +1058,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>792</td>
       <td>05:50:00</td>
       <td>22:31:00</td>
+      <td>202</td>
       <td>05:45:00</td>
       <td>22:23:00</td>
-      <td>202</td>
       <td>11</td>
-      <td>Super Loop - Counterclockwise</td>
       <td>201</td>
+      <td>Super Loop - Counterclockwise</td>
     </tr>
     <tr>
       <th>84</th>
@@ -1087,12 +1075,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>792</td>
       <td>05:45:00</td>
       <td>22:23:00</td>
+      <td>201</td>
       <td>05:50:00</td>
       <td>22:31:00</td>
-      <td>201</td>
       <td>11</td>
-      <td>Super Loop - Clockwise</td>
       <td>202</td>
+      <td>Super Loop - Clockwise</td>
     </tr>
     <tr>
       <th>92</th>
@@ -1104,12 +1092,12 @@ opposite_routes >> filter(_.route_long_name.str.lower().str.contains("(north)|(s
       <td>76</td>
       <td>06:16:00</td>
       <td>17:39:00</td>
+      <td>104</td>
       <td>06:10:00</td>
       <td>17:41:00</td>
-      <td>104</td>
       <td>35</td>
-      <td>Great America ACE Station -  South Santa Clara</td>
       <td>ACE Yellow</td>
+      <td>Great America ACE Station -  South Santa Clara</td>
     </tr>
   </tbody>
 </table>
@@ -1167,10 +1155,11 @@ active_route_names = active_route_metrics >> inner_join(
     _, route_names, [*pk_str, "route_id"]
 )
 
+unique_route_names = tbl.gtfs_schedule_routes() >> distinct(_.calitp_itp_id, _.calitp_url_number, _.route_long_name)
+
 duplicate_route_names = (
     active_route_names
-    >> inner_join(_, active_route_names, [*pk_str, "route_long_name"])
-    >> filter(_.route_id_x != _.route_id_y)
+    >> inner_join(_, unique_route_names, [*pk_str, "route_long_name"])
 )
 
 duplicate_route_names >> count(_.calitp_itp_id, _.calitp_url_number)
@@ -1199,31 +1188,31 @@ duplicate_route_names >> count(_.calitp_itp_id, _.calitp_url_number)
       <th>0</th>
       <td>182</td>
       <td>0</td>
-      <td>10240</td>
+      <td>122</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>293</td>
+      <td>4</td>
       <td>0</td>
-      <td>42</td>
+      <td>113</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>295</td>
+      <td>278</td>
       <td>0</td>
-      <td>26</td>
+      <td>74</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>61</td>
+      <td>3</td>
       <td>0</td>
-      <td>14</td>
+      <td>61</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>235</td>
+      <td>183</td>
       <td>0</td>
-      <td>12</td>
+      <td>61</td>
     </tr>
   </tbody>
 </table>
@@ -1262,21 +1251,31 @@ duplicate_route_names >> filter(_.calitp_itp_id == 182) >> count(_.route_long_na
     <tr>
       <th>0</th>
       <td>Metro Local Line</td>
-      <td>10100</td>
+      <td>101</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Metro Rapid Line</td>
-      <td>110</td>
+      <td>11</td>
     </tr>
     <tr>
       <th>2</th>
       <td>Metro Express Line</td>
-      <td>30</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Metro Limited Line</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Metro G Line (Orange) 901</td>
+      <td>1</td>
     </tr>
   </tbody>
 </table>
-<p>3 rows × 2 columns</p><p># .. may have more rows</p></div>
+<p>5 rows × 2 columns</p><p># .. may have more rows</p></div>
 
 
 
