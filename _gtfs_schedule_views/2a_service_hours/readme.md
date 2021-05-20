@@ -23,112 +23,7 @@ pk_col = (_.calitp_itp_id, _.calitp_url_number)
 
 DATE_START = "2021-04-01"
 DATE_END = "2021-05-01"
-```
 
-
-</details>
-
-<details>
-
-<summary>show code</summary>
-
-
-
-```python
-# Convenience tables
-agency_trip_routes = (
-    tbl.gtfs_schedule_trips()
-    >> select(*pk_col, _.trip_id, _.route_id)
-    >> inner_join(
-        _,
-        tbl.gtfs_schedule_routes() >> select(*pk_col, _.route_id, _.route_long_name),
-        [*pk_str, "route_id"],
-    )
-)
-
-# trip_stop_times = (
-#     tbl_stops_and_times
-#     >> inner_join(
-#         _,
-#         tbl.gtfs_schedule_trips() >> select(_.trip_id, _.service_id, _.route_id, *pk_col),
-#         [*pk_str, "trip_id"],
-#     )
-# )
-
-trip_stop_times = tbl_stops_and_times
-```
-
-
-</details>
-
-* 30:01:01 is not a time in most data systems
-* we may want to know which times occur after midnight
-
-## Motivating Cases
-
-## Modelling time in transit, midnight switchpoint
-
-### Maximum hour part in stop_times data
-
-<details>
-
-<summary>show code</summary>
-
-
-
-```python
-extract_hour = lambda colname: sql_raw('REGEXP_EXTRACT(%s, "([0-9]*?):")' % colname)
-
-hour_extracted = trip_stop_times >> mutate(
-    arrival_hour=extract_hour("arrival_time"),
-    departure_hour=extract_hour("departure_time"),
-)
-
-(
-    hour_extracted
-    >> summarize(
-        max_hour=_.arrival_hour.astype(int).max(),
-        departure_hour=_.departure_hour.astype(int).max(),
-    )
-    >> collect()
-)
-```
-
-
-</details>
-
-
-
-
-<table border="0" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>max_hour</th>
-      <th>departure_hour</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>30</td>
-      <td>30</td>
-    </tr>
-  </tbody>
-</table>
-<p>1 rows × 2 columns</p>
-
-
-
-### Converting to a TIME type
-
-<details>
-
-<summary>show code</summary>
-
-
-
-```python
 from siuba.siu import symbolic_dispatch
 from siuba.sql.dialects.bigquery import BigqueryColumn
 from sqlalchemy import sql
@@ -145,7 +40,106 @@ def as_time(col, fmt=None) -> BigqueryColumn:
 def time_diff(x, y, unit) -> BigqueryColumn:
     return sql.func.time_diff(x, y, sql.text(unit))
 
+```
 
+
+</details>
+
+<details>
+
+<summary>show code</summary>
+
+
+
+```python
+# Main tables defined ------------
+
+extract_hour = lambda colname: sql_raw('REGEXP_EXTRACT(%s, "([0-9]*?):")' % colname)
+
+hour_extracted = tbl_stops_and_times >> mutate(
+    arrival_hour=extract_hour("arrival_time"),
+    departure_hour=extract_hour("departure_time"),
+)
+
+(
+    hour_extracted
+    >> summarize(
+        max_hour=_.arrival_hour.astype(int).max(),
+        departure_hour=_.departure_hour.astype(int).max(),
+    )
+    >> collect()
+)
+
+from siuba.dply.vector import lag
+
+# Create new time columns to track hour number, as well as converting
+# times like 25:00:00 to 1:00:00
+stop_times_fixed = (
+    hour_extracted
+    >> mutate(
+        stop_sequence = _.stop_sequence.astype(int),
+        arrival_hour_24=(_.arrival_hour.astype(int) % 24).astype(str),
+        departure_hour_24=(_.departure_hour.astype(int) % 24).astype(str),
+        new_arrival_time=as_time(_.arrival_time.str.replace("^([0-9]*?):", _.arrival_hour_24 + ":")),
+        new_departure_time=as_time(_.departure_time.str.replace("^([0-9]*?):", _.departure_hour_24 + ":"))
+    )
+)
+
+# this expression infers when an arrival time is after midnight, by checking one of these holds..
+# * explicitly encoded
+#   - departure hour coded as >= 24 (e.g. 24:00:00)
+#   - or, arrival hour coded as > 24
+# * implicitly coded
+#   - previous departure is later than 22:00 (assuming transit times are < 2 hours)
+#   - and, it's an earlier time than previous departure (e.g. departed 23:50, arrived 00:10)
+# * it's after a stop time that met the above criteria
+expr_after_midnight = (
+    (_.departure_hour.astype(int) >= 24)
+    | (_.arrival_hour.astype(int) > 24)
+    | ((_.prev_departure > "22:00:00") & (_.new_arrival_time < _.prev_departure))
+).fillna(False).astype(int).cumsum() >= 1
+
+
+stop_times_enhanced = (
+    stop_times_fixed
+    >> group_by(*pk_col, _.trip_id)
+    >> arrange(_.stop_sequence)
+    >> mutate(
+        prev_departure=lag(_.new_departure_time),
+        arrives_after_midnight=expr_after_midnight,
+        # if arrival is after midnight, need to add a days worth of seconds
+        # to the time diff, to account for e.g. 00:00 - 23:50 being negative
+        n_transit_seconds_raw=(
+            time_diff(_.new_arrival_time, _.prev_departure, "SECOND")
+        ),
+        n_transit_seconds=if_else(_.n_transit_seconds_raw < 0, _.n_transit_seconds_raw + (60 * 60 * 24), _.n_transit_seconds_raw),
+        ttl_transit_seconds=_.n_transit_seconds.cumsum(),
+    )
+    >> ungroup()
+)
+```
+
+
+</details>
+
+* 30:01:01 is not a time in most data systems
+* we may want to know which times occur after midnight
+
+## Motivating Cases
+
+## Modelling time in transit, midnight switchpoint
+
+### Maximum hour part in stop_times data
+
+### Converting to a TIME type
+
+<details>
+
+<summary>show code</summary>
+
+
+
+```python
 fix_hour = str_format(_.arrival_hour.astype(int) % 24, "%02d")
 
 df_hour_counts = (hour_extracted >> 
@@ -297,65 +291,6 @@ with pd.option_context("display.max_rows", 999):
 
 
 ```python
-from siuba.dply.vector import lag
-
-# Create new time columns to track hour number, as well as converting
-# times like 25:00:00 to 1:00:00
-stop_times_fixed = (
-    hour_extracted
-    >> mutate(
-        stop_sequence = _.stop_sequence.astype(int),
-        arrival_hour_24=(_.arrival_hour.astype(int) % 24).astype(str),
-        departure_hour_24=(_.departure_hour.astype(int) % 24).astype(str),
-        new_arrival_time=as_time(_.arrival_time.str.replace("^([0-9]*?):", _.arrival_hour_24 + ":")),
-        new_departure_time=as_time(_.departure_time.str.replace("^([0-9]*?):", _.departure_hour_24 + ":"))
-    )
-)
-
-# this expression infers when an arrival time is after midnight, by checking one of these holds..
-# * explicitly encoded
-#   - departure hour coded as >= 24 (e.g. 24:00:00)
-#   - or, arrival hour coded as > 24
-# * implicitly coded
-#   - previous departure is later than 22:00 (assuming transit times are < 2 hours)
-#   - and, it's an earlier time than previous departure (e.g. departed 23:50, arrived 00:10)
-# * it's after a stop time that met the above criteria
-expr_after_midnight = (
-    (_.departure_hour.astype(int) >= 24)
-    | (_.arrival_hour.astype(int) > 24)
-    | ((_.prev_departure > "22:00:00") & (_.new_arrival_time < _.prev_departure))
-).fillna(False).astype(int).cumsum() >= 1
-
-
-stop_times_enhanced = (
-    stop_times_fixed
-    >> group_by(*pk_col, _.trip_id)
-    >> arrange(_.stop_sequence)
-    >> mutate(
-        prev_departure=lag(_.new_departure_time),
-        arrives_after_midnight=expr_after_midnight,
-        # if arrival is after midnight, need to add a days worth of seconds
-        # to the time diff, to account for e.g. 00:00 - 23:50 being negative
-        n_transit_seconds_raw=(
-            time_diff(_.new_arrival_time, _.prev_departure, "SECOND")
-        ),
-        n_transit_seconds=if_else(_.n_transit_seconds_raw < 0, _.n_transit_seconds_raw + (60 * 60 * 24), _.n_transit_seconds_raw),
-        ttl_transit_seconds=_.n_transit_seconds.cumsum(),
-    )
-    >> ungroup()
-)
-```
-
-
-</details>
-
-<details>
-
-<summary>show code</summary>
-
-
-
-```python
 stop_times_enhanced >> count(_.arrives_after_midnight)
 ```
 
@@ -421,14 +356,14 @@ from plotnine import *
 
 
     
-![png](../2b_service_hours/readme_files/../2b_service_hours/readme_13_0.png)
+![png](../2a_service_hours/readme_files/../2a_service_hours/readme_11_0.png)
     
 
 
 
 
 
-    <ggplot: (-9223372036530360204)>
+    <ggplot: (317711680)>
 
 
 
@@ -654,7 +589,7 @@ It could be interpreted as follows:
 (
     midnight_edge_cases
     >> filter(_.stop_sequence_rank == 1, _.arrival_hour.astype(int) >= 25)
-    >> inner_join(_, agency_trip_routes, [*pk_str, "trip_id"])
+    >> inner_join(_, tbl_agency_trips, [*pk_str, "trip_id"])
     >> select(
         _.calitp_itp_id,
         _.calitp_url_number,
@@ -694,6 +629,34 @@ It could be interpreted as follows:
       <th>prev_departure</th>
       <th>arrives_after_midnight</th>
       <th>arrival_hour</th>
+      <th>agency_url</th>
+      <th>route_type</th>
+      <th>route_color</th>
+      <th>agency_id</th>
+      <th>calitp_extracted_at</th>
+      <th>direction_id</th>
+      <th>shape_id</th>
+      <th>agency_timezone</th>
+      <th>wheelchair_accessible</th>
+      <th>calitp_extracted_at_y</th>
+      <th>route_short_name</th>
+      <th>agency_fare_url</th>
+      <th>agency_phone</th>
+      <th>trip_short_name</th>
+      <th>agency_lang</th>
+      <th>route_desc</th>
+      <th>route_text_color</th>
+      <th>bikes_allowed</th>
+      <th>calitp_extracted_at_x</th>
+      <th>agency_email</th>
+      <th>continuous_pickup</th>
+      <th>route_url</th>
+      <th>agency_name</th>
+      <th>block_id</th>
+      <th>service_id</th>
+      <th>trip_headsign</th>
+      <th>continuous_drop_off</th>
+      <th>route_sort_order</th>
       <th>route_id</th>
     </tr>
   </thead>
@@ -715,6 +678,34 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>25</td>
+      <td>https://SFMTA.com</td>
+      <td>3</td>
+      <td></td>
+      <td>SFMTA</td>
+      <td>2021-04-16</td>
+      <td>0</td>
+      <td>184123</td>
+      <td>America/Los_Angeles</td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>14</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>en</td>
+      <td></td>
+      <td></td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>None</td>
+      <td>None</td>
+      <td>https://SFMTA.com/14</td>
+      <td>San Francisco Municipal Transportation Agency</td>
+      <td>1493</td>
+      <td>1</td>
+      <td>Daly City</td>
+      <td>None</td>
+      <td>None</td>
       <td>16283</td>
     </tr>
     <tr>
@@ -734,6 +725,34 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>27</td>
+      <td>https://SFMTA.com</td>
+      <td>3</td>
+      <td></td>
+      <td>SFMTA</td>
+      <td>2021-04-16</td>
+      <td>0</td>
+      <td>184123</td>
+      <td>America/Los_Angeles</td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>14</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>en</td>
+      <td></td>
+      <td></td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>None</td>
+      <td>None</td>
+      <td>https://SFMTA.com/14</td>
+      <td>San Francisco Municipal Transportation Agency</td>
+      <td>1496</td>
+      <td>1</td>
+      <td>Daly City</td>
+      <td>None</td>
+      <td>None</td>
       <td>16283</td>
     </tr>
     <tr>
@@ -753,6 +772,34 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>29</td>
+      <td>https://SFMTA.com</td>
+      <td>3</td>
+      <td></td>
+      <td>SFMTA</td>
+      <td>2021-04-16</td>
+      <td>0</td>
+      <td>184123</td>
+      <td>America/Los_Angeles</td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>14</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>en</td>
+      <td></td>
+      <td></td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>None</td>
+      <td>None</td>
+      <td>https://SFMTA.com/14</td>
+      <td>San Francisco Municipal Transportation Agency</td>
+      <td>1493</td>
+      <td>1</td>
+      <td>Daly City</td>
+      <td>None</td>
+      <td>None</td>
       <td>16283</td>
     </tr>
     <tr>
@@ -772,6 +819,34 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>27</td>
+      <td>https://SFMTA.com</td>
+      <td>3</td>
+      <td></td>
+      <td>SFMTA</td>
+      <td>2021-04-16</td>
+      <td>0</td>
+      <td>184123</td>
+      <td>America/Los_Angeles</td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>14</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>en</td>
+      <td></td>
+      <td></td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>None</td>
+      <td>None</td>
+      <td>https://SFMTA.com/14</td>
+      <td>San Francisco Municipal Transportation Agency</td>
+      <td>1493</td>
+      <td>1</td>
+      <td>Daly City</td>
+      <td>None</td>
+      <td>None</td>
       <td>16283</td>
     </tr>
     <tr>
@@ -791,11 +866,39 @@ It could be interpreted as follows:
       <td>None</td>
       <td>True</td>
       <td>26</td>
+      <td>https://SFMTA.com</td>
+      <td>3</td>
+      <td></td>
+      <td>SFMTA</td>
+      <td>2021-04-16</td>
+      <td>0</td>
+      <td>184123</td>
+      <td>America/Los_Angeles</td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>14</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>en</td>
+      <td></td>
+      <td></td>
+      <td>None</td>
+      <td>2021-04-16</td>
+      <td>None</td>
+      <td>None</td>
+      <td>https://SFMTA.com/14</td>
+      <td>San Francisco Municipal Transportation Agency</td>
+      <td>1495</td>
+      <td>1</td>
+      <td>Daly City</td>
+      <td>None</td>
+      <td>None</td>
       <td>16283</td>
     </tr>
   </tbody>
 </table>
-<p>5 rows × 16 columns</p><p># .. may have more rows</p></div>
+<p>5 rows × 44 columns</p><p># .. may have more rows</p></div>
 
 
 
@@ -813,7 +916,7 @@ One issue
 qa_neg_transit_time = (
     stop_times_enhanced
     >> filter(_.n_transit_seconds_raw < 0)
-    >> inner_join(_, agency_trip_routes, [*pk_str, "trip_id"])    
+    >> inner_join(_, tbl_agency_trips, [*pk_str, "trip_id"])    
     >> select(
         _.calitp_itp_id,
         _.calitp_url_number,
@@ -897,7 +1000,7 @@ Looks like a paratransit bus, called dial-a-ride from Tulare County Area Transit
     >> filter(_.n_transit_seconds == _.n_transit_seconds.max())
     >> select(_.calitp_itp_id, _.calitp_url_number, _.trip_id, _.ttl_transit_seconds)
     >> mutate(ttl_transit_hours = _.ttl_transit_seconds // 3600)
-    >> inner_join(_, agency_trip_routes, [*pk_str, "trip_id"])
+    >> inner_join(_, tbl_agency_trips, [*pk_str, "trip_id"])
 )
 ```
 
@@ -919,7 +1022,35 @@ Looks like a paratransit bus, called dial-a-ride from Tulare County Area Transit
       <th>trip_id</th>
       <th>ttl_transit_seconds</th>
       <th>ttl_transit_hours</th>
+      <th>agency_url</th>
+      <th>route_type</th>
+      <th>route_color</th>
+      <th>agency_id</th>
+      <th>calitp_extracted_at</th>
+      <th>direction_id</th>
       <th>route_long_name</th>
+      <th>shape_id</th>
+      <th>agency_timezone</th>
+      <th>wheelchair_accessible</th>
+      <th>calitp_extracted_at_y</th>
+      <th>route_short_name</th>
+      <th>agency_fare_url</th>
+      <th>agency_phone</th>
+      <th>trip_short_name</th>
+      <th>agency_lang</th>
+      <th>route_desc</th>
+      <th>route_text_color</th>
+      <th>bikes_allowed</th>
+      <th>calitp_extracted_at_x</th>
+      <th>agency_email</th>
+      <th>continuous_pickup</th>
+      <th>route_url</th>
+      <th>agency_name</th>
+      <th>block_id</th>
+      <th>service_id</th>
+      <th>trip_headsign</th>
+      <th>continuous_drop_off</th>
+      <th>route_sort_order</th>
       <th>route_id</th>
     </tr>
   </thead>
@@ -931,14 +1062,44 @@ Looks like a paratransit bus, called dial-a-ride from Tulare County Area Transit
       <td>t_554230_b_17398_tn_0</td>
       <td>79200</td>
       <td>22.0</td>
+      <td>http://tularecounty.ca.gov/rma/index.cfm/public-works/tulare-county-area-transit-tcat/</td>
+      <td>3</td>
+      <td>None</td>
+      <td>937</td>
+      <td>2021-04-29</td>
+      <td>0</td>
       <td>Dial-a-Ride</td>
+      <td>None</td>
+      <td>America/Los_Angeles</td>
+      <td>None</td>
+      <td>2021-04-29</td>
+      <td>None</td>
+      <td>http://www.tularecounty.ca.gov/rma/index.cfm/public-works/tulare-county-area-transit-tcat/tcat-systemwide-area-map/</td>
+      <td>877-404-6473</td>
+      <td>None</td>
+      <td>en</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>2021-04-29</td>
+      <td>None</td>
+      <td>1</td>
+      <td>None</td>
+      <td>Tulare County Area Transit</td>
+      <td>None</td>
+      <td>c_15968_b_17398_d_31</td>
+      <td>None</td>
+      <td>1</td>
+      <td>9</td>
       <td>12496</td>
     </tr>
   </tbody>
 </table>
-<p>1 rows × 7 columns</p><p># .. may have more rows</p></div>
+<p>1 rows × 35 columns</p><p># .. may have more rows</p></div>
 
 
+
+### How long do trips tend to be?
 
 <details>
 
@@ -959,6 +1120,8 @@ transit_minutes = (
 
 
 </details>
+
+In general, most trips tend to be under 3 hours. The graph below shows total transit time for trips, as a function of the number of stops they have.
 
 <details>
 
@@ -987,16 +1150,18 @@ transit_minutes = (
 
 
     
-![png](../2b_service_hours/readme_files/../2b_service_hours/readme_28_0.png)
+![png](../2a_service_hours/readme_files/../2a_service_hours/readme_28_0.png)
     
 
 
 
 
 
-    <ggplot: (281090985)>
+    <ggplot: (-9223372036577937541)>
 
 
+
+### Looking at the few trips longer than 3 hours
 
 <details>
 
@@ -1022,17 +1187,13 @@ transit_minutes = (
 
 
     
-![png](../2b_service_hours/readme_files/../2b_service_hours/readme_29_0.png)
+![png](../2a_service_hours/readme_files/../2a_service_hours/readme_30_0.png)
     
 
 
 
 
 
-    <ggplot: (324701935)>
+    <ggplot: (317957896)>
 
 
-
-## TODO: make agency_trips (agency + routes + trips)
-
-Since knowing anything about an active route requires joining with schedules.
