@@ -15,8 +15,6 @@
 
 
 ```python
-# initial setup
-
 %run 0_data_model.ipynb
 
 pk_str = ["calitp_itp_id", "calitp_url_number"]
@@ -45,7 +43,21 @@ tbl_schedule_daily
 <div><pre># Source: lazy query
 # DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
 # Preview:
-</pre><table border="0" class="dataframe">
+</pre><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -65,77 +77,77 @@ tbl_schedule_daily
   <tbody>
     <tr>
       <th>0</th>
-      <td>256</td>
+      <td>34</td>
       <td>0</td>
-      <td>Sunday</td>
-      <td>2010-12-31</td>
-      <td>2020-12-31</td>
-      <td>2021-04-16</td>
+      <td>c_139_b_398_d_31</td>
+      <td>2013-01-01</td>
+      <td>2024-01-01</td>
+      <td>2021-04-19</td>
       <td>0</td>
-      <td>2019-06-17</td>
+      <td>2014-09-13</td>
       <td>None</td>
       <td>None</td>
       <td>False</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>256</td>
+      <td>97</td>
       <td>0</td>
-      <td>Sunday</td>
-      <td>2010-12-31</td>
-      <td>2020-12-31</td>
+      <td>c_1856_b_1167_d_32</td>
+      <td>2016-01-01</td>
+      <td>2020-01-01</td>
       <td>2021-04-16</td>
       <td>0</td>
-      <td>2014-08-25</td>
+      <td>2016-06-28</td>
       <td>None</td>
       <td>None</td>
       <td>False</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>256</td>
+      <td>97</td>
       <td>0</td>
-      <td>Sunday</td>
-      <td>2010-12-31</td>
-      <td>2020-12-31</td>
+      <td>c_1856_b_1167_d_32</td>
+      <td>2016-01-01</td>
+      <td>2020-01-01</td>
       <td>2021-04-16</td>
       <td>0</td>
-      <td>2011-12-05</td>
+      <td>2016-07-01</td>
       <td>None</td>
       <td>None</td>
       <td>False</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>256</td>
+      <td>99</td>
       <td>0</td>
-      <td>Saturday</td>
-      <td>2010-12-31</td>
-      <td>2020-12-31</td>
-      <td>2021-04-16</td>
+      <td>c_237_b_78_d_4</td>
+      <td>2015-01-02</td>
+      <td>2021-12-31</td>
+      <td>2021-05-03</td>
       <td>0</td>
-      <td>2012-06-18</td>
+      <td>2016-08-06</td>
       <td>None</td>
       <td>None</td>
       <td>False</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>256</td>
+      <td>1</td>
+      <td>5</td>
+      <td>c_237_b_78_d_4</td>
+      <td>2015-01-02</td>
+      <td>2021-12-31</td>
+      <td>2021-05-03</td>
       <td>0</td>
-      <td>Saturday</td>
-      <td>2010-12-31</td>
-      <td>2020-12-31</td>
-      <td>2021-04-16</td>
-      <td>0</td>
-      <td>2013-02-11</td>
+      <td>2016-10-30</td>
       <td>None</td>
       <td>None</td>
       <td>False</td>
     </tr>
   </tbody>
 </table>
-<p>5 rows × 11 columns</p><p># .. may have more rows</p></div>
+</div><p># .. may have more rows</p></div>
 
 
 
@@ -188,7 +200,21 @@ DATE_END = str(datetime.date.today())
 
 
 
-<table border="0" class="dataframe">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -212,7 +238,7 @@ DATE_END = str(datetime.date.today())
     </tr>
   </tbody>
 </table>
-<p>1 rows × 6 columns</p>
+</div>
 
 
 
@@ -243,7 +269,7 @@ DATE_END = str(datetime.date.today())
 
 
 
-    <ggplot: (-9223372036554963305)>
+    <ggplot: (301341935)>
 
 
 
@@ -277,7 +303,21 @@ DATE_END = str(datetime.date.today())
 
 
 
-<table border="0" class="dataframe">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -292,16 +332,16 @@ DATE_END = str(datetime.date.today())
   <tbody>
     <tr>
       <th>0</th>
-      <td>7059</td>
-      <td>830</td>
-      <td>2021-05-03</td>
-      <td>2021-05-17</td>
-      <td>794</td>
+      <td>7019</td>
+      <td>815</td>
+      <td>2021-04-30</td>
+      <td>2021-05-14</td>
+      <td>789</td>
       <td>0</td>
     </tr>
   </tbody>
 </table>
-<p>1 rows × 6 columns</p>
+</div>
 
 
 
@@ -330,7 +370,21 @@ DATE_END = str(datetime.date.today())
 
 
 
-<table border="0" class="dataframe">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -408,7 +462,7 @@ DATE_END = str(datetime.date.today())
     </tr>
   </tbody>
 </table>
-<p>8 rows × 5 columns</p>
+</div>
 
 
 
@@ -437,7 +491,21 @@ DATE_END = str(datetime.date.today())
 <div><pre># Source: lazy query
 # DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
 # Preview:
-</pre><table border="0" class="dataframe">
+</pre><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -453,7 +521,7 @@ DATE_END = str(datetime.date.today())
     </tr>
   </tbody>
 </table>
-<p>1 rows × 2 columns</p><p># .. may have more rows</p></div>
+</div><p># .. may have more rows</p></div>
 
 
 
@@ -478,7 +546,21 @@ tbl_schedule_daily >> filter(_.service_indicator.isna()) >> head(1)
 <div><pre># Source: lazy query
 # DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
 # Preview:
-</pre><table border="0" class="dataframe">
+</pre><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -505,14 +587,14 @@ tbl_schedule_daily >> filter(_.service_indicator.isna()) >> head(1)
       <td>None</td>
       <td>None</td>
       <td>None</td>
-      <td>2021-05-27</td>
+      <td>2021-04-05</td>
       <td>True</td>
       <td>None</td>
       <td>True</td>
     </tr>
   </tbody>
 </table>
-<p>1 rows × 11 columns</p><p># .. may have more rows</p></div>
+</div><p># .. may have more rows</p></div>
 
 
 
@@ -546,7 +628,21 @@ df_exception_counts
 
 
 
-<table border="0" class="dataframe">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -575,21 +671,21 @@ df_exception_counts
       <th>2</th>
       <td>278</td>
       <td>0</td>
-      <td>72952-1111100-0</td>
+      <td>72957-1111100-0</td>
       <td>88</td>
     </tr>
     <tr>
       <th>3</th>
       <td>278</td>
       <td>0</td>
-      <td>72965-1111100-0</td>
+      <td>72954-1111100-0</td>
       <td>88</td>
     </tr>
     <tr>
       <th>4</th>
       <td>278</td>
       <td>0</td>
-      <td>72954-1111100-0</td>
+      <td>72968-1111100-0</td>
       <td>88</td>
     </tr>
     <tr>
@@ -603,40 +699,41 @@ df_exception_counts
       <th>218</th>
       <td>278</td>
       <td>0</td>
-      <td>72982-0000010-0</td>
+      <td>72979-1111100-0</td>
       <td>1</td>
     </tr>
     <tr>
       <th>219</th>
       <td>343</td>
       <td>0</td>
-      <td>c_21375_b_29794_d_64</td>
+      <td>c_21375_b_29794_d_32</td>
       <td>1</td>
     </tr>
     <tr>
       <th>220</th>
-      <td>48</td>
+      <td>182</td>
       <td>0</td>
-      <td>108699a6-0536-4926-bab1-56d4547e77c9</td>
+      <td>DSE-US-1650</td>
       <td>1</td>
     </tr>
     <tr>
       <th>221</th>
-      <td>278</td>
+      <td>62</td>
       <td>0</td>
-      <td>72976-0000001-0</td>
+      <td>c_17552_b_26542_d_32</td>
       <td>1</td>
     </tr>
     <tr>
       <th>222</th>
-      <td>182</td>
+      <td>30</td>
       <td>0</td>
-      <td>DSE-PP-1615</td>
+      <td>c_21294_b_29772_d_127</td>
       <td>1</td>
     </tr>
   </tbody>
 </table>
 <p>223 rows × 4 columns</p>
+</div>
 
 
 
@@ -670,7 +767,21 @@ exception_dates = (
 
 
 
-<table border="0" class="dataframe">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -716,7 +827,7 @@ exception_dates = (
     </tr>
   </tbody>
 </table>
-<p>7 rows × 2 columns</p>
+</div>
 
 
 
@@ -754,7 +865,7 @@ join_cols = [_[k] for k in join_keys]
 
 
 
-    <ggplot: (299865457)>
+    <ggplot: (318255880)>
 
 
 
@@ -784,7 +895,21 @@ join_cols = [_[k] for k in join_keys]
 <div><pre># Source: lazy query
 # DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
 # Preview:
-</pre><table border="0" class="dataframe">
+</pre><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -826,7 +951,7 @@ join_cols = [_[k] for k in join_keys]
     </tr>
   </tbody>
 </table>
-<p>5 rows × 3 columns</p><p># .. may have more rows</p></div>
+</div><p># .. may have more rows</p></div>
 
 
 
@@ -837,11 +962,9 @@ join_cols = [_[k] for k in join_keys]
 
 
 ```python
-filter_itp8 = filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
-
 (
     exception_schedules
-    >> filter_itp8
+    >> filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
     >> filter(_.service_date.dt.year.isin([2020, 2021]))
     >> collect()
     >> count(_.service_date)
@@ -862,7 +985,7 @@ filter_itp8 = filter(_.calitp_itp_id == 8, _.calitp_url_number == 1)
 
 
 
-    <ggplot: (-9223372036525444818)>
+    <ggplot: (318292947)>
 
 
 
@@ -884,7 +1007,21 @@ tbl.gtfs_schedule_calendar() >> filter_itp8 >> count() >> collect()
 
 
 
-<table border="0" class="dataframe">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -898,7 +1035,7 @@ tbl.gtfs_schedule_calendar() >> filter_itp8 >> count() >> collect()
     </tr>
   </tbody>
 </table>
-<p>1 rows × 1 columns</p>
+</div>
 
 
 
@@ -914,8 +1051,7 @@ However, it does not have any corresponding trips. In this case, it looks like t
 (
     tbl.gtfs_schedule_calendar()
     >> filter_itp8
-    >> inner_join(_, tbl.gtfs_schedule_trips(), [*pk_str, "service_id"])
-    >> count()
+    >> inner_join(_, trip_routes, [*pk_str, "service_id"])
 )
 ```
 
@@ -928,21 +1064,48 @@ However, it does not have any corresponding trips. In this case, it looks like t
 <div><pre># Source: lazy query
 # DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
 # Preview:
-</pre><table border="0" class="dataframe">
+</pre><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>n</th>
+      <th>calitp_itp_id</th>
+      <th>calitp_url_number</th>
+      <th>service_id</th>
+      <th>monday</th>
+      <th>tuesday</th>
+      <th>wednesday</th>
+      <th>thursday</th>
+      <th>friday</th>
+      <th>saturday</th>
+      <th>sunday</th>
+      <th>start_date</th>
+      <th>end_date</th>
+      <th>calitp_extracted_at</th>
+      <th>trip_id</th>
+      <th>route_id</th>
+      <th>route_long_name</th>
+      <th>route_url</th>
+      <th>route_type</th>
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <th>0</th>
-      <td>0</td>
-    </tr>
   </tbody>
 </table>
-<p>1 rows × 1 columns</p><p># .. may have more rows</p></div>
+</div><p># .. may have more rows</p></div>
 
 
 
@@ -981,7 +1144,21 @@ However, it does not have any corresponding trips. In this case, it looks like t
 <div><pre># Source: lazy query
 # DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
 # Preview:
-</pre><table border="0" class="dataframe">
+</pre><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -994,11 +1171,11 @@ However, it does not have any corresponding trips. In this case, it looks like t
     <tr>
       <th>0</th>
       <td>The Link - Baldwin Hills Parklands</td>
-      <td>https://dpw.lacounty.gov/transit/TheLinkBaldwin.aspx</td>
+      <td>https://dpw.lacounty.gov/transit/TheLinkBaldwi...</td>
       <td>3</td>
     </tr>
   </tbody>
 </table>
-<p>1 rows × 3 columns</p><p># .. may have more rows</p></div>
+</div><p># .. may have more rows</p></div>
 
 
