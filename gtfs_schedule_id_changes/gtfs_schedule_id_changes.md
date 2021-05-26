@@ -86,7 +86,7 @@ tbl_feeds
 
 
 <div><pre># Source: lazy query
-# DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
+# DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=1000000000)
 # Preview:
 </pre><table border="0" class="dataframe">
   <thead>
@@ -259,7 +259,7 @@ route_id_changes = (
 
 
 
-    <ggplot: (314534320)>
+    <ggplot: (-9223372036529127052)>
 
 
 
@@ -304,7 +304,7 @@ trips_end = fetch_date(tbl.gtfs_schedule_type2_trips(), DATE_END)
 
 
 
-    <ggplot: (-9223372036540011022)>
+    <ggplot: (-9223372036529115595)>
 
 
 
@@ -349,6 +349,6 @@ stops_end = fetch_date(tbl.gtfs_schedule_type2_stops(), DATE_END)
 
 
 
-    <ggplot: (314770054)>
+    <ggplot: (326454227)>
 
 
