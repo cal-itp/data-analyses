@@ -28,6 +28,8 @@ tbl = AutoTable(
 
 </details>
 
+## Grab specific agency feeds
+
 <details>
 
 <summary>show code</summary>
@@ -84,7 +86,7 @@ tbl_feeds
 
 
 <div><pre># Source: lazy query
-# DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=1000000000)
+# DB Conn: Engine(bigquery://cal-itp-data-infra/?maximum_bytes_billed=100000000)
 # Preview:
 </pre><table border="0" class="dataframe">
   <thead>
@@ -250,14 +252,14 @@ route_id_changes = (
 
 
     
-![png](gtfs_schedule_id_changes_files/gtfs_schedule_id_changes_7_0.png)
+![png](gtfs_schedule_id_changes_files/gtfs_schedule_id_changes_8_0.png)
     
 
 
 
 
 
-    <ggplot: (-9223372036540360753)>
+    <ggplot: (314534320)>
 
 
 
@@ -295,16 +297,18 @@ trips_end = fetch_date(tbl.gtfs_schedule_type2_trips(), DATE_END)
 
 
     
-![png](gtfs_schedule_id_changes_files/gtfs_schedule_id_changes_9_0.png)
+![png](gtfs_schedule_id_changes_files/gtfs_schedule_id_changes_10_0.png)
     
 
 
 
 
 
-    <ggplot: (314465747)>
+    <ggplot: (-9223372036540011022)>
 
 
+
+## Stop ID changes
 
 <details>
 
@@ -338,13 +342,13 @@ stops_end = fetch_date(tbl.gtfs_schedule_type2_stops(), DATE_END)
 
 
     
-![png](gtfs_schedule_id_changes_files/gtfs_schedule_id_changes_10_0.png)
+![png](gtfs_schedule_id_changes_files/gtfs_schedule_id_changes_12_0.png)
     
 
 
 
 
 
-    <ggplot: (314438706)>
+    <ggplot: (314770054)>
 
 
