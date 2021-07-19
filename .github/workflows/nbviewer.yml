@@ -1,0 +1,43 @@
+name: Generate nbviewer links
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+    paths:
+      - "**.ipynb"
+
+jobs:
+  nbviewer-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: get files
+        id: files
+        uses: jitterbit/get-changed-files@v1
+
+      - name: add comments
+        uses: actions/github-script@v3
+        env:
+          FILES: ${{steps.files.outputs.all}}
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const body = process.env.FILES
+              .split(" ")
+              .filter(f => f.endsWith(".ipynb"))
+              .map(f => `* [${f}](https://nbviewer.jupyter.org/github/${context.repo.owner}/${context.repo.repo}/blob/${context.sha}/${f})`)
+
+            if (body.length > 0) {
+              github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: "nbviewer URLs for impacted notebooks:\n\n" + body.join("\n")
+              })
+            }
