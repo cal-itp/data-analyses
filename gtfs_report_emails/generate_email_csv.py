@@ -79,3 +79,10 @@ final_all_emails = (
 # -
 
 final_all_emails.to_csv(f"report_emails_{REPORT_PUBLISH_DATE}.csv")
+
+# +
+# import requests
+
+# for link in final_all_emails.dev_url.tolist():
+#     r = requests.get(link)
+#     r.raise_for_status()
