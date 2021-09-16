@@ -1,0 +1,239 @@
+---
+title: "issue_329"
+author: "Charlie Costanzo"
+date: "9/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(reticulate)
+knitr::knit_engines$set(python = reticulate::eng_python)
+
+library(DBI)
+
+con <- dbConnect(
+  bigrquery::bigquery(),
+  project = "cal-itp-data-infra",
+  dataset = "views"
+  )
+```
+
+```{python include=FALSE}
+from siuba import *
+from calitp.tables import tbl
+import pandas as pd
+pd.set_option("display.max_rows", 20)
+```
+
+# Issue #329
+
+## 1. Number of Routes for a Given Agency Over Time
+
+### SQL
+**Primary Fact Table** → views.gtfs_schedule_fact_daily_feed_routes  
+**Secondary Tables** →  views.gtfs_schedule_dim_feeds
+
+*Time* → date (GROUP BY)  
+*Geography* → route_key (COUNT)  
+*Agency* → Join w/ views.gtfs_schedule_dim_feeds on feed_key for calitp_feed_name (GROUP BY)
+
+```{sql connection=con}
+SELECT
+calitp_feed_name, date, count(*) AS count_feeds
+FROM `views.gtfs_schedule_fact_daily_feed_routes` 
+JOIN `views.gtfs_schedule_dim_feeds` USING (feed_key)
+WHERE
+calitp_feed_name = "Unitrans (0)"
+GROUP BY
+1, 2
+ORDER BY
+date DESC
+LIMIT 10
+```
+
+### Metabase
+**Primary Fact Table** → Gtfs Schedule Fact Daily Feed Routes
+
+![](./assets/routes_agency_over_time.png)
+
+### Siuba
+```{python}
+routes_table = (tbl.views.gtfs_schedule_fact_daily_feed_routes())
+
+feed_name_table = (tbl.views.gtfs_schedule_dim_feeds())
+
+# Join to get CalITP Feed Names
+
+joined_routes_feed_name = left_join(routes_table, feed_name_table, {"feed_key": "feed_key"})
+
+# Count routes by date and CalITP Feed Names, order by date, filter by specific calitp_feed_name
+
+joined_routes_feed_name >> filter(_.calitp_feed_name == "Unitrans (0)") >> count(_.date) >> arrange(_.date)
+```
+
+## 2. Number of Stops for a Given Agency Over Time
+
+### SQL
+
+**Primary Fact Table** → views.gtfs_schedule_fact_daily_feed_stops  
+**Secondary Tables** →  views.gtfs_schedule_dim_feeds  
+
+*Time* → date (GROUP BY)  
+*Geography* → stop_key (COUNT)  
+*Agency* → Join w/ views.gtfs_schedule_dim_feeds on feed_key for calitp_feed_name (GROUP BY)  
+
+```{sql connection=con}
+SELECT
+calitp_feed_name, date, count(*) AS count_stops
+FROM `views.gtfs_schedule_fact_daily_feed_stops` 
+JOIN `views.gtfs_schedule_dim_feeds` USING (feed_key)
+WHERE
+calitp_feed_name = "Unitrans (0)"
+GROUP BY
+1, 2
+ORDER BY
+date
+LIMIT 10
+```
+
+### Metabase
+**Primary Fact Table** → Gtfs Schedule Fact Daily Feed Stops
+
+![](./assets/stops_agency_over_time.png)
+
+### Siuba
+
+```{python}
+stops_table = (tbl.views.gtfs_schedule_fact_daily_feed_stops()
+)
+
+feed_name_table = (tbl.views.gtfs_schedule_dim_feeds()
+)
+
+## Join to get CalITP Feed Names
+
+joined_stops_feed_name = left_join(stops_table, feed_name_table, {"feed_key": "feed_key"})
+
+## Count stops by date and CalITP Feed Names, order by date, filter by specific calitp_feed_name
+
+joined_stops_feed_name >> count(_.date, _.calitp_feed_name)  >> filter(_.calitp_feed_name == "Unitrans (0)") >> arrange(_.date)
+```
+
+## 3. Number of Stops Made Across all Trips for an Agency 
+
+### SQL
+**Primary Fact Table** → views.gtfs_schedule_data_feed_trip_stops_latest  
+**Secondary Tables** →  views.gtfs_schedule_fact_daily_trips  
+                        views.gtfs_agency_names
+
+*Time* → no variable - this table only has information for the current day  
+*Geography* → stop_time_key (COUNT)  
+*Agency* → calitp_feed_name (GROUP BY)
+
+```{sql connection=con}
+SELECT
+calitp_feed_name, count(*) AS n_trip_stops, COUNT(DISTINCT(trip_id)) as n_trips, COUNT(DISTINCT(stop_id)) as n_stops
+FROM `views.gtfs_schedule_data_feed_trip_stops_latest` 
+WHERE
+calitp_feed_name = "Unitrans (0)"
+GROUP BY
+calitp_feed_name
+```
+
+### Metabase
+**Primary Fact Table** → Gtfs Schedule Data Feed Trip Stops Latest
+
+*Count of Trip Stops Made Across all Trips for an Agency*
+![](./assets/count_trip_stops.png)
+
+*Distinct Trips in Trip Stops*
+![](./assets/distinct_trips_in_trip_stops.png)
+
+*Distinct Stops in Trip Stops*
+![](./assets/distinct_stops_in_trip_stops.png)
+
+### Siuba
+```{python}
+daily_trip_stops = (tbl.views.gtfs_schedule_data_feed_trip_stops_latest())
+
+daily_trip_stops >> filter(_.calitp_feed_name == "Unitrans (0)") >> summarize(n_trips = _.trip_id.nunique(), n_stops = _.stop_id.nunique(),  n = _.trip_id.size())
+```
+
+## 4. For a Given Agency, on Each Day, Days Until the Feed Expires 
+
+### SQL
+**Primary Fact Table** → views.gtfs_schedule_fact_daily_feeds  
+**Secondary Fact Table** → views.gtfs_schedule_dim_feeds
+
+*Time* → date, feed_end_date  
+*Measure* → days_until_feed_end_date  
+*Agency* → calitp_feed_name (GROUP BY)
+```{sql connection=con}
+SELECT calitp_feed_name, date, days_until_feed_end_date, feed_end_date
+FROM views.gtfs_schedule_fact_daily_feeds
+JOIN views.gtfs_schedule_dim_feeds USING (feed_key)
+```
+
+### Metabase
+**Primary Fact Table** → views.gtfs_schedule_fact_daily_feeds  
+**Secondary Fact Table** → views.gtfs_schedule_dim_feeds
+
+![](./assets/days_until_agency_feed_expires.png)
+
+### Siuba
+**Primary Fact Table** → views.gtfs_schedule_fact_daily_feeds  
+**Secondary Fact Table** → views.gtfs_schedule_dim_feeds
+
+```{python}
+fact_daily_feeds_table = (tbl.views.gtfs_schedule_fact_daily_feeds())
+
+schedule_dim_feeds_table = (tbl.views.gtfs_schedule_dim_feeds())
+
+joined_fact_dim_feeds = left_join(fact_daily_feeds_table, schedule_dim_feeds_table, {"feed_key": "feed_key"})
+
+time_until_feed_end_date = joined_fact_dim_feeds >> select(_.calitp_feed_name, _.date, _.days_until_feed_end_date, _.feed_end_date)
+``````
+
+## 5. Max Number of Stops a Trip Can Have, Per Agency
+
+### SQL
+**Primary Fact Table** →  views.gtfs_schedule_data_feed_trip_stops_latest
+**Secondary Tables** →  views.gtfs_schedule_dim_feeds
+
+*Time* → date (GROUP BY)  
+*Geography* → trip_id (GROUP BY)
+*Geography* → count (COUNT)
+*Agency* → Join w/ views.gtfs_schedule_dim_feeds on feed_key for calitp_feed_name (GROUP BY)
+
+```{sql connection=con}
+WITH 
+counting_stop_times AS (SELECT
+trip_id, calitp_feed_name, COUNT(stop_time_key) AS count_stop_time_key
+FROM `views.gtfs_schedule_data_feed_trip_stops_latest` 
+WHERE
+calitp_feed_name = "Unitrans (0)"
+GROUP BY
+1, 2)
+
+SELECT
+calitp_feed_name, MAX(count_stop_time_key) AS max_count_stop_time_key
+FROM
+counting_stop_times
+GROUP BY
+calitp_feed_name
+```
+
+### Metabase
+**Primary Fact Table** → views.gtfs_schedule_data_feed_trip_stops_latest
+
+![](./assets/max_stops_per_trip_by_agency.png)
+
+### Siuba
+```{python}
+daily_trip_stops = (tbl.views.gtfs_schedule_data_feed_trip_stops_latest())
+
+daily_trip_stops >> count(_.trip_id, _.calitp_feed_name) >> filter(_.calitp_feed_name == "Unitrans (0)") >> summarize(n_max = _.n.max())
+```
+
