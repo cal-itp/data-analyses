@@ -29,7 +29,7 @@ Projects:
 https://github.com/cal-itp/
 
 Repositories:  
-* data-infra  
+* (data-infra)[https://github.com/cal-itp/data-infra]  
 * data-analyses
 * calitp-py
 
