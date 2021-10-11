@@ -29,9 +29,9 @@ Projects:
 https://github.com/cal-itp/
 
 Repositories:  
-* (data-infra)[https://github.com/cal-itp/data-infra]  
-* data-analyses
-* calitp-py
+* [data-analyses](https://github.com/cal-itp/data-analyses)  
+* [data-infra](https://github.com/cal-itp/data-infra)  
+* [calitp-py](https://github.com/cal-itp/calitp-py)  
 
 ### Jupyter Lab - CALITP Cloud
 
