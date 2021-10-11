@@ -9,3 +9,30 @@ Place for sharing quick reports, and works in progress
 
 This repository is for quick sharing of works in progress and simple analyses.
 You don't need to open a pull request :).
+
+## Quick Links - Get Started in Data Analysis
+
+### Metabase
+
+https://dashboards.calitp.org/
+
+### BigQuery - Google Cloud Console
+
+https://console.cloud.google.com/bigquery/
+
+Projects:  
+* cal-itp-data-infra  
+* cal-itp-data-infra-staging
+
+### Github Repositories
+
+https://github.com/cal-itp/
+
+Repositories:  
+* data-infra  
+* data-analyses
+* calitp-py
+
+### Jupyter Lab - CALITP Cloud
+
+(Instructions Here)
