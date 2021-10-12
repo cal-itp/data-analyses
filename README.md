@@ -33,5 +33,4 @@ Repositories:
 * [data-infra](https://github.com/cal-itp/data-infra)  
 
 ### Jupyter Lab - CALITP Cloud
-
-(Coming Soon - Add Instructions Here)
+[https://hubtest.k8s.calitp.jarv.us/](https://hubtest.k8s.calitp.jarv.us/)
