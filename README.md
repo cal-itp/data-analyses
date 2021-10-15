@@ -34,7 +34,11 @@ https://github.com/cal-itp/
 
 Repositories:  
 * [data-analyses](https://github.com/cal-itp/data-analyses)  
-* [data-infra](https://github.com/cal-itp/data-infra)  
+* [data-infra](https://github.com/cal-itp/data-infra)
+
+Tutorials:
+* [Querying the Cal-ITP Data Warehouse](https://docs.calitp.org/calitp-py/)
+
 
 ### Jupyter Lab - CALITP Cloud
 
