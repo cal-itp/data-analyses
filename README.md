@@ -36,7 +36,7 @@ Repositories:
 * [data-analyses](https://github.com/cal-itp/data-analyses)  
 * [data-infra](https://github.com/cal-itp/data-infra)
 
-Tutorials:
+### Tutorials:
 * [Querying the Cal-ITP Data Warehouse](https://docs.calitp.org/calitp-py/)
 
 
