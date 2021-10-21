@@ -68,18 +68,22 @@ def prep_calenviroscreen(df):
         'Tract', 'ZIP', 'Population',
         'sq_mi', 'pop_sq_mi',
         'CIscoreP', 'Pollution_', 'PopCharP',
-        'equity_group', 'pollution_group', 'popchar_group',
+        'CIscoreP_group', 'Pollution__group', 'PopCharP_group',
         'County', 'City_1', 'geometry',  
     ]
     
-    df3 = (df2.rename(columns = 
+    df3 = (df2[keep_cols]
+           .rename(columns = 
                      {"CIscoreP_group": "equity_group",
                      "Pollution__group": "pollution_group",
-                     "PopCharP_group": "popchar_group"}
+                     "PopCharP_group": "popchar_group",
+                     "City_1": "City",
+                     "CIscoreP": "overall_ptile",
+                     "Pollution_": "pollution_ptile",
+                     "PopCharP": "popchar_ptile"}
                     )
            .sort_values(by="Tract")
            .reset_index(drop=True)
-           [keep_cols]
           )
     
     return df3
