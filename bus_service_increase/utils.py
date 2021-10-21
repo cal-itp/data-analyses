@@ -1,19 +1,27 @@
 """
 Utility functions
 """
+import gcsfs
 import pandas as pd
 
 SQ_MI_PER_SQ_M = 3.86 * 10**-7
+GCS_PROJECT = "cal-itp-data-infra"
+BUCKET_NAME = "bus-service-increase"
 
-def import_export(DATASET_NAME, OUTPUT_FILE_NAME): 
+def import_export(DATASET_NAME, OUTPUT_FILE_NAME, GCS=True): 
     """
     DATASET_NAME: str. Name of csv dataset.
     OUTPUT_FILE_NAME: str. Name of output parquet dataset.
     """
     df = pd.read_csv(f"{DATASET_NAME}.csv")    
-    df.to_parquet(f"./{OUTPUT_FILE_NAME}.parquet")
-
     
+    if GCS is True:
+        df.to_parquet(f"gs://{BUCKET_NAME}/{OUTPUT_FILE_NAME}.parquet")
+    else:
+        df.to_parquet(f"./{OUTPUT_FILE_NAME}.parquet")
+    
+        
+
 def define_equity_groups(df, percentile_col = ["CIscoreP"], num_groups=5):
     """
     df: pandas.DataFrame
@@ -73,7 +81,5 @@ def prep_calenviroscreen(df):
            .reset_index(drop=True)
            [keep_cols]
           )
-    
-
     
     return df3
