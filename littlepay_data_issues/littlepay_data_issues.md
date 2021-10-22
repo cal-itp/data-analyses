@@ -627,6 +627,76 @@ pd.read_sql_query(sample_duplicate_transaction_records_sql, connection, params={
 
 What is `Route Z`?
 
+### Duplicate transactions across file partitions
+
+We are loading these transactions from date-partitioned CSV files, and it appears that there aren't any duplicates within each partition -- only across partitions. Are there corrections being made to transactions that might appear in a later dated partition?
+
+
+```python
+duplicate_transaction_ids__within_partitions_sql = f"""
+with 
+
+all_ids as (
+    select _FILE_NAME as fn, littlepay_transaction_id
+    from `cal-itp-data-infra.payments.device_transactions`
+    where participant_id = %(agency)s
+),
+
+duplicate_ids as (
+    select fn, littlepay_transaction_id
+    from all_ids 
+    group by 1, 2
+    having count(*) > 1
+)
+
+select
+    %(agency)s as `Agency`,
+    (select count(distinct littlepay_transaction_id) from all_ids) as `Total_Unique_IDs`,
+    (select count(*) from duplicate_ids) as `Duplicate_IDs_within_partitions`
+"""
+
+pd.read_sql_query(duplicate_transaction_ids__within_partitions_sql, connection, params={'agency': 'mst'})
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Agency</th>
+      <th>Total_Unique_IDs</th>
+      <th>Duplicate_IDs_within_partitions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>mst</td>
+      <td>19582</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
 ## Duplicate `micropayment_id`
 
 We expect the number of duplicate micropayment IDs from  each agency to be `0`.
@@ -962,6 +1032,84 @@ pd.read_sql_query(count_duplicate_micropayment_records_sql, connection, params={
       <td>DEBIT</td>
       <td>complete_variable_fare</td>
       <td>2021-09-27</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+Unlike the transactions, the majority of duplicates for micropayments happen within partitions (as opposed to between partitions).
+
+
+```python
+duplicate_transaction_ids__within_partitions_sql = f"""
+with 
+
+all_ids as (
+    select _FILE_NAME as fn, micropayment_id
+    from `cal-itp-data-infra.payments.micropayments`
+    where participant_id = %(agency)s
+),
+
+duplicate_ids as (
+    select micropayment_id
+    from all_ids 
+    group by 1
+    having count(*) > 1
+),
+
+duplicate_ids_by_partition as (
+    select fn, micropayment_id
+    from all_ids 
+    group by 1, 2
+    having count(*) > 1
+)
+
+select
+    %(agency)s as `Agency`,
+    (select count(distinct micropayment_id) from all_ids) as `Total_Unique_IDs`,
+    (select count(distinct micropayment_id) from duplicate_ids) as `Count_IDs_with_Duplicates`,
+    (select count(distinct micropayment_id) from duplicate_ids_by_partition) as `Duplicate_IDs_within_partitions`
+"""
+
+pd.read_sql_query(duplicate_transaction_ids__within_partitions_sql, connection, params={'agency': 'mst'})
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Agency</th>
+      <th>Total_Unique_IDs</th>
+      <th>Count_IDs_with_Duplicates</th>
+      <th>Duplicate_IDs_within_partitions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>mst</td>
+      <td>16588</td>
+      <td>10272</td>
+      <td>10220</td>
     </tr>
   </tbody>
 </table>
@@ -1341,6 +1489,469 @@ pd.read_sql_query("""
     </tr>
   </tbody>
 </table>
+</div>
+
+
+
+# Investigating changes across duplicate IDs
+
+It may be reasonable for there to be certain fields that change for a duplicated transaction ID, but we should check whether the fields we see being changed fall into that reasonable set. Based on the below, it looks like the `route_id`, `location_id`, `location_name`, and `direction` fields are the only ones that are inconsistent across instances transaction ids.
+
+For micropayments on the other hand, the only field that seems to change across duplicate `micropayment_id` values is the `transaction_time`. As was mentioned above though, these changes happen within the same partition files.
+
+
+```python
+consistent_fields = [
+    'participant_id',
+    'customer_id',
+    'device_transaction_id',
+    'littlepay_transaction_id',
+    'device_id',
+    'device_id_issuer',
+    'type',
+    'transaction_outcome',
+    'transction_deny_reason',
+    'transaction_date_time_utc',
+#    'location_id',
+    'location_scheme',
+#    'location_name',
+    'zone_id',
+#    'route_id',
+    'mode',
+#    'direction',
+    'latitude',
+    'longitude',
+    'vehicle_id',
+    'granted_zone_ids',
+    'onward_zone_ids',
+    'calitp_extracted_at',
+]
+
+sql = f"""
+    with
+    
+    deduped_transactions as (
+        select distinct {', '.join(consistent_fields)}
+        from payments.device_transactions
+        where participant_id = 'mst'
+    ),
+    
+    dup_ids as (
+        select littlepay_transaction_id
+        from deduped_transactions
+        group by littlepay_transaction_id
+        having count(*) > 1
+    )
+    
+    select distinct *
+    from deduped_transactions
+    join dup_ids using (littlepay_transaction_id)
+    order by littlepay_transaction_id
+    limit 2
+"""
+
+pd.read_sql_query(sql, connection)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>littlepay_transaction_id</th>
+      <th>participant_id</th>
+      <th>customer_id</th>
+      <th>device_transaction_id</th>
+      <th>device_id</th>
+      <th>device_id_issuer</th>
+      <th>type</th>
+      <th>transaction_outcome</th>
+      <th>transction_deny_reason</th>
+      <th>transaction_date_time_utc</th>
+      <th>location_scheme</th>
+      <th>zone_id</th>
+      <th>mode</th>
+      <th>latitude</th>
+      <th>longitude</th>
+      <th>vehicle_id</th>
+      <th>granted_zone_ids</th>
+      <th>onward_zone_ids</th>
+      <th>calitp_extracted_at</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+consistent_fields = [
+    'micropayment_id',
+    'aggregation_id',
+    'participant_id',
+    'customer_id',
+    'funding_source_vault_id',
+#    'transaction_time',
+    'payment_liability',
+    'charge_amount',
+    'nominal_amount',
+    'currency_code',
+    'type',
+    'charge_type',
+    'calitp_extracted_at',
+]
+
+sql = f"""
+    with
+    
+    deduped_micropayments as (
+        select distinct {', '.join(consistent_fields)}
+        from payments.micropayments
+        where participant_id = 'mst'
+    ),
+    
+    dup_ids as (
+        select micropayment_id
+        from deduped_micropayments
+        group by micropayment_id
+        having count(*) > 1
+    )
+    
+    select distinct *
+    from deduped_micropayments
+    join dup_ids using (micropayment_id)
+    order by micropayment_id
+    limit 2
+"""
+
+pd.read_sql_query(sql, connection)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>micropayment_id</th>
+      <th>aggregation_id</th>
+      <th>participant_id</th>
+      <th>customer_id</th>
+      <th>funding_source_vault_id</th>
+      <th>payment_liability</th>
+      <th>charge_amount</th>
+      <th>nominal_amount</th>
+      <th>currency_code</th>
+      <th>type</th>
+      <th>charge_type</th>
+      <th>calitp_extracted_at</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+</div>
+
+
+
+# Investigating Customer duplication
+
+We expect there to be some unique key or composite key in the `customer_funding_source` table, and that it will be made up of some combination of `funding_source_id`, `funding_source_vault_id`, `customer_id`, however there are a number of duplications even when we use _all_ of these IDs as a composite key (even within a single date's data!):
+
+
+```python
+sql = """
+with dup_counts_within_partition_files as (
+    select _FILE_NAME as fn, funding_source_id, funding_source_vault_id, customer_id, count(*) as num_dups
+    from payments.customer_funding_source
+    group by 1, 2, 3, 4
+    having count(*) > 1
+)
+
+select
+    count(distinct funding_source_id || funding_source_vault_id || customer_id) as num_duplicated_composite_keys,
+    max(num_dups) as max_dups_per_key_per_file
+from dup_counts_within_partition_files
+"""
+
+pd.read_sql_query(sql, connection)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>num_duplicated_composite_keys</th>
+      <th>max_dups_per_key_per_file</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1216</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+Moreover, we expect that each `customer_id` is correlated with either a single `funding_source_vault_id` or a single `funding_source_id` (I wasn't sure which, so I checked both), however, that's also not the case, as can be seen with the two queries below.
+
+
+```python
+sql = """
+select customer_id, count(*) as count_of_distinct_funding_source_id
+from (
+    select distinct customer_id, funding_source_id
+    from payments.customer_funding_source)
+group by 1
+having count(*) > 1
+order by count(*) desc
+"""
+
+pd.read_sql_query(sql, connection)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>customer_id</th>
+      <th>count_of_distinct_funding_source_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>56580229-a41b-416a-84df-3344c63d435d</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>b50875da-01b8-45c6-8509-d11056045554</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>cb35f24f-f3d4-433a-9c52-6e213aeca853</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>6563418a-d7fb-4328-9062-e52ac0b607e2</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>6d2a695e-feac-41fb-b5c8-16a60d82e272</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>364</th>
+      <td>9e1184e2-aa35-42ec-913a-6d55b9d33ea8</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>365</th>
+      <td>669dd84b-22dd-4faa-a018-ac364e6a5fa6</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>366</th>
+      <td>ffe21fbf-7b13-449d-b508-f506fb60cc11</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>367</th>
+      <td>2edd2ca8-ed22-4a74-bc12-322da867205d</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>368</th>
+      <td>cab41f98-eebd-4f19-b17b-c1d286fd3f0d</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+<p>369 rows × 2 columns</p>
+</div>
+
+
+
+
+```python
+sql = """
+select customer_id, count(*) as count_of_distinct_vault_id
+from (
+    select distinct customer_id, funding_source_vault_id
+    from payments.customer_funding_source)
+group by 1
+having count(*) > 1
+order by count(*) desc
+"""
+
+pd.read_sql_query(sql, connection)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>customer_id</th>
+      <th>count_of_distinct_vault_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>cb35f24f-f3d4-433a-9c52-6e213aeca853</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>6563418a-d7fb-4328-9062-e52ac0b607e2</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>8eba2297-8c43-4063-9cc4-02f431ba29b9</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>13532d65-8ebd-4496-8412-e472491f0d58</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>7db5f9bf-da6f-4903-ac47-e26c1e2307d5</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>191</th>
+      <td>56662871-56da-4a07-b49e-d3985d3ea193</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>192</th>
+      <td>4b0c3469-2360-457b-9d11-9c153a2822c3</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>193</th>
+      <td>5696fe72-fa73-45ac-8509-e72f4b384311</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>194</th>
+      <td>37fe21e8-d5c6-4d08-8e5a-b5d7beb0fc96</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>195</th>
+      <td>4c8470fe-1129-4d7d-83b7-e0046e3ca108</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+<p>196 rows × 2 columns</p>
 </div>
 
 
