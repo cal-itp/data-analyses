@@ -6,7 +6,9 @@ import pandas as pd
 
 SQ_MI_PER_SQ_M = 3.86 * 10**-7
 GCS_PROJECT = "cal-itp-data-infra"
-BUCKET_NAME = "bus-service-increase"
+BUCKET_NAME = "calitp-analytics-data"
+BUCKET_DIR = "bus_service_increase"
+GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 
 def import_export(DATASET_NAME, OUTPUT_FILE_NAME, GCS=True): 
     """
@@ -16,7 +18,7 @@ def import_export(DATASET_NAME, OUTPUT_FILE_NAME, GCS=True):
     df = pd.read_csv(f"{DATASET_NAME}.csv")    
     
     if GCS is True:
-        df.to_parquet(f"gs://{BUCKET_NAME}/{OUTPUT_FILE_NAME}.parquet")
+        df.to_parquet(f"{GCS_FILE_PATH}{OUTPUT_FILE_NAME}.parquet")
     else:
         df.to_parquet(f"./{OUTPUT_FILE_NAME}.parquet")
     
