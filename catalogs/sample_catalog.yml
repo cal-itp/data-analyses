@@ -31,12 +31,14 @@ sources:
     driver: shapefile
     description: LA Metro rail lines
     args:
-      urlpath: zip+gs://calitp-analytics-data/test_zipped_shapefile.zip
+      urlpath: gs://calitp-analytics-data/test_zipped_shapefile.zip
+      use_fsspec: true
   test_geojson:
     driver: geojson
     description: Description
     args:
       urlpath: gs://calitp-analytics-data/test_geojson_file.geojson
+      use_fsspec: true
   test_csv:
     driver: csv
     description: Description
