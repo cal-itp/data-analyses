@@ -25,18 +25,18 @@ sources:
     driver: parquet
     description: LEHD Workplace Area Characteristics (WAC) federal jobs by census tract.
     args:
-      urlpath: gs://calitp-data-analytics/data-analyses/wac_fed_tract.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/wac_fed_tract.parquet
       engine: pyarrow
   test_zipped_shapefile:
     driver: shapefile
     description: LA Metro rail lines
     args:
-      urlpath: zip+gs://calitp-data-analytics/test_zipped_shapefile.zip
+      urlpath: zip+gs://calitp-analytics-data/test_zipped_shapefile.zip
   test_geojson:
     driver: geojson
     description: Description
     args:
-      urlpath: gs://calitp-data-analytics/test_geojson_file.geojson
+      urlpath: gs://calitp-analytics-data/test_geojson_file.geojson
   test_csv:
     driver: csv
     description: Description
