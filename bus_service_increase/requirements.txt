@@ -1,3 +1,4 @@
 fsspec
 geopandas
 gcsfs
+rtree
