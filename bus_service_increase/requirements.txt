@@ -2,3 +2,4 @@ fsspec
 geopandas
 gcsfs
 rtree
+intake-geopandas
