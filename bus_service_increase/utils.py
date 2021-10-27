@@ -4,11 +4,14 @@ Utility functions
 import gcsfs
 import pandas as pd
 
-SQ_MI_PER_SQ_M = 3.86 * 10**-7
 GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/bus_service_increase"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
+
+SQ_MI_PER_SQ_M = 3.86 * 10**-7
+
+WGS84 = "EPSG:4326"
 
 def import_export(DATASET_NAME, OUTPUT_FILE_NAME, GCS=True): 
     """
