@@ -3,6 +3,8 @@ Utility functions
 """
 import gcsfs
 import pandas as pd
+import datetime as dt
+from calendar import THURSDAY, SATURDAY, SUNDAY
 
 GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
@@ -92,3 +94,18 @@ def prep_calenviroscreen(df):
           )
     
     return df3
+
+def get_recent_dates():
+    '''
+    Return a dict with ISO date strings for the most recent thursday, saturday, and sunday.
+    Useful for querying.
+    '''
+
+    today = dt.date.today()
+    dates = []
+    for day_of_week in [THURSDAY, SATURDAY, SUNDAY]:
+        offset = (today.weekday() - day_of_week) % 7
+        last_day = today - dt.timedelta(days=offset)
+        dates.append(last_day.isoformat())
+    
+    return dict(zip(['thurs', 'sat', 'sun'], dates))
