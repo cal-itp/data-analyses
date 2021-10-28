@@ -96,20 +96,30 @@ def prep_calenviroscreen(df):
     return df3
 
 
+weekday_names = {THURSDAY: 'thurs', SATURDAY: 'sat', SUNDAY: 'sun'}
 def get_recent_dates():
     '''
-    Return a dict with ISO date strings for the most recent thursday, saturday, and sunday.
+    Return a dict with dt.date objects for a recent thursday, saturday, and sunday.
     Useful for querying.
     '''
 
-    today = dt.date.today()
+    two_wks_ago = dt.date.today() - dt.timedelta(days=14)
     dates = []
     for day_of_week in [THURSDAY, SATURDAY, SUNDAY]:
-        offset = (today.weekday() - day_of_week) % 7
-        last_day = today - dt.timedelta(days=offset)
-        dates.append(last_day.isoformat())
+        offset = (two_wks_ago.weekday() - day_of_week) % 7
+        last_day = two_wks_ago - dt.timedelta(days=offset)
+        dates.append(last_day)
     
     return dict(zip(['thurs', 'sat', 'sun'], dates))
+
+# def add_weekday_col(df):
+#     '''
+#     Add a column with a human-readable weekday.
+#     ex. df.apply(add_weekday_col, axis=1)
+#     '''
+#     weekdays = {THURSDAY: 'thurs', SATURDAY: 'sat', SUNDAY: 'sun'}
+#     df['weekday'] = weekdays[df.service_date.weekday()]
+#     return df
 
 
 # There are multiple feeds, with different trip_keys but same trip_ids
