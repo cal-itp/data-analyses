@@ -97,7 +97,7 @@ def prep_calenviroscreen(df):
 
 def get_recent_dates():
     '''
-    Return a dict with ISO date strings for the most recent thursday, saturday, and sunday.
+    Return a dict with dt.date objects for the most recent thursday, saturday, and sunday.
     Useful for querying.
     '''
 
@@ -106,6 +106,6 @@ def get_recent_dates():
     for day_of_week in [THURSDAY, SATURDAY, SUNDAY]:
         offset = (today.weekday() - day_of_week) % 7
         last_day = today - dt.timedelta(days=offset)
-        dates.append(last_day.isoformat())
+        dates.append(last_day)
     
     return dict(zip(['thurs', 'sat', 'sun'], dates))
