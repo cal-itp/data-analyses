@@ -37,23 +37,15 @@ def define_equity_groups(df, percentile_col = ["CIscoreP"], num_groups=5):
                     grouped into bins.
     num_groups: integer.
                 Number of bins, groups. Ex: for quartiles, num_groups=4.
+                
+    `pd.cut` vs `pd.qcut`: 
+    https://stackoverflow.com/questions/30211923/what-is-the-difference-between-pandas-qcut-and-pandas-cut            
     """
     
     for col in percentile_col:
-        df = df.assign(group_col = 0)
+        new_col = f"{col}_group"
+        df[new_col] = pd.cut(df[col], bins=num_groups, labels=False)
 
-        bin_range = round(100 / num_groups)
-
-        for i in range(1, num_groups + 1):
-            max_cutoff = i * bin_range
-            df = df.assign(
-                group_col = df.apply(
-                    lambda x: i if (x[col] <= max_cutoff) and 
-                    (x[col] >= max_cutoff - 19)
-                    else x.group_col, axis = 1),
-            )
-        df = df.rename(columns = {"group_col": f"{col}_group"})
-    
     return df
 
 
@@ -68,7 +60,7 @@ def prep_calenviroscreen(df):
     df2 = define_equity_groups(
         df,
         percentile_col =  ["CIscoreP", "Pollution_", "PopCharP"], 
-        num_groups = 5 )
+        num_groups = 3)
     
     # Rename columns
     keep_cols = [

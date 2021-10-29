@@ -97,7 +97,7 @@ def merge_calenviroscreen_lehd(calenviroscreen, lehd):
     # Calculate jobs per sq mi
     df = df.assign(
         num_jobs = df.num_jobs.fillna(0).astype(int),
-        jobs_sq_mi = df.num_jobs / df.Population,
+        jobs_sq_mi = df.num_jobs / df.sq_mi,
     )
     
     return df
