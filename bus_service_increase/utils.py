@@ -37,28 +37,15 @@ def define_equity_groups(df, percentile_col = ["CIscoreP"], num_groups=5):
                     grouped into bins.
     num_groups: integer.
                 Number of bins, groups. Ex: for quartiles, num_groups=4.
+                
+    `pd.cut` vs `pd.qcut`: 
+    https://stackoverflow.com/questions/30211923/what-is-the-difference-between-pandas-qcut-and-pandas-cut            
     """
     
-    bin_range = round((100 / num_groups), 0)
-
-    # Percentiles and our cut-offs aren't playing nice
-    # Round the percentile cols to make sure they get binned correctly    
     for col in percentile_col:
-        df = df.assign(group_col = 0)
-             
-        for i in range(1, num_groups + 1):
-            max_cutoff = i * bin_range
-            df = df.assign(
-                group_col = df.apply(
-                    lambda x: i if 
-                    (
-                        round(x[col], 1) <= max_cutoff) and 
-                    (round(x[col], 1) > round(max_cutoff - bin_range, 0)
-                    )
-                    else x.group_col, axis = 1),
-            )
-        df = df.rename(columns = {"group_col": f"{col}_group"})
-    
+        new_col = f"{col}_group"
+        df[new_col] = pd.cut(df[col], bins=num_groups, labels=False)
+
     return df
 
 
