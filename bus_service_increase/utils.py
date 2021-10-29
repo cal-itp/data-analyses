@@ -39,17 +39,22 @@ def define_equity_groups(df, percentile_col = ["CIscoreP"], num_groups=5):
                 Number of bins, groups. Ex: for quartiles, num_groups=4.
     """
     
+    bin_range = round((100 / num_groups), 0)
+
+    # Percentiles and our cut-offs aren't playing nice
+    # Round the percentile cols to make sure they get binned correctly    
     for col in percentile_col:
         df = df.assign(group_col = 0)
-
-        bin_range = round(100 / num_groups)
-
+             
         for i in range(1, num_groups + 1):
             max_cutoff = i * bin_range
             df = df.assign(
                 group_col = df.apply(
-                    lambda x: i if (x[col] <= max_cutoff) and 
-                    (x[col] >= max_cutoff - 19)
+                    lambda x: i if 
+                    (
+                        round(x[col], 1) <= max_cutoff) and 
+                    (round(x[col], 1) > round(max_cutoff - bin_range, 0)
+                    )
                     else x.group_col, axis = 1),
             )
         df = df.rename(columns = {"group_col": f"{col}_group"})
@@ -68,7 +73,7 @@ def prep_calenviroscreen(df):
     df2 = define_equity_groups(
         df,
         percentile_col =  ["CIscoreP", "Pollution_", "PopCharP"], 
-        num_groups = 5 )
+        num_groups = 3)
     
     # Rename columns
     keep_cols = [
