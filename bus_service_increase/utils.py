@@ -195,3 +195,16 @@ def aggregate_by_tract(gdf, group_cols,
     ).drop(columns = "index")
     
     return df3
+
+def fix_gtfs_time(gtfs_timestring):
+    '''Reformats a GTFS timestamp (which allows the hour to exceed 24 to mark service day continuity)
+    to standard 24-hour time.
+    '''
+    split = gtfs_timestring.split(':')
+    hour = int(split[0])
+    if hour >= 24:
+        split[0] = str(hour - 24)
+        corrected = (':').join(split)
+        return corrected.strip()
+    else:
+        return gtfs_timestring.strip()
