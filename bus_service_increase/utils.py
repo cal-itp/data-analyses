@@ -95,8 +95,6 @@ def prep_calenviroscreen(df):
     
     return df3
 
-
-weekday_names = {THURSDAY: 'thurs', SATURDAY: 'sat', SUNDAY: 'sun'}
 def get_recent_dates():
     '''
     Return a dict with dt.date objects for a recent thursday, saturday, and sunday.
@@ -111,16 +109,6 @@ def get_recent_dates():
         dates.append(last_day)
     
     return dict(zip(['thurs', 'sat', 'sun'], dates))
-
-# def add_weekday_col(df):
-#     '''
-#     Add a column with a human-readable weekday.
-#     ex. df.apply(add_weekday_col, axis=1)
-#     '''
-#     weekdays = {THURSDAY: 'thurs', SATURDAY: 'sat', SUNDAY: 'sun'}
-#     df['weekday'] = weekdays[df.service_date.weekday()]
-#     return df
-
 
 # There are multiple feeds, with different trip_keys but same trip_ids
 # Only keep calitp_url_number == 0 EXCEPT LA Metro
