@@ -14,6 +14,7 @@ import geopandas as gpd
 import pandas as pd
 
 import utils
+import calenviroscreen_utils
 
 # Download LEHD data from Urban Institute
 URBAN_URL = "https://urban-data-catalog.s3.amazonaws.com/drupal-root-live/"
@@ -87,7 +88,7 @@ def merge_and_process(data_to_merge = []):
     
     
 def merge_calenviroscreen_lehd(calenviroscreen, lehd):
-    gdf = utils.prep_calenviroscreen(calenviroscreen)
+    gdf = calenviroscreen_utils.prep_calenviroscreen(calenviroscreen)
     
     # Merge LEHD with CalEnviroScreen
     df = pd.merge(gdf, lehd, 
