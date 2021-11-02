@@ -45,7 +45,7 @@ def aggregate_by_tract(gdf, group_cols,
                        on=group_cols, how="left", validate="1:1")
         
      
-    return df2
+    return df2.drop(columns = "index")
 
 
 def attach_tract_geometry(df, tract_geometry_df, 
