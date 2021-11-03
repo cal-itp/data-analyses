@@ -128,3 +128,28 @@ def generate_calenviroscreen_lehd_data(lehd_datasets):
     df = merge_calenviroscreen_lehd(gdf, lehd)
     
     return df
+
+
+# Stop times by tract
+def generate_stop_times_tract_data():
+    df = gpd.read_parquet("./bus_stop_times_by_tract.parquet")
+
+    df = df.assign(
+        num_arrivals = df.num_arrivals.fillna(0),
+        popdensity_group = pd.qcut(df.pop_sq_mi, q=3, labels=False) + 1,
+        jobdensity_group = pd.qcut(df.jobs_sq_mi, q=3, labels=False) + 1,
+    )
+
+    df = df.assign(
+        avg_density_score = round(
+            df[["jobdensity_group", "popdensity_group"]].sum(axis=1) / 2, 
+            0),
+        arrivals_sq_mi = df.num_arrivals / df.sq_mi,
+        arrivals_per_1k = (df.num_arrivals / df.Population) * 1_000,
+    )
+    
+    df = df.assign(
+        arrivals_group = pd.qcut(df.arrivals_per_1k, q=3, labels=False) + 1,
+    )
+
+    return df
