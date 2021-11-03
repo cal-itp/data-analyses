@@ -13,12 +13,16 @@ from branca.element import Figure
 def make_choropleth_map(df, plot_col, 
                         popup_dict, tooltip_dict, colorscale, 
                         fig_width, fig_height, 
-                        zoom=6, centroid = [36.2, -119.1]):
+                        zoom=6, centroid = [36.2, -119.1], 
+                        title="Chart Title"):
     fig = Figure(width = fig_width, height = fig_height)
     
     m = folium.Map(location=centroid, tiles='cartodbpositron', 
                zoom_start=zoom, width=fig_width,height=fig_height)
 
+    title_html = f'''
+             <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
+             '''
 
     popup = GeoJsonPopup(
         fields=list(popup_dict.keys()),
@@ -63,5 +67,8 @@ def make_choropleth_map(df, plot_col,
 
 
     fig.add_child(m)
+    m.get_root().html.add_child(folium.Element(title_html))
+    colorscale.caption = "Legend"
+    colorscale.add_to(m)
     
     return fig
