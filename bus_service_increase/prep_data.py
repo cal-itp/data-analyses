@@ -132,10 +132,12 @@ def generate_calenviroscreen_lehd_data(lehd_datasets):
 
 # Stop times by tract
 def generate_stop_times_tract_data():
-    df = gpd.read_parquet("./bus_stop_times_by_tract.parquet")
+    df = gpd.read_parquet(f"{utils.GCS_FILE_PATH}bus_stop_times_by_tract.parquet")
 
     df = df.assign(
         num_arrivals = df.num_arrivals.fillna(0),
+        stop_id = df.stop_id.fillna(0),
+        itp_id = df.itp_id.fillna(0),
         popdensity_group = pd.qcut(df.pop_sq_mi, q=3, labels=False) + 1,
         jobdensity_group = pd.qcut(df.jobs_sq_mi, q=3, labels=False) + 1,
     )
@@ -151,5 +153,17 @@ def generate_stop_times_tract_data():
     df = df.assign(
         arrivals_group = pd.qcut(df.arrivals_per_1k, q=3, labels=False) + 1,
     )
+    
+    round_me = ['pop_sq_mi', 'overall_ptile', 'jobs_sq_mi',
+               'arrivals_sq_mi', 'arrivals_per_1k'
+               ]
+    integrify_me = [
+        'equity_group', 'num_jobs', 'num_arrivals', 
+        'stop_id', 'itp_id',
+        'avg_density_score',
+    ]
+    
+    df[round_me] = df[round_me].round(2)
+    df[integrify_me] = df[integrify_me].astype(int)
 
     return df
