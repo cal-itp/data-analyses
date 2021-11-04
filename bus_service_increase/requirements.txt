@@ -1,6 +1,10 @@
+altair
+altair_saver
 folium
 fsspec
 geopandas
 gcsfs
 rtree
+intake
 intake-geopandas
+intake-parquet
