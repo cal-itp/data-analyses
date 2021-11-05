@@ -5,6 +5,3 @@ fsspec
 geopandas
 gcsfs
 rtree
-intake
-intake-geopandas
-intake-parquet

@@ -11,10 +11,13 @@ LEHD Data Dictionary:
 https://datacatalog.urban.org/sites/default/files/data-dictionary-files/LODESTechDoc7.5.pdf
 """
 import geopandas as gpd
+import intake
 import pandas as pd
 
 import utils
 import calenviroscreen_utils
+
+catalog = intake.open_catalog("./catalog.yml")
 
 # Download LEHD data from Urban Institute
 URBAN_URL = "https://urban-data-catalog.s3.amazonaws.com/drupal-root-live/"
@@ -109,8 +112,7 @@ def merge_calenviroscreen_lehd(calenviroscreen, lehd):
 #--------------------------------------------------------#
 def generate_calenviroscreen_lehd_data(lehd_datasets):
     # CalEnviroScreen data (gdf)
-    CALENVIROSCREEN_FILE = 'calenviroscreen40shp_F_2021/CES4_final.shp'
-    gdf = gpd.read_file(f"./{CALENVIROSCREEN_FILE}")
+    gdf = catalog.calenviroscreen_raw.read()
     
     # LEHD Data
     lehd_dfs = {}
@@ -132,8 +134,9 @@ def generate_calenviroscreen_lehd_data(lehd_datasets):
 
 # Stop times by tract
 def generate_stop_times_tract_data():
-    df = gpd.read_parquet(f"{utils.GCS_FILE_PATH}bus_stop_times_by_tract.parquet")
-
+    #df = gpd.read_parquet(f"{utils.GCS_FILE_PATH}bus_stop_times_by_tract.parquet")
+    df = catalog.bus_stop_times_by_tract.read()
+    
     df = df.assign(
         num_arrivals = df.num_arrivals.fillna(0),
         stop_id = df.stop_id.fillna(0),
