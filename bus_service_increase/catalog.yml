@@ -1,0 +1,16 @@
+metadata:
+  version: 1
+sources:
+  # CalEnviroScreen
+  calenviroscreen_raw:
+    driver: shapefile
+    description: CalEnviroScreen 4.0 raw data
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen40shpf2021shp.zip
+      use_fsspec: true
+  # Processed data 
+  bus_stop_times_by_tract:
+    driver: geoparquet
+    description: Number of daily bus arrivals by tract
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_stop_times_by_tract.parquet
