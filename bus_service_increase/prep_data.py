@@ -30,9 +30,11 @@ datasets = ["wac_all_se01_tract_minus_fed",
             "wac_all_se03_tract_minus_fed", 
             "wac_fed_tract"]
 
+'''
 for dataset in datasets:
     utils.import_export(DATASET_NAME = f"{URBAN_URL}{DATE_DOWNLOAD}{dataset}", 
                         OUTPUT_FILE_NAME = dataset, GCS=True)
+'''
 
 #--------------------------------------------------------#
 ### LEHD functions
