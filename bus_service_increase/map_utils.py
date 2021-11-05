@@ -11,6 +11,15 @@ import folium
 from folium.features import GeoJsonPopup, GeoJsonTooltip
 from branca.element import Figure
 
+    
+# Centroids for various regions and zoom level
+REGION_CENTROIDS = {
+    "Alameda":  [[37.84, -122.27], 12],
+    "Los Angeles": [[34.00, -118.18], 11],
+    "CA": [[35.8, -119.4], 6],
+}
+
+
 def make_choropleth_map(df, plot_col, 
                         popup_dict, tooltip_dict, colorscale, 
                         fig_width, fig_height, 
@@ -69,8 +78,8 @@ def make_choropleth_map(df, plot_col,
 
     fig.add_child(m)
     m.get_root().html.add_child(folium.Element(title_html))
-    colorscale.caption = "Legend"
-    colorscale.add_to(m)
+    #colorscale.caption = "Legend"
+    #colorscale.add_to(m)
     
     return fig
 
