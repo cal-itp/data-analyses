@@ -5,3 +5,4 @@ fsspec
 geopandas
 gcsfs
 rtree
+selenium
