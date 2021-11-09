@@ -23,8 +23,11 @@ REGION_CENTROIDS = {
 def make_choropleth_map(df, plot_col, 
                         popup_dict, tooltip_dict, colorscale, 
                         fig_width, fig_height, 
-                        zoom=6, centroid = [36.2, -119.1], 
-                        title="Chart Title"):
+                        zoom=REGION_CENTROIDS["CA"][1], 
+                        centroid = REGION_CENTROIDS["CA"][0], 
+                        title="Chart Title",
+                       ):
+    
     fig = Figure(width = fig_width, height = fig_height)
     
     m = folium.Map(location=centroid, tiles='cartodbpositron', 
@@ -33,14 +36,23 @@ def make_choropleth_map(df, plot_col,
     title_html = f'''
              <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
              '''
-
+    
+    fig.get_root().html.add_child(folium.Element(title_html))
+        
+    TOOLTIP_KWARGS = {
+        "min_width": 50,
+        "max_width": 100,
+        "font_size": "12px",
+    }
+    
     popup = GeoJsonPopup(
         fields=list(popup_dict.keys()),
         aliases=list(popup_dict.values()),
         localize=True,
         labels=True,
         style=f"background-color: light_gray;",
-        max_width = 100,
+        min_width = TOOLTIP_KWARGS["min_width"],
+        max_width = TOOLTIP_KWARGS["max_width"],
     )
 
     tooltip = GeoJsonTooltip(
@@ -55,9 +67,10 @@ def make_choropleth_map(df, plot_col,
             border: 0px #FFFFFF;
             border-radius: 0px;
             box-shadow: 0px;
-            font-size: 12px;
+            font-size: {TOOLTIP_KWARGS["font_size"]};
         """,
-        max_width=300,
+        min_width=TOOLTIP_KWARGS["min_width"],
+        max_width=TOOLTIP_KWARGS["max_width"],
     )
 
     #https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
@@ -72,14 +85,13 @@ def make_choropleth_map(df, plot_col,
             "weight": 0.2,
         },
         tooltip=tooltip,
-        popup=popup,
+        #popup=popup,
     ).add_to(m)
-
-
+    
+    colorscale.caption = "Legend"
+    colorscale.add_to(m)
+    
     fig.add_child(m)
-    m.get_root().html.add_child(folium.Element(title_html))
-    #colorscale.caption = "Legend"
-    #colorscale.add_to(m)
     
     return fig
 
