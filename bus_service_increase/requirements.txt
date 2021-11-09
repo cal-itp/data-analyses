@@ -1,0 +1,8 @@
+altair
+altair_saver
+folium
+fsspec
+geopandas
+gcsfs
+rtree
+selenium
