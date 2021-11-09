@@ -2,7 +2,6 @@
 
 ## Maps
 
-* [Test](https://docs.calitp.org/data-analyses/bus_service_increase/img/1arrivals_pc_high.html)
 * [Service Density for High Need Tracts](https://docs.calitp.org/data-analyses/bus_service_increase/img/arrivals_high.html)
 * [Service Density for Med Need Tracts](https://docs.calitp.org/data-analyses/bus_service_increase/img/arrivals_med.html)
 * [Service Density for Low Need Tracts](https://docs.calitp.org/data-analyses/bus_service_increase/img/arrivals_low.html)
