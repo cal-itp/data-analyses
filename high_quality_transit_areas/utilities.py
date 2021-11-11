@@ -6,6 +6,16 @@ import fiona
 from ipyleaflet import Map, GeoJSON, projections, basemaps, GeoData, LayersControl, WidgetControl, GeoJSON
 from ipywidgets import Text, HTML
 
+import gcsfs
+from calitp.storage import get_fs
+fs = get_fs()
+import os
+
+GCS_PROJECT = "cal-itp-data-infra"
+BUCKET_NAME = "calitp-analytics-data"
+BUCKET_DIR = "data-analyses/high_quality_transit_areas"
+GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
+
 def map_hqta(gdf, mouseover=None):
     global nix_list
     nix_list = []
@@ -67,3 +77,12 @@ def map_hqta(gdf, mouseover=None):
     m.add_control(LayersControl())
 
     return m
+
+def geoparquet_gcs_export(gdf, name):
+    '''
+    Save geodataframe as parquet locally, then move to GCS bucket and delete local file.
+    '''
+    gdf.to_parquet(f"{name}.parquet")
+    fs.put(f"./{name}.parquet", f"{GCS_FILE_PATH}{name}.parquet")
+    os.remove(f"./{name}.parquet")
+    return
