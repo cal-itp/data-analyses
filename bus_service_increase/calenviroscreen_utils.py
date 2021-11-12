@@ -1,6 +1,7 @@
 """
 Utility functions for CalEnviroScreen data.
 """
+import numpy as np
 import pandas as pd
 import utils
 
@@ -19,6 +20,8 @@ def define_equity_groups(df, percentile_col = ["CIscoreP"], num_groups=5):
     
     for col in percentile_col:
         new_col = f"{col}_group"
+        # -999 should be replaced as NaN, so it doesn't throw off the binning of groups
+        df[col] = df[col].replace(-999, np.nan)
         df[new_col] = pd.cut(df[col], bins=num_groups, labels=False) + 1
 
     return df
