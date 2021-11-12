@@ -100,7 +100,7 @@ def make_folium_choropleth_map(df, plot_col,
             "weight": 0.2,
         },
         tooltip=tooltip,
-        #popup=popup,
+        popup=popup,
     ).add_to(m)
     
     colorscale.caption = "Legend"
