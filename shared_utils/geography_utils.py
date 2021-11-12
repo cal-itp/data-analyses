@@ -4,8 +4,9 @@ Utility functions for census tract data.
 import geopandas as gpd
 import pandas as pd
 
-WGS84 = "EPGS:4326"
-CAStatePlane = "EPSG:2229"
+WGS84 = "EPSG:4326"
+CA_StatePlane = "EPSG:2229" # units are in feet
+CA_NAD83Albers = "EPSG:3310" # units are in meters
 
 SQ_MI_PER_SQ_M = 3.86 * 10**-7
 
