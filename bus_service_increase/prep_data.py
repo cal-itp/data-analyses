@@ -93,6 +93,7 @@ def merge_and_process(data_to_merge = []):
     
     
 def merge_calenviroscreen_lehd(calenviroscreen, lehd):
+    calenviroscreen = catalog.calenviroscreen_raw.read()
     gdf = calenviroscreen_utils.prep_calenviroscreen(calenviroscreen)
     
     # Merge LEHD with CalEnviroScreen
@@ -104,6 +105,12 @@ def merge_calenviroscreen_lehd(calenviroscreen, lehd):
     df = df.assign(
         num_jobs = df.num_jobs.fillna(0).astype(int),
         jobs_sq_mi = df.num_jobs / df.sq_mi,
+    )
+    
+    # Add a pop + jobs per sq mi
+    df = df.assign(
+        pop_jobs = df.Population + df.num_jobs,
+        popjobs_sq_mi = (df.Population + df.num_jobs) / df.sq_mi
     )
     
     return df
