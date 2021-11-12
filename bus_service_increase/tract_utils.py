@@ -30,7 +30,7 @@ def aggregate_by_tract(df, group_cols,
     
     Returns a pandas.DataFrame or geopandas.GeoDataFrame (same as input).
     '''
-    df2 = gdf[group_cols].drop_duplicates().reset_index()
+    df2 = df[group_cols].drop_duplicates().reset_index()
     
     if len(sum_cols) > 0:
         sum_df = df.pivot_table(index=group_cols, 
