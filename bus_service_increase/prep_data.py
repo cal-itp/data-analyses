@@ -109,7 +109,7 @@ def merge_calenviroscreen_lehd(calenviroscreen, lehd):
     
     # Add a pop + jobs per sq mi
     df = df.assign(
-        pop_jobs = df.Population + df.num_jobs,
+        num_pop_jobs = df.Population + df.num_jobs,
         popjobs_sq_mi = (df.Population + df.num_jobs) / df.sq_mi
     )
     
@@ -150,7 +150,7 @@ def generate_stop_times_tract_data():
         num_jobs = df.num_jobs.fillna(0),
         stop_id = df.stop_id.fillna(0),
         itp_id = df.itp_id.fillna(0),
-        num_pop_jobs = df.Population.fillna(0) + df.num_jobs.fillna(0),
+        num_pop_jobs = df.num_pop_jobs.fillna(0),
         popdensity_group = pd.qcut(df.pop_sq_mi, q=3, labels=False) + 1,
         jobdensity_group = pd.qcut(df.jobs_sq_mi, q=3, labels=False) + 1,
         popjobdensity_group = pd.qcut(df.popjobs_sq_mi, q=3, labels=False) + 1,
