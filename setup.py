@@ -13,6 +13,7 @@ setup(
         "calitp", "geopandas", "numpy", "pandas", 
         "altair", "matplotlib", # charts
         "folium", "ipyleaflet", # maps
-        "branca", "vega-cli", "vega-lite-cli", # colors, other dependencies?
+        "branca",  # colors
+        #"vega-cli", "vega-lite-cli",
     ],
 )
