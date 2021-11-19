@@ -8,10 +8,15 @@ Functions to create choropleth maps.
 """
 import altair
 import folium
-from folium.features import GeoJsonPopup, GeoJsonTooltip
-from branca.element import Figure
+import ipyleaflet
 
-    
+from branca.element import Figure
+from folium.features import GeoJsonPopup, GeoJsonTooltip
+from ipyleaflet import Map, GeoData, LayersControl, basemaps, WidgetControl
+from ipywidgets import link, FloatSlider, Text, HTML
+from ipywidgets.embed import embed_minimal_html
+
+
 # Centroids for various regions and zoom level
 REGION_CENTROIDS = {
     "Alameda":  [[37.84, -122.27], 12],
@@ -20,13 +25,23 @@ REGION_CENTROIDS = {
 }
 
 
-def make_choropleth_map(df, plot_col, 
-                        popup_dict, tooltip_dict, colorscale, 
-                        fig_width, fig_height, 
-                        zoom=REGION_CENTROIDS["CA"][1], 
-                        centroid = REGION_CENTROIDS["CA"][0], 
-                        title="Chart Title",
-                       ):
+def make_folium_choropleth_map(df, plot_col, 
+                               popup_dict, tooltip_dict, colorscale, 
+                               fig_width, fig_height, 
+                               zoom=REGION_CENTROIDS["CA"][1], 
+                               centroid = REGION_CENTROIDS["CA"][0], 
+                               title="Chart Title",
+                              ):
+    '''
+    Parameters:
+    
+    Pros/Cons: 
+    folium can handle multiple columns displayed in popup/tooltip.
+    ipyleaflet can only handle one.
+    
+    folium can export as HTML map; ipyleaflet can't.
+    folium can't render in notebook currently; ipyleaflet can.
+    '''
     
     fig = Figure(width = fig_width, height = fig_height)
     
@@ -85,7 +100,7 @@ def make_choropleth_map(df, plot_col,
             "weight": 0.2,
         },
         tooltip=tooltip,
-        #popup=popup,
+        popup=popup,
     ).add_to(m)
     
     colorscale.caption = "Legend"
@@ -94,6 +109,78 @@ def make_choropleth_map(df, plot_col,
     fig.add_child(m)
     
     return fig
+
+
+def make_ipyleaflet_choropleth_map(choropleth_dict, plot_col, 
+                               colorscale, 
+                               zoom=REGION_CENTROIDS["CA"][1], 
+                               centroid = REGION_CENTROIDS["CA"][0], 
+                                  ):
+    
+    '''
+    Parameters:
+    
+    choropleth_dict: dict. Takes this format:
+        {
+            "geo_data": geo_data,
+            "choro_data": choro_data,
+            "layer_name": string, human-readable layer name,
+            "MIN_VALUE": numeric,
+            "MAX_VALUE": numeric,
+            "plot_col_name": string, human-readable column name,
+            "fig_width": string, e.g., '100%'
+            "fig_height": string, e.g., '100%'
+            "fig_min_width_px": string, e.g., '600px'
+            "fig_min_height_px": string, e.g., '600px'
+        }
+    '''
+    m = ipyleaflet.Map(center = centroid, zoom = zoom,
+                      basemap = basemaps.CartoDB.Positron)
+    
+    layer = ipyleaflet.Choropleth(
+        geo_data = choropleth_dict["geo_data"],
+        choro_data = choropleth_dict["choro_data"], 
+        colormap = colorscale,
+        border_color = '#999999',
+        style = {'fillOpacity': 0.6, 'weight': 0.5, 'color': '#999999', 'opacity': 0.8},
+        value_min = choropleth_dict["MIN_VALUE"],
+        value_max = choropleth_dict["MAX_VALUE"],
+        name = choropleth_dict["layer_name"]
+    )
+
+
+    html = HTML(''' 
+        Hover over a tract
+    ''')
+
+    html.layout.margin = '0 px 10px 10px 10px'
+
+    def on_hover(**kwargs):
+        properties = kwargs.get("feature", {}).get("properties")
+        id = kwargs.get("feature", {}).get("id")
+        if not properties:
+            return
+        html.value=f"""
+        <b>Tract: </b>{id} <br>
+        <b>Daily Arrivals per 1k: </b> {properties[plot_col]:,g} <br>
+        """ 
+
+    layer.on_hover(on_hover)
+
+    m.add_layer(layer)
+    
+    control = ipyleaflet.WidgetControl(widget = html, position = 'topright')
+    layers_control = ipyleaflet.LayersControl(position = 'topright')
+
+    m.add_control(control)
+    m.add_control(layers_control)
+
+    m.layout.height = choropleth_dict["fig_height"]
+    m.layout.width = choropleth_dict["fig_width"]
+    m.layout.min_height = choropleth_dict["fig_min_height_px"] 
+    m.layout.min_width = choropleth_dict["fig_min_width_px"]
+
+    return m
 
 
 #--------------------------------------------------------------#
