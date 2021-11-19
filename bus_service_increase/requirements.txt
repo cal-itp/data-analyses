@@ -4,5 +4,5 @@ folium
 fsspec
 geopandas
 gcsfs
+ipyleaflet
 rtree
-selenium
