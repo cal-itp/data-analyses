@@ -148,13 +148,15 @@ def make_ipyleaflet_choropleth_map(choropleth_dict, plot_col,
         name = choropleth_dict["layer_name"]
     )
 
-
+    """
     html = HTML(''' 
         Hover over a tract
     ''')
 
     html.layout.margin = '0 px 10px 10px 10px'
-
+    """
+    
+    '''
     def on_hover(**kwargs):
         properties = kwargs.get("feature", {}).get("properties")
         id = kwargs.get("feature", {}).get("id")
@@ -166,7 +168,7 @@ def make_ipyleaflet_choropleth_map(choropleth_dict, plot_col,
         """ 
 
     layer.on_hover(on_hover)
-
+    '''
     m.add_layer(layer)
     
     control = ipyleaflet.WidgetControl(widget = html, position = 'topright')
