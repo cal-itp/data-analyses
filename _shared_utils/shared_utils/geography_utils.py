@@ -68,13 +68,13 @@ def aggregate_by_geography(df, group_cols,
     return df2.drop(columns = "index")
 
 
-def attach_tract_geometry(df, tract_geometry_df, 
-                          merge_col = ["Tract"], join="left"):
+def attach_geometry(df, geometry_df, 
+                    merge_col = ["Tract"], join="left"):
     """
     df: pandas.DataFrame
         The df that needs tract geometry added.
-    tract_geometry_df: geopandas.GeoDataFrame
-        The gdf that supplies the tract polygon geometry.
+    geometry_df: geopandas.GeoDataFrame
+        The gdf that supplies the geometry.
     merge_col: list. 
         List of columns to do the merge on. 
     join: str.
@@ -83,7 +83,7 @@ def attach_tract_geometry(df, tract_geometry_df,
     Returns a geopandas.GeoDataFrame
     """    
     gdf = pd.merge(
-        tract_geometry_df.to_crs(WGS84),
+        geometry_df.to_crs(WGS84),
         df,
         on = merge_col,
         how = join,
