@@ -9,6 +9,7 @@ Functions to create choropleth maps.
 import altair
 import folium
 import ipyleaflet
+import json
 
 from branca.element import Figure
 from folium.features import GeoJsonPopup, GeoJsonTooltip
@@ -111,19 +112,21 @@ def make_folium_choropleth_map(df, plot_col,
     return fig
 
 
-def make_ipyleaflet_choropleth_map(choropleth_dict, plot_col, 
-                               colorscale, 
-                               zoom=REGION_CENTROIDS["CA"][1], 
-                               centroid = REGION_CENTROIDS["CA"][0], 
+def make_ipyleaflet_choropleth_map(gdf, plot_col, geometry_col,
+                                   choropleth_dict,
+                                   colorscale, 
+                                   zoom=REGION_CENTROIDS["CA"][1], 
+                                   centroid = REGION_CENTROIDS["CA"][0], 
                                   ):
-    
     '''
     Parameters:
     
+    gdf: geopandas.GeoDataFrame
+    plot_col: str, name of the column to map
+    geometry_col: str, e.g., "Tract" or "District"
+    
     choropleth_dict: dict. Takes this format:
         {
-            "geo_data": geo_data,
-            "choro_data": choro_data,
             "layer_name": string, human-readable layer name,
             "MIN_VALUE": numeric,
             "MAX_VALUE": numeric,
@@ -134,12 +137,23 @@ def make_ipyleaflet_choropleth_map(choropleth_dict, plot_col,
             "fig_min_height_px": string, e.g., '600px'
         }
     '''
+    
+    # An error might come up if the geometry_col (Tract) is string in geo_data and numeric in choro_data
+    # Coerce it to be string in both
+    gdf = gdf.astype({geometry_col: str})
+    geo_data = json.loads(gdf.set_index(geometry_col).to_json())
+    
+    # Take what we want to map and turn it into a dictionary
+    # Can only include the key-value pair, the value you want to map, nothing more.
+    choro_data = dict(zip(gdf[geometry_col].tolist(), gdf[plot_col].tolist()))
+    
+    
     m = ipyleaflet.Map(center = centroid, zoom = zoom,
                       basemap = basemaps.CartoDB.Positron)
     
     layer = ipyleaflet.Choropleth(
-        geo_data = choropleth_dict["geo_data"],
-        choro_data = choropleth_dict["choro_data"], 
+        geo_data = geo_data,
+        choro_data = choro_data, 
         colormap = colorscale,
         border_color = '#999999',
         style = {'fillOpacity': 0.6, 'weight': 0.5, 'color': '#999999', 'opacity': 0.8},
@@ -147,28 +161,27 @@ def make_ipyleaflet_choropleth_map(choropleth_dict, plot_col,
         value_max = choropleth_dict["MAX_VALUE"],
         name = choropleth_dict["layer_name"]
     )
-
-    """
+    
+    
     html = HTML(''' 
         Hover over a tract
     ''')
 
     html.layout.margin = '0 px 10px 10px 10px'
-    """
     
-    '''
+    
     def on_hover(**kwargs):
         properties = kwargs.get("feature", {}).get("properties")
         id = kwargs.get("feature", {}).get("id")
         if not properties:
             return
         html.value=f"""
-        <b>Tract: </b>{id} <br>
-        <b>Daily Arrivals per 1k: </b> {properties[plot_col]:,g} <br>
+        <b>{geometry_col.title()}: </b>{id} <br>
+        <b>{choropleth_dict['name']}: </b> {properties[plot_col]:,g} <br>
         """ 
 
     layer.on_hover(on_hover)
-    '''
+    
     m.add_layer(layer)
     
     control = ipyleaflet.WidgetControl(widget = html, position = 'topright')
@@ -181,5 +194,6 @@ def make_ipyleaflet_choropleth_map(choropleth_dict, plot_col,
     m.layout.width = choropleth_dict["fig_width"]
     m.layout.min_height = choropleth_dict["fig_min_height_px"] 
     m.layout.min_width = choropleth_dict["fig_min_width_px"]
-
+    
     return m
+    
