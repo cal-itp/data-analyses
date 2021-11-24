@@ -14,7 +14,7 @@ setup(
         "altair", "matplotlib", # charts
         "folium", "ipyleaflet", # maps
         "branca",  # colors
-        "ipywidgets", "altair_saver" # supporting
+        "ipywidgets", "altair_saver", "vega" # supporting
         #"vega-cli", "vega-lite-cli",
     ],
 )
