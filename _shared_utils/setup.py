@@ -11,10 +11,11 @@ setup(
     package_dir={"_shared_utils": "shared_utils"},
     install_requires=[
         "calitp", "geopandas", "numpy", "pandas", 
-        "altair", "matplotlib", # charts
+        "altair", "matplotlib", "plotnine", # charts
         "folium", "ipyleaflet", # maps
         "branca",  # colors
-        "ipywidgets", "altair_saver", "vega" # supporting
-        #"vega-cli", "vega-lite-cli",
+        "ipywidgets", "altair_saver", "vega", # supporting
+        # To also include in Docker
+        "pygeos", "rtree", "fiona", "shapely", "openpyxl", # spatial
     ],
 )
