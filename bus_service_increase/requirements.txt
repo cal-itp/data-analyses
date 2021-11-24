@@ -1,8 +1,1 @@
-altair
-altair_saver
-folium
-fsspec
-geopandas
-gcsfs
-ipyleaflet
 rtree
