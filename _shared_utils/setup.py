@@ -12,8 +12,9 @@ setup(
     install_requires=[
         "calitp", "geopandas", "numpy", "pandas", 
         "altair", "matplotlib", # charts
-        "folium", "ipyleaflet", "ipywidgets", # maps
+        "folium", "ipyleaflet", # maps
         "branca",  # colors
+        "ipywidgets", "altair_saver" # supporting
         #"vega-cli", "vega-lite-cli",
     ],
 )
