@@ -14,6 +14,7 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
+import shared_utils
 import utils
 import calenviroscreen_utils
 
@@ -32,8 +33,12 @@ datasets = ["wac_all_se01_tract_minus_fed",
 
 '''
 for dataset in datasets:
-    utils.import_export(DATASET_NAME = f"{URBAN_URL}{DATE_DOWNLOAD}{dataset}", 
-                        OUTPUT_FILE_NAME = dataset, GCS=True)
+    shared_utils.utils.import_csv_export_parquet(
+        DATASET_NAME = f"{URBAN_URL}{DATE_DOWNLOAD}{dataset}",
+        OUTPUT_FILE_NAME = dataset, 
+        GCS_FILE_PATH = utils.GCS_FILE_PATH,
+        GCS=True
+    )
 '''
 
 #--------------------------------------------------------#
