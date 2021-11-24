@@ -8,11 +8,13 @@ setup(
     author='Cal-ITP',
     license='Apache',
     include_package_data=True,
-    package_dir={"shared_utils": "shared_utils"},
+    package_dir={"_shared_utils": "shared_utils"},
     install_requires=[
         "calitp", "geopandas", "numpy", "pandas", 
         "altair", "matplotlib", # charts
         "folium", "ipyleaflet", # maps
-        "branca", "vega-cli", "vega-lite-cli", # colors, other dependencies?
+        "branca",  # colors
+        "ipywidgets", "altair_saver", "vega" # supporting
+        #"vega-cli", "vega-lite-cli",
     ],
 )
