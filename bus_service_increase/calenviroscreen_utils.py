@@ -3,6 +3,7 @@ Utility functions for CalEnviroScreen data.
 """
 import numpy as np
 import pandas as pd
+import shared_utils
 import utils
 
 def define_equity_groups(df, percentile_col = ["CIscoreP"], num_groups=5):
@@ -31,7 +32,7 @@ def prep_calenviroscreen(df):
     # Fix tract ID and calculate pop density
     df = (df.assign(
             Tract = df.Tract.apply(lambda x: '0' + str(x)[:-2]).astype(str),
-            sq_mi = df.geometry.area * utils.SQ_MI_PER_SQ_M,
+            sq_mi = df.geometry.area * shared_utils.geography_utils.SQ_MI_PER_SQ_M,
         ).rename(columns = {
             "TotPop19": "Population",
             "ApproxLoc": "City",
