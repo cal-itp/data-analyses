@@ -65,7 +65,7 @@ https://api.census.gov/data/2019/acs/acs5?get=NAME,\
         
     return census_df
 
-def map_hqta(gdf, mouseover=None):
+def simple_map(gdf, mouseover=None):
     
     x = gdf.to_crs('EPSG:4326').geometry.iloc[0].centroid.x
     y = gdf.to_crs('EPSG:4326').geometry.iloc[0].centroid.y
