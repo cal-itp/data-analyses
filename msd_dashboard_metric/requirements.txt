@@ -1,0 +1,7 @@
+ipyleaflet
+geopandas
+pygeos
+intake
+intake-dcat
+intake-geopandas
+intake-parquet
