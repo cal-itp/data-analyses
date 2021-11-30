@@ -7,6 +7,7 @@ sources:
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/tl_2019_06_bg.zip
           use_fsspec: true
+          
     stanford_shorelines:
         driver: shapefile
         description: Stanford shoreline data
@@ -14,3 +15,9 @@ sources:
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/stanford_shorelines.zip
           use_fsspec: true
+          
+    ca_bg_population:
+        driver: parquet
+        description: Population by CA block group, from 2019 ACS 5 year via Census API
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/pop_block_grp.parquet
