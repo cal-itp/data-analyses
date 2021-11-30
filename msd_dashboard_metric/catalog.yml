@@ -1,0 +1,23 @@
+metadata:
+  version: 1
+sources:
+    ca_block_groups:
+        driver: shapefile
+        description: CA Census Block Group Geographies 2019
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/tl_2019_06_bg.zip
+          use_fsspec: true
+          
+    stanford_shorelines:
+        driver: shapefile
+        description: Stanford shoreline data
+        url: https://earthworks.stanford.edu/catalog/stanford-vt021tk4894
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/stanford_shorelines.zip
+          use_fsspec: true
+          
+    ca_bg_population:
+        driver: parquet
+        description: Population by CA block group, from 2019 ACS 5 year via Census API
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/pop_block_grp.parquet
