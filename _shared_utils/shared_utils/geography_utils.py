@@ -1,8 +1,17 @@
 """
-Utility functions for census tract data.
+Utility functions for geospatial data.
+Some functions for dealing with census tract or other geographic unit dfs.
 """
 import geopandas as gpd
+import os
 import pandas as pd
+import shapely
+
+os.environ["CALITP_BQ_MAX_BYTES"] = str(50_000_000_000)
+
+import calitp
+from calitp.tables import tbl
+from siuba import *
 
 WGS84 = "EPSG:4326"
 CA_StatePlane = "EPSG:2229" # units are in feet
@@ -90,3 +99,55 @@ def attach_geometry(df, geometry_df,
     )
     
     return gdf
+
+
+# Function to take transit stop point data and create lines 
+def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326"):
+    """
+    Parameters:
+    ITP_ID_LIST: list. List of ITP IDs found in agencies.yml
+    CRS: str. Default is WGS84, but able to re-project to another CRS.
+    
+    Returns a geopandas.GeoDataFrame, where each line is the operator-route-line geometry.
+    """
+    all_routes = gpd.GeoDataFrame()
+    
+    for itp_id in ITP_ID_LIST:
+        shapes = (tbl.gtfs_schedule.shapes()
+                  >> filter(_.calitp_itp_id == int(itp_id))
+                  >> collect()
+        )
+
+        # Make a gdf
+        shapes = (gpd.GeoDataFrame(shapes, 
+                              geometry = gpd.points_from_xy
+                              (shapes.shape_pt_lon, shapes.shape_pt_lat),
+                              crs = WGS84)
+             )
+                
+        # Now, combine all the stops by stop sequence, and create linestring
+        for route in shapes.shape_id.unique():
+            single_shape = (shapes
+                            >> filter(_.shape_id == route)
+                            >> mutate(shape_pt_sequence = _.shape_pt_sequence.astype(int))
+                            # arrange in the order of stop sequence
+                            >> arrange(_.shape_pt_sequence)
+            )
+            
+            # Convert from a bunch of points to a line (for a route, there are multiple points)
+            route_line = shapely.geometry.LineString(list(single_shape['geometry']))
+            single_route = (single_shape
+                           [['calitp_itp_id', 'shape_id', 'calitp_extracted_at']]
+                           .iloc[[0]]
+                          ) ##preserve info cols
+            single_route['geometry'] = route_line
+            single_route = gpd.GeoDataFrame(single_route, crs=WGS84)
+            
+            all_routes = all_routes.append(single_route)
+    
+    all_routes = (all_routes.to_crs(CRS)
+                  .sort_values(["calitp_itp_id", "shape_id"])
+                  .reset_index(drop=True)
+                 )
+    
+    return all_routes
