@@ -9,6 +9,7 @@ Functions to create choropleth maps.
 import altair
 import folium
 import ipyleaflet
+import inspect
 import json
 
 from branca.element import Figure
@@ -31,7 +32,7 @@ def make_folium_choropleth_map(df, plot_col,
                                fig_width, fig_height, 
                                zoom=REGION_CENTROIDS["CA"][1], 
                                centroid = REGION_CENTROIDS["CA"][0], 
-                               title="Chart Title",
+                               title="Chart Title", **kwargs,
                               ):
     '''
     Parameters:
@@ -44,10 +45,18 @@ def make_folium_choropleth_map(df, plot_col,
     folium can't render in notebook currently; ipyleaflet can.
     '''
     
-    fig = Figure(width = fig_width, height = fig_height)
+    # Pass more kwargs through various sub-functions
+    # https://stackoverflow.com/questions/26534134/python-pass-different-kwargs-to-multiple-functions
+    fig_args = [k for k, v in inspect.signature(Figure).parameters.items()]
+    fig_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in fig_args}
+    
+    fig = Figure(width = fig_width, height = fig_height, **fig_dict)
+    
+    map_args = [k for k, v in inspect.signature(folium.Map).parameters.items()]
+    map_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in map_args}
     
     m = folium.Map(location=centroid, tiles='cartodbpositron', 
-               zoom_start=zoom, width=fig_width,height=fig_height)
+               zoom_start=zoom, width=fig_width,height=fig_height, **map_dict)
 
     title_html = f'''
              <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
@@ -57,7 +66,7 @@ def make_folium_choropleth_map(df, plot_col,
         
     TOOLTIP_KWARGS = {
         "min_width": 50,
-        "max_width": 100,
+            "max_width": 100,
         "font_size": "12px",
     }
     
@@ -90,6 +99,9 @@ def make_folium_choropleth_map(df, plot_col,
     )
 
     #https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
+    geojson_args = [k for k, v in inspect.signature(folium.GeoJson).parameters.items()]
+    geojson_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in geojson_args}
+    
     g = folium.GeoJson(
         df,
         style_function=lambda x: {
@@ -102,6 +114,7 @@ def make_folium_choropleth_map(df, plot_col,
         },
         tooltip=tooltip,
         popup=popup,
+        **geojson_dict
     ).add_to(m)
     
     colorscale.caption = "Legend"
@@ -117,6 +130,7 @@ def make_ipyleaflet_choropleth_map(gdf, plot_col, geometry_col,
                                    colorscale, 
                                    zoom=REGION_CENTROIDS["CA"][1], 
                                    centroid = REGION_CENTROIDS["CA"][0], 
+                                   **kwargs,
                                   ):
     '''
     Parameters:
@@ -147,9 +161,14 @@ def make_ipyleaflet_choropleth_map(gdf, plot_col, geometry_col,
     # Can only include the key-value pair, the value you want to map, nothing more.
     choro_data = dict(zip(gdf[geometry_col].tolist(), gdf[plot_col].tolist()))
     
+    map_args = [k for k, v in inspect.signature(ipyleaflet.Map).parameters.items()]
+    map_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in map_args}
     
     m = ipyleaflet.Map(center = centroid, zoom = zoom,
-                      basemap = basemaps.CartoDB.Positron)
+                      basemap = basemaps.CartoDB.Positron, **map_dict)
+    
+    choro_args = [k for k, v in inspect.signature(ipyleaflet.Choropleth).parameters.items()]
+    choro_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in choro_args}
     
     layer = ipyleaflet.Choropleth(
         geo_data = geo_data,
@@ -159,7 +178,8 @@ def make_ipyleaflet_choropleth_map(gdf, plot_col, geometry_col,
         style = {'fillOpacity': 0.6, 'weight': 0.5, 'color': '#999999', 'opacity': 0.8},
         value_min = choropleth_dict["MIN_VALUE"],
         value_max = choropleth_dict["MAX_VALUE"],
-        name = choropleth_dict["layer_name"]
+        name = choropleth_dict["layer_name"],
+        **choro_dict
     )
     
     
@@ -169,7 +189,7 @@ def make_ipyleaflet_choropleth_map(gdf, plot_col, geometry_col,
 
     html.layout.margin = '0 px 10px 10px 10px'
     
-    
+        
     def on_hover(**kwargs):
         properties = kwargs.get("feature", {}).get("properties")
         id = kwargs.get("feature", {}).get("id")
@@ -184,8 +204,15 @@ def make_ipyleaflet_choropleth_map(gdf, plot_col, geometry_col,
     
     m.add_layer(layer)
     
-    control = ipyleaflet.WidgetControl(widget = html, position = 'topright')
-    layers_control = ipyleaflet.LayersControl(position = 'topright')
+    widget_args = [k for k, v in inspect.signature(ipyleaflet.WidgetControl).parameters.items()]
+    widget_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in widget_args}
+    
+    control = ipyleaflet.WidgetControl(widget = html, position = 'topright', **widget_dict)
+    
+    layers_args = [k for k, v in inspect.signature(ipyleaflet.LayersControl).parameters.items()]
+    layers_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in layers_args}
+    
+    layers_control = ipyleaflet.LayersControl(position = 'topright', **layers_dict)
 
     m.add_control(control)
     m.add_control(layers_control)
