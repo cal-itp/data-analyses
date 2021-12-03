@@ -41,40 +41,33 @@ def aggregate_by_geography(df, group_cols,
     
     Returns a pandas.DataFrame or geopandas.GeoDataFrame (same as input).
     '''
-    df2 = df[group_cols].drop_duplicates().reset_index()
+    final_df = df[group_cols].drop_duplicates().reset_index()
+    
+    def aggregate_and_merge(df, final_df, 
+                            group_cols, agg_cols, AGGREGATE_FUNCTION):
+        
+        agg_df = df.pivot_table(index=group_cols,
+                       values=agg_cols,
+                       aggfunc=AGGREGATE_FUNCTION).reset_index()
+        
+        final_df = pd.merge(final_df, agg_df, 
+                           on=group_cols, how="left", validate="1:1")
+        return final_df
+
     
     if len(sum_cols) > 0:
-        sum_df = df.pivot_table(index=group_cols, 
-                                values=sum_cols, 
-                                aggfunc="sum").reset_index()
-        df2 = pd.merge(df2, sum_df,
-                      on=group_cols, how="left", validate="1:1"
-                     )
-  
+        final_df = aggregate_and_merge(df, final_df, group_cols, sum_cols, "sum")
+        
     if len(mean_cols) > 0:
-        mean_df = df.pivot_table(index=group_cols, 
-                                values=mean_cols, 
-                                aggfunc="mean").reset_index()
-        df2 = pd.merge(df2, mean_df,
-                      on=group_cols, how="left", validate="1:1"
-                     )
+        final_df = aggregate_and_merge(df, final_df, group_cols, mean_cols, "mean")
         
     if len(count_cols) > 0:
-        count_df = df.pivot_table(index=group_cols, 
-                                  values=count_cols, 
-                                  aggfunc="count").reset_index()
-        df2 = pd.merge(df2, count_df, 
-                     on=group_cols, how="left", validate="1:1")
-    
+        final_df = aggregate_and_merge(df, final_df, group_cols, count_cols, "count")
+ 
     if len(nunique_cols) > 0:
-        nunique_df = df.pivot_table(index=group_cols,
-                                     values=nunique_cols,
-                                     aggfunc="nunique").reset_index()
-        df2 = pd.merge(df2, nunique_df, 
-                       on=group_cols, how="left", validate="1:1")
-        
+        final_df = aggregate_and_merge(df, final_df, group_cols, nunique_cols, "nunique")
      
-    return df2.drop(columns = "index")
+    return final_df.drop(columns = "index")
 
 
 def attach_geometry(df, geometry_df, 
