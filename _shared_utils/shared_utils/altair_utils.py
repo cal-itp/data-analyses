@@ -54,6 +54,8 @@ def preset_chart_config(chart):
              .configure_legend(labelColor=blackTitle, labelFont=font, labelFontSize=11,
                                padding=1,symbolSize=30,symbolType= 'square',
                                titleColor=blackTitle, titleFont=font, titleFontSize=14,
-                               titlePadding=10,)
+                               titlePadding=10,
+                               labelLimit=0
+                              )
             )
     return chart
