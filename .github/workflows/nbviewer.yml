@@ -20,6 +20,7 @@ jobs:
       - name: get files
         id: files
         uses: jitterbit/get-changed-files@v1
+        continue-on-error: true
 
       - name: add comments
         uses: actions/github-script@v3
