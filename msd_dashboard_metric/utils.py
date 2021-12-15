@@ -3,7 +3,7 @@ import numpy as np
 import geopandas as gpd
 import datetime as dt
 
-from utils import *
+import shared_utils
 
 import calitp
 from calitp.tables import tbl
@@ -59,7 +59,7 @@ def get_stops_and_trips(filter_accessible):
     stops_trips = gpd.GeoDataFrame(stops_trips,
                         geometry=gpd.points_from_xy(stops_trips.stop_lon,
                                                    stops_trips.stop_lat),
-                        crs = 'EPSG:4326').to_crs('EPSG:6414') ## https://epsg.io/6414 (meters)
+                        crs = 'EPSG:4326').to_crs(shared_utils.geography_utils.CA_NAD83Albers)
     return stops_trips
 
 def get_census_ca_counties(census_vars, geography='tract'):
