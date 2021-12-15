@@ -17,6 +17,8 @@ from ipywidgets import Text, HTML
 # census_api_key = "&key="
 census_api_key = ""
 
+GCS_FILE_PATH = 'gs://calitp-analytics-data/data-analyses/msd_dashboard_metric'
+
 def get_stops_and_trips(filter_accessible):
     '''
     Returns a basic view of stops x modes serving stop.
