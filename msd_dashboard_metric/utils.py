@@ -3,19 +3,36 @@ import numpy as np
 import geopandas as gpd
 import datetime as dt
 
-from utils import *
+import shared_utils
 
 import calitp
 from calitp.tables import tbl
 from siuba import *
 
 import requests
+import intake
+
 from ipyleaflet import Map, GeoJSON, projections, basemaps, GeoData, LayersControl, WidgetControl, GeoJSON, LegendControl
 from ipywidgets import Text, HTML
 
 ## get a key here if needed: https://www.census.gov/data/developers/guidance.html
 # census_api_key = "&key="
 census_api_key = ""
+
+GCS_FILE_PATH = 'gs://calitp-analytics-data/data-analyses/msd_dashboard_metric'
+
+catalog = intake.open_catalog('./catalog.yml')
+
+def get_ca_block_group_geo():
+    
+    ca_block_geo = catalog.ca_block_groups.read()
+    ca_block_geo = ca_block_geo.to_crs('EPSG:4326')
+    stanford_shorelines = catalog.stanford_shorelines.read()
+    ca_shoreline = stanford_shorelines >> filter(_.STFIPS == '06')
+    ca_block_geo = ca_block_geo.clip(ca_shoreline)
+    ca_block_geo = ca_block_geo.to_crs(shared_utils.geography_utils.CA_NAD83Albers)
+    
+    return ca_block_geo
 
 def get_stops_and_trips(filter_accessible):
     '''
@@ -59,7 +76,7 @@ def get_stops_and_trips(filter_accessible):
     stops_trips = gpd.GeoDataFrame(stops_trips,
                         geometry=gpd.points_from_xy(stops_trips.stop_lon,
                                                    stops_trips.stop_lat),
-                        crs = 'EPSG:4326').to_crs('EPSG:6414') ## https://epsg.io/6414 (meters)
+                        crs = 'EPSG:4326').to_crs(shared_utils.geography_utils.CA_NAD83Albers)
     return stops_trips
 
 def get_census_ca_counties(census_vars, geography='tract'):
