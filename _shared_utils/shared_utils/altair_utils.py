@@ -28,7 +28,7 @@ chart_height = 250
 
 markColor = '#30a2da'
 axisColor = '#cbcbcb'
-guideLabelColor = '#999'
+guideLabelColor = '#474747'
 guideTitleColor = '#333'
 blackTitle = '#333'
 font="Arial"
