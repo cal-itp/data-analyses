@@ -1,6 +1,13 @@
 from ipyleaflet import Map, GeoJSON, projections, basemaps, GeoData, LayersControl, WidgetControl, GeoJSON, LegendControl
 from ipywidgets import Text, HTML
 
+import gcsfs
+
+GCS_PROJECT = "cal-itp-data-infra"
+BUCKET_NAME = "calitp-analytics-data"
+BUCKET_DIR = "data-analyses/rt_delay"
+GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
+
 def simple_map(gdf, mouseover=None):
     
     x = gdf.to_crs('EPSG:4326').geometry.iloc[0].centroid.x
