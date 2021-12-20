@@ -2,6 +2,7 @@ from ipyleaflet import Map, GeoJSON, projections, basemaps, GeoData, LayersContr
 from ipywidgets import Text, HTML
 
 import gcsfs
+import shapely
 
 GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
@@ -9,6 +10,13 @@ BUCKET_DIR = "data-analyses/rt_delay"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 
 def simple_map(gdf, mouseover=None):
+    
+    gdf = gdf.copy()
+    
+    if type(gdf.geometry.iloc[0]) == shapely.geometry.point.Point:
+        gdf.geometry = gdf.buffer(50)
+    elif type(gdf.geometry.iloc[0]) == shapely.geometry.linestring.LineString:
+        gdf.geometry = gdf.buffer(50)
     
     x = gdf.to_crs('EPSG:4326').geometry.iloc[0].centroid.x
     y = gdf.to_crs('EPSG:4326').geometry.iloc[0].centroid.y
