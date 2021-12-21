@@ -121,7 +121,7 @@ def make_folium_choropleth_map(df, plot_col,
     colorscale.add_to(m)
     
     fig.add_child(m)
-    
+        
     return fig
 
 
