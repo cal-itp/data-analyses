@@ -18,18 +18,6 @@ from calitp import to_snakecase
 from siuba import *
 
 
-
-#change format of columns to integer
-def get_num(x):
-    try:
-        return int(x)
-    except Exception:
-        try:
-            return float(x)
-        except Exception:
-            return x       
-        
-        
 #reading data
 def read_data(): 
     #read datasets
@@ -38,7 +26,19 @@ def read_data():
     
     #bringing the two dfs together
     df = pd.concat([odf, wdf], ignore_index=True)
+    pd.set_option('display.max_columns', None)
+    
     return df
+
+#get integers without coercing other values
+def get_num(x):
+    try:
+        return int(x)
+    except Exception:
+        try:
+            return float(x)
+        except Exception:
+            return x  
 
 
 #main cleaning function
@@ -71,18 +71,16 @@ def clean_data(df):
     #drop second half
     df.drop(['projectNO'], axis=1, inplace=True)
     
-    def get_num(x):
-        try:
-            return int(x)
-        except Exception:
-            try:
-                return float(x)
-            except Exception:
-                return x  
     
     #get the integers of the `locode` and `projectID` column
     df['locode'] = df['locode'].apply(get_num)
     df['projectID'] = df['projectID'].apply(get_num)
+    #df['fed_requested'] = df['fed_requested'].apply(get_num)
+    #df['ac_requested'] = df['ac_requested'].apply(get_num)
+    #df['total_requested'] = df['total_requested'].apply(get_num)
+    
+    #get the Prepared Year 
+    df['prepared_y'] = pd.DatetimeIndex(df['prepared_date']).year
     
     #replace Non-MPO formatting
     df.mpo.replace(['NONMPO'], ['NON-MPO'], inplace=True)
@@ -96,70 +94,43 @@ def prefix_cleaning(df):
     
     df = clean_data(df)
     
-    df.prefix.replace(['BR-'], ['BR'], inplace=True)
+    df["prefix"] = df.prefix.str.replace('-', '')
+    
+    replace_me = ["CASB003", "CASB05", 'CASB06','CASB07','CASB09','CASB10','CASB11','CASB12','CASB803','CASB902','CASB904','CASB905','CASB12'] 
+    for i in replace_me:
+        df.prefix.replace(i, 'CASB', inplace=True)
+    
+    replace_me = ['FERPL16', 'FERPL17','FERPL18','FERPL19','FERPLN16'] 
+    for i in replace_me:
+        df.prefix.replace(i, 'FERPL', inplace=True)
 
-    df.prefix.replace(['ATP-CML'], ['ATPCML'], inplace=True)
+    replace_me = ['FSP11', 'FSP12','FSP13','FSP14'] 
+    for i in replace_me:
+        df.prefix.replace(i, 'FSP', inplace=True)
+   
+    replace_me = ['HSIP5','HISP5'] 
+    for i in replace_me:
+        df.prefix.replace(i, 'HSIP', inplace=True)
+   
+    replace_me = ['NCPD02'] 
+    for i in replace_me:
+        df.prefix.replace(i, 'NCPD', inplace=True)
+   
+    replace_me = ['PLHL04', 'PLHL05','PLHL10','PLHL11','PLHL04','PLHL05'] 
+    for i in replace_me:
+        df.prefix.replace(i, 'PLHL', inplace=True)
 
-    df.prefix.replace(['CASB003'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB05'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB06'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB07'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB09'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB10'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB11'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB12'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB803'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB902'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB904'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB905'], ['CASB'], inplace=True)
-    df.prefix.replace(['CASB12'], ['CASB'], inplace=True)
+    replace_me = ['PLHDL05', 'PLHDL06','PLHDL08'] 
+    for i in replace_me:
+        df.prefix.replace(i, 'PLDHL', inplace=True)
+    
+    replace_me = ['TGR2DG.'] 
+    for i in replace_me:
+        df.prefix.replace(i, 'TGR2DG', inplace=True)
 
-    df.prefix.replace(['FERPL16'], ['FERPL'], inplace=True)
-    df.prefix.replace(['FERPL17'], ['FERPL'], inplace=True)
-    df.prefix.replace(['FERPL18'], ['FERPL'], inplace=True)
-    df.prefix.replace(['FERPL19'], ['FERPL'], inplace=True)
-    df.prefix.replace(['FERPLN16'], ['FERPL'], inplace=True)
-
-    df.prefix.replace(['FSP11'], ['FSP'], inplace=True)
-    df.prefix.replace(['FSP12'], ['FSP'], inplace=True)
-    df.prefix.replace(['FSP13'], ['FSP'], inplace=True)
-    df.prefix.replace(['FSP14'], ['FSP'], inplace=True)
-
-    df.prefix.replace(['RPSTPLE-'], ['RPSTPLE'], inplace=True)
-
-    df.prefix.replace(['RPSTPLE-'], ['RPSTPLE'], inplace=True)
-
-    df.prefix.replace(['HSIP5'], ['HSIP'], inplace=True)
-    df.prefix.replace(['HSIIPL'], ['HSIPL'], inplace=True)
-    df.prefix.replace(['HISP5'], ['HSIP'], inplace=True)
-
-
-    df.prefix.replace(['NCPD02'], ['NCPD'], inplace=True)
-
-
-    df.prefix.replace(['PLHL04'], ['PLHL'], inplace=True)
-    df.prefix.replace(['PLHL05'], ['PLHL'], inplace=True)
-    df.prefix.replace(['PLHL10'], ['PLHL'], inplace=True)
-    df.prefix.replace(['PLHL11'], ['PLHL'], inplace=True)
-
-    df.prefix.replace(['PLHDL05'], ['PLDHL'], inplace=True)
-    df.prefix.replace(['PLHDL06'], ['PLDHL'], inplace=True)
-    df.prefix.replace(['PLHDL08'], ['PLDHL'], inplace=True)
-    df.prefix.replace(['PLHL04'], ['PLHL'], inplace=True)
-    df.prefix.replace(['PLHL05'], ['PLHL'], inplace=True)
-
-    df.prefix.replace(['RPSTPL-'], ['RPSTPL'], inplace=True)
-
-    df.prefix.replace(['SRTSL-'], ['SRTSL'], inplace=True)
-
-    df.prefix.replace(['TGR2DG.'], ['TGR2DG'], inplace=True)
-
-    df.prefix.replace(['TCSP02'], ['TCSP'], inplace=True)
-    df.prefix.replace(['TCSP03'], ['TCSP'], inplace=True)
-    df.prefix.replace(['TCSP05'], ['TCSP'], inplace=True)
-    df.prefix.replace(['TCSP06'], ['TCSP'], inplace=True)
-    df.prefix.replace(['TCSP08'], ['TCSP'], inplace=True)
-    df.prefix.replace(['TCSP10'], ['TCSP'], inplace=True)
+    replace_me = ['TCSP02', 'TCSP03','TCSP05','TCSP06','TCSP08','TCSP10'] 
+    for i in replace_me:
+        df.prefix.replace(i, 'TCSP', inplace=True)
     
     return df
 
