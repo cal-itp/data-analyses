@@ -107,16 +107,27 @@ def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326"):
     
     for itp_id in ITP_ID_LIST:
         shapes = (tbl.gtfs_schedule.shapes()
-                  >> filter(_.calitp_itp_id == int(itp_id))
+                  >> filter(_.calitp_itp_id == int(itp_id)) 
                   >> collect()
         )
-
+        
         # Make a gdf
         shapes = (gpd.GeoDataFrame(shapes, 
                               geometry = gpd.points_from_xy
                               (shapes.shape_pt_lon, shapes.shape_pt_lat),
                               crs = WGS84)
              )
+        
+        # Count the number of stops for a given shape_id
+        # Must be > 1 (need at least 2 points to make a line)
+        shapes = shapes.assign(
+            num_stops = (shapes.groupby("shape_id")["shape_pt_sequence"]
+                         .transform("count")
+                        )
+        )
+        
+        # Drop the shape_ids that can't make a line
+        shapes = shapes[shapes.num_stops > 1].reset_index(drop=True)
                 
         # Now, combine all the stops by stop sequence, and create linestring
         for route in shapes.shape_id.unique():
