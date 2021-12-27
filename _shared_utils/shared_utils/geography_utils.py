@@ -95,7 +95,7 @@ def attach_geometry(df, geometry_df,
 
 
 # Function to take transit stop point data and create lines 
-def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326"):
+def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326", alternate_df=None):
     """
     Parameters:
     ITP_ID_LIST: list. List of ITP IDs found in agencies.yml
@@ -103,13 +103,18 @@ def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326"):
     
     Returns a geopandas.GeoDataFrame, where each line is the operator-route-line geometry.
     """
+        
     all_routes = gpd.GeoDataFrame()
     
     for itp_id in ITP_ID_LIST:
-        shapes = (tbl.gtfs_schedule.shapes()
-                  >> filter(_.calitp_itp_id == int(itp_id)) 
-                  >> collect()
-        )
+        if alternate_df is None:
+            shapes = (tbl.gtfs_schedule.shapes()
+                      >> filter(_.calitp_itp_id == int(itp_id)) 
+                      >> collect()
+            )
+        
+        elif alternate_df is not None:
+            shapes = alternate_df
         
         # Make a gdf
         shapes = (gpd.GeoDataFrame(shapes, 
@@ -141,7 +146,7 @@ def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326"):
             # Convert from a bunch of points to a line (for a route, there are multiple points)
             route_line = shapely.geometry.LineString(list(single_shape['geometry']))
             single_route = (single_shape
-                           [['calitp_itp_id', 'shape_id', 'calitp_extracted_at']]
+                           [['calitp_itp_id', 'shape_id']]
                            .iloc[[0]]
                           ) ##preserve info cols
             single_route['geometry'] = route_line
@@ -151,7 +156,33 @@ def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326"):
     
     all_routes = (all_routes.to_crs(CRS)
                   .sort_values(["calitp_itp_id", "shape_id"])
+                  .drop_duplicates()
                   .reset_index(drop=True)
                  )
     
     return all_routes
+
+
+def create_point_geometry(df, longitude_col = "stop_lon", 
+                         latitude_col = "stop_lat", crs = WGS84):
+    """
+    Parameters:
+    df: pandas.DataFrame to turn into geopandas.GeoDataFrame, 
+        default dataframe in mind is gtfs_schedule.stops
+        
+    longitude_col: str, column name corresponding to longitude
+                    in gtfs_schedule.stops, this column is "stop_lon"
+                    
+    latitude_col: str, column name corresponding to latitude
+                    in gtfs_schedule.stops, this column is "stop_lat"
+    
+    crs: str, coordinate reference system for point geometry
+    """
+    df = df.assign(
+        geometry = gpd.points_from_xy(df[longitude_col], df[latitude_col], 
+                                      crs = crs
+                                     )
+    )
+
+    gdf = gpd.GeoDataFrame(df)
+    return gdf
