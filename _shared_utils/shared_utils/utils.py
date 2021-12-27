@@ -3,6 +3,7 @@ import fsspec
 import os
 import pandas as pd
 import requests
+import shutil
 
 from calitp.storage import get_fs
 fs = get_fs()
@@ -34,7 +35,38 @@ def geoparquet_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     gdf.to_parquet(f"./{FILE_NAME}.parquet")
     fs.put(f"./{FILE_NAME}.parquet", f"{GCS_FILE_PATH}{FILE_NAME}.parquet")
     os.remove(f"./{FILE_NAME}.parquet")
-
+    
+# Make zipped shapefile
+# https://github.com/CityOfLosAngeles/planning-entitlements/blob/master/notebooks/utils.py
+def make_zipped_shapefile(df, path):
+    """
+    Make a zipped shapefile and save locally
+    Parameters
+    ==========
+    df: gpd.GeoDataFrame to be saved as zipped shapefile
+    path: str, local path to where the zipped shapefile is saved.
+            Ex: "folder_name/census_tracts" 
+                "folder_name/census_tracts.zip"
+                
+    Remember: ESRI only takes 10 character column names!!
+    """
+    # Grab first element of path (can input filename.zip or filename)
+    dirname = os.path.splitext(path)[0]
+    print(f"Path name: {path}")
+    print(f"Dirname (1st element of path): {dirname}")
+    # Make sure there's no folder with the same name
+    shutil.rmtree(dirname, ignore_errors=True)
+    # Make folder
+    os.mkdir(dirname)
+    shapefile_name = f"{os.path.basename(dirname)}.shp"
+    print(f"Shapefile name: {shapefile_name}")
+    # Export shapefile into its own folder with the same name
+    df.to_file(driver="ESRI Shapefile", filename=f"{dirname}/{shapefile_name}")
+    print(f"Shapefile component parts folder: {dirname}/{shapefile_name}")
+    # Zip it up
+    shutil.make_archive(dirname, "zip", dirname)
+    # Remove the unzipped folder
+    shutil.rmtree(dirname, ignore_errors=True)
 
 # Function to overwrite file in GitHub
 # Based on https://github.com/CityOfLosAngeles/aqueduct/tree/master/civis-aqueduct-utils/civis_aqueduct_utils
