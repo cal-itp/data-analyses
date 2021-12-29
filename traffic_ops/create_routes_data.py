@@ -122,7 +122,8 @@ def make_routes_shapefile():
     route_info = pd.read_parquet("./route_info.parquet")
     agencies = pd.read_parquet("./agencies.parquet")
     routes = gpd.read_parquet("./routes.parquet")
-    
+    latest_itp_id = pd.read_parquet("./latest_itp_id.parquet")
+
     time1 = datetime.now()
     print(f"Read in data: {time1-time0}")
     
@@ -145,11 +146,14 @@ def make_routes_shapefile():
     # Attach agency_id and agency_name using calitp_itp_id
     routes_assembled2 = prep_data.attach_agency_info(routes_assembled, agencies)
     
-    routes_assembled2 = (prep_data.drop_itp_id_zero(routes_assembled2, 
-                                                    itp_id_col = "calitp_itp_id")
-                        # Any renaming to be done before exporting
-                        .rename(columns = prep_data.RENAME_COLS)
-                       )
+    routes_assembled2 = (prep_data.filter_latest_itp_id(routes_assembled2, 
+                                                        latest_itp_id, 
+                                                        itp_id_col = "calitp_itp_id")
+                         # Any renaming to be done before exporting
+                         .rename(columns = prep_data.RENAME_COLS)
+                         .sort_values(["itp_id", "route_id"])
+                         .reset_index(drop=True)
+                        )
     
     print(f"Routes script total execution time: {time3-time0}")
 

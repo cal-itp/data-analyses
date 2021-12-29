@@ -91,6 +91,7 @@ def make_stops_shapefile():
     stops = pd.read_parquet("./stops.parquet")
     route_info = pd.read_parquet("./route_info.parquet")
     agencies = pd.read_parquet("./agencies.parquet")
+    latest_itp_id = pd.read_parquet("./latest_itp_id.parquet")
 
     df = create_stops_data(stops)
         
@@ -102,10 +103,14 @@ def make_stops_shapefile():
     time2 = datetime.now()
     print(f"Attach route and operator info to stops: {time2-time1}")
     
-    df2 = (prep_data.drop_itp_id_zero(df2, itp_id_col = "calitp_itp_id")
-            .rename(columns = prep_data.RENAME_COLS)
+    df2 = (prep_data.filter_latest_itp_id(df2, latest_itp_id, 
+                                          itp_id_col = "calitp_itp_id")
+           # Any renaming to be done before exporting
+           .rename(columns = prep_data.RENAME_COLS)
+           .sort_values(["itp_id", "route_id", "stop_id"])
+           .reset_index(drop=True)
           )
-
+    
     print(f"Stops script total execution time: {time2-time0}")
     
     return df2
