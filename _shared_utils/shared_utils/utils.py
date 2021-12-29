@@ -1,5 +1,6 @@
 import base64
 import fsspec
+import geopandas as gpd
 import os
 import pandas as pd
 import requests
@@ -35,6 +36,24 @@ def geoparquet_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     gdf.to_parquet(f"./{FILE_NAME}.parquet")
     fs.put(f"./{FILE_NAME}.parquet", f"{GCS_FILE_PATH}{FILE_NAME}.parquet")
     os.remove(f"./{FILE_NAME}.parquet")
+
+    
+def download_geoparquet(GCS_FILE_PATH, FILE_NAME, save_locally=False):
+    """
+    Parameters:
+    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    FILE_NAME: str, name of file (without the .parquet).
+                Ex: test_file (not test_file.parquet)
+    save_locally: bool, defaults to False. if True, will save geoparquet locally.
+    """
+    object_path = fs.open(f"{GCS_FILE_PATH}{FILE_NAME}.parquet")
+    gdf = gpd.read_parquet(object_path)
+    
+    if save_locally is True:
+        gdf.to_parquet(f"./{FILE_NAME}.parquet")
+    
+    return gdf
+    
     
 # Make zipped shapefile
 # https://github.com/CityOfLosAngeles/planning-entitlements/blob/master/notebooks/utils.py
