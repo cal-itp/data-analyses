@@ -13,8 +13,7 @@ from datetime import datetime
 import prep_data
 import create_routes_data
 import create_stops_data
-from shared_utils import utils
-
+import utils
 
 def create_shapefiles_and_export():
     time0 = datetime.now()

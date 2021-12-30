@@ -13,7 +13,7 @@ from calitp.tables import tbl
 from calitp import query_sql
 from datetime import datetime
 from siuba import *
-from shared_utils import geography_utils
+import utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 
@@ -73,8 +73,8 @@ def create_local_parquets():
     # This takes about 37 min to run and create this routes shapefile
     ITP_ID_LIST = list(agencies.calitp_itp_id.unique())
     
-    routes = geography_utils.make_routes_shapefile(
-                ITP_ID_LIST, CRS = geography_utils.WGS84, 
+    routes = utils.make_routes_shapefile(
+                ITP_ID_LIST, CRS = utils.WGS84, 
                 alternate_df=None)
     routes.to_parquet("./routes.parquet")
     

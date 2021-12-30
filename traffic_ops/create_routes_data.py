@@ -18,8 +18,8 @@ from calitp import query_sql
 from datetime import datetime
 from siuba import *
 
-from shared_utils import geography_utils
 import prep_data
+import utils
 
 def grab_missing_stops(ITP_ID, missing_trips_df, stops_df):
     df = (
@@ -85,8 +85,8 @@ def routes_for_operators_notin_shapes(routes_part1, stops, route_info):
                   }
     )
     
-    missing_trips_stops2 = geography_utils.make_routes_shapefile(
-        LOOP_ME, CRS = geography_utils.WGS84, 
+    missing_trips_stops2 = utils.make_routes_shapefile(
+        LOOP_ME, CRS = utils.WGS84, 
         alternate_df=missing_trips_stops
     )
     
