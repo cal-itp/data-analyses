@@ -8,8 +8,8 @@ import geopandas as gpd
 import pandas as pd
 import os
 
-from shared_utils import geography_utils
 import prep_data
+import utils
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 pd.set_option("display.max_rows", 20)
@@ -21,11 +21,11 @@ from siuba import *
 
 # Grab stops dataset and turn it from df to gdf
 def create_stops_data(stops):
-    stops = geography_utils.create_point_geometry(stops, 
-                            longitude_col = "stop_lon", 
-                            latitude_col = "stop_lat", 
-                            crs = geography_utils.WGS84
-                        )
+    stops = utils.create_point_geometry(stops, 
+                                        longitude_col = "stop_lon", 
+                                        latitude_col = "stop_lat", 
+                                        crs = utils.WGS84
+                                       )
 
     # There are a couple of duplicates when looking at ID-stop_id (but diff stop_code)
     # Drop these, since stop_id is used to merge with route_id
