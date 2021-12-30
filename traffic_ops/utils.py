@@ -1,98 +1,102 @@
 """
-Utility functions for geospatial data.
-Some functions for dealing with census tract or other geographic unit dfs.
+Utility functions from _shared_utils
+
+Since Airflow runs in data-infra,
+rather than install all the shared_utils, 
+just lift the relevant functions needed for scripts.
 """
+import fsspec
 import geopandas as gpd
 import os
 import pandas as pd
 import shapely
+import shutil
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(50_000_000_000)
 
 import calitp
 from calitp.tables import tbl
+from calitp.storage import get_fs
 from siuba import *
+fs = get_fs()
 
+#----------------------------------------------------------#
+## _shared_utils/utils.py
+# https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/utils.py
+#----------------------------------------------------------#
+def geoparquet_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
+    '''
+    Save geodataframe as parquet locally, 
+    then move to GCS bucket and delete local file.
+    
+    gdf: geopandas.GeoDataFrame
+    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    FILE_NAME: str. Filename.
+    '''
+    gdf.to_parquet(f"./{FILE_NAME}.parquet")
+    fs.put(f"./{FILE_NAME}.parquet", f"{GCS_FILE_PATH}{FILE_NAME}.parquet")
+    os.remove(f"./{FILE_NAME}.parquet")
+
+    
+def download_geoparquet(GCS_FILE_PATH, FILE_NAME, save_locally=False):
+    """
+    Parameters:
+    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    FILE_NAME: str, name of file (without the .parquet).
+                Ex: test_file (not test_file.parquet)
+    save_locally: bool, defaults to False. if True, will save geoparquet locally.
+    """
+    object_path = fs.open(f"{GCS_FILE_PATH}{FILE_NAME}.parquet")
+    gdf = gpd.read_parquet(object_path)
+    
+    if save_locally is True:
+        gdf.to_parquet(f"./{FILE_NAME}.parquet")
+    
+    return gdf
+    
+    
+# Make zipped shapefile
+# https://github.com/CityOfLosAngeles/planning-entitlements/blob/master/notebooks/utils.py
+def make_zipped_shapefile(df, path):
+    """
+    Make a zipped shapefile and save locally
+    Parameters
+    ==========
+    df: gpd.GeoDataFrame to be saved as zipped shapefile
+    path: str, local path to where the zipped shapefile is saved.
+            Ex: "folder_name/census_tracts" 
+                "folder_name/census_tracts.zip"
+                
+    Remember: ESRI only takes 10 character column names!!
+    """
+    # Grab first element of path (can input filename.zip or filename)
+    dirname = os.path.splitext(path)[0]
+    print(f"Path name: {path}")
+    print(f"Dirname (1st element of path): {dirname}")
+    # Make sure there's no folder with the same name
+    shutil.rmtree(dirname, ignore_errors=True)
+    # Make folder
+    os.mkdir(dirname)
+    shapefile_name = f"{os.path.basename(dirname)}.shp"
+    print(f"Shapefile name: {shapefile_name}")
+    # Export shapefile into its own folder with the same name
+    df.to_file(driver="ESRI Shapefile", filename=f"{dirname}/{shapefile_name}")
+    print(f"Shapefile component parts folder: {dirname}/{shapefile_name}")
+    # Zip it up
+    shutil.make_archive(dirname, "zip", dirname)
+    # Remove the unzipped folder
+    shutil.rmtree(dirname, ignore_errors=True)
+    
+    
+#----------------------------------------------------------#
+## _shared_utils/geography_utils.py
+# https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/geography_utils.py
+#----------------------------------------------------------# 
 WGS84 = "EPSG:4326"
 CA_StatePlane = "EPSG:2229" # units are in feet
 CA_NAD83Albers = "EPSG:3310" # units are in meters
 
 SQ_MI_PER_SQ_M = 3.86 * 10**-7
-
-def aggregate_by_geography(df, group_cols, 
-                       sum_cols = [], mean_cols = [], 
-                       count_cols = [], nunique_cols = []):
-    '''
-    df: pandas.DataFrame or geopandas.GeoDataFrame., 
-        The df on which the aggregating is done.
-        If it's a geodataframe, it must exclude the tract's geometry column
-    
-    group_cols: list. 
-        List of columns to do the groupby, but exclude geometry.
-    sum_cols: list. 
-        List of columns to calculate a sum with the groupby.
-    mean_cols: list. 
-        List of columns to calculate an average with the groupby 
-        (beware: may want weighted averages and not simple average!!).
-    count_cols: list. 
-        List of columns to calculate a count with the groupby.
-    nunique_cols: list. 
-        List of columns to calculate the number of unique values with the groupby.
-    
-    Returns a pandas.DataFrame or geopandas.GeoDataFrame (same as input).
-    '''
-    final_df = df[group_cols].drop_duplicates().reset_index()
-    
-    def aggregate_and_merge(df, final_df, 
-                            group_cols, agg_cols, AGGREGATE_FUNCTION):
-        
-        agg_df = df.pivot_table(index=group_cols,
-                       values=agg_cols,
-                       aggfunc=AGGREGATE_FUNCTION).reset_index()
-        
-        final_df = pd.merge(final_df, agg_df, 
-                           on=group_cols, how="left", validate="1:1")
-        return final_df
-
-    
-    if len(sum_cols) > 0:
-        final_df = aggregate_and_merge(df, final_df, group_cols, sum_cols, "sum")
-        
-    if len(mean_cols) > 0:
-        final_df = aggregate_and_merge(df, final_df, group_cols, mean_cols, "mean")
-        
-    if len(count_cols) > 0:
-        final_df = aggregate_and_merge(df, final_df, group_cols, count_cols, "count")
- 
-    if len(nunique_cols) > 0:
-        final_df = aggregate_and_merge(df, final_df, group_cols, nunique_cols, "nunique")
-     
-    return final_df.drop(columns = "index")
-
-
-def attach_geometry(df, geometry_df, 
-                    merge_col = ["Tract"], join="left"):
-    """
-    df: pandas.DataFrame
-        The df that needs tract geometry added.
-    geometry_df: geopandas.GeoDataFrame
-        The gdf that supplies the geometry.
-    merge_col: list. 
-        List of columns to do the merge on. 
-    join: str.
-        Specify whether it's a left, inner, or outer join.
-        
-    Returns a geopandas.GeoDataFrame
-    """    
-    gdf = pd.merge(
-        geometry_df.to_crs(WGS84),
-        df,
-        on = merge_col,
-        how = join,
-    )
-    
-    return gdf
-
 
 # Function to take transit stop point data and create lines 
 def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326", alternate_df=None):
