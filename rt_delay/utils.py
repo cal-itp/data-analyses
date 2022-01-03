@@ -4,6 +4,8 @@ from ipywidgets import Text, HTML
 import gcsfs
 import shapely
 
+import branca
+
 GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/rt_delay"
