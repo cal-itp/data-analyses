@@ -150,7 +150,7 @@ def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326", alternate_df=None):
             # Convert from a bunch of points to a line (for a route, there are multiple points)
             route_line = shapely.geometry.LineString(list(single_shape['geometry']))
             single_route = (single_shape
-                           [['calitp_itp_id', 'shape_id']]
+                           [['calitp_itp_id', 'calitp_url_number', 'shape_id']]
                            .iloc[[0]]
                           ) ##preserve info cols
             single_route['geometry'] = route_line
