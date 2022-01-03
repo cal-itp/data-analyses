@@ -51,3 +51,9 @@ def simple_map(gdf, mouseover=None):
     m.add_control(LayersControl())
 
     return m
+
+def reversed_colormap(existing):
+    return branca.colormap.LinearColormap(
+        colors=list(reversed(existing.colors)),
+        vmin=existing.vmin, vmax=existing.vmax
+    )
