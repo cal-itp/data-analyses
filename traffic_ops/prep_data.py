@@ -50,6 +50,7 @@ def create_local_parquets():
     )
     route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
 
+    
     agencies = (
         tbl.gtfs_schedule.agency()
         >> select(_.calitp_itp_id, _.agency_id, _.agency_name)
@@ -58,6 +59,7 @@ def create_local_parquets():
     )
     agencies.to_parquet(f"{DATA_PATH}agencies.parquet")
 
+    
     # Filter to the ITP_IDs present in the latest agencies.yml
     latest_itp_id = (tbl.views.gtfs_schedule_dim_feeds()
                      >> filter(_.calitp_id_in_latest==True)

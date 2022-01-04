@@ -21,7 +21,7 @@ def create_shapefiles_and_export():
     # Create local parquets
     prep_data.create_local_parquets() 
     print("Local parquets created")
-    
+    '''
     routes = create_routes_data.make_routes_shapefile()    
     stops = create_stops_data.make_stops_shapefile()
             
@@ -45,6 +45,6 @@ def create_shapefiles_and_export():
     
     time1 = datetime.now()
     print(f"Total run time for routes/stops script: {time1-time0}")
-    
+    '''
     
 create_shapefiles_and_export()
