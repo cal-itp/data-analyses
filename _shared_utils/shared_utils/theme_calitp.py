@@ -1,4 +1,12 @@
 """
+Set Cal-ITP altair style template,
+top-level configuration (for pngs), 
+and color palettes.
+"""
+import altair as alt
+import calitp_color_palette as cp
+
+"""
 Setting altair theme to resemble Urban: 
 https://towardsdatascience.com/consistently-beautiful-visualizations-with-altair-themes-c7f9f889602
 
@@ -9,33 +17,33 @@ Download Google font:
 https://gist.github.com/ravgeetdhillon/0063aaee240c0cddb12738c232bd8a49
 """
 
-def urban_theme():
-    # Typography
-    font = "Lato"
-    # At Urban it's the same font for all text but it's good to keep them separate in case you want to change one later.
-    labelFont = "Lato" 
-    sourceFont = "Lato"
-    # Axes
-    axisColor = "#000000"
-    gridColor = "#DEDDDD"
+PALETTE = {
+    "category_bright": cp.CALITP_CATEGORY_BRIGHT_COLORS,
+    "category_bold": cp.CALITP_CATEGORY_BOLD_COLORS,
+    "diverging": cp.CALITP_DIVERGING_COLORS,
+    "sequential": cp.CALITP_SEQUENTIAL_COLORS,
+}
+
+def calitp_theme():
+    font_size = 18
+    chart_width = 400
+    chart_height = 250
+
+    markColor = '#8CBCCB'
+    axisColor = '#cbcbcb'
+    guideLabelColor = '#474747'
+    guideTitleColor = '#333'
+    blackTitle = '#333'
+    font="Calibri" #"Raleway"
+    labelFont="Arial" #"Nunito Sans"
+    sourceFont=labelFont
+    backgroundColor = "white"
+    
+    gridColor=axisColor
+    
     # Colors
-    main_palette = ["#1696d2", 
-                    "#d2d2d2",
-                    "#000000", 
-                    "#fdbf11", 
-                    "#ec008b", 
-                    "#55b748", 
-                    "#5c5859", 
-                    "#db2b27", 
-                   ]
-    sequential_palette = ["#cfe8f3", 
-                          "#a2d4ec", 
-                          "#73bfe2", 
-                          "#46abdb", 
-                          "#1696d2", 
-                          "#12719e", 
-                         ]
-return {
+
+    return {
         # width and height are configured outside the config dict because they are Chart configurations/properties not chart-elements' configurations/properties.
         "width": 685, # from the guide
         "height": 380, # not in the guide
@@ -80,8 +88,8 @@ return {
                 "titleX": 18, # move it to the right so it aligns with the labels 
             },
             "range": {
-                "category": main_palette,
-                "diverging": sequential_palette,
+                "category": PALETTE["category_bright"],
+                "diverging": PALETTE["diverging"],
             },
             "legend": {
                 "labelFont": labelFont,
