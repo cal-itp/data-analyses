@@ -117,7 +117,8 @@ def make_folium_choropleth_map(df, plot_col,
         **geojson_dict
     ).add_to(m)
     
-    colorscale.caption = "Legend"
+    if not colorscale.caption: # allow a preset alternative caption if desired
+        colorscale.caption = "Legend"
     colorscale.add_to(m)
     
     fig.add_child(m)
