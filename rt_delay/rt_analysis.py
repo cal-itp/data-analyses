@@ -15,11 +15,11 @@ class VehiclePositionsTrip:
     '''Trip data and useful methods for analyzing GTFS-RT vehicle positions data'''
     
     def __init__(self, vp_gdf, shape_gdf):
-        
-        global vp_gdff
-        vp_gdff = vp_gdf
+        self.debug_dict = {}
         
         assert vp_gdf.crs == shared_utils.geography_utils.CA_NAD83Albers
+        trip_timespan = (vp_gdf.vehicle_timestamp.max() - vp_gdf.vehicle_timestamp.min())
+        assert (trip_timespan.days == 0 and trip_timespan.seconds < 12*60**2), "vehicle positions timespan > 12 hours, same trip on multiple days?"
         vp_gdf = vp_gdf >> distinct(_.trip_id, _.vehicle_timestamp, _keep_all=True)
         
         self.date = vp_gdf.date.iloc[0]
@@ -71,6 +71,16 @@ class VehiclePositionsTrip:
             self._fix_progression()
     
     def _shift_calculate(self, vehicle_positions):
+        
+        print('sc_called')
+        if hasattr(self, "progressing_positions"):
+            print(self.progressing_positions.shape)
+            self.debug_dict[self.progressing_positions.shape[0]] = self.progressing_positions.copy()
+        else:
+            print(self.vehicle_positions.shape)
+            self.debug_dict[self.vehicle_positions.shape[0]] = self.vehicle_positions.copy()
+        
+        # vehicle_positions = vehicle_positions >> arrange(_.vehicle_timestamp) ## unnecessary?
         vehicle_positions['last_time'] = vehicle_positions.vehicle_timestamp.shift(1)
         vehicle_positions['last_loc'] = vehicle_positions.shape_meters.shift(1)
         vehicle_positions['secs_from_last'] = vehicle_positions.vehicle_timestamp - vehicle_positions.last_time
@@ -322,8 +332,9 @@ class RtAnalysis:
             all_stop_speeds = gpd.GeoDataFrame()
             for shape_id in self.delay_view.shape_id.unique():
                 for direction_id in self.delay_view.direction_id.unique():
-                    stop_speeds = (self.delay_view
-                                 >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))
+                    this_shape_direction = (self.delay_view
+                                 >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
+                    stop_speeds = (this_shape_direction
                                  >> group_by(_.trip_id)
                                  >> arrange(_.stop_sequence)
                                  >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
@@ -339,17 +350,22 @@ class RtAnalysis:
                                     x.shape_meters),
                                                     axis = 1)
                     stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
-
-                    stop_speeds = (stop_speeds
-                         >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
-                         >> group_by(_.stop_sequence)
-                         >> mutate(speed_mph = speed_calculators[how])
-                         >> mutate(speed_mph = _.speed_mph.round(1))
-                         >> mutate(shape_meters = _.shape_meters.round(0))
-                         >> distinct(_.stop_sequence, _keep_all=True)
-                         >> ungroup()
-                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.trip_id)
-                        )
+                    
+                    try:
+                        stop_speeds = (stop_speeds
+                             >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
+                             >> group_by(_.stop_sequence)
+                             >> mutate(speed_mph = speed_calculators[how])
+                             >> mutate(speed_mph = _.speed_mph.round(1))
+                             >> mutate(shape_meters = _.shape_meters.round(0))
+                             >> distinct(_.stop_sequence, _keep_all=True)
+                             >> ungroup()
+                             >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.trip_id)
+                            )
+                    except Exception as e:
+                        print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
+                        continue
+                              
                     print(stop_speeds.shape_id.iloc[0], stop_speeds.shape)
                     if stop_speeds.speed_mph.max() > 70:
                         print(f'speed above 70 for shape {stop_speeds.shape_id.iloc[0]}, dropping')

@@ -3,6 +3,7 @@ import shared_utils
 import gcsfs
 import shapely
 import datetime as dt
+import pandas as pd
 
 import branca
 
@@ -38,3 +39,7 @@ def primary_cardinal_direction(origin, destination):
             return('Northbound')
         else:
             return('Southbound')
+        
+def show_full_df(df):
+    with pd.option_context('display.max_rows', None):
+        return display(df)
