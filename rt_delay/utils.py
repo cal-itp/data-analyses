@@ -2,6 +2,7 @@ import shared_utils
 
 import gcsfs
 import shapely
+import datetime as dt
 
 import branca
 
@@ -11,6 +12,11 @@ BUCKET_DIR = "data-analyses/rt_delay"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 
 MPH_PER_MPS = 2.237 ## use to convert meters/second to miles/hour
+
+def convert_ts(ts):    
+    pacific_dt = dt.datetime.fromtimestamp(ts)
+    # print(pacific_dt)
+    return pacific_dt
 
 def reversed_colormap(existing):
     return branca.colormap.LinearColormap(
