@@ -2,16 +2,35 @@
 Set Cal-ITP altair style template,
 top-level configuration (for pngs), 
 and color palettes.
+
+References:
+
+Setting custom Altair theme as .py (Urban): 
+https://towardsdatascience.com/consistently-beautiful-visualizations-with-altair-themes-c7f9f889602
+
+GH code: 
+https://github.com/chekos/altair_themes_blog/tree/master/notebooks
+
+Download Google fonts:
+https://gist.github.com/ravgeetdhillon/0063aaee240c0cddb12738c232bd8a49
+
+Altair GH issue setting custom theme: 
+https://github.com/altair-viz/altair/issues/1333
+https://discourse.holoviz.org/t/altair-theming/1421/2
+
+https://stackoverflow.com/questions/33061785/can-i-load-google-fonts-with-matplotlib-and-jupyter
+
+matplotlib:
+https://github.com/CityOfLosAngeles/los-angeles-citywide-data-style
+
 """
 import altair as alt
 import calitp_color_palette as cp
 
 from plotnine import *
 
-#https://github.com/CityOfLosAngeles/los-angeles-citywide-data-style
-
 #--------------------------------------------------------------#
-# Chart parameters for altair
+# Chart parameters
 #--------------------------------------------------------------#
 font_size = 18
 chart_width = 400
@@ -33,23 +52,6 @@ PALETTE = {
     "sequential": cp.CALITP_SEQUENTIAL_COLORS,
 }
 
-"""
-Setting custom Altair theme as .py (Urban): 
-https://towardsdatascience.com/consistently-beautiful-visualizations-with-altair-themes-c7f9f889602
-
-GH code: 
-https://github.com/chekos/altair_themes_blog/tree/master/notebooks
-
-Download Google fonts:
-https://gist.github.com/ravgeetdhillon/0063aaee240c0cddb12738c232bd8a49
-
-Altair GH issue setting custom theme: 
-https://github.com/altair-viz/altair/issues/1333
-
-https://discourse.holoviz.org/t/altair-theming/1421/2
-
-https://stackoverflow.com/questions/33061785/can-i-load-google-fonts-with-matplotlib-and-jupyter
-"""
 
 '''
 # Run this in notebook
@@ -59,6 +61,9 @@ https://stackoverflow.com/questions/33061785/can-i-load-google-fonts-with-matplo
 </style>
 '''
 
+#--------------------------------------------------------------#
+# Altair
+#--------------------------------------------------------------#
 def calitp_theme(font=font, labelFont=labelFont, font_size = font_size, 
                  chart_width = chart_width, chart_height = chart_height,
                  markColor = markColor, axisColor = axisColor,
@@ -184,9 +189,7 @@ def calitp_theme(font=font, labelFont=labelFont, font_size = font_size,
 
 
 # Let's add in more top-level chart configuratinos
-# But, we can always adjust elements by adjusting chart_width or chart_height in a notebook
 # Need to add more since altair_saver will lose a lot of the theme applied
-# Has been adjusted to match the calitp_theme above.
 def preset_chart_config(chart):
     chart = (chart.properties(
                 width = chart_width, height = chart_height,
@@ -208,4 +211,34 @@ def preset_chart_config(chart):
                                labelLimit=0
                               )
             )
+    return chart
+
+
+#--------------------------------------------------------------#
+# Plotnine
+#--------------------------------------------------------------#
+def preset_plotnine_config(chart):
+    chart = (chart
+             + theme_538()
+             + theme(plot_background=element_rect(fill=backgroundColor, color=backgroundColor),
+                     panel_background=element_rect(fill=backgroundColor, color=backgroundColor),
+                     panel_grid_major_y=element_line(
+                        color=axisColor, linetype='solid', size=1),
+                     panel_grid_major_x=element_blank(),
+                     figure_size=(7.0, 4.4),
+                     title=element_text(weight="bold", size=font_size, 
+                                        family=font, color=blackTitle),
+                     axis_title=element_text(family=labelFont, size=12, color=guideTitleColor),
+                     axis_text=element_text(family=labelFont, size=10, color=guideLabelColor, 
+                                            margin={'r': 4}
+                                           ),
+                     axis_title_x=element_text(margin={'t': 10}),
+                     axis_title_y=element_text(margin={'r': 10}),
+                     legend_title=element_text(font=labelFont, size=14, color=blackTitle, 
+                                               margin={'b': 10}),
+                     legend_text=element_text(font=labelFont, size=11, color=blackTitle, 
+                                              margin={'t': 5, 'b': 5, 'r': 5, 'l': 5}),
+                    )
+    )
+    
     return chart
