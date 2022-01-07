@@ -1,7 +1,16 @@
 import altair as alt
+from shared_utils import calitp_color_palette as cp
 
 #--------------------------------------------------------------#
-# Fivethirtyeight altair theme
+# Cal-ITP color palette
+#--------------------------------------------------------------#
+CALITP_CATEGORY_BRIGHT_COLORS = cp.CALITP_CATEGORY_BRIGHT_COLORS
+CALITP_CATEGORY_BOLD_COLORS = cp.CALITP_CATEGORY_BOLD_COLORS
+CALITP_DIVERGING_COLORS = cp.CALITP_DIVERGING_COLORS
+CALITP_SEQUENTIAL_COLORS = cp.CALITP_SEQUENTIAL_COLORS
+
+#--------------------------------------------------------------#
+# Fivethirtyeight color palette
 #--------------------------------------------------------------#
 FIVETHIRTYEIGHT_CATEGORY_COLORS = [
   '#30a2da', '#fc4f30', '#e5ae38',
