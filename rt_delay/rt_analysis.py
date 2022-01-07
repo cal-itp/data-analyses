@@ -1,8 +1,11 @@
 import shared_utils
+from shared_utils.geography_utils import CA_NAD83Albers
+from shared_utils.map_utils import make_folium_choropleth_map
 import branca
-from utils import *
 
+from utils import *
 from siuba import *
+
 import pandas as pd
 import geopandas as gpd
 import shapely
@@ -12,33 +15,31 @@ import time
 from zoneinfo import ZoneInfo
 
 class VehiclePositionsTrip:
-    '''Trip data and useful methods for analyzing GTFS-RT vehicle positions data'''
+    '''Trip data and useful methods for analyzing GTFS-RT vehicle positions data
+    '''
     
     def __init__(self, vp_gdf, shape_gdf):
         self.debug_dict = {}
         
-        assert vp_gdf.crs == shared_utils.geography_utils.CA_NAD83Albers
+        assert vp_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"vehicle positions and shape CRS must be {CA_NAD83Albers}"
         trip_timespan = (vp_gdf.vehicle_timestamp.max() - vp_gdf.vehicle_timestamp.min())
         assert (trip_timespan.days == 0 and trip_timespan.seconds < 12*60**2), "vehicle positions timespan > 12 hours, same trip on multiple days?"
         vp_gdf = vp_gdf >> distinct(_.trip_id, _.vehicle_timestamp, _keep_all=True)
         
-        self.date = vp_gdf.date.iloc[0]
-        self.trip_id = vp_gdf.trip_id.iloc[0]
-        self.route_id = vp_gdf.route_id.iloc[0]
-        self.shape_id = vp_gdf.shape_id.iloc[0]
-        self.direction_id = vp_gdf.direction_id.iloc[0]
-        self.entity_id = vp_gdf.entity_id.iloc[0]
-        self.vehicle_id = vp_gdf.vehicle_id.iloc[0]
-        self.calitp_itp_id = vp_gdf.calitp_itp_id.iloc[0]
-        self.calitp_url_number = vp_gdf.calitp_url_number.iloc[0]
+        trip_info_cols = ['date', 'trip_id', 'route_id', 'shape_id',
+                         'direction_id', 'entity_id', 'vehicle_id', 'calitp_itp_id',
+                         'calitp_url_number']
+        assert set(trip_info_cols).issubset(vp_gdf.columns), f"vehicle positions must contain columns: {trip_info_cols}"
+        for col in trip_info_cols:
+            setattr(self, col, vp_gdf[col].iloc[0])
+        
         self.vehicle_positions = vp_gdf >> select(_.vehicle_timestamp,
                                               _.header_timestamp,
                                               _.geometry)
         self._attach_shape(shape_gdf)
         
     def _attach_shape(self, shape_gdf):
-        assert shape_gdf.crs == shared_utils.geography_utils.CA_NAD83Albers
-        assert shape_gdf.calitp_itp_id.iloc[0] == self.calitp_itp_id
+        assert shape_gdf.calitp_itp_id.iloc[0] == self.calitp_itp_id, "shape ITP ID does not match vehicle positions"
         self.shape = (shape_gdf
                         >> filter(_.shape_id == self.shape_id)
                         >> select(_.shape_id, _.geometry))
@@ -57,18 +58,10 @@ class VehiclePositionsTrip:
         self.vehicle_positions = self._shift_calculate(self.vehicle_positions)
         self.progressing_positions = self.vehicle_positions >> filter(_.progressed)
         ## check if positions have progressed from immediate previous point, but not previous point of forwards progression
-        if not self.progressing_positions.shape_meters.is_monotonic:
+        while not self.progressing_positions.shape_meters.is_monotonic:
             print(f'check location data for trip {self.trip_id}')
-            self._fix_progression()
-    
-    def _fix_progression(self):
-        
-        self.progressing_positions = self._shift_calculate(self.progressing_positions)
-        self.progressing_positions = self.progressing_positions >> filter(_.progressed)
-        ## check if positions have progressed from immediate previous point, but not previous point of forwards progression
-        if not self.progressing_positions.shape_meters.is_monotonic:
-            # print(f'recheck location data for trip {self.trip_id}')
-            self._fix_progression()
+            self.progressing_positions = self._shift_calculate(self.progressing_positions)
+            self.progressing_positions = self.progressing_positions >> filter(_.progressed)
     
     def _shift_calculate(self, vehicle_positions):
         
@@ -130,16 +123,12 @@ class VehiclePositionsTrip:
         
         gdf = self.vehicle_positions.copy()
         gdf['time'] = gdf.vehicle_timestamp.apply(lambda x: x.strftime('%H:%M:%S'))
-
         gdf = gdf >> select(_.geometry, _.time,
                             _.shape_meters, _.last_loc, _.speed_from_last)
         gdf['speed_mph'] = gdf.speed_from_last * MPH_PER_MPS
-        
         gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape.geometry.iloc[0],
                                                                 x.last_loc,
-                                                                x.shape_meters),
-                                axis = 1)
-        
+                                                                x.shape_meters), axis = 1)
         gdf.geometry = gdf.buffer(25)
         gdf = gdf.to_crs(shared_utils.geography_utils.WGS84)
         gdf = gdf >> filter(_.speed_mph > 0)
@@ -149,9 +138,8 @@ class VehiclePositionsTrip:
         gdf['shape_id'] = self.shape_id
         gdf['direction_id'] = self.direction_id
         gdf['trip_id'] = self.trip_id
-        # display(gdf)
         
-        if gdf.speed_mph.max() > 70:
+        if gdf.speed_mph.max() > 70: ## TODO better system to raise errors on impossibly fast speeds
             print(f'speed above 70 for trip {self.trip_id}, dropping')
             gdf = gdf >> filter(_.speed_mph < 70)
 
@@ -168,7 +156,7 @@ class VehiclePositionsTrip:
             "time": "Time"
         }
         
-        g = shared_utils.map_utils.make_folium_choropleth_map(
+        g = make_folium_choropleth_map(
             gdf,
             plot_col = 'speed_mph',
             popup_dict = popup_dict,
@@ -210,16 +198,12 @@ class RtAnalysis:
                                             self.trips_positions >> filter(_.trip_id == trip_id),
                                             self.shape_gdf)
         
-    def generate_delay_view(self, trip_ids = None):
+    def generate_delay_view(self):
         print('gdv called')
 
-        if  type(trip_ids) == type(None): ## trip_ids could potentially be a list or pd.Series...
-            trip_ids = self.trip_ids
-        
-        self._delay_view_inputs = trip_ids
         self.delay_view = gpd.GeoDataFrame()
         trips_processed = 0
-        for trip_id in trip_ids:
+        for trip_id in self.trip_ids:
             try:
                 trip_rt_data = self.trip_vehicle_positions[trip_id]
                 trip_st = (self.stop_times >> filter(_.trip_id == trip_id)).copy()
@@ -256,28 +240,28 @@ class RtAnalysis:
     
     def generate_delay_summary(self, trip_ids = None):       
 
-        if  type(trip_ids) == type(None): ## trip_ids could potentially be a list or pd.Series...
-            trip_ids = self.trip_ids
-        
-        if hasattr(self, 'delay_view') and set(list(self.delay_view.trip_id.unique())) == set(list(trip_ids)):
-        ## if delay view exists and matches request, use it
-            stop_geos = self.delay_view >> select(_.stop_id, _.geometry) >> distinct(_.stop_id, _keep_all=True)
-            self.delay_summary = (self.delay_view
-                     >> group_by(_.stop_id, _.stop_sequence,)
-                     >> summarize(avg_delay = _.delay.mean(), max_delay = _.delay.max())
-                     # >> inner_join(_, stop_geos, on = 'stop_id')
-                     >> arrange(_.stop_sequence)
-                    )
-            self.delay_summary = stop_geos >> inner_join(_, self.delay_summary, on = 'stop_id')
+        if  type(trip_ids) != type(None): ## trip_ids could potentially be a list or pd.Series...
+            gdf = self.delay_view.copy() >> filter(_.trip_id.isin(trip_ids))
         else:
-            self.generate_delay_view(trip_ids) ## generate new delay view if necessary
-            return self.generate_delay_summary(trip_ids)
+            gdf = self.delay_view.copy()
+        
+        stop_geos = gdf >> select(_.stop_id, _.geometry) >> distinct(_.stop_id, _keep_all=True)
+        self.delay_summary = (gdf
+                 >> group_by(_.stop_id, _.stop_sequence,)
+                 >> summarize(avg_delay = _.delay.mean(), max_delay = _.delay.max())
+                 # >> inner_join(_, stop_geos, on = 'stop_id')
+                 >> arrange(_.stop_sequence)
+                )
+        self.delay_summary = stop_geos >> inner_join(_, self.delay_summary, on = 'stop_id')
         return self.delay_summary
     
     def map_stop_delays(self, how = 'max',  trip_ids = None):
                 
-        if  type(trip_ids) == type(None): ## trip_ids could potentially be a list or pd.Series...
-            trip_ids = self.trip_ids
+        if  type(trip_ids) != type(None): ## trip_ids could potentially be a list or pd.Series...
+            gdf = self.delay_view.copy() >> filter(_.trip_id.isin(trip_ids))
+        else:
+            gdf = self.delay_view.copy()
+            
         assert how in ['max', 'average']
         self.generate_delay_summary(trip_ids)
         
@@ -301,7 +285,7 @@ class RtAnalysis:
             "stop_id": "Stop ID",
         }
         
-        g = shared_utils.map_utils.make_folium_choropleth_map(
+        g = make_folium_choropleth_map(
             gdf,
             plot_col = 'delay_minutes',
             popup_dict = popup_dict,
@@ -318,66 +302,62 @@ class RtAnalysis:
         
     def map_segment_speeds(self, how = 'high_delay', segments = 'stops', trip_ids = None): ##TODO split out segment speed view?
 
-        if  type(trip_ids) == type(None): ## trip_ids could potentially be a list or pd.Series...
-            trip_ids = self.trip_ids
+        if  type(trip_ids) != type(None): ## trip_ids could potentially be a list or pd.Series...
+            gdf = self.delay_view.copy() >> filter(_.trip_id.isin(trip_ids))
+        else:
+            gdf = self.delay_view.copy()
         
         assert how in ['low_speeds', 'average']
         assert segments in ['stops', 'detailed']
         
         speed_calculators = {'low_speeds': _.speed_mph.quantile(.2), ## 20th percentile speed
                             'average': _.speed_mph.mean()} ## average speed
-        
-        if hasattr(self, 'delay_view') and set(list(self._delay_view_inputs)) == set(list(trip_ids)):
-            
-            all_stop_speeds = gpd.GeoDataFrame()
-            for shape_id in self.delay_view.shape_id.unique():
-                for direction_id in self.delay_view.direction_id.unique():
-                    this_shape_direction = (self.delay_view
-                                 >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
-                    stop_speeds = (this_shape_direction
-                                 >> group_by(_.trip_id)
-                                 >> arrange(_.stop_sequence)
-                                 >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
-                                 >> mutate(last_loc = _.shape_meters.shift(1))
-                                 >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
-                                 >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last) 
-                                 >> ungroup()
-                                )
-                    stop_speeds.geometry = stop_speeds.apply(
-                        lambda x: shapely.ops.substring(
-                                    self.trip_vehicle_positions[x.trip_id].shape.geometry.iloc[0],
-                                    x.last_loc,
-                                    x.shape_meters),
-                                                    axis = 1)
-                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
                     
-                    try:
-                        stop_speeds = (stop_speeds
-                             >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
-                             >> group_by(_.stop_sequence)
-                             >> mutate(speed_mph = speed_calculators[how])
-                             >> mutate(speed_mph = _.speed_mph.round(1))
-                             >> mutate(shape_meters = _.shape_meters.round(0))
-                             >> distinct(_.stop_sequence, _keep_all=True)
+        all_stop_speeds = gpd.GeoDataFrame()
+        for shape_id in gdf.shape_id.unique():
+            for direction_id in gdf.direction_id.unique():
+                this_shape_direction = (gdf
+                             >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
+                stop_speeds = (this_shape_direction
+                             >> group_by(_.trip_id)
+                             >> arrange(_.stop_sequence)
+                             >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
+                             >> mutate(last_loc = _.shape_meters.shift(1))
+                             >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
+                             >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last) 
                              >> ungroup()
-                             >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.trip_id)
                             )
-                    except Exception as e:
-                        print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
-                        continue
-                              
-                    print(stop_speeds.shape_id.iloc[0], stop_speeds.shape)
-                    if stop_speeds.speed_mph.max() > 70:
-                        print(f'speed above 70 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                        stop_speeds = stop_speeds >> filter(_.speed_mph < 70)
-                    all_stop_speeds = all_stop_speeds.append(stop_speeds)
-            
-            self.segment_speed_view = all_stop_speeds
-            return self._generate_segment_map(how = how)
-            
-        else:
-            self.generate_delay_view(trip_ids) ## generate new delay view if necessary
-            return self.map_segment_speeds(how, segments, trip_ids = trip_ids)
+                stop_speeds.geometry = stop_speeds.apply(
+                    lambda x: shapely.ops.substring(
+                                self.trip_vehicle_positions[x.trip_id].shape.geometry.iloc[0],
+                                x.last_loc,
+                                x.shape_meters),
+                                                axis = 1)
+                stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
+
+                try:
+                    stop_speeds = (stop_speeds
+                         >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
+                         >> group_by(_.stop_sequence)
+                         >> mutate(speed_mph = speed_calculators[how])
+                         >> mutate(speed_mph = _.speed_mph.round(1))
+                         >> mutate(shape_meters = _.shape_meters.round(0))
+                         >> distinct(_.stop_sequence, _keep_all=True)
+                         >> ungroup()
+                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.trip_id)
+                        )
+                except Exception as e:
+                    print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
+                    continue
+
+                print(stop_speeds.shape_id.iloc[0], stop_speeds.shape)
+                if stop_speeds.speed_mph.max() > 70:
+                    print(f'speed above 70 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                    stop_speeds = stop_speeds >> filter(_.speed_mph < 70)
+                all_stop_speeds = all_stop_speeds.append(stop_speeds)
+
+        self.segment_speed_view = all_stop_speeds
+        return self._generate_segment_map(how = how)
         
     def _generate_segment_map(self, how, colorscale = None, size = [900, 550]):
         
@@ -402,7 +382,7 @@ class RtAnalysis:
             "stop_sequence": "Next Stop Sequence"
         }
 
-        g = shared_utils.map_utils.make_folium_choropleth_map(
+        g = make_folium_choropleth_map(
             gdf,
             plot_col = 'speed_mph',
             popup_dict = popup_dict,
