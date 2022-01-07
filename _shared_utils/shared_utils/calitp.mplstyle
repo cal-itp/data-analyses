@@ -1,0 +1,53 @@
+# Matplotlib style sheet for the Cal-ITP data science team.
+# Based off of: https://github.com/CityOfLosAngeles/los-angeles-citywide-data-style/blob/master/los_angeles_citywide_data_style/citywide.mplstyle
+#https://towardsdatascience.com/how-to-create-and-use-custom-matplotlib-style-sheet-9393f498063
+#https://github.com/matplotlib/matplotlib/blob/main/lib/matplotlib/mpl-data/stylelib/fivethirtyeight.mplstylec
+# Use this to tweak: https://github.com/matplotlib/matplotlib/blob/v3.4.3/matplotlibrc.template
+
+# Pull some Seaborn whitegrid parameters
+# https://github.com/matplotlib/matplotlib/blob/main/lib/matplotlib/mpl-data/stylelib/seaborn-whitegrid.mplstyle
+font.family: sans-serif
+font.sans-serif: DejaVu Sans
+
+# Fivethirtyeight parameters
+lines.linewidth: 4
+lines.solid_capstyle: butt
+
+legend.fancybox: true
+legend.loc: center right
+# CALITP_CATEGORY_BRIGHT
+axes.prop_cycle: cycler('color', ['2EA8CE', 'EB9F3C', 'F4D837', '51BF9D', '8CBCCB', '9487C0'])
+axes.facecolor: white
+axes.labelsize: medium
+axes.axisbelow: true
+axes.grid: true
+axes.grid.axis: y
+axes.edgecolor: f0f0f0
+axes.linewidth: 1.0
+axes.titlesize: x-large
+axes.titlepad: 10
+
+patch.edgecolor: f0f0f0
+patch.linewidth: 0.5
+
+svg.fonttype: path
+
+grid.linestyle: -
+grid.linewidth: 1.0
+grid.color: f0f0f0
+
+xtick.major.size: 0
+xtick.minor.size: 0
+ytick.major.size: 0
+ytick.minor.size: 0
+
+font.size:12.0
+
+savefig.edgecolor: white
+savefig.facecolor: white
+
+figure.subplot.left: 0.08
+figure.subplot.right: 0.95
+figure.subplot.bottom: 0.07
+figure.facecolor: white
+figure.figsize: 7.0, 4.4
