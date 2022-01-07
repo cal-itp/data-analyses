@@ -25,9 +25,8 @@ https://github.com/CityOfLosAngeles/los-angeles-citywide-data-style
 
 """
 import altair as alt
-import calitp_color_palette as cp
-
 from plotnine import *
+from shared_utils import calitp_color_palette as cp
 
 #--------------------------------------------------------------#
 # Chart parameters

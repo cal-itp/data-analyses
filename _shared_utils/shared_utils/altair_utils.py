@@ -1,5 +1,5 @@
 import altair as alt
-import calitp_color_palette as cp
+from shared_utils import calitp_color_palette as cp
 
 #--------------------------------------------------------------#
 # Cal-ITP color palette
@@ -27,7 +27,6 @@ FIVETHIRTYEIGHT_SEQUENTIAL_COLORS = [
     '#d6e8ed', '#cee0e5', '#91bfd9', 
     '#549cc6', '#1d78b5'
 ]
-
 
 #--------------------------------------------------------------#
 # Chart parameters for altair
