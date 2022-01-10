@@ -9,5 +9,15 @@ setup(
     license='Apache',
     include_package_data=True,
     package_dir={"_shared_utils": "shared_utils"},
-    install_requires=["altair_saver"],
+    install_requires=[
+        "calitp", "geopandas", "numpy", "pandas", 
+        "altair", "matplotlib", "plotnine", "plotly", "seaborn", # charts
+        "folium", "ipyleaflet", # maps
+        "branca",  # colors
+        "ipywidgets", "altair_saver", "vega", # supporting
+        # To also include in Docker
+        "pygeos", # pygeos has some compatibility issue with geopandas...one of them needs to be hardcoded and set to a version
+        "rtree", "fiona", "shapely", "openpyxl", # spatial
+        "python-dotenv", # env
+    ],
 )
