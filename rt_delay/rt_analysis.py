@@ -22,11 +22,10 @@ class VehiclePositionsTrip:
         self.debug_dict = {}
         
         assert vp_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"vehicle positions and shape CRS must be {CA_NAD83Albers}"
-        trip_timespan = (vp_gdf.vehicle_timestamp.max() - vp_gdf.vehicle_timestamp.min())
-        assert (trip_timespan.days == 0 and trip_timespan.seconds < 12*60**2), "vehicle positions timespan > 12 hours, same trip on multiple days?"
-        vp_gdf = vp_gdf >> distinct(_.trip_id, _.vehicle_timestamp, _keep_all=True)
+        assert vp_gdf.trip_key.nunique() == 1, "non-unique trip key in vp_gdf"
+        vp_gdf = vp_gdf >> distinct(_.trip_key, _.vehicle_timestamp, _keep_all=True)
         
-        trip_info_cols = ['date', 'trip_id', 'route_id', 'shape_id',
+        trip_info_cols = ['service_date', 'trip_key', 'trip_id', 'route_id', 'shape_id',
                          'direction_id', 'entity_id', 'vehicle_id', 'calitp_itp_id',
                          'calitp_url_number']
         assert set(trip_info_cols).issubset(vp_gdf.columns), f"vehicle positions must contain columns: {trip_info_cols}"
@@ -59,7 +58,7 @@ class VehiclePositionsTrip:
         self.progressing_positions = self.vehicle_positions >> filter(_.progressed)
         ## check if positions have progressed from immediate previous point, but not previous point of forwards progression
         while not self.progressing_positions.shape_meters.is_monotonic:
-            print(f'check location data for trip {self.trip_id}')
+            print(f'check location data for trip {self.trip_key}')
             self.progressing_positions = self._shift_calculate(self.progressing_positions)
             self.progressing_positions = self.progressing_positions >> filter(_.progressed)
     
@@ -115,7 +114,7 @@ class VehiclePositionsTrip:
 
             return est_dt
         except KeyError:
-            print(f'insufficient bounding points for trip {self.trip_id}, location {desired_position}', end=': ')
+            print(f'insufficient bounding points for trip {self.trip_key}, location {desired_position}', end=': ')
             print(f'start/end of route?')
             return None
         
@@ -140,7 +139,7 @@ class VehiclePositionsTrip:
         gdf['trip_id'] = self.trip_id
         
         if gdf.speed_mph.max() > 70: ## TODO better system to raise errors on impossibly fast speeds
-            print(f'speed above 70 for trip {self.trip_id}, dropping')
+            print(f'speed above 70 for trip {self.trip_key}, dropping')
             gdf = gdf >> filter(_.speed_mph < 70)
 
         colorscale = branca.colormap.step.RdYlGn_08.scale(vmin=gdf.speed_mph.min(), 
@@ -177,25 +176,25 @@ class VehiclePositionsTrip:
 class RtAnalysis:
     '''Current top-level class for GTFS-RT analysis'''
     
-    def __init__(self, trips_positions_joined, stop_times, stops, shape_gdf, trip_ids): ## trips_position_joined is temporary
+    def __init__(self, trips_positions_joined, stop_times, stops, shape_gdf, trip_keys): ## trips_position_joined is temporary
         
         for df in (trips_positions_joined, stop_times, stops, shape_gdf):
             assert df.calitp_itp_id.nunique() == 1
             assert df.calitp_url_number.nunique() == 1
         
-        self.trips_positions = trips_positions_joined >> filter(_.trip_id.isin(trip_ids))
-        self.stop_times = stop_times >> filter(_.trip_id.isin(trip_ids))
+        self.trips_positions = trips_positions_joined >> filter(_.trip_key.isin(trip_keys))
+        self.stop_times = stop_times >> filter(_.trip_id.isin(self.trips_positions.trip_id))
         self.stops = stops
         self.st_geo = self.stops >> inner_join(_, self.stop_times, on = ['calitp_itp_id', 'calitp_url_number','stop_id'])
         self.shape_gdf = shape_gdf
-        self.trip_ids = trip_ids
+        self.trip_keys = trip_keys
         self.generate_vp_trips()
         
     def generate_vp_trips(self):
         self.trip_vehicle_positions = {}
-        for trip_id in self.trip_ids:
-            self.trip_vehicle_positions[trip_id] = VehiclePositionsTrip(
-                                            self.trips_positions >> filter(_.trip_id == trip_id),
+        for trip_key in self.trip_keys:
+            self.trip_vehicle_positions[trip_key] = VehiclePositionsTrip(
+                                            self.trips_positions >> filter(_.trip_key == trip_key),
                                             self.shape_gdf)
         
     def generate_delay_view(self):
@@ -203,11 +202,11 @@ class RtAnalysis:
 
         self.delay_view = gpd.GeoDataFrame()
         trips_processed = 0
-        for trip_id in self.trip_ids:
+        for trip_key in self.trip_keys:
             try:
-                trip_rt_data = self.trip_vehicle_positions[trip_id]
-                trip_st = (self.stop_times >> filter(_.trip_id == trip_id)).copy()
-                trip_st_geo = (self.st_geo >> filter(_.trip_id == trip_id)).copy()
+                trip_rt_data = self.trip_vehicle_positions[trip_key]
+                trip_st = (self.stop_times >> filter(_.trip_id == self.trip_vehicle_positions[trip_key].trip_id)).copy()
+                trip_st_geo = (self.st_geo >> filter(_.trip_id == self.trip_vehicle_positions[trip_key].trip_id)).copy()
                 trip_st_geo['route_id'] = trip_rt_data.route_id
                 trip_st_geo['shape_id'] = trip_rt_data.shape_id
                 trip_st_geo['direction_id'] = trip_rt_data.direction_id
@@ -225,8 +224,8 @@ class RtAnalysis:
                 trip_st_geo['delay'] = trip_st_geo.actual_time - trip_st_geo.arrival_time
                 trip_st_geo['date'] = trip_rt_data.date
                 trip_view = trip_st_geo.dropna(subset=['delay']) >> arrange(_.arrival_time) >> select(
-                                                                _.arrival_time, _.actual_time, _.delay,
-                                                             _.stop_id, _.trip_id, _.shape_id, _.direction_id,
+                                                            _.trip_key, _.arrival_time, _.actual_time, _.delay,
+                                                            _.stop_id, _.trip_id, _.shape_id, _.direction_id,
                                                             _.direction, _.stop_sequence, _.route_id,
                                                             _.shape_meters, _.date, _.geometry)
                 self.delay_view = self.delay_view.append(trip_view)
@@ -234,14 +233,14 @@ class RtAnalysis:
                 if trips_processed % 5 == 0:
                     print(f'{trips_processed} trips processed')
             except Exception as e:
-                print(trip_id, e)
-        self.delay_view = (self.delay_view >> arrange(_.stop_sequence, _.trip_id)).set_crs(self.st_geo.crs)
+                print(trip_key, e)
+        self.delay_view = (self.delay_view >> arrange(_.stop_sequence, _.trip_key)).set_crs(self.st_geo.crs)
         return self.delay_view
     
-    def generate_delay_summary(self, trip_ids = None):       
+    def generate_delay_summary(self, trip_keys = None):       
 
-        if  type(trip_ids) != type(None): ## trip_ids could potentially be a list or pd.Series...
-            gdf = self.delay_view.copy() >> filter(_.trip_id.isin(trip_ids))
+        if  type(trip_keys) != type(None): ## trip_keys could potentially be a list or pd.Series...
+            gdf = self.delay_view.copy() >> filter(_.trip_key.isin(trip_keys))
         else:
             gdf = self.delay_view.copy()
         
@@ -255,15 +254,15 @@ class RtAnalysis:
         self.delay_summary = stop_geos >> inner_join(_, self.delay_summary, on = 'stop_id')
         return self.delay_summary
     
-    def map_stop_delays(self, how = 'max',  trip_ids = None):
+    def map_stop_delays(self, how = 'max',  trip_keys = None):
                 
-        if  type(trip_ids) != type(None): ## trip_ids could potentially be a list or pd.Series...
-            gdf = self.delay_view.copy() >> filter(_.trip_id.isin(trip_ids))
+        if  type(trip_keys) != type(None): ## trip_keys could potentially be a list or pd.Series...
+            gdf = self.delay_view.copy() >> filter(_.trip_key.isin(trip_keys))
         else:
             gdf = self.delay_view.copy()
             
         assert how in ['max', 'average']
-        self.generate_delay_summary(trip_ids)
+        self.generate_delay_summary(trip_keys)
         
         gdf = self.delay_summary.copy()
         if how == 'max':
@@ -300,10 +299,10 @@ class RtAnalysis:
         return g
 
         
-    def map_segment_speeds(self, how = 'high_delay', segments = 'stops', trip_ids = None): ##TODO split out segment speed view?
+    def map_segment_speeds(self, how = 'high_delay', segments = 'stops', trip_keys = None): ##TODO split out segment speed view?
 
-        if  type(trip_ids) != type(None): ## trip_ids could potentially be a list or pd.Series...
-            gdf = self.delay_view.copy() >> filter(_.trip_id.isin(trip_ids))
+        if  type(trip_keys) != type(None): ## trip_keys could potentially be a list or pd.Series...
+            gdf = self.delay_view.copy() >> filter(_.trip_key.isin(trip_keys))
         else:
             gdf = self.delay_view.copy()
         
@@ -319,7 +318,7 @@ class RtAnalysis:
                 this_shape_direction = (gdf
                              >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
                 stop_speeds = (this_shape_direction
-                             >> group_by(_.trip_id)
+                             >> group_by(_.trip_key)
                              >> arrange(_.stop_sequence)
                              >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
                              >> mutate(last_loc = _.shape_meters.shift(1))
@@ -329,7 +328,7 @@ class RtAnalysis:
                             )
                 stop_speeds.geometry = stop_speeds.apply(
                     lambda x: shapely.ops.substring(
-                                self.trip_vehicle_positions[x.trip_id].shape.geometry.iloc[0],
+                                self.trip_vehicle_positions[x.trip_key].shape.geometry.iloc[0],
                                 x.last_loc,
                                 x.shape_meters),
                                                 axis = 1)
@@ -344,7 +343,8 @@ class RtAnalysis:
                          >> mutate(shape_meters = _.shape_meters.round(0))
                          >> distinct(_.stop_sequence, _keep_all=True)
                          >> ungroup()
-                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.trip_id)
+                         >> select(-_.arrival_time, -_.actual_time, -_.delay,
+                                   -_.trip_id, -_.trip_key)
                         )
                 except Exception as e:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
@@ -404,7 +404,7 @@ class RtAnalysis:
         
         if hasattr(self, 'delay_view'):
             summary = (self.delay_view
-             >> group_by(_.trip_id, _.shape_id, _.direction_id)
+             >> group_by(_.trip_key, _.trip_id, _.shape_id, _.direction_id)
              >> summarize(min_meters = _.shape_meters.min(),
                          min_stop = _.stop_sequence.min(),
                          max_meters = _.shape_meters.max(),
