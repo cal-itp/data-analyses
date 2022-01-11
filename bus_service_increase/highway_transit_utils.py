@@ -17,14 +17,10 @@ def clean_highways():
                    "77f2d7ba94e040a78bfbe36feb6279da_0.geojson")
     gdf = gpd.read_file(HIGHWAY_URL)
     
-    drop_cols = ['OBJECTID', 'RteSuffix',
-                 'PMPrefix', 'bPM', 'ePM',
-                 'PMSuffix', 'bPMc', 'ePMc',
-                 'bOdometer', 'eOdometer', 
-                 'AlignCode', 'Shape_Length',
-                ]
-    gdf = gdf.drop(columns=drop_cols)
+    keep_cols = ['Route', 'County', 'District', 'RouteType',
+                 'Direction', 'geometry']
     
+    gdf = gdf[keep_cols]
     print(f"# rows before dissolve: {len(gdf)}")
     
     # See if we can dissolve further - use all cols except geometry
