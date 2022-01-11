@@ -173,14 +173,55 @@ class VehiclePositionsTrip:
 
         return g
     
+class ScheduleInterpolator:
+    '''Find scheduled location at arbitrary points along a shape based on static GTFS data.
+    Useful for comparing delay at positions besides stops.
+    '''
+    
+    def __init__(self, trips, st_geo, shape_gdf):
+    '''trips: df of GTFS trips, st_geo: gdf of GTFS stop times, after joining w/ stops,
+    shape_gdf: gdf of geometries for each shape'''
+    assert st_geo.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"stop times and shape CRS must be {CA_NAD83Albers}"
+    
+    def time_at_position(self, desired_position):
+
+    global bounding_points
+
+    try:
+        next_point = (self.progressing_positions
+              >> filter(_.shape_meters > desired_position)
+              >> filter(_.shape_meters == _.shape_meters.min())
+             )
+        prev_point = (self.progressing_positions
+              >> filter(_.shape_meters < desired_position)
+              >> filter(_.shape_meters == _.shape_meters.max())
+             )
+        bounding_points = (prev_point.append(next_point).copy().reset_index(drop=True)
+                >> select(-_.secs_from_last, -_.meters_from_last, -_.speed_from_last)) ## drop in case bounding points are nonconsecutive
+        secs_from_last = (bounding_points.loc[1].vehicle_timestamp - bounding_points.loc[0].vehicle_timestamp).seconds
+        meters_from_last = bounding_points.loc[1].shape_meters - bounding_points.loc[0].shape_meters
+        speed_from_last = meters_from_last / secs_from_last
+
+        meters_position_to_next = bounding_points.loc[1].shape_meters - desired_position
+        est_seconds_to_next = meters_position_to_next / speed_from_last
+        est_td_to_next = dt.timedelta(seconds=est_seconds_to_next)
+        est_dt = bounding_points.iloc[-1].vehicle_timestamp - est_td_to_next
+
+        return est_dt
+    except KeyError:
+        print(f'insufficient bounding points for trip {self.trip_key}, location {desired_position}', end=': ')
+        print(f'start/end of route?')
+        return None
+    
 class RtAnalysis:
     '''Current top-level class for GTFS-RT analysis'''
     
     def __init__(self, trips_positions_joined, stop_times, stops, shape_gdf, trip_keys): ## trips_position_joined is temporary
-        
+        self.debug_dict = {}
         for df in (trips_positions_joined, stop_times, stops, shape_gdf):
             assert df.calitp_itp_id.nunique() == 1
             assert df.calitp_url_number.nunique() == 1
+        assert shape_gdf.crs == CA_NAD83Albers, f"shape CRS must be {CA_NAD83Albers}"
         
         self.trips_positions = trips_positions_joined >> filter(_.trip_key.isin(trip_keys))
         self.stop_times = stop_times >> filter(_.trip_id.isin(self.trips_positions.trip_id))
@@ -205,8 +246,13 @@ class RtAnalysis:
         for trip_key in self.trip_keys:
             try:
                 trip_rt_data = self.trip_vehicle_positions[trip_key]
+                # print(self.stop_times.dtypes)
+                # print(type(self.trip_vehicle_positions[trip_key].trip_id))
                 trip_st = (self.stop_times >> filter(_.trip_id == self.trip_vehicle_positions[trip_key].trip_id)).copy()
                 trip_st_geo = (self.st_geo >> filter(_.trip_id == self.trip_vehicle_positions[trip_key].trip_id)).copy()
+                self.debug_dict['id'] = self.trip_vehicle_positions[trip_key].trip_id
+                self.debug_dict['st'] = trip_st
+                self.debug_dict['geo'] = trip_st_geo
                 trip_st_geo['route_id'] = trip_rt_data.route_id
                 trip_st_geo['shape_id'] = trip_rt_data.shape_id
                 trip_st_geo['direction_id'] = trip_rt_data.direction_id
@@ -222,18 +268,20 @@ class RtAnalysis:
                                                                 axis = 1) ## format scheduled arrival times
                 # _debug = trip_st_geo
                 trip_st_geo['delay'] = trip_st_geo.actual_time - trip_st_geo.arrival_time
-                trip_st_geo['date'] = trip_rt_data.date
+                trip_st_geo['service_date'] = trip_rt_data.service_date
+                trip_st_geo['trip_key'] = trip_rt_data.trip_key
                 trip_view = trip_st_geo.dropna(subset=['delay']) >> arrange(_.arrival_time) >> select(
                                                             _.trip_key, _.arrival_time, _.actual_time, _.delay,
                                                             _.stop_id, _.trip_id, _.shape_id, _.direction_id,
                                                             _.direction, _.stop_sequence, _.route_id,
-                                                            _.shape_meters, _.date, _.geometry)
+                                                            _.shape_meters, _.service_date, _.geometry)
                 self.delay_view = self.delay_view.append(trip_view)
                 trips_processed += 1
                 if trips_processed % 5 == 0:
                     print(f'{trips_processed} trips processed')
             except Exception as e:
                 print(trip_key, e)
+        self.debug_dict['delay'] = self.delay_view
         self.delay_view = (self.delay_view >> arrange(_.stop_sequence, _.trip_key)).set_crs(self.st_geo.crs)
         return self.delay_view
     
@@ -363,7 +411,7 @@ class RtAnalysis:
         
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
 
-        gdf = self.segment_speed_view >> select(-_.date)
+        gdf = self.segment_speed_view >> select(-_.service_date)
         gdf.geometry = gdf.set_crs(shared_utils.geography_utils.CA_NAD83Albers).buffer(25)
         
         if not colorscale:
