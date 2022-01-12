@@ -40,8 +40,8 @@ axisColor = '#cbcbcb'
 guideLabelColor = '#474747'
 guideTitleColor = '#333'
 blackTitle = '#333'
-font="Calibri" #"Raleway"
-labelFont="Arial" #"Nunito Sans"
+font="Raleway"
+labelFont="Nunito Sans"
 backgroundColor = "white"
 
 PALETTE = {
