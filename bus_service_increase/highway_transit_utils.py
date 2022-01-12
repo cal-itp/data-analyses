@@ -62,7 +62,13 @@ def overlay_transit_to_highways(buffer_feet =
     direction_cols = ["NB", "SB", "EB", "WB"]
     for c in direction_cols:
         highways[c] = highways.groupby(group_cols)[c].transform('max')
-
+    
+    # Buffer first, then dissolve
+    # If dissolve first, then buffer, kernel times out
+    highways = highways.assign(
+                geometry = highways.geometry.buffer(buffer_feet)   
+    )
+    
     highways = highways.dissolve(by=group_cols + direction_cols).reset_index()
     
     ## Clean transit routes
@@ -78,9 +84,6 @@ def overlay_transit_to_highways(buffer_feet =
                       .reset_index(drop=True)
                       .assign(route_length = transit_routes.geometry.length)
                      )
-    highways = highways.assign(
-                geometry = highways.buffer(buffer_feet)   
-    )
     
     # Overlay
     # Note: an overlay based on intersection changes the geometry column
