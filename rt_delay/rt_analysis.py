@@ -178,40 +178,73 @@ class ScheduleInterpolator:
     Useful for comparing delay at positions besides stops.
     '''
     
-    def __init__(self, trips, st_geo, shape_gdf):
-    '''trips: df of GTFS trips, st_geo: gdf of GTFS stop times, after joining w/ stops,
-    shape_gdf: gdf of geometries for each shape'''
-    assert st_geo.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"stop times and shape CRS must be {CA_NAD83Albers}"
+    def __init__(self, trip_st_gdf, shape_gdf):
+        '''trip_st_gdf: gdf of GTFS trip (filtered to 1 trip) joined w/ GTFS stop times and stops,
+        shape_gdf: gdf of geometries for each shape'''
+        self.debug_dict = {}
+        
+        assert trip_st_gdf.trip_key.nunique() == 1, "non-unique trip key in trip_st_gdf"
+        assert trip_st_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"stop times and shape CRS must be {CA_NAD83Albers}"
+        self.time_col = 'arrival_dt'
+
+        trip_info_cols = ['service_date', 'trip_key', 'trip_id', 'route_id', 'shape_id',
+                     'direction_id', 'calitp_itp_id',
+                     'calitp_url_number']
+        assert set(trip_info_cols).issubset(trip_st_gdf.columns), f"trip_st_gdf must contain columns: {trip_info_cols}"
+        for col in trip_info_cols:
+            setattr(self, col, trip_st_gdf[col].iloc[0])
+
+        self.trip_st = trip_st_gdf
+        self._attach_shape(shape_gdf)
+
+    def _attach_shape(self, shape_gdf):
+        assert shape_gdf.calitp_itp_id.iloc[0] == self.calitp_itp_id, "shape ITP ID does not match vehicle positions"
+        self.debug_dict['joined'] = self.trip_st
+        self.shape = (shape_gdf
+                        >> filter(_.shape_id == self.shape_id)
+                        >> select(_.shape_id, _.geometry))
+        self.trip_st['shape_meters'] = (self.trip_st.geometry
+                                .apply(lambda x: self.shape.geometry.iloc[0].project(x)))
+        self.trip_st >> arrange(_.stop_sequence)
+        self.trip_st = self.trip_st.apply(gtfs_time_to_dt, axis=1)
+        self.debug_dict['trip_st'] = self.trip_st
+
+        origin = (self.trip_st >> filter(_.shape_meters == _.shape_meters.min())
+        ).geometry.iloc[0]
+        destination = (self.trip_st >> filter(_.shape_meters == _.shape_meters.max())
+        ).geometry.iloc[0]
+        self.direction = primary_cardinal_direction(origin, destination)
+
     
     def time_at_position(self, desired_position):
 
-    global bounding_points
+        global bounding_points
 
-    try:
-        next_point = (self.progressing_positions
-              >> filter(_.shape_meters > desired_position)
-              >> filter(_.shape_meters == _.shape_meters.min())
-             )
-        prev_point = (self.progressing_positions
-              >> filter(_.shape_meters < desired_position)
-              >> filter(_.shape_meters == _.shape_meters.max())
-             )
-        bounding_points = (prev_point.append(next_point).copy().reset_index(drop=True)
-                >> select(-_.secs_from_last, -_.meters_from_last, -_.speed_from_last)) ## drop in case bounding points are nonconsecutive
-        secs_from_last = (bounding_points.loc[1].vehicle_timestamp - bounding_points.loc[0].vehicle_timestamp).seconds
-        meters_from_last = bounding_points.loc[1].shape_meters - bounding_points.loc[0].shape_meters
-        speed_from_last = meters_from_last / secs_from_last
+        try:
+            next_point = (self.trip_st
+                  >> filter(_.shape_meters > desired_position)
+                  >> filter(_.shape_meters == _.shape_meters.min())
+                 )
+            prev_point = (self.trip_st
+                  >> filter(_.shape_meters < desired_position)
+                  >> filter(_.shape_meters == _.shape_meters.max())
+                 )
+            bounding_points = (prev_point.append(next_point).copy().reset_index(drop=True)
+                    >> select(-_.secs_from_last, -_.meters_from_last, -_.speed_from_last)) ## drop in case bounding points are nonconsecutive
+            secs_from_last = (bounding_points.loc[1][self.time_col] - bounding_points.loc[0][self.time_col]).seconds
+            meters_from_last = bounding_points.loc[1].shape_meters - bounding_points.loc[0].shape_meters
+            speed_from_last = meters_from_last / secs_from_last
 
-        meters_position_to_next = bounding_points.loc[1].shape_meters - desired_position
-        est_seconds_to_next = meters_position_to_next / speed_from_last
-        est_td_to_next = dt.timedelta(seconds=est_seconds_to_next)
-        est_dt = bounding_points.iloc[-1].vehicle_timestamp - est_td_to_next
+            meters_position_to_next = bounding_points.loc[1].shape_meters - desired_position
+            est_seconds_to_next = meters_position_to_next / speed_from_last
+            est_td_to_next = dt.timedelta(seconds=est_seconds_to_next)
+            est_dt = bounding_points.iloc[-1][self.time_col] - est_td_to_next
 
-        return est_dt
-    except KeyError:
-        print(f'insufficient bounding points for trip {self.trip_key}, location {desired_position}', end=': ')
-        print(f'start/end of route?')
-        return None
+            return est_dt
+        except KeyError:
+            print(f'insufficient bounding points for trip {self.trip_key}, location {desired_position}', end=': ')
+            print(f'start/end of route?')
+            return None
     
 class RtAnalysis:
     '''Current top-level class for GTFS-RT analysis'''
