@@ -472,7 +472,7 @@ class RtAnalysis:
             fig_width = size[0], fig_height = size[1],
             zoom = 13,
             centroid = [33.790, -118.154],
-            title=f"Long Beach Transit {how_formatted[how]} Bus Speeds Between Stops, Afternoon Peak",
+            title=f"Long Beach Transit {how_formatted[how]} Bus Speeds Between Stops, ** Peak",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
                 "fillOpacity": 0.6,

@@ -1,5 +1,5 @@
 import shared_utils
-from shared_utils.geography_utils import CA_NAD83Albers
+from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.map_utils import make_folium_choropleth_map
 import branca
 
@@ -27,8 +27,7 @@ class TripPositionInterpolator:
         assert position_gdf.trip_key.nunique() == 1, "non-unique trip key in vp_gdf"
         
         trip_info_cols = ['service_date', 'trip_key', 'trip_id', 'route_id', 'shape_id',
-                         'direction_id', 'calitp_itp_id',
-                         'calitp_url_number'] + addl_info_cols
+                         'direction_id', 'calitp_itp_id'] + addl_info_cols
         assert set(trip_info_cols).issubset(position_gdf.columns), f"position_gdf must contain columns: {trip_info_cols}"
         for col in trip_info_cols:
             setattr(self, col, position_gdf[col].iloc[0])
@@ -92,7 +91,8 @@ class TripPositionInterpolator:
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
         gdf.geometry = gdf.buffer(25)
-        gdf = gdf.to_crs(shared_utils.geography_utils.WGS84)
+        gdf = gdf.to_crs(WGS84)
+        centroid = gdf.dissolve().centroid
         gdf = gdf >> filter(_.speed_mph > 0)
         gdf = gdf >> mutate(speed_mph = _.speed_mph.round(1),
                            shape_meters = _.shape_meters.round(0))
@@ -126,7 +126,7 @@ class TripPositionInterpolator:
             colorscale = colorscale,
             fig_width = 1000, fig_height = 700,
             zoom = 13,
-            centroid = [33.790, -118.154],
+            centroid = [centroid.y, centroid.x],
             title=f"Trip Speed Map (Route {self.route_id}, {self.direction}, ** Peak)", ##TODO time classification, remove hardcode
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
@@ -156,6 +156,8 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
             self.progressing_positions = self._shift_calculate(self.progressing_positions)
             self.progressing_positions = self.progressing_positions >> filter(_.progressed)
         self.cleaned_positions = self.progressing_positions ## for position and map methods in TripPositionInterpolator
+        self.cleaned_positions = self.cleaned_positions >> arrange(self.time_col)
+
     
     def _shift_calculate(self, vehicle_positions):
         
@@ -167,7 +169,7 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
             print(self.position_gdf.shape)
             self.debug_dict[self.position_gdf.shape[0]] = self.position_gdf.copy()
         
-        # vehicle_positions = vehicle_positions >> arrange(_.vehicle_timestamp) ## unnecessary?
+        vehicle_positions = vehicle_positions >> arrange(self.time_col) ## unnecessary?
         vehicle_positions['last_time'] = vehicle_positions[self.time_col].shift(1)
         vehicle_positions['last_loc'] = vehicle_positions.shape_meters.shift(1)
         vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col] - vehicle_positions.last_time
@@ -203,4 +205,5 @@ class ScheduleInterpolator(TripPositionInterpolator):
         self.position_gdf['speed_from_last'] = (self.position_gdf.meters_from_last
                                                      / self.position_gdf.secs_from_last) ## meters/second
         self.cleaned_positions = self.position_gdf ## for position and map methods in TripPositionInterpolator
+        self.cleaned_positions = self.cleaned_positions >> arrange(self.time_col)
     
