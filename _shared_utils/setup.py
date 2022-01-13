@@ -9,5 +9,4 @@ setup(
     license='Apache',
     include_package_data=True,
     package_dir={"_shared_utils": "shared_utils"},
-    install_requires==[],
 )
