@@ -66,6 +66,7 @@ def overlay_transit_to_highways(buffer_feet =
     # Buffer first, then dissolve
     # If dissolve first, then buffer, kernel times out
     highways = highways.assign(
+                highway_length = highways.geometry.length,
                 geometry = highways.geometry.buffer(buffer_feet)   
     )
     
