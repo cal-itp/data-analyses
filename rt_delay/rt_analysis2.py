@@ -206,4 +206,66 @@ class ScheduleInterpolator(TripPositionInterpolator):
                                                      / self.position_gdf.secs_from_last) ## meters/second
         self.cleaned_positions = self.position_gdf ## for position and map methods in TripPositionInterpolator
         self.cleaned_positions = self.cleaned_positions >> arrange(self.time_col)
+        
+class OperatorDayAnalysis:
+    '''New top-level class for rt delay/speed analysis of a single operator on a single day
+    '''
+    def __init__(self, itp_id, analysis_date):
+        '''
+        itp_id: an itp_id (string or integer)
+        analysis date: datetime.date
+        '''
+        self.itp_id = int(itp_id)
+        assert type(analysis_date) == type(dt.date), 'analysis date must be a datetime.date object'
+        self.analysis_date = analysis_date
+        ## get view df/gdfs TODO implement temporary caching with parquets in bucket...
+        self.vehicle_positions = get_vehicle_positions(self.itp_id, self.analysis_date)
+        self.trips = get_trips(self.itp_id, self.analysis_date)
+        self.stop_times = get_stop_times(self.itp_id, self.analysis_date)
+        self.stops = get_stop_times(self.itp_id, self.analysis_date)
+        
+        self.trips_positions_joined = (self.trips 
+                                        >> inner_join(_, (self.vehicle_positions, on= ['trip_id', 'calitp_itp_id'])
+                                       ) ##TODO check info cols here...
+                                       
+        self.trips_positions_joined = gpd.GeoDataFrame(trips_positions_joined,
+                                    geometry=gpd.points_from_xy(trips_positions_joined.vehicle_position_longitude,
+                                                                trips_positions_joined.vehicle_position_latitude),
+                                    crs=WGS84).to_crs(CA_NAD83Albers)
+        self.routelines = shared_utils.geography_utils.make_routes_shapefile([self.itp_id], CA_NAD83Albers)
+        ## end of caching...
+        self.vp_trip_ids = (self.vehicle_positions >> distinct(_.trip_id)).trip_id
+        self.scheduled_trip_rt_coverage = self.vp_trip_ids.size / (self.trips >> distinct(_.trip_id)).trip_id.size
+        ## ^ should refactor
+        self._generate_position_interpolators()
+        
+    def _generate_position_interpolators(self):
+        '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
+        self.position_interpolators = {}
+        for trip_id in vp_trip_ids:
+            st_trip_joined = (self.stops 
+                              >> inner_join(_, self.stop_times, on = ['calitp_itp_id', 'trip_id'])
+                              >> inner_join(_, self.trips, on = ['calitp_itp_id', 'trip_id'])
+                             )
+            trip_positions_joined = self.trips_positions_joined >> filter(_.trip_id == trip_id)
+            self.position_interpolators[trip_id] = {'rt': VehiclePositionsInterpolator(trip_positions_joined, self.routelines)
+                                                   'schedule': ScheduleInterpolator(st_trip_joined, self.routelines)}
+            ## TODO better checking for incomplete trips (either here or in interpolator...)
     
+    def filter_trip_ids(start_time = None, end_time = None, route_ids = None, direction_id = None, direction = None):
+        '''
+        start_time, end_time: string %H:%M, for example '11:00' and '14:00'
+        route_ids: list or pd.Series of route_ids
+        direction_id: 0 or 1
+        direction: string 'north', 'east', 'south', 'west' (experimental)
+        '''
+        assert start_time or end_time or route_ids or direction_id or direction, 'must supply at least 1 argument to filter'
+        assert not start_time or type(dt.datetime.strptime(start_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
+        assert not end_time or type(dt.datetime.strptime(end_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
+        assert not route_ids or type(route_ids) == list or type(route_ids) == 
+
+        view = self.trips_positions_joined.copy()
+        if start_time:
+            view = view.filter(_.vehicle_timestamp.apply(lambda x: x.strftime('%H:%M')))
+        
+                                       

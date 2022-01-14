@@ -85,6 +85,9 @@ def get_vehicle_postions(itp_id, analysis_date):
     
     Interim function for getting complete vehicle positions data for a single operator on a single date of interest.
     To be replaced as RT views are implemented...
+    
+    Currently drops positions for day after analysis date after 2AM, temporary fix to balance capturing trips crossing
+    midnight with avoiding duplicates...
     '''
     
     
@@ -93,8 +96,9 @@ FROM `cal-itp-data-infra.gtfs_rt.vehicle_positions`
 WHERE calitp_itp_id = {itp_id}
 """).calitp_url_number
     
+    next_date = analysis_date + dt.timedelta(days = 1)
     date_str = analysis_date.strftime('%Y-%m-%d')
-    next_str = (analysis_date + dt.timedelta(days = 1)).strftime('%Y-%m-%d')
+    next_str = next_date.strftime('%Y-%m-%d')
     where = ''
     ##utc, must bracket 2 days for 1 day pacific...
     for url_number in url_numbers:
@@ -112,6 +116,8 @@ ORDER BY header_timestamp""") ## where[3:] removes first OR, creating a valid SQ
     df.vehicle_timestamp = df.vehicle_timestamp.apply(convert_ts)
     df.header_timestamp = df.header_timestamp.apply(convert_ts)
     
+    next_day_cutoff = dt.datetime.combine(next_date, dt.time(hour=2))
+    df = df >> filter(_.vehicle_timestamp < next_day_cutoff)
     assert df.vehicle_timestamp.min() < dt.datetime.combine(analysis_date, dt.time(0)), 'rt data starts after analysis date'
     assert dt.datetime.combine(analysis_date, dt.time(hour=23, minute=59)) < df.vehicle_timestamp.max(), 'rt data ends early on analysis date'
     
@@ -145,3 +151,60 @@ def get_trips(itp_id, analysis_date):
     )
     
     return trips
+
+def get_stop_times(itp_id, analysis_date):
+    '''
+        itp_id: an itp_id (string or integer)
+    analysis_date: datetime.date
+    
+    Interim function for getting complete stop times data for a single operator on a single date of interest.
+    To be replaced as RT views are implemented...
+    '''
+    next_date = analysis_date + dt.timedelta(days = 1)
+    date_str = analysis_date.strftime('%Y-%m-%d')
+    next_str = next_date.strftime('%Y-%m-%d')
+    min_date, max_date = (date_str, next_str)
+
+    trips_query = (tbl.views.gtfs_schedule_fact_daily_trips()
+        >> filter(_.calitp_extracted_at <= min_date, _.calitp_deleted_at > max_date)
+        >> filter(_.calitp_itp_id == itp_id)
+        >> filter(_.service_date == date_str)
+        >> filter(_.calitp_extracted_at == _.calitp_extracted_at.max())
+        >> filter(_.is_in_service == True)
+        >> select(_.trip_key, _.service_date)
+        )
+    trips_ix_query = (trips_query
+        >> inner_join(_, tbl.views.gtfs_schedule_index_feed_trip_stops(), on = 'trip_key')
+        )
+    st_query = (tbl.views.gtfs_schedule_dim_stop_times()
+        >> filter(_.calitp_itp_id == itp_id)
+        )
+    st = (trips_ix_query
+        >> inner_join(_, st_query, on = 'stop_time_key')
+        >> mutate(stop_sequence = _.stop_sequence.astype(int)) ## in SQL!
+        >> arrange(_.stop_sequence)
+        >> collect()
+        )
+    return st
+
+def get_stops(itp_id, analysis_date):
+    '''
+    itp_id: an itp_id (string or integer)
+    analysis_date: datetime.date
+    
+    Interim function for getting complete stops data for a single operator on a single date of interest.
+    To be replaced as RT views are implemented...
+    '''
+    stops = (tbl.views.gtfs_schedule_dim_stops()
+     >> filter(_.calitp_itp_id == samtrans_itp_id)
+     >> distinct(_.calitp_itp_id, _.calitp_url_number, _.stop_id,
+              _.stop_lat, _.stop_lon, _.stop_name, _.stop_key)
+     >> inner_join(_, sam_trips_ix_query >> distinct(_.stop_key), on = 'stop_key')
+     >> collect()
+     >> distinct(_.stop_id, _keep_all=True) ## should be ok to drop duplicates, but must use stop_id for future joins...
+    )
+
+    stops = gpd.GeoDataFrame(stops, geometry=gpd.points_from_xy(stops.stop_lon, stops.stop_lat),
+                            crs='EPSG:4326').to_crs(shared_utils.geography_utils.CA_NAD83Albers)
+    return stops
+
