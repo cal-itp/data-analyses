@@ -36,6 +36,8 @@ class TripPositionInterpolator:
         assert (shape_gdf.calitp_itp_id == self.calitp_itp_id).all(), "position_gdf and shape_gdf itp_id should match"
         self.position_gdf = position_gdf.drop(columns = trip_info_cols)
         self._attach_shape(shape_gdf)
+        self.median_time = self.position_gdf[self.time_col].median()
+        self.time_of_day = categorize_time_of_day(self.median_time)
         
     def _attach_shape(self, shape_gdf):
         self.shape = (shape_gdf
@@ -128,7 +130,7 @@ class TripPositionInterpolator:
             fig_width = 1000, fig_height = 700,
             zoom = 13,
             centroid = [centroid.y, centroid.x],
-            title=f"Trip Speed Map (Route {self.route_id}, {self.direction}, ** Peak)", ##TODO time classification, remove hardcode
+            title=f"Trip Speed Map (Route {self.route_id}, {self.direction}, {self.time_of_day})",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
                 "fillOpacity": 0.6,
@@ -241,6 +243,15 @@ class OperatorDayAnalysis:
         self.routelines = get_routelines(self.itp_id)
         assert type(self.routelines) == type(gpd.GeoDataFrame()) and not self.routelines.empty, 'routelines must not be empty'
         ## end of caching...
+        self.trs = self.trips >> select(_.shape_id, _.trip_id)
+        self.trs = self.trs >> inner_join(_, self.stop_times >> select(_.trip_id, _.stop_id), on = 'trip_id')
+        self.trs = self.trs >> distinct(_.stop_id, _.shape_id)
+        self.trs = self.stops >> select(_.stop_id, _.stop_name, _.geometry) >> inner_join(_, self.trs, on = 'stop_id')
+        print(f'projecting')
+        self.trs['shape_meters'] = (self.trs.apply(lambda x:
+                (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
+         axis = 1))
+        print(f'done')
         self.vp_trip_ids = (self.vehicle_positions >> distinct(_.trip_id)).trip_id
         # self.vp_trip_keys = (self.vehicle_positions >> distinct(_.trip_key)).trip_key ##TODO switch
         self.scheduled_trip_rt_coverage = self.vp_trip_ids.size / (self.trips >> distinct(_.trip_id)).trip_id.size
@@ -278,33 +289,40 @@ class OperatorDayAnalysis:
     def _generate_stop_delay_view(self):
         
         trips = self.trips >> select(_.trip_id, _.route_id, _.direction_id, _.shape_id)
+        trips = trips >> filter(_.trip_id.isin(list(self.position_interpolators.keys())))
         st = self.stop_times >> select(_.trip_key, _.trip_id, _.stop_id, _.stop_sequence, _.arrival_time)
-        delays = self.stops >> select(_.stop_id, _.stop_name, _.geometry) >> inner_join(_, st, on = 'stop_id')
-        delays = delays >> inner_join(_, trips, on = 'trip_id')
-        delays['shape_meters'] = (delays.apply(lambda x:
-                                (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
-                         axis = 1))
-        delays = delays >> filter(_.trip_id.isin(list(self.position_interpolators.keys())))
+        delays = self.trs >> inner_join(_, st, on = 'stop_id')
+        delays = delays >> inner_join(_, trips, on = ['trip_id', 'shape_id'])
+        delays = delays >> distinct(_.trip_id, _.stop_id, _keep_all=True) ## TODO drop duplicates elsewhere?
+        # print('projecting...')
+        # delays['shape_meters'] = (delays.apply(lambda x:
+        #                         (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
+        #                  axis = 1))
+        # print('done...')
         _delays = gpd.GeoDataFrame()
         for trip_id in delays.trip_id.unique():
-            # try:
-            _delay = delays >> filter(_.trip_id == trip_id)
-            _delay['actual_time'] = _delay.apply(lambda x: 
-                            self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
-                            axis = 1)
-            _delay = _delay.dropna(subset=['actual_time'])
-            _delay['arrival_time'] = _delay.apply(lambda x:
-                                dt.datetime.combine(x.actual_time.date(),
-                                                    dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time()),
-                                                    axis = 1) ## format scheduled arrival times
-            _delay = _delay >> filter(_.arrival_time.apply(lambda x: x.date()) == _.actual_time.iloc[0].date())
-            _delay['arrival_time'] = _delay.arrival_time.astype('datetime64')
-            return _delay
-            _delay['delay'] = _delay.actual_time - delays.arrival_time
-            _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
-            _delays = _delays.append(_delay)
-            # except:
-            #     print(f'could not generate delays for trip {trip_id}')
+            try:
+                _delay = delays >> filter(_.trip_id == trip_id)
+                _delay['actual_time'] = _delay.apply(lambda x: 
+                                self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
+                                axis = 1)
+                _delay = _delay.dropna(subset=['actual_time'])
+                _delay['arrival_time'] = _delay.apply(lambda x:
+                                    dt.datetime.combine(x.actual_time.date(),
+                                                        dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time()),
+                                                        axis = 1) ## format scheduled arrival times
+                _delay = _delay >> filter(_.arrival_time.apply(lambda x: x.date()) == _.actual_time.iloc[0].date())
+                _delay['arrival_time'] = _delay.arrival_time.astype('datetime64')
+                self.debug_dict[f'{trip_id}_times'] = _delay
+                _delay['delay'] = _delay.actual_time - _delay.arrival_time
+                _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
+                _delays = _delays.append(_delay)
+                self.debug_dict[f'{trip_id}_delay'] = _delay
+                # return
+            except Exception as e:
+                print(f'could not generate delays for trip {trip_id}')
+                print(e)
+                # return
         self.stop_delay_view = _delays
         return
     
@@ -333,7 +351,7 @@ class OperatorDayAnalysis:
     def reset_filter(self):
         self.filter = None
         
-    def map_segment_speeds(self, how = 'high_delay', segments = 'stops', trip_keys = None): ##TODO split out segment speed view?
+    def map_segment_speeds(self, how = 'low_speeds', segments = 'stops', trip_keys = None): ##TODO split out segment speed view?
 
         if  type(trip_keys) != type(None): ## trip_keys could potentially be a list or pd.Series...
             gdf = self.stop_delay_view.copy() >> filter(_.trip_key.isin(trip_keys))
@@ -360,9 +378,13 @@ class OperatorDayAnalysis:
                              >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last) 
                              >> ungroup()
                             )
+                if stop_speeds.empty:
+                    print(f'{shape_id}_{direction_id}_st_spd empty!')
+                    continue
+                self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
                 stop_speeds.geometry = stop_speeds.apply(
                     lambda x: shapely.ops.substring(
-                                self.trip_vehicle_positions[x.trip_key].shape.geometry.iloc[0],
+                                self.position_interpolators[x.trip_id]['rt'].shape.geometry.iloc[0],
                                 x.last_loc,
                                 x.shape_meters),
                                                 axis = 1)
@@ -411,7 +433,7 @@ class OperatorDayAnalysis:
             "speed_mph": "Speed (miles per hour)",
             "shape_meters": "Distance along route (meters)",
             "route_id": "Route",
-            "direction": "Direction",
+            # "direction": "Direction",
             "shape_id": "Shape ID",
             "direction_id": "Direction ID",
             "stop_id": "Next Stop ID",

@@ -343,3 +343,17 @@ def get_routelines(itp_id):
         export_path = GCS_FILE_PATH+'cached_views/'
         shared_utils.utils.geoparquet_gcs_export(routelines, export_path, f'{itp_id}_routelines')
         return routelines
+    
+def categorize_time_of_day(dt):
+    if dt.hour < 4:
+        return('Owl')
+    elif dt.hour < 7:
+        return('Early AM')
+    elif dt.hour < 10:
+        return('AM Peak')
+    elif dt.hour < 15:
+        return('Midday')
+    elif dt.hour < 20:
+        return('PM Peak')
+    else:
+        return('Evening')
