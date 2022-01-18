@@ -49,7 +49,6 @@ def create_local_parquets():
         >> collect()
     )
     route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
-
     
     agencies = (
         tbl.gtfs_schedule.agency()
