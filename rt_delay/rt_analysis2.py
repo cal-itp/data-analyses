@@ -257,7 +257,11 @@ class OperatorDayAnalysis:
         self.scheduled_trip_rt_coverage = self.vp_trip_ids.size / (self.trips >> distinct(_.trip_id)).trip_id.size
         ## ^ should refactor
         self._generate_position_interpolators() ## comment out for first test
-        # self._generate_stop_delay_view()
+        self.rt_trips = self.trips.copy() >> filter(_.trip_id.isin(self.position_interpolators.keys()))
+        self.rt_trips['median_time'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].median_time.time(), axis = 1)
+        self.rt_trips['direction'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].direction, axis = 1)
+        self._generate_stop_delay_view()
+        self.filter = None
         
     def _generate_position_interpolators(self):
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
@@ -302,7 +306,7 @@ class OperatorDayAnalysis:
         _delays = gpd.GeoDataFrame()
         for trip_id in delays.trip_id.unique():
             try:
-                _delay = delays >> filter(_.trip_id == trip_id)
+                _delay = delays.copy() >> filter(_.trip_id == trip_id)
                 _delay['actual_time'] = _delay.apply(lambda x: 
                                 self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
                                 axis = 1)
@@ -331,7 +335,7 @@ class OperatorDayAnalysis:
         start_time, end_time: string %H:%M, for example '11:00' and '14:00'
         route_ids: list or pd.Series of route_ids
         direction_id: 0 or 1
-        direction: string 'north', 'east', 'south', 'west' (experimental)
+        direction: string 'Northbound', 'Eastbound', 'Southbound', 'Westbound' (experimental)
         '''
         assert start_time or end_time or route_ids or direction_id or direction, 'must supply at least 1 argument to filter'
         assert not start_time or type(dt.datetime.strptime(start_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
@@ -339,8 +343,14 @@ class OperatorDayAnalysis:
         assert not route_ids or type(route_ids) == list or type(route_ids) == type(pd.Series())
 
         self.filter = {}
-        self.filter['start_time'] = start_time
-        self.filter['end_time'] = end_time
+        if start_time:
+            self.filter['start_time'] = dt.datetime.strptime(start_time, '%H:%M').time()
+        else:
+            self.filter['start_time'] = None
+        if end_time:
+            self.filter['end_time'] = dt.datetime.strptime(end_time, '%H:%M').time()
+        else:
+            self.filter['end_time'] = None
         self.filter['route_ids'] = route_ids
         self.filter['direction_id'] = direction_id
         self.filter['direction'] = direction
@@ -350,20 +360,32 @@ class OperatorDayAnalysis:
             
     def reset_filter(self):
         self.filter = None
-        
-    def map_segment_speeds(self, how = 'low_speeds', segments = 'stops', trip_keys = None): ##TODO split out segment speed view?
-
-        if  type(trip_keys) != type(None): ## trip_keys could potentially be a list or pd.Series...
-            gdf = self.stop_delay_view.copy() >> filter(_.trip_key.isin(trip_keys))
+    
+    def _filter(self, df):
+        '''Filters a df (containing trip_id) on trip_id based on any set filter.
+        '''
+        if self.filter == None:
+            return df
         else:
-            gdf = self.stop_delay_view.copy()
+            trips = self.rt_trips.copy()
+            print(f'view filter: {self.filter}')
+        if self.filter['start_time']:
+            trips = trips >> filter(_.median_time > self.filter['start_time'])
+        if self.filter['end_time']:
+            trips = trips >> filter(_.median_time < self.filter['end_time'])
+        if self.filter['route_ids']:
+            trips = trips >> filter(_.route_id.isin(self.filter['route_ids']))
+        if self.filter['direction_id']:
+            trips = trips >> filter(_.direction_id == self.filter['direction_id'])
+        if self.filter['direction']:
+            trips = trips >> filter(_.direction == self.filter['direction'])
+        return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
         
-        assert how in ['low_speeds', 'average']
+    def segment_speed_map(self, segments = 'stops', how = 'average', colorscale = None, size = [900, 550]):
+        
         assert segments in ['stops', 'detailed']
         
-        speed_calculators = {'low_speeds': _.speed_mph.quantile(.2), ## 20th percentile speed
-                            'average': _.speed_mph.mean()} ## average speed
-                    
+        gdf = self._filter(self.stop_delay_view)
         all_stop_speeds = gpd.GeoDataFrame()
         for shape_id in gdf.shape_id.unique():
             for direction_id in gdf.direction_id.unique():
@@ -379,7 +401,7 @@ class OperatorDayAnalysis:
                              >> ungroup()
                             )
                 if stop_speeds.empty:
-                    print(f'{shape_id}_{direction_id}_st_spd empty!')
+                    # print(f'{shape_id}_{direction_id}_st_spd empty!')
                     continue
                 self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
                 stop_speeds.geometry = stop_speeds.apply(
@@ -394,8 +416,9 @@ class OperatorDayAnalysis:
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> group_by(_.stop_sequence)
-                         >> mutate(speed_mph = speed_calculators[how])
-                         >> mutate(speed_mph = _.speed_mph.round(1))
+                         >> mutate(avg_mph = _.speed_mph.mean().round(1),
+                                  _20p_mph = _.speed_mph.quantile(.2).round(1))
+                         # >> mutate(speed_mph = _.speed_mph.round(1))
                          >> mutate(shape_meters = _.shape_meters.round(0))
                          >> distinct(_.stop_sequence, _keep_all=True)
                          >> ungroup()
@@ -407,22 +430,30 @@ class OperatorDayAnalysis:
                     continue
 
                 print(stop_speeds.shape_id.iloc[0], stop_speeds.shape)
-                if stop_speeds.speed_mph.max() > 70:
+                if stop_speeds.avg_mph.max() > 70:
                     print(f'speed above 70 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                    stop_speeds = stop_speeds >> filter(_.speed_mph < 70)
+                    stop_speeds = stop_speeds >> filter(_.avg_mph < 70)
                 all_stop_speeds = all_stop_speeds.append(stop_speeds)
 
-        self.segment_speed_view = all_stop_speeds
-        return self._generate_segment_map(how = how)
+        self.stop_segment_speed_view = all_stop_speeds
+        return self._show_speed_map(how = how, colorscale = colorscale, size = size)
     
-    def _generate_segment_map(self, how, colorscale = None, size = [900, 550]):
+    def _show_speed_map(self, how, colorscale, size):
         
+        gdf = self.stop_segment_speed_view
+        
+        how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
 
-        gdf = self.segment_speed_view >> select(-_.service_date)
+        gdf = gdf >> select(-_.service_date)
         gdf.geometry = gdf.set_crs(CA_NAD83Albers).buffer(25)
         gdf = gdf.to_crs(WGS84)
         centroid = gdf.dissolve().centroid
+        
+        if hasattr(self, 'agency_name'):
+            name = self.agency_name
+        else:
+            name = self.itp_id
 
         if not colorscale:
             colorscale = branca.colormap.step.RdYlGn_10.scale(vmin=gdf.speed_mph.min(), 
@@ -430,7 +461,7 @@ class OperatorDayAnalysis:
             colorscale.caption = "Speed (miles per hour)"
 
         popup_dict = {
-            "speed_mph": "Speed (miles per hour)",
+            how_speed_col[how]: "Speed (miles per hour)",
             "shape_meters": "Distance along route (meters)",
             "route_id": "Route",
             # "direction": "Direction",
@@ -449,7 +480,7 @@ class OperatorDayAnalysis:
             fig_width = size[0], fig_height = size[1],
             zoom = 13,
             centroid = [centroid.y, centroid.x],
-            title=f"Long Beach Transit {how_formatted[how]} Bus Speeds Between Stops, ** Peak",
+            title=f"{name} {how_formatted[how]} Bus Speeds Between Stops",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
                 "fillOpacity": 0.6,
@@ -457,3 +488,18 @@ class OperatorDayAnalysis:
         )
 
         return g  
+    
+    def route_coverage_summary(self):
+        
+        if hasattr(self, 'stop_delay_view'):
+            summary = (self.stop_delay_view
+             >> group_by(_.trip_key, _.trip_id, _.shape_id, _.direction_id)
+             >> summarize(min_meters = _.shape_meters.min(),
+                         min_stop = _.stop_sequence.min(),
+                         max_meters = _.shape_meters.max(),
+                         max_stop = _.stop_sequence.max())
+            )
+            return summary
+        else:
+            self._generate_stop_delay_view()
+            return self.route_coverage_summary()
