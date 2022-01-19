@@ -79,8 +79,8 @@ class TripPositionInterpolator:
 
             return est_dt
         except KeyError:
-            print(f'insufficient bounding points for trip {self.trip_key}, location {desired_position}', end=': ')
-            print(f'start/end of route?')
+            # print(f'insufficient bounding points for trip {self.trip_key}, location {desired_position}', end=': ')
+            # print(f'start/end of route?')
             return None
         
     def detailed_speed_map(self):
@@ -160,7 +160,7 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
         self.progressing_positions = self.position_gdf >> filter(_.progressed)
         ## check if positions have progressed from immediate previous point, but not previous point of forwards progression
         while not self.progressing_positions.shape_meters.is_monotonic:
-            print(f'check location data for trip {self.trip_key}')
+            print(f'check location data for trip {self.trip_id}')
             self.progressing_positions = self._shift_calculate(self.progressing_positions)
             self.progressing_positions = self.progressing_positions >> filter(_.progressed)
         self.cleaned_positions = self.progressing_positions ## for position and map methods in TripPositionInterpolator
@@ -169,10 +169,9 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
     
     def _shift_calculate(self, vehicle_positions):
         
-        print('sc_called')
-        if hasattr(self, "progressing_positions"):
-            print(self.progressing_positions.shape)
-            self.debug_dict[self.progressing_positions.shape[0]] = self.progressing_positions.copy()
+        # if hasattr(self, "progressing_positions"):
+        #     print(self.progressing_positions.shape)
+        #     self.debug_dict[self.progressing_positions.shape[0]] = self.progressing_positions.copy()
         
         vehicle_positions = vehicle_positions >> arrange(self.time_col) ## unnecessary?
         vehicle_positions['last_time'] = vehicle_positions[self.time_col].shift(1)
@@ -262,13 +261,14 @@ class OperatorDayAnalysis:
         self.rt_trips['direction'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].direction, axis = 1)
         self._generate_stop_delay_view()
         self.filter = None
+        self.filter_formatted = None
         
     def _generate_position_interpolators(self):
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
         self.position_interpolators = {}
         # for trip_id in self.vp_trip_ids[:5]: ##small test
         for trip_id in self.vp_trip_ids: ##big test
-            print(trip_id)
+            # print(trip_id)
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
             self.debug_dict[f'{trip_id}_trip'] = trip
             st_trip_joined = (trip
@@ -298,11 +298,6 @@ class OperatorDayAnalysis:
         delays = self.trs >> inner_join(_, st, on = 'stop_id')
         delays = delays >> inner_join(_, trips, on = ['trip_id', 'shape_id'])
         delays = delays >> distinct(_.trip_id, _.stop_id, _keep_all=True) ## TODO drop duplicates elsewhere?
-        # print('projecting...')
-        # delays['shape_meters'] = (delays.apply(lambda x:
-        #                         (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
-        #                  axis = 1))
-        # print('done...')
         _delays = gpd.GeoDataFrame()
         for trip_id in delays.trip_id.unique():
             try:
@@ -427,9 +422,9 @@ class OperatorDayAnalysis:
                         )
                 except Exception as e:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
+                    print(e)
                     continue
 
-                print(stop_speeds.shape_id.iloc[0], stop_speeds.shape)
                 if stop_speeds.avg_mph.max() > 70:
                     print(f'speed above 70 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_.avg_mph < 70)
@@ -480,7 +475,7 @@ class OperatorDayAnalysis:
             fig_width = size[0], fig_height = size[1],
             zoom = 13,
             centroid = [centroid.y, centroid.x],
-            title=f"{name} {how_formatted[how]} Bus Speeds Between Stops",
+            title=f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
                 "fillOpacity": 0.6,
