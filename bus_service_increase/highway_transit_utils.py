@@ -39,8 +39,57 @@ def clean_highways():
                                          "state_highway_network")
     
 
-def overlay_transit_to_highways(buffer_feet = 
-                                shared_utils.geography_utils.FEET_PER_MI):
+def process_transit_routes():
+    ## Clean transit routes
+    df = (catalog.transit_routes.read()
+          .to_crs(shared_utils.geography_utils.CA_StatePlane))
+    
+    # Transit routes included some extra info about 
+    # route_long_name, route_short_name, agency_id
+    # Get it down to unique shape_id
+    subset_cols = ["itp_id", "shape_id", "route_id", "geometry"]
+    df = (df[subset_cols]
+          .drop_duplicates()
+          .reset_index(drop=True)
+          .assign(route_length = df.geometry.length)
+         )
+    
+    df = df.assign(
+        total_routes = df.groupby("itp_id")["route_id"].transform("count")
+    )
+    
+    return df
+
+
+def process_highways(buffer_feet = shared_utils.geography_utils.FEET_PER_MI):
+    df = (catalog.state_highway_network.read()
+          .to_crs(shared_utils.geography_utils.CA_StatePlane))
+    
+    # Get dummies for direction
+    # Can make data wide instead of long
+    direction_dummies = pd.get_dummies(df.Direction, dtype=int)
+    df = pd.concat([df.drop(columns = "Direction"), 
+                    direction_dummies], axis=1)
+
+    group_cols = ['Route', 'County', 'District', 'RouteType']
+    direction_cols = ["NB", "SB", "EB", "WB"]
+    
+    for c in direction_cols:
+        df[c] = df.groupby(group_cols)[c].transform('max')
+    
+    # Buffer first, then dissolve
+    # If dissolve first, then buffer, kernel times out
+    df = df.assign(
+        highway_length = df.geometry.length,
+        geometry = df.geometry.buffer(buffer_feet)   
+    )
+    
+    df = df.dissolve(by=group_cols + direction_cols).reset_index()
+    
+    return df
+    
+    
+def overlay_transit_to_highways():
     """
     Function to find areas of intersection between
     highways (default of 1 mile buffer) and transit routes.
@@ -48,43 +97,10 @@ def overlay_transit_to_highways(buffer_feet =
     Returns: geopandas.GeoDataFrame, with geometry column reflecting
     the areas of intersection.
     """
-    highways = (catalog.state_highway_network.read()
-                .to_crs(shared_utils.geography_utils.CA_StatePlane))
     
-    # Get dummies for direction
-    # Can make data wide instead of long
-    direction_dummies = pd.get_dummies(highways.Direction, dtype=int)
-    highways = pd.concat([highways.drop(columns = "Direction"), 
-                          direction_dummies], axis=1)
-
-
-    group_cols = ['Route', 'County', 'District', 'RouteType']
-    direction_cols = ["NB", "SB", "EB", "WB"]
-    for c in direction_cols:
-        highways[c] = highways.groupby(group_cols)[c].transform('max')
-    
-    # Buffer first, then dissolve
-    # If dissolve first, then buffer, kernel times out
-    highways = highways.assign(
-                highway_length = highways.geometry.length,
-                geometry = highways.geometry.buffer(buffer_feet)   
-    )
-    
-    highways = highways.dissolve(by=group_cols + direction_cols).reset_index()
-    
-    ## Clean transit routes
-    transit_routes = (catalog.transit_routes.read()
-                      .to_crs(shared_utils.geography_utils.CA_StatePlane))
-    
-    # Transit routes included some extra info about 
-    # route_long_name, route_short_name, agency_id
-    # Get it down to unique shape_id
-    subset_cols = ["itp_id", "shape_id", "route_id", "geometry"]
-    transit_routes = (transit_routes[subset_cols]
-                      .drop_duplicates()
-                      .reset_index(drop=True)
-                      .assign(route_length = transit_routes.geometry.length)
-                     )
+    highways = process_highways(buffer_feet = 
+                                shared_utils.geography_utils.FEET_PER_MI)
+    transit_routes = process_transit_routes()
     
     # Overlay
     # Note: an overlay based on intersection changes the geometry column
