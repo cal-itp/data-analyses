@@ -1,0 +1,55 @@
+metadata:
+  version: 1
+sources:
+        
+#     black_cat_5311data:
+#         driver: excel
+#         description: Description
+#         args:
+#             urlpath: gs://calitp-analytics-data/data-analyses/5311 /Grant_Projects.xlsx
+    
+    gtfs_status:
+        driver: csv
+        description: Description
+        args:
+            urlpath: gs://calitp-analytics-data/data-analyses/5311 /Fixed_Route-CTDist-RT_status.csv
+        
+#     agency_information:
+#         driver: excel
+#         description: Description
+#         args:
+#             urlpath: gs://calitp-analytics-data/data-analyses/5311 /2020_Agency_Information.xlsx
+    
+#     agency_revenue_sources:
+#         driver: excel
+#         description: Description
+#         args:
+#             urlpath: gs://calitp-analytics-data/data-analyses/5311 /2020_revenue_sources.xlsx
+    
+#     vehicle_count_age:
+#         driver: excel
+#         description: Description
+#         args:
+#           urlpath: gs://calitp-analytics-data/data-analyses/5311 /2020-Vehicles_1.xlsm
+    
+
+
+          
+    
+         
+         
+         
+         
+
+
+         
+         
+         
+         
+         
+         
+          
+          
+          
+          
+          
