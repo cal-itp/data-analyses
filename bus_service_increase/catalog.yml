@@ -14,3 +14,15 @@ sources:
     description: Number of daily bus arrivals by tract
     args:
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_stop_times_by_tract.parquet
+  transit_routes:
+    driver: geoparquet
+    description: All GTFS schedule transit routes.
+    args:
+    # source: traffic_ops/export_shapefiles.py
+      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/routes_assembled.parquet
+  state_highway_network:
+    driver: geoparquet
+    description: State highway network.
+    args:
+    # source: bus_service_increase/highway_transit_utils.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/state_highway_network.parquet
