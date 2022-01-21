@@ -257,7 +257,7 @@ def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height,
                          )
         layer.add_to(m)
     
-    folium.LayerControl().add_to(m)
+    folium.LayerControl('topright', collapsed=False).add_to(m)
     
     # Now, attach everything to Figure    
     fig.add_child(m)
