@@ -26,13 +26,56 @@ REGION_CENTROIDS = {
     "CA": [[35.8, -119.4], 6],
 }
 
+#------------------------------------------------------------------------#
+## Folium
+#------------------------------------------------------------------------#
+# Move popup and tooltip functions out, since styling is similar
+# Pass in make_folium_choropleth_map() and make_folium_multiple_layers_map()
+TOOLTIP_KWARGS = {
+    "min_width": 50,
+    "max_width": 100,
+    "font_size": "12px",
+}
+
+def format_folium_popup(popup_dict):
+    popup = GeoJsonPopup(
+        fields=list(popup_dict.keys()),
+        aliases=list(popup_dict.values()),
+        #localize=True,
+        labels=True,
+        style=f"background-color: light_gray;",
+        min_width = TOOLTIP_KWARGS["min_width"],
+        max_width = TOOLTIP_KWARGS["max_width"],
+    )
+    return popup
+
+def format_folium_tooltip(tooltip_dict):
+    tooltip = GeoJsonTooltip(
+        fields=list(tooltip_dict.keys()),
+        aliases=list(tooltip_dict.values()),
+        # localize = True sets the commas for numbers, but zipcode should be displayed as string
+        #localize=True,
+        sticky=False,
+        labels=True,
+        style=f"""
+            background-color: "gray";
+            border: 0px #FFFFFF;
+            border-radius: 0px;
+            box-shadow: 0px;
+            font-size: {TOOLTIP_KWARGS["font_size"]};
+        """,
+        min_width=TOOLTIP_KWARGS["min_width"],
+        max_width=TOOLTIP_KWARGS["max_width"],
+    )
+    return tooltip
+
 
 def make_folium_choropleth_map(df, plot_col, 
                                popup_dict, tooltip_dict, colorscale, 
                                fig_width, fig_height, 
                                zoom=REGION_CENTROIDS["CA"][1], 
                                centroid = REGION_CENTROIDS["CA"][0], 
-                               title="Chart Title", **kwargs,
+                               title="Chart Title", legend_name = "Legend", **kwargs,
                               ):
     '''
     Parameters:
@@ -49,6 +92,7 @@ def make_folium_choropleth_map(df, plot_col,
     zoom: int. 
     centroid: list, of the format [latitude, longitude]
     title: str.
+    legend_name: str
     **kwargs: any other keyword arguments that can passed into existing folium functions
             that are used in this function
 
@@ -79,44 +123,13 @@ def make_folium_choropleth_map(df, plot_col,
     
     fig.get_root().html.add_child(folium.Element(title_html))
         
-    TOOLTIP_KWARGS = {
-        "min_width": 50,
-            "max_width": 100,
-        "font_size": "12px",
-    }
-    
-    popup = GeoJsonPopup(
-        fields=list(popup_dict.keys()),
-        aliases=list(popup_dict.values()),
-        localize=True,
-        labels=True,
-        style=f"background-color: light_gray;",
-        min_width = TOOLTIP_KWARGS["min_width"],
-        max_width = TOOLTIP_KWARGS["max_width"],
-    )
-
-    tooltip = GeoJsonTooltip(
-        fields=list(tooltip_dict.keys()),
-        aliases=list(tooltip_dict.values()),
-        # localize = True sets the commas for numbers, but zipcode should be displayed as string
-        #localize=True,
-        sticky=False,
-        labels=True,
-        style=f"""
-            background-color: "gray";
-            border: 0px #FFFFFF;
-            border-radius: 0px;
-            box-shadow: 0px;
-            font-size: {TOOLTIP_KWARGS["font_size"]};
-        """,
-        min_width=TOOLTIP_KWARGS["min_width"],
-        max_width=TOOLTIP_KWARGS["max_width"],
-    )
+    popup = format_folium_popup(popup_dict)
+    tooltip = format_folium_tooltip(tooltip_dict)
 
     #https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
     geojson_args = [k for k, v in inspect.signature(folium.GeoJson).parameters.items()]
     geojson_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in geojson_args}
-    
+
     g = folium.GeoJson(
         df,
         style_function=lambda x: {
@@ -129,10 +142,11 @@ def make_folium_choropleth_map(df, plot_col,
         },
         tooltip=tooltip,
         popup=popup,
+        name = {legend_name},
         **geojson_dict
     ).add_to(m)
     
-    colorscale.caption = "Legend"
+    colorscale.caption = f"{legend_name}"
     colorscale.add_to(m)
     
     fig.add_child(m)
@@ -152,14 +166,18 @@ def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height,
     LAYERS_DICT: dict. Can contain as many other polygon layers as needed.
     
         Must contain the following key-value pairs
+        key: name of the layer
+        value: dict with relevant info for plotting the layer
+                df, plot_col, popup_dict, tooltip_dict, colorscale
+                
         LAYERS_DICT = {
-            1: {"df": geopandas.GeoDataFrame,
+            "layer_name1": {"df": geopandas.GeoDataFrame,
                 "plot_col": str,
                 "popup_dict": dict,
                 "tooltip_dict": dict,
                 "colorscale": branca.colormap element
             },
-            2: {"df": geopandas.GeoDataFrame,
+            "layer_name2": {"df": geopandas.GeoDataFrame,
                 "plot_col": str,
                 "popup_dict": dict,
                 "tooltip_dict": dict,
@@ -197,45 +215,15 @@ def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height,
     
     # Define function that can theoretically pop out as many polygon layers as needed
     def get_layer(df, plot_col, popup_dict, tooltip_dict, 
-              colorscale, **kwargs):    
-        TOOLTIP_KWARGS = {
-                "min_width": 50,
-                "max_width": 100,
-                "font_size": "12px",
-        }
+              colorscale, layer_name, **kwargs):    
 
-        popup = GeoJsonPopup(
-            fields=list(popup_dict.keys()),
-            aliases=list(popup_dict.values()),
-            localize=True,
-            labels=True,
-            style=f"background-color: light_gray;",
-            min_width = TOOLTIP_KWARGS["min_width"],
-            max_width = TOOLTIP_KWARGS["max_width"],
-        )
-
-        tooltip = GeoJsonTooltip(
-            fields=list(tooltip_dict.keys()),
-            aliases=list(tooltip_dict.values()),
-            # localize = True sets the commas for numbers, but zipcode should be displayed as string
-            #localize=True,
-            sticky=False,
-            labels=True,
-            style=f"""
-                background-color: "gray";
-                border: 0px #FFFFFF;
-                border-radius: 0px;
-                box-shadow: 0px;
-                font-size: {TOOLTIP_KWARGS["font_size"]};
-            """,
-            min_width=TOOLTIP_KWARGS["min_width"],
-            max_width=TOOLTIP_KWARGS["max_width"],
-        )
+        popup = format_folium_popup(popup_dict)
+        tooltip = format_folium_tooltip(tooltip_dict)
 
         #https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
         geojson_args = [k for k, v in inspect.signature(folium.GeoJson).parameters.items()]
         geojson_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in geojson_args}
-
+        
         g = folium.GeoJson(
             df,
             style_function=lambda x: {
@@ -248,6 +236,7 @@ def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height,
             },
             tooltip=tooltip,
             popup=popup,
+            name = layer_name,
             **geojson_dict
         )
 
@@ -257,22 +246,28 @@ def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height,
     # Unpack the dictionary associated with each layer,
     # Then attach that layer to the Map element
     for key, nested_dict in LAYERS_DICT.items():
-        # key: layer number
+        # key: layer name or layer number
         # value: dictionary of all the components associated with folium layer
         d = nested_dict
-        layer = get_layer(d["df"], d["plot_col"], 
-                          d["popup_dict"], 
-                          d["tooltip_dict"], 
-                          d["colorscale"])
+        layer = get_layer(df = d["df"], plot_col = d["plot_col"], 
+                          popup_dict = d["popup_dict"], 
+                          tooltip_dict = d["tooltip_dict"], 
+                          colorscale = d["colorscale"], 
+                          layer_name = key,
+                         )
         layer.add_to(m)
-        
+    
+    folium.LayerControl().add_to(m)
+    
     # Now, attach everything to Figure    
     fig.add_child(m)
     
     return fig
     
 
-
+#------------------------------------------------------------------------#
+## ipyleaflet
+#------------------------------------------------------------------------#
 def make_ipyleaflet_choropleth_map(gdf, plot_col, geometry_col,
                                    choropleth_dict,
                                    colorscale, 
