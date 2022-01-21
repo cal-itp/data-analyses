@@ -37,6 +37,21 @@ def make_folium_choropleth_map(df, plot_col,
     '''
     Parameters:
     
+    df: geopandas.GeoDataFrame
+    plot_col: str, name of the column to map
+    popup_dict: dict
+                key: column name; value: display name in popup
+    tooltip_dict: dict
+                key: column name; value: display name in tooltip           
+    colorscale: branca.colormap element
+    fig_width: int. Ex: 500 
+    fig_height: int. Ex: 500
+    zoom: int. 
+    centroid: list, of the format [latitude, longitude]
+    title: str.
+    **kwargs: any other keyword arguments that can passed into existing folium functions
+            that are used in this function
+
     Pros/Cons: 
     folium can handle multiple columns displayed in popup/tooltip.
     ipyleaflet can only handle one.
@@ -123,6 +138,139 @@ def make_folium_choropleth_map(df, plot_col,
     fig.add_child(m)
         
     return fig
+
+## Adjust function to have multiple layers in folium
+# Modify the original function...but generalize the unpacking of the layer portion
+# Keep original function the same, don't break other ppl's work
+def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height, 
+                                    zoom=REGION_CENTROIDS["CA"][1], 
+                                    centroid = REGION_CENTROIDS["CA"][0], 
+                                    title="Chart Title", **kwargs,
+                                   ):
+    '''
+    Parameters:
+    LAYERS_DICT: dict. Can contain as many other polygon layers as needed.
+    
+        Must contain the following key-value pairs
+        LAYERS_DICT = {
+            1: {"df": geopandas.GeoDataFrame,
+                "plot_col": str,
+                "popup_dict": dict,
+                "tooltip_dict": dict,
+                "colorscale": branca.colormap element
+            },
+            2: {"df": geopandas.GeoDataFrame,
+                "plot_col": str,
+                "popup_dict": dict,
+                "tooltip_dict": dict,
+                "colorscale": branca.colormap element
+            },
+        }
+
+    fig_width: int. Ex: 500 
+    fig_height: int. Ex: 500
+    zoom: int. 
+    centroid: list, of the format [latitude, longitude]
+    title: str.
+    **kwargs: any other keyword arguments that can passed into existing folium functions
+            that are used in this function
+    '''
+    
+    # Pass more kwargs through various sub-functions
+    # https://stackoverflow.com/questions/26534134/python-pass-different-kwargs-to-multiple-functions
+    fig_args = [k for k, v in inspect.signature(Figure).parameters.items()]
+    fig_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in fig_args}
+    
+    fig = Figure(width = fig_width, height = fig_height, **fig_dict)
+    
+    map_args = [k for k, v in inspect.signature(folium.Map).parameters.items()]
+    map_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in map_args}
+    
+    m = folium.Map(location=centroid, tiles='cartodbpositron', 
+               zoom_start=zoom, width=fig_width,height=fig_height, **map_dict)
+    
+    title_html = f'''
+         <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
+         '''
+    
+    fig.get_root().html.add_child(folium.Element(title_html))
+    
+    # Define function that can theoretically pop out as many polygon layers as needed
+    def get_layer(df, plot_col, popup_dict, tooltip_dict, 
+              colorscale, **kwargs):    
+        TOOLTIP_KWARGS = {
+                "min_width": 50,
+                "max_width": 100,
+                "font_size": "12px",
+        }
+
+        popup = GeoJsonPopup(
+            fields=list(popup_dict.keys()),
+            aliases=list(popup_dict.values()),
+            localize=True,
+            labels=True,
+            style=f"background-color: light_gray;",
+            min_width = TOOLTIP_KWARGS["min_width"],
+            max_width = TOOLTIP_KWARGS["max_width"],
+        )
+
+        tooltip = GeoJsonTooltip(
+            fields=list(tooltip_dict.keys()),
+            aliases=list(tooltip_dict.values()),
+            # localize = True sets the commas for numbers, but zipcode should be displayed as string
+            #localize=True,
+            sticky=False,
+            labels=True,
+            style=f"""
+                background-color: "gray";
+                border: 0px #FFFFFF;
+                border-radius: 0px;
+                box-shadow: 0px;
+                font-size: {TOOLTIP_KWARGS["font_size"]};
+            """,
+            min_width=TOOLTIP_KWARGS["min_width"],
+            max_width=TOOLTIP_KWARGS["max_width"],
+        )
+
+        #https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
+        geojson_args = [k for k, v in inspect.signature(folium.GeoJson).parameters.items()]
+        geojson_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in geojson_args}
+
+        g = folium.GeoJson(
+            df,
+            style_function=lambda x: {
+                "fillColor": colorscale(x["properties"][plot_col])
+                if x["properties"][plot_col] is not None
+                else f"gray",
+                "color": "#FFFFFF",
+                "fillOpacity": 0.8,
+                "weight": 0.2,
+            },
+            tooltip=tooltip,
+            popup=popup,
+            **geojson_dict
+        )
+
+        return g
+
+    # Now, loop through the keys in the LAYERS_DICT,
+    # Unpack the dictionary associated with each layer,
+    # Then attach that layer to the Map element
+    for key, nested_dict in LAYERS_DICT.items():
+        # key: layer number
+        # value: dictionary of all the components associated with folium layer
+        d = nested_dict
+        layer = get_layer(d["df"], d["plot_col"], 
+                          d["popup_dict"], 
+                          d["tooltip_dict"], 
+                          d["colorscale"])
+        layer.add_to(m)
+        
+    # Now, attach everything to Figure    
+    fig.add_child(m)
+    
+    return fig
+    
 
 
 def make_ipyleaflet_choropleth_map(gdf, plot_col, geometry_col,
