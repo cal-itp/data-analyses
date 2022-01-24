@@ -20,8 +20,22 @@ def load_grantprojects():
     df = to_snakecase(df)
     df = df.drop(columns=['project_closed_by', 'project_closed_date', 'project_closed_time'])
     
-    #get just the 5311 agencies
-    df = (df>>filter(_.funding_program.str.contains('5311')))
+    #get just the rural agencies
+    df = (df>>filter(_.reporter_type=='Rural Reporter'))
+    
+    return df
+
+def load_grantprojects5339(): 
+    df = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /Grant_Projects.xlsx', sheet_name=None), ignore_index=True)
+    
+    pd.set_option('display.max_columns', None)
+    
+    #a bit of cleaning
+    df = to_snakecase(df)
+    df = df.drop(columns=['project_closed_by', 'project_closed_date', 'project_closed_time'])
+    
+    #get just the 5339 agencies
+    df = (df>>filter(_.funding_program.str.contains('5339')))
     
     return df
 
