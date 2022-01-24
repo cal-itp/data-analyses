@@ -26,3 +26,13 @@ sources:
     args:
     # source: bus_service_increase/highway_transit_utils.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/state_highway_network.parquet
+  ca_geoportal:
+        driver: dcat
+        args:
+          url: https://gis.data.ca.gov/data.json
+          items:
+              county_boundaries: https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries     
+
+      
+      
+     
