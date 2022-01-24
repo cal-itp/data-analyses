@@ -21,3 +21,17 @@ sources:
         description: Population by CA block group, from 2019 ACS 5 year via Census API
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/pop_block_grp.parquet
+          
+    # ca_blocks: ## no geoparquet support in intake?
+    #     driver: parquet
+    #     description: CA Census Block Geographies 2020
+    #     args:
+    #       urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/2020_tiger_block_geo.parquet
+    #       use_fsspec: true
+          
+    ca_block_population:
+        driver: parquet
+        description: Population by Block, from 2020 redistricting summary file (table P1)
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/census_2020_p1.parquet
+          use_fsspec: true
