@@ -57,6 +57,14 @@ def process_transit_routes():
           .assign(route_length = df.geometry.length)
          )
     
+    # Noticed that shape_id and route_id still tag too many routes
+    # Keep the longest route_length and eliminate short trips
+    df = (df.sort_values(["itp_id", "route_id", "route_length"],
+                     ascending=[True, True, False])
+           .drop_duplicates(subset=["itp_id", "route_id"])
+           .reset_index(drop=True)
+    )
+    
     df = df.assign(
         total_routes = df.groupby("itp_id")["route_id"].transform("count")
     )
