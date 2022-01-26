@@ -19,9 +19,10 @@ def load_grantprojects():
     #a bit of cleaning
     df = to_snakecase(df)
     df = df.drop(columns=['project_closed_by', 'project_closed_date', 'project_closed_time'])
-    
-    #get just the rural agencies
-    df = (df>>filter(_.reporter_type=='Rural Reporter'))
+    #keep only 5311 programs 
+    subset = ['Section 5311', '5310 Exp', '5310 Trad', '5311(f) Cont', 'CMAQ (FTA 5311)',
+       'Section 5311(f)','5311(f) Round 2']
+    df = df[df.funding_program.isin(subset)]
     
     return df
 
@@ -47,10 +48,26 @@ def load_vehiclesdata():
     #cannot use to_snakecase because of integer column names
     vehicles_info = vehicles_info['Age Distribution']
     vehicles = (vehicles_info>>filter(_.State=='CA'))
-    
+    #Add up columns 0-12 to get a new bin 
+    vehicles['0-12'] = vehicles[[0,1,2,3,4,5,6,7,8,9,10,11,12]].sum(axis=1)          
+    #dropping columns: no need for 0-12 anymore
+    vehicles = vehicles.drop(columns=[0,1,2,3,4,5,6,7,8,9,10,11,12,'primary_uza_population', 'years_old',      'legacy_ntd_id'])
+    #only want rural reporters
+    vehicles = vehicles.loc[vehicles['Reporter Type'] == 'Rural Reporter'] 
+    #can convert to snakecase now
+    vehicles = to_snakecase(vehicles)
     return vehicles
 
-
+##AH: this isn't working for some reason...says Excel file format cannot be determined, you must specify an engine #manually. 
+def load_organizations_data():
+    organizations =  pd.read_csv('gs://calitp-analytics-data/data-analyses/5311 /organizations-all_organizations.csv', sheet_name = ['organizations-all_organizations'])
+    organizations = to_snakecase(organizations)
+    organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status','#_services_w__complete_rt_status',
+       '#_fixed_route_services_w__static_gtfs',
+       'complete_static_gtfs_coverage__1=yes_', 'complete_rt_coverage',
+       '>=1_gtfs_feed_for_any_service__1=yes_',
+       '>=_1_complete_rt_set__1=yes_']]
+    return organizations
 
 def load_agencyinfo(): 
     agencies = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020_Agency_Information.xlsx',
