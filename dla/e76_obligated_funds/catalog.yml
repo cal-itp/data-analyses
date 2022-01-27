@@ -1,0 +1,49 @@
+metadata:
+  version: 1
+sources:
+        
+    ca_open_data:
+        driver: dcat
+        args:
+          url: https://data.ca.gov/data.json
+          items:
+              
+              city_boundary: 22ef3a34-212c-4306-b5dd-f805117e1a6b      
+              
+              county_boundary: ac0096a2-7b7e-4605-9de3-31dd017ad532
+      
+      
+    district_bound:
+        driver: geojson
+        description: Description
+        args:
+          urlpath: https://gisdata.dot.ca.gov/arcgis/rest/services/Boundary/District_Tiger_Lines/MapServer/0/query?where=1%3D1&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=OBJECTID%2C+DISTRICT%2C+Region%2C+Shape%2C+Shape_Length%2C+Shape_Area&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&returnDistinctValues=false&resultOffset=&resultRecordCount=&f=pjson
+ 
+    rtpa_bound:
+        driver: geojson
+        description: Description
+        args:
+          urlpath: https://gisdata.dot.ca.gov/arcgis/rest/services/Boundary/RPTA_Boundaries/MapServer/0/query?where=1%3D1&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=OBJECTID%2C+RTPA+%2C+LABEL_RTPA%2C+SHAPE%2C+SHAPE_Length%2C+SHAPE_Area&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&returnDistinctValues=false&resultOffset=&resultRecordCount=&f=pjson
+          
+    locode_official:
+        driver: excel
+        description: Description
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx
+         
+         
+         
+         
+
+
+         
+         
+         
+         
+         
+         
+          
+          
+          
+          
+          
