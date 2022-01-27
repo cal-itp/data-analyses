@@ -63,12 +63,16 @@ def load_vehiclesdata():
 def load_organizations_data():
     organizations =  pd.read_csv('gs://calitp-analytics-data/data-analyses/5311 /organizations-all_organizations.csv')
     organizations = to_snakecase(organizations)
+    #Only keeping relevant columns
     organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status','#_services_w__complete_rt_status',
        '#_fixed_route_services_w__static_gtfs',
        'complete_static_gtfs_coverage__1=yes_', 'complete_rt_coverage',
        '>=1_gtfs_feed_for_any_service__1=yes_',
        '>=_1_complete_rt_set__1=yes_']]
+    #Renaming columns 
     organizations = organizations.rename(columns = {'ntp_id':'ntd_id', 'name':'agency'})
+    #dropping any agencies without NTD IDs
+    organizations.dropna(subset=['ntd_id'])
     return organizations
 
 
