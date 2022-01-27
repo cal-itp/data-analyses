@@ -39,24 +39,7 @@ def load_grantprojects5339():
     df = (df>>filter(_.funding_program.str.contains('5339')))
     
     return df
-
-
-def replace_modes(row):
-        if row.vehicle_type in Automobiles:
-            return "Rail"
-        elif row.vehicle_type in Bus:
-            return "Bus"
-        else:
-            return "Vans"
         
-def get_vehicle_groups(df): 
-    Automobiles = ['Automobile','Automobiles (Service)','Sports Utility Vehicle']
-    Bus = ['Bus','Over-the-road Bus']
-    Vans = ['Van','Trucks and other Rubber Tire Vehicles (Service)','Minivan','Cutaway']
-    
-    vehicles["vehicle_groups"] = vehicles.apply(lambda x: replace_modes(x), axis=1)
-    
-    return vehicles
 
 
 def load_vehiclesdata():
@@ -77,7 +60,26 @@ def load_vehiclesdata():
     #can convert to snakecase now
     vehicles = to_snakecase(vehicles)
     #adding vehicle grouping function
-    vehicles = get_vehicle_groups(vehicles)
+    
+    
+    def get_vehicle_groups(vehicles):
+        Automobiles = ['Automobile','Automobiles (Service)','Sports Utility Vehicle']
+        Bus = ['Bus','Over-the-road Bus']
+        Vans = ['Van','Trucks and other Rubber Tire Vehicles (Service)','Minivan','Cutaway']
+        
+        def replace_modes(row):
+            if row.vehicle_type in Automobiles:
+                return "Rail"
+            elif row.vehicle_type in Bus:
+                return "Bus"
+            else:
+                return "Vans"
+        
+        vehicles["vehicle_groups"] = vehicles.apply(lambda x: replace_modes(x), axis=1)
+    
+        return vehicles
+
+    vehicles = (get_vehicle_groups(vehicles))
     
     return vehicles
 
