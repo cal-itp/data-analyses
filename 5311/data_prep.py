@@ -41,6 +41,24 @@ def load_grantprojects5339():
     return df
 
 
+def replace_modes(row):
+        if row.vehicle_type in Automobiles:
+            return "Rail"
+        elif row.vehicle_type in Bus:
+            return "Bus"
+        else:
+            return "Vans"
+        
+def get_vehicle_groups(df): 
+    Automobiles = ['Automobile','Automobiles (Service)','Sports Utility Vehicle']
+    Bus = ['Bus','Over-the-road Bus']
+    Vans = ['Van','Trucks and other Rubber Tire Vehicles (Service)','Minivan','Cutaway']
+    
+    vehicles["vehicle_groups"] = vehicles.apply(lambda x: replace_modes(x), axis=1)
+    
+    return vehicles
+
+
 def load_vehiclesdata():
     vehicles_info =  pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020-Vehicles_1.xlsm',
                                    sheet_name = ['Age Distribution'])
@@ -58,6 +76,9 @@ def load_vehiclesdata():
     vehicles = vehicles.loc[vehicles['Reporter Type'] == 'Rural Reporter'] 
     #can convert to snakecase now
     vehicles = to_snakecase(vehicles)
+    #adding vehicle grouping function
+    vehicles = get_vehicle_groups(vehicles)
+    
     return vehicles
 
 def load_organizations_data():
