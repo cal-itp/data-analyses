@@ -11,6 +11,8 @@ import os
 import prep_data
 import utils
 
+DATA_PATH = prep_data.DATA_PATH
+
 os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 pd.set_option("display.max_rows", 20)
 
@@ -88,10 +90,10 @@ def make_stops_shapefile():
     time0 = datetime.now()
     
     # Read in local parquets
-    stops = pd.read_parquet("./stops.parquet")
-    route_info = pd.read_parquet("./route_info.parquet")
-    agencies = pd.read_parquet("./agencies.parquet")
-    latest_itp_id = pd.read_parquet("./latest_itp_id.parquet")
+    stops = pd.read_parquet(f"{DATA_PATH}stops.parquet")
+    route_info = pd.read_parquet(f"{DATA_PATH}route_info.parquet")
+    agencies = pd.read_parquet(f"{DATA_PATH}agencies.parquet")
+    latest_itp_id = pd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
     df = create_stops_data(stops)
         
