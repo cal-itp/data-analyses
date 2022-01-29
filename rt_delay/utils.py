@@ -30,6 +30,9 @@ GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 
 MPH_PER_MPS = 2.237 ## use to convert meters/second to miles/hour
 
+ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
+ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
+
 def convert_ts(ts):    
     pacific_dt = dt.datetime.fromtimestamp(ts)
     return pacific_dt
