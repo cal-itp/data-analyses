@@ -16,6 +16,7 @@ from siuba import *
 import utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
+DATA_PATH = "./data/"
 
 def create_local_parquets():
     time0 = datetime.now()
@@ -29,7 +30,7 @@ def create_local_parquets():
         >> distinct()
         >> collect()
     )
-    stops.to_parquet("./stops.parquet")
+    stops.to_parquet(f"{DATA_PATH}stops.parquet")
 
     trips = (
         tbl.gtfs_schedule.trips()
@@ -37,7 +38,7 @@ def create_local_parquets():
         >> distinct()
         >> collect()
     )
-    trips.to_parquet("./trips.parquet")
+    trips.to_parquet(f"{DATA_PATH}trips.parquet")
 
     route_info = (
         tbl.gtfs_schedule.routes()
@@ -47,16 +48,17 @@ def create_local_parquets():
         >> distinct()
         >> collect()
     )
-    route_info.to_parquet("./route_info.parquet")
-
+    route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
+    
     agencies = (
         tbl.gtfs_schedule.agency()
         >> select(_.calitp_itp_id, _.agency_id, _.agency_name)
         >> distinct()
         >> collect()
     )
-    agencies.to_parquet("./agencies.parquet")
+    agencies.to_parquet(f"{DATA_PATH}agencies.parquet")
 
+    
     # Filter to the ITP_IDs present in the latest agencies.yml
     latest_itp_id = (tbl.views.gtfs_schedule_dim_feeds()
                      >> filter(_.calitp_id_in_latest==True)
@@ -64,7 +66,7 @@ def create_local_parquets():
                      >> distinct()
                      >> collect()
                     )
-    latest_itp_id.to_parquet("./latest_itp_id.parquet")
+    latest_itp_id.to_parquet(f"{DATA_PATH}latest_itp_id.parquet")
     
     time1 = datetime.now()
     print(f"Part 1: Queries and create local parquets: {time1-time0}")
@@ -76,7 +78,7 @@ def create_local_parquets():
     routes = utils.make_routes_shapefile(
                 ITP_ID_LIST, CRS = utils.WGS84, 
                 alternate_df=None)
-    routes.to_parquet("./routes.parquet")
+    routes.to_parquet(f"{DATA_PATH}routes.parquet")
     
     time2 = datetime.now()
     print(f"Part 2: Create routes shapefile: {time2-time1}")
@@ -87,7 +89,7 @@ def create_local_parquets():
 # Function to delete local parquets
 def delete_local_parquets():
     # Find all local parquets
-    FILES = [f for f in glob.glob("*.parquet")]
+    FILES = [f for f in glob.glob(f"{DATA_PATH}*.parquet")]
     print(f"list of parquet files to delete: {FILES}")
     
     for file_name in FILES:
