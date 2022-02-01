@@ -1,7 +1,7 @@
 import branca
 import pandas as pd
 
-import prep_data
+import setup_viz_data
 import utils
 from setup_tract_charts import *
 from setup_tract_maps import *
@@ -12,7 +12,7 @@ from shared_utils import calitp_color_palette as cp
 ## Functions to wrangle data for charts
 #----------------------------------------------------------------#
 def import_processed_data():
-    df = prep_data.generate_stop_times_tract_data()
+    df = setup_viz_data.generate_stop_times_tract_data()
     df = df.assign(
         geometry = df.geometry.simplify(tolerance=0.005)
     )
