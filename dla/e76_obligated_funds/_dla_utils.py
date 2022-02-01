@@ -55,13 +55,15 @@ def calculate_data_head(df, col, aggregate_by=["dist"], aggfunc="sum"):
 #get basic information from the different columns by year
 
 def count_all_years(df, groupedby=["dist"]):
-    count_years = geography_utils.aggregate_by_geography(
+    count_years = (geography_utils.aggregate_by_geography(
         df, 
         group_cols = ["prepared_y", "dist"],
         sum_cols = ["total_requested", "ac_requested", "fed_requested"],
         mean_cols = ["total_requested", "ac_requested", "fed_requested"],
         nunique_cols = ["primary_agency_name", "mpo", "prefix", "project_no", "project_location", "type_of_work"]
     ).sort_values(["prepared_y", "dist"], ascending=[False, True])
+    .astype({"prepared_y": "Int64"})
+    )
     
     count_years= count_years.rename(columns={"ac_requested_x": "ac_requested_sum",
                                 "fed_requested_x": "fed_requested_sum",
@@ -82,7 +84,7 @@ def count_all_years(df, groupedby=["dist"]):
 ## want to create a function that gets a new dataframe that will hold all the counts and top twenty 
 def find_top(df):
     
-    cols= [{"prefix",
+    cols= ["prefix",
            "prepared_y",
            "status_comment",
            "project_location",
@@ -90,59 +92,80 @@ def find_top(df):
            "seq",
            "mpo",
            "primary_agency_name",
-           "dist"}]
+           "dist"]
     
-    tops_1 = (df
-          >>count(_.prefix)
-          >>arrange(-_.n)).head(20
-                               ).reset_index(drop=True
-                                            ).rename(columns={"n": "unique_prefix"})
-    tops_2 = (df
-          >>count(_.prepared_y)
-          >>arrange(-_.n)).head(20
-                               ).reset_index(drop=True
-                                            ).rename(columns={"n": "unique_prepared_y"})
-    tops_3 = (df
-          >>count(_.status_comment)
-          >>arrange(-_.n)).head(20
-                               ).reset_index(drop=True
-                                            ).rename(columns={"n": "unique_status_comment"})
-    tops_4 = (df
-          >>count(_.project_location)
-          >>arrange(-_.n)).head(20
-                               ).reset_index(drop=True
-                                            ).rename(columns={"n": "unique_project_location"})
-    tops_5 = (df
-          >>count(_.type_of_work)
-          >>arrange(-_.n)).head(20
-                               ).reset_index(drop=True
-                                            ).rename(columns={"n": "unique_type_of_work"})
-    tops_6 = (df
-          >>count(_.mpo)
-          >>arrange(-_.n)).head(20
-                               ).reset_index(drop=True
-                                            ).rename(columns={"n": "unique_mpo"})
-    tops_7 = (df
-          >>count(_.primary_agency_name)
-          >>arrange(-_.n)).head(20
-                               ).reset_index(drop=True
-                                            ).rename(columns={"n": "unique_primary_agency_name"})
-    tops_8 = (df
-          >>count(_.dist)
-          >>arrange(-_.n)).head(20
-                               ).reset_index(drop=True
-                                            ).rename(columns={"n": "unique_dist"})
+    RENAME_DICT = {}
+    
+    def count_and_sort(col):
+        df1 = ((df >> count(_[col]) >> arrange(-_.n))
+        .head(20).reset_index(drop=True)
+               .assign(variable=col)
+               .rename(columns = {col:'value', "n":"count"})
+        )
+        
+        return df1
+    
+    final = pd.DataFrame()
+    for col in cols:
+        agg = count_and_sort(col)
+        
+        final = pd.concat([final, agg], sort = False, axis=0)
     
     
-    test1 = tops_1.join(tops_2, how='outer')
-    test2 = test1.join(tops_3, how='outer')
-    test3 = test2.join(tops_4, how='outer')
-    test4 = test3.join(tops_5, how='outer')
-    test5 = test4.join(tops_6, how='outer')
-    test6 = test5.join(tops_7, how='outer')
-    tops = test6.join(tops_8, how='outer')
+    return final
+
+
+#     tops_1 = (df
+#           >>count(_.prefix)
+#           >>arrange(-_.n)).head(20
+#                                ).reset_index(drop=True
+#                                             ).rename(columns={"n": "unique_prefix"})
+#     tops_2 = (df
+#           >>count(_.prepared_y)
+#           >>arrange(-_.n)).head(20
+#                                ).reset_index(drop=True
+#                                             ).rename(columns={"n": "unique_prepared_y"})
+#     tops_3 = (df
+#           >>count(_.status_comment)
+#           >>arrange(-_.n)).head(20
+#                                ).reset_index(drop=True
+#                                             ).rename(columns={"n": "unique_status_comment"})
+#     tops_4 = (df
+#           >>count(_.project_location)
+#           >>arrange(-_.n)).head(20
+#                                ).reset_index(drop=True
+#                                             ).rename(columns={"n": "unique_project_location"})
+#     tops_5 = (df
+#           >>count(_.type_of_work)
+#           >>arrange(-_.n)).head(20
+#                                ).reset_index(drop=True
+#                                             ).rename(columns={"n": "unique_type_of_work"})
+#     tops_6 = (df
+#           >>count(_.mpo)
+#           >>arrange(-_.n)).head(20
+#                                ).reset_index(drop=True
+#                                             ).rename(columns={"n": "unique_mpo"})
+#     tops_7 = (df
+#           >>count(_.primary_agency_name)
+#           >>arrange(-_.n)).head(20
+#                                ).reset_index(drop=True
+#                                             ).rename(columns={"n": "unique_primary_agency_name"})
+#     tops_8 = (df
+#           >>count(_.dist)
+#           >>arrange(-_.n)).head(20
+#                                ).reset_index(drop=True
+#                                             ).rename(columns={"n": "unique_dist"})
+    
+    
+#     test1 = tops_1.join(tops_2, how='outer')
+#     test2 = test1.join(tops_3, how='outer')
+#     test3 = test2.join(tops_4, how='outer')
+#     test4 = test3.join(tops_5, how='outer')
+#     test5 = test4.join(tops_6, how='outer')
+#     test6 = test5.join(tops_7, how='outer')
+#     tops = test6.join(tops_8, how='outer')
                        
-    return tops
+    # return tops
 
 
 """
@@ -179,6 +202,13 @@ def labeling(word):
 """
 Basic Charts
 """
+
+# %%html
+# <style>
+# @import url('https://fonts.googleapis.com/css?family=Lato');
+# </style>
+
+
 # Bar
 def basic_bar_chart(df, x_col, y_col):
     
@@ -197,15 +227,22 @@ def basic_bar_chart(df, x_col, y_col):
                           title=f"Highest {labeling(x_col)} by {labeling(y_col)}")
     )
 
-
+    chart=styleguide.preset_chart_config(chart)
     chart.save(f"./chart_outputs/bar_{x_col}_by_{y_col}.png")
     
     return chart
 
 
 # Scatter 
-def basic_scatter_chart(df, col, aggregate_by, colorcol):
+def basic_scatter_chart(df, col, aggregate_by, colorcol, chart_title=""):
     
+    if chart_title != "":
+        chart_title= f"Highest {labeling(col)} by {labeling(aggregate_by)}"
+        save=""
+        
+    elif chart_title == "":
+        save = "_top_20"
+        
     chart = (alt.Chart(df)
              .mark_circle(size=60)
              .encode(
@@ -218,11 +255,11 @@ def basic_scatter_chart(df, col, aggregate_by, colorcol):
                                       legend=alt.Legend(title=(labeling(col)))
                                   ))
              .properties( 
-                          title=f"Highest {labeling(col)} by {labeling(aggregate_by)}")
+                          title = chart_title)
     )
 
-
-    chart.save(f"./chart_outputs/scatter_{col}_by_{aggregate_by}.png")
+    chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./chart_outputs/scatter_{col}_by_{aggregate_by}{save}.png")
     
     return chart
 
@@ -236,9 +273,10 @@ def basic_line_chart(df, x_col, y_col):
                  x=alt.X(x_col, title=labeling(x_col)),
                  y=alt.Y(y_col, title=labeling(y_col))
                                    )
-              )
+              ).properties( 
+                          title=f"{labeling(x_col)} by {labeling(y_col)}")
 
-
+    chart=styleguide.preset_chart_config(chart)
     chart.save(f"./chart_outputs/line_{x_col}_by_{y_col}.png")
     
     return chart
