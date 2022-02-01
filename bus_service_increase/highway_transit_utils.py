@@ -153,20 +153,3 @@ def parallel_or_intersecting(df, pct_route_threshold=0.5,
     )
     
     return df
-
-
-    
-#--------------------------------------------------------#
-### Functions to prep CA county shapefile
-#--------------------------------------------------------#
-# Instead of setting centroid in the map, 
-# find the county the operator falls within and 
-# set it to the county's centroid
-
-def grab_county_centroids():
-    df = (catalog.ca_geoportal.county_boundaries.read()
-               .to_crs(geography_utils.CA_StatePlane))
-
-    df = df[["COUNTY_NAME", "geometry"]]
-
-    df = df.dissolve(by="COUNTY_NAME").reset_index()
