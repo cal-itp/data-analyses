@@ -1,3 +1,4 @@
+import datetime as dt
 import geopandas as gpd
 import os
 import pandas as pd
@@ -12,11 +13,80 @@ from calitp.tables import tbl
 from calitp import query_sql
 from siuba import *
 
-SELECTED_DATE = "2021-10-07"
+#---------------------------------------------------------------#
+# Set dates for analysis
+#---------------------------------------------------------------#
+# Replace get_recent_dates()
+# Explicitly set dates
+dates = {
+    'thurs': dt.date(2021, 10, 7),
+    'sat': dt.date(2021, 10, 9),
+    'sun': dt.date(2021, 10, 10)
+}
+
+min_date = min(dates.values())
+max_date = max(dates.values())
+
+
+#---------------------------------------------------------------#
+# Warehouse Queries for A1_generate_existing_service.ipynb
+#---------------------------------------------------------------#
+# Temporarily stash datasets to read in create_service_estimator.py
+# utils.DATA_PATH is "./data/"
+DATA_PATH = "./data/test/"
+
+date_tbl = (tbl.views.dim_date() 
+            >> select(_.date == _.full_date, _.day_name)            
+           )
+
+def grab_selected_trips_for_date(selected_date):
+    # Maybe do away with the collect(), that slows it down a lot
+    # Have a way to merge the LzyTbls with joins, at the end, collect()
+    
+    ## get trips for operator on dates of interest, join with day of week table
+    trips = (tbl.views.gtfs_schedule_fact_daily_trips()
+             >> filter(_.calitp_extracted_at <= min_date, _.calitp_deleted_at > max_date)
+             >> filter(_.is_in_service == True, _.service_date == selected_date)
+             >> select(_.calitp_itp_id, _.date == _.service_date, 
+                       _.trip_key, _.trip_id, _.is_in_service)
+             #>> filter(_.calitp_itp_id == itp_id)
+             >> inner_join(_, date_tbl, on = 'date')
+             #>> collect()
+    )
+    
+    ## get stop times for operator
+    tbl_stop_times = (tbl.views.gtfs_schedule_dim_stop_times()
+                      >> filter(_.calitp_extracted_at <= min_date, _.calitp_deleted_at > max_date)
+                      >> select(_.calitp_itp_id, _.trip_id, _.departure_time,
+                                _.stop_sequence, _.stop_id)
+    )
+    
+    ## join stop times to trips 
+    stops = (trips 
+             >> inner_join(_, tbl_stop_times, on = ['calitp_itp_id', 'trip_id'])
+            )
+    
+    ## get trips dimensional table
+    tbl_trips = (tbl.views.gtfs_schedule_dim_trips()
+                 >> filter(_.calitp_extracted_at <= min_date, _.calitp_deleted_at > max_date)
+                 >> select(_.trip_key, _.shape_id, _.route_id)
+    )
+
+    ## join dim_trips info to stop times
+    trips_joined = (stops 
+                    >> inner_join(_, tbl_trips, on = 'trip_key')
+                    >> collect()
+                   )
+    
+    trips_joined.to_parquet(f"{DATA_PATH}trips_joined_{selected_date}")
+
+
 
 #---------------------------------------------------------------#
 # Warehouse Queries for B1_service_opportunities_tract.ipynb
 #---------------------------------------------------------------#
+SELECTED_DATE = dates['thurs']
+
 '''
 # Since this is run for a selected date, don't need to rerun
 
@@ -88,8 +158,10 @@ if __name__ == "__main__":
     # Run this to get the static parquet files
     # Analysis is for a particular day, so don't need to hit warehouse constantly
     
-    # Put A1_generate_existing_service.ipynb queries here
-    # Get existing service 
+    # (1) Get existing service 
+    for key in dates.keys():
+        print(f"Grab selected trips for {key}")
+        grab_selected_trips_for_date(dates[key])
     
-    # Get daily bus stop arrivals with geometry
+    # (2) Get daily bus stop arrivals with geometry
     process_daily_stop_times()
