@@ -124,13 +124,13 @@ def merge_calenviroscreen_lehd(calenviroscreen, lehd):
 #--------------------------------------------------------#
 ### Function to make cleaned data
 #--------------------------------------------------------#
-def generate_calenviroscreen_lehd_data(lehd_datasets):
+def generate_calenviroscreen_lehd_data():
     # CalEnviroScreen data (gdf)
     gdf = catalog.calenviroscreen_raw.read()
     
     # LEHD Data
     lehd_dfs = {}
-    for d in lehd_datasets:
+    for d in datasets:
         lehd_dfs[d] = pd.read_parquet(f"{utils.GCS_FILE_PATH}{d}.parquet")
     
     cleaned_dfs = []
