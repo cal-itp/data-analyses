@@ -55,8 +55,8 @@ def load_vehiclesdata():
     vehicles['10-12'] = vehicles[[10,11,12]].sum(axis=1)
     #dropping columns: no need for 0-12 anymore
     vehicles = vehicles.drop(columns=[0,1,2,3,4,5,6,7,8,9,10,11,12])
-    #only want rural reporters
-    vehicles = vehicles.loc[vehicles['Reporter Type'] == 'Rural Reporter'] 
+    #don't filter since some agencies are full reporters
+    #vehicles = vehicles.loc[vehicles['Reporter Type'] == 'Rural Reporter'] 
     #can convert to snakecase now
     vehicles = to_snakecase(vehicles)
     #adding vehicle grouping function
@@ -92,10 +92,11 @@ def load_organizations_data():
        'complete_static_gtfs_coverage__1=yes_', 'complete_rt_coverage',
        '>=1_gtfs_feed_for_any_service__1=yes_',
        '>=_1_complete_rt_set__1=yes_']]
-    #Renaming columns 
-    organizations = organizations.rename(columns = {'ntp_id':'ntd_id', 'name':'agency'})
+   #Renaming columns 
+    organizations = organizations.rename(columns = {'ntp_id':'ntd_id', '#_services_w__complete_rt_status':'number_services_w_complete_rt_status',
+    'complete_static_gtfs_coverage__1=yes_':'complete_static_gtfs_coverage_1_means_yes', '>=1_gtfs_feed_for_any_service__1=yes_':'gt_1_gtfs_for_any_service_1_means_yes', '>=_1_complete_rt_set__1=yes_':'gt_1_complete_rt_set_1_means_yes' })
     #dropping any agencies without NTD IDs
-    organizations.dropna(subset=['ntd_id'])
+    organizations = organizations.dropna(subset=['ntd_id'])
     return organizations
 
 
