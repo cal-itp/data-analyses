@@ -66,7 +66,7 @@ def load_vehiclesdata():
         
         def replace_modes(row):
             if row.vehicle_type in Automobiles:
-                return "Rail"
+                return "Automobiles"
             elif row.vehicle_type in Bus:
                 return "Bus"
             else:
@@ -95,7 +95,6 @@ def load_organizations_data():
     organizations.ntd_id = organizations.ntd_id.astype(str)
     return organizations
 
-
 def load_agencyinfo(): 
     agencies = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020_Agency_Information.xlsx',
                                       sheet_name=None),ignore_index=True)
@@ -114,24 +113,8 @@ def load_catalog_gtfs():
     
     return gtfs_status 
 
-def load_organizations_data2():
-    File_Organizations =  "organizations-all_organizations.csv"
-    organizations =  pd.read_csv(f'{GCS_FILE_PATH}{File_Organizations}')
-    organizations = to_snakecase(organizations)
-    #Only keeping relevant columns
-    organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status','#_services_w__complete_rt_status',
-       '#_fixed_route_services_w__static_gtfs',
-       'complete_static_gtfs_coverage__1=yes_', 'complete_rt_coverage',
-       '>=1_gtfs_feed_for_any_service__1=yes_',
-       '>=_1_complete_rt_set__1=yes_']]
-   #Renaming columns 
-    organizations = organizations.rename(columns = {'ntp_id':'ntd_id','#_services_w__complete_rt_status':'number_services_w_complete_rt_status', 'complete_static_gtfs_coverage__1=yes_':'complete_static_gtfs_coverage_1_means_yes',     '>=1_gtfs_feed_for_any_service__1=yes_':'gt_1_gtfs_for_any_service_1_means_yes', '>=_1_complete_rt_set__1=yes_':'gt_1_complete_rt_set_1_means_yes'})
-    #making sure ntd_id is a string
-    organizations.ntd_id = organizations.ntd_id.astype(str)
-    return organizations
-
 def load_vehiclesdata2():
-    File_Vehicles =  "2020-Vehicles_1.xlsm"
+    File_Vehicles =  "cleaned_vehicles.xlsx"
     vehicles_info =  pd.read_excel(f'{GCS_FILE_PATH}{File_Vehicles}',
                                    sheet_name = ['Age Distribution'])
     pd.set_option('display.max_columns', None)
@@ -158,7 +141,7 @@ def load_vehiclesdata2():
         
         def replace_modes(row):
             if row.vehicle_type in Automobiles:
-                return "Rail"
+                return "Automobiles"
             elif row.vehicle_type in Bus:
                 return "Bus"
             else:
