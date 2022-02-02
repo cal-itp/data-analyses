@@ -137,6 +137,8 @@ def attach_funding(all_operators_df):
 def create_service_estimator_data():
     #DATA_PATH = "./data/test/"
     DATA_PATH = "gs://calitp-analytics-data/data-analyses/bus_service_increase/test/"
+    GCS_FILE_PATH = DATA_PATH
+    
     time0 = dt.datetime.now()
     
     processed_dfs = {}
@@ -169,17 +171,17 @@ def create_service_estimator_data():
             value], ignore_index=True, axis=0)
 
     all_operators_shape_frequency.to_parquet(
-        f"{utils.GCS_FILE_PATH}shape_frequency.parquet")
+        f"{GCS_FILE_PATH}shape_frequency.parquet")
     
     finish_time_append = dt.datetime.now()
     print(f"Execution time for append/export: {finish_time_append - start_time_append}")
     
     # Attach funding info
     funding_time = dt.datetime.now()
-    shape_frequency = pd.read_parquet(f"{utils.GCS_FILE_PATH}shape_frequency.parquet")
+    shape_frequency = pd.read_parquet(f"{GCS_FILE_PATH}shape_frequency.parquet")
     
     with_funding = attach_funding(shape_frequency)
-    with_funding.to_parquet(f"{utils.GCS_FILE_PATH}shape_frequency_funding.parquet")
+    with_funding.to_parquet(f"{GCS_FILE_PATH}shape_frequency_funding.parquet")
     
     print(f"Execution time for attaching funding: {funding_time - finish_time_append}")
     print(f"Total execution time: {funding_time - time0}")
