@@ -49,14 +49,13 @@ def grab_selected_trips_for_date(selected_date):
              >> filter(_.is_in_service == True, _.service_date == selected_date)
              >> select(_.calitp_itp_id, _.date == _.service_date, 
                        _.trip_key, _.trip_id, _.is_in_service)
-             #>> filter(_.calitp_itp_id == itp_id)
              >> inner_join(_, date_tbl, on = 'date')
-             #>> collect()
     )
     
     ## get stop times for operator
     tbl_stop_times = (tbl.views.gtfs_schedule_dim_stop_times()
-                      >> filter(_.calitp_extracted_at <= min_date, _.calitp_deleted_at > max_date)
+                      >> filter(_.calitp_extracted_at <= min_date, 
+                                _.calitp_deleted_at > max_date)
                       >> select(_.calitp_itp_id, _.trip_id, _.departure_time,
                                 _.stop_sequence, _.stop_id)
     )
@@ -78,7 +77,7 @@ def grab_selected_trips_for_date(selected_date):
                     >> collect()
                    )
     
-    day_name = trips_joined.day_name.iloc[0].str.lower()
+    day_name = trips_joined.day_name.iloc[0].lower()
     
     three_letters = ["monday", "wednesday", "friday", "saturday", "sunday"]
     if day_name == "thursday":
@@ -86,7 +85,7 @@ def grab_selected_trips_for_date(selected_date):
     elif day_name == "tuesday":
         day = "tues"
     elif day_name in three_letters:
-        day = day_name[:2]
+        day = day_name[:3]
 
     trips_joined.to_parquet(f"{DATA_PATH}trips_joined_{day}.parquet")
 
@@ -171,6 +170,7 @@ if __name__ == "__main__":
     # (1) Get existing service 
     for key in dates.keys():
         print(f"Grab selected trips for {key}")
+        # Does it work if dates[key] is a datetime? Seems like it, no need to coerce to be str
         selected_date = dates[key]
         grab_selected_trips_for_date(selected_date)
     
