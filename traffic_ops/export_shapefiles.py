@@ -15,13 +15,15 @@ import create_routes_data
 import create_stops_data
 import utils
 
+DATA_PATH = prep_data.DATA_PATH
+
 def create_shapefiles_and_export():
     time0 = datetime.now()
     
     # Create local parquets
     prep_data.create_local_parquets() 
     print("Local parquets created")
-    
+    '''
     routes = create_routes_data.make_routes_shapefile()    
     stops = create_stops_data.make_stops_shapefile()
             
@@ -32,12 +34,14 @@ def create_shapefiles_and_export():
     print("Geoparquets exported to GCS")
         
     # To read geoparquets in without putting it in catalog
-    #routes = utils.download_geoparquet(prep_data.GCS_FILE_PATH, "routes_assembled", save_locally=True)
-    #stops = utils.download_geoparquet(prep_data.GCS_FILE_PATH, "stops_assembled", save_locally=True)
+    routes = utils.download_geoparquet(prep_data.GCS_FILE_PATH, 
+    f"{DATA_PATH}routes_assembled", save_locally=True)
+    stops = utils.download_geoparquet(prep_data.GCS_FILE_PATH, 
+    f"{DATA_PATH}stops_assembled", save_locally=True)
         
     # Export as zipped shapefile (10-char column names)
-    utils.make_zipped_shapefile(routes, "routes_assembled.zip")
-    utils.make_zipped_shapefile(stops, "stops_assembled.zip")
+    utils.make_zipped_shapefile(routes, f"{DATA_PATH}routes_assembled.zip")
+    utils.make_zipped_shapefile(stops, f"{DATA_PATH}stops_assembled.zip")
     
     # Delete local parquets
     #prep_data.delete_local_parquets()
@@ -45,6 +49,6 @@ def create_shapefiles_and_export():
     
     time1 = datetime.now()
     print(f"Total run time for routes/stops script: {time1-time0}")
-    
+    '''
     
 create_shapefiles_and_export()

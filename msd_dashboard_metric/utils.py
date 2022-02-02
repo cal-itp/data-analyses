@@ -19,7 +19,7 @@ from ipywidgets import Text, HTML
 # census_api_key = "&key="
 census_api_key = ""
 
-GCS_FILE_PATH = 'gs://calitp-analytics-data/data-analyses/msd_dashboard_metric'
+GCS_FILE_PATH = 'gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/'
 
 catalog = intake.open_catalog('./catalog.yml')
 

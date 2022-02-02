@@ -154,7 +154,7 @@ def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326", alternate_df=None):
             # Convert from a bunch of points to a line (for a route, there are multiple points)
             route_line = shapely.geometry.LineString(list(single_shape['geometry']))
             single_route = (single_shape
-                           [['calitp_itp_id', 'shape_id']]
+                           [['calitp_itp_id', 'calitp_url_number', 'shape_id']]
                            .iloc[[0]]
                           ) ##preserve info cols
             single_route['geometry'] = route_line
@@ -194,3 +194,53 @@ def create_point_geometry(df, longitude_col = "stop_lon",
 
     gdf = gpd.GeoDataFrame(df)
     return gdf
+
+# Function to get narrow down feeds to operators
+# Only keep calitp_url_number == 0 EXCEPT LA Metro
+def include_exclude_multiple_feeds(df, id_col = "itp_id", 
+                                   group_cols = ["itp_id", "trip_id", 
+                                                 "stop_id", "calitp_url_number"],
+                                   include_ids = [182], exclude_ids = [200]):
+    """
+    df: pandas.DataFrame.
+    id_col: str, column name for calitp_itp_id, such as "itp_id"
+    group_cols: list,
+            list of columns to do a sort_values on, and uniquely identify the row
+            (Ex: for stop-level data, use 
+            ["calitp_itp_id", "trip_id", "stop_id", "calitp_url_number"]).
+            Leave calitp_url_number last, to make sure the first feed is kept. 
+    include_ids: list, 
+            list of itp_ids that are allowed to have multiple feeds 
+            (Ex: LA Metro) 
+    exclude_ids: list, list of itp_ids to drop. (Ex: MTC, regional feed)
+    """
+    def keep_feeds(row):
+        # Drop feeds if any of the ITP_IDs are listed
+        if row[id_col] in exclude_ids:
+            return 0
+        # LA Metro, will keep both feeds
+        elif row[id_col] in include_ids:
+            return 1
+
+        # Otherwise, keep the first feed, until we can identify the primary feed
+        elif row["calitp_url_number"] == 0:
+            return 1
+        elif row["calitp_url_number"] == 1:
+            return 0
+    
+    df = df.assign(
+        keep = df.apply(lambda x: keep_feeds(x), axis=1)  
+    )
+    
+    df2 = df[df.keep==1].drop(columns = "keep").reset_index(drop=True)
+    
+    print(f"# obs in original df: {len(df)}")
+    print(f"# obs in new df: {len(df2)}")
+    
+    # There are still multiple operators here
+    # But, seems like for those trip_ids, they are different values 
+    # between url_number==0 vs url_number==1
+    multiple_urls = list(df2[df2.calitp_url_number==1][id_col].unique())
+    print(f"These operators have multiple calitp_url_number values: {multiple_urls}")    
+    
+    return df2
