@@ -95,10 +95,11 @@ class TripPositionInterpolator:
         ''' Generates a detailed map of speeds along the trip based on all valid position data
         '''
         gdf = self.cleaned_positions.copy()
+        gdf['speed_mph'] = gdf.speed_from_last * MPH_PER_MPS
+        gdf = gdf.round({'speed_mph': 1, 'shape_meters': 0})
         gdf['time'] = gdf[self.time_col].apply(lambda x: x.strftime('%H:%M:%S'))
         gdf = gdf >> select(_.geometry, _.time,
-                            _.shape_meters, _.last_loc, _.speed_from_last)
-        gdf['speed_mph'] = gdf.speed_from_last * MPH_PER_MPS
+                            _.shape_meters, _.last_loc, _.speed_mph)
         gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape.geometry.iloc[0],
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
@@ -107,7 +108,6 @@ class TripPositionInterpolator:
         gdf = gdf.to_crs(WGS84)
         centroid = gdf.dissolve().centroid
         gdf = gdf >> filter(_.speed_mph > 0)
-        gdf = gdf.round({'speed_mph': 1, 'shape_meters': 0})
 
         gdf['shape_id'] = self.shape_id
         gdf['direction_id'] = self.direction_id
@@ -116,6 +116,7 @@ class TripPositionInterpolator:
         if gdf.speed_mph.max() > 80: ## TODO better system to raise errors on impossibly fast speeds
             print(f'speed above 80 for trip {self.trip_key}, dropping')
             gdf = gdf >> filter(_.speed_mph < 80)
+        self.debug_dict['map_gdf'] = gdf
 
         colorscale = branca.colormap.step.RdYlGn_08.scale(vmin=gdf.speed_mph.min(), 
                      vmax=gdf.speed_mph.max())
@@ -221,12 +222,12 @@ class ScheduleInterpolator(TripPositionInterpolator):
                                                      / self.position_gdf.secs_from_last) ## meters/second
         self.cleaned_positions = self.position_gdf ## for position and map methods in TripPositionInterpolator
         self.cleaned_positions = self.cleaned_positions >> arrange(self.time_col)
-        
+
 class OperatorDayAnalysis:
     '''New top-level class for rt delay/speed analysis of a single operator on a single day
     '''
-    def __init__(self, itp_id, analysis_date):
-        pbar = pbar in globals() ##check if notebook tqdm progress bar is used
+    def __init__(self, itp_id, analysis_date, pbar = None):
+        self.pbar = pbar
         self.debug_dict = {}
         '''
         itp_id: an itp_id (string or integer)
@@ -279,7 +280,10 @@ class OperatorDayAnalysis:
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
         self.position_interpolators = {}
         # for trip_id in self.vp_trip_ids[:5]: ##small test
-        for trip_id in tqdm(self.vp_trip_ids): ##big test
+        if type(self.pbar) != type(None):
+            self.pbar.reset(total=len(self.vp_trip_ids))
+            self.pbar.desc = 'Generating position interpolators'
+        for trip_id in self.vp_trip_ids: ##big test
             # print(trip_id)
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
             self.debug_dict[f'{trip_id}_trip'] = trip
@@ -297,8 +301,10 @@ class OperatorDayAnalysis:
                                                        }
             except AssertionError as e:
                 print(e)
-            if pbar in globals():
-                pbar.update()
+            if type(self.pbar) != type(None):
+                self.pbar.update()
+        if type(self.pbar) != type(None):
+            self.pbar.refresh()
             # except Exception as e:
             #     print(f'could not generate interpolators for {trip_id}')
             #     print(e)
@@ -316,8 +322,9 @@ class OperatorDayAnalysis:
         delays = delays >> distinct(_.trip_id, _.stop_id, _keep_all=True) ## TODO drop duplicates elsewhere?
         _delays = gpd.GeoDataFrame()
         
-        if pbar:
-            pbar.reset(total=len(delays.trip_id.unique()))
+        if type(self.pbar) != type(None):
+            self.pbar.reset(total=len(delays.trip_id.unique()))
+            self.pbar.desc = 'Generating stop delay view'
         for trip_id in tqdm(delays.trip_id.unique()):
             try:
                 _delay = delays.copy() >> filter(_.trip_id == trip_id)
@@ -342,8 +349,10 @@ class OperatorDayAnalysis:
                 print(e)
                 # return
                 
-            if pbar:
-                pbar.update()
+            if type(self.pbar) != type(None):
+                self.pbar.update()
+        if type(self.pbar) != type(None):
+            self.pbar.refresh()
                 
         self.stop_delay_view = _delays
         return
@@ -412,9 +421,10 @@ class OperatorDayAnalysis:
         
         gdf = self._filter(self.stop_delay_view)
         all_stop_speeds = gpd.GeoDataFrame()
-        # for shape_id in tqdm(gdf.shape_id.unique()): trying pbar.update...
-        if pbar:
-            pbar.reset(total=len(delays.trip_id.unique()))
+        # for shape_id in tqdm(gdf.shape_id.unique()): trying self.pbar.update...
+        if type(self.pbar) != type(None):
+            self.pbar.reset(total=len(gdf.shape_id.unique()))
+            self.pbar.desc = 'Generating segment speeds'
         for shape_id in gdf.shape_id.unique():
             for direction_id in gdf.direction_id.unique():
                 this_shape_direction = (gdf
@@ -462,8 +472,10 @@ class OperatorDayAnalysis:
                     stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
                 all_stop_speeds = all_stop_speeds.append(stop_speeds)
                 
-                if pbar in globals():
-                    pbar.update()
+                if type(self.pbar) != type(None):
+                    self.pbar.update()
+            if type(self.pbar) != type(None):
+                self.pbar.refresh
 
         self.stop_segment_speed_view = all_stop_speeds
         return self._show_speed_map(how = how, colorscale = colorscale, size = size)
