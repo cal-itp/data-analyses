@@ -148,7 +148,8 @@ def create_service_estimator_data():
 
         print(f"Do time calculations for {key}")
         st_trips_joined = get_time_calculations(days_st)
-
+        #st_trips_joined.to_parquet(f"{DATA_PATH}timecalc_{key}")
+        
         print(f"Calculate runtimes for {key}")    
         processed_dfs[key] = calculate_runtime_hourlytrips(st_trips_joined)
 
