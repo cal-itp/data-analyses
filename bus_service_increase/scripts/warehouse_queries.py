@@ -78,7 +78,17 @@ def grab_selected_trips_for_date(selected_date):
                     >> collect()
                    )
     
-    trips_joined.to_parquet(f"{DATA_PATH}trips_joined_{selected_date}")
+    day_name = trips_joined.day_name.iloc[0].str.lower()
+    
+    three_letters = ["monday", "wednesday", "friday", "saturday", "sunday"]
+    if day_name == "thursday":
+        day = "thurs"
+    elif day_name == "tuesday":
+        day = "tues"
+    elif day_name in three_letters:
+        day = day_name[:2]
+
+    trips_joined.to_parquet(f"{DATA_PATH}trips_joined_{day}.parquet")
 
 
 
@@ -161,7 +171,8 @@ if __name__ == "__main__":
     # (1) Get existing service 
     for key in dates.keys():
         print(f"Grab selected trips for {key}")
-        grab_selected_trips_for_date(dates[key])
+        selected_date = dates[key]
+        grab_selected_trips_for_date(selected_date)
     
     # (2) Get daily bus stop arrivals with geometry
     process_daily_stop_times()

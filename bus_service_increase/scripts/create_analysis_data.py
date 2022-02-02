@@ -135,7 +135,8 @@ def attach_funding(all_operators_df):
 
 # Loop through and grab weekday/Sat/Sun subsets of joined data, calculate runtimes
 def create_service_estimator_data():
-    DATA_PATH = "./data/test/"
+    #DATA_PATH = "./data/test/"
+    DATA_PATH = "gs://calitp-analytics-data/data-analyses/bus_service_increase/test/"
     time0 = dt.datetime.now()
     
     processed_dfs = {}
@@ -143,7 +144,7 @@ def create_service_estimator_data():
         start_time_loop = dt.datetime.now()
 
         print(f"Grab selected trips for {key}")
-        days_st = pd.read_parquet(f"{DATA_PATH}trips_{dates[key]}.parquet")
+        days_st = pd.read_parquet(f"{DATA_PATH}trips_{key}.parquet")
 
         print(f"Do time calculations for {key}")
         st_trips_joined = get_time_calculations(days_st)
