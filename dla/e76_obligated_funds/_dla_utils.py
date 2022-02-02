@@ -234,14 +234,24 @@ def basic_bar_chart(df, x_col, y_col):
 
 
 # Scatter 
-def basic_scatter_chart(df, col, aggregate_by, colorcol, chart_title=""):
+def basic_scatter_chart(df, col, aggregate_by, colorcol, chart_title=[]):
     
-    if chart_title != "":
-        chart_title= f"Highest {labeling(col)} by {labeling(aggregate_by)}"
-        save=""
-        
-    elif chart_title == "":
+    if chart_title == []:
+        new_title == chart_title
         save = "_top_20"
+        
+    elif chart_title != []:
+        chart_title= (f"Highest {labeling(col)} by {labeling(aggregate_by)}")
+        save= [""]
+        
+    
+#     if chart_title != [""]:
+#         chart_title= (f"Highest {labeling(col)} by {labeling(aggregate_by)}")
+#         save= [""]
+        
+#     elif chart_title == [""]:
+#         chart_title == [""]
+#         save = "_top_20"
         
     chart = (alt.Chart(df)
              .mark_circle(size=60)
@@ -255,7 +265,7 @@ def basic_scatter_chart(df, col, aggregate_by, colorcol, chart_title=""):
                                       legend=alt.Legend(title=(labeling(col)))
                                   ))
              .properties( 
-                          title = chart_title)
+                          title = (new_title))
     )
 
     chart=styleguide.preset_chart_config(chart)
