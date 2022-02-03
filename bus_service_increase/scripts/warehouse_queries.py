@@ -18,6 +18,8 @@ from siuba import *
 #---------------------------------------------------------------#
 # Replace get_recent_dates()
 # Explicitly set dates
+# ??? Can these take datetime or have to be string?
+# Datetimes should work? Double check
 dates = {
     'thurs': dt.date(2021, 10, 7),
     'sat': dt.date(2021, 10, 9),
