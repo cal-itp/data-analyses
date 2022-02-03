@@ -37,16 +37,20 @@ def get_time_calculations(df):
 def calculate_runtime_hourlytrips(df):
     # Calculate run time for a trip
     # Find the median stop (keep that observation)
+    def find_runtime(df):
+        mindt = df[df.stop_sequence == df.stop_sequence.min()].departure_time.iloc[0]
+        maxdt = df[df.stop_sequence == df.stop_sequence.max()].departure_time.iloc[0]
+        td = (maxdt - mindt)
+        df['runtime_seconds'] = td.seconds
+        return df
+
     group_cols = ['trip_key', 'day_name']
-    df = df.assign(
-        mindt = df.groupby(group_cols)["departure_time"].transform("min"),
-        maxdt = df.groupby(group_cols)["departure_time"].transform("max"),
-        middle_stop = df.groupby(["trip_key", "day_name"])["stop_sequence"].transform("median"),
-    ).astype({"middle_stop": "int64"})
+    df = df.groupby(group_cols).apply(find_runtime)
 
     df = df.assign(
-        runtime_seconds = (df.maxdt - df.mindt).dt.seconds
-    ).drop(columns = ["mindt", "maxdt"])
+        middle_stop = df.groupby(group_cols)["stop_sequence"].transform("median"),
+    ).astype({"middle_stop": "int64"})
+    
     
     # Drop any trips with runtime of NaN calculated
     df = df[df.runtime_seconds.notna()].reset_index(drop=True)
