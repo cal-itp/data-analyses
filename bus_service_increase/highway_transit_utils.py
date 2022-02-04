@@ -38,7 +38,10 @@ def clean_highways():
                                          utils.GCS_FILE_PATH, 
                                          "state_highway_network")
     
-
+    
+#--------------------------------------------------------#
+### Functions to create overlay dataset + further cleaning
+#--------------------------------------------------------#
 def process_transit_routes():
     ## Clean transit routes
     df = (catalog.transit_routes.read()
@@ -53,6 +56,14 @@ def process_transit_routes():
           .reset_index(drop=True)
           .assign(route_length = df.geometry.length)
          )
+    
+    # Noticed that shape_id and route_id still tag too many routes
+    # Keep the longest route_length and eliminate short trips
+    df = (df.sort_values(["itp_id", "route_id", "route_length"],
+                     ascending=[True, True, False])
+           .drop_duplicates(subset=["itp_id", "route_id"])
+           .reset_index(drop=True)
+    )
     
     df = df.assign(
         total_routes = df.groupby("itp_id")["route_id"].transform("count")
@@ -105,7 +116,40 @@ def overlay_transit_to_highways():
     # Overlay
     # Note: an overlay based on intersection changes the geometry column
     # The new geometry column will reflect that area of intersection
-    gdf = gpd.overlay(transit_routes, highways, how = "intersection")
-
+    gdf = gpd.overlay(transit_routes, highways, how = "intersection")   
+    
     return gdf
 
+
+def make_processed_data():
+    gdf = overlay_transit_to_highways()
+    gdf = gdf.assign(
+        pct_route = (gdf.geometry.length / gdf.route_length).round(3),
+        pct_highway = (gdf.geometry.length / gdf.highway_length).round(3),
+    )
+    
+    # Set pct_highway to have max of 1
+    # LA Metro Line 910 (Silver Line) runs on the 110 freeway in both directions.
+    # Has to do with the fact that highway length was calculated only for 1 direction (~centerline). 
+    # The length was calculated, 1 mi buffer drawn, then the dissolve (computationally expensive).
+
+    gdf = gdf.assign(
+        pct_highway = gdf.apply(lambda x: 1 if x.pct_highway > 1 
+                                else x.pct_highway, axis=1),
+    )
+    
+    return gdf
+
+
+def parallel_or_intersecting(df, pct_route_threshold=0.5, 
+                             pct_highway_threshold=0.1):
+    # Play with various thresholds to decide how to designate parallel
+    df = df.assign(
+        parallel = df.apply(lambda x: 
+                            1 if (
+                                (x.pct_route >= pct_route_threshold) and 
+                                (x.pct_highway >= pct_highway_threshold)
+                            ) else 0, axis=1),
+    )
+    
+    return df

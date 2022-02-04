@@ -21,6 +21,8 @@ from siuba import *
 import prep_data
 import utils
 
+DATA_PATH = prep_data.DATA_PATH
+
 def grab_missing_stops(ITP_ID, missing_trips_df, stops_df):
     df = (
         tbl.gtfs_schedule.stop_times()
@@ -90,7 +92,7 @@ def routes_for_operators_notin_shapes(routes_part1, stops, route_info):
         alternate_df=missing_trips_stops
     )
     
-    missing_trips_stops2.to_parquet("./missing_routes.parquet")
+    missing_trips_stops2.to_parquet(f"{DATA_PATH}missing_routes.parquet")
 
     routes2 = pd.merge(
         missing_trips_stops2,
@@ -117,12 +119,12 @@ def make_routes_shapefile():
     time0 = datetime.now()
         
     # Read in local parquets
-    stops = pd.read_parquet("./stops.parquet")
-    trips = pd.read_parquet("./trips.parquet")
-    route_info = pd.read_parquet("./route_info.parquet")
-    agencies = pd.read_parquet("./agencies.parquet")
-    routes = gpd.read_parquet("./routes.parquet")
-    latest_itp_id = pd.read_parquet("./latest_itp_id.parquet")
+    stops = pd.read_parquet(f"{DATA_PATH}stops.parquet")
+    trips = pd.read_parquet(f"{DATA_PATH}trips.parquet")
+    route_info = pd.read_parquet(f"{DATA_PATH}route_info.parquet")
+    agencies = pd.read_parquet(f"{DATA_PATH}agencies.parquet")
+    routes = gpd.read_parquet(f"{DATA_PATH}routes.parquet")
+    latest_itp_id = pd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
     time1 = datetime.now()
     print(f"Read in data: {time1-time0}")

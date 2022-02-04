@@ -12,6 +12,9 @@ BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/bus_service_increase"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 
+DATA_PATH = "./data/"
+IMG_PATH = "./img/"
+
 def import_export(DATASET_NAME, OUTPUT_FILE_NAME, GCS=True): 
     """
     DATASET_NAME: str. Name of csv dataset.

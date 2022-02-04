@@ -11,20 +11,37 @@ import folium
 import ipyleaflet
 import inspect
 import json
+import pandas as pd
 
 from branca.element import Figure
 from folium.features import GeoJsonPopup, GeoJsonTooltip
+from folium.plugins import FloatImage
 from ipyleaflet import Map, GeoData, LayersControl, basemaps, WidgetControl
 from ipywidgets import link, FloatSlider, Text, HTML
 from ipywidgets.embed import embed_minimal_html
 
 
 # Centroids for various regions and zoom level
-REGION_CENTROIDS = {
-    "Alameda":  [[37.84, -122.27], 12],
-    "Los Angeles": [[34.00, -118.18], 11],
-    "CA": [[35.8, -119.4], 6],
-}
+def grab_region_centroids():
+    # This parquet is created in shared_utils/shared_data.py
+    df = pd.read_parquet(
+        "gs://calitp-analytics-data/data-analyses/ca_county_centroids.parquet")
+    
+    df = df.assign(
+        centroid = df.centroid.apply(lambda x: x.tolist())
+    )    
+    
+    # Manipulate parquet file to be dictionary to use in map_utils
+    region_centroids = dict(
+        zip(df.county_name, 
+            df[["centroid", "zoom"]].to_dict(orient="records")
+           )
+    )
+
+    return region_centroids
+
+
+REGION_CENTROIDS = grab_region_centroids()
 
 #------------------------------------------------------------------------#
 ## Folium
@@ -73,8 +90,8 @@ def format_folium_tooltip(tooltip_dict):
 def make_folium_choropleth_map(df, plot_col, 
                                popup_dict, tooltip_dict, colorscale, 
                                fig_width, fig_height, 
-                               zoom=REGION_CENTROIDS["CA"][1], 
-                               centroid = REGION_CENTROIDS["CA"][0], 
+                               zoom=REGION_CENTROIDS["CA"]["zoom"], 
+                               centroid = REGION_CENTROIDS["CA"]["centroid"], 
                                title="Chart Title", legend_name = "Legend", **kwargs,
                               ):
     '''
@@ -157,9 +174,12 @@ def make_folium_choropleth_map(df, plot_col,
 # Modify the original function...but generalize the unpacking of the layer portion
 # Keep original function the same, don't break other ppl's work
 def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height, 
-                                    zoom=REGION_CENTROIDS["CA"][1], 
-                                    centroid = REGION_CENTROIDS["CA"][0], 
-                                    title="Chart Title", **kwargs,
+                                    zoom=REGION_CENTROIDS["CA"]["zoom"], 
+                                    centroid = REGION_CENTROIDS["CA"]["centroid"], 
+                                    title="Chart Title", 
+                                    legend_dict = {"legend_url": "", 
+                                                   "legend_bottom": 85, "legend_left": 5}, 
+                                    **kwargs,
                                    ):
     '''
     Parameters:
@@ -190,6 +210,21 @@ def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height,
     zoom: int. 
     centroid: list, of the format [latitude, longitude]
     title: str.
+    legend_dict: dict
+        
+        legend_dict = {
+            "legend_url": str 
+                        GitHub url to the image of the legend manually created
+                        Ex:  ('https://raw.githubusercontent.com/cal-itp/data-analyses/'
+                                'more-highways/bus_service_increase/'
+                                'img/legend_intersecting_parallel.png'
+                        )   
+                        
+            "legend_bottom": int 
+                            value between 0-100, relative to the bottom edge of figure
+            "legend_left": int
+                            value between 0-100, relative to the left edge of figure
+        }
     **kwargs: any other keyword arguments that can passed into existing folium functions
             that are used in this function
     '''
@@ -257,6 +292,16 @@ def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height,
                          )
         layer.add_to(m)
     
+    # Legend doesn't show up with multiple layers
+    # One way around, create the colorscale(s) as one image and save it 
+    # Then, insert that legend as a URL to be an image
+    # I think legend_bottom and legend_left numbers must be 0-100? 
+    # Going even 95 pushes it to the top edge of the figure
+    image = FloatImage(legend_dict["legend_url"], 
+                       legend_dict["legend_bottom"], 
+                       legend_dict["legend_left"]).add_to(m)
+    
+    
     folium.LayerControl('topright', collapsed=False).add_to(m)
     
     # Now, attach everything to Figure    
@@ -271,8 +316,8 @@ def make_folium_multiple_layers_map(LAYERS_DICT, fig_width, fig_height,
 def make_ipyleaflet_choropleth_map(gdf, plot_col, geometry_col,
                                    choropleth_dict,
                                    colorscale, 
-                                   zoom=REGION_CENTROIDS["CA"][1], 
-                                   centroid = REGION_CENTROIDS["CA"][0], 
+                                   zoom=REGION_CENTROIDS["CA"]["zoom"], 
+                                   centroid = REGION_CENTROIDS["CA"]["centroid"], 
                                    **kwargs,
                                   ):
     '''

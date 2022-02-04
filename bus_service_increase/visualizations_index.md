@@ -11,3 +11,10 @@
 ## Charts
 
 * [Scatterplot: Pop / Job Density vs Service Density](https://docs.calitp.org/data-analyses/bus_service_increase/img/scatter_popjobdensity_servicedensity.html)
+
+## Parallel and Intersecting Transit Routes
+* [LA Metro (182)](https://docs.calitp.org/data-analyses/bus_service_increase/img/parallel_182.html)
+* [SJ Valley Transportation Authority (294)](https://docs.calitp.org/data-analyses/bus_service_increase/img/parallel_294.html)
+* [BART (279)](https://docs.calitp.org/data-analyses/bus_service_increase/img/parallel_279.html)
+* [SF Muni (282)](https://docs.calitp.org/data-analyses/bus_service_increase/img/parallel_282.html)
+* [SD Metropolitan Transit System (278)](https://docs.calitp.org/data-analyses/bus_service_increase/img/parallel_278.html)
