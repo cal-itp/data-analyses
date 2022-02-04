@@ -33,6 +33,50 @@ def get_time_calculations(df):
     
     return df
 
+def add_zeros(one_operator_df):
+    '''
+    Creates rows with 0 trips for hour for all departure hours x shape_ids where that shape_id wasn't running at all
+    by first generating a multiindex of all possible shape_id/day_name/departure_hour,
+    then setting that as the index for the single-operator shape_frequency df.
+    That results in NaNs for departure_hours where no service currently exists,
+    then just an easy .fillna(0) turns those rows into useful data for calculating increases.
+    '''
+    shape_frequency = one_operator_df
+    ## insert nulls or 0 for missing values as appropriate
+    shapes_routes = shape_frequency[['shape_id', 'route_id']].set_index('shape_id').to_dict()['route_id']
+    iterables = [shape_frequency.shape_id.unique(), ['Thursday', 'Saturday', 'Sunday'], range(0, 24)]
+    multi_ix = pd.MultiIndex.from_product(iterables, names=['shape_id', 'day_name', 'departure_hour'])
+    shape_frequency = shape_frequency.set_index(['shape_id', 'day_name', 'departure_hour'])
+    try:
+        shape_frequency = shape_frequency.reindex(multi_ix).reset_index()
+    except ValueError: ## aggregate rare shape_ids with multiple routes (these may be errors)
+        duplicate_indicies = shape_frequency.index[shape_frequency.index.duplicated()]
+    #     print(f'''
+    #     caution, operator has {len(duplicate_indicies)} duplicate shape/day/departure_hour \
+    # out of an ix of {len(shape_frequency.index)}
+    #     ''')
+        assert len(duplicate_indicies) < len(shape_frequency.index) / 100, 'too many duplicate shape/day/departure_hour'
+        shape_frequency = shape_frequency.groupby(['shape_id', 'day_name', 'departure_hour']).agg(
+            {'calitp_itp_id':max, 'route_id':max, 'trips_per_hour':sum, 'mean_runtime_min':np.mean})
+        shape_frequency = shape_frequency.reindex(multi_ix).reset_index()
+
+    shape_frequency['calitp_itp_id'] = (shape_frequency['calitp_itp_id']
+                                        .fillna(method='bfill')
+                                        .fillna(method='ffill')
+                                       )
+    shape_frequency['trips_per_hour'] = shape_frequency['trips_per_hour'].fillna(0)
+    return shape_frequency
+
+def add_all_zeros(shape_frequency_df):
+    '''
+    Wrapper to apply add_zeros to entire df, fix format
+    '''
+    df_with_zeros = shape_frequency_df.groupby('calitp_itp_id').apply(add_zeros)
+    df_with_zeros = (df_with_zeros.reset_index(drop=True)
+             .astype({'calitp_itp_id': 'int64'}) ##fix type
+             [['calitp_itp_id', 'shape_id', 'departure_hour',
+               'day_name', 'route_id', 'trips_per_hour', 'mean_runtime_min']]) ##order to match original
+    return df_with_zeros
 
 def calculate_runtime_hourlytrips(df):
     # Calculate run time for a trip
@@ -111,7 +155,10 @@ def calculate_runtime_hourlytrips(df):
     # Now, drop ITP_ID==200 to use individual operator feeds
     shape_frequency3 = shape_frequency2 >> filter(_.calitp_itp_id != 200)
     
-    return shape_frequency3
+    # Add zeros for each hour when existing service doesn't run at all
+    shape_frequency4 = add_all_zeros(shape_frequency3)
+     
+    return shape_frequency4
 
 
 def attach_funding(all_operators_df):
