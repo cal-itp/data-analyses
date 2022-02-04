@@ -95,13 +95,9 @@ def load_cleaned_organizations_data():
     organizations =  pd.read_csv(f'{GCS_FILE_PATH}{File_Organization_Clean}')
     organizations = to_snakecase(organizations)
     #Only keeping relevant columns
-    organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status','#_services_w__complete_rt_status',
-       '#_fixed_route_services_w__static_gtfs',
-       'complete_static_gtfs_coverage__1=yes_', 'complete_rt_coverage',
-       '>=1_gtfs_feed_for_any_service__1=yes_',
-       '>=_1_complete_rt_set__1=yes_']]
-   #Renaming columns 
-    organizations = organizations.rename(columns = {'ntp_id':'ntd_id','#_services_w__complete_rt_status':'number_services_w_complete_rt_status', 'complete_static_gtfs_coverage__1=yes_':'complete_static_gtfs_coverage_1_means_yes',     '>=1_gtfs_feed_for_any_service__1=yes_':'gt_1_gtfs_for_any_service_1_means_yes', '>=_1_complete_rt_set__1=yes_':'gt_1_complete_rt_set_1_means_yes'})
+    organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status']]
+    #Renaming columns 
+    organizations = organizations.rename(columns = {'ntp_id':'ntd_id'})
     #making sure ntd_id is a string
     organizations.ntd_id = organizations.ntd_id.astype(str)
     return organizations
@@ -113,6 +109,14 @@ def load_agencyinfo():
     agency_info = agencies>>filter(_.state=='CA')
     
     return agency_info
+
+def GTFS():
+    GTFS_File =  "services-GTFS Schedule Status.csv"
+    GTFS =  pd.read_csv(f'{GCS_FILE_PATH}{GTFS_File}')
+    GTFS = to_snakecase(GTFS)
+     #Only keeping relevant columns
+    GTFS = GTFS [['name','provider','operator','gtfs_schedule_status']]
+    return GTFS
 
 """
 Old Functions
