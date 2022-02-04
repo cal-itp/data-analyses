@@ -115,58 +115,6 @@ def find_top(df):
     return final
 
 
-#     tops_1 = (df
-#           >>count(_.prefix)
-#           >>arrange(-_.n)).head(20
-#                                ).reset_index(drop=True
-#                                             ).rename(columns={"n": "unique_prefix"})
-#     tops_2 = (df
-#           >>count(_.prepared_y)
-#           >>arrange(-_.n)).head(20
-#                                ).reset_index(drop=True
-#                                             ).rename(columns={"n": "unique_prepared_y"})
-#     tops_3 = (df
-#           >>count(_.status_comment)
-#           >>arrange(-_.n)).head(20
-#                                ).reset_index(drop=True
-#                                             ).rename(columns={"n": "unique_status_comment"})
-#     tops_4 = (df
-#           >>count(_.project_location)
-#           >>arrange(-_.n)).head(20
-#                                ).reset_index(drop=True
-#                                             ).rename(columns={"n": "unique_project_location"})
-#     tops_5 = (df
-#           >>count(_.type_of_work)
-#           >>arrange(-_.n)).head(20
-#                                ).reset_index(drop=True
-#                                             ).rename(columns={"n": "unique_type_of_work"})
-#     tops_6 = (df
-#           >>count(_.mpo)
-#           >>arrange(-_.n)).head(20
-#                                ).reset_index(drop=True
-#                                             ).rename(columns={"n": "unique_mpo"})
-#     tops_7 = (df
-#           >>count(_.primary_agency_name)
-#           >>arrange(-_.n)).head(20
-#                                ).reset_index(drop=True
-#                                             ).rename(columns={"n": "unique_primary_agency_name"})
-#     tops_8 = (df
-#           >>count(_.dist)
-#           >>arrange(-_.n)).head(20
-#                                ).reset_index(drop=True
-#                                             ).rename(columns={"n": "unique_dist"})
-    
-    
-#     test1 = tops_1.join(tops_2, how='outer')
-#     test2 = test1.join(tops_3, how='outer')
-#     test3 = test2.join(tops_4, how='outer')
-#     test4 = test3.join(tops_5, how='outer')
-#     test5 = test4.join(tops_6, how='outer')
-#     test6 = test5.join(tops_7, how='outer')
-#     tops = test6.join(tops_8, how='outer')
-                       
-    # return tops
-
 
 """
 Labeling
