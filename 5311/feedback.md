@@ -34,3 +34,11 @@ The GCS file path is something repeated in a handful of times in the script. Can
 Ex: remove the white space in `5311 ` to be `5311`...do you have to fix it once or fix it a handful of times? 
 
 In notebooks, you should reference this file path using a variable `data_prep.GCS_FILE_PATH` or `GCS_FILE_PATH` instead of typing out the full path.
+
+
+#### Clean up notebooks
+
+Once stuff from notebooks is moved into scripts, clean up the exploratory notebooks. Keep some to track thought processes when debugging the data. No more duplicate notebooks showing the same thing.
+
+Use naming scheme to separate tasks for collaboration. A1, A2, B1, B2, etc.
+
