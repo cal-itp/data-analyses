@@ -53,7 +53,7 @@ Use functions related to the following:
 <br>Merging datasets together using the 2 crosswalks already available.
     * Merge NTD with GTFS (left join) --> `m1_df`
     * Merge grants with m1_df (left join) --> `m2_df`
-    * Within `pd.merge`, explicitly define your `how=` to choose left or inner join, and set `indicator=True`. Print outputs to show the join results.
+    * Within `pd.merge`, explicitly define your `how=` to choose left or inner join, define `validate=`, and set `indicator=True`. Print outputs to show the join results.
     * Deal with missing info: left joins mean grant recipients that do not have NTD IDs, and subsequently, no ITP IDs are kept. This is ok, but have a way to flag and remove these from visualizations related to GTFS status.
 
 1. Aggregate.
