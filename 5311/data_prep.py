@@ -39,10 +39,20 @@ def load_grantprojects5339():
     #get just the 5339 agencies
     df = (df>>filter(_.funding_program.str.contains('5339')))
     return df
-        
 
-def load_vehiclesdata():
-    vehicles_info =  pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020-Vehicles_1.xlsm', sheet_name = ['Age Distribution'])
+def load_catalog_gtfs(): 
+    
+    catalog = intake.open_catalog("catalog.yml")
+    gtfs_status = catalog.gtfs_status.read()
+    gtfs_status = to_snakecase(gtfs_status)
+    
+    
+    return gtfs_status 
+
+def load_cleaned_vehiclesdata():
+    File_Vehicles =  "cleaned_vehicles.xlsx"
+    vehicles_info =  pd.read_excel(f'{GCS_FILE_PATH}{File_Vehicles}',
+                                   sheet_name = ['Age Distribution'])
     pd.set_option('display.max_columns', None)
     #cannot use to_snakecase because of integer column names
     vehicles_info = vehicles_info['Age Distribution']
@@ -95,17 +105,14 @@ def load_vehiclesdata():
     
     return vehicles
 
-def load_organizations_data():
-    organizations =  pd.read_csv('gs://calitp-analytics-data/data-analyses/5311 /organizations-all_organizations.csv')
+def load_cleaned_organizations_data():
+    File_Organization_Clean =  "organizations_cleaned.csv"
+    organizations =  pd.read_csv(f'{GCS_FILE_PATH}{File_Organization_Clean}')
     organizations = to_snakecase(organizations)
     #Only keeping relevant columns
-    organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status','#_services_w__complete_rt_status',
-       '#_fixed_route_services_w__static_gtfs',
-       'complete_static_gtfs_coverage__1=yes_', 'complete_rt_coverage',
-       '>=1_gtfs_feed_for_any_service__1=yes_',
-       '>=_1_complete_rt_set__1=yes_']]
-   #Renaming columns 
-    organizations = organizations.rename(columns = {'ntp_id':'ntd_id','#_services_w__complete_rt_status':'number_services_w_complete_rt_status', 'complete_static_gtfs_coverage__1=yes_':'complete_static_gtfs_coverage_1_means_yes',     '>=1_gtfs_feed_for_any_service__1=yes_':'gt_1_gtfs_for_any_service_1_means_yes', '>=_1_complete_rt_set__1=yes_':'gt_1_complete_rt_set_1_means_yes'})
+    organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status']]
+    #Renaming columns 
+    organizations = organizations.rename(columns = {'ntp_id':'ntd_id'})
     #making sure ntd_id is a string
     organizations.ntd_id = organizations.ntd_id.astype(str)
     return organizations
@@ -118,20 +125,20 @@ def load_agencyinfo():
     
     return agency_info
 
+def GTFS():
+    GTFS_File =  "services-GTFS Schedule Status.csv"
+    GTFS =  pd.read_csv(f'{GCS_FILE_PATH}{GTFS_File}')
+    GTFS = to_snakecase(GTFS)
+     #Only keeping relevant columns
+    GTFS = GTFS [['name','provider','operator','gtfs_schedule_status']]
+    return GTFS
 
-def load_catalog_gtfs(): 
-    
-    catalog = intake.open_catalog("catalog.yml")
-    gtfs_status = catalog.gtfs_status.read()
-    gtfs_status = to_snakecase(gtfs_status)
-    
-    
-    return gtfs_status 
+"""
+Old Functions
 
-def load_vehiclesdata2():
-    File_Vehicles =  "cleaned_vehicles.xlsx"
-    vehicles_info =  pd.read_excel(f'{GCS_FILE_PATH}{File_Vehicles}',
-                                   sheet_name = ['Age Distribution'])
+"""
+def load_vehiclesdata():
+    vehicles_info =  pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020-Vehicles_1.xlsm', sheet_name = ['Age Distribution'])
     pd.set_option('display.max_columns', None)
     #cannot use to_snakecase because of integer column names
     vehicles_info = vehicles_info['Age Distribution']
@@ -220,9 +227,8 @@ def load_vehiclesdata2():
     
     return vehicles
 
-def load_cleaned_organizations_data():
-    File_Organization_Clean =  "organizations_cleaned.csv"
-    organizations =  pd.read_csv(f'{GCS_FILE_PATH}{File_Organization_Clean}')
+def load_organizations_data():
+    organizations =  pd.read_csv('gs://calitp-analytics-data/data-analyses/5311 /organizations-all_organizations.csv')
     organizations = to_snakecase(organizations)
     #Only keeping relevant columns
     organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status','#_services_w__complete_rt_status',
