@@ -302,7 +302,10 @@ def create_maps(df, CHART_IMG_PATH):
     fig.save(f"{CHART_IMG_PATH}opportunity_tracts.html")
 
 
-df = import_processed_data()
-# additional function to subset
-create_charts(df, CHART_IMG_PATH="./test_img/")
-create_maps(df, CHART_IMG_PATH = "./test_img/")
+def create_all_viz(CHART_IMG_PATH):
+    df = import_processed_data()
+    
+    # additional function to subset
+    
+    create_charts(df, CHART_IMG_PATH)
+    create_maps(df, CHART_IMG_PATH)
