@@ -12,27 +12,98 @@ https://datacatalog.urban.org/sites/default/files/data-dictionary-files/LODESTec
 """
 import geopandas as gpd
 import intake
+import numpy as np
 import pandas as pd
 
 import shared_utils
 import utils
-import calenviroscreen_utils
 
 catalog = intake.open_catalog("./catalog.yml")
 
+#--------------------------------------------------------#
+### CalEnviroScreen functions
+#--------------------------------------------------------#
+def define_equity_groups(df, percentile_col = ["CIscoreP"], num_groups=5):
+    """
+    df: pandas.DataFrame
+    percentile_col: list.
+                    List of columns with values that are percentils, to be
+                    grouped into bins.
+    num_groups: integer.
+                Number of bins, groups. Ex: for quartiles, num_groups=4.
+                
+    `pd.cut` vs `pd.qcut`: 
+    https://stackoverflow.com/questions/30211923/what-is-the-difference-between-pandas-qcut-and-pandas-cut            
+    """
+    
+    for col in percentile_col:
+        new_col = f"{col}_group"
+        # -999 should be replaced as NaN, so it doesn't throw off the binning of groups
+        df[col] = df[col].replace(-999, np.nan)
+        df[new_col] = pd.cut(df[col], bins=num_groups, labels=False) + 1
+
+    return df
+
+
+def prep_calenviroscreen(df):
+    # Fix tract ID and calculate pop density
+    df = (df.assign(
+            Tract = df.Tract.apply(lambda x: '0' + str(x)[:-2]).astype(str),
+            sq_mi = df.geometry.area * shared_utils.geography_utils.SQ_MI_PER_SQ_M,
+        ).rename(columns = {
+            "TotPop19": "Population",
+            "ApproxLoc": "City",
+        })
+    )
+    df['pop_sq_mi'] = df.Population / df.sq_mi
+    
+    df2 = define_equity_groups(
+        df,
+        percentile_col =  ["CIscoreP", "PolBurdP", "PopCharP"], 
+        num_groups = 3)
+    
+    # Rename columns
+    keep_cols = [
+        'Tract', 'ZIP', 'Population',
+        'sq_mi', 'pop_sq_mi',
+        'CIscoreP', 'PolBurdP', 'PopCharP',
+        'CIscoreP_group', 'PolBurdP_group', 'PopCharP_group',
+        'County', 'City', 'geometry',  
+    ]
+    
+    df3 = (df2[keep_cols]
+           .rename(columns = 
+                     {"CIscoreP_group": "equity_group",
+                     "PolBurdP_group": "pollution_group",
+                     "PopCharP_group": "popchar_group",
+                     "CIscoreP": "overall_ptile",
+                     "PolBurdP": "pollution_ptile",
+                     "PopCharP": "popchar_ptile"}
+                    )
+           .sort_values(by="Tract")
+           .reset_index(drop=True)
+          )
+    
+    return df3
+
+
+
+#--------------------------------------------------------#
+### LEHD functions
+#--------------------------------------------------------#
 # Download LEHD data from Urban Institute
 URBAN_URL = "https://urban-data-catalog.s3.amazonaws.com/drupal-root-live/"
 DATE_DOWNLOAD = "2021/04/19/"
 
 # Doing all_se01-se03 is the same as primary jobs
 # summing up to tract level gives same df.describe() results
-datasets = ["wac_all_se01_tract_minus_fed", 
+LEHD_DATASETS = ["wac_all_se01_tract_minus_fed", 
             "wac_all_se02_tract_minus_fed",
             "wac_all_se03_tract_minus_fed", 
             "wac_fed_tract"]
 
 '''
-for dataset in datasets:
+for dataset in LEHD_DATASETS:
     shared_utils.utils.import_csv_export_parquet(
         DATASET_NAME = f"{URBAN_URL}{DATE_DOWNLOAD}{dataset}",
         OUTPUT_FILE_NAME = dataset, 
@@ -41,9 +112,6 @@ for dataset in datasets:
     )
 '''
 
-#--------------------------------------------------------#
-### LEHD functions
-#--------------------------------------------------------#
 def process_lehd(df):
     # Subset to CA, keep maxiumum year, and only keep total jobs
     keep_cols = ["trct", "c000"]
@@ -62,6 +130,9 @@ def process_lehd(df):
     return df
 
 
+#--------------------------------------------------------#
+### Functions to merge CalEnviroScreen and LEHD 
+#--------------------------------------------------------#
 # Merge and clean up 
 def merge_and_process(data_to_merge = []):
     """
@@ -97,12 +168,9 @@ def merge_and_process(data_to_merge = []):
     return final   
     
     
-def merge_calenviroscreen_lehd(calenviroscreen, lehd):
-    calenviroscreen = catalog.calenviroscreen_raw.read()
-    gdf = calenviroscreen_utils.prep_calenviroscreen(calenviroscreen)
-    
+def merge_calenviroscreen_lehd(calenviroscreen, lehd):    
     # Merge LEHD with CalEnviroScreen
-    df = pd.merge(gdf, lehd, 
+    df = pd.merge(calenviroscreen, lehd, 
                   on = "Tract", how = "left", validate = "1:1"
                  )
     
@@ -121,16 +189,15 @@ def merge_calenviroscreen_lehd(calenviroscreen, lehd):
     return df
 
 
-#--------------------------------------------------------#
-### Function to make cleaned data
-#--------------------------------------------------------#
-def generate_calenviroscreen_lehd_data(lehd_datasets):
+## Put all functions above together to generate cleaned CalEnviroScreen + LEHD data
+def generate_calenviroscreen_lehd_data():
     # CalEnviroScreen data (gdf)
     gdf = catalog.calenviroscreen_raw.read()
+    gdf = prep_calenviroscreen(gdf)
     
     # LEHD Data
     lehd_dfs = {}
-    for d in lehd_datasets:
+    for d in LEHD_DATASETS:
         lehd_dfs[d] = pd.read_parquet(f"{utils.GCS_FILE_PATH}{d}.parquet")
     
     cleaned_dfs = []
@@ -146,49 +213,6 @@ def generate_calenviroscreen_lehd_data(lehd_datasets):
     return df
 
 
-# Stop times by tract
-def generate_stop_times_tract_data():
-    df = catalog.bus_stop_times_by_tract.read()
-    
-    df = df.assign(
-        num_arrivals = df.num_arrivals.fillna(0),
-        num_jobs = df.num_jobs.fillna(0),
-        stop_id = df.stop_id.fillna(0),
-        itp_id = df.itp_id.fillna(0),
-        num_pop_jobs = df.num_pop_jobs.fillna(0),
-        popdensity_group = pd.qcut(df.pop_sq_mi, q=3, labels=False) + 1,
-        jobdensity_group = pd.qcut(df.jobs_sq_mi, q=3, labels=False) + 1,
-        popjobdensity_group = pd.qcut(df.popjobs_sq_mi, q=3, labels=False) + 1,
-    )
 
-    # These columns may result in NaNs becuase pop or jobs can be zero as denom
-    # Let's keep it and allow arrivals_groups to be 0 (instead of 1-3)
-    # Should only be a problem if pop OR jobs is zero or if pop AND jobs is zero.
-    df = df.assign(
-        arrivals_per_1k_p = (df.num_arrivals / df.Population) * 1_000,
-        arrivals_per_1k_j = (df.num_arrivals / df.num_jobs) * 1_000,
-        arrivals_per_1k_pj = (df.num_arrivals / df.num_pop_jobs) * 1_000,
-    )
 
-    df = df.assign(
-        arrivals_group_p = pd.qcut(df.arrivals_per_1k_p, q=3, labels=False) + 1,
-        arrivals_group_j =  pd.qcut(df.arrivals_per_1k_j, q=3, labels=False) + 1,
-        arrivals_group_pj = pd.qcut(df.arrivals_per_1k_pj, q=3, labels=False) + 1,
-    )
-    
-    round_me = [
-        'pop_sq_mi', 'jobs_sq_mi', 'popjobs_sq_mi', 
-        'overall_ptile', 'pollution_ptile', 'popchar_ptile',
-        'arrivals_per_1k_p', 'arrivals_per_1k_j', 'arrivals_per_1k_pj',
-    ]
-    
-    integrify_me = [
-        'equity_group', 'num_jobs', 'num_arrivals', 
-        'stop_id', 'itp_id',
-        'arrivals_group_p', 'arrivals_group_j', 'arrivals_group_pj',
-    ]
-    
-    df[round_me] = df[round_me].round(2)
-    df[integrify_me] = df[integrify_me].fillna(0).astype(int)
 
-    return df

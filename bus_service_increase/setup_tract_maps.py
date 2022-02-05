@@ -11,4 +11,3 @@ def grab_legend_thresholds(df, plot_col, arrivals_group):
     colormap_cutoff = [cut1, cut2, cut3]
     
     return colormap_cutoff, MIN_VALUE, MAX_VALUE
-

@@ -158,7 +158,8 @@ def make_routes_shapefile(ITP_ID_LIST = [], CRS="EPSG:4326", alternate_df=None):
             single_route['geometry'] = route_line
             single_route = gpd.GeoDataFrame(single_route, crs=WGS84)
             
-            all_routes = all_routes.append(single_route)
+            #https://stackoverflow.com/questions/15819050/pandas-dataframe-concat-vs-append/48168086
+            all_routes = pd.concat([all_routes, single_route], ignore_index=True, axis=0)
     
     all_routes = (all_routes.to_crs(CRS)
                   .sort_values(["calitp_itp_id", "shape_id"])
