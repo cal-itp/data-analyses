@@ -9,6 +9,7 @@ from siuba import *
 from calitp import *
 from plotnine import *
 import intake
+from shared_utils import geography_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"
 
@@ -60,21 +61,35 @@ def load_vehiclesdata():
     
     
     def get_vehicle_groups(vehicles):
-        Automobiles = ['Automobile','Automobiles (Service)','Sports Utility Vehicle']
-        Bus = ['Bus','Over-the-road Bus']
-        Vans = ['Van','Trucks and other Rubber Tire Vehicles (Service)','Minivan','Cutaway']
+        Automobiles = ['Automobile','Sports Utility Vehicle']
+        Bus = ['Bus','Over-the-road Bus','Articulated Bus','Double Decker Bus','Trolleybus']
+        Vans = ['Van','','Minivan','Cutaway']
+        Trains = ['Vintage Trolley','Automated Guideway Vehicle','Heavy Rail Passenger Car','Light Rail Vehicle',
+                 'Commuter Rail Self-Propelled Passenger Car','Commuter Rail Passenger Coach','Commuter Rail Locomotive',
+                'Cable Car']
+        Service = ['Automobiles (Service)',
+                   'Trucks and other Rubber Tire Vehicles (Service)',
+                   'Steel Wheel Vehicles (Service)']
+        other = ['Other','Ferryboat']
         
         def replace_modes(row):
             if row.vehicle_type in Automobiles:
                 return "Automobiles"
             elif row.vehicle_type in Bus:
                 return "Bus"
+            elif row.vehicle_type in Trains:
+                return "Train"
+            elif row.vehicle_type in Vans:
+                return "Van"
+            elif row.vehicle_type in Service:
+                return "Service"
             else:
-                return "Vans"
+                return "Other"
         
         vehicles["vehicle_groups"] = vehicles.apply(lambda x: replace_modes(x), axis=1)
     
         return vehicles
+    
 
     vehicles = (get_vehicle_groups(vehicles))
     
@@ -135,23 +150,73 @@ def load_vehiclesdata2():
     
     
     def get_vehicle_groups(vehicles):
-        Automobiles = ['Automobile','Automobiles (Service)','Sports Utility Vehicle']
-        Bus = ['Bus','Over-the-road Bus']
-        Vans = ['Van','Trucks and other Rubber Tire Vehicles (Service)','Minivan','Cutaway']
+        Automobiles = ['Automobile','Sports Utility Vehicle']
+        Bus = ['Bus','Over-the-road Bus','Articulated Bus','Double Decker Bus','Trolleybus']
+        Vans = ['Van','','Minivan','Cutaway']
+        Trains = ['Vintage Trolley','Automated Guideway Vehicle','Heavy Rail Passenger Car','Light Rail Vehicle',
+                 'Commuter Rail Self-Propelled Passenger Car','Commuter Rail Passenger Coach','Commuter Rail Locomotive',
+                'Cable Car']
+        Service = ['Automobiles (Service)',
+                   'Trucks and other Rubber Tire Vehicles (Service)',
+                   'Steel Wheel Vehicles (Service)']
+        other = ['Other','Ferryboat']
         
         def replace_modes(row):
             if row.vehicle_type in Automobiles:
                 return "Automobiles"
             elif row.vehicle_type in Bus:
                 return "Bus"
+            elif row.vehicle_type in Trains:
+                return "Train"
+            elif row.vehicle_type in Vans:
+                return "Van"
+            elif row.vehicle_type in Service:
+                return "Service"
             else:
-                return "Vans"
+                return "Other"
         
         vehicles["vehicle_groups"] = vehicles.apply(lambda x: replace_modes(x), axis=1)
     
         return vehicles
+    
+    def get_age_and_doors(df):   
+
+        df = df.rename(columns={'_60+': '_60plus'})
+
+        age = geography_utils.aggregate_by_geography(df, 
+                           group_cols = ["agency"],
+                           sum_cols = ["total_vehicles", "_0_9","_10_12", "_13_15", "_16_20","_21_25","_26_30","_31_60","_60plus"],
+                             mean_cols = ["average_age_of_fleet__in_years_", "average_lifetime_miles_per_vehicle"]
+                                          ).sort_values(["agency","total_vehicles"], ascending=[True, True])
+    
+
+        older = (age.query('_21_25 != 0 or _26_30 != 0 or _31_60 != 0 or _60plus!=0'))
+        older["sum_15plus"] = older[["_16_20","_21_25","_26_30","_31_60","_60plus"]].sum(axis=1)
+        older = (older>>select(_.agency, _.sum_15plus))
+
+        age = pd.merge(age, older, on=['agency'], how='left')
+
+        types = (df
+                 >>select(_.agency, _.vehicle_groups, _._0_9, _._10_12, _._13_15, _._16_20, _._21_25, _._26_30, _._31_60, _._60plus))
+        types['sum_type'] = types[['_0_9', '_10_12', '_13_15', '_16_20', '_21_25','_26_30','_31_60','_60plus']].sum(axis=1)
+        #https://towardsdatascience.com/pandas-pivot-the-ultimate-guide-5c693e0771f3
+        types = (types.pivot_table(index="agency", columns="vehicle_groups", values="sum_type", aggfunc=np.sum, fill_value=0)).reset_index()
+
+        types['automobiles_door']= (types['Automobiles']*2)
+        types['bus_doors']= (types['Bus']*2)
+        types['train_doors']=(types['Train']*2)
+        types['van_doors']=(types['Van']*1)
+
+        types["doors_sum"] = types[["automobiles_door","bus_doors","train_doors","van_doors"]].sum(axis=1)
+
+        agency_counts = pd.merge(age, types, on=['agency'], how='left')
+    
+          
+
+        return agency_counts
 
     vehicles = (get_vehicle_groups(vehicles))
+    vehicles = (get_age_and_doors(vehicles))
     
     return vehicles
 
