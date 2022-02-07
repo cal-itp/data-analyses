@@ -13,6 +13,9 @@ import shapely
 import datetime as dt
 import time
 from zoneinfo import ZoneInfo
+from tqdm import tqdm
+
+import numpy as np
 
 class TripPositionInterpolator:
     ''' Interpolates the location of a specific trip using either rt or schedule data
@@ -57,47 +60,27 @@ class TripPositionInterpolator:
         ).geometry.iloc[0]
         self.direction = primary_cardinal_direction(origin, destination)
         
+        
     def time_at_position(self, desired_position):
         ''' Returns an estimate of this trip's arrival time at any linear position along the shape, based
         on the nearest two positions.
         desired_position: int (meters from start of shape)
         '''
-        global bounding_points
-        
-        try:
-            next_point = (self.cleaned_positions ##TODO define in subclasses
-                  >> filter(_.shape_meters > desired_position)
-                  >> filter(_.shape_meters == _.shape_meters.min())
-                 )
-            prev_point = (self.cleaned_positions
-                  >> filter(_.shape_meters < desired_position)
-                  >> filter(_.shape_meters == _.shape_meters.max())
-                 )
-            bounding_points = (prev_point.append(next_point).copy().reset_index(drop=True)
-                    >> select(-_.secs_from_last, -_.meters_from_last, -_.speed_from_last)) ## drop in case bounding points are nonconsecutive, TODO implement in subclass
-            secs_from_last = (bounding_points.loc[1][self.time_col] - bounding_points.loc[0][self.time_col]).seconds
-            meters_from_last = bounding_points.loc[1].shape_meters - bounding_points.loc[0].shape_meters
-            speed_from_last = meters_from_last / secs_from_last
-
-            meters_position_to_next = bounding_points.loc[1].shape_meters - desired_position
-            est_seconds_to_next = meters_position_to_next / speed_from_last
-            est_td_to_next = dt.timedelta(seconds=est_seconds_to_next)
-            est_dt = bounding_points.iloc[-1][self.time_col] - est_td_to_next ##TODO time_col in subclass
-
-            return est_dt
-        except KeyError:
-            # print(f'insufficient bounding points for trip {self.trip_key}, location {desired_position}', end=': ')
-            # print(f'start/end of route?')
+        interpolation = time_at_position_numba(desired_position, self._shape_array, self._dt_array)
+        if interpolation:
+            return dt.datetime.utcfromtimestamp(interpolation)
+        else:
             return None
         
     def detailed_speed_map(self):
         ''' Generates a detailed map of speeds along the trip based on all valid position data
         '''
         gdf = self.cleaned_positions.copy()
+        gdf['speed_mph'] = gdf.speed_from_last * MPH_PER_MPS
+        gdf = gdf.round({'speed_mph': 1, 'shape_meters': 0})
         gdf['time'] = gdf[self.time_col].apply(lambda x: x.strftime('%H:%M:%S'))
         gdf = gdf >> select(_.geometry, _.time,
-                            _.shape_meters, _.last_loc, _.speed_from_last)
-        gdf['speed_mph'] = gdf.speed_from_last * MPH_PER_MPS
+                            _.shape_meters, _.last_loc, _.speed_mph)
         gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape.geometry.iloc[0],
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
@@ -106,7 +89,6 @@ class TripPositionInterpolator:
         gdf = gdf.to_crs(WGS84)
         centroid = gdf.dissolve().centroid
         gdf = gdf >> filter(_.speed_mph > 0)
-        gdf = gdf.round({'speed_mph': 1, 'shape_meters': 0})
 
         gdf['shape_id'] = self.shape_id
         gdf['direction_id'] = self.direction_id
@@ -115,6 +97,7 @@ class TripPositionInterpolator:
         if gdf.speed_mph.max() > 80: ## TODO better system to raise errors on impossibly fast speeds
             print(f'speed above 80 for trip {self.trip_key}, dropping')
             gdf = gdf >> filter(_.speed_mph < 80)
+        self.debug_dict['map_gdf'] = gdf
 
         colorscale = branca.colormap.step.RdYlGn_08.scale(vmin=gdf.speed_mph.min(), 
                      vmax=gdf.speed_mph.max())
@@ -175,6 +158,11 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
             self.progressing_positions = self.progressing_positions >> filter(_.progressed)
         self.cleaned_positions = self.progressing_positions ## for position and map methods in TripPositionInterpolator
         self.cleaned_positions = self.cleaned_positions >> arrange(self.time_col)
+        self._shape_array = self.cleaned_positions.shape_meters.to_numpy()
+        self._dt_array = (self.cleaned_positions[self.time_col].to_numpy()
+                                      .astype('datetime64[s]')
+                                      .astype('float64')
+                                     )
 
     
     def _shift_calculate(self, vehicle_positions):
@@ -184,13 +172,15 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
         #     self.debug_dict[self.progressing_positions.shape[0]] = self.progressing_positions.copy()
         
         vehicle_positions = vehicle_positions >> arrange(self.time_col) ## unnecessary?
-        vehicle_positions['last_time'] = vehicle_positions[self.time_col].shift(1)
-        vehicle_positions['last_loc'] = vehicle_positions.shape_meters.shift(1)
-        vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col] - vehicle_positions.last_time
+        # vehicle_positions['last_time'] = vehicle_positions[self.time_col].shift(1)
+        # vehicle_positions['last_loc'] = vehicle_positions.shape_meters.shift(1)
+        # vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col] - vehicle_positions.last_time
+        vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col].diff()
         vehicle_positions.secs_from_last = (vehicle_positions.secs_from_last
                                         .apply(lambda x: x.seconds))
-        vehicle_positions['meters_from_last'] = (vehicle_positions.shape_meters
-                                                      - vehicle_positions.last_loc)
+        # vehicle_positions['meters_from_last'] = (vehicle_positions.shape_meters
+        #                                               - vehicle_positions.last_loc)
+        vehicle_positions['meters_from_last'] = vehicle_positions.shape_meters.diff()
         vehicle_positions['progressed'] = vehicle_positions['meters_from_last'] > 0 ## has the bus moved ahead?
         vehicle_positions['speed_from_last'] = (vehicle_positions.meters_from_last
                                                      / vehicle_positions.secs_from_last) ## meters/second
@@ -220,11 +210,12 @@ class ScheduleInterpolator(TripPositionInterpolator):
                                                      / self.position_gdf.secs_from_last) ## meters/second
         self.cleaned_positions = self.position_gdf ## for position and map methods in TripPositionInterpolator
         self.cleaned_positions = self.cleaned_positions >> arrange(self.time_col)
-        
+
 class OperatorDayAnalysis:
     '''New top-level class for rt delay/speed analysis of a single operator on a single day
     '''
-    def __init__(self, itp_id, analysis_date):
+    def __init__(self, itp_id, analysis_date, pbar = None):
+        self.pbar = pbar
         self.debug_dict = {}
         '''
         itp_id: an itp_id (string or integer)
@@ -277,6 +268,9 @@ class OperatorDayAnalysis:
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
         self.position_interpolators = {}
         # for trip_id in self.vp_trip_ids[:5]: ##small test
+        if type(self.pbar) != type(None):
+            self.pbar.reset(total=len(self.vp_trip_ids))
+            self.pbar.desc = 'Generating position interpolators'
         for trip_id in self.vp_trip_ids: ##big test
             # print(trip_id)
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
@@ -295,6 +289,10 @@ class OperatorDayAnalysis:
                                                        }
             except AssertionError as e:
                 print(e)
+            if type(self.pbar) != type(None):
+                self.pbar.update()
+        if type(self.pbar) != type(None):
+            self.pbar.refresh()
             # except Exception as e:
             #     print(f'could not generate interpolators for {trip_id}')
             #     print(e)
@@ -311,7 +309,11 @@ class OperatorDayAnalysis:
         delays = delays >> inner_join(_, trips, on = ['trip_id', 'shape_id'])
         delays = delays >> distinct(_.trip_id, _.stop_id, _keep_all=True) ## TODO drop duplicates elsewhere?
         _delays = gpd.GeoDataFrame()
-        for trip_id in delays.trip_id.unique():
+        
+        if type(self.pbar) != type(None):
+            self.pbar.reset(total=len(delays.trip_id.unique()))
+            self.pbar.desc = 'Generating stop delay view'
+        for trip_id in tqdm(delays.trip_id.unique()):
             try:
                 _delay = delays.copy() >> filter(_.trip_id == trip_id)
                 _delay['actual_time'] = _delay.apply(lambda x: 
@@ -334,6 +336,12 @@ class OperatorDayAnalysis:
                 print(f'could not generate delays for trip {trip_id}')
                 print(e)
                 # return
+                
+            if type(self.pbar) != type(None):
+                self.pbar.update()
+        if type(self.pbar) != type(None):
+            self.pbar.refresh()
+                
         self.stop_delay_view = _delays
         return
     
@@ -401,6 +409,10 @@ class OperatorDayAnalysis:
         
         gdf = self._filter(self.stop_delay_view)
         all_stop_speeds = gpd.GeoDataFrame()
+        # for shape_id in tqdm(gdf.shape_id.unique()): trying self.pbar.update...
+        if type(self.pbar) != type(None):
+            self.pbar.reset(total=len(gdf.shape_id.unique()))
+            self.pbar.desc = 'Generating segment speeds'
         for shape_id in gdf.shape_id.unique():
             for direction_id in gdf.direction_id.unique():
                 this_shape_direction = (gdf
@@ -447,6 +459,11 @@ class OperatorDayAnalysis:
                     print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
                 all_stop_speeds = all_stop_speeds.append(stop_speeds)
+                
+                if type(self.pbar) != type(None):
+                    self.pbar.update()
+            if type(self.pbar) != type(None):
+                self.pbar.refresh
 
         self.stop_segment_speed_view = all_stop_speeds
         return self._show_speed_map(how = how, colorscale = colorscale, size = size)
