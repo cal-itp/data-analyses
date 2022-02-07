@@ -172,13 +172,15 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
         #     self.debug_dict[self.progressing_positions.shape[0]] = self.progressing_positions.copy()
         
         vehicle_positions = vehicle_positions >> arrange(self.time_col) ## unnecessary?
-        vehicle_positions['last_time'] = vehicle_positions[self.time_col].shift(1)
-        vehicle_positions['last_loc'] = vehicle_positions.shape_meters.shift(1)
-        vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col] - vehicle_positions.last_time
+        # vehicle_positions['last_time'] = vehicle_positions[self.time_col].shift(1)
+        # vehicle_positions['last_loc'] = vehicle_positions.shape_meters.shift(1)
+        # vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col] - vehicle_positions.last_time
+        vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col].diff()
         vehicle_positions.secs_from_last = (vehicle_positions.secs_from_last
                                         .apply(lambda x: x.seconds))
-        vehicle_positions['meters_from_last'] = (vehicle_positions.shape_meters
-                                                      - vehicle_positions.last_loc)
+        # vehicle_positions['meters_from_last'] = (vehicle_positions.shape_meters
+        #                                               - vehicle_positions.last_loc)
+        vehicle_positions['meters_from_last'] = vehicle_positions.shape_meters.diff()
         vehicle_positions['progressed'] = vehicle_positions['meters_from_last'] > 0 ## has the bus moved ahead?
         vehicle_positions['speed_from_last'] = (vehicle_positions.meters_from_last
                                                      / vehicle_positions.secs_from_last) ## meters/second
