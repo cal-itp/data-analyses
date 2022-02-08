@@ -1,6 +1,5 @@
 import geopandas as gpd
 import os
-import numpy as np
 import pandas as pd
 
 from calitp.tables import tbl
