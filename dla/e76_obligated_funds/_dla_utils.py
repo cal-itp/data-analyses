@@ -116,6 +116,20 @@ def find_top(df):
 
 
 
+
+def get_nunique(df, col, groupby_col):
+    
+    counts = (df >> group_by(_[groupby_col]) >> summarize(n=_[col].nunique()) >> arrange(-_.n))
+    
+#     if groupby_col == []:
+#         counts = (df >> group_by(_[groupby_col]) >> summarize(n=_[col].nunique()) >> arrange(-_.n))
+
+        
+#     elif groupby_col != []:
+#         counts = (df >> summarize(n=_[col].nunique()) >> arrange(-_.n))
+    
+    return counts
+
 """
 Labeling
 """
@@ -182,15 +196,15 @@ def basic_bar_chart(df, x_col, y_col):
 
 
 # Scatter 
-def basic_scatter_chart(df, col, aggregate_by, colorcol, chart_title=[]):
+def basic_scatter_chart(df, col, aggregate_by, colorcol, chart_title=""):
     
-    if chart_title == []:
-        new_title == chart_title
+    if chart_title == "":
+        new_title = chart_title
         save = "_top_20"
         
-    elif chart_title != []:
-        chart_title= (f"Highest {labeling(col)} by {labeling(aggregate_by)}")
-        save= [""]
+    elif chart_title != "":
+        new_title= (f"Highest {labeling(col)} by {labeling(aggregate_by)}")
+        save= ""
         
     
 #     if chart_title != [""]:
@@ -239,207 +253,105 @@ def basic_line_chart(df, x_col, y_col):
     
     return chart
 
-
-
-
-
 """
-Old Functions and Charts:
+Interactive Functions
 """
 
+from plotnine import *
 
-#reading in catalog and merging with df
+import ipywidgets as widgets
+from ipywidgets import *
+from IPython.display import Markdown
+from IPython.core.display import display
 
-# def read_catalog(df):    
-#     catalog = intake.open_catalog("catalog.yml")
+## From Tiffany's DLA Function Branch on Github
 
-#     city_boundary = catalog.ca_open_data.city_boundary.read()
-#     county_bound = catalog.ca_open_data.county_boundary.read()
- 
-#     district_bound= catalog.district_bound.read()
-#     rtpa_bound= catalog.rtpa_bound.read()
-#     locode_df = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx', sheet_name=None), ignore_index=True)
-#     locode_df = to_snakecase(locode_df)
-
-#     #renaming
-#     county_bound['name'] =  county_bound['name'] + ' County'
-#     county_bound.rename(columns={'name': 'county_name', 'geometry': 'geometry2'}, inplace=True)
-
-#     # deleting Calaveras County because the location of the project is not in district 7
-#     delete_row = df[df["primary_agency_name"]== 'Calaveras County'].index
-#     df = df.drop(delete_row)
-
-#     new_df1 = pd.merge(df, locode_df,  how='left', left_on=['primary_agency_name'], right_on = ['agency_name'])
-#     new_df2 = pd.merge(new_df1, city_bound,  how='left', left_on=['primary_agency_name'], right_on = ['NAME'])
-#     new_df3 = left_join(new_df2, county_bound, on = "county_name")
-
-#     return new_df3
-
-
-
-
-
-# #Function to find unqiue prefix and chart
-# #config plotnine chart to styleguide from Tiffany's shared_utils
-
-# def preset_plotnine_config(chart):
-#     chart = (chart
-#              + theme_538()
-#              + theme(plot_background=element_rect(fill=backgroundColor, color=backgroundColor),
-#                      panel_background=element_rect(fill=backgroundColor, color=backgroundColor),
-#                      panel_grid_major_y=element_line(
-#                         color=axisColor, linetype='solid', size=1),
-#                      panel_grid_major_x=element_blank(),
-#                      figure_size=(7.0, 4.4),
-#                      title=element_text(weight="bold", size=font_size, 
-#                                         family=font, color=blackTitle),
-#                      axis_title=element_text(family=labelFont, size=12, color=guideTitleColor),
-#                      axis_text=element_text(family=labelFont, size=10, color=guideLabelColor, 
-#                                             margin={'r': 4}
-#                                            ),
-#                      axis_title_x=element_text(margin={'t': 10}),
-#                      axis_title_y=element_text(margin={'r': 10}),
-#                      legend_title=element_text(font=labelFont, size=14, color=blackTitle, 
-#                                                margin={'b': 10}),
-#                      legend_text=element_text(font=labelFont, size=11, color=blackTitle, 
-#                                               margin={'t': 5, 'b': 5, 'r': 5, 'l': 5}),
-#                     )
-#     )
+def summarize_and_plot(df, select_col, place):
+    subset = df[df[select_col]==place].rename(
+        columns = {
+            "fed_requested": "Federal",
+            "ac_requested": "AC",
+            "total_requested": "Total",
+        }
+    )
     
-#     return chart
+    prefix_count_n = subset >> count(_.prefix)
+
+    display(Markdown(f"**Summary Statistics for {place}**"))
+    display(Markdown(f"The number of obligations {place} has is {len(prefix_count_n)}"))
+    
+    display(Markdown(
+        f"The number of prefix codes {place} uses is {subset.prefix.nunique()}"))
+
+    pd.set_option("display.max_columns", None)
+
+    funds = subset[['Federal','AC','Total']].describe()
+    display(funds.style.format(precision=2, na_rep='MISSING', thousands=","))
+
+    display(Markdown(f"**Top Project Types in {place}**"))
+
+    work_df = subset >> count(_.type_of_work) >> arrange(-_.n)
+    display(work_df.head(5))
+    
+    ax1 = (prefix_count_n
+            >> ggplot(aes("prefix", "n", fill="prefix")) 
+               + geom_col() 
+               + theme(axis_text_x = element_text(angle = 45 , hjust=1))
+               + labs(title='Agency Program Codes', x='Program Codes', 
+                      y='Number of Obligations', fill="Program Type")
+        )
+    display(ax1)
+
+def on_selection(*args):
+    output.clear_output()
+    with output:
+        summarize_and_plot(df, select_col, dropdown.value)
 
 
+def interactive_widget(df, select_col):
 
-# def prefix_all_agencies(df, prefix_unique):
+    dropdown = widgets.Dropdown(
+        description=f"{select_col.title()}",
+        options=df[select_col].sort_values().unique().tolist(),
+    )
+    output = widgets.Output()
+
+    display(dropdown)
+    display(output)
+
+    def on_selection(*args):
+        output.clear_output()
+        with output:
+            summarize_and_plot(df, select_col, dropdown.value)
+
+    dropdown.observe(on_selection, names="value")
+    on_selection()
+
+
+def interactive_widget_counts(df, select_col, unique_col):
+
+    dropdown = widgets.Dropdown(
+        description=f"{select_col.title()}",
+        options=df[select_col].sort_values().unique().tolist(),
+    )
+    output = widgets.Output()
+
+    display(dropdown)
+    display(output)
     
-#     # graphs 
-#     prefixes = df[df.prefix== prefix_unique]
+    def counts(df, select_col, unique_col, place):
+        subset = df[df[select_col]==place]
+        counts = (subset >> count(_[unique_col]) >> arrange(-_.n))
     
-#     prefix_count_num = (prefixes >> count(_.primary_agency_name) >> arrange(-_.n)).head(50)
-    
-#     prefix_count = (prefixes >> count(_.primary_agency_name) >> arrange(-_.n)).head(20)
-    
-#     display(Markdown(f"**The number of agencies using {prefix_unique} is {len(prefix_count_num)}**"))
-    
-#     # for the table- using one as some agencies only have one entry
-#     display(df[(df.prefix == prefix_unique)].sample(1))
-    
-    
-#     ax1 = (prefix_count
-#             >> ggplot(aes("primary_agency_name", "n", fill="primary_agency_name")) 
-#                 + geom_col() 
-#                 + theme(axis_text_x = element_text(angle = 45 , hjust=1))
-#                 + labs(title='Top Agencies using Prefix', x='Agency', y='Number of Obligations', fill="Agency")
-#                 + theme_538()
-#                 + theme(plot_background=element_rect(fill=backgroundColor, color=backgroundColor),
-#                      panel_background=element_rect(fill=backgroundColor, color=backgroundColor),
-#                      panel_grid_major_y=element_line(
-#                         color=axisColor, linetype='solid', size=1),
-#                      panel_grid_major_x=element_blank(),
-#                      figure_size=(7.0, 4.4),
-#                      title=element_text(weight="bold", size=font_size, 
-#                                         family=font, color=blackTitle),
-#                      axis_title=element_text(family=labelFont, size=12, color=guideTitleColor),
-#                      axis_text=element_text(family=labelFont, size=10, color=guideLabelColor, 
-#                                             margin={'r': 4}
-#                                            ),
-#                      axis_title_x=element_text(margin={'t': 10}),
-#                      axis_title_y=element_text(margin={'r': 10}),
-#                      legend_title=element_text(font=labelFont, size=14, color=blackTitle, 
-#                                                margin={'b': 10}),
-#                      legend_text=element_text(font=labelFont, size=11, color=blackTitle, 
-#                                               margin={'t': 5, 'b': 5, 'r': 5, 'l': 5}),
-#                     )
-#             )    
-#     #ax1 = preset_plotnine_config(ax1)
-#     return ax1
-  
+        display(counts)
+
+
+    def on_selection(*args):
+        output.clear_output()
+        with output:
+            counts(df, select_col, unique_col, dropdown.value)
+
+    dropdown.observe(on_selection, names="value")
+    on_selection()
     
     
-
-
-
-# #basic charting to get number of unique values in column
-
-# def basic_agg_nunique(df, col, aggregate_by=["dist"]):
-#     df1 = ((df >> group_by(_[aggregate_by]) >> summarize(n=_[col].nunique()) >> arrange(-_.n)).head(20))
-#     chart = (alt.Chart(df1)
-#              .mark_bar()
-#              .encode(
-#                  x=alt.X(aggregate_by, title=f"{labeling(aggregate_by)}"),
-#                  y=alt.Y("n", title=f"Number of Unique {labeling(col)}"),
-#                  #column = "payment:N",
-#                  color = alt.Color("n",
-#                                   scale=alt.Scale(
-#                                       range=altair_utils.CALITP_SEQUENTIAL_COLORS),
-#                                       legend=alt.Legend(title=f"{(labeling(col))}")
-#                                   ))
-#              .properties( 
-#                           title=f"Number of Unique {labeling(col)} by {labeling(aggregate_by)}")
-#     )
-
-
-#     chart.save(f"./chart_outputs/{col}_by_{aggregate_by}.png")
-
-#     return chart
-
-
-# #chart with choice of aggregation method
-
-# def chart_top_agg(df, col, aggregate_by, aggfunc):
-    
-#     #df1 = (calculate_data_head(df, col, aggregate_by, aggfunc))
-    
-#     chart = (alt.Chart(df1)
-#              .mark_bar()
-#              .encode(
-#                  x=alt.X(aggregate_by, title=labeling(aggregate_by), sort=('-y')),
-#                  y=alt.Y(col, title=labeling(col)),
-#                  #column = "payment:N",
-#                  color = alt.Color(col,
-#                                   scale=alt.Scale(
-#                                       range=altair_utils.CALITP_SEQUENTIAL_COLORS),
-#                                       legend=alt.Legend(title=(labeling(col)))
-#                                   ))
-#              .properties( 
-#                           title=f"Highest {labeling(col)} {labeling(aggfunc)}s by {labeling(aggregate_by)}")
-#     )
-
-
-#     chart.save(f"./chart_outputs/{col}_{aggfunc}_by_{aggregate_by}.png")
-    
-#     return chart
-
-
-
-# #group charting: examples
-#     #groupby_col_x axis = prepared_y
-#     #agg_by_col = dist or mpo 
-#     #sum_col= primary_agency_name or prefix
-
-# def group_chart_nunique(df, groupby_col_x, agg_by_col, sum_col):
-#     dist_years1 = (df >> group_by(_[groupby_col_x], _[agg_by_col]) 
-#                    >> summarize(n=_[sum_col].nunique()) 
-#                    >> arrange(-_[groupby_col_x]))
-
-    
-    
-#     chart = alt.Chart(dist_years1).mark_bar().encode(
-#             column=((f"{agg_by_col}:N")
-#                     #, title=labeling(agg_by_col)
-#                    ),
-#             x=alt.X((f"{groupby_col_x}:O"), title=labeling(groupby_col_x)),
-#             y=alt.Y('n:Q', title=(f"Number of Unique {labeling(sum_col)}")),
-#             color = alt.Color((f"{agg_by_col}:N"), 
-#                                   scale=alt.Scale(
-#                                       range=altair_utils.CALITP_SEQUENTIAL_COLORS),  
-#                                    legend=alt.Legend(title=(labeling(sum_col)))
-#                                   )
-#                                   )
-#     chart.save(f"./chart_outputs/grouped_{agg_by_col}_by_{groupby_col_x}.png")
-    
-#     return chart
-
-
-
-
