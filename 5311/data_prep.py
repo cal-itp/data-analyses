@@ -105,7 +105,7 @@ def load_cleaned_vehiclesdata():
         df = df.rename(columns={'_60+': '_60plus'})
 
         age = geography_utils.aggregate_by_geography(df, 
-                           group_cols = ["agency", "ntd_id"],
+                           group_cols = ["agency", "ntd_id", "reporter_type"],
                            sum_cols = ["total_vehicles", "_0_9","_10_12", "_13_15", "_16_20","_21_25","_26_30","_31_60","_60plus"],
                              mean_cols = ["average_age_of_fleet__in_years_", "average_lifetime_miles_per_vehicle"]
                                           ).sort_values(["agency","total_vehicles"], ascending=[True, True])
@@ -175,5 +175,77 @@ def GTFS():
     #some agencies have "" replace with space
     GTFS['provider'] = GTFS['provider'].str.replace('"', "")
     return GTFS
+
+
+'''
+charting functions 
+'''
+# Bar
+def basic_bar_chart(df, x_col, y_col):
+    
+    chart = (alt.Chart(df)
+             .mark_bar()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 #column = "payment:N",
+                 color = alt.Color(y_col,
+                                  scale=alt.Scale(
+                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
+                                      legend=alt.Legend(title=(labeling(y_col)))
+                                  ))
+             .properties( 
+                          title=(f"Highest {labeling(x_col)} by {labeling(y_col)}"))
+    )
+
+    chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./chart_outputs/bar_{x_col}_by_{y_col}.png")
+    
+    return chart
+
+
+# Scatter 
+def basic_scatter_chart(df, x_col, y_col, colorcol):
+    
+    chart = (alt.Chart(df)
+             .mark_circle(size=60)
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col)),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 #column = "payment:N",
+                 color = alt.Color(y_col,
+                                  scale=alt.Scale(
+                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
+                                      legend=alt.Legend(title=(labeling(y_col)))
+                                  ))
+             .properties( 
+                          title = (f"Highest {labeling(x_col)} by {labeling(y_col)}"))
+    )
+
+    chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./chart_outputs/scatter_{x_col}_by_{y_col}.png")
+    
+    return chart
+
+
+# Line
+def basic_line_chart(df, x_col, y_col):
+    
+    chart = (alt.Chart(df)
+             .mark_line()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col)),
+                 y=alt.Y(y_col, title=labeling(y_col))
+                                   )
+              ).properties( 
+                          title=f"{labeling(x_col)} by {labeling(y_col)}")
+
+    chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./chart_outputs/line_{x_col}_by_{y_col}.png")
+    
+    return chart
+
+
+
 
 
