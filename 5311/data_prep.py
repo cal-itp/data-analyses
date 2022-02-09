@@ -131,10 +131,10 @@ def GTFS():
     GTFS = to_snakecase(GTFS)
     #Only keeping relevant columns
     GTFS = GTFS [['name','provider','operator','gtfs_schedule_status']]
-    #drop GTFS with nas
-    GTFS = GTFS.dropna(subset=['simple_GTFS_status'])
     #rename to avoid confusion
     GTFS = GTFS.rename(columns = {'gtfs_schedule_status':'simple_GTFS_status'})     
+    #drop GTFS with nas
+    GTFS = GTFS.dropna(subset=['simple_GTFS_status'])
     #some agencies have "" replace with space
     GTFS['provider'] = GTFS['provider'].str.replace('"', "")
     return GTFS
