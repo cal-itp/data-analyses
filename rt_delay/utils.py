@@ -369,3 +369,30 @@ def time_at_position_numba(desired_position, shape_array, dt_float_array):
         return np.interp(desired_position, shape_array, dt_float_array)
     else:
         return None
+    
+def clip_along_shape(segment_polygon):
+    
+    if segment_polygon.length > 150:
+    
+        left_side = segment_polygon.bounds[0]
+        right_side = segment_polygon.bounds[2]
+        top_side = segment_polygon.bounds[3]
+
+        top = (segment_polygon.centroid.x, segment_polygon.bounds[1] + 50)
+        lower_left = (left_side - 25, segment_polygon.bounds[1])
+        lower_right = (right_side + 25, segment_polygon.bounds[1])
+        clip1 = shapely.geometry.Polygon((top, lower_left, lower_right))
+
+        vertex_1 = (left_side, top_side)
+        vertex_2 = (right_side, top_side)
+        vertex_3 = (right_side, top_side - 45)
+        vertex_4 = (segment_polygon.centroid.x, top_side - 10)
+        vertex_5 = (left_side, top_side - 45)
+
+        clip2 = shapely.geometry.Polygon((vertex_1, vertex_2, vertex_3,
+                                     vertex_4, vertex_5))
+
+        return segment_polygon.difference(clip1).difference(clip2)
+    
+    else:
+        return segment_polygon
