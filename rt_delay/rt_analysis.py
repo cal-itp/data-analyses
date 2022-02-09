@@ -80,12 +80,20 @@ class TripPositionInterpolator:
         gdf = gdf.round({'speed_mph': 1, 'shape_meters': 0})
         gdf['time'] = gdf[self.time_col].apply(lambda x: x.strftime('%H:%M:%S'))
         gdf = gdf >> select(_.geometry, _.time,
-                            _.shape_meters, _.last_loc, _.speed_mph)
+                            _.shape_meters, _.speed_mph)
+        gdf['last_loc'] = gdf.shape_meters.shift(1)
+        gdf = gdf.iloc[1:,:] ## remove first row (inaccurate shape data)
         gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape.geometry.iloc[0],
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
-        gdf.geometry = gdf.buffer(25).simplify(tolerance=15)
+        ## shift to right side of road to display direction
+        gdf.geometry = gdf.geometry.apply(lambda x: x.parallel_offset(25, 'right'))
+        gdf.geometry = gdf.buffer(20).simplify(tolerance=15)
         gdf = gdf >> filter(gdf.geometry.is_valid)
+        # gdf.geometry = gdf.geometry.apply(clip_along_shape)
+        self.detailed_map_view = gdf.copy()
+        gdf = gdf >> filter(-gdf.geometry.is_empty)
+        
         gdf = gdf.to_crs(WGS84)
         centroid = gdf.dissolve().centroid
         gdf = gdf >> filter(_.speed_mph > 0)
