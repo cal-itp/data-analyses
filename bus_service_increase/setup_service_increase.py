@@ -210,10 +210,9 @@ def add_ntd_operator_vrh_buses():
     return ntd_joined
     
 
-def calculate_operator_capex():
+def calculate_operator_capex(service_increase_df, ntd_joined):
     # Bring in service df
-    df = pd.read_parquet(f"{DATA_PATH}service_increase.parquet")
-    by_operator = (df.groupby(['calitp_itp_id', 'tract_type'])
+    by_operator = (service_increase_df.groupby(['calitp_itp_id', 'tract_type'])
                    [['addl_service_hrs_annual']].sum()
                   )
     
@@ -221,7 +220,6 @@ def calculate_operator_capex():
     BUS_COST = 776_941
     BUS_SERVICE_LIFE = 14 # use this assumption
     
-    ntd_joined = pd.read_parquet(f'{DATA_PATH}vehicles_ntd_joined.parquet')
     MEDIAN_VRH_PER_BUS = ntd_joined['vrh_per_bus'].median()
     
     by_operator['additional_buses'] = by_operator.addl_service_hrs_annual / MEDIAN_VRH_PER_BUS
@@ -245,5 +243,5 @@ if __name__ == "__main__":
     ntd_joined.to_parquet(f'{DATA_PATH}vehicles_ntd_joined.parquet')
     
     # Calculate operator capital expenditures
-    hours_by_operator = calculate_operator_capex()
+    hours_by_operator = calculate_operator_capex(service_combined, ntd_joined)
     hours_by_operator.to_parquet(f'{DATA_PATH}increase_by_operator.parquet')
