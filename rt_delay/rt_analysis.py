@@ -88,10 +88,11 @@ class TripPositionInterpolator:
                                                                 x.shape_meters), axis = 1)
         ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(lambda x: x.parallel_offset(25, 'right'))
+        self.detailed_map_view = gdf.copy()
+        ## create clips, integrate buffer+simplify?
         gdf.geometry = gdf.buffer(20).simplify(tolerance=15)
         gdf = gdf >> filter(gdf.geometry.is_valid)
         # gdf.geometry = gdf.geometry.apply(clip_along_shape)
-        self.detailed_map_view = gdf.copy()
         gdf = gdf >> filter(-gdf.geometry.is_empty)
         
         gdf = gdf.to_crs(WGS84)
