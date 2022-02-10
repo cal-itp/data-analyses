@@ -11,6 +11,13 @@ from plotnine import *
 import intake
 from shared_utils import geography_utils
 
+import altair as alt
+import altair_saver
+from shared_utils import geography_utils
+from shared_utils import altair_utils
+from shared_utils import calitp_color_palette as cp
+from shared_utils import styleguide
+
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"
 
 
@@ -100,98 +107,12 @@ def load_cleaned_vehiclesdata():
     
         return vehicles
     
-
-    vehicles = (get_vehicle_groups(vehicles))
-    
-    return vehicles
-
-def load_cleaned_organizations_data():
-    File_Organization_Clean =  "organizations_cleaned.csv"
-    organizations =  pd.read_csv(f'{GCS_FILE_PATH}{File_Organization_Clean}')
-    organizations = to_snakecase(organizations)
-    #Only keeping relevant columns
-    organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status']]
-    #Renaming columns 
-    organizations = organizations.rename(columns = {'ntp_id':'ntd_id'})
-    #making sure ntd_id is a string
-    organizations.ntd_id = organizations.ntd_id.astype(str)
-    return organizations
-
-def load_agencyinfo(): 
-    agencies = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020_Agency_Information.xlsx',
-                                      sheet_name=None),ignore_index=True)
-    agencies = to_snakecase(agencies)
-    agency_info = agencies>>filter(_.state=='CA')
-    
-    return agency_info
-
-def GTFS():
-    GTFS_File =  "services-GTFS Schedule Status.csv"
-    GTFS =  pd.read_csv(f'{GCS_FILE_PATH}{GTFS_File}')
-    GTFS = to_snakecase(GTFS)
-     #Only keeping relevant columns
-    GTFS = GTFS [['name','provider','operator','gtfs_schedule_status']]
-    return GTFS
-
-"""
-Old Functions
-
-"""
-def load_vehiclesdata():
-    vehicles_info =  pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020-Vehicles_1.xlsm', sheet_name = ['Age Distribution'])
-    pd.set_option('display.max_columns', None)
-    #cannot use to_snakecase because of integer column names
-    vehicles_info = vehicles_info['Age Distribution']
-    vehicles = (vehicles_info>>filter(_.State=='CA'))
-    #Add up columns 0-9 to get a new bin 
-    vehicles['0-9'] = vehicles[[0,1,2,3,4,5,6,7,8,9]].sum(axis=1)
-    #Add up columns 10-12
-    vehicles['10-12'] = vehicles[[10,11,12]].sum(axis=1)
-    #dropping columns: no need for 0-12 anymore
-    vehicles = vehicles.drop(columns=[0,1,2,3,4,5,6,7,8,9,10,11,12])
-    #can convert to snakecase now
-    vehicles = to_snakecase(vehicles)
-    #making sure ntd_id is a string
-    vehicles.ntd_id = vehicles.ntd_id.astype(str)
-    #adding vehicle grouping function
-    
-    
-    def get_vehicle_groups(vehicles):
-        Automobiles = ['Automobile','Sports Utility Vehicle']
-        Bus = ['Bus','Over-the-road Bus','Articulated Bus','Double Decker Bus','Trolleybus']
-        Vans = ['Van','','Minivan','Cutaway']
-        Trains = ['Vintage Trolley','Automated Guideway Vehicle','Heavy Rail Passenger Car','Light Rail Vehicle',
-                 'Commuter Rail Self-Propelled Passenger Car','Commuter Rail Passenger Coach','Commuter Rail Locomotive',
-                'Cable Car']
-        Service = ['Automobiles (Service)',
-                   'Trucks and other Rubber Tire Vehicles (Service)',
-                   'Steel Wheel Vehicles (Service)']
-        other = ['Other','Ferryboat']
-        
-        def replace_modes(row):
-            if row.vehicle_type in Automobiles:
-                return "Automobiles"
-            elif row.vehicle_type in Bus:
-                return "Bus"
-            elif row.vehicle_type in Trains:
-                return "Train"
-            elif row.vehicle_type in Vans:
-                return "Van"
-            elif row.vehicle_type in Service:
-                return "Service"
-            else:
-                return "Other"
-        
-        vehicles["vehicle_groups"] = vehicles.apply(lambda x: replace_modes(x), axis=1)
-    
-        return vehicles
-    
     def get_age_and_doors(df):   
 
         df = df.rename(columns={'_60+': '_60plus'})
 
         age = geography_utils.aggregate_by_geography(df, 
-                           group_cols = ["agency"],
+                           group_cols = ["agency", "ntd_id", "reporter_type"],
                            sum_cols = ["total_vehicles", "_0_9","_10_12", "_13_15", "_16_20","_21_25","_26_30","_31_60","_60plus"],
                              mean_cols = ["average_age_of_fleet__in_years_", "average_lifetime_miles_per_vehicle"]
                                           ).sort_values(["agency","total_vehicles"], ascending=[True, True])
@@ -224,23 +145,133 @@ def load_vehiclesdata():
 
     vehicles = (get_vehicle_groups(vehicles))
     vehicles = (get_age_and_doors(vehicles))
+
     
     return vehicles
 
-def load_organizations_data():
-    organizations =  pd.read_csv('gs://calitp-analytics-data/data-analyses/5311 /organizations-all_organizations.csv')
+def load_cleaned_organizations_data():
+    File_Organization_Clean =  "organizations_cleaned.csv"
+    organizations =  pd.read_csv(f'{GCS_FILE_PATH}{File_Organization_Clean}')
     organizations = to_snakecase(organizations)
     #Only keeping relevant columns
-    organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status','#_services_w__complete_rt_status',
-       '#_fixed_route_services_w__static_gtfs',
-       'complete_static_gtfs_coverage__1=yes_', 'complete_rt_coverage',
-       '>=1_gtfs_feed_for_any_service__1=yes_',
-       '>=_1_complete_rt_set__1=yes_']]
-   #Renaming columns 
-    organizations = organizations.rename(columns = {'ntp_id':'ntd_id','#_services_w__complete_rt_status':'number_services_w_complete_rt_status', 'complete_static_gtfs_coverage__1=yes_':'complete_static_gtfs_coverage_1_means_yes',     '>=1_gtfs_feed_for_any_service__1=yes_':'gt_1_gtfs_for_any_service_1_means_yes', '>=_1_complete_rt_set__1=yes_':'gt_1_complete_rt_set_1_means_yes'})
+    organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status']]
+    #Renaming columns 
+    organizations = organizations.rename(columns = {'ntp_id':'ntd_id'})
     #making sure ntd_id is a string
     organizations.ntd_id = organizations.ntd_id.astype(str)
     return organizations
+
+def load_agencyinfo(): 
+    agencies = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020_Agency_Information.xlsx',
+                                      sheet_name=None),ignore_index=True)
+    agencies = to_snakecase(agencies)
+    agency_info = agencies>>filter(_.state=='CA')
+    
+    return agency_info
+
+def GTFS():
+    GTFS_File =  "services-GTFS Schedule Status.csv"
+    GTFS =  pd.read_csv(f'{GCS_FILE_PATH}{GTFS_File}')
+    GTFS = to_snakecase(GTFS)
+    #Only keeping relevant columns
+    GTFS = GTFS [['name','provider','operator','gtfs_schedule_status']]
+    #rename to avoid confusion
+    GTFS = GTFS.rename(columns = {'gtfs_schedule_status':'simple_GTFS_status'})     
+    #drop GTFS with nas
+    GTFS = GTFS.dropna(subset=['simple_GTFS_status'])
+    #some agencies have "" replace with space
+    GTFS['provider'] = GTFS['provider'].str.replace('"', "")
+    return GTFS
+
+
+'''
+charting functions 
+'''
+#Labels
+def labeling(word):
+    # Add specific use cases where it's not just first letter capitalized
+    LABEL_DICT = { "prepared_y": "Year",
+              "dist": "District",
+              "nunique":"Number of Unique",
+              "project_no": "Project Number"}
+    
+    if (word == "mpo") or (word == "rtpa"):
+        word = word.upper()
+    elif word in LABEL_DICT.keys():
+        word = LABEL_DICT[word]
+    else:
+        #word = word.replace('n_', 'Number of ').title()
+        word = word.replace('unique_', "Number of Unique ").title()
+        word = word.replace('_', ' ').title()
+    
+    return word
+
+# Bar
+def basic_bar_chart(df, x_col, y_col):
+    
+    chart = (alt.Chart(df)
+             .mark_bar()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 #column = "payment:N",
+                 color = alt.Color(y_col,
+                                  scale=alt.Scale(
+                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
+                                      legend=alt.Legend(title=(labeling(y_col)))
+                                  ))
+             .properties( 
+                          title=(f"Highest {labeling(x_col)} by {labeling(y_col)}"))
+    )
+
+    chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./chart_outputs/bar_{x_col}_by_{y_col}.png")
+    
+    return chart
+
+
+# Scatter 
+def basic_scatter_chart(df, x_col, y_col, colorcol):
+    
+    chart = (alt.Chart(df)
+             .mark_circle(size=60)
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col)),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 #column = "payment:N",
+                 color = alt.Color(colorcol,
+                                  scale=alt.Scale(
+                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
+                                      legend=alt.Legend(title=(labeling(colorcol)))
+                                  ))
+             .properties( 
+                          title = (f"Highest {labeling(x_col)} by {labeling(y_col)}"))
+    )
+
+    chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./chart_outputs/scatter_{x_col}_by_{y_col}.png")
+    
+    return chart
+
+
+# Line
+def basic_line_chart(df, x_col, y_col):
+    
+    chart = (alt.Chart(df)
+             .mark_line()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col)),
+                 y=alt.Y(y_col, title=labeling(y_col))
+                                   )
+              ).properties( 
+                          title=f"{labeling(x_col)} by {labeling(y_col)}")
+
+    chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./chart_outputs/line_{x_col}_by_{y_col}.png")
+    
+    return chart
+
+
 
 
 
