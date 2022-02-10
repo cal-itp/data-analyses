@@ -11,6 +11,9 @@ import utils
 
 catalog = intake.open_catalog("*.yml")
 
+DATA_PATH = "./data/"
+IMG_PATH = "./img/"
+
 #--------------------------------------------------------#
 ### State Highway Network
 #--------------------------------------------------------#
@@ -100,7 +103,7 @@ def process_highways(buffer_feet = shared_utils.geography_utils.FEET_PER_MI):
     return df
     
     
-def overlay_transit_to_highways():
+def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEET_PER_MI):
     """
     Function to find areas of intersection between
     highways (default of 1 mile buffer) and transit routes.
@@ -109,29 +112,30 @@ def overlay_transit_to_highways():
     the areas of intersection.
     """
     
-    highways = process_highways(buffer_feet = 
-                                shared_utils.geography_utils.FEET_PER_MI)
+    # Can pass a different buffer zone to determine parallel corridors
+    highways = process_highways(buffer_feet = hwy_buffer_feet)
     transit_routes = process_transit_routes()
     
     # Overlay
     # Note: an overlay based on intersection changes the geometry column
     # The new geometry column will reflect that area of intersection
-    gdf = gpd.overlay(transit_routes, highways, how = "intersection")   
+    gdf = gpd.overlay(transit_routes, highways, how = "intersection")  
     
-    return gdf
-
-
-def make_processed_data():
-    gdf = overlay_transit_to_highways()
+    
+    # Using new geometry column, calculate what % that intersection is of the route and hwy
     gdf = gdf.assign(
         pct_route = (gdf.geometry.length / gdf.route_length).round(3),
         pct_highway = (gdf.geometry.length / gdf.highway_length).round(3),
     )
     
-    # Set pct_highway to have max of 1
-    # LA Metro Line 910 (Silver Line) runs on the 110 freeway in both directions.
-    # Has to do with the fact that highway length was calculated only for 1 direction (~centerline). 
-    # The length was calculated, 1 mi buffer drawn, then the dissolve (computationally expensive).
+    '''
+    Set pct_highway to have max of 1
+    LA Metro Line 910 (Silver Line) runs on the 110 freeway in both directions.
+    Has to do with the fact that highway length was calculated only 
+    for 1 direction (~centerline). 
+    The length was calculated, 1 mi buffer drawn, then the 
+    dissolve (computationally expensive).
+    '''
 
     gdf = gdf.assign(
         pct_highway = gdf.apply(lambda x: 1 if x.pct_highway > 1 
@@ -143,6 +147,7 @@ def make_processed_data():
 
 def parallel_or_intersecting(df, pct_route_threshold=0.5, 
                              pct_highway_threshold=0.1):
+    
     # Play with various thresholds to decide how to designate parallel
     df = df.assign(
         parallel = df.apply(lambda x: 
@@ -153,3 +158,24 @@ def parallel_or_intersecting(df, pct_route_threshold=0.5,
     )
     
     return df
+
+
+# Use this in notebook
+# Can pass different parameters if buffer or thresholds need adjusting
+def make_analysis_data(hwy_buffer_feet=
+                       shared_utils.geography_utils.FEET_PER_MI, 
+                       pct_route_threshold = 0.5,
+                       pct_highway_threshold = 0.1,
+                       DATA_PATH = "", FILE_NAME = "parallel_or_intersecting"
+                      ):
+    
+    # Get overlay between highway and transit routes
+    # Draw buffer around highways
+    gdf = overlay_transit_to_highways(hwy_buffer_feet)
+
+    # Categorize whether route is parallel or intersecting based on threshold
+    gdf2 = parallel_or_intersecting(gdf, 
+                                    pct_route_threshold, 
+                                    pct_highway_threshold)
+    
+    gdf2.to_parquet(f"{DATA_PATH}{FILE_NAME}.parquet")
