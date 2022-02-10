@@ -192,9 +192,6 @@ def labeling(word):
     # Add specific use cases where it's not just first letter capitalized
     LABEL_DICT = { "prepared_y": "Year",
               "dist": "District",
-              "total_requested": "Total Requested",
-              "fed_requested":"Fed Requested",
-              "ac_requested": "Advance Construction Requested",
               "nunique":"Number of Unique",
               "project_no": "Project Number"}
     
@@ -242,10 +239,10 @@ def basic_scatter_chart(df, x_col, y_col, colorcol):
                  x=alt.X(x_col, title=labeling(x_col)),
                  y=alt.Y(y_col, title=labeling(y_col)),
                  #column = "payment:N",
-                 color = alt.Color(y_col,
+                 color = alt.Color(colorcol,
                                   scale=alt.Scale(
                                       range=altair_utils.CALITP_SEQUENTIAL_COLORS),
-                                      legend=alt.Legend(title=(labeling(y_col)))
+                                      legend=alt.Legend(title=(labeling(colorcol)))
                                   ))
              .properties( 
                           title = (f"Highest {labeling(x_col)} by {labeling(y_col)}"))
