@@ -51,10 +51,11 @@ def basic_bar_chart(df, x_col, y_col):
              .encode(
                  x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
                  y=alt.Y(y_col, title=labeling(y_col)),
-                 color = alt.Color(x_col,
+                 #column = "payment:N",
+                 color = alt.Color(y_col,
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
-                                      legend=alt.Legend(title=(labeling(x_col)))
+                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
+                                      legend=alt.Legend(title=(labeling(y_col)))
                                   ))
              .properties( 
                           title=(f"Highest {labeling(x_col)} by {labeling(y_col)}"))
@@ -74,9 +75,10 @@ def basic_scatter_chart(df, x_col, y_col, colorcol):
              .encode(
                  x=alt.X(x_col, title=labeling(x_col)),
                  y=alt.Y(y_col, title=labeling(y_col)),
+                 #column = "payment:N",
                  color = alt.Color(colorcol,
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
                                       legend=alt.Legend(title=(labeling(colorcol)))
                                   ))
              .properties( 
@@ -96,17 +98,59 @@ def basic_line_chart(df, x_col, y_col):
              .mark_line()
              .encode(
                  x=alt.X(x_col, title=labeling(x_col)),
-                 y=alt.Y(y_col, title=labeling(y_col)), 
-                 color = alt.Color(y_col,
-                                  scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
-                                      legend=alt.Legend(title=(labeling(y_col)))
+                 y=alt.Y(y_col, title=labeling(y_col))
                                    )
               ).properties( 
-                          title=f"{labeling(x_col)} by {labeling(y_col)}"))
+                          title=f"{labeling(x_col)} by {labeling(y_col)}")
+
     chart=styleguide.preset_chart_config(chart)
     chart.save(f"./chart_outputs/line_{x_col}_by_{y_col}.png")
     
     return chart
 
 
+# Bar chart without highest f'string
+def basic_bar_chart2(df, x_col, y_col):
+    
+    chart = (alt.Chart(df)
+             .mark_bar()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 #column = "payment:N",
+                 color = alt.Color(y_col,
+                                  scale=alt.Scale(
+                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
+                                      legend=alt.Legend(title=(labeling(y_col)))
+                                  ))
+             .properties( 
+                          title=(f"{labeling(x_col)} by {labeling(y_col)}"))
+    )
+
+    chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./chart_outputs/bar_{x_col}_by_{y_col}.png")
+    
+    return chart
+
+
+'''
+
+Aggregating Functions
+
+'''
+#Aggregate by fleet size, GTFS, vehicle ages.
+def aggregation_one(df, grouping_col):
+    #adding up the vehicles 9+ and 15+ 
+    df['vehicles_older_than_9']= df['_10_12'] + df['_13_15'] + df['_16_20'] + df['_21_25'] + df['_26_30'] + df['_31_60'] + df['_60plus']
+    df['vehicles_older_than_15']= df['_16_20'] + df['_21_25'] + df['_26_30'] + df['_31_60'] + df['_60plus']
+    #rename 0-9
+    df = df.rename(columns={'_0_9':'vehicles_0_to_9'}) 
+    #pivot 
+    df = df.groupby([grouping_col]).agg({'vehicles_older_than_9':'sum', 'vehicles_older_than_15':'sum', 'vehicles_0_to_9': 'sum'}) 
+    #dividing the different bins by the total across all agencies
+    df['vehicles_percent_older_than_9'] = (df['vehicles_older_than_9']/sum(df['vehicles_older_than_9']))*100
+    df['vehicles_percent_older_than_15'] = (df['vehicles_older_than_15']/sum(df['vehicles_older_than_15']))*100
+    df['vehicles_percent_0_to_9'] = (df['vehicles_0_to_9']/sum(df['vehicles_0_to_9']))*100
+    #reset index
+    df = df.reset_index()
+    return df 
