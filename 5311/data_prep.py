@@ -183,6 +183,107 @@ def GTFS():
     GTFS['provider'] = GTFS['provider'].str.replace('"', "")
     return GTFS
 
+"""
+Merged Data
+
+"""
+#Merged dataframe objects
+#crosswalk dictionary for merging data frame
+crosswalk = {'City of Chowchilla ': 'City of Chowchilla, dba: Chowchilla Area Transit ',
+     'City of Dinuba ':  'City of Dinuba',
+     'Modoc Transportation Agency': 'Modoc Transportation Agency',
+     'Butte County Association of Governments/ Butte Regional Transit': 'Butte County Association of Governments',
+     'Calaveras County Public Works':  'Calaveras Transit Agency',
+     'City of Escalon ':  'City of Escalon, dba: eTrans',
+     'County of Mariposa':  'Mariposa County Transit, dba: Mari-Go',
+     'County of Shasta Department of Public Works':  'County of Shasta Department of Public Works',
+     'County of Siskiyou': 'County of Siskiyou, dba: Siskiyou County Transit',
+     'County of Tulare': 'Tulare County Area Transit',
+     'Eureka Transit Service':  'City of Eureka, dba: Eureka Transit Service',
+     'Kern Regional Transit':  'Kern Regional Transit',
+     'Livermore Amador Valley Transit Authority':  'Livermore / Amador Valley Transit Authority',
+     'Placer County Public Works (TART & PCT)': 'County of Placer, dba: Placer County Department of Public Works',
+     'Plumas County Transportation Commission': 'Plumas County Transportation Commission',
+     'San Luis Obispo Regional Transit Authority':  'San Luis Obispo Regional Transit Authority',
+     'Sonoma County Transit':  'County of Sonoma, dba: Sonoma County Transit',
+     'Sunline Transit Agency':  'SunLine Transit Agency',
+     'Tehama County Transit Agency': 'Tehama County',
+     'Trinity County Department of Transportation ':  'Trinity County',
+     'Tuolumne County Transit Agency (TCTA)':  'Tuolumne County Transit',
+     'Amador Transit':  'Amador Regional Transit System',
+     'City of Corcoran - Corcoran Area Transit':  'City of Corcoran, dba: Corcoran Area Transit',
+     'Yosemite Area Regional Transportation System ':  'Yosemite Area Regional Transportation System',
+     'County Connection (Central Contra Costa Transit Authority)': 'Central Contra Costa Transit Authority, dba: COUNTY CONNECTION',
+     'Calaveras Transit Agency ': 'Calaveras Transit Agency'}
+
+#Agencies that ONLY appear in Black Cat
+BC_Only = ['County of Los Angeles - Department of Public Works',
+ 'County of Nevada Public Works, Transit Services Division',
+ 'County of Sacramento Department of Transportation',
+ 'Glenn County Transportation Commission',
+ 'Stanislaus County Public Works - Transit Division',
+ 'Alpine County Community Development',
+ 'Fresno Council of Governments',
+ 'Greyhound Lines, Inc.']
+
+#Dataframe merge, commenting out for now.
+'''
+def merged_dataframe():
+    #call data frames we have to join.
+    df_5311 = data_prep.load_grantprojects()
+    vehicles = data_prep.load_cleaned_vehiclesdata()
+    organizations = data_prep.load_cleaned_organizations_data()
+    #merge vehicles from NTD & GTFS
+    vehicles_gtfs = pd.merge(vehicles, organizations,  how='left', on=['ntd_id'])
+    #left merge, Black Cat on the left and vehicle_gtfs on the right. 
+    Test1 = (pd.merge(df_5311, vehicles_gtfs,  how='left', left_on=['organization_name'], 
+                      right_on=['name'], indicator=True)
+            )
+    #Filter out for left only matches, make it into a list
+    Left_only = Test1[(Test1._merge.str.contains("left_only", case= False))] 
+    Left_orgs = Left_only['organization_name'].drop_duplicates().tolist()
+    #Delete  left only matches from original df 
+    m2 = Test1[~Test1.organization_name.isin(Left_orgs)]
+    #making a data frame with only failed merges out out of original Black Cat
+    fail = df_5311[df_5311.organization_name.isin(Left_orgs)]
+    #replacing organization names from Black Cat with agency names from NTD Vehicles.
+    fail['organization_name'].replace(crosswalk, inplace= True)
+    #Merging the failed organizations to vehicles 
+    Test2 = pd.merge(fail, vehicles_gtfs,  how='left', left_on=['organization_name'], right_on=['agency'])
+    #appending failed matches to the first data frame
+    BC_GTFS_NTD = m2.append(Test2, ignore_index=True)
+    #create a column to flag agencies that appear in black cat only
+    def BC_only(row):
+    if row.organization_name in BC_Only:
+        return '1'
+    else: 
+        return '0'  
+    BC_GTFS_NTD["Is_Agency_In_BC_Only_1_means_Yes"] = BC_GTFS_NTD.apply(lambda x: BC_only(x), axis=1)
+    #replace GTFS and cal itp for Klamath. Klamath does not appear in NTD data.
+    BC_GTFS_NTD.loc[(BC_GTFS_NTD['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "itp_id"] = "436"
+    BC_GTFS_NTD.loc[(BC_GTFS_NTD['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "gtfs_schedule_status"] = "needed"
+    #get a more definitive GTFS status: ok, needed, long term solution needed, research
+    temp = BC_GTFS_NTD.gtfs_schedule_status.fillna("None")
+    BC_GTFS_NTD['GTFS_schedule_status_use'] = np.where(temp.str.contains("None"),"None",
+                   np.where(temp.str.contains("ok"), "Ok",
+                   np.where(temp.str.contains("long"), "Long-term solution needed",
+                   np.where(temp.str.contains("research"), "Research", "Needed"))))
+    #### FLEET SIZE STUFF #####
+    #delete old columns
+    BC_GTFS_NTD = BC_GTFS_NTD.drop(columns=['gtfs_schedule_status','name','agency'])
+    #rename
+    BC_GTFS_NTD = BC_GTFS_NTD.rename(columns = {'GTFS_schedule_status_use':'GTFS'})
+    #get agencies without any data to show up when grouping
+    show_up = ['reporter_type']
+    for i in show_up:
+        BC_GTFS_NT2[i] = BC_GTFS_NTD[i].fillna('None')
+    #change itp id to be float.
+    BC_GTFS_NTD['itp_id'] = BC_GTFS_NTD['itp_id'].fillna(0)
+    BC_GTFS_NTD.loc[(BC_GTFS_NTD['itp_id'] == '436'), "itp_id"] = 436
+    #save into parquet
+    BC_GTFS_NTD.to_parquet
+return BC_GTFS_NTD 
+'''
 
 '''
 charting functions 
@@ -272,6 +373,47 @@ def basic_line_chart(df, x_col, y_col):
     return chart
 
 
+# Bar chart without highest f'string
+def basic_bar_chart2(df, x_col, y_col):
+    
+    chart = (alt.Chart(df)
+             .mark_bar()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 #column = "payment:N",
+                 color = alt.Color(y_col,
+                                  scale=alt.Scale(
+                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
+                                      legend=alt.Legend(title=(labeling(y_col)))
+                                  ))
+             .properties( 
+                          title=(f"{labeling(x_col)} by {labeling(y_col)}"))
+    )
 
+    chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./chart_outputs/bar_{x_col}_by_{y_col}.png")
+    
+    return chart
 
+'''
 
+Aggregating Functions
+
+'''
+#Aggregate by fleet size, GTFS, vehicle ages.
+def aggregation_one(df, grouping_col):
+    #adding up the vehicles 9+ and 15+ 
+    df['vehicles_older_than_9']= df['_10_12'] + df['_13_15'] + df['_16_20'] + df['_21_25'] + df['_26_30'] + df['_31_60'] + df['_60plus']
+    df['vehicles_older_than_15']= df['_16_20'] + df['_21_25'] + df['_26_30'] + df['_31_60'] + df['_60plus']
+    #rename 0-9
+    df = df.rename(columns={'_0_9':'vehicles_0_to_9'}) 
+    #pivot 
+    df = df.groupby([grouping_col]).agg({'vehicles_older_than_9':'sum', 'vehicles_older_than_15':'sum', 'vehicles_0_to_9': 'sum'}) 
+    #dividing the different bins by the total across all agencies
+    df['vehicles_percent_older_than_9'] = (df['vehicles_older_than_9']/sum(df['vehicles_older_than_9']))*100
+    df['vehicles_percent_older_than_15'] = (df['vehicles_older_than_15']/sum(df['vehicles_older_than_15']))*100
+    df['vehicles_percent_0_to_9'] = (df['vehicles_0_to_9']/sum(df['vehicles_0_to_9']))*100
+    #reset index
+    df = df.reset_index()
+    return df 
