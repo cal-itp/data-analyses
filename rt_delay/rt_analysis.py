@@ -87,10 +87,11 @@ class TripPositionInterpolator:
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
         ## shift to right side of road to display direction
-        gdf.geometry = gdf.geometry.apply(lambda x: x.parallel_offset(25, 'right'))
+        gdf.geometry = gdf.geometry.apply(lambda x:
+            x.parallel_offset(25, 'right') if isinstance(x, shapely.geometry.LineString) else x)
         self.detailed_map_view = gdf.copy()
         ## create clips, integrate buffer+simplify?
-        gdf.geometry = gdf.buffer(20).simplify(tolerance=15)
+        gdf.geometry = gdf.geometry.apply(arrowize_segment).simplify(tolerance=5)
         gdf = gdf >> filter(gdf.geometry.is_valid)
         # gdf.geometry = gdf.geometry.apply(clip_along_shape)
         gdf = gdf >> filter(-gdf.geometry.is_empty)
@@ -322,7 +323,7 @@ class OperatorDayAnalysis:
         if type(self.pbar) != type(None):
             self.pbar.reset(total=len(delays.trip_id.unique()))
             self.pbar.desc = 'Generating stop delay view'
-        for trip_id in tqdm(delays.trip_id.unique()):
+        for trip_id in delays.trip_id.unique():
             try:
                 _delay = delays.copy() >> filter(_.trip_id == trip_id)
                 _delay['actual_time'] = _delay.apply(lambda x: 
@@ -487,8 +488,16 @@ class OperatorDayAnalysis:
 
         gdf = gdf >> select(-_.service_date)
         gdf = gdf.set_crs(CA_NAD83Albers)
-        gdf.geometry = gdf.buffer(25).simplify(tolerance=15)
+        
+                ## shift to right side of road to display direction
+        gdf.geometry = gdf.geometry.apply(try_parallel)
+        self.detailed_map_view = gdf.copy()
+        ## create clips, integrate buffer+simplify?
+        gdf.geometry = gdf.geometry.apply(arrowize_segment).simplify(tolerance=5)
         gdf = gdf >> filter(gdf.geometry.is_valid)
+        gdf = gdf >> filter(-gdf.geometry.is_empty)
+        
+        # gdf.geometry = gdf.buffer(25).simplify(tolerance=15)
         assert gdf.shape[0] >= self.stop_segment_speed_view.shape[0]*.99, 'over 1% of geometries invalid after buffer+simplify'
         gdf = gdf.to_crs(WGS84)
         centroid = gdf.dissolve().centroid
