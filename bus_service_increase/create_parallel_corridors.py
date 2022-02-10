@@ -166,7 +166,7 @@ def make_analysis_data(hwy_buffer_feet=
                        shared_utils.geography_utils.FEET_PER_MI, 
                        pct_route_threshold = 0.5,
                        pct_highway_threshold = 0.1,
-                       DATA_PATH = ""
+                       DATA_PATH = "", FILE_NAME = "parallel_or_intersecting"
                       ):
     
     # Get overlay between highway and transit routes
@@ -178,4 +178,4 @@ def make_analysis_data(hwy_buffer_feet=
                                     pct_route_threshold, 
                                     pct_highway_threshold)
     
-    gdf2.to_parquet(f"{DATA_PATH}parallel_or_intersecting.parquet")
+    gdf2.to_parquet(f"{DATA_PATH}{FILE_NAME}.parquet")
