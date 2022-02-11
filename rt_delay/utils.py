@@ -92,7 +92,7 @@ def check_cached(filename):
         return path
     else:
         return None
-
+    
 def get_vehicle_positions(itp_id, analysis_date):
     ''' 
     itp_id: an itp_id (string or integer)
@@ -108,32 +108,29 @@ def get_vehicle_positions(itp_id, analysis_date):
     
     next_date = analysis_date + dt.timedelta(days = 1)
     date_str = analysis_date.strftime('%Y-%m-%d')
-    next_str = next_date.strftime('%Y-%m-%d')
-    where = ''
+    
+    start = dt.datetime.combine(analysis_date, dt.time(0))
+    start_ts = int(start.timestamp())
+    end = start + dt.timedelta(days = 1, seconds = 2 * 60**2)
+    end_ts = int(end.timestamp())
+    
     filename = f'vp_{itp_id}_{date_str}.parquet'
     path = check_cached(filename)
     if path:
         print('found parquet')
         return pd.read_parquet(path)
     else:
-        url_numbers = query_sql(f"""SELECT DISTINCT calitp_url_number
-    FROM `cal-itp-data-infra.gtfs_rt.vehicle_positions`
-    WHERE calitp_itp_id = {itp_id}
-    """).calitp_url_number
-
-
-        ##utc, must bracket 2 days for 1 day pacific...
-        for url_number in url_numbers:
-            where += f"""OR _FILE_NAME='gs://gtfs-data/rt-processed/vehicle_positions/vp_{date_str}_{itp_id}_{url_number}.parquet'
-    OR _FILE_NAME='gs://gtfs-data/rt-processed/vehicle_positions/vp_{next_str}_{itp_id}_{url_number}.parquet'"""
-
-        df = query_sql(f"""SELECT *
-    FROM `cal-itp-data-infra.gtfs_rt.vehicle_positions`
-    WHERE {where[3:]}
-    ORDER BY header_timestamp""") ## where[3:] removes first OR, creating a valid SQL query
-
-        df = df >> distinct(_.vehicle_trip_id, _.vehicle_timestamp, _keep_all=True)
-        df = df >> rename(trip_id = _.vehicle_trip_id)
+        df = query_sql(f"""
+        SELECT calitp_itp_id, calitp_url_number,
+        header.timestamp AS header_timestamp, vehicle.timestamp AS vehicle_timestamp,
+        vehicle.vehicle.label AS entity_id, vehicle.vehicle.id AS vehicle_id,
+        vehicle.trip.tripId AS trip_id, vehicle.position.longitude AS vehicle_longitude,
+        vehicle.position.latitude AS vehicle_latitude
+        FROM `cal-itp-data-infra.gtfs_rt.vehicle_positions`
+        WHERE calitp_itp_id = {itp_id} AND vehicle.timestamp > {start_ts} AND vehicle.timestamp < {end_ts}
+        """)
+        
+        df = df >> distinct(_.trip_id, _.vehicle_timestamp, _keep_all=True)
         df = df.dropna(subset=['vehicle_timestamp'])
         assert not df.empty, f'no vehicle positions data found for {date_str}'
         df.vehicle_timestamp = df.vehicle_timestamp.apply(convert_ts)
@@ -141,14 +138,11 @@ def get_vehicle_positions(itp_id, analysis_date):
 
         # assert df.vehicle_timestamp.min() < dt.datetime.combine(analysis_date, dt.time(0)), 'rt data starts after analysis date'
         # assert dt.datetime.combine(analysis_date, dt.time(hour=23, minute=59)) < df.vehicle_timestamp.max(), 'rt data ends early on analysis date'
-        if not df.vehicle_timestamp.min() < dt.datetime.combine(analysis_date, dt.time(0)):
-            warnings.warn('rt data starts after analysis date')
-        if not dt.datetime.combine(analysis_date, dt.time(hour=23, minute=59)) < df.vehicle_timestamp.max():
-            warnings.warn('rt data ends early on analysis date')
-        next_day_cutoff = dt.datetime.combine(next_date, dt.time(hour=2))
-        df = df >> filter(_.vehicle_timestamp < next_day_cutoff,
-                         _.vehicle_timestamp > dt.datetime.combine(analysis_date, dt.time(hour=0))
-                         )
+        # if not df.vehicle_timestamp.min() < dt.datetime.combine(analysis_date, dt.time(0)):
+        #     warnings.warn('rt data starts after analysis date')
+        # if not dt.datetime.combine(end) < df.vehicle_timestamp.max():
+        #     warnings.warn('rt data ends early on analysis date')
+
         df.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
         return df
 
@@ -162,32 +156,35 @@ def get_trips(itp_id, analysis_date):
     '''
     
     date_str = analysis_date.strftime('%Y-%m-%d')
-    next_str = (analysis_date + dt.timedelta(days = 1)).strftime('%Y-%m-%d')
     filename = f'trips_{itp_id}_{date_str}.parquet'
     path = check_cached(filename)
     if path:
         print('found parquet')
-        return pd.read_parquet(path)
-    elif int(itp_id) != 170:
+        cached = pd.read_parquet(path)
+        if not cached.empty:
+            return pd.read_parquet(path)
+        else:
+            print('cached parquet empty, will try a fresh query')
+    if int(itp_id) != 170:
         trips = (tbl.views.gtfs_schedule_fact_daily_trips()
-        >> filter(_.calitp_extracted_at <= date_str, _.calitp_deleted_at > next_str)
-        >> filter(_.calitp_itp_id == itp_id)
-        >> filter(_.service_date == date_str)
-        >> filter(_.is_in_service == True)
-        >> filter(_.calitp_extracted_at == _.calitp_extracted_at.max())
-        >> select(_.trip_key, _.service_date)
-        >> inner_join(_, tbl.views.gtfs_schedule_dim_trips(), on = 'trip_key')
-        >> select(_.calitp_itp_id, _.calitp_url_number, _.service_date,
-                  _.trip_key, _.trip_id, _.route_id, _.direction_id,
-                  _.shape_id, _.calitp_extracted_at, _.calitp_deleted_at)
-        >> collect()
-        >> distinct(_.trip_id, _keep_all=True)
-        )
+            >> filter(_.calitp_extracted_at <= analysis_date, _.calitp_deleted_at > analysis_date)
+            >> filter(_.calitp_itp_id == itp_id)
+            >> filter(_.service_date == analysis_date)
+            >> filter(_.is_in_service == True)
+            >> filter(_.calitp_extracted_at == _.calitp_extracted_at.max())
+            >> select(_.trip_key, _.service_date)
+            >> inner_join(_, tbl.views.gtfs_schedule_dim_trips(), on = 'trip_key')
+            >> select(_.calitp_itp_id, _.calitp_url_number, _.service_date,
+                      _.trip_key, _.trip_id, _.route_id, _.direction_id,
+                      _.shape_id, _.calitp_extracted_at, _.calitp_deleted_at)
+            >> collect()
+            >> distinct(_.trip_id, _keep_all=True)
+                )
     else:
         trips = (tbl.views.gtfs_schedule_fact_daily_trips()
         # >> filter(_.calitp_extracted_at <= date_str, _.calitp_deleted_at > next_str)
         >> filter(_.calitp_itp_id == itp_id)
-        >> filter(_.service_date == date_str)
+        >> filter(_.service_date == analysis_date)
         >> filter(_.is_in_service == True)
         # >> filter(_.calitp_extracted_at == _.calitp_extracted_at.max())
         >> select(_.trip_key, _.service_date)
