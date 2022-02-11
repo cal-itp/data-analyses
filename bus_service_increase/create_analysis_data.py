@@ -11,6 +11,7 @@ import warehouse_queries
 from calitp.tables import tbl
 from siuba import *
 
+# Use sub-folder for Jan 2022
 DATA_PATH = warehouse_queries.DATA_PATH
 
 #------------------------------------------------------------------#
