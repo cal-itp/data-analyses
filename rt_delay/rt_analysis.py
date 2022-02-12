@@ -107,6 +107,9 @@ class TripPositionInterpolator:
         if gdf.speed_mph.max() > 80: ## TODO better system to raise errors on impossibly fast speeds
             print(f'speed above 80 for trip {self.trip_key}, dropping')
             gdf = gdf >> filter(_.speed_mph < 80)
+        if gdf.speed_mph.max() < 0: ## TODO better system to raise errors on impossibly fast speeds
+            print(f'negative speed for trip {self.trip_key}, dropping')
+            gdf = gdf >> filter(_.speed_mph > 0)
         self.debug_dict['map_gdf'] = gdf
 
         colorscale = branca.colormap.step.RdYlGn_08.scale(vmin=gdf.speed_mph.min(), 
@@ -468,6 +471,9 @@ class OperatorDayAnalysis:
                 if stop_speeds.avg_mph.max() > 80:
                     print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
+                if stop_speeds._20p_mph.min() < 0:
+                    print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                    stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
                 all_stop_speeds = all_stop_speeds.append(stop_speeds)
                 
                 if type(self.pbar) != type(None):
