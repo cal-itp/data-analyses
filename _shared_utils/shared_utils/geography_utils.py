@@ -22,8 +22,10 @@ FEET_PER_MI = 5_280
 SQ_FT_PER_SQ_MI = 2.788 * 10**7
 
 def aggregate_by_geography(df, group_cols, 
-                       sum_cols = [], mean_cols = [], 
-                       count_cols = [], nunique_cols = []):
+                           sum_cols = [], mean_cols = [], 
+                           count_cols = [], nunique_cols = [],
+                           rename_cols = False
+                          ):
     '''
     df: pandas.DataFrame or geopandas.GeoDataFrame., 
         The df on which the aggregating is done.
@@ -40,6 +42,9 @@ def aggregate_by_geography(df, group_cols,
         List of columns to calculate a count with the groupby.
     nunique_cols: list. 
         List of columns to calculate the number of unique values with the groupby.
+    rename_cols: boolean.
+        Defaults to False. If True, will rename columns in sum_cols to have suffix `_sum`,
+        rename columns in mean_cols to have suffix `_mean`, etc.
     
     Returns a pandas.DataFrame or geopandas.GeoDataFrame (same as input).
     '''
@@ -51,6 +56,12 @@ def aggregate_by_geography(df, group_cols,
         agg_df = df.pivot_table(index=group_cols,
                        values=agg_cols,
                        aggfunc=AGGREGATE_FUNCTION).reset_index()
+        
+        if rename_cols == True:
+            # https://stackoverflow.com/questions/34049618/how-to-add-a-suffix-or-prefix-to-each-column-name
+            # Why won't .add_prefix or .add_suffix work?
+            for c in agg_cols:
+                agg_df = agg_df.rename(columns = {c: f"{c}_{AGGREGATE_FUNCTION}"})
         
         final_df = pd.merge(final_df, agg_df, 
                            on=group_cols, how="left", validate="1:1")
