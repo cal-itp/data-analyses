@@ -54,10 +54,10 @@ def calculate_data_head(df, col, aggregate_by=["dist"], aggfunc="sum"):
 #from Tiffany's branch DLA functions
 #get basic information from the different columns by year
 
-def count_all_years(df, groupedby=["dist"]):
+def count_all_years(df, groupedby=["prepared_y", "dist"]): 
     count_years = (geography_utils.aggregate_by_geography(
         df, 
-        group_cols = ["prepared_y", "dist"],
+        group_cols = groupedby, 
         sum_cols = ["total_requested", "ac_requested", "fed_requested"],
         mean_cols = ["total_requested", "ac_requested", "fed_requested"],
         nunique_cols = ["primary_agency_name", "mpo", "prefix", "project_no", "project_location", "type_of_work"]
