@@ -187,8 +187,7 @@ def GTFS():
 Merged Data
 
 """
-#Merged dataframe objects
-#crosswalk dictionary for merging data frame
+#crosswalk dictionary for function merged_dataframe()
 crosswalk = {'City of Chowchilla ': 'City of Chowchilla, dba: Chowchilla Area Transit ',
      'City of Dinuba ':  'City of Dinuba',
      'Modoc Transportation Agency': 'Modoc Transportation Agency',
@@ -216,8 +215,8 @@ crosswalk = {'City of Chowchilla ': 'City of Chowchilla, dba: Chowchilla Area Tr
      'County Connection (Central Contra Costa Transit Authority)': 'Central Contra Costa Transit Authority, dba: COUNTY CONNECTION',
      'Calaveras Transit Agency ': 'Calaveras Transit Agency'}
 
-#Agencies that ONLY appear in Black Cat
-BC_Only = ['County of Los Angeles - Department of Public Works',
+#Agencies that ONLY appear in Black Cat  for function merged_dataframe()
+BC_Agency_List = ['County of Los Angeles - Department of Public Works',
  'County of Nevada Public Works, Transit Services Division',
  'County of Sacramento Department of Transportation',
  'Glenn County Transportation Commission',
@@ -226,49 +225,75 @@ BC_Only = ['County of Los Angeles - Department of Public Works',
  'Fresno Council of Governments',
  'Greyhound Lines, Inc.']
 
-#Dataframe merge, commenting out for now.
-'''
+#Merging all 3 data frames, the full version info including year info 2011-2021.
 def merged_dataframe():
-    #call data frames we have to join.
+    ### MERGING ###
+    #call the 3 data frames we have to join.
     df_5311 = data_prep.load_grantprojects()
     vehicles = data_prep.load_cleaned_vehiclesdata()
     organizations = data_prep.load_cleaned_organizations_data()
     #merge vehicles from NTD & GTFS
     vehicles_gtfs = pd.merge(vehicles, organizations,  how='left', on=['ntd_id'])
     #left merge, Black Cat on the left and vehicle_gtfs on the right. 
-    Test1 = (pd.merge(df_5311, vehicles_gtfs,  how='left', left_on=['organization_name'], 
+    m1 = (pd.merge(df_5311, vehicles_gtfs,  how='left', left_on=['organization_name'], 
                       right_on=['name'], indicator=True)
             )
+    
     #Filter out for left only matches, make it into a list
-    Left_only = Test1[(Test1._merge.str.contains("left_only", case= False))] 
+    Left_only = m1[(m1._merge.str.contains("left_only", case= False))] 
     Left_orgs = Left_only['organization_name'].drop_duplicates().tolist()
     #Delete  left only matches from original df 
-    m2 = Test1[~Test1.organization_name.isin(Left_orgs)]
+    m2 = m1[~m1.organization_name.isin(Left_orgs)]
     #making a data frame with only failed merges out out of original Black Cat
     fail = df_5311[df_5311.organization_name.isin(Left_orgs)]
     #replacing organization names from Black Cat with agency names from NTD Vehicles.
     fail['organization_name'].replace(crosswalk, inplace= True)
     #Merging the failed organizations to vehicles 
-    Test2 = pd.merge(fail, vehicles_gtfs,  how='left', left_on=['organization_name'], right_on=['agency'])
+    Test = pd.merge(fail, vehicles_gtfs,  how='left', left_on=['organization_name'], right_on=['agency'])
     #appending failed matches to the first data frame
-    BC_GTFS_NTD = m2.append(Test2, ignore_index=True)
-    #create a column to flag agencies that appear in black cat only
+    BC_GTFS_NTD = m2.append(Test, ignore_index=True)
+    
+    ### METRIC TO SHOW BLACK CAT ONLY AGENCIES ###
+    #Function
     def BC_only(row):
-    if row.organization_name in BC_Only:
-        return '1'
-    else: 
-        return '0'  
+        if row.organization_name in BC_Agency_List:
+            return '1'
+        else: 
+            return '0'  
     BC_GTFS_NTD["Is_Agency_In_BC_Only_1_means_Yes"] = BC_GTFS_NTD.apply(lambda x: BC_only(x), axis=1)
-    #replace GTFS and cal itp for Klamath. Klamath does not appear in NTD data.
+    
+    #Replace GTFS and cal itp for Klamath. 
+    #Klamath does not appear in NTD data so we missed it when we merged NTD & Cal ITP on NTD ID
     BC_GTFS_NTD.loc[(BC_GTFS_NTD['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "itp_id"] = "436"
     BC_GTFS_NTD.loc[(BC_GTFS_NTD['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "gtfs_schedule_status"] = "needed"
+    
     #get a more definitive GTFS status: ok, needed, long term solution needed, research
     temp = BC_GTFS_NTD.gtfs_schedule_status.fillna("None")
     BC_GTFS_NTD['GTFS_schedule_status_use'] = np.where(temp.str.contains("None"),"None",
                    np.where(temp.str.contains("ok"), "Ok",
                    np.where(temp.str.contains("long"), "Long-term solution needed",
                    np.where(temp.str.contains("research"), "Research", "Needed"))))
-    #### FLEET SIZE STUFF #####
+    
+    ###FLEET SIZE METRIC ### 
+    #First grabbing only one row for each agency into a new data frame 
+    Fleet_size = BC_GTFS_NTD.groupby(['organization_name',]).agg({'total_vehicles':'max'}).reindex()
+    #Get percentiles in objects for total vehicle.
+    p75 = Fleet_size.total_vehicles.quantile(0.75).astype(int)
+    p25 = Fleet_size.total_vehicles.quantile(0.25).astype(int)
+    p50 = Fleet_size.total_vehicles.quantile(0.50).astype(int)
+    #Function for fleet size
+    def fleet_size (row):
+        if ((row.total_vehicles > 0) and (row.total_vehicles < p25)):
+            return "Small"
+        elif ((row.total_vehicles > p25) and (row.total_vehicles < p75)):
+            return "Medium"
+        elif ((row.total_vehicles > p50) and (row.total_vehicles > p75 )):
+               return "Large"
+        else:
+            return "No Info"
+    BC_GTFS_NTD["fleet_size"] = BC_GTFS_NTD.apply(lambda x: fleet_size(x), axis=1)
+    
+    ### FINAL CLEAN UP ###
     #delete old columns
     BC_GTFS_NTD = BC_GTFS_NTD.drop(columns=['gtfs_schedule_status','name','agency'])
     #rename
@@ -276,12 +301,10 @@ def merged_dataframe():
     #get agencies without any data to show up when grouping
     show_up = ['reporter_type']
     for i in show_up:
-        BC_GTFS_NT2[i] = BC_GTFS_NTD[i].fillna('None')
-    #change itp id to be float.
+        BC_GTFS_NTD[i] = BC_GTFS_NTD[i].fillna('None')
+    #change itp id to be floats & 0 so parquet will work
     BC_GTFS_NTD['itp_id'] = BC_GTFS_NTD['itp_id'].fillna(0)
     BC_GTFS_NTD.loc[(BC_GTFS_NTD['itp_id'] == '436'), "itp_id"] = 436
     #save into parquet
-    BC_GTFS_NTD.to_parquet
-return BC_GTFS_NTD 
-
-'''
+    BC_GTFS_NTD2.to_parquet("BC_GTFS_NTD.parquet")
+    return BC_GTFS_NTD 
