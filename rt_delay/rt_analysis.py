@@ -41,6 +41,13 @@ class TripPositionInterpolator:
         self._attach_shape(shape_gdf)
         self.median_time = self.position_gdf[self.time_col].median()
         self.time_of_day = categorize_time_of_day(self.median_time)
+        self.total_meters = (self.cleaned_positions.shape_meters.max() - self.cleaned_positions.shape_meters.min())
+        self.total_seconds = (self.cleaned_positions.vehicle_timestamp.max() - self.cleaned_positions.vehicle_timestamp.min()).seconds
+        try:
+            self.mean_speed_mph = (self.total_meters / self.total_seconds) * MPH_PER_MPS
+        except:
+            self.mean_speed_mph = np.nan
+            print(f'speed failed, check cleaned positions for trip {self.trip_id}')
         
     def _attach_shape(self, shape_gdf):
         ''' Filters gtfs shapes to the shape served by this trip. Additionally, projects positions_gdf to a linear
@@ -273,6 +280,7 @@ class OperatorDayAnalysis:
         self.rt_trips = self.trips.copy() >> filter(_.trip_id.isin(self.position_interpolators.keys()))
         self.rt_trips['median_time'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].median_time.time(), axis = 1)
         self.rt_trips['direction'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].direction, axis = 1)
+        self.rt_trips['mean_speed_mph'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].mean_speed_mph, axis = 1)
         self._generate_stop_delay_view()
         self.filter = None
         self.filter_formatted = ''
