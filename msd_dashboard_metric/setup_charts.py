@@ -72,3 +72,11 @@ def base_line_chart(df):
              )
             )
     return chart
+
+# Add tooltip for line charts
+def add_tooltip(chart, y_col):
+    chart = (chart.encode(
+            tooltip = ["date", y_col]
+        ).interactive()
+    )
+    return chart
