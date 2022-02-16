@@ -7,11 +7,24 @@ import numpy as np
 import pandas as pd
 
 """
-Loading in Data
+Loading in Crosswalks
 
 """
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
+
+#Allocation PPNO Crosswalk
+FILE_NAME3 = "Allocation_PPNO_Crosswalk.csv"
+allocation_ppno_crosswalk = pd.read_csv(f"{GCS_FILE_PATH}{FILE_NAME3}")
+    
+#Allocation PPNO Crosswalk
+FILE_NAME4 = "Projects_PPNO.xlsx"
+project_ppno_crosswalk = pd.read_excel(f"{GCS_FILE_PATH}{FILE_NAME4}")
+
+"""
+Cleaning & Loading Data
+
+"""
 
 #Project Sheet
 def project(): 
@@ -85,17 +98,10 @@ def allocation():
          )
     return df
 
-"""
-Loading in Crosswalks
-
-"""
-
-
-
 
 
 """
-Misc Functions 
+Semi Annual Report
 
 """
 #For table 2 in semi annual report, put projects df in here
@@ -110,9 +116,9 @@ def summary_SAR_table_two(df):
                                'Expended_Amt_project_sheet': 'Expended_Amount'})
          )
     #create percentages
-    df['Expended_Percent_of_Awarded'] = (df['Expended_Amount']/df['Award_Amount'])*100
-    df['Expended_Percent_of_Allocated'] = (df['Expended_Amount']/df['Amount_Allocated'])*100
-    df['Percent_Allocated'] = (df['Amount_Allocated']/df['Award_Amount'])*100
+    df['Expended_Percent_of_Awarded'] = (df['Expended_Amount']/df['Award_Amount'])
+    df['Expended_Percent_of_Allocated'] = (df['Expended_Amount']/df['Amount_Allocated'])
+    df['Percent_Allocated'] = (df['Amount_Allocated']/df['Award_Amount'])
     #transpose 
     df = df.set_index('Award_Year').T
     #grand totals for monetary columns
@@ -123,15 +129,19 @@ def summary_SAR_table_two(df):
     Alloc = df.at['Amount_Allocated','Grand_Total']
     TIRCP = df.at['Award_Amount','Grand_Total']
     #filling in totals of percentages
-    df.at['Expended_Percent_of_Awarded','Grand_Total'] = (Exp/TIRCP)*100
-    df.at['Expended_Percent_of_Allocated','Grand_Total'] = (Exp/Alloc)*100
-    df.at['Percent_Allocated','Grand_Total'] = (Alloc/TIRCP)*100
+    df.at['Expended_Percent_of_Awarded','Grand_Total'] = (Exp/TIRCP)
+    df.at['Expended_Percent_of_Allocated','Grand_Total'] = (Exp/Alloc)
+    df.at['Percent_Allocated','Grand_Total'] = (Alloc/TIRCP)
     #switching rows to correct order
     df = (df.reindex(['Number_of_Awarded_Projects', 'Award_Amount', 'Amount_Allocated',
                      'Percent_Allocated','Expended_Amount', 'Expended_Percent_of_Awarded', 'Expended_Percent_of_Allocated'])
     )
     return df 
 
+"""
+Tableau Functions
+
+"""
 #Categorizing expended percentage for Tableau dashboard
 #Input project dataframe here
 def expended_percent(row):
