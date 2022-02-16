@@ -43,11 +43,9 @@ class TripPositionInterpolator:
         self.time_of_day = categorize_time_of_day(self.median_time)
         self.total_meters = (self.cleaned_positions.shape_meters.max() - self.cleaned_positions.shape_meters.min())
         self.total_seconds = (self.cleaned_positions.vehicle_timestamp.max() - self.cleaned_positions.vehicle_timestamp.min()).seconds
-        try:
-            self.mean_speed_mph = (self.total_meters / self.total_seconds) * MPH_PER_MPS
-        except:
-            self.mean_speed_mph = np.nan
-            print(f'speed failed, check cleaned positions for trip {self.trip_id}')
+        assert self.total_meters > 1000, "less than 1km of data"
+        assert self.total_seconds > 60, "less than 60 seconds of data"
+        self.mean_speed_mph = (self.total_meters / self.total_seconds) * MPH_PER_MPS
         
     def _attach_shape(self, shape_gdf):
         ''' Filters gtfs shapes to the shape served by this trip. Additionally, projects positions_gdf to a linear

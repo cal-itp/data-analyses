@@ -304,7 +304,7 @@ def time_at_position_numba(desired_position, shape_array, dt_float_array):
 
 def try_parallel(geometry):
     try:
-        return geometry.parallel_offset(25, 'right')
+        return geometry.parallel_offset(30, 'right')
     except:
         return geometry
     
