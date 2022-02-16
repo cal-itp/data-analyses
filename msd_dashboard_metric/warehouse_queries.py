@@ -1,9 +1,11 @@
-# Queries in common for accessibility
+# Warehouse queries
+import os
 import pandas as pd
+
+os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 
 from calitp.tables import tbl
 from siuba import *
-
 
 #----------------------------------------------------------#
 ## Stops and Trips
