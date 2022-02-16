@@ -229,9 +229,9 @@ BC_Agency_List = ['County of Los Angeles - Department of Public Works',
 def merged_dataframe():
     ### MERGING ###
     #call the 3 data frames we have to join.
-    df_5311 = data_prep.load_grantprojects()
-    vehicles = data_prep.load_cleaned_vehiclesdata()
-    organizations = data_prep.load_cleaned_organizations_data()
+    df_5311 = load_grantprojects()
+    vehicles = load_cleaned_vehiclesdata()
+    organizations = load_cleaned_organizations_data()
     #merge vehicles from NTD & GTFS
     vehicles_gtfs = pd.merge(vehicles, organizations,  how='left', on=['ntd_id'])
     #left merge, Black Cat on the left and vehicle_gtfs on the right. 
@@ -278,9 +278,9 @@ def merged_dataframe():
     #First grabbing only one row for each agency into a new data frame 
     Fleet_size = BC_GTFS_NTD.groupby(['organization_name',]).agg({'total_vehicles':'max'}).reindex()
     #Get percentiles in objects for total vehicle.
-    p75 = Fleet_size.total_vehicles.quantile(0.75).astype(int)
-    p25 = Fleet_size.total_vehicles.quantile(0.25).astype(int)
-    p50 = Fleet_size.total_vehicles.quantile(0.50).astype(int)
+    p75 = Fleet_size.total_vehicles.quantile(0.75).astype(float)
+    p25 = Fleet_size.total_vehicles.quantile(0.25).astype(float)
+    p50 = Fleet_size.total_vehicles.quantile(0.50).astype(float)
     #Function for fleet size
     def fleet_size (row):
         if ((row.total_vehicles > 0) and (row.total_vehicles < p25)):
@@ -306,5 +306,5 @@ def merged_dataframe():
     BC_GTFS_NTD['itp_id'] = BC_GTFS_NTD['itp_id'].fillna(0)
     BC_GTFS_NTD.loc[(BC_GTFS_NTD['itp_id'] == '436'), "itp_id"] = 436
     #save into parquet
-    BC_GTFS_NTD2.to_parquet("BC_GTFS_NTD.parquet")
+    #BC_GTFS_NTD.to_parquet("BC_GTFS_NTD.parquet")
     return BC_GTFS_NTD 
