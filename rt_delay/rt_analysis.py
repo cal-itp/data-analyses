@@ -140,6 +140,7 @@ class TripPositionInterpolator:
             zoom = 13,
             centroid = [centroid.y, centroid.x],
             title=f"Trip Speed Map (Route {self.route_id}, {self.direction}, {self.time_of_day})",
+            legend_name = "Speed (miles per hour)",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
                 "fillOpacity": 0.6,
@@ -266,6 +267,11 @@ class OperatorDayAnalysis:
         self.trs = self.trs >> distinct(_.stop_id, _.shape_id)
         self.trs = self.stops >> select(_.stop_id, _.stop_name, _.geometry) >> inner_join(_, self.trs, on = 'stop_id')
         # print(f'projecting')
+        if not self.trs.shape_id.isin(self.routelines.shape_id).all():
+            no_shape_trs = self.trs >> filter(-_.shape_id.isin(self.routelines.shape_id))
+            print(f'{no_shape_trs.shape[0]} trips out of {self.trs.shape[0]} have no shape, dropping')
+            assert no_shape_trs.shape[0] < self.trs.shape[0] / 10, '>10% of trips have no shape!'
+            self.trs = self.trs >> filter(_.shape_id.isin(self.routelines.shape_id))
         self.trs['shape_meters'] = (self.trs.apply(lambda x:
                 (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
          axis = 1))
@@ -280,8 +286,20 @@ class OperatorDayAnalysis:
         self.rt_trips['direction'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].direction, axis = 1)
         self.rt_trips['mean_speed_mph'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].mean_speed_mph, axis = 1)
         self._generate_stop_delay_view()
+        self.endpoint_delay_view = (self.stop_delay_view
+                      >> group_by(_.trip_id)
+                      >> filter(_.stop_sequence == _.stop_sequence.max())
+                      >> ungroup()
+                      >> mutate(arrival_hour = _.arrival_time.apply(lambda x: x.hour))
+                     )
+        self.endpoint_delay_summary = (self.endpoint_delay_view
+                      >> group_by(_.direction_id, _.route_id, _.arrival_hour)
+                      >> summarize(n_trips = _.route_id.size, mean_end_delay = _.delay.mean())
+                     )
         self.filter = None
         self.filter_formatted = ''
+        self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
+                                         self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
         
     def _generate_position_interpolators(self):
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
@@ -388,6 +406,13 @@ class OperatorDayAnalysis:
         self.filter['route_ids'] = route_ids
         self.filter['direction_id'] = direction_id
         self.filter['direction'] = direction
+        if start_time and end_time:
+            self.hr_duration_in_filter = (dt.datetime.combine(self.analysis_date, self.filter['end_time'])
+                                 - dt.datetime.combine(self.analysis_date, self.filter['start_time'])
+                                ).seconds / 60**2
+        else:
+            self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
+                                         self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
             
     def reset_filter(self):
         self.filter = None
@@ -411,6 +436,8 @@ class OperatorDayAnalysis:
         if self.filter['direction']:
             trips = trips >> filter(_.direction == self.filter['direction'])
         return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
+    
+
         
     def segment_speed_map(self, segments = 'stops', how = 'average',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550]):
@@ -436,6 +463,7 @@ class OperatorDayAnalysis:
             for direction_id in gdf.direction_id.unique():
                 this_shape_direction = (gdf
                              >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
+                self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
                 stop_speeds = (this_shape_direction
                              >> group_by(_.trip_key)
                              >> arrange(_.stop_sequence)
@@ -461,14 +489,17 @@ class OperatorDayAnalysis:
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> group_by(_.stop_sequence)
-                         >> mutate(avg_mph = _.speed_mph.mean(),
+                         >> mutate(n_trips = _.stop_sequence.size,
+                                    avg_mph = _.speed_mph.mean(),
                                   _20p_mph = _.speed_mph.quantile(.2),
+                                   trips_per_hour = _.n_trips / self.hr_duration_in_filter
                                   )
                          >> distinct(_.stop_sequence, _keep_all=True)
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay,
                                    -_.trip_id, -_.trip_key)
                         )
+                    self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
                 except Exception as e:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
                     print(e)
@@ -493,7 +524,8 @@ class OperatorDayAnalysis:
     def _show_speed_map(self, how, colorscale, size):
         
         gdf = self.stop_segment_speed_view.copy()
-        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0}) ##round for display
+        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0,
+                        'trips_per_hour': 1}) ##round for display
         
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
@@ -527,7 +559,8 @@ class OperatorDayAnalysis:
             "shape_id": "Shape ID",
             "direction_id": "Direction ID",
             "stop_id": "Next Stop ID",
-            "stop_sequence": "Next Stop Sequence"
+            "stop_sequence": "Next Stop Sequence",
+            "trips_per_hour": "Trips per Hour" 
         }
 
         g = make_folium_choropleth_map(
@@ -540,6 +573,7 @@ class OperatorDayAnalysis:
             zoom = 13,
             centroid = [centroid.y, centroid.x],
             title=f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}",
+            legend_name = "Speed (miles per hour)",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
                 "fillOpacity": 0.6,

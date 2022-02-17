@@ -220,7 +220,8 @@ def get_stop_times(itp_id, analysis_date, force_clear = False):
         >> arrange(_.stop_sequence)
         >> collect()
         )
-
+    st.arrival_time = st.arrival_time.str.strip()
+    st.departure_time = st.departure_time.str.strip()
     st.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
     return st
 
