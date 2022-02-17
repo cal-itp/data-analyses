@@ -45,11 +45,16 @@ def clean_highways():
 #--------------------------------------------------------#
 ### Functions to create overlay dataset + further cleaning
 #--------------------------------------------------------#
-def process_transit_routes():
-    ## Clean transit routes
-    df = (catalog.transit_routes.read()
-          .to_crs(shared_utils.geography_utils.CA_StatePlane))
+# Can this function be reworked to take a df?
+def process_transit_routes(alternate_df = None):
+    if alternate_df is None:
+        df = catalog.transit_routes.read()
+    else:
+        df = alternate_df
     
+    ## Clean transit routes
+    df = df.to_crs(shared_utils.geography_utils.CA_StatePlane)
+
     # Transit routes included some extra info about 
     # route_long_name, route_short_name, agency_id
     # Get it down to unique shape_id
@@ -103,7 +108,9 @@ def process_highways(buffer_feet = shared_utils.geography_utils.FEET_PER_MI):
     return df
     
     
-def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEET_PER_MI):
+def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEET_PER_MI,
+                                alternate_df = None
+                               ):
     """
     Function to find areas of intersection between
     highways (default of 1 mile buffer) and transit routes.
@@ -114,7 +121,7 @@ def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEE
     
     # Can pass a different buffer zone to determine parallel corridors
     highways = process_highways(buffer_feet = hwy_buffer_feet)
-    transit_routes = process_transit_routes()
+    transit_routes = process_transit_routes(alternate_df)
     
     # Overlay
     # Note: an overlay based on intersection changes the geometry column
@@ -163,15 +170,26 @@ def parallel_or_intersecting(df, pct_route_threshold=0.5,
 # Use this in notebook
 # Can pass different parameters if buffer or thresholds need adjusting
 def make_analysis_data(hwy_buffer_feet=
-                       shared_utils.geography_utils.FEET_PER_MI, 
+                       shared_utils.geography_utils.FEET_PER_MI,
+                       alternate_df = None,
                        pct_route_threshold = 0.5,
                        pct_highway_threshold = 0.1,
                        DATA_PATH = "", FILE_NAME = "parallel_or_intersecting"
                       ):
+    '''
+    hwy_buffer_feet: int, number of feet to draw hwy buffers, defaults to 1 mile
+    alternate_df: None or pandas.DataFrame
+                    can input an alternate df for transit routes
+                    otherwise, use the `shapes_processed` from other analysis
+    pct_route_threshold: float, between 0-1
+    pct_highway_threshold: float, between 0-1
+    DATA_PATH: str, file path for saving parallel transit routes dataset
+    FILE_NAME: str, file name for saving parallel transit routes dataset
     
+    '''
     # Get overlay between highway and transit routes
     # Draw buffer around highways
-    gdf = overlay_transit_to_highways(hwy_buffer_feet)
+    gdf = overlay_transit_to_highways(hwy_buffer_feet, alternate_df)
 
     # Categorize whether route is parallel or intersecting based on threshold
     gdf2 = parallel_or_intersecting(gdf, 
