@@ -175,7 +175,10 @@ Basic Charts
 
 
 # Bar
-def basic_bar_chart(df, x_col, y_col, color_col, subset):
+def basic_bar_chart(df, x_col, y_col, color_col, subset, chart_title=''):
+    
+    if chart_title == "":
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
     
     chart = (alt.Chart(df)
              .mark_bar()
@@ -189,7 +192,7 @@ def basic_bar_chart(df, x_col, y_col, color_col, subset):
                                       legend=alt.Legend(title=(labeling(color_col)))
                                   ))
              .properties( 
-                          title=f"{labeling(x_col)} by {labeling(y_col)}")
+                          title=chart_title)
     )
 
     chart=styleguide.preset_chart_config(chart)
@@ -199,48 +202,37 @@ def basic_bar_chart(df, x_col, y_col, color_col, subset):
 
 
 # Scatter 
-def basic_scatter_chart(df, col, aggregate_by, colorcol, chart_title=""):
+def basic_scatter_chart(df, x_col, y_col, color_col, subset, chart_title=""):
     
     if chart_title == "":
-        new_title = chart_title
-        save = "_top_20"
-        
-    elif chart_title != "":
-        new_title= (f"{labeling(col)} by {labeling(aggregate_by)}")
-        save= ""
-        
-    
-#     if chart_title != [""]:
-#         chart_title= (f"Highest {labeling(col)} by {labeling(aggregate_by)}")
-#         save= [""]
-        
-#     elif chart_title == [""]:
-#         chart_title == [""]
-#         save = "_top_20"
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
         
     chart = (alt.Chart(df)
              .mark_circle(size=60)
              .encode(
-                 x=alt.X(aggregate_by, title=labeling(aggregate_by)),
-                 y=alt.Y(col, title=labeling(col)),
-                 #column = "payment:N",
-                 color = alt.Color(colorcol,
+                 x=alt.X(x_col, title=labeling(x_col)),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 color = alt.Color(color_col,
                                   scale=alt.Scale(
                                       range=altair_utils.CALITP_SEQUENTIAL_COLORS),
-                                      legend=alt.Legend(title=(labeling(col)))
+                                      legend=alt.Legend(title=(labeling(color_col)))
                                   ))
              .properties( 
-                          title = (new_title))
+                          title = (chart_title))
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/d{subset}_outputs/scatter_{col}_by_{aggregate_by}{save}.png")
+    chart.save(f"./chart_outputs/d{subset}_outputs/scatter_{x_col}_by_{y_col}{save}.png")
     
     return chart
 
 
 # Line
-def basic_line_chart(df, x_col, y_col, subset):
+def basic_line_chart(df, x_col, y_col, subset, chart_title=''):
+    
+    if chart_title == "":
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
+    
     
     chart = (alt.Chart(df)
              .mark_line()
@@ -249,7 +241,7 @@ def basic_line_chart(df, x_col, y_col, subset):
                  y=alt.Y(y_col, title=labeling(y_col))
                                    )
               ).properties( 
-                          title=f"{labeling(x_col)} by {labeling(y_col)}")
+                          title=chart_title)
 
     chart=styleguide.preset_chart_config(chart)
     chart.save(f"./chart_outputs/d{subset}_outputs/line_{x_col}_by_{y_col}.png")

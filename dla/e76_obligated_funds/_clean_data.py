@@ -17,6 +17,7 @@ import pandas as pd
 from calitp import to_snakecase
 from siuba import *
 
+pd.set_option('display.max_columns', None)
 
 #reading data
 def read_data(): 
