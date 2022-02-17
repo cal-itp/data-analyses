@@ -3,27 +3,43 @@ import geopandas as gpd
 import os
 import pandas as pd
 
-import utils
-import shared_utils
-
-os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
-pd.set_option("display.max_rows", 20)
+os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
 
 from calitp.tables import tbl
 from calitp import query_sql
 from siuba import *
+
+import utils
+import shared_utils
+
+'''
+Stash datasets in GCS to read in create_service_estimator.py
+warehouse_queries and create_analysis_data functions related 
+to service increase estimation need to be created in a "bundle"
+otherewise, `shape_id` may not match
+Use sub-folders to store intermediate parquets
+
+The original analysis was done on Oct 2021 service dates for 
+service estimation and tract bus arrivals.
+Keep those in `utils.GCS_FILE_PATH`.
+
+New sub-folders take form: f"{utils.GCS_FILE_PATH}SUBFOLDER_NAME/"
+'''
+
+DATA_PATH = f"{utils.GCS_FILE_PATH}2022_Jan/"
 
 #---------------------------------------------------------------#
 # Set dates for analysis
 #---------------------------------------------------------------#
 # Replace get_recent_dates()
 # Explicitly set dates
-# ??? Can these take datetime or have to be string?
-# Datetimes should work? Double check
 dates = {
-    'thurs': dt.date(2021, 10, 7),
-    'sat': dt.date(2021, 10, 9),
-    'sun': dt.date(2021, 10, 10)
+    #'thurs': dt.date(2021, 10, 7),
+    #'sat': dt.date(2021, 10, 9),
+    #'sun': dt.date(2021, 10, 10),
+    "thurs": "2022-1-6", 
+    "sat": "2022-1-8",
+    "sun": "2022-1-9",
 }
 
 min_date = min(dates.values())
@@ -33,10 +49,6 @@ max_date = max(dates.values())
 #---------------------------------------------------------------#
 # Warehouse Queries for A1_generate_existing_service.ipynb
 #---------------------------------------------------------------#
-# Temporarily stash datasets to read in create_service_estimator.py
-# utils.DATA_PATH is "./data/"
-DATA_PATH = "./data/test/"
-
 date_tbl = (tbl.views.dim_date() 
             >> select(_.date == _.full_date, _.day_name)            
            )
@@ -47,7 +59,8 @@ def grab_selected_trips_for_date(selected_date):
     
     ## get trips for operator on dates of interest, join with day of week table
     trips = (tbl.views.gtfs_schedule_fact_daily_trips()
-             >> filter(_.calitp_extracted_at <= min_date, _.calitp_deleted_at > max_date)
+             >> filter(_.calitp_extracted_at <= min_date, 
+                       _.calitp_deleted_at > max_date)
              >> filter(_.is_in_service == True, _.service_date == selected_date)
              >> select(_.calitp_itp_id, _.date == _.service_date, 
                        _.trip_key, _.trip_id, _.is_in_service)
@@ -69,7 +82,8 @@ def grab_selected_trips_for_date(selected_date):
     
     ## get trips dimensional table
     tbl_trips = (tbl.views.gtfs_schedule_dim_trips()
-                 >> filter(_.calitp_extracted_at <= min_date, _.calitp_deleted_at > max_date)
+                 >> filter(_.calitp_extracted_at <= min_date, 
+                           _.calitp_deleted_at > max_date)
                  >> select(_.trip_key, _.shape_id, _.route_id)
     )
 
@@ -90,7 +104,6 @@ def grab_selected_trips_for_date(selected_date):
         day = day_name[:3]
 
     trips_joined.to_parquet(f"{DATA_PATH}trips_joined_{day}.parquet")
-
 
 
 #---------------------------------------------------------------#
@@ -130,11 +143,11 @@ daily_stop_times = (
  >> collect()
 )
 
-daily_stop_times.to_parquet(f"{utils.DATA_PATH}daily_stop_times.parquet")
+daily_stop_times.to_parquet(f"{utils.GCS_FILE_PATH}daily_stop_times.parquet")
 '''
 
 def process_daily_stop_times():
-    daily_stop_times = pd.read_parquet(f"{utils.DATA_PATH}daily_stop_times.parquet")
+    daily_stop_times = pd.read_parquet(f"{utils.GCS_FILE_PATH}daily_stop_times.parquet")
     
     # Handle some exclusions
     daily_stop_times = utils.include_exclude_multiple_feeds(
@@ -162,7 +175,7 @@ def process_daily_stop_times():
         >> collect()
     )
 
-    aggregated_stops_with_geom.to_parquet(f"{utils.DATA_PATH}aggregated_stops_with_geom.parquet")
+    aggregated_stops_with_geom.to_parquet(f"{utils.GCS_FILE_PATH}aggregated_stops_with_geom.parquet")
     
     
 if __name__ == "__main__":
@@ -172,7 +185,6 @@ if __name__ == "__main__":
     # (1) Get existing service 
     for key in dates.keys():
         print(f"Grab selected trips for {key}")
-        # Does it work if dates[key] is a datetime? Seems like it, no need to coerce to be str
         selected_date = dates[key]
         grab_selected_trips_for_date(selected_date)
     
