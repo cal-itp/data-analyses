@@ -170,3 +170,8 @@ def simple_map(gdf, mouseover=None):
     m.add_control(LayersControl())
 
     return m
+
+def calculate_access_proportion(num_df, denom_df, col):
+    proportion = num_df[col].sum() / denom_df[col].sum()
+    percentage = (proportion * 100).round(2)
+    return percentage
