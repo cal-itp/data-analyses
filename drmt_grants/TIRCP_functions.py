@@ -119,8 +119,8 @@ Semi Annual Report
 #SAR entire report.
 def semi_annual_report():
     ### Load in sheets ### 
-    df_project = TIRCP_functions.project()
-    df_allocation = TIRCP_functions.allocation()
+    df_project = project()
+    df_allocation = allocation()
     #Only keeping certain columns
     df_project = df_project[['Project_Manager','Award_Year', 'Project_#','Project_Title','PPNO',
                              'TIRCP_project_sheet','Expended_Amt_project_sheet','Allocated_Amount']]
@@ -215,7 +215,7 @@ Tableau Functions
 #Script for the projects sheet that I inputted into Tableau
 def tableau():
     #Keeping only the columns we want
-    df = TIRCP_functions.project()
+    df = project()
     df = df[['Award_Year', 'Project_#','Local_Agency','Project_Title','PPNO',
     'Key_Project_Elements','TIRCP_project_sheet','Allocated_Amount',
      'Expended_Amt_project_sheet']]
