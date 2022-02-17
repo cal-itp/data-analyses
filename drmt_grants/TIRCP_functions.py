@@ -39,7 +39,8 @@ def project():
     df = pd.merge(df, project_ppno_crosswalk, on = ["Award_Year", "Local_Agency"], how = "left")
     df.PPNO_New = df.apply(lambda x: x.PPNO_New if (str(x.PPNO_New2) == 'nan') else x.PPNO_New2, axis=1)
     df = df.drop(['PPNO','PPNO_New2'], axis=1).rename(columns = {'PPNO_New':'PPNO'})
-    
+    #Change  PPNO to all be strings
+    df.PPNO = df.PPNO.astype(str)
     ### MONETARY COLS CLEAN UP ###
     proj_cols = ['TIRCP_Award_Amount_($)', 'Allocated_Amount','Expended_Amount','Unallocated_Amount','Total_Project_Cost','Other_Funds_Involved']
     df[proj_cols] = df[proj_cols].fillna(value=0)
