@@ -11,4 +11,3 @@ Below are our scripts and notebooks we used for cleaning the data and creating t
 1. [utils](./_utils.py): functions for charts and aggregating the merged data frames. 
 1. [door_analysis](./door_analysis.ipynb): notebook that explores the district information, number of doors, and fleet size of each 5311 organization. 
 1. [gtfs_monetary_analysis](./gtfs_monetary_analysis.ipynb): notebook that explores the gtfs status, reporter type, organizations in district, and fleet size & age of the organizations. Also charts the total sum of 5311 funds received by each agency from 2011-2021.
-1. [chart_outputs](./chart_outputs): contains all the visualizations.
