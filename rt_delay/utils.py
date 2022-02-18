@@ -220,7 +220,8 @@ def get_stop_times(itp_id, analysis_date, force_clear = False):
         >> arrange(_.stop_sequence)
         >> collect()
         )
-
+    st.arrival_time = st.arrival_time.str.strip()
+    st.departure_time = st.departure_time.str.strip()
     st.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
     return st
 
@@ -304,7 +305,7 @@ def time_at_position_numba(desired_position, shape_array, dt_float_array):
 
 def try_parallel(geometry):
     try:
-        return geometry.parallel_offset(25, 'right')
+        return geometry.parallel_offset(30, 'right')
     except:
         return geometry
     
