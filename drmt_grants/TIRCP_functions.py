@@ -125,8 +125,7 @@ def semi_annual_report():
     #Only keeping certain columns
     df_project = df_project[['Project_Manager','Award_Year', 'Project_#','Project_Title','PPNO',
                              'TIRCP_project_sheet','Expended_Amt_project_sheet','Allocated_Amount']]
-    df_allocation = df_allocation[['Expended_Amt_Allocation_Sheet','Allocation_Amt_Allocation_Sheet','Award_Year','Award_Recipient', 'Implementing_Agency','PPNO',
-                                'Phase', 'LED','Allocation_Date','Completion_Date','Third_Party_Award_Date','Components']]
+    df_allocation = df_allocation[['Expended_Amt_Allocation_Sheet','Allocation_Amt_Allocation_Sheet','Award_Year','Award_Recipient', 'Implementing_Agency','PPNO','Phase', 'LED','Allocation_Date','Completion_Date','Third_Party_Award_Date','Components']]
     
     ###Summary ###
     summary_table_2 = summary_SAR_table_two(df_project) 
