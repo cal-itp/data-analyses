@@ -21,6 +21,7 @@ stops = (tbl.gtfs_schedule.stops()
          >> distinct()
 )
 
+
 # Trip query
 trips = (tbl.gtfs_schedule.trips()
          >> select(_.calitp_itp_id, _.calitp_url_number, 
@@ -30,7 +31,7 @@ trips = (tbl.gtfs_schedule.trips()
          >> distinct()
 )
 
-
+'''
 #----------------------------------------------------------#
 ## Validations for Critical Errors
 #----------------------------------------------------------#
@@ -112,4 +113,4 @@ fares_feeds = (
     >> collect()
 )
 
-
+'''
