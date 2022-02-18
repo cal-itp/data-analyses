@@ -148,6 +148,14 @@ class TripPositionInterpolator:
         )
 
         return g
+    
+    def export_detailled_map(self, folder_name):
+        '''
+        Export a detailled map of this trip to a specified folder. File will be named according to trip data,
+        for example: {calitp_itp_id}_rt_{route_id}_tr_{trip_id}.html
+        '''
+        m = self.detailed_speed_map()
+        m.save(f'./{folder_name}/{self.calitp_itp_id}_rt_{self.route_id}_tr_{self.trip_id}.html')
 
 class VehiclePositionsInterpolator(TripPositionInterpolator):
     '''Interpolate arrival times along a trip from GTFS-RT Vehicle Positions data.
@@ -183,22 +191,12 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
                                       .astype('float64')
                                      )
 
-    
     def _shift_calculate(self, vehicle_positions):
         
-        # if hasattr(self, "progressing_positions"):
-        #     print(self.progressing_positions.shape)
-        #     self.debug_dict[self.progressing_positions.shape[0]] = self.progressing_positions.copy()
-        
         vehicle_positions = vehicle_positions >> arrange(self.time_col) ## unnecessary?
-        # vehicle_positions['last_time'] = vehicle_positions[self.time_col].shift(1)
-        # vehicle_positions['last_loc'] = vehicle_positions.shape_meters.shift(1)
-        # vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col] - vehicle_positions.last_time
         vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col].diff()
         vehicle_positions.secs_from_last = (vehicle_positions.secs_from_last
                                         .apply(lambda x: x.seconds))
-        # vehicle_positions['meters_from_last'] = (vehicle_positions.shape_meters
-        #                                               - vehicle_positions.last_loc)
         vehicle_positions['meters_from_last'] = vehicle_positions.shape_meters.diff()
         vehicle_positions['progressed'] = vehicle_positions['meters_from_last'] > 0 ## has the bus moved ahead?
         vehicle_positions['speed_from_last'] = (vehicle_positions.meters_from_last
@@ -240,14 +238,14 @@ class OperatorDayAnalysis:
         itp_id: an itp_id (string or integer)
         analysis date: datetime.date
         '''
-        self.itp_id = int(itp_id)
+        self.calitp_itp_id = int(itp_id)
         assert type(analysis_date) == dt.date, 'analysis date must be a datetime.date object'
         self.analysis_date = analysis_date
         ## get view df/gdfs TODO implement temporary caching with parquets in bucket...
-        self.vehicle_positions = get_vehicle_positions(self.itp_id, self.analysis_date)
-        self.trips = get_trips(self.itp_id, self.analysis_date)
-        self.stop_times = get_stop_times(self.itp_id, self.analysis_date)
-        self.stops = get_stops(self.itp_id, self.analysis_date)
+        self.vehicle_positions = get_vehicle_positions(self.calitp_itp_id, self.analysis_date)
+        self.trips = get_trips(self.calitp_itp_id, self.analysis_date)
+        self.stop_times = get_stop_times(self.calitp_itp_id, self.analysis_date)
+        self.stops = get_stops(self.calitp_itp_id, self.analysis_date)
         trips = self.trips >> select(-_.calitp_url_number, -_.calitp_extracted_at, -_.calitp_deleted_at)
         positions = self.vehicle_positions >> select(-_.calitp_url_number)
         self.trips_positions_joined = (trips
@@ -258,8 +256,7 @@ class OperatorDayAnalysis:
                                     geometry=gpd.points_from_xy(self.trips_positions_joined.vehicle_longitude,
                                                                 self.trips_positions_joined.vehicle_latitude),
                                     crs=WGS84).to_crs(CA_NAD83Albers)
-        # self.routelines = shared_utils.geography_utils.make_routes_shapefile([self.itp_id], CA_NAD83Albers)
-        self.routelines = get_routelines(self.itp_id)
+        self.routelines = get_routelines(self.calitp_itp_id)
         assert type(self.routelines) == type(gpd.GeoDataFrame()) and not self.routelines.empty, 'routelines must not be empty'
         ## end of caching...
         self.trs = self.trips >> select(_.shape_id, _.trip_id)
@@ -550,7 +547,7 @@ class OperatorDayAnalysis:
         if hasattr(self, 'agency_name'):
             name = self.agency_name
         else:
-            name = self.itp_id
+            name = self.calitp_itp_id
 
         popup_dict = {
             how_speed_col[how]: "Speed (miles per hour)",
