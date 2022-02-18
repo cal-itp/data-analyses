@@ -24,7 +24,7 @@ class TripPositionInterpolator:
         ''' positions_gdf: a gdf with either rt vehicle positions or joined stops+stop_times
         shape_gdf: a gdf with line geometries for each shape
         '''
-        self.debug_dict = {}
+        # self.debug_dict = {}
         assert type(position_gdf) == type(gpd.GeoDataFrame()) and not position_gdf.empty, "positions gdf must not be empty"
         assert type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty"
         assert position_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"position and shape CRS must be {CA_NAD83Albers}"
@@ -115,7 +115,7 @@ class TripPositionInterpolator:
         if gdf.speed_mph.max() < 0: ## TODO better system to raise errors on impossibly fast speeds
             print(f'negative speed for trip {self.trip_key}, dropping')
             gdf = gdf >> filter(_.speed_mph > 0)
-        self.debug_dict['map_gdf'] = gdf
+        # self.debug_dict['map_gdf'] = gdf
 
         colorscale = branca.colormap.step.RdYlGn_08.scale(vmin=gdf.speed_mph.min(), 
                      vmax=gdf.speed_mph.max())
@@ -235,7 +235,7 @@ class OperatorDayAnalysis:
     '''
     def __init__(self, itp_id, analysis_date, pbar = None):
         self.pbar = pbar
-        self.debug_dict = {}
+        # self.debug_dict = {}
         '''
         itp_id: an itp_id (string or integer)
         analysis date: datetime.date
@@ -311,15 +311,15 @@ class OperatorDayAnalysis:
         for trip_id in self.vp_trip_ids: ##big test
             # print(trip_id)
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
-            self.debug_dict[f'{trip_id}_trip'] = trip
+            # self.debug_dict[f'{trip_id}_trip'] = trip
             st_trip_joined = (trip
                               >> inner_join(_, self.stop_times, on = ['calitp_itp_id', 'trip_id', 'service_date', 'trip_key'])
                               >> inner_join(_, self.stops, on = ['stop_id', 'calitp_itp_id'])
                              )
             st_trip_joined = gpd.GeoDataFrame(st_trip_joined, geometry=st_trip_joined.geometry, crs=CA_NAD83Albers)
             trip_positions_joined = self.trips_positions_joined >> filter(_.trip_id == trip_id)
-            self.debug_dict[f'{trip_id}_st'] = st_trip_joined
-            self.debug_dict[f'{trip_id}_vp'] = trip_positions_joined
+            # self.debug_dict[f'{trip_id}_st'] = st_trip_joined
+            # self.debug_dict[f'{trip_id}_vp'] = trip_positions_joined
             try:
                 self.position_interpolators[trip_id] = {'rt': VehiclePositionsInterpolator(trip_positions_joined, self.routelines),
                                                            # 'schedule': ScheduleInterpolator(st_trip_joined, self.routelines) ## probably need to save memory for now ?
@@ -363,11 +363,11 @@ class OperatorDayAnalysis:
                                                         axis = 1) ## format scheduled arrival times
                 _delay = _delay >> filter(_.arrival_time.apply(lambda x: x.date()) == _.actual_time.iloc[0].date())
                 _delay['arrival_time'] = _delay.arrival_time.astype('datetime64')
-                self.debug_dict[f'{trip_id}_times'] = _delay
+                # self.debug_dict[f'{trip_id}_times'] = _delay
                 _delay['delay'] = _delay.actual_time - _delay.arrival_time
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
                 _delays = _delays.append(_delay)
-                self.debug_dict[f'{trip_id}_delay'] = _delay
+                # self.debug_dict[f'{trip_id}_delay'] = _delay
                 # return
             except Exception as e:
                 print(f'could not generate delays for trip {trip_id}')
@@ -463,7 +463,7 @@ class OperatorDayAnalysis:
             for direction_id in gdf.direction_id.unique():
                 this_shape_direction = (gdf
                              >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
-                self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
+                # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
                 stop_speeds = (this_shape_direction
                              >> group_by(_.trip_key)
                              >> arrange(_.stop_sequence)
@@ -476,7 +476,7 @@ class OperatorDayAnalysis:
                 if stop_speeds.empty:
                     # print(f'{shape_id}_{direction_id}_st_spd empty!')
                     continue
-                self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
+                # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
                 stop_speeds.geometry = stop_speeds.apply(
                     lambda x: shapely.ops.substring(
                                 self.position_interpolators[x.trip_id]['rt'].shape.geometry.iloc[0],
@@ -499,7 +499,7 @@ class OperatorDayAnalysis:
                          >> select(-_.arrival_time, -_.actual_time, -_.delay,
                                    -_.trip_id, -_.trip_key)
                         )
-                    self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
+                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
                 except Exception as e:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
                     print(e)
@@ -531,6 +531,7 @@ class OperatorDayAnalysis:
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
 
         gdf = gdf >> select(-_.service_date)
+        gdf = gdf >> arrange(_.trips_per_hour)
         gdf = gdf.set_crs(CA_NAD83Albers)
         
                 ## shift to right side of road to display direction
