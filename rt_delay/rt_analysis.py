@@ -16,6 +16,8 @@ from zoneinfo import ZoneInfo
 from tqdm import tqdm
 
 import numpy as np
+from calitp.tables import tbl
+
 
 class TripPositionInterpolator:
     ''' Interpolates the location of a specific trip using either rt or schedule data
@@ -241,6 +243,7 @@ class OperatorDayAnalysis:
         self.calitp_itp_id = int(itp_id)
         assert type(analysis_date) == dt.date, 'analysis date must be a datetime.date object'
         self.analysis_date = analysis_date
+        self.display_date = self.analysis_date.strftime('%b %d (%a)')
         ## get view df/gdfs TODO implement temporary caching with parquets in bucket...
         self.vehicle_positions = get_vehicle_positions(self.calitp_itp_id, self.analysis_date)
         self.trips = get_trips(self.calitp_itp_id, self.analysis_date)
@@ -297,6 +300,10 @@ class OperatorDayAnalysis:
         self.filter_formatted = ''
         self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
                                          self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
+        self.calitp_agency_name = (tbl.views.gtfs_schedule_dim_feeds()
+         >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
+         >> collect()
+        ).calitp_agency_name.iloc[0]
         
     def _generate_position_interpolators(self):
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
@@ -410,6 +417,17 @@ class OperatorDayAnalysis:
         else:
             self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
                                          self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
+        if self.filter['route_ids'] and len(self.filter['route_ids']) < 5:
+            rts = 'Route(s) ' + ', '.join(self.filter['route_ids'])
+        elif self.filter['route_ids'] and len(self.filter['route_ids']) < 5:
+            rts = 'Multiple Routes'
+        elif not self.filter['route_ids']:
+            rts = 'All Routes'
+            
+        print(self.filter)
+        ## properly format for pm peak, TODO add other periods
+        if start_time and end_time and start_time == '15:00' and end_time == '19:00':
+            self.filter_formatted = f', {rts}, PM Peak, {self.display_date}'
             
     def reset_filter(self):
         self.filter = None
@@ -542,12 +560,8 @@ class OperatorDayAnalysis:
         # gdf.geometry = gdf.buffer(25).simplify(tolerance=15)
         assert gdf.shape[0] >= self.stop_segment_speed_view.shape[0]*.99, 'over 1% of geometries invalid after buffer+simplify'
         gdf = gdf.to_crs(WGS84)
-        centroid = gdf.dissolve().centroid
-        
-        if hasattr(self, 'agency_name'):
-            name = self.agency_name
-        else:
-            name = self.calitp_itp_id
+        centroid = gdf.dissolve().centroid 
+        name = self.calitp_agency_name
 
         popup_dict = {
             how_speed_col[how]: "Speed (miles per hour)",
