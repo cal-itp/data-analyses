@@ -54,10 +54,9 @@ def get_employment_tract_data():
     job_density = (tract_pop_employ >> group_by('under_4_sq_km') 
                >> summarize(jobs = _.num_jobs.sum())
               )
-    jobs_proportion = (
-        (job_density >> filter(_.under_4_sq_km) >> select(_.jobs).sum()) / 
-        (job_density >> select(_.jobs)).sum()
-    )
+    jobs_proportion = ((job_density >> filter(_.under_4_sq_km) >> select(_.jobs)).sum() / 
+                       (job_density >> select(_.jobs)).sum()
+                      )
     
     print(f"Proportion of jobs in tracts < 4 sq km: {jobs_proportion}")
     
@@ -131,7 +130,7 @@ def save_spatial_joined_data():
                         # .drop_duplicates(subset=['geo_id'])
                      ) ## not dropping enables correct feed aggregations...
     
-    # Join in with RT data for al lstops / accessible stops
+    # Join in with RT data for all stops / accessible stops
     all_stops_rt = (block_level_static 
                 >> inner_join(_, rt_complete, 
                               on =['calitp_itp_id', 'calitp_url_number'])
@@ -150,4 +149,33 @@ def save_spatial_joined_data():
                                              'all_stops_rt')
     shared_utils.utils.geoparquet_gcs_export(accessible_stops_trips_rt, utils.GCS_FILE_PATH, 
                                              'accessible_stops_trips_rt')
+
     
+def employment_spatial_joins(tract_pop_employ_filtered, all_stops, accessible_stops_trips):
+
+    all_employment_joined = (tract_pop_employ_filtered
+                    .sjoin(all_stops, how='inner', predicate='intersects')
+                    # .drop_duplicates(subset=['Tract'])
+                   ) >> select(-_.index_right, -_.index_left) 
+    
+    accessible_employment_joined = (tract_pop_employ_filtered
+                    .sjoin(accessible_stops_trips, how='inner', predicate='intersects')
+                    # .drop_duplicates(subset=['Tract'])
+                   ) >> select(-_.index_right, -_.index_left)
+    
+    
+    acc_rt_employ = (tract_pop_employ_filtered
+                    .sjoin(accessible_stops_trips_rt >> select(-_.index_right, -_.index_left), 
+                           how='inner', predicate='intersects')
+                    .drop_duplicates(subset=['Tract'])
+                   )
+    
+        
+    all_rt_employ = (tract_pop_employ_filtered
+                    .sjoin(all_stops_rt >> select(-_.index_right, -_.index_left), 
+                           how='inner', predicate='intersects')
+                    .drop_duplicates(subset=['Tract'])
+                   )
+    
+    return (all_employment_joined, accessible_employment_joined, 
+            acc_rt_employ, all_rt_employ)
