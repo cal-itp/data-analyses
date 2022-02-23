@@ -16,17 +16,27 @@ import numpy as np
 import pandas as pd
 from calitp import to_snakecase
 from siuba import *
+#import cpi
 
 pd.set_option('display.max_columns', None)
 
 #reading data
-def read_data(): 
+def read_data():
     #read datasets
-    odf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/obligated-projects.xlsx', sheet_name=None), ignore_index=True)
-    wdf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/E-76-Waiting-list.xlsx', sheet_name=None), ignore_index=True)
+#     odf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/obligated-projects.xlsx', sheet_name=None), ignore_index=True)
+#     wdf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/E-76-Waiting-list.xlsx', sheet_name=None), ignore_index=True)
     
-    #bringing the two dfs together
-    df = pd.concat([odf, wdf], ignore_index=True)
+#     #bringing the two dfs together
+#     df = pd.concat([odf, wdf], ignore_index=True)
+#     pd.set_option('display.max_columns', None)
+    
+    url = 'https://dot.ca.gov/-/media/dot-media/programs/local-assistance/documents/reports/obligated-projects.xlsx'
+    df1 = pd.concat(pd.read_excel(url, sheet_name=None), ignore_index=True)
+
+    url2 = 'https://dot.ca.gov/-/media/dot-media/programs/local-assistance/documents/reports/e-76-waiting-list.xlsx'
+    df2 = pd.read_excel(url2)
+
+    df = pd.concat([df1, df2], ignore_index=True)
     pd.set_option('display.max_columns', None)
     
     return df
@@ -68,7 +78,7 @@ def clean_data(df):
     
     #separate out the 'project_no'
     df[["projectID", "projectNO"]] = df["project_no"].str.split(pat="(", expand=True)
-    df.projectNO = [x.replace(")", "") for x in df.projectNO]
+    #df.projectNO = [x.replace(")", "") for x in df.projectNO]
     #drop second half
     df.drop(['projectNO'], axis=1, inplace=True)
     
@@ -178,12 +188,51 @@ def clean_agency_names(df):
     
     return df
 
+def adjust_prices(df):
+    
+    cols =  ["total_requested",
+           "fed_requested",
+           "ac_requested"]
+    
+    # Inflation table
+    import cpi 
+    
+    def inflation_table(base_year):
+        cpi.update()
+        series_df = cpi.series.get(area="U.S. city average").to_dataframe()
+        inflation_df = (series_df[series_df.year >= 2008]
+               .pivot_table(index='year', values='value', aggfunc='mean')
+               .reset_index()
+              )
+        denominator = inflation_df.value.loc[inflation_df.year==base_year].iloc[0]
+
+        inflation_df = inflation_df.assign(
+            inflation = inflation_df.value.divide(denominator)
+        )
+    
+        return inflation_df
+    
+    ##get cpi table 
+    cpi = inflation_table(2021)
+    cpi = (cpi>>select(_.year, _.value))
+    cpi_dict = dict(zip(cpi['year'], cpi['value']))
+    
+    
+    for col in cols:
+        multiplier = df["prepared_y"].map(cpi_dict)  
+    
+        ##using 270.97 for 2021 dollars
+        df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
+    return df
+
+
 
 def make_clean_data():
     df = read_data()
     df = clean_data(df)
     df = prefix_cleaning(df)
     df = clean_agency_names(df)
+    df = adjust_prices(df)
     
     for c in ["locode", "ftip_no", "projectID"]:
         df[c] = df[c].astype(str)
