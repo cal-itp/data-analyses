@@ -5,6 +5,18 @@ Data prep
 
 import numpy as np
 import pandas as pd
+from siuba import *
+from calitp import *
+from plotnine import *
+import intake
+import shared_utils
+
+import altair as alt
+import altair_saver
+from shared_utils import geography_utils
+from shared_utils import altair_utils
+from shared_utils import calitp_color_palette as cp
+from shared_utils import styleguide
 
 """
 Loading in Crosswalks
@@ -35,12 +47,28 @@ def project():
     ### PPNO CLEAN UP ###
     # stripping PPNO down to <5 characters
     df = df.assign(PPNO_New = df['PPNO'].str.slice(start=0, stop=5))
-    #Merge in Crosswalk 
+    
+    ### RECIPIENTS ###
+    #Some grant recipients have multiple spellings of their name. E.g. BART versus Bay Area Rapid Tranist
+    df['Local_Agency'] = (df['Local_Agency'].replace({'San Joaquin Regional\nRail Commission / San Joaquin Joint Powers Authority':
+                                                      'San Joaquin Regional Rail Commission / San Joaquin Joint Powers Authority', 
+                                                 'San Francisco Municipal  Transportation Agency':'San Francisco Municipal Transportation Agency',
+                                                 'San Francisco Municipal Transportation Agency (SFMTA)': 'San Francisco Municipal Transportation Agency',
+                                                 'Capitol Corridor Joint Powers Authority (CCJPA)':  'Capitol Corridor Joint Powers Authority',
+                                                 'Bay Area Rapid Transit (BART)': 'Bay Area Rapid Transit District (BART)',
+                                                 'Los Angeles County Metropolitan Transportation Authority (LA Metro)': 'Los Angeles County Metropolitan Transportation Authority',
+                                                 'Santa Clara Valley Transportation Authority (SCVTA)': 'Santa Clara Valley Transportation Authority',
+                                                 'Solano Transportation Authority (STA)':  'Solano Transportation Authority',
+                                                 'Southern California Regional Rail Authority (SCRRA - Metrolink)': 'Southern California  Regional Rail Authority'
+                                                 }))
+    
+    ### CROSSWALK ### 
     df = pd.merge(df, project_ppno_crosswalk, on = ["Award_Year", "Local_Agency"], how = "left")
     df.PPNO_New = df.apply(lambda x: x.PPNO_New if (str(x.PPNO_New2) == 'nan') else x.PPNO_New2, axis=1)
     df = df.drop(['PPNO','PPNO_New2'], axis=1).rename(columns = {'PPNO_New':'PPNO'})
     #Change  PPNO to all be strings
     df.PPNO = df.PPNO.astype(str)
+    
     ### MONETARY COLS CLEAN UP ###
     proj_cols = ['TIRCP_Award_Amount_($)', 'Allocated_Amount','Expended_Amount','Unallocated_Amount','Total_Project_Cost','Other_Funds_Involved']
     df[proj_cols] = df[proj_cols].fillna(value=0)
@@ -263,8 +291,8 @@ Program Allocation Plan
 """
 def program_allocation_plan(): 
     ### LOAD IN SHEETS ### 
-    df_project = project_test #REPLACE LATER
-    df_allocation = alloc_test #REPLACE LATER
+    df_project = project()
+    df_allocation = allocation()
     #Only keeping certain columns
     df_project = (df_project[['Award_Year', 'Project_#','TIRCP_project_sheet','Local_Agency','Project_Title',
                               'PPNO', 'Unallocated_amt_project_sheet']]
@@ -329,14 +357,14 @@ def program_allocation_plan():
     
 
 """
-Tableau Functions
+Tableau 
 
 """
 ### SHEET CONNECTED TO TABLEAU ### 
 def tableau():
     #Keeping only the columns we want
-    df = project()
-    df = df[['Award_Year', 'Project_#','Local_Agency','Project_Title','PPNO',
+    df = project() 
+    df = df[['Award_Year', 'Project_#','Local_Agency','Project_Title','PPNO', 'County', 
     'Key_Project_Elements','TIRCP_project_sheet','Allocated_Amount',
      'Expended_Amt_project_sheet']]
     
@@ -388,6 +416,90 @@ def tableau():
 
     df['Progress'] = df.apply(progress, axis = 1)
     
+    #Which projects are large,small, medium
+    p75 = df.TIRCP_project_sheet.quantile(0.75).astype(float)
+    p25 = df.TIRCP_project_sheet.quantile(0.25).astype(float)
+    p50 = df.TIRCP_project_sheet.quantile(0.50).astype(float)
+    
+    def project_size (row):
+        if ((row.TIRCP_project_sheet > 0) and (row.TIRCP_project_sheet < p25)):
+            return "Small"
+        elif ((row.TIRCP_project_sheet > p25) and (row.TIRCP_project_sheet < p75)):
+            return "Medium"
+        elif ((row.TIRCP_project_sheet > p50) and (row.TIRCP_project_sheet > p75 )):
+            return "Large"
+        else:
+            return "$0 recorded for TIRCP"
+        
+    df["Project_Category"] = df.apply(lambda x: project_size(x), axis=1)
+     #Rename cols to the right names
+    df = (df.rename(columns = {'Expended_Amt_project_sheet':'Expended_Amount', 
+                                                'TIRCP_project_sheet': "TIRCP_Amount"}
+                  ))
     ### GCS ###
-    df.to_csv(f'{GCS_FILE_PATH}df_tableau_sheet.csv', index = False)
+    #df.to_csv(f'{GCS_FILE_PATH}df_tableau_sheet.csv', index = False)
     return df 
+
+'''
+CHARTS
+'''
+#Labels
+def labeling(word):
+    # Add specific use cases where it's not just first letter capitalized
+    LABEL_DICT = { "prepared_y": "Year",
+              "dist": "District",
+              "nunique":"Number of Unique",
+              "project_no": "Project Number"}
+    
+    if (word == "mpo") or (word == "rtpa"):
+        word = word.upper()
+    elif word in LABEL_DICT.keys():
+        word = LABEL_DICT[word]
+    else:
+        #word = word.replace('n_', 'Number of ').title()
+        word = word.replace('unique_', "Number of Unique ").title()
+        word = word.replace('_', ' ').title()
+    
+    return word
+
+# Bar
+def basic_bar_chart(df, x_col, y_col, colorcol):
+    
+    chart = (alt.Chart(df)
+             .mark_bar()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 color = alt.Color(colorcol,
+                                  scale=alt.Scale(
+                                      range=altair_utils.CALITP_CATEGORY_BOLD_COLORS),
+                                      legend=alt.Legend(title=(labeling(colorcol)))
+                                  ))
+             .properties( 
+                          title=(f"{labeling(x_col)} by {labeling(y_col)}"))
+    )
+
+    chart=styleguide.preset_chart_config(chart)
+    return chart
+
+
+# Scatter 
+def basic_scatter_chart(df, x_col, y_col, colorcol):
+    
+    chart = (alt.Chart(df)
+             .mark_circle(size=60)
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col)),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 color = alt.Color(colorcol,
+                                  scale=alt.Scale(
+                                      range=altair_utils.CALITP_CATEGORY_BOLD_COLORS),
+                                      legend=alt.Legend(title=(labeling(colorcol)))
+                                  ))
+             .properties( 
+                          title = (f"{labeling(x_col)} by {labeling(y_col)}"))
+    )
+
+    chart=styleguide.preset_chart_config(chart)
+    return chart
+
