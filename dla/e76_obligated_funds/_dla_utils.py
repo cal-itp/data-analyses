@@ -24,6 +24,8 @@ from ipywidgets import *
 from IPython.display import Markdown
 from IPython.core.display import display
 
+pd.options.display.float_format = '{:,.2f}'.format
+
 ## add to notebook cell
 # alt.themes.register("calitp_theme", styleguide.calitp_theme)
 # alt.themes.enable("calitp_theme")
@@ -196,7 +198,8 @@ def basic_bar_chart(df, x_col, y_col, color_col, subset, chart_title=''):
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/d{subset}_outputs/bar_{x_col}_by_{y_col}.png")
+    savepath = (chart_title.replace(" ", "_"))
+    chart.save(f"./chart_outputs/d{subset}_outputs/bar_{savepath}.png")
     
     return chart
 
@@ -222,7 +225,9 @@ def basic_scatter_chart(df, x_col, y_col, color_col, subset, chart_title=""):
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/d{subset}_outputs/scatter_{x_col}_by_{y_col}{save}.png")
+    savepath = (chart_title.replace(" ", "_"))
+    chart.save(f"./chart_outputs/d{subset}_outputs/scatter_{savepath}.png")
+    
     
     return chart
 
@@ -244,7 +249,8 @@ def basic_line_chart(df, x_col, y_col, subset, chart_title=''):
                           title=chart_title)
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/d{subset}_outputs/line_{x_col}_by_{y_col}.png")
+    savepath = (chart_title.replace(" ", "_"))
+    chart.save(f"./chart_outputs/d{subset}_outputs/line_{savepath}.png")
     
     return chart
 
