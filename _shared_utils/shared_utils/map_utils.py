@@ -6,18 +6,18 @@ Functions to create choropleth maps.
 # https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
 # https://stackoverflow.com/questions/47846744/create-an-asymmetric-colormap
 """
+import inspect
+import json
+
 import altair
 import folium
 import ipyleaflet
-import inspect
-import json
 import pandas as pd
-
 from branca.element import Figure
 from folium.features import GeoJsonPopup, GeoJsonTooltip
 from folium.plugins import FloatImage
-from ipyleaflet import Map, GeoData, LayersControl, basemaps, WidgetControl
-from ipywidgets import link, FloatSlider, Text, HTML
+from ipyleaflet import GeoData, LayersControl, Map, WidgetControl, basemaps
+from ipywidgets import HTML, FloatSlider, Text, link
 from ipywidgets.embed import embed_minimal_html
 
 
@@ -404,7 +404,7 @@ def make_ipyleaflet_choropleth_map(
     )
 
     html = HTML(
-        """ 
+        """
         Hover over a tract
     """
     )

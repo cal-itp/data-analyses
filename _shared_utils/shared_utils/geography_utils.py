@@ -2,8 +2,9 @@
 Utility functions for geospatial data.
 Some functions for dealing with census tract or other geographic unit dfs.
 """
-import geopandas as gpd
 import os
+
+import geopandas as gpd
 import pandas as pd
 import shapely
 

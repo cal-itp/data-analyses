@@ -1,11 +1,11 @@
 import base64
-import fsspec
-import geopandas as gpd
 import os
-import pandas as pd
-import requests
 import shutil
 
+import fsspec
+import geopandas as gpd
+import pandas as pd
+import requests
 from calitp.storage import get_fs
 
 fs = get_fs()
