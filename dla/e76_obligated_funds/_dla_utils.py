@@ -24,12 +24,15 @@ from ipywidgets import *
 from IPython.display import Markdown
 from IPython.core.display import display
 
+pd.options.display.float_format = '{:,.2f}'.format
+
 ## add to notebook cell
 # alt.themes.register("calitp_theme", styleguide.calitp_theme)
 # alt.themes.enable("calitp_theme")
 
 
 # aggfunc for specified columns
+
 
 def calculate_data_all(df, col, aggregate_by=["dist"], aggfunc="sum"):
     df = (df.groupby(aggregate_by)
@@ -54,10 +57,10 @@ def calculate_data_head(df, col, aggregate_by=["dist"], aggfunc="sum"):
 #from Tiffany's branch DLA functions
 #get basic information from the different columns by year
 
-def count_all_years(df, groupedby=["dist"]):
+def count_all_years(df, groupedby=["prepared_y", "dist"]): 
     count_years = (geography_utils.aggregate_by_geography(
         df, 
-        group_cols = ["prepared_y", "dist"],
+        group_cols = groupedby, 
         sum_cols = ["total_requested", "ac_requested", "fed_requested"],
         mean_cols = ["total_requested", "ac_requested", "fed_requested"],
         nunique_cols = ["primary_agency_name", "mpo", "prefix", "project_no", "project_location", "type_of_work"]
@@ -79,6 +82,8 @@ def count_all_years(df, groupedby=["dist"]):
                                 "project_no":"unique_project_no",
                                 "type_of_work":"unique_type_of_work"})
 
+    count_years = count_years.dropna(axis = 0)
+    
     return count_years
 
 ## want to create a function that gets a new dataframe that will hold all the counts and top twenty 
@@ -172,7 +177,10 @@ Basic Charts
 
 
 # Bar
-def basic_bar_chart(df, x_col, y_col):
+def basic_bar_chart(df, x_col, y_col, color_col, subset, chart_title=''):
+    
+    if chart_title == "":
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
     
     chart = (alt.Chart(df)
              .mark_bar()
@@ -180,64 +188,56 @@ def basic_bar_chart(df, x_col, y_col):
                  x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
                  y=alt.Y(y_col, title=labeling(y_col)),
                  #column = "payment:N",
-                 color = alt.Color(y_col,
+                 color = alt.Color(color_col,
                                   scale=alt.Scale(
                                       range=altair_utils.CALITP_SEQUENTIAL_COLORS),
-                                      legend=alt.Legend(title=(labeling(y_col)))
+                                      legend=alt.Legend(title=(labeling(color_col)))
                                   ))
              .properties( 
-                          title=f"Highest {labeling(x_col)} by {labeling(y_col)}")
+                          title=chart_title)
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/bar_{x_col}_by_{y_col}.png")
+    savepath = (chart_title.replace(" ", "_"))
+    chart.save(f"./chart_outputs/d{subset}_outputs/bar_{savepath}.png")
     
     return chart
 
 
 # Scatter 
-def basic_scatter_chart(df, col, aggregate_by, colorcol, chart_title=""):
+def basic_scatter_chart(df, x_col, y_col, color_col, subset, chart_title=""):
     
     if chart_title == "":
-        new_title = chart_title
-        save = "_top_20"
-        
-    elif chart_title != "":
-        new_title= (f"Highest {labeling(col)} by {labeling(aggregate_by)}")
-        save= ""
-        
-    
-#     if chart_title != [""]:
-#         chart_title= (f"Highest {labeling(col)} by {labeling(aggregate_by)}")
-#         save= [""]
-        
-#     elif chart_title == [""]:
-#         chart_title == [""]
-#         save = "_top_20"
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
         
     chart = (alt.Chart(df)
              .mark_circle(size=60)
              .encode(
-                 x=alt.X(aggregate_by, title=labeling(aggregate_by)),
-                 y=alt.Y(col, title=labeling(col)),
-                 #column = "payment:N",
-                 color = alt.Color(colorcol,
+                 x=alt.X(x_col, title=labeling(x_col)),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 color = alt.Color(color_col,
                                   scale=alt.Scale(
                                       range=altair_utils.CALITP_SEQUENTIAL_COLORS),
-                                      legend=alt.Legend(title=(labeling(col)))
+                                      legend=alt.Legend(title=(labeling(color_col)))
                                   ))
              .properties( 
-                          title = (new_title))
+                          title = (chart_title))
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/scatter_{col}_by_{aggregate_by}{save}.png")
+    savepath = (chart_title.replace(" ", "_"))
+    chart.save(f"./chart_outputs/d{subset}_outputs/scatter_{savepath}.png")
+    
     
     return chart
 
 
 # Line
-def basic_line_chart(df, x_col, y_col):
+def basic_line_chart(df, x_col, y_col, subset, chart_title=''):
+    
+    if chart_title == "":
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
+    
     
     chart = (alt.Chart(df)
              .mark_line()
@@ -246,10 +246,11 @@ def basic_line_chart(df, x_col, y_col):
                  y=alt.Y(y_col, title=labeling(y_col))
                                    )
               ).properties( 
-                          title=f"{labeling(x_col)} by {labeling(y_col)}")
+                          title=chart_title)
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/line_{x_col}_by_{y_col}.png")
+    savepath = (chart_title.replace(" ", "_"))
+    chart.save(f"./chart_outputs/d{subset}_outputs/line_{savepath}.png")
     
     return chart
 
