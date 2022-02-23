@@ -17,6 +17,7 @@ from tqdm import tqdm
 
 import numpy as np
 from calitp.tables import tbl
+import seaborn as sns
 
 
 class TripPositionInterpolator:
@@ -291,6 +292,7 @@ class OperatorDayAnalysis:
                       >> filter(_.stop_sequence == _.stop_sequence.max())
                       >> ungroup()
                       >> mutate(arrival_hour = _.arrival_time.apply(lambda x: x.hour))
+                      >> inner_join(_, self.rt_trips >> select(_.trip_id, _.mean_speed_mph), on = 'trip_id')
                      )
         self.endpoint_delay_summary = (self.endpoint_delay_view
                       >> group_by(_.direction_id, _.route_id, _.arrival_hour)
@@ -301,9 +303,9 @@ class OperatorDayAnalysis:
         self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
                                          self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
         self.calitp_agency_name = (tbl.views.gtfs_schedule_dim_feeds()
-         >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
-         >> collect()
-        ).calitp_agency_name.iloc[0]
+             >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
+             >> collect()
+            ).calitp_agency_name.iloc[0]
         
     def _generate_position_interpolators(self):
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
@@ -428,6 +430,10 @@ class OperatorDayAnalysis:
         ## properly format for pm peak, TODO add other periods
         if start_time and end_time and start_time == '15:00' and end_time == '19:00':
             self.filter_formatted = f', {rts}, PM Peak, {self.display_date}'
+        elif not start_time and not end_time:
+            self.filter_formatted = f', {rts}, All Day, {self.display_date}'
+        else:
+            self.filter_formatted = f', {rts}, {start_time}–{end_time}, {self.display_date}'
             
     def reset_filter(self):
         self.filter = None
@@ -509,7 +515,7 @@ class OperatorDayAnalysis:
                                   _20p_mph = _.speed_mph.quantile(.2),
                                    trips_per_hour = _.n_trips / self.hr_duration_in_filter
                                   )
-                         >> distinct(_.stop_sequence, _keep_all=True)
+                         # >> distinct(_.stop_sequence, _keep_all=True) ## comment out to enable speed distribution analysis
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay,
                                    -_.trip_id, -_.trip_key)
@@ -539,6 +545,7 @@ class OperatorDayAnalysis:
     def _show_speed_map(self, how, colorscale, size):
         
         gdf = self.stop_segment_speed_view.copy()
+        gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0,
                         'trips_per_hour': 1}) ##round for display
         
@@ -549,7 +556,7 @@ class OperatorDayAnalysis:
         gdf = gdf >> arrange(_.trips_per_hour)
         gdf = gdf.set_crs(CA_NAD83Albers)
         
-                ## shift to right side of road to display direction
+        ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(try_parallel)
         self.detailed_map_view = gdf.copy()
         ## create clips, integrate buffer+simplify?
@@ -611,3 +618,21 @@ class OperatorDayAnalysis:
         else:
             self._generate_stop_delay_view()
             return self.route_coverage_summary()
+
+    def chart_delays(self):
+        '''
+        A bar chart showing delays grouped by arrival hour for current filtered selection
+        '''
+        filtered_endpoint = self._filter(self.endpoint_delay_view)
+        grouped = (filtered_endpoint >> group_by(_.arrival_hour)
+                   >> summarize(mean_end_delay = _.delay.mean())
+                  )
+        grouped['Minutes of Delay at Endpoint'] = grouped.mean_end_delay.apply(lambda x: x.seconds / 60)
+        grouped['Hour'] = grouped.arrival_hour
+        sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Minutes of Delay at Endpoint'], ci=None, 
+                       palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
+            .set_title(f"{self.calitp_agency_name} Mean Delays by Arrival Hour{self.filter_formatted}")
+           )
+        chart = sns_plot.get_figure()
+        chart.tight_layout()
+        return chart
