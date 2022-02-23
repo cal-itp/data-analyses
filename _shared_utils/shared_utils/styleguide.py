@@ -1,20 +1,20 @@
 """
 Set Cal-ITP altair style template,
-top-level configuration (for pngs), 
+top-level configuration (for pngs),
 and color palettes.
 
 References:
 
-Setting custom Altair theme as .py (Urban): 
+Setting custom Altair theme as .py (Urban):
 https://towardsdatascience.com/consistently-beautiful-visualizations-with-altair-themes-c7f9f889602
 
-GH code: 
+GH code:
 https://github.com/chekos/altair_themes_blog/tree/master/notebooks
 
 Download Google fonts:
 https://gist.github.com/ravgeetdhillon/0063aaee240c0cddb12738c232bd8a49
 
-Altair GH issue setting custom theme: 
+Altair GH issue setting custom theme:
 https://github.com/altair-viz/altair/issues/1333
 https://discourse.holoviz.org/t/altair-theming/1421/2
 
