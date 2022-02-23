@@ -107,7 +107,7 @@ def save_initial_data():
                          _.calitp_url_number == _.url_number)
               )
 
-    rt_complete.to_parquet(f'{GCS_FILE_PATH}rt_complete.parquet')
+    rt_complete.to_parquet(f'{utils.GCS_FILE_PATH}rt_complete.parquet')
     
 
 def make_tract_block_crosswalk(block_df, tract_df):
@@ -217,6 +217,10 @@ def employment_spatial_joins(tract_employ_df, stop_dfs, crosswalk_block_tract):
 
 
 def spatial_joins_to_blocks_and_tracts():    
+    '''
+    Do 2 spatial joins, one with census blocks, one with census tracts.
+    Return 2 dictionaries of results.
+    '''
     # Read in parquets from above
     ca_block_joined = shared_utils.utils.download_geoparquet(
         utils.GCS_FILE_PATH, 'block_population_joined')
