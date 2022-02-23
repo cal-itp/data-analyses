@@ -236,7 +236,7 @@ class OperatorDayAnalysis:
     '''
     def __init__(self, itp_id, analysis_date, pbar = None):
         self.pbar = pbar
-        # self.debug_dict = {}
+        self.debug_dict = {}
         '''
         itp_id: an itp_id (string or integer)
         analysis date: datetime.date
@@ -545,7 +545,9 @@ class OperatorDayAnalysis:
     def _show_speed_map(self, how, colorscale, size):
         
         gdf = self.stop_segment_speed_view.copy()
+        orig_rows = gdf.shape[0]
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
+        self.debug_dict['gdf'] = gdf
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0,
                         'trips_per_hour': 1}) ##round for display
         
@@ -564,8 +566,7 @@ class OperatorDayAnalysis:
         gdf = gdf >> filter(gdf.geometry.is_valid)
         gdf = gdf >> filter(-gdf.geometry.is_empty)
         
-        # gdf.geometry = gdf.buffer(25).simplify(tolerance=15)
-        assert gdf.shape[0] >= self.stop_segment_speed_view.shape[0]*.99, 'over 1% of geometries invalid after buffer+simplify'
+        assert gdf.shape[0] >= orig_rows*.99, 'over 1% of geometries invalid after buffer+simplify'
         gdf = gdf.to_crs(WGS84)
         centroid = gdf.dissolve().centroid 
         name = self.calitp_agency_name
