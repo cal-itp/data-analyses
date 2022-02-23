@@ -545,8 +545,8 @@ class OperatorDayAnalysis:
     def _show_speed_map(self, how, colorscale, size):
         
         gdf = self.stop_segment_speed_view.copy()
-        orig_rows = gdf.shape[0]
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
+        orig_rows = gdf.shape[0]
         self.debug_dict['gdf'] = gdf
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0,
                         'trips_per_hour': 1}) ##round for display
