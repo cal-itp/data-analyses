@@ -109,73 +109,147 @@ def save_initial_data():
 
     rt_complete.to_parquet(f'{GCS_FILE_PATH}rt_complete.parquet')
     
+
+def make_tract_block_crosswalk(block_df, tract_df):
+    # Use overlay
+    # See how much of block intersects with tract
+    # Keep the largest intersection
+    crosswalk = gpd.overlay(
+        block_df[["geo_id", "geometry"]].assign(block_area = block_df.geometry.area),
+        tract_df[["Tract", "geometry"]],
+        how = 'intersection',
+    )
+
+    crosswalk2 = crosswalk.assign(
+        overlap_area = crosswalk.geometry.area
+    )
     
-def save_spatial_joined_data():
+    crosswalk2 = (crosswalk2.sort_values(['geo_id', 'overlap_area'], 
+                                     ascending=[True, False])
+              .drop_duplicates(subset=['geo_id'])
+              .drop(columns = ['block_area', 'overlap_area', 'geometry'])
+              .reset_index(drop=True)
+             )
+    
+    return crosswalk2
+
+
+def spatial_join_to_stops(ca_block, stops_dfs, rt_df):
+    """
+    ca_block: pandas.DataFrame
+        base geography file, by blocks
+    stop_df: pandas.DataFrame
+        all stops, stops that are accessible, etc 
+    """
+    
+    # Store all the sjoins in this dict
+    processed_dfs = {}
+    
+    for stop_key, stop_df in stops_dfs.items():
+        # Join in GTFS schedule for all stops / accessible stops for blocks
+        df = (ca_block.sjoin(stop_df, how = 'inner', predicate='intersects')
+              .drop(columns = 'index_right')
+              #.rename(columns = {"index_right": f"index_{stop_key}"})
+             )
+
+        if stop_key=="accessible_stops":
+            ##important at block level to avoid double counts
+            df = df.drop_duplicates(subset=['geo_id'])
+
+        key = f"block_{stop_key}"
+        processed_dfs[key] = df
+
+        # Join in RT availability
+        df2 = (df 
+               >> inner_join(_, rt_df, 
+                             on = ['calitp_itp_id', 'calitp_url_number'])
+              )
+            
+        rt_key = f"block_{stop_key}_rt"
+        processed_dfs[rt_key] = df2
+                       
+    return processed_dfs
+
+
+def employment_spatial_joins(tract_employ_df, stop_dfs, crosswalk_block_tract):
+    """
+    tract_employ_df: pandas.DataFrame
+        base geography file, by tracts
+    stop_df: pandas.DataFrame
+        all stops, stops that are accessible, etc 
+    """
+    
+    # Store all the sjoins in this dict
+    processed_dfs = {}    
+    
+    for stop_key, stop_df in stop_dfs.items():
+        if "rt" not in stop_key:
+            df = (tract_employ_df.sjoin(stop_df, how='inner', predicate='intersects')
+                  .drop(columns = 'index_right')
+                 )
+            
+        if "rt" in stop_key:
+            # With RT data, the block geometry is included
+            # Use crosswalk to merge
+            
+            # First, merge in crosswalk to get the block's geo_id
+            df = pd.merge(
+                tract_employ_df,
+                crosswalk_block_tract,
+                on = "Tract",
+                how = "inner"
+            )
+            
+            # Now, merge in block level data with geo_id
+            df = pd.merge(df,
+                          stop_df.drop(columns = ["area", "geometry"]),
+                          on = 'geo_id',
+                          how = 'inner'
+            )
+            # Drop duplicates because there are multiple blocks in a tract
+            # But, we only keep the 1 stop linked to the 1 tract
+            df = df.drop_duplicates(subset=['Tract'])
+        
+        key = f"tract_{stop_key.replace('block_', '')}"
+        processed_dfs[key] = df
+    
+    return processed_dfs
+
+
+def spatial_joins_to_blocks_and_tracts():    
     # Read in parquets from above
-    ca_block_joined = utils.download_geoparquet(utils.GCS_FILE_PATH, 'block_population_joined')
-    all_stops = utils.download_geoparquet(utils.GCS_FILE_PATH, 'all_stops')
-    accessible_stops_trips = utils.download_geoparquet(utils.GCS_FILE_PATH, 
-                                                       'accessible_stops_trips')
+    ca_block_joined = shared_utils.utils.download_geoparquet(
+        utils.GCS_FILE_PATH, 'block_population_joined')
+    all_stops = shared_utils.utils.download_geoparquet(utils.GCS_FILE_PATH, 'all_stops')
+    accessible_stops_trips = shared_utils.utils.download_geoparquet(
+        utils.GCS_FILE_PATH, 'accessible_stops_trips')
     rt_complete = pd.read_parquet(f"{utils.GCS_FILE_PATH}rt_complete.parquet") 
     
-    # Join in GTFS schedule for all stops / accessible stops
-    block_level_accessible = (ca_block_joined
-                              .sjoin(accessible_stops_trips, how='inner', 
-                                 predicate='intersects')
-                                ##important at block level to avoid double counts
-                              .drop_duplicates(subset=['geo_id'])) 
+    # Read in employment data by tract
+    tract_pop_employ_filtered = get_employment_tract_data()
     
-    block_level_static = (ca_block_joined
-                          .sjoin(all_stops, how='inner', predicate='intersects')
-                        # .drop_duplicates(subset=['geo_id'])
-                     ) ## not dropping enables correct feed aggregations...
-    
-    # Join in with RT data for all stops / accessible stops
-    all_stops_rt = (block_level_static 
-                >> inner_join(_, rt_complete, 
-                              on =['calitp_itp_id', 'calitp_url_number'])
-               )
-    
-    accessible_stops_trips_rt = (block_level_accessible 
-                             >> inner_join(_, rt_complete, 
-                                           on =['calitp_itp_id', 'calitp_url_number'])
-                            )
-    # Intermediate exports
-    shared_utils.utils.geoparquet_gcs_export(block_level_accessible, utils.GCS_FILE_PATH, 
-                                             'block_level_accessible')
-    shared_utils.utils.geoparquet_gcs_export(block_level_static, utils.GCS_FILE_PATH, 
-                                             'block_level_static')
-    shared_utils.utils.geoparquet_gcs_export(all_stops_rt, utils.GCS_FILE_PATH, 
-                                             'all_stops_rt')
-    shared_utils.utils.geoparquet_gcs_export(accessible_stops_trips_rt, utils.GCS_FILE_PATH, 
-                                             'accessible_stops_trips_rt')
+    # Do 1st spatial join 
+    # Blocks to all stops / accessible stops
+    stops_dfs = {
+        "all_stops": all_stops,
+        "accessible_stops": accessible_stops_trips,
+    }
 
+    sjoin_blocks = spatial_join_to_stops(ca_block_joined, stops_dfs, rt_complete)
     
-def employment_spatial_joins(tract_pop_employ_filtered, all_stops, accessible_stops_trips):
+    # Save intermediate exports?
+    # Skip for now, since dict is holding results
+    
+    # Make tract-block crosswalk
+    crosswalk = make_tract_block_crosswalk(ca_block_joined, tract_pop_employ_filtered)
+    
+    stops_dfs2 = {
+        "all_stops": all_stops,
+        "accessible_stops": accessible_stops_trips,
+        "all_stops_rt": sjoin_blocks["block_all_stops_rt"],
+        "accessible_stops_rt": sjoin_blocks["block_accessible_stops_rt"],
+    }
 
-    all_employment_joined = (tract_pop_employ_filtered
-                    .sjoin(all_stops, how='inner', predicate='intersects')
-                    # .drop_duplicates(subset=['Tract'])
-                   ) >> select(-_.index_right, -_.index_left) 
+    sjoin_tracts = employment_spatial_joins(tract_pop_employ_filtered, stops_dfs2, crosswalk)
     
-    accessible_employment_joined = (tract_pop_employ_filtered
-                    .sjoin(accessible_stops_trips, how='inner', predicate='intersects')
-                    # .drop_duplicates(subset=['Tract'])
-                   ) >> select(-_.index_right, -_.index_left)
-    
-    
-    acc_rt_employ = (tract_pop_employ_filtered
-                    .sjoin(accessible_stops_trips_rt >> select(-_.index_right, -_.index_left), 
-                           how='inner', predicate='intersects')
-                    .drop_duplicates(subset=['Tract'])
-                   )
-    
-        
-    all_rt_employ = (tract_pop_employ_filtered
-                    .sjoin(all_stops_rt >> select(-_.index_right, -_.index_left), 
-                           how='inner', predicate='intersects')
-                    .drop_duplicates(subset=['Tract'])
-                   )
-    
-    return (all_employment_joined, accessible_employment_joined, 
-            acc_rt_employ, all_rt_employ)
+    return sjoin_blocks, sjoin_tracts
