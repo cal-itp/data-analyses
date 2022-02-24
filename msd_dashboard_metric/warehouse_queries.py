@@ -1,9 +1,13 @@
-# Queries in common for accessibility
+# Warehouse queries
+import os
 import pandas as pd
+
+os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 
 from calitp.tables import tbl
 from siuba import *
 
+import utils
 
 #----------------------------------------------------------#
 ## Stops and Trips
@@ -19,6 +23,7 @@ stops = (tbl.gtfs_schedule.stops()
          >> distinct()
 )
 
+
 # Trip query
 trips = (tbl.gtfs_schedule.trips()
          >> select(_.calitp_itp_id, _.calitp_url_number, 
@@ -32,7 +37,7 @@ trips = (tbl.gtfs_schedule.trips()
 #----------------------------------------------------------#
 ## Validations for Critical Errors
 #----------------------------------------------------------#
-validations_df = (
+validations_query = (
     tbl.views.validation_fact_daily_feed_notices()
     >> select(_.feed_key, _.calitp_itp_id, _.calitp_url_number,
               _.date, _.code)
@@ -56,7 +61,7 @@ validations_df = (
     # Get distinct, otherwise for a feed-date-code, there can be multiple entries
     # because that's what is captured in num_errors
     >> distinct()
-    >> collect()
+    #>> collect()
 )
 
 def add_daily_feeds(df):
@@ -88,7 +93,6 @@ def add_daily_feeds(df):
     
     return df
 
-validations = add_daily_feeds(validations_df)
 
 #----------------------------------------------------------#
 ## Fares v2
@@ -101,13 +105,26 @@ dim_feeds = (tbl.views.gtfs_schedule_dim_feeds()
              )
 )
 
-fares_feeds = (
-    tbl.views.gtfs_schedule_fact_daily_feed_files()
-    >> filter(_.file_key=="fare_leg_rules.txt", 
-              _.is_interpolated == False)
-    >> select(_.feed_key, _.date, )
-    >> inner_join(_, dim_feeds, "feed_key")
-    >> collect()
-)
 
+#----------------------------------------------------------#
+## Create local parquets
+#----------------------------------------------------------#
+def create_local_parquets():
+    validations_df = validations_query >> collect()
+    validations = add_daily_feeds(validations_df)
+    
+    fares_feeds = (
+        tbl.views.gtfs_schedule_fact_daily_feed_files()
+        >> filter(_.file_key=="fare_leg_rules.txt", 
+                  _.is_interpolated == False)
+        >> select(_.feed_key, _.date, )
+        >> inner_join(_, dim_feeds, "feed_key")
+        >> collect()
+    )
+    
+    validations.to_parquet(f"{utils.GCS_FILE_PATH}validations.parquet")
+    fares_feeds.to_parquet(f"{utils.GCS_FILE_PATH}fares_feeds.parquet")
+    print("Created and exported validations and fares v2 datasets")
+    
 
+#create_local_parquets()
