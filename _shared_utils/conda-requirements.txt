@@ -1,2 +1,2 @@
-vega-cli 
+vega-cli
 vega-lite-cli
