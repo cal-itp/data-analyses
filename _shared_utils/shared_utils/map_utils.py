@@ -9,16 +9,14 @@ Functions to create choropleth maps.
 import inspect
 import json
 
-import altair
 import folium
 import ipyleaflet
 import pandas as pd
 from branca.element import Figure
 from folium.features import GeoJsonPopup, GeoJsonTooltip
 from folium.plugins import FloatImage
-from ipyleaflet import GeoData, LayersControl, Map, WidgetControl, basemaps
-from ipywidgets import HTML, FloatSlider, Text, link
-from ipywidgets.embed import embed_minimal_html
+from ipyleaflet import basemaps
+from ipywidgets import HTML
 
 
 # Centroids for various regions and zoom level
@@ -41,7 +39,7 @@ def grab_region_centroids():
 REGION_CENTROIDS = grab_region_centroids()
 
 # ------------------------------------------------------------------------#
-## Folium
+# Folium
 # ------------------------------------------------------------------------#
 # Move popup and tooltip functions out, since styling is similar
 # Pass in make_folium_choropleth_map() and make_folium_multiple_layers_map()
@@ -58,7 +56,7 @@ def format_folium_popup(popup_dict):
         aliases=list(popup_dict.values()),
         # localize=True,
         labels=True,
-        style=f"background-color: light_gray;",
+        style="background-color: light_gray;",
         min_width=TOOLTIP_KWARGS["min_width"],
         max_width=TOOLTIP_KWARGS["max_width"],
     )
@@ -159,12 +157,12 @@ def make_folium_choropleth_map(
     geojson_args = [k for k, v in inspect.signature(folium.GeoJson).parameters.items()]
     geojson_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in geojson_args}
 
-    g = folium.GeoJson(
+    folium.GeoJson(
         df,
         style_function=lambda x: {
             "fillColor": colorscale(x["properties"][plot_col])
             if x["properties"][plot_col] is not None
-            else f"gray",
+            else "gray",
             "color": "#FFFFFF",
             "fillOpacity": 0.8,
             "weight": 0.2,
@@ -183,7 +181,7 @@ def make_folium_choropleth_map(
     return fig
 
 
-## Adjust function to have multiple layers in folium
+# Adjust function to have multiple layers in folium
 # Modify the original function...but generalize the unpacking of the layer portion
 # Keep original function the same, don't break other ppl's work
 def make_folium_multiple_layers_map(
@@ -288,7 +286,7 @@ def make_folium_multiple_layers_map(
             style_function=lambda x: {
                 "fillColor": colorscale(x["properties"][plot_col])
                 if x["properties"][plot_col] is not None
-                else f"gray",
+                else "gray",
                 "color": "#FFFFFF",
                 "fillOpacity": 0.8,
                 "weight": 0.2,
@@ -323,7 +321,7 @@ def make_folium_multiple_layers_map(
     # Then, insert that legend as a URL to be an image
     # I think legend_bottom and legend_left numbers must be 0-100?
     # Going even 95 pushes it to the top edge of the figure
-    image = FloatImage(
+    FloatImage(
         legend_dict["legend_url"],
         legend_dict["legend_bottom"],
         legend_dict["legend_left"],
@@ -338,7 +336,7 @@ def make_folium_multiple_layers_map(
 
 
 # ------------------------------------------------------------------------#
-## ipyleaflet
+# ipyleaflet
 # ------------------------------------------------------------------------#
 def make_ipyleaflet_choropleth_map(
     gdf,
