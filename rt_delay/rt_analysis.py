@@ -58,6 +58,7 @@ class TripPositionInterpolator:
         self.shape = (shape_gdf
                         >> filter(_.shape_id == self.shape_id)
                         >> select(_.shape_id, _.geometry))
+        assert not self.shape.geometry.empty, f'shape empty for trip {self.trip_id}!'
         self.position_gdf['shape_meters'] = (self.position_gdf.geometry
                                 .apply(lambda x: self.shape.geometry.iloc[0].project(x)))
         self._linear_reference()
@@ -270,7 +271,7 @@ class OperatorDayAnalysis:
         # print(f'projecting')
         if not self.trs.shape_id.isin(self.routelines.shape_id).all():
             no_shape_trs = self.trs >> filter(-_.shape_id.isin(self.routelines.shape_id))
-            print(f'{no_shape_trs.shape[0]} trips out of {self.trs.shape[0]} have no shape, dropping')
+            print(f'{no_shape_trs.shape[0]} scheduled trips out of {self.trs.shape[0]} have no shape, dropping')
             assert no_shape_trs.shape[0] < self.trs.shape[0] / 10, '>10% of trips have no shape!'
             self.trs = self.trs >> filter(_.shape_id.isin(self.routelines.shape_id))
         self.trs['shape_meters'] = (self.trs.apply(lambda x:
@@ -520,7 +521,8 @@ class OperatorDayAnalysis:
                          >> select(-_.arrival_time, -_.actual_time, -_.delay,
                                    -_.trip_id, -_.trip_key)
                         )
-                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
+                    self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
+                    assert not stop_speeds.empty, 'stop speeds gdf is empty!'
                 except Exception as e:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
                     print(e)
@@ -547,7 +549,6 @@ class OperatorDayAnalysis:
         gdf = self.stop_segment_speed_view.copy()
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
         orig_rows = gdf.shape[0]
-        self.debug_dict['gdf'] = gdf
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0,
                         'trips_per_hour': 1}) ##round for display
         
