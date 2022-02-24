@@ -11,12 +11,16 @@ from plotnine import *
 import intake
 from shared_utils import geography_utils
 
+import cpi
+
 import altair as alt
 import altair_saver
 from shared_utils import geography_utils
 from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
+
+pd.set_option('display.max_columns', 100)
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"
 
@@ -169,6 +173,50 @@ def load_airtable():
        'gtfs_static_status', 'gtfs_realtime_status']]
     return Airtable
 
+
+"""
+Inflation Functions
+using 2021 currency as base
+"""
+# Inflation table
+def inflation_table(base_year):
+    cpi.update()
+    series_df = cpi.series.get(area="U.S. city average").to_dataframe()
+    inflation_df = (series_df[series_df.year >= 2008]
+           .pivot_table(index='year', values='value', aggfunc='mean')
+           .reset_index()
+          )
+    denominator = inflation_df.value.loc[inflation_df.year==base_year].iloc[0]
+
+    inflation_df = inflation_df.assign(
+        inflation = inflation_df.value.divide(denominator)
+    )
+    
+    return inflation_df
+
+def adjust_prices(df):
+    
+    cols =  ["allocationamount",
+             "encumbered_amount",
+             "expendedamount",
+             "activebalance",
+             "closedoutbalance"]
+    
+    ##get cpi table 
+    cpi = inflation_table(2021)
+    cpi.update
+    cpi = (cpi>>select(_.year, _.value))
+    cpi_dict = dict(zip(cpi['year'], cpi['value']))
+    
+    
+    for col in cols:
+        multiplier = df["project_year"].map(cpi_dict)  
+    
+        ##using 270.97 for 2021 dollars
+        df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
+    return df
+
+
 """
 Merged Data
 
@@ -293,6 +341,11 @@ def merged_dataframe():
     #change itp id to be floats & 0 so parquet will work
     BC_GTFS_NTD['itp_id'] = BC_GTFS_NTD['itp_id'].fillna(0)
     BC_GTFS_NTD.loc[(BC_GTFS_NTD['itp_id'] == '436'), "itp_id"] = 436
+    
+    
+    #add $ columns with adjusted values for inflation 
+    BC_GTFS_NTD = adjust_prices(BC_GTFS_NTD)
+    
     #save into parquet
     #BC_GTFS_NTD.to_parquet("BC_GTFS_NTD.parquet")
     return BC_GTFS_NTD 
@@ -317,10 +370,13 @@ def aggregated_merged_df():
     df_original = df_original.groupby(['organization_name',]).agg({'allocationamount':'sum',
                                          'encumbered_amount':'sum',
                                          'expendedamount':'sum',
-                                         'encumbered_amount':'sum',
                                          'activebalance':'sum',
                                          'closedoutbalance':'sum',
-                                         'expendedamount':'sum',
+                                         'adjusted_allocationamount':'sum',
+                                         'adjusted_expendedamount':'sum',
+                                         'adjusted_encumbered_amount':'sum',
+                                         'adjusted_activebalance':'sum',
+                                         'adjusted_closedoutbalance':'sum',                                                
                                          'total_vehicles':'max',
                                          'average_age_of_fleet__in_years_':'max',
                                          'average_lifetime_miles_per_vehicle':'max',
@@ -343,6 +399,7 @@ def aggregated_merged_df():
                                          '_31_60':'max',
                                          '_16plus':'max',
                                          '_60plus':'max'}).reset_index()
+   
    
     df_subset = df_subset.drop_duplicates()
     
