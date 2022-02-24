@@ -5,7 +5,7 @@ import geopandas as gpd
 import pandas as pd
 
 
-## Function to set the county centroids and zoom levels
+# Function to set the county centroids and zoom levels
 # used in folium and ipyleaflet maps
 def make_county_centroids():
     URL = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
@@ -58,6 +58,5 @@ if __name__ == "__main__":
     # Don't use from shared_utils import geography_utils
     # Those have other dependencies...like map_utils imports from geography_utils
     import geography_utils
-    import utils
 
     make_county_centroids()

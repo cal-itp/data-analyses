@@ -7,12 +7,10 @@ import os
 import geopandas as gpd
 import pandas as pd
 import shapely
-
-os.environ["CALITP_BQ_MAX_BYTES"] = str(50_000_000_000)
-
-import calitp
 from calitp.tables import tbl
 from siuba import *
+
+os.environ["CALITP_BQ_MAX_BYTES"] = str(50_000_000_000)
 
 WGS84 = "EPSG:4326"
 CA_StatePlane = "EPSG:2229"  # units are in feet
@@ -62,7 +60,7 @@ def aggregate_by_geography(
             index=group_cols, values=agg_cols, aggfunc=AGGREGATE_FUNCTION
         ).reset_index()
 
-        if rename_cols == True:
+        if rename_cols is True:
             # https://stackoverflow.com/questions/34049618/how-to-add-a-suffix-or-prefix-to-each-column-name
             # Why won't .add_prefix or .add_suffix work?
             for c in agg_cols:
@@ -172,7 +170,7 @@ def make_routes_shapefile(ITP_ID_LIST=[], CRS="EPSG:4326", alternate_df=None):
                 ["calitp_itp_id", "calitp_url_number", "shape_id"]
             ].iloc[
                 [0]
-            ]  ##preserve info cols
+            ]  # preserve info cols
             single_route["geometry"] = route_line
             single_route = gpd.GeoDataFrame(single_route, crs=WGS84)
 

@@ -1,4 +1,3 @@
-import altair as alt
 from shared_utils import calitp_color_palette as cp
 
 # --------------------------------------------------------------#
@@ -61,6 +60,8 @@ font = "Arial"
 # But, we can always adjust elements by adjusting chart_width or chart_height in a notebook
 # Need to add more since altair_saver will lose a lot of the theme applied
 # https://github.com/vega/vega-themes/blob/master/src/theme-fivethirtyeight.ts
+
+
 def preset_chart_config(chart):
     chart = (
         chart.properties(
