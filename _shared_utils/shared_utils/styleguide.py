@@ -24,7 +24,6 @@ matplotlib:
 https://github.com/CityOfLosAngeles/los-angeles-citywide-data-style
 
 """
-import altair as alt
 from plotnine import *
 from shared_utils import calitp_color_palette as cp
 
@@ -63,6 +62,8 @@ PALETTE = {
 # --------------------------------------------------------------#
 # Altair
 # --------------------------------------------------------------#
+
+
 def calitp_theme(
     font=font,
     labelFont=labelFont,
@@ -143,7 +144,7 @@ def calitp_theme(
             "group": {
                 "fill": backgroundColor,
             },
-            ### MARKS CONFIGURATIONS ###
+            # MARKS CONFIGURATIONS #
             "arc": {
                 "fill": markColor,
             },
