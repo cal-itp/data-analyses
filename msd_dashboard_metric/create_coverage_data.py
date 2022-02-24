@@ -12,7 +12,6 @@ from siuba import *
 
 import utils
 import shared_utils
-import warehouse_queries
 
 
 catalog = intake.open_catalog("./catalog.yml")
@@ -256,4 +255,21 @@ def spatial_joins_to_blocks_and_tracts():
 
     sjoin_tracts = employment_spatial_joins(tract_pop_employ_filtered, stops_dfs2, crosswalk)
     
-    return sjoin_blocks, sjoin_tracts
+    
+    rename_block_files = {
+        "block_all_stops": "block_level_static",
+        "block_accessible_stops": "block_level_accessible",
+        "block_all_stops_rt": "all_stops_rt",
+        "block_accessible_stops_rt": "accessible_stops_trips_rt",
+    }
+    
+    for key, value in sjoin_blocks.items():
+        print(key)
+        new_name = rename_block_files[key]
+        value.to_parquet(f"./data/{new_name}.parquet")
+    
+    for key, value in sjoin_tracts.items():
+        print(key)
+        value.to_parquet(f"./data/{key}.parquet")
+    
+    #return sjoin_blocks, sjoin_tracts
