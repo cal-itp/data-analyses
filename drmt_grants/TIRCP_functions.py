@@ -480,6 +480,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol):
     )
 
     chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./Charts/bar_{x_col}_by_{y_col}.png")
     return chart
 
 
@@ -487,7 +488,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol):
 def basic_scatter_chart(df, x_col, y_col, colorcol):
     
     chart = (alt.Chart(df)
-             .mark_circle(size=200)
+             .mark_circle(size=350)
              .encode(
                  x=alt.X(x_col, title=labeling(x_col)),
                  y=alt.Y(y_col, title=labeling(y_col)),
@@ -501,5 +502,6 @@ def basic_scatter_chart(df, x_col, y_col, colorcol):
     )
 
     chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./Charts/scatter_{x_col}_by_{y_col}.png")
     return chart
 
