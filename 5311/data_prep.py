@@ -11,12 +11,16 @@ from plotnine import *
 import intake
 from shared_utils import geography_utils
 
+import cpi
+
 import altair as alt
 import altair_saver
 from shared_utils import geography_utils
 from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
+
+pd.set_option('display.max_columns', 100)
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"
 
@@ -161,27 +165,57 @@ def load_cleaned_organizations_data():
     organizations.ntd_id = organizations.ntd_id.astype(str)
     return organizations
 
-def load_agencyinfo(): 
-    agencies = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020_Agency_Information.xlsx',
-                                      sheet_name=None),ignore_index=True)
-    agencies = to_snakecase(agencies)
-    agency_info = agencies>>filter(_.state=='CA')
-    
-    return agency_info
+def load_airtable():
+    File_Airtable = "organizations-AllOrganizations_1.csv"
+    Airtable =  pd.read_csv(f'{GCS_FILE_PATH}{File_Airtable}')
+    Airtable = to_snakecase(Airtable)
+    Airtable = Airtable[['name', 'caltrans_district', 'mpo_rtpa', 'planning_authority',
+       'gtfs_static_status', 'gtfs_realtime_status']]
+    return Airtable
 
-def GTFS():
-    GTFS_File =  "services-GTFS Schedule Status.csv"
-    GTFS =  pd.read_csv(f'{GCS_FILE_PATH}{GTFS_File}')
-    GTFS = to_snakecase(GTFS)
-    #Only keeping relevant columns
-    GTFS = GTFS [['name','provider','operator','gtfs_schedule_status']]
-    #rename to avoid confusion
-    GTFS = GTFS.rename(columns = {'gtfs_schedule_status':'simple_GTFS_status'})     
-    #drop GTFS with nas
-    GTFS = GTFS.dropna(subset=['simple_GTFS_status'])
-    #some agencies have "" replace with space
-    GTFS['provider'] = GTFS['provider'].str.replace('"', "")
-    return GTFS
+
+"""
+Inflation Functions
+using 2021 currency as base
+"""
+# Inflation table
+def inflation_table(base_year):
+    cpi.update()
+    series_df = cpi.series.get(area="U.S. city average").to_dataframe()
+    inflation_df = (series_df[series_df.year >= 2008]
+           .pivot_table(index='year', values='value', aggfunc='mean')
+           .reset_index()
+          )
+    denominator = inflation_df.value.loc[inflation_df.year==base_year].iloc[0]
+
+    inflation_df = inflation_df.assign(
+        inflation = inflation_df.value.divide(denominator)
+    )
+    
+    return inflation_df
+
+def adjust_prices(df):
+    
+    cols =  ["allocationamount",
+             "encumbered_amount",
+             "expendedamount",
+             "activebalance",
+             "closedoutbalance"]
+    
+    ##get cpi table 
+    cpi = inflation_table(2021)
+    cpi.update
+    cpi = (cpi>>select(_.year, _.value))
+    cpi_dict = dict(zip(cpi['year'], cpi['value']))
+    
+    
+    for col in cols:
+        multiplier = df["project_year"].map(cpi_dict)  
+    
+        ##using 270.97 for 2021 dollars
+        df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
+    return df
+
 
 """
 Merged Data
@@ -225,7 +259,8 @@ BC_Agency_List = ['County of Los Angeles - Department of Public Works',
  'Fresno Council of Governments',
  'Greyhound Lines, Inc.']
 
-#Merging all 3 data frames, the full version info including year info 2011-2021.
+### FULL DATA SET ###
+#Merging all 3 data frames, without any aggregation. There are ~800 rows of data from 2011-2021.
 def merged_dataframe():
     ### MERGING ###
     #call the 3 data frames we have to join.
@@ -253,7 +288,7 @@ def merged_dataframe():
     #appending failed matches to the first data frame
     BC_GTFS_NTD = m2.append(Test, ignore_index=True)
     
-    ### METRIC TO SHOW BLACK CAT ONLY AGENCIES ###
+    ### FLAG TO SHOW BLACK CAT ONLY AGENCIES ###
     #Function
     def BC_only(row):
         if row.organization_name in BC_Agency_List:
@@ -262,11 +297,12 @@ def merged_dataframe():
             return '0'  
     BC_GTFS_NTD["Is_Agency_In_BC_Only_1_means_Yes"] = BC_GTFS_NTD.apply(lambda x: BC_only(x), axis=1)
     
-    #Replace GTFS and cal itp for Klamath. 
+    ###Replace GTFS and cal itp for Klamath###
     #Klamath does not appear in NTD data so we missed it when we merged NTD & Cal ITP on NTD ID
     BC_GTFS_NTD.loc[(BC_GTFS_NTD['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "itp_id"] = "436"
     BC_GTFS_NTD.loc[(BC_GTFS_NTD['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "gtfs_schedule_status"] = "needed"
     
+    ###GTFS###
     #get a more definitive GTFS status: ok, needed, long term solution needed, research
     temp = BC_GTFS_NTD.gtfs_schedule_status.fillna("None")
     BC_GTFS_NTD['GTFS_schedule_status_use'] = np.where(temp.str.contains("None"),"None",
@@ -305,6 +341,87 @@ def merged_dataframe():
     #change itp id to be floats & 0 so parquet will work
     BC_GTFS_NTD['itp_id'] = BC_GTFS_NTD['itp_id'].fillna(0)
     BC_GTFS_NTD.loc[(BC_GTFS_NTD['itp_id'] == '436'), "itp_id"] = 436
+    
+    
+    #add $ columns with adjusted values for inflation 
+    BC_GTFS_NTD = adjust_prices(BC_GTFS_NTD)
+    
     #save into parquet
     #BC_GTFS_NTD.to_parquet("BC_GTFS_NTD.parquet")
     return BC_GTFS_NTD 
+
+### AGGGREGATED MERGED DATA SET ###
+#this function takes the full data frame above & sums it down to just one row for each organization with aggregated statistics. GTFS, district, planning authority, and mppo rtpa info also included
+#this function takes the merged data frame above, which has around 700 rows & 
+#sums it down to just one row for each organization with aggregated statistics
+def aggregated_merged_df(): 
+    #read original df & airtable
+    df_original = merged_dataframe()
+    airtable = load_airtable()
+    
+    # Grab the reporter type, fleet size, ntd id, and itp id to subset out
+    df_subset = df_original[['organization_name','reporter_type', 'fleet_size', 'ntd_id', 'itp_id']]
+    
+    #aggregate vehicles 16+ above. 
+    column_names = ['_16_20', '_21_25', '_26_30', '_31_60']
+    df_original['_16plus']= df_original[column_names].sum(axis=1)
+    
+    #grab the max of all vehicle information & sum of all monetary cols from Black Cat
+    df_original = df_original.groupby(['organization_name',]).agg({'allocationamount':'sum',
+                                         'encumbered_amount':'sum',
+                                         'expendedamount':'sum',
+                                         'activebalance':'sum',
+                                         'closedoutbalance':'sum',
+                                         'adjusted_allocationamount':'sum',
+                                         'adjusted_expendedamount':'sum',
+                                         'adjusted_encumbered_amount':'sum',
+                                         'adjusted_activebalance':'sum',
+                                         'adjusted_closedoutbalance':'sum',                                                
+                                         'total_vehicles':'max',
+                                         'average_age_of_fleet__in_years_':'max',
+                                         'average_lifetime_miles_per_vehicle':'max',
+                                         'Automobiles':'max',
+                                         'Bus':'max',
+                                         'Other':'max',
+                                         'Train':'max',
+                                         'Van':'max',
+                                         'automobiles_door':'max',
+                                         'bus_doors':'max',
+                                         'van_doors':'max',
+                                         'train_doors':'max',
+                                         'doors_sum':'max',
+                                         '_0_9':'max',
+                                         '_10_12':'max',
+                                         '_13_15':'max',
+                                         '_16_20':'max',
+                                         '_21_25':'max',
+                                         '_26_30':'max',
+                                         '_31_60':'max',
+                                         '_16plus':'max',
+                                         '_60plus':'max'}).reset_index()
+   
+   
+    df_subset = df_subset.drop_duplicates()
+    
+    #Merge the 2 dfs together
+    df_merge1 = pd.merge(df_original,df_subset, how='left', left_on='organization_name', right_on = 'organization_name')
+    
+    #Merge df_merge1 with Air table that contains MPO, planning authority, more definitive GTFS status
+    df_merge2 = pd.merge(df_merge1, airtable, how='left', left_on='organization_name', right_on='name')
+    
+    #GTFS is now split between gtfs_static & gtfs_realtime, create groups to show orgs with both
+    #orgs with only either RT/Static, orgs with none
+    def gtfs_status_indicator(df):   
+        if (df['gtfs_static_status'] == 'Static OK') and (df['gtfs_realtime_status'] == "RT OK"):
+            return 'Both static & RT OK'
+        elif (df['gtfs_static_status'] == 'Static Incomplete') and (df['gtfs_realtime_status'] == "RT OK"):
+            return 'Only RT'
+        elif (df['gtfs_static_status'] == 'Static OK') and (df['gtfs_realtime_status'] == "RT Incomplete"):
+            return 'Only Static'
+        else: 
+            return "None"
+    df_merge2['GTFS_Status'] = df_merge2.apply(gtfs_status_indicator, axis = 1)
+    
+    #Drop unnecessary cols
+    df_merge2 = df_merge2.drop('name', 1)
+    return df_merge2 
