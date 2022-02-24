@@ -364,9 +364,9 @@ Tableau
 def tableau():
     #Keeping only the columns we want
     df = project() 
-    df = df[['Award_Year', 'Project_#','Local_Agency','Project_Title','PPNO', 'County', 
-    'Key_Project_Elements','TIRCP_project_sheet','Allocated_Amount',
-     'Expended_Amt_project_sheet']]
+    #df = df[['Award_Year', 'Project_#','Local_Agency','Project_Title','PPNO', 'County', 
+    #'Key_Project_Elements','TIRCP_project_sheet','Allocated_Amount',
+     #'Expended_Amt_project_sheet']]
     
     #Getting percentages & filling in with 0
     df['Expended_Percent'] = df['Expended_Amt_project_sheet']/df['Allocated_Amount']
@@ -487,7 +487,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol):
 def basic_scatter_chart(df, x_col, y_col, colorcol):
     
     chart = (alt.Chart(df)
-             .mark_circle(size=60)
+             .mark_circle(size=200)
              .encode(
                  x=alt.X(x_col, title=labeling(x_col)),
                  y=alt.Y(y_col, title=labeling(y_col)),
