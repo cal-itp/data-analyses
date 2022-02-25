@@ -66,6 +66,7 @@ def get_employment_tract_data():
     tract_pop_employ_filtered = tract_pop_employ >> filter(_.under_4_sq_km)
     
     return tract_pop_employ_filtered
+    
 
 
 def save_initial_data():
@@ -107,6 +108,7 @@ def save_initial_data():
               )
 
     rt_complete.to_parquet(f'{utils.GCS_FILE_PATH}rt_complete.parquet')
+    
     
 
 def make_tract_block_crosswalk(block_df, tract_df):
@@ -239,10 +241,7 @@ def spatial_joins_to_blocks_and_tracts():
     }
 
     sjoin_blocks = spatial_join_to_stops(ca_block_joined, stops_dfs, rt_complete)
-    
-    # Save intermediate exports?
-    # Skip for now, since dict is holding results
-    
+        
     # Make tract-block crosswalk
     crosswalk = make_tract_block_crosswalk(ca_block_joined, tract_pop_employ_filtered)
     
@@ -266,10 +265,8 @@ def spatial_joins_to_blocks_and_tracts():
     for key, value in sjoin_blocks.items():
         print(key)
         new_name = rename_block_files[key]
-        value.to_parquet(f"./data/{new_name}.parquet")
+        shared_utils.utils.geoparquet_gcs_export(value, GCS_FILE_PATH, f"{new_name}")
     
     for key, value in sjoin_tracts.items():
         print(key)
-        value.to_parquet(f"./data/{key}.parquet")
-    
-    #return sjoin_blocks, sjoin_tracts
+        shared_utils.utils.geoparquet_gcs_export(value, GCS_FILE_PATH, f"{key}")
