@@ -16,19 +16,19 @@ import numpy as np
 import pandas as pd
 from calitp import to_snakecase
 from siuba import *
-#import cpi
+import cpi
 
 pd.set_option('display.max_columns', None)
 
 #reading data
 def read_data():
     #read datasets
-#     odf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/obligated-projects.xlsx', sheet_name=None), ignore_index=True)
-#     wdf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/E-76-Waiting-list.xlsx', sheet_name=None), ignore_index=True)
+    # odf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/obligated-projects.xlsx', sheet_name=None), ignore_index=True)
+    # wdf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/E-76-Waiting-list.xlsx', sheet_name=None), ignore_index=True)
     
 #     #bringing the two dfs together
-#     df = pd.concat([odf, wdf], ignore_index=True)
-#     pd.set_option('display.max_columns', None)
+    # df = pd.concat([odf, wdf], ignore_index=True)
+    # pd.set_option('display.max_columns', None)
     
     url = 'https://dot.ca.gov/-/media/dot-media/programs/local-assistance/documents/reports/obligated-projects.xlsx'
     df1 = pd.concat(pd.read_excel(url, sheet_name=None), ignore_index=True)
@@ -75,6 +75,7 @@ def clean_data(df):
 
     #drop duplicates
     df.drop_duplicates(inplace=True)
+    df = df.dropna(how='all', axis=0)
     
     #separate out the 'project_no'
     df[["projectID", "projectNO"]] = df["project_no"].str.split(pat="(", expand=True)
