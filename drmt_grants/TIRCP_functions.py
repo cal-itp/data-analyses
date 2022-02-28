@@ -364,9 +364,6 @@ Tableau
 def tableau():
     #Keeping only the columns we want
     df = project() 
-    #df = df[['Award_Year', 'Project_#','Local_Agency','Project_Title','PPNO', 'County', 
-    #'Key_Project_Elements','TIRCP_project_sheet','Allocated_Amount',
-     #'Expended_Amt_project_sheet']]
     
     #Getting percentages & filling in with 0
     df['Expended_Percent'] = df['Expended_Amt_project_sheet']/df['Allocated_Amount']
@@ -416,6 +413,20 @@ def tableau():
 
     df['Progress'] = df.apply(progress, axis = 1)
     
+    #Renaming districts
+    df['District'] = (df['District'].replace({7:'District 7: Los Angeles',
+                                            4:'District 4: Bay Area / Oakland',
+                                            'VAR':'Various',
+                                            10:'District 10: Stockton',
+                                            11:'District 11: San Diego',
+                                            3:'District 3: Marysville / Sacramento',
+                                            12: 'District 12: Orange County',
+                                            8: 'District 8: San Bernardino / Riverside',
+                                            5:'District 5: San Luis Obispo / Santa Barbara',
+                                            6:'District 6: Fresno / Bakersfield',
+                                            1:'District 1: Eureka'
+                                                 }))
+    
     #Which projects are large,small, medium
     p75 = df.TIRCP_project_sheet.quantile(0.75).astype(float)
     p25 = df.TIRCP_project_sheet.quantile(0.25).astype(float)
@@ -437,7 +448,7 @@ def tableau():
                                                 'TIRCP_project_sheet': "TIRCP_Amount"}
                   ))
     ### GCS ###
-    #df.to_csv(f'{GCS_FILE_PATH}df_tableau_sheet.csv', index = False)
+    df.to_csv(f'{GCS_FILE_PATH}df_tableau_sheet.csv', index = False)
     return df 
 
 '''
