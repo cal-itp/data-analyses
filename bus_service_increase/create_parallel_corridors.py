@@ -149,7 +149,18 @@ def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEE
                                 else x.pct_highway, axis=1),
     )
     
-    return gdf
+    # Fix geometry - don't want the overlay geometry, which is intersection
+    # Want to use a transit route's line geometry
+    gdf2 = pd.merge(
+        transit_routes[["itp_id", "shape_id", "route_id", "geometry"]],
+        gdf.drop(columns = "geometry"),
+        on = ["itp_id", "route_id", "shape_id"],
+        how = "left",
+        # Allow 1:m merge because the same transit route can overlap with various highways
+        validate = "1:m"
+    )
+    
+    return gdf2
 
 
 def parallel_or_intersecting(df, pct_route_threshold=0.5, 
