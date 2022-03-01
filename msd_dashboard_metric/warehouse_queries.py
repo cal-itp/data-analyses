@@ -127,4 +127,4 @@ def create_local_parquets():
     print("Created and exported validations and fares v2 datasets")
     
 
-#create_local_parquets()
+create_local_parquets()
