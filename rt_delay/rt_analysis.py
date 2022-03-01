@@ -422,7 +422,7 @@ class OperatorDayAnalysis:
                                          self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
         if self.filter['route_ids'] and len(self.filter['route_ids']) < 5:
             rts = 'Route(s) ' + ', '.join(self.filter['route_ids'])
-        elif self.filter['route_ids'] and len(self.filter['route_ids']) < 5:
+        elif self.filter['route_ids'] and len(self.filter['route_ids']) > 5:
             rts = 'Multiple Routes'
         elif not self.filter['route_ids']:
             rts = 'All Routes'
