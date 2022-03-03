@@ -246,7 +246,7 @@ def semi_annual_report():
     })
     )
     ### GCS ###
-    with pd.ExcelWriter(f"{GCS_FILE_PATH}FUNCTION_TEST_TIRCP_SAR.xlsx") as writer:
+    with pd.ExcelWriter(f"{GCS_FILE_PATH}Semi_Annual_Report.xlsx") as writer:
         summary_table_2.to_excel(writer, sheet_name="Summary", index=True)
         df_pivot.to_excel(writer, sheet_name="FY", index=True)
     return df_pivot
@@ -347,7 +347,7 @@ def program_allocation_plan():
     df_2020 = pivot(df_combined.loc[df_combined['Award_Year'] == 2020])
     
     #GCS 
-    with pd.ExcelWriter(f'{GCS_FILE_PATH}FUNCTION_TEST_PAP.xlsx') as writer:
+    with pd.ExcelWriter(f'{GCS_FILE_PATH}Program_Allocation_Plan.xlsx') as writer:
         df_2015.to_excel(writer, sheet_name="2015_Cycle_1", index=True)
         df_2016.to_excel(writer, sheet_name="2016_Cycle_2", index=True)
         df_2018.to_excel(writer, sheet_name="2018_Cycle_3", index=True)
@@ -363,10 +363,7 @@ Tableau
 ### SHEET CONNECTED TO TABLEAU ### 
 def tableau():
     #Keeping only the columns we want
-    df = project() 
-    #df = df[['Award_Year', 'Project_#','Local_Agency','Project_Title','PPNO', 'County', 
-    #'Key_Project_Elements','TIRCP_project_sheet','Allocated_Amount',
-     #'Expended_Amt_project_sheet']]
+    df = project()
     
     #Getting percentages & filling in with 0
     df['Expended_Percent'] = df['Expended_Amt_project_sheet']/df['Allocated_Amount']
@@ -416,6 +413,39 @@ def tableau():
 
     df['Progress'] = df.apply(progress, axis = 1)
     
+    #Renaming districts
+    df['District'] = (df['District'].replace({7:'District 7: Los Angeles',
+                                            4:'District 4: Bay Area / Oakland',
+                                            'VAR':'Various',
+                                            10:'District 10: Stockton',
+                                            11:'District 11: San Diego',
+                                            3:'District 3: Marysville / Sacramento',
+                                            12: 'District 12: Orange County',
+                                            8: 'District 8: San Bernardino / Riverside',
+                                            5:'District 5: San Luis Obispo / Santa Barbara',
+                                            6:'District 6: Fresno / Bakersfield',
+                                            1:'District 1: Eureka'
+                                                 }))
+    #Renaming counties
+    df['County'] = (df['County'].replace({'LA': 'Los Angeles', 
+                                          'VAR': 'Various', 
+                                          'MON': 'Mono', 
+                                          'ORA':'Orange', 
+                                          'SAC':'Sacramento', 
+                                          'SD':'San Diego', 
+                                          'SF': 'San Francisco', 
+                                          'SJ':'San Joaquin', 
+                                          'SJ ': 'San Joaquin', 
+                                          'FRE':"Fresno",
+                                           'SBD':'San Bernandino', 
+                                          'SCL':'Santa Clara', 
+                                          'ALA':'Alameda', 
+                                          'SM':'San Mateo', 
+                                          'SB': 'San Barbara', 
+                                          'SON, MRN': 'Various', 
+
+                                                 }))
+    
     #Which projects are large,small, medium
     p75 = df.TIRCP_project_sheet.quantile(0.75).astype(float)
     p25 = df.TIRCP_project_sheet.quantile(0.25).astype(float)
@@ -437,7 +467,10 @@ def tableau():
                                                 'TIRCP_project_sheet': "TIRCP_Amount"}
                   ))
     ### GCS ###
-    #df.to_csv(f'{GCS_FILE_PATH}df_tableau_sheet.csv', index = False)
+    with pd.ExcelWriter(f"{GCS_FILE_PATH}Tableau_Sheet.xlsx") as writer:
+        df.to_excel(writer, sheet_name="Data", index=False)
+    return df
+
     return df 
 
 '''
@@ -480,6 +513,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol):
     )
 
     chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./Charts/bar_{x_col}_by_{y_col}.png")
     return chart
 
 
@@ -487,7 +521,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol):
 def basic_scatter_chart(df, x_col, y_col, colorcol):
     
     chart = (alt.Chart(df)
-             .mark_circle(size=200)
+             .mark_circle(size=350)
              .encode(
                  x=alt.X(x_col, title=labeling(x_col)),
                  y=alt.Y(y_col, title=labeling(y_col)),
@@ -501,5 +535,6 @@ def basic_scatter_chart(df, x_col, y_col, colorcol):
     )
 
     chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./Charts/scatter_{x_col}_by_{y_col}.png")
     return chart
 
