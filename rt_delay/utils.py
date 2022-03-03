@@ -31,6 +31,9 @@ BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/rt_delay"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 
+BUS_BUCKET_DIR = "data-analyses/bus_service_increase"
+BUS_GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUS_BUCKET_DIR}/"
+
 MPH_PER_MPS = 2.237 ## use to convert meters/second to miles/hour
 
 ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
