@@ -50,18 +50,19 @@ def include_exclude_multiple_feeds(df, id_col = "itp_id",
                                    include_ids = [182], exclude_ids = [200]):
     """
     df: pandas.DataFrame.
-    id_col: str, column name for calitp_itp_id, such as "itp_id"
+    id_col: str, column name for calitp_itp_id, such as "itp_id" 
     include_ids: list, 
             list of itp_ids that are allowed to have multiple feeds 
             (Ex: LA Metro) 
     exclude_ids: list, list of itp_ids to drop. (Ex: MTC, regional feed)
     """
     # If there are explicit regional feeds to drop, put that in exclude_ids
-    group_cols = [id_col, "trip_id", "stop_id", 
-                  "calitp_url_number"]
+    group_cols = list(df.columns)
+    dup_cols = [i for i in group_cols if i != "calitp_url_number"]
+
     df2 = (df[~df[id_col].isin(exclude_ids)]
            .sort_values(group_cols)
-           .drop_duplicates(subset=group_cols)
+           .drop_duplicates(subset=dup_cols)
            .reset_index(drop=True)
           )
     
