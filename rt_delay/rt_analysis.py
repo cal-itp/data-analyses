@@ -492,7 +492,12 @@ class OperatorDayAnalysis:
                              >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
                              >> mutate(last_loc = _.shape_meters.shift(1))
                              >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
-                             >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last) 
+                             >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
+                             >> mutate(last_delay = _.delay.shift(1))
+                             >> mutate(delay_chg_sec = (_.delay - _.last_delay)
+                                       .map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2)
+                                      )
+                             >> mutate(delay_sec = _.delay.map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2))
                              >> ungroup()
                             )
                 if stop_speeds.empty:
@@ -518,8 +523,7 @@ class OperatorDayAnalysis:
                                   )
                          # >> distinct(_.stop_sequence, _keep_all=True) ## comment out to enable speed distribution analysis
                          >> ungroup()
-                         >> select(-_.arrival_time, -_.actual_time, -_.delay,
-                                   -_.trip_id, -_.trip_key)
+                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
                         )
                     self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
                     assert not stop_speeds.empty, 'stop speeds gdf is empty!'
@@ -547,6 +551,8 @@ class OperatorDayAnalysis:
     def _show_speed_map(self, how, colorscale, size):
         
         gdf = self.stop_segment_speed_view.copy()
+        # print(gdf.dtypes)
+        singletrip = gdf.trip_id.nunique() == 1
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
         orig_rows = gdf.shape[0]
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0,
@@ -576,13 +582,15 @@ class OperatorDayAnalysis:
             how_speed_col[how]: "Speed (miles per hour)",
             "shape_meters": "Distance along route (meters)",
             "route_id": "Route",
-            # "direction": "Direction",
             "shape_id": "Shape ID",
             "direction_id": "Direction ID",
             "stop_id": "Next Stop ID",
             "stop_sequence": "Next Stop Sequence",
             "trips_per_hour": "Trips per Hour" 
         }
+        if singletrip:
+            popup_dict["delay_sec"] = "Current Delay (seconds)"
+            popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
 
         g = make_folium_choropleth_map(
             gdf,
