@@ -69,7 +69,13 @@ def project():
     #Change  PPNO to all be strings
     df.PPNO = df.PPNO.astype(str)
     
+    ### DATES CLEAN UP ###
+    #Replace FY 21/22 with Cycle 4
+    df["Award_Cycle"].replace({'FY 21/22': 4}, inplace=True)
+    
     ### MONETARY COLS CLEAN UP ###
+    # correcting string to 0 
+    df["Percentge_Allocated"].replace({'Not Allocated': 0}, inplace=True)
     proj_cols = ['TIRCP_Award_Amount_($)', 'Allocated_Amount','Expended_Amount','Unallocated_Amount','Total_Project_Cost','Other_Funds_Involved']
     df[proj_cols] = df[proj_cols].fillna(value=0)
     df[proj_cols] = df[proj_cols].apply(pd.to_numeric, errors='coerce')
@@ -362,9 +368,19 @@ Tableau
 """
 ### SHEET CONNECTED TO TABLEAU ### 
 def tableau():
-    #Keeping only the columns we want
     df = project()
-    
+    #Keeping only the columns we want
+    df = (df[['PPNO','Award_Year', 'Project_#', 'Local_Agency', 'Vendor_ID_#',
+       'Project_Title', 'District', 'County', 'Key_Project_Elements',
+       'Master_Agreement_Number', 'Master_Agreement_Expiration_Date',
+       'Project_Manager', 'Regional_Coordinator',
+       'Technical_Assistance-CALTP_(Y/N)', 'Technical_Assistance-Fleet_(Y/N)',
+       'Technical_Assistance-Network_Integration_(Y/N)',
+       'Technical_Assistance-Priority_Population_(Y/N)', 'Total_Project_Cost',
+       'TIRCP_project_sheet', 'Allocated_Amount',
+       'Unallocated_amt_project_sheet', 'Percentge_Allocated',
+       'Expended_Amt_project_sheet', 'Other_Funds_Involved']]
+                 )
     #Getting percentages & filling in with 0
     df['Expended_Percent'] = df['Expended_Amt_project_sheet']/df['Allocated_Amount']
     df['Allocated_Percent'] = df['Allocated_Amount']/df['TIRCP_project_sheet']
@@ -471,6 +487,9 @@ def tableau():
         df.to_excel(writer, sheet_name="Data", index=False)
     return df
 
+    ### GCS ###
+    df = df.to_parquet(f'{GCS_FILE_PATH}TIRCP_Tableau_Parquet.parquet')
+    return df 
     return df 
 
 '''
