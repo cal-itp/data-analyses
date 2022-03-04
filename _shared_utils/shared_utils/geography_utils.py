@@ -155,14 +155,18 @@ def make_routes_shapefile(ITP_ID_LIST=[], CRS="EPSG:4326", alternate_df=None):
         shapes = shapes[shapes.num_stops > 1].reset_index(drop=True)
 
         # Now, combine all the stops by stop sequence, and create linestring
-        for route in shapes.shape_id.unique():
-            single_shape = (
-                shapes
-                >> filter(_.shape_id == route)
-                >> mutate(shape_pt_sequence=_.shape_pt_sequence.astype(int))
-                # arrange in the order of stop sequence
-                >> arrange(_.shape_pt_sequence)
-            )
+        unique_shapes = list(shapes.shape_id.unique())
+
+        # Sometimes shape_id as NoneType comes up, and creates a problem, skip those
+        try:
+            for route in unique_shapes:
+                single_shape = (
+                    shapes
+                    >> filter(_.shape_id == route)
+                    >> mutate(shape_pt_sequence=_.shape_pt_sequence.astype(int))
+                    # arrange in the order of stop sequence
+                    >> arrange(_.shape_pt_sequence)
+                )
 
             # Convert from a bunch of points to a line (for a route, there are multiple points)
             route_line = shapely.geometry.LineString(list(single_shape["geometry"]))
@@ -178,6 +182,8 @@ def make_routes_shapefile(ITP_ID_LIST=[], CRS="EPSG:4326", alternate_df=None):
             all_routes = pd.concat(
                 [all_routes, single_route], ignore_index=True, axis=0
             )
+        except TypeError:
+            print(f"unable to grab ID: {itp_id}, route: {route}")
 
     all_routes = (
         all_routes.to_crs(CRS)
