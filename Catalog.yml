@@ -10,7 +10,13 @@ sources:
       use_fsspec: true
 
   TIRCP_processed:
-    driver: Excel
+    driver: csv
     description: Processed TIRCP. 
     args:
-      urlpath: gs://calitp-analytics-data/data-analyses/tircp/Tableau_Sheet.xlsx
+      urlpath: gs://calitp-analytics-data/data-analyses/tircp/data-analyses_tircp_Tableau_Sheet.csv
+      
+  ACS_S0802_2019:
+    driver: csv
+    description: ACS 2019 5 year Table ID:S0802. 
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/tircp/ACS_TEST.csv
