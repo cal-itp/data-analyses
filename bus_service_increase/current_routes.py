@@ -12,10 +12,14 @@ from siuba import *
 # Tweak this and find out why there are some NoneType
 # Address it in shared_utils later
 import geog_utils
+import utils
 import create_parallel_corridors
 from shared_utils import geography_utils
+from calitp.storage import get_fs
+fs = get_fs()
 
 
+DATA_PATH = create_parallel_corridors.DATA_PATH
 TODAY_DATE = str(dt.date.today())
 
 def grab_current_transit_route_shapes(DATA_PATH, FILE_NAME):
@@ -64,7 +68,7 @@ if __name__ == "__main__":
     #grab_current_transit_route_shapes("./data/", FILE_NAME = "shapes")
     
     # Create parallel corridors
-    transit_routes = gpd.read_parquet("./data/shapes_2022-03-02.parquet")
+    transit_routes = gpd.read_parquet(f"{DATA_PATH}shapes_2022-03-02.parquet")
     
     # Need route_id attached for parallel_corridors stuff to work
     transit_routes2 = add_route_info(transit_routes)
@@ -74,7 +78,7 @@ if __name__ == "__main__":
         alternate_df = transit_routes2,
         pct_route_threshold = 0.3,
         pct_highway_threshold = 0.1,
-        DATA_PATH = create_parallel_corridors.DATA_PATH, 
+        DATA_PATH = DATA_PATH, 
         FILE_NAME = "parallel_or_intersecting_2022-03-02"
     )
     
@@ -82,6 +86,17 @@ if __name__ == "__main__":
     create_parallel_corridors.make_analysis_data(
         hwy_buffer_feet=50, alternate_df = transit_routes2,
         pct_route_threshold = 0.1, pct_highway_threshold = 0,
-        DATA_PATH = create_parallel_corridors.DATA_PATH, 
+        DATA_PATH = DATA_PATH, 
         FILE_NAME = "routes_on_shn_2022-03-02"
     )
+    
+    # Export to GCS
+    files = [
+        "shapes_2022-03-02",
+        "parallel_or_intersecting_2022-03-02", 
+        "routes_on_shn_2022-03-02"]
+    
+    for FILE_NAME in files:
+        fs.put(f"{DATA_PATH}{FILE_NAME}.parquet", 
+               f"{utils.GCS_FILE_PATH}{FILE_NAME}.parquet")
+
