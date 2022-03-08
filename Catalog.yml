@@ -15,8 +15,8 @@ sources:
     args:
       urlpath: gs://calitp-analytics-data/data-analyses/tircp/data-analyses_tircp_Tableau_Sheet.csv
       
-  ACS_S0802_2019:
+  Caltrans_District_Crosswalk:
     driver: csv
-    description: ACS 2019 5 year Table ID:S0802. 
+    description: Assign districts with counties.  
     args:
-      urlpath: gs://calitp-analytics-data/data-analyses/tircp/ACS_TEST.csv
+      urlpath: https://storage.cloud.google.com/calitp-analytics-data/data-analyses/tircp/Caltrans_District_County.csv
