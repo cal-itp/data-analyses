@@ -302,7 +302,7 @@ def categorize_time_of_day(dt):
     
 @jit(nopython=True) ##numba gives huge speedup here (~60x)
 def time_at_position_numba(desired_position, shape_array, dt_float_array):
-    if desired_position < shape_array.max() and desired_position > shape_array.min():\
+    if desired_position < shape_array.max() and desired_position > shape_array.min():
         return np.interp(desired_position, shape_array, dt_float_array)
     else:
         return None
