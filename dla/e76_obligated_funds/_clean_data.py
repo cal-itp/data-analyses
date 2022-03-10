@@ -16,19 +16,26 @@ import numpy as np
 import pandas as pd
 from calitp import to_snakecase
 from siuba import *
-#import cpi
+import cpi
+
+from calitp.storage import get_fs
+fs = get_fs()
+
+GCS_FILE_PATH = 'gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/'
 
 pd.set_option('display.max_columns', None)
+
+
 
 #reading data
 def read_data():
     #read datasets
-#     odf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/obligated-projects.xlsx', sheet_name=None), ignore_index=True)
-#     wdf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/E-76-Waiting-list.xlsx', sheet_name=None), ignore_index=True)
+    # odf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/obligated-projects.xlsx', sheet_name=None), ignore_index=True)
+    # wdf = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/E-76-Waiting-list.xlsx', sheet_name=None), ignore_index=True)
     
 #     #bringing the two dfs together
-#     df = pd.concat([odf, wdf], ignore_index=True)
-#     pd.set_option('display.max_columns', None)
+    # df = pd.concat([odf, wdf], ignore_index=True)
+    # pd.set_option('display.max_columns', None)
     
     url = 'https://dot.ca.gov/-/media/dot-media/programs/local-assistance/documents/reports/obligated-projects.xlsx'
     df1 = pd.concat(pd.read_excel(url, sheet_name=None), ignore_index=True)
@@ -75,6 +82,7 @@ def clean_data(df):
 
     #drop duplicates
     df.drop_duplicates(inplace=True)
+    df = df.dropna(how='all', axis=0)
     
     #separate out the 'project_no'
     df[["projectID", "projectNO"]] = df["project_no"].str.split(pat="(", expand=True)
@@ -226,6 +234,103 @@ def adjust_prices(df):
     return df
 
 
+#add project categories
+
+def add_categories(df):
+
+    ACTIVE_TRANSPORTATION = ['bike', 'bicycle', 'cyclist', 
+                             'pedestrian', 
+                             ## including the spelling errors of `pedestrian`
+                             'pedestrain',
+                             'crosswalk', 
+                             'bulb out', 'bulb-out', 
+                             'active transp', 'traffic reduction', 
+                             'speed reduction', 'ped', 'srts', 
+                             'safe routes to school',
+                             'sidewalk', 'side walk', 'Cl ', 'trail'
+                            ]
+    TRANSIT = ['bus', 'metro', 'station', #Station comes up a few times as a charging station and also as a train station
+               'transit','fare', 'brt', 'yarts', 'rail'
+               # , 'station' in description and 'charging station' not in description
+              ] 
+    BRIDGE = ["bridge", 'viaduct']
+    STREET = ['traffic signal', 'resurface', 'resurfacing', 'slurry', 'seal' 
+              'sign', 'stripe', 'striping', 'median', 
+              'guard rail', 'guardrail', 
+              'road', 'street', 
+              'sinkhole', 'intersection', 'signal', 'curb',
+              'light', 'tree', 'pavement', 'roundabout'
+             ]
+
+    FREEWAY = ['hov ', 'hot ', 'freeway', 'highway', 'express lanes', 'hwy']
+
+
+    INFRA_RESILIENCY_ER = ['repair', 'emergency', 'replace','retrofit', 'er',
+                           'rehab', 'improvements', 'seismic', 'reconstruct', 'restoration']
+
+    CONGESTION_RELIEF = ['congestion', 'rideshare','ridesharing', 'vanpool', 'car share']
+
+    NOT_INC = ['charging', 'fueling', 'cng']
+
+    def categorize_project_descriptions(row):
+        """
+        This function takes a individual type of work description (row of a dataframe)
+        and returns a dummy flag of 1 if it finds keyword present in
+        project categories (active transportation, transit, bridge, etc).
+        A description can contain multiple keywords across categories.
+        """
+        # Make lowercase
+        description = row.type_of_work.lower()
+    
+        # Store a bunch of columns that will be flagged
+        # A project can involve multiple things...also, not sure what's in the descriptions
+        active_transp = 0
+        transit = 0
+        bridge = 0
+        street = 0
+        freeway = 0
+        infra_resiliency_er = 0
+        congestion_relief = 0
+        
+        if any(word in description for word in ACTIVE_TRANSPORTATION):
+            active_transp = 1
+        
+        #if any(word in description if instanceof(word, str) else word(description) for word in TRANSIT)
+
+        if (any(word in description for word in TRANSIT) and 
+            not any(exclude_word in description for exclude_word in NOT_INC)
+           ):
+            transit = 1
+        
+        if any(word in description for word in BRIDGE):
+            bridge = 1
+        if any(word in description for word in STREET):
+            street = 1
+        if any(word in description for word in FREEWAY):
+            freeway = 1 
+        if any(word in description for word in INFRA_RESILIENCY_ER):
+            infra_resiliency_er = 1
+        if any(word in description for word in CONGESTION_RELIEF):
+            congestion_relief = 1    
+        
+        
+        return pd.Series(
+            [active_transp, transit, bridge, street, freeway, infra_resiliency_er, congestion_relief], 
+            index=['active_transp', 'transit', 'bridge', 'street', 
+                   'freeway', 'infra_resiliency_er', 'congestion_relief']
+        )
+    
+    
+    work_categories = df.apply(categorize_project_descriptions, axis=1)
+    work_cols = list(work_categories.columns)
+    df2 = pd.concat([df, work_categories], axis=1)
+    
+    df2 = df2.assign(work_categories = df2[work_cols].sum(axis=1))
+    
+    return(df2)
+
+
+
 
 def make_clean_data():
     df = read_data()
@@ -233,6 +338,7 @@ def make_clean_data():
     df = prefix_cleaning(df)
     df = clean_agency_names(df)
     df = adjust_prices(df)
+    df = add_categories(df)
     
     for c in ["locode", "ftip_no", "projectID"]:
         df[c] = df[c].astype(str)
@@ -240,6 +346,13 @@ def make_clean_data():
     return df
 
 
+## running function to make_clean_data
+df = make_clean_data()
+
+## save to GCS
+df.to_parquet(f"{GCS_FILE_PATH}dla_df.parquet")
 
 
+## also save locally 
+df.to_parquet("dla_df.parquet")
 
