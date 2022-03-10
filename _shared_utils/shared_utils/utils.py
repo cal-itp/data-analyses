@@ -1,43 +1,45 @@
 import base64
-import fsspec
-import geopandas as gpd
 import os
-import pandas as pd
-import requests
 import shutil
 
+import fsspec
+import geopandas as gpd
+import pandas as pd
+import requests
 from calitp.storage import get_fs
+
 fs = get_fs()
 
-def import_csv_export_parquet(DATASET_NAME, OUTPUT_FILE_NAME, GCS_FILE_PATH, GCS=True): 
+
+def import_csv_export_parquet(DATASET_NAME, OUTPUT_FILE_NAME, GCS_FILE_PATH, GCS=True):
     """
     DATASET_NAME: str. Name of csv dataset.
     OUTPUT_FILE_NAME: str. Name of output parquet dataset.
     GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
- 
+
     """
-    df = pd.read_csv(f"{DATASET_NAME}.csv")    
-    
+    df = pd.read_csv(f"{DATASET_NAME}.csv")
+
     if GCS is True:
         df.to_parquet(f"{GCS_FILE_PATH}{OUTPUT_FILE_NAME}.parquet")
     else:
         df.to_parquet(f"./{OUTPUT_FILE_NAME}.parquet")
-        
+
 
 def geoparquet_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
-    '''
-    Save geodataframe as parquet locally, 
+    """
+    Save geodataframe as parquet locally,
     then move to GCS bucket and delete local file.
-    
+
     gdf: geopandas.GeoDataFrame
     GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
     FILE_NAME: str. Filename.
-    '''
+    """
     gdf.to_parquet(f"./{FILE_NAME}.parquet")
     fs.put(f"./{FILE_NAME}.parquet", f"{GCS_FILE_PATH}{FILE_NAME}.parquet")
     os.remove(f"./{FILE_NAME}.parquet")
 
-    
+
 def download_geoparquet(GCS_FILE_PATH, FILE_NAME, save_locally=False):
     """
     Parameters:
@@ -48,13 +50,13 @@ def download_geoparquet(GCS_FILE_PATH, FILE_NAME, save_locally=False):
     """
     object_path = fs.open(f"{GCS_FILE_PATH}{FILE_NAME}.parquet")
     gdf = gpd.read_parquet(object_path)
-    
+
     if save_locally is True:
         gdf.to_parquet(f"./{FILE_NAME}.parquet")
-    
+
     return gdf
-    
-    
+
+
 # Make zipped shapefile
 # https://github.com/CityOfLosAngeles/planning-entitlements/blob/master/notebooks/utils.py
 def make_zipped_shapefile(df, path):
@@ -64,9 +66,9 @@ def make_zipped_shapefile(df, path):
     ==========
     df: gpd.GeoDataFrame to be saved as zipped shapefile
     path: str, local path to where the zipped shapefile is saved.
-            Ex: "folder_name/census_tracts" 
+            Ex: "folder_name/census_tracts"
                 "folder_name/census_tracts.zip"
-                
+
     Remember: ESRI only takes 10 character column names!!
     """
     # Grab first element of path (can input filename.zip or filename)
@@ -87,6 +89,7 @@ def make_zipped_shapefile(df, path):
     # Remove the unzipped folder
     shutil.rmtree(dirname, ignore_errors=True)
 
+
 # Function to overwrite file in GitHub
 # Based on https://github.com/CityOfLosAngeles/aqueduct/tree/master/civis-aqueduct-utils/civis_aqueduct_utils
 
@@ -94,6 +97,7 @@ DEFAULT_COMMITTER = {
     "name": "Service User",
     "email": "my-email@email.com",
 }
+
 
 def upload_file_to_github(
     token,

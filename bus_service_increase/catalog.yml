@@ -8,18 +8,29 @@ sources:
     args:
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen40shpf2021shp.zip
       use_fsspec: true
-  # Processed data 
+  # Processed data for service increase analysis
   bus_stop_times_by_tract:
     driver: geoparquet
     description: Number of daily bus arrivals by tract
     args:
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_stop_times_by_tract.parquet
+  service_increase_by_route:
+    driver: parquet
+    description: Number of additional trips to reach desired frequencies by route.
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/service_increase.parquet 
+  service_increase_by_operator:
+    driver: parquet
+    description: Number of additional buses, trips, capital expenditures to reach desired frequencies by operator.
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/increase_by_operator.parquet 
+  # Processed data for parallel corridors analysis    
   transit_routes:
     driver: geoparquet
     description: All GTFS schedule transit routes.
     args:
-    # source: traffic_ops/export_shapefiles.py
-      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/routes_assembled.parquet
+    # source: create_analysis_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/2022_Jan/shapes_processed.parquet
   state_highway_network:
     driver: geoparquet
     description: State highway network.
