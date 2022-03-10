@@ -20,6 +20,7 @@ import branca
 
 from numba import jit
 import numpy as np
+import seaborn as sns
 
 ## set system time
 os.environ['TZ'] = 'America/Los_Angeles'
@@ -220,7 +221,8 @@ def get_stop_times(itp_id, analysis_date, force_clear = False):
         >> arrange(_.stop_sequence)
         >> collect()
         )
-
+    st.arrival_time = st.arrival_time.str.strip()
+    st.departure_time = st.departure_time.str.strip()
     st.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
     return st
 
@@ -304,7 +306,7 @@ def time_at_position_numba(desired_position, shape_array, dt_float_array):
 
 def try_parallel(geometry):
     try:
-        return geometry.parallel_offset(25, 'right')
+        return geometry.parallel_offset(30, 'right')
     except:
         return geometry
     
@@ -349,3 +351,21 @@ def arrowize_segment(line_geometry, arrow_distance = 15, buffer_distance = 20):
                 return geom
     except:
         return line_geometry.simplify(tolerance = 5).buffer(buffer_distance)
+    
+# def chart_hourly(df, data_col, hour_col, title = ''):
+#     '''
+#     Return a bar chart of endpoint delay or speed grouped by hour
+#     '''
+#     df = df.copy()
+#     df['']
+#     >> group_by(_.hour_col)
+#     sns_plot = (sns.barplot(x=rt_1['Hour'], y=rt_1['Minutes of Delay at Endpoint'], ci=None, 
+#                        palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
+#             .set_title("SJRTD 44 Delay by Time of Day, Feb 8")
+#            )
+#     chart3 = sns_plot.get_figure()
+#     chart3.tight_layout()
+# def chart_scatter(df, data_col, title = ''):
+#     '''
+#     Return a scatter chart showing distribution of speeds or delays
+#     '''

@@ -16,6 +16,9 @@ from zoneinfo import ZoneInfo
 from tqdm import tqdm
 
 import numpy as np
+from calitp.tables import tbl
+import seaborn as sns
+
 
 class TripPositionInterpolator:
     ''' Interpolates the location of a specific trip using either rt or schedule data
@@ -24,7 +27,7 @@ class TripPositionInterpolator:
         ''' positions_gdf: a gdf with either rt vehicle positions or joined stops+stop_times
         shape_gdf: a gdf with line geometries for each shape
         '''
-        self.debug_dict = {}
+        # self.debug_dict = {}
         assert type(position_gdf) == type(gpd.GeoDataFrame()) and not position_gdf.empty, "positions gdf must not be empty"
         assert type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty"
         assert position_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"position and shape CRS must be {CA_NAD83Albers}"
@@ -41,6 +44,11 @@ class TripPositionInterpolator:
         self._attach_shape(shape_gdf)
         self.median_time = self.position_gdf[self.time_col].median()
         self.time_of_day = categorize_time_of_day(self.median_time)
+        self.total_meters = (self.cleaned_positions.shape_meters.max() - self.cleaned_positions.shape_meters.min())
+        self.total_seconds = (self.cleaned_positions.vehicle_timestamp.max() - self.cleaned_positions.vehicle_timestamp.min()).seconds
+        assert self.total_meters > 1000, "less than 1km of data"
+        assert self.total_seconds > 60, "less than 60 seconds of data"
+        self.mean_speed_mph = (self.total_meters / self.total_seconds) * MPH_PER_MPS
         
     def _attach_shape(self, shape_gdf):
         ''' Filters gtfs shapes to the shape served by this trip. Additionally, projects positions_gdf to a linear
@@ -50,6 +58,7 @@ class TripPositionInterpolator:
         self.shape = (shape_gdf
                         >> filter(_.shape_id == self.shape_id)
                         >> select(_.shape_id, _.geometry))
+        assert not self.shape.geometry.empty, f'shape empty for trip {self.trip_id}!'
         self.position_gdf['shape_meters'] = (self.position_gdf.geometry
                                 .apply(lambda x: self.shape.geometry.iloc[0].project(x)))
         self._linear_reference()
@@ -110,7 +119,7 @@ class TripPositionInterpolator:
         if gdf.speed_mph.max() < 0: ## TODO better system to raise errors on impossibly fast speeds
             print(f'negative speed for trip {self.trip_key}, dropping')
             gdf = gdf >> filter(_.speed_mph > 0)
-        self.debug_dict['map_gdf'] = gdf
+        # self.debug_dict['map_gdf'] = gdf
 
         colorscale = branca.colormap.step.RdYlGn_08.scale(vmin=gdf.speed_mph.min(), 
                      vmax=gdf.speed_mph.max())
@@ -135,6 +144,7 @@ class TripPositionInterpolator:
             zoom = 13,
             centroid = [centroid.y, centroid.x],
             title=f"Trip Speed Map (Route {self.route_id}, {self.direction}, {self.time_of_day})",
+            legend_name = "Speed (miles per hour)",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
                 "fillOpacity": 0.6,
@@ -142,6 +152,14 @@ class TripPositionInterpolator:
         )
 
         return g
+    
+    def export_detailled_map(self, folder_name):
+        '''
+        Export a detailled map of this trip to a specified folder. File will be named according to trip data,
+        for example: {calitp_itp_id}_rt_{route_id}_tr_{trip_id}.html
+        '''
+        m = self.detailed_speed_map()
+        m.save(f'./{folder_name}/{self.calitp_itp_id}_rt_{self.route_id}_tr_{self.trip_id}.html')
 
 class VehiclePositionsInterpolator(TripPositionInterpolator):
     '''Interpolate arrival times along a trip from GTFS-RT Vehicle Positions data.
@@ -177,22 +195,12 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
                                       .astype('float64')
                                      )
 
-    
     def _shift_calculate(self, vehicle_positions):
         
-        # if hasattr(self, "progressing_positions"):
-        #     print(self.progressing_positions.shape)
-        #     self.debug_dict[self.progressing_positions.shape[0]] = self.progressing_positions.copy()
-        
         vehicle_positions = vehicle_positions >> arrange(self.time_col) ## unnecessary?
-        # vehicle_positions['last_time'] = vehicle_positions[self.time_col].shift(1)
-        # vehicle_positions['last_loc'] = vehicle_positions.shape_meters.shift(1)
-        # vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col] - vehicle_positions.last_time
         vehicle_positions['secs_from_last'] = vehicle_positions[self.time_col].diff()
         vehicle_positions.secs_from_last = (vehicle_positions.secs_from_last
                                         .apply(lambda x: x.seconds))
-        # vehicle_positions['meters_from_last'] = (vehicle_positions.shape_meters
-        #                                               - vehicle_positions.last_loc)
         vehicle_positions['meters_from_last'] = vehicle_positions.shape_meters.diff()
         vehicle_positions['progressed'] = vehicle_positions['meters_from_last'] > 0 ## has the bus moved ahead?
         vehicle_positions['speed_from_last'] = (vehicle_positions.meters_from_last
@@ -234,14 +242,15 @@ class OperatorDayAnalysis:
         itp_id: an itp_id (string or integer)
         analysis date: datetime.date
         '''
-        self.itp_id = int(itp_id)
+        self.calitp_itp_id = int(itp_id)
         assert type(analysis_date) == dt.date, 'analysis date must be a datetime.date object'
         self.analysis_date = analysis_date
+        self.display_date = self.analysis_date.strftime('%b %d (%a)')
         ## get view df/gdfs TODO implement temporary caching with parquets in bucket...
-        self.vehicle_positions = get_vehicle_positions(self.itp_id, self.analysis_date)
-        self.trips = get_trips(self.itp_id, self.analysis_date)
-        self.stop_times = get_stop_times(self.itp_id, self.analysis_date)
-        self.stops = get_stops(self.itp_id, self.analysis_date)
+        self.vehicle_positions = get_vehicle_positions(self.calitp_itp_id, self.analysis_date)
+        self.trips = get_trips(self.calitp_itp_id, self.analysis_date)
+        self.stop_times = get_stop_times(self.calitp_itp_id, self.analysis_date)
+        self.stops = get_stops(self.calitp_itp_id, self.analysis_date)
         trips = self.trips >> select(-_.calitp_url_number, -_.calitp_extracted_at, -_.calitp_deleted_at)
         positions = self.vehicle_positions >> select(-_.calitp_url_number)
         self.trips_positions_joined = (trips
@@ -252,8 +261,7 @@ class OperatorDayAnalysis:
                                     geometry=gpd.points_from_xy(self.trips_positions_joined.vehicle_longitude,
                                                                 self.trips_positions_joined.vehicle_latitude),
                                     crs=WGS84).to_crs(CA_NAD83Albers)
-        # self.routelines = shared_utils.geography_utils.make_routes_shapefile([self.itp_id], CA_NAD83Albers)
-        self.routelines = get_routelines(self.itp_id)
+        self.routelines = get_routelines(self.calitp_itp_id)
         assert type(self.routelines) == type(gpd.GeoDataFrame()) and not self.routelines.empty, 'routelines must not be empty'
         ## end of caching...
         self.trs = self.trips >> select(_.shape_id, _.trip_id)
@@ -261,6 +269,11 @@ class OperatorDayAnalysis:
         self.trs = self.trs >> distinct(_.stop_id, _.shape_id)
         self.trs = self.stops >> select(_.stop_id, _.stop_name, _.geometry) >> inner_join(_, self.trs, on = 'stop_id')
         # print(f'projecting')
+        if not self.trs.shape_id.isin(self.routelines.shape_id).all():
+            no_shape_trs = self.trs >> filter(-_.shape_id.isin(self.routelines.shape_id))
+            print(f'{no_shape_trs.shape[0]} scheduled trips out of {self.trs.shape[0]} have no shape, dropping')
+            assert no_shape_trs.shape[0] < self.trs.shape[0] / 10, '>10% of trips have no shape!'
+            self.trs = self.trs >> filter(_.shape_id.isin(self.routelines.shape_id))
         self.trs['shape_meters'] = (self.trs.apply(lambda x:
                 (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
          axis = 1))
@@ -273,9 +286,27 @@ class OperatorDayAnalysis:
         self.rt_trips = self.trips.copy() >> filter(_.trip_id.isin(self.position_interpolators.keys()))
         self.rt_trips['median_time'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].median_time.time(), axis = 1)
         self.rt_trips['direction'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].direction, axis = 1)
+        self.rt_trips['mean_speed_mph'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].mean_speed_mph, axis = 1)
         self._generate_stop_delay_view()
+        self.endpoint_delay_view = (self.stop_delay_view
+                      >> group_by(_.trip_id)
+                      >> filter(_.stop_sequence == _.stop_sequence.max())
+                      >> ungroup()
+                      >> mutate(arrival_hour = _.arrival_time.apply(lambda x: x.hour))
+                      >> inner_join(_, self.rt_trips >> select(_.trip_id, _.mean_speed_mph), on = 'trip_id')
+                     )
+        self.endpoint_delay_summary = (self.endpoint_delay_view
+                      >> group_by(_.direction_id, _.route_id, _.arrival_hour)
+                      >> summarize(n_trips = _.route_id.size, mean_end_delay = _.delay.mean())
+                     )
         self.filter = None
         self.filter_formatted = ''
+        self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
+                                         self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
+        self.calitp_agency_name = (tbl.views.gtfs_schedule_dim_feeds()
+             >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
+             >> collect()
+            ).calitp_agency_name.iloc[0]
         
     def _generate_position_interpolators(self):
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
@@ -287,15 +318,15 @@ class OperatorDayAnalysis:
         for trip_id in self.vp_trip_ids: ##big test
             # print(trip_id)
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
-            self.debug_dict[f'{trip_id}_trip'] = trip
+            # self.debug_dict[f'{trip_id}_trip'] = trip
             st_trip_joined = (trip
                               >> inner_join(_, self.stop_times, on = ['calitp_itp_id', 'trip_id', 'service_date', 'trip_key'])
                               >> inner_join(_, self.stops, on = ['stop_id', 'calitp_itp_id'])
                              )
             st_trip_joined = gpd.GeoDataFrame(st_trip_joined, geometry=st_trip_joined.geometry, crs=CA_NAD83Albers)
             trip_positions_joined = self.trips_positions_joined >> filter(_.trip_id == trip_id)
-            self.debug_dict[f'{trip_id}_st'] = st_trip_joined
-            self.debug_dict[f'{trip_id}_vp'] = trip_positions_joined
+            # self.debug_dict[f'{trip_id}_st'] = st_trip_joined
+            # self.debug_dict[f'{trip_id}_vp'] = trip_positions_joined
             try:
                 self.position_interpolators[trip_id] = {'rt': VehiclePositionsInterpolator(trip_positions_joined, self.routelines),
                                                            # 'schedule': ScheduleInterpolator(st_trip_joined, self.routelines) ## probably need to save memory for now ?
@@ -339,11 +370,11 @@ class OperatorDayAnalysis:
                                                         axis = 1) ## format scheduled arrival times
                 _delay = _delay >> filter(_.arrival_time.apply(lambda x: x.date()) == _.actual_time.iloc[0].date())
                 _delay['arrival_time'] = _delay.arrival_time.astype('datetime64')
-                self.debug_dict[f'{trip_id}_times'] = _delay
+                # self.debug_dict[f'{trip_id}_times'] = _delay
                 _delay['delay'] = _delay.actual_time - _delay.arrival_time
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
                 _delays = _delays.append(_delay)
-                self.debug_dict[f'{trip_id}_delay'] = _delay
+                # self.debug_dict[f'{trip_id}_delay'] = _delay
                 # return
             except Exception as e:
                 print(f'could not generate delays for trip {trip_id}')
@@ -382,6 +413,28 @@ class OperatorDayAnalysis:
         self.filter['route_ids'] = route_ids
         self.filter['direction_id'] = direction_id
         self.filter['direction'] = direction
+        if start_time and end_time:
+            self.hr_duration_in_filter = (dt.datetime.combine(self.analysis_date, self.filter['end_time'])
+                                 - dt.datetime.combine(self.analysis_date, self.filter['start_time'])
+                                ).seconds / 60**2
+        else:
+            self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
+                                         self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
+        if self.filter['route_ids'] and len(self.filter['route_ids']) < 5:
+            rts = 'Route(s) ' + ', '.join(self.filter['route_ids'])
+        elif self.filter['route_ids'] and len(self.filter['route_ids']) > 5:
+            rts = 'Multiple Routes'
+        elif not self.filter['route_ids']:
+            rts = 'All Routes'
+            
+        print(self.filter)
+        ## properly format for pm peak, TODO add other periods
+        if start_time and end_time and start_time == '15:00' and end_time == '19:00':
+            self.filter_formatted = f', {rts}, PM Peak, {self.display_date}'
+        elif not start_time and not end_time:
+            self.filter_formatted = f', {rts}, All Day, {self.display_date}'
+        else:
+            self.filter_formatted = f', {rts}, {start_time}–{end_time}, {self.display_date}'
             
     def reset_filter(self):
         self.filter = None
@@ -405,6 +458,8 @@ class OperatorDayAnalysis:
         if self.filter['direction']:
             trips = trips >> filter(_.direction == self.filter['direction'])
         return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
+    
+
         
     def segment_speed_map(self, segments = 'stops', how = 'average',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550]):
@@ -430,6 +485,7 @@ class OperatorDayAnalysis:
             for direction_id in gdf.direction_id.unique():
                 this_shape_direction = (gdf
                              >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
+                # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
                 stop_speeds = (this_shape_direction
                              >> group_by(_.trip_key)
                              >> arrange(_.stop_sequence)
@@ -442,7 +498,7 @@ class OperatorDayAnalysis:
                 if stop_speeds.empty:
                     # print(f'{shape_id}_{direction_id}_st_spd empty!')
                     continue
-                self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
+                # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
                 stop_speeds.geometry = stop_speeds.apply(
                     lambda x: shapely.ops.substring(
                                 self.position_interpolators[x.trip_id]['rt'].shape.geometry.iloc[0],
@@ -455,14 +511,18 @@ class OperatorDayAnalysis:
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> group_by(_.stop_sequence)
-                         >> mutate(avg_mph = _.speed_mph.mean(),
+                         >> mutate(n_trips = _.stop_sequence.size,
+                                    avg_mph = _.speed_mph.mean(),
                                   _20p_mph = _.speed_mph.quantile(.2),
+                                   trips_per_hour = _.n_trips / self.hr_duration_in_filter
                                   )
-                         >> distinct(_.stop_sequence, _keep_all=True)
+                         # >> distinct(_.stop_sequence, _keep_all=True) ## comment out to enable speed distribution analysis
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay,
                                    -_.trip_id, -_.trip_key)
                         )
+                    self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
+                    assert not stop_speeds.empty, 'stop speeds gdf is empty!'
                 except Exception as e:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
                     print(e)
@@ -487,15 +547,19 @@ class OperatorDayAnalysis:
     def _show_speed_map(self, how, colorscale, size):
         
         gdf = self.stop_segment_speed_view.copy()
-        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0}) ##round for display
+        gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
+        orig_rows = gdf.shape[0]
+        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0,
+                        'trips_per_hour': 1}) ##round for display
         
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
 
         gdf = gdf >> select(-_.service_date)
+        gdf = gdf >> arrange(_.trips_per_hour)
         gdf = gdf.set_crs(CA_NAD83Albers)
         
-                ## shift to right side of road to display direction
+        ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(try_parallel)
         self.detailed_map_view = gdf.copy()
         ## create clips, integrate buffer+simplify?
@@ -503,15 +567,10 @@ class OperatorDayAnalysis:
         gdf = gdf >> filter(gdf.geometry.is_valid)
         gdf = gdf >> filter(-gdf.geometry.is_empty)
         
-        # gdf.geometry = gdf.buffer(25).simplify(tolerance=15)
-        assert gdf.shape[0] >= self.stop_segment_speed_view.shape[0]*.99, 'over 1% of geometries invalid after buffer+simplify'
+        assert gdf.shape[0] >= orig_rows*.99, 'over 1% of geometries invalid after buffer+simplify'
         gdf = gdf.to_crs(WGS84)
-        centroid = gdf.dissolve().centroid
-        
-        if hasattr(self, 'agency_name'):
-            name = self.agency_name
-        else:
-            name = self.itp_id
+        centroid = gdf.dissolve().centroid 
+        name = self.calitp_agency_name
 
         popup_dict = {
             how_speed_col[how]: "Speed (miles per hour)",
@@ -521,7 +580,8 @@ class OperatorDayAnalysis:
             "shape_id": "Shape ID",
             "direction_id": "Direction ID",
             "stop_id": "Next Stop ID",
-            "stop_sequence": "Next Stop Sequence"
+            "stop_sequence": "Next Stop Sequence",
+            "trips_per_hour": "Trips per Hour" 
         }
 
         g = make_folium_choropleth_map(
@@ -534,6 +594,7 @@ class OperatorDayAnalysis:
             zoom = 13,
             centroid = [centroid.y, centroid.x],
             title=f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}",
+            legend_name = "Speed (miles per hour)",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
                 "fillOpacity": 0.6,
@@ -559,3 +620,21 @@ class OperatorDayAnalysis:
         else:
             self._generate_stop_delay_view()
             return self.route_coverage_summary()
+
+    def chart_delays(self):
+        '''
+        A bar chart showing delays grouped by arrival hour for current filtered selection
+        '''
+        filtered_endpoint = self._filter(self.endpoint_delay_view)
+        grouped = (filtered_endpoint >> group_by(_.arrival_hour)
+                   >> summarize(mean_end_delay = _.delay.mean())
+                  )
+        grouped['Minutes of Delay at Endpoint'] = grouped.mean_end_delay.apply(lambda x: x.seconds / 60)
+        grouped['Hour'] = grouped.arrival_hour
+        sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Minutes of Delay at Endpoint'], ci=None, 
+                       palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
+            .set_title(f"{self.calitp_agency_name} Mean Delays by Arrival Hour{self.filter_formatted}")
+           )
+        chart = sns_plot.get_figure()
+        chart.tight_layout()
+        return chart

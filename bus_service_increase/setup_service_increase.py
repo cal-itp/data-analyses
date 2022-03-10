@@ -7,10 +7,10 @@ from siuba import *
 
 import utils
 import shared_utils
+import warehouse_queries
 
-ix = pd.IndexSlice
-
-DATA_PATH = "./data/test/"
+# Use sub-folder for Jan 2022
+DATA_PATH = warehouse_queries.DATA_PATH
 
 # Merge routes with tract type (notebook A3)
 def merge_routes_with_tract_type():
@@ -238,6 +238,7 @@ if __name__ == "__main__":
     service_combined = calculate_additional_trips_service_hours(service_tract_type)
     service_combined.to_parquet(f"{DATA_PATH}service_increase.parquet")
     
+    
     # Prep NTD data for VRH and # buses
     ntd_joined = add_ntd_operator_vrh_buses()
     ntd_joined.to_parquet(f'{DATA_PATH}vehicles_ntd_joined.parquet')
@@ -245,3 +246,4 @@ if __name__ == "__main__":
     # Calculate operator capital expenditures
     hours_by_operator = calculate_operator_capex(service_combined, ntd_joined)
     hours_by_operator.to_parquet(f'{DATA_PATH}increase_by_operator.parquet')
+    

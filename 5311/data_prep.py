@@ -11,12 +11,16 @@ from plotnine import *
 import intake
 from shared_utils import geography_utils
 
+import cpi
+
 import altair as alt
 import altair_saver
 from shared_utils import geography_utils
 from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
+
+pd.set_option('display.max_columns', 100)
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"
 
@@ -161,117 +165,269 @@ def load_cleaned_organizations_data():
     organizations.ntd_id = organizations.ntd_id.astype(str)
     return organizations
 
-def load_agencyinfo(): 
-    agencies = pd.concat(pd.read_excel('gs://calitp-analytics-data/data-analyses/5311 /2020_Agency_Information.xlsx',
-                                      sheet_name=None),ignore_index=True)
-    agencies = to_snakecase(agencies)
-    agency_info = agencies>>filter(_.state=='CA')
-    
-    return agency_info
-
-def GTFS():
-    GTFS_File =  "services-GTFS Schedule Status.csv"
-    GTFS =  pd.read_csv(f'{GCS_FILE_PATH}{GTFS_File}')
-    GTFS = to_snakecase(GTFS)
-    #Only keeping relevant columns
-    GTFS = GTFS [['name','provider','operator','gtfs_schedule_status']]
-    #rename to avoid confusion
-    GTFS = GTFS.rename(columns = {'gtfs_schedule_status':'simple_GTFS_status'})     
-    #drop GTFS with nas
-    GTFS = GTFS.dropna(subset=['simple_GTFS_status'])
-    #some agencies have "" replace with space
-    GTFS['provider'] = GTFS['provider'].str.replace('"', "")
-    return GTFS
+def load_airtable():
+    File_Airtable = "organizations-AllOrganizations_1.csv"
+    Airtable =  pd.read_csv(f'{GCS_FILE_PATH}{File_Airtable}')
+    Airtable = to_snakecase(Airtable)
+    Airtable = Airtable[['name', 'caltrans_district', 'mpo_rtpa', 'planning_authority',
+       'gtfs_static_status', 'gtfs_realtime_status']]
+    return Airtable
 
 
-'''
-charting functions 
-'''
-#Labels
-def labeling(word):
-    # Add specific use cases where it's not just first letter capitalized
-    LABEL_DICT = { "prepared_y": "Year",
-              "dist": "District",
-              "nunique":"Number of Unique",
-              "project_no": "Project Number"}
-    
-    if (word == "mpo") or (word == "rtpa"):
-        word = word.upper()
-    elif word in LABEL_DICT.keys():
-        word = LABEL_DICT[word]
-    else:
-        #word = word.replace('n_', 'Number of ').title()
-        word = word.replace('unique_', "Number of Unique ").title()
-        word = word.replace('_', ' ').title()
-    
-    return word
+"""
+Inflation Functions
+using 2021 currency as base
+"""
+# Inflation table
+def inflation_table(base_year):
+    cpi.update()
+    series_df = cpi.series.get(area="U.S. city average").to_dataframe()
+    inflation_df = (series_df[series_df.year >= 2008]
+           .pivot_table(index='year', values='value', aggfunc='mean')
+           .reset_index()
+          )
+    denominator = inflation_df.value.loc[inflation_df.year==base_year].iloc[0]
 
-# Bar
-def basic_bar_chart(df, x_col, y_col):
-    
-    chart = (alt.Chart(df)
-             .mark_bar()
-             .encode(
-                 x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
-                 y=alt.Y(y_col, title=labeling(y_col)),
-                 #column = "payment:N",
-                 color = alt.Color(y_col,
-                                  scale=alt.Scale(
-                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
-                                      legend=alt.Legend(title=(labeling(y_col)))
-                                  ))
-             .properties( 
-                          title=(f"Highest {labeling(x_col)} by {labeling(y_col)}"))
+    inflation_df = inflation_df.assign(
+        inflation = inflation_df.value.divide(denominator)
     )
-
-    chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/bar_{x_col}_by_{y_col}.png")
     
-    return chart
+    return inflation_df
 
-
-# Scatter 
-def basic_scatter_chart(df, x_col, y_col, colorcol):
+def adjust_prices(df):
     
-    chart = (alt.Chart(df)
-             .mark_circle(size=60)
-             .encode(
-                 x=alt.X(x_col, title=labeling(x_col)),
-                 y=alt.Y(y_col, title=labeling(y_col)),
-                 #column = "payment:N",
-                 color = alt.Color(colorcol,
-                                  scale=alt.Scale(
-                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
-                                      legend=alt.Legend(title=(labeling(colorcol)))
-                                  ))
-             .properties( 
-                          title = (f"Highest {labeling(x_col)} by {labeling(y_col)}"))
-    )
-
-    chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/scatter_{x_col}_by_{y_col}.png")
+    cols =  ["allocationamount",
+             "encumbered_amount",
+             "expendedamount",
+             "activebalance",
+             "closedoutbalance"]
     
-    return chart
-
-
-# Line
-def basic_line_chart(df, x_col, y_col):
+    ##get cpi table 
+    cpi = inflation_table(2021)
+    cpi.update
+    cpi = (cpi>>select(_.year, _.value))
+    cpi_dict = dict(zip(cpi['year'], cpi['value']))
     
-    chart = (alt.Chart(df)
-             .mark_line()
-             .encode(
-                 x=alt.X(x_col, title=labeling(x_col)),
-                 y=alt.Y(y_col, title=labeling(y_col))
-                                   )
-              ).properties( 
-                          title=f"{labeling(x_col)} by {labeling(y_col)}")
-
-    chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./chart_outputs/line_{x_col}_by_{y_col}.png")
     
-    return chart
+    for col in cols:
+        multiplier = df["project_year"].map(cpi_dict)  
+    
+        ##using 270.97 for 2021 dollars
+        df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
+    return df
 
 
+"""
+Merged Data
 
+"""
+#crosswalk dictionary for function merged_dataframe()
+crosswalk = {'City of Chowchilla ': 'City of Chowchilla, dba: Chowchilla Area Transit ',
+     'City of Dinuba ':  'City of Dinuba',
+     'Modoc Transportation Agency': 'Modoc Transportation Agency',
+     'Butte County Association of Governments/ Butte Regional Transit': 'Butte County Association of Governments',
+     'Calaveras County Public Works':  'Calaveras Transit Agency',
+     'City of Escalon ':  'City of Escalon, dba: eTrans',
+     'County of Mariposa':  'Mariposa County Transit, dba: Mari-Go',
+     'County of Shasta Department of Public Works':  'County of Shasta Department of Public Works',
+     'County of Siskiyou': 'County of Siskiyou, dba: Siskiyou County Transit',
+     'County of Tulare': 'Tulare County Area Transit',
+     'Eureka Transit Service':  'City of Eureka, dba: Eureka Transit Service',
+     'Kern Regional Transit':  'Kern Regional Transit',
+     'Livermore Amador Valley Transit Authority':  'Livermore / Amador Valley Transit Authority',
+     'Placer County Public Works (TART & PCT)': 'County of Placer, dba: Placer County Department of Public Works',
+     'Plumas County Transportation Commission': 'Plumas County Transportation Commission',
+     'San Luis Obispo Regional Transit Authority':  'San Luis Obispo Regional Transit Authority',
+     'Sonoma County Transit':  'County of Sonoma, dba: Sonoma County Transit',
+     'Sunline Transit Agency':  'SunLine Transit Agency',
+     'Tehama County Transit Agency': 'Tehama County',
+     'Trinity County Department of Transportation ':  'Trinity County',
+     'Tuolumne County Transit Agency (TCTA)':  'Tuolumne County Transit',
+     'Amador Transit':  'Amador Regional Transit System',
+     'City of Corcoran - Corcoran Area Transit':  'City of Corcoran, dba: Corcoran Area Transit',
+     'Yosemite Area Regional Transportation System ':  'Yosemite Area Regional Transportation System',
+     'County Connection (Central Contra Costa Transit Authority)': 'Central Contra Costa Transit Authority, dba: COUNTY CONNECTION',
+     'Calaveras Transit Agency ': 'Calaveras Transit Agency'}
 
+#Agencies that ONLY appear in Black Cat  for function merged_dataframe()
+BC_Agency_List = ['County of Los Angeles - Department of Public Works',
+ 'County of Nevada Public Works, Transit Services Division',
+ 'County of Sacramento Department of Transportation',
+ 'Glenn County Transportation Commission',
+ 'Stanislaus County Public Works - Transit Division',
+ 'Alpine County Community Development',
+ 'Fresno Council of Governments',
+ 'Greyhound Lines, Inc.']
 
+### FULL DATA SET ###
+#Merging all 3 data frames, without any aggregation. There are ~800 rows of data from 2011-2021.
+def merged_dataframe():
+    ### MERGING ###
+    #call the 3 data frames we have to join.
+    df_5311 = load_grantprojects()
+    vehicles = load_cleaned_vehiclesdata()
+    organizations = load_cleaned_organizations_data()
+    #merge vehicles from NTD & GTFS
+    vehicles_gtfs = pd.merge(vehicles, organizations,  how='left', on=['ntd_id'])
+    #left merge, Black Cat on the left and vehicle_gtfs on the right. 
+    m1 = (pd.merge(df_5311, vehicles_gtfs,  how='left', left_on=['organization_name'], 
+                      right_on=['name'], indicator=True)
+            )
+    
+    #Filter out for left only matches, make it into a list
+    Left_only = m1[(m1._merge.str.contains("left_only", case= False))] 
+    Left_orgs = Left_only['organization_name'].drop_duplicates().tolist()
+    #Delete  left only matches from original df 
+    m2 = m1[~m1.organization_name.isin(Left_orgs)]
+    #making a data frame with only failed merges out out of original Black Cat
+    fail = df_5311[df_5311.organization_name.isin(Left_orgs)]
+    #replacing organization names from Black Cat with agency names from NTD Vehicles.
+    fail['organization_name'].replace(crosswalk, inplace= True)
+    #Merging the failed organizations to vehicles 
+    Test = pd.merge(fail, vehicles_gtfs,  how='left', left_on=['organization_name'], right_on=['agency'])
+    #appending failed matches to the first data frame
+    BC_GTFS_NTD = m2.append(Test, ignore_index=True)
+    
+    ### FLAG TO SHOW BLACK CAT ONLY AGENCIES ###
+    #Function
+    def BC_only(row):
+        if row.organization_name in BC_Agency_List:
+            return '1'
+        else: 
+            return '0'  
+    BC_GTFS_NTD["Is_Agency_In_BC_Only_1_means_Yes"] = BC_GTFS_NTD.apply(lambda x: BC_only(x), axis=1)
+    
+    ###Replace GTFS and cal itp for Klamath###
+    #Klamath does not appear in NTD data so we missed it when we merged NTD & Cal ITP on NTD ID
+    BC_GTFS_NTD.loc[(BC_GTFS_NTD['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "itp_id"] = "436"
+    BC_GTFS_NTD.loc[(BC_GTFS_NTD['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "gtfs_schedule_status"] = "needed"
+    
+    ###GTFS###
+    #get a more definitive GTFS status: ok, needed, long term solution needed, research
+    temp = BC_GTFS_NTD.gtfs_schedule_status.fillna("None")
+    BC_GTFS_NTD['GTFS_schedule_status_use'] = np.where(temp.str.contains("None"),"None",
+                   np.where(temp.str.contains("ok"), "Ok",
+                   np.where(temp.str.contains("long"), "Long-term solution needed",
+                   np.where(temp.str.contains("research"), "Research", "Needed"))))
+    
+    ###FLEET SIZE METRIC ### 
+    #First grabbing only one row for each agency into a new data frame 
+    Fleet_size = BC_GTFS_NTD.groupby(['organization_name',]).agg({'total_vehicles':'max'}).reindex()
+    #Get percentiles in objects for total vehicle.
+    p75 = Fleet_size.total_vehicles.quantile(0.75).astype(float)
+    p25 = Fleet_size.total_vehicles.quantile(0.25).astype(float)
+    p50 = Fleet_size.total_vehicles.quantile(0.50).astype(float)
+    #Function for fleet size
+    def fleet_size (row):
+        if ((row.total_vehicles > 0) and (row.total_vehicles < p25)):
+            return "Small"
+        elif ((row.total_vehicles > p25) and (row.total_vehicles < p75)):
+            return "Medium"
+        elif ((row.total_vehicles > p50) and (row.total_vehicles > p75 )):
+               return "Large"
+        else:
+            return "No Info"
+    BC_GTFS_NTD["fleet_size"] = BC_GTFS_NTD.apply(lambda x: fleet_size(x), axis=1)
+    
+    ### FINAL CLEAN UP ###
+    #delete old columns
+    BC_GTFS_NTD = BC_GTFS_NTD.drop(columns=['gtfs_schedule_status','name','agency'])
+    #rename
+    BC_GTFS_NTD = BC_GTFS_NTD.rename(columns = {'GTFS_schedule_status_use':'GTFS'})
+    #get agencies without any data to show up when grouping
+    show_up = ['reporter_type']
+    for i in show_up:
+        BC_GTFS_NTD[i] = BC_GTFS_NTD[i].fillna('None')
+    #change itp id to be floats & 0 so parquet will work
+    BC_GTFS_NTD['itp_id'] = BC_GTFS_NTD['itp_id'].fillna(0)
+    BC_GTFS_NTD.loc[(BC_GTFS_NTD['itp_id'] == '436'), "itp_id"] = 436
+    
+    
+    #add $ columns with adjusted values for inflation 
+    BC_GTFS_NTD = adjust_prices(BC_GTFS_NTD)
+    
+    #save into parquet
+    #BC_GTFS_NTD.to_parquet("BC_GTFS_NTD.parquet")
+    return BC_GTFS_NTD 
+
+### AGGGREGATED MERGED DATA SET ###
+#this function takes the full data frame above & sums it down to just one row for each organization with aggregated statistics. GTFS, district, planning authority, and mppo rtpa info also included
+#this function takes the merged data frame above, which has around 700 rows & 
+#sums it down to just one row for each organization with aggregated statistics
+def aggregated_merged_df(): 
+    #read original df & airtable
+    df_original = merged_dataframe()
+    airtable = load_airtable()
+    
+    # Grab the reporter type, fleet size, ntd id, and itp id to subset out
+    df_subset = df_original[['organization_name','reporter_type', 'fleet_size', 'ntd_id', 'itp_id']]
+    
+    #aggregate vehicles 16+ above. 
+    column_names = ['_16_20', '_21_25', '_26_30', '_31_60']
+    df_original['_16plus']= df_original[column_names].sum(axis=1)
+    
+    #duplicate allocationamount col so we can get the mean an organiztaion received.
+    df_original['allocationamount_mean'] = df_original['allocationamount']
+    
+    #grab the max of all vehicle information & sum of all monetary cols from Black Cat
+    df_original = df_original.groupby(['organization_name',]).agg({'allocationamount_mean': 
+                                                                   'mean',
+                                                                   'allocationamount':'sum',
+                                         'encumbered_amount':'sum',
+                                         'expendedamount':'sum',
+                                         'activebalance':'sum',
+                                         'closedoutbalance':'sum',
+                                         'adjusted_allocationamount':'sum',
+                                         'adjusted_expendedamount':'sum',
+                                         'adjusted_encumbered_amount':'sum',
+                                         'adjusted_activebalance':'sum',
+                                         'adjusted_closedoutbalance':'sum',                                                
+                                         'total_vehicles':'max',
+                                         'average_age_of_fleet__in_years_':'max',
+                                         'average_lifetime_miles_per_vehicle':'max',
+                                         'Automobiles':'max',
+                                         'Bus':'max',
+                                         'Other':'max',
+                                         'Train':'max',
+                                         'Van':'max',
+                                         'automobiles_door':'max',
+                                         'bus_doors':'max',
+                                         'van_doors':'max',
+                                         'train_doors':'max',
+                                         'doors_sum':'max',
+                                         '_0_9':'max',
+                                         '_10_12':'max',
+                                         '_13_15':'max',
+                                         '_16_20':'max',
+                                         '_21_25':'max',
+                                         '_26_30':'max',
+                                         '_31_60':'max',
+                                         '_16plus':'max',
+                                         '_60plus':'max'}).reset_index()
+   
+   
+    df_subset = df_subset.drop_duplicates()
+    
+    #Merge the 2 dfs together
+    df_merge1 = pd.merge(df_original,df_subset, how='left', left_on='organization_name', right_on = 'organization_name')
+    
+    #Merge df_merge1 with Air table that contains MPO, planning authority, more definitive GTFS status
+    df_merge2 = pd.merge(df_merge1, airtable, how='left', left_on='organization_name', right_on='name')
+    
+    #GTFS is now split between gtfs_static & gtfs_realtime, create groups to show orgs with both
+    #orgs with only either RT/Static, orgs with none
+    def gtfs_status_indicator(df):   
+        if (df['gtfs_static_status'] == 'Static OK') and (df['gtfs_realtime_status'] == "RT OK"):
+            return 'Both static & RT OK'
+        elif (df['gtfs_static_status'] == 'Static Incomplete') and (df['gtfs_realtime_status'] == "RT OK"):
+            return 'Only RT'
+        elif (df['gtfs_static_status'] == 'Static OK') and (df['gtfs_realtime_status'] == "RT Incomplete"):
+            return 'Only Static'
+        else: 
+            return "None"
+    df_merge2['GTFS_Status'] = df_merge2.apply(gtfs_status_indicator, axis = 1)
+    
+    #Drop unnecessary cols
+    df_merge2 = df_merge2.drop('name', 1)
+    
+    return df_merge2 
