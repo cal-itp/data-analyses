@@ -47,3 +47,11 @@ Could you provide better end-to-end service for ppl who go between DTLA and Veni
 
 
 
+[osrm](https://github.com/vaclavdekanovsky/data-analysis-in-examples/blob/master/Maps/Driving%20Distance/Driving%20Distance%20between%20two%20places.ipynb) -- can't be installed in Hub
+[osmx part 1](https://towardsdatascience.com/driving-distance-between-two-or-more-places-in-python-89779d691def) -- nodes for bus stops snapping to same one
+[osmx part 2](https://towardsdatascience.com/how-to-calculate-travel-time-for-any-location-in-the-world-56ce639511f)
+[valhalla](https://github.com/valhalla/valhalla)
+[valhalla demos](https://github.com/valhalla/demos)
+[kuan's blog on calculating travel time](http://kuanbutts.com/2020/09/12/raptor-simple-example/)
+[google-api-python-client](https://github.com/googleapis/google-api-python-client/blob/main/docs/batch.md)
+[google python package](https://github.com/googlemaps/google-maps-services-python)

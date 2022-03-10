@@ -9,7 +9,7 @@ These shared utility functions are quality-of-life improvements for analysts as 
 1. In terminal, change directory into `_shared_utils`: `cd data-analyses/_shared_utils`
 1. Run the make command to further do the `pip install` and `conda install`: `make setup_env`
 1. Do work in your project-subfolder. Ex: `cd ../bus_service_increase`
-1. Within Jupyter Notebook or script: `import shared_utils` 
+1. Within Jupyter Notebook or script: `import shared_utils`
 
 
 **References**
