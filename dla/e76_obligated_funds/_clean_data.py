@@ -225,12 +225,26 @@ def adjust_prices(df):
     cpi = (cpi>>select(_.year, _.value))
     cpi_dict = dict(zip(cpi['year'], cpi['value']))
     
+    df = pd.merge(df, 
+         cpi_table[["year", "multiplier"]],
+         left_on = "prepared_y",
+         right_on = "year",
+         how = "left",
+         validate = "m:1",
+        )
     
-    for col in cols:
-        multiplier = df["prepared_y"].map(cpi_dict)  
+    orig = ["total_requested", 
+        "fed_requested", 
+        "ac_requested"]
+
+    for c in cols:
+        df[f"adjusted_{c}"] = df.apply(lambda x: x[c] * x.multiplier, axis=1)
     
-        ##using 270.97 for 2021 dollars
-        df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
+#     for col in cols:
+#         multiplier = df["prepared_y"].map(cpi_dict)  
+    
+#         ##using 270.97 for 2021 dollars
+#         df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
     return df
 
 
