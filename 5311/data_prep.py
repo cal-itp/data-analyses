@@ -366,8 +366,13 @@ def aggregated_merged_df():
     column_names = ['_16_20', '_21_25', '_26_30', '_31_60']
     df_original['_16plus']= df_original[column_names].sum(axis=1)
     
+    #duplicate allocationamount col so we can get the mean an organiztaion received.
+    df_original['allocationamount_mean'] = df_original['allocationamount']
+    
     #grab the max of all vehicle information & sum of all monetary cols from Black Cat
-    df_original = df_original.groupby(['organization_name',]).agg({'allocationamount':'sum',
+    df_original = df_original.groupby(['organization_name',]).agg({'allocationamount_mean': 
+                                                                   'mean',
+                                                                   'allocationamount':'sum',
                                          'encumbered_amount':'sum',
                                          'expendedamount':'sum',
                                          'activebalance':'sum',
@@ -424,4 +429,5 @@ def aggregated_merged_df():
     
     #Drop unnecessary cols
     df_merge2 = df_merge2.drop('name', 1)
+    
     return df_merge2 
