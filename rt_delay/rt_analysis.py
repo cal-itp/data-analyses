@@ -57,10 +57,10 @@ class TripPositionInterpolator:
         '''
         self.shape = (shape_gdf
                         >> filter(_.shape_id == self.shape_id)
-                        >> select(_.shape_id, _.geometry))
-        assert not self.shape.geometry.empty, f'shape empty for trip {self.trip_id}!'
+                        >> select(_.shape_id, _.geometry)).geometry.iloc[0]
+        assert self.shape, f'shape empty for trip {self.trip_id}!'
         self.position_gdf['shape_meters'] = (self.position_gdf.geometry
-                                .apply(lambda x: self.shape.geometry.iloc[0].project(x)))
+                                .apply(lambda x: self.shape.project(x)))
         self._linear_reference()
         
         origin = (self.position_gdf >> filter(_.shape_meters == _.shape_meters.min())
@@ -92,7 +92,7 @@ class TripPositionInterpolator:
                             _.shape_meters, _.speed_mph)
         gdf['last_loc'] = gdf.shape_meters.shift(1)
         gdf = gdf.iloc[1:,:] ## remove first row (inaccurate shape data)
-        gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape.geometry.iloc[0],
+        gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape,
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
         ## shift to right side of road to display direction
@@ -508,7 +508,7 @@ class OperatorDayAnalysis:
                 # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
                 stop_speeds.geometry = stop_speeds.apply(
                     lambda x: shapely.ops.substring(
-                                self.position_interpolators[x.trip_id]['rt'].shape.geometry.iloc[0],
+                                self.position_interpolators[x.trip_id]['rt'].shape,
                                 x.last_loc,
                                 x.shape_meters),
                                                 axis = 1)
