@@ -17,6 +17,7 @@ import geopandas as gpd
 import warnings
 
 import branca
+import folium
 
 from numba import jit
 import numpy as np
@@ -372,3 +373,63 @@ def arrowize_segment(line_geometry, arrow_distance = 15, buffer_distance = 20):
 #     '''
 #     Return a scatter chart showing distribution of speeds or delays
 #     '''
+
+def layer_points(rt_interpolator):
+    initial_bk_noise = (rt_interpolator.position_gdf
+                        >> filter(_.meters_from_last < 0)
+                        >> select(_.geometry, _.shape_meters, _.progressed,
+                                  _.secs_from_last, _.meters_from_last)
+                       )
+    initial_deduped = (rt_interpolator.position_gdf
+                       >> distinct(_.shape_meters, _keep_all=True)
+                       >> select(_.geometry, _.shape_meters, _.progressed,
+                                 _.secs_from_last, _.meters_from_last)
+                      )
+    cleaned = rt_interpolator.cleaned_positions >> select(_.geometry, _.shape_meters, _.progressed,
+                                             _.secs_from_last, _.meters_from_last)
+    popup_dict = {'shape_meters': 'shape_meters', 'progressed': 'progressed', 'secs_from_last': 'secs_from_last',
+                 'meters_from_last': 'meters_from_last'}
+    layers_dict = {'initial backwards noise': {'df': initial_bk_noise,
+                                              'plot_col': 'shape_meters',
+                                              'popup_dict': popup_dict,
+                                              'tooltip_dict': popup_dict,
+                                              'colorscale': branca.colormap.step.Blues_03},
+                   'initial position deduplicated': {'df': initial_deduped,
+                                              'plot_col': 'shape_meters',
+                                              'popup_dict': popup_dict,
+                                              'tooltip_dict': popup_dict,
+                                              'colorscale': branca.colormap.step.Greens_03},
+                    'cleaned_final': {'df': cleaned,
+                                              'plot_col': 'shape_meters',
+                                              'popup_dict': popup_dict,
+                                              'tooltip_dict': popup_dict,
+                                              'colorscale': branca.colormap.step.Greens_03},
+
+                  }
+    for i in range(rt_interpolator._position_cleaning_count):
+        layers_dict[f'cleaned_{i}'] = {'df': (rt_interpolator.debug_dict[f'clean_{i}'] 
+                                       >> select(_.geometry, _.shape_meters, _.progressed,
+                                          _.secs_from_last, _.meters_from_last)),
+                          'plot_col': 'shape_meters',
+                          'popup_dict': popup_dict,
+                          'tooltip_dict': popup_dict,
+                          'colorscale': branca.colormap.step.Reds_03,
+                          # 'marker':  marker
+                                      }
+    # return layers_dict
+    return shared_utils.map_utils.make_folium_multiple_layers_map(layers_dict, 900, 500)
+
+def map_line(gdf):
+    # gdf = gdf.buffer(1)
+    gdf = gdf.to_crs(shared_utils.geography_utils.WGS84)
+    centroid = gdf.geometry.iloc[0].centroid
+    m = folium.Map(location = [centroid.y, centroid.x], zoom_start = 13, tiles="cartodbpositron")
+    folium.GeoJson(gdf.to_json()).add_to(m)
+    return m
+
+def categorize_cleaning(rt_operator_day, interpolator_key):
+    rt_interpolator = rt_operator_day.position_interpolators[interpolator_key]['rt']
+    raw = rt_interpolator.position_gdf.shape[0]
+    same_loc_dropped = (rt_interpolator.position_gdf >> distinct(_.shape_meters)).shape[0]
+    cleaned = rt_interpolator.cleaned_positions.shape[0]
+    return (interpolator_key, cleaned / raw, cleaned / same_loc_dropped)
