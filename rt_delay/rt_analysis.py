@@ -170,6 +170,8 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
         assert type(vp_gdf) == type(gpd.GeoDataFrame()) and not vp_gdf.empty, "vehicle positions gdf must not be empty"
         assert type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty"
         
+        self.debug_dict = {}
+        
         self.position_type = 'rt'
         self.time_col = 'vehicle_timestamp'
         self._position_cleaning_count = 0
@@ -181,12 +183,14 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
         
         self.position_gdf = self._shift_calculate(self.position_gdf)
         self.progressing_positions = self.position_gdf >> filter(_.progressed)
+        self.debug_dict['clean_0'] = self.progressing_positions.copy()
         ## check if positions have progressed from immediate previous point, but not previous point of forwards progression
         while not self.progressing_positions.shape_meters.is_monotonic:
             self._position_cleaning_count += 1
             # print(f'check location data for trip {self.trip_id}')
             self.progressing_positions = self._shift_calculate(self.progressing_positions)
             self.progressing_positions = self.progressing_positions >> filter(_.progressed)
+            self.debug_dict[f'clean_{self._position_cleaning_count}'] = self.progressing_positions.copy()
         self.cleaned_positions = self.progressing_positions ## for position and map methods in TripPositionInterpolator
         self.cleaned_positions = self.cleaned_positions >> arrange(self.time_col)
         self._shape_array = self.cleaned_positions.shape_meters.to_numpy()
