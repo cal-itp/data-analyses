@@ -57,10 +57,10 @@ class TripPositionInterpolator:
         '''
         self.shape = (shape_gdf
                         >> filter(_.shape_id == self.shape_id)
-                        >> select(_.shape_id, _.geometry))
-        assert not self.shape.geometry.empty, f'shape empty for trip {self.trip_id}!'
+                        >> select(_.shape_id, _.geometry)).geometry.iloc[0]
+        assert self.shape, f'shape empty for trip {self.trip_id}!'
         self.position_gdf['shape_meters'] = (self.position_gdf.geometry
-                                .apply(lambda x: self.shape.geometry.iloc[0].project(x)))
+                                .apply(lambda x: self.shape.project(x)))
         self._linear_reference()
         
         origin = (self.position_gdf >> filter(_.shape_meters == _.shape_meters.min())
@@ -92,7 +92,7 @@ class TripPositionInterpolator:
                             _.shape_meters, _.speed_mph)
         gdf['last_loc'] = gdf.shape_meters.shift(1)
         gdf = gdf.iloc[1:,:] ## remove first row (inaccurate shape data)
-        gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape.geometry.iloc[0],
+        gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape,
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
         ## shift to right side of road to display direction
@@ -170,6 +170,8 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
         assert type(vp_gdf) == type(gpd.GeoDataFrame()) and not vp_gdf.empty, "vehicle positions gdf must not be empty"
         assert type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty"
         
+        self.debug_dict = {}
+        
         self.position_type = 'rt'
         self.time_col = 'vehicle_timestamp'
         self._position_cleaning_count = 0
@@ -181,12 +183,14 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
         
         self.position_gdf = self._shift_calculate(self.position_gdf)
         self.progressing_positions = self.position_gdf >> filter(_.progressed)
+        self.debug_dict['clean_0'] = self.progressing_positions.copy()
         ## check if positions have progressed from immediate previous point, but not previous point of forwards progression
         while not self.progressing_positions.shape_meters.is_monotonic:
             self._position_cleaning_count += 1
             # print(f'check location data for trip {self.trip_id}')
             self.progressing_positions = self._shift_calculate(self.progressing_positions)
             self.progressing_positions = self.progressing_positions >> filter(_.progressed)
+            self.debug_dict[f'clean_{self._position_cleaning_count}'] = self.progressing_positions.copy()
         self.cleaned_positions = self.progressing_positions ## for position and map methods in TripPositionInterpolator
         self.cleaned_positions = self.cleaned_positions >> arrange(self.time_col)
         self._shape_array = self.cleaned_positions.shape_meters.to_numpy()
@@ -203,6 +207,7 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
                                         .apply(lambda x: x.seconds))
         vehicle_positions['meters_from_last'] = vehicle_positions.shape_meters.diff()
         vehicle_positions['progressed'] = vehicle_positions['meters_from_last'] > 0 ## has the bus moved ahead?
+        vehicle_positions.iloc[0, vehicle_positions.columns.get_loc('progressed')] = True ## avoid dropping start point
         vehicle_positions['speed_from_last'] = (vehicle_positions.meters_from_last
                                                      / vehicle_positions.secs_from_last) ## meters/second
         return vehicle_positions
@@ -278,15 +283,14 @@ class OperatorDayAnalysis:
                 (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
          axis = 1))
         # print(f'done')
-        self.vp_trip_ids = (self.vehicle_positions >> distinct(_.trip_id)).trip_id
-        # self.vp_trip_keys = (self.vehicle_positions >> distinct(_.trip_key)).trip_key ##TODO switch
-        self.scheduled_trip_rt_coverage = self.vp_trip_ids.size / (self.trips >> distinct(_.trip_id)).trip_id.size
-        ## ^ should refactor
+        self.vp_obs_by_trip = self.vehicle_positions >> count(_.trip_id) >> arrange(-_.n)
         self._generate_position_interpolators() ## comment out for first test
         self.rt_trips = self.trips.copy() >> filter(_.trip_id.isin(self.position_interpolators.keys()))
         self.rt_trips['median_time'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].median_time.time(), axis = 1)
         self.rt_trips['direction'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].direction, axis = 1)
         self.rt_trips['mean_speed_mph'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].mean_speed_mph, axis = 1)
+        self.pct_trips_valid_rt = self.rt_trips.trip_id.nunique() / self.trips.trip_id.nunique()
+
         self._generate_stop_delay_view()
         self.endpoint_delay_view = (self.stop_delay_view
                       >> group_by(_.trip_id)
@@ -311,11 +315,10 @@ class OperatorDayAnalysis:
     def _generate_position_interpolators(self):
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
         self.position_interpolators = {}
-        # for trip_id in self.vp_trip_ids[:5]: ##small test
         if type(self.pbar) != type(None):
-            self.pbar.reset(total=len(self.vp_trip_ids))
+            self.pbar.reset(total=self.vehicle_positions.trip_id.nunique())
             self.pbar.desc = 'Generating position interpolators'
-        for trip_id in self.vp_trip_ids: ##big test
+        for trip_id in self.vehicle_positions.trip_id.unique():
             # print(trip_id)
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
             # self.debug_dict[f'{trip_id}_trip'] = trip
@@ -332,14 +335,14 @@ class OperatorDayAnalysis:
                                                            # 'schedule': ScheduleInterpolator(st_trip_joined, self.routelines) ## probably need to save memory for now ?
                                                        }
             except AssertionError as e:
-                print(e)
+            # except Exception as e:
+                # print(e)
+                print(trip_id)
             if type(self.pbar) != type(None):
                 self.pbar.update()
         if type(self.pbar) != type(None):
             self.pbar.refresh()
-            # except Exception as e:
-            #     print(f'could not generate interpolators for {trip_id}')
-            #     print(e)
+
             # TODO better checking for incomplete trips (either here or in interpolator...)
     
     def _generate_stop_delay_view(self):
@@ -364,6 +367,7 @@ class OperatorDayAnalysis:
                                 self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
                                 axis = 1)
                 _delay = _delay.dropna(subset=['actual_time'])
+                _delay.arrival_time = _delay.arrival_time.map(lambda x: fix_arrival_time(x)[0]) ## reformat 25:xx GTFS timestamps to standard 24 hour time
                 _delay['arrival_time'] = _delay.apply(lambda x:
                                     dt.datetime.combine(x.actual_time.date(),
                                                         dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time()),
@@ -373,7 +377,7 @@ class OperatorDayAnalysis:
                 # self.debug_dict[f'{trip_id}_times'] = _delay
                 _delay['delay'] = _delay.actual_time - _delay.arrival_time
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
-                _delays = _delays.append(_delay)
+                _delays = pd.concat((_delays, _delay))
                 # self.debug_dict[f'{trip_id}_delay'] = _delay
                 # return
             except Exception as e:
@@ -485,14 +489,22 @@ class OperatorDayAnalysis:
             for direction_id in gdf.direction_id.unique():
                 this_shape_direction = (gdf
                              >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
-                # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
+                if this_shape_direction.empty:
+                    print(f'{shape_id}_{direction_id}_ empty!')
+                    continue
+                self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
                 stop_speeds = (this_shape_direction
                              >> group_by(_.trip_key)
                              >> arrange(_.stop_sequence)
                              >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
                              >> mutate(last_loc = _.shape_meters.shift(1))
                              >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
-                             >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last) 
+                             >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
+                             >> mutate(last_delay = _.delay.shift(1))
+                             >> mutate(delay_chg_sec = (_.delay - _.last_delay)
+                                       .map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2)
+                                      )
+                             >> mutate(delay_sec = _.delay.map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2))
                              >> ungroup()
                             )
                 if stop_speeds.empty:
@@ -501,7 +513,7 @@ class OperatorDayAnalysis:
                 # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
                 stop_speeds.geometry = stop_speeds.apply(
                     lambda x: shapely.ops.substring(
-                                self.position_interpolators[x.trip_id]['rt'].shape.geometry.iloc[0],
+                                self.position_interpolators[x.trip_id]['rt'].shape,
                                 x.last_loc,
                                 x.shape_meters),
                                                 axis = 1)
@@ -518,8 +530,7 @@ class OperatorDayAnalysis:
                                   )
                          # >> distinct(_.stop_sequence, _keep_all=True) ## comment out to enable speed distribution analysis
                          >> ungroup()
-                         >> select(-_.arrival_time, -_.actual_time, -_.delay,
-                                   -_.trip_id, -_.trip_key)
+                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
                         )
                     self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
                     assert not stop_speeds.empty, 'stop speeds gdf is empty!'
@@ -534,7 +545,7 @@ class OperatorDayAnalysis:
                 if stop_speeds._20p_mph.min() < 0:
                     print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
-                all_stop_speeds = all_stop_speeds.append(stop_speeds)
+                all_stop_speeds = pd.concat((all_stop_speeds, stop_speeds))
                 
                 if type(self.pbar) != type(None):
                     self.pbar.update()
@@ -547,6 +558,8 @@ class OperatorDayAnalysis:
     def _show_speed_map(self, how, colorscale, size):
         
         gdf = self.stop_segment_speed_view.copy()
+        # print(gdf.dtypes)
+        singletrip = gdf.trip_id.nunique() == 1
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
         orig_rows = gdf.shape[0]
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0,
@@ -576,13 +589,15 @@ class OperatorDayAnalysis:
             how_speed_col[how]: "Speed (miles per hour)",
             "shape_meters": "Distance along route (meters)",
             "route_id": "Route",
-            # "direction": "Direction",
             "shape_id": "Shape ID",
             "direction_id": "Direction ID",
             "stop_id": "Next Stop ID",
             "stop_sequence": "Next Stop Sequence",
             "trips_per_hour": "Trips per Hour" 
         }
+        if singletrip:
+            popup_dict["delay_sec"] = "Current Delay (seconds)"
+            popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
 
         g = make_folium_choropleth_map(
             gdf,
