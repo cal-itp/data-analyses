@@ -40,6 +40,8 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
         for cell in nb_man.nb.cells:
             if cell.cell_type == "markdown":
                 cell.source = cell.source.format(**kwargs['original_parameters'])
+            if cell.cell_type == "code":
+                cell.metadata.tags.append("remove_input")
 
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
@@ -54,6 +56,7 @@ def parameterize_filename(old_path: Path, params: Dict) -> Path:
         + "__".join(f"{k}_{v}" for k, v in params.items())
         + old_path.suffix
     )
+
 
 def convert_to_html(path: Path) -> Path:
     html_output_path = path.with_suffix(".html")
@@ -113,6 +116,7 @@ def build(
                 parameters=params_dict,
                 cwd=analysis.notebook.parent,
                 engine_name="markdown",
+                report_mode=True,
                 original_parameters=params_dict,
             )
 
