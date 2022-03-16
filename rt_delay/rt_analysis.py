@@ -207,6 +207,7 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
                                         .apply(lambda x: x.seconds))
         vehicle_positions['meters_from_last'] = vehicle_positions.shape_meters.diff()
         vehicle_positions['progressed'] = vehicle_positions['meters_from_last'] > 0 ## has the bus moved ahead?
+        vehicle_positions.iloc[0, vehicle_positions.columns.get_loc('progressed')] = True ## avoid dropping start point
         vehicle_positions['speed_from_last'] = (vehicle_positions.meters_from_last
                                                      / vehicle_positions.secs_from_last) ## meters/second
         return vehicle_positions
@@ -334,14 +335,14 @@ class OperatorDayAnalysis:
                                                            # 'schedule': ScheduleInterpolator(st_trip_joined, self.routelines) ## probably need to save memory for now ?
                                                        }
             except AssertionError as e:
-                print(e)
+            # except Exception as e:
+                # print(e)
+                print(trip_id)
             if type(self.pbar) != type(None):
                 self.pbar.update()
         if type(self.pbar) != type(None):
             self.pbar.refresh()
-            # except Exception as e:
-            #     print(f'could not generate interpolators for {trip_id}')
-            #     print(e)
+
             # TODO better checking for incomplete trips (either here or in interpolator...)
     
     def _generate_stop_delay_view(self):
