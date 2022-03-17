@@ -10,7 +10,7 @@ https://dot.ca.gov/programs/local-assistance/reports/e-76-waiting
 
 """
 
-
+#! pip install cpi
 
 import numpy as np
 import pandas as pd
@@ -209,43 +209,71 @@ def adjust_prices(df):
         cpi.update()
         series_df = cpi.series.get(area="U.S. city average").to_dataframe()
         inflation_df = (series_df[series_df.year >= 2008]
-               .pivot_table(index='year', values='value', aggfunc='mean')
-               .reset_index()
-              )
+                        .pivot_table(index='year', values='value', aggfunc='mean')
+                        .reset_index()
+                       )
         denominator = inflation_df.value.loc[inflation_df.year==base_year].iloc[0]
 
         inflation_df = inflation_df.assign(
-            inflation = inflation_df.value.divide(denominator)
+        inflation = inflation_df.value.divide(denominator)
         )
     
         return inflation_df
+#         cpi.update()
+#         series_df = cpi.series.get(area="U.S. city average").to_dataframe()
+#         inflation_df = (series_df[series_df.year >= 2008]
+#                .pivot_table(index='year', values='value', aggfunc='mean')
+#                .reset_index()
+#               )
+#         denominator = inflation_df.value.loc[inflation_df.year==base_year].iloc[0]
+
+#         inflation_df = inflation_df.assign(
+#             inflation = inflation_df.value.divide(denominator)
+#         )
+    
+#         return inflation_df
+    
     
     ##get cpi table 
     cpi = inflation_table(2021)
+    cpi.update
     cpi = (cpi>>select(_.year, _.value))
     cpi_dict = dict(zip(cpi['year'], cpi['value']))
     
-    df = pd.merge(df, 
-         cpi_table[["year", "multiplier"]],
-         left_on = "prepared_y",
-         right_on = "year",
-         how = "left",
-         validate = "m:1",
-        )
     
-    orig = ["total_requested", 
-        "fed_requested", 
-        "ac_requested"]
-
-    for c in cols:
-        df[f"adjusted_{c}"] = df.apply(lambda x: x[c] * x.multiplier, axis=1)
+    for col in cols:
+        multiplier = df["prepared_y"].map(cpi_dict)  
     
-#     for col in cols:
-#         multiplier = df["prepared_y"].map(cpi_dict)  
-    
-#         ##using 270.97 for 2021 dollars
-#         df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
+        ##using 270.97 for 2021 dollars
+        df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
     return df
+
+#     ##get cpi table 
+#     cpi_table = inflation_table(2021)
+# #     cpi = (cpi>>select(_.year, _.value))
+# #     cpi_dict = dict(zip(cpi['year'], cpi['value']))
+    
+#     df = pd.merge(df, 
+#          cpi_table[["year", "multiplier"]],
+#          left_on = "prepared_y",
+#          right_on = "year",
+#          how = "left",
+#          validate = "m:1",
+#         )
+    
+#     orig = ["total_requested", 
+#         "fed_requested", 
+#         "ac_requested"]
+
+#     for c in cols:
+#         df[f"adjusted_{c}"] = df.apply(lambda x: x[c] * x.multiplier, axis=1)
+    
+# #     for col in cols:
+# #         multiplier = df["prepared_y"].map(cpi_dict)  
+    
+# #         ##using 270.97 for 2021 dollars
+# #         df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
+#     return df
 
 
 #add project categories
