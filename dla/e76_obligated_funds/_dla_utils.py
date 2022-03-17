@@ -64,7 +64,9 @@ def count_all_years(df, groupedby=["prepared_y", "dist"]):
         sum_cols = ["total_requested", "ac_requested", "fed_requested"],
         mean_cols = ["total_requested", "ac_requested", "fed_requested"],
         nunique_cols = ["primary_agency_name", "mpo", "prefix", "project_no", "project_location", "type_of_work"]
-    ).sort_values(["prepared_y", "dist"], ascending=[False, True])
+    ).sort_values(["prepared_y",
+                   "dist"
+                  ], ascending=[False, True])
     .astype({"prepared_y": "Int64"})
     )
     
