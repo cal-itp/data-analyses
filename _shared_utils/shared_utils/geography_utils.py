@@ -131,10 +131,16 @@ def make_routes_shapefile(ITP_ID_LIST=[], CRS="EPSG:4326", alternate_df=None):
 
         elif alternate_df is not None:
             shapes = alternate_df.copy()
-            # shape_id is None, which will throw up an error later on when there's groupby
-            shapes = shapes.assign(
-                shape_id=shapes.route_id,
-            )
+
+            # With historical gtfs_schedule_type2.shapes table, there is a valid shape_id
+            if shapes.shape_id.isnull().sum() == 0:
+                pass
+            else:
+                # shape_id is None, which will throw up an error later on when there's groupby
+                # So, create shape_id and fill it in with route_id info
+                shapes = shapes.assign(
+                    shape_id=shapes.route_id,
+                )
 
         # Make a gdf
         shapes = gpd.GeoDataFrame(
