@@ -2,7 +2,8 @@
 format: jb-book
 root: README
 parts:
-  - caption: DLA Analyses by District
+  - #caption: DLA Analyses by District
     chapters:
       - file: dla/dla_analysis
-      - glob: dla/e76_obligated_funds/*
+        sections:
+          - glob: dla/e76_obligated_funds/*
