@@ -38,8 +38,15 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
         assert 'original_parameters' in kwargs
 
         for cell in nb_man.nb.cells:
+
+            # display() calls for markdown break jupyterbook/sphinx
+            # https://github.com/executablebooks/jupyter-book/issues/1610
+            # so we have to manually parameterize headers in markdown cells; for example, "District {district}" in a
+            # markdown cell vs "display(Markdown(f"District: {district}))" in a code cell
             if cell.cell_type == "markdown":
                 cell.source = cell.source.format(**kwargs['original_parameters'])
+
+            # hide input (i.e. code) for all cells
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
 
@@ -86,6 +93,7 @@ def build(
     output_dir: Path = "./target/",
     docs_dir: Path = "./docs/",
     report: str = None,
+    execute: bool = True,
 ) -> None:
     with open(config) as f:
         docs_config = DocsConfig(notebooks=yaml.safe_load(f))
@@ -110,15 +118,19 @@ def build(
             typer.echo(
                 f"executing papermill; writing {analysis.notebook} => {output_path}"
             )
-            pm.execute_notebook(
-                input_path=analysis.notebook,
-                output_path=output_path,
-                parameters=params_dict,
-                cwd=analysis.notebook.parent,
-                engine_name="markdown",
-                report_mode=True,
-                original_parameters=params_dict,
-            )
+
+            if execute:
+                pm.execute_notebook(
+                    input_path=analysis.notebook,
+                    output_path=output_path,
+                    parameters=params_dict,
+                    cwd=analysis.notebook.parent,
+                    engine_name="markdown",
+                    report_mode=True,
+                    original_parameters=params_dict,
+                )
+            else:
+                typer.echo(f"execute={execute} so we are skipping actual execution")
 
             # html_output_path = convert_to_html(output_path)
 
@@ -131,7 +143,10 @@ def build(
             [
                 "jb",
                 "build",
-                "docs",
+                "-W",
+                "-n",
+                "--keep-going",
+                str(docs_dir),
             ]
         )
 
