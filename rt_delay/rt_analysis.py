@@ -393,14 +393,15 @@ class OperatorDayAnalysis:
         self.stop_delay_view = _delays
         return
     
-    def set_filter(self, start_time = None, end_time = None, route_ids = None, direction_id = None, direction = None):
+    def set_filter(self, start_time = None, end_time = None, route_ids = None,
+                   shape_ids = None, direction_id = None, direction = None):
         '''
         start_time, end_time: string %H:%M, for example '11:00' and '14:00'
         route_ids: list or pd.Series of route_ids
         direction_id: 0 or 1
         direction: string 'Northbound', 'Eastbound', 'Southbound', 'Westbound' (experimental)
         '''
-        assert start_time or end_time or route_ids or direction_id or direction, 'must supply at least 1 argument to filter'
+        assert start_time or end_time or route_ids or direction_id or direction or shape_ids, 'must supply at least 1 argument to filter'
         assert not start_time or type(dt.datetime.strptime(start_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not end_time or type(dt.datetime.strptime(end_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not route_ids or type(route_ids) == list or type(route_ids) == type(pd.Series())
@@ -415,6 +416,7 @@ class OperatorDayAnalysis:
         else:
             self.filter['end_time'] = None
         self.filter['route_ids'] = route_ids
+        self.filter['shape_ids'] = shape_ids
         self.filter['direction_id'] = direction_id
         self.filter['direction'] = direction
         if start_time and end_time:
@@ -457,6 +459,8 @@ class OperatorDayAnalysis:
             trips = trips >> filter(_.median_time < self.filter['end_time'])
         if self.filter['route_ids']:
             trips = trips >> filter(_.route_id.isin(self.filter['route_ids']))
+        if self.filter['shape_ids']:
+            trips = trips >> filter(_.shape_id.isin(self.filter['shape_ids']))
         if self.filter['direction_id']:
             trips = trips >> filter(_.direction_id == self.filter['direction_id'])
         if self.filter['direction']:
