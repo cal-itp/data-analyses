@@ -18,7 +18,9 @@ latex:
     targetname: book.tex
 
 launch_buttons:
-  jupyterhub_url: "https://hubtest.k8s.calitp.jarv.us/"
+  binderhub_url: "https://mybinder.org"
+  jupyterhub_url: "https://hubtest.k8s.calitp.jarv.us"
+  thebe: true
 
 repository:
   url: https://github.com/cal-itp/data-analyses/  # Online location of your book

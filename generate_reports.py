@@ -42,7 +42,7 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             # display() calls for markdown break jupyterbook/sphinx
             # https://github.com/executablebooks/jupyter-book/issues/1610
             # so we have to manually parameterize headers in markdown cells; for example, "District {district}" in a
-            # markdown cell vs "display(Markdown(f"District: {district}))" in a code cell
+            # markdown cell vs "display(Markdown(f"## District: {district}))" in a code cell
             if cell.cell_type == "markdown":
                 cell.source = cell.source.format(**kwargs['original_parameters'])
 
