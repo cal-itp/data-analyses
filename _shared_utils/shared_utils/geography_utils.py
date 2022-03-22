@@ -137,10 +137,16 @@ def make_routes_shapefile(ITP_ID_LIST=[], CRS="EPSG:4326", alternate_df=None):
                 pass
             else:
                 # shape_id is None, which will throw up an error later on when there's groupby
-                # So, create shape_id and fill it in with route_id info
-                shapes = shapes.assign(
-                    shape_id=shapes.route_id,
-                )
+                # So, create shape_id and fill it in with route_id info, but only if it's missing
+                # To flag these, shape_id as a column wouldn't even exist.
+                if "shape_id" not in shapes.columns:
+                    shapes = shapes.assign(
+                        shape_id=shapes.route_id,
+                    )
+                else:
+                    # This handles operators where most of their shape_ids are valid
+                    # Let's just drop missing ones.
+                    shapes = shapes[shapes.shape_id.notna()].reset_index(drop=True)
 
         # Make a gdf
         shapes = gpd.GeoDataFrame(
