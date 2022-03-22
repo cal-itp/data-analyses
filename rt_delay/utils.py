@@ -355,24 +355,6 @@ def arrowize_segment(line_geometry, arrow_distance = 15, buffer_distance = 20):
                 return geom
     except:
         return line_geometry.simplify(tolerance = 5).buffer(buffer_distance)
-    
-# def chart_hourly(df, data_col, hour_col, title = ''):
-#     '''
-#     Return a bar chart of endpoint delay or speed grouped by hour
-#     '''
-#     df = df.copy()
-#     df['']
-#     >> group_by(_.hour_col)
-#     sns_plot = (sns.barplot(x=rt_1['Hour'], y=rt_1['Minutes of Delay at Endpoint'], ci=None, 
-#                        palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
-#             .set_title("SJRTD 44 Delay by Time of Day, Feb 8")
-#            )
-#     chart3 = sns_plot.get_figure()
-#     chart3.tight_layout()
-# def chart_scatter(df, data_col, title = ''):
-#     '''
-#     Return a scatter chart showing distribution of speeds or delays
-#     '''
 
 def layer_points(rt_interpolator):
     initial_bk_noise = (rt_interpolator.position_gdf
