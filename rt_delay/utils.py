@@ -150,6 +150,21 @@ def get_vehicle_positions(itp_id, analysis_date):
 
         df.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
         return df
+    
+def get_routes(itp_id, analysis_date):
+    routes_on_date = (tbl.views.gtfs_schedule_fact_daily_feed_routes()
+         >> filter(_.date == analysis_date)
+         >> filter(_.calitp_extracted_at <= analysis_date, _.calitp_deleted_at >= analysis_date)
+        )
+
+    operator_routes = tbl.views.gtfs_schedule_dim_routes() >> filter(_.calitp_itp_id == itp_id)
+    routes_date_joined = (routes_on_date
+         >> inner_join(_, operator_routes >> select(_.route_id, _.route_key, _.route_short_name),
+                       on = 'route_key')
+         >> select(_.route_id, _.route_short_name)
+         >> collect()
+        )
+    return routes_date_joined
 
 def get_trips(itp_id, analysis_date, force_clear=False):
     ''' 
@@ -158,6 +173,8 @@ def get_trips(itp_id, analysis_date, force_clear=False):
     
     Interim function for getting complete trips data for a single operator on a single date of interest.
     To be replaced as RT views are implemented...
+    
+    Updated to include route_short_name from routes
     '''
     
     date_str = analysis_date.strftime('%Y-%m-%d')
@@ -182,8 +199,10 @@ def get_trips(itp_id, analysis_date, force_clear=False):
                   _.shape_id, _.calitp_extracted_at, _.calitp_deleted_at)
         >> collect()
         >> distinct(_.trip_id, _keep_all=True)
+        >> inner_join(_, get_routes(itp_id, analysis_date), on = 'route_id')
             )
-    trips.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
+    if not path or force_clear:
+        trips.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
     return trips
 
 def get_stop_times(itp_id, analysis_date, force_clear = False):
