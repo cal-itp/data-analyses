@@ -6,7 +6,7 @@ import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import humanize
 import nbformat
@@ -32,7 +32,8 @@ RESOLVERS = [
 
 class Analysis(BaseModel):
     notebook: Path
-    params: Dict[str, List]
+    params: Dict[str, List] = {}
+    prepare_only: bool = False
 
 
 class DocsConfig(BaseModel):
@@ -122,14 +123,18 @@ def build(
     for name, analysis in docs_config.notebooks.items():
         if report and name != report:
             continue
-        params = zip(*analysis.params.values())
+        params = list(zip(*analysis.params.values()))
         (output_dir / analysis.notebook.parent).mkdir(parents=True, exist_ok=True)
 
-        for param_set in params:
+        for param_set in params or [{}]:
             params_dict = {k: v for k, v in zip(analysis.params.keys(), param_set)}
-            parameterized_filepath = analysis.notebook.parent / parameterize_filename(
-                analysis.notebook, params_dict
-            )
+
+            if params_dict:
+                parameterized_filepath = analysis.notebook.parent / parameterize_filename(
+                    analysis.notebook, params_dict
+                )
+            else:
+                parameterized_filepath = analysis.notebook
             output_path = output_dir / parameterized_filepath
             typer.echo(
                 f"executing papermill; writing {analysis.notebook} => {output_path}"
@@ -143,7 +148,7 @@ def build(
                     cwd=analysis.notebook.parent,
                     engine_name="markdown",
                     report_mode=True,
-                    prepare_only=prepare_only,
+                    prepare_only=prepare_only or analysis.prepare_only,
                     original_parameters=params_dict,
                 )
             else:
