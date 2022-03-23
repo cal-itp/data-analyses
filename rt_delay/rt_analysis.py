@@ -18,6 +18,8 @@ from tqdm import tqdm
 import numpy as np
 from calitp.tables import tbl
 import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 
 class TripPositionInterpolator:
@@ -33,8 +35,8 @@ class TripPositionInterpolator:
         assert position_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"position and shape CRS must be {CA_NAD83Albers}"
         assert position_gdf.trip_key.nunique() == 1, "non-unique trip key in position gdf"
         
-        trip_info_cols = ['service_date', 'trip_key', 'trip_id', 'route_id', 'shape_id',
-                         'direction_id', 'calitp_itp_id'] + addl_info_cols
+        trip_info_cols = ['service_date', 'trip_key', 'trip_id', 'route_id', 'route_short_name',
+                          'shape_id', 'direction_id', 'calitp_itp_id'] + addl_info_cols
         assert set(trip_info_cols).issubset(position_gdf.columns), f"position_gdf must contain columns: {trip_info_cols}"
         for col in trip_info_cols:
             setattr(self, col, position_gdf[col].iloc[0]) ## allow access to trip_id, etc. using self.trip_id
@@ -143,7 +145,7 @@ class TripPositionInterpolator:
             fig_width = 1000, fig_height = 700,
             zoom = 13,
             centroid = [centroid.y, centroid.x],
-            title=f"Trip Speed Map (Route {self.route_id}, {self.direction}, {self.time_of_day})",
+            title=f"Trip Speed Map (Route {self.route_short_name}, {self.direction}, {self.time_of_day})",
             legend_name = "Speed (miles per hour)",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
@@ -349,7 +351,7 @@ class OperatorDayAnalysis:
         ''' Creates a (filtered) view with delays for each trip at each stop
         '''
         
-        trips = self.trips >> select(_.trip_id, _.route_id, _.direction_id, _.shape_id)
+        trips = self.trips >> select(_.trip_id, _.route_id, _.route_short_name, _.direction_id, _.shape_id)
         trips = trips >> filter(_.trip_id.isin(list(self.position_interpolators.keys())))
         st = self.stop_times >> select(_.trip_key, _.trip_id, _.stop_id, _.stop_sequence, _.arrival_time)
         delays = self.trs >> inner_join(_, st, on = 'stop_id')
@@ -393,19 +395,21 @@ class OperatorDayAnalysis:
         self.stop_delay_view = _delays
         return
     
-    def set_filter(self, start_time = None, end_time = None, route_ids = None,
+    def set_filter(self, start_time = None, end_time = None, route_names = None,
                    shape_ids = None, direction_id = None, direction = None):
         '''
         start_time, end_time: string %H:%M, for example '11:00' and '14:00'
-        route_ids: list or pd.Series of route_ids
-        direction_id: 0 or 1
+        route_names: list or pd.Series of route_names (GTFS route_short_name)
+        direction_id: '0' or '1'
         direction: string 'Northbound', 'Eastbound', 'Southbound', 'Westbound' (experimental)
         '''
-        assert start_time or end_time or route_ids or direction_id or direction or shape_ids, 'must supply at least 1 argument to filter'
+        assert start_time or end_time or route_names or direction_id or direction or shape_ids, 'must supply at least 1 argument to filter'
         assert not start_time or type(dt.datetime.strptime(start_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not end_time or type(dt.datetime.strptime(end_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
-        assert not route_ids or type(route_ids) == list or type(route_ids) == type(pd.Series())
-
+        assert not route_names or type(route_names) == list or type(route_names) == type(pd.Series())
+        if route_names:
+            assert pd.Series(route_names).isin(self.rt_trips.route_short_name).all(), 'at least 1 route not found in self.rt_trips'
+        assert not direction_id or type(direction_id) == str and len(direction_id) == 1
         self.filter = {}
         if start_time:
             self.filter['start_time'] = dt.datetime.strptime(start_time, '%H:%M').time()
@@ -415,8 +419,16 @@ class OperatorDayAnalysis:
             self.filter['end_time'] = dt.datetime.strptime(end_time, '%H:%M').time()
         else:
             self.filter['end_time'] = None
-        self.filter['route_ids'] = route_ids
+        self.filter['route_names'] = route_names
         self.filter['shape_ids'] = shape_ids
+        if shape_ids:
+            shape_trips = (self.rt_trips >> filter(_.shape_id.isin(shape_ids))
+                           >> distinct(_.route_short_name, _keep_all=True)
+                           >> collect()
+                          )
+            self.filter['route_names'] = list(shape_trips.route_short_name)
+            if len(shape_ids) == 1:
+                direction = self.position_interpolators[shape_trips.trip_id.iloc[0]]['rt'].direction
         self.filter['direction_id'] = direction_id
         self.filter['direction'] = direction
         if start_time and end_time:
@@ -426,21 +438,23 @@ class OperatorDayAnalysis:
         else:
             self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
                                          self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
-        if self.filter['route_ids'] and len(self.filter['route_ids']) < 5:
-            rts = 'Route(s) ' + ', '.join(self.filter['route_ids'])
-        elif self.filter['route_ids'] and len(self.filter['route_ids']) > 5:
+        if self.filter['route_names'] and len(self.filter['route_names']) < 5:
+            rts = 'Route(s) ' + ', '.join(self.filter['route_names'])
+        elif self.filter['route_names'] and len(self.filter['route_names']) > 5:
             rts = 'Multiple Routes'
-        elif not self.filter['route_ids']:
+        elif not self.filter['route_names']:
             rts = 'All Routes'
             
         print(self.filter)
         ## properly format for pm peak, TODO add other periods
         if start_time and end_time and start_time == '15:00' and end_time == '19:00':
-            self.filter_formatted = f', {rts}, PM Peak, {self.display_date}'
+            period = 'PM Peak'
         elif not start_time and not end_time:
-            self.filter_formatted = f', {rts}, All Day, {self.display_date}'
+            period = 'All Day'
         else:
-            self.filter_formatted = f', {rts}, {start_time}–{end_time}, {self.display_date}'
+            period = f'{start_time}–{end_time}'
+        elements_ordered = [rts, direction, period, self.display_date]
+        self.filter_formatted = ', ' + ', '.join([str(x) for x in elements_ordered if x])
             
     def reset_filter(self):
         self.filter = None
@@ -457,8 +471,8 @@ class OperatorDayAnalysis:
             trips = trips >> filter(_.median_time > self.filter['start_time'])
         if self.filter['end_time']:
             trips = trips >> filter(_.median_time < self.filter['end_time'])
-        if self.filter['route_ids']:
-            trips = trips >> filter(_.route_id.isin(self.filter['route_ids']))
+        if self.filter['route_names']:
+            trips = trips >> filter(_.route_short_name.isin(self.filter['route_names']))
         if self.filter['shape_ids']:
             trips = trips >> filter(_.shape_id.isin(self.filter['shape_ids']))
         if self.filter['direction_id']:
@@ -592,7 +606,7 @@ class OperatorDayAnalysis:
         popup_dict = {
             how_speed_col[how]: "Speed (miles per hour)",
             "shape_meters": "Distance along route (meters)",
-            "route_id": "Route",
+            "route_short_name": "Route",
             "shape_id": "Shape ID",
             "direction_id": "Direction ID",
             "stop_id": "Next Stop ID",
@@ -657,3 +671,29 @@ class OperatorDayAnalysis:
         chart = sns_plot.get_figure()
         chart.tight_layout()
         return chart
+    
+    def chart_variability(self, min_stop_seq = None, max_stop_seq = None):
+        '''
+        Chart trip speed variability, as speed between each stop segments.
+        stop_sequence_range: (min_stop, max_stop)
+        '''
+        sns.set(rc = {'figure.figsize':(13,6)})
+        assert (self.filter['shape_ids']
+                and len(self.filter['shape_ids']) == 1
+                and self.filter['direction_id']
+               ), 'must filter to a single shape_id and direction_id'
+        to_chart = self._filter(self.stop_segment_speed_view.copy())
+        if min_stop_seq:
+            to_chart = to_chart >> filter(_.stop_sequence >= min_stop_seq)
+        if max_stop_seq:
+            to_chart = to_chart >> filter(_.stop_sequence <= max_stop_seq)
+        to_chart.stop_name = to_chart.stop_name.str.split('&').map(lambda x: x[-1])
+        to_chart = to_chart.rename(columns={'speed_mph': 'Segement Speed (mph)',
+                                      'delay_chg_sec': 'Increase in Delay (seconds)',
+                                      'stop_sequence': 'Stop Segment ID',
+                                      'stop_name': 'Segment Cross Street'})
+        plt.xticks(rotation=65)
+        variability_plt = sns.swarmplot(x = to_chart['Segment Cross Street'], y=to_chart['Segement Speed (mph)'],
+              palette=shared_utils.calitp_color_palette.CALITP_CATEGORY_BRIGHT_COLORS,
+             ).set_title(f"{self.calitp_agency_name} Speed Variability by Stop Segment{self.filter_formatted}")
+        return variability_plt
