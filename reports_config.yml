@@ -4,3 +4,6 @@ dla:
     district:
       - 4
       - 7
+dla_interactive:
+  notebook: ./dla/e76_obligated_funds/interactive_functions_1.ipynb
+  prepare_only: yes
