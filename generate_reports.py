@@ -16,9 +16,18 @@ from nbconvert import HTMLExporter
 from nbformat.v4 import new_output
 from papermill.engines import NBClientEngine, papermill_engines
 from pydantic import BaseModel
+import humanize
 
 app = typer.Typer()
 
+
+def district_name(district, **_):
+    return humanize.apnumber(district).title()
+
+
+RESOLVERS = [
+    district_name,
+]
 
 class Analysis(BaseModel):
     notebook: Path
@@ -37,6 +46,11 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
 
         assert 'original_parameters' in kwargs
 
+        params = kwargs['original_parameters']
+
+        for func in RESOLVERS:
+            params[func.__name__] = func(**kwargs['original_parameters'])
+
         for cell in nb_man.nb.cells:
 
             # display() calls for markdown break jupyterbook/sphinx
@@ -44,7 +58,7 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             # so we have to manually parameterize headers in markdown cells; for example, "District {district}" in a
             # markdown cell vs "display(Markdown(f"## District: {district}))" in a code cell
             if cell.cell_type == "markdown":
-                cell.source = cell.source.format(**kwargs['original_parameters'])
+                cell.source = cell.source.format(**params)
 
             # hide input (i.e. code) for all cells
             if cell.cell_type == "code":
@@ -94,6 +108,7 @@ def build(
     docs_dir: Path = "./docs/",
     report: str = None,
     execute: bool = True,
+prepare_only: bool = False,
 ) -> None:
     with open(config) as f:
         docs_config = DocsConfig(notebooks=yaml.safe_load(f))
@@ -127,6 +142,7 @@ def build(
                     cwd=analysis.notebook.parent,
                     engine_name="markdown",
                     report_mode=True,
+                    prepare_only=prepare_only,
                     original_parameters=params_dict,
                 )
             else:
