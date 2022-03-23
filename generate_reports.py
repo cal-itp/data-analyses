@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
+import humanize
 import nbformat
 import papermill as pm
 import typer
@@ -16,7 +17,6 @@ from nbconvert import HTMLExporter
 from nbformat.v4 import new_output
 from papermill.engines import NBClientEngine, papermill_engines
 from pydantic import BaseModel
-import humanize
 
 app = typer.Typer()
 
@@ -28,6 +28,7 @@ def district_name(district, **_):
 RESOLVERS = [
     district_name,
 ]
+
 
 class Analysis(BaseModel):
     notebook: Path
@@ -44,12 +45,12 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
         # call the papermill execution engine:
         super().execute_managed_notebook(nb_man, kernel_name, **kwargs)
 
-        assert 'original_parameters' in kwargs
+        assert "original_parameters" in kwargs
 
-        params = kwargs['original_parameters']
+        params = kwargs["original_parameters"]
 
         for func in RESOLVERS:
-            params[func.__name__] = func(**kwargs['original_parameters'])
+            params[func.__name__] = func(**kwargs["original_parameters"])
 
         for cell in nb_man.nb.cells:
 
@@ -108,7 +109,7 @@ def build(
     docs_dir: Path = "./docs/",
     report: str = None,
     execute: bool = True,
-prepare_only: bool = False,
+    prepare_only: bool = False,
 ) -> None:
     with open(config) as f:
         docs_config = DocsConfig(notebooks=yaml.safe_load(f))
@@ -150,7 +151,9 @@ prepare_only: bool = False,
 
             # html_output_path = convert_to_html(output_path)
 
-            docs_output_path = docs_dir / parameterized_filepath #.with_suffix(".html")
+            docs_output_path = (
+                docs_dir / parameterized_filepath
+            )  # .with_suffix(".html")
             docs_output_path.parent.mkdir(parents=True, exist_ok=True)
             typer.echo(f"placing in docs; {output_path} => {docs_output_path}")
             shutil.copy(output_path, docs_output_path)
