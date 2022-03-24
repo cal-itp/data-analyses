@@ -288,6 +288,7 @@ class OperatorDayAnalysis:
         self.vp_obs_by_trip = self.vehicle_positions >> count(_.trip_id) >> arrange(-_.n)
         self._generate_position_interpolators() ## comment out for first test
         self.rt_trips = self.trips.copy() >> filter(_.trip_id.isin(self.position_interpolators.keys()))
+        self.debug_dict['rt_trips'] = self.rt_trips
         self.rt_trips['median_time'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].median_time.time(), axis = 1)
         self.rt_trips['direction'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].direction, axis = 1)
         self.rt_trips['mean_speed_mph'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].mean_speed_mph, axis = 1)
@@ -313,6 +314,7 @@ class OperatorDayAnalysis:
              >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
              >> collect()
             ).calitp_agency_name.iloc[0]
+        self.rt_trips['calitp_agency_name'] = self.calitp_agency_name
         
     def _generate_position_interpolators(self):
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
