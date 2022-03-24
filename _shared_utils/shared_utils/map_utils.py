@@ -416,7 +416,7 @@ def make_ipyleaflet_choropleth_map(
             return
         html.value = f"""
         <b>{geometry_col.title()}: </b>{id} <br>
-        <b>{choropleth_dict['name']}: </b> {properties[plot_col]:,g} <br>
+        <b>{choropleth_dict['layer_name']}: </b> {properties[plot_col]:,g} <br>
         """
 
     layer.on_hover(on_hover)
