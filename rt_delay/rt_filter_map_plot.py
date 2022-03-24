@@ -25,6 +25,8 @@ class RtFilterMapper:
     Collects filtering and mapping functions, init with stop segment speed view and rt_trips
     '''
     def __init__(self, rt_trips, segment_speed_view):
+        segment_speed_view = segment_speed_view >> inner_join(_, rt_trips >> select(_.route_id, _.route_short_name),
+                                                             on = 'route_id')
         self.rt_trips = rt_trips
         self.stop_segment_speed_view = segment_speed_view
         self.stop_segment_speed_view = self.stop_segment_speed_view >> filter(_.speed_mph < 70)
