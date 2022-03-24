@@ -18,7 +18,7 @@ from nbformat.v4 import new_output
 from papermill.engines import NBClientEngine, papermill_engines
 from pydantic import BaseModel
 
-app = typer.Typer()
+app = typer.Typer(help="CLI to tie together papermill and jupyter book")
 
 
 def district_name(district, **_):
@@ -108,10 +108,27 @@ def build(
     config: Path = "./reports_config.yml",
     output_dir: Path = "./target/",
     docs_dir: Path = "./docs/",
-    report: str = None,
-    execute: bool = True,
-    prepare_only: bool = False,
+    report: str = typer.Option(
+        None,
+        help="If provided, the name of the report to build.",
+    ),
+    execute_papermill: bool = typer.Option(
+        True,
+        help="If false, will skip calls to papermill.",
+    ),
+    prepare_only: bool = typer.Option(
+        False,
+        help="Pass-through flag to papermill; if true, papermill will not actually execute cells.",
+    ),
 ) -> None:
+    """
+    Builds a static site from parameterized notebooks as defined in the config file (default ./reports_config.yml).
+
+    Use the --report flag to only build specific reports.
+
+    For example:
+    $ python generate_reports.py build --report=dla
+    """
     with open(config) as f:
         docs_config = DocsConfig(notebooks=yaml.safe_load(f))
 
@@ -130,8 +147,9 @@ def build(
             params_dict = {k: v for k, v in zip(analysis.params.keys(), param_set)}
 
             if params_dict:
-                parameterized_filepath = analysis.notebook.parent / parameterize_filename(
-                    analysis.notebook, params_dict
+                parameterized_filepath = (
+                    analysis.notebook.parent
+                    / parameterize_filename(analysis.notebook, params_dict)
                 )
             else:
                 parameterized_filepath = analysis.notebook
@@ -140,7 +158,7 @@ def build(
                 f"executing papermill; writing {analysis.notebook} => {output_path}"
             )
 
-            if execute:
+            if execute_papermill:
                 pm.execute_notebook(
                     input_path=analysis.notebook,
                     output_path=output_path,
@@ -152,7 +170,7 @@ def build(
                     original_parameters=params_dict,
                 )
             else:
-                typer.echo(f"execute={execute} so we are skipping actual execution")
+                typer.echo(f"execute_papermill={execute_papermill} so we are skipping actual execution")
 
             # html_output_path = convert_to_html(output_path)
 
