@@ -445,7 +445,7 @@ class OperatorDayAnalysis:
         elif not self.filter['route_names']:
             rts = 'All Routes'
             
-        print(self.filter)
+        # print(self.filter)
         ## properly format for pm peak, TODO add other periods
         if start_time and end_time and start_time == '15:00' and end_time == '19:00':
             period = 'PM Peak'
@@ -455,6 +455,7 @@ class OperatorDayAnalysis:
             period = f'{start_time}–{end_time}'
         elements_ordered = [rts, direction, period, self.display_date]
         self.filter_formatted = ', ' + ', '.join([str(x) for x in elements_ordered if x])
+        return self.filter
             
     def reset_filter(self):
         self.filter = None
@@ -679,9 +680,7 @@ class OperatorDayAnalysis:
         '''
         sns.set(rc = {'figure.figsize':(13,6)})
         assert (self.filter['shape_ids']
-                and len(self.filter['shape_ids']) == 1
-                and self.filter['direction_id']
-               ), 'must filter to a single shape_id and direction_id'
+                and len(self.filter['shape_ids']) == 1), 'must filter to a single shape_id'
         to_chart = self._filter(self.stop_segment_speed_view.copy())
         if min_stop_seq:
             to_chart = to_chart >> filter(_.stop_sequence >= min_stop_seq)
