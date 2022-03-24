@@ -104,6 +104,8 @@ def clean_data(df):
     #replace Non-MPO formatting
     df.mpo.replace(['NONMPO'], ['NON-MPO'], inplace=True)
     
+    df['process_days']= (df['dist_processing_days'] + df['hq_processing_days'] + df['fhwa_processing_days'])
+    
     return df
 
 
@@ -292,7 +294,7 @@ def add_categories(df):
                              'sidewalk', 'side walk', 'Cl ', 'trail'
                             ]
     TRANSIT = ['bus', 'metro', 'station', #Station comes up a few times as a charging station and also as a train station
-               'transit','fare', 'brt', 'yarts', 'rail'
+               'transit','fare', 'brt', 'yarts', ' rail'
                # , 'station' in description and 'charging station' not in description
               ] 
     BRIDGE = ["bridge", 'viaduct']
