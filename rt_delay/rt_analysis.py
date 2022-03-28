@@ -268,7 +268,8 @@ class OperatorDayAnalysis:
                                     geometry=gpd.points_from_xy(self.trips_positions_joined.vehicle_longitude,
                                                                 self.trips_positions_joined.vehicle_latitude),
                                     crs=WGS84).to_crs(CA_NAD83Albers)
-        self.routelines = get_routelines(self.calitp_itp_id)
+        self.routelines = get_routelines(self.calitp_itp_id, self.analysis_date)
+        self.routelines = self.routelines.dropna() ## invalid geos are nones in new df...
         assert type(self.routelines) == type(gpd.GeoDataFrame()) and not self.routelines.empty, 'routelines must not be empty'
         ## end of caching...
         self.trs = self.trips >> select(_.shape_id, _.trip_id)
@@ -339,9 +340,7 @@ class OperatorDayAnalysis:
                                                            # 'schedule': ScheduleInterpolator(st_trip_joined, self.routelines) ## probably need to save memory for now ?
                                                        }
             except AssertionError as e:
-            # except Exception as e:
-                # print(e)
-                print(trip_id)
+                continue
             if type(self.pbar) != type(None):
                 self.pbar.update()
         if type(self.pbar) != type(None):
