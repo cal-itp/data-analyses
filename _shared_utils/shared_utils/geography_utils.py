@@ -2,15 +2,12 @@
 Utility functions for geospatial data.
 Some functions for dealing with census tract or other geographic unit dfs.
 """
-import os
-
 import geopandas as gpd
 import pandas as pd
 import shapely
+from calitp import query_sql
 from calitp.tables import tbl
 from siuba import *
-
-os.environ["CALITP_BQ_MAX_BYTES"] = str(50_000_000_000)
 
 WGS84 = "EPSG:4326"
 CA_StatePlane = "EPSG:2229"  # units are in feet
@@ -109,7 +106,57 @@ def attach_geometry(df, geometry_df, merge_col=["Tract"], join="left"):
     return gdf
 
 
-def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326"):
+# Function to construct the SQL condition for make_routes_gdf()
+def construct_condition(SELECTED_DATE, INCLUDE_ITP_LIST):
+    def unpack_list_make_or_statement(INCLUDE_ITP_LIST):
+        new_cond = ""
+
+        for i in range(0, len(INCLUDE_ITP_LIST)):
+            cond = f"calitp_itp_id = {INCLUDE_ITP_LIST[i]}"
+            if i == 0:
+                new_cond = cond
+            else:
+                new_cond = new_cond + " OR " + cond
+
+        new_cond = "(" + new_cond + ")"
+
+        return new_cond
+
+    operator_or_statement = unpack_list_make_or_statement(INCLUDE_ITP_LIST)
+
+    date_condition = (
+        f'(calitp_extracted_at <= "{SELECTED_DATE}" AND '
+        f'calitp_deleted_at > "{SELECTED_DATE}")'
+    )
+
+    condition = operator_or_statement + " AND " + date_condition
+
+    return condition
+
+
+# Run the sql query with the condition in long-form
+def create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST):
+    condition = construct_condition(SELECTED_DATE, ITP_ID_LIST)
+
+    sql_statement = f"""
+        SELECT
+            calitp_itp_id,
+            calitp_url_number,
+            shape_id,
+            pt_array
+
+        FROM `views.gtfs_schedule_dim_shapes_geo`
+
+        WHERE
+            {condition}
+        """
+
+    df = query_sql(sql_statement)
+
+    return df
+
+
+def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None):
     """
     Parameters:
 
@@ -119,26 +166,26 @@ def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326"):
         Defaults to EPSG:4326 (WGS84)
     EXCLUDE_ITP_ID: list
             Defaults to exclude ITP_ID==200, which is an aggregate Bay Area feed
-    INCLUDE_ITP_ID: list or "all"
+    ITP_ID_LIST: list or None
             Defaults to all ITP_IDs except ITP_ID==200.
             For a subset of operators, include a list, such as [182, 100].
-    All operators for selected date: ~x minutes
+
+    All operators for selected date: ~11 minutes
     """
 
-    df = (
-        tbl.views.gtfs_schedule_dim_shapes()
-        >> filter(
-            _.calitp_extracted_at <= SELECTED_DATE, _.calitp_deleted_at > SELECTED_DATE
+    if ITP_ID_LIST is None:
+        df = (
+            tbl.views.gtfs_schedule_dim_shapes_geo()
+            >> filter(
+                _.calitp_extracted_at <= SELECTED_DATE,
+                _.calitp_deleted_at > SELECTED_DATE,
+            )
+            >> filter(_.calitp_itp_id != 200)
+            >> select(_.calitp_itp_id, _.calitp_url_number, _.shape_id, _.pt_array)
+            >> collect()
         )
-        >> filter(_.calitp_itp_id != 200)
-        >> select(_.calitp_itp_id, _.calitp_url_number, _.shape_id)
-        >> inner_join(
-            _,
-            tbl.views.gtfs_schedule_dim_shapes_geo(),
-            ["calitp_itp_id", "calitp_url_number", "shape_id"],
-        )
-        >> collect()
-    )
+    else:
+        df = create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST)
 
     # Laurie's example: https://github.com/cal-itp/data-analyses/blob/752eb5639771cb2cd5f072f70a06effd232f5f22/gtfs_shapes_geo_examples/example_shapes_geo_handling.ipynb
     # have to convert to linestring
