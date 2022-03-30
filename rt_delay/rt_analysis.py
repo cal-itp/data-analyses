@@ -57,10 +57,9 @@ class TripPositionInterpolator:
         position along the shape and calls _linear_reference() to calculate speeds+times for valid positions
         shape_gdf: a gdf with line geometries for each shape
         '''
-        self.shape = (shape_gdf
-                        >> filter(_.shape_id == self.shape_id)
-                        >> select(_.shape_id, _.geometry)).geometry.iloc[0]
-        assert self.shape, f'shape empty for trip {self.trip_id}!'
+        shape_geo = (shape_gdf >> filter(_.shape_id == self.shape_id)).geometry
+        assert len(shape_geo) > 0 and shape_geo.iloc[0], f'shape empty for trip {self.trip_id}!'
+        self.shape = shape_geo.iloc[0]
         self.position_gdf['shape_meters'] = (self.position_gdf.geometry
                                 .apply(lambda x: self.shape.project(x)))
         self._linear_reference()
