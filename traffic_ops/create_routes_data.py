@@ -18,7 +18,7 @@ from calitp import query_sql
 from datetime import datetime
 from siuba import *
 
-import prep_data
+import prep_data2
 import utils
 
 DATA_PATH = prep_data.DATA_PATH
@@ -122,7 +122,6 @@ def make_routes_shapefile():
     stops = pd.read_parquet(f"{DATA_PATH}stops.parquet")
     trips = pd.read_parquet(f"{DATA_PATH}trips.parquet")
     route_info = pd.read_parquet(f"{DATA_PATH}route_info.parquet")
-    agencies = pd.read_parquet(f"{DATA_PATH}agencies.parquet")
     routes = gpd.read_parquet(f"{DATA_PATH}routes.parquet")
     latest_itp_id = pd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
