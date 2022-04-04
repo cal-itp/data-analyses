@@ -294,10 +294,10 @@ def get_stops(itp_id, analysis_date, force_clear = False):
     shared_utils.utils.geoparquet_gcs_export(stops, export_path, filename[:-8])
     return stops
 
-def get_routelines(itp_id, analysis_date):
+def get_routelines(itp_id, analysis_date, force_clear = False):
     
     date_str = analysis_date.strftime('%Y-%m-%d')
-    filename = f'routelines_{itp_id}_{date_str}'
+    filename = f'routelines_{itp_id}_{date_str}.parquet'
     path = check_cached(filename)
     if path and not force_clear:
         print('found parquet')
