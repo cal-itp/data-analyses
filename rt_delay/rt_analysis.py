@@ -379,6 +379,7 @@ class OperatorDayAnalysis:
                 # self.debug_dict[f'{trip_id}_times'] = _delay
                 _delay['delay'] = _delay.actual_time - _delay.arrival_time
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
+                _delay['delay_seconds'] = _delay.delay.map(lambda x: x.seconds)
                 _delays = pd.concat((_delays, _delay))
                 # self.debug_dict[f'{trip_id}_delay'] = _delay
                 # return
@@ -511,7 +512,7 @@ class OperatorDayAnalysis:
                 if this_shape_direction.empty:
                     print(f'{shape_id}_{direction_id}_ empty!')
                     continue
-                self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
+                # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
                 stop_speeds = (this_shape_direction
                              >> group_by(_.trip_key)
                              >> arrange(_.stop_sequence)
@@ -519,11 +520,9 @@ class OperatorDayAnalysis:
                              >> mutate(last_loc = _.shape_meters.shift(1))
                              >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
                              >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
-                             >> mutate(last_delay = _.delay.shift(1))
-                             >> mutate(delay_chg_sec = (_.delay - _.last_delay)
-                                       .map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2)
-                                      )
-                             >> mutate(delay_sec = _.delay.map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2))
+                             # >> mutate(last_delay = _.delay.shift(1))
+                             >> mutate(delay_chg_sec = (_.delay_seconds - _.delay_seconds.shift(1)))
+                             # >> mutate(delay_sec = _.delay.map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2))
                              >> ungroup()
                             )
                 if stop_speeds.empty:
@@ -551,7 +550,7 @@ class OperatorDayAnalysis:
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
                         )
-                    self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
+                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
                     assert not stop_speeds.empty, 'stop speeds gdf is empty!'
                 except Exception as e:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
@@ -615,7 +614,7 @@ class OperatorDayAnalysis:
             "trips_per_hour": "Trips per Hour" 
         }
         if singletrip:
-            popup_dict["delay_sec"] = "Current Delay (seconds)"
+            popup_dict["delay_seconds"] = "Current Delay (seconds)"
             popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
 
         g = make_folium_choropleth_map(
