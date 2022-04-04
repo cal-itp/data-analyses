@@ -12,13 +12,13 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 
 from calitp.tables import tbl
 from calitp import query_sql
+from datetime import datetime
 from siuba import *
 
 import utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 DATA_PATH = "./data/test/"
-
 
 stop_cols = ["calitp_itp_id", "stop_id", 
              "stop_lat", "stop_lon", 
@@ -30,10 +30,9 @@ trip_cols = ["calitp_itp_id", "route_id", "shape_id"]
 route_cols = ["calitp_itp_id", "route_id", 
               "route_short_name", "route_long_name"]
 
-shape_cols = ["calitp_itp_id", "calitp_url_number", "shape_id", "pt_array"]
-
 
 def grab_selected_date(SELECTED_DATE):
+    # Always exclude ITP_ID = 200!
     # Stops query
     dim_stops = (tbl.views.gtfs_schedule_dim_stops()
                  >> select(*stop_cols, _.stop_key)
@@ -42,6 +41,7 @@ def grab_selected_date(SELECTED_DATE):
 
     stops = (tbl.views.gtfs_schedule_fact_daily_feed_stops()
              >> filter(_.date == SELECTED_DATE)
+             >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
              >> select(_.stop_key, _.date)
              >> inner_join(_, dim_stops, on = "stop_key")
              >> select(*stop_cols)
@@ -58,6 +58,7 @@ def grab_selected_date(SELECTED_DATE):
     trips = (tbl.views.gtfs_schedule_fact_daily_trips()
              >> filter(_.service_date == SELECTED_DATE, 
                        _.is_in_service==True)
+             >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
              >> select(_.trip_key, _.service_date)
              >> inner_join(_, dim_trips, on = "trip_key")
              >> select(*trip_cols)
@@ -74,6 +75,7 @@ def grab_selected_date(SELECTED_DATE):
 
     route_info = (tbl.views.gtfs_schedule_fact_daily_feed_routes()
                   >> filter(_.date == SELECTED_DATE)
+                  >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
                   >> select(_.route_key, _.date)
                   >> inner_join(_, dim_routes, on = "route_key")
                   >> select(*route_cols)
@@ -86,6 +88,7 @@ def grab_selected_date(SELECTED_DATE):
 
 
 def create_local_parquets(SELECTED_DATE):
+    time0 = datetime.now()
     stops, trips, route_info = grab_selected_date(SELECTED_DATE)
         
     # Filter to the ITP_IDs present in the latest agencies.yml
@@ -96,22 +99,29 @@ def create_local_parquets(SELECTED_DATE):
                      >> collect()
                     )
     
+    stops.to_parquet(f"{DATA_PATH}stops.parquet")
+    trips.to_parquet(f"{DATA_PATH}trips.parquet")
+    route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
+    latest_itp_id.to_parquet(f"{DATA_PATH}latest_itp_id.parquet")
+    
     time1 = datetime.now()
     print(f"Part 1: Queries and create local parquets: {time1-time0}")
 
     routes = utils.make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None)
+    routes_unique = (routes[(routes.calitp_itp_id != 0) & 
+                            (routes.calitp_itp_id != 20)]
+                     .sort_values(["calitp_itp_id", "calitp_url_number", "shape_id"])
+                     .drop_duplicates(subset=["calitp_itp_id", "shape_id"])
+                     .drop(columns = ["calitp_url_number", "pt_array"])
+                     .sort_values(["calitp_itp_id", "shape_id"])
+                     .reset_index(drop=True)
+    )
+    routes_unique.to_parquet(f"{DATA_PATH}routes.parquet")
     
     time2 = datetime.now()
     print(f"Part 2: Shapes: {time2-time1}")
-    
-    # Write parquets locally
-    for f in [stops, trips, route_info, latest_itp_id, routes]:
-        f.to_parquet(f"{DATA_PATH}{f}.parquet")
-    
-    time3 = datetime.now()
-    print(f"Part 3: export local parquets {time3-time2}")
-    
-    print(f"Total execution time: {time3-time0}") 
+            
+    print(f"Total execution time: {time2-time0}") 
     
     
 # Function to delete local parquets
@@ -217,3 +227,7 @@ def filter_latest_itp_id(df, latest_itp_id_df, itp_id_col = "calitp_itp_id"):
     print(f"# rows dropped: {only_latest_id - starting_length}")
     
     return df
+
+if __name__ == "__main__":
+    SELECTED_DATE = "2022-3-15"
+    create_local_parquets(SELECTED_DATE)
