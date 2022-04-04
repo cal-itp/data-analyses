@@ -24,12 +24,12 @@ class RtFilterMapper:
     '''
     Collects filtering and mapping functions, init with stop segment speed view and rt_trips
     '''
-    def __init__(self, rt_trips, segment_speed_view):
-        segment_speed_view = segment_speed_view >> inner_join(_, rt_trips >> select(_.route_id, _.route_short_name),
-                                                             on = 'route_id')
+    def __init__(self, rt_trips, stop_delay_view,
+                 routelines, pbar = None):
+        self.pbar = pbar
         self.rt_trips = rt_trips
-        self.stop_segment_speed_view = segment_speed_view
-        self.stop_segment_speed_view = self.stop_segment_speed_view >> filter(_.speed_mph < 70)
+        self.stop_delay_view = stop_delay_view
+        self.routelines = routelines
         self.calitp_agency_name = rt_trips.calitp_agency_name.iloc[0]
         self.analysis_date = rt_trips.service_date.iloc[0]
         self.display_date = self.analysis_date.strftime('%b %d (%a)')
@@ -77,8 +77,8 @@ class RtFilterMapper:
                                  - dt.datetime.combine(self.analysis_date, self.filter['start_time'])
                                 ).seconds / 60**2
         else:
-            self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
-                                         self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
+            self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
+                                         self.stop_delay_view.actual_time.min()).seconds / 60**2
         if self.filter['route_names'] and len(self.filter['route_names']) < 5:
             rts = 'Route(s) ' + ', '.join(self.filter['route_names'])
         elif self.filter['route_names'] and len(self.filter['route_names']) > 5:
@@ -124,12 +124,100 @@ class RtFilterMapper:
     
 ## TODO, optionally port over segment speed map from rt_analysis, would require stop delay view
 ## alternatively, simply export full day segment speed view
+
+    def segment_speed_map(self, segments = 'stops', how = 'average',
+                          colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550]):
+        ''' Generate a map of segment speeds aggregated across all trips for each shape, either as averages
+        or 20th percentile speeds.
+        
+        segments: 'stops' or 'detailed' (detailed not yet implemented)
+        how: 'average' or 'low_speeds'
+        colorscale: branca.colormap
+        size: [x, y]
+        
+        '''
+        assert segments in ['stops', 'detailed']
+        assert how in ['average', 'low_speeds']
+        
+        gdf = self._filter(self.stop_delay_view)
+        all_stop_speeds = gpd.GeoDataFrame()
+        # for shape_id in tqdm(gdf.shape_id.unique()): trying self.pbar.update...
+        if type(self.pbar) != type(None):
+            self.pbar.reset(total=len(gdf.shape_id.unique()))
+            self.pbar.desc = 'Generating segment speeds'
+        for shape_id in gdf.shape_id.unique():
+            for direction_id in gdf.direction_id.unique():
+                this_shape_direction = (gdf
+                             >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
+                if this_shape_direction.empty:
+                    print(f'{shape_id}_{direction_id}_ empty!')
+                    continue
+                # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
+                stop_speeds = (this_shape_direction
+                             >> group_by(_.trip_key)
+                             >> arrange(_.stop_sequence)
+                             >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
+                             >> mutate(last_loc = _.shape_meters.shift(1))
+                             >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
+                             >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
+                             # >> mutate(last_delay = _.delay.shift(1))
+                             >> mutate(delay_chg_sec = (_.delay_seconds - _.delay_seconds.shift(1)))
+                             # >> mutate(delay_sec = _.delay.map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2))
+                             >> ungroup()
+                            )
+                if stop_speeds.empty:
+                    # print(f'{shape_id}_{direction_id}_st_spd empty!')
+                    continue
+                # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
+                stop_speeds.geometry = stop_speeds.apply(
+                    lambda x: shapely.ops.substring(
+                                (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
+                                x.last_loc,
+                                x.shape_meters),
+                                                axis = 1)
+                stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
+
+                try:
+                    stop_speeds = (stop_speeds
+                         >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
+                         >> group_by(_.stop_sequence)
+                         >> mutate(n_trips = _.stop_sequence.size,
+                                    avg_mph = _.speed_mph.mean(),
+                                  _20p_mph = _.speed_mph.quantile(.2),
+                                   trips_per_hour = _.n_trips / self.hr_duration_in_filter
+                                  )
+                         # >> distinct(_.stop_sequence, _keep_all=True) ## comment out to enable speed distribution analysis
+                         >> ungroup()
+                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
+                        )
+                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
+                    assert not stop_speeds.empty, 'stop speeds gdf is empty!'
+                except Exception as e:
+                    print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
+                    print(e)
+                    continue
+
+                if stop_speeds.avg_mph.max() > 80:
+                    print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                    stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
+                if stop_speeds._20p_mph.min() < 0:
+                    print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                    stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
+                all_stop_speeds = pd.concat((all_stop_speeds, stop_speeds))
+                
+                if type(self.pbar) != type(None):
+                    self.pbar.update()
+            if type(self.pbar) != type(None):
+                self.pbar.refresh
+
+        self.stop_segment_speed_view = all_stop_speeds
+        return self._show_speed_map(how = how, colorscale = colorscale, size = size)
     
-    def show_speed_map(self, how = 'average',
+    def _show_speed_map(self, how = 'average',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550]):
         
         gdf = self.stop_segment_speed_view.copy()
-        gdf = self._filter(gdf)
+        # gdf = self._filter(gdf)
         # print(gdf.dtypes)
         singletrip = gdf.trip_id.nunique() == 1
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
