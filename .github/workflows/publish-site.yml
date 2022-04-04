@@ -52,8 +52,8 @@ jobs:
         npm install -g netlify-cli
         netlify deploy --dir=docs/_build/html --alias=${GITHUB_REPOSITORY#*/}-${PR_NUMBER}
       env:
-        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_PREVIEW_APP_SITE_ID }}
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PREVIEW_APP_AUTH_TOKEN }}
         PR_NUMBER: ${{ github.event.number }}
 
     - name: Add netlify link PR comment
