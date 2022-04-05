@@ -256,7 +256,7 @@ class RtFilterMapper:
             "trips_per_hour": "Trips per Hour" 
         }
         if singletrip:
-            popup_dict["delay_sec"] = "Current Delay (seconds)"
+            popup_dict["delay_seconds"] = "Current Delay (seconds)"
             popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
 
         g = make_folium_choropleth_map(
