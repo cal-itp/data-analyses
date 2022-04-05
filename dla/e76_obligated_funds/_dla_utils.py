@@ -162,6 +162,81 @@ def get_nunique(df, col, groupby_col):
     
     return counts
 
+
+
+def project_cat(df, i):
+    subset = df >> filter(_[i] == 1)
+    subset_2 = (
+        (find_top(subset))
+        >> filter(_.variable == "primary_agency_name")
+        >> select(_.value, _.count)
+    ).head(5)
+    subset_2["Percent of Category"] = ((subset_2["count"]) / (len(subset))) * 100
+    subset_2 = subset_2.rename(
+        columns={"value": "Agency", "count": f"{labeling(i)} Obligations"}
+    )
+
+    # generate chart:
+
+    subset_3 = (
+        (
+            subset.groupby(["primary_agency_name"])
+            .agg(
+                {
+                    i: "sum",
+                    "process_days": "mean",
+                    "adjusted_total_requested": "mean",
+                    "adjusted_fed_requested": "mean",
+                    "adjusted_ac_requested": "mean",
+                }
+            )
+            .reset_index()
+        )
+        >> arrange(-_[i])
+    ).head(5)
+
+    subset_3 = subset_3.rename(
+        columns={
+            "primary_agency_name": "Agency",
+            "adjusted_total_requested": "Total Requested",
+            "adjusted_fed_requested": "Fed Requested",
+            "adjusted_ac_requested": "AC Requested",
+        }
+    )
+
+    subset_4 = pd.melt(
+        subset_3,
+        id_vars=["Agency"],
+        value_vars=["Total Requested", "Fed Requested", "AC Requested"],
+        var_name="Categories",
+        value_name="Funding Amount",
+    )
+
+    chart = (
+        alt.Chart(subset_4)
+        .mark_bar()
+        .encode(
+            x=alt.X(
+                "Funding Amount",
+                axis=alt.Axis(format="$.2s", title="Obligated Funding ($2021)"),
+            ),
+            y=alt.Y("Agency"),
+            color=alt.Color(
+                "Categories:N",
+                scale=alt.Scale(range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+            ),
+            row="Categories:N",
+        )
+    )
+
+    chart = add_tooltip(chart, "Agency", "Funding Amount")
+
+    display(
+        HTML(f"<strong>Top Agencies using {labeling(i)} Projects</strong>")
+    )
+    display(subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"}))
+    display(chart)
+
 """
 Labeling
 """
