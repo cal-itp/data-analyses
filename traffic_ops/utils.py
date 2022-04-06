@@ -98,7 +98,9 @@ def create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST):
             calitp_url_number,
             shape_id,
             pt_array
+
         FROM `views.gtfs_schedule_dim_shapes_geo`
+
         WHERE
             {condition}
         """
@@ -111,15 +113,15 @@ def create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST):
 def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None):
     """
     Parameters:
+
     SELECTED_DATE: str or datetime
         Ex: '2022-1-1' or datetime.date(2022, 1, 1)
     CRS: str, a projected coordinate reference system.
         Defaults to EPSG:4326 (WGS84)
-    EXCLUDE_ITP_ID: list
-            Defaults to exclude ITP_ID==200, which is an aggregate Bay Area feed
     ITP_ID_LIST: list or None
             Defaults to all ITP_IDs except ITP_ID==200.
             For a subset of operators, include a list, such as [182, 100].
+
     All operators for selected date: ~11 minutes
     """
 
@@ -170,6 +172,7 @@ def make_routes_line_geom_for_missing_shapes(df, CRS="EPSG:4326"):
         Find the trips that aren't in `shapes.txt`.
         https://github.com/cal-itp/data-analyses/blob/main/traffic_ops/create_routes_data.py#L63-L69
         Use that dataframe here.
+
     CRS: str, a projected coordinated reference system.
             Defaults to EPSG:4326 (WGS84)
     """
@@ -204,66 +207,12 @@ def make_routes_line_geom_for_missing_shapes(df, CRS="EPSG:4326"):
     gdf2 = (
         gdf.sort_values(group_cols + ["stop_sequence"])
         .groupby(group_cols)["geometry"]
-        .apply(lambda x: LineString(x.tolist()))
+        .apply(lambda x: shapely.geometry.LineString(x.tolist()))
     )
-
-    gdf2 = gpd.GeoDataFrame(gdf2, geometry="geometry", crs=WGS84)
-    gdf2 = (
-        gdf2.to_crs(CRS)
-        .sort_values(["calitp_itp_id", "calitp_url_number", "shape_id"])
-        .drop_duplicates()
-        .reset_index(drop=True)
-    )
-
-    return 
-
-
-def make_routes_line_geom_for_missing_shapes(df, CRS="EPSG:4326"):
-    """
-    Parameters:
-    df: pandas.DataFrame.
-        Compile a dataframe from gtfs_schedule_trips.
-        Find the trips that aren't in `shapes.txt`.
-        https://github.com/cal-itp/data-analyses/blob/main/traffic_ops/create_routes_data.py#L63-L69
-        Use that dataframe here.
-    CRS: str, a projected coordinated reference system.
-            Defaults to EPSG:4326 (WGS84)
-    """
-    if "shape_id" not in df.columns:
-        df = df.assign(shape_id=df.route_id)
-
-    # Make a gdf
-    gdf = gpd.GeoDataFrame(
-        df,
-        geometry=gpd.points_from_xy(df.stop_lon, df.stop_lat),
-        crs=WGS84,
-    )
-
-    # Count the number of stops for a given shape_id
-    # Must be > 1 (need at least 2 points to make a line)
-    gdf = gdf.assign(
-        num_stops=(gdf.groupby("shape_id")["stop_sequence"].transform("count"))
-    )
-
-    # Drop the shape_ids that can't make a line
-    gdf = (
-        gdf[gdf.num_stops > 1]
-        .reset_index(drop=True)
-        .assign(stop_sequence=gdf.stop_sequence.astype(int))
-        .drop(columns="num_stops")
-    )
-
-    # shapely make linestring with groupby
-    # https://gis.stackexchange.com/questions/366058/pandas-dataframe-to-shapely-linestring-using-groupby-sortby
-    group_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
-
-    gdf2 = (
-        gdf.sort_values(group_cols + ["stop_sequence"])
-        .groupby(group_cols)["geometry"]
-        .apply(lambda x: LineString(x.tolist()))
-    )
-
-    gdf2 = gpd.GeoDataFrame(gdf2, geometry="geometry", crs=WGS84)
+    
+    # Turn geoseries into gdf
+    gdf2 = gpd.GeoDataFrame(gdf2, geometry="geometry", crs=WGS84).reset_index()
+        
     gdf2 = (
         gdf2.to_crs(CRS)
         .sort_values(["calitp_itp_id", "calitp_url_number", "shape_id"])
