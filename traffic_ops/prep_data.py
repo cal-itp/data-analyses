@@ -12,16 +12,16 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 
 from calitp.tables import tbl
 from calitp import query_sql
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from siuba import *
 
 import utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
-DATA_PATH = "./data/test/"
+DATA_PATH = "./data/"
 
-SELECTED_DATE = "2022-4-1"
-
+SELECTED_DATE = date.today() - timedelta(days=1)
+    
 stop_cols = ["calitp_itp_id", "stop_id", 
              "stop_lat", "stop_lon", 
              "stop_name", "stop_code"
@@ -92,7 +92,14 @@ def grab_selected_date(SELECTED_DATE):
 def create_local_parquets(SELECTED_DATE):
     time0 = datetime.now()
     stops, trips, route_info = grab_selected_date(SELECTED_DATE)
-        
+    
+    agencies = (
+        tbl.gtfs_schedule.agency()
+        >> select(_.calitp_itp_id, _.agency_id, _.agency_name)
+        >> distinct()
+        >> collect()
+    )
+    
     # Filter to the ITP_IDs present in the latest agencies.yml
     latest_itp_id = (tbl.views.gtfs_schedule_dim_feeds()
                      >> filter(_.calitp_id_in_latest==True)
@@ -104,6 +111,7 @@ def create_local_parquets(SELECTED_DATE):
     stops.to_parquet(f"{DATA_PATH}stops.parquet")
     trips.to_parquet(f"{DATA_PATH}trips.parquet")
     route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
+    agencies.to_parquet(f"{DATA_PATH}agencies.parquet")
     latest_itp_id.to_parquet(f"{DATA_PATH}latest_itp_id.parquet")
     
     time1 = datetime.now()
@@ -205,15 +213,6 @@ def filter_latest_itp_id(df, latest_itp_id_df, itp_id_col = "calitp_itp_id"):
     print(f"# rows to start: {starting_length}")
     print(f"# operators to start: {df[itp_id_col].nunique()}")
     
-    df = (df[df[itp_id_col] != 0]
-          .sort_values([itp_id_col, "route_id"])
-          .reset_index(drop=True)
-         )
-    
-    no_zeros = len(df)
-    print(f"# rows after ITP_ID==0 dropped: {no_zeros}")
-    print(f"# operators after ITP_ID==0 dropped: {df[itp_id_col].nunique()}")
-    
     # Drop ITP_IDs if not found in the latest_itp_id
     if itp_id_col != "calitp_itp_id":
         latest_itp_id_df = latest_itp_id_df.rename(columns = {
@@ -229,7 +228,3 @@ def filter_latest_itp_id(df, latest_itp_id_df, itp_id_col = "calitp_itp_id"):
     print(f"# rows dropped: {only_latest_id - starting_length}")
     
     return df
-
-
-if __name__ == "__main__":
-    create_local_parquets(SELECTED_DATE)
