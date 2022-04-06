@@ -20,6 +20,8 @@ import utils
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 DATA_PATH = "./data/test/"
 
+SELECTED_DATE = "2022-4-1"
+
 stop_cols = ["calitp_itp_id", "stop_id", 
              "stop_lat", "stop_lon", 
              "stop_name", "stop_code"
@@ -228,6 +230,6 @@ def filter_latest_itp_id(df, latest_itp_id_df, itp_id_col = "calitp_itp_id"):
     
     return df
 
+
 if __name__ == "__main__":
-    SELECTED_DATE = "2022-3-15"
     create_local_parquets(SELECTED_DATE)
