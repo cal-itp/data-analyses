@@ -221,3 +221,24 @@ def make_routes_line_geom_for_missing_shapes(df, CRS="EPSG:4326"):
     )
 
     return gdf2
+
+
+def create_point_geometry(
+    df, longitude_col="stop_lon", latitude_col="stop_lat", crs=WGS84
+):
+    """
+    Parameters:
+    df: pandas.DataFrame to turn into geopandas.GeoDataFrame,
+        default dataframe in mind is gtfs_schedule.stops
+    longitude_col: str, column name corresponding to longitude
+                    in gtfs_schedule.stops, this column is "stop_lon"
+    latitude_col: str, column name corresponding to latitude
+                    in gtfs_schedule.stops, this column is "stop_lat"
+    crs: str, coordinate reference system for point geometry
+    """
+    df = df.assign(
+        geometry=gpd.points_from_xy(df[longitude_col], df[latitude_col], crs=crs)
+    )
+
+    gdf = gpd.GeoDataFrame(df)
+    return gdf
