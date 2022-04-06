@@ -10,7 +10,7 @@ import geopandas as gpd
 
 from datetime import datetime
 
-import prep_data2 as prep_data
+import prep_data
 import create_routes_data
 import create_stops_data
 import utils
@@ -21,20 +21,20 @@ def create_shapefiles_and_export():
     time0 = datetime.now()
     
     # Create local parquets
-    #prep_data.create_local_parquets(prep_data.SELECTED_DATE) 
+    prep_data.create_local_parquets(prep_data.SELECTED_DATE) 
     print("Local parquets created")
     
     routes = create_routes_data.make_routes_shapefile()    
-    #stops = create_stops_data.make_stops_shapefile()
-            
+    stops = create_stops_data.make_stops_shapefile()
+    
     # Export geoparquets to GCS
     utils.geoparquet_gcs_export(routes, prep_data.GCS_FILE_PATH, "routes_assembled")
-    #utils.geoparquet_gcs_export(stops, prep_data.GCS_FILE_PATH, "stops_assembled")
+    utils.geoparquet_gcs_export(stops, prep_data.GCS_FILE_PATH, "stops_assembled")
     
     print("Geoparquets exported to GCS")
     
     # Delete local parquets
-    #prep_data.delete_local_parquets()
+    prep_data.delete_local_parquets()
     print("Local parquets deleted")
     
     time1 = datetime.now()
