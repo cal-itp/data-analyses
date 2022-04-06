@@ -14,15 +14,21 @@ from plotnine import *
 import altair as alt
 import altair_saver
 
-from shared_utils import geography_utils
+from IPython.display import Markdown
+from IPython.core.display import display
+
 from shared_utils import altair_utils
+from shared_utils import geography_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
+from calitp import to_snakecase
+import intake
+
 import ipywidgets as widgets
 from ipywidgets import *
-from IPython.display import Markdown
-from IPython.core.display import display
+
+
 
 pd.options.display.float_format = '{:,.2f}'.format
 
@@ -57,33 +63,54 @@ def calculate_data_head(df, col, aggregate_by=["dist"], aggfunc="sum"):
 #from Tiffany's branch DLA functions
 #get basic information from the different columns by year
 
-def count_all_years(df, groupedby=["prepared_y", "dist"]): 
-    count_years = (geography_utils.aggregate_by_geography(
-        df, 
-        group_cols = groupedby, 
-        sum_cols = ["total_requested", "ac_requested", "fed_requested"],
-        mean_cols = ["total_requested", "ac_requested", "fed_requested"],
-        nunique_cols = ["primary_agency_name", "mpo", "prefix", "project_no", "project_location", "type_of_work"]
-    ).sort_values(["prepared_y", "dist"], ascending=[False, True])
-    .astype({"prepared_y": "Int64"})
-    )
-    
-    count_years= count_years.rename(columns={"ac_requested_x": "ac_requested_sum",
-                                "fed_requested_x": "fed_requested_sum",
-                                "total_requested_x": "total_requested_sum",
-                                "ac_requested_y": "ac_requested_mean",
-                                "fed_requested_y": "fed_requested_mean",
-                                "total_requested_y": "total_requested_mean",
-                                "status": "counts",
-                                "prefix": "unique_prefix",
-                                "primary_agency_name": "unique_primary_agency_name",
-                                "mpo":"unique_mpo",          
-                                "project_location": "unique_project_location",
-                                "project_no":"unique_project_no",
-                                "type_of_work":"unique_type_of_work"})
 
-    count_years = count_years.dropna(axis = 0)
-    
+def count_all_years(df, groupedby=["prepared_y", "dist"]):
+    count_years = (
+        geography_utils.aggregate_by_geography(
+            df,
+            group_cols=groupedby,
+            sum_cols=[
+                "adjusted_total_requested",
+                "adjusted_ac_requested",
+                "adjusted_fed_requested",
+            ],
+            mean_cols=[
+                "adjusted_total_requested",
+                "adjusted_ac_requested",
+                "adjusted_fed_requested",
+            ],
+            nunique_cols=[
+                "primary_agency_name",
+                "mpo",
+                "prefix",
+                "project_no",
+                "project_location",
+                "type_of_work",
+            ],
+            rename_cols=False
+        )
+        .sort_values(["prepared_y", "dist"], ascending=[False, True])
+        .astype({"prepared_y": "Int64"})
+    )
+
+    count_years = count_years.rename(
+        columns={
+            "ac_requested_x": "ac_requested_sum",
+            "fed_requested_x": "fed_requested_sum",
+            "total_requested_x": "total_requested_sum",
+            "ac_requested_y": "ac_requested_mean",
+            "fed_requested_y": "fed_requested_mean",
+            "total_requested_y": "total_requested_mean",
+            "prefix": "unique_prefix",
+            "primary_agency_name": "unique_primary_agency_name",
+            "mpo": "unique_mpo",
+            "project_location": "unique_project_location",
+            "project_no": "unique_project_no",
+            "type_of_work": "unique_type_of_work",
+        }
+    )
+    count_years = count_years.dropna(axis=0)
+
     return count_years
 
 ## want to create a function that gets a new dataframe that will hold all the counts and top twenty 
@@ -135,6 +162,81 @@ def get_nunique(df, col, groupby_col):
     
     return counts
 
+
+
+def project_cat(df, i):
+    subset = df >> filter(_[i] == 1)
+    subset_2 = (
+        (find_top(subset))
+        >> filter(_.variable == "primary_agency_name")
+        >> select(_.value, _.count)
+    ).head(5)
+    subset_2["Percent of Category"] = ((subset_2["count"]) / (len(subset))) * 100
+    subset_2 = subset_2.rename(
+        columns={"value": "Agency", "count": f"{labeling(i)} Obligations"}
+    )
+
+    # generate chart:
+
+    subset_3 = (
+        (
+            subset.groupby(["primary_agency_name"])
+            .agg(
+                {
+                    i: "sum",
+                    "process_days": "mean",
+                    "adjusted_total_requested": "mean",
+                    "adjusted_fed_requested": "mean",
+                    "adjusted_ac_requested": "mean",
+                }
+            )
+            .reset_index()
+        )
+        >> arrange(-_[i])
+    ).head(5)
+
+    subset_3 = subset_3.rename(
+        columns={
+            "primary_agency_name": "Agency",
+            "adjusted_total_requested": "Total Requested",
+            "adjusted_fed_requested": "Fed Requested",
+            "adjusted_ac_requested": "AC Requested",
+        }
+    )
+
+    subset_4 = pd.melt(
+        subset_3,
+        id_vars=["Agency"],
+        value_vars=["Total Requested", "Fed Requested", "AC Requested"],
+        var_name="Categories",
+        value_name="Funding Amount",
+    )
+
+    chart = (
+        alt.Chart(subset_4)
+        .mark_bar()
+        .encode(
+            x=alt.X(
+                "Funding Amount",
+                axis=alt.Axis(format="$.2s", title="Obligated Funding ($2021)"),
+            ),
+            y=alt.Y("Agency"),
+            color=alt.Color(
+                "Categories:N",
+                scale=alt.Scale(range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+            ),
+            row="Categories:N",
+        )
+    )
+
+    chart = add_tooltip(chart, "Agency", "Funding Amount")
+
+    display(
+        HTML(f"<strong>Top Agencies using {labeling(i)} Projects</strong>")
+    )
+    display(subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"}))
+    display(chart)
+
 """
 Labeling
 """
@@ -143,25 +245,38 @@ Labeling
 
 def labeling(word):
     # Add specific use cases where it's not just first letter capitalized
-    LABEL_DICT = { "prepared_y": "Year",
-              "dist": "District",
-              "total_requested": "Total Requested",
-              "fed_requested":"Fed Requested",
-              "ac_requested": "Advance Construction Requested",
-              "nunique":"Number of Unique",
-              "project_no": "Project Number"}
-    
+    LABEL_DICT = {
+        "prepared_y": "Year",
+        "dist": "District",
+        "total_requested": "Total Requested",
+        "fed_requested": "Fed Requested",
+        "ac_requested": "Advance Construction Requested",
+        "nunique": "Number of Unique",
+        "project_no": "Project Number",
+        "active_transp": "Active Transportation",
+        "infra_resiliency_er": "Infrastructure & Emergency Relief",
+        "congestion_relief": "Congestion Relief",
+        "n":"Count",
+        "primary_agency_name":"Agency"
+    }
+
     if (word == "mpo") or (word == "rtpa"):
         word = word.upper()
     elif word in LABEL_DICT.keys():
         word = LABEL_DICT[word]
     else:
-        word = word.replace('n_', 'Number of ').title()
-        word = word.replace('unique_', "Number of Unique ").title()
-        word = word.replace('_', ' ').title()
-    
+        #word = word.replace("n_", "Number of ").title()
+        word = word.replace("unique_", "Number of Unique ").title()
+        word = word.replace("_", " ").title()
+
     return word
 
+
+
+def add_tooltip(chart, tooltip1, tooltip2):
+    chart = (
+        chart.encode(tooltip= [tooltip1,tooltip2]))
+    return chart
 
 
 
@@ -174,6 +289,7 @@ Basic Charts
 # <style>
 # @import url('https://fonts.googleapis.com/css?family=Lato');
 # </style>
+
 
 
 # Bar
@@ -201,6 +317,30 @@ def basic_bar_chart(df, x_col, y_col, color_col, subset, chart_title=''):
     savepath = (chart_title.replace(" ", "_"))
     chart.save(f"./chart_outputs/d{subset}_outputs/bar_{savepath}.png")
     
+    return chart
+
+
+
+def basic_bar_chart_no_save(df, x_col, y_col, color_col, subset, chart_title=''):
+
+    if chart_title == "":
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
+
+    chart = (alt.Chart(df)
+             .mark_bar()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
+                 y=alt.Y(y_col, title=labeling(y_col)),
+                 color = alt.Color(color_col,
+                                  scale=alt.Scale(
+                                      range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+                                      legend=alt.Legend(title=(labeling(color_col)), symbolLimit=10)
+                                  )
+                                   ).properties( 
+                          title=chart_title))
+
+    chart=styleguide.preset_chart_config(chart)
+    chart = add_tooltip(chart, x_col, y_col)
     return chart
 
 
@@ -232,6 +372,8 @@ def basic_scatter_chart(df, x_col, y_col, color_col, subset, chart_title=""):
     return chart
 
 
+
+
 # Line
 def basic_line_chart(df, x_col, y_col, subset, chart_title=''):
     
@@ -253,6 +395,25 @@ def basic_line_chart(df, x_col, y_col, subset, chart_title=''):
     chart.save(f"./chart_outputs/d{subset}_outputs/line_{savepath}.png")
     
     return chart
+
+
+def basic_line_chart_test_no_save(df, x_col, y_col, subset, chart_title=''):
+    
+    if chart_title == "":
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
+     
+    chart = (alt.Chart(df)
+             .mark_line()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col)),
+                 y=alt.Y(y_col, title=labeling(y_col)))
+              ).properties( 
+                          title=chart_title)
+
+    chart=styleguide.preset_chart_config(chart)
+    chart = add_tooltip(chart, x_col, y_col)
+    return chart
+
 
 """
 Interactive Functions
