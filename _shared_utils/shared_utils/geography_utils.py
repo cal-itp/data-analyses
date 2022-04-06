@@ -164,8 +164,6 @@ def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None):
         Ex: '2022-1-1' or datetime.date(2022, 1, 1)
     CRS: str, a projected coordinate reference system.
         Defaults to EPSG:4326 (WGS84)
-    EXCLUDE_ITP_ID: list
-            Defaults to exclude ITP_ID==200, which is an aggregate Bay Area feed
     ITP_ID_LIST: list or None
             Defaults to all ITP_IDs except ITP_ID==200.
             For a subset of operators, include a list, such as [182, 100].
@@ -255,10 +253,12 @@ def make_routes_line_geom_for_missing_shapes(df, CRS="EPSG:4326"):
     gdf2 = (
         gdf.sort_values(group_cols + ["stop_sequence"])
         .groupby(group_cols)["geometry"]
-        .apply(lambda x: LineString(x.tolist()))
+        .apply(lambda x: shapely.geometry.LineString(x.tolist()))
     )
 
-    gdf2 = gpd.GeoDataFrame(gdf2, geometry="geometry", crs=WGS84)
+    # Turn geoseries into gdf
+    gdf2 = gpd.GeoDataFrame(gdf2, geometry="geometry", crs=WGS84).reset_index()
+    
     gdf2 = (
         gdf2.to_crs(CRS)
         .sort_values(["calitp_itp_id", "calitp_url_number", "shape_id"])
