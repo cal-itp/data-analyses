@@ -146,67 +146,65 @@ class RtFilterMapper:
             self.pbar.reset(total=len(gdf.shape_id.unique()))
             self.pbar.desc = 'Generating segment speeds'
         for shape_id in gdf.shape_id.unique():
-            for direction_id in gdf.direction_id.unique():
-                this_shape_direction = (gdf
-                             >> filter((_.shape_id == shape_id) & (_.direction_id == direction_id))).copy()
-                if this_shape_direction.empty:
-                    print(f'{shape_id}_{direction_id}_ empty!')
-                    continue
-                # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
-                stop_speeds = (this_shape_direction
-                             >> group_by(_.trip_key)
-                             >> arrange(_.stop_sequence)
-                             >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
-                             >> mutate(last_loc = _.shape_meters.shift(1))
-                             >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
-                             >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
-                             # >> mutate(last_delay = _.delay.shift(1))
-                             >> mutate(delay_chg_sec = (_.delay_seconds - _.delay_seconds.shift(1)))
-                             # >> mutate(delay_sec = _.delay.map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2))
-                             >> ungroup()
-                            )
-                if stop_speeds.empty:
-                    # print(f'{shape_id}_{direction_id}_st_spd empty!')
-                    continue
-                # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
-                stop_speeds.geometry = stop_speeds.apply(
-                    lambda x: shapely.ops.substring(
-                                (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
-                                x.last_loc,
-                                x.shape_meters),
-                                                axis = 1)
-                stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
-
-                try:
-                    stop_speeds = (stop_speeds
-                         >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
-                         >> group_by(_.stop_sequence)
-                         >> mutate(n_trips = _.stop_sequence.size,
-                                    avg_mph = _.speed_mph.mean(),
-                                  _20p_mph = _.speed_mph.quantile(.2),
-                                   trips_per_hour = _.n_trips / self.hr_duration_in_filter
-                                  )
-                         # >> distinct(_.stop_sequence, _keep_all=True) ## comment out to enable speed distribution analysis
+            this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
+            if this_shape.empty:
+                print(f'{shape_id} empty!')
+                continue
+            # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
+            stop_speeds = (this_shape
+                         >> group_by(_.trip_key)
+                         >> arrange(_.stop_sequence)
+                         >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
+                         >> mutate(last_loc = _.shape_meters.shift(1))
+                         >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
+                         >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
+                         # >> mutate(last_delay = _.delay.shift(1))
+                         >> mutate(delay_chg_sec = (_.delay_seconds - _.delay_seconds.shift(1)))
+                         # >> mutate(delay_sec = _.delay.map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2))
                          >> ungroup()
-                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
                         )
-                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
-                    assert not stop_speeds.empty, 'stop speeds gdf is empty!'
-                except Exception as e:
-                    print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
-                    print(e)
-                    continue
+            if stop_speeds.empty:
+                # print(f'{shape_id}_{direction_id}_st_spd empty!')
+                continue
+            # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
+            stop_speeds.geometry = stop_speeds.apply(
+                lambda x: shapely.ops.substring(
+                            (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
+                            x.last_loc,
+                            x.shape_meters),
+                                            axis = 1)
+            stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
 
-                if stop_speeds.avg_mph.max() > 80:
-                    print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                    stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
-                if stop_speeds._20p_mph.min() < 0:
-                    print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                    stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
-                all_stop_speeds = pd.concat((all_stop_speeds, stop_speeds))
-                
-                if type(self.pbar) != type(None):
-                    self.pbar.update()
+            try:
+                stop_speeds = (stop_speeds
+                     >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
+                     >> group_by(_.stop_sequence)
+                     >> mutate(n_trips = _.stop_sequence.size,
+                                avg_mph = _.speed_mph.mean(),
+                              _20p_mph = _.speed_mph.quantile(.2),
+                               trips_per_hour = _.n_trips / self.hr_duration_in_filter
+                              )
+                     # >> distinct(_.stop_sequence, _keep_all=True) ## comment out to enable speed distribution analysis
+                     >> ungroup()
+                     >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
+                    )
+                # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
+                assert not stop_speeds.empty, 'stop speeds gdf is empty!'
+            except Exception as e:
+                print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
+                print(e)
+                continue
+
+            if stop_speeds.avg_mph.max() > 80:
+                print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
+            if stop_speeds._20p_mph.min() < 0:
+                print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
+            all_stop_speeds = pd.concat((all_stop_speeds, stop_speeds))
+
+            if type(self.pbar) != type(None):
+                self.pbar.update()
             if type(self.pbar) != type(None):
                 self.pbar.refresh
 
