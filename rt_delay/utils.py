@@ -161,7 +161,7 @@ def get_routes(itp_id, analysis_date):
     routes_date_joined = (routes_on_date
          >> inner_join(_, operator_routes >> select(_.route_id, _.route_key, _.route_short_name),
                        on = 'route_key')
-         >> select(_.route_id, _.route_short_name)
+         >> distinct(_.route_id, _.route_short_name)
          >> collect()
         )
     return routes_date_joined
@@ -241,8 +241,9 @@ def get_stop_times(itp_id, analysis_date, force_clear = False):
     st = (trips_ix_query
         >> inner_join(_, st_query, on = 'stop_time_key')
         >> mutate(stop_sequence = _.stop_sequence.astype(int)) ## in SQL!
-        >> arrange(_.stop_sequence)
         >> collect()
+        >> distinct(_.stop_id, _.trip_id, _keep_all=True) 
+        >> arrange(_.stop_sequence)
         )
     st.arrival_time = st.arrival_time.str.strip()
     st.departure_time = st.departure_time.str.strip()
