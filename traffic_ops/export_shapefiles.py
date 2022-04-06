@@ -21,7 +21,7 @@ def create_shapefiles_and_export():
     time0 = datetime.now()
     
     # Create local parquets
-    prep_data.create_local_parquets(prep_data.SELECTED_DATE) 
+    #prep_data.create_local_parquets(prep_data.SELECTED_DATE) 
     print("Local parquets created")
     
     routes = create_routes_data.make_routes_shapefile()    
