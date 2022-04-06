@@ -37,13 +37,13 @@ def grab_selected_date(SELECTED_DATE):
     # Always exclude ITP_ID = 200!
     # Stops query
     dim_stops = (tbl.views.gtfs_schedule_dim_stops()
+                 >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
                  >> select(*stop_cols, _.stop_key)
                  >> distinct()
                 )
 
     stops = (tbl.views.gtfs_schedule_fact_daily_feed_stops()
              >> filter(_.date == SELECTED_DATE)
-             >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
              >> select(_.stop_key, _.date)
              >> inner_join(_, dim_stops, on = "stop_key")
              >> select(*stop_cols)
@@ -53,6 +53,7 @@ def grab_selected_date(SELECTED_DATE):
     
     # Trips query
     dim_trips = (tbl.views.gtfs_schedule_dim_trips()
+                >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
                  >> select(*trip_cols, _.trip_key)
                  >> distinct()
                 )
@@ -60,7 +61,6 @@ def grab_selected_date(SELECTED_DATE):
     trips = (tbl.views.gtfs_schedule_fact_daily_trips()
              >> filter(_.service_date == SELECTED_DATE, 
                        _.is_in_service==True)
-             >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
              >> select(_.trip_key, _.service_date)
              >> inner_join(_, dim_trips, on = "trip_key")
              >> select(*trip_cols)
@@ -70,6 +70,7 @@ def grab_selected_date(SELECTED_DATE):
     
     ## Route info query
     dim_routes = (tbl.views.gtfs_schedule_dim_routes()
+                  >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
                   >> select(*route_cols, _.route_key)
                   >> distinct()
                  )
@@ -77,7 +78,6 @@ def grab_selected_date(SELECTED_DATE):
 
     route_info = (tbl.views.gtfs_schedule_fact_daily_feed_routes()
                   >> filter(_.date == SELECTED_DATE)
-                  >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
                   >> select(_.route_key, _.date)
                   >> inner_join(_, dim_routes, on = "route_key")
                   >> select(*route_cols)

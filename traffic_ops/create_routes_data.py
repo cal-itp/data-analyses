@@ -58,6 +58,8 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
       .reset_index(drop=True)
      )
     
+    print("Read in missing shapes")
+    
     # Only grab trip info for the shape_ids that are missing, or, appear in missing_shapes
     trip_cols = ["calitp_itp_id", "route_id", "shape_id"]
 
@@ -69,6 +71,7 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
                  >> select(*trip_cols, _.trip_key)
                  >> distinct()
                 )
+    print("Read in dim_trips")
 
     missing_trips = (
         tbl.views.gtfs_schedule_fact_daily_trips()
@@ -79,6 +82,7 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
         >> distinct()
         >> collect()
     )
+    print("Read in missing_trips")
     
     # Since there are multiple trips, we'll sort the same way, and keep the first one
     group_cols = ["calitp_itp_id", "route_id", "shape_id"]
@@ -86,7 +90,8 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
                       .drop_duplicates(subset=group_cols)
                       .reset_index(drop=True)
     )
-    
+    print("Make missing_trips2")
+
     stop_info_trips = (
         tbl.views.gtfs_schedule_dim_stop_times()
         >> filter(_.calitp_itp_id.isin(missing_trips2.calitp_itp_id))
@@ -103,7 +108,8 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
         # Want to merge back route_id on, but need to collect first
         >> inner_join(_, missing_trips2)
     )
-    
+    print("Make stop_info_trips")
+
     # Somehow, getting back some multiple points for same trip_id, stop_id
     group_cols = ["calitp_itp_id", "trip_id", "stop_id"]
     stop_info_trips = (stop_info_trips.sort_values(group_cols)
@@ -112,10 +118,13 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
                        # make_routes_line_geom_for_missing_shapes requires calitp_url_number
                        .assign(calitp_url_number=0)
                       )
-    
+    print("Drop duplicates in stop_info_trips")
+
     # Assemble line geometry
     missing_routes = utils.make_routes_line_geom_for_missing_shapes(stop_info_trips)
     
+    print("Make missing_routes")
+
     # Merge route_id back in, which is lost when it 
     # passes through make_routes_line_geom_for_missing_shapes
     # Also, get rid of calitp_url_number
@@ -126,8 +135,11 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
         how = "inner",
         validate = "1:1",
     )
+    print("Make missing_routes2")
+
     
-    routes_part2 = prep_data2.attach_route_name(missing_routes2, route_info)
+    routes_part2 = prep_data.attach_route_name(missing_routes2, route_info)
+    print("Make routes_part2")
 
     return routes_part2
 
@@ -165,13 +177,13 @@ def make_routes_shapefile():
                        )
     
     # Attach agency_id and agency_name using calitp_itp_id
-    routes_assembled2 = prep_data.attach_agency_info(routes_assembled, agencies)
+    #routes_assembled2 = prep_data.attach_agency_info(routes_assembled, agencies)
     
-    routes_assembled2 = (prep_data.filter_latest_itp_id(routes_assembled2, 
+    routes_assembled2 = (prep_data.filter_latest_itp_id(routes_assembled, 
                                                         latest_itp_id, 
                                                         itp_id_col = "calitp_itp_id")
                          # Any renaming to be done before exporting
-                         .rename(columns = prep_dat2a.RENAME_COLS)
+                         .rename(columns = prep_data.RENAME_COLS)
                          .sort_values(["itp_id", "route_id"])
                          .reset_index(drop=True)
                         )
