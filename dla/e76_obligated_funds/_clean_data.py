@@ -10,7 +10,7 @@ https://dot.ca.gov/programs/local-assistance/reports/e-76-waiting
 
 """
 
-
+#! pip install cpi
 
 import numpy as np
 import pandas as pd
@@ -103,6 +103,8 @@ def clean_data(df):
     
     #replace Non-MPO formatting
     df.mpo.replace(['NONMPO'], ['NON-MPO'], inplace=True)
+    
+    df['process_days']= (df['dist_processing_days'] + df['hq_processing_days'] + df['fhwa_processing_days'])
     
     return df
 
@@ -209,19 +211,34 @@ def adjust_prices(df):
         cpi.update()
         series_df = cpi.series.get(area="U.S. city average").to_dataframe()
         inflation_df = (series_df[series_df.year >= 2008]
-               .pivot_table(index='year', values='value', aggfunc='mean')
-               .reset_index()
-              )
+                        .pivot_table(index='year', values='value', aggfunc='mean')
+                        .reset_index()
+                       )
         denominator = inflation_df.value.loc[inflation_df.year==base_year].iloc[0]
 
         inflation_df = inflation_df.assign(
-            inflation = inflation_df.value.divide(denominator)
+        inflation = inflation_df.value.divide(denominator)
         )
     
         return inflation_df
+#         cpi.update()
+#         series_df = cpi.series.get(area="U.S. city average").to_dataframe()
+#         inflation_df = (series_df[series_df.year >= 2008]
+#                .pivot_table(index='year', values='value', aggfunc='mean')
+#                .reset_index()
+#               )
+#         denominator = inflation_df.value.loc[inflation_df.year==base_year].iloc[0]
+
+#         inflation_df = inflation_df.assign(
+#             inflation = inflation_df.value.divide(denominator)
+#         )
+    
+#         return inflation_df
+    
     
     ##get cpi table 
     cpi = inflation_table(2021)
+    cpi.update
     cpi = (cpi>>select(_.year, _.value))
     cpi_dict = dict(zip(cpi['year'], cpi['value']))
     
@@ -233,8 +250,59 @@ def adjust_prices(df):
         df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
     return df
 
+#     ##get cpi table 
+#     cpi_table = inflation_table(2021)
+# #     cpi = (cpi>>select(_.year, _.value))
+# #     cpi_dict = dict(zip(cpi['year'], cpi['value']))
+    
+#     df = pd.merge(df, 
+#          cpi_table[["year", "multiplier"]],
+#          left_on = "prepared_y",
+#          right_on = "year",
+#          how = "left",
+#          validate = "m:1",
+#         )
+    
+#     orig = ["total_requested", 
+#         "fed_requested", 
+#         "ac_requested"]
+
+#     for c in cols:
+#         df[f"adjusted_{c}"] = df.apply(lambda x: x[c] * x.multiplier, axis=1)
+    
+# #     for col in cols:
+# #         multiplier = df["prepared_y"].map(cpi_dict)  
+    
+# #         ##using 270.97 for 2021 dollars
+# #         df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
+#     return df
+
 
 #add project categories
+
+def add_agency_cat(df):
+    group = df >> count(_.primary_agency_name) >> arrange(_.n)
+    q33 = group.n.quantile(0.33).astype(float)
+    q66 = group.n.quantile(0.66).astype(float)
+
+    def obligation_size(row):
+        if (row.n > 0) and (row.n <= q33):
+            return "Small"
+        elif (row.n > q33) and (row.n <= q66):
+            return "Medium"
+        elif row.n > q66:
+            return "Large"
+        else:
+            return "No Info"
+
+    group["obligation_cat"] = group.apply(lambda x: obligation_size(x), axis=1)
+
+    agency_map = dict(zip(group["primary_agency_name"], group["obligation_cat"]))
+
+    df["obligation_cat"] = df["primary_agency_name"].map(agency_map)
+    
+    return df
+
 
 def add_categories(df):
 
@@ -250,7 +318,7 @@ def add_categories(df):
                              'sidewalk', 'side walk', 'Cl ', 'trail'
                             ]
     TRANSIT = ['bus', 'metro', 'station', #Station comes up a few times as a charging station and also as a train station
-               'transit','fare', 'brt', 'yarts', 'rail'
+               'transit','fare', 'brt', 'yarts', 'railroad', 'highway-rail'
                # , 'station' in description and 'charging station' not in description
               ] 
     BRIDGE = ["bridge", 'viaduct']
@@ -270,7 +338,8 @@ def add_categories(df):
 
     CONGESTION_RELIEF = ['congestion', 'rideshare','ridesharing', 'vanpool', 'car share']
 
-    NOT_INC = ['charging', 'fueling', 'cng']
+    NOT_INC = ['charging', 'fueling', 'cng', 'bridge', 'trail',
+           'k-rail', 'guardrails', 'bridge rail', 'guard', 'guarrail']
 
     def categorize_project_descriptions(row):
         """
@@ -338,6 +407,7 @@ def make_clean_data():
     df = prefix_cleaning(df)
     df = clean_agency_names(df)
     df = adjust_prices(df)
+    df = add_agency_cat(df)
     df = add_categories(df)
     
     for c in ["locode", "ftip_no", "projectID"]:
