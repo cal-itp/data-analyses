@@ -18,3 +18,13 @@ https://docs.calitp.org/data-infra/analytics_welcome/overview.html
 #### Data Analytics Documentation - Introduction to Analytics Tools
 
 https://docs.calitp.org/data-infra/analytics_tools/overview.html
+
+## Parameterized reports
+
+[The reports config file](./reports_config.yml) configures the parameterized report
+generation for this repo.
+
+### Caveats
+Jupyter Book/Sphinx do not play nicely with Markdown headers written out in `display()`
+calls. Therefore, [generate_reports.py](./generate_reports.py) uses a custom Papermill
+engine to template Markdown cells directly.
