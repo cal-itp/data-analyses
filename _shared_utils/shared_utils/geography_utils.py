@@ -258,7 +258,7 @@ def make_routes_line_geom_for_missing_shapes(df, CRS="EPSG:4326"):
 
     # Turn geoseries into gdf
     gdf2 = gpd.GeoDataFrame(gdf2, geometry="geometry", crs=WGS84).reset_index()
-    
+
     gdf2 = (
         gdf2.to_crs(CRS)
         .sort_values(["calitp_itp_id", "calitp_url_number", "shape_id"])
