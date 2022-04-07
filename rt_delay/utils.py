@@ -308,8 +308,10 @@ def get_routelines(itp_id, analysis_date, force_clear = False):
         else:
             print('cached parquet empty, will try a fresh query')
     else:
-        # routelines = shared_utils.geography_utils.make_routes_shapefile([itp_id], CA_NAD83Albers)
-        routelines = get_new_routelines(itp_id, analysis_date)
+        routelines = shared_utils.geography_utils.make_routes_gdf(SELECTED_DATE = analysis_date,
+                                                             CRS = shared_utils.geography_utils.CA_NAD83Albers,
+                                                             ITP_ID_LIST = [itp_id])
+        routelines = routelines >> select(-_.pt_array) >> distinct(_.shape_id, _keep_all=True)
         export_path = GCS_FILE_PATH+'cached_views/'
         shared_utils.utils.geoparquet_gcs_export(routelines, export_path, filename)
         return routelines
@@ -451,21 +453,21 @@ def make_linestring(x):
         as_wkt = [shapely.wkt.loads(i) for i in x]
         return shapely.geometry.LineString(as_wkt)
 
-def get_new_routelines(itp_id, analysis_date):
+# def get_new_routelines(itp_id, analysis_date):
 
-    shapes = (tbl.views.gtfs_schedule_dim_shapes_geo()
-          >> filter(_.calitp_extracted_at <= analysis_date, 
-                    _.calitp_deleted_at > analysis_date
-                   )
-          >> filter(_.calitp_itp_id == itp_id)
-          >> select(_.calitp_itp_id, _.calitp_url_number, _.calitp_extracted_at,
-                    _.calitp_deleted_at, _.shape_id, _.pt_array)
-          >> collect()
-         )
-        # apply the function
-    shapes['geometry'] = shapes.pt_array.apply(make_linestring)
+#     shapes = (tbl.views.gtfs_schedule_dim_shapes_geo()
+#           >> filter(_.calitp_extracted_at <= analysis_date, 
+#                     _.calitp_deleted_at > analysis_date
+#                    )
+#           >> filter(_.calitp_itp_id == itp_id)
+#           >> select(_.calitp_itp_id, _.calitp_url_number, _.calitp_extracted_at,
+#                     _.calitp_deleted_at, _.shape_id, _.pt_array)
+#           >> collect()
+#          )
+#         # apply the function
+#     shapes['geometry'] = shapes.pt_array.apply(make_linestring)
 
-    # convert to geopandas; geometry column contains the linestring
-    shapes = gpd.GeoDataFrame(shapes, geometry = 'geometry', crs=WGS84)
-    shapes = shapes.to_crs(CA_NAD83Albers)
-    return shapes >> select(-_.pt_array)
+#     # convert to geopandas; geometry column contains the linestring
+#     shapes = gpd.GeoDataFrame(shapes, geometry = 'geometry', crs=WGS84)
+#     shapes = shapes.to_crs(CA_NAD83Albers)
+#     return shapes >> select(-_.pt_array)
