@@ -3,6 +3,7 @@ Functions to query GTFS schedule data,
 save locally as parquets, 
 then clean up at the end of the script.
 """
+import geopandas as gpd
 import pandas as pd
 import glob
 import os
@@ -11,44 +12,86 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 
 from calitp.tables import tbl
 from calitp import query_sql
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from siuba import *
+
 import utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 DATA_PATH = "./data/"
 
-def create_local_parquets():
-    time0 = datetime.now()
+SELECTED_DATE = date.today() - timedelta(days=1)
     
-    stops = (
-        tbl.gtfs_schedule.stops()
-        >> select(_.calitp_itp_id, _.stop_id, 
-                  _.stop_lat, _.stop_lon, 
-                  _.stop_name, _.stop_code
+stop_cols = ["calitp_itp_id", "stop_id", 
+             "stop_lat", "stop_lon", 
+             "stop_name", "stop_code"
+            ]
+
+trip_cols = ["calitp_itp_id", "route_id", "shape_id"]
+
+route_cols = ["calitp_itp_id", "route_id", 
+              "route_short_name", "route_long_name"]
+
+
+def grab_selected_date(SELECTED_DATE):
+    # Always exclude ITP_ID = 200!
+    # Stops query
+    dim_stops = (tbl.views.gtfs_schedule_dim_stops()
+                 >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
+                 >> select(*stop_cols, _.stop_key)
+                 >> distinct()
+                )
+
+    stops = (tbl.views.gtfs_schedule_fact_daily_feed_stops()
+             >> filter(_.date == SELECTED_DATE)
+             >> select(_.stop_key, _.date)
+             >> inner_join(_, dim_stops, on = "stop_key")
+             >> select(*stop_cols)
+             >> distinct()
+             >> collect()
+            )
+    
+    # Trips query
+    dim_trips = (tbl.views.gtfs_schedule_dim_trips()
+                >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
+                 >> select(*trip_cols, _.trip_key)
+                 >> distinct()
+                )
+
+    trips = (tbl.views.gtfs_schedule_fact_daily_trips()
+             >> filter(_.service_date == SELECTED_DATE, 
+                       _.is_in_service==True)
+             >> select(_.trip_key, _.service_date)
+             >> inner_join(_, dim_trips, on = "trip_key")
+             >> select(*trip_cols)
+             >> distinct()
+             >> collect()
+            )
+    
+    ## Route info query
+    dim_routes = (tbl.views.gtfs_schedule_dim_routes()
+                  >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
+                  >> select(*route_cols, _.route_key)
+                  >> distinct()
                  )
-        >> distinct()
-        >> collect()
-    )
-    stops.to_parquet(f"{DATA_PATH}stops.parquet")
 
-    trips = (
-        tbl.gtfs_schedule.trips()
-        >> select(_.calitp_itp_id, _.route_id, _.shape_id)
-        >> distinct()
-        >> collect()
-    )
-    trips.to_parquet(f"{DATA_PATH}trips.parquet")
 
-    route_info = (
-        tbl.gtfs_schedule.routes()
-        # NB/SB may share same route_id, but different short/long names
-        >> select(_.calitp_itp_id, _.route_id, 
-                  _.route_short_name, _.route_long_name)
-        >> distinct()
-        >> collect()
-    )
-    route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
+    route_info = (tbl.views.gtfs_schedule_fact_daily_feed_routes()
+                  >> filter(_.date == SELECTED_DATE)
+                  >> select(_.route_key, _.date)
+                  >> inner_join(_, dim_routes, on = "route_key")
+                  >> select(*route_cols)
+                  >> distinct()
+                  >> collect()
+                 )
+    
+    return stops, trips, route_info
+
+
+
+def create_local_parquets(SELECTED_DATE):
+    time0 = datetime.now()
+    stops, trips, route_info = grab_selected_date(SELECTED_DATE)
     
     agencies = (
         tbl.gtfs_schedule.agency()
@@ -56,8 +99,6 @@ def create_local_parquets():
         >> distinct()
         >> collect()
     )
-    agencies.to_parquet(f"{DATA_PATH}agencies.parquet")
-
     
     # Filter to the ITP_IDs present in the latest agencies.yml
     latest_itp_id = (tbl.views.gtfs_schedule_dim_feeds()
@@ -66,24 +107,31 @@ def create_local_parquets():
                      >> distinct()
                      >> collect()
                     )
+    
+    stops.to_parquet(f"{DATA_PATH}stops.parquet")
+    trips.to_parquet(f"{DATA_PATH}trips.parquet")
+    route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
+    agencies.to_parquet(f"{DATA_PATH}agencies.parquet")
     latest_itp_id.to_parquet(f"{DATA_PATH}latest_itp_id.parquet")
     
     time1 = datetime.now()
     print(f"Part 1: Queries and create local parquets: {time1-time0}")
-    
-    # Use geography_utils to assemble routes from shapes.txt
-    # This takes about 37 min to run and create this routes shapefile
-    ITP_ID_LIST = list(agencies.calitp_itp_id.unique())
-    
-    routes = utils.make_routes_shapefile(
-                ITP_ID_LIST, CRS = utils.WGS84, 
-                alternate_df=None)
-    routes.to_parquet(f"{DATA_PATH}routes.parquet")
+
+    routes = utils.make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None)
+    routes_unique = (routes[(routes.calitp_itp_id != 0) & 
+                            (routes.calitp_itp_id != 20)]
+                     .sort_values(["calitp_itp_id", "calitp_url_number", "shape_id"])
+                     .drop_duplicates(subset=["calitp_itp_id", "shape_id"])
+                     .drop(columns = ["calitp_url_number", "pt_array"])
+                     .sort_values(["calitp_itp_id", "shape_id"])
+                     .reset_index(drop=True)
+    )
+    routes_unique.to_parquet(f"{DATA_PATH}routes.parquet")
     
     time2 = datetime.now()
-    print(f"Part 2: Create routes shapefile: {time2-time1}")
-
-    print(f"Total execution time for all queries: {time2-time0}")
+    print(f"Part 2: Shapes: {time2-time1}")
+            
+    print(f"Total execution time: {time2-time0}") 
     
     
 # Function to delete local parquets
@@ -144,7 +192,8 @@ def attach_agency_info(df, agency_info):
     # #https://stackoverflow.com/questions/45306988/column-of-lists-convert-list-to-string-as-a-new-column
 
     for c in ["agency_id", "agency_name"]: 
-        agency_info2[c] = agency_info2[c].apply(lambda x: ", ".join([str(i) for i in x]))
+        agency_info2[c] = agency_info2[c].apply(
+            lambda x: ", ".join([str(i) for i in x]))
     
     df2 = pd.merge(
         df,
@@ -164,15 +213,6 @@ def filter_latest_itp_id(df, latest_itp_id_df, itp_id_col = "calitp_itp_id"):
     print(f"# rows to start: {starting_length}")
     print(f"# operators to start: {df[itp_id_col].nunique()}")
     
-    df = (df[df[itp_id_col] != 0]
-          .sort_values([itp_id_col, "route_id"])
-          .reset_index(drop=True)
-         )
-    
-    no_zeros = len(df)
-    print(f"# rows after ITP_ID==0 dropped: {no_zeros}")
-    print(f"# operators after ITP_ID==0 dropped: {df[itp_id_col].nunique()}")
-    
     # Drop ITP_IDs if not found in the latest_itp_id
     if itp_id_col != "calitp_itp_id":
         latest_itp_id_df = latest_itp_id_df.rename(columns = {
@@ -185,6 +225,6 @@ def filter_latest_itp_id(df, latest_itp_id_df, itp_id_col = "calitp_itp_id"):
     only_latest_id = len(df)
     print(f"# rows with only latest agencies.yml: {only_latest_id}")
     print(f"# operators with only latest agencies.yml: {df[itp_id_col].nunique()}")
-    print(f"# rows dropped-: {only_latest_id - starting_length}")
+    print(f"# rows dropped: {only_latest_id - starting_length}")
     
     return df
