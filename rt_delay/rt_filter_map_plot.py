@@ -191,7 +191,7 @@ class RtFilterMapper:
                 # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
                 assert not stop_speeds.empty, 'stop speeds gdf is empty!'
             except Exception as e:
-                print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}, direction_id: {direction_id}')
+                print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
                 print(e)
                 continue
 
