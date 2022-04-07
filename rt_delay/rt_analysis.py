@@ -356,7 +356,9 @@ class OperatorDayAnalysis:
         st = self.stop_times >> select(_.trip_key, _.trip_id, _.stop_id, _.stop_sequence, _.arrival_time)
         delays = self.trs >> inner_join(_, st, on = 'stop_id')
         delays = delays >> inner_join(_, trips, on = ['trip_id', 'shape_id'])
-        delays = delays >> distinct(_.trip_id, _.stop_id, _keep_all=True) ## TODO drop duplicates elsewhere?
+        ## changed to stop sequence which should catch more duplicates, but a pain point from url number handling...
+        delays = delays >> distinct(_.trip_id, _.stop_sequence, _keep_all=True) 
+        self.debug_dict['delays'] = delays
         _delays = gpd.GeoDataFrame()
         
         if type(self.pbar) != type(None):
@@ -364,7 +366,7 @@ class OperatorDayAnalysis:
             self.pbar.desc = 'Generating stop delay view'
         for trip_id in delays.trip_id.unique():
             try:
-                _delay = delays.copy() >> filter(_.trip_id == trip_id)
+                _delay = delays.copy() >> filter(_.trip_id == trip_id) >> distinct(_.stop_id, _keep_all = True)
                 _delay['actual_time'] = _delay.apply(lambda x: 
                                 self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
                                 axis = 1)
@@ -381,7 +383,7 @@ class OperatorDayAnalysis:
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
                 _delay['delay_seconds'] = _delay.delay.map(lambda x: x.seconds)
                 _delays = pd.concat((_delays, _delay))
-                # self.debug_dict[f'{trip_id}_delay'] = _delay
+                self.debug_dict[f'{trip_id}_delay'] = _delay
                 # return
             except Exception as e:
                 print(f'could not generate delays for trip {trip_id}')
