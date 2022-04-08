@@ -69,6 +69,9 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
 
+                if '%%capture' in cell.source:
+                    cell.outputs = []
+
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
 papermill_engines.register_entry_points()
