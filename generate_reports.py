@@ -49,9 +49,12 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
         assert "original_parameters" in kwargs
 
         params = kwargs["original_parameters"]
-
+        
         for func in RESOLVERS:
-            params[func.__name__] = func(**kwargs["original_parameters"])
+            try:
+                params[func.__name__] = func(**kwargs["original_parameters"])
+            except TypeError:
+                pass
 
         for cell in nb_man.nb.cells:
 
