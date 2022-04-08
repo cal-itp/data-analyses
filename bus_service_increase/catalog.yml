@@ -42,7 +42,13 @@ sources:
         args:
           url: https://gis.data.ca.gov/data.json
           items:
-              county_boundaries: https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries     
+              county_boundaries: https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries  
+  parallel_trips_with_stops:
+    driver: geoparquet
+    description: Parallel routes to SHN, 1 trip selected for each route, with stop info.
+    args:
+    # source: setup_parallel_trips_with_stops.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/parallel_trips_with_stops.parquet
 
       
       
