@@ -39,9 +39,13 @@ def select_one_trip(df):
                  "trip_first_departure_ts", "trip_last_arrival_ts", 
                 ]
     
+    # Some departure_time is None
     df = df[df.departure_time.notna()].assign(
         departure_hr = pd.to_datetime(df.trip_first_departure_ts, unit='s').dt.hour                   
-    ).drop(columns = drop_cols).drop_duplicates().reset_index(drop=True)
+    ).drop(columns = drop_cols).drop_duplicates()
+    
+    # Make sure no NaNs make it through
+    df = df[(df.departure_hr.notna()) & (df.departure_hr < 24)].reset_index(drop=True)
     
     # Across trip_ids, for the same route_id, there are differing max_stop_sequence
     # Can't use max_stop_sequence to find longest route_length
@@ -137,7 +141,8 @@ def grab_stop_geom(df):
                          "trip_id", "stop_sequence"])
            .reset_index(drop=True)
            .drop(columns = ["stop_lon", "stop_lat", 
-                            "trip_first_departure_ts", "trip_last_arrival_ts"])
+                            # Keep trip_first_arrival_ts (in case departure_time is NaN)
+                            "trip_last_arrival_ts"])
           )
 
     return gdf
