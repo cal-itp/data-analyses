@@ -2,23 +2,20 @@
 Utility functions for geospatial data.
 Some functions for dealing with census tract or other geographic unit dfs.
 """
-import os
-
 import geopandas as gpd
 import pandas as pd
 import shapely
+from calitp import query_sql
 from calitp.tables import tbl
 from siuba import *
-
-os.environ["CALITP_BQ_MAX_BYTES"] = str(50_000_000_000)
 
 WGS84 = "EPSG:4326"
 CA_StatePlane = "EPSG:2229"  # units are in feet
 CA_NAD83Albers = "EPSG:3310"  # units are in meters
 
-SQ_MI_PER_SQ_M = 3.86 * 10 ** -7
+SQ_MI_PER_SQ_M = 3.86 * 10**-7
 FEET_PER_MI = 5_280
-SQ_FT_PER_SQ_MI = 2.788 * 10 ** 7
+SQ_FT_PER_SQ_MI = 2.788 * 10**7
 
 
 def aggregate_by_geography(
@@ -109,90 +106,167 @@ def attach_geometry(df, geometry_df, merge_col=["Tract"], join="left"):
     return gdf
 
 
-# Function to take transit stop point data and create lines
-def make_routes_shapefile(ITP_ID_LIST=[], CRS="EPSG:4326", alternate_df=None):
+# Function to construct the SQL condition for make_routes_gdf()
+def construct_condition(SELECTED_DATE, INCLUDE_ITP_LIST):
+    def unpack_list_make_or_statement(INCLUDE_ITP_LIST):
+        new_cond = ""
+
+        for i in range(0, len(INCLUDE_ITP_LIST)):
+            cond = f"calitp_itp_id = {INCLUDE_ITP_LIST[i]}"
+            if i == 0:
+                new_cond = cond
+            else:
+                new_cond = new_cond + " OR " + cond
+
+        new_cond = "(" + new_cond + ")"
+
+        return new_cond
+
+    operator_or_statement = unpack_list_make_or_statement(INCLUDE_ITP_LIST)
+
+    date_condition = (
+        f'(calitp_extracted_at <= "{SELECTED_DATE}" AND '
+        f'calitp_deleted_at > "{SELECTED_DATE}")'
+    )
+
+    condition = operator_or_statement + " AND " + date_condition
+
+    return condition
+
+
+# Run the sql query with the condition in long-form
+def create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST):
+    condition = construct_condition(SELECTED_DATE, ITP_ID_LIST)
+
+    sql_statement = f"""
+        SELECT
+            calitp_itp_id,
+            calitp_url_number,
+            shape_id,
+            pt_array
+
+        FROM `views.gtfs_schedule_dim_shapes_geo`
+
+        WHERE
+            {condition}
+        """
+
+    df = query_sql(sql_statement)
+
+    return df
+
+
+def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None):
     """
     Parameters:
-    ITP_ID_LIST: list. List of ITP IDs found in agencies.yml
-    CRS: str. Default is WGS84, but able to re-project to another CRS.
 
-    Returns a geopandas.GeoDataFrame, where each line is the operator-route-line geometry.
+    SELECTED_DATE: str or datetime
+        Ex: '2022-1-1' or datetime.date(2022, 1, 1)
+    CRS: str, a projected coordinate reference system.
+        Defaults to EPSG:4326 (WGS84)
+    ITP_ID_LIST: list or None
+            Defaults to all ITP_IDs except ITP_ID==200.
+            For a subset of operators, include a list, such as [182, 100].
+
+    All operators for selected date: ~11 minutes
     """
 
-    all_routes = gpd.GeoDataFrame()
-
-    for itp_id in ITP_ID_LIST:
-        if alternate_df is None:
-            shapes = (
-                tbl.gtfs_schedule.shapes()
-                >> filter(_.calitp_itp_id == int(itp_id))
-                >> collect()
+    if ITP_ID_LIST is None:
+        df = (
+            tbl.views.gtfs_schedule_dim_shapes_geo()
+            >> filter(
+                _.calitp_extracted_at <= SELECTED_DATE,
+                _.calitp_deleted_at > SELECTED_DATE,
             )
-
-        elif alternate_df is not None:
-            shapes = alternate_df.copy()
-            # shape_id is None, which will throw up an error later on when there's groupby
-            shapes = shapes.assign(
-                shape_id=shapes.route_id,
-            )
-
-        # Make a gdf
-        shapes = gpd.GeoDataFrame(
-            shapes,
-            geometry=gpd.points_from_xy(shapes.shape_pt_lon, shapes.shape_pt_lat),
-            crs=WGS84,
+            >> filter(_.calitp_itp_id != 200)
+            >> select(_.calitp_itp_id, _.calitp_url_number, _.shape_id, _.pt_array)
+            >> collect()
         )
+    else:
+        df = create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST)
 
-        # Count the number of stops for a given shape_id
-        # Must be > 1 (need at least 2 points to make a line)
-        shapes = shapes.assign(
-            num_stops=(
-                shapes.groupby("shape_id")["shape_pt_sequence"].transform("count")
-            )
-        )
+    # Laurie's example: https://github.com/cal-itp/data-analyses/blob/752eb5639771cb2cd5f072f70a06effd232f5f22/gtfs_shapes_geo_examples/example_shapes_geo_handling.ipynb
+    # have to convert to linestring
+    def make_linestring(x):
 
-        # Drop the shape_ids that can't make a line
-        shapes = shapes[shapes.num_stops > 1].reset_index(drop=True)
+        # shapely errors if the array contains only one point
+        if len(x) > 1:
+            # each point in the array is wkt
+            # so convert them to shapely points via list comprehension
+            as_wkt = [shapely.wkt.loads(i) for i in x]
+            return shapely.geometry.LineString(as_wkt)
 
-        # Now, combine all the stops by stop sequence, and create linestring
-        unique_shapes = list(shapes.shape_id.unique())
+    # apply the function
+    df["geometry"] = df.pt_array.apply(make_linestring)
 
-        # Sometimes shape_id as NoneType comes up, and creates a problem, skip those
-        try:
-            for route in unique_shapes:
-                single_shape = (
-                    shapes
-                    >> filter(_.shape_id == route)
-                    >> mutate(shape_pt_sequence=_.shape_pt_sequence.astype(int))
-                    # arrange in the order of stop sequence
-                    >> arrange(_.shape_pt_sequence)
-                )
+    # convert to geopandas; geometry column contains the linestring
+    gdf = gpd.GeoDataFrame(df, geometry="geometry", crs=WGS84)
 
-            # Convert from a bunch of points to a line (for a route, there are multiple points)
-            route_line = shapely.geometry.LineString(list(single_shape["geometry"]))
-            single_route = single_shape[
-                ["calitp_itp_id", "calitp_url_number", "shape_id"]
-            ].iloc[
-                [0]
-            ]  # preserve info cols
-            single_route["geometry"] = route_line
-            single_route = gpd.GeoDataFrame(single_route, crs=WGS84)
+    # Project, if necessary
+    gdf = gdf.to_crs(CRS)
 
-            # https://stackoverflow.com/questions/15819050/pandas-dataframe-concat-vs-append/48168086
-            all_routes = pd.concat(
-                [all_routes, single_route], ignore_index=True, axis=0
-            )
-        except TypeError:
-            print(f"unable to grab ID: {itp_id}, route: {route}")
+    return gdf
 
-    all_routes = (
-        all_routes.to_crs(CRS)
-        .sort_values(["calitp_itp_id", "shape_id"])
+
+# Function to deal with edge cases where operators do not submit the optional shapes.txt
+# Use stops data / stop sequence to handle
+def make_routes_line_geom_for_missing_shapes(df, CRS="EPSG:4326"):
+    """
+    Parameters:
+    df: pandas.DataFrame.
+        Compile a dataframe from gtfs_schedule_trips.
+        Find the trips that aren't in `shapes.txt`.
+        https://github.com/cal-itp/data-analyses/blob/main/traffic_ops/create_routes_data.py#L63-L69
+        Use that dataframe here.
+
+    CRS: str, a projected coordinated reference system.
+            Defaults to EPSG:4326 (WGS84)
+    """
+    if "shape_id" not in df.columns:
+        df = df.assign(shape_id=df.route_id)
+
+    # Make a gdf
+    gdf = gpd.GeoDataFrame(
+        df,
+        geometry=gpd.points_from_xy(df.stop_lon, df.stop_lat),
+        crs=WGS84,
+    )
+
+    # Count the number of stops for a given shape_id
+    # Must be > 1 (need at least 2 points to make a line)
+    gdf = gdf.assign(
+        num_stops=(gdf.groupby("shape_id")["stop_sequence"].transform("count"))
+    )
+
+    # Drop the shape_ids that can't make a line
+    gdf = (
+        gdf[gdf.num_stops > 1]
+        .reset_index(drop=True)
+        .assign(stop_sequence=gdf.stop_sequence.astype(int))
+        .drop(columns="num_stops")
+    )
+
+    # shapely make linestring with groupby
+    # https://gis.stackexchange.com/questions/366058/pandas-dataframe-to-shapely-linestring-using-groupby-sortby
+    group_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
+
+    gdf2 = (
+        gdf.sort_values(group_cols + ["stop_sequence"])
+        .groupby(group_cols)["geometry"]
+        .apply(lambda x: shapely.geometry.LineString(x.tolist()))
+    )
+
+    # Turn geoseries into gdf
+    gdf2 = gpd.GeoDataFrame(gdf2, geometry="geometry", crs=WGS84).reset_index()
+
+    gdf2 = (
+        gdf2.to_crs(CRS)
+        .sort_values(["calitp_itp_id", "calitp_url_number", "shape_id"])
         .drop_duplicates()
         .reset_index(drop=True)
     )
 
-    return all_routes
+    return gdf2
 
 
 def create_point_geometry(

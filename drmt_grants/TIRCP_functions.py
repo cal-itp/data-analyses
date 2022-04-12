@@ -39,7 +39,7 @@ Cleaning & Loading Data
 """
 #Project Sheet
 def project(): 
-    FILE_NAME1 = "Raw_Project_Tracking_Sheet.xlsx"
+    FILE_NAME1 = "TIRCP_Projects_March_14_2022.xlsx"
     df = pd.read_excel(f"{GCS_FILE_PATH}{FILE_NAME1}") 
     df.columns = df.columns.str.strip().str.replace(' ', '_')
     df.columns = df.columns.map(lambda x: x.strip())
@@ -50,7 +50,7 @@ def project():
     
     ### RECIPIENTS ###
     #Some grant recipients have multiple spellings of their name. E.g. BART versus Bay Area Rapid Tranist
-    df['Local_Agency'] = (df['Local_Agency'].replace({'San Joaquin Regional\nRail Commission / San Joaquin Joint Powers Authority':
+    df['Grant_Recipient'] = (df['Grant_Recipient'].replace({'San Joaquin Regional\nRail Commission / San Joaquin Joint Powers Authority':
                                                       'San Joaquin Regional Rail Commission / San Joaquin Joint Powers Authority', 
                                                  'San Francisco Municipal  Transportation Agency':'San Francisco Municipal Transportation Agency',
                                                  'San Francisco Municipal Transportation Agency (SFMTA)': 'San Francisco Municipal Transportation Agency',
@@ -63,13 +63,19 @@ def project():
                                                  }))
     
     ### CROSSWALK ### 
-    df = pd.merge(df, project_ppno_crosswalk, on = ["Award_Year", "Local_Agency"], how = "left")
+    df = pd.merge(df, project_ppno_crosswalk, left_on = ["Award_Year", "Grant_Recipient"], right_on = ["Award_Year","Local_Agency"], how = "left")
     df.PPNO_New = df.apply(lambda x: x.PPNO_New if (str(x.PPNO_New2) == 'nan') else x.PPNO_New2, axis=1)
     df = df.drop(['PPNO','PPNO_New2'], axis=1).rename(columns = {'PPNO_New':'PPNO'})
     #Change  PPNO to all be strings
     df.PPNO = df.PPNO.astype(str)
     
+    ### DATES CLEAN UP ###
+    #Replace FY 21/22 with Cycle 4
+    df["Award_Cycle"].replace({'FY 21/22': 4}, inplace=True)
+    
     ### MONETARY COLS CLEAN UP ###
+    # correcting string to 0 
+    df["Percentage_Allocated"].replace({'Not Allocated': 0}, inplace=True)
     proj_cols = ['TIRCP_Award_Amount_($)', 'Allocated_Amount','Expended_Amount','Unallocated_Amount','Total_Project_Cost','Other_Funds_Involved']
     df[proj_cols] = df[proj_cols].fillna(value=0)
     df[proj_cols] = df[proj_cols].apply(pd.to_numeric, errors='coerce')
@@ -82,19 +88,24 @@ def project():
     return df
 
 #Allocation Sheet
+
+   
 def allocation(): 
-    FILE_NAME2 = "Allocation_Agreement.xlsx"
+    FILE_NAME2 = "TIRCP_Allocation_March_14_2022.xlsx"
     df = pd.read_excel(f"{GCS_FILE_PATH}{FILE_NAME2}")
+    
     #stripping spaces & _ 
     df.columns = df.columns.str.strip().str.replace(' ', '_')
     #stripping spaces in columns
     df.columns = df.columns.map(lambda x: x.strip())
     
+    #drop NA
+    df= df.dropna(how='all')
     ### PPNO CLEAN UP ### 
     # stripping PPNO down to <5 characters
     df = df.assign(PPNO_New = df['PPNO'].str.slice(start=0, stop=5))
     #Merge in Crosswalk 
-    df = pd.merge(df, allocation_ppno_crosswalk, on = ["Award_Year", "Award_Recipient"], how = "left")
+    df = pd.merge(df, allocation_ppno_crosswalk, left_on = ["Award_Year", "Grant_Recipient"], right_on =["Award_Year","Award_Recipient"], how = "left")
     #Map Crosswalk 
     df.PPNO_New = df.apply(lambda x: x.PPNO_New if (str(x.PPNO_New2) == 'nan') else x.PPNO_New2, axis=1)
     #Drop old PPNO 
@@ -112,12 +123,22 @@ def allocation():
             .fillna('TBD')
         )
     #replacing values for date columns to be coerced later 
-    df["Allocation_Date"] = (df["Allocation_Date"].replace({"FY 26/27": "2026-12-31", "08/12//20": '2020-08-12 00:00:00', 
-                                         'FY 21/22': '2021-12-31','FY 22/23': '2022-12-31',
-                                         'FY 20/21': '2020-12-31', 'FY 23/24': '2023-12-31',
-                                         'FY 24/25': '2024-12-31','FY 25/26': '2025-12-31'})) 
+    df["Allocation_Date"] = (df["Allocation_Date"].replace({"08/12//20": '2020-08-12 00:00:00', 
+                                        
+                                         'FY 20/21': '2020-12-31 00:00:00'})) 
    
-    df["Completion_Date"] = (df["Completion_Date"].replace({ 'June 24. 2024': '2024-06-01 00:00:00',  
+    df["Completion_Date"] = (df["Completion_Date"].replace({
+    'Complete\n6/1/2019': '2019-06-01 00:00:00',
+    'Complete\n2/11/2018': '2018-02-11 00:00:00',
+    'Complete\n6/30/2020': '2020-06-30 00:00:00',
+     '\n6/30/2018': '2018-06-30 00:00:00', 
+     '\n6/29/2020':'2020-06-29 00:00:00', 
+        '\n11/1/2019': '2019-01-11 00:00:00',
+    '\nJun-29\n':'2019-06-01 00:00:00',
+    '6/30/2021\n12/31/2021\n10/20/2022': '2022-10-22 00:00:00',
+    'Complete\n1/31/2020': '2020-01-31 00:00:00',
+    'Complete\n8/30/2020': '2020-08-30 00:00:00',
+    'June 24. 2024': '2024-06-01 00:00:00',  
     '11/21/2024\n7/30/2025 (Q4)': '2024-11-21 00:00:00', 
     'Jun-26': '2026-01-01 00:00:00', 
      'Jun-29': '2029-06-01 00:00:00',
@@ -147,12 +168,9 @@ def allocation():
      '5-7-2020': '2020-05-07 00:00:00'})) 
     
     df["Third_Party_Award_Date"] = df["Third_Party_Award_Date"].replace({ 
-    'Augsut 12, 2021': '2021-08-12 00:00:00',
-    '43435': '2018-12-01 00:00:00',
-    '07-29-2020': '2020-07-29 00:00:00',
-    '43497' : '2019-02-01 00:00:00',
-    'TBD 6-24-2021' : '2021-06-24 00:00:00',
-    'TBD 6-30-2022' : '2022-06-30 00:00:00'})
+    '-': 'TBD',
+    'Pending 6/30/2022':'2022-06-30 00:00:00',
+    'Augsut 12, 2021': '2021-08-12 00:00:00',})
     
     # coerce to dates
     df = df.assign(
@@ -185,6 +203,7 @@ def allocation():
     df = (df.rename(columns = {'Allocation_Amount':'Allocation_Amt_Allocation_Sheet',
                                'Expended_Amount': 'Expended_Amt_Allocation_Sheet'})
          )
+   
     return df
 
 """
@@ -362,9 +381,19 @@ Tableau
 """
 ### SHEET CONNECTED TO TABLEAU ### 
 def tableau():
-    #Keeping only the columns we want
     df = project()
-    
+    #Keeping only the columns we want
+    df = (df[['PPNO','Award_Year', 'Project_#', 'Local_Agency', 'Vendor_ID_#',
+       'Project_Title', 'District', 'County', 'Key_Project_Elements',
+       'Master_Agreement_Number', 'Master_Agreement_Expiration_Date',
+       'Project_Manager', 'Regional_Coordinator',
+       'Technical_Assistance-CALTP_(Y/N)', 'Technical_Assistance-Fleet_(Y/N)',
+       'Technical_Assistance-Network_Integration_(Y/N)',
+       'Technical_Assistance-Priority_Population_(Y/N)', 'Total_Project_Cost',
+       'TIRCP_project_sheet', 'Allocated_Amount',
+       'Unallocated_amt_project_sheet', 'Percentge_Allocated',
+       'Expended_Amt_project_sheet', 'Other_Funds_Involved']]
+                 )
     #Getting percentages & filling in with 0
     df['Expended_Percent'] = df['Expended_Amt_project_sheet']/df['Allocated_Amount']
     df['Allocated_Percent'] = df['Allocated_Amount']/df['TIRCP_project_sheet']
@@ -471,6 +500,9 @@ def tableau():
         df.to_excel(writer, sheet_name="Data", index=False)
     return df
 
+    ### GCS ###
+    df = df.to_parquet(f'{GCS_FILE_PATH}TIRCP_Tableau_Parquet.parquet')
+    return df 
     return df 
 
 '''
