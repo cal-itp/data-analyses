@@ -1,6 +1,6 @@
 import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
-from shared_utils.map_utils import make_folium_choropleth_map
+from shared_utils.map_utils import make_folium_choropleth_map, make_folium_multiple_layers_map
 import branca
 
 from utils import *
@@ -86,7 +86,7 @@ class RtFilterMapper:
         elif not self.filter['route_names']:
             rts = 'All Routes'
             
-        print(self.filter)
+        # print(self.filter)
         ## properly format for pm peak, TODO add other periods
         if start_time and end_time and start_time == '15:00' and end_time == '19:00':
             period = 'PM Peak'
@@ -107,7 +107,7 @@ class RtFilterMapper:
             return df
         else:
             trips = self.rt_trips.copy()
-            print(f'view filter: {self.filter}')
+            # print(f'view filter: {self.filter}')
         if self.filter['start_time']:
             trips = trips >> filter(_.median_time > self.filter['start_time'])
         if self.filter['end_time']:
@@ -273,7 +273,7 @@ class RtFilterMapper:
                 "fillOpacity": 0.6,
             }
         )
-
+        
         return g  
 
     def chart_delays(self):
