@@ -4,8 +4,11 @@ Utility functions
 import datetime as dt
 import gcsfs
 import pandas as pd
+import pickle
 
 from calendar import THURSDAY, SATURDAY, SUNDAY
+from calitp.storage import get_fs
+fs = get_fs()
 
 GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
@@ -90,3 +93,31 @@ def fix_gtfs_time(gtfs_timestring):
         return corrected.strip()
     else:
         return gtfs_timestring.strip()
+
+    
+# https://stackoverflow.com/questions/25052980/use-pickle-to-save-dictionary-in-python
+def save_request_json(my_list, name, 
+                        DATA_PATH = DATA_PATH, 
+                        GCS_FILE_PATH = GCS_FILE_PATH):
+    # result comes back as a list, but add [0] and it's a dict
+    my_dict = my_list[0]
+    
+    # Convert to json
+    #https://gist.github.com/romgapuz/c7a4cedb85f090ac1b55383a58fa572c
+    json_obj = json.loads(json.dumps(my_dict, default=str))
+    
+    # Save json locally
+    json.dump(json_obj, open(f"{DATA_PATH}{name}.json", "w", encoding='utf-8'))
+    
+    # Put the json object in GCS. 
+    fs.put(f"{DATA_PATH}{name}.json", f"{GCS_FILE_PATH}{name}.json")
+    print(f"Saved {name}")
+    
+    
+def open_request_json(name, DATA_PATH = DATA_PATH, 
+                       GCS_FILE_PATH = GCS_FILE_PATH):
+    # Download object from GCS bucket
+    gcs_json = fs.get(f"{GCS_FILE_PATH}{name}.json", f"{DATA_PATH}{name}.json")
+    my_dict = json.load(open(f"{DATA_PATH}{i}.json"))
+    
+    return my_dict
