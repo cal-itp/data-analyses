@@ -2,5 +2,48 @@ dla:
   notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
   params:
     district:
-      - 4
-      - 7
+    - 4
+    - 7
+rt:
+  notebook: ./rt_delay/15_parameterize.ipynb
+  params:
+    itp_id:
+    - 110
+    - 126
+    - 127
+    - 135
+    - 148
+    - 159
+    - 167
+    - 170
+    - 182
+    - 188
+    - 194
+    - 208
+    - 218
+    - 221
+    - 226
+    - 235
+    - 243
+    - 246
+    - 259
+    - 269
+    - 278
+    - 282
+    - 284
+    - 290
+    - 293
+    - 294
+    - 295
+    - 300
+    - 301
+    - 30
+    - 310
+    - 315
+    - 336
+    - 349
+    - 350
+    - 361
+    - 45
+    - 4
+    - 75
