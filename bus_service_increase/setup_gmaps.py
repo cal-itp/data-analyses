@@ -166,8 +166,22 @@ def make_gmaps_df():
     # all the "geometry" kind of columns are tuples or lists now
     final = pd.DataFrame(final)
     
-    final["identifier"] = final.calitp_itp_id.astype(str).str.cat(
-                    [final.route_id, final.trip_id, final.shape_id], sep ="__")
+    final["identifier"] = (
+        final.calitp_itp_id.astype(str).str.cat(
+            [final.route_id, final.trip_id, final.shape_id], sep ="__")
+    )
+    
+    # These weird characters are preventing the name from being used in GCS
+    final = final.assign(
+        identifier = (
+            final.identifier.str.replace('@', '', regex=False)
+                  .str.replace('.', '', regex=False)
+                  .str.replace('[', '', regex=False)
+                  .str.replace(']', '', regex=False)
+                  .str.replace('/', '', regex=False)
+                     
+                 )
+    )
     
     final.to_parquet(f"{utils.GCS_FILE_PATH}gmaps_df.parquet")
     print("Exported to GCS")
