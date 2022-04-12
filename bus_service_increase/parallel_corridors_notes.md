@@ -41,10 +41,10 @@ Line 605:
 No route should take more than twice as long than car route
 1. Most efficient car route...how long that takes, origin to destination
 1. How long does it take to drive the existing transit route. Start with the route...see how long it takes now, highlight areas of delay, but also show the minimum trip time (if bus went its top avg speed throughout).
+1. Multiple scenarios: most efficient car route with no traffic, most efficient car route during traffic, car driving existing transit route during traffic, transit route during free-flowing traffic
 
 Line 33 is good local bus, goes along Venice Blvd
 Could you provide better end-to-end service for ppl who go between DTLA and Venice, by using 10 fwy.
-
 
 
 [osrm](https://github.com/vaclavdekanovsky/data-analysis-in-examples/blob/master/Maps/Driving%20Distance/Driving%20Distance%20between%20two%20places.ipynb) -- can't be installed in Hub
@@ -55,3 +55,10 @@ Could you provide better end-to-end service for ppl who go between DTLA and Veni
 [kuan's blog on calculating travel time](http://kuanbutts.com/2020/09/12/raptor-simple-example/)
 [google-api-python-client](https://github.com/googleapis/google-api-python-client/blob/main/docs/batch.md)
 [google python package](https://github.com/googlemaps/google-maps-services-python)
+[pyosmium](https://github.com/osmcode/pyosmium)
+
+## PEMS Data
+* https://stackoverflow.com/questions/64152588/read-a-gz-file-from-google-cloud-storage-via-python-jupyter
+* https://stackoverflow.com/questions/62500248/unzip-and-read-a-gz-file-from-google-cloud-storage-via-python-cloud-function
+* https://cloud.google.com/storage/docs/downloading-objects#storage-download-object-python
+* https://stackoverflow.com/questions/12902540/read-from-a-gzip-file-in-python
