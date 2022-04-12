@@ -2,7 +2,7 @@ from calitp.tables import tbl
 from calitp import query_sql
 
 import shared_utils
-from shared_utils.geography_utils import CA_NAD83Albers
+from shared_utils.geography_utils import CA_NAD83Albers, WGS84
 from siuba import *
 
 import gcsfs
@@ -17,6 +17,7 @@ import geopandas as gpd
 import warnings
 
 import branca
+import folium
 
 from numba import jit
 import numpy as np
@@ -30,6 +31,9 @@ GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/rt_delay"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
+
+BUS_BUCKET_DIR = "data-analyses/bus_service_increase"
+BUS_GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUS_BUCKET_DIR}/"
 
 MPH_PER_MPS = 2.237 ## use to convert meters/second to miles/hour
 
@@ -146,6 +150,21 @@ def get_vehicle_positions(itp_id, analysis_date):
 
         df.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
         return df
+    
+def get_routes(itp_id, analysis_date):
+    routes_on_date = (tbl.views.gtfs_schedule_fact_daily_feed_routes()
+         >> filter(_.date == analysis_date)
+         >> filter(_.calitp_extracted_at <= analysis_date, _.calitp_deleted_at >= analysis_date)
+        )
+
+    operator_routes = tbl.views.gtfs_schedule_dim_routes() >> filter(_.calitp_itp_id == itp_id)
+    routes_date_joined = (routes_on_date
+         >> inner_join(_, operator_routes >> select(_.route_id, _.route_key, _.route_short_name),
+                       on = 'route_key')
+         >> distinct(_.route_id, _.route_short_name)
+         >> collect()
+        )
+    return routes_date_joined
 
 def get_trips(itp_id, analysis_date, force_clear=False):
     ''' 
@@ -154,6 +173,8 @@ def get_trips(itp_id, analysis_date, force_clear=False):
     
     Interim function for getting complete trips data for a single operator on a single date of interest.
     To be replaced as RT views are implemented...
+    
+    Updated to include route_short_name from routes
     '''
     
     date_str = analysis_date.strftime('%Y-%m-%d')
@@ -178,8 +199,10 @@ def get_trips(itp_id, analysis_date, force_clear=False):
                   _.shape_id, _.calitp_extracted_at, _.calitp_deleted_at)
         >> collect()
         >> distinct(_.trip_id, _keep_all=True)
+        >> inner_join(_, get_routes(itp_id, analysis_date), on = 'route_id')
             )
-    trips.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
+    if not path or force_clear:
+        trips.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
     return trips
 
 def get_stop_times(itp_id, analysis_date, force_clear = False):
@@ -218,8 +241,9 @@ def get_stop_times(itp_id, analysis_date, force_clear = False):
     st = (trips_ix_query
         >> inner_join(_, st_query, on = 'stop_time_key')
         >> mutate(stop_sequence = _.stop_sequence.astype(int)) ## in SQL!
-        >> arrange(_.stop_sequence)
         >> collect()
+        >> distinct(_.stop_id, _.trip_id, _keep_all=True) 
+        >> arrange(_.stop_sequence)
         )
     st.arrival_time = st.arrival_time.str.strip()
     st.departure_time = st.departure_time.str.strip()
@@ -271,16 +295,25 @@ def get_stops(itp_id, analysis_date, force_clear = False):
     shared_utils.utils.geoparquet_gcs_export(stops, export_path, filename[:-8])
     return stops
 
-def get_routelines(itp_id):
-    '''currently we only have shapes for latest, this will impede historical rt analysis...'''
-    path = check_cached(f'{itp_id}_routelines.parquet')
-    if path:
-        print('found_parquet')
-        return gpd.read_parquet(path)
+def get_routelines(itp_id, analysis_date, force_clear = False):
+    
+    date_str = analysis_date.strftime('%Y-%m-%d')
+    filename = f'routelines_{itp_id}_{date_str}.parquet'
+    path = check_cached(filename)
+    if path and not force_clear:
+        print('found parquet')
+        cached = gpd.read_parquet(path)
+        if not cached.empty:
+            return cached
+        else:
+            print('cached parquet empty, will try a fresh query')
     else:
-        routelines = shared_utils.geography_utils.make_routes_shapefile([itp_id], CA_NAD83Albers)
+        routelines = shared_utils.geography_utils.make_routes_gdf(SELECTED_DATE = analysis_date,
+                                                             CRS = shared_utils.geography_utils.CA_NAD83Albers,
+                                                             ITP_ID_LIST = [itp_id])
+        routelines = routelines >> select(-_.pt_array) >> distinct(_.shape_id, _keep_all=True)
         export_path = GCS_FILE_PATH+'cached_views/'
-        shared_utils.utils.geoparquet_gcs_export(routelines, export_path, f'{itp_id}_routelines')
+        shared_utils.utils.geoparquet_gcs_export(routelines, export_path, filename)
         return routelines
     
 def categorize_time_of_day(dt):
@@ -299,7 +332,7 @@ def categorize_time_of_day(dt):
     
 @jit(nopython=True) ##numba gives huge speedup here (~60x)
 def time_at_position_numba(desired_position, shape_array, dt_float_array):
-    if desired_position < shape_array.max() and desired_position > shape_array.min():\
+    if desired_position < shape_array.max() and desired_position > shape_array.min():
         return np.interp(desired_position, shape_array, dt_float_array)
     else:
         return None
@@ -351,21 +384,90 @@ def arrowize_segment(line_geometry, arrow_distance = 15, buffer_distance = 20):
                 return geom
     except:
         return line_geometry.simplify(tolerance = 5).buffer(buffer_distance)
-    
-# def chart_hourly(df, data_col, hour_col, title = ''):
-#     '''
-#     Return a bar chart of endpoint delay or speed grouped by hour
-#     '''
-#     df = df.copy()
-#     df['']
-#     >> group_by(_.hour_col)
-#     sns_plot = (sns.barplot(x=rt_1['Hour'], y=rt_1['Minutes of Delay at Endpoint'], ci=None, 
-#                        palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
-#             .set_title("SJRTD 44 Delay by Time of Day, Feb 8")
-#            )
-#     chart3 = sns_plot.get_figure()
-#     chart3.tight_layout()
-# def chart_scatter(df, data_col, title = ''):
-#     '''
-#     Return a scatter chart showing distribution of speeds or delays
-#     '''
+
+def layer_points(rt_interpolator):
+    initial_bk_noise = (rt_interpolator.position_gdf
+                        >> filter(_.meters_from_last < 0)
+                        >> select(_.geometry, _.shape_meters, _.progressed,
+                                  _.secs_from_last, _.meters_from_last)
+                       )
+    initial_deduped = (rt_interpolator.position_gdf
+                       >> distinct(_.shape_meters, _keep_all=True)
+                       >> select(_.geometry, _.shape_meters, _.progressed,
+                                 _.secs_from_last, _.meters_from_last)
+                      )
+    cleaned = rt_interpolator.cleaned_positions >> select(_.geometry, _.shape_meters, _.progressed,
+                                             _.secs_from_last, _.meters_from_last)
+    popup_dict = {'shape_meters': 'shape_meters', 'progressed': 'progressed', 'secs_from_last': 'secs_from_last',
+                 'meters_from_last': 'meters_from_last'}
+    layers_dict = {'initial backwards noise': {'df': initial_bk_noise,
+                                              'plot_col': 'shape_meters',
+                                              'popup_dict': popup_dict,
+                                              'tooltip_dict': popup_dict,
+                                              'colorscale': branca.colormap.step.Blues_03},
+                   'initial position deduplicated': {'df': initial_deduped,
+                                              'plot_col': 'shape_meters',
+                                              'popup_dict': popup_dict,
+                                              'tooltip_dict': popup_dict,
+                                              'colorscale': branca.colormap.step.Greens_03},
+                    'cleaned_final': {'df': cleaned,
+                                              'plot_col': 'shape_meters',
+                                              'popup_dict': popup_dict,
+                                              'tooltip_dict': popup_dict,
+                                              'colorscale': branca.colormap.step.Greens_03},
+
+                  }
+    for i in range(rt_interpolator._position_cleaning_count):
+        layers_dict[f'cleaned_{i}'] = {'df': (rt_interpolator.debug_dict[f'clean_{i}'] 
+                                       >> select(_.geometry, _.shape_meters, _.progressed,
+                                          _.secs_from_last, _.meters_from_last)),
+                          'plot_col': 'shape_meters',
+                          'popup_dict': popup_dict,
+                          'tooltip_dict': popup_dict,
+                          'colorscale': branca.colormap.step.Reds_03,
+                          # 'marker':  marker
+                                      }
+    # return layers_dict
+    return shared_utils.map_utils.make_folium_multiple_layers_map(layers_dict, 900, 500)
+
+def map_line(gdf):
+    # gdf = gdf.buffer(1)
+    gdf = gdf.to_crs(shared_utils.geography_utils.WGS84)
+    centroid = gdf.geometry.iloc[0].centroid
+    m = folium.Map(location = [centroid.y, centroid.x], zoom_start = 13, tiles="cartodbpositron")
+    folium.GeoJson(gdf.to_json()).add_to(m)
+    return m
+
+def categorize_cleaning(rt_operator_day, interpolator_key):
+    rt_interpolator = rt_operator_day.position_interpolators[interpolator_key]['rt']
+    raw = rt_interpolator.position_gdf.shape[0]
+    same_loc_dropped = (rt_interpolator.position_gdf >> distinct(_.shape_meters)).shape[0]
+    cleaned = rt_interpolator.cleaned_positions.shape[0]
+    return (interpolator_key, cleaned / raw, cleaned / same_loc_dropped)
+
+def make_linestring(x):
+    # shapely errors if the array contains only one point
+    if len(x) > 1:
+        # each point in the array is wkt
+        # so convert them to shapely points via list comprehension
+        as_wkt = [shapely.wkt.loads(i) for i in x]
+        return shapely.geometry.LineString(as_wkt)
+
+# def get_new_routelines(itp_id, analysis_date):
+
+#     shapes = (tbl.views.gtfs_schedule_dim_shapes_geo()
+#           >> filter(_.calitp_extracted_at <= analysis_date, 
+#                     _.calitp_deleted_at > analysis_date
+#                    )
+#           >> filter(_.calitp_itp_id == itp_id)
+#           >> select(_.calitp_itp_id, _.calitp_url_number, _.calitp_extracted_at,
+#                     _.calitp_deleted_at, _.shape_id, _.pt_array)
+#           >> collect()
+#          )
+#         # apply the function
+#     shapes['geometry'] = shapes.pt_array.apply(make_linestring)
+
+#     # convert to geopandas; geometry column contains the linestring
+#     shapes = gpd.GeoDataFrame(shapes, geometry = 'geometry', crs=WGS84)
+#     shapes = shapes.to_crs(CA_NAD83Albers)
+#     return shapes >> select(-_.pt_array)
