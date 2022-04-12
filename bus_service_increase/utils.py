@@ -2,9 +2,8 @@
 Utility functions
 """
 import datetime as dt
-import gcsfs
+import json
 import pandas as pd
-import pickle
 
 from calendar import THURSDAY, SATURDAY, SUNDAY
 from calitp.storage import get_fs
@@ -97,8 +96,8 @@ def fix_gtfs_time(gtfs_timestring):
     
 # https://stackoverflow.com/questions/25052980/use-pickle-to-save-dictionary-in-python
 def save_request_json(my_list, name, 
-                        DATA_PATH = DATA_PATH, 
-                        GCS_FILE_PATH = GCS_FILE_PATH):
+                      DATA_PATH = DATA_PATH, 
+                      GCS_FILE_PATH = GCS_FILE_PATH):
     # result comes back as a list, but add [0] and it's a dict
     my_dict = my_list[0]
     
@@ -118,6 +117,6 @@ def open_request_json(name, DATA_PATH = DATA_PATH,
                        GCS_FILE_PATH = GCS_FILE_PATH):
     # Download object from GCS bucket
     gcs_json = fs.get(f"{GCS_FILE_PATH}{name}.json", f"{DATA_PATH}{name}.json")
-    my_dict = json.load(open(f"{DATA_PATH}{i}.json"))
+    my_dict = json.load(open(f"{DATA_PATH}{name}.json"))
     
     return my_dict
