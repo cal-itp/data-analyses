@@ -14,7 +14,7 @@ from plotnine import *
 import altair as alt
 import altair_saver
 
-from IPython.display import Markdown
+from IPython.display import Markdown, HTML
 from IPython.core.display import display
 
 from shared_utils import altair_utils
@@ -232,7 +232,7 @@ def project_cat(df, i):
     chart = add_tooltip(chart, "Agency", "Funding Amount")
 
     display(
-        HTML(f"<strong>Top Agencies using {labeling(i)} Projects</strong>")
+        Markdown(f"**Top Agencies using {labeling(i)} Projects**")
     )
     display(subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"}))
     display(chart)
