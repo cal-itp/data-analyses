@@ -49,6 +49,12 @@ sources:
     args:
     # source: setup_parallel_trips_with_stops.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/parallel_trips_with_stops.parquet
+  gmaps_results:
+    driver: geoparquet
+    description: Parallel routes to SHN with car travel time
+    args:
+    # source: make_gmaps_results.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/gmaps_results.parquet
 
       
       
