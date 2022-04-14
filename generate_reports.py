@@ -2,6 +2,7 @@
 Generates
 """
 import copy
+import json
 import shutil
 import subprocess
 from datetime import datetime
@@ -69,7 +70,8 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
 
-                if '%%capture' in cell.source:
+                if '#export_papermill' in cell.source:
+                    params = {**params, **json.loads(cell.outputs[0]['text'])}
                     cell.outputs = []
 
 
