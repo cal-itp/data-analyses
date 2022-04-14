@@ -24,10 +24,11 @@ def extra_highway_aggregation(gdf):
     # Now we took sum for pct_highway, values can be > 1, set it back to 1 max again.
     gdf2 = gdf2.assign(
         pct_highway = gdf2.apply(lambda x: 1 if x.pct_highway > 1 
-                                 else x.pct_highway, axis=1)
+                                 else x.pct_highway, axis=1),
     )
 
     return gdf2
+
 
 def extra_operator_aggregation(gdf):
     # For the unique route_id, flag it as parallel if it is parallel to any hwy Route
@@ -64,6 +65,23 @@ def aggregate(df, by="operator"):
             "route_id": "unique_route_id",
             "parallel": "num_parallel",
         }).sort_values(group_cols).reset_index(drop=True)
+           .astype({"unique_route_id": int})
     )
     
+    # Last minute clean-up after aggregation
+    if by == "operator":
+        df2 = df2.astype({"itp_id": int})
+        
+        
+    if by=="highway":
+        df2 = (df2.assign(
+                NB_SB = df2.apply(lambda x: 1 if (x.NB == 1) or (x.SB == 1)
+                                  else 0, axis=1).astype(int),
+                EB_WB = df2.apply(lambda x: 1 if (x.EB == 1) or (x.WB == 1)
+                                  else 0, axis=1).astype(int),
+            ).drop(columns = ["NB", "SB", "EB", "WB"])
+               .astype({"District": int, "Route": int})
+        )
+        
     return df2
+    
