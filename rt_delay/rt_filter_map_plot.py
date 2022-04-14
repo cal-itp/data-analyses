@@ -33,6 +33,18 @@ class RtFilterMapper:
         self.calitp_agency_name = rt_trips.calitp_agency_name.iloc[0]
         self.analysis_date = rt_trips.service_date.iloc[0]
         self.display_date = self.analysis_date.strftime('%b %d (%a)')
+        
+        self.endpoint_delay_view = (self.stop_delay_view
+                      >> group_by(_.trip_id)
+                      >> filter(_.stop_sequence == _.stop_sequence.max())
+                      >> ungroup()
+                      >> mutate(arrival_hour = _.arrival_time.apply(lambda x: x.hour))
+                      >> inner_join(_, self.rt_trips >> select(_.trip_id, _.mean_speed_mph), on = 'trip_id')
+                     )
+        self.endpoint_delay_summary = (self.endpoint_delay_view
+                      >> group_by(_.direction_id, _.route_id, _.arrival_hour)
+                      >> summarize(n_trips = _.route_id.size, mean_end_delay_seconds = _.delay_seconds.mean())
+                     )
 
     def set_filter(self, start_time = None, end_time = None, route_names = None,
                    shape_ids = None, direction_id = None, direction = None):
@@ -89,12 +101,16 @@ class RtFilterMapper:
         # print(self.filter)
         ## properly format for pm peak, TODO add other periods
         if start_time and end_time and start_time == '15:00' and end_time == '19:00':
-            period = 'PM Peak'
+            self.filter_period = 'PM Peak'
+        elif start_time and end_time and start_time == '06:00' and end_time == '09:00':
+            self.filter_period = 'AM Peak'
+        elif start_time and end_time and start_time == '10:00' and end_time == '14:00':
+            self.filter_period = 'Midday'
         elif not start_time and not end_time:
-            period = 'All Day'
+            self.filter_period = 'All Day'
         else:
-            period = f'{start_time}–{end_time}'
-        elements_ordered = [rts, direction, period, self.display_date]
+            self.filter_period = f'{start_time}–{end_time}'
+        elements_ordered = [rts, direction, self.filter_period, self.display_date]
         self.filter_formatted = ', ' + ', '.join([str(x) for x in elements_ordered if x])
             
     def reset_filter(self):
