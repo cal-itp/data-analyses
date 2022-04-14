@@ -73,6 +73,9 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
                 if '#export_papermill' in cell.source:
                     params = {**params, **json.loads(cell.outputs[0]['text'])}
                     cell.outputs = []
+            
+                if '%%capture' in cell.source:
+                    cell.outputs = []
 
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
