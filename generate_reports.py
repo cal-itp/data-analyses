@@ -70,7 +70,8 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
 
-                if '#export_papermill' in cell.source:
+                # Consider importing this name from calitp.magics
+                if '%%capture_parameters' in cell.source:
                     params = {**params, **json.loads(cell.outputs[0]['text'])}
                     cell.outputs = []
             
