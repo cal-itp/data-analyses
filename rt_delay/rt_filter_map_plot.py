@@ -20,6 +20,8 @@ from calitp.tables import tbl
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from IPython.display import display, Markdown
+
 class RtFilterMapper:
     '''
     Collects filtering and mapping functions, init with stop segment speed view and rt_trips
@@ -142,7 +144,8 @@ class RtFilterMapper:
 ## alternatively, simply export full day segment speed view
 
     def segment_speed_map(self, segments = 'stops', how = 'average',
-                          colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550]):
+                          colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
+                         no_title=False):
         ''' Generate a map of segment speeds aggregated across all trips for each shape, either as averages
         or 20th percentile speeds.
         
@@ -225,10 +228,10 @@ class RtFilterMapper:
                 self.pbar.refresh
 
         self.stop_segment_speed_view = all_stop_speeds
-        return self._show_speed_map(how = how, colorscale = colorscale, size = size)
+        return self._show_speed_map(how = how, colorscale = colorscale, size = size, no_title = no_title)
     
     def _show_speed_map(self, how = 'average',
-                          colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550]):
+                          colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550], no_title = False):
         
         gdf = self.stop_segment_speed_view.copy()
         # gdf = self._filter(gdf)
@@ -272,6 +275,10 @@ class RtFilterMapper:
         if singletrip:
             popup_dict["delay_seconds"] = "Current Delay (seconds)"
             popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
+        if no_title:
+            title = ''
+        else:
+            title = f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}"
 
         g = make_folium_choropleth_map(
             gdf,
@@ -282,7 +289,7 @@ class RtFilterMapper:
             fig_width = size[0], fig_height = size[1],
             zoom = 13,
             centroid = [centroid.y, centroid.x],
-            title=f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}",
+            title = title,
             legend_name = "Speed (miles per hour)",
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
@@ -333,3 +340,22 @@ class RtFilterMapper:
               palette=shared_utils.calitp_color_palette.CALITP_CATEGORY_BRIGHT_COLORS,
              ).set_title(f"{self.calitp_agency_name} Speed Variability by Stop Segment{self.filter_formatted}")
         return variability_plt
+    
+    def describe_delayed_routes(self):
+        try:
+            most_delayed = (self._filter(self.endpoint_delay_view)
+                        >> group_by(_.shape_id)
+                        >> summarize(mean_delay_seconds = _.delay_seconds.mean())
+                        >> arrange(-_.mean_delay_seconds)
+                        >> head(5)
+                       )
+            most_delayed = most_delayed >> inner_join(_,
+                                   self.rt_trips >> distinct(_.shape_id, _keep_all=True),
+                                   on = 'shape_id')
+            most_delayed = most_delayed.apply(describe_most_delayed, axis=1)
+            display_list = most_delayed.full_description.to_list()
+            with_newlines = '\n * ' + '\n * '.join(display_list)
+            display(Markdown(f'{self.filter_period} most delayed routes: {with_newlines}'))
+        except:
+            print('describe delayed routes failed!')
+        return
