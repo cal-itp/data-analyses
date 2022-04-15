@@ -7,9 +7,6 @@ parts:
       - file: dla/dla_analysis
         sections:
           - glob: dla/e76_obligated_funds/*
-      - file: rt_delay/rt_delay
-        sections:
-          - glob: rt_delay/*
       - file: bus_service_increase/parallel_corridors
         sections:
           - glob: parallel_corridors/*
