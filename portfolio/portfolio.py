@@ -92,7 +92,10 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
         params = kwargs["original_parameters"]
 
         for func in RESOLVERS:
-            params[func.__name__] = func(**kwargs["original_parameters"])
+            try:
+                params[func.__name__] = func(**kwargs["original_parameters"])
+            except TypeError:
+                pass
 
         for cell in nb_man.nb.cells:
 
@@ -106,6 +109,9 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             # hide input (i.e. code) for all cells
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
+
+            if '%%capture' in cell.source:
+                cell.outputs = []
 
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
