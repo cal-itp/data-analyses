@@ -1,7 +1,7 @@
 # Book settings
 # Learn more at https://jupyterbook.org/customize/config.html
 
-title: {{ analysis.name | title }}
+title: {{ analysis.title }}
 author: Cal-ITP
 #logo: calitp_logo_MAIN.png
 
