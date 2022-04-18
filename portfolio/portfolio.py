@@ -18,7 +18,7 @@ from pydantic import BaseModel
 from pydantic.class_validators import validator
 
 CONFIG_OPTION = typer.Option(
-    f"{os.path.dirname(os.path.realpath(__file__))}/reports_config.yml",
+    f"{os.path.dirname(os.path.realpath(__file__))}/analyses.yml",
 )
 
 DEPLOY_OPTION = typer.Option(
@@ -55,6 +55,7 @@ RESOLVERS = [
 
 class Analysis(BaseModel):
     notebook: Path
+    name: str
     params: Dict[str, List] = {}
     readme: Optional[Path] = None
     prepare_only: bool = False
@@ -127,9 +128,9 @@ def clean() -> None:
 
 
 @app.command()
-def generate_index(
+def index(
     config=CONFIG_OPTION,
-    deploy=DEPLOY_OPTION,
+    deploy: bool = DEPLOY_OPTION,
 ) -> None:
     with open(config) as f:
         portfolio_config = PortfolioConfig(analyses=yaml.safe_load(f))
@@ -141,11 +142,22 @@ def generate_index(
             typer.echo(f"writing out to {fname}")
             f.write(env.get_template(template).render(analyses=analyses))
 
+    if deploy:
+        subprocess.run(
+            [
+                "netlify",
+                "deploy",
+                "--site=cal-itp-data-analyses",
+                "--dir=portfolio/index",
+            ]
+        ).check_returncode()
+
 
 @app.command()
 def build(
     report: str,
     config=CONFIG_OPTION,
+    deploy: bool = DEPLOY_OPTION,
     output_dir: Path = "./target/",
     portfolio_dir: Path = "./portfolio/",
     execute_papermill: bool = typer.Option(
@@ -172,55 +184,75 @@ def build(
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    for name, analysis in portfolio_config.analyses.items():
-        if report != name:
-            continue
-        params = list(zip(*analysis.params.values()))
-        (output_dir / analysis.notebook.parent).mkdir(parents=True, exist_ok=True)
+    analysis = portfolio_config.analyses[report]
+    analysis_dir = portfolio_dir / Path(report)
 
-        for param_set in params or [{}]:
-            params_dict = {k: v for k, v in zip(analysis.params.keys(), param_set)}
+    analysis_root = analysis.notebook.parts[0]
+    typer.echo(f"copying readme from {analysis_root} to {analysis_dir}")
+    shutil.copy(analysis_root / Path("README.md"), analysis_dir / Path("README.md"))
 
-            if params_dict:
-                parameterized_filepath = analysis.notebook.parent / parameterize_filename(
-                    analysis.notebook, params_dict
-                )
-            else:
-                parameterized_filepath = analysis.notebook
-            output_path = output_dir / parameterized_filepath
-            typer.echo(f"executing papermill; writing {analysis.notebook} => {output_path}")
+    params = list(zip(*analysis.params.values()))
+    (output_dir / analysis.notebook.parent).mkdir(parents=True, exist_ok=True)
 
-            if execute_papermill:
-                pm.execute_notebook(
-                    input_path=analysis.notebook,
-                    output_path=output_path,
-                    parameters=params_dict,
-                    cwd=analysis.notebook.parent,
-                    engine_name="markdown",
-                    report_mode=True,
-                    prepare_only=prepare_only or analysis.prepare_only,
-                    original_parameters=params_dict,
-                )
-            else:
-                typer.echo(f"execute_papermill={execute_papermill} so we are skipping actual execution")
+    for param_set in params or [{}]:
+        params_dict = {k: v for k, v in zip(analysis.params.keys(), param_set)}
 
-            # html_output_path = convert_to_html(output_path)
+        if params_dict:
+            parameterized_filepath = analysis.notebook.parent / parameterize_filename(analysis.notebook, params_dict)
+        else:
+            parameterized_filepath = analysis.notebook
+        output_path = output_dir / parameterized_filepath
+        typer.echo(f"executing papermill; writing {analysis.notebook} => {output_path}")
 
-            portfolio_output_path = portfolio_dir / parameterized_filepath  # .with_suffix(".html")
-            portfolio_output_path.parent.mkdir(parents=True, exist_ok=True)
-            typer.echo(f"placing in portfolio; {output_path} => {portfolio_output_path}")
-            shutil.copy(output_path, portfolio_output_path)
+        if execute_papermill:
+            pm.execute_notebook(
+                input_path=analysis.notebook,
+                output_path=output_path,
+                parameters=params_dict,
+                cwd=analysis.notebook.parent,
+                engine_name="markdown",
+                report_mode=True,
+                prepare_only=prepare_only or analysis.prepare_only,
+                original_parameters=params_dict,
+            )
+        else:
+            typer.echo(f"execute_papermill={execute_papermill} so we are skipping actual execution")
 
+        # html_output_path = convert_to_html(output_path)
+
+        portfolio_output_path = portfolio_dir / parameterized_filepath  # .with_suffix(".html")
+        portfolio_output_path.parent.mkdir(parents=True, exist_ok=True)
+        typer.echo(f"placing in portfolio; {output_path} => {portfolio_output_path}")
+        shutil.copy(output_path, portfolio_output_path)
+
+    for template in ["_config.yml", "_toc.yml"]:
+        fname = f"./portfolio/{report}/{template}"
+        with open(fname, "w") as f:
+            typer.echo(f"writing out to {fname}")
+            f.write(env.get_template(template).render(report=report, analysis=analysis))
+
+    subprocess.run(
+        [
+            "jb",
+            "build",
+            "-W",
+            "-n",
+            "--keep-going",
+            ".",
+        ],
+        cwd=f"./portfolio/{report}/",
+    ).check_returncode()
+
+    if deploy:
         subprocess.run(
             [
-                "jb",
-                "build",
-                "-W",
-                "-n",
-                "--keep-going",
-                str(portfolio_dir),
+                "netlify",
+                "deploy",
+                "--site=cal-itp-data-analyses",
+                "--dir=portfolio/index",
+                f"--alias={report}",
             ]
-        )
+        ).check_returncode()
 
 
 if __name__ == "__main__":
