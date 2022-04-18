@@ -76,7 +76,6 @@ class Site(BaseModel):
         return readme or values["notebook"]
 
 
-
 class PortfolioConfig(BaseModel):
     sites: List[Site]
 
@@ -110,7 +109,7 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
 
-            if '%%capture' in cell.source:
+            if "%%capture" in cell.source:
                 cell.outputs = []
 
 
@@ -231,7 +230,9 @@ def build(
 
         # html_output_path = convert_to_html(output_path)
 
-        portfolio_path = portfolio_dir / parameterized_filepath.parent / Path("notebooks") / parameterized_filepath.name  # .with_suffix(".html")
+        portfolio_path = (
+            portfolio_dir / parameterized_filepath.parent / Path("notebooks") / parameterized_filepath.name
+        )  # .with_suffix(".html")
         print(portfolio_dir, parameterized_filepath, portfolio_path)
         portfolio_path.parent.mkdir(parents=True, exist_ok=True)
         typer.echo(f"placing in portfolio; {target_path} => {portfolio_path}")
