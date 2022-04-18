@@ -12,6 +12,7 @@ import nbformat
 import papermill as pm
 import typer
 import yaml
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from nbconvert import HTMLExporter
 from papermill.engines import NBClientEngine, papermill_engines
 from pydantic import BaseModel
@@ -28,8 +29,6 @@ DEPLOY_OPTION = typer.Option(
 )
 
 app = typer.Typer(help="CLI to tie together papermill and jupyter book")
-
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 env = Environment(loader=FileSystemLoader("./portfolio/templates/"), autoescape=select_autoescape())
 
