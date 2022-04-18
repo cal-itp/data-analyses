@@ -140,7 +140,7 @@ def index(
     deploy: bool = DEPLOY_OPTION,
 ) -> None:
     with open(config) as f:
-        portfolio_config = PortfolioConfig(analyses=yaml.safe_load(f))
+        portfolio_config = PortfolioConfig(**yaml.safe_load(f))
 
     analyses = portfolio_config.sites
     for template in ["index.html", "_redirects"]:
@@ -255,7 +255,7 @@ def build(
                 "netlify",
                 "deploy",
                 "--site=cal-itp-data-analyses",
-                "--dir=portfolio/index",
+                f"--dir=portfolio/{report}/_build/html/",
                 f"--alias={report}",
             ]
         ).check_returncode()
