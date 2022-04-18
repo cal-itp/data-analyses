@@ -339,6 +339,7 @@ class OperatorDayAnalysis:
                                                            # 'schedule': ScheduleInterpolator(st_trip_joined, self.routelines) ## probably need to save memory for now ?
                                                        }
             except AssertionError as e:
+                print(e)
                 continue
             if type(self.pbar) != type(None):
                 self.pbar.update()
