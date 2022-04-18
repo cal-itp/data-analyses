@@ -61,6 +61,16 @@ class Part(BaseModel):
     def slug(self) -> str:
         return slugify_params(self.params)
 
+    def as_toc(self) -> Dict:
+        d = {
+            "caption": self.caption,
+            "chapters": [{
+                "glob": f"{self.slug}/*",
+            }]
+        }
+
+        return d
+
 
 class Site(BaseModel):
     name: str
@@ -84,15 +94,9 @@ class Site(BaseModel):
         return yaml.dump({
             "format": "jb-book",
             "root": "README",
-            "parts": [{
-                "caption": part.caption,
-                "chapters": [
-                    {
-                        "glob": f"{part.slug}/*",
-                    }
-                ]
-            } for part in self.parts]
+            "parts": [part.as_toc() for part in self.parts if part.chapters]
         })
+
 
 class PortfolioConfig(BaseModel):
     sites: List[Site]
@@ -196,6 +200,7 @@ def build(
 
     site = next(site for site in portfolio_config.sites if site.name == report)
     site_dir = portfolio_dir / Path(report)
+    site_dir.mkdir(parents=True, exist_ok=True)
     analysis_root = site.directory
 
     typer.echo(f"copying readme from {analysis_root} to {site_dir}")
@@ -241,7 +246,7 @@ def build(
     with open(fname, "w") as f:
         typer.echo(f"writing out to {fname}")
         f.write(env.get_template("_config.yml").render(report=report, analysis=site))
-    fname = f"./portfolio/{report}/toc.yml"
+    fname = f"./portfolio/{report}/_toc.yml"
     with open(fname, "w") as f:
         typer.echo(f"writing out to {fname}")
         f.write(site.toc_yaml)
