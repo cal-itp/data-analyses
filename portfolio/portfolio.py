@@ -42,28 +42,33 @@ RESOLVERS = [
 ]
 
 
-# class TOC(BaseModel):
-#     def as_yaml(self) -> str:
-#         return yaml.dump({
-#             "format:": "jb-book",
-#             "root": "README",
-#             "parts": [{
-#
-#             } for part in parts]
-#         })
+def slugify_params(params: Dict) -> str:
+    return "__".join(f"{k}_{slugify(str(v))}" for k, v in params.items())
 
 
 def parameterize_filename(old_path: Path, params: Dict) -> Path:
     assert old_path.suffix == ".ipynb"
-    return Path(old_path.stem + "__" + "__".join(f"{k}_{v}" for k, v in params.items()) + old_path.suffix)
+    return Path(old_path.stem + "__" + slugify_params(params) + old_path.suffix)
+
+
+class Part(BaseModel):
+    caption: str
+    notebook: Optional[Path] = None
+    params: Optional[Dict] = {}
+    chapters: Optional[List[Dict]] = []
+
+    @property
+    def slug(self) -> str:
+        return slugify_params(self.params)
 
 
 class Site(BaseModel):
     name: str
     title: str
-    notebook: Path
-    params: Dict[str, List] = {}
+    directory: Path
     readme: Optional[Path] = None
+    notebook: Optional[Path] = None
+    parts: List[Part]
     prepare_only: bool = False
 
     @property
@@ -74,6 +79,20 @@ class Site(BaseModel):
     def convert_status(cls, readme, values):
         return readme or values["notebook"]
 
+    @property
+    def toc_yaml(self) -> str:
+        return yaml.dump({
+            "format": "jb-book",
+            "root": "README",
+            "parts": [{
+                "caption": part.caption,
+                "chapters": [
+                    {
+                        "glob": f"{part.slug}/*",
+                    }
+                ]
+            } for part in self.parts]
+        })
 
 class PortfolioConfig(BaseModel):
     sites: List[Site]
@@ -114,24 +133,6 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
 papermill_engines.register_entry_points()
-
-
-def convert_to_html(path: Path) -> Path:
-    html_output_path = path.with_suffix(".html")
-    typer.echo(f"converting to html, {path} => {html_output_path}")
-
-    html_exporter = HTMLExporter(template_name="lab")
-
-    with open(path) as f:
-        output_notebook = nbformat.reads(f.read(), as_version=4)
-
-    body, _ = html_exporter.from_notebook_node(output_notebook)
-
-    html_output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(html_output_path, "w") as f:
-        f.write(body)
-    return html_output_path
-
 
 @app.command()
 def clean() -> None:
@@ -193,55 +194,57 @@ def build(
 
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    analysis = next(site for site in portfolio_config.sites if site.name == report)
+    site = next(site for site in portfolio_config.sites if site.name == report)
     site_dir = portfolio_dir / Path(report)
+    analysis_root = site.directory
 
-    analysis_root = analysis.notebook.parts[0]
     typer.echo(f"copying readme from {analysis_root} to {site_dir}")
     shutil.copy(analysis_root / Path("README.md"), site_dir / Path("README.md"))
 
-    params = list(zip(*analysis.params.values()))
-    (target_dir / analysis.notebook.parent).mkdir(parents=True, exist_ok=True)
+    (target_dir / site.notebook.parent).mkdir(parents=True, exist_ok=True)
 
-    for param_set in params or [{}]:
-        params_dict = {k: v for k, v in zip(analysis.params.keys(), param_set)}
+    for part in site.parts:
+        for chapter in part.chapters:
+            params = {**part.params, **chapter}
+            notebook = part.notebook or site.notebook
+            if params:
+                parameterized_filepath = Path(report) / parameterize_filename(notebook, params)
+            else:
+                parameterized_filepath = notebook
+            target_path = target_dir / parameterized_filepath
+            typer.echo(f"executing papermill; writing {notebook} => {target_path}")
 
-        if params_dict:
-            parameterized_filepath = Path(report) / parameterize_filename(analysis.notebook, params_dict)
-        else:
-            parameterized_filepath = analysis.notebook
-        target_path = target_dir / parameterized_filepath
-        typer.echo(f"executing papermill; writing {analysis.notebook} => {target_path}")
+            if execute_papermill:
+                pm.execute_notebook(
+                    input_path=notebook,
+                    output_path=target_path,
+                    parameters=params,
+                    cwd=notebook.parent,
+                    engine_name="markdown",
+                    report_mode=True,
+                    prepare_only=prepare_only or site.prepare_only,
+                    original_parameters=params,
+                )
+            else:
+                typer.echo(f"execute_papermill={execute_papermill} so we are skipping actual execution")
 
-        if execute_papermill:
-            pm.execute_notebook(
-                input_path=analysis.notebook,
-                output_path=target_path,
-                parameters=params_dict,
-                cwd=analysis.notebook.parent,
-                engine_name="markdown",
-                report_mode=True,
-                prepare_only=prepare_only or analysis.prepare_only,
-                original_parameters=params_dict,
+
+            portfolio_path = (
+                portfolio_dir / parameterized_filepath.parent / Path(part.slug) / parameterized_filepath.name
             )
-        else:
-            typer.echo(f"execute_papermill={execute_papermill} so we are skipping actual execution")
+            print(portfolio_dir, parameterized_filepath, portfolio_path)
+            portfolio_path.parent.mkdir(parents=True, exist_ok=True)
+            typer.echo(f"placing in portfolio; {target_path} => {portfolio_path}")
+            shutil.copy(target_path, portfolio_path)
 
-        # html_output_path = convert_to_html(output_path)
-
-        portfolio_path = (
-            portfolio_dir / parameterized_filepath.parent / Path("notebooks") / parameterized_filepath.name
-        )  # .with_suffix(".html")
-        print(portfolio_dir, parameterized_filepath, portfolio_path)
-        portfolio_path.parent.mkdir(parents=True, exist_ok=True)
-        typer.echo(f"placing in portfolio; {target_path} => {portfolio_path}")
-        shutil.copy(target_path, portfolio_path)
-
-    for template in ["_config.yml", "_toc.yml"]:
-        fname = f"./portfolio/{report}/{template}"
-        with open(fname, "w") as f:
-            typer.echo(f"writing out to {fname}")
-            f.write(env.get_template(template).render(report=report, analysis=analysis))
+    fname = f"./portfolio/{report}/_config.yml"
+    with open(fname, "w") as f:
+        typer.echo(f"writing out to {fname}")
+        f.write(env.get_template("_config.yml").render(report=report, analysis=site))
+    fname = f"./portfolio/{report}/toc.yml"
+    with open(fname, "w") as f:
+        typer.echo(f"writing out to {fname}")
+        f.write(site.toc_yaml)
 
     subprocess.run(
         [
