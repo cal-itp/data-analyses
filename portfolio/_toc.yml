@@ -1,8 +1,0 @@
-
-format: jb-book
-root: README
-parts:
-  - chapters:
-      - file: dla/dla_analysis
-        sections:
-          - glob: dla/e76_obligated_funds/*
