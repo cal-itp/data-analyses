@@ -233,15 +233,11 @@ def project_cat(df, i):
 
     chart = add_tooltip(chart, "Agency", "Funding Amount")
 
-    display(Markdown(f"<h2>Top Agencies using {labeling(i)} Projects</h2>"))
-   
+
+    display(Markdown(f"<h3>Top Agencies using {labeling(i)} Projects</h3>"))
     display(subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"}))
     #display(chart)
-   
-    
-    
-    
-    
+
 
 """
 Labeling
@@ -431,13 +427,6 @@ def basic_line_chart_test_no_save(df, x_col, y_col, subset
 """
 Interactive Functions
 """
-
-from plotnine import *
-
-import ipywidgets as widgets
-from ipywidgets import *
-from IPython.display import Markdown
-from IPython.core.display import display
 
 ## From Tiffany's DLA Function Branch on Github
 
