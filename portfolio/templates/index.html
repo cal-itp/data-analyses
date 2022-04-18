@@ -6,7 +6,7 @@
 </head>
 <body>
 {% for analysis in analyses -%}
-<p><a href="/{{ analysis }}/">{{ analysis|title }}</a></p>
+<p><a href="/{{ analysis.name }}/">{{ analysis.title }}</a></p>
 {% endfor %}
 </body>
 </html>
