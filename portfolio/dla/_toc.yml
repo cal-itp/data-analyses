@@ -2,4 +2,4 @@ format: jb-book
 root: README
 parts:
   - chapters:
-      - glob: e76_obligated_funds/*
+      - glob: notebooks/*
