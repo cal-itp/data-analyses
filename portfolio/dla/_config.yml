@@ -1,7 +1,7 @@
 # Book settings
 # Learn more at https://jupyterbook.org/customize/config.html
 
-title: Dla Grant Analysis
+title: Dla
 author: Cal-ITP
 #logo: calitp_logo_MAIN.png
 
@@ -25,7 +25,7 @@ launch_buttons:
 repository:
   url: https://github.com/cal-itp/data-analyses/  # Online location of your book
 #  path_to_book: docs  # Optional path to your book, relative to the repository root
-  path_to_book: DLA Grant Analysis
+  path_to_book: dla
   branch: main  # Which branch of the repository should be used when creating links (optional)
 
 # Add GitHub buttons to your book

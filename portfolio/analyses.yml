@@ -1,7 +1,8 @@
-dla:
-  name: DLA Grant Analysis
-  notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
-  params:
-    district:
-      - 4
-      - 7
+sites:
+  - name: dla
+    title: DLA Grant Analysis
+    notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
+    params:
+      district:
+        - 4
+        - 7
