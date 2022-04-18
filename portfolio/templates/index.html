@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cal-ITP Data Analyses Portfolio</title>
+</head>
+<body>
+{% for analysis in analyses -%}
+<p><a href="/{{ analysis }}/">{{ analysis|title }}</a></p>
+{% endfor %}
+</body>
+</html>

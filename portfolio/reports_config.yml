@@ -1,0 +1,12 @@
+dla:
+  notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
+  params:
+    district:
+      - 4
+      - 7
+dla2:
+  notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
+  params:
+    district:
+      - 4
+      - 7
