@@ -10,7 +10,6 @@ fs = gcsfs.GCSFileSystem()
 import shapely
 import datetime as dt
 import os
-import re
 import time
 #from zoneinfo import ZoneInfo
 import pandas as pd
@@ -457,24 +456,21 @@ def make_linestring(x):
         as_wkt = [shapely.wkt.loads(i) for i in x]
         return shapely.geometry.LineString(as_wkt)
 
-def exclude_desc(desc):
-    ## match descriptions that don't give additional info, like Route 602 or Route 51B
-    number_only = re.search(' *Route *[0-9]*[a-z]{0,1}$', desc, flags=re.IGNORECASE)
-    metro = re.search(' *Metro.*(Local|Rapid|Limited).*Line', desc, flags=re.IGNORECASE)
-    return number_only or metro
+# def get_new_routelines(itp_id, analysis_date):
 
-def which_desc(row):
-    long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
-    route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
-    if route_desc_valid:
-        return f', {row.route_desc}'
-    elif long_name_valid:
-        return f', {row.route_long_name}'
-    else:
-        return ''
-    
-def describe_most_delayed(row):
-    description = which_desc(row)
-    full_description = f'{row.route_short_name}{description}, {row.direction}: {round(row.mean_delay_seconds/60, 0)} minutes late on average'
-    row['full_description'] = full_description
-    return row
+#     shapes = (tbl.views.gtfs_schedule_dim_shapes_geo()
+#           >> filter(_.calitp_extracted_at <= analysis_date, 
+#                     _.calitp_deleted_at > analysis_date
+#                    )
+#           >> filter(_.calitp_itp_id == itp_id)
+#           >> select(_.calitp_itp_id, _.calitp_url_number, _.calitp_extracted_at,
+#                     _.calitp_deleted_at, _.shape_id, _.pt_array)
+#           >> collect()
+#          )
+#         # apply the function
+#     shapes['geometry'] = shapes.pt_array.apply(make_linestring)
+
+#     # convert to geopandas; geometry column contains the linestring
+#     shapes = gpd.GeoDataFrame(shapes, geometry = 'geometry', crs=WGS84)
+#     shapes = shapes.to_crs(CA_NAD83Albers)
+#     return shapes >> select(-_.pt_array)
