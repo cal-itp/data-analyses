@@ -231,7 +231,7 @@ def build(
 
                 portfolio_path = chapter_path / parameterized_filepath.name
                 portfolio_path.parent.mkdir(parents=True, exist_ok=True)
-                typer.secho(f"parameterizing {notebook} => {portfolio_path}", typer.colors.GREEN)
+                typer.secho(f"parameterizing {notebook} => {portfolio_path}", fg=typer.colors.GREEN)
 
                 if execute_papermill:
                     pm.execute_notebook(
@@ -249,16 +249,16 @@ def build(
 
             fname = f"./portfolio/{report}/{chapter_slug}.md"
             with open(fname, "w") as f:
-                typer.secho(f"writing readme to {fname}", typer.colors.GREEN)
+                typer.secho(f"writing readme to {fname}", fg=typer.colors.GREEN)
                 f.write(f"# {chapter.caption}")
 
     fname = f"./portfolio/{report}/_config.yml"
     with open(fname, "w") as f:
-        typer.secho(f"writing config to {fname}", typer.colors.GREEN)
+        typer.secho(f"writing config to {fname}", fg=typer.colors.GREEN)
         f.write(env.get_template("_config.yml").render(report=report, analysis=site))
     fname = f"./portfolio/{report}/_toc.yml"
     with open(fname, "w") as f:
-        typer.secho(f"writing toc to {fname}", typer.colors.GREEN)
+        typer.secho(f"writing toc to {fname}", fg=typer.colors.GREEN)
         f.write(site.toc_yaml)
 
     subprocess.run(
