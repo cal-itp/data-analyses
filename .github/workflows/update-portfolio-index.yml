@@ -33,6 +33,7 @@ jobs:
       env:
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_PREVIEW_APP_SITE_ID }}
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PREVIEW_APP_AUTH_TOKEN }}
+        PR_NUMBER: ${{ github.event.number }}
 
     - name: Add netlify link PR comment
       uses: actions/github-script@v3
