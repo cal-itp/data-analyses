@@ -1,6 +1,13 @@
 """
 Utility functions for working with
 State Highway Network and transit routes.
+
+Highways Raw data: [SHN on Geoportal](https://opendata.arcgis.com/datasets/77f2d7ba94e040a78bfbe36feb6279da_0.geojson) 
+Processed data: run raw data through `create_parallel_corridors.py` 
+export to GCS, put in catalog.
+
+Transit Routes: Use `traffic_ops/export_shapefiles.py` that 
+creates `routes_assembled.parquet` in GCS, put in catalog.
 """
 import geopandas as gpd
 import intake
@@ -208,3 +215,7 @@ def make_analysis_data(hwy_buffer_feet=
                                     pct_highway_threshold)
     
     gdf2.to_parquet(f"{DATA_PATH}{FILE_NAME}.parquet")
+    
+    # For map, need highway to be 250 ft buffer
+    #highways = process_highways(buffer_feet=250)
+    #highways.to_parquet(f"{DATA_PATH}highways.parquet")
