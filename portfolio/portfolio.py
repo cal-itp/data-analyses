@@ -151,6 +151,7 @@ def clean() -> None:
 def index(
     config=CONFIG_OPTION,
     deploy: bool = DEPLOY_OPTION,
+    alias: str = None,
 ) -> None:
     with open(config) as f:
         portfolio_config = PortfolioConfig(**yaml.safe_load(f))
@@ -162,15 +163,18 @@ def index(
             typer.echo(f"writing out to {fname}")
             f.write(env.get_template(template).render(analyses=analyses))
 
+    args = [
+        "netlify",
+        "deploy",
+        "--site=cal-itp-data-analyses",
+        "--dir=portfolio/index",
+    ]
+
+    if alias:
+        args.append(f"--alias={alias}")
+
     if deploy:
-        subprocess.run(
-            [
-                "netlify",
-                "deploy",
-                "--site=cal-itp-data-analyses",
-                "--dir=portfolio/index",
-            ]
-        ).check_returncode()
+        subprocess.run(args).check_returncode()
 
 
 @app.command()

@@ -1,10 +1,10 @@
-name: Publish docs to gh-pages
+name: Update and deploy portfolio index site
 
 on:
   pull_request:
     paths:
-      - '.github/workflows/publish-site.yml'
-      - 'docs/**'
+      - '.github/workflows/update-portfolio-index.yml'
+      - 'portfolio/**'
 
 jobs:
   build-docs:
@@ -23,19 +23,16 @@ jobs:
 
     - name: Install python packages
       run: |
-        pip install -r requirements.txt
+        pip install -r portfolio/requirements.txt
 
-    # docs preview ----
     - name: Netlify docs preview
       if: ${{ github.ref != 'refs/heads/main' }}
       run: |
         npm install -g netlify-cli
-        jb build -W -n --keep-going ./docs
-        netlify deploy --dir=docs/_build/html --alias=${GITHUB_REPOSITORY#*/}-${PR_NUMBER}
+        python portfolio/portfolio.py index --deploy --alias=${GITHUB_REPOSITORY#*/}-${PR_NUMBER}
       env:
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_PREVIEW_APP_SITE_ID }}
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PREVIEW_APP_AUTH_TOKEN }}
-        PR_NUMBER: ${{ github.event.number }}
 
     - name: Add netlify link PR comment
       uses: actions/github-script@v3
