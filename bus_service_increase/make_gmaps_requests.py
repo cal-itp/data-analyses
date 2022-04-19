@@ -46,7 +46,6 @@ if __name__ == "__main__":
     waypoints = df.waypoints.tolist()
     identifiers = df.identifier.tolist()
 
-    no_results = []
     for i, (o, d) in enumerate(zip(origin, destination)):
         try:
             result = gmaps.directions(
@@ -73,4 +72,3 @@ if __name__ == "__main__":
             
         except:
             print(f"No result: {identifiers[i]}")
-            no_results.append(identifiers[i])

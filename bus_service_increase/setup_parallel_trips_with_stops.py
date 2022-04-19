@@ -67,6 +67,9 @@ def select_one_trip(df):
             )
     
     # Select trip that is closest to 25th percentile (min_diff)
+    # ERROR: Should be abs(df.service_hours - df.p25)
+    # But, cannot change df here because the identifier includes trip_id
+    # and don't want to rerun google maps requests
     df["difference"] = df.service_hours - df.p25
     df["min_diff"] = df.groupby(group_cols)["difference"].transform("min")
 
