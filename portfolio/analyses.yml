@@ -11,15 +11,9 @@ sites:
             params:
               district: 4
               district_name: LA Metro (this is a placeholder)
-            sections:
-              - itp_id: 1
-              - itp_id: 2
           - caption: District 7
             params:
               district: 7
-            sections:
-              - itp_id: 3
-              - itp_id: 4
   - name: rt
     title: Realtime Delay Analysis
     directory: ./rt_delay/
