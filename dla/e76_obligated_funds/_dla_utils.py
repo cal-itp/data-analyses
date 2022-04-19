@@ -14,6 +14,7 @@ from plotnine import *
 import altair as alt
 import altair_saver
 
+
 from IPython.display import Markdown, HTML
 from IPython.core.display import display
 
@@ -27,6 +28,7 @@ import intake
 
 import ipywidgets as widgets
 from ipywidgets import *
+
 
 
 
@@ -231,11 +233,15 @@ def project_cat(df, i):
 
     chart = add_tooltip(chart, "Agency", "Funding Amount")
 
-    display(
-        Markdown(f"**Top Agencies using {labeling(i)} Projects**")
-    )
+    display(Markdown(f"<h2>Top Agencies using {labeling(i)} Projects</h2>"))
+   
     display(subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"}))
-    display(chart)
+    #display(chart)
+   
+    
+    
+    
+    
 
 """
 Labeling
@@ -321,10 +327,12 @@ def basic_bar_chart(df, x_col, y_col, color_col, subset, chart_title=''):
 
 
 
-def basic_bar_chart_no_save(df, x_col, y_col, color_col, subset, chart_title=''):
+def basic_bar_chart_no_save(df, x_col, y_col, color_col, subset
+                           # , chart_title=''
+                           ):
 
-    if chart_title == "":
-        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
+    # if chart_title == "":
+    #     chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
 
     chart = (alt.Chart(df)
              .mark_bar()
@@ -336,8 +344,10 @@ def basic_bar_chart_no_save(df, x_col, y_col, color_col, subset, chart_title='')
                                       range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
                                       legend=alt.Legend(title=(labeling(color_col)), symbolLimit=10)
                                   )
-                                   ).properties( 
-                          title=chart_title))
+                                   )
+             # .properties( 
+             #              title=chart_title)
+            )
 
     chart=styleguide.preset_chart_config(chart)
     chart = add_tooltip(chart, x_col, y_col)
@@ -397,18 +407,21 @@ def basic_line_chart(df, x_col, y_col, subset, chart_title=''):
     return chart
 
 
-def basic_line_chart_test_no_save(df, x_col, y_col, subset, chart_title=''):
+def basic_line_chart_test_no_save(df, x_col, y_col, subset
+                                  # , chart_title=''
+                                 ):
     
-    if chart_title == "":
-        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
+    # if chart_title == "":
+    #     chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
      
     chart = (alt.Chart(df)
              .mark_line()
              .encode(
                  x=alt.X(x_col, title=labeling(x_col)),
                  y=alt.Y(y_col, title=labeling(y_col)))
-              ).properties( 
-                          title=chart_title)
+              )
+    # .properties( 
+    #                       title=chart_title)
 
     chart=styleguide.preset_chart_config(chart)
     chart = add_tooltip(chart, x_col, y_col)
