@@ -1,5 +1,7 @@
 # README
 
+Refer here for [visualizations index](./visualizations_index.md)
+
 ## Bus Service Increase
 
 Scripts associated with data creation and visualization / output generation. The bus service increase analysis is done for a selected Thursday, Saturday, and Sunday in October 2021, and the processed dataset is fairly static. 
