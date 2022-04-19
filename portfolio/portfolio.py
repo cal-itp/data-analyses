@@ -61,16 +61,6 @@ class Part(BaseModel):
     def slug(self) -> str:
         return slugify_params(self.params)
 
-    def as_toc(self) -> Dict:
-        d = {
-            "caption": self.caption,
-            "chapters": [{
-                "glob": f"{self.slug}/*",
-            }]
-        }
-
-        return d
-
 
 class Site(BaseModel):
     name: str
@@ -94,7 +84,12 @@ class Site(BaseModel):
         return yaml.dump({
             "format": "jb-book",
             "root": "README",
-            "parts": [part.as_toc() for part in self.parts if part.chapters]
+            "parts": [{
+                "caption": part.caption,
+                "chapters": [{
+                    "glob": f"{part.slug}/*",
+                }]
+            } for part in self.parts if part.chapters]
         })
 
 
