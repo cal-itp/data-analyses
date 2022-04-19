@@ -1,0 +1,3 @@
+{% for analysis in analyses -%}
+/{{ analysis.name }}/* https://{{ analysis.name }}--cal-itp-data-analyses.netlify.app//:splat  200
+{% endfor %}
