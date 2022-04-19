@@ -159,9 +159,10 @@ def get_routes(itp_id, analysis_date):
 
     operator_routes = tbl.views.gtfs_schedule_dim_routes() >> filter(_.calitp_itp_id == itp_id)
     routes_date_joined = (routes_on_date
-         >> inner_join(_, operator_routes >> select(_.route_id, _.route_key, _.route_short_name),
+         >> inner_join(_, operator_routes >> select(_.route_id, _.route_key, _.route_short_name,
+                                                   _.route_long_name, _.route_desc),
                        on = 'route_key')
-         >> distinct(_.route_id, _.route_short_name)
+         >> distinct(_.route_id, _.route_short_name, _.route_long_name, _.route_desc)
          >> collect()
         )
     return routes_date_joined
@@ -187,6 +188,8 @@ def get_trips(itp_id, analysis_date, force_clear=False):
             return cached
         else:
             print('cached parquet empty, will try a fresh query')
+    else:
+        print('getting trips...')
     trips = (tbl.views.gtfs_schedule_fact_daily_trips()
         >> filter(_.calitp_extracted_at <= analysis_date, _.calitp_deleted_at >= analysis_date)
         >> filter(_.calitp_itp_id == itp_id)
