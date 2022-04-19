@@ -6,16 +6,17 @@ sites:
     notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
     parts:
       - caption: Introduction
-      - caption: District 4
-        params:
-          district: 4
-          district_name: LA Metro (this is a placeholder)
-        chapters:
-          - itp_id: 1
-          - itp_id: 2
-      - caption: District 7
-        params:
-          district: 7
-        chapters:
-          - itp_id: 3
-          - itp_id: 4
+      - chapters:
+          - caption: District 4
+            params:
+              district: 4
+              district_name: LA Metro (this is a placeholder)
+            sections:
+              - itp_id: 1
+              - itp_id: 2
+          - caption: District 7
+            params:
+              district: 7
+            sections:
+              - itp_id: 3
+              - itp_id: 4

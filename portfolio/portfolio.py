@@ -51,11 +51,17 @@ def parameterize_filename(old_path: Path, params: Dict) -> Path:
     return Path(old_path.stem + "__" + slugify_params(params) + old_path.suffix)
 
 
-class Part(BaseModel):
+class Chapter(BaseModel):
     caption: str
+    params: Dict = {}
+    sections: List[Dict] = []
+
+
+class Part(BaseModel):
+    caption: Optional[str] = None
     notebook: Optional[Path] = None
-    params: Optional[Dict] = {}
-    chapters: Optional[List[Dict]] = []
+    params: Dict = {}
+    chapters: List[Chapter] = []
 
     @property
     def slug(self) -> str:
@@ -87,10 +93,13 @@ class Site(BaseModel):
             "parts": [{
                 "caption": part.caption,
                 "chapters": [{
-                    "glob": f"{part.slug}/*",
-                }]
+                    "file": f"{slugify_params({**part.params, **chapter.params})}.md",
+                    "sections": [{
+                        "glob": f"{slugify_params({**part.params, **chapter.params})}/*",
+                    }],
+                } for chapter in part.chapters]
             } for part in self.parts if part.chapters]
-        })
+        }, indent=4)
 
 
 class PortfolioConfig(BaseModel):
@@ -204,46 +213,52 @@ def build(
     (target_dir / site.notebook.parent).mkdir(parents=True, exist_ok=True)
 
     for part in site.parts:
-        for chapter in part.chapters:
-            params = {**part.params, **chapter}
-            notebook = part.notebook or site.notebook
-            if params:
-                parameterized_filepath = Path(report) / parameterize_filename(notebook, params)
-            else:
-                parameterized_filepath = notebook
-            target_path = target_dir / parameterized_filepath
-            typer.echo(f"executing papermill; writing {notebook} => {target_path}")
+        # TODO: handle this for non-parameterized files/introductions
+        if not part.chapters:
+            continue
+        for chapter in part.chapters or [Chapter()]:
+            chapter_slug = slugify_params({**part.params, **chapter.params})
+            chapter_path = site_dir / Path(chapter_slug)
+            for section in chapter.sections or [{}]:
+                params = {**part.params, **chapter.params, **section}
+                notebook = part.notebook or site.notebook
 
-            if execute_papermill:
-                pm.execute_notebook(
-                    input_path=notebook,
-                    output_path=target_path,
-                    parameters=params,
-                    cwd=notebook.parent,
-                    engine_name="markdown",
-                    report_mode=True,
-                    prepare_only=prepare_only or site.prepare_only,
-                    original_parameters=params,
-                )
-            else:
-                typer.echo(f"execute_papermill={execute_papermill} so we are skipping actual execution")
+                # TODO: this should be cleaned up a bit
+                if params:
+                    parameterized_filepath = Path(report) / parameterize_filename(notebook, section)
+                else:
+                    parameterized_filepath = notebook
 
+                portfolio_path = chapter_path / parameterized_filepath.name
+                portfolio_path.parent.mkdir(parents=True, exist_ok=True)
+                typer.secho(f"parameterizing {notebook} => {portfolio_path}", typer.colors.GREEN)
 
-            portfolio_path = (
-                portfolio_dir / parameterized_filepath.parent / Path(part.slug) / parameterized_filepath.name
-            )
-            print(portfolio_dir, parameterized_filepath, portfolio_path)
-            portfolio_path.parent.mkdir(parents=True, exist_ok=True)
-            typer.echo(f"placing in portfolio; {target_path} => {portfolio_path}")
-            shutil.copy(target_path, portfolio_path)
+                if execute_papermill:
+                    pm.execute_notebook(
+                        input_path=notebook,
+                        output_path=portfolio_path,
+                        parameters=params,
+                        cwd=notebook.parent,
+                        engine_name="markdown",
+                        report_mode=True,
+                        prepare_only=prepare_only or site.prepare_only,
+                        original_parameters=params,
+                    )
+                else:
+                    typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW)
+
+            fname = f"./portfolio/{report}/{chapter_slug}.md"
+            with open(fname, "w") as f:
+                typer.secho(f"writing readme to {fname}", typer.colors.GREEN)
+                f.write(f"# {chapter.caption}")
 
     fname = f"./portfolio/{report}/_config.yml"
     with open(fname, "w") as f:
-        typer.echo(f"writing out to {fname}")
+        typer.secho(f"writing config to {fname}", typer.colors.GREEN)
         f.write(env.get_template("_config.yml").render(report=report, analysis=site))
     fname = f"./portfolio/{report}/_toc.yml"
     with open(fname, "w") as f:
-        typer.echo(f"writing out to {fname}")
+        typer.secho(f"writing toc to {fname}", typer.colors.GREEN)
         f.write(site.toc_yaml)
 
     subprocess.run(
