@@ -14,7 +14,6 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 pd.set_option("display.max_rows", 20)
 
 from calitp.tables import tbl
-from calitp import query_sql
 from datetime import datetime
 from siuba import *
 
@@ -23,94 +22,116 @@ import utils
 
 DATA_PATH = prep_data.DATA_PATH
 
-def grab_missing_stops(ITP_ID, missing_trips_df, stops_df):
-    df = (
-        tbl.gtfs_schedule.stop_times()
-        # Loop through individual operators, then do the join to find those trips
-        # until the issue that makes kernel restarts is fixed
-        >> filter(_.calitp_itp_id == ITP_ID)
-        >> select(_.calitp_itp_id, _.stop_id, _.stop_sequence, _.trip_id)
-        # Can't do isin without the collect()
-        # But collect() is what is making kernel restart / shutting down notebook
-        >> distinct()
-        >> collect()
-        >> inner_join(_, missing_trips_df, ["calitp_itp_id", "trip_id"])
-        >> inner_join(_, stops_df, ["calitp_itp_id", "stop_id"])
-    )
+def merge_shapes_to_routes(trips, routes):
+    # Left only means in trips, but shape_id not found in shapes.txt
+    # right only means in routes, but no route that has that shape_id 
+    # We probably should keep how = "left"?
+    # left only means we can assemble from stop sequence?
+    m1 = pd.merge(
+            trips,
+            routes,
+            on = ["calitp_itp_id", "shape_id"],
+            how = "left",
+            validate = "m:1",
+            indicator=True
+        )
     
-    return df
+    # routes is a gdf, so turn it back into gdf
+    m2 = gpd.GeoDataFrame(m1, geometry="geometry", crs = utils.WGS84)
+    
+    return m2
 
 
-def routes_for_operators_in_shapes(routes, trips, route_info):
+def routes_for_operators_in_shapes(merged_shapes_routes, route_info):
     # Attach route_id from gtfs_schedule.trips, using shape_id
-    routes1 = pd.merge(
-        routes,
-        trips,
-        on = ["calitp_itp_id", "shape_id"],
-        # There are shape_ids that are left_only (1,600 obs)
-        how = "inner",
-        validate = "1:m",
-    )
-
+    routes1 = (merged_shapes_routes[merged_shapes_routes._merge=="both"]
+      .drop(columns = ["_merge"])
+      .reset_index(drop=True)
+     )
+    
     routes_part1 = prep_data.attach_route_name(routes1, route_info)
+    
     return routes_part1
 
 
+def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
+    missing_shapes = (merged_shapes_routes[merged_shapes_routes._merge=="left_only"]
+      .drop(columns = ["geometry", "_merge"])
+      .reset_index(drop=True)
+     )
+        
+    # Only grab trip info for the shape_ids that are missing, or, appear in missing_shapes
+    trip_cols = ["calitp_itp_id", "route_id", "shape_id"]
 
+    dim_trips = (tbl.views.gtfs_schedule_dim_trips()
+                 # filter first to just the smaller set of IDs in missing_shapes
+                 >> filter(_.calitp_itp_id.isin(missing_shapes.calitp_itp_id))
+                 # Now find those shape_ids and trips associated
+                 >> filter(_.shape_id.isin(missing_shapes.shape_id))
+                 >> select(*trip_cols, _.trip_key)
+                 >> distinct()
+                )
 
-def routes_for_operators_notin_shapes(routes_part1, stops, route_info):
-    # Find the stops that aren't in `shapes.txt`
     missing_trips = (
-        tbl.gtfs_schedule.trips()
-        >> select(_.calitp_itp_id, _.route_id, _.shape_id, _.trip_id)
+        tbl.views.gtfs_schedule_fact_daily_trips()
+        >> filter(_.service_date == prep_data.SELECTED_DATE, 
+               _.is_in_service==True)
+        >> select(_.trip_key, _.trip_id)
+        >> inner_join(_, dim_trips, on = "trip_key")
         >> distinct()
         >> collect()
-        >> filter(~_.shape_id.isin(routes_part1.shape_id))
     )
     
-    LOOP_ME = missing_trips.calitp_itp_id.unique().tolist()
-    print(f"operators: {LOOP_ME}, # operators: {len(LOOP_ME)}")
+    # Since there are multiple trips, we'll sort the same way, and keep the first one
+    group_cols = ["calitp_itp_id", "route_id", "shape_id"]
+    missing_trips2 = (missing_trips.sort_values(group_cols + ["trip_id"])
+                      .drop_duplicates(subset=group_cols)
+                      .reset_index(drop=True)
+    )
 
-    missing_trips_stops = pd.DataFrame()
-    for ITP_ID in LOOP_ME:
-        df = grab_missing_stops(ITP_ID, missing_trips, stops)
-        missing_trips_stops = (missing_trips_stops.append(df)
-                               .sort_values(["calitp_itp_id", "trip_id", "stop_sequence"])
-                               .reset_index(drop=True)
-                              )
-        
-    # Rename colums to match what's used in geography_utils
-    missing_trips_stops = missing_trips_stops.rename(
-        columns = {"stop_lon": "shape_pt_lon", 
-                  "stop_lat": "shape_pt_lat",
-                   "stop_sequence": "shape_pt_sequence",
-                  }
+    stop_info_trips = (
+        tbl.views.gtfs_schedule_dim_stop_times()
+        >> filter(_.calitp_itp_id.isin(missing_trips2.calitp_itp_id))
+        >> filter(_.trip_id.isin(missing_trips2.trip_id))
+        >> distinct()
+        >> inner_join(_,
+                      tbl.views.gtfs_schedule_dim_stops(), 
+                      on = ["calitp_itp_id", "stop_id"])
+        >> select(_.calitp_itp_id, _.trip_id, 
+                  _.stop_id, _.stop_sequence,
+                  _.stop_lon, _.stop_lat)
+        >> distinct()
+        >> collect()
+        # Want to merge back route_id on, but need to collect first
+        >> inner_join(_, missing_trips2)
     )
-    
-    missing_trips_stops2 = utils.make_routes_shapefile(
-        LOOP_ME, CRS = utils.WGS84, 
-        alternate_df=missing_trips_stops
-    )
-    
-    missing_trips_stops2.to_parquet(f"{DATA_PATH}missing_routes.parquet")
 
-    routes2 = pd.merge(
-        missing_trips_stops2,
-        (missing_trips_stops[["calitp_itp_id", "route_id", "shape_id"]]
-         .assign(shape_id = missing_trips_stops.route_id)
-        .drop_duplicates()
-        ),
+    # Somehow, getting back some multiple points for same trip_id, stop_id
+    group_cols = ["calitp_itp_id", "trip_id", "stop_id"]
+    stop_info_trips = (stop_info_trips.sort_values(group_cols)
+                       .drop_duplicates(subset=group_cols)
+                       .reset_index(drop=True)
+                       # make_routes_line_geom_for_missing_shapes requires calitp_url_number
+                       .assign(calitp_url_number=0)
+                      )
+    print("Drop duplicates in stop_info_trips")
+
+    # Assemble line geometry
+    missing_routes = utils.make_routes_line_geom_for_missing_shapes(stop_info_trips)
+    
+    # Merge route_id back in, which is lost when it 
+    # passes through make_routes_line_geom_for_missing_shapes
+    # Also, get rid of calitp_url_number
+    missing_routes2 = pd.merge(
+        missing_routes.drop(columns="calitp_url_number"),
+        stop_info_trips[["calitp_itp_id", "shape_id", "route_id"]].drop_duplicates(),
         on = ["calitp_itp_id", "shape_id"],
         how = "inner",
-        validate = "1:m",
+        validate = "1:1",
     )
 
-    # In geography_utils.make_routes_shapefile, when alternate_df is set,
-    # the shape_id is replaced with route_id (since shape_id is None)
-    # Change it back after route line geometry created
-    routes2 = routes2.assign(shape_id = None)
-    
-    routes_part2 = prep_data.attach_route_name(routes2, route_info)
+    routes_part2 = prep_data.attach_route_name(missing_routes2, route_info)
+
     return routes_part2
 
 
@@ -122,24 +143,26 @@ def make_routes_shapefile():
     stops = pd.read_parquet(f"{DATA_PATH}stops.parquet")
     trips = pd.read_parquet(f"{DATA_PATH}trips.parquet")
     route_info = pd.read_parquet(f"{DATA_PATH}route_info.parquet")
-    agencies = pd.read_parquet(f"{DATA_PATH}agencies.parquet")
     routes = gpd.read_parquet(f"{DATA_PATH}routes.parquet")
+    agencies = pd.read_parquet(f"{DATA_PATH}agencies.parquet")
     latest_itp_id = pd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
+    df = merge_shapes_to_routes(trips, routes)
+    
     time1 = datetime.now()
-    print(f"Read in data: {time1-time0}")
+    print(f"Read in data and merge shapes to routes: {time1-time0}")    
     
-    routes_part1 = routes_for_operators_in_shapes(routes, trips, route_info)
-    
+    routes_part1 = routes_for_operators_in_shapes(df, route_info)
+
     time2 = datetime.now()
     print(f"Part 1 - routes for operator-routes in shapes.txt: {time2-time1}")
     
-    routes_part2 = routes_for_operators_notin_shapes(routes_part1, stops, route_info)
+    routes_part2 = routes_for_operators_notin_shapes(df, route_info)
     
     time3 = datetime.now()
     print(f"Part 2 - routes for operator-routes not in shapes.txt: {time3-time2}")
     
-    routes_assembled = (routes_part1.append(routes_part2)
+    routes_assembled = (pd.concat([routes_part1, routes_part2], axis=0)
                         .sort_values(["calitp_itp_id", "route_id"])
                         .drop_duplicates()
                         .reset_index(drop=True)

@@ -31,7 +31,7 @@ jobs:
           script: |
             const body = process.env.FILES
               .split(" ")
-              .filter(f => f.endsWith(".ipynb"))
+              .filter(f => (f.endsWith(".ipynb") && not f.startsWith("portfolio/")))
               .map(f => `* [${f}](https://nbviewer.jupyter.org/github/${context.repo.owner}/${context.repo.repo}/blob/${context.sha}/${f})`)
 
             if (body.length > 0) {

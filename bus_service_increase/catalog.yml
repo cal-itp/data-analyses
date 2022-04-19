@@ -42,7 +42,31 @@ sources:
         args:
           url: https://gis.data.ca.gov/data.json
           items:
-              county_boundaries: https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries     
+              county_boundaries: https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries  
+  highways_cleaned:
+    driver: geoparquet
+    description: SHN dissolved and added 250 ft buffer. Use this for plotting on maps.
+    args:
+    # source: create_parallel_corridors.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet
+  parallel_or_intersecting_routes:
+    driver: geoparquet
+    description: All transit routes with intersection to SHN (each route-highway route segment kept).
+    args:
+    # source: create_parallel_corridors.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/parallel_or_intersecting.parquet
+  parallel_trips_with_stops:
+    driver: geoparquet
+    description: Parallel routes to SHN, 1 trip selected for each route, with stop info.
+    args:
+    # source: setup_parallel_trips_with_stops.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/parallel_trips_with_stops.parquet
+  gmaps_results:
+    driver: geoparquet
+    description: Parallel routes to SHN with car travel time
+    args:
+    # source: make_gmaps_results.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/gmaps_results.parquet
 
       
       

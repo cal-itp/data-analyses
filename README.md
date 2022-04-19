@@ -26,5 +26,5 @@ generation for this repo.
 
 ### Caveats
 Jupyter Book/Sphinx do not play nicely with Markdown headers written out in `display()`
-calls. Therefore, [generate_reports.py](./generate_reports.py) uses a custom Papermill
+calls. Therefore, [portfolio.py](./portfolio.py) uses a custom Papermill
 engine to template Markdown cells directly.
