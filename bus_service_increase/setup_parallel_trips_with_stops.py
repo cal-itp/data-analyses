@@ -39,35 +39,19 @@ def select_one_trip(df):
                  "trip_first_departure_ts", "trip_last_arrival_ts", 
                 ]
     
-
-    df = df.assign(
-        departure_hr = pd.to_datetime(df.trip_first_departure_ts, unit='s').dt.hour                                        
-    ).drop(columns = drop_cols).drop_duplicates().reset_index(drop=True)
+    # Some departure_time is None
+    df = df[df.departure_time.notna()].assign(
+        departure_hr = pd.to_datetime(df.trip_first_departure_ts, unit='s').dt.hour                   
+    ).drop(columns = drop_cols).drop_duplicates()
+    
+    # Make sure no NaNs make it through
+    df = df[(df.departure_hr.notna()) & (df.departure_hr < 24)].reset_index(drop=True)
     
     # Across trip_ids, for the same route_id, there are differing max_stop_sequence
     # Can't use max_stop_sequence to find longest route_length
     # Use service hours instead to find faster trip during free-flowing traffic
     group_cols = ["calitp_itp_id", "route_id"]
     
-    # Should there be a check that there are mid-day trips for that route_id?
-    # Select trip by departure_hr
-    hour_order = [
-        12, 11, 13, 10, 14, # ideally we want mid-day
-        15, 7, 20, 6, 21, # but, can move into earlier PM or early AM
-        0, 1, 2, 3, 4, 5, 22, 23, # owl service
-        8, 9, # AM peak 
-        16, 17, 18, 19, # PM peak
-    ]
-    
-    for i in range(0, 24):
-        if i == 0:
-            df['selection_rank'] = df.apply(
-                lambda x: hour_order[i] if x.departure_hr == i 
-                else 0, axis=1) 
-        else:
-            df['selection_rank'] = df.apply(
-                lambda x: hour_order[i] if x.departure_hr == i 
-                else x.selection_rank, axis=1) 
     
     # Select a trip that closest to 25th percentile (lower means faster!)
     # This groupby ruins the index, throws an error, so just merge in as separate df
@@ -83,6 +67,9 @@ def select_one_trip(df):
             )
     
     # Select trip that is closest to 25th percentile (min_diff)
+    # ERROR: Should be abs(df.service_hours - df.p25)
+    # But, cannot change df here because the identifier includes trip_id
+    # and don't want to rerun google maps requests
     df["difference"] = df.service_hours - df.p25
     df["min_diff"] = df.groupby(group_cols)["difference"].transform("min")
 
@@ -98,7 +85,7 @@ def select_one_trip(df):
                         ascending=[True, True, False])
            .drop_duplicates(subset=group_cols)
            .drop(columns = ["faster_trip", "difference", "min_diff", 
-                            "p25", "selection_rank"])
+                            "p25"])
            .reset_index(drop=True)
           )
 
@@ -157,7 +144,8 @@ def grab_stop_geom(df):
                          "trip_id", "stop_sequence"])
            .reset_index(drop=True)
            .drop(columns = ["stop_lon", "stop_lat", 
-                            "trip_first_departure_ts", "trip_last_arrival_ts"])
+                            # Keep trip_first_arrival_ts (in case departure_time is NaN)
+                            "trip_last_arrival_ts"])
           )
 
     return gdf
@@ -170,6 +158,8 @@ def make_parallel_routes_df_with_stops():
     trips = pd.read_parquet(f"{DATA_PATH}trips_joined_thurs.parquet")
     SELECTED_DATE = '2022-1-6' #warehouse_queries.dates['thurs']
     
+    print("Read in data")
+    
     # Attach service hours
     # This df is trip_id-stop_id level
     trips_with_service_hrs = grab_service_hours(trips, SELECTED_DATE)
@@ -177,6 +167,8 @@ def make_parallel_routes_df_with_stops():
     # Narrow down to 1 trip per route_id
     selected_trip = select_one_trip(trips_with_service_hrs)
     
+    print("Select 1 trip")
+
     # Narrow down to just parallel routes
     selected_parallel_trips = subset_to_parallel_routes(selected_trip)
 
@@ -188,8 +180,22 @@ def make_parallel_routes_df_with_stops():
                 trips_with_service_hrs.trip_key.isin(selected_parallel_trips.trip_key)]
               .reset_index(drop=True)
              )
+    
+    print("Select parallel trip and cleanup")
 
     final_df = grab_stop_geom(parallel_trips_with_stops)
-    final_df.to_parquet("./data/parallel_trips_with_stops.parquet")
     
-make_parallel_routes_df_with_stops() 
+    # Get rid of dups / drop ITP_ID==200
+    final_df = (final_df[final_df.calitp_itp_id != 200]
+                .sort_values(["calitp_itp_id", "route_id", "trip_id", "stop_sequence"])
+                .drop_duplicates(subset=["calitp_itp_id", "route_id", "trip_id", "stop_sequence"])
+                .reset_index(drop=True)
+               )
+    
+    shared_utils.utils.geoparquet_gcs_export(final_df, 
+                                             utils.GCS_FILE_PATH, "parallel_trips_with_stops")
+    print("Exported to GCS")
+
+
+if __name__ == "__main__":
+    make_parallel_routes_df_with_stops() 
