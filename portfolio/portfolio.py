@@ -174,6 +174,7 @@ def index(
         args.append(f"--alias={alias}")
 
     if deploy:
+        typer.secho(f"deploying with args {args}", fg=typer.colors.GREEN)
         subprocess.run(args).check_returncode()
 
 
