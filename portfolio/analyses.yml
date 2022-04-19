@@ -20,3 +20,27 @@ sites:
             sections:
               - itp_id: 3
               - itp_id: 4
+  - name: rt
+    title: Realtime Delay Analysis
+    directory: ./rt_delay/
+    readme: ./rt_delay/README.md
+    notebook: ./rt_delay/15_parameterize.ipynb
+    parts:
+      - chapters:
+          - caption: District 1
+            params:
+              district: 1
+            sections:
+              - itp_id: 110
+              - itp_id: 126
+              - itp_id: 127
+              - itp_id: 135
+              - itp_id: 148
+          - caption: District 2 -
+            params:
+              district: 2
+            sections:
+              - itp_id: 159
+              - itp_id: 167
+              - itp_id: 170
+              - itp_id: 182
