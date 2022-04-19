@@ -1,0 +1,11 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: district_4__district_name_la-metro-this-is-a-placeholder.md
+        sections:
+        -   glob: district_4__district_name_la-metro-this-is-a-placeholder/*
+    -   file: district_7.md
+        sections:
+        -   glob: district_7/*
+root: README
