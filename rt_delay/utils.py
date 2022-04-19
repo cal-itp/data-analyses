@@ -11,7 +11,7 @@ import shapely
 import datetime as dt
 import os
 import time
-from zoneinfo import ZoneInfo
+#from zoneinfo import ZoneInfo
 import pandas as pd
 import geopandas as gpd
 import warnings
