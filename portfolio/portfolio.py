@@ -12,6 +12,7 @@ import nbformat
 import papermill as pm
 import typer
 import yaml
+import json
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from nbconvert import HTMLExporter
 from papermill.engines import NBClientEngine, papermill_engines
@@ -134,9 +135,13 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             # hide input (i.e. code) for all cells
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
+                
+                # Consider importing this name from calitp.magics
+                if '%%capture_parameters' in cell.source:
+                    params = {**params, **json.loads(cell.outputs[0]['text'])}
 
-            if "%%capture" in cell.source:
-                cell.outputs = []
+                if "%%capture" in cell.source:
+                    cell.outputs = []
 
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)

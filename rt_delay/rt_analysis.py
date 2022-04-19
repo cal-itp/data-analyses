@@ -11,11 +11,9 @@ import geopandas as gpd
 import shapely
 
 import datetime as dt
-import time
-from zoneinfo import ZoneInfo
 from tqdm import tqdm
 
-import numpy as np
+# import numpy as np
 from calitp.tables import tbl
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -339,6 +337,7 @@ class OperatorDayAnalysis:
                                                            # 'schedule': ScheduleInterpolator(st_trip_joined, self.routelines) ## probably need to save memory for now ?
                                                        }
             except AssertionError as e:
+                print(e)
                 continue
             if type(self.pbar) != type(None):
                 self.pbar.update()
