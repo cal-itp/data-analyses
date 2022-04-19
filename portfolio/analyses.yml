@@ -1,0 +1,34 @@
+sites:
+  - name: dla
+    title: DLA Grant Analysis
+    directory: ./dla/
+    readme: ./dla/README.md
+    notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
+    parts:
+      - caption: Introduction
+      - chapters:
+          - caption: District 4
+            params:
+              district: 4
+              district_name: LA Metro (this is a placeholder)
+          - caption: District 7
+            params:
+              district: 7
+  - name: rt
+    title: Realtime Delay Analysis
+    directory: ./rt_delay/
+    readme: ./rt_delay/README.md
+    notebook: ./rt_delay/15_parameterize.ipynb
+    parts:
+      - chapters:
+          - caption: District 02 - Redding
+            params:
+              district: 1
+            sections:
+              - itp_id: 259
+          - caption: District 03 - Marysville
+            params:
+              district: 03
+            sections:
+              - itp_id: 221
+#              - itp_id: 273
