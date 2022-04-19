@@ -5,3 +5,4 @@ pyyaml==6.0
 typer==0.4.1
 jupyter-book==0.12.2
 intake==0.6.4
+humanize
