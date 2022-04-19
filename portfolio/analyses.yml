@@ -37,4 +37,4 @@ sites:
               district: 03
             sections:
               - itp_id: 221
-              - itp_id: 273
+#              - itp_id: 273
