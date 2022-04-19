@@ -12,7 +12,7 @@ import shapely
 
 import datetime as dt
 import time
-from zoneinfo import ZoneInfo
+#from zoneinfo import ZoneInfo
 from tqdm import tqdm
 
 import numpy as np
