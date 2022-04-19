@@ -237,7 +237,8 @@ class RtFilterMapper:
         singletrip = gdf.trip_id.nunique() == 1
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
         orig_rows = gdf.shape[0]
-        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_meters': 0,
+        gdf['shape_miles'] = gdf.shape_meters / 1609
+        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_miles': 1,
                         'trips_per_hour': 1}) ##round for display
         
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
@@ -262,13 +263,13 @@ class RtFilterMapper:
 
         popup_dict = {
             how_speed_col[how]: "Speed (miles per hour)",
-            "shape_meters": "Distance along route (meters)",
             "route_short_name": "Route",
-            "shape_id": "Shape ID",
-            "direction_id": "Direction ID",
-            "stop_id": "Next Stop ID",
-            "stop_sequence": "Next Stop Sequence",
-            "trips_per_hour": "Trips per Hour" 
+            # "shape_id": "Shape ID",
+            # "direction_id": "Direction ID",
+            # "stop_id": "Next Stop ID",
+            # "stop_sequence": "Next Stop Sequence",
+            "trips_per_hour": "Frequency (trips per hour)" ,
+            "shape_miles": "Distance from start of route (miles)"
         }
         if singletrip:
             popup_dict["delay_seconds"] = "Current Delay (seconds)"
