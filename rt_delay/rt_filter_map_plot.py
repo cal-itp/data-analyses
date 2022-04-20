@@ -226,7 +226,8 @@ class RtFilterMapper:
                 self.pbar.refresh
 
         self.stop_segment_speed_view = all_stop_speeds
-        return self._show_speed_map(how = how, colorscale = colorscale, size = size, no_title = no_title)
+        return
+        # return self._show_speed_map(how = how, colorscale = colorscale, size = size, no_title = no_title)
     
     def _show_speed_map(self, how = 'average',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550], no_title = False):
