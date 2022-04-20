@@ -43,7 +43,7 @@ sites:
         district: 05 - San Luis Obispo
       sections:
       - itp_id: 293
-      - itp_id: 312
+      # - itp_id: 312 (maps won't generate?)
       - itp_id: 208
     - caption: District 02 - Redding
       params:
@@ -114,4 +114,4 @@ sites:
       sections:
       - itp_id: 99
   readme: ./rt_delay/README.md
-  title: Realtime Delay Analysis
+  title: California Transit Speed Maps
