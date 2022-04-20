@@ -55,7 +55,7 @@ sites:
         district: 07 - Los Angeles
       sections:
       - itp_id: 75
-      - itp_id: 182
+      # - itp_id: 182
       - itp_id: 45
       - itp_id: 260
       - itp_id: 243
