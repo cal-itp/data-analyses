@@ -1,6 +1,11 @@
 name: Update and deploy portfolio index site
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-portfolio-index.yml'
+      - 'portfolio/**'
   pull_request:
     paths:
       - '.github/workflows/update-portfolio-index.yml'
@@ -31,9 +36,16 @@ jobs:
         npm install -g netlify-cli
         python portfolio/portfolio.py index --deploy --alias=${GITHUB_REPOSITORY#*/}-${PR_NUMBER}
       env:
-        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_PREVIEW_APP_SITE_ID }}
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PREVIEW_APP_AUTH_TOKEN }}
         PR_NUMBER: ${{ github.event.number }}
+
+    - name: Netlify docs production
+      if: ${{ github.ref == 'refs/heads/main' }}
+      run: |
+        npm install -g netlify-cli
+        python portfolio/portfolio.py index --deploy --prod
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PREVIEW_APP_AUTH_TOKEN }}
 
     - name: Add netlify link PR comment
       uses: actions/github-script@v3
@@ -41,7 +53,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const suffix = "--cal-itp-previews.netlify.app"
+          const suffix = "--cal-itp-data-analyses.netlify.app"
           github.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
