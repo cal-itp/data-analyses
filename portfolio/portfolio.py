@@ -157,7 +157,6 @@ def index(
     config=CONFIG_OPTION,
     deploy: bool = DEPLOY_OPTION,
     alias: str = None,
-    prod: bool = False,
 ) -> None:
     with open(config) as f:
         portfolio_config = PortfolioConfig(**yaml.safe_load(f))
@@ -178,9 +177,6 @@ def index(
 
     if alias:
         args.append(f"--alias={alias}")
-
-    if prod:
-        args.append("--prod")
 
     if deploy:
         typer.secho(f"deploying with args {args}", fg=typer.colors.GREEN)
