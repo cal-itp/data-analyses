@@ -53,7 +53,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const suffix = "--cal-itp-previews.netlify.app"
+          const suffix = "--cal-itp-data-analyses.netlify.app"
           github.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
