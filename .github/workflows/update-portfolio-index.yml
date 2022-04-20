@@ -43,7 +43,7 @@ jobs:
       if: ${{ github.ref == 'refs/heads/main' }}
       run: |
         npm install -g netlify-cli
-        python portfolio/portfolio.py index --deploy
+        python portfolio/portfolio.py index --deploy --prod
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PREVIEW_APP_AUTH_TOKEN }}
 
