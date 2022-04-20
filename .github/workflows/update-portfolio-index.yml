@@ -2,7 +2,7 @@ name: Update and deploy portfolio index site
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - '.github/workflows/update-portfolio-index.yml'
       - 'portfolio/**'
