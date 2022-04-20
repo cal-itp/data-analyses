@@ -92,8 +92,8 @@ def gtfs_time_to_dt(df):
                         dt.datetime.strptime(timestring, '%H:%M:%S').time())
     return df
 
-def check_cached(filename):
-    path = f'{GCS_FILE_PATH}cached_views/{filename}'
+def check_cached(filename, subfolder='cached_views/'):
+    path = f'{GCS_FILE_PATH}{subfolder}{filename}'
     if fs.exists(path):
         return path
     else:
