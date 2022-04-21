@@ -255,7 +255,9 @@ class RtFilterMapper:
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
 
-        gdf = gdf >> select(-_.service_date)
+        gdf = gdf >> select(-_.service_date, -_.last_loc, -_.shape_meters,
+                           -_.meters_from_last, -_.speed_mph, -_.speed_from_last,
+                           -_.trip_id, -_.trip_key, -_.n_trips) ## drop unused cols for smaller map size
         gdf = gdf >> arrange(_.trips_per_hour)
         gdf = gdf.set_crs(CA_NAD83Albers)
         
@@ -305,7 +307,8 @@ class RtFilterMapper:
             highlight_function=lambda x: {
                 'fillColor': '#DD1C77',
                 "fillOpacity": 0.6,
-            }
+            },
+            reduce_precision = False
         )
         
         return g  
