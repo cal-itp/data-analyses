@@ -113,6 +113,8 @@ class RtFilterMapper:
             self.filter_period = f'{start_time}–{end_time}'
         elements_ordered = [rts, direction, self.filter_period, self.display_date]
         self.filter_formatted = ', ' + ', '.join([str(x) for x in elements_ordered if x])
+        
+        self._time_only_filter = not route_names and not shape_ids and not direction_id and not direction
             
     def reset_filter(self):
         self.filter = None
@@ -159,8 +161,9 @@ class RtFilterMapper:
         
         gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.strftime("%m_%d")}_{self.filter_period}'
         subfolder = 'segment_speed_views/'
-        if check_cached (f'{gcs_filename}.parquet', subfolder):
-            self.stop_segment_speed_view = gpd.read_parquet(f'{GCS_FILE_PATH}{subfolder}{gcs_filename}.parquet')
+        cached_periods = ['PM_Peak', 'AM_Peak', 'Midday', 'All_Day']
+        if check_cached (f'{gcs_filename}.parquet', subfolder) and self.filter_period in cached_periods:
+            self.stop_segment_speed_view = self._filter(gpd.read_parquet(f'{GCS_FILE_PATH}{subfolder}{gcs_filename}.parquet'))
         else:
             gdf = self._filter(self.stop_delay_view)
             all_stop_speeds = gpd.GeoDataFrame()
@@ -171,7 +174,7 @@ class RtFilterMapper:
             for shape_id in gdf.shape_id.unique():
                 this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
                 if this_shape.empty:
-                    print(f'{shape_id} empty!')
+                    # print(f'{shape_id} empty!')
                     continue
                 # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
                 stop_speeds = (this_shape
@@ -214,15 +217,15 @@ class RtFilterMapper:
                     # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
                     assert not stop_speeds.empty, 'stop speeds gdf is empty!'
                 except Exception as e:
-                    print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
-                    print(e)
+                    # print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
+                    # print(e)
                     continue
 
                 if stop_speeds.avg_mph.max() > 80:
-                    print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                    # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
                 if stop_speeds._20p_mph.min() < 0:
-                    print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                    # print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
                 all_stop_speeds = pd.concat((all_stop_speeds, stop_speeds))
 
@@ -232,7 +235,8 @@ class RtFilterMapper:
                     self.pbar.refresh
             self.stop_segment_speed_view = all_stop_speeds
             export_path = f'{GCS_FILE_PATH}segment_speed_views/'
-            shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
+            if self._time_only_filter:
+                shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
         return self._show_speed_map(how = how, colorscale = colorscale, size = size, no_title = no_title)
     
     def _show_speed_map(self, how = 'average',
