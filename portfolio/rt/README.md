@@ -16,5 +16,8 @@ Segment speed is estimated using the time and distance between vehicle positions
 
 Delay is estimated by comparing the _time_ each transit vehicle actually arrived at a stop to the scheduled arrival time.
 
-### 
-#### Questions or Feedback? Please email hello@calitp.org
+## Ongoing Work
+
+The Cal-ITP team is working to share our derived datasets, including this vehicle speed and delay data, using the California Open Data Portal. In the interim, data is available by contacting us or via the download links on each map page.
+
+### Questions or Feedback? Please email hello@calitp.org
