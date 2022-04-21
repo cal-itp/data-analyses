@@ -80,6 +80,13 @@ def add_quantiles_timeofday(df):
                    )
           )
     
+    df3["abs_diff"] = abs(df3.service_hours - df3.p50)
+    df3["min_diff"] = df3.groupby(group_cols)["abs_diff"].transform("min")
+    df3 = df3.assign(
+        p50_trip = df3.apply(lambda x: 1 if x.min_diff == x.abs_diff
+                                else 0, axis=1)
+    ).drop(columns = ["abs_diff", "min_diff"])
+    
     return df3
 
 
@@ -135,10 +142,21 @@ def designate_plot_group(df):
     # on how many routes plotted
     # But, there's also some where bus_multiplier can't be derived, if Google API didn't return results
     # Use 1 trip to designate
+    for c in ["bus_multiplier", "bus_difference"]:
+        df = df.assign(
+            minimum = df.groupby(["calitp_itp_id", "route_id"])[c].transform("min"),
+            maximum = df.groupby(["calitp_itp_id", "route_id"])[c].transform("max"),
+        )
+        df = df.assign(
+            spread = (df.maximum - df.minimum).round(3)
+        ).rename(columns = {"spread": f"{c}_spread"}).drop(columns = ["minimum", "maximum"])
+
     df2 = (df[df.bus_multiplier.notna()]
-           [["calitp_itp_id", "route_id", "pct_trips_competitive"]]
+           [["calitp_itp_id", "route_id", "pct_trips_competitive", 
+             "bus_multiplier_spread", "bus_difference_spread"]]
            .drop_duplicates()
-           .sort_values(["calitp_itp_id", "pct_trips_competitive"], ascending=[True, False])
+           .sort_values(["calitp_itp_id", "pct_trips_competitive", "bus_multiplier_spread"], 
+                        ascending=[True, False, False])
            .reset_index(drop=True)
           )
     
