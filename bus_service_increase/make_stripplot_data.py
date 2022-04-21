@@ -117,7 +117,8 @@ def merge_in_competitive_routes(df):
         competitive_route = df3.competitive_route.fillna(0).astype(int),
         fastest_trip = df3.fastest_trip.fillna(0).astype(int),
         bus_multiplier = df3.service_hours.divide(df3.car_duration_hours).round(2),
-        bus_difference = (df3.service_hours - df3.car_duration_hours).round(2),
+        # difference (in minutes) between car and bus
+        bus_difference = ((df3.service_hours - df3.car_duration_hours) * 60).round(1),
     )
     
     
@@ -152,11 +153,15 @@ def designate_plot_group(df):
         ).rename(columns = {"spread": f"{c}_spread"}).drop(columns = ["minimum", "maximum"])
 
     df2 = (df[df.bus_multiplier.notna()]
-           [["calitp_itp_id", "route_id", "pct_trips_competitive", 
-             "bus_multiplier_spread", "bus_difference_spread"]]
+           [["calitp_itp_id", "route_id", "p50", 
+             "pct_trips_competitive", 
+             "num_competitive", "bus_multiplier_spread", "bus_difference_spread"]]
            .drop_duplicates()
-           .sort_values(["calitp_itp_id", "pct_trips_competitive", "bus_multiplier_spread"], 
-                        ascending=[True, False, False])
+           # sort in descending order for % trips competitive, then by # competitive trips,
+           # then by 50th percentile, then one with lower spread
+           .sort_values(["calitp_itp_id", "pct_trips_competitive", "num_competitive",
+                         "p50", "bus_multiplier_spread"], 
+                        ascending=[True, False, False, True, True])
            .reset_index(drop=True)
           )
     
