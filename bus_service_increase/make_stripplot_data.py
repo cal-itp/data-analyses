@@ -31,6 +31,7 @@ def pare_down_trips(df):
     
     return df2
 
+
 def time_of_day(row):
     if (row.departure_hour <= 6) or (row.departure_hour >= 20):
         return "Owl Service"
@@ -41,32 +42,7 @@ def time_of_day(row):
     elif (row.departure_hour > 16) and (row.departure_hour <= 19):
         return "PM Peak"
 
-def calculate_quantiles(df, group_cols, i):
-    quantile = (df.groupby(group_cols)["service_hours"]
-                    .quantile(i/100).reset_index()
-                    .rename(columns = {"service_hours": f"p{i}"})
-                   )
     
-    df2 = pd.merge(
-        df, quantile, 
-        on = group_cols,
-        how = "inner",
-        validate = "m:1"
-    )
-        
-    df2["difference"] = abs(df2.service_hours - df2[f"p{i}"])
-    df2["min_diff"] = df2.groupby(group_cols)["difference"].transform("min")
-        
-    df2 = (df2.assign(
-            new_col = df2.apply(
-                lambda x: 1 if x.difference == x.min_diff else 0, axis=1)
-        ).rename(columns = {"new_col": f"p{i}_trip"})
-        .drop(columns = ["difference", "min_diff"])
-    )
-    
-    return df2
-
-
 def add_quantiles_timeofday(df):
     df = df.assign(
         departure_hour = pd.to_datetime(
@@ -88,11 +64,13 @@ def add_quantiles_timeofday(df):
     # Identify the 25th, 50th, 75th percentile trips
     quantile_dict = {}
     for i in [25, 50, 75]:
+        # the groupby / quantile destroys index, need to merge in separately as df
         quantile_dict[i] = (df2.groupby(group_cols)["service_hours"]
                 .quantile(i/100).reset_index()
                 .rename(columns = {"service_hours": f"p{i}"})
                ) 
-    
+        
+    # Merge the quantile dfs in
     df3 = (df2.merge(quantile_dict[25],
                     on = group_cols, how = "left", validate = "m:1"
             ).merge(quantile_dict[50],
@@ -118,7 +96,7 @@ def merge_in_competitive_routes(df):
                    on = trip_cols,
                    how = "left",
                    validate = "m:1",
-    ).rename(columns = {"competitive": "competitive_trip"})
+    ).rename(columns = {"competitive": "fastest_trip"})
     
     # Merge in route-level info
     df3 = pd.merge(df2,
@@ -130,11 +108,26 @@ def merge_in_competitive_routes(df):
     
     df3 = df3.assign(
         competitive_route = df3.competitive_route.fillna(0).astype(int),
-        competitive_trip = df3.competitive_trip.fillna(0).astype(int),
-        bus_multiplier = df3.service_hours.divide(df3.car_duration_hours),
+        fastest_trip = df3.fastest_trip.fillna(0).astype(int),
+        bus_multiplier = df3.service_hours.divide(df3.car_duration_hours).round(2),
+        bus_difference = (df3.service_hours - df3.car_duration_hours).round(2),
     )
-        
-    return df3
+    
+    
+    # Calculate % of trips below threshold
+    df4 = df3.assign(
+        num_trips = df3.groupby(route_cols)["trip_id"].transform("nunique"),
+        is_competitive = df3.apply(lambda x: 1 if x.bus_multiplier <= 2 
+                                   else 0, axis=1)    
+    )
+    
+    df4["num_competitive"] = df4.groupby(route_cols)["is_competitive"].transform("sum")
+    
+    df4 = df4.assign(
+        pct_trips_competitive = df4.num_competitive.divide(df4.num_trips).round(3)
+    ).drop(columns = ["is_competitive"])
+    
+    return df4
 
 
 def designate_plot_group(df):
@@ -142,15 +135,22 @@ def designate_plot_group(df):
     # on how many routes plotted
     # But, there's also some where bus_multiplier can't be derived, if Google API didn't return results
     # Use 1 trip to designate
-    # Find the trip closest to p50
+    df2 = (df[df.bus_multiplier.notna()]
+           [["calitp_itp_id", "route_id", "pct_trips_competitive"]]
+           .drop_duplicates()
+           .sort_values(["calitp_itp_id", "pct_trips_competitive"], ascending=[True, False])
+           .reset_index(drop=True)
+          )
     
+    '''
+    # Find the trip closest to p50
     df2 = (df[(df.service_hours == df.p50) & (df.bus_multiplier.notna())]
            .sort_values(["calitp_itp_id", "route_id", "departure_hour"])
            .drop_duplicates(subset=["calitp_itp_id", "route_id"])
            .reset_index(drop=True)
     )
-    
-    df2["order"] = df2.groupby('calitp_itp_id')["route_id"].cumcount()
+    '''
+    df2["order"] = df2.groupby('calitp_itp_id')["pct_trips_competitive"].cumcount()
     # use -1 to round to nearest 10s
     # since we generated cumcount(), which orders it from 1, 2, ...n for each group
     # if we want groups of 10 per chart, can just round to nearest 10s
@@ -166,6 +166,28 @@ def designate_plot_group(df):
     )
     
     return df3
+
+
+def merge_in_airtable_name_district(df):
+    airtable_organizations = (
+        tbl.airtable.california_transit_organizations()
+        >> select(_.itp_id, _.name, _.caltrans_district
+                  , _.drmt_organization_name)
+        >> collect()
+        >> filter(_.itp_id.notna())
+    ).sort_values(["itp_id", "name"]).drop_duplicates(
+        subset="itp_id").reset_index(drop=True)
+                            
+    # Airtable gives us fewer duplicates than doing tbl.gtfs_schedule.agency()
+    df2 = pd.merge(
+        df,
+        airtable_organizations.rename(columns = {"itp_id": "calitp_itp_id"}),
+        on = "calitp_itp_id",
+        how = "left",
+        validate = "m:1",
+    )
+    
+    return df2
 
 
 if __name__ == "__main__":
@@ -191,4 +213,6 @@ if __name__ == "__main__":
     df3 = add_quantiles_timeofday(df2)
     df4 = merge_in_competitive_routes(df3)
     df5 = designate_plot_group(df4)
-    df5.to_parquet("./data/stripplot_trips.parquet")
+    df6 = merge_in_airtable_name_district(df5)
+    
+    df6.to_parquet("./data/stripplot_trips.parquet")
