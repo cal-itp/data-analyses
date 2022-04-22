@@ -46,6 +46,7 @@ class RtFilterMapper:
                       >> group_by(_.direction_id, _.route_id, _.arrival_hour)
                       >> summarize(n_trips = _.route_id.size, mean_end_delay_seconds = _.delay_seconds.mean())
                      )
+        self.reset_filter()
 
     def set_filter(self, start_time = None, end_time = None, route_names = None,
                    shape_ids = None, direction_id = None, direction = None):
@@ -112,12 +113,16 @@ class RtFilterMapper:
         else:
             self.filter_period = f'{start_time}–{end_time}'
         elements_ordered = [rts, direction, self.filter_period, self.display_date]
-        self.filter_formatted = ', ' + ', '.join([str(x) for x in elements_ordered if x])
+        self.filter_formatted = ', ' + ', '.join([str(x).replace('_', ' ') for x in elements_ordered if x])
         
         self._time_only_filter = not route_names and not shape_ids and not direction_id and not direction
             
     def reset_filter(self):
         self.filter = None
+        self.filter_period = 'All_Day'
+        rts = 'All Routes'
+        elements_ordered = [rts, self.filter_period, self.display_date]
+        self.filter_formatted = ', ' + ', '.join([str(x).replace('_', ' ') for x in elements_ordered if x])
     
     def _filter(self, df):
         '''Filters a df (containing trip_id) on trip_id based on any set filter.
@@ -162,8 +167,8 @@ class RtFilterMapper:
         gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.strftime("%m_%d")}_{self.filter_period}'
         subfolder = 'segment_speed_views/'
         cached_periods = ['PM_Peak', 'AM_Peak', 'Midday', 'All_Day']
-        if check_cached (f'{gcs_filename}.parquet', subfolder) and self.filter_period in cached_periods:
-            self.stop_segment_speed_view = self._filter(gpd.read_parquet(f'{GCS_FILE_PATH}{subfolder}{gcs_filename}.parquet'))
+        if check_cached (f'{gcs_filename}.parquet', subfolder) and self.filter_period in cached_periods and self._time_only_filter:
+            self.stop_segment_speed_view = gpd.read_parquet(f'{GCS_FILE_PATH}{subfolder}{gcs_filename}.parquet')
         else:
             gdf = self._filter(self.stop_delay_view)
             all_stop_speeds = gpd.GeoDataFrame()
@@ -233,6 +238,9 @@ class RtFilterMapper:
                     self.pbar.update()
                 if type(self.pbar) != type(None):
                     self.pbar.refresh
+            if self._time_only_filter:
+                all_stop_speeds = all_stop_speeds >> select(-_.speed_mph, -_.speed_from_last,
+                                                   -_.trip_id, -_.trip_key)
             self.stop_segment_speed_view = all_stop_speeds
             export_path = f'{GCS_FILE_PATH}segment_speed_views/'
             if self._time_only_filter:
@@ -245,7 +253,7 @@ class RtFilterMapper:
         gdf = self.stop_segment_speed_view.copy()
         # gdf = self._filter(gdf)
         # print(gdf.dtypes)
-        singletrip = gdf.trip_id.nunique() == 1
+        # singletrip = gdf.trip_id.nunique() == 1 ## incompatible with current caching approach
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
         orig_rows = gdf.shape[0]
         gdf['shape_miles'] = gdf.shape_meters / 1609
@@ -256,8 +264,7 @@ class RtFilterMapper:
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
 
         gdf = gdf >> select(-_.service_date, -_.last_loc, -_.shape_meters,
-                           -_.meters_from_last, -_.speed_mph, -_.speed_from_last,
-                           -_.trip_id, -_.trip_key, -_.n_trips) ## drop unused cols for smaller map size
+                           -_.meters_from_last, -_.n_trips) ## drop unused cols for smaller map size
         gdf = gdf >> arrange(_.trips_per_hour)
         gdf = gdf.set_crs(CA_NAD83Albers)
         
@@ -285,9 +292,9 @@ class RtFilterMapper:
             "trips_per_hour": "Frequency (trips per hour)" ,
             "shape_miles": "Distance from start of route (miles)"
         }
-        if singletrip:
-            popup_dict["delay_seconds"] = "Current Delay (seconds)"
-            popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
+        # if singletrip:
+        #     popup_dict["delay_seconds"] = "Current Delay (seconds)"
+        #     popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
         if no_title:
             title = ''
         else:
@@ -313,19 +320,24 @@ class RtFilterMapper:
         
         return g  
 
-    def chart_delays(self):
+    def chart_delays(self, no_title = False):
         '''
         A bar chart showing delays grouped by arrival hour for current filtered selection
         '''
         filtered_endpoint = self._filter(self.endpoint_delay_view)
         grouped = (filtered_endpoint >> group_by(_.arrival_hour)
-                   >> summarize(mean_end_delay = _.delay.mean())
+                   >> summarize(mean_end_delay = _.delay_seconds.mean())
                   )
-        grouped['Minutes of Delay at Endpoint'] = grouped.mean_end_delay.apply(lambda x: x.seconds / 60)
+        grouped['Minutes of Delay at Endpoint'] = grouped.mean_end_delay.apply(lambda x: x / 60)
         grouped['Hour'] = grouped.arrival_hour
+        if no_title:
+            title = ''
+        else:
+            title = f"{self.calitp_agency_name} Mean Delays by Arrival Hour{self.filter_formatted}"
+            
         sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Minutes of Delay at Endpoint'], ci=None, 
                        palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
-            .set_title(f"{self.calitp_agency_name} Mean Delays by Arrival Hour{self.filter_formatted}")
+            .set_title(title)
            )
         chart = sns_plot.get_figure()
         chart.tight_layout()
@@ -339,7 +351,8 @@ class RtFilterMapper:
         sns.set(rc = {'figure.figsize':(13,6)})
         assert (self.filter['shape_ids']
                 and len(self.filter['shape_ids']) == 1), 'must filter to a single shape_id'
-        to_chart = self._filter(self.stop_segment_speed_view.copy())
+        _ = self.segment_speed_map()
+        to_chart = self.stop_segment_speed_view.copy()
         if min_stop_seq:
             to_chart = to_chart >> filter(_.stop_sequence >= min_stop_seq)
         if max_stop_seq:
@@ -372,5 +385,6 @@ class RtFilterMapper:
             period_formatted = self.filter_period.replace('_', ' ')
             display(Markdown(f'{period_formatted} most delayed routes: {with_newlines}'))
         except:
-            print('describe delayed routes failed!')
+            # print('describe delayed routes failed!')
+            pass
         return
