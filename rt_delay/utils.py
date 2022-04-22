@@ -461,7 +461,8 @@ def exclude_desc(desc):
     ## match descriptions that don't give additional info, like Route 602 or Route 51B
     number_only = re.search(' *Route *[0-9]*[a-z]{0,1}$', desc, flags=re.IGNORECASE)
     metro = re.search(' *Metro.*(Local|Rapid|Limited).*Line', desc, flags=re.IGNORECASE)
-    return number_only or metro
+    redwood = re.search(' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)', desc, flags=re.IGNORECASE)
+    return number_only or metro or redwood
 
 def which_desc(row):
     long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
