@@ -5,6 +5,7 @@ Use this df to back the stripplot
 showing variability of trip service hours 
 (bus_multiplier) compared to car travel.
 """
+import geopandas as gpd
 import intake
 import math 
 import os
@@ -16,6 +17,7 @@ from calitp.tables import tbl
 from siuba import *
 
 import setup_parallel_trips_with_stops
+import shared_utils
 import utils
 
 catalog = intake.open_catalog("./*.yml")
@@ -93,6 +95,7 @@ def add_quantiles_timeofday(df):
 def merge_in_competitive_routes(df):
     # Tag as competitive
     gdf = catalog.gmaps_results.read()
+    CRS = gdf.crs
     
     route_cols = ["calitp_itp_id", "route_id"]
     trip_cols = route_cols + ["shape_id", "trip_id"]
@@ -107,7 +110,7 @@ def merge_in_competitive_routes(df):
     
     # Merge in route-level info
     df3 = pd.merge(df2,
-                   gdf[route_cols + ["car_duration_hours", "competitive"]],
+                   gdf[route_cols + ["car_duration_hours", "competitive", "geometry"]],
                    on = route_cols,
                    how = "left",
                    validate = "m:1"
@@ -134,6 +137,8 @@ def merge_in_competitive_routes(df):
     df4 = df4.assign(
         pct_trips_competitive = df4.num_competitive.divide(df4.num_trips).round(3)
     ).drop(columns = ["is_competitive"])
+    
+    df4 = gpd.GeoDataFrame(df4, crs=CRS)
     
     return df4
 
@@ -238,4 +243,4 @@ if __name__ == "__main__":
     df5 = designate_plot_group(df4)
     df6 = merge_in_airtable_name_district(df5)
     
-    df6.to_parquet("./data/stripplot_trips.parquet")
+    shared_utils.utils.geoparquet_gcs_export(df6, utils.GCS_FILE_PATH, "competitive_route_variability")
