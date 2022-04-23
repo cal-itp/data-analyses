@@ -225,7 +225,7 @@ class RtFilterMapper:
                     # print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
                     # print(e)
                     continue
-
+                stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
                 if stop_speeds.avg_mph.max() > 80:
                     # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
@@ -343,7 +343,8 @@ class RtFilterMapper:
         chart.tight_layout()
         return chart
     
-    def chart_variability(self, min_stop_seq = None, max_stop_seq = None):
+    def chart_variability(self, min_stop_seq = None, max_stop_seq = None, num_segments = None,
+                         no_title = False):
         '''
         Chart trip speed variability, as speed between each stop segments.
         stop_sequence_range: (min_stop, max_stop)
@@ -351,8 +352,12 @@ class RtFilterMapper:
         sns.set(rc = {'figure.figsize':(13,6)})
         assert (self.filter['shape_ids']
                 and len(self.filter['shape_ids']) == 1), 'must filter to a single shape_id'
-        _ = self.segment_speed_map()
+        _map = self.segment_speed_map()
         to_chart = self.stop_segment_speed_view.copy()
+        if num_segments:
+            unique_stops = list(self.stop_segment_speed_view.stop_sequence.unique())[:num_segments]
+            min_stop_seq = min(unique_stops)
+            max_stop_seq = max(unique_stops)
         if min_stop_seq:
             to_chart = to_chart >> filter(_.stop_sequence >= min_stop_seq)
         if max_stop_seq:
@@ -363,9 +368,12 @@ class RtFilterMapper:
                                       'stop_sequence': 'Stop Segment ID',
                                       'stop_name': 'Segment Cross Street'})
         plt.xticks(rotation=65)
+        title = f"{self.calitp_agency_name} Speed Variability by Stop Segment{self.filter_formatted}"
+        if no_title:
+            title = None
         variability_plt = sns.swarmplot(x = to_chart['Segment Cross Street'], y=to_chart['Segement Speed (mph)'],
               palette=shared_utils.calitp_color_palette.CALITP_CATEGORY_BRIGHT_COLORS,
-             ).set_title(f"{self.calitp_agency_name} Speed Variability by Stop Segment{self.filter_formatted}")
+             ).set_title(title)
         return variability_plt
     
     def describe_delayed_routes(self):

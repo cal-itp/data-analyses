@@ -116,6 +116,7 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
         assert "original_parameters" in kwargs
 
         params = kwargs["original_parameters"]
+        no_stderr = kwargs["no_stderr"]
 
         for func in RESOLVERS:
             try:
@@ -142,6 +143,9 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
 
                 if "%%capture" in cell.source:
                     cell.outputs = []
+                    
+                if no_stderr:
+                    cell.outputs = [output for output in cell.outputs if 'name' not in output.keys() or output['name'] != 'stderr']
 
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
@@ -193,6 +197,10 @@ def build(
     execute_papermill: bool = typer.Option(
         True,
         help="If false, will skip calls to papermill.",
+    ),
+    no_stderr: bool = typer.Option(
+        False,
+        help="If true, will clear stderr stream for cell outputs",
     ),
     prepare_only: bool = typer.Option(
         False,
@@ -253,6 +261,7 @@ def build(
                         report_mode=True,
                         prepare_only=prepare_only or site.prepare_only,
                         original_parameters=params,
+                        no_stderr = no_stderr,
                     )
                 else:
                     typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW)
