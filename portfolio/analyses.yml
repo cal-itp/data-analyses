@@ -41,8 +41,8 @@ sites:
         district: 04 - Oakland
       sections:
       - itp_id: 194
-      - itp_id: 315
-      - itp_id: 246
+      # - itp_id: 315 SMART not in analysis scope
+      # - itp_id: 246 Caltrain not in analysis scope
       - itp_id: 167
       - itp_id: 110
       - itp_id: 350
