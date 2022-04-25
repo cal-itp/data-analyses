@@ -1,0 +1,30 @@
+sites:
+- directory: ./dla/
+  name: dla
+  notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
+  parts:
+  - caption: Introduction
+  - chapters:
+    - caption: District 4
+      params:
+        district: 4
+        district_name: LA Metro (this is a placeholder)
+    - caption: District 7
+      params:
+        district: 7
+  readme: ./dla/README.md
+  title: DLA Grant Analysis
+- directory: ./rt_delay/
+  name: rt
+  notebook: ./rt_delay/speedmaps.ipynb
+  parts:
+  - chapters:
+    - caption: District 04 - Oakland
+      params:
+        district: 04 - Oakland
+      sections:
+      - itp_id: 194
+      # - itp_id: 315 SMART not in analysis scope
+      # - itp_id: 246 Caltrain not in analysis scope
+  readme: ./rt_delay/README.md
+  title: California Transit Speed Maps
