@@ -12,6 +12,7 @@ import nbformat
 import papermill as pm
 import typer
 import yaml
+import json
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from nbconvert import HTMLExporter
 from papermill.engines import NBClientEngine, papermill_engines
@@ -115,6 +116,7 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
         assert "original_parameters" in kwargs
 
         params = kwargs["original_parameters"]
+        no_stderr = kwargs["no_stderr"]
 
         for func in RESOLVERS:
             try:
@@ -134,9 +136,16 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             # hide input (i.e. code) for all cells
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
+                
+                # Consider importing this name from calitp.magics
+                if '%%capture_parameters' in cell.source:
+                    params = {**params, **json.loads(cell.outputs[0]['text'])}
 
-            if "%%capture" in cell.source:
-                cell.outputs = []
+                if "%%capture" in cell.source:
+                    cell.outputs = []
+                    
+                if no_stderr:
+                    cell.outputs = [output for output in cell.outputs if 'name' not in output.keys() or output['name'] != 'stderr']
 
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
@@ -192,6 +201,10 @@ def build(
     execute_papermill: bool = typer.Option(
         True,
         help="If false, will skip calls to papermill.",
+    ),
+    no_stderr: bool = typer.Option(
+        False,
+        help="If true, will clear stderr stream for cell outputs",
     ),
     prepare_only: bool = typer.Option(
         False,
@@ -252,6 +265,7 @@ def build(
                         report_mode=True,
                         prepare_only=prepare_only or site.prepare_only,
                         original_parameters=params,
+                        no_stderr = no_stderr,
                     )
                 else:
                     typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW)
