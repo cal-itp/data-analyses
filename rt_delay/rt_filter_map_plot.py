@@ -322,9 +322,13 @@ class RtFilterMapper:
 
     def chart_delays(self, no_title = False):
         '''
-        A bar chart showing delays grouped by arrival hour for current filtered selection
+        A bar chart showing delays grouped by arrival hour for current filtered selection.
+        Currently hardcoded to 0600-2200.
         '''
-        filtered_endpoint = self._filter(self.endpoint_delay_view)
+        filtered_endpoint = (self._filter(self.endpoint_delay_view)
+                             >> filter(_.arrival_hour > 5)
+                             >> filter(_.arrival_hour < 23)
+                            )
         grouped = (filtered_endpoint >> group_by(_.arrival_hour)
                    >> summarize(mean_end_delay = _.delay_seconds.mean())
                   )
