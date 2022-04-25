@@ -24,7 +24,7 @@ sites:
         district: 01 - Eureka
       sections:
       - itp_id: 135
-      - itp_id: 159
+      # - itp_id: 159 Data issue
     - caption: District 02 - Redding
       params:
         district: 02 - Redding
