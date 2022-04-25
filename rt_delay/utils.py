@@ -92,8 +92,8 @@ def gtfs_time_to_dt(df):
                         dt.datetime.strptime(timestring, '%H:%M:%S').time())
     return df
 
-def check_cached(filename):
-    path = f'{GCS_FILE_PATH}cached_views/{filename}'
+def check_cached(filename, subfolder='cached_views/'):
+    path = f'{GCS_FILE_PATH}{subfolder}{filename}'
     if fs.exists(path):
         return path
     else:
@@ -459,9 +459,18 @@ def make_linestring(x):
 
 def exclude_desc(desc):
     ## match descriptions that don't give additional info, like Route 602 or Route 51B
-    number_only = re.search(' *Route *[0-9]*[a-z]{0,1}$', desc, flags=re.IGNORECASE)
-    metro = re.search(' *Metro.*(Local|Rapid|Limited).*Line', desc, flags=re.IGNORECASE)
-    return number_only or metro
+    exclude_texts = [' *Route *[0-9]*[a-z]{0,1}$', ' *Metro.*(Local|Rapid|Limited).*Line',
+                    ' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)',
+                     ' *service within the Stockton Metropolitan Area',
+                     ' *Hopper bus can deviate',
+                     " *RTD's Interregional Commuter Service is a limited-capacity service"
+                    ]
+    desc_eval = [re.search(text, desc, flags=re.IGNORECASE) for text in exclude_texts]
+    # number_only = re.search(' *Route *[0-9]*[a-z]{0,1}$', desc, flags=re.IGNORECASE)
+    # metro = re.search(' *Metro.*(Local|Rapid|Limited).*Line', desc, flags=re.IGNORECASE)
+    # redwood = re.search(' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)', desc, flags=re.IGNORECASE)
+    # return number_only or metro or redwood
+    return any(desc_eval)
 
 def which_desc(row):
     long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
