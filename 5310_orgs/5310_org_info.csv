@@ -1,0 +1,151 @@
+,organization_name,ntd_id_x,ntd_id_y,ntd_id,agency_name,name,doing_business_as,reporter_acronym,organization_type_x,organization_type_y,roles,reporter_type,city,itp_id,opm_id_drmt,mobility_services_operated,mpo_rtpa,_merge,in_5310,compare_names,merge_status
+0,Angel View Inc,,,,,Angel View Inc,,,,Non-Profit Organization,,,,,,Angel View,,right_only,both,True,Name Match; Airtable
+1,ARC Imperial Valley,,,,,ARC Imperial Valley,,,,Non-Profit Organization,,,,398.0,,Arc Imperial Valley Transportation,,right_only,both,True,Name Match; Airtable
+2,Area 1 Agency on Aging,,,,,Area 1 Agency on Aging,,,,,,,,399.0,,,,right_only,both,True,Name Match; Airtable
+3,Big Valley 50 Plus,,,,,Big Valley 50 Plus,,,,Non-Profit Organization,,,,404.0,,Big Valley 50 Plus,,right_only,both,True,Name Match; Airtable
+4,Care-A-Van Transit Systems Inc,,,,,Care-A-Van Transit Systems Inc,,,,Company,,,,407.0,,Care-A-Van Transit,,right_only,both,True,Name Match; Airtable
+5,Casa Allegra Community Services,,,,,Casa Allegra Community Services,,,,Non-Profit Organization,,,,,,Casa Allegra,,right_only,both,True,Name Match; Airtable
+6,Catholic Charities of the Diocese of Stockton,,,,,Catholic Charities of the Diocese of Stockton,,,,Non-Profit Organization,,,,408.0,,Catholic Charities Stockton Senior Transportation,,right_only,both,True,Name Match; Airtable
+7,City of Fontana,,,,,City of Fontana,,,,City/Town,,,,414.0,,City of Fontana Senior Transportation,,right_only,both,True,Name Match; Airtable
+8,City of Rio Vista,,,9R02-91014,City of Rio Vista,City of Rio Vista,Rio Vista Delta Breeze,,"City, County or Local Government Unit or Department of Transportation",City/Town,,Rural Reporter,Rio Vista,264.0,448003.0,Rio Vista Delta Breeze,Metropolitan Transportation Commission,both,both,True,Name Match; NTD
+9,City of Roseville,,,90168,City of Roseville,City of Roseville,Roseville Transit,,"City, County or Local Government Unit or Department of Transportation",City/Town,,Reduced Reporter,Roseville,271.0,331005.0,"Roseville Transit,Roseville Dial-A-Ride",Sacramento Area Council of Governments,both,both,True,Name Match; NTD
+10,City of Santa Rosa,,,90017,City of Santa Rosa,City of Santa Rosa,,,"City, County or Local Government Unit or Department of Transportation",City/Town,,Full Reporter,Santa Rosa,301.0,449002.0,"Santa Rosa CityBus,Santa Rosa Call Ahead Service",Metropolitan Transportation Commission,both,both,True,Name Match; NTD
+11,City of Visalia,,,90091,City of Visalia  ,City of Visalia,Visalia Transit,VT,"City, County or Local Government Unit or Department of Transportation",City/Town,,Full Reporter,Visalia,361.0,654006.0,"V-LINE,Visalia Transit,Visalia Dial-A-Ride",Tulare County Association of Governments,both,both,True,Name Match; NTD
+12,City of Visalia,,90091.0,90091.0,,City of Visalia,,,,City/Town,,,,361.0,654006.0,"V-LINE,Visalia Transit,Visalia Dial-A-Ride",Tulare County Association of Governments,right_only,both,True,Name Match; Airtable
+13,Colusa County Transit Agency,,,9R02-91112,Colusa County Transit Agency,Colusa County Transit Agency,,CCTA,"City, County or Local Government Unit or Department of Transportation",Independent Agency,,Rural Reporter,Colusa,74.0,306002.0,Colusa County Transit,,both,both,True,Name Match; NTD
+14,Common Ground Senior Services,,,,,Common Ground Senior Services,,,,Non-Profit Organization,,,,419.0,,Silver Streak Transport,,right_only,both,True,Name Match; Airtable
+15,Desert Access and Mobility Inc,,,,,Desert Access and Mobility Inc,,,,,,,,,,,,right_only,both,True,Name Match; Airtable
+16,Desert ARC,,,,,Desert ARC,,,,Non-Profit Organization,,,,,,Desert ARC,,right_only,both,True,Name Match; Airtable
+17,Eastern Sierra Transit Authority,,,9R02-91062,Eastern Sierra Transit Authority,Eastern Sierra Transit Authority,,ESTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Rural Reporter,Bishop,99.0,926002.0,"Eastern Sierra Transit Authority Community Routes,Reds Meadow Shuttle,Mammoth Lakes Trolleys,ESTA 395 Routes,Mammoth Lakes Buses,Lone Pine Dial-A-Ride,Walker Pine Dial-A-Ride,Bishop Dial-A-Ride,Mammoth Lakes Dial-A-Ride",,both,both,True,Name Match; NTD
+18,El Dorado County Transit Authority,,,90229,El Dorado County Transit Authority,El Dorado County Transit Authority,,EDCTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Reduced Reporter,Diamond Springs,101.0,309002.0,"El Dorado Transit,Sacramento/South Lake Tahoe Connector Bus,El Dorado Dial-A-Ride,SAC-MED,El Dorado Paratransit",Sacramento Area Council of Governments,both,both,True,Name Match; NTD
+19,ElderHelp of San Diego,,,,,ElderHelp of San Diego,,,,Non-Profit Organization,,,,427.0,,Seniors A Go Go,,right_only,both,True,Name Match; Airtable
+20,Friends of Children with Special Needs,,,,,Friends of Children with Special Needs,,,,Non-Profit Organization,,,,,,,,right_only,both,True,Name Match; Airtable
+21,Humboldt Senior Resource Center,,,,,Humboldt Senior Resource Center,,,,Non-Profit Organization,,,,,,Humboldt Senior Resource Center,,right_only,both,True,Name Match; Airtable
+22,Humboldt Transit Authority,,,9R02-91036,Humboldt Transit Authority,Humboldt Transit Authority,,HTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Rural Reporter,Eureka,135.0,112005.0,"Humboldt Transit Authority Dial-A-Ride,Redwood Transit System,Samoa Transit System,Willow Creek",,both,both,True,Name Match; NTD
+23,Humboldt Transit Authority,,,A0009,Humboldt Transit Authority,Humboldt Transit Authority,,HTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Group Plan Sponsor,Eureka,135.0,112005.0,"Humboldt Transit Authority Dial-A-Ride,Redwood Transit System,Samoa Transit System,Willow Creek",,both,both,True,Name Match; NTD
+24,Imperial County Transportation Commission,,,90226,Imperial County Transportation Commission,Imperial County Transportation Commission,,ICTC,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,El Centro,138.0,1113001.0,Imperial Valley Transit,Southern California Association of Governments,both,both,True,Name Match; NTD
+25,Independent Living Partnership,,,,,Independent Living Partnership,,,,,,,,433.0,,,,right_only,both,True,Name Match; Airtable
+26,Inyo-Mono Association for the Handicapped,,,,,Inyo-Mono Association for the Handicapped,,,,Non-Profit Organization,,,,434.0,,Inyo-Mono Association for the Handicapped,,right_only,both,True,Name Match; Airtable
+27,Lake Transit Authority,,,9R02-91053,Lake Transit Authority,Lake Transit Authority,,LTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Rural Reporter,Lower Lake,159.0,117002.0,"Lake Transit,Clearlake/Lower Lake Dial-A-Ride,Lakeport Dial-A-Ride",,both,both,True,Name Match; NTD
+28,LIFE ElderCare,,,,,LIFE ElderCare,,,,Non-Profit Organization,,,,437.0,,Life ElderCare,,right_only,both,True,Name Match; Airtable
+29,Marin County Transit District,,,90234,Marin County Transit District,Marin County Transit District,,,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,San Rafael,194.0,421002.0,"Marin Transit,West Marin Stagecoach,Novato Dial-A-Ride,Dillon Beach/Tomales Dial-A-Ride,Point Reyes Dial-A-Ride",Metropolitan Transportation Commission,both,both,True,Name Match; NTD
+30,Mendocino Transit Authority,,,9R02-91047,Mendocino Transit Authority,Mendocino Transit Authority,,,Independent Public Agency or Authority of Transit Service,Independent Agency,,Rural Reporter,Ukiah,198.0,123002.0,"Mendocino Transit Authority,Ukiah Dial-A-Ride,Fort Bragg Dial-A-Ride,Ukiah Paratransit,Fort Bragg Paratransit",,both,both,True,Name Match; NTD
+31,Metropolitan Transportation Commission,,,90094,Metropolitan Transportation Commission,Metropolitan Transportation Commission,,MTC,"MPO, COG or Other Planning Agency",MPO/RTPA,Metropolitan Planning Organization,Full Reporter,San Francisco,200.0,,,,both,both,True,Name Match; NTD
+32,Metropolitan Transportation Commission,,,A0013,Metropolitan Transportation Commission,Metropolitan Transportation Commission,,MTC,"MPO, COG or Other Planning Agency",MPO/RTPA,Metropolitan Planning Organization,Group Plan Sponsor,San Francisco,200.0,,,,both,both,True,Name Match; NTD
+33,Mobility Matters,,,,,Mobility Matters,,,,Non-Profit Organization,,,,442.0,,"Mobility Matters Rides for Seniors,Mobility Matters Rides 4 Veterans",,right_only,both,True,Name Match; Airtable
+34,Monterey-Salinas Transit,,,90062,Monterey-Salinas Transit,Monterey-Salinas Transit,,MST,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,Monterey,208.0,527001.0,"Monterey-Salinas Transit,MST Monterey Trolley,Carmel Valley Grapevine Express,MST RIDES,MST Senior Shuttles,MST Special Medical Trips",Association of Monterey Bay Area Governments,both,both,True,Name Match; NTD
+35,Morongo Basin Transit Authority,,,9R02-91090,Morongo Basin Transit Authority,Morongo Basin Transit Authority,,MBTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Rural Reporter,Joshua Tree,212.0,540002.0,"MBTA Bus,MBTA Ready Ride",Southern California Association of Governments,both,both,True,Name Match; NTD
+36,Mountain Shadows Support Group,,,,,Mountain Shadows Support Group,,,,Non-Profit Organization,,,,442.0,,Mountain Shadows Transportation ,,right_only,both,True,Name Match; Airtable
+37,Napa Valley Transportation Authority,,,90088,Napa Valley Transportation Authority,Napa Valley Transportation Authority,,NVTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,Napa,218.0,428002.0,"Vine Transit,Yountville Trolley,Calistoga Shuttle,St Helena Shuttle,Taxi Scrip,Vine Go,American Canyon Transit,City of Napa On-Demand",Metropolitan Transportation Commission,both,both,True,Name Match; NTD
+38,North and South of Market Adult Day Health,,,,,North and South of Market Adult Day Health,,,,,,,,445.0,,,,right_only,both,True,Name Match; Airtable
+39,North Valley Services,,,,,North Valley Services,,,,,,,,446.0,,,,right_only,both,True,Name Match; Airtable
+40,Omnitrans,,,90029,Omnitrans,OmniTrans,,,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,San Bernardino,232.0,836004.0,"OmniTrans,OmniRide,OmniTrans sbX,OmniAccess",Southern California Association of Governments,both,both,False,Name Match; NTD
+41,Pace Solano,,,,,Pace Solano,,,,Non-Profit Organization,,,,,,Pace Solano,,right_only,both,True,Name Match; Airtable
+42,Palo Verde Valley Transit Agency,,,9R02-99454,Palo Verde Valley Transit Agency,Palo Verde Valley Transit Agency,,"PVVTA,Desert Roadrunner",Independent Public Agency or Authority of Transit Service,Independent Agency,,Rural Reporter,Blythe,238.0,833005.0,Desert Roadrunner,Southern California Association of Governments,both,both,True,Name Match; NTD
+43,Peninsula Jewish Community Center,,,,,Peninsula Jewish Community Center,,,,Non-Profit Organization,,,,450.0,,Get Up & Go,,right_only,both,True,Name Match; Airtable
+44,Peppermint Ridge,,,,,Peppermint Ridge,,,,Non-Profit Organization,,,,,,Peppermint Ridge,,right_only,both,True,Name Match; Airtable
+45,Porterville Sheltered Workshop,,,,,Porterville Sheltered Workshop,,,,Non-Profit Organization,,,,452.0,,Porterville Sheltered Workshop Transportation Services,,right_only,both,True,Name Match; Airtable
+46,Reach Out Morongo Basin,,,,,Reach Out Morongo Basin,,,,Non-Profit Organization,,,,454.0,,Reach Out Morongo Basin,,right_only,both,True,Name Match; Airtable
+47,Redwood Coast Transit Authority,,,9R02-91097,Redwood Coast Transit Authority,Redwood Coast Transit Authority,,RCTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Rural Reporter,Crescent City,261.0,108002.0,"Redwood Coast Transit,Redwood Coast Dial-A-Ride",,both,both,True,Name Match; NTD
+48,Riverside Transit Agency,,,90031,Riverside Transit Agency,Riverside Transit Agency,,RTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,Riverside,269.0,833007.0,"Riverside Transit,Riverside Transit Dial-A-Ride",Southern California Association of Governments,both,both,True,Name Match; NTD
+49,San Benito County Local Transportation Authority,,,,,San Benito County Local Transportation Authority,,,,Independent Agency,,,,274.0,535001.0,"County Express On-Demand,County Express,County Express Dial-A Ride",Association of Monterey Bay Area Governments,right_only,both,True,Name Match; Airtable
+50,San Joaquin Regional Transit District,,,90012,San Joaquin Regional Transit District,San Joaquin Regional Transit District,,RTD,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,Stockton,284.0,1039006.0,"SJRTD Local,SJRTD BRT Express,SJRTD Commuter,SJRTD Hopper,RTD Dial-A-Ride",San Joaquin Council of Governments,both,both,True,Name Match; NTD
+51,San Luis Obispo Council of Governments,,,90297,San Luis Obispo Council of Governments,San Luis Obispo Council of Governments,,SLOCOG,"MPO, COG or Other Planning Agency",Council of Governments,"Regional Transportation Planning Agency,Metropolitan Planning Organization,Census Affiliate Data Center",Reduced Reporter,San Luis Obispo,288.0,,Paso Robles Dial-A-Ride,,both,both,True,Name Match; NTD
+52,San Mateo County Transit District,,,90009,San Mateo County Transit District,San Mateo County Transit District,SamTrans,,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,San Carlos,290.0,441010.0,"SamTrans,Redi-Wheels,RediCoast,Bayshore Brisbane Senior Shuttle,SamTrans Shuttles,SamCoast,FLX Pacifica",Metropolitan Transportation Commission,both,both,True,Name Match; NTD
+53,Santa Clara Valley Transportation Authority,,,90013,Santa Clara Valley Transportation Authority,Santa Clara Valley Transportation Authority,,VTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,San Jose,294.0,443001.0,"VTA Light Rail,VTA Rapid Bus,VTA Express Bus,VTA Bus,VTA ACE Shuttles,Valley Medical Center Shuttle,VTA ACCESS,VTA School Tripper",Metropolitan Transportation Commission,both,both,True,Name Match; NTD
+54,Self-Help for the Elderly,,,,,Self-Help for the Elderly,,,,Non-Profit Organization,,,,,,Self-Help for the Elderly,,right_only,both,True,Name Match; Airtable
+55,Tahoe Transportation District,,,,,Tahoe Transportation District,,,,Independent Agency,,,,331.0,309004.0,"Tahoe Truckee Area Regional Transportation,Tahoe Transportation Paratransit",Tahoe Regional Planning Agency,right_only,both,True,Name Match; Airtable
+56,The Arc of Amador and Calaveras,,,,,The Arc of Amador and Calaveras,,,,Non-Profit Organization,,,,461.0,,The Arc of Amador and Calaveras,,right_only,both,True,Name Match; Airtable
+57,The Respite Inn,,,,,The Respite Inn,,,,Non-Profit Organization,,,,,,The Respite Inn,,right_only,both,True,Name Match; Airtable
+58,Town of Truckee,,,9R02-91101,Town of Truckee,Town of Truckee,,TOT,"City, County or Local Government Unit or Department of Transportation",City/Town,,Rural Reporter,Truckee,340.0,329003.0,"TART Connect,Truckee TART Dial A Ride,Placer TART Paratransit",,both,both,True,Name Match; NTD
+59,Valley Achievement Center,,,,,Valley Achievement Center,,,,Non-Profit Organization,,,,467.0,,Valley Achievement Center Transportation Services,,right_only,both,True,Name Match; Airtable
+60,Victor Valley Community Services Council,,,,,Victor Valley Community Services Council,,,,Non-Profit Organization,,,,468.0,,Victor Valley Community Transportation,,right_only,both,True,Name Match; Airtable
+61,Victor Valley Transit Authority,,,90148,Victor Valley Transit Authority,Victor Valley Transit Authority,,VVTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,Hesperia,360.0,836005.0,"Victor Valley Transit,Victor Valley ADA Direct Access",Southern California Association of Governments,both,both,True,Name Match; NTD
+62,Vivalon Inc,,,,,Vivalon Inc,,,,,,,,,,Golden Gate Transit Paratransit,,right_only,both,True,Name Match; Airtable
+63,West Valley Community Services,,,,,West Valley Community Services,,,,Non-Profit Organization,,,,470.0,,Reach Your Destination Easily,,right_only,both,True,Name Match; Airtable
+64,Work Training Center,,,,,Work Training Center,,,,Non-Profit Organization,,,,471.0,,,,right_only,both,True,Name Match; Airtable
+65,Yolo County Transportation District,,,90090,Yolo County Transportation District,Yolo County Transportation District,Yolobus,YCTD,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,Woodland,372.0,357002.0,"Yolobus,Yolobus Special,Causeway Connection",Sacramento Area Council of Governments,both,both,True,Name Match; NTD
+66,Amador Transit,9R02-91000,9R02-91000,9R02-91000,Amador Regional Transit System,Amador Regional Transit System,,ARTS,Independent Public Agency or Authority of Transit Service,Independent Agency,,Rural Reporter,Jackson,11.0,1003002.0,"Amador Transit,Amador Transit Dial-A-Ride",,both,left_only,False,"Manual Match, NTD"
+67,Sunline Transit Agency,90079,90079,90079,SunLine Transit Agency,SunLine Transit Agency,,,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,Thousand Palms,327.0,833008.0,"SunLine Transit,SunLine School Tripper,SunDial Paratransit,SunLine 10 Commuter Link,SunRide,Palm Springs Buzz",Southern California Association of Governments,both,left_only,False,"Manual Match, NTD"
+68,Butte County Association of Governments  Butte Regional Transit,90208,90208,90208,Butte County Association of Governments,Butte County Association of Governments,,BCAG,"MPO, COG or Other Planning Agency",Joint Powers Agency,"Regional Transportation Planning Agency,Metropolitan Planning Organization,Census Affiliate Data Center,Area Wide Clearinghouse",Full Reporter,Chico,47.0,304001.0,"B-Line,B-Line Paratransit",Butte County Association of Governments,both,left_only,False,"Manual Match, NTD"
+69,Easy Lift Transportation Inc,90243,,90243,Easy Lift Transportation,Easy Lift Transportation,,,Private-Non-Profit Corporation,Private-Non-Profit Corporation,,Reduced Reporter,Goleta,100.0,542014.0,"Easy Lift Dial-A-Ride,Non Emergency Accessible Transportation",Santa Barbara County Association of Governments,both,left_only,False,"Manual Match, NTD"
+70,Livermore Amador Valley Transit Authority,90144,90144,90144,Livermore Amador Valley Transit Authority,Livermore Amador Valley Transit Authority,,LAVTA,Independent Public Agency or Authority of Transit Service,Independent Agency,,Full Reporter,Livermore,167.0,401003.0,"Tri-Valley Wheels,Tri-Valley Wheels Paratransit,Wheels School",Metropolitan Transportation Commission,both,left_only,True,"Manual Match, NTD"
+71,San Francisco Municipal Transportation Agency,90015,90015,90015,City and County of San Francisco,City and County of San Francisco,San Francisco Municipal Transportation Agency (MUNI),SFMTA,"City, County or Local Government Unit or Department of Transportation",City/Town,,Full Reporter,San Francisco,282.0,438003.0,"Muni Metro,SF Access Van,Muni Bus,San Francisco Cable Cars,Market Street Historic Railway",Metropolitan Transportation Commission,both,left_only,False,"Manual Match, NTD"
+72,Asian Community Center of Sacramento Valley Inc DBA ACC Senior Services,,,,,Asian Community Center of Sacramento Valley,,,Non-Profit Organization,Non-Profit Organization,,,,400.0,,ACC Rides Transportation Services,,right_only,left_only,False,"Manual Match, Airtable"
+73,Avenidas ,,,,,Avenidas,,,,,,,,401.0,,Avenidas Door-to-Door,,right_only,left_only,False,"Manual Match, Airtable"
+74,City of Lafayette: Lamorinda Sprit Van Program,,,,,City of Lafayette,,,City/Town,City/Town,,,,416.0,,Lamorinda Spirit Van,,right_only,left_only,False,"Manual Match, Airtable"
+75,City of Vista ,,,,,City of Vista,,,City/Town,City/Town,,,,,,,,right_only,left_only,False,"Manual Match, Airtable"
+76,Coastal Seniors Inc,,,,,Coastal Seniors,,,Non-Profit Organization,Non-Profit Organization,,,,418.0,,Point Arena Coastal Seniors,,right_only,left_only,False,"Manual Match, Airtable"
+77,Community Bridges Liftline,,,,,Community Bridges Inc,,,,,,,,420.0,,Lift Line,,right_only,left_only,False,"Manual Match, Airtable"
+78,Community Partners In Caring,,,,,Partners in Caring,,,,,,,,,,,,right_only,left_only,False,"Manual Match, Airtable"
+79,Dignity Health Connected Living,,,,,Dignity Health,,,,,,,,422.0,,"Dignity Health Connected Living,Shasta Connect",,right_only,left_only,False,"Manual Match, Airtable"
+80,Drivers for Survivors Inc,,,,,Drivers for Survivors,,,,,,,,423.0,,,,right_only,left_only,False,"Manual Match, Airtable"
+81,Faith in Action,,,,,Faith in Action Inc,,,Non-Profit Organization,Non-Profit Organization,,,,,,Ride with Pride,,right_only,left_only,False,"Manual Match, Airtable"
+82,Humboldt Medi-Trans,,,,,Humboldt Medi-Trans Inc,,,Non-Profit Organization,Non-Profit Organization,,,,,,Humboldt Medi-Trans,,right_only,left_only,False,"Manual Match, Airtable"
+83,Lutheran Social Services of Southern California,,,,,Lutheran Social Services,,,,,,,,439.0,,,,right_only,left_only,False,"Manual Match, Airtable"
+84,North of the River Recreation and Park District,,,,,North of River Recreation and Park District,,,Independent Agency,Consolidated Transportation Services Agency,,,,,,North of River Recreation and Park District,,right_only,left_only,False,"Manual Match, Airtable"
+85,Outreach & Escort Inc ,,,,,OUTREACH,,,,Non-Profit Organization,,,,448.0,,OUTREACH Senior and Disabled Transportation and Resources,,right_only,left_only,False,"Manual Match, Airtable"
+86,Shores of Hope ,,,,,Shores of Hope,,,,Non-Profit Organization,,,,458.0,,Shores of Hope Transportation Services,,right_only,left_only,False,"Manual Match, Airtable"
+87,Able Industries,,,,,Able Inc,,,,Non-Profit Organization,,,,,,Able Inc.,,right_only,left_only,False,"Manual Match, Airtable"
+88,ARC Bakersfield,,,,,Bakersfield ARC,,,,Non-Profit Organization,,,,,,Bakersfield ARC,,right_only,left_only,False,"Manual Match, Airtable"
+89,Center for Elders' Independence ,,,,,Center for Elders' Independence,,,,Non-Profit Organization,,,,409.0,,,,right_only,left_only,False,"Manual Match, Airtable"
+90,Contra Costa ARC,,,,,VistAbility,Contra Cost ARC,,,Non-Profit Organization,,,,,,VistAbility,,right_only,left_only,False,"Manual Match, Airtable"
+91,Family Bridges Inc,,,,,Family Bridges,,,,Non-Profit Organization,,,,,,Family Bridges,,right_only,left_only,False,"Manual Match, Airtable"
+92,Full Access & Coordinated Transportation Inc,,,,,Facilitating Access to Coordinated Transportation,,FACT,,Non-Profit Organization,Consolidated Transportation Services Agency,,,,,,,right_only,left_only,False,"Manual Match, Airtable"
+93,Institute on Aging ,,,,,Institute on Aging,,,,Non-Profit Organization,,,,,,Institute on Aging,,right_only,left_only,False,"Manual Match, Airtable"
+94,Lodi Memorial Hospital Association Inc Adult Day Services,,,,,Lodi Memorial Hospital Association,,,,,,,,438.0,,,,right_only,left_only,False,"Manual Match, Airtable"
+95,MOVE Stanislaus Transportation,,,,,MOVE Stanislaus,,,,,,,,444.0,,VetsVan,,right_only,left_only,False,"Manual Match, Airtable"
+96,On Lok Senior Health Services,,,,,On Lok,,,,Non-Profit Organization,,,,,,On Lok Senior Health Services,,right_only,left_only,False,"Manual Match, Airtable"
+97,Paratransit Services (Red Bluff),,,,,Paratransit Services Inc,,,,,,,,,,"Glenn Ride,Glenn Dial-A-Ride",,right_only,left_only,False,"Manual Match, Airtable"
+98,Pride Industries One Inc,,,,,Pride Industries Inc,,,,Company,,,,453.0,,Pride Industries Transportation,,right_only,left_only,False,"Manual Match, Airtable"
+99,Redwood Coast Seniors Inc,,,,,Redwood Coast Seniors,,,,Non-Profit Organization,,,,456.0,,Redwood Coast Senior Rides,,right_only,left_only,False,"Manual Match, Airtable"
+100,SMOOTH,,,,,Santa Maria Organization of Transportation Helpers (SMOOTH) ,,,,,,,,,,"Guadalupe Flyer,Guadalupe Shuttle,Santa Maria/Orcutt Senior Dial-A-Ride",,right_only,left_only,False,"Manual Match, Airtable"
+101,SAHA,,,,,Satellite Affordable Housing Associates (SAHA),,,,Non-Profit Organization,,,,,,SAHA,,right_only,left_only,False,"Manual Match, Airtable"
+102,Solano Tranportation Authority ,,,,,Solano Transportation Authority,,,,Independent Agency,,,,,,Solano Mobility Local Taxi Card Program,,right_only,left_only,False,"Manual Match, Airtable"
+103,United Cerebral Palsy Association of Greater Sacramento Inc,,,,,United Cerebral Palsy Association of Greater Sacramento,,,,Non-Profit Organization,,,,464.0,,UCP Safe Trip,,right_only,left_only,False,"Manual Match, Airtable"
+104,United Cerebral Palsy of San Luis Obispo County ,,,,,United Cerebral Palsy of San Luis Obispo County,,,,Non-Profit Organization,,,,,,,,right_only,left_only,False,"Manual Match, Airtable"
+105,Bay Area Outreach & Recreation Program Inc,,,,,Bay Area Outreach & Recreation Program,,,,Non-Profit Organization,,,,402.0,,Bay Area Outreach & Recreation Program,,right_only,left_only,False,"Manual Match, Airtable"
+106,Kimochi Inc,,,,,Kimochi,,,,Non-Profit Organization,,,,435.0,,Kimochi Transportation Services,,right_only,left_only,False,"Manual Match, Airtable"
+107,Milestones of Development INC,,,,,Milestones of Development,,,,Non-Profit Organization,,,,440.0,,Milestones of Development,,right_only,left_only,False,"Manual Match, Airtable"
+108,Ukiah Senior Center Inc,,,,,Ukiah Senior Center,,,,Non-Profit Organization,,,,463.0,,Ukiah Senior Center Transportation,,right_only,left_only,False,"Manual Match, Airtable"
+109,Choice in Aging,,,,,,,,,,,,,,,,,,left_only,False,No Match
+110,Consolidated Tribal Health Project Inc,,,,,,,,,,,,,,,,,,left_only,False,No Match
+111,County of Sacramento Department of Child Family and Adult Services,,,,,,,,,,,,,,,,,,left_only,False,No Match
+112,County of Sonoma Human Services Department Adult and Aging Division,,,,,,,,,,,,,,,,,,left_only,False,No Match
+113,County of Ventura Health Services Agency,,,,,,,,,,,,,,,,,,left_only,False,No Match
+114,Dignity Community Care,,,,,,,,,,,,,,,,,,left_only,False,No Match
+115,Foothill AIDS Project,,,,,,,,,,,,,,,,,,left_only,False,No Match
+116,Mental Health Client Action Network (MHCAN) ,,,,,,,,,,,,,,,,,,left_only,False,No Match
+117,NCI Affiliates,,,,,,,,,,,,,,,,,,left_only,False,No Match
+118,OPARC,,,,,,,,,,,,,,,,,,left_only,False,No Match
+119,Seniors Council of Santa Cruz and San Benito Counties,,,,,,,,,,,,,,,,,,left_only,False,No Match
+120,Valley Resource Center,,,,,,,,,,,,,,,,,,left_only,False,No Match
+121,Wilshire Community Services,,,,,,,,,,,,,,,,,,left_only,False,No Match
+122,Calaveras County Public Works,,,,,,,,,,,,,,,,,,left_only,False,No Match
+123,East Bay Services to the Developmentally Disabled ,,,,,,,,,,,,,,,,,,left_only,False,No Match
+124,Friends of Adult Day Health Care Centers,,,,,,,,,,,,,,,,,,left_only,False,No Match
+125,Futures Explored Inc,,,,,,,,,,,,,,,,,,left_only,False,No Match
+126,Help Central Inc,,,,,,,,,,,,,,,,,,left_only,False,No Match
+127,Howard Prep,,,,,,,,,,,,,,,,,,left_only,False,No Match
+128,Inland Empire United Way,,,,,,,,,,,,,,,,,,left_only,False,No Match
+129,Kings Rehabilitation Center,,,,,,,,,,,,,,,,,,left_only,False,No Match
+130,Life Steps Foundation Inc Santa Maria,,,,,,,,,,,,,,,,,,left_only,False,No Match
+131,Lighthouse for the Blind and Visually Impaired,,,,,,,,,,,,,,,,,,left_only,False,No Match
+132,Nevada-Sierra Connecting Point Public Authority,,,,,,,,,,,,,,,,,,left_only,False,No Match
+133,The Center for Independent Living,,,,,,,,,,,,,,,,,,left_only,False,No Match
+134,Eden I&R INC,,,,,,,,,,,,,,,,,,left_only,False,No Match
+135,Lake Links Inc,,,,,,,,,,,,,,,,,,left_only,False,No Match
+136,Peninsula Family Service,,,,,,,,,,,,,,,,,,left_only,False,No Match
+137,Tehama County Transit Agency,,,,,,,,,,,,,,,,,,left_only,False,No Match
+138,Tuolumne County Transit Agency (TCTA),,,,,,,,,,,,,,,,,,left_only,False,No Match
+139,Alegria Community Living,,,,,,,,,,,,,,,,,,left_only,False,No Match
+140,Contra Costa Transportation Authority (CCTA),,,,,,,,,,,,,,,,,,left_only,False,No Match
+141,County of Nevada Public Works Transit Services Division,,,,,,,,,,,,,,,,,,left_only,False,No Match
+142,Delano Association for the Developmentally Disabled Inc,,,,,,,,,,,,,,,,,,left_only,False,No Match
+143,Desert Area Resources and Training,,,,,,,,,,,,,,,,,,left_only,False,No Match
+144,Golden Rain Foundation of Walnut Creek,,,,,,,,,,,,,,,,,,left_only,False,No Match
+145,Loma Linda University Health,,,,,,,,,,,,,,,,,,left_only,False,No Match
+146,New Advances for People with Disabilities,,,,,,,,,,,,,,,,,,left_only,False,No Match
+147,Pomeroy Recreation & Rehabilitation Center,,,,,,,,,,,,,,,,,,left_only,False,No Match
+148,Regents of the University of California Santa Cruz,,,,,,,,,,,,,,,,,,left_only,False,No Match
+149,United Cerebral Palsy Association Inc of Stanislaus County,,,,,,,,,,,,,,,,,,left_only,False,No Match
