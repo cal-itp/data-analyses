@@ -120,13 +120,13 @@ sites:
   - chapters:
     - caption: District 4 - Oakland
       params:
-        district: 4
+        district: 04 - Oakland
         sections:
         - itp_id: 4
     - caption: District 7 - Los Angeles
       params:
-          district: 7
+          district: 07 - Los Angeles
           sections:
           - itp_id: 182
-  readme: ./bus_service_increase/analysis_README.md
+  readme: ./bus_service_increase/README.md
   title: Parallel Bus Corridors to State Highway Network
