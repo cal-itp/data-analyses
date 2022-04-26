@@ -1,3 +1,0 @@
-# Portfolio README
-
-placeholder
