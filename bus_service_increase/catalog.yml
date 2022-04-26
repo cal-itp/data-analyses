@@ -67,7 +67,12 @@ sources:
     args:
     # source: make_gmaps_results.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/gmaps_results.parquet
-
+  competitive_route_variability:
+    driver: geoparquet
+    description: gmaps_results, wrangled to attach trip info back, to visualize competitive route variability in trip times
+    args:
+    # source: make_stripplot_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/competitive_route_variability.parquet
       
       
      
