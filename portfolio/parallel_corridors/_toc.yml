@@ -1,0 +1,11 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: district_04-oakland.md
+        sections:
+        -   glob: district_04-oakland/*
+    -   file: district_07-los-angeles.md
+        sections:
+        -   glob: district_07-los-angeles/*
+root: README
