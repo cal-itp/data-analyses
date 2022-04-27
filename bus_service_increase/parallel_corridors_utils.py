@@ -7,6 +7,9 @@ import pandas as pd
 import setup_parallel_trips_with_stops
 import utils
 from shared_utils import calitp_color_palette as cp
+from shared_utils import styleguide
+
+alt.themes.register("calitp_theme", styleguide.calitp_theme)
 
 catalog = intake.open_catalog("./*.yml")
 
