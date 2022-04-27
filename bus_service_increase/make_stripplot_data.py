@@ -148,49 +148,38 @@ def designate_plot_group(df):
     # on how many routes plotted
     # But, there's also some where bus_multiplier can't be derived, if Google API didn't return results
     # Use 1 trip to designate
+    route_cols = ["calitp_itp_id", "route_id"]
+    
     for c in ["bus_multiplier", "bus_difference"]:
         df = df.assign(
-            minimum = df.groupby(["calitp_itp_id", "route_id"])[c].transform("min"),
-            maximum = df.groupby(["calitp_itp_id", "route_id"])[c].transform("max"),
+            minimum = df.groupby(route_cols)[c].transform("min"),
+            maximum = df.groupby(route_cols)[c].transform("max"),
         )
         df = df.assign(
             spread = (df.maximum - df.minimum).round(3)
         ).rename(columns = {"spread": f"{c}_spread"}).drop(columns = ["minimum", "maximum"])
 
-    df2 = (df[df.bus_multiplier.notna()]
-           [["calitp_itp_id", "route_id", "p50", 
-             "pct_trips_competitive", 
-             "num_competitive", "bus_multiplier_spread", "bus_difference_spread"]]
-           .drop_duplicates()
-           # sort in descending order for % trips competitive, then by # competitive trips,
-           # then by 50th percentile, then one with lower spread
-           .sort_values(["calitp_itp_id", "pct_trips_competitive", "num_competitive",
-                         "p50", "bus_multiplier_spread"], 
-                        ascending=[True, False, False, True, True])
-           .reset_index(drop=True)
-          )
-    
-    '''
-    # Find the trip closest to p50
-    df2 = (df[(df.service_hours == df.p50) & (df.bus_multiplier.notna())]
-           .sort_values(["calitp_itp_id", "route_id", "departure_hour"])
-           .drop_duplicates(subset=["calitp_itp_id", "route_id"])
+    df2 = (df.assign(
+               # Break it up into short / medium / long routes instead of plot group
+               max_service = df.groupby(route_cols)["service_hours"].transform("max"),
+          )[df.bus_multiplier.notna()]
            .reset_index(drop=True)
     )
-    '''
-    df2["order"] = df2.groupby('calitp_itp_id')["pct_trips_competitive"].cumcount()
-    # use -1 to round to nearest 10s
-    # since we generated cumcount(), which orders it from 1, 2, ...n for each group
-    # if we want groups of 10 per chart, can just round to nearest 10s
-    df2["plot_group"] = df2.apply(lambda x: math.floor(x.order / 10.0), axis=1)
+
+    df2 = df2.assign(
+        route_group = df2.apply(lambda x: "short" if x.max_service <= 1.0
+                               else "medium" if x.max_service <=1.5
+                               else "long", axis=1)
+    ).drop(columns = ["max_service"])
     
-    # Merge plot_group in for all routes
+    
+    # Merge back in
     df3 = pd.merge(
         df, 
-        df2[["calitp_itp_id", "route_id", "plot_group"]], 
-        on = ["calitp_itp_id", "route_id"],
+        df2[["calitp_itp_id", "route_id", "route_group"]].drop_duplicates(), 
+        on = route_cols,
         how = "left",
-        validate = "m:1",
+        validate = "m:1"
     )
     
     return df3
