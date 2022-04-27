@@ -8,6 +8,7 @@ assignees: ''
 ---
 ## Research Question
 **Single sentence** description:  
+  
 **Detailed** description:
 ## Stakeholders and Audience
 Who is asking the question, who is the audience, and how will this research be used? 
