@@ -1,0 +1,8 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: district_7.md
+        sections:
+        -   glob: district_7/*
+root: README
