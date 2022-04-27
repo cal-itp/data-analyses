@@ -2,6 +2,9 @@ format: jb-book
 parts:
 -   caption: null
     chapters:
+    -   file: district_4.md
+        sections:
+        -   glob: district_4/*
     -   file: district_7.md
         sections:
         -   glob: district_7/*
