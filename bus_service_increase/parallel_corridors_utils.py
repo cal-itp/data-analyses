@@ -4,6 +4,8 @@ import altair as alt
 import intake
 import pandas as pd
 
+from IPython.display import display, Markdown, HTML
+
 import setup_parallel_trips_with_stops
 import utils
 from shared_utils import calitp_color_palette as cp
@@ -182,3 +184,35 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
     )
         
     return chart
+
+
+def generate_report(df):
+    # Set up df for charting (cut-off at some threshold to show most competitive routes)
+    PCT_COMPETITIVE_THRESHOLD = 0.75
+    plot_me = (df[df.pct_trips_competitive > PCT_COMPETITIVE_THRESHOLD]
+           .drop(columns = "geometry")
+    )
+    
+    y_col1 = "bus_multiplier"
+    Y_MIN1, Y_MAX1 = set_yaxis_range(plot_me, y_col1)
+
+    y_col2 = "bus_difference"
+    Y_MIN2, Y_MAX2 = set_yaxis_range(plot_me, y_col2)
+    
+    def combine_stripplots(df):
+        multiplier_chart = make_stripplot(
+            df, y_col1, Y_MIN = Y_MIN1, Y_MAX = Y_MAX1
+        )
+
+
+        difference_chart = make_stripplot(
+            df, y_col2, Y_MIN = Y_MIN2, Y_MAX = Y_MAX2
+        )
+            
+        return multiplier_chart, difference_chart
+    
+    s1, s2 = combine_stripplots(plot_me[plot_me.route_group=="short"])
+            
+    display(Markdown("Short Routes"))
+    display(s1)
+    display(s2)
