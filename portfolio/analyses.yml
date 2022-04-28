@@ -114,7 +114,6 @@ sites:
   title: California Transit Speed Maps
 - directory: ./bus_service_increase/
   name: parallel_corridors
-  notebook: ./bus_service_increase/stripplot.ipynb
   notebook: ./bus_service_increase/test-chart.ipynb
   parts:
   - caption: Introduction
