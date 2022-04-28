@@ -179,10 +179,11 @@ def aggregated_transit_hwy_stats():
         
     return operator_stats, hwy_stats
     
-''' 
-# Is this still needed?
-
+    
 def routes_highways_geom_for_operator(operator_df):
+    # This seems slightly overlapping with C1, where gdf is
+    # imported at the beginning of ipywidget
+    # but, not sure how to combine and make more efficient
     gdf = catalog.parallel_or_intersecting_routes.read()
     highways = catalog.highways_cleaned.read()
 
@@ -194,4 +195,3 @@ def routes_highways_geom_for_operator(operator_df):
                  ]
     
     return transit_routes, hwys_df
-'''
