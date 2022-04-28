@@ -10,7 +10,7 @@ copyright: "2022"
 # See https://jupyterbook.org/content/execute.html
 execute:
   execute_notebooks: 'off'
-  allow_errors: true
+  allow_errors: false
   timeout: -1
 
 # Define the name of the latex output file for PDF builds
@@ -27,7 +27,7 @@ repository:
   url: https://github.com/cal-itp/data-analyses/  # Online location of your book
 #  path_to_book: docs  # Optional path to your book, relative to the repository root
   path_to_book: parallel_corridors
-  branch: better-stripplots  # Which branch of the repository should be used when creating links (optional)
+  branch: main  # Which branch of the repository should be used when creating links (optional)
 
 # Add GitHub buttons to your book
 # See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
