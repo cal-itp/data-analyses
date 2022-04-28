@@ -133,7 +133,7 @@ sites:
   readme: ./bus_service_increase/README.md
   title: Parallel Bus Corridors to State Highway Network
 - directory: ./bus_service_increase/
-  name: parallel_corridors
+  name: parallel_corridors2
   notebook: ./bus_service_increase/test-chart.ipynb
   parts:
   - caption: Introduction
