@@ -10,7 +10,7 @@ copyright: "2022"
 # See https://jupyterbook.org/content/execute.html
 execute:
   execute_notebooks: 'off'
-  allow_errors: false
+  allow_errors: true
   timeout: -1
 
 # Define the name of the latex output file for PDF builds
