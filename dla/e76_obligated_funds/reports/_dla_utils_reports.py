@@ -1,6 +1,5 @@
 """
 Analysis Functions
-
 """
 
 import numpy as np
@@ -229,8 +228,9 @@ def project_cat(df, i, district):
     )
 
     chart = add_tooltip(chart, "Agency", "Funding Amount")
-
     #chart.save(f"./chart_outputs/project_cat/bar_{district}_{i}.png")
+
+
     #path = (f'/chart_outputs/project_cat/bar_{district}_{i}.png')
     #path2= ('/chart_outputs/project_cat/bar_4_active_transp.png')
     table = subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"})
@@ -239,10 +239,8 @@ def project_cat(df, i, district):
          #   , Image(filename = path2)
            )
     #display(Markdown([pic](/chart_outputs/project_cat/bar_4_active_transp.png))
+    
     display(chart)
-
-
-
 
 
 """
@@ -524,5 +522,3 @@ def interactive_widget_counts(df, select_col, unique_col):
 
     dropdown.observe(on_selection, names="value")
     on_selection()
-
-    
