@@ -62,3 +62,8 @@ Could you provide better end-to-end service for ppl who go between DTLA and Veni
 * https://stackoverflow.com/questions/62500248/unzip-and-read-a-gz-file-from-google-cloud-storage-via-python-cloud-function
 * https://cloud.google.com/storage/docs/downloading-objects#storage-download-object-python
 * https://stackoverflow.com/questions/12902540/read-from-a-gzip-file-in-python
+
+## Express Bus
+Where would you locate an express bus?
+* https://mobility.tamu.edu/mip/strategies-pdfs/system-modification/technical-summary/Express-Bus-Service-4-Pg.pdf
+* https://www.vta.org/projects/express-bus-program
