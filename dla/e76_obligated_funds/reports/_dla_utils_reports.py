@@ -229,7 +229,7 @@ def project_cat(df, i, district):
     )
 
     chart = add_tooltip(chart, "Agency", "Funding Amount")
-    chart.save(f"./chart_outputs/project_cat/bar_{district}_{i}.png")
+    #chart.save(f"./chart_outputs/project_cat/bar_{district}_{i}.png")
 
 
     #path = (f'/chart_outputs/project_cat/bar_{district}_{i}.png')
@@ -241,7 +241,7 @@ def project_cat(df, i, district):
            )
     #display(Markdown([pic](/chart_outputs/project_cat/bar_4_active_transp.png))
     
-    #display(chart)
+    display(chart)
 
 
 """
