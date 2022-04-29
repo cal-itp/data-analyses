@@ -20,7 +20,7 @@ sites:
   readme: ./bus_service_increase/README.md
   title: Parallel Bus Corridors to State Highway Network
 - directory: ./bus_service_increase/
-  name: test
+  name: test_altair
   notebook: ./bus_service_increase/test-chart.ipynb
   parts:
   - caption: Introduction
@@ -57,5 +57,7 @@ sites:
   - caption: Introduction
   - chapters:
     - caption: CA
+      params:
+        state: CA
   readme: ./bus_service_increase/README.md
   title: No Parameters

@@ -21,7 +21,7 @@ from pydantic.class_validators import validator
 from slugify import slugify
 
 CONFIG_OPTION = typer.Option(
-    f"{os.path.dirname(os.path.realpath(__file__))}/analyses.yml",
+    f"{os.path.dirname(os.path.realpath(__file__))}/test-analyses.yml",
 )
 
 DEPLOY_OPTION = typer.Option(
