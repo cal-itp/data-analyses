@@ -1,3 +1,11 @@
+"""
+Combine parallel and competitive datasets.
+Aggregate into summary stats at the operator or highway Route level.
+
+Competitive routes must be subset of parallel routes.
+Parallel routes are combination of transit route with highway Route,
+and a route may be parallel to 1 highway but not other highways it intersects with.
+"""
 import intake
 import pandas as pd
 
@@ -6,55 +14,43 @@ from shared_utils import geography_utils
 catalog = intake.open_catalog("./*.yml")
 
 
-def merge_in_competitive_routes(df):
+def competitive_to_route_level():
     # This is output from `make_stripplot_data.py`
-    # Wrangle it so it is at route-level, instead of trip-level
-    trip_df = pd.read_parquet("./data/stripplot_trips.parquet")
-    
+    # Wrangle it so it is at route-level, instead of trip-level    
+    df = catalog.competitive_route_variability.read()
+
     keep_cols = [
         "calitp_itp_id", "route_id", 
         "pct_trips_competitive", 
         #"caltrans_district", 
     ]
 
-    trip_df2 = (trip_df[keep_cols].drop_duplicates()
-                .reset_index(drop=True)
-               )
-    
-    trip_df3 = trip_df2.assign(
-        competitive_route = trip_df2.apply(lambda x: 
-                                           1 if x.pct_trips_competitive >= 0.75
-                                           else 0, axis=1)
-    ).rename(columns = {"calitp_itp_id": "itp_id"})
-
-    
-    # Merge back on with df
-    df2 = pd.merge(
-        df, 
-        trip_df3,
-        on = ["itp_id", "route_id"],
-        # m:1 in case the route falls in multiple counties, want it to be sorted into both
-        validate = "m:1"
-    )
-    
+    df2 = (df[keep_cols].drop_duplicates()
+           .rename(columns = {"calitp_itp_id": "itp_id"})
+           .reset_index(drop=True)
+          )
+        
     return df2
 
 
 def calculate_parallel_competitive_stats(df, group_cols):
-    # Calculate % parallel
-    df2 = df.assign(
-        pct_parallel = df.parallel.divide(df.route_id).round(3)
+    df2 = geography_utils.aggregate_by_geography(
+        df,
+        group_cols = group_cols,
+        sum_cols = ["parallel", "competitive"],
+        nunique_cols = ["route_id"]
     )
     
-    if "itp_id" in group_cols:
-        df2 = df2.assign(
-            pct_competitive = df2.competitive_route.divide(df.route_id).round(3)
-        )
+    # Calculate % parallel
+    df2 = df2.assign(
+        pct_parallel = df2.parallel.divide(df2.route_id).round(3),
+        pct_competitive = df2.competitive.divide(df2.route_id).round(3),
+    )
     
     df2 = (df2.rename(columns = {
-        "route_id": "unique_route_id",
-        "parallel": "num_parallel",
-        "competitive_route": "num_competitive"})
+                "route_id": "unique_route_id",
+                "parallel": "num_parallel",
+                "competitive": "num_competitive"})
            .sort_values(group_cols)
            .reset_index(drop=True)
            .astype({"unique_route_id": int})
@@ -82,6 +78,7 @@ def aggregate_highways(df):
             "pct_highway": "sum",
             "highway_length": "sum",
             "parallel": "max",
+            "competitive": "max",
         }).reset_index()
     )
 
@@ -91,25 +88,18 @@ def aggregate_highways(df):
                                  else x.pct_highway, axis=1),
     )
     
-    df3 = geography_utils.aggregate_by_geography(
-        df2,
-        group_cols = group_cols,
-        sum_cols = ["parallel"],
-        nunique_cols = ["route_id"]
-    )
+    df3 = calculate_parallel_competitive_stats(df2, group_cols)
     
-    df4 = calculate_parallel_competitive_stats(df3, group_cols)
-
-    df5 = (df4.assign(
-        NB_SB = df4.apply(lambda x: 1 if (x.NB == 1) or (x.SB == 1)
+    df4 = (df3.assign(
+        NB_SB = df3.apply(lambda x: 1 if (x.NB == 1) or (x.SB == 1)
                           else 0, axis=1).astype(int),
-        EB_WB = df4.apply(lambda x: 1 if (x.EB == 1) or (x.WB == 1)
+        EB_WB = df3.apply(lambda x: 1 if (x.EB == 1) or (x.WB == 1)
                           else 0, axis=1).astype(int),
         ).drop(columns = ["NB", "SB", "EB", "WB"])
        .astype({"District": int, "Route": int})
     )
     
-    return df5   
+    return df4   
     
     
 def aggregate_operators(df):
@@ -119,30 +109,23 @@ def aggregate_operators(df):
     operator_hwys = grab_highways_for_operator(df)
     
     # For the unique route_id, flag it as parallel if it is parallel to any hwy Route
+    # also flag if it is competitive along any hwy Route
     df2 = (df.groupby(group_cols + ["route_id"])
-            .agg({"parallel": "max"})
+            .agg({"parallel": "max", 
+                  "competitive": "max"})
             .reset_index()
     )
     
-    df3 = merge_in_competitive_routes(df2)
+    df3 = calculate_parallel_competitive_stats(df2, group_cols)
 
-    df4 = geography_utils.aggregate_by_geography(
-        df3,
-        group_cols = group_cols,
-        sum_cols = ["parallel", "competitive_route"],
-        nunique_cols = ["route_id"]
-    )
-    
-    df5 = calculate_parallel_competitive_stats(df4, group_cols)
-    
-    df6 = pd.merge(df5,
+    df4 = pd.merge(df3,
                operator_hwys,
                on = "itp_id", 
                how = "left",
                validate = "m:1"
               ).astype({"itp_id": int})
     
-    return df6
+    return df4
     
 
 
@@ -164,8 +147,29 @@ def grab_highways_for_operator(df):
 
     
 def aggregated_transit_hwy_stats():    
-    gdf = catalog.parallel_or_intersecting_routes.read()
-
+    parallel = catalog.parallel_or_intersecting_routes.read()
+    competitive = competitive_to_route_level()
+    
+    gdf = pd.merge(
+        parallel,
+        competitive,
+        on = ["itp_id", "route_id"],
+        how = "left",
+        # m:1 because parallel is at itp_id, route_id, shape_id level
+        # competitive is at itp_id, route_id level
+        validate = "m:1"
+    )
+    
+    # Since competitive routes should be a subset of parallel routes,
+    # But competitive routes are determined at route-level, 
+    # whereas parallel is determined at route-highway intersection level,
+    # set competitive to be 1 only if it is occurring on parallel segment.
+    gdf = gdf.assign(
+        competitive = gdf.apply(lambda x: 
+                               1 if ((x.pct_trips_competitive >= 0.75) and (x.parallel == 1))
+                               else 0, axis=1)
+    )
+    
     operator_stats = (aggregate_operators(gdf)
                       .sort_values(["pct_parallel", "pct_competitive"], 
                                    ascending=[False, False])
