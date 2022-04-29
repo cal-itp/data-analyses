@@ -4,16 +4,27 @@ sites:
   notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
   parts:
   - caption: Introduction
-  - chapters:
-    - caption: District 4
-      params:
-        district: 4
-        district_name: LA Metro (this is a placeholder)
-    - caption: District 7
-      params:
-        district: 7
+  - caption: District 4
+    params:
+      district: 4
+      district_name: LA Metro (this is a placeholder)
+    chapters:
+      - caption: ITP ID 1
+        params:
+          itp_id: 1
+        sections:
+          # TODO: prefix the slugified notebook names so that sections show up in the right order
+          - notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
+          - notebook: ./dla/e76_obligated_funds/prototype-district_2.ipynb
+      - caption: ITP ID 2
+        params:
+          itp_id: 2
+        sections:
+          - notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
+          - notebook: ./dla/e76_obligated_funds/prototype-district_2.ipynb
   readme: ./dla/README.md
   title: DLA Grant Analysis
+
 - directory: ./rt_delay/
   name: rt
   notebook: ./rt_delay/speedmaps.ipynb

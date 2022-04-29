@@ -21,7 +21,7 @@ from pydantic.class_validators import validator
 from slugify import slugify
 
 CONFIG_OPTION = typer.Option(
-    f"{os.path.dirname(os.path.realpath(__file__))}/test-analyses.yml",
+    f"{os.path.dirname(os.path.realpath(__file__))}/analyses.yml",
 )
 
 DEPLOY_OPTION = typer.Option(
@@ -54,6 +54,7 @@ def parameterize_filename(old_path: Path, params: Dict) -> Path:
 
 class Chapter(BaseModel):
     caption: str
+    notebook: Optional[Path] = None
     params: Dict = {}
     sections: List[Dict] = []
 
@@ -151,10 +152,6 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
 papermill_engines.register_entry_points()
 
-@app.command()
-def clean() -> None:
-    shutil.rmtree("./target/")
-
 
 @app.command()
 def index(
@@ -243,7 +240,9 @@ def build(
             chapter_path = site_dir / Path(chapter_slug)
             for section in chapter.sections or [{}]:
                 params = {**part.params, **chapter.params, **section}
-                notebook = part.notebook or site.notebook
+                notebook = section.get('notebook') or chapter.notebook or part.notebook or site.notebook
+                if isinstance(notebook, str):
+                    notebook = Path(notebook)
 
                 # TODO: this should be cleaned up a bit
                 if params:
@@ -297,15 +296,15 @@ def build(
     ).check_returncode()
 
     if deploy:
-        subprocess.run(
-            [
-                "netlify",
-                "deploy",
-                "--site=cal-itp-data-analyses",
-                f"--dir=portfolio/{report}/_build/html/",
-                f"--alias={report}",
-            ]
-        ).check_returncode()
+        args = [
+            "netlify",
+            "deploy",
+            "--site=cal-itp-data-analyses",
+            f"--dir=portfolio/{report}/_build/html/",
+            f"--alias={report}",
+        ]
+        typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
+        subprocess.run(args).check_returncode()
 
 
 if __name__ == "__main__":
