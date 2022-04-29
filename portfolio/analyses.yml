@@ -1,17 +1,58 @@
 sites:
 - directory: ./dla/
   name: dla
-  notebook: ./dla/e76_obligated_funds/prototype-district.ipynb
+  notebook: ./dla/e76_obligated_funds/reports/report_test2.ipynb
   parts:
   - caption: Introduction
   - chapters:
+     - caption: District 1
+      params:
+        district: 1
+        district_name: District 01 - Eureka
+    - caption: District 2
+      params:
+        district: 2
+        district_name: District 02 - Redding
+    - caption: District 3
+      params:
+        district: 3
+        district_name: District 03 - Marysville
     - caption: District 4
       params:
         district: 4
-        district_name: LA Metro (this is a placeholder)
+        district_name: District 04 - Oakland
+    - caption: District 5
+      params:
+        district: 5
+        district_name: District 05 - San Luis Obispo
+    - caption: District 6
+      params:
+        district: 6
+        district_name: District 06 - Fresno
     - caption: District 7
       params:
         district: 7
+        district_name: District 07 - Los Angeles
+    - caption: District 8
+      params:
+        district: 8
+        district_name: District 08 - San Bernardino
+    - caption: District 9
+      params:
+        district: 9
+        district_name: District 09 - Bishop
+    - caption: District 10
+      params:
+        district: 10
+        district_name: District 10 - Stockton
+    - caption: District 11
+      params:
+        district: 11
+        district_name: District 11 - San Diego
+    - caption: District 12
+      params:
+        district: 12
+        district_name: District 12 - Irvine
   readme: ./dla/README.md
   title: DLA Grant Analysis
 - directory: ./rt_delay/
