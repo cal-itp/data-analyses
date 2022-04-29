@@ -229,6 +229,7 @@ def project_cat(df, i, district):
 
     chart = add_tooltip(chart, "Agency", "Funding Amount")
     chart = chart.properties(width=400,height=70)
+
     #chart.save(f"./chart_outputs/project_cat/bar_{district}_{i}.png")
 
 
