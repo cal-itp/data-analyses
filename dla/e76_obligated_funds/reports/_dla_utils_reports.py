@@ -229,13 +229,7 @@ def project_cat(df, i, district):
     )
 
     chart = add_tooltip(chart, "Agency", "Funding Amount")
-<<<<<<< HEAD
     #chart.save(f"./chart_outputs/project_cat/bar_{district}_{i}.png")
-=======
-    chart.save(f"./chart_outputs/project_cat/bar_{district}_{i}.png")
->>>>>>> move report notebooks and utils to new folder in dla
-
-
     #path = (f'/chart_outputs/project_cat/bar_{district}_{i}.png')
     #path2= ('/chart_outputs/project_cat/bar_4_active_transp.png')
     table = subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"})
@@ -244,12 +238,8 @@ def project_cat(df, i, district):
          #   , Image(filename = path2)
            )
     #display(Markdown([pic](/chart_outputs/project_cat/bar_4_active_transp.png))
-    
-<<<<<<< HEAD
     display(chart)
-=======
-    #display(chart)
->>>>>>> move report notebooks and utils to new folder in dla
+
 
 
 """
