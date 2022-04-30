@@ -212,7 +212,17 @@ def generate_report(df):
         return multiplier_chart, difference_chart
     
     s1, s2 = combine_stripplots(plot_me[plot_me.route_group=="short"])
+    m1, m2 = combine_stripplots(plot_me[plot_me.route_group=="medium"])
+    l1, l2 = combine_stripplots(plot_me[plot_me.route_group=="long"])
             
-    display(HTML("<h3> Short Routes </h3>"))
+    display(HTML("<h3>Short Routes</h3>"))
     display(s1)
     display(s2)
+    
+    display(HTML("<h3>Medium Routes</h3>"))
+    display(m1)
+    display(m2)
+    
+    display(HTML("<h3>Long Routes</h3>"))
+    display(l1)
+    display(l2)
