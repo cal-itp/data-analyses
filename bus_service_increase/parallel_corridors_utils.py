@@ -213,6 +213,6 @@ def generate_report(df):
     
     s1, s2 = combine_stripplots(plot_me[plot_me.route_group=="short"])
             
-    display(Markdown("Short Routes"))
+    display(HTML("<h3> Short Routes </h3>"))
     display(s1)
     display(s2)
