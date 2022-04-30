@@ -60,8 +60,8 @@ def calculate_parallel_competitive_stats(df, group_cols):
 
 
 def aggregate_highways(df):
-    group_cols = ["Route", "County", "District", 
-                      "NB", "SB", "EB", "WB"]
+    group_cols = ["Route", "County", "District", "highway_length", 
+                      "NB", "SB", "EB", "WB"] 
     
     # First, aggregate once to get rid of edge cases where RouteType differs
     # 110 in LA County is both Interstate and State Highway
