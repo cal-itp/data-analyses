@@ -1,14 +1,404 @@
 organization_name,mobility_service,agency_id,network_id,route_id,category
 A-Paratransit,nan,nan,nan,nan,primary
+ACE Parking,nan,nan,nan,nan,primary
+Active Network,nan,nan,nan,nan,primary
+AEP Ticketing,nan,nan,nan,nan,primary
+Alameda Loop Shuttle,nan,nan,nan,nan,primary
+All Yellow Taxi,nan,nan,nan,nan,primary
+Alpine County Local Transportation Commission,nan,nan,nan,nan,primary
+Amador County,nan,nan,nan,nan,primary
+Amador County Transportation Commission,nan,nan,nan,nan,primary
+Ambiance Inc.,nan,nan,nan,nan,primary
+"American Logistics Company, LLC",nan,nan,nan,nan,primary
+AmericanEagle,nan,nan,nan,nan,primary
+Ampla Health,nan,nan,nan,nan,primary
+Apple,nan,nan,nan,nan,primary
+Area 1 Agency on Aging,nan,nan,nan,nan,primary
+ARINC,nan,nan,nan,nan,primary
+Association of Monterey Bay Area Governments,nan,nan,nan,nan,primary
+Avail Technologies Inc.,nan,nan,nan,nan,primary
+Bakersfield Airport Valet Express,nan,nan,nan,nan,primary
+Bell Cab Inc.,nan,nan,nan,nan,primary
+Beverly Hills Cab,nan,nan,nan,nan,primary
+Binary System,nan,nan,nan,nan,primary
+Bishop Paiute Tribe,nan,nan,nan,nan,primary
+Bishop Peak Technologies,nan,nan,nan,nan,primary
+Black Tie Transportation Inc.,nan,nan,nan,nan,primary
+BlinkTag,nan,nan,nan,nan,primary
+Bombardier,nan,nan,nan,nan,primary
+Brookfield Residential,nan,nan,nan,nan,primary
+Butte County,nan,nan,nan,nan,primary
+Bytemark Inc.,nan,nan,nan,nan,primary
+Calaveras Council of Governments,nan,nan,nan,nan,primary
+California Department of Transportation,nan,nan,nan,nan,primary
+California Integrated Travel Project,nan,nan,nan,nan,primary
+California State University San Bernardino,nan,nan,nan,nan,primary
+California Vanpool Authority,nan,nan,nan,nan,primary
+Castle Rock Associates ,nan,nan,nan,nan,primary
+Central Coast Cab Inc.,nan,nan,nan,nan,primary
+Centum Adetel,nan,nan,nan,nan,primary
+Ceres Area Transit,nan,nan,nan,nan,primary
+Chase Inc.,nan,nan,nan,nan,primary
+Checker Cab,nan,nan,nan,nan,primary
+Chemehuevi Indian Tribe,nan,nan,nan,nan,primary
+CHK America,nan,nan,nan,nan,primary
+Cittati,nan,nan,nan,nan,primary
+City and County Association of Governments of San Mateo County,nan,nan,nan,nan,primary
+City Cab Inc.,nan,nan,nan,nan,primary
+City of Amador City,nan,nan,nan,nan,primary
+City of Angels,nan,nan,nan,nan,primary
+City of Arroyo Grande,nan,nan,nan,nan,primary
+City of Atherton,nan,nan,nan,nan,primary
+City of Bakersfield,nan,nan,nan,nan,primary
+City of Biggs,nan,nan,nan,nan,primary
+City of Bishop,nan,nan,nan,nan,primary
+City of Brisbane,nan,nan,nan,nan,primary
+City of Buellton,nan,nan,nan,nan,primary
+City of Burlingame,nan,nan,nan,nan,primary
+City of Capitola,nan,nan,nan,nan,primary
+City of Carlsbad,nan,nan,nan,nan,primary
+City of Carmel by the Sea,nan,nan,nan,nan,primary
+City of Carpinteria,nan,nan,nan,nan,primary
+City of Ceres,nan,nan,nan,nan,primary
+City of Chico,nan,nan,nan,nan,primary
+City of Chula Vista,nan,nan,nan,nan,primary
+City of Claremont,nan,nan,nan,nan,primary
+City of Coalinga,nan,nan,nan,nan,primary
+City of Colma,nan,nan,nan,nan,primary
+City of Coronado,nan,nan,nan,nan,primary
+City of Daly City,nan,nan,nan,nan,primary
+City of Del Mar,nan,nan,nan,nan,primary
+City of Del Rey Oaks,nan,nan,nan,nan,primary
+City of Dinuba,nan,nan,nan,nan,primary
+City of El Cajon,nan,nan,nan,nan,primary
+City of Elk Grove,nan,nan,nan,nan,primary
+City of Encinitas,nan,nan,nan,nan,primary
+City of Escalon,nan,nan,nan,nan,primary
+City of Escondido,nan,nan,nan,nan,primary
+City of Exeter,nan,nan,nan,nan,primary
+City of Farmersville,nan,nan,nan,nan,primary
+City of Fillmore,nan,nan,nan,nan,primary
+City of Firebaugh,nan,nan,nan,nan,primary
+City of Folsom,nan,nan,nan,nan,primary
+City of Foster City,nan,nan,nan,nan,primary
+City of Fowler,nan,nan,nan,nan,primary
+City of Goleta,nan,nan,nan,nan,primary
+City of Gonzalez,nan,nan,nan,nan,primary
+City of Greenfield,nan,nan,nan,nan,primary
+City of Grover Beach,nan,nan,nan,nan,primary
+City of Half Moon Bay,nan,nan,nan,nan,primary
+City of Hillsborough,nan,nan,nan,nan,primary
+City of Hollister,nan,nan,nan,nan,primary
+City of Hughson,nan,nan,nan,nan,primary
+City of Imperial Beach,nan,nan,nan,nan,primary
+City of Ione,nan,nan,nan,nan,primary
+City of Jackson,nan,nan,nan,nan,primary
+City of Kerman,nan,nan,nan,nan,primary
+City of King City,nan,nan,nan,nan,primary
+City of Kingsburg,nan,nan,nan,nan,primary
+City of La Mesa,nan,nan,nan,nan,primary
+City of Lathrop,nan,nan,nan,nan,primary
+City of Lemon Grove,nan,nan,nan,nan,primary
+City of Lincoln,nan,nan,nan,nan,primary
+City of Lindsay,nan,nan,nan,nan,primary
+City of Maricopa,nan,nan,nan,nan,primary
+City of Marina,nan,nan,nan,nan,primary
+City of Mendota,nan,nan,nan,nan,primary
+City of Millbrae,nan,nan,nan,nan,primary
+City of Modesto,nan,nan,nan,nan,primary
+City of Monterey,nan,nan,nan,nan,primary
+City of Mountain View,nan,nan,nan,nan,primary
+City of National City,nan,nan,nan,nan,primary
+City of Newman,nan,nan,nan,nan,primary
+City of Oakdale,nan,nan,nan,nan,primary
+City of Oceanside,nan,nan,nan,nan,primary
+City of Orange Cove,nan,nan,nan,nan,primary
+City of Oroville,nan,nan,nan,nan,primary
+City of Oxnard,nan,nan,nan,nan,primary
+City of Pacific Grove,nan,nan,nan,nan,primary
+City of Pacifica,nan,nan,nan,nan,primary
+City of Paso Robles,nan,nan,nan,nan,primary
+City of Patterson,nan,nan,nan,nan,primary
+City of Pismo Beach,nan,nan,nan,nan,primary
+City of Plymouth,nan,nan,nan,nan,primary
+City of Portola Valley,nan,nan,nan,nan,primary
+City of Poway,nan,nan,nan,nan,primary
+City of Reedley,nan,nan,nan,nan,primary
+City of Riverbank,nan,nan,nan,nan,primary
+City of Salinas,nan,nan,nan,nan,primary
+City of San Carlos,nan,nan,nan,nan,primary
+City of San Diego,nan,nan,nan,nan,primary
+City of San Joaquin,nan,nan,nan,nan,primary
+City of San Juan Bautista,nan,nan,nan,nan,primary
+City of Sand City,nan,nan,nan,nan,primary
+City of Sanger,nan,nan,nan,nan,primary
+City of Santa Barbara,nan,nan,nan,nan,primary
+City of Santa Cruz,nan,nan,nan,nan,primary
+City of Santa Paula,nan,nan,nan,nan,primary
+City of Santee,nan,nan,nan,nan,primary
+City of Scotts Valley,nan,nan,nan,nan,primary
+City of Seaside,nan,nan,nan,nan,primary
+City of Selma,nan,nan,nan,nan,primary
+City of Solana Beach,nan,nan,nan,nan,primary
+City of Soledad,nan,nan,nan,nan,primary
+City of Stockton,nan,nan,nan,nan,primary
+City of Sutter Creek,nan,nan,nan,nan,primary
+City of Tehachapi,nan,nan,nan,nan,primary
+City of Tulare,nan,nan,nan,nan,primary
+City of Vista,nan,nan,nan,nan,primary
+City of Waterford,nan,nan,nan,nan,primary
+City of Watsonville,nan,nan,nan,nan,primary
+City of Woodlake,nan,nan,nan,nan,primary
+City of Woodside,nan,nan,nan,nan,primary
+City or Parlier,nan,nan,nan,nan,primary
+Clever Devices Ltd.,nan,nan,nan,nan,primary
+Cloverdale Transit,nan,nan,nan,nan,primary
+Coach USA Inc.,nan,nan,nan,nan,primary
+Colusa County Transportation Commission,nan,nan,nan,nan,primary
+Conduent Inc,nan,nan,nan,nan,primary
+Connectpoint,nan,nan,nan,nan,primary
+Connexionz Inc.,nan,nan,nan,nan,primary
+Consolidated Tribal Health Project Inc.,nan,nan,nan,nan,primary
+Constellation Software Inc,nan,nan,nan,nan,primary
+Corinthian Inc.,nan,nan,nan,nan,primary
+Council of San Benito County Governments,nan,nan,nan,nan,primary
+Covina Transit,nan,nan,nan,nan,primary
+Cubic,nan,nan,nan,nan,primary
+DASH,nan,nan,nan,nan,primary
+DataGraffikk A.G. ,nan,nan,nan,nan,primary
+Deaf Plus Adult Community,nan,nan,nan,nan,primary
+Del Norte Local Transportation Commission,nan,nan,nan,nan,primary
+"Delano Association for the Developmentally Disabled, Inc.",nan,nan,nan,nan,primary
+"Desert Access and Mobility, Inc",nan,nan,nan,nan,primary
+Dilax Inc.,nan,nan,nan,nan,primary
+DoubleMap Inc.,nan,nan,nan,nan,primary
+Drivers for Survivors,nan,nan,nan,nan,primary
+Dumbarton Bridge Regional Operations Consortium,nan,nan,nan,nan,primary
+Easy Does It Emergency Services,nan,nan,nan,nan,primary
+Ecolane,nan,nan,nan,nan,primary
+El Dorado County Transportation Commission,nan,nan,nan,nan,primary
+El Paseo Limo,nan,nan,nan,nan,primary
+Elavon,nan,nan,nan,nan,primary
+Empire Transportation,nan,nan,nan,nan,primary
+Empressa,nan,nan,nan,nan,primary
+ETA Transit Inc.,nan,nan,nan,nan,primary
+Everbridge,nan,nan,nan,nan,primary
+"Express
+  Transportation Services, LLC",nan,nan,nan,nan,primary
+Federal Transit Administration,nan,nan,nan,nan,primary
+Fidelity National Information Services,nan,nan,nan,nan,primary
+Fiesta Taxi,nan,nan,nan,nan,primary
+FIS,nan,nan,nan,nan,primary
+Fiserv,nan,nan,nan,nan,primary
+Ford,nan,nan,nan,nan,primary
+Fresno Council of Governments,nan,nan,nan,nan,primary
+Fresno County,nan,nan,nan,nan,primary
+Friends Outside,nan,nan,nan,nan,primary
+Genfare,nan,nan,nan,nan,primary
+GeoSpatial Technologies,nan,nan,nan,nan,primary
+Giro Inc.,nan,nan,nan,nan,primary
+Glenn County Transportation Commission,nan,nan,nan,nan,primary
+Global Paratransit Inc.,nan,nan,nan,nan,primary
+GMV S.A.,nan,nan,nan,nan,primary
+GMV Syncromatics Inc,nan,nan,nan,nan,primary
+Granicus,nan,nan,nan,nan,primary
+HaCon AG,nan,nan,nan,nan,primary
+Hanover Displays Ltd,nan,nan,nan,nan,primary
+Hella Aglaia Mobile Vision GMBH,nan,nan,nan,nan,primary
+Hobnob,nan,nan,nan,nan,primary
+Hopthru,nan,nan,nan,nan,primary
+Humboldt County Association of Governments,nan,nan,nan,nan,primary
+IBI,nan,nan,nan,nan,primary
+Icomera AG,nan,nan,nan,nan,primary
+Imperial County,nan,nan,nan,nan,primary
+Independent Cab Co Inc,nan,nan,nan,nan,primary
+Independent Living Partnership,nan,nan,nan,nan,primary
+Independent Taxi,nan,nan,nan,nan,primary
+INIT SE,nan,nan,nan,nan,primary
+Inland Regional Center,nan,nan,nan,nan,primary
+Intelliride,nan,nan,nan,nan,primary
+Interline,nan,nan,nan,nan,primary
+Intersection,nan,nan,nan,nan,primary
+Inyo County,nan,nan,nan,nan,primary
+Inyo County Local Transportation Commission,nan,nan,nan,nan,primary
+IPS Systems,nan,nan,nan,nan,primary
+Iris Inc.,nan,nan,nan,nan,primary
+ISC Applied Systems,nan,nan,nan,nan,primary
+Jewish Family Service of San Diego,nan,nan,nan,nan,primary
+John Wayne Airport,nan,nan,nan,nan,primary
+Karuk Tribe,nan,nan,nan,nan,primary
+Kern Council of Governments,nan,nan,nan,nan,primary
+Kings County Association of Governments,nan,nan,nan,nan,primary
+Lake County/City Area Planning Council,nan,nan,nan,nan,primary
+Lassen County Transportation Commission,nan,nan,nan,nan,primary
+Lodi Memorial Hospital Association,nan,nan,nan,nan,primary
+LOSSAN Rail Corridor Agency ,nan,nan,nan,nan,primary
+Luminator Technology Group,nan,nan,nan,nan,primary
+Lutheran Social Services,nan,nan,nan,nan,primary
+Lyft Inc.,nan,nan,nan,nan,primary
+Mackenzie Laboratories,nan,nan,nan,nan,primary
+Madera County Transportation Commission,nan,nan,nan,nan,primary
+Malmator,nan,nan,nan,nan,primary
+Marina Taxi Co Inc.,nan,nan,nan,nan,primary
+Mariposa County Local Transportation Commission,nan,nan,nan,nan,primary
+Masabi,nan,nan,nan,nan,primary
+Mecatran,nan,nan,nan,nan,primary
+mecatran.com,nan,nan,nan,nan,primary
+Medical Transportation Management,nan,nan,nan,nan,primary
+Mendocino Council of Governments,nan,nan,nan,nan,primary
+Merced County Association of Governments,nan,nan,nan,nan,primary
+Metro Transit Services Inc.,nan,nan,nan,nan,primary
+Metropolitan Transportation Commission,nan,nan,nan,nan,primary
+Michigan Technological University Center for Technology and Training,nan,nan,nan,nan,primary
+Microsoft,nan,nan,nan,nan,primary
+"MIG, Inc.",nan,nan,nan,nan,primary
+Mobility Management Partners,nan,nan,nan,nan,primary
+MobilityData,nan,nan,nan,nan,primary
+Modaxo Inc,nan,nan,nan,nan,primary
+Modoc County Local Transportation Commission,nan,nan,nan,nan,primary
+Mono County Local Transportation Commission,nan,nan,nan,nan,primary
+Monterey County,nan,nan,nan,nan,primary
+Monterey Peninsula College,nan,nan,nan,nan,primary
+Moovel,nan,nan,nan,nan,primary
+MV Paratransit,nan,nan,nan,nan,primary
+MV Transportation,nan,nan,nan,nan,primary
+My Ride To Work,nan,nan,nan,nan,primary
+National Express Transit Corporation (NEXT),nan,nan,nan,nan,primary
+Network Paratransit System,nan,nan,nan,nan,primary
+Nevada County Transportation Commission,nan,nan,nan,nan,primary
+Newport Beach Friends of Oasis Senior Center,nan,nan,nan,nan,primary
+Nixle,nan,nan,nan,nan,primary
+Norman Y. Mineta San Jose International Airport,nan,nan,nan,nan,primary
+North and South of Market Adult Day Health,nan,nan,nan,nan,primary
+North Bay Taxi Inc.,nan,nan,nan,nan,primary
+North Valley Services,nan,nan,nan,nan,primary
+Oakland International Airport,nan,nan,nan,nan,primary
+Ontario International Airport,nan,nan,nan,nan,primary
+Open Transit Software Foundation,nan,nan,nan,nan,primary
+Optibus,nan,nan,nan,nan,primary
+Orange Belt Stages,nan,nan,nan,nan,primary
+Orange Cab Inc.,nan,nan,nan,nan,primary
+Orange County,nan,nan,nan,nan,primary
+Padam Mobility,nan,nan,nan,nan,primary
+Paramount Transportation,nan,nan,nan,nan,primary
+Paratransit Inc. ,nan,nan,nan,nan,primary
+Paratransit Services Inc.,nan,nan,nan,nan,primary
+Parking Company of America,nan,nan,nan,nan,primary
+Partners in Caring,nan,nan,nan,nan,primary
+Passio Technologies,nan,nan,nan,nan,primary
+People Services,nan,nan,nan,nan,primary
+Placer County Transportation Planning Agency,nan,nan,nan,nan,primary
+Placer TART Paratransit,nan,nan,nan,nan,primary
+PlanIt,nan,nan,nan,nan,primary
+Plumas County Transportation Commission,nan,nan,nan,nan,primary
+Port Hueneme,nan,nan,nan,nan,primary
+Rapid Connection LLC,nan,nan,nan,nan,primary
+"Ride-Right, LLC",nan,nan,nan,nan,primary
+RideFact Brokerage,nan,nan,nan,nan,primary
+Riverside County,nan,nan,nan,nan,primary
+Riverside County Transportation Commission,nan,nan,nan,nan,primary
+RouteMatch,nan,nan,nan,nan,primary
+RydeTrans,nan,nan,nan,nan,primary
+S&A Systems Inc.,nan,nan,nan,nan,primary
+Sacramento Area Council of Governments,nan,nan,nan,nan,primary
+Sacramento International Airport,nan,nan,nan,nan,primary
+Sal's Taxi Inc.,nan,nan,nan,nan,primary
+Salinas Yellow Cab Inc.,nan,nan,nan,nan,primary
+San Benito County,nan,nan,nan,nan,primary
+San Bernardino County,nan,nan,nan,nan,primary
+San Bernardino County Transportation Authority,nan,nan,nan,nan,primary
+San Diego Association of Governments,nan,nan,nan,nan,primary
+San Diego County,nan,nan,nan,nan,primary
+San Diego State University,nan,nan,nan,nan,primary
+"San Diego Trolley, Inc.",nan,nan,nan,nan,primary
+San Gabriel Transit Inc.,nan,nan,nan,nan,primary
+San Joaquin Council of Governments,nan,nan,nan,nan,primary
+San Joaquin County,nan,nan,nan,nan,primary
+San Luis Obispo Council of Governments,nan,nan,nan,nan,primary
+San Luis Obispo County,nan,nan,nan,nan,primary
+San Mateo County,nan,nan,nan,nan,primary
+Santa Barbara City College,nan,nan,nan,nan,primary
+Santa Barbara County,nan,nan,nan,nan,primary
+Santa Cruz County,nan,nan,nan,nan,primary
+Santa Cruz County Regional Transportation Commission,nan,nan,nan,nan,primary
+Santa Maria Organization of Transportation Helpers (SMOOTH) ,nan,nan,nan,nan,primary
+SAP,nan,nan,nan,nan,primary
+Seniors First,nan,nan,nan,nan,primary
+Services for Seniors,nan,nan,nan,nan,primary
+Shasta County Regional Transportation Planning Agency,nan,nan,nan,nan,primary
+Shopify Inc.,nan,nan,nan,nan,primary
+Siemens AG,nan,nan,nan,nan,primary
+Sierra County Transportation Commission,nan,nan,nan,nan,primary
+Sierra Management,nan,nan,nan,nan,primary
+Signature Rail,nan,nan,nan,nan,primary
+Silver Ride LLC,nan,nan,nan,nan,primary
+Siskiyou County Local Transportation Commission,nan,nan,nan,nan,primary
+SMA and Partners Ltd.,nan,nan,nan,nan,primary
+Solutions for Transit,nan,nan,nan,nan,primary
+South Bay Yellow/United Checker Cab Co-op,nan,nan,nan,nan,primary
+Southern California Association of Governments,nan,nan,nan,nan,primary
+"Southland Transit, Inc.",nan,nan,nan,nan,primary
+Spirit Bus,nan,nan,nan,nan,primary
+Sprint,nan,nan,nan,nan,primary
+Square Inc.,nan,nan,nan,nan,primary
+Stanislaus Council of Governments,nan,nan,nan,nan,primary
+Stanislaus County,nan,nan,nan,nan,primary
+Stanislaus Regional Transit,nan,nan,nan,nan,primary
+Storer Transit Systems Inc.,nan,nan,nan,nan,primary
+SunriseSESA,nan,nan,nan,nan,primary
+Sutter Health,nan,nan,nan,nan,primary
+Swiftly Inc.,nan,nan,nan,nan,primary
+SYSTEMTECHNIK,nan,nan,nan,nan,primary
+Tahoe Regional Planning Agency,nan,nan,nan,nan,primary
+Tehama County Transportation Commission,nan,nan,nan,nan,primary
+The Master Scheduler,nan,nan,nan,nan,primary
+There or not. ,nan,nan,nan,nan,primary
+Token Transit,nan,nan,nan,nan,primary
+TouchNet,nan,nan,nan,nan,primary
+Town of Mammoth Lakes,nan,nan,nan,nan,primary
+Town of Paradise,nan,nan,nan,nan,primary
+TransDev,nan,nan,nan,nan,primary
+Transit App Inc.,nan,nan,nan,nan,primary
+TransLoc,nan,nan,nan,nan,primary
+Transnnovation Inc,nan,nan,nan,nan,primary
+Transportation Agency for Monterey County,nan,nan,nan,nan,primary
+Transportation Concepts Inc.,nan,nan,nan,nan,primary
+TransTrack Solutions Group,nan,nan,nan,nan,primary
+Trapeze Group,nan,nan,nan,nan,primary
+Trillium Inc.,nan,nan,nan,nan,primary
+Trinity County Transportation Commission,nan,nan,nan,nan,primary
+TripShot Inc.,nan,nan,nan,nan,primary
+Tulare County,nan,nan,nan,nan,primary
+Tulare County Area Transit,nan,nan,nan,nan,primary
+Tulare County Association of Governments,nan,nan,nan,nan,primary
+Tuolumne County Transportation Council,nan,nan,nan,nan,primary
+Uber Inc.,nan,nan,nan,nan,primary
+United Checker Cab,nan,nan,nan,nan,primary
+United Independent Taxi,nan,nan,nan,nan,primary
+United Taxi of San Fernando Valley Inc.,nan,nan,nan,nan,primary
+USDA Forest Service Southwest Region,nan,nan,nan,nan,primary
+UTA,nan,nan,nan,nan,primary
+VenTek,nan,nan,nan,nan,primary
+Ventura County,nan,nan,nan,nan,primary
+"Veolia Transit Services, Inc",nan,nan,nan,nan,primary
+Via Inc.,nan,nan,nan,nan,primary
+Vivalon Inc.,nan,nan,nan,nan,primary
+Volaris Group,nan,nan,nan,nan,primary
+Volunteer Center of Sonoma County,nan,nan,nan,nan,primary
+"Volunteer Transportation Center, Inc.",nan,nan,nan,nan,primary
+Wabtec,nan,nan,nan,nan,primary
+WaySine LLC,nan,nan,nan,nan,primary
+Wells Fargo,nan,nan,nan,nan,primary
+Westminster on Wheels Senior Transportation Program,nan,nan,nan,nan,primary
+Work Training Center,nan,nan,nan,nan,primary
+Worldpay,nan,nan,nan,nan,primary
+Yellow Cab CA,nan,nan,nan,nan,primary
+Zonar Inc.,nan,nan,nan,nan,primary
 ABC Shuttle,ABC Airport Shuttle,,,,
 Able Inc.,Able Inc.,,,,
 Abrazar Inc.,Abrazar,,,,
 Access Services,LA Access Services,,,,
-ACE Parking,nan,nan,nan,nan,primary
-Active Network,nan,nan,nan,nan,primary
-AEP Ticketing,nan,nan,nan,nan,primary
 Age Well Senior Services,Age Well Senior Services,,,,
-Alameda Loop Shuttle,nan,nan,nan,nan,primary
 Alameda-Contra Costa Transit District,AC Transit,AC,nan,*,primary
 Alameda-Contra Costa Transit District,AC Transit,AC,nan,*,primary
 Alameda-Contra Costa Transit District,AC Transit,AC,nan,*,primary
@@ -18,6 +408,7 @@ Alameda-Contra Costa Transit District,Dumbarton Express,DE,nan,nan,primary
 Alameda-Contra Costa Transit District,Dumbarton Express,DE,nan,nan,primary
 Alameda-Contra Costa Transit District,Dumbarton Express,DE,nan,nan,primary
 Alameda-Contra Costa Transit District,East Bay Paratransit,,,,
+San Francisco Bay Area Rapid Transit District,East Bay Paratransit,,,,
 Alameda-Contra Costa Transit District,AC Transit Transbay,AC,nan,"AC:L,AC:J,AC:F,AC:G,AC:LA,AC:NL,AC:,AC:NX,AC:O,AC:P,AC:W,AC:V,AC:E,AC:NX3,AC:OX",primary
 Alameda-Contra Costa Transit District,AC Transit Transbay,AC,nan,"AC:L,AC:J,AC:F,AC:G,AC:LA,AC:NL,AC:,AC:NX,AC:O,AC:P,AC:W,AC:V,AC:E,AC:NX3,AC:OX",primary
 Alameda-Contra Costa Transit District,AC Transit Transbay,AC,nan,"AC:L,AC:J,AC:F,AC:G,AC:LA,AC:NL,AC:,AC:NX,AC:O,AC:P,AC:W,AC:V,AC:E,AC:NX3,AC:OX",primary
@@ -27,18 +418,10 @@ Alameda-Contra Costa Transit District,AC Transit Tempo,AC,nan,AC:1T,primary
 Alameda-Contra Costa Transit District,AC Transit Tempo,AC,nan,AC:1T,primary
 Alameda-Contra Costa Transit District,AC Transit Tempo,AC,nan,AC:1T,primary
 Alcatraz Cruises Inc.,Alcatraz Ferry,899,nan,nan,primary
-All Yellow Taxi,nan,nan,nan,nan,primary
 Alpine County,Alpine County Transit,,,,
-Alpine County Local Transportation Commission,nan,nan,nan,nan,primary
-Amador County,nan,nan,nan,nan,primary
-Amador County Transportation Commission,nan,nan,nan,nan,primary
 Amador Regional Transit System,Amador Transit,nan,nan,nan,primary
 Amador Regional Transit System,Amador Transit Dial-A-Ride,,,,
-Ambiance Inc.,nan,nan,nan,nan,primary
 American Cancer Society,American Cancer Society,,,,
-"American Logistics Company, LLC",nan,nan,nan,nan,primary
-AmericanEagle,nan,nan,nan,nan,primary
-Ampla Health,nan,nan,nan,nan,primary
 Amtrak,Coast Starlight,nan,nan,36924,primary
 Amtrak,California Zephyr,nan,nan,"96,93",primary
 Amtrak,Thruway,174,nan,26025,primary
@@ -53,15 +436,9 @@ Angel Island-Tiburon Ferry Company,Angel Island-Tiburon Ferry,897,nan,nan,primar
 Angel View Inc.,Angel View,,,,
 Antelope Valley Transit Authority,Antelope Valley Dial-A-Ride,,,,
 Antelope Valley Transit Authority,Antelope Valley Transportation Authority,nan,nan,nan,primary
-Apple,nan,nan,nan,nan,primary
 ARC Imperial Valley,Arc Imperial Valley Transportation,,,,
-Area 1 Agency on Aging,nan,nan,nan,nan,primary
-ARINC,nan,nan,nan,nan,primary
 Asian Community Center of Sacramento Valley,ACC Rides Transportation Services,,,,
-Association of Monterey Bay Area Governments,nan,nan,nan,nan,primary
-Avail Technologies Inc.,nan,nan,nan,nan,primary
 Avenidas,Avenidas Door-to-Door,,,,
-Bakersfield Airport Valet Express,nan,nan,nan,nan,primary
 Bakersfield ARC,Bakersfield ARC,,,,
 Balboa Island Ferry,Balboa Island Ferry,,,,
 Banning Pass Transit,Banning Pass Transit,nan,nan,nan,primary
@@ -71,65 +448,39 @@ Banning Pass Transit,Banning Pass Transit,nan,nan,nan,primary
 Banning Pass Transit,Banning Connect Dial-A-Ride,,,,
 Bay Area Outreach & Recreation Program,Bay Area Outreach & Recreation Program,,,,
 Becoming Independent,Becoming Independent,,,,
-Bell Cab Inc.,nan,nan,nan,nan,primary
-Beverly Hills Cab,nan,nan,nan,nan,primary
 Big Valley 50 Plus,Big Valley 50 Plus,,,,
-Binary System,nan,nan,nan,nan,primary
-Bishop Paiute Tribe,nan,nan,nan,nan,primary
-Bishop Peak Technologies,nan,nan,nan,nan,primary
-Black Tie Transportation Inc.,nan,nan,nan,nan,primary
-BlinkTag,nan,nan,nan,nan,primary
 Blue and Gold Fleet,Blue and Gold Fleet,901,nan,nan,primary
 Blue Lake Rancheria,Blue Lake Rancheria,972,nan,nan,primary
 Blue Lake Rancheria,Blue Lake Rancheria,972,nan,nan,primary
 Blue Lake Rancheria,Blue Lake Rancheria,972,nan,nan,primary
 Blue Lake Rancheria,Blue Lake Rancheria,972,nan,nan,primary
-Bombardier,nan,nan,nan,nan,primary
 Brisbane Village Helping Hands Inc.,Brisbane Village Helping Hands Rides,,,,
-Brookfield Residential,nan,nan,nan,nan,primary
 Bureau of Land Management,Bizz Johnson Trail Shuttle,,,,
-Butte County,nan,nan,nan,nan,primary
 Butte County Association of Governments,B-Line,nan,nan,nan,primary
 Butte County Association of Governments,B-Line Paratransit,,,,
 Butte-Glenn Community College District,Butte College Bus,,,,
-Bytemark Inc.,nan,nan,nan,nan,primary
-Calaveras Council of Governments,nan,nan,nan,nan,primary
 Calaveras County,Calaveras Connect,nan,nan,nan,primary
 Calaveras County,Calaveras Direct Connect,,,,
 California College of the Arts,CCA Intercampus Shuttle,,,,
-California Department of Transportation,nan,nan,nan,nan,primary
-California Integrated Travel Project,nan,nan,nan,nan,primary
 California Pacific Medical Center,CPMC Shuttle,,,,
 California State University East Bay,CSUEB Hill Hopper Shuttle,,,,
 California State University Long Beach,CSULB Shuttles,,,,
 California State University Northridge,CSUN Campus Shuttles,,,,
-California State University San Bernardino,nan,nan,nan,nan,primary
-California Vanpool Authority,nan,nan,nan,nan,primary
 Camarillo Health Care District,Care-A-Van,,,,
 Cambria Community Council,Cambria Community Bus,,,,
 Camping Unlimited for Developmentally Disabled,Camping Unlimited for Developmentally Disabled,,,,
 Capitol Corridor Joint Powers Authority,Capitol Corridor,AM,nan,nan,primary
 Care-A-Van Transit Systems Inc.,Care-A-Van Transit,,,,
 Casa Allegra Community Services,Casa Allegra,,,,
-Castle Rock Associates ,nan,nan,nan,nan,primary
 Catalina Express,Catalina Express,,,,
 Catalina Flyer,Catalina Flyer,,,,
 Catalina Island Conservancy,Wildlands Express,,,,
 Catholic Charities of the Diocese of Stockton,Catholic Charities Stockton Senior Transportation,,,,
 Center for Elders' Independence,Center for Elders' Independence,,,,
 Central California Nikkei Foundation,Central California Nikkei Center,,,,
-Central Coast Cab Inc.,nan,nan,nan,nan,primary
 Central Coast Shuttle Services Inc.,Central Coast LAX Shuttle,,,,
-Centum Adetel,nan,nan,nan,nan,primary
-Ceres Area Transit,nan,nan,nan,nan,primary
 Charitable Adult Rides & Services,On-the-go Transportation,,,,
-Chase Inc.,nan,nan,nan,nan,primary
-Checker Cab,nan,nan,nan,nan,primary
-Chemehuevi Indian Tribe,nan,nan,nan,nan,primary
-CHK America,nan,nan,nan,nan,primary
 Chumash Casino Resort,Chumash Casino Shuttle,,,,
-Cittati,nan,nan,nan,nan,primary
-City and County Association of Governments of San Mateo County,nan,nan,nan,nan,primary
 City and County of San Francisco,Muni Metro,SF,nan,"SF:J,SF:KT,SF:L,SF:M,SF:N,",primary
 City and County of San Francisco,Muni Metro,SF,nan,"SF:J,SF:KT,SF:L,SF:M,SF:N,",primary
 City and County of San Francisco,Muni Metro,SF,nan,"SF:J,SF:KT,SF:L,SF:M,SF:N,",primary
@@ -147,28 +498,23 @@ City and County of San Francisco,Market Street Historic Railway,SF,nan,SF:F,prim
 City and County of San Francisco,Market Street Historic Railway,SF,nan,SF:F,primary
 City and County of San Francisco,Market Street Historic Railway,SF,nan,SF:F,primary
 City and County of San Francisco,Market Street Historic Railway,SF,nan,SF:F,primary
-City Cab Inc.,nan,nan,nan,nan,primary
 City of Agoura Hills,Agoura Hills Dial-A-Ride ,,,,
 City of Alameda,Alameda Loop Shuttle,,,,
 City of Alhambra,Alhambra Community Transit,nan,nan,nan,primary
 City of Alhambra,Alhambra Senior Ride,,,,
 City of Aliso Viejo,Aliso Viejo Senior Mobility Program,,,,
-City of Amador City,nan,nan,nan,nan,primary
 City of Anaheim,Senior Wheels,,,,
-City of Angels,nan,nan,nan,nan,primary
 City of Arcadia,Arcadia Transit,nan,nan,nan,primary
 City of Arcadia,Arcadia Transit Dial-A-Ride,,,,
 City of Arcata,Arcata and Mad River Transit System,3,nan,nan,primary
 City of Arcata,Arcata and Mad River Transit System,3,nan,nan,primary
 City of Arcata,Arcata and Mad River Transit System,3,nan,nan,primary
 City of Arcata,Arcata and Mad River Transit System,3,nan,nan,primary
-City of Arroyo Grande,nan,nan,nan,nan,primary
 City of Artesia,Artesia Express Dial-A-Ride,,,,
 City of Artesia,Artesia Transit,,,,
 City of Arvin,Arvin Transit,nan,nan,nan,primary
 City of Arvin,Arvin Transit Dial-A-Ride,,,,
 City of Atascadero,Atascadero Dial-A-Ride,,,,
-City of Atherton,nan,nan,nan,nan,primary
 City of Auburn,Auburn Transit,nan,nan,nan,primary
 City of Auburn,Auburn On Demand,,,,
 City of Avalon,Avalon Community Transit,nan,nan,nan,primary
@@ -179,7 +525,6 @@ City of Avalon,Avalon Dial-A-Ride,,,,
 City of Avalon,Avalon Access,,,,
 City of Azusa,Azusa Dial-A-Ride,,,,
 City of Azusa,Azusa Gold Line Shuttle,,,,
-City of Bakersfield,nan,nan,nan,nan,primary
 City of Baldwin Park,Baldwin Park Transit,nan,nan,nan,primary
 City of Baldwin Park,Baldwin Park Transit Dial-A-Ride,,,,
 City of Beaumont,Beaumont Pass Transit,nan,nan,nan,primary
@@ -195,20 +540,15 @@ City of Berkeley,Berkeley Rides for Senior and the Disabled Taxi Scrip,,,,
 City of Beverly Hills,Beverly Hills Trolley,,,,
 City of Beverly Hills,Beverly Hills Dial-A-Ride,,,,
 City of Beverly Hills,Beverly Hills Senior and Disabled On-Demand,,,,
-City of Biggs,nan,nan,nan,nan,primary
-City of Bishop,nan,nan,nan,nan,primary
 City of Brea,Brea Shuttle Express,,,,
 City of Brea,Brea Senior Shuttle,,,,
 City of Brea,Brea Senior on the Go,,,,
-City of Brisbane,nan,nan,nan,nan,primary
-City of Buellton,nan,nan,nan,nan,primary
 City of Buena Park,Senior Transportation Runabout,,,,
 City of Burbank,Burbank Bus,nan,nan,nan,primary
 City of Burbank,Burbank Bus,nan,nan,nan,primary
 City of Burbank,Burbank Bus,nan,nan,nan,primary
 City of Burbank,Burbank Bus,nan,nan,nan,primary
 City of Burbank,Burbank Bus Senior and Disabled,,,,
-City of Burlingame,nan,nan,nan,nan,primary
 City of Calabasas,Calabasas Shuttle,nan,nan,*,primary
 City of Calabasas,Calabasas Trolley,nan,nan,CalabasasTrolley,primary
 City of Calabasas,Calabasas Dial-A-Ride,,,,
@@ -222,22 +562,12 @@ City of Camarillo,Camarillo Trolly,153,nan,4109,primary
 City of Camarillo,Camarillo Trolly,153,nan,4109,primary
 City of Camarillo,Camarillo Trolly,153,nan,4109,primary
 City of Camarillo,Camarillo Dial-A-Ride,,,,
-City of Capitola,nan,nan,nan,nan,primary
-City of Carlsbad,nan,nan,nan,nan,primary
-City of Carmel by the Sea,nan,nan,nan,nan,primary
-City of Carpinteria,nan,nan,nan,nan,primary
 City of Carson,Carson Dial-A-Ride,,,,
-City of Ceres,nan,nan,nan,nan,primary
 City of Cerritos,Cerritos on Wheels,,,,
 City of Cerritos,Cerritos Dial-A-Ride,,,,
-City of Chico,nan,nan,nan,nan,primary
 City of Chowchilla,The City BUS,,,,
-City of Chula Vista,nan,nan,nan,nan,primary
-City of Claremont,nan,nan,nan,nan,primary
 City of Clovis,Clovis Transit Stageline,nan,nan,nan,primary
 City of Clovis,Clovis Transit Roundup,,,,
-City of Coalinga,nan,nan,nan,nan,primary
-City of Colma,nan,nan,nan,nan,primary
 City of Commerce,Commerce Municipal Bus Lines,nan,nan,nan,primary
 City of Commerce,Commerce Municipal Bus Lines,nan,nan,nan,primary
 City of Commerce,Commerce Municipal Bus Lines,nan,nan,nan,primary
@@ -248,7 +578,6 @@ City of Compton,Compton Dial-A-Ride,,,,
 City of Corcoran,Corcoran Area Transit,,,,
 City of Corona,Corona Cruiser,nan,nan,nan,primary
 City of Corona,Corona Dial-A-Ride,,,,
-City of Coronado,nan,nan,nan,nan,primary
 City of Covina,Covina Dial-A-Ride,,,,
 City of Cudahy,Cudahy Area Rapid Transit,nan,nan,nan,primary
 City of Cudahy,Cudahy Dial-A-Ride,,,,
@@ -258,21 +587,16 @@ City of Culver City,Culver City Taxi Coupons,,,,
 City of Cuyama,Cuyama Shuttle,,,,
 City of Cypress,Cypress Senior Taxi Vouchers,,,,
 City of Cypress,Cypress Transit,,,,
-City of Daly City,nan,nan,nan,nan,primary
 City of Dana Point,Dana Point Senior Shuttle,,,,
 City of Davis,Davis Community Transit,,,,
-City of Del Mar,nan,nan,nan,nan,primary
-City of Del Rey Oaks,nan,nan,nan,nan,primary
 City of Delano,Delano Area Rapid Transit,nan,nan,nan,primary
 City of Delano,Delano Dial-A-Ride,,,,
 City of Diamond Bar,Diamond Ride,,,,
-City of Dinuba,nan,nan,nan,nan,primary
 City of Dixon,Dixon Readi Ride,,,,
 City of Downey,DowneyLINK,nan,nan,nan,primary
 City of Downey,Downy Dial-A-Ride,,,,
 City of Duarte,Duarte Transit,nan,nan,nan,primary
 City of East Palo Alto,East Palo Alto Senior Van,,,,
-City of El Cajon,nan,nan,nan,nan,primary
 City of El Monte,El Monte Dial-A-Ride,,,,
 City of El Monte,El Monte Transit,nan,nan,*,primary
 City of El Monte,El Monte Commuter Shuttles,nan,nan,"6810,6811",primary
@@ -280,15 +604,10 @@ City of El Segundo,El Segundo Dial-A-Ride,,,,
 City of El Segundo,El Segundo Doctor Dial-A-Ride,,,,
 City of El Segundo,El Segundo Lunchtime Shuttle,nan,nan,nan,primary
 City of El Segundo,El Segundo Beach Shuttle,nan,nan,nan,primary
-City of Elk Grove,nan,nan,nan,nan,primary
-City of Encinitas,nan,nan,nan,nan,primary
-City of Escalon,nan,nan,nan,nan,primary
-City of Escondido,nan,nan,nan,nan,primary
 City of Eureka,Eureka Transit Service,2,nan,nan,primary
 City of Eureka,Eureka Transit Service,2,nan,nan,primary
 City of Eureka,Eureka Transit Service,2,nan,nan,primary
 City of Eureka,Eureka Transit Service,2,nan,nan,primary
-City of Exeter,nan,nan,nan,nan,primary
 City of Fairfield,Fairfield and Suisun Transit,FS,nan,nan,primary
 City of Fairfield,Fairfield and Suisun Transit,FS,nan,nan,primary
 City of Fairfield,Fairfield and Suisun Transit,FS,nan,nan,primary
@@ -298,15 +617,13 @@ City of Fairfield,Solano Express,VN,nan,VN:21,primary
 City of Fairfield,Solano Express,VN,nan,VN:21,primary
 City of Fairfield,Solano Express,VN,nan,VN:21,primary
 City of Fairfield,Solano Express,VN,nan,VN:21,primary
-City of Farmersville,nan,nan,nan,nan,primary
-City of Fillmore,nan,nan,nan,nan,primary
-City of Firebaugh,nan,nan,nan,nan,primary
-City of Folsom,nan,nan,nan,nan,primary
+Solano County Transit,Solano Express,VN,nan,VN:21,primary
+Solano County Transit,Solano Express,VN,nan,VN:21,primary
+Solano County Transit,Solano Express,VN,nan,VN:21,primary
+Solano County Transit,Solano Express,VN,nan,VN:21,primary
 City of Fontana,City of Fontana Senior Transportation,,,,
 City of Fortuna,Fortuna Transit,,,,
-City of Foster City,nan,nan,nan,nan,primary
 City of Fountain Valley,Senior Hop On,,,,
-City of Fowler,nan,nan,nan,nan,primary
 City of Fremont,Ride-On Tri-City! Wheelchair-Accessible Van Service,,,,
 City of Fremont,Ride-On Tri-City! Taxi Service,,,,
 City of Fremont,Ride-On Tri-City! Ride-Hailing Service,,,,
@@ -320,39 +637,24 @@ City of Glendale,Glendale Beeline,nan,nan,nan,primary
 City of Glendale,Glendale Dial-A-Ride,,,,
 City of Glendora,Glendora Shuttles,nan,nan,nan,primary
 City of Glendora,Glendora Dial-A-Ride,,,,
-City of Goleta,nan,nan,nan,nan,primary
-City of Gonzalez,nan,nan,nan,nan,primary
-City of Greenfield,nan,nan,nan,nan,primary
 City of Gridley,Gridley Golden Feather Flyer,,,,
-City of Grover Beach,nan,nan,nan,nan,primary
 City of Guadalupe,Guadalupe Flyer,nan,nan,nan,primary
 City of Guadalupe,Guadalupe Shuttle,,,,
-City of Half Moon Bay,nan,nan,nan,nan,primary
 City of Hawaiian Gardens,Hawaiian Gardens Dial-a-Ride,,,,
 City of Hawaiian Gardens,Hawaiian Gardens Red Route,,,,
 City of Hawthorne,Hawthorne Dial-A-Ride Transportation,,,,
-City of Hillsborough,nan,nan,nan,nan,primary
-City of Hollister,nan,nan,nan,nan,primary
-City of Hughson,nan,nan,nan,nan,primary
 City of Huntington Beach,Surf City Seniors on the Go,,,,
 City of Huntington Park,Huntington Park Express,nan,nan,nan,primary
 City of Huntington Park,Huntington Park Dial-A-Ride,,,,
 City of Huron,City of Huron,,,,
-City of Imperial Beach,nan,nan,nan,nan,primary
 City of Inglewood,"""Inglewood",,,,
 City of Inglewood," Hawthorn and Lennox Para-Transit""",,,,
 City of Inglewood,Inglewood Taxi Voucher Program,,,,
 City of Inglewood,Inglewood Senior Van,,,,
 City of Inglewood,I-Line Shuttle,,,,
-City of Ione,nan,nan,nan,nan,primary
 City of Irvine,Irvine TRIPS,,,,
-City of Jackson,nan,nan,nan,nan,primary
-City of Kerman,nan,nan,nan,nan,primary
-City of King City,nan,nan,nan,nan,primary
-City of Kingsburg,nan,nan,nan,nan,primary
 City of La Cañada Flintridge,La Cañada Flintridge Dial-a-Ride,,,,
 City of La Habra,La Habra Car Service,,,,
-City of La Mesa,nan,nan,nan,nan,primary
 City of La Mirada,La Mirada Transit,,,,
 City of La Puente,La Puente Link,nan,nan,nan,primary
 City of La Puente,La Puente Dial-A-Ride,,,,
@@ -364,11 +666,7 @@ City of Laguna Niguel, Laguna Niguel Senior Mobility Program,,,,
 City of Laguna Woods,Laguna Woods Senior Mobility Program,,,,
 City of Lake Forest,Lake Forest Senior Transportation,,,,
 City of Lakewood,Lakewood DASH,,,,
-City of Lathrop,nan,nan,nan,nan,primary
 City of Lawndale,Lawndale Beat,nan,nan,nan,primary
-City of Lemon Grove,nan,nan,nan,nan,primary
-City of Lincoln,nan,nan,nan,nan,primary
-City of Lindsay,nan,nan,nan,nan,primary
 City of Lodi,Grapeline,nan,nan,nan,primary
 City of Lodi,Vineline and Dial-A-Ride,,,,
 City of Lompoc,City of Lompoc Transit,nan,nan,nan,primary
@@ -396,22 +694,16 @@ City of Malibu,Malibu Dial-A-Ride,,,,
 City of Manhattan Beach,Manhattan Beach Dial-A-Ride,,,,
 City of Manteca,Manteca Transit,nan,nan,nan,primary
 City of Manteca,Manteca Dial-A-Ride,,,,
-City of Maricopa,nan,nan,nan,nan,primary
-City of Marina,nan,nan,nan,nan,primary
 City of Maywood,Maywood Dial-A-Ride,,,,
 City of Maywood,Maywood Express Shuttle,,,,
 City of McFarland,McFarland Dial-A-Ride,,,,
-City of Mendota,nan,nan,nan,nan,primary
 City of Menlo Park,Menlo Park Senior Door-to-Door,,,,
-City of Millbrae,nan,nan,nan,nan,primary
 City of Mission Viejo,Mission Viejo Dial-A-Taxi,,,,
-City of Modesto,nan,nan,nan,nan,primary
 City of Monrovia,Monrovia Transit,,,,
 City of Monrovia,GoMonrovia Ride Hail,,,,
 City of Montebello,Montebello Bus Lines,nan,nan,nan,primary
 City of Montebello,Montebello Link,,,,
 City of Montebello,Montebello Dial-A-Taxi,,,,
-City of Monterey,nan,nan,nan,nan,primary
 City of Monterey Park,Monterey Park Dial-a-Ride,,,,
 City of Monterey Park,Spirit Bus,nan,nan,nan,primary
 City of Moorpark,Moorpark City Transit,147,nan,nan,primary
@@ -420,37 +712,28 @@ City of Moorpark,Moorpark City Transit,147,nan,nan,primary
 City of Moorpark,Moorpark City Transit,147,nan,nan,primary
 City of Moorpark,Moorpark Dial-A-Ride,,,,
 City of Morgan Hill,Reach Your Destination Easily,,,,
+Saratoga Area Senior Coordinating Council,Reach Your Destination Easily,,,,
+West Valley Community Services,Reach Your Destination Easily,,,,
 City of Morro Bay,Morro Bay Transit,nan,nan,mbt_fixed route,primary
 City of Morro Bay,Morro Bay Trolley,nan,nan,*,primary
-City of Mountain View,nan,nan,nan,nan,primary
-City of National City,nan,nan,nan,nan,primary
 City of Needles,Needles Area Transit,nan,nan,nan,primary
 City of Needles,Needles Dial-A-Ride,,,,
-City of Newman,nan,nan,nan,nan,primary
 City of Newport Beach,OASIS Transportation Service,,,,
 City of Norwalk,Norwalk Transit System,nan,nan,nan,primary
 City of Norwalk,Norwalk Dial-A-Ride,,,,
 City of Norwalk,Norwalk TaxiCard,,,,
-City of Oakdale,nan,nan,nan,nan,primary
-City of Oceanside,nan,nan,nan,nan,primary
 City of Ojai,Ojai Trolley,148,nan,nan,primary
 City of Ojai,Ojai Trolley,148,nan,nan,primary
 City of Ojai,Ojai Trolley,148,nan,nan,primary
 City of Ojai,Ojai Trolley,148,nan,nan,primary
-City of Orange Cove,nan,nan,nan,nan,primary
 City of Orcutt,Santa Maria/Orcutt Senior Dial-A-Ride,,,,
-City of Oroville,nan,nan,nan,nan,primary
-City of Oxnard,nan,nan,nan,nan,primary
-City of Pacific Grove,nan,nan,nan,nan,primary
-City of Pacifica,nan,nan,nan,nan,primary
+City of Santa Maria,Santa Maria/Orcutt Senior Dial-A-Ride,,,,
 City of Palo Alto,Palo Alto Shuttle,,,,
 City of Pasadena,Pasadena Transit,nan,nan,nan,primary
 City of Pasadena,Pasadena Transit,nan,nan,nan,primary
 City of Pasadena,Pasadena Transit,nan,nan,nan,primary
 City of Pasadena,Pasadena Transit,nan,nan,nan,primary
 City of Pasadena,Pasadena Dial-A-Ride,,,,
-City of Paso Robles,nan,nan,nan,nan,primary
-City of Patterson,nan,nan,nan,nan,primary
 City of Petaluma,Petaluma Transit,PE,nan,nan,primary
 City of Petaluma,Petaluma Transit,PE,nan,nan,primary
 City of Petaluma,Petaluma Transit,PE,nan,nan,primary
@@ -458,13 +741,9 @@ City of Petaluma,Petaluma Transit,PE,nan,nan,primary
 City of Petaluma,Petaluma Paratransit,,,,
 City of Pico Rivera,Pico Rivera Dial-A-Cab,,,,
 City of Pico Rivera,Pico Rivera Dial-A-Van,,,,
-City of Pismo Beach,nan,nan,nan,nan,primary
 City of Placentia,Placentia Senior Mobility Program,,,,
 City of Pleasanton,Pleasanton Rides,,,,
-City of Plymouth,nan,nan,nan,nan,primary
 City of Porterville,Dial-a-COLT,,,,
-City of Portola Valley,nan,nan,nan,nan,primary
-City of Poway,nan,nan,nan,nan,primary
 City of Rancho Cordova,Rancho CordoVan,SRTD,nan,"175,176,177",primary
 City of Rancho Cordova,Rancho CordoVan,SRTD,nan,"175,176,177",primary
 City of Rancho Cordova,Rancho CordoVan,SRTD,nan,"175,176,177",primary
@@ -476,32 +755,22 @@ City of Redondo Beach,Beach Cities Transit,nan,nan,nan,primary
 City of Redondo Beach,Beach Cities Transit,nan,nan,nan,primary
 City of Redondo Beach,WAVE Dial-A-Ride,,,,
 City of Redwood City,Redwood City Senior Center Shuttle,,,,
-City of Reedley,nan,nan,nan,nan,primary
 City of Ridgecrest,Ridgecrest Transit,nan,nan,nan,primary
 City of Rio Vista,Rio Vista Delta Breeze,RV,nan,nan,primary
 City of Ripon,Blossom Express,nan,nan,nan,primary
-City of Riverbank,nan,nan,nan,nan,primary
 City of Riverside,Riverside Connect,,,,
 City of Rosemead,Rosemead Dial-A-Ride,,,,
 City of Roseville,Roseville Transit,Roseville,nan,nan,primary
 City of Roseville,Roseville Dial-A-Ride,,,,
-City of Salinas,nan,nan,nan,nan,primary
 City of San Bruno,San Bruno Senior Center Bus,,,,
-City of San Carlos,nan,nan,nan,nan,primary
 City of San Clemente,San Clemente Senior Mobility Program,,,,
 City of San Clemente,San Clemente Trolley,,,,
-City of San Diego,nan,nan,nan,nan,primary
 City of San Fernando,Mission City Transit,,,,
-City of San Joaquin,nan,nan,nan,nan,primary
-City of San Juan Bautista,nan,nan,nan,nan,primary
 City of San Juan Capistrano,San Juan Capistrano Free Weekend Trolley,nan,nan,nan,primary
 City of San Luis Obispo,SLO Transit,nan,nan,nan,primary
 City of San Marcos,San Marcos Catch a Ride!,,,,
 City of San Mateo,Get Around! Senior Rides,,,,
-City of Sand City,nan,nan,nan,nan,primary
-City of Sanger,nan,nan,nan,nan,primary
 City of Santa Ana,Santa Ana Senior Mobility Program,,,,
-City of Santa Barbara,nan,nan,nan,nan,primary
 City of Santa Clarita,Santa Clarita Transit,nan,nan,nan,primary
 City of Santa Clarita,Santa Clarita Transit,nan,nan,nan,primary
 City of Santa Clarita,Santa Clarita Transit,nan,nan,nan,primary
@@ -509,9 +778,7 @@ City of Santa Clarita,Santa Clarita Transit,nan,nan,nan,primary
 City of Santa Clarita,Go! Santa Clarita,,,,
 City of Santa Clarita,Santa Clarita Summer Trolly,,,,
 City of Santa Clarita,Santa Clarita Dial-A-Ride,,,,
-City of Santa Cruz,nan,nan,nan,nan,primary
 City of Santa Fe Springs,Santa Fe Springs Transit,,,,
-City of Santa Maria,Santa Maria/Orcutt Senior Dial-A-Ride,,,,
 City of Santa Maria,Santa Maria Area Transit,nan,SMAT,nan,primary
 City of Santa Maria,Santa Maria Area Transit,nan,SMAT,nan,primary
 City of Santa Maria,Santa Maria Area Transit,nan,SMAT,nan,primary
@@ -527,18 +794,13 @@ City of Santa Monica,Big Blue Bus,nan,nan,nan,primary
 City of Santa Monica,Big Blue Bus,nan,nan,nan,primary
 City of Santa Monica,Mobility on Demand Everyday,,,,
 City of Santa Monica,Santa Monica College Intercampus Shuttles,,,,
-City of Santa Paula,nan,nan,nan,nan,primary
 City of Santa Rosa,Santa Rosa CityBus,SR,nan,nan,primary
 City of Santa Rosa,Santa Rosa CityBus,SR,nan,nan,primary
 City of Santa Rosa,Santa Rosa CityBus,SR,nan,nan,primary
 City of Santa Rosa,Santa Rosa CityBus,SR,nan,nan,primary
 City of Santa Rosa,Santa Rosa Call Ahead Service,,,,
 City of Santa Rosa,Santa Rosa Paratransit,,,,
-City of Santee,nan,nan,nan,nan,primary
-City of Scotts Valley,nan,nan,nan,nan,primary
 City of Seal Beach,Seal Beach Senior Transportation Services,,,,
-City of Seaside,nan,nan,nan,nan,primary
-City of Selma,nan,nan,nan,nan,primary
 City of Shafter,Shafter Dial-A-Ride,,,,
 City of Sierra Madre,Sierra Madre Dial-A-Ride,,,,
 City of Sierra Madre,Gateway Coach,nan,nan,nan,primary
@@ -548,8 +810,6 @@ City of Simi Valley,Simi Valley Transit,152,nan,nan,primary
 City of Simi Valley,Simi Valley Transit,152,nan,nan,primary
 City of Simi Valley,Simi Valley Transit,152,nan,nan,primary
 City of Simi Valley,Simi Valley Paratransit / Dial-A-Ride,,,,
-City of Solana Beach,nan,nan,nan,nan,primary
-City of Soledad,nan,nan,nan,nan,primary
 City of Solvang,Santa Ynez Valley Transit,nan,nan,nan,primary
 City of Solvang,Santa Ynez Valley Dial-A-Ride,,,,
 City of South El Monte,South El Monte Transportation,,,,
@@ -557,11 +817,8 @@ City of South Gate,Get Around Town Express,nan,nan,nan,primary
 City of South Gate,South Gate Phone-A-Ride,,,,
 City of South Pasadena,South Pasadena Dial-A-Ride,,,,
 City of South San Francisco,Free South City Shuttle,SS,nan,nan,primary
-City of Stockton,nan,nan,nan,nan,primary
-City of Sutter Creek,nan,nan,nan,nan,primary
 City of Taft,Taft Area Transit,nan,nan,nan,primary
 City of Taft,Taft Dial-A-Ride,,,,
-City of Tehachapi,nan,nan,nan,nan,primary
 City of Thousand Oaks,Thousand Oaks Transit,142,nan,nan,primary
 City of Thousand Oaks,Thousand Oaks Transit,142,nan,nan,primary
 City of Thousand Oaks,Thousand Oaks Transit,142,nan,nan,primary
@@ -577,7 +834,6 @@ City of Torrance,Torrance Dial-A-Taxi,,,,
 City of Tracy,TRACER,nan,nan,nan,primary
 City of Tracy,TRACER Paratransit,,,,
 City of Tracy,TRACER Plus,,,,
-City of Tulare,nan,nan,nan,nan,primary
 City of Turlock,Turlock Transit,nan,nan,nan,primary
 City of Turlock,Turlock Transit,nan,nan,nan,primary
 City of Turlock,Turlock Transit,nan,nan,nan,primary
@@ -600,11 +856,8 @@ City of Visalia,Visalia Transit,nan,nan,nan,primary
 City of Visalia,Visalia Transit,nan,nan,nan,primary
 City of Visalia,Sequoia Shuttle,,,,
 City of Visalia,Visalia Dial-A-Ride,,,,
-City of Vista,nan,nan,nan,nan,primary
 City of Walnut,Walnut Way Dial-A-Cab,,,,
 City of Wasco,Wasco Dial-a-Ride,nan,nan,nan,primary
-City of Waterford,nan,nan,nan,nan,primary
-City of Watsonville,nan,nan,nan,nan,primary
 City of West Covina,Go West Shuttle,nan,nan,nan,primary
 City of West Covina,Go West Dial-A-Ride Service,,,,
 City of West Hollywood,WeHo Shuttles,,,,
@@ -615,53 +868,27 @@ City of Westminster,Westminster on Wheels,,,,
 City of Whittier,La Habra Heights Dial-a-Ride,,,,
 City of Whittier,Whittier Dial-A-Ride,,,,
 City of Whittier,Whittier Dial-A-Ride Plus,,,,
-City of Woodlake,nan,nan,nan,nan,primary
-City of Woodside,nan,nan,nan,nan,primary
 City of Yorba Linda,Yorba Linda TRAILS,,,,
-City or Parlier,nan,nan,nan,nan,primary
-Clever Devices Ltd.,nan,nan,nan,nan,primary
-Cloverdale Transit,nan,nan,nan,nan,primary
-Coach USA Inc.,nan,nan,nan,nan,primary
 Coastal Seniors,Point Arena Coastal Seniors,,,,
 Colusa County Transit Agency,Colusa County Transit,,,,
-Colusa County Transportation Commission,nan,nan,nan,nan,primary
 Common Ground Senior Services,Silver Streak Transport,,,,
 Community Bridges Inc.,Lift Line,,,,
 Commute.org,Commute.org Shuttles,CM,nan,nan,primary
-Conduent Inc,nan,nan,nan,nan,primary
-Connectpoint,nan,nan,nan,nan,primary
-Connexionz Inc.,nan,nan,nan,nan,primary
-Consolidated Tribal Health Project Inc.,nan,nan,nan,nan,primary
-Constellation Software Inc,nan,nan,nan,nan,primary
 Contra Costa County Transportation Authority,County Connection,AC,nan,nan,primary
 Contra Costa County Transportation Authority,County Connection,CC,nan,nan,primary
 Contra Costa County Transportation Authority,County Connection,CC,nan,nan,primary
 Contra Costa County Transportation Authority,County Connection,CC,nan,nan,primary
 Contra Costa County Transportation Authority,LINK Paratransit,,,,
-Corinthian Inc.,nan,nan,nan,nan,primary
 Costa Mesa Senior Center,Costa Mesa Senior Taxi,,,,
-Council of San Benito County Governments,nan,nan,nan,nan,primary
-Covina Transit,nan,nan,nan,nan,primary
-Cubic,nan,nan,nan,nan,primary
-DASH,nan,nan,nan,nan,primary
-DataGraffikk A.G. ,nan,nan,nan,nan,primary
 DAV,Northern CA VA DAV Van,,,,
 DAV,Sepulveda DAV Van,,,,
 DAV,San Francisco DAV Van,,,,
 DAV,Santa Barbara DAV Van,,,,
 DAV,West Los Angeles DAV Van,,,,
-Deaf Plus Adult Community,nan,nan,nan,nan,primary
-Del Norte Local Transportation Commission,nan,nan,nan,nan,primary
-"Delano Association for the Developmentally Disabled, Inc.",nan,nan,nan,nan,primary
 Demaris Express Inc.,Cross Border Express,,,,
-"Desert Access and Mobility, Inc",nan,nan,nan,nan,primary
 Desert ARC,Desert ARC,,,,
 Dignity Health,Dignity Health Connected Living,,,,
-Dilax Inc.,nan,nan,nan,nan,primary
 Disneyland Shuttle Express,Disneyland Shuttle,,,,
-DoubleMap Inc.,nan,nan,nan,nan,primary
-Drivers for Survivors,nan,nan,nan,nan,primary
-Dumbarton Bridge Regional Operations Consortium,nan,nan,nan,nan,primary
 Eastern Contra Costa Transit Authority,Tri Delta Transit,3D,nan,nan,primary
 Eastern Contra Costa Transit Authority,Tri Delta Transit,3D,nan,nan,primary
 Eastern Contra Costa Transit Authority,Tri Delta Transit,3D,nan,nan,primary
@@ -692,10 +919,8 @@ Eastern Sierra Transit Authority,Lone Pine Dial-A-Ride,,,,
 Eastern Sierra Transit Authority,Walker Pine Dial-A-Ride,,,,
 Eastern Sierra Transit Authority,Bishop Dial-A-Ride,,,,
 Eastern Sierra Transit Authority,Mammoth Lakes Dial-A-Ride,,,,
-Easy Does It Emergency Services,nan,nan,nan,nan,primary
 Easy Lift Transportation,Easy Lift Dial-A-Ride,,,,
 Easy Lift Transportation,Non Emergency Accessible Transportation,,,,
-Ecolane,nan,nan,nan,nan,primary
 El Camino Health Inc.,Road Runners,,,,
 El Concilio,El Concilio Medical Transportation Services ,,,,
 El Corre Caminos,El Corre Caminos,,,,
@@ -704,38 +929,21 @@ El Dorado County Transit Authority,Sacramento/South Lake Tahoe Connector Bus,nan
 El Dorado County Transit Authority,El Dorado Dial-A-Ride,,,,
 El Dorado County Transit Authority,SAC-MED,,,,
 El Dorado County Transit Authority,El Dorado Paratransit,,,,
-El Dorado County Transportation Commission,nan,nan,nan,nan,primary
-El Paseo Limo,nan,nan,nan,nan,primary
-Elavon,nan,nan,nan,nan,primary
 ElderHelp of San Diego,Seniors A Go Go,,,,
 Emeryville Transportation Management Agency,Emery Go-Round,EM,nan,nan,primary
-Empire Transportation,nan,nan,nan,nan,primary
-Empressa,nan,nan,nan,nan,primary
-ETA Transit Inc.,nan,nan,nan,nan,primary
-Everbridge,nan,nan,nan,nan,primary
-"Express
-  Transportation Services, LLC",nan,nan,nan,nan,primary
 Facilitating Access to Coordinated Transportation,RideFACT,,,,
 Faith in Action Inc.,Ride with Pride,,,,
 Family Bridges,Family Bridges,,,,
-Federal Transit Administration,nan,nan,nan,nan,primary
-Fidelity National Information Services,nan,nan,nan,nan,primary
-Fiesta Taxi,nan,nan,nan,nan,primary
 First Transit,Rosemead Explorer,nan,nan,nan,primary
-FIS,nan,nan,nan,nan,primary
-Fiserv,nan,nan,nan,nan,primary
 Flagship Cruises and Events Inc.,Coronado Ferry,nan,nan,COR,primary
 FlixBus,FlixBus,,,,
 Foothill Transit,Foothill Transit,nan,nan,nan,primary
 Foothill Transit,Foothill Transit,nan,nan,nan,primary
 Foothill Transit,Foothill Transit,nan,nan,nan,primary
 Foothill Transit,Foothill Transit,nan,nan,nan,primary
-Ford,nan,nan,nan,nan,primary
 Forest Folk Incorporated,Idyllwild Shuttle Bus,,,,
 Foster City Village Inc.,Foster City Village,,,,
 Foundation for Senior Care,Fallbrook Senior Care Van,,,,
-Fresno Council of Governments,nan,nan,nan,nan,primary
-Fresno County,nan,nan,nan,nan,primary
 Fresno County Rural Transit Agency,Coalinga Transit Dial-A-Ride,,,,
 Fresno County Rural Transit Agency,San Joaquin Transit,,,,
 Fresno County Rural Transit Agency,Westside Transit,171,nan,1014,primary
@@ -761,19 +969,11 @@ Fresno County Rural Transit Agency,Kerman Transit,,,,
 Fresno State University,Bulldog Express,,,,
 Fresno State University,Fresno State SCOUT,,,,
 Friends of Children with Special Needs,Friends of Children with Special Needs,,,,
-Friends Outside,nan,nan,nan,nan,primary
 Fronteras Del Norte,Fronteras Del Norte,,,,
 Gary and Mary West PACE,West PACE,,,,
 Genentech Inc.,Genentech Shuttle,,,,
-Genfare,nan,nan,nan,nan,primary
-GeoSpatial Technologies,nan,nan,nan,nan,primary
-Giro Inc.,nan,nan,nan,nan,primary
 Glenn County,Glenn Ride,nan,nan,nan,primary
 Glenn County,Glenn Dial-A-Ride,,,,
-Glenn County Transportation Commission,nan,nan,nan,nan,primary
-Global Paratransit Inc.,nan,nan,nan,nan,primary
-GMV S.A.,nan,nan,nan,nan,primary
-GMV Syncromatics Inc,nan,nan,nan,nan,primary
 Gold Coast Transit,Gold Coast Access,,,,
 Gold Coast Transit,Gold Coast Transit,nan,nan,nan,primary
 Gold Coast Transit,Gold Coast Transit,139,nan,nan,primary
@@ -795,18 +995,11 @@ Golden Empire Transit District,GET Bus On Demand,,,,
 "Golden Gate Bridge, Highway and Transportation District",Golden Gate Chase Center Ferry,,,,
 "Golden Rays Senior Citizens of Sierra County, Inc.",Western Sierra County Senior Transportation copy,,,,
 Google,Pacific Shores Shuttle,,,,
-Granicus,nan,nan,nan,nan,primary
 Greyhound,Greyhound,,,,
-HaCon AG,nan,nan,nan,nan,primary
-Hanover Displays Ltd,nan,nan,nan,nan,primary
 Heart of the Valley,Heart of the Valley,,,,
-Hella Aglaia Mobile Vision GMBH,nan,nan,nan,nan,primary
 Help of Ojai Inc.,Help of Ojai,,,,
 Hi-Desert Memorial Health Care Foundation,Lift Transportation Program,,,,
-Hobnob,nan,nan,nan,nan,primary
 Home of Guiding Hands,Home of Guiding Hands Transportation Services,,,,
-Hopthru,nan,nan,nan,nan,primary
-Humboldt County Association of Governments,nan,nan,nan,nan,primary
 Humboldt Medi-Trans Inc.,Humboldt Medi-Trans,,,,
 Humboldt Senior Resource Center,Humboldt Senior Resource Center,,,,
 Humboldt Transit Authority,Humboldt Transit Authority Dial-A-Ride,,,,
@@ -822,37 +1015,17 @@ Humboldt Transit Authority,Willow Creek,1,Willow_Creek,nan,primary
 Humboldt Transit Authority,Willow Creek,1,Willow_Creek,nan,primary
 Humboldt Transit Authority,Willow Creek,1,Willow_Creek,nan,primary
 Humboldt Transit Authority,Willow Creek,1,Willow_Creek,nan,primary
-IBI,nan,nan,nan,nan,primary
-Icomera AG,nan,nan,nan,nan,primary
-Imperial County,nan,nan,nan,nan,primary
 Imperial County Transportation Commission,Imperial Valley Transit,,,,
 Imperial County Transportation Commission,IVT Access,,,,
 Imperial County Transportation Commission,IVT Meditrans,,,,
 Imperial County Transportation Commission,IVT Ride,,,,
 Incorporated Senior Citizens of Sierra County,Eastern Sierra County Senior Transportation,,,,
-Independent Cab Co Inc,nan,nan,nan,nan,primary
-Independent Living Partnership,nan,nan,nan,nan,primary
-Independent Taxi,nan,nan,nan,nan,primary
-INIT SE,nan,nan,nan,nan,primary
-Inland Regional Center,nan,nan,nan,nan,primary
 Institute on Aging,Institute on Aging,,,,
-Intelliride,nan,nan,nan,nan,primary
-Interline,nan,nan,nan,nan,primary
-Intersection,nan,nan,nan,nan,primary
-Inyo County,nan,nan,nan,nan,primary
-Inyo County Local Transportation Commission,nan,nan,nan,nan,primary
 Inyo-Mono Association for the Handicapped,Inyo-Mono Association for the Handicapped,,,,
-IPS Systems,nan,nan,nan,nan,primary
-Iris Inc.,nan,nan,nan,nan,primary
-ISC Applied Systems,nan,nan,nan,nan,primary
-Jewish Family Service of San Diego,nan,nan,nan,nan,primary
-John Wayne Airport,nan,nan,nan,nan,primary
 Jovenes de Antaño,Jovenes de Antaño,,,,
 Kaiser Permanente,Redwood City Medical Center Shuttle,,,,
 Kaiser Permanente,East Bay Kaiser Permanente BART Shuttles,,,,
 Karmel Shuttle Service,Karmel Airport Shuttle,,,,
-Karuk Tribe,nan,nan,nan,nan,primary
-Kern Council of Governments,nan,nan,nan,nan,primary
 Kern County,Kern Transit,194,nan,nan,primary
 Kern County,Mojave Dial-A-Ride,,,,
 Kern County,Rosamonde Dial-A-Ride,,,,
@@ -869,16 +1042,13 @@ Kings County Area Public Transit Agency,KART,nan,nan,nan,primary
 Kings County Area Public Transit Agency,KART,nan,nan,nan,primary
 Kings County Area Public Transit Agency,KART Paratransit,,,,
 Kings County Area Public Transit Agency,KART Flex Route,,,,
-Kings County Association of Governments,nan,nan,nan,nan,primary
 Klamath Trinity Non-Emergency Transportation,KT NET,,,,
-Lake County/City Area Planning Council,nan,nan,nan,nan,primary
 Lake Transit Authority,Lake Transit,nan,nan,nan,primary
 Lake Transit Authority,Lake Transit,nan,nan,nan,primary
 Lake Transit Authority,Lake Transit,nan,nan,nan,primary
 Lake Transit Authority,Lake Transit,nan,nan,nan,primary
 Lake Transit Authority,Clearlake/Lower Lake Dial-A-Ride,,,,
 Lake Transit Authority,Lakeport Dial-A-Ride,,,,
-Lassen County Transportation Commission,nan,nan,nan,nan,primary
 Lassen Senior Services Inc.,Lassen Senior Services Shuttle,,,,
 Lassen Transit Service Agency,Lassen Rural Bus,nan,nan,nan,primary
 Lassen Transit Service Agency,Lassen Rural Bus Dial-A-Ride,,,,
@@ -898,7 +1068,6 @@ Limousine Express,Limousine Express Bus,,,,
   Valley Transit Authority",Tri-Valley Wheels Paratransit,,,,
 "Livermore / Amador
   Valley Transit Authority",Wheels School,,,,
-Lodi Memorial Hospital Association,nan,nan,nan,nan,primary
 Long Beach Transit,Long Beach Transit,nan,nan,nan,primary
 Long Beach Transit,Long Beach Transit,nan,nan,nan,primary
 Long Beach Transit,Long Beach Transit,nan,nan,nan,primary
@@ -937,20 +1106,13 @@ Los Angeles County Metropolitan Transportation Authority,LA Metro Rail,nan,nan,n
 Los Angeles County Metropolitan Transportation Authority,LA Metro Rail,nan,nan,nan,primary
 Los Angeles County Metropolitan Transportation Authority,LA Metro Micro,,,,
 Los Angeles World Airports,LAX Fly Away,nan,nan,nan,primary
-LOSSAN Rail Corridor Agency ,nan,nan,nan,nan,primary
 Loyola Marymount University,LMU Shuttle,,,,
-Luminator Technology Group,nan,nan,nan,nan,primary
-Lutheran Social Services,nan,nan,nan,nan,primary
-Lyft Inc.,nan,nan,nan,nan,primary
-Mackenzie Laboratories,nan,nan,nan,nan,primary
 Madera County,Madera County Connection,nan,nan,nan,primary
 Madera County,Madera County Connection,nan,nan,nan,primary
 Madera County,Madera County Connection,nan,nan,nan,primary
 Madera County,Madera County Connection,nan,nan,nan,primary
 Madera County,Eastern Madera County Medical Escort Van,,,,
 Madera County,Eastern Madera County Senior Bus,,,,
-Madera County Transportation Commission,nan,nan,nan,nan,primary
-Malmator,nan,nan,nan,nan,primary
 Marin Airporter,Marin Airporter,,,,
 Marin County Transit District,Marin Access Paratransit,,,,
 Marin County Transit District,Marin Transit,MA,nan,nan,primary
@@ -967,17 +1129,10 @@ Marin County Transit District,Novato Dial-A-Ride,,,,
 Marin County Transit District,Dillon Beach/Tomales Dial-A-Ride,,,,
 Marin County Transit District,Point Reyes Dial-A-Ride,,,,
 Marin County Transit District,Marin Catch-A-Ride,,,,
-Marina Taxi Co Inc.,nan,nan,nan,nan,primary
 Mariposa County,MariGo,,,,
 Mariposa County,Mariposa Medi-Trans,,,,
-Mariposa County Local Transportation Commission,nan,nan,nan,nan,primary
 Marymount College California,Marymount Campus Shuttle,,,,
-Masabi,nan,nan,nan,nan,primary
-Mecatran,nan,nan,nan,nan,primary
-mecatran.com,nan,nan,nan,nan,primary
-Medical Transportation Management,nan,nan,nan,nan,primary
 Megabus,Megabus,,,,
-Mendocino Council of Governments,nan,nan,nan,nan,primary
 Mendocino Transit Authority,Mendocino Transit Authority,nan,nan,nan,primary
 Mendocino Transit Authority,Ukiah Dial-A-Ride,,,,
 Mendocino Transit Authority,Fort Bragg Dial-A-Ride,,,,
@@ -985,26 +1140,13 @@ Mendocino Transit Authority,Ukiah Paratransit,,,,
 Mendocino Transit Authority,Fort Bragg Paratransit,,,,
 Mendocino Transit Authority,Willits Paratransit,,,,
 Menlo Park Shuttles,Menlo Park Shuttles,nan,nan,nan,primary
-Merced County Association of Governments,nan,nan,nan,nan,primary
-Metro Transit Services Inc.,nan,nan,nan,nan,primary
-Metropolitan Transportation Commission,nan,nan,nan,nan,primary
-Michigan Technological University Center for Technology and Training,nan,nan,nan,nan,primary
-Microsoft,nan,nan,nan,nan,primary
-"MIG, Inc.",nan,nan,nan,nan,primary
 Milestones of Development,Milestones of Development,,,,
 Mission Bay Transportation Management Agency,Mission Bay Shuttles,nan,nan,nan,primary
-Mobility Management Partners,nan,nan,nan,nan,primary
 Mobility Matters,Mobility Matters Rides for Seniors,,,,
 Mobility Matters,Mobility Matters Rides 4 Veterans,,,,
-MobilityData,nan,nan,nan,nan,primary
-Modaxo Inc,nan,nan,nan,nan,primary
-Modoc County Local Transportation Commission,nan,nan,nan,nan,primary
 Modoc Transportation Authority ,Sage Stage Local,,,,
 Modoc Transportation Authority ,Sage Stage Intercity,nan,nan,nan,primary
 Mono County,Mono County Senior Transportation,,,,
-Mono County Local Transportation Commission,nan,nan,nan,nan,primary
-Monterey County,nan,nan,nan,nan,primary
-Monterey Peninsula College,nan,nan,nan,nan,primary
 Monterey-Salinas Transit,Monterey-Salinas Transit,nan,nan,*,primary
 Monterey-Salinas Transit,Monterey-Salinas Transit,nan,nan,*,primary
 Monterey-Salinas Transit,Monterey-Salinas Transit,nan,nan,*,primary
@@ -1022,7 +1164,6 @@ Monterey-Salinas Transit,MST Senior Shuttles,nan,nan,"091,092,093,094,095",prima
 Monterey-Salinas Transit,MST Senior Shuttles,nan,nan,"091,092,093,094,095",primary
 Monterey-Salinas Transit,MST Special Medical Trips,,,,
 Monument Impact Inc.,Monument Community Shuttle,,,,
-Moovel,nan,nan,nan,nan,primary
 Morongo Band of Mission Indians,Morongo Dial-A-Ride,,,,
 Morongo Basin Transit Authority,MBTA Bus,nan,nan,nan,primary
 Morongo Basin Transit Authority,MBTA Ready Ride,,,,
@@ -1037,9 +1178,6 @@ Mountain View Transportation Management Association,MVGO,nan,nan,nan,primary
 Mountain View Transportation Management Association,MVGO,nan,nan,nan,primary
 MOVE Stanislaus,VetsVan,,,,
 MOVE Stanislaus,Volunteers on the Go,,,,
-MV Paratransit,nan,nan,nan,nan,primary
-MV Transportation,nan,nan,nan,nan,primary
-My Ride To Work,nan,nan,nan,nan,primary
 Napa Valley Transportation Authority,Vine Transit,VN,nan,*,primary
 Napa Valley Transportation Authority,Vine Transit,VN,nan,*,primary
 Napa Valley Transportation Authority,Vine Transit,VN,nan,*,primary
@@ -1057,19 +1195,11 @@ Napa Valley Transportation Authority,Taxi Scrip,,,,
 Napa Valley Transportation Authority,Vine Go,,,,
 Napa Valley Transportation Authority,American Canyon Transit,VN,nan,VN:American Canyon Transit,primary
 Napa Valley Transportation Authority,City of Napa On-Demand,,,,
-National Express Transit Corporation (NEXT),nan,nan,nan,nan,primary
-Network Paratransit System,nan,nan,nan,nan,primary
 Nevada County,Nevada County Connects,nan,nan,nan,primary
 Nevada County,Nevada County Connects,nan,nan,nan,primary
 Nevada County,Nevada County Connects,nan,nan,nan,primary
 Nevada County,Nevada County Connects,nan,nan,nan,primary
 Nevada County,Nevada County Now,,,,
-Nevada County Transportation Commission,nan,nan,nan,nan,primary
-Newport Beach Friends of Oasis Senior Center,nan,nan,nan,nan,primary
-Nixle,nan,nan,nan,nan,primary
-Norman Y. Mineta San Jose International Airport,nan,nan,nan,nan,primary
-North and South of Market Adult Day Health,nan,nan,nan,nan,primary
-North Bay Taxi Inc.,nan,nan,nan,nan,primary
 North County Transit District,NCTD Coaster,nan,nan,"398,498",primary
 North County Transit District,NCTD Coaster,nan,nan,"398,498",primary
 North County Transit District,NCTD Coaster,nan,nan,"398,498",primary
@@ -1087,22 +1217,14 @@ North County Transit District,NCTD LIFT,,,,
 North Fork Rancheria of Mono Indians of California,North Fork Rancheria Tribal Transit Program,,,,
 North Lake Tahoe Express,North Lake Tahoe Express,904,nan,nan,primary
 North of River Recreation and Park District,North of River Recreation and Park District,,,,
-North Valley Services,nan,nan,nan,nan,primary
 Northern Inyo Healthcare Foundation,CAREshuttle,,,,
 Northrop Grumman,Northrop Grumman Shuttle,,,,
-Oakland International Airport,nan,nan,nan,nan,primary
 OmniTrans,OmniTrans,nan,nan,*,primary
 OmniTrans,OmniRide,,,,
 OmniTrans,OmniTrans sbX,nan,nan,10330,primary
 OmniTrans,OmniAccess,,,,
 On Lok,On Lok Senior Health Services,,,,
-Ontario International Airport,nan,nan,nan,nan,primary
-Open Transit Software Foundation,nan,nan,nan,nan,primary
-Optibus,nan,nan,nan,nan,primary
 Oracle Inc.,Oracle Shuttle,,,,
-Orange Belt Stages,nan,nan,nan,nan,primary
-Orange Cab Inc.,nan,nan,nan,nan,primary
-Orange County,nan,nan,nan,nan,primary
 Orange County Transportation Authority,Irvine Shuttle,nan,nan,"400,401,403,405",primary
 Orange County Transportation Authority,Irvine Shuttle,nan,nan,"400,401,403,405",primary
 Orange County Transportation Authority,Irvine Shuttle,nan,nan,"400,401,403,405",primary
@@ -1116,15 +1238,8 @@ Orange County Transportation Authority,OC Access,,,,
 Orange County Transportation Authority,OC Streetcar,,,,
 OUTREACH,OUTREACH Senior and Disabled Transportation and Resources,,,,
 Pace Solano,Pace Solano,,,,
-Padam Mobility,nan,nan,nan,nan,primary
 Palo Verde Valley Transit Agency,Desert Roadrunner,nan,nan,nan,primary
 Palos Verdes Peninsula Transit Authority,Palos Verdes Peninsula Transit Authority,nan,nan,nan,primary
-Paramount Transportation,nan,nan,nan,nan,primary
-Paratransit Inc. ,nan,nan,nan,nan,primary
-Paratransit Services Inc.,nan,nan,nan,nan,primary
-Parking Company of America,nan,nan,nan,nan,primary
-Partners in Caring,nan,nan,nan,nan,primary
-Passio Technologies,nan,nan,nan,nan,primary
 Peninsula Corridor Joint Powers Board,Caltrain,CT,nan,nan,primary
 Peninsula Corridor Joint Powers Board,Caltrain,CT,nan,nan,primary
 Peninsula Corridor Joint Powers Board,Caltrain,CT,nan,nan,primary
@@ -1132,18 +1247,13 @@ Peninsula Corridor Joint Powers Board,Caltrain,CT,nan,nan,primary
 Peninsula Corridor Joint Powers Board,Caltrain Shuttles,,,,
 Peninsula Jewish Community Center,Get Up & Go,,,,
 "Peninsula Volunteers, Inc.",Little House Transportation,,,,
-People Services,nan,nan,nan,nan,primary
 Peppermint Ridge,Peppermint Ridge,,,,
 Philippines Airlines,PAL LAX to San Diego Shuttle,,,,
 Placer County,Placer County Transit,nan,nan,nan,primary
 Placer County,Placer County Dial-A-Ride,,,,
 Placer County,Placer Commuter Express,nan,nan,11117,primary
-Placer County Transportation Planning Agency,nan,nan,nan,nan,primary
-Placer TART Paratransit,nan,nan,nan,nan,primary
-PlanIt,nan,nan,nan,nan,primary
 Playa Vista,Playa Vista Shuttle,,,,
 Plumas County,Plumas County Senior Transportation,,,,
-Plumas County Transportation Commission,nan,nan,nan,nan,primary
 Plumas Transit Systems,Plumas Transit Systems,nan,nan,nan,primary
 Point Loma Nazarene University,Point Loma University Shuttle,,,,
 Pomona Valley Transportation Authority,Claremont Dial-A-Ride,,,,
@@ -1151,7 +1261,6 @@ Pomona Valley Transportation Authority,San Dimas Dial-A-Cab,,,,
 Pomona Valley Transportation Authority,One Step,,,,
 Pomona Valley Transportation Authority,Get About,,,,
 Pomona Valley Transportation Authority,Ready Now,,,,
-Port Hueneme,nan,nan,nan,nan,primary
 Porterville Sheltered Workshop,Porterville Sheltered Workshop Transportation Services,,,,
 Presidio Trust,PresidiGo,nan,nan,nan,primary
 Presidio Trust,PresidiGo,nan,nan,nan,primary
@@ -1159,7 +1268,6 @@ Presidio Trust,PresidiGo,nan,nan,nan,primary
 Presidio Trust,PresidiGo,nan,nan,nan,primary
 Pride Industries Inc.,Pride Industries Transportation,,,,
 Prime Time Shuttle,Prime Time Airport Shuttle,,,,
-Rapid Connection LLC,nan,nan,nan,nan,primary
 Reach Out Morongo Basin,Reach Out Morongo Basin,,,,
 Redding Area Bus Authority,Redding Area Bus Authority,nan,*,nan,primary
 Redding Area Bus Authority,Redding Area Bus Authority,nan,*,nan,primary
@@ -1176,11 +1284,7 @@ Regional Center for the East Bay,Regional Center for the East Bay,,,,
 Ride On,Ride On Access Shuttle,,,,
 Ride On,Veteren's Express,,,,
 Ride On,Ride On Shuttle Services,,,,
-"Ride-Right, LLC",nan,nan,nan,nan,primary
-RideFact Brokerage,nan,nan,nan,nan,primary
 Rio Hondo College,Rio Hondo College TRAM,,,,
-Riverside County,nan,nan,nan,nan,primary
-Riverside County Transportation Commission,nan,nan,nan,nan,primary
 Riverside Transit Agency,Riverside Transit,nan,nan,nan,primary
 Riverside Transit Agency,Riverside Transit,nan,nan,nan,primary
 Riverside Transit Agency,Riverside Transit,nan,nan,nan,primary
@@ -1188,13 +1292,8 @@ Riverside Transit Agency,Riverside Transit,nan,nan,nan,primary
 Riverside Transit Agency,Riverside Transit Dial-A-Ride,,,,
 Riverside University Health System,Riverside University Health System Courtesy Van,,,,
 Roadrunner Shuttle and Limousine Service,SBA Shuttle,,,,
-RouteMatch,nan,nan,nan,nan,primary
-RydeTrans,nan,nan,nan,nan,primary
-S&A Systems Inc.,nan,nan,nan,nan,primary
-Sacramento Area Council of Governments,nan,nan,nan,nan,primary
 Sacramento County,South County Transit Link,nan,nan,nan,primary
 Sacramento County,South County Transit Dial-A-Ride,,,,
-Sacramento International Airport,nan,nan,nan,nan,primary
 Sacramento Regional Transit District,SacRT Light Rail,SRTD,nan,"507,519,533",primary
 Sacramento Regional Transit District,SacRT Light Rail,SRTD,nan,"507,519,533",primary
 Sacramento Regional Transit District,SacRT Light Rail,SRTD,nan,"507,519,533",primary
@@ -1228,17 +1327,10 @@ Sacramento Regional Transit District,SacRT Bus,SRTD,nan,*,primary
 Sacramento Regional Transit District,SacRT Neighborhood Ride,,,,
 Sacramento State University,Hornet Shuttle,,,,
 Sacramento State University,Herky Streetcar,,,,
-Sal's Taxi Inc.,nan,nan,nan,nan,primary
-Salinas Yellow Cab Inc.,nan,nan,nan,nan,primary
 Sally's Fund,Sally's Fund,,,,
-San Benito County,nan,nan,nan,nan,primary
 San Benito County Local Transportation Authority,County Express On-Demand,,,,
 San Benito County Local Transportation Authority,County Express,nan,nan,nan,primary
 San Benito County Local Transportation Authority,County Express Dial-A Ride,,,,
-San Bernardino County,nan,nan,nan,nan,primary
-San Bernardino County Transportation Authority,nan,nan,nan,nan,primary
-San Diego Association of Governments,nan,nan,nan,nan,primary
-San Diego County,nan,nan,nan,nan,primary
 San Diego International Airport,San Diego Flyer,,,,
 San Diego International Airport,SAN Trolley to Terminal Shuttle,nan,nan,AIR,primary
 San Diego Metropolitan Transit System,SDG&E Silver Line Vintage Trolley,,,,
@@ -1255,19 +1347,13 @@ San Diego Metropolitan Transit System,San Diego Trolley,nan,nan,nan,primary
 San Diego Metropolitan Transit System,San Diego Trolley,nan,nan,"510,520,530",primary
 San Diego Metropolitan Transit System,San Diego Trolley,nan,nan,nan,primary
 San Diego Metropolitan Transit System,San Diego Trolley,nan,nan,nan,primary
-San Diego State University,nan,nan,nan,nan,primary
 San Diego Transit Corporation,MTS Access,,,,
-"San Diego Trolley, Inc.",nan,nan,nan,nan,primary
 San Francisco Bay Area Rapid Transit District,Bay Area Rapid Transit,BA,nan,nan,primary
 San Francisco Bay Area Rapid Transit District,Bay Area Rapid Transit,BA,nan,nan,primary
 San Francisco Bay Area Rapid Transit District,Bay Area Rapid Transit,BA,nan,nan,primary
-San Francisco Bay Area Rapid Transit District,East Bay Paratransit,,,,
 San Francisco Bay Area Water Emergency Transit Authority,San Francisco Bay Ferry,SB,nan,nan,primary
 San Francisco Bay Area Water Emergency Transit Authority,San Francisco Bay Ferry Giants Service,,,,
 San Francisco International Airport,SFO AirTrain,SI,nan,nan,primary
-San Gabriel Transit Inc.,nan,nan,nan,nan,primary
-San Joaquin Council of Governments,nan,nan,nan,nan,primary
-San Joaquin County,nan,nan,nan,nan,primary
 San Joaquin Joint Powers Authority,Amtrak San Joaquins,nan,nan,26025,primary
 San Joaquin Regional Rail Commission,Altamont Corridor Express,CE,nan,nan,primary
 San Joaquin Regional Transit District,SJRTD Local,nan,nan,*,primary
@@ -1289,8 +1375,6 @@ San Joaquin Regional Transit District,SJRTD Hopper,nan,nan,"1,2,3,4,5,6,9,90,91,
 San Joaquin Regional Transit District,RTD Van Go!,,,,
 San Joaquin Regional Transit District,RTD Dial-A-Ride,,,,
 San Leandro Transportation Management Organization,San Leandro LINKS,,,,
-San Luis Obispo Council of Governments,nan,nan,nan,nan,primary
-San Luis Obispo County,nan,nan,nan,nan,primary
 San Luis Obispo Regional Transit Authority ,Paso Express,nan,nan,"A,B",primary
 San Luis Obispo Regional Transit Authority ,South County Area Transit,nan,nan,"21,24,27,28",primary
 San Luis Obispo Regional Transit Authority ,San Luis Obispo Regional Transit Authority,nan,nan,*,primary
@@ -1302,7 +1386,6 @@ San Luis Obispo Regional Transit Authority ,Shandon-Paso Robles Dial-A-Ride,,,,
 San Luis Obispo Regional Transit Authority ,Templeton-Paso Robles Dial-A-Ride,,,,
 San Luis Obispo Regional Transit Authority ,Paso Robles Dial-A-Ride,,,,
 San Luis Obispo Regional Transit Authority ,Nipomo Dial-A-Ride,,,,
-San Mateo County,nan,nan,nan,nan,primary
 San Mateo County Transit District,SamTrans,SM,nan,*,primary
 San Mateo County Transit District,SamTrans,SM,nan,*,primary
 San Mateo County Transit District,SamTrans,SM,nan,*,primary
@@ -1317,8 +1400,7 @@ San Mateo County Transit District,FLX Pacifica,SM,nan,SM:FLX,primary
 San Mateo County Transit District,FLX Pacifica,SM,nan,SM:FLX,primary
 San Mateo County Transit District,FLX Pacifica,SM,nan,SM:FLX,primary
 San Mateo County Transit District,Bayhill San Bruno Shuttle,,,,
-Santa Barbara City College,nan,nan,nan,nan,primary
-Santa Barbara County,nan,nan,nan,nan,primary
+Walmart Inc.,Bayhill San Bruno Shuttle,,,,
 Santa Barbara County Association of Governments,Clean Air Express,nan,nan,nan,primary
 Santa Barbara Metropolitan Transit District,Santa Barbara Metropolitan Transit District,nan,nan,nan,primary
 Santa Barbara Metropolitan Transit District,Santa Barbara Metropolitan Transit District,nan,nan,nan,primary
@@ -1353,55 +1435,34 @@ Santa Clara Valley Transportation Authority,VTA School Tripper,SC,nan,"SC:School
 Santa Clara Valley Transportation Authority,VTA School Tripper,SC,nan,"SC:School 246, SC:School 288,SC:School 287,SC:School 288M,SC:School 256,SC:School 270,SC:School 288L,SC:School 247",primary
 Santa Clara Valley Transportation Authority,VTA School Tripper,SC,nan,"SC:School 246, SC:School 288,SC:School 287,SC:School 288M,SC:School 256,SC:School 270,SC:School 288L,SC:School 247",primary
 Santa Clara Valley Transportation Authority,VTA School Tripper,SC,nan,"SC:School 246, SC:School 288,SC:School 287,SC:School 288M,SC:School 256,SC:School 270,SC:School 288L,SC:School 247",primary
-Santa Cruz County,nan,nan,nan,nan,primary
-Santa Cruz County Regional Transportation Commission,nan,nan,nan,nan,primary
 Santa Cruz Metropolitan Transit District,Cruz On-demand,,,,
 Santa Cruz Metropolitan Transit District,METRO PeraCruz,,,,
 Santa Cruz Metropolitan Transit District,Watsonville Circulator,nan,free,nan,primary
 Santa Cruz Metropolitan Transit District,Santa Cruz METRO,nan,*,nan,primary
-Santa Maria Organization of Transportation Helpers (SMOOTH) ,nan,nan,nan,nan,primary
 Santiago Express Inc.,Santiago Express,,,,
-SAP,nan,nan,nan,nan,primary
-Saratoga Area Senior Coordinating Council,Reach Your Destination Easily,,,,
 Satellite Affordable Housing Associates (SAHA),SAHA,,,,
 Scripps Mercy Hospital,Scripps Mercy Hospital,,,,
 SDTJ Passport,SDTJ Passport,,,,
 Self-Help for the Elderly,Self-Help for the Elderly,,,,
-Seniors First,nan,nan,nan,nan,primary
 Sequoia Village Inc.,Sequoia Village,,,,
 Sequoia Village Inc.,Village of the Coastside,,,,
-Services for Seniors,nan,nan,nan,nan,primary
 Seton Hospital,Seton BART Shuttle,,,,
 Shasta County,Burney Express,nan,burney,nan,primary
 Shasta County,Burney Express,nan,burney,nan,primary
 Shasta County,Burney Express,nan,burney,nan,primary
 Shasta County,Burney Express,nan,burney,nan,primary
-Shasta County Regional Transportation Planning Agency,nan,nan,nan,nan,primary
 Shasta Regional Transit Agency,Shasta Connect,,,,
-Shopify Inc.,nan,nan,nan,nan,primary
 Shores of Hope,Shores of Hope Transportation Services,,,,
-Siemens AG,nan,nan,nan,nan,primary
-Sierra County Transportation Commission,nan,nan,nan,nan,primary
-Sierra Management,nan,nan,nan,nan,primary
 Sierra Point Owners Association,Sierra Point Shuttle,,,,
-Signature Rail,nan,nan,nan,nan,primary
-Silver Ride LLC,nan,nan,nan,nan,primary
 Siskiyou County,Siskiyou Transit and General Express,nan,nan,nan,primary
-Siskiyou County Local Transportation Commission,nan,nan,nan,nan,primary
 Skyline College,Skyline College Shuttle,,,,
-SMA and Partners Ltd.,nan,nan,nan,nan,primary
 Solano County Transit,SolTrans,ST,nan,nan,primary
 Solano County Transit,SolTrans,ST,nan,nan,primary
 Solano County Transit,SolTrans,ST,nan,nan,primary
 Solano County Transit,SolTrans,ST,nan,nan,primary
 Solano County Transit,SolTrans ADA Paratransit,,,,
-Solano County Transit,Solano Express,VN,nan,VN:21,primary
-Solano County Transit,Solano Express,VN,nan,VN:21,primary
-Solano County Transit,Solano Express,VN,nan,VN:21,primary
-Solano County Transit,Solano Express,VN,nan,VN:21,primary
 Solano Transportation Authority,Solano Mobility Local Taxi Card Program,,,,
 Solano Transportation Authority,Solano Mobility First/Last Mile Program,,,,
-Solutions for Transit,nan,nan,nan,nan,primary
 Sonoma County,Sonoma County Transit,SO,nan,*,primary
 Sonoma County,Sonoma County Transit,SO,nan,*,primary
 Sonoma County,Sonoma County Transit,SO,nan,*,primary
@@ -1416,24 +1477,15 @@ Sonoma-Marin Area Rail Transit District,Sonoma-Marin Area Rail Transit,SA,nan,na
 Sonoma-Marin Area Rail Transit District,Sonoma-Marin Area Rail Transit,SA,nan,nan,primary
 Sonoma-Marin Area Rail Transit District,Sonoma-Marin Area Rail Transit,SA,nan,nan,primary
 Sonoma-Marin Area Rail Transit District,Sonoma-Marin Area Rail Transit,SA,nan,nan,primary
-South Bay Yellow/United Checker Cab Co-op,nan,nan,nan,nan,primary
 South Side Community Connections,Wheels and Village Express,,,,
 South Side Community Connections,SCC Wheels,,,,
 South Tahoe Airporter,South Tahoe Airporter,,,,
-Southern California Association of Governments,nan,nan,nan,nan,primary
 Southern California Regional Rail Authority,Metrolink,nan,nan,nan,primary
-"Southland Transit, Inc.",nan,nan,nan,nan,primary
-Spirit Bus,nan,nan,nan,nan,primary
-Sprint,nan,nan,nan,nan,primary
-Square Inc.,nan,nan,nan,nan,primary
 St Mary Medical Center,St Mary Medical Center Van Service,,,,
 St Pauls Senior Services,St Pauls PACE,,,,
 St. Madeleine Sophie's Center,Hop on the Bus,,,,
 Stanford Health Care,Stanford Medicine Shuttles,,,,
 Stanford University,Marguerite Shuttle,nan,nan,nan,primary
-Stanislaus Council of Governments,nan,nan,nan,nan,primary
-Stanislaus County,nan,nan,nan,nan,primary
-Stanislaus Regional Transit,nan,nan,nan,nan,primary
 Stanislaus Regional Transit Authority,Stanislaus Regional Transit,,,,
 Stanislaus Regional Transit Authority,StaRT Commuter,,,,
 Stanislaus Regional Transit Authority,StaRT ADA Paratransit ,,,,
@@ -1447,58 +1499,31 @@ Stanislaus Regional Transit Authority,Modesto Area Express,nan,nan,nan,primary
 Stanislaus Regional Transit Authority,eTrans Dial-A-Ride,,,,
 Stanislaus Regional Transit Authority,Modesto Area Dial-A-Ride,,,,
 SteppingStone,SteppingStone,,,,
-Storer Transit Systems Inc.,nan,nan,nan,nan,primary
 SunLine Transit Agency,Palm Springs Buzz,,,,
 SunLine Transit Agency,SunLine Transit,nan,nan,*,primary
 SunLine Transit Agency,SunLine School Tripper,nan,nan,"1774,1777,1778,1779,1781,1785,1786,1788,1789,1790,1791",primary
 SunLine Transit Agency,SunDial Paratransit,,,,
 SunLine Transit Agency,SunLine 10 Commuter Link,nan,nan,1771,primary
 SunLine Transit Agency,SunRide,,,,
-SunriseSESA,nan,nan,nan,nan,primary
 Susanville Indian Rancheria,Susanville Indian Rancheria Public Transportation Program,62,nan,nan,primary
-Sutter Health,nan,nan,nan,nan,primary
-Swiftly Inc.,nan,nan,nan,nan,primary
-SYSTEMTECHNIK,nan,nan,nan,nan,primary
-Tahoe Regional Planning Agency,nan,nan,nan,nan,primary
 Tahoe Transportation District,Tahoe Truckee Area Regional Transportation,16,nan,nan,primary
 Tahoe Transportation District,Tahoe Transportation Paratransit,,,,
 Tehama County,Tehama Rural Area eXpress,21,nan,nan,primary
 Tehama County,ParaTRAX,,,,
-Tehama County Transportation Commission,nan,nan,nan,nan,primary
 The Arc of Amador and Calaveras,The Arc of Amador and Calaveras,,,,
-The Master Scheduler,nan,nan,nan,nan,primary
 The Respite Inn,The Respite Inn,,,,
-There or not. ,nan,nan,nan,nan,primary
 Tideline,Tideline Water Taxi,TD,nan,nan,primary
-Token Transit,nan,nan,nan,nan,primary
 Torrance Memorial Hospital,Torrance Memorial Van Service,,,,
-TouchNet,nan,nan,nan,nan,primary
-Town of Mammoth Lakes,nan,nan,nan,nan,primary
-Town of Paradise,nan,nan,nan,nan,primary
 Town of Truckee,TART Connect,,,,
 Town of Truckee,Truckee TART Dial A Ride,,,,
 Town of Truckee,Placer TART Paratransit,,,,
-TransDev,nan,nan,nan,nan,primary
-Transit App Inc.,nan,nan,nan,nan,primary
 Transit Joint Powers Authority for Merced County,Merced The Bus,nan,nan,nan,primary
 Transit Joint Powers Authority for Merced County,Merced The Bus,nan,nan,nan,primary
 Transit Joint Powers Authority for Merced County,Merced The Bus,nan,nan,nan,primary
 Transit Joint Powers Authority for Merced County,Merced The Micro Bus,,,,
 Transit Joint Powers Authority for Merced County,Merced The Bus Paratransit,,,,
-TransLoc,nan,nan,nan,nan,primary
-Transnnovation Inc,nan,nan,nan,nan,primary
-Transportation Agency for Monterey County,nan,nan,nan,nan,primary
-Transportation Concepts Inc.,nan,nan,nan,nan,primary
-TransTrack Solutions Group,nan,nan,nan,nan,primary
-Trapeze Group,nan,nan,nan,nan,primary
-Trillium Inc.,nan,nan,nan,nan,primary
 Trinity County,Trinity Transit,nan,nan,nan,primary
-Trinity County Transportation Commission,nan,nan,nan,nan,primary
-TripShot Inc.,nan,nan,nan,nan,primary
 Tufesa,Tufesa,,,,
-Tulare County,nan,nan,nan,nan,primary
-Tulare County Area Transit,nan,nan,nan,nan,primary
-Tulare County Association of Governments,nan,nan,nan,nan,primary
 Tulare County Regional Transit Agency,Tulare Intermodal Express,nan,nan,"T1,T2,T3,T4,T5,T7,T11",primary
 Tulare County Regional Transit Agency,Tulare Intermodal Express,nan,nan,nan,primary
 Tulare County Regional Transit Agency,Tulare Intermodal Express,nan,nan,nan,primary
@@ -1514,15 +1539,10 @@ Tule River Tribe,Tule River Transportation Services,,,,
 Tuolumne County Transit Agency,Tuolumne County Transit,nan,nan,nan,primary
 Tuolumne County Transit Agency,Dodge Ridge Ski Bus,,,,
 Tuolumne County Transit Agency,Tuolumne County Dial-Your-Ride,,,,
-Tuolumne County Transportation Council,nan,nan,nan,nan,primary
 Turning Point Community Programs,Community Activities and Rehabilitation Transportation,,,,
-Uber Inc.,nan,nan,nan,nan,primary
 Ukiah Senior Center,Ukiah Senior Center Transportation,,,,
 United Cerebral Palsy Association of Greater Sacramento,UCP Safe Trip,,,,
 United Cerebral Palsy of San Luis Obispo County,Ride On Community Interaction Shuttle,,,,
-United Checker Cab,nan,nan,nan,nan,primary
-United Independent Taxi,nan,nan,nan,nan,primary
-United Taxi of San Fernando Valley Inc.,nan,nan,nan,nan,primary
 "University of California, Berkeley",Bear Transit,nan,nan,nan,primary
 "University of California, Berkeley",The Loop,,,,
 "University of California, Davis",Unitrans,530-752-BUSS,nan,nan,primary
@@ -1542,11 +1562,7 @@ United Taxi of San Fernando Valley Inc.,nan,nan,nan,nan,primary
 "University of California, Santa Cruz",UCSC TAPS Disability Van Service,,,,
 University of Southern California,USC Buses,,,,
 Upland Manor,Upland Manor Community Van,,,,
-USDA Forest Service Southwest Region,nan,nan,nan,nan,primary
-UTA,nan,nan,nan,nan,primary
 Valley Achievement Center,Valley Achievement Center Transportation Services,,,,
-VenTek,nan,nan,nan,nan,primary
-Ventura County,nan,nan,nan,nan,primary
 Ventura County Transportation Commission,VCTC Intercity,143,nan,nan,primary
 Ventura County Transportation Commission,VCTC Intercity,143,nan,nan,primary
 Ventura County Transportation Commission,VCTC Intercity,143,nan,nan,primary
@@ -1557,8 +1573,6 @@ Ventura County Transportation Commission,Valley Express,149,nan,nan,primary
 Ventura County Transportation Commission,Valley Express,149,nan,nan,primary
 Ventura County Transportation Commission,Valley Express Dial-A-Ride,,,,
 Ventura Transit System Inc,Smart Shuttle Airport Transportation,,,,
-"Veolia Transit Services, Inc",nan,nan,nan,nan,primary
-Via Inc.,nan,nan,nan,nan,primary
 Victor Valley Community Services Council,Victor Valley Community Transportation,,,,
 Victor Valley Transit Authority,Victor Valley Transit,nan,nan,nan,primary
 Victor Valley Transit Authority,Victor Valley Transit,nan,nan,nan,primary
@@ -1567,16 +1581,7 @@ Victor Valley Transit Authority,Victor Valley Transit,nan,nan,nan,primary
 Victor Valley Transit Authority,Victor Valley ADA Direct Access,,,,
 Vintage House,Vintage House myRide,,,,
 VistAbility,VistAbility,,,,
-Vivalon Inc.,nan,nan,nan,nan,primary
-Volaris Group,nan,nan,nan,nan,primary
-Volunteer Center of Sonoma County,nan,nan,nan,nan,primary
-"Volunteer Transportation Center, Inc.",nan,nan,nan,nan,primary
-Wabtec,nan,nan,nan,nan,primary
-Walmart Inc.,Bayhill San Bruno Shuttle,,,,
-WaySine LLC,nan,nan,nan,nan,primary
-Wells Fargo,nan,nan,nan,nan,primary
 West Berkeley Transportation Management Agency,West Berkeley Shuttle,nan,nan,nan,primary
-West Valley Community Services,Reach Your Destination Easily,,,,
 Western Contra Costa Transit Authority,WestCAT Local,WC,nan,*,primary
 Western Contra Costa Transit Authority,WestCAT Lynx Express,WC,nan,WC:Lynx,primary
 Western Contra Costa Transit Authority,WestCAT Express Bus to BART,WC,nan,"WC:JR,WC:JL,WC:JX,WC:JPX",primary
@@ -1584,11 +1589,7 @@ Western Contra Costa Transit Authority,WestCAT Senior Dial-A-Ride,,,,
 Western Contra Costa Transit Authority,WestCAT ADA Paratransit,,,,
 Western Placer Consolidated Transportation Service Agency,Health Express,,,,
 Western Placer Consolidated Transportation Service Agency,Placer MyRides,,,,
-Westminster on Wheels Senior Transportation Program,nan,nan,nan,nan,primary
 Willits Seniors Inc.,Willits Harrah Senior Center,,,,
-Work Training Center,nan,nan,nan,nan,primary
-Worldpay,nan,nan,nan,nan,primary
-Yellow Cab CA,nan,nan,nan,nan,primary
 Yolo County Transportation District,Yolobus,nan,nan,nan,primary
 Yolo County Transportation District,Yolobus,d139e461-175c-4156-beb0-e6a23b64d978,nan,nan,primary
 Yolo County Transportation District,Yolobus,nan,nan,nan,primary
@@ -1602,4 +1603,3 @@ Yuba-Sutter Transit Authority,Sacramento Express,nan,Sacramento,nan,primary
 Yuba-Sutter Transit Authority,Yuba College Sutter Campus Shuttle,nan,shuttle,nan,primary
 Yuma County Intergovernmental Public Transportation Authority,Yuma County Area Transit,nan,nan,nan,primary
 Yurok Tribe,Yurok Tribe Transit Service,,,,
-Zonar Inc.,nan,nan,nan,nan,primary
