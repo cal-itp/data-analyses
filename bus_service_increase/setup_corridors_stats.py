@@ -33,27 +33,20 @@ def competitive_to_route_level():
     return df2
 
 
-def calculate_parallel_competitive_stats(df, group_cols):
-    df2 = geography_utils.aggregate_by_geography(
-        df,
-        group_cols = group_cols,
-        sum_cols = ["parallel", "competitive"],
-        nunique_cols = ["route_id"]
-    )
-    
+def calculate_parallel_competitive_stats(df, group_cols):    
     # Calculate % parallel
-    df2 = df2.assign(
-        pct_parallel = df2.parallel.divide(df2.route_id).round(3),
-        pct_competitive = df2.competitive.divide(df2.route_id).round(3),
+    df = df.assign(
+        pct_parallel = df.parallel.divide(df.route_id).round(3),
+        pct_competitive = df.competitive.divide(df.route_id).round(3),
     )
     
-    df2 = (df2.rename(columns = {
-                "route_id": "unique_route_id",
+    df2 = (df.rename(columns = {
+                "route_id": "count_route_id",
                 "parallel": "num_parallel",
                 "competitive": "num_competitive"})
            .sort_values(group_cols)
            .reset_index(drop=True)
-           .astype({"unique_route_id": int})
+           .astype({"count_route_id": int})
           )
 
     return df2
@@ -65,29 +58,28 @@ def aggregate_highways(df):
     
     # First, aggregate once to get rid of edge cases where RouteType differs
     # 110 in LA County is both Interstate and State Highway
-    # Make sure other highway characteristics are correctly grabbed (max or sum)
-    df2 = (df.groupby(["Route", "County", "District",
-                     "route_id", "total_routes"])
-        .agg({
-            "NB": "max",
-            "SB": "max", 
-            "EB": "max",
-            "WB": "max",
-            "route_length": "sum",
-            "pct_route": "sum",
-            "pct_highway": "sum",
-            "highway_length": "sum",
-            "parallel": "max",
-            "competitive": "max",
-        }).reset_index()
+    # Make sure other highway characteristics are correctly grabbed (max or sum)    
+    df2 = (df.groupby(["Route", "County", "District"])
+     .agg(
+         {"route_id": "count", # count because nunique would undercount if same route_id is used across operators
+          "itp_id": "nunique",
+          "highway_length": "sum",
+          "NB": "max", 
+          "SB": "max",
+          "EB": "max",
+          "WB": "max",
+          "pct_highway": "sum",
+          "parallel": "sum",
+          "competitive": "sum",
+         }).reset_index()
     )
-
+        
     # Now we took sum for pct_highway, values can be > 1, set it back to 1 max again.
     df2 = df2.assign(
         pct_highway = df2.apply(lambda x: 1 if x.pct_highway > 1 
                                  else x.pct_highway, axis=1),
     )
-    
+        
     df3 = calculate_parallel_competitive_stats(df2, group_cols)
     
     df4 = (df3.assign(
@@ -116,16 +108,23 @@ def aggregate_operators(df):
             .reset_index()
     )
     
-    df3 = calculate_parallel_competitive_stats(df2, group_cols)
+    df3 = geography_utils.aggregate_by_geography(
+        df2,
+        group_cols = group_cols,
+        sum_cols = ["parallel", "competitive"],
+        count_cols = ["route_id"]
+    )
+    
+    df4 = calculate_parallel_competitive_stats(df3, group_cols)
 
-    df4 = pd.merge(df3,
+    df5 = pd.merge(df4,
                operator_hwys,
                on = "itp_id", 
                how = "left",
                validate = "m:1"
               ).astype({"itp_id": int})
     
-    return df4
+    return df5
     
 
 
