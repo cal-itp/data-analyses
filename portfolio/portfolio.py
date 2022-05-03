@@ -47,9 +47,9 @@ def slugify_params(params: Dict) -> str:
     return "__".join(f"{k}_{slugify(str(v))}" for k, v in params.items())
 
 
-def parameterize_filename(old_path: Path, params: Dict) -> Path:
+def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
     assert old_path.suffix == ".ipynb"
-    return Path(old_path.stem + "__" + slugify_params(params) + old_path.suffix)
+    return Path(str(i) + "__" + old_path.stem + "__" + slugify_params(params) + old_path.suffix)
 
 
 class Chapter(BaseModel):
@@ -238,7 +238,7 @@ def build(
         for chapter in part.chapters or [Chapter()]:
             chapter_slug = slugify_params({**part.params, **chapter.params})
             chapter_path = site_dir / Path(chapter_slug)
-            for section in chapter.sections or [{}]:
+            for i, section in enumerate(chapter.sections or [{}]):
                 params = {**part.params, **chapter.params, **section}
                 notebook = section.get('notebook') or chapter.notebook or part.notebook or site.notebook
                 if isinstance(notebook, str):
@@ -246,7 +246,7 @@ def build(
 
                 # TODO: this should be cleaned up a bit
                 if params:
-                    parameterized_filepath = Path(report) / parameterize_filename(notebook, section)
+                    parameterized_filepath = Path(report) / parameterize_filename(i, notebook, section)
                 else:
                     parameterized_filepath = notebook
 
