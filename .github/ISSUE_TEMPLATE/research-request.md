@@ -1,6 +1,6 @@
 ---
 name: Research Request
-about: Complete this issue template upon receiving research requests from stakeholders, and continue to revisit and add content as work goes on.
+about: Complete this issue template upon receiving research requests from stakeholders, and continue to revisit to add content as work goes on.
 title: Research Request - [Title]
 labels: 'research request'
 assignees: ''
