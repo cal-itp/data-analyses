@@ -6,6 +6,8 @@ labels: 'research request'
 assignees: ''
 
 ---
+Complete the below upon receiving a research request, and continue to add to this issue as you receive additional details and produce deliverables.
+
 ## Research Question
 **Single sentence** description:  
   
