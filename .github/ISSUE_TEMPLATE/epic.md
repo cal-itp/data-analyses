@@ -8,7 +8,7 @@ assignees: ''
 ---
 After receiving a research request, use this template to plan and track your work. Be sure to also add the appropriate project-level label to this issue (eg gtfs-rt, DLA).
 
-## Epic - [Research Request Project Title]
+## Epic Information - [Research Request Project Title]
 ### Summary
 * 
 
