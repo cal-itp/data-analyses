@@ -1,12 +1,11 @@
 ---
 name: Research Request
 about: Complete this issue template upon receiving research requests from stakeholders, and continue to revisit to add content as work goes on.
-title: Research Request - [Title]
+title: Research Request - [Project Title]
 labels: 'research request'
 assignees: ''
-
 ---
-Complete the below upon receiving a research request, and continue to add to this issue as you receive additional details and produce deliverables.
+Complete the below when receiving a research request, and continue to add to this issue as you receive additional details and produce deliverables. Be sure to also add the appropriate project-level label to this issue (eg gtfs-rt, DLA).
 
 ## Research Question
 **Single sentence** description:  
