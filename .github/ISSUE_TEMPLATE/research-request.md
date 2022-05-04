@@ -4,7 +4,6 @@ about: Complete this issue template upon receiving research requests from stakeh
 title: Research Request - [Project Title]
 labels: 'research request'
 assignees: ''
-
 ---
 Complete the below when receiving a research request, and continue to add to this issue as you receive additional details and produce deliverables. Be sure to also add the appropriate project-level label to this issue (eg gtfs-rt, DLA).
 
