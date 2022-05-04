@@ -85,13 +85,6 @@ def specific_point(y_col):
     return chart
 
 
-def set_yaxis_range(df, y_col):
-    Y_MIN = df[y_col].min()
-    Y_MAX = df[y_col].max()
-    
-    return Y_MIN, Y_MAX
-
-
 def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):  
     # max_trip_route_group is in hours, convert to minutes to match bus_difference units
     plus25pct_travel_minutes = df.max_trip_route_group.iloc[0] * 60 * 0.25
@@ -102,9 +95,16 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
     # We want to draw horizontal line on chart
     if y_col == "bus_multiplier":
         df = df.assign(cutoff=2)
+        # if that operator falls well below cut-off, we want the horiz lines to be shown
+        # take the max and add some buffer so horiz line can be seen
+        Y_MAX = max(df.cutoff.iloc[0] + 0.5, Y_MAX)
+        Y_MIN = min(-0.25, Y_MIN)
+        
     elif y_col == "bus_difference":
         df = df.assign(cutoff=0)
-    
+        Y_MAX = max(df.cutoff2.iloc[0] + 5, Y_MAX)
+        Y_MIN = min(-5, Y_MIN)
+        
     # Use the same sorting done in the wrangling
     route_sort_order = list(df.sort_values(["calitp_itp_id", 
                                             "pct_trips_competitive", 
@@ -207,80 +207,4 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
     return chart
 
 
-PCT_COMPETITIVE_THRESHOLD = 0.75
 
-def generate_report(df, PCT_COMPETITIVE_THRESHOLD = PCT_COMPETITIVE_THRESHOLD):
-    # Set up df for charting (cut-off at some threshold to show most competitive routes)
-    plot_me = (df[df.pct_trips_competitive > PCT_COMPETITIVE_THRESHOLD]
-           .drop(columns = "geometry")
-    )
-    
-    
-    def top15_routes(df, route_group):
-        df2 = (df[df.route_group==route_group])
-        
-        # Set a cut-off to enable sorting, where most of the trips are 
-        # below a certain time difference cut-off, 
-        # grab top 15 routes where majority of trips are below that cut-off 
-        # cut-off done off of bus_difference because it's easier to understand
-        bus_difference_cutoff = df2.bus_difference.quantile(0.25)
-        
-        route_cols = ["calitp_itp_id", "route_id"]
-        
-        df2 = df2.assign(
-            below_cutoff = df2.apply(lambda x: 1 if x.service_hours <= bus_difference_cutoff 
-                                     else 0, axis=1),
-            num_trips = df2.groupby(route_cols)["trip_id"].transform("count")
-        )
-        
-        df2["below_cutoff"] = df2.groupby(route_cols)["below_cutoff"].transform("sum")
-        df2["pct_below_cutoff"] = df2.below_cutoff.divide(df2.num_trips)
-        
-        df3 = (df2
-               .sort_values(["calitp_itp_id", "below_cutoff", 
-                             "pct_below_cutoff", "route_id"],
-                            ascending = [True, False, False, True]
-                           )
-               .drop_duplicates(subset=["calitp_itp_id", "route_id"])
-              ).head(15)
-                
-        return list(df3.route_id)
-    
-    y_col1 = "bus_multiplier"
-    Y_MIN1, Y_MAX1 = set_yaxis_range(plot_me, y_col1)
-
-    y_col2 = "bus_difference"
-    Y_MIN2, Y_MAX2 = set_yaxis_range(plot_me, y_col2)
-    
-    def combine_stripplots(df):
-        multiplier_chart = make_stripplot(
-            df, y_col1, Y_MIN = Y_MIN1, Y_MAX = Y_MAX1
-        )
-
-
-        difference_chart = make_stripplot(
-            df, y_col2, Y_MIN = Y_MIN2, Y_MAX = Y_MAX2
-        )
-            
-        return multiplier_chart, difference_chart
-    
-    
-    short_routes= top15_routes(plot_me, "short")
-    med_routes = top15_routes(plot_me, "medium")
-    long_routes = top15_routes(plot_me, "long")
-    
-    s1, s2 = combine_stripplots(plot_me[plot_me.route_id.isin(short_routes)])
-    m1, m2 = combine_stripplots(plot_me[plot_me.route_id.isin(med_routes)])
-    l1, l2 = combine_stripplots(plot_me[plot_me.route_id.isin(long_routes)])
-            
-    display(HTML("<h3>Short Routes</h3>"))
-    display(s1)
-    display(s2)
-    
-    display(HTML("<h3>Medium Routes</h3>"))
-    display(m1)
-    display(m2)
-    
-    display(HTML("<h3>Long Routes</h3>"))
-    display(l1)
-    display(l2)
