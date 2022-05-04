@@ -114,21 +114,21 @@ sites:
   title: California Transit Speed Maps
 - directory: ./bus_service_increase/
   name: parallel_corridors
-  notebook: ./bus_service_increase/test-chart.ipynb
+  notebook: ./bus_service_increase/stripplot.ipynb
   parts:
   - caption: Introduction
   - chapters:
-    - caption: District 04 - Oakland
+    - caption: District 4
       params:
-        district: 4
+          district: 4
       sections:
-      - itp_id: 4
-      - itp_id: 310
-    - caption: District 07 - Los Angeles
+        - itp_id: 4
+        - itp_id: 310
+    - caption: District 7
       params:
-        district: 7
+          district: 7
       sections:
-      - itp_id: 182
-      - itp_id: 183
+        - itp_id: 182
+        - itp_id: 183
   readme: ./bus_service_increase/README.md
   title: Parallel Bus Corridors to State Highway Network
