@@ -11,23 +11,20 @@ After receiving a research request, use this template to plan and track your wor
 ## Epic - [Research Request Project Title]
 ### Summary
 * 
-* 
 
 ### Acceptance Criteria
-* 
 * 
 
 ### Research required:
 * 
-* 
 
 ### Notes / Misc
-
-### Issues
-
-- [ ] 1. #
-- [ ] 2. #
 
 ### Reviewer [Stakeholder]
 
 1.
+
+## Issues
+
+- [ ] 1. #
+- [ ] 2. #
