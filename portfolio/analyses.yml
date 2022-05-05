@@ -1,46 +1,58 @@
 sites:
 - directory: ./dla/
   name: dla
-  notebook: ./dla/e76_obligated_funds/reports/report_test2.ipynb
+  notebook: ./dla/e76_obligated_funds/reports/report_dla_districts.ipynb
   parts:
   - caption: Introduction
   - chapters:
-    - caption: District 1
+    - caption: District 1 - Eureka
       params:
         district: 1
-    - caption: District 2
+        district_name: District 1 - Eureka
+    - caption: District 2 - Redding
       params:
         district: 2
-    - caption: District 3
+        district_name: District 2 - Redding
+    - caption: District 3 - Marysville
       params:
         district: 3
-    - caption: District 4
+        district_name: District 3 - Marysville
+    - caption: District 4 - Oakland
       params:
         district: 4
-    - caption: District 5
+        district_name: District 4 - Oakland
+    - caption: District 5 - San Luis Obispo
       params:
         district: 5
-    - caption: District 6
+        district_name: District 5 - San Luis Obispo
+    - caption: District 6 - Fresno
       params:
         district: 6
+        district_name: District 6 - Fresno
     - caption: District 7
       params:
         district: 7
-    - caption: District 8
+        district_name: 
+    - caption: District 8 - San Bernardino
       params:
         district: 8
-    - caption: District 9
+        district_name: District 8 - San Bernardino
+    - caption: District 9 - Bishop
       params:
         district: 9
-    - caption: District 10
+        district_name: District 9 - Bishop
+    - caption: District 10 - Stockton
       params:
         district: 10
-    - caption: District 11
+        district_name: District 10 - Stockton
+    - caption: District 11 - San Diego
       params:
         district: 11
-    - caption: District 12
+        district_name: District 11 - San Diego
+    - caption: District 12 - Irvine
       params:
         district: 12
+        district_name: District 12 - Irvine
   readme: ./dla/README.md
   title: DLA Grant Analysis
 - directory: ./rt_delay/
