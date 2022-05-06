@@ -1,0 +1,19 @@
+title: Parallel Bus Corridors to State Highway Network
+directory: ./bus_service_increase/
+readme: ./bus_service_increase/README.md
+notebook: ./bus_service_increase/stripplot.ipynb
+parts:
+  - caption: Introduction
+  - chapters:
+      - caption: District 04 - Oakland
+        params:
+          district: 4
+        sections:
+          - itp_id: 4
+          - itp_id: 310
+      - caption: District 07 - Los Angeles
+        params:
+          district: 7
+        sections:
+          - itp_id: 182
+          - itp_id: 183

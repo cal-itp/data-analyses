@@ -1,6 +1,8 @@
 """
 Generates
 """
+import enum
+import json
 import os
 import shutil
 import subprocess
@@ -8,28 +10,31 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import humanize
-import nbformat
 import papermill as pm
 import typer
 import yaml
-import json
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from nbconvert import HTMLExporter
 from papermill.engines import NBClientEngine, papermill_engines
 from pydantic import BaseModel
 from pydantic.class_validators import validator
 from slugify import slugify
 
-CONFIG_OPTION = typer.Option(
-    f"{os.path.dirname(os.path.realpath(__file__))}/analyses.yml",
-)
+assert os.getcwd().endswith("data-analyses"), "this script must be run from the root of the data-analyses repo!"
+
+PORTFOLIO_DIR = Path("./portfolio/")
+SITES_DIR = PORTFOLIO_DIR / Path("sites")
+
+SiteChoices = enum.Enum('SiteChoices', {
+    f.replace(".yml", ""): f.replace(".yml", "")
+    for f in os.listdir(SITES_DIR)
+})
 
 DEPLOY_OPTION = typer.Option(
     False,
     help="Actually deploy this component to netlify.",
 )
 
-app = typer.Typer(help="CLI to tie together papermill and jupyter book")
+app = typer.Typer(help="CLI to tie together papermill, jupyter book, and netlify")
 
 env = Environment(loader=FileSystemLoader("./portfolio/templates/"), autoescape=select_autoescape())
 
@@ -47,13 +52,14 @@ def slugify_params(params: Dict) -> str:
     return "__".join(f"{k}_{slugify(str(v))}" for k, v in params.items())
 
 
-def parameterize_filename(old_path: Path, params: Dict) -> Path:
+def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
     assert old_path.suffix == ".ipynb"
-    return Path(old_path.stem + "__" + slugify_params(params) + old_path.suffix)
+    return Path(str(i) + "__" + old_path.stem + "__" + slugify_params(params) + old_path.suffix)
 
 
 class Chapter(BaseModel):
     caption: str
+    notebook: Optional[Path] = None
     params: Dict = {}
     sections: List[Dict] = []
 
@@ -70,21 +76,20 @@ class Part(BaseModel):
 
 
 class Site(BaseModel):
-    name: str
     title: str
     directory: Path
-    readme: Optional[Path] = None
+    readme: Optional[Path] = "README.md"
     notebook: Optional[Path] = None
     parts: List[Part]
     prepare_only: bool = False
 
+    @validator('readme', pre=True, always=True)
+    def default_readme(cls, v, *, values, **kwargs):
+        return v or (values['directory'] / Path("README.md"))
+
     @property
     def slug(self) -> str:
         return slugify(self.title)
-
-    @validator("readme", always=True)
-    def convert_status(cls, readme, values):
-        return readme or values["notebook"]
 
     @property
     def toc_yaml(self) -> str:
@@ -151,27 +156,23 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
 papermill_engines.register_entry_points()
 
-@app.command()
-def clean() -> None:
-    shutil.rmtree("./target/")
-
 
 @app.command()
 def index(
-    config=CONFIG_OPTION,
     deploy: bool = DEPLOY_OPTION,
     alias: str = None,
     prod: bool = False,
 ) -> None:
-    with open(config) as f:
-        portfolio_config = PortfolioConfig(**yaml.safe_load(f))
+    sites = []
+    for site in os.listdir("./portfolio/sites/"):
+        with open(f"./portfolio/sites/{site}") as f:
+            sites.append(Site(name=site.replace(".yml", ""), **yaml.safe_load(f)))
 
-    analyses = portfolio_config.sites
     for template in ["index.html", "_redirects"]:
         fname = f"./portfolio/index/{template}"
         with open(fname, "w") as f:
             typer.echo(f"writing out to {fname}")
-            f.write(env.get_template(template).render(analyses=analyses))
+            f.write(env.get_template(template).render(sites=sites))
 
     args = [
         "netlify",
@@ -192,12 +193,19 @@ def index(
 
 
 @app.command()
+def clean(
+    site: str,
+) -> None:
+    """
+    Cleans the portfolio folder for a given site.
+    """
+    shutil.rmtree(PORTFOLIO_DIR / Path(site))
+
+
+@app.command()
 def build(
-    report: str,
-    config=CONFIG_OPTION,
+    site: SiteChoices,
     deploy: bool = DEPLOY_OPTION,
-    target_dir: Path = "./target/",
-    portfolio_dir: Path = "./portfolio/",
     execute_papermill: bool = typer.Option(
         True,
         help="If false, will skip calls to papermill.",
@@ -212,53 +220,40 @@ def build(
     ),
 ) -> None:
     """
-    Builds a static site from parameterized notebooks as defined in the config file (default ./reports_config.yml).
-
-    Use the --report flag to only build specific reports.
-
-    For example:
-    $ python generate_reports.py build --report=dla
+    Builds a static site from parameterized notebooks as defined in a site YAML file.
     """
-    with open(config) as f:
-        portfolio_config = PortfolioConfig(**yaml.safe_load(f))
+    site_output_dir = PORTFOLIO_DIR / Path(site.value)
+    site_output_dir.mkdir(parents=True, exist_ok=True)
 
-    target_dir.mkdir(parents=True, exist_ok=True)
+    with open(SITES_DIR / Path(f"{site.value}.yml")) as f:
+        site = Site(**yaml.safe_load(f))
 
-    site = next(site for site in portfolio_config.sites if site.name == report)
-    site_dir = portfolio_dir / Path(report)
-    site_dir.mkdir(parents=True, exist_ok=True)
-    analysis_root = site.directory
-
-    typer.echo(f"copying readme from {analysis_root} to {site_dir}")
-    shutil.copy(analysis_root / Path("README.md"), site_dir / Path("README.md"))
-
-    (target_dir / site.notebook.parent).mkdir(parents=True, exist_ok=True)
+    typer.echo(f"copying readme from {site.directory} to {site_output_dir}")
+    shutil.copy(site.readme, site_output_dir / site.readme.name)
 
     for part in site.parts:
-        # TODO: handle this for non-parameterized files/introductions
-        if not part.chapters:
-            continue
-        for chapter in part.chapters or [Chapter()]:
+        for chapter in part.chapters:
             chapter_slug = slugify_params({**part.params, **chapter.params})
-            chapter_path = site_dir / Path(chapter_slug)
-            for section in chapter.sections or [{}]:
+            chapter_path = site_output_dir / Path(chapter_slug)
+            chapter_path.mkdir(parents=True, exist_ok=True)
+            for i, section in enumerate(chapter.sections or [{}]):
                 params = {**part.params, **chapter.params, **section}
-                notebook = part.notebook or site.notebook
+                notebook = section.get('notebook') or chapter.notebook or part.notebook or site.notebook
 
-                # TODO: this should be cleaned up a bit
-                if params:
-                    parameterized_filepath = Path(report) / parameterize_filename(notebook, section)
-                else:
-                    parameterized_filepath = notebook
+                if not notebook:
+                    raise ValueError("no notebook found at any level")
 
-                portfolio_path = chapter_path / parameterized_filepath.name
-                portfolio_path.parent.mkdir(parents=True, exist_ok=True)
-                typer.secho(f"parameterizing {notebook} => {portfolio_path}", fg=typer.colors.GREEN)
+                if isinstance(notebook, str):
+                    notebook = Path(notebook)
+
+                parameterized_path = chapter_path / Path(parameterize_filename(i, notebook, params))
+
+                typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
 
                 if execute_papermill:
                     pm.execute_notebook(
                         input_path=notebook,
-                        output_path=portfolio_path,
+                        output_path=parameterized_path,
                         parameters=params,
                         cwd=notebook.parent,
                         engine_name="markdown",
@@ -270,16 +265,16 @@ def build(
                 else:
                     typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW)
 
-            fname = f"./portfolio/{report}/{chapter_slug}.md"
+            fname = site_output_dir / f"{chapter_slug}.md"
             with open(fname, "w") as f:
                 typer.secho(f"writing readme to {fname}", fg=typer.colors.GREEN)
                 f.write(f"# {chapter.caption}")
 
-    fname = f"./portfolio/{report}/_config.yml"
+    fname = site_output_dir / Path("_config.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing config to {fname}", fg=typer.colors.GREEN)
-        f.write(env.get_template("_config.yml").render(report=report, analysis=site))
-    fname = f"./portfolio/{report}/_toc.yml"
+        f.write(env.get_template("_config.yml").render(site=site))
+    fname = site_output_dir / Path("_toc.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing toc to {fname}", fg=typer.colors.GREEN)
         f.write(site.toc_yaml)
@@ -293,19 +288,19 @@ def build(
             "--keep-going",
             ".",
         ],
-        cwd=f"./portfolio/{report}/",
+        cwd=site_output_dir,
     ).check_returncode()
 
     if deploy:
-        subprocess.run(
-            [
-                "netlify",
-                "deploy",
-                "--site=cal-itp-data-analyses",
-                f"--dir=portfolio/{report}/_build/html/",
-                f"--alias={report}",
-            ]
-        ).check_returncode()
+        args = [
+            "netlify",
+            "deploy",
+            "--site=cal-itp-data-analyses",
+            f"--dir=portfolio/{site.value}/_build/html/",
+            f"--alias={site.value}",
+        ]
+        typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
+        subprocess.run(args).check_returncode()
 
 
 if __name__ == "__main__":
