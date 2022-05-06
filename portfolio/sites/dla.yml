@@ -1,0 +1,43 @@
+title: DLA Grant Analysis
+directory: ./dla/
+readme: ./dla/README.md
+notebook: ./dla/e76_obligated_funds/reports/report_test2.ipynb
+parts:
+- caption: Introduction
+- chapters:
+  - caption: District 1
+    params:
+      district: 1
+#  - caption: District 2
+#    params:
+#      district: 2
+#  - caption: District 3
+#    params:
+#      district: 3
+#  - caption: District 4
+#    params:
+#      district: 4
+#  - caption: District 5
+#    params:
+#      district: 5
+#  - caption: District 6
+#    params:
+#      district: 6
+#  - caption: District 7
+#    params:
+#      district: 7
+#  - caption: District 8
+#    params:
+#      district: 8
+#  - caption: District 9
+#    params:
+#      district: 9
+#  - caption: District 10
+#    params:
+#      district: 10
+#  - caption: District 11
+#    params:
+#      district: 11
+#  - caption: District 12
+#    params:
+#      district: 12
