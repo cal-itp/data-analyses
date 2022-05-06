@@ -27,9 +27,11 @@ Scripts associated with data creation and visualization / output generation. The
 1. [create_parallel_corridors](./create_parallel_corridors.py): find transit routes that are considered parallel to State Highway Network
 1. [setup_corridors_stats](./setup_corridors_stats.py): aggregate summary stats by operator or highway route
 1. Planning and Modal Advisory Committee (PMAC) analysis: [script](current_routes.py) and [analysis notebook](./pmac.ipynb) -- these were run with latest dates prior to `dim_shapes` table creation
-1. [setup_parallel_trips_with_stops](./setup_parallel_trips_with_stops.py): set up parallel routes, select 1 representative trip per route (20th percentile for travel time), to compare against car 
+1. [setup_parallel_trips_with_stops](./setup_parallel_trips_with_stops.py): set up parallel routes, select 1 representative trip per route (fastest trip), to compare against car 
 
 ### Visualization / Outputs
 
 1. [setup_gmaps](./setup_gmaps.py): set up df to be used in Google Directions API with origin, destination, waypoint, and departure times
 1. [make_gmaps_requests](./make_gmaps_requests.py): make Google Directions API requests and cache results in GCS
+1. [make_gmaps_results](./make_gmaps_results.py): grab cached JSON results and assemble into df
+1. [make_stripplot_data](./make_stripplot_data.py): merge competitive routes info from Google Directions API back to trip-level data and wrangle data for making stripplots showing trip variability.
