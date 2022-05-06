@@ -4,19 +4,20 @@
 
 **Parallel routes**: routes where at least 30% of the bus route falls within 1 mile of the SHN *and* cover at least 10% of the highway segment's length.
 
-In CA, nearly ___ % of bus routes are parallel.
+In CA, nearly 2/3 of bus routes are parallel, accounting for 55% of the service hours (typical weekday, 2/8/22).
 
 Caltrans:
 * If Caltrans were to sponsor an express bus, which highway corridors have no parallel transit routes?
 
 Transit operators:
 * Of the parallel bus routes, which ones are competitive against car travel and targeted for future service improvements? 
+* Operators with GTFS Real-Time feeds: explore these competitive bus routes and [see where the bottlenecks are](https://analysis.calitp.org/rt/README.html).
 * Which highway corridors have somme parallel routes but few competitive routes?
 
 
 ## Data
 
-* GTFS schedule data - trips on a typical weekday, Jan 6, 2022.
+* GTFS schedule data - trips on a typical weekday, 1/6/22.
 * State highway network
 
 ## Methodology
@@ -38,7 +39,7 @@ The `bus_multiplier` metric is then paired with a `bus_difference` metric. At le
 * Medium (1-1.5 hrs): +30 min
 * Long (> 1.5 hrs): +40 min
 
-Notes:
+### Notes
 
 * Google Directions API results vary by time-of-day, but not by day-of-week or month/seasons. Nevertheless, the car travels on the same day at the same departure hour as the bus, with the same origin, destination, and waypoints, for the best one-to-one comparison.
 * A single request takes in origin, destination, and up to 25 waypoints. If the bus route is short enough, every 3rd bus stop is used as a waypoint. Every 4th or every 5th is used for longer routes, and 25 waypoints is always maxed out for these cases.
