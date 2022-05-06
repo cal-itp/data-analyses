@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -14,6 +15,7 @@ import papermill as pm
 import typer
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from papermill import PapermillExecutionError
 from papermill.engines import NBClientEngine, papermill_engines
 from pydantic import BaseModel
 from pydantic.class_validators import validator
@@ -205,6 +207,7 @@ def clean(
 @app.command()
 def build(
     site: SiteChoices,
+    continue_on_error: bool = False,
     deploy: bool = DEPLOY_OPTION,
     execute_papermill: bool = typer.Option(
         True,
@@ -222,14 +225,17 @@ def build(
     """
     Builds a static site from parameterized notebooks as defined in a site YAML file.
     """
-    site_output_dir = PORTFOLIO_DIR / Path(site.value)
+    site_name = site.value
+    site_output_dir = PORTFOLIO_DIR / Path(site_name)
     site_output_dir.mkdir(parents=True, exist_ok=True)
 
-    with open(SITES_DIR / Path(f"{site.value}.yml")) as f:
+    with open(SITES_DIR / Path(f"{site_name}.yml")) as f:
         site = Site(**yaml.safe_load(f))
 
     typer.echo(f"copying readme from {site.directory} to {site_output_dir}")
     shutil.copy(site.readme, site_output_dir / site.readme.name)
+
+    errors = []
 
     for part in site.parts:
         for chapter in part.chapters:
@@ -251,17 +257,24 @@ def build(
                 typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
 
                 if execute_papermill:
-                    pm.execute_notebook(
-                        input_path=notebook,
-                        output_path=parameterized_path,
-                        parameters=params,
-                        cwd=notebook.parent,
-                        engine_name="markdown",
-                        report_mode=True,
-                        prepare_only=prepare_only or site.prepare_only,
-                        original_parameters=params,
-                        no_stderr = no_stderr,
-                    )
+                    try:
+                        pm.execute_notebook(
+                            input_path=notebook,
+                            output_path=parameterized_path,
+                            parameters=params,
+                            cwd=notebook.parent,
+                            engine_name="markdown",
+                            report_mode=True,
+                            prepare_only=prepare_only or site.prepare_only,
+                            original_parameters=params,
+                            no_stderr = no_stderr,
+                        )
+                    except PapermillExecutionError as e:
+                        if continue_on_error:
+                            typer.secho(f"error encountered during papermill execution", fg=typer.colors.RED)
+                            errors.append(e)
+                        else:
+                            raise
                 else:
                     typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW)
 
@@ -292,15 +305,23 @@ def build(
     ).check_returncode()
 
     if deploy:
+        if continue_on_error and errors:
+            ans = input(f"{len(errors)} encountered during papermill; enter that number to continue: ")
+            assert int(ans) == len(errors)
+
         args = [
             "netlify",
             "deploy",
             "--site=cal-itp-data-analyses",
-            f"--dir=portfolio/{site.value}/_build/html/",
-            f"--alias={site.value}",
+            f"--dir=portfolio/{site_name}/_build/html/",
+            f"--alias={site_name}",
         ]
         typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
         subprocess.run(args).check_returncode()
+
+    if errors:
+        typer.secho(f"{len(errors)} errors encountered during papermill execution")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
