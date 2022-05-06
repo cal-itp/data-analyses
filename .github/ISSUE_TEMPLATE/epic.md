@@ -15,10 +15,10 @@ After receiving a research request, use this template to plan and track your wor
 ### Research required:
 * 
 
-### Notes / Misc
+### Notes, misc:
 * 
 
-### Reviewer [Stakeholder]
+### Reviewers [Stakeholders]
 
 1.
 
