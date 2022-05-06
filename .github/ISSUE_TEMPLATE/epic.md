@@ -12,13 +12,11 @@ After receiving a research request, use this template to plan and track your wor
 ### Summary
 * 
 
-### Acceptance Criteria
-* 
-
 ### Research required:
 * 
 
 ### Notes / Misc
+* 
 
 ### Reviewer [Stakeholder]
 
@@ -28,3 +26,6 @@ After receiving a research request, use this template to plan and track your wor
 
 - [ ] 1. #
 - [ ] 2. #
+
+### Deliverables
+* Notebooks, dashboards, narratives, presentation details.
