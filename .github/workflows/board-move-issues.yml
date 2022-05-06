@@ -12,11 +12,11 @@ jobs:
 
     - name: add-new-issues-to-repository-based-project-column
       uses: takanabe/github-actions-automate-projects@v0.0.2
-      if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'analytics research'
+      if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'research request'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_PROJECT_URL: https://github.com/cal-itp/data-analyses/projects/1
-        GITHUB_PROJECT_COLUMN_NAME: Backlog
+        GITHUB_PROJECT_COLUMN_NAME: Research Requests
 
     - name: add-new-issues-to-repository-based-project-column
       uses: takanabe/github-actions-automate-projects@v0.0.2
@@ -24,4 +24,20 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_PROJECT_URL: https://github.com/cal-itp/data-analyses/projects/1
-        GITHUB_PROJECT_COLUMN_NAME: Backlog
+        GITHUB_PROJECT_COLUMN_NAME: Issues in Progress
+
+    - name: add-new-issues-to-repository-based-project-column
+      uses: takanabe/github-actions-automate-projects@v0.0.2
+      if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'portfolio request'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_PROJECT_URL: https://github.com/cal-itp/data-analyses/projects/1
+        GITHUB_PROJECT_COLUMN_NAME: Ready for Portfolio
+
+    - name: add-new-issues-to-repository-based-project-column
+      uses: takanabe/github-actions-automate-projects@v0.0.2
+      if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'epic'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_PROJECT_URL: https://github.com/cal-itp/data-analyses/projects/1
+        GITHUB_PROJECT_COLUMN_NAME: Epics in Progress
