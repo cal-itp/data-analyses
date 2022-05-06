@@ -20,8 +20,10 @@ Complete this issue template when you are ready to deploy parameterized or stand
 - [ ] Multiple notebooks deployed into own site 
 
 ### Identify parts / chapters / sections
-Ex 1: RT analysis / district / ITP ID or
-Ex 2:  district / ITP ID / notebook A, notebook B
+For more information on how to structure your notebook, visit the Jupyter Book documentation for [Structuring the Table of Contents](https://jupyterbook.org/en/stable/structure/toc.html).  
+  
+**Ex 1**: RT analysis / district / ITP ID  
+**Ex 2**:  district / ITP ID / notebook A, notebook B
 
 * Part
   * Chapter
