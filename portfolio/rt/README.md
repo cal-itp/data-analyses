@@ -2,7 +2,7 @@
 
 These maps, tables, and charts provide an overview of typical weekday transit vehicle speeds in California. They are based on actual, archived positions data from each vehicle. They are generally accurate for their intended purpose of identifying slower parts of bus routes that would be candidates for projects to speed up buses, but some erroneous data may be present. Feel free to contact Cal-ITP with any data questions.
 
-Maps are organized by Caltrans district, with a separate page for each transit operator within the district.
+Maps are organized by Caltrans district, with a separate page for each transit operator within the district. It's easiest to navigate the site using the menu on the left side of the page. Click the dropdown icon for each district to show links to each operator within the district. Alternatively, you can navigate through all pages in order using the "Next" and "Previous" links at the bottom of each page.
 
 ## Data Sources
 
