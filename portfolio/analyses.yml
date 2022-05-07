@@ -24,7 +24,6 @@ sites:
         district: 01 - Eureka
       sections:
       - itp_id: 135
-      # - itp_id: 159 Data issue
     - caption: District 02 - Redding
       params:
         district: 02 - Redding
@@ -41,8 +40,6 @@ sites:
         district: 04 - Oakland
       sections:
       - itp_id: 194
-      # - itp_id: 315 SMART not in analysis scope
-      # - itp_id: 246 Caltrain not in analysis scope
       - itp_id: 167
       - itp_id: 110
       - itp_id: 350
@@ -116,19 +113,66 @@ sites:
   name: parallel_corridors
   notebook: ./bus_service_increase/stripplot.ipynb
   parts:
-  - caption: Introduction
   - chapters:
-    - caption: District 4
+    - caption: District 01 - Eureka
       params:
-          district: 4
+        district: 01 - Eureka
       sections:
-        - itp_id: 4
-        - itp_id: 310
-    - caption: District 7
+      - itp_id: 18
+    - caption: District 02 - Redding
       params:
-          district: 7
+        district: 02 - Redding
       sections:
-        - itp_id: 182
-        - itp_id: 183
+      - itp_id: 83
+    - caption: District 03 - Marysville
+      params:
+        district: 03 - Marysville
+      sections:
+      - itp_id: 23
+    - caption: District 04 - Oakland
+      params:
+        district: 04 - Oakland
+      sections:
+      - itp_id: 4
+    - caption: District 05 - San Luis Obispo
+      params:
+        district: 05 - San Luis Obispo
+      sections:
+      - itp_id: 129
+    - caption: District 06 - Fresno
+      params:
+        district: 06 - Fresno
+      sections:
+      - itp_id: 71
+    - caption: District 07 - Los Angeles
+      params:
+        district: 07 - Los Angeles
+      sections:
+      - itp_id: 16
+    - caption: District 08 - San Bernardino
+      params:
+        district: 08 - San Bernardino
+      sections:
+      - itp_id: 30
+    - caption: District 09 - Bishop
+      params:
+        district: 09 - Bishop
+      sections:
+      - itp_id: 99
+    - caption: District 10 - Stockton
+      params:
+        district: 10 - Stockton
+      sections:
+      - itp_id: 11
+    - caption: District 11 - San Diego
+      params:
+        district: 11 - San Diego
+      sections:
+      - itp_id: 226
+    - caption: District 12 - Irvine
+      params:
+        district: 12 - Irvine
+      sections:
+      - itp_id: 154
   readme: ./bus_service_increase/README.md
   title: Parallel Bus Corridors to State Highway Network
