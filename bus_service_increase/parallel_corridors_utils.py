@@ -85,11 +85,17 @@ def specific_point(y_col):
     return chart
 
 
-def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):  
-    # max_trip_route_group is in hours, convert to minutes to match bus_difference units
-    plus25pct_travel_minutes = df.max_trip_route_group.iloc[0] * 60 * 0.25
+diff_cutoffs = {
+    "short": 20,
+    "medium": 30,
+    "long": 40,
+}
+
+def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
+    # Instead of doing +25% travel time, just use set cut-offs because it's easier
+    # to write caption for across operators
     df = df.assign(
-        cutoff2 = plus25pct_travel_minutes
+        cutoff2 = diff_cutoffs[df.route_group.iloc[0]]
     )
     
     # We want to draw horizontal line on chart
