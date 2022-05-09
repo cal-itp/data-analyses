@@ -2,40 +2,7 @@ format: jb-book
 parts:
 -   caption: null
     chapters:
-    -   file: district_01-eureka.md
-        sections:
-        -   glob: district_01-eureka/*
-    -   file: district_02-redding.md
-        sections:
-        -   glob: district_02-redding/*
-    -   file: district_03-marysville.md
-        sections:
-        -   glob: district_03-marysville/*
-    -   file: district_04-oakland.md
-        sections:
-        -   glob: district_04-oakland/*
-    -   file: district_05-san-luis-obispo.md
-        sections:
-        -   glob: district_05-san-luis-obispo/*
-    -   file: district_06-fresno.md
-        sections:
-        -   glob: district_06-fresno/*
     -   file: district_07-los-angeles.md
         sections:
         -   glob: district_07-los-angeles/*
-    -   file: district_08-san-bernardino.md
-        sections:
-        -   glob: district_08-san-bernardino/*
-    -   file: district_09-bishop.md
-        sections:
-        -   glob: district_09-bishop/*
-    -   file: district_10-stockton.md
-        sections:
-        -   glob: district_10-stockton/*
-    -   file: district_11-san-diego.md
-        sections:
-        -   glob: district_11-san-diego/*
-    -   file: district_12-irvine.md
-        sections:
-        -   glob: district_12-irvine/*
 root: README
