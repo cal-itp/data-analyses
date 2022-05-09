@@ -49,3 +49,19 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_PROJECT_URL: https://github.com/cal-itp/data-analyses/projects/1
         GITHUB_PROJECT_COLUMN_NAME: Issues in Progress
+
+    - name: add-new-issues-to-repository-based-project-column
+      uses: takanabe/github-actions-automate-projects@v0.0.2
+      if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'feature request'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_PROJECT_URL: https://github.com/cal-itp/data-analyses/projects/1
+        GITHUB_PROJECT_COLUMN_NAME: To Be Refined
+
+    - name: add-new-issues-to-repository-based-project-column
+      uses: takanabe/github-actions-automate-projects@v0.0.2
+      if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'bug'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_PROJECT_URL: https://github.com/cal-itp/data-analyses/projects/1
+        GITHUB_PROJECT_COLUMN_NAME: To Be Refined
