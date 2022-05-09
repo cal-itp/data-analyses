@@ -1,7 +1,7 @@
 sites:
 - directory: ./dla/
   name: dla
-  notebook: ./dla/e76_obligated_funds/reports/report_dla_districts.ipynb
+  notebook: ./dla/e76_obligated_funds/reports/report_test2.ipynb
   parts:
   - caption: Introduction
   - chapters:
