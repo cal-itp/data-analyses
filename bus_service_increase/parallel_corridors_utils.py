@@ -1,4 +1,7 @@
 """
+Functions backing competitive-parallel-routes.ipynb.
+
+Create stripplots and stats used in narrative.
 """
 import altair as alt
 import intake
@@ -56,7 +59,7 @@ def operator_parallel_competitive_stats(itp_id, pct_trips_competitive_cutoff):
 #------------------------------------------------------------#
 # Color to designate p25, p50, p75, fastest trip?
 DARK_GRAY = "#323434"
-NAVY = cp.CALITP_CATEGORY_BOLD_COLORS[0]
+#NAVY = cp.CALITP_CATEGORY_BOLD_COLORS[0]
 
 def labeling(word):
     label_dict = {
@@ -163,19 +166,19 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
 
     horiz_line = (
         alt.Chart()
-        .mark_rule(strokeDash=[2,3])
+        .mark_rule()
         .encode(
             y=alt.Y("cutoff:Q"),
-            color=alt.value(DARK_GRAY)
+            color=alt.value("black")
         )
     )
     
     horiz_line2 = (
         alt.Chart()
-        .mark_rule(strokeDash=[2,3])
+        .mark_rule(strokeDash=[3,3])
         .encode(
             y=alt.Y("cutoff2:Q"),
-            color=alt.value(NAVY)
+            color=alt.value(DARK_GRAY)
         )
     )
     
@@ -192,12 +195,15 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
         
     # Must define data with top-level configuration to be able to facet
     if y_col == "bus_difference":
-        other_charts = p50 + horiz_line + horiz_line2 + text
+        horiz_charts = (horiz_line + horiz_line2)
+        other_charts = p50 + text
     else:
-        other_charts = p50 + horiz_line + text
+        horiz_charts = horiz_line
+        other_charts = p50 + text
     
     chart = (
-        (stripplot.properties(width=60) + 
+        (horiz_charts + 
+         stripplot.properties(width=50) + 
          other_charts)
         .facet(
             column = alt.Column("route_id:N", title="Route ID",
