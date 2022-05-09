@@ -2,7 +2,7 @@
 name: Feature Request - Data or Tooling
 about: Suggest an idea for the warehouse or our analytics tooling.
 title: 'Feature Request'
-labels: 'feature request'
+labels: 'feature request','admin'
 assignees: 'charlie-costanzo'
 
 ---
