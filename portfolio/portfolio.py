@@ -377,6 +377,7 @@ def build(
         for chapter in part.chapters:
             chapter.generate(
                 execute_papermill=execute_papermill,
+                continue_on_error=continue_on_error,
                 prepare_only=prepare_only,
                 no_stderr=no_stderr,
             )
