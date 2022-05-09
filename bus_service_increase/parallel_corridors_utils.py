@@ -1,4 +1,7 @@
 """
+Functions backing competitive-parallel-routes.ipynb.
+
+Create stripplots and stats used in narrative.
 """
 import altair as alt
 import intake
@@ -37,9 +40,10 @@ def operator_parallel_competitive_stats(itp_id, pct_trips_competitive_cutoff):
     parallel_df = setup_parallel_trips_with_stops.subset_to_parallel_routes(df)
     
     competitive_df = catalog.competitive_route_variability.read()
-    competitive_df = competitive_df[(competitive_df.calitp_itp_id == itp_id) & 
-                                    (competitive_df.pct_trips_competitive > pct_trips_competitive_cutoff)
-                                   ]
+    competitive_df = competitive_df[
+        (competitive_df.calitp_itp_id == itp_id) & 
+        (competitive_df.pct_trips_competitive > pct_trips_competitive_cutoff)
+    ]
     
     operator_dict = {
         "num_routes": df.route_id.nunique(),
@@ -55,6 +59,7 @@ def operator_parallel_competitive_stats(itp_id, pct_trips_competitive_cutoff):
 #------------------------------------------------------------#
 # Color to designate p25, p50, p75, fastest trip?
 DARK_GRAY = "#323434"
+#NAVY = cp.CALITP_CATEGORY_BOLD_COLORS[0]
 
 def labeling(word):
     label_dict = {
@@ -83,27 +88,38 @@ def specific_point(y_col):
     return chart
 
 
-def set_yaxis_range(df, y_col):
-    Y_MIN = df[y_col].min()
-    Y_MAX = df[y_col].max()
+diff_cutoffs = {
+    "short": 20,
+    "medium": 30,
+    "long": 40,
+}
+
+def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
+    # Instead of doing +25% travel time, just use set cut-offs because it's easier
+    # to write caption for across operators
+    df = df.assign(
+        cutoff2 = diff_cutoffs[df.route_group.iloc[0]]
+    )
     
-    return Y_MIN, Y_MAX
-
-
-def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):  
     # We want to draw horizontal line on chart
     if y_col == "bus_multiplier":
         df = df.assign(cutoff=2)
-    else:
+        # if that operator falls well below cut-off, we want the horiz lines to be shown
+        # take the max and add some buffer so horiz line can be seen
+        Y_MAX = max(df.cutoff.iloc[0] + 0.5, Y_MAX)
+        Y_MIN = min(-0.25, Y_MIN)
+        
+    elif y_col == "bus_difference":
         df = df.assign(cutoff=0)
-    
+        Y_MAX = max(df.cutoff2.iloc[0] + 5, Y_MAX)
+        Y_MIN = min(-5, Y_MIN)
+        
     # Use the same sorting done in the wrangling
     route_sort_order = list(df.sort_values(["calitp_itp_id", 
                                             "pct_trips_competitive", 
                                             "num_competitive",
-                                            "p50", 
-                                            f"{y_col}_spread"], 
-                                       ascending=[True, False, False, True, True]
+                                            "p50"], 
+                                       ascending=[True, False, False, True]
                                       )
                         .drop_duplicates(subset=["route_id"]).route_id)
         
@@ -150,9 +166,18 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
 
     horiz_line = (
         alt.Chart()
-        .mark_rule(strokeDash=[2,3])
+        .mark_rule()
         .encode(
             y=alt.Y("cutoff:Q"),
+            color=alt.value("black")
+        )
+    )
+    
+    horiz_line2 = (
+        alt.Chart()
+        .mark_rule(strokeDash=[3,3])
+        .encode(
+            y=alt.Y("cutoff2:Q"),
             color=alt.value(DARK_GRAY)
         )
     )
@@ -169,9 +194,17 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
            ).transform_filter(alt.datum.fastest_trip==1)
         
     # Must define data with top-level configuration to be able to facet
+    if y_col == "bus_difference":
+        horiz_charts = (horiz_line + horiz_line2)
+        other_charts = p50 + text
+    else:
+        horiz_charts = horiz_line
+        other_charts = p50 + text
+    
     chart = (
-        (stripplot.properties(width=60) + 
-         p50 + horiz_line + text)
+        (horiz_charts + 
+         stripplot.properties(width=50) + 
+         other_charts)
         .facet(
             column = alt.Column("route_id:N", title="Route ID",
                                 sort = route_sort_order), 
@@ -186,33 +219,4 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
     return chart
 
 
-def generate_report(df):
-    # Set up df for charting (cut-off at some threshold to show most competitive routes)
-    PCT_COMPETITIVE_THRESHOLD = 0.75
-    plot_me = (df[df.pct_trips_competitive > PCT_COMPETITIVE_THRESHOLD]
-           .drop(columns = "geometry")
-    )
-    
-    y_col1 = "bus_multiplier"
-    Y_MIN1, Y_MAX1 = set_yaxis_range(plot_me, y_col1)
 
-    y_col2 = "bus_difference"
-    Y_MIN2, Y_MAX2 = set_yaxis_range(plot_me, y_col2)
-    
-    def combine_stripplots(df):
-        multiplier_chart = make_stripplot(
-            df, y_col1, Y_MIN = Y_MIN1, Y_MAX = Y_MAX1
-        )
-
-
-        difference_chart = make_stripplot(
-            df, y_col2, Y_MIN = Y_MIN2, Y_MAX = Y_MAX2
-        )
-            
-        return multiplier_chart, difference_chart
-    
-    s1, s2 = combine_stripplots(plot_me[plot_me.route_group=="short"])
-            
-    display(Markdown("Short Routes"))
-    display(s1)
-    display(s2)

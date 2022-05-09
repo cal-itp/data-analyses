@@ -1,6 +1,5 @@
 """
 Merge competitive routes info back onto all trips.
-
 Use this df to back the stripplot
 showing variability of trip service hours 
 (bus_multiplier) compared to car travel.
@@ -144,39 +143,42 @@ def merge_in_competitive_routes(df):
 
 
 def designate_plot_group(df):
-    # Add plot group, since stripplot can get crowded depending 
-    # on how many routes plotted
-    # But, there's also some where bus_multiplier can't be derived, if Google API didn't return results
-    # Use 1 trip to designate
+    # Add plot group, since stripplot can get crowded, plot 15 max?
     route_cols = ["calitp_itp_id", "route_id"]
     
-    for c in ["bus_multiplier", "bus_difference"]:
+    for c in ["bus_difference"]:
         df = df.assign(
             minimum = df.groupby(route_cols)[c].transform("min"),
             maximum = df.groupby(route_cols)[c].transform("max"),
         )
         df = df.assign(
-            spread = (df.maximum - df.minimum).round(3)
+            spread = (df.maximum - df.minimum) + 
         ).rename(columns = {"spread": f"{c}_spread"}).drop(columns = ["minimum", "maximum"])
 
     df2 = (df.assign(
                # Break it up into short / medium / long routes instead of plot group
-               max_service = df.groupby(route_cols)["service_hours"].transform("max"),
+               max_trip_hrs = df.groupby(route_cols)["service_hours"].transform("max"),
           )[df.bus_multiplier.notna()]
            .reset_index(drop=True)
     )
-
-    df2 = df2.assign(
-        route_group = df2.apply(lambda x: "short" if x.max_service <= 1.0
-                               else "medium" if x.max_service <=1.5
-                               else "long", axis=1)
-    ).drop(columns = ["max_service"])
     
+    
+    df2 = df2.assign(
+        route_group = df2.apply(lambda x: "short" if x.max_trip_hrs <= 1.0
+                               else "medium" if x.max_trip_hrs <=1.5
+                               else "long", axis=1)
+    )
+    
+    df2 = df2.assign(
+        max_trip_route_group = df2.groupby(
+            ["calitp_itp_id", "route_group"])["service_hours"].transform("max") 
+    )
     
     # Merge back in
     df3 = pd.merge(
         df, 
-        df2[["calitp_itp_id", "route_id", "route_group"]].drop_duplicates(), 
+        df2[["calitp_itp_id", "route_id", "route_group", 
+             "max_trip_hrs", "max_trip_route_group"]].drop_duplicates(), 
         on = route_cols,
         how = "left",
         validate = "m:1"
@@ -210,17 +212,13 @@ def merge_in_airtable_name_district(df):
 if __name__ == "__main__":
     '''
     DATA_PATH = f"{utils.GCS_FILE_PATH}2022_Jan/"
-
     # Read in intermediate parquet for trips on selected date
     trips = pd.read_parquet(f"{DATA_PATH}trips_joined_thurs.parquet")
-
     SELECTED_DATE = '2022-1-6' #warehouse_queries.dates['thurs']
-
     # Attach service hours
     # This df is trip_id-stop_id level
     trips_with_service_hrs = setup_parallel_trips_with_stops.grab_service_hours(
         trips, SELECTED_DATE)
-
     trips_with_service_hrs.to_parquet("./data/trips_with_service_hours.parquet")
     '''
     
@@ -232,4 +230,5 @@ if __name__ == "__main__":
     df5 = designate_plot_group(df4)
     df6 = merge_in_airtable_name_district(df5)
     
-    shared_utils.utils.geoparquet_gcs_export(df6, utils.GCS_FILE_PATH, "competitive_route_variability")
+    shared_utils.utils.geoparquet_gcs_export(
+        df6, utils.GCS_FILE_PATH, "competitive_route_variability")
