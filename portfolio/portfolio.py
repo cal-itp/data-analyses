@@ -64,6 +64,119 @@ class Chapter(BaseModel):
     notebook: Optional[Path] = None
     params: Dict = {}
     sections: List[Dict] = []
+    part: "Part" = None
+
+    @property
+    def resolved_notebook(self):
+        return self.notebook or self.part.notebook or self.part.site.notebook
+
+    @property
+    def resolved_params(self):
+        return {**self.part.params, **self.params}
+
+    @property
+    def slug(self):
+        return slugify_params(self.resolved_params)
+
+    @property
+    def path(self):
+        return self.part.site.output_dir / Path(self.slug)
+
+    def generate(self, execute_papermill=True, continue_on_error=False, **papermill_kwargs) -> List[PapermillExecutionError]:
+        errors = []
+        self.path.mkdir(parents=True, exist_ok=True)
+
+        if self.sections:
+            fname = self.part.site.output_dir / f"{self.slug}.md"
+            with open(fname, "w") as f:
+                typer.secho(f"writing readme to {fname}", fg=typer.colors.GREEN)
+                f.write(f"# {self.caption}")
+
+            for i, section in enumerate(self.sections):
+                params = {**self.resolved_params, **section}
+                notebook = section.get('notebook') or self.resolved_notebook
+
+                if not notebook:
+                    raise ValueError("no notebook found at any level")
+
+                if isinstance(notebook, str):
+                    notebook = Path(notebook)
+
+                parameterized_path = self.path / Path(parameterize_filename(i, notebook, params))
+
+                typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
+
+                if execute_papermill:
+                    try:
+                        pm.execute_notebook(
+                            input_path=notebook,
+                            output_path=parameterized_path,
+                            parameters=params,
+                            cwd=notebook.parent,
+                            engine_name="markdown",
+                            report_mode=True,
+                            original_parameters=params,
+                            **papermill_kwargs,
+                        )
+                    except PapermillExecutionError as e:
+                        if continue_on_error:
+                            typer.secho(f"error encountered during papermill execution", fg=typer.colors.RED)
+                            errors.append(e)
+                        else:
+                            raise
+                else:
+                    typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW)
+
+        else:
+            notebook = self.resolved_notebook
+
+            if not notebook:
+                raise ValueError("no notebook found at any level")
+
+            if isinstance(notebook, str):
+                notebook = Path(notebook)
+
+            parameterized_path = self.path / Path(parameterize_filename(0, notebook, self.resolved_params))
+
+            typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
+
+            if execute_papermill:
+                try:
+                    pm.execute_notebook(
+                        input_path=notebook,
+                        output_path=parameterized_path,
+                        parameters=self.resolved_params,
+                        cwd=notebook.parent,
+                        engine_name="markdown",
+                        report_mode=True,
+                        original_parameters=self.resolved_params,
+                        **papermill_kwargs,
+                    )
+                except PapermillExecutionError as e:
+                    if continue_on_error:
+                        typer.secho(f"error encountered during papermill execution", fg=typer.colors.RED)
+                        errors.append(e)
+                    else:
+                        raise
+            else:
+                typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution",
+                            fg=typer.colors.YELLOW)
+
+        return errors
+
+    @property
+    def toc(self):
+        if self.sections:
+            return {
+                "file": f"{self.slug}.md",
+                "sections": [{
+                    "glob": f"{self.slug}/*",
+                }],
+            }
+
+        return {
+            "file": f"{self.slug}/{parameterize_filename(0, self.resolved_notebook, self.resolved_params)}",
+        }
 
 
 class Part(BaseModel):
@@ -71,19 +184,40 @@ class Part(BaseModel):
     notebook: Optional[Path] = None
     params: Dict = {}
     chapters: List[Chapter] = []
+    site: "Site" = None
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+        for chapter in self.chapters:
+            chapter.part = self
 
     @property
     def slug(self) -> str:
         return slugify_params(self.params)
 
+    @property
+    def to_toc(self):
+        return {
+                "caption": self.caption,
+                "chapters": [chapter.toc for chapter in self.chapters]
+            }
+
 
 class Site(BaseModel):
+    output_dir: Path
     title: str
     directory: Path
     readme: Optional[Path] = "README.md"
     notebook: Optional[Path] = None
     parts: List[Part]
     prepare_only: bool = False
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+        for part in self.parts:
+            part.site = self
 
     @validator('readme', pre=True, always=True)
     def default_readme(cls, v, *, values, **kwargs):
@@ -98,15 +232,7 @@ class Site(BaseModel):
         return yaml.dump({
             "format": "jb-book",
             "root": "README",
-            "parts": [{
-                "caption": part.caption,
-                "chapters": [{
-                    "file": f"{slugify_params({**part.params, **chapter.params})}.md",
-                    "sections": [{
-                        "glob": f"{slugify_params({**part.params, **chapter.params})}/*",
-                    }],
-                } for chapter in part.chapters]
-            } for part in self.parts if part.chapters]
+            "parts": [part.to_toc for part in self.parts if part.chapters]
         }, indent=4)
 
 
@@ -230,58 +356,11 @@ def build(
     site_output_dir.mkdir(parents=True, exist_ok=True)
 
     with open(SITES_DIR / Path(f"{site_name}.yml")) as f:
-        site = Site(**yaml.safe_load(f))
+        site = Site(output_dir=site_output_dir, **yaml.safe_load(f))
 
     typer.echo(f"copying readme from {site.directory} to {site_output_dir}")
     shutil.copy(site.readme, site_output_dir / site.readme.name)
 
-    errors = []
-
-    for part in site.parts:
-        for chapter in part.chapters:
-            chapter_slug = slugify_params({**part.params, **chapter.params})
-            chapter_path = site_output_dir / Path(chapter_slug)
-            chapter_path.mkdir(parents=True, exist_ok=True)
-            for i, section in enumerate(chapter.sections or [{}]):
-                params = {**part.params, **chapter.params, **section}
-                notebook = section.get('notebook') or chapter.notebook or part.notebook or site.notebook
-
-                if not notebook:
-                    raise ValueError("no notebook found at any level")
-
-                if isinstance(notebook, str):
-                    notebook = Path(notebook)
-
-                parameterized_path = chapter_path / Path(parameterize_filename(i, notebook, params))
-
-                typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
-
-                if execute_papermill:
-                    try:
-                        pm.execute_notebook(
-                            input_path=notebook,
-                            output_path=parameterized_path,
-                            parameters=params,
-                            cwd=notebook.parent,
-                            engine_name="markdown",
-                            report_mode=True,
-                            prepare_only=prepare_only or site.prepare_only,
-                            original_parameters=params,
-                            no_stderr = no_stderr,
-                        )
-                    except PapermillExecutionError as e:
-                        if continue_on_error:
-                            typer.secho(f"error encountered during papermill execution", fg=typer.colors.RED)
-                            errors.append(e)
-                        else:
-                            raise
-                else:
-                    typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW)
-
-            fname = site_output_dir / f"{chapter_slug}.md"
-            with open(fname, "w") as f:
-                typer.secho(f"writing readme to {fname}", fg=typer.colors.GREEN)
-                f.write(f"# {chapter.caption}")
 
     fname = site_output_dir / Path("_config.yml")
     with open(fname, "w") as f:
@@ -291,6 +370,16 @@ def build(
     with open(fname, "w") as f:
         typer.secho(f"writing toc to {fname}", fg=typer.colors.GREEN)
         f.write(site.toc_yaml)
+
+    errors = []
+
+    for part in site.parts:
+        for chapter in part.chapters:
+            chapter.generate(
+                execute_papermill=execute_papermill,
+                prepare_only=prepare_only,
+                no_stderr=no_stderr,
+            )
 
     subprocess.run(
         [
