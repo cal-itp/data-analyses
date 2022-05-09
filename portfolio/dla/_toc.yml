@@ -2,7 +2,5 @@ format: jb-book
 parts:
 -   caption: null
     chapters:
-    -   file: district_1.md
-        sections:
-        -   glob: district_1/*
+    -   file: district_1/0__report_test2__district_1.ipynb
 root: README
