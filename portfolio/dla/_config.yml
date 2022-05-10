@@ -3,6 +3,7 @@
 
 title: DLA Grant Analysis
 author: Cal-ITP
+copyright: "2022"
 #logo: calitp_logo_MAIN.png
 
 # Force re-execution of notebooks on each build.
