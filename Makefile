@@ -6,5 +6,5 @@ build_parallel_corridors:
 	python bus_service_increase/deploy_portfolio_yaml.py    
 	python portfolio/portfolio.py build parallel_corridors --deploy 
 	git add portfolio/parallel_corridors/district_*/ portfolio/parallel_corridors/*.yml portfolio/parallel_corridors/*.md 
-	git add portfolio/analyses.yml
+	git add portfolio/sites/
     #--config=./portfolio/test-analyses.yml

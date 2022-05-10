@@ -6,7 +6,7 @@ especially when there are too many parameters to list.
 import geopandas as gpd
 import intake
 import pandas as pd
-from ruamel import yaml
+import yaml
 
 catalog = intake.open_catalog("./bus_service_increase/*.yml")
 
@@ -23,7 +23,7 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML):
     """
     df = catalog.competitive_route_variability.read()
     
-    districts = sorted(list(df[df.caltrans_district.notna()].caltrans_district.unique()))
+    districts = sorted(list(df[df.caltrans_district.notna()].caltrans_district.unique()))[:1]
 
     # Eric's example
     # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
@@ -83,4 +83,4 @@ def check_if_rt_data_available(PORTFOLIO_SITE_YAML):
 
 
 if __name__ == "__main__":
-    itp_dict = overwrite_yaml(PORTFOLIO_SITE_YAML, SITE_NAME)
+    itp_dict = overwrite_yaml(PORTFOLIO_SITE_YAML)
