@@ -17,8 +17,7 @@ from ipyleaflet import Map, GeoJSON, projections, basemaps, GeoData, LayersContr
 from ipywidgets import Text, HTML
 
 import gcsfs
-from calitp.storage import get_fs
-fs = get_fs()
+fs = gcsfs.GCSFileSystem()
 import os
 
 GCS_PROJECT = "cal-itp-data-infra"
@@ -66,91 +65,6 @@ def find_stop_with_high_trip_count(segment, stops, stop_times, rank, calculated_
         return segment
     except IndexError:
         return segment
-    
-def get_operator_views(itp_id):
-    """Returns relevant views from the data warehouse for a single transit operator."""
-    ## TODO refactor to new shapes?
-    ## actually refactor this whole thing to use views, a new definite date, etc...
-    shapes = (
-        tbl.gtfs_schedule.shapes()
-        >> filter(_.calitp_itp_id == int(itp_id))
-        >> collect()
-    )
-    shapes = gpd.GeoDataFrame(
-        shapes,
-        geometry=gpd.points_from_xy(shapes.shape_pt_lon, shapes.shape_pt_lat),
-        crs="EPSG:4326",
-    ).to_crs(shared_utils.geography_utils.CA_NAD83Albers)
-    most_recent_wed = (
-        tbl.views.dim_date()
-        >> filter(_.full_date < dt.datetime.now().date())
-        >> filter(_.day_name == "Wednesday")
-        >> filter(_.full_date == _.full_date.max())
-        >> select(_.service_date == _.full_date)
-    )
-    wednesday = (
-        tbl.views.gtfs_schedule_fact_daily_service()
-        >> filter(_.calitp_itp_id == int(itp_id))
-        >> inner_join(_, most_recent_wed, on="service_date")
-        >> collect()
-    )
-    wednesday = wednesday >> select(_.calitp_itp_id, _.calitp_url_number, _.service_id)
-
-    bus_routes = (
-        tbl.gtfs_schedule.routes()
-        >> filter(_.calitp_itp_id == int(itp_id))
-        >> filter((_.route_type == "3") | (_.route_type == "11"))
-        >> select(_.calitp_itp_id, _.calitp_url_number, _.route_id)
-        >> collect()
-    )
-    print("loaded bus routes")
-
-    trips = (
-        tbl.gtfs_schedule.trips()
-        >> filter(_.calitp_itp_id == int(itp_id))
-        >> collect()
-        >> inner_join(
-            _, bus_routes, on=["calitp_itp_id", "calitp_url_number", "route_id"]
-        )
-        >> inner_join(
-            _, wednesday, on=["calitp_itp_id", "calitp_url_number", "service_id"]
-        )
-    )
-    print("loaded trips")
-    stop_times = (
-        tbl.gtfs_schedule.stop_times()
-        >> filter(_.calitp_itp_id == int(itp_id))
-        >> collect()
-    )
-    stop_times = (
-        stop_times
-        >> inner_join(_, trips, on=["calitp_itp_id", "calitp_url_number", "trip_id"])
-        >> select(
-            -_.stop_headsign,
-            -_.pickup_type,
-            -_.drop_off_type,
-            -_.continuous_pickup,
-            -_.continuous_drop_off,
-            -_.shape_dist_travelled,
-            -_.timepoint,
-        )
-    )
-    print("loaded stop times")
-
-    stops = (
-        tbl.gtfs_schedule.stops()
-        >> filter(_.calitp_itp_id == itp_id)
-        >> select(_.stop_id, _.stop_lat, _.stop_lon)
-        >> collect()
-    )
-    stops = gpd.GeoDataFrame(
-        stops,
-        geometry=gpd.points_from_xy(stops.stop_lon, stops.stop_lat),
-        crs="EPSG:4326",
-    ).to_crs(shared_utils.geography_utils.CA_NAD83Albers)
-    print("loaded stops")
-
-    return shapes, trips, stop_times, stops
 
 def fix_arrival_time(gtfs_timestring):
     """Reformats a GTFS timestamp (which allows the hour to exceed 24 to mark service day continuity)
@@ -227,12 +141,3 @@ def map_hqta(gdf, mouseover=None):
     m.add_control(LayersControl())
 
     return m
-
-def geoparquet_gcs_export(gdf, name):
-    '''
-    Save geodataframe as parquet locally, then move to GCS bucket and delete local file.
-    '''
-    gdf.to_parquet(f"{name}.parquet")
-    fs.put(f"./{name}.parquet", f"{GCS_FILE_PATH}{name}.parquet")
-    os.remove(f"./{name}.parquet")
-    return

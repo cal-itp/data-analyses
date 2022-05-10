@@ -161,17 +161,18 @@ def get_routes(itp_id, analysis_date):
     operator_routes = tbl.views.gtfs_schedule_dim_routes() >> filter(_.calitp_itp_id == itp_id)
     routes_date_joined = (routes_on_date
          >> inner_join(_, operator_routes >> select(_.route_id, _.route_key, _.route_short_name,
-                                                   _.route_long_name, _.route_desc),
+                                                   _.route_long_name, _.route_desc, _.route_type),
                        on = 'route_key')
-         >> distinct(_.route_id, _.route_short_name, _.route_long_name, _.route_desc)
+         >> distinct(_.route_id, _.route_short_name, _.route_long_name, _.route_desc, _.route_type)
          >> collect()
         )
     return routes_date_joined
 
-def get_trips(itp_id, analysis_date, force_clear=False):
+def get_trips(itp_id, analysis_date, force_clear=False, route_types=None):
     ''' 
     itp_id: an itp_id (string or integer)
     analysis_date: datetime.date
+    route types: (optional) filter for certain GTFS route types
     
     Interim function for getting complete trips data for a single operator on a single date of interest.
     To be replaced as RT views are implemented...
@@ -186,27 +187,30 @@ def get_trips(itp_id, analysis_date, force_clear=False):
         print('found parquet')
         cached = pd.read_parquet(path)
         if not cached.empty:
-            return cached
+            trips = cached
         else:
-            print('cached parquet empty, will try a fresh query')
+            print('cached parquet empty, will try a fresh query') ##TODO fix logic here -- consder splitting out some of this...
     else:
         print('getting trips...')
-    trips = (tbl.views.gtfs_schedule_fact_daily_trips()
-        >> filter(_.calitp_extracted_at <= analysis_date, _.calitp_deleted_at >= analysis_date)
-        >> filter(_.calitp_itp_id == itp_id)
-        >> filter(_.service_date == analysis_date)
-        >> filter(_.is_in_service == True)
-        >> select(_.trip_key, _.service_date)
-        >> inner_join(_, tbl.views.gtfs_schedule_dim_trips(), on = 'trip_key')
-        >> select(_.calitp_itp_id, _.calitp_url_number, _.service_date,
-                  _.trip_key, _.trip_id, _.route_id, _.direction_id,
-                  _.shape_id, _.calitp_extracted_at, _.calitp_deleted_at)
-        >> collect()
-        >> distinct(_.trip_id, _keep_all=True)
-        >> inner_join(_, get_routes(itp_id, analysis_date), on = 'route_id')
-            )
-    if not path or force_clear:
-        trips.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
+        trips = (tbl.views.gtfs_schedule_fact_daily_trips()
+            >> filter(_.calitp_extracted_at <= analysis_date, _.calitp_deleted_at >= analysis_date)
+            >> filter(_.calitp_itp_id == itp_id)
+            >> filter(_.service_date == analysis_date)
+            >> filter(_.is_in_service == True)
+            >> select(_.trip_key, _.service_date)
+            >> inner_join(_, tbl.views.gtfs_schedule_dim_trips(), on = 'trip_key')
+            >> select(_.calitp_itp_id, _.calitp_url_number, _.service_date,
+                      _.trip_key, _.trip_id, _.route_id, _.direction_id,
+                      _.shape_id, _.calitp_extracted_at, _.calitp_deleted_at)
+            >> collect()
+            >> distinct(_.trip_id, _keep_all=True)
+            >> inner_join(_, get_routes(itp_id, analysis_date), on = 'route_id')
+                )
+        if not path or force_clear:
+            trips.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
+    if route_types:
+        print(f'filtering to GTFS route types {route_types}')
+        trips = trips >> filter(_.route_type.isin(route_types))
     return trips
 
 def get_stop_times(itp_id, analysis_date, force_clear = False):
