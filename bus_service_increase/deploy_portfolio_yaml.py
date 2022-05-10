@@ -6,18 +6,17 @@ especially when there are too many parameters to list.
 import geopandas as gpd
 import intake
 import pandas as pd
-import yaml
+from ruamel import yaml
 
 catalog = intake.open_catalog("./bus_service_increase/*.yml")
 
-PORTFOLIO_SITE_YAML = "./portfolio/analyses.yml"
-SITE_NAME = "parallel_corridors"
+PORTFOLIO_SITE_YAML = "./portfolio/sites/parallel_corridors.yml"
 
-def overwrite_yaml(PORTFOLIO_SITE_YAML, SITE_NAME):
+def overwrite_yaml(PORTFOLIO_SITE_YAML):
     """
     PORTFOLIO_SITE_YAML: str
                         relative path to where the yaml is for portfolio
-                        '../portfolio/analyses.yml' or '../portfolio/sites.yml'
+                        '../portfolio/analyses.yml' or '../portfolio/sites/parallel_corridors.yml'
     SITE_NAME: str
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
@@ -31,11 +30,6 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML, SITE_NAME):
 
     with open(PORTFOLIO_SITE_YAML) as analyses:
         analyses_data = yaml.load(analyses, yaml.Loader)
-    
-    # https://stackoverflow.com/questions/2170900/get-first-list-index-containing-sub-string
-    # Find the index for where parallel_corridors analysis is located
-    site_index = [idx for idx, s in enumerate(analyses_data["sites"]) if 
-              SITE_NAME in s['name']][0]
     
     # list any ITP IDs to be excluded, either because of invalid data or just too few results
     exclude_ids = [0]
@@ -59,7 +53,7 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML, SITE_NAME):
     parts_list = [{'chapters': chapters_list}]
 
 
-    analyses_data['sites'][site_index]['parts'] = parts_list
+    analyses_data['parts'] = parts_list
     
     output = yaml.dump(analyses_data)
 
@@ -76,11 +70,7 @@ def check_if_rt_data_available(PORTFOLIO_SITE_YAML):
     with open(PORTFOLIO_SITE_YAML) as analyses:
         analyses_data = yaml.load(analyses, yaml.Loader)
     
-    RT_SITE = "rt"
-    rt_site_index = [idx for idx, s in enumerate(analyses_data["sites"]) if 
-                     RT_SITE in s['name']][0]
-    
-    rt_chapters = analyses_data['sites'][rt_site_index]['parts'][0]["chapters"]
+    rt_chapters = analyses_data['parts'][0]["chapters"]
 
     rt_itp_ids = []
 

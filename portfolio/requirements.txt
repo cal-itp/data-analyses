@@ -7,3 +7,4 @@ jupyter-book==0.12.2
 intake==0.6.4
 humanize==4.0.0
 python-slugify==6.1.1
+ruamel.yaml==0.17.21
