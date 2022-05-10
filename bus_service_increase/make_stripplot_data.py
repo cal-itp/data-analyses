@@ -10,7 +10,7 @@ import math
 import os
 import pandas as pd
 
-os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
+#os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 
 from calitp.tables import tbl
 from siuba import *
@@ -142,6 +142,13 @@ def merge_in_competitive_routes(df):
     return df4
 
 
+diff_cutoffs = {
+    "short": 20,
+    "medium": 30,
+    "long": 40,
+}
+
+
 def designate_plot_group(df):
     # Add plot group, since stripplot can get crowded, plot 15 max?
     route_cols = ["calitp_itp_id", "route_id"]
@@ -152,13 +159,13 @@ def designate_plot_group(df):
             maximum = df.groupby(route_cols)[c].transform("max"),
         )
         df = df.assign(
-            spread = (df.maximum - df.minimum) + 
+            spread = (df.maximum - df.minimum) 
         ).rename(columns = {"spread": f"{c}_spread"}).drop(columns = ["minimum", "maximum"])
 
     df2 = (df.assign(
                # Break it up into short / medium / long routes instead of plot group
                max_trip_hrs = df.groupby(route_cols)["service_hours"].transform("max"),
-          )[df.bus_multiplier.notna()]
+          )
            .reset_index(drop=True)
     )
     
@@ -170,8 +177,7 @@ def designate_plot_group(df):
     )
     
     df2 = df2.assign(
-        max_trip_route_group = df2.groupby(
-            ["calitp_itp_id", "route_group"])["service_hours"].transform("max") 
+        max_trip_route_group = df2.groupby(route_cols)["service_hours"].transform("max") 
     )
     
     # Merge back in
@@ -184,7 +190,21 @@ def designate_plot_group(df):
         validate = "m:1"
     )
     
-    return df3
+    # Add cut-off thresholds by route_group
+    # Calculate a certain threshold of competitive trips within that cut-off, and
+    # call those "viable"
+    df4 = df3.assign(
+        below_cutoff = df3.apply(lambda x: 
+                                 1 if x.bus_difference <= diff_cutoffs[x.route_group]
+                                 else 0, axis=1),
+        num_trips = df3.groupby(route_cols)["trip_id"].transform("count")
+    )
+    
+
+    df4["below_cutoff"] = df4.groupby(route_cols)["below_cutoff"].transform("sum")
+    df4["pct_below_cutoff"] = df4.below_cutoff.divide(df4.num_trips)
+    
+    return df4
 
 
 def merge_in_airtable_name_district(df):
