@@ -1,18 +1,22 @@
 ---
 name: Research Request
-about: Analysts are to complete this issue template upon receiving research requests from stakeholders.
-title: Research Request - [Title]
+about: Complete this issue template upon receiving research requests from stakeholders, and continue to revisit to add content as work goes on.
+title: Research Request - [Project Title]
 labels: 'research request'
 assignees: ''
-
 ---
+Complete the below when receiving a research request, and continue to add to this issue as you receive additional details and produce deliverables. Be sure to also add the appropriate project-level label to this issue (eg gtfs-rt, DLA).
+
 ## Research Question
 **Single sentence** description:  
   
 **Detailed** description:
 
-## Stakeholders and Audience
-Who is asking the question, who is the audience, and how will this research be used? 
+## How will this research be used?
+What will be achieved or informed? What is the intended impact?
+
+## Stakeholders & End-Users
+Who is asking the question, and who is the audience?
 
 ## Metrics
 * any specific calculations

@@ -1,6 +1,5 @@
 """
 Merge competitive routes info back onto all trips.
-
 Use this df to back the stripplot
 showing variability of trip service hours 
 (bus_multiplier) compared to car travel.
@@ -144,53 +143,45 @@ def merge_in_competitive_routes(df):
 
 
 def designate_plot_group(df):
-    # Add plot group, since stripplot can get crowded depending 
-    # on how many routes plotted
-    # But, there's also some where bus_multiplier can't be derived, if Google API didn't return results
-    # Use 1 trip to designate
-    for c in ["bus_multiplier", "bus_difference"]:
+    # Add plot group, since stripplot can get crowded, plot 15 max?
+    route_cols = ["calitp_itp_id", "route_id"]
+    
+    for c in ["bus_difference"]:
         df = df.assign(
-            minimum = df.groupby(["calitp_itp_id", "route_id"])[c].transform("min"),
-            maximum = df.groupby(["calitp_itp_id", "route_id"])[c].transform("max"),
+            minimum = df.groupby(route_cols)[c].transform("min"),
+            maximum = df.groupby(route_cols)[c].transform("max"),
         )
         df = df.assign(
-            spread = (df.maximum - df.minimum).round(3)
+            spread = (df.maximum - df.minimum) + 
         ).rename(columns = {"spread": f"{c}_spread"}).drop(columns = ["minimum", "maximum"])
 
-    df2 = (df[df.bus_multiplier.notna()]
-           [["calitp_itp_id", "route_id", "p50", 
-             "pct_trips_competitive", 
-             "num_competitive", "bus_multiplier_spread", "bus_difference_spread"]]
-           .drop_duplicates()
-           # sort in descending order for % trips competitive, then by # competitive trips,
-           # then by 50th percentile, then one with lower spread
-           .sort_values(["calitp_itp_id", "pct_trips_competitive", "num_competitive",
-                         "p50", "bus_multiplier_spread"], 
-                        ascending=[True, False, False, True, True])
-           .reset_index(drop=True)
-          )
-    
-    '''
-    # Find the trip closest to p50
-    df2 = (df[(df.service_hours == df.p50) & (df.bus_multiplier.notna())]
-           .sort_values(["calitp_itp_id", "route_id", "departure_hour"])
-           .drop_duplicates(subset=["calitp_itp_id", "route_id"])
+    df2 = (df.assign(
+               # Break it up into short / medium / long routes instead of plot group
+               max_trip_hrs = df.groupby(route_cols)["service_hours"].transform("max"),
+          )[df.bus_multiplier.notna()]
            .reset_index(drop=True)
     )
-    '''
-    df2["order"] = df2.groupby('calitp_itp_id')["pct_trips_competitive"].cumcount()
-    # use -1 to round to nearest 10s
-    # since we generated cumcount(), which orders it from 1, 2, ...n for each group
-    # if we want groups of 10 per chart, can just round to nearest 10s
-    df2["plot_group"] = df2.apply(lambda x: math.floor(x.order / 10.0), axis=1)
     
-    # Merge plot_group in for all routes
+    
+    df2 = df2.assign(
+        route_group = df2.apply(lambda x: "short" if x.max_trip_hrs <= 1.0
+                               else "medium" if x.max_trip_hrs <=1.5
+                               else "long", axis=1)
+    )
+    
+    df2 = df2.assign(
+        max_trip_route_group = df2.groupby(
+            ["calitp_itp_id", "route_group"])["service_hours"].transform("max") 
+    )
+    
+    # Merge back in
     df3 = pd.merge(
         df, 
-        df2[["calitp_itp_id", "route_id", "plot_group"]], 
-        on = ["calitp_itp_id", "route_id"],
+        df2[["calitp_itp_id", "route_id", "route_group", 
+             "max_trip_hrs", "max_trip_route_group"]].drop_duplicates(), 
+        on = route_cols,
         how = "left",
-        validate = "m:1",
+        validate = "m:1"
     )
     
     return df3
@@ -221,17 +212,13 @@ def merge_in_airtable_name_district(df):
 if __name__ == "__main__":
     '''
     DATA_PATH = f"{utils.GCS_FILE_PATH}2022_Jan/"
-
     # Read in intermediate parquet for trips on selected date
     trips = pd.read_parquet(f"{DATA_PATH}trips_joined_thurs.parquet")
-
     SELECTED_DATE = '2022-1-6' #warehouse_queries.dates['thurs']
-
     # Attach service hours
     # This df is trip_id-stop_id level
     trips_with_service_hrs = setup_parallel_trips_with_stops.grab_service_hours(
         trips, SELECTED_DATE)
-
     trips_with_service_hrs.to_parquet("./data/trips_with_service_hours.parquet")
     '''
     
@@ -243,4 +230,5 @@ if __name__ == "__main__":
     df5 = designate_plot_group(df4)
     df6 = merge_in_airtable_name_district(df5)
     
-    shared_utils.utils.geoparquet_gcs_export(df6, utils.GCS_FILE_PATH, "competitive_route_variability")
+    shared_utils.utils.geoparquet_gcs_export(
+        df6, utils.GCS_FILE_PATH, "competitive_route_variability")
