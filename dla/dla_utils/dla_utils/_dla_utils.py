@@ -315,7 +315,7 @@ def basic_bar_chart(df, x_col, y_col, color_col, subset, chart_title=''):
 
     chart=styleguide.preset_chart_config(chart)
     savepath = (chart_title.replace(" ", "_"))
-    chart.save(f"./chart_outputs/d{subset}_outputs/bar_{savepath}.png")
+#    chart.save(f"./chart_outputs/d{subset}_outputs/bar_{savepath}.png")
     
     return chart
 
@@ -395,8 +395,8 @@ def basic_line_chart(df, x_col, y_col, subset, chart_title=''):
                           title=chart_title)
 
     chart=styleguide.preset_chart_config(chart)
-    savepath = (chart_title.replace(" ", "_"))
-    chart.save(f"./chart_outputs/d{subset}_outputs/line_{savepath}.png")
+    # savepath = (chart_title.replace(" ", "_"))
+    # chart.save(f"./chart_outputs/d{subset}_outputs/line_{savepath}.png")
     
     return chart
 
