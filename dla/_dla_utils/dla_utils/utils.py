@@ -231,26 +231,10 @@ def project_cat(df, i):
     )
 
     chart = add_tooltip(chart, "Agency", "Funding Amount")
-
-<<<<<<< Updated upstream
-    display(Markdown(f"<h2>Top Agencies using {labeling(i)} Projects</h2>"))
-   
-=======
-<<<<<<< Updated upstream
-    display(
-        Markdown(f"**Top Agencies using {labeling(i)} Projects**")
-    )
-=======
-    display(Markdown(f"<h3>Top Agencies using {labeling(i)} Projects</h3>"))
-   
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+    display(HTML(f"<h3>Top Agencies using {labeling(i)} Projects</h3>"))
     display(subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"}))
     #display(chart)
    
-    
-    
-    
     
 
 """
