@@ -1,8 +1,3 @@
-"""
-5311 Utils for Analysis and Charting 
-"""
-
-
 import numpy as np
 import pandas as pd
 from siuba import *
@@ -19,11 +14,6 @@ from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
 
-
-
-'''
-charting functions 
-'''
 #Labels
 def labeling(word):
     # Add specific use cases where it's not just first letter capitalized
@@ -62,5 +52,5 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./bar_{x_col}_by_{y_col}.png")
+    chart.save(f"./bar_{chart_title}.png")
     return chart
