@@ -13,5 +13,184 @@ parts:
     - itp_id: 159
     - itp_id: 198
     - itp_id: 261
+  - caption: District 02 - Redding
+    params:
+      district: 02 - Redding
+    sections:
+    - itp_id: 83
+    - itp_id: 162
+    - itp_id: 204
+    - itp_id: 259
+    - itp_id: 329
+    - itp_id: 334
+  - caption: District 03 - Marysville
+    params:
+      district: 03 - Marysville
+    sections:
+    - itp_id: 13
+    - itp_id: 23
+    - itp_id: 101
+    - itp_id: 122
+    - itp_id: 221
+    - itp_id: 251
+    - itp_id: 271
+    - itp_id: 273
+    - itp_id: 331
+    - itp_id: 351
+    - itp_id: 372
+    - itp_id: 376
+  - caption: District 04 - Oakland
+    params:
+      district: 04 - Oakland
+    sections:
+    - itp_id: 4
+    - itp_id: 56
+    - itp_id: 76
+    - itp_id: 106
+    - itp_id: 110
+    - itp_id: 127
+    - itp_id: 167
+    - itp_id: 194
+    - itp_id: 201
+    - itp_id: 218
+    - itp_id: 246
+    - itp_id: 247
+    - itp_id: 257
+    - itp_id: 264
+    - itp_id: 279
+    - itp_id: 280
+    - itp_id: 281
+    - itp_id: 282
+    - itp_id: 290
+    - itp_id: 294
+    - itp_id: 301
+    - itp_id: 310
+    - itp_id: 314
+    - itp_id: 315
+    - itp_id: 324
+    - itp_id: 336
+    - itp_id: 350
+    - itp_id: 356
+    - itp_id: 368
+  - caption: District 05 - San Luis Obispo
+    params:
+      district: 05 - San Luis Obispo
+    sections:
+    - itp_id: 129
+    - itp_id: 169
+    - itp_id: 208
+    - itp_id: 274
+    - itp_id: 287
+    - itp_id: 289
+    - itp_id: 293
+    - itp_id: 296
+    - itp_id: 312
+  - caption: District 06 - Fresno
+    params:
+      district: 06 - Fresno
+    sections:
+    - itp_id: 71
+    - itp_id: 91
+    - itp_id: 93
+    - itp_id: 116
+    - itp_id: 126
+    - itp_id: 146
+    - itp_id: 148
+    - itp_id: 188
+    - itp_id: 346
+    - itp_id: 361
+  - caption: District 07 - Los Angeles
+    params:
+      district: 07 - Los Angeles
+    sections:
+    - itp_id: 6
+    - itp_id: 16
+    - itp_id: 17
+    - itp_id: 24
+    - itp_id: 29
+    - itp_id: 35
+    - itp_id: 36
+    - itp_id: 37
+    - itp_id: 45
+    - itp_id: 49
+    - itp_id: 75
+    - itp_id: 77
+    - itp_id: 86
+    - itp_id: 87
+    - itp_id: 95
+    - itp_id: 102
+    - itp_id: 118
+    - itp_id: 120
+    - itp_id: 121
+    - itp_id: 123
+    - itp_id: 164
+    - itp_id: 170
+    - itp_id: 179
+    - itp_id: 182
+    - itp_id: 183
+    - itp_id: 210
+    - itp_id: 228
+    - itp_id: 231
+    - itp_id: 239
+    - itp_id: 243
+    - itp_id: 260
+    - itp_id: 270
+    - itp_id: 295
+    - itp_id: 300
+    - itp_id: 305
+    - itp_id: 308
+    - itp_id: 320
+    - itp_id: 323
+    - itp_id: 337
+    - itp_id: 339
+    - itp_id: 366
+    - itp_id: 380
+  - caption: District 08 - San Bernardino
+    params:
+      district: 08 - San Bernardino
+    sections:
+    - itp_id: 30
+    - itp_id: 34
+    - itp_id: 79
+    - itp_id: 212
+    - itp_id: 220
+    - itp_id: 232
+    - itp_id: 238
+    - itp_id: 327
+    - itp_id: 360
+  - caption: District 09 - Bishop
+    params:
+      district: 09 - Bishop
+    sections:
+    - itp_id: 99
+  - caption: District 10 - Stockton
+    params:
+      district: 10 - Stockton
+    sections:
+    - itp_id: 10
+    - itp_id: 11
+    - itp_id: 50
+    - itp_id: 168
+    - itp_id: 203
+    - itp_id: 284
+    - itp_id: 341
+    - itp_id: 343
+    - itp_id: 349
+    - itp_id: 374
+    - itp_id: 482
+  - caption: District 11 - San Diego
+    params:
+      district: 11 - San Diego
+    sections:
+    - itp_id: 226
+    - itp_id: 278
+    - itp_id: 386
+  - caption: District 12 - Irvine
+    params:
+      district: 12 - Irvine
+    sections:
+    - itp_id: 137
+    - itp_id: 154
+    - itp_id: 235
 readme: ./bus_service_increase/README.md
 title: Parallel Bus Corridors to State Highway Network

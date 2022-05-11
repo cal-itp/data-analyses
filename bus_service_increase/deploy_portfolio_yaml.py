@@ -23,7 +23,7 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML):
     """
     df = catalog.competitive_route_variability.read()
     
-    districts = sorted(list(df[df.caltrans_district.notna()].caltrans_district.unique()))[:1]
+    districts = sorted(list(df[df.caltrans_district.notna()].caltrans_district.unique()))
 
     # Eric's example
     # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
