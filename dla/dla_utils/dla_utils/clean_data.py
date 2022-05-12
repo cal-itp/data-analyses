@@ -10,8 +10,6 @@ https://dot.ca.gov/programs/local-assistance/reports/e-76-waiting
 
 """
 
-#! pip install cpi
-
 import numpy as np
 import pandas as pd
 from calitp import to_snakecase
