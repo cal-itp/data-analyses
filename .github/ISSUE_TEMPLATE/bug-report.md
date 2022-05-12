@@ -1,7 +1,7 @@
 ---
 name: Bug Report - Data or Tooling
 about: Create a report to help us improve our warehouse or our analytics tooling.
-title: 'Bug: '
+title: 'Bug: : [description]'
 labels: ["bug", "admin"]
 assignees: 'charlie-costanzo'
 ---
