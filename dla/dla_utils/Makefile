@@ -1,4 +1,2 @@
-setup_env:
+setup_dla:
 	pip install -r requirements.txt
-	pip install cpi
-	conda install --yes -c conda-forge --file conda-requirements.txt

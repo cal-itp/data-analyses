@@ -9,4 +9,5 @@ setup(
     license="Apache",
     include_package_data=True,
     package_dir={"_dla_utils": "dla_utils"},
+    install_requires=["cpi"],
 )
