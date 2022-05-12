@@ -4,7 +4,7 @@
 
 ## Important Definitions
 
-The [Methodology section](#Methodology) explains why these definitions are needed. 
+The [Methodology section](#methodology) explains why these definitions are needed. 
 
 **Parallel routes**: routes where at least 30% of the bus route falls within 1 mile of the SHN *and* cover at least 10% of the highway segment's length.
 
