@@ -13,7 +13,6 @@ from plotnine import *
 import altair as alt
 import altair_saver
 
-
 from IPython.display import Markdown, HTML
 from IPython.core.display import display
 
@@ -28,18 +27,13 @@ import intake
 import ipywidgets as widgets
 from ipywidgets import *
 
-
-
-
 pd.options.display.float_format = '{:,.2f}'.format
 
 ## add to notebook cell
 # alt.themes.register("calitp_theme", styleguide.calitp_theme)
 # alt.themes.enable("calitp_theme")
 
-
 # aggfunc for specified columns
-
 
 def calculate_data_all(df, col, aggregate_by=["dist"], aggfunc="sum"):
     df = (df.groupby(aggregate_by)
@@ -369,8 +363,8 @@ def basic_scatter_chart(df, x_col, y_col, color_col, subset, chart_title=""):
     )
 
     chart=styleguide.preset_chart_config(chart)
-    savepath = (chart_title.replace(" ", "_"))
-    chart.save(f"./chart_outputs/d{subset}_outputs/scatter_{savepath}.png")
+    # savepath = (chart_title.replace(" ", "_"))
+    # chart.save(f"./chart_outputs/d{subset}_outputs/scatter_{savepath}.png")
     
     
     return chart

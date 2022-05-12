@@ -4,7 +4,7 @@ These shared utils include general charting functions as well as DLA related agg
 
 ## Getting Started
 
-1. In terminal, change directory into `_dla_utils`: `cd data-analyses/dla/dla_utils`
+1. In terminal, change directory into `dla_utils`: `cd data-analyses/dla/dla_utils`
 1. Run the make command to further do the `pip install` and `conda install`: `make setup_env`
 1. Do work in your project-subfolder. Ex: `cd ../dla/reports`
 1. Within Jupyter Notebook or script: `from dla_utils import _dla_utils`
