@@ -1,0 +1,19 @@
+title: RT + Parallel
+name: rt_parallel
+directory: ./bus_service_increase/
+parts:
+- caption: Introduction
+- chapters:
+  - caption: ITP ID 182
+    params: 
+      itp_id: 182
+    sections:
+    - notebook: ./rt_delay/speedmaps.ipynb
+    - notebook: ./bus_service_increase/competitive-parallel-routes.ipynb
+  - caption: ITP ID 183
+    params: 
+      itp_id: 183
+    sections:
+    - notebook: ./rt_delay/speedmaps.ipynb
+    - notebook: ./bus_service_increase/competitive-parallel-routes.ipynb
+readme: ./bus_service_increase/README.md
