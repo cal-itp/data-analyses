@@ -1,0 +1,10 @@
+directory: ./bus_service_increase/
+parts:
+- caption: Introduction
+- chapters:
+  - caption: Chapter 1
+    params: 
+        state: CA
+    notebook: ./bus_service_increase/definitions-competitive-viable.ipynb
+readme: ./bus_service_increase/README.md
+title: Highway Corridors
