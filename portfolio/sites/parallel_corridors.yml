@@ -1,6 +1,4 @@
 directory: ./bus_service_increase/
-readme: ./bus_service_increase/README.md
-title: Parallel Bus Corridors to State Highway Network
 notebook: ./bus_service_increase/competitive-parallel-routes.ipynb
 parts:
 - chapters:
@@ -29,6 +27,7 @@ parts:
     params:
       district: 03 - Marysville
     sections:
+    - itp_id: 13
     - itp_id: 23
     - itp_id: 101
     - itp_id: 122
@@ -45,6 +44,7 @@ parts:
       district: 04 - Oakland
     sections:
     - itp_id: 4
+    - itp_id: 56
     - itp_id: 76
     - itp_id: 106
     - itp_id: 110
@@ -58,6 +58,7 @@ parts:
     - itp_id: 257
     - itp_id: 264
     - itp_id: 279
+    - itp_id: 280
     - itp_id: 281
     - itp_id: 282
     - itp_id: 290
@@ -90,6 +91,7 @@ parts:
     sections:
     - itp_id: 71
     - itp_id: 91
+    - itp_id: 93
     - itp_id: 116
     - itp_id: 126
     - itp_id: 146
@@ -101,13 +103,25 @@ parts:
     params:
       district: 07 - Los Angeles
     sections:
+    - itp_id: 6
     - itp_id: 16
+    - itp_id: 17
+    - itp_id: 24
+    - itp_id: 29
+    - itp_id: 35
+    - itp_id: 36
+    - itp_id: 37
     - itp_id: 45
+    - itp_id: 49
     - itp_id: 75
+    - itp_id: 77
+    - itp_id: 86
     - itp_id: 87
+    - itp_id: 95
     - itp_id: 102
     - itp_id: 118
     - itp_id: 120
+    - itp_id: 121
     - itp_id: 123
     - itp_id: 164
     - itp_id: 170
@@ -115,15 +129,21 @@ parts:
     - itp_id: 182
     - itp_id: 183
     - itp_id: 210
+    - itp_id: 228
     - itp_id: 231
     - itp_id: 239
     - itp_id: 243
     - itp_id: 260
+    - itp_id: 270
     - itp_id: 295
     - itp_id: 300
+    - itp_id: 305
     - itp_id: 308
+    - itp_id: 320
+    - itp_id: 323
     - itp_id: 337
     - itp_id: 339
+    - itp_id: 366
     - itp_id: 380
   - caption: District 08 - San Bernardino
     params:
@@ -133,8 +153,10 @@ parts:
     - itp_id: 34
     - itp_id: 79
     - itp_id: 212
+    - itp_id: 220
     - itp_id: 232
     - itp_id: 238
+    - itp_id: 327
     - itp_id: 360
   - caption: District 09 - Bishop
     params:
@@ -145,7 +167,9 @@ parts:
     params:
       district: 10 - Stockton
     sections:
+    - itp_id: 10
     - itp_id: 11
+    - itp_id: 50
     - itp_id: 168
     - itp_id: 203
     - itp_id: 284
@@ -165,5 +189,8 @@ parts:
     params:
       district: 12 - Irvine
     sections:
+    - itp_id: 137
     - itp_id: 154
     - itp_id: 235
+readme: ./bus_service_increase/README.md
+title: Parallel Bus Corridors to State Highway Network
