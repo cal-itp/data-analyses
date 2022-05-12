@@ -1,0 +1,6 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: state_ca/0__definitions-competitive-viable__state_ca.ipynb
+root: README
