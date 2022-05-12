@@ -9,8 +9,7 @@ import intake
 import math 
 import os
 import pandas as pd
-
-os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
+import re
 
 from calitp.tables import tbl
 from siuba import *
@@ -142,6 +141,13 @@ def merge_in_competitive_routes(df):
     return df4
 
 
+diff_cutoffs = {
+    "short": 20,
+    "medium": 30,
+    "long": 40,
+}
+
+
 def designate_plot_group(df):
     # Add plot group, since stripplot can get crowded, plot 15 max?
     route_cols = ["calitp_itp_id", "route_id"]
@@ -152,13 +158,13 @@ def designate_plot_group(df):
             maximum = df.groupby(route_cols)[c].transform("max"),
         )
         df = df.assign(
-            spread = (df.maximum - df.minimum) + 
+            spread = (df.maximum - df.minimum) 
         ).rename(columns = {"spread": f"{c}_spread"}).drop(columns = ["minimum", "maximum"])
 
     df2 = (df.assign(
                # Break it up into short / medium / long routes instead of plot group
                max_trip_hrs = df.groupby(route_cols)["service_hours"].transform("max"),
-          )[df.bus_multiplier.notna()]
+          )
            .reset_index(drop=True)
     )
     
@@ -170,8 +176,7 @@ def designate_plot_group(df):
     )
     
     df2 = df2.assign(
-        max_trip_route_group = df2.groupby(
-            ["calitp_itp_id", "route_group"])["service_hours"].transform("max") 
+        max_trip_route_group = df2.groupby(route_cols)["service_hours"].transform("max") 
     )
     
     # Merge back in
@@ -184,7 +189,21 @@ def designate_plot_group(df):
         validate = "m:1"
     )
     
-    return df3
+    # Add cut-off thresholds by route_group
+    # Calculate a certain threshold of competitive trips within that cut-off, and
+    # call those "viable"
+    df4 = df3.assign(
+        below_cutoff = df3.apply(lambda x: 
+                                 1 if x.bus_difference <= diff_cutoffs[x.route_group]
+                                 else 0, axis=1),
+        num_trips = df3.groupby(route_cols)["trip_id"].transform("count")
+    )
+    
+
+    df4["below_cutoff"] = df4.groupby(route_cols)["below_cutoff"].transform("sum")
+    df4["pct_below_cutoff"] = df4.below_cutoff.divide(df4.num_trips)
+    
+    return df4
 
 
 def merge_in_airtable_name_district(df):
@@ -209,12 +228,78 @@ def merge_in_airtable_name_district(df):
     return df2
 
 
+def add_route_name(df):
+    # Eric picks which route desc to use, tweak his function a bit
+    # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/utils.py
+    # Match his so there's conformity between analyses
+    route_names = (tbl.views.gtfs_schedule_dim_routes()
+               >> filter(_.calitp_extracted_at < SELECTED_DATE, 
+                         _.calitp_deleted_at >= SELECTED_DATE
+                        )
+               >> select(_.calitp_itp_id, _.route_id, 
+                         _.route_short_name, _.route_long_name, _.route_desc
+                        )
+               # Do a filtering first, then do a pd.merge later
+               >> filter(_.calitp_itp_id.isin(df.calitp_itp_id.unique().tolist()))
+               >> filter(_.route_id.isin(df.route_id.unique().tolist()))
+               >> distinct()
+               >> collect()        
+    )
+    
+    def exclude_desc(desc):
+        ## match descriptions that don't give additional info, like Route 602 or Route 51B
+        exclude_texts = [
+            ' *Route *[0-9]*[a-z]{0,1}$', 
+            ' *Metro.*(Local|Rapid|Limited).*Line',
+            ' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)',
+            ' *service within the Stockton Metropolitan Area',
+            ' *Hopper bus can deviate',
+            " *RTD's Interregional Commuter Service is a limited-capacity service"
+        ]
+        desc_eval = [re.search(text, desc, flags=re.IGNORECASE) for text in exclude_texts]
+        # number_only = re.search(' *Route *[0-9]*[a-z]{0,1}$', desc, flags=re.IGNORECASE)
+        # metro = re.search(' *Metro.*(Local|Rapid|Limited).*Line', desc, flags=re.IGNORECASE)
+        # redwood = re.search(' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)', desc, flags=re.IGNORECASE)
+        # return number_only or metro or redwood
+        return any(desc_eval)
+    
+    
+    def which_desc(row):
+        long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
+        route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
+        if route_desc_valid:
+            return row.route_desc.title()
+        elif long_name_valid:
+            return row.route_long_name.title()
+        else:
+            return ''
+    
+    route_names = route_names.assign(
+        route_name_used = route_names.apply(lambda x: which_desc(x), axis=1)
+    )
+
+    df2 = pd.merge(
+        df, 
+        route_names[route_names.route_name_used != ""][
+            ["calitp_itp_id", "route_id", "route_name_used"]].drop_duplicates(),
+        on = ["calitp_itp_id", "route_id"],
+        how = "left",
+        # many on the left because df is unique at itp_id-route_id-shape_id
+        validate = "m:1",
+    )
+    
+    return df2
+
+    
+
 if __name__ == "__main__":
     '''
     DATA_PATH = f"{utils.GCS_FILE_PATH}2022_Jan/"
     # Read in intermediate parquet for trips on selected date
     trips = pd.read_parquet(f"{DATA_PATH}trips_joined_thurs.parquet")
+    '''
     SELECTED_DATE = '2022-1-6' #warehouse_queries.dates['thurs']
+    '''
     # Attach service hours
     # This df is trip_id-stop_id level
     trips_with_service_hrs = setup_parallel_trips_with_stops.grab_service_hours(
@@ -229,6 +314,7 @@ if __name__ == "__main__":
     df4 = merge_in_competitive_routes(df3)
     df5 = designate_plot_group(df4)
     df6 = merge_in_airtable_name_district(df5)
+    df7 = add_route_name(df6)
     
     shared_utils.utils.geoparquet_gcs_export(
-        df6, utils.GCS_FILE_PATH, "competitive_route_variability")
+        df7, utils.GCS_FILE_PATH, "competitive_route_variability")
