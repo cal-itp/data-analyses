@@ -10,7 +10,7 @@ The [Methodology section](#Methodology) explains why these definitions are neede
 
 **Competitive routes**: routes where at least 75% of the trips take no longer than 2x a car. 
 
-**Viable competitive routes**: competitive routes where at least 75% of the trips take no longer than 2x a car *and* 50% of the trips take no longer than an additional 20, 30, or 40 min cut-off time (depending on route length). 
+**Viable competitive routes**: competitive routes where at least 75% of the trips take no longer than 2x a car *and* 100% of the trips take no longer than an additional 20, 30, or 40 min cut-off time (depending on route length). 
 
 In CA, nearly 2/3 of bus routes are parallel, accounting for 55% of the service hours (typical weekday, 2/8/22).
 
@@ -46,13 +46,13 @@ Within an operator, there is additional variability in the type of routes it ser
 
 Bus riders would not accept such a high discrepancy for travel time. Therefore, a new metric, `bus_difference` is calculated, showing the difference, in minutes, between bus and car travel time for that bus trip. 
 
-The `bus_multiplier` metric is then paired with a `bus_difference` metric. At least 50% of the bus route's trips must be within this `bus_difference` threshold. For a short route, at least 50% of the bus route's trips cannot take longer than an additional 20 min compared to a car. These thresholds are used to show an operator its most viable competitive routes, and up to 15 routes are recommended for each route group.
+The `bus_multiplier` metric is then paired with a `bus_difference` metric. All of the bus route's trips must be within this `bus_difference` threshold. For a short route, all of the bus route's trips cannot take longer than an additional 20 min compared to a car. These thresholds are used to show an operator its most viable competitive routes, and up to 15 routes are recommended for each route group.
 
 * Short (< 1 hr): +20 min for bus
 * Medium (1-1.5 hrs): +30 min
 * Long (> 1.5 hrs): +40 min
 
-**Viable competitive routes**: competitive routes where at least 75% of the trips take no longer than 2x a car *and* 50% of the trips take no longer than an additional 20, 30, or 40 min cut-off time (depending on route length). 
+**Viable competitive routes**: competitive routes where at least 75% of the trips take no longer than 2x a car *and* 100% of the trips take no longer than an additional 20, 30, or 40 min cut-off time (depending on route length). 
 
 
 ### Notes

@@ -117,7 +117,7 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
         # if that operator falls well below cut-off, we want the horiz lines to be shown
         # take the max and add some buffer so horiz line can be seen
         Y_MAX = max(df.cutoff.iloc[0] + 1, Y_MAX)
-        Y_MIN = min(-0.25, Y_MIN)
+        Y_MIN = min(0, Y_MIN)
         
     elif y_col == "bus_difference":
         df = df.assign(cutoff=0)
@@ -158,7 +158,7 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
                                  "service_hours", "car_duration_hours",
                                  "bus_multiplier", "bus_difference", 
                                  "num_trips", "num_competitive",
-                                 "pct_trips_competitive",
+                                 "pct_trips_competitive", "pct_below_cutoff",
                                  "p25", "p50", "p75"
                                 ])
           )
