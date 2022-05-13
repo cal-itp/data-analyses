@@ -8,5 +8,6 @@ parts:
     sections:
     - notebook: ./bus_service_increase/definitions-competitive-viable.ipynb
     - notebook: ./bus_service_increase/scatterplot.ipynb
+name: highway_corridors    
 readme: ./bus_service_increase/README.md
 title: Highway Corridors
