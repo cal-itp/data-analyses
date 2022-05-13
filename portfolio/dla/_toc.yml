@@ -1,0 +1,17 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: district_1/0__report_test2__district_1.ipynb
+    -   file: district_2/0__report_test2__district_2.ipynb
+    -   file: district_3/0__report_test2__district_3.ipynb
+    -   file: district_4/0__report_test2__district_4.ipynb
+    -   file: district_5/0__report_test2__district_5.ipynb
+    -   file: district_6/0__report_test2__district_6.ipynb
+    -   file: district_7/0__report_test2__district_7.ipynb
+    -   file: district_8/0__report_test2__district_8.ipynb
+    -   file: district_9/0__report_test2__district_9.ipynb
+    -   file: district_10/0__report_test2__district_10.ipynb
+    -   file: district_11/0__report_test2__district_11.ipynb
+    -   file: district_12/0__report_test2__district_12.ipynb
+root: README
