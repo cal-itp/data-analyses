@@ -1,7 +1,7 @@
 title: DLA Grant Analysis
 directory: ./dla/
 readme: ./dla/README.md
-notebook: ./dla/e76_obligated_funds/reports/report_test2.ipynb
+notebook: ./dla/e76_obligated_funds/reports/dla_district_report.ipynb
 parts:
 - caption: Introduction
 - chapters:
