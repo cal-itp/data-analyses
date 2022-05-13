@@ -1,7 +1,8 @@
-# Run this in data-analyses and specify dla/Makefile: make build_dla_reports -f portfolio_Makefile
+# Run this in data-analyses and specify dla/Makefile: make build_dla_reports -f portfolio_Makefile_dla
 build_dla_reports:
-	#pip install -r portfolio/requirements.txt
-	#git rm portfolio/dla/ -rf
+	pip install -r portfolio/requirements.txt
+	pip install humanize
+	git rm portfolio/dla/ -rf
 	#rm portfolio/dla/ -rf
 	python portfolio/portfolio.py build dla --deploy 
 	git add portfolio/dla/district_*/ portfolio/dla/*.yml portfolio/dla/*.md 
