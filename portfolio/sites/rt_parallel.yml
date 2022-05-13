@@ -1,5 +1,4 @@
 title: RT + Parallel
-name: rt_parallel
 directory: ./bus_service_increase/
 parts:
 - caption: Introduction
