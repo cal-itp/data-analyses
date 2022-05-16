@@ -1,1 +1,3 @@
 googlemaps
+nbformat==5.1.3 
+papermill==2.3.4
