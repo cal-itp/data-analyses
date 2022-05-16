@@ -173,8 +173,9 @@ def make_folium_choropleth_map(
         **geojson_dict,
     ).add_to(m)
 
-    colorscale.caption = f"{legend_name}"
-    colorscale.add_to(m)
+    if legend_name is not None:
+        colorscale.caption = f"{legend_name}"
+        colorscale.add_to(m)
 
     fig.add_child(m)
 
