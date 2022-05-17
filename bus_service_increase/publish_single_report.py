@@ -2,7 +2,6 @@
 Script to publish single notebooks.
 Run this in data-analyses/bus_service_increase directory.
 """
-#import base64
 import dotenv
 import os
 import subprocess
