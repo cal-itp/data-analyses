@@ -13,7 +13,9 @@ from shared_utils import geography_utils
 
 catalog = intake.open_catalog("./*.yml")
 
-
+#-----------------------------------------------------------#
+## Sub-functions for aggregate hwy and operator stats
+#-----------------------------------------------------------#
 def competitive_to_route_level():
     # This is output from `make_stripplot_data.py`
     # Wrangle it so it is at route-level, instead of trip-level    
@@ -125,26 +127,14 @@ def aggregate_operators(df):
               ).astype({"itp_id": int})
     
     return df5
-    
 
 
-def grab_highways_for_operator(df):
-    # Assemble a list of highways associated with the operator
-    # create a column that lists those highways
-    # merge that in
-    operator_hwys = (df[["itp_id", "Route"]][df.Route.notna()]
-         .drop_duplicates()
-         .astype(int)
-        )
-
-    operator_hwys = (operator_hwys.groupby("itp_id")["Route"]
-                     .apply(lambda x: x.tolist())
-                     .reset_index()
-                     .rename(columns = {"Route": "hwy_list"})
-                    )
-    return operator_hwys
-
-    
+#-----------------------------------------------------------#
+## Aggregate hwy and operator stats
+#-----------------------------------------------------------#
+# Assemble, for operator, their parallel and competitive routes
+# Aggregate and get relevant stats from highway POV and operator POV
+# Depends on sub-functions defined above
 def aggregated_transit_hwy_stats():    
     parallel = catalog.parallel_or_intersecting_routes.read()
     competitive = competitive_to_route_level()
@@ -182,7 +172,30 @@ def aggregated_transit_hwy_stats():
         
     return operator_stats, hwy_stats
     
-    
+
+#-----------------------------------------------------------#
+## Helper functions in notebooks
+# ipywidgets needs filtering/zooming in to specific operator or hwy
+#-----------------------------------------------------------#    
+# Assemble a list of highways associated with the operator
+# Store that in a column and merge it in
+# Will be useful for filtering in ipywidgets
+def grab_highways_for_operator(df):
+    operator_hwys = (df[["itp_id", "Route"]][df.Route.notna()]
+         .drop_duplicates()
+         .astype(int)
+        )
+
+    operator_hwys = (operator_hwys.groupby("itp_id")["Route"]
+                     .apply(lambda x: x.tolist())
+                     .reset_index()
+                     .rename(columns = {"Route": "hwy_list"})
+                    )
+    return operator_hwys
+
+
+# Grab transit route geometry for operator 
+# so folium map can zoom in appropriately for a specific highway / operator combo
 def routes_highways_geom_for_operator(operator_df):
     # This seems slightly overlapping with C1, where gdf is
     # imported at the beginning of ipywidget
@@ -198,3 +211,51 @@ def routes_highways_geom_for_operator(operator_df):
                  ]
     
     return transit_routes, hwys_df
+
+
+# For hwys with zero or little competitive routes
+# Calculate some additional stats and prep data for mapping
+def process_hwy_stats(df):
+    # parallel routes / competitive routes per mile
+    # or percents?
+    # right now, highway_length is in feet
+    df = df.assign(
+        parallel_per_mi = (df.num_parallel.divide(df.highway_length) * 
+                           geography_utils.FEET_PER_MI),
+        competitive_per_mi = (df.num_competitive.divide(df.highway_length) * 
+                              geography_utils.FEET_PER_MI),
+    )
+    
+    # Add in highways geometry
+    highways = catalog.highways_cleaned.read()
+
+    gdf = pd.merge(
+        highways.assign(geometry=highways.geometry.buffer(200)).drop(
+            columns = ["NB", "SB", "EB", "WB"]),
+        df,
+        on = ["Route", "County", "District"],
+        how = "inner",
+        validate = "m:1"
+    ).rename(columns = {
+        "highway_length_x": "highway_length_routetype",
+        "highway_length_y": "highway_length_route",
+    })
+    
+    # More descriptive hwy label for maps
+    def hwy_route_label(row):
+        if row.RouteType=="Interstate":
+            label = row.RouteType + " " + str(row.Route) 
+        else:
+            label = row.RouteType + " Hwy " + str(row.Route)
+        return label
+    
+    # Convert highway length into miles
+    gdf2 = gdf.assign(
+        highway_length_routetype = gdf.highway_length_routetype.divide(
+            geography_utils.FEET_PER_MI).round(2),
+        highway_length_route = gdf.highway_length_route.divide(
+            geography_utils.FEET_PER_MI).round(2),
+        hwy_route_name = gdf.apply(lambda x: hwy_route_label(x), axis=1),
+    )
+    
+    return gdf2

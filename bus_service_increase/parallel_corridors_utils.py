@@ -1,18 +1,20 @@
 """
-Functions backing competitive-parallel-routes.ipynb.
+Functions backing competitive-parallel-routes.ipynb and 
+ca-highways-no-parallel-routes.ipynb and ca-highways-low-competetive-routes.ipynb.
 
 Create stripplots and stats used in narrative.
 """
 import altair as alt
+import branca
 import intake
 import pandas as pd
 
-from IPython.display import display, Markdown, HTML
+from IPython.display import Markdown, HTML, display_html
 
 import setup_parallel_trips_with_stops
 import utils
 from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
+from shared_utils import styleguide, map_utils
 from make_stripplot_data import diff_cutoffs
 
 alt.themes.register("calitp_theme", styleguide.calitp_theme)
@@ -75,7 +77,6 @@ def operator_parallel_competitive_stats(itp_id, pct_trips_competitive_cutoff, pc
 #------------------------------------------------------------#
 # Color to designate p25, p50, p75, fastest trip?
 DARK_GRAY = "#323434"
-#NAVY = cp.CALITP_CATEGORY_BOLD_COLORS[0]
 
 def labeling(word):
     label_dict = {
@@ -272,3 +273,126 @@ def competitive_route_level_stats(df):
     )
     
     return df3
+
+#------------------------------------------------------------#
+# Folium map
+#------------------------------------------------------------#
+FIG_HEIGHT = 300
+FIG_WIDTH = 550
+
+PLOT_COL = "count_route_id"
+POPUP_DICT = {
+    "Route": "Hwy Route",
+    "County": "County",
+    "District": "District",
+    "RouteType": "Route Type",
+    "count_route_id": "# transit routes",
+    "num_parallel": "# parallel routes",
+    "num_competitive": "# competitive routes",
+    "pct_parallel": "% parallel routes",
+    "pct_competitive": "% competetive routes",
+    "highway_length_routetype": "Hwy Length (mi)",
+}
+
+
+def make_map(gdf): 
+    # Create unique colors for each highway in district
+    # Do it off of the index value
+    # TODO: figure out how to get this list to be truncated
+    # index in there makes map not display
+    COLORSCALE = branca.colormap.StepColormap(
+        colors = cp.CALITP_CATEGORY_BOLD_COLORS,
+    )
+    
+    m = map_utils.make_folium_choropleth_map(
+        gdf,
+        plot_col = PLOT_COL,
+        popup_dict = POPUP_DICT, tooltip_dict = POPUP_DICT,
+        colorscale = COLORSCALE,
+        fig_width = FIG_WIDTH,
+        fig_height = FIG_HEIGHT,
+        zoom = 10,
+        centroid = [gdf.geometry.centroid.y, 
+                    gdf.geometry.centroid.x,
+                   ],
+        title = f"{gdf.hwy_route_name.iloc[0]}",
+        legend_name = None,
+    )
+    
+    return m
+
+
+# iframe the map and insert side-by-side
+# Go back to raw html for this
+# https://stackoverflow.com/questions/57943687/showing-two-folium-maps-side-by-side
+border = 'border:none'
+display = 'display:inline-block; width: 48%; margin: 0; padding: 0;'
+img_size = 'width: 300px; height: 375px;'
+scrolling = 'scrolling: no;'
+
+def iframe_styling(map_obj, direction):
+    html_str = f'''
+    <iframe srcdoc="{map_obj.get_root().render().replace('"', '&quot;')}" 
+    style="float:{direction}; {img_size}
+    {display}
+    {border}">
+    </iframe>
+    '''
+
+    return html_str
+
+def display_side_by_side(*args):
+    html_str=''
+    for df in args:
+        html_str+=df
+    display_html(html_str, raw=True)
+    
+    
+# District-level stats printed as table before maps
+def district_stats(gdf, district):
+    cols = [
+        "Route", "County", "RouteType", 
+        "count_route_id", "highway_length_routetype",
+    ]
+    
+    # Format html table
+    table = (
+        gdf[gdf.District==district][cols]
+        .rename(columns = POPUP_DICT)
+        .style.format({'Hwy Length (mi)': '{:,.2f}'})
+        .set_properties(**{'text-align': 'center'})
+        .set_table_styles([dict(selector='th',props=[('text-align', 'center')])
+                          ])
+        .hide(axis="index")
+    )
+    return table
+
+#------------------------------------------------------------#
+# District outputs all together
+#------------------------------------------------------------#    
+def show_district_analysis(gdf, district):
+    subset = (gdf[gdf.District==district]
+              .sort_values(
+                  ["count_route_id", "highway_length_routetype"], 
+                  ascending=[False, False])
+              .reset_index(drop=True)
+             )
+    
+    # Put maps side-by-side
+    # Loop and pick every other. 1st element as left_map; 2nd element as right_map
+    for i in range(0, len(subset), 2):
+        # If it's even number for maps, always have a left and right
+        # or, if it's odd and we're not at the last obs
+        if (len(subset) % 2 == 0) or ((len(subset) % 2 == 1) and (i != len(subset) - 1)):
+            m1 = make_map(subset[subset.index==i])
+            m2 = make_map(subset[subset.index==i+1])
+
+            left_map = iframe_styling(m1, "left")
+            right_map = iframe_styling(m2, "right")
+            display_side_by_side(left_map, right_map)
+        elif (len(subset) % 2 == 1) and (i == len(subset) - 1): 
+            m1 = make_map(subset[subset.index==i])
+            left_map = iframe_styling(m1, "left")
+            display_side_by_side(left_map)
+
+
