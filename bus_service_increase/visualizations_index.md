@@ -19,3 +19,7 @@
 * [SF Muni (282)](https://docs.calitp.org/data-analyses/bus_service_increase/img/parallel_282.html)
 * [SD Metropolitan Transit System (278)](https://docs.calitp.org/data-analyses/bus_service_increase/img/parallel_278.html)
 * [Competitive Parallel Transit Routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/competitive_routes.html)
+
+## Reports
+* [Highway Corridors with No Parallel Routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-no-parallel-routes.html)
+* [Highway Corridors with Low Competitive Routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-low-competitive-routes.html)
