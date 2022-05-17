@@ -1,8 +1,3 @@
-"""
-5311 Utils for Analysis and Charting 
-"""
-
-
 import numpy as np
 import pandas as pd
 from siuba import *
@@ -19,11 +14,6 @@ from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
 
-
-
-'''
-charting functions 
-'''
 #Labels
 def labeling(word):
     # Add specific use cases where it's not just first letter capitalized
@@ -43,7 +33,7 @@ def labeling(word):
     
     return word
 
-# Bar
+# Bar Chart
 def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     if chart_title == "":
         chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
@@ -62,5 +52,50 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./bar_{x_col}_by_{y_col}.png")
+    chart.save(f"./bar_{chart_title}.png")
     return chart
+
+### BAR CHART WITH LABELS  ###
+#Base bar chart
+def base_bar(df):
+    chart = (alt.Chart(df)
+             .mark_bar()
+             )
+    return chart
+
+# Fancier Bar Chart
+def fancy_bar_chart(df, x_col, y_col, label_col, chart_title=''):
+    
+    if chart_title == "":
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
+    
+    bar = base_bar(df)
+    
+    bar = (bar.encode(
+         x=alt.X(x_col, title=labeling(x_col)),
+         y=alt.Y(y_col, title=labeling(y_col), sort=('-x')),
+         color=alt.Color(y_col, 
+                        scale=alt.Scale(
+                            range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS
+                        )
+                )
+             )
+            )
+    #https://stackoverflow.com/questions/54015250/altair-setting-constant-label-color-for-bar-chart
+    text = (bar
+            .mark_text(align="left", baseline="middle",
+                       color="black", dy=3
+                      )
+            .encode(text=label_col, 
+                    # Set color here, because encoding for mark_text gets 
+                    # superseded by alt.Color
+                   color=alt.value("black"))
+    )
+      
+    chart = (bar+text)
+    
+    chart = (styleguide.preset_chart_config(chart)
+             .properties(title= chart_title).configure_axis(grid=False)
+            )
+    chart.save(f"./bar_{chart_title}.png")
+    display(chart)
