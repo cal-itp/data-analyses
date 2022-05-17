@@ -1,8 +1,0 @@
-format: jb-book
-parts:
--   caption: null
-    chapters:
-    -   file: state_ca.md
-        sections:
-        -   glob: state_ca/*
-root: README
