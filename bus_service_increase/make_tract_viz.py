@@ -3,7 +3,6 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
-import setup_viz_data
 import utils
 from setup_tract_charts import *
 from shared_utils import geography_utils, map_utils
