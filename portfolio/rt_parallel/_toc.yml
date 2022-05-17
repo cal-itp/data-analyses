@@ -1,0 +1,19 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: itp_id_4.md
+        sections:
+        -   glob: itp_id_4/*
+    -   file: itp_id_301.md
+        sections:
+        -   glob: itp_id_301/*
+-   caption: null
+    chapters:
+    -   file: itp_id_182.md
+        sections:
+        -   glob: itp_id_182/*
+    -   file: itp_id_183.md
+        sections:
+        -   glob: itp_id_183/*
+root: README
