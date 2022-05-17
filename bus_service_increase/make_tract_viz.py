@@ -1,18 +1,64 @@
 import branca
+import geopandas as gpd
+import intake
 import pandas as pd
 
 import setup_viz_data
 import utils
 from setup_tract_charts import *
-from setup_tract_maps import *
 from shared_utils import geography_utils, map_utils
 from shared_utils import calitp_color_palette as cp
+
+catalog = intake.open_catalog("./catalog.yml")
 
 #----------------------------------------------------------------#
 ## Functions to wrangle data for charts
 #----------------------------------------------------------------#
 def import_processed_data():
-    df = setup_viz_data.generate_stop_times_tract_data()
+    df = catalog.bus_stop_times_by_tract.read()
+    
+    df = df.assign(
+        num_arrivals = df.num_arrivals.fillna(0),
+        num_jobs = df.num_jobs.fillna(0),
+        stop_id = df.stop_id.fillna(0),
+        itp_id = df.itp_id.fillna(0),
+        num_pop_jobs = df.num_pop_jobs.fillna(0),
+        popdensity_group = pd.qcut(df.pop_sq_mi, q=3, labels=False) + 1,
+        jobdensity_group = pd.qcut(df.jobs_sq_mi, q=3, labels=False) + 1,
+        popjobdensity_group = pd.qcut(df.popjobs_sq_mi, q=3, labels=False) + 1,
+    )
+
+    # These columns may result in NaNs becuase pop or jobs can be zero as denom
+    # Let's keep it and allow arrivals_groups to be 0 (instead of 1-3)
+    # Should only be a problem if pop OR jobs is zero or if pop AND jobs is zero.
+    df = df.assign(
+        arrivals_per_1k_p = (df.num_arrivals / df.Population) * 1_000,
+        arrivals_per_1k_j = (df.num_arrivals / df.num_jobs) * 1_000,
+        arrivals_per_1k_pj = (df.num_arrivals / df.num_pop_jobs) * 1_000,
+    )
+
+    df = df.assign(
+        arrivals_group_p = pd.qcut(df.arrivals_per_1k_p, q=3, labels=False) + 1,
+        arrivals_group_j =  pd.qcut(df.arrivals_per_1k_j, q=3, labels=False) + 1,
+        arrivals_group_pj = pd.qcut(df.arrivals_per_1k_pj, q=3, labels=False) + 1,
+    )
+    
+    round_me = [
+        'pop_sq_mi', 'jobs_sq_mi', 'popjobs_sq_mi', 
+        'overall_ptile', 'pollution_ptile', 'popchar_ptile',
+        'arrivals_per_1k_p', 'arrivals_per_1k_j', 'arrivals_per_1k_pj',
+    ]
+    
+    integrify_me = [
+        'equity_group', 'num_jobs', 'num_arrivals', 
+        'stop_id', 'itp_id',
+        'arrivals_group_p', 'arrivals_group_j', 'arrivals_group_pj',
+    ]
+    
+    df[round_me] = df[round_me].round(2)
+    df[integrify_me] = df[integrify_me].fillna(0).astype(int)
+    
+    # Map getting too big, use simplify to decrease size
     df = df.assign(
         geometry = df.geometry.simplify(tolerance=0.005)
     )
@@ -22,20 +68,7 @@ def import_processed_data():
     return df
 
     
-# Further subset data
-# How to write a function that can handle multiple districts, MPOs, counties?
-# county is easy bc tract has that attached
-'''
-def attach_crosswalk(df, crosswalk, geography="county"):
-    if geography=="county":
-        # do this
-    elif geography=="district":
-        # do this
-    elif geography=="MPO":
-    else:
-        # handle all other cases...how?
-'''
-# After subsetting data, generate more summary stats
+# Generate more summary stats
 # Can aggregate by equity, by equity-density, by density, etc
 
 def aggregate_generate_stats(df, group_cols):
@@ -300,12 +333,3 @@ def create_maps(df, CHART_IMG_PATH):
         title="Opportunity Tracts by CalEnviroScreen Need")
     
     fig.save(f"{CHART_IMG_PATH}opportunity_tracts.html")
-
-
-def create_all_viz(CHART_IMG_PATH):
-    df = import_processed_data()
-    
-    # additional function to subset
-    
-    create_charts(df, CHART_IMG_PATH)
-    create_maps(df, CHART_IMG_PATH)
