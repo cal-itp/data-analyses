@@ -18,7 +18,8 @@ dotenv.load_dotenv("_env")
 TOKEN = os.environ["GITHUB_API_KEY"]
 REPO = "cal-itp/data-analyses"
 BRANCH = "highways-single-site"
-REPO_FOLDER = "bus_service_increase/img/"
+REPO_FOLDER = "bus_service_increase/"
+REPORT_FOLDER = "img/"
 
 DEFAULT_COMMITTER = {
     "name": "Cal-ITP service user",
@@ -38,7 +39,7 @@ def publish_notebooks(notebooks_to_run):
             pm.execute_notebook(
                 input_file,
                 output_file,
-                cwd="./img/",
+                cwd=f"./{REPORT_FOLDER}/",
                 #log_output=True
             )
             output_format = 'html'
@@ -61,8 +62,8 @@ def publish_notebooks(notebooks_to_run):
                 TOKEN,
                 REPO,
                 BRANCH,
-                f"{REPO_FOLDER}{html_file_name}",
-                f"./{html_file_name}",
+                f"{REPO_FOLDER}{REPORT_FOLDER}{html_file_name}",
+                f"./{REPORT_ROLDER}{html_file_name}",
                 f"Upload {html_file_name}",
                 DEFAULT_COMMITTER
             )
