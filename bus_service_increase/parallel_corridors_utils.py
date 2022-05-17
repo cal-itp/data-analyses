@@ -277,8 +277,8 @@ def competitive_route_level_stats(df):
 #------------------------------------------------------------#
 # Folium map
 #------------------------------------------------------------#
-FIG_HEIGHT = 320
-FIG_WIDTH = 300
+FIG_HEIGHT = 300
+FIG_WIDTH = 550
 
 PLOT_COL = "count_route_id"
 POPUP_DICT = {
@@ -325,10 +325,10 @@ def make_map(gdf):
 # iframe the map and insert side-by-side
 # Go back to raw html for this
 # https://stackoverflow.com/questions/57943687/showing-two-folium-maps-side-by-side
-border = 'border: 0.5 px gray; margin: 0; padding: 0;'
+border = 'border:none'
 display = 'display:inline-block; width: 48%; margin: 0; padding: 0;'
-float_dir = f''
-img_size = 'width: 500px; height: 350px;'
+img_size = 'width: 300px; height: 375px;'
+scrolling = 'scrolling: no;'
 
 def iframe_styling(map_obj, direction):
     html_str = f'''
