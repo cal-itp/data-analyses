@@ -9,7 +9,7 @@ import branca
 import intake
 import pandas as pd
 
-from IPython.display import display, Markdown, HTML
+from IPython.display import Markdown, HTML, display_html
 
 import setup_parallel_trips_with_stops
 import utils
@@ -277,26 +277,6 @@ def competitive_route_level_stats(df):
 #------------------------------------------------------------#
 # Folium map
 #------------------------------------------------------------#
-def district_stats(subset, district):    
-    display_cols = [
-            "Route", "County", "RouteType", 
-            "count_route_id", "highway_length_routetype",
-        ]
-
-    # Format html table
-    subset_style = (
-        subset[display_cols]
-        .rename(columns = POPUP_DICT)
-        .style.format({'Hwy Length (mi)': '{:,.2f}'})
-        .set_properties(**{'text-align': 'center'})
-        .set_table_styles([dict(selector='th',props=[('text-align', 'center')])
-                          ])
-        .hide(axis="index")
-        .to_html()
-    )
-    if len(subset) > 0:
-        display(HTML(subset_style))
-        
 FIG_HEIGHT = 320
 FIG_WIDTH = 300
 
@@ -341,6 +321,55 @@ def make_map(gdf):
     
     return m
 
+
+# iframe the map and insert side-by-side
+# Go back to raw html for this
+# https://stackoverflow.com/questions/57943687/showing-two-folium-maps-side-by-side
+border = 'border: 0.5 px gray; margin: 0; padding: 0;'
+display = 'display:inline-block; width: 48%; margin: 0; padding: 0;'
+float_dir = f''
+img_size = 'width: 500px; height: 350px;'
+
+def iframe_styling(map_obj, direction):
+    html_str = f'''
+    <iframe srcdoc="{map_obj.get_root().render().replace('"', '&quot;')}" 
+    style="float:{direction}; {img_size}
+    {display}
+    {border}">
+    </iframe>
+    '''
+
+    return html_str
+
+def display_side_by_side(*args):
+    html_str=''
+    for df in args:
+        html_str+=df
+    display_html(html_str, raw=True)
+    
+    
+# District-level stats printed as table before maps
+def district_stats(gdf, district):
+    cols = [
+        "Route", "County", "RouteType", 
+        "count_route_id", "highway_length_routetype",
+    ]
+    
+    # Format html table
+    table = (
+        gdf[gdf.District==district][cols]
+        .rename(columns = POPUP_DICT)
+        .style.format({'Hwy Length (mi)': '{:,.2f}'})
+        .set_properties(**{'text-align': 'center'})
+        .set_table_styles([dict(selector='th',props=[('text-align', 'center')])
+                          ])
+        .hide(axis="index")
+    )
+    return table
+
+#------------------------------------------------------------#
+# District outputs all together
+#------------------------------------------------------------#    
 def show_district_analysis(gdf, district):
     subset = (gdf[gdf.District==district]
               .sort_values(
@@ -349,9 +378,21 @@ def show_district_analysis(gdf, district):
               .reset_index(drop=True)
              )
     
-    # Show a table of stats for entire district
-    district_stats(subset, district)
-    
-    for i in range(0, len(subset)):
-        m = make_map(subset[subset.index==i])
-        display(m)
+    # Put maps side-by-side
+    # Loop and pick every other. 1st element as left_map; 2nd element as right_map
+    for i in range(0, len(subset), 2):
+        # If it's even number for maps, always have a left and right
+        # or, if it's odd and we're not at the last obs
+        if (len(subset) % 2 == 0) or ((len(subset) % 2 == 1) and (i != len(subset) - 1)):
+            m1 = make_map(subset[subset.index==i])
+            m2 = make_map(subset[subset.index==i+1])
+
+            left_map = iframe_styling(m1, "left")
+            right_map = iframe_styling(m2, "right")
+            display_side_by_side(left_map, right_map)
+        elif (len(subset) % 2 == 1) and (i == len(subset) - 1): 
+            m1 = make_map(subset[subset.index==i])
+            left_map = iframe_styling(m1, "left")
+            display_side_by_side(left_map)
+
+
