@@ -18,7 +18,7 @@ dotenv.load_dotenv("_env")
 TOKEN = os.environ["GITHUB_API_KEY"]
 REPO = "cal-itp/data-analyses"
 BRANCH = "highways-single-site"
-REPO_FOLDER = "bus_service_increase/"
+REPO_FOLDER = "bus_service_increase/img/"
 
 DEFAULT_COMMITTER = {
     "name": "Cal-ITP service user",
@@ -28,7 +28,8 @@ DEFAULT_COMMITTER = {
 notebooks_to_run = {
     # key: name of notebook in directory
     # value: name of the notebook papermill execution (can be renamed)
-    "ca-highways-no-parallel-routes2.ipynb": "./ca-highways-no-parallel-routes.ipynb",
+    "highways-no-parallel-routes-gh.ipynb": "./highways-no-parallel-routes.ipynb",
+    "highways-low-competitive-routes.ipynb": "./highways-low-competitive-routes.ipynb"
 }
 
 def publish_notebooks(notebooks_to_run):
@@ -37,7 +38,7 @@ def publish_notebooks(notebooks_to_run):
             pm.execute_notebook(
                 input_file,
                 output_file,
-                #cwd=f"./{REPO_FOLDER}",
+                cwd="./img/",
                 #log_output=True
             )
             output_format = 'html'
@@ -55,8 +56,7 @@ def publish_notebooks(notebooks_to_run):
             print("Converted to HTML")
             # Now find the HTML file and upload
             html_file_name = output_file.replace(".ipynb", ".html")
-            #print(f"html name: {html_file_name}")
-
+            
             utils.upload_file_to_github(
                 TOKEN,
                 REPO,
@@ -67,8 +67,7 @@ def publish_notebooks(notebooks_to_run):
                 DEFAULT_COMMITTER
             )
             print("Successful upload to GitHub")
-            
-            os.remove(f"./{html_file_name}")
+            os.remove(output_file)
     except:
         print(f"Unsuccessful upload of {html_file_name}")
     
