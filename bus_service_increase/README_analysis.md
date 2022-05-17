@@ -16,6 +16,8 @@ Scripts associated with data creation and visualization / output generation. The
 1. [setup_service_increase](./setup_service_increase_data.py): calculate additional trips, service hours, annual service hours, and capital expenditures needed by operator
 1. [setup_tract_charts](./setup_tract_charts.py): functions for altair charts, seaborn heatmaps
 1. [make_tract_viz](./make_tract_viz.py): combine charts and maps and produce all visualizations needed
+1. [service_increase_estimator](./A3_service_increase_estimator.ipynb): estimate service hours increase, capital expenditures to bring transit up to desired 15, 30, 60 min frequencies by urban/suburban/rural.
+1. [bus_arrivals_by_tract](./B2_chart_bus_arrivals_by_tract.ipynb): charts and maps produced for tract-level population / service density against equity scores.
 
 
 ## Parallel Corridors
@@ -27,9 +29,9 @@ Scripts associated with data creation and visualization / output generation. The
 
 ### Planning and Modal Advisory Committee (PMAC)
 
-1. [script](./D1_current_routes.py) and
+1. [script](./D1_current_routes.py)
 1. [analysis notebook](./D2_pmac.ipynb)
-Note: these were run with latest dates prior to `dim_shapes` table creation. 
+Note: these were run with latest dates prior to `dim_shapes` table creation.  
 
 ### Data Assembly
 
@@ -45,7 +47,7 @@ Note: these were run with latest dates prior to `dim_shapes` table creation.
 1. [parallel_corridors_utils](./parallel_corridors_utils.py): utility functions used in reports.  
 1. [deploy_portfolio_yaml](./deploy_portfolio_yaml.py): programmatically set up jupyterbook yml file in [portfolio/sites/](../portfolio/sites/parallel_corridors.yml)
 1. [competitive-parallel-routes](./competitive-parallel-routes.ipynb): parameterized report at operator-level showing which parallel routes are viable competitive routes to prioritize for service improvements
-1. [publish_single_report](./publish_single_report.py): nbconvert notebook () into html, then upload it to GitHub and host as GH pages
+1. [publish_single_report](./publish_single_report.py): nbconvert notebook into html, then upload it to GitHub and host as GH pages
 1. [highways-no-parallel-routes-gh](./highways-no-parallel-routes-gh.ipynb): unparameterized report at state-level showing highway corridors by district with no parallel routes (GH page deploy)
 1. [highways-no-parallel-routes-jb](./highways-no-parallel-routes-jb.ipynb): unparameterized report at state-level showing highway corridors by district with no parallel routes (Jupyterbook deploy)
 1. [highways-low-competitive-routes.ipynb](./highways-low-competitive-routes.ipynb): unparameterized report at state-level showing highway corridors by district with high parallel routes, but low competitive routes (GH page deploy)
