@@ -175,7 +175,8 @@ def process_daily_stop_times():
         >> collect()
     )
 
-    aggregated_stops_with_geom.to_parquet(f"{utils.GCS_FILE_PATH}aggregated_stops_with_geom.parquet")
+    aggregated_stops_with_geom.to_parquet(
+        f"{utils.GCS_FILE_PATH}aggregated_stops_with_geom.parquet")
     
     
 if __name__ == "__main__":
