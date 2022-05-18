@@ -8,70 +8,73 @@ sources:
     args:
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen40shpf2021shp.zip
       use_fsspec: true
-  # Processed data for service increase analysis
-  bus_stop_times_by_tract:
-    driver: geoparquet
-    description: Number of daily bus arrivals by tract
-    args:
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_stop_times_by_tract.parquet
-  service_increase_by_route:
-    driver: parquet
-    description: Number of additional trips to reach desired frequencies by route.
-    args:
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/service_increase.parquet 
-  service_increase_by_operator:
-    driver: parquet
-    description: Number of additional buses, trips, capital expenditures to reach desired frequencies by operator.
-    args:
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/increase_by_operator.parquet 
-  # Processed data for parallel corridors analysis    
-  transit_routes:
-    driver: geoparquet
-    description: All GTFS schedule transit routes.
-    args:
-    # source: create_analysis_data.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/2022_Jan/shapes_processed.parquet
-  state_highway_network:
-    driver: geoparquet
-    description: State highway network.
-    args:
-    # source: bus_service_increase/highway_transit_utils.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/state_highway_network.parquet
   ca_geoportal:
         driver: dcat
         args:
           url: https://gis.data.ca.gov/data.json
           items:
-              county_boundaries: https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries  
+              county_boundaries: https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries   
+  ## PROCESSED DATA: SERVICE INCREASE ANALYSIS
+  bus_stop_times_by_tract:
+    driver: geoparquet
+    description: Number of daily bus arrivals by tract
+    args:
+      # source: bus_service_increase/create_analysis_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_stop_times_by_tract.parquet
+  service_increase_by_route:
+    driver: parquet
+    description: Number of additional trips to reach desired frequencies by route.
+    args:
+      # source: bus_service_increase/setup_service_increase.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/service_increase.parquet 
+  service_increase_by_operator:
+    driver: parquet
+    description: Number of additional buses, trips, capital expenditures to reach desired frequencies by operator.
+    args:
+      # source: bus_service_increase/setup_service_increase.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/increase_by_operator.parquet 
+  ## PROCESSED DATA: PARALLEL CORRIDORS ANALYSIS
+  transit_routes:
+    driver: geoparquet
+    description: All GTFS schedule transit routes.
+    args:
+      # source: bus_service_increase/create_analysis_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/2022_Jan/shapes_processed.parquet
+  state_highway_network:
+    driver: geoparquet
+    description: State highway network.
+    args:
+    # source: bus_service_increase/create_parallel_corridors.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/state_highway_network.parquet
   highways_cleaned:
     driver: geoparquet
     description: SHN dissolved and added 250 ft buffer. Use this for plotting on maps.
     args:
-    # source: create_parallel_corridors.py
+      # source: bus_service_increase/create_parallel_corridors.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet
   parallel_or_intersecting_routes:
     driver: geoparquet
     description: All transit routes with intersection to SHN (each route-highway route segment kept).
     args:
-    # source: create_parallel_corridors.py
+      # source: bus_service_increase/create_parallel_corridors.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/parallel_or_intersecting.parquet
   parallel_trips_with_stops:
     driver: geoparquet
     description: Parallel routes to SHN, 1 trip selected for each route, with stop info.
     args:
-    # source: setup_parallel_trips_with_stops.py
+      # source: bus_service_increase/E1_setup_parallel_trips_with_stops.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/parallel_trips_with_stops.parquet
   gmaps_results:
     driver: geoparquet
     description: Parallel routes to SHN with car travel time
     args:
-    # source: make_gmaps_results.py
+      # source: bus_service_increase/E4_make_gmaps_results.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/gmaps_results.parquet
   competitive_route_variability:
     driver: geoparquet
     description: gmaps_results, wrangled to attach trip info back, to visualize competitive route variability in trip times
     args:
-    # source: make_stripplot_data.py
+      # source: bus_service_increase/E5_make_stripplot_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/competitive_route_variability.parquet
       
       
