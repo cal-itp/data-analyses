@@ -234,11 +234,13 @@ def project_cat(df, i, district):
 
     #path = (f'/chart_outputs/project_cat/bar_{district}_{i}.png')
     #path2= ('/chart_outputs/project_cat/bar_4_active_transp.png')
-    table = subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"}).hide(axis='index')
+    table = (subset_2.style.hide(axis='index').format(formatter={("Percent of Category"): "{:.2f}%"}))
     display(HTML(f"<h3> Top Agencies using {labeling(i)} Projects </h3>"))
     display(table 
          #   , Image(filename = path2)
            )
+    ## display(table.to_html(index=False))   #doesnt work
+    ## display(table.Styler.hide(axis='index')) #doesnt work
     #display(Markdown([pic](/chart_outputs/project_cat/bar_4_active_transp.png))
     
     display(chart)
