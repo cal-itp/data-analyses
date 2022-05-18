@@ -2,16 +2,16 @@ format: jb-book
 parts:
 -   caption: null
     chapters:
-    -   file: district_1/0__dla_district_report__district_1.ipynb
-    -   file: district_2/0__dla_district_report__district_2.ipynb
-    -   file: district_3/0__dla_district_report__district_3.ipynb
-    -   file: district_4/0__dla_district_report__district_4.ipynb
-    -   file: district_5/0__dla_district_report__district_5.ipynb
-    -   file: district_6/0__dla_district_report__district_6.ipynb
-    -   file: district_7/0__dla_district_report__district_7.ipynb
-    -   file: district_8/0__dla_district_report__district_8.ipynb
-    -   file: district_9/0__dla_district_report__district_9.ipynb
-    -   file: district_10/0__dla_district_report__district_10.ipynb
-    -   file: district_11/0__dla_district_report__district_11.ipynb
-    -   file: district_12/0__dla_district_report__district_12.ipynb
+    -   file: district_1__district_title_district-1-eureka/0__dla_district_report__district_1__district_title_district-1-eureka.ipynb
+    -   file: district_2__district_title_district-2-redding/0__dla_district_report__district_2__district_title_district-2-redding.ipynb
+    -   file: district_3__district_title_district-3-marysville/0__dla_district_report__district_3__district_title_district-3-marysville.ipynb
+    -   file: district_4__district_title_district-4-oakland/0__dla_district_report__district_4__district_title_district-4-oakland.ipynb
+    -   file: district_5__district_title_district-5-san-luis-obispo/0__dla_district_report__district_5__district_title_district-5-san-luis-obispo.ipynb
+    -   file: district_6__district_title_district-6-fresno/0__dla_district_report__district_6__district_title_district-6-fresno.ipynb
+    -   file: district_7__district_title_district-7-los-angeles/0__dla_district_report__district_7__district_title_district-7-los-angeles.ipynb
+    -   file: district_8__district_title_district-8-san-bernardino/0__dla_district_report__district_8__district_title_district-8-san-bernardino.ipynb
+    -   file: district_9__district_title_district-9-bishop/0__dla_district_report__district_9__district_title_district-9-bishop.ipynb
+    -   file: district_10__district_title_district-10-stockton/0__dla_district_report__district_10__district_title_district-10-stockton.ipynb
+    -   file: district_11__district_title_district-11-san-diego/0__dla_district_report__district_11__district_title_district-11-san-diego.ipynb
+    -   file: district_12__district_title_district-12-irvine/0__dla_district_report__district_12__district_title_district-12-irvine.ipynb
 root: README
