@@ -5,39 +5,39 @@ notebook: ./dla/e76_obligated_funds/reports/dla_district_report.ipynb
 parts:
 - caption: Introduction
 - chapters:
-  - caption: District 1 - Eureka
-    params:
+  - params:
       district: 1
-  - caption: District 2 - Redding
-    params:
+      district_title: District 1 - Eureka
+  - params:
       district: 2
-  - caption: District 3 - Marysville
-    params:
+      district_title: District 2 - Redding
+  - params:
       district: 3
-  - caption: District 4 - Oakland
-    params:
+      district_title: District 3 - Marysville
+  - params:
       district: 4
-  - caption: District 5 - San Luis Obispo
-    params:
+      district_title: District 4 - Oakland
+  - params:
       district: 5
-  - caption: District 6 - Fresno
-    params:
+      district_title: District 5 - San Luis Obispo
+  - params:
       district: 6
-  - caption: District 7 - Los Angeles
-    params:
+      district_title: District 6 - Fresno
+  - params:
       district: 7
-  - caption: District 8 - San Bernardino
-    params:
+      district_title: District 7 - Los Angeles
+  - params:
       district: 8
-  - caption: District 9 - Bishop
-    params:
+      district_title: District 8 - San Bernardino
+  - params:
       district: 9
-  - caption: District 10 - Stockton
-    params:
+      district_title: District 9 - Bishop
+  - params:
       district: 10
-  - caption: District 11 - San Diego
-    params:
+      district_title: District 10 - Stockton
+  - params:
       district: 11
-  - caption: District 12 - Irvine
-    params:
+      district_title: District 11 - San Diego
+  - params:
       district: 12
+      district_title: District 12 - Irvine

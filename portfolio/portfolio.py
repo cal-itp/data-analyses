@@ -60,7 +60,7 @@ def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
 
 
 class Chapter(BaseModel):
-    caption: str
+    caption: Optional[str]
     notebook: Optional[Path] = None
     params: Dict = {}
     sections: List[Dict] = []
@@ -378,12 +378,13 @@ def build(
 
     for part in site.parts:
         for chapter in part.chapters:
-            chapter.generate(
+            errors.extend(chapter.generate(
                 execute_papermill=execute_papermill,
                 continue_on_error=continue_on_error,
                 prepare_only=prepare_only,
                 no_stderr=no_stderr,
-            )
+            ))
+
 
     subprocess.run(
         [
@@ -413,7 +414,7 @@ def build(
         subprocess.run(args).check_returncode()
 
     if errors:
-        typer.secho(f"{len(errors)} errors encountered during papermill execution")
+        typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
         sys.exit(1)
 
 
