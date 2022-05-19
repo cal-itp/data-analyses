@@ -7,7 +7,10 @@ import pandas as pd
 
 import utils
 
-
+# Set up cleaning functions to standardize 
+# across datasets
+# Keep address info, sheet_uuid, standardize column naming and types
+# keep sqft info, district, county info if available
 def clean_office(df):
     keep_cols = [
         "district", "address", "district_name", "owned_or_leased",
