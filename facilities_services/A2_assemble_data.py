@@ -26,8 +26,12 @@ def clean_office(df):
               sqft = df[["owned_net", "leased", "other"]].sum(axis=1),
               category = "office",
           ).drop(columns = ["owned_net", "leased"])
-    
+        # It looks like district_name is related to the city of the address
+        # Diamond Bar is listed as part of District 8. 
+        # DB is the city of the address, not the caltrans district name.
+          .rename(columns = {"district_name": "city"})
     )
+    
     return df
 
 def clean_maintenance(df):
