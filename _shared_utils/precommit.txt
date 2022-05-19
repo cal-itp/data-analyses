@@ -1,0 +1,4 @@
+# Run in terminal -- shared_utils needs to pass pre-commit hooks
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files
