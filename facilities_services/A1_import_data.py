@@ -5,6 +5,7 @@ Write each sheet as parquet into GCS.
 Cannot use pd.read_excel() with GCS filepath.
 """
 import pandas as pd
+import uuid
 
 from calitp import to_snakecase
 
@@ -55,6 +56,13 @@ def clean_column_names(df):
 
     return df
 
+# Need a uuid to be able to reference individual sheets
+# Later, will compile into 1 df (but there might be duplicates based on scanning of addresses)
+def generate_uuid(df):
+    df["sheet_uuid"] = df.apply(lambda _: str(uuid.uuid4()), axis=1)
+    return df
+    
+    
 def clean_office(df):
     df = clean_column_names(df)
     
@@ -79,11 +87,17 @@ def clean_office(df):
            .drop(columns = drop_cols)
          )
     
+    df3 = generate_uuid(df3)
+    
     return df3
 
 def clean_maintenance(df):
     df = clean_column_names(df)
     drop_cols = ['unnamed:_9', 'unnamed:_10', 'legend']
+    
+    rename_cols = {
+        "dist": "district",
+    }
     
     df = (df.assign(
         zip_code = df.zip_code.astype(str),
@@ -92,16 +106,23 @@ def clean_maintenance(df):
         facility_type = df.apply(lambda x: "Maintenance Station" if x.ms_ss == "MS"
                                  else "Stand-alone Sand Salt Storage Sheds", axis=1)
         ).drop(columns = drop_cols)
+        .rename(columns = rename_cols)
     )
     
+    df = generate_uuid(df)
+
     return df
 
 def clean_equipment(df):
     df = clean_column_names(df)
+    df = generate_uuid(df)
+    
     return df
 
 def clean_tmc(df):
     df = clean_column_names(df)
+    df = generate_uuid(df)
+    
     return df
 
 def clean_labs(df):
@@ -109,9 +130,12 @@ def clean_labs(df):
     df = df.assign(
         zip_code = df.zip_code.astype("Int64")
     )
+    
+    df = generate_uuid(df)
+
     return df
 
-
+    
 if __name__ == "__main__":
     # Read in sheets correctly and save as dict
     imported_dfs = read_in_sheets(f"{utils.DATA_PATH}{FILENAME}")
