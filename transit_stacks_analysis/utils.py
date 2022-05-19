@@ -13,7 +13,9 @@ from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
-
+'''
+CHARTS
+'''
 #Labels
 def labeling(word):
     # Add specific use cases where it's not just first letter capitalized
@@ -99,3 +101,26 @@ def fancy_bar_chart(df, x_col, y_col, label_col, chart_title=''):
             )
     chart.save(f"./bar_{chart_title}.png")
     display(chart)
+'''
+OTHER
+'''
+#Grab value counts and turn it into a dataframe
+def value_counts_df(df, col_of_interest):
+    df = (
+    df[col_of_interest].value_counts()
+    .to_frame()
+    .reset_index()
+    )
+    return df 
+    
+### Count number of strings within a column, separated out by columns and group them by "name" column.
+# https://stackoverflow.com/questions/51502263/pandas-dataframe-object-has-no-attribute-str
+def number_of_elements(df, column_use, column_new):
+    df[column_new] = (
+        df[column_use]
+        .str.split(",+")
+        .str.len()
+        .groupby(df.services)
+        .transform("sum")
+    )
+    return df 
