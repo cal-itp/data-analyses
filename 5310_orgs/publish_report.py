@@ -13,11 +13,11 @@ import requests
 
 from shared_utils import utils
 
-OUTPUT_FILENAME = "5310_report"
+OUTPUT_FILENAME = "5310_report_output"
 
 pm.execute_notebook(
     # notebook to execute
-    'projecttypes_of_interest.ipynb',
+    '5310_report_work.ipynb',
     # if needed, rename the notebook as something different
     # this will be the filename that is used when converting to HTML or PDF
     f'{OUTPUT_FILENAME}.ipynb',
