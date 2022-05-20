@@ -53,24 +53,26 @@ if __name__ == "__main__":
     assembled_dict = {}
     
     for i in unique_uuid:
-        # Grab cached result
-        result = utils.open_request_json(
-            i,
-            DATA_PATH = utils.DATA_PATH,
-            GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}geocode_cache/"
-        )
-        if result is not None:
+        try:
+            # Grab cached result
+            result = utils.open_request_json(
+                i,
+                DATA_PATH = utils.DATA_PATH,
+                GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}geocode_cache/"
+            )
+            
             # Compile JSON into pd.Series
             results_series = compile_results(result)
             assembled_dict[i] = results_series    
+            
             # Transpose, so it shows up in columns
             # Add sheet_uuid, allow it to be merged back to df later
-            #results_df = (pd.DataFrame(results_series).T
-            #              .assign(sheet_uuid = i)
-            #             )
-            #full_results = pd.concat([full_results, results_df], 
-            #                         ignore_index=True)
-        else:
+            results_df = (pd.DataFrame(results_series).T
+                          .assign(sheet_uuid = i)
+                         )
+            full_results = pd.concat([full_results, results_df], 
+                                     ignore_index=True)
+        except:
             errors.append(i)
     
     
@@ -78,9 +80,9 @@ if __name__ == "__main__":
         pickle.dump(assembled_dict, f)
         
     # Export results to GCS
-    #print(f"# geocoded results: {len(full_results)}")
-    #full_results.to_parquet(f"{utils.GCS_FILE_PATH}geocoder_results.parquet")
+    print(f"# geocoded results: {len(full_results)}")
+    full_results.to_parquet(f"{utils.GCS_FILE_PATH}geocoder_results.parquet")
     
     # Export errors as pickle to double check
-    #with open(f"{utils.DATA_PATH}errors_compiling.pickle", "wb") as f:
-    #    pickle.dump(errors, f)
+    with open(f"{utils.DATA_PATH}errors_compiling.pickle", "wb") as f:
+        pickle.dump(errors, f)

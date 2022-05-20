@@ -39,9 +39,12 @@ def clean_up_addresses(row):
     
 def assemble_full_address(row):
     if (row.address_cleaned is not None) and (row.city is not None):
+        
         address_city = row.address_cleaned + " " + row.city
+        address_city = address_city.replace("None", "")
         address_with_zip = address_city + ", CA " + str(row.zip_code)
-
+        address_with_zip = address_with_zip.replace("None", "")
+        
         if row.category=="office":
             full_address = address_city + ", CA"
         elif ((row.category=="maintenance") and (row.zip_code2 is None)):
@@ -53,6 +56,8 @@ def assemble_full_address(row):
     else:
         full_address = "Incomplete"
     
+    full_address = full_address.replace("-None", "").replace("None", "")
+
     return full_address
 
 
