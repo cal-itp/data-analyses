@@ -4,6 +4,9 @@ Utility functions
 import json
 import pandas as pd
 
+from calitp.storage import get_fs
+fs = get_fs()
+
 GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/facilities_services"
