@@ -36,14 +36,17 @@ def geocode_address(row):
     # also use this as sanity check
     results = g.osm
     
-    utils.save_request_json(results, row.sheet_uuid, 
-                            DATA_PATH = utils.DATA_PATH, 
-                            GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}geocode_cache/")
+    if results is not None:
+        utils.save_request_json(results, row.sheet_uuid, 
+                                DATA_PATH = utils.DATA_PATH, 
+                                GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}geocode_cache/")
+
+        print(f"Cached {row.sheet_uuid}")
     
-    print(f"Cached {row.sheet_uuid}")
-    
-    return row.sheet_uuid
-    
+        return row.sheet_uuid
+    else:
+        return None
+
 
 # https://stackoverflow.com/questions/26835477/pickle-load-variable-if-exists-or-create-and-save-it
 # If pickle file is found, use it. Otherwise, create any empty pickle file
@@ -72,17 +75,25 @@ if __name__ == "__main__":
     have_results = read_or_new_pickle(f"{utils.DATA_PATH}{PICKLE_FILE}", [])
     
     unique_uuid = list(geocode_df.sheet_uuid)
-    no_results_yet = set(unique_uuid).difference(set(have_results))
+    no_results_yet = list(set(unique_uuid).difference(set(have_results)))
     
     # New list to store results and add it to have_results
     new_results = []
     
     for i in no_results_yet:
-        result_uuid = geocode_df[geocode_df.sheet_uuid == i].apply(
-            lambda x: geocode_address(x), axis=1)
-        new_results.append(result_uuid)
+        try:
+            result_uuid = geocode_df[geocode_df.sheet_uuid == i].apply(
+                lambda x: geocode_address(x), axis=1)
+            if result_uuid is not None:
+                new_results.append(result_uuid)
+        except:
+            pass
     
+
     # Overwrite pickle and make sure no uuid is duplicated
+    # our identifiers are string. if it's something else, like pd.Series, it's unusable
+    # https://stackoverflow.com/questions/18352784/how-to-remove-all-of-certain-data-types-from-list
+    new_results = [x for x in new_results if isinstance(x, str)]
     updated_results = list(set(have_results + new_results))
     
     with open(f"{utils.DATA_PATH}{PICKLE_FILE}", "wb") as f:

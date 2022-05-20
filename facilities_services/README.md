@@ -19,6 +19,8 @@ The facility types include office buildings, equipment shops, maintenance statio
 
 ### Steps
 * Data import, basic cleaning, standardize across, assemble into 1
-* Geocode addresses
+* Geocode addresses (put some in geocoder, some manually done if descriptions are given for maintenance facilities)
 * Pick HQTA file to use
 * Bring in route or stop info? Only picking locations near the origin/destination of route?
+* Need to join to HQTA bus stops (major stops? minor stops?)
+* Do a first pass to see just how many facilities even join to the HQTA all shapes dissolved. If very few, there are few eligible to be retrofitted...won't matter if it's near start/end of route.
