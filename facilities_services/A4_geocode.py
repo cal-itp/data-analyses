@@ -27,16 +27,17 @@ def prep_geocode_df():
     return geocode_df
 
 
-def geocode_address(row):
+def osm_geocode_address(row):
     input_address = row.full_address
     
     g = geocoder.osm(input_address)
     # results are a dict with x, y, address components
     # keep it all, since we don't always have zip_code
     # also use this as sanity check
-    results = g.osm
+    if g.ok is True:
+        results = g.osm
     
-    if results is not None:
+        #if results is not None:
         utils.save_request_json(results, row.sheet_uuid, 
                                 DATA_PATH = utils.DATA_PATH, 
                                 GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}geocode_cache/")
@@ -48,7 +49,27 @@ def geocode_address(row):
         return None
 
 
-# https://stackoverflow.com/questions/26835477/pickle-load-variable-if-exists-or-create-and-save-it
+def arcgis_geocode_address(row):
+    input_address = row.full_address
+    
+    g = geocoder.arcgis(input_address)
+    
+    if g.ok is True:
+        results = g.json
+        
+        utils.save_request_json(results, row.sheet_uuid,
+                                DATA_PATH = utils.DATA_PATH,
+                                GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}arcgis_geocode/"
+                               )
+        
+        print(f"Cached {row.sheet_uuid}")
+        
+        return row.sheet_uuid
+    else:
+        return None
+
+    
+    # https://stackoverflow.com/questions/26835477/pickle-load-variable-if-exists-or-create-and-save-it
 # If pickle file is found, use it. Otherwise, create any empty pickle file
 # to hold uuids that have cached results
 def read_or_new_pickle(path, default_in_file):
@@ -83,7 +104,7 @@ if __name__ == "__main__":
     for i in no_results_yet:
         try:
             result_uuid = geocode_df[geocode_df.sheet_uuid == i].apply(
-                lambda x: geocode_address(x), axis=1)
+                lambda x: arcgis_geocode_address(x), axis=1)
             if result_uuid is not None:
                 new_results.append(result_uuid)
         except:
