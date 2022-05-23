@@ -174,8 +174,9 @@ class Chapter(BaseModel):
                 }],
             }
 
+        folder = f"{self.slug}/" if self.slug else ""
         return {
-            "file": f"{self.slug}/{parameterize_filename(0, self.resolved_notebook, self.resolved_params)}",
+            "file": f"{folder}{parameterize_filename(0, self.resolved_notebook, self.resolved_params)}",
         }
 
 
