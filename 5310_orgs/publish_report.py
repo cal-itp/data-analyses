@@ -1,6 +1,10 @@
 '''
 single report script for 5310
-run in data-analyses/5310_orgs
+run the following in terminal in data-analyses:
+
+pip install -r portfolio/requirements.txt
+cd 5310_orgs
+python publish_report.py
 '''
 import dotenv
 import os
