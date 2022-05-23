@@ -240,18 +240,20 @@ Labeling
 def labeling(word):
     # Add specific use cases where it's not just first letter capitalized
     LABEL_DICT = {
-        "prepared_y": "Year",
         "dist": "District",
+        "nunique": "Number of Unique",
+        "n":"Count",
+        "name_NTD_Airtable":"Organization Name",
+        "prefix":"Prefix Code",
+        "prepared_y": "Year",
         "total_requested": "Total Requested",
         "fed_requested": "Fed Requested",
         "ac_requested": "Advance Construction Requested",
-        "nunique": "Number of Unique",
         "project_no": "Project Number",
         "active_transp": "Active Transportation",
         "infra_resiliency_er": "Infrastructure & Emergency Relief",
         "congestion_relief": "Congestion Relief",
-        "n":"Count",
-        "primary_agency_name":"Agency"
+        "primary_agency_name":"Organization Name"
     }
 
     if (word == "mpo") or (word == "rtpa"):
@@ -265,14 +267,14 @@ def labeling(word):
 
     return word
 
-
-
 def add_tooltip(chart, tooltip1, tooltip2):
     chart = (
         chart.encode(tooltip= [tooltip1,tooltip2]))
     return chart
 
-
+def pretify_tables(df):
+    df = df.rename(columns = labeling)
+    display(HTML(df.to_html(index=False)))
 
 
 """
