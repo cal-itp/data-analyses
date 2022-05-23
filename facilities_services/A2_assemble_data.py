@@ -21,7 +21,7 @@ def clean_office(df):
     # standardize how district is across other sheets
     df = (df[keep_cols]
           .assign(
-              district = df.apply(lambda x: "14" if x.district=="HQ"
+              district = df.apply(lambda x: "59" if x.district=="HQ"
                                   else x.district.replace("D", ""), axis=1).astype(int),
               sqft = df[["owned_net", "leased", "other"]].sum(axis=1),
               category = "office",
