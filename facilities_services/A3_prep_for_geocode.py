@@ -5,15 +5,11 @@ Clean up addresses.
 Also spit out csv to do manual geocodes
 where addresses can't be constructed.
 """
-import geocoder
 import intake
 import pandas as pd
 import re
 
 import utils
-
-DATA_PATH = "./data/"
-GCS_FILE_PATH = utils.GCS_FILE_PATH
 
 catalog = intake.open_catalog("./*.yml")
 

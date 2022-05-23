@@ -29,15 +29,13 @@ def prep_geocode_df():
 
 def osm_geocode_address(row):
     input_address = row.full_address
-    
     g = geocoder.osm(input_address)
+    
     # results are a dict with x, y, address components
     # keep it all, since we don't always have zip_code
     # also use this as sanity check
     if g.ok is True:
         results = g.osm
-    
-        #if results is not None:
         utils.save_request_json(results, row.sheet_uuid, 
                                 DATA_PATH = utils.DATA_PATH, 
                                 GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}geocode_cache/")
@@ -51,12 +49,10 @@ def osm_geocode_address(row):
 
 def arcgis_geocode_address(row):
     input_address = row.full_address
-    
     g = geocoder.arcgis(input_address)
     
     if g.ok is True:
         results = g.json
-        
         utils.save_request_json(results, row.sheet_uuid,
                                 DATA_PATH = utils.DATA_PATH,
                                 GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}arcgis_geocode/"
