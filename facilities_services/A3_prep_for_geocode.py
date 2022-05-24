@@ -81,7 +81,7 @@ if __name__ == "__main__":
                  "address", "address_cleaned", "city", "zip_code", "zip_code2",
                  "full_address"]
     
-    manual_geocoding[keep_cols].to_csv(f"{utils.GCS_FILE_PATH}manual_geocoding.csv")
+    manual_geocoding[keep_cols].to_csv(f"{utils.GCS_FILE_PATH}manual_geocoding.csv", index=False)
     
     # These can go into a geocoder
     for_geocoding = df[(df.full_address.str.contains(f"[0-9]"))] 
