@@ -1,0 +1,9 @@
+metadata:
+  version: 1
+sources:
+  tier1_facilities_addresses:
+    driver: parquet
+    description: Assembled dataframe of Tier 1 facilities with addresses.
+    args:
+      # source: facilities_services/A2_assemble_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/facilities_services/tier1_facilities_for_geocoding.parquet
