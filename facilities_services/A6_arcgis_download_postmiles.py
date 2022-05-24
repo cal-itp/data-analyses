@@ -10,6 +10,8 @@ import geopandas as gpd
 import urllib.parse
 import requests
 
+import utils
+
 def query_arcgis_feature_server(url_feature_server=''):
     '''
     This function downloads all of the features available on a given ArcGIS 
