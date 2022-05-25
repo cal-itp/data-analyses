@@ -39,3 +39,16 @@ subprocess.run([
     "--no-prompt",
     f"{OUTPUT_FILENAME}.ipynb",
 ])
+
+# # Similar as converting to HTML, but change the output_format
+# # shell out, run NB Convert
+# OUTPUT_FORMAT = 'PDFviaHTML'
+# subprocess.run([
+#     "jupyter",
+#     "nbconvert",
+#     "--to",
+#     OUTPUT_FORMAT,
+#     "--no-input",
+#     "--no-prompt",
+#     f"../{OUTPUT_FILENAME}.ipynb",
+# ])
