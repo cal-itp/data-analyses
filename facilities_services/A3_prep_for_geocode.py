@@ -79,10 +79,12 @@ if __name__ == "__main__":
     
     keep_cols = ["sheet_uuid", 
                  "address", "address_cleaned", "city", "zip_code", "zip_code2",
-                 "full_address"]
+                 "full_address", 
+                 "county", "facility_name"
+                ]
     
     manual_geocoding[keep_cols].to_csv(f"{utils.GCS_FILE_PATH}manual_geocoding.csv", index=False)
-    
+
     # These can go into a geocoder
     for_geocoding = df[(df.full_address.str.contains(f"[0-9]"))] 
     for_geocoding.to_parquet(f"{utils.GCS_FILE_PATH}for_geocoding.parquet")
