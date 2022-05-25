@@ -7,3 +7,9 @@ sources:
     args:
       # source: facilities_services/A2_assemble_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/facilities_services/tier1_facilities_for_geocoding.parquet
+  tier1_facilities_geocoded:
+    driver: geoparquet
+    description: Assembled dataframe of Tier 1 facilities with geocoded results.
+    args:
+      # source: facilities_services/A8_assemble_geocoded_results.py
+      urlpath: gs://calitp-analytics-data/data-analyses/facilities_services/tier1_facilities_geocoded.parquet
