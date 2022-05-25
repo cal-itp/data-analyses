@@ -253,7 +253,16 @@ def labeling(word):
         "active_transp": "Active Transportation",
         "infra_resiliency_er": "Infrastructure & Emergency Relief",
         "congestion_relief": "Congestion Relief",
-        "primary_agency_name":"Organization Name"
+        "primary_agency_name":"Organization Name",
+        "organization_name": "Organization Name",
+        "n_vp": "Vehicle Purchase",
+        "n_oa": "Operating Assistance",
+        "n_mm": "Mobility Management",
+        "n_hsp": "Hardware/Software Purchase",
+        "n_c": "Communications",
+        "n_fe": "Facilities Equipment",
+        "n_s": "Surveillance",
+        "n_sub": "Subsidies",
     }
 
     if (word == "mpo") or (word == "rtpa"):
@@ -272,9 +281,35 @@ def add_tooltip(chart, tooltip1, tooltip2):
         chart.encode(tooltip= [tooltip1,tooltip2]))
     return chart
 
+#just for renaming columns and removing index
 def pretify_tables(df):
     df = df.rename(columns = labeling)
-    display(HTML(df.to_html(index=False)))
+    #display(HTML(df.to_html(index=False)))
+    return df.to_html(index=False)
+
+#same function as before but centers column names 
+def pretify_tables2(df, c_cols, r_cols):
+    
+    df = df.rename(columns=labeling)
+    
+    if c_cols == "":
+        df = (df.style.hide(axis='index').set_properties(
+            subset= [r_cols], **{"text-align": "right"}
+        ).set_properties(subset= ["Organization Name"], **{"text-align": "center"}
+                        ).set_table_styles([dict(selector="th", props=[("text-align", "center")])]))
+    elif r_cols == "":
+        df = (df.style.hide(axis='index')
+              .set_properties(subset= [c_cols], **{"text-align":"center"})
+              .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
+             )
+        
+    else:
+        df = (df.style.hide(axis='index').set_properties(
+            subset= [r_cols], **{"text-align": "right"}
+        ).set_properties(subset= [c_cols], **{"text-align": "center"}
+                        ).set_table_styles([dict(selector="th", props=[("text-align", "center")])]))
+    
+    return (df.to_html(index=False))
 
 
 """
@@ -286,7 +321,25 @@ Basic Charts
 # @import url('https://fonts.googleapis.com/css?family=Lato');
 # </style>
 
+#Bar 
+def bar_chart_nosubset(df, x_col, y_col, color_col, chart_title=""):
 
+    bar = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=alt.X(x_col, title=labeling(x_col), sort=("-y")),
+            y=alt.Y(y_col, title=labeling(y_col)),
+            color=alt.Color(
+                color_col,
+                scale=alt.Scale(range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+                legend=alt.Legend(title=(labeling(color_col)), symbolLimit=10)
+            )
+        ).properties(title=chart_title))
+    
+    chart = styleguide.preset_chart_config(bar)
+    
+    return chart
 
 # Bar
 def basic_bar_chart(df, x_col, y_col, color_col, subset, chart_title=''):
