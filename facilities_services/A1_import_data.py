@@ -13,7 +13,6 @@ import utils
 
 # Use sheet_name=None to return all sheets (returns a dict)
 FILENAME = "Tier_1_Facility_Location_Inventory_5-17-22.xlsx"
-DATA_PATH = "./data/"
 
 def read_in_sheets(FILE_PATH):
     # Read in individual sheets
