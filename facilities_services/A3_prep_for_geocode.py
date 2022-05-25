@@ -83,7 +83,7 @@ if __name__ == "__main__":
                  "county", "facility_name"
                 ]
     
-    manual_geocoding[keep_cols].to_csv(f"{utils.GCS_FILE_PATH}manual_geocoding.csv", index=False)
+    manual_geocoding[keep_cols].to_parquet(f"{utils.GCS_FILE_PATH}manual_geocoding.parquet")
 
     # These can go into a geocoder
     for_geocoding = df[(df.full_address.str.contains(f"[0-9]"))] 
