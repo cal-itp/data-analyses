@@ -1,6 +1,7 @@
 metadata:
   version: 1
 sources:
+  ## FACILITIES DATA
   tier1_facilities_addresses:
     driver: parquet
     description: Assembled dataframe of Tier 1 facilities with addresses.
@@ -13,3 +14,29 @@ sources:
     args:
       # source: facilities_services/A8_assemble_geocoded_results.py
       urlpath: gs://calitp-analytics-data/data-analyses/facilities_services/tier1_facilities_geocoded.parquet
+  tier1_facilities_processed:
+    driver: geoparquet
+    description: Tier 1 facilities geocoded and aggregated to unique address.
+    args:
+      # source: facilities_services/A9_create_processed_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/facilities_services/tier1_facilities_processed.parquet
+  ## HQTA DATA
+  hqta_shapes:
+    driver: geoparquet
+    description: High quality transit areas (polygons)
+    args:
+      # source: high_quality_transit_areas/
+      urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/export/2022-05-04/ca_hq_transit_areas.parquet
+  ## OPEN DATA
+  ca_counties:
+    driver: geojson
+    description: CA counties
+    args:
+      # source: https://data.ca.gov/dataset/california-counties1
+      urlpath: https://gis.data.cnra.ca.gov/datasets/CALFIRE-Forestry::california-counties-1.geojson?outSR=%7B
+  caltrans_districts:
+    driver: geojson
+    description: Caltrans districts
+    args:
+      # source: https://data.ca.gov/dataset/caltrans-districts1
+      urlpath: https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D

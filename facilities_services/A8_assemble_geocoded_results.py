@@ -68,11 +68,9 @@ if __name__ == "__main__":
                        axis=0, ignore_index=True)
             )
 
-    final = (gpd.GeoDataFrame(final)
-             .drop(columns = [ "full_address", "address_cleaned", 
-                              "city", "zip_code", "zip_code2"])
-            )
+    final = gpd.GeoDataFrame(final)
     
+    # Check that the number of observations match
     print(f"# obs in original df: {len(df)}")
     print(f"# obs in final df: {len(final)}")
     
