@@ -285,7 +285,11 @@ def add_tooltip(chart, tooltip1, tooltip2):
 def pretify_tables(df):
     df = df.rename(columns = labeling)
     #display(HTML(df.to_html(index=False)))
-    return df.to_html(index=False)
+    df = (df.style.hide(axis='index')
+              .set_properties(**{'text-align': 'center'})
+              .set_table_styles([dict(selector='th', props=[('text-align', 'center')])])
+             )
+    return (df.to_html(index=False))
 
 #same function as before but centers column names 
 def pretify_tables2(df, c_cols, r_cols):
