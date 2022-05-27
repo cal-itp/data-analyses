@@ -13,7 +13,7 @@ from plotnine import *
 import altair as alt
 import altair_saver
 
-from IPython.display import Markdown, HTML
+from IPython.display import Markdown, HTML, display_html, display
 from IPython.core.display import display
 
 from shared_utils import altair_utils
@@ -282,39 +282,30 @@ def add_tooltip(chart, tooltip1, tooltip2):
     return chart
 
 #just for renaming columns and removing index
+
 def pretify_tables(df):
-    df = df.rename(columns = labeling)
-    #display(HTML(df.to_html(index=False)))
-    df = (df.style.hide(axis='index')
+    
+    r_cols = {'Count','Sum Allocated','Sum Allocated By Year'}
+    
+    df = df.rename(columns=labeling)
+    df_styler = (df.style.hide(axis='index')
               .set_properties(**{'text-align': 'center'})
               .set_table_styles([dict(selector='th', props=[('text-align', 'center')])])
              )
-    return (df.to_html(index=False))
+    
+    for col in r_cols:
+        if col in df:
+            df_styler = (df_styler
+                  .set_properties(subset= [col], **{"text-align":"right"})
+                 )
+            
+    return (df_styler.to_html(index=False))
 
-#same function as before but centers column names 
-def pretify_tables2(df, c_cols, r_cols):
-    
-    df = df.rename(columns=labeling)
-    
-    if c_cols == "":
-        df = (df.style.hide(axis='index').set_properties(
-            subset= [r_cols], **{"text-align": "right"}
-        ).set_properties(subset= ["Organization Name"], **{"text-align": "center"}
-                        ).set_table_styles([dict(selector="th", props=[("text-align", "center")])]))
-    elif r_cols == "":
-        df = (df.style.hide(axis='index')
-              .set_properties(subset= [c_cols], **{"text-align":"center"})
-              .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
-             )
-        
-    else:
-        df = (df.style.hide(axis='index').set_properties(
-            subset= [r_cols], **{"text-align": "right"}
-        ).set_properties(subset= [c_cols], **{"text-align": "center"}
-                        ).set_table_styles([dict(selector="th", props=[("text-align", "center")])]))
-    
-    return (df.to_html(index=False))
-
+def display_side_by_side(*args):
+        html_str=''
+        for df in args:
+            html_str+=df
+        display_html(html_str.replace('table','table style="display:inline"'),raw=True)
 
 """
 Basic Charts
