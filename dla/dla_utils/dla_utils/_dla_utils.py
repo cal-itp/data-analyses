@@ -159,7 +159,7 @@ def get_nunique(df, col, groupby_col):
 
 
 
-def project_cat(df, i):
+def project_cat(df, i, district):
     subset = df >> filter(_[i] == 1)
     subset_2 = (
         (find_top(subset))
@@ -225,11 +225,17 @@ def project_cat(df, i):
     )
 
     chart = add_tooltip(chart, "Agency", "Funding Amount")
-    display(HTML(f"<h3>Top Agencies using {labeling(i)} Projects</h3>"))
-    display(subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"}))
-    #display(chart)
-   
-    
+    chart = chart.properties(width=400,height=70)
+
+    subset_2['Percent of Category'] = subset_2['Percent of Category'].map('${:,.2f}'.format)
+    #table = (subset_2.style.hide(axis='index').format(formatter={("Percent of Category"): "{:.2f}%"}))
+    display(HTML(f"<h3> Top Agencies using {labeling(i)} Projects </h3>"))
+    # display(table)
+    display(HTML(pretify_tables(subset_2)))
+
+    display(chart)
+
+
 
 """
 Labeling
@@ -263,6 +269,10 @@ def labeling(word):
         "n_fe": "Facilities Equipment",
         "n_s": "Surveillance",
         "n_sub": "Subsidies",
+        "primary_agency_name": "Agency",
+        "adjusted_total_requested": "Total Requested",
+        "adjusted_fed_requested": "Fed Requested",
+        "adjusted_ac_requested": "AC Requested",
     }
 
     if (word == "mpo") or (word == "rtpa"):
