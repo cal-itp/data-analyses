@@ -55,9 +55,13 @@ def make_geojson_layer(single_layer_dict, layer_name):
     
     
     geojson_args = [k for k, v in inspect.signature(folium.GeoJson).parameters.items()]
-    geojson_args.remove("style_function")
+    
+    default_params = ["data", "name", "tooltip", "popup", "style_function"]
+    # Remove the ones that definitely have inputs through the dictionary
+    geojson_args2 = list(set(geojson_args).difference(set(default_params)))
+    
     geojson_dict = {k: single_layer_dict.pop(k) for k in dict(single_layer_dict) 
-                    if k in geojson_args} 
+                    if k in geojson_args2} 
     
     g = folium.GeoJson(
         single_layer_dict["df"],
