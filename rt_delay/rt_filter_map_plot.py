@@ -400,3 +400,15 @@ class RtFilterMapper:
             # print('describe delayed routes failed!')
             pass
         return
+    
+def from_gcs(itp_id, analysis_date):
+    ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_analysis.OperatorDayAnalysis.export_views_gcs()
+    '''
+    month_day = analysis_date.strftime('%m_%d')
+    trips = pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{month_day}.parquet')
+    stop_delay = gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{month_day}.parquet')
+    stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: dt.datetime.fromisoformat(x))
+    stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: dt.datetime.fromisoformat(x))
+    routelines = get_routelines(itp_id, analysis_date)
+    rt_day = RtFilterMapper(trips, stop_delay, routelines)
+    return rt_day
