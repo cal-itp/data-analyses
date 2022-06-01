@@ -196,13 +196,11 @@ def calitp_theme(
 
 # Let's add in more top-level chart configuratinos
 # Need to add more since altair_saver will lose a lot of the theme applied
-def preset_chart_config(chart):
+
+# Apply top-level chart config but do not set properties (before hconcat, vconcat, etc)
+def apply_chart_config(chart):
     chart = (
-        chart.properties(
-            width=chart_width,
-            height=chart_height,
-        )
-        .configure(background=backgroundColor, font=font)
+        chart.configure(background=backgroundColor, font=font)
         .configure_axis(
             domainColor=axisColor,
             grid=True,
@@ -242,6 +240,17 @@ def preset_chart_config(chart):
             labelLimit=0,
         )
     )
+    return chart
+
+
+# Single-chart top-level chart config
+# Cannot use this if hconcat or vconcat is used
+def preset_chart_config(chart):
+    chart = apply_chart_config(chart).properties(
+        width=chart_width,
+        height=chart_height,
+    )
+
     return chart
 
 
