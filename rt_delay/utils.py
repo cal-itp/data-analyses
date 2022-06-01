@@ -492,3 +492,9 @@ def describe_most_delayed(row):
     full_description = f'{row.route_short_name}{description}, {row.direction}: {round(row.mean_delay_seconds/60, 0)} minutes late on average'
     row['full_description'] = full_description
     return row
+
+def describe_slowest(row):
+    description = which_desc(row)
+    full_description = f'{row.route_short_name}{description}, {row.direction}: {round(row.median_trip_mph, 1)} mph median trip speed for {row.num_trips} trip{"s" if row.num_trips > 1 else ""}'
+    row['full_description'] = full_description
+    return row
