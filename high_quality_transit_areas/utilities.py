@@ -25,6 +25,8 @@ BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/high_quality_transit_areas"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 
+itp_blue = shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[0]
+
 def create_segments(geometry):
     """Splits a Shapely LineString into smaller LineStrings. If a MultiLineString passed,
     splits each LineString in that collection.
@@ -80,7 +82,7 @@ def fix_arrival_time(gtfs_timestring):
         return gtfs_timestring.strip()
     
 
-def map_hqta(gdf, mouseover=None):
+def map_hqta(gdf, mouseover=None, name='gdf'):
     global nix_list
     nix_list = []
     
@@ -128,10 +130,10 @@ def map_hqta(gdf, mouseover=None):
     else:
     
         geo_data_hq = GeoData(geo_dataframe = gdf.to_crs('EPSG:4326'),
-                               style={'color': 'black', 'fillColor': '#08589e',
+                               style={'color': 'black', 'fillColor': itp_blue,
                                             'opacity':0.4, 'weight':.5, 'dashArray':'2', 'fillOpacity':0.3},
                                hover_style={'fillColor': 'red' , 'fillOpacity': 0.2},
-                               name = 'gdf')
+                               name = name)
         m.add_layer(geo_data_hq)
     
     if mouseover:
