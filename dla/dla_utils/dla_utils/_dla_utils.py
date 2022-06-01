@@ -159,7 +159,7 @@ def get_nunique(df, col, groupby_col):
 
 
 
-def project_cat(df, i):
+def project_cat(df, i, district):
     subset = df >> filter(_[i] == 1)
     subset_2 = (
         (find_top(subset))
@@ -223,13 +223,21 @@ def project_cat(df, i):
             row="Categories:N",
         )
     )
-
-    chart = add_tooltip(chart, "Agency", "Funding Amount")
-    display(HTML(f"<h3>Top Agencies using {labeling(i)} Projects</h3>"))
-    display(subset_2.style.format(formatter={("Percent of Category"): "{:.2f}%"}))
-    #display(chart)
-   
     
+    chart = chart.encode([alt.Tooltip('Agency', title=labeling('Agency')),
+                          alt.Tooltip('Funding Amount', title=labeling('Funding Amount'), format="$,.2f")
+                          ])
+    chart = chart.properties(width=400,height=70)
+
+    subset_2['Percent of Category'] = subset_2['Percent of Category'].map('${:,.2f}'.format)
+    #table = (subset_2.style.hide(axis='index').format(formatter={("Percent of Category"): "{:.2f}%"}))
+    display(HTML(f"<h3> Top Agencies using {labeling(i)} Projects </h3>"))
+    # display(table)
+    display(HTML(pretify_tables(subset_2)))
+
+    display(chart)
+
+
 
 """
 Labeling
@@ -263,6 +271,11 @@ def labeling(word):
         "n_fe": "Facilities Equipment",
         "n_s": "Surveillance",
         "n_sub": "Subsidies",
+        "primary_agency_name": "Agency",
+        "adjusted_total_requested": "Total Requested",
+        "adjusted_fed_requested": "Fed Requested",
+        "adjusted_ac_requested": "AC Requested",
+        "avg_funds":"Average Funds"
     }
 
     if (word == "mpo") or (word == "rtpa"):
@@ -277,8 +290,9 @@ def labeling(word):
     return word
 
 def add_tooltip(chart, tooltip1, tooltip2):
-    chart = (
-        chart.encode(tooltip= [tooltip1,tooltip2]))
+    chart=chart.encode([alt.Tooltip(tooltip1, title=labeling(tooltip1)),
+                          alt.Tooltip(tooltip2, title=labeling(tooltip2))]
+                                   )
     return chart
 
 #just for renaming columns and removing index
@@ -377,18 +391,18 @@ def basic_bar_chart_no_save(df, x_col, y_col, color_col, subset
              .encode(
                  x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
                  y=alt.Y(y_col, title=labeling(y_col)),
-                 color = alt.Color(color_col,
+                 color = (alt.Color(color_col,
                                   scale=alt.Scale(
                                       range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
                                       legend=alt.Legend(title=(labeling(color_col)), symbolLimit=10)
-                                  )
+                                  )),
+                 tooltip=[alt.Tooltip(x_col, title=labeling(x_col)),
+                          alt.Tooltip(y_col, title=labeling(y_col))]
                                    )
-             # .properties( 
-             #              title=chart_title)
             )
 
     chart=styleguide.preset_chart_config(chart)
-    chart = add_tooltip(chart, x_col, y_col)
+    #chart = add_tooltip(chart, labeling(x_col), labeling(y_col))
     return chart
 
 
