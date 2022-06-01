@@ -1,0 +1,8 @@
+title: Tier 1 Facilities in High Quality Transit Areas
+directory: ./facilities_services/
+readme: ./facilities_services/README.md
+#notebook: ./facilities_services/tier1-facilities-hqta.ipynb
+parts:
+- caption: Introduction
+- chapters:
+  - notebook: ./facilities_services/tier1-facilities-hqta.ipynb
