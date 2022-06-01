@@ -1,6 +1,6 @@
 # Facilities Services
 
-Working with Facilities Strategic Initiative to understand potential retrofits of Caltrans facilities. FSI [summary doc]().
+Working with Facilities Strategic Initiative to understand potential retrofits of Caltrans facilities. .
 
 The facility tiers are numbered in a proposed priority order in which the FSI project team will focus on for assessing how Caltrans plans, manages, prioritizes, and funds infrastructure needs.
 
