@@ -8,7 +8,7 @@ repos:
     rev: v2.4.0
     hooks:
       - id: flake8
-        args: ["--ignore=E501,W503,F403,F405"] # line too long and line before binary operator (black is ok with these)
+        args: ["--ignore=E501,W503,F403,F405,E731"] # line too long and line before binary operator (black is ok with these), assign lambda expression OK
         types:
           - python
       - id: trailing-whitespace
