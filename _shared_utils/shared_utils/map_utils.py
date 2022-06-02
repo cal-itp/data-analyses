@@ -341,8 +341,9 @@ def make_folium_multiple_layers_map(
     # Then, insert that legend as a URL to be an image
     # I think legend_bottom and legend_left numbers must be 0-100?
     # Going even 95 pushes it to the top edge of the figure
-    legend = setup_folium_legend(legend_dict)
-    legend.add_to(m)
+    if legend_dict is not None:
+        legend = setup_folium_legend(legend_dict)
+        legend.add_to(m)
 
     folium.LayerControl("topright", collapsed=False).add_to(m)
 
