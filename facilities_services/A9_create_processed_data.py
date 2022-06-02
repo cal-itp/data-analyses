@@ -36,7 +36,14 @@ def aggregate_to_address(gdf):
             .drop(columns = drop_cols)
           )
     
-    return gdf2
+    # Equipment and maintenance don't come w/ sqft
+    # Don't let it be stored as zero, store as NaN
+    gdf3 = gdf2.assign(
+        sqft = gdf2.apply(lambda x: None if x.category in ["maintenance", "equipment"]
+                          else x.sqft, axis=1)
+    )
+    
+    return gdf3
 
 
 # Join facilities (points) to some polygon geometry (county or district)
