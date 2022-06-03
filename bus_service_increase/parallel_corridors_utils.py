@@ -237,7 +237,7 @@ def competitive_route_level_stats(df):
     # from make_stripplot_data, set this to hours 17-19
     pm_peak_hours = 3 
     
-    route_cols = ["calitp_itp_id", "route_id", "route_name"]
+    route_cols = ["calitp_itp_id", "route_id", "route_id2", "route_name"]
     
     keep_cols = route_cols + [
         "route_group",
