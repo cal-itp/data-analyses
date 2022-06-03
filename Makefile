@@ -1,7 +1,7 @@
 # Run this in data-analyses
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 build_parallel_corridors:
-	pip install -r portfolio/requirements.txt
+	#pip install -r portfolio/requirements.txt
 	#git rm portfolio/parallel_corridors/ -rf
 	#python portfolio/portfolio.py clean parallel_corridors_draft     
 	#python bus_service_increase/deploy_portfolio_yaml.py   

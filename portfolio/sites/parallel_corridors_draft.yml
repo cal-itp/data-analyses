@@ -1,0 +1,23 @@
+directory: ./bus_service_increase/
+notebook: ./bus_service_increase/competitive-parallel-routes.ipynb
+parts:
+- chapters:
+  - caption: District 04 - Oakland
+    params:
+      district: 04 - Oakland
+    sections:
+    - itp_id: 4
+    - itp_id: 279
+  - caption: District 07 - Los Angeles
+    params:
+      district: 07 - Los Angeles
+    sections:
+    - itp_id: 182
+    - itp_id: 183
+  - caption: District 12 - Irvine
+    params:
+      district: 12 - Irvine
+    sections:
+    - itp_id: 235
+readme: ./bus_service_increase/README.md
+title: Parallel Bus Corridors to State Highway Network
