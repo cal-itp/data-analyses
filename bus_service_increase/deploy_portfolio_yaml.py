@@ -4,16 +4,15 @@ Programmatically add params to how deploying portfolio,
 especially when there are too many parameters to list.
 """
 import geopandas as gpd
-import intake
+#import intake
 import pandas as pd
 import yaml
 
 import parallel_corridors_utils
 
-catalog = intake.open_catalog("./bus_service_increase/*.yml")
+#catalog = intake.open_catalog("./bus_service_increase/*.yml")
 
 PORTFOLIO_SITE_YAML = "./portfolio/sites/parallel_corridors.yml"
-
 
 # Do a quick check and suppress operators that just show 1 route in each route_group
 # From UI/UX perspective, it's confusing to readers because they think it's an error that
@@ -56,7 +55,8 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML):
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    df = catalog.competitive_route_variability.read()    
+    #df = catalog.competitive_route_variability.read()  
+    df = gpd.read_parquet(f"{utils.GCS_FILE_PATH}competitive_route_variability.parquet")
     
     operators_to_include = valid_operators(df)
     
