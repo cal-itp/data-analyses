@@ -347,6 +347,34 @@ class RtFilterMapper:
         chart.tight_layout()
         return chart
     
+    def chart_speeds(self, no_title = False):
+        '''
+        A bar chart showing delays grouped by arrival hour for current filtered selection.
+        Currently hardcoded to 0600-2200.
+        '''
+        filtered_trips = (self._filter(self.rt_trips)
+                             >> mutate(median_hour = _.median_time.apply(lambda x: x.hour))
+                             >> filter(_.median_hour > 5)
+                             >> filter(_.median_hour < 23)
+                            )
+        grouped = (filtered_trips >> group_by(_.median_hour)
+                   >> summarize(median_trip_mph = _.mean_speed_mph.median())
+                  )
+        grouped['Median Trip Speed (mph)'] = grouped.median_trip_mph.apply(lambda x: round(x, 1))
+        grouped['Hour'] = grouped.median_hour
+        if no_title:
+            title = ''
+        else:
+            title = f"{self.calitp_agency_name} Median Trip Speeds by Arrival Hour{self.filter_formatted}"
+            
+        sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Median Trip Speed (mph)'], ci=None, 
+                       palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
+            .set_title(title)
+           )
+        chart = sns_plot.get_figure()
+        chart.tight_layout()
+        return chart
+    
     def chart_variability(self, min_stop_seq = None, max_stop_seq = None, num_segments = None,
                          no_title = False):
         '''
