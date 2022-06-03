@@ -380,24 +380,46 @@ class RtFilterMapper:
              ).set_title(title)
         return variability_plt
     
-    def describe_delayed_routes(self):
+    ## works fine, not especially handy to agencies
+    # def describe_delayed_routes(self):
+    #     try:
+    #         most_delayed = (self._filter(self.endpoint_delay_view)
+    #                     >> group_by(_.shape_id)
+    #                     >> summarize(mean_delay_seconds = _.delay_seconds.mean())
+    #                     >> arrange(-_.mean_delay_seconds)
+    #                     >> head(5)
+    #                    )
+    #         most_delayed = most_delayed >> inner_join(_,
+    #                                self.rt_trips >> distinct(_.shape_id, _keep_all=True),
+    #                                on = 'shape_id')
+    #         most_delayed = most_delayed.apply(describe_most_delayed, axis=1)
+    #         display_list = most_delayed.full_description.to_list()
+    #         with_newlines = '\n * ' + '\n * '.join(display_list)
+    #         period_formatted = self.filter_period.replace('_', ' ')
+    #         display(Markdown(f'{period_formatted} most delayed routes: {with_newlines}'))
+    #     except:
+    #         # print('describe delayed routes failed!')
+    #         pass
+    #     return
+    
+    def describe_slow_routes(self):
         try:
-            most_delayed = (self._filter(self.endpoint_delay_view)
-                        >> group_by(_.shape_id)
-                        >> summarize(mean_delay_seconds = _.delay_seconds.mean())
-                        >> arrange(-_.mean_delay_seconds)
-                        >> head(5)
-                       )
-            most_delayed = most_delayed >> inner_join(_,
-                                   self.rt_trips >> distinct(_.shape_id, _keep_all=True),
-                                   on = 'shape_id')
-            most_delayed = most_delayed.apply(describe_most_delayed, axis=1)
-            display_list = most_delayed.full_description.to_list()
+            slowest = (self._filter(self.rt_trips)
+                >> group_by(_.shape_id)
+                >> summarize(num_trips = _.shape_id.count(), median_trip_mph = _.mean_speed_mph.median())
+                >> arrange(_.median_trip_mph)
+                >> inner_join(_, self._filter(self.rt_trips) >> distinct(_.shape_id, _.route_id, _.route_short_name,
+                            _.route_long_name, _.route_desc, _.direction), on = 'shape_id')
+                >> head(7)
+            )
+            slowest = slowest.apply(describe_slowest, axis=1)
+            display_list = slowest.full_description.to_list()
             with_newlines = '\n * ' + '\n * '.join(display_list)
             period_formatted = self.filter_period.replace('_', ' ')
-            display(Markdown(f'{period_formatted} most delayed routes: {with_newlines}'))
+            # display(slowest)
+            display(Markdown(f'{period_formatted} slowest routes: {with_newlines}'))
         except:
-            # print('describe delayed routes failed!')
+            # print('describe slow routes failed!')
             pass
         return
     
