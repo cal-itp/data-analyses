@@ -49,7 +49,6 @@ parts:
           - itp_id: 126
           - itp_id: 148
           - itp_id: 361
-          - itp_id: 474
       - caption: District 07 - Los Angeles
         params:
           district: 07 - Los Angeles
