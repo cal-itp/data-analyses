@@ -3,7 +3,7 @@
 build_parallel_corridors:
 	#pip install -r portfolio/requirements.txt
 	#git rm portfolio/parallel_corridors/ -rf
-	#python portfolio/portfolio.py clean parallel_corridors_draft     
+	python portfolio/portfolio.py clean parallel_corridors_draft     
 	#python bus_service_increase/deploy_portfolio_yaml.py   
 	python portfolio/portfolio.py build parallel_corridors_draft --deploy 
 	#git add portfolio/parallel_corridors_draft/district_*/ portfolio/parallel_corridors_draft/*.yml portfolio/parallel_corridors_draft/*.md     
