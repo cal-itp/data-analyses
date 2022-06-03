@@ -20,7 +20,8 @@ Caltrans perspective:
 Transit operator perspective:
 * Of the parallel bus routes, which ones are competitive against car travel and should be targeted for future service improvements? 
 * Operators with GTFS Real-Time feeds: explore these competitive bus routes and [see where the bottlenecks are](https://analysis.calitp.org/rt/README.html).
-* Which highway corridors have some parallel routes but few competitive routes?
+* Which highway corridors have some parallel routes but [few competitive routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-low-parallel-routes.html)?
+* Which highway corridors have [no parallel routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-no-parallel-routes.html)?
 
 
 ## Data
@@ -46,7 +47,7 @@ Within an operator, there is additional variability in the type of routes it ser
 
 Bus riders would not accept such a high discrepancy for travel time. Therefore, a new metric, `bus_difference` is calculated, showing the difference, in minutes, between bus and car travel time for that bus trip. 
 
-The `bus_multiplier` metric is then paired with a `bus_difference` metric. All of the bus route's trips must be within this `bus_difference` threshold. For a short route, all of the bus route's trips cannot take longer than an additional 20 min compared to a car. These thresholds are used to show an operator its most viable competitive routes, and up to 15 routes are recommended for each route group.
+The `bus_multiplier` metric is then paired with a `bus_difference` metric. All of the bus route's trips must be within this `bus_difference` threshold. For a short route, all of the bus route's trips cannot take longer than an additional 20 min compared to a car. These thresholds are used to show an operator its most viable competitive routes. **For each route group, the operator must have at least 2 routes, and up to 15 routes are recommended.** 
 
 * Short (< 1 hr): +20 min for bus
 * Medium (1-1.5 hrs): +30 min
