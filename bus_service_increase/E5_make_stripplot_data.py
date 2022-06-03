@@ -14,7 +14,7 @@ import re
 from calitp.tables import tbl
 from siuba import *
 
-import setup_parallel_trips_with_stops
+import E1_setup_parallel_trips_with_stops as setup_parallel_trips_with_stops
 import shared_utils
 import utils
 
@@ -205,15 +205,39 @@ def designate_plot_group(df):
     
     return df4
 
-
-def merge_in_airtable_name_district(df):
+# Use agency_name from our views.gtfs_schedule.agency instead of Airtable?
+def merge_in_agency_name(df):
+    # This is the agency_name used in RT maps
+    # rt_delay/rt_analysis.py#L309
+    agency_names = (
+        tbl.views.gtfs_schedule_dim_feeds() 
+        >> select(_.calitp_itp_id, _.calitp_agency_name)
+        >> distinct()
+        >> collect()
+    ).sort_values(["calitp_itp_id", "calitp_agency_name"]).drop_duplicates(
+        subset="calitp_itp_id"
+    ).reset_index(drop=True)
+    
+    df2 = pd.merge(
+        df,
+        agency_names,
+        on = "calitp_itp_id",
+        how = "left",
+        validate = "m:1",
+    )
+    
+    return df2
+    
+    
+def merge_in_airtable(df):
+    # Don't use name from Airtable. But, use district.
     airtable_organizations = (
         tbl.airtable.california_transit_organizations()
-        >> select(_.itp_id, _.name, _.caltrans_district
-                  , _.drmt_organization_name)
+        >> select(_.itp_id, _.caltrans_district)
+        >> distinct()
         >> collect()
         >> filter(_.itp_id.notna())
-    ).sort_values(["itp_id", "name"]).drop_duplicates(
+    ).sort_values(["itp_id", "caltrans_district"]).drop_duplicates(
         subset="itp_id").reset_index(drop=True)
                             
     # Airtable gives us fewer duplicates than doing tbl.gtfs_schedule.agency()
@@ -281,7 +305,9 @@ def add_route_name(df):
     df2 = pd.merge(
         df, 
         route_names[route_names.route_name_used != ""][
-            ["calitp_itp_id", "route_id", "route_name_used"]].drop_duplicates(),
+            ["calitp_itp_id", "route_id", "route_name_used", 
+             # add route_short_name to use in charts, perhaps more descriptive than route_id
+            "route_short_name"]].drop_duplicates(),
         on = ["calitp_itp_id", "route_id"],
         how = "left",
         # many on the left because df is unique at itp_id-route_id-shape_id
@@ -313,8 +339,9 @@ if __name__ == "__main__":
     df3 = add_quantiles_timeofday(df2)
     df4 = merge_in_competitive_routes(df3)
     df5 = designate_plot_group(df4)
-    df6 = merge_in_airtable_name_district(df5)
-    df7 = add_route_name(df6)
+    df6 = merge_in_agency_name(df5)
+    df7 = merge_in_airtable(df6)
+    df8 = add_route_name(df7)
     
     shared_utils.utils.geoparquet_gcs_export(
-        df7, utils.GCS_FILE_PATH, "competitive_route_variability")
+        df8, utils.GCS_FILE_PATH, "competitive_route_variability")

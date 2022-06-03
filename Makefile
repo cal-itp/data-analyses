@@ -3,7 +3,7 @@
 build_parallel_corridors:
 	pip install -r portfolio/requirements.txt
 	#git rm portfolio/parallel_corridors/ -rf
-	python portfolio/portfolio.py clean parallel_corridors     
+	python portfolio/portfolio.py clean parallel_corridors
 	python bus_service_increase/deploy_portfolio_yaml.py   
 	python portfolio/portfolio.py build parallel_corridors --deploy 
 	git add portfolio/parallel_corridors/district_*/ portfolio/parallel_corridors/*.yml portfolio/parallel_corridors/*.md 
@@ -12,7 +12,7 @@ build_parallel_corridors:
     
     
 build_tier1_facilities_notebook:
-	#pip install -r portfolio/requirements.txt
+	pip install -r portfolio/requirements.txt
 	#git rm portfolio/tier1_facilities/ -rf
 	python portfolio/portfolio.py clean tier1_facilities
 	python portfolio/portfolio.py build tier1_facilities --deploy 
