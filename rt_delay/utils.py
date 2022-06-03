@@ -124,22 +124,25 @@ def get_vehicle_positions(itp_id, analysis_date):
         print('found parquet')
         return pd.read_parquet(path)
     else:
-        df = query_sql(f"""
-        SELECT itp_id AS calitp_itp_id, url_number AS calitp_url_number,
-        header.timestamp AS header_timestamp, vehicle.timestamp AS vehicle_timestamp,
-        vehicle.vehicle.label AS entity_id, vehicle.vehicle.id AS vehicle_id,
-        vehicle.trip.tripId AS trip_id, vehicle.position.longitude AS vehicle_longitude,
-        vehicle.position.latitude AS vehicle_latitude
-        FROM `cal-itp-data-infra.external_gtfs_rt.vehicle_positions`
-        WHERE itp_id = {itp_id} AND dt IN ("{analysis_date}", "{next_date}")
-        """)
+        all_positions = pd.DataFrame()
+        for date in [analysis_date, next_date]: ## 2 queries to avoid running out of memory on siuba steps for LA Metro...
+            df = query_sql(f"""
+            SELECT itp_id AS calitp_itp_id, url_number AS calitp_url_number,
+            header.timestamp AS header_timestamp, vehicle.timestamp AS vehicle_timestamp,
+            vehicle.vehicle.label AS entity_id, vehicle.vehicle.id AS vehicle_id,
+            vehicle.trip.tripId AS trip_id, vehicle.position.longitude AS vehicle_longitude,
+            vehicle.position.latitude AS vehicle_latitude
+            FROM `cal-itp-data-infra.external_gtfs_rt.vehicle_positions`
+            WHERE itp_id = {itp_id} AND dt = "{date}"
+            """)
 
-        df = df >> distinct(_.trip_id, _.vehicle_timestamp, _keep_all=True)
-        df = df.dropna(subset=['vehicle_timestamp'])
-        assert not df.empty, f'no vehicle positions data found for {date_str}'
-        df.vehicle_timestamp = df.vehicle_timestamp.apply(convert_ts)
-        df.header_timestamp = df.header_timestamp.apply(convert_ts)
-        df = df >> filter(_.header_timestamp > start, _.header_timestamp < end)
+            df = df >> distinct(_.trip_id, _.vehicle_timestamp, _keep_all=True)
+            df = df.dropna(subset=['vehicle_timestamp'])
+            assert not df.empty, f'no vehicle positions data found for {date_str}'
+            df.vehicle_timestamp = df.vehicle_timestamp.apply(convert_ts)
+            df.header_timestamp = df.header_timestamp.apply(convert_ts)
+            df = df >> filter(_.header_timestamp > start, _.header_timestamp < end)
+            all_positions = pd.concat([all_positions, df])
 
         # assert df.vehicle_timestamp.min() < dt.datetime.combine(analysis_date, dt.time(0)), 'rt data starts after analysis date'
         # assert dt.datetime.combine(analysis_date, dt.time(hour=23, minute=59)) < df.vehicle_timestamp.max(), 'rt data ends early on analysis date'
@@ -148,8 +151,8 @@ def get_vehicle_positions(itp_id, analysis_date):
         # if not dt.datetime.combine(end) < df.vehicle_timestamp.max():
         #     warnings.warn('rt data ends early on analysis date')
 
-        df.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
-        return df
+        all_positions.to_parquet(f'{GCS_FILE_PATH}cached_views/{filename}')
+        return all_positions
     
 def get_routes(itp_id, analysis_date):
     routes_on_date = (tbl.views.gtfs_schedule_fact_daily_feed_routes()
@@ -490,5 +493,11 @@ def which_desc(row):
 def describe_most_delayed(row):
     description = which_desc(row)
     full_description = f'{row.route_short_name}{description}, {row.direction}: {round(row.mean_delay_seconds/60, 0)} minutes late on average'
+    row['full_description'] = full_description
+    return row
+
+def describe_slowest(row):
+    description = which_desc(row)
+    full_description = f'{row.route_short_name}{description}, {row.direction}: {round(row.median_trip_mph, 1)} mph median trip speed for {row.num_trips} trip{"s" if row.num_trips > 1 else ""}'
     row['full_description'] = full_description
     return row
