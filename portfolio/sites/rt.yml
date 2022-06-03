@@ -1,6 +1,4 @@
-title: California Transit Speed Maps
 directory: ./rt_delay/
-readme: ./rt_delay/README.md
 notebook: ./rt_delay/speedmaps.ipynb
 parts:
   - chapters:
@@ -9,7 +7,6 @@ parts:
           district: 01 - Eureka
         sections:
           - itp_id: 135
-        # - itp_id: 159 Data issue
       - caption: District 02 - Redding
         params:
           district: 02 - Redding
@@ -20,32 +17,30 @@ parts:
           district: 03 - Marysville
         sections:
           - itp_id: 221
+          - itp_id: 372
           - itp_id: 273
       - caption: District 04 - Oakland
         params:
           district: 04 - Oakland
         sections:
           - itp_id: 194
-          # - itp_id: 315 SMART not in analysis scope
-          # - itp_id: 246 Caltrain not in analysis scope
           - itp_id: 167
           - itp_id: 110
+          - itp_id: 247
           - itp_id: 350
           - itp_id: 310
           - itp_id: 336
           - itp_id: 282
           - itp_id: 4
           - itp_id: 127
-          - itp_id: 301
           - itp_id: 294
-          - itp_id: 218
           - itp_id: 290
       - caption: District 05 - San Luis Obispo
         params:
           district: 05 - San Luis Obispo
         sections:
           - itp_id: 293
-          - itp_id: 208
+          - itp_id: 298
       - caption: District 06 - Fresno
         params:
           district: 06 - Fresno
@@ -54,6 +49,7 @@ parts:
           - itp_id: 126
           - itp_id: 148
           - itp_id: 361
+          - itp_id: 474
       - caption: District 07 - Los Angeles
         params:
           district: 07 - Los Angeles
@@ -64,6 +60,7 @@ parts:
           - itp_id: 260
           - itp_id: 243
           - itp_id: 300
+          - itp_id: 87
           - itp_id: 170
           - itp_id: 295
           - itp_id: 183
@@ -71,6 +68,7 @@ parts:
         params:
           district: 08 - San Bernardino
         sections:
+          - itp_id: 360
           - itp_id: 269
           - itp_id: 30
       - caption: District 09 - Bishop
@@ -95,3 +93,5 @@ parts:
           district: 12 - Irvine
         sections:
           - itp_id: 235
+readme: ./rt_delay/README.md
+title: California Transit Speed Maps

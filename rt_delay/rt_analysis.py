@@ -247,6 +247,10 @@ class OperatorDayAnalysis:
         analysis date: datetime.date
         '''
         self.calitp_itp_id = int(itp_id)
+        self.calitp_agency_name = (tbl.views.gtfs_schedule_dim_feeds()
+             >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
+             >> collect()
+            ).calitp_agency_name.iloc[0]
         assert type(analysis_date) == dt.date, 'analysis date must be a datetime.date object'
         self.analysis_date = analysis_date
         self.display_date = self.analysis_date.strftime('%b %d (%a)')
@@ -306,10 +310,6 @@ class OperatorDayAnalysis:
         self.filter_formatted = ''
         self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
                                          self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
-        self.calitp_agency_name = (tbl.views.gtfs_schedule_dim_feeds()
-             >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
-             >> collect()
-            ).calitp_agency_name.iloc[0]
         self.rt_trips['calitp_agency_name'] = self.calitp_agency_name
         
     def _generate_position_interpolators(self):
@@ -317,7 +317,7 @@ class OperatorDayAnalysis:
         self.position_interpolators = {}
         if type(self.pbar) != type(None):
             self.pbar.reset(total=self.vehicle_positions.trip_id.nunique())
-            self.pbar.desc = 'Generating position interpolators'
+            self.pbar.desc = f'Generating position interpolators for {self.calitp_agency_name} ({self.calitp_itp_id})'
         for trip_id in self.vehicle_positions.trip_id.unique():
             # print(trip_id)
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
@@ -360,7 +360,7 @@ class OperatorDayAnalysis:
         
         if type(self.pbar) != type(None):
             self.pbar.reset(total=len(delays.trip_id.unique()))
-            self.pbar.desc = 'Generating stop delay view'
+            self.pbar.desc = f'Generating stop delay view for {self.calitp_agency_name} ({self.calitp_itp_id})'
         for trip_id in delays.trip_id.unique():
             try:
                 _delay = delays.copy() >> filter(_.trip_id == trip_id) >> distinct(_.stop_id, _keep_all = True)
