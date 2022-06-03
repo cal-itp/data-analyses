@@ -2,21 +2,53 @@ directory: ./bus_service_increase/
 notebook: ./bus_service_increase/competitive-parallel-routes.ipynb
 parts:
 - chapters:
+  - caption: District 01 - Eureka
+    params:
+      district: 01 - Eureka
+    sections:
+    - itp_id: 159
+    - itp_id: 261
+  - caption: District 02 - Redding
+    params:
+      district: 02 - Redding
+    sections:
+    - itp_id: 259
   - caption: District 03 - Marysville
     params:
       district: 03 - Marysville
     sections:
+    - itp_id: 101
+    - itp_id: 221
     - itp_id: 271
     - itp_id: 273
+    - itp_id: 331
+    - itp_id: 351
+    - itp_id: 372
   - caption: District 04 - Oakland
     params:
       district: 04 - Oakland
     sections:
     - itp_id: 4
+    - itp_id: 76
+    - itp_id: 106
+    - itp_id: 110
     - itp_id: 167
     - itp_id: 194
+    - itp_id: 218
+    - itp_id: 246
+    - itp_id: 247
+    - itp_id: 279
+    - itp_id: 281
     - itp_id: 282
+    - itp_id: 290
+    - itp_id: 294
+    - itp_id: 301
+    - itp_id: 310
     - itp_id: 314
+    - itp_id: 324
+    - itp_id: 336
+    - itp_id: 350
+    - itp_id: 356
   - caption: District 05 - San Luis Obispo
     params:
       district: 05 - San Luis Obispo
@@ -29,23 +61,50 @@ parts:
     params:
       district: 06 - Fresno
     sections:
+    - itp_id: 91
+    - itp_id: 116
     - itp_id: 148
+    - itp_id: 346
+    - itp_id: 361
+    - itp_id: 474
   - caption: District 07 - Los Angeles
     params:
       district: 07 - Los Angeles
     sections:
     - itp_id: 16
+    - itp_id: 87
+    - itp_id: 102
+    - itp_id: 120
     - itp_id: 170
     - itp_id: 179
     - itp_id: 182
     - itp_id: 183
+    - itp_id: 231
+    - itp_id: 260
+    - itp_id: 295
     - itp_id: 300
+    - itp_id: 337
     - itp_id: 339
+    - itp_id: 380
   - caption: District 08 - San Bernardino
     params:
       district: 08 - San Bernardino
     sections:
     - itp_id: 232
+    - itp_id: 360
+  - caption: District 09 - Bishop
+    params:
+      district: 09 - Bishop
+    sections:
+    - itp_id: 99
+  - caption: District 10 - Stockton
+    params:
+      district: 10 - Stockton
+    sections:
+    - itp_id: 168
+    - itp_id: 203
+    - itp_id: 284
+    - itp_id: 349
   - caption: District 11 - San Diego
     params:
       district: 11 - San Diego

@@ -4,13 +4,18 @@ Programmatically add params to how deploying portfolio,
 especially when there are too many parameters to list.
 """
 import geopandas as gpd
-#import intake
+import intake
 import pandas as pd
 import yaml
 
-import parallel_corridors_utils
+import utils
 
-#catalog = intake.open_catalog("./bus_service_increase/*.yml")
+catalog = intake.open_catalog("./bus_service_increase/*.yml")
+
+# these come from parallel_corridors_utils
+# but, importing these throws error because of directories when the Makefile is run
+PCT_COMPETITIVE_THRESHOLD = 0.75
+PCT_TRIPS_BELOW_CUTOFF = 1.0
 
 PORTFOLIO_SITE_YAML = "./portfolio/sites/parallel_corridors.yml"
 
@@ -19,8 +24,8 @@ PORTFOLIO_SITE_YAML = "./portfolio/sites/parallel_corridors.yml"
 # more routes aren't showing up, rather than deliberately showing results that meet certain criteria
 def valid_operators(df):
     t1 = df[(df.route_group.notna()) &
-            (df.pct_trips_competitive > parallel_corridors_utils.PCT_COMPETITIVE_THRESHOLD) &
-            (df.pct_below_cutoff >= parallel_corridors_utils.PCT_TRIPS_BELOW_CUTOFF)
+            (df.pct_trips_competitive > PCT_COMPETITIVE_THRESHOLD) &
+            (df.pct_below_cutoff >= PCT_TRIPS_BELOW_CUTOFF)
            ]
     
     # Count unique routes that show up by operator-route_group
@@ -38,7 +43,7 @@ def valid_operators(df):
     # If all 3 groups are showing 1 route each, then that operator should be excluded from report
     t3 = t2.groupby("calitp_itp_id").agg({"valid": "sum"}).reset_index()
 
-    t4 = t3[t3.valid > 1]
+    t4 = t3[t3.valid >= 1]
     
     print(f"# operators included in analysis: {len(t3)}")
     print(f"# operators included in report: {len(t4)}")
@@ -55,8 +60,7 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML):
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    #df = catalog.competitive_route_variability.read()  
-    df = gpd.read_parquet(f"{utils.GCS_FILE_PATH}competitive_route_variability.parquet")
+    df = catalog.competitive_route_variability.read()  
     
     operators_to_include = valid_operators(df)
     
