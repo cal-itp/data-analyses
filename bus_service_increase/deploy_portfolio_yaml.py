@@ -4,14 +4,48 @@ Programmatically add params to how deploying portfolio,
 especially when there are too many parameters to list.
 """
 import geopandas as gpd
-import intake
+#import intake
 import pandas as pd
 import yaml
 
-catalog = intake.open_catalog("./bus_service_increase/*.yml")
+import parallel_corridors_utils
+
+#catalog = intake.open_catalog("./bus_service_increase/*.yml")
 
 PORTFOLIO_SITE_YAML = "./portfolio/sites/parallel_corridors.yml"
 
+# Do a quick check and suppress operators that just show 1 route in each route_group
+# From UI/UX perspective, it's confusing to readers because they think it's an error that
+# more routes aren't showing up, rather than deliberately showing results that meet certain criteria
+def valid_operators(df):
+    t1 = df[(df.route_group.notna()) &
+            (df.pct_trips_competitive > parallel_corridors_utils.PCT_COMPETITIVE_THRESHOLD) &
+            (df.pct_below_cutoff >= parallel_corridors_utils.PCT_TRIPS_BELOW_CUTOFF)
+           ]
+    
+    # Count unique routes that show up by operator-route_group
+    t2 = (t1.groupby(["calitp_itp_id", "route_group"])
+          .agg({"route_id":"nunique"})
+          .reset_index()
+         )
+    
+    # Valid if it's showing at least 2 routes in each group
+    t2 = t2.assign(
+        valid = t2.apply(lambda x: 1 if x.route_id > 1
+                         else 0, axis=1)
+    )
+    
+    # If all 3 groups are showing 1 route each, then that operator should be excluded from report
+    t3 = t2.groupby("calitp_itp_id").agg({"valid": "sum"}).reset_index()
+
+    t4 = t3[t3.valid > 1]
+    
+    print(f"# operators included in analysis: {len(t3)}")
+    print(f"# operators included in report: {len(t4)}")
+   
+    return list(t4.calitp_itp_id)
+    
+    
 def overwrite_yaml(PORTFOLIO_SITE_YAML):
     """
     PORTFOLIO_SITE_YAML: str
@@ -21,7 +55,12 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML):
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    df = catalog.competitive_route_variability.read()
+    #df = catalog.competitive_route_variability.read()  
+    df = gpd.read_parquet(f"{utils.GCS_FILE_PATH}competitive_route_variability.parquet")
+    
+    operators_to_include = valid_operators(df)
+    
+    df = df[df.calitp_itp_id.isin(operators_to_include)]
     
     districts = sorted(list(df[df.caltrans_district.notna()].caltrans_district.unique()))
 
