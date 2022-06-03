@@ -32,5 +32,3 @@ for f in in_features:
 
     arcpy.ExportMetadata_conversion (out_location + '/' + f, translator, 
         xml_file)
-    
-
