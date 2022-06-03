@@ -14,7 +14,7 @@ import re
 from calitp.tables import tbl
 from siuba import *
 
-import setup_parallel_trips_with_stops
+import E1_setup_parallel_trips_with_stops as setup_parallel_trips_with_stops
 import shared_utils
 import utils
 
@@ -281,7 +281,9 @@ def add_route_name(df):
     df2 = pd.merge(
         df, 
         route_names[route_names.route_name_used != ""][
-            ["calitp_itp_id", "route_id", "route_name_used"]].drop_duplicates(),
+            ["calitp_itp_id", "route_id", "route_name_used", 
+             # add route_short_name to use in charts, perhaps more descriptive than route_id
+            "route_short_name"]].drop_duplicates(),
         on = ["calitp_itp_id", "route_id"],
         how = "left",
         # many on the left because df is unique at itp_id-route_id-shape_id
