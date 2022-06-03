@@ -14,7 +14,6 @@ Maps are organized by Caltrans district, with a separate page for each transit o
 
 Segment speed is estimated using the time and distance between vehicle positions reports, with distance being measured linearly along the corresponding transit route. These maps show stop-to-stop speeds, which are calculated by interpolating the two nearest position reports for each trip in order to estimate speed between two stops, then taking the 20th percentile of speeds for that stop segment in each period (morning peak, afternoon peak, and midday)
 
-Delay is estimated by comparing the _time_ each transit vehicle actually arrived at a stop to the scheduled arrival time.
 
 ## Ongoing Work
 
