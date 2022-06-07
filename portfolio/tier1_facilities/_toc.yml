@@ -1,6 +1,0 @@
-format: jb-book
-parts:
--   caption: null
-    chapters:
-    -   file: 0__tier1-facilities-hqta__.ipynb
-root: README
