@@ -1,4 +1,4 @@
-# Introduction2
+# Introduction
 
 Working with Facilities Strategic Initiative (FSI) to understand potential retrofits of Caltrans facilities.
 
