@@ -19,12 +19,16 @@ https://docs.calitp.org/data-infra/analytics_welcome/overview.html
 
 https://docs.calitp.org/data-infra/analytics_tools/overview.html
 
-## Parameterized reports
+## Publishing Reports
+[The sites folder](./portfolio/sites/) contains the YAML files that drive sites
+deployed to [https://analysis.calitp.org/](https://analysis.calitp.org/); the existing
+sites can be used as examples/templates for deploying additional sites. Also, the
+Data Services Documentation has a [specific chapter](https://docs.calitp.org/data-infra/publishing/overview.html)
+dedicated to various ways to publish data.
 
-[The reports config file](./reports_config.yml) configures the parameterized report
-generation for this repo.
-
-### Caveats
+### Caveats (when using the portfolio site)
 Jupyter Book/Sphinx do not play nicely with Markdown headers written out in `display()`
 calls. Therefore, [portfolio.py](./portfolio.py) uses a custom Papermill
-engine to template Markdown cells directly.
+engine to template Markdown cells directly, following Python formatted-string
+syntax. For example, your Markdown cell could contain `# {district_name}` and
+it will be templated by the underlying engine.
