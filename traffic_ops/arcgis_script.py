@@ -56,6 +56,10 @@ for f in in_features:
                                     "ENABLED")
 
 
+# Compress file gdb for sending -- nope, this doesn't create a zipped file
+# Manually create zipped .gdb file
+arcpy.CompressFileGeodatabaseData_management(out_location, "Lossless compression")
+
     
     # https://desktop.arcgis.com/en/arcmap/latest/manage-data/metadata/editing-metadata-for-many-arcgis-items.htm
     # Add changes in metadata and write it to the file
