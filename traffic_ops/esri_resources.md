@@ -23,9 +23,12 @@
 
 
 ## ArcGIS
-* [Metadata class](https://pro.arcgis.com/en/pro-app/latest/arcpy/metadata/metadata-class.htm)
+* [Metadata template](https://desktop.arcgis.com/en/arcmap/latest/manage-data/metadata/creating-a-metadata-template.htm)
+* [Metadata workflow editing multiple items](https://desktop.arcgis.com/en/arcmap/latest/manage-data/metadata/editing-metadata-for-many-arcgis-items.htm)
 * [Loading Python script](https://desktop.arcgis.com/en/arcmap/10.3/analyze/executing-tools/saving-loading-and-recalling-at-the-python-window.htm)
-* [Migrate metadata scripts from ArcMap to ArcGIS Pro](https://pro.arcgis.com/en/pro-app/latest/arcpy/metadata/migrating-from-arcmap-to-arcgis-pro.htm)
+* 
+
 
 ## Other
 * [Convert XML to shp](https://gis.stackexchange.com/questions/71182/programmatically-converting-arbitrary-xml-data-to-shapefile)
+
