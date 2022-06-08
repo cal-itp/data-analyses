@@ -9,8 +9,8 @@ arcpy.env.workspace = r"C:\Users\s153936\Documents\ArcGIS"
 # Set local variables
 in_features = [
     #'stops_assembled', 'routes_assembled',
-    #'ca_hq_transit_areas',
-    'ca_hq_transit_stops',
+    'ca_hq_transit_areas',
+    #'ca_hq_transit_stops',
 ]
 
 out_location = 'open_data.gdb'
