@@ -59,12 +59,12 @@ def download_geoparquet(GCS_FILE_PATH, FILE_NAME, save_locally=False):
 
 # Make zipped shapefile
 # https://github.com/CityOfLosAngeles/planning-entitlements/blob/master/notebooks/utils.py
-def make_zipped_shapefile(df, path):
+def make_shapefile(gdf, path):
     """
     Make a zipped shapefile and save locally
     Parameters
     ==========
-    df: gpd.GeoDataFrame to be saved as zipped shapefile
+    gdf: gpd.GeoDataFrame to be saved as zipped shapefile
     path: str, local path to where the zipped shapefile is saved.
             Ex: "folder_name/census_tracts"
                 "folder_name/census_tracts.zip"
@@ -75,15 +75,36 @@ def make_zipped_shapefile(df, path):
     dirname = os.path.splitext(path)[0]
     print(f"Path name: {path}")
     print(f"Dirname (1st element of path): {dirname}")
+
     # Make sure there's no folder with the same name
     shutil.rmtree(dirname, ignore_errors=True)
+
     # Make folder
     os.mkdir(dirname)
     shapefile_name = f"{os.path.basename(dirname)}.shp"
     print(f"Shapefile name: {shapefile_name}")
+
     # Export shapefile into its own folder with the same name
-    df.to_file(driver="ESRI Shapefile", filename=f"{dirname}/{shapefile_name}")
+    gdf.to_file(driver="ESRI Shapefile", filename=f"{dirname}/{shapefile_name}")
     print(f"Shapefile component parts folder: {dirname}/{shapefile_name}")
+
+    return dirname, shapefile_name
+
+
+def make_zipped_shapefile(gdf, path):
+    """
+    Make a zipped shapefile and save locally
+    Parameters
+    ==========
+    gdf: gpd.GeoDataFrame to be saved as zipped shapefile
+    path: str, local path to where the zipped shapefile is saved.
+            Ex: "folder_name/census_tracts"
+                "folder_name/census_tracts.zip"
+
+    Remember: ESRI only takes 10 character column names!!
+    """
+    dirname, shapefile_name = make_shapefile(gdf, path)
+
     # Zip it up
     shutil.make_archive(dirname, "zip", dirname)
     # Remove the unzipped folder
