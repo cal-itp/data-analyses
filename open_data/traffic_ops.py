@@ -3,10 +3,10 @@ from metadata_update import fill_in_keyword_list
 
 KEYWORDS = [
     'Transportation',
-    'Land Use',
-    'Transit-Oriented Development',
-    'TOD',
-    'High Quality Transit'
+    'GTFS',
+    'Transit routes',
+    'Transit stops',
+    'Transit',
 ]
 
 KEYWORDS_FORMATTED = fill_in_keyword_list(
@@ -30,8 +30,8 @@ ROUTES_DICT = {
     "abstract": "Public. EPSG: 3310",
     "purpose": PURPOSE, 
 
-    "beginning_date": "20220517",
-    "end_date": "20220617",
+    "beginning_date": "20220608",
+    "end_date": "20220708",
     "place": "California",
 
     "status": "Complete", 
@@ -45,8 +45,8 @@ ROUTES_DICT = {
     "data_dict_url": "some_url", 
 
     "contact_organization": "Caltrans", 
-    "contact_person": "Eric Dasmalchi", 
-    "contact_email": "eric.dasmalchi@dot.ca.gov" 
+    "contact_person": "Tiffany Chu", 
+    "contact_email": "tiffany.chu@dot.ca.gov" 
 }
 
 # Use same data dictionary with tiny modifications
