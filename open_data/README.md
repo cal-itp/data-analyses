@@ -25,4 +25,5 @@
 1. Zip the file gdb manually - have code, check if it works in ArcGIS
 
 ## Open Data Portal Datasets
-1. [High Quality Transit Areas (HQTA)](./hqta_metadata_dict.py)
+1. [High Quality Transit Areas (HQTA)](./hqta.py)
+1. [Transit Stops and Routes (Traffic Ops request)](./traffic_ops.py)
