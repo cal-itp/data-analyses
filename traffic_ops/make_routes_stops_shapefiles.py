@@ -15,7 +15,7 @@ import create_routes_data
 import create_stops_data
 from shared_utils import utils
 
-def create_shapefiles_and_export():
+if __name__ == "__main__":
     time0 = datetime.now()
     
     # Create local parquets
@@ -41,7 +41,3 @@ def create_shapefiles_and_export():
     
     time1 = datetime.now()
     print(f"Total run time for routes/stops script: {time1-time0}")
-    
-    
-if __name__ == "__main__":
-    create_shapefiles_and_export()
