@@ -1,6 +1,7 @@
 # Save a version of script that runs within ArcGIS
 import arcpy
 import os
+import zipfile
 
 print os.getcwd()
 # Set this path to be in _env
@@ -53,5 +54,22 @@ for f in in_features:
     
 
 # Compress file gdb for sending -- nope, this doesn't create a zipped file
-# Manually create zipped .gdb file
-arcpy.CompressFileGeodatabaseData_management(out_location, "Lossless compression")
+#arcpy.CompressFileGeodatabaseData_management(out_location, "Lossless compression")
+
+#https://community.esri.com/t5/python-questions/zip-a-file-geodatabase-using-arcpy-or-zipfile/td-p/388286
+#Creates the empty zip file and opens it for writing       
+def zip_gdb(input_gdb):
+    gdb_file = str(input_gdb)
+    out_file = gdb_file[0:-4] + '.zip'
+    gdb_name = os.path.basename(gdb_file)
+    
+    with zipfile.ZipFile(out_file, mode='w', 
+                         compression=zipfile.ZIP_DEFLATED, 
+                         allowZip64=True) as myzip:
+        for f in os.listdir(gdb_file):
+            if f[-5:] != '.lock':
+                myzip.write(os.path.join(gdb_file, f), gdb_name + '/' + os.path.basename(f))
+    
+    print('Completed zipping: {}'.format(gdb_file))
+
+zip_gdb(out_location)
