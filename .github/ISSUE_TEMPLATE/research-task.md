@@ -20,6 +20,6 @@ Use this template to create issues that represent small chunks of work (.5 - 2 d
 
 * **Research Required**:  
 
-* **Metrics**: what specific calculations are you loooking to find?  
+* **Metrics**: what specific calculations are you looking to find?  
 
 * **Expected Outputs / Findings**: what do you hope to have created when this is complete?
