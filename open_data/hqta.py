@@ -1,7 +1,7 @@
 # HQTA transit areas and transit stops data dictionary
 from metadata_update import fill_in_keyword_list
 
-HQTA_KEYWORDS = [
+KEYWORDS = [
     'Transportation',
     'Land Use',
     'Transit-Oriented Development',
@@ -9,8 +9,8 @@ HQTA_KEYWORDS = [
     'High Quality Transit'
 ]
 
-HQTA_KEYWORDS_FORMATTED = fill_in_keyword_list(
-    topic='transportation', keyword_list = HQTA_KEYWORDS)
+KEYWORDS_FORMATTED = fill_in_keyword_list(
+    topic='transportation', keyword_list = KEYWORDS)
 
 
 PURPOSE = ('''
@@ -38,7 +38,7 @@ HQTA_TRANSIT_AREAS_DICT = {
     "status": "Complete", 
     "frequency": "Monthly",
     
-    "theme_topics": HQTA_KEYWORDS_FORMATTED, 
+    "theme_topics": KEYWORDS_FORMATTED, 
 
     "methodology": METHODOLOGY, 
     
