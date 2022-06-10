@@ -33,3 +33,10 @@
 ## Open Data Portal Datasets
 1. [High Quality Transit Areas (HQTA)](./hqta.py)
 1. [Transit Stops and Routes (Traffic Ops request)](./traffic_ops.py)
+
+TODO:
+* metadata won't have the structure unless it's been filled out first
+* we want to grab certain things. come up with list of these things, and grab the relevant ones.
+* otherwise, want to copy the metadata of an existing file.
+
+small python script for command line args for dates (start, end date)
