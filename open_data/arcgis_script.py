@@ -5,7 +5,8 @@ More limited because it relies on `arcpy`
 ## Run this in Hub -- dotenv cannot be run in ArcGIS
 # Set this path to be in _env
 # Hardcode it in the script within ArcGIS
-import dot_env
+import dotenv
+import os
 dotenv.load_dotenv("_env")
 ARCGIS_PATH = os.environ["ARCGIS_PATH"]
 
@@ -19,8 +20,10 @@ arcpy.env.workspace = ARCGIS_PATH
 
 # Set local variables
 in_features = [
-    'ca_hq_transit_areas',
-    'ca_hq_transit_stops',
+    #'ca_hq_transit_areas',
+    #'ca_hq_transit_stops',
+    'ca_transit_routes',
+    'ca_transit_stops',
 ]
 
 out_location = 'open_data.gdb'
