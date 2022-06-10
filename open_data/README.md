@@ -19,8 +19,14 @@
 
 ## Analyst Steps
 1. Make sure geodataframe is saved as a shapefile or zipped shapefile. Use `shared_utils.utils.make_shapefile()` or `shared_utils.utils.make_zipped_shapefile()`.
+    * Download the files from the Hub to your local filesystem.
 1. Run [arcgis_script](./arcgis_script.py) for Steps 2-3.
+    * Open a notebook in Hub and find the `ARCGIS_PATH`
+    * Hardcode that path for `arcpy.env.workspace = ARCGIS_PATH`
+    * The exported XML metadata will be in file gdb directory.
+    * Upload the XML metadata into Hub.
 1. In terminal: `python open_data.py` for Steps 4-7.
+    * Change into the `open_data` directory: `cd open_data/`
 1. Run [arcgis_script](./arcgis_script.py) for Step 8.
 1. Zip the file gdb manually - have code, check if it works in ArcGIS
 
