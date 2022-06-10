@@ -16,14 +16,15 @@ import arcpy
 import os
 import zipfile
 
+#arcpy.env.workspace = "C:\Users\s153936\Documents\ArcGIS"
 arcpy.env.workspace = ARCGIS_PATH
 
 # Set local variables
 in_features = [
-    #'ca_hq_transit_areas',
-    #'ca_hq_transit_stops',
-    'ca_transit_routes',
-    'ca_transit_stops',
+    'ca_hq_transit_areas',
+    'ca_hq_transit_stops',
+    #'ca_transit_routes',
+    #'ca_transit_stops',
 ]
 
 out_location = 'open_data.gdb'
@@ -32,7 +33,8 @@ out_location = 'open_data.gdb'
 directory = arcpy.GetInstallInfo("desktop")["InstallDir"] 
 
 # Export metadata using FGDC
-translator =  directory + 'Metadata\Translator\ArcGIS2FGDC.xml'
+#translator =  directory + 'Metadata\Translator\ArcGIS2FGDC.xml'
+translator =  directory + 'Metadata\Translator\ArcGIS2ISO19139.xml'
 
 
 for f in in_features:
@@ -57,7 +59,7 @@ for f in in_features:
 
 for f in in_features:
     # This is the one after it's manually changed. Keep separate to see what works.
-    updated_xml_file = f + '/' + f + '.xml'
+    updated_xml_file = out_location + '/' + f + '.xml'
             
     # Import the updated xml, then overwrite the metadata in the file gdb    
     arcpy.conversion.ImportMetadata(updated_xml_file, 
