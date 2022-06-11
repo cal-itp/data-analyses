@@ -48,6 +48,12 @@ HQTA_TRANSIT_AREAS_DICT = {
     "contact_organization": "Caltrans", 
     "contact_person": "Eric Dasmalchi", 
     "contact_email": "eric.dasmalchi@dot.ca.gov" 
+    
+    # Add 2 other elements not in Caltrans documentation
+    # resource contact (same info as metadata contact)
+    # edition: can use number of date. edition date can't be found when exported as FGDC
+    # FGDC is what's listed as recommended in Caltrans documentation
+    # ISO19139 does contain edition date and edition, but it's way harder to parse
 }
 
 # Use same data dictionary with tiny modifications

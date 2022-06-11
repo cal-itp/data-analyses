@@ -5,7 +5,6 @@ Analyst inputs a dictionary of values to overwrite.
 Convert JSON back to XML to feed in ArcGIS.
 """
 import xml.etree.ElementTree as ET
-import json
 import xmltodict
 
 # Convert XML to JSON
@@ -15,12 +14,12 @@ def xml_to_json(path: str) -> dict:
         print(f"Loading XML as JSON from {path}")
         xml = ET.tostring(ET.parse(path).getroot())
         return xmltodict.parse(xml, 
-                               #attr_prefix="@", cdata_key="#text", 
+                               attr_prefix="", cdata_key="text", 
+                               #process_namespaces=True,
                                dict_constructor=dict)
     except:
         print(f"Loading failed for {path}")
     return {}
-
 
 # Function to put in list of keywords (MINIMUM 5 needed)
 def fill_in_keyword_list(topic='transportation', keyword_list = []):

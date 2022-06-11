@@ -21,10 +21,10 @@ arcpy.env.workspace = ARCGIS_PATH
 
 # Set local variables
 in_features = [
-    'ca_hq_transit_areas',
-    'ca_hq_transit_stops',
-    #'ca_transit_routes',
-    #'ca_transit_stops',
+    #'ca_hq_transit_areas',
+    #'ca_hq_transit_stops',
+    'ca_transit_routes',
+    'ca_transit_stops',
 ]
 
 out_location = 'open_data.gdb'
@@ -33,14 +33,18 @@ out_location = 'open_data.gdb'
 directory = arcpy.GetInstallInfo("desktop")["InstallDir"] 
 
 # Export metadata using FGDC
-#translator =  directory + 'Metadata\Translator\ArcGIS2FGDC.xml'
-translator =  directory + 'Metadata\Translator\ArcGIS2ISO19139.xml'
+translator =  directory + 'Metadata\Translator\ArcGIS2FGDC.xml'
+#translator =  directory + 'Metadata\Translator\ArcGIS2ISO19139.xml'
 
 
 for f in in_features:
     # construct the filename, which is takes form of routes_assembled/routes_assembled.shp
     shp_file_name = f + '/' + f + '.shp'
-
+    
+    try:
+        arcpy.management.Delete(out_location + '/' + f)
+    except:
+        pass
     # Execute FeatureClassToGeodatabase
     arcpy.FeatureClassToGeodatabase_conversion(shp_file_name, out_location)
     
