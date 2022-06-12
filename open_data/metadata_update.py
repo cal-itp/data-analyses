@@ -21,6 +21,53 @@ def xml_to_json(path: str) -> dict:
         print(f"Loading failed for {path}")
     return {}
 
+
+# Lift necessary stuff from 1st time through shp to file gdb
+def lift_necessary_dataset_elements(metadata_json):
+    m = metadata_json["metadata"]
+    
+    # Store this info in a dictionary
+    d = {}
+    
+    # Bounding box
+    d["idinfo"] = {}
+    d["idinfo"]["spdom"] = m["idinfo"]["spdom"] 
+    
+    # Some description about geospatial layer
+    d["spdoinfo"] = m["spdoinfo"] 
+    
+    # Spatial reference info
+    d["spref"] = m["spref"] 
+    
+    # Field and entity attributes
+    d["eainfo"] = m["eainfo"]
+    
+    return d
+
+
+def overwrite_default_with_dataset_elements(metadata_json):
+    DEFAULT_XML = "./metadata_xml/default.xml"
+    default_template = metadata_update.xml_to_json(DEFAULT_XML)
+    default = default_template["metadata"]
+    
+    # Grab the necessary elements from my dataset
+    necessary_elements = lift_necessary_dataset_elements(metadata_json)
+    
+    # Overwrite it in the default template
+    for key, value in default.items():
+        if key in necessary_elements.keys() and key != "idinfo":
+            default[key] = necessary_elements[key]
+        
+        elif key == "idinfo":
+            for k, v in value.items():
+                if k == "spdom":
+                    default[key][k] = necessary_elements[key][k]
+           
+            
+    # Return the default template, but now with our dataset's info populated
+    return default_template
+
+
 # Function to put in list of keywords (MINIMUM 5 needed)
 def fill_in_keyword_list(topic='transportation', keyword_list = []):
     if len(keyword_list) >= 5:
@@ -36,7 +83,19 @@ def fill_in_keyword_list(topic='transportation', keyword_list = []):
     else:
         return "Input minimum 5 keywords"
 
+# First time metadata is generated off of template, it holds '-999' as value
+# Subsequent updates, pull it, and add 1
+def check_edition_add_one(metadata):
+    input_edition = metadata["idinfo"]["citation"]["citeinfo"]["edition"]
     
+    if input_edition == -999:
+        new_edition = 1
+    else:
+        new_edition = str(int(input_edition) + 1)
+    
+    return new_edition
+    
+
 SAMPLE_DATASET_INFO = {
     "dataset_name": "my_dataset", 
     "publish_entity": "California Integrated Travel Project", 
@@ -72,6 +131,11 @@ def overwrite_metadata_json(metadata_json, DATASET_INFO):
     
     m["idinfo"]["citation"]["citeinfo"]["title"] = d["dataset_name"]
     m["idinfo"]["citation"]["citeinfo"]["pubinfo"]["publish"] = d["publish_entity"]
+    ## Need edition and resource contact added to be approved 
+    # Add edition 
+    # Use number instead of date (shows up when exported in FGDC)
+    NEW_EDITION = check_edition_add_one(m)
+    m["idinfo"]["citation"]["citeinfo"]["edition"] = NEW_EDITION
     
     m["idinfo"]["descript"]["abstract"] = d["abstract"]
     m["idinfo"]["descript"]["purpose"] = d["purpose"]
@@ -85,11 +149,17 @@ def overwrite_metadata_json(metadata_json, DATASET_INFO):
 
     m["idinfo"]["keywords"] = d["theme_topics"]    
 
+    # Add resource contact
+    m["idinfo"]["ptcontac"]["cntinfo"]["cntorgp"]["cntorg"] = d["contact_organization"]
+    m["idinfo"]["ptcontac"]["cntinfo"]["cntorgp"]["cntper"] = d["contact_person"]
+    m["idinfo"]["ptcontac"]["cntinfo"]["cntpos"] = d["publish_entity"]
+    m["idinfo"]["ptcontac"]["cntinfo"]["cntemail"] = d["contact_email"]    
+    
     m["dataqual"]["lineage"]["procstep"]["procdesc"] = d["methodology"]    
     
-    m["eainfo"]["detailed"][0]["enttyp"]["enttypl"] = d["dataset_name"]    
-    m["eainfo"]["detailed"][1]["enttyp"]["enttypd"] = d["data_dict_type"]    
-    m["eainfo"]["detailed"][1]["enttyp"]["enttypds"] = d["data_dict_url"]    
+    m["eainfo"]["detailed"]["enttyp"]["enttypl"] = d["dataset_name"]    
+    m["eainfo"]["detailed"]["enttyp"]["enttypd"] = d["data_dict_type"]    
+    m["eainfo"]["detailed"]["enttyp"]["enttypds"] = d["data_dict_url"]    
   
     m["metainfo"]["metc"]["cntinfo"]["cntorgp"]["cntorg"] = d["contact_organization"]    
     m["metainfo"]["metc"]["cntinfo"]["cntorgp"]["cntper"] = d["contact_person"]    
@@ -99,7 +169,8 @@ def overwrite_metadata_json(metadata_json, DATASET_INFO):
     return new_metadata 
 
 
-def update_metadata_xml(XML_FILE, DATASET_INFO = SAMPLE_DATASET_INFO):
+
+def update_metadata_xml(XML_FILE, DATASET_INFO = SAMPLE_DATASET_INFO, first_run=False):
     """
     XML_FILE: string.
         Path to the XML metadata file.
@@ -108,19 +179,33 @@ def update_metadata_xml(XML_FILE, DATASET_INFO = SAMPLE_DATASET_INFO):
     DATASET_INFO: dict.
         Dictionary with values to overwrite in metadata. 
         Analyst needs to replace the values where needed.
+    
+    first_run: boolean.
+        Defaults to False.
+        For the first time, set to True, so you apply `default.xml` as template.
     """
     
     # Read in original XML as JSON
     esri_metadata = xml_to_json(XML_FILE)
     print("Read in XML as JSON")
     
-    new_metadata = overwrite_metadata_json(esri_metadata, DATASET_INFO)
+    if first_run is True:
+        # Apply template
+        metadata_templated = overwrite_default_with_dataset_elements(esri_metadata)
+        print("Default template applied.")
+    else:
+        metadata_templated = esri_metadata.copy()
+        print("Skip default template.")
+        
+    new_metadata = overwrite_metadata_json(metadata_templated, DATASET_INFO)
     print("Overwrite JSON using dict")
 
     new_xml = xmltodict.unparse(new_metadata, pretty=True)
     print("Convert JSON back to XML")
     
     # Overwrite existing XML file
-    with open(XML_FILE, 'w') as f:
+    OUTPUT_FOLDER = "./metadata_xml/run_in_esri/"
+    
+    with open(f"{OUTPUT_FOLDER}{XML_FILE}", 'w') as f:
         f.write(new_xml)
     print("Save over existing XML")
