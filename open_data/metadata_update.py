@@ -7,6 +7,8 @@ Convert JSON back to XML to feed in ArcGIS.
 import xml.etree.ElementTree as ET
 import xmltodict
 
+METADATA_FOLDER = "metadata_xml/"
+
 # Convert XML to JSON
 # https://stackoverflow.com/questions/48821725/xml-parsers-expat-expaterror-not-well-formed-invalid-token
 def xml_to_json(path: str) -> dict:  
@@ -46,8 +48,8 @@ def lift_necessary_dataset_elements(metadata_json):
 
 
 def overwrite_default_with_dataset_elements(metadata_json):
-    DEFAULT_XML = "./metadata_xml/default.xml"
-    default_template = metadata_update.xml_to_json(DEFAULT_XML)
+    DEFAULT_XML = f"./{METADATA_FOLDER}default.xml"
+    default_template = xml_to_json(DEFAULT_XML)
     default = default_template["metadata"]
     
     # Grab the necessary elements from my dataset
@@ -83,13 +85,14 @@ def fill_in_keyword_list(topic='transportation', keyword_list = []):
     else:
         return "Input minimum 5 keywords"
 
+    
 # First time metadata is generated off of template, it holds '-999' as value
 # Subsequent updates, pull it, and add 1
 def check_edition_add_one(metadata):
     input_edition = metadata["idinfo"]["citation"]["citeinfo"]["edition"]
     
-    if input_edition == -999:
-        new_edition = 1
+    if input_edition == '-999':
+        new_edition = str(1)
     else:
         new_edition = str(int(input_edition) + 1)
     
@@ -204,8 +207,9 @@ def update_metadata_xml(XML_FILE, DATASET_INFO = SAMPLE_DATASET_INFO, first_run=
     print("Convert JSON back to XML")
     
     # Overwrite existing XML file
-    OUTPUT_FOLDER = "./metadata_xml/run_in_esri/"
-    
-    with open(f"{OUTPUT_FOLDER}{XML_FILE}", 'w') as f:
+    OUTPUT_FOLDER = "run_in_esri/"
+    FILE = f"{XML_FILE.split(METADATA_FOLDER)[1]}"
+        
+    with open(f"{METADATA_FOLDER}{OUTPUT_FOLDER}{FILE}", 'w') as f:
         f.write(new_xml)
     print("Save over existing XML")
