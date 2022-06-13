@@ -15,13 +15,13 @@ from calitp import query_sql
 from datetime import datetime, date, timedelta
 from siuba import *
 
-import utils
+from shared_utils import geography_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 DATA_PATH = "./data/"
-
-SELECTED_DATE = date.today() - timedelta(days=1)
     
+SELECTED_DATE = date.today() - timedelta(days=1)
+
 stop_cols = ["calitp_itp_id", "stop_id", 
              "stop_lat", "stop_lon", 
              "stop_name", "stop_code"
@@ -88,7 +88,6 @@ def grab_selected_date(SELECTED_DATE):
     return stops, trips, route_info
 
 
-
 def create_local_parquets(SELECTED_DATE):
     time0 = datetime.now()
     stops, trips, route_info = grab_selected_date(SELECTED_DATE)
@@ -117,7 +116,9 @@ def create_local_parquets(SELECTED_DATE):
     time1 = datetime.now()
     print(f"Part 1: Queries and create local parquets: {time1-time0}")
 
-    routes = utils.make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None)
+    routes = geography_utils.make_routes_gdf(SELECTED_DATE, 
+                                             CRS=geography_utils.WGS84, 
+                                             ITP_ID_LIST=None)
     routes_unique = (routes[(routes.calitp_itp_id != 0) & 
                             (routes.calitp_itp_id != 20)]
                      .sort_values(["calitp_itp_id", "calitp_url_number", "shape_id"])
@@ -143,9 +144,11 @@ def delete_local_parquets():
     for file_name in FILES:
         os.remove(f"{file_name}")
 
-        
-## These functions are used in `create_routes_data.py` and `create_stops_data.py`
 
+#----------------------------------------------------#        
+# Functions are used in 
+# `create_routes_data.py` and `create_stops_data.py`
+#----------------------------------------------------#
 # Define column names, must fit ESRI 10 character limits
 RENAME_COLS = {
     "calitp_itp_id": "itp_id",

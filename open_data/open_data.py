@@ -27,10 +27,12 @@ OPEN_DATA = {
 }
 
 if __name__=="__main__":
-    RUN_ME = ["transit_stops", "transit_routes"]
+    RUN_ME = ["hqta_areas", "hqta_stops"]
     
     for name, dataset in OPEN_DATA.items():
-        if key in RUN_ME:
+        if name in RUN_ME:
             print(name)
             print("-------------------------------------------")
-            metadata_update.update_metadata_xml(dataset["path"], dataset["metadata_dict"])
+            metadata_update.update_metadata_xml(dataset["path"], 
+                                                dataset["metadata_dict"], 
+                                                first_run=False)
