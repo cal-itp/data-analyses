@@ -14,12 +14,30 @@ KEYWORDS_FORMATTED = fill_in_keyword_list(
 
 
 PURPOSE = ('''
-    Purpose.
+    Provide all CA transit stops and routes (geospatial) from all 
+    transit operators.
     '''
 )
 
 METHODOLOGY = ('''
-    Methodology.
+    This data was assembled from the General Transit Feed Specification (GTFS) 
+    schedule data. GTFS tables are text files, but these have been
+    compiled for all operators and transformed into geospatial data, with
+    minimal data processing. 
+    The transit routes dataset is assembled from two tables:
+    (1) `shapes.txt`, which defines the route alignment path, 
+    and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`.
+    `shapes.txt` is an optional GTFS table with richer information than just 
+    transit stop longitude/latitude. For the routes that aren't found in `shapes.txt`,
+    we compile the stop sequences with stop longitude/latitude to roughly capture the 
+    route alignment.
+    The transit stops dataset is assembled from `stops.txt`, which contains information
+    about the route, stop sequence, and stop longitude/latitude.
+    
+    References: https://gtfs.org/. 
+    https://gtfs.org/schedule/reference/#shapestxt. 
+    https://gtfs.org/schedule/reference/#stopstxt. 
+    https://gtfs.org/schedule/reference/#tripstxt. 
     '''
 )
 
