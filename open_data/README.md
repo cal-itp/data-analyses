@@ -24,9 +24,12 @@
     * Open a notebook in Hub and find the `ARCGIS_PATH`
     * Hardcode that path for `arcpy.env.workspace = ARCGIS_PATH`
     * The exported XML metadata will be in file gdb directory.
-    * Upload the XML metadata into Hub.
+    * Upload the XML metadata into Hub in `open_data/metadata_xml/`.
+1. Open `open_data.py` and modify the script to overwrite XML for the desired datasets.
 1. In terminal: `python open_data.py` for Steps 4-7.
-    * Change into the `open_data` directory: `cd open_data/`
+    * Change into the `open_data` directory: `cd open_data/`.
+    * The overwritten XML is stored in `open_data/metadata_xml/run_in_esri/`.
+    * Download the overwritten XML files locally to run in ArcGIS.
 1. Run [arcgis_script](./arcgis_script.py) for Step 8.
 1. Zip the file gdb manually - have code, check if it works in ArcGIS
 
