@@ -11,16 +11,13 @@ import pandas as pd
 import os
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
-pd.set_option("display.max_rows", 20)
 
 from calitp.tables import tbl
 from datetime import datetime
 from siuba import *
 
 import prep_data
-import utils
-
-DATA_PATH = prep_data.DATA_PATH
+from shared_utils import geography_utils
 
 def merge_shapes_to_routes(trips, routes):
     # Left only means in trips, but shape_id not found in shapes.txt
@@ -37,7 +34,7 @@ def merge_shapes_to_routes(trips, routes):
         )
     
     # routes is a gdf, so turn it back into gdf
-    m2 = gpd.GeoDataFrame(m1, geometry="geometry", crs = utils.WGS84)
+    m2 = gpd.GeoDataFrame(m1, geometry="geometry", crs = geography_utils.WGS84)
     
     return m2
 
@@ -117,7 +114,7 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
     print("Drop duplicates in stop_info_trips")
 
     # Assemble line geometry
-    missing_routes = utils.make_routes_line_geom_for_missing_shapes(stop_info_trips)
+    missing_routes = geography_utils.make_routes_line_geom_for_missing_shapes(stop_info_trips)
     
     # Merge route_id back in, which is lost when it 
     # passes through make_routes_line_geom_for_missing_shapes
@@ -138,7 +135,8 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
 # Assemble routes file
 def make_routes_shapefile():
     time0 = datetime.now()
-        
+    DATA_PATH = prep_data.DATA_PATH
+
     # Read in local parquets
     stops = pd.read_parquet(f"{DATA_PATH}stops.parquet")
     trips = pd.read_parquet(f"{DATA_PATH}trips.parquet")

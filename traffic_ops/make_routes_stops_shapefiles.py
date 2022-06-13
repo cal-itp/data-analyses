@@ -13,11 +13,9 @@ from datetime import datetime
 import prep_data
 import create_routes_data
 import create_stops_data
-import utils
+from shared_utils import utils
 
-DATA_PATH = prep_data.DATA_PATH
-
-def create_shapefiles_and_export():
+if __name__ == "__main__":
     time0 = datetime.now()
     
     # Create local parquets
@@ -28,10 +26,14 @@ def create_shapefiles_and_export():
     stops = create_stops_data.make_stops_shapefile()
     
     # Export geoparquets to GCS
-    utils.geoparquet_gcs_export(routes, prep_data.GCS_FILE_PATH, "routes_assembled")
-    utils.geoparquet_gcs_export(stops, prep_data.GCS_FILE_PATH, "stops_assembled")
+    utils.geoparquet_gcs_export(routes, prep_data.GCS_FILE_PATH, "ca_transit_routes")
+    utils.geoparquet_gcs_export(stops, prep_data.GCS_FILE_PATH, "ca_transit_stops")
     
     print("Geoparquets exported to GCS")
+    
+    # Export as shapefiles
+    utils.make_shapefile(routes, f"{prep_data.DATA_PATH}ca_transit_routes")
+    utils.make_shapefile(stops, f"{prep_data.DATA_PATH}ca_transit_stops")
     
     # Delete local parquets
     prep_data.delete_local_parquets()
@@ -39,7 +41,3 @@ def create_shapefiles_and_export():
     
     time1 = datetime.now()
     print(f"Total run time for routes/stops script: {time1-time0}")
-    
-    
-if __name__ == "__main__":
-    create_shapefiles_and_export()

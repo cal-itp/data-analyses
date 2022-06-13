@@ -3,10 +3,10 @@ from metadata_update import fill_in_keyword_list
 
 KEYWORDS = [
     'Transportation',
-    'Land Use',
-    'Transit-Oriented Development',
-    'TOD',
-    'High Quality Transit'
+    'GTFS',
+    'Transit routes',
+    'Transit stops',
+    'Transit',
 ]
 
 KEYWORDS_FORMATTED = fill_in_keyword_list(
@@ -14,12 +14,30 @@ KEYWORDS_FORMATTED = fill_in_keyword_list(
 
 
 PURPOSE = ('''
-    Purpose.
+    Provide all CA transit stops and routes (geospatial) from all 
+    transit operators.
     '''
 )
 
 METHODOLOGY = ('''
-    Methodology.
+    This data was assembled from the General Transit Feed Specification (GTFS) 
+    schedule data. GTFS tables are text files, but these have been
+    compiled for all operators and transformed into geospatial data, with
+    minimal data processing. 
+    The transit routes dataset is assembled from two tables:
+    (1) `shapes.txt`, which defines the route alignment path, 
+    and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`.
+    `shapes.txt` is an optional GTFS table with richer information than just 
+    transit stop longitude/latitude. For the routes that aren't found in `shapes.txt`,
+    we compile the stop sequences with stop longitude/latitude to roughly capture the 
+    route alignment.
+    The transit stops dataset is assembled from `stops.txt`, which contains information
+    about the route, stop sequence, and stop longitude/latitude.
+    
+    References: https://gtfs.org/. 
+    https://gtfs.org/schedule/reference/#shapestxt. 
+    https://gtfs.org/schedule/reference/#stopstxt. 
+    https://gtfs.org/schedule/reference/#tripstxt. 
     '''
 )
 
@@ -30,8 +48,8 @@ ROUTES_DICT = {
     "abstract": "Public. EPSG: 3310",
     "purpose": PURPOSE, 
 
-    "beginning_date": "20220517",
-    "end_date": "20220617",
+    "beginning_date": "20220608",
+    "end_date": "20220708",
     "place": "California",
 
     "status": "Complete", 
@@ -45,8 +63,8 @@ ROUTES_DICT = {
     "data_dict_url": "some_url", 
 
     "contact_organization": "Caltrans", 
-    "contact_person": "Eric Dasmalchi", 
-    "contact_email": "eric.dasmalchi@dot.ca.gov" 
+    "contact_person": "Tiffany Chu", 
+    "contact_email": "tiffany.chu@dot.ca.gov" 
 }
 
 # Use same data dictionary with tiny modifications

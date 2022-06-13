@@ -8,26 +8,24 @@ import geopandas as gpd
 import pandas as pd
 import os
 
-import prep_data
-import utils
-
-DATA_PATH = prep_data.DATA_PATH
-
 os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
-pd.set_option("display.max_rows", 20)
 
 from calitp.tables import tbl
 from calitp import query_sql
 from datetime import datetime
 from siuba import *
 
+import prep_data
+from shared_utils import geography_utils
+
+
 # Grab stops dataset and turn it from df to gdf
 def create_stops_data(stops):
-    stops = utils.create_point_geometry(stops, 
-                                        longitude_col = "stop_lon", 
-                                        latitude_col = "stop_lat", 
-                                        crs = utils.WGS84
-                                       )
+    stops = geography_utils.create_point_geometry(
+        stops, 
+        longitude_col = "stop_lon", latitude_col = "stop_lat", 
+        crs = geography_utils.WGS84
+    )
 
     # There are a couple of duplicates when looking at ID-stop_id (but diff stop_code)
     # Drop these, since stop_id is used to merge with route_id
@@ -88,7 +86,8 @@ def attach_route_info_to_stops(stops, route_info, agencies):
 
 def make_stops_shapefile():
     time0 = datetime.now()
-    
+    DATA_PATH = prep_data.DATA_PATH
+
     # Read in local parquets
     stops = pd.read_parquet(f"{DATA_PATH}stops.parquet")
     route_info = pd.read_parquet(f"{DATA_PATH}route_info.parquet")

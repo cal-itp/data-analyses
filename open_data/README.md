@@ -19,10 +19,27 @@
 
 ## Analyst Steps
 1. Make sure geodataframe is saved as a shapefile or zipped shapefile. Use `shared_utils.utils.make_shapefile()` or `shared_utils.utils.make_zipped_shapefile()`.
+    * Download the files from the Hub to your local filesystem.
 1. Run [arcgis_script](./arcgis_script.py) for Steps 2-3.
+    * Open a notebook in Hub and find the `ARCGIS_PATH`
+    * Hardcode that path for `arcpy.env.workspace = ARCGIS_PATH`
+    * The exported XML metadata will be in file gdb directory.
+    * Upload the XML metadata into Hub in `open_data/metadata_xml/`.
+1. Open `open_data.py` and modify the script to overwrite XML for the desired datasets.
 1. In terminal: `python open_data.py` for Steps 4-7.
+    * Change into the `open_data` directory: `cd open_data/`.
+    * The overwritten XML is stored in `open_data/metadata_xml/run_in_esri/`.
+    * Download the overwritten XML files locally to run in ArcGIS.
 1. Run [arcgis_script](./arcgis_script.py) for Step 8.
 1. Zip the file gdb manually - have code, check if it works in ArcGIS
 
 ## Open Data Portal Datasets
-1. [High Quality Transit Areas (HQTA)](./hqta_metadata_dict.py)
+1. [High Quality Transit Areas (HQTA)](./hqta.py)
+1. [Transit Stops and Routes (Traffic Ops request)](./traffic_ops.py)
+
+TODO:
+* metadata won't have the structure unless it's been filled out first
+* we want to grab certain things. come up with list of these things, and grab the relevant ones.
+* otherwise, want to copy the metadata of an existing file.
+
+small python script for command line args for dates (start, end date)

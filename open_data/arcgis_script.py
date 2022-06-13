@@ -16,12 +16,13 @@ import arcpy
 import os
 import zipfile
 
+#arcpy.env.workspace = "C:\Users\s153936\Documents\ArcGIS"
 arcpy.env.workspace = ARCGIS_PATH
 
 # Set local variables
 in_features = [
-    #'ca_hq_transit_areas',
-    #'ca_hq_transit_stops',
+    'ca_hq_transit_areas',
+    'ca_hq_transit_stops',
     'ca_transit_routes',
     'ca_transit_stops',
 ]
@@ -33,12 +34,17 @@ directory = arcpy.GetInstallInfo("desktop")["InstallDir"]
 
 # Export metadata using FGDC
 translator =  directory + 'Metadata\Translator\ArcGIS2FGDC.xml'
+#translator =  directory + 'Metadata\Translator\ArcGIS2ISO19139.xml'
 
 
 for f in in_features:
     # construct the filename, which is takes form of routes_assembled/routes_assembled.shp
     shp_file_name = f + '/' + f + '.shp'
-
+    
+    try:
+        arcpy.management.Delete(out_location + '/' + f)
+    except:
+        pass
     # Execute FeatureClassToGeodatabase
     arcpy.FeatureClassToGeodatabase_conversion(shp_file_name, out_location)
     
@@ -54,10 +60,10 @@ for f in in_features:
 
 ### UPDATE XML METADATA SEPARATELY IN PYTHON OUTSIDE OF ARCGIS
 
-
+# Run this after putting the updated XML in the file gdb
 for f in in_features:
     # This is the one after it's manually changed. Keep separate to see what works.
-    updated_xml_file = f + '/' + f + '.xml'
+    updated_xml_file = out_location + '/' + f + '.xml'
             
     # Import the updated xml, then overwrite the metadata in the file gdb    
     arcpy.conversion.ImportMetadata(updated_xml_file, 
@@ -70,7 +76,10 @@ for f in in_features:
 #arcpy.CompressFileGeodatabaseData_management(out_location, "Lossless compression")
 
 #https://community.esri.com/t5/python-questions/zip-a-file-geodatabase-using-arcpy-or-zipfile/td-p/388286
-#Creates the empty zip file and opens it for writing       
+#Creates the empty zip file and opens it for writing  
+
+# This isn't working. Can't open the file gdb as directory in ArcGIS, 
+# though outside of ArcGIS, it seems like it's finding the folder
 def zip_gdb(input_gdb):
     gdb_file = str(input_gdb)
     out_file = gdb_file[0:-4] + '.zip'
@@ -86,3 +95,7 @@ def zip_gdb(input_gdb):
     print('Completed zipping: {}'.format(gdb_file))
 
 zip_gdb(out_location)
+
+
+out_file = out_location + '.zip'
+shutil.make_archive(out_file, 'zip', out_location)‍‍‍‍‍‍‍
