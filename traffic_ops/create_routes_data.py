@@ -39,13 +39,54 @@ def merge_shapes_to_routes(trips, routes):
     return m2
 
 
+def handle_metrolink(trips, routes):
+    trips = trips[trips.calitp_itp_id==323]
+    routes = routes[routes.calitp_itp_id==323]
+    
+    def map_substring(s, my_dict):
+        for key, value in my_dict.items():
+            if key in s:
+                return my_dict[key]
+        
+        
+    metrolink_shape_to_route = {
+        'SB': 'San Bernardino Line', 
+        'IE': 'Inland Emp.-Orange Co. Line',
+        # if this is after IE, it correctly maps the IEOC and OC routes with dict
+        # but, just in case, let's just break out this case for OC so it never maps onto IEOC
+        'OCin': 'Orange County Line',  
+        'OCout': 'Orange County Line',
+        'RIVER': 'Riverside Line', 
+        'AV': 'Antelope Valley Line', 
+        'VT': 'Ventura County Line',
+        'LAX': 'LAX FlyAway Bus', 
+        '91': '91 Line',
+    }    
+    
+    routes = routes.assign(
+        route_id = routes.shape_id.apply(lambda x: 
+                                         map_substring(x, metrolink_shape_to_route))
+    )
+     
+    routes2 = pd.merge(
+        routes,
+        # Drop shape_id from trips, since it's all None
+        trips.drop(columns = "shape_id"),
+        on = ["calitp_itp_id", "route_id"],
+        how = "inner",
+        indicator = True
+    )
+        
+    return routes2
+    
+
 def routes_for_operators_in_shapes(merged_shapes_routes, route_info):
     # Attach route_id from gtfs_schedule.trips, using shape_id
     routes1 = (merged_shapes_routes[merged_shapes_routes._merge=="both"]
       .drop(columns = ["_merge"])
       .reset_index(drop=True)
      )
-    
+
     routes_part1 = prep_data.attach_route_name(routes1, route_info)
     
     return routes_part1
@@ -129,7 +170,7 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
 
     routes_part2 = prep_data.attach_route_name(missing_routes2, route_info)
 
-    return routes_part2
+    return routes_part2    
 
 
 # Assemble routes file
@@ -145,7 +186,12 @@ def make_routes_shapefile():
     agencies = pd.read_parquet(f"{DATA_PATH}agencies.parquet")
     latest_itp_id = pd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
-    df = merge_shapes_to_routes(trips, routes)
+    df1 = merge_shapes_to_routes(trips, routes)
+    metrolink = handle_metrolink(trips, routes)
+    
+    df = pd.concat([df1[df1.calitp_itp_id != 323], 
+                    metrolink
+                   ], axis=0, ignore_index=True)
     
     time1 = datetime.now()
     print(f"Read in data and merge shapes to routes: {time1-time0}")    
