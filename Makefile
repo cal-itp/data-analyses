@@ -20,8 +20,8 @@ build_dla_reports:
 
 
 build_hqta:
-	#pip install -r portfolio/requirements.txt
-	#git rm portfolio/hqta/ -rf
+	pip install -r portfolio/requirements.txt
+	git rm portfolio/hqta/ -rf
 	python portfolio/portfolio.py clean hqta
 	python portfolio/portfolio.py build hqta --deploy 
 	git add portfolio/hqta/*.yml portfolio/hqta/*.md portfolio/hqta/*.ipynb
