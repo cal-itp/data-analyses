@@ -15,12 +15,13 @@ from calitp import query_sql
 from datetime import datetime, date, timedelta
 from siuba import *
 
-from shared_utils import geography_utils
+from shared_utils import geography_utils, portfolio_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 DATA_PATH = "./data/"
     
-SELECTED_DATE = date.today() - timedelta(days=1)
+#SELECTED_DATE = date.today() - timedelta(days=1)
+SELECTED_DATE = "2022-06-21"
 
 stop_cols = ["calitp_itp_id", "stop_id", 
              "stop_lat", "stop_lon", 
@@ -28,9 +29,6 @@ stop_cols = ["calitp_itp_id", "stop_id",
             ]
 
 trip_cols = ["calitp_itp_id", "route_id", "shape_id"]
-
-route_cols = ["calitp_itp_id", "route_id", 
-              "route_short_name", "route_long_name"]
 
 
 def grab_selected_date(SELECTED_DATE):
@@ -69,21 +67,7 @@ def grab_selected_date(SELECTED_DATE):
             )
     
     ## Route info query
-    dim_routes = (tbl.views.gtfs_schedule_dim_routes()
-                  >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
-                  >> select(*route_cols, _.route_key)
-                  >> distinct()
-                 )
-
-
-    route_info = (tbl.views.gtfs_schedule_fact_daily_feed_routes()
-                  >> filter(_.date == SELECTED_DATE)
-                  >> select(_.route_key, _.date)
-                  >> inner_join(_, dim_routes, on = "route_key")
-                  >> select(*route_cols)
-                  >> distinct()
-                  >> collect()
-                 )
+    route_info = portfolio_utils.add_route_name(SELECTED_DATE)
     
     return stops, trips, route_info
 
@@ -91,13 +75,6 @@ def grab_selected_date(SELECTED_DATE):
 def create_local_parquets(SELECTED_DATE):
     time0 = datetime.now()
     stops, trips, route_info = grab_selected_date(SELECTED_DATE)
-    
-    agencies = (
-        tbl.gtfs_schedule.agency()
-        >> select(_.calitp_itp_id, _.agency_id, _.agency_name)
-        >> distinct()
-        >> collect()
-    )
     
     # Filter to the ITP_IDs present in the latest agencies.yml
     latest_itp_id = (tbl.views.gtfs_schedule_dim_feeds()
@@ -110,7 +87,6 @@ def create_local_parquets(SELECTED_DATE):
     stops.to_parquet(f"{DATA_PATH}stops.parquet")
     trips.to_parquet(f"{DATA_PATH}trips.parquet")
     route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
-    agencies.to_parquet(f"{DATA_PATH}agencies.parquet")
     latest_itp_id.to_parquet(f"{DATA_PATH}latest_itp_id.parquet")
     
     time1 = datetime.now()
@@ -152,11 +128,7 @@ def delete_local_parquets():
 # Define column names, must fit ESRI 10 character limits
 RENAME_COLS = {
     "calitp_itp_id": "itp_id",
-    "route_short_name": "route_name",
-    "route_long_name": "route_full",
-    # Ideally, we want to include _list because 
-    # these columns aren't the same as agency_id and agency_name
-    "agency_name": "agency",
+    "calitp_agency_name": "agency_name",
 }
 
 
@@ -167,50 +139,27 @@ def attach_route_name(df, route_info_df):
     df: pandas.DataFrame
         each row is unique to itp_id-route_id
     route_info_df: pandas.DataFrame
-                    each row is unique to route_id-route_long_name-route_short_name
+                    each row is unique to route_id-route_name_used
+                    portfolio_utils selects 1 from route_short_name, route_long_name, and route_desc
     """
     # Attach route info from gtfs_schedule.routes, using route_id
+    route_info_unique = (route_info_df
+                         .sort_values(["calitp_itp_id", "route_id", "route_name_used"])
+                         .drop_duplicates(subset=["calitp_itp_id", "route_id"])
+                        )
+    
     routes = pd.merge(
         df, 
-        route_info_df,
+        route_info_unique,
         on = ["calitp_itp_id", "route_id"],
         how = "left",
-        # route_id can have multiple long/short names
-        validate = "m:m",
+        validate = "m:1",
     )
 
     return routes
 
 
-# Define function to attach agency_id, agency_name using calitp_itp_id
-def attach_agency_info(df, agency_info):
-    # Turn df from long, and condense values into list
-    # They'll want to look at stops by ID, but see the list of agencies it's associated with
-    agency_info2 = (agency_info.groupby("calitp_itp_id")
-                 .agg(pd.Series.tolist)
-                 .reset_index()
-                )
-    
-    # Turn list into string, since ESRI can't handle lists
-    # #https://stackoverflow.com/questions/45306988/column-of-lists-convert-list-to-string-as-a-new-column
-
-    for c in ["agency_id", "agency_name"]: 
-        agency_info2[c] = agency_info2[c].apply(
-            lambda x: ", ".join([str(i) for i in x]))
-    
-    df2 = pd.merge(
-        df,
-        agency_info2,
-        on = "calitp_itp_id",
-        how = "left",
-        validate = "m:1",
-    )
-    
-    return df2
-
-
 # Function to filter to latest ITP_ID in agencies.yml
-# Also, embed dropping calitp_itp_id==0 as a step (print how many obs)
 def filter_latest_itp_id(df, latest_itp_id_df, itp_id_col = "calitp_itp_id"):
     starting_length = len(df)
     print(f"# rows to start: {starting_length}")
@@ -224,7 +173,7 @@ def filter_latest_itp_id(df, latest_itp_id_df, itp_id_col = "calitp_itp_id"):
     df = (df[df[itp_id_col].isin(latest_itp_id_df[itp_id_col])]
           .reset_index(drop=True)
          )
-    
+        
     only_latest_id = len(df)
     print(f"# rows with only latest agencies.yml: {only_latest_id}")
     print(f"# operators with only latest agencies.yml: {df[itp_id_col].nunique()}")
