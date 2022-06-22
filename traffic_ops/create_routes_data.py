@@ -17,7 +17,7 @@ from datetime import datetime
 from siuba import *
 
 import prep_data
-from shared_utils import geography_utils
+from shared_utils import geography_utils, portfolio_utils
 
 def merge_shapes_to_routes(trips, routes):
     # Left only means in trips, but shape_id not found in shapes.txt
@@ -183,7 +183,6 @@ def make_routes_shapefile():
     trips = pd.read_parquet(f"{DATA_PATH}trips.parquet")
     route_info = pd.read_parquet(f"{DATA_PATH}route_info.parquet")
     routes = gpd.read_parquet(f"{DATA_PATH}routes.parquet")
-    agencies = pd.read_parquet(f"{DATA_PATH}agencies.parquet")
     latest_itp_id = pd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
     df1 = merge_shapes_to_routes(trips, routes)
@@ -213,7 +212,16 @@ def make_routes_shapefile():
                        )
     
     # Attach agency_id and agency_name using calitp_itp_id
-    routes_assembled2 = prep_data.attach_agency_info(routes_assembled, agencies)
+    #routes_assembled2 = prep_data.attach_agency_info(routes_assembled, agencies)
+    agency_names = portfolio_utils.add_agency_name(SELECTED_DATE = prep_data.SELECTED_DATE)
+    
+    routes_assembled2 = pd.merge(
+        routes_assembled,
+        agency_names,
+        on = "calitp_itp_id",
+        how = "left",
+        validate = "m:1"
+    )
     
     routes_assembled2 = (prep_data.filter_latest_itp_id(routes_assembled2, 
                                                         latest_itp_id, 
