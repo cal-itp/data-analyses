@@ -3,6 +3,7 @@ from . import (
     calitp_color_palette,
     geography_utils,
     map_utils,
+    portfolio_utils,
     styleguide,
     utils,
 )
@@ -16,4 +17,5 @@ __all__ = [
     "altair_utils",
     "calitp_color_palette",
     "styleguide",
+    "portfolio_utils",
 ]
