@@ -16,12 +16,17 @@ from calitp.tables import tbl
 from siuba import *
 
 
-def add_agency_name():
+def add_agency_name(SELECTED_DATE=date.today() + timedelta(days=-1)):
     # This is the agency_name used in RT maps
     # rt_delay/rt_analysis.py#L309
+    # Similar version here with date needed - https://github.com/cal-itp/data-analyses/blob/main/high_quality_transit_areas/combine_and_visualize.ipynb
     df = (
         (
             tbl.views.gtfs_schedule_dim_feeds()
+            >> filter(
+                _.calitp_extracted_at < SELECTED_DATE,
+                _.calitp_deleted_at >= SELECTED_DATE,
+            )
             >> select(_.calitp_itp_id, _.calitp_agency_name)
             >> distinct()
             >> collect()
