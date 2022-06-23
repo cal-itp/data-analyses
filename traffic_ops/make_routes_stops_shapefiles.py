@@ -7,6 +7,7 @@ export as geoparquet in GCS, and
 export as zipped shapefile or geojson
 """
 import geopandas as gpd
+import os
 
 from datetime import datetime
 
@@ -15,11 +16,14 @@ import create_routes_data
 import create_stops_data
 from shared_utils import utils
 
+
 if __name__ == "__main__":
+    assert os.getcwd().endswith("traffic_ops"), "this script must be run from traffic_ops directory!"
+
     time0 = datetime.now()
     
     # Create local parquets
-    prep_data.create_local_parquets(prep_data.SELECTED_DATE) 
+    #prep_data.create_local_parquets(prep_data.SELECTED_DATE) 
     print("Local parquets created")
     
     routes = create_routes_data.make_routes_shapefile()    

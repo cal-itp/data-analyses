@@ -71,9 +71,7 @@ def attach_route_info_to_stops(stops, route_info):
     # Attach route info (long/short names) using route_id
     stops_with_route3 = prep_data.attach_route_name(stops_with_route2, route_info)
     
-    # Attach agency_id and agency_name using calitp_itp_id
-    #stops_with_route4 = prep_data.attach_agency_info(stops_with_route3, agencies)
-
+    # Attach agency_name
     agency_names = portfolio_utils.add_agency_name(SELECTED_DATE = prep_data.SELECTED_DATE)
     
     stops_with_route4 = pd.merge(
@@ -84,11 +82,8 @@ def attach_route_info_to_stops(stops, route_info):
         validate = "m:1"
     )
     
-    # Should calitp_itp_id==0 be dropped? There are stop_ids present though.
     stops_with_route4 = (stops_with_route4
-                         .rename(columns = {"route_name_used": "route_name"})
-                         .sort_values(["calitp_itp_id", "route_id", 
-                                       "route_name", "stop_id"])
+                         .sort_values(["calitp_itp_id", "route_id", "stop_id"])
                          .reset_index(drop=True)
                         )
     

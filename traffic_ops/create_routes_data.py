@@ -211,8 +211,7 @@ def make_routes_shapefile():
                         .reset_index(drop=True)
                        )
     
-    # Attach agency_id and agency_name using calitp_itp_id
-    #routes_assembled2 = prep_data.attach_agency_info(routes_assembled, agencies)
+    # Attach agency_name
     agency_names = portfolio_utils.add_agency_name(SELECTED_DATE = prep_data.SELECTED_DATE)
     
     routes_assembled2 = pd.merge(
