@@ -6,6 +6,7 @@ import metadata_update
 # Import various dictionaries
 import hqta
 import traffic_ops
+import test_dict
 
 OPEN_DATA = {
     "hqta_areas": {
@@ -24,10 +25,14 @@ OPEN_DATA = {
         "path": "./metadata_xml/ca_transit_routes.xml",
         "metadata_dict": traffic_ops.ROUTES_DICT,
     },
+    "test": {
+        "path": "./metadata_xml/test_me.xml", 
+        "metadata_dict": test_dict.MY_DICT
+    }
 }
 
 if __name__=="__main__":
-    RUN_ME = ["hqta_areas", "hqta_stops"]
+    RUN_ME = ["test"]
     
     for name, dataset in OPEN_DATA.items():
         if name in RUN_ME:
@@ -35,4 +40,4 @@ if __name__=="__main__":
             print("-------------------------------------------")
             metadata_update.update_metadata_xml(dataset["path"], 
                                                 dataset["metadata_dict"], 
-                                                first_run=False)
+                                                first_run=True)
