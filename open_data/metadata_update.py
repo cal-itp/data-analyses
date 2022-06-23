@@ -4,8 +4,12 @@ Overwrite XML metadata using JSON.
 Analyst inputs a dictionary of values to overwrite.
 Convert JSON back to XML to feed in ArcGIS.
 """
+import pandas as pd
 import xml.etree.ElementTree as ET
 import xmltodict
+
+from pydantic import BaseModel
+from typing import List, Dict
 
 METADATA_FOLDER = "metadata_xml/"
 
@@ -86,6 +90,60 @@ def fill_in_keyword_list(topic='transportation', keyword_list = []):
         return "Input minimum 5 keywords"
 
     
+# Validate the data dict format (CSV or XML, for our case)
+# But be more lenient and take 'csv', 'xml' and fix it
+def validate_data_dict_format(string):
+    DATA_DICT_FORMAT = ["CSV", "XML"]
+
+    if string.upper() in DATA_DICT_FORMAT:
+        return string.upper()
+    elif string in DATA_DICT_DICT_FORMAT:
+        return string
+    else: 
+        print(f"Valid data dictionary formats: {DATA_DICT_FORMAT}.")  
+    
+    
+# Validate the update frequency, be more lenient, and fix it     
+def validate_update_frequency(string):
+    UPDATE_FREQUENCY = [
+        "Continual", "Daily", "Weekly",
+        "Fortnightly", "Monthly", "Quarterly", 
+        "Biannually", "Annually", 
+        "As Needed", "Irregular", "Not Planned", "Unknown"
+    ]
+    
+    if string.title() in UPDATE_FREQUENCY:
+        return string.title()
+    elif string in UPDATE_FREQUENCY:
+        return string
+    else:
+        print(f"Valid update frequency values: {UPDATE_FREQUENCY}")    
+
+        
+def validate_dates(string):
+    """
+    date1 = '2021-06-01'
+    date2 = '1/1/21'
+    date3 = '03-05-2021'
+    date4 = '04-15-22'
+    date5 = '20200830'
+    """
+    date = pd.to_datetime(string).date()
+    
+    # Always want month and day to be 2 digit string
+    # date5 is the case that is hardest to parse correctly, and pd.to_datetime() does it, but datetime.datetime doesn't do it correctly
+    # https://stackoverflow.com/questions/3505831/in-python-how-do-i-convert-a-single-digit-number-into-a-double-digits-string
+    def format_month_day(value):
+        return str(value).zfill(2)
+
+    valid_date = (str(date.year) + 
+                  format_month_day(date.month) + 
+                  format_month_day(date.day)
+                 )
+    
+    return valid_date
+    
+        
 # First time metadata is generated off of template, it holds '-999' as value
 # Subsequent updates, pull it, and add 1
 def check_edition_add_one(metadata):
@@ -99,31 +157,45 @@ def check_edition_add_one(metadata):
     return new_edition
     
 
-SAMPLE_DATASET_INFO = {
-    "dataset_name": "my_dataset", 
-    "publish_entity": "California Integrated Travel Project", 
-
-    "abstract": "Public. EPSG: 3310",
-    "purpose": "Summary sentence about dataset.", 
-
-    "beginning_date": "YYYYMMDD",
-    "end_date": "YYYYMMDD",
-    "place": "California",
-
-    "status": "Complete", 
-    "frequency": "Monthly",
+# Validate the metadata dictionary input we supply
+# Certain fields are pre-filled, unlikely to change
+# If the key isn't there, then it'll be filled in with default
+class metadata_input(BaseModel):
+    dataset_name: str
+    publish_entity: str = "California Integrated Travel Project"
+    abstract: str
+    purpose: str
+    beginning_date: str
+    end_date: str
+    place: str = "California"
+    status: str = "Complete"
+    frequency: str = "Monthly"
+    #theme_keywords: List[str]
+    theme_topics: Dict
+    methodology: str
+    data_dict_type: str
+    data_dict_url: str
+    contact_organization: str = "Caltrans"
+    contact_person: str
+    contact_email: str = "hello@calitp.org"            
     
-    "theme_topics": [], 
 
-    "methodology": "Detailed methodology description", 
+def fix_values_in_validated_dict(d):
+    # Construct the theme_topics dict from keyword list
+    d["theme_topics"] = fill_in_keyword_list(
+        topic="transportation", keyword_list=d["theme_keywords"])
     
-    "data_dict_type": "CSV",
-    "data_dict_url": "some_url", 
-
-    "contact_organization": "Caltrans", 
-    "contact_person": "Analyst Name", 
-    "contact_email": "hello@calitp.org" 
-}
+    # Frequency and data dict are more lenient,
+    # Functions will correct the values
+    d["frequency"] = validate_update_frequency(d["frequency"])
+    
+    d["data_dict_type"] = validate_data_dict_format(d["data_dict_type"])
+    
+    # Take various forms of date and construct it correctly
+    d["beginning_date"] = validate_dates(d["beginning_date"])
+    d["end_date"] = validate_dates(d["end_date"])
+    
+    return d
 
 
 # Overwrite the metadata after dictionary of dataset info is supplied
@@ -173,7 +245,7 @@ def overwrite_metadata_json(metadata_json, DATASET_INFO):
 
 
 
-def update_metadata_xml(XML_FILE, DATASET_INFO = SAMPLE_DATASET_INFO, first_run=False):
+def update_metadata_xml(XML_FILE, DATASET_INFO, first_run=False):
     """
     XML_FILE: string.
         Path to the XML metadata file.
@@ -199,8 +271,15 @@ def update_metadata_xml(XML_FILE, DATASET_INFO = SAMPLE_DATASET_INFO, first_run=
     else:
         metadata_templated = esri_metadata.copy()
         print("Skip default template.")
-        
-    new_metadata = overwrite_metadata_json(metadata_templated, DATASET_INFO)
+    
+    # These rely on functions, so they can't be used in pydantic easily
+    DATASET_INFO = fix_values_in_validated_dict(DATASET_INFO) 
+    
+    # Validate the dict input with pydantic
+    DATASET_INFO_VALIDATED = metadata_input(**DATASET_INFO).dict()
+    
+    # Overwrite the metadata with dictionary input
+    new_metadata = overwrite_metadata_json(metadata_templated, DATASET_INFO_VALIDATED)
     print("Overwrite JSON using dict")
 
     new_xml = xmltodict.unparse(new_metadata, pretty=True)

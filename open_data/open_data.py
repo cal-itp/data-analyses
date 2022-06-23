@@ -6,7 +6,6 @@ import metadata_update
 # Import various dictionaries
 import hqta
 import traffic_ops
-import test_dict
 
 OPEN_DATA = {
     "hqta_areas": {
@@ -25,10 +24,6 @@ OPEN_DATA = {
         "path": "./metadata_xml/ca_transit_routes.xml",
         "metadata_dict": traffic_ops.ROUTES_DICT,
     },
-    "test": {
-        "path": "./metadata_xml/test_me.xml", 
-        "metadata_dict": test_dict.MY_DICT
-    }
 }
 
 if __name__=="__main__":
