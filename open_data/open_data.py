@@ -27,7 +27,7 @@ OPEN_DATA = {
 }
 
 if __name__=="__main__":
-    RUN_ME = ["hqta_areas", "hqta_stops"]
+    RUN_ME = ["test"]
     
     for name, dataset in OPEN_DATA.items():
         if name in RUN_ME:
@@ -35,4 +35,4 @@ if __name__=="__main__":
             print("-------------------------------------------")
             metadata_update.update_metadata_xml(dataset["path"], 
                                                 dataset["metadata_dict"], 
-                                                first_run=False)
+                                                first_run=True)

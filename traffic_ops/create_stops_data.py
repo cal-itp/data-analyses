@@ -16,7 +16,7 @@ from datetime import datetime
 from siuba import *
 
 import prep_data
-from shared_utils import geography_utils
+from shared_utils import geography_utils, portfolio_utils
 
 
 # Grab stops dataset and turn it from df to gdf
@@ -39,7 +39,7 @@ def create_stops_data(stops):
 
 
 # Attach all the various route information    
-def attach_route_info_to_stops(stops, route_info, agencies):
+def attach_route_info_to_stops(stops, route_info):
     # gtfs_schedule.stop_times merged with gtfs_schedule.trips gives route_id (via trip_id)
     stops_with_route = (
         tbl.gtfs_schedule.stop_times()    
@@ -71,13 +71,19 @@ def attach_route_info_to_stops(stops, route_info, agencies):
     # Attach route info (long/short names) using route_id
     stops_with_route3 = prep_data.attach_route_name(stops_with_route2, route_info)
     
-    # Attach agency_id and agency_name using calitp_itp_id
-    stops_with_route4 = prep_data.attach_agency_info(stops_with_route3, agencies)
-
-    # Should calitp_itp_id==0 be dropped? There are stop_ids present though.
+    # Attach agency_name
+    agency_names = portfolio_utils.add_agency_name(SELECTED_DATE = prep_data.SELECTED_DATE)
+    
+    stops_with_route4 = pd.merge(
+        stops_with_route3,
+        agency_names,
+        on = "calitp_itp_id",
+        how = "left",
+        validate = "m:1"
+    )
+    
     stops_with_route4 = (stops_with_route4
-                         .sort_values(["calitp_itp_id", "route_id", 
-                                       "route_long_name", "stop_id"])
+                         .sort_values(["calitp_itp_id", "route_id", "stop_id"])
                          .reset_index(drop=True)
                         )
     
@@ -91,7 +97,6 @@ def make_stops_shapefile():
     # Read in local parquets
     stops = pd.read_parquet(f"{DATA_PATH}stops.parquet")
     route_info = pd.read_parquet(f"{DATA_PATH}route_info.parquet")
-    agencies = pd.read_parquet(f"{DATA_PATH}agencies.parquet")
     latest_itp_id = pd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
     df = create_stops_data(stops)
@@ -99,7 +104,7 @@ def make_stops_shapefile():
     time1 = datetime.now()
     print(f"Create stop geometry: {time1-time0}")
     
-    df2 = attach_route_info_to_stops(df, route_info, agencies)
+    df2 = attach_route_info_to_stops(df, route_info)
     
     time2 = datetime.now()
     print(f"Attach route and operator info to stops: {time2-time1}")
