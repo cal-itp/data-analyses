@@ -9,4 +9,4 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
 1. **[make_routes_stops_shapefiles](./make_routes_stops_shapefiles.py)**: run this script once a month to create the `ca_transit_routes` (line geometry) and `ca_transit_stops` (point geometry) datasets in the open data portal.
 
 ## Open Data
-* [Metadata](../open_data/traffic_ops.py)  assocsiated with `ca_transit_routes` and `ca_transit_stops` are in the `open_data` directory.
+* [Metadata](../open_data/traffic_ops.py) associated with `ca_transit_routes` and `ca_transit_stops` are in the `open_data` directory.
