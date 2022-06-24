@@ -93,7 +93,6 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     )
 
     chart=styleguide.preset_chart_config(chart)
-    display(chart)
     return chart
 
 ### BASIC SCATTER CHART WITH INTERACTIVE TOOL TIP ### 
@@ -116,7 +115,6 @@ def basic_scatter(df, x_col, y_col, colorcol, chart_title=''):
     )
 
     chart=styleguide.preset_chart_config(chart)
-    display(chart)
     return chart
 ### BAR CHART WITH LABELS AND A LEGEND ###
 #Base bar chart
@@ -161,5 +159,4 @@ def fancy_bar_chart(df, LEGEND, y_col, x_col, label_col, chart_title=''):
     chart = (styleguide.preset_chart_config(chart)
              .properties(title= chart_title).configure_axis(grid=False)
             )
-    display(chart)
     return chart 
