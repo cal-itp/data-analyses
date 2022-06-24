@@ -34,7 +34,7 @@ def add_airtable_filter(orgs):
     
     # filter for reporting category
     orgs_2 = ((orgs.query("reporting_category == ('Core') or reporting_category ==('Other Public Transit')"))
-              >> filter(_.currently_operating__from_mobility_services_managed_.str.contains('checked')))
+              )
     
     # filter for service type
     fixed = orgs_2[
