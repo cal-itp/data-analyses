@@ -26,6 +26,16 @@ def value_function(df, column_of_int):
     )
     return df_new
 
+### Adjust dollar amounts to millions ###
+def millions(df, col_name: str): 
+    df['Amt in M'] = (
+    "$"
+    + (df[col_name].astype(float) / 1000000)
+    .round(0)
+    .astype(str)
+    + "M")
+    return df 
+
 ### Style a dataframe ### 
 def color(value):
     if value <  496292.00:
@@ -39,6 +49,8 @@ def color(value):
     else:
         color =  "#2EA8CE"
     return f'background-color: {color}'
+
+
 '''
 Charts
 '''
@@ -61,7 +73,7 @@ def labeling(word):
     
     return word
 
-### BASIC BAR CHART ### 
+### BASIC BAR CHART WITH INTERACTIVE TOOL TIP ### 
 def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     if chart_title == "":
         chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
@@ -72,17 +84,40 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
                  y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
                  color = alt.Color(colorcol, 
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_DIVERGING_COLORS),
+                                      range=cp.CALITP_DIVERGING_COLORS),
                                       legend=alt.Legend(title=(labeling(colorcol)))
-                                  ))
+                                  ),
+                tooltip = [x_col, y_col])
              .properties( 
                        title=chart_title)
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./bar_{x_col}_by_{y_col}.png")
+    display(chart)
     return chart
 
+### BASIC SCATTER CHART WITH INTERACTIVE TOOL TIP ### 
+def basic_scatter(df, x_col, y_col, colorcol, chart_title=''):
+    if chart_title == "":
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
+    chart = (alt.Chart(df)
+             .mark_circle(size = 100)
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col), ),
+                 y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
+                 color = alt.Color(colorcol, 
+                                  scale=alt.Scale(
+                                      range=cp.CALITP_DIVERGING_COLORS),
+                                      legend=alt.Legend(title=(labeling(colorcol)))
+                                  ),
+                tooltip = [x_col, y_col])
+             .properties( 
+                       title=chart_title)
+    )
+
+    chart=styleguide.preset_chart_config(chart)
+    display(chart)
+    return chart
 ### BAR CHART WITH LABELS AND A LEGEND ###
 #Base bar chart
 def base_bar(df):
@@ -105,7 +140,7 @@ def fancy_bar_chart(df, LEGEND, y_col, x_col, label_col, chart_title=''):
          color=alt.Color(y_col, 
                         scale=alt.Scale(
                             domain=LEGEND, #Specifies the order of the legend.
-                            range=altair_utils.CALITP_DIVERGING_COLORS
+                            range=cp.CALITP_DIVERGING_COLORS
                         )
                 )
              )
@@ -126,5 +161,5 @@ def fancy_bar_chart(df, LEGEND, y_col, x_col, label_col, chart_title=''):
     chart = (styleguide.preset_chart_config(chart)
              .properties(title= chart_title).configure_axis(grid=False)
             )
-    chart.save(f"./bar_{x_col}_by_{y_col}.png")
     display(chart)
+    return chart 
