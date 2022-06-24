@@ -27,6 +27,8 @@ OPEN_DATA = {
 }
 
 if __name__=="__main__":
+    assert os.getcwd().endswith("open_data"), "this script must be run from open_data directory!"
+
     RUN_ME = ["test"]
     
     for name, dataset in OPEN_DATA.items():
