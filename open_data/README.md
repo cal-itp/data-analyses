@@ -18,8 +18,8 @@
 9. Zip the file gdb
 
 ## Analyst Steps
-1. Add your dataset to `catalog.yml` and run `gcs-to-esri`.
-    * In terminal: cd `open_data` followed by `python gcs-to-esri.py` 
+1. Add your dataset to `catalog.yml` and run `gcs_to_esri`.
+    * In terminal: cd `open_data` followed by `python gcs_to_esri.py` 
     * The log will show basics like column names and EPSG. Make sure the metadata reflects the same info!
     * Download the zipped shapefiles from the Hub to your local filesystem.
 1. Run [arcgis_script](./arcgis_script.py) for Steps 2-3.

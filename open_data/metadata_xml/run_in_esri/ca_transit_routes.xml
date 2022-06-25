@@ -4,7 +4,7 @@
 		<citation>
 			<citeinfo>
 				<title>ca_transit_routes</title>
-				<edition>1</edition>
+				<edition>2</edition>
 				<geoform>vector digital data</geoform>
 				<pubinfo>
 					<publish>California Integrated Travel Project</publish>
@@ -12,7 +12,7 @@
 			</citeinfo>
 		</citation>
 		<descript>
-			<abstract>Public. EPSG: 3310</abstract>
+			<abstract>Public. EPSG: 4326</abstract>
 			<purpose>
     Provide all CA transit stops and routes (geospatial) from all 
     transit operators.
@@ -21,8 +21,8 @@
 		<timeperd>
 			<timeinfo>
 				<rngdates>
-					<begdate>20220608</begdate>
-					<enddate>20220708</enddate>
+					<begdate>20220622</begdate>
+					<enddate>20220722</enddate>
 				</rngdates>
 			</timeinfo>
 			<current>California</current>
@@ -40,16 +40,7 @@
 			</bounding>
 		</spdom>
 		<keywords>
-			<themekt>ISO 19115 Topic Categories</themekt>
-			<themekey>transportation</themekey>
-		</keywords>
-		<keywords>
-			<themekt>None</themekt>
-			<themekey>Transportation</themekey>
-			<themekey>GTFS</themekey>
-			<themekey>Transit routes</themekey>
-			<themekey>Transit stops</themekey>
-			<themekey>Transit</themekey>
+			<themekt>themekey</themekt>
 		</keywords>
 		<accconst>None</accconst>
 		<useconst>None</useconst>
@@ -96,7 +87,7 @@
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>String</sdtstype>
-				<ptvctcnt>7895</ptvctcnt>
+				<ptvctcnt>7612</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -149,12 +140,6 @@
 			</attr>
 			<attr>
 				<attrlabl>route_name</attrlabl>
-			</attr>
-			<attr>
-				<attrlabl>route_full</attrlabl>
-			</attr>
-			<attr>
-				<attrlabl>agency_id</attrlabl>
 			</attr>
 			<attr>
 				<attrlabl>agency</attrlabl>

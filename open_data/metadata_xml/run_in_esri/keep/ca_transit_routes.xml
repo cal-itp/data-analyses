@@ -3,8 +3,8 @@
 	<idinfo>
 		<citation>
 			<citeinfo>
-				<title>ca_transit_stops</title>
-				<edition>2</edition>
+				<title>ca_transit_routes</title>
+				<edition>1</edition>
 				<geoform>vector digital data</geoform>
 				<pubinfo>
 					<publish>California Integrated Travel Project</publish>
@@ -12,7 +12,7 @@
 			</citeinfo>
 		</citation>
 		<descript>
-			<abstract>Public. EPSG: 4326</abstract>
+			<abstract>Public. EPSG: 3310</abstract>
 			<purpose>
     Provide all CA transit stops and routes (geospatial) from all 
     transit operators.
@@ -21,8 +21,8 @@
 		<timeperd>
 			<timeinfo>
 				<rngdates>
-					<begdate>20220622</begdate>
-					<enddate>20220722</enddate>
+					<begdate>20220608</begdate>
+					<enddate>20220708</enddate>
 				</rngdates>
 			</timeinfo>
 			<current>California</current>
@@ -33,14 +33,23 @@
 		</status>
 		<spdom>
 			<bounding>
-				<westbc>-124.223417</westbc>
-				<eastbc>-69.965541</eastbc>
-				<northbc>49.273757</northbc>
+				<westbc>-124.226362</westbc>
+				<eastbc>-69.965466</eastbc>
+				<northbc>48.716492</northbc>
 				<southbc>25.849554</southbc>
 			</bounding>
 		</spdom>
 		<keywords>
-			<themekt>themekey</themekt>
+			<themekt>ISO 19115 Topic Categories</themekt>
+			<themekey>transportation</themekey>
+		</keywords>
+		<keywords>
+			<themekt>None</themekt>
+			<themekey>Transportation</themekey>
+			<themekey>GTFS</themekey>
+			<themekey>Transit routes</themekey>
+			<themekey>Transit stops</themekey>
+			<themekey>Transit</themekey>
 		</keywords>
 		<accconst>None</accconst>
 		<useconst>None</useconst>
@@ -86,8 +95,8 @@
 		<direct>Vector</direct>
 		<ptvctinf>
 			<sdtsterm>
-				<sdtstype>Entity point</sdtstype>
-				<ptvctcnt>196083</ptvctcnt>
+				<sdtstype>String</sdtstype>
+				<ptvctcnt>7895</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -109,7 +118,7 @@
 	<eainfo>
 		<detailed>
 			<enttyp>
-				<enttypl>ca_transit_stops</enttypl>
+				<enttypl>ca_transit_routes</enttypl>
 				<enttypd>CSV</enttypd>
 				<enttypds>some_url</enttypds>
 			</enttyp>
@@ -133,28 +142,30 @@
 				<attrlabl>itp_id</attrlabl>
 			</attr>
 			<attr>
-				<attrlabl>stop_id</attrlabl>
-			</attr>
-			<attr>
-				<attrlabl>stop_lat</attrlabl>
-			</attr>
-			<attr>
-				<attrlabl>stop_lon</attrlabl>
-			</attr>
-			<attr>
-				<attrlabl>stop_name</attrlabl>
-			</attr>
-			<attr>
-				<attrlabl>stop_code</attrlabl>
-			</attr>
-			<attr>
 				<attrlabl>route_id</attrlabl>
+			</attr>
+			<attr>
+				<attrlabl>shape_id</attrlabl>
 			</attr>
 			<attr>
 				<attrlabl>route_name</attrlabl>
 			</attr>
 			<attr>
+				<attrlabl>route_full</attrlabl>
+			</attr>
+			<attr>
+				<attrlabl>agency_id</attrlabl>
+			</attr>
+			<attr>
 				<attrlabl>agency</attrlabl>
+			</attr>
+			<attr>
+				<attrlabl>Shape_Length</attrlabl>
+				<attrdef>Length of feature in internal units.</attrdef>
+				<attrdefs>Esri</attrdefs>
+				<attrdomv>
+					<udom>Positive real numbers that are automatically generated.</udom>
+				</attrdomv>
 			</attr>
 		</detailed>
 	</eainfo>

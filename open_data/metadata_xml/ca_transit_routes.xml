@@ -23,7 +23,7 @@
     <ptvctinf>
       <sdtsterm>
         <sdtstype>String</sdtstype>
-        <ptvctcnt>7895</ptvctcnt>
+        <ptvctcnt>7612</ptvctcnt>
       </sdtsterm>
     </ptvctinf>
   </spdoinfo>
@@ -76,12 +76,6 @@
         <attrlabl>route_name</attrlabl>
       </attr>
       <attr>
-        <attrlabl>route_full</attrlabl>
-      </attr>
-      <attr>
-        <attrlabl>agency_id</attrlabl>
-      </attr>
-      <attr>
         <attrlabl>agency</attrlabl>
       </attr>
       <attr>
@@ -95,7 +89,7 @@
     </detailed>
   </eainfo>
   <metainfo>
-    <metd>20220611</metd>
+    <metd>20220624</metd>
     <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
     <metstdv>FGDC-STD-001-1998</metstdv>
     <mettc>local time</mettc>
