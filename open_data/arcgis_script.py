@@ -27,6 +27,7 @@ in_features = [
     'ca_transit_stops',
 ]
 
+staging_location = 'staging.gdb'
 out_location = 'open_data.gdb'
 
 # Path to Metadata stylesheet
@@ -41,30 +42,48 @@ for f in in_features:
     # construct the filename, which is takes form of routes_assembled/routes_assembled.shp
     shp_file_name = f + '/' + f + '.shp'
     
+    # Need this try/except because arcpy won't let you overwrite, and will error if it finds it 
     try:
-        arcpy.management.Delete(out_location + '/' + f)
+        arcpy.management.Delete(staging_location + '/' + f)
     except:
         pass
+
     # Execute FeatureClassToGeodatabase
-    arcpy.FeatureClassToGeodatabase_conversion(shp_file_name, out_location)
+    arcpy.FeatureClassToGeodatabase_conversion(shp_file_name, staging_location)
+
     
+for f in in_features:
     # Construct XML filename
     # Spit out one that's before it's manually changed
-    xml_file = f + '.xml'
-    
-    arcpy.ExportMetadata_conversion (out_location + '/' + f, 
+    xml_file = staging_location + '/' + f + '.xml'
+    # Export metadata XML
+    arcpy.ExportMetadata_conversion(staging_location + '/' + f, 
                                      translator, 
-                                     out_location + '/' + xml_file)
+                                     xml_file)
     
 
 
 ### UPDATE XML METADATA SEPARATELY IN PYTHON OUTSIDE OF ARCGIS
 
 # Run this after putting the updated XML in the file gdb
+# Clean up the open_data file gdb
+for f in in_features:
+    # Delete the feature class in this gdb, because we don't want _1 appended to end
+    try:
+        arcpy.management.Delete(out_location + '/' + f)
+    except:
+        pass
+    
+    # Copy over the feature class from staging.gdb to open_data.gdb
+    arcpy.conversion.FeatureClassToFeatureClass(staging_location + '/' + f, 
+                                                out_location + '/', 
+                                                f)
+
+    
 for f in in_features:
     # This is the one after it's manually changed. Keep separate to see what works.
     updated_xml_file = out_location + '/' + f + '.xml'
-            
+
     # Import the updated xml, then overwrite the metadata in the file gdb    
     arcpy.conversion.ImportMetadata(updated_xml_file, 
                                     "FROM_FGDC", 

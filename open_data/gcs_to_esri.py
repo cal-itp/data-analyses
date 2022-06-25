@@ -14,11 +14,11 @@ from shared_utils import utils
 catalog = intake.open_catalog("./*.yml")
 
 
-
 def standardize_column_names(df):
     df.columns = df.columns.str.replace('calitp_itp_id', 'calitp_id')
     df.columns = df.columns.str.replace('agency_name', 'agency')
     return df
+
 
 # Use this to double-check metadata is entered correctly
 def print_info(gdf):
