@@ -21,6 +21,7 @@
 1. Add your dataset to `catalog.yml` and run `gcs_to_esri`.
     * In terminal: cd `open_data` followed by `python gcs_to_esri.py` 
     * The log will show basics like column names and EPSG. Make sure the metadata reflects the same info!
+    * Only use EPSG:4326 (WGS84). Use `gdf.to_crs()` if necessary. All open data portal datasets will be in WGS84.
     * Download the zipped shapefiles from the Hub to your local filesystem.
 1. Run [arcgis_script](./arcgis_script.py) for Steps 2-3.
     * Open a notebook in Hub and find the `ARCGIS_PATH`

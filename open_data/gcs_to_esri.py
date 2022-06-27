@@ -9,13 +9,13 @@ import glob
 import intake
 import os
 
-from shared_utils import utils
+from shared_utils import utils, geography_utils
 
 catalog = intake.open_catalog("./*.yml")
 
 
 def standardize_column_names(df):
-    df.columns = df.columns.str.replace('calitp_itp_id', 'calitp_id')
+    df.columns = df.columns.str.replace('calitp_itp_id', 'itp_id')
     df.columns = df.columns.str.replace('agency_name', 'agency')
     return df
 
@@ -42,7 +42,7 @@ if __name__=="__main__":
     datasets = list(dict(catalog).keys())
     
     for d in datasets:
-        gdf = catalog[d].read()
+        gdf = catalog[d].read().to_crs(geography_utils.WGS84)
         gdf = standardize_column_names(gdf)
 
         print(f"********* {d} *************")
