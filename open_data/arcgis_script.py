@@ -50,7 +50,47 @@ for f in in_features:
 
     # Execute FeatureClassToGeodatabase
     arcpy.FeatureClassToGeodatabase_conversion(shp_file_name, staging_location)
+    
+    # Print field names, just in case it needs renaming
+    field_list = arcpy.ListFields(
+        staging_location + '/' + f)  #get a list of fields for each feature class
+    
+    for field in field_list: #loop through each field
+        print(field.name)
 
+        
+# Rename fields
+need_renaming = [
+    'ca_hq_transit_areas',
+    'ca_hq_transit_stops',
+]
+
+for f in need_renaming:
+    # Grab this renaming dict
+    #hqta.RENAME_CA_HQTA
+    RENAME_CA_HQTA = {
+        "calitp_itp": "itp_id_primary",
+        "agency_nam": "agency_primary",
+        "calitp_i_1": "itp_id_secondary",
+        "agency_n_1": "agency_secondary",
+        "calitp_id_": "itp_id_primary",
+        "agency_pri": "agency_primary",
+        "calitp_i_1": "itp_id_secondary",
+        "agency_sec": "agency_secondary",
+        "hqta_detai": "hqta_details",
+    }
+    
+    # To change field names, must use AlterField_management, 
+    # because changing it in XML won't carry through when you sync
+    field_list = arcpy.ListFields(
+        staging_location + '/' + f)  #get a list of fields for each feature class
+
+    for field in field_list: #loop through each field
+        if field.name in RENAME_CA_HQTA:  #look for the name elev
+            arcpy.AlterField_management(
+                staging_location + '/' + f, 
+                field.name, RENAME_CA_HQTA[field.name])
+    
     
 for f in in_features:
     # Construct XML filename
@@ -90,7 +130,15 @@ for f in in_features:
                                     out_location + '/' + f, 
                                     "ENABLED")
     
-
+    
+# Clean up XML file in staging.gdb
+# If not, next time, it will error because it can't output an XML file when one is present (no overwriting)
+for f in in_features:
+    try:
+        os.remove(xml_file)
+    except:
+        pass
+    
 # Compress file gdb for sending -- nope, this doesn't create a zipped file
 #arcpy.CompressFileGeodatabaseData_management(out_location, "Lossless compression")
 
@@ -101,7 +149,7 @@ for f in in_features:
 # though outside of ArcGIS, it seems like it's finding the folder
 def zip_gdb(input_gdb):
     gdb_file = str(input_gdb)
-    out_file = gdb_file[0:-4] + '.zip'
+    out_file = gdb_file + '.zip'
     gdb_name = os.path.basename(gdb_file)
     
     with zipfile.ZipFile(out_file, mode='w', 
