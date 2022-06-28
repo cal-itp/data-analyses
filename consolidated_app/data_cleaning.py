@@ -18,18 +18,51 @@ from shared_utils import utils
 from siuba import *
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/consolidated_applications/"
-FILE =  "Copy of Application_Review_Report_5_2_2022.xls"
+
 
 from calitp.storage import get_fs
 fs = get_fs()
 
+
 '''
-Cleaning up Project Descriptions & Project Names
+Functions for Initial Clean Up 
 '''
-def clean_project_desc():
-    df = to_snakecase(pd.read_excel(f'{GCS_FILE_PATH}{FILE}'))
-    
-    #Organization names 
+#Function for comparing total funding amount versus total estimated expense
+def funding_vs_expenses(df):
+    if df["total_state_federal_local_funding"] == df["total_expenses"]:
+        return "Fully funded"
+    elif df["total_state_federal_local_funding"] > df["total_expenses"]:
+        return "Funding exceeds total expenses"
+    else:
+        return "Not fully funded"
+
+#Function for mapping percentiles 
+def funding_range(row):
+        if ((row.total_state_fed_only > 0) and (row.total_state_fed_only < p25)):
+            return "25"
+        elif ((row.total_state_fed_only > p25) and (row.total_state_fed_only < p75)):
+            return "50"
+        elif ((row.total_state_fed_only > p50) and (row.total_state_fed_only > p75 )):
+               return "75"
+        else:
+            return "No Info"
+        
+'''
+Import & Load
+'''
+def load_con_app():
+    #We keep all the columns 
+    con_app_file =  "Copy of Application_Review_Report_5_2_2022.xls"
+    con_app =  to_snakecase(
+    pd.read_excel(f"{GCS_FILE_PATH}{con_app_file}"))
+    return con_app_df
+
+'''
+Initial Clean Up 
+An unpivoted & unaggregated, but cleaned up version of the df 
+'''
+def initial_cleaning(df):
+    ### ORG NAMES ###
     #Replace Ventura County since it read in strangely
     df["organization_name"] = df["organization_name"].replace(
     {"Ventura County Transportation Commission\xa0": "Ventura County Transportation Commission"})
@@ -38,13 +71,14 @@ def clean_project_desc():
     df["organization_name"] = df["organization_name"].str.replace(
     "\s+\(.*$", "", regex=True)
    
-    #There are hundreds of project descriptions: organize to fewer categories.
-    #Change all strings to lowercase so we can search through properly
-    df["project_description"] = df["project_description"].str.lower()
-    
+    ### PROJECT CATEGORIES ### 
     #Search through descriptions for the keywords below and input keyword into the new column "short description"
+    df["project_description"] = df["project_description"].str.lower()
     df["short_description"] = df["project_description"].str.extract(
-    "(operating|bus|construction|buses|planning|van|vessel|fare|ridership|vehicle|station|service|equipment|maintenance|surveillance|renovate|free|equip|operational)",
+    '''(operating|bus|construction|buses|planning|van
+        |vessel|fare|ridership|vehicle|station|
+        service|equipment|maintenance|surveillance|renovate|free|equip|operational)
+        ''',
     expand=False,)
     
     #Replace the keywords with the main categories
@@ -71,23 +105,9 @@ def clean_project_desc():
         "renovate": "maintenance/renovation",
         "equipment": "purchasing other tech",
         "equip": "purchasing other tech",
-        "surveillance": "purchasing other tech"}).fillna("other category").str.title())
+        "surveillance": "purchasing other tech"}).fillna("other category").str.title() 
     
-    return df
-
-'''
-Cleaning up Monetary columns
-'''
-#Function for comparing total funding amount versus total estimated expense
-def funding_vs_expenses(df):
-    if df["total_state_federal_local_funding"] == df["total_expenses"]:
-        return "Fully funded"
-    elif df["total_state_federal_local_funding"] > df["total_expenses"]:
-        return "Funding exceeds total expenses"
-    else:
-        return "Not fully funded"
-    
-def clean_monetary(df):
+    ### MONETARY COLS ### 
     #Local totals: split on ":" and extract only the last item
     #To grab the total of local funding a proejct will have/has
     df["local_total"] = df["local_total"].str.split(": ").str[-1]
@@ -95,11 +115,12 @@ def clean_monetary(df):
     #Remove $ and , turn column from str into float
     df["local_total"] = (
     df["local_total"]
-    .str.replace("(,|$)", "", regex=True)
+    .str.replace(",", "", regex=True)
+    .str.replace("$", "", regex= True)
     .fillna(0)
     .astype("float")) 
     
-    #Grab list of monetary cols
+    #Grab list of the rest of the monetary cols
     monetary_cols = [
     "total_expenses",
     "_5311_funds",
@@ -122,23 +143,20 @@ def clean_monetary(df):
     .astype("float"))
     
     #Create three new cols: total for local, state, and fed
-    #total for state and local funds only
-    #whether a project is fully funded or not 
+    # and total for state and local funds only
     df = df.assign(
     total_state_federal_local_funding = (df["state_total"]
     + df["local_total"]
     + df["federal_total"]
     + df["other_fed_funds_total"]),    
     total_state_fed_only = 
-    (df["state_total"] + df["federal_total"]), 
-    fully_funded = df.apply(funding_vs_expenses, axis=1)
-    ) 
-    return df 
-
-'''
-Cleaning up Districts
-'''
-def clean_districts(df):
+    (df["state_total"] + df["federal_total"])) 
+    
+    #Apply function to determine if a project is fully funded or not
+    df['fully_funded'] = df.apply(funding_vs_expenses, axis=1)
+    
+     
+    ### DISTRICTS ### 
     #Find any rows with missing values in the district column: 
     #no_districts = data[data["district"].isnull()]
     #no_districts_list = no_districts["project_upin"].tolist()
@@ -167,30 +185,17 @@ def clean_districts(df):
         6: "District 6: Fresno / Bakersfield",
         1: "District 1: Eureka",
     })
-    
-    return df 
-
-'''
-Fully Cleaned Dataset
-'''
-def fully_clean():
-    df1 = clean_project_desc()
-    df2 = clean_monetary(df1)
-    cleaned_unpivoted_df = clean_districts(df2)
-    return cleaned_unpivoted_df 
-
+    return df
+   
 '''
 Melted Dataframe
 The original df has a row for each unique project & columns for each fund 
 regardless of whether or not a project is requesting that fund.
-Clean up df from wide to long
+Thus, we should clean up df from wide to long. 
 '''
-def melt_df(): 
+def melt_df(df): 
     # Keep only subset of what I want to melt & the identifier column 
     # Which is the project_upin: a unique identifier for each product
-    
-    #Load in clean dataset 
-    df = fully_clean() 
     
     melt_subset1 = df[
     [
@@ -277,6 +282,7 @@ def melt_df():
     m1 = m1[m1["funding_received"] > 0]
     return m1 
 
+
 '''
 Grouped Dataframe
 Building off of the melted dataframe, take all the funds 
@@ -284,9 +290,7 @@ a project is asking for and put the funds on one line.
 This way we can see analyze the combos of the various funds 
 orgs are applying for 
 '''
-def grouped_df():
-    melt = melt_df() 
-    original_df = fully_clean() 
+def grouped_df(melted_df, initial_clean_df):
     # Exclude totals: not a fund 
     grouped1 = melt.loc[
     ~melt["program_name"].isin(
@@ -319,8 +323,46 @@ def grouped_df():
     
     return grouped2 
 
-
-
+'''
+Geodataframe for the map
+'''
+def gdf_conapp(df):
+    #Load geojson with the shapes of the Caltrans districts
+    geojson = (gpd.read_file("https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojsonoutSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D")
+               .to_crs(epsg=4326))
+    
+    #Keep only the columns we want 
+    geojson = geojson[["DISTRICT", "Shape_Length", "Shape_Area", "geometry"]]
+    
+    #Take the cleaned, unaggregated dataframe and get summarize statistics
+    summarized = df.groupby("district").agg(
+    {"project_upin": "count", "total_state_fed_only": "sum"}).reset_index()
+    
+    #New column that rounds total_state_fed to millions
+    summarized["funding_millions"] = (
+    "$"
+    + (summarized["total_state_fed_only"].astype(float) / 1000000)
+    .round()
+    .astype(str)
+    + "M")
+    
+    #For the map, it looks nicer when the legend is pinned to percentiles instead of 
+    #actual dollar amounts.
+    #Grab percentiles
+    p75 = summarized.total_state_fed_only.quantile(0.75).astype(float)
+    p25 =summarized.total_state_fed_only.quantile(0.25).astype(float)
+    p50 = summarized.total_state_fed_only.quantile(0.50).astype(float)
+    
+    #Apply function into a new column
+    summarized["funding_percentile"] = summarized.apply(lambda x: funding_range(x), axis=1)
+    
+    #Merge geojson with the summarized df
+    gdf = geojson.merge(
+    summarized, how="inner", left_on="DISTRICT", right_on="district") 
+    
+    #Export 
+    shared_utils.utils.geoparquet_gcs_export(gdf,  "gs://calitp-analytics-data/data analyses/consolidated_applications/",
+    "script_con_app_gdf")
 
 
 
