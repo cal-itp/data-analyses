@@ -11,6 +11,8 @@ import xmltodict
 from pydantic import BaseModel
 from typing import List, Dict
 
+import validation 
+
 METADATA_FOLDER = "metadata_xml/"
 
 # Convert XML to JSON
@@ -74,89 +76,6 @@ def overwrite_default_with_dataset_elements(metadata_json):
     return default_template
 
 
-# Function to put in list of keywords (MINIMUM 5 needed)
-def fill_in_keyword_list(topic='transportation', keyword_list = []):
-    if len(keyword_list) >= 5:
-        filled_out_list = [
-            {'themekt': 'ISO 19115 Topic Categories',
-             'themekey': topic},
-             {'themekt': 'None',
-              'themekey': keyword_list
-             }
-        ]
-
-        return filled_out_list
-    else:
-        return "Input minimum 5 keywords"
-
-    
-# Validate the data dict format (CSV or XML, for our case)
-# But be more lenient and take 'csv', 'xml' and fix it
-def validate_data_dict_format(string):
-    DATA_DICT_FORMAT = ["CSV", "XML"]
-
-    if string.upper() in DATA_DICT_FORMAT:
-        return string.upper()
-    elif string in DATA_DICT_DICT_FORMAT:
-        return string
-    else: 
-        print(f"Valid data dictionary formats: {DATA_DICT_FORMAT}.")  
-    
-    
-# Validate the update frequency, be more lenient, and fix it     
-def validate_update_frequency(string):
-    UPDATE_FREQUENCY = [
-        "Continual", "Daily", "Weekly",
-        "Fortnightly", "Monthly", "Quarterly", 
-        "Biannually", "Annually", 
-        "As Needed", "Irregular", "Not Planned", "Unknown"
-    ]
-    
-    if string.title() in UPDATE_FREQUENCY:
-        return string.title()
-    elif string in UPDATE_FREQUENCY:
-        return string
-    else:
-        print(f"Valid update frequency values: {UPDATE_FREQUENCY}")    
-
-        
-def validate_dates(string):
-    """
-    date1 = '2021-06-01'
-    date2 = '1/1/21'
-    date3 = '03-05-2021'
-    date4 = '04-15-22'
-    date5 = '20200830'
-    """
-    date = pd.to_datetime(string).date()
-    
-    # Always want month and day to be 2 digit string
-    # date5 is the case that is hardest to parse correctly, and pd.to_datetime() does it, but datetime.datetime doesn't do it correctly
-    # https://stackoverflow.com/questions/3505831/in-python-how-do-i-convert-a-single-digit-number-into-a-double-digits-string
-    def format_month_day(value):
-        return str(value).zfill(2)
-
-    valid_date = (str(date.year) + 
-                  format_month_day(date.month) + 
-                  format_month_day(date.day)
-                 )
-    
-    return valid_date
-    
-        
-# First time metadata is generated off of template, it holds '-999' as value
-# Subsequent updates, pull it, and add 1
-def check_edition_add_one(metadata):
-    input_edition = metadata["idinfo"]["citation"]["citeinfo"]["edition"]
-    
-    if input_edition == '-999':
-        new_edition = str(1)
-    else:
-        new_edition = str(int(input_edition) + 1)
-    
-    return new_edition
-    
-
 # Validate the metadata dictionary input we supply
 # Certain fields are pre-filled, unlikely to change
 # If the key isn't there, then it'll be filled in with default
@@ -170,7 +89,6 @@ class metadata_input(BaseModel):
     place: str = "California"
     status: str = "Complete"
     frequency: str = "Monthly"
-    #theme_keywords: List[str]
     theme_topics: Dict
     methodology: str
     data_dict_type: str
@@ -182,18 +100,15 @@ class metadata_input(BaseModel):
 
 def fix_values_in_validated_dict(d):
     # Construct the theme_topics dict from keyword list
-    d["theme_topics"] = fill_in_keyword_list(
+    d["theme_topics"] = validation.fill_in_keyword_list(
         topic="transportation", keyword_list=d["theme_keywords"])
     
-    # Frequency and data dict are more lenient,
-    # Functions will correct the values
-    d["frequency"] = validate_update_frequency(d["frequency"])
+    d["frequency"] = validation.check_update_frequency(d["frequency"])
     
-    d["data_dict_type"] = validate_data_dict_format(d["data_dict_type"])
+    d["data_dict_type"] = validation.check_data_dict_format(d["data_dict_type"])
     
-    # Take various forms of date and construct it correctly
-    d["beginning_date"] = validate_dates(d["beginning_date"])
-    d["end_date"] = validate_dates(d["end_date"])
+    d["beginning_date"] = validation.check_dates(d["beginning_date"])
+    d["end_date"] = validation.check_dates(d["end_date"])
     
     return d
 
@@ -209,7 +124,7 @@ def overwrite_metadata_json(metadata_json, DATASET_INFO):
     ## Need edition and resource contact added to be approved 
     # Add edition 
     # Use number instead of date (shows up when exported in FGDC)
-    NEW_EDITION = check_edition_add_one(m)
+    NEW_EDITION = validation.check_edition_add_one(m)
     m["idinfo"]["citation"]["citeinfo"]["edition"] = NEW_EDITION
     
     m["idinfo"]["descript"]["abstract"] = d["abstract"]

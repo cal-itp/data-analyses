@@ -34,13 +34,9 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(stops, prep_data.GCS_FILE_PATH, "ca_transit_stops")
     
     print("Geoparquets exported to GCS")
-        
-    # Export as shapefiles
-    #utils.make_shapefile(routes, f"{prep_data.DATA_PATH}ca_transit_routes")
-    #utils.make_shapefile(stops, f"{prep_data.DATA_PATH}ca_transit_stops")
     
     # Delete local parquets
-    #prep_data.delete_local_parquets()
+    prep_data.delete_local_parquets()
     print("Local parquets deleted")
     
     time1 = datetime.now()

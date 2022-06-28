@@ -1,6 +1,8 @@
 """
 Track the metadata updates for all open data portal datasets.
 """
+import os
+
 import metadata_update
 
 # Import various dictionaries
@@ -27,7 +29,11 @@ OPEN_DATA = {
 }
 
 if __name__=="__main__":
-    RUN_ME = ["test"]
+    assert os.getcwd().endswith("open_data"), "this script must be run from open_data directory!"
+
+    RUN_ME = [
+        "hqta_areas", 
+        "hqta_stops", ]
     
     for name, dataset in OPEN_DATA.items():
         if name in RUN_ME:
