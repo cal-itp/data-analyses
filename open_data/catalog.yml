@@ -1,0 +1,29 @@
+metadata:
+  version: 1
+sources:   
+  ca_hq_transit_areas:
+    driver: geojson
+    description: High Quality Transit Areas (polygons)
+    args:
+      # source: high_quality_transit_areas/combine_and_visualize.ipynb
+      urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/export/2022-06-15/ca_hq_transit_areas.geojson
+      use_fsspec: true
+  ca_hq_transit_stops:
+    driver: geojson
+    description: High Quality Transit Areas (points)
+    args:
+      # source: high_quality_transit_areas/combine_and_visualize.ipynb
+      urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/export/2022-06-15/ca_hq_transit_stops.geojson
+      use_fsspec: true
+  ca_transit_routes:
+    driver: geoparquet
+    description: All CA transit routes (lines)
+    args:
+      # source: traffic_ops/make_routes_stops_shapefiles.py
+      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet
+  ca_transit_stops:
+    driver: geoparquet
+    description: All CA transit stops (points)
+    args:
+      # source: traffic_ops/make_routes_stops_shapefiles.py
+      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_stops.parquet

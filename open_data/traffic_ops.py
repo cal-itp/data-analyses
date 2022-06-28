@@ -1,6 +1,4 @@
 # Traffic Ops routes and stops data dictionary
-from metadata_update import fill_in_keyword_list
-
 KEYWORDS = [
     'Transportation',
     'GTFS',
@@ -8,9 +6,6 @@ KEYWORDS = [
     'Transit stops',
     'Transit',
 ]
-
-KEYWORDS_FORMATTED = fill_in_keyword_list(
-    topic='transportation', keyword_list = KEYWORDS)
 
 
 PURPOSE = ('''
@@ -45,17 +40,17 @@ ROUTES_DICT = {
     "dataset_name": "ca_transit_routes", 
     "publish_entity": "California Integrated Travel Project", 
 
-    "abstract": "Public. EPSG: 3310",
+    "abstract": "Public. EPSG: 4326",
     "purpose": PURPOSE, 
 
-    "beginning_date": "20220608",
-    "end_date": "20220708",
+    "beginning_date": "20220622",
+    "end_date": "20220722",
     "place": "California",
 
     "status": "Complete", 
     "frequency": "Monthly",
     
-    "theme_topics": KEYWORDS_FORMATTED, 
+    "theme_keywords": KEYWORDS, 
 
     "methodology": METHODOLOGY, 
     
