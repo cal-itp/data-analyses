@@ -143,3 +143,16 @@ def map_hqta(gdf, mouseover=None, name='gdf'):
     m.add_control(LayersControl())
 
     return m
+
+# Something like this (psuedo code, you can fill it out with more detailed definitions since you're more familiar)
+def hqta_details(row):
+    if row.hqta_type == 'major_stop_bus':
+        if row.calitp_itp_id_primary != int(row.calitp_itp_id_secondary):
+            return 'intersection_2_bus_routes_different_operators'
+        else:
+            return 'intersection_2_bus_routes_same_operator'
+    elif row.hqta_type == 'hq_corridor_bus':
+          return 'stop_along_hq_bus_corridor_single_operator'
+    elif row.hqta_type in ['major_stop_ferry', 'major_stop_brt', 'major_stop_rail']:     
+         # (not sure if ferry, brt, rail, primary/secondary ids are filled in.)
+        return row.hqta_type + '_single_operator'
