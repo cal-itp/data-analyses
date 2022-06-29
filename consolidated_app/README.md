@@ -8,3 +8,7 @@ The Division of Rail and Mass Transportation's Consolidated Application rolled o
 * Black Cat ->  Application tab -> Program Dropdown Menu -> Select Consolidated Application
     * Copy and pasted the table into Excel. 
     * Only the <i>Application Statuses</i> and <i>Applications Submitted</i> portion of the report is based on this data. 
+* File with all of the geogrpahies of the Caltrans districts 
+
+## Cleaning
+* data_cleaning.con_app_complete_clean()
