@@ -35,6 +35,9 @@ def geoparquet_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
     FILE_NAME: str. Filename.
     """
+    if FILE_NAME.endswith(".parquet"):
+        FILE_NAME = FILE_NAME.replace(".parquet", "")
+
     gdf.to_parquet(f"./{FILE_NAME}.parquet")
     fs.put(f"./{FILE_NAME}.parquet", f"{GCS_FILE_PATH}{FILE_NAME}.parquet")
     os.remove(f"./{FILE_NAME}.parquet")
@@ -48,6 +51,9 @@ def download_geoparquet(GCS_FILE_PATH, FILE_NAME, save_locally=False):
                 Ex: test_file (not test_file.parquet)
     save_locally: bool, defaults to False. if True, will save geoparquet locally.
     """
+    if FILE_NAME.endswith(".parquet"):
+        FILE_NAME = FILE_NAME.replace(".parquet", "")
+
     object_path = fs.open(f"{GCS_FILE_PATH}{FILE_NAME}.parquet")
     gdf = gpd.read_parquet(object_path)
 
