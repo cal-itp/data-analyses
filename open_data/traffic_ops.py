@@ -28,7 +28,6 @@ METHODOLOGY = ('''
     route alignment.
     The transit stops dataset is assembled from `stops.txt`, which contains information
     about the route, stop sequence, and stop longitude/latitude.
-    
     References: https://gtfs.org/. 
     https://gtfs.org/schedule/reference/#shapestxt. 
     https://gtfs.org/schedule/reference/#stopstxt. 
@@ -59,7 +58,9 @@ ROUTES_DICT = {
 
     "contact_organization": "Caltrans", 
     "contact_person": "Tiffany Chu", 
-    "contact_email": "tiffany.chu@dot.ca.gov" 
+    "contact_email": "tiffany.chu@dot.ca.gov",
+    
+    "horiz_accuracy": "0.00004 decimal degrees",
 }
 
 # Use same data dictionary with tiny modifications
