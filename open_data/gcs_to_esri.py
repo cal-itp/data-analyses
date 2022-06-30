@@ -20,41 +20,6 @@ def standardize_column_names(df):
     return df
 
 
-def horiz_accuracy_decimal_places(gdf, decimal_degrees_string):
-    '''
-    0.00004 decimal degrees (4 meters) for `stops` and anything derived from that
-    0.001 decimal degrees (100 meters)
-    
-    If we had point data, we could probably cast it to floats, 
-    round, then convert back to geometry
-    
-    But, no real way of rounding geometry column to appropriate decimal places
-    
-    For the most part, we are at 5 decimal places for stops, so that's fine
-    TODO: Think more about shapes though...do we want 3 decimal places? 
-    100 m is how far the shapes path must be from the stop. But it doesn't mean how far it
-    is from the actual alignment / the path being represented.
-    
-    https://stackoverflow.com/questions/6189956/easy-way-of-finding-decimal-places
-    '''
-    fraction = float(decimal_degrees_string.replace(' decimal degrees', ''))
-    decimal_places = abs(int(f'{fraction:e}'.split('e')[-1]))
-    
-    gdf = gdf.to_crs(geography_utils.WGS84)
-    gdf = gdf.assign(
-        x = round(gdf.geometry.x, decimal_places),
-        y = round(gdf.geometry.y, decimal_places),
-    ).drop(columns = "geometry")
-    
-    gdf = geography_utils.create_point_geometry(
-        gdf, 
-        longitude_col = "x", latitude_col = "y",
-        crs = geography_utils.WGS84
-    ).drop(columns = ["x", "y"])
-    
-    
-    return gdf
-
 # Use this to double-check metadata is entered correctly
 def print_info(gdf):
     print(f"CRS Info: {gdf.crs.name}, EPSG: {gdf.crs.to_epsg()}")
