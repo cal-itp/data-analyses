@@ -37,7 +37,7 @@ directory = arcpy.GetInstallInfo("desktop")["InstallDir"]
 translator =  directory + 'Metadata\Translator\ArcGIS2FGDC.xml'
 #translator =  directory + 'Metadata\Translator\ArcGIS2ISO19139.xml'
 
-
+# Convert shapefile layer to gdb feature class
 for f in in_features:
     # construct the filename, which is takes form of routes_assembled/routes_assembled.shp
     shp_file_name = f + '/' + f + '.shp'
