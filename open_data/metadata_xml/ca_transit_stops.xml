@@ -13,10 +13,7 @@
 		</citation>
 		<descript>
 			<abstract>Public. EPSG: 4326</abstract>
-			<purpose>
-    Provide all CA transit stops and routes (geospatial) from all 
-    transit operators.
-    </purpose>
+			<purpose>Provide all CA transit stops and routes (geospatial) from all transit operators.</purpose>
 		</descript>
 		<timeperd>
 			<timeinfo>
@@ -57,28 +54,14 @@
 		<native>Version 6.2 (Build 9200) ; Esri ArcGIS 10.8.1.14362</native>
 	</idinfo>
 	<dataqual>
+		<posacc>
+			<horizpa>
+				<horizpar>0.00004 decimal degrees</horizpar>
+			</horizpa>
+		</posacc>
 		<lineage>
 			<procstep>
-				<procdesc>
-    This data was assembled from the General Transit Feed Specification (GTFS) 
-    schedule data. GTFS tables are text files, but these have been
-    compiled for all operators and transformed into geospatial data, with
-    minimal data processing. 
-    The transit routes dataset is assembled from two tables:
-    (1) `shapes.txt`, which defines the route alignment path, 
-    and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`.
-    `shapes.txt` is an optional GTFS table with richer information than just 
-    transit stop longitude/latitude. For the routes that aren't found in `shapes.txt`,
-    we compile the stop sequences with stop longitude/latitude to roughly capture the 
-    route alignment.
-    The transit stops dataset is assembled from `stops.txt`, which contains information
-    about the route, stop sequence, and stop longitude/latitude.
-    
-    References: https://gtfs.org/. 
-    https://gtfs.org/schedule/reference/#shapestxt. 
-    https://gtfs.org/schedule/reference/#stopstxt. 
-    https://gtfs.org/schedule/reference/#tripstxt. 
-    </procdesc>
+				<procdesc>This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. For the routes that aren't found in `shapes.txt`, we compile the stop sequences with stop longitude/latitude to roughly capture the route alignment. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt.</procdesc>
 			</procstep>
 		</lineage>
 	</dataqual>
