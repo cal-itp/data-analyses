@@ -14,7 +14,6 @@ ARCGIS_PATH = os.environ["ARCGIS_PATH"]
 # Save a version of script that runs within ArcGIS
 import arcpy
 import os
-import zipfile
 
 #arcpy.env.workspace = "C:\Users\s153936\Documents\ArcGIS"
 arcpy.env.workspace = ARCGIS_PATH

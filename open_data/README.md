@@ -40,8 +40,5 @@
 1. [High Quality Transit Areas (HQTA)](./hqta.py)
 1. [Transit Stops and Routes (Traffic Ops request)](./traffic_ops.py)
 
-## Notes
-* Horizontal accuracy 
-    * 0.00004 decimal degrees (4 meters) for `stops` and anything derived from that
-    * 0.001 decimal degrees (100 meters) for `shapes`
-* Add to default template, make sure rounding is done to appropriate decimal places to not give false sense of accuracy
+## Open Data Intake Process
+Open a ticket on the Intranet to update or add new services and provide [justification](./intake_justification.md)
