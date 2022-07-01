@@ -95,7 +95,8 @@ class metadata_input(BaseModel):
     data_dict_url: str
     contact_organization: str = "Caltrans"
     contact_person: str
-    contact_email: str = "hello@calitp.org"            
+    contact_email: str = "hello@calitp.org"
+    horiz_accuracy: str = "0.00004 decimal degrees"
     
 
 def fix_values_in_validated_dict(d):
@@ -109,6 +110,8 @@ def fix_values_in_validated_dict(d):
     
     d["beginning_date"] = validation.check_dates(d["beginning_date"])
     d["end_date"] = validation.check_dates(d["end_date"])
+    
+    d["horiz_accuracy"] = validation.check_horiz_accuracy(d["horiz_accuracy"])
     
     return d
 
@@ -139,12 +142,12 @@ def overwrite_metadata_json(metadata_json, DATASET_INFO):
 
     m["idinfo"]["keywords"] = d["theme_topics"]    
 
-    # Add resource contact
     m["idinfo"]["ptcontac"]["cntinfo"]["cntorgp"]["cntorg"] = d["contact_organization"]
     m["idinfo"]["ptcontac"]["cntinfo"]["cntorgp"]["cntper"] = d["contact_person"]
     m["idinfo"]["ptcontac"]["cntinfo"]["cntpos"] = d["publish_entity"]
     m["idinfo"]["ptcontac"]["cntinfo"]["cntemail"] = d["contact_email"]    
     
+    m["dataqual"]["posacc"]["horizpa"]["horizpar"] = d["horiz_accuracy"]
     m["dataqual"]["lineage"]["procstep"]["procdesc"] = d["methodology"]    
     
     m["eainfo"]["detailed"]["enttyp"]["enttypl"] = d["dataset_name"]    
@@ -155,7 +158,7 @@ def overwrite_metadata_json(metadata_json, DATASET_INFO):
     m["metainfo"]["metc"]["cntinfo"]["cntorgp"]["cntper"] = d["contact_person"]    
     m["metainfo"]["metc"]["cntinfo"]["cntpos"] = d["publish_entity"]    
     m["metainfo"]["metc"]["cntinfo"]["cntemail"] = d["contact_email"]    
-
+    
     return new_metadata 
 
 
