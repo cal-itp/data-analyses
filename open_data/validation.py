@@ -93,3 +93,13 @@ def check_edition_add_one(metadata):
         new_edition = str(int(input_edition) + 1)
     
     return new_edition
+
+    
+def check_horiz_accuracy(string):
+    # Must be in decimal degrees
+    if " decimal degrees" not in string:
+        print("Convert horizontal accuracy to decimal degrees")
+    if "0." not in string:
+        print("Use leading zero before decimal degrees")
+    else:
+        return string

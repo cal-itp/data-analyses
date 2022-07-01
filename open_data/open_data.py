@@ -32,8 +32,9 @@ if __name__=="__main__":
     assert os.getcwd().endswith("open_data"), "this script must be run from open_data directory!"
 
     RUN_ME = [
-        "hqta_areas", 
-        "hqta_stops", ]
+        "hqta_areas", "hqta_stops",
+        "transit_stops", "transit_routes",
+    ]
     
     for name, dataset in OPEN_DATA.items():
         if name in RUN_ME:

@@ -64,6 +64,11 @@
     <native> Version 6.2 (Build 9200) ; Esri ArcGIS 10.8.1.14362</native>
   </idinfo>
   <dataqual>
+    <posacc>
+      <horizpa>
+        <horizpar>0.00004 decimal degrees</horizpar>
+      </horizpa>
+    </posacc>
     <lineage>
       <procstep>
         <procdesc>Methodology.</procdesc>
