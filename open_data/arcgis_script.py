@@ -35,12 +35,13 @@ directory = arcpy.GetInstallInfo("desktop")["InstallDir"]
 # Export metadata using FGDC
 translator =  directory + 'Metadata\Translator\ArcGIS2FGDC.xml'
 
-# Convert shapefile layer to gdb feature class
+## (1) Convert shapefile layer to gdb feature class
 for f in in_features:
     # construct the filename, which is takes form of routes_assembled/routes_assembled.shp
     shp_file_name = f + '/' + f + '.shp'
     
-    # Need this try/except because arcpy won't let you overwrite, and will error if it finds it 
+    # Need this try/except because arcpy won't let you overwrite, 
+    # and will error if it finds it 
     try:
         arcpy.management.Delete(staging_location + '/' + f)
     except:
@@ -57,7 +58,9 @@ for f in in_features:
         print(field.name)
 
         
-# Rename fields
+## (2) Rename fields where needed
+# Do this once it's a feature class, so we can preserve the new column names
+# before metadata is created
 need_renaming = [
     'ca_hq_transit_areas',
     'ca_hq_transit_stops',
@@ -90,6 +93,7 @@ for f in need_renaming:
                 field.name, RENAME_CA_HQTA[field.name])
     
     
+## (3) Export metadata associated with file gdb feature class in FGDC format    
 for f in in_features:
     # Construct XML filename
     # Spit out one that's before it's manually changed
@@ -101,10 +105,12 @@ for f in in_features:
     
 
 
-### UPDATE XML METADATA SEPARATELY IN PYTHON OUTSIDE OF ARCGIS
+### (4) UPDATE XML METADATA SEPARATELY IN PYTHON OUTSIDE OF ARCGIS
 
-# Run this after putting the updated XML in the file gdb
-# Clean up the open_data file gdb
+## (5) Copy the feature class from staging location to out location
+# In the out location, we can drop the new XML and use it to sync
+# Use staging location and out location because otherwise, arcpy errors when it detects
+# another XML when you try and update the layer in a subsequent update
 for f in in_features:
     # Delete the feature class in this gdb, because we don't want _1 appended to end
     try:
@@ -117,7 +123,7 @@ for f in in_features:
                                                 out_location + '/', 
                                                 f)
 
-    
+## (6) Sync the XML with the feature class    
 for f in in_features:
     # This is the one after it's manually changed. Keep separate to see what works.
     updated_xml_file = out_location + '/' + f + '.xml'
@@ -129,8 +135,9 @@ for f in in_features:
                                     "ENABLED")
     
     
-# Clean up XML file in staging.gdb
-# If not, next time, it will error because it can't output an XML file when one is present (no overwriting)
+## (7) Clean up XML file in staging.gdb
+# If not, next time, it will error because it can't output an XML file 
+# when one is present (no overwriting)
 for f in in_features:
     try:
         os.remove(xml_file)
