@@ -39,11 +39,11 @@ ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
 ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 
 # Datetime formats
-DATE_WEEKDAY_FMT = "%b %d (%a)"
-MONTH_DAY_FMT = "%m_%d"
-HOUR_MIN_FMT = "%H:%M"
-HOUR_MIN_SEC_FMT = "%H:%M:%S"
-FULL_DATE_FMT = "%Y-%m-%d"
+DATE_WEEKDAY_FMT = "%b %d (%a)" # Jun 01 (Wed) for 6/1/22
+MONTH_DAY_FMT = "%m_%d" #6_01 for 6/1/22 
+HOUR_MIN_FMT = "%H:%M" #08:00 for 8 am, 13:00 for 1pm
+HOUR_MIN_SEC_FMT = "%H:%M:%S" #08:15:05 for 8:15 am + 5 sec, 13:15:05 for 1:15pm + 5 sec
+FULL_DATE_FMT = "%Y-%m-%d" # 2022-06-01 for 6/1/22
 
 
 def convert_ts(ts):
