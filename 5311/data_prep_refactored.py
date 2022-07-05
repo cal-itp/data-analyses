@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 from siuba import *
@@ -11,13 +12,14 @@ from shared_utils import geography_utils
 from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
+import agency_crosswalk 
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"
 
 """
 Importing the Data
 """
-#5311 information from Black Cat
+#5311 data from Black Cat
 def load_grantprojects(): 
     File_5311 =  "Grant_Projects.xlsx"
     df = to_snakecase(pd.read_excel(f'{GCS_FILE_PATH}{File_5311}'))
@@ -36,10 +38,11 @@ def load_catalog_gtfs():
     return gtfs_status 
 
 #Airtable data with organization name and NTD ID. 
+#Cleaned up orgs name manually in Excel back in January because had issues merging. 
 def load_cleaned_organizations_data():
     File_Organization_Clean =  "organizations_cleaned.csv"
     organizations =  to_snakecase(pd.read_csv(f'{GCS_FILE_PATH}{File_Organization_Clean}'))
-    #Only keeping relevant columns
+    #Only keep relevant columns
     organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status']]
     #Renaming NTD ID to its proper name  
     organizations = organizations.rename(columns = {'ntp_id':'ntd_id'})
@@ -47,7 +50,9 @@ def load_cleaned_organizations_data():
     organizations.ntd_id = organizations.ntd_id.astype(str)
     return organizations
 
-#Second airtable from Cal ITP: no NTD ids, but other info like Caltrans distrct
+#Second airtable from Cal ITP: no NTD ids, but other info like Caltrans distrct, 
+#https://airtable.com/appPnJWrQ7ui4UmIl/tblFsd8D5oFRqep8Z/viwVBVSd0ZhYu8Ewm?blocks=hide
+#Go to "All Views" -> "More collaborative views" -> "All Organizations" to download this.
 def load_airtable():
     File_Airtable = "organizations-AllOrganizations_1.csv"
     Airtable = to_snakecase(pd.read_csv(f'{GCS_FILE_PATH}{File_Airtable}'))
@@ -61,7 +66,6 @@ def load_vehicle_data():
     File_Vehicles =  "cleaned_vehicles.xlsx"
     vehicles_info =  pd.read_excel(f'{GCS_FILE_PATH}{File_Vehicles}',
                                    sheet_name = 'Age Distribution')
-    #cannot use to_snakecase because of integer column names
     vehicles = (vehicles_info>>filter(_.State=='CA'))
     
     return vehicles
@@ -87,7 +91,7 @@ def inflation_table(base_year):
     return inflation_df
 
 def adjust_prices(df):
-    
+    #Monetary columns
     cols =  ["allocationamount",
              "encumbered_amount",
              "expendedamount",
@@ -108,10 +112,10 @@ def adjust_prices(df):
         df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
     return df
 
-#Flag BlackCat only values
+#Flag BlackCat only organizations as 1
 def blackcat_only(row):
     #If there are no values for GTFS, reporter type, and fleet size, then we can probably say
-    #This organization is not registered by Cal ITP or NTD
+    #this organization is not registered by Cal ITP or NTD
     if ((row.GTFS == 'None') and (row.reporter_type == 'None') and row.fleet_size == 'No Info'):
         return "1"
     else:
@@ -138,36 +142,6 @@ def fleet_size_rating(df):
     df["fleet_size"] = df.apply(lambda x: fleet_size(x), axis=1)
   
     return df    
-'''
-Crosswalk
-'''
-#crosswalk dictionary for function merged_dataframe()
-crosswalk = {'City of Chowchilla ': 'City of Chowchilla, dba: Chowchilla Area Transit ',
-     'City of Dinuba ':  'City of Dinuba',
-     'Modoc Transportation Agency': 'Modoc Transportation Agency',
-     'Butte County Association of Governments/ Butte Regional Transit': 'Butte County Association of Governments',
-     'Calaveras County Public Works':  'Calaveras Transit Agency',
-     'City of Escalon ':  'City of Escalon, dba: eTrans',
-     'County of Mariposa':  'Mariposa County Transit, dba: Mari-Go',
-     'County of Shasta Department of Public Works':  'County of Shasta Department of Public Works',
-     'County of Siskiyou': 'County of Siskiyou, dba: Siskiyou County Transit',
-     'County of Tulare': 'Tulare County Area Transit',
-     'Eureka Transit Service':  'City of Eureka, dba: Eureka Transit Service',
-     'Kern Regional Transit':  'Kern Regional Transit',
-     'Livermore Amador Valley Transit Authority':  'Livermore / Amador Valley Transit Authority',
-     'Placer County Public Works (TART & PCT)': 'County of Placer, dba: Placer County Department of Public Works',
-     'Plumas County Transportation Commission': 'Plumas County Transportation Commission',
-     'San Luis Obispo Regional Transit Authority':  'San Luis Obispo Regional Transit Authority',
-     'Sonoma County Transit':  'County of Sonoma, dba: Sonoma County Transit',
-     'Sunline Transit Agency':  'SunLine Transit Agency',
-     'Tehama County Transit Agency': 'Tehama County',
-     'Trinity County Department of Transportation ':  'Trinity County',
-     'Tuolumne County Transit Agency (TCTA)':  'Tuolumne County Transit',
-     'Amador Transit':  'Amador Regional Transit System',
-     'City of Corcoran - Corcoran Area Transit':  'City of Corcoran, dba: Corcoran Area Transit',
-     'Yosemite Area Regional Transportation System ':  'Yosemite Area Regional Transportation System',
-     'County Connection (Central Contra Costa Transit Authority)': 'Central Contra Costa Transit Authority, dba: COUNTY CONNECTION',
-     'Calaveras Transit Agency ': 'Calaveras Transit Agency'}
 
 """
 Cleaning up NTD Vehicles Data Set
@@ -352,7 +326,7 @@ def ntd_airtable_5311_merge():
     fail = df_5311[df_5311.organization_name.isin(Left_orgs)]
     
     #replacing organization names from Black Cat with agency names from m1  
-    fail['organization_name'].replace(crosswalk, inplace= True)
+    fail['organization_name'].replace(agency_crosswalk.crosswalk, inplace= True)
     
     #Merging the "failed" dataframe with m1 (NTD and GTFS Airtable info) 
     m3 = pd.merge(fail, m1,  how='left', left_on=['organization_name'], right_on=['agency'])
@@ -361,39 +335,40 @@ def ntd_airtable_5311_merge():
     m4 = pd.concat([m2, m3])
     return m4
 
-#The final dataframe without any aggregation
+#The final dataframe without any aggregation 
+#Merge again with another airtable source
 def final_df():
     df1 = ntd_airtable_5311_merge()
     airtable2 = load_airtable()
-    #Manually replace Klamath
-    #Klamath does not appear in NTD data so we missed it when we merged NTD & Cal ITP on NTD ID
-    df1.loc[(df1['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "itp_id"] = "436"
-    df1.loc[(df1['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "gtfs_schedule_status"] = "needed"
-    
+  
     #Change ITP ID ID to be floats & 0 so parquet will work
-    df1['itp_id'] = df1['itp_id'].fillna(0).str.replace("'", "")
-    #df1.loc[(df1['itp_id'] == '436'), "itp_id"] = 436
-    #Del & rename columns
-    df2 = df1.drop(columns=['name','gtfs_schedule_status','agency'])
-    
+    df1['itp_id'] = df1['itp_id'].fillna(0).astype('int64')
+ 
     #Apply functions 
     #Call inflation function to add $ columns with adjusted values for inflation 
     df2 = adjust_prices(df1)
     #Apply fleet size() function
     df2 = fleet_size_rating(df1)
-    #Merge df1 with the new airtable stuff 
-    final = pd.merge(df1, airtable2, how='left', left_on='name', right_on='name')
     
-    #Concatenate the two GTFS cols together into one column 
+    #Merge df2 with the new airtable stuff 
+    final = pd.merge(df2, airtable2, how='left', left_on='name', right_on='name')
+    
+    #Concatenate the two GTFS cols together into one column, to get complete GTFS status
     final["GTFS"] = final["gtfs_static_status"] + '_' + final["gtfs_realtime_status"]
     
-    #Drop old columns
-    final = final.drop(columns = ['gtfs_static_status','gtfs_realtime_status','_merge'])
-    #Fill NA by data types 
+    #Drop columns
+    final = final.drop(columns = ['gtfs_static_status','gtfs_realtime_status','_merge', 'agency'])
+    
+    #Fill NA by data types
     final.fillna(final.dtypes.replace({'float64': 0.0, 'object': 'None'}), inplace=True)
    
     #Apply Black Cat only function 
     final["Is_Agency_In_BC_Only_1_means_Yes"] = final.apply(lambda x: blackcat_only(x), axis=1)
+    
+    #Manually replace Klamath
+    #Klamath does not appear in NTD data so we missed it when we merged NTD & Cal ITP on NTD ID
+    final.loc[(final['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "GTFS"] = "Static OK_RT Incomplete"
+    final.loc[(final['organization_name'] == 'Klamath Trinity Non-Emergency Transportation\u200b'), "itp_id"] = "436"
     
     return final
 
@@ -404,12 +379,13 @@ Summarizing the Dataframe
 #Takes the df from 700+ rows to <100 with info such as: total amount an organization 
 #received, total vehicles, caltrans district, average fleet age, GTFS status.
 
-#Columns for aggregation 
+#Columns for summing 
 sum_cols = ['allocationamount','encumbered_amount',
 'expendedamount', 'activebalance','closedoutbalance',
 'adjusted_allocationamount', 'adjusted_expendedamount',
 'adjusted_encumbered_amount', 'adjusted_activebalance']
 
+#Columns for max 
 max_cols = ['Is_Agency_In_BC_Only_1_means_Yes',
 'total_vehicles',
 'average_age_of_fleet__in_years_',
@@ -417,7 +393,8 @@ max_cols = ['Is_Agency_In_BC_Only_1_means_Yes',
 'Automobiles', 'Bus','Other', 'Train','Van','automobiles_door',
 'bus_doors', 'van_doors', 'train_doors', 'doors_sum',
 '_31_60', '_16plus','_60plus', 'adjusted_closedoutbalance']
-            
+
+#Columns for mean
 mean_cols = ['allocation_mean']           
 
 #Function for aggregating   
