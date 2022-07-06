@@ -13,8 +13,46 @@ from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/transit_stacks/"
+
 '''
-CHARTS
+Basic Cleaning
+Useful for the few different 
+Transitstacks datasets in Airtable
+'''
+def basic_cleaning(path_file:str, col_split:str, columns_to_count:list):
+    #Read in
+    df = to_snakecase(pd.read_csv(f"{GCS_FILE_PATH}{path_file}"))
+    
+    #Fill in nulls & drop duplicates
+    df = df.fillna('N/A').drop_duplicates()
+    
+    #For all columns, take out quotations
+    df = df.replace('"', '', regex=True)
+    '''
+    De duplicate: in Airtable, certain elements that are the same are repeated several times
+    which is not necessary in our analysis. Also remove unnecessary quotation marks
+    https://stackoverflow.com/questions/56466917/is-there-a-way-in-pandas-to-remove-duplicates-from-within-a-series
+    '''
+    df[col_split] = (
+    df[col_split]
+    .apply(lambda x: ", ".join(set([y.strip() for y in x.split(",")])))
+    .str.strip())
+    
+    '''
+    Count number of elements delinated by commas in a column
+    '''
+    for c in columns_to_count:
+        # Create a new column for counted elements
+        df[f"number_of_{c}"] =  (df[c]
+        .apply(lambda x: len(x.split(","))) 
+        .astype("int64")
+        ) 
+        
+    return df 
+
+'''
+Charts
 '''
 #Labels
 def labeling(word):
@@ -57,7 +95,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     chart.save(f"./bar_{chart_title}.png")
     return chart
 
-### BAR CHART WITH LABELS  ###
+### Bar chart with labels  ###
 #Base bar chart
 def base_bar(df):
     chart = (alt.Chart(df)
@@ -101,9 +139,18 @@ def fancy_bar_chart(df, x_col, y_col, label_col, chart_title=''):
             )
     chart.save(f"./bar_{chart_title}.png")
     display(chart)
+    
 '''
-OTHER
+Other functions
 '''
+#Count elements in a column, delinated by commas: without any grouping
+def count_by_commas(df, col_to_count: str, new_col_name:str): 
+    df[new_col_name] = (
+    df[col_to_count]
+    .apply(lambda x: len(x.split(",")))
+    .astype("int64")) 
+    return df 
+
 #Grab value counts and turn it into a dataframe
 def value_counts_df(df, col_of_interest):
     df = (
@@ -124,3 +171,14 @@ def number_of_elements(df, column_use, column_new):
         .transform("sum")
     )
     return df 
+
+#Function that puts all the elements in the column "col to summarize" 
+#onto one line. For ex: an agency typically purchases 1+ products,
+#and each product has its own line: this function grabs all the products
+#by agency and puts it on the same line.
+def summarize_rows(df, col_to_group: str, col_to_summarize: str):
+    df_col_to_summarize = (df.groupby(col_to_group)[col_to_summarize]
+    .apply(','.join)
+    .reset_index())
+    return df_col_to_summarize
+    
