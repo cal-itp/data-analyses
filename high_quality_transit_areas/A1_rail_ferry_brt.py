@@ -7,9 +7,7 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(900_000_000_000) ## 800GB?
 import datetime as dt
 import geopandas as gpd
 import intake
-import numpy as np
 import pandas as pd
-import fiona
 
 from calitp.tables import tbl
 from siuba import *
