@@ -1,1 +1,3 @@
+dask
+dask_geopandas
 pygeos
