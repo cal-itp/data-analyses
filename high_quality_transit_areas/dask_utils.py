@@ -9,17 +9,16 @@ import utilities
 from shared_utils import rt_utils
 
 
-def stop_times_aggregation(itp_id, analysis_date):
-    date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
-    
-    ddf = dd.read_parquet(f"{rt_utils.GCS_FILE_PATH}"
-                                 f"cached_views/st_{itp_id}_{date_str}.parquet")
-
+#------------------------------------------------------#
+# Stop times
+#------------------------------------------------------#
+## Aggregate stops by departure hour
+def stop_times_aggregation(stop_times):
     # Some fixing, transformation, aggregation with dask
     # Grab departure hour
     #https://stackoverflow.com/questions/45428292/how-to-convert-pandas-str-split-call-to-to-dask
-    ddf = ddf.assign(
-        departure_hour = ddf.departure_time.str.partition(":")[0].astype(int)
+    ddf = stop_times.assign(
+        departure_hour = stop_times.departure_time.str.partition(":")[0].astype(int)
     )
     
     # Since hours past 24 are allowed for overnight trips
@@ -65,26 +64,24 @@ def stop_times_aggregation(itp_id, analysis_date):
     return df
 
 
-def merge_routes_to_trips(itp_id, analysis_date):
-    date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
-
-    routelines_ddf = dask_geopandas.read_parquet(f"{rt_utils.GCS_FILE_PATH}"
-                                 f"cached_views/routelines_{itp_id}_{date_str}.parquet")
-    
-    routelines_ddf = routelines_ddf.assign(
-        route_length = routelines_ddf.geometry.length
+#------------------------------------------------------#
+# Routelines
+#------------------------------------------------------#
+# For LA Metro, out of ~700 unique shape_ids,
+# this pares is down to ~115 route_ids
+# Use the pared down shape_ids to get hqta_segments
+def merge_routes_to_trips(routelines, trips):    
+    routelines_ddf = routelines.assign(
+        route_length = routelines.geometry.length
     )
-    
-    trips_ddf = dd.read_parquet(f"{rt_utils.GCS_FILE_PATH}"
-                                f"cached_views/trips_{itp_id}_{date_str}.parquet")
-    
+        
     # Merge routes to trips with using trip_id
     # Keep route_id and shape_id, but drop trip_id by the end
     shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
     
     m1 = dd.merge(
         routelines_ddf,
-        trips_ddf[shape_id_cols + ["trip_id", "route_id"]],
+        trips[shape_id_cols + ["trip_id", "route_id"]],
         on = shape_id_cols,
         how = "left",
     )
@@ -100,21 +97,16 @@ def merge_routes_to_trips(itp_id, analysis_date):
       .drop(columns = "trip_id")
      )
     
-    # For LA Metro, out of ~700 unique shape_ids,
-    # this pares is down to ~115 route_ids
-    # Use this to get segments
-    
     return m2.compute()
 
 
 def add_buffer(gdf, buffer_size=50):
-    gddf = dask_geopandas.from_geopandas(gdf, npartitions=1)
 
-    gddf = gddf.assign(
-        geometry = gddf.geometry.buffer(buffer_size)
+    gdf = gdf.assign(
+        geometry = gdf.geometry.buffer(buffer_size)
     )
     
-    return gddf.compute()
+    return gdf
 
 
 def add_segment_id(df):
@@ -137,7 +129,8 @@ def add_segment_id(df):
 def segment_route(gdf):
     segmented = gpd.GeoDataFrame() ##changed to gdf?
 
-    route_cols = ["calitp_itp_id", "calitp_url_number", "route_id", "shape_id"]
+    route_cols = ["calitp_itp_id", "calitp_url_number", 
+                  "route_id", "shape_id"]
 
     # Turn 1 row of geometry into hqta_segments, every 1,250 m
     for segment in utilities.create_segments(gdf.geometry):
@@ -163,26 +156,3 @@ def segment_route(gdf):
     return segmented
         
     
-def hqta_segment_to_stop(hqta_segments, stops):    
-    segment_to_stop = (dask_geopandas.sjoin(
-            stops.drop(columns = ["stop_lon", "stop_lat"]),
-            hqta_segments[["hqta_segment_id", "geometry"]],
-            how = "inner",
-            predicate = "intersects"
-        ).drop(columns = ["index_right"])
-        .drop_duplicates(subset=["calitp_itp_id", "stop_id", "hqta_segment_id"])
-        .reset_index(drop=True)
-    )
-
-    # Dask geodataframe, even if you drop geometry col, retains df as gdf
-    # Use compute() to convert back to df or gdf and merge
-    segment_to_stop2 = segment_to_stop.drop(columns = "geometry").compute()
-    
-    segment_to_stop3 = pd.merge(
-        hqta_segments[["hqta_segment_id", "geometry"]].compute(),
-        segment_to_stop2,
-        on = "hqta_segment_id",
-        how = "inner"
-    )
-    
-    return segment_to_stop3
