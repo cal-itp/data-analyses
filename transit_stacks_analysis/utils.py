@@ -172,13 +172,24 @@ def number_of_elements(df, column_use, column_new):
     )
     return df 
 
-#Function that puts all the elements in the column "col to summarize" 
-#onto one line. For ex: an agency typically purchases 1+ products,
-#and each product has its own line: this function grabs all the products
-#by agency and puts it on the same line.
+#Puts all the elements in the column "col to summarize" 
+#onto one line and separates it by commas. 
+#For ex: an agency typically purchases 1+ products,and each product has its own line: 
+#this function grabs all the products by agency and puts it on the same line.
 def summarize_rows(df, col_to_group: str, col_to_summarize: str):
     df_col_to_summarize = (df.groupby(col_to_group)[col_to_summarize]
     .apply(','.join)
     .reset_index())
     return df_col_to_summarize
-    
+
+#Groups dataframe, aggregates it by unique count, sorts by the aggregated col
+#Returns top 10 values from largest to smallest
+def summarize_top_ten(df, group_by_col: str, agg_and_sort_col: str): 
+    df = (
+    df.groupby(group_by_col)
+    .agg({agg_and_sort_col: "nunique"})
+    .sort_values(agg_and_sort_col, ascending=False)
+    .reset_index()
+    .head(10)
+    )
+    return df 
