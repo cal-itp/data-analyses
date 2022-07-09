@@ -50,7 +50,8 @@ def hqta_segment_to_stop(hqta_segments, stops):
 
     # Dask geodataframe, even if you drop geometry col, retains df as gdf
     # Use compute() to convert back to df or gdf and merge
-    keep_cols = ["calitp_itp_id", "calitp_url_number", "stop_id"] + segment_cols
+    keep_cols = ["calitp_itp_id", "calitp_url_number", 
+                 "shape_id", "stop_id"] + segment_cols
     segment_to_stop2 = segment_to_stop[keep_cols].compute()
     
     segment_to_stop3 = pd.merge(
@@ -64,7 +65,7 @@ def hqta_segment_to_stop(hqta_segments, stops):
 
 
 def hqta_segment_with_max_trips(df, peak_trips_by_stop):
-    segment_cols = ["hqta_segment_id", "segment_sequence"]
+    segment_cols = ["hqta_segment_id", "segment_sequence", "shape_id"]
     stop_cols = ["calitp_itp_id", "calitp_url_number", "stop_id"]
     
     ddf = dd.from_pandas(df[segment_cols + stop_cols], npartitions=1)
@@ -104,13 +105,14 @@ def hqta_segment_with_max_trips(df, peak_trips_by_stop):
 
 #TODO: must exclude trips that run only in the AM and PM. those don't count
 def identify_hq_transit_corr(df):
-    gdf = gdf.assign(
-        hq_transit_corr = gdf.apply(lambda x: 
-                                    True if (x.am_max_trips > 4 and (x.pm_max_trips > 4))
-                                    else False, axis=1)
+    df = df.assign(
+        hq_transit_corr = df.apply(lambda x: 
+                                   True if (x.am_max_trips > 4 and 
+                                            (x.pm_max_trips > 4))
+                                   else False, axis=1)
     )
 
-    return gdf
+    return df
 
 
 def single_operator_hqta(routelines, trips, stop_times, stops):
@@ -132,14 +134,21 @@ def single_operator_hqta(routelines, trips, stop_times, stops):
     # Required to spatially find stops within each segment
     all_routes3 = dask_utils.add_buffer(all_routes2, buffer_size=50)
     
+    # Convert to dask gdf
     hqta_segments = dask_geopandas.from_geopandas(all_routes3, npartitions=1)
-
+    # Join hqta segment to stops
     segment_to_stop = hqta_segment_to_stop(hqta_segments, stops)
+    
+    # Get aggregated stops during AM/PM peak
     peak_trips_by_stop = dask_utils.stop_times_aggregation(stop_times)
-
+    
+    # By hqta segment, find the max trips across varying stops within AM/PM peak
     segment_with_max_stops = hqta_segment_with_max_trips(segment_to_stop, peak_trips_by_stop)
     
-    return segment_with_max_stops
+    # Tag whether that row is a HQ transit corr
+    hq_transit_segments = identify_hq_transit_corr(segment_with_max_stops)
+    
+    return hq_transit_segments
 
 
 if __name__=="__main__":
