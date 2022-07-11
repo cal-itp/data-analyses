@@ -18,191 +18,102 @@ from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
-"""
-Loading in Crosswalks
-
-"""
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
+FILE_NAME = "TIRCP_July_8_2022.xlsx"
 
-#Allocation PPNO Crosswalk
-FILE_NAME3 = "Allocation_PPNO_Crosswalk.csv"
-allocation_ppno_crosswalk = pd.read_csv(f"{GCS_FILE_PATH}{FILE_NAME3}")
-    
-#Allocation PPNO Crosswalk
-FILE_NAME4 = "Projects_PPNO.xlsx"
-project_ppno_crosswalk = pd.read_excel(f"{GCS_FILE_PATH}{FILE_NAME4}")
+#Crosswalk
+import crosswalks 
 
 """
-Cleaning & Loading Data
+Functions
+"""
+#Some PPNO numbers are 5+. Slice them down to <= 5.
+def ppno_slice(df):
+    df = df.assign(ppno = df['ppno'].str.slice(start=0, stop=5))
+    return df 
 
+"""
+Import the Data
 """
 #Project Sheet
-def project(): 
-    FILE_NAME1 = "TIRCP_Projects_March_14_2022.xlsx"
-    df = pd.read_excel(f"{GCS_FILE_PATH}{FILE_NAME1}") 
-    df.columns = df.columns.str.strip().str.replace(' ', '_')
-    df.columns = df.columns.map(lambda x: x.strip())
-    
-    ### PPNO CLEAN UP ###
-    # stripping PPNO down to <5 characters
-    df = df.assign(PPNO_New = df['PPNO'].str.slice(start=0, stop=5))
-    
-    ### RECIPIENTS ###
-    #Some grant recipients have multiple spellings of their name. E.g. BART versus Bay Area Rapid Tranist
-    df['Grant_Recipient'] = (df['Grant_Recipient'].replace({'San Joaquin Regional\nRail Commission / San Joaquin Joint Powers Authority':
-                                                      'San Joaquin Regional Rail Commission / San Joaquin Joint Powers Authority', 
-                                                 'San Francisco Municipal  Transportation Agency':'San Francisco Municipal Transportation Agency',
-                                                 'San Francisco Municipal Transportation Agency (SFMTA)': 'San Francisco Municipal Transportation Agency',
-                                                 'Capitol Corridor Joint Powers Authority (CCJPA)':  'Capitol Corridor Joint Powers Authority',
-                                                 'Bay Area Rapid Transit (BART)': 'Bay Area Rapid Transit District (BART)',
-                                                 'Los Angeles County Metropolitan Transportation Authority (LA Metro)': 'Los Angeles County Metropolitan Transportation Authority',
-                                                 'Santa Clara Valley Transportation Authority (SCVTA)': 'Santa Clara Valley Transportation Authority',
-                                                 'Solano Transportation Authority (STA)':  'Solano Transportation Authority',
-                                                 'Southern California Regional Rail Authority (SCRRA - Metrolink)': 'Southern California  Regional Rail Authority'
-                                                 }))
-    
-    ### CROSSWALK ### 
-    df = pd.merge(df, project_ppno_crosswalk, left_on = ["Award_Year", "Grant_Recipient"], right_on = ["Award_Year","Local_Agency"], how = "left")
-    df.PPNO_New = df.apply(lambda x: x.PPNO_New if (str(x.PPNO_New2) == 'nan') else x.PPNO_New2, axis=1)
-    df = df.drop(['PPNO','PPNO_New2'], axis=1).rename(columns = {'PPNO_New':'PPNO'})
-    #Change  PPNO to all be strings
-    df.PPNO = df.PPNO.astype(str)
-    
-    ### DATES CLEAN UP ###
-    #Replace FY 21/22 with Cycle 4
-    df["Award_Cycle"].replace({'FY 21/22': 4}, inplace=True)
-    
-    ### MONETARY COLS CLEAN UP ###
-    # correcting string to 0 
-    df["Percentage_Allocated"].replace({'Not Allocated': 0}, inplace=True)
-    proj_cols = ['TIRCP_Award_Amount_($)', 'Allocated_Amount','Expended_Amount','Unallocated_Amount','Total_Project_Cost','Other_Funds_Involved']
-    df[proj_cols] = df[proj_cols].fillna(value=0)
-    df[proj_cols] = df[proj_cols].apply(pd.to_numeric, errors='coerce')
-    
-    #rename to avoid confusion with allocation sheet
-    df = (df.rename(columns = {'TIRCP_Award_Amount_($)':'TIRCP_project_sheet',
-                               'Expended_Amount': 'Expended_Amt_project_sheet',
-                               'Unallocated_Amount':'Unallocated_amt_project_sheet'})
-         )
+def load_project(): 
+    #Load in 
+    df = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}{FILE_NAME}", sheet_name="Project Tracking"))
+    #Clean PPNO, strip down to <5 characters
+    df = ppno_slice(df)
     return df
 
-#Allocation Sheet
+#Allocation Agreement Sheet
+def load_allocation(): 
+    #Load in 
+    df =  to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}{FILE_NAME}", sheet_name="Agreement Allocations"))
+    #Clean PPNO, strip down to <5 characters
+    df = ppno_slice(df)
+    return df
 
+'''
+Clean Up the Data:
+'''
+#Clean up project sheet 
+def clean_project():
+    df = load_project()
+    #Replace some values manually that are NaN
+    df.loc[(df["grant_recipient"] == "San Bernardino County Transportation Authority (SBCTA)"), "ppno"] = '1230'
+    df.loc[(df["grant_recipient"] == "Bay Area Rapid Transit District (BART)"), "ppno"] = 'CP060'
+    df.loc[(df["grant_recipient"] == "Santa Monica Big Blue Bus"), "ppno"] = 'CP071'
+    
+    #Replace grant recipients
+    #Some grant recipients have multiple spellings of their name. E.g. BART versus Bay Area Rapid Tranist
+    df['grant_recipient'] = df['grant_recipient'].replace(crosswalks.grant_recipients_projects)
    
+    #Replace FY 21/22 with Cycle 4
+    df["award_cycle"].replace({'FY 21/22': 4}, inplace=True)
+
+    #Coerce cols that are supposed to be numeric
+    df['other_funds_involved'] = df['other_funds_involved'].apply(pd.to_numeric, errors='coerce')
+    
+    #Add prefix
+    df = df.add_prefix("project_")
+    return df
+
+
+#Allocation Sheet
 def allocation(): 
-    FILE_NAME2 = "TIRCP_Allocation_March_14_2022.xlsx"
-    df = pd.read_excel(f"{GCS_FILE_PATH}{FILE_NAME2}")
+    df = load_allocation()
     
-    #stripping spaces & _ 
-    df.columns = df.columns.str.strip().str.replace(' ', '_')
-    #stripping spaces in columns
-    df.columns = df.columns.map(lambda x: x.strip())
+    #Some rows are not completed: drop them
+    df = df.dropna(subset=['award_year', 'grant_recipient', 'ppno'])
     
-    #drop NA
-    df= df.dropna(how='all')
-    ### PPNO CLEAN UP ### 
-    # stripping PPNO down to <5 characters
-    df = df.assign(PPNO_New = df['PPNO'].str.slice(start=0, stop=5))
-    #Merge in Crosswalk 
-    df = pd.merge(df, allocation_ppno_crosswalk, left_on = ["Award_Year", "Grant_Recipient"], right_on =["Award_Year","Award_Recipient"], how = "left")
-    #Map Crosswalk 
-    df.PPNO_New = df.apply(lambda x: x.PPNO_New if (str(x.PPNO_New2) == 'nan') else x.PPNO_New2, axis=1)
-    #Drop old PPNO 
-    df = df.drop(['PPNO','PPNO_New2'], axis=1).rename(columns = {'PPNO_New': 'PPNO'}) 
-    
-    ### DATES CLEAN UP ###
-    #rename thid party award date
-    df = df.rename(columns = {'3rd_Party_Award_Date':'Third_Party_Award_Date'})
-    #clean up dates in a loop
-    alloc_dates = ["Allocation_Date", "Third_Party_Award_Date", "Completion_Date", "LED",
-                  ]
-    for i in [alloc_dates]:
-        df[i] = (df[i].replace('/', '-', regex = True).replace('Complete', '', regex = True)
-            .replace('\n', '', regex=True).replace('Pending','TBD',regex= True)
-            .fillna('TBD')
-        )
-    #replacing values for date columns to be coerced later 
-    df["Allocation_Date"] = (df["Allocation_Date"].replace({"08/12//20": '2020-08-12 00:00:00', 
-                                        
-                                         'FY 20/21': '2020-12-31 00:00:00'})) 
-   
-    df["Completion_Date"] = (df["Completion_Date"].replace({
-    'Complete\n6/1/2019': '2019-06-01 00:00:00',
-    'Complete\n2/11/2018': '2018-02-11 00:00:00',
-    'Complete\n6/30/2020': '2020-06-30 00:00:00',
-     '\n6/30/2018': '2018-06-30 00:00:00', 
-     '\n6/29/2020':'2020-06-29 00:00:00', 
-        '\n11/1/2019': '2019-01-11 00:00:00',
-    '\nJun-29\n':'2019-06-01 00:00:00',
-    '6/30/2021\n12/31/2021\n10/20/2022': '2022-10-22 00:00:00',
-    'Complete\n1/31/2020': '2020-01-31 00:00:00',
-    'Complete\n8/30/2020': '2020-08-30 00:00:00',
-    'June 24. 2024': '2024-06-01 00:00:00',  
-    '11/21/2024\n7/30/2025 (Q4)': '2024-11-21 00:00:00', 
-    'Jun-26': '2026-01-01 00:00:00', 
-     'Jun-29': '2029-06-01 00:00:00',
-    'Complete\n11/12/2019': '2019-11-12 00:00:00' , 
-    'Deallocated': '', 
-    'Jun-28': '2028-06-01 00:00:00',  
-    'Jun-25': '2025-06-01 00:00:00', 
-    'Jun-23':'2023-06-01 00:00:00', 
-    'Jun-27': '2027-06-01 00:00:00',
-    'Jan-25': '2025-01-01 00:00:00',
-    '11-21-20247-30-2025 (Q4)':'2025-07-30 00:00:00',
-    '6-30-202112-31-2021': '2021-12-31 00:00:00',
-    '6-1-2019': '2019-06-01 00:00:00',
-    '2-11-2018': '2018-02-11 00:00:00',
-     '6-30-2020': '2020-06-30 00:00:00',
-    ' 6-30-2018': '2018-06-30 00:00:00',
-     '6-29-2020': '2020-06-29 00:00:00',
-     '11-1-2019': '2019-11-01 00:00:00',
-     ' 12-10-2018': '2018-12-10 00:00:00',
-     ' 11-13-2019': '2019-11-13 00:00:00',
-     '3-30-2020':'2020-03-30 00:00:00',
-    ' 6-30-2020': '2020-06-30 00:00:00',
-    '11-12-2019': '2019-11-12 00:00:00',
-    '1-31-2020': '2020-01-31 00:00:00',
-    '8-30-2020': '2020-08-30 00:00:00',
-    '5-16-2020': '2020,05-16 00:00:00',
-     '5-7-2020': '2020-05-07 00:00:00'})) 
-    
-    df["Third_Party_Award_Date"] = df["Third_Party_Award_Date"].replace({ 
-    '-': 'TBD',
-    'Pending 6/30/2022':'2022-06-30 00:00:00',
-    'Augsut 12, 2021': '2021-08-12 00:00:00',})
-    
-    # coerce to dates
-    df = df.assign(
-    Allocation_Date_New = pd.to_datetime(df.Allocation_Date, errors="coerce").dt.date,
-    Third_Party_Award_Date_New = pd.to_datetime(df.Third_Party_Award_Date, errors="coerce").dt.date,
-    Completion_Date_New = pd.to_datetime(df.Completion_Date, errors="coerce").dt.date,
-    LED_New = pd.to_datetime(df.LED, errors="coerce").dt.date)
-    #dropping old date columns
-    df = df.drop(alloc_dates, axis=1)
-    #rename coerced columns
-    df = (df.rename(columns = {'Allocation_Date_New':'Allocation_Date',
-                               'Third_Party_Award_Date_New':'Third_Party_Award_Date',
-                               'Completion_Date_New': 'Completion_Date','LED_New': 'LED'})
-         )
-    
-    ### CLEAN UP MONETARY COLS ###
+    #Monetary Columns
     # correcting string to 0 
-    df["Expended_Amount"].replace({'Deallocation': 0}, inplace=True)
-    #replacing monetary amounts with 0 & coerce to numeric 
-    allocation_monetary_cols = ['SB1_Funding','Expended_Amount','Allocation_Amount',
-       'GGRF_Funding','Prior_Fiscal_Years_to_2020',
-       'Fiscal_Year_2020-2021', 'Fiscal_Year_2021-2022',
-       'Fiscal_Year_2022-2023', 'Fiscal_Year_2023-2024',
-       'Fiscal_Year_2024-2025', 'Fiscal_Year_2025-2026',
-       'Fiscal_Year_2026-2027', 'Fiscal_Year_2027-2028',
-       'Fiscal_Year_2028-2029', 'Fiscal_Year_2029-2030']
-    df[allocation_monetary_cols] = df[allocation_monetary_cols].fillna(value=0)
-    df[allocation_monetary_cols] = df[allocation_monetary_cols].apply(pd.to_numeric, errors='coerce')
-    #rename columns that are similar to project sheet to avoid confusion
-    df = (df.rename(columns = {'Allocation_Amount':'Allocation_Amt_Allocation_Sheet',
-                               'Expended_Amount': 'Expended_Amt_Allocation_Sheet'})
-         )
+    df["expended_amount"] = (df["expended_amount"]
+                             .replace({'Deallocation': 0})
+                             .astype('int64')
+                            )
+    
+    #Fill in NA based on data type
+    df = df.fillna(df.dtypes.replace({'float64': 0.0, 'object': 'None'}), inplace=True)
+    
+    #Dates
+    #Replace some string values that are in date columns
+    df['_3rd_party_award_date'] = df['_3rd_party_award_date'].replace(crosswalks.allocation_3rd_party_date)
+    df['led'] = df['led'].replace(crosswalks.allocation_led)     
+    df['completion_date'] = df['completion_date'].replace(crosswalks.allocation_completion_date) 
+    
+    #Coerce dates to datetime
+    date_columns = ['allocation_date', 'completion_date','_3rd_party_award_date', 'led', 
+       'date_regional_coordinator_receives_psa', 'date_oc_receives_psa',
+       'date_opm_receives_psa', 'date_legal_receives_psa',
+       'date_returned_to_pm',
+       'date_psa_approved_by_local_agency', 'date_signed_by_drmt',
+       'psa_expiry_date','date_branch_chief_receives_psa',]     
+    #https://sparkbyexamples.com/pandas/pandas-convert-multiple-columns-to-datetime-type/
+    for c in date_columns:
+        allocation[c] = allocation[c].apply(pd.to_datetime, errors='coerce')
+   
+    #Add prefix
+    df = df.add_prefix("allocation_")
    
     return df
 
@@ -504,69 +415,3 @@ def tableau():
     df = df.to_parquet(f'{GCS_FILE_PATH}TIRCP_Tableau_Parquet.parquet')
     return df 
     return df 
-
-'''
-CHARTS
-'''
-#Labels
-def labeling(word):
-    # Add specific use cases where it's not just first letter capitalized
-    LABEL_DICT = { "prepared_y": "Year",
-              "dist": "District",
-              "nunique":"Number of Unique",
-              "project_no": "Project Number"}
-    
-    if (word == "mpo") or (word == "rtpa"):
-        word = word.upper()
-    elif word in LABEL_DICT.keys():
-        word = LABEL_DICT[word]
-    else:
-        #word = word.replace('n_', 'Number of ').title()
-        word = word.replace('unique_', "Number of Unique ").title()
-        word = word.replace('_', ' ').title()
-    
-    return word
-
-# Bar
-def basic_bar_chart(df, x_col, y_col, colorcol):
-    
-    chart = (alt.Chart(df)
-             .mark_bar()
-             .encode(
-                 x=alt.X(x_col, title=labeling(x_col), sort=('-y')),
-                 y=alt.Y(y_col, title=labeling(y_col)),
-                 color = alt.Color(colorcol,
-                                  scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BOLD_COLORS),
-                                      legend=alt.Legend(title=(labeling(colorcol)))
-                                  ))
-             .properties( 
-                          title=(f"{labeling(x_col)} by {labeling(y_col)}"))
-    )
-
-    chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./Charts/bar_{x_col}_by_{y_col}.png")
-    return chart
-
-
-# Scatter 
-def basic_scatter_chart(df, x_col, y_col, colorcol):
-    
-    chart = (alt.Chart(df)
-             .mark_circle(size=350)
-             .encode(
-                 x=alt.X(x_col, title=labeling(x_col)),
-                 y=alt.Y(y_col, title=labeling(y_col)),
-                 color = alt.Color(colorcol,
-                                  scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BOLD_COLORS),
-                                      legend=alt.Legend(title=(labeling(colorcol)))
-                                  ))
-             .properties( 
-                          title = (f"{labeling(x_col)} by {labeling(y_col)}"))
-    )
-
-    chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./Charts/scatter_{x_col}_by_{y_col}.png")
-    return chart
-
