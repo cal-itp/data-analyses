@@ -160,7 +160,8 @@ if __name__=="__main__":
         # Import data
         FILE_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
         
-        routelines = gpd.read_parquet(f"{FILE_PATH}routelines_{itp_id}_{date_str}.parquet")
+        routelines = dask_geopandas.read_parquet(
+            f"{FILE_PATH}routelines_{itp_id}_{date_str}.parquet")
         trips = dd.read_parquet(f"{FILE_PATH}trips_{itp_id}_{date_str}.parquet")
         stop_times = dd.read_parquet(f"{FILE_PATH}st_{itp_id}_{date_str}.parquet")
         stops = dask_geopandas.read_parquet(f"{FILE_PATH}stops_{itp_id}_{date_str}.parquet")
