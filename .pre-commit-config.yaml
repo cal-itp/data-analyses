@@ -8,7 +8,7 @@ repos:
     rev: v2.4.0
     hooks:
       - id: flake8
-        args: ["--ignore=E501,W503,F403,F405,E731"] # line too long and line before binary operator (black is ok with these), assign lambda expression OK
+        args: ["--ignore=E501,W503,F403,F405,E731,E712"] # line too long and line before binary operator (black is ok with these), assign lambda expression OK, comparison to True with is (siuba uses ==)
         types:
           - python
       - id: trailing-whitespace
