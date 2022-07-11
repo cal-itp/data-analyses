@@ -435,7 +435,7 @@ def time_at_position_numba(desired_position, shape_array, dt_float_array):
 def try_parallel(geometry):
     try:
         return geometry.parallel_offset(30, "right")
-    except:
+    except Exception:
         return geometry
 
 
@@ -489,7 +489,7 @@ def arrowize_segment(line_geometry, arrow_distance=15, buffer_distance=20):
         for geom in differences.geoms:
             if geom.area == max(areas):
                 return geom
-    except:
+    except Exception:
         return line_geometry.simplify(tolerance=5).buffer(buffer_distance)
 
 
