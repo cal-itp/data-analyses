@@ -548,7 +548,7 @@ class RtFilterMapper:
             period_formatted = self.filter_period.replace("_", " ")
             # display(slowest)
             display(Markdown(f"{period_formatted} slowest routes: {with_newlines}"))
-        except:
+        except Exception:
             # print('describe slow routes failed!')
             pass
         return
