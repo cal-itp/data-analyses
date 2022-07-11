@@ -8,11 +8,10 @@ route name, Caltrans district the same way.
 Based on `rt_delay/speedmaps.ipynb`,
 `bus_service_increase/competitive-parallel-routes.ipynb`
 """
-
-import re
 from datetime import date, timedelta
 
 from calitp.tables import tbl
+from shared_utils import rt_utils
 from siuba import *
 
 
@@ -83,37 +82,8 @@ def add_route_name(SELECTED_DATE=date.today() + timedelta(days=-1)):
         >> collect()
     )
 
-    def exclude_desc(desc):
-        # match descriptions that don't give additional info, like Route 602 or Route 51B
-        exclude_texts = [
-            " *Route *[0-9]*[a-z]{0,1}$",
-            " *Metro.*(Local|Rapid|Limited).*Line",
-            " *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)",
-            " *service within the Stockton Metropolitan Area",
-            " *Hopper bus can deviate",
-            " *RTD's Interregional Commuter Service is a limited-capacity service",
-        ]
-        desc_eval = [
-            re.search(text, desc, flags=re.IGNORECASE) for text in exclude_texts
-        ]
-        # number_only = re.search(' *Route *[0-9]*[a-z]{0,1}$', desc, flags=re.IGNORECASE)
-        # metro = re.search(' *Metro.*(Local|Rapid|Limited).*Line', desc, flags=re.IGNORECASE)
-        # redwood = re.search(' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)', desc, flags=re.IGNORECASE)
-        # return number_only or metro or redwood
-        return any(desc_eval)
-
-    def which_desc(row):
-        long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
-        route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
-        if route_desc_valid:
-            return row.route_desc.title()
-        elif long_name_valid:
-            return row.route_long_name.title()
-        else:
-            return ""
-
     route_names = route_names.assign(
-        route_name_used=route_names.apply(lambda x: which_desc(x), axis=1)
+        route_name_used=route_names.apply(lambda x: rt_utils.which_desc(x), axis=1)
     )
 
     # Just keep important columns to merge

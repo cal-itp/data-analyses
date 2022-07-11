@@ -582,15 +582,6 @@ def categorize_cleaning(rt_operator_day, interpolator_key):
     return (interpolator_key, cleaned / raw, cleaned / same_loc_dropped)
 
 
-def make_linestring(x):
-    # shapely errors if the array contains only one point
-    if len(x) > 1:
-        # each point in the array is wkt
-        # so convert them to shapely points via list comprehension
-        as_wkt = [shapely.wkt.loads(i) for i in x]
-        return shapely.geometry.LineString(as_wkt)
-
-
 def exclude_desc(desc):
     # match descriptions that don't give additional info, like Route 602 or Route 51B
     exclude_texts = [
