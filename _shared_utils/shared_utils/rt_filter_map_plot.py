@@ -463,7 +463,7 @@ class RtFilterMapper:
         assert (
             self.filter["shape_ids"] and len(self.filter["shape_ids"]) == 1
         ), "must filter to a single shape_id"
-        _map = self.segment_speed_map()
+        # _map = self.segment_speed_map()
         to_chart = self.stop_segment_speed_view.copy()
         if num_segments:
             unique_stops = list(self.stop_segment_speed_view.stop_sequence.unique())[
