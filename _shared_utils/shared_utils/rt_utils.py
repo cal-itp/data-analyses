@@ -39,11 +39,13 @@ ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
 ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 
 # Datetime formats
-DATE_WEEKDAY_FMT = "%b %d (%a)" # Jun 01 (Wed) for 6/1/22
-MONTH_DAY_FMT = "%m_%d" #6_01 for 6/1/22 
-HOUR_MIN_FMT = "%H:%M" #08:00 for 8 am, 13:00 for 1pm
-HOUR_MIN_SEC_FMT = "%H:%M:%S" #08:15:05 for 8:15 am + 5 sec, 13:15:05 for 1:15pm + 5 sec
-FULL_DATE_FMT = "%Y-%m-%d" # 2022-06-01 for 6/1/22
+DATE_WEEKDAY_FMT = "%b %d (%a)"  # Jun 01 (Wed) for 6/1/22
+MONTH_DAY_FMT = "%m_%d"  # 6_01 for 6/1/22
+HOUR_MIN_FMT = "%H:%M"  # 08:00 for 8 am, 13:00 for 1pm
+HOUR_MIN_SEC_FMT = (
+    "%H:%M:%S"  # 08:15:05 for 8:15 am + 5 sec, 13:15:05 for 1:15pm + 5 sec
+)
+FULL_DATE_FMT = "%Y-%m-%d"  # 2022-06-01 for 6/1/22
 
 
 def convert_ts(ts):
@@ -409,16 +411,20 @@ def get_routelines(itp_id, analysis_date, force_clear=False):
         return routelines
 
 
-def categorize_time_of_day(dt):
-    if dt.hour < 4:
+def categorize_time_of_day(value):
+    if isinstance(value, int):
+        hour = value
+    elif isinstance(value, dt.datetime):
+        hour = value.hour
+    if hour < 4:
         return "Owl"
-    elif dt.hour < 7:
+    elif hour < 7:
         return "Early AM"
-    elif dt.hour < 10:
+    elif hour < 10:
         return "AM Peak"
-    elif dt.hour < 15:
+    elif hour < 15:
         return "Midday"
-    elif dt.hour < 20:
+    elif hour < 20:
         return "PM Peak"
     else:
         return "Evening"
