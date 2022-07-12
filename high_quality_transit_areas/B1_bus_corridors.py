@@ -5,6 +5,7 @@ import dask.dataframe as dd
 import dask_geopandas
 import datetime as dt
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 
 from siuba import *
@@ -32,11 +33,10 @@ date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
 #stop_times = rt_utils.get_stop_times(itp_id, analysis_date)
 #stops = rt_utils.get_stops(itp_id, analysis_date)
 
+segment_cols = ["hqta_segment_id", "segment_sequence"]
 
 ## Join HQTA segment to stop
-# Find nearest stop
 def hqta_segment_to_stop(hqta_segments, stops):    
-    segment_cols = ["hqta_segment_id", "segment_sequence"]
     
     segment_to_stop = (dask_geopandas.sjoin(
             stops[["stop_id", "geometry"]],
@@ -44,56 +44,78 @@ def hqta_segment_to_stop(hqta_segments, stops):
             how = "inner",
             predicate = "intersects"
         ).drop(columns = ["index_right"])
-        .drop_duplicates(subset=segment_cols)
+    )[segment_cols + ["stop_id"]]
+    
+    
+    # After sjoin, we don't want to keep stop's point geom
+    # Merge on hqta_segment_id's polygon geom
+    segment_to_stop2 = dd.merge(
+        hqta_segments,
+        segment_to_stop,
+        on = segment_cols
+    )
+    
+    return segment_to_stop2
+
+
+def hqta_segment_keep_one_stop(hqta_segments, stop_times):
+    # Find stop with the highest trip count
+    # If there are multiple stops within hqta_segment, only keep 1 stop
+    trip_count_by_stop = dask_utils.find_stop_with_high_trip_count(stop_times)
+
+    # Keep the stop in the segment with highest trips
+    segment_to_stop = (dd.merge(
+            hqta_segments, 
+            trip_count_by_stop,
+            on = ["calitp_itp_id", "stop_id"]
+        ).sort_values(["hqta_segment_id", "n_trips"], ascending=[True, False])
+        .drop_duplicates(subset="hqta_segment_id")
         .reset_index(drop=True)
     )
-
-    # Dask geodataframe, even if you drop geometry col, retains df as gdf
-    # Use compute() to convert back to df or gdf and merge
-    keep_cols = ["calitp_itp_id", "calitp_url_number", 
-                 "shape_id", "stop_id"] + segment_cols
-    segment_to_stop2 = segment_to_stop[keep_cols].compute()
     
-    segment_to_stop3 = pd.merge(
-        hqta_segments[segment_cols + ["geometry"]].compute(),
-        segment_to_stop2,
-        on = segment_cols,
-        how = "inner"
+    return segment_to_stop
+
+
+def max_trips_by_segment(df, group_cols):
+    df2 = (df
+           .groupby(group_cols)
+           .agg({"n_trips": np.max})
+           .reset_index()
+          )
+    return df2.compute() # compute is what makes it a pandas df, rather than dask df
+    
+
+def add_hqta_segment_peak_trips(df, aggregated_stop_times):
+    stop_cols = ["calitp_itp_id", "stop_id"]
+        
+    # Flexible AM peak - find max trips at the stop before noon
+    am_max = (max_trips_by_segment(
+        aggregated_stop_times[aggregated_stop_times.departure_hour < 12], 
+        group_cols = stop_cols
+        ).rename(columns = {"n_trips": "am_max_trips"})
     )
     
-    return segment_to_stop3
-
-
-def hqta_segment_with_max_trips(df, peak_trips_by_stop):
-    segment_cols = ["hqta_segment_id", "segment_sequence", "shape_id"]
-    stop_cols = ["calitp_itp_id", "calitp_url_number", "stop_id"]
-    
-    ddf = dd.from_pandas(df[segment_cols + stop_cols], npartitions=1)
-
-    # Within a hqta_segment_id find
-    # max am_peak trips and max pm_peak trips
-    # drop stop_id info (since multiple stops can share the same max)    
-    peak_trips_by_stop_segment = dd.merge(
-        ddf, 
-        peak_trips_by_stop, 
-        on = ["calitp_itp_id", "stop_id"],
-        how = "inner",
+    # Flexible PM peak - find max trips at the stop before noon
+    pm_max = (max_trips_by_segment(
+        aggregated_stop_times[aggregated_stop_times.departure_hour >= 12],
+        group_cols = stop_cols
+        ).rename(columns = {"n_trips": "pm_max_trips"})
     )
     
-    peak_trips_by_segment = (peak_trips_by_stop_segment
-                             .groupby(stop_cols + segment_cols)
-                         .agg({"am_max_trips": "max", 
-                               "pm_max_trips": "max"})
-                         .reset_index()
-                        ).compute()
+    # This is at the stop_id level
+    peak_trips_by_segment = pd.merge(
+        am_max, pm_max,
+        on = stop_cols,
+    )
     
-    # Merge the geometry back in after aggregation (finding max trips along that segment)
-    gdf = pd.merge(
-        df[stop_cols + segment_cols + ["geometry"]].drop_duplicates(),
+    # Merge at the hqta_segment_id-stop_id level to get it back to segments
+    gdf = dd.merge(
+        df[stop_cols + segment_cols + 
+           ["calitp_url_number", "shape_id", "geometry"]].drop_duplicates(),
         peak_trips_by_segment,
-        on = stop_cols + segment_cols,
+        on = stop_cols,
         how = "left"
-    )
+    ).compute()
     
     gdf = gdf.assign(
         am_max_trips = gdf.am_max_trips.fillna(0).astype(int),
@@ -139,11 +161,15 @@ def single_operator_hqta(routelines, trips, stop_times, stops):
     # Join hqta segment to stops
     segment_to_stop = hqta_segment_to_stop(hqta_segments, stops)
     
-    # Get aggregated stops during AM/PM peak
-    peak_trips_by_stop = dask_utils.stop_times_aggregation(stop_times)
+    # Within hqta segment, if there are multiple stops, keep stop with highest trip count
+    segment_to_stop_unique = hqta_segment_keep_one_stop(segment_to_stop, stop_times)
     
-    # By hqta segment, find the max trips across varying stops within AM/PM peak
-    segment_with_max_stops = hqta_segment_with_max_trips(segment_to_stop, peak_trips_by_stop)
+    # Get aggregated stops by departure_hour and stop_id
+    trips_by_stop_hour = dask_utils.stop_times_aggregation_by_hour(stop_times)
+    
+    # By hqta segment, find the max trips for AM/PM peak
+    segment_with_max_stops = add_hqta_segment_peak_trips(
+        segment_to_stop_unique, trips_by_stop_hour)
     
     # Tag whether that row is a HQ transit corr
     hq_transit_segments = identify_hq_transit_corr(segment_with_max_stops)
