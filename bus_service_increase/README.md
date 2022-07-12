@@ -20,7 +20,7 @@ Caltrans perspective:
 Transit operator perspective:
 * Of the parallel bus routes, which ones are competitive against car travel and should be targeted for future service improvements? 
 * Operators with GTFS Real-Time feeds: explore these competitive bus routes and [see where the bottlenecks are](https://analysis.calitp.org/rt/README.html).
-* Which highway corridors have some parallel routes but [few competitive routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-low-parallel-routes.html)?
+* Which highway corridors have some parallel routes but [few competitive routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-low-competitive-routes.html)?
 * Which highway corridors have [no parallel routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-no-parallel-routes.html)?
 
 

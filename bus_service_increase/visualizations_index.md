@@ -21,6 +21,6 @@
 * [Competitive Parallel Transit Routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/competitive_routes.html)
 
 ## Reports
-* [Parallel Corridors: Viable Competitive Routes by Operator](https://analysis.calitp.org/parallel_corridors/README.md)
+* [Parallel Corridors: Viable Competitive Routes by Operator](https://analysis.calitp.org/parallel_corridors/README.html)
 * [Highway Corridors with No Parallel Routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-no-parallel-routes.html)
 * [Highway Corridors with Low Competitive Routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-low-competitive-routes.html)
