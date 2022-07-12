@@ -28,7 +28,7 @@ def fix_departure_time(stop_times):
     
     return ddf
     
-def stop_times_aggregation(stop_times):
+def stop_times_aggregation_by_hour(stop_times):
     ddf = fix_departure_time(stop_times)
     
     stop_cols = ["calitp_itp_id", "stop_id"]
@@ -37,36 +37,24 @@ def stop_times_aggregation(stop_times):
                       .agg({'trip_id': 'count'})
                       .reset_index()
                       .rename(columns = {"trip_id": "n_trips"})
-                     )        
-        
-    def max_trips_at_stop(df):
-        df2 = (df
-               .groupby(stop_cols)
-               .agg({"n_trips": np.max})
-               .reset_index()
-              )
-        return df2.compute() # compute is what makes it a pandas df, rather than dask df
+                     )    
     
-    # Flexible AM peak - find max trips at the stop before noon
-    am_max = (max_trips_at_stop(
-        trips_per_hour[trips_per_hour.departure_hour < 12])
-              .rename(columns = {"n_trips": "am_max_trips"})
-    )
+    return trips_per_hour
 
-    
-    # Flexible PM peak - find max trips at the stop after noon
-    pm_max = (max_trips_at_stop(
-        trips_per_hour[trips_per_hour.departure_hour >= 12])
-              .rename(columns = {"n_trips": "pm_max_trips"})
-    )
 
-    df = pd.merge(
-        am_max,
-        pm_max,
-        on = stop_cols,
-    )
+# utilities.find_stop_with_high_trip_count
+def find_stop_with_high_trip_count(stop_times):    
+    trip_count_by_stop = (stop_times
+                          .groupby(["calitp_itp_id", "stop_id"])
+                          .agg({"trip_id": "count"})
+                          .reset_index()
+                          .rename(columns = {"trip_id": "n_trips"})
+                          .sort_values(["calitp_itp_id", "n_trips"], 
+                                       ascending=[True, False])
+                          .reset_index(drop=True)
+                         )
     
-    return df
+    return trip_count_by_stop
 
 
 #------------------------------------------------------#
