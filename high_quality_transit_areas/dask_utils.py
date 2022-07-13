@@ -101,7 +101,7 @@ def find_longest_route_shape(merged_routelines_trips):
 
 
 
-def overlay_longest_shape_with_other_shapes(longest_shape, other_shapes):
+def overlay_longest_shape_with_other_shapes(longest_shape, other_shapes):    
     overlay_diff = gpd.overlay(
         other_shapes,
         longest_shape[["shape_id", "geometry"]],
@@ -109,51 +109,30 @@ def overlay_longest_shape_with_other_shapes(longest_shape, other_shapes):
         # False keeps all geometries
         keep_geom_type=False
     )
-
+    
+    overlay_diff_gddf = dask_geopandas.from_geopandas(
+        overlay_diff[overlay_diff.route_id.notna()], npartitions=1)
+    
     # Once you overlay the other shapes against the longest route
     # calculate the overlay length
     # Go from longest length and add that shape_id to the longest route
-    # The longest overlay length will help us add more of the physical route network
-    # that is missing so far
-    overlay_diff = (overlay_diff[overlay_diff.route_id.notna()]
-                    .assign(
-                        overlay_length = overlay_diff.geometry.length
-                    )
-                   )
+    # The longest overlay length will help us add more of the physical route network that's missing
     
-    overlay_diff = overlay_diff.assign(
-        num = overlay_diff.sort_values(route_cols + ["overlay_length"], 
-                                       ascending=[True, True, True, False])
-        .groupby(route_cols).cumcount() + 1
-    ).sort_values(route_cols + ["num"]).reset_index(drop=True)
-    
-    return overlay_diff
-
-
-def fill_out_longest_shape_with_other_segments(longest_shape, overlay_diff):
-    # Finding overlay isn't catching subsequent shapes that clearly fall in dissolved shape
-    # Just use centroid against the other shapes
-    overlay_diff = overlay_diff.assign(
-        x = overlay_diff.geometry.centroid.x.round(3),
-        y = overlay_diff.geometry.centroid.y.round(3),
+    # From these differences, there's several segments that duplicative
+    # But, doing it with gpd.overlay isn't good at sorting it
+    # Find the centroid of these smaller segments, and if the centroid is the same, drop the duplicate
+    overlay_diff_gddf = overlay_diff_gddf.assign(
+        overlay_length = overlay_diff_gddf.geometry.length,
+        x = overlay_diff_gddf.geometry.centroid.x.round(3),
+        y = overlay_diff_gddf.geometry.centroid.y.round(3),
     )
-
-    overlay_diff2 = (overlay_diff.drop_duplicates(subset = route_cols + ["x", "y"])
-                     .reset_index(drop=True)
-                    )
+                   
+    overlay_diff_gddf2 = (overlay_diff_gddf
+                          .drop_duplicates(subset = route_cols + ["x", "y"])
+                          .reset_index(drop=True)
+                         ).compute()
     
-    keep_cols = route_cols + ["shape_id", "geometry"]
-    expanded_shape = pd.concat([longest_shape[keep_cols], 
-                                 overlay_diff2[keep_cols]], axis=0)
-    
-    expanded_shape = (expanded_shape.assign(
-                        route_length = expanded_shape.geometry.length
-                    ).sort_values(route_cols + ["route_length"], 
-                                  ascending=[True, True, True, False])
-                      .reset_index(drop=True)
-                     )
-    
-    return expanded_shape
+    return overlay_diff_gddf2
 
 
 def select_needed_shapes_for_route_network(routelines, trips):
@@ -178,17 +157,22 @@ def select_needed_shapes_for_route_network(routelines, trips):
     overlay_diff = overlay_longest_shape_with_other_shapes(
         longest_shape, other_shapes)
     
-    # From these differences, there's several segments that duplicative
-    # But, doing it with gpd.overlay isn't good at sorting it
-    # Find the centroid of these smaller segments, and if the centroid is the same, drop the duplicate
-    expanded_shape = fill_out_longest_shape_with_other_segments(
-        longest_shape, overlay_diff)
-    
+    keep_cols = route_cols + ["shape_id", "geometry"]
 
+    expanded_shape = pd.concat([longest_shape[keep_cols], 
+                                 overlay_diff[keep_cols]], axis=0)
+    
+    expanded_shape = (expanded_shape.assign(
+                        route_length = expanded_shape.geometry.length
+                    ).sort_values(route_cols + ["route_length"], 
+                                  ascending=[True, True, True, False])
+                      .reset_index(drop=True)
+                     )
+    
     return expanded_shape
     '''
-    
     return longest_shape
+
 
 def add_buffer(gdf, buffer_size=50):
     gdf = gdf.assign(

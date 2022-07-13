@@ -149,6 +149,7 @@ def single_operator_hqta(routelines, trips, stop_times, stops):
     
         all_routes = pd.concat([all_routes, gdf])
     
+    
     # Add HQTA segment ID
     all_routes2 = dask_utils.add_segment_id(all_routes)
 
