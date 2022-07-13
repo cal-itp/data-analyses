@@ -140,7 +140,7 @@ def identify_hq_transit_corr(df):
 def single_operator_hqta(routelines, trips, stop_times, stops):
     # Pare down all the shape_id-trip_id combos down to shape_id-route_id
     # Keep the longest route_length to use to get hqta segments
-    route_shapes = dask_utils.merge_routes_to_trips(routelines, trips)
+    route_shapes = dask_utils.select_needed_shapes_for_route_network(routelines, trips)
     
     all_routes = gpd.GeoDataFrame()
     for i in route_shapes.index:
