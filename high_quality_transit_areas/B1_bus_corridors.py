@@ -10,12 +10,12 @@ import pandas as pd
 
 from siuba import *
 
-import A1_rail_ferry_brt as rail_ferry_brt
-import utilities
+#import utilities
 import dask_utils
+from A1_rail_ferry_brt import analysis_date
+from utilities import GCS_FILE_PATH
 from shared_utils import rt_utils, geography_utils
 
-analysis_date = rail_ferry_brt.analysis_date
 
 itp_id = 182
 date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
