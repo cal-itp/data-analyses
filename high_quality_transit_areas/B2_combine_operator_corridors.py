@@ -1,7 +1,8 @@
 """
-Take single operator HQTA and combine.
-"""
+Take single operator HQTA and combine across operators.
 
+Additional data cleaning to filter out small HQTA segments.
+"""
 import dask.dataframe as dd
 import dask_geopandas
 import datetime as dt
