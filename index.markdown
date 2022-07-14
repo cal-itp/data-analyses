@@ -6,4 +6,4 @@ layout: home
 
 ## Highlights
 
-- [Visualization](/bus_service_increase/visualizations_index.html)
+- [Visualization](bus_service_increase/visualizations_index.html)
