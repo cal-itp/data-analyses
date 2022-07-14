@@ -14,7 +14,7 @@ from siuba import *
 import dask_utils
 import utilities
 from A1_rail_ferry_brt import analysis_date
-from shared_utils import rt_utils, geography_utils, utils
+from shared_utils import rt_utils, geography_utils, utils, gtfs_utils
 
 date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
 
@@ -36,17 +36,17 @@ ITP_IDS = (tbl.gtfs_schedule.agency()
 ).calitp_itp_id.tolist()
 '''
 
+# merged = merge_routes_to_trips(routelines, trips) throwing error
+# ValueError: You are trying to merge on object and int32 columns. If you wish to proceed you should use pd.concat 
 VALUE_ERROR_IDS = [
-    117, 118, 15, # merged = merge_routes_to_trips(routelines, trips) throwing error
-    # ValueError: You are trying to merge on object and int32 columns. If you wish to proceed you should use pd.concat (one of them is empty)    
-    167, 169, 16,
-    186, 192, 199,
-    206, 207, 213, 214, 21, 
-    254, 263, 265, 273, 
-    323, 338, 33, 
-    365, 394, 
-    41, 54, 81, 91,
-
+    #117, 118, 15,  
+    #167, 169, 16,
+    #186, 192, 199,
+    #206, 207, 213, 214, 21, 
+    #254, 263, 265, 273, 
+    #338, 33, 
+    #365, 394, 
+    #41, 54, 81, 91,
 ]
 
 FILE_NOT_FOUND_IDS = [
@@ -69,7 +69,7 @@ ITP_IDS_IN_GCS = [
     257, 259, 260, 261, 264, 269, 270, 271, 
     274, 278, 279, 280, 281, 282, 284, 287, 289, 
     290, 293, 294, 295, 296, 298, 29, 300, 301, 305, 308, 30, 310, 312, 314, 315, 320, 
-    324, 327, 329, 331, 334, 336, 337, 339, 
+    323, 324, 327, 329, 331, 334, 336, 337, 339, 
     341, 343, 344, 346, 349, 34, 350, 351, 356, 35, 360, 361, 
     366, 367, 368, 36, 372, 374, 376, 37, 380, 381, 386, 389, 
     42, 45, 473, 474, 482, 483, 484, 48, 49, 4, 50, 
@@ -217,40 +217,62 @@ def single_operator_hqta(routelines, trips, stop_times, stops):
     hq_transit_segments = identify_hq_transit_corr(segment_with_max_stops)
     
     return hq_transit_segments
+    
 
+def import_data(itp_id, date_str):
+    FILE_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
 
+    routelines = dask_geopandas.read_parquet(
+                f"{FILE_PATH}routelines_{itp_id}_{date_str}.parquet")
+    stop_times = dd.read_parquet(f"{FILE_PATH}st_{itp_id}_{date_str}.parquet")
+    stops = dask_geopandas.read_parquet(f"{FILE_PATH}stops_{itp_id}_{date_str}.parquet")
+    
+    # For Metrolink, trips need to have shape_id manually filled in,
+    # since it shows up as NaN in the raw GTFS files
+    if itp_id == 323:
+        trips1 = pd.read_parquet(f"{FILE_PATH}trips_{itp_id}_{date_str}.parquet")
+        trips2 = gtfs_utils.fill_in_metrolink_trips_df_with_shape_id(trips1)
+        trips = dd.from_pandas(trips2, npartitions=1) 
+    else:
+        trips = dd.read_parquet(f"{FILE_PATH}trips_{itp_id}_{date_str}.parquet")
+    
+    return routelines, trips, stop_times, stops
+        
+        
+    
 if __name__=="__main__":
     date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
     
     start_time = dt.datetime.now()
             
-    for itp_id in ITP_IDS_IN_GCS:
+    for itp_id in VALUE_ERROR_IDS: #ITP_IDS_IN_GCS
 
         operator_start = dt.datetime.now()
+            
+        routelines, trips, stop_times, stops = import_data(itp_id, date_str)   
 
-        FILE_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
+        print(f"read in cached files: {itp_id}")                
+            
+        # The files are stored in GCS regardless, so they'll always return something
+        # But, only keep going if all the files have rows present
+        # If any are zero, skip it, because we can't draw HQTA boundaries on it
+        if ((len(routelines) > 0) and (len(trips) > 0) and 
+            (len(stop_times) > 0) and (len(stops) > 0)):
+            
+            gdf = single_operator_hqta(routelines, trips, stop_times, stops)
 
-        routelines = dask_geopandas.read_parquet(
-            f"{FILE_PATH}routelines_{itp_id}_{date_str}.parquet")
-        trips = dd.read_parquet(f"{FILE_PATH}trips_{itp_id}_{date_str}.parquet")
-        stop_times = dd.read_parquet(f"{FILE_PATH}st_{itp_id}_{date_str}.parquet")
-        stops = dask_geopandas.read_parquet(f"{FILE_PATH}stops_{itp_id}_{date_str}.parquet")
+            print(f"created single operator hqta: {itp_id}")
 
-        print(f"read in cached files: {itp_id}")
-        
-        gdf = single_operator_hqta(routelines, trips, stop_times, stops)
+            # Export each operator to test GCS folder (separate from Eric's)        
+            utils.geoparquet_gcs_export(
+                gdf, f'{TEST_GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
 
-        print(f"created single operator hqta: {itp_id}")
+            print(f"successful export: {itp_id}")
 
-        # Export each operator to test GCS folder (separate from Eric's)        
-        utils.geoparquet_gcs_export(
-            gdf, f'{TEST_GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
-
-        print(f"successful export: {itp_id}")
-        
-        operator_end = dt.datetime.now()
-        print(f"execution time for {itp_id}: {operator_end - operator_start}")
-
+            operator_end = dt.datetime.now()
+            print(f"execution time for {itp_id}: {operator_end - operator_start}")
+        else:
+            continue
     
     end_time = dt.datetime.now()
     print(f"total execution time: {end_time-start_time}")
