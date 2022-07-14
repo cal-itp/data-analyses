@@ -9,9 +9,6 @@ import utilities
 from shared_utils import rt_utils
 
 
-stop_cols = ["calitp_itp_id", "stop_id"]
-route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
-
 #------------------------------------------------------#
 # Stop times
 #------------------------------------------------------#
@@ -20,8 +17,10 @@ def fix_departure_time(stop_times):
     # Some fixing, transformation, aggregation with dask
     # Grab departure hour
     #https://stackoverflow.com/questions/45428292/how-to-convert-pandas-str-split-call-to-to-dask
-    ddf = stop_times.assign(
-        departure_hour = stop_times.departure_time.str.partition(":")[0].astype(int)
+    stop_times2 = stop_times[~stop_times.departure_time.isna()].reset_index(drop=True)
+    
+    ddf = stop_times2.assign(
+        departure_hour = stop_times2.departure_time.str.partition(":")[0].astype(int)
     )
     
     # Since hours past 24 are allowed for overnight trips
@@ -32,6 +31,8 @@ def fix_departure_time(stop_times):
     return ddf
     
 def stop_times_aggregation_by_hour(stop_times):
+    stop_cols = ["calitp_itp_id", "stop_id"]
+
     ddf = fix_departure_time(stop_times)
     
     # Aggregate how many trips are made at that stop by departure hour
@@ -45,7 +46,9 @@ def stop_times_aggregation_by_hour(stop_times):
 
 
 # utilities.find_stop_with_high_trip_count
-def find_stop_with_high_trip_count(stop_times):    
+def find_stop_with_high_trip_count(stop_times): 
+    stop_cols = ["calitp_itp_id", "stop_id"]
+
     trip_count_by_stop = (stop_times
                           .groupby(stop_cols)
                           .agg({"trip_id": "count"})
@@ -126,7 +129,9 @@ def overlay_longest_shape_with_other_shapes(longest_shape, other_shapes):
         x = overlay_diff_gddf.geometry.centroid.x.round(3),
         y = overlay_diff_gddf.geometry.centroid.y.round(3),
     )
-                   
+    
+    route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
+
     overlay_diff_gddf2 = (overlay_diff_gddf
                           .drop_duplicates(subset = route_cols + ["x", "y"])
                           .reset_index(drop=True)
@@ -136,6 +141,8 @@ def overlay_longest_shape_with_other_shapes(longest_shape, other_shapes):
 
 
 def select_needed_shapes_for_route_network(routelines, trips):
+    route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
+
     # For a given route, the longest route_length may provide 90% of the needed shape (line geom)
     # But, it's missing parts where buses may turn around for layovers
     # Add these segments in, based on those shape_ids, so we can build out a complete route network

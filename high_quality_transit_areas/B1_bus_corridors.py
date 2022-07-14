@@ -7,33 +7,68 @@ import datetime as dt
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-
+from calitp.storage import get_fs
+from calitp.tables import tbl
 from siuba import *
 
-#import utilities
 import dask_utils
+import utilities
 from A1_rail_ferry_brt import analysis_date
-from utilities import GCS_FILE_PATH
-from shared_utils import rt_utils, geography_utils
+from shared_utils import rt_utils, geography_utils, utils
 
-
-itp_id = 182
 date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
 
-# Skip writing geoparquet again for now 
-# TODO: tweak rt_utils to overwrite export? 
-# Overwriting while testing this is not ideal, don't want to mess it up
+fs = get_fs()
 
-#routelines = gpd.read_parquet(f"{rt_utils.GCS_FILE_PATH}"
-#                             f"cached_views/routelines_{itp_id}_{date_str}.parquet" 
-#                            )
+# Apparently these have to be defined in the script?
+GCS_PROJECT = "cal-itp-data-infra"
+BUCKET_DIR = "data-analyses/hqta_test"
+TEST_GCS_FILE_PATH = f"gs://{utilities.BUCKET_NAME}/{BUCKET_DIR}/"
 
-## force clear to ensure route type data present
-#trips = rt_utils.get_trips(itp_id, analysis_date, force_clear=True, route_types = ['3'])
-#stop_times = rt_utils.get_stop_times(itp_id, analysis_date)
-#stops = rt_utils.get_stops(itp_id, analysis_date)
 
 segment_cols = ["hqta_segment_id", "segment_sequence"]
+
+'''
+ITP_IDS = (tbl.gtfs_schedule.agency()
+           >> distinct(_.calitp_itp_id)
+           >> filter(_.calitp_itp_id != 200)
+           >> collect()
+).calitp_itp_id.tolist()
+'''
+
+ITP_IDS_IN_GCS = [
+    #101, 102, 103, 105, 106, 108, 10, 110,
+    112, 116, 117, 118, 11, 120, 
+    121, 122, 123, 126, 127, 129,
+    135, 137, 13, 142, 146, 148, 14,
+    152, 154, 159, 15, 
+    162, 165, 167, 168, 169, 16, 
+    170, 171, 172, 173, 174, 176, 177, 178, 179, 17,
+    181, 182, 183, 186, 187, 188, 18, 190, 
+    192, 194, 198, 199, 
+    201, 203, 204, 206, 207, 208, 
+    210, 212, 213, 214, 217, 218, 21, 
+    220, 221, 226, 228, 231, 232, 235,
+    238, 239, 23, 243, 246, 247, 24, 
+    251, 254, 257, 259, 260, 
+    261, 263, 264, 265, 269, 
+    270, 271, 273, 274, 278, 279,
+    280, 281, 282, 284, 287, 289, 
+    290, 293, 294, 295, 296, 298, 29, 
+    300, 301, 305, 308, 30, 
+    310, 312, 314, 315, 320, 323, 324, 327, 329, 
+    331, 334, 336, 337, 338, 339, 33, 
+    341, 343, 344, 346, 349, 34, 
+    350, 351, 356, 35, 360, 361, 365,
+    366, 367, 368, 36, 372, 374, 376, 37,
+    380, 381, 386, 389, 394, 
+    41, 42, 45, 473, 474,
+    482, 483, 484, 48, 49, 4, 
+    50, 54, 56, 61, 6, 
+    70, 71, 75, 76, 77, 79, 
+    81, 82, 83, 86, 87, 
+    91, 95, 98, 99,
+]
 
 ## Join HQTA segment to stop
 def hqta_segment_to_stop(hqta_segments, stops):    
@@ -74,20 +109,19 @@ def hqta_segment_keep_one_stop(hqta_segments, stop_times):
     )
     
     return segment_to_stop
-
-
-def max_trips_by_segment(df, group_cols):
-    df2 = (df
-           .groupby(group_cols)
-           .agg({"n_trips": np.max})
-           .reset_index()
-          )
-    return df2.compute() # compute is what makes it a pandas df, rather than dask df
     
 
 def add_hqta_segment_peak_trips(df, aggregated_stop_times):
     stop_cols = ["calitp_itp_id", "stop_id"]
-        
+    
+    def max_trips_by_segment(df, group_cols):
+        df2 = (df
+               .groupby(group_cols)
+               .agg({"n_trips": np.max})
+               .reset_index()
+              )
+        return df2.compute() # compute is what makes it a pandas df, rather than dask df    
+    
     # Flexible AM peak - find max trips at the stop before noon
     am_max = (max_trips_by_segment(
         aggregated_stop_times[aggregated_stop_times.departure_hour < 12], 
@@ -103,7 +137,7 @@ def add_hqta_segment_peak_trips(df, aggregated_stop_times):
     )
     
     # This is at the stop_id level
-    peak_trips_by_segment = pd.merge(
+    peak_trips_by_segment = dd.merge(
         am_max, pm_max,
         on = stop_cols,
     )
@@ -115,14 +149,14 @@ def add_hqta_segment_peak_trips(df, aggregated_stop_times):
         peak_trips_by_segment,
         on = stop_cols,
         how = "left"
-    ).compute()
+    )
     
     gdf = gdf.assign(
         am_max_trips = gdf.am_max_trips.fillna(0).astype(int),
         pm_max_trips = gdf.pm_max_trips.fillna(0).astype(int),
     )
         
-    return gdf
+    return gdf.compute()
 
 
 #TODO: must exclude trips that run only in the AM and PM. those don't count
@@ -180,17 +214,37 @@ def single_operator_hqta(routelines, trips, stop_times, stops):
 
 if __name__=="__main__":
     date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
+    
+    start_time = dt.datetime.now()
+            
+    for itp_id in ITP_IDS_IN_GCS:
 
-    itp_id_list = [182]
+        operator_start = dt.datetime.now()
 
-    for itp_id in itp_id_list:
-        # Import data
         FILE_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
-        
+
         routelines = dask_geopandas.read_parquet(
             f"{FILE_PATH}routelines_{itp_id}_{date_str}.parquet")
         trips = dd.read_parquet(f"{FILE_PATH}trips_{itp_id}_{date_str}.parquet")
         stop_times = dd.read_parquet(f"{FILE_PATH}st_{itp_id}_{date_str}.parquet")
         stops = dask_geopandas.read_parquet(f"{FILE_PATH}stops_{itp_id}_{date_str}.parquet")
+
+        print(f"read in cached files: {itp_id}")
         
-        gdf = bus_corridors.single_operator_hqta(routelines, trips, stop_times, stops)
+        gdf = single_operator_hqta(routelines, trips, stop_times, stops)
+
+        print(f"created single operator hqta: {itp_id}")
+
+        # Export each operator to test GCS folder (separate from Eric's)        
+        utils.geoparquet_gcs_export(
+            gdf, f'{TEST_GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
+
+        print(f"successful export: {itp_id}")
+        
+        operator_end = dt.datetime.now()
+        print(f"execution time for {itp_id}: {operator_end - operator_start}")
+
+    
+    end_time = dt.datetime.now()
+    print(f"total execution time: {end_time-start_time}")
+        
