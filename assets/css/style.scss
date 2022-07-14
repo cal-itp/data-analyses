@@ -1,0 +1,110 @@
+---
+# This front matter block is required for Jekyll
+---
+
+$primary-1-bright: #2ea8ce;
+$primary-1-bold: #136c97;
+$primary-1-light: #dff2f2;
+
+$primary-2-bright: #f4d837;
+$primary-2-bold: #f6bf16;
+$primary-2-light: #f7eccf;
+
+$primary-3-bright: #8cbccb;
+$primary-3-bold: #7790a3;
+$primary-3-light: #dee1e6;
+
+$secondary-1-bright: #9487c0;
+$secondary-1-bold: #5b559c;
+$secondary-1-light: #e3e0f0;
+
+$secondary-2-bright: #eb9f3c;
+$secondary-2-bold: #e16b26;
+$secondary-2-light: #fae7d0;
+
+$secondary-3-bright: #51bf9d;
+$secondary-3-bold: #00896b;
+$secondary-3-light: #dcefe7;
+
+body {
+    color: #333;
+    font-family: Poppins, sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.7777778;
+    padding: 3rem 0;
+}
+
+.page-header {
+    margin-bottom: 3rem;
+}
+
+.header-logo {
+    max-height: 3rem;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    color: $primary-1-bold;
+    font-family: Raleway, serif;
+    line-height: 1.25;
+    margin: 1em 0;
+    padding-bottom: .3333em;
+}
+
+h3,
+h4 {
+    color: $primary-3-bold;
+}
+
+h2 {
+    border-bottom: 3px solid $primary-2-light;
+}
+
+a {
+    color: $primary-1-bright;
+}
+
+.wrapper {
+    margin: auto;
+    max-width: 65ch;
+    padding: 0 2rem;
+}
+
+.list-title {
+    font-weight: bold;
+}
+
+.list-subtitle {
+    color: $primary-3-bright;
+    font-weight: normal;
+}
+
+code,
+pre {
+    color: $secondary-1-bold;
+}
+
+pre {
+    background-color: rgba($primary-1-light, .3);
+    border: 1px solid $primary-1-light;
+    border-radius: .25rem;
+    font-size: .875rem;
+    line-height: 1.33333;
+    overflow: auto;
+    padding: 1rem;
+}
+
+table {
+    border: 1px solid $primary-3-light;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: .875rem;
+    margin: 1em 0;
+}
+
+td, th {
+    border: 1px solid $primary-3-light;
+    padding: .25rem .5rem;
+}
