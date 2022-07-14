@@ -10,8 +10,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
-
-# import shared_utils
 from calitp import query_sql
 from calitp.tables import tbl
 from numba import jit
@@ -381,7 +379,7 @@ def get_stops(itp_id, analysis_date, force_clear=False):
         crs="EPSG:4326",
     ).to_crs(geography_utils.CA_NAD83Albers)
     export_path = GCS_FILE_PATH + "cached_views/"
-    utils.geoparquet_gcs_export(stops, export_path, filename[:-8])
+    utils.geoparquet_gcs_export(stops, export_path, filename)
     return stops
 
 
