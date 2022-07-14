@@ -11,6 +11,27 @@ import B1_bus_corridors as bus_corridors
 from shared_utils import utils
 
 
+def clean_combined_operators(gdf):
+    # Drop segments that are large enough
+    gdf = gdf.assign(
+        area = gdf.geometry.area 
+    )
+    
+    gdf2 = gdf[gdf.area > 50*400].compute()  ##50m width * 400m segment min
+    
+    dissolved = gdf2.dissolve(
+        by=["calitp_itp_id", "shape_id", "hq_transit_corr"]).reset_index()
+
+    dissolved = dissolved.assign(
+        area = dissolved.geometry.area
+    )
+    
+    dissolved2 = (dissolved[dissolved.area > 50*3_000] ##50m width * 3000m shape min
+                 .reset_index(drop=True)
+                 )
+
+    return dissolved2 
+
 # Read first one in, to set the metadata for dask gdf
 OPERATOR_PATH = f"{bus_corridors.TEST_GCS_FILE_PATH}bus_corridors/"
 first_operator = ITP_IDS_IN_GCS[0]
@@ -37,6 +58,17 @@ if __name__ == "__main__":
                                 f'{bus_corridors.TEST_GCS_FILE_PATH}intermediate/', 
                                 'all_bus')
     
-    print("Exported to GCS")
+    time1 = dt.datetime.now()
+    print(f"Exported all_bus to GCS: {time1-start}")
+    
+    gdf3 = clean_combined_operators(gdf2)
+    
+    utils.geoparquet_gcs_export(gdf3,
+                                f'{bus_corridors.TEST_GCS_FILE_PATH}intermediate/'
+                                'shape_dissolve'
+                               )
+    time2 = dt.datetime.now()
+    print(f"Exported shape_dissolve to GCS: {time2-time1}")
+    
     end = dt.datetime.now()
     print(f"Execution time: {end-start}")
