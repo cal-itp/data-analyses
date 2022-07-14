@@ -24,7 +24,7 @@ FILE_NAME = "TIRCP_July_8_2022.xlsx"
 import crosswalks 
 
 #Import cleaned up data
-import data_prep
+import A1_data_prep
 
 '''
 Functions
@@ -37,7 +37,7 @@ def expended_percent(row):
         return "26-50"
     elif (row.Expended_Percent > 0.50) and (row.Expended_Percent < 0.76):
         return "51-75"
-    elif (row.Expended_Percent > 0.75) and (row.Expended_Percent < 1.0):
+    elif (row.Expended_Percent > 0.75) and (row.Expended_Percent < 0.95):
         return "76-99"
     elif row.Expended_Percent == 0.0:
          return "0"
@@ -47,41 +47,41 @@ def expended_percent(row):
 # Categorize years and expended_percent_group into bins
 def progress(df):
     ### 2015 ###
-    if (df["Award_Year"] == 2015) and (df["Expended_Percent_Group"] == "1-25") | (
+    if (df["project_award_year"] == 2015) and (df["Expended_Percent_Group"] == "1-25") | (
             df["Expended_Percent_Group"] == "26-50"
         ):
            return "Behind"
-    elif (df["Award_Year"] == 2015) and (
+    elif (df["project_award_year"] == 2015) and (
             df["Expended_Percent_Group"] == "76-99"
         ) | (df["Expended_Percent_Group"] == "51-75"):
          return "On Track"
 
      ### 2016 ###
-    elif (df["Award_Year"] == 2016) and (df["Expended_Percent_Group"] == "1-25") | (
+    elif (df["project_award_year"] == 2016) and (df["Expended_Percent_Group"] == "1-25") | (
             df["Expended_Percent_Group"] == "26-50"
         ):
         return "Behind"
-    elif (df["Award_Year"] == 2016) and (
+    elif (df["project_award_year"] == 2016) and (
             df["Expended_Percent_Group"] == "51-75"
         ) | (df["Expended_Percent_Group"] == "76-99"):
          return "On Track"
 
      ### 2018 ###
-    elif (df["Award_Year"] == 2018) and (df["Expended_Percent_Group"] == "1-25"):
+    elif (df["project_award_year"] == 2018) and (df["Expended_Percent_Group"] == "1-25"):
         return "Behind"
-    elif (df["Award_Year"] == 2018) and (
+    elif (df["project_award_year"] == 2018) and (
             df["Expended_Percent_Group"] == "26-50"
         ) | (df["Expended_Percent_Group"] == "51-75"):
         return "On Track"
-    elif (df["Award_Year"] == 2018) and (df["Expended_Percent_Group"] == "76-99"):
+    elif (df["project_award_year"] == 2018) and (df["Expended_Percent_Group"] == "76-99"):
          return "Ahead"
 
      ### 2020 ###
-    elif (df["Award_Year"] == 2020) and (df["Expended_Percent_Group"] == "1-25"):
+    elif (df["project_award_year"] == 2020) and (df["Expended_Percent_Group"] == "1-25"):
            return "Behind"
-    elif (df["Award_Year"] == 2020) and (df["Expended_Percent_Group"] == "26-50"):
+    elif (df["project_award_year"] == 2020) and (df["Expended_Percent_Group"] == "26-50"):
            return "On Track"
-    elif (df["Award_Year"] == 2020) and (
+    elif (df["project_award_year"] == 2020) and (
             df["Expended_Percent_Group"] == "51-75"
         ) | (df["Expended_Percent_Group"] == "76-99"):
             return "Ahead"
@@ -93,90 +93,86 @@ def progress(df):
     ### Else ###
     else:
         return "100% of allocated funds spent"
-        
-#Which projects are large,small, medium
-p75 = df.TIRCP_project_sheet.quantile(0.75).astype(float)
-p25 = df.TIRCP_project_sheet.quantile(0.25).astype(float)
-p50 = df.TIRCP_project_sheet.quantile(0.50).astype(float)
-    
-def project_size (row):
-    if ((row.TIRCP_project_sheet > 0) and (row.TIRCP_project_sheet < p25)):
-         return "Small"
-    elif ((row.TIRCP_project_sheet > p25) and (row.TIRCP_project_sheet < p75)):
-         return "Medium"
-    elif ((row.TIRCP_project_sheet > p50) and (row.TIRCP_project_sheet > p75 )):
-         return "Large"
-    else:
-        return "$0 recorded for TIRCP"
-        
+'''
+Columns
+'''
+columns_to_keep = ['project_award_year','project_grant_recipient',
+       'project_project_title', 'project_ppno', 'project_district',
+       'project_technical_assistance_calitp__y_n_',
+       'project_technical_assistance_fleet__y_n_',
+       'project_technical_assistance_network_integration__y_n_',
+       'project_technical_assistance_priority_population__y_n_',
+       'project_total_project_cost', 'project_tircp_award_amount__$_',
+       'project_allocated_amount', 'project_unallocated_amount',
+       'project_expended_amount', 'project_award_cycle',
+       'project_estimated_tircp_ghg_reductions',
+       'project_cost_per_ghg_ton_reduced', 'project_increased_ridership',
+       'project_service_integration', 'project_improve_safety',
+       'project_project_readiness','project_county']    
 '''
 Script
 '''
-def tableau():
-    df = data_prep.project()
-    #Keeping only the columns we want
-    df = (df[['PPNO','Award_Year', 'Project_#', 'Local_Agency', 'Vendor_ID_#',
-       'Project_Title', 'District', 'County', 'Key_Project_Elements',
-       'Master_Agreement_Number', 'Master_Agreement_Expiration_Date',
-       'Project_Manager', 'Regional_Coordinator',
-       'Technical_Assistance-CALTP_(Y/N)', 'Technical_Assistance-Fleet_(Y/N)',
-       'Technical_Assistance-Network_Integration_(Y/N)',
-       'Technical_Assistance-Priority_Population_(Y/N)', 'Total_Project_Cost',
-       'TIRCP_project_sheet', 'Allocated_Amount',
-       'Unallocated_amt_project_sheet', 'Percentge_Allocated',
-       'Expended_Amt_project_sheet', 'Other_Funds_Involved']]
-                 )
-    #Getting percentages & filling in with 0
-    df['Expended_Percent'] = df['Expended_Amt_project_sheet']/df['Allocated_Amount']
-    df['Allocated_Percent'] = df['Allocated_Amount']/df['TIRCP_project_sheet']
-    df[['Expended_Percent','Allocated_Percent']] = df[['Expended_Percent','Allocated_Percent']].fillna(value=0)
+def tableau():  
+    #Load in cleaned project sheets
+    df = A1_data_prep.clean_project()
+  
+    # Keeping only certain columns.
+    df = df[columns_to_keep]
+
+    #Create new cols
+    df = df.assign(
+    Expended_Percent = (df["project_expended_amount"] / df["project_allocated_amount"]),
+    Allocated_Percent = (df["project_allocated_amount"] / df["project_tircp_award_amount__$_"]),
+    Unallocated_Amount = (df["project_tircp_award_amount__$_"] - df["project_allocated_amount"]),
+    Projects_Funded_Percent = (df['project_tircp_award_amount__$_']/df['project_total_project_cost'])
+    )
+   
+    # filling in for 0's
+    new_cols_list = ["Expended_Percent", "Allocated_Percent", "Unallocated_Amount", 'Projects_Funded_Percent'] 
+    df[new_cols_list] = df[new_cols_list].fillna(0)
     
- 
+    #Replace distircts & counties with their full names 
+    df['project_district'] = df['project_district'].replace(crosswalks.full_ct_district)
+    df['project_county'] = df['project_county'].replace(crosswalks.full_county)
+    
+    #Apply functions
+    #Categorize projects into expended % bins
     df["Expended_Percent_Group"] = df.apply(lambda x: expended_percent(x), axis=1)
     
-  
-    df['Progress'] = df.apply(progress, axis = 1)
+    #Categorize projects whether they are ahead/behind/0 expenditures/etc
+    df["Progress"] = df.apply(progress, axis=1)
     
-    #Renaming districts
-    df['District'] = (df['District'].replace({7:'District 7: Los Angeles',
-                                            4:'District 4: Bay Area / Oakland',
-                                            'VAR':'Various',
-                                            10:'District 10: Stockton',
-                                            11:'District 11: San Diego',
-                                            3:'District 3: Marysville / Sacramento',
-                                            12: 'District 12: Orange County',
-                                            8: 'District 8: San Bernardino / Riverside',
-                                            5:'District 5: San Luis Obispo / Santa Barbara',
-                                            6:'District 6: Fresno / Bakersfield',
-                                            1:'District 1: Eureka'
-                                                 }))
-    #Renaming counties
-    df['County'] = (df['County'].replace({'LA': 'Los Angeles', 
-                                          'VAR': 'Various', 
-                                          'MON': 'Mono', 
-                                          'ORA':'Orange', 
-                                          'SAC':'Sacramento', 
-                                          'SD':'San Diego', 
-                                          'SF': 'San Francisco', 
-                                          'SJ':'San Joaquin', 
-                                          'SJ ': 'San Joaquin', 
-                                          'FRE':"Fresno",
-                                           'SBD':'San Bernandino', 
-                                          'SCL':'Santa Clara', 
-                                          'ALA':'Alameda', 
-                                          'SM':'San Mateo', 
-                                          'SB': 'San Barbara', 
-                                          'SON, MRN': 'Various', 
-
-                                                 }))
+    #Categorize projects whether they are large/small/med based on TIRCPamount
     
+    #Rename TIRCP column to something cleaner
+    df= df.rename(columns={'project_tircp_award_amount__$_': "tircp"})
+    # Which projects are large,small, medium
+    p75 = df.tircp.quantile(0.75).astype(float)
+    p50 = df.tircp.quantile(0.50).astype(float)
+    p25 = df.tircp.quantile(0.25).astype(float)
+    
+    def project_size (row):
+        if ((row.tircp > 0) and (row.tircp < p25)):
+             return "Small"
+        elif ((row.tircp > p25) and (row.tircp < p50)):
+             return "Medium"
+        elif (row.tircp > p50):
+             return "Large"
+        elif (row.tircp == 0):
+            return "$0 recorded for TIRCP"
+        else:
+            return "Medium"
+        
     df["Project_Category"] = df.apply(lambda x: project_size(x), axis=1)
-     #Rename cols to the right names
-    df = (df.rename(columns = {'Expended_Amt_project_sheet':'Expended_Amount', 
-                                                'TIRCP_project_sheet': "TIRCP_Amount"}
-                  ))
-    ### GCS ###
-    with pd.ExcelWriter(f"{GCS_FILE_PATH}Tableau_Sheet.xlsx") as writer:
+    
+    #Clean up column names
+    df.columns = (df.columns
+                  .str.replace('[_]', ' ')
+                  .str.replace('project','')
+                  .str.title()
+                  .str.strip()
+                 )
+    #Write to GCS
+    with pd.ExcelWriter(f"{GCS_FILE_PATH}Script_Tableau_Sheet.xlsx") as writer:
         df.to_excel(writer, sheet_name="Data", index=False)
-    return df 
-
+    return df

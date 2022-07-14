@@ -24,26 +24,12 @@ FILE_NAME = "TIRCP_July_8_2022.xlsx"
 import crosswalks 
 
 #Import cleaned up data
-import data_prep
+import A1_data_prep
 
 '''
 Functions
 '''
-#Function to highlight differences between two dataframes 
-# https://stackoverflow.com/questions/50102808/highlighting-the-difference-between-two-dataframes
-# https://stackoverflow.com/questions/56647813/perform-operations-after-styling-in-a-dataframe
-def highlight_diff(current, previous, color="pink"):
-    # Define html attribute
-    attr = "background-color: {}".format(color)
-    # Where data != other set attribute
-    return pd.DataFrame(
-    np.where(current.ne(previous), attr, ""),
-    index=current.index,
-    columns=current.columns,
-        )
-
 #Function for the summary table 
-#Input project df 
 def summary_SAR_table_two(df):
     #pivot
     df = (df
@@ -88,6 +74,8 @@ def summary_SAR_table_two(df):
     return df 
 '''
 Columns
+&
+Lists
 '''
 #Columns to keep 
 allocation_cols = ['allocation_award_year','allocation_expended_amount','allocation_allocation_amount',
@@ -125,12 +113,11 @@ max_cols = ['Percent_of_Allocation_Expended','Allocated_Before_July_31_2020']
 '''
 Complete Semiannual Report
 '''
-#The function that brings complete Semi Annual  Report
-def semiannual_report():
+def full_sar_report():
     #Load in raw sheets
-    df_project = data_prep.clean_project()
-    df_allocation = data_prep.clean_allocation()
-    #previous_sar = data_prep.load_previous_sar()
+    df_project = A1_data_prep.clean_project()
+    df_allocation = A1_data_prep.clean_allocation()
+    previous_sar = A1_data_prep.load_previous_sar()
     
     #Function for summary table portion of the report
     summary = summary_SAR_table_two(df_project)
@@ -173,32 +160,32 @@ def semiannual_report():
     
     #Rename cols 
     m1 = m1.rename(columns = {'allocation_led': 'Phase_Completion_Date',
-                                      'project_tircp_award_amount__$_': 'TIRCP_Award_Amount',
-                                      'allocation__3rd_party_award_date':'CON_Contract_Award_Date'})
+         'project_tircp_award_amount__$_': 'TIRCP_Award_Amount',
+         'allocation__3rd_party_award_date':'CON_Contract_Award_Date'})
 
     #Pivot
-    df_pivot =m1.groupby(group_by_cols).agg({**{e:'max' for e in max_cols}, **{e:'sum' for e in sum_cols}})
-
-    #Reset index
-    df_reset = df_pivot.reset_index() 
+    df_pivoted =m1.groupby(group_by_cols).agg({**{e:'max' for e in max_cols}, **{e:'sum' for e in sum_cols}})
     
-    #Highlight the differences between the previous report
-    #And the current report 
-    '''
-    current_highlighted_diffs = df_reset.style.apply(
-        highlight_diff, axis=None, previous=fake_SAR, color="pink"
-    )
-    '''
+    #Apply styling to show difference between current SAR and previous SAR
+    #https://stackoverflow.com/questions/17095101/compare-two-dataframes-and-output-their-differences-side-by-side
+    #Reset index from dataframe above
+    df_current = df_pivoted.reset_index() 
+    df_all = pd.concat([df_current, previous_sar], keys=['Current_SAR', 'Previous_SAR'], axis =1)
+    df_all = df_all.swaplevel(axis='columns')[df_current.columns[1:]]
+    
+    def highlight_diff(data, color='pink'):
+        attr = 'background-color: {}'.format(color)
+        other = data.xs('Current_SAR', axis='columns', level=-1)
+        return pd.DataFrame(np.where(data.ne(other, level=0), attr, ''),
+                        index=data.index, columns=data.columns)
+    
+    df_highlighted = df_all.style.apply(highlight_diff, axis=None)
+    
     #Save to GCS
-    '''
-    with pd.ExcelWriter(f"{GCS_FILE_PATH}TESTING_Semi_Annual_Report.xlsx") as writer:
+    with pd.ExcelWriter(f"{GCS_FILE_PATH}Script_Semi_Annual_Report.xlsx") as writer:
         summary.to_excel(writer, sheet_name="Summary", index=True)
-        df_pivot.to_excel(writer, sheet_name="FY", index=True)
-        df_reset.to_excel(
-            writer, sheet_name="Unpivoted_Current_Version", index=False
-        )
-        current_highlighted_diffs.to_excel(
-            writer, sheet_name="Highlighted_Differences", index=False
-        )
-    '''
-    return m1, df_pivot, summary
+        df_pivoted.to_excel(writer, sheet_name="FY", index=True)
+        df_current.to_excel(writer, sheet_name="Unpivoted_Current_Version", index=False)
+        df_highlighted.to_excel(writer, sheet_name="highlighted")
+        
+    return df_current, df_pivoted, summary
