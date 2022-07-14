@@ -1,10 +1,9 @@
 ---
-# Feel free to add content and custom Front Matter to this file.
-# To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
-
 layout: home
 ---
 
 # Data Analyses
 
-This is an auto-generated index page
+## Highlights
+
+- [Visualization](/bus_service_increase/visualizations_index.html)

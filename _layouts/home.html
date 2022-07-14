@@ -5,14 +5,17 @@ layout: default
 {{ content }}
 
 {%- if site.html_pages.size > 0 -%}
-    <ul class="page-list">
-        {%- for page in site.html_pages -%}
-            <li class="list-item">
-                <a class="list-link" href="{{ page.url | relative_url }}">
-                    <span class="list-title">{{ page.title | default: page.name }}</span>
-                </a>
-                <small class="list-subtitle">{{ page.path }}</small>
-            </li>
-        {%- endfor -%}
-    </ul>
+    <h2>All pages</h2>
+    <details>
+        <summary>Show all</summary>
+        <ul class="page-list">
+            {%- for page in site.html_pages -%}
+                <li class="list-item">
+                    <a class="list-link" href="{{ page.url | relative_url }}">
+                        <span class="list-title">{{ page.title | default: page.name }}</span></a>
+                    <small class="list-subtitle">{{ page.path }}</small>
+                </li>
+            {%- endfor -%}
+        </ul>
+    </details>
 {%- endif -%}

@@ -53,6 +53,7 @@ exclude:
   - vendor/cache/
   - vendor/gems/
   - vendor/ruby/
+  - portfolio/
 
 # use github-flavored markdown
 kramdown:
