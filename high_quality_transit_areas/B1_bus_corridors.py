@@ -39,23 +39,25 @@ ITP_IDS = (tbl.gtfs_schedule.agency()
 # merged = merge_routes_to_trips(routelines, trips) throwing error
 # ValueError: You are trying to merge on object and int32 columns. If you wish to proceed you should use pd.concat 
 VALUE_ERROR_IDS = [
-    #117, 118, 15,  
-    #167, 169, 16,
-    #186, 192, 199,
-    #206, 207, 213, 214, 21, 
-    #254, 263, 265, 273, 
-    #338, 33, 
-    #365, 394, 
-    #41, 54, 81, 91,
+    117, 118, 15,  
+    167, 169, 16,
+    186, 192, 199,
+    206, 207, 213, 214, 21, 
+    254, 263, 265, 273, 
+    338, 33, 365, 394, 
+    41, 54, 81, 91,
 ]
 
 FILE_NOT_FOUND_IDS = [
-    203, #FileNotFoundError: for routelines 
-
+    203, #FileNotFoundError: for routelines (confirmed)
+    # What's in ITP_IDS but not in GCS
+    481, # this is City of South SF
+    485, # this is the Treasure Island ferry, it's captured by points
 ]
 
 TOO_LONG_IDS = [
     13, # taking a long time, for utilities.create_segments(gdf.geometry) 
+    # This is Amtrak and is excluded by Eric already
 ]
 
 ITP_IDS_IN_GCS = [
