@@ -247,7 +247,7 @@ if __name__=="__main__":
     
     start_time = dt.datetime.now()
             
-    for itp_id in VALUE_ERROR_IDS: #ITP_IDS_IN_GCS
+    for itp_id in ITP_IDS_IN_GCS:
 
         operator_start = dt.datetime.now()
             

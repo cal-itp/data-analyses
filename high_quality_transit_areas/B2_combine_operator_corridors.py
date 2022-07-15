@@ -12,7 +12,9 @@ import B1_bus_corridors as bus_corridors
 from shared_utils import utils
 
 
-def clean_combined_operators(gdf):
+def clean_combined_operators(gdf):    
+    gdf = dask_geopandas.from_geopandas(gdf, npartitions=1)
+    
     # Drop segments that are large enough
     gdf = gdf.assign(
         area = gdf.geometry.area 
@@ -35,7 +37,7 @@ def clean_combined_operators(gdf):
 
 # Read first one in, to set the metadata for dask gdf
 OPERATOR_PATH = f"{bus_corridors.TEST_GCS_FILE_PATH}bus_corridors/"
-first_operator = ITP_IDS_IN_GCS[0]
+first_operator = bus_corridors.ITP_IDS_IN_GCS[0]
 
 if __name__ == "__main__":
     start = dt.datetime.now()
@@ -65,7 +67,7 @@ if __name__ == "__main__":
     gdf3 = clean_combined_operators(gdf2)
     
     utils.geoparquet_gcs_export(gdf3,
-                                f'{bus_corridors.TEST_GCS_FILE_PATH}intermediate/'
+                                f'{bus_corridors.TEST_GCS_FILE_PATH}intermediate/',
                                 'shape_dissolve'
                                )
     time2 = dt.datetime.now()
