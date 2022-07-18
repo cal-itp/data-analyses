@@ -8,3 +8,8 @@ sources:
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/msd_dashboard_metric/stanford_shorelines.zip
           use_fsspec: true
+    ca_boundary:
+        driver: geoparquet
+        description: CA boundary
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/ca_boundary.parquet

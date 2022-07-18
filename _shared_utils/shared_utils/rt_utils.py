@@ -10,8 +10,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
-
-# import shared_utils
 from calitp import query_sql
 from calitp.tables import tbl
 from numba import jit
@@ -39,11 +37,13 @@ ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
 ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 
 # Datetime formats
-DATE_WEEKDAY_FMT = "%b %d (%a)"
-MONTH_DAY_FMT = "%m_%d"
-HOUR_MIN_FMT = "%H:%M"
-HOUR_MIN_SEC_FMT = "%H:%M:%S"
-FULL_DATE_FMT = "%Y-%m-%d"
+DATE_WEEKDAY_FMT = "%b %d (%a)"  # Jun 01 (Wed) for 6/1/22
+MONTH_DAY_FMT = "%m_%d"  # 6_01 for 6/1/22
+HOUR_MIN_FMT = "%H:%M"  # 08:00 for 8 am, 13:00 for 1pm
+HOUR_MIN_SEC_FMT = (
+    "%H:%M:%S"  # 08:15:05 for 8:15 am + 5 sec, 13:15:05 for 1:15pm + 5 sec
+)
+FULL_DATE_FMT = "%Y-%m-%d"  # 2022-06-01 for 6/1/22
 
 
 def convert_ts(ts):
@@ -379,7 +379,7 @@ def get_stops(itp_id, analysis_date, force_clear=False):
         crs="EPSG:4326",
     ).to_crs(geography_utils.CA_NAD83Albers)
     export_path = GCS_FILE_PATH + "cached_views/"
-    utils.geoparquet_gcs_export(stops, export_path, filename[:-8])
+    utils.geoparquet_gcs_export(stops, export_path, filename)
     return stops
 
 
@@ -409,16 +409,20 @@ def get_routelines(itp_id, analysis_date, force_clear=False):
         return routelines
 
 
-def categorize_time_of_day(dt):
-    if dt.hour < 4:
+def categorize_time_of_day(value):
+    if isinstance(value, int):
+        hour = value
+    elif isinstance(value, dt.datetime):
+        hour = value.hour
+    if hour < 4:
         return "Owl"
-    elif dt.hour < 7:
+    elif hour < 7:
         return "Early AM"
-    elif dt.hour < 10:
+    elif hour < 10:
         return "AM Peak"
-    elif dt.hour < 15:
+    elif hour < 15:
         return "Midday"
-    elif dt.hour < 20:
+    elif hour < 20:
         return "PM Peak"
     else:
         return "Evening"
@@ -574,15 +578,6 @@ def categorize_cleaning(rt_operator_day, interpolator_key):
     ]
     cleaned = rt_interpolator.cleaned_positions.shape[0]
     return (interpolator_key, cleaned / raw, cleaned / same_loc_dropped)
-
-
-def make_linestring(x):
-    # shapely errors if the array contains only one point
-    if len(x) > 1:
-        # each point in the array is wkt
-        # so convert them to shapely points via list comprehension
-        as_wkt = [shapely.wkt.loads(i) for i in x]
-        return shapely.geometry.LineString(as_wkt)
 
 
 def exclude_desc(desc):
