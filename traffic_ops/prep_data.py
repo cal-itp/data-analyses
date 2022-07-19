@@ -3,6 +3,8 @@ Functions to query GTFS schedule data,
 save locally as parquets, 
 then clean up at the end of the script.
 """
+import dask.dataframe as dd
+
 import geopandas as gpd
 import pandas as pd
 import glob
@@ -15,7 +17,7 @@ from calitp import query_sql
 from datetime import datetime, date, timedelta
 from siuba import *
 
-from shared_utils import geography_utils, portfolio_utils
+from shared_utils import geography_utils, portfolio_utils, gtfs_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 DATA_PATH = "./data/"
@@ -50,7 +52,10 @@ def grab_selected_date(SELECTED_DATE):
     
     # Trips query
     dim_trips = (tbl.views.gtfs_schedule_dim_trips()
-                >> filter(_.calitp_itp_id != 200, _.calitp_itp_id != 0)
+                >> filter(_.calitp_itp_id != 200, 
+                          _.calitp_itp_id != 0, 
+                          _.calitp_itp_id != 323
+                         )
                  >> select(*trip_cols, _.trip_key)
                  >> distinct()
                 )
@@ -71,9 +76,40 @@ def grab_selected_date(SELECTED_DATE):
     return stops, trips, route_info
 
 
+def metrolink_trips_query(SELECTED_DATE):
+    # Modify existing trips query
+    dim_trips = (tbl.views.gtfs_schedule_dim_trips()
+                 >> filter(_.calitp_itp_id==323)
+                 >> select(*trip_cols, _.trip_key, _.direction_id)
+                 >> distinct()
+                )            
+                 
+
+    metrolink_trips = (tbl.views.gtfs_schedule_fact_daily_trips()
+             >> filter(_.service_date == SELECTED_DATE, 
+                       _.is_in_service==True)
+             >> select(_.trip_key, _.service_date)
+             >> inner_join(_, dim_trips, on = "trip_key")
+             >> select(*trip_cols)
+             >> distinct()
+             >> collect()
+            )
+                 
+                 
+    return metrolink_trips
+    
+
 def create_local_parquets(SELECTED_DATE):
     time0 = datetime.now()
     stops, trips, route_info = grab_selected_date(SELECTED_DATE)
+    
+    # Original trips query excludes Metrolink
+    # Do Metrolink query separately for trips, to fill in missing shape_id values here
+    metrolink_trips = metrolink_trips_query(SELECTED_DATE)
+    
+    # Full trips table, with Metrolink concatenated
+    trips = pd.concat([trips, metrolink_trips], axis=0, ignore_index=True)
+    
     
     # Filter to the ITP_IDs present in the latest agencies.yml
     latest_itp_id = (tbl.views.gtfs_schedule_dim_feeds()
@@ -148,12 +184,12 @@ def attach_route_name(df, route_info_df):
                          .drop_duplicates(subset=["calitp_itp_id", "route_id"])
                         )
     
-    routes = pd.merge(
+    routes = dd.merge(
         df, 
         route_info_unique,
         on = ["calitp_itp_id", "route_id"],
         how = "left",
-        validate = "m:1",
+        #validate = "m:1",
     )
 
     return routes
