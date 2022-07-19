@@ -3,6 +3,8 @@ Functions to query GTFS schedule data,
 save locally as parquets, 
 then clean up at the end of the script.
 """
+import dask.dataframe as dd
+
 import geopandas as gpd
 import pandas as pd
 import glob
@@ -182,12 +184,12 @@ def attach_route_name(df, route_info_df):
                          .drop_duplicates(subset=["calitp_itp_id", "route_id"])
                         )
     
-    routes = pd.merge(
+    routes = dd.merge(
         df, 
         route_info_unique,
         on = ["calitp_itp_id", "route_id"],
         how = "left",
-        validate = "m:1",
+        #validate = "m:1",
     )
 
     return routes
