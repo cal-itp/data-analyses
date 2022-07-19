@@ -133,6 +133,9 @@ def rename_cols(df, with_intersect=False):
     return df
 
 
+# TODO: is the clip necessary?
+# If the point is to just find the stop_ids that are near the clip,
+# can the sjoin do it?
 def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
     start = dt.datetime.now()
     
