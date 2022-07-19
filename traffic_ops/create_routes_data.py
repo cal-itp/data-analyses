@@ -6,6 +6,8 @@ Operator-routes in shapes.txt need route line geometry.
 Operator-routes not in shapes.txt use stop sequence 
 to generate route line geometry.
 """
+import dask.dataframe as dd
+import dask_geopandas
 import geopandas as gpd
 import pandas as pd
 import os
@@ -24,17 +26,19 @@ def merge_shapes_to_routes(trips, routes):
     # right only means in routes, but no route that has that shape_id 
     # We probably should keep how = "left"?
     # left only means we can assemble from stop sequence?
-    m1 = pd.merge(
+    m1 = dd.merge(
             trips,
             routes,
             on = ["calitp_itp_id", "shape_id"],
             how = "left",
-            validate = "m:1",
+            #validate = "m:1",
             indicator=True
-        )
+        ).compute()
     
     # routes is a gdf, so turn it back into gdf
     m2 = gpd.GeoDataFrame(m1, geometry="geometry", crs = geography_utils.WGS84)
+    
+    m2 = dask_geopandas.from_geopandas(m2, npartitions=1)
     
     return m2
     
@@ -53,9 +57,10 @@ def routes_for_operators_in_shapes(merged_shapes_routes, route_info):
 
 def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
     missing_shapes = (merged_shapes_routes[merged_shapes_routes._merge=="left_only"]
-      .drop(columns = ["geometry", "_merge"])
+      [["calitp_itp_id", "route_id", "shape_id"]]
       .reset_index(drop=True)
      )
+    
         
     # Only grab trip info for the shape_ids that are missing, or, appear in missing_shapes
     trip_cols = ["calitp_itp_id", "route_id", "shape_id"]
@@ -138,11 +143,11 @@ def make_routes_shapefile():
     DATA_PATH = prep_data.DATA_PATH
 
     # Read in local parquets
-    stops = pd.read_parquet(f"{DATA_PATH}stops.parquet")
-    trips = pd.read_parquet(f"{DATA_PATH}trips.parquet")
-    route_info = pd.read_parquet(f"{DATA_PATH}route_info.parquet")
-    routes = gpd.read_parquet(f"{DATA_PATH}routes.parquet")
-    latest_itp_id = pd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
+    stops = dd.read_parquet(f"{DATA_PATH}stops.parquet")
+    trips = dd.read_parquet(f"{DATA_PATH}trips.parquet")
+    route_info = dd.read_parquet(f"{DATA_PATH}route_info.parquet")
+    routes = dask_geopandas.read_parquet(f"{DATA_PATH}routes.parquet")
+    latest_itp_id = dd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
     df = merge_shapes_to_routes(trips, routes)
     
@@ -159,7 +164,8 @@ def make_routes_shapefile():
     time3 = datetime.now()
     print(f"Part 2 - routes for operator-routes not in shapes.txt: {time3-time2}")
     
-    routes_assembled = (pd.concat([routes_part1, routes_part2], axis=0)
+    routes_assembled = (dd.multi.concat([routes_part1, routes_part2], axis=0)
+                        .compute()
                         .sort_values(["calitp_itp_id", "route_id"])
                         .drop_duplicates()
                         .reset_index(drop=True)
@@ -167,6 +173,7 @@ def make_routes_shapefile():
     
     # Attach agency_name
     agency_names = portfolio_utils.add_agency_name(SELECTED_DATE = prep_data.SELECTED_DATE)
+    
     
     routes_assembled2 = pd.merge(
         routes_assembled,
