@@ -23,7 +23,7 @@ if __name__ == "__main__":
     time0 = datetime.now()
     
     # Create local parquets
-    #prep_data.create_local_parquets(prep_data.SELECTED_DATE) 
+    prep_data.create_local_parquets(prep_data.SELECTED_DATE) 
     print("Local parquets created")
     
     routes = create_routes_data.make_routes_shapefile()    
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     print("Geoparquets exported to GCS")
     
     # Delete local parquets
-    prep_data.delete_local_parquets()
+    #prep_data.delete_local_parquets()
     print("Local parquets deleted")
     
     time1 = datetime.now()
