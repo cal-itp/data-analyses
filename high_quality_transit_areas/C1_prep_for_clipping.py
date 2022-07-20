@@ -12,7 +12,7 @@ import geopandas as gpd
 import pandas as pd
 
 import B1_bus_corridors as bus_corridors
-
+from shared_utils import utils
 
 def prep_bus_corridors():
     bus_hqtc = dask_geopandas.read_parquet(
@@ -30,7 +30,8 @@ def prep_bus_corridors():
 # Before, have been focusing on shape_id
 # Now, change it to hqta_segment_id
 def find_intersection_hqta_segments(gdf, itp_id):
-    keep_cols = ["calitp_itp_id", "hqta_segment_id", "geometry"]
+    segment_cols = ["calitp_itp_id", "hqta_segment_id"]
+    keep_cols = segment_cols + ["geometry"]
     
     operator = gdf[gdf.calitp_itp_id == itp_id][keep_cols]
     not_operator = gdf[gdf.calitp_itp_id != itp_id][keep_cols]
@@ -51,7 +52,10 @@ def find_intersection_hqta_segments(gdf, itp_id):
         predicate="intersects"
     )
     
-    intersecting_segments = (s1[keep_cols + 
+    # Once the spatial join is done, don't need to store the geometry
+    # for the operator, since that's already stored in operator hqta_segments
+    # Just keep the pairs of operator hqta_segments - intersecting_operator hqta_segments
+    intersecting_segments = (s1[segment_cols + 
                              ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]]
                              .drop_duplicates()
                              .reset_index(drop=True)
@@ -156,8 +160,12 @@ if __name__=="__main__":
     time2 = dt.datetime.now()
     print(f"compute for pairwise/subset_corridors: {time2 - time1}")
     
-    pairwise.to_parquet("./data/pairwise.parquet")
-    subset_corridors.to_parquet("./data/subset_corridors.parquet")
+    pairwise.to_parquet(f"{bus_corridors.TEST_GCS_FILE_PATH}intermediate/pairwise.parquet")
+    
+    utils.geoparquet_gcs_export(subset_corridors,
+                        f'{bus_corridors.TEST_GCS_FILE_PATH}intermediate/',
+                        'subset_corridors'
+                       )
     
     end = dt.datetime.now()
     print(f"execution time: {end-start}")

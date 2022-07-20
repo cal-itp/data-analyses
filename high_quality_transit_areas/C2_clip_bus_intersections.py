@@ -9,6 +9,7 @@ import datetime as dt
 import geopandas as gpd
 import pandas as pd
 
+import B1_bus_corridors as bus_corridors
 import C1_prep_for_clipping as C1
 
 # TODO: is the clip necessary?
@@ -67,8 +68,11 @@ def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
 if __name__ == "__main__":
     start = dt.datetime.now()
     
-    intersecting_shapes = dd.read_parquet("./data/pairwise.parquet")
-    corridors = dask_geopandas.read_parquet("./data/subset_corridors.parquet")
+    intersecting_shapes = dd.read_parquet(
+        f"{bus_corridors.TEST_GCS_FILE_PATH}intermediate/pairwise.parquet")
+    
+    corridors = dask_geopandas.read_parquet(
+        f"{bus_corridors.TEST_GCS_FILE_PATH}intermediate/subset_corridors.parquet")
     
     # Presumably, this list of ITP_IDs is pared down 
     # because only ones with sjoin are included
