@@ -95,6 +95,6 @@ if __name__ == "__main__":
     time2 = dt.datetime.now()
     print(f"compute for full clipped df: {time2 - time1}")
     
-    clipped2.to_parquet("./all_clipped.parquet")
+    clipped2.to_parquet("./data/all_clipped.parquet")
     
     end = dt.datetime.now()
