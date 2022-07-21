@@ -70,7 +70,10 @@ def find_stop_with_high_trip_count(stop_times):
 # Use the pared down shape_ids to get hqta_segments
 def merge_routes_to_trips(routelines, trips):    
     routelines_ddf = routelines.assign(
-        route_length = routelines.geometry.length
+        route_length = routelines.geometry.length,
+        # Easier to drop if we make sure centroid of that line segment is the same too
+        x = routelines.geometry.centroid.x.round(3),
+        y = routelines.geometry.centroid.y.round(3),
     )
         
     # Merge routes to trips with using trip_id
@@ -86,23 +89,29 @@ def merge_routes_to_trips(routelines, trips):
                 shape_id_cols + ["route_id"]],
             on = shape_id_cols,
             how = "inner",
-        ).drop_duplicates(subset=shape_id_cols + ["route_id"])
+        ).drop_duplicates(subset=["calitp_itp_id", "route_id", 
+                                  "route_length", "x", "y"])
+        .drop(columns = ["x", "y"])
         .reset_index(drop=True)
     )
     
     return m1
 
-
-def find_longest_route_shape(merged_routelines_trips): 
+    
+def find_longest_route_shapes(merged_routelines_trips, n=1): 
     # Sort in descending order by route_length
     # Since there are short/long trips for a given route_id,
-    # Keep the longest one for each route_id
-    longest_shape = (merged_routelines_trips
-                     .sort_values(["route_id", "route_length"],
-                     ascending=[True, False])
-      .drop_duplicates(subset="route_id")
-      .reset_index(drop=True)
-     ).compute()
+    # Keep the longest 5 shape_ids within a route_id 
+    # then do the dissolve
+    # Doing it off of the full one creates gaps in the line geom
+    df = merged_routelines_trips.assign(
+        obs = (merged_routelines_trips.sort_values(["route_id", "route_length"], 
+                                  ascending=[True, False])
+               .groupby(["calitp_itp_id", "route_id"]).cumcount() + 1
+              )
+    )
+    
+    longest_shape = df[df.obs <= n].drop(columns="obs").reset_index(drop=True)
     
     return longest_shape
 
@@ -117,13 +126,16 @@ def select_needed_shapes_for_route_network(routelines, trips):
     # Add these segments in, so we can build out a complete route network
     merged = merge_routes_to_trips(routelines, trips)
     
-    longest_shape = find_longest_route_shape(merged)
+    # Go back to picking the longest one (n=1), since n=5 gives errors
+    # Suspect that the dissolve/unary_union orders the points differently, 
+    # and the hqta segments are truncated way too short
+    longest_shape = find_longest_route_shapes(merged)
     
     # CHANGE GEOMETRY?
     # Can either keep the shape_id and associate the dissolved geometry with that shape_id
     # Or, drop shape_id, since now shape_id is not reflecting the raw line geom 
     # for that shape_id, and that's confusing to the end user (also, shape_id is not used, since hqta_segment_id is primary unit of analysis)
-    dissolved_by_route = (merged[route_cols + ["geometry"]]
+    dissolved_by_route = (longest_shape[route_cols + ["geometry"]]
                           .compute()
                           .dissolve(by=route_cols)
                           .reset_index()
