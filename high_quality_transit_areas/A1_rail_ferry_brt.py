@@ -58,7 +58,8 @@ def routes_to_stops(routes_tbl, analysis_date):
                       >> inner_join(_, 
                                     tbl.views.gtfs_schedule_index_feed_trip_stops(), 
                                     on = 'trip_key')
-                      >> select(-_.calitp_url_number, -_.calitp_extracted_at, -_.calitp_deleted_at)
+                      >> select(-_.calitp_url_number, 
+                                -_.calitp_extracted_at, -_.calitp_deleted_at)
     )
     
     stops = (tbl.views.gtfs_schedule_dim_stops()

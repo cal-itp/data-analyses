@@ -14,6 +14,9 @@ import pandas as pd
 import B1_bus_corridors as bus_corridors
 from shared_utils import utils
 
+
+segment_cols = ["calitp_itp_id", "hqta_segment_id"]
+
 def prep_bus_corridors():
     bus_hqtc = dask_geopandas.read_parquet(
         f'{bus_corridors.TEST_GCS_FILE_PATH}intermediate/all_bus.parquet')
@@ -30,7 +33,6 @@ def prep_bus_corridors():
 # Before, have been focusing on shape_id
 # Now, change it to hqta_segment_id
 def find_intersection_hqta_segments(gdf, itp_id):
-    segment_cols = ["calitp_itp_id", "hqta_segment_id"]
     keep_cols = segment_cols + ["geometry"]
     
     operator = gdf[gdf.calitp_itp_id == itp_id][keep_cols]
@@ -67,11 +69,9 @@ def find_intersection_hqta_segments(gdf, itp_id):
 def compile_pairwise_intersections(corridors, ITP_ID_LIST):
     start = dt.datetime.now()
 
-    keep_cols = ["calitp_itp_id", "hqta_segment_id"]
-
     # Having trouble initializing empty dask geodataframe
     # just subset so metadata is copied over
-    intersecting_segments = corridors[corridors.calitp_itp_id==0][keep_cols]
+    intersecting_segments = corridors[corridors.calitp_itp_id==0][segment_cols]
 
     for itp_id in ITP_ID_LIST:
         operator_shape = find_intersection_hqta_segments(corridors, itp_id)
@@ -95,8 +95,6 @@ def compile_pairwise_intersections(corridors, ITP_ID_LIST):
 
 # Get pairwise one into just unique df
 def unique_intersecting_segments(df):
-    segment_cols = ["calitp_itp_id", "hqta_segment_id"]
-    
     part1 = df[segment_cols].drop_duplicates()
     part2 = (df[["intersect_calitp_itp_id", "intersect_hqta_segment_id"]]
              .drop_duplicates()
@@ -112,9 +110,7 @@ def unique_intersecting_segments(df):
     return unique
 
 
-def subset_corridors(gdf, intersecting_shapes):
-    segment_cols = ["calitp_itp_id", "hqta_segment_id"]
-    
+def subset_corridors(gdf, intersecting_shapes):    
     shapes_needed = unique_intersecting_segments(intersecting_shapes)
     
     gdf2 = dd.merge(gdf, shapes_needed, 
