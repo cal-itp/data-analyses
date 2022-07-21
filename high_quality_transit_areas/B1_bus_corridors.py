@@ -1,5 +1,9 @@
 """
 Move bus_corridors.ipynb into script.
+
+This takes 2.5 hr to run (when keeping all the shapes, dissolving).
+Half that when it just keeps the longest shape.
+But this should be more accurate.
 """
 import dask.dataframe as dd
 import dask_geopandas
@@ -8,10 +12,10 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from calitp.storage import get_fs
-from calitp.tables import tbl
 from siuba import *
 
 import dask_utils
+import operators_for_hqta
 import utilities
 from A1_rail_ferry_brt import analysis_date
 from shared_utils import rt_utils, geography_utils, utils, gtfs_utils
@@ -27,14 +31,8 @@ TEST_GCS_FILE_PATH = f"gs://{utilities.BUCKET_NAME}/{BUCKET_DIR}/"
 
 
 segment_cols = ["hqta_segment_id", "segment_sequence"]
+stop_cols = ["calitp_itp_id", "stop_id"]
 
-'''
-ITP_IDS = (tbl.gtfs_schedule.agency()
-           >> distinct(_.calitp_itp_id)
-           >> filter(_.calitp_itp_id != 200)
-           >> collect()
-).calitp_itp_id.tolist()
-'''
 
 # merged = merge_routes_to_trips(routelines, trips) throwing error
 # ValueError: You are trying to merge on object and int32 columns. If you wish to proceed you should use pd.concat 
@@ -60,24 +58,9 @@ TOO_LONG_IDS = [
     # This is Amtrak and is excluded by Eric already
 ]
 
-ITP_IDS_IN_GCS = [
-    101, 102, 103, 105, 106, 108, 10, 110, 112, 116, 
-    11, 120, 121, 122, 123, 126, 127, 129, 135, 137, 
-    142, 146, 148, 14, 152, 154, 159, 162, 165, 168,
-    170, 171, 172, 173, 174, 176, 177, 178, 179, 17, 181, 182, 183, 
-    187, 188, 18, 190, 194, 198, 
-    201, 204, 208, 210, 212, 217, 218, 
-    220, 221, 226, 228, 231, 232, 235, 238, 239, 23, 243, 246, 247, 24, 251, 
-    257, 259, 260, 261, 264, 269, 270, 271, 
-    274, 278, 279, 280, 281, 282, 284, 287, 289, 
-    290, 293, 294, 295, 296, 298, 29, 300, 301, 305, 308, 30, 310, 312, 314, 315, 320, 
-    323, 324, 327, 329, 331, 334, 336, 337, 339, 
-    341, 343, 344, 346, 349, 34, 350, 351, 356, 35, 360, 361, 
-    366, 367, 368, 36, 372, 374, 376, 37, 380, 381, 386, 389, 
-    42, 45, 473, 474, 482, 483, 484, 48, 49, 4, 50, 
-    56, 61, 6, 70, 71, 75, 76, 77, 79, 
-    82, 83, 86, 87, 95, 98, 99,
-]
+
+ITP_IDS_IN_GCS = operators_for_hqta.get_valid_itp_ids()
+
 
 ## Join HQTA segment to stop
 def hqta_segment_to_stop(hqta_segments, stops):    
@@ -111,7 +94,7 @@ def hqta_segment_keep_one_stop(hqta_segments, stop_times):
     segment_to_stop = (dd.merge(
             hqta_segments, 
             trip_count_by_stop,
-            on = ["calitp_itp_id", "stop_id"]
+            on = stop_cols
         ).sort_values(["hqta_segment_id", "n_trips"], ascending=[True, False])
         .drop_duplicates(subset="hqta_segment_id")
         .reset_index(drop=True)
@@ -121,7 +104,6 @@ def hqta_segment_keep_one_stop(hqta_segments, stop_times):
     
 
 def add_hqta_segment_peak_trips(df, aggregated_stop_times):
-    stop_cols = ["calitp_itp_id", "stop_id"]
     
     def max_trips_by_segment(df, group_cols):
         df2 = (df
@@ -154,7 +136,7 @@ def add_hqta_segment_peak_trips(df, aggregated_stop_times):
     # Merge at the hqta_segment_id-stop_id level to get it back to segments
     gdf = dd.merge(
         df[stop_cols + segment_cols + 
-           ["calitp_url_number", "shape_id", "geometry"]].drop_duplicates(),
+           ["calitp_url_number", "route_id", "geometry"]].drop_duplicates(),
         peak_trips_by_segment,
         on = stop_cols,
         how = "left"
@@ -168,7 +150,6 @@ def add_hqta_segment_peak_trips(df, aggregated_stop_times):
     return gdf.compute()
 
 
-#TODO: must exclude trips that run only in the AM and PM. those don't count
 def identify_hq_transit_corr(df):
     df = df.assign(
         hq_transit_corr = df.apply(lambda x: 
@@ -181,11 +162,14 @@ def identify_hq_transit_corr(df):
 
 
 def single_operator_hqta(routelines, trips, stop_times, stops):
-    # Pare down all the shape_id-trip_id combos down to shape_id-route_id
-    # Keep the longest route_length to use to get hqta segments
+    # Pare down all the shape_id-trip_id combos down to route_id
+    # This is the dissolved shape for each route_id (no more shape_id)
     route_shapes = dask_utils.select_needed_shapes_for_route_network(routelines, trips)
     
+    # Loop through each row to segment that route's line geom into hqta segments
+    # Looping because dask_utils.segment_route function cuts 1 line geom into several lines
     all_routes = gpd.GeoDataFrame()
+    
     for i in route_shapes.index:
         one_route = route_shapes[route_shapes.index==i]
         gdf = dask_utils.segment_route(one_route)
@@ -221,6 +205,7 @@ def single_operator_hqta(routelines, trips, stop_times, stops):
     return hq_transit_segments
     
 
+
 def import_data(itp_id, date_str):
     FILE_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
 
@@ -239,8 +224,8 @@ def import_data(itp_id, date_str):
         trips = dd.read_parquet(f"{FILE_PATH}trips_{itp_id}_{date_str}.parquet")
     
     return routelines, trips, stop_times, stops
-        
-        
+    
+    
     
 if __name__=="__main__":
     date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
