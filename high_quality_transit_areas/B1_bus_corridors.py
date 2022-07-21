@@ -1,9 +1,16 @@
 """
 Move bus_corridors.ipynb into script.
 
+Picking just the longest route takes 26 min to run.
+The known issue related to this is that it misses layover 
+and possible 1-way streets in certain directions.
+but hqta segments are drawn in longer bits, closer to the 1,250 m 
+as intended.
+
 This takes 2.5 hr to run (when keeping all the shapes, dissolving).
-Half that when it just keeps the longest shape.
-But this should be more accurate.
+This has problems with how points in a line are ordered,
+and choppy hqta segments are not useful, because they may not attach
+properly to stops.
 """
 import dask.dataframe as dd
 import dask_geopandas
