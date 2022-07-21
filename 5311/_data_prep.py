@@ -11,7 +11,7 @@ from shared_utils import geography_utils
 from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
-import agency_crosswalk 
+import _agency_crosswalk as agency_crosswalk
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"
 
