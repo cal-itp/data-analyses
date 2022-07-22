@@ -151,18 +151,25 @@ Cleaning up NTD Vehicles Data Set
 """
 #Categorize vehicles down to 6 major categories
 def get_vehicle_groups(row):
-    Automobiles = ['Automobile','Sports Utility Vehicle']
-    Bus = ['Bus','Over-the-road Bus','Articulated Bus',
-           'Double Decker Bus','Trolleybus']
-    Vans = ['Van','','Minivan','Cutaway']
-    Trains = ['Vintage Trolley','Automated Guideway Vehicle',
-              'Heavy Rail Passenger Car','Light Rail Vehicle',
-             'Commuter Rail Self-Propelled Passenger Car','Commuter Rail Passenger Coach',
-            'Commuter Rail Locomotive',  'Cable Car']
-    Service = ['Automobiles (Service)',
-               'Trucks and other Rubber Tire Vehicles (Service)',
-               'Steel Wheel Vehicles (Service)']
-    other = ['Other','Ferryboat']
+    Automobiles = ["Automobile", "Sports Utility Vehicle"]
+    Bus = ["Bus", "Over-the-road Bus", "Articulated Bus", "Double Decker Bus", "Trolleybus"]
+    Vans = ["Van", "", "Minivan", "Cutaway"]
+    Trains = [
+    "Vintage Trolley",
+    "Automated Guideway Vehicle",
+    "Heavy Rail Passenger Car",
+    "Light Rail Vehicle",
+    "Commuter Rail Self-Propelled Passenger Car",
+    "Commuter Rail Passenger Coach",
+    "Commuter Rail Locomotive",
+    "Cable Car",
+    ]
+    Service = [
+    "Automobiles (Service)",
+    "Trucks and other Rubber Tire Vehicles (Service)",
+    "Steel Wheel Vehicles (Service)",
+    ]
+    other = ["Other", "Ferryboat"]
     
     if row.vehicle_type in Automobiles:
         return "Automobiles"
@@ -388,22 +395,39 @@ Summarizing the Dataframe
 #received, total vehicles, caltrans district, average fleet age, GTFS status.
 
 #Columns for summing 
-sum_cols = ['allocationamount',
-'encumbered_amount',
-'expendedamount', 'activebalance','closedoutbalance',
-'adjusted_allocationamount', 'adjusted_expendedamount',
-'adjusted_encumbered_amount', 'adjusted_activebalance']
+sum_cols = [
+    "allocationamount",
+    "encumbered_amount",
+    "expendedamount",
+    "activebalance",
+    "closedoutbalance",
+    "adjusted_allocationamount",
+    "adjusted_expendedamount",
+    "adjusted_encumbered_amount",
+    "adjusted_activebalance",
+]
 
 #Columns for max 
-max_cols = ['Is_Agency_In_BC_Only_1_means_Yes',
-'total_vehicles',
-'average_age_of_fleet__in_years_',
-'average_lifetime_miles_per_vehicle',
-'Automobiles', 'Bus','Other', 'Train',
-'Van','automobiles_door',
-'bus_doors', 'van_doors', 'train_doors', 
-'doors_sum','_31_60', '_16plus','_60plus', 
-'adjusted_closedoutbalance']
+max_cols = [
+    "Is_Agency_In_BC_Only_1_means_Yes",
+    "total_vehicles",
+    "average_age_of_fleet__in_years_",
+    "average_lifetime_miles_per_vehicle",
+    "Automobiles",
+    "Bus",
+    "Other",
+    "Train",
+    "Van",
+    "automobiles_door",
+    "bus_doors",
+    "van_doors",
+    "train_doors",
+    "doors_sum",
+    "_31_60",
+    "_16plus",
+    "_60plus",
+    "adjusted_closedoutbalance",
+]
 
 #Columns for mean
 mean_cols = ['allocation_mean']           
