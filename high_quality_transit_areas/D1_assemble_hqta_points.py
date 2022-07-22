@@ -19,10 +19,12 @@ import pandas as pd
 from calitp.tables import tbl
 from siuba import *
 
-import C1_prep_for_clipping as C1
+import C1_prep_for_clipping as prep_clip
 from A1_rail_ferry_brt import analysis_date
 from shared_utils import geography_utils, utils
 from utilities import catalog_filepath
+
+COMPILED_RAIL_BRT_FERRY = catalog_filepath["rail_brt_ferry_initial"]
 
 stop_cols = ["calitp_itp_id", "stop_id"]
 
@@ -110,7 +112,7 @@ def sjoin_all_stops_to_clipped_intersections(clipped_intersections, tbl_stops):
 # are stops that physically reside in the corridor.
 def create_stops_along_corridors(tbl_stops):
     
-    bus_corridors = C1.prep_bus_corridors()
+    bus_corridors = prep_clip.prep_bus_corridors()
     
     stops_in_hq_corr = (dask_geopandas.sjoin(
                                 tbl_stops, 
@@ -131,6 +133,24 @@ def create_stops_along_corridors(tbl_stops):
     return stops_in_hq_corr2
     
     
+def get_rail_ferry_brt_extract():
+    df = dask_geopandas.read_parquet(COMPILED_RAIL_BRT_FERRY)
+
+    keep_cols = ["calitp_itp_id", "stop_id", 
+                 "hqta_type", "route_type", "geometry"]
+                            
+    df2 = (df[keep_cols].assign(
+            hqta_type = df.route_type.map(
+                lambda x: "major_stop_rail" if x in ["0", "1", "2"]
+                else "major_stop_brt" if x == "3" 
+                else "major_stop_ferry")
+        ).rename(columns = {"calitp_itp_id": "calitp_itp_primary"})
+       .drop(columns = "route_type")
+    )
+
+    return df2    
+    
+
     
 if __name__=="__main__":
 
@@ -156,3 +176,12 @@ if __name__=="__main__":
     
     
     stops_in_hq_corridor = create_stops_along_corridors(tbl_stops_gddf)
+
+    
+    rail_ferry_brt = get_rail_ferry_brt_extract()
+
+    # Combine all the points data
+    hqta_points_combined = dd.multi.concat([major_transit_stop, #major_stop_bus,
+                                            stops_in_hq_corridor,
+                                            rail_ferry_brt
+                                           ], axis=0)

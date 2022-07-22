@@ -72,10 +72,17 @@ def get_list_of_cached_itp_ids():
     ITP_IDS_WITH_CACHED_FILES = []
 
     for itp_id in ALL_ITP_IDS:
-        cached_response = rt_utils.check_cached(
+        response1 = rt_utils.check_cached(
             f"routelines_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
-
-        if cached_response is not None:
+        response2 = rt_utils.check_cached(
+            f"trips_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+        response3 = rt_utils.check_cached(
+            f"st_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+        response4 = rt_utils.check_cached(
+            f"stops_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+        
+        all_responses = [response1, response2, response3, response4]
+        if all(r is not None for r in all_responses):
             ITP_IDS_WITH_CACHED_FILES.append(itp_id)
     
     return sorted(ITP_IDS_WITH_CACHED_FILES)
