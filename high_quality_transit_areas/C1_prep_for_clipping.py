@@ -3,6 +3,10 @@ Prep components needed for clipping.
 Find pairwise hqta_segment_ids with dask_geopandas.sjoin
 to narrow down the rows to pass through clipping.
 
+This takes 19.5 min to run. 
+TODO: speed up by not doing each segment, maybe route 
+within operator.
+
 From combine_and_visualize.ipynb
 """
 import dask.dataframe as dd
@@ -34,18 +38,10 @@ def prep_bus_corridors():
 
 # Before, have been focusing on shape_id
 # Now, change it to hqta_segment_id
-def find_intersection_hqta_segments(gdf, itp_id):
-    keep_cols = segment_cols + ["geometry"]
-    
-    operator = gdf[gdf.calitp_itp_id == itp_id][keep_cols]
-    not_operator = gdf[gdf.calitp_itp_id != itp_id][keep_cols]
-    
+def sjoin_operator_not_operator(operator, not_operator):
     # Let's keep the pair of that intersection and store it
     # Need to rename not_operator columns so it's easier to distinguish
-    not_operator = not_operator.rename(columns = {
-        "calitp_itp_id": "intersect_calitp_itp_id",
-        "hqta_segment_id": "intersect_hqta_segment_id"})
-    
+    not_operator = rename_cols(not_operator, with_intersect=True)    
     
     # Do a spatial join first to see what rows should be included
     # Compile all of them, because clipping is computationally expensive,
@@ -68,6 +64,48 @@ def find_intersection_hqta_segments(gdf, itp_id):
     return intersecting_segments
 
 
+def find_intersection_hqta_segments(gdf, itp_id):
+    keep_cols = segment_cols + ["geometry"]
+    
+    operator = gdf[gdf.calitp_itp_id == itp_id][keep_cols]
+    not_operator = gdf[gdf.calitp_itp_id != itp_id][keep_cols]
+    
+    # First, find intersections across operators
+    intersections_across_operators = sjoin_operator_not_operator(operator, not_operator)
+    
+    # Set the metadata for intersections within operators
+    intersections_within_operators = intersections_across_operators.head(0)
+    
+    # Now add in the intersections within operators
+    operator_segments = list(operator.hqta_segment_id.unique())
+    
+    for i in operator_segments:
+        # Subset to particular hqta_segment_id, then use same sjoin,
+        # where the "in group" is one_route and the "out group" is other_routes
+        one_segment = operator[operator.hqta_segment_id == i]
+        other_segments = operator[operator.hqta_segment_id != i]
+        
+        within_operator = sjoin_operator_not_operator(one_segment, other_segments)
+        
+        within_operator = dd.multi.concat(
+            [intersections_within_operators, within_operator], axis=0)
+    
+    # Concatenate the intersections found across operator and within operator,
+    # but drop the geometry, because we only need the df to store this info
+    keep_cols = segment_cols + ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]
+    
+    all_intersections = (dd.multi.concat(
+        [intersections_across_operators, intersections_within_operators], 
+        axis=0).drop_duplicates()
+         .sort_values("hqta_segment_id")
+         .reset_index(drop=True)
+        [keep_cols]
+    )
+    
+    return all_intersections
+
+
+
 def compile_pairwise_intersections(corridors, ITP_ID_LIST):
     start = dt.datetime.now()
 
@@ -75,9 +113,15 @@ def compile_pairwise_intersections(corridors, ITP_ID_LIST):
     # just subset so metadata is copied over
     intersecting_segments = corridors[corridors.calitp_itp_id==0][segment_cols]
 
+    
     for itp_id in ITP_ID_LIST:
+        time0 = dt.datetime.now()
+        
         operator_shape = find_intersection_hqta_segments(corridors, itp_id)
-
+        
+        time1 = dt.datetime.now()
+        print(f"grab intersection hqta segments for {itp_id}: {time1 - time0}")
+        
         intersecting_segments = (dd.multi.concat(
             [intersecting_segments, operator_shape], axis=0)
             .drop_duplicates()
@@ -125,13 +169,13 @@ def subset_corridors(gdf, intersecting_shapes):
 
 def rename_cols(df, with_intersect=False):
     if with_intersect is True:
-        df = df.add_prefix('intersect_')
+        df.columns = [f'intersect_{col}' if col != 'geometry' 
+                      else col for col in df.columns]
+        
     elif with_intersect is False:
         df.columns = df.columns.str.replace('intersect_', '')
         
     return df
-
-
 
 
 if __name__=="__main__":

@@ -2,6 +2,9 @@
 Take single operator HQTA and combine across operators.
 
 Additional data cleaning to filter out small HQTA segments.
+
+This takes 2 min to run. 
+Quicker if getting rid of shape_dissolve (see if it's necessary to use in future stages)
 """
 import dask.dataframe as dd
 import dask_geopandas
@@ -37,6 +40,7 @@ def clean_combined_operators(gdf):
 
 # Read first one in, to set the metadata for dask gdf
 OPERATOR_PATH = f"{bus_corridors.TEST_GCS_FILE_PATH}bus_corridors/"
+
 first_operator = bus_corridors.ITP_IDS_IN_GCS[0]
 
 if __name__ == "__main__":
