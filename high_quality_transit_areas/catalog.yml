@@ -50,3 +50,9 @@ sources:
         description: Combine all the bus intersections (clipped) geometries into one file. Created in C2_clip_bus_intersections.py.
         args:
           urlpath: ./data/all_clipped.parquet 
+    # Source: C3.py
+    major_bus_stops:
+        driver: geoparquet
+        description:  Created in C3.py.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/major_bus_stops.parquet
