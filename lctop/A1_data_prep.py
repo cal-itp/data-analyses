@@ -18,7 +18,7 @@ Caltrans_shape = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6e
 FILE_NAME = "LCTOP_allyears.xlsx"
 
 '''
-Column Lists 
+Columns 
 '''
 boolean_cols = [
     "agency_service_area_has_a_dac",
@@ -64,11 +64,6 @@ date_columns = ['qm_tool__date_', 'completion_date','start_date']
 float_columns = ['ridership_increase','fossil_fuel_use_reduction__transportation_']
 
 '''
-Values
-'''
-missing_date = pd.to_datetime('2100-01-01')
-
-'''
 Functions
 '''
 #Function to remove any dba:, special characters, typos, etc
@@ -106,9 +101,36 @@ def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
     fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
     os.remove(f"./{FILE_NAME}.geojson")
+
+#Function for categorizing percentiles based on column of interest
+#returns a new column with percentile 
+def percentiles(df, col_of_interest: str): 
+    #Get percentiles in objects for total vehicle.
+    p75 = df[col_of_interest].quantile(0.75).astype(float)
+    p25 = df[col_of_interest].quantile(0.25).astype(float)
+    p50 = df[col_of_interest].quantile(0.50).astype(float)
+    
+    #actually categorize each value for percentile
+    def percentile_categorize (row):
+        if ((row[col_of_interest] > 0) and (row[col_of_interest] <= p25)):
+            return "25 percentile"
+        elif ((row[col_of_interest] > p25) and (row[col_of_interest]<= p75)):
+            return "50th percentile"
+        elif (row[col_of_interest]> p75):
+               return "75th percentile"
+        elif (row[col_of_interest] < 0):
+               return "Increase" 
+        else:
+            return "Zero"
+    df[f'{col_of_interest}_percentile'] = df.apply(lambda x: percentile_categorize(x), axis=1)
+  
+    return df
+
 '''
 Crosswalks
+& Variables
 '''
+#Replacing agency names 
 agency_crosswalk = {"Stanislaus County Public Works   Transit": "Stanislaus County Public Works Transit",
         "Stanislaus County Public Works  Transit": "Stanislaus County Public Works Transit",
         "Stanislaus County Public WorksTransit": "Stanislaus County Public Works Transit",
@@ -119,6 +141,10 @@ agency_crosswalk = {"Stanislaus County Public Works   Transit": "Stanislaus Coun
         "Modoc Transportation": "Modoc County Transportation Commission",
         "Los Angeles County Metoropolitan Transportation Authority": "Los Angeles County Metropolitan Transportation Authority",
         "Calaveras Transit": "Calaveras Transit Agnecy"}
+
+#Value to populate date columns that have missing values, so they show up in Tableau
+missing_date = pd.to_datetime('2100-01-01')
+
 '''
 Import the original data
 '''
@@ -145,11 +171,11 @@ def clean_lctop():
     #Clean up agency names: multiple spellings of the same agencies
     #First pass is to replace strange characters and typos.
     df2 = cleaning_agency_names(df1, 'lead_agency')
-    #Second pass: use a crosswalk to map values
+    #Second pass, use a crosswalk to map values
     df2['lead_agency'] = df2['lead_agency'].replace(agency_crosswalk)
     
     #There are columns that are encoded as yes/no and close/open.
-    #but there are multiple spellings of the same value: clean them up
+    #but there are multiple spellings of the same value, clean them up
     for i in boolean_cols:
         df2[i] = (df2[i]
                .str.strip()
@@ -157,7 +183,7 @@ def clean_lctop():
                .str.replace('close','closed')
                .str.replace('closedd','closed')
                         )
-    #Strip the word 'county' from county column for potential mapping
+    #Strip the word 'county' from county column 
     df2['county'] = df2['county'].str.replace('County','')
     
     #Coerce columns that are the wrong type & fill in missing values
@@ -182,6 +208,7 @@ def clean_lctop():
 Aggregating
 Data for Metrics
 '''
+#Columns
 sum_cols = [
     "funds_to_benefit_dac",
     "total_project_request_99314_+_99313",
@@ -199,9 +226,27 @@ sum_cols = [
 ]
 nunique_cols = ["project_id#", "lead_agency"]
 
+metric_cols = [
+    "Diesel Pm Reductions  Lbs",
+    "Fossil Fuel Use Reduction  Energy",
+    "Fossil Fuel Use Reduction  Transportation",
+    "Funds To Benefit Dac",
+    "Ghg Reduction  Mtco2E",
+    "Nox Reductions  Lbs",
+    "Pm 2 5 Reductions  Lbs",
+    "Reactive Organic Gas Reduction  Lbs",
+    "Renewable Energy Generation  Kwh",
+    "Ridership Increase",
+    "Total Project Cost",
+    "Total Project Request 99314 + 99313",
+    "Vmt Reduction",
+    "# of Agencies",
+    "# of Projects",
+]
+
 def district_fy_summary():
     original_df = clean_lctop()
-    ct_distircts = load_CT_district_shapes()
+    ct_districts = load_CT_district_shapes()
     #Aggregate
     summary = geography_utils.aggregate_by_geography(
     original_df,
@@ -219,8 +264,12 @@ def district_fy_summary():
     .rename(columns={"Lead Agency": "# of Agencies", "Project Id#": "# of Projects"})
     )
     
+    #Instead of having the raw values, change them into percentiles (results saved in new col)
+    for i in metric_cols:
+        summary = percentiles(summary, i)
+        
     #Attach Caltrans District geometry 
-    gdf1 = ct_distircts.merge(
+    gdf1 = ct_districts.merge(
     summary, how="inner", left_on="DISTRICT", right_on="Distr")
     
     #Save
@@ -228,5 +277,4 @@ def district_fy_summary():
     gdf1,
     "gs://calitp-analytics-data/data-analyses/lctop/",
     "lctop_districts",) 
-    
     return summary, gdf1
