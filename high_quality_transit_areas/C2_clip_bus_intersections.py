@@ -7,18 +7,24 @@ import dask.dataframe as dd
 import dask_geopandas
 import datetime as dt
 import geopandas as gpd
+import glob
+import os
 import pandas as pd
 
 import B1_bus_corridors as bus_corridors
 import C1_prep_for_clipping as C1
+from utilities import catalog_filepath
 
-# TODO: is the clip necessary?
-# If the point is to just find the stop_ids that are near the clip,
-# can the sjoin do it?
+segment_cols = ["calitp_itp_id", "hqta_segment_id"]
+
+# Explicitly define which inputs are in this script
+# Use urlpath from catalog.yml
+PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
+SUBSET_CORRIDORS = catalog_filepath("subset_corridors")
+
+
 def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
     start = dt.datetime.now()
-    
-    segment_cols = ["calitp_itp_id", "hqta_segment_id"]
     
     operator = (corridors_df[corridors_df.calitp_itp_id == itp_id]
                 [segment_cols + ["geometry"]]
@@ -49,9 +55,6 @@ def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
     print(f"prepare intersection dfs for {itp_id}: {time1-start}")
     
     not_operator_df = not_operator.compute()
-    # This step takes 3.5 min for each operator, no matter the operator size
-    # Need to speed up this step, think about it differently
-    # not_operator.dissolve().reset_index(drop=True).compute() also takes 3.5 min
     
     time2 = dt.datetime.now()
     print(f"compute to make gdf for {itp_id}: {time2-time1}")
@@ -65,14 +68,19 @@ def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
     return intersection
 
 
+def delete_local_clipped_files():
+    temp_operator_files = [f for f in glob.glob("./data/intersections/clipped_*.parquet")]
+    
+    for f in temp_operator_files:
+        os.remove(f)
+    
+
 if __name__ == "__main__":
     start = dt.datetime.now()
     
-    intersecting_shapes = dd.read_parquet(
-        f"{bus_corridors.TEST_GCS_FILE_PATH}intermediate/pairwise.parquet")
+    intersecting_shapes = dd.read_parquet(PAIRWISE_FILE)
     
-    corridors = dask_geopandas.read_parquet(
-        f"{bus_corridors.TEST_GCS_FILE_PATH}intermediate/subset_corridors.parquet")
+    corridors = dask_geopandas.read_parquet(SUBSET_CORRIDORS)
     
     # Presumably, this list of ITP_IDs is pared down 
     # because only ones with sjoin are included
@@ -95,10 +103,17 @@ if __name__ == "__main__":
             continue
     
     
-    clipped2 = clipped.compute()
+    clipped2 = (clipped.compute()
+                .sort_values(segment_cols, ascending=[True, True])
+                .reset_index(drop=True)
+               )
+    
     time2 = dt.datetime.now()
     print(f"compute for full clipped df: {time2 - time1}")
     
     clipped2.to_parquet("./data/all_clipped.parquet")
+    
+    # Delete the temporary clipped files for each operator
+    delete_local_clipped_files()
     
     end = dt.datetime.now()

@@ -13,13 +13,15 @@ import pandas as pd
 
 import B1_bus_corridors as bus_corridors
 from shared_utils import utils
-
+from utilities import catalog_filepath
 
 segment_cols = ["calitp_itp_id", "hqta_segment_id"]
 
+# Input files
+ALL_BUS = catalog_filepath("all_bus")
+
 def prep_bus_corridors():
-    bus_hqtc = dask_geopandas.read_parquet(
-        f'{bus_corridors.TEST_GCS_FILE_PATH}intermediate/all_bus.parquet')
+    bus_hqtc = dask_geopandas.read_parquet(ALL_BUS)
     
     bus_hqtc2 = bus_hqtc[bus_hqtc.hq_transit_corr==True].reset_index(drop=True)
     bus_hqtc2 = bus_hqtc2.assign(

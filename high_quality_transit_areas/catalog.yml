@@ -13,3 +13,40 @@ sources:
         description: CA boundary
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/ca_boundary.parquet
+    ## INTERMEDIATE DATA
+    # Source: A2_combine.py
+    rail_brt_ferry_initial:
+        driver: geoparquet
+        description: Rail / BRT / Ferry points created in A2_combine.py
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/rail_brt_ferry.parquet
+    # Source: B2_combine_operator_corridors.py
+    all_bus:
+        driver: geoparquet
+        description: Combined corridors across all operators. Created in B2_combine_operators_corridors.py.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/all_bus.parquet
+    # Source: B2_combine_operator_corridors.py
+    shape_dissolve:
+        driver: geoparquet
+        description: Dissolved corridors, remove smaller areas. Created in B2_combine_operators_corridors.py. (IS THIS NEEDED)?
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/shape_dissolve.parquet   
+    # Source: C1_prep_for_clipping.py
+    pairwise_intersections:
+        driver: geoparquet
+        description: Use dask_geopandas.sjoin to find which hqta segments do intersect at some point. Created in C1_prep_for_clipping.py. 
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/pairwise.parquet   
+    # Source: C1_prep_for_clipping.py
+    subset_corridors:
+        driver: geoparquet
+        description: Narrow down `all_bus` to hqta segments that are found in `pairwise_intersections`. Created in C1_prep_for_clipping.py.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/subset_corridors.parquet 
+    # Source: C2_clip_bus_intersections.py
+    combined_clipped_intersections:
+        driver: geoparquet
+        description: Combine all the bus intersections (clipped) geometries into one file. Created in C2_clip_bus_intersections.py.
+        args:
+          urlpath: ./data/all_clipped.parquet 
