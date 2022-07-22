@@ -65,8 +65,10 @@ TOO_LONG_IDS = [
     # This is Amtrak and is excluded by Eric already
 ]
 
+ERROR_IDS = VALUE_ERROR_IDS + FILE_NOT_FOUND_IDS + TOO_LONG_IDS
 
-ITP_IDS_IN_GCS = operators_for_hqta.get_valid_itp_ids()
+VALID_ITP_IDS = operators_for_hqta.get_valid_itp_ids()
+ITP_IDS_IN_GCS = [x for x in VALID_ITP_IDS if x not in ERROR_IDS]
 
 
 ## Join HQTA segment to stop
