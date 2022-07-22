@@ -4,9 +4,12 @@ import calitp
 import fiona
 import gcsfs
 import geopandas as gpd
+import intake
 import numpy as np
 import pandas as pd
+import os
 import shapely
+
 from calitp.tables import tbl
 from ipyleaflet import GeoData, GeoJSON, LayersControl, Map, WidgetControl, basemaps, projections
 from ipywidgets import HTML, Text
@@ -16,12 +19,13 @@ from shared_utils import calitp_color_palette, geography_utils
 from siuba import *
 
 fs = gcsfs.GCSFileSystem()
-import os
 
 GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/high_quality_transit_areas"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
+
+catalog = intake.open_catalog("./*.yml")
 
 # Colors
 BLUE = "#08589e"
@@ -179,3 +183,7 @@ def hqta_details(row):
     elif row.hqta_type in ["major_stop_ferry", "major_stop_brt", "major_stop_rail"]:
         # (not sure if ferry, brt, rail, primary/secondary ids are filled in.)
         return row.hqta_type + "_single_operator"
+    
+
+def catalog_filepath(file):
+    return catalog[file].urlpath

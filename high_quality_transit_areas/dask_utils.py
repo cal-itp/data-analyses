@@ -70,115 +70,78 @@ def find_stop_with_high_trip_count(stop_times):
 # Use the pared down shape_ids to get hqta_segments
 def merge_routes_to_trips(routelines, trips):    
     routelines_ddf = routelines.assign(
-        route_length = routelines.geometry.length
+        route_length = routelines.geometry.length,
+        # Easier to drop if we make sure centroid of that line segment is the same too
+        x = routelines.geometry.centroid.x.round(3),
+        y = routelines.geometry.centroid.y.round(3),
     )
         
     # Merge routes to trips with using trip_id
     # Keep route_id and shape_id, but drop trip_id by the end
-    shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
+    shape_id_cols = ["calitp_itp_id", "shape_id"]
     
     m1 = (dd.merge(
             routelines_ddf,
-            trips[shape_id_cols + ["trip_id", "route_id"]],
+            # Don't merge using calitp_url_number because ITP ID 282 (SFMTA)
+            # can use calitp_url_number = 1
+            # Just keep calitp_url_number = 0 from routelines_ddf
+            trips.drop(columns = "calitp_url_number")[
+                shape_id_cols + ["route_id"]],
             on = shape_id_cols,
-            how = "left",
-        ).drop_duplicates(subset=shape_id_cols)
+            how = "inner",
+        ).drop_duplicates(subset=["calitp_itp_id", "route_id", 
+                                  "route_length", "x", "y"])
+        .drop(columns = ["x", "y"])
         .reset_index(drop=True)
     )
     
     return m1
 
-
-def find_longest_route_shape(merged_routelines_trips):
+    
+def find_longest_route_shapes(merged_routelines_trips, n=1): 
     # Sort in descending order by route_length
     # Since there are short/long trips for a given route_id,
-    # Keep the longest one for each route_id
-    longest_shape = (merged_routelines_trips.drop(columns = "trip_id")
-                     .sort_values(["route_id", "route_length"],
-                     ascending=[True, False])
-      .drop_duplicates(subset="route_id")
-      .reset_index(drop=True)
-     ).compute()
+    # Keep the longest 5 shape_ids within a route_id 
+    # then do the dissolve
+    # Doing it off of the full one creates gaps in the line geom
+    df = merged_routelines_trips.assign(
+        obs = (merged_routelines_trips.sort_values(["route_id", "route_length"], 
+                                  ascending=[True, False])
+               .groupby(["calitp_itp_id", "route_id"]).cumcount() + 1
+              )
+    )
+    
+    longest_shape = df[df.obs <= n].drop(columns="obs").reset_index(drop=True)
     
     return longest_shape
 
-
-
-def overlay_longest_shape_with_other_shapes(longest_shape, other_shapes):    
-    overlay_diff = gpd.overlay(
-        other_shapes,
-        longest_shape[["shape_id", "geometry"]],
-        how = "difference",
-        # False keeps all geometries
-        keep_geom_type=False
-    )
-    
-    overlay_diff_gddf = dask_geopandas.from_geopandas(
-        overlay_diff[overlay_diff.route_id.notna()], npartitions=1)
-    
-    # Once you overlay the other shapes against the longest route
-    # calculate the overlay length
-    # Go from longest length and add that shape_id to the longest route
-    # The longest overlay length will help us add more of the physical route network that's missing
-    
-    # From these differences, there's several segments that duplicative
-    # But, doing it with gpd.overlay isn't good at sorting it
-    # Find the centroid of these smaller segments, and if the centroid is the same, drop the duplicate
-    overlay_diff_gddf = overlay_diff_gddf.assign(
-        overlay_length = overlay_diff_gddf.geometry.length,
-        x = overlay_diff_gddf.geometry.centroid.x.round(3),
-        y = overlay_diff_gddf.geometry.centroid.y.round(3),
-    )
-    
-    route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
-
-    overlay_diff_gddf2 = (overlay_diff_gddf
-                          .drop_duplicates(subset = route_cols + ["x", "y"])
-                          .reset_index(drop=True)
-                         ).compute()
-    
-    return overlay_diff_gddf2
 
 
 def select_needed_shapes_for_route_network(routelines, trips):
     route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
 
-    # For a given route, the longest route_length may provide 90% of the needed shape (line geom)
+    # For a given route, the longest route_length may provide 90% of the needed shape 
+    # (line geom)
     # But, it's missing parts where buses may turn around for layovers
-    # Add these segments in, based on those shape_ids, so we can build out a complete route network
+    # Add these segments in, so we can build out a complete route network
     merged = merge_routes_to_trips(routelines, trips)
     
-    longest_shape = find_longest_route_shape(merged)
+    # Go back to picking the longest one (n=1), since n=5 gives errors
+    # Suspect that the dissolve/unary_union orders the points differently, 
+    # and the hqta segments are truncated way too short
+    longest_shape = find_longest_route_shapes(merged)
     
-    '''
-    # Not the longest routes
-    other_shapes = (merged[~merged.shape_id.isin(longest_shape.shape_id)]
-          .sort_values(route_cols + ["route_length"], 
-                          ascending=[True, True, True, False])
-          .reset_index(drop=True)
-         ).compute()
-
+    # CHANGE GEOMETRY?
+    # Can either keep the shape_id and associate the dissolved geometry with that shape_id
+    # Or, drop shape_id, since now shape_id is not reflecting the raw line geom 
+    # for that shape_id, and that's confusing to the end user (also, shape_id is not used, since hqta_segment_id is primary unit of analysis)
+    dissolved_by_route = (longest_shape[route_cols + ["geometry"]]
+                          .compute()
+                          .dissolve(by=route_cols)
+                          .reset_index()
+                         )
     
-    # For all the other shapes that are not the longest route_length
-    # Find the difference using gpd.overlay when compared to the longest shape
-    overlay_diff = overlay_longest_shape_with_other_shapes(
-        longest_shape, other_shapes)
-    
-    keep_cols = route_cols + ["shape_id", "geometry"]
-
-    expanded_shape = pd.concat([longest_shape[keep_cols], 
-                                 overlay_diff[keep_cols]], axis=0)
-    
-    expanded_shape = (expanded_shape.assign(
-                        route_length = expanded_shape.geometry.length
-                    ).sort_values(route_cols + ["route_length"], 
-                                  ascending=[True, True, True, False])
-                      .reset_index(drop=True)
-                     )
-    
-    return expanded_shape
-    '''
-    return longest_shape
+    return dissolved_by_route
 
 
 def add_buffer(gdf, buffer_size=50):
@@ -197,7 +160,8 @@ def add_segment_id(df):
                                    # this checksum hash always give same value if 
                                    # the same combination of strings are given
                                    zlib.crc32(
-                                       (str(x.calitp_itp_id) + x.shape_id + x.segment_sequence)
+                                       (str(x.calitp_itp_id) + 
+                                        x.route_id + x.segment_sequence)
                                        .encode("utf-8")), 
                                        axis=1),
     )
@@ -208,8 +172,7 @@ def add_segment_id(df):
 def segment_route(gdf):
     segmented = gpd.GeoDataFrame() ##changed to gdf?
 
-    route_shape_cols = ["calitp_itp_id", "calitp_url_number", 
-                  "route_id", "shape_id"]
+    route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
 
     # Turn 1 row of geometry into hqta_segments, every 1,250 m
     for segment in utilities.create_segments(gdf.geometry):
@@ -218,16 +181,16 @@ def segment_route(gdf):
         segmented = pd.concat([segmented, to_append], axis=0, ignore_index=True)
     
         segmented = segmented.assign(
-            temp_index = (segmented.sort_values(route_shape_cols)
+            temp_index = (segmented.sort_values(route_cols)
                           .reset_index(drop=True).index
                          )
         )
     
     segmented = (segmented.assign(
-        segment_sequence = (segmented.groupby(route_shape_cols)["temp_index"]
+        segment_sequence = (segmented.groupby(route_cols)["temp_index"]
                             .transform("rank") - 1).astype(int).astype(str)
                            )
-                 .sort_values(route_shape_cols)
+                 .sort_values(route_cols)
                  .reset_index(drop=True)
                  .drop(columns = "temp_index")
                 )
