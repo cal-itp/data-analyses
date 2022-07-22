@@ -1,6 +1,8 @@
 """
 Do clipping to find where bus corridors intersect.
 
+This takes 2 min to run.
+
 From combine_and_visualize.ipynb
 """
 import dask.dataframe as dd
