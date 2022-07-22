@@ -285,9 +285,11 @@ def create_point_geometry(
 
     crs: str, coordinate reference system for point geometry
     """
+    # Default CRS for stop_lon, stop_lat is WGS84
     df = df.assign(
-        geometry=gpd.points_from_xy(df[longitude_col], df[latitude_col], crs=crs)
+        geometry=gpd.points_from_xy(df[longitude_col], df[latitude_col], crs=WGS84)
     )
 
-    gdf = gpd.GeoDataFrame(df)
+    # ALlow projection to different CRS
+    gdf = gpd.GeoDataFrame(df).to_crs(crs)
     return gdf
