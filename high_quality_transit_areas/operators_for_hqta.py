@@ -1,13 +1,28 @@
 """
-Do a check of the operators to run, 
-what is missing if we put in this
-explicit list vs running the tbl.gtfs_schedule.agency query
+Do a check of the operators to run and return a list.
+
+Setting a list ahead of time vs running the tbl.gtfs_schedule.agency query
+in the B1_bus_corridors script + adding more if/else/try/except statements.
+Want to be explicit in what operators should be able to run, ones we
+expect not to run, and ones we expect should run and are erroring.
+
+Return a list of operators that have cached files, and 
+thus should be able to have their HQTA corridors compiled.
 """
+import json
 import pandas as pd
 
+from siuba import *
+
 from calitp.tables import tbl
+from shared_utils import rt_utils
+from A1_rail_ferry_brt import analysis_date
+
+date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
+HQTA_OPERATORS_FILE = "./hqta_operators.json"
 
 
+'''
 ITP_IDS_IN_GCS = [
     101, 102, 103, 105, 106, 108, 10, 110,
     112, 116, 117, 118, 11, 120, 
@@ -41,16 +56,52 @@ ITP_IDS_IN_GCS = [
     81, 82, 83, 86, 87, 
     91, 95, 98, 99
 ]
-
-ITP_IDS = (tbl.gtfs_schedule.agency()
-           >> distinct(_.calitp_itp_id)
-           >> filter(_.calitp_itp_id != 200)
-           >> collect()
-).calitp_itp_id.tolist()
+'''
 
 
-IN_GCS_NOT_BQ = set(ITP_IDS_IN_GCS).difference(set(ITP_IDS))
-IN_BQ_NOT_GCS = set(ITP_IDS).difference(set(ITP_IDS_IN_GCS))
+def get_list_of_cached_itp_ids():
+    ALL_ITP_IDS = (tbl.gtfs_schedule.agency()
+               >> distinct(_.calitp_itp_id)
+               >> filter(_.calitp_itp_id != 200, 
+                         # Amtrak is always filtered out
+                         _.calitp_itp_id != 13)
+               >> collect()
+    ).calitp_itp_id.tolist()
+    
+    
+    ITP_IDS_WITH_CACHED_FILES = []
 
-print(f"ITP IDs in GCS, not in warehouse: {IN_GCS_NOT_BQ}")
-print(f"ITP IDs in warehouse, not in GCS: {IN_BQ_NOT_GCS}")
+    for itp_id in ALL_ITP_IDS:
+        response1 = rt_utils.check_cached(
+            f"routelines_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+        response2 = rt_utils.check_cached(
+            f"trips_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+        response3 = rt_utils.check_cached(
+            f"st_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+        response4 = rt_utils.check_cached(
+            f"stops_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+        
+        all_responses = [response1, response2, response3, response4]
+        if all(r is not None for r in all_responses):
+            ITP_IDS_WITH_CACHED_FILES.append(itp_id)
+    
+    return sorted(ITP_IDS_WITH_CACHED_FILES)
+
+
+def get_valid_itp_ids(file=HQTA_OPERATORS_FILE):
+    with open(f"./{file}") as f:
+        data = json.load(f)
+        
+    return data["VALID_ITP_IDS"]
+
+    
+if __name__=="__main__":
+    ITP_IDS = get_list_of_cached_itp_ids()
+    
+    # Turn list into a dict, then save as json
+    VALID_ITP_IDS_DICT = {}
+    VALID_ITP_IDS_DICT["VALID_ITP_IDS"] = ITP_IDS
+    
+    # Write it out as json
+    with open(f"{HQTA_OPERATORS_FILE}", "w") as f:
+        json.dump(VALID_ITP_IDS_DICT, f)
