@@ -39,3 +39,6 @@
 ## Open Data Portal Datasets
 1. [High Quality Transit Areas (HQTA)](./hqta.py)
 1. [Transit Stops and Routes (Traffic Ops request)](./traffic_ops.py)
+
+## Open Data Intake Process
+Open a ticket on the Intranet to update or add new services and provide [justification](./intake_justification.md)

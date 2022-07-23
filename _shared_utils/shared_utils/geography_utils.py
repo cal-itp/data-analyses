@@ -156,6 +156,17 @@ def create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST):
     return df
 
 
+# Laurie's example: https://github.com/cal-itp/data-analyses/blob/752eb5639771cb2cd5f072f70a06effd232f5f22/gtfs_shapes_geo_examples/example_shapes_geo_handling.ipynb
+# have to convert to linestring
+def make_linestring(x):
+    # shapely errors if the array contains only one point
+    if len(x) > 1:
+        # each point in the array is wkt
+        # so convert them to shapely points via list comprehension
+        as_wkt = [shapely.wkt.loads(i) for i in x]
+        return shapely.geometry.LineString(as_wkt)
+
+
 def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None):
     """
     Parameters:
@@ -184,17 +195,6 @@ def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None):
         )
     else:
         df = create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST)
-
-    # Laurie's example: https://github.com/cal-itp/data-analyses/blob/752eb5639771cb2cd5f072f70a06effd232f5f22/gtfs_shapes_geo_examples/example_shapes_geo_handling.ipynb
-    # have to convert to linestring
-    def make_linestring(x):
-
-        # shapely errors if the array contains only one point
-        if len(x) > 1:
-            # each point in the array is wkt
-            # so convert them to shapely points via list comprehension
-            as_wkt = [shapely.wkt.loads(i) for i in x]
-            return shapely.geometry.LineString(as_wkt)
 
     # apply the function
     df["geometry"] = df.pt_array.apply(make_linestring)
@@ -285,9 +285,11 @@ def create_point_geometry(
 
     crs: str, coordinate reference system for point geometry
     """
+    # Default CRS for stop_lon, stop_lat is WGS84
     df = df.assign(
-        geometry=gpd.points_from_xy(df[longitude_col], df[latitude_col], crs=crs)
+        geometry=gpd.points_from_xy(df[longitude_col], df[latitude_col], crs=WGS84)
     )
 
-    gdf = gpd.GeoDataFrame(df)
+    # ALlow projection to different CRS
+    gdf = gpd.GeoDataFrame(df).to_crs(crs)
     return gdf
