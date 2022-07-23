@@ -3,9 +3,7 @@ Prep components needed for clipping.
 Find pairwise hqta_segment_ids with dask_geopandas.sjoin
 to narrow down the rows to pass through clipping.
 
-This takes 19.5 min to run. 
-TODO: speed up by not doing each segment, maybe route 
-within operator.
+This takes 15 min to run. 
 
 From combine_and_visualize.ipynb
 """
@@ -67,27 +65,31 @@ def sjoin_operator_not_operator(operator, not_operator):
 def find_intersection_hqta_segments(gdf, itp_id):
     keep_cols = segment_cols + ["geometry"]
     
-    operator = gdf[gdf.calitp_itp_id == itp_id][keep_cols]
+    # Create subset dfs for the "in_group"
+    # to be compared with sjoin with the "out_group"
+    # Keep route_id with operator to find intersections WITHIN operator
+    operator = gdf[gdf.calitp_itp_id == itp_id][keep_cols + ["route_id"]]    
     not_operator = gdf[gdf.calitp_itp_id != itp_id][keep_cols]
     
     # First, find intersections across operators
-    intersections_across_operators = sjoin_operator_not_operator(operator, not_operator)
+    intersections_across_operators = sjoin_operator_not_operator(
+        operator[keep_cols], not_operator)
     
     # Set the metadata for intersections within operators
     intersections_within_operators = intersections_across_operators.head(0)
     
     # Now add in the intersections within operators
-    operator_segments = list(operator.hqta_segment_id.unique())
+    operator_routes = list(operator.route_id.unique())
     
-    for i in operator_segments:
-        # Subset to particular hqta_segment_id, then use same sjoin,
+    for i in operator_routes:
+        # Subset to particular route_id, then use same sjoin,
         # where the "in group" is one_route and the "out group" is other_routes
-        one_segment = operator[operator.hqta_segment_id == i]
-        other_segments = operator[operator.hqta_segment_id != i]
+        one_route = operator[operator.route_id == i]
+        other_routes = operator[operator.route_id != i]
         
-        within_operator = sjoin_operator_not_operator(one_segment, other_segments)
+        within_operator = sjoin_operator_not_operator(one_route, other_routes)
         
-        within_operator = dd.multi.concat(
+        intersections_within_operators = dd.multi.concat(
             [intersections_within_operators, within_operator], axis=0)
     
     # Concatenate the intersections found across operator and within operator,
@@ -95,10 +97,11 @@ def find_intersection_hqta_segments(gdf, itp_id):
     keep_cols = segment_cols + ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]
     
     all_intersections = (dd.multi.concat(
-        [intersections_across_operators, intersections_within_operators], 
-        axis=0).drop_duplicates()
-         .sort_values("hqta_segment_id")
-         .reset_index(drop=True)
+        [intersections_across_operators, 
+         intersections_within_operators], axis=0)
+        .drop_duplicates()
+        .sort_values("hqta_segment_id")
+        .reset_index(drop=True)
         [keep_cols]
     )
     

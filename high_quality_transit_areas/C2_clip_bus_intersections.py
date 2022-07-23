@@ -1,7 +1,7 @@
 """
 Do clipping to find where bus corridors intersect.
 
-This takes 2 min to run.
+This takes 6.5 min to run.
 
 From combine_and_visualize.ipynb
 """
@@ -19,8 +19,7 @@ from utilities import catalog_filepath
 
 segment_cols = ["calitp_itp_id", "hqta_segment_id"]
 
-# Explicitly define which inputs are in this script
-# Use urlpath from catalog.yml
+# Input files
 PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
 SUBSET_CORRIDORS = catalog_filepath("subset_corridors")
 
