@@ -140,7 +140,13 @@ agency_crosswalk = {"Stanislaus County Public Works   Transit": "Stanislaus Coun
         "Plumas County Transportation  Commission": "Plumas County Transportation  Commission",
         "Modoc Transportation": "Modoc County Transportation Commission",
         "Los Angeles County Metoropolitan Transportation Authority": "Los Angeles County Metropolitan Transportation Authority",
-        "Calaveras Transit": "Calaveras Transit Agnecy"}
+        "Calaveras Transit": "Calaveras Transit Agnecy",
+        "Arcata": "City of Arcata",
+        "Arvin":'The City of Arvin',
+        "Auburn": "City of Auburn",
+        "El Dorado County Transit Authority":"El Dorado County Transit",
+        "Golden Gate Bridge Highway  Transportation District": "Golden Gate Bridge Highway and Transportation District",
+        "Plumas County Transportation  Commission":"Plumas County Transportation Commission"}
 
 #Value to populate date columns that have missing values, so they show up in Tableau
 missing_date = pd.to_datetime('2100-01-01')
