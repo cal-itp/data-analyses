@@ -35,9 +35,12 @@ def geoparquet_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
     FILE_NAME: str. Filename.
     """
-    file_name_sanitized = FILE_NAME.replace('.parquet', '')
+    file_name_sanitized = FILE_NAME.replace(".parquet", "")
     gdf.to_parquet(f"./{file_name_sanitized}.parquet")
-    fs.put(f"./{file_name_sanitized}.parquet", f"{GCS_FILE_PATH}{file_name_sanitized}.parquet")
+    fs.put(
+        f"./{file_name_sanitized}.parquet",
+        f"{GCS_FILE_PATH}{file_name_sanitized}.parquet",
+    )
     os.remove(f"./{file_name_sanitized}.parquet")
 
 
