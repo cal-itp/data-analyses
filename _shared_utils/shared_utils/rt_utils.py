@@ -232,7 +232,8 @@ def get_trips(itp_id, analysis_date, force_clear=False, route_types=None):
         else:
             print(
                 "cached parquet empty, will try a fresh query"
-            )  # TODO fix logic here -- consider splitting out some of this...
+            )
+            return get_trips(itp_id, analysis_date, force_clear=True, route_types=route_types)
     else:
         print("getting trips...")
         trips = (
