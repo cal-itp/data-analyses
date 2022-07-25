@@ -112,7 +112,10 @@ if __name__ == "__main__":
     time2 = dt.datetime.now()
     print(f"compute for full clipped df: {time2 - time1}")
     
-    clipped2.to_parquet("./data/all_clipped.parquet")
+    utils.geoparquet_gcs_export(clipped2,
+                        f'{bus_corridors.TEST_GCS_FILE_PATH}',
+                        'all_clipped'
+                       )    
     
     # Delete the temporary clipped files for each operator
     delete_local_clipped_files()

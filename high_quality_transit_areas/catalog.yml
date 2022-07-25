@@ -49,7 +49,7 @@ sources:
         driver: geoparquet
         description: Combine all the bus intersections (clipped) geometries into one file. Created in C2_clip_bus_intersections.py.
         args:
-          urlpath: ./data/all_clipped.parquet 
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/all_clipped.parquet
     # Source: C3.py
     major_bus_stops:
         driver: geoparquet
