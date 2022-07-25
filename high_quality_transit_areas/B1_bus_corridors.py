@@ -1,7 +1,7 @@
 """
 Move bus_corridors.ipynb into script.
 
-Picking just the longest route takes 26 min to run.
+Picking just the longest route takes 21 min to run.
 The known issue related to this is that it misses layover 
 and possible 1-way streets in certain directions.
 but hqta segments are drawn in longer bits, closer to the 1,250 m 
