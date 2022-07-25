@@ -230,10 +230,10 @@ def get_trips(itp_id, analysis_date, force_clear=False, route_types=None):
         if not cached.empty:
             trips = cached
         else:
-            print(
-                "cached parquet empty, will try a fresh query"
+            print("cached parquet empty, will try a fresh query")
+            return get_trips(
+                itp_id, analysis_date, force_clear=True, route_types=route_types
             )
-            return get_trips(itp_id, analysis_date, force_clear=True, route_types=route_types)
     else:
         print("getting trips...")
         trips = (
