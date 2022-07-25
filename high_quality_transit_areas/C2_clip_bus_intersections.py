@@ -14,7 +14,7 @@ import os
 import pandas as pd
 
 import B1_bus_corridors as bus_corridors
-import C1_prep_for_clipping as C1
+import C1_prep_for_clipping as prep_clip
 from utilities import catalog_filepath
 
 segment_cols = ["calitp_itp_id", "hqta_segment_id"]
@@ -40,7 +40,7 @@ def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
                                .reset_index(drop=True)
                               )
     
-    operator_pair_intersect = C1.rename_cols(
+    operator_pair_intersect = prep_clip.rename_cols(
         operator_pair_intersect, with_intersect=False)
     
     
