@@ -1,8 +1,11 @@
 """
 Do clipping to find where bus corridors intersect.
 
-This takes nearly 2 hrs (1 hr 52 min) to run.
- 
+With hqta_segment_id clipping, but looping across route_id, 
+it takes 51 min to run.
+LA Metro takes 3.5 min to run.
+
+With route_id clipping, takes 1 hr 52 min to run: 
 LA Metro takes 6 min to run, and ITP ID 4 takes 4 min to run.
 Big Blue Bus takes 10 min to run.
 
@@ -21,9 +24,9 @@ import C1_prep_for_clipping as prep_clip
 from shared_utils import utils
 from utilities import catalog_filepath
 
-route_cols = ["calitp_itp_id", "route_id"]
+segment_cols = ["calitp_itp_id", "hqta_segment_id"]
 
-intersect_route_cols = ["intersect_calitp_itp_id", "intersect_route_id"]
+intersect_segment_cols = ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]
 
 # Input files
 PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
@@ -33,7 +36,7 @@ SUBSET_CORRIDORS = catalog_filepath("subset_corridors")
 def get_operator_intersections_as_clipping_mask(corridors_df, intersecting_pairs, itp_id):
     intersecting_pairs = (intersecting_pairs[
         intersecting_pairs.calitp_itp_id == itp_id]
-        [intersect_route_cols]
+        [intersect_segment_cols]
         .drop_duplicates()
         .reset_index(drop=True)
     )
@@ -46,7 +49,7 @@ def get_operator_intersections_as_clipping_mask(corridors_df, intersecting_pairs
     operator_pairs_with_geom = dd.merge(
         corridors_df,
         operator_pairs,
-        on = route_cols,
+        on = segment_cols,
         how = "inner",
     )
     
@@ -65,15 +68,15 @@ def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
     # These are the possible segments that should be used as the masking df in the clip
     # Do it at the operator-level
     # Since 1 segment is selected in the loop, it doesn't matter if the masking df is large    
-    operator_routes = list(operator.route_id.unique())
+    operator_segments = list(operator.route_id.unique())
     
     # Set the dask metadata
     intersections = operator.head(0)
     
-    for i in operator_routes:
+    for i in operator_segments:
         clipped_segment = dask_geopandas.clip(
             operator[operator.route_id == i],
-            corresponding_pairs, 
+            corresponding_pairs[corresponding_pairs.route_id != i], 
             keep_geom_type = True
         )
         
@@ -97,10 +100,8 @@ def delete_local_clipped_files():
 if __name__ == "__main__":
     start = dt.datetime.now()
         
-    keep_cols = route_cols + ["geometry"]
-
     intersecting_pairs = dd.read_parquet(PAIRWISE_FILE)
-    corridors = dask_geopandas.read_parquet(SUBSET_CORRIDORS)[keep_cols]
+    corridors = dask_geopandas.read_parquet(SUBSET_CORRIDORS)
     
     # Use the subsetted down list of ITP IDS
     VALID_ITP_IDS = list(corridors.calitp_itp_id.unique())
@@ -123,7 +124,7 @@ if __name__ == "__main__":
     
     
     clipped2 = (clipped.compute()
-                .sort_values(route_cols, ascending=[True, True])
+                .sort_values(segment_cols, ascending=[True, True])
                 .reset_index(drop=True)
                )
     
