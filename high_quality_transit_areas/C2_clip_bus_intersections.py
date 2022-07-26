@@ -1,7 +1,10 @@
 """
 Do clipping to find where bus corridors intersect.
 
-This takes 4.5 min to run.
+This takes nearly 2 hrs (1 hr 52 min) to run.
+ 
+LA Metro takes 6 min to run, and ITP ID 4 takes 4 min to run.
+Big Blue Bus takes 10 min to run.
 
 From combine_and_visualize.ipynb
 """
@@ -18,61 +21,70 @@ import C1_prep_for_clipping as prep_clip
 from shared_utils import utils
 from utilities import catalog_filepath
 
-segment_cols = ["calitp_itp_id", "hqta_segment_id"]
+route_cols = ["calitp_itp_id", "route_id"]
 
-intersect_segment_cols = ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]
+intersect_route_cols = ["intersect_calitp_itp_id", "intersect_route_id"]
 
 # Input files
 PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
 SUBSET_CORRIDORS = catalog_filepath("subset_corridors")
 
 
+def get_operator_intersections_as_clipping_mask(corridors_df, intersecting_pairs, itp_id):
+    intersecting_pairs = (intersecting_pairs[
+        intersecting_pairs.calitp_itp_id == itp_id]
+        [intersect_route_cols]
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+    
+    # Rename columns so it's not intersect_
+    operator_pairs = prep_clip.rename_cols(intersecting_pairs, with_intersect=False)
+    
+    # Merge back into dask gdf to get geom
+    # Can't use isin with dask
+    operator_pairs_with_geom = dd.merge(
+        corridors_df,
+        operator_pairs,
+        on = route_cols,
+        how = "inner",
+    )
+    
+    # Run compute() because masking df has to be gdf
+    return operator_pairs_with_geom.compute()
+    
+    
 def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
     start = dt.datetime.now()
     
-    operator = (corridors_df[corridors_df.calitp_itp_id == itp_id]
-                [segment_cols + ["route_direction", "geometry"]]
-               )
+    operator = corridors_df[corridors_df.calitp_itp_id == itp_id]
     
-    # Bring in the table for which pairs of hqta_segment_id this 
-    # operator intersects with, but only if it is orthogonal 
-    # route_direction cannot be the same in sjoin results
-    # ex: a north-south route that intersects with north-south route 
-    # likely lies on top of each other, but doesn't cross each other
-    operator_pair_intersect = (intersecting_pairs
-                               [intersecting_pairs.calitp_itp_id == itp_id]
-                               [intersect_segment_cols]
-                               .drop_duplicates()
-                               .reset_index(drop=True)
-                              )
+    corresponding_pairs = get_operator_intersections_as_clipping_mask(
+        corridors_df, intersecting_pairs, itp_id)
     
-    operator_pair_intersect = prep_clip.rename_cols(
-        operator_pair_intersect, with_intersect=False)
+    # These are the possible segments that should be used as the masking df in the clip
+    # Do it at the operator-level
+    # Since 1 segment is selected in the loop, it doesn't matter if the masking df is large    
+    operator_routes = list(operator.route_id.unique())
     
+    # Set the dask metadata
+    intersections = operator.head(0)
     
-    # Now, merge in the operator-hqta_segment that intersect with given operator,
-    # so that there's fewer rows to do the clipping on
-    not_operator = dd.merge(corridors_df[segment_cols + ["route_direction", "geometry"]], 
-                            operator_pair_intersect,
-                            on = segment_cols,
-                            how = "inner"
-                           )
+    for i in operator_routes:
+        clipped_segment = dask_geopandas.clip(
+            operator[operator.route_id == i],
+            corresponding_pairs, 
+            keep_geom_type = True
+        )
+        
+        intersections = dd.multi.concat([intersections, 
+                                         clipped_segment], axis=0)
+                            
     
-    time1 = dt.datetime.now()
-    print(f"prepare intersection dfs for {itp_id}: {time1-start}")
+    end = dt.datetime.now()
+    print(f"clipping for {itp_id}: {end-start}")
     
-    not_operator_df = not_operator.compute()
-    
-    time2 = dt.datetime.now()
-    print(f"compute to make gdf for {itp_id}: {time2-time1}")
-    
-    intersection = dask_geopandas.clip(operator, 
-                                       not_operator_df, keep_geom_type=True)
-    
-    time3 = dt.datetime.now()
-    print(f"clipping for {itp_id}: {time3-time2}")
-    
-    return intersection
+    return intersections
 
 
 def delete_local_clipped_files():
@@ -84,23 +96,14 @@ def delete_local_clipped_files():
 
 if __name__ == "__main__":
     start = dt.datetime.now()
+        
+    keep_cols = route_cols + ["geometry"]
+
+    intersecting_pairs = dd.read_parquet(PAIRWISE_FILE)
+    corridors = dask_geopandas.read_parquet(SUBSET_CORRIDORS)[keep_cols]
     
-    intersecting_shapes = dd.read_parquet(PAIRWISE_FILE)
-    
-    # Here, already drop where the dask_geopandas.sjoin gave us intersections
-    # of route directions going in the same direction
-    # Only allow orthogonal ones to be used in the clip
-    intersecting_shapes = intersecting_shapes[
-        intersecting_shapes.route_direction != 
-        intersecting_shapes.intersect_route_direction]
-    
-    corridors = dask_geopandas.read_parquet(SUBSET_CORRIDORS)
-    
-    # Take the list of ITP_IDS found in both datasets
-    # Those are valid ITP_IDS that can go through clip successfully
-    ITP_IDS_IN_CORRIDORS = list(corridors.calitp_itp_id.unique())
-    ITP_IDS_IN_PAIRWISE = list(intersecting_shapes.calitp_itp_id.unique())
-    VALID_ITP_IDS = list(set(ITP_IDS_IN_CORRIDORS).intersection(set(ITP_IDS_IN_PAIRWISE)))
+    # Use the subsetted down list of ITP IDS
+    VALID_ITP_IDS = list(corridors.calitp_itp_id.unique())
     
     time1 = dt.datetime.now()
     print(f"read in data, assemble valid ITP_IDS: {time1 - start}")
@@ -108,7 +111,7 @@ if __name__ == "__main__":
     clipped = corridors.head(0)
 
     for itp_id in VALID_ITP_IDS:
-        intersection = clip_by_itp_id(corridors, intersecting_shapes, itp_id)
+        intersection = clip_by_itp_id(corridors, intersecting_pairs, itp_id)
                 
         if len(intersection) > 0:
             intersection2 = intersection.compute()
@@ -120,7 +123,7 @@ if __name__ == "__main__":
     
     
     clipped2 = (clipped.compute()
-                .sort_values(segment_cols, ascending=[True, True])
+                .sort_values(route_cols, ascending=[True, True])
                 .reset_index(drop=True)
                )
     
