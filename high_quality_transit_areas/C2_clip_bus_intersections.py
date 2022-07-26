@@ -1,7 +1,7 @@
 """
 Do clipping to find where bus corridors intersect.
 
-This takes 6.5 min to run.
+This takes 4.5 min to run.
 
 From combine_and_visualize.ipynb
 """
@@ -15,9 +15,12 @@ import pandas as pd
 
 import B1_bus_corridors as bus_corridors
 import C1_prep_for_clipping as prep_clip
+from shared_utils import utils
 from utilities import catalog_filepath
 
 segment_cols = ["calitp_itp_id", "hqta_segment_id"]
+
+intersect_segment_cols = ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]
 
 # Input files
 PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
@@ -28,14 +31,17 @@ def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
     start = dt.datetime.now()
     
     operator = (corridors_df[corridors_df.calitp_itp_id == itp_id]
-                [segment_cols + ["geometry"]]
+                [segment_cols + ["route_direction", "geometry"]]
                )
     
     # Bring in the table for which pairs of hqta_segment_id this 
-    # operator intersects with
+    # operator intersects with, but only if it is orthogonal 
+    # route_direction cannot be the same in sjoin results
+    # ex: a north-south route that intersects with north-south route 
+    # likely lies on top of each other, but doesn't cross each other
     operator_pair_intersect = (intersecting_pairs
                                [intersecting_pairs.calitp_itp_id == itp_id]
-                               [["intersect_calitp_itp_id", "intersect_hqta_segment_id"]]
+                               [intersect_segment_cols]
                                .drop_duplicates()
                                .reset_index(drop=True)
                               )
@@ -46,7 +52,7 @@ def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
     
     # Now, merge in the operator-hqta_segment that intersect with given operator,
     # so that there's fewer rows to do the clipping on
-    not_operator = dd.merge(corridors_df[segment_cols + ["geometry"]], 
+    not_operator = dd.merge(corridors_df[segment_cols + ["route_direction", "geometry"]], 
                             operator_pair_intersect,
                             on = segment_cols,
                             how = "inner"
@@ -81,11 +87,20 @@ if __name__ == "__main__":
     
     intersecting_shapes = dd.read_parquet(PAIRWISE_FILE)
     
+    # Here, already drop where the dask_geopandas.sjoin gave us intersections
+    # of route directions going in the same direction
+    # Only allow orthogonal ones to be used in the clip
+    intersecting_shapes = intersecting_shapes[
+        intersecting_shapes.route_direction != 
+        intersecting_shapes.intersect_route_direction]
+    
     corridors = dask_geopandas.read_parquet(SUBSET_CORRIDORS)
     
-    # Presumably, this list of ITP_IDs is pared down 
-    # because only ones with sjoin are included
-    VALID_ITP_IDS = list(corridors.calitp_itp_id.unique())
+    # Take the list of ITP_IDS found in both datasets
+    # Those are valid ITP_IDS that can go through clip successfully
+    ITP_IDS_IN_CORRIDORS = list(corridors.calitp_itp_id.unique())
+    ITP_IDS_IN_PAIRWISE = list(intersecting_shapes.calitp_itp_id.unique())
+    VALID_ITP_IDS = list(set(ITP_IDS_IN_CORRIDORS).intersection(set(ITP_IDS_IN_PAIRWISE)))
     
     time1 = dt.datetime.now()
     print(f"read in data, assemble valid ITP_IDS: {time1 - start}")
