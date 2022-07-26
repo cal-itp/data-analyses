@@ -10,10 +10,7 @@
 ## Pairwise
 * clipping C2 now takes 3 min
 * Right now, add table, which works a lot faster
-* But, LA Metro shows some missing clipped areas
-* When it's selected at operator level, route A in a given operator is not compared to all other routes with the same operator. Function added for this.
-* To speed up finding connections within an operator, try keeping it at route_id level, right now it's at segment_id.
-* Add those, and clipped areas should be more complete.
+* TODO: fix the clipping, break apart by north-south vs east-west? Otherwise, the masking df used for the clip will keep 
 
 ## Intersections
 * Draw buffer, then find all the stops that fall into that intersection
