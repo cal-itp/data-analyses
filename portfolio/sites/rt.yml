@@ -43,6 +43,7 @@ parts:
         sections:
           - itp_id: 293
           - itp_id: 298
+          - itp_id: 208 ## added MST July 26
       - caption: District 06 - Fresno
         params:
           district: 06 - Fresno
