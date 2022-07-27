@@ -10,6 +10,7 @@ From combine_and_visualize.ipynb
 """
 import dask.dataframe as dd
 import dask_geopandas
+import datetime as dt
 import geopandas as gpd
 import pandas as pd
 
@@ -55,7 +56,10 @@ def query_all_stops(analysis_date):
     return tbl_stops
 
 
-def create_major_transit_stop(clipped_df):    
+def merge_clipped_with_hqta_segments():   
+    # Clean up the clipped df and remove large shapes
+    clipped_df = clean_clip.process_clipped_intersections()
+    
     # For hqta_segment level data, only 1 stop is attached to each segment
     # It's the stop with the highest trip count
     hqta_segment = dask_geopandas.read_parquet(ALL_BUS)
@@ -69,13 +73,6 @@ def create_major_transit_stop(clipped_df):
         hqta_segment[keep_cols],
         on = segment_cols,
         how = "inner"
-    )
-    
-    # Add the hqta type for these stops
-    # These stops have the highest trip count to 
-    # designate this corridor as high quality
-    stops_in_bus_intersections = stops_in_bus_intersections.assign(
-        hqta_type = "major_transit_stop",
     )
     
     # Change to gdf because gdf.explode only works with geopandas, not dask gdf
@@ -166,14 +163,10 @@ def create_stops_along_corridors(tbl_stops):
 
 
 if __name__ == "__main__":
-    # Clean up the clipped df and remove large shapes
-    gdf = clean_clip.process_clipped_intersections()
     
-    # Don't need to save the buffered gdf here probably
-    #utils.geoparquet_gcs_export(one_intersection_per_row, 
-    #                            f'{TEST_GCS_FILE_PATH}', 'major_bus_stops')
+    start = dt.datetime.now()
 
-    freq_bus_stops_in_intersections = create_major_transit_stop(gdf)
+    freq_bus_stops_in_intersections = merge_clipped_with_hqta_segments()
 
     # This exploded geometry is what will be used in spatial join on all stops
     # to see which stops fall in this
@@ -186,4 +179,10 @@ if __name__ == "__main__":
 
     stops_in_hq_corr = create_stops_along_corridors(all_stops)
     
+    # Export locally
+    # Remove in the following script after appending
+    major_stop_bus.compute().to_parquet("./data/major_stop_bus.parquet")
+    stops_in_hq_corr.compute().to_parquet("./data/stops_in_hq_corr.parquet")
     
+    end = dt.datetime.now()
+    print(f"execution time: {end-start}")
