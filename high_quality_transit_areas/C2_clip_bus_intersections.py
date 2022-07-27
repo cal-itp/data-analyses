@@ -19,7 +19,7 @@ import glob
 import os
 import pandas as pd
 
-import B1_bus_corridors as bus_corridors
+from B1_bus_corridors import TEST_GCS_FILE_PATH
 import C1_prep_for_clipping as prep_clip
 from shared_utils import utils
 from utilities import catalog_filepath
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     print(f"compute for full clipped df: {time2 - time1}")
     
     utils.geoparquet_gcs_export(clipped2,
-                        f'{bus_corridors.TEST_GCS_FILE_PATH}',
+                        f'{TEST_GCS_FILE_PATH}',
                         'all_clipped'
                        )    
     
