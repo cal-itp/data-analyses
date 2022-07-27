@@ -258,3 +258,4 @@ portfolio/rt/_build/html/_sources/district_04-oakland/15_parameterize__itp_id_33
 portfolio/rt/_build/html/_sources/district_11-san-diego/15_parameterize__itp_id_278.ipynb filter=lfs diff=lfs merge=lfs -text
 portfolio/rt/_build/jupyter_execute/district_04-oakland/15_parameterize__itp_id_294.ipynb filter=lfs diff=lfs merge=lfs -text
 portfolio/rt/_build/jupyter_execute/district_09-bishop/15_parameterize__itp_id_99.ipynb filter=lfs diff=lfs merge=lfs -text
+portfolio/**/*.ipynb filter=lfs diff=lfs merge=lfs -text
