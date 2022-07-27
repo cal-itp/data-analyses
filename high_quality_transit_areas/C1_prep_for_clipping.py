@@ -13,7 +13,7 @@ import datetime as dt
 import geopandas as gpd
 import pandas as pd
 
-import B1_bus_corridors as bus_corridors
+from B1_bus_corridors import TEST_GCS_FILE_PATH
 from shared_utils import utils
 from utilities import catalog_filepath
 
@@ -213,10 +213,10 @@ if __name__=="__main__":
     time2 = dt.datetime.now()
     print(f"compute for pairwise/subset_corridors: {time2 - time1}")
     
-    pairwise.to_parquet(f"{bus_corridors.TEST_GCS_FILE_PATH}intermediate/pairwise.parquet")
+    pairwise.to_parquet(f"{TEST_GCS_FILE_PATH}intermediate/pairwise.parquet")
     
     utils.geoparquet_gcs_export(subset_corridors,
-                        f'{bus_corridors.TEST_GCS_FILE_PATH}intermediate/',
+                        f'{TEST_GCS_FILE_PATH}intermediate/',
                         'subset_corridors'
                        )
     
