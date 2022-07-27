@@ -2,6 +2,32 @@
 Utils for RT Schedule
 """
 
+import os
+os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000) ## 800GB?
+
+from calitp.tables import tbl
+from calitp import query_sql
+import calitp.magics
+import branca
+
+import shared_utils
+
+from siuba import *
+import pandas as pd
+
+import datetime as dt
+import time
+from zoneinfo import ZoneInfo
+
+import importlib
+
+import gcsfs
+fs = gcsfs.GCSFileSystem()
+
+from tqdm import tqdm_notebook
+from tqdm.notebook import trange, tqdm
+
+
 # Get the data for Scheduled Trips and RT Trips  
 def find_ran_trips(itp_id, analysis_date):
     gtfs_daily = (
@@ -13,7 +39,7 @@ def find_ran_trips(itp_id, analysis_date):
     )
     rt = query_sql(
         f"""
-        SELECT * FROM `cal-itp-data-infra-staging.nla_views.test_rt_trips`
+        SELECT * FROM `cal-itp-data-infra-staging.natalie_views.test_rt_trips`
         WHERE date = '{analysis_date}'
         """
     )
@@ -36,7 +62,7 @@ def get_pct_ran(join, date):
 
     return pct_ran
 
-def get_pct_ran_df():
+def get_pct_ran_df(date_list, itp_id):
     pcts = []
     for date in date_list: 
         sched_rt_df = (find_ran_trips(itp_id, date))
