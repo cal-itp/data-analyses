@@ -26,3 +26,8 @@ build_hqta:
 	python portfolio/portfolio.py build hqta --deploy 
 	git add portfolio/hqta/*.yml portfolio/hqta/*.md portfolio/hqta/*.ipynb
 	git add portfolio/sites/ 
+    
+add_precommit
+	pip install pre-commit
+	pre-commit install 
+	#pre-commit run --all-files 
