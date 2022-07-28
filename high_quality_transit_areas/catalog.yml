@@ -68,3 +68,9 @@ sources:
         description: Combined point data for all HQTA types. Created in D1_assemble_hqta_points.py.
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/hqta_points.parquet
+    # Source: D2_assemble_hqta_polygons
+    hqta_areas:
+        driver: geoparquet
+        description: Combined polygon data for all HQTA types. Created in D2_assemble_hqta_polygons.py.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/hqta_polygons.parquet
