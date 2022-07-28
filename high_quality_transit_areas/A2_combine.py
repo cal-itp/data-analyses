@@ -6,12 +6,13 @@ and filter out certain stop_ids.
 
 Export combined rail_brt_ferry data into GCS.
 """
+import geopandas as gpd
 import pandas as pd
 
 import A1_rail_ferry_brt as rail_ferry_brt
-import B1_bus_corridors as bus_corridors
 from shared_utils import utils
 #from utilities import GCS_FILE_PATH
+from B1_bus_corridors import TEST_GCS_FILE_PATH
 
 
 metro_street_running =[
@@ -27,7 +28,7 @@ metro_street_running =[
 van_ness_ids = [
     '8096', '8097', '18095', '18098', '8094', '8099', '18093', '8100',
     '18092', '18101', '18102', '18091', '18103', '8090', '18104', '18089',
-    '18105', '18088']
+    '18105', '18088'] 
 
 
 if __name__ == "__main__":
@@ -63,7 +64,5 @@ if __name__ == "__main__":
     
     # Export to GCS
     utils.geoparquet_gcs_export(rail_brt_ferry, 
-                                f'{bus_corridors.TEST_GCS_FILE_PATH}', 
+                                f'{TEST_GCS_FILE_PATH}', 
                                 'rail_brt_ferry')
-
-    

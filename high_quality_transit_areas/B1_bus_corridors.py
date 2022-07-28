@@ -1,7 +1,7 @@
 """
 Move bus_corridors.ipynb into script.
 
-Picking just the longest route takes 26 min to run.
+Picking just the longest route takes 21 min to run.
 The known issue related to this is that it misses layover 
 and possible 1-way streets in certain directions.
 but hqta segments are drawn in longer bits, closer to the 1,250 m 
@@ -145,7 +145,7 @@ def add_hqta_segment_peak_trips(df, aggregated_stop_times):
     # Merge at the hqta_segment_id-stop_id level to get it back to segments
     gdf = dd.merge(
         df[stop_cols + segment_cols + 
-           ["calitp_url_number", "route_id", "geometry"]].drop_duplicates(),
+           ["calitp_url_number", "route_id", "route_direction", "geometry"]].drop_duplicates(),
         peak_trips_by_segment,
         on = stop_cols,
         how = "left"
