@@ -116,10 +116,6 @@ def create_major_stop_bus(all_stops, bus_intersections):
         .drop_duplicates(
             subset=["calitp_itp_id_left", "stop_id", "calitp_itp_id_right"])
     ).reset_index(drop=True)
-    # why get centroid? drawing buffer around that, but
-    # centroid may be different than the bus stop's point geom
-    # which geometry should we be left with? both options are point geom
-    # should it reflect the bus stop or the centroid of the intersection?
     
     stops_in_intersection = (major_bus_stops_in_intersections.assign(
                                 hqta_type = "major_stop_bus",
@@ -172,8 +168,7 @@ if __name__ == "__main__":
     # to see which stops fall in this
     bus_intersections = explode_bus_intersections(freq_bus_stops_in_intersections)
     
-    #all_stops = query_all_stops(analysis_date)
-    all_stops = dask_geopandas.read_parquet("./data/all_stops.parquet")
+    all_stops = query_all_stops(analysis_date)
     
     major_stop_bus = create_major_stop_bus(all_stops, bus_intersections)
 
