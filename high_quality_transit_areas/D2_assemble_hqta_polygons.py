@@ -77,9 +77,6 @@ def drop_bad_stops_final_processing(gdf, bad_stop_list):
 if __name__=="__main__":
     start = dt.datetime.now()
     
-    # Confirm this is the starting point for polygons
-    # Partly from points if it's not stops_in_hq_corridor
-    # and add the hq corridors, after filtering initially
     hqta_points = dask_geopandas.read_parquet(HQTA_POINTS_FILE)
     bus_hq_corr = prep_clip.prep_bus_corridors()
     
