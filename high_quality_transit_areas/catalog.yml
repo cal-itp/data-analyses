@@ -25,13 +25,7 @@ sources:
         driver: geoparquet
         description: Combined corridors across all operators. Created in B2_combine_operators_corridors.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/all_bus.parquet
-    # Source: B2_combine_operator_corridors.py
-    shape_dissolve:
-        driver: geoparquet
-        description: Dissolved corridors, remove smaller areas. Created in B2_combine_operators_corridors.py. (IS THIS NEEDED)?
-        args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/shape_dissolve.parquet   
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/all_bus.parquet  
     # Source: C1_prep_for_clipping.py
     pairwise_intersections:
         driver: geoparquet
@@ -49,10 +43,28 @@ sources:
         driver: geoparquet
         description: Combine all the bus intersections (clipped) geometries into one file. Created in C2_clip_bus_intersections.py.
         args:
-          urlpath: ./data/all_clipped.parquet 
-    # Source: C3.py
-    major_bus_stops:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/all_clipped.parquet
+    # Source: C4_create_bus_hqta_types.py
+    major_stop_bus:
         driver: geoparquet
-        description:  Created in C3.py.
+        description: Bus stops that are within the bus intersections (clipped and exploded). Created in C4_create_bus_hqta_types.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/major_bus_stops.parquet
+          urlpath: ./data/major_stop_bus.parquet
+    stops_in_hq_corr:
+        driver: geoparquet
+        description: Bus stops that are within the HQ corridors, even if they stops themselves do not have a lot of trips pass through. Created in C4_create_bus_hqta_types.py.
+        args:
+          urlpath: ./data/stops_in_hq_corr.parquet
+    ## FINAL DATA
+    # Source: D1_assemble_hqta_points
+    hqta_points:
+        driver: geoparquet
+        description: Combined point data for all HQTA types. Created in D1_assemble_hqta_points.py.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/hqta_points.parquet
+    # Source: D2_assemble_hqta_polygons
+    hqta_areas:
+        driver: geoparquet
+        description: Combined polygon data for all HQTA types. Created in D2_assemble_hqta_polygons.py.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/hqta_polygons.parquet

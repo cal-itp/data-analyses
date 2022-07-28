@@ -1,11 +1,9 @@
 """
 Prep components needed for clipping.
-Find pairwise hqta_segment_ids with dask_geopandas.sjoin
+Find pairwise hqta_segment_ids / route_ids with dask_geopandas.sjoin
 to narrow down the rows to pass through clipping.
 
-This takes 19.5 min to run. 
-TODO: speed up by not doing each segment, maybe route 
-within operator.
+This takes 15 min to run. 
 
 From combine_and_visualize.ipynb
 """
@@ -15,11 +13,15 @@ import datetime as dt
 import geopandas as gpd
 import pandas as pd
 
-import B1_bus_corridors as bus_corridors
+from B1_bus_corridors import TEST_GCS_FILE_PATH
 from shared_utils import utils
 from utilities import catalog_filepath
 
-segment_cols = ["calitp_itp_id", "hqta_segment_id"]
+segment_cols = ["calitp_itp_id", "hqta_segment_id", "route_direction"]
+
+intersect_segment_cols = ["intersect_calitp_itp_id", 
+                        "intersect_hqta_segment_id", "intersect_route_direction"]
+
 
 # Input files
 ALL_BUS = catalog_filepath("all_bus")
@@ -36,8 +38,7 @@ def prep_bus_corridors():
     return bus_hqtc2
 
 
-# Before, have been focusing on shape_id
-# Now, change it to hqta_segment_id
+# Spatial join on route_id 
 def sjoin_operator_not_operator(operator, not_operator):
     # Let's keep the pair of that intersection and store it
     # Need to rename not_operator columns so it's easier to distinguish
@@ -53,10 +54,8 @@ def sjoin_operator_not_operator(operator, not_operator):
     )
     
     # Once the spatial join is done, don't need to store the geometry
-    # for the operator, since that's already stored in operator hqta_segments
-    # Just keep the pairs of operator hqta_segments - intersecting_operator hqta_segments
     intersecting_segments = (s1[segment_cols + 
-                             ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]]
+                                intersect_segment_cols]
                              .drop_duplicates()
                              .reset_index(drop=True)
                             )
@@ -64,41 +63,46 @@ def sjoin_operator_not_operator(operator, not_operator):
     return intersecting_segments
 
 
-def find_intersection_hqta_segments(gdf, itp_id):
+def find_intersection_across_and_within(gdf, itp_id):
     keep_cols = segment_cols + ["geometry"]
     
-    operator = gdf[gdf.calitp_itp_id == itp_id][keep_cols]
+    # Create subset dfs for the "in_group"
+    # to be compared with sjoin with the "out_group"
+    # Keep route_id with operator to find intersections WITHIN operator
+    operator = gdf[gdf.calitp_itp_id == itp_id][["route_id"] + keep_cols]    
     not_operator = gdf[gdf.calitp_itp_id != itp_id][keep_cols]
     
     # First, find intersections across operators
-    intersections_across_operators = sjoin_operator_not_operator(operator, not_operator)
+    intersections_across_operators = sjoin_operator_not_operator(
+        operator[keep_cols], not_operator)
     
     # Set the metadata for intersections within operators
     intersections_within_operators = intersections_across_operators.head(0)
     
     # Now add in the intersections within operators
-    operator_segments = list(operator.hqta_segment_id.unique())
+    operator_routes = list(operator.route_id.unique())
     
-    for i in operator_segments:
-        # Subset to particular hqta_segment_id, then use same sjoin,
+    for i in operator_routes:
+        # Subset to particular route_id, then use same sjoin,
         # where the "in group" is one_route and the "out group" is other_routes
-        one_segment = operator[operator.hqta_segment_id == i]
-        other_segments = operator[operator.hqta_segment_id != i]
+        one_route = operator[operator.route_id == i]
+        other_routes = operator[operator.route_id != i]
         
-        within_operator = sjoin_operator_not_operator(one_segment, other_segments)
+        within_operator = sjoin_operator_not_operator(one_route, other_routes)
         
-        within_operator = dd.multi.concat(
+        intersections_within_operators = dd.multi.concat(
             [intersections_within_operators, within_operator], axis=0)
     
     # Concatenate the intersections found across operator and within operator,
     # but drop the geometry, because we only need the df to store this info
-    keep_cols = segment_cols + ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]
+    keep_cols = segment_cols + intersect_segment_cols 
     
     all_intersections = (dd.multi.concat(
-        [intersections_across_operators, intersections_within_operators], 
-        axis=0).drop_duplicates()
-         .sort_values("hqta_segment_id")
-         .reset_index(drop=True)
+        [intersections_across_operators, 
+         intersections_within_operators], axis=0)
+        .drop_duplicates()
+        .sort_values("hqta_segment_id")
+        .reset_index(drop=True)
         [keep_cols]
     )
     
@@ -117,10 +121,10 @@ def compile_pairwise_intersections(corridors, ITP_ID_LIST):
     for itp_id in ITP_ID_LIST:
         time0 = dt.datetime.now()
         
-        operator_shape = find_intersection_hqta_segments(corridors, itp_id)
+        operator_shape = find_intersection_across_and_within(corridors, itp_id)
         
         time1 = dt.datetime.now()
-        print(f"grab intersection hqta segments for {itp_id}: {time1 - time0}")
+        print(f"grab intersections for {itp_id}: {time1 - time0}")
         
         intersecting_segments = (dd.multi.concat(
             [intersecting_segments, operator_shape], axis=0)
@@ -133,7 +137,8 @@ def compile_pairwise_intersections(corridors, ITP_ID_LIST):
     
     intersecting_segments = intersecting_segments.astype({
         "intersect_calitp_itp_id": int,
-        "intersect_hqta_segment_id": int
+        "intersect_hqta_segment_id": int,
+        "intersect_route_direction": str
     })
     
     return intersecting_segments
@@ -142,7 +147,7 @@ def compile_pairwise_intersections(corridors, ITP_ID_LIST):
 # Get pairwise one into just unique df
 def unique_intersecting_segments(df):
     part1 = df[segment_cols].drop_duplicates()
-    part2 = (df[["intersect_calitp_itp_id", "intersect_hqta_segment_id"]]
+    part2 = (df[intersect_segment_cols]
              .drop_duplicates()
             )
     
@@ -188,24 +193,30 @@ if __name__=="__main__":
     
     intersecting_shapes = compile_pairwise_intersections(corridors, ITP_IDS)
     
-    keep_cols = ["calitp_itp_id", "hqta_segment_id", "geometry"]
+    keep_cols = segment_cols + ["geometry"]
     
-    corridors2 = subset_corridors(corridors[keep_cols], intersecting_shapes)
+    corridors2 = subset_corridors(corridors[keep_cols + ["route_id"]], intersecting_shapes)
     
     time1 = dt.datetime.now()
     print(f"subset corridors: {time1 - start}")
     
     # Save results locally temporarily
-    pairwise = intersecting_shapes.compute()
+    # Here, already drop where the dask_geopandas.sjoin gave us intersections
+    # of route directions going in the same direction
+    # Only allow orthogonal ones to be used in the clip
+    pairwise = intersecting_shapes[
+        intersecting_shapes.route_direction != 
+        intersecting_shapes.intersect_route_direction].compute()
+        
     subset_corridors = corridors2.compute()
 
     time2 = dt.datetime.now()
     print(f"compute for pairwise/subset_corridors: {time2 - time1}")
     
-    pairwise.to_parquet(f"{bus_corridors.TEST_GCS_FILE_PATH}intermediate/pairwise.parquet")
+    pairwise.to_parquet(f"{TEST_GCS_FILE_PATH}intermediate/pairwise.parquet")
     
     utils.geoparquet_gcs_export(subset_corridors,
-                        f'{bus_corridors.TEST_GCS_FILE_PATH}intermediate/',
+                        f'{TEST_GCS_FILE_PATH}intermediate/',
                         'subset_corridors'
                        )
     

@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import zlib
 
+from shapely.geometry import LineString, Point
+
 import utilities
 from shared_utils import rt_utils
 
@@ -116,6 +118,34 @@ def find_longest_route_shapes(merged_routelines_trips, n=1):
     return longest_shape
 
 
+def add_route_cardinal_direction(df):
+    # Grab the start / endpoint of a linestring
+    #https://gis.stackexchange.com/questions/358584/how-to-extract-long-and-lat-of-start-and-end-points-to-seperate-columns-from-t
+    df = df.assign(
+        origin = df.geometry.apply(lambda x: Point(x.coords[0]), 
+                                              meta=('origin', 'geometry')),
+        destination = df.geometry.apply(lambda x: Point(x.coords[-1]), 
+                                                   meta=('destination', 'geometry')),
+    )
+    
+    # Stick the origin/destination of a route_id and return the primary cardinal direction
+    df = df.assign(
+        route_primary_direction = df.apply(
+            lambda x: rt_utils.primary_cardinal_direction(
+                x.origin, x.destination), axis=1, meta=('route_direction', 'str'))
+    )
+    
+    # Don't care exactly if it's southbound or northbound, but care that it's north-south
+    # Want to test for orthogonality for 2 bus routes intersecting
+    df = df.assign(
+        route_direction = df.route_primary_direction.apply(
+            lambda x: "north-south" if x in ["Northbound", "Southbound"]
+            else "east-west", meta=('route_direction', 'str')
+        ), 
+    ).drop(columns = ["origin", "destination", "route_primary_direction"])
+
+    return df
+        
 
 def select_needed_shapes_for_route_network(routelines, trips):
     route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
@@ -135,13 +165,20 @@ def select_needed_shapes_for_route_network(routelines, trips):
     # Can either keep the shape_id and associate the dissolved geometry with that shape_id
     # Or, drop shape_id, since now shape_id is not reflecting the raw line geom 
     # for that shape_id, and that's confusing to the end user (also, shape_id is not used, since hqta_segment_id is primary unit of analysis)
+    
+    ##TODO: 
+    # Use direction_id from routelines, take longest in both directions
+    '''
     dissolved_by_route = (longest_shape[route_cols + ["geometry"]]
                           .compute()
                           .dissolve(by=route_cols)
                           .reset_index()
                          )
+    '''
     
-    return dissolved_by_route
+    longest_shape_with_dir = add_route_cardinal_direction(longest_shape).compute()
+        
+    return longest_shape_with_dir
 
 
 def add_buffer(gdf, buffer_size=50):
