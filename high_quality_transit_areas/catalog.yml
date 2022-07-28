@@ -25,13 +25,7 @@ sources:
         driver: geoparquet
         description: Combined corridors across all operators. Created in B2_combine_operators_corridors.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/all_bus.parquet
-    # Source: B2_combine_operator_corridors.py
-    shape_dissolve:
-        driver: geoparquet
-        description: Dissolved corridors, remove smaller areas. Created in B2_combine_operators_corridors.py. (IS THIS NEEDED)?
-        args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/shape_dissolve.parquet   
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/all_bus.parquet  
     # Source: C1_prep_for_clipping.py
     pairwise_intersections:
         driver: geoparquet
