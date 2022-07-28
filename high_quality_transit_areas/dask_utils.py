@@ -165,6 +165,9 @@ def select_needed_shapes_for_route_network(routelines, trips):
     # Can either keep the shape_id and associate the dissolved geometry with that shape_id
     # Or, drop shape_id, since now shape_id is not reflecting the raw line geom 
     # for that shape_id, and that's confusing to the end user (also, shape_id is not used, since hqta_segment_id is primary unit of analysis)
+    
+    ##TODO: 
+    # Use direction_id from routelines, take longest in both directions
     '''
     dissolved_by_route = (longest_shape[route_cols + ["geometry"]]
                           .compute()

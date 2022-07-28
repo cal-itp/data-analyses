@@ -2,8 +2,8 @@
 Create the bus-related hqta_types
 
 These are hqta_types: 
-* major_transit_stop: where 2 HQ bus corridors intersect
-* major_stop_bus: the bus stop within the above intersection that does have the highest trip count
+* major_stop_bus: the bus stop within the above intersection does not necessarily have
+the highest trip count
 * hq_corridor_bus: stops along the HQ transit corr (may not be highest trip count)
 
 From combine_and_visualize.ipynb
