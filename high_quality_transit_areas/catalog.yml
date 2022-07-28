@@ -53,11 +53,18 @@ sources:
     # Source: C4_create_bus_hqta_types.py
     major_stop_bus:
         driver: geoparquet
-        description:  Bus stops that are within the bus intersections (clipped and exploded). Created in C4_create_bus_hqta_types.py.
+        description: Bus stops that are within the bus intersections (clipped and exploded). Created in C4_create_bus_hqta_types.py.
         args:
           urlpath: ./data/major_stop_bus.parquet
     stops_in_hq_corr:
         driver: geoparquet
-        description:  Bus stops that are within the HQ corridors, even if they stops themselves do not have a lot of trips pass through. Created in C4_create_bus_hqta_types.py.
+        description: Bus stops that are within the HQ corridors, even if they stops themselves do not have a lot of trips pass through. Created in C4_create_bus_hqta_types.py.
         args:
           urlpath: ./data/stops_in_hq_corr.parquet
+    ## FINAL DATA
+    # Source: D1_assemble_hqta_points
+    hqta_points:
+        driver: geoparquet
+        description: Combined point data for all HQTA types. Created in D1_assemble_hqta_points.py.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/hqta_points.parquet
