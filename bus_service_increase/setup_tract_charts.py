@@ -17,7 +17,9 @@ alt.renderers.enable('altair_saver', fmts=['png'])
 plt.style.use('../_shared_utils/shared_utils/calitp.mplstyle')
 
 
-def grab_legend_thresholds(df, plot_col, arrivals_group):
+def grab_legend_thresholds(df: pd.DataFrame, 
+                           plot_col: str,
+                           arrivals_group: str) -> float, float, float:
     cut1 = df[(df[arrivals_group]==1) & (df[plot_col] > 0)][plot_col].min()
     cut2 = df[df[arrivals_group]==2][plot_col].min()
     cut3 = df[df[arrivals_group]==3][plot_col].min()
@@ -46,7 +48,7 @@ CHART_LABELING = {
     "popjobdensity_group": "Pop / Job Density",
 }
 
-def labeling(word):
+def labeling(word: str) -> str:
     if word in CHART_LABELING.keys():
         word = CHART_LABELING[word]
     else: 
@@ -54,7 +56,7 @@ def labeling(word):
     return word
 
 
-def chartnaming(word):
+def chartnaming(word: str) -> str:
     word = word.replace('_pj', '').replace('_group', '')
     return word
 
