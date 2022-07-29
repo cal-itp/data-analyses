@@ -65,18 +65,18 @@ PALETTE = {
 
 
 def calitp_theme(
-    font=font,
-    labelFont=labelFont,
-    font_size=font_size,
-    chart_width=chart_width,
-    chart_height=chart_height,
-    markColor=markColor,
-    axisColor=axisColor,
-    guideLabelColor=guideLabelColor,
-    guideTitleColor=guideTitleColor,
-    blackTitle=blackTitle,
-    backgroundColor=backgroundColor,
-    PALETTE=PALETTE,
+    font: str = font,
+    labelFont: str = labelFont,
+    font_size: int = font_size,
+    chart_width: int = chart_width,
+    chart_height: int = chart_height,
+    markColor: str = markColor,
+    axisColor: str = axisColor,
+    guideLabelColor: str = guideLabelColor,
+    guideTitleColor: str = guideTitleColor,
+    blackTitle: str = blackTitle,
+    backgroundColor: str = backgroundColor,
+    PALETTE: dict = PALETTE,
 ):
     # Typography
     # At Urban it's the same font for all text but it's good to keep them separate in case you want to change one later.
@@ -198,7 +198,7 @@ def calitp_theme(
 # Need to add more since altair_saver will lose a lot of the theme applied
 
 # Apply top-level chart config but do not set properties (before hconcat, vconcat, etc)
-def apply_chart_config(chart):
+def apply_chart_config(chart: alt.Chart) -> alt.Chart:
     chart = (
         chart.configure(background=backgroundColor, font=font)
         .configure_axis(
@@ -245,7 +245,7 @@ def apply_chart_config(chart):
 
 # Single-chart top-level chart config
 # Cannot use this if hconcat or vconcat is used
-def preset_chart_config(chart):
+def preset_chart_config(chart: alt.Chart) -> alt.Chart:
     chart = apply_chart_config(chart).properties(
         width=chart_width,
         height=chart_height,

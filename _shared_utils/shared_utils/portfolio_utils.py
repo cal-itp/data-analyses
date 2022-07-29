@@ -8,17 +8,23 @@ route name, Caltrans district the same way.
 Based on `rt_delay/speedmaps.ipynb`,
 `bus_service_increase/competitive-parallel-routes.ipynb`
 """
-from datetime import date, timedelta
+import datetime as dt
 
+import pandas as pd
 from calitp.tables import tbl
 from shared_utils import rt_utils
 from siuba import *
 
 
-def add_agency_name(SELECTED_DATE=date.today() + timedelta(days=-1)):
-    # This is the agency_name used in RT maps
-    # rt_delay/rt_analysis.py#L309
-    # Similar version here with date needed - https://github.com/cal-itp/data-analyses/blob/main/high_quality_transit_areas/combine_and_visualize.ipynb
+def add_agency_name(
+    SELECTED_DATE: str | dt.date = dt.date.today() + dt.timedelta(days=-1),
+) -> pd.DataFrame:
+    """
+    Returns a dataframe with calitp_itp_id and the agency name used in portfolio.
+
+    This is the agency_name used in RT maps
+    rt_delay/rt_analysis.py#L309
+    """
     df = (
         (
             tbl.views.gtfs_schedule_dim_feeds()
@@ -39,7 +45,10 @@ def add_agency_name(SELECTED_DATE=date.today() + timedelta(days=-1)):
 
 
 # https://github.com/cal-itp/data-analyses/blob/main/bus_service_increase/E5_make_stripplot_data.py
-def add_caltrans_district():
+def add_caltrans_district() -> pd.DataFrame:
+    """
+    Returns a dataframe with calitp_itp_id and the caltrans district
+    """
     df = (
         (
             tbl.airtable.california_transit_organizations()
@@ -59,7 +68,9 @@ def add_caltrans_district():
 
 
 # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/utils.py
-def add_route_name(SELECTED_DATE=date.today() + timedelta(days=-1)):
+def add_route_name(
+    SELECTED_DATE: str | dt.date = dt.date.today() + dt.timedelta(days=-1),
+) -> pd.DataFrame:
     """
     SELECTED_DATE: datetime or str.
         Defaults to yesterday's date.
@@ -94,7 +105,10 @@ def add_route_name(SELECTED_DATE=date.today() + timedelta(days=-1)):
 
 
 # https://github.com/cal-itp/data-analyses/blob/main/traffic_ops/prep_data.py
-def latest_itp_id():
+def latest_itp_id() -> pd.DataFrame:
+    """
+    Returns a dataframe of 1 column with the latest calitp_itp_ids.
+    """
     df = (
         tbl.views.gtfs_schedule_dim_feeds()
         >> filter(_.calitp_id_in_latest is True)
