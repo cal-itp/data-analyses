@@ -6,6 +6,7 @@ Competitive routes must be subset of parallel routes.
 Parallel routes are combination of transit route with highway Route,
 and a route may be parallel to 1 highway but not other highways it intersects with.
 """
+import geopandas as gpd
 import intake
 import pandas as pd
 
@@ -16,7 +17,7 @@ catalog = intake.open_catalog("./*.yml")
 #-----------------------------------------------------------#
 ## Sub-functions for aggregate hwy and operator stats
 #-----------------------------------------------------------#
-def competitive_to_route_level():
+def competitive_to_route_level() -> pd.DataFrame:
     # This is output from `make_stripplot_data.py`
     # Wrangle it so it is at route-level, instead of trip-level    
     df = catalog.competitive_route_variability.read()
@@ -35,7 +36,8 @@ def competitive_to_route_level():
     return df2
 
 
-def calculate_parallel_competitive_stats(df, group_cols):    
+def calculate_parallel_competitive_stats(df: gpd.GeoDataFrame, 
+                                         group_cols: list) -> gpd.GeoDataFrame:    
     # Calculate % parallel
     df = df.assign(
         pct_parallel = df.parallel.divide(df.route_id).round(3),
@@ -54,7 +56,7 @@ def calculate_parallel_competitive_stats(df, group_cols):
     return df2
 
 
-def aggregate_highways(df):
+def aggregate_highways(df: gpd.GeoDataFrame) -> pd.DataFrame:
     group_cols = ["Route", "County", "District", "highway_length", 
                       "NB", "SB", "EB", "WB"] 
     
@@ -96,7 +98,7 @@ def aggregate_highways(df):
     return df4   
     
     
-def aggregate_operators(df):
+def aggregate_operators(df: gpd.GeoDataFrame) -> pd.DataFrame:
     group_cols = ["itp_id", "County"]
     
     # Put this operator_hwys first before it gets aggregated and overwritten
@@ -135,7 +137,7 @@ def aggregate_operators(df):
 # Assemble, for operator, their parallel and competitive routes
 # Aggregate and get relevant stats from highway POV and operator POV
 # Depends on sub-functions defined above
-def aggregated_transit_hwy_stats():    
+def aggregated_transit_hwy_stats() -> (pd.DataFrame, pd.DataFrame):    
     parallel = catalog.parallel_or_intersecting_routes.read()
     competitive = competitive_to_route_level()
     
@@ -159,12 +161,14 @@ def aggregated_transit_hwy_stats():
                                else 0, axis=1)
     )
     
+    # Get high-level stats of % parallel, % competitive by operator
     operator_stats = (aggregate_operators(gdf)
                       .sort_values(["pct_parallel", "pct_competitive"], 
                                    ascending=[False, False])
                       .reset_index(drop=True)
                      )
-        
+    
+    # Get high-level stats of % parallel by hwy type        
     hwy_stats = (aggregate_highways(gdf)
                  .sort_values("pct_parallel", ascending=False)
                  .reset_index(drop=True)
@@ -180,7 +184,7 @@ def aggregated_transit_hwy_stats():
 # Assemble a list of highways associated with the operator
 # Store that in a column and merge it in
 # Will be useful for filtering in ipywidgets
-def grab_highways_for_operator(df):
+def grab_highways_for_operator(df: gpd.GeoDataFrame) -> pd.DataFrame:
     operator_hwys = (df[["itp_id", "Route"]][df.Route.notna()]
          .drop_duplicates()
          .astype(int)
@@ -196,7 +200,8 @@ def grab_highways_for_operator(df):
 
 # Grab transit route geometry for operator 
 # so folium map can zoom in appropriately for a specific highway / operator combo
-def routes_highways_geom_for_operator(operator_df):
+def routes_highways_geom_for_operator(
+    operator_df: pd.DataFrame) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
     # This seems slightly overlapping with C1, where gdf is
     # imported at the beginning of ipywidget
     # but, not sure how to combine and make more efficient
@@ -215,7 +220,7 @@ def routes_highways_geom_for_operator(operator_df):
 
 # For hwys with zero or little competitive routes
 # Calculate some additional stats and prep data for mapping
-def process_hwy_stats(df):
+def process_hwy_stats(df: pd.DataFrame) -> gpd.GeoDataFrame:
     # parallel routes / competitive routes per mile
     # or percents?
     # right now, highway_length is in feet

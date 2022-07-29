@@ -16,7 +16,7 @@ catalog = intake.open_catalog("./*.yml")
 # Define grouping of cols that captures each trip
 trip_group = ["calitp_itp_id", "route_id", "trip_id", "shape_id", "service_hours"]
 
-def data_wrangling(df):
+def data_wrangling(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df["first_departure"] = pd.to_datetime(df.trip_first_departure_ts, unit='s').dt.time
     
     # If departure_time isn't available, or, when parsed, will be outside 0-23 hrs
@@ -51,16 +51,16 @@ def data_wrangling(df):
 # destination is >= last_waypoint_rank & <= last_waypoint_rank + divisible_by
 # can allow destination to be last_waypoint_rank
 
-def last_waypoint_and_destination_rank(divisible_by):
+def last_waypoint_and_destination_rank(divisible_by: int) -> (int, int):
     first = 1
     first_waypoint = first + divisible_by
     # (x- first_waypoint) / divisible_by) + 1 = 25
     # Solve for x
     x = (divisible_by * 24) + first_waypoint
-    return x, x+divisible_by
+    return x, x + divisible_by
 
 
-def subset_stops(df):
+def subset_stops(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # https://stackoverflow.com/questions/25055712/pandas-every-nth-row
     # df = df.iloc[::3]
     df["stop_rank"] = df.groupby(trip_group).cumcount() + 1
@@ -102,7 +102,7 @@ def subset_stops(df):
     return subset
 
 
-def select_origin_destination(df):
+def select_origin_destination(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df = df[df.is_od==1].reset_index(drop=True)
     
     # Wrangle it so there are columns with previous point and current point in the same row
@@ -127,7 +127,7 @@ def select_origin_destination(df):
     return df2
 
 
-def assemble_waypoints(df):
+def assemble_waypoints(df: gpd.GeoDataFrame) -> pd.DataFrame:
     df = df[(df.is_waypoint==1) & (df.is_od==0)].reset_index(drop=True)
     
     # Take all the stops in between origin/destination, put tuples into a list
