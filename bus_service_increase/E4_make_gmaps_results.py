@@ -22,7 +22,7 @@ DATA_PATH = "./gmaps_cache/"
 GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}gmaps_cache/"
 
 
-def grab_cached_results(df):
+def grab_cached_results(df: pd.DataFrame) -> (list, list):
     result_ids = list(df.identifier)
 
     successful_ids = []
@@ -41,7 +41,8 @@ def grab_cached_results(df):
     
     return successful_ids, durations 
             
-def double_check_lists_match(successful_ids, durations):            
+def double_check_lists_match(successful_ids: list, 
+                             durations: list) -> pd.DataFrame:            
     # Double check lengths match
     print(f"# results_ids: {len(successful_ids)}")
     print(f"# durations: {len(durations)}")
@@ -54,7 +55,7 @@ def double_check_lists_match(successful_ids, durations):
         
         return results_df
      
-def compare_travel_time_by_mode(df):
+def compare_travel_time_by_mode(df: pd.DataFrame) -> pd.DataFrame:
     df = df.assign(
         car_duration_hours = df.duration_in_sec.divide(60 * 60)
     )
@@ -67,7 +68,7 @@ def compare_travel_time_by_mode(df):
     return df
 
 
-def assemble_route_geom(df, SELECTED_DATE):
+def assemble_route_geom(df: pandas.DataFrame, SELECTED_DATE: str) -> gpd.GeoDataFrame:
     operators = list(df.calitp_itp_id.unique())
 
     routes = shared_utils.geography_utils.make_routes_gdf(
