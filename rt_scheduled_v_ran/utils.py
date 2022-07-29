@@ -1,5 +1,5 @@
 """
-Utils for RT Schedule
+Utils for Scheduled vs RT Trips
 """
 
 import os
@@ -56,8 +56,10 @@ def get_pct_ran(join, date):
     ## eventually generate a dataframe with the columns (dates and pct_ran)
     day_pct_ran = {}
     day_pct_ran['date'] = date
-    day_pct_ran['pct_trips_ran'] = ((len(join>>filter(_.have_rt=='both')))/(len(join)))
-    
+    if ((len(join))!=0):
+        day_pct_ran['pct_trips_ran'] = ((len(join>>filter(_.have_rt=='both')))/(len(join)))
+    elif ((len(join))==0):
+        day_pct_ran['pct_trips_ran'] = ''
     pct_ran = pd.DataFrame([day_pct_ran])
 
     return pct_ran
