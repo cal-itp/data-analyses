@@ -13,7 +13,12 @@ catalog = intake.open_catalog("./catalog.yml")
 #----------------------------------------------------------------#
 ## Functions to wrangle data for charts
 #----------------------------------------------------------------#
-def import_processed_data():
+def import_processed_data()-> pd.DataFrame:
+    """
+    Import processed bus stop times data by census tract.
+    
+    Clean up columns, dtypes, labeling for making visualizations.
+    """
     df = catalog.bus_stop_times_by_tract.read()
     
     df = df.assign(
@@ -70,7 +75,7 @@ def import_processed_data():
 # Generate more summary stats
 # Can aggregate by equity, by equity-density, by density, etc
 
-def aggregate_generate_stats(df, group_cols):
+def aggregate_generate_stats(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
     # After subset
     t1 = geography_utils.aggregate_by_geography(
         df, 
@@ -90,7 +95,8 @@ def aggregate_generate_stats(df, group_cols):
 
 
 # Need to pivot df first for heatmaps
-def pivot_get_counts(df, index_col, group_col, value_col):
+def pivot_get_counts(df:pd.DataFrame | gpd.GeoDataFrame, 
+                     index_col: str, group_col:str, value_col:str) -> pd.DataFrame:
     df2 = df.pivot(index = index_col, 
                    columns = group_col, 
                    values = value_col)

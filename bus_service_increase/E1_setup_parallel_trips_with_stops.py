@@ -1,3 +1,12 @@
+"""
+Grab stashed trips parquet file.
+Add in service hours, narrow it down to 1 trip per route,
+and subset it to parallel routes only.
+
+Create a df that has the selected trip per route
+with all the stop info (and stop sequence) attached.
+"""
+import datetime
 import geopandas as gpd
 import os
 import pandas as pd
@@ -12,7 +21,8 @@ import utils
 import shared_utils
 
 
-def grab_service_hours(df, SELECTED_DATE):
+def grab_service_hours(df: pd.DataFrame, 
+                       SELECTED_DATE: str | datetime.datetime):
     daily_trip_info = (
         tbl.views.gtfs_schedule_fact_daily_trips()
         >> filter(_.service_date == SELECTED_DATE)
@@ -34,7 +44,7 @@ def grab_service_hours(df, SELECTED_DATE):
     
     return df2
 
-def select_one_trip(df):
+def select_one_trip(df: pd.DataFrame) -> pd.DataFrame:
     drop_cols = ["stop_sequence", "stop_id", "departure_time", 
                  "trip_first_departure_ts", "trip_last_arrival_ts", 
                 ]
@@ -92,7 +102,7 @@ def select_one_trip(df):
     return df2
 
 
-def subset_to_parallel_routes(df):
+def subset_to_parallel_routes(df: pd.DataFrame) -> gpd.GeoDataFrame:
     # Just use route_id to flag parallel, not shape_id
     # It won't matter anyway, because we will use stop's point geom
     parallel_routes = shared_utils.utils.download_geoparquet(utils.GCS_FILE_PATH, 
@@ -120,7 +130,7 @@ def subset_to_parallel_routes(df):
     return gdf
 
 
-def grab_stop_geom(df):
+def grab_stop_geom(df: pd.DataFrame) -> gpd.GeoDataFrame:
     stop_info = (tbl.views.gtfs_schedule_dim_stops()
                  >> select(_.calitp_itp_id,
                        _.stop_id, _.stop_lon, _.stop_lat,
@@ -187,13 +197,16 @@ def make_parallel_routes_df_with_stops():
     
     # Get rid of dups / drop ITP_ID==200
     final_df = (final_df[final_df.calitp_itp_id != 200]
-                .sort_values(["calitp_itp_id", "route_id", "trip_id", "stop_sequence"])
-                .drop_duplicates(subset=["calitp_itp_id", "route_id", "trip_id", "stop_sequence"])
+                .sort_values(["calitp_itp_id", "route_id", 
+                              "trip_id", "stop_sequence"])
+                .drop_duplicates(subset=["calitp_itp_id", "route_id", 
+                                         "trip_id", "stop_sequence"])
                 .reset_index(drop=True)
                )
     
     shared_utils.utils.geoparquet_gcs_export(final_df, 
-                                             utils.GCS_FILE_PATH, "parallel_trips_with_stops")
+                                             utils.GCS_FILE_PATH, 
+                                             "parallel_trips_with_stops")
     print("Exported to GCS")
 
 

@@ -6,6 +6,7 @@ Create stripplots and stats used in narrative.
 """
 import altair as alt
 import branca
+import geopandas as gpd
 import intake
 import pandas as pd
 
@@ -25,7 +26,9 @@ SELECTED_DATE = '2022-1-6' #warehouse_queries.dates['thurs']
 PCT_COMPETITIVE_THRESHOLD = 0.75
 PCT_TRIPS_BELOW_CUTOFF = 1.0
 
-def operator_parallel_competitive_stats(itp_id, pct_trips_competitive_cutoff, pct_trips_cutoff):
+def operator_parallel_competitive_stats(itp_id: int, 
+                                        pct_trips_competitive_cutoff: float, 
+                                        pct_trips_cutoff: float) -> dict:
     """
     itp_id: int
     pct_trips_competitive_cutoff: float
@@ -80,7 +83,7 @@ def operator_parallel_competitive_stats(itp_id, pct_trips_competitive_cutoff, pc
 # Color to designate p25, p50, p75, fastest trip?
 DARK_GRAY = "#323434"
 
-def labeling(word):
+def labeling(word: str) -> str:
     label_dict = {
         "bus_multiplier": "Ratio of Bus to Car Travel Time",
         "bus_difference": "Difference in Bus to Car Travel Time (min)"
@@ -94,7 +97,7 @@ def labeling(word):
     return word
 
 
-def specific_point(y_col):
+def specific_point(y_col: str) -> alt.Chart:
     chart = (
         alt.Chart()
         .mark_point(size=20, opacity=0.6, strokeWidth=1.3)
@@ -107,7 +110,9 @@ def specific_point(y_col):
     return chart
 
 
-def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
+def make_stripplot(df: pd.DataFrame | gpd.GeoDataFrame, 
+                   y_col: str = "bus_multiplier", 
+                   Y_MIN: int = 0, Y_MAX: int = 5) -> alt.Chart:
     # Instead of doing +25% travel time, just use set cut-offs because it's easier
     # to write caption for across operators    
     df = df.assign(
@@ -233,7 +238,7 @@ def make_stripplot(df, y_col="bus_multiplier", Y_MIN=0, Y_MAX=5):
 # Add competitive route stats to display in report
 # Create these stats ahead of time
 # Subset later in the notebook by route_group
-def competitive_route_level_stats(df):
+def competitive_route_level_stats(df: pd.DataFrame | gpd.GeoDataFrame) -> pd.DataFrame:
     # from make_stripplot_data, set this to hours 17-19
     pm_peak_hours = 3 
     
@@ -298,7 +303,7 @@ POPUP_DICT = {
 }
 
 
-def make_map(gdf): 
+def make_map(gdf: gpd.GeoDataFrame): 
     # Create unique colors for each highway in district
     # Do it off of the index value
     # TODO: figure out how to get this list to be truncated

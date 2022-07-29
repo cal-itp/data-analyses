@@ -8,6 +8,8 @@ import intake
 import pandas as pd
 import yaml
 
+from pathlib import Path
+
 import utils
 
 catalog = intake.open_catalog("./bus_service_increase/*.yml")
@@ -17,12 +19,12 @@ catalog = intake.open_catalog("./bus_service_increase/*.yml")
 PCT_COMPETITIVE_THRESHOLD = 0.75
 PCT_TRIPS_BELOW_CUTOFF = 1.0
 
-PORTFOLIO_SITE_YAML = "./portfolio/sites/parallel_corridors.yml"
+PORTFOLIO_SITE_YAML = Path("./portfolio/sites/parallel_corridors.yml")
 
 # Do a quick check and suppress operators that just show 1 route in each route_group
 # From UI/UX perspective, it's confusing to readers because they think it's an error that
 # more routes aren't showing up, rather than deliberately showing results that meet certain criteria
-def valid_operators(df):
+def valid_operators(df: pd.DataFrame | gpd.GeoDataFrame) -> list:
     t1 = df[(df.route_group.notna()) &
             (df.pct_trips_competitive > PCT_COMPETITIVE_THRESHOLD) &
             (df.pct_below_cutoff >= PCT_TRIPS_BELOW_CUTOFF)
@@ -51,7 +53,7 @@ def valid_operators(df):
     return list(t4.calitp_itp_id)
     
     
-def overwrite_yaml(PORTFOLIO_SITE_YAML):
+def overwrite_yaml(PORTFOLIO_SITE_YAML: Path) -> list:
     """
     PORTFOLIO_SITE_YAML: str
                         relative path to where the yaml is for portfolio
@@ -107,9 +109,10 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML):
     
     return chapters_list
 
+
 # Compare the ITP IDs for parallel corridors and RT
 # If URL available for RT analysis, embed in parameterized notebook
-def check_if_rt_data_available(PORTFOLIO_SITE_YAML):
+def check_if_rt_data_available(PORTFOLIO_SITE_YAML: Path) -> list:
     with open(PORTFOLIO_SITE_YAML) as analyses:
         analyses_data = yaml.load(analyses, yaml.Loader)
     

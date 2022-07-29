@@ -17,7 +17,9 @@ alt.renderers.enable('altair_saver', fmts=['png'])
 plt.style.use('../_shared_utils/shared_utils/calitp.mplstyle')
 
 
-def grab_legend_thresholds(df, plot_col, arrivals_group):
+def grab_legend_thresholds(df: pd.DataFrame, 
+                           plot_col: str,
+                           arrivals_group: str) -> float, float, float:
     cut1 = df[(df[arrivals_group]==1) & (df[plot_col] > 0)][plot_col].min()
     cut2 = df[df[arrivals_group]==2][plot_col].min()
     cut3 = df[df[arrivals_group]==3][plot_col].min()
@@ -46,7 +48,7 @@ CHART_LABELING = {
     "popjobdensity_group": "Pop / Job Density",
 }
 
-def labeling(word):
+def labeling(word: str) -> str:
     if word in CHART_LABELING.keys():
         word = CHART_LABELING[word]
     else: 
@@ -54,12 +56,13 @@ def labeling(word):
     return word
 
 
-def chartnaming(word):
+def chartnaming(word: str) -> str:
     word = word.replace('_pj', '').replace('_group', '')
     return word
 
 
-def base_bar_chart(df, x_col, y_col, Y_MAX):
+def base_bar_chart(df: pd.DataFrame, x_col: str, 
+                   y_col: str, Y_MAX: int) -> alt.Chart:
     bar = (alt.Chart(df)
            .mark_bar()
            .encode(
@@ -76,8 +79,9 @@ def base_bar_chart(df, x_col, y_col, Y_MAX):
     return bar
     
 
-def bar_chart(df, x_col, y_col, color_col, Y_MAX, 
-              chart_title, IMG_PATH = f"{utils.IMG_PATH}"):
+def bar_chart(df: pd.DataFrame, x_col: str, y_col: str, 
+              color_col: str, Y_MAX: int, 
+              chart_title: str, IMG_PATH = f"{utils.IMG_PATH}"):
     
     # Need to add a way to find the max across different datasets...
     # So charts are comparable in presentation
@@ -101,8 +105,11 @@ def bar_chart(df, x_col, y_col, color_col, Y_MAX,
     bar.save(f"{IMG_PATH}{chartnaming(y_col)}_{chartnaming(x_col)}.png")
 
 
-def grouped_bar_chart(df, x_col, y_col, color_col, grouped_col, Y_MAX, 
-                      chart_title, IMG_PATH = f"{utils.IMG_PATH}"):    
+def grouped_bar_chart(df: pd.DataFrame, 
+                      x_col: str, y_col: str, 
+                      color_col: str, grouped_col: str, 
+                      Y_MAX: int, chart_title: str, 
+                      IMG_PATH = f"{utils.IMG_PATH}"):    
     bar = base_bar_chart(df, x_col, y_col, Y_MAX)
     bar = (bar.encode(
             column = alt.Column(f"{grouped_col}:N", 
@@ -125,7 +132,7 @@ def grouped_bar_chart(df, x_col, y_col, color_col, grouped_col, Y_MAX,
 #----------------------------------------------------------------#
 ## Heatmaps
 #----------------------------------------------------------------#
-def make_heatmap(df, chart_title, xtitle, ytitle):
+def make_heatmap(df: pd.DataFrame, chart_title: str, xtitle: str, ytitle: str):
     chart = (sns.heatmap(df, cmap="Blues")
              .set(title=chart_title, xlabel=xtitle, ylabel=ytitle,
                  )
@@ -137,12 +144,15 @@ def make_heatmap(df, chart_title, xtitle, ytitle):
 #----------------------------------------------------------------#
 ## Scatterplots
 #----------------------------------------------------------------#
-def make_scatterplot(df, x_col, y_col, group_col, tooltip_list, chart_title):
+def make_scatterplot(df: pd.DataFrame, 
+                     x_col: str, y_col: str, 
+                     group_col: str, tooltip_list: list, 
+                     chart_title: str) -> alt.Chart:
     
     # Interactive chart should be centered near where 95th percentile data is
     # There are outliers...but let's not have it so zoomed out
     
-    def colname_label(col):
+    def colname_label(col: str) -> (str, str):
         colname = col.split(":")[0]
         coltitle = colname.replace('_', ' ').replace(' pj', '').replace('popjobs', 'pop/job')
         return colname, coltitle
