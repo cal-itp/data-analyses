@@ -16,10 +16,12 @@ import pandas as pd
 import shared_utils
 import utils
 
+from pathlib import Path
+
 catalog = intake.open_catalog("*.yml")
 
-DATA_PATH = "./data/"
-IMG_PATH = "./img/"
+DATA_PATH = Path("./data/")
+IMG_PATH = Path("./img/")
 
 #--------------------------------------------------------#
 ### State Highway Network
@@ -53,7 +55,8 @@ def clean_highways():
 ### Functions to create overlay dataset + further cleaning
 #--------------------------------------------------------#
 # Can this function be reworked to take a df?
-def process_transit_routes(alternate_df = None):
+def process_transit_routes(alternate_df: 
+                           gpd.GeoDataFrame | None = None) -> gpd.GeoDataFrame:
     if alternate_df is None:
         df = catalog.transit_routes.read()
     else:
@@ -87,7 +90,8 @@ def process_transit_routes(alternate_df = None):
     return df
 
 
-def process_highways(buffer_feet = shared_utils.geography_utils.FEET_PER_MI):
+def process_highways(buffer_feet: int = 
+                     shared_utils.geography_utils.FEET_PER_MI) -> gpd.GeoDataFrame:
     df = (catalog.state_highway_network.read()
           .to_crs(shared_utils.geography_utils.CA_StatePlane))
     
@@ -115,9 +119,9 @@ def process_highways(buffer_feet = shared_utils.geography_utils.FEET_PER_MI):
     return df
     
     
-def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEET_PER_MI,
+def overlay_transit_to_highways(hwy_buffer_feet: int = shared_utils.geography_utils.FEET_PER_MI,
                                 alternate_df = None
-                               ):
+                               ) -> gpd.GeoDataFrame:
     """
     Function to find areas of intersection between
     highways (default of 1 mile buffer) and transit routes.
@@ -170,8 +174,9 @@ def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEE
     return gdf2
 
 
-def parallel_or_intersecting(df, pct_route_threshold=0.5, 
-                             pct_highway_threshold=0.1):
+def parallel_or_intersecting(df: gpd.GeoDataFrame, 
+                             pct_route_threshold: float =0.5, 
+                             pct_highway_threshold: float = 0.1) -> gpd.GeoDataFrame:
     
     # Play with various thresholds to decide how to designate parallel
     df = df.assign(
