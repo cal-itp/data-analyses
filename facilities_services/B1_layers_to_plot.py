@@ -12,7 +12,7 @@ from shared_utils import geography_utils
 catalog = intake.open_catalog("./*.yml")
 
 
-def subset_hqta():
+def subset_hqta() -> gpd.GeoDataFrame:
     hqta = catalog.hqta_shapes.read()
 
     exclude_me = [
@@ -31,7 +31,7 @@ def subset_hqta():
     return hqta2
 
 
-def spatial_join_facilities_hqta():
+def spatial_join_facilities_hqta(): gpd.GeoDataFrame:
     facilities = catalog.tier1_facilities_processed.read()
     hqta = subset_hqta()    
     
@@ -45,10 +45,13 @@ def spatial_join_facilities_hqta():
     
     return gdf
 
-import pandas as pd
 
-# Notice there's some observations missing district info (maybe fell outside district boundaries?)
-def fill_in_missing_district(df):
+
+def fill_in_missing_district(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    '''
+    Notice there's some observations missing district info 
+    (maybe fell outside district boundaries?)
+    '''
     missing_df = df[df.district.isna()]
     non_missing_df = df[df.district.notna()]
     
@@ -72,7 +75,16 @@ def fill_in_missing_district(df):
     
     return df2
 
-def layers_to_plot():
+
+def layers_to_plot()-> (gpd.GeoDataFrame, gpd.GeoDataFrame):
+    """
+    Prepare the 2 layers to plot in a map.
+    
+    Facilities (point)
+    HQTA (polygon) -- dissolve this so it's at operator-level (don't need route-info)
+    
+    Do a spatial join to only find facilities in HQTA areas
+    """
     gdf = spatial_join_facilities_hqta()
 
     gdf = gdf.astype({"district": "Int64"})
