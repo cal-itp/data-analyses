@@ -26,73 +26,58 @@ my_clean_dataframes = []
 '''
 Functions that can be used across sheets
 '''
-
-'''
-For PSOE and TPSOE sheets, subset out OE adjacent columns
-and PS adjacent columns into their own dataframe, before
-concating them
-'''
-def subset_psoe_tpsoe(df, ps_list: list, oe_list: list):
-    df_ps = df[ps_list]
-    df_oe = df[oe_list]
-    return df_ps, df_oe
-
-'''
-Cleaning the PSOE and TPSOE sheets
-prior to concating them by stripping columns of their prefixes 
-'''
 def cleaning_psoe_tpsoe(df, ps_or_oe: str):
-    # Fill in the column type for either PS: personal services
-    # or OE: operating expense
+    """ 
+    Cleaning the PSOE and TPSOE sheets
+    prior to concating them by stripping columns of their prefixes   
+    """
     df["type"] = ps_or_oe
 
-    # Strip away the prefixes from column names
-    # https://stackoverflow.com/questions/54097284/removing-suffix-from-dataframe-column-names-python
-    # Create suffix
+    """
+    Strip away the prefixes from column names
+    https://stackoverflow.com/questions/54097284/removing-suffix-from-dataframe-column-names-python
+    Create suffix
+    """
     suffix = f"{ps_or_oe}_"
     df.columns = df.columns.str.replace(suffix, "", regex=True)
-
-    # There is a enc_+_exp_projection for OE: try and except to rename to projection
-    # To match PS
-    try:
-        df = df.rename(columns={"enc_+_exp_projection": "projection"})
-    except:
-        pass
 
     return df
 
 '''
-Function that loads & cleans in raw data
+Function that loads & cleans raw data
 '''
 def import_raw_data(file_name: str, name_of_sheet: str, appropriations_to_filter: list):
 
-    """
-    Name_of_sheet: name of Excel tab that contains data
-    Appropriations_to_filter: certain appropriations are filtered out
-    but this is can change based on what ppl want. 
-    A list of what to filter allows for
-    flexibility.  The cleaned data frames are then held into a list 
-    called my_clean_dataframes
+    """Load the raw data and clean it up.
+
+    Args:
+        file_name: the Excel workbook
+        name_of_sheet: the name of the sheet
+        appropriations_to_filter: list of all the appropriations to be filtered out
+
+    Returns:
+        The cleaned df. Input the results into a list.
+
     """
     df = pd.read_excel(f"{GCS_FILE_PATH}{file_name}", sheet_name=name_of_sheet)
-    
+
     # Get rid of the unnecessary header info
     # Stuff like "Enterprise Datalink Production download as of 05/23/2022"
     df = df.iloc[13:].reset_index(drop=True)
 
-    # The first row contains column names
+    # The first row contains column names - update it to the column
     df.columns = df.iloc[0]
 
     # Drop the first row as they are now column names
     df = df.drop(df.index[0]).reset_index(drop=True)
 
-    # Drop rows with NA in the certain cols,
+    # Drop rows with NA in PEC Class
     # Since those are probably the grand totals tagged at the end of the Excel sheet
     df = df.dropna(subset=["PEC Class"])
-    
-    #Snakecase         
-    df = to_snakecase(df) 
-         
+
+    # Snakecase
+    df = to_snakecase(df)
+
     # Rename columns to mimc dashboard
     df = df.rename(
         columns={
@@ -106,19 +91,29 @@ def import_raw_data(file_name: str, name_of_sheet: str, appropriations_to_filter
             "appr": "appropriation",
             "total_expended___encumbrance": "total_expenditure",
             "oe_bal_excl_pre_enc": "oe_balance",
-            "oe__enc_+_oe_exp_projection": "oe_enc_+_oe_exp_projection",
+            "oe__enc_+_oe_exp_projection": "oe_projection",
         }
     )
 
     # Certain appropriation(s) are filtered out:
     df = df[~df.appropriation.isin(appropriations_to_filter)]
 
-    # Narrow down division names
+    # Narrow down division names inot a new column
     df["division"] = df["pec_class_description"].replace(div_crosswalks)
 
-    # Adding dataframe to an empty list
+    # Adding dataframe to an empty list called my_clean_dataframes
     my_clean_dataframes.append(df)
 
+    """
+    Drop AP if the column exists.
+    It seems to exist through data for AP 1-9, but deleted for 
+    other periods
+    """
+    try:
+        df = df.drop(columns=["ap"])
+    except:
+        pass
+    
     return df
 
 '''
@@ -127,7 +122,7 @@ Funds by Division Sheet
 def create_fund_by_division(df):
     # Drop excluded cols
     excluded_cols = ["appr_catg", "act__hours", "py_pos_alloc"]
-    df = ap11.drop(columns=excluded_cols)
+    df = df.drop(columns=excluded_cols)
 
     # Add a blank column for notes
     df["notes"] = np.nan
@@ -135,51 +130,9 @@ def create_fund_by_division(df):
     return df
 
 '''
-TPSOE 
+TPSOE Sheet
 '''
-# Monetary cols to coerce into floats
-tpsoe_monetary_cols = [
-        "allocation",
-        "expenditure",
-        "balance",
-        "encumbrance",
-        "projection",
-        "year_end_expendded_pace",
-        "%_expended",
-    ]
-
-#Rearranging the cols to be the right order
-tpsoe_order_of_cols = [
-        "pec_class",
-        "division",
-        "fund",
-        "fund_description",
-        "appropriation",
-        "type",
-        "allocation",
-        "expenditure",
-        "balance",
-        "encumbrance",
-        "projection",
-        "year_end_expendded_pace",
-        "%_expended",
-    ]
-
-# Cols for OE
-tpsoe_oe_list = [
-    "fund",
-    "fund_description",
-    "appropriation",
-    "pec_class",
-    "division",
-    "oe_allocation",
-    "oe_encumbrance",
-    "oe_expenditure",
-    "oe_balance",
-    "oe_enc_+_oe_exp_projection",
-]
-
-# Cols: for PS
+# Columns relevant PS
 tpsoe_ps_list = [
     "fund",
     "fund_description",
@@ -194,55 +147,114 @@ tpsoe_ps_list = [
     "ps_%_expended",
 ]
 
-#Create the TPSOE sheet
-def create_tpsoe(df, oe_list: list, ps_ist:list): 
-    #Can just subset right here
-    tpsoe_oe = cleaning_tpsoe(df[oe_list], "oe")
-    tpsoe_ps = cleaning_tpsoe(df[ps_ist], "ps")
-    
-    #Stack them on top of each other, now that the 
-    #columns are the same name
+# Columns relevant OE
+tpsoe_oe_list = [
+    "fund",
+    "fund_description",
+    "appropriation",
+    "pec_class",
+    "division",
+    "oe_allocation",
+    "oe_encumbrance",
+    "oe_expenditure",
+    "oe_balance",
+    "oe_projection",
+]
+
+# Monetary columns
+monetary_cols = [
+    "allocation",
+    "expenditure",
+    "balance",
+    "encumbrance",
+    "projection",
+]
+
+# Ordering the columns correctly
+order_of_cols = [
+    "pec_class",
+    "division",
+    "fund",
+    "fund_description",
+    "appropriation",
+    "type",
+    "allocation",
+    "expenditure",
+    "balance",
+    "encumbrance",
+    "projection",
+    "year_end_expendded_pace",
+    "%_expended",
+]
+
+# Create the sheet
+def create_tpsoe(df, ps_list: list, oe_list: list):
+    """
+    ps_list: a list of all the ps related columns.
+    oe_list: a list of all the oe related columns.
+    Use this to subset out the whole dataframe,
+    one for personal services, one for operating expenses.
+    """
+
+    # Clean up and subset out the dataframe
+    tpsoe_oe = cleaning_psoe_tpsoe(df[oe_list], "oe")
+    tpsoe_ps = cleaning_psoe_tpsoe(df[ps_list], "ps")
+
+    # Concat the two dataframes together
     c1 = pd.concat([tpsoe_ps, tpsoe_oe], sort=False)
-    
-    #Correct order of columns
-    c1 = c1[tpsoe_order_of_cols]
+
+    # Rearrange the columns to the right order
+    c1 = c1[order_of_cols]
 
     # Add a notes column
     c1["notes"] = np.nan
-    
-    #Force monetary cols into floats
-    c1[tpsoe_monetary_cols] = c1[tpsoe_monetary_cols].astype("float64")
+
+    # Correct data types of monetary columns from objects to float
+    c1[monetary_cols] = c1[monetary_cols].astype("float64")
 
     return c1
 
 '''
-Timeline 
-All the AP data stacked on top of each other
+Timeline Sheet
 '''
-#How to automate this...instead of having to type in a tuple
-def create_timeline(keys_list: tuple):
-    '''
-    Keys reflect the accounting period the dataframe is taken.
-    Grabbing my_clean_dataframes which holds all my clean & filtered dfs
-    Stacking them all, adding a column called "source" which gives a source
-    of where the row was taken from
-    '''
-    df = (
-    pd.concat(my_clean_dataframes, keys=keys_list)
-    .rename_axis(("source", "tmp"))
-    .reset_index(level=0)
-    .reset_index(drop=True))
+def create_timeline(my_clean_dataframes:list):
+    """
+    Loop through all the cleaned dfs in the list
+    my_clean_dataframes. Tag each dataframe as 1,
+    2,3,etc to fill in the column "ap" (aka accounting
+    period) that differentiates which accounting period each df comes from.
+    """
+    keys_list = []
+
+    for i, item in enumerate(my_clean_dataframes):
+        keys_list.append(i + 1)
+
+    """
+    Stack all the dfs in my_clean_dataframes, starting 
+    https://stackoverflow.com/questions/59267129/how-to-concatenate-multiple-dataframes-from-multiple-sources-in-pandas
+    """
+    c1 = (
+        pd.concat(my_clean_dataframes, keys=keys_list)
+        .rename_axis(("source", "tmp"))
+        .reset_index(level=0)
+        .reset_index(drop=True)
+    )
+
+    # Drop original accounting period column & replace the new source col
+    try:
+        c1 = c1.drop(
+        columns=[
+            "ap"])
+    except:
+        pass
     
-    #Drop and rename columns
-    df = (df
-          .drop(columns=["ap",])
-          .rename(columns={"source": "ap"})
-         )
-    return df
+    c1 = c1.rename(columns={"source": "ap"})
+    return c1
 
 '''
 PSOE Timeline
 '''
+# Columns relevant PS
 psoe_ps_cols = [
     "appr_catg",
     "fund",
@@ -259,7 +271,8 @@ psoe_ps_cols = [
     "pec_class_description",
 ]
 
-psoe_os_cols = [
+# Columns relevant OE
+psoe_oe_cols = [
     "appr_catg",
     "fund",
     "fund_description",
@@ -270,41 +283,44 @@ psoe_os_cols = [
     "oe_encumbrance",
     "oe_expenditure",
     "oe_balance",
-    "oe_enc_+_oe_exp_projection",
+    "oe_projection",
     "oe_%_expended",
     "ap",
     "pec_class_description",
 ]
 
+# Reorder to the right column
 psoe_right_col_order = [
-        "appr_catg",
-        "fund",
-        "fund_description",
-        "appropriation",
-        "division",
-        "pec_class",
-        "pec_class_description",
-        "allocation",
-        "expense",
-        "balance",
-        "projection",
-        "%_expended",
-        "ap",
-        "type",
-        "encumbrance",
-    ]
+    "appr_catg",
+    "fund",
+    "fund_description",
+    "appropriation",
+    "division",
+    "pec_class",
+    "pec_class_description",
+    "allocation",
+    "expense",
+    "balance",
+    "projection",
+    "%_expended",
+    "ap",
+    "type",
+    "encumbrance",
+]
+
 def create_psoe_timeline(df, ps_list: list, oe_list: list):
-    #Subset the dataframe into OE and PS only. Apply cleaning function.
+
+    # Create 2 dataframes that subsets out OE and PS
     psoe_oe = cleaning_psoe_tpsoe(df[oe_list], "oe")
     psoe_ps = cleaning_psoe_tpsoe(df[ps_list], "ps")
-    
-    #Stack the two dataframes on top of each other
-    c1 = pd.concat([psoe_ps, psoe_oe], sort=False)
-    
-    #Rename & oeorder to mimic original PMP
-    c1 = c1[psoe_right_col_order].rename(columns={"expenditure": "expense"})
 
-    # Add a notes column
-    c1["notes"] = np.nan
+    # Stack both dataframes on top of each other
+    c1 = pd.concat([psoe_ps, psoe_oe], sort=False)
+
+    # Rename column
+    c1 = c1.rename(columns={"expenditure": "expense"})
+
+    # Rearrange the dataframe in the right order
+    c1 = c1[psoe_right_col_order]
 
     return c1
