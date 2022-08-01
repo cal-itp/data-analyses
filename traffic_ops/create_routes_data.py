@@ -183,15 +183,20 @@ def make_routes_shapefile():
         validate = "m:1"
     )
     
-    routes_assembled2 = (prep_data.filter_latest_itp_id(routes_assembled2, 
-                                                        latest_itp_id, 
-                                                        itp_id_col = "calitp_itp_id")
-                         # Any renaming to be done before exporting
-                         .rename(columns = prep_data.RENAME_COLS)
-                         .sort_values(["itp_id", "route_id"])
-                         .reset_index(drop=True)
-                        )
+    latest_itp_id = portfolio_utils.latest_itp_id(SELECTED_DATE = prep_data.SELECTED_DATE)
     
+    routes_assembled2 = (pd.merge(
+        routes_assembled2, 
+        latest_itp_id,
+        on = "calitp_itp_id",
+        how = "inner",
+        validate = "m:1")
+     # Any renaming to be done before exporting
+     .rename(columns = prep_data.RENAME_COLS)
+     .sort_values(["itp_id", "route_id"])
+     .reset_index(drop=True)
+    )
+
     print(f"Routes script total execution time: {time3-time0}")
 
     return routes_assembled2

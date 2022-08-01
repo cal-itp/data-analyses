@@ -109,8 +109,12 @@ def make_stops_shapefile():
     time2 = datetime.now()
     print(f"Attach route and operator info to stops: {time2-time1}")
     
-    df2 = (prep_data.filter_latest_itp_id(df2, latest_itp_id, 
-                                          itp_id_col = "calitp_itp_id")
+    latest_itp_id = portfolio_utils.latest_itp_id(SELECTED_DATE = prep_data.SELECTED_DATE)
+
+    df2 = (pd.merge(df2, 
+                    latest_itp_id,
+                    on = "calitp_itp_id",
+                    how = "inner")
            # Any renaming to be done before exporting
            .rename(columns = prep_data.RENAME_COLS)
            .sort_values(["itp_id", "route_id", "stop_id"])
