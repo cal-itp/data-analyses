@@ -46,6 +46,25 @@ def cleaning_psoe_tpsoe(df, ps_or_oe: str):
 '''
 Function that loads & cleans raw data
 '''
+int_cols = [
+    "ps_allocation",
+    "ps_expenditure",
+    "ps_balance",
+    "ps_projection",
+    "py_pos_alloc",
+    "act__hours",
+    "oe_allocation",
+    "oe_encumbrance",
+    "oe_expenditure",
+    "oe_balance",
+    "total_allocation",
+    "total_expenditure",
+    "total_balance",
+    "total_projection",
+    "ap"
+]
+
+
 def import_raw_data(file_name: str, name_of_sheet: str, appropriations_to_filter: list):
 
     """Load the raw data and clean it up.
@@ -91,10 +110,32 @@ def import_raw_data(file_name: str, name_of_sheet: str, appropriations_to_filter
             "appr": "appropriation",
             "total_expended___encumbrance": "total_expenditure",
             "oe_bal_excl_pre_enc": "oe_balance",
-            "oe__enc_+_oe_exp_projection": "oe_projection",
         }
     )
-
+    
+    """
+    Drop Projection Cols & Recreate
+    """
+    
+    try:
+        df = df.drop(columns="oe_projection")
+    except:
+        pass
+    
+    try:
+        df = df.drop(columns="oe__enc_+_oe_exp_projection")
+    except:
+        pass
+    
+    # Change to the right data type
+    df[int_cols] = df[int_cols].astype("int64")
+    
+    # Add the column of 'Year End Expended Pace'
+    df["year_expended_pace"] = (df["ps_projection"] / df["ps_allocation"]).fillna(0)
+    
+    # Create oe__enc_+_oe_exp_projection
+    df['oe_projection'] = (df['oe_encumbrance']+df['oe_expenditure']/(df.iloc[0]['ap'])*12).astype('int64')
+    
     # Certain appropriation(s) are filtered out:
     df = df[~df.appropriation.isin(appropriations_to_filter)]
 
@@ -103,16 +144,6 @@ def import_raw_data(file_name: str, name_of_sheet: str, appropriations_to_filter
 
     # Adding dataframe to an empty list called my_clean_dataframes
     my_clean_dataframes.append(df)
-
-    """
-    Drop AP if the column exists.
-    It seems to exist through data for AP 1-9, but deleted for 
-    other periods
-    """
-    try:
-        df = df.drop(columns=["ap"])
-    except:
-        pass
     
     return df
 
@@ -121,12 +152,13 @@ Funds by Division Sheet
 '''
 def create_fund_by_division(df):
     # Drop excluded cols
-    excluded_cols = ["appr_catg", "act__hours", "py_pos_alloc"]
+    excluded_cols = ["appr_catg", "act__hours", "py_pos_alloc", "pec_class_description", "ap"]
     df = df.drop(columns=excluded_cols)
-
+    
     # Add a blank column for notes
     df["notes"] = np.nan
 
+    
     return df
 
 '''
@@ -143,7 +175,7 @@ tpsoe_ps_list = [
     "ps_expenditure",
     "ps_balance",
     "ps_projection",
-    "year_end_expendded_pace",
+    "year_expended_pace",
     "ps_%_expended",
 ]
 
@@ -183,7 +215,7 @@ order_of_cols = [
     "balance",
     "encumbrance",
     "projection",
-    "year_end_expendded_pace",
+    "year_expended_pace",
     "%_expended",
 ]
 
@@ -219,36 +251,10 @@ Timeline Sheet
 '''
 def create_timeline(my_clean_dataframes:list):
     """
-    Loop through all the cleaned dfs in the list
-    my_clean_dataframes. Tag each dataframe as 1,
-    2,3,etc to fill in the column "ap" (aka accounting
-    period) that differentiates which accounting period each df comes from.
+    Stack all the dfs in my_clean_dataframes
     """
-    keys_list = []
-
-    for i, item in enumerate(my_clean_dataframes):
-        keys_list.append(i + 1)
-
-    """
-    Stack all the dfs in my_clean_dataframes, starting 
-    https://stackoverflow.com/questions/59267129/how-to-concatenate-multiple-dataframes-from-multiple-sources-in-pandas
-    """
-    c1 = (
-        pd.concat(my_clean_dataframes, keys=keys_list)
-        .rename_axis(("source", "tmp"))
-        .reset_index(level=0)
-        .reset_index(drop=True)
-    )
-
-    # Drop original accounting period column & replace the new source col
-    try:
-        c1 = c1.drop(
-        columns=[
-            "ap"])
-    except:
-        pass
+    c1 = pd.concat(my_clean_dataframes, sort = False)
     
-    c1 = c1.rename(columns={"source": "ap"})
     return c1
 
 '''
