@@ -1,15 +1,18 @@
 """
 Functions to create choropleth maps.
-# https://stackoverflow.com/questions/64792041/white-gap-between-python-folium-map-and-jupyter-notebook-cell
-# Folium examples: https://nbviewer.jupyter.org/github/python-visualization/folium/blob/master/examples/Colormaps.ipynb
-# https://nbviewer.jupyter.org/github/python-visualization/folium/blob/master/examples/GeoJsonPopupAndTooltip.ipynb
-# https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
-# https://stackoverflow.com/questions/47846744/create-an-asymmetric-colormap
+
+https://stackoverflow.com/questions/64792041/white-gap-between-python-folium-map-and-jupyter-notebook-cell
+* Folium examples: https://nbviewer.jupyter.org/github/python-visualization/folium/blob/master/examples/Colormaps.ipynb
+* https://nbviewer.jupyter.org/github/python-visualization/folium/blob/master/examples/GeoJsonPopupAndTooltip.ipynb
+* https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
+* https://stackoverflow.com/questions/47846744/create-an-asymmetric-colormap
 """
 import inspect
 import json
 
+import branca
 import folium
+import geopandas as gpd
 import ipyleaflet
 import pandas as pd
 from branca.element import Figure
@@ -20,7 +23,7 @@ from ipywidgets import HTML
 
 
 # Centroids for various regions and zoom level
-def grab_region_centroids():
+def grab_region_centroids() -> dict:
     # This parquet is created in shared_utils/shared_data.py
     df = pd.read_parquet(
         "gs://calitp-analytics-data/data-analyses/ca_county_centroids.parquet"
@@ -44,7 +47,9 @@ REGION_CENTROIDS = grab_region_centroids()
 # ------------------------------------------------------------------------#
 # Break out each component of folium map / figure
 # Better usage for single layer or multiple layers
-def setup_folium_figure(fig_width, fig_height, title, **fig_dict):
+def setup_folium_figure(
+    fig_width: int, fig_height: int, title: str, **fig_dict: dict
+) -> Figure:
 
     fig = Figure(fig_width, fig_height, **fig_dict)
     title_html = f"""
@@ -56,7 +61,9 @@ def setup_folium_figure(fig_width, fig_height, title, **fig_dict):
     return fig
 
 
-def setup_folium_map(fig_width, fig_height, centroid, zoom, **map_dict):
+def setup_folium_map(
+    fig_width: int, fig_height: int, centroid: int, zoom: int, **map_dict: dict
+) -> folium.folium.Map:
     m = folium.Map(
         location=centroid,
         tiles="cartodbpositron",
@@ -78,7 +85,7 @@ TOOLTIP_KWARGS = {
 }
 
 
-def format_folium_popup(popup_dict):
+def format_folium_popup(popup_dict: dict) -> folium.features.GeoJsonPopup:
     popup = GeoJsonPopup(
         fields=list(popup_dict.keys()),
         aliases=list(popup_dict.values()),
@@ -91,7 +98,7 @@ def format_folium_popup(popup_dict):
     return popup
 
 
-def format_folium_tooltip(tooltip_dict):
+def format_folium_tooltip(tooltip_dict: dict) -> folium.features.GeoJsonTooltip:
     tooltip = GeoJsonTooltip(
         fields=list(tooltip_dict.keys()),
         aliases=list(tooltip_dict.values()),
@@ -113,19 +120,19 @@ def format_folium_tooltip(tooltip_dict):
 
 
 def make_folium_choropleth_map(
-    df,
-    plot_col,
-    popup_dict,
-    tooltip_dict,
-    colorscale,
-    fig_width,
-    fig_height,
-    zoom=REGION_CENTROIDS["CA"]["zoom"],
-    centroid=REGION_CENTROIDS["CA"]["centroid"],
-    title="Chart Title",
-    legend_name="Legend",
+    df: gpd.GeoDataFrame,
+    plot_col: str,
+    popup_dict: dict,
+    tooltip_dict: dict,
+    colorscale: branca.colormap.StepColorMap | branca.colormap.LinearColormap,
+    fig_width: int,
+    fig_height: int,
+    zoom: int = REGION_CENTROIDS["CA"]["zoom"],
+    centroid: list[float] = REGION_CENTROIDS["CA"]["centroid"],
+    title: str = "Chart Title",
+    legend_name: str = "Legend",
     **kwargs,
-):
+) -> Figure:
     """
     Parameters:
 
@@ -197,13 +204,11 @@ def make_folium_choropleth_map(
     return fig
 
 
-# Adjust function to have multiple layers in folium
-# Modify the original function...but generalize the unpacking of the layer portion
-# Keep original function the same, don't break other ppl's work
-
 # Define function that can theoretically pop out as many layers as needed
 # Can be point data too, since now it can take additional arguments for customizing markers
-def make_geojson_layer(single_layer_dict, layer_name):
+def make_geojson_layer(
+    single_layer_dict: dict, layer_name: str
+) -> folium.features.GeoJson:
     # Grab keys from the layer dictionary
     plot_col = single_layer_dict["plot_col"]
     colorscale = single_layer_dict["colorscale"]
@@ -249,7 +254,7 @@ def make_geojson_layer(single_layer_dict, layer_name):
     return g
 
 
-def setup_folium_legend(legend_dict):
+def setup_folium_legend(legend_dict: dict) -> FloatImage:
     legend = FloatImage(
         legend_dict["legend_url"],
         legend_dict["legend_bottom"],
@@ -260,13 +265,13 @@ def setup_folium_legend(legend_dict):
 
 
 def make_folium_multiple_layers_map(
-    LAYERS_DICT,
-    fig_width,
-    fig_height,
-    zoom=REGION_CENTROIDS["CA"]["zoom"],
-    centroid=REGION_CENTROIDS["CA"]["centroid"],
-    title="Chart Title",
-    legend_dict={"legend_url": "", "legend_bottom": 85, "legend_left": 5},
+    LAYERS_DICT: dict,
+    fig_width: int,
+    fig_height: int,
+    zoom: int = REGION_CENTROIDS["CA"]["zoom"],
+    centroid: list[float] = REGION_CENTROIDS["CA"]["centroid"],
+    title: str = "Chart Title",
+    legend_dict: dict = {"legend_url": "", "legend_bottom": 85, "legend_left": 5},
     **kwargs,
 ):
     """
@@ -357,15 +362,15 @@ def make_folium_multiple_layers_map(
 # ipyleaflet
 # ------------------------------------------------------------------------#
 def make_ipyleaflet_choropleth_map(
-    gdf,
-    plot_col,
-    geometry_col,
-    choropleth_dict,
-    colorscale,
-    zoom=REGION_CENTROIDS["CA"]["zoom"],
-    centroid=REGION_CENTROIDS["CA"]["centroid"],
+    gdf: gpd.GeoDataFrame,
+    plot_col: str,
+    geometry_col: str,
+    choropleth_dict: dict,
+    colorscale: branca.colormap.LinearColormap | branca.colormap.StepColorMap,
+    zoom: int = REGION_CENTROIDS["CA"]["zoom"],
+    centroid: list[float] = REGION_CENTROIDS["CA"]["centroid"],
     **kwargs,
-):
+) -> ipyleaflet.leaflet.Map:
     """
     Parameters:
 

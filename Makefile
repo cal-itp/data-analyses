@@ -27,7 +27,7 @@ build_hqta:
 	git add portfolio/hqta/*.yml portfolio/hqta/*.md portfolio/hqta/*.ipynb
 	git add portfolio/sites/ 
     
-add_precommit
+add_precommit:
 	pip install pre-commit
 	pre-commit install 
 	#pre-commit run --all-files 

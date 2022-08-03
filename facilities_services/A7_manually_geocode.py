@@ -12,14 +12,7 @@ import utils
 import shared_utils
 
 # Basic cleaning of SHN postmiles dataset
-def clean_postmiles():
-
-    '''
-    df = shared_utils.utils.download_geoparquet( 
-        GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}", 
-        FILE_NAME = "shn_postmiles"
-    )
-    '''
+def clean_postmiles() -> gpd.GeoDataFrame:
     df = gpd.read_parquet(f"{utils.DATA_PATH}shn_postmiles.parquet")
     
     # Round to 2 decimal places
@@ -48,10 +41,12 @@ ADDRESS_PM_DICT = {
     
 
 # Subset and find those in manual geocoding list that would be found in postmiles df
-def subset_manual_geocoding(df):
+def subset_manual_geocoding(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df = df.assign(
-        address = df.apply(lambda x: ADDRESS_PM_DICT[x.address] if x.address in ADDRESS_PM_DICT.keys()
-                           else x.address, axis=1)
+        address = df.apply(
+            lambda x: ADDRESS_PM_DICT[x.address] 
+            if x.address in ADDRESS_PM_DICT.keys()
+            else x.address, axis=1)
     )
     
     # These should be found in postmiles, with "Hwy X PM Y" pattern
@@ -65,7 +60,7 @@ def subset_manual_geocoding(df):
     return df2
 
 
-def parse_postmiles(df):
+def parse_postmiles(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df = df.assign(
         Route = (df.address.str.split(" PM ", expand=True)[0]
                         .str.replace("HWY", "").astype(int)
@@ -80,10 +75,15 @@ def parse_postmiles(df):
     return df
 
 
-# There are duplicates because there's a lat/lon for each direction (N/S, E/W)
-# Take centroid vs keep one of the obs after explicitly sorting
-# Either create new geometry or have a lat/lon that appears in postmiles df
-def find_centroid(df):
+def find_centroid(df: pd.DataFrame) -> gpd.GeoDataFrame:
+    """
+    There are duplicates because there's a lat/lon for each direction (N/S, E/W)
+    
+    Take centroid vs keep one of the obs after explicitly sorting
+    
+    Either create new geometry or have a lat/lon that appears in postmiles df.
+    Go with finding the centroid between N/S and E/W to be the centerline point.
+    """
     # The merge was left_only, and is df, not gdf
     gdf = df.set_geometry("geometry")
     
@@ -105,25 +105,31 @@ def find_centroid(df):
     return gdf3
 
 
-def add_manual_results(df): 
+def add_manual_results(df:pd.DataFrame)->gpd.GeoDataFrame: 
     ADDRESS_DICT2 = {
         # Where Pacific Crest Trail intersects with Hwy 80
-        "BOREAL RIDGE ROAD & PACIFIC CREST TRAILWAY": {"longitude": -120.336147, "latitude": 39.342918},
+        "BOREAL RIDGE ROAD & PACIFIC CREST TRAILWAY": {"longitude": -120.336147, 
+                                                       "latitude": 39.342918},
         # A guess - these bldgs don't have any associated with on Google Maps
         # It's roughly 19 mi north of Ojai, off Hwy 33
-        "19 MILES NORTH OF OJAI": {"longitude": -119.302167, "latitude": 34.597436},
+        "19 MILES NORTH OF OJAI": {"longitude": -119.302167, 
+                                   "latitude": 34.597436},
     } 
 
     # Find these in geocoder_results
     # Use full_address to match and create the lon/lat columns
     FULL_ADDRESS_DICT = {
-        "Childcare center Oakland, CA": {"longitude": -122.264931, "latitude": 37.810912}, 
-        "Childcare center Los Angeles, CA": {"longitude": -118.243285, "latitude": 34.051899},
-        "Equipment shop Los Angeles, CA": {"longitude": -118.243285, "latitude": 34.051899},
+        "Childcare center Oakland, CA": {"longitude": -122.264931, 
+                                         "latitude": 37.810912}, 
+        "Childcare center Los Angeles, CA": {"longitude": -118.243285, 
+                                             "latitude": 34.051899},
+        "Equipment shop Los Angeles, CA": {"longitude": -118.243285, 
+                                           "latitude": 34.051899},
     }
     
     
-    def add_lat_lon(row):
+    def add_lat_lon(row)-> pd.Series:
+        # Return a pd.Series of a list object with [lon, lat] coordinates
         if row.full_address in FULL_ADDRESS_DICT.keys():
             longitude = FULL_ADDRESS_DICT[row.full_address]["longitude"]
             latitude = FULL_ADDRESS_DICT[row.full_address]["latitude"]

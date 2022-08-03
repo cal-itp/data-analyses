@@ -1,6 +1,9 @@
 """
 Read in raw parquet, standardize across datasets
 to create 1 dataframe that can be geocoded.
+
+Look across the the dataframes, find what's in common, and 
+do a more detailed data processing before assembling into 1 combined dataset.
 """
 import numpy as np
 import pandas as pd
@@ -11,7 +14,7 @@ import utils
 # across datasets
 # Keep address info, sheet_uuid, standardize column naming and types
 # keep sqft info, district, county info if available
-def clean_office(df):
+def clean_office(df: pd.DataFrame) -> pd.DataFrame:
     keep_cols = [
         "district", "address", "district_name", "owned_or_leased",
         "owned_net", "leased", "other",
@@ -34,7 +37,7 @@ def clean_office(df):
     
     return df
 
-def clean_maintenance(df):
+def clean_maintenance(df: pd.DataFrame) -> pd.DataFrame:
     rename_cols = {
         "mtce_facility_name": "facility_name",
     }
@@ -63,7 +66,7 @@ def clean_maintenance(df):
     
     return df
 
-def clean_equipment(df):
+def clean_equipment(df: pd.DataFrame) -> pd.DataFrame:
     rename_cols = {
         "facility": "facility_name",
         "street": "address",
@@ -84,7 +87,7 @@ def clean_equipment(df):
     
     return df
 
-def clean_labs(df):
+def clean_labs(df: pd.DataFrame) -> pd.DataFrame:
     rename_cols = {
         "classification_nametype_of_facility": "facility_type",
         "asset_name": "facility_name",

@@ -17,7 +17,7 @@ import shared_utils
 catalog = intake.open_catalog("./*.yml")
 
 
-def aggregate_to_address(gdf):
+def aggregate_to_address(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # First, add up sqft for what's owned/leased and other
     gdf = gdf.assign(
         sqft = gdf[["sqft", "other"]].sum(axis=1)
@@ -46,8 +46,11 @@ def aggregate_to_address(gdf):
     return gdf3
 
 
-# Join facilities (points) to some polygon geometry (county or district)
-def sjoin_to_geography(df, geog_df):
+def sjoin_to_geography(df: gpd.GeoDataFrame, 
+                       geog_df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    '''
+    Join facilities (points) to some polygon geometry (county or district)
+    '''
     s1 = gpd.sjoin(
         df.to_crs(shared_utils.geography_utils.WGS84), 
         geog_df.to_crs(shared_utils.geography_utils.WGS84),
