@@ -27,10 +27,15 @@ my_clean_dataframes = []
 Functions that can be used across sheets
 '''
 def cleaning_psoe_tpsoe(df, ps_or_oe: str):
+
+    
     """ 
     Cleaning the PSOE and TPSOE sheets
     prior to concating them by stripping columns of their prefixes   
     """
+    df = df.rename(columns = {"oe_enc_+_oe_exp_projection": 
+                              "oe_projection"}
+                  ) 
     df["type"] = ps_or_oe
 
     """
@@ -50,22 +55,21 @@ int_cols = [
     "ps_allocation",
     "ps_expenditure",
     "ps_balance",
-    "ps_projection",
     "py_pos_alloc",
     "act__hours",
     "oe_allocation",
     "oe_encumbrance",
     "oe_expenditure",
     "oe_balance",
-    "total_allocation",
-    "total_expenditure",
-    "total_balance",
-    "total_projection",
-    "ap"
 ]
 
 
-def import_raw_data(file_name: str, name_of_sheet: str, appropriations_to_filter: list):
+def import_raw_data(
+    file_name: str,
+    name_of_sheet: str,
+    appropriations_to_filter: list,
+    accounting_period: int,
+):
 
     """Load the raw data and clean it up.
 
@@ -73,6 +77,7 @@ def import_raw_data(file_name: str, name_of_sheet: str, appropriations_to_filter
         file_name: the Excel workbook
         name_of_sheet: the name of the sheet
         appropriations_to_filter: list of all the appropriations to be filtered out
+        ap: enter the accounting period this is
 
     Returns:
         The cleaned df. Input the results into a list.
@@ -108,56 +113,69 @@ def import_raw_data(file_name: str, name_of_sheet: str, appropriations_to_filter
             "oe_enc": "oe_encumbrance",
             "oe_exp": "oe_expenditure",
             "appr": "appropriation",
-            "total_expended___encumbrance": "total_expenditure",
             "oe_bal_excl_pre_enc": "oe_balance",
         }
     )
-    
-    """
-    Drop Projection Cols & Recreate
-    """
-    
-    try:
-        df = df.drop(columns="oe_projection")
-    except:
-        pass
-    
-    try:
-        df = df.drop(columns="oe__enc_+_oe_exp_projection")
-    except:
-        pass
-    
-    # Change to the right data type
-    df[int_cols] = df[int_cols].astype("int64")
-    
-    # Add the column of 'Year End Expended Pace'
-    df["year_expended_pace"] = (df["ps_projection"] / df["ps_allocation"]).fillna(0)
-    
-    # Create oe__enc_+_oe_exp_projection
-    df['oe_projection'] = (df['oe_encumbrance']+df['oe_expenditure']/(df.iloc[0]['ap'])*12).astype('int64')
-    
+
     # Certain appropriation(s) are filtered out:
     df = df[~df.appropriation.isin(appropriations_to_filter)]
+    
+    # Change to the right data type
+    df[int_cols] = df[int_cols].astype("int64").fillna(0)
+    """
+    Create Columns
+    Change to assign later
+    """
+    # Fill in a column with the accounting period
+    df["ap"] = accounting_period
 
-    # Narrow down division names inot a new column
+    # Create a variable that just captures one instance of the ap,
+    # this is used in certain calculations for columns
+    ap_variable = df.iloc[0]["ap"]
+    
+    # Add column of PS Projection
+    df["ps_projection"] = (df["ps_expenditure"] / ap_variable) * 12
+    # PS % Expended
+    df["ps_%_expended"] = (df["ps_expenditure"] / df["ps_allocation"]).fillna(0)
+    # Add the column of 'Year End Expended Pace'
+    df["year_expended_pace"] = (df["ps_projection"] / df["ps_allocation"]).fillna(0)
+    # Create oe__enc_+_oe_exp_projection
+    df["oe_enc_+_oe_exp_projection"] = df["oe_encumbrance"] + df["oe_expenditure"] / (
+        ap_variable * 12
+    ).astype("int64")
+    # Create OE expended
+    df["oe_%_expended"] = (df["oe_enc_+_oe_exp_projection"] / df["oe_allocation"]).fillna(0)
+
+    # Narrow down division names into a new column
     df["division"] = df["pec_class_description"].replace(div_crosswalks)
+
+    # Add in totals
+    df["total_allocation"] = df["oe_allocation"] + df["ps_allocation"]
+    # Originally called total expended & encumbrance
+    df["total_expenditure"] = (
+        df["oe_encumbrance"] + df["oe_expenditure"] + df["ps_expenditure"]
+    )
+    df["total_balance"] = df["ps_balance"] + df["oe_balance"]
+    df["total_projection"] = df["ps_projection"] + df["oe_enc_+_oe_exp_projection"]
+    df["total_%_expended"] = (df["total_expenditure"] / df["total_allocation"]).fillna(
+        0
+    )
 
     # Adding dataframe to an empty list called my_clean_dataframes
     my_clean_dataframes.append(df)
-    
+ 
     return df
-
 '''
 Funds by Division Sheet
 '''
 def create_fund_by_division(df):
+    
     # Drop excluded cols
     excluded_cols = ["appr_catg", "act__hours", "py_pos_alloc", "pec_class_description", "ap"]
     df = df.drop(columns=excluded_cols)
     
     # Add a blank column for notes
     df["notes"] = np.nan
-
     
     return df
 
@@ -227,7 +245,6 @@ def create_tpsoe(df, ps_list: list, oe_list: list):
     Use this to subset out the whole dataframe,
     one for personal services, one for operating expenses.
     """
-
     # Clean up and subset out the dataframe
     tpsoe_oe = cleaning_psoe_tpsoe(df[oe_list], "oe")
     tpsoe_ps = cleaning_psoe_tpsoe(df[ps_list], "ps")
@@ -260,6 +277,8 @@ def create_timeline(my_clean_dataframes:list):
     # Reset index
     c1 = c1.reset_index(drop = True)
     
+    # Drop irrelevant cols
+    c1 = c1.drop(columns = 'year_expended_pace')
     return c1
 
 '''
@@ -320,7 +339,6 @@ psoe_right_col_order = [
 ]
 
 def create_psoe_timeline(df, ps_list: list, oe_list: list):
-
     # Create 2 dataframes that subsets out OE and PS
     psoe_oe = cleaning_psoe_tpsoe(df[oe_list], "oe")
     psoe_ps = cleaning_psoe_tpsoe(df[ps_list], "ps")
