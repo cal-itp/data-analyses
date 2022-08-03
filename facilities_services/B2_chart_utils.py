@@ -1,9 +1,15 @@
+"""
+Chart utility functions to use in reporting notebook.
+
+Report: tier1-facilities-hqta.ipynb
+"""
 import altair as alt
+import pandas as pd
 
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
-def make_donut_chart(df, y_col, color_col):
+def make_donut_chart(df: pd.DataFrame, y_col: str, color_col: str) -> alt.Chart:
 
     chart = (alt.Chart(df)
              .mark_arc(innerRadius=75)
@@ -37,7 +43,7 @@ def make_donut_chart(df, y_col, color_col):
     return chart
 
 
-def make_bar_chart(df, x_col):
+def make_bar_chart(df: pd.DataFrame, x_col: str) -> alt.Chart:
     x_label = f"{x_col.replace('_name', '').title()}"
     
     chart = (alt.Chart(df)

@@ -14,7 +14,7 @@ import utils
 # Use sheet_name=None to return all sheets (returns a dict)
 FILENAME = "Tier_1_Facility_Location_Inventory_5-17-22.xlsx"
 
-def read_in_sheets(FILE_PATH):
+def read_in_sheets(FILE_PATH: str) -> dict:
     # Read in individual sheets
     # where headers are change from sheet to sheet
     df_dict = pd.read_excel(FILE_PATH, sheet_name=None)
@@ -32,6 +32,8 @@ def read_in_sheets(FILE_PATH):
     tmc = pd.read_excel(FILE_PATH, sheet_name = "TMCs")
     labs = pd.read_excel(FILE_PATH, sheet_name = "Labs", header = 3)
     
+    # Store all the datasets in sheets as a dict
+    # Will pass these through basic cleaning after
     imported_dfs = {
         "office": to_snakecase(office),
         "maintenance": to_snakecase(maintenance),
@@ -43,7 +45,7 @@ def read_in_sheets(FILE_PATH):
     return imported_dfs
 
 # Cursory cleaning of column names applicable to all sheets
-def clean_column_names(df):
+def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     # Get rid of those asterisks, double underscores, and leading/trailing underscores
     df.columns = (df.columns.str.replace("*", "", regex=True)
                   .str.replace(r'_{2}', '', regex=True)
@@ -55,14 +57,25 @@ def clean_column_names(df):
 
     return df
 
-# Need a uuid to be able to reference individual sheets
-# Later, will compile into 1 df (but there might be duplicates based on scanning of addresses)
-def generate_uuid(df):
+
+def generate_uuid(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Need a uuid to be able to reference individual sheets.
+    Later, compile it into 1 df (but there might be duplicates by addresses, and
+    those duplicates would have different uuids)
+    '''
     df["sheet_uuid"] = df.apply(lambda _: str(uuid.uuid4()), axis=1)
     return df
     
     
-def clean_office(df):
+def clean_office(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Basic cleaning of the `office` sheet in Excel, 
+    and only keep columns that store row-level info.
+    
+    Any columns that are aggregations get dropped, 
+    because keeping them will give us redundant info.
+    """
     df = clean_column_names(df)
     
     rename_cols = {
@@ -70,8 +83,9 @@ def clean_office(df):
         "ownedoleasedl": "owned_or_leased",    
     }
     
-    drop_cols = ['district_total_gross_spaceowned_gross_leased',
-       'district_total_net_spaceowned_net_leased']
+    drop_cols = [
+        'district_total_gross_spaceowned_gross_leased',
+        'district_total_net_spaceowned_net_leased']
     
     # Drop the lines where comments are inserted
     # Also drop where District / Geographic District / Grand Totals are given
@@ -90,7 +104,13 @@ def clean_office(df):
     
     return df3
 
-def clean_maintenance(df):
+def clean_maintenance(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Basic cleaning of the `maintenance` sheet in Excel.
+    
+    Include the legend on the side of Excel sheet and 
+    populate the column with it.
+    """
     df = clean_column_names(df)
     drop_cols = ['unnamed:_9', 'unnamed:_10', 'legend']
     
@@ -112,19 +132,28 @@ def clean_maintenance(df):
 
     return df
 
-def clean_equipment(df):
+def clean_equipment(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Basic cleaning of the `equipment` sheet in Excel.
+    """
     df = clean_column_names(df)
     df = generate_uuid(df)
     
     return df
 
-def clean_tmc(df):
+def clean_tmc(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Basic cleaning of the `tmc` sheet in Excel.
+    """
     df = clean_column_names(df)
     df = generate_uuid(df)
     
     return df
 
-def clean_labs(df):
+def clean_labs(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Basic cleaning of the `labs` sheet in Excel.
+    """
     df = clean_column_names(df)
     df = df.assign(
         zip_code = df.zip_code.astype("Int64")
@@ -138,7 +167,8 @@ def clean_labs(df):
 if __name__ == "__main__":
     # Read in sheets correctly and save as dict
     imported_dfs = read_in_sheets(f"{utils.DATA_PATH}{FILENAME}")
-
+    
+    # Map the cleaning function to each dataset
     cleaning_functions = {
         "office": clean_office,   
         "maintenance": clean_maintenance,
@@ -150,6 +180,9 @@ if __name__ == "__main__":
     # Do basic cleaning, write to parquet
     cleaned_dfs = {}
     for key, data in imported_dfs.items():
+        # key: dataset_name; value: df
+        # Apply the cleaning function for each specific dataset 
+        # by keying into the dataset's name
         cleaned_dfs[key] = cleaning_functions[key](data)
         
     for key, value in cleaned_dfs.items():

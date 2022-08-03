@@ -7,6 +7,7 @@ such as cleaning/reformatting arrival times.
 
 Leave the RT-specific analysis there.
 """
+import pandas as pd
 
 METROLINK_SHAPE_TO_ROUTE = {
     "AVin": "Antelope Valley Line",
@@ -30,7 +31,7 @@ METROLINK_SHAPE_TO_ROUTE = {
 METROLINK_ROUTE_TO_SHAPE = dict((v, k) for k, v in METROLINK_SHAPE_TO_ROUTE.items())
 
 
-def fill_in_metrolink_trips_df_with_shape_id(trips):
+def fill_in_metrolink_trips_df_with_shape_id(trips: pd.DataFrame) -> pd.DataFrame:
     """
     trips: pandas.DataFrame.
             What is returned from tbl.views.gtfs_schedule_dim_trips()
