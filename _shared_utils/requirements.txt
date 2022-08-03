@@ -1,3 +1,5 @@
 -e .
 cpi==1.0.5
 xmltodict==0.13.0
+dask==2022.05.2
+dask_geopandas==0.2.0
