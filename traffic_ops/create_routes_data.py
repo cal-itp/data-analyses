@@ -147,7 +147,6 @@ def make_routes_shapefile():
     trips = dd.read_parquet(f"{DATA_PATH}trips.parquet")
     route_info = dd.read_parquet(f"{DATA_PATH}route_info.parquet")
     routes = dask_geopandas.read_parquet(f"{DATA_PATH}routes.parquet")
-    latest_itp_id = dd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
     df = merge_shapes_to_routes(trips, routes)
     
