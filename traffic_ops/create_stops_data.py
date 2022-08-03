@@ -97,7 +97,6 @@ def make_stops_shapefile():
     # Read in local parquets
     stops = pd.read_parquet(f"{DATA_PATH}stops.parquet")
     route_info = pd.read_parquet(f"{DATA_PATH}route_info.parquet")
-    latest_itp_id = pd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
     df = create_stops_data(stops)
         
