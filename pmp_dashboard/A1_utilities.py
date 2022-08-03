@@ -234,15 +234,18 @@ def create_tpsoe(df, ps_list: list, oe_list: list):
 
     # Concat the two dataframes together
     c1 = pd.concat([tpsoe_ps, tpsoe_oe], sort=False)
-
+    
     # Rearrange the columns to the right order
     c1 = c1[order_of_cols]
 
     # Add a notes column
     c1["notes"] = np.nan
-
+    
     # Correct data types of monetary columns from objects to float
     c1[monetary_cols] = c1[monetary_cols].astype("float64")
+    
+    # Reset index
+    c1 = c1.reset_index(drop = True)
 
     return c1
 
@@ -250,10 +253,12 @@ def create_tpsoe(df, ps_list: list, oe_list: list):
 Timeline Sheet
 '''
 def create_timeline(my_clean_dataframes:list):
-    """
-    Stack all the dfs in my_clean_dataframes
-    """
+    
+    # Stack all the dfs in my_clean_dataframes
     c1 = pd.concat(my_clean_dataframes, sort = False)
+    
+    # Reset index
+    c1 = c1.reset_index(drop = True)
     
     return c1
 
