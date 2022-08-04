@@ -24,7 +24,6 @@ GCS_PROJECT = "cal-itp-data-infra"
 # import os
 # os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
 
-
 YESTERDAY_DATE = datetime.date.today() + datetime.timedelta(days=-1)
 
 
@@ -189,6 +188,49 @@ def get_trips(
     return trips
 
 
+def get_route_shapes(
+    selected_date: str | datetime.date,
+    itp_id_list: list[int] = None,
+    get_df: bool = True,
+    CRS: str = geography_utils.WGS84,
+) -> gpd.GeoDataFrame:
+    """
+    Return a subset of geography_utils.make_routes_gdf()
+    to only have the `shape_id` values present on a selected day.
+
+    geography_utils.make_routes_gdf() only selects based on calitp_extracted_at
+    and calitp_deleted_at date range.
+    """
+    trips = (
+        get_trips(
+            selected_date=selected_date,
+            itp_id_list=itp_id_list,
+            trip_cols=["calitp_itp_id", "calitp_url_number", "shape_id"],
+            get_df=False,
+        )
+        >> distinct()
+        >> collect()
+    )
+
+    route_shapes = (
+        geography_utils.make_routes_gdf(
+            SELECTED_DATE=selected_date, CRS=CRS, ITP_ID_LIST=itp_id_list
+        )
+        .drop(columns=["pt_array"])
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+
+    route_shapes_on_day = pd.merge(
+        route_shapes,
+        trips,
+        on=["calitp_itp_id", "calitp_url_number", "shape_id"],
+        how="inner",
+    )
+
+    return route_shapes_on_day
+
+
 def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
     # Some fixing, transformation, aggregation with dask
     # Grab departure hour
@@ -208,6 +250,12 @@ def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
 
 
 def check_departure_hours_input(departure_hours: tuple | list) -> list:
+    """
+    If given a tuple(start_hour, end_hour), it will return a list of the values.
+    Ex: (0, 4) will return [0, 1, 2, 3]
+
+    Returns a list of departure hours
+    """
     if isinstance(departure_hours, tuple):
         return list(range(departure_hours[0], departure_hours[1]))
     elif isinstance(departure_hours, list):
@@ -217,11 +265,21 @@ def check_departure_hours_input(departure_hours: tuple | list) -> list:
 def get_stop_times(
     selected_date: str | datetime.date = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
-    departure_hours: list[int] | tuple(int) = None,
+    departure_hours: list[int] | tuple[int] = None,
     stop_time_cols: list[str] = None,
-    get_df: bool = True,
-) -> pd.DataFrame:
+    # get_df: bool = False
+) -> dd.DataFrame:
+    """
+    Returns a stop_times table from `tbl.views.gtfs_schedule_dim_stop_times.`
+    This table usually is huge, so let's get some filtering done in Dask.
+    Allow additional data processing by returning a Dask DataFrame.
 
+    get_df: bool.
+            If True, returns pd.DataFrame.
+            If False, returns dd.DataFrame.
+            Default to False because stop_times is big, reading it in-memory
+            will probably not work.
+    """
     ddf = dask_bigquery.read_gbq(
         project_id=GCS_PROJECT,
         dataset_id="views",
@@ -243,48 +301,4 @@ def get_stop_times(
     if stop_time_cols is not None:
         ddf = ddf[stop_time_cols].reset_index(drop=True)
 
-    if get_df is True:
-        ddf = ddf.compute()
-
     return ddf
-
-
-def get_trips_with_stop_times(
-    selected_date: str | datetime.date = YESTERDAY_DATE,
-    itp_id_list: list[int] = None,
-    departure_hours: list[int] | tuple(int) = None,
-    trip_stop_time_cols: list[str] = None,
-    get_df: bool = True,
-) -> pd.DataFrame:
-
-    trips = get_trips(
-        selected_date=selected_date,
-        itp_id_list=itp_id_list,
-        trip_cols=None,
-        get_df=False,
-    )
-
-    # Join to stop_times, since stop_times always depends on trip_id
-    # No other way to filter stop_times by date
-    trips_with_stop_times = tbl.views.gtfs_schedule_dim_stop_times() >> inner_join(
-        _,
-        # Drop these columns,
-        # the inner join will either return 0 rows or _x, _y
-        # Can't use in merge_cols
-        # because they are different values
-        trips >> select(-_.calitp_hash, -_.calitp_extracted_at, -_.calitp_deleted_at),
-        on=["calitp_itp_id", "calitp_url_number", "trip_id"],
-    )
-
-    if itp_id_list is not None:
-        trips_with_stop_times = trips_with_stop_times >> filter(
-            _.calitp_itp_id.isin(itp_id_list)
-        )
-
-    if trip_stop_time_cols is not None:
-        trips_with_stop_times = trips_with_stop_times >> select(*trip_stop_time_cols)
-
-    if get_df is True:
-        trips_with_stop_times = trips_with_stop_times >> collect()
-
-    return trips_with_stop_times
