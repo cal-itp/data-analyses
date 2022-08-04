@@ -11,11 +11,15 @@ Leave the RT-specific analysis there.
 """
 import datetime
 
+import dask.dataframe as dd
+import dask_bigquery
 import geopandas as gpd
 import pandas as pd
 from calitp.tables import tbl
 from shared_utils import geography_utils
 from siuba import *
+
+GCS_PROJECT = "cal-itp-data-infra"
 
 # import os
 # os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
@@ -185,10 +189,70 @@ def get_trips(
     return trips
 
 
+def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
+    # Some fixing, transformation, aggregation with dask
+    # Grab departure hour
+    # https://stackoverflow.com/questions/45428292/how-to-convert-pandas-str-split-call-to-to-dask
+    stop_times2 = stop_times[~stop_times.departure_time.isna()].reset_index(drop=True)
+
+    ddf = stop_times2.assign(
+        departure_hour=stop_times2.departure_time.str.partition(":")[0].astype(int)
+    )
+
+    # Since hours past 24 are allowed for overnight trips
+    # coerce these to fall between 0-23
+    # https://stackoverflow.com/questions/54955833/apply-a-lambda-function-to-a-dask-dataframe
+    ddf["departure_hour"] = ddf.departure_hour.map(lambda x: x - 24 if x >= 24 else x)
+
+    return ddf
+
+
+def check_departure_hours_input(departure_hours: tuple | list) -> list:
+    if isinstance(departure_hours, tuple):
+        return list(range(departure_hours[0], departure_hours[1]))
+    elif isinstance(departure_hours, list):
+        return departure_hours
+
+
+def get_stop_times(
+    selected_date: str | datetime.date = YESTERDAY_DATE,
+    itp_id_list: list[int] = None,
+    departure_hours: list[int] | tuple(int) = None,
+    stop_time_cols: list[str] = None,
+    get_df: bool = True,
+) -> pd.DataFrame:
+
+    ddf = dask_bigquery.read_gbq(
+        project_id=GCS_PROJECT,
+        dataset_id="views",
+        table_id="gtfs_schedule_dim_stop_times",
+    )
+
+    # Fix departure times (coerce any that pass the 24 hr mark into falling between 0-24)
+    ddf = fix_departure_time(ddf)
+
+    if itp_id_list is not None:
+        ddf = ddf[ddf.calitp_itp_id.isin(itp_id_list)].reset_index(drop=True)
+
+    if departure_hours is not None:
+        # Convert departure hours into list for filtering
+        departure_hours = check_departure_hours_input(departure_hours)
+
+        ddf = ddf[ddf.departure_hour.isin(departure_hours)].reset_index(drop=True)
+
+    if stop_time_cols is not None:
+        ddf = ddf[stop_time_cols].reset_index(drop=True)
+
+    if get_df is True:
+        ddf = ddf.compute()
+
+    return ddf
+
+
 def get_trips_with_stop_times(
     selected_date: str | datetime.date = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
-    departure_hours: list[int] = None,
+    departure_hours: list[int] | tuple(int) = None,
     trip_stop_time_cols: list[str] = None,
     get_df: bool = True,
 ) -> pd.DataFrame:
