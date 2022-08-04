@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 from siuba import *
@@ -12,7 +11,7 @@ from shared_utils import geography_utils
 from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
-import agency_crosswalk 
+import _agency_crosswalk as agency_crosswalk
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"
 
@@ -44,9 +43,9 @@ def load_cleaned_organizations_data():
     organizations =  to_snakecase(pd.read_csv(f'{GCS_FILE_PATH}{File_Organization_Clean}'))
     #Only keep relevant columns
     organizations = organizations[['name','ntp_id','itp_id','gtfs_schedule_status']]
-    #Renaming NTD ID to its proper name  
+    #Rename NTD ID to its proper name  
     organizations = organizations.rename(columns = {'ntp_id':'ntd_id'})
-    #making sure ntd_id is a string
+    #Make sure ntd_id is a string
     organizations.ntd_id = organizations.ntd_id.astype(str)
     return organizations
 
@@ -74,6 +73,10 @@ def load_vehicle_data():
 Metric/ETC Functions
 Inflation Functions uses 2021 currency as base
 """
+#Change this values to reflect your year of interest
+base_year = 2021
+current_year_dollars = 270.97
+
 # Inflation table
 def inflation_table(base_year):
     cpi.update()
@@ -99,7 +102,7 @@ def adjust_prices(df):
              "closedoutbalance"]
     
     ##get cpi table 
-    cpi = inflation_table(2021)
+    cpi = inflation_table(base_year)
     cpi.update
     cpi = (cpi>>select(_.year, _.value))
     cpi_dict = dict(zip(cpi['year'], cpi['value']))
@@ -109,14 +112,14 @@ def adjust_prices(df):
         multiplier = df["project_year"].map(cpi_dict)  
     
         ##using 270.97 for 2021 dollars
-        df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
+        df[f"adjusted_{col}"] = ((df[col] * current_year_dollars) / multiplier)
     return df
 
 #Flag BlackCat only organizations as 1
 def blackcat_only(row):
     #If there are no values for GTFS, reporter type, and fleet size, then we can probably say
-    #this organization is not registered by Cal ITP or NTD
-    if ((row.GTFS == 'None') and (row.reporter_type == 'None') and row.fleet_size == 'No Info'):
+    #this organization is not registered by Cal ITP or NTD: code them as 1. 
+    if ((row.GTFS == 'None') and (row.reporter_type == 'None') and (row.fleet_size == 'No Info')):
         return "1"
     else:
         return "0"
@@ -148,16 +151,25 @@ Cleaning up NTD Vehicles Data Set
 """
 #Categorize vehicles down to 6 major categories
 def get_vehicle_groups(row):
-    Automobiles = ['Automobile','Sports Utility Vehicle']
-    Bus = ['Bus','Over-the-road Bus','Articulated Bus','Double Decker Bus','Trolleybus']
-    Vans = ['Van','','Minivan','Cutaway']
-    Trains = ['Vintage Trolley','Automated Guideway Vehicle','Heavy Rail Passenger Car','Light Rail Vehicle',
-             'Commuter Rail Self-Propelled Passenger Car','Commuter Rail Passenger Coach','Commuter Rail Locomotive',
-            'Cable Car']
-    Service = ['Automobiles (Service)',
-               'Trucks and other Rubber Tire Vehicles (Service)',
-               'Steel Wheel Vehicles (Service)']
-    other = ['Other','Ferryboat']
+    Automobiles = ["Automobile", "Sports Utility Vehicle"]
+    Bus = ["Bus", "Over-the-road Bus", "Articulated Bus", "Double Decker Bus", "Trolleybus"]
+    Vans = ["Van", "", "Minivan", "Cutaway"]
+    Trains = [
+    "Vintage Trolley",
+    "Automated Guideway Vehicle",
+    "Heavy Rail Passenger Car",
+    "Light Rail Vehicle",
+    "Commuter Rail Self-Propelled Passenger Car",
+    "Commuter Rail Passenger Coach",
+    "Commuter Rail Locomotive",
+    "Cable Car",
+    ]
+    Service = [
+    "Automobiles (Service)",
+    "Trucks and other Rubber Tire Vehicles (Service)",
+    "Steel Wheel Vehicles (Service)",
+    ]
+    other = ["Other", "Ferryboat"]
     
     if row.vehicle_type in Automobiles:
         return "Automobiles"
@@ -298,7 +310,7 @@ def ntd_airtable_merge():
     organizations = load_cleaned_organizations_data() 
     vehicles = clean_vehicles_data() 
     #merge the 2 datasets on the left, since there are many more entries on the left
-    m1 = pd.merge(vehicles, organizations,  how='left', on=['ntd_id'])
+    m1 = pd.merge(vehicles, organizations,  how='left', on='ntd_id')
     return m1
 
 
@@ -314,7 +326,7 @@ def ntd_airtable_5311_merge():
     #Some matches failed:subset out a df with left only matches
     Left_only = m2[(m2._merge.str.contains("left_only", case= False))] 
     
-    #Take organizations left and make it into a list
+    #Take organizations left and make it into a list to filter out the df
     Left_orgs = Left_only['organization_name'].drop_duplicates().tolist()
     
     #Delete  left only matches from original df 
@@ -342,16 +354,19 @@ def final_df():
     airtable2 = load_airtable()
   
     #Change ITP ID ID to be floats & 0 so parquet will work
-    df1['itp_id'] = df1['itp_id'].fillna(0).astype('int64')
+    df1['itp_id'] = (df1['itp_id']
+                     .fillna(0)
+                     .astype('int64')
+                    )
  
     #Apply functions 
     #Call inflation function to add $ columns with adjusted values for inflation 
     df2 = adjust_prices(df1)
     #Apply fleet size() function
-    df2 = fleet_size_rating(df1)
+    df2 = fleet_size_rating(df2)
     
     #Merge df2 with the new airtable stuff 
-    final = pd.merge(df2, airtable2, how='left', left_on='name', right_on='name')
+    final = pd.merge(df2, airtable2, how='left', on='name')
     
     #Concatenate the two GTFS cols together into one column, to get complete GTFS status
     final["GTFS"] = final["gtfs_static_status"] + '_' + final["gtfs_realtime_status"]
@@ -360,7 +375,7 @@ def final_df():
     final = final.drop(columns = ['gtfs_static_status','gtfs_realtime_status','_merge', 'agency'])
     
     #Fill NA by data types
-    final.fillna(final.dtypes.replace({'float64': 0.0, 'object': 'None'}), inplace=True)
+    final = final.fillna(final.dtypes.replace({'float64': 0.0, 'object': 'None'}))
    
     #Apply Black Cat only function 
     final["Is_Agency_In_BC_Only_1_means_Yes"] = final.apply(lambda x: blackcat_only(x), axis=1)
@@ -380,19 +395,39 @@ Summarizing the Dataframe
 #received, total vehicles, caltrans district, average fleet age, GTFS status.
 
 #Columns for summing 
-sum_cols = ['allocationamount','encumbered_amount',
-'expendedamount', 'activebalance','closedoutbalance',
-'adjusted_allocationamount', 'adjusted_expendedamount',
-'adjusted_encumbered_amount', 'adjusted_activebalance']
+sum_cols = [
+    "allocationamount",
+    "encumbered_amount",
+    "expendedamount",
+    "activebalance",
+    "closedoutbalance",
+    "adjusted_allocationamount",
+    "adjusted_expendedamount",
+    "adjusted_encumbered_amount",
+    "adjusted_activebalance",
+]
 
 #Columns for max 
-max_cols = ['Is_Agency_In_BC_Only_1_means_Yes',
-'total_vehicles',
-'average_age_of_fleet__in_years_',
-'average_lifetime_miles_per_vehicle',
-'Automobiles', 'Bus','Other', 'Train','Van','automobiles_door',
-'bus_doors', 'van_doors', 'train_doors', 'doors_sum',
-'_31_60', '_16plus','_60plus', 'adjusted_closedoutbalance']
+max_cols = [
+    "Is_Agency_In_BC_Only_1_means_Yes",
+    "total_vehicles",
+    "average_age_of_fleet__in_years_",
+    "average_lifetime_miles_per_vehicle",
+    "Automobiles",
+    "Bus",
+    "Other",
+    "Train",
+    "Van",
+    "automobiles_door",
+    "bus_doors",
+    "van_doors",
+    "train_doors",
+    "doors_sum",
+    "_31_60",
+    "_16plus",
+    "_60plus",
+    "adjusted_closedoutbalance",
+]
 
 #Columns for mean
 mean_cols = ['allocation_mean']           
@@ -411,12 +446,19 @@ def aggregated_df():
     
     #Aggregate
     #https://stackoverflow.com/questions/67717440/use-a-list-of-column-names-in-groupby-agg
-    df = (df.groupby(['organization_name',
+    df = ((df.groupby(['organization_name',
                      'reporter_type', 
                      'fleet_size', 
                      'ntd_id', 
-                     'itp_id','mpo_rtpa','GTFS','caltrans_district','planning_authority'], as_index=False)
-    .agg({**{e:'max' for e in max_cols}, **{e:'sum' for e in sum_cols}, **{e: 'mean' for e in mean_cols}}).reset_index())
+                     'itp_id','mpo_rtpa',
+                      'GTFS','caltrans_district',
+                      'planning_authority'], as_index=False)
+                    .agg({**{e:'max' for e in max_cols}, 
+                          **{e:'sum' for e in sum_cols}, 
+                          **{e: 'mean' for e in mean_cols}})
+                   .reset_index())
+         ) 
+         
    
     return df 
     
