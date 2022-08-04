@@ -90,13 +90,15 @@ def metrolink_trips_query(SELECTED_DATE):
                        _.is_in_service==True)
              >> select(_.trip_key, _.service_date)
              >> inner_join(_, dim_trips, on = "trip_key")
-             >> select(*trip_cols)
+             >> select(*trip_cols, _.direction_id)
              >> distinct()
              >> collect()
             )
                  
-                 
-    return metrolink_trips
+    corrected_metrolink = gtfs_utils.fill_in_metrolink_trips_df_with_shape_id(
+        metrolink_trips).drop(columns = "direction_id")
+                  
+    return corrected_metrolink
     
 
 def create_local_parquets(SELECTED_DATE):
@@ -106,6 +108,7 @@ def create_local_parquets(SELECTED_DATE):
     # Original trips query excludes Metrolink
     # Do Metrolink query separately for trips, to fill in missing shape_id values here
     metrolink_trips = metrolink_trips_query(SELECTED_DATE)
+    
     
     # Full trips table, with Metrolink concatenated
     trips = pd.concat([trips, metrolink_trips], axis=0, ignore_index=True)
