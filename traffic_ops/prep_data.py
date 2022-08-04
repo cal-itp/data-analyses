@@ -94,7 +94,8 @@ def metrolink_trips_query(SELECTED_DATE):
              >> distinct()
              >> collect()
             )
-                 
+    
+    # Fill in the missing shape_id value, then drop direction_id
     corrected_metrolink = gtfs_utils.fill_in_metrolink_trips_df_with_shape_id(
         metrolink_trips).drop(columns = "direction_id")
                   
