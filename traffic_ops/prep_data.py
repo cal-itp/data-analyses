@@ -90,13 +90,16 @@ def metrolink_trips_query(SELECTED_DATE):
                        _.is_in_service==True)
              >> select(_.trip_key, _.service_date)
              >> inner_join(_, dim_trips, on = "trip_key")
-             >> select(*trip_cols)
+             >> select(*trip_cols, _.direction_id)
              >> distinct()
              >> collect()
             )
-                 
-                 
-    return metrolink_trips
+    
+    # Fill in the missing shape_id value, then drop direction_id
+    corrected_metrolink = gtfs_utils.fill_in_metrolink_trips_df_with_shape_id(
+        metrolink_trips).drop(columns = "direction_id")
+                  
+    return corrected_metrolink
     
 
 def create_local_parquets(SELECTED_DATE):
@@ -107,22 +110,14 @@ def create_local_parquets(SELECTED_DATE):
     # Do Metrolink query separately for trips, to fill in missing shape_id values here
     metrolink_trips = metrolink_trips_query(SELECTED_DATE)
     
+    
     # Full trips table, with Metrolink concatenated
     trips = pd.concat([trips, metrolink_trips], axis=0, ignore_index=True)
     
     
-    # Filter to the ITP_IDs present in the latest agencies.yml
-    latest_itp_id = (tbl.views.gtfs_schedule_dim_feeds()
-                     >> filter(_.calitp_id_in_latest==True)
-                     >> select(_.calitp_itp_id)
-                     >> distinct()
-                     >> collect()
-                    )
-    
     stops.to_parquet(f"{DATA_PATH}stops.parquet")
     trips.to_parquet(f"{DATA_PATH}trips.parquet")
     route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
-    latest_itp_id.to_parquet(f"{DATA_PATH}latest_itp_id.parquet")
     
     time1 = datetime.now()
     print(f"Part 1: Queries and create local parquets: {time1-time0}")
@@ -193,26 +188,3 @@ def attach_route_name(df, route_info_df):
     )
 
     return routes
-
-
-# Function to filter to latest ITP_ID in agencies.yml
-def filter_latest_itp_id(df, latest_itp_id_df, itp_id_col = "calitp_itp_id"):
-    starting_length = len(df)
-    print(f"# rows to start: {starting_length}")
-    print(f"# operators to start: {df[itp_id_col].nunique()}")
-    
-    # Drop ITP_IDs if not found in the latest_itp_id
-    if itp_id_col != "calitp_itp_id":
-        latest_itp_id_df = latest_itp_id_df.rename(columns = {
-            "calitp_itp_id": itp_id_col})
-    
-    df = (df[df[itp_id_col].isin(latest_itp_id_df[itp_id_col])]
-          .reset_index(drop=True)
-         )
-        
-    only_latest_id = len(df)
-    print(f"# rows with only latest agencies.yml: {only_latest_id}")
-    print(f"# operators with only latest agencies.yml: {df[itp_id_col].nunique()}")
-    print(f"# rows dropped: {only_latest_id - starting_length}")
-    
-    return df

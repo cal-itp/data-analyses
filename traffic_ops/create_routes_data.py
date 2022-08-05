@@ -147,7 +147,6 @@ def make_routes_shapefile():
     trips = dd.read_parquet(f"{DATA_PATH}trips.parquet")
     route_info = dd.read_parquet(f"{DATA_PATH}route_info.parquet")
     routes = dask_geopandas.read_parquet(f"{DATA_PATH}routes.parquet")
-    latest_itp_id = dd.read_parquet(f"{DATA_PATH}latest_itp_id.parquet")
 
     df = merge_shapes_to_routes(trips, routes)
     
@@ -183,15 +182,20 @@ def make_routes_shapefile():
         validate = "m:1"
     )
     
-    routes_assembled2 = (prep_data.filter_latest_itp_id(routes_assembled2, 
-                                                        latest_itp_id, 
-                                                        itp_id_col = "calitp_itp_id")
-                         # Any renaming to be done before exporting
-                         .rename(columns = prep_data.RENAME_COLS)
-                         .sort_values(["itp_id", "route_id"])
-                         .reset_index(drop=True)
-                        )
+    latest_itp_id = portfolio_utils.latest_itp_id(SELECTED_DATE = prep_data.SELECTED_DATE)
     
+    routes_assembled2 = (pd.merge(
+        routes_assembled2, 
+        latest_itp_id,
+        on = "calitp_itp_id",
+        how = "inner",
+        validate = "m:1")
+     # Any renaming to be done before exporting
+     .rename(columns = prep_data.RENAME_COLS)
+     .sort_values(["itp_id", "route_id"])
+     .reset_index(drop=True)
+    )
+
     print(f"Routes script total execution time: {time3-time0}")
 
     return routes_assembled2
