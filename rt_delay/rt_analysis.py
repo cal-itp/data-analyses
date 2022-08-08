@@ -1,9 +1,10 @@
 import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.map_utils import make_folium_choropleth_map
+from shared_utils.rt_utils import *
+
 import branca
 
-from utils import *
 from siuba import *
 
 import pandas as pd
