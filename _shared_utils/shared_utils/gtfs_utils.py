@@ -203,19 +203,26 @@ def get_trips(
         trips = trips >> select(*trip_cols)
 
     if get_df is True:
-        trips = trips >> filter(_.calitp_itp_id != 323) >> collect()
+        # Handle Metrolink if we need to
+        if (itp_id_list is None) or (323 in itp_id_list):
+            not_metrolink_trips = trips >> filter(_.calitp_itp_id != 323) >> collect()
 
-        # Fix Metrolink trips as a pd.DataFrame, then concatenate
-        # This means that LazyTbl output will not show correct results
-        # If Metrolink is not in itp_id_list, then this is empty dataframe, and that's ok
-        corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(metrolink_trips)
+            # Fix Metrolink trips as a pd.DataFrame, then concatenate
+            # This means that LazyTbl output will not show correct results
+            # If Metrolink is not in itp_id_list, then this is empty dataframe, and that's ok
+            corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(
+                metrolink_trips
+            )
 
-        if trip_cols is not None:
-            corrected_metrolink = corrected_metrolink[trip_cols]
+            if trip_cols is not None:
+                corrected_metrolink = corrected_metrolink[trip_cols]
 
-        trips = pd.concat(
-            [trips, corrected_metrolink], axis=0, ignore_index=True
-        ).reset_index(drop=True)
+            trips = pd.concat(
+                [not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True
+            ).reset_index(drop=True)
+
+        else:
+            trips = trips >> collect()
 
     return trips
 
