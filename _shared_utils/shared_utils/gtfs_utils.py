@@ -94,10 +94,15 @@ def get_route_info(
 
     routes = (
         tbl.views.gtfs_schedule_fact_daily_feed_routes()
-        >> filter(_.date == selected_date)
-        >> inner_join(
-            _, dim_routes, on=["route_key", "calitp_extracted_at", "calitp_deleted_at"]
+        >> filter(
+            _.date == selected_date,
+            _.calitp_extracted_at <= selected_date,
+            _.calitp_deleted_at >= selected_date,
         )
+        # Drop one set of these (extracted_at/deleted_at),
+        # since adding it into the merge cols sometimes returns zero rows
+        >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
+        >> inner_join(_, dim_routes, on=["route_key"])
         >> distinct()
     )
 
@@ -118,6 +123,7 @@ def get_stops(
     itp_id_list: list[int] = None,
     stop_cols: list[str] = None,
     get_df: bool = True,
+    crs: str = geography_utils.WGS84,
 ) -> gpd.GeoDataFrame:
 
     # Stops query
@@ -125,10 +131,15 @@ def get_stops(
 
     stops = (
         tbl.views.gtfs_schedule_fact_daily_feed_stops()
-        >> filter(_.date == selected_date)
-        >> inner_join(
-            _, dim_stops, on=["stop_key", "calitp_extracted_at", "calitp_deleted_at"]
+        >> filter(
+            _.date == selected_date,
+            _.calitp_extracted_at <= selected_date,
+            _.calitp_deleted_at >= selected_date,
         )
+        # Drop one set of these (extracted_at/deleted_at),
+        # since adding it into the merge cols sometimes returns zero rows
+        >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
+        >> inner_join(_, dim_stops, on=["stop_key"])
         >> distinct()
     )
 
@@ -139,7 +150,8 @@ def get_stops(
         stops = stops >> select(*stop_cols)
 
     if get_df is True:
-        stops = geography_utils.create_point_geometry(stops >> collect()).drop(
+        stops = stops >> collect()
+        stops = geography_utils.create_point_geometry(stops, crs=crs).drop(
             columns=["stop_lon", "stop_lat"]
         )
 
@@ -158,7 +170,15 @@ def get_trips(
 
     trips = (
         tbl.views.gtfs_schedule_fact_daily_trips()
-        >> filter(_.service_date == selected_date, _.is_in_service == True)
+        >> filter(
+            _.service_date == selected_date,
+            _.calitp_extracted_at <= selected_date,
+            _.calitp_deleted_at >= selected_date,
+            _.is_in_service == True,
+        )
+        # Drop one set of these (extracted_at/deleted_at),
+        # since adding it into the merge cols sometimes returns zero rows
+        >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
         >> inner_join(
             _,
             dim_trips,
@@ -169,8 +189,6 @@ def get_trips(
                 "service_id",
                 "calitp_itp_id",
                 "calitp_url_number",
-                "calitp_extracted_at",
-                "calitp_deleted_at",
             ],
         )
         >> distinct()
@@ -185,19 +203,26 @@ def get_trips(
         trips = trips >> select(*trip_cols)
 
     if get_df is True:
-        trips = trips >> filter(_.calitp_itp_id != 323) >> collect()
+        # Handle Metrolink if we need to
+        if (itp_id_list is None) or (323 in itp_id_list):
+            not_metrolink_trips = trips >> filter(_.calitp_itp_id != 323) >> collect()
 
-        # Fix Metrolink trips as a pd.DataFrame, then concatenate
-        # This means that LazyTbl output will not show correct results
-        # If Metrolink is not in itp_id_list, then this is empty dataframe, and that's ok
-        corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(metrolink_trips)
+            # Fix Metrolink trips as a pd.DataFrame, then concatenate
+            # This means that LazyTbl output will not show correct results
+            # If Metrolink is not in itp_id_list, then this is empty dataframe, and that's ok
+            corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(
+                metrolink_trips
+            )
 
-        if trip_cols is not None:
-            corrected_metrolink = corrected_metrolink[trip_cols]
+            if trip_cols is not None:
+                corrected_metrolink = corrected_metrolink[trip_cols]
 
-        trips = pd.concat(
-            [trips, corrected_metrolink], axis=0, ignore_index=True
-        ).reset_index(drop=True)
+            trips = pd.concat(
+                [not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True
+            ).reset_index(drop=True)
+
+        else:
+            trips = trips >> collect()
 
     return trips
 
@@ -206,7 +231,7 @@ def get_route_shapes(
     selected_date: str | datetime.date,
     itp_id_list: list[int] = None,
     get_df: bool = True,
-    CRS: str = geography_utils.WGS84,
+    crs: str = geography_utils.WGS84,
 ) -> gpd.GeoDataFrame:
     """
     Return a subset of geography_utils.make_routes_gdf()
@@ -228,7 +253,7 @@ def get_route_shapes(
 
     route_shapes = (
         geography_utils.make_routes_gdf(
-            SELECTED_DATE=selected_date, CRS=CRS, ITP_ID_LIST=itp_id_list
+            SELECTED_DATE=selected_date, CRS=crs, ITP_ID_LIST=itp_id_list
         )
         .drop(columns=["pt_array"])
         .drop_duplicates()

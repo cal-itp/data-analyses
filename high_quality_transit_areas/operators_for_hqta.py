@@ -9,6 +9,9 @@ expect not to run, and ones we expect should run and are erroring.
 Return a list of operators that have cached files, and 
 thus should be able to have their HQTA corridors compiled.
 """
+import dask.dataframe as dd
+import dask_geopandas
+import datetime as dt
 import json
 import pandas as pd
 
@@ -16,12 +19,12 @@ from siuba import *
 
 from calitp.tables import tbl
 from shared_utils import rt_utils
-from A1_rail_ferry_brt import analysis_date
 
+analysis_date = dt.date(2022, 7, 13) 
 date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
-HQTA_OPERATORS_FILE = "./hqta_operators.json"
-
-
+EXPORT_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
+ALL_OPERATORS_FILE = "./hqta_operators.json"
+VALID_OPERATORS_FILE = "./valid_hqta_operators.json"
 '''
 ITP_IDS_IN_GCS = [
     101, 102, 103, 105, 106, 108, 10, 110,
@@ -58,16 +61,20 @@ ITP_IDS_IN_GCS = [
 ]
 '''
 
-
-def get_list_of_cached_itp_ids():
-    ALL_ITP_IDS = (tbl.gtfs_schedule.agency()
-               >> distinct(_.calitp_itp_id)
-               >> filter(_.calitp_itp_id != 200, 
-                         # Amtrak is always filtered out
-                         _.calitp_itp_id != 13)
-               >> collect()
-    ).calitp_itp_id.tolist()
-    
+def get_list_of_cached_itp_ids(date_str: str, ALL_ITP_IDS: list = None) -> list:
+    """
+    ALL_ITP_IDS: list. 
+                Allow passing an alternate list of IDs in. 
+                If list is not specified, then run a fresh query.    
+    """
+    if ALL_ITP_IDS is None:
+        ALL_ITP_IDS = (tbl.gtfs_schedule.agency()
+                   >> distinct(_.calitp_itp_id)
+                   >> filter(_.calitp_itp_id != 200, 
+                             # Amtrak is always filtered out
+                             _.calitp_itp_id != 13)
+                   >> collect()
+        ).calitp_itp_id.tolist()
     
     ITP_IDS_WITH_CACHED_FILES = []
 
@@ -88,20 +95,75 @@ def get_list_of_cached_itp_ids():
     return sorted(ITP_IDS_WITH_CACHED_FILES)
 
 
-def get_valid_itp_ids(file=HQTA_OPERATORS_FILE):
+def list_to_json(my_list: list, file: str):
+    """
+    Turn list to json
+    """
+    MY_DICT = {}
+    MY_DICT["VALID_ITP_IDS"] = my_list
+    
+    with open(f"./{file.replace('.json', '')}.json", "w") as f:
+        json.dump(MY_DICT, f)
+        
+    
+def itp_ids_from_json(file: str = VALID_OPERATORS_FILE) -> list:
+    # First, open the JSON with all the operators
     with open(f"./{file}") as f:
         data = json.load(f)
-        
+    
     return data["VALID_ITP_IDS"]
+
+
+def check_for_completeness(export_path: str = EXPORT_PATH, 
+                           all_operators_file: str = ALL_OPERATORS_FILE, 
+                           valid_operators_file: str = VALID_OPERATORS_FILE):
+    
+    # First, open the JSON with all the operators
+    ALL_ITP_IDS = itp_ids_from_json(all_operators_file)
+    
+    # Go through and check that the files are non-empty for all 4
+    # If it is, then add it to our smaller list of operators that we expect to run through
+    # rest of the HQTA workflow
+    IDS_WITH_FULL_INFO = [] 
+    
+    for itp_id in ALL_ITP_IDS:  
+        routelines = dask_geopandas.read_parquet(
+                f"{export_path}routelines_{itp_id}_{date_str}.parquet")
+        trips = dd.read_parquet(f"{export_path}trips_{itp_id}_{date_str}.parquet")
+        stop_times = dd.read_parquet(f"{export_path}st_{itp_id}_{date_str}.parquet")
+        stops = dask_geopandas.read_parquet(f"{export_path}stops_{itp_id}_{date_str}.parquet")
+       
+        if ( (len(routelines.index) > 0) and (len(trips.index) > 0) and 
+            (len(stop_times.index) > 0) and (len(stops.index) > 0) ):    
+            IDS_WITH_FULL_INFO.append(itp_id)
+    
+    return IDS_WITH_FULL_INFO
 
     
 if __name__=="__main__":
-    ITP_IDS = get_list_of_cached_itp_ids()
+    start = dt.datetime.now()
+    
+    # These are all the IDs that have some cached files in GCS
+    ITP_IDS = get_list_of_cached_itp_ids(date_str)
     
     # Turn list into a dict, then save as json
-    VALID_ITP_IDS_DICT = {}
-    VALID_ITP_IDS_DICT["VALID_ITP_IDS"] = ITP_IDS
+    list_to_json(ITP_IDS, ALL_OPERATORS_FILE)
     
-    # Write it out as json
-    with open(f"{HQTA_OPERATORS_FILE}", "w") as f:
-        json.dump(VALID_ITP_IDS_DICT, f)
+    time1 = dt.datetime.now()
+    print(f"cached ids, save as json: {time1-start}")
+    
+    # Now check whether an operator has a complete set of files (len > 0)
+    IDS_WITH_FULL_INFO = check_for_completeness(
+        EXPORT_PATH, ALL_OPERATORS_FILE, VALID_OPERATORS_FILE)
+    
+    # Save that list to json, should be smaller than all operators with cached
+    list_to_json(IDS_WITH_FULL_INFO, VALID_OPERATORS_FILE)
+    
+    time2 = dt.datetime.now()
+    print(f"check files for completeness, save as json: {time2-time1}")
+    
+    end = dt.datetime.now()
+    print(f"execution time: {end-start}")
+
+        
+    

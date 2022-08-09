@@ -1,9 +1,5 @@
 # High Quality Transit Areas Analysis
 
-## Analysis Flow
-
-* 
-
 ## High Quality Transit Areas Relevant Statutes
 
 [PRC 21155](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21155.&lawCode=PRC)
@@ -26,3 +22,15 @@
 (4) Fare collection system that promotes efficiency.
 (5) Defined stations._
     * Unlikely to determine if a service qualifies as BRT under this definition using GTFS alone
+    
+## Workflow
+
+HQTA data is updated at a monthly frequency for the open data portal.
+
+1. [Download data](./download_data.py) and cache parquets in GCS
+1. [Create JSONs](./operators_for_hqta.py) storing a dictionary with [all the operators](./hqta_operators.json) that have cached files, and [valid operators](./valid_hqta_operators.json). 
+    * It's possible in downloading the `routes`, `trips`, `stops`, and `stop_times`, one of the files is not able to be successfully downloaded, but the other 3 are. 
+    * Also, it's possible that files with no rows are downloaded.
+    * A check for complete information (all 4 files are present and are non-empty)
+    * These valid operators are the ones that continue on in the HQTA workflow.
+1. 

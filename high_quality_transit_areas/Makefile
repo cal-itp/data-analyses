@@ -1,3 +1,7 @@
+download_hqta_data:
+	python download_data.py
+	python operators_for_hqta.py
+    
 create_hqta_data:
 	#pip install -r requirements.txt
 	#python A1_rail_ferry_brt.py
