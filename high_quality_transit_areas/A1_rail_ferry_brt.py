@@ -14,9 +14,9 @@ from siuba import *
 
 import utilities
 from shared_utils import rt_utils, geography_utils
+from update_vars import analysis_date
 
 catalog = intake.open_catalog("./*.yml")
-analysis_date = dt.date(2022, 6, 15) ## Wed, June 15
 
 
 def get_routes_by_type(route_types, analysis_date):
