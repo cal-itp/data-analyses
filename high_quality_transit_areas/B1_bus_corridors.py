@@ -27,7 +27,8 @@ import utilities
 from A1_rail_ferry_brt import analysis_date
 from shared_utils import rt_utils, geography_utils, utils, gtfs_utils
 
-date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
+from update_vars import (analysis_date, date_str, 
+                         CACHED_VIEWS_EXPORT_PATH, VALID_OPERATORS_FILE)
 
 fs = get_fs()
 
@@ -67,7 +68,7 @@ TOO_LONG_IDS = [
 
 ERROR_IDS = VALUE_ERROR_IDS + FILE_NOT_FOUND_IDS + TOO_LONG_IDS
 
-VALID_ITP_IDS = operators_for_hqta.get_valid_itp_ids()
+VALID_ITP_IDS = operators_for_hqta.itp_ids_from_json(file=VALID_OPERATORS_FILE)
 ITP_IDS_IN_GCS = [x for x in VALID_ITP_IDS if x not in ERROR_IDS]
 
 
@@ -216,29 +217,19 @@ def single_operator_hqta(routelines, trips, stop_times, stops):
 
 
 def import_data(itp_id, date_str):
-    FILE_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
-
     routelines = dask_geopandas.read_parquet(
-                f"{FILE_PATH}routelines_{itp_id}_{date_str}.parquet")
-    stop_times = dd.read_parquet(f"{FILE_PATH}st_{itp_id}_{date_str}.parquet")
-    stops = dask_geopandas.read_parquet(f"{FILE_PATH}stops_{itp_id}_{date_str}.parquet")
-    
-    # For Metrolink, trips need to have shape_id manually filled in,
-    # since it shows up as NaN in the raw GTFS files
-    if itp_id == 323:
-        trips1 = pd.read_parquet(f"{FILE_PATH}trips_{itp_id}_{date_str}.parquet")
-        trips2 = gtfs_utils.fill_in_metrolink_trips_df_with_shape_id(trips1)
-        trips = dd.from_pandas(trips2, npartitions=1) 
-    else:
-        trips = dd.read_parquet(f"{FILE_PATH}trips_{itp_id}_{date_str}.parquet")
+                f"{CACHED_VIEWS_EXPORT_PATH}routelines_{itp_id}_{date_str}.parquet")
+    trips = dd.read_parquet(f"{CACHED_VIEWS_EXPORT_PATH}trips_{itp_id}_{date_str}.parquet")
+    stop_times = dd.read_parquet(
+        f"{CACHED_VIEWS_EXPORT_PATH}st_{itp_id}_{date_str}.parquet")
+    stops = dask_geopandas.read_parquet(
+        f"{CACHED_VIEWS_EXPORT_PATH}stops_{itp_id}_{date_str}.parquet")
     
     return routelines, trips, stop_times, stops
     
     
     
-if __name__=="__main__":
-    date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
-    
+if __name__=="__main__":    
     start_time = dt.datetime.now()
             
     for itp_id in ITP_IDS_IN_GCS:
@@ -249,26 +240,18 @@ if __name__=="__main__":
 
         print(f"read in cached files: {itp_id}")                
             
-        # The files are stored in GCS regardless, so they'll always return something
-        # But, only keep going if all the files have rows present
-        # If any are zero, skip it, because we can't draw HQTA boundaries on it
-        if ((len(routelines) > 0) and (len(trips) > 0) and 
-            (len(stop_times) > 0) and (len(stops) > 0)):
-            
-            gdf = single_operator_hqta(routelines, trips, stop_times, stops)
+        gdf = single_operator_hqta(routelines, trips, stop_times, stops)
 
-            print(f"created single operator hqta: {itp_id}")
+        print(f"created single operator hqta: {itp_id}")
 
-            # Export each operator to test GCS folder (separate from Eric's)        
-            utils.geoparquet_gcs_export(
-                gdf, f'{TEST_GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
+        # Export each operator to test GCS folder (separate from Eric's)        
+        utils.geoparquet_gcs_export(
+            gdf, f'{TEST_GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
 
-            print(f"successful export: {itp_id}")
+        print(f"successful export: {itp_id}")
 
-            operator_end = dt.datetime.now()
-            print(f"execution time for {itp_id}: {operator_end - operator_start}")
-        else:
-            continue
+        operator_end = dt.datetime.now()
+        print(f"execution time for {itp_id}: {operator_end - operator_start}")
     
     end_time = dt.datetime.now()
     print(f"total execution time: {end_time-start_time}")
