@@ -18,9 +18,7 @@ from calitp.tables import tbl
 from shared_utils import rt_utils
 from A1_rail_ferry_brt import analysis_date
 
-date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
 HQTA_OPERATORS_FILE = "./hqta_operators.json"
-
 
 '''
 ITP_IDS_IN_GCS = [
@@ -59,15 +57,20 @@ ITP_IDS_IN_GCS = [
 '''
 
 
-def get_list_of_cached_itp_ids():
-    ALL_ITP_IDS = (tbl.gtfs_schedule.agency()
-               >> distinct(_.calitp_itp_id)
-               >> filter(_.calitp_itp_id != 200, 
-                         # Amtrak is always filtered out
-                         _.calitp_itp_id != 13)
-               >> collect()
-    ).calitp_itp_id.tolist()
-    
+def get_list_of_cached_itp_ids(date_str: str, ALL_ITP_IDS: list = None) -> list:
+    """
+    ALL_ITP_IDS: list. 
+                Allow passing an alternate list of IDs in. 
+                If list is not specified, then run a fresh query.    
+    """
+    if ALL_ITP_IDS is None:
+        ALL_ITP_IDS = (tbl.gtfs_schedule.agency()
+                   >> distinct(_.calitp_itp_id)
+                   >> filter(_.calitp_itp_id != 200, 
+                             # Amtrak is always filtered out
+                             _.calitp_itp_id != 13)
+                   >> collect()
+        ).calitp_itp_id.tolist()
     
     ITP_IDS_WITH_CACHED_FILES = []
 
@@ -96,7 +99,9 @@ def get_valid_itp_ids(file=HQTA_OPERATORS_FILE):
 
     
 if __name__=="__main__":
-    ITP_IDS = get_list_of_cached_itp_ids()
+    date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
+
+    ITP_IDS = get_list_of_cached_itp_ids(date_str)
     
     # Turn list into a dict, then save as json
     VALID_ITP_IDS_DICT = {}
