@@ -24,6 +24,8 @@ from siuba import *
 import operators_for_hqta
 from shared_utils import gtfs_utils, rt_utils, geography_utils, utils
 
+# Should some of these variables be set somewhere else? Ahead of a fresh run?
+# Otherwise, run into problem of circular imports maybe
 LOCAL_PATH = "./data/"
 analysis_date = dt.date(2022, 7, 13)
 date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
@@ -50,33 +52,6 @@ def primary_trip_query(itp_id: int,
     
     full_trips.to_parquet(f"{LOCAL_PATH}temp_{filename}")
     
-'''
-def keys_for_operator_day(itp_id: int, 
-                          analysis_date: dt.date
-                         ) -> siuba.sql.verbs.LazyTbl:
-    """
-    Use trip table to grab all the keys we need.
-    For that selected date, ITP ID, grab trip_key, feed_key, 
-    stop_key, stop_time_key.
-    """
-    dataset = "trips"
-    filename = f"{dataset}_{itp_id}_{date_str}.parquet"    
-    
-    trip_keys_for_day = pd.read_parquet(f"{LOCAL_PATH}temp_{filename}")
-    trip_keys_for_day = trip_keys_for_day["trip_key"].drop_duplicates()
-    
-    ix_keys_for_day = (tbl.views.gtfs_schedule_index_feed_trip_stops()
-                       >> inner_join(_, 
-                                     trip_keys_for_day,
-                                     on = "trip_key"
-                                    )
-                       >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
-                       >> distinct()
-                       >> collect()
-    )
-    
-    ix_keys_for_day.to_parquet(f"{LOCAL_PATH}ix_keys_for_day.parquet")
-'''  
 
 def get_routelines(itp_id: int, 
                    analysis_date: dt.date):
@@ -227,7 +202,13 @@ if __name__=="__main__":
     
     start = dt.datetime.now()
     
-    ALL_IDS = operators_for_hqta.get_valid_itp_ids()
+    ALL_IDS = (tbl.gtfs_schedule.agency()
+               >> distinct(_.calitp_itp_id)
+               >> filter(_.calitp_itp_id != 200, 
+                         # Amtrak is always filtered out
+                         _.calitp_itp_id != 13)
+               >> collect()
+              ).calitp_itp_id.tolist()
     
     # ITP IDs already run in the script
     CACHED_IDS = operators_for_hqta.get_list_of_cached_itp_ids(
@@ -236,22 +217,17 @@ if __name__=="__main__":
     IDS_TO_RUN = list(set(ALL_IDS).difference(set(CACHED_IDS)))
     print(f"# operators to run: {len(IDS_TO_RUN)}")
     
-    remove_me = [21, 200, 13]
-    IDS_TO_RUN = [i for i in IDS_TO_RUN if i not in remove_me]    
-    
-    # Need this table, but no filtering on itp_id
-    #ix_keys_for_day = tbl.views.gtfs_schedule_index_feed_trip_stops()
+    # TODO: rethink cached IDs. For the most part, we know there are some
+    # that are erroring, such as ITP ID 21, and we want to ignore those going forward
+    # that's caught in completeness check later on, but 
+    # at this stage, it'll show there's a bunch of operators we want to keep trying on
     
     for itp_id in sorted(IDS_TO_RUN):
         time0 = dt.datetime.now()
         print(f"*********Download data for: {itp_id}*********")
         
         # Stash a trips table locally to use
-        
         primary_trip_query(itp_id, analysis_date)
-        
-        # Stash the ix_keys_for_day locally to use in get_stops and get_stop_times
-        #keys_for_operator_day(itp_id, analysis_date)
 
         # Download routes, trips, stops, stop_times and save in GCS
         get_routelines(itp_id, analysis_date)
@@ -267,7 +243,6 @@ if __name__=="__main__":
         time1 = dt.datetime.now()
         print(f"download files for {itp_id}: {time1 - time0}")
 
-    # Need to remove 21, 200, 13
-    
     end = dt.datetime.now()
     print(f"execution time: {end-start}")
+    
