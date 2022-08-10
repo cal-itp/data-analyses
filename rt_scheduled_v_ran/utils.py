@@ -44,7 +44,7 @@ def load_schedule_data(start_date, end_date, itp_id):
 def load_rt_data(start_date, end_date):
     rt = query_sql(
         f"""
-        SELECT * FROM `cal-itp-data-infra-staging.natalie_views.test_rt_trips`
+        SELECT * FROM `cal-itp-data-infra-staging.natalie_views.gtfs_rt_distinct_trips`
         WHERE date BETWEEN '{start_date}' AND '{end_date}'
         """
     )
