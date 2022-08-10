@@ -1,7 +1,3 @@
-'''
-Project Sheet
-Crosswalks
-'''
 """
 Project Sheet
 Crosswalks

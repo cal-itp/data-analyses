@@ -10,13 +10,12 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
 FILE_NAME = "TIRCP_July_8_2022.xlsx"
 
 #Crosswalk
-import crosswalks 
+import A5_crosswalks as crosswalks
 
 #Import cleaned up data
 import A1_data_prep
-
 """
-Functions
+Tableau 
 """
 # Categorizing expended percentage into bins
 def expended_percent(row):

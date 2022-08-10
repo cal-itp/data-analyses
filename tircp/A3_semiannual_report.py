@@ -3,7 +3,6 @@ Semiannual Report
 '''
 import pandas as pd
 from calitp import *
-import shared_utils
 
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
@@ -15,11 +14,11 @@ import A5_crosswalks as crosswalks
 #Import cleaned up data
 import A1_data_prep
 
-'''
+"""
 Columns
 &
 Lists
-'''
+"""
 # Columns to keep
 allocation_cols = [
     "allocation_award_year",
@@ -106,9 +105,24 @@ list_to_add = [
     "Expended_Amount",
     "Number_of_Awarded_Projects",
 ]
-'''
+
+missing_date = pd.to_datetime("2100-01-01")
+
+"""
+Functions
+"""
+def highlight_differences(data, color="pink"):
+        attr = "background-color: {}".format(color)
+        other = data.xs("Current_SAR", axis="columns", level=-1)
+        return pd.DataFrame(
+            np.where(data.ne(other, level=0), attr, ""),
+            index=data.index,
+            columns=data.columns,
+        )
+    
+"""
 Create Summary Page
-'''
+"""
 def summary_SAR_table(df):
     # Group by and aggregate
     df = (
@@ -168,16 +182,18 @@ def summary_SAR_table(df):
         ]
     )
     return df
-'''
+
+"""
 Complete Semiannual Report
-'''
+"""
 def full_sar_report():
+    
     # Load in raw sheets
     df_project = A1_data_prep.clean_project()
     df_allocation = A1_data_prep.clean_allocation()
     previous_sar = A1_data_prep.load_previous_sar()
 
-    # Function for summary table portion of the report
+    # Create summary table portion of the report
     summary = summary_SAR_table(df_project)
 
     # Only keeping certain columns
@@ -191,16 +207,16 @@ def full_sar_report():
         left_on=["allocation_ppno", "allocation_award_year"],
         right_on=["project_ppno", "project_award_year"],
     )
-    # drop duplicates
+    
+    # Drop duplicates
     m1 = m1.drop_duplicates()
 
     # Fill in missing dates with a fake one so it'll show up in the group by
-    missing_date = pd.to_datetime("2100-01-01")
     for i in dates:
         m1[i] = m1[i].fillna(missing_date).apply(pd.to_datetime)
 
     """
-    Add new columns with percentages and a new column to flag whether an allocation date is
+    Add columns with percentages and to flag whether an allocation date is
     AFTER  7-31-2020 then blank, if BEFORE 7-31-2020 then X
     """ 
     m1 = m1.assign(
@@ -247,30 +263,20 @@ def full_sar_report():
     """
     # Reset index from dataframe above
     df_current = df_pivoted.reset_index()
+    
+    # Stack current SAR and previous SAR and differentiate them between the keys 
     df_all = pd.concat(
         [df_current, previous_sar], keys=["Current_SAR", "Previous_SAR"], axis=1
     )
     df_all = df_all.swaplevel(axis="columns")[df_current.columns[1:]]
     
-    """
-    Note to self: move this out
-    """
-    def highlight_diff(data, color="pink"):
-        attr = "background-color: {}".format(color)
-        other = data.xs("Current_SAR", axis="columns", level=-1)
-        return pd.DataFrame(
-            np.where(data.ne(other, level=0), attr, ""),
-            index=data.index,
-            columns=data.columns,
-        )
-
-    df_highlighted = df_all.style.apply(highlight_diff, axis=None)
+    df_highlighted = df_all.style.apply(highlight_differences, axis=None)
 
     # Save to GCS
-    with pd.ExcelWriter(f"{GCS_FILE_PATH}Script_Semi_Annual_Report.xlsx") as writer:
+    with pd.ExcelWriter(f"{GCS_FILE_PATH}Semi_Annual_Report.xlsx") as writer:
         summary.to_excel(writer, sheet_name="Summary", index=True)
         df_pivoted.to_excel(writer, sheet_name="FY", index=True)
         df_current.to_excel(writer, sheet_name="Unpivoted_Current_Version", index=False)
         df_highlighted.to_excel(writer, sheet_name="highlighted")
-
-    return df_current, df_pivoted, summary
+    
+    return df_current, df_pivoted, summary, df_highlighted
