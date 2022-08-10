@@ -23,13 +23,9 @@ from siuba import *
 
 import operators_for_hqta
 from shared_utils import gtfs_utils, rt_utils, geography_utils, utils
+from update_vars import analysis_date, date_str, EXPORT_PATH
 
-# Should some of these variables be set somewhere else? Ahead of a fresh run?
-# Otherwise, run into problem of circular imports maybe
 LOCAL_PATH = "./data/"
-analysis_date = dt.date(2022, 7, 13)
-date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
-EXPORT_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
 
 def primary_trip_query(itp_id: int,
                        analysis_date: dt.date):
@@ -64,12 +60,16 @@ def get_routelines(itp_id: int,
     dataset = "routelines"
     filename = f'{dataset}_{itp_id}_{date_str}.parquet'
     
+    # Read in the full trips table
+    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_{filename}")
+    
     routelines = gtfs_utils.get_route_shapes(
-            selected_date = analysis_date,
-            itp_id_list = [itp_id],
-            get_df = True,
-            crs = geography_utils.CA_NAD83Albers
-        )
+        selected_date = analysis_date,
+        itp_id_list = [itp_id],
+        get_df = True,
+        crs = geography_utils.CA_NAD83Albers,
+        trip_df = full_trip
+    )
     
     if not routelines.empty:
         utils.geoparquet_gcs_export(routelines, 
@@ -179,46 +179,22 @@ def get_stop_times(itp_id: int, analysis_date: str | dt.date):
 
     full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_{filename}")
     
-    stop_times_query = (
-        tbl.views.gtfs_schedule_dim_stop_times()
-        >> filter(_.calitp_itp_id == itp_id)
-        >> select(-_.calitp_url_number)
-        >> distinct()
-    )
-    
-    # Use the gtfs_schedule_index_feed_trip_stops to find the stop_time_keys
-    # that actually occurred on that day
-    trips_stops_ix_query = (
-        full_trips[["trip_key"]]
-        >> inner_join(_, 
-                      # This table only has keys, no itp_id or date to filter on
-                      (tbl.views.gtfs_schedule_index_feed_trip_stops()
-                       >> select(_.trip_key, _.stop_time_key)
-                       >> distinct()), 
-                      on = "trip_key") 
-    )
-    
-    stop_times = (stop_times_query
-                  >> inner_join(_, 
-                                trips_stops_ix_query, 
-                                on = "stop_time_key")
-                  >> mutate(stop_sequence=_.stop_sequence.astype(int))  # in SQL!
-                  >> collect()
-                  >> distinct(_.stop_id, _.trip_id, _keep_all=True)
-                  >> arrange(_.trip_id, _.stop_sequence)
-    )
-    
-    
-    stop_times = stop_times.assign(
-        arrival_time = stop_times.arrival_time.str.strip(),
-        departure_time = stop_times.departure_time.str.strip(),
+    stop_times = gtfs_utils.get_stop_times(
+        selected_date = analysis_date,
+        itp_id_list: [itp_id],
+        stop_time_cols = None,
+        get_df = True,
+        departure_hours = None,
+        trip_df = full_trips
     )
     
     if not stop_times.empty:
         stop_times.to_parquet(f"{EXPORT_PATH}{filename}")
         print(f"{itp_id}: {dataset} exported to GCS")
     
+
     
+
 if __name__=="__main__":
     
     start = dt.datetime.now()
