@@ -379,12 +379,12 @@ def get_stop_times(
             )
             >> distinct()
         )
-    # When a pre-existing table is given, convert it to pd.DataFrame
-    # even if a LazyTbl is given
+    # When a pre-existing table is given, leave as LzyTbl
+    # But how to handle pd.DataFrame?
     elif trip_df is not None:
         keep_cols = ["trip_key"]
         if isinstance(trip_df, siuba.sql.verbs.LazyTbl):
-            trips_on_day = trip_df >> collect() >> select(keep_cols)
+            trips_on_day = trip_df >> select(keep_cols)
         elif isinstance(trip_df, pd.DataFrame):
             trips_on_day = trip_df[keep_cols]
 
