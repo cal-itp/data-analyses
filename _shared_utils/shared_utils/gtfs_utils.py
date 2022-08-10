@@ -14,6 +14,7 @@ import datetime
 import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
+import siuba
 from calitp.tables import tbl
 from shared_utils import geography_utils
 from siuba import *
@@ -27,7 +28,7 @@ YESTERDAY_DATE = datetime.date.today() + datetime.timedelta(days=-1)
 
 
 # ----------------------------------------------------------------#
-## Metrolink known error (shape_ids are missing in trips table).
+# Metrolink known error (shape_ids are missing in trips table).
 # Fill it in manually.
 # ----------------------------------------------------------------#
 METROLINK_SHAPE_TO_ROUTE = {
@@ -86,7 +87,7 @@ def fill_in_metrolink_trips_df_with_shape_id(trips: pd.DataFrame) -> pd.DataFram
 
 
 # ----------------------------------------------------------------#
-## Convenience siuba filtering functions for querying
+# Convenience siuba filtering functions for querying
 # ----------------------------------------------------------------#
 def filter_itp_id(itp_id_list: list):
     """
@@ -114,7 +115,7 @@ def subset_cols(cols: list):
 
 
 # ----------------------------------------------------------------#
-## Routes
+# Routes
 # ----------------------------------------------------------------#
 # Route Info - views.gtfs_schedule_dim_routes + views.gtfs_schedule_fact_daily_feed_routes
 # Route Shapes - geography_utils.make_routes_gdf()
@@ -159,6 +160,7 @@ def get_route_shapes(
     itp_id_list: list[int] = None,
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
+    trip_df: siuba.sql.verbs.LazyTbl | pd.DataFrame = None,
 ) -> gpd.GeoDataFrame:
     """
     Return a subset of geography_utils.make_routes_gdf()
@@ -166,17 +168,27 @@ def get_route_shapes(
 
     geography_utils.make_routes_gdf() only selects based on calitp_extracted_at
     and calitp_deleted_at date range.
+
+    Allow a pre-existing trips table to be supplied.
+    If not, run a fresh trips query.
     """
-    trips = (
-        get_trips(
-            selected_date=selected_date,
-            itp_id_list=itp_id_list,
-            trip_cols=["calitp_itp_id", "calitp_url_number", "shape_id"],
-            get_df=False,
+    if trip_df is None:
+        trips = (
+            get_trips(
+                selected_date=selected_date,
+                itp_id_list=itp_id_list,
+                trip_cols=["calitp_itp_id", "calitp_url_number", "shape_id"],
+                get_df=True,
+            )
+            >> distinct()
         )
-        >> distinct()
-        >> collect()
-    )
+    # When a pre-existing table is given, convert it to pd.DataFrame
+    # even if a LazyTbl is given
+    elif trip_df is not None:
+        if isinstance(trip_df, siuba.sql.verbs.LazyTbl):
+            trips = trip_df >> collect()
+        elif isinstance(trip_df, pd.DataFrame):
+            trips = trip_df
 
     route_shapes = (
         geography_utils.make_routes_gdf(
@@ -198,7 +210,7 @@ def get_route_shapes(
 
 
 # ----------------------------------------------------------------#
-## Stops
+# Stops
 # ----------------------------------------------------------------#
 def get_stops(
     selected_date: str | datetime.date = YESTERDAY_DATE,
@@ -239,7 +251,7 @@ def get_stops(
 
 
 # ----------------------------------------------------------------#
-## Trips
+# Trips
 # ----------------------------------------------------------------#
 def get_trips(
     selected_date: str | datetime.date = YESTERDAY_DATE,
@@ -284,7 +296,7 @@ def get_trips(
     # Handle Metrolink when we need to
     if ((itp_id_list is None) or (323 in itp_id_list)) and (get_df is True):
         metrolink_trips = trips >> filter(_.calitp_itp_id == 323) >> collect()
-        not_metrolinke_trips = trips >> filter(_.calitp_itp_id != 323) >> collect()
+        not_metrolink_trips = trips >> filter(_.calitp_itp_id != 323) >> collect()
 
         # Fix Metrolink trips as a pd.DataFrame, then concatenate
         # This means that LazyTbl output will not show correct results
@@ -302,7 +314,7 @@ def get_trips(
 
 
 # ----------------------------------------------------------------#
-## Stop Times
+# Stop Times
 # ----------------------------------------------------------------#
 def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
     # Some fixing, transformation, aggregation with dask
@@ -341,6 +353,7 @@ def get_stop_times(
     stop_time_cols: list[str] = None,
     get_df: bool = False,
     departure_hours: tuple | list = None,
+    trip_df: pd.DataFrame | siuba.sql.verbs.LazyTbl = None,
 ) -> dd.DataFrame:
     """
     Download stop times table for operator on a day.
@@ -348,23 +361,32 @@ def get_stop_times(
     Since it's huge, return dask dataframe by default, to
     allow for more wrangling before turning it back to pd.DataFrame.
 
+    Allow a pre-existing trips table to be supplied.
+    If not, run a fresh trips query.
+
     get_df: bool.
             If True, return pd.DataFrame
-            If False, return dd.DataFrame (which also includes extra departure_hour column)
-
-    TODO: is extra column for dask confusing?
+            If False, return dd.DataFrame
     """
-
-    # Grab the trips for that day
-    trips_on_day = (
-        get_trips(
-            selected_date=selected_date,
-            itp_id_list=itp_id_list,
-            trip_cols=["trip_key"],
-            get_df=False,
+    if trip_df is None:
+        # Grab the trips for that day
+        trips_on_day = (
+            get_trips(
+                selected_date=selected_date,
+                itp_id_list=itp_id_list,
+                trip_cols=["trip_key"],
+                get_df=False,
+            )
+            >> distinct()
         )
-        >> distinct()
-    )
+    # When a pre-existing table is given, convert it to pd.DataFrame
+    # even if a LazyTbl is given
+    elif trip_df is not None:
+        keep_cols = ["trip_key"]
+        if isinstance(trip_df, siuba.sql.verbs.LazyTbl):
+            trips_on_day = trip_df >> collect() >> select(keep_cols)
+        elif isinstance(trip_df, pd.DataFrame):
+            trips_on_day = trip_df[keep_cols]
 
     stop_times_query = (
         tbl.views.gtfs_schedule_dim_stop_times()
@@ -393,7 +415,6 @@ def get_stop_times(
         >> collect()
         >> distinct(_.stop_id, _.trip_id, _keep_all=True)
         >> arrange(_.trip_id, _.stop_sequence)
-        # >> subset_cols(stop_time_cols)
     )
 
     # Turn to dask dataframe
