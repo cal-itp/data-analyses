@@ -169,9 +169,7 @@ def get_stops(itp_id: int, analysis_date: str | dt.date):
 def get_stop_times(itp_id: int, analysis_date: str | dt.date):
     """
     Download stop times for the trips that ran on selected date.
-    
-    TODO: how to align with gtfs_utils? dd.DataFrame or pd.DataFrame?
-    
+        
     Write pd.DataFrame in GCS.
     """
     dataset = "st"
@@ -192,9 +190,29 @@ def get_stop_times(itp_id: int, analysis_date: str | dt.date):
         stop_times.to_parquet(f"{EXPORT_PATH}{filename}")
         print(f"{itp_id}: {dataset} exported to GCS")
     
-
     
+def check_route_trips_stops_are_cached(itp_id: int, date_str: str):
+    """
+    Check that routelines, trips, stops parquets are present.
+    If not, don't bother downloading stop_times (computationally expensive!).
+    
+    This way, if an operator is missing files, they are 
+    always missing at least 2.
+    """
+    response1 = rt_utils.check_cached(
+            f"routelines_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+    response2 = rt_utils.check_cached(
+        f"trips_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+    response3 = rt_utils.check_cached(
+        f"stops_{itp_id}_{date_str}.parquet", subfolder="cached_views/")    
+    
+    all_responses = [response1, response2, response3]
+        if all(r is not None for r in all_responses):
+            return True
+        else:
+            return False
 
+        
 if __name__=="__main__":
     
     start = dt.datetime.now()
@@ -230,7 +248,11 @@ if __name__=="__main__":
         get_routelines(itp_id, analysis_date)
         get_trips(itp_id, analysis_date)
         get_stops(itp_id, analysis_date)
-        get_stop_times(itp_id, analysis_date)
+        
+        # Check that routes, trips, stops were downloaded successfully
+        # If all 3 are present, then download stop_times. Otherwise, skip stop_times.
+        if check_route_trips_stops_are_cached(itp_id, date_str) is True:
+            get_stop_times(itp_id, analysis_date)
         
         # Remove full trips file
         trip_file = glob.glob(f"{LOCAL_PATH}temp_trips_{itp_id}_*.parquet")
