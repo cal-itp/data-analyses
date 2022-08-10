@@ -12,7 +12,6 @@ Leave the RT-specific analysis there.
 import datetime
 
 import dask.dataframe as dd
-import dask_bigquery
 import geopandas as gpd
 import pandas as pd
 from calitp.tables import tbl
@@ -27,6 +26,10 @@ GCS_PROJECT = "cal-itp-data-infra"
 YESTERDAY_DATE = datetime.date.today() + datetime.timedelta(days=-1)
 
 
+# ----------------------------------------------------------------#
+## Metrolink known error (shape_ids are missing in trips table).
+# Fill it in manually.
+# ----------------------------------------------------------------#
 METROLINK_SHAPE_TO_ROUTE = {
     "AVin": "Antelope Valley Line",
     "AVout": "Antelope Valley Line",
@@ -82,6 +85,41 @@ def fill_in_metrolink_trips_df_with_shape_id(trips: pd.DataFrame) -> pd.DataFram
     return df
 
 
+# ----------------------------------------------------------------#
+## Convenience siuba filtering functions for querying
+# ----------------------------------------------------------------#
+def filter_itp_id(itp_id_list: list):
+    """
+    Filter if itp_id_list is present.
+    Otherwise, skip.
+    """
+    if itp_id_list is not None:
+        return filter(_.calitp_itp_id.isin(itp_id_list))
+    elif itp_id_list is None:
+        return filter()
+
+
+def subset_cols(cols: list):
+    """
+    Select subset of columns, if column list is present.
+    Otherwise, skip.
+    """
+    if cols is not None:
+        return select(*cols)
+    elif cols is None:
+        # Can't use select(), because we'll select no columns
+        # But, without knowing full list of columns, let's just
+        # filter out nothing
+        return filter()
+
+
+# ----------------------------------------------------------------#
+## Routes
+# ----------------------------------------------------------------#
+# Route Info - views.gtfs_schedule_dim_routes + views.gtfs_schedule_fact_daily_feed_routes
+# Route Shapes - geography_utils.make_routes_gdf()
+
+
 def get_route_info(
     selected_date: str | datetime.date = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
@@ -90,7 +128,9 @@ def get_route_info(
 ) -> pd.DataFrame:
 
     # Route info query
-    dim_routes = tbl.views.gtfs_schedule_dim_routes() >> distinct()
+    dim_routes = (
+        tbl.views.gtfs_schedule_dim_routes() >> filter_itp_id(itp_id_list) >> distinct()
+    )
 
     routes = (
         tbl.views.gtfs_schedule_fact_daily_feed_routes()
@@ -99,132 +139,19 @@ def get_route_info(
             _.calitp_extracted_at <= selected_date,
             _.calitp_deleted_at >= selected_date,
         )
+        >> filter_itp_id(itp_id_list)
         # Drop one set of these (extracted_at/deleted_at),
         # since adding it into the merge cols sometimes returns zero rows
         >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
         >> inner_join(_, dim_routes, on=["route_key"])
+        >> subset_cols(route_cols)
         >> distinct()
     )
-
-    if itp_id_list is not None:
-        routes = routes >> filter(_.calitp_itp_id.isin(itp_id_list))
-
-    if route_cols is not None:
-        routes = routes >> select(*route_cols)
 
     if get_df is True:
         routes = routes >> collect()
 
     return routes
-
-
-def get_stops(
-    selected_date: str | datetime.date = YESTERDAY_DATE,
-    itp_id_list: list[int] = None,
-    stop_cols: list[str] = None,
-    get_df: bool = True,
-    crs: str = geography_utils.WGS84,
-) -> gpd.GeoDataFrame:
-
-    # Stops query
-    dim_stops = tbl.views.gtfs_schedule_dim_stops() >> distinct()
-
-    stops = (
-        tbl.views.gtfs_schedule_fact_daily_feed_stops()
-        >> filter(
-            _.date == selected_date,
-            _.calitp_extracted_at <= selected_date,
-            _.calitp_deleted_at >= selected_date,
-        )
-        # Drop one set of these (extracted_at/deleted_at),
-        # since adding it into the merge cols sometimes returns zero rows
-        >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
-        >> inner_join(_, dim_stops, on=["stop_key"])
-        >> distinct()
-    )
-
-    if itp_id_list is not None:
-        stops = stops >> filter(_.calitp_itp_id.isin(itp_id_list))
-
-    if stop_cols is not None:
-        stops = stops >> select(*stop_cols)
-
-    if get_df is True:
-        stops = stops >> collect()
-        stops = geography_utils.create_point_geometry(stops, crs=crs).drop(
-            columns=["stop_lon", "stop_lat"]
-        )
-
-    return stops
-
-
-def get_trips(
-    selected_date: str | datetime.date = YESTERDAY_DATE,
-    itp_id_list: list[int] = None,
-    trip_cols: list[str] = None,
-    get_df: bool = True,
-) -> pd.DataFrame:
-
-    # Trips query
-    dim_trips = tbl.views.gtfs_schedule_dim_trips() >> distinct()
-
-    trips = (
-        tbl.views.gtfs_schedule_fact_daily_trips()
-        >> filter(
-            _.service_date == selected_date,
-            _.calitp_extracted_at <= selected_date,
-            _.calitp_deleted_at >= selected_date,
-            _.is_in_service == True,
-        )
-        # Drop one set of these (extracted_at/deleted_at),
-        # since adding it into the merge cols sometimes returns zero rows
-        >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
-        >> inner_join(
-            _,
-            dim_trips,
-            on=[
-                "trip_key",
-                "trip_id",
-                "route_id",
-                "service_id",
-                "calitp_itp_id",
-                "calitp_url_number",
-            ],
-        )
-        >> distinct()
-    )
-
-    metrolink_trips = trips >> filter(_.calitp_itp_id == 323) >> collect()
-
-    if itp_id_list is not None:
-        trips = trips >> filter(_.calitp_itp_id.isin(itp_id_list))
-
-    if trip_cols is not None:
-        trips = trips >> select(*trip_cols)
-
-    if get_df is True:
-        # Handle Metrolink if we need to
-        if (itp_id_list is None) or (323 in itp_id_list):
-            not_metrolink_trips = trips >> filter(_.calitp_itp_id != 323) >> collect()
-
-            # Fix Metrolink trips as a pd.DataFrame, then concatenate
-            # This means that LazyTbl output will not show correct results
-            # If Metrolink is not in itp_id_list, then this is empty dataframe, and that's ok
-            corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(
-                metrolink_trips
-            )
-
-            if trip_cols is not None:
-                corrected_metrolink = corrected_metrolink[trip_cols]
-
-            trips = pd.concat(
-                [not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True
-            ).reset_index(drop=True)
-
-        else:
-            trips = trips >> collect()
-
-    return trips
 
 
 def get_route_shapes(
@@ -270,6 +197,113 @@ def get_route_shapes(
     return route_shapes_on_day
 
 
+# ----------------------------------------------------------------#
+## Stops
+# ----------------------------------------------------------------#
+def get_stops(
+    selected_date: str | datetime.date = YESTERDAY_DATE,
+    itp_id_list: list[int] = None,
+    stop_cols: list[str] = None,
+    get_df: bool = True,
+    crs: str = geography_utils.WGS84,
+) -> gpd.GeoDataFrame:
+
+    # Stops query
+    dim_stops = (
+        tbl.views.gtfs_schedule_dim_stops() >> filter_itp_id(itp_id_list) >> distinct()
+    )
+
+    stops = (
+        tbl.views.gtfs_schedule_fact_daily_feed_stops()
+        >> filter(
+            _.date == selected_date,
+            _.calitp_extracted_at <= selected_date,
+            _.calitp_deleted_at >= selected_date,
+        )
+        >> filter_itp_id(itp_id_list)
+        # Drop one set of these (extracted_at/deleted_at),
+        # since adding it into the merge cols sometimes returns zero rows
+        >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
+        >> inner_join(_, dim_stops, on=["stop_key"])
+        >> subset_cols(stop_cols)
+        >> distinct()
+    )
+
+    if get_df is True:
+        stops = stops >> collect()
+        stops = geography_utils.create_point_geometry(stops, crs=crs).drop(
+            columns=["stop_lon", "stop_lat"]
+        )
+
+    return stops
+
+
+# ----------------------------------------------------------------#
+## Trips
+# ----------------------------------------------------------------#
+def get_trips(
+    selected_date: str | datetime.date = YESTERDAY_DATE,
+    itp_id_list: list[int] = None,
+    trip_cols: list[str] = None,
+    get_df: bool = True,
+) -> pd.DataFrame:
+
+    # Trips query
+    dim_trips = (
+        tbl.views.gtfs_schedule_dim_trips() >> filter_itp_id(itp_id_list) >> distinct()
+    )
+
+    trips = (
+        tbl.views.gtfs_schedule_fact_daily_trips()
+        >> filter(
+            _.service_date == selected_date,
+            _.calitp_extracted_at <= selected_date,
+            _.calitp_deleted_at >= selected_date,
+            _.is_in_service == True,
+        )
+        >> filter_itp_id(itp_id_list)
+        # Drop one set of these (extracted_at/deleted_at),
+        # since adding it into the merge cols sometimes returns zero rows
+        >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
+        >> inner_join(
+            _,
+            dim_trips,
+            on=[
+                "trip_key",
+                "trip_id",
+                "route_id",
+                "service_id",
+                "calitp_itp_id",
+                "calitp_url_number",
+            ],
+        )
+        >> subset_cols(trip_cols)
+        >> distinct()
+    )
+
+    # Handle Metrolink when we need to
+    if ((itp_id_list is None) or (323 in itp_id_list)) and (get_df is True):
+        metrolink_trips = trips >> filter(_.calitp_itp_id == 323) >> collect()
+        not_metrolinke_trips = trips >> filter(_.calitp_itp_id != 323) >> collect()
+
+        # Fix Metrolink trips as a pd.DataFrame, then concatenate
+        # This means that LazyTbl output will not show correct results
+        # If Metrolink is not in itp_id_list, then this is empty dataframe, and that's ok
+        corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(metrolink_trips)
+
+        trips = pd.concat(
+            [not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True
+        ).reset_index(drop=True)
+
+    elif (itp_id_list is not None) and (323 not in itp_id_list) and (get_df is True):
+        trips = trips >> collect()
+
+    return trips
+
+
+# ----------------------------------------------------------------#
+## Stop Times
+# ----------------------------------------------------------------#
 def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
     # Some fixing, transformation, aggregation with dask
     # Grab departure hour
@@ -304,40 +338,94 @@ def check_departure_hours_input(departure_hours: tuple | list) -> list:
 def get_stop_times(
     selected_date: str | datetime.date = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
-    departure_hours: list[int] | tuple[int] = None,
     stop_time_cols: list[str] = None,
-    # get_df: bool = False
+    get_df: bool = False,
+    departure_hours: tuple | list = None,
 ) -> dd.DataFrame:
     """
-    Returns a stop_times table from `tbl.views.gtfs_schedule_dim_stop_times.`
-    This table usually is huge, so let's get some filtering done in Dask.
-    Allow additional data processing by returning a Dask DataFrame.
+    Download stop times table for operator on a day.
+
+    Since it's huge, return dask dataframe by default, to
+    allow for more wrangling before turning it back to pd.DataFrame.
 
     get_df: bool.
-            If True, returns pd.DataFrame.
-            If False, returns dd.DataFrame.
-            Default to False because stop_times is big, reading it in-memory
-            will probably not work.
+            If True, return pd.DataFrame
+            If False, return dd.DataFrame (which also includes extra departure_hour column)
+
+    TODO: is extra column for dask confusing?
     """
-    ddf = dask_bigquery.read_gbq(
-        project_id=GCS_PROJECT,
-        dataset_id="views",
-        table_id="gtfs_schedule_dim_stop_times",
+
+    # Grab the trips for that day
+    trips_on_day = (
+        get_trips(
+            selected_date=selected_date,
+            itp_id_list=itp_id_list,
+            trip_cols=["trip_key"],
+            get_df=False,
+        )
+        >> distinct()
     )
 
-    # Fix departure times (coerce any that pass the 24 hr mark into falling between 0-24)
-    ddf = fix_departure_time(ddf)
+    stop_times_query = (
+        tbl.views.gtfs_schedule_dim_stop_times()
+        >> filter_itp_id(itp_id_list)
+        >> select(-_.calitp_url_number)
+        >> distinct()
+    )
 
-    if itp_id_list is not None:
-        ddf = ddf[ddf.calitp_itp_id.isin(itp_id_list)].reset_index(drop=True)
+    # Use the gtfs_schedule_index_feed_trip_stops to find the stop_time_keys
+    # that actually occurred on that day
+    trips_stops_ix_query = trips_on_day >> inner_join(
+        _,
+        # This table only has keys, no itp_id or date to filter on
+        (
+            tbl.views.gtfs_schedule_index_feed_trip_stops()
+            >> select(_.trip_key, _.stop_time_key)
+            >> distinct()
+        ),
+        on="trip_key",
+    )
+
+    stop_times = (
+        stop_times_query
+        >> inner_join(_, trips_stops_ix_query, on="stop_time_key")
+        >> mutate(stop_sequence=_.stop_sequence.astype(int))  # in SQL!
+        >> collect()
+        >> distinct(_.stop_id, _.trip_id, _keep_all=True)
+        >> arrange(_.trip_id, _.stop_sequence)
+        # >> subset_cols(stop_time_cols)
+    )
+
+    # Turn to dask dataframe
+    stop_times_ddf = dd.from_pandas(stop_times, npartitions=1)
+
+    # Basic cleaning of arrival / departure time and dropping duplicates
+    stop_times_ddf = (
+        stop_times_ddf.assign(
+            arrival_time=stop_times.arrival_time.str.strip(),
+            departure_time=stop_times.departure_time.str.strip(),
+        )
+        .drop_duplicates(subset=["stop_id", "trip_id"])
+        .reset_index(drop=True)
+    )
+
+    # Correctly parse departure times if they cross 24 hr threshold
+    stop_times_cleaned = fix_departure_time(stop_times_ddf)
 
     if departure_hours is not None:
-        # Convert departure hours into list for filtering
-        departure_hours = check_departure_hours_input(departure_hours)
+        # If tuple is given, change that to a list of departure hours
+        departure_hours_cleaned = check_departure_hours_input(departure_hours)
 
-        ddf = ddf[ddf.departure_hour.isin(departure_hours)].reset_index(drop=True)
+        # Subset by departure hours
+        stop_times_cleaned = stop_times_cleaned[
+            stop_times_cleaned.departure_hour.isin(departure_hours_cleaned)
+        ].reset_index(drop=True)
 
+    # Subset at the very end, otherwise cleaning of departure times won't work
     if stop_time_cols is not None:
-        ddf = ddf[stop_time_cols].reset_index(drop=True)
+        stop_times_cleaned = stop_times_cleaned[stop_time_cols]
 
-    return ddf
+    if get_df is True:
+        stop_times_cleaned = stop_times_cleaned.compute()
+
+    return stop_times_cleaned

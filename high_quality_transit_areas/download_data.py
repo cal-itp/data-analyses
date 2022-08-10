@@ -54,7 +54,7 @@ def primary_trip_query(itp_id: int,
     
 
 def get_routelines(itp_id: int, 
-                   analysis_date: dt.date):
+                   analysis_date: str | dt.date):
     """
     Download the route shapes (line geom) from dim_shapes_geo
     associated with shape_ids / trips that ran on selected day.
@@ -79,7 +79,7 @@ def get_routelines(itp_id: int,
         print(f"{itp_id}: {dataset} exported to GCS")
     
     
-def get_trips(itp_id: int, analysis_date: dt.date, 
+def get_trips(itp_id: int, analysis_date: str | dt.date, 
               #route_types: list = None
              ):
     """
@@ -135,7 +135,7 @@ def get_trips(itp_id: int, analysis_date: dt.date,
     '''
     
     
-def get_stops(itp_id: int, analysis_date: dt.date):
+def get_stops(itp_id: int, analysis_date: str | dt.date):
     """
     Download stops for the trips that ran on selected date.
     
@@ -166,7 +166,7 @@ def get_stops(itp_id: int, analysis_date: dt.date):
         print(f"{itp_id}: {dataset} exported to GCS")
 
         
-def get_stop_times(itp_id: int, analysis_date: dt.date):
+def get_stop_times(itp_id: int, analysis_date: str | dt.date):
     """
     Download stop times for the trips that ran on selected date.
     
@@ -177,16 +177,37 @@ def get_stop_times(itp_id: int, analysis_date: dt.date):
     dataset = "st"
     filename = f"{dataset}_{itp_id}_{date_str}.parquet"
 
-    stop_times = (
+    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_{filename}")
+    
+    stop_times_query = (
         tbl.views.gtfs_schedule_dim_stop_times()
         >> filter(_.calitp_itp_id == itp_id)
         >> select(-_.calitp_url_number)
         >> distinct()
-        >> mutate(stop_sequence=_.stop_sequence.astype(int)) # in SQL!
-        >> collect()
-        >> distinct(_.stop_id, _.trip_id, _keep_all=True)
-        >> arrange(_.calitp_itp_id, _.trip_id, _.stop_sequence)
     )
+    
+    # Use the gtfs_schedule_index_feed_trip_stops to find the stop_time_keys
+    # that actually occurred on that day
+    trips_stops_ix_query = (
+        full_trips[["trip_key"]]
+        >> inner_join(_, 
+                      # This table only has keys, no itp_id or date to filter on
+                      (tbl.views.gtfs_schedule_index_feed_trip_stops()
+                       >> select(_.trip_key, _.stop_time_key)
+                       >> distinct()), 
+                      on = "trip_key") 
+    )
+    
+    stop_times = (stop_times_query
+                  >> inner_join(_, 
+                                trips_stops_ix_query, 
+                                on = "stop_time_key")
+                  >> mutate(stop_sequence=_.stop_sequence.astype(int))  # in SQL!
+                  >> collect()
+                  >> distinct(_.stop_id, _.trip_id, _keep_all=True)
+                  >> arrange(_.trip_id, _.stop_sequence)
+    )
+    
     
     stop_times = stop_times.assign(
         arrival_time = stop_times.arrival_time.str.strip(),
