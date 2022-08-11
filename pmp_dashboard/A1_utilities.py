@@ -2,7 +2,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from calitp import *
-from shared_utils import utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/pmp_dashboard/"
 
@@ -77,7 +76,7 @@ def import_and_clean(
         ap: enter the accounting period this is
 
     Returns:
-        The cleaned df. Input the results into a list.
+        The cleaned df. Input the results into my list called my_cleaned_dataframes.
 
     """
     df = pd.read_excel(f"{GCS_FILE_PATH}{file_name}", sheet_name=name_of_sheet)
@@ -152,6 +151,7 @@ def import_and_clean(
     my_clean_dataframes.append(df)
     
     return df
+
 '''
 Funds by Division Sheet
 '''
@@ -228,7 +228,7 @@ tpsoe_oe_list = [
 ]
 
 # Monetary columns
-monetary_cols = [
+tpsoe_monetary_cols = [
     "allocation",
     "expenditure",
     "balance",
@@ -237,7 +237,7 @@ monetary_cols = [
 ]
 
 # Ordering the columns correctly
-order_of_cols = [
+tpsoe_order_of_cols = [
     "pec_class",
     "division",
     "fund",
@@ -274,10 +274,10 @@ def create_tpsoe(df, ps_list: list, oe_list: list):
     c1 = pd.concat([tpsoe_ps, tpsoe_oe], sort=False)
     
     # Rearrange the columns to the right order
-    c1 = c1[order_of_cols]
+    c1 = c1[tpsoe_order_of_cols]
     
     # Correct data types of monetary columns from objects to float
-    c1[monetary_cols] = c1[monetary_cols].astype("float64")
+    c1[tpsoe_monetary_cols] = c1[tpsoe_monetary_cols].astype("float64")
     
     # Reset index
     c1 = c1.reset_index(drop = True)
@@ -422,7 +422,20 @@ def create_psoe_timeline(df, ps_list: list, oe_list: list):
 Final Script to 
 bring everything together
 """
-def pmp_dashboard_sheets(df, unwanted_timeline_appropriations: str, title:str):
+if __name__ == "__main__":
+    appropriations_unwanted = []
+    
+    df = import_and_clean(
+    "AP12 June.xls",
+    "Download",
+    appropriations_unwanted,
+    12)
+    
+    unwanted_timeline_appropriations = []
+    
+    title: 'testing'
+    
+    # def pmp_dashboard_sheets(df, unwanted_timeline_appropriations: str, title:str):
    
     """Takes a cleaned data frame and returns
     the entire Excel workbook for publishing the PMP dashboard.
@@ -438,7 +451,8 @@ def pmp_dashboard_sheets(df, unwanted_timeline_appropriations: str, title:str):
     tspoe =create_tpsoe(df, tpsoe_ps_list, tpsoe_oe_list)
     timeline = create_timeline(my_clean_dataframes)
     psoe = create_psoe_timeline(timeline,psoe_ps_cols, psoe_oe_cols)
-
+    
+    """
     # Filter out stuff for timeline
     unwanted = timeline[
         (timeline["appropriation"] == unwanted_timeline_appropriations)
@@ -447,7 +461,7 @@ def pmp_dashboard_sheets(df, unwanted_timeline_appropriations: str, title:str):
     ]
     timeline = timeline.drop(index=unwanted.index)
     timeline = timeline.reset_index(drop=True)
-    
+    """
     # Change column names back without underscores & title case
     for df in [fund_by_div, tspoe, timeline, psoe]: 
         df.columns = (df.columns
@@ -456,11 +470,11 @@ def pmp_dashboard_sheets(df, unwanted_timeline_appropriations: str, title:str):
                )
     # Save
     with pd.ExcelWriter(
-        f"{GCS_FILE_PATH}AP_{title}_cleaned_data.xlsx"
+        f"{GCS_FILE_PATH}AP_test_cleaned_data.xlsx"
     ) as writer:
         fund_by_div.to_excel(writer, sheet_name="fund_by_div", index=False)
         tspoe.to_excel(writer, sheet_name="tspoe", index=False)
         timeline.to_excel(writer, sheet_name="timeline", index=False)
         psoe.to_excel(writer, sheet_name="psoe", index=False)
 
-    return fund_by_div, tspoe, timeline, psoe
+    # return fund_by_div, tspoe, timeline, psoe
