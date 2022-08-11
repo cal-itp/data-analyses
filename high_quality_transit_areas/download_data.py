@@ -23,13 +23,9 @@ from siuba import *
 
 import operators_for_hqta
 from shared_utils import gtfs_utils, rt_utils, geography_utils, utils
+from update_vars import analysis_date, date_str, EXPORT_PATH
 
-# Should some of these variables be set somewhere else? Ahead of a fresh run?
-# Otherwise, run into problem of circular imports maybe
 LOCAL_PATH = "./data/"
-analysis_date = dt.date(2022, 7, 13)
-date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
-EXPORT_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
 
 def primary_trip_query(itp_id: int,
                        analysis_date: dt.date):
@@ -54,7 +50,7 @@ def primary_trip_query(itp_id: int,
     
 
 def get_routelines(itp_id: int, 
-                   analysis_date: dt.date):
+                   analysis_date: str | dt.date):
     """
     Download the route shapes (line geom) from dim_shapes_geo
     associated with shape_ids / trips that ran on selected day.
@@ -64,12 +60,16 @@ def get_routelines(itp_id: int,
     dataset = "routelines"
     filename = f'{dataset}_{itp_id}_{date_str}.parquet'
     
+    # Read in the full trips table
+    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_trips_{itp_id}_{date_str}.parquet")
+    
     routelines = gtfs_utils.get_route_shapes(
-            selected_date = analysis_date,
-            itp_id_list = [itp_id],
-            get_df = True,
-            crs = geography_utils.CA_NAD83Albers
-        )
+        selected_date = analysis_date,
+        itp_id_list = [itp_id],
+        get_df = True,
+        crs = geography_utils.CA_NAD83Albers,
+        trip_df = full_trip
+    )
     
     if not routelines.empty:
         utils.geoparquet_gcs_export(routelines, 
@@ -79,7 +79,7 @@ def get_routelines(itp_id: int,
         print(f"{itp_id}: {dataset} exported to GCS")
     
     
-def get_trips(itp_id: int, analysis_date: dt.date, 
+def get_trips(itp_id: int, analysis_date: str | dt.date, 
               #route_types: list = None
              ):
     """
@@ -135,7 +135,7 @@ def get_trips(itp_id: int, analysis_date: dt.date,
     '''
     
     
-def get_stops(itp_id: int, analysis_date: dt.date):
+def get_stops(itp_id: int, analysis_date: str | dt.date):
     """
     Download stops for the trips that ran on selected date.
     
@@ -166,31 +166,24 @@ def get_stops(itp_id: int, analysis_date: dt.date):
         print(f"{itp_id}: {dataset} exported to GCS")
 
         
-def get_stop_times(itp_id: int, analysis_date: dt.date):
+def get_stop_times(itp_id: int, analysis_date: str | dt.date):
     """
     Download stop times for the trips that ran on selected date.
-    
-    TODO: how to align with gtfs_utils? dd.DataFrame or pd.DataFrame?
-    
+        
     Write pd.DataFrame in GCS.
     """
     dataset = "st"
     filename = f"{dataset}_{itp_id}_{date_str}.parquet"
 
-    stop_times = (
-        tbl.views.gtfs_schedule_dim_stop_times()
-        >> filter(_.calitp_itp_id == itp_id)
-        >> select(-_.calitp_url_number)
-        >> distinct()
-        >> mutate(stop_sequence=_.stop_sequence.astype(int)) # in SQL!
-        >> collect()
-        >> distinct(_.stop_id, _.trip_id, _keep_all=True)
-        >> arrange(_.calitp_itp_id, _.trip_id, _.stop_sequence)
-    )
+    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_trips_{itp_id}_{date_str}.parquet")
     
-    stop_times = stop_times.assign(
-        arrival_time = stop_times.arrival_time.str.strip(),
-        departure_time = stop_times.departure_time.str.strip(),
+    stop_times = gtfs_utils.get_stop_times(
+        selected_date = analysis_date,
+        itp_id_list = [itp_id],
+        stop_time_cols = None,
+        get_df = True,
+        departure_hours = None,
+        trip_df = full_trips
     )
     
     if not stop_times.empty:
@@ -198,6 +191,29 @@ def get_stop_times(itp_id: int, analysis_date: dt.date):
         print(f"{itp_id}: {dataset} exported to GCS")
     
     
+def check_route_trips_stops_are_cached(itp_id: int, date_str: str):
+    """
+    Check that routelines, trips, stops parquets are present.
+    If not, don't bother downloading stop_times (computationally expensive!).
+    
+    This way, if an operator is missing files, they are 
+    always missing at least 2.
+    """
+    response1 = rt_utils.check_cached(
+            f"routelines_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+    response2 = rt_utils.check_cached(
+        f"trips_{itp_id}_{date_str}.parquet", subfolder="cached_views/")
+    response3 = rt_utils.check_cached(
+        f"stops_{itp_id}_{date_str}.parquet", subfolder="cached_views/")    
+    
+    all_responses = [response1, response2, response3]
+    
+    if all(r is not None for r in all_responses):
+        return True
+    else:
+        return False
+
+        
 if __name__=="__main__":
     
     start = dt.datetime.now()
@@ -217,6 +233,7 @@ if __name__=="__main__":
     IDS_TO_RUN = list(set(ALL_IDS).difference(set(CACHED_IDS)))
     print(f"# operators to run: {len(IDS_TO_RUN)}")
     
+    IDS_TO_RUN = [i for i in IDS_TO_RUN if i != 17]
     # TODO: rethink cached IDs. For the most part, we know there are some
     # that are erroring, such as ITP ID 21, and we want to ignore those going forward
     # that's caught in completeness check later on, but 
@@ -228,20 +245,25 @@ if __name__=="__main__":
         
         # Stash a trips table locally to use
         primary_trip_query(itp_id, analysis_date)
-
+        
         # Download routes, trips, stops, stop_times and save in GCS
         get_routelines(itp_id, analysis_date)
         get_trips(itp_id, analysis_date)
         get_stops(itp_id, analysis_date)
-        get_stop_times(itp_id, analysis_date)
-        
+
+        # Check that routes, trips, stops were downloaded successfully
+        # If all 3 are present, then download stop_times. Otherwise, skip stop_times.
+        if check_route_trips_stops_are_cached(itp_id, date_str) is True:
+            get_stop_times(itp_id, analysis_date)
+
         # Remove full trips file
         trip_file = glob.glob(f"{LOCAL_PATH}temp_trips_{itp_id}_*.parquet")
         for f in trip_file:
             os.remove(f)
-        
+
         time1 = dt.datetime.now()
         print(f"download files for {itp_id}: {time1 - time0}")
+
 
     end = dt.datetime.now()
     print(f"execution time: {end-start}")
