@@ -138,7 +138,7 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
             filter3 = filter(_[keys[2]].isin(values[2]))
             return filter1 >> filter2 >> filter3
 
-    else:
+    elif (filter_dict == {}) or (filter_dict is None):
         return filter()
 
 
@@ -175,8 +175,8 @@ def get_route_info(
         # since adding it into the merge cols sometimes returns zero rows
         >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
         >> inner_join(_, dim_routes, on=["route_key"])
-        >> subset_cols(route_cols)
         >> filter_custom_col(custom_filtering)
+        >> subset_cols(route_cols)
         >> distinct()
     )
 
@@ -271,13 +271,12 @@ def get_stops(
             _.calitp_extracted_at <= selected_date,
             _.calitp_deleted_at >= selected_date,
         )
-        >> filter_itp_id(itp_id_list)
         # Drop one set of these (extracted_at/deleted_at),
         # since adding it into the merge cols sometimes returns zero rows
         >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
         >> inner_join(_, dim_stops, on=["stop_key"])
-        >> subset_cols(stop_cols)
         >> filter_custom_col(custom_filtering)
+        >> subset_cols(stop_cols)
         >> distinct()
     )
 
@@ -331,8 +330,8 @@ def get_trips(
                 "calitp_url_number",
             ],
         )
-        >> subset_cols(trip_cols)
         >> filter_custom_col(custom_filtering)
+        >> subset_cols(trip_cols)
         >> distinct()
     )
 

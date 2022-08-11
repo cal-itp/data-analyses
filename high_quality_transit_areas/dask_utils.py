@@ -14,24 +14,6 @@ from shared_utils import rt_utils
 #------------------------------------------------------#
 # Stop times
 #------------------------------------------------------#
-## Aggregate stops by departure hour
-def fix_departure_time(stop_times):
-    # Some fixing, transformation, aggregation with dask
-    # Grab departure hour
-    #https://stackoverflow.com/questions/45428292/how-to-convert-pandas-str-split-call-to-to-dask
-    stop_times2 = stop_times[~stop_times.departure_time.isna()].reset_index(drop=True)
-    
-    ddf = stop_times2.assign(
-        departure_hour = stop_times2.departure_time.str.partition(":")[0].astype(int)
-    )
-    
-    # Since hours past 24 are allowed for overnight trips
-    # coerce these to fall between 0-23
-    #https://stackoverflow.com/questions/54955833/apply-a-lambda-function-to-a-dask-dataframe
-    ddf["departure_hour"] = ddf.departure_hour.map(lambda x: x-24 if x >=24 else x)
-    
-    return ddf
-    
 def stop_times_aggregation_by_hour(stop_times):
     stop_cols = ["calitp_itp_id", "stop_id"]
 
