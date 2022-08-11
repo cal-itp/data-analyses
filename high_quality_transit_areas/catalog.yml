@@ -19,31 +19,31 @@ sources:
         driver: geoparquet
         description: Rail / BRT / Ferry points created in A2_combine.py
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/rail_brt_ferry.parquet
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/rail_brt_ferry.parquet
     # Source: B2_combine_operator_corridors.py
     all_bus:
         driver: geoparquet
         description: Combined corridors across all operators. Created in B2_combine_operators_corridors.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/all_bus.parquet  
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/intermediate/all_bus.parquet  
     # Source: C1_prep_for_clipping.py
     pairwise_intersections:
         driver: geoparquet
         description: Use dask_geopandas.sjoin to find which hqta segments do intersect at some point. Created in C1_prep_for_clipping.py. 
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/pairwise.parquet   
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/intermediate/pairwise.parquet   
     # Source: C1_prep_for_clipping.py
     subset_corridors:
         driver: geoparquet
         description: Narrow down `all_bus` to hqta segments that are found in `pairwise_intersections`. Created in C1_prep_for_clipping.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/intermediate/subset_corridors.parquet 
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/intermediate/subset_corridors.parquet 
     # Source: C2_clip_bus_intersections.py
     combined_clipped_intersections:
         driver: geoparquet
         description: Combine all the bus intersections (clipped) geometries into one file. Created in C2_clip_bus_intersections.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/all_clipped.parquet
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/all_clipped.parquet
     # Source: C4_create_bus_hqta_types.py
     major_stop_bus:
         driver: geoparquet
@@ -61,10 +61,10 @@ sources:
         driver: geoparquet
         description: Combined point data for all HQTA types. Created in D1_assemble_hqta_points.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/hqta_points.parquet
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_points.parquet
     # Source: D2_assemble_hqta_polygons
     hqta_areas:
         driver: geoparquet
         description: Combined polygon data for all HQTA types. Created in D2_assemble_hqta_polygons.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/hqta_test/hqta_polygons.parquet
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_polygons.parquet
