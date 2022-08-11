@@ -39,7 +39,7 @@ def create_segments(geometry):
     """
 
     lines = []
-    segment_distance_meters = 1250
+    segment_distance_meters = 1_250
     geometry = geometry.iloc[0]
     if hasattr(geometry, "geoms"):  ##check if MultiLineString
         linestrings = geometry.geoms
@@ -49,47 +49,6 @@ def create_segments(geometry):
         for i in range(0, int(linestring.length), segment_distance_meters):
             lines.append(substring(linestring, i, i + segment_distance_meters))
     return lines
-
-
-def find_stop_with_high_trip_count(segment, stops, stop_times, rank, calculated_stops):
-    """Given a shape segment, finds the stop serving the most (or other rank) trips
-    within that segment.
-    Adds that stop's stop_id to segment data (a row).
-    """
-
-    stops_in_seg = gpd.clip(stops, segment.geometry)
-    if stops_in_seg.size == 0:
-        return segment
-
-    stop_times_in_seg = stops_in_seg >> inner_join(_, stop_times, on="stop_id")
-    trip_count_by_stop = (
-        stop_times_in_seg >> count(_.stop_id) >> arrange(-_.n) >> rename(n_trips=_.n)
-    )
-    try:
-        stop_id = trip_count_by_stop["stop_id"].iloc[rank - 1]
-
-        if stop_id in list(calculated_stops):
-            return segment
-        segment["stop_id"] = stop_id
-        segment["n_trips"] = trip_count_by_stop["n_trips"].iloc[rank - 1]
-        return segment
-    except IndexError:
-        return segment
-
-
-def fix_arrival_time(gtfs_timestring):
-    """Reformats a GTFS timestamp (which allows the hour to exceed 24 to mark
-    service day continuity)
-    to standard 24-hour time.
-    """
-    split = gtfs_timestring.split(":")
-    hour = int(split[0])
-    if hour >= 24:
-        split[0] = str(hour - 24)
-        corrected = (":").join(split)
-        return corrected.strip()
-    else:
-        return gtfs_timestring.strip()
 
 
 def map_hqta(gdf, mouseover=None, name="gdf"):
