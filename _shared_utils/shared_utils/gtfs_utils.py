@@ -126,7 +126,7 @@ def get_route_info(
     itp_id_list: list[int] = None,
     route_cols: list[str] = None,
     get_df: bool = True,
-) -> pd.DataFrame:
+) -> pd.DataFrame | siuba.sql.verbs.LazyTbl:
 
     # Route info query
     dim_routes = (
