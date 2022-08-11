@@ -61,7 +61,7 @@ def get_routelines(itp_id: int,
     filename = f'{dataset}_{itp_id}_{date_str}.parquet'
     
     # Read in the full trips table
-    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_{filename}")
+    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_trips_{itp_id}_{date_str}.parquet")
     
     routelines = gtfs_utils.get_route_shapes(
         selected_date = analysis_date,
@@ -175,11 +175,11 @@ def get_stop_times(itp_id: int, analysis_date: str | dt.date):
     dataset = "st"
     filename = f"{dataset}_{itp_id}_{date_str}.parquet"
 
-    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_{filename}")
+    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_trips_{itp_id}_{date_str}.parquet")
     
     stop_times = gtfs_utils.get_stop_times(
         selected_date = analysis_date,
-        itp_id_list: [itp_id],
+        itp_id_list = [itp_id],
         stop_time_cols = None,
         get_df = True,
         departure_hours = None,
@@ -207,10 +207,11 @@ def check_route_trips_stops_are_cached(itp_id: int, date_str: str):
         f"stops_{itp_id}_{date_str}.parquet", subfolder="cached_views/")    
     
     all_responses = [response1, response2, response3]
-        if all(r is not None for r in all_responses):
-            return True
-        else:
-            return False
+    
+    if all(r is not None for r in all_responses):
+        return True
+    else:
+        return False
 
         
 if __name__=="__main__":
@@ -232,6 +233,7 @@ if __name__=="__main__":
     IDS_TO_RUN = list(set(ALL_IDS).difference(set(CACHED_IDS)))
     print(f"# operators to run: {len(IDS_TO_RUN)}")
     
+    IDS_TO_RUN = [i for i in IDS_TO_RUN if i != 17]
     # TODO: rethink cached IDs. For the most part, we know there are some
     # that are erroring, such as ITP ID 21, and we want to ignore those going forward
     # that's caught in completeness check later on, but 
@@ -243,24 +245,25 @@ if __name__=="__main__":
         
         # Stash a trips table locally to use
         primary_trip_query(itp_id, analysis_date)
-
+        
         # Download routes, trips, stops, stop_times and save in GCS
         get_routelines(itp_id, analysis_date)
         get_trips(itp_id, analysis_date)
         get_stops(itp_id, analysis_date)
-        
+
         # Check that routes, trips, stops were downloaded successfully
         # If all 3 are present, then download stop_times. Otherwise, skip stop_times.
         if check_route_trips_stops_are_cached(itp_id, date_str) is True:
             get_stop_times(itp_id, analysis_date)
-        
+
         # Remove full trips file
         trip_file = glob.glob(f"{LOCAL_PATH}temp_trips_{itp_id}_*.parquet")
         for f in trip_file:
             os.remove(f)
-        
+
         time1 = dt.datetime.now()
         print(f"download files for {itp_id}: {time1 - time0}")
+
 
     end = dt.datetime.now()
     print(f"execution time: {end-start}")
