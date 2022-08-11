@@ -170,7 +170,6 @@ def get_route_info(
             _.calitp_extracted_at <= selected_date,
             _.calitp_deleted_at >= selected_date,
         )
-        >> filter_itp_id(itp_id_list)
         # Drop one set of these (extracted_at/deleted_at),
         # since adding it into the merge cols sometimes returns zero rows
         >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
