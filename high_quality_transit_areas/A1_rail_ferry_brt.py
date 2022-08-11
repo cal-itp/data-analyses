@@ -13,75 +13,60 @@ from calitp.tables import tbl
 from siuba import *
 
 import utilities
-from shared_utils import rt_utils, geography_utils
+from shared_utils import rt_utils, geography_utils, gtfs_utils
 from update_vars import analysis_date
 
 catalog = intake.open_catalog("./*.yml")
 
+def routes_to_stops(rail_routes_tbl, analysis_date):
+    # Get list of ITP IDs to filter trips against, and exclude 200
+    rail_itp_ids = list(
+        (rail_routes_tbl 
+         >> filter(_.calitp_itp_id != 200)
+         >> select(_.calitp_itp_id)
+         >> distinct()
+         >> collect()
+        ).calitp_itp_id)
 
-def get_routes_by_type(route_types, analysis_date):
-    routes_on_date = (tbl.views.gtfs_schedule_fact_daily_feed_routes()
-         >> filter(_.date == analysis_date)
-         >> filter(_.calitp_extracted_at <= analysis_date, 
-                   _.calitp_deleted_at >= analysis_date)
-        )
-
-    dim_routes = tbl.views.gtfs_schedule_dim_routes()
-    routes_date_joined = (routes_on_date
-         >> inner_join(_, (dim_routes 
-                           >> select(_.route_id, _.route_key, _.route_short_name,
-                                     _.route_long_name, _.route_desc, 
-                                     _.route_type, _.calitp_itp_id)),
-                       on = 'route_key')
-         # >> distinct(_.calitp_itp_id, _.route_id, _.route_short_name, 
-         #                 _.route_long_name, _.route_desc, _.route_type)
-         >> filter(_.calitp_itp_id != 200) # avoid MTC feed in favor of individual operator feeds
-         >> filter((_.route_type.isin(route_types)))
-         # >> collect()
-        )
+    # Query to find trips on selected day for those rail routes selected 
+    rail_trips = (tbl.views.gtfs_schedule_fact_daily_trips()
+                  >> filter(_.calitp_extracted_at <= analysis_date, 
+                            _.calitp_deleted_at >= analysis_date, 
+                            _.service_date == analysis_date, 
+                            _.is_in_service == True)
+                  >> select(_.trip_key, _.service_date, _.route_id, _.calitp_itp_id)
+                  >> inner_join(_, rail_routes_tbl, 
+                            on = ['calitp_itp_id', 'route_id'])
+                  >> inner_join(_, 
+                                tbl.views.gtfs_schedule_index_feed_trip_stops() 
+                                >> select(_.trip_key, _.stop_key), 
+                                on = "trip_key")
+                  >> filter(_.calitp_itp_id != 200)
+                 )
     
-    return routes_date_joined
-
-def routes_to_stops(routes_tbl, analysis_date):
+    # Get list of stop_keys to do custom filtering
+    rail_stop_keys = list(
+        (rail_trips 
+         >> select(_.stop_key) 
+         >> distinct()
+         >> collect()
+        ).stop_key)
     
-    trips_query = (tbl.views.gtfs_schedule_fact_daily_trips()
-                   >> filter(_.calitp_extracted_at <= analysis_date, 
-                             _.calitp_deleted_at >= analysis_date)
-                   >> filter(_.service_date == analysis_date)
-                   >> filter(_.is_in_service == True)
-                   >> select(_.trip_key, _.service_date, _.route_id, _.calitp_itp_id)
-                   >> inner_join(_, routes_tbl, 
-                                 on = ['calitp_itp_id', 'route_id'])
-    )
+    keep_stop_cols = [
+        "calitp_itp_id", "stop_id", 
+        "stop_lat", "stop_lon", 
+        "stop_name", "stop_key"
+    ]
     
-    trips_ix_query = (trips_query
-                      >> inner_join(_, 
-                                    tbl.views.gtfs_schedule_index_feed_trip_stops(), 
-                                    on = 'trip_key')
-                      >> select(-_.calitp_url_number, 
-                                -_.calitp_extracted_at, -_.calitp_deleted_at)
-    )
-    
-    stops = (tbl.views.gtfs_schedule_dim_stops()
-             >> distinct(_.calitp_itp_id, _.stop_id,
-                         _.stop_lat, _.stop_lon, _.stop_name, _.stop_key)
-             >> inner_join(_, 
-                           (trips_ix_query 
-                            >> distinct(_.stop_key, _.route_type)), 
-                           on = 'stop_key')
-             >> collect()
-             >> distinct(_.calitp_itp_id, _.stop_id, _keep_all=True) 
-             ## should be ok to drop duplicates, but must use stop_id for future joins...
-             >> select(-_.stop_key)
-            
-    )
-
-    stops = (gpd.GeoDataFrame(stops, 
-                             geometry=gpd.points_from_xy(
-                                 stops.stop_lon, stops.stop_lat
-                             ), crs=geography_utils.WGS84)
-             .to_crs(geography_utils.CA_NAD83Albers)
-            )
+    # Get gdf of rail stops
+    rail_stops = gtfs_utils.get_stops(
+        selected_date = analysis_date,
+        itp_id_list = rail_itp_ids,
+        get_df = True,
+        stop_cols = keep_stop_cols,
+        crs = geography_utils.CA_NAD83Albers,
+        custom_filtering={"stop_key": rail_stop_keys}
+    ) 
     
     # Clip to CA
     ca = catalog.ca_boundary.read().to_crs(geography_utils.CA_NAD83Albers)
@@ -92,10 +77,24 @@ def routes_to_stops(routes_tbl, analysis_date):
 def grab_rail_data(analysis_date):
     # Grab the different route types for rail from route tables
     rail_route_types = ['0', '1', '2']
-    new_routes = get_routes_by_type(rail_route_types, analysis_date)
-        
+    
+    keep_route_cols = [
+        "feed_key", "route_key", 
+        "calitp_itp_id", "date", "route_id", 
+        "route_short_name", "route_long_name", "route_desc", "route_type"
+        "calitp_extracted_at", "calitp_deleted_at"
+    ]
+
+    rail_routes = gtfs_utils.get_route_info(
+        selected_date = analysis_date,
+        itp_id_list = None,
+        route_cols = keep_route_cols,
+        get_df = False,
+        custom_filtering = {"route_type": rail_route_types}
+    )
+            
     # Grab rail stops and clip to CA    
-    rail_stops = routes_to_stops(new_routes, analysis_date)
+    rail_stops = routes_to_stops(rail_routes, analysis_date)
     
     return rail_stops
 
