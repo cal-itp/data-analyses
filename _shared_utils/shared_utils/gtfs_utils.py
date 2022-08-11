@@ -89,7 +89,7 @@ def fill_in_metrolink_trips_df_with_shape_id(trips: pd.DataFrame) -> pd.DataFram
 # ----------------------------------------------------------------#
 # Convenience siuba filtering functions for querying
 # ----------------------------------------------------------------#
-def filter_itp_id(itp_id_list: list):
+def filter_itp_id(itp_id_list: list) -> siuba.dply.verbs.Pipeable:
     """
     Filter if itp_id_list is present.
     Otherwise, skip.
@@ -100,7 +100,7 @@ def filter_itp_id(itp_id_list: list):
         return filter()
 
 
-def subset_cols(cols: list):
+def subset_cols(cols: list) -> siuba.dply.verbs.Pipeable:
     """
     Select subset of columns, if column list is present.
     Otherwise, skip.
@@ -111,6 +111,40 @@ def subset_cols(cols: list):
         # Can't use select(), because we'll select no columns
         # But, without knowing full list of columns, let's just
         # filter out nothing
+        return filter()
+
+
+def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
+    """
+    Unpack the dictionary of custom columns / value to filter on.
+    Key: column name
+    Value: list with values to keep
+
+    Otherwise, skip.
+
+    TODO: Expand beyond 3. Does piping mean that order of conditions matter?
+
+    Placement/order for where this filter happens...for stop_times..is it too late in the query?
+    Should a check be included to run the filter if it finds the column in the first query it can?
+    """
+    if filter_dict or (filter_dict is not None):
+
+        keys, values = zip(*filter_dict.items())
+
+        # Accommodate 3 filtering conditions for now
+        if len(keys) >= 1:
+            filter1 = filter(_[keys[0]].isin(values[0]))
+            return filter1
+
+        elif len(keys) >= 2:
+            filter2 = filter(_[keys[1]].isin(values[1]))
+            return filter1 >> filter2
+
+        elif len(keys) >= 3:
+            filter3 = filter(_[keys[2]].isin(values[2]))
+            return filter1 >> filter2 >> filter3
+
+    else:
         return filter()
 
 
@@ -126,6 +160,7 @@ def get_route_info(
     itp_id_list: list[int] = None,
     route_cols: list[str] = None,
     get_df: bool = True,
+    custom_filtering: dict = {},
 ) -> pd.DataFrame | siuba.sql.verbs.LazyTbl:
 
     # Route info query
@@ -146,6 +181,7 @@ def get_route_info(
         >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
         >> inner_join(_, dim_routes, on=["route_key"])
         >> subset_cols(route_cols)
+        >> filter_custom_col(custom_filtering)
         >> distinct()
     )
 
@@ -161,6 +197,7 @@ def get_route_shapes(
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     trip_df: siuba.sql.verbs.LazyTbl | pd.DataFrame = None,
+    custom_filtering: dict = {},
 ) -> gpd.GeoDataFrame:
     """
     Return a subset of geography_utils.make_routes_gdf()
@@ -171,6 +208,9 @@ def get_route_shapes(
 
     Allow a pre-existing trips table to be supplied.
     If not, run a fresh trips query.
+
+    Custom_filtering doesn't filter in the query (which relies on trips query),
+    but can filter out after it's a gpd.GeoDataFrame
     """
     if trip_df is None:
         trips = (
@@ -206,6 +246,8 @@ def get_route_shapes(
         how="inner",
     )
 
+    route_shapes_on_day = route_shapes_on_day >> filter_custom_col(custom_filtering)
+
     return route_shapes_on_day
 
 
@@ -218,7 +260,8 @@ def get_stops(
     stop_cols: list[str] = None,
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
-) -> gpd.GeoDataFrame:
+    custom_filtering: dict = {},
+) -> gpd.GeoDataFrame | siuba.sql.verbs.LazyTbl:
 
     # Stops query
     dim_stops = (
@@ -238,6 +281,7 @@ def get_stops(
         >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
         >> inner_join(_, dim_stops, on=["stop_key"])
         >> subset_cols(stop_cols)
+        >> filter_custom_col(custom_filtering)
         >> distinct()
     )
 
@@ -258,7 +302,8 @@ def get_trips(
     itp_id_list: list[int] = None,
     trip_cols: list[str] = None,
     get_df: bool = True,
-) -> pd.DataFrame:
+    custom_filtering: dict = {},
+) -> pd.DataFrame | siuba.sql.verbs.LazyTbl:
 
     # Trips query
     dim_trips = (
@@ -290,6 +335,7 @@ def get_trips(
             ],
         )
         >> subset_cols(trip_cols)
+        >> filter_custom_col(custom_filtering)
         >> distinct()
     )
 
@@ -354,7 +400,8 @@ def get_stop_times(
     get_df: bool = False,
     departure_hours: tuple | list = None,
     trip_df: pd.DataFrame | siuba.sql.verbs.LazyTbl = None,
-) -> dd.DataFrame:
+    custom_filtering: dict = {},
+) -> dd.DataFrame | pd.DataFrame:
     """
     Download stop times table for operator on a day.
 
@@ -426,6 +473,7 @@ def get_stop_times(
         stop_times_query
         >> inner_join(_, trips_stops_ix_query, on="stop_time_key")
         >> mutate(stop_sequence=_.stop_sequence.astype(int))  # in SQL!
+        >> filter_custom_col(custom_filtering)
         >> collect()
         >> distinct(_.stop_id, _.trip_id, _keep_all=True)
         >> arrange(_.trip_id, _.stop_sequence)
