@@ -19,10 +19,11 @@ from update_vars import analysis_date
 
 catalog = intake.open_catalog("./*.yml")
 
-def routes_to_stops(routes_tbl: siuba.sql.verbs.LzyTbl, 
+
+def routes_to_stops(routes_tbl: siuba.sql.verbs.LazyTbl, 
                     analysis_date: dt.date) -> gpd.GeoDataFrame:
     """
-    Takes routes LzyTbl, and bring in trips and index tables
+    Takes routes LazyTbl, and bring in trips and index tables
     to find which stops were present on selected date.
     
     Clip stop point geom to CA boundary.
@@ -97,7 +98,7 @@ def grab_rail_data(analysis_date: dt.date) -> gpd.GeoDataFrame:
     keep_route_cols = [
         "feed_key", "route_key", 
         "calitp_itp_id", "date", "route_id", 
-        "route_short_name", "route_long_name", "route_desc", "route_type"
+        "route_short_name", "route_long_name", "route_desc", "route_type",
         "calitp_extracted_at", "calitp_deleted_at"
     ]
 
@@ -132,14 +133,6 @@ def grab_operator_brt(itp_id: int, analysis_date: dt.date):
         "route_short_name", "route_long_name", 
         "route_desc", "route_type",
     ]
-
-    operator_brt = gtfs_utils.get_route_info(
-        selected_date = analysis_date,
-        itp_id_list = [itp_id],
-        route_cols = keep_route_cols,
-        get_df = False,
-        custom_filtering = BRT_ROUTE_FILTERING[itp_id]
-    )
     
     BRT_ROUTE_FILTERING = {
         # LA Metro BRT
@@ -151,6 +144,14 @@ def grab_operator_brt(itp_id: int, analysis_date: dt.date):
         # Muni
         282: {"route_short_name": ['49']}
     }
+
+    operator_brt = gtfs_utils.get_route_info(
+        selected_date = analysis_date,
+        itp_id_list = [itp_id],
+        route_cols = keep_route_cols,
+        get_df = False,
+        custom_filtering = BRT_ROUTE_FILTERING[itp_id]
+    )
         
     if itp_id not in BRT_OPERATORS:
         raise KeyError("Operator does not have BRT route filtering condition set.")
@@ -160,9 +161,9 @@ def grab_operator_brt(itp_id: int, analysis_date: dt.date):
     return operator_brt_stops
 
 
-def additional_brt_filtering_out_stops(df: gpd.DataFrame, 
+def additional_brt_filtering_out_stops(df: gpd.GeoDataFrame, 
                                        itp_id: int, 
-                                       filtering_list: list) -> gpd.DataFrame:
+                                       filtering_list: list) -> gpd.GeoDataFrame:
     """
     df: geopandas.GeoDataFrame
         Input BRT stops data
@@ -183,7 +184,7 @@ def grab_ferry_data(analysis_date: dt.date):
     keep_route_cols = [
         "feed_key", "route_key", 
         "calitp_itp_id", "date", "route_id", 
-        "route_short_name", "route_long_name", "route_desc", "route_type"
+        "route_short_name", "route_long_name", "route_desc", "route_type",
         "calitp_extracted_at", "calitp_deleted_at"
     ]
 
