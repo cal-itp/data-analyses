@@ -18,24 +18,13 @@ import datetime as dt
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from calitp.storage import get_fs
-from siuba import *
 
 import dask_utils
 import operators_for_hqta
-import utilities
-from A1_rail_ferry_brt import analysis_date
-from shared_utils import rt_utils, geography_utils, utils, gtfs_utils
-
-from update_vars import (analysis_date, date_str, 
+from shared_utils import utils
+from utilities import GCS_FILE_PATH
+from update_vars import (date_str, 
                          CACHED_VIEWS_EXPORT_PATH, VALID_OPERATORS_FILE)
-
-fs = get_fs()
-
-# Apparently these have to be defined in the script?
-GCS_PROJECT = "cal-itp-data-infra"
-BUCKET_DIR = "data-analyses/hqta_test"
-TEST_GCS_FILE_PATH = f"gs://{utilities.BUCKET_NAME}/{BUCKET_DIR}/"
 
 
 segment_cols = ["hqta_segment_id", "segment_sequence"]
@@ -73,7 +62,9 @@ ITP_IDS_IN_GCS = [x for x in VALID_ITP_IDS if x not in ERROR_IDS]
 
 
 ## Join HQTA segment to stop
-def hqta_segment_to_stop(hqta_segments, stops):    
+def hqta_segment_to_stop(hqta_segments: dask_geopandas.GeoDataFrame, 
+                         stops: dask_geopandas.GeoDataFrame
+                        ) -> dask_geopandas.GeoDataFrame:    
     
     segment_to_stop = (dask_geopandas.sjoin(
             stops[["stop_id", "geometry"]],
@@ -95,7 +86,9 @@ def hqta_segment_to_stop(hqta_segments, stops):
     return segment_to_stop2
 
 
-def hqta_segment_keep_one_stop(hqta_segments, stop_times):
+def hqta_segment_keep_one_stop(hqta_segments: dask_geopandas.GeoDataFrame, 
+                               stop_times: dd.DataFrame
+                              ) -> dask_geopandas.GeoDataFrame:
     # Find stop with the highest trip count
     # If there are multiple stops within hqta_segment, only keep 1 stop
     trip_count_by_stop = dask_utils.find_stop_with_high_trip_count(stop_times)
@@ -113,15 +106,18 @@ def hqta_segment_keep_one_stop(hqta_segments, stop_times):
     return segment_to_stop
     
 
-def add_hqta_segment_peak_trips(df, aggregated_stop_times):
+def add_hqta_segment_peak_trips(df: dask_geopandas.GeoDataFrame, 
+                                aggregated_stop_times: dd.DataFrame
+                               ) -> gpd.GeoDataFrame:
     
-    def max_trips_by_segment(df, group_cols):
+    def max_trips_by_segment(df: dd.DataFrame, 
+                             group_cols: list) -> dd.DataFrame:
         df2 = (df
                .groupby(group_cols)
                .agg({"n_trips": np.max})
                .reset_index()
               )
-        return df2.compute() # compute is what makes it a pandas df, rather than dask df    
+        return df2    
     
     # Flexible AM peak - find max trips at the stop before noon
     am_max = (max_trips_by_segment(
@@ -146,7 +142,8 @@ def add_hqta_segment_peak_trips(df, aggregated_stop_times):
     # Merge at the hqta_segment_id-stop_id level to get it back to segments
     gdf = dd.merge(
         df[stop_cols + segment_cols + 
-           ["calitp_url_number", "route_id", "route_direction", "geometry"]].drop_duplicates(),
+           ["calitp_url_number", "route_id", 
+            "route_direction", "geometry"]].drop_duplicates(),
         peak_trips_by_segment,
         on = stop_cols,
         how = "left"
@@ -160,7 +157,12 @@ def add_hqta_segment_peak_trips(df, aggregated_stop_times):
     return gdf.compute()
 
 
-def identify_hq_transit_corr(df):
+def identify_hq_transit_corr(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Tag segment as being a high quality transit corridor if it
+    has at least 4 trips in AM and PM (before 12pm, after 12pm, 
+    whatever is max in each period)
+    """
     df = df.assign(
         hq_transit_corr = df.apply(lambda x: 
                                    True if (x.am_max_trips > 4 and 
@@ -171,7 +173,10 @@ def identify_hq_transit_corr(df):
     return df
 
 
-def single_operator_hqta(routelines, trips, stop_times, stops):
+def single_operator_hqta(routelines: dask_geopandas.GeoDataFrame, 
+                         trips: dd.DataFrame, 
+                         stop_times: dd.DataFrame, 
+                         stops: dask_geopandas.GeoDataFrame) -> gpd.GeoDataFrame:
     # Pare down all the shape_id-trip_id combos down to route_id
     # This is the dissolved shape for each route_id (no more shape_id)
     route_shapes = dask_utils.select_needed_shapes_for_route_network(routelines, trips)
@@ -219,7 +224,8 @@ def single_operator_hqta(routelines, trips, stop_times, stops):
 def import_data(itp_id, date_str):
     routelines = dask_geopandas.read_parquet(
                 f"{CACHED_VIEWS_EXPORT_PATH}routelines_{itp_id}_{date_str}.parquet")
-    trips = dd.read_parquet(f"{CACHED_VIEWS_EXPORT_PATH}trips_{itp_id}_{date_str}.parquet")
+    trips = dd.read_parquet(
+        f"{CACHED_VIEWS_EXPORT_PATH}trips_{itp_id}_{date_str}.parquet")
     stop_times = dd.read_parquet(
         f"{CACHED_VIEWS_EXPORT_PATH}st_{itp_id}_{date_str}.parquet")
     stops = dask_geopandas.read_parquet(
@@ -246,7 +252,7 @@ if __name__=="__main__":
 
         # Export each operator to test GCS folder (separate from Eric's)        
         utils.geoparquet_gcs_export(
-            gdf, f'{TEST_GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
+            gdf, f'{GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
 
         print(f"successful export: {itp_id}")
 

@@ -1,23 +1,26 @@
 import dask.dataframe as dd
 import dask_geopandas
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 import zlib
 
 from shapely.geometry import LineString, Point
 
 import utilities
-from shared_utils import rt_utils
-
+from shared_utils import rt_utils, gtfs_utils
 
 #------------------------------------------------------#
 # Stop times
 #------------------------------------------------------#
-def stop_times_aggregation_by_hour(stop_times):
+def stop_times_aggregation_by_hour(stop_times: dd.DataFrame) -> dd.DataFrame:
+    """
+    Take the stop_times table 
+    and group by stop_id-departure hour
+    and count how many trips occur.
+    """
     stop_cols = ["calitp_itp_id", "stop_id"]
 
-    ddf = fix_departure_time(stop_times)
+    ddf = gtfs_utils.fix_departure_time(stop_times)
     
     # Aggregate how many trips are made at that stop by departure hour
     trips_per_hour = (ddf.groupby(stop_cols + ["departure_hour"])
@@ -30,7 +33,12 @@ def stop_times_aggregation_by_hour(stop_times):
 
 
 # utilities.find_stop_with_high_trip_count
-def find_stop_with_high_trip_count(stop_times): 
+def find_stop_with_high_trip_count(
+    stop_times: dd.DataFrame) -> dd.DataFrame: 
+    """
+    Take the stop_times table, and
+    count how many trips pass through that stop_id
+    """
     stop_cols = ["calitp_itp_id", "stop_id"]
 
     trip_count_by_stop = (stop_times
@@ -49,10 +57,15 @@ def find_stop_with_high_trip_count(stop_times):
 #------------------------------------------------------#
 # Routelines
 #------------------------------------------------------#
-# For LA Metro, out of ~700 unique shape_ids,
-# this pares is down to ~115 route_ids
-# Use the pared down shape_ids to get hqta_segments
-def merge_routes_to_trips(routelines, trips):    
+def merge_routes_to_trips(routelines: dask_geopandas.GeoDataFrame, 
+                          trips: dd.DataFrame) -> dask_geopandas.GeoDataFrame:   
+    """
+    Merge routes and trips tables.
+    
+    For LA Metro, out of ~700 unique shape_ids,
+    this pares it down to ~115 route_ids.
+    Use this pared down shape_ids to get hqta_segments.
+    """
     routelines_ddf = routelines.assign(
         route_length = routelines.geometry.length,
         # Easier to drop if we make sure centroid of that line segment is the same too
@@ -82,12 +95,18 @@ def merge_routes_to_trips(routelines, trips):
     return m1
 
     
-def find_longest_route_shapes(merged_routelines_trips, n=1): 
-    # Sort in descending order by route_length
-    # Since there are short/long trips for a given route_id,
-    # Keep the longest 5 shape_ids within a route_id 
-    # then do the dissolve
-    # Doing it off of the full one creates gaps in the line geom
+def find_longest_route_shapes(
+    merged_routelines_trips: dask_geopandas.GeoDataFrame, 
+    n: int = 1) -> dask_geopandas.GeoDataFrame: 
+    """
+    Sort in descending order by route_length
+    Since there are short/long trips for a given route_id,
+    Keep the longest shape_ids within a route_id 
+    
+    TODO: further investigation into how to keep the longest 2 shape_ids
+    Even doing a dissolve, or keeping top 5 longest shape_id within a route_id
+    will leave lots of gaps in the hqta_segments
+    """
     df = merged_routelines_trips.assign(
         obs = (merged_routelines_trips.sort_values(["route_id", "route_length"], 
                                   ascending=[True, False])
@@ -100,7 +119,14 @@ def find_longest_route_shapes(merged_routelines_trips, n=1):
     return longest_shape
 
 
-def add_route_cardinal_direction(df):
+def add_route_cardinal_direction(
+    df: dask_geopandas.GeoDataFrame) -> dask_geopandas.GeoDataFrame:
+    """
+    For each row, grab the origin/destination of the linestring.
+    Put OD into rt_utils.primary_cardinal_direction(), 
+    and aggregate "northbound", "southbound", etc to 
+    to "north-south" or "east-west".
+    """
     # Grab the start / endpoint of a linestring
     #https://gis.stackexchange.com/questions/358584/how-to-extract-long-and-lat-of-start-and-end-points-to-seperate-columns-from-t
     df = df.assign(
@@ -129,7 +155,19 @@ def add_route_cardinal_direction(df):
     return df
         
 
-def select_needed_shapes_for_route_network(routelines, trips):
+def select_needed_shapes_for_route_network(
+    routelines: dask_geopandas.GeoDataFrame, 
+    trips: dd.DataFrame) -> gpd.GeoDataFrame:
+    """
+    Merge the routelines and trips tables,
+    narrow down all the shape_ids to just 1 per route_id.
+    
+    Possible to expand to 2 per route_id if needed.
+    
+    Add cardinal direction for that route_id.
+
+    Returns a gpd.GeoDataFrame, ready to be cut into hqta_segments
+    """
     route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
 
     # For a given route, the longest route_length may provide 90% of the needed shape 
@@ -163,7 +201,8 @@ def select_needed_shapes_for_route_network(routelines, trips):
     return longest_shape_with_dir
 
 
-def add_buffer(gdf, buffer_size=50):
+def add_buffer(gdf: gpd.GeoDataFrame, 
+               buffer_size: int = 50) -> gpd.GeoDataFrame:
     gdf = gdf.assign(
         geometry = gdf.geometry.buffer(buffer_size)
     )
@@ -171,7 +210,7 @@ def add_buffer(gdf, buffer_size=50):
     return gdf
 
 
-def add_segment_id(df):
+def add_segment_id(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     ## compute (hopefully unique) hash of segment id that can be used 
     # across routes/operators
     df2 = df.assign(
@@ -188,12 +227,17 @@ def add_segment_id(df):
     return df2
 
 
-def segment_route(gdf):
-    segmented = gpd.GeoDataFrame() ##changed to gdf?
+def segment_route(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Draw segments every 1,250 m.
+    Then create an hqta_segment_id that we can reference later on.
+    """
+    segmented = gpd.GeoDataFrame() 
 
     route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
 
     # Turn 1 row of geometry into hqta_segments, every 1,250 m
+    # create_segments() must take a row.geometry (gpd.GeoDataFrame)
     for segment in utilities.create_segments(gdf.geometry):
         to_append = gdf.drop(columns=["geometry"])
         to_append["geometry"] = segment
