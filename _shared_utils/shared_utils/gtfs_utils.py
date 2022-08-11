@@ -397,16 +397,30 @@ def get_stop_times(
 
     # Use the gtfs_schedule_index_feed_trip_stops to find the stop_time_keys
     # that actually occurred on that day
-    trips_stops_ix_query = trips_on_day >> inner_join(
-        _,
+    # Handle the pd.DataFrame trips_on_day table separately
+    if isinstance(trips_on_day, pd.DataFrame):
+        keep_trip_keys = pd.Series(trips_on_day.trip_key)
+
         # This table only has keys, no itp_id or date to filter on
-        (
+        # When it's pd.DataFrame, let's use filtering against a pd.Series to accomplish this
+        # since inner_join will not work unless it's LzyTbl on both sides
+        trips_stops_ix_query = (
             tbl.views.gtfs_schedule_index_feed_trip_stops()
             >> select(_.trip_key, _.stop_time_key)
             >> distinct()
-        ),
-        on="trip_key",
-    )
+            >> filter(_.trip_key.isin(keep_trip_keys))
+        )
+
+    else:
+        trips_stops_ix_query = (
+            # This table only has keys, no itp_id or date to filter on
+            (
+                tbl.views.gtfs_schedule_index_feed_trip_stops()
+                >> select(_.trip_key, _.stop_time_key)
+                >> distinct()
+            )
+            >> inner_join(_, trips_on_day, on="trip_key")
+        )
 
     stop_times = (
         stop_times_query
