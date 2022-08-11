@@ -2,12 +2,6 @@
 GTFS utils.
 
 Queries to grab trips, stops, routes.
-
-TODO: move over some of the rt_utils
-over here, if it addresses GTFS schedule data more generally,
-such as cleaning/reformatting arrival times.
-
-Leave the RT-specific analysis there.
 """
 import datetime
 
@@ -152,7 +146,8 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
 # Routes
 # ----------------------------------------------------------------#
 # Route Info - views.gtfs_schedule_dim_routes + views.gtfs_schedule_fact_daily_feed_routes
-# Route Shapes - geography_utils.make_routes_gdf()
+# Route Shapes - geography_utils.make_routes_gdf() + trips query
+# Combine these 2?
 
 
 def get_route_info(
@@ -254,6 +249,7 @@ def get_route_shapes(
 # ----------------------------------------------------------------#
 # Stops
 # ----------------------------------------------------------------#
+# views.gtfs_schedule_dim_stops + views.gtfs_schedule_fact_daily_feed_stops
 def get_stops(
     selected_date: str | datetime.date = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
@@ -297,6 +293,7 @@ def get_stops(
 # ----------------------------------------------------------------#
 # Trips
 # ----------------------------------------------------------------#
+# views.gtfs_schedule_dim_trips + views.gtfs_schedule_fact_daily_trips + handle metrolink
 def get_trips(
     selected_date: str | datetime.date = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
@@ -362,10 +359,13 @@ def get_trips(
 # ----------------------------------------------------------------#
 # Stop Times
 # ----------------------------------------------------------------#
+# views. gtfs_schedule_dim_stop_times + views.gtfs_schedule_index_feed_trip_stops + trips query
 def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
-    # Some fixing, transformation, aggregation with dask
-    # Grab departure hour
-    # https://stackoverflow.com/questions/45428292/how-to-convert-pandas-str-split-call-to-to-dask
+    """
+    Some fixing, transformation, aggregation with dask
+    Add departure hour column
+    https://stackoverflow.com/questions/45428292/how-to-convert-pandas-str-split-call-to-to-dask
+    """
     stop_times2 = stop_times[~stop_times.departure_time.isna()].reset_index(drop=True)
 
     ddf = stop_times2.assign(
@@ -414,6 +414,8 @@ def get_stop_times(
     get_df: bool.
             If True, return pd.DataFrame
             If False, return dd.DataFrame
+
+    TODO: custom_filtering...is it placed too late in the query?
     """
     if trip_df is None:
         # Grab the trips for that day
@@ -426,12 +428,12 @@ def get_stop_times(
             )
             >> distinct()
         )
-    # When a pre-existing table is given, leave as LzyTbl
-    # But how to handle pd.DataFrame?
+
     elif trip_df is not None:
         keep_cols = ["trip_key"]
         if isinstance(trip_df, siuba.sql.verbs.LazyTbl):
             trips_on_day = trip_df >> select(keep_cols)
+        # Have to handle pd.DataFrame separately later
         elif isinstance(trip_df, pd.DataFrame):
             trips_on_day = trip_df[keep_cols]
 
@@ -449,25 +451,21 @@ def get_stop_times(
         keep_trip_keys = pd.Series(trips_on_day.trip_key)
 
         # This table only has keys, no itp_id or date to filter on
-        # When it's pd.DataFrame, let's use filtering against a pd.Series to accomplish this
-        # since inner_join will not work unless it's LzyTbl on both sides
         trips_stops_ix_query = (
             tbl.views.gtfs_schedule_index_feed_trip_stops()
             >> select(_.trip_key, _.stop_time_key)
             >> distinct()
+            # When it's pd.DataFrame, let's use filtering against a pd.Series to accomplish this
+            # since inner_join will not work unless it's LzyTbl on both sides
             >> filter(_.trip_key.isin(keep_trip_keys))
         )
 
     else:
         trips_stops_ix_query = (
-            # This table only has keys, no itp_id or date to filter on
-            (
-                tbl.views.gtfs_schedule_index_feed_trip_stops()
-                >> select(_.trip_key, _.stop_time_key)
-                >> distinct()
-            )
-            >> inner_join(_, trips_on_day, on="trip_key")
-        )
+            tbl.views.gtfs_schedule_index_feed_trip_stops()
+            >> select(_.trip_key, _.stop_time_key)
+            >> distinct()
+        ) >> inner_join(_, trips_on_day, on="trip_key")
 
     stop_times = (
         stop_times_query
