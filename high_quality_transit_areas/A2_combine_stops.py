@@ -62,5 +62,5 @@ if __name__ == "__main__":
     
     # Export to GCS
     utils.geoparquet_gcs_export(rail_brt_ferry, 
-                                f'{GCS_FILE_PATH}', 
+                                GCS_FILE_PATH, 
                                 'rail_brt_ferry')
