@@ -22,7 +22,7 @@ import gcsfs
 import numpy as np
 import pandas as pd
 
-import dask_utils
+import corridor_utils
 import operators_for_hqta
 from shared_utils import utils
 from utilities import GCS_FILE_PATH
@@ -66,7 +66,7 @@ def hqta_segment_keep_one_stop(hqta_segments: dg.GeoDataFrame,
                               ) -> dg.GeoDataFrame:
     # Find stop with the highest trip count
     # If there are multiple stops within hqta_segment, only keep 1 stop
-    trip_count_by_stop = dask_utils.find_stop_with_high_trip_count(stop_times)
+    trip_count_by_stop = corridor_utils.find_stop_with_high_trip_count(stop_times)
 
     # Keep the stop in the segment with highest trips
     segment_to_stop = (dd.merge(
@@ -154,25 +154,25 @@ def single_operator_hqta(routelines: dg.GeoDataFrame,
                          stops: dg.GeoDataFrame) -> gpd.GeoDataFrame:
     # Pare down all the shape_id-trip_id combos down to route_id
     # This is the dissolved shape for each route_id (no more shape_id)
-    route_shapes = dask_utils.select_needed_shapes_for_route_network(routelines, trips)
+    route_shapes = corridor_utils.select_needed_shapes_for_route_network(routelines, trips)
     
     # Loop through each row to segment that route's line geom into hqta segments
-    # Looping because dask_utils.segment_route function cuts 1 line geom into several lines
+    # Looping because corridor_utils.segment_route function cuts 1 line geom into several lines
     all_routes = gpd.GeoDataFrame()
     
     for i in route_shapes.index:
         one_route = route_shapes[route_shapes.index==i]
-        gdf = dask_utils.segment_route(one_route)
+        gdf = corridor_utils.segment_route(one_route)
     
         all_routes = pd.concat([all_routes, gdf])
     
     
     # Add HQTA segment ID
-    all_routes2 = dask_utils.add_segment_id(all_routes)
+    all_routes2 = corridor_utils.add_segment_id(all_routes)
 
     ##generous buffer for street/sidewalk width? 
     # Required to spatially find stops within each segment
-    all_routes3 = dask_utils.add_buffer(all_routes2, buffer_size=50)
+    all_routes3 = corridor_utils.add_buffer(all_routes2, buffer_size=50)
     
     # Convert to dask gdf
     hqta_segments = dg.from_geopandas(all_routes3, npartitions=1)
@@ -183,7 +183,7 @@ def single_operator_hqta(routelines: dg.GeoDataFrame,
     segment_to_stop_unique = hqta_segment_keep_one_stop(segment_to_stop, stop_times)
     
     # Get aggregated stops by departure_hour and stop_id
-    trips_by_stop_hour = dask_utils.stop_times_aggregation_by_hour(stop_times)
+    trips_by_stop_hour = corridor_utils.stop_times_aggregation_by_hour(stop_times)
     
     # By hqta segment, find the max trips for AM/PM peak
     segment_with_max_stops = add_hqta_segment_peak_trips(
