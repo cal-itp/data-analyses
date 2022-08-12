@@ -6,7 +6,7 @@ Additional data cleaning to filter out small HQTA segments.
 This takes 2 min to run. 
 """
 import dask.dataframe as dd
-import dask_geopandas
+import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 
@@ -25,12 +25,12 @@ if __name__ == "__main__":
     start = dt.datetime.now()
     
     # Read in first operator to set the metadata for dask gdf
-    gdf = dask_geopandas.read_parquet(
+    gdf = dg.read_parquet(
         f'{OPERATOR_PATH}{first_operator}_bus.parquet'
     )
 
     for itp_id in ITP_IDS_IN_GCS[1:]:
-        operator = dask_geopandas.read_parquet(
+        operator = dg.read_parquet(
             f'{OPERATOR_PATH}{itp_id}_bus.parquet')
 
         gdf = dd.multi.concat([gdf, operator], axis=0)

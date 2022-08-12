@@ -15,9 +15,10 @@ and choppy hqta segments are not useful, because they may not attach
 properly to stops.
 """
 import dask.dataframe as dd
-import dask_geopandas
+import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
+import gcsfs
 import numpy as np
 import pandas as pd
 
@@ -28,17 +29,19 @@ from utilities import GCS_FILE_PATH
 from update_vars import (date_str, CACHED_VIEWS_EXPORT_PATH, 
                          VALID_OPERATORS_FILE)
 
+fs = gcsfs.GCSFileSystem()
+
 segment_cols = ["hqta_segment_id", "segment_sequence"]
 stop_cols = ["calitp_itp_id", "stop_id"]
 
 ITP_IDS_IN_GCS = operators_for_hqta.itp_ids_from_json(file=VALID_OPERATORS_FILE)
 
 ## Join HQTA segment to stop
-def hqta_segment_to_stop(hqta_segments: dask_geopandas.GeoDataFrame, 
-                         stops: dask_geopandas.GeoDataFrame
-                        ) -> dask_geopandas.GeoDataFrame:    
+def hqta_segment_to_stop(hqta_segments: dg.GeoDataFrame, 
+                         stops: dg.GeoDataFrame
+                        ) -> dg.GeoDataFrame:    
     
-    segment_to_stop = (dask_geopandas.sjoin(
+    segment_to_stop = (dg.sjoin(
             stops[["stop_id", "geometry"]],
             hqta_segments,
             how = "inner",
@@ -58,9 +61,9 @@ def hqta_segment_to_stop(hqta_segments: dask_geopandas.GeoDataFrame,
     return segment_to_stop2
 
 
-def hqta_segment_keep_one_stop(hqta_segments: dask_geopandas.GeoDataFrame, 
+def hqta_segment_keep_one_stop(hqta_segments: dg.GeoDataFrame, 
                                stop_times: dd.DataFrame
-                              ) -> dask_geopandas.GeoDataFrame:
+                              ) -> dg.GeoDataFrame:
     # Find stop with the highest trip count
     # If there are multiple stops within hqta_segment, only keep 1 stop
     trip_count_by_stop = dask_utils.find_stop_with_high_trip_count(stop_times)
@@ -78,7 +81,7 @@ def hqta_segment_keep_one_stop(hqta_segments: dask_geopandas.GeoDataFrame,
     return segment_to_stop
     
 
-def add_hqta_segment_peak_trips(df: dask_geopandas.GeoDataFrame, 
+def add_hqta_segment_peak_trips(df: dg.GeoDataFrame, 
                                 aggregated_stop_times: dd.DataFrame
                                ) -> gpd.GeoDataFrame:
     
@@ -145,10 +148,10 @@ def identify_hq_transit_corr(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df
 
 
-def single_operator_hqta(routelines: dask_geopandas.GeoDataFrame, 
+def single_operator_hqta(routelines: dg.GeoDataFrame, 
                          trips: dd.DataFrame, 
                          stop_times: dd.DataFrame, 
-                         stops: dask_geopandas.GeoDataFrame) -> gpd.GeoDataFrame:
+                         stops: dg.GeoDataFrame) -> gpd.GeoDataFrame:
     # Pare down all the shape_id-trip_id combos down to route_id
     # This is the dissolved shape for each route_id (no more shape_id)
     route_shapes = dask_utils.select_needed_shapes_for_route_network(routelines, trips)
@@ -172,7 +175,7 @@ def single_operator_hqta(routelines: dask_geopandas.GeoDataFrame,
     all_routes3 = dask_utils.add_buffer(all_routes2, buffer_size=50)
     
     # Convert to dask gdf
-    hqta_segments = dask_geopandas.from_geopandas(all_routes3, npartitions=1)
+    hqta_segments = dg.from_geopandas(all_routes3, npartitions=1)
     # Join hqta segment to stops
     segment_to_stop = hqta_segment_to_stop(hqta_segments, stops)
     
@@ -194,13 +197,13 @@ def single_operator_hqta(routelines: dask_geopandas.GeoDataFrame,
 
 
 def import_data(itp_id, date_str):
-    routelines = dask_geopandas.read_parquet(
+    routelines = dg.read_parquet(
                 f"{CACHED_VIEWS_EXPORT_PATH}routelines_{itp_id}_{date_str}.parquet")
     trips = dd.read_parquet(
         f"{CACHED_VIEWS_EXPORT_PATH}trips_{itp_id}_{date_str}.parquet")
     stop_times = dd.read_parquet(
         f"{CACHED_VIEWS_EXPORT_PATH}st_{itp_id}_{date_str}.parquet")
-    stops = dask_geopandas.read_parquet(
+    stops = dg.read_parquet(
         f"{CACHED_VIEWS_EXPORT_PATH}stops_{itp_id}_{date_str}.parquet")
     
     return routelines, trips, stop_times, stops
@@ -209,7 +212,10 @@ def import_data(itp_id, date_str):
     
 if __name__=="__main__":        
     start_time = dt.datetime.now()
-            
+    
+    # TODO: add back in? clear cache each month?
+    # fs.rm(f'{GCS_FILE_PATH}bus_corridors/*')        
+    
     for itp_id in ITP_IDS_IN_GCS:
 
         operator_start = dt.datetime.now()
@@ -222,7 +228,7 @@ if __name__=="__main__":
 
         print(f"created single operator hqta: {itp_id}")
 
-        # Export each operator to test GCS folder (separate from Eric's)        
+        # Export each operator         
         utils.geoparquet_gcs_export(
             gdf, f'{GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
 

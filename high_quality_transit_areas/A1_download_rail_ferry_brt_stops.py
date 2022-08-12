@@ -2,13 +2,13 @@
 Move rail_ferry_brt.ipynb into script.
 """
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(900_000_000_000) ## 800GB?
+os.environ["CALITP_BQ_MAX_BYTES"] = str(400_000_000_000)
 
 import datetime as dt
 import geopandas as gpd
 import intake
 import pandas as pd
-import siuba
+import siuba.sql.verbs.LazyTbl
 
 from calitp.tables import tbl
 from siuba import *
