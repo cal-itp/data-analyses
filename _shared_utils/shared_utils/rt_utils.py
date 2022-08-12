@@ -138,13 +138,12 @@ def get_vehicle_positions(itp_id, analysis_date):
     else:
         df = query_sql(
             f"""
-        SELECT itp_id AS calitp_itp_id, url_number AS calitp_url_number,
-        header.timestamp AS header_timestamp, vehicle.timestamp AS vehicle_timestamp,
-        vehicle.vehicle.label AS entity_id, vehicle.vehicle.id AS vehicle_id,
-        vehicle.trip.tripId AS trip_id, vehicle.position.longitude AS vehicle_longitude,
-        vehicle.position.latitude AS vehicle_latitude
-        FROM `cal-itp-data-infra.external_gtfs_rt.vehicle_positions`
-        WHERE itp_id = {itp_id} AND dt IN ("{analysis_date}", "{next_date}")
+        SELECT calitp_itp_id, calitp_url_number,
+        timestamp AS vehicle_timestamp,
+        vehicle_label AS entity_id, vehicle_id,
+        trip_id, longitude AS vehicle_longitude, latitude AS vehicle_latitude
+        FROM `cal-itp-data-infra.staging.stg_rt__vehicle_positions`
+        WHERE calitp_itp_id = {itp_id} AND date IN ("{analysis_date}", "{next_date}")
         """
         )
 
@@ -152,8 +151,9 @@ def get_vehicle_positions(itp_id, analysis_date):
         df = df.dropna(subset=["vehicle_timestamp"])
         assert not df.empty, f"no vehicle positions data found for {date_str}"
         df.vehicle_timestamp = df.vehicle_timestamp.apply(convert_ts)
-        df.header_timestamp = df.header_timestamp.apply(convert_ts)
-        df = df >> filter(_.header_timestamp > start, _.header_timestamp < end)
+        ## header timestamp not present in staging, add upstream if desired
+        # df.header_timestamp = df.header_timestamp.apply(convert_ts)
+        df = df >> filter(_.vehicle_timestamp > start, _.vehicle_timestamp < end)
 
         # assert df.vehicle_timestamp.min() < dt.datetime.combine(analysis_date, dt.time(0)), 'rt data starts after analysis date'
         # assert dt.datetime.combine(analysis_date, dt.time(hour=23, minute=59)) < df.vehicle_timestamp.max(), 'rt data ends early on analysis date'
