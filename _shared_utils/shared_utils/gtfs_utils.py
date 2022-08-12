@@ -121,7 +121,7 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
     Placement/order for where this filter happens...for stop_times..is it too late in the query?
     Should a check be included to run the filter if it finds the column in the first query it can?
     """
-    if (filter_dict != {}) or (filter_dict is not None):
+    if (filter_dict != {}) and (filter_dict is not None):
 
         keys, values = zip(*filter_dict.items())
 
