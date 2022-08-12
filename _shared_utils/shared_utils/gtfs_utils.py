@@ -8,7 +8,7 @@ import datetime
 import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
-import siuba.sql.verbs.LazyTbl
+import siuba  # need this to do type hint in functions
 from calitp.tables import tbl
 from shared_utils import geography_utils
 from siuba import *
@@ -155,7 +155,7 @@ def get_route_info(
     itp_id_list: list[int] = None,
     route_cols: list[str] = None,
     get_df: bool = True,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> pd.DataFrame | siuba.sql.verbs.LazyTbl:
 
     # Route info query
@@ -191,7 +191,7 @@ def get_route_shapes(
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     trip_df: siuba.sql.verbs.LazyTbl | pd.DataFrame = None,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> gpd.GeoDataFrame:
     """
     Return a subset of geography_utils.make_routes_gdf()
@@ -255,7 +255,7 @@ def get_stops(
     stop_cols: list[str] = None,
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> gpd.GeoDataFrame | siuba.sql.verbs.LazyTbl:
 
     # Stops query
@@ -297,7 +297,7 @@ def get_trips(
     itp_id_list: list[int] = None,
     trip_cols: list[str] = None,
     get_df: bool = True,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> pd.DataFrame | siuba.sql.verbs.LazyTbl:
 
     # Trips query
@@ -398,7 +398,7 @@ def get_stop_times(
     get_df: bool = False,
     departure_hours: tuple | list = None,
     trip_df: pd.DataFrame | siuba.sql.verbs.LazyTbl = None,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> dd.DataFrame | pd.DataFrame:
     """
     Download stop times table for operator on a day.
