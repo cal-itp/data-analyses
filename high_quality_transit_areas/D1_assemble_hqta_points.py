@@ -4,40 +4,45 @@ Combine all the points for HQ transit open data portal.
 From combine_and_visualize.ipynb
 """
 import dask.dataframe as dd
-import dask_geopandas
+import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import numpy as np
 import os
 import pandas as pd
 
-from calitp.tables import tbl
-from siuba import *
-
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
-from A1_rail_ferry_brt import analysis_date
-from B1_bus_corridors import TEST_GCS_FILE_PATH
-from shared_utils import utils, geography_utils
+from shared_utils import utils, geography_utils, portfolio_utils
+from update_vars import analysis_date
 
 # Input files
 MAJOR_STOP_BUS_FILE = utilities.catalog_filepath("major_stop_bus")
 STOPS_IN_CORRIDOR_FILE = utilities.catalog_filepath("stops_in_hq_corr")
     
     
-def get_agency_names():
-    names = (tbl.views.gtfs_schedule_dim_feeds()
-             >> filter(_.calitp_extracted_at < analysis_date, 
-                       _.calitp_deleted_at > analysis_date)
-             >> select(_.calitp_itp_id_primary == _.calitp_itp_id, 
-                       _.agency_name_primary == _.calitp_agency_name)
-             >> collect()
+def get_agency_names() -> pd.DataFrame:
+    names = portfolio_utils.add_agency_name(analysis_date)
+    
+    names = (names.astype({"calitp_itp_id": int})
+             .rename(columns = {
+                 "calitp_itp_id": "calitp_itp_id_primary", 
+                 "calitp_agency_name": "agency_name_primary"})
             )
     
     return names
 
 
-def add_agency_names_hqta_details(gdf):
+def add_agency_names_hqta_details(gdf: dg.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Add agency names by merging it in with our crosswalk
+    to get the primary ITP ID and primary agency name.
+    
+    Then use a function to add secondary ITP ID and secondary agency name 
+    and hqta_details column.
+    hqta_details makes it clearer for open data portal users why
+    some ID / agency name columns show the same info or are missing.
+    """
     names_df = get_agency_names()
     
     name_dict = (names_df.set_index('calitp_itp_id_primary')
@@ -64,7 +69,7 @@ def add_agency_names_hqta_details(gdf):
     return with_names
 
 
-def clean_up_hqta_points(gdf):
+def clean_up_hqta_points(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     gdf2 = (gdf.drop_duplicates(
                     subset=["calitp_itp_id_primary", "hqta_type", "stop_id"])
                    .sort_values(["calitp_itp_id_primary", "hqta_type", "stop_id"])
@@ -84,15 +89,16 @@ if __name__=="__main__":
     start = dt.datetime.now()
     
     rail_ferry_brt = rail_ferry_brt_extract.get_rail_ferry_brt_extract()
-    major_stop_bus = dask_geopandas.read_parquet(MAJOR_STOP_BUS_FILE)
-    stops_in_corridor = dask_geopandas.read_parquet(STOPS_IN_CORRIDOR_FILE)
+    major_stop_bus = dg.read_parquet(MAJOR_STOP_BUS_FILE)
+    stops_in_corridor = dg.read_parquet(STOPS_IN_CORRIDOR_FILE)
     
     # Combine all the points data
-    hqta_points_combined = dd.multi.concat([major_stop_bus,
+    hqta_points_combined = (dd.multi.concat([major_stop_bus,
                                             stops_in_corridor,
                                             rail_ferry_brt,
                                            ], axis=0)
-    
+                            .astype({"calitp_itp_id_primary": int})
+                           )
     
     time1 = dt.datetime.now()
     print(f"combined points: {time1 - start}")
@@ -105,7 +111,7 @@ if __name__=="__main__":
     print(f"add agency names / compute: {time2 - time1}")
     
     utils.geoparquet_gcs_export(gdf,
-                    f'{TEST_GCS_FILE_PATH}',
+                    utilities.GCS_FILE_PATH,
                     'hqta_points'
                    )    
     

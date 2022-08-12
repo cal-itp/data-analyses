@@ -19,12 +19,9 @@ from siuba import *
 
 from calitp.tables import tbl
 from shared_utils import rt_utils
+from update_vars import (analysis_date, date_str, CACHED_VIEWS_EXPORT_PATH, 
+                         ALL_OPERATORS_FILE, VALID_OPERATORS_FILE)
 
-analysis_date = dt.date(2022, 7, 13) 
-date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
-EXPORT_PATH = f"{rt_utils.GCS_FILE_PATH}cached_views/"
-ALL_OPERATORS_FILE = "./hqta_operators.json"
-VALID_OPERATORS_FILE = "./valid_hqta_operators.json"
 '''
 ITP_IDS_IN_GCS = [
     101, 102, 103, 105, 106, 108, 10, 110,
@@ -114,7 +111,7 @@ def itp_ids_from_json(file: str = VALID_OPERATORS_FILE) -> list:
     return data["VALID_ITP_IDS"]
 
 
-def check_for_completeness(export_path: str = EXPORT_PATH, 
+def check_for_completeness(export_path: str = CACHED_VIEWS_EXPORT_PATH, 
                            all_operators_file: str = ALL_OPERATORS_FILE, 
                            valid_operators_file: str = VALID_OPERATORS_FILE):
     
@@ -154,7 +151,7 @@ if __name__=="__main__":
     
     # Now check whether an operator has a complete set of files (len > 0)
     IDS_WITH_FULL_INFO = check_for_completeness(
-        EXPORT_PATH, ALL_OPERATORS_FILE, VALID_OPERATORS_FILE)
+        CACHED_VIEWS_EXPORT_PATH, ALL_OPERATORS_FILE, VALID_OPERATORS_FILE)
     
     # Save that list to json, should be smaller than all operators with cached
     list_to_json(IDS_WITH_FULL_INFO, VALID_OPERATORS_FILE)
