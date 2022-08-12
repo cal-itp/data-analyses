@@ -1,5 +1,7 @@
 """
-Move bus_corridors.ipynb into script.
+Draw bus corridors (routes -> segments) for each operator,
+and attach number of trips that pass through each stop.
+Use this to flag whether a segment is an high quality transit corridor.
 
 Picking just the longest route takes 21 min to run.
 The known issue related to this is that it misses layover 
@@ -23,43 +25,13 @@ import dask_utils
 import operators_for_hqta
 from shared_utils import utils
 from utilities import GCS_FILE_PATH
-from update_vars import (date_str, 
-                         CACHED_VIEWS_EXPORT_PATH, VALID_OPERATORS_FILE)
-
+from update_vars import (date_str, CACHED_VIEWS_EXPORT_PATH, 
+                         VALID_OPERATORS_FILE)
 
 segment_cols = ["hqta_segment_id", "segment_sequence"]
 stop_cols = ["calitp_itp_id", "stop_id"]
 
-
-# merged = merge_routes_to_trips(routelines, trips) throwing error
-# ValueError: You are trying to merge on object and int32 columns. If you wish to proceed you should use pd.concat 
-VALUE_ERROR_IDS = [
-    117, 118, 15,  
-    167, 169, 16,
-    186, 192, 199,
-    206, 207, 213, 214, 21, 
-    254, 263, 265, 273, 
-    338, 33, 365, 394, 
-    41, 54, 81, 91,
-]
-
-FILE_NOT_FOUND_IDS = [
-    203, #FileNotFoundError: for routelines (confirmed)
-    # What's in ITP_IDS but not in GCS
-    481, # this is City of South SF
-    485, # this is the Treasure Island ferry, it's captured by points
-]
-
-TOO_LONG_IDS = [
-    13, # taking a long time, for utilities.create_segments(gdf.geometry) 
-    # This is Amtrak and is excluded by Eric already
-]
-
-ERROR_IDS = VALUE_ERROR_IDS + FILE_NOT_FOUND_IDS + TOO_LONG_IDS
-
-VALID_ITP_IDS = operators_for_hqta.itp_ids_from_json(file=VALID_OPERATORS_FILE)
-ITP_IDS_IN_GCS = [x for x in VALID_ITP_IDS if x not in ERROR_IDS]
-
+ITP_IDS_IN_GCS = operators_for_hqta.itp_ids_from_json(file=VALID_OPERATORS_FILE)
 
 ## Join HQTA segment to stop
 def hqta_segment_to_stop(hqta_segments: dask_geopandas.GeoDataFrame, 
@@ -235,7 +207,7 @@ def import_data(itp_id, date_str):
     
     
     
-if __name__=="__main__":    
+if __name__=="__main__":        
     start_time = dt.datetime.now()
             
     for itp_id in ITP_IDS_IN_GCS:
