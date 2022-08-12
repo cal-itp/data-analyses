@@ -5,7 +5,7 @@ Mostly more processing of routelines, trips, stop times tables
 to get it ready for finding high quality transit corridors.
 """
 import dask.dataframe as dd
-import dask_geopandas
+import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 import zlib
@@ -62,8 +62,8 @@ def find_stop_with_high_trip_count(
 #------------------------------------------------------#
 # Routelines
 #------------------------------------------------------#
-def merge_routes_to_trips(routelines: dask_geopandas.GeoDataFrame, 
-                          trips: dd.DataFrame) -> dask_geopandas.GeoDataFrame:   
+def merge_routes_to_trips(routelines: dg.GeoDataFrame, 
+                          trips: dd.DataFrame) -> dg.GeoDataFrame:   
     """
     Merge routes and trips tables.
     
@@ -88,10 +88,11 @@ def merge_routes_to_trips(routelines: dask_geopandas.GeoDataFrame,
             # can use calitp_url_number = 1
             # Just keep calitp_url_number = 0 from routelines_ddf
             trips.drop(columns = "calitp_url_number")[
-                shape_id_cols + ["route_id"]],
+                shape_id_cols + ["route_id", "direction_id"]],
             on = shape_id_cols,
             how = "inner",
         ).drop_duplicates(subset=["calitp_itp_id", "route_id", 
+                                  "direction_id", 
                                   "route_length", "x", "y"])
         .drop(columns = ["x", "y"])
         .reset_index(drop=True)
@@ -101,46 +102,154 @@ def merge_routes_to_trips(routelines: dask_geopandas.GeoDataFrame,
 
     
 def find_longest_route_shapes(
-    merged_routelines_trips: dask_geopandas.GeoDataFrame, 
-    n: int = 1) -> dask_geopandas.GeoDataFrame: 
+    merged_routelines_trips: dg.GeoDataFrame
+) -> dg.GeoDataFrame: 
     """
     Sort in descending order by route_length
     Since there are short/long trips for a given route_id,
-    Keep the longest shape_ids within a route_id 
-    
-    TODO: further investigation into how to keep the longest 2 shape_ids
-    Even doing a dissolve, or keeping top 5 longest shape_id within a route_id
-    will leave lots of gaps in the hqta_segments
+    Keep the longest shape_ids within a route_id-direction_id
     """
-    df = merged_routelines_trips.assign(
-        obs = (merged_routelines_trips.sort_values(["route_id", "route_length"], 
-                                  ascending=[True, False])
-               .groupby(["calitp_itp_id", "route_id"]).cumcount() + 1
-              )
+    route_dir_cols = ["calitp_itp_id", "calitp_url_number",
+                      "route_id", "direction_id"]
+
+    # Keep the longest shape_id for each direction
+    longest_shape_by_direction = (
+        merged_routelines_trips.groupby(route_dir_cols)
+        .route_length.max().compute()
+    ).reset_index()
+    
+
+    longest_shapes = dd.merge(
+        merged_routelines_trips, 
+        longest_shape_by_direction,
+        on = route_dir_cols + ["route_length"],
+        how = "inner"
+    ).reset_index(drop=True)
+    
+    return longest_shapes
+
+
+def symmetric_difference_by_route(longest_shapes: dg.GeoDataFrame, 
+                                  route: str) -> gpd.GeoDataFrame:
+    """
+    For a given route, take the 2 longest shapes (1 for each direction),
+    find the symmetric difference.
+    
+    Explode and only keep segments longer than 750 m.
+    Concatenate this with the longest shape (1 direction) then dissolve
+    
+    Returns only 1 row for each route.
+    Between the 2 directions, this is as full of a route network we can get
+    without increasing complexity. 
+    """
+    route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
+    
+    # Start with the longest direction (doesn't matter if it's 0 or 1)
+    one_route = (longest_shapes[longest_shapes.route_id == route]
+             .compute() # gpd.overlay requires gpd.GeoDataFrame
+             # in case multiple rows are selected
+             # only keep 1 for each direction (pick 1st shape_id)
+             .sort_values(["direction_id", "shape_id", "route_length"], 
+                          ascending=[True, True, False])
+             .drop_duplicates(subset=["direction_id"])
+             .reset_index(drop=True)
+            )
+    
+    first = one_route[one_route.index==0]
+    second = one_route[one_route.index==1]
+    
+    # Find the symmetric difference 
+    # This takes away the parts that are overlapping
+    # and keeps the differences -- this still isn't what we fully want, but gets closer
+    overlay = first.overlay(second, how = "symmetric_difference")
+    
+    # Notice that overlay keeps a lot of short segments that are in the
+    # middle of the route. Drop these. We mostly want
+    # layover spots and where 1-way direction is.
+    exploded = (overlay[["geometry"]].dissolve()
+                .explode(index_parts=True)
+                .reset_index()
+                .drop(columns = ["level_0", "level_1"])
+               )
+    
+    # Need to populate our exploded df with these
+    itp_id = one_route.calitp_itp_id.iloc[0]
+    url_number = one_route.calitp_url_number.iloc[0]
+    
+    exploded2 = exploded.assign(
+        overlay_length = exploded.geometry.length,
+        route_id = route,
+        calitp_itp_id = itp_id,
+        calitp_url_number = url_number
     )
     
-    longest_shape = df[df.obs <= n].drop(columns="obs").reset_index(drop=True)
+    CUTOFF = 750 # 750 m is pretty close to how long our hqta segments are,
+    # which are 1,250 m. Maybe these segments are long enough to be included.
+    
+    exploded_long_enough = exploded2[exploded2.overlay_length > CUTOFF]
+    
+    # Now, dissolve it, so it becomes 1 row again
+    segments_to_attach = (exploded_long_enough[route_cols + ["geometry"]]
+                          .dissolve(by=route_cols)
+                          .reset_index()
+                         )
+    
+    
+    # Do this on the longest shape_id, because once it becomes
+    # multilinestring, dask can't do the shapely Point(x.coords) operation
+    # Grab the start / endpoint of a linestring
+    #https://gis.stackexchange.com/questions/358584/how-to-extract-long-and-lat-of-start-and-end-points-to-seperate-columns-from-t
+    first = first.assign(
+        origin = first.geometry.apply(lambda x: Point(x.coords[0])),
+        destination = first.geometry.apply(lambda x: Point(x.coords[-1])),
+    )
+    
+    # Concatenate the longest one shape_id
+    # with the segments that are long enough
+    combined_longest = pd.concat([
+        first[route_cols + ["origin", "destination", "geometry"]],
+        segments_to_attach
+    ], axis=0, ignore_index=True)
+    
+    combined = combined_longest.dissolve(by=route_cols).reset_index()
+    
+    return combined
+
+
+def symmetric_difference_for_operator(longest_shapes: dg.GeoDataFrame
+                                      ) -> gpd.GeoDataFrame:
+    """
+    Loop through each route and assemble the cleaned up symmetric
+    difference overlays. 
+    
+    Overlay requires geopandas. After concatenating all the routes
+    within an operator, turn it back to dask_geopandas.
+    
+    Returns a dg.GeoDataFrame.
+    """
+    operator_routes = list(longest_shapes.route_id.unique().compute())
+    
+    all_routes = gpd.GeoDataFrame()
+    
+    for r in sorted(operator_routes):
+        one_route = symmetric_difference_by_route(longest_shapes, r)
+        
+        all_routes = pd.concat([all_routes, one_route], 
+                               axis=0, ignore_index=True)
+        
+    longest_shape = dg.from_geopandas(all_routes, npartitions=1)
     
     return longest_shape
-
+        
 
 def add_route_cardinal_direction(
-    df: dask_geopandas.GeoDataFrame) -> dask_geopandas.GeoDataFrame:
+    df: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """
     For each row, grab the origin/destination of the linestring.
     Put OD into rt_utils.primary_cardinal_direction(), 
     and aggregate "northbound", "southbound", etc to 
     to "north-south" or "east-west".
     """
-    # Grab the start / endpoint of a linestring
-    #https://gis.stackexchange.com/questions/358584/how-to-extract-long-and-lat-of-start-and-end-points-to-seperate-columns-from-t
-    df = df.assign(
-        origin = df.geometry.apply(lambda x: Point(x.coords[0]), 
-                                              meta=('origin', 'geometry')),
-        destination = df.geometry.apply(lambda x: Point(x.coords[-1]), 
-                                                   meta=('destination', 'geometry')),
-    )
-    
     # Stick the origin/destination of a route_id and return the primary cardinal direction
     df = df.assign(
         route_primary_direction = df.apply(
@@ -161,7 +270,7 @@ def add_route_cardinal_direction(
         
 
 def select_needed_shapes_for_route_network(
-    routelines: dask_geopandas.GeoDataFrame, 
+    routelines: dg.GeoDataFrame, 
     trips: dd.DataFrame) -> gpd.GeoDataFrame:
     """
     Merge the routelines and trips tables,
@@ -175,16 +284,15 @@ def select_needed_shapes_for_route_network(
     """
     route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
 
-    # For a given route, the longest route_length may provide 90% of the needed shape 
-    # (line geom)
-    # But, it's missing parts where buses may turn around for layovers
-    # Add these segments in, so we can build out a complete route network
+    # Merge routelines to trips, and drop shape_ids that are 
+    # giving the same info (in terms of route_length, direction_id)
     merged = merge_routes_to_trips(routelines, trips)
     
-    # Go back to picking the longest one (n=1), since n=5 gives errors
-    # Suspect that the dissolve/unary_union orders the points differently, 
-    # and the hqta segments are truncated way too short
-    longest_shape = find_longest_route_shapes(merged, n=1)
+    # Keep only the longest 2 shape_ids (1 in each direction) for each route_id
+    longest_shapes = find_longest_route_shapes(merged)
+    
+    # Do a gpd.overlay to combine the 2 shape_ids into 1 row for each route_id
+    longest_shape = symmetric_difference_for_operator(longest_shapes)
     
     longest_shape_with_dir = add_route_cardinal_direction(longest_shape).compute()
         
