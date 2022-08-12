@@ -1,3 +1,9 @@
+"""
+Functions for creating bus corridors.
+
+Mostly more processing of routelines, trips, stop times tables
+to get it ready for finding high quality transit corridors.
+"""
 import dask.dataframe as dd
 import dask_geopandas
 import geopandas as gpd
@@ -32,7 +38,6 @@ def stop_times_aggregation_by_hour(stop_times: dd.DataFrame) -> dd.DataFrame:
     return trips_per_hour
 
 
-# utilities.find_stop_with_high_trip_count
 def find_stop_with_high_trip_count(
     stop_times: dd.DataFrame) -> dd.DataFrame: 
     """
@@ -179,22 +184,7 @@ def select_needed_shapes_for_route_network(
     # Go back to picking the longest one (n=1), since n=5 gives errors
     # Suspect that the dissolve/unary_union orders the points differently, 
     # and the hqta segments are truncated way too short
-    longest_shape = find_longest_route_shapes(merged)
-    
-    # CHANGE GEOMETRY?
-    # Can either keep the shape_id and associate the dissolved geometry with that shape_id
-    # Or, drop shape_id, since now shape_id is not reflecting the raw line geom 
-    # for that shape_id, and that's confusing to the end user (also, shape_id is not used, since hqta_segment_id is primary unit of analysis)
-    
-    ##TODO: 
-    # Use direction_id from routelines, take longest in both directions
-    '''
-    dissolved_by_route = (longest_shape[route_cols + ["geometry"]]
-                          .compute()
-                          .dissolve(by=route_cols)
-                          .reset_index()
-                         )
-    '''
+    longest_shape = find_longest_route_shapes(merged, n=1)
     
     longest_shape_with_dir = add_route_cardinal_direction(longest_shape).compute()
         
