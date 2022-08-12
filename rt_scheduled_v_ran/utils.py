@@ -96,15 +96,55 @@ def get_pct_ran_df(itp_id, list_of_dates, gtfs_daily, rt):
     return pd.DataFrame(pcts)
 
 
-def agg_by_date(df, sum1_sched, sum2_rt):
+def agg_by_date(df, sum1_sched, sum2_vp):
     agg_df = (df
      >>group_by(_.calitp_itp_id,
+                _.agency_name,
             _.calitp_url_number,
             _.service_date,
             _.weekday,
            _.month)
      >>summarize(total_num_sched = (_[sum1_sched].sum()),
-             total_num_rt = (_[sum2_rt].sum()))
-     >>mutate(pct_w_rt = (_.total_num_rt)/(_.total_num_sched))
+             total_num_vp = (_[sum2_vp].sum()))
+     >>mutate(pct_w_vp = (_.total_num_vp)/(_.total_num_sched))
             )
     return agg_df
+
+def groupby_onecol(df, groupbycol, aggcol):
+    if groupbycol == "weekday":
+        cats_day = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        grouped = df>>group_by(_[groupbycol])>>summarize(avg = _[aggcol].mean())
+        grouped['weekday'] = pd.Categorical(grouped['weekday'], categories=cats_day, ordered=True)
+        grouped = grouped.sort_values('weekday')
+        return grouped
+    
+    if groupbycol== "month":
+        cats_month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        grouped = df>>group_by(_[groupbycol])>>summarize(avg = _[aggcol].mean())
+        grouped['month'] = pd.Categorical(grouped['month'], categories=cats_month, ordered=True)
+        grouped = grouped.sort_values('month')
+        return grouped
+
+    elif groupbycol == "":
+        grouped2 = df>>group_by(_[groupbycol])>>summarize(avg = _[aggcol].mean())
+        return grouped2
+
+
+def groupby_twocol(df, groupbycol1, groupbycol2, aggcol, timeframe):
+    if timeframe == "weekday":
+        cats_day = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        grouped = df>>group_by(_[groupbycol1], _[groupbycol2])>>summarize(avg = _[aggcol].mean())
+        grouped['weekday'] = pd.Categorical(grouped['weekday'], categories=cats_day, ordered=True)
+        grouped = grouped.sort_values('weekday')
+        return grouped
+    
+    if timeframe== "month":
+        cats_month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        grouped = df>>group_by(_[groupbycol, _[groupbycol2]])>>summarize(avg = _[aggcol].mean())
+        grouped['month'] = pd.Categorical(grouped['month'], categories=cats_month, ordered=True)
+        grouped = grouped.sort_values('month')
+        return grouped
+
+    elif timeframe == "":
+        grouped2 = df>>group_by(_[groupbycol, _[groupbycol2]])>>summarize(avg = _[aggcol].mean())
+        return grouped2
