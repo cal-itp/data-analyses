@@ -4,7 +4,7 @@ Make a polygon version of HQ transit corridors for open data portal.
 From combine_and_visualize.ipynb
 """
 import dask.dataframe as dd
-import dask_geopandas
+import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import pandas as pd
@@ -12,7 +12,6 @@ import pandas as pd
 import C1_prep_for_clipping as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
-from B1_bus_corridors import TEST_GCS_FILE_PATH
 from shared_utils import utils, geography_utils
 
 HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
@@ -22,7 +21,14 @@ HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 bad_stops = ['315604', '315614', '689']
 
 
-def filter_and_buffer(hqta_points, hqta_segments):    
+def filter_and_buffer(hqta_points: dg.GeoDataFrame, 
+                      hqta_segments: dg.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Convert the HQTA point geom into polygon geom.
+    
+    Buffers are already drawn for corridors and stops, so 
+    draw new buffers, and address each hqta_type separately.
+    """
     stops = (hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
              .to_crs(geography_utils.CA_NAD83Albers)
             )
@@ -50,12 +56,19 @@ def filter_and_buffer(hqta_points, hqta_segments):
     
     hqta_polygons = (dd.multi.concat([corridors, stops], axis=0)
                      .to_crs(geography_utils.WGS84)
+                     # Make sure dtype is still int after concat
+                     .astype({"calitp_itp_id_primary": int})
                     ).compute()
     
     return hqta_polygons
 
 
-def drop_bad_stops_final_processing(gdf, bad_stop_list):
+def drop_bad_stops_final_processing(gdf: gpd.GeoDataFrame, 
+                                    bad_stop_list: list) -> gpd.GeoDataFrame:
+    """
+    Input a list of known bad stops in the script to 
+    exclude from the polygons.
+    """
     keep_cols = [
         "calitp_itp_id_primary", "calitp_itp_id_secondary", 
         "agency_name_primary", "agency_name_secondary",
@@ -77,7 +90,7 @@ def drop_bad_stops_final_processing(gdf, bad_stop_list):
 if __name__=="__main__":
     start = dt.datetime.now()
     
-    hqta_points = dask_geopandas.read_parquet(HQTA_POINTS_FILE)
+    hqta_points = dg.read_parquet(HQTA_POINTS_FILE)
     bus_hq_corr = prep_clip.prep_bus_corridors()
     
     # Filter and buffer for stops (805 m) and corridors (755 m)
@@ -92,9 +105,9 @@ if __name__=="__main__":
     
     # Export to GCS
     utils.geoparquet_gcs_export(gdf2,
-                f'{TEST_GCS_FILE_PATH}',
-                'hqta_areas'
-               )    
+                                utilities.GCS_FILE_PATH,
+                                'hqta_areas'
+                               )    
     
     # TODO: add export to individual folder as geojsonL
     # maybe create object loader fs.put in shared_utils

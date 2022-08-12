@@ -22,8 +22,9 @@ from calitp.tables import tbl
 from siuba import *
 
 import operators_for_hqta
-from shared_utils import gtfs_utils, rt_utils, geography_utils, utils
-from update_vars import analysis_date, date_str, EXPORT_PATH
+
+from update_vars import analysis_date, date_str, CACHED_VIEWS_EXPORT_PATH
+from shared_utils import gtfs_utils, geography_utils, utils
 
 LOCAL_PATH = "./data/"
 
@@ -73,7 +74,7 @@ def get_routelines(itp_id: int,
     
     if not routelines.empty:
         utils.geoparquet_gcs_export(routelines, 
-                            EXPORT_PATH, 
+                            CACHED_VIEWS_EXPORT_PATH, 
                             filename)
 
         print(f"{itp_id}: {dataset} exported to GCS")
@@ -125,7 +126,7 @@ def get_trips(itp_id: int, analysis_date: str | dt.date,
                           on = ["calitp_itp_id", "route_id"])
     )
     if not trips.empty:
-        trips.to_parquet(f"{EXPORT_PATH}{filename}")
+        trips.to_parquet(f"{CACHED_VIEWS_EXPORT_PATH}{filename}")
         print(f"{itp_id}: {dataset} exported to GCS")
     '''
     # TODO: work this into a later function
@@ -162,7 +163,7 @@ def get_stops(itp_id: int, analysis_date: str | dt.date):
     )
     
     if not stops.empty:
-        utils.geoparquet_gcs_export(stops, EXPORT_PATH, filename)
+        utils.geoparquet_gcs_export(stops, CACHED_VIEWS_EXPORT_PATH, filename)
         print(f"{itp_id}: {dataset} exported to GCS")
 
         
@@ -187,7 +188,7 @@ def get_stop_times(itp_id: int, analysis_date: str | dt.date):
     )
     
     if not stop_times.empty:
-        stop_times.to_parquet(f"{EXPORT_PATH}{filename}")
+        stop_times.to_parquet(f"{CACHED_VIEWS_EXPORT_PATH}{filename}")
         print(f"{itp_id}: {dataset} exported to GCS")
     
     
@@ -233,7 +234,6 @@ if __name__=="__main__":
     IDS_TO_RUN = list(set(ALL_IDS).difference(set(CACHED_IDS)))
     print(f"# operators to run: {len(IDS_TO_RUN)}")
     
-    IDS_TO_RUN = [i for i in IDS_TO_RUN if i != 17]
     # TODO: rethink cached IDs. For the most part, we know there are some
     # that are erroring, such as ITP ID 21, and we want to ignore those going forward
     # that's caught in completeness check later on, but 

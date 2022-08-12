@@ -8,7 +8,7 @@ import datetime
 import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
-import siuba
+import siuba  # need this to do type hint in functions
 from calitp.tables import tbl
 from shared_utils import geography_utils
 from siuba import *
@@ -121,7 +121,7 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
     Placement/order for where this filter happens...for stop_times..is it too late in the query?
     Should a check be included to run the filter if it finds the column in the first query it can?
     """
-    if filter_dict or (filter_dict is not None):
+    if (filter_dict != {}) and (filter_dict is not None):
 
         keys, values = zip(*filter_dict.items())
 
@@ -138,7 +138,7 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
             filter3 = filter(_[keys[2]].isin(values[2]))
             return filter1 >> filter2 >> filter3
 
-    else:
+    elif (filter_dict == {}) or (filter_dict is None):
         return filter()
 
 
@@ -155,7 +155,7 @@ def get_route_info(
     itp_id_list: list[int] = None,
     route_cols: list[str] = None,
     get_df: bool = True,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> pd.DataFrame | siuba.sql.verbs.LazyTbl:
 
     # Route info query
@@ -170,13 +170,12 @@ def get_route_info(
             _.calitp_extracted_at <= selected_date,
             _.calitp_deleted_at >= selected_date,
         )
-        >> filter_itp_id(itp_id_list)
         # Drop one set of these (extracted_at/deleted_at),
         # since adding it into the merge cols sometimes returns zero rows
         >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
         >> inner_join(_, dim_routes, on=["route_key"])
-        >> subset_cols(route_cols)
         >> filter_custom_col(custom_filtering)
+        >> subset_cols(route_cols)
         >> distinct()
     )
 
@@ -192,7 +191,7 @@ def get_route_shapes(
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     trip_df: siuba.sql.verbs.LazyTbl | pd.DataFrame = None,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> gpd.GeoDataFrame:
     """
     Return a subset of geography_utils.make_routes_gdf()
@@ -256,7 +255,7 @@ def get_stops(
     stop_cols: list[str] = None,
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> gpd.GeoDataFrame | siuba.sql.verbs.LazyTbl:
 
     # Stops query
@@ -271,13 +270,12 @@ def get_stops(
             _.calitp_extracted_at <= selected_date,
             _.calitp_deleted_at >= selected_date,
         )
-        >> filter_itp_id(itp_id_list)
         # Drop one set of these (extracted_at/deleted_at),
         # since adding it into the merge cols sometimes returns zero rows
         >> select(-_.calitp_extracted_at, -_.calitp_deleted_at)
         >> inner_join(_, dim_stops, on=["stop_key"])
-        >> subset_cols(stop_cols)
         >> filter_custom_col(custom_filtering)
+        >> subset_cols(stop_cols)
         >> distinct()
     )
 
@@ -299,7 +297,7 @@ def get_trips(
     itp_id_list: list[int] = None,
     trip_cols: list[str] = None,
     get_df: bool = True,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> pd.DataFrame | siuba.sql.verbs.LazyTbl:
 
     # Trips query
@@ -331,8 +329,8 @@ def get_trips(
                 "calitp_url_number",
             ],
         )
-        >> subset_cols(trip_cols)
         >> filter_custom_col(custom_filtering)
+        >> subset_cols(trip_cols)
         >> distinct()
     )
 
@@ -400,7 +398,7 @@ def get_stop_times(
     get_df: bool = False,
     departure_hours: tuple | list = None,
     trip_df: pd.DataFrame | siuba.sql.verbs.LazyTbl = None,
-    custom_filtering: dict = {},
+    custom_filtering: dict = None,
 ) -> dd.DataFrame | pd.DataFrame:
     """
     Download stop times table for operator on a day.

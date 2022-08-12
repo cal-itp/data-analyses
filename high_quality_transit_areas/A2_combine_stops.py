@@ -9,11 +9,10 @@ Export combined rail_brt_ferry data into GCS.
 import geopandas as gpd
 import pandas as pd
 
-import A1_rail_ferry_brt as rail_ferry_brt
+import A1_download_rail_ferry_brt_stops as rail_ferry_brt
 from shared_utils import utils
-#from utilities import GCS_FILE_PATH
-from B1_bus_corridors import TEST_GCS_FILE_PATH
-
+from utilities import GCS_FILE_PATH
+from update_vars import analysis_date
 
 metro_street_running =[
     '141012', '13805', '5397', '13803',
@@ -32,7 +31,6 @@ van_ness_ids = [
 
 
 if __name__ == "__main__":
-    analysis_date = rail_ferry_brt.analysis_date
     # Rail
     rail_stops = rail_ferry_brt.grab_rail_data(analysis_date)
 
@@ -64,5 +62,5 @@ if __name__ == "__main__":
     
     # Export to GCS
     utils.geoparquet_gcs_export(rail_brt_ferry, 
-                                f'{TEST_GCS_FILE_PATH}', 
+                                GCS_FILE_PATH, 
                                 'rail_brt_ferry')

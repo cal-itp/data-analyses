@@ -4,14 +4,14 @@ and get it ready to be combined with other bus-related points.
 
 From combine_and_visualize.ipynb
 """
-import dask_geopandas
+import dask_geopandas as dg
 from utilities import catalog_filepath
 
 COMPILED_RAIL_BRT_FERRY = catalog_filepath("rail_brt_ferry_initial")
    
 
 def get_rail_ferry_brt_extract():
-    df = dask_geopandas.read_parquet(COMPILED_RAIL_BRT_FERRY)
+    df = dg.read_parquet(COMPILED_RAIL_BRT_FERRY)
 
     keep_cols = ["calitp_itp_id", "stop_id", 
                 "route_type", "geometry"]

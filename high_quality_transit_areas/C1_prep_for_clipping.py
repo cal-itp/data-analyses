@@ -8,14 +8,13 @@ This takes 15 min to run.
 From combine_and_visualize.ipynb
 """
 import dask.dataframe as dd
-import dask_geopandas
+import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import pandas as pd
 
-from B1_bus_corridors import TEST_GCS_FILE_PATH
 from shared_utils import utils
-from utilities import catalog_filepath
+from utilities import catalog_filepath, GCS_FILE_PATH
 
 segment_cols = ["calitp_itp_id", "hqta_segment_id", "route_direction"]
 
@@ -26,8 +25,13 @@ intersect_segment_cols = ["intersect_calitp_itp_id",
 # Input files
 ALL_BUS = catalog_filepath("all_bus")
 
-def prep_bus_corridors():
-    bus_hqtc = dask_geopandas.read_parquet(ALL_BUS)
+def prep_bus_corridors() -> dg.GeoDataFrame:
+    """
+    Import all hqta segments with hq_transit_corr tagged.
+    
+    Only keep if hq_transit_corr == True
+    """
+    bus_hqtc = dg.read_parquet(ALL_BUS)
     
     bus_hqtc2 = bus_hqtc[bus_hqtc.hq_transit_corr==True].reset_index(drop=True)
     bus_hqtc2 = bus_hqtc2.assign(
@@ -38,16 +42,25 @@ def prep_bus_corridors():
     return bus_hqtc2
 
 
-# Spatial join on route_id 
-def sjoin_operator_not_operator(operator, not_operator):
+def sjoin_operator_not_operator(operator: dg.GeoDataFrame, 
+                                not_operator: dg.GeoDataFrame
+                               ) -> dd.DataFrame:
+    """
+    Spatial join of the in group vs the out group. 
+    This could be the operator vs other operators, 
+    or a route vs other routes.
+    
+    Create a crosswalk / pairwise table showing these links.
+    
+    Compile all of them, because clipping is computationally expensive,
+    so we want to do it on fewer rows. 
+    
+    """
     # Let's keep the pair of that intersection and store it
     # Need to rename not_operator columns so it's easier to distinguish
     not_operator = rename_cols(not_operator, with_intersect=True)    
     
-    # Do a spatial join first to see what rows should be included
-    # Compile all of them, because clipping is computationally expensive,
-    # so we want to do it on fewer rows
-    s1 = dask_geopandas.sjoin(
+    s1 = dg.sjoin(
         operator, 
         not_operator,
         predicate="intersects"
@@ -63,7 +76,16 @@ def sjoin_operator_not_operator(operator, not_operator):
     return intersecting_segments
 
 
-def find_intersection_across_and_within(gdf, itp_id):
+def find_intersection_across_and_within(gdf: dg.GeoDataFrame, 
+                                        itp_id: int) -> dg.GeoDataFrame:
+    """
+    Loop across to find intersections BETWEEN operators 
+    (this itp_id vs all other ones) 
+    and WITHIN operator (one route vs all other routes)
+    
+    Return a dask GeoDataFrame of all the segments for an operator
+    that should go through clipping process.
+    """
     keep_cols = segment_cols + ["geometry"]
     
     # Create subset dfs for the "in_group"
@@ -110,7 +132,15 @@ def find_intersection_across_and_within(gdf, itp_id):
 
 
 
-def compile_pairwise_intersections(corridors, ITP_ID_LIST):
+def compile_pairwise_intersections(corridors: dg.GeoDataFrame, 
+                                   ITP_ID_LIST: list) -> dd.DataFrame:
+    """
+    Loop through each operator to find the intersections 
+    across all operators and within the same operator.
+    
+    Compile all these pairwise intersections into a giant table
+    across all operators.
+    """
     start = dt.datetime.now()
 
     # Having trouble initializing empty dask geodataframe
@@ -144,13 +174,21 @@ def compile_pairwise_intersections(corridors, ITP_ID_LIST):
     return intersecting_segments
 
 
-# Get pairwise one into just unique df
-def unique_intersecting_segments(df):
+def unique_intersecting_segments(df: dd.DataFrame) -> dd.DataFrame:
+    """
+    From the pairwise df, return one without duplicates.
+    
+    If Route A intersects with Route B, it will also have a
+    corresponding entry of Route B intersecting with Route A.
+    In this case, Route A and Route B each appear twice.
+    
+    Returns a dd.DataFrame where Route A, Route B would show up uniquely.
+    """
     part1 = df[segment_cols].drop_duplicates()
     part2 = (df[intersect_segment_cols]
              .drop_duplicates()
             )
-    
+    # Rename to have the same column names as part1
     part2 = rename_cols(part2, with_intersect=False)
     
     unique = (dd.multi.concat([part1, part2], axis=0)
@@ -161,7 +199,13 @@ def unique_intersecting_segments(df):
     return unique
 
 
-def subset_corridors(gdf, intersecting_shapes):    
+def subset_corridors(gdf: dg.GeoDataFrame, 
+                     intersecting_shapes: dd.DataFrame
+                    ) -> dg.GeoDataFrame: 
+    """
+    Take all the hq_transit_corr segments and 
+    only keep the ones that have a pairwise intersection entry.
+    """
     shapes_needed = unique_intersecting_segments(intersecting_shapes)
     
     gdf2 = dd.merge(gdf, shapes_needed, 
@@ -172,7 +216,13 @@ def subset_corridors(gdf, intersecting_shapes):
     return gdf2
 
 
-def rename_cols(df, with_intersect=False):
+def rename_cols(df: dd.DataFrame | pd.DataFrame, 
+                with_intersect: bool = False
+               ) -> dd.DataFrame | pd.DataFrame:
+    """
+    Rename the set of columns used repeatedly in script
+    and add or remove prefix.
+    """
     if with_intersect is True:
         df.columns = [f'intersect_{col}' if col != 'geometry' 
                       else col for col in df.columns]
@@ -213,10 +263,10 @@ if __name__=="__main__":
     time2 = dt.datetime.now()
     print(f"compute for pairwise/subset_corridors: {time2 - time1}")
     
-    pairwise.to_parquet(f"{TEST_GCS_FILE_PATH}intermediate/pairwise.parquet")
+    pairwise.to_parquet(f"{GCS_FILE_PATH}intermediate/pairwise.parquet")
     
     utils.geoparquet_gcs_export(subset_corridors,
-                        f'{TEST_GCS_FILE_PATH}intermediate/',
+                        f'{GCS_FILE_PATH}intermediate/',
                         'subset_corridors'
                        )
     
