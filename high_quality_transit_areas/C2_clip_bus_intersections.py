@@ -2,7 +2,7 @@
 Do clipping to find where bus corridors intersect.
 
 With hqta_segment_id clipping, but looping across route_id, 
-it takes 51 min to run.
+it takes 42 min to run.
 LA Metro takes 3.5 min to run.
 
 With route_id clipping, takes 1 hr 52 min to run: 
@@ -12,17 +12,16 @@ Big Blue Bus takes 10 min to run.
 From combine_and_visualize.ipynb
 """
 import dask.dataframe as dd
-import dask_geopandas
+import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import glob
 import os
 import pandas as pd
 
-from B1_bus_corridors import TEST_GCS_FILE_PATH
 import C1_prep_for_clipping as prep_clip
 from shared_utils import utils
-from utilities import catalog_filepath
+from utilities import catalog_filepath, GCS_FILE_PATH
 
 segment_cols = ["calitp_itp_id", "hqta_segment_id"]
 
@@ -33,7 +32,16 @@ PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
 SUBSET_CORRIDORS = catalog_filepath("subset_corridors")
 
 
-def get_operator_intersections_as_clipping_mask(corridors_df, intersecting_pairs, itp_id):
+def get_operator_intersections_as_clipping_mask(
+    corridors_df: dg.GeoDataFrame, intersecting_pairs: dd.DataFrame, 
+    itp_id: int) -> gpd.GeoDataFrame:
+    """
+    For an operator, look in the pairwise table and find the intersections.
+    Attach the line geom back on, which is needed for clipping.
+    
+    Return a gpd.GeoDataFrame 
+    The clipping mask can be gpd.GeoDataFrame, cannot be dg.GeoDataFrame
+    """
     intersecting_pairs = (intersecting_pairs[
         intersecting_pairs.calitp_itp_id == itp_id]
         [intersect_segment_cols]
@@ -57,7 +65,14 @@ def get_operator_intersections_as_clipping_mask(corridors_df, intersecting_pairs
     return operator_pairs_with_geom.compute()
     
     
-def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
+def clip_by_itp_id(corridors_df: dg.GeoDataFrame, 
+                   intersecting_pairs: dd.DataFrame, 
+                   itp_id: int) -> dg.GeoDataFrame:
+    """
+    Do the clipping for each operator.
+    Loop through by route_id (more aggregated than hqta_segments, but not as
+    aggregated as entire operator, which could be really slow to do the clipping).
+    """
     start = dt.datetime.now()
     
     operator = corridors_df[corridors_df.calitp_itp_id == itp_id]
@@ -74,7 +89,7 @@ def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
     intersections = operator.head(0)
     
     for i in operator_segments:
-        clipped_segment = dask_geopandas.clip(
+        clipped_segment = dg.clip(
             operator[operator.route_id == i],
             corresponding_pairs[corresponding_pairs.route_id != i], 
             keep_geom_type = True
@@ -83,7 +98,6 @@ def clip_by_itp_id(corridors_df, intersecting_pairs, itp_id):
         intersections = dd.multi.concat([intersections, 
                                          clipped_segment], axis=0)
                             
-    
     end = dt.datetime.now()
     print(f"clipping for {itp_id}: {end-start}")
     
@@ -101,7 +115,7 @@ if __name__ == "__main__":
     start = dt.datetime.now()
         
     intersecting_pairs = dd.read_parquet(PAIRWISE_FILE)
-    corridors = dask_geopandas.read_parquet(SUBSET_CORRIDORS)
+    corridors = dg.read_parquet(SUBSET_CORRIDORS)
     
     # Use the subsetted down list of ITP IDS
     VALID_ITP_IDS = list(corridors.calitp_itp_id.unique())
@@ -113,8 +127,9 @@ if __name__ == "__main__":
 
     for itp_id in VALID_ITP_IDS:
         intersection = clip_by_itp_id(corridors, intersecting_pairs, itp_id)
-                
-        if len(intersection) > 0:
+        
+        # If there are no clips, then skip the concatenation
+        if len(intersection.index) > 0:
             intersection2 = intersection.compute()
             intersection2.to_parquet(f"./data/intersections/clipped_{itp_id}.parquet")
             
@@ -132,9 +147,8 @@ if __name__ == "__main__":
     print(f"compute for full clipped df: {time2 - time1}")
     
     utils.geoparquet_gcs_export(clipped2,
-                        f'{TEST_GCS_FILE_PATH}',
-                        'all_clipped'
-                       )    
+                                GCS_FILE_PATH,
+                                'all_clipped')    
     
     # Delete the temporary clipped files for each operator
     delete_local_clipped_files()
