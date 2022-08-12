@@ -96,7 +96,7 @@ def get_pct_ran_df(itp_id, list_of_dates, gtfs_daily, rt):
     return pd.DataFrame(pcts)
 
 
-def by_date(df, sum1_sched, sum2_rt):
+def agg_by_date(df, sum1_sched, sum2_rt):
     agg_df = (df
      >>group_by(_.calitp_itp_id,
             _.calitp_url_number,
@@ -105,6 +105,6 @@ def by_date(df, sum1_sched, sum2_rt):
            _.month)
      >>summarize(total_num_sched = (_[sum1_sched].sum()),
              total_num_rt = (_[sum2_rt].sum()))
-     >>mutate(pct_ran = (_.total_num_rt)/(_.total_num_sched))
+     >>mutate(pct_w_rt = (_.total_num_rt)/(_.total_num_sched))
             )
     return agg_df
