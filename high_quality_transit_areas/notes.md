@@ -13,3 +13,7 @@
 
 # Organization
 * Clean up all the scripts, retire old functions, move `dask_utils` into `utilities`? 
+
+# Logs
+* Create logs to check that certain things run successfully with INFO
+* Make sure hitting BigQuery query limit shows an error (it runs successfully in a script)

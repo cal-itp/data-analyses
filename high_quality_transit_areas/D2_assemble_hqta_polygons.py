@@ -56,6 +56,8 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     
     hqta_polygons = (dd.multi.concat([corridors, stops], axis=0)
                      .to_crs(geography_utils.WGS84)
+                     # Make sure dtype is still int after concat
+                     .astype({"calitp_itp_id_primary": int})
                     ).compute()
     
     return hqta_polygons
