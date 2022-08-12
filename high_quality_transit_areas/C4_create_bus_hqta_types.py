@@ -52,7 +52,7 @@ def query_all_stops(analysis_date: dt.date) -> gpd.GeoDataFrame:
         stop_cols = keep_stop_cols,
         get_df = True,
         crs = geography_utils.CA_NAD83Albers,
-        custom_filtering = {}
+        custom_filtering = None
     )
     
     return stops
@@ -137,7 +137,7 @@ def create_major_stop_bus(all_stops: gpd.GeoDataFrame,
     major_stops = only_major_bus_stops(all_stops, bus_intersections)
 
     major_bus_stops_in_intersections = (
-        dask_geopandas.sjoin(
+        dg.sjoin(
             major_stops,
             bus_intersections[["calitp_itp_id", "geometry"]],
             how = "inner",

@@ -23,9 +23,12 @@ STOPS_IN_CORRIDOR_FILE = utilities.catalog_filepath("stops_in_hq_corr")
     
 def get_agency_names() -> pd.DataFrame:
     names = portfolio_utils.add_agency_name(analysis_date)
-    names = names.rename(columns = {
-        "calitp_itp_id": "calitp_itp_id_primary", 
-        "calitp_agency_name": "agency_name_primary"})
+    
+    names = (names.astype({"calitp_itp_id": int})
+             .rename(columns = {
+                 "calitp_itp_id": "calitp_itp_id_primary", 
+                 "calitp_agency_name": "agency_name_primary"})
+            )
     
     return names
 
@@ -90,11 +93,12 @@ if __name__=="__main__":
     stops_in_corridor = dg.read_parquet(STOPS_IN_CORRIDOR_FILE)
     
     # Combine all the points data
-    hqta_points_combined = dd.multi.concat([major_stop_bus,
+    hqta_points_combined = (dd.multi.concat([major_stop_bus,
                                             stops_in_corridor,
                                             rail_ferry_brt,
                                            ], axis=0)
-    
+                            .astype({"calitp_itp_id_primary": int})
+                           )
     
     time1 = dt.datetime.now()
     print(f"combined points: {time1 - start}")
