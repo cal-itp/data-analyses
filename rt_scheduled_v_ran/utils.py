@@ -148,3 +148,27 @@ def groupby_twocol(df, groupbycol1, groupbycol2, aggcol, timeframe):
     elif timeframe == "":
         grouped2 = df>>group_by(_[groupbycol, _[groupbycol2]])>>summarize(avg = _[aggcol].mean())
         return grouped2
+    
+def labeling(word):
+    # Add specific use cases where it's not just first letter capitalized
+    LABEL_DICT = {
+        "dist": "District",
+        "nunique": "Number of Unique",
+        "n":"Count",
+        "pct_w_vp": "Percent of Scheduled Trips with Vehicle Postions",
+        "avg_pct_w_vp":"Average Percent of Scheduled Trips with Vehicle Positions",
+        "primary_agency_name": "Agency",
+        "avg":"Average"
+    }
+
+    if (word == "mpo") or (word == "rtpa"):
+        word = word.upper()
+    elif word in LABEL_DICT.keys():
+        word = LABEL_DICT[word]
+    else:
+        word = word.replace("n_", "Number of ").title()
+        word = word.replace("unique_", "Number of Unique ").title()
+        word = word.replace("_", " ").title()
+        word = word.title()
+
+    return word
