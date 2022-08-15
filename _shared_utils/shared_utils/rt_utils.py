@@ -2,6 +2,7 @@ import datetime as dt
 import os
 import re
 import time
+from pathlib import Path
 
 import branca
 import folium
@@ -11,9 +12,10 @@ import numpy as np
 import pandas as pd
 import shapely
 from calitp import query_sql
-from calitp.tables import tbl
+
+# from calitp.tables import tbl
 from numba import jit
-from shared_utils import geography_utils, map_utils, utils
+from shared_utils import geography_utils, gtfs_utils, map_utils, utils
 from siuba import *
 
 # from zoneinfo import ZoneInfo
@@ -29,6 +31,7 @@ GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/rt_delay"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
+EXPORT_PATH = f"{GCS_FILE_PATH}cached_views/"
 
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 
@@ -46,18 +49,26 @@ HOUR_MIN_SEC_FMT = (
 FULL_DATE_FMT = "%Y-%m-%d"  # 2022-06-01 for 6/1/22
 
 
-def convert_ts(ts):
+def convert_ts(ts: int) -> dt.datetime:
     pacific_dt = dt.datetime.fromtimestamp(ts)
     return pacific_dt
 
 
-def reversed_colormap(existing):
+def reversed_colormap(existing: branca.colormap.ColorMap) -> branca.colormap.ColorMap:
     return branca.colormap.LinearColormap(
         colors=list(reversed(existing.colors)), vmin=existing.vmin, vmax=existing.vmax
     )
 
 
-def primary_cardinal_direction(origin, destination):
+def primary_cardinal_direction(origin, destination) -> str:
+    """
+    origin: shapely.geometry.Point
+    destination: shapely.geometry.Point
+
+    Takes point geometry and returns the primary cardinal direction
+    (north, south, east, west). To use, first grab the origin
+    and destination of a line geometry.
+    """
     distance_east = destination.x - origin.x
     distance_north = destination.y - origin.y
 
@@ -73,38 +84,48 @@ def primary_cardinal_direction(origin, destination):
             return "Southbound"
 
 
-def show_full_df(df):
+def show_full_df(df: pd.DataFrame):
     with pd.option_context("display.max_rows", None):
         return display(df)
 
 
-def fix_arrival_time(gtfs_timestring):
-    """Reformats a GTFS timestamp (which allows the hour to exceed 24 to mark service day continuity)
+def fix_arrival_time(gtfs_timestring: str) -> tuple[str, int]:
+    """Reformats a GTFS timestamp (which allows the hour to exceed
+    24 to mark service day continuity)
     to standard 24-hour time.
     """
     split = gtfs_timestring.split(":")
     hour = int(split[0])
     extra_day = 0
+
     if hour >= 24:
         extra_day = 1
         split[0] = str(hour - 24)
         corrected = (":").join(split)
         return corrected.strip(), extra_day
+
     else:
         return gtfs_timestring.strip(), extra_day
 
 
-def gtfs_time_to_dt(df):
+def gtfs_time_to_dt(df: pd.DataFrame) -> pd.DataFrame:
     date = df.service_date
+
     timestring, extra_day = fix_arrival_time(df.arrival_time)
+
     df["arrival_dt"] = dt.datetime.combine(
         date + dt.timedelta(days=extra_day),
         dt.datetime.strptime(timestring, HOUR_MIN_SEC_FMT).time(),
     )
+
     return df
 
 
-def check_cached(filename, subfolder="cached_views/"):
+def check_cached(filename: str, subfolder: str | Path = "cached_views/") -> str | Path:
+    """
+    Check GCS bucket to see if a file already is there.
+    Returns the path, if it exists.
+    """
     path = f"{GCS_FILE_PATH}{subfolder}{filename}"
     if fs.exists(path):
         return path
@@ -112,15 +133,32 @@ def check_cached(filename, subfolder="cached_views/"):
         return None
 
 
-def get_vehicle_positions(itp_id, analysis_date):
+def trips_cached(itp_id: int, date_str: str) -> pd.DataFrame:
+    """
+    Check for the trips file for that operator on selected date.
+    Use in all the queries that can take a trips pd.DataFrame.
+
+    If not, return None, and a fresh query can be run.
+    """
+    trips_cached = check_cached(f"trips_{itp_id}_{date_str}.parquet")
+
+    if trips_cached:
+        return pd.read_parquet(trips_cached)
+    else:
+        return None
+
+
+def get_vehicle_positions(itp_id: int, analysis_date: dt.date) -> pd.DataFrame:
     """
     itp_id: an itp_id (string or integer)
     analysis_date: datetime.date
 
-    Interim function for getting complete vehicle positions data for a single operator on a single date of interest.
+    Interim function for getting complete vehicle positions data for a
+    single operator on a single date of interest.
     To be replaced as RT views are implemented...
 
-    Currently drops positions for day after analysis date after 2AM, temporary fix to balance capturing trips crossing
+    Currently drops positions for day after analysis date after 2AM,
+    temporary fix to balance capturing trips crossing
     midnight with avoiding duplicates...
     """
 
@@ -162,60 +200,48 @@ def get_vehicle_positions(itp_id, analysis_date):
         # if not dt.datetime.combine(end) < df.vehicle_timestamp.max():
         #     warnings.warn('rt data ends early on analysis date')
 
-        df.to_parquet(f"{GCS_FILE_PATH}cached_views/{filename}")
+        df.to_parquet(f"{EXPORT_PATH}{filename}")
         return df
 
 
-def get_routes(itp_id, analysis_date):
-    routes_on_date = (
-        tbl.views.gtfs_schedule_fact_daily_feed_routes()
-        >> filter(_.date == analysis_date)
-        >> filter(
-            _.calitp_extracted_at <= analysis_date, _.calitp_deleted_at >= analysis_date
-        )
+def get_routes(itp_id: int, analysis_date: dt.date):
+    """
+    Grab routes running for operator on selected date.
+
+    Returns siuba.sql.verbs.LazyTbl.
+    """
+    keep_route_cols = [
+        "calitp_itp_id",
+        "route_id",
+        "route_short_name",
+        "route_long_name",
+        "route_desc",
+        "route_type",
+    ]
+
+    routes = gtfs_utils.get_route_info(
+        selected_date=analysis_date,
+        itp_id_list=[itp_id],
+        route_cols=keep_route_cols,
+        get_df=False,
     )
 
-    operator_routes = tbl.views.gtfs_schedule_dim_routes() >> filter(
-        _.calitp_itp_id == itp_id
-    )
-    routes_date_joined = (
-        routes_on_date
-        >> inner_join(
-            _,
-            (
-                operator_routes
-                >> select(
-                    _.calitp_itp_id,
-                    _.route_id,
-                    _.route_key,
-                    _.route_short_name,
-                    _.route_long_name,
-                    _.route_desc,
-                    _.route_type,
-                )
-            ),
-            on="route_key",
-        )
-        >> distinct(
-            _.calitp_itp_id,
-            _.route_id,
-            _.route_short_name,
-            _.route_long_name,
-            _.route_desc,
-            _.route_type,
-        )
-        # >> collect()
-    )
-    return routes_date_joined
+    return routes
 
 
-def get_trips(itp_id, analysis_date, force_clear=False, route_types=None):
+def get_trips(
+    itp_id: int,
+    analysis_date: dt.date,
+    force_clear: bool = False,
+    route_types: list = None,
+) -> pd.DataFrame:
     """
     itp_id: an itp_id (string or integer)
     analysis_date: datetime.date
     route types: (optional) filter for certain GTFS route types
 
-    Interim function for getting complete trips data for a single operator on a single date of interest.
+    Interim function for getting complete trips data for a single operator
+    on a single date of interest.
     To be replaced as RT views are implemented...
 
     Updated to include route_short_name from routes
@@ -223,7 +249,9 @@ def get_trips(itp_id, analysis_date, force_clear=False, route_types=None):
 
     date_str = analysis_date.strftime(FULL_DATE_FMT)
     filename = f"trips_{itp_id}_{date_str}.parquet"
+
     path = check_cached(filename)
+
     if path and not force_clear:
         print("found parquet")
         cached = pd.read_parquet(path)
@@ -236,56 +264,69 @@ def get_trips(itp_id, analysis_date, force_clear=False, route_types=None):
             )
     else:
         print("getting trips...")
-        trips = (
-            tbl.views.gtfs_schedule_fact_daily_trips()
-            >> filter(
-                _.calitp_extracted_at <= analysis_date,
-                _.calitp_deleted_at >= analysis_date,
-            )
-            >> filter(_.calitp_itp_id == itp_id)
-            >> filter(_.service_date == analysis_date)
-            >> filter(_.is_in_service == True)
-            >> select(_.trip_key, _.service_date)
-            >> inner_join(_, tbl.views.gtfs_schedule_dim_trips(), on="trip_key")
-            >> select(
-                _.calitp_itp_id,
-                _.calitp_url_number,
-                _.service_date,
-                _.trip_key,
-                _.trip_id,
-                _.route_id,
-                _.direction_id,
-                _.shape_id,
-                _.calitp_extracted_at,
-                _.calitp_deleted_at,
-            )
-            >> collect()
-            >> distinct(_.trip_id, _keep_all=True)
-            >> inner_join(
-                _,
-                get_routes(itp_id, analysis_date) >> collect(),
-                on=["calitp_itp_id", "route_id"],
-            )
+
+        keep_trip_cols = [
+            "calitp_itp_id",
+            "calitp_url_number",
+            "service_date",
+            "trip_key",
+            "trip_id",
+            "route_id",
+            "direction_id",
+            "shape_id",
+            "calitp_extracted_at",
+            "calitp_deleted_at",
+        ]
+
+        trips = gtfs_utils.get_trips(
+            selected_date=analysis_date,
+            itp_id_list=[itp_id],
+            trip_cols=keep_trip_cols,
+            get_df=False,
         )
+
+        # Grab the get_routes() function defined above
+        # which already subsets to what we want, and returns a LazyTbl
+        routes = get_routes(
+            selected_date=analysis_date,
+            itp_id_list=[itp_id],
+        )
+
+        # Keep both as LazyTbl to do inner join
+        trips = (
+            trips >> inner_join(_, routes, on=["calitp_itp_id", "route_id"])
+        ) >> collect()
+
+        # Drop duplicates (not able to drop when querying trips table
+        # without forcing a collect()
+        trips = trips.drop_duplicates(subset="trip_id").reset_index(drop=True)
+
         if not path or force_clear:
-            trips.to_parquet(f"{GCS_FILE_PATH}cached_views/{filename}")
+            trips.to_parquet(f"{EXPORT_PATH}{filename}")
+
     if route_types:
         print(f"filtering to GTFS route types {route_types}")
         trips = trips >> filter(_.route_type.isin(route_types))
+
     return trips
 
 
-def get_stop_times(itp_id, analysis_date, force_clear=False):
+def get_stop_times(
+    itp_id: int, analysis_date: dt.date, force_clear: bool = False
+) -> pd.DataFrame:
     """
-        itp_id: an itp_id (string or integer)
+    itp_id: an itp_id (string or integer)
     analysis_date: datetime.date
 
-    Interim function for getting complete stop times data for a single operator on a single date of interest.
+    Interim function for getting complete stop times data for a single operator
+    on a single date of interest.
     To be replaced as RT views are implemented...
     """
     date_str = analysis_date.strftime(FULL_DATE_FMT)
     filename = f"st_{itp_id}_{date_str}.parquet"
+
     path = check_cached(filename)
+
     if path and not force_clear:
         print("found parquet")
         cached = pd.read_parquet(path)
@@ -293,41 +334,26 @@ def get_stop_times(itp_id, analysis_date, force_clear=False):
             return cached
         else:
             print("cached parquet empty, will try a fresh query")
-    trips_query = (
-        tbl.views.gtfs_schedule_fact_daily_trips()
-        >> filter(
-            _.calitp_extracted_at <= analysis_date, _.calitp_deleted_at >= analysis_date
-        )
-        >> filter(_.calitp_itp_id == itp_id)
-        >> filter(_.service_date == analysis_date)
-        >> filter(_.is_in_service == True)
-        >> select(_.trip_key, _.service_date)
+
+    trip_df_setting = trips_cached(itp_id, date_str)
+
+    st = gtfs_utils.get_stop_times(
+        selected_date=analysis_date,
+        itp_id_list=[itp_id],
+        stop_time_cols=None,
+        get_df=True,  # return pd.DataFrame in the end
+        trip_df=trip_df_setting,
+        departure_hours=None,  # no filtering, return all departure hours
     )
-    trips_ix_query = (
-        trips_query
-        >> inner_join(_, tbl.views.gtfs_schedule_index_feed_trip_stops(), on="trip_key")
-        >> select(-_.calitp_url_number, -_.calitp_extracted_at, -_.calitp_deleted_at)
-    )
-    st_query = (
-        tbl.views.gtfs_schedule_dim_stop_times()
-        >> filter(_.calitp_itp_id == itp_id)
-        >> select(-_.calitp_url_number)
-    )
-    st = (
-        trips_ix_query
-        >> inner_join(_, st_query, on="stop_time_key")
-        >> mutate(stop_sequence=_.stop_sequence.astype(int))  # in SQL!
-        >> collect()
-        >> distinct(_.stop_id, _.trip_id, _keep_all=True)
-        >> arrange(_.stop_sequence)
-    )
-    st.arrival_time = st.arrival_time.str.strip()
-    st.departure_time = st.departure_time.str.strip()
-    st.to_parquet(f"{GCS_FILE_PATH}cached_views/{filename}")
+
+    st.to_parquet(f"{EXPORT_PATH}{filename}")
+
     return st
 
 
-def get_stops(itp_id, analysis_date, force_clear=False):
+def get_stops(
+    itp_id: int, analysis_date: dt.date, force_clear: bool = False
+) -> gpd.GeoDataFrame:
     """
     itp_id: an itp_id (string or integer)
     analysis_date: datetime.date
@@ -337,7 +363,9 @@ def get_stops(itp_id, analysis_date, force_clear=False):
     """
     date_str = analysis_date.strftime(FULL_DATE_FMT)
     filename = f"stops_{itp_id}_{date_str}.parquet"
+
     path = check_cached(filename)
+
     if path and not force_clear:
         print("found parquet")
         cached = gpd.read_parquet(path)
@@ -345,50 +373,38 @@ def get_stops(itp_id, analysis_date, force_clear=False):
             return cached
         else:
             print("cached parquet empty, will try a fresh query")
-    trips_query = (
-        tbl.views.gtfs_schedule_fact_daily_trips()
-        >> filter(
-            _.calitp_extracted_at <= analysis_date, _.calitp_deleted_at >= analysis_date
-        )
-        >> filter(_.calitp_itp_id == itp_id)
-        >> filter(_.service_date == analysis_date)
-        >> filter(_.is_in_service == True)
-        >> select(_.trip_key, _.service_date)
-    )
-    trips_ix_query = (
-        trips_query
-        >> inner_join(_, tbl.views.gtfs_schedule_index_feed_trip_stops(), on="trip_key")
-        >> select(-_.calitp_url_number, -_.calitp_extracted_at, -_.calitp_deleted_at)
-    )
-    stops = (
-        tbl.views.gtfs_schedule_dim_stops()
-        >> filter(_.calitp_itp_id == itp_id)
-        >> distinct(
-            _.calitp_itp_id, _.stop_id, _.stop_lat, _.stop_lon, _.stop_name, _.stop_key
-        )
-        >> inner_join(_, trips_ix_query >> distinct(_.stop_key), on="stop_key")
-        >> collect()
-        >> distinct(
-            _.stop_id, _keep_all=True
-        )  # should be ok to drop duplicates, but must use stop_id for future joins...
-        >> select(-_.stop_key)
+
+    keep_stop_cols = [
+        "calitp_itp_id",
+        "stop_id",
+        "stop_lat",
+        "stop_lon",
+        "stop_name",
+        "stop_key",
+    ]
+
+    stops = gtfs_utils.get_stops(
+        selected_date=analysis_date,
+        itp_id_list=[itp_id],
+        stop_cols=keep_stop_cols,
+        get_df=True,
+        crs=geography_utils.CA_NAD83Albers,
     )
 
-    stops = gpd.GeoDataFrame(
-        stops,
-        geometry=gpd.points_from_xy(stops.stop_lon, stops.stop_lat),
-        crs="EPSG:4326",
-    ).to_crs(geography_utils.CA_NAD83Albers)
-    export_path = GCS_FILE_PATH + "cached_views/"
-    utils.geoparquet_gcs_export(stops, export_path, filename)
+    utils.geoparquet_gcs_export(stops, EXPORT_PATH, filename)
+
     return stops
 
 
-def get_routelines(itp_id, analysis_date, force_clear=False):
+def get_routelines(
+    itp_id: int, analysis_date: dt.date, force_clear: bool = False
+) -> gpd.GeoDataFrame:
 
     date_str = analysis_date.strftime(FULL_DATE_FMT)
     filename = f"routelines_{itp_id}_{date_str}.parquet"
+
     path = check_cached(filename)
+
     if path and not force_clear:
         print("found parquet")
         cached = gpd.read_parquet(path)
@@ -397,20 +413,23 @@ def get_routelines(itp_id, analysis_date, force_clear=False):
         else:
             print("cached parquet empty, will try a fresh query")
     else:
-        routelines = geography_utils.make_routes_gdf(
-            SELECTED_DATE=analysis_date,
-            CRS=geography_utils.CA_NAD83Albers,
-            ITP_ID_LIST=[itp_id],
+
+        trip_df_setting = trips_cached(itp_id, date_str)
+
+        routelines = gtfs_utils.get_route_shapes(
+            selected_date=analysis_date,
+            itp_id_list=[itp_id],
+            get_df=True,
+            crs=geography_utils.CA_NAD83Albers,
+            trip_df=trip_df_setting,
         )
-        routelines = (
-            routelines >> select(-_.pt_array) >> distinct(_.shape_id, _keep_all=True)
-        )
-        export_path = GCS_FILE_PATH + "cached_views/"
-        utils.geoparquet_gcs_export(routelines, export_path, filename)
+
+        utils.geoparquet_gcs_export(routelines, EXPORT_PATH, filename)
+
         return routelines
 
 
-def categorize_time_of_day(value):
+def categorize_time_of_day(value: int | dt.datetime) -> str:
     if isinstance(value, int):
         hour = value
     elif isinstance(value, dt.datetime):
@@ -444,8 +463,12 @@ def try_parallel(geometry):
         return geometry
 
 
-def arrowize_segment(line_geometry, arrow_distance=15, buffer_distance=20):
-    """Given a linestring segment from a gtfs shape, buffer and clip to show direction of progression"""
+def arrowize_segment(
+    line_geometry, arrow_distance: int = 15, buffer_distance: int = 20
+):
+    """Given a linestring segment from a gtfs shape,
+    buffer and clip to show direction of progression"""
+
     try:
         # segment = line_geometry.parallel_offset(25, 'right')
         segment = line_geometry.simplify(tolerance=5)
@@ -512,18 +535,22 @@ def layer_points(rt_interpolator):
         >> filter(_.meters_from_last < 0)
         >> select(*keep_cols)
     )
+
     initial_deduped = (
         rt_interpolator.position_gdf
         >> distinct(_.shape_meters, _keep_all=True)
         >> select(*keep_cols)
     )
+
     cleaned = rt_interpolator.cleaned_positions >> select(*keep_cols)
+
     popup_dict = {
         "shape_meters": "shape_meters",
         "progressed": "progressed",
         "secs_from_last": "secs_from_last",
         "meters_from_last": "meters_from_last",
     }
+
     layers_dict = {
         "initial backwards noise": {
             "df": initial_bk_noise,
@@ -547,6 +574,7 @@ def layer_points(rt_interpolator):
             "colorscale": branca.colormap.step.Greens_03,
         },
     }
+
     for i in range(rt_interpolator._position_cleaning_count):
         layers_dict[f"cleaned_{i}"] = {
             "df": (rt_interpolator.debug_dict[f"clean_{i}"] >> select(*keep_cols)),
@@ -567,7 +595,9 @@ def map_line(gdf):
     m = folium.Map(
         location=[centroid.y, centroid.x], zoom_start=13, tiles="cartodbpositron"
     )
+
     folium.GeoJson(gdf.to_json()).add_to(m)
+
     return m
 
 
@@ -578,6 +608,7 @@ def categorize_cleaning(rt_operator_day, interpolator_key):
         0
     ]
     cleaned = rt_interpolator.cleaned_positions.shape[0]
+
     return (interpolator_key, cleaned / raw, cleaned / same_loc_dropped)
 
 
