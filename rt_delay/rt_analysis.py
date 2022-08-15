@@ -8,6 +8,7 @@ import branca
 from siuba import *
 
 import pandas as pd
+import numpy as np
 import geopandas as gpd
 import shapely
 
@@ -344,6 +345,26 @@ class OperatorDayAnalysis:
             self.pbar.refresh()
 
             # TODO better checking for incomplete trips (either here or in interpolator...)
+            
+    def _add_km_segments(self, _delay):
+        ''' Experimental to break up long segments
+        '''
+        
+        _delay = _delay.set_index('shape_meters')
+        new_ix = np.arange(_delay.index.min(), _delay.index.max(), 1000)
+        first_shape_meters = (_delay >> filter(_.stop_sequence == _.stop_sequence.min())).index.to_numpy()[0]
+        new_ix = new_ix[new_ix > first_shape_meters]
+        new_df = pd.DataFrame(index=new_ix)
+        new_df.index.name = 'shape_meters'
+        appended = pd.concat([_delay, new_df])
+        appended.trip_id = appended.trip_id.fillna(method='ffill').fillna(method='bfill')
+        appended = appended >> arrange(_.shape_meters)
+        appended.stop_sequence = appended.stop_sequence.interpolate()
+        appended = appended.reset_index()
+        appended['actual_time'] = appended.apply(lambda x: 
+                    self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
+                    axis = 1)
+        return appended
     
     def _generate_stop_delay_view(self):
         ''' Creates a (filtered) view with delays for each trip at each stop
@@ -380,6 +401,13 @@ class OperatorDayAnalysis:
                 _delay['delay'] = _delay.actual_time - _delay.arrival_time
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
                 _delay['delay_seconds'] = _delay.delay.map(lambda x: x.seconds)
+                
+                # try:
+                _delay = self._add_km_segments(_delay)
+                # except:
+                #     print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
+                #     continue
+                
                 _delays = pd.concat((_delays, _delay))
                 self.debug_dict[f'{trip_id}_delay'] = _delay
                 # return
