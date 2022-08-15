@@ -266,7 +266,7 @@ class OperatorDayAnalysis:
                                                                 self.trips_positions_joined.vehicle_latitude),
                                     crs=WGS84).to_crs(CA_NAD83Albers)
         self.routelines = get_routelines(self.calitp_itp_id, self.analysis_date)
-        self.routelines = self.routelines.dropna() ## invalid geos are nones in new df...
+        self.routelines = self.routelines.dropna(subset=['geometry']) ## invalid geos are nones in new df...
         assert type(self.routelines) == type(gpd.GeoDataFrame()) and not self.routelines.empty, 'routelines must not be empty'
         self.trs = self.trips >> select(_.shape_id, _.trip_id)
         self.trs = self.trs >> inner_join(_, self.stop_times >> select(_.trip_id, _.stop_id), on = 'trip_id')
@@ -324,7 +324,7 @@ class OperatorDayAnalysis:
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
             # self.debug_dict[f'{trip_id}_trip'] = trip
             st_trip_joined = (trip
-                              >> inner_join(_, self.stop_times, on = ['calitp_itp_id', 'trip_id', 'service_date', 'trip_key'])
+                              >> inner_join(_, self.stop_times, on = ['calitp_itp_id', 'trip_id', 'trip_key'])
                               >> inner_join(_, self.stops, on = ['stop_id', 'calitp_itp_id'])
                              )
             st_trip_joined = gpd.GeoDataFrame(st_trip_joined, geometry=st_trip_joined.geometry, crs=CA_NAD83Albers)
