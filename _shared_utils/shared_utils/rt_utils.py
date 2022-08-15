@@ -288,7 +288,7 @@ def get_trips(
         # Grab the get_routes() function defined above
         # which already subsets to what we want, and returns a LazyTbl
         routes = get_routes(
-            itp_eid = itp_id,
+            itp_eid=itp_id,
             analysis_date=analysis_date,
         )
 
