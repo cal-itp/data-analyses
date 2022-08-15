@@ -151,7 +151,7 @@ def get_vehicle_positions(itp_id, analysis_date):
         df = df.dropna(subset=["vehicle_timestamp"])
         assert not df.empty, f"no vehicle positions data found for {date_str}"
         df.vehicle_timestamp = df.vehicle_timestamp.apply(convert_ts)
-        ## header timestamp not present in staging, add upstream if desired
+        # header timestamp not present in staging, add upstream if desired
         # df.header_timestamp = df.header_timestamp.apply(convert_ts)
         df = df >> filter(_.vehicle_timestamp > start, _.vehicle_timestamp < end)
 
