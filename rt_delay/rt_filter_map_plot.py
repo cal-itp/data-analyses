@@ -26,6 +26,7 @@ class RtFilterMapper:
     '''
     def __init__(self, rt_trips, stop_delay_view,
                  routelines, pbar = None):
+        self.debug_dict = {}
         self.pbar = pbar
         self.rt_trips = rt_trips
         self.calitp_itp_id = self.rt_trips.calitp_itp_id.iloc[0]
@@ -183,7 +184,7 @@ class RtFilterMapper:
                     continue
                 # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
                 stop_speeds = (this_shape
-                             >> group_by(_.trip_key)
+                             >> group_by(_.trip_id)
                              >> arrange(_.stop_sequence)
                              >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
                              >> mutate(last_loc = _.shape_meters.shift(1))
@@ -219,19 +220,21 @@ class RtFilterMapper:
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
                         )
-                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
+                    self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
                     assert not stop_speeds.empty, 'stop speeds gdf is empty!'
                 except Exception as e:
-                    # print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
-                    # print(e)
+                    print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
+                    print(e)
                     continue
-                stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
-                if stop_speeds.avg_mph.max() > 80:
-                    # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                    stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
+                ## TODO debug km segments
+                # stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
+                # if stop_speeds.avg_mph.max() > 80:
+                #     # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                #     stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
                 if stop_speeds._20p_mph.min() < 0:
                     # print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
+                
                 all_stop_speeds = pd.concat((all_stop_speeds, stop_speeds))
 
                 if type(self.pbar) != type(None):
@@ -256,6 +259,7 @@ class RtFilterMapper:
         # singletrip = gdf.trip_id.nunique() == 1 ## incompatible with current caching approach
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
         orig_rows = gdf.shape[0]
+        self.debug_dict['_show_gdf'] = gdf
         gdf['shape_miles'] = gdf.shape_meters / 1609
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_miles': 1,
                         'trips_per_hour': 1}) ##round for display
