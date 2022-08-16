@@ -60,13 +60,3 @@ if __name__ == "__main__":
         DATA_PATH = GCS_FILE_PATH, 
         FILE_NAME = f"routes_on_shn_{date_str}"
     )    
-    '''
-    # Export to GCS
-    files = [
-        f"parallel_or_intersecting_{date_str}", 
-        f"routes_on_shn_{date_str}"]
-    
-    for FILE_NAME in files:
-        fs.put(f"{DATA_PATH}{FILE_NAME}.parquet", 
-               f"{utils.GCS_FILE_PATH}{FILE_NAME}.parquet")
-    '''
