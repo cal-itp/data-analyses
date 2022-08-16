@@ -16,12 +16,10 @@ import pandas as pd
 import shared_utils
 import utils
 
-from pathlib import Path
-
 catalog = intake.open_catalog("*.yml")
 
-DATA_PATH = Path("./data/")
-IMG_PATH = Path("./img/")
+DATA_PATH = "./data/"
+IMG_PATH = "./img/"
 
 #--------------------------------------------------------#
 ### State Highway Network
@@ -219,7 +217,10 @@ def make_analysis_data(hwy_buffer_feet=
                                     pct_route_threshold, 
                                     pct_highway_threshold)
     
-    gdf2.to_parquet(f"{DATA_PATH}{FILE_NAME}.parquet")
+    if "gs://" in DATA_PATH:
+        shared_utils.utils.geoparquet_gcs_export(gdf2, DATA_PATH, FILE_NAME)
+    else:
+        gdf2.to_parquet(f"{DATA_PATH}{FILE_NAME}.parquet")
     
     # For map, need highway to be 250 ft buffer
     #highways = process_highways(buffer_feet=250)
