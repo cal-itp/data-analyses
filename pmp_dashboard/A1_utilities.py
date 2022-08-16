@@ -1,4 +1,3 @@
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 from calitp import *
@@ -27,7 +26,6 @@ Functions that can be used across sheets
 '''
 def cleaning_psoe_tpsoe(df, ps_or_oe: str):
 
-    
     """ 
     Cleaning the PSOE and TPSOE sheets
     prior to concating them by stripping columns of their prefixes   
@@ -102,7 +100,7 @@ def import_and_clean(
     df = df[~df.appr.isin(appropriations_to_filter)]
     
     # Change to the right data type
-    df[int_cols] = df[int_cols].astype("int64").fillna(0)
+    df[int_cols] = df[int_cols].astype("float64").fillna(0)
     """
     Create Columns
     """
@@ -111,11 +109,9 @@ def import_and_clean(
 
     # Create a variable that just captures one instance of the ap,
     # this is used in certain calculations for columns
-    ap_variable = df.iloc[0]["ap"]
-    
     df = df.assign(
-          ps_projection = (df["ps_exp"] / ap_variable) * 12,
-          oe_enc_plus_oe_exp_projection = (df["oe_enc"] + df["oe_exp"] / ap_variable * 12).astype("int64"),
+          ps_projection = (df["ps_exp"] / accounting_period) * 12,
+          oe_enc_plus_oe_exp_projection = (df["oe_enc"] + df["oe_exp"] / accounting_period * 12).astype("float64"),
           total_expenditure = (df["oe_enc"] + df["oe_exp"] + df["ps_exp"]),
           total_allocation = df["oe_alloc"] + df["ps_alloc"],
           )
@@ -148,7 +144,7 @@ def import_and_clean(
     )
     
     # Adding dataframe to an empty list called my_clean_dataframes
-    my_clean_dataframes.append(df)
+    # my_clean_dataframes.append(df)
     
     return df
 
@@ -322,20 +318,14 @@ timeline_right_order = [
     "ap",
 ]
 
-def create_timeline(my_clean_dataframes:list):
-    
-    # Stack all the dfs in my_clean_dataframes
-    c1 = pd.concat(my_clean_dataframes, sort = False)
-    
-    # Reset index
-    c1 = c1.reset_index(drop = True)
+def create_timeline(df):
     
     # Drop irrelevant col(s)
-    c1 = c1.drop(columns = 'year_expended_pace')
+    df = df.drop(columns = 'year_expended_pace')
     
     # Rearrange to the right order
-    c1 = c1[timeline_right_order]
-    return c1
+    df = df[timeline_right_order]
+    return df
 
 '''
 PSOE Timeline
@@ -422,20 +412,12 @@ def create_psoe_timeline(df, ps_list: list, oe_list: list):
 Final Script to 
 bring everything together
 """
-if __name__ == "__main__":
-    appropriations_unwanted = []
-    
-    df = import_and_clean(
-    "AP12 June.xls",
-    "Download",
-    appropriations_unwanted,
-    12)
-    
-    unwanted_timeline_appropriations = []
-    
-    title: 'testing'
-    
-    # def pmp_dashboard_sheets(df, unwanted_timeline_appropriations: str, title:str):
+def pmp_dashboard_sheets(
+    file_name: str,
+    name_of_sheet: str,
+    appropriations_to_filter: list,
+    accounting_period: int,
+    title:str):
    
     """Takes a cleaned data frame and returns
     the entire Excel workbook for publishing the PMP dashboard.
@@ -447,6 +429,7 @@ if __name__ == "__main__":
 
     """
     # Running scripts for each sheet
+    df = import_and_clean(file_name, name_of_sheet, appropriations_to_filter, accounting_period)
     fund_by_div = create_fund_by_division(df)
     tspoe =create_tpsoe(df, tpsoe_ps_list, tpsoe_oe_list)
     timeline = create_timeline(my_clean_dataframes)
@@ -461,7 +444,8 @@ if __name__ == "__main__":
     ]
     timeline = timeline.drop(index=unwanted.index)
     timeline = timeline.reset_index(drop=True)
-    """
+    """ 
+    
     # Change column names back without underscores & title case
     for df in [fund_by_div, tspoe, timeline, psoe]: 
         df.columns = (df.columns
@@ -470,11 +454,13 @@ if __name__ == "__main__":
                )
     # Save
     with pd.ExcelWriter(
-        f"{GCS_FILE_PATH}AP_test_cleaned_data.xlsx"
+        f"{GCS_FILE_PATH}AP_{title}.xlsx"
     ) as writer:
         fund_by_div.to_excel(writer, sheet_name="fund_by_div", index=False)
         tspoe.to_excel(writer, sheet_name="tspoe", index=False)
         timeline.to_excel(writer, sheet_name="timeline", index=False)
         psoe.to_excel(writer, sheet_name="psoe", index=False)
 
-    # return fund_by_div, tspoe, timeline, psoe
+# if __name__ == "__main__":
+    
+    
