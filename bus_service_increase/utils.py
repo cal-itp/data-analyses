@@ -7,7 +7,6 @@ import pandas as pd
 
 from calendar import THURSDAY, SATURDAY, SUNDAY
 from calitp.storage import get_fs
-from pathlib import Path
 
 fs = get_fs()
 
@@ -16,8 +15,8 @@ BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/bus_service_increase"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 
-DATA_PATH = Path("./data/")
-IMG_PATH = Path("./img/")
+DATA_PATH = "./data/"
+IMG_PATH = "./img/"
 
 def import_export(DATASET_NAME: str, OUTPUT_FILE_NAME: str, GCS:bool=True): 
     """
@@ -102,8 +101,8 @@ def fix_gtfs_time(gtfs_timestring: str) -> str:
 # https://stackoverflow.com/questions/25052980/use-pickle-to-save-dictionary-in-python
 def save_request_json(my_list: list, 
                       name: str, 
-                      DATA_PATH: Path = DATA_PATH, 
-                      GCS_FILE_PATH: Path = GCS_FILE_PATH):
+                      DATA_PATH: str = DATA_PATH, 
+                      GCS_FILE_PATH: str = GCS_FILE_PATH):
     """
     Input a json response that comes back as a list.
     Write it to GCS bucket
@@ -124,8 +123,8 @@ def save_request_json(my_list: list,
     
     
 def open_request_json(name: str, 
-                      DATA_PATH: Path = DATA_PATH, 
-                      GCS_FILE_PATH: Path = GCS_FILE_PATH) -> dict:
+                      DATA_PATH: str = DATA_PATH, 
+                      GCS_FILE_PATH: str = GCS_FILE_PATH) -> dict:
     """
     Grab the json object from GCS and import it.
     
