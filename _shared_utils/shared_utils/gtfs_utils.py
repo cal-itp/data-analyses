@@ -4,13 +4,15 @@ GTFS utils.
 Queries to grab trips, stops, routes.
 """
 import datetime
+from typing import Literal
 
 import dask.dataframe as dd
+import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 import siuba  # need this to do type hint in functions
 from calitp.tables import tbl
-from shared_utils import geography_utils
+from shared_utils import geography_utils, rt_utils, utils
 from siuba import *
 
 GCS_PROJECT = "cal-itp-data-infra"
@@ -357,7 +359,7 @@ def get_trips(
 # ----------------------------------------------------------------#
 # Stop Times
 # ----------------------------------------------------------------#
-# views. gtfs_schedule_dim_stop_times + views.gtfs_schedule_index_feed_trip_stops + trips query
+# views.gtfs_schedule_dim_stop_times + views.gtfs_schedule_index_feed_trip_stops + trips query
 def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
     """
     Some fixing, transformation, aggregation with dask
@@ -508,3 +510,93 @@ def get_stop_times(
         stop_times_cleaned = stop_times_cleaned.compute()
 
     return stop_times_cleaned
+
+
+# ----------------------------------------------------------------#
+# Concatenate all stashed files in GCS
+# ----------------------------------------------------------------#
+# Moving forward, should use cached files whenever possible
+# especially for external-facing analysis
+# get the most use out of caching and create the same
+# "universe" of operators whenever we can
+
+
+def format_date(analysis_date: datetime.date | str) -> str:
+    """
+    Get date formatted correctly in all the queries
+    """
+    if isinstance(analysis_date, datetime.date):
+        return analysis_date.strftime(rt_utils.FULL_DATE_FMT)
+    elif isinstance(analysis_date, str):
+        return datetime.datetime.strptime(analysis_date, rt_utils.FULL_DATE_FMT).date()
+
+
+ALL_ITP_IDS = (
+    tbl.gtfs_schedule.agency() >> select(_.calitp_itp_id) >> distinct() >> collect()
+).calitp_itp_id.tolist()
+
+
+def all_routelines_or_stops_with_cached(
+    dataset: Literal["routelines", "stops"] = "routelines",
+    analysis_date: datetime.date | str = "2022-06-15",
+    itp_id_list: list = ALL_ITP_IDS,
+    export_path="gs://calitp-analytics-data/data-analyses/traffic_ops/",
+):
+    """
+    Use cached files whenever possible, instead of running fresh query.
+    Routelines and stops are geospatial, import and export with geopandas.
+    """
+
+    date_str = format_date(analysis_date)
+
+    # Set metadata
+    gdf = dg.read_parquet(
+        f"{rt_utils.EXPORT_PATH}{dataset}_182_{date_str}.parquet"
+    ).head(0)
+
+    for itp_id in sorted(itp_id_list):
+
+        filename = f"{dataset}_{itp_id}_{date_str}.parquet"
+        path = rt_utils.check_cached(filename)
+
+        if path:
+            operator = dg.read_parquet(path)
+            gdf = dd.multi.concat([gdf, operator], axis=0, ignore_index=True)
+
+    gdf = gdf.compute().reset_index(drop=True)
+
+    utils.geoparquet_gcs_export(gdf, export_path, f"{dataset}_{date_str}")
+
+
+def all_trips_or_stoptimes_with_cached(
+    dataset: Literal["trips", "st"] = "trips",
+    analysis_date: datetime.date | str = "2022-06-15",
+    itp_id_list: list = ALL_ITP_IDS,
+    export_path="gs://calitp-analytics-data/data-analyses/traffic_ops/",
+):
+    """
+    Use cached files whenever possible, instead of running fresh query.
+    Trips and stop times are tabular, import and export with pandas.
+
+    Unlikely that stop times will ever need to be concatenated?
+    """
+    date_str = format_date(analysis_date)
+
+    # Set metadata
+    df = pd.read_parquet(
+        f"{rt_utils.EXPORT_PATH}{dataset}_182_{date_str}.parquet"
+    ).head(0)
+    df = dd.from_pandas(df, npartitions=1)
+
+    for itp_id in sorted(itp_id_list):
+
+        filename = f"{dataset}_{itp_id}_{date_str}.parquet"
+        path = rt_utils.check_cached(filename)
+
+        if path:
+            operator = pd.read_parquet(path)
+            df = dd.multi.concat([df, operator], axis=0, ignore_index=True)
+
+    df = df.compute().reset_index(drop=True)
+
+    df.to_parquet(f"{export_path}{dataset}_{date_str}.parquet")
