@@ -1,10 +1,10 @@
 import base64
 import os
 import shutil
+from pathlib import Path
 
 import fsspec
 import geopandas as gpd
-import pandas as pd
 import requests
 from calitp.storage import get_fs
 
@@ -29,7 +29,9 @@ def geoparquet_gcs_export(gdf: gpd.GeoDataFrame, GCS_FILE_PATH: str, FILE_NAME: 
     os.remove(f"./{file_name_sanitized}.parquet")
 
 
-def download_geoparquet(GCS_FILE_PATH: str, FILE_NAME: str, save_locally: bool = False):
+def download_geoparquet(
+    GCS_FILE_PATH: str, FILE_NAME: str, save_locally: bool = False
+) -> gpd.GeoDataFrame:
     """
     Parameters:
     GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
@@ -50,7 +52,7 @@ def download_geoparquet(GCS_FILE_PATH: str, FILE_NAME: str, save_locally: bool =
 
 # Make zipped shapefile
 # https://github.com/CityOfLosAngeles/planning-entitlements/blob/master/notebooks/utils.py
-def make_shapefile(gdf, path):
+def make_shapefile(gdf: gpd.GeoDataFrame, path: str | Path) -> tuple[Path, str]:
     """
     Make a zipped shapefile and save locally
     Parameters
@@ -61,6 +63,9 @@ def make_shapefile(gdf, path):
                 "folder_name/census_tracts.zip"
 
     Remember: ESRI only takes 10 character column names!!
+
+    Returns a folder name (dirname) where the shapefile is stored and
+    a filename. Both are strings.
     """
     # Grab first element of path (can input filename.zip or filename)
     dirname = os.path.splitext(path)[0]
@@ -82,7 +87,7 @@ def make_shapefile(gdf, path):
     return dirname, shapefile_name
 
 
-def make_zipped_shapefile(gdf, path):
+def make_zipped_shapefile(gdf: gpd.GeoDataFrame, path: str | Path):
     """
     Make a zipped shapefile and save locally
     Parameters
