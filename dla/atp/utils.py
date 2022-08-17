@@ -13,7 +13,9 @@ def read_in_data():
     project_details = to_snakecase(pd.read_excel("gs://calitp-analytics-data/data-analyses/dla/atp/Project Details.xls"))
     
     df = pd.merge(main_details, project_details, how="outer", on=["project_app_id", "project_cycle"], indicator='matches')
-    columns_to_drop = ['a1_imp_agcy_contact','a1_imp_agcy_email','a1_imp_agcy_phone']
-    df = df.drop(['a1_imp_agcy_contact','a1_imp_agcy_email','a1_imp_agcy_phone'], inplace=True)
+    columns_to_drop = ['a1_imp_agcy_contact','a1_imp_agcy_email','a1_imp_agcy_phone',
+                      'a1_proj_partner_contact', 'a1_proj_partner_email', 'a1_proj_partner_phone']
+    df = df.drop(columns = columns_to_drop)
+    #inplace=True)
     return df
 
