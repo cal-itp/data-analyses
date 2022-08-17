@@ -121,10 +121,16 @@ def gtfs_time_to_dt(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def check_cached(filename: str, subfolder: str | Path = "cached_views/") -> str | Path:
+def check_cached(
+    filename: str,
+    GCS_FILE_PATH: str | Path = GCS_FILE_PATH,
+    subfolder: str | Path = "cached_views/",
+) -> str | Path:
     """
     Check GCS bucket to see if a file already is there.
     Returns the path, if it exists.
+
+    GCS_FILE_PATH: Defaults to gs://calitp-analytics-data/data-analyses/rt_delay/
     """
     path = f"{GCS_FILE_PATH}{subfolder}{filename}"
     if fs.exists(path):
