@@ -10,74 +10,142 @@ import pandas as pd
 import glob
 import os
 
-from shared_utils import geography_utils, portfolio_utils, gtfs_utils
+from siuba import *
+from typing import Literal
+
+from shared_utils import geography_utils, gtfs_utils, utils
 
 ANALYSIS_DATE = datetime.date(2022, 7, 13)
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 DATA_PATH = "./data/"
-    
-stop_cols = ["calitp_itp_id", "stop_id", 
-             "stop_name", "stop_code", 
-             "geometry"
-            ]
-
-trip_cols = ["calitp_itp_id", "route_id", "shape_id"]
 
 
-def grab_selected_date(selected_date: datetime.date | str) 
--> tuple[gpd.GeoDataFrame, pd.DataFrame, gpd.GeoDataFrame, pd.DataFrame]:
+def grab_selected_date(selected_date: 
+                       datetime.date | str) -> tuple[gpd.GeoDataFrame, 
+                                                     pd.DataFrame, 
+                                                     gpd.GeoDataFrame, 
+                                                     pd.DataFrame]:
     """
-    Return all the cached files for stops, trips, routes, and route_info
+    Create the cached files for stops, trips, routes, and route_info
     """
-    stops = gtfs_utils.all_routelines_or_stops_with_cached(
+    gtfs_utils.all_routelines_or_stops_with_cached(
         dataset = "stops",
         analysis_date = selected_date,
-    )[stop_cols]
+        export_path = GCS_FILE_PATH
+    )
     
-    trips = gtfs_utils.all_trips_or_stoptimes_with_cached(
+    gtfs_utils.all_trips_or_stoptimes_with_cached(
         dataset = "trips",
-        analysis_date = selected_date
-    )[trip_cols]
+        analysis_date = selected_date,
+        export_path = GCS_FILE_PATH
+    )
     
-    routes = gtfs_utils.all_routelines_or_stops_with_cached(
+    gtfs_utils.all_routelines_or_stops_with_cached(
         dataset = "routelines",
-        analysis_date = selected_date
-    ).to_crs(geography_utils.WGS84)
+        analysis_date = selected_date,
+        export_path = GCS_FILE_PATH
+    )
     
-    route_info = portfolio_utils.add_route_name(selected_date)
-    
-    return stops, trips, routes, route_info
-    
+    # stops, trips, and routes save directly to GCS already
 
-def create_local_parquets(selected_date: datetime.date):
+
+def grab_amtrak(selected_date: datetime.date | str
+               ) -> tuple[gpd.GeoDataFrame, pd.DataFrame, gpd.GeoDataFrame]:
     """
-    Save parquets locally while analysis is running
+    Amtrak (ITP_ID 13) is always excluded from queries for hqta and rt_delay
+    
+    Add back in now for our open data portal dataset
     """
-    time0 = datetime.now()
-    stops, trips, routes, route_info = grab_selected_date(selected_date)    
+    itp_id = 13
     
-    stops.to_parquet(f"{DATA_PATH}stops.parquet")
-    trips.to_parquet(f"{DATA_PATH}trips.parquet")
-    routes.to_parquet(f"{DATA_PATH}routes.parquet")
-    route_info.to_parquet(f"{DATA_PATH}route_info.parquet")
+    keep_stop_cols = [
+        'calitp_itp_id', 'stop_id', 'stop_name', 
+        'stop_lon', 'stop_lat', 'stop_key'
+    ]
     
-    time1 = datetime.now()
-    print(f"Part 1: Queries and create local parquets: {time1-time0}")
-            
-    print(f"Total execution time: {time1-time0}") 
+    amtrak_stops = gtfs_utils.get_stops(
+        selected_date = selected_date, 
+        itp_id_list = [itp_id],
+        stop_cols = keep_stop_cols,
+        get_df = True,
+        crs = geography_utils.CA_NAD83Albers, # this is the CRS used for rt_delay
+    )
     
+    keep_trip_cols = [
+        'calitp_itp_id', 'calitp_url_number', 'service_date', 'trip_key',
+        'trip_id', 'route_id', 'direction_id', 'shape_id',
+        'calitp_extracted_at', 'calitp_deleted_at', 
+    ]
     
-# Function to delete local parquets
-def delete_local_parquets():
-    # Find all local parquets
-    FILES = [f for f in glob.glob(f"{DATA_PATH}*.parquet")]
-    print(f"list of parquet files to delete: {FILES}")
+    amtrak_trips = gtfs_utils.get_trips(
+        selected_date = selected_date, 
+        itp_id_list = [itp_id],
+        trip_cols = keep_trip_cols,
+        get_df = False,
+    )
     
-    for file_name in FILES:
-        os.remove(f"{file_name}")
+    # Grab route_info, return LazyTbl, and merge with trips
+    keep_route_cols = [
+        'calitp_itp_id', 'route_id',
+        'route_short_name',
+        'route_long_name', 'route_desc', 'route_type'
+    ]
+
+    amtrak_route_info = gtfs_utils.get_route_info(
+        selected_date = selected_date,
+        itp_id_list = [itp_id],
+        route_cols = keep_route_cols,
+        get_df = False
+    )
+    
+    amtrak_trips = (amtrak_trips 
+         >> inner_join(_, amtrak_route_info, 
+                       on = ['calitp_itp_id', 'route_id'])
+         >> collect()
+        )
+    
+    amtrak_routelines = gtfs_utils.get_route_shapes(
+        selected_date = selected_date,
+        itp_id_list = [itp_id],
+        get_df = True,
+        crs = geography_utils.CA_NAD83Albers,
+        trip_df = amtrak_trips
+    )
+    
+    return amtrak_stops, amtrak_trips, amtrak_routelines
 
 
+def concatenate_amtrak(
+    selected_date: datetime.date | str = "2022-05-04", 
+    export_path: str = GCS_FILE_PATH):
+    """
+    Grab the cached file on selected date for trips, stops, routelines.
+    Concatenate Amtrak.
+    Save a new cached file in GCS.
+    """
+    date_str = gtfs_utils.format_date(selected_date)
+    
+    amtrak_stops, amtrak_trips, amtrak_routelines = grab_amtrak(selected_date)
+       
+    trips = pd.read_parquet(f"{export_path}trips_{date_str}.parquet")
+    trips_all = pd.concat([trips, amtrak_trips], axis=0, ignore_index=True)
+    trips_all.to_parquet(f"{export_path}trips.parquet")
+    
+    stops = gpd.read_parquet(f"{export_path}stops_{date_str}.parquet")
+    stops_all = pd.concat([stops, amtrak_stops], axis=0, ignore_index=True)
+    utils.geoparquet_gcs_export(stops_all, export_path, "stops")
+        
+    routelines = gpd.read_parquet(f"{export_path}routelines_{date_str}.parquet")        
+    routelines_all = pd.concat([routelines, amtrak_routelines], axis=0, ignore_index=True)
+    utils.geoparquet_gcs_export(routelines_all, export_path, "routelines")
+
+
+def create_local_parquets(selected_date):
+    grab_selected_date(selected_date) 
+    concatenate_amtrak(selected_date, GCS_FILE_PATH)
+
+        
 #----------------------------------------------------#        
 # Functions are used in 
 # `create_routes_data.py` and `create_stops_data.py`
@@ -90,7 +158,7 @@ RENAME_COLS = {
 }
 
 
-def attach_route_name(df: pd.DataFrame, route_info_df: pd.DataFrame) -> pd.DataFrame:
+def attach_route_name(df: dd.DataFrame, route_info_df: dd.DataFrame) -> dd.DataFrame:
     """
     Function to attach route_info using route_id
 

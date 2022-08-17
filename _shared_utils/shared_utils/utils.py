@@ -11,22 +11,7 @@ from calitp.storage import get_fs
 fs = get_fs()
 
 
-def import_csv_export_parquet(DATASET_NAME, OUTPUT_FILE_NAME, GCS_FILE_PATH, GCS=True):
-    """
-    DATASET_NAME: str. Name of csv dataset.
-    OUTPUT_FILE_NAME: str. Name of output parquet dataset.
-    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
-
-    """
-    df = pd.read_csv(f"{DATASET_NAME}.csv")
-
-    if GCS is True:
-        df.to_parquet(f"{GCS_FILE_PATH}{OUTPUT_FILE_NAME}.parquet")
-    else:
-        df.to_parquet(f"./{OUTPUT_FILE_NAME}.parquet")
-
-
-def geoparquet_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
+def geoparquet_gcs_export(gdf: gpd.GeoDataFrame, GCS_FILE_PATH: str, FILE_NAME: str):
     """
     Save geodataframe as parquet locally,
     then move to GCS bucket and delete local file.
@@ -44,7 +29,7 @@ def geoparquet_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     os.remove(f"./{file_name_sanitized}.parquet")
 
 
-def download_geoparquet(GCS_FILE_PATH, FILE_NAME, save_locally=False):
+def download_geoparquet(GCS_FILE_PATH: str, FILE_NAME: str, save_locally: bool = False):
     """
     Parameters:
     GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
@@ -52,7 +37,9 @@ def download_geoparquet(GCS_FILE_PATH, FILE_NAME, save_locally=False):
                 Ex: test_file (not test_file.parquet)
     save_locally: bool, defaults to False. if True, will save geoparquet locally.
     """
-    object_path = fs.open(f"{GCS_FILE_PATH}{FILE_NAME.replace('.parquet', '')}.parquet")
+    file_name_sanitized = FILE_NAME.replace(".parquet", "")
+
+    object_path = fs.open(f"{GCS_FILE_PATH}{file_name_sanitized}.parquet")
     gdf = gpd.read_parquet(object_path)
 
     if save_locally is True:
@@ -125,13 +112,13 @@ DEFAULT_COMMITTER = {
 
 
 def upload_file_to_github(
-    token,
-    repo,
-    branch,
-    path,
-    local_file_path,
-    commit_message,
-    committer=DEFAULT_COMMITTER,
+    token: str,
+    repo: str,
+    branch: str,
+    path: str,
+    local_file_path: str,
+    commit_message: str,
+    committer: dict = DEFAULT_COMMITTER,
 ):
     """
     Parameters
