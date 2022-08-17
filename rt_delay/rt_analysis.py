@@ -403,6 +403,7 @@ class OperatorDayAnalysis:
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
                 _delay['delay_seconds'] = _delay.delay.map(lambda x: x.seconds)
                 
+                self.debug_dict[f'{trip_id}_stopsegs'] = _delay
                 # try:
                 _delay = self._add_km_segments(_delay)
                 # except:
