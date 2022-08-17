@@ -23,21 +23,16 @@ if __name__ == "__main__":
     time0 = datetime.now()
     
     # Create local parquets
-    prep_data.create_local_parquets(prep_data.SELECTED_DATE) 
+    prep_data.create_local_parquets(prep_data.ANALYSIS_DATE) 
     print("Local parquets created")
     
-    routes = create_routes_data.make_routes_shapefile()    
-    stops = create_stops_data.make_stops_shapefile()
-    
-    # Export geoparquets to GCS
+    routes = create_routes_data.make_routes_shapefile()   
     utils.geoparquet_gcs_export(routes, prep_data.GCS_FILE_PATH, "ca_transit_routes")
+
+    stops = create_stops_data.make_stops_shapefile()    
     utils.geoparquet_gcs_export(stops, prep_data.GCS_FILE_PATH, "ca_transit_stops")
     
     print("Geoparquets exported to GCS")
-    
-    # Delete local parquets
-    #prep_data.delete_local_parquets()
-    print("Local parquets deleted")
-    
+        
     time1 = datetime.now()
     print(f"Total run time for routes/stops script: {time1-time0}")
