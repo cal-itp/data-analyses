@@ -6,95 +6,98 @@ Operator-routes in shapes.txt need route line geometry.
 Operator-routes not in shapes.txt use stop sequence 
 to generate route line geometry.
 """
+import os
+os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
+
 import dask.dataframe as dd
-import dask_geopandas
+import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
-import os
-
-os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 
 from calitp.tables import tbl
 from datetime import datetime
 from siuba import *
 
 import prep_data
-from shared_utils import geography_utils, portfolio_utils
+from shared_utils import geography_utils, gtfs_utils, portfolio_utils
 
-def merge_shapes_to_routes(trips, routes):
+
+def merge_trips_to_routes(trips: dd.DataFrame, 
+                          routes: dg.GeoDataFrame) -> dg.GeoDataFrame:
+    # Routes or trips can contain multiple calitp_url_numbers 
+    # for same calitp_itp_id-shape_id. Drop these now
+    # dask can only sort by 1 column!
+    shape_id_cols = ["calitp_itp_id", "shape_id"]
+    
+    routes = (routes.sort_values("calitp_url_number")
+              .drop_duplicates(subset=shape_id_cols)
+              .reset_index(drop=True)
+    )
+    
+    trips = (trips.sort_values("calitp_url_number")
+             .drop_duplicates(subset=["calitp_itp_id", "trip_id"])
+             .reset_index(drop=True)
+    )
+    
     # Left only means in trips, but shape_id not found in shapes.txt
     # right only means in routes, but no route that has that shape_id 
     # We probably should keep how = "left"?
     # left only means we can assemble from stop sequence?
     m1 = dd.merge(
             trips,
-            routes,
-            on = ["calitp_itp_id", "shape_id"],
+            routes[shape_id_cols + ["geometry"]].drop_duplicates(),
+            on = shape_id_cols,
             how = "left",
             #validate = "m:1",
             indicator=True
         ).compute()
-    
+
     # routes is a gdf, so turn it back into gdf
-    m2 = gpd.GeoDataFrame(m1, geometry="geometry", crs = geography_utils.WGS84)
+    m2 = gpd.GeoDataFrame(m1, geometry="geometry", 
+                          crs = geography_utils.CA_NAD83Albers
+                         ).to_crs(geography_utils.WGS84)
     
-    m2 = dask_geopandas.from_geopandas(m2, npartitions=1)
+    m2 = dg.from_geopandas(m2, npartitions=1)
     
     return m2
-    
-
-def routes_for_operators_in_shapes(merged_shapes_routes, route_info):
-    # Attach route_id from gtfs_schedule.trips, using shape_id
-    routes1 = (merged_shapes_routes[merged_shapes_routes._merge=="both"]
-      .drop(columns = ["_merge"])
-      .reset_index(drop=True)
-     )
-
-    routes_part1 = prep_data.attach_route_name(routes1, route_info)
-    
-    return routes_part1
 
 
-def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
-    missing_shapes = (merged_shapes_routes[merged_shapes_routes._merge=="left_only"]
-      [["calitp_itp_id", "route_id", "shape_id"]]
+def routes_for_operators_notin_shapes(
+    merged_trips_routes: dg.GeoDataFrame) -> gpd.GeoDataFrame:
+    missing_shapes = (merged_trips_routes[
+        (merged_trips_routes._merge=="left_only") &
+        (merged_trips_routes.calitp_itp_id != 323)] # gtfs_utils fixes Metrolink upstream 
+      [["calitp_itp_id", "route_id", "trip_id", "shape_id"]] 
       .reset_index(drop=True)
      )
     
-        
+    MISSING_ITP_IDS = list(missing_shapes.calitp_itp_id.unique())
+    MISSING_TRIPS = list(missing_shapes.trip_id.unique())
+    
     # Only grab trip info for the shape_ids that are missing, or, appear in missing_shapes
-    trip_cols = ["calitp_itp_id", "route_id", "shape_id"]
+    keep_trip_cols = ["calitp_itp_id", "route_id", "shape_id",
+                      "trip_id", "trip_key"]
 
-    dim_trips = (tbl.views.gtfs_schedule_dim_trips()
-                 # filter first to just the smaller set of IDs in missing_shapes
-                 >> filter(_.calitp_itp_id.isin(missing_shapes.calitp_itp_id))
-                 # Now find those shape_ids and trips associated
-                 >> filter(_.shape_id.isin(missing_shapes.shape_id))
-                 >> select(*trip_cols, _.trip_key)
-                 >> distinct()
-                )
-
-    missing_trips = (
-        tbl.views.gtfs_schedule_fact_daily_trips()
-        >> filter(_.service_date == prep_data.SELECTED_DATE, 
-               _.is_in_service==True)
-        >> select(_.trip_key, _.trip_id)
-        >> inner_join(_, dim_trips, on = "trip_key")
-        >> distinct()
-        >> collect()
+    missing_trips = gtfs_utils.get_trips(
+        selected_date = prep_data.ANALYSIS_DATE,
+        itp_id_list = MISSING_ITP_IDS,
+        trip_cols = keep_trip_cols,
+        get_df = True,
+        custom_filtering = {"trip_id": MISSING_TRIPS}
     )
     
     # Since there are multiple trips, we'll sort the same way, and keep the first one
-    group_cols = ["calitp_itp_id", "route_id", "shape_id"]
+    # since we care about showing route-level geom
+    group_cols = ["calitp_itp_id", "shape_id", "route_id"]
     missing_trips2 = (missing_trips.sort_values(group_cols + ["trip_id"])
                       .drop_duplicates(subset=group_cols)
                       .reset_index(drop=True)
     )
-
+    
     stop_info_trips = (
         tbl.views.gtfs_schedule_dim_stop_times()
-        >> filter(_.calitp_itp_id.isin(missing_trips2.calitp_itp_id))
-        >> filter(_.trip_id.isin(missing_trips2.trip_id))
+        >> filter(_.calitp_itp_id.isin(MISSING_ITP_IDS))
+        >> filter(_.trip_id.isin(MISSING_TRIPS))
         >> distinct()
         >> inner_join(_,
                       tbl.views.gtfs_schedule_dim_stops(), 
@@ -129,49 +132,48 @@ def routes_for_operators_notin_shapes(merged_shapes_routes, route_info):
         stop_info_trips[["calitp_itp_id", "shape_id", "route_id"]].drop_duplicates(),
         on = ["calitp_itp_id", "shape_id"],
         how = "inner",
-        validate = "1:1",
+        validate = "1:m",
     )
-
-    routes_part2 = prep_data.attach_route_name(missing_routes2, route_info)
-
-    return routes_part2    
+    
+    return missing_routes2    
 
 
 # Assemble routes file
 def make_routes_shapefile():
     time0 = datetime.now()
-    DATA_PATH = prep_data.DATA_PATH
-
+    
     # Read in local parquets
-    stops = dd.read_parquet(f"{DATA_PATH}stops.parquet")
-    trips = dd.read_parquet(f"{DATA_PATH}trips.parquet")
-    route_info = dd.read_parquet(f"{DATA_PATH}route_info.parquet")
-    routes = dask_geopandas.read_parquet(f"{DATA_PATH}routes.parquet")
+    trips = dd.read_parquet(
+        f"{prep_data.GCS_FILE_PATH}trips.parquet")
+    routes = dg.read_parquet(
+        f"{prep_data.GCS_FILE_PATH}routelines.parquet")
 
-    df = merge_shapes_to_routes(trips, routes)
+    df = merge_trips_to_routes(trips, routes)
     
     time1 = datetime.now()
     print(f"Read in data and merge shapes to routes: {time1-time0}")    
     
-    routes_part1 = routes_for_operators_in_shapes(df, route_info)
-
-    time2 = datetime.now()
-    print(f"Part 1 - routes for operator-routes in shapes.txt: {time2-time1}")
+    routes_not_in_shapes = routes_for_operators_notin_shapes(df)
     
-    routes_part2 = routes_for_operators_notin_shapes(df, route_info)
-    
-    time3 = datetime.now()
-    print(f"Part 2 - routes for operator-routes not in shapes.txt: {time3-time2}")
-    
-    routes_assembled = (dd.multi.concat([routes_part1, routes_part2], axis=0)
+    if len(routes_not_in_shapes) > 0:
+        routes_assembled = (dd.multi.concat([
+            df[df._merge=="both"].drop(columns = "_merge"), 
+            routes_not_in_shapes], axis=0)
                         .compute()
                         .sort_values(["calitp_itp_id", "route_id"])
                         .drop_duplicates()
                         .reset_index(drop=True)
                        )
+    else:
+        routes_assembled = df[df._merge=="both"].drop(columns="_merge").reset_index(drop=True)
+    
+    time2 = datetime.now()
+    print(f"Add in routes for operator-routes not in shapes.txt: {time2-time1}")
+    
     
     # Attach agency_name
-    agency_names = portfolio_utils.add_agency_name(SELECTED_DATE = prep_data.SELECTED_DATE)
+    agency_names = portfolio_utils.add_agency_name(
+        SELECTED_DATE = prep_data.ANALYSIS_DATE)
     
     
     routes_assembled2 = pd.merge(
@@ -182,7 +184,7 @@ def make_routes_shapefile():
         validate = "m:1"
     )
     
-    latest_itp_id = portfolio_utils.latest_itp_id(SELECTED_DATE = prep_data.SELECTED_DATE)
+    latest_itp_id = portfolio_utils.latest_itp_id()
     
     routes_assembled2 = (pd.merge(
         routes_assembled2, 
@@ -195,7 +197,8 @@ def make_routes_shapefile():
      .sort_values(["itp_id", "route_id"])
      .reset_index(drop=True)
     )
-
+    
+    time3 = datetime.now()
     print(f"Routes script total execution time: {time3-time0}")
 
     return routes_assembled2
