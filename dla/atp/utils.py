@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 from siuba import *
 
+from shared_utils import geography_utils
+from dla_utils import _dla_utils
+
 from calitp import to_snakecase
 
 def read_in_data():
@@ -19,3 +22,24 @@ def read_in_data():
     #inplace=True)
     return df
 
+def get_num(x):
+    try:
+        return int(x)
+    except Exception:
+        try:
+            return float(x)
+        except Exception:
+            return x  
+
+def clean_data(df):
+    
+    # convert columns
+    columns_to_int = ['a1_locode', 'a2_senatedistc', 'a2_senate_dist_b', 'a2_assem_dist_b','a2_assem_dist_c','a2_congress_dist_b','a2_congress_dist_c','a2_proj_lat','a2_proj_long',
+                  'a2_senate_dist_b','a2_senatedistc','p_un_sig_inter_new_roundabout','a4_emp_based_pct','a4_le_methods','a4_srts_le','a1_locode','a2_senatedistc','a2_senate_dist_b']
+    for col in columns_to_int:
+        gdf[col] = gdf[col].apply(get_num)
+    
+    #add geometry
+    gdf = (geography_utils.create_point_geometry(df, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
+
+    return gdf
