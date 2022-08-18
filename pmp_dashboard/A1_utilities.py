@@ -18,8 +18,10 @@ div_crosswalks= {
             "Regional Planning": "DOTP",
         }
 
-#A list to hold clean dataframes
-my_clean_dataframes = []
+# Remove underscores, title case, and strip whitespaces
+def clean_up_columns(df):
+    df.columns = df.columns.str.replace("_", " ").str.title().str.strip()
+    return df
 
 '''
 Functions that can be used across sheets
@@ -42,9 +44,9 @@ def cleaning_psoe_tpsoe(df, ps_or_oe: str):
 
     return df
 
-'''
+"""
 Function that loads & cleans raw data
-'''
+"""
 int_cols = [
     "ps_alloc",
     "ps_exp",
@@ -143,9 +145,6 @@ def import_and_clean(
         }
     )
     
-    # Adding dataframe to an empty list called my_clean_dataframes
-    # my_clean_dataframes.append(df)
-    
     return df
 
 '''
@@ -188,7 +187,10 @@ def create_fund_by_division(df):
     
     # Rearrange the columns to the right order
     df = df[div_funds_right_order]
-
+    
+    # Clean up col names
+    df = clean_up_columns(df)
+    
     return df
 
 '''
@@ -284,11 +286,14 @@ def create_tpsoe(df, ps_list: list, oe_list: list):
     # Add a notes column
     c1["notes"] = np.nan
     
+    # Clean up Columns
+    c1 = clean_up_columns(c1)
+    
     return c1
 
-'''
+"""
 Timeline Sheet
-'''
+"""
 timeline_right_order = [
     "appr_catg",
     "fund",
@@ -318,14 +323,26 @@ timeline_right_order = [
     "ap",
 ]
 
+
 def create_timeline(df):
-    
+    # Open up the sheet with all the accounting periods
+    timeline_all_aps = pd.read_excel(
+        f"{GCS_FILE_PATH}All_Accounting_Periods.xlsx", sheet_name="timeline"
+    )
+
     # Drop irrelevant col(s)
-    df = df.drop(columns = 'year_expended_pace')
-    
+    df = df.drop(columns="year_expended_pace")
+
     # Rearrange to the right order
     df = df[timeline_right_order]
-    return df
+
+    # Clean up col names
+    df = clean_up_columns(df)
+
+    # Concat current accounting period with previous data, reset index
+    c1 = pd.concat([df, timeline_all_aps], sort=False).reset_index(drop = True)
+
+    return c1
 
 '''
 PSOE Timeline
@@ -385,11 +402,10 @@ psoe_right_col_order = [
 ]
 
 def create_psoe_timeline(df, ps_list: list, oe_list: list):
+
     # Rename this column so I can concat both sheets properly
-    df = df.rename(columns = {"oe_enc_+_oe_exp_projection": 
-                              "oe_projection"}
-                  ) 
-    
+    df = df.rename(columns={"oe_enc_+_oe_exp_projection": "oe_projection"})
+
     # Create 2 dataframes that subsets out OE and PS
     psoe_oe = cleaning_psoe_tpsoe(df[oe_list], "oe")
     psoe_ps = cleaning_psoe_tpsoe(df[ps_list], "ps")
@@ -401,13 +417,21 @@ def create_psoe_timeline(df, ps_list: list, oe_list: list):
     c1 = c1.rename(columns={"expenditure": "expense"})
 
     # Rearrange the dataframe in the right order
-    c1 = c1[psoe_right_col_order]
-    
+    c1 = c1[utils.psoe_right_col_order]
+
     # Fill in na
     c1 = c1.fillna(0)
     
-    return c1
+    # Clean up col names
+    c1 = clean_up_columns(c1)
+    
+    # Open up sheet with previous accounting periods
+    psoe_all_aps = pd.read_excel(f"{GCS_FILE_PATH}All_Accounting_Periods.xlsx", sheet_name="psoe")
 
+    # Concat current accounting period with previous data. Reset index.
+    c2 = pd.concat([c1, psoe_all_aps], sort=False).reset_index(drop=True)
+
+    return c2
 """
 Final Script to 
 bring everything together
@@ -417,24 +441,31 @@ def pmp_dashboard_sheets(
     name_of_sheet: str,
     appropriations_to_filter: list,
     accounting_period: int,
-    title:str):
-   
-    """Takes a cleaned data frame and returns
-    the entire Excel workbook for publishing the PMP dashboard.
+    year: str,
+):
+
+    """Takes the original and returns
+    the entire cleaned Excel workbook for publishing the PMP dashboard.
 
     Args:
-        df: cleaned dataframe fter using import_raw_data
-        unwanted_timeline_appropriations: additional filter option for timeline data
-        title: the name for your file, accounting_period_year
-
+        file_name: GCS path already defined, input file name
+        name_of_sheet: name of Excel sheet.
+        appropriations_to_filter: appropriations to delete varies in each month. 
+        a list allows you to change
+        accounting_period: the current data's accounting period, used to name
+        the finished workbook and for certain column calculations
+        year: the fiscal year used to name the finished workbook
+    
     """
     # Running scripts for each sheet
-    df = import_and_clean(file_name, name_of_sheet, appropriations_to_filter, accounting_period)
+    df = import_and_clean(
+        file_name, name_of_sheet, appropriations_to_filter, accounting_period
+    )
     fund_by_div = create_fund_by_division(df)
-    tspoe =create_tpsoe(df, tpsoe_ps_list, tpsoe_oe_list)
-    timeline = create_timeline(my_clean_dataframes)
-    psoe = create_psoe_timeline(timeline,psoe_ps_cols, psoe_oe_cols)
-    
+    tspoe = create_tpsoe(df, tpsoe_ps_list,tpsoe_oe_list)
+    timeline = create_timeline(df)
+    psoe = create_psoe_timeline(df, psoe_ps_cols,psoe_oe_cols)
+
     """
     # Filter out stuff for timeline
     unwanted = timeline[
@@ -444,23 +475,20 @@ def pmp_dashboard_sheets(
     ]
     timeline = timeline.drop(index=unwanted.index)
     timeline = timeline.reset_index(drop=True)
-    """ 
-    
-    # Change column names back without underscores & title case
-    for df in [fund_by_div, tspoe, timeline, psoe]: 
-        df.columns = (df.columns
-                .str.replace('_',' ')
-                .str.title()
-               )
-    # Save
-    with pd.ExcelWriter(
-        f"{GCS_FILE_PATH}AP_{title}.xlsx"
-    ) as writer:
+    """
+
+    # Save to file with every single accounting period
+    with pd.ExcelWriter(f"{GCS_FILE_PATH}All_Accounting_Periods.xlsx") as writer:
+        timeline.to_excel(writer, sheet_name="timeline", index=False)
+        psoe.to_excel(writer, sheet_name="psoe", index=False)
+ 
+    # Save this month's output
+    with pd.ExcelWriter(f"{GCS_FILE_PATH}AP_{accounting_period}_{year}.xlsx") as writer:
         fund_by_div.to_excel(writer, sheet_name="fund_by_div", index=False)
         tspoe.to_excel(writer, sheet_name="tspoe", index=False)
         timeline.to_excel(writer, sheet_name="timeline", index=False)
         psoe.to_excel(writer, sheet_name="psoe", index=False)
 
-# if __name__ == "__main__":
-    
-    
+if __name__ == '__main__': 
+    # execute only if run as a script
+    pmp_dashboard_sheets()
