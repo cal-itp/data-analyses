@@ -4,9 +4,9 @@ from calitp import *
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/pmp_dashboard/"
 
-'''
+"""
 Crosswalks, Lists, Variables
-'''
+"""
 #Group PEC Class descriptions into divisions
 div_crosswalks= {
             "State & Fed Mass Trans": "DRMT",
@@ -18,14 +18,11 @@ div_crosswalks= {
             "Regional Planning": "DOTP",
         }
 
-# Remove underscores, title case, and strip whitespaces
-def clean_up_columns(df):
-    df.columns = df.columns.str.replace("_", " ").str.title().str.strip()
-    return df
 
-'''
+
+"""
 Functions that can be used across sheets
-'''
+"""
 def cleaning_psoe_tpsoe(df, ps_or_oe: str):
 
     """ 
@@ -37,11 +34,15 @@ def cleaning_psoe_tpsoe(df, ps_or_oe: str):
     """
     Strip away the prefixes from column names
     https://stackoverflow.com/questions/54097284/removing-suffix-from-dataframe-column-names-python
-    Create suffix
     """
     suffix = f"{ps_or_oe}_"
     df.columns = df.columns.str.replace(suffix, "", regex=True)
 
+    return df
+
+# Remove underscores, title case, and strip whitespaces
+def clean_up_columns(df):
+    df.columns = df.columns.str.replace("_", " ").str.title().str.strip()
     return df
 
 """
@@ -417,7 +418,7 @@ def create_psoe_timeline(df, ps_list: list, oe_list: list):
     c1 = c1.rename(columns={"expenditure": "expense"})
 
     # Rearrange the dataframe in the right order
-    c1 = c1[utils.psoe_right_col_order]
+    c1 = c1[psoe_right_col_order]
 
     # Fill in na
     c1 = c1.fillna(0)
@@ -432,6 +433,7 @@ def create_psoe_timeline(df, ps_list: list, oe_list: list):
     c2 = pd.concat([c1, psoe_all_aps], sort=False).reset_index(drop=True)
 
     return c2
+
 """
 Final Script to 
 bring everything together
@@ -469,15 +471,15 @@ def pmp_dashboard_sheets(
     """
     # Filter out stuff for timeline
     unwanted = timeline[
-        (timeline["appropriation"] == unwanted_timeline_appropriations)
-        & (timeline["ps_allocation"] == 0)
-        & (timeline["oe_allocation"] == 0)
+        (timeline["Appropriation"] == unwanted_timeline_appropriations)
+        & (timeline["Ps Allocation"] == 0)
+        & (timeline["Oe Allocation"] == 0)
     ]
     timeline = timeline.drop(index=unwanted.index)
     timeline = timeline.reset_index(drop=True)
     """
 
-    # Save to file with every single accounting period
+    # Save to Excel workbook with data from every single accounting period
     with pd.ExcelWriter(f"{GCS_FILE_PATH}All_Accounting_Periods.xlsx") as writer:
         timeline.to_excel(writer, sheet_name="timeline", index=False)
         psoe.to_excel(writer, sheet_name="psoe", index=False)
@@ -490,5 +492,10 @@ def pmp_dashboard_sheets(
         psoe.to_excel(writer, sheet_name="psoe", index=False)
 
 if __name__ == '__main__': 
-    # execute only if run as a script
-    pmp_dashboard_sheets()
+    FILE_NAME = "AP3 September.xls"
+    NAME_OF_SHEET = "Download"
+    APPROPRIATIONS_TO_FILTER = []
+    ACCOUNTING_PERIOD =  3
+    YEAR = "TEST_21_22"
+    
+    pmp_dashboard_sheets(FILE_NAME,NAME_OF_SHEET,APPROPRIATIONS_TO_FILTER,ACCOUNTING_PERIOD,YEAR)
