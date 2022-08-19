@@ -54,7 +54,7 @@ def clean_highways():
 #--------------------------------------------------------#
 # Can this function be reworked to take a df?
 def process_transit_routes(alternate_df: 
-                           gpd.GeoDataFrame | None = None) -> gpd.GeoDataFrame:
+                           gpd.GeoDataFrame = None) -> gpd.GeoDataFrame:
     if alternate_df is None:
         df = catalog.transit_routes.read()
     else:
@@ -66,12 +66,10 @@ def process_transit_routes(alternate_df:
     # Transit routes included some extra info about 
     # route_long_name, route_short_name, agency_id
     # Get it down to route_id instead of shape_id, pick longest shape
-    subset_cols = ["itp_id", "route_id", "shape_id", "geometry"]
-
-    df2 = (df[subset_cols]
-          .assign(route_length = df.geometry.length)
-          .sort_values(["itp_id", "route_id", "route_length"], 
+    df2 = df.assign(route_length = df.geometry.length)
+    df2 = (df2.sort_values(["itp_id", "route_id", "route_length"], 
                   ascending=[True, True, False])
+           .drop_duplicates(subset=["itp_id", "route_id"])
           .reset_index(drop=True)
          )
     

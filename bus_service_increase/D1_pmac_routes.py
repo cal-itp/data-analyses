@@ -1,43 +1,62 @@
-import datetime
+"""
+Script to create PMAC data
+"""
+import os
+os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
+
 import geopandas as gpd
 import pandas as pd
 
+#from calitp.tables import tbl
+#from siuba import *
+
 import create_parallel_corridors
+import utils
+import pmac
 from shared_utils import gtfs_utils, geography_utils
-from calitp.storage import get_fs
-fs = get_fs()
 
-analysis_date = datetime.date(2022, 5, 4)
-date_str = gtfs_utils.format_date(analysis_date)
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
+TRAFFIC_OPS_GCS = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
+date_str = pmac.DATES["Q2_2022"] 
+
+def get_total_service_hours(selected_date):
+    # Run a query that aggregates service hours to shape_id level
+    trip_cols = ["calitp_itp_id", "calitp_url_number", 
+                 "route_id", "shape_id"]
+    
+    trips_with_hrs = (tbl.views.gtfs_schedule_fact_daily_trips()
+             >> filter(_.service_date == selected_date, 
+                       _.is_in_service==True, 
+                       _.calitp_itp_id != 200)
+             >> select(_.trip_key, _.service_date, _.service_hours)
+             >> inner_join(_, 
+                           tbl.views.gtfs_schedule_dim_trips()
+                           >> select(*trip_cols, _.trip_key)
+                           >> distinct(), 
+                           on = "trip_key")
+             >> group_by(_.calitp_itp_id, _.calitp_url_number, _.shape_id, _.route_id)
+             >> mutate(total_service_hours = _.service_hours.sum())
+             >> select(*trip_cols, _.total_service_hours)
+             >> distinct()
+             >> collect()
+            )
+
+    trips_with_hrs.to_parquet(
+        f"{utils.GCS_FILE_PATH}trips_with_hrs_{selected_date}.parquet")
 
 
-if __name__ == "__main__":
-    '''
-    # Grab trips table for selected date
+if __name__ == "__main__":    
     
-    gtfs_utils.all_trips_or_stoptimes_with_cached(
-        dataset="trips",
-        analysis_date = analysis_date,
-        export_path = GCS_FILE_PATH
-    )
+    # Use concatenated routelines and trips from traffic_ops work
+    # Use the datasets with Amtrak added back in (rt_delay always excludes Amtrak)
+    routelines = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}routelines.parquet")
+    trips = pd.read_parquet(f"{TRAFFIC_OPS_GCS}trips.parquet")
     
-    # Grab routelines for selected date (line geom)
-    
-    gtfs_utils.all_routelines_or_stops_with_cached(
-        dataset="routelines",
-        analysis_date = analysis_date,
-        export_path = GCS_FILE_PATH
-    )
-    '''
-    
-    routelines = gpd.read_parquet(f"{GCS_FILE_PATH}routelines_{date_str}.parquet")
-    trips = pd.read_parquet(f"{GCS_FILE_PATH}trips_{date_str}.parquet")
+    shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
     
     trips_with_geom = pd.merge(
-        routelines,
+        routelines[shape_id_cols + ["geometry"]].drop_duplicates(subset=shape_id_cols),
         trips,
-        on = ["calitp_itp_id", "calitp_url_number", "shape_id"],
+        on = shape_id_cols,
         how = "inner",
         validate = "1:m",
     ).rename(columns = {"calitp_itp_id": "itp_id"})
@@ -47,7 +66,7 @@ if __name__ == "__main__":
         alternate_df = trips_with_geom,
         pct_route_threshold = 0.3,
         pct_highway_threshold = 0.1,
-        DATA_PATH = GCS_FILE_PATH, 
+        DATA_PATH = utils.GCS_FILE_PATH, 
         FILE_NAME = f"parallel_or_intersecting_{date_str}"
     )
     
@@ -57,6 +76,9 @@ if __name__ == "__main__":
         alternate_df = trips_with_geom,
         pct_route_threshold = 0.1, 
         pct_highway_threshold = 0,
-        DATA_PATH = GCS_FILE_PATH, 
+        DATA_PATH = utils.GCS_FILE_PATH, 
         FILE_NAME = f"routes_on_shn_{date_str}"
     )    
+    
+    # Get aggregated service hours by shape_id
+    #get_total_service_hours(date_str)
