@@ -19,7 +19,8 @@ from calitp.tables import tbl
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-
+import logging
+logging.basicConfig(filename = 'rt.log')
 
 class TripPositionInterpolator:
     ''' Interpolates the location of a specific trip using either rt or schedule data
@@ -29,35 +30,45 @@ class TripPositionInterpolator:
         shape_gdf: a gdf with line geometries for each shape
         '''
         # self.debug_dict = {}
-        assert type(position_gdf) == type(gpd.GeoDataFrame()) and not position_gdf.empty, "positions gdf must not be empty"
-        assert type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty"
-        assert position_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"position and shape CRS must be {CA_NAD83Albers}"
-        assert position_gdf.trip_key.nunique() == 1, "non-unique trip key in position gdf"
+        self.logassert(type(position_gdf) == type(gpd.GeoDataFrame()) and not position_gdf.empty, "positions gdf must not be empty")
+        self.logassert(type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty")
+        self.logassert(position_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"position and shape CRS must be {CA_NAD83Albers}")
+        self.logassert(position_gdf.trip_key.nunique() == 1, "non-unique trip key in position gdf")
         
         trip_info_cols = ['service_date', 'trip_key', 'trip_id', 'route_id', 'route_short_name',
                           'shape_id', 'direction_id', 'calitp_itp_id'] + addl_info_cols
-        assert set(trip_info_cols).issubset(position_gdf.columns), f"position_gdf must contain columns: {trip_info_cols}"
+        self.logassert(set(trip_info_cols).issubset(position_gdf.columns), f"position_gdf must contain columns: {trip_info_cols}")
         for col in trip_info_cols:
             setattr(self, col, position_gdf[col].iloc[0]) ## allow access to trip_id, etc. using self.trip_id
             
-        assert (shape_gdf.calitp_itp_id == self.calitp_itp_id).all(), "position_gdf and shape_gdf itp_id should match"
+        self.logassert((shape_gdf.calitp_itp_id == self.calitp_itp_id).all(), "position_gdf and shape_gdf itp_id should match")
         self.position_gdf = position_gdf.drop(columns = trip_info_cols)
         self._attach_shape(shape_gdf)
         self.median_time = self.position_gdf[self.time_col].median()
         self.time_of_day = categorize_time_of_day(self.median_time)
         self.total_meters = (self.cleaned_positions.shape_meters.max() - self.cleaned_positions.shape_meters.min())
         self.total_seconds = (self.cleaned_positions.vehicle_timestamp.max() - self.cleaned_positions.vehicle_timestamp.min()).seconds
-        assert self.total_meters > 1000, "less than 1km of data"
-        assert self.total_seconds > 60, "less than 60 seconds of data"
+        self.logassert(self.total_meters > 1000, "less than 1km of data")
+        self.logassert(self.total_seconds > 60, "less than 60 seconds of data")
         self.mean_speed_mph = (self.total_meters / self.total_seconds) * MPH_PER_MPS
         
+    def logassert(self, conditon, message):
+        if conditon:
+            return
+        elif hasattr(self, 'calitp_itp_id') and hasattr(self, 'trip_id'):
+            logging.error(f'{self.calitp_itp_id}:{self.trip_id}:{message}')
+            raise AssertionError
+        else:
+            logging.error(message)
+            raise AssertionError  
+    
     def _attach_shape(self, shape_gdf):
         ''' Filters gtfs shapes to the shape served by this trip. Additionally, projects positions_gdf to a linear
         position along the shape and calls _linear_reference() to calculate speeds+times for valid positions
         shape_gdf: a gdf with line geometries for each shape
         '''
         shape_geo = (shape_gdf >> filter(_.shape_id == self.shape_id)).geometry
-        assert len(shape_geo) > 0 and shape_geo.iloc[0], f'shape empty for trip {self.trip_id}!'
+        self.logassert(len(shape_geo) > 0 and shape_geo.iloc[0], f'shape empty for trip {self.trip_id}!')
         self.shape = shape_geo.iloc[0]
         self.position_gdf['shape_meters'] = (self.position_gdf.geometry
                                 .apply(lambda x: self.shape.project(x)))
@@ -167,8 +178,8 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
     def __init__(self, vp_gdf, shape_gdf):
         # print(vp_gdf.head(1))
         # print(shape_gdf.head(1))
-        assert type(vp_gdf) == type(gpd.GeoDataFrame()) and not vp_gdf.empty, "vehicle positions gdf must not be empty"
-        assert type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty"
+        self.logassert(type(vp_gdf) == type(gpd.GeoDataFrame()) and not vp_gdf.empty, "vehicle positions gdf must not be empty")
+        self.logassert(type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty")
         
         self.debug_dict = {}
         
@@ -336,7 +347,7 @@ class OperatorDayAnalysis:
                                                            # 'schedule': ScheduleInterpolator(st_trip_joined, self.routelines) ## probably need to save memory for now ?
                                                        }
             except AssertionError as e:
-                print(e)
+                # print(e)
                 continue
             if type(self.pbar) != type(None):
                 self.pbar.update()
