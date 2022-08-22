@@ -15,7 +15,7 @@ import utils
 from shared_utils import gtfs_utils, geography_utils, rt_dates
 
 TRAFFIC_OPS_GCS = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
-date_str = rt_dates.PMAC["Q2_2022"] 
+ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"] 
 
 def get_total_service_hours(selected_date):
     # Run a query that aggregates service hours to shape_id level
@@ -47,8 +47,8 @@ if __name__ == "__main__":
     
     # Use concatenated routelines and trips from traffic_ops work
     # Use the datasets with Amtrak added back in (rt_delay always excludes Amtrak)
-    routelines = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}routelines_{date_str}_all.parquet")
-    trips = pd.read_parquet(f"{TRAFFIC_OPS_GCS}trips_{date_str}_all.parquet")
+    routelines = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}routelines_{ANALYSIS_DATE}_all.parquet")
+    trips = pd.read_parquet(f"{TRAFFIC_OPS_GCS}trips_{ANALYSIS_DATE}_all.parquet")
     
     shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
     
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         pct_route_threshold = 0.3,
         pct_highway_threshold = 0.1,
         DATA_PATH = utils.GCS_FILE_PATH, 
-        FILE_NAME = f"parallel_or_intersecting_{date_str}"
+        FILE_NAME = f"parallel_or_intersecting_{ANALYSIS_DATE}"
     )
     
     # 50 ft buffers, get routes that are 
@@ -76,8 +76,8 @@ if __name__ == "__main__":
         pct_route_threshold = 0.1, 
         pct_highway_threshold = 0,
         DATA_PATH = utils.GCS_FILE_PATH, 
-        FILE_NAME = f"routes_on_shn_{date_str}"
+        FILE_NAME = f"routes_on_shn_{ANALYSIS_DATE}"
     )    
     
     # Get aggregated service hours by shape_id
-    #get_total_service_hours(date_str)
+    #get_total_service_hours(ANALYSIS_DATE)
