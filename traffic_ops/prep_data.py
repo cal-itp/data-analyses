@@ -137,20 +137,33 @@ def concatenate_amtrak(
     
     grab_amtrak(selected_date)
     
-    amtrak_trips = pd.read_parquet("amtrak_trips.parquet")
-    amtrak_routelines = gpd.read_parquet("amtrak_routelines.parquet")
-    amtrak_stops = gpd.read_parquet("amtrak_stops.parquet")
+    amtrak_trips = dd.read_parquet("amtrak_trips.parquet")
+    amtrak_routelines = dg.read_parquet("amtrak_routelines.parquet")
+    amtrak_stops = dg.read_parquet("amtrak_stops.parquet")
     
-    trips = pd.read_parquet(f"{export_path}trips_{date_str}.parquet")
-    trips_all = pd.concat([trips, amtrak_trips], axis=0, ignore_index=True)
-    trips_all.to_parquet(f"{export_path}trips_{date_str}_all.parquet")
+    trips = dd.read_parquet(f"{export_path}trips_{date_str}.parquet")
+    trips_all = (dd.multi.concat([trips, amtrak_trips], axis=0)
+                 .astype({"trip_key": int})
+                )
+    trips_all.compute().to_parquet(f"{export_path}trips_{date_str}_all.parquet")
     
-    stops = gpd.read_parquet(f"{export_path}stops_{date_str}.parquet")
-    stops_all = pd.concat([stops, amtrak_stops], axis=0, ignore_index=True)
+    stops = dgread_parquet(f"{export_path}stops_{date_str}.parquet")
+    stops_all = (dd.multi.concat([
+                stops.to_crs(geography_utils.WGS84), 
+                amtrak_stops.to_crs(geography_utils.WGS84)
+            ], axis=0)
+            .drop(columns = ["stop_lon", "stop_lat"])
+            .astype({"stop_key": "Int64"})
+    ).compute()
     utils.geoparquet_gcs_export(stops_all, export_path, f"stops_{date_str}_all")
         
-    routelines = gpd.read_parquet(f"{export_path}routelines_{date_str}.parquet")        
-    routelines_all = pd.concat([routelines, amtrak_routelines], axis=0, ignore_index=True)
+    routelines = dg.read_parquet(f"{export_path}routelines_{date_str}.parquet")        
+    routelines_all = (dd.multi.concat([
+                        routelines.to_crs(geography_utils.WGS84), 
+                        amtrak_routelines.to_crs(geography_utils.WGS84)
+                    ], axis=0)
+                    .astype({"trip_key": "Int64"})
+                ).compute()
     utils.geoparquet_gcs_export(routelines_all, export_path, f"routelines_{date_str}_all")
     
     # Remove Amtrak now that full dataset made
