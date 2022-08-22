@@ -7,16 +7,15 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
 import geopandas as gpd
 import pandas as pd
 
-#from calitp.tables import tbl
-#from siuba import *
+from calitp.tables import tbl
+from siuba import *
 
 import create_parallel_corridors
 import utils
-import pmac
-from shared_utils import gtfs_utils, geography_utils
+from shared_utils import gtfs_utils, geography_utils, rt_dates
 
 TRAFFIC_OPS_GCS = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
-date_str = pmac.DATES["Q2_2022"] 
+date_str = rt_dates.PMAC["Q2_2022"] 
 
 def get_total_service_hours(selected_date):
     # Run a query that aggregates service hours to shape_id level
@@ -48,8 +47,8 @@ if __name__ == "__main__":
     
     # Use concatenated routelines and trips from traffic_ops work
     # Use the datasets with Amtrak added back in (rt_delay always excludes Amtrak)
-    routelines = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}routelines.parquet")
-    trips = pd.read_parquet(f"{TRAFFIC_OPS_GCS}trips.parquet")
+    routelines = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}routelines_{date_str}_all.parquet")
+    trips = pd.read_parquet(f"{TRAFFIC_OPS_GCS}trips_{date_str}_all.parquet")
     
     shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
     
