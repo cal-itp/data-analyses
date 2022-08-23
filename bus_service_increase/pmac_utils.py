@@ -188,6 +188,14 @@ def add_percent(df: pd.DataFrame, col_list: list) -> pd.DataFrame:
         
     return df
 
+#https://stackoverflow.com/questions/23482668/sorting-by-a-custom-list-in-pandas
+def sort_by_column(df: pd.DataFrame, col: str = "category", 
+                   sort_key: list = ["parallel", "on_shn", "other"]) -> pd.DataFrame:
+    # Custom sort order for categorical variable
+    df = df.sort_values(col, 
+                        key=lambda c: c.map(lambda e: sort_key.index(e)))
+    return df
+
 
 def get_summary_table(df: pd.DataFrame)-> pd.DataFrame: 
     """
@@ -201,5 +209,7 @@ def get_summary_table(df: pd.DataFrame)-> pd.DataFrame:
     ).astype({"total_service_hours": int})
     
     summary = add_percent(summary, ["total_service_hours", "unique_route"])
+    
+    summary = sort_by_column(summary)
     
     return summary
