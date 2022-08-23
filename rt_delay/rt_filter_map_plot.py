@@ -13,7 +13,7 @@ import shapely
 import datetime as dt
 from tqdm import tqdm
 
-# import numpy as np
+import numpy as np
 from calitp.tables import tbl
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -461,8 +461,8 @@ def from_gcs(itp_id, analysis_date):
     month_day = analysis_date.strftime('%m_%d')
     trips = pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{month_day}.parquet')
     stop_delay = gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{month_day}.parquet')
-    stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: dt.datetime.fromisoformat(x))
-    stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: dt.datetime.fromisoformat(x))
+    stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
+    stop_delay['actual_time'] = stop_delay.actual_time.map((lambda x: np.datetime64(x))
     routelines = get_routelines(itp_id, analysis_date)
     rt_day = RtFilterMapper(trips, stop_delay, routelines)
     return rt_day
