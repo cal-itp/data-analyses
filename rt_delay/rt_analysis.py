@@ -348,6 +348,7 @@ class OperatorDayAnalysis:
             
     def _add_km_segments(self, _delay):
         ''' Experimental to break up long segments
+            TODO consistent, shape-level index with km segments dropped too close to stops...
         '''
         
         _delay = _delay.set_index('shape_meters')
