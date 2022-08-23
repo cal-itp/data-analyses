@@ -17,7 +17,8 @@ def merge_trips_with_service_hrs(date_str) -> pd.DataFrame:
     """
     Merge trips df with trips_with_service_hrs (aggregated to shape_id).
     
-    Each row should be calitp_itp_id-route_id-shape_id level.
+    Aggregate this to route_level, since shape_id is confusing
+    and leads to double-counting, or merges not going through in full.
     """
     trips_with_hrs = pd.read_parquet(
         f"{GCS_FILE_PATH}trips_with_hrs_{date_str}.parquet")
