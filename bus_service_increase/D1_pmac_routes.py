@@ -12,7 +12,7 @@ from siuba import *
 
 import create_parallel_corridors
 import utils
-from shared_utils import gtfs_utils, geography_utils, rt_dates
+from shared_utils import gtfs_utils, geography_utils, portfolio_utils, rt_dates
 
 TRAFFIC_OPS_GCS = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"] 
@@ -22,25 +22,36 @@ def get_total_service_hours(selected_date):
     trip_cols = ["calitp_itp_id", "calitp_url_number", 
                  "route_id", "shape_id"]
     
-    trips_with_hrs = (tbl.views.gtfs_schedule_fact_daily_trips()
-             >> filter(_.service_date == selected_date, 
-                       _.is_in_service==True, 
-                       _.calitp_itp_id != 200)
-             >> select(_.trip_key, _.service_date, _.service_hours)
-             >> inner_join(_, 
-                           tbl.views.gtfs_schedule_dim_trips()
-                           >> select(*trip_cols, _.trip_key)
-                           >> distinct(), 
-                           on = "trip_key")
-             >> group_by(_.calitp_itp_id, _.calitp_url_number, _.shape_id, _.route_id)
-             >> mutate(total_service_hours = _.service_hours.sum())
-             >> select(*trip_cols, _.total_service_hours)
-             >> distinct()
-             >> collect()
-            )
+    # exclude 200!
+    itp_ids_on_day = (portfolio_utils.add_agency_name(selected_date)
+                      >> filter(_.calitp_itp_id != 200)
+                      >> select(_.calitp_itp_id)
+                      >> distinct()
+                     )
+    
+    ITP_IDS = itp_ids_on_day.calitp_itp_id.tolist()
+    
+    trips_with_hrs = gtfs_utils.get_trips(
+        selected_date = selected_date,
+        itp_id_list = ITP_IDS,
+        trip_cols = None,
+        get_df = True # only when it's True can the Metrolink fix get applied
+    ) 
+    
+    trips_with_hrs.to_parquet(f"./data/trips_with_hrs_staging_{selected_date}.parquet")
+    
+    aggregated_hrs = (trips_with_hrs.groupby(trip_cols)
+                      .agg({"service_hours": "sum"})
+                      .reset_index()
+                      .rename(columns = {"service_hours": "total_service_hours"})
+                      .drop_duplicates()
+    )
 
-    trips_with_hrs.to_parquet(
+    aggregated_hrs.to_parquet(
         f"{utils.GCS_FILE_PATH}trips_with_hrs_{selected_date}.parquet")
+    
+    # Once aggregated dataset written to GCS, remove local cache
+    os.remove(f"./data/trips_with_hrs_staging_{selected_date}.parquet")
 
 
 if __name__ == "__main__":    

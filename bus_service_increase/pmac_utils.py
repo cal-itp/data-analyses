@@ -61,21 +61,11 @@ def get_parallel_routes(date_str: str) -> pd.DataFrame:
     
     # Grab district
     route_cols = ["itp_id", "route_id"]
-    district_for_route = (parallel[parallel.District.notna()]
-                          [route_cols + ["District"]]
-                          .drop_duplicates(subset=route_cols)
-    )
+
     
     parallel2 = get_unique_routes(parallel)
-
-    parallel3 = pd.merge(parallel2, 
-                         district_for_route, 
-                         on = route_cols,
-                         how = "left",
-                         validate = "1:1"
-                        )
     
-    return parallel3
+    return parallel2
 
 
 def get_on_shn_routes(date_str: str) -> pd.DataFrame:
