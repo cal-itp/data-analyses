@@ -36,7 +36,7 @@ jobs:
         npm install -g netlify-cli
         python portfolio/portfolio.py index --deploy --alias=${GITHUB_REPOSITORY#*/}-${PR_NUMBER}
       env:
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PREVIEW_APP_AUTH_TOKEN }}
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         PR_NUMBER: ${{ github.event.number }}
 
     - name: Netlify docs production
@@ -45,7 +45,7 @@ jobs:
         npm install -g netlify-cli
         python portfolio/portfolio.py index --deploy --prod
       env:
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PREVIEW_APP_AUTH_TOKEN }}
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
     - name: Add netlify link PR comment
       uses: actions/github-script@v3
