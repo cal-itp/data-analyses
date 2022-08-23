@@ -50,14 +50,15 @@ class RtFilterMapper:
         self.reset_filter()
 
     def set_filter(self, start_time = None, end_time = None, route_names = None,
-                   shape_ids = None, direction_id = None, direction = None):
+                   shape_ids = None, direction_id = None, direction = None, trip_ids = None):
         '''
         start_time, end_time: string %H:%M, for example '11:00' and '14:00'
         route_names: list or pd.Series of route_names (GTFS route_short_name)
         direction_id: '0' or '1'
         direction: string 'Northbound', 'Eastbound', 'Southbound', 'Westbound' (experimental)
+        trip_ids: list or pd.Series of trip_ids (GTFS trip_ids)
         '''
-        assert start_time or end_time or route_names or direction_id or direction or shape_ids, 'must supply at least 1 argument to filter'
+        assert start_time or end_time or route_names or direction_id or direction or shape_ids or trip_ids, 'must supply at least 1 argument to filter'
         assert not start_time or type(dt.datetime.strptime(start_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not end_time or type(dt.datetime.strptime(end_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not route_names or type(route_names) == list or type(route_names) == tuple or type(route_names) == type(pd.Series())
@@ -77,6 +78,7 @@ class RtFilterMapper:
             self.filter['end_time'] = None
         self.filter['route_names'] = route_names
         self.filter['shape_ids'] = shape_ids
+        self.filter['trip_ids'] = trip_ids
         if shape_ids:
             shape_trips = (self.rt_trips >> filter(_.shape_id.isin(shape_ids))
                            >> distinct(_.route_short_name, _keep_all=True)
@@ -85,6 +87,14 @@ class RtFilterMapper:
             self.filter['route_names'] = list(shape_trips.route_short_name)
             if len(shape_ids) == 1:
                 direction = (self.rt_trips >> filter(_.shape_id == shape_ids[0])).direction.iloc[0]
+        if trip_ids:
+            trips = (self.rt_trips >> filter(_.trip_id.isin(trip_ids))
+                           >> distinct(_.route_short_name, _keep_all=True)
+                           >> collect()
+                          )
+            self.filter['route_names'] = list(trips.route_short_name)
+            if len(trip_ids) == 1:
+                direction = (self.rt_trips >> filter(_.trip_id == trip_ids[0])).direction.iloc[0]
         self.filter['direction_id'] = direction_id
         self.filter['direction'] = direction
         if start_time and end_time:
@@ -101,8 +111,6 @@ class RtFilterMapper:
         elif not self.filter['route_names']:
             rts = 'All Routes'
             
-        # print(self.filter)
-        ## properly format for pm peak, TODO add other periods
         if start_time and end_time and start_time == '15:00' and end_time == '19:00':
             self.filter_period = 'PM_Peak'
         elif start_time and end_time and start_time == '06:00' and end_time == '09:00':
@@ -116,7 +124,7 @@ class RtFilterMapper:
         elements_ordered = [rts, direction, self.filter_period, self.display_date]
         self.filter_formatted = ', ' + ', '.join([str(x).replace('_', ' ') for x in elements_ordered if x])
         
-        self._time_only_filter = not route_names and not shape_ids and not direction_id and not direction
+        self._time_only_filter = not route_names and not shape_ids and not direction_id and not direction and not trip_ids
             
     def reset_filter(self):
         self.filter = None
@@ -141,14 +149,14 @@ class RtFilterMapper:
             trips = trips >> filter(_.route_short_name.isin(self.filter['route_names']))
         if self.filter['shape_ids']:
             trips = trips >> filter(_.shape_id.isin(self.filter['shape_ids']))
+        if self.filter['trip_ids']:
+            trips = trips >> filter(_.trip_id.isin(self.filter['trip_ids']))
         if self.filter['direction_id']:
             trips = trips >> filter(_.direction_id == self.filter['direction_id'])
         if self.filter['direction']:
             trips = trips >> filter(_.direction == self.filter['direction'])
         return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
     
-## TODO, optionally port over segment speed map from rt_analysis, would require stop delay view
-## alternatively, simply export full day segment speed view
 
     def segment_speed_map(self, segments = 'stops', how = 'average',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
@@ -462,7 +470,7 @@ def from_gcs(itp_id, analysis_date):
     trips = pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{month_day}.parquet')
     stop_delay = gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{month_day}.parquet')
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
-    stop_delay['actual_time'] = stop_delay.actual_time.map((lambda x: np.datetime64(x))
+    stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
     routelines = get_routelines(itp_id, analysis_date)
     rt_day = RtFilterMapper(trips, stop_delay, routelines)
     return rt_day
