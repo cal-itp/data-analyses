@@ -7,6 +7,7 @@ import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
 
 import dask.dataframe as dd
+import dask_geopandas as dg
 import datetime
 import geopandas as gpd
 import pandas as pd
@@ -134,9 +135,7 @@ def concatenate_amtrak(
     Save a new cached file in GCS.
     """
     date_str = gtfs_utils.format_date(selected_date)
-    
-    grab_amtrak(selected_date)
-    
+        
     amtrak_trips = dd.read_parquet("amtrak_trips.parquet")
     amtrak_routelines = dg.read_parquet("amtrak_routelines.parquet")
     amtrak_stops = dg.read_parquet("amtrak_stops.parquet")
@@ -147,7 +146,7 @@ def concatenate_amtrak(
                 )
     trips_all.compute().to_parquet(f"{export_path}trips_{date_str}_all.parquet")
     
-    stops = dgread_parquet(f"{export_path}stops_{date_str}.parquet")
+    stops = dg.read_parquet(f"{export_path}stops_{date_str}.parquet")
     stops_all = (dd.multi.concat([
                 stops.to_crs(geography_utils.WGS84), 
                 amtrak_stops.to_crs(geography_utils.WGS84)
@@ -173,6 +172,7 @@ def concatenate_amtrak(
 
 def create_local_parquets(selected_date):
     grab_selected_date(selected_date) 
+    grab_amtrak(selected_date)
     concatenate_amtrak(selected_date, GCS_FILE_PATH)
 
         
