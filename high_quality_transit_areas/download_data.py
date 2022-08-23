@@ -24,7 +24,7 @@ from siuba import *
 import operators_for_hqta
 
 from update_vars import analysis_date, date_str, CACHED_VIEWS_EXPORT_PATH
-from shared_utils import gtfs_utils, geography_utils, utils
+from shared_utils import gtfs_utils, geography_utils, rt_utils, utils
 
 LOCAL_PATH = "./data/"
 
@@ -69,7 +69,7 @@ def get_routelines(itp_id: int,
         itp_id_list = [itp_id],
         get_df = True,
         crs = geography_utils.CA_NAD83Albers,
-        trip_df = full_trip
+        trip_df = full_trips
     )
     
     if not routelines.empty:
