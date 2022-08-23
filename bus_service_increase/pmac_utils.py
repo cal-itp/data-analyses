@@ -1,58 +1,83 @@
 """
 Functions to wrangle PMAC datasets created from D1_pmac_routes.py
 """
+import altair as alt
 import geopandas as gpd
 import pandas as pd
 
+from D1_pmac_routes import TRAFFIC_OPS_GCS
 from utils import GCS_FILE_PATH
 from shared_utils import geography_utils
 
-def merge_trips_with_service_hrs(trips: pd.DataFrame, 
-                                 trips_with_hrs: pd.DataFrame) -> pd.DataFrame:
+#---------------------------------------------------------------#
+# Data processing - merge trips dfs, tag a route as parallel/on shn/other
+#---------------------------------------------------------------#
+
+def merge_trips_with_service_hrs(date_str) -> pd.DataFrame:
     """
     Merge trips df with trips_with_service_hrs (aggregated to shape_id).
     
     Each row should be calitp_itp_id-route_id-shape_id level.
     """
-    shape_id_cols = [
-        "calitp_itp_id", "calitp_url_number", 
-        "route_id", "shape_id"
+    trips_with_hrs = pd.read_parquet(
+        f"{GCS_FILE_PATH}trips_with_hrs_{date_str}.parquet")
+    
+    trips = pd.read_parquet(
+        f"{TRAFFIC_OPS_GCS}trips_{date_str}.parquet")
+    
+    route_cols = [
+        "calitp_itp_id", "route_id"
     ]
-
-    trips_full_info = pd.merge(
-        # there are multiple trips sharing same shape_id
-        # that's fine, but since trips_with_hrs is already aggregated up to
-        # the shape_id level, aggregate for trips too
-        trips[shape_id_cols].drop_duplicates(),
+    
+    route_service_hours = geography_utils.aggregate_by_geography(
         trips_with_hrs,
-        on = shape_id_cols, 
+        group_cols = route_cols,
+        sum_cols = ["total_service_hours"]
+    ) 
+    
+    # there are multiple trips sharing same shape_id
+    # that's fine, but since trips_with_hrs is already aggregated up to
+    # the route_id level, aggregate for trips too
+    route_full_info = pd.merge(
+        trips[route_cols].drop_duplicates(),
+        route_service_hours,
+        on = route_cols,
         how = "outer",
         validate = "1:1",
         indicator=True
-    )
-    
-    # Don't keep url_number and make sure no duplicates are around
-    trips_full_info2 = (trips_full_info
-                        .drop(columns = "calitp_url_number")
-                        .drop_duplicates()
-                        .rename(columns = {"calitp_itp_id": "itp_id"})
-                       )
-    
-    return trips_full_info2
+    ).rename(columns = {"calitp_itp_id": "itp_id"})
 
     
-def get_parallel_routes(date_str):
+    return route_full_info
+
+    
+def get_parallel_routes(date_str: str) -> pd.DataFrame:
      # If it is parallel, we want to flag as 1
     parallel = gpd.read_parquet(
         f"{GCS_FILE_PATH}parallel_or_intersecting_{date_str}.parquet")
     
     parallel = parallel[parallel.parallel==1]
+    
+    # Grab district
+    route_cols = ["itp_id", "route_id"]
+    district_for_route = (parallel[parallel.District.notna()]
+                          [route_cols + ["District"]]
+                          .drop_duplicates(subset=route_cols)
+    )
+    
     parallel2 = get_unique_routes(parallel)
 
-    return parallel2
+    parallel3 = pd.merge(parallel2, 
+                         district_for_route, 
+                         on = route_cols,
+                         how = "left",
+                         validate = "1:1"
+                        )
+    
+    return parallel3
 
 
-def get_on_shn_routes(date_str):
+def get_on_shn_routes(date_str: str) -> pd.DataFrame:
     # These are routes that have some part on SHN
     # BUT, there is overlap between the parallel
     # Since the requirements here are less stringent than parallel
@@ -76,14 +101,14 @@ def get_unique_routes(df: pd.DataFrame) -> pd.DataFrame:
     """
     # If there are multiple shape_ids for route_id,
     # Keep the one where it's has higher overlap with SHN
-    df = (df.sort_values(["itp_id", "route_id", "pct_route", "shape_id"],
-                         ascending=[True, True, False, True],
-                        )
-                .drop_duplicates(subset=["itp_id", "route_id"])
-                [["itp_id", "route_id", "District", "parallel"]]
-                .reset_index(drop=True)
-               )
-    return df
+    # If it was ever tagged as parallel, let's keep that obs
+    df2 = (df.groupby(["itp_id", "route_id"])
+           .agg({"pct_route": "max", 
+                "parallel": "max"})
+           .reset_index()
+          )[["itp_id", "route_id", "parallel"]].drop_duplicates()
+    
+    return df2
     
     
 def mutually_exclusive_groups(df):
@@ -110,40 +135,32 @@ def mutually_exclusive_groups(df):
     return df2 
     
     
-def flag_parallel_intersecting_routes(trips: pd.DataFrame, 
-                                      trips_with_hrs: pd.DataFrame, 
-                                      date_str: str) -> pd.DataFrame:
+def flag_parallel_intersecting_routes(date_str: str) -> pd.DataFrame:
     """
     Take the trips df (each indiv trip) and aggregated trip_service_hrs df
     (aggregated to shape_id), merge together,
     and flag whether a transit route is parallel, on SHN, or other.
     """
-    # Merge trips and trips_with_hrs dfs
-    df = merge_trips_with_service_hrs(trips, trips_with_hrs)
-    
-    route_level_hours = geography_utils.aggregate_by_geography(
-        df, 
-        group_cols = ["itp_id", "route_id", "_merge"],
-        sum_cols = ["total_service_hours"]
-    )
+    # Merge trips and trips_with_hrs dfs, and aggregate to route_level
+    route_level_df = merge_trips_with_service_hrs(date_str)
     
     # Flag routes if they're parallel or on SHN
     parallel_routes = get_parallel_routes(date_str)
     on_shn_routes = get_on_shn_routes(date_str)
     
     # Merge the parallel and on_shn dummy variables in
-    with_parallel_flag = pd.merge(route_level_hours, 
+    with_parallel_flag = pd.merge(route_level_df, 
                                   parallel_routes,
                                   on = ["itp_id", "route_id"],
                                   how = "left",
-                                  validate = "m:1"
+                                  validate = "1:1"
     )
     
     with_shn_flag = pd.merge(with_parallel_flag,
                              on_shn_routes,
-                             on = ["itp_id", "route_id", "District"],
+                             on = ["itp_id", "route_id"],
                              how = "left",
-                             validate = "m:1"
+                             validate = "1:1"
     )
     
     # Make sure parallel, on_shn, and other are mutually exclusive categories
@@ -155,3 +172,34 @@ def flag_parallel_intersecting_routes(trips: pd.DataFrame,
     with_categories = with_categories.assign(unique_route=1)
 
     return with_categories
+
+
+#---------------------------------------------------------------#
+# Get summary stats (by district) or make bar chart (by district)
+#---------------------------------------------------------------#
+def add_percent(df: pd.DataFrame, col_list: list) -> pd.DataFrame:
+    """
+    Create columns with pct values. 
+    """
+    for c in col_list:
+        new_col = f"pct_{c}"
+        df[new_col] = (df[c] / df[c].sum()).round(3) * 100
+        df[c] = df[c].round(0)
+        
+    return df
+
+
+def get_summary_table(df: pd.DataFrame)-> pd.DataFrame: 
+    """
+    Aggregate by parallel/on_shn/other category.
+    Calculate number and pct of service hours, routes.
+    """
+    summary = geography_utils.aggregate_by_geography(
+        df, 
+        group_cols = ["category"],
+        sum_cols = ["total_service_hours", "unique_route"],
+    ).astype({"total_service_hours": int})
+    
+    summary = add_percent(summary, ["total_service_hours", "unique_route"])
+    
+    return summary
