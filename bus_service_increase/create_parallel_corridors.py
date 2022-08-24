@@ -17,7 +17,6 @@ import shared_utils
 import utils
 
 catalog = intake.open_catalog("*.yml")
-facilities_catalog = intake.open_catalog("../facilities_services/*.yml")
 
 DATA_PATH = "./data/"
 IMG_PATH = "./img/"
