@@ -27,6 +27,21 @@ fs = gcsfs.GCSFileSystem()
 from tqdm import tqdm_notebook
 from tqdm.notebook import trange, tqdm
 
+# Read in complete data table
+def read_data():
+    
+    df = query_sql(
+    """
+    SELECT *
+    FROM `cal-itp-data-infra-staging.natalie_views.gtfs_rt_vs_sched_routes`
+    """
+    )
+    
+    df['service_date'] = pd.to_datetime(df['service_date'])
+    df['weekday'] = pd.Series(df.service_date).dt.day_name()
+    df['month'] =  pd.Series(df.service_date).dt.month_name()
+    
+    return df
 
 # Get the data for Scheduled Trips and RT Trips  
 
@@ -109,6 +124,8 @@ def agg_by_date(df, sum1_sched, sum2_vp):
      >>mutate(pct_w_vp = (_.total_num_vp)/(_.total_num_sched))
             )
     return agg_df
+
+
 
 def groupby_onecol(df, groupbycol, aggcol):
     if groupbycol == "weekday":
