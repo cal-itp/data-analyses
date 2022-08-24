@@ -16,8 +16,7 @@ import A1_data_prep
 
 """
 Columns
-&
-Lists
+
 """
 # Columns to keep
 allocation_cols = [
@@ -93,11 +92,6 @@ sum_cols = [
 ]
 
 max_cols = ["Percent_of_Allocation_Expended", "Allocated_Before_July_31_2020"]
-
-list_to_add = ['Award_Amount',
-               'Amount_Allocated',
-               'Expended_Amount', 
-               'Number_of_Awarded_Projects']
 
 list_to_add = [
     "Award_Amount",
@@ -273,7 +267,7 @@ def full_sar_report():
     df_highlighted = df_all.style.apply(highlight_differences, axis=None)
 
     # Save to GCS
-    with pd.ExcelWriter(f"{GCS_FILE_PATH}Semi_Annual_Report.xlsx") as writer:
+    with pd.ExcelWriter(f"{GCS_FILE_PATH}Script_Semi_Annual_Report.xlsx") as writer:
         summary.to_excel(writer, sheet_name="Summary", index=True)
         df_pivoted.to_excel(writer, sheet_name="FY", index=True)
         df_current.to_excel(writer, sheet_name="Unpivoted_Current_Version", index=False)
