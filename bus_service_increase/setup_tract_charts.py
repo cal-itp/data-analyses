@@ -19,7 +19,7 @@ plt.style.use('../_shared_utils/shared_utils/calitp.mplstyle')
 
 def grab_legend_thresholds(df: pd.DataFrame, 
                            plot_col: str,
-                           arrivals_group: str) -> float, float, float:
+                           arrivals_group: str) -> tuple[float]:
     cut1 = df[(df[arrivals_group]==1) & (df[plot_col] > 0)][plot_col].min()
     cut2 = df[df[arrivals_group]==2][plot_col].min()
     cut3 = df[df[arrivals_group]==3][plot_col].min()
