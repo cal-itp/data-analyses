@@ -17,6 +17,7 @@ import shared_utils
 import utils
 
 catalog = intake.open_catalog("*.yml")
+facilities_catalog = intake.open_catalog("../facilities_services/*.yml")
 
 DATA_PATH = "./data/"
 IMG_PATH = "./img/"
@@ -67,22 +68,23 @@ def process_transit_routes(alternate_df:
     # route_long_name, route_short_name, agency_id
     # Get it down to route_id instead of shape_id, pick longest shape
     df2 = df.assign(route_length = df.geometry.length)
-    df2 = (df2.sort_values(["itp_id", "route_id", "route_length"], 
+    df3 = (df2.sort_values(["itp_id", "route_id", "route_length"], 
                   ascending=[True, True, False])
            .drop_duplicates(subset=["itp_id", "route_id"])
           .reset_index(drop=True)
          )
     
-    # Drop duplicate rows, keep longest
     # Then count how many unique route_ids appear for operator (that's denominator)
-    df3 = (df2.drop_duplicates(subset=["itp_id", "route_id"])
-          .reset_index(drop=True)
-          .assign(
-              total_routes = df2.groupby("itp_id")["route_id"].transform("nunique")
-          )
-    )
+    keep_cols = [
+        "itp_id", "route_id", "total_routes",
+        "route_length", "geometry"
+    ]
     
-    return df3
+    df4 = df3.assign(
+              total_routes = df3.groupby("itp_id")["route_id"].transform("nunique")
+          )[keep_cols]
+    
+    return df4
 
 
 def process_highways(buffer_feet: int = 
@@ -134,7 +136,11 @@ def overlay_transit_to_highways(
     # Overlay
     # Note: an overlay based on intersection changes the geometry column
     # The new geometry column will reflect that area of intersection
-    gdf = gpd.overlay(transit_routes, highways, how = "intersection")  
+    gdf = gpd.overlay(transit_routes, 
+                      highways, 
+                      how = "intersection", 
+                      keep_geom_type = False
+                     )  
     
     
     # Using new geometry column, calculate what % that intersection 
@@ -161,12 +167,13 @@ def overlay_transit_to_highways(
     # Fix geometry - don't want the overlay geometry, which is intersection
     # Want to use a transit route's line geometry
     gdf2 = pd.merge(
-        transit_routes[["itp_id", "shape_id", "route_id", "geometry"]],
+        transit_routes[["itp_id", "route_id", "geometry"]].drop_duplicates(),
         gdf.drop(columns = "geometry"),
-        on = ["itp_id", "route_id", "shape_id"],
+        on = ["itp_id", "route_id"],
         how = "left",
         # Allow 1:m merge because the same transit route can overlap with various highways
-        validate = "1:m"
+        validate = "1:m",
+        indicator=True
     )
     
     return gdf2
@@ -186,7 +193,7 @@ def parallel_or_intersecting(df: gpd.GeoDataFrame,
     )
     
     return df
-
+ 
 
 # Use this in notebook
 # Can pass different parameters if buffer or thresholds need adjusting
@@ -212,6 +219,9 @@ def make_analysis_data(hwy_buffer_feet=
     # Draw buffer around highways
     gdf = overlay_transit_to_highways(hwy_buffer_feet, alternate_df)
 
+    # Remove transit routes that do not overlap with highways
+    gdf = gdf[gdf._merge!="left_only"].drop(columns = "_merge").reset_index(drop=True)
+    
     # Categorize whether route is parallel or intersecting based on threshold
     gdf2 = parallel_or_intersecting(gdf, 
                                     pct_route_threshold, 
