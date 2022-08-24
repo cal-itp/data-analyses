@@ -53,7 +53,8 @@ def clean_highways():
 ### Functions to create overlay dataset + further cleaning
 #--------------------------------------------------------#
 # Can this function be reworked to take a df?
-def process_transit_routes(alternate_df = None):
+def process_transit_routes(alternate_df: 
+                           gpd.GeoDataFrame = None) -> gpd.GeoDataFrame:
     if alternate_df is None:
         df = catalog.transit_routes.read()
     else:
@@ -64,30 +65,29 @@ def process_transit_routes(alternate_df = None):
 
     # Transit routes included some extra info about 
     # route_long_name, route_short_name, agency_id
-    # Get it down to unique shape_id
-    subset_cols = ["itp_id", "shape_id", "route_id", "geometry"]
-    df = (df[subset_cols]
-          .drop_duplicates()
+    # Get it down to route_id instead of shape_id, pick longest shape
+    df2 = df.assign(route_length = df.geometry.length)
+    df2 = (df2.sort_values(["itp_id", "route_id", "route_length"], 
+                  ascending=[True, True, False])
+           .drop_duplicates(subset=["itp_id", "route_id"])
           .reset_index(drop=True)
-          .assign(route_length = df.geometry.length)
          )
     
-    # Noticed that shape_id and route_id still tag too many routes
-    # Keep the longest route_length and eliminate short trips
-    df = (df.sort_values(["itp_id", "route_id", "route_length"],
-                     ascending=[True, True, False])
-           .drop_duplicates(subset=["itp_id", "route_id"])
-           .reset_index(drop=True)
+    # Drop duplicate rows, keep longest
+    # Then count how many unique route_ids appear for operator (that's denominator)
+    df3 = (df2.drop_duplicates(subset=["itp_id", "route_id"])
+          .reset_index(drop=True)
+          .assign(
+              total_routes = df2.groupby("itp_id")["route_id"].transform("nunique")
+          )
     )
     
-    df = df.assign(
-        total_routes = df.groupby("itp_id")["route_id"].transform("count")
-    )
-    
-    return df
+    return df3
 
 
-def process_highways(buffer_feet = shared_utils.geography_utils.FEET_PER_MI):
+def process_highways(buffer_feet: int = 
+                     shared_utils.geography_utils.FEET_PER_MI
+                    ) -> gpd.GeoDataFrame:
     df = (catalog.state_highway_network.read()
           .to_crs(shared_utils.geography_utils.CA_StatePlane))
     
@@ -115,9 +115,10 @@ def process_highways(buffer_feet = shared_utils.geography_utils.FEET_PER_MI):
     return df
     
     
-def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEET_PER_MI,
-                                alternate_df = None
-                               ):
+def overlay_transit_to_highways(
+    hwy_buffer_feet: int = shared_utils.geography_utils.FEET_PER_MI,
+    alternate_df = None
+) -> gpd.GeoDataFrame:
     """
     Function to find areas of intersection between
     highways (default of 1 mile buffer) and transit routes.
@@ -136,7 +137,8 @@ def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEE
     gdf = gpd.overlay(transit_routes, highways, how = "intersection")  
     
     
-    # Using new geometry column, calculate what % that intersection is of the route and hwy
+    # Using new geometry column, calculate what % that intersection 
+    # is of the route and hwy
     gdf = gdf.assign(
         pct_route = (gdf.geometry.length / gdf.route_length).round(3),
         pct_highway = (gdf.geometry.length / gdf.highway_length).round(3),
@@ -170,8 +172,9 @@ def overlay_transit_to_highways(hwy_buffer_feet=shared_utils.geography_utils.FEE
     return gdf2
 
 
-def parallel_or_intersecting(df, pct_route_threshold=0.5, 
-                             pct_highway_threshold=0.1):
+def parallel_or_intersecting(df: gpd.GeoDataFrame, 
+                             pct_route_threshold: float = 0.5, 
+                             pct_highway_threshold: float = 0.1) -> gpd.GeoDataFrame:
     
     # Play with various thresholds to decide how to designate parallel
     df = df.assign(
@@ -214,7 +217,10 @@ def make_analysis_data(hwy_buffer_feet=
                                     pct_route_threshold, 
                                     pct_highway_threshold)
     
-    gdf2.to_parquet(f"{DATA_PATH}{FILE_NAME}.parquet")
+    if "gs://" in DATA_PATH:
+        shared_utils.utils.geoparquet_gcs_export(gdf2, DATA_PATH, FILE_NAME)
+    else:
+        gdf2.to_parquet(f"{DATA_PATH}{FILE_NAME}.parquet")
     
     # For map, need highway to be 250 ft buffer
     #highways = process_highways(buffer_feet=250)

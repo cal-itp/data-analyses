@@ -1,14 +1,15 @@
 """
-Compile cached results into dataframe.
+Compile cached results stored in GCS
+into geodataframe.
 """
 import pandas as pd
-import pickle
 
 import A4_geocode
 import utils
+import shared_utils
 
 # Parse the results dict and compile as pd.Series
-def compile_results(results):
+def compile_results(results: dict) -> pd.Series:
             
     address_arcgis_clean = results["address"]
     address_input = results["raw"]["name"]
@@ -52,4 +53,15 @@ if __name__ == "__main__":
         
     # Export results to GCS
     print(f"# geocoded results: {len(full_results)}")
-    full_results.to_parquet(f"{utils.GCS_FILE_PATH}geocoder_results.parquet")
+    
+    gdf = shared_utils.geography_utils.create_point_geometry(
+        full_results,
+        longitude_col = "longitude",
+        latitude_col = "latitude",
+    ).drop(columns = ["longitude", "latitude"])
+    
+
+    shared_utils.utils.geoparquet_gcs_export(gdf, 
+                                             utils.GCS_FILE_PATH, 
+                                             "geocoder_results"
+                                            )

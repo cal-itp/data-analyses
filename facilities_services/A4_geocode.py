@@ -11,7 +11,7 @@ import pickle
 
 import utils
 
-def prep_geocode_df():
+def prep_geocode_df() -> pd.DataFrame:
     df = pd.read_parquet(f"{utils.GCS_FILE_PATH}for_geocoding.parquet")
     
     # Now that we removed the stuff in parentheses, 
@@ -25,26 +25,6 @@ def prep_geocode_df():
         subset=["full_address", "city", "zip_code"])
     
     return geocode_df
-
-
-def osm_geocode_address(row):
-    input_address = row.full_address
-    g = geocoder.osm(input_address)
-    
-    # results are a dict with x, y, address components
-    # keep it all, since we don't always have zip_code
-    # also use this as sanity check
-    if g.ok is True:
-        results = g.osm
-        utils.save_request_json(results, row.sheet_uuid, 
-                                DATA_PATH = utils.DATA_PATH, 
-                                GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}geocode_cache/")
-
-        print(f"Cached {row.sheet_uuid}")
-    
-        return row.sheet_uuid
-    else:
-        return None
 
 
 def arcgis_geocode_address(row):
@@ -65,7 +45,7 @@ def arcgis_geocode_address(row):
         return None
 
     
-    # https://stackoverflow.com/questions/26835477/pickle-load-variable-if-exists-or-create-and-save-it
+# https://stackoverflow.com/questions/26835477/pickle-load-variable-if-exists-or-create-and-save-it
 # If pickle file is found, use it. Otherwise, create any empty pickle file
 # to hold uuids that have cached results
 def read_or_new_pickle(path, default_in_file):
@@ -84,7 +64,7 @@ def read_or_new_pickle(path, default_in_file):
 if __name__ == "__main__":
     geocode_df = prep_geocode_df()
      
-    # Geocode and cache results
+    # Geocode and cache results -- arcgis geocoder works fine, does it in 1 batch
     # Assume it's going to take batches to compile
    
     # Returns empty list the first time

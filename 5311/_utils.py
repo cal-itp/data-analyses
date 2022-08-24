@@ -1,8 +1,6 @@
 """
 5311 Utils for Analysis and Charting 
 """
-
-
 import numpy as np
 import pandas as pd
 from siuba import *
@@ -18,11 +16,8 @@ from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
-
-
-
 '''
-charting functions 
+Charting Functions 
 '''
 #Labels
 def labeling(word):
@@ -43,7 +38,7 @@ def labeling(word):
     
     return word
 
-# Bar
+# Bar Chart
 def basic_bar_chart(df, x_col, y_col, colorcol):
     
     chart = (alt.Chart(df)
@@ -66,7 +61,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol):
     return chart
 
 
-# Scatter 
+# Scatter Chart
 def basic_scatter_chart(df, x_col, y_col, colorcol):
     
     chart = (alt.Chart(df)
@@ -89,7 +84,7 @@ def basic_scatter_chart(df, x_col, y_col, colorcol):
     return chart
 
 
-# Line
+# Line Chart
 def basic_line_chart(df, x_col, y_col, colorcol):
     
     chart = (alt.Chart(df)
@@ -110,7 +105,14 @@ def basic_line_chart(df, x_col, y_col, colorcol):
     
     return chart
 
-
+#Return multiple charts at once based on a fixed X axis and 
+#but mulitple y value sin a list
+def multi_charts(df, x_axis_col:str, cols_of_int: list):
+    for i in cols_of_int:
+        df_i = df[[x_axis_col, i]]
+        bar_chart_i = basic_bar_chart(df_i, x_axis_col, i, x_axis_col)
+        display(bar_chart_i)
+    return bar_chart_i
 
 
 
@@ -135,3 +137,15 @@ def aggregation_one(df, grouping_col):
     #reset index
     df = df.reset_index()
     return df 
+
+'''
+Other
+'''
+#Clean up titles on a dataframe
+def cols_cleanup(df):
+    df.columns = (df.columns
+                  .str.replace('[_]', ' ')
+                  .str.title()
+                  .str.strip()
+                 )
+    return df

@@ -17,7 +17,7 @@ DATA_PATH = warehouse_queries.DATA_PATH
 #------------------------------------------------------------------#
 ## Functions to create operator-route-level dataset
 #------------------------------------------------------------------#
-def get_time_calculations(df):
+def get_time_calculations(df: pd.DataFrame) -> pd.DataFrame:
     ## time calculations
     df = df.assign(
         date = pd.to_datetime(df.date),
@@ -71,7 +71,8 @@ def add_zeros(one_operator_df):
     # out of an ix of {len(shape_frequency.index)}
     #     ''')
         assert len(duplicate_indicies) < len(shape_frequency.index) / 100, 'too many duplicate shape/day/departure_hour'
-        shape_frequency = (shape_frequency.groupby(['shape_id', 'day_name', 'departure_hour'])
+        shape_frequency = (shape_frequency
+                           .groupby(['shape_id', 'day_name', 'departure_hour'])
                            .agg({'calitp_itp_id':max, 
                                  'route_id':max, 
                                  'trips_per_hour':sum, 
@@ -164,8 +165,9 @@ def calculate_runtime_hourlytrips(df):
     # There's an aggregation to deal with multiple route_ids that share same shape_id
     # If there are still multiple route_ids, then aggregate and sum / mean
     # Modify this to include itp_id into the groupby
-    shape_frequency2 = (shape_frequency.groupby(
-        ["calitp_itp_id", "shape_id", "departure_hour", "day_name"])
+    shape_frequency2 = (shape_frequency
+                        .groupby(["calitp_itp_id", "shape_id", 
+                                  "departure_hour", "day_name"])
                         .agg({"route_id": "max", 
                               "trips_per_hour": "sum", 
                               "mean_runtime_min": "mean"
@@ -188,7 +190,7 @@ def attach_funding(all_operators_df):
                     >> right_join(_, all_operators_df, on = 'calitp_itp_id')
                    )
     
-    def fix_funds(value):
+    def fix_funds(value: str) -> int:
         if type(value) != str:
             return None
         else:
@@ -261,7 +263,7 @@ def create_service_estimator_data():
 
 ## Start functions related to A2
 # Categorize tracts and add back further process the operator-route-level df
-def generate_shape_categories(shapes_df):
+def generate_shape_categories(shapes_df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     shapes_df = (shapes_df.reset_index(drop=True)
                  .to_crs(shared_utils.geography_utils.CA_NAD83Albers)
                 )
@@ -302,7 +304,7 @@ def generate_shape_categories(shapes_df):
     return shapes_df
 
 
-def categorize_shape(row):
+def categorize_shape(row: float) -> str:
     if row.pct_urban == row.pct_max:
         row['tract_type'] = 'urban'
     elif row.pct_suburban == row.pct_max:

@@ -13,7 +13,7 @@ from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
 '''
-Functions
+Non-Chart Functions
 '''
 ### Turn value counts into a dataframe ###
 def value_function(df, column_of_int):
@@ -25,6 +25,16 @@ def value_function(df, column_of_int):
                        'index': column_of_int})
     )
     return df_new
+
+### Add a new column that rounds dollar amounts to millions ###
+def millions(df, col_name: str): 
+    df['Amt in M'] = (
+    "$"
+    + (df[col_name].astype(float) / 1000000)
+    .round(0)
+    .astype(str)
+    + "M")
+    return df 
 
 ### Style a dataframe ### 
 def color(value):
@@ -39,10 +49,11 @@ def color(value):
     else:
         color =  "#2EA8CE"
     return f'background-color: {color}'
+
 '''
-Charts
+Charts Functions
 '''
-#Labels
+#Labels for charts 
 def labeling(word):
     # Add specific use cases where it's not just first letter capitalized
     LABEL_DICT = { "prepared_y": "Year",
@@ -55,13 +66,13 @@ def labeling(word):
     elif word in LABEL_DICT.keys():
         word = LABEL_DICT[word]
     else:
-        #word = word.replace('n_', 'Number of ').title()
         word = word.replace('unique_', "Number of Unique ").title()
         word = word.replace('_', ' ').title()
     
     return word
 
-### BASIC BAR CHART ### 
+### Bar chart with interactive tooltip: x_col and y_col will show up ### 
+### This function only returns a chart, doesn't save
 def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     if chart_title == "":
         chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
@@ -72,18 +83,43 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
                  y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
                  color = alt.Color(colorcol, 
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_DIVERGING_COLORS),
+                                      range=cp.CALITP_DIVERGING_COLORS),
                                       legend=alt.Legend(title=(labeling(colorcol)))
-                                  ))
+                                  ),
+                tooltip = [x_col, y_col])
              .properties( 
                        title=chart_title)
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./bar_{x_col}_by_{y_col}.png")
     return chart
 
-### BAR CHART WITH LABELS AND A LEGEND ###
+### Bar chart with with tooltips: x_col and another col ### 
+### This function only returns a chart, doesn't save
+def basic_bar_chart_v2(df, x_col, y_col, tooltip_col, colorcol, chart_title=''):
+    if chart_title == "":
+        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
+    chart = (alt.Chart(df)
+             .mark_bar()
+             .encode(
+                 x=alt.X(x_col, title=labeling(x_col), ),
+                 y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
+                 color = alt.Color(colorcol, 
+                                  scale=alt.Scale(
+                                      range=cp.CALITP_DIVERGING_COLORS),
+                                      legend=alt.Legend(title=(labeling(colorcol)))
+                                  ),
+                tooltip = [x_col, tooltip_col])
+             .properties( 
+                       title=chart_title)
+    )
+
+    chart=styleguide.preset_chart_config(chart)
+    return chart
+
+### Bar chart with labels at the end of the bar and custom legend ###
+### This function only returns a chart, doesn't save
+
 #Base bar chart
 def base_bar(df):
     chart = (alt.Chart(df)
@@ -105,7 +141,7 @@ def fancy_bar_chart(df, LEGEND, y_col, x_col, label_col, chart_title=''):
          color=alt.Color(y_col, 
                         scale=alt.Scale(
                             domain=LEGEND, #Specifies the order of the legend.
-                            range=altair_utils.CALITP_DIVERGING_COLORS
+                            range=cp.CALITP_DIVERGING_COLORS
                         )
                 )
              )
@@ -126,5 +162,4 @@ def fancy_bar_chart(df, LEGEND, y_col, x_col, label_col, chart_title=''):
     chart = (styleguide.preset_chart_config(chart)
              .properties(title= chart_title).configure_axis(grid=False)
             )
-    chart.save(f"./bar_{x_col}_by_{y_col}.png")
-    display(chart)
+    return chart 

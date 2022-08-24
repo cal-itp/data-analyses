@@ -2,6 +2,8 @@
 Utility functions for geospatial data.
 Some functions for dealing with census tract or other geographic unit dfs.
 """
+import datetime
+
 import geopandas as gpd
 import pandas as pd
 import shapely
@@ -19,14 +21,14 @@ SQ_FT_PER_SQ_MI = 2.788 * 10**7
 
 
 def aggregate_by_geography(
-    df,
-    group_cols,
-    sum_cols=[],
-    mean_cols=[],
-    count_cols=[],
-    nunique_cols=[],
-    rename_cols=False,
-):
+    df: pd.DataFrame | gpd.GeoDataFrame,
+    group_cols: list,
+    sum_cols: list = [],
+    mean_cols: list = [],
+    count_cols: list = [],
+    nunique_cols: list = [],
+    rename_cols: bool = False,
+) -> pd.DataFrame:
     """
     df: pandas.DataFrame or geopandas.GeoDataFrame.,
         The df on which the aggregating is done.
@@ -51,7 +53,13 @@ def aggregate_by_geography(
     """
     final_df = df[group_cols].drop_duplicates().reset_index()
 
-    def aggregate_and_merge(df, final_df, group_cols, agg_cols, AGGREGATE_FUNCTION):
+    def aggregate_and_merge(
+        df: pd.DataFrame | gpd.GeoDataFrame,
+        final_df: pd.DataFrame,
+        group_cols: list,
+        agg_cols: list,
+        AGGREGATE_FUNCTION: str,
+    ):
 
         agg_df = df.pivot_table(
             index=group_cols, values=agg_cols, aggfunc=AGGREGATE_FUNCTION
@@ -83,7 +91,12 @@ def aggregate_by_geography(
     return final_df.drop(columns="index")
 
 
-def attach_geometry(df, geometry_df, merge_col=["Tract"], join="left"):
+def attach_geometry(
+    df: pd.DataFrame,
+    geometry_df: gpd.GeoDataFrame,
+    merge_col: list = ["Tract"],
+    join: str = "left",
+) -> gpd.GeoDataFrame:
     """
     df: pandas.DataFrame
         The df that needs tract geometry added.
@@ -107,8 +120,10 @@ def attach_geometry(df, geometry_df, merge_col=["Tract"], join="left"):
 
 
 # Function to construct the SQL condition for make_routes_gdf()
-def construct_condition(SELECTED_DATE, INCLUDE_ITP_LIST):
-    def unpack_list_make_or_statement(INCLUDE_ITP_LIST):
+def construct_condition(
+    SELECTED_DATE: str | datetime.datetime, INCLUDE_ITP_LIST: list
+) -> str:
+    def unpack_list_make_or_statement(INCLUDE_ITP_LIST: list) -> str:
         new_cond = ""
 
         for i in range(0, len(INCLUDE_ITP_LIST)):
@@ -135,7 +150,9 @@ def construct_condition(SELECTED_DATE, INCLUDE_ITP_LIST):
 
 
 # Run the sql query with the condition in long-form
-def create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST):
+def create_shapes_for_subset(
+    SELECTED_DATE: str | datetime.datetime, ITP_ID_LIST: list
+) -> pd.DataFrame:
     condition = construct_condition(SELECTED_DATE, ITP_ID_LIST)
 
     sql_statement = f"""
@@ -156,7 +173,22 @@ def create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST):
     return df
 
 
-def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None):
+# Laurie's example: https://github.com/cal-itp/data-analyses/blob/752eb5639771cb2cd5f072f70a06effd232f5f22/gtfs_shapes_geo_examples/example_shapes_geo_handling.ipynb
+# have to convert to linestring
+def make_linestring(x: str) -> shapely.geometry.LineString:
+    # shapely errors if the array contains only one point
+    if len(x) > 1:
+        # each point in the array is wkt
+        # so convert them to shapely points via list comprehension
+        as_wkt = [shapely.wkt.loads(i) for i in x]
+        return shapely.geometry.LineString(as_wkt)
+
+
+def make_routes_gdf(
+    SELECTED_DATE: str | datetime.datetime,
+    CRS: str = "EPSG:4326",
+    ITP_ID_LIST: list = None,
+):
     """
     Parameters:
 
@@ -185,32 +217,20 @@ def make_routes_gdf(SELECTED_DATE, CRS="EPSG:4326", ITP_ID_LIST=None):
     else:
         df = create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST)
 
-    # Laurie's example: https://github.com/cal-itp/data-analyses/blob/752eb5639771cb2cd5f072f70a06effd232f5f22/gtfs_shapes_geo_examples/example_shapes_geo_handling.ipynb
-    # have to convert to linestring
-    def make_linestring(x):
-
-        # shapely errors if the array contains only one point
-        if len(x) > 1:
-            # each point in the array is wkt
-            # so convert them to shapely points via list comprehension
-            as_wkt = [shapely.wkt.loads(i) for i in x]
-            return shapely.geometry.LineString(as_wkt)
-
     # apply the function
     df["geometry"] = df.pt_array.apply(make_linestring)
 
-    # convert to geopandas; geometry column contains the linestring
-    gdf = gpd.GeoDataFrame(df, geometry="geometry", crs=WGS84)
-
-    # Project, if necessary
-    gdf = gdf.to_crs(CRS)
+    # convert to geopandas; geometry column contains the linestring, re-project if needed
+    gdf = gpd.GeoDataFrame(df, geometry="geometry", crs=WGS84).to_crs(CRS)
 
     return gdf
 
 
 # Function to deal with edge cases where operators do not submit the optional shapes.txt
 # Use stops data / stop sequence to handle
-def make_routes_line_geom_for_missing_shapes(df, CRS="EPSG:4326"):
+def make_routes_line_geom_for_missing_shapes(
+    df: pd.DataFrame, CRS: str = "EPSG:4326"
+) -> gpd.GeoDataFrame:
     """
     Parameters:
     df: pandas.DataFrame.
@@ -270,8 +290,11 @@ def make_routes_line_geom_for_missing_shapes(df, CRS="EPSG:4326"):
 
 
 def create_point_geometry(
-    df, longitude_col="stop_lon", latitude_col="stop_lat", crs=WGS84
-):
+    df: pd.DataFrame,
+    longitude_col: str = "stop_lon",
+    latitude_col: str = "stop_lat",
+    crs: str = WGS84,
+) -> gpd.GeoDataFrame:
     """
     Parameters:
     df: pandas.DataFrame to turn into geopandas.GeoDataFrame,
@@ -285,9 +308,12 @@ def create_point_geometry(
 
     crs: str, coordinate reference system for point geometry
     """
+    # Default CRS for stop_lon, stop_lat is WGS84
     df = df.assign(
-        geometry=gpd.points_from_xy(df[longitude_col], df[latitude_col], crs=crs)
+        geometry=gpd.points_from_xy(df[longitude_col], df[latitude_col], crs=WGS84)
     )
 
-    gdf = gpd.GeoDataFrame(df)
+    # ALlow projection to different CRS
+    gdf = gpd.GeoDataFrame(df).to_crs(crs)
+
     return gdf
