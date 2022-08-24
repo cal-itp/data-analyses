@@ -13,7 +13,7 @@ import shapely
 import datetime as dt
 from tqdm import tqdm
 
-# import numpy as np
+import numpy as np
 from calitp.tables import tbl
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -26,6 +26,7 @@ class RtFilterMapper:
     '''
     def __init__(self, rt_trips, stop_delay_view,
                  routelines, pbar = None):
+        self.debug_dict = {}
         self.pbar = pbar
         self.rt_trips = rt_trips
         self.calitp_itp_id = self.rt_trips.calitp_itp_id.iloc[0]
@@ -49,14 +50,15 @@ class RtFilterMapper:
         self.reset_filter()
 
     def set_filter(self, start_time = None, end_time = None, route_names = None,
-                   shape_ids = None, direction_id = None, direction = None):
+                   shape_ids = None, direction_id = None, direction = None, trip_ids = None):
         '''
         start_time, end_time: string %H:%M, for example '11:00' and '14:00'
         route_names: list or pd.Series of route_names (GTFS route_short_name)
         direction_id: '0' or '1'
         direction: string 'Northbound', 'Eastbound', 'Southbound', 'Westbound' (experimental)
+        trip_ids: list or pd.Series of trip_ids (GTFS trip_ids)
         '''
-        assert start_time or end_time or route_names or direction_id or direction or shape_ids, 'must supply at least 1 argument to filter'
+        assert start_time or end_time or route_names or direction_id or direction or shape_ids or trip_ids, 'must supply at least 1 argument to filter'
         assert not start_time or type(dt.datetime.strptime(start_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not end_time or type(dt.datetime.strptime(end_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not route_names or type(route_names) == list or type(route_names) == tuple or type(route_names) == type(pd.Series())
@@ -76,6 +78,7 @@ class RtFilterMapper:
             self.filter['end_time'] = None
         self.filter['route_names'] = route_names
         self.filter['shape_ids'] = shape_ids
+        self.filter['trip_ids'] = trip_ids
         if shape_ids:
             shape_trips = (self.rt_trips >> filter(_.shape_id.isin(shape_ids))
                            >> distinct(_.route_short_name, _keep_all=True)
@@ -84,6 +87,14 @@ class RtFilterMapper:
             self.filter['route_names'] = list(shape_trips.route_short_name)
             if len(shape_ids) == 1:
                 direction = (self.rt_trips >> filter(_.shape_id == shape_ids[0])).direction.iloc[0]
+        if trip_ids:
+            trips = (self.rt_trips >> filter(_.trip_id.isin(trip_ids))
+                           >> distinct(_.route_short_name, _keep_all=True)
+                           >> collect()
+                          )
+            self.filter['route_names'] = list(trips.route_short_name)
+            if len(trip_ids) == 1:
+                direction = (self.rt_trips >> filter(_.trip_id == trip_ids[0])).direction.iloc[0]
         self.filter['direction_id'] = direction_id
         self.filter['direction'] = direction
         if start_time and end_time:
@@ -100,8 +111,6 @@ class RtFilterMapper:
         elif not self.filter['route_names']:
             rts = 'All Routes'
             
-        # print(self.filter)
-        ## properly format for pm peak, TODO add other periods
         if start_time and end_time and start_time == '15:00' and end_time == '19:00':
             self.filter_period = 'PM_Peak'
         elif start_time and end_time and start_time == '06:00' and end_time == '09:00':
@@ -115,7 +124,7 @@ class RtFilterMapper:
         elements_ordered = [rts, direction, self.filter_period, self.display_date]
         self.filter_formatted = ', ' + ', '.join([str(x).replace('_', ' ') for x in elements_ordered if x])
         
-        self._time_only_filter = not route_names and not shape_ids and not direction_id and not direction
+        self._time_only_filter = not route_names and not shape_ids and not direction_id and not direction and not trip_ids
             
     def reset_filter(self):
         self.filter = None
@@ -140,23 +149,23 @@ class RtFilterMapper:
             trips = trips >> filter(_.route_short_name.isin(self.filter['route_names']))
         if self.filter['shape_ids']:
             trips = trips >> filter(_.shape_id.isin(self.filter['shape_ids']))
+        if self.filter['trip_ids']:
+            trips = trips >> filter(_.trip_id.isin(self.filter['trip_ids']))
         if self.filter['direction_id']:
             trips = trips >> filter(_.direction_id == self.filter['direction_id'])
         if self.filter['direction']:
             trips = trips >> filter(_.direction == self.filter['direction'])
         return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
     
-## TODO, optionally port over segment speed map from rt_analysis, would require stop delay view
-## alternatively, simply export full day segment speed view
 
-    def segment_speed_map(self, segments = 'stops', how = 'average',
+    def segment_speed_map(self, segments = 'stops', how = 'low_speeds',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
                          no_title=False):
         ''' Generate a map of segment speeds aggregated across all trips for each shape, either as averages
         or 20th percentile speeds.
         
         segments: 'stops' or 'detailed' (detailed not yet implemented)
-        how: 'average' or 'low_speeds'
+        how: 'average' or 'low_speeds' (low_speeds is 20%ile)
         colorscale: branca.colormap
         size: [x, y]
         
@@ -183,7 +192,7 @@ class RtFilterMapper:
                     continue
                 # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
                 stop_speeds = (this_shape
-                             >> group_by(_.trip_key)
+                             >> group_by(_.trip_id)
                              >> arrange(_.stop_sequence)
                              >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
                              >> mutate(last_loc = _.shape_meters.shift(1))
@@ -219,19 +228,21 @@ class RtFilterMapper:
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
                         )
-                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd2'] = stop_speeds
+                    self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
                     assert not stop_speeds.empty, 'stop speeds gdf is empty!'
                 except Exception as e:
-                    # print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
-                    # print(e)
+                    print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
+                    print(e)
                     continue
-                stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
-                if stop_speeds.avg_mph.max() > 80:
-                    # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                    stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
+                ## TODO debug km segments
+                # stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
+                # if stop_speeds.avg_mph.max() > 80:
+                #     # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                #     stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
                 if stop_speeds._20p_mph.min() < 0:
                     # print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
+                
                 all_stop_speeds = pd.concat((all_stop_speeds, stop_speeds))
 
                 if type(self.pbar) != type(None):
@@ -256,6 +267,7 @@ class RtFilterMapper:
         # singletrip = gdf.trip_id.nunique() == 1 ## incompatible with current caching approach
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
         orig_rows = gdf.shape[0]
+        self.debug_dict['_show_gdf'] = gdf
         gdf['shape_miles'] = gdf.shape_meters / 1609
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_miles': 1,
                         'trips_per_hour': 1}) ##round for display
@@ -457,8 +469,8 @@ def from_gcs(itp_id, analysis_date):
     month_day = analysis_date.strftime('%m_%d')
     trips = pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{month_day}.parquet')
     stop_delay = gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{month_day}.parquet')
-    stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: dt.datetime.fromisoformat(x))
-    stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: dt.datetime.fromisoformat(x))
+    stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
+    stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
     routelines = get_routelines(itp_id, analysis_date)
     rt_day = RtFilterMapper(trips, stop_delay, routelines)
     return rt_day
