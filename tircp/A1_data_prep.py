@@ -51,6 +51,10 @@ def organization_cleaning(df, column_wanted: str):
     )
     return df
 
+# Format numbers to currency
+def currency_format(df, col_name: str):
+    df[col_name] = "$" + (df[col_name].astype(float)).round(0).astype(str)
+    return df
 """
 Import the Data
 """
@@ -215,7 +219,7 @@ def clean_allocation_manual(df):
 
 # Clean the entire allocation sheet
 def clean_allocation():
-    df = A1_data_prep.load_allocation()
+    df = load_allocation()
 
     """
     Some rows are not completely filled: drop them based on whether or not some
