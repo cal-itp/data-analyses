@@ -158,14 +158,14 @@ class RtFilterMapper:
         return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
     
 
-    def segment_speed_map(self, segments = 'stops', how = 'average',
+    def segment_speed_map(self, segments = 'stops', how = 'low_speeds',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
                          no_title=False):
         ''' Generate a map of segment speeds aggregated across all trips for each shape, either as averages
         or 20th percentile speeds.
         
         segments: 'stops' or 'detailed' (detailed not yet implemented)
-        how: 'average' or 'low_speeds'
+        how: 'average' or 'low_speeds' (low_speeds is 20%ile)
         colorscale: branca.colormap
         size: [x, y]
         
