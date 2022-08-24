@@ -9,11 +9,12 @@ from D1_pmac_routes import TRAFFIC_OPS_GCS
 from utils import GCS_FILE_PATH
 from shared_utils import geography_utils
 
+route_cols = ["itp_id", "route_id"]
 #---------------------------------------------------------------#
 # Data processing - merge trips dfs, tag a route as parallel/on shn/other
 #---------------------------------------------------------------#
 
-def merge_trips_with_service_hrs(date_str) -> pd.DataFrame:
+def calculate_route_level_service_hours(date_str) -> pd.DataFrame:
     """
     Merge trips df with trips_with_service_hrs (aggregated to shape_id).
     
@@ -21,26 +22,28 @@ def merge_trips_with_service_hrs(date_str) -> pd.DataFrame:
     and leads to double-counting, or merges not going through in full.
     """
     trips_with_hrs = pd.read_parquet(
-        f"{GCS_FILE_PATH}trips_with_hrs_{date_str}.parquet")
+        f"{GCS_FILE_PATH}trips_with_hrs_{date_str}.parquet").rename(
+        columns = {"calitp_itp_id": "itp_id"})
     
     trips = pd.read_parquet(
-        f"{TRAFFIC_OPS_GCS}trips_{date_str}.parquet")
+        f"{TRAFFIC_OPS_GCS}trips_{date_str}.parquet").rename(
+        columns = {"calitp_itp_id": "itp_id"})
     
-    route_cols = [
-        "calitp_itp_id", "route_id"
-    ]
-    
+    # Aggregate trips with service hours (at shape_id level) up to route_id
     route_service_hours = geography_utils.aggregate_by_geography(
         trips_with_hrs,
         group_cols = route_cols,
         sum_cols = ["total_service_hours"]
     ) 
     
+    # Aggregate trips (at trip_id level) to route_id
+    routes = trips[route_cols].drop_duplicates().reset_index(drop=True)
+    
     # there are multiple trips sharing same shape_id
     # that's fine, but since trips_with_hrs is already aggregated up to
     # the route_id level, aggregate for trips too
     route_full_info = pd.merge(
-        trips[route_cols].drop_duplicates(),
+        routes,
         route_service_hours,
         on = route_cols,
         how = "outer",
@@ -59,23 +62,9 @@ def get_parallel_routes(date_str: str) -> pd.DataFrame:
     
     parallel = parallel[parallel.parallel==1]
     
-    # Grab district
-    route_cols = ["itp_id", "route_id"]
-    district_for_route = (parallel[parallel.District.notna()]
-                          [route_cols + ["District"]]
-                          .drop_duplicates(subset=route_cols)
-    )
-    
     parallel2 = get_unique_routes(parallel)
-
-    parallel3 = pd.merge(parallel2, 
-                         district_for_route, 
-                         on = route_cols,
-                         how = "left",
-                         validate = "1:1"
-                        )
     
-    return parallel3
+    return parallel2
 
 
 def get_on_shn_routes(date_str: str) -> pd.DataFrame:
@@ -86,13 +75,11 @@ def get_on_shn_routes(date_str: str) -> pd.DataFrame:
     on_shn = gpd.read_parquet(
         f"{GCS_FILE_PATH}routes_on_shn_{date_str}.parquet"
     )
+    on_shn2 = on_shn[on_shn.parallel == 1]
+
+    on_shn3 = get_unique_routes(on_shn2)
     
-    on_shn2 = get_unique_routes(on_shn)
-    on_shn2 = on_shn2.assign(
-        on_shn = 1,
-    ).drop(columns = "parallel")
-    
-    return on_shn2
+    return on_shn3
 
 
 def get_unique_routes(df: pd.DataFrame) -> pd.DataFrame:
@@ -102,39 +89,64 @@ def get_unique_routes(df: pd.DataFrame) -> pd.DataFrame:
     """
     # If there are multiple shape_ids for route_id,
     # Keep the one where it's has higher overlap with SHN
-    # If it was ever tagged as parallel, let's keep that obs
-    df2 = (df.groupby(["itp_id", "route_id"])
-           .agg({"pct_route": "max", 
-                "parallel": "max"})
-           .reset_index()
-          )[["itp_id", "route_id", "parallel"]].drop_duplicates()
+    # If it was ever tagged as parallel, let's keep that obs    
+    df2 = (df.sort_values(route_cols + ["pct_route", "pct_highway"],
+                          ascending=[True, True, False, False]
+                         )
+           .drop_duplicates(subset=route_cols)
+          )[route_cols]
     
     return df2
     
-    
-def mutually_exclusive_groups(df):
+
+def mutually_exclusive_groups(df: pd.DataFrame) -> pd.DataFrame:
     # Now, force mutual exclusivity
-    def make_mutually_exclusive(row):
-        if row.parallel==1:
+    def make_mutually_exclusive(row) -> str:
+        if row.in_parallel=="both":
             return "parallel"
-        elif row.on_shn==1:
+        elif (row.in_parallel=="left_only") and (row.in_on_shn=="both"):
             return "on_shn"
-        else:
+        elif (row.in_parallel=="left_only") and (row.in_on_shn=="left_only"):
             return "other"
     
-    df["category"] = df.apply(lambda x: make_mutually_exclusive(x), axis=1)
-    
     df2 = df.assign(
-        is_parallel = df.apply(lambda x: 
-                               1 if x.category == "parallel" else 0, axis=1),
-        is_on_shn = df.apply(lambda x: 
-                             1 if x.category == "on_shn" else 0, axis=1),
-        is_other = df.apply(lambda x: 
-                            1 if x.category == "other" else 0, axis=1),
-    ).drop(columns = ["parallel", "on_shn"])
+        category = df.apply(lambda x: make_mutually_exclusive(x), axis=1),
+        # Flag a unique route, since nunique(route_id) isn't exact, if route_id is 1
+        # and many operators share that value
+        unique_route = 1
+    ).drop(columns = ["in_parallel", "in_on_shn"])
     
-    return df2 
+    return df2
     
+
+def add_district(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
+    """
+    Merge in district info (only 1 district per route_id)
+    """
+    
+    parallel = gpd.read_parquet(
+        f"{GCS_FILE_PATH}parallel_or_intersecting_{date_str}.parquet")
+    
+    district = parallel[route_cols + ["pct_route","District"]].drop_duplicates()
+    
+    # If there's multiple districts, keep the one associated with the highest % route 
+    # since that's the obs we keep anyway
+    district2 = (district.sort_values(route_cols + ["pct_route", "District"], 
+                                     ascending=[True, True, False, True])
+                 .drop_duplicates(subset=route_cols)
+                 .reset_index(drop=True)
+                 [route_cols + ["District"]]
+    )
+    
+    df2 = pd.merge(
+        df, district2,
+        on = route_cols,
+        how = "left",
+        validate = "1:1"
+    )
+    
+    return df2
+
     
 def flag_parallel_intersecting_routes(date_str: str) -> pd.DataFrame:
     """
@@ -143,7 +155,7 @@ def flag_parallel_intersecting_routes(date_str: str) -> pd.DataFrame:
     and flag whether a transit route is parallel, on SHN, or other.
     """
     # Merge trips and trips_with_hrs dfs, and aggregate to route_level
-    route_level_df = merge_trips_with_service_hrs(date_str)
+    route_level_df = calculate_route_level_service_hours(date_str)
     
     # Flag routes if they're parallel or on SHN
     parallel_routes = get_parallel_routes(date_str)
@@ -152,26 +164,26 @@ def flag_parallel_intersecting_routes(date_str: str) -> pd.DataFrame:
     # Merge the parallel and on_shn dummy variables in
     with_parallel_flag = pd.merge(route_level_df, 
                                   parallel_routes,
-                                  on = ["itp_id", "route_id"],
+                                  on = route_cols,
                                   how = "left",
-                                  validate = "1:1"
+                                  validate = "1:1",
+                                  indicator="in_parallel"
     )
     
     with_shn_flag = pd.merge(with_parallel_flag,
                              on_shn_routes,
-                             on = ["itp_id", "route_id"],
+                             on = route_cols,
                              how = "left",
-                             validate = "1:1"
+                             validate = "1:1",
+                             indicator="in_on_shn"
     )
     
+
     # Make sure parallel, on_shn, and other are mutually exclusive categories
     # A route can only fall into 1 of these groups
     with_categories = mutually_exclusive_groups(with_shn_flag)
+    with_categories = add_district(with_categories, date_str)
     
-    # Flag a unique route, since nunique(route_id) isn't exact, if route_id is 1
-    # and many operators share that value
-    with_categories = with_categories.assign(unique_route=1)
-
     return with_categories
 
 
