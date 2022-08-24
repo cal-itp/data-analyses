@@ -140,13 +140,13 @@ def groupby_twocol(df, groupbycol1, groupbycol2, aggcol, timeframe):
     
     if timeframe== "month":
         cats_month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-        grouped = df>>group_by(_[groupbycol, _[groupbycol2]])>>summarize(avg = _[aggcol].mean())
+        grouped = df>>group_by(_[groupbycol1], _[groupbycol2])>>summarize(avg = _[aggcol].mean())
         grouped['month'] = pd.Categorical(grouped['month'], categories=cats_month, ordered=True)
         grouped = grouped.sort_values('month')
         return grouped
 
     elif timeframe == "":
-        grouped2 = df>>group_by(_[groupbycol, _[groupbycol2]])>>summarize(avg = _[aggcol].mean())
+        grouped2 = df>>group_by(_[groupbycol1], _[groupbycol2])>>summarize(avg = _[aggcol].mean())
         return grouped2
     
 def labeling(word):
