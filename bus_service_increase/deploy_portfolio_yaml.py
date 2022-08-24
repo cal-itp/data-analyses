@@ -8,11 +8,52 @@ import intake
 import pandas as pd
 import yaml
 
+from pathlib import Path
+
+import utils
+
 catalog = intake.open_catalog("./bus_service_increase/*.yml")
 
-PORTFOLIO_SITE_YAML = "./portfolio/sites/parallel_corridors.yml"
+# these come from parallel_corridors_utils
+# but, importing these throws error because of directories when the Makefile is run
+PCT_COMPETITIVE_THRESHOLD = 0.75
+PCT_TRIPS_BELOW_CUTOFF = 1.0
 
-def overwrite_yaml(PORTFOLIO_SITE_YAML):
+PORTFOLIO_SITE_YAML = Path("./portfolio/sites/parallel_corridors.yml")
+
+# Do a quick check and suppress operators that just show 1 route in each route_group
+# From UI/UX perspective, it's confusing to readers because they think it's an error that
+# more routes aren't showing up, rather than deliberately showing results that meet certain criteria
+def valid_operators(df: pd.DataFrame | gpd.GeoDataFrame) -> list:
+    t1 = df[(df.route_group.notna()) &
+            (df.pct_trips_competitive > PCT_COMPETITIVE_THRESHOLD) &
+            (df.pct_below_cutoff >= PCT_TRIPS_BELOW_CUTOFF)
+           ]
+    
+    # Count unique routes that show up by operator-route_group
+    t2 = (t1.groupby(["calitp_itp_id", "route_group"])
+          .agg({"route_id":"nunique"})
+          .reset_index()
+         )
+    
+    # Valid if it's showing at least 2 routes in each group
+    t2 = t2.assign(
+        valid = t2.apply(lambda x: 1 if x.route_id > 1
+                         else 0, axis=1)
+    )
+    
+    # If all 3 groups are showing 1 route each, then that operator should be excluded from report
+    t3 = t2.groupby("calitp_itp_id").agg({"valid": "sum"}).reset_index()
+
+    t4 = t3[t3.valid >= 1]
+    
+    print(f"# operators included in analysis: {len(t3)}")
+    print(f"# operators included in report: {len(t4)}")
+   
+    return list(t4.calitp_itp_id)
+    
+    
+def overwrite_yaml(PORTFOLIO_SITE_YAML: Path) -> list:
     """
     PORTFOLIO_SITE_YAML: str
                         relative path to where the yaml is for portfolio
@@ -21,7 +62,11 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML):
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    df = catalog.competitive_route_variability.read()
+    df = catalog.competitive_route_variability.read()  
+    
+    operators_to_include = valid_operators(df)
+    
+    df = df[df.calitp_itp_id.isin(operators_to_include)]
     
     districts = sorted(list(df[df.caltrans_district.notna()].caltrans_district.unique()))
 
@@ -64,9 +109,10 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML):
     
     return chapters_list
 
+
 # Compare the ITP IDs for parallel corridors and RT
 # If URL available for RT analysis, embed in parameterized notebook
-def check_if_rt_data_available(PORTFOLIO_SITE_YAML):
+def check_if_rt_data_available(PORTFOLIO_SITE_YAML: Path) -> list:
     with open(PORTFOLIO_SITE_YAML) as analyses:
         analyses_data = yaml.load(analyses, yaml.Loader)
     

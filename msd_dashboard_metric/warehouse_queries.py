@@ -126,5 +126,5 @@ def create_local_parquets():
     fares_feeds.to_parquet(f"{utils.GCS_FILE_PATH}fares_feeds.parquet")
     print("Created and exported validations and fares v2 datasets")
     
-
-create_local_parquets()
+if __name__ == "__main__":
+    create_local_parquets()

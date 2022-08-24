@@ -1,0 +1,8 @@
+title: High Quality Transit Areas
+directory: ./facilities_services/
+readme: ./facilities_services/README.md
+parts:
+- caption: Introduction
+- chapters:
+  - notebook: ./facilities_services/tier1-facilities-hqta.ipynb
+  - notebook: ./high_quality_transit_areas/hqta_green_SACOG.ipynb

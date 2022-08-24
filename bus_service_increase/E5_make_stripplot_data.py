@@ -14,13 +14,13 @@ import re
 from calitp.tables import tbl
 from siuba import *
 
-import setup_parallel_trips_with_stops
+import E1_setup_parallel_trips_with_stops as setup_parallel_trips_with_stops
 import shared_utils
 import utils
 
 catalog = intake.open_catalog("./*.yml")
 
-def pare_down_trips(df):
+def pare_down_trips(df: pd.DataFrame) -> pd.DataFrame:
     # This dataset is trip-stop level
     # Keep unique trip
     df2 = (df.drop(columns = ["stop_id", "stop_sequence", "date", 
@@ -32,7 +32,7 @@ def pare_down_trips(df):
     return df2
 
 
-def time_of_day(row):
+def time_of_day(row: int) -> str:
     if (row.departure_hour <= 6) or (row.departure_hour >= 20):
         return "Owl Service"
     elif (row.departure_hour > 6) and (row.departure_hour <= 9):
@@ -43,7 +43,7 @@ def time_of_day(row):
         return "PM Peak"
 
     
-def add_quantiles_timeofday(df):
+def add_quantiles_timeofday(df: pd.DataFrame) -> pd.DataFrame:
     df = df.assign(
         departure_hour = pd.to_datetime(
             df.trip_first_departure_ts, unit='s').dt.hour,
@@ -90,7 +90,7 @@ def add_quantiles_timeofday(df):
     return df3
 
 
-def merge_in_competitive_routes(df):
+def merge_in_competitive_routes(df: pd.DataFrame) -> gpd.GeoDataFrame:
     # Tag as competitive
     gdf = catalog.gmaps_results.read()
     CRS = gdf.crs
@@ -148,7 +148,7 @@ diff_cutoffs = {
 }
 
 
-def designate_plot_group(df):
+def designate_plot_group(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Add plot group, since stripplot can get crowded, plot 15 max?
     route_cols = ["calitp_itp_id", "route_id"]
     
@@ -205,18 +205,44 @@ def designate_plot_group(df):
     
     return df4
 
-
-def merge_in_airtable_name_district(df):
+# Use agency_name from our views.gtfs_schedule.agency instead of Airtable?
+def merge_in_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    # This is the agency_name used in RT maps
+    # rt_delay/rt_analysis.py#L309
+    agency_names = (
+        tbl.views.gtfs_schedule_dim_feeds() 
+        >> select(_.calitp_itp_id, _.calitp_agency_name)
+        >> distinct()
+        >> collect()
+    ).sort_values(["calitp_itp_id", "calitp_agency_name"]).drop_duplicates(
+        subset="calitp_itp_id"
+    ).reset_index(drop=True)
+    
+    df2 = pd.merge(
+        df,
+        agency_names,
+        on = "calitp_itp_id",
+        how = "left",
+        validate = "m:1",
+    )
+    
+    return df2
+    
+    
+def merge_in_airtable(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    # Don't use name from Airtable. But, use district.
     airtable_organizations = (
         tbl.airtable.california_transit_organizations()
-        >> select(_.itp_id, _.name, _.caltrans_district
-                  , _.drmt_organization_name)
+        >> select(_.itp_id, _.caltrans_district)
+        >> distinct()
         >> collect()
         >> filter(_.itp_id.notna())
-    ).sort_values(["itp_id", "name"]).drop_duplicates(
+    ).sort_values(["itp_id", "caltrans_district"]).drop_duplicates(
         subset="itp_id").reset_index(drop=True)
                             
     # Airtable gives us fewer duplicates than doing tbl.gtfs_schedule.agency()
+    # But naming should be done with tbl.gtfs_schedule.agency because that's what's used
+    # in speedmaps already. Need standardization
     df2 = pd.merge(
         df,
         airtable_organizations.rename(columns = {"itp_id": "calitp_itp_id"}),
@@ -228,60 +254,30 @@ def merge_in_airtable_name_district(df):
     return df2
 
 
-def add_route_name(df):
-    # Eric picks which route desc to use, tweak his function a bit
-    # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/utils.py
-    # Match his so there's conformity between analyses
-    route_names = (tbl.views.gtfs_schedule_dim_routes()
-               >> filter(_.calitp_extracted_at < SELECTED_DATE, 
-                         _.calitp_deleted_at >= SELECTED_DATE
-                        )
-               >> select(_.calitp_itp_id, _.route_id, 
-                         _.route_short_name, _.route_long_name, _.route_desc
-                        )
-               # Do a filtering first, then do a pd.merge later
-               >> filter(_.calitp_itp_id.isin(df.calitp_itp_id.unique().tolist()))
-               >> filter(_.route_id.isin(df.route_id.unique().tolist()))
-               >> distinct()
-               >> collect()        
+def add_route_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:    
+    route_names = shared_utils.portfolio_utils.add_route_name(SELECTED_DATE=SELECTED_DATE)
+    route_names_short = (
+        tbl.views.gtfs_schedule_dim_routes()
+        >> filter(_.calitp_extracted_at < SELECTED_DATE, 
+                  _.calitp_deleted_at >= SELECTED_DATE)
+        >> select(_.calitp_itp_id, _.route_id, _.route_short_name,)
+        >> distinct()
+        >> collect()
     )
     
-    def exclude_desc(desc):
-        ## match descriptions that don't give additional info, like Route 602 or Route 51B
-        exclude_texts = [
-            ' *Route *[0-9]*[a-z]{0,1}$', 
-            ' *Metro.*(Local|Rapid|Limited).*Line',
-            ' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)',
-            ' *service within the Stockton Metropolitan Area',
-            ' *Hopper bus can deviate',
-            " *RTD's Interregional Commuter Service is a limited-capacity service"
-        ]
-        desc_eval = [re.search(text, desc, flags=re.IGNORECASE) for text in exclude_texts]
-        # number_only = re.search(' *Route *[0-9]*[a-z]{0,1}$', desc, flags=re.IGNORECASE)
-        # metro = re.search(' *Metro.*(Local|Rapid|Limited).*Line', desc, flags=re.IGNORECASE)
-        # redwood = re.search(' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)', desc, flags=re.IGNORECASE)
-        # return number_only or metro or redwood
-        return any(desc_eval)
+    # Also need route_short_name, which is not available in portfolio_utils
+    route_names = pd.merge(route_names, 
+                           route_names_short,
+                           on = ["calitp_itp_id", "route_id"], 
+                           how = "left"
+                          )
     
-    
-    def which_desc(row):
-        long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
-        route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
-        if route_desc_valid:
-            return row.route_desc.title()
-        elif long_name_valid:
-            return row.route_long_name.title()
-        else:
-            return ''
-    
-    route_names = route_names.assign(
-        route_name_used = route_names.apply(lambda x: which_desc(x), axis=1)
-    )
-
     df2 = pd.merge(
         df, 
         route_names[route_names.route_name_used != ""][
-            ["calitp_itp_id", "route_id", "route_name_used"]].drop_duplicates(),
+            ["calitp_itp_id", "route_id", "route_name_used", 
+             # add route_short_name to use in charts, perhaps more descriptive than route_id
+            "route_short_name"]].drop_duplicates(),
         on = ["calitp_itp_id", "route_id"],
         how = "left",
         # many on the left because df is unique at itp_id-route_id-shape_id
@@ -313,8 +309,9 @@ if __name__ == "__main__":
     df3 = add_quantiles_timeofday(df2)
     df4 = merge_in_competitive_routes(df3)
     df5 = designate_plot_group(df4)
-    df6 = merge_in_airtable_name_district(df5)
-    df7 = add_route_name(df6)
+    df6 = merge_in_agency_name(df5)
+    df7 = merge_in_airtable(df6)
+    df8 = add_route_name(df7)
     
     shared_utils.utils.geoparquet_gcs_export(
-        df7, utils.GCS_FILE_PATH, "competitive_route_variability")
+        df8, utils.GCS_FILE_PATH, "competitive_route_variability")

@@ -7,6 +7,7 @@ import pandas as pd
 
 from calendar import THURSDAY, SATURDAY, SUNDAY
 from calitp.storage import get_fs
+
 fs = get_fs()
 
 GCS_PROJECT = "cal-itp-data-infra"
@@ -17,7 +18,7 @@ GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 DATA_PATH = "./data/"
 IMG_PATH = "./img/"
 
-def import_export(DATASET_NAME, OUTPUT_FILE_NAME, GCS=True): 
+def import_export(DATASET_NAME: str, OUTPUT_FILE_NAME: str, GCS:bool=True): 
     """
     DATASET_NAME: str. Name of csv dataset.
     OUTPUT_FILE_NAME: str. Name of output parquet dataset.
@@ -30,7 +31,7 @@ def import_export(DATASET_NAME, OUTPUT_FILE_NAME, GCS=True):
         df.to_parquet(f"./{OUTPUT_FILE_NAME}.parquet")
     
 
-def get_recent_dates():
+def get_recent_dates() -> dict:
     '''
     Return a dict with dt.date objects for a recent thursday, saturday, and sunday.
     Useful for querying.
@@ -48,8 +49,10 @@ def get_recent_dates():
 
 # There are multiple feeds, with different trip_keys but same trip_ids
 # Only keep calitp_url_number == 0 EXCEPT LA Metro
-def include_exclude_multiple_feeds(df, id_col = "itp_id",
-                                   include_ids = [182], exclude_ids = [200]):
+def include_exclude_multiple_feeds(df: pd.DataFrame, 
+                                   id_col: str = "itp_id",
+                                   include_ids: list = [182], 
+                                   exclude_ids: list = [200]) -> pd.DataFrame:
     """
     df: pandas.DataFrame.
     id_col: str, column name for calitp_itp_id, such as "itp_id" 
@@ -80,8 +83,9 @@ def include_exclude_multiple_feeds(df, id_col = "itp_id",
     return df2
 
 
-def fix_gtfs_time(gtfs_timestring):
-    '''Reformats a GTFS timestamp (which allows the hour to exceed 24 to mark service day continuity)
+def fix_gtfs_time(gtfs_timestring: str) -> str:
+    '''Reformats a GTFS timestamp (which allows the hour to exceed 24 to 
+    mark service day continuity)
     to standard 24-hour time.
     '''
     split = gtfs_timestring.split(':')
@@ -95,9 +99,14 @@ def fix_gtfs_time(gtfs_timestring):
 
     
 # https://stackoverflow.com/questions/25052980/use-pickle-to-save-dictionary-in-python
-def save_request_json(my_list, name, 
-                      DATA_PATH = DATA_PATH, 
-                      GCS_FILE_PATH = GCS_FILE_PATH):
+def save_request_json(my_list: list, 
+                      name: str, 
+                      DATA_PATH: str = DATA_PATH, 
+                      GCS_FILE_PATH: str = GCS_FILE_PATH):
+    """
+    Input a json response that comes back as a list.
+    Write it to GCS bucket
+    """
     # result comes back as a list, but add [0] and it's a dict
     my_dict = my_list[0]
     
@@ -113,8 +122,14 @@ def save_request_json(my_list, name,
     print(f"Saved {name}")
     
     
-def open_request_json(name, DATA_PATH = DATA_PATH, 
-                       GCS_FILE_PATH = GCS_FILE_PATH):
+def open_request_json(name: str, 
+                      DATA_PATH: str = DATA_PATH, 
+                      GCS_FILE_PATH: str = GCS_FILE_PATH) -> dict:
+    """
+    Grab the json object from GCS and import it.
+    
+    Returns a dict.
+    """
     # Download object from GCS bucket
     gcs_json = fs.get(f"{GCS_FILE_PATH}{name}.json", f"{DATA_PATH}{name}.json")
     my_dict = json.load(open(f"{DATA_PATH}{name}.json"))

@@ -23,7 +23,9 @@ catalog = intake.open_catalog("./catalog.yml")
 #--------------------------------------------------------#
 ### CalEnviroScreen functions
 #--------------------------------------------------------#
-def define_equity_groups(df, percentile_col = ["CIscoreP"], num_groups=5):
+def define_equity_groups(df: pd.DataFrame, 
+                         percentile_col: list = ["CIscoreP"], 
+                         num_groups: int=5) -> pd.DataFrame:
     """
     df: pandas.DataFrame
     percentile_col: list.
@@ -45,7 +47,7 @@ def define_equity_groups(df, percentile_col = ["CIscoreP"], num_groups=5):
     return df
 
 
-def prep_calenviroscreen(df):
+def prep_calenviroscreen(df: pd.DataFrame)-> pd.DataFrame:
     # Fix tract ID and calculate pop density
     df = (df.assign(
             Tract = df.Tract.apply(lambda x: '0' + str(x)[:-2]).astype(str),
@@ -112,7 +114,7 @@ for dataset in LEHD_DATASETS:
     )
 '''
 
-def process_lehd(df):
+def process_lehd(df: pd.DataFrame) -> pd.DataFrame:
     # Subset to CA, keep maxiumum year, and only keep total jobs
     keep_cols = ["trct", "c000"]
     
@@ -134,7 +136,7 @@ def process_lehd(df):
 ### Functions to merge CalEnviroScreen and LEHD 
 #--------------------------------------------------------#
 # Merge and clean up 
-def merge_and_process(data_to_merge = []):
+def merge_and_process(data_to_merge: list = []) -> pd.DataFrame:
     """
     data_to_merge: list. List of pandas.DataFrames to merge.
     """    
@@ -168,7 +170,8 @@ def merge_and_process(data_to_merge = []):
     return final   
     
     
-def merge_calenviroscreen_lehd(calenviroscreen, lehd):    
+def merge_calenviroscreen_lehd(calenviroscreen: pd.DataFrame, 
+                               lehd: pd.DataFrame) -> pd.DataFrame:    
     # Merge LEHD with CalEnviroScreen
     df = pd.merge(calenviroscreen, lehd, 
                   on = "Tract", how = "left", validate = "1:1"
@@ -190,7 +193,7 @@ def merge_calenviroscreen_lehd(calenviroscreen, lehd):
 
 
 ## Put all functions above together to generate cleaned CalEnviroScreen + LEHD data
-def generate_calenviroscreen_lehd_data():
+def generate_calenviroscreen_lehd_data() -> pd.DataFrame:
     # CalEnviroScreen data (gdf)
     gdf = catalog.calenviroscreen_raw.read()
     gdf = prep_calenviroscreen(gdf)

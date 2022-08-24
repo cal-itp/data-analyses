@@ -1,15 +1,18 @@
 """
 Functions to create choropleth maps.
-# https://stackoverflow.com/questions/64792041/white-gap-between-python-folium-map-and-jupyter-notebook-cell
-# Folium examples: https://nbviewer.jupyter.org/github/python-visualization/folium/blob/master/examples/Colormaps.ipynb
-# https://nbviewer.jupyter.org/github/python-visualization/folium/blob/master/examples/GeoJsonPopupAndTooltip.ipynb
-# https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
-# https://stackoverflow.com/questions/47846744/create-an-asymmetric-colormap
+
+https://stackoverflow.com/questions/64792041/white-gap-between-python-folium-map-and-jupyter-notebook-cell
+* Folium examples: https://nbviewer.jupyter.org/github/python-visualization/folium/blob/master/examples/Colormaps.ipynb
+* https://nbviewer.jupyter.org/github/python-visualization/folium/blob/master/examples/GeoJsonPopupAndTooltip.ipynb
+* https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
+* https://stackoverflow.com/questions/47846744/create-an-asymmetric-colormap
 """
 import inspect
 import json
 
+import branca
 import folium
+import geopandas as gpd
 import ipyleaflet
 import pandas as pd
 from branca.element import Figure
@@ -20,7 +23,7 @@ from ipywidgets import HTML
 
 
 # Centroids for various regions and zoom level
-def grab_region_centroids():
+def grab_region_centroids() -> dict:
     # This parquet is created in shared_utils/shared_data.py
     df = pd.read_parquet(
         "gs://calitp-analytics-data/data-analyses/ca_county_centroids.parquet"
@@ -38,9 +41,41 @@ def grab_region_centroids():
 
 REGION_CENTROIDS = grab_region_centroids()
 
+
 # ------------------------------------------------------------------------#
 # Folium
 # ------------------------------------------------------------------------#
+# Break out each component of folium map / figure
+# Better usage for single layer or multiple layers
+def setup_folium_figure(
+    fig_width: int, fig_height: int, title: str, **fig_dict: dict
+) -> Figure:
+
+    fig = Figure(fig_width, fig_height, **fig_dict)
+    title_html = f"""
+         <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
+         """
+
+    fig.get_root().html.add_child(folium.Element(title_html))
+
+    return fig
+
+
+def setup_folium_map(
+    fig_width: int, fig_height: int, centroid: int, zoom: int, **map_dict: dict
+) -> folium.folium.Map:
+    m = folium.Map(
+        location=centroid,
+        tiles="cartodbpositron",
+        zoom_start=zoom,
+        width=fig_width,
+        height=fig_height,
+        **map_dict,
+    )
+
+    return m
+
+
 # Move popup and tooltip functions out, since styling is similar
 # Pass in make_folium_choropleth_map() and make_folium_multiple_layers_map()
 TOOLTIP_KWARGS = {
@@ -50,7 +85,7 @@ TOOLTIP_KWARGS = {
 }
 
 
-def format_folium_popup(popup_dict):
+def format_folium_popup(popup_dict: dict) -> folium.features.GeoJsonPopup:
     popup = GeoJsonPopup(
         fields=list(popup_dict.keys()),
         aliases=list(popup_dict.values()),
@@ -63,7 +98,7 @@ def format_folium_popup(popup_dict):
     return popup
 
 
-def format_folium_tooltip(tooltip_dict):
+def format_folium_tooltip(tooltip_dict: dict) -> folium.features.GeoJsonTooltip:
     tooltip = GeoJsonTooltip(
         fields=list(tooltip_dict.keys()),
         aliases=list(tooltip_dict.values()),
@@ -85,19 +120,19 @@ def format_folium_tooltip(tooltip_dict):
 
 
 def make_folium_choropleth_map(
-    df,
-    plot_col,
-    popup_dict,
-    tooltip_dict,
-    colorscale,
-    fig_width,
-    fig_height,
-    zoom=REGION_CENTROIDS["CA"]["zoom"],
-    centroid=REGION_CENTROIDS["CA"]["centroid"],
-    title="Chart Title",
-    legend_name="Legend",
+    df: gpd.GeoDataFrame,
+    plot_col: str,
+    popup_dict: dict,
+    tooltip_dict: dict,
+    colorscale: branca.colormap.ColorMap,
+    fig_width: int,
+    fig_height: int,
+    zoom: int = REGION_CENTROIDS["CA"]["zoom"],
+    centroid: list[float] = REGION_CENTROIDS["CA"]["centroid"],
+    title: str = "Chart Title",
+    legend_name: str = "Legend",
     **kwargs,
-):
+) -> Figure:
     """
     Parameters:
 
@@ -130,25 +165,12 @@ def make_folium_choropleth_map(
     fig_args = [k for k, v in inspect.signature(Figure).parameters.items()]
     fig_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in fig_args}
 
-    fig = Figure(width=fig_width, height=fig_height, **fig_dict)
+    fig = setup_folium_figure(fig_width, fig_height, title, **fig_dict)
 
     map_args = [k for k, v in inspect.signature(folium.Map).parameters.items()]
     map_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in map_args}
 
-    m = folium.Map(
-        location=centroid,
-        tiles="cartodbpositron",
-        zoom_start=zoom,
-        width=fig_width,
-        height=fig_height,
-        **map_dict,
-    )
-
-    title_html = f"""
-             <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
-             """
-
-    fig.get_root().html.add_child(folium.Element(title_html))
+    m = setup_folium_map(fig_width, fig_height, centroid, zoom, **map_dict)
 
     popup = format_folium_popup(popup_dict)
     tooltip = format_folium_tooltip(tooltip_dict)
@@ -182,17 +204,74 @@ def make_folium_choropleth_map(
     return fig
 
 
-# Adjust function to have multiple layers in folium
-# Modify the original function...but generalize the unpacking of the layer portion
-# Keep original function the same, don't break other ppl's work
+# Define function that can theoretically pop out as many layers as needed
+# Can be point data too, since now it can take additional arguments for customizing markers
+def make_geojson_layer(
+    single_layer_dict: dict, layer_name: str
+) -> folium.features.GeoJson:
+    # Grab keys from the layer dictionary
+    plot_col = single_layer_dict["plot_col"]
+    colorscale = single_layer_dict["colorscale"]
+    popup = format_folium_popup(single_layer_dict["popup_dict"])
+    tooltip = format_folium_tooltip(single_layer_dict["tooltip_dict"])
+
+    # Allow for styling to overwrite default
+    # If style_function is present, use that, otherwise, use this default for choropleth
+    default_style_function = lambda x: {
+        "fillColor": colorscale(x["properties"][plot_col])
+        if x["properties"][plot_col] is not None
+        else "gray",
+        "color": "#FFFFFF",
+        "fillOpacity": 0.8,
+        "weight": 0.2,
+    }
+
+    selected_style_function = single_layer_dict.get(
+        "style_function", default_style_function
+    )
+
+    geojson_args = [k for k, v in inspect.signature(folium.GeoJson).parameters.items()]
+
+    default_params = ["data", "name", "tooltip", "popup", "style_function"]
+    # Remove the ones that definitely have inputs through the dictionary
+    geojson_args2 = list(set(geojson_args).difference(set(default_params)))
+
+    geojson_dict = {
+        k: single_layer_dict.pop(k)
+        for k in dict(single_layer_dict)
+        if k in geojson_args2
+    }
+
+    g = folium.GeoJson(
+        single_layer_dict["df"],
+        style_function=selected_style_function,
+        tooltip=tooltip,
+        popup=popup,
+        name=layer_name,
+        **geojson_dict,
+    )
+
+    return g
+
+
+def setup_folium_legend(legend_dict: dict) -> FloatImage:
+    legend = FloatImage(
+        legend_dict["legend_url"],
+        legend_dict["legend_bottom"],
+        legend_dict["legend_left"],
+    )
+
+    return legend
+
+
 def make_folium_multiple_layers_map(
-    LAYERS_DICT,
-    fig_width,
-    fig_height,
-    zoom=REGION_CENTROIDS["CA"]["zoom"],
-    centroid=REGION_CENTROIDS["CA"]["centroid"],
-    title="Chart Title",
-    legend_dict={"legend_url": "", "legend_bottom": 85, "legend_left": 5},
+    LAYERS_DICT: dict,
+    fig_width: int,
+    fig_height: int,
+    zoom: int = REGION_CENTROIDS["CA"]["zoom"],
+    centroid: list[float] = REGION_CENTROIDS["CA"]["centroid"],
+    title: str = "Chart Title",
+    legend_dict: dict = {"legend_url": "", "legend_bottom": 85, "legend_left": 5},
     **kwargs,
 ):
     """
@@ -248,85 +327,28 @@ def make_folium_multiple_layers_map(
     fig_args = [k for k, v in inspect.signature(Figure).parameters.items()]
     fig_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in fig_args}
 
-    fig = Figure(width=fig_width, height=fig_height, **fig_dict)
+    fig = setup_folium_figure(fig_width, fig_height, title, **fig_dict)
 
     map_args = [k for k, v in inspect.signature(folium.Map).parameters.items()]
     map_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in map_args}
 
-    m = folium.Map(
-        location=centroid,
-        tiles="cartodbpositron",
-        zoom_start=zoom,
-        width=fig_width,
-        height=fig_height,
-        **map_dict,
-    )
-
-    title_html = f"""
-         <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
-         """
-
-    fig.get_root().html.add_child(folium.Element(title_html))
-
-    # Define function that can theoretically pop out as many polygon layers as needed
-    def get_layer(
-        df, plot_col, popup_dict, tooltip_dict, colorscale, layer_name, **kwargs
-    ):
-
-        popup = format_folium_popup(popup_dict)
-        tooltip = format_folium_tooltip(tooltip_dict)
-
-        # https://medium.com/analytics-vidhya/create-and-visualize-choropleth-map-with-folium-269d3fd12fa0
-        geojson_args = [
-            k for k, v in inspect.signature(folium.GeoJson).parameters.items()
-        ]
-        geojson_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in geojson_args}
-
-        g = folium.GeoJson(
-            df,
-            style_function=lambda x: {
-                "fillColor": colorscale(x["properties"][plot_col])
-                if x["properties"][plot_col] is not None
-                else "gray",
-                "color": "#FFFFFF",
-                "fillOpacity": 0.8,
-                "weight": 0.2,
-            },
-            tooltip=tooltip,
-            popup=popup,
-            name=layer_name,
-            **geojson_dict,
-        )
-
-        return g
+    m = setup_folium_map(fig_width, fig_height, centroid, zoom, **map_dict)
 
     # Now, loop through the keys in the LAYERS_DICT,
     # Unpack the dictionary associated with each layer,
     # Then attach that layer to the Map element
-    for key, nested_dict in LAYERS_DICT.items():
-        # key: layer name or layer number
-        # value: dictionary of all the components associated with folium layer
-        d = nested_dict
-        layer = get_layer(
-            df=d["df"],
-            plot_col=d["plot_col"],
-            popup_dict=d["popup_dict"],
-            tooltip_dict=d["tooltip_dict"],
-            colorscale=d["colorscale"],
-            layer_name=key,
-        )
-        layer.add_to(m)
+    for layer_name, layer_dict in LAYERS_DICT.items():
+        g = make_geojson_layer(layer_dict, layer_name)
+        g.add_to(m)
 
     # Legend doesn't show up with multiple layers
     # One way around, create the colorscale(s) as one image and save it
     # Then, insert that legend as a URL to be an image
     # I think legend_bottom and legend_left numbers must be 0-100?
     # Going even 95 pushes it to the top edge of the figure
-    FloatImage(
-        legend_dict["legend_url"],
-        legend_dict["legend_bottom"],
-        legend_dict["legend_left"],
-    ).add_to(m)
+    if legend_dict is not None:
+        legend = setup_folium_legend(legend_dict)
+        legend.add_to(m)
 
     folium.LayerControl("topright", collapsed=False).add_to(m)
 
@@ -340,15 +362,15 @@ def make_folium_multiple_layers_map(
 # ipyleaflet
 # ------------------------------------------------------------------------#
 def make_ipyleaflet_choropleth_map(
-    gdf,
-    plot_col,
-    geometry_col,
-    choropleth_dict,
-    colorscale,
-    zoom=REGION_CENTROIDS["CA"]["zoom"],
-    centroid=REGION_CENTROIDS["CA"]["centroid"],
+    gdf: gpd.GeoDataFrame,
+    plot_col: str,
+    geometry_col: str,
+    choropleth_dict: dict,
+    colorscale: branca.colormap.ColorMap,
+    zoom: int = REGION_CENTROIDS["CA"]["zoom"],
+    centroid: list[float] = REGION_CENTROIDS["CA"]["centroid"],
     **kwargs,
-):
+) -> ipyleaflet.leaflet.Map:
     """
     Parameters:
 

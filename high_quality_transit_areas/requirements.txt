@@ -1,3 +1,0 @@
-geopandas
-pygeos
-ipyleaflet

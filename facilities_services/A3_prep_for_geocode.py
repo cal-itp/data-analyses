@@ -13,7 +13,7 @@ import utils
 
 catalog = intake.open_catalog("./*.yml")
 
-def clean_up_addresses(row):
+def clean_up_addresses(row: str) -> str:
     if row.address is not None:
         address_string = row.address
 
@@ -34,6 +34,13 @@ def clean_up_addresses(row):
         return None 
     
 def assemble_full_address(row):
+    """
+    Construct the fullest address we can for different sheets.
+    This gives the best chance at geocoding correctly.
+    
+    Maintenance provides some with zip code columns, whereas
+    office doesn't have zip code at all.
+    """
     if (row.address_cleaned is not None) and (row.city is not None):
         
         address_city = row.address_cleaned + " " + row.city
@@ -57,7 +64,7 @@ def assemble_full_address(row):
     return full_address
 
 
-def prep_for_geocoding(df):
+def prep_for_geocoding(df: pd.DataFrame) -> pd.DataFrame:
     df = df.assign(
         address_cleaned = df.apply(lambda x: clean_up_addresses(x), axis=1)
     )
@@ -79,10 +86,12 @@ if __name__ == "__main__":
     
     keep_cols = ["sheet_uuid", 
                  "address", "address_cleaned", "city", "zip_code", "zip_code2",
-                 "full_address"]
+                 "full_address", 
+                 "county", "facility_name"
+                ]
     
-    manual_geocoding[keep_cols].to_csv(f"{utils.GCS_FILE_PATH}manual_geocoding.csv", index=False)
-    
+    manual_geocoding[keep_cols].to_parquet(f"{utils.GCS_FILE_PATH}manual_geocoding.parquet")
+
     # These can go into a geocoder
     for_geocoding = df[(df.full_address.str.contains(f"[0-9]"))] 
     for_geocoding.to_parquet(f"{utils.GCS_FILE_PATH}for_geocoding.parquet")

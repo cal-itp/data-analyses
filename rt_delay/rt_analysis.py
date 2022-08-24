@@ -1,12 +1,14 @@
 import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.map_utils import make_folium_choropleth_map
+from shared_utils.rt_utils import *
+
 import branca
 
-from utils import *
 from siuba import *
 
 import pandas as pd
+import numpy as np
 import geopandas as gpd
 import shapely
 
@@ -265,7 +267,7 @@ class OperatorDayAnalysis:
                                                                 self.trips_positions_joined.vehicle_latitude),
                                     crs=WGS84).to_crs(CA_NAD83Albers)
         self.routelines = get_routelines(self.calitp_itp_id, self.analysis_date)
-        self.routelines = self.routelines.dropna() ## invalid geos are nones in new df...
+        self.routelines = self.routelines.dropna(subset=['geometry']) ## invalid geos are nones in new df...
         assert type(self.routelines) == type(gpd.GeoDataFrame()) and not self.routelines.empty, 'routelines must not be empty'
         self.trs = self.trips >> select(_.shape_id, _.trip_id)
         self.trs = self.trs >> inner_join(_, self.stop_times >> select(_.trip_id, _.stop_id), on = 'trip_id')
@@ -281,6 +283,7 @@ class OperatorDayAnalysis:
                 (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
          axis = 1))
         # print(f'done')
+        self.routelines = self.routelines.apply(self._ix_from_routeline, axis=1)
         self.vp_obs_by_trip = self.vehicle_positions >> count(_.trip_id) >> arrange(-_.n)
         self._generate_position_interpolators() ## comment out for first test
         self.rt_trips = self.trips.copy() >> filter(_.trip_id.isin(self.position_interpolators.keys()))
@@ -312,6 +315,24 @@ class OperatorDayAnalysis:
             ).calitp_agency_name.iloc[0]
         self.rt_trips['calitp_agency_name'] = self.calitp_agency_name
         
+    def _ix_from_routeline(self, routeline):
+        try:
+            km_index = np.arange(1000, routeline.geometry.length, 1000)
+            stops_filtered = (self.trs
+                              >> filter(_.shape_id == routeline.shape_id)
+                              >> arrange(_.shape_meters))
+            stop_loc_array = stops_filtered.shape_meters.to_numpy()
+            # print(stop_loc_array)
+            ## https://stackoverflow.com/questions/56024634/minimum-distance-for-each-value-in-array-respect-to-other
+            idx = np.searchsorted(stop_loc_array, km_index, side='right')
+            result = km_index-stop_loc_array[idx-1] # substract one for proper index
+            km_index = km_index[result > 1000]
+            routeline['km_index'] = km_index
+        except:
+            routeline['km_index'] = np.zeros(0)
+            print(f'could not interpolate segments for shape {routeline.shape_id}')
+        return routeline
+        
     def _generate_position_interpolators(self):
         '''For each trip_key in analysis, generate vehicle positions and schedule interpolator objects'''
         self.position_interpolators = {}
@@ -323,7 +344,7 @@ class OperatorDayAnalysis:
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
             # self.debug_dict[f'{trip_id}_trip'] = trip
             st_trip_joined = (trip
-                              >> inner_join(_, self.stop_times, on = ['calitp_itp_id', 'trip_id', 'service_date', 'trip_key'])
+                              >> inner_join(_, self.stop_times, on = ['calitp_itp_id', 'trip_id', 'trip_key'])
                               >> inner_join(_, self.stops, on = ['stop_id', 'calitp_itp_id'])
                              )
             st_trip_joined = gpd.GeoDataFrame(st_trip_joined, geometry=st_trip_joined.geometry, crs=CA_NAD83Albers)
@@ -343,6 +364,33 @@ class OperatorDayAnalysis:
             self.pbar.refresh()
 
             # TODO better checking for incomplete trips (either here or in interpolator...)
+            
+    def _add_km_segments(self, _delay):
+        ''' Experimental to break up long segments
+            To filter these out, self.stop_delay_view.dropna(subset=['stop_id'])
+        '''
+        
+        new_ix = (self.routelines >> filter(_.shape_id == _delay.shape_id.iloc[0])).km_index.iloc[0]
+        if np.any(new_ix):
+            _delay = _delay.set_index('shape_meters')
+            first_shape_meters = (_delay >> filter(_.stop_sequence == _.stop_sequence.min())).index.to_numpy()[0]
+            new_ix = new_ix[new_ix > first_shape_meters]
+            new_df = pd.DataFrame(index=new_ix)
+            new_df.index.name = 'shape_meters'
+            appended = pd.concat([_delay, new_df])
+            appended.trip_id = appended.trip_id.fillna(method='ffill').fillna(method='bfill')
+            appended.shape_id = appended.shape_id.fillna(method='ffill').fillna(method='bfill')
+            appended.route_id = appended.route_id.fillna(method='ffill').fillna(method='bfill')
+            appended.route_short_name = appended.route_short_name.fillna(method='ffill').fillna(method='bfill')                                              
+            appended = appended >> arrange(_.shape_meters)
+            appended.stop_sequence = appended.stop_sequence.interpolate()
+            appended = appended.reset_index()
+            appended['actual_time'] = appended.apply(lambda x: 
+                        self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
+                        axis = 1)
+            return appended
+        else:
+            return _delay
     
     def _generate_stop_delay_view(self):
         ''' Creates a (filtered) view with delays for each trip at each stop
@@ -379,6 +427,14 @@ class OperatorDayAnalysis:
                 _delay['delay'] = _delay.actual_time - _delay.arrival_time
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
                 _delay['delay_seconds'] = _delay.delay.map(lambda x: x.seconds)
+                
+                self.debug_dict[f'{trip_id}_stopsegs'] = _delay
+                # try:
+                _delay = self._add_km_segments(_delay)
+                # except:
+                #     print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
+                #     continue
+                
                 _delays = pd.concat((_delays, _delay))
                 self.debug_dict[f'{trip_id}_delay'] = _delay
                 # return
