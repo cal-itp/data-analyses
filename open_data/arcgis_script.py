@@ -17,6 +17,8 @@ import os
 
 #arcpy.env.workspace = "C:\Users\s153936\Documents\ArcGIS"
 arcpy.env.workspace = ARCGIS_PATH
+ENTERPRISE_PATH  = 'C:\Users\s153936\Documents\ArcGIS\AppData\Roaming\ESRI\Desktop10.8\ArcCatalog\HQrail(edit)@sv03tmcsqlprd1.sde'
+
 
 # Set local variables
 in_features = [
@@ -143,3 +145,5 @@ for f in in_features:
         os.remove(xml_file)
     except:
         pass
+
+## (8) Move from file gdb to enterprise gdb?
