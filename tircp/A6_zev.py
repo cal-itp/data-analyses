@@ -16,6 +16,11 @@ from shared_utils import styleguide
 """
 Summary table for ZEV
 """
+# Format numbers to currency in uuu8
+def currency_format(df, col_name: str):
+    df[col_name] = "$" + (df[col_name].astype(float)).round(0).astype(str)
+    return df
+
 def zev_summary(
     df_zev,
     df_all_projects,
@@ -94,74 +99,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     )
 
     chart=styleguide.preset_chart_config(chart)
+    chart.save(f"./bar_{chart_title}.png")
     return chart
 
-### Bar chart with with tooltips: x_col and another col ### 
-### This function only returns a chart, doesn't save
-def basic_bar_chart_v2(df, x_col, y_col, tooltip_col, colorcol, chart_title=''):
-    if chart_title == "":
-        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
-    chart = (alt.Chart(df)
-             .mark_bar()
-             .encode(
-                 x=alt.X(x_col, title=labeling(x_col), ),
-                 y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
-                 color = alt.Color(colorcol, 
-                                  scale=alt.Scale(
-                                      range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
-                                      legend=alt.Legend(title=(labeling(colorcol)))
-                                  ),
-                tooltip = [x_col, tooltip_col])
-             .properties( 
-                       title=chart_title)
-    )
 
-    chart=styleguide.preset_chart_config(chart)
-    return chart
-
-### Bar chart with labels at the end of the bar and custom legend ###
-### This function only returns a chart, doesn't save
-
-#Base bar chart
-def base_bar(df):
-    chart = (alt.Chart(df)
-             .mark_bar()
-             )
-    return chart
-
-#Function
-def fancy_bar_chart(df, LEGEND, y_col, x_col, label_col, chart_title=''):
-    
-    if chart_title == "":
-        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
-    
-    bar = base_bar(df)
-    
-    bar = (bar.encode(
-         x=alt.X(x_col, title=labeling(x_col)),
-         y=alt.Y(y_col, title=labeling(y_col), sort=('-x')),
-         color=alt.Color(y_col, 
-                        scale=alt.Scale(
-                            domain=LEGEND, #Specifies the order of the legend.
-                            range=cp.CALITP_CATEGORY_BRIGHT_COLORS
-                        )
-                )
-             )
-            )
-    #https://stackoverflow.com/questions/54015250/altair-setting-constant-label-color-for-bar-chart
-    text = (bar
-            .mark_text(align="left", baseline="middle",
-                       color="black", dy=3
-                      )
-            .encode(text=label_col, 
-                    # Set color here, because encoding for mark_text gets 
-                    # superseded by alt.Color
-                   color=alt.value("black"))
-    )
-      
-    chart = (bar+text)
-    
-    chart = (styleguide.preset_chart_config(chart)
-             .properties(title= chart_title).configure_axis(grid=False)
-            )
-    return chart 
