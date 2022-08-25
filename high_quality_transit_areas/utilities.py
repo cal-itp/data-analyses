@@ -1,22 +1,14 @@
-import datetime as dt
-
-import calitp
-import fiona
 import gcsfs
 import geopandas as gpd
 import intake
-import numpy as np
 import pandas as pd
 import os
 import shapely
 
-from calitp.tables import tbl
-from ipyleaflet import GeoData, GeoJSON, LayersControl, Map, WidgetControl, basemaps, projections
+from ipyleaflet import (GeoData, LayersControl, Map, 
+                        WidgetControl, basemaps)
 from ipywidgets import HTML, Text
-from shapely.geometry import LineString, MultiPoint
-from shapely.ops import split, substring
 from shared_utils import calitp_color_palette, geography_utils
-from siuba import *
 
 fs = gcsfs.GCSFileSystem()
 
@@ -33,31 +25,15 @@ ORANGE = "#fec44f"
 ITP_BLUE = calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[0]
 
 
-def create_segments(geometry):
-    """Splits a Shapely LineString into smaller LineStrings. If a MultiLineString passed,
-    splits each LineString in that collection.
-    """
-
-    lines = []
-    segment_distance_meters = 1_250
-    geometry = geometry.iloc[0]
-    if hasattr(geometry, "geoms"):  ##check if MultiLineString
-        linestrings = geometry.geoms
-    else:
-        linestrings = [geometry]
-    for linestring in linestrings:
-        for i in range(0, int(linestring.length), segment_distance_meters):
-            lines.append(substring(linestring, i, i + segment_distance_meters))
-    return lines
-
-
-def map_hqta(gdf, mouseover=None, name="gdf"):
+def map_hqta(gdf: gpd.GeoDataFrame, mouseover: bool = None, name: str = "gdf"):
     global nix_list
     nix_list = []
 
     if "calitp_extracted_at" in gdf.columns:
         gdf = gdf.drop(columns="calitp_extracted_at")
-    gdf = gdf.to_crs("EPSG:6414")  ## https://epsg.io/6414 (meters)
+    
+    gdf = gdf.to_crs(geography_utils.CA_NAD83Albers)  # meters
+    
     if gdf.geometry.iloc[0].geom_type == "Point":
         gdf.geometry = gdf.geometry.buffer(200)
 
@@ -144,5 +120,6 @@ def hqta_details(row):
         return row.hqta_type + "_single_operator"
     
 
-def catalog_filepath(file):
+def catalog_filepath(file: str) -> str:
+    # Return the path that's saved in the catalog
     return catalog[file].urlpath

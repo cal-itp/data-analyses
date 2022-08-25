@@ -24,7 +24,7 @@ import pandas as pd
 
 import corridor_utils
 import operators_for_hqta
-from shared_utils import utils
+from shared_utils import utils, geography_utils
 from utilities import GCS_FILE_PATH
 from update_vars import (date_str, CACHED_VIEWS_EXPORT_PATH, 
                          VALID_OPERATORS_FILE)
@@ -162,7 +162,11 @@ def single_operator_hqta(routelines: dg.GeoDataFrame,
     
     for i in route_shapes.index:
         one_route = route_shapes[route_shapes.index==i]
-        gdf = corridor_utils.segment_route(one_route)
+        gdf = geography_utils.cut_segments(
+            one_route, 
+            group_cols = ["calitp_itp_id", "calitp_url_number", "route_id"], 
+            segment_distance = 1_250
+        )
     
         all_routes = pd.concat([all_routes, gdf])
     
@@ -227,7 +231,7 @@ if __name__=="__main__":
         gdf = single_operator_hqta(routelines, trips, stop_times, stops)
 
         print(f"created single operator hqta: {itp_id}")
-
+        
         # Export each operator         
         utils.geoparquet_gcs_export(
             gdf, f'{GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
@@ -236,7 +240,7 @@ if __name__=="__main__":
 
         operator_end = dt.datetime.now()
         print(f"execution time for {itp_id}: {operator_end - operator_start}")
-    
+        
     end_time = dt.datetime.now()
     print(f"total execution time: {end_time-start_time}")
         
