@@ -366,6 +366,16 @@ def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
     Add departure hour column
     https://stackoverflow.com/questions/45428292/how-to-convert-pandas-str-split-call-to-to-dask
     """
+    # Basic cleaning of arrival / departure time and dropping duplicates
+    stop_times = (
+        stop_times.assign(
+            arrival_time=stop_times.arrival_time.str.strip(),
+            departure_time=stop_times.departure_time.str.strip(),
+        )
+        .drop_duplicates(subset=["stop_id", "trip_id"])
+        .reset_index(drop=True)
+    )
+
     stop_times2 = stop_times[~stop_times.departure_time.isna()].reset_index(drop=True)
 
     ddf = stop_times2.assign(
@@ -479,16 +489,6 @@ def get_stop_times(
 
     # Turn to dask dataframe
     stop_times_ddf = dd.from_pandas(stop_times, npartitions=1)
-
-    # Basic cleaning of arrival / departure time and dropping duplicates
-    stop_times_ddf = (
-        stop_times_ddf.assign(
-            arrival_time=stop_times.arrival_time.str.strip(),
-            departure_time=stop_times.departure_time.str.strip(),
-        )
-        .drop_duplicates(subset=["stop_id", "trip_id"])
-        .reset_index(drop=True)
-    )
 
     # Correctly parse departure times if they cross 24 hr threshold
     stop_times_cleaned = fix_departure_time(stop_times_ddf)
