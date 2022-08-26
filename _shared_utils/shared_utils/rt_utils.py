@@ -176,12 +176,14 @@ def get_vehicle_positions(itp_id: int, analysis_date: dt.date) -> pd.DataFrame:
 
     filename = f"vp_{itp_id}_{date_str}.parquet"
     path = check_cached(filename)
-    
+
     st_combined = dt.datetime.combine(analysis_date, dt.time(8))
     st_ts_utc = int(st_combined.timestamp())
-    end_combined = dt.datetime.combine(analysis_date + dt.timedelta(days=1), dt.time(10))
+    end_combined = dt.datetime.combine(
+        analysis_date + dt.timedelta(days=1), dt.time(10)
+    )
     end_ts_utc = int(end_combined.timestamp())
-    
+
     if path:
         print("found parquet")
         return pd.read_parquet(path)
