@@ -80,7 +80,8 @@ def process_transit_routes(alternate_df:
     ]
     
     df4 = df3.assign(
-        total_routes = df3.groupby("itp_id")["route_id"].transform("nunique")
+        total_routes = df3.groupby("itp_id")["route_id"].transform(
+            "nunique").astype("Int64")
     )[keep_cols]
     
     return df4
@@ -105,7 +106,7 @@ def prep_highway_directions_for_dissolve(
     direction_cols = ["NB", "SB", "EB", "WB"]
     
     for c in direction_cols:
-        df[c] = df.groupby(group_cols)[c].transform('max')
+        df[c] = df.groupby(group_cols)[c].transform('max').astype(int)
 
     return df
     
@@ -121,11 +122,15 @@ def process_highways(buffer_feet: int =
     # If dissolve first, then buffer, kernel times out
     df = df.assign(
         highway_length = df.geometry.length,
-        geometry = df.geometry.buffer(buffer_feet)   
+        geometry = df.geometry.buffer(buffer_feet),
+        Route = df.Route.astype(int),
     )
     
+    direction_cols = ["NB", "SB", "EB", "WB"]
     df = df.dissolve(by=group_cols + direction_cols).reset_index()
     
+    df[direction_cols] = df[direction_cols].astype(int)
+        
     return df
     
     
@@ -160,6 +165,7 @@ def overlay_transit_to_highways(
     gdf = gdf.assign(
         pct_route = (gdf.geometry.length / gdf.route_length).round(3),
         pct_highway = (gdf.geometry.length / gdf.highway_length).round(3),
+        Route = gdf.Route.astype(int),
     )
     
     '''
