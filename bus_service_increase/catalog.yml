@@ -76,7 +76,7 @@ sources:
     args:
       # source: bus_service_increase/E5_make_stripplot_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/competitive_route_variability.parquet
-  # 100 Recs for Better Buses 
+  ## PROCESSED DATA: 100 RECOMMENDATIONS FOR BETTER BUSES
   bus_routes_on_hwys:
     driver: geoparquet
     description: Bus routes that run a significant portion of their route on the hwy.
@@ -85,10 +85,16 @@ sources:
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_routes_on_hwys.parquet
   segmented_highways:
     driver: geoparquet
-    description: Highways cut at 0.5 mi segments.
+    description: Highways cut at 1 mi segments.
     args:
       # source: bus_service_increase/G1_better_buses_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/segmented_highways.parquet
+  bus_routes_aggregated_stats:
+    driver: parquet
+    description: Aggregated stats for stop times and trips by route_id and time-of-day.
+    args:
+      # source: bus_service_increase/G2_aggregated_stats.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_routes_on_hwys_aggregated_stats.parquet
       
       
      
