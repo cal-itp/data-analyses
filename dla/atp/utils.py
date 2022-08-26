@@ -88,7 +88,6 @@ def format_districts(df, col_a, col_b, col_c, new_col):
   
     return df
     
-    
 def clean_data(df):
     
     # # convert columns
@@ -106,4 +105,3 @@ def clean_data(df):
     gdf = (geography_utils.create_point_geometry(df, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
 
     return gdf
-
