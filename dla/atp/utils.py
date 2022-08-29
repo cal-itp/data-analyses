@@ -87,7 +87,21 @@ def format_districts(df, col_a, col_b, col_c, new_col):
                               'c':col_c})
   
     return df
+
+#change most of the columns with zeros to NaNs
+## keeping some of the columns for check purposes and other analyses (ex. pct columns and counts). 
+def convert_zeros_to_nan(df):
+    df_zero = df.loc[:, df.eq(0).any()]
+    df_zero.drop(['a2_assem_dist_b','a2_assem_dist_c', 'a2_congress_dist_b', 'a2_congress_dist_c', 'a2_senate_dist_b', 'a2_senatedistc',
+              'a2_past_proj_qty', 'a3_st_num_schools', 'agency_app_num',
+             'a3_st_ped_pct', 'a3_trail_trans_pct', 'a4_ped_gap_pct',  'a4_reg_init_pct', 'a4_com_init_pct',
+              'a4_safe_route_pct', 'a4_fl_mile_pct', 'a4_emp_based_pct', 'a4_other_ni_pct'
+             ], axis=1, inplace=True)
+    df_zero_list = df_zero.columns.to_list()
+    df[df_zero_list] = df[df_zero_list].replace({'0':np.nan, 0:np.nan})
     
+    return df
+
 def clean_data(df):
     
     # # convert columns
@@ -100,6 +114,10 @@ def clean_data(df):
     df = (format_districts(df, "a2_assem_dist_a", "a2_assem_dist_b", "a2_assem_dist_c", "assembly_district"))
     df = (format_districts(df, "a2_congress_dist_a", "a2_congress_dist_b", "a2_congress_dist_c", "congressional_district"))
     df = (format_districts(df, "a2_senate_dist_a", "a2_senate_dist_b", "a2_senatedistc", "senate_district"))
+    
+    #change most of the columns with zeros to NaNs
+    ## keeping some of the columns for check purposes and other analyses (ex. pct columns and counts). 
+    df = convert_zeros_to_nan(df)
     
     #add geometry
     gdf = (geography_utils.create_point_geometry(df, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
