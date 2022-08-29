@@ -367,10 +367,17 @@ def cut_segments(
     segmented = gpd.GeoDataFrame()
 
     # create_segments() must take a row.geometry (gpd.GeoDataFrame)
+    gdf = gdf.reset_index(drop=True)
 
-    for segment in create_segments(gdf.geometry, int(segment_distance)):
-        to_append = gdf.drop(columns=["geometry"])
+    for index in gdf.index:
+        one_row = gdf[gdf.index == index]
+        segment = create_segments(one_row.geometry, int(segment_distance))
+
+        to_append = pd.DataFrame()
         to_append["geometry"] = segment
+        for c in group_cols:
+            to_append[c] = one_row[c].iloc[0]
+
         segmented = pd.concat([segmented, to_append], axis=0, ignore_index=True)
 
         segmented = segmented.assign(
