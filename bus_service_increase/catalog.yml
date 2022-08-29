@@ -107,5 +107,10 @@ sources:
     args:
       # source: bus_service_increase/G2_aggregated_stats.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_stops_on_hwys_aggregated_stats.parquet
-      
+  highway_segment_stats:
+    driver: geoparquet
+    description: Route stats for only stops that fall on SHN joined to highway segments, aggregated by highway segments.
+    args:
+      # source: bus_service_increase/G3_highway_segment_stats.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highway_segment_stats.parquet
      
