@@ -322,9 +322,11 @@ class OperatorDayAnalysis:
                               >> arrange(_.shape_meters))
             stop_loc_array = stops_filtered.shape_meters.to_numpy()
             # print(stop_loc_array)
-            ## https://stackoverflow.com/questions/56024634/minimum-distance-for-each-value-in-array-respect-to-other
+            # https://stackoverflow.com/questions/56024634/minimum-distance-for-each-value-in-array-respect-to-other
+            # get minimum distance to any existing stop for each kilometer segment
             idx = np.searchsorted(stop_loc_array, km_index, side='right')
             result = km_index-stop_loc_array[idx-1] # substract one for proper index
+            # if kilometer segment is < 1km from an existing stop, drop
             km_index = km_index[result > 1000]
             routeline['km_index'] = km_index
         except:

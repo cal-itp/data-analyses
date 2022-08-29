@@ -398,8 +398,9 @@ class RtFilterMapper:
                 and len(self.filter['shape_ids']) == 1), 'must filter to a single shape_id'
         _map = self.segment_speed_map()
         to_chart = self.stop_segment_speed_view.copy()
+        to_chart = to_chart.dropna(subset=['stop_id'])
         if num_segments:
-            unique_stops = list(self.stop_segment_speed_view.stop_sequence.unique())[:num_segments]
+            unique_stops = list(to_chart.stop_sequence.unique())[:num_segments]
             min_stop_seq = min(unique_stops)
             max_stop_seq = max(unique_stops)
         if min_stop_seq:
