@@ -17,6 +17,7 @@ from utils import GCS_FILE_PATH
 
 catalog = intake.open_catalog("./*.yml")
 ANALYSIS_DATE = rt_dates.DATES["may2022"]
+TRAFFIC_OPS_GCS = 'gs://calitp-analytics-data/data-analyses/traffic_ops/'
 
 
 # From D1_pmac_routes.py, routes_on_shn_{ANALYSIS_DATE}.parquet was created
@@ -98,10 +99,30 @@ if __name__=="__main__":
     
     utils.geoparquet_gcs_export(bus_routes, GCS_FILE_PATH, "bus_routes_on_hwys")
     
-    # (2) Cut highway segments at 1 mi segment lengths
+    # (2) Find subset of stops that run on highways
+    # Use a 100 ft buffer around hwys
+    bus_routes_polygon = bus_routes.assign(
+        geometry = bus_routes.geometry.buffer(100)
+    )
+    
+    stops = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}stops_{ANALYSIS_DATE}.parquet")
+    
+    stops_on_hwy = gpd.sjoin(
+        stops.to_crs(geography_utils.CA_StatePlane),
+        bus_routes_polygon.to_crs(geography_utils.CA_StatePlane)[["geometry"]],
+        how = "inner",
+        predicate = "intersects"
+    ).drop(columns = "index_right").drop_duplicates(
+        subset=["calitp_itp_id", "stop_id"])
+    
+    utils.geoparquet_gcs_export(stops_on_hwy, GCS_FILE_PATH, "stops_on_hwys")
+    
+    
+    # (3) Cut highway segments at 1 mi segment lengths
     # We are already in EPSG:2229 (CA State Plane - ft)
     SEGMENT_DISTANCE = geography_utils.FEET_PER_MI
     
     highways = cut_highway_segments(SEGMENT_DISTANCE)
     
     utils.geoparquet_gcs_export(highways, GCS_FILE_PATH, "segmented_highways")
+    
