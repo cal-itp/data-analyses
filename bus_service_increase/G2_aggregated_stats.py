@@ -125,11 +125,11 @@ def aggregate_by_time_of_day(stop_times: dd.DataFrame,
         stop_times, group_cols, stat_col = {"departure_hour": "count"}
     ).rename(columns = {"departure_hour": "stop_arrivals"})
     
-    count_stops = aggregate_stat_by_time_of_day(
+    nunique_stops = aggregate_stat_by_time_of_day(
         stop_times, group_cols, stat_col = {"stop_id": "nunique"}
     ).rename(columns = {"stop_id": "stops"})
     
-    # Merge number of trips and number of stop arrivals
+    # Merge aggregations
     ddf1 = dd.merge(
         nunique_trips,
         count_stop_arrivals,
@@ -137,14 +137,13 @@ def aggregate_by_time_of_day(stop_times: dd.DataFrame,
         how = "inner"
     )
     
-    # Merge in number of stops
     ddf2 = dd.merge(
         ddf1,
         count_stops,
         on = group_cols,
         how = "inner"
     ).compute()
-    
+            
     return ddf2
 
 
@@ -162,8 +161,14 @@ def reshape_long_to_wide(df: pd.DataFrame,
     
     df.pivot(index=group_cols, columns = long_col, values = value_col)
     """
+    # To reshape, cannot contain duplicate entries
+    # Get it down to non-duplicate form
+    # For stop-level, if you're reshaping on value_col==trip, that stop contains
+    # the same trip info multiple times.
+    df2 = df[group_cols + [long_col, value_col]].drop_duplicates()
+    
     #https://stackoverflow.com/questions/22798934/pandas-long-to-wide-reshape-by-two-variables
-    reshaped = df.pivot(
+    reshaped = df2.pivot(
         index=group_cols, columns=long_col,
         values=value_col
     ).reset_index().pipe(to_snakecase)
@@ -188,15 +193,14 @@ def reshape_long_to_wide(df: pd.DataFrame,
     return reshaped
 
 
-def long_to_wide_format(df: pd.DataFrame) -> pd.DataFrame:
+def long_to_wide_format(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
     """
     Take the long df, which is structured where each row is 
     a route_id-time_of_day combination, and columns are 
-    'num_trips' and 'num_stop_arrivals'.
+    'trips' and 'stop_arrivals' and 'stops'.
     
     Reshape it to being wide, so each row is route_id.
     """
-    route_cols = ["calitp_itp_id", "service_date", "route_id"]
 
     df = df.astype({"time_of_day": "category"})
     
@@ -206,54 +210,55 @@ def long_to_wide_format(df: pd.DataFrame) -> pd.DataFrame:
                           'midday','pm_peak', 'evening']
     
     trips_reshaped = reshape_long_to_wide(
-        df, group_cols = route_cols, 
+        df, group_cols = group_cols, 
         long_col = "time_of_day", 
         value_col="trips", long_col_sort_order = time_of_day_sorted)
     
     stop_arrivals_reshaped = reshape_long_to_wide(
-        df, group_cols = route_cols, 
+        df, group_cols = group_cols, 
         long_col = "time_of_day", 
         value_col="stop_arrivals", long_col_sort_order = time_of_day_sorted)
     
     stops_reshaped = reshape_long_to_wide(
-        df, group_cols = route_cols, 
+        df, group_cols = group_cols, 
         long_col = "time_of_day", 
         value_col="stops", long_col_sort_order = time_of_day_sorted)
     
     
     # Just keep subset of columns (don't need all time-of-day)?
-    trips_reshaped = only_peak_and_total(
-        trips_reshaped, group_cols = route_cols, prefix = "trips")
-    stop_arrivals_reshaped = only_peak_and_total(
-        stop_arrivals_reshaped, group_cols = route_cols, prefix = "stop_arrivals")
-    stops_reshaped = only_peak_and_total(
-        stops_reshaped, group_cols = route_cols, prefix="stops")
+    def only_peak_and_total(df: pd.DataFrame, 
+                            group_cols: list, 
+                            prefix: str = "trips"
+                           ) -> pd.DataFrame:
+        
+        cols_to_sum = [f"{prefix}_am_peak", f"{prefix}_pm_peak"]
+        df[f"{prefix}_peak"] = df[cols_to_sum].sum(axis=1)
+
+        keep_cols = group_cols + [f"{prefix}_peak", f"{prefix}_total"]
+        df2 = df[keep_cols]
+
+        return df2
     
+    trips_reshaped = only_peak_and_total(
+        trips_reshaped, group_cols, prefix = "trips")
+    stop_arrivals_reshaped = only_peak_and_total(
+        stop_arrivals_reshaped, group_cols, prefix = "stop_arrivals")
+    stops_reshaped = only_peak_and_total(
+        stops_reshaped, group_cols, prefix = "stops")
     
     # After reshaping separately, merge it back together, and each row now is route-level
     df_wide = pd.merge(
         trips_reshaped, 
         stop_arrivals_reshaped,
-        on = route_cols,
+        on = group_cols,
         how = "inner"
     ).merge(stops_reshaped,
-            on = route_cols,
+            on = group_cols,
             how = "inner"
     )
+        
     
     return df_wide
-
-
-def only_peak_and_total(df: pd.DataFrame, 
-                        group_cols: list, 
-                        prefix: str = "trips"
-                       ) -> pd.DataFrame:
-    df[f"{prefix}_peak"] = df[[f"{prefix}_am_peak", f"{prefix}_pm_peak"]].sum(axis=1)
-    
-    keep_cols = group_cols + [f"{prefix}_peak", f"{prefix}_total"]
-    df2 = df[keep_cols]
-    
-    return df2
 
 
 def get_competitive_routes() -> pd.DataFrame:
@@ -282,7 +287,7 @@ def get_competitive_routes() -> pd.DataFrame:
 
 
 if __name__=="__main__":
-    # Read in bus routes that run on highways to use for filtering in dask df
+    # (1) Read in bus routes that run on highways to use for filtering in dask df
     bus_routes = catalog.bus_routes_on_hwys.read()
     
     keep_itp_ids = bus_routes.itp_id.unique().tolist()
@@ -295,11 +300,13 @@ if __name__=="__main__":
         itp_id_list = keep_itp_ids,
         export_path = GCS_FILE_PATH
     )
-    '''
     
+    # stops already cached for 5/4
+    '''
+    # (2) Combine stop_times and trips, and filter to routes that appear in bus_routes
     stop_times = dd.read_parquet(f"{GCS_FILE_PATH}st_{ANALYSIS_DATE}.parquet")
     trips = dd.read_parquet(f"{TRAFFIC_OPS_GCS}trips_{ANALYSIS_DATE}.parquet")
-    
+        
     # Subset stop times and merge with trips
     stop_times_with_hr = subset_trips_and_stop_times(
         trips, stop_times, 
@@ -307,24 +314,37 @@ if __name__=="__main__":
         route_list = keep_routes
     )
     
-    route_level_cols = [
-        "calitp_itp_id", "service_date", 
-        "route_id", "time_of_day",
-    ]
-
-    #stop_level_cols = route_level_cols + ["stop_id"]
+    # (3) Aggregate to route-level
+    route_cols = ["calitp_itp_id", "service_date", "route_id"]
     
-    # Aggregate to stop-level (should we use stop point geom later?)
-    #by_stop_and_time_of_day = aggregate_by_time_of_day(
-    #    stop_times_with_hr, stop_level_cols
-    #)
-    
-    # Aggregate to route-level
+    # (3a) All stops on route
     by_route_and_time_of_day = aggregate_by_time_of_day(
-        stop_times_with_hr, route_level_cols
+        stop_times_with_hr, route_cols + ["time_of_day"]
     )
     
-    by_route = long_to_wide_format(by_route_and_time_of_day)
+    by_route = long_to_wide_format(by_route_and_time_of_day, route_cols)
+    
+    by_route.to_parquet(f"{GCS_FILE_PATH}bus_routes_on_hwys_aggregated_stats.parquet")
+    
+    # (3b) Only stops on hwys for route
+    stops_on_hwy = catalog.bus_stops_on_hwys.read()
+    
+    stop_times_with_hr_hwy = dd.merge(
+        stop_times_with_hr,
+        stops_on_hwy[["calitp_itp_id", "stop_id"]],
+        on = ["calitp_itp_id", "stop_id"],
+        how = "inner",
+    )
+    
+    by_route_hwy_stops_and_time_of_day = aggregate_by_time_of_day(
+        stop_times_with_hr_hwy, route_cols + ["time_of_day"]
+    )
+    
+    by_route_hwy = long_to_wide_format(by_route_hwy_stops_and_time_of_day, route_cols)
+    
+    by_route_hwy.to_parquet(
+        f"{GCS_FILE_PATH}bus_stops_on_hwys_aggregated_stats.parquet")
+    
     
     # Merge in the competitive trip variability dataset
     # This contains, at the route-level, % trips competitive, num_trips competitive
@@ -342,5 +362,4 @@ if __name__=="__main__":
         how = "left",
     )
     '''
-    by_route.to_parquet(
-        f"{GCS_FILE_PATH}bus_routes_on_hwys_aggregated_stats.parquet")
+
