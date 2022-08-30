@@ -106,46 +106,6 @@ def aggregate_stat_by_time_of_day(df: dd.DataFrame,
     return agg_df
         
 
-def aggregate_by_time_of_day(stop_times: dd.DataFrame, 
-                             group_cols: list) -> pd.DataFrame:
-    """
-    Aggregate given different group_cols.
-    Count each individual stop time (a measure of 'saturation' along a hwy corridor)
-    or just count number of trips that occurred?
-    """    
-    # nunique seems to not work in groupby.agg
-    # even though https://github.com/dask/dask/pull/8479 seems to resolve it?
-    # alternative is to use nunique as series
-
-    nunique_trips = aggregate_stat_by_time_of_day(
-        stop_times, group_cols, stat_col = {"trip_id": "nunique"}
-    ).rename(columns = {"trip_id": "trips"})
-    
-    count_stop_arrivals = aggregate_stat_by_time_of_day(
-        stop_times, group_cols, stat_col = {"departure_hour": "count"}
-    ).rename(columns = {"departure_hour": "stop_arrivals"})
-    
-    nunique_stops = aggregate_stat_by_time_of_day(
-        stop_times, group_cols, stat_col = {"stop_id": "nunique"}
-    ).rename(columns = {"stop_id": "stops"})
-    
-    # Merge aggregations
-    ddf1 = dd.merge(
-        nunique_trips,
-        count_stop_arrivals,
-        on = group_cols,
-        how = "inner"
-    )
-    
-    ddf2 = dd.merge(
-        ddf1,
-        nunique_stops,
-        on = group_cols,
-        how = "inner"
-    ).compute()
-            
-    return ddf2
-
 def reshape_long_to_wide(df: pd.DataFrame, 
                          group_cols: list,
                          long_col: str = 'time_of_day',
@@ -206,32 +166,11 @@ def long_to_wide_format(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
     # doing a sum of nunique across categories is not the same as counting nunique over a larger group
     time_of_day_sorted = ['peak', 'all_day']
     
-    trips_reshaped = reshape_long_to_wide(
+    df_wide = reshape_long_to_wide(
         df, group_cols = group_cols, 
         long_col = "time_of_day", 
         value_col="trips", long_col_sort_order = time_of_day_sorted)
     
-    stop_arrivals_reshaped = reshape_long_to_wide(
-        df, group_cols = group_cols, 
-        long_col = "time_of_day", 
-        value_col="stop_arrivals", long_col_sort_order = time_of_day_sorted)
-    
-    stops_reshaped = reshape_long_to_wide(
-        df, group_cols = group_cols, 
-        long_col = "time_of_day", 
-        value_col="stops", long_col_sort_order = time_of_day_sorted)
-    
-    # After reshaping separately, merge it back together, and each row now is route-level
-    df_wide = pd.merge(
-        trips_reshaped, 
-        stop_arrivals_reshaped,
-        on = group_cols,
-        how = "inner"
-    ).merge(stops_reshaped,
-            on = group_cols,
-            how = "inner"
-    )
-        
     
     return df_wide
 
@@ -246,15 +185,20 @@ def compile_all_aggregated_stats(stop_times_with_time_of_day: dd.DataFrame,
         stop_times_with_time_of_day.time_of_day.isin(peak_bins)
     ].assign(time_of_day="peak")
 
-    by_route_peak = aggregate_by_time_of_day(
-        stop_times_peak, group_cols + ["time_of_day"]
-    )
+    by_route_peak = aggregate_stat_by_time_of_day(
+        stop_times_peak, 
+        group_cols + ["time_of_day"], 
+        stat_col = {"trip_id": "nunique"}
+    ).rename(columns = {"trip_id": "trips"}).compute()
+    
 
     stop_times_all_day = stop_times_with_time_of_day.assign(time_of_day="all_day")
 
-    by_route_all_day = aggregate_by_time_of_day(
-        stop_times_all_day, group_cols + ["time_of_day"]
-    )
+    by_route_all_day = aggregate_stat_by_time_of_day(
+        stop_times_all_day, 
+        group_cols + ["time_of_day"],
+        stat_col = {"trip_id": "nunique"}
+    ).rename(columns = {"trip_id": "trips"}).compute()
 
     by_route = pd.concat(
         [by_route_peak, by_route_all_day], axis=0)
@@ -325,21 +269,6 @@ if __name__=="__main__":
     
     by_route_all_stops.to_parquet(
         f"{GCS_FILE_PATH}bus_routes_on_hwys_aggregated_stats.parquet")    
-    
-    # (3b) Only stops on hwys for route
-    stops_on_hwy = catalog.bus_stops_on_hwys.read()
-    
-    stop_times_with_hr_hwy = dd.merge(
-        stop_times_with_hr,
-        stops_on_hwy[["calitp_itp_id", "stop_id"]],
-        on = ["calitp_itp_id", "stop_id"],
-        how = "inner",
-    )
-    
-    by_route_hwy_stops = compile_all_aggregated_stats(stop_times_with_hr_hwy, route_cols)
-
-    by_route_hwy_stops.to_parquet(
-        f"{GCS_FILE_PATH}bus_stops_on_hwys_aggregated_stats.parquet")
     
     
     # Merge in the competitive trip variability dataset
