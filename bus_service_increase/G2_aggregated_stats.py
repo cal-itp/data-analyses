@@ -310,15 +310,16 @@ if __name__=="__main__":
         itp_id_list = keep_itp_ids, 
         route_list = keep_routes
     )
+    
+    stop_times_with_hr.compute().to_parquet(f"./data/stop_times_for_routes_on_shn.parquet")
 
     # (3) Aggregate to route-level
     route_cols = ["calitp_itp_id", "service_date", "route_id"]
     
-    # (3a) All stops on route
-    by_route_all_stops = compile_peak_all_day_aggregated_stats(
-        stop_times_with_hr, route_cols)
+    by_route = compile_peak_all_day_aggregated_stats(
+        stop_times_with_hr, route_cols, stat_cols = {"trip_id": "nunique"})
     
-    by_route_all_stops.to_parquet(
+    by_route.to_parquet(
         f"{GCS_FILE_PATH}bus_routes_on_hwys_aggregated_stats.parquet")    
     
     
