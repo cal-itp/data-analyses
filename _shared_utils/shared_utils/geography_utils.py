@@ -317,3 +317,86 @@ def create_point_geometry(
     gdf = gpd.GeoDataFrame(df).to_crs(crs)
 
     return gdf
+
+
+def create_segments(geometry: gpd.GeoSeries, segment_distance: int) -> gpd.GeoSeries:
+    """
+    Splits a Shapely LineString into smaller LineStrings.
+    If a MultiLineString passed, splits each LineString in that collection.
+
+    Input a geometry column, such as gdf.geometry.
+
+    Double check: segment_distance must be given in the same units as the CRS!
+    """
+    lines = []
+    geometry = geometry.iloc[0]
+
+    if hasattr(geometry, "geoms"):  # check if MultiLineString
+        linestrings = geometry.geoms
+    else:
+        linestrings = [geometry]
+
+    for linestring in linestrings:
+        for i in range(0, int(linestring.length), segment_distance):
+            lines.append(shapely.ops.substring(linestring, i, i + segment_distance))
+
+    return lines
+
+
+def cut_segments(
+    gdf: gpd.GeoDataFrame,
+    group_cols: list = ["calitp_itp_id", "calitp_url_number", "route_id"],
+    segment_distance: int = 1_000,
+) -> gpd.GeoDataFrame:
+    """
+    Cut segments from linestrings at defined segment lengths.
+    Make sure segment distance is defined in the same CRS as the gdf.
+
+    group_cols: list of columns.
+                The set of columns that represents how segments should be cut.
+                Ex: for transit route, it's calitp_itp_id-calitp_url_number-route_id
+                Ex: for highways, it's Route-RouteType-County-District.
+
+    Returns a gpd.GeoDataFrame where each linestring row is now multiple
+    rows (each at the pre-defined segment_distance). A new column called
+    `segment_sequence` is also created, which differentiates each
+    new row created (since they share the same group_cols).
+    """
+    EPSG_CODE = gdf.crs.to_epsg()
+
+    segmented = gpd.GeoDataFrame()
+
+    # create_segments() must take a row.geometry (gpd.GeoDataFrame)
+    gdf = gdf.reset_index(drop=True)
+
+    for index in gdf.index:
+        one_row = gdf[gdf.index == index]
+        segment = create_segments(one_row.geometry, int(segment_distance))
+
+        to_append = pd.DataFrame()
+        to_append["geometry"] = segment
+        for c in group_cols:
+            to_append[c] = one_row[c].iloc[0]
+
+        segmented = pd.concat([segmented, to_append], axis=0, ignore_index=True)
+
+        segmented = segmented.assign(
+            temp_index=(segmented.sort_values(group_cols).reset_index(drop=True).index)
+        )
+
+    segmented = (
+        segmented.assign(
+            segment_sequence=(
+                segmented.groupby(group_cols)["temp_index"].transform("rank") - 1
+            )
+            .astype(int)
+            .astype(str)
+        )
+        .sort_values(group_cols)
+        .reset_index(drop=True)
+        .drop(columns="temp_index")
+    )
+
+    segmented2 = gpd.GeoDataFrame(segmented, crs=f"EPSG:{EPSG_CODE}")
+
+    return segmented2

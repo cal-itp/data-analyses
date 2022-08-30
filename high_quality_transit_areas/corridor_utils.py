@@ -10,7 +10,7 @@ import geopandas as gpd
 import pandas as pd
 import zlib
 
-from shapely.geometry import LineString, Point
+from shapely.geometry import Point
 
 import utilities
 from shared_utils import rt_utils, gtfs_utils
@@ -323,39 +323,3 @@ def add_segment_id(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     )
 
     return df2
-
-
-def segment_route(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    """
-    Draw segments every 1,250 m.
-    Then create an hqta_segment_id that we can reference later on.
-    """
-    segmented = gpd.GeoDataFrame() 
-
-    route_cols = ["calitp_itp_id", "calitp_url_number", "route_id"]
-
-    # Turn 1 row of geometry into hqta_segments, every 1,250 m
-    # create_segments() must take a row.geometry (gpd.GeoDataFrame)
-    for segment in utilities.create_segments(gdf.geometry):
-        to_append = gdf.drop(columns=["geometry"])
-        to_append["geometry"] = segment
-        segmented = pd.concat([segmented, to_append], axis=0, ignore_index=True)
-    
-        segmented = segmented.assign(
-            temp_index = (segmented.sort_values(route_cols)
-                          .reset_index(drop=True).index
-                         )
-        )
-    
-    segmented = (segmented.assign(
-        segment_sequence = (segmented.groupby(route_cols)["temp_index"]
-                            .transform("rank") - 1).astype(int).astype(str)
-                           )
-                 .sort_values(route_cols)
-                 .reset_index(drop=True)
-                 .drop(columns = "temp_index")
-                )
-    
-    return segmented
-        
-    

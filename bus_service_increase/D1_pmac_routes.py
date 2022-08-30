@@ -58,7 +58,8 @@ if __name__ == "__main__":
     
     # Use concatenated routelines and trips from traffic_ops work
     # Use the datasets with Amtrak added back in (rt_delay always excludes Amtrak)
-    routelines = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}routelines_{ANALYSIS_DATE}_all.parquet")
+    routelines = gpd.read_parquet(
+        f"{TRAFFIC_OPS_GCS}routelines_{ANALYSIS_DATE}_all.parquet")
     trips = pd.read_parquet(f"{TRAFFIC_OPS_GCS}trips_{ANALYSIS_DATE}_all.parquet")
     
     shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]

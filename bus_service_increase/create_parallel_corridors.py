@@ -80,15 +80,20 @@ def process_transit_routes(alternate_df:
     ]
     
     df4 = df3.assign(
-              total_routes = df3.groupby("itp_id")["route_id"].transform("nunique")
-          )[keep_cols]
+        total_routes = df3.groupby("itp_id")["route_id"].transform(
+            "nunique").astype("Int64")
+    )[keep_cols]
     
     return df4
 
 
-def process_highways(buffer_feet: int = 
-                     shared_utils.geography_utils.FEET_PER_MI
-                    ) -> gpd.GeoDataFrame:
+def prep_highway_directions_for_dissolve(
+    group_cols: list = ["Route", "County", "District", "RouteType"]
+) -> gpd.GeoDataFrame:    
+    '''
+    Put in a list of group_cols, and aggregate highway segments with 
+    the direction info up to the group_col level.
+    '''
     df = (catalog.state_highway_network.read()
           .to_crs(shared_utils.geography_utils.CA_StatePlane))
     
@@ -98,21 +103,34 @@ def process_highways(buffer_feet: int =
     df = pd.concat([df.drop(columns = "Direction"), 
                     direction_dummies], axis=1)
 
-    group_cols = ['Route', 'County', 'District', 'RouteType']
     direction_cols = ["NB", "SB", "EB", "WB"]
     
     for c in direction_cols:
-        df[c] = df.groupby(group_cols)[c].transform('max')
+        df[c] = df.groupby(group_cols)[c].transform('max').astype(int)
+
+    return df
+    
+    
+def process_highways(buffer_feet: int = 
+                     shared_utils.geography_utils.FEET_PER_MI
+                    ) -> gpd.GeoDataFrame:
+    
+    group_cols = ["Route", "County", "District", "RouteType"]
+    df = prep_highway_directions_for_dissolve(group_cols)
     
     # Buffer first, then dissolve
     # If dissolve first, then buffer, kernel times out
     df = df.assign(
         highway_length = df.geometry.length,
-        geometry = df.geometry.buffer(buffer_feet)   
+        geometry = df.geometry.buffer(buffer_feet),
+        Route = df.Route.astype(int),
     )
     
+    direction_cols = ["NB", "SB", "EB", "WB"]
     df = df.dissolve(by=group_cols + direction_cols).reset_index()
     
+    df[direction_cols] = df[direction_cols].astype(int)
+        
     return df
     
     
@@ -147,6 +165,7 @@ def overlay_transit_to_highways(
     gdf = gdf.assign(
         pct_route = (gdf.geometry.length / gdf.route_length).round(3),
         pct_highway = (gdf.geometry.length / gdf.highway_length).round(3),
+        Route = gdf.Route.astype(int),
     )
     
     '''
