@@ -76,6 +76,41 @@ sources:
     args:
       # source: bus_service_increase/E5_make_stripplot_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/competitive_route_variability.parquet
-      
-      
+  ## PROCESSED DATA: 100 RECOMMENDATIONS FOR BETTER BUSES
+  bus_routes_on_hwys:
+    driver: geoparquet
+    description: Bus routes that run a significant portion of their route on the hwy.
+    args:
+      # source: bus_service_increase/G1_better_buses_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_routes_on_hwys.parquet
+  bus_stops_on_hwys:
+    driver: geoparquet
+    description: Bus routes that run a significant portion of their route on the hwy.
+    args:
+      # source: bus_service_increase/G1_better_buses_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/stops_on_hwys.parquet
+  segmented_highways:
+    driver: geoparquet
+    description: Highways cut at 1 mi segments.
+    args:
+      # source: bus_service_increase/G1_better_buses_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/segmented_highways.parquet
+  bus_routes_aggregated_stats:
+    driver: parquet
+    description: Aggregated stats for stop times and trips by route_id for all stops on the route.
+    args:
+      # source: bus_service_increase/G2_aggregated_stats.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_routes_on_hwys_aggregated_stats.parquet
+  bus_stops_aggregated_stats:
+    driver: parquet
+    description: Aggregated stats for stop times and trips by route_id for only stops that fall on SHN on the route.
+    args:
+      # source: bus_service_increase/G2_aggregated_stats.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_stops_on_hwys_aggregated_stats.parquet
+  highway_segment_stats:
+    driver: geoparquet
+    description: Route stats for only stops that fall on SHN joined to highway segments, aggregated by highway segments.
+    args:
+      # source: bus_service_increase/G3_highway_segment_stats.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highway_segment_stats.parquet
      
