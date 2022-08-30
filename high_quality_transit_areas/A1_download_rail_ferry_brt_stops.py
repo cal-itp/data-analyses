@@ -21,7 +21,6 @@ from update_vars import analysis_date
 
 catalog = intake.open_catalog("./*.yml")
 
-
 def operators_with_route_type(route_type_list: list) -> list:
     """
     Function to just find a subset of operators, 
