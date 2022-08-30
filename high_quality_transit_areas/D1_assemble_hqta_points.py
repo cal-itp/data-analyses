@@ -10,11 +10,18 @@ import geopandas as gpd
 import numpy as np
 import os
 import pandas as pd
+import sys
+
+from loguru import logger
 
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
 from shared_utils import utils, geography_utils, portfolio_utils
 from update_vars import analysis_date
+
+logger.add("./logs/D1_assemble_hqta_points.log")
+logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+
 
 # Input files
 MAJOR_STOP_BUS_FILE = utilities.catalog_filepath("major_stop_bus")
@@ -101,14 +108,14 @@ if __name__=="__main__":
                            )
     
     time1 = dt.datetime.now()
-    print(f"combined points: {time1 - start}")
+    logger.info(f"combined points: {time1 - start}")
     
     # Add agency names, hqta_details, project back to WGS84
     gdf = add_agency_names_hqta_details(hqta_points_combined)
     gdf = clean_up_hqta_points(gdf)
     
     time2 = dt.datetime.now()
-    print(f"add agency names / compute: {time2 - time1}")
+    logger.info(f"add agency names / compute: {time2 - time1}")
     
     utils.geoparquet_gcs_export(gdf,
                     utilities.GCS_FILE_PATH,
@@ -122,4 +129,4 @@ if __name__=="__main__":
     # fs.mkdir(f'{GCS_FILE_PATH}export/{analysis_date.isoformat()}/')
     
     end = dt.datetime.now()
-    print(f"execution time: {end-start}")
+    logger.info(f"execution time: {end-start}")
