@@ -17,16 +17,22 @@ import geopandas as gpd
 import glob
 import pandas as pd
 import siuba
+import sys 
 
 from calitp.tables import tbl
 from siuba import *
+from loguru import logger
 
 import operators_for_hqta
 
-from update_vars import analysis_date, date_str, CACHED_VIEWS_EXPORT_PATH
+from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH
 from shared_utils import gtfs_utils, geography_utils, rt_utils, utils
 
+logger.add("./logs/download_data.log")
+logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+
 LOCAL_PATH = "./data/"
+date_str = analysis_date
 
 def primary_trip_query(itp_id: int,
                        analysis_date: dt.date):
@@ -48,7 +54,8 @@ def primary_trip_query(itp_id: int,
     )
     
     full_trips.to_parquet(f"{LOCAL_PATH}temp_{filename}")
-    
+    logger.info(f"{itp_id}: {dataset} saved locally")
+
 
 def get_routelines(itp_id: int, 
                    analysis_date: str | dt.date):
@@ -62,7 +69,8 @@ def get_routelines(itp_id: int,
     filename = f'{dataset}_{itp_id}_{date_str}.parquet'
     
     # Read in the full trips table
-    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_trips_{itp_id}_{date_str}.parquet")
+    full_trips = pd.read_parquet(
+        f"{LOCAL_PATH}temp_trips_{itp_id}_{date_str}.parquet")
     
     routelines = gtfs_utils.get_route_shapes(
         selected_date = analysis_date,
@@ -74,15 +82,13 @@ def get_routelines(itp_id: int,
     
     if not routelines.empty:
         utils.geoparquet_gcs_export(routelines, 
-                            CACHED_VIEWS_EXPORT_PATH, 
-                            filename)
+                                    CACHED_VIEWS_EXPORT_PATH, 
+                                    filename)
 
-        print(f"{itp_id}: {dataset} exported to GCS")
+        logger.info(f"{itp_id}: {dataset} exported to GCS")
     
     
-def get_trips(itp_id: int, analysis_date: str | dt.date, 
-              #route_types: list = None
-             ):
+def get_trips(itp_id: int, analysis_date: str | dt.date):
     """
     Download the trips that ran on selected day.
     TODO: filter for route_types? Or do later?
@@ -127,13 +133,7 @@ def get_trips(itp_id: int, analysis_date: str | dt.date,
     )
     if not trips.empty:
         trips.to_parquet(f"{CACHED_VIEWS_EXPORT_PATH}{filename}")
-        print(f"{itp_id}: {dataset} exported to GCS")
-    '''
-    # TODO: work this into a later function
-    if route_types:
-        print(f"filtering to GTFS route types {route_types}")
-        trips = trips >> filter(_.route_type.isin(route_types))
-    '''
+        logger.info(f"{itp_id}: {dataset} exported to GCS")
     
     
 def get_stops(itp_id: int, analysis_date: str | dt.date):
@@ -164,7 +164,7 @@ def get_stops(itp_id: int, analysis_date: str | dt.date):
     
     if not stops.empty:
         utils.geoparquet_gcs_export(stops, CACHED_VIEWS_EXPORT_PATH, filename)
-        print(f"{itp_id}: {dataset} exported to GCS")
+        logger.info(f"{itp_id}: {dataset} exported to GCS")
 
         
 def get_stop_times(itp_id: int, analysis_date: str | dt.date):
@@ -189,7 +189,7 @@ def get_stop_times(itp_id: int, analysis_date: str | dt.date):
     
     if not stop_times.empty:
         stop_times.to_parquet(f"{CACHED_VIEWS_EXPORT_PATH}{filename}")
-        print(f"{itp_id}: {dataset} exported to GCS")
+        logger.info(f"{itp_id}: {dataset} exported to GCS")
     
     
 def check_route_trips_stops_are_cached(itp_id: int, date_str: str):
@@ -232,16 +232,12 @@ if __name__=="__main__":
         date_str, ALL_ITP_IDS = ALL_IDS)
     
     IDS_TO_RUN = list(set(ALL_IDS).difference(set(CACHED_IDS)))
-    print(f"# operators to run: {len(IDS_TO_RUN)}")
-    
-    # TODO: rethink cached IDs. For the most part, we know there are some
-    # that are erroring, such as ITP ID 21, and we want to ignore those going forward
-    # that's caught in completeness check later on, but 
-    # at this stage, it'll show there's a bunch of operators we want to keep trying on
+    logger.info(f"# operators to run: {len(IDS_TO_RUN)}")
     
     for itp_id in sorted(IDS_TO_RUN):
         time0 = dt.datetime.now()
-        print(f"*********Download data for: {itp_id}*********")
+        
+        logger.info(f"*********** Download data for: {itp_id} ***********")
         
         # Stash a trips table locally to use
         primary_trip_query(itp_id, analysis_date)
@@ -262,9 +258,8 @@ if __name__=="__main__":
             os.remove(f)
 
         time1 = dt.datetime.now()
-        print(f"download files for {itp_id}: {time1 - time0}")
-
+        logger.info(f"download files for {itp_id}: {time1-time0}")
 
     end = dt.datetime.now()
-    print(f"execution time: {end-start}")
     
+    logger.info(f"execution time: {end-start}")
