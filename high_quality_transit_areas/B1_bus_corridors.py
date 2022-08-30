@@ -22,12 +22,17 @@ import gcsfs
 import numpy as np
 import pandas as pd
 
+from loguru import logger
+
 import corridor_utils
 import operators_for_hqta
 from shared_utils import utils, geography_utils
 from utilities import GCS_FILE_PATH
 from update_vars import (date_str, CACHED_VIEWS_EXPORT_PATH, 
                          VALID_OPERATORS_FILE)
+
+logger.add("./logs/B1_bus_corridors.log")
+logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
 
 fs = gcsfs.GCSFileSystem()
 
@@ -226,21 +231,23 @@ if __name__=="__main__":
             
         routelines, trips, stop_times, stops = import_data(itp_id, date_str)   
 
-        print(f"read in cached files: {itp_id}")                
-            
+        logger.info(f"read in cached files: {itp_id}")
+    
         gdf = single_operator_hqta(routelines, trips, stop_times, stops)
 
-        print(f"created single operator hqta: {itp_id}")
-        
+        logger.info(f"created single operator hqta: {itp_id}")
+
         # Export each operator         
         utils.geoparquet_gcs_export(
             gdf, f'{GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
 
-        print(f"successful export: {itp_id}")
+        logger.info(f"successful export: {itp_id}")
 
         operator_end = dt.datetime.now()
-        print(f"execution time for {itp_id}: {operator_end - operator_start}")
         
+        logger.info(f"execution time for {itp_id}: {operator_end - operator_start}")
+
     end_time = dt.datetime.now()
-    print(f"total execution time: {end_time-start_time}")
+    logger.info(f"total execution time: {end_time-start_time}")
+
         

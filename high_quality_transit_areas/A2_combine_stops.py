@@ -6,13 +6,20 @@ and filter out certain stop_ids.
 
 Export combined rail_brt_ferry data into GCS.
 """
+import datetime
 import geopandas as gpd
 import pandas as pd
+import sys
+
+from loguru import logger
 
 import A1_download_rail_ferry_brt_stops as rail_ferry_brt
 from shared_utils import utils
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date
+
+logger.add("./logs/A2_combine_stops.log")
+logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
 
 metro_street_running =[
     '141012', '13805', '5397', '13803',
@@ -31,8 +38,13 @@ van_ness_ids = [
 
 
 if __name__ == "__main__":
+    start = datetime.datetime.now()
+    
     # Rail
     rail_stops = rail_ferry_brt.grab_rail_data(analysis_date)
+    
+    time1 = datetime.datetime.now()
+    logger.info(f"grabbed rail: {time1-start}")
 
     # BRT
     # LA Metro
@@ -49,8 +61,14 @@ if __name__ == "__main__":
     muni_brt_stops = rail_ferry_brt.additional_brt_filtering_out_stops(
         muni_brt_stops, 282, van_ness_ids)
 
+    time2 = datetime.datetime.now()
+    logger.info(f"grabbed brt: {time2-time1}")
+    
     # Ferry
     ferry_stops = rail_ferry_brt.grab_ferry_data(analysis_date)
+    
+    time3 = datetime.datetime.now()
+    logger.info(f"grabbed ferry: {time3-time2}")
     
     # Concatenate datasets
     rail_brt_ferry = pd.concat([
@@ -59,8 +77,13 @@ if __name__ == "__main__":
         ferry_stops
     ], axis=0, ignore_index=True)
     
+    logger.info("concatenated datasets")
+
     
     # Export to GCS
     utils.geoparquet_gcs_export(rail_brt_ferry, 
                                 GCS_FILE_PATH, 
                                 'rail_brt_ferry')
+    
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end-start}")
