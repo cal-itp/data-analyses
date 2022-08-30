@@ -12,9 +12,15 @@ import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import pandas as pd
+import sys
+
+from loguru import logger
 
 from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
+
+logger.add("./logs/C1_prep_for_clipping.log")
+logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
 
 segment_cols = ["calitp_itp_id", "hqta_segment_id", "route_direction"]
 
@@ -154,7 +160,8 @@ def compile_pairwise_intersections(corridors: dg.GeoDataFrame,
         operator_shape = find_intersection_across_and_within(corridors, itp_id)
         
         time1 = dt.datetime.now()
-        print(f"grab intersections for {itp_id}: {time1 - time0}")
+        logger.info(f"grab intersections for {itp_id}: {time1 - time0}")
+
         
         intersecting_segments = (dd.multi.concat(
             [intersecting_segments, operator_shape], axis=0)
@@ -163,8 +170,8 @@ def compile_pairwise_intersections(corridors: dg.GeoDataFrame,
         )
 
     end = dt.datetime.now()
-    print(f"execution time for compiling pairwise: {end-start}")
-    
+    logger.info(f"execution time for compiling pairwise: {end-start}")
+
     intersecting_segments = intersecting_segments.astype({
         "intersect_calitp_itp_id": int,
         "intersect_hqta_segment_id": int,
@@ -248,8 +255,8 @@ if __name__=="__main__":
     corridors2 = subset_corridors(corridors[keep_cols + ["route_id"]], intersecting_shapes)
     
     time1 = dt.datetime.now()
-    print(f"subset corridors: {time1 - start}")
-    
+    logger.info(f"subset corridors: {time1 - start}")
+
     # Save results locally temporarily
     # Here, already drop where the dask_geopandas.sjoin gave us intersections
     # of route directions going in the same direction
@@ -261,7 +268,7 @@ if __name__=="__main__":
     subset_corridors = corridors2.compute()
 
     time2 = dt.datetime.now()
-    print(f"compute for pairwise/subset_corridors: {time2 - time1}")
+    logger.info(f"compute for pairwise/subset_corridors: {time2 - time1}")
     
     pairwise.to_parquet(f"{GCS_FILE_PATH}intermediate/pairwise.parquet")
     
@@ -271,4 +278,4 @@ if __name__=="__main__":
                        )
     
     end = dt.datetime.now()
-    print(f"execution time: {end-start}")
+    logger.info(f"execution time: {end-start}")

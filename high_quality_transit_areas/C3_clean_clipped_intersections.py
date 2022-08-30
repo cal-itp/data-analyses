@@ -11,6 +11,7 @@ import shapely.geometry as sh
 
 from utilities import catalog_filepath
 
+
 # Input files
 COMBINED_CLIPPED = catalog_filepath("combined_clipped_intersections")
 
