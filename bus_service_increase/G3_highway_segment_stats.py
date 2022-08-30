@@ -10,7 +10,7 @@ from utils import GCS_FILE_PATH
 
 catalog = intake.open_catalog("*.yml")
 
-highway_cols = ["District", "County", "hwy_segment_id"]
+highway_cols = ["District", "County", "Route", "RouteType", "hwy_segment_id"]
 route_cols = ["calitp_itp_id", "route_id"]
 
 
@@ -80,7 +80,7 @@ if __name__=="__main__":
     # (2) Just use stats at route-level for stops that actually fall on SHN
     stats_on_hwy = catalog.bus_stops_aggregated_stats.read()
     
-    highway_stats = aggregate_to_hwy_segments(s
+    highway_stats = aggregate_to_hwy_segments(
         highways_with_buses, stats_on_hwy)
     
     utils.geoparquet_gcs_export(highway_stats, 
