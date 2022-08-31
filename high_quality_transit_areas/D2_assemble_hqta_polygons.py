@@ -16,9 +16,12 @@ import C1_prep_for_clipping as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
 from shared_utils import utils, geography_utils
+from D1_assemble_hqta_points import EXPORT_PATH
 
 logger.add("./logs/D2_assemble_hqta_polygons.log")
-logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
 
 HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 
@@ -110,14 +113,17 @@ if __name__=="__main__":
     gdf2 = drop_bad_stops_final_processing(gdf, bad_stops)    
     
     # Export to GCS
+    # Stash this date's into its own folder, to convert to geojson, geojsonl
+    utils.geoparquet_gcs_export(gdf2, 
+                                EXPORT_PATH, 
+                                'ca_hq_transit_areas'
+                               )
+    
+    # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(gdf2,
                                 utilities.GCS_FILE_PATH,
                                 'hqta_areas'
                                )    
-    
-    # TODO: add export to individual folder as geojsonL
-    # maybe create object loader fs.put in shared_utils
-    # fs.mkdir(f'{GCS_FILE_PATH}export/{analysis_date.isoformat()}/')
-    
+        
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

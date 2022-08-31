@@ -26,7 +26,9 @@ from utilities import catalog_filepath
 from update_vars import analysis_date
 
 logger.add("./logs/C4_create_bus_hqta_types.log")
-logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
 
 # Input files
 ALL_BUS = catalog_filepath("all_bus")

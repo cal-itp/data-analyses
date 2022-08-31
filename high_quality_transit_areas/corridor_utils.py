@@ -71,6 +71,8 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
     this pares it down to ~115 route_ids.
     Use this pared down shape_ids to get hqta_segments.
     """
+    shape_id_cols = ["calitp_itp_id", "shape_id"]
+
     routelines_ddf = routelines.assign(
         route_length = routelines.geometry.length,
         # Easier to drop if we make sure centroid of that line segment is the same too
@@ -80,15 +82,13 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
         
     # Merge routes to trips with using trip_id
     # Keep route_id and shape_id, but drop trip_id by the end
-    shape_id_cols = ["calitp_itp_id", "shape_id"]
     
     m1 = (dd.merge(
             routelines_ddf,
             # Don't merge using calitp_url_number because ITP ID 282 (SFMTA)
             # can use calitp_url_number = 1
             # Just keep calitp_url_number = 0 from routelines_ddf
-            trips.drop(columns = "calitp_url_number")[
-                shape_id_cols + ["route_id", "direction_id"]],
+            trips[shape_id_cols + ["route_id", "direction_id"]],
             on = shape_id_cols,
             how = "inner",
         ).drop_duplicates(subset=["calitp_itp_id", "route_id", 
@@ -97,6 +97,12 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
         .drop(columns = ["x", "y"])
         .reset_index(drop=True)
     )
+    
+    # If direction_id is missing, then later code will break, because
+    # we need to find the longest route_length
+    # Don't really care what direction is, since we will replace it with north-south
+    # Just need a value to stand-in, treat it as the same direction
+    m1 = m1.assign(direction_id = m1.direction_id.fillna(0))
     
     return m1
 
@@ -109,9 +115,9 @@ def find_longest_route_shapes(
     Since there are short/long trips for a given route_id,
     Keep the longest shape_ids within a route_id-direction_id
     """
-    route_dir_cols = ["calitp_itp_id", "calitp_url_number",
+    route_dir_cols = ["calitp_itp_id",
                       "route_id", "direction_id"]
-
+    
     # Keep the longest shape_id for each direction
     longest_shape_by_direction = (
         merged_routelines_trips.groupby(route_dir_cols)
