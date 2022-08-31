@@ -4,7 +4,7 @@ import shared_utils
 
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-FILE_NAME = "TIRCP_July_8_2022.xlsx"
+FILE_NAME = "TIRCP_August_24_2022.xlsx"
 
 #Crosswalk
 import A5_crosswalks as crosswalks
