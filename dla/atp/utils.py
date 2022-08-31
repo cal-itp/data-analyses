@@ -21,15 +21,7 @@ def read_in_data():
     df = df.drop(columns = columns_to_drop)
     #inplace=True)
     return df
-
-def get_num(x):
-    try:
-        return int(x)
-    except Exception:
-        try:
-            return float(x)
-        except Exception:
-            return x  
+  
 
 ## function to condense the columns for various districts that are manually entered in 3 boxes of the application
 ## function will return "Needs Manual Assistance" to identify the cases that do not fit in the model.
@@ -119,7 +111,11 @@ def clean_data(df):
     ## keeping some of the columns for check purposes and other analyses (ex. pct columns and counts). 
     df = convert_zeros_to_nan(df)
     
-    #add geometry
+    #convert df columns locode to Int64. Change 'None' values to nulls.
+    df = df.replace({'a1_locode': 'None'}, np.nan)
+    df = df.astype({'a1_locode':'Int64'})
+    
+    #add geometry for lat long column
     gdf = (geography_utils.create_point_geometry(df, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
 
     return gdf
