@@ -44,7 +44,6 @@ drop_cols = [
         "contact_e_mail",
         "authorized_agent_name",
         "authorized_agent_title",
-        "project_description__short_",
         "project_sub_type",
     ]
 
