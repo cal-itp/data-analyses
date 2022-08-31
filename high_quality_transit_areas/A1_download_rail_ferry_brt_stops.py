@@ -184,7 +184,8 @@ def grab_operator_brt(itp_id: int, analysis_date: dt.date):
     
     BRT_ROUTE_FILTERING = {
         # LA Metro BRT
-        182: {"route_id": ["901", "910"]},
+        182: {"route_desc": ["METRO SILVER LINE", "METRO ORANGE LINE"]},
+              #["901", "910"]
         # AC Transit BRT
         4: {"route_id": ['1T']},
         # Omni BRT -- too infrequent!
@@ -192,7 +193,7 @@ def grab_operator_brt(itp_id: int, analysis_date: dt.date):
         # Muni
         282: {"route_short_name": ['49']}
     }
-
+    
     operator_brt = gtfs_utils.get_route_info(
         selected_date = analysis_date,
         itp_id_list = [itp_id],

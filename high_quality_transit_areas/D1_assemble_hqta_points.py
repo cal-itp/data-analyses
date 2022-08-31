@@ -20,8 +20,11 @@ from shared_utils import utils, geography_utils, portfolio_utils
 from update_vars import analysis_date
 
 logger.add("./logs/D1_assemble_hqta_points.log")
-logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
 
+EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 
 # Input files
 MAJOR_STOP_BUS_FILE = utilities.catalog_filepath("major_stop_bus")
@@ -117,16 +120,20 @@ if __name__=="__main__":
     time2 = dt.datetime.now()
     logger.info(f"add agency names / compute: {time2 - time1}")
     
+    # Export to GCS
+    # Stash this date's into its own folder, to convert to geojson, geojsonl
     utils.geoparquet_gcs_export(gdf,
-                    utilities.GCS_FILE_PATH,
-                    'hqta_points'
-                   )    
+                                EXPORT_PATH,
+                                'ca_hq_transit_stops'
+                               )  
+    
+    # Overwrite most recent version (other catalog entry constantly changes)
+    utils.geoparquet_gcs_export(gdf, 
+                                utilities.GCS_FILE_PATH,
+                                'hqta_points'
+                               )
     
     delete_local_files()
-    
-    # TODO: add export to individual folder as geojsonL
-    # maybe create object loader fs.put in shared_utils
-    # fs.mkdir(f'{GCS_FILE_PATH}export/{analysis_date.isoformat()}/')
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

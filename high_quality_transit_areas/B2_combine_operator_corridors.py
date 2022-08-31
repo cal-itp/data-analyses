@@ -9,6 +9,7 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
+import sys
 
 from loguru import logger
 
@@ -18,7 +19,9 @@ from utilities import GCS_FILE_PATH
 from update_vars import VALID_OPERATORS_FILE
 
 logger.add("./logs/B2_combine_operator_corridors.log")
-logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
 
 # Read first one in, to set the metadata for dask gdf
 OPERATOR_PATH = f"{GCS_FILE_PATH}bus_corridors/"

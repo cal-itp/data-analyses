@@ -139,7 +139,8 @@ def check_for_completeness(export_path: str = CACHED_VIEWS_EXPORT_PATH,
         stops = dask_geopandas.read_parquet(f"{export_path}stops_{itp_id}_{date_str}.parquet")
        
         if ( (len(routelines.index) > 0) and (len(trips.index) > 0) and 
-            (len(stop_times.index) > 0) and (len(stops.index) > 0) ):    
+            (len(stop_times.index) > 0) and (len(stops.index) > 0) 
+           ):  
             IDS_WITH_FULL_INFO.append(itp_id)
     
     return IDS_WITH_FULL_INFO

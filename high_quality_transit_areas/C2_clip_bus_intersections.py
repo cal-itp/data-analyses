@@ -27,8 +27,9 @@ from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 
 logger.add("./logs/C2_clip_bus_intersections.log")
-logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
-
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
 
 segment_cols = ["calitp_itp_id", "hqta_segment_id"]
 
