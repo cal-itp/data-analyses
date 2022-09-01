@@ -25,6 +25,7 @@ from loguru import logger
 import C1_prep_for_clipping as prep_clip
 from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
+from update_vars import analysis_date
 
 logger.add("./logs/C2_clip_bus_intersections.log")
 logger.add(sys.stderr, 
@@ -120,6 +121,8 @@ def delete_local_clipped_files():
     
 
 if __name__ == "__main__":
+    logger.info(f"Analysis date: {analysis_date}")
+
     start = dt.datetime.now()
         
     intersecting_pairs = dd.read_parquet(PAIRWISE_FILE)

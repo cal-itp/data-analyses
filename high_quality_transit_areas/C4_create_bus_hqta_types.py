@@ -199,7 +199,7 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 
 if __name__ == "__main__":
-    
+    logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     # Narrow down to the stops of operators who also have

@@ -16,7 +16,7 @@ from loguru import logger
 import operators_for_hqta
 from shared_utils import utils
 from utilities import GCS_FILE_PATH
-from update_vars import VALID_OPERATORS_FILE
+from update_vars import analysis_date, VALID_OPERATORS_FILE
 
 logger.add("./logs/B2_combine_operator_corridors.log")
 logger.add(sys.stderr, 
@@ -30,6 +30,7 @@ ITP_IDS_IN_GCS = operators_for_hqta.itp_ids_from_json(file=VALID_OPERATORS_FILE)
 first_operator = ITP_IDS_IN_GCS[0]
 
 if __name__ == "__main__":
+    logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     # Read in first operator to set the metadata for dask gdf

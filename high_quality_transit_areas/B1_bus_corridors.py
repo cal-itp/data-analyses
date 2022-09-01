@@ -217,7 +217,9 @@ def import_data(itp_id, date_str):
     
     
     
-if __name__=="__main__":        
+if __name__=="__main__":   
+    logger.info(f"Analysis date: {analysis_date}")
+
     start_time = dt.datetime.now()
     
     # TODO: add back in? clear cache each month?
