@@ -128,6 +128,9 @@ class RtFilterMapper:
             
     def reset_filter(self):
         self.filter = None
+        self._time_only_filter = True
+        self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
+                                         self.stop_delay_view.actual_time.min()).seconds / 60**2
         self.filter_period = 'All_Day'
         rts = 'All Routes'
         elements_ordered = [rts, self.filter_period, self.display_date]
@@ -186,11 +189,12 @@ class RtFilterMapper:
                 self.pbar.reset(total=len(gdf.shape_id.unique()))
                 self.pbar.desc = 'Generating segment speeds'
             for shape_id in gdf.shape_id.unique():
+                # try:
                 this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
-                if this_shape.empty:
-                    # print(f'{shape_id} empty!')
-                    continue
-                # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
+                print(shape_id)
+                self.debug_dict[f'{shape_id}_segments'] = this_shape
+                # Siuba errors unless you do this twice? TODO make upstream issue...
+                this_shape = this_shape >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
                 stop_speeds = (this_shape
                              >> group_by(_.trip_id)
                              >> arrange(_.stop_sequence)
@@ -198,14 +202,9 @@ class RtFilterMapper:
                              >> mutate(last_loc = _.shape_meters.shift(1))
                              >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
                              >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
-                             # >> mutate(last_delay = _.delay.shift(1))
                              >> mutate(delay_chg_sec = (_.delay_seconds - _.delay_seconds.shift(1)))
-                             # >> mutate(delay_sec = _.delay.map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2))
                              >> ungroup()
                             )
-                if stop_speeds.empty:
-                    # print(f'{shape_id}_{direction_id}_st_spd empty!')
-                    continue
                 # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
                 stop_speeds.geometry = stop_speeds.apply(
                     lambda x: shapely.ops.substring(
@@ -215,30 +214,29 @@ class RtFilterMapper:
                                                 axis = 1)
                 stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
 
-                try:
-                    stop_speeds = (stop_speeds
-                         >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
-                         >> group_by(_.stop_sequence)
-                         >> mutate(n_trips = _.stop_sequence.size,
-                                    avg_mph = _.speed_mph.mean(),
-                                  _20p_mph = _.speed_mph.quantile(.2),
-                                   trips_per_hour = _.n_trips / self.hr_duration_in_filter
-                                  )
-                         # >> distinct(_.stop_sequence, _keep_all=True) ## comment out to enable speed distribution analysis
-                         >> ungroup()
-                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
-                        )
-                    self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
-                    assert not stop_speeds.empty, 'stop speeds gdf is empty!'
-                except Exception as e:
-                    print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
-                    print(e)
-                    continue
-                ## TODO debug km segments
-                # stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
-                # if stop_speeds.avg_mph.max() > 80:
-                #     # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                #     stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
+                stop_speeds = (stop_speeds
+                     >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
+                     >> group_by(_.stop_sequence)
+                     >> mutate(n_trips = _.stop_sequence.size,
+                                avg_mph = _.speed_mph.mean(),
+                              _20p_mph = _.speed_mph.quantile(.2),
+                               trips_per_hour = _.n_trips / self.hr_duration_in_filter
+                              )
+                     >> ungroup()
+                     >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
+                    )
+                self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
+                assert not stop_speeds.empty, 'stop speeds gdf is empty!'
+                # except Exception as e:
+                #     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
+                #     print(e)
+                #     continue
+                
+                stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
+                if stop_speeds.avg_mph.max() > 80:
+                    # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                    stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
+                
                 if stop_speeds._20p_mph.min() < 0:
                     # print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
@@ -249,12 +247,9 @@ class RtFilterMapper:
                     self.pbar.update()
                 if type(self.pbar) != type(None):
                     self.pbar.refresh
-            if self._time_only_filter:
-                all_stop_speeds = all_stop_speeds >> select(-_.speed_mph, -_.speed_from_last,
-                                                   -_.trip_id, -_.trip_key)
             self.stop_segment_speed_view = all_stop_speeds
             export_path = f'{GCS_FILE_PATH}segment_speed_views/'
-            if self._time_only_filter:
+            if self._time_only_filter and self.filter_period in ['AM_Peak', 'PM_Peak', 'Midday', 'All_Day']:
                 shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
         return self._show_speed_map(how = how, colorscale = colorscale, size = size, no_title = no_title)
     
@@ -263,9 +258,11 @@ class RtFilterMapper:
         
         gdf = self.stop_segment_speed_view.copy()
         # gdf = self._filter(gdf)
-        # print(gdf.dtypes)
-        # singletrip = gdf.trip_id.nunique() == 1 ## incompatible with current caching approach
-        gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
+        # essential here for reasonable map size!
+        gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
+        # Further reduce map size on speedmap site
+        if self._time_only_filter:
+            gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id, -_.trip_key)
         orig_rows = gdf.shape[0]
         self.debug_dict['_show_gdf'] = gdf
         gdf['shape_miles'] = gdf.shape_meters / 1609
