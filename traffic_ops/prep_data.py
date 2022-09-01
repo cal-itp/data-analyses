@@ -16,9 +16,9 @@ import glob
 from siuba import *
 from typing import Literal
 
-from shared_utils import geography_utils, gtfs_utils, utils
+from shared_utils import geography_utils, gtfs_utils, utils, rt_dates
 
-ANALYSIS_DATE = datetime.date(2022, 5, 4)
+ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["jul2022"])
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 DATA_PATH = "./data/"
