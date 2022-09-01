@@ -30,8 +30,9 @@ def grab_selected_date(selected_date:
                                                      gpd.GeoDataFrame, 
                                                      pd.DataFrame]:
     """
-    Create the cached files for stops, trips, routes, and route_info
+    Create the cached files for stops, trips, stop_times, routes, and route_info
     """
+    '''
     gtfs_utils.all_routelines_or_stops_with_cached(
         dataset = "stops",
         analysis_date = selected_date,
@@ -49,9 +50,16 @@ def grab_selected_date(selected_date:
         analysis_date = selected_date,
         export_path = GCS_FILE_PATH
     )
+    '''
     
-    # stops, trips, and routes save directly to GCS already
-
+    gtfs_utils.all_trips_or_stoptimes_with_cached(
+        dataset = "st",
+        analysis_date = selected_date,
+        export_path = GCS_FILE_PATH
+    )
+    
+    # stops, trips, stop_times, and routes save directly to GCS already
+        
 
 def grab_amtrak(selected_date: datetime.date | str
                ) -> tuple[gpd.GeoDataFrame, pd.DataFrame, gpd.GeoDataFrame]:
@@ -76,7 +84,6 @@ def grab_amtrak(selected_date: datetime.date | str
     )
     
     amtrak_stops.to_parquet("amtrak_stops.parquet")
-    
     
     keep_trip_cols = [
         'calitp_itp_id', 'calitp_url_number', 'service_date', 'trip_key',
@@ -113,7 +120,6 @@ def grab_amtrak(selected_date: datetime.date | str
     
     amtrak_trips.to_parquet("amtrak_trips.parquet")
     
-    
     amtrak_routelines = gtfs_utils.get_route_shapes(
         selected_date = selected_date,
         itp_id_list = [itp_id],
@@ -124,6 +130,14 @@ def grab_amtrak(selected_date: datetime.date | str
     
     amtrak_routelines.to_parquet("amtrak_routelines.parquet")
     
+    amtrak_st = gtfs_utils.get_stop_times(
+        selected_date = selected_date,
+        itp_id_list = [itp_id],
+        get_df = True,
+        trip_df = amtrak_trips
+    )
+    
+    amtrak_st.to_parquet("amtrak_st.parquet")
 
 
 def concatenate_amtrak(
@@ -135,10 +149,12 @@ def concatenate_amtrak(
     Save a new cached file in GCS.
     """
     date_str = gtfs_utils.format_date(selected_date)
-        
+    
     amtrak_trips = dd.read_parquet("amtrak_trips.parquet")
     amtrak_routelines = dg.read_parquet("amtrak_routelines.parquet")
     amtrak_stops = dg.read_parquet("amtrak_stops.parquet")
+    amtrak_st = dd.read_parquet("amtrak_st.parquet")
+    
     
     trips = dd.read_parquet(f"{export_path}trips_{date_str}.parquet")
     trips_all = (dd.multi.concat([trips, amtrak_trips], axis=0)
@@ -165,8 +181,15 @@ def concatenate_amtrak(
                 ).compute()
     utils.geoparquet_gcs_export(routelines_all, export_path, f"routelines_{date_str}_all")
     
+    st = dd.read_parquet(f"{export_path}st_{date_str}.parquet")
+    st_all = (dd.multi.concat([
+                st, amtrak_st], axis=0).astype({
+                "stop_time_key": "Int64", "trip_key": "Int64"})
+    )
+    st_all.compute().to_parquet(f"{export_path}st_{date_str}_all.parquet")
+    
     # Remove Amtrak now that full dataset made
-    for dataset in ["trips", "routelines", "stops"]:
+    for dataset in ["trips", "routelines", "stops", "st"]:
         os.remove(f"amtrak_{dataset}.parquet")
 
 

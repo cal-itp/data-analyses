@@ -101,6 +101,11 @@ def add_route_name(
     keep_cols = ["calitp_itp_id", "route_id", "route_name_used"]
     route_names = route_names[keep_cols].sort_values(keep_cols).reset_index(drop=True)
 
+    # If route names show up with leading comma
+    route_names = route_names.assign(
+        route_name_used=route_names.route_name_used.str.lstrip(",").str.strip()
+    )
+
     return route_names
 
 
@@ -111,7 +116,7 @@ def latest_itp_id() -> pd.DataFrame:
     """
     df = (
         tbl.views.gtfs_schedule_dim_feeds()
-        >> filter(_.calitp_id_in_latest is True)
+        >> filter(_.calitp_id_in_latest == True)
         >> select(_.calitp_itp_id)
         >> distinct()
         >> collect()
