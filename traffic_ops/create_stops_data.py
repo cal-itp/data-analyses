@@ -17,7 +17,7 @@ from siuba import *
 
 import prep_data
 from shared_utils import geography_utils, portfolio_utils
-from create_routes_data import add_route_agency_name
+from create_routes_data import add_route_agency_name, remove_trip_cols
 
 # Attach all the various route information    
 def attach_route_info_to_stops(stops: dg.GeoDataFrame, 
@@ -38,7 +38,7 @@ def attach_route_info_to_stops(stops: dg.GeoDataFrame,
         ix_trips,
         on = "stop_key",
         how = "inner"
-    ).merge(trips.drop(columns = ["calitp_extracted_at", "calitp_deleted_at"]), 
+    ).merge(trips.drop(columns = remove_trip_cols), 
             on = ["calitp_itp_id", "trip_key"],
             how = "inner"
     ).to_crs(geography_utils.WGS84).compute()

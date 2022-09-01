@@ -8,11 +8,16 @@ import geopandas as gpd
 import glob
 import intake
 import os
+import sys
+
+from loguru import logger
 
 from shared_utils import utils, geography_utils
 
-catalog = intake.open_catalog("./*.yml")
+logger.add("./logs/gcs_to_esri.log")
+logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
+catalog = intake.open_catalog("./*.yml")
 
 def standardize_column_names(df):
     df.columns = df.columns.str.replace('calitp_itp_id', 'itp_id')
@@ -22,9 +27,9 @@ def standardize_column_names(df):
 
 # Use this to double-check metadata is entered correctly
 def print_info(gdf):
-    print(f"CRS Info: {gdf.crs.name}, EPSG: {gdf.crs.to_epsg()}")
-    print(f"columns: {gdf.columns}")
-    print(f"{gdf.dtypes}")
+    logger.info(f"CRS Info: {gdf.crs.name}, EPSG: {gdf.crs.to_epsg()}")
+    logger.info(f"columns: {gdf.columns}")
+    logger.info(f"{gdf.dtypes}")
     
     
 # Once local zipped shapefiles are created, clean up after we don't need them    
@@ -45,7 +50,7 @@ if __name__=="__main__":
         gdf = catalog[d].read().to_crs(geography_utils.WGS84)
         gdf = standardize_column_names(gdf)
 
-        print(f"********* {d} *************")
+        logger.info(f"********* {d} *************")
         print_info(gdf)
 
         # Zip the shapefile
