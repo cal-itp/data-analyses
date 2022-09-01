@@ -38,7 +38,7 @@ def attach_route_info_to_stops(stops: dg.GeoDataFrame,
         ix_trips,
         on = "stop_key",
         how = "inner"
-    ).merge(trips, 
+    ).merge(trips.drop(columns = ["calitp_extracted_at", "calitp_deleted_at"]), 
             on = ["calitp_itp_id", "trip_key"],
             how = "inner"
     ).to_crs(geography_utils.WGS84).compute()
