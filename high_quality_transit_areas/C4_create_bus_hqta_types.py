@@ -13,15 +13,22 @@ import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import pandas as pd
+import sys
 
 from calitp.tables import tbl
 from siuba import *
+from loguru import logger
 
 import C1_prep_for_clipping as prep_clip
 import C3_clean_clipped_intersections as clean_clip
 from shared_utils import utils, geography_utils, gtfs_utils
 from utilities import catalog_filepath
 from update_vars import analysis_date
+
+logger.add("./logs/C4_create_bus_hqta_types.log")
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
 
 # Input files
 ALL_BUS = catalog_filepath("all_bus")
@@ -147,14 +154,15 @@ def create_major_stop_bus(all_stops: gpd.GeoDataFrame,
             subset=["calitp_itp_id_left", "stop_id", "calitp_itp_id_right"])
     ).reset_index(drop=True)
     
-    stops_in_intersection = (major_bus_stops_in_intersections.assign(
-                                hqta_type = "major_stop_bus",
-                                ).rename(columns = 
-                                         {"calitp_itp_id_left": "calitp_itp_id_primary", 
-                                          "calitp_itp_id_right": "calitp_itp_id_secondary",
-                                         })
-                              [["calitp_itp_id_primary", "calitp_itp_id_secondary", 
-                                "stop_id", "geometry", "hqta_type"]]
+    stops_in_intersection = (
+        major_bus_stops_in_intersections.assign(
+            hqta_type = "major_stop_bus",
+            ).rename(columns = 
+                     {"calitp_itp_id_left": "calitp_itp_id_primary", 
+                      "calitp_itp_id_right": "calitp_itp_id_secondary",
+                     })
+          [["calitp_itp_id_primary", "calitp_itp_id_secondary", 
+            "stop_id", "geometry", "hqta_type"]]
     )
     
     return stops_in_intersection
@@ -191,7 +199,7 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 
 if __name__ == "__main__":
-    
+    logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     # Narrow down to the stops of operators who also have
@@ -204,12 +212,15 @@ if __name__ == "__main__":
     
     # Grab point geom with all stops
     all_stops = query_all_stops(analysis_date)
+    logger.info("grab all stops")
     
     # Create hqta_type == major_stop_bus
     major_stop_bus = create_major_stop_bus(all_stops, bus_intersections)
-    
+    logger.info("create major stop bus")
+
     # Create hqta_type = hq_corridor_bus
     stops_in_hq_corr = create_stops_along_corridors(all_stops)
+    logger.info("create hq corridor bus")
     
     # Export locally
     # Remove in the following script after appending
@@ -217,4 +228,4 @@ if __name__ == "__main__":
     stops_in_hq_corr.compute().to_parquet("./data/stops_in_hq_corr.parquet")
     
     end = dt.datetime.now()
-    print(f"execution time: {end-start}")
+    logger.info(f"execution time: {end-start}")

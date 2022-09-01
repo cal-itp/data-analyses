@@ -14,13 +14,21 @@ import dask_geopandas
 import datetime as dt
 import json
 import pandas as pd
+import sys
 
+from loguru import logger
 from siuba import *
 
 from calitp.tables import tbl
 from shared_utils import rt_utils
-from update_vars import (analysis_date, date_str, CACHED_VIEWS_EXPORT_PATH, 
+from update_vars import (analysis_date, CACHED_VIEWS_EXPORT_PATH, 
                          ALL_OPERATORS_FILE, VALID_OPERATORS_FILE)
+
+date_str = analysis_date
+
+logger.add("./logs/operators_for_hqta.log")
+logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+
 
 '''
 ITP_IDS_IN_GCS = [
@@ -131,7 +139,8 @@ def check_for_completeness(export_path: str = CACHED_VIEWS_EXPORT_PATH,
         stops = dask_geopandas.read_parquet(f"{export_path}stops_{itp_id}_{date_str}.parquet")
        
         if ( (len(routelines.index) > 0) and (len(trips.index) > 0) and 
-            (len(stop_times.index) > 0) and (len(stops.index) > 0) ):    
+            (len(stop_times.index) > 0) and (len(stops.index) > 0) 
+           ):  
             IDS_WITH_FULL_INFO.append(itp_id)
     
     return IDS_WITH_FULL_INFO
@@ -147,8 +156,9 @@ if __name__=="__main__":
     list_to_json(ITP_IDS, ALL_OPERATORS_FILE)
     
     time1 = dt.datetime.now()
-    print(f"cached ids, save as json: {time1-start}")
-    
+    #print(f"cached ids, save as json: {time1-start}")
+    logger.info(f"cached ids, save as json: {time1-start}")
+
     # Now check whether an operator has a complete set of files (len > 0)
     IDS_WITH_FULL_INFO = check_for_completeness(
         CACHED_VIEWS_EXPORT_PATH, ALL_OPERATORS_FILE, VALID_OPERATORS_FILE)
@@ -157,10 +167,12 @@ if __name__=="__main__":
     list_to_json(IDS_WITH_FULL_INFO, VALID_OPERATORS_FILE)
     
     time2 = dt.datetime.now()
-    print(f"check files for completeness, save as json: {time2-time1}")
-    
+    #print(f"check files for completeness, save as json: {time2-time1}")
+    logger.info(f"check files for completeness, save as json: {time2-time1}")
+
     end = dt.datetime.now()
-    print(f"execution time: {end-start}")
+    #print(f"execution time: {end-start}")
+    logger.info(f"execution time: {end-start}")
 
         
     

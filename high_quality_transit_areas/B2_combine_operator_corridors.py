@@ -9,11 +9,19 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
+import sys
+
+from loguru import logger
 
 import operators_for_hqta
 from shared_utils import utils
 from utilities import GCS_FILE_PATH
-from update_vars import VALID_OPERATORS_FILE
+from update_vars import analysis_date, VALID_OPERATORS_FILE
+
+logger.add("./logs/B2_combine_operator_corridors.log")
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
 
 # Read first one in, to set the metadata for dask gdf
 OPERATOR_PATH = f"{GCS_FILE_PATH}bus_corridors/"
@@ -22,6 +30,7 @@ ITP_IDS_IN_GCS = operators_for_hqta.itp_ids_from_json(file=VALID_OPERATORS_FILE)
 first_operator = ITP_IDS_IN_GCS[0]
 
 if __name__ == "__main__":
+    logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     # Read in first operator to set the metadata for dask gdf
@@ -35,7 +44,8 @@ if __name__ == "__main__":
 
         gdf = dd.multi.concat([gdf, operator], axis=0)
     
-    print("Concatenated all operators")
+    logger.info("Concatenated all operators")
+
     
     # Compute to make it a gdf
     gdf2 = gdf.compute().reset_index(drop=True)
@@ -45,4 +55,4 @@ if __name__ == "__main__":
                                 'all_bus')
     
     end = dt.datetime.now()
-    print(f"Execution time: {end-start}")
+    logger.info(f"Execution time: {end-start}")

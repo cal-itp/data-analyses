@@ -18,3 +18,4 @@
 * Create logs to check that certain things run successfully with INFO
 * Make sure hitting BigQuery query limit shows an error (it runs successfully in a script)
 * https://www.machinelearningplus.com/python/python-logging-guide/
+* https://github.com/Delgan/loguru

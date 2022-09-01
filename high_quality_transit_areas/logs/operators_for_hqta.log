@@ -1,0 +1,1313 @@
+2022-08-29 19:23:50.978 | INFO     | __main__:<module>:158 - cached ids, save as json: 0:00:35.131401
+2022-08-29 19:30:45.191 | INFO     | __main__:<module>:169 - check files for completeness, save as json: 0:06:54.213165
+2022-08-29 19:30:45.192 | INFO     | __main__:<module>:173 - execution time: 0:07:29.345092
+2022-08-30 18:11:42.428 | INFO     | __main__:<module>:235 - read in cached files: 4
+2022-08-30 18:14:53.977 | INFO     | __main__:<module>:235 - read in cached files: 4
+2022-08-30 18:16:52.913 | INFO     | __main__:<module>:235 - read in cached files: 4
+2022-08-30 18:24:53.948 | INFO     | __main__:<module>:235 - read in cached files: 4
+2022-08-30 19:10:27.523 | INFO     | __main__:<module>:235 - read in cached files: 4
+2022-08-30 20:07:11.032 | INFO     | __main__:<module>:241 - *********** Download data for: 4 ***********
+2022-08-30 20:07:42.222 | INFO     | __main__:get_routelines:88 - 4: routelines exported to GCS
+2022-08-30 20:07:42.225 | INFO     | __main__:<module>:265 - download files for 4: 0:00:31.192697
+2022-08-30 20:07:42.225 | INFO     | __main__:<module>:241 - *********** Download data for: 6 ***********
+2022-08-30 20:07:46.569 | INFO     | __main__:get_routelines:88 - 6: routelines exported to GCS
+2022-08-30 20:07:46.571 | INFO     | __main__:<module>:265 - download files for 6: 0:00:04.345059
+2022-08-30 20:07:46.571 | INFO     | __main__:<module>:241 - *********** Download data for: 10 ***********
+2022-08-30 20:07:48.500 | INFO     | __main__:get_routelines:88 - 10: routelines exported to GCS
+2022-08-30 20:07:48.503 | INFO     | __main__:<module>:265 - download files for 10: 0:00:01.931498
+2022-08-30 20:07:48.504 | INFO     | __main__:<module>:241 - *********** Download data for: 11 ***********
+2022-08-30 20:07:52.246 | INFO     | __main__:get_routelines:88 - 11: routelines exported to GCS
+2022-08-30 20:07:52.248 | INFO     | __main__:<module>:265 - download files for 11: 0:00:03.744394
+2022-08-30 20:07:52.248 | INFO     | __main__:<module>:241 - *********** Download data for: 14 ***********
+2022-08-30 20:07:57.468 | INFO     | __main__:get_routelines:88 - 14: routelines exported to GCS
+2022-08-30 20:07:57.470 | INFO     | __main__:<module>:265 - download files for 14: 0:00:05.221974
+2022-08-30 20:07:57.471 | INFO     | __main__:<module>:241 - *********** Download data for: 15 ***********
+2022-08-30 20:07:59.190 | INFO     | __main__:get_routelines:88 - 15: routelines exported to GCS
+2022-08-30 20:07:59.193 | INFO     | __main__:<module>:265 - download files for 15: 0:00:01.721474
+2022-08-30 20:07:59.193 | INFO     | __main__:<module>:241 - *********** Download data for: 16 ***********
+2022-08-30 20:08:03.302 | INFO     | __main__:get_routelines:88 - 16: routelines exported to GCS
+2022-08-30 20:08:03.305 | INFO     | __main__:<module>:265 - download files for 16: 0:00:04.111990
+2022-08-30 20:08:03.306 | INFO     | __main__:<module>:241 - *********** Download data for: 17 ***********
+2022-08-30 20:08:05.128 | INFO     | __main__:get_routelines:88 - 17: routelines exported to GCS
+2022-08-30 20:08:05.129 | INFO     | __main__:<module>:265 - download files for 17: 0:00:01.822996
+2022-08-30 20:08:05.131 | INFO     | __main__:<module>:241 - *********** Download data for: 18 ***********
+2022-08-30 20:08:11.087 | INFO     | __main__:get_routelines:88 - 18: routelines exported to GCS
+2022-08-30 20:08:11.090 | INFO     | __main__:<module>:265 - download files for 18: 0:00:05.958888
+2022-08-30 20:08:11.091 | INFO     | __main__:<module>:241 - *********** Download data for: 21 ***********
+2022-08-30 20:11:04.248 | INFO     | __main__:<module>:241 - *********** Download data for: 4 ***********
+2022-08-30 20:11:31.471 | INFO     | __main__:get_routelines:88 - 4: routelines exported to GCS
+2022-08-30 20:11:31.474 | INFO     | __main__:<module>:268 - download files for 4: 0:00:27.225901
+2022-08-30 20:11:31.475 | INFO     | __main__:<module>:241 - *********** Download data for: 6 ***********
+2022-08-30 20:11:34.289 | INFO     | __main__:get_routelines:88 - 6: routelines exported to GCS
+2022-08-30 20:11:34.292 | INFO     | __main__:<module>:268 - download files for 6: 0:00:02.816787
+2022-08-30 20:11:34.293 | INFO     | __main__:<module>:241 - *********** Download data for: 10 ***********
+2022-08-30 20:11:35.942 | INFO     | __main__:get_routelines:88 - 10: routelines exported to GCS
+2022-08-30 20:11:35.944 | INFO     | __main__:<module>:268 - download files for 10: 0:00:01.651241
+2022-08-30 20:11:35.945 | INFO     | __main__:<module>:241 - *********** Download data for: 11 ***********
+2022-08-30 20:11:38.500 | INFO     | __main__:get_routelines:88 - 11: routelines exported to GCS
+2022-08-30 20:11:38.502 | INFO     | __main__:<module>:268 - download files for 11: 0:00:02.556754
+2022-08-30 20:11:38.502 | INFO     | __main__:<module>:241 - *********** Download data for: 14 ***********
+2022-08-30 20:11:42.422 | INFO     | __main__:get_routelines:88 - 14: routelines exported to GCS
+2022-08-30 20:11:42.425 | INFO     | __main__:<module>:268 - download files for 14: 0:00:03.923112
+2022-08-30 20:11:42.426 | INFO     | __main__:<module>:241 - *********** Download data for: 15 ***********
+2022-08-30 20:11:43.947 | INFO     | __main__:get_routelines:88 - 15: routelines exported to GCS
+2022-08-30 20:11:43.950 | INFO     | __main__:<module>:268 - download files for 15: 0:00:01.524137
+2022-08-30 20:11:43.951 | INFO     | __main__:<module>:241 - *********** Download data for: 16 ***********
+2022-08-30 20:11:46.924 | INFO     | __main__:get_routelines:88 - 16: routelines exported to GCS
+2022-08-30 20:11:46.927 | INFO     | __main__:<module>:268 - download files for 16: 0:00:02.976013
+2022-08-30 20:11:46.927 | INFO     | __main__:<module>:241 - *********** Download data for: 17 ***********
+2022-08-30 20:11:48.401 | INFO     | __main__:get_routelines:88 - 17: routelines exported to GCS
+2022-08-30 20:11:48.404 | INFO     | __main__:<module>:268 - download files for 17: 0:00:01.477057
+2022-08-30 20:11:48.406 | INFO     | __main__:<module>:241 - *********** Download data for: 18 ***********
+2022-08-30 20:11:53.110 | INFO     | __main__:get_routelines:88 - 18: routelines exported to GCS
+2022-08-30 20:11:53.112 | INFO     | __main__:<module>:268 - download files for 18: 0:00:04.706117
+2022-08-30 20:11:53.112 | INFO     | __main__:<module>:241 - *********** Download data for: 21 ***********
+2022-08-30 20:11:53.372 | INFO     | __main__:<module>:241 - *********** Download data for: 23 ***********
+2022-08-30 20:11:55.216 | INFO     | __main__:get_routelines:88 - 23: routelines exported to GCS
+2022-08-30 20:11:55.218 | INFO     | __main__:<module>:268 - download files for 23: 0:00:01.845978
+2022-08-30 20:11:55.219 | INFO     | __main__:<module>:241 - *********** Download data for: 24 ***********
+2022-08-30 20:11:57.026 | INFO     | __main__:get_routelines:88 - 24: routelines exported to GCS
+2022-08-30 20:11:57.028 | INFO     | __main__:<module>:268 - download files for 24: 0:00:01.809769
+2022-08-30 20:11:57.029 | INFO     | __main__:<module>:241 - *********** Download data for: 29 ***********
+2022-08-30 20:11:59.092 | INFO     | __main__:get_routelines:88 - 29: routelines exported to GCS
+2022-08-30 20:11:59.094 | INFO     | __main__:<module>:268 - download files for 29: 0:00:02.065276
+2022-08-30 20:11:59.095 | INFO     | __main__:<module>:241 - *********** Download data for: 30 ***********
+2022-08-30 20:12:01.434 | INFO     | __main__:get_routelines:88 - 30: routelines exported to GCS
+2022-08-30 20:12:01.436 | INFO     | __main__:<module>:268 - download files for 30: 0:00:02.340772
+2022-08-30 20:12:01.436 | INFO     | __main__:<module>:241 - *********** Download data for: 33 ***********
+2022-08-30 20:12:01.686 | INFO     | __main__:<module>:241 - *********** Download data for: 34 ***********
+2022-08-30 20:12:04.126 | INFO     | __main__:get_routelines:88 - 34: routelines exported to GCS
+2022-08-30 20:12:04.128 | INFO     | __main__:<module>:268 - download files for 34: 0:00:02.442182
+2022-08-30 20:12:04.128 | INFO     | __main__:<module>:241 - *********** Download data for: 35 ***********
+2022-08-30 20:12:05.866 | INFO     | __main__:get_routelines:88 - 35: routelines exported to GCS
+2022-08-30 20:12:05.867 | INFO     | __main__:<module>:268 - download files for 35: 0:00:01.738938
+2022-08-30 20:12:05.868 | INFO     | __main__:<module>:241 - *********** Download data for: 36 ***********
+2022-08-30 20:12:10.118 | INFO     | __main__:get_routelines:88 - 36: routelines exported to GCS
+2022-08-30 20:12:10.119 | INFO     | __main__:<module>:268 - download files for 36: 0:00:04.251510
+2022-08-30 20:12:10.120 | INFO     | __main__:<module>:241 - *********** Download data for: 37 ***********
+2022-08-30 20:12:12.103 | INFO     | __main__:get_routelines:88 - 37: routelines exported to GCS
+2022-08-30 20:12:12.107 | INFO     | __main__:<module>:268 - download files for 37: 0:00:01.987340
+2022-08-30 20:12:12.109 | INFO     | __main__:<module>:241 - *********** Download data for: 41 ***********
+2022-08-30 20:12:12.364 | INFO     | __main__:<module>:241 - *********** Download data for: 42 ***********
+2022-08-30 20:12:18.465 | INFO     | __main__:get_routelines:88 - 42: routelines exported to GCS
+2022-08-30 20:12:18.467 | INFO     | __main__:<module>:268 - download files for 42: 0:00:06.103510
+2022-08-30 20:12:18.468 | INFO     | __main__:<module>:241 - *********** Download data for: 45 ***********
+2022-08-30 20:12:20.811 | INFO     | __main__:get_routelines:88 - 45: routelines exported to GCS
+2022-08-30 20:12:20.812 | INFO     | __main__:<module>:268 - download files for 45: 0:00:02.344296
+2022-08-30 20:12:20.813 | INFO     | __main__:<module>:241 - *********** Download data for: 48 ***********
+2022-08-30 20:12:23.024 | INFO     | __main__:get_routelines:88 - 48: routelines exported to GCS
+2022-08-30 20:12:23.027 | INFO     | __main__:<module>:268 - download files for 48: 0:00:02.213756
+2022-08-30 20:12:23.028 | INFO     | __main__:<module>:241 - *********** Download data for: 49 ***********
+2022-08-30 20:12:25.300 | INFO     | __main__:get_routelines:88 - 49: routelines exported to GCS
+2022-08-30 20:12:25.303 | INFO     | __main__:<module>:268 - download files for 49: 0:00:02.275485
+2022-08-30 20:12:25.304 | INFO     | __main__:<module>:241 - *********** Download data for: 50 ***********
+2022-08-30 20:12:29.232 | INFO     | __main__:get_routelines:88 - 50: routelines exported to GCS
+2022-08-30 20:12:29.234 | INFO     | __main__:<module>:268 - download files for 50: 0:00:03.930064
+2022-08-30 20:12:29.235 | INFO     | __main__:<module>:241 - *********** Download data for: 54 ***********
+2022-08-30 20:12:29.473 | INFO     | __main__:<module>:241 - *********** Download data for: 56 ***********
+2022-08-30 20:12:31.573 | INFO     | __main__:get_routelines:88 - 56: routelines exported to GCS
+2022-08-30 20:12:31.575 | INFO     | __main__:<module>:268 - download files for 56: 0:00:02.102285
+2022-08-30 20:12:31.575 | INFO     | __main__:<module>:241 - *********** Download data for: 61 ***********
+2022-08-30 20:12:47.187 | INFO     | __main__:get_routelines:88 - 61: routelines exported to GCS
+2022-08-30 20:12:47.189 | INFO     | __main__:<module>:268 - download files for 61: 0:00:15.614150
+2022-08-30 20:12:47.190 | INFO     | __main__:<module>:241 - *********** Download data for: 70 ***********
+2022-08-30 20:12:51.118 | INFO     | __main__:get_routelines:88 - 70: routelines exported to GCS
+2022-08-30 20:12:51.120 | INFO     | __main__:<module>:268 - download files for 70: 0:00:03.929806
+2022-08-30 20:12:51.120 | INFO     | __main__:<module>:241 - *********** Download data for: 71 ***********
+2022-08-30 20:12:53.131 | INFO     | __main__:get_routelines:88 - 71: routelines exported to GCS
+2022-08-30 20:12:53.134 | INFO     | __main__:<module>:268 - download files for 71: 0:00:02.013259
+2022-08-30 20:12:53.135 | INFO     | __main__:<module>:241 - *********** Download data for: 75 ***********
+2022-08-30 20:12:54.975 | INFO     | __main__:get_routelines:88 - 75: routelines exported to GCS
+2022-08-30 20:12:54.978 | INFO     | __main__:<module>:268 - download files for 75: 0:00:01.842862
+2022-08-30 20:12:54.978 | INFO     | __main__:<module>:241 - *********** Download data for: 76 ***********
+2022-08-30 20:12:59.036 | INFO     | __main__:get_routelines:88 - 76: routelines exported to GCS
+2022-08-30 20:12:59.038 | INFO     | __main__:<module>:268 - download files for 76: 0:00:04.059363
+2022-08-30 20:12:59.038 | INFO     | __main__:<module>:241 - *********** Download data for: 77 ***********
+2022-08-30 20:13:00.921 | INFO     | __main__:get_routelines:88 - 77: routelines exported to GCS
+2022-08-30 20:13:00.923 | INFO     | __main__:<module>:268 - download files for 77: 0:00:01.885185
+2022-08-30 20:13:00.924 | INFO     | __main__:<module>:241 - *********** Download data for: 79 ***********
+2022-08-30 20:13:02.984 | INFO     | __main__:get_routelines:88 - 79: routelines exported to GCS
+2022-08-30 20:13:02.987 | INFO     | __main__:<module>:268 - download files for 79: 0:00:02.062707
+2022-08-30 20:13:02.987 | INFO     | __main__:<module>:241 - *********** Download data for: 81 ***********
+2022-08-30 20:13:05.030 | INFO     | __main__:get_routelines:88 - 81: routelines exported to GCS
+2022-08-30 20:13:05.033 | INFO     | __main__:<module>:268 - download files for 81: 0:00:02.045231
+2022-08-30 20:13:05.033 | INFO     | __main__:<module>:241 - *********** Download data for: 82 ***********
+2022-08-30 20:13:07.588 | INFO     | __main__:get_routelines:88 - 82: routelines exported to GCS
+2022-08-30 20:13:07.590 | INFO     | __main__:<module>:268 - download files for 82: 0:00:02.556593
+2022-08-30 20:13:07.590 | INFO     | __main__:<module>:241 - *********** Download data for: 83 ***********
+2022-08-30 20:13:12.276 | INFO     | __main__:get_routelines:88 - 83: routelines exported to GCS
+2022-08-30 20:13:12.277 | INFO     | __main__:<module>:268 - download files for 83: 0:00:04.687342
+2022-08-30 20:13:12.278 | INFO     | __main__:<module>:241 - *********** Download data for: 86 ***********
+2022-08-30 20:13:15.953 | INFO     | __main__:get_routelines:88 - 86: routelines exported to GCS
+2022-08-30 20:13:15.954 | INFO     | __main__:<module>:268 - download files for 86: 0:00:03.676509
+2022-08-30 20:13:15.955 | INFO     | __main__:<module>:241 - *********** Download data for: 87 ***********
+2022-08-30 20:13:20.435 | INFO     | __main__:get_routelines:88 - 87: routelines exported to GCS
+2022-08-30 20:13:20.437 | INFO     | __main__:<module>:268 - download files for 87: 0:00:04.482325
+2022-08-30 20:13:20.438 | INFO     | __main__:<module>:241 - *********** Download data for: 91 ***********
+2022-08-30 20:13:20.671 | INFO     | __main__:<module>:241 - *********** Download data for: 95 ***********
+2022-08-30 20:13:22.665 | INFO     | __main__:get_routelines:88 - 95: routelines exported to GCS
+2022-08-30 20:13:22.666 | INFO     | __main__:<module>:268 - download files for 95: 0:00:01.995530
+2022-08-30 20:13:22.667 | INFO     | __main__:<module>:241 - *********** Download data for: 98 ***********
+2022-08-30 20:13:26.273 | INFO     | __main__:get_routelines:88 - 98: routelines exported to GCS
+2022-08-30 20:13:26.275 | INFO     | __main__:<module>:268 - download files for 98: 0:00:03.608141
+2022-08-30 20:13:26.276 | INFO     | __main__:<module>:241 - *********** Download data for: 99 ***********
+2022-08-30 20:13:29.501 | INFO     | __main__:get_routelines:88 - 99: routelines exported to GCS
+2022-08-30 20:13:29.503 | INFO     | __main__:<module>:268 - download files for 99: 0:00:03.227574
+2022-08-30 20:13:29.504 | INFO     | __main__:<module>:241 - *********** Download data for: 101 ***********
+2022-08-30 20:13:32.698 | INFO     | __main__:get_routelines:88 - 101: routelines exported to GCS
+2022-08-30 20:13:32.700 | INFO     | __main__:<module>:268 - download files for 101: 0:00:03.195840
+2022-08-30 20:13:32.700 | INFO     | __main__:<module>:241 - *********** Download data for: 102 ***********
+2022-08-30 20:13:34.591 | INFO     | __main__:get_routelines:88 - 102: routelines exported to GCS
+2022-08-30 20:13:34.592 | INFO     | __main__:<module>:268 - download files for 102: 0:00:01.891885
+2022-08-30 20:13:34.592 | INFO     | __main__:<module>:241 - *********** Download data for: 103 ***********
+2022-08-30 20:13:36.339 | INFO     | __main__:get_routelines:88 - 103: routelines exported to GCS
+2022-08-30 20:13:36.342 | INFO     | __main__:<module>:268 - download files for 103: 0:00:01.749378
+2022-08-30 20:13:36.343 | INFO     | __main__:<module>:241 - *********** Download data for: 105 ***********
+2022-08-30 20:13:39.944 | INFO     | __main__:get_routelines:88 - 105: routelines exported to GCS
+2022-08-30 20:13:39.947 | INFO     | __main__:<module>:268 - download files for 105: 0:00:03.603746
+2022-08-30 20:13:39.947 | INFO     | __main__:<module>:241 - *********** Download data for: 106 ***********
+2022-08-30 20:13:41.876 | INFO     | __main__:get_routelines:88 - 106: routelines exported to GCS
+2022-08-30 20:13:41.879 | INFO     | __main__:<module>:268 - download files for 106: 0:00:01.931499
+2022-08-30 20:13:41.880 | INFO     | __main__:<module>:241 - *********** Download data for: 107 ***********
+2022-08-30 20:13:43.705 | INFO     | __main__:get_routelines:88 - 107: routelines exported to GCS
+2022-08-30 20:13:43.707 | INFO     | __main__:<module>:268 - download files for 107: 0:00:01.826467
+2022-08-30 20:13:43.707 | INFO     | __main__:<module>:241 - *********** Download data for: 108 ***********
+2022-08-30 20:13:49.320 | INFO     | __main__:get_routelines:88 - 108: routelines exported to GCS
+2022-08-30 20:13:49.322 | INFO     | __main__:<module>:268 - download files for 108: 0:00:05.614812
+2022-08-30 20:13:49.323 | INFO     | __main__:<module>:241 - *********** Download data for: 110 ***********
+2022-08-30 20:13:52.466 | INFO     | __main__:get_routelines:88 - 110: routelines exported to GCS
+2022-08-30 20:13:52.472 | INFO     | __main__:<module>:268 - download files for 110: 0:00:03.148831
+2022-08-30 20:13:52.474 | INFO     | __main__:<module>:241 - *********** Download data for: 112 ***********
+2022-08-30 20:13:58.179 | INFO     | __main__:get_routelines:88 - 112: routelines exported to GCS
+2022-08-30 20:13:58.183 | INFO     | __main__:<module>:268 - download files for 112: 0:00:05.709158
+2022-08-30 20:13:58.184 | INFO     | __main__:<module>:241 - *********** Download data for: 116 ***********
+2022-08-30 20:14:01.727 | INFO     | __main__:get_routelines:88 - 116: routelines exported to GCS
+2022-08-30 20:14:01.730 | INFO     | __main__:<module>:268 - download files for 116: 0:00:03.546673
+2022-08-30 20:14:01.732 | INFO     | __main__:<module>:241 - *********** Download data for: 117 ***********
+2022-08-30 20:14:03.783 | INFO     | __main__:get_routelines:88 - 117: routelines exported to GCS
+2022-08-30 20:14:03.786 | INFO     | __main__:<module>:268 - download files for 117: 0:00:02.054588
+2022-08-30 20:14:03.788 | INFO     | __main__:<module>:241 - *********** Download data for: 118 ***********
+2022-08-30 20:14:04.048 | INFO     | __main__:<module>:241 - *********** Download data for: 120 ***********
+2022-08-30 20:14:06.457 | INFO     | __main__:get_routelines:88 - 120: routelines exported to GCS
+2022-08-30 20:14:06.459 | INFO     | __main__:<module>:268 - download files for 120: 0:00:02.410938
+2022-08-30 20:14:06.460 | INFO     | __main__:<module>:241 - *********** Download data for: 121 ***********
+2022-08-30 20:14:08.428 | INFO     | __main__:get_routelines:88 - 121: routelines exported to GCS
+2022-08-30 20:14:08.430 | INFO     | __main__:<module>:268 - download files for 121: 0:00:01.970273
+2022-08-30 20:14:08.430 | INFO     | __main__:<module>:241 - *********** Download data for: 122 ***********
+2022-08-30 20:14:10.565 | INFO     | __main__:get_routelines:88 - 122: routelines exported to GCS
+2022-08-30 20:14:10.567 | INFO     | __main__:<module>:268 - download files for 122: 0:00:02.136839
+2022-08-30 20:14:10.569 | INFO     | __main__:<module>:241 - *********** Download data for: 123 ***********
+2022-08-30 20:14:13.802 | INFO     | __main__:get_routelines:88 - 123: routelines exported to GCS
+2022-08-30 20:14:13.805 | INFO     | __main__:<module>:268 - download files for 123: 0:00:03.236650
+2022-08-30 20:14:13.807 | INFO     | __main__:<module>:241 - *********** Download data for: 126 ***********
+2022-08-30 20:14:17.668 | INFO     | __main__:get_routelines:88 - 126: routelines exported to GCS
+2022-08-30 20:14:17.671 | INFO     | __main__:<module>:268 - download files for 126: 0:00:03.864761
+2022-08-30 20:14:17.673 | INFO     | __main__:<module>:241 - *********** Download data for: 127 ***********
+2022-08-30 20:14:24.223 | INFO     | __main__:get_routelines:88 - 127: routelines exported to GCS
+2022-08-30 20:14:24.226 | INFO     | __main__:<module>:268 - download files for 127: 0:00:06.552975
+2022-08-30 20:14:24.226 | INFO     | __main__:<module>:241 - *********** Download data for: 129 ***********
+2022-08-30 20:14:26.110 | INFO     | __main__:get_routelines:88 - 129: routelines exported to GCS
+2022-08-30 20:14:26.112 | INFO     | __main__:<module>:268 - download files for 129: 0:00:01.885651
+2022-08-30 20:14:26.113 | INFO     | __main__:<module>:241 - *********** Download data for: 135 ***********
+2022-08-30 20:14:32.067 | INFO     | __main__:get_routelines:88 - 135: routelines exported to GCS
+2022-08-30 20:14:32.069 | INFO     | __main__:<module>:268 - download files for 135: 0:00:05.956050
+2022-08-30 20:14:32.069 | INFO     | __main__:<module>:241 - *********** Download data for: 137 ***********
+2022-08-30 20:14:33.827 | INFO     | __main__:get_routelines:88 - 137: routelines exported to GCS
+2022-08-30 20:14:33.828 | INFO     | __main__:<module>:268 - download files for 137: 0:00:01.758990
+2022-08-30 20:14:33.829 | INFO     | __main__:<module>:241 - *********** Download data for: 142 ***********
+2022-08-30 20:14:41.148 | INFO     | __main__:get_routelines:88 - 142: routelines exported to GCS
+2022-08-30 20:14:41.152 | INFO     | __main__:<module>:268 - download files for 142: 0:00:07.323130
+2022-08-30 20:14:41.153 | INFO     | __main__:<module>:241 - *********** Download data for: 146 ***********
+2022-08-30 20:14:45.496 | INFO     | __main__:get_routelines:88 - 146: routelines exported to GCS
+2022-08-30 20:14:45.499 | INFO     | __main__:<module>:268 - download files for 146: 0:00:04.346739
+2022-08-30 20:14:45.500 | INFO     | __main__:<module>:241 - *********** Download data for: 148 ***********
+2022-08-30 20:14:48.672 | INFO     | __main__:get_routelines:88 - 148: routelines exported to GCS
+2022-08-30 20:14:48.675 | INFO     | __main__:<module>:268 - download files for 148: 0:00:03.175077
+2022-08-30 20:14:48.676 | INFO     | __main__:<module>:241 - *********** Download data for: 152 ***********
+2022-08-30 20:14:50.616 | INFO     | __main__:get_routelines:88 - 152: routelines exported to GCS
+2022-08-30 20:14:50.618 | INFO     | __main__:<module>:268 - download files for 152: 0:00:01.941654
+2022-08-30 20:14:50.618 | INFO     | __main__:<module>:241 - *********** Download data for: 154 ***********
+2022-08-30 20:14:52.723 | INFO     | __main__:get_routelines:88 - 154: routelines exported to GCS
+2022-08-30 20:14:52.725 | INFO     | __main__:<module>:268 - download files for 154: 0:00:02.106700
+2022-08-30 20:14:52.726 | INFO     | __main__:<module>:241 - *********** Download data for: 159 ***********
+2022-08-30 20:14:56.195 | INFO     | __main__:get_routelines:88 - 159: routelines exported to GCS
+2022-08-30 20:14:56.197 | INFO     | __main__:<module>:268 - download files for 159: 0:00:03.471473
+2022-08-30 20:14:56.198 | INFO     | __main__:<module>:241 - *********** Download data for: 162 ***********
+2022-08-30 20:14:59.365 | INFO     | __main__:get_routelines:88 - 162: routelines exported to GCS
+2022-08-30 20:14:59.367 | INFO     | __main__:<module>:268 - download files for 162: 0:00:03.169590
+2022-08-30 20:14:59.368 | INFO     | __main__:<module>:241 - *********** Download data for: 165 ***********
+2022-08-30 20:15:01.250 | INFO     | __main__:get_routelines:88 - 165: routelines exported to GCS
+2022-08-30 20:15:01.252 | INFO     | __main__:<module>:268 - download files for 165: 0:00:01.883768
+2022-08-30 20:15:01.252 | INFO     | __main__:<module>:241 - *********** Download data for: 167 ***********
+2022-08-30 20:15:11.035 | INFO     | __main__:get_routelines:88 - 167: routelines exported to GCS
+2022-08-30 20:15:11.038 | INFO     | __main__:<module>:268 - download files for 167: 0:00:09.785860
+2022-08-30 20:15:11.039 | INFO     | __main__:<module>:241 - *********** Download data for: 168 ***********
+2022-08-30 20:15:12.969 | INFO     | __main__:get_routelines:88 - 168: routelines exported to GCS
+2022-08-30 20:15:12.971 | INFO     | __main__:<module>:268 - download files for 168: 0:00:01.931462
+2022-08-30 20:15:12.971 | INFO     | __main__:<module>:241 - *********** Download data for: 169 ***********
+2022-08-30 20:15:15.084 | INFO     | __main__:get_routelines:88 - 169: routelines exported to GCS
+2022-08-30 20:15:15.086 | INFO     | __main__:<module>:268 - download files for 169: 0:00:02.114512
+2022-08-30 20:15:15.086 | INFO     | __main__:<module>:241 - *********** Download data for: 170 ***********
+2022-08-30 20:15:21.304 | INFO     | __main__:get_routelines:88 - 170: routelines exported to GCS
+2022-08-30 20:15:21.306 | INFO     | __main__:<module>:268 - download files for 170: 0:00:06.220246
+2022-08-30 20:15:21.307 | INFO     | __main__:<module>:241 - *********** Download data for: 171 ***********
+2022-08-30 20:15:24.701 | INFO     | __main__:get_routelines:88 - 171: routelines exported to GCS
+2022-08-30 20:15:24.705 | INFO     | __main__:<module>:268 - download files for 171: 0:00:03.398196
+2022-08-30 20:15:24.707 | INFO     | __main__:<module>:241 - *********** Download data for: 172 ***********
+2022-08-30 20:15:28.385 | INFO     | __main__:get_routelines:88 - 172: routelines exported to GCS
+2022-08-30 20:15:28.387 | INFO     | __main__:<module>:268 - download files for 172: 0:00:03.680333
+2022-08-30 20:15:28.388 | INFO     | __main__:<module>:241 - *********** Download data for: 173 ***********
+2022-08-30 20:15:31.654 | INFO     | __main__:get_routelines:88 - 173: routelines exported to GCS
+2022-08-30 20:15:31.656 | INFO     | __main__:<module>:268 - download files for 173: 0:00:03.267911
+2022-08-30 20:15:31.656 | INFO     | __main__:<module>:241 - *********** Download data for: 174 ***********
+2022-08-30 20:15:34.788 | INFO     | __main__:get_routelines:88 - 174: routelines exported to GCS
+2022-08-30 20:15:34.791 | INFO     | __main__:<module>:268 - download files for 174: 0:00:03.134890
+2022-08-30 20:15:34.792 | INFO     | __main__:<module>:241 - *********** Download data for: 176 ***********
+2022-08-30 20:15:37.933 | INFO     | __main__:get_routelines:88 - 176: routelines exported to GCS
+2022-08-30 20:15:37.935 | INFO     | __main__:<module>:268 - download files for 176: 0:00:03.142382
+2022-08-30 20:15:37.935 | INFO     | __main__:<module>:241 - *********** Download data for: 177 ***********
+2022-08-30 20:15:41.094 | INFO     | __main__:get_routelines:88 - 177: routelines exported to GCS
+2022-08-30 20:15:41.097 | INFO     | __main__:<module>:268 - download files for 177: 0:00:03.161271
+2022-08-30 20:15:41.097 | INFO     | __main__:<module>:241 - *********** Download data for: 178 ***********
+2022-08-30 20:15:44.305 | INFO     | __main__:get_routelines:88 - 178: routelines exported to GCS
+2022-08-30 20:15:44.308 | INFO     | __main__:<module>:268 - download files for 178: 0:00:03.210622
+2022-08-30 20:15:44.308 | INFO     | __main__:<module>:241 - *********** Download data for: 179 ***********
+2022-08-30 20:15:47.340 | INFO     | __main__:get_routelines:88 - 179: routelines exported to GCS
+2022-08-30 20:15:47.343 | INFO     | __main__:<module>:268 - download files for 179: 0:00:03.034932
+2022-08-30 20:15:47.345 | INFO     | __main__:<module>:241 - *********** Download data for: 181 ***********
+2022-08-30 20:15:50.701 | INFO     | __main__:get_routelines:88 - 181: routelines exported to GCS
+2022-08-30 20:15:50.704 | INFO     | __main__:<module>:268 - download files for 181: 0:00:03.358632
+2022-08-30 20:15:50.704 | INFO     | __main__:<module>:241 - *********** Download data for: 182 ***********
+2022-08-30 20:16:08.083 | INFO     | __main__:get_routelines:88 - 182: routelines exported to GCS
+2022-08-30 20:16:08.087 | INFO     | __main__:<module>:268 - download files for 182: 0:00:17.382848
+2022-08-30 20:16:08.088 | INFO     | __main__:<module>:241 - *********** Download data for: 183 ***********
+2022-08-30 20:16:12.415 | INFO     | __main__:get_routelines:88 - 183: routelines exported to GCS
+2022-08-30 20:16:12.417 | INFO     | __main__:<module>:268 - download files for 183: 0:00:04.329658
+2022-08-30 20:16:12.418 | INFO     | __main__:<module>:241 - *********** Download data for: 186 ***********
+2022-08-30 20:16:12.668 | INFO     | __main__:<module>:241 - *********** Download data for: 187 ***********
+2022-08-30 20:16:14.669 | INFO     | __main__:get_routelines:88 - 187: routelines exported to GCS
+2022-08-30 20:16:14.672 | INFO     | __main__:<module>:268 - download files for 187: 0:00:02.003485
+2022-08-30 20:16:14.672 | INFO     | __main__:<module>:241 - *********** Download data for: 188 ***********
+2022-08-30 20:16:16.822 | INFO     | __main__:get_routelines:88 - 188: routelines exported to GCS
+2022-08-30 20:16:16.825 | INFO     | __main__:<module>:268 - download files for 188: 0:00:02.152496
+2022-08-30 20:16:16.826 | INFO     | __main__:<module>:241 - *********** Download data for: 190 ***********
+2022-08-30 20:16:21.648 | INFO     | __main__:get_routelines:88 - 190: routelines exported to GCS
+2022-08-30 20:16:21.649 | INFO     | __main__:<module>:268 - download files for 190: 0:00:04.823248
+2022-08-30 20:16:21.650 | INFO     | __main__:<module>:241 - *********** Download data for: 192 ***********
+2022-08-30 20:16:21.897 | INFO     | __main__:<module>:241 - *********** Download data for: 194 ***********
+2022-08-30 20:16:34.445 | INFO     | __main__:get_routelines:88 - 194: routelines exported to GCS
+2022-08-30 20:16:34.448 | INFO     | __main__:<module>:268 - download files for 194: 0:00:12.551033
+2022-08-30 20:16:34.448 | INFO     | __main__:<module>:241 - *********** Download data for: 198 ***********
+2022-08-30 20:16:38.830 | INFO     | __main__:get_routelines:88 - 198: routelines exported to GCS
+2022-08-30 20:16:38.833 | INFO     | __main__:<module>:268 - download files for 198: 0:00:04.384088
+2022-08-30 20:16:38.833 | INFO     | __main__:<module>:241 - *********** Download data for: 199 ***********
+2022-08-30 20:16:39.061 | INFO     | __main__:<module>:241 - *********** Download data for: 201 ***********
+2022-08-30 20:16:42.092 | INFO     | __main__:get_routelines:88 - 201: routelines exported to GCS
+2022-08-30 20:16:42.095 | INFO     | __main__:<module>:268 - download files for 201: 0:00:03.033905
+2022-08-30 20:16:42.096 | INFO     | __main__:<module>:241 - *********** Download data for: 204 ***********
+2022-08-30 20:16:45.354 | INFO     | __main__:get_routelines:88 - 204: routelines exported to GCS
+2022-08-30 20:16:45.357 | INFO     | __main__:<module>:268 - download files for 204: 0:00:03.260432
+2022-08-30 20:16:45.358 | INFO     | __main__:<module>:241 - *********** Download data for: 206 ***********
+2022-08-30 20:16:50.167 | INFO     | __main__:get_routelines:88 - 206: routelines exported to GCS
+2022-08-30 20:16:50.169 | INFO     | __main__:<module>:268 - download files for 206: 0:00:04.810814
+2022-08-30 20:16:50.170 | INFO     | __main__:<module>:241 - *********** Download data for: 207 ***********
+2022-08-30 20:16:52.671 | INFO     | __main__:get_routelines:88 - 207: routelines exported to GCS
+2022-08-30 20:16:52.672 | INFO     | __main__:<module>:268 - download files for 207: 0:00:02.502637
+2022-08-30 20:16:52.673 | INFO     | __main__:<module>:241 - *********** Download data for: 208 ***********
+2022-08-30 20:16:58.563 | INFO     | __main__:get_routelines:88 - 208: routelines exported to GCS
+2022-08-30 20:16:58.566 | INFO     | __main__:<module>:268 - download files for 208: 0:00:05.893306
+2022-08-30 20:16:58.568 | INFO     | __main__:<module>:241 - *********** Download data for: 210 ***********
+2022-08-30 20:17:00.605 | INFO     | __main__:get_routelines:88 - 210: routelines exported to GCS
+2022-08-30 20:17:00.606 | INFO     | __main__:<module>:268 - download files for 210: 0:00:02.038640
+2022-08-30 20:17:00.607 | INFO     | __main__:<module>:241 - *********** Download data for: 212 ***********
+2022-08-30 20:17:02.893 | INFO     | __main__:get_routelines:88 - 212: routelines exported to GCS
+2022-08-30 20:17:02.896 | INFO     | __main__:<module>:268 - download files for 212: 0:00:02.288637
+2022-08-30 20:17:02.896 | INFO     | __main__:<module>:241 - *********** Download data for: 213 ***********
+2022-08-30 20:17:03.139 | INFO     | __main__:<module>:241 - *********** Download data for: 214 ***********
+2022-08-30 20:17:06.468 | INFO     | __main__:get_routelines:88 - 214: routelines exported to GCS
+2022-08-30 20:17:06.470 | INFO     | __main__:<module>:268 - download files for 214: 0:00:03.330815
+2022-08-30 20:17:06.471 | INFO     | __main__:<module>:241 - *********** Download data for: 217 ***********
+2022-08-30 20:17:09.619 | INFO     | __main__:get_routelines:88 - 217: routelines exported to GCS
+2022-08-30 20:17:09.622 | INFO     | __main__:<module>:268 - download files for 217: 0:00:03.151663
+2022-08-30 20:17:09.624 | INFO     | __main__:<module>:241 - *********** Download data for: 218 ***********
+2022-08-30 20:17:13.581 | INFO     | __main__:get_routelines:88 - 218: routelines exported to GCS
+2022-08-30 20:17:13.583 | INFO     | __main__:<module>:268 - download files for 218: 0:00:03.959706
+2022-08-30 20:17:13.584 | INFO     | __main__:<module>:241 - *********** Download data for: 220 ***********
+2022-08-30 20:17:15.859 | INFO     | __main__:get_routelines:88 - 220: routelines exported to GCS
+2022-08-30 20:17:15.860 | INFO     | __main__:<module>:268 - download files for 220: 0:00:02.276045
+2022-08-30 20:17:15.861 | INFO     | __main__:<module>:241 - *********** Download data for: 221 ***********
+2022-08-30 20:17:20.402 | INFO     | __main__:get_routelines:88 - 221: routelines exported to GCS
+2022-08-30 20:17:20.404 | INFO     | __main__:<module>:268 - download files for 221: 0:00:04.543623
+2022-08-30 20:17:20.405 | INFO     | __main__:<module>:241 - *********** Download data for: 226 ***********
+2022-08-30 20:17:25.122 | INFO     | __main__:get_routelines:88 - 226: routelines exported to GCS
+2022-08-30 20:17:25.124 | INFO     | __main__:<module>:268 - download files for 226: 0:00:04.719332
+2022-08-30 20:17:25.125 | INFO     | __main__:<module>:241 - *********** Download data for: 228 ***********
+2022-08-30 20:17:27.974 | INFO     | __main__:get_routelines:88 - 228: routelines exported to GCS
+2022-08-30 20:17:27.977 | INFO     | __main__:<module>:268 - download files for 228: 0:00:02.852358
+2022-08-30 20:17:27.978 | INFO     | __main__:<module>:241 - *********** Download data for: 231 ***********
+2022-08-30 20:17:34.132 | INFO     | __main__:get_routelines:88 - 231: routelines exported to GCS
+2022-08-30 20:17:34.134 | INFO     | __main__:<module>:268 - download files for 231: 0:00:06.155802
+2022-08-30 20:17:34.135 | INFO     | __main__:<module>:241 - *********** Download data for: 232 ***********
+2022-08-30 20:17:41.104 | INFO     | __main__:get_routelines:88 - 232: routelines exported to GCS
+2022-08-30 20:17:41.107 | INFO     | __main__:<module>:268 - download files for 232: 0:00:06.971880
+2022-08-30 20:17:41.107 | INFO     | __main__:<module>:241 - *********** Download data for: 235 ***********
+2022-08-30 20:17:52.282 | INFO     | __main__:get_routelines:88 - 235: routelines exported to GCS
+2022-08-30 20:17:52.284 | INFO     | __main__:<module>:268 - download files for 235: 0:00:11.176777
+2022-08-30 20:17:52.285 | INFO     | __main__:<module>:241 - *********** Download data for: 238 ***********
+2022-08-30 20:17:54.489 | INFO     | __main__:get_routelines:88 - 238: routelines exported to GCS
+2022-08-30 20:17:54.492 | INFO     | __main__:<module>:268 - download files for 238: 0:00:02.206679
+2022-08-30 20:17:54.492 | INFO     | __main__:<module>:241 - *********** Download data for: 239 ***********
+2022-08-30 20:17:58.223 | INFO     | __main__:get_routelines:88 - 239: routelines exported to GCS
+2022-08-30 20:17:58.225 | INFO     | __main__:<module>:268 - download files for 239: 0:00:03.732799
+2022-08-30 20:17:58.226 | INFO     | __main__:<module>:241 - *********** Download data for: 243 ***********
+2022-08-30 20:18:01.524 | INFO     | __main__:get_routelines:88 - 243: routelines exported to GCS
+2022-08-30 20:18:01.526 | INFO     | __main__:<module>:268 - download files for 243: 0:00:03.300538
+2022-08-30 20:18:01.527 | INFO     | __main__:<module>:241 - *********** Download data for: 246 ***********
+2022-08-30 20:18:04.955 | INFO     | __main__:get_routelines:88 - 246: routelines exported to GCS
+2022-08-30 20:18:04.957 | INFO     | __main__:<module>:268 - download files for 246: 0:00:03.430814
+2022-08-30 20:18:04.958 | INFO     | __main__:<module>:241 - *********** Download data for: 247 ***********
+2022-08-30 20:18:07.301 | INFO     | __main__:get_routelines:88 - 247: routelines exported to GCS
+2022-08-30 20:18:07.303 | INFO     | __main__:<module>:268 - download files for 247: 0:00:02.344433
+2022-08-30 20:18:07.303 | INFO     | __main__:<module>:241 - *********** Download data for: 251 ***********
+2022-08-30 20:18:11.050 | INFO     | __main__:get_routelines:88 - 251: routelines exported to GCS
+2022-08-30 20:18:11.052 | INFO     | __main__:<module>:268 - download files for 251: 0:00:03.749303
+2022-08-30 20:18:11.053 | INFO     | __main__:<module>:241 - *********** Download data for: 254 ***********
+2022-08-30 20:18:11.291 | INFO     | __main__:<module>:241 - *********** Download data for: 257 ***********
+2022-08-30 20:18:13.178 | INFO     | __main__:get_routelines:88 - 257: routelines exported to GCS
+2022-08-30 20:18:13.179 | INFO     | __main__:<module>:268 - download files for 257: 0:00:01.888015
+2022-08-30 20:18:13.180 | INFO     | __main__:<module>:241 - *********** Download data for: 259 ***********
+2022-08-30 20:18:15.706 | INFO     | __main__:get_routelines:88 - 259: routelines exported to GCS
+2022-08-30 20:18:15.708 | INFO     | __main__:<module>:268 - download files for 259: 0:00:02.528088
+2022-08-30 20:18:15.708 | INFO     | __main__:<module>:241 - *********** Download data for: 260 ***********
+2022-08-30 20:18:17.744 | INFO     | __main__:get_routelines:88 - 260: routelines exported to GCS
+2022-08-30 20:18:17.747 | INFO     | __main__:<module>:268 - download files for 260: 0:00:02.038474
+2022-08-30 20:18:17.748 | INFO     | __main__:<module>:241 - *********** Download data for: 261 ***********
+2022-08-30 20:18:21.021 | INFO     | __main__:get_routelines:88 - 261: routelines exported to GCS
+2022-08-30 20:18:21.023 | INFO     | __main__:<module>:268 - download files for 261: 0:00:03.274597
+2022-08-30 20:18:21.023 | INFO     | __main__:<module>:241 - *********** Download data for: 263 ***********
+2022-08-30 20:18:21.270 | INFO     | __main__:<module>:241 - *********** Download data for: 264 ***********
+2022-08-30 20:18:23.202 | INFO     | __main__:get_routelines:88 - 264: routelines exported to GCS
+2022-08-30 20:18:23.204 | INFO     | __main__:<module>:268 - download files for 264: 0:00:01.934045
+2022-08-30 20:18:23.205 | INFO     | __main__:<module>:241 - *********** Download data for: 265 ***********
+2022-08-30 20:18:23.437 | INFO     | __main__:<module>:241 - *********** Download data for: 269 ***********
+2022-08-30 20:18:38.935 | INFO     | __main__:get_routelines:88 - 269: routelines exported to GCS
+2022-08-30 20:18:38.937 | INFO     | __main__:<module>:268 - download files for 269: 0:00:15.500432
+2022-08-30 20:18:38.938 | INFO     | __main__:<module>:241 - *********** Download data for: 270 ***********
+2022-08-30 20:18:40.772 | INFO     | __main__:get_routelines:88 - 270: routelines exported to GCS
+2022-08-30 20:18:40.774 | INFO     | __main__:<module>:268 - download files for 270: 0:00:01.836243
+2022-08-30 20:18:40.775 | INFO     | __main__:<module>:241 - *********** Download data for: 271 ***********
+2022-08-30 20:18:46.174 | INFO     | __main__:get_routelines:88 - 271: routelines exported to GCS
+2022-08-30 20:18:46.177 | INFO     | __main__:<module>:268 - download files for 271: 0:00:05.402317
+2022-08-30 20:18:46.178 | INFO     | __main__:<module>:241 - *********** Download data for: 273 ***********
+2022-08-30 20:18:46.419 | INFO     | __main__:<module>:241 - *********** Download data for: 274 ***********
+2022-08-30 20:18:48.588 | INFO     | __main__:get_routelines:88 - 274: routelines exported to GCS
+2022-08-30 20:18:48.591 | INFO     | __main__:<module>:268 - download files for 274: 0:00:02.171555
+2022-08-30 20:18:48.592 | INFO     | __main__:<module>:241 - *********** Download data for: 278 ***********
+2022-08-30 20:18:59.776 | INFO     | __main__:get_routelines:88 - 278: routelines exported to GCS
+2022-08-30 20:18:59.779 | INFO     | __main__:<module>:268 - download files for 278: 0:00:11.186264
+2022-08-30 20:18:59.781 | INFO     | __main__:<module>:241 - *********** Download data for: 279 ***********
+2022-08-30 20:19:05.009 | INFO     | __main__:<module>:268 - download files for 279: 0:00:05.228506
+2022-08-30 20:19:05.010 | INFO     | __main__:<module>:241 - *********** Download data for: 280 ***********
+2022-08-30 20:19:07.051 | INFO     | __main__:get_routelines:88 - 280: routelines exported to GCS
+2022-08-30 20:19:07.053 | INFO     | __main__:<module>:268 - download files for 280: 0:00:02.043472
+2022-08-30 20:19:07.054 | INFO     | __main__:<module>:241 - *********** Download data for: 281 ***********
+2022-08-30 20:19:10.234 | INFO     | __main__:get_routelines:88 - 281: routelines exported to GCS
+2022-08-30 20:19:10.236 | INFO     | __main__:<module>:268 - download files for 281: 0:00:03.182256
+2022-08-30 20:19:10.237 | INFO     | __main__:<module>:241 - *********** Download data for: 282 ***********
+2022-08-30 20:19:22.662 | INFO     | __main__:get_routelines:88 - 282: routelines exported to GCS
+2022-08-30 20:19:22.666 | INFO     | __main__:<module>:268 - download files for 282: 0:00:12.429647
+2022-08-30 20:19:22.668 | INFO     | __main__:<module>:241 - *********** Download data for: 284 ***********
+2022-08-30 20:19:28.799 | INFO     | __main__:get_routelines:88 - 284: routelines exported to GCS
+2022-08-30 20:19:28.802 | INFO     | __main__:<module>:268 - download files for 284: 0:00:06.133971
+2022-08-30 20:19:28.802 | INFO     | __main__:<module>:241 - *********** Download data for: 287 ***********
+2022-08-30 20:19:30.637 | INFO     | __main__:get_routelines:88 - 287: routelines exported to GCS
+2022-08-30 20:19:30.639 | INFO     | __main__:<module>:268 - download files for 287: 0:00:01.836292
+2022-08-30 20:19:30.639 | INFO     | __main__:<module>:241 - *********** Download data for: 289 ***********
+2022-08-30 20:19:34.222 | INFO     | __main__:get_routelines:88 - 289: routelines exported to GCS
+2022-08-30 20:19:34.223 | INFO     | __main__:<module>:268 - download files for 289: 0:00:03.583911
+2022-08-30 20:19:34.223 | INFO     | __main__:<module>:241 - *********** Download data for: 290 ***********
+2022-08-30 20:19:43.797 | INFO     | __main__:get_routelines:88 - 290: routelines exported to GCS
+2022-08-30 20:19:43.800 | INFO     | __main__:<module>:268 - download files for 290: 0:00:09.576085
+2022-08-30 20:19:43.800 | INFO     | __main__:<module>:241 - *********** Download data for: 293 ***********
+2022-08-30 20:19:49.637 | INFO     | __main__:get_routelines:88 - 293: routelines exported to GCS
+2022-08-30 20:19:49.639 | INFO     | __main__:<module>:268 - download files for 293: 0:00:05.839000
+2022-08-30 20:19:49.640 | INFO     | __main__:<module>:241 - *********** Download data for: 294 ***********
+2022-08-30 20:20:10.874 | INFO     | __main__:get_routelines:88 - 294: routelines exported to GCS
+2022-08-30 20:20:10.878 | INFO     | __main__:<module>:268 - download files for 294: 0:00:21.237880
+2022-08-30 20:20:10.879 | INFO     | __main__:<module>:241 - *********** Download data for: 295 ***********
+2022-08-30 20:20:15.814 | INFO     | __main__:get_routelines:88 - 295: routelines exported to GCS
+2022-08-30 20:20:15.817 | INFO     | __main__:<module>:268 - download files for 295: 0:00:04.937843
+2022-08-30 20:20:15.819 | INFO     | __main__:<module>:241 - *********** Download data for: 296 ***********
+2022-08-30 20:20:21.488 | INFO     | __main__:get_routelines:88 - 296: routelines exported to GCS
+2022-08-30 20:20:21.490 | INFO     | __main__:<module>:268 - download files for 296: 0:00:05.671002
+2022-08-30 20:20:21.490 | INFO     | __main__:<module>:241 - *********** Download data for: 298 ***********
+2022-08-30 20:20:25.200 | INFO     | __main__:get_routelines:88 - 298: routelines exported to GCS
+2022-08-30 20:20:25.201 | INFO     | __main__:<module>:268 - download files for 298: 0:00:03.710998
+2022-08-30 20:20:25.202 | INFO     | __main__:<module>:241 - *********** Download data for: 300 ***********
+2022-08-30 20:20:29.454 | INFO     | __main__:get_routelines:88 - 300: routelines exported to GCS
+2022-08-30 20:20:29.457 | INFO     | __main__:<module>:268 - download files for 300: 0:00:04.255050
+2022-08-30 20:20:29.458 | INFO     | __main__:<module>:241 - *********** Download data for: 301 ***********
+2022-08-30 20:20:31.965 | INFO     | __main__:get_routelines:88 - 301: routelines exported to GCS
+2022-08-30 20:20:31.967 | INFO     | __main__:<module>:268 - download files for 301: 0:00:02.508934
+2022-08-30 20:20:31.968 | INFO     | __main__:<module>:241 - *********** Download data for: 305 ***********
+2022-08-30 20:20:33.722 | INFO     | __main__:get_routelines:88 - 305: routelines exported to GCS
+2022-08-30 20:20:33.724 | INFO     | __main__:<module>:268 - download files for 305: 0:00:01.756230
+2022-08-30 20:20:33.724 | INFO     | __main__:<module>:241 - *********** Download data for: 308 ***********
+2022-08-30 20:20:36.007 | INFO     | __main__:get_routelines:88 - 308: routelines exported to GCS
+2022-08-30 20:20:36.010 | INFO     | __main__:<module>:268 - download files for 308: 0:00:02.285110
+2022-08-30 20:20:36.010 | INFO     | __main__:<module>:241 - *********** Download data for: 310 ***********
+2022-08-30 20:20:41.924 | INFO     | __main__:get_routelines:88 - 310: routelines exported to GCS
+2022-08-30 20:20:41.927 | INFO     | __main__:<module>:268 - download files for 310: 0:00:05.916359
+2022-08-30 20:20:41.927 | INFO     | __main__:<module>:241 - *********** Download data for: 312 ***********
+2022-08-30 20:20:43.810 | INFO     | __main__:get_routelines:88 - 312: routelines exported to GCS
+2022-08-30 20:20:43.812 | INFO     | __main__:<module>:268 - download files for 312: 0:00:01.884352
+2022-08-30 20:20:43.812 | INFO     | __main__:<module>:241 - *********** Download data for: 314 ***********
+2022-08-30 20:20:49.919 | INFO     | __main__:get_routelines:88 - 314: routelines exported to GCS
+2022-08-30 20:20:49.921 | INFO     | __main__:<module>:268 - download files for 314: 0:00:06.108440
+2022-08-30 20:20:49.921 | INFO     | __main__:<module>:241 - *********** Download data for: 315 ***********
+2022-08-30 20:20:52.404 | INFO     | __main__:get_routelines:88 - 315: routelines exported to GCS
+2022-08-30 20:20:52.406 | INFO     | __main__:<module>:268 - download files for 315: 0:00:02.484890
+2022-08-30 20:20:52.407 | INFO     | __main__:<module>:241 - *********** Download data for: 320 ***********
+2022-08-30 20:20:54.217 | INFO     | __main__:get_routelines:88 - 320: routelines exported to GCS
+2022-08-30 20:20:54.220 | INFO     | __main__:<module>:268 - download files for 320: 0:00:01.813233
+2022-08-30 20:20:54.221 | INFO     | __main__:<module>:241 - *********** Download data for: 323 ***********
+2022-08-30 20:20:56.642 | INFO     | __main__:get_routelines:88 - 323: routelines exported to GCS
+2022-08-30 20:20:56.644 | INFO     | __main__:<module>:268 - download files for 323: 0:00:02.423299
+2022-08-30 20:20:56.645 | INFO     | __main__:<module>:241 - *********** Download data for: 324 ***********
+2022-08-30 20:20:58.657 | INFO     | __main__:get_routelines:88 - 324: routelines exported to GCS
+2022-08-30 20:20:58.659 | INFO     | __main__:<module>:268 - download files for 324: 0:00:02.013700
+2022-08-30 20:20:58.659 | INFO     | __main__:<module>:241 - *********** Download data for: 327 ***********
+2022-08-30 20:21:01.870 | INFO     | __main__:get_routelines:88 - 327: routelines exported to GCS
+2022-08-30 20:21:01.872 | INFO     | __main__:<module>:268 - download files for 327: 0:00:03.213114
+2022-08-30 20:21:01.874 | INFO     | __main__:<module>:241 - *********** Download data for: 329 ***********
+2022-08-30 20:21:04.359 | INFO     | __main__:get_routelines:88 - 329: routelines exported to GCS
+2022-08-30 20:21:04.361 | INFO     | __main__:<module>:268 - download files for 329: 0:00:02.487378
+2022-08-30 20:21:04.363 | INFO     | __main__:<module>:241 - *********** Download data for: 331 ***********
+2022-08-30 20:21:08.781 | INFO     | __main__:get_routelines:88 - 331: routelines exported to GCS
+2022-08-30 20:21:08.783 | INFO     | __main__:<module>:268 - download files for 331: 0:00:04.420296
+2022-08-30 20:21:08.784 | INFO     | __main__:<module>:241 - *********** Download data for: 334 ***********
+2022-08-30 20:21:11.519 | INFO     | __main__:get_routelines:88 - 334: routelines exported to GCS
+2022-08-30 20:21:11.521 | INFO     | __main__:<module>:268 - download files for 334: 0:00:02.737581
+2022-08-30 20:21:11.522 | INFO     | __main__:<module>:241 - *********** Download data for: 336 ***********
+2022-08-30 20:21:18.081 | INFO     | __main__:get_routelines:88 - 336: routelines exported to GCS
+2022-08-30 20:21:18.083 | INFO     | __main__:<module>:268 - download files for 336: 0:00:06.560690
+2022-08-30 20:21:18.084 | INFO     | __main__:<module>:241 - *********** Download data for: 337 ***********
+2022-08-30 20:21:20.604 | INFO     | __main__:get_routelines:88 - 337: routelines exported to GCS
+2022-08-30 20:21:20.606 | INFO     | __main__:<module>:268 - download files for 337: 0:00:02.522257
+2022-08-30 20:21:20.606 | INFO     | __main__:<module>:241 - *********** Download data for: 338 ***********
+2022-08-30 20:21:21.156 | INFO     | __main__:<module>:241 - *********** Download data for: 339 ***********
+2022-08-30 20:21:27.413 | INFO     | __main__:get_routelines:88 - 339: routelines exported to GCS
+2022-08-30 20:21:27.415 | INFO     | __main__:<module>:268 - download files for 339: 0:00:06.259219
+2022-08-30 20:21:27.415 | INFO     | __main__:<module>:241 - *********** Download data for: 341 ***********
+2022-08-30 20:21:30.551 | INFO     | __main__:get_routelines:88 - 341: routelines exported to GCS
+2022-08-30 20:21:30.553 | INFO     | __main__:<module>:268 - download files for 341: 0:00:03.137577
+2022-08-30 20:21:30.554 | INFO     | __main__:<module>:241 - *********** Download data for: 343 ***********
+2022-08-30 20:21:36.123 | INFO     | __main__:get_routelines:88 - 343: routelines exported to GCS
+2022-08-30 20:21:36.125 | INFO     | __main__:<module>:268 - download files for 343: 0:00:05.571584
+2022-08-30 20:21:36.126 | INFO     | __main__:<module>:241 - *********** Download data for: 344 ***********
+2022-08-30 20:21:39.811 | INFO     | __main__:get_routelines:88 - 344: routelines exported to GCS
+2022-08-30 20:21:39.813 | INFO     | __main__:<module>:268 - download files for 344: 0:00:03.686831
+2022-08-30 20:21:39.813 | INFO     | __main__:<module>:241 - *********** Download data for: 346 ***********
+2022-08-30 20:21:43.898 | INFO     | __main__:get_routelines:88 - 346: routelines exported to GCS
+2022-08-30 20:21:43.901 | INFO     | __main__:<module>:268 - download files for 346: 0:00:04.087342
+2022-08-30 20:21:43.902 | INFO     | __main__:<module>:241 - *********** Download data for: 349 ***********
+2022-08-30 20:21:46.501 | INFO     | __main__:get_routelines:88 - 349: routelines exported to GCS
+2022-08-30 20:21:46.504 | INFO     | __main__:<module>:268 - download files for 349: 0:00:02.602601
+2022-08-30 20:21:46.505 | INFO     | __main__:<module>:241 - *********** Download data for: 350 ***********
+2022-08-30 20:21:49.558 | INFO     | __main__:get_routelines:88 - 350: routelines exported to GCS
+2022-08-30 20:21:49.560 | INFO     | __main__:<module>:268 - download files for 350: 0:00:03.054858
+2022-08-30 20:21:49.561 | INFO     | __main__:<module>:241 - *********** Download data for: 351 ***********
+2022-08-30 20:21:52.529 | INFO     | __main__:get_routelines:88 - 351: routelines exported to GCS
+2022-08-30 20:21:52.530 | INFO     | __main__:<module>:268 - download files for 351: 0:00:02.969947
+2022-08-30 20:21:52.531 | INFO     | __main__:<module>:241 - *********** Download data for: 356 ***********
+2022-08-30 20:21:55.323 | INFO     | __main__:get_routelines:88 - 356: routelines exported to GCS
+2022-08-30 20:21:55.326 | INFO     | __main__:<module>:268 - download files for 356: 0:00:02.795515
+2022-08-30 20:21:55.327 | INFO     | __main__:<module>:241 - *********** Download data for: 360 ***********
+2022-08-30 20:22:00.880 | INFO     | __main__:get_routelines:88 - 360: routelines exported to GCS
+2022-08-30 20:22:00.883 | INFO     | __main__:<module>:268 - download files for 360: 0:00:05.555852
+2022-08-30 20:22:00.885 | INFO     | __main__:<module>:241 - *********** Download data for: 361 ***********
+2022-08-30 20:22:03.665 | INFO     | __main__:get_routelines:88 - 361: routelines exported to GCS
+2022-08-30 20:22:03.668 | INFO     | __main__:<module>:268 - download files for 361: 0:00:02.783145
+2022-08-30 20:22:03.669 | INFO     | __main__:<module>:241 - *********** Download data for: 365 ***********
+2022-08-30 20:22:04.076 | INFO     | __main__:<module>:241 - *********** Download data for: 366 ***********
+2022-08-30 20:22:06.248 | INFO     | __main__:get_routelines:88 - 366: routelines exported to GCS
+2022-08-30 20:22:06.249 | INFO     | __main__:<module>:268 - download files for 366: 0:00:02.172674
+2022-08-30 20:22:06.249 | INFO     | __main__:<module>:241 - *********** Download data for: 367 ***********
+2022-08-30 20:22:08.775 | INFO     | __main__:get_routelines:88 - 367: routelines exported to GCS
+2022-08-30 20:22:08.778 | INFO     | __main__:<module>:268 - download files for 367: 0:00:02.528942
+2022-08-30 20:22:08.780 | INFO     | __main__:<module>:241 - *********** Download data for: 368 ***********
+2022-08-30 20:22:13.010 | INFO     | __main__:get_routelines:88 - 368: routelines exported to GCS
+2022-08-30 20:22:13.013 | INFO     | __main__:<module>:268 - download files for 368: 0:00:04.232901
+2022-08-30 20:22:13.014 | INFO     | __main__:<module>:241 - *********** Download data for: 372 ***********
+2022-08-30 20:22:15.268 | INFO     | __main__:get_routelines:88 - 372: routelines exported to GCS
+2022-08-30 20:22:15.271 | INFO     | __main__:<module>:268 - download files for 372: 0:00:02.257432
+2022-08-30 20:22:15.273 | INFO     | __main__:<module>:241 - *********** Download data for: 374 ***********
+2022-08-30 20:22:19.752 | INFO     | __main__:get_routelines:88 - 374: routelines exported to GCS
+2022-08-30 20:22:19.754 | INFO     | __main__:<module>:268 - download files for 374: 0:00:04.481410
+2022-08-30 20:22:19.755 | INFO     | __main__:<module>:241 - *********** Download data for: 376 ***********
+2022-08-30 20:22:23.242 | INFO     | __main__:get_routelines:88 - 376: routelines exported to GCS
+2022-08-30 20:22:23.245 | INFO     | __main__:<module>:268 - download files for 376: 0:00:03.490943
+2022-08-30 20:22:23.247 | INFO     | __main__:<module>:241 - *********** Download data for: 380 ***********
+2022-08-30 20:22:28.458 | INFO     | __main__:get_routelines:88 - 380: routelines exported to GCS
+2022-08-30 20:22:28.460 | INFO     | __main__:<module>:268 - download files for 380: 0:00:05.213123
+2022-08-30 20:22:28.460 | INFO     | __main__:<module>:241 - *********** Download data for: 381 ***********
+2022-08-30 20:22:32.600 | INFO     | __main__:get_routelines:88 - 381: routelines exported to GCS
+2022-08-30 20:22:32.603 | INFO     | __main__:<module>:268 - download files for 381: 0:00:04.142095
+2022-08-30 20:22:32.603 | INFO     | __main__:<module>:241 - *********** Download data for: 386 ***********
+2022-08-30 20:22:34.840 | INFO     | __main__:get_routelines:88 - 386: routelines exported to GCS
+2022-08-30 20:22:34.842 | INFO     | __main__:<module>:268 - download files for 386: 0:00:02.238889
+2022-08-30 20:22:34.843 | INFO     | __main__:<module>:241 - *********** Download data for: 389 ***********
+2022-08-30 20:22:39.174 | INFO     | __main__:get_routelines:88 - 389: routelines exported to GCS
+2022-08-30 20:22:39.176 | INFO     | __main__:<module>:268 - download files for 389: 0:00:04.333711
+2022-08-30 20:22:39.177 | INFO     | __main__:<module>:241 - *********** Download data for: 394 ***********
+2022-08-30 20:22:39.427 | INFO     | __main__:<module>:241 - *********** Download data for: 473 ***********
+2022-08-30 20:22:43.361 | INFO     | __main__:get_routelines:88 - 473: routelines exported to GCS
+2022-08-30 20:22:43.364 | INFO     | __main__:<module>:268 - download files for 473: 0:00:03.936632
+2022-08-30 20:22:43.365 | INFO     | __main__:<module>:241 - *********** Download data for: 474 ***********
+2022-08-30 20:22:46.925 | INFO     | __main__:get_routelines:88 - 474: routelines exported to GCS
+2022-08-30 20:22:46.927 | INFO     | __main__:<module>:268 - download files for 474: 0:00:03.562014
+2022-08-30 20:22:46.927 | INFO     | __main__:<module>:241 - *********** Download data for: 481 ***********
+2022-08-30 20:22:49.051 | INFO     | __main__:get_routelines:88 - 481: routelines exported to GCS
+2022-08-30 20:22:49.053 | INFO     | __main__:<module>:268 - download files for 481: 0:00:02.126008
+2022-08-30 20:22:49.054 | INFO     | __main__:<module>:241 - *********** Download data for: 482 ***********
+2022-08-30 20:22:51.768 | INFO     | __main__:get_routelines:88 - 482: routelines exported to GCS
+2022-08-30 20:22:51.770 | INFO     | __main__:<module>:268 - download files for 482: 0:00:02.716097
+2022-08-30 20:22:51.770 | INFO     | __main__:<module>:241 - *********** Download data for: 483 ***********
+2022-08-30 20:22:53.687 | INFO     | __main__:get_routelines:88 - 483: routelines exported to GCS
+2022-08-30 20:22:53.689 | INFO     | __main__:<module>:268 - download files for 483: 0:00:01.918423
+2022-08-30 20:22:53.689 | INFO     | __main__:<module>:241 - *********** Download data for: 484 ***********
+2022-08-30 20:22:57.006 | INFO     | __main__:get_routelines:88 - 484: routelines exported to GCS
+2022-08-30 20:22:57.009 | INFO     | __main__:<module>:268 - download files for 484: 0:00:03.319340
+2022-08-30 20:22:57.009 | INFO     | __main__:<module>:241 - *********** Download data for: 485 ***********
+2022-08-30 20:22:58.934 | INFO     | __main__:get_routelines:88 - 485: routelines exported to GCS
+2022-08-30 20:22:58.937 | INFO     | __main__:<module>:268 - download files for 485: 0:00:01.927353
+2022-08-30 20:22:58.937 | INFO     | __main__:<module>:272 - execution time: 0:11:55.740899
+2022-08-30 20:38:05.680 | INFO     | __main__:<module>:232 - read in cached files: 4
+2022-08-30 20:44:25.620 | INFO     | __main__:<module>:231 - read in cached files: 4
+2022-08-30 20:59:36.784 | INFO     | __main__:<module>:232 - read in cached files: 4
+2022-08-30 21:04:01.051 | INFO     | __main__:<module>:236 - created single operator hqta: 4
+2022-08-30 21:04:02.371 | INFO     | __main__:<module>:242 - successful export: 4
+2022-08-30 21:04:02.372 | INFO     | __main__:<module>:246 - execution time for 4: 0:04:26.865164
+2022-08-30 21:04:03.828 | INFO     | __main__:<module>:232 - read in cached files: 6
+2022-08-30 21:04:07.015 | INFO     | __main__:<module>:236 - created single operator hqta: 6
+2022-08-30 21:04:07.192 | INFO     | __main__:<module>:242 - successful export: 6
+2022-08-30 21:04:07.193 | INFO     | __main__:<module>:246 - execution time for 6: 0:00:04.820312
+2022-08-30 21:04:08.641 | INFO     | __main__:<module>:232 - read in cached files: 10
+2022-08-30 21:04:11.186 | INFO     | __main__:<module>:236 - created single operator hqta: 10
+2022-08-30 21:04:11.305 | INFO     | __main__:<module>:242 - successful export: 10
+2022-08-30 21:04:11.307 | INFO     | __main__:<module>:246 - execution time for 10: 0:00:04.112640
+2022-08-30 21:04:12.735 | INFO     | __main__:<module>:232 - read in cached files: 11
+2022-08-30 21:04:19.171 | INFO     | __main__:<module>:236 - created single operator hqta: 11
+2022-08-30 21:04:19.351 | INFO     | __main__:<module>:242 - successful export: 11
+2022-08-30 21:04:19.352 | INFO     | __main__:<module>:246 - execution time for 11: 0:00:08.043389
+2022-08-30 21:04:20.765 | INFO     | __main__:<module>:232 - read in cached files: 14
+2022-08-31 09:08:39.163 | INFO     | __main__:<module>:232 - read in cached files: 4
+2022-08-31 09:12:59.015 | INFO     | __main__:<module>:236 - created single operator hqta: 4
+2022-08-31 09:13:00.343 | INFO     | __main__:<module>:242 - successful export: 4
+2022-08-31 09:13:00.344 | INFO     | __main__:<module>:246 - execution time for 4: 0:04:22.836928
+2022-08-31 09:13:01.809 | INFO     | __main__:<module>:232 - read in cached files: 6
+2022-08-31 09:13:05.120 | INFO     | __main__:<module>:236 - created single operator hqta: 6
+2022-08-31 09:13:05.294 | INFO     | __main__:<module>:242 - successful export: 6
+2022-08-31 09:13:05.295 | INFO     | __main__:<module>:246 - execution time for 6: 0:00:04.949945
+2022-08-31 09:13:06.746 | INFO     | __main__:<module>:232 - read in cached files: 10
+2022-08-31 09:13:09.220 | INFO     | __main__:<module>:236 - created single operator hqta: 10
+2022-08-31 09:13:09.345 | INFO     | __main__:<module>:242 - successful export: 10
+2022-08-31 09:13:09.348 | INFO     | __main__:<module>:246 - execution time for 10: 0:00:04.052105
+2022-08-31 09:13:10.667 | INFO     | __main__:<module>:232 - read in cached files: 11
+2022-08-31 09:13:17.809 | INFO     | __main__:<module>:236 - created single operator hqta: 11
+2022-08-31 09:13:17.999 | INFO     | __main__:<module>:242 - successful export: 11
+2022-08-31 09:13:18.000 | INFO     | __main__:<module>:246 - execution time for 11: 0:00:08.651014
+2022-08-31 09:13:19.197 | INFO     | __main__:<module>:232 - read in cached files: 14
+2022-08-31 09:15:10.665 | INFO     | __main__:<module>:236 - created single operator hqta: 14
+2022-08-31 09:15:10.938 | INFO     | __main__:<module>:242 - successful export: 14
+2022-08-31 09:15:10.940 | INFO     | __main__:<module>:246 - execution time for 14: 0:01:52.939426
+2022-08-31 09:15:12.395 | INFO     | __main__:<module>:232 - read in cached files: 15
+2022-08-31 09:15:14.860 | INFO     | __main__:<module>:236 - created single operator hqta: 15
+2022-08-31 09:15:14.973 | INFO     | __main__:<module>:242 - successful export: 15
+2022-08-31 09:15:14.974 | INFO     | __main__:<module>:246 - execution time for 15: 0:00:04.032521
+2022-08-31 09:15:16.470 | INFO     | __main__:<module>:232 - read in cached files: 16
+2022-08-31 09:15:31.717 | INFO     | __main__:<module>:236 - created single operator hqta: 16
+2022-08-31 09:15:31.962 | INFO     | __main__:<module>:242 - successful export: 16
+2022-08-31 09:15:31.963 | INFO     | __main__:<module>:246 - execution time for 16: 0:00:16.988662
+2022-08-31 09:15:33.427 | INFO     | __main__:<module>:232 - read in cached files: 17
+2022-08-31 09:15:37.023 | INFO     | __main__:<module>:236 - created single operator hqta: 17
+2022-08-31 09:15:37.196 | INFO     | __main__:<module>:242 - successful export: 17
+2022-08-31 09:15:37.198 | INFO     | __main__:<module>:246 - execution time for 17: 0:00:05.233885
+2022-08-31 09:15:38.630 | INFO     | __main__:<module>:232 - read in cached files: 18
+2022-08-31 09:15:49.350 | INFO     | __main__:<module>:236 - created single operator hqta: 18
+2022-08-31 09:15:49.566 | INFO     | __main__:<module>:242 - successful export: 18
+2022-08-31 09:15:49.568 | INFO     | __main__:<module>:246 - execution time for 18: 0:00:12.369379
+2022-08-31 09:15:50.973 | INFO     | __main__:<module>:232 - read in cached files: 23
+2022-08-31 09:15:53.559 | INFO     | __main__:<module>:236 - created single operator hqta: 23
+2022-08-31 09:15:53.725 | INFO     | __main__:<module>:242 - successful export: 23
+2022-08-31 09:15:53.726 | INFO     | __main__:<module>:246 - execution time for 23: 0:00:04.156500
+2022-08-31 09:15:55.120 | INFO     | __main__:<module>:232 - read in cached files: 24
+2022-08-31 09:15:57.760 | INFO     | __main__:<module>:236 - created single operator hqta: 24
+2022-08-31 09:15:57.925 | INFO     | __main__:<module>:242 - successful export: 24
+2022-08-31 09:15:57.926 | INFO     | __main__:<module>:246 - execution time for 24: 0:00:04.200168
+2022-08-31 09:15:59.447 | INFO     | __main__:<module>:232 - read in cached files: 29
+2022-08-31 09:16:03.483 | INFO     | __main__:<module>:236 - created single operator hqta: 29
+2022-08-31 09:16:03.660 | INFO     | __main__:<module>:242 - successful export: 29
+2022-08-31 09:16:03.660 | INFO     | __main__:<module>:246 - execution time for 29: 0:00:05.733387
+2022-08-31 09:16:05.098 | INFO     | __main__:<module>:232 - read in cached files: 30
+2022-08-31 09:16:09.551 | INFO     | __main__:<module>:236 - created single operator hqta: 30
+2022-08-31 09:16:09.724 | INFO     | __main__:<module>:242 - successful export: 30
+2022-08-31 09:16:09.725 | INFO     | __main__:<module>:246 - execution time for 30: 0:00:06.064296
+2022-08-31 09:16:11.154 | INFO     | __main__:<module>:232 - read in cached files: 34
+2022-08-31 09:16:16.431 | INFO     | __main__:<module>:236 - created single operator hqta: 34
+2022-08-31 09:16:16.609 | INFO     | __main__:<module>:242 - successful export: 34
+2022-08-31 09:16:16.610 | INFO     | __main__:<module>:246 - execution time for 34: 0:00:06.883833
+2022-08-31 09:16:18.060 | INFO     | __main__:<module>:232 - read in cached files: 35
+2022-08-31 09:16:20.475 | INFO     | __main__:<module>:236 - created single operator hqta: 35
+2022-08-31 09:16:20.586 | INFO     | __main__:<module>:242 - successful export: 35
+2022-08-31 09:16:20.587 | INFO     | __main__:<module>:246 - execution time for 35: 0:00:03.976910
+2022-08-31 09:16:22.043 | INFO     | __main__:<module>:232 - read in cached files: 36
+2022-08-31 09:16:24.641 | INFO     | __main__:<module>:236 - created single operator hqta: 36
+2022-08-31 09:16:24.785 | INFO     | __main__:<module>:242 - successful export: 36
+2022-08-31 09:16:24.786 | INFO     | __main__:<module>:246 - execution time for 36: 0:00:04.198571
+2022-08-31 09:16:26.237 | INFO     | __main__:<module>:232 - read in cached files: 37
+2022-08-31 09:16:29.363 | INFO     | __main__:<module>:236 - created single operator hqta: 37
+2022-08-31 09:16:29.537 | INFO     | __main__:<module>:242 - successful export: 37
+2022-08-31 09:16:29.539 | INFO     | __main__:<module>:246 - execution time for 37: 0:00:04.751695
+2022-08-31 09:16:31.034 | INFO     | __main__:<module>:232 - read in cached files: 42
+2022-08-31 09:16:41.751 | INFO     | __main__:<module>:236 - created single operator hqta: 42
+2022-08-31 09:16:41.961 | INFO     | __main__:<module>:242 - successful export: 42
+2022-08-31 09:16:41.962 | INFO     | __main__:<module>:246 - execution time for 42: 0:00:12.422073
+2022-08-31 09:16:43.417 | INFO     | __main__:<module>:232 - read in cached files: 45
+2022-08-31 09:16:47.115 | INFO     | __main__:<module>:236 - created single operator hqta: 45
+2022-08-31 09:16:47.302 | INFO     | __main__:<module>:242 - successful export: 45
+2022-08-31 09:16:47.306 | INFO     | __main__:<module>:246 - execution time for 45: 0:00:05.343350
+2022-08-31 09:16:48.846 | INFO     | __main__:<module>:232 - read in cached files: 48
+2022-08-31 09:17:02.682 | INFO     | __main__:<module>:236 - created single operator hqta: 48
+2022-08-31 09:17:02.905 | INFO     | __main__:<module>:242 - successful export: 48
+2022-08-31 09:17:02.907 | INFO     | __main__:<module>:246 - execution time for 48: 0:00:15.599187
+2022-08-31 09:17:04.377 | INFO     | __main__:<module>:232 - read in cached files: 49
+2022-08-31 09:17:10.190 | INFO     | __main__:<module>:236 - created single operator hqta: 49
+2022-08-31 09:17:10.393 | INFO     | __main__:<module>:242 - successful export: 49
+2022-08-31 09:17:10.394 | INFO     | __main__:<module>:246 - execution time for 49: 0:00:07.487242
+2022-08-31 09:17:11.838 | INFO     | __main__:<module>:232 - read in cached files: 50
+2022-08-31 09:17:15.656 | INFO     | __main__:<module>:236 - created single operator hqta: 50
+2022-08-31 09:17:15.828 | INFO     | __main__:<module>:242 - successful export: 50
+2022-08-31 09:17:15.828 | INFO     | __main__:<module>:246 - execution time for 50: 0:00:05.433287
+2022-08-31 09:17:17.321 | INFO     | __main__:<module>:232 - read in cached files: 56
+2022-08-31 09:17:21.909 | INFO     | __main__:<module>:236 - created single operator hqta: 56
+2022-08-31 09:17:22.081 | INFO     | __main__:<module>:242 - successful export: 56
+2022-08-31 09:17:22.082 | INFO     | __main__:<module>:246 - execution time for 56: 0:00:06.253426
+2022-08-31 09:17:23.610 | INFO     | __main__:<module>:232 - read in cached files: 61
+2022-08-31 09:18:12.075 | INFO     | __main__:<module>:236 - created single operator hqta: 61
+2022-08-31 09:18:12.619 | INFO     | __main__:<module>:242 - successful export: 61
+2022-08-31 09:18:12.620 | INFO     | __main__:<module>:246 - execution time for 61: 0:00:50.537270
+2022-08-31 09:18:14.105 | INFO     | __main__:<module>:232 - read in cached files: 70
+2022-08-31 09:18:31.905 | INFO     | __main__:<module>:236 - created single operator hqta: 70
+2022-08-31 09:18:32.213 | INFO     | __main__:<module>:242 - successful export: 70
+2022-08-31 09:18:32.214 | INFO     | __main__:<module>:246 - execution time for 70: 0:00:19.593893
+2022-08-31 09:18:33.728 | INFO     | __main__:<module>:232 - read in cached files: 71
+2022-08-31 09:18:36.817 | INFO     | __main__:<module>:236 - created single operator hqta: 71
+2022-08-31 09:18:37.011 | INFO     | __main__:<module>:242 - successful export: 71
+2022-08-31 09:18:37.012 | INFO     | __main__:<module>:246 - execution time for 71: 0:00:04.796514
+2022-08-31 09:18:38.485 | INFO     | __main__:<module>:232 - read in cached files: 75
+2022-08-31 09:18:43.726 | INFO     | __main__:<module>:236 - created single operator hqta: 75
+2022-08-31 09:18:43.907 | INFO     | __main__:<module>:242 - successful export: 75
+2022-08-31 09:18:43.909 | INFO     | __main__:<module>:246 - execution time for 75: 0:00:06.896297
+2022-08-31 09:18:45.346 | INFO     | __main__:<module>:232 - read in cached files: 76
+2022-08-31 09:19:19.539 | INFO     | __main__:<module>:236 - created single operator hqta: 76
+2022-08-31 09:19:19.788 | INFO     | __main__:<module>:242 - successful export: 76
+2022-08-31 09:19:19.789 | INFO     | __main__:<module>:246 - execution time for 76: 0:00:35.878811
+2022-08-31 09:19:21.300 | INFO     | __main__:<module>:232 - read in cached files: 77
+2022-08-31 09:19:26.531 | INFO     | __main__:<module>:236 - created single operator hqta: 77
+2022-08-31 09:19:26.701 | INFO     | __main__:<module>:242 - successful export: 77
+2022-08-31 09:19:26.703 | INFO     | __main__:<module>:246 - execution time for 77: 0:00:06.913682
+2022-08-31 09:19:28.307 | INFO     | __main__:<module>:232 - read in cached files: 79
+2022-08-31 09:19:31.662 | INFO     | __main__:<module>:236 - created single operator hqta: 79
+2022-08-31 09:19:31.840 | INFO     | __main__:<module>:242 - successful export: 79
+2022-08-31 09:19:31.841 | INFO     | __main__:<module>:246 - execution time for 79: 0:00:05.135689
+2022-08-31 09:19:33.409 | INFO     | __main__:<module>:232 - read in cached files: 81
+2022-08-31 09:19:39.003 | INFO     | __main__:<module>:236 - created single operator hqta: 81
+2022-08-31 09:19:39.168 | INFO     | __main__:<module>:242 - successful export: 81
+2022-08-31 09:19:39.171 | INFO     | __main__:<module>:246 - execution time for 81: 0:00:07.329514
+2022-08-31 09:19:40.658 | INFO     | __main__:<module>:232 - read in cached files: 82
+2022-08-31 09:19:52.626 | INFO     | __main__:<module>:236 - created single operator hqta: 82
+2022-08-31 09:19:52.815 | INFO     | __main__:<module>:242 - successful export: 82
+2022-08-31 09:19:52.817 | INFO     | __main__:<module>:246 - execution time for 82: 0:00:13.642043
+2022-08-31 09:19:54.629 | INFO     | __main__:<module>:232 - read in cached files: 83
+2022-08-31 09:20:06.244 | INFO     | __main__:<module>:236 - created single operator hqta: 83
+2022-08-31 09:20:06.673 | INFO     | __main__:<module>:242 - successful export: 83
+2022-08-31 09:20:06.676 | INFO     | __main__:<module>:246 - execution time for 83: 0:00:13.858016
+2022-08-31 09:20:10.197 | INFO     | __main__:<module>:232 - read in cached files: 86
+2022-08-31 09:20:15.052 | INFO     | __main__:<module>:236 - created single operator hqta: 86
+2022-08-31 09:20:15.392 | INFO     | __main__:<module>:242 - successful export: 86
+2022-08-31 09:20:15.393 | INFO     | __main__:<module>:246 - execution time for 86: 0:00:08.714377
+2022-08-31 09:20:17.638 | INFO     | __main__:<module>:232 - read in cached files: 87
+2022-08-31 09:20:26.586 | INFO     | __main__:<module>:236 - created single operator hqta: 87
+2022-08-31 09:20:26.795 | INFO     | __main__:<module>:242 - successful export: 87
+2022-08-31 09:20:26.796 | INFO     | __main__:<module>:246 - execution time for 87: 0:00:11.402095
+2022-08-31 09:20:28.254 | INFO     | __main__:<module>:232 - read in cached files: 95
+2022-08-31 09:20:34.497 | INFO     | __main__:<module>:236 - created single operator hqta: 95
+2022-08-31 09:20:34.687 | INFO     | __main__:<module>:242 - successful export: 95
+2022-08-31 09:20:34.688 | INFO     | __main__:<module>:246 - execution time for 95: 0:00:07.891746
+2022-08-31 09:20:36.156 | INFO     | __main__:<module>:232 - read in cached files: 98
+2022-08-31 09:20:39.734 | INFO     | __main__:<module>:236 - created single operator hqta: 98
+2022-08-31 09:20:39.907 | INFO     | __main__:<module>:242 - successful export: 98
+2022-08-31 09:20:39.909 | INFO     | __main__:<module>:246 - execution time for 98: 0:00:05.220902
+2022-08-31 09:20:41.344 | INFO     | __main__:<module>:232 - read in cached files: 99
+2022-08-31 09:20:51.886 | INFO     | __main__:<module>:236 - created single operator hqta: 99
+2022-08-31 09:20:52.214 | INFO     | __main__:<module>:242 - successful export: 99
+2022-08-31 09:20:52.215 | INFO     | __main__:<module>:246 - execution time for 99: 0:00:12.304113
+2022-08-31 09:20:55.132 | INFO     | __main__:<module>:232 - read in cached files: 101
+2022-08-31 09:21:07.269 | INFO     | __main__:<module>:236 - created single operator hqta: 101
+2022-08-31 09:21:07.717 | INFO     | __main__:<module>:242 - successful export: 101
+2022-08-31 09:21:07.718 | INFO     | __main__:<module>:246 - execution time for 101: 0:00:15.502025
+2022-08-31 09:21:10.043 | INFO     | __main__:<module>:232 - read in cached files: 102
+2022-08-31 09:21:18.755 | INFO     | __main__:<module>:236 - created single operator hqta: 102
+2022-08-31 09:21:19.008 | INFO     | __main__:<module>:242 - successful export: 102
+2022-08-31 09:21:19.009 | INFO     | __main__:<module>:246 - execution time for 102: 0:00:11.290990
+2022-08-31 09:21:21.252 | INFO     | __main__:<module>:232 - read in cached files: 103
+2022-08-31 09:21:24.857 | INFO     | __main__:<module>:236 - created single operator hqta: 103
+2022-08-31 09:21:25.050 | INFO     | __main__:<module>:242 - successful export: 103
+2022-08-31 09:21:25.051 | INFO     | __main__:<module>:246 - execution time for 103: 0:00:06.041540
+2022-08-31 09:21:27.171 | INFO     | __main__:<module>:232 - read in cached files: 105
+2022-08-31 09:21:44.749 | INFO     | __main__:<module>:236 - created single operator hqta: 105
+2022-08-31 09:21:45.105 | INFO     | __main__:<module>:242 - successful export: 105
+2022-08-31 09:21:45.107 | INFO     | __main__:<module>:246 - execution time for 105: 0:00:20.054846
+2022-08-31 09:21:46.905 | INFO     | __main__:<module>:232 - read in cached files: 106
+2022-08-31 09:21:53.273 | INFO     | __main__:<module>:236 - created single operator hqta: 106
+2022-08-31 09:21:53.475 | INFO     | __main__:<module>:242 - successful export: 106
+2022-08-31 09:21:53.476 | INFO     | __main__:<module>:246 - execution time for 106: 0:00:08.368844
+2022-08-31 09:21:54.923 | INFO     | __main__:<module>:232 - read in cached files: 107
+2022-08-31 09:21:57.594 | INFO     | __main__:<module>:236 - created single operator hqta: 107
+2022-08-31 09:21:57.865 | INFO     | __main__:<module>:242 - successful export: 107
+2022-08-31 09:21:57.866 | INFO     | __main__:<module>:246 - execution time for 107: 0:00:04.389022
+2022-08-31 09:21:59.358 | INFO     | __main__:<module>:232 - read in cached files: 108
+2022-08-31 09:22:10.417 | INFO     | __main__:<module>:236 - created single operator hqta: 108
+2022-08-31 09:22:10.631 | INFO     | __main__:<module>:242 - successful export: 108
+2022-08-31 09:22:10.633 | INFO     | __main__:<module>:246 - execution time for 108: 0:00:12.767045
+2022-08-31 09:22:12.123 | INFO     | __main__:<module>:232 - read in cached files: 110
+2022-08-31 09:22:24.832 | INFO     | __main__:<module>:236 - created single operator hqta: 110
+2022-08-31 09:22:25.013 | INFO     | __main__:<module>:242 - successful export: 110
+2022-08-31 09:22:25.015 | INFO     | __main__:<module>:246 - execution time for 110: 0:00:14.380203
+2022-08-31 09:22:26.527 | INFO     | __main__:<module>:232 - read in cached files: 112
+2022-08-31 09:23:05.186 | INFO     | __main__:<module>:236 - created single operator hqta: 112
+2022-08-31 09:23:05.616 | INFO     | __main__:<module>:242 - successful export: 112
+2022-08-31 09:23:05.617 | INFO     | __main__:<module>:246 - execution time for 112: 0:00:40.600748
+2022-08-31 09:23:07.386 | INFO     | __main__:<module>:232 - read in cached files: 116
+2022-08-31 09:23:21.976 | INFO     | __main__:<module>:236 - created single operator hqta: 116
+2022-08-31 09:23:22.258 | INFO     | __main__:<module>:242 - successful export: 116
+2022-08-31 09:23:22.260 | INFO     | __main__:<module>:246 - execution time for 116: 0:00:16.642763
+2022-08-31 09:23:23.739 | INFO     | __main__:<module>:232 - read in cached files: 117
+2022-08-31 09:23:30.138 | INFO     | __main__:<module>:236 - created single operator hqta: 117
+2022-08-31 09:23:30.415 | INFO     | __main__:<module>:242 - successful export: 117
+2022-08-31 09:23:30.416 | INFO     | __main__:<module>:246 - execution time for 117: 0:00:08.153397
+2022-08-31 09:23:31.936 | INFO     | __main__:<module>:232 - read in cached files: 120
+2022-08-31 09:23:40.174 | INFO     | __main__:<module>:236 - created single operator hqta: 120
+2022-08-31 09:23:40.354 | INFO     | __main__:<module>:242 - successful export: 120
+2022-08-31 09:23:40.355 | INFO     | __main__:<module>:246 - execution time for 120: 0:00:09.938434
+2022-08-31 09:23:41.791 | INFO     | __main__:<module>:232 - read in cached files: 121
+2022-08-31 09:23:45.429 | INFO     | __main__:<module>:236 - created single operator hqta: 121
+2022-08-31 09:23:45.619 | INFO     | __main__:<module>:242 - successful export: 121
+2022-08-31 09:23:45.620 | INFO     | __main__:<module>:246 - execution time for 121: 0:00:05.264064
+2022-08-31 09:23:47.070 | INFO     | __main__:<module>:232 - read in cached files: 122
+2022-08-31 09:23:49.512 | INFO     | __main__:<module>:236 - created single operator hqta: 122
+2022-08-31 09:23:49.680 | INFO     | __main__:<module>:242 - successful export: 122
+2022-08-31 09:23:49.681 | INFO     | __main__:<module>:246 - execution time for 122: 0:00:04.061175
+2022-08-31 09:23:51.225 | INFO     | __main__:<module>:232 - read in cached files: 123
+2022-08-31 09:24:08.197 | INFO     | __main__:<module>:236 - created single operator hqta: 123
+2022-08-31 09:24:08.451 | INFO     | __main__:<module>:242 - successful export: 123
+2022-08-31 09:24:08.452 | INFO     | __main__:<module>:246 - execution time for 123: 0:00:18.769886
+2022-08-31 09:24:09.966 | INFO     | __main__:<module>:232 - read in cached files: 126
+2022-08-31 09:24:22.768 | INFO     | __main__:<module>:236 - created single operator hqta: 126
+2022-08-31 09:24:22.996 | INFO     | __main__:<module>:242 - successful export: 126
+2022-08-31 09:24:22.998 | INFO     | __main__:<module>:246 - execution time for 126: 0:00:14.545049
+2022-08-31 09:24:24.463 | INFO     | __main__:<module>:232 - read in cached files: 127
+2022-08-31 09:24:52.797 | INFO     | __main__:<module>:236 - created single operator hqta: 127
+2022-08-31 09:24:53.088 | INFO     | __main__:<module>:242 - successful export: 127
+2022-08-31 09:24:53.089 | INFO     | __main__:<module>:246 - execution time for 127: 0:00:30.090941
+2022-08-31 09:24:54.625 | INFO     | __main__:<module>:232 - read in cached files: 129
+2022-08-31 09:24:57.664 | INFO     | __main__:<module>:236 - created single operator hqta: 129
+2022-08-31 09:24:57.845 | INFO     | __main__:<module>:242 - successful export: 129
+2022-08-31 09:24:57.847 | INFO     | __main__:<module>:246 - execution time for 129: 0:00:04.756829
+2022-08-31 09:24:59.608 | INFO     | __main__:<module>:232 - read in cached files: 135
+2022-08-31 09:25:11.498 | INFO     | __main__:<module>:236 - created single operator hqta: 135
+2022-08-31 09:25:11.740 | INFO     | __main__:<module>:242 - successful export: 135
+2022-08-31 09:25:11.741 | INFO     | __main__:<module>:246 - execution time for 135: 0:00:13.893960
+2022-08-31 09:25:13.225 | INFO     | __main__:<module>:232 - read in cached files: 137
+2022-08-31 09:25:16.866 | INFO     | __main__:<module>:236 - created single operator hqta: 137
+2022-08-31 09:25:16.995 | INFO     | __main__:<module>:242 - successful export: 137
+2022-08-31 09:25:16.996 | INFO     | __main__:<module>:246 - execution time for 137: 0:00:05.253900
+2022-08-31 09:25:18.514 | INFO     | __main__:<module>:232 - read in cached files: 142
+2022-08-31 09:26:19.646 | INFO     | __main__:<module>:236 - created single operator hqta: 142
+2022-08-31 09:26:20.541 | INFO     | __main__:<module>:242 - successful export: 142
+2022-08-31 09:26:20.542 | INFO     | __main__:<module>:246 - execution time for 142: 0:01:03.546058
+2022-08-31 09:26:22.058 | INFO     | __main__:<module>:232 - read in cached files: 146
+2022-08-31 09:26:32.588 | INFO     | __main__:<module>:236 - created single operator hqta: 146
+2022-08-31 09:26:32.758 | INFO     | __main__:<module>:242 - successful export: 146
+2022-08-31 09:26:32.759 | INFO     | __main__:<module>:246 - execution time for 146: 0:00:12.216481
+2022-08-31 09:26:34.248 | INFO     | __main__:<module>:232 - read in cached files: 148
+2022-08-31 09:26:45.912 | INFO     | __main__:<module>:236 - created single operator hqta: 148
+2022-08-31 09:26:46.112 | INFO     | __main__:<module>:242 - successful export: 148
+2022-08-31 09:26:46.114 | INFO     | __main__:<module>:246 - execution time for 148: 0:00:13.354070
+2022-08-31 09:26:47.599 | INFO     | __main__:<module>:232 - read in cached files: 152
+2022-08-31 09:26:51.090 | INFO     | __main__:<module>:236 - created single operator hqta: 152
+2022-08-31 09:26:51.265 | INFO     | __main__:<module>:242 - successful export: 152
+2022-08-31 09:26:51.266 | INFO     | __main__:<module>:246 - execution time for 152: 0:00:05.152082
+2022-08-31 09:26:52.832 | INFO     | __main__:<module>:232 - read in cached files: 154
+2022-08-31 09:26:56.633 | INFO     | __main__:<module>:236 - created single operator hqta: 154
+2022-08-31 09:26:56.770 | INFO     | __main__:<module>:242 - successful export: 154
+2022-08-31 09:26:56.771 | INFO     | __main__:<module>:246 - execution time for 154: 0:00:05.503550
+2022-08-31 09:26:58.282 | INFO     | __main__:<module>:232 - read in cached files: 159
+2022-08-31 09:27:07.318 | INFO     | __main__:<module>:236 - created single operator hqta: 159
+2022-08-31 09:27:07.495 | INFO     | __main__:<module>:242 - successful export: 159
+2022-08-31 09:27:07.497 | INFO     | __main__:<module>:246 - execution time for 159: 0:00:10.725948
+2022-08-31 09:27:08.993 | INFO     | __main__:<module>:232 - read in cached files: 162
+2022-08-31 09:27:13.808 | INFO     | __main__:<module>:236 - created single operator hqta: 162
+2022-08-31 09:27:13.977 | INFO     | __main__:<module>:242 - successful export: 162
+2022-08-31 09:27:13.978 | INFO     | __main__:<module>:246 - execution time for 162: 0:00:06.479790
+2022-08-31 09:27:15.473 | INFO     | __main__:<module>:232 - read in cached files: 165
+2022-08-31 09:27:21.181 | INFO     | __main__:<module>:236 - created single operator hqta: 165
+2022-08-31 09:27:21.359 | INFO     | __main__:<module>:242 - successful export: 165
+2022-08-31 09:27:21.361 | INFO     | __main__:<module>:246 - execution time for 165: 0:00:07.382559
+2022-08-31 09:27:22.857 | INFO     | __main__:<module>:232 - read in cached files: 167
+2022-08-31 09:27:44.302 | INFO     | __main__:<module>:236 - created single operator hqta: 167
+2022-08-31 09:27:44.630 | INFO     | __main__:<module>:242 - successful export: 167
+2022-08-31 09:27:44.632 | INFO     | __main__:<module>:246 - execution time for 167: 0:00:23.269921
+2022-08-31 09:27:46.087 | INFO     | __main__:<module>:232 - read in cached files: 168
+2022-08-31 09:27:54.915 | INFO     | __main__:<module>:236 - created single operator hqta: 168
+2022-08-31 09:27:55.098 | INFO     | __main__:<module>:242 - successful export: 168
+2022-08-31 09:27:55.100 | INFO     | __main__:<module>:246 - execution time for 168: 0:00:10.466640
+2022-08-31 09:27:56.534 | INFO     | __main__:<module>:232 - read in cached files: 169
+2022-08-31 09:28:01.915 | INFO     | __main__:<module>:236 - created single operator hqta: 169
+2022-08-31 09:28:02.083 | INFO     | __main__:<module>:242 - successful export: 169
+2022-08-31 09:28:02.084 | INFO     | __main__:<module>:246 - execution time for 169: 0:00:06.981894
+2022-08-31 09:28:03.627 | INFO     | __main__:<module>:232 - read in cached files: 170
+2022-08-31 09:28:38.343 | INFO     | __main__:<module>:236 - created single operator hqta: 170
+2022-08-31 09:28:38.765 | INFO     | __main__:<module>:242 - successful export: 170
+2022-08-31 09:28:38.767 | INFO     | __main__:<module>:246 - execution time for 170: 0:00:36.682592
+2022-08-31 09:28:40.326 | INFO     | __main__:<module>:232 - read in cached files: 171
+2022-08-31 09:28:54.421 | INFO     | __main__:<module>:236 - created single operator hqta: 171
+2022-08-31 09:28:54.785 | INFO     | __main__:<module>:242 - successful export: 171
+2022-08-31 09:28:54.786 | INFO     | __main__:<module>:246 - execution time for 171: 0:00:16.018454
+2022-08-31 09:28:56.195 | INFO     | __main__:<module>:232 - read in cached files: 172
+2022-08-31 09:29:10.162 | INFO     | __main__:<module>:236 - created single operator hqta: 172
+2022-08-31 09:29:10.420 | INFO     | __main__:<module>:242 - successful export: 172
+2022-08-31 09:29:10.421 | INFO     | __main__:<module>:246 - execution time for 172: 0:00:15.634264
+2022-08-31 09:29:11.962 | INFO     | __main__:<module>:232 - read in cached files: 173
+2022-08-31 09:29:26.165 | INFO     | __main__:<module>:236 - created single operator hqta: 173
+2022-08-31 09:29:26.394 | INFO     | __main__:<module>:242 - successful export: 173
+2022-08-31 09:29:26.396 | INFO     | __main__:<module>:246 - execution time for 173: 0:00:15.974590
+2022-08-31 09:29:27.848 | INFO     | __main__:<module>:232 - read in cached files: 174
+2022-08-31 09:29:41.987 | INFO     | __main__:<module>:236 - created single operator hqta: 174
+2022-08-31 09:29:42.227 | INFO     | __main__:<module>:242 - successful export: 174
+2022-08-31 09:29:42.228 | INFO     | __main__:<module>:246 - execution time for 174: 0:00:15.830498
+2022-08-31 09:29:43.727 | INFO     | __main__:<module>:232 - read in cached files: 176
+2022-08-31 09:29:57.780 | INFO     | __main__:<module>:236 - created single operator hqta: 176
+2022-08-31 09:29:58.007 | INFO     | __main__:<module>:242 - successful export: 176
+2022-08-31 09:29:58.009 | INFO     | __main__:<module>:246 - execution time for 176: 0:00:15.780680
+2022-08-31 09:29:59.528 | INFO     | __main__:<module>:232 - read in cached files: 177
+2022-08-31 09:30:14.006 | INFO     | __main__:<module>:236 - created single operator hqta: 177
+2022-08-31 09:30:14.237 | INFO     | __main__:<module>:242 - successful export: 177
+2022-08-31 09:30:14.238 | INFO     | __main__:<module>:246 - execution time for 177: 0:00:16.226788
+2022-08-31 09:30:15.713 | INFO     | __main__:<module>:232 - read in cached files: 178
+2022-08-31 09:30:29.711 | INFO     | __main__:<module>:236 - created single operator hqta: 178
+2022-08-31 09:30:29.941 | INFO     | __main__:<module>:242 - successful export: 178
+2022-08-31 09:30:29.942 | INFO     | __main__:<module>:246 - execution time for 178: 0:00:15.703763
+2022-08-31 09:30:31.429 | INFO     | __main__:<module>:232 - read in cached files: 179
+2022-08-31 09:30:45.646 | INFO     | __main__:<module>:236 - created single operator hqta: 179
+2022-08-31 09:30:45.884 | INFO     | __main__:<module>:242 - successful export: 179
+2022-08-31 09:30:45.885 | INFO     | __main__:<module>:246 - execution time for 179: 0:00:15.942359
+2022-08-31 09:30:47.427 | INFO     | __main__:<module>:232 - read in cached files: 181
+2022-08-31 09:31:01.699 | INFO     | __main__:<module>:236 - created single operator hqta: 181
+2022-08-31 09:31:01.934 | INFO     | __main__:<module>:242 - successful export: 181
+2022-08-31 09:31:01.936 | INFO     | __main__:<module>:246 - execution time for 181: 0:00:16.050058
+2022-08-31 09:31:03.311 | INFO     | __main__:<module>:232 - read in cached files: 182
+2022-08-31 09:35:08.458 | INFO     | __main__:<module>:236 - created single operator hqta: 182
+2022-08-31 09:35:08.962 | INFO     | __main__:<module>:242 - successful export: 182
+2022-08-31 09:35:08.963 | INFO     | __main__:<module>:246 - execution time for 182: 0:04:07.026733
+2022-08-31 09:35:10.413 | INFO     | __main__:<module>:232 - read in cached files: 183
+2022-08-31 09:36:06.520 | INFO     | __main__:<module>:236 - created single operator hqta: 183
+2022-08-31 09:36:07.001 | INFO     | __main__:<module>:242 - successful export: 183
+2022-08-31 09:36:07.004 | INFO     | __main__:<module>:246 - execution time for 183: 0:00:58.040413
+2022-08-31 09:36:08.532 | INFO     | __main__:<module>:232 - read in cached files: 187
+2022-08-31 09:36:12.172 | INFO     | __main__:<module>:236 - created single operator hqta: 187
+2022-08-31 09:36:12.371 | INFO     | __main__:<module>:242 - successful export: 187
+2022-08-31 09:36:12.372 | INFO     | __main__:<module>:246 - execution time for 187: 0:00:05.366384
+2022-08-31 09:36:13.917 | INFO     | __main__:<module>:232 - read in cached files: 188
+2022-08-31 09:36:18.576 | INFO     | __main__:<module>:236 - created single operator hqta: 188
+2022-08-31 09:36:18.744 | INFO     | __main__:<module>:242 - successful export: 188
+2022-08-31 09:36:18.746 | INFO     | __main__:<module>:246 - execution time for 188: 0:00:06.373389
+2022-08-31 09:36:20.227 | INFO     | __main__:<module>:232 - read in cached files: 190
+2022-08-31 09:36:29.113 | INFO     | __main__:<module>:236 - created single operator hqta: 190
+2022-08-31 09:36:29.302 | INFO     | __main__:<module>:242 - successful export: 190
+2022-08-31 09:36:29.303 | INFO     | __main__:<module>:246 - execution time for 190: 0:00:10.555915
+2022-08-31 09:36:30.762 | INFO     | __main__:<module>:232 - read in cached files: 194
+2022-08-31 09:37:08.601 | INFO     | __main__:<module>:236 - created single operator hqta: 194
+2022-08-31 09:37:09.148 | INFO     | __main__:<module>:242 - successful export: 194
+2022-08-31 09:37:09.151 | INFO     | __main__:<module>:246 - execution time for 194: 0:00:39.846978
+2022-08-31 09:37:10.646 | INFO     | __main__:<module>:232 - read in cached files: 198
+2022-08-31 09:37:20.055 | INFO     | __main__:<module>:236 - created single operator hqta: 198
+2022-08-31 09:37:20.253 | INFO     | __main__:<module>:242 - successful export: 198
+2022-08-31 09:37:20.254 | INFO     | __main__:<module>:246 - execution time for 198: 0:00:11.102788
+2022-08-31 09:37:21.729 | INFO     | __main__:<module>:232 - read in cached files: 201
+2022-08-31 09:37:26.094 | INFO     | __main__:<module>:236 - created single operator hqta: 201
+2022-08-31 09:37:26.265 | INFO     | __main__:<module>:242 - successful export: 201
+2022-08-31 09:37:26.267 | INFO     | __main__:<module>:246 - execution time for 201: 0:00:06.012800
+2022-08-31 09:37:27.727 | INFO     | __main__:<module>:232 - read in cached files: 204
+2022-08-31 09:37:30.578 | INFO     | __main__:<module>:236 - created single operator hqta: 204
+2022-08-31 09:37:30.699 | INFO     | __main__:<module>:242 - successful export: 204
+2022-08-31 09:37:30.700 | INFO     | __main__:<module>:246 - execution time for 204: 0:00:04.431427
+2022-08-31 09:37:32.205 | INFO     | __main__:<module>:232 - read in cached files: 206
+2022-08-31 09:37:39.781 | INFO     | __main__:<module>:236 - created single operator hqta: 206
+2022-08-31 09:37:39.986 | INFO     | __main__:<module>:242 - successful export: 206
+2022-08-31 09:37:39.987 | INFO     | __main__:<module>:246 - execution time for 206: 0:00:09.286424
+2022-08-31 09:37:41.433 | INFO     | __main__:<module>:232 - read in cached files: 207
+2022-08-31 09:37:47.305 | INFO     | __main__:<module>:236 - created single operator hqta: 207
+2022-08-31 09:37:47.501 | INFO     | __main__:<module>:242 - successful export: 207
+2022-08-31 09:37:47.502 | INFO     | __main__:<module>:246 - execution time for 207: 0:00:07.514443
+2022-08-31 09:37:49.032 | INFO     | __main__:<module>:232 - read in cached files: 208
+2022-08-31 09:38:12.901 | INFO     | __main__:<module>:236 - created single operator hqta: 208
+2022-08-31 09:38:13.188 | INFO     | __main__:<module>:242 - successful export: 208
+2022-08-31 09:38:13.189 | INFO     | __main__:<module>:246 - execution time for 208: 0:00:25.686841
+2022-08-31 09:38:14.631 | INFO     | __main__:<module>:232 - read in cached files: 210
+2022-08-31 09:38:18.073 | INFO     | __main__:<module>:236 - created single operator hqta: 210
+2022-08-31 09:38:18.248 | INFO     | __main__:<module>:242 - successful export: 210
+2022-08-31 09:38:18.251 | INFO     | __main__:<module>:246 - execution time for 210: 0:00:05.060760
+2022-08-31 09:38:19.732 | INFO     | __main__:<module>:232 - read in cached files: 212
+2022-08-31 09:38:26.037 | INFO     | __main__:<module>:236 - created single operator hqta: 212
+2022-08-31 09:38:26.212 | INFO     | __main__:<module>:242 - successful export: 212
+2022-08-31 09:38:26.214 | INFO     | __main__:<module>:246 - execution time for 212: 0:00:07.961964
+2022-08-31 09:38:27.994 | INFO     | __main__:<module>:232 - read in cached files: 214
+2022-08-31 09:38:33.761 | INFO     | __main__:<module>:236 - created single operator hqta: 214
+2022-08-31 09:38:34.033 | INFO     | __main__:<module>:242 - successful export: 214
+2022-08-31 09:38:34.035 | INFO     | __main__:<module>:246 - execution time for 214: 0:00:07.820263
+2022-08-31 09:38:35.465 | INFO     | __main__:<module>:232 - read in cached files: 217
+2022-08-31 09:38:49.499 | INFO     | __main__:<module>:236 - created single operator hqta: 217
+2022-08-31 09:38:49.713 | INFO     | __main__:<module>:242 - successful export: 217
+2022-08-31 09:38:49.716 | INFO     | __main__:<module>:246 - execution time for 217: 0:00:15.679983
+2022-08-31 09:38:51.187 | INFO     | __main__:<module>:232 - read in cached files: 218
+2022-08-31 09:38:59.395 | INFO     | __main__:<module>:236 - created single operator hqta: 218
+2022-08-31 09:38:59.582 | INFO     | __main__:<module>:242 - successful export: 218
+2022-08-31 09:38:59.583 | INFO     | __main__:<module>:246 - execution time for 218: 0:00:09.866350
+2022-08-31 09:39:01.032 | INFO     | __main__:<module>:232 - read in cached files: 220
+2022-08-31 09:39:03.402 | INFO     | __main__:<module>:236 - created single operator hqta: 220
+2022-08-31 09:39:03.567 | INFO     | __main__:<module>:242 - successful export: 220
+2022-08-31 09:39:03.568 | INFO     | __main__:<module>:246 - execution time for 220: 0:00:03.984570
+2022-08-31 09:39:05.002 | INFO     | __main__:<module>:232 - read in cached files: 221
+2022-08-31 09:39:11.392 | INFO     | __main__:<module>:236 - created single operator hqta: 221
+2022-08-31 09:39:11.566 | INFO     | __main__:<module>:242 - successful export: 221
+2022-08-31 09:39:11.567 | INFO     | __main__:<module>:246 - execution time for 221: 0:00:07.998348
+2022-08-31 09:39:13.063 | INFO     | __main__:<module>:232 - read in cached files: 226
+2022-08-31 09:39:44.358 | INFO     | __main__:<module>:236 - created single operator hqta: 226
+2022-08-31 09:39:44.666 | INFO     | __main__:<module>:242 - successful export: 226
+2022-08-31 09:39:44.668 | INFO     | __main__:<module>:246 - execution time for 226: 0:00:33.100900
+2022-08-31 09:39:46.150 | INFO     | __main__:<module>:232 - read in cached files: 228
+2022-08-31 09:39:51.937 | INFO     | __main__:<module>:236 - created single operator hqta: 228
+2022-08-31 09:39:52.110 | INFO     | __main__:<module>:242 - successful export: 228
+2022-08-31 09:39:52.112 | INFO     | __main__:<module>:246 - execution time for 228: 0:00:07.442050
+2022-08-31 09:39:53.653 | INFO     | __main__:<module>:232 - read in cached files: 231
+2022-08-31 09:40:50.497 | INFO     | __main__:<module>:236 - created single operator hqta: 231
+2022-08-31 09:40:50.971 | INFO     | __main__:<module>:242 - successful export: 231
+2022-08-31 09:40:50.972 | INFO     | __main__:<module>:246 - execution time for 231: 0:00:58.857461
+2022-08-31 09:40:52.532 | INFO     | __main__:<module>:232 - read in cached files: 232
+2022-08-31 09:41:17.982 | INFO     | __main__:<module>:236 - created single operator hqta: 232
+2022-08-31 09:41:18.301 | INFO     | __main__:<module>:242 - successful export: 232
+2022-08-31 09:41:18.303 | INFO     | __main__:<module>:246 - execution time for 232: 0:00:27.331027
+2022-08-31 09:41:19.784 | INFO     | __main__:<module>:232 - read in cached files: 235
+2022-08-31 09:42:18.757 | INFO     | __main__:<module>:236 - created single operator hqta: 235
+2022-08-31 09:42:19.296 | INFO     | __main__:<module>:242 - successful export: 235
+2022-08-31 09:42:19.298 | INFO     | __main__:<module>:246 - execution time for 235: 0:01:00.993641
+2022-08-31 09:42:20.757 | INFO     | __main__:<module>:232 - read in cached files: 238
+2022-08-31 09:42:25.763 | INFO     | __main__:<module>:236 - created single operator hqta: 238
+2022-08-31 09:42:25.947 | INFO     | __main__:<module>:242 - successful export: 238
+2022-08-31 09:42:25.949 | INFO     | __main__:<module>:246 - execution time for 238: 0:00:06.650557
+2022-08-31 09:42:27.392 | INFO     | __main__:<module>:232 - read in cached files: 239
+2022-08-31 09:42:30.400 | INFO     | __main__:<module>:236 - created single operator hqta: 239
+2022-08-31 09:42:30.589 | INFO     | __main__:<module>:242 - successful export: 239
+2022-08-31 09:42:30.590 | INFO     | __main__:<module>:246 - execution time for 239: 0:00:04.639830
+2022-08-31 09:42:32.071 | INFO     | __main__:<module>:232 - read in cached files: 243
+2022-08-31 09:42:39.523 | INFO     | __main__:<module>:236 - created single operator hqta: 243
+2022-08-31 09:42:39.716 | INFO     | __main__:<module>:242 - successful export: 243
+2022-08-31 09:42:39.717 | INFO     | __main__:<module>:246 - execution time for 243: 0:00:09.126720
+2022-08-31 09:42:41.181 | INFO     | __main__:<module>:232 - read in cached files: 246
+2022-08-31 09:42:49.763 | INFO     | __main__:<module>:236 - created single operator hqta: 246
+2022-08-31 09:42:49.937 | INFO     | __main__:<module>:242 - successful export: 246
+2022-08-31 09:42:49.938 | INFO     | __main__:<module>:246 - execution time for 246: 0:00:10.220229
+2022-08-31 09:42:51.342 | INFO     | __main__:<module>:232 - read in cached files: 247
+2022-08-31 09:43:00.570 | INFO     | __main__:<module>:236 - created single operator hqta: 247
+2022-08-31 09:43:00.753 | INFO     | __main__:<module>:242 - successful export: 247
+2022-08-31 09:43:00.754 | INFO     | __main__:<module>:246 - execution time for 247: 0:00:10.814968
+2022-08-31 09:43:02.264 | INFO     | __main__:<module>:232 - read in cached files: 251
+2022-08-31 09:43:10.249 | INFO     | __main__:<module>:236 - created single operator hqta: 251
+2022-08-31 09:43:10.434 | INFO     | __main__:<module>:242 - successful export: 251
+2022-08-31 09:43:10.435 | INFO     | __main__:<module>:246 - execution time for 251: 0:00:09.680810
+2022-08-31 09:43:12.291 | INFO     | __main__:<module>:232 - read in cached files: 257
+2022-08-31 09:43:15.499 | INFO     | __main__:<module>:236 - created single operator hqta: 257
+2022-08-31 09:43:15.672 | INFO     | __main__:<module>:242 - successful export: 257
+2022-08-31 09:43:15.674 | INFO     | __main__:<module>:246 - execution time for 257: 0:00:05.238436
+2022-08-31 09:43:17.216 | INFO     | __main__:<module>:232 - read in cached files: 259
+2022-08-31 09:43:28.639 | INFO     | __main__:<module>:236 - created single operator hqta: 259
+2022-08-31 09:43:28.859 | INFO     | __main__:<module>:242 - successful export: 259
+2022-08-31 09:43:28.860 | INFO     | __main__:<module>:246 - execution time for 259: 0:00:13.184470
+2022-08-31 09:43:30.398 | INFO     | __main__:<module>:232 - read in cached files: 260
+2022-08-31 09:43:35.720 | INFO     | __main__:<module>:236 - created single operator hqta: 260
+2022-08-31 09:43:35.927 | INFO     | __main__:<module>:242 - successful export: 260
+2022-08-31 09:43:35.928 | INFO     | __main__:<module>:246 - execution time for 260: 0:00:07.067624
+2022-08-31 09:43:37.376 | INFO     | __main__:<module>:232 - read in cached files: 261
+2022-08-31 09:43:44.793 | INFO     | __main__:<module>:236 - created single operator hqta: 261
+2022-08-31 09:43:44.972 | INFO     | __main__:<module>:242 - successful export: 261
+2022-08-31 09:43:44.973 | INFO     | __main__:<module>:246 - execution time for 261: 0:00:09.044158
+2022-08-31 09:43:46.406 | INFO     | __main__:<module>:232 - read in cached files: 264
+2022-08-31 09:43:49.484 | INFO     | __main__:<module>:236 - created single operator hqta: 264
+2022-08-31 09:43:49.603 | INFO     | __main__:<module>:242 - successful export: 264
+2022-08-31 09:43:49.604 | INFO     | __main__:<module>:246 - execution time for 264: 0:00:04.630590
+2022-08-31 09:43:51.080 | INFO     | __main__:<module>:232 - read in cached files: 269
+2022-08-31 09:44:38.867 | INFO     | __main__:<module>:236 - created single operator hqta: 269
+2022-08-31 09:44:39.322 | INFO     | __main__:<module>:242 - successful export: 269
+2022-08-31 09:44:39.323 | INFO     | __main__:<module>:246 - execution time for 269: 0:00:49.718597
+2022-08-31 09:44:40.714 | INFO     | __main__:<module>:232 - read in cached files: 270
+2022-08-31 09:44:43.775 | INFO     | __main__:<module>:236 - created single operator hqta: 270
+2022-08-31 09:44:43.943 | INFO     | __main__:<module>:242 - successful export: 270
+2022-08-31 09:44:43.947 | INFO     | __main__:<module>:246 - execution time for 270: 0:00:04.623337
+2022-08-31 09:44:45.421 | INFO     | __main__:<module>:232 - read in cached files: 271
+2022-08-31 09:45:12.244 | INFO     | __main__:<module>:236 - created single operator hqta: 271
+2022-08-31 09:45:12.466 | INFO     | __main__:<module>:242 - successful export: 271
+2022-08-31 09:45:12.468 | INFO     | __main__:<module>:246 - execution time for 271: 0:00:28.519612
+2022-08-31 09:45:13.945 | INFO     | __main__:<module>:232 - read in cached files: 274
+2022-08-31 09:45:17.200 | INFO     | __main__:<module>:236 - created single operator hqta: 274
+2022-08-31 09:45:17.365 | INFO     | __main__:<module>:242 - successful export: 274
+2022-08-31 09:45:17.366 | INFO     | __main__:<module>:246 - execution time for 274: 0:00:04.897061
+2022-08-31 09:45:18.867 | INFO     | __main__:<module>:232 - read in cached files: 278
+2022-08-31 09:47:05.511 | INFO     | __main__:<module>:236 - created single operator hqta: 278
+2022-08-31 09:47:05.887 | INFO     | __main__:<module>:242 - successful export: 278
+2022-08-31 09:47:05.889 | INFO     | __main__:<module>:246 - execution time for 278: 0:01:48.522176
+2022-08-31 09:47:07.378 | INFO     | __main__:<module>:232 - read in cached files: 280
+2022-08-31 09:47:16.373 | INFO     | __main__:<module>:236 - created single operator hqta: 280
+2022-08-31 09:47:16.492 | INFO     | __main__:<module>:242 - successful export: 280
+2022-08-31 09:47:16.494 | INFO     | __main__:<module>:246 - execution time for 280: 0:00:10.605105
+2022-08-31 09:47:18.020 | INFO     | __main__:<module>:232 - read in cached files: 281
+2022-08-31 09:47:25.736 | INFO     | __main__:<module>:236 - created single operator hqta: 281
+2022-08-31 09:47:25.961 | INFO     | __main__:<module>:242 - successful export: 281
+2022-08-31 09:47:25.963 | INFO     | __main__:<module>:246 - execution time for 281: 0:00:09.467272
+2022-08-31 09:47:27.411 | INFO     | __main__:<module>:232 - read in cached files: 282
+2022-08-31 09:49:45.847 | INFO     | __main__:<module>:236 - created single operator hqta: 282
+2022-08-31 09:49:46.151 | INFO     | __main__:<module>:242 - successful export: 282
+2022-08-31 09:49:46.153 | INFO     | __main__:<module>:246 - execution time for 282: 0:02:20.189054
+2022-08-31 09:49:47.624 | INFO     | __main__:<module>:232 - read in cached files: 284
+2022-08-31 09:50:20.661 | INFO     | __main__:<module>:236 - created single operator hqta: 284
+2022-08-31 09:50:20.980 | INFO     | __main__:<module>:242 - successful export: 284
+2022-08-31 09:50:20.981 | INFO     | __main__:<module>:246 - execution time for 284: 0:00:34.827222
+2022-08-31 09:50:22.442 | INFO     | __main__:<module>:232 - read in cached files: 287
+2022-08-31 09:50:27.754 | INFO     | __main__:<module>:236 - created single operator hqta: 287
+2022-08-31 09:50:27.935 | INFO     | __main__:<module>:242 - successful export: 287
+2022-08-31 09:50:27.937 | INFO     | __main__:<module>:246 - execution time for 287: 0:00:06.955039
+2022-08-31 09:50:29.339 | INFO     | __main__:<module>:232 - read in cached files: 289
+2022-08-31 09:50:43.901 | INFO     | __main__:<module>:236 - created single operator hqta: 289
+2022-08-31 09:50:44.149 | INFO     | __main__:<module>:242 - successful export: 289
+2022-08-31 09:50:44.150 | INFO     | __main__:<module>:246 - execution time for 289: 0:00:16.211654
+2022-08-31 09:50:45.736 | INFO     | __main__:<module>:232 - read in cached files: 290
+2022-08-31 09:52:11.349 | INFO     | __main__:<module>:236 - created single operator hqta: 290
+2022-08-31 09:52:11.884 | INFO     | __main__:<module>:242 - successful export: 290
+2022-08-31 09:52:11.885 | INFO     | __main__:<module>:246 - execution time for 290: 0:01:27.734753
+2022-08-31 09:52:13.492 | INFO     | __main__:<module>:232 - read in cached files: 293
+2022-08-31 09:52:31.480 | INFO     | __main__:<module>:236 - created single operator hqta: 293
+2022-08-31 09:52:31.745 | INFO     | __main__:<module>:242 - successful export: 293
+2022-08-31 09:52:31.747 | INFO     | __main__:<module>:246 - execution time for 293: 0:00:19.861598
+2022-08-31 09:52:33.453 | INFO     | __main__:<module>:232 - read in cached files: 294
+2022-08-31 09:54:15.031 | INFO     | __main__:<module>:236 - created single operator hqta: 294
+2022-08-31 09:54:15.571 | INFO     | __main__:<module>:242 - successful export: 294
+2022-08-31 09:54:15.573 | INFO     | __main__:<module>:246 - execution time for 294: 0:01:43.825276
+2022-08-31 09:54:17.222 | INFO     | __main__:<module>:232 - read in cached files: 295
+2022-08-31 09:54:49.017 | INFO     | __main__:<module>:236 - created single operator hqta: 295
+2022-08-31 09:54:49.344 | INFO     | __main__:<module>:242 - successful export: 295
+2022-08-31 09:54:49.346 | INFO     | __main__:<module>:246 - execution time for 295: 0:00:33.771984
+2022-08-31 09:54:50.953 | INFO     | __main__:<module>:232 - read in cached files: 296
+2022-08-31 09:55:11.064 | INFO     | __main__:<module>:236 - created single operator hqta: 296
+2022-08-31 09:55:11.372 | INFO     | __main__:<module>:242 - successful export: 296
+2022-08-31 09:55:11.373 | INFO     | __main__:<module>:246 - execution time for 296: 0:00:22.025895
+2022-08-31 09:55:12.887 | INFO     | __main__:<module>:232 - read in cached files: 298
+2022-08-31 09:55:26.546 | INFO     | __main__:<module>:236 - created single operator hqta: 298
+2022-08-31 09:55:26.789 | INFO     | __main__:<module>:242 - successful export: 298
+2022-08-31 09:55:26.790 | INFO     | __main__:<module>:246 - execution time for 298: 0:00:15.416404
+2022-08-31 09:55:28.276 | INFO     | __main__:<module>:232 - read in cached files: 300
+2022-08-31 09:55:43.407 | INFO     | __main__:<module>:236 - created single operator hqta: 300
+2022-08-31 09:55:43.618 | INFO     | __main__:<module>:242 - successful export: 300
+2022-08-31 09:55:43.621 | INFO     | __main__:<module>:246 - execution time for 300: 0:00:16.830567
+2022-08-31 09:55:45.139 | INFO     | __main__:<module>:232 - read in cached files: 301
+2022-08-31 09:55:55.629 | INFO     | __main__:<module>:236 - created single operator hqta: 301
+2022-08-31 09:55:55.825 | INFO     | __main__:<module>:242 - successful export: 301
+2022-08-31 09:55:55.826 | INFO     | __main__:<module>:246 - execution time for 301: 0:00:12.204172
+2022-08-31 09:55:57.359 | INFO     | __main__:<module>:232 - read in cached files: 305
+2022-08-31 09:55:59.742 | INFO     | __main__:<module>:236 - created single operator hqta: 305
+2022-08-31 09:55:59.905 | INFO     | __main__:<module>:242 - successful export: 305
+2022-08-31 09:55:59.906 | INFO     | __main__:<module>:246 - execution time for 305: 0:00:04.079456
+2022-08-31 09:56:01.422 | INFO     | __main__:<module>:232 - read in cached files: 308
+2022-08-31 09:56:05.287 | INFO     | __main__:<module>:236 - created single operator hqta: 308
+2022-08-31 09:56:05.451 | INFO     | __main__:<module>:242 - successful export: 308
+2022-08-31 09:56:05.452 | INFO     | __main__:<module>:246 - execution time for 308: 0:00:05.545285
+2022-08-31 09:56:07.038 | INFO     | __main__:<module>:232 - read in cached files: 310
+2022-08-31 09:56:22.652 | INFO     | __main__:<module>:236 - created single operator hqta: 310
+2022-08-31 09:56:22.892 | INFO     | __main__:<module>:242 - successful export: 310
+2022-08-31 09:56:22.895 | INFO     | __main__:<module>:246 - execution time for 310: 0:00:17.442532
+2022-08-31 09:56:24.401 | INFO     | __main__:<module>:232 - read in cached files: 312
+2022-08-31 09:56:27.513 | INFO     | __main__:<module>:236 - created single operator hqta: 312
+2022-08-31 09:56:27.681 | INFO     | __main__:<module>:242 - successful export: 312
+2022-08-31 09:56:27.682 | INFO     | __main__:<module>:246 - execution time for 312: 0:00:04.785389
+2022-08-31 09:56:29.246 | INFO     | __main__:<module>:232 - read in cached files: 314
+2022-08-31 09:57:02.452 | INFO     | __main__:<module>:236 - created single operator hqta: 314
+2022-08-31 09:57:03.008 | INFO     | __main__:<module>:242 - successful export: 314
+2022-08-31 09:57:03.009 | INFO     | __main__:<module>:246 - execution time for 314: 0:00:35.326407
+2022-08-31 09:57:04.650 | INFO     | __main__:<module>:232 - read in cached files: 315
+2022-08-31 09:57:08.259 | INFO     | __main__:<module>:236 - created single operator hqta: 315
+2022-08-31 09:57:08.491 | INFO     | __main__:<module>:242 - successful export: 315
+2022-08-31 09:57:08.493 | INFO     | __main__:<module>:246 - execution time for 315: 0:00:05.482816
+2022-08-31 09:57:10.006 | INFO     | __main__:<module>:232 - read in cached files: 320
+2022-08-31 09:57:13.451 | INFO     | __main__:<module>:236 - created single operator hqta: 320
+2022-08-31 09:57:13.566 | INFO     | __main__:<module>:242 - successful export: 320
+2022-08-31 09:57:13.569 | INFO     | __main__:<module>:246 - execution time for 320: 0:00:05.075130
+2022-08-31 09:57:15.014 | INFO     | __main__:<module>:232 - read in cached files: 323
+2022-08-31 09:57:21.566 | INFO     | __main__:<module>:236 - created single operator hqta: 323
+2022-08-31 09:57:21.822 | INFO     | __main__:<module>:242 - successful export: 323
+2022-08-31 09:57:21.823 | INFO     | __main__:<module>:246 - execution time for 323: 0:00:08.253251
+2022-08-31 09:57:23.331 | INFO     | __main__:<module>:232 - read in cached files: 324
+2022-08-31 09:57:38.306 | INFO     | __main__:<module>:236 - created single operator hqta: 324
+2022-08-31 09:57:38.585 | INFO     | __main__:<module>:242 - successful export: 324
+2022-08-31 09:57:38.587 | INFO     | __main__:<module>:246 - execution time for 324: 0:00:16.762839
+2022-08-31 09:57:40.170 | INFO     | __main__:<module>:232 - read in cached files: 327
+2022-08-31 09:57:57.554 | INFO     | __main__:<module>:236 - created single operator hqta: 327
+2022-08-31 09:57:57.802 | INFO     | __main__:<module>:242 - successful export: 327
+2022-08-31 09:57:57.803 | INFO     | __main__:<module>:246 - execution time for 327: 0:00:19.214650
+2022-08-31 09:57:59.303 | INFO     | __main__:<module>:232 - read in cached files: 329
+2022-08-31 09:58:06.283 | INFO     | __main__:<module>:236 - created single operator hqta: 329
+2022-08-31 09:58:06.457 | INFO     | __main__:<module>:242 - successful export: 329
+2022-08-31 09:58:06.459 | INFO     | __main__:<module>:246 - execution time for 329: 0:00:08.655392
+2022-08-31 09:58:07.981 | INFO     | __main__:<module>:232 - read in cached files: 331
+2022-08-31 09:58:18.529 | INFO     | __main__:<module>:236 - created single operator hqta: 331
+2022-08-31 09:58:18.709 | INFO     | __main__:<module>:242 - successful export: 331
+2022-08-31 09:58:18.710 | INFO     | __main__:<module>:246 - execution time for 331: 0:00:12.250334
+2022-08-31 09:58:20.193 | INFO     | __main__:<module>:232 - read in cached files: 334
+2022-08-31 09:58:27.213 | INFO     | __main__:<module>:236 - created single operator hqta: 334
+2022-08-31 09:58:27.385 | INFO     | __main__:<module>:242 - successful export: 334
+2022-08-31 09:58:27.387 | INFO     | __main__:<module>:246 - execution time for 334: 0:00:08.675764
+2022-08-31 09:58:29.022 | INFO     | __main__:<module>:232 - read in cached files: 336
+2022-08-31 09:58:41.563 | INFO     | __main__:<module>:236 - created single operator hqta: 336
+2022-08-31 09:58:41.779 | INFO     | __main__:<module>:242 - successful export: 336
+2022-08-31 09:58:41.780 | INFO     | __main__:<module>:246 - execution time for 336: 0:00:14.392725
+2022-08-31 09:58:43.235 | INFO     | __main__:<module>:232 - read in cached files: 337
+2022-08-31 09:58:49.102 | INFO     | __main__:<module>:236 - created single operator hqta: 337
+2022-08-31 09:58:49.285 | INFO     | __main__:<module>:242 - successful export: 337
+2022-08-31 09:58:49.286 | INFO     | __main__:<module>:246 - execution time for 337: 0:00:07.504953
+2022-08-31 09:58:50.783 | INFO     | __main__:<module>:232 - read in cached files: 339
+2022-08-31 09:59:01.784 | INFO     | __main__:<module>:236 - created single operator hqta: 339
+2022-08-31 09:59:02.063 | INFO     | __main__:<module>:242 - successful export: 339
+2022-08-31 09:59:02.064 | INFO     | __main__:<module>:246 - execution time for 339: 0:00:12.777831
+2022-08-31 09:59:03.519 | INFO     | __main__:<module>:232 - read in cached files: 341
+2022-08-31 09:59:08.323 | INFO     | __main__:<module>:236 - created single operator hqta: 341
+2022-08-31 09:59:08.512 | INFO     | __main__:<module>:242 - successful export: 341
+2022-08-31 09:59:08.513 | INFO     | __main__:<module>:246 - execution time for 341: 0:00:06.447924
+2022-08-31 09:59:10.054 | INFO     | __main__:<module>:232 - read in cached files: 343
+2022-08-31 09:59:33.340 | INFO     | __main__:<module>:236 - created single operator hqta: 343
+2022-08-31 09:59:33.831 | INFO     | __main__:<module>:242 - successful export: 343
+2022-08-31 09:59:33.832 | INFO     | __main__:<module>:246 - execution time for 343: 0:00:25.319213
+2022-08-31 09:59:35.688 | INFO     | __main__:<module>:232 - read in cached files: 344
+2022-08-31 09:59:41.739 | INFO     | __main__:<module>:236 - created single operator hqta: 344
+2022-08-31 09:59:41.908 | INFO     | __main__:<module>:242 - successful export: 344
+2022-08-31 09:59:41.909 | INFO     | __main__:<module>:246 - execution time for 344: 0:00:08.076366
+2022-08-31 09:59:43.521 | INFO     | __main__:<module>:232 - read in cached files: 346
+2022-08-31 09:59:52.534 | INFO     | __main__:<module>:236 - created single operator hqta: 346
+2022-08-31 09:59:52.719 | INFO     | __main__:<module>:242 - successful export: 346
+2022-08-31 09:59:52.720 | INFO     | __main__:<module>:246 - execution time for 346: 0:00:10.810375
+2022-08-31 09:59:54.312 | INFO     | __main__:<module>:232 - read in cached files: 349
+2022-08-31 10:00:00.530 | INFO     | __main__:<module>:236 - created single operator hqta: 349
+2022-08-31 10:00:00.702 | INFO     | __main__:<module>:242 - successful export: 349
+2022-08-31 10:00:00.703 | INFO     | __main__:<module>:246 - execution time for 349: 0:00:07.982618
+2022-08-31 10:00:02.222 | INFO     | __main__:<module>:232 - read in cached files: 350
+2022-08-31 10:00:14.196 | INFO     | __main__:<module>:236 - created single operator hqta: 350
+2022-08-31 10:00:14.388 | INFO     | __main__:<module>:242 - successful export: 350
+2022-08-31 10:00:14.389 | INFO     | __main__:<module>:246 - execution time for 350: 0:00:13.685211
+2022-08-31 10:00:15.893 | INFO     | __main__:<module>:232 - read in cached files: 351
+2022-08-31 10:00:27.439 | INFO     | __main__:<module>:236 - created single operator hqta: 351
+2022-08-31 10:00:27.611 | INFO     | __main__:<module>:242 - successful export: 351
+2022-08-31 10:00:27.612 | INFO     | __main__:<module>:246 - execution time for 351: 0:00:13.222205
+2022-08-31 10:00:29.097 | INFO     | __main__:<module>:232 - read in cached files: 356
+2022-08-31 10:00:37.850 | INFO     | __main__:<module>:236 - created single operator hqta: 356
+2022-08-31 10:00:38.049 | INFO     | __main__:<module>:242 - successful export: 356
+2022-08-31 10:00:38.050 | INFO     | __main__:<module>:246 - execution time for 356: 0:00:10.437459
+2022-08-31 10:00:39.599 | INFO     | __main__:<module>:232 - read in cached files: 360
+2022-08-31 10:01:02.844 | INFO     | __main__:<module>:236 - created single operator hqta: 360
+2022-08-31 10:01:03.119 | INFO     | __main__:<module>:242 - successful export: 360
+2022-08-31 10:01:03.120 | INFO     | __main__:<module>:246 - execution time for 360: 0:00:25.069264
+2022-08-31 10:01:04.680 | INFO     | __main__:<module>:232 - read in cached files: 361
+2022-08-31 10:01:16.072 | INFO     | __main__:<module>:236 - created single operator hqta: 361
+2022-08-31 10:01:16.294 | INFO     | __main__:<module>:242 - successful export: 361
+2022-08-31 10:01:16.295 | INFO     | __main__:<module>:246 - execution time for 361: 0:00:13.175255
+2022-08-31 10:01:18.004 | INFO     | __main__:<module>:232 - read in cached files: 366
+2022-08-31 10:01:22.179 | INFO     | __main__:<module>:236 - created single operator hqta: 366
+2022-08-31 10:01:22.356 | INFO     | __main__:<module>:242 - successful export: 366
+2022-08-31 10:01:22.358 | INFO     | __main__:<module>:246 - execution time for 366: 0:00:06.061771
+2022-08-31 10:01:23.889 | INFO     | __main__:<module>:232 - read in cached files: 367
+2022-08-31 10:01:27.875 | INFO     | __main__:<module>:236 - created single operator hqta: 367
+2022-08-31 10:01:28.044 | INFO     | __main__:<module>:242 - successful export: 367
+2022-08-31 10:01:28.046 | INFO     | __main__:<module>:246 - execution time for 367: 0:00:05.687294
+2022-08-31 10:01:29.685 | INFO     | __main__:<module>:232 - read in cached files: 368
+2022-08-31 10:01:45.043 | INFO     | __main__:<module>:236 - created single operator hqta: 368
+2022-08-31 10:01:45.260 | INFO     | __main__:<module>:242 - successful export: 368
+2022-08-31 10:01:45.261 | INFO     | __main__:<module>:246 - execution time for 368: 0:00:17.214650
+2022-08-31 10:01:46.756 | INFO     | __main__:<module>:232 - read in cached files: 372
+2022-08-31 10:02:00.544 | INFO     | __main__:<module>:236 - created single operator hqta: 372
+2022-08-31 10:02:00.774 | INFO     | __main__:<module>:242 - successful export: 372
+2022-08-31 10:02:00.775 | INFO     | __main__:<module>:246 - execution time for 372: 0:00:15.513725
+2022-08-31 10:02:02.224 | INFO     | __main__:<module>:232 - read in cached files: 374
+2022-08-31 10:02:07.776 | INFO     | __main__:<module>:236 - created single operator hqta: 374
+2022-08-31 10:02:07.956 | INFO     | __main__:<module>:242 - successful export: 374
+2022-08-31 10:02:07.957 | INFO     | __main__:<module>:246 - execution time for 374: 0:00:07.181443
+2022-08-31 10:02:09.399 | INFO     | __main__:<module>:232 - read in cached files: 376
+2022-08-31 10:02:20.449 | INFO     | __main__:<module>:236 - created single operator hqta: 376
+2022-08-31 10:02:20.621 | INFO     | __main__:<module>:242 - successful export: 376
+2022-08-31 10:02:20.622 | INFO     | __main__:<module>:246 - execution time for 376: 0:00:12.664112
+2022-08-31 10:02:22.196 | INFO     | __main__:<module>:232 - read in cached files: 380
+2022-08-31 10:02:45.494 | INFO     | __main__:<module>:236 - created single operator hqta: 380
+2022-08-31 10:02:45.704 | INFO     | __main__:<module>:242 - successful export: 380
+2022-08-31 10:02:45.705 | INFO     | __main__:<module>:246 - execution time for 380: 0:00:25.083270
+2022-08-31 10:02:47.379 | INFO     | __main__:<module>:232 - read in cached files: 381
+2022-08-31 10:03:03.033 | INFO     | __main__:<module>:236 - created single operator hqta: 381
+2022-08-31 10:03:03.280 | INFO     | __main__:<module>:242 - successful export: 381
+2022-08-31 10:03:03.281 | INFO     | __main__:<module>:246 - execution time for 381: 0:00:17.574775
+2022-08-31 10:03:04.789 | INFO     | __main__:<module>:232 - read in cached files: 386
+2022-08-31 10:03:12.525 | INFO     | __main__:<module>:236 - created single operator hqta: 386
+2022-08-31 10:03:12.701 | INFO     | __main__:<module>:242 - successful export: 386
+2022-08-31 10:03:12.703 | INFO     | __main__:<module>:246 - execution time for 386: 0:00:09.422166
+2022-08-31 10:03:14.127 | INFO     | __main__:<module>:232 - read in cached files: 389
+2022-08-31 10:03:24.833 | INFO     | __main__:<module>:236 - created single operator hqta: 389
+2022-08-31 10:03:25.017 | INFO     | __main__:<module>:242 - successful export: 389
+2022-08-31 10:03:25.018 | INFO     | __main__:<module>:246 - execution time for 389: 0:00:12.312891
+2022-08-31 10:03:26.643 | INFO     | __main__:<module>:232 - read in cached files: 473
+2022-08-31 10:03:34.610 | INFO     | __main__:<module>:236 - created single operator hqta: 473
+2022-08-31 10:03:34.791 | INFO     | __main__:<module>:242 - successful export: 473
+2022-08-31 10:03:34.793 | INFO     | __main__:<module>:246 - execution time for 473: 0:00:09.774581
+2022-08-31 10:03:36.323 | INFO     | __main__:<module>:232 - read in cached files: 474
+2022-08-31 10:03:58.607 | INFO     | __main__:<module>:236 - created single operator hqta: 474
+2022-08-31 10:03:58.832 | INFO     | __main__:<module>:242 - successful export: 474
+2022-08-31 10:03:58.834 | INFO     | __main__:<module>:246 - execution time for 474: 0:00:24.040680
+2022-08-31 10:04:00.336 | INFO     | __main__:<module>:232 - read in cached files: 481
+2022-08-31 10:04:03.770 | INFO     | __main__:<module>:236 - created single operator hqta: 481
+2022-08-31 10:04:04.047 | INFO     | __main__:<module>:242 - successful export: 481
+2022-08-31 10:04:04.051 | INFO     | __main__:<module>:246 - execution time for 481: 0:00:05.215951
+2022-08-31 10:04:05.605 | INFO     | __main__:<module>:232 - read in cached files: 482
+2022-08-31 10:04:11.026 | INFO     | __main__:<module>:236 - created single operator hqta: 482
+2022-08-31 10:04:11.203 | INFO     | __main__:<module>:242 - successful export: 482
+2022-08-31 10:04:11.204 | INFO     | __main__:<module>:246 - execution time for 482: 0:00:07.151178
+2022-08-31 10:04:12.855 | INFO     | __main__:<module>:232 - read in cached files: 483
+2022-08-31 10:04:19.504 | INFO     | __main__:<module>:236 - created single operator hqta: 483
+2022-08-31 10:04:19.688 | INFO     | __main__:<module>:242 - successful export: 483
+2022-08-31 10:04:19.689 | INFO     | __main__:<module>:246 - execution time for 483: 0:00:08.483673
+2022-08-31 10:04:21.291 | INFO     | __main__:<module>:232 - read in cached files: 484
+2022-08-31 10:04:42.278 | INFO     | __main__:<module>:236 - created single operator hqta: 484
+2022-08-31 10:04:42.498 | INFO     | __main__:<module>:242 - successful export: 484
+2022-08-31 10:04:42.499 | INFO     | __main__:<module>:246 - execution time for 484: 0:00:22.809870
+2022-08-31 10:04:43.953 | INFO     | __main__:<module>:232 - read in cached files: 485
+2022-08-31 10:04:46.319 | INFO     | __main__:<module>:236 - created single operator hqta: 485
+2022-08-31 10:04:46.512 | INFO     | __main__:<module>:242 - successful export: 485
+2022-08-31 10:04:46.513 | INFO     | __main__:<module>:246 - execution time for 485: 0:00:04.013125
+2022-08-31 10:04:46.514 | INFO     | __main__:<module>:249 - total execution time: 0:56:09.006151
+2022-08-31 11:18:05.240 | INFO     | __main__:<module>:44 - Concatenated all operators
+2022-08-31 11:18:51.433 | INFO     | __main__:<module>:55 - Execution time: 0:02:08.810685
+2022-09-01 08:33:53.967 | INFO     | __main__:<module>:160 - cached ids, save as json: 0:00:35.723100
+2022-09-01 08:41:31.230 | INFO     | __main__:<module>:171 - check files for completeness, save as json: 0:07:37.263284
+2022-09-01 08:41:31.230 | INFO     | __main__:<module>:175 - execution time: 0:08:12.986887

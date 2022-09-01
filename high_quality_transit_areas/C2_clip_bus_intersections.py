@@ -18,10 +18,19 @@ import geopandas as gpd
 import glob
 import os
 import pandas as pd
+import sys
+
+from loguru import logger
 
 import C1_prep_for_clipping as prep_clip
 from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
+from update_vars import analysis_date
+
+logger.add("./logs/C2_clip_bus_intersections.log")
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
 
 segment_cols = ["calitp_itp_id", "hqta_segment_id"]
 
@@ -99,7 +108,7 @@ def clip_by_itp_id(corridors_df: dg.GeoDataFrame,
                                          clipped_segment], axis=0)
                             
     end = dt.datetime.now()
-    print(f"clipping for {itp_id}: {end-start}")
+    logger.info(f"clipping for {itp_id}: {end-start}")
     
     return intersections
 
@@ -112,6 +121,8 @@ def delete_local_clipped_files():
     
 
 if __name__ == "__main__":
+    logger.info(f"Analysis date: {analysis_date}")
+
     start = dt.datetime.now()
         
     intersecting_pairs = dd.read_parquet(PAIRWISE_FILE)
@@ -121,7 +132,7 @@ if __name__ == "__main__":
     VALID_ITP_IDS = list(corridors.calitp_itp_id.unique())
     
     time1 = dt.datetime.now()
-    print(f"read in data, assemble valid ITP_IDS: {time1 - start}")
+    logger.info(f"read in data, assemble valid ITP_IDS: {time1 - start}")
     
     clipped = corridors.head(0)
 
@@ -144,7 +155,7 @@ if __name__ == "__main__":
                )
     
     time2 = dt.datetime.now()
-    print(f"compute for full clipped df: {time2 - time1}")
+    logger.info(f"compute for full clipped df: {time2 - time1}")
     
     utils.geoparquet_gcs_export(clipped2,
                                 GCS_FILE_PATH,
@@ -154,3 +165,4 @@ if __name__ == "__main__":
     delete_local_clipped_files()
     
     end = dt.datetime.now()
+    logger.info(f"execution time: {end-start}")
