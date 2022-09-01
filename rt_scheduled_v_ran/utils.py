@@ -33,7 +33,7 @@ def read_data():
     df = query_sql(
     """
     SELECT *
-    FROM `cal-itp-data-infra-staging.natalie_views.gtfs_rt_vs_sched_routes`
+    FROM `cal-itp-data-infra-staging.natalie_views.gtfs_rt_vs_schedule_trips_sample`
     """
     )
     
