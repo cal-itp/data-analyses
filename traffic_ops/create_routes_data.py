@@ -34,7 +34,7 @@ def merge_trips_to_routes(trips: dd.DataFrame,
     # right only means in routes, but no route that has that shape_id 
     # only 1% falls into right_only
     m1 = dd.merge(
-            trips,
+            trips.drop(columns = ["calitp_extracted_at", "calitp_deleted_at"]),
             routes[shape_id_cols + ["geometry"]].drop_duplicates(),
             on = shape_id_cols,
             how = "inner",

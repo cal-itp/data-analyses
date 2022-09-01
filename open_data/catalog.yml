@@ -2,7 +2,7 @@ metadata:
   version: 1
 sources:   
   ca_hq_transit_areas:
-    driver: parquet
+    driver: geoparquet
     description: High Quality Transit Areas (polygons)
     args:
       # source: high_quality_transit_areas/D2_assemble_hqta_polygons.py
