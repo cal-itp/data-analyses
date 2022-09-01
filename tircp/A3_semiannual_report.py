@@ -267,4 +267,5 @@ def create_sar_report():
         df_current.to_excel(writer, sheet_name="Unpivoted_Current_Version", index=False)
         df_highlighted.to_excel(writer, sheet_name="highlighted")
     
+    print("Successfully saved Semi Annual Report to GCS") 
     return df_current, df_pivoted, summary, df_highlighted
