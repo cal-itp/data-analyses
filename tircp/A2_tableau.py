@@ -215,3 +215,5 @@ def complete_tableau():
     with pd.ExcelWriter(f"{GCS_FILE_PATH}Tableau_Workbook.xlsx") as writer:
         tableau.to_excel(writer, sheet_name="main", index=False)
         burndown.to_excel(writer, sheet_name = "burndown", index=False)
+        
+    print("Successfully saved Tableau workbook to GCS") 

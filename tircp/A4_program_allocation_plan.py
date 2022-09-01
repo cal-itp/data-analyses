@@ -162,7 +162,8 @@ def create_program_allocation_plan():
     df_2016 = pivot(m1.loc[m1["Award Year"] == 2016])
     df_2018 = pivot(m1.loc[m1["Award Year"] == 2018])
     df_2020 = pivot(m1.loc[m1["Award Year"] == 2020])
-    df_2022 = pivot(m1.loc[m1["Award Year"] == 2022])
+    # Commenting out df_2022 for now because there isn't any data for it
+    # df_2022 = pivot(m1.loc[m1["Award Year"] == 2022])
  
     # GCS
     with pd.ExcelWriter(f"{GCS_FILE_PATH}Script_Program_Allocation_Plan.xlsx") as writer:
@@ -170,6 +171,7 @@ def create_program_allocation_plan():
         df_2016.to_excel(writer, sheet_name="2016_Cycle_2", index=True)
         df_2018.to_excel(writer, sheet_name="2018_Cycle_3", index=True)
         df_2020.to_excel(writer, sheet_name="2020_Cycle_4", index=True)
-        df_2022.to_excel(writer, sheet_name="2022_Cycle_5", index=True)
-  
+        # df_2022.to_excel(writer, sheet_name="2022_Cycle_5", index=True)
+        
+    print("Successfully saved Program Allocation Plan to GCS") 
     return m1
