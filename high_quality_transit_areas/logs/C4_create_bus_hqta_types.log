@@ -1,0 +1,4 @@
+2022-08-31 17:58:36.943 | INFO     | __main__:<module>:215 - grab all stops
+2022-08-31 17:58:37.076 | INFO     | __main__:<module>:219 - create major stop bus
+2022-08-31 17:58:37.607 | INFO     | __main__:<module>:223 - create hq corridor bus
+2022-08-31 17:58:44.853 | INFO     | __main__:<module>:231 - execution time: 0:00:21.714876

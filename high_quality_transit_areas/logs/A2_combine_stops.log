@@ -1,0 +1,5 @@
+2022-08-31 14:24:40.336 | INFO     | __main__:<module>:46 - grabbed rail: 0:00:14.785554
+2022-08-31 14:25:11.313 | INFO     | __main__:<module>:64 - grabbed brt: 0:00:30.977223
+2022-08-31 14:25:21.586 | INFO     | __main__:<module>:70 - grabbed ferry: 0:00:10.272764
+2022-08-31 14:25:21.591 | INFO     | __main__:<module>:79 - concatenated datasets
+2022-08-31 14:25:21.885 | INFO     | __main__:<module>:88 - execution time: 0:00:56.334763
