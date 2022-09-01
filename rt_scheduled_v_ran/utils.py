@@ -27,6 +27,28 @@ fs = gcsfs.GCSFileSystem()
 from tqdm import tqdm_notebook
 from tqdm.notebook import trange, tqdm
 
+import altair as alt
+from shared_utils import altair_utils
+from shared_utils import geography_utils
+from shared_utils import calitp_color_palette as cp
+from shared_utils import styleguide
+
+
+# Read in complete data table
+def read_data():
+    
+    df = query_sql(
+    """
+    SELECT *
+    FROM `cal-itp-data-infra-staging.natalie_views.gtfs_rt_vs_schedule_trips_sample`
+    """
+    )
+    
+    df['service_date'] = pd.to_datetime(df['service_date'])
+    df['weekday'] = pd.Series(df.service_date).dt.day_name()
+    df['month'] =  pd.Series(df.service_date).dt.month_name()
+    
+    return df
 
 # Get the data for Scheduled Trips and RT Trips  
 
@@ -110,6 +132,8 @@ def agg_by_date(df, sum1_sched, sum2_vp):
             )
     return agg_df
 
+
+
 def groupby_onecol(df, groupbycol, aggcol):
     if groupbycol == "weekday":
         cats_day = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -172,3 +196,20 @@ def labeling(word):
         word = word.title()
 
     return word
+
+## Charting Functions 
+
+# Bar chart over time 
+#need to specify color scheme outside of charting function which can be done with .encode()
+def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_txt):
+    bar = (alt.Chart(df)
+        .mark_bar(size=8)
+        .encode(
+            x=alt.X(x_col, title=labeling(x_col), sort=(sort)),
+            y=alt.Y(y_col, stack = None, title=labeling(y_col), axis=alt.Axis(format=yaxis_format)),
+            color = color_col,
+        ).properties(title=title_txt))
+    
+    chart = styleguide.preset_chart_config(bar)
+    return chart
+
