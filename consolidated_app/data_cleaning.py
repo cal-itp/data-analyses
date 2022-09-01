@@ -1,7 +1,3 @@
-'''
-Cleaning data for Consolidated Application
-There are 4 different cleaned dataframes. 
-'''
 import os
 import re as re
 
@@ -26,7 +22,7 @@ fs = get_fs()
 '''
 Functions for Initial Clean Up 
 '''
-#Function for comparing total funding amount versus total estimated expense
+# Function for comparing total funding amount versus total estimated expense
 def funding_vs_expenses(df):
     if df["total_state_federal_local_funding"] == df["total_expenses"]:
         return "Fully funded"
@@ -35,46 +31,32 @@ def funding_vs_expenses(df):
     else:
         return "Not fully funded"
 
-'''
-Import & Load
-'''
-def load_con_app():
-    #We keep all the columns 
-    con_app_file =  "Copy of Application_Review_Report_5_2_2022.xls"
-    con_app =  to_snakecase(
-    pd.read_excel(f"{GCS_FILE_PATH}{con_app_file}"))
-    return con_app
+# Function to clean agency/organization names 
+def organization_cleaning(df, column_wanted: str):
+    df[column_wanted] = (
+        df[column_wanted]
+        .str.strip()
+        .str.split(",")
+        .str[0]
+        .str.replace("/", "")
+        .str.split("(")
+        .str[0]
+        .str.split("/")
+        .str[0]
+        .str.title()
+        .str.replace("Trasit", "Transit")
+        .str.strip() #strip again after getting rid of certain things
+    )
+    return df
 
-'''
-Initial Clean Up 
-An unpivoted & unaggregated, but cleaned up version of the df 
-'''
-def initial_cleaning(df):
-    ### ORG NAMES ###
-    #Replace Ventura County since it read in strangely
-    df["organization_name"] = df["organization_name"].replace(
-    {"Ventura County Transportation Commission\xa0": "Ventura County Transportation Commission"}).str.replace(
-    "\s+\(.*$", "", regex=True)
-    
-    # Remove any acronyms
-    #df["organization_name"] = df["organization_name"].str.replace("\s+\(.*$", "", regex=True)
-   
-    ### PROJECT CATEGORIES ### 
-    #Spell out project categories 
-    df["project_category"] = df["project_category"].replace(
-    {"OP": "Operating", "CA": "Capital", "PL": "Planning", "CM": "Capital Maintenance"})
-    
-    #Project categories are pretty vague, but project description has 200+ diff inputs
-    #Search through descriptions for the keywords below and input keyword into the new column "short description"
-    df["project_description"] = df["project_description"].str.lower()
-    df["short_description"] = df["project_description"].str.extract(
-    "(operating|bus|construction|buses|planning|van|vessel|fare|ridership|vehicle|station|service|equipment|maintenance|surveillance|renovate|free|equip|operational)",
-    expand=False)
-    #Replace the keywords with the main categories
-    #Capture any entries that don't fall into a particular category as "other" 
-    #Change this column to title case for cleaner look
-    df["short_description"] = df["short_description"].replace(
-    {
+project_keywords = "(operating|bus|construction|buses|planning|van|vessel|fare|ridership|vehicle|station|service|equipment|maintenance|surveillance|renovate|free|equip|operational)"
+
+"""
+Dictionaries
+& Lists
+"""
+# Map project keywords to broader categories
+project_dictionary =  {
         "operating": "operating assistance",
         "operational": "operating assistance",
         "free": "free fare program",
@@ -94,75 +76,10 @@ def initial_cleaning(df):
         "renovate": "maintenance/renovation",
         "equipment": "purchasing other tech",
         "equip": "purchasing other tech",
-        "surveillance": "purchasing other tech"})
-    
-    df["short_description"] = (
-    df["short_description"].fillna("other category").str.title())
-    ### MONETARY COLS ### 
-    #Local totals: split on ":" and extract only the last item
-    #To grab the total of local funding a proejct will have/has
-    df["local_total"] = df["local_total"].str.split(": ").str[-1]
-    
-    #Remove $ and , turn column from str into float
-    df["local_total"] = (
-    df["local_total"]
-    .str.replace(",", "", regex=True)
-    .str.replace("$", "", regex= True)
-    .fillna(0)
-    .astype("float")) 
-        
-    #List of original monetary columns: excludes ones I've created
-    monetary_cols = [
-    "total_expenses",
-    "_5311_funds",
-    "_5311_f__funds",
-    "_5311_cmaq_funds",
-    "_5339_funds",
-    "federal_total",
-    "other_fed_funds_total",
-    "lctop__state__funds",
-    "sb1__state_of_good_repair__state__funds",
-    "transit_development_act__state__funds",
-    "other_state_funds",
-    "state_total"]
-    
-    #Clean them all up
-    df[monetary_cols] = (
-    df[monetary_cols]
-    .fillna(value=0)
-    .apply(pd.to_numeric, errors="coerce")
-    .astype("float"))
-    
-    #Create three new cols: total for local, state, and fed
-    # and total for state and local funds only
-    df = df.assign(
-    total_state_federal_local_funding = (df["state_total"]
-    + df["local_total"]
-    + df["federal_total"]
-    + df["other_fed_funds_total"]),    
-    total_state_fed_only = 
-    (df["state_total"] + df["federal_total"])) 
-    
-    #Apply function to determine if a project is fully funded or not
-    df['fully_funded'] = df.apply(funding_vs_expenses, axis=1)
-    
-     
-    ### DISTRICTS ### 
-    #Find any rows with missing values in the district column - will change from year to year 
-    #no_districts = data[data["district"].isnull()]
-    #no_districts_list = no_districts["project_upin"].tolist()
-    
-    #Replace the districts by organization names
-    df.loc[(df["organization_name"] == "City of Banning"), "district"] = 8
-    df.loc[(df["organization_name"] == "City of Clovis"), "district"] = 6
-    df.loc[(df["organization_name"] == "City of Los Angeles DOT"), "district"] = 7
-    df.loc[(df["organization_name"] == "Peninsula Corridor Joint Powers Board"), "district"] = 4
-    df.loc[(df["organization_name"] == "San Joaquin Regional Rail Commission"), "district"] = 10
-    df.loc[(df["organization_name"] == "Western Contra Costa Transit Authority"), "district"] = 4
-    
-    # Create new column with fully spelled out names
-    df["full_district_name"] = df["district"].replace(
-    {
+        "surveillance": "purchasing other tech"}
+
+# Map district numbers to its full names
+district_dictionary = {
         7: "District 7: Los Angeles",
         4: "District 4: Bay Area / Oakland",
         2: "District 2: Redding",
@@ -175,7 +92,116 @@ def initial_cleaning(df):
         5: "District 5: San Luis Obispo / Santa Barbara",
         6: "District 6: Fresno / Bakersfield",
         1: "District 1: Eureka",
-    })
+    }
+
+        
+# List of original monetary columns: excludes ones I've created
+monetary_cols = [
+    "total_expenses",
+    "_5311_funds",
+    "_5311_f__funds",
+    "_5311_cmaq_funds",
+    "_5339_funds",
+    "federal_total",
+    "other_fed_funds_total",
+    "lctop__state__funds",
+    "sb1__state_of_good_repair__state__funds",
+    "transit_development_act__state__funds",
+    "other_state_funds",
+    "state_total"]
+
+"""
+Import & Load
+"""
+def load_con_app():
+    #We keep all the columns 
+    con_app_file =  "Copy of Application_Review_Report_5_2_2022.xls"
+    con_app =  to_snakecase(
+    pd.read_excel(f"{GCS_FILE_PATH}{con_app_file}"))
+    return con_app
+
+'''
+Initial Clean Up 
+An unpivoted & unaggregated, but cleaned up version of the df 
+'''
+def initial_cleaning(df):
+    
+    # Clean organization names
+    df = organization_cleaning(df, "organization_name")
+   
+    # PROJECT CATEGORIES
+    # Spell out project categories 
+    df["project_category"] = df["project_category"].replace(
+    {"OP": "Operating", "CA": "Capital", "PL": "Planning", "CM": "Capital Maintenance"})
+    
+    # Project categories are pretty vague, but project description has 200+ diff inputs
+    # Search through descriptions for the keywords below and input keyword into the new column "short description"
+    # Lower project description
+    df["project_description"] = df["project_description"].str.lower()
+    
+    # Extract keywords that pop up often
+    df["short_description"] = df["project_description"].str.extract(project_keywords, expand=False)
+    
+    # Replace the keywords with the main categories
+    # Capture any entries that don't fall into a particular category as "other" 
+    df["short_description"] = (df["short_description"]
+                               .replace(project_dictionary)
+                               .fillna("other category")
+                               .str.title()
+                              )
+    
+    # MONETARY COLS 
+    # Local totals: split on ":" and extract only the last item
+    # To grab the total of local funding a proejct has
+    df["local_total"] = df["local_total"].str.split(": ").str[-1]
+    
+    # Remove characters and turn column from str into float
+    df["local_total"] = (
+    df["local_total"]
+    .str.replace(",", "", regex=True)
+    .str.replace("$", "", regex= True)
+    .fillna(0)
+    .astype("float")) 
+    
+    # Clean all monetary columns up
+    df[monetary_cols] = (
+    df[monetary_cols]
+    .fillna(value=0)
+    .apply(pd.to_numeric, errors="coerce")
+    .astype("float"))
+    
+    # Create two new cols: total for state and fed
+    # and total for state and local funds only
+    df = df.assign(
+    total_state_federal_local_funding = (df["state_total"]
+    + df["local_total"]
+    + df["federal_total"]
+    + df["other_fed_funds_total"]),    
+    total_state_fed_only = 
+    (df["state_total"] + df["federal_total"])) 
+    
+    # Apply function to determine if a project is fully funded or not
+    df['fully_funded'] = df.apply(funding_vs_expenses, axis=1)
+    
+    # DISTRICTS 
+    # Create new column with fully spelled out names
+    df["full_district_name"] = df["district"].replace(district_dictionary)
+    
+    # MANUAL
+    # Will change each year
+    # Replace Ventura County since it read in strangely
+    df["organization_name"] = df["organization_name"].replace(
+    {"Ventura County Transportation Commission\xa0": "Ventura County Transportation Commission"}).str.replace(
+    "\s+\(.*$", "", regex=True)
+    
+    #Replace the districts by organization names
+    df.loc[(df["organization_name"] == "City of Banning"), "district"] = 8
+    df.loc[(df["organization_name"] == "City of Clovis"), "district"] = 6
+    df.loc[(df["organization_name"] == "City of Los Angeles DOT"), "district"] = 7
+    df.loc[(df["organization_name"] == "Peninsula Corridor Joint Powers Board"), "district"] = 4
+    df.loc[(df["organization_name"] == "San Joaquin Regional Rail Commission"), "district"] = 10
+    df.loc[(df["organization_name"] == "Western Contra Costa Transit Authority"), "district"] = 4
+    
     return df
    
 '''
@@ -184,12 +210,7 @@ The original df has a row for each unique project & columns for each fund
 regardless of whether or not a project is requesting that fund.
 Thus, we should clean up df from wide to long. 
 '''
-def melt_df(df): 
-    # Keep only subset of what I want to melt & the identifier column 
-    # Which is the project_upin: a unique identifier for each product
-    
-    melt_subset1 = df[
-    [
+subset_for_melted_df = [
         "project_upin",
         "_5311_funds",
         "_5311_f__funds",
@@ -203,14 +224,9 @@ def melt_df(df):
         "local_total",
         "federal_total",
         "state_total",
-    ]]
-    
-    #Melt the df: put funds (value_vars) beneath value_name and the
-    #associated funding amounts under the column "funding received."
-    melt_subset2 = pd.melt(
-    melt_subset1, #subsetted df 
-    id_vars=["project_upin"],
-    value_vars=[
+    ]
+
+list_for_value_vars = [
         "_5311_funds",
         "_5311_f__funds",
         "_5311_cmaq_funds",
@@ -223,15 +239,9 @@ def melt_df(df):
         "local_total",
         "federal_total",
         "state_total",
-    ],
-    var_name="program_name",
-    value_name="funding_received",)
-    
-    # Create a subset of the original df 
-    # To merge it onto our melted df so we can info such as project description
-    # Fully funded or not, etc 
-    df2 = df[
-    [
+    ]
+
+subset_og_df = [
         "total_expenses",
         "organization_name",
         "district",
@@ -246,7 +256,27 @@ def melt_df(df):
         "total_state_federal_local_funding",
         "fully_funded",
         "short_description",
-    ]]
+    ]
+
+def melt_df(df): 
+    # Keep only subset of what I want to melt & the identifier column 
+    # Which is the project_upin: a unique identifier for each product
+    
+    melt_subset1 = df[subset_for_melted_df]
+    
+    # Melt the df: put funds (value_vars) beneath value_name and the
+    # associated funding amounts under the column "funding received."
+    melt_subset2 = pd.melt(
+    melt_subset1, #subsetted df 
+    id_vars=["project_upin"],
+    value_vars= list_for_value_vars,
+    var_name="program_name",
+    value_name="funding_received",)
+    
+    # Create a subset of the original df 
+    # To merge it onto our melted df so we can info such as project description
+    # Fully funded or not, etc 
+    df2 = df[subset_og_df]
     
     # Left merge with melted dataframe, which will has MANY more lines 
     m1 = pd.merge(melt_subset2, df2, on="project_upin", how="left")
@@ -271,7 +301,8 @@ def melt_df(df):
     # Filter out excess rows with $0 in the col "funding_received"
     # To shorten dataframe 
     m1 = m1[m1["funding_received"] > 0]
-    return m1 
+    
+    return m1
 
 '''
 Grouped Dataframe
@@ -304,8 +335,8 @@ def group_df(melted_df, initial_clean_df):
     grouped2 = grouped2[
     ["project_upin", "organization_name", "project_description", "all_programs", "year"]]
     
-    # Count # of funds under "all programs" column to get a metric of how many funds 
-    #Orgs want for a particular project
+    # Count number of funds under "all programs" column to get a metric of how many funds 
+    # an orgs want for a particular project
     # https://stackoverflow.com/questions/51502263/pandas-dataframe-object-has-no-attribute-str
     grouped2["count_of_funding_programs_applied"] = (
     grouped2["all_programs"]
@@ -314,7 +345,7 @@ def group_df(melted_df, initial_clean_df):
     .groupby(grouped2.project_upin)
     .transform("sum"))
     
-    return grouped2 
+    return grouped2
 
 '''
 Geodataframe for the map
@@ -372,28 +403,28 @@ def gdf_conapp(df):
 '''
 Function to build all 4 dataframes together
 '''
-def con_app_complete_clean():
-    #Load in original sheet
-    raw_con_app = load_con_app() 
+def conapp_complete_report():
+    # Load in original sheet
+    original_con_app = load_con_app() 
     
-    #Do the initial cleaning
-    cleaned_con_app = initial_cleaning(raw_con_app) 
+    # Do the initial cleaning
+    cleaned_con_app = initial_cleaning(original_con_app) 
     
-    #First aggregation: melting the dataframe
+    # First aggregation: melting the dataframe
     melted_df = melt_df(cleaned_con_app)
     
-    #Second aggregation: putting all funding programs onto a single line  
+    # Second aggregation: putting all funding programs onto a single line  
     grouped_df = group_df(melted_df, cleaned_con_app)
     
-    #Third aggregation: summarize and turn it into a gdf that will be saved
-    #as a geoparquet to GCS but will return a regular dataframe for previewing
+    # Third aggregation: summarize and turn it into a gdf that will be saved
+    # as a geoparquet to GCS but will return a regular dataframe for previewing
     gdf = gdf_conapp(cleaned_con_app)
     
-    #Write the first 3 dfs into an Excel workbook  and save to GCS in case
+    """
+    Write the first 3 dfs into an Excel workbook  and save to GCS in case
     with pd.ExcelWriter(f"{GCS_FILE_PATH}Script_Testing.xlsx") as writer:
         melted_df.to_excel(writer, sheet_name="pivoted_data", index=False)
         cleaned_con_app.to_excel(writer, sheet_name="cleaned_unpivoted_data", index=False)
         grouped_df.to_excel(writer, sheet_name="combos_of_funding_programs", index=False)
-    
-    #Return everything
+    """
     return cleaned_con_app, melted_df, grouped_df,  gdf
