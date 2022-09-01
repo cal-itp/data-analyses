@@ -1,0 +1,10 @@
+2022-08-29 19:38:39.914 | INFO     | __main__:<module>:47 - grabbed rail: 0:00:14.782580
+2022-08-29 19:39:03.740 | INFO     | __main__:<module>:65 - grabbed brt: 0:00:23.826383
+2022-08-29 19:39:13.307 | INFO     | __main__:<module>:71 - grabbed ferry: 0:00:09.566656
+2022-08-29 19:39:13.315 | INFO     | __main__:<module>:80 - concatenated datasets
+2022-08-29 19:39:13.575 | INFO     | __main__:<module>:89 - execution time: 0:00:48.443815
+2022-08-31 14:18:00.658 | INFO     | __main__:<module>:46 - grabbed rail: 0:00:14.726742
+2022-08-31 14:18:28.589 | INFO     | __main__:<module>:64 - grabbed brt: 0:00:27.931204
+2022-08-31 14:18:40.062 | INFO     | __main__:<module>:70 - grabbed ferry: 0:00:11.473023
+2022-08-31 14:18:40.067 | INFO     | __main__:<module>:79 - concatenated datasets
+2022-08-31 14:18:40.406 | INFO     | __main__:<module>:88 - execution time: 0:00:54.474263

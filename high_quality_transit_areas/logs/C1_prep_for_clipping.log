@@ -1,0 +1,272 @@
+2022-08-31 11:22:21.593 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 4: 0:00:16.544537
+2022-08-31 11:22:32.078 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 6: 0:00:10.396320
+2022-08-31 11:22:42.354 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 14: 0:00:10.233472
+2022-08-31 11:22:53.856 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 16: 0:00:11.463291
+2022-08-31 11:23:04.412 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 18: 0:00:10.516747
+2022-08-31 11:23:14.324 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 29: 0:00:09.863790
+2022-08-31 11:23:24.161 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 34: 0:00:09.794784
+2022-08-31 11:23:34.058 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 36: 0:00:09.855396
+2022-08-31 11:23:44.098 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 42: 0:00:09.995617
+2022-08-31 11:23:54.306 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 45: 0:00:10.164013
+2022-08-31 11:24:05.073 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 48: 0:00:10.726049
+2022-08-31 11:24:16.725 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 61: 0:00:11.608002
+2022-08-31 11:24:27.495 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 70: 0:00:10.722753
+2022-08-31 11:24:38.005 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 75: 0:00:10.463731
+2022-08-31 11:24:49.140 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 76: 0:00:11.085824
+2022-08-31 11:24:59.260 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 77: 0:00:10.069787
+2022-08-31 11:25:09.819 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 82: 0:00:10.509159
+2022-08-31 11:25:20.461 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 87: 0:00:10.588505
+2022-08-31 11:25:31.941 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 95: 0:00:11.429792
+2022-08-31 11:25:42.232 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 98: 0:00:10.239926
+2022-08-31 11:26:02.309 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 99: 0:00:20.025862
+2022-08-31 11:26:32.750 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 101: 0:00:30.385619
+2022-08-31 11:26:43.209 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 102: 0:00:10.390026
+2022-08-31 11:26:53.469 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 105: 0:00:10.206875
+2022-08-31 11:27:03.216 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 106: 0:00:09.694298
+2022-08-31 11:27:12.907 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 108: 0:00:09.634852
+2022-08-31 11:27:23.306 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 110: 0:00:10.343997
+2022-08-31 11:27:35.177 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 112: 0:00:11.809828
+2022-08-31 11:27:45.849 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 116: 0:00:10.612039
+2022-08-31 11:27:57.925 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 120: 0:00:12.002934
+2022-08-31 11:28:09.337 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 121: 0:00:11.348260
+2022-08-31 11:28:20.700 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 123: 0:00:11.157772
+2022-08-31 11:28:30.881 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 126: 0:00:10.118290
+2022-08-31 11:28:41.458 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 127: 0:00:10.510946
+2022-08-31 11:28:51.198 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 129: 0:00:09.666678
+2022-08-31 11:29:01.517 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 135: 0:00:10.248023
+2022-08-31 11:29:14.847 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 142: 0:00:13.252687
+2022-08-31 11:29:26.052 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 146: 0:00:11.132940
+2022-08-31 11:29:41.591 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 148: 0:00:15.458178
+2022-08-31 11:29:56.272 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 154: 0:00:14.598529
+2022-08-31 11:30:06.547 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 159: 0:00:10.200632
+2022-08-31 11:30:16.546 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 165: 0:00:09.926006
+2022-08-31 11:30:27.112 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 167: 0:00:10.419551
+2022-08-31 11:30:37.907 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 168: 0:00:10.713110
+2022-08-31 11:30:48.288 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 169: 0:00:10.294176
+2022-08-31 11:31:00.640 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 170: 0:00:12.266726
+2022-08-31 11:31:10.798 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 171: 0:00:10.077971
+2022-08-31 11:31:20.657 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 172: 0:00:09.777275
+2022-08-31 11:31:31.255 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 173: 0:00:10.518019
+2022-08-31 11:31:42.193 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 174: 0:00:10.858870
+2022-08-31 11:31:55.007 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 176: 0:00:12.724258
+2022-08-31 11:32:06.061 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 177: 0:00:10.942861
+2022-08-31 11:32:16.837 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 178: 0:00:10.689134
+2022-08-31 11:32:27.172 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 179: 0:00:10.253440
+2022-08-31 11:32:38.044 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 181: 0:00:10.779643
+2022-08-31 11:32:53.328 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 182: 0:00:15.196513
+2022-08-31 11:33:05.968 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 183: 0:00:12.534744
+2022-08-31 11:33:15.681 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 187: 0:00:09.610686
+2022-08-31 11:33:25.810 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 190: 0:00:10.018132
+2022-08-31 11:33:37.779 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 194: 0:00:11.870663
+2022-08-31 11:33:50.308 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 198: 0:00:12.327734
+2022-08-31 11:34:01.700 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 201: 0:00:11.264442
+2022-08-31 11:34:13.766 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 206: 0:00:11.958804
+2022-08-31 11:34:24.322 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 207: 0:00:10.451100
+2022-08-31 11:34:35.716 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 208: 0:00:11.290321
+2022-08-31 11:34:49.470 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 212: 0:00:13.640617
+2022-08-31 11:34:59.442 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 214: 0:00:09.819451
+2022-08-31 11:35:09.933 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 217: 0:00:10.383646
+2022-08-31 11:35:19.929 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 218: 0:00:09.882116
+2022-08-31 11:35:29.769 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 221: 0:00:09.718693
+2022-08-31 11:35:40.989 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 226: 0:00:11.107777
+2022-08-31 11:35:51.100 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 228: 0:00:09.988023
+2022-08-31 11:36:08.158 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 231: 0:00:16.937540
+2022-08-31 11:36:22.157 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 232: 0:00:13.600325
+2022-08-31 11:36:34.636 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 235: 0:00:12.348134
+2022-08-31 11:36:44.812 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 238: 0:00:10.052353
+2022-08-31 11:36:54.903 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 243: 0:00:09.961209
+2022-08-31 11:37:04.850 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 247: 0:00:09.818774
+2022-08-31 11:37:14.514 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 251: 0:00:09.537454
+2022-08-31 11:37:24.325 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 257: 0:00:09.682668
+2022-08-31 11:37:34.679 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 259: 0:00:10.228162
+2022-08-31 11:37:44.589 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 260: 0:00:09.772502
+2022-08-31 11:38:02.611 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 261: 0:00:17.892891
+2022-08-31 11:38:13.749 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 269: 0:00:11.002654
+2022-08-31 11:38:24.363 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 271: 0:00:10.477088
+2022-08-31 11:38:38.562 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 278: 0:00:14.060661
+2022-08-31 11:38:48.349 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 280: 0:00:09.638614
+2022-08-31 11:38:58.402 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 281: 0:00:09.913735
+2022-08-31 11:39:13.769 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 282: 0:00:15.220024
+2022-08-31 11:39:25.276 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 284: 0:00:11.301224
+2022-08-31 11:39:35.089 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 287: 0:00:09.652865
+2022-08-31 11:39:45.422 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 289: 0:00:10.167337
+2022-08-31 11:39:59.141 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 290: 0:00:13.554380
+2022-08-31 11:40:09.818 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 293: 0:00:10.512954
+2022-08-31 11:40:23.426 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 294: 0:00:13.442298
+2022-08-31 11:40:34.667 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 295: 0:00:11.065915
+2022-08-31 11:40:45.298 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 296: 0:00:10.444696
+2022-08-31 11:40:55.723 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 298: 0:00:10.231390
+2022-08-31 11:41:06.326 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 300: 0:00:10.414010
+2022-08-31 11:41:16.426 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 301: 0:00:09.916159
+2022-08-31 11:41:26.359 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 308: 0:00:09.742804
+2022-08-31 11:41:36.823 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 310: 0:00:10.267477
+2022-08-31 11:41:46.653 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 312: 0:00:09.643088
+2022-08-31 11:41:57.824 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 314: 0:00:10.980954
+2022-08-31 11:42:07.819 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 323: 0:00:09.778078
+2022-08-31 11:42:20.452 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 324: 0:00:12.437527
+2022-08-31 11:42:41.181 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 327: 0:00:20.122238
+2022-08-31 11:42:52.340 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 329: 0:00:10.584834
+2022-08-31 11:43:02.308 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 334: 0:00:09.771620
+2022-08-31 11:43:12.724 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 336: 0:00:10.216888
+2022-08-31 11:43:22.982 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 339: 0:00:10.062161
+2022-08-31 11:43:32.995 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 341: 0:00:09.780363
+2022-08-31 11:43:43.921 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 343: 0:00:10.713461
+2022-08-31 11:43:53.648 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 349: 0:00:09.520476
+2022-08-31 11:44:04.077 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 350: 0:00:10.209415
+2022-08-31 11:44:14.366 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 351: 0:00:10.076488
+2022-08-31 11:44:24.520 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 356: 0:00:09.947169
+2022-08-31 11:44:35.310 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 360: 0:00:10.566508
+2022-08-31 11:44:45.621 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 361: 0:00:10.101980
+2022-08-31 11:44:55.371 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 366: 0:00:09.532494
+2022-08-31 11:45:05.285 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 367: 0:00:09.706836
+2022-08-31 11:45:16.006 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 368: 0:00:10.513492
+2022-08-31 11:45:26.908 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 372: 0:00:10.683184
+2022-08-31 11:45:37.571 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 376: 0:00:10.411301
+2022-08-31 11:45:48.382 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 380: 0:00:10.485525
+2022-08-31 11:45:59.016 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 381: 0:00:10.418470
+2022-08-31 11:46:08.963 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 386: 0:00:09.709450
+2022-08-31 11:46:19.874 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 474: 0:00:10.683404
+2022-08-31 11:46:30.492 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 483: 0:00:10.399614
+2022-08-31 11:46:41.975 | INFO     | __main__:compile_pairwise_intersections:165 - grab intersections for 484: 0:00:11.246089
+2022-08-31 11:46:42.217 | INFO     | __main__:compile_pairwise_intersections:175 - execution time for compiling pairwise: 0:24:37.172438
+2022-08-31 11:46:42.759 | INFO     | __main__:<module>:260 - subset corridors: 0:24:45.981417
+2022-08-31 11:54:53.869 | INFO     | __main__:<module>:273 - compute for pairwise/subset_corridors: 0:08:11.109986
+2022-08-31 11:54:56.367 | INFO     | __main__:<module>:283 - execution time: 0:32:59.589132
+2022-08-31 12:14:13.787 | INFO     | __main__:<module>:132 - read in data, assemble valid ITP_IDS: 0:00:01.249134
+2022-08-31 12:21:10.498 | INFO     | __main__:clip_by_itp_id:110 - clipping for 4: 0:06:54.987685
+2022-08-31 12:36:25.703 | INFO     | __main__:clip_by_itp_id:110 - clipping for 6: 0:00:03.026602
+2022-08-31 12:36:31.307 | INFO     | __main__:clip_by_itp_id:110 - clipping for 14: 0:00:03.586686
+2022-08-31 12:36:38.699 | INFO     | __main__:clip_by_itp_id:110 - clipping for 16: 0:00:04.043939
+2022-08-31 12:36:45.499 | INFO     | __main__:clip_by_itp_id:110 - clipping for 18: 0:00:02.648352
+2022-08-31 12:36:48.153 | INFO     | __main__:clip_by_itp_id:110 - clipping for 29: 0:00:02.646663
+2022-08-31 12:36:52.935 | INFO     | __main__:clip_by_itp_id:110 - clipping for 34: 0:00:02.835905
+2022-08-31 12:36:57.690 | INFO     | __main__:clip_by_itp_id:110 - clipping for 42: 0:00:02.808324
+2022-08-31 12:37:00.423 | INFO     | __main__:clip_by_itp_id:110 - clipping for 45: 0:00:02.724926
+2022-08-31 12:37:05.979 | INFO     | __main__:clip_by_itp_id:110 - clipping for 48: 0:00:03.603831
+2022-08-31 12:37:23.553 | INFO     | __main__:clip_by_itp_id:110 - clipping for 61: 0:00:14.264422
+2022-08-31 12:37:52.870 | INFO     | __main__:clip_by_itp_id:110 - clipping for 70: 0:00:05.977946
+2022-08-31 12:38:04.050 | INFO     | __main__:clip_by_itp_id:110 - clipping for 75: 0:00:02.881144
+2022-08-31 12:38:10.485 | INFO     | __main__:clip_by_itp_id:110 - clipping for 76: 0:00:04.472294
+2022-08-31 12:38:17.979 | INFO     | __main__:clip_by_itp_id:110 - clipping for 77: 0:00:02.734441
+2022-08-31 12:38:23.323 | INFO     | __main__:clip_by_itp_id:110 - clipping for 82: 0:00:03.344108
+2022-08-31 12:38:29.979 | INFO     | __main__:clip_by_itp_id:110 - clipping for 87: 0:00:03.569691
+2022-08-31 12:38:36.466 | INFO     | __main__:clip_by_itp_id:110 - clipping for 95: 0:00:02.917168
+2022-08-31 12:38:41.348 | INFO     | __main__:clip_by_itp_id:110 - clipping for 98: 0:00:02.561796
+2022-08-31 12:38:44.628 | INFO     | __main__:clip_by_itp_id:110 - clipping for 99: 0:00:03.274551
+2022-08-31 12:38:49.595 | INFO     | __main__:clip_by_itp_id:110 - clipping for 101: 0:00:02.816039
+2022-08-31 12:38:52.426 | INFO     | __main__:clip_by_itp_id:110 - clipping for 102: 0:00:02.825061
+2022-08-31 12:38:57.074 | INFO     | __main__:clip_by_itp_id:110 - clipping for 105: 0:00:04.640674
+2022-08-31 12:39:06.298 | INFO     | __main__:clip_by_itp_id:110 - clipping for 106: 0:00:03.116317
+2022-08-31 12:39:12.296 | INFO     | __main__:clip_by_itp_id:110 - clipping for 108: 0:00:02.826956
+2022-08-31 12:39:15.758 | INFO     | __main__:clip_by_itp_id:110 - clipping for 110: 0:00:03.454570
+2022-08-31 12:39:31.610 | INFO     | __main__:clip_by_itp_id:110 - clipping for 112: 0:00:12.614638
+2022-08-31 12:39:58.689 | INFO     | __main__:clip_by_itp_id:110 - clipping for 116: 0:00:03.643798
+2022-08-31 12:40:05.361 | INFO     | __main__:clip_by_itp_id:110 - clipping for 120: 0:00:03.100730
+2022-08-31 12:40:10.651 | INFO     | __main__:clip_by_itp_id:110 - clipping for 121: 0:00:02.784498
+2022-08-31 12:40:19.729 | INFO     | __main__:clip_by_itp_id:110 - clipping for 123: 0:00:07.190932
+2022-08-31 12:40:34.667 | INFO     | __main__:clip_by_itp_id:110 - clipping for 126: 0:00:03.988545
+2022-08-31 12:40:43.636 | INFO     | __main__:clip_by_itp_id:110 - clipping for 127: 0:00:05.155078
+2022-08-31 12:40:52.597 | INFO     | __main__:clip_by_itp_id:110 - clipping for 129: 0:00:02.650775
+2022-08-31 12:40:55.416 | INFO     | __main__:clip_by_itp_id:110 - clipping for 135: 0:00:02.812272
+2022-08-31 12:41:42.517 | INFO     | __main__:clip_by_itp_id:110 - clipping for 142: 0:00:47.092003
+2022-08-31 12:43:23.074 | INFO     | __main__:clip_by_itp_id:110 - clipping for 146: 0:00:02.924599
+2022-08-31 12:43:28.374 | INFO     | __main__:clip_by_itp_id:110 - clipping for 148: 0:00:02.997895
+2022-08-31 12:43:31.191 | INFO     | __main__:clip_by_itp_id:110 - clipping for 154: 0:00:02.808024
+2022-08-31 12:43:34.148 | INFO     | __main__:clip_by_itp_id:110 - clipping for 159: 0:00:02.948430
+2022-08-31 12:43:39.176 | INFO     | __main__:clip_by_itp_id:110 - clipping for 165: 0:00:02.781935
+2022-08-31 12:43:44.454 | INFO     | __main__:clip_by_itp_id:110 - clipping for 167: 0:00:03.122966
+2022-08-31 12:43:49.695 | INFO     | __main__:clip_by_itp_id:110 - clipping for 168: 0:00:02.864547
+2022-08-31 12:43:54.708 | INFO     | __main__:clip_by_itp_id:110 - clipping for 169: 0:00:02.698296
+2022-08-31 12:44:20.587 | INFO     | __main__:clip_by_itp_id:110 - clipping for 170: 0:00:25.871961
+2022-08-31 12:45:20.917 | INFO     | __main__:clip_by_itp_id:110 - clipping for 171: 0:00:03.428112
+2022-08-31 12:45:26.936 | INFO     | __main__:clip_by_itp_id:110 - clipping for 172: 0:00:03.162370
+2022-08-31 12:45:32.985 | INFO     | __main__:clip_by_itp_id:110 - clipping for 173: 0:00:03.182709
+2022-08-31 12:45:39.214 | INFO     | __main__:clip_by_itp_id:110 - clipping for 174: 0:00:03.322781
+2022-08-31 12:45:45.229 | INFO     | __main__:clip_by_itp_id:110 - clipping for 176: 0:00:03.140035
+2022-08-31 12:45:51.427 | INFO     | __main__:clip_by_itp_id:110 - clipping for 177: 0:00:03.223097
+2022-08-31 12:45:57.588 | INFO     | __main__:clip_by_itp_id:110 - clipping for 178: 0:00:03.281369
+2022-08-31 12:46:03.836 | INFO     | __main__:clip_by_itp_id:110 - clipping for 179: 0:00:03.178884
+2022-08-31 12:46:10.081 | INFO     | __main__:clip_by_itp_id:110 - clipping for 181: 0:00:03.246233
+2022-08-31 12:50:53.424 | INFO     | __main__:clip_by_itp_id:110 - clipping for 182: 0:04:40.528766
+2022-08-31 13:01:49.233 | INFO     | __main__:clip_by_itp_id:110 - clipping for 183: 0:00:34.334663
+2022-08-31 13:03:04.397 | INFO     | __main__:clip_by_itp_id:110 - clipping for 187: 0:00:02.968703
+2022-08-31 13:03:09.454 | INFO     | __main__:clip_by_itp_id:110 - clipping for 190: 0:00:03.043651
+2022-08-31 13:03:27.854 | INFO     | __main__:clip_by_itp_id:110 - clipping for 194: 0:00:16.131330
+2022-08-31 13:04:02.413 | INFO     | __main__:clip_by_itp_id:110 - clipping for 198: 0:00:02.917617
+2022-08-31 13:04:05.267 | INFO     | __main__:clip_by_itp_id:110 - clipping for 201: 0:00:02.847536
+2022-08-31 13:04:10.708 | INFO     | __main__:clip_by_itp_id:110 - clipping for 206: 0:00:03.352681
+2022-08-31 13:04:16.177 | INFO     | __main__:clip_by_itp_id:110 - clipping for 207: 0:00:02.731567
+2022-08-31 13:04:22.173 | INFO     | __main__:clip_by_itp_id:110 - clipping for 208: 0:00:05.988425
+2022-08-31 13:04:33.380 | INFO     | __main__:clip_by_itp_id:110 - clipping for 212: 0:00:02.851540
+2022-08-31 13:04:38.207 | INFO     | __main__:clip_by_itp_id:110 - clipping for 214: 0:00:02.715270
+2022-08-31 13:04:43.104 | INFO     | __main__:clip_by_itp_id:110 - clipping for 217: 0:00:04.891355
+2022-08-31 13:04:52.520 | INFO     | __main__:clip_by_itp_id:110 - clipping for 218: 0:00:02.967036
+2022-08-31 13:04:57.918 | INFO     | __main__:clip_by_itp_id:110 - clipping for 221: 0:00:03.024169
+2022-08-31 13:05:08.701 | INFO     | __main__:clip_by_itp_id:110 - clipping for 226: 0:00:08.515027
+2022-08-31 13:05:24.445 | INFO     | __main__:clip_by_itp_id:110 - clipping for 228: 0:00:02.872716
+2022-08-31 13:05:39.084 | INFO     | __main__:clip_by_itp_id:110 - clipping for 231: 0:00:12.471680
+2022-08-31 13:06:05.195 | INFO     | __main__:clip_by_itp_id:110 - clipping for 232: 0:00:04.487425
+2022-08-31 13:06:57.303 | INFO     | __main__:clip_by_itp_id:110 - clipping for 235: 0:00:46.869713
+2022-08-31 13:08:39.062 | INFO     | __main__:clip_by_itp_id:110 - clipping for 238: 0:00:02.794062
+2022-08-31 13:08:44.317 | INFO     | __main__:clip_by_itp_id:110 - clipping for 243: 0:00:03.206749
+2022-08-31 13:08:50.200 | INFO     | __main__:clip_by_itp_id:110 - clipping for 247: 0:00:03.140332
+2022-08-31 13:08:55.549 | INFO     | __main__:clip_by_itp_id:110 - clipping for 251: 0:00:02.856998
+2022-08-31 13:08:58.191 | INFO     | __main__:clip_by_itp_id:110 - clipping for 257: 0:00:02.634454
+2022-08-31 13:09:01.622 | INFO     | __main__:clip_by_itp_id:110 - clipping for 259: 0:00:03.425387
+2022-08-31 13:09:07.386 | INFO     | __main__:clip_by_itp_id:110 - clipping for 260: 0:00:02.699646
+2022-08-31 13:09:12.232 | INFO     | __main__:clip_by_itp_id:110 - clipping for 261: 0:00:02.957809
+2022-08-31 13:09:23.434 | INFO     | __main__:clip_by_itp_id:110 - clipping for 269: 0:00:08.924535
+2022-08-31 13:09:42.732 | INFO     | __main__:clip_by_itp_id:110 - clipping for 271: 0:00:03.965409
+2022-08-31 13:10:32.308 | INFO     | __main__:clip_by_itp_id:110 - clipping for 278: 0:00:45.642719
+2022-08-31 13:12:10.487 | INFO     | __main__:clip_by_itp_id:110 - clipping for 280: 0:00:02.961677
+2022-08-31 13:12:15.279 | INFO     | __main__:clip_by_itp_id:110 - clipping for 281: 0:00:02.834964
+2022-08-31 13:14:41.685 | INFO     | __main__:clip_by_itp_id:110 - clipping for 282: 0:02:24.450437
+2022-08-31 13:20:03.856 | INFO     | __main__:clip_by_itp_id:110 - clipping for 284: 0:00:07.904994
+2022-08-31 13:20:19.049 | INFO     | __main__:clip_by_itp_id:110 - clipping for 287: 0:00:02.817495
+2022-08-31 13:20:24.332 | INFO     | __main__:clip_by_itp_id:110 - clipping for 289: 0:00:03.205023
+2022-08-31 13:21:09.244 | INFO     | __main__:clip_by_itp_id:110 - clipping for 290: 0:00:42.673598
+2022-08-31 13:22:43.126 | INFO     | __main__:clip_by_itp_id:110 - clipping for 293: 0:00:03.728934
+2022-08-31 13:23:50.980 | INFO     | __main__:clip_by_itp_id:110 - clipping for 294: 0:01:04.847907
+2022-08-31 13:26:13.056 | INFO     | __main__:clip_by_itp_id:110 - clipping for 295: 0:00:09.034410
+2022-08-31 13:26:32.166 | INFO     | __main__:clip_by_itp_id:110 - clipping for 296: 0:00:04.866734
+2022-08-31 13:26:41.214 | INFO     | __main__:clip_by_itp_id:110 - clipping for 298: 0:00:03.251934
+2022-08-31 13:26:46.296 | INFO     | __main__:clip_by_itp_id:110 - clipping for 300: 0:00:05.073376
+2022-08-31 13:26:57.084 | INFO     | __main__:clip_by_itp_id:110 - clipping for 301: 0:00:03.656327
+2022-08-31 13:27:03.657 | INFO     | __main__:clip_by_itp_id:110 - clipping for 308: 0:00:02.789755
+2022-08-31 13:27:07.198 | INFO     | __main__:clip_by_itp_id:110 - clipping for 310: 0:00:03.534495
+2022-08-31 13:27:13.527 | INFO     | __main__:clip_by_itp_id:110 - clipping for 312: 0:00:02.722024
+2022-08-31 13:27:21.946 | INFO     | __main__:clip_by_itp_id:110 - clipping for 314: 0:00:08.414264
+2022-08-31 13:27:38.919 | INFO     | __main__:clip_by_itp_id:110 - clipping for 323: 0:00:03.013548
+2022-08-31 13:27:46.547 | INFO     | __main__:clip_by_itp_id:110 - clipping for 324: 0:00:04.725864
+2022-08-31 13:27:55.993 | INFO     | __main__:clip_by_itp_id:110 - clipping for 327: 0:00:03.352779
+2022-08-31 13:28:02.250 | INFO     | __main__:clip_by_itp_id:110 - clipping for 329: 0:00:03.177249
+2022-08-31 13:28:07.786 | INFO     | __main__:clip_by_itp_id:110 - clipping for 334: 0:00:03.071356
+2022-08-31 13:28:14.808 | INFO     | __main__:clip_by_itp_id:110 - clipping for 336: 0:00:04.448939
+2022-08-31 13:28:23.062 | INFO     | __main__:clip_by_itp_id:110 - clipping for 339: 0:00:03.086625
+2022-08-31 13:28:28.268 | INFO     | __main__:clip_by_itp_id:110 - clipping for 341: 0:00:02.778755
+2022-08-31 13:28:32.411 | INFO     | __main__:clip_by_itp_id:110 - clipping for 343: 0:00:04.136817
+2022-08-31 13:28:39.704 | INFO     | __main__:clip_by_itp_id:110 - clipping for 349: 0:00:02.945004
+2022-08-31 13:28:45.554 | INFO     | __main__:clip_by_itp_id:110 - clipping for 350: 0:00:03.620317
+2022-08-31 13:28:52.189 | INFO     | __main__:clip_by_itp_id:110 - clipping for 351: 0:00:03.247483
+2022-08-31 13:28:57.977 | INFO     | __main__:clip_by_itp_id:110 - clipping for 356: 0:00:03.248610
+2022-08-31 13:29:04.300 | INFO     | __main__:clip_by_itp_id:110 - clipping for 360: 0:00:03.607813
+2022-08-31 13:29:10.654 | INFO     | __main__:clip_by_itp_id:110 - clipping for 361: 0:00:03.294735
+2022-08-31 13:29:16.054 | INFO     | __main__:clip_by_itp_id:110 - clipping for 366: 0:00:02.760814
+2022-08-31 13:29:20.909 | INFO     | __main__:clip_by_itp_id:110 - clipping for 367: 0:00:02.911422
+2022-08-31 13:29:26.800 | INFO     | __main__:clip_by_itp_id:110 - clipping for 368: 0:00:03.863757
+2022-08-31 13:29:35.020 | INFO     | __main__:clip_by_itp_id:110 - clipping for 372: 0:00:04.007833
+2022-08-31 13:29:42.742 | INFO     | __main__:clip_by_itp_id:110 - clipping for 376: 0:00:03.263667
+2022-08-31 13:29:48.592 | INFO     | __main__:clip_by_itp_id:110 - clipping for 380: 0:00:03.299209
+2022-08-31 13:29:54.939 | INFO     | __main__:clip_by_itp_id:110 - clipping for 381: 0:00:03.584161
+2022-08-31 13:30:01.292 | INFO     | __main__:clip_by_itp_id:110 - clipping for 386: 0:00:02.861428
+2022-08-31 13:30:07.227 | INFO     | __main__:clip_by_itp_id:110 - clipping for 474: 0:00:03.807299
+2022-08-31 13:30:13.743 | INFO     | __main__:clip_by_itp_id:110 - clipping for 483: 0:00:02.885552
+2022-08-31 13:30:21.267 | INFO     | __main__:clip_by_itp_id:110 - clipping for 484: 0:00:05.128925
+2022-08-31 13:53:43.053 | INFO     | __main__:<module>:155 - compute for full clipped df: 1:39:29.266643
+2022-08-31 13:53:44.893 | INFO     | __main__:<module>:165 - execution time: 1:39:32.355755
+2022-08-31 14:05:21.451 | INFO     | __main__:<module>:215 - grab all stops
+2022-08-31 14:05:21.573 | INFO     | __main__:<module>:219 - create major stop bus
+2022-08-31 14:05:22.150 | INFO     | __main__:<module>:223 - create hq corridor bus
+2022-08-31 14:05:30.339 | INFO     | __main__:<module>:231 - execution time: 0:00:24.462973
+2022-08-31 14:20:19.857 | INFO     | __main__:<module>:110 - filter and buffer: 0:00:17.741578
+2022-08-31 14:20:28.281 | INFO     | __main__:<module>:129 - execution time: 0:00:26.165031

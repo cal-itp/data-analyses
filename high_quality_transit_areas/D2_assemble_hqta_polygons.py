@@ -8,11 +8,21 @@ import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import pandas as pd
+import sys
+
+from loguru import logger
 
 import C1_prep_for_clipping as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
 from shared_utils import utils, geography_utils
+from D1_assemble_hqta_points import EXPORT_PATH
+from update_vars import analysis_date
+
+logger.add("./logs/D2_assemble_hqta_polygons.log")
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
 
 HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 
@@ -88,6 +98,7 @@ def drop_bad_stops_final_processing(gdf: gpd.GeoDataFrame,
 
 
 if __name__=="__main__":
+    logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     hqta_points = dg.read_parquet(HQTA_POINTS_FILE)
@@ -98,20 +109,23 @@ if __name__=="__main__":
     gdf = filter_and_buffer(hqta_points, bus_hq_corr)
     
     time1 = dt.datetime.now()
-    print(f"filter and buffer: {time1 - start}")
+    logger.info(f"filter and buffer: {time1 - start}")
     
     # Drop bad stops, subset, get ready for export
     gdf2 = drop_bad_stops_final_processing(gdf, bad_stops)    
     
     # Export to GCS
+    # Stash this date's into its own folder, to convert to geojson, geojsonl
+    utils.geoparquet_gcs_export(gdf2, 
+                                EXPORT_PATH, 
+                                'ca_hq_transit_areas'
+                               )
+    
+    # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(gdf2,
                                 utilities.GCS_FILE_PATH,
                                 'hqta_areas'
                                )    
-    
-    # TODO: add export to individual folder as geojsonL
-    # maybe create object loader fs.put in shared_utils
-    # fs.mkdir(f'{GCS_FILE_PATH}export/{analysis_date.isoformat()}/')
-    
+        
     end = dt.datetime.now()
-    print(f"execution time: {end-start}")
+    logger.info(f"execution time: {end-start}")

@@ -3,14 +3,11 @@ Draw bus corridors (routes -> segments) for each operator,
 and attach number of trips that pass through each stop.
 Use this to flag whether a segment is an high quality transit corridor.
 
-Picking just the longest route takes 21 min to run.
-The known issue related to this is that it misses layover 
-and possible 1-way streets in certain directions.
-but hqta segments are drawn in longer bits, closer to the 1,250 m 
-as intended.
+This takes 56 min to run.
 
-This takes 2.5 hr to run (when keeping all the shapes, dissolving).
-This has problems with how points in a line are ordered,
+Picking just the longest route takes 21 min to run.
+Keeping all shapes and dissolving takes 2.5 hrs to run, but 
+has problems with how points in a line are ordered,
 and choppy hqta segments are not useful, because they may not attach
 properly to stops.
 """
@@ -21,18 +18,25 @@ import geopandas as gpd
 import gcsfs
 import numpy as np
 import pandas as pd
+import sys
+
+from loguru import logger
 
 import corridor_utils
 import operators_for_hqta
 from shared_utils import utils, geography_utils
 from utilities import GCS_FILE_PATH
-from update_vars import (date_str, CACHED_VIEWS_EXPORT_PATH, 
+from update_vars import (analysis_date, CACHED_VIEWS_EXPORT_PATH, 
                          VALID_OPERATORS_FILE)
+
+logger.add("./logs/B1_bus_corridors.log")
+logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
 fs = gcsfs.GCSFileSystem()
 
 segment_cols = ["hqta_segment_id", "segment_sequence"]
 stop_cols = ["calitp_itp_id", "stop_id"]
+route_cols = ["route_id", "route_direction"]
 
 ITP_IDS_IN_GCS = operators_for_hqta.itp_ids_from_json(file=VALID_OPERATORS_FILE)
 
@@ -116,9 +120,8 @@ def add_hqta_segment_peak_trips(df: dg.GeoDataFrame,
     
     # Merge at the hqta_segment_id-stop_id level to get it back to segments
     gdf = dd.merge(
-        df[stop_cols + segment_cols + 
-           ["calitp_url_number", "route_id", 
-            "route_direction", "geometry"]].drop_duplicates(),
+        df[stop_cols + segment_cols + route_cols + 
+           ["calitp_url_number", "geometry"]].drop_duplicates(),
         peak_trips_by_segment,
         on = stop_cols,
         how = "left"
@@ -164,7 +167,7 @@ def single_operator_hqta(routelines: dg.GeoDataFrame,
         one_route = route_shapes[route_shapes.index==i]
         gdf = geography_utils.cut_segments(
             one_route, 
-            group_cols = ["calitp_itp_id", "calitp_url_number", "route_id"], 
+            group_cols = ["calitp_itp_id", "calitp_url_number"] + route_cols, 
             segment_distance = 1_250
         )
     
@@ -214,7 +217,9 @@ def import_data(itp_id, date_str):
     
     
     
-if __name__=="__main__":        
+if __name__=="__main__":   
+    logger.info(f"Analysis date: {analysis_date}")
+
     start_time = dt.datetime.now()
     
     # TODO: add back in? clear cache each month?
@@ -224,23 +229,25 @@ if __name__=="__main__":
 
         operator_start = dt.datetime.now()
             
-        routelines, trips, stop_times, stops = import_data(itp_id, date_str)   
-
-        print(f"read in cached files: {itp_id}")                
-            
+        routelines, trips, stop_times, stops = import_data(itp_id, analysis_date)   
+                
+        logger.info(f"read in cached files: {itp_id}")
+    
         gdf = single_operator_hqta(routelines, trips, stop_times, stops)
 
-        print(f"created single operator hqta: {itp_id}")
-        
+        logger.info(f"created single operator hqta: {itp_id}")
+
         # Export each operator         
         utils.geoparquet_gcs_export(
             gdf, f'{GCS_FILE_PATH}bus_corridors/', f'{itp_id}_bus')
 
-        print(f"successful export: {itp_id}")
+        logger.info(f"successful export: {itp_id}")
 
         operator_end = dt.datetime.now()
-        print(f"execution time for {itp_id}: {operator_end - operator_start}")
         
+        logger.info(f"execution time for {itp_id}: {operator_end - operator_start}")
+
     end_time = dt.datetime.now()
-    print(f"total execution time: {end_time-start_time}")
+    logger.info(f"total execution time: {end_time-start_time}")
+
         
