@@ -37,7 +37,7 @@ def process_clipped_intersections() -> dg.GeoDataFrame:
     
     return gdf 
 
-
+# Don't drop big areas for now and see how it turns out
 def drop_big_areas(geometry: sh.multipolygon.MultiPolygon | sh.polygon.Polygon
                   ) -> sh.MultiPolygon | sh.polygon.Polygon:
     LENGTH = 1_000

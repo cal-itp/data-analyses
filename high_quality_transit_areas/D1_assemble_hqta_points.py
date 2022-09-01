@@ -96,6 +96,7 @@ def delete_local_files():
     
     
 if __name__=="__main__":
+    logger.info(f"Analysis date: {analysis_date}")    
     start = dt.datetime.now()
     
     rail_ferry_brt = rail_ferry_brt_extract.get_rail_ferry_brt_extract()

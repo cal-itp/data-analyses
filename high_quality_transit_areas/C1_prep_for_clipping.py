@@ -18,6 +18,7 @@ from loguru import logger
 
 from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
+from update_vars import analysis_date
 
 logger.add("./logs/C1_prep_for_clipping.log")
 logger.add(sys.stderr, 
@@ -243,7 +244,7 @@ def rename_cols(df: dd.DataFrame | pd.DataFrame,
 
 
 if __name__=="__main__":
-
+    logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
 
     corridors = prep_bus_corridors()   

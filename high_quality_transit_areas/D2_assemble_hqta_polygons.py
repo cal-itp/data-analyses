@@ -17,6 +17,7 @@ import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
 from shared_utils import utils, geography_utils
 from D1_assemble_hqta_points import EXPORT_PATH
+from update_vars import analysis_date
 
 logger.add("./logs/D2_assemble_hqta_polygons.log")
 logger.add(sys.stderr, 
@@ -97,6 +98,7 @@ def drop_bad_stops_final_processing(gdf: gpd.GeoDataFrame,
 
 
 if __name__=="__main__":
+    logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     hqta_points = dg.read_parquet(HQTA_POINTS_FILE)
