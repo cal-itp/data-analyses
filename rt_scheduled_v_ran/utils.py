@@ -27,6 +27,13 @@ fs = gcsfs.GCSFileSystem()
 from tqdm import tqdm_notebook
 from tqdm.notebook import trange, tqdm
 
+import altair as alt
+from shared_utils import altair_utils
+from shared_utils import geography_utils
+from shared_utils import calitp_color_palette as cp
+from shared_utils import styleguide
+
+
 # Read in complete data table
 def read_data():
     
@@ -189,3 +196,20 @@ def labeling(word):
         word = word.title()
 
     return word
+
+## Charting Functions 
+
+# Bar chart over time 
+#need to specify color scheme outside of charting function which can be done with .encode()
+def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_txt):
+    bar = (alt.Chart(df)
+        .mark_bar(size=8)
+        .encode(
+            x=alt.X(x_col, title=labeling(x_col), sort=(sort)),
+            y=alt.Y(y_col, stack = None, title=labeling(y_col), axis=alt.Axis(format=yaxis_format)),
+            color = color_col,
+        ).properties(title=title_txt))
+    
+    chart = styleguide.preset_chart_config(bar)
+    return chart
+
