@@ -12,6 +12,10 @@ from datetime import datetime
 import prep_data
 from shared_utils import geography_utils, portfolio_utils
 
+# List of cols to drop from trips table
+# Didn't remove after switching to gtfs_utils, but these 
+# are datetime and will get rejected in the zipped shapefile conversion anyway
+remove_trip_cols = ["service_date", "calitp_extracted_at", "calitp_deleted_at"]
 
 def merge_trips_to_routes(trips: dd.DataFrame, 
                           routes: dg.GeoDataFrame) -> dg.GeoDataFrame:
@@ -34,7 +38,7 @@ def merge_trips_to_routes(trips: dd.DataFrame,
     # right only means in routes, but no route that has that shape_id 
     # only 1% falls into right_only
     m1 = dd.merge(
-            trips.drop(columns = ["calitp_extracted_at", "calitp_deleted_at"]),
+            trips.drop(columns = remove_trip_cols),
             routes[shape_id_cols + ["geometry"]].drop_duplicates(),
             on = shape_id_cols,
             how = "inner",
