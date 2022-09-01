@@ -37,6 +37,7 @@ van_ness_ids = [
 
 
 if __name__ == "__main__":
+    logger.info(f"Analysis date: {analysis_date}")
     start = datetime.datetime.now()
     
     # Rail
