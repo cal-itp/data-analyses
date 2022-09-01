@@ -2,21 +2,15 @@
 Semiannual Report
 '''
 import pandas as pd
+import numpy as np
 from calitp import *
-
-#GCS File Path:
+import A5_crosswalks as crosswalks
+import A1_data_prep
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
 FILE_NAME = "TIRCP_July_8_2022.xlsx"
 
-#Crosswalk
-import A5_crosswalks as crosswalks
-
-#Import cleaned up data
-import A1_data_prep
-
 """
 Columns
-
 """
 # Columns to keep
 allocation_cols = [
@@ -180,7 +174,7 @@ def summary_SAR_table(df):
 """
 Complete Semiannual Report
 """
-def full_sar_report():
+def create_sar_report():
     
     # Load in raw sheets
     df_project = A1_data_prep.clean_project()
@@ -210,8 +204,8 @@ def full_sar_report():
         m1[i] = m1[i].fillna(missing_date).apply(pd.to_datetime)
 
     """
-    Add columns with percentages and to flag whether an allocation date is
-    AFTER  7-31-2020 then blank, if BEFORE 7-31-2020 then X
+    Add 3 columns: 2 column percentage metrics and 1 column to flag
+    whether an allocation date is AFTER  7-31-2020 then blank, if BEFORE 7-31-2020 then X
     """ 
     m1 = m1.assign(
         Percent_of_Allocation_Expended=(
@@ -228,16 +222,16 @@ def full_sar_report():
         ),
     )
 
+    # Fill in null values based on datatype of each column
+    m1 = m1.fillna(m1.dtypes.replace({"float64": 0.0, "int64": 0}))
+    
     # Filter out projects that are excluded
     m1 = m1[
         (m1.allocation_allocation_amount > 0)
         & (m1.Percent_of_Allocation_Expended < 0.99)
     ]
-
-    # Fill in null values based on datatype of each column
-    m1 = m1.fillna(m1.dtypes.replace({"float64": 0.0, "int64": 0}))
-
-    # Rename cols
+    
+    # Rename cols to the right names
     m1 = m1.rename(
         columns={
             "allocation_led": "Phase_Completion_Date",

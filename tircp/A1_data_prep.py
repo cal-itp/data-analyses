@@ -21,10 +21,9 @@ def ppno_slice(df):
 def project_id_slice(df):
     df["project_id"] = df["project_id"].str.replace("\n", "")
     df = df.assign(project_id=df["project_id"].str.slice(start=0, stop=10))
-
     return df
 
-# Function to clean cols 
+# Function to clean cols before exporting
 def clean_up_columns(df):
     df.columns = (
         df.columns.str.replace("_", " ")
@@ -35,7 +34,7 @@ def clean_up_columns(df):
     )
     return df
 
-# Function to clean agency/organization name 
+# Function to clean agency/organization names 
 def organization_cleaning(df, column_wanted: str):
     df[column_wanted] = (
         df[column_wanted]
@@ -48,13 +47,16 @@ def organization_cleaning(df, column_wanted: str):
         .str.split("/")
         .str[0]
         .str.title()
+        .str.replace("Trasit", "Transit")
+        .str.strip() #strip again after getting rid of certain things
     )
     return df
 
-# Format numbers to currency
+# Format a column to a currency format
 def currency_format(df, col_name: str):
     df[col_name] = "$" + (df[col_name].astype(float)).round(0).astype(str)
     return df
+
 """
 Import the Data
 """
@@ -109,7 +111,7 @@ def load_invoice():
 """
 Clean Project Sheet 
 """
-# Manual cleaning portion of project
+# Manual cleaning portion of project that will change with each sheet
 def clean_project_manual(df):
 
     # Replace agencies with the right PPNO
@@ -141,7 +143,7 @@ def clean_project():
 
     """
     Some grant recipients have multiple spellings of their name. 
-    E.g. BART versus Bay Area Rapid Transit
+    E.g. BART versus Bay Area Rapid Transit. Fix this.
     """
     df = organization_cleaning(df, "grant_recipient")
     df["grant_recipient"] = df["grant_recipient"].replace(
@@ -212,7 +214,7 @@ def clean_allocation_manual(df):
     # Some PPNO are NaN, sort by award year & grant recipient to backwards fill values
     df = df.sort_values(["award_year", "grant_recipient"])
     
-    # Replace with allocation
+    # Replace with PPNO with a crosswalk for everything else
     df["ppno"] = df["ppno"].replace(crosswalks.ppno_crosswalk_allocation)
 
     return df
@@ -242,7 +244,7 @@ def clean_allocation():
     # Clean organization name/de duplicate
     df = organization_cleaning(df, "grant_recipient")
 
-    # Do some manually cleaning
+    # Do some manual replacing of values
     df = clean_allocation_manual(df) 
     
     # Add prefix
@@ -291,4 +293,7 @@ def clean_invoice():
     # Clean organization names and de deuplicate
     df = organization_cleaning(df, "implementing_agency")
 
+    # Add prefix
+    df = df.add_prefix("invoice_")
+    
     return df

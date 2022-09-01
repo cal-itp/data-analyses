@@ -4,26 +4,25 @@ Tableau
 import numpy as np
 import pandas as pd
 from calitp import *
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
 import A5_crosswalks as crosswalks
 import A1_data_prep
+
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
 
 """
 Functions
 """
-# Rate a project
+# Categorize a project by percentiles
 def project_size_rating(dataframe, original_column: str, new_column: str):
-    """Rate a project by big, small, and medium
-
-    Extended description of function.
-
+    """Rate a project by percentiles and returning small/medium/large for any column
+    
     Args:
         dataframe
         original_column (str): column to create the metric off of
         new_column (str): new column to hold results
 
     Returns:
-        bool: Description of return value
+        the dataframe with the new column with the categorization.
 
     """
     # Get percentiles in objects for total vehicle.
@@ -46,7 +45,6 @@ def project_size_rating(dataframe, original_column: str, new_column: str):
 
     return dataframe
 
-# Categorizing expended percentage into bins
 # Categorizing expended percentage into bins
 def expended_percent(row):
     if (row.Expended_Percent > 0) and (row.Expended_Percent < 0.26):
@@ -136,9 +134,9 @@ burndown_cols_to_keep = [
     "allocation_completion_date",
 ]
 
-'''
-Scripts
-'''
+"""
+Script
+"""
 def tableau_dashboard():
     # Load in cleaned project sheets
     df = A1_data_prep.clean_project()
@@ -208,9 +206,7 @@ def create_burndown():
 
     return m1
 
-"""
-Script to bring it together
-"""
+# Script to bring it together
 def complete_tableau():
     burndown = create_burndown()
     tableau = tableau_dashboard()
@@ -219,5 +215,3 @@ def complete_tableau():
     with pd.ExcelWriter(f"{GCS_FILE_PATH}Tableau_Workbook.xlsx") as writer:
         tableau.to_excel(writer, sheet_name="main", index=False)
         burndown.to_excel(writer, sheet_name = "burndown", index=False)
-        
-    return burndown, tableau
