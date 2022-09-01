@@ -1,0 +1,5 @@
+2022-08-31 17:58:55.863 | INFO     | __main__:<module>:114 - combined points: 0:00:00.508981
+2022-08-31 17:59:09.925 | INFO     | __main__:<module>:121 - add agency names / compute: 0:00:14.061696
+2022-08-31 17:59:10.827 | INFO     | __main__:<module>:139 - execution time: 0:00:15.472545
+2022-08-31 17:59:34.727 | INFO     | __main__:<module>:110 - filter and buffer: 0:00:13.898339
+2022-08-31 17:59:41.334 | INFO     | __main__:<module>:129 - execution time: 0:00:20.505857
