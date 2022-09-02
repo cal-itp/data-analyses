@@ -540,7 +540,7 @@ def all_routelines_or_stops_with_cached(
     dataset: Literal["routelines", "stops"] = "routelines",
     analysis_date: datetime.date | str = "2022-06-15",
     itp_id_list: list = ALL_ITP_IDS,
-    export_path="gs://calitp-analytics-data/data-analyses/traffic_ops/",
+    export_path="gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/",
 ):
     """
     Use cached files whenever possible, instead of running fresh query.
@@ -572,7 +572,7 @@ def all_trips_or_stoptimes_with_cached(
     dataset: Literal["trips", "st"] = "trips",
     analysis_date: datetime.date | str = "2022-06-15",
     itp_id_list: list = ALL_ITP_IDS,
-    export_path="gs://calitp-analytics-data/data-analyses/traffic_ops/",
+    export_path="gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/",
 ):
     """
     Use cached files whenever possible, instead of running fresh query.
