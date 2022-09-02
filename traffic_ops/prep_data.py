@@ -24,15 +24,11 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
 DATA_PATH = "./data/"
 
 
-def grab_selected_date(selected_date: 
-                       datetime.date | str) -> tuple[gpd.GeoDataFrame, 
-                                                     pd.DataFrame, 
-                                                     gpd.GeoDataFrame, 
-                                                     pd.DataFrame]:
+def grab_selected_date(selected_date: str):
     """
     Create the cached files for stops, trips, stop_times, routes, and route_info
     """
-    '''
+    
     gtfs_utils.all_routelines_or_stops_with_cached(
         dataset = "stops",
         analysis_date = selected_date,
@@ -50,7 +46,7 @@ def grab_selected_date(selected_date:
         analysis_date = selected_date,
         export_path = GCS_FILE_PATH
     )
-    '''
+    
     
     gtfs_utils.all_trips_or_stoptimes_with_cached(
         dataset = "st",
