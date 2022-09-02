@@ -37,17 +37,25 @@ def merge_trips_to_routes(trips: dd.DataFrame,
     # Left only means in trips, but shape_id not found in shapes.txt
     # right only means in routes, but no route that has that shape_id 
     # only 1% falls into right_only
+    keep_cols = [
+        'calitp_itp_id', 'route_id', 'shape_id', 
+        'route_type', 'geometry',
+    ]
+    
     m1 = dd.merge(
             trips.drop(columns = remove_trip_cols),
             routes[shape_id_cols + ["geometry"]].drop_duplicates(),
             on = shape_id_cols,
             how = "inner",
             #validate = "m:1",
-        ).compute()
-
-    # routes is a gdf, but we lost it putting it as right df in merge, so turn it back into gdf
+        )[keep_cols].drop_duplicates().compute()
+    
+    # routes is a gdf, but we lost it putting it as right df in merge, 
+    # so turn it back into gdf, don't assume we know what CRS it was
+    orig_crs = routes.crs.to_epsg()
+    
     m2 = gpd.GeoDataFrame(m1, geometry="geometry", 
-                          crs = geography_utils.CA_NAD83Albers
+                          crs = f"EPSG: {orig_crs}"
                          ).to_crs(geography_utils.WGS84)
         
     return m2

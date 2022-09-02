@@ -4,7 +4,7 @@
 		<citation>
 			<citeinfo>
 				<title>ca_transit_routes</title>
-				<edition>2</edition>
+				<edition>3</edition>
 				<geoform>vector digital data</geoform>
 				<pubinfo>
 					<publish>California Integrated Travel Project</publish>
@@ -18,8 +18,8 @@
 		<timeperd>
 			<timeinfo>
 				<rngdates>
-					<begdate>20220622</begdate>
-					<enddate>20220722</enddate>
+					<begdate>20220713</begdate>
+					<enddate>20220813</enddate>
 				</rngdates>
 			</timeinfo>
 			<current>California</current>
@@ -70,7 +70,7 @@
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>String</sdtstype>
-				<ptvctcnt>7612</ptvctcnt>
+				<ptvctcnt>7456</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -120,6 +120,9 @@
 			</attr>
 			<attr>
 				<attrlabl>shape_id</attrlabl>
+			</attr>
+			<attr>
+				<attrlabl>route_type</attrlabl>
 			</attr>
 			<attr>
 				<attrlabl>route_name</attrlabl>
