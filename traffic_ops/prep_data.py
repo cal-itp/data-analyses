@@ -20,7 +20,9 @@ from shared_utils import geography_utils, gtfs_utils, utils, rt_dates
 
 ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["jul2022"])
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
+GCS = "gs://calitp-analytics-data/data-analyses/"
+TRAFFIC_OPS_GCS = f"{GCS}traffic_ops/"
+COMPILED_CACHED_GCS = f"{GCS}rt_delay/compiled_cached_views/"
 DATA_PATH = "./data/"
 
 
@@ -32,26 +34,25 @@ def grab_selected_date(selected_date: str):
     gtfs_utils.all_routelines_or_stops_with_cached(
         dataset = "stops",
         analysis_date = selected_date,
-        export_path = GCS_FILE_PATH
+        export_path = COMPILED_CACHED_GCS
     )
     
     gtfs_utils.all_trips_or_stoptimes_with_cached(
         dataset = "trips",
         analysis_date = selected_date,
-        export_path = GCS_FILE_PATH
+        export_path = COMPILED_CACHED_GCS
     )
     
     gtfs_utils.all_routelines_or_stops_with_cached(
         dataset = "routelines",
         analysis_date = selected_date,
-        export_path = GCS_FILE_PATH
+        export_path = COMPILED_CACHED_GCS
     )
-    
     
     gtfs_utils.all_trips_or_stoptimes_with_cached(
         dataset = "st",
         analysis_date = selected_date,
-        export_path = GCS_FILE_PATH
+        export_path = COMPILED_CACHED_GCS
     )
     
     # stops, trips, stop_times, and routes save directly to GCS already
@@ -138,7 +139,7 @@ def grab_amtrak(selected_date: datetime.date | str
 
 def concatenate_amtrak(
     selected_date: datetime.date | str = "2022-05-04", 
-    export_path: str = GCS_FILE_PATH):
+    export_path: str = COMPILED_CACHED_GCS):
     """
     Grab the cached file on selected date for trips, stops, routelines.
     Concatenate Amtrak.
@@ -175,7 +176,8 @@ def concatenate_amtrak(
                     ], axis=0)
                     .astype({"trip_key": "Int64"})
                 ).compute()
-    utils.geoparquet_gcs_export(routelines_all, export_path, f"routelines_{date_str}_all")
+    utils.geoparquet_gcs_export(routelines_all, 
+                                export_path, f"routelines_{date_str}_all")
     
     st = dd.read_parquet(f"{export_path}st_{date_str}.parquet")
     st_all = (dd.multi.concat([
@@ -192,7 +194,7 @@ def concatenate_amtrak(
 def create_local_parquets(selected_date):
     grab_selected_date(selected_date) 
     grab_amtrak(selected_date)
-    concatenate_amtrak(selected_date, GCS_FILE_PATH)
+    concatenate_amtrak(selected_date, COMPILED_CACHED_GCS)
 
         
 #----------------------------------------------------#        

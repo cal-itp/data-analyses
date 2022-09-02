@@ -68,11 +68,11 @@ def make_stops_shapefile():
 
     # Read in local parquets
     stops = dg.read_parquet(
-        f"{prep_data.GCS_FILE_PATH}stops_{prep_data.ANALYSIS_DATE}_all.parquet")
+        f"{prep_data.COMPILED_CACHED_GCS}stops_{prep_data.ANALYSIS_DATE}_all.parquet")
     trips = dd.read_parquet(
-        f"{prep_data.GCS_FILE_PATH}trips_{prep_data.ANALYSIS_DATE}_all.parquet")
+        f"{prep_data.COMPILED_CACHED_GCS}trips_{prep_data.ANALYSIS_DATE}_all.parquet")
     stop_times = dd.read_parquet(
-        f"{prep_data.GCS_FILE_PATH}st_{prep_data.ANALYSIS_DATE}_all.parquet")
+        f"{prep_data.COMPILED_CACHED_GCS}st_{prep_data.ANALYSIS_DATE}_all.parquet")
     
     time1 = datetime.now()
     print(f"Get rid of duplicates: {time1-time0}")
