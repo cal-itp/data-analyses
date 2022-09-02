@@ -28,10 +28,10 @@ if __name__ == "__main__":
     print("Local parquets created")
     
     routes = create_routes_data.make_routes_shapefile()   
-    utils.geoparquet_gcs_export(routes, prep_data.GCS_FILE_PATH, "ca_transit_routes")
+    utils.geoparquet_gcs_export(routes, prep_data.TRAFFIC_OPS_GCS, "ca_transit_routes")
 
     stops = create_stops_data.make_stops_shapefile()    
-    utils.geoparquet_gcs_export(stops, prep_data.GCS_FILE_PATH, "ca_transit_stops")
+    utils.geoparquet_gcs_export(stops, prep_data.TRAFFIC_OPS_GCS, "ca_transit_stops")
     
     print("Geoparquets exported to GCS")
         
