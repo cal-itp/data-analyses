@@ -19,8 +19,8 @@ ROUTES_DICT = {
     "abstract": "Public. EPSG: 4326",
     "purpose": PURPOSE, 
 
-    "beginning_date": "20220622",
-    "end_date": "20220722",
+    "beginning_date": "20220713",
+    "end_date": "20220813",
     "place": "California",
 
     "status": "Complete", 

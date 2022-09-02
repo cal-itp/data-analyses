@@ -12,6 +12,10 @@ from datetime import datetime
 import prep_data
 from shared_utils import geography_utils, portfolio_utils
 
+# List of cols to drop from trips table
+# Didn't remove after switching to gtfs_utils, but these 
+# are datetime and will get rejected in the zipped shapefile conversion anyway
+remove_trip_cols = ["service_date", "calitp_extracted_at", "calitp_deleted_at"]
 
 def merge_trips_to_routes(trips: dd.DataFrame, 
                           routes: dg.GeoDataFrame) -> dg.GeoDataFrame:
@@ -33,17 +37,25 @@ def merge_trips_to_routes(trips: dd.DataFrame,
     # Left only means in trips, but shape_id not found in shapes.txt
     # right only means in routes, but no route that has that shape_id 
     # only 1% falls into right_only
+    keep_cols = [
+        'calitp_itp_id', 'route_id', 'shape_id', 
+        'route_type', 'geometry',
+    ]
+    
     m1 = dd.merge(
-            trips,
+            trips.drop(columns = remove_trip_cols),
             routes[shape_id_cols + ["geometry"]].drop_duplicates(),
             on = shape_id_cols,
             how = "inner",
             #validate = "m:1",
-        ).compute()
-
-    # routes is a gdf, but we lost it putting it as right df in merge, so turn it back into gdf
+        )[keep_cols].drop_duplicates().compute()
+    
+    # routes is a gdf, but we lost it putting it as right df in merge, 
+    # so turn it back into gdf, don't assume we know what CRS it was
+    orig_crs = routes.crs.to_epsg()
+    
     m2 = gpd.GeoDataFrame(m1, geometry="geometry", 
-                          crs = geography_utils.CA_NAD83Albers
+                          crs = f"EPSG: {orig_crs}"
                          ).to_crs(geography_utils.WGS84)
         
     return m2
@@ -102,9 +114,9 @@ def make_routes_shapefile():
     
     # Read in local parquets
     trips = dd.read_parquet(
-        f"{prep_data.GCS_FILE_PATH}trips.parquet")
+        f"{prep_data.GCS_FILE_PATH}trips_{prep_data.ANALYSIS_DATE}_all.parquet")
     routes = dg.read_parquet(
-        f"{prep_data.GCS_FILE_PATH}routelines.parquet")
+        f"{prep_data.GCS_FILE_PATH}routelines_{prep_data.ANALYSIS_DATE}_all.parquet")
 
     df = merge_trips_to_routes(trips, routes)
     

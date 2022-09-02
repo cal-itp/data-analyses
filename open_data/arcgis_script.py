@@ -15,8 +15,8 @@ ARCGIS_PATH = os.environ["ARCGIS_PATH"]
 import arcpy
 import os
 
-#arcpy.env.workspace = "C:\Users\s153936\Documents\ArcGIS"
-arcpy.env.workspace = ARCGIS_PATH
+arcpy.env.workspace = "C:\Users\s153936\Documents\ArcGIS"
+#arcpy.env.workspace = ARCGIS_PATH
 ENTERPRISE_PATH  = 'C:\Users\s153936\Documents\ArcGIS\AppData\Roaming\ESRI\Desktop10.8\ArcCatalog\HQrail(edit)@sv03tmcsqlprd1.sde'
 
 
@@ -128,6 +128,8 @@ for f in in_features:
 ## (6) Sync the XML with the feature class    
 for f in in_features:
     # This is the one after it's manually changed. Keep separate to see what works.
+    # There's already XML files for each feature class, so just copy and paste 
+    # the new XML from metadata_xml/run_in_esri and replace those
     updated_xml_file = out_location + '/' + f + '.xml'
 
     # Import the updated xml, then overwrite the metadata in the file gdb    
@@ -139,10 +141,12 @@ for f in in_features:
     
 ## (7) Clean up XML file in staging.gdb
 # If not, next time, it will error because it can't output an XML file 
-# when one is present (no overwriting)
+# when one is present (no overwriting) -- doesn't work, can't find path?
 for f in in_features:
+    path = staging_location + '/' + f + '.xml'
+    print(path)
     try:
-        os.remove(xml_file)
+        os.remove(path)
     except:
         pass
 
