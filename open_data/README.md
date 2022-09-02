@@ -1,7 +1,9 @@
 # README
 ## Metadata Automation Steps and References
 
-1. Dataset created in Hub. Save as shapefile. Do we version one as geoparquet in GCS? The file needs to be downloaded locally, so if a zipped shapefile is produced (faster to download from Hub), it will need to be unzipped before running the script. 
+1. Dataset created in Hub. Run [gcs_to_esri](./gcs_to_esri.py) script to convert geoparquets to zipped shapefiles.
+    * Zipped shapefiles need to be downloaded from Hub.
+    * Unzip before reading it in ESRI as layers
 2. Shapefile written as feature class in file gdb
 * Start with [arcgis_script](./arcgis_script.py)
 * [Edit metadata for many ArcGIS items](https://desktop.arcgis.com/en/arcmap/latest/manage-data/metadata/editing-metadata-for-many-arcgis-items.htm)
