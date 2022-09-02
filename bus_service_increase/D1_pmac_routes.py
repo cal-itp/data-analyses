@@ -92,4 +92,4 @@ if __name__ == "__main__":
     )    
     
     # Get aggregated service hours by shape_id
-    #get_total_service_hours(ANALYSIS_DATE)
+    get_total_service_hours(ANALYSIS_DATE)
