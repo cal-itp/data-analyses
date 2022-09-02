@@ -2,17 +2,12 @@
 Create stops file with identifiers including
 route_id, route_name, agency_id, agency_name.
 """
-import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
-
 import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
-from calitp.tables import tbl
 from datetime import datetime
-from siuba import *
 
 import prep_data
 from shared_utils import geography_utils, gtfs_utils, portfolio_utils, rt_utils
