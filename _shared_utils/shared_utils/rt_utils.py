@@ -12,8 +12,6 @@ import numpy as np
 import pandas as pd
 import shapely
 from calitp import query_sql
-
-# from calitp.tables import tbl
 from numba import jit
 from shared_utils import geography_utils, gtfs_utils, map_utils, utils
 from siuba import *
@@ -154,7 +152,9 @@ def trips_cached(itp_id: int, date_str: str) -> pd.DataFrame:
         return None
 
 
-def get_vehicle_positions(itp_id: int, analysis_date: dt.date) -> pd.DataFrame:
+def get_vehicle_positions(
+    itp_id: int, analysis_date: dt.date, export_path: str | Path = EXPORT_PATH
+) -> pd.DataFrame:
     """
     itp_id: an itp_id (string or integer)
     analysis_date: datetime.date
@@ -216,7 +216,7 @@ def get_vehicle_positions(itp_id: int, analysis_date: dt.date) -> pd.DataFrame:
         # if not dt.datetime.combine(end) < df.vehicle_timestamp.max():
         #     warnings.warn('rt data ends early on analysis date')
 
-        df.to_parquet(f"{EXPORT_PATH}{filename}")
+        df.to_parquet(f"{export_path}{filename}")
         return df
 
 
@@ -250,6 +250,7 @@ def get_trips(
     analysis_date: dt.date,
     force_clear: bool = False,
     route_types: list = None,
+    export_path: str | Path = EXPORT_PATH,
 ) -> pd.DataFrame:
     """
     itp_id: an itp_id (string or integer)
@@ -318,7 +319,7 @@ def get_trips(
         trips = trips.drop_duplicates(subset="trip_id").reset_index(drop=True)
 
         if not path or force_clear:
-            trips.to_parquet(f"{EXPORT_PATH}{filename}")
+            trips.to_parquet(f"{export_path}{filename}")
 
     if route_types:
         print(f"filtering to GTFS route types {route_types}")
@@ -328,7 +329,10 @@ def get_trips(
 
 
 def get_stop_times(
-    itp_id: int, analysis_date: dt.date, force_clear: bool = False
+    itp_id: int,
+    analysis_date: dt.date,
+    force_clear: bool = False,
+    export_path: str | Path = EXPORT_PATH,
 ) -> pd.DataFrame:
     """
     itp_id: an itp_id (string or integer)
@@ -362,13 +366,16 @@ def get_stop_times(
         departure_hours=None,  # no filtering, return all departure hours
     )
 
-    st.to_parquet(f"{EXPORT_PATH}{filename}")
+    st.to_parquet(f"{export_path}{filename}")
 
     return st
 
 
 def get_stops(
-    itp_id: int, analysis_date: dt.date, force_clear: bool = False
+    itp_id: int,
+    analysis_date: dt.date,
+    force_clear: bool = False,
+    export_path: str | Path = EXPORT_PATH,
 ) -> gpd.GeoDataFrame:
     """
     itp_id: an itp_id (string or integer)
@@ -407,13 +414,16 @@ def get_stops(
         crs=geography_utils.CA_NAD83Albers,
     )
 
-    utils.geoparquet_gcs_export(stops, EXPORT_PATH, filename)
+    utils.geoparquet_gcs_export(stops, export_path, filename)
 
     return stops
 
 
 def get_routelines(
-    itp_id: int, analysis_date: dt.date, force_clear: bool = False
+    itp_id: int,
+    analysis_date: dt.date,
+    force_clear: bool = False,
+    export_path: str | Path = EXPORT_PATH,
 ) -> gpd.GeoDataFrame:
 
     date_str = analysis_date.strftime(FULL_DATE_FMT)
@@ -440,7 +450,7 @@ def get_routelines(
             trip_df=trip_df_setting,
         )
 
-        utils.geoparquet_gcs_export(routelines, EXPORT_PATH, filename)
+        utils.geoparquet_gcs_export(routelines, export_path, filename)
 
         return routelines
 
