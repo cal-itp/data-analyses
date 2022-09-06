@@ -27,8 +27,7 @@ from utils import GCS_FILE_PATH
 
 ANALYSIS_DATE = rt_dates.DATES["may2022"]
 catalog = intake.open_catalog("*.yml")
-TRAFFIC_OPS_GCS = 'gs://calitp-analytics-data/data-analyses/traffic_ops/'
-
+COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
 
 def subset_trips_and_stop_times(trips: dd.DataFrame, 
                                 stop_times: dd.DataFrame,
@@ -295,14 +294,14 @@ if __name__=="__main__":
         dataset="st",
         analysis_date = ANALYSIS_DATE,
         itp_id_list = keep_itp_ids,
-        export_path = GCS_FILE_PATH
+        export_path = COMPILED_CACHED_GCS
     )
     
     # stops already cached for 5/4
     '''
     # (2) Combine stop_times and trips, and filter to routes that appear in bus_routes
-    stop_times = dd.read_parquet(f"{GCS_FILE_PATH}st_{ANALYSIS_DATE}.parquet")
-    trips = dd.read_parquet(f"{TRAFFIC_OPS_GCS}trips_{ANALYSIS_DATE}.parquet")
+    stop_times = dd.read_parquet(f"{COMPILED_CACHED_GCS}st_{ANALYSIS_DATE}.parquet")
+    trips = dd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}.parquet")
         
     # Subset stop times and merge with trips
     stop_times_with_hr = subset_trips_and_stop_times(

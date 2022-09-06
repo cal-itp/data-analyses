@@ -14,7 +14,7 @@ import create_parallel_corridors
 import utils
 from shared_utils import gtfs_utils, geography_utils, portfolio_utils, rt_dates
 
-COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
+COMPILED_CACHED_GCS = f"gs://{utils.BUCKET_NAME}/data-analyses/rt_delay/compiled_cached_views/"
 ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"] 
 
 def get_total_service_hours(selected_date):
