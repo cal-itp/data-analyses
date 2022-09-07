@@ -186,10 +186,10 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
         
         self.position_type = 'rt'
         self.time_col = 'vehicle_timestamp'
-        self._position_cleaning_count = 0
         TripPositionInterpolator.__init__(self, position_gdf = vp_gdf, shape_gdf = shape_gdf,
                                           addl_info_cols = ['entity_id', 'vehicle_id'])
         self.position_gdf = self.position_gdf >> distinct(_.vehicle_timestamp, _keep_all=True)
+        ##TODO drop positions near shape stop/end
         
     def _linear_reference(self):
         raw_positions = self.position_gdf.copy()
