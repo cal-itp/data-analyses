@@ -6,7 +6,6 @@ Calculate once for each operator, then concatenate and save.
 Based on rt_delay/rt_filter_map_plot.py,
 and just expand to do grouping across trips / operators.
 
-
 The rt_trips parquets have speed by trip-level
 #df = pd.read_parquet(f"{GCS_FILE_PATH}rt_trips/{itp_id}_{date}.parquet")
 
@@ -89,10 +88,12 @@ def generate_speeds(df, itp_id):
 if __name__ == "__main__":
     
     ALL_ITP_IDS = gtfs_utils.ALL_ITP_IDS
-    
+
     # get the date format, which uses underscore, not hyphens
     date = f"{month}_{day}"
-
+    
+    # (1) If there's a stop_delay df for the operator, run it through more processing
+    # Concatenate for all operators
     gdf = gpd.GeoDataFrame()
     
     for itp_id in ALL_ITP_IDS:
@@ -129,5 +130,22 @@ if __name__ == "__main__":
     
     print("Remove all local parquets")        
 
+    
+    # (2) If there's a rt_trips df for the operator, concatenate for all operators
+    df = pd.DataFrame()
+    
+    for itp_id in ALL_ITP_IDS:
+        try:
+            trip_df = pd.read_parquet(
+                f"{rt_utils.GCS_FILE_PATH}rt_trips/{itp_id}_{date}.parquet")
 
+            df = pd.concat([df, trip_df], axis=0, ignore_index=True)
+        except:
+            continue
+        
+    df = df.sort_values(["calitp_itp_id", "route_id", "trip_id"]).reset_index(drop=True)
+    
+    df.to_parquet(f"{rt_utils.GCS_FILE_PATH}rt_trips/all_operators_{analysis_date}.parquet")
+
+    print("Concatenated all parquets for rt_trips")        
 
