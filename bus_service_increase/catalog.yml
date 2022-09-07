@@ -95,22 +95,33 @@ sources:
     args:
       # source: bus_service_increase/G1_better_buses_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/segmented_highways.parquet
+  stop_times_for_routes_on_shn:
+    driver: parquet
+    description: Stop times table for just routes on SHN (intermediate file to use in G2 and G3).
+    args:
+      # source: bus_service_increase/G2_aggregated_stats.py
+      urlpath: ./data/stop_times_for_routes_on_shn.parquet  
   bus_routes_aggregated_stats:
     driver: parquet
     description: Aggregated stats for stop times and trips by route_id for all stops on the route.
     args:
       # source: bus_service_increase/G2_aggregated_stats.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_routes_on_hwys_aggregated_stats.parquet
-  bus_stops_aggregated_stats:
-    driver: parquet
-    description: Aggregated stats for stop times and trips by route_id for only stops that fall on SHN on the route.
-    args:
-      # source: bus_service_increase/G2_aggregated_stats.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_stops_on_hwys_aggregated_stats.parquet
   highway_segment_stats:
     driver: geoparquet
-    description: Route stats for only stops that fall on SHN joined to highway segments, aggregated by highway segments.
+    description: At highway 1 mile segment level, have the number of trips, stop arrivals, and stops across operators.
     args:
       # source: bus_service_increase/G3_highway_segment_stats.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highway_segment_stats.parquet
-     
+  speeds_by_stop:
+    driver: geoparquet
+    description: Speed calculated at the stop-level for all operators. Based on rt_filter_map_plot.py.
+    args:
+      # source: bus_service_increase/G5_calculate_speeds_all_operators.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/segment_speed_views/all_operators_2022-05-04.parquet     
+  speeds_by_trip:
+    driver: geoparquet
+    description: Speed summary stat at the trip-level for all operators. 
+    args:
+      # source: bus_service_increase/G5_calculate_speeds_all_operators.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/rt_trips/all_operators_2022-05-04.parquet
