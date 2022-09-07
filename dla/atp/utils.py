@@ -258,5 +258,9 @@ def clean_data(df):
     
     #add geometry for lat long column
     gdf = (geography_utils.create_point_geometry(df, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
-
+    
+    #export to GCS
+    gdf.to_excel(f"{GCS_FILE_PATH}cleaned_df.xlsx")
+    
+    #also return in notebook
     return gdf
