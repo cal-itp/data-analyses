@@ -9,6 +9,7 @@ from siuba import *
 import pandas as pd
 import geopandas as gpd
 import shapely
+import folium
 
 import datetime as dt
 from tqdm import tqdm
@@ -128,6 +129,9 @@ class RtFilterMapper:
             
     def reset_filter(self):
         self.filter = None
+        self._time_only_filter = True
+        self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
+                                         self.stop_delay_view.actual_time.min()).seconds / 60**2
         self.filter_period = 'All_Day'
         rts = 'All Routes'
         elements_ordered = [rts, self.filter_period, self.display_date]
@@ -157,10 +161,57 @@ class RtFilterMapper:
             trips = trips >> filter(_.direction == self.filter['direction'])
         return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
     
-
+    def add_corridor(self, corridor_gdf):
+        '''
+        Add ability to filter stop_delay_view and subsequently generated stop_segment_speed_views
+        to trips running within a corridor, as specified by a polygon bounding box (corridor gdf).
+        Enables calculation of metrics for SCCP, LPP.
+        '''
+        corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
+        self.corridor = corridor_gdf
+        to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence']).dropna(subset=['stop_id'])
+        clipped = to_clip.clip(corridor_gdf)
+        shape_sequences = (self.stop_delay_view.dropna(subset=['stop_id'])
+                          >> distinct(_.shape_id, _.stop_sequence)
+                          >> arrange(_.shape_id, _.stop_sequence)
+                         )
+        stops_per_shape = shape_sequences >> group_by(_.shape_id) >> summarize(n_stops = _.shape_id.size)
+        # can use this as # of stops in corr...
+        stops_in_corr = clipped >> group_by(_.shape_id) >> summarize(in_corr = _.shape_id.size)
+        stop_comparison = stops_per_shape >> inner_join(_, stops_in_corr, on='shape_id')
+        # only keep shapes with at least half of stops in corridor
+        stop_comparison = stop_comparison >> mutate(corr_shape = _.in_corr > _.n_stops / 2)
+        corr_shapes = stop_comparison >> filter(_.corr_shape)
+        self._shape_sequence_filter = {}
+        for shape_id in corr_shapes.shape_id.unique():
+            self._shape_sequence_filter[shape_id] = {}
+            clipped_min = (clipped >> filter(_.shape_id == shape_id)).stop_sequence.min()
+            clipped_max = (clipped >> filter(_.shape_id == shape_id)).stop_sequence.max()
+            this_shape = shape_sequences >> filter(_.shape_id == shape_id)
+            filter_min = (this_shape >> filter(_.stop_sequence < clipped_min)).stop_sequence.max()
+            filter_max = (this_shape >> filter(_.stop_sequence > clipped_max)).stop_sequence.min()
+            self._shape_sequence_filter[shape_id]['min'] = max(0, filter_min)
+            self._shape_sequence_filter[shape_id]['max'] = filter_max if not np.isnan(filter_max) else clipped_max
+            
+        fn = (lambda x: x.shape_id in (self._shape_sequence_filter.keys())
+              and x.stop_sequence >= self._shape_sequence_filter[x.shape_id]['min']
+              and x.stop_sequence <= self._shape_sequence_filter[x.shape_id]['max']
+             )
+        self.stop_delay_view['corridor'] = self.stop_delay_view.apply(fn, axis=1)
+        corridor_filtered = self.stop_delay_view >> filter(_.corridor)
+        first_stops = corridor_filtered >> group_by(_.trip_id) >> summarize(stop_sequence = _.stop_sequence.min())
+        entry_delays = (first_stops
+                >> inner_join(_, corridor_filtered, on = ['trip_id', 'stop_sequence'])
+                >> select(_.trip_id, _.delay_seconds)
+                >> rename(entry_delay_seconds = _.delay_seconds)
+               )
+        with_entry_delay = corridor_filtered >> inner_join(_, entry_delays, on='trip_id')
+        with_entry_delay = with_entry_delay >> mutate(corridor_delay_seconds = _.delay_seconds - _.entry_delay_seconds)
+        self.corridor_stop_delays = with_entry_delay
+    
     def segment_speed_map(self, segments = 'stops', how = 'low_speeds',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
-                         no_title=False):
+                         no_title = False, corridor = False):
         ''' Generate a map of segment speeds aggregated across all trips for each shape, either as averages
         or 20th percentile speeds.
         
@@ -176,21 +227,25 @@ class RtFilterMapper:
         gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.strftime("%m_%d")}_{self.filter_period}'
         subfolder = 'segment_speed_views/'
         cached_periods = ['PM_Peak', 'AM_Peak', 'Midday', 'All_Day']
-        if check_cached (f'{gcs_filename}.parquet', subfolder) and self.filter_period in cached_periods and self._time_only_filter:
+        if (check_cached (f'{gcs_filename}.parquet', subfolder) and self.filter_period in cached_periods
+            and self._time_only_filter and not corridor):
             self.stop_segment_speed_view = gpd.read_parquet(f'{GCS_FILE_PATH}{subfolder}{gcs_filename}.parquet')
         else:
             gdf = self._filter(self.stop_delay_view)
+            if corridor:
+                assert hasattr(self, 'corridor'), 'must add corridor before generating corridor map'
+                gdf = gdf >> filter(_.corridor)
             all_stop_speeds = gpd.GeoDataFrame()
             # for shape_id in tqdm(gdf.shape_id.unique()): trying self.pbar.update...
             if type(self.pbar) != type(None):
                 self.pbar.reset(total=len(gdf.shape_id.unique()))
                 self.pbar.desc = 'Generating segment speeds'
             for shape_id in gdf.shape_id.unique():
+                # try:
                 this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
-                if this_shape.empty:
-                    # print(f'{shape_id} empty!')
-                    continue
-                # self.debug_dict[f'{shape_id}_{direction_id}_tsd'] = this_shape_direction
+                self.debug_dict[f'{shape_id}_segments'] = this_shape
+                # Siuba errors unless you do this twice? TODO make upstream issue...
+                this_shape = this_shape >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
                 stop_speeds = (this_shape
                              >> group_by(_.trip_id)
                              >> arrange(_.stop_sequence)
@@ -198,14 +253,9 @@ class RtFilterMapper:
                              >> mutate(last_loc = _.shape_meters.shift(1))
                              >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
                              >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
-                             # >> mutate(last_delay = _.delay.shift(1))
                              >> mutate(delay_chg_sec = (_.delay_seconds - _.delay_seconds.shift(1)))
-                             # >> mutate(delay_sec = _.delay.map(lambda x: x.seconds if x.days == 0 else x.seconds - 24*60**2))
                              >> ungroup()
                             )
-                if stop_speeds.empty:
-                    # print(f'{shape_id}_{direction_id}_st_spd empty!')
-                    continue
                 # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
                 stop_speeds.geometry = stop_speeds.apply(
                     lambda x: shapely.ops.substring(
@@ -215,30 +265,29 @@ class RtFilterMapper:
                                                 axis = 1)
                 stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
 
-                try:
-                    stop_speeds = (stop_speeds
-                         >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
-                         >> group_by(_.stop_sequence)
-                         >> mutate(n_trips = _.stop_sequence.size,
-                                    avg_mph = _.speed_mph.mean(),
-                                  _20p_mph = _.speed_mph.quantile(.2),
-                                   trips_per_hour = _.n_trips / self.hr_duration_in_filter
-                                  )
-                         # >> distinct(_.stop_sequence, _keep_all=True) ## comment out to enable speed distribution analysis
-                         >> ungroup()
-                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
-                        )
-                    self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
-                    assert not stop_speeds.empty, 'stop speeds gdf is empty!'
-                except Exception as e:
-                    print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
-                    print(e)
-                    continue
-                ## TODO debug km segments
-                # stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
-                # if stop_speeds.avg_mph.max() > 80:
-                #     # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                #     stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
+                stop_speeds = (stop_speeds
+                     >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
+                     >> group_by(_.stop_sequence)
+                     >> mutate(n_trips = _.stop_sequence.size,
+                                avg_mph = _.speed_mph.mean(),
+                              _20p_mph = _.speed_mph.quantile(.2),
+                               trips_per_hour = _.n_trips / self.hr_duration_in_filter
+                              )
+                     >> ungroup()
+                     >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
+                    )
+                self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
+                assert not stop_speeds.empty, 'stop speeds gdf is empty!'
+                # except Exception as e:
+                #     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
+                #     print(e)
+                #     continue
+                
+                stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
+                if stop_speeds.avg_mph.max() > 80:
+                    # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
+                    stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
+                
                 if stop_speeds._20p_mph.min() < 0:
                     # print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
                     stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
@@ -249,23 +298,24 @@ class RtFilterMapper:
                     self.pbar.update()
                 if type(self.pbar) != type(None):
                     self.pbar.refresh
-            if self._time_only_filter:
-                all_stop_speeds = all_stop_speeds >> select(-_.speed_mph, -_.speed_from_last,
-                                                   -_.trip_id, -_.trip_key)
             self.stop_segment_speed_view = all_stop_speeds
             export_path = f'{GCS_FILE_PATH}segment_speed_views/'
-            if self._time_only_filter:
+            if self._time_only_filter and self.filter_period in ['AM_Peak', 'PM_Peak', 'Midday', 'All_Day']:
                 shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
-        return self._show_speed_map(how = how, colorscale = colorscale, size = size, no_title = no_title)
+        # self.speed_map_params = {'how': how, 'colorscale': colorscale, 'size': size, 'no_title': no_title, 'corridor': corridor}
+        self.speed_map_params = (how, colorscale, size, no_title, corridor)
+        return self._show_speed_map()
     
-    def _show_speed_map(self, how = 'average',
-                          colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550], no_title = False):
+    def _show_speed_map(self):
         
+        how, colorscale, size, no_title, corridor = self.speed_map_params
         gdf = self.stop_segment_speed_view.copy()
         # gdf = self._filter(gdf)
-        # print(gdf.dtypes)
-        # singletrip = gdf.trip_id.nunique() == 1 ## incompatible with current caching approach
-        gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True) ## essential here for reasonable map size!
+        # essential here for reasonable map size!
+        gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
+        # Further reduce map size on speedmap site
+        if self._time_only_filter:
+            gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id, -_.trip_key)
         orig_rows = gdf.shape[0]
         self.debug_dict['_show_gdf'] = gdf
         gdf['shape_miles'] = gdf.shape_meters / 1609
@@ -329,6 +379,40 @@ class RtFilterMapper:
             },
             reduce_precision = False
         )
+
+# Adding corridor to map works OK, if needed would just have to tweak opacity, handle legend 
+        
+#         layers_dict = {
+#             "Speed Data": {"df": gdf,
+#                 "plot_col": how_speed_col[how],
+#                 "popup_dict": popup_dict,
+#                 "tooltip_dict": popup_dict,
+#                 "colorscale": colorscale
+#                 }
+#         }
+        
+#         if corridor:
+#             layers_dict["Corridor"] = {"df": self.corridor,
+#                 "plot_col": self.corridor.columns[0],
+#                 "popup_dict": {},
+#                 "tooltip_dict": {},
+#                 "colorscale": branca.colormap.StepColormap(colors=shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS)
+#                 }
+        
+#         g = make_folium_multiple_layers_map(
+#             layers_dict,
+#             fig_width = size[0],
+#             fig_height = size[1],
+#             zoom = 13,
+#             centroid = [centroid[1], centroid[0]],
+#             title = title, 
+#             legend_name = "Speed (miles per hour)",
+#             highlight_function=lambda x: {
+#                 'fillColor': '#DD1C77',
+#                 "fillOpacity": 0.6,
+#             },
+#             reduce_precision = False
+#         )
         
         return g  
 
@@ -398,8 +482,9 @@ class RtFilterMapper:
                 and len(self.filter['shape_ids']) == 1), 'must filter to a single shape_id'
         _map = self.segment_speed_map()
         to_chart = self.stop_segment_speed_view.copy()
+        to_chart = to_chart.dropna(subset=['stop_id'])
         if num_segments:
-            unique_stops = list(self.stop_segment_speed_view.stop_sequence.unique())[:num_segments]
+            unique_stops = list(to_chart.stop_sequence.unique())[:num_segments]
             min_stop_seq = min(unique_stops)
             max_stop_seq = max(unique_stops)
         if min_stop_seq:
@@ -463,7 +548,52 @@ class RtFilterMapper:
             pass
         return
     
-def from_gcs(itp_id, analysis_date):
+    def quick_map_corridor(self):
+        
+        mappable_stops = (self.stop_delay_view
+                  >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
+                  >> filter(_.corridor)
+                  >> select(_.stop_id, _.geometry, _.stop_sequence)
+                 )
+        m = pd.concat([mappable_stops, self.corridor]).explore(tiles = "CartoDB positron")
+        return m
+    
+    def corridor_metrics(self):
+        '''
+        Generate schedule based and speed based metrics for SCCP/LPP programs.
+        '''
+        assert hasattr(self, 'corridor'), 'must add corridor before generating corridor metrics'
+        schedule_metric = (self.corridor_stop_delays
+             >> group_by(_.trip_id)
+             >> summarize(median_corridor_delay_seconds = _.corridor_delay_seconds.median())
+             >> summarize(sum_of_medians_minutes = _.median_corridor_delay_seconds.sum() / 60)
+            ).sum_of_medians_minutes.iloc[0]
+        
+        self.stop_delay_view = self.stop_delay_view >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
+        corridor_trip_speeds = (self.stop_delay_view
+             >> filter(_.corridor)
+             >> group_by(_.trip_id)
+             >> mutate(entry_time = _.actual_time.min())
+             >> mutate(exit_time = _.actual_time.max())
+             >> mutate(entry_loc = _.shape_meters.min())
+             >> mutate(exit_loc = _.shape_meters.max())
+             >> mutate(meters_from_entry = (_.exit_loc - _.entry_loc))
+             >> mutate(seconds_from_entry = (_.exit_time - _.entry_time).apply(lambda x: x.seconds))
+             >> mutate(speed_from_entry = _.meters_from_entry / _.seconds_from_entry)
+             >> ungroup()
+             >> distinct(_.trip_id, _keep_all=True)
+            )
+        target_speed_mps = 16 / MPH_PER_MPS
+        df = (corridor_trip_speeds
+              >> mutate(corridor_speed_mph = _.speed_from_entry * MPH_PER_MPS)
+              >> mutate(target_seconds = _.meters_from_entry / target_speed_mps)
+              >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
+             )
+        speed_metric = df.target_delay_seconds.sum() / 60
+        return {'schedule_metric': schedule_metric,
+               'speed_metric': speed_metric}
+    
+def from_gcs(itp_id, analysis_date, pbar = None):
     ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_analysis.OperatorDayAnalysis.export_views_gcs()
     '''
     month_day = analysis_date.strftime('%m_%d')
@@ -472,5 +602,5 @@ def from_gcs(itp_id, analysis_date):
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
     routelines = get_routelines(itp_id, analysis_date)
-    rt_day = RtFilterMapper(trips, stop_delay, routelines)
+    rt_day = RtFilterMapper(trips, stop_delay, routelines, pbar)
     return rt_day
