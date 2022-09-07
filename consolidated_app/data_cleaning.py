@@ -45,7 +45,7 @@ def organization_cleaning(df, column_wanted: str):
         .str[0]
         .str.title()
         .str.replace("Trasit", "Transit")
-        .str.strip() #strip again after getting rid of certain things
+        .str.strip() #strip whitespaces again after getting rid of certain things
     )
     return df
 
@@ -183,12 +183,10 @@ def initial_cleaning(df):
     # Apply function to determine if a project is fully funded or not
     df['fully_funded'] = df.apply(funding_vs_expenses, axis=1)
     
-    # DISTRICTS 
     # Create new column with fully spelled out names
     df["full_district_name"] = df["district"].replace(district_dictionary)
     
-    # MANUAL
-    # Will change each year
+    # MANUAL PORTION - will change each year
     # Replace Ventura County since it read in strangely
     df["organization_name"] = df["organization_name"].replace(
     {"Ventura County Transportation Commission\xa0": "Ventura County Transportation Commission"}).str.replace(
@@ -260,8 +258,7 @@ subset_og_df = [
 
 def melt_df(df): 
     # Keep only subset of what I want to melt & the identifier column 
-    # Which is the project_upin: a unique identifier for each product
-    
+    # Which is the project_upin: a unique identifier for each project
     melt_subset1 = df[subset_for_melted_df]
     
     # Melt the df: put funds (value_vars) beneath value_name and the
@@ -278,7 +275,7 @@ def melt_df(df):
     # Fully funded or not, etc 
     df2 = df[subset_og_df]
     
-    # Left merge with melted dataframe, which will has MANY more lines 
+    # Left merge with melted dataframe, which will have MANY more lines 
     m1 = pd.merge(melt_subset2, df2, on="project_upin", how="left")
     
     # Rename funds for clarity 
@@ -363,12 +360,10 @@ def gdf_conapp(df):
     {"project_upin": "count", "total_state_fed_only": "sum"}).reset_index()
     
     #New column that rounds total_state_fed to millions
-    summarized["funding_millions"] = (
-    "$"
-    + (summarized["total_state_fed_only"].astype(float) / 1000000)
-    .round()
-    .astype(str)
-    + "M")
+    summarized = utilities.millions(summarized, "total_state_fed_only")
+    
+    #Rename column
+    summarized = summarized.rename(columns = {'Amt in M': 'funding_millions'}) 
     
     #For the map, it looks nicer when the legend is pinned to percentiles instead of 
     #actual dollar amounts.
@@ -394,11 +389,8 @@ def gdf_conapp(df):
     gdf = geojson.merge(
     summarized, how="inner", left_on="DISTRICT", right_on="district") 
     
-    #Export 
-    shared_utils.utils.geoparquet_gcs_export(gdf, f'{GCS_FILE_PATH}',
-    "script_con_app_gdf")
-    
-    return summarized
+    return gdf
+
 
 '''
 Function to build all 4 dataframes together
@@ -416,8 +408,7 @@ def conapp_complete_report():
     # Second aggregation: putting all funding programs onto a single line  
     grouped_df = group_df(melted_df, cleaned_con_app)
     
-    # Third aggregation: summarize and turn it into a gdf that will be saved
-    # as a geoparquet to GCS but will return a regular dataframe for previewing
+    # Third aggregation: summarize and turn it into a gdf 
     gdf = gdf_conapp(cleaned_con_app)
     
     """
