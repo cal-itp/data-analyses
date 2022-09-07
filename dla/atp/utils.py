@@ -179,6 +179,11 @@ def find_potential_locode_matches(df):
     remaining_locodes = ((check_locode.merge(locodes, left_on='a1_locode', right_on='agency_locode', how = 'outer', indicator = True))
     >>filter(_._merge== 'left_only'))
     
+    remaining_locodes = remaining_locodes.drop(columns=['agency_name',
+                                                        'district', 'county_name',
+                                                        'rtpa_name', 'mpo_name',
+                                                        'mpo_locode_fads', 'active_e76s______7_12_2021_'])
+    
     #convert locodes to list of names
     names_list = locodes['agency_name'].tolist()
     pattern_names = '|'.join(names_list)
@@ -216,6 +221,7 @@ def find_potential_locode_matches(df):
     # export potential match list
     potential_matches.to_excel(f"{GCS_FILE_PATH}needs_assistance/needs_assistance_potential_match_locodes.xlsx")
 
+
 def clean_data(df):
         
     #condense assembly, congressional and senate district columns
@@ -239,7 +245,7 @@ def clean_data(df):
     locodes = to_snakecase(pd.read_excel("gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
     
     check_counties(df) 
-    # find_potential_locode_matches(df)
+    find_potential_locode_matches(df)
     
     #add columns in cleaned df that were not in project details or main detail sheets.
     df["#"] = ""
