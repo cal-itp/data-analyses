@@ -14,7 +14,7 @@ import create_parallel_corridors
 import utils
 from shared_utils import gtfs_utils, geography_utils, portfolio_utils, rt_dates
 
-TRAFFIC_OPS_GCS = "gs://calitp-analytics-data/data-analyses/traffic_ops/"
+COMPILED_CACHED_GCS = f"gs://{utils.BUCKET_NAME}/data-analyses/rt_delay/compiled_cached_views/"
 ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"] 
 
 def get_total_service_hours(selected_date):
@@ -59,8 +59,8 @@ if __name__ == "__main__":
     # Use concatenated routelines and trips from traffic_ops work
     # Use the datasets with Amtrak added back in (rt_delay always excludes Amtrak)
     routelines = gpd.read_parquet(
-        f"{TRAFFIC_OPS_GCS}routelines_{ANALYSIS_DATE}_all.parquet")
-    trips = pd.read_parquet(f"{TRAFFIC_OPS_GCS}trips_{ANALYSIS_DATE}_all.parquet")
+        f"{COMPILED_CACHED_GCS}routelines_{ANALYSIS_DATE}_all.parquet")
+    trips = pd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}_all.parquet")
     
     shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
     
@@ -92,4 +92,4 @@ if __name__ == "__main__":
     )    
     
     # Get aggregated service hours by shape_id
-    #get_total_service_hours(ANALYSIS_DATE)
+    get_total_service_hours(ANALYSIS_DATE)

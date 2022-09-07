@@ -27,8 +27,7 @@ from utils import GCS_FILE_PATH
 
 ANALYSIS_DATE = rt_dates.DATES["may2022"]
 catalog = intake.open_catalog("*.yml")
-TRAFFIC_OPS_GCS = 'gs://calitp-analytics-data/data-analyses/traffic_ops/'
-
+COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
 
 def subset_trips_and_stop_times(trips: dd.DataFrame, 
                                 stop_times: dd.DataFrame,
@@ -78,32 +77,50 @@ def subset_trips_and_stop_times(trips: dd.DataFrame,
 
 def aggregate_stat_by_time_of_day(df: dd.DataFrame, 
                                   group_cols: list, 
-                                  stat_col: dict = {"trip_id": "nunique"}
-                                 ) -> dd.DataFrame:
+                                  stat_cols: dict = {"trip_id": "nunique", 
+                                                    "departure_hour": "count",
+                                                    "stop_id": "nunique"}
+                                 ) -> pd.DataFrame:
     """
     Aggregate given different group_cols.
-    
-    Avoid merging together, since dask df requires setting of metadata,
-    and there isn't an easy way to pre-define what the metadata is in group_cols
     """    
-    for key, value in stat_col.items():
-        use_col = key
-        agg = value
-        
-    # nunique seems to not work in groupby.agg
-    # even though https://github.com/dask/dask/pull/8479 seems to resolve it?
-    # alternative is to use nunique as series
-    if agg=="nunique":
-        agg_df = (df.groupby(group_cols)[use_col].nunique()
+    
+    def group_and_aggregate(df: dd.DataFrame, 
+                            group_cols: list, 
+                            agg_col: str, agg_func: str) -> pd.DataFrame:
+        # nunique seems to not work in groupby.agg
+        # even though https://github.com/dask/dask/pull/8479 seems to resolve it?
+        # alternative is to use nunique as series
+        if agg_func=="nunique":
+            agg_df = (df.groupby(group_cols)[agg_col].nunique()
                     .reset_index()
                  )
-    else:
-        agg_df = (df.groupby(group_cols)
-                .agg({use_col: agg})
-                .reset_index()
-                 )
+        else:
+            agg_df = (df.groupby(group_cols)
+                      .agg({agg_col: agg_func})
+                      .reset_index()
+                     )
         
-    return agg_df
+        # return pd.DataFrame for now, since it's not clear what the metadata should be
+        # if we are inputting different things in stats_col
+        return agg_df.compute()
+    
+    final = pd.DataFrame()
+    
+    for agg_col, agg_func in stat_cols.items():
+        agg_df = group_and_aggregate(df, group_cols, agg_col, agg_func)
+        
+        # If it's empty, just add our new table of aggregations in with concat
+        if final.empty:
+            final = pd.concat([final, agg_df], axis=0, ignore_index=True)
+        
+        # If it's not empty, do a merge
+        else:
+            final = pd.merge(
+                final, agg_df, on = group_cols, how = "left"
+            )
+    
+    return final
         
 
 def reshape_long_to_wide(df: pd.DataFrame, 
@@ -149,7 +166,10 @@ def reshape_long_to_wide(df: pd.DataFrame,
     return reshaped
 
 
-def long_to_wide_format(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
+def long_to_wide_format(df: pd.DataFrame, 
+                        group_cols: list, 
+                        stat_cols: list = ["trips", "stop_arrivals", "stops"]
+                       ) -> pd.DataFrame:
     """
     Take the long df, which is structured where each row is 
     a route_id-time_of_day combination, and columns are 
@@ -166,46 +186,75 @@ def long_to_wide_format(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
     # doing a sum of nunique across categories is not the same as counting nunique over a larger group
     time_of_day_sorted = ['peak', 'all_day']
     
-    df_wide = reshape_long_to_wide(
-        df, group_cols = group_cols, 
-        long_col = "time_of_day", 
-        value_col="trips", long_col_sort_order = time_of_day_sorted)
+    df_wide = pd.DataFrame()
     
+    for c in stat_cols:
+        one_stat_wide = reshape_long_to_wide(
+            df, group_cols = group_cols,
+            long_col = "time_of_day",
+            value_col = c, long_col_sort_order = time_of_day_sorted
+        )
+        
+        # for the first column to reshape, just concatenate it
+        if df_wide.empty:
+            df_wide = pd.concat([df_wide, one_stat_wide], axis=0)
+        else:
+            df_wide = pd.merge(
+                df_wide,
+                one_stat_wide, 
+                on = group_cols,
+                how = "left"
+            )
     
     return df_wide
 
 
-def compile_all_aggregated_stats(stop_times_with_time_of_day: dd.DataFrame,
-                                 group_cols: list
-                                ) -> pd.DataFrame:
-        
+def compile_peak_all_day_aggregated_stats(
+    stop_times_with_time_of_day: dd.DataFrame,
+    group_cols: list,
+    stat_cols: dict = {"trip_id": "nunique", 
+                       "departure_hour": "count", 
+                       "stop_id": "nunique"}) -> pd.DataFrame:
+    
+    rename_aggregated_cols = {
+        "trip_id": "trips", 
+        "departure_hour": "stop_arrivals",
+        "stop_id": "stops"
+    }
+    
+    # Peak Hours
     peak_bins = ["AM Peak", "PM Peak"]
     
     stop_times_peak = stop_times_with_time_of_day[
         stop_times_with_time_of_day.time_of_day.isin(peak_bins)
     ].assign(time_of_day="peak")
-
-    by_route_peak = aggregate_stat_by_time_of_day(
+    
+    peak_table = aggregate_stat_by_time_of_day(
         stop_times_peak, 
         group_cols + ["time_of_day"], 
-        stat_col = {"trip_id": "nunique"}
-    ).rename(columns = {"trip_id": "trips"}).compute()
-    
-
+        stat_cols = stat_cols
+    ).rename(columns = rename_aggregated_cols)
+        
+    # All day    
     stop_times_all_day = stop_times_with_time_of_day.assign(time_of_day="all_day")
 
-    by_route_all_day = aggregate_stat_by_time_of_day(
+    all_day_table = aggregate_stat_by_time_of_day(
         stop_times_all_day, 
         group_cols + ["time_of_day"],
-        stat_col = {"trip_id": "nunique"}
-    ).rename(columns = {"trip_id": "trips"}).compute()
+        stat_cols = stat_cols
+    ).rename(columns = rename_aggregated_cols)
 
-    by_route = pd.concat(
-        [by_route_peak, by_route_all_day], axis=0)
+    df = pd.concat(
+        [peak_table, all_day_table], axis=0)
     
-    by_route_wide = long_to_wide_format(by_route, group_cols)
+    # Reshape from long to wide (do it for each aggregated stat separately and merge)
+    aggregated_stats_cols = [c for c in df.columns if c not in group_cols and 
+                             c != "time_of_day"]
+    
+    df_wide = long_to_wide_format(df, group_cols, 
+                                  stat_cols = aggregated_stats_cols)
 
-    return by_route_wide
+    return df_wide
 
 
 def get_competitive_routes() -> pd.DataFrame:
@@ -245,14 +294,14 @@ if __name__=="__main__":
         dataset="st",
         analysis_date = ANALYSIS_DATE,
         itp_id_list = keep_itp_ids,
-        export_path = GCS_FILE_PATH
+        export_path = COMPILED_CACHED_GCS
     )
     
     # stops already cached for 5/4
     '''
     # (2) Combine stop_times and trips, and filter to routes that appear in bus_routes
-    stop_times = dd.read_parquet(f"{GCS_FILE_PATH}st_{ANALYSIS_DATE}.parquet")
-    trips = dd.read_parquet(f"{TRAFFIC_OPS_GCS}trips_{ANALYSIS_DATE}.parquet")
+    stop_times = dd.read_parquet(f"{COMPILED_CACHED_GCS}st_{ANALYSIS_DATE}.parquet")
+    trips = dd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}.parquet")
         
     # Subset stop times and merge with trips
     stop_times_with_hr = subset_trips_and_stop_times(
@@ -260,14 +309,16 @@ if __name__=="__main__":
         itp_id_list = keep_itp_ids, 
         route_list = keep_routes
     )
+    
+    stop_times_with_hr.compute().to_parquet(f"./data/stop_times_for_routes_on_shn.parquet")
 
     # (3) Aggregate to route-level
     route_cols = ["calitp_itp_id", "service_date", "route_id"]
     
-    # (3a) All stops on route
-    by_route_all_stops = compile_all_aggregated_stats(stop_times_with_hr, route_cols)
+    by_route = compile_peak_all_day_aggregated_stats(
+        stop_times_with_hr, route_cols, stat_cols = {"trip_id": "nunique"})
     
-    by_route_all_stops.to_parquet(
+    by_route.to_parquet(
         f"{GCS_FILE_PATH}bus_routes_on_hwys_aggregated_stats.parquet")    
     
     

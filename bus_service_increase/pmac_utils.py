@@ -5,7 +5,7 @@ import altair as alt
 import geopandas as gpd
 import pandas as pd
 
-from D1_pmac_routes import TRAFFIC_OPS_GCS
+from D1_pmac_routes import COMPILED_CACHED_GCS
 from utils import GCS_FILE_PATH
 from shared_utils import geography_utils
 
@@ -26,7 +26,7 @@ def calculate_route_level_service_hours(date_str) -> pd.DataFrame:
         columns = {"calitp_itp_id": "itp_id"})
     
     trips = pd.read_parquet(
-        f"{TRAFFIC_OPS_GCS}trips_{date_str}.parquet").rename(
+        f"{COMPILED_CACHED_GCS}trips_{date_str}.parquet").rename(
         columns = {"calitp_itp_id": "itp_id"})
     
     # Aggregate trips with service hours (at shape_id level) up to route_id
@@ -202,8 +202,10 @@ def add_percent(df: pd.DataFrame, col_list: list) -> pd.DataFrame:
     return df
 
 #https://stackoverflow.com/questions/23482668/sorting-by-a-custom-list-in-pandas
-def sort_by_column(df: pd.DataFrame, col: str = "category", 
-                   sort_key: list = ["parallel", "on_shn", "other"]) -> pd.DataFrame:
+def sort_by_column(df: pd.DataFrame, 
+                   col: str = "category", 
+                   sort_key: list = ["parallel", "on_shn", "other"]
+                  ) -> pd.DataFrame:
     # Custom sort order for categorical variable
     df = df.sort_values(col, 
                         key=lambda c: c.map(lambda e: sort_key.index(e)))
