@@ -15,7 +15,7 @@ from shared_utils import styleguide
 '''
 Non-Chart Functions
 '''
-### Turn value counts into a dataframe ###
+# Turn value counts into a dataframe 
 def value_function(df, column_of_int):
     df_new = (
     df[column_of_int].value_counts()
@@ -26,7 +26,7 @@ def value_function(df, column_of_int):
     )
     return df_new
 
-### Add a new column that rounds dollar amounts to millions ###
+# Add a new column that rounds dollar amounts to millions 
 def millions(df, col_name: str): 
     df['Amt in M'] = (
     "$"
@@ -36,7 +36,7 @@ def millions(df, col_name: str):
     + "M")
     return df 
 
-### Style a dataframe ### 
+# Style a dataframe 
 def color(value):
     if value <  496292.00:
         color = "#E16B26"
@@ -71,8 +71,8 @@ def labeling(word):
     
     return word
 
-### Bar chart with interactive tooltip: x_col and y_col will show up ### 
-### This function only returns a chart, doesn't save
+# Bar chart with interactive tooltip: x_col and y_col will show up 
+# This function only returns a chart, doesn't save
 def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     if chart_title == "":
         chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
@@ -94,8 +94,8 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     chart=styleguide.preset_chart_config(chart)
     return chart
 
-### Bar chart with with tooltips: x_col and another col ### 
-### This function only returns a chart, doesn't save
+# Bar chart with with tooltips: x_col and another col 
+# This function only returns a chart, doesn't save
 def basic_bar_chart_v2(df, x_col, y_col, tooltip_col, colorcol, chart_title=''):
     if chart_title == "":
         chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
@@ -117,8 +117,8 @@ def basic_bar_chart_v2(df, x_col, y_col, tooltip_col, colorcol, chart_title=''):
     chart=styleguide.preset_chart_config(chart)
     return chart
 
-### Bar chart with labels at the end of the bar and custom legend ###
-### This function only returns a chart, doesn't save
+# Bar chart with labels at the end of the bar and custom legend 
+#This function only returns a chart, doesn't save
 
 #Base bar chart
 def base_bar(df):

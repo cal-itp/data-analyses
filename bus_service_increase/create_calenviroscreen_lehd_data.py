@@ -39,10 +39,15 @@ def define_equity_groups(df: pd.DataFrame,
     """
     
     for col in percentile_col:
-        new_col = f"{col}_group"
         # -999 should be replaced as NaN, so it doesn't throw off the binning of groups
-        df[col] = df[col].replace(-999, np.nan)
-        df[new_col] = pd.cut(df[col], bins=num_groups, labels=False) + 1
+        df = (df.assign(
+                col = df[col].replace(-999, np.nan),
+                new_col = pd.cut(df[col], bins=num_groups, labels=False) + 1
+            ).drop(columns = col) # drop original column and use the one with replaced values
+            .rename(columns = {
+                "col": col, 
+                "new_col": f"{col}_group"})
+             )
 
     return df
 

@@ -114,9 +114,9 @@ def make_routes_shapefile():
     
     # Read in local parquets
     trips = dd.read_parquet(
-        f"{prep_data.GCS_FILE_PATH}trips_{prep_data.ANALYSIS_DATE}_all.parquet")
+        f"{prep_data.COMPILED_CACHED_GCS}trips_{prep_data.ANALYSIS_DATE}_all.parquet")
     routes = dg.read_parquet(
-        f"{prep_data.GCS_FILE_PATH}routelines_{prep_data.ANALYSIS_DATE}_all.parquet")
+        f"{prep_data.COMPILED_CACHED_GCS}routelines_{prep_data.ANALYSIS_DATE}_all.parquet")
 
     df = merge_trips_to_routes(trips, routes)
     
