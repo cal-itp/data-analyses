@@ -31,6 +31,30 @@ HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 bad_stops = ['315604', '315614', '689']
 
 
+def get_dissolved_hq_corridor_bus(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
+    """
+    Take each segment, then dissolve by operator,
+    and use this dissolved polygon in hqta_polygons.
+    
+    Draw a buffer around this.
+    """
+    # Can keep route_id in dissolve, but route_id is not kept in final 
+    # export, so there would be multiple rows for multiple route_ids, 
+    # and no way to distinguish between them
+    keep_cols = ['calitp_itp_id', 'hq_transit_corr']
+    
+    gdf2 = gdf[keep_cols + ['geometry']].compute()
+    
+    dissolved = (gdf2.dissolve(by=keep_cols)
+                 .reset_index()
+                )
+    
+    # Turn back into dask gdf
+    dissolved_gddf = dg.from_geopandas(dissolved, npartitions=1)
+
+    return dissolved_gddf
+
+
 def filter_and_buffer(hqta_points: dg.GeoDataFrame, 
                       hqta_segments: dg.GeoDataFrame) -> gpd.GeoDataFrame:
     """
@@ -42,10 +66,9 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     stops = (hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
              .to_crs(geography_utils.CA_NAD83Albers)
             )
-    # Change this back to adding the dissolved version of shape_id (route_id)
-    # Not drawing buffers around each stop
-    # indiv stop-level dataset is in the hqta_points already
-    corridors = hqta_segments.to_crs(geography_utils.CA_NAD83Albers)
+
+    corridor_segments = hqta_segments.to_crs(geography_utils.CA_NAD83Albers)
+    corridors = get_dissolved_hq_corridor_bus(corridor_segments)
     
     # General buffer distance: 1/2mi ~= 805 meters
     # Bus corridors are already buffered 50 meters, so will buffer 755 meters
@@ -54,9 +77,7 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     )
     
     corridor_cols = [
-        "calitp_itp_id_primary", "stop_id", "hqta_segment_id", 
-        "am_max_trips", "pm_max_trips", 
-        "hqta_type", "geometry"
+        "calitp_itp_id_primary", "hqta_type", "geometry"
     ]
     
     corridors = corridors.assign(

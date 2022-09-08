@@ -88,11 +88,6 @@ def clean_up_hqta_points(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     )
     
     return gdf2
-
-
-def delete_local_files():
-    os.remove(MAJOR_STOP_BUS_FILE)
-    os.remove(STOPS_IN_CORRIDOR_FILE)
     
     
 if __name__=="__main__":
@@ -122,7 +117,7 @@ if __name__=="__main__":
     logger.info(f"add agency names / compute: {time2 - time1}")
     
     # Export to GCS
-    # Stash this date's into its own folder, to convert to geojson, geojsonl
+    # Stash this date's into its own folder, to convert to geojson, geojsonl later
     utils.geoparquet_gcs_export(gdf,
                                 EXPORT_PATH,
                                 'ca_hq_transit_stops'
@@ -133,8 +128,6 @@ if __name__=="__main__":
                                 utilities.GCS_FILE_PATH,
                                 'hqta_points'
                                )
-    
-    #delete_local_files()
-    
+        
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

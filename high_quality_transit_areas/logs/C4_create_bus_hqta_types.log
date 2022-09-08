@@ -2,3 +2,9 @@
 2022-08-31 14:05:21.573 | INFO     | __main__:<module>:219 - create major stop bus
 2022-08-31 14:05:22.150 | INFO     | __main__:<module>:223 - create hq corridor bus
 2022-08-31 14:05:30.339 | INFO     | __main__:<module>:231 - execution time: 0:00:24.462973
+2022-09-08 13:02:15.068 | INFO     | __main__:<module>:202 - Analysis date: 2022-08-17
+2022-09-08 13:16:27.152 | INFO     | __main__:<module>:202 - Analysis date: 2022-08-17
+2022-09-08 13:16:43.760 | INFO     | __main__:<module>:215 - grab all stops
+2022-09-08 13:16:43.886 | INFO     | __main__:<module>:219 - create major stop bus
+2022-09-08 13:16:44.448 | INFO     | __main__:<module>:223 - create hq corridor bus
+2022-09-08 13:16:55.883 | INFO     | __main__:<module>:240 - execution time: 0:00:28.730462
