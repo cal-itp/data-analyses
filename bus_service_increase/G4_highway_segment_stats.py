@@ -99,8 +99,29 @@ def spatial_join_stops_to_highway_segments(
     return stops_with_speeds
 
 
-def calculate_trip_weighted_speed(gdf: gpd.GeoDataFrame, group_cols: list
-                                 ) -> pd.DataFrame:
+def filter_stop_times_to_stops_on_hwy(stops_on_hwy: gpd.GeoDataFrame) -> dd.DataFrame:
+    """
+    Filter stop times table down to the stops that have been attached
+    to hwy segments.
+    
+    Turn into dask dataframe by the end.
+    """
+    stop_times_with_hr = catalog.stop_times_for_routes_on_shn.read()
+    
+    stop_times_on_hwy = pd.merge(
+        stop_times_with_hr, 
+        stops_on_hwy[["calitp_itp_id", "stop_id", "hwy_segment_id"]],
+        on = ["calitp_itp_id", "stop_id"],
+        how = "inner"
+    )
+    
+    stop_times_on_hwy = dd.from_pandas(stop_times_on_hwy, npartitions=1)
+    
+    return stop_times_on_hwy
+
+
+def calculate_trip_weighted_speed(gdf: gpd.GeoDataFrame, 
+                                  group_cols: list) -> pd.DataFrame:
     """
     Speed (mph) should be weighted by number of trips.
     Generate the weighted average separately, easier to merge in later.
@@ -155,7 +176,7 @@ def aggregate_to_hwy_segment(gdf: gpd.GeoDataFrame,
         columns = group_cols + sum_cols + ["geometry"])
     
     return segment_with_geom
-    
+
 
 if __name__=="__main__":
 
@@ -170,16 +191,7 @@ if __name__=="__main__":
     stops_on_hwy = spatial_join_stops_to_highway_segments(highways_polygon)
     
     # (4a) Filter the stop_times table down to stops attached to hwy segments
-    stop_times_with_hr = catalog.stop_times_for_routes_on_shn.read()
-    
-    stop_times_on_hwy = pd.merge(
-        stop_times_with_hr, 
-        stops_on_hwy[["calitp_itp_id", "stop_id", "hwy_segment_id"]],
-        on = ["calitp_itp_id", "stop_id"],
-        how = "inner"
-    )
-    
-    stop_times_on_hwy = dd.from_pandas(stop_times_on_hwy, npartitions=1)
+    stop_times_on_hwy = filter_stop_times_to_stops_on_hwy(stops_on_hwy)
     
     # (4b) Aggregate stops and stop_times to segments 
     by_route_segment = G2_aggregated_stats.compile_peak_all_day_aggregated_stats(
