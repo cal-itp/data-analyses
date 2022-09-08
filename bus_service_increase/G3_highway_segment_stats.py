@@ -9,7 +9,7 @@ import pandas as pd
 import G2_aggregated_stats
 from shared_utils import geography_utils, utils
 from utils import GCS_FILE_PATH
-from G1_get_buses_on_shn import ANALYSIS_DATE, TRAFFIC_OPS_GCS
+from G1_get_buses_on_shn import ANALYSIS_DATE, COMPILED_CACHED_GCS
 
 catalog = intake.open_catalog("*.yml")
 
@@ -49,12 +49,29 @@ def sjoin_bus_routes_to_hwy_segments(highways: gpd.GeoDataFrame) -> gpd.GeoDataF
     return s1 
 
 
+def average_speed_by_stop():   
+    speed_by_stops = catalog.speeds_by_stop.read()
+        
+    # Drop observations with way too fast speeds
+    speed_by_stops2 = speed_by_stops[speed_by_stops.speed_mph <= 65]
+    
+    mean_speed = geography_utils.aggregate_by_geography(
+        speed_by_stops2,
+        group_cols = ["calitp_itp_id", "stop_id"],
+        mean_cols = ["speed_mph"],
+        nunique_cols = ["trip_id"]
+    ).rename(columns = {"speed_mph": "mean_speed_mph", 
+                        "trip_id": "num_trips"}).astype({"num_trips": "Int64"})
+    
+    return mean_speed
+        
+
 def spatial_join_stops_to_highway_segments(
     highways: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Spatial join highway segments polygon to stops.
     """
-    stops = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}stops_{ANALYSIS_DATE}.parquet")
+    stops = gpd.read_parquet(f"{COMPILED_CACHED_GCS}stops_{ANALYSIS_DATE}.parquet")
     
     stops_on_hwys = gpd.sjoin(
         stops.to_crs(geography_utils.CA_StatePlane), 
@@ -63,13 +80,48 @@ def spatial_join_stops_to_highway_segments(
         predicate="intersects"
     ).drop(columns = "index_right")
 
-    # Only keep sjoin if it's the same calitp_itp_id
+    # No duplicates of same stop_id by hwy segment
     stops_on_hwys2 = (stops_on_hwys.drop_duplicates(
         subset=["calitp_itp_id", "stop_id", "hwy_segment_id"]
         ).reset_index(drop=True)
     )
     
-    return stops_on_hwys2
+    # Merge in RT speed info by stop-level
+    mean_speed_by_stop = average_speed_by_stop()
+    
+    stops_with_speeds = pd.merge(
+        stops_on_hwys2, 
+        mean_speed_by_stop,    
+        on = ["calitp_itp_id", "stop_id"],
+        how = "inner",
+    )
+    
+    return stops_with_speeds
+
+
+def calculate_trip_weighted_speed(gdf: gpd.GeoDataFrame, group_cols: list
+                                 ) -> pd.DataFrame:
+    """
+    Speed (mph) should be weighted by number of trips.
+    Generate the weighted average separately, easier to merge in later.
+    """
+    segment_speed = gdf.assign(
+        weighted_speed = gdf.mean_speed_mph * gdf.num_trips
+    )
+    
+    segment_speed_agg = geography_utils.aggregate_by_geography(
+        segment_speed,
+        group_cols = group_cols,
+        sum_cols = ["weighted_speed", "num_trips"]
+    )
+    
+    segment_speed_agg = segment_speed_agg.assign(
+        mean_speed_mph_trip_weighted = (segment_speed_agg.weighted_speed / 
+                                        segment_speed_agg.num_trips
+                                       )
+    ).drop(columns = ["weighted_speed", "num_trips"])
+    
+    return segment_speed_agg
 
 
 def aggregate_to_hwy_segment(gdf: gpd.GeoDataFrame, 
@@ -78,15 +130,17 @@ def aggregate_to_hwy_segment(gdf: gpd.GeoDataFrame,
     sum_cols = [
         'trips_peak', 'trips_all_day', 
         'stop_arrivals_peak', 'stop_arrivals_all_day',
-        'stops_peak', 'stops_all_day'
+        'stops_peak', 'stops_all_day',
     ]
     
+    # These are stats we can easily sum up, to highway segment level
     segment = geography_utils.aggregate_by_geography(
         gdf,
         group_cols = group_cols,
         sum_cols = sum_cols,
     )
     
+    # Attach the highway segment line geom back in
     segment_with_geom = geography_utils.attach_geometry(
         segment,
         gdf[group_cols + ["geometry"]].drop_duplicates(),
@@ -94,9 +148,11 @@ def aggregate_to_hwy_segment(gdf: gpd.GeoDataFrame,
         join = "inner"
     )
     
+    # Clean up dtypes, re-order columns
     segment_with_geom[sum_cols] = segment_with_geom[sum_cols].astype(int)
-    segment_with_geom = segment_with_geom.reindex(columns = group_cols + 
-                                                  sum_cols + ["geometry"])
+    
+    segment_with_geom = segment_with_geom.reindex(
+        columns = group_cols + sum_cols + ["geometry"])
     
     return segment_with_geom
     
@@ -131,6 +187,7 @@ if __name__=="__main__":
         stat_cols = {"departure_hour": "count", 
                      "stop_id": "nunique"})
     
+    
     # (5) Merge in the trip, stop_times, and stops aggregated stats
     # (5a) Merge in trip stats at route-level 
     route_stats = catalog.bus_routes_aggregated_stats.read()
@@ -155,7 +212,18 @@ if __name__=="__main__":
     # (5c) Now aggregate to hwy_segment_id, since there can be multiple routes 
     # on same segment_id
     segments_with_geom = aggregate_to_hwy_segment(segments_with_stops, highway_cols)
-
-    utils.geoparquet_gcs_export(segments_with_geom, 
+    
+    # (5d) Add in average speed, aggregated to hwy_segment_id
+    weighted_speeds = calculate_trip_weighted_speed(
+        stops_on_hwy, ["hwy_segment_id"])
+    
+    segments_with_geom_and_speed = pd.merge(
+        segments_with_geom, 
+        weighted_speeds, 
+        on = "hwy_segment_id",
+        how = "inner",
+    )
+    
+    utils.geoparquet_gcs_export(segments_with_geom_and_speed, 
                                 GCS_FILE_PATH, 
                                 "highway_segment_stats")

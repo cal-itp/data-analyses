@@ -118,10 +118,10 @@ sources:
     description: Speed calculated at the stop-level for all operators. Based on rt_filter_map_plot.py.
     args:
       # source: bus_service_increase/G5_calculate_speeds_all_operators.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/segment_speed_views/all_operators_2022-05-04.parquet     
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/segment_speed_views/all_operators_2022-05-04.parquet     
   speeds_by_trip:
-    driver: geoparquet
+    driver: parquet
     description: Speed summary stat at the trip-level for all operators. 
     args:
       # source: bus_service_increase/G5_calculate_speeds_all_operators.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/rt_trips/all_operators_2022-05-04.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/rt_trips/all_operators_2022-05-04.parquet

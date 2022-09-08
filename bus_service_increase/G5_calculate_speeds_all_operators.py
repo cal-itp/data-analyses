@@ -19,11 +19,10 @@ import pandas as pd
 
 from shared_utils import (rt_utils, rt_dates, 
                           geography_utils, gtfs_utils, utils)
+from G1_get_buses_on_shn import ANALYSIS_DATE
 
-analysis_date = rt_dates.DATES["may2022"]
-
-month = analysis_date.split('-')[1]
-day = analysis_date.split('-')[2]
+month = ANALYSIS_DATE.split('-')[1]
+day = ANALYSIS_DATE.split('-')[2]
 
 
 def generate_speeds(df, itp_id):
@@ -71,7 +70,9 @@ def generate_speeds(df, itp_id):
         speed_mph = (df.meters_from_last / df.seconds_from_last) * rt_utils.MPH_PER_MPS
     )
     
-    keep_cols = sort_cols + ["actual_time", "arrival_time", 
+    keep_cols = sort_cols + ["stop_id", "stop_name",
+                             "shape_meters",
+                             "actual_time", "arrival_time", 
                              "seconds_from_last", 
                              "meters_from_last", "delay_chg_sec", 
                              "speed_mph", "geometry"]
@@ -120,7 +121,7 @@ if __name__ == "__main__":
     
     utils.geoparquet_gcs_export(gdf, 
                                 f"{rt_utils.GCS_FILE_PATH}segment_speed_views/", 
-                                f"all_operators_{analysis_date}"
+                                f"all_operators_{ANALYSIS_DATE}"
                                )
     
     print("Concatenated, exported all operators to GCS")
@@ -129,7 +130,7 @@ if __name__ == "__main__":
         os.remove(f)
     
     print("Remove all local parquets")        
-
+    
     
     # (2) If there's a rt_trips df for the operator, concatenate for all operators
     df = pd.DataFrame()
@@ -145,7 +146,8 @@ if __name__ == "__main__":
         
     df = df.sort_values(["calitp_itp_id", "route_id", "trip_id"]).reset_index(drop=True)
     
-    df.to_parquet(f"{rt_utils.GCS_FILE_PATH}rt_trips/all_operators_{analysis_date}.parquet")
+    df.to_parquet(
+        f"{rt_utils.GCS_FILE_PATH}rt_trips/all_operators_{ANALYSIS_DATE}.parquet")
 
     print("Concatenated all parquets for rt_trips")        
-
+    
