@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 import shapely
+from shapely.geometry import Point
 
 import datetime as dt
 from tqdm import tqdm
@@ -186,15 +187,38 @@ class VehiclePositionsInterpolator(TripPositionInterpolator):
         
         self.position_type = 'rt'
         self.time_col = 'vehicle_timestamp'
-        self._position_cleaning_count = 0
         TripPositionInterpolator.__init__(self, position_gdf = vp_gdf, shape_gdf = shape_gdf,
                                           addl_info_cols = ['entity_id', 'vehicle_id'])
         self.position_gdf = self.position_gdf >> distinct(_.vehicle_timestamp, _keep_all=True)
+    
+    def _loop_shape_filter(self):
+        '''
+        Determines if the start of the shape is near the end of the shape,
+        if so drops vehicle positions points in this area to avoid incorrect projection.
+        Functions as intended but does not fully solve issue, since midway loops can
+        also cause issue if GTFS shape has low definition. Also need to further review
+        intergration with the progression filter step
+        '''
+        shape_start = np.array(self.shape.coords[0])
+        shape_end = np.array(self.shape.coords[-1])
+        # fast way to get euclidian distance using numpy!
+        start_end_dist = np.linalg.norm(shape_start - shape_end)
+        distance_threshold = 150 # meters
+        if start_end_dist < distance_threshold:
+            start_point = Point(self.shape.coords[0])
+            self.start_buffered = start_point.buffer(75) # meters
+            self.position_gdf = (self.position_gdf
+                                 >> mutate(too_close_to_start = _.geometry.apply(lambda x: self.start_buffered.contains(x)))
+                                 >> mutate(too_close_to_loop = _.geometry.apply(lambda x: self.hardcode_buffered.contains(x)))
+                                )
+            self.position_gdf = self.position_gdf >> filter(-_.too_close_to_start)            
         
     def _linear_reference(self):
+        # self._loop_shape_filter() # not yet usable as intended
         raw_positions = self.position_gdf.copy()
         raw_positions = raw_positions >> arrange(self.time_col)
         raw_position_array = raw_positions.shape_meters.to_numpy()
+        # filter to positions that have progressed from the most recent position
         cast_monotonic = np.maximum.accumulate(raw_position_array)
         raw_positions.shape_meters = cast_monotonic
         raw_positions = raw_positions.drop_duplicates(subset=['shape_meters'], keep = 'last')
