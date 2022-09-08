@@ -12,6 +12,8 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 
+from siuba import *
+
 from shared_utils import geography_utils, gtfs_utils, utils, rt_dates
 
 ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["aug2022"])
@@ -127,7 +129,6 @@ def concatenate_amtrak(
                 stops.to_crs(geography_utils.WGS84), 
                 amtrak_stops.to_crs(geography_utils.WGS84)
             ], axis=0)
-            .drop(columns = ["stop_lon", "stop_lat"])
             .astype({"stop_key": "Int64"})
     ).compute()
     utils.geoparquet_gcs_export(stops_all, export_path, f"stops_{date_str}_all")
