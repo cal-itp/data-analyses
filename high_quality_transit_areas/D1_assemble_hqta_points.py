@@ -134,7 +134,7 @@ if __name__=="__main__":
                                 'hqta_points'
                                )
     
-    delete_local_files()
+    #delete_local_files()
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

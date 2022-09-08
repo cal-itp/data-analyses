@@ -42,7 +42,9 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     stops = (hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
              .to_crs(geography_utils.CA_NAD83Albers)
             )
-    
+    # Change this back to adding the dissolved version of shape_id (route_id)
+    # Not drawing buffers around each stop
+    # indiv stop-level dataset is in the hqta_points already
     corridors = hqta_segments.to_crs(geography_utils.CA_NAD83Albers)
     
     # General buffer distance: 1/2mi ~= 805 meters
