@@ -1,7 +1,9 @@
 download_hqta_data:
 	python download_data.py
 	python operators_for_hqta.py
+	python compile_operators_data.py    
 	python A2_combine_stops.py
+    
 
 grab_corridors_and_clip:
 	python B1_bus_corridors.py
