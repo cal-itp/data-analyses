@@ -16,7 +16,7 @@ import C1_prep_for_clipping as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
 from shared_utils import utils, geography_utils
-from D1_assemble_hqta_points import EXPORT_PATH
+from D1_assemble_hqta_points import EXPORT_PATH, add_route_info
 from update_vars import analysis_date
 
 logger.add("./logs/D2_assemble_hqta_polygons.log")
@@ -41,7 +41,7 @@ def get_dissolved_hq_corridor_bus(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     # Can keep route_id in dissolve, but route_id is not kept in final 
     # export, so there would be multiple rows for multiple route_ids, 
     # and no way to distinguish between them
-    keep_cols = ['calitp_itp_id', 'hq_transit_corr']
+    keep_cols = ['calitp_itp_id', 'hq_transit_corr', 'route_id']
     
     gdf2 = gdf[keep_cols + ['geometry']].compute()
     
@@ -66,7 +66,7 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     stops = (hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
              .to_crs(geography_utils.CA_NAD83Albers)
             )
-
+    
     corridor_segments = hqta_segments.to_crs(geography_utils.CA_NAD83Albers)
     corridors = get_dissolved_hq_corridor_bus(corridor_segments)
     
@@ -77,7 +77,7 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     )
     
     corridor_cols = [
-        "calitp_itp_id_primary", "hqta_type", "geometry"
+        "calitp_itp_id_primary", "hqta_type", "route_id", "geometry"
     ]
     
     corridors = corridors.assign(
@@ -110,7 +110,7 @@ def drop_bad_stops_final_processing(gdf: gpd.GeoDataFrame,
     keep_cols = [
         "calitp_itp_id_primary", "calitp_itp_id_secondary", 
         "agency_name_primary", "agency_name_secondary",
-        "hqta_type", "hqta_details", "geometry"
+        "hqta_type", "hqta_details", "route_id", "geometry"
     ]
     
     # Drop bad stops, subset columns
@@ -118,7 +118,7 @@ def drop_bad_stops_final_processing(gdf: gpd.GeoDataFrame,
             [keep_cols]
             .sort_values(["hqta_type", "calitp_itp_id_primary", 
                           "calitp_itp_id_secondary",
-                          "hqta_details"])
+                          "hqta_details", "route_id"])
             .reset_index(drop=True)
            )
     
