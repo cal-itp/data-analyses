@@ -50,4 +50,21 @@ def drop_big_areas(geometry: sh.multipolygon.MultiPolygon | sh.polygon.Polygon
             return geometry
     else:
         return np.nan
-   
+
+
+def get_dissolved_hq_corridor_bus(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Take each segment, then dissolve by operator-route_id,
+    and use this dissolved polygon in hqta_polygons.
+    
+    Draw a buffer around this.
+    """
+    keep_cols = ['calitp_itp_id', 'hq_transit_corr', 'route_id']
+
+    dissolved = (gdf[gdf.hq_transit_corr is True]
+                 [keep_cols + ['geometry']]
+                 .dissolve(by=keep_cols)
+                 .reset_index()
+                )
+
+    return dissolved
