@@ -539,3 +539,14 @@
 2022-09-08 13:01:59.318 | INFO     | __main__:<module>:158 - compute for full clipped df: 1:44:49.874863
 2022-09-08 13:02:01.706 | INFO     | __main__:<module>:168 - execution time: 1:44:53.633340
 2022-09-08 13:02:15.068 | INFO     | __main__:<module>:202 - Analysis date: 2022-08-17
+2022-09-08 13:16:27.152 | INFO     | __main__:<module>:202 - Analysis date: 2022-08-17
+2022-09-08 13:16:43.760 | INFO     | __main__:<module>:215 - grab all stops
+2022-09-08 13:16:43.886 | INFO     | __main__:<module>:219 - create major stop bus
+2022-09-08 13:16:44.448 | INFO     | __main__:<module>:223 - create hq corridor bus
+2022-09-08 13:16:55.883 | INFO     | __main__:<module>:240 - execution time: 0:00:28.730462
+2022-09-08 13:33:52.665 | INFO     | __main__:<module>:126 - Analysis date: 2022-08-17
+2022-09-08 13:34:16.982 | INFO     | __main__:<module>:137 - filter and buffer: 0:00:24.295672
+2022-09-08 13:34:20.339 | INFO     | __main__:<module>:156 - execution time: 0:00:27.652159
+2022-09-08 13:38:15.682 | INFO     | __main__:<module>:126 - Analysis date: 2022-08-17
+2022-09-08 13:38:44.449 | INFO     | __main__:<module>:137 - filter and buffer: 0:00:28.766541
+2022-09-08 13:38:46.677 | INFO     | __main__:<module>:156 - execution time: 0:00:30.994542

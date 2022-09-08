@@ -121,5 +121,9 @@ def hqta_details(row):
     
 
 def catalog_filepath(file: str) -> str:
-    # Return the path that's saved in the catalog
+    """
+    Return the file path for files in catalog.
+    Need full path when using dask to read in files, 
+    can't just use catalog.file_name.read().
+    """
     return catalog[file].urlpath
