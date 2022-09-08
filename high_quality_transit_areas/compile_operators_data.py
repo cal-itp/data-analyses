@@ -10,13 +10,11 @@ import sys
 from loguru import logger
 
 from shared_utils import rt_dates, gtfs_utils
-from update_vars import analysis_date
+from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 logger.add("./logs/compile_operators_data.log")
 logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
 
-GCS = "gs://calitp-analytics-data/data-analyses/"
-COMPILED_CACHED_GCS = f"{GCS}rt_delay/compiled_cached_views/"
 
 def grab_selected_date(selected_date: str):
     """
@@ -26,7 +24,7 @@ def grab_selected_date(selected_date: str):
     gtfs_utils.all_routelines_or_stops_with_cached(
         dataset = "stops",
         analysis_date = selected_date,
-        export_path = COMPILED_CACHED_GCS
+        export_path = COMPILED_CACHED_VIEWS
     )
     
     logger.info("stops compiled and cached")
@@ -34,7 +32,7 @@ def grab_selected_date(selected_date: str):
     gtfs_utils.all_trips_or_stoptimes_with_cached(
         dataset = "trips",
         analysis_date = selected_date,
-        export_path = COMPILED_CACHED_GCS
+        export_path = COMPILED_CACHED_VIEWS
     )
     
     logger.info("trips compiled and cached")
@@ -42,7 +40,7 @@ def grab_selected_date(selected_date: str):
     gtfs_utils.all_routelines_or_stops_with_cached(
         dataset = "routelines",
         analysis_date = selected_date,
-        export_path = COMPILED_CACHED_GCS
+        export_path = COMPILED_CACHED_VIEWS
     )
     
     logger.info("routelines compiled and cached")
@@ -50,7 +48,7 @@ def grab_selected_date(selected_date: str):
     gtfs_utils.all_trips_or_stoptimes_with_cached(
         dataset = "st",
         analysis_date = selected_date,
-        export_path = COMPILED_CACHED_GCS
+        export_path = COMPILED_CACHED_VIEWS
     )
     
     logger.info("stop times compiled and cached")

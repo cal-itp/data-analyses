@@ -17,7 +17,7 @@ from loguru import logger
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
 from shared_utils import utils, geography_utils, portfolio_utils
-from update_vars import analysis_date
+from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 logger.add("./logs/D1_assemble_hqta_points.log")
 logger.add(sys.stderr, 
@@ -29,6 +29,40 @@ EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 # Input files
 MAJOR_STOP_BUS_FILE = utilities.catalog_filepath("major_stop_bus")
 STOPS_IN_CORRIDOR_FILE = utilities.catalog_filepath("stops_in_hq_corr")
+    
+
+def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
+    """
+    Use calitp_itp_id-stop_id to add route_id back in, 
+    using the trips and stop_times table.
+    """    
+    stop_times = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+    trips = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+    
+    stop_cols = ["calitp_itp_id", "stop_id"]
+    trip_cols = ["calitp_itp_id", "trip_id"]
+    
+    one_trip = (stop_times[stop_cols + ["trip_id"]]
+                .drop_duplicates(subset=stop_cols)
+                .reset_index(drop=True)
+               )
+    
+    with_route_info = dd.merge(
+        one_trip,
+        trips[trip_cols + ["route_id"]].drop_duplicates(),
+        on = trip_cols,
+        how = "inner"
+    ).rename(columns = {"calitp_itp_id": "calitp_itp_id_primary"})
+
+    hqta_points_with_route = dd.merge(
+        hqta_points,
+        with_route_info,
+        on = ["calitp_itp_id_primary", "stop_id"],
+        how = "inner",
+    ).drop(columns = "trip_id")
+    
+    return hqta_points_with_route
+
     
     
 def get_agency_names() -> pd.DataFrame:
@@ -77,7 +111,7 @@ def add_agency_names_hqta_details(gdf: dg.GeoDataFrame) -> gpd.GeoDataFrame:
                     hqta_details = with_names.apply(utilities.hqta_details, axis=1)
                 )
     return with_names
-
+    
 
 def clean_up_hqta_points(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     gdf2 = (gdf.drop_duplicates(
@@ -109,12 +143,18 @@ if __name__=="__main__":
     time1 = dt.datetime.now()
     logger.info(f"combined points: {time1 - start}")
     
-    # Add agency names, hqta_details, project back to WGS84
-    gdf = add_agency_names_hqta_details(hqta_points_combined)
-    gdf = clean_up_hqta_points(gdf)
+    # Add in route_id 
+    hqta_points_with_route_info = add_route_info(hqta_points_combined)
     
     time2 = dt.datetime.now()
-    logger.info(f"add agency names / compute: {time2 - time1}")
+    logger.info(f"add route info: {time2 - time1}")
+
+    # Add agency names, hqta_details, project back to WGS84
+    gdf = add_agency_names_hqta_details(hqta_points_with_route_info)
+    gdf = clean_up_hqta_points(gdf)
+    
+    time3 = dt.datetime.now()
+    logger.info(f"add agency names / compute: {time3 - time2}")
     
     # Export to GCS
     # Stash this date's into its own folder, to convert to geojson, geojsonl later
