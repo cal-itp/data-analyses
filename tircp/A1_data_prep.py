@@ -87,9 +87,9 @@ def load_allocation():
 
 # Previous SAR - this one is fake
 def load_previous_sar():
-    file_to_sar = "Fake_SAR_July_14.xlsx"
+    file_to_sar = "fake_sar.xlsx"
     df = to_snakecase(
-        pd.read_excel(f"{GCS_FILE_PATH}{file_to_sar}", sheet_name="dataframe (3)")
+        pd.read_excel(f"{GCS_FILE_PATH}{file_to_sar}", sheet_name="Unpivoted_Current_Version")
     )
     return df
 

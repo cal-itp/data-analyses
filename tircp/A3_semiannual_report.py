@@ -175,7 +175,6 @@ def summary_SAR_table(df):
 Complete Semiannual Report
 """
 def create_sar_report():
-    
     # Load in raw sheets
     df_project = A1_data_prep.clean_project()
     df_allocation = A1_data_prep.clean_allocation()
@@ -204,8 +203,8 @@ def create_sar_report():
         m1[i] = m1[i].fillna(missing_date).apply(pd.to_datetime)
 
     """
-    Add 3 columns: 2 column percentage metrics and 1 column to flag
-    whether an allocation date is AFTER  7-31-2020 then blank, if BEFORE 7-31-2020 then X
+    Add columns with percentages and to flag whether an allocation date is
+    AFTER  7-31-2020 then blank, if BEFORE 7-31-2020 then X
     """ 
     m1 = m1.assign(
         Percent_of_Allocation_Expended=(
@@ -222,16 +221,16 @@ def create_sar_report():
         ),
     )
 
-    # Fill in null values based on datatype of each column
-    m1 = m1.fillna(m1.dtypes.replace({"float64": 0.0, "int64": 0}))
-    
     # Filter out projects that are excluded
     m1 = m1[
         (m1.allocation_allocation_amount > 0)
         & (m1.Percent_of_Allocation_Expended < 0.99)
     ]
-    
-    # Rename cols to the right names
+
+    # Fill in null values based on datatype of each column
+    m1 = m1.fillna(m1.dtypes.replace({"float64": 0.0, "int64": 0}))
+
+    # Rename cols
     m1 = m1.rename(
         columns={
             "allocation_led": "Phase_Completion_Date",
@@ -246,15 +245,28 @@ def create_sar_report():
     )
 
     """
-    Apply styling to show difference between current SAR and previous SAR
+    Apply a pink background to show what has changed 
+    between the previous and current SAR
     https://stackoverflow.com/questions/17095101/compare-two-dataframes-and-output-their-differences-side-by-side
     """
+    # Clean up the SAR dataframe a bit before applying styling.
     # Reset index from dataframe above
     df_current = df_pivoted.reset_index()
     
+    # Delete project # from both dfs to avoid confusion
+    df_current = df_current.drop(columns = ["project_project_#"]) 
+    previous_sar = previous_sar.drop(columns = ["project_project_#"]) 
+    
+    # Create a list of current PPNO/projects
+    current_project_names = df_current['project_project_title'].unique().tolist()
+    
+    # Filter out any project titles that aren't in the current SAR in the previous SAR
+    # So the highlighted differences will be more accurate. 
+    previous_sar = previous_sar[previous_sar["project_project_title"].isin(current_project_names)]
+    
     # Stack current SAR and previous SAR and differentiate them between the keys 
     df_all = pd.concat(
-        [df_current, previous_sar], keys=["Current_SAR", "Previous_SAR"], axis=1
+        [previous_sar, df_current], keys=[ "Previous_SAR","Current_SAR"], axis=1
     )
     df_all = df_all.swaplevel(axis="columns")[df_current.columns[1:]]
     
