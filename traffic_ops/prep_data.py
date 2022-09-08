@@ -169,32 +169,3 @@ RENAME_COLS = {
     "calitp_agency_name": "agency",
     "route_name_used": "route_name",
 }
-
-
-def attach_route_name(df: dd.DataFrame, route_info_df: dd.DataFrame) -> dd.DataFrame:
-    """
-    Function to attach route_info using route_id
-
-    Parameters:
-    df: pandas.DataFrame
-        each row is unique to itp_id-route_id
-    route_info_df: pandas.DataFrame
-                    each row is unique to route_id-route_name_used
-                    portfolio_utils selects 1 from route_short_name, 
-                    route_long_name, and route_desc
-    """
-    # Attach route info from gtfs_schedule.routes, using route_id
-    route_info_unique = (route_info_df
-                         .sort_values(["calitp_itp_id", "route_id", "route_name_used"])
-                         .drop_duplicates(subset=["calitp_itp_id", "route_id"])
-                        )
-    
-    routes = dd.merge(
-        df, 
-        route_info_unique,
-        on = ["calitp_itp_id", "route_id"],
-        how = "left",
-        #validate = "m:1",
-    )
-
-    return routes
