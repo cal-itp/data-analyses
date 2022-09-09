@@ -1,12 +1,12 @@
 """
-Compile route-level data for mapping / viz?
+Compile highway segment level stats for visualizations.
 """
 import dask.dataframe as dd
 import intake
 import geopandas as gpd
 import pandas as pd
 
-import G2_aggregated_stats
+import G2_aggregated_route_stats
 from shared_utils import geography_utils, utils
 from utils import GCS_FILE_PATH
 from G1_get_buses_on_shn import ANALYSIS_DATE, COMPILED_CACHED_GCS
@@ -145,9 +145,13 @@ def calculate_trip_weighted_speed(gdf: gpd.GeoDataFrame,
     return segment_speed_agg
 
 
-def aggregate_to_hwy_segment(gdf: gpd.GeoDataFrame, 
+def aggregate_to_hwy_segment(df: pd.DataFrame, 
+                             highway_segment_gdf: gpd.GeoDataFrame,
                              group_cols: list) -> gpd.GeoDataFrame:
-    
+    """
+    Aggregate df to hwy segment.
+    Attach hwy segment polygon geometry back on.
+    """
     sum_cols = [
         'trips_peak', 'trips_all_day', 
         'stop_arrivals_peak', 'stop_arrivals_all_day',
@@ -156,15 +160,17 @@ def aggregate_to_hwy_segment(gdf: gpd.GeoDataFrame,
     
     # These are stats we can easily sum up, to highway segment level
     segment = geography_utils.aggregate_by_geography(
-        gdf,
+        df,
         group_cols = group_cols,
         sum_cols = sum_cols,
     )
     
     # Attach the highway segment line geom back in
+    other_hwy_cols = list(set(highway_cols).difference(set(["hwy_segment_id"])))
+    
     segment_with_geom = geography_utils.attach_geometry(
         segment,
-        gdf[group_cols + ["geometry"]].drop_duplicates(),
+        highway_segment_gdf[group_cols + other_hwy_cols + ["geometry"]].drop_duplicates(),
         merge_col = group_cols,
         join = "inner"
     )
@@ -173,7 +179,7 @@ def aggregate_to_hwy_segment(gdf: gpd.GeoDataFrame,
     segment_with_geom[sum_cols] = segment_with_geom[sum_cols].astype(int)
     
     segment_with_geom = segment_with_geom.reindex(
-        columns = group_cols + sum_cols + ["geometry"])
+        columns = other_hwy_cols + group_cols + sum_cols + ["geometry"])
     
     return segment_with_geom
 
@@ -194,38 +200,19 @@ if __name__=="__main__":
     stop_times_on_hwy = filter_stop_times_to_stops_on_hwy(stops_on_hwy)
     
     # (4b) Aggregate stops and stop_times to segments 
-    by_route_segment = G2_aggregated_stats.compile_peak_all_day_aggregated_stats(
+    by_route_segment = G2_aggregated_route_stats.compile_peak_all_day_aggregated_stats(
         stop_times_on_hwy, route_segment_cols, 
-        stat_cols = {"departure_hour": "count", 
+        stat_cols = {"trip_id": "nunique", 
+                     "departure_hour": "count", 
                      "stop_id": "nunique"})
     
     
-    # (5) Merge in the trip, stop_times, and stops aggregated stats
-    # (5a) Merge in trip stats at route-level 
-    route_stats = catalog.bus_routes_aggregated_stats.read()
-    
-    keep_cols = route_cols + ["service_date", "trips_peak", "trips_all_day"]
-    
-    segments_with_trips = pd.merge(
-        highway_segments_with_bus, 
-        route_stats[keep_cols],
-        on = route_cols,
-        how = "inner",
-    )
-    
-    # (5b) Merge in stop_times and stops by segment
-    segments_with_stops = pd.merge(
-        segments_with_trips,
-        by_route_segment,
-        on = route_segment_cols,
-        how = "left"
-    )
-    
-    # (5c) Now aggregate to hwy_segment_id, since there can be multiple routes 
+    # (5a) Now aggregate to hwy_segment_id, since there can be multiple routes 
     # on same segment_id
-    segments_with_geom = aggregate_to_hwy_segment(segments_with_stops, highway_cols)
+    segments_with_geom = aggregate_to_hwy_segment(by_route_segment, highways, 
+                                                  ["hwy_segment_id"])
     
-    # (5d) Add in average speed, aggregated to hwy_segment_id
+    # (5b) Add in average speed, aggregated to hwy_segment_id
     weighted_speeds = calculate_trip_weighted_speed(
         stops_on_hwy, ["hwy_segment_id"])
     
