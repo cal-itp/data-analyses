@@ -7,6 +7,7 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
+import intake
 import numpy as np
 import os
 import pandas as pd
@@ -24,6 +25,7 @@ logger.add(sys.stderr,
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
 
+catalog = intake.open_catalog("*.yml")
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 
 # Input files
@@ -61,7 +63,10 @@ def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
         how = "inner",
     ).drop(columns = "trip_id")
     
-    return hqta_points_with_route
+    # Clip to CA
+    ca_hqta_points = utilities.clip_to_ca(hqta_points_with_route)
+    
+    return ca_hqta_points
 
     
     
@@ -116,9 +121,9 @@ def add_agency_names_hqta_details(gdf: dg.GeoDataFrame) -> gpd.GeoDataFrame:
 def clean_up_hqta_points(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     gdf2 = (gdf.drop_duplicates(
                     subset=["calitp_itp_id_primary", "hqta_type", "stop_id"])
-                   .sort_values(["calitp_itp_id_primary", "hqta_type", "stop_id"])
-                   .reset_index(drop=True)
-                   .to_crs(geography_utils.WGS84)
+                .sort_values(["calitp_itp_id_primary", "hqta_type", "stop_id"])
+                .reset_index(drop=True)
+            .to_crs(geography_utils.WGS84)
     )
     
     return gdf2
