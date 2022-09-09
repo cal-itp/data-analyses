@@ -3,3 +3,73 @@
 2022-08-31 14:19:32.869 | INFO     | __main__:<module>:139 - execution time: 0:00:16.224141
 2022-08-31 14:20:19.857 | INFO     | __main__:<module>:110 - filter and buffer: 0:00:17.741578
 2022-08-31 14:20:28.281 | INFO     | __main__:<module>:129 - execution time: 0:00:26.165031
+2022-09-08 13:19:31.644 | INFO     | __main__:<module>:94 - Analysis date: 2022-08-17
+2022-09-08 13:19:33.633 | INFO     | __main__:<module>:110 - combined points: 0:00:01.988949
+2022-09-08 13:19:49.407 | INFO     | __main__:<module>:117 - add agency names / compute: 0:00:15.773257
+2022-09-08 13:19:50.252 | INFO     | __main__:<module>:133 - execution time: 0:00:18.607259
+2022-09-08 13:33:52.665 | INFO     | __main__:<module>:126 - Analysis date: 2022-08-17
+2022-09-08 13:34:16.982 | INFO     | __main__:<module>:137 - filter and buffer: 0:00:24.295672
+2022-09-08 13:34:20.339 | INFO     | __main__:<module>:156 - execution time: 0:00:27.652159
+2022-09-08 13:38:15.682 | INFO     | __main__:<module>:126 - Analysis date: 2022-08-17
+2022-09-08 13:38:44.449 | INFO     | __main__:<module>:137 - filter and buffer: 0:00:28.766541
+2022-09-08 13:38:46.677 | INFO     | __main__:<module>:156 - execution time: 0:00:30.994542
+2022-09-08 14:55:03.212 | INFO     | __main__:<module>:128 - Analysis date: 2022-08-17
+2022-09-08 14:55:04.575 | INFO     | __main__:<module>:144 - combined points: 0:00:01.362743
+2022-09-08 14:56:33.509 | INFO     | __main__:<module>:128 - Analysis date: 2022-08-17
+2022-09-08 14:56:34.802 | INFO     | __main__:<module>:144 - combined points: 0:00:01.292318
+2022-09-08 15:11:32.916 | INFO     | __main__:<module>:128 - Analysis date: 2022-08-17
+2022-09-08 15:11:34.234 | INFO     | __main__:<module>:144 - combined points: 0:00:01.317842
+2022-09-08 15:11:34.734 | INFO     | __main__:<module>:150 - add route info: 0:00:00.499690
+2022-09-08 15:11:53.790 | INFO     | __main__:<module>:157 - add agency names / compute: 0:00:19.055967
+2022-09-08 15:11:54.545 | INFO     | __main__:<module>:173 - execution time: 0:00:21.628127
+2022-09-08 15:13:21.178 | INFO     | __main__:<module>:128 - Analysis date: 2022-08-17
+2022-09-08 15:13:22.476 | INFO     | __main__:<module>:144 - combined points: 0:00:01.297210
+2022-09-08 15:13:23.002 | INFO     | __main__:<module>:150 - add route info: 0:00:00.525857
+2022-09-08 15:13:41.210 | INFO     | __main__:<module>:157 - add agency names / compute: 0:00:18.208102
+2022-09-08 15:13:41.960 | INFO     | __main__:<module>:173 - execution time: 0:00:20.781257
+2022-09-08 15:19:15.912 | INFO     | __main__:<module>:131 - Analysis date: 2022-08-17
+2022-09-08 15:19:41.572 | INFO     | __main__:<module>:142 - filter and buffer: 0:00:25.658137
+2022-09-08 15:19:44.588 | INFO     | __main__:<module>:161 - execution time: 0:00:28.673196
+2022-09-08 15:20:16.841 | INFO     | __main__:<module>:131 - Analysis date: 2022-08-17
+2022-09-08 15:20:40.792 | INFO     | __main__:<module>:142 - filter and buffer: 0:00:23.949465
+2022-09-08 15:20:43.818 | INFO     | __main__:<module>:161 - execution time: 0:00:26.975662
+2022-09-08 15:28:12.636 | INFO     | __main__:<module>:129 - Analysis date: 2022-08-17
+2022-09-08 15:28:34.655 | INFO     | __main__:<module>:140 - filter and buffer: 0:00:22.018166
+2022-09-08 15:28:37.860 | INFO     | __main__:<module>:159 - execution time: 0:00:25.223267
+2022-09-09 10:26:46.075 | INFO     | __main__:<module>:135 - Analysis date: 2022-08-17
+2022-09-09 10:26:47.697 | INFO     | __main__:<module>:151 - combined points: 0:00:01.620958
+2022-09-09 10:26:48.384 | INFO     | __main__:<module>:157 - add route info: 0:00:00.687190
+2022-09-09 10:27:06.772 | INFO     | __main__:<module>:164 - add agency names / compute: 0:00:18.388066
+2022-09-09 10:27:07.439 | INFO     | __main__:<module>:180 - execution time: 0:00:21.362688
+2022-09-09 10:27:28.319 | INFO     | __main__:<module>:137 - Analysis date: 2022-08-17
+2022-09-09 10:27:48.919 | INFO     | __main__:<module>:148 - filter and buffer: 0:00:20.598943
+2022-09-09 10:49:17.551 | INFO     | __main__:<module>:133 - Analysis date: 2022-08-17
+2022-09-09 10:49:18.920 | INFO     | __main__:<module>:149 - combined points: 0:00:01.367319
+2022-09-09 10:49:20.425 | INFO     | __main__:<module>:155 - add route info: 0:00:01.505324
+2022-09-09 10:49:47.968 | INFO     | __main__:<module>:162 - add agency names / compute: 0:00:27.543210
+2022-09-09 10:49:48.821 | INFO     | __main__:<module>:178 - execution time: 0:00:31.268479
+2022-09-09 10:50:16.543 | INFO     | __main__:<module>:132 - Analysis date: 2022-08-17
+2022-09-09 10:50:44.793 | INFO     | __main__:<module>:143 - filter and buffer: 0:00:28.246097
+2022-09-09 10:50:47.997 | INFO     | __main__:<module>:162 - execution time: 0:00:31.450036
+2022-09-09 12:57:15.396 | INFO     | __main__:<module>:138 - Analysis date: 2022-08-17
+2022-09-09 12:57:16.758 | INFO     | __main__:<module>:154 - combined points: 0:00:01.359458
+2022-09-09 12:57:18.088 | INFO     | __main__:<module>:160 - add route info: 0:00:01.330623
+2022-09-09 12:57:45.237 | INFO     | __main__:<module>:167 - add agency names / compute: 0:00:27.148938
+2022-09-09 12:57:45.649 | INFO     | __main__:<module>:176 - export as geoparquet in date folder
+2022-09-09 12:57:45.978 | INFO     | __main__:<module>:184 - export as geoparquet
+2022-09-09 12:59:26.751 | INFO     | __main__:<module>:138 - Analysis date: 2022-08-17
+2022-09-09 12:59:28.085 | INFO     | __main__:<module>:154 - combined points: 0:00:01.332842
+2022-09-09 12:59:29.295 | INFO     | __main__:<module>:160 - add route info: 0:00:01.210012
+2022-09-09 12:59:54.961 | INFO     | __main__:<module>:167 - add agency names / compute: 0:00:25.666115
+2022-09-09 12:59:55.490 | INFO     | __main__:<module>:176 - export as geoparquet in date folder
+2022-09-09 12:59:56.028 | INFO     | __main__:<module>:184 - export as geoparquet
+2022-09-09 13:00:25.917 | INFO     | __main__:<module>:193 - export as geojson
+2022-09-09 13:00:46.797 | INFO     | __main__:<module>:201 - export as geojsonl
+2022-09-09 13:00:46.798 | INFO     | __main__:<module>:204 - execution time: 0:01:20.045269
+2022-09-09 13:00:59.978 | INFO     | __main__:<module>:136 - Analysis date: 2022-08-17
+2022-09-09 13:01:23.004 | INFO     | __main__:<module>:147 - filter and buffer: 0:00:23.023111
+2022-09-09 13:01:25.030 | INFO     | __main__:<module>:158 - export as geoparquet in date folder
+2022-09-09 13:01:26.927 | INFO     | __main__:<module>:166 - export as geoparquet
+2022-09-09 13:02:12.756 | INFO     | __main__:<module>:175 - export as geojson
+2022-09-09 13:03:02.363 | INFO     | __main__:<module>:183 - export as geojsonl
+2022-09-09 13:03:02.366 | INFO     | __main__:<module>:186 - execution time: 0:02:02.384813

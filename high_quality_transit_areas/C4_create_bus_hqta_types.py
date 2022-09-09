@@ -22,7 +22,7 @@ from loguru import logger
 import C1_prep_for_clipping as prep_clip
 import C3_clean_clipped_intersections as clean_clip
 from shared_utils import utils, geography_utils, gtfs_utils
-from utilities import catalog_filepath
+from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
 logger.add("./logs/C4_create_bus_hqta_types.log")
@@ -222,10 +222,19 @@ if __name__ == "__main__":
     stops_in_hq_corr = create_stops_along_corridors(all_stops)
     logger.info("create hq corridor bus")
     
-    # Export locally
-    # Remove in the following script after appending
-    major_stop_bus.compute().to_parquet("./data/major_stop_bus.parquet")
-    stops_in_hq_corr.compute().to_parquet("./data/stops_in_hq_corr.parquet")
+    # Export to GCS
+    major_stop_bus_df = major_stop_bus.compute()
+    stops_in_hq_corr_df = stops_in_hq_corr.compute()
+    
+    utils.geoparquet_gcs_export(major_stop_bus_df, 
+                                GCS_FILE_PATH,
+                                'major_stop_bus'
+                               )
+    
+    utils.geoparquet_gcs_export(stops_in_hq_corr_df,
+                                GCS_FILE_PATH,
+                                'stops_in_hq_corr'
+                               )
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

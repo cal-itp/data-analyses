@@ -13,49 +13,15 @@ import geopandas as gpd
 import pandas as pd
 
 from siuba import *
-from typing import Literal
 
 from shared_utils import geography_utils, gtfs_utils, utils, rt_dates
 
-ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["jul2022"])
+ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["aug2022"])
 
 GCS = "gs://calitp-analytics-data/data-analyses/"
 TRAFFIC_OPS_GCS = f"{GCS}traffic_ops/"
 COMPILED_CACHED_GCS = f"{GCS}rt_delay/compiled_cached_views/"
 DATA_PATH = "./data/"
-
-
-def grab_selected_date(selected_date: str):
-    """
-    Create the cached files for stops, trips, stop_times, routes, and route_info
-    """
-    
-    gtfs_utils.all_routelines_or_stops_with_cached(
-        dataset = "stops",
-        analysis_date = selected_date,
-        export_path = COMPILED_CACHED_GCS
-    )
-    
-    gtfs_utils.all_trips_or_stoptimes_with_cached(
-        dataset = "trips",
-        analysis_date = selected_date,
-        export_path = COMPILED_CACHED_GCS
-    )
-    
-    gtfs_utils.all_routelines_or_stops_with_cached(
-        dataset = "routelines",
-        analysis_date = selected_date,
-        export_path = COMPILED_CACHED_GCS
-    )
-    
-    gtfs_utils.all_trips_or_stoptimes_with_cached(
-        dataset = "st",
-        analysis_date = selected_date,
-        export_path = COMPILED_CACHED_GCS
-    )
-    
-    # stops, trips, stop_times, and routes save directly to GCS already
-        
 
 def grab_amtrak(selected_date: datetime.date | str
                ) -> tuple[gpd.GeoDataFrame, pd.DataFrame, gpd.GeoDataFrame]:
@@ -163,7 +129,6 @@ def concatenate_amtrak(
                 stops.to_crs(geography_utils.WGS84), 
                 amtrak_stops.to_crs(geography_utils.WGS84)
             ], axis=0)
-            .drop(columns = ["stop_lon", "stop_lat"])
             .astype({"stop_key": "Int64"})
     ).compute()
     utils.geoparquet_gcs_export(stops_all, export_path, f"stops_{date_str}_all")
@@ -191,7 +156,6 @@ def concatenate_amtrak(
 
 
 def create_local_parquets(selected_date):
-    grab_selected_date(selected_date) 
     grab_amtrak(selected_date)
     concatenate_amtrak(selected_date, COMPILED_CACHED_GCS)
 
@@ -206,32 +170,3 @@ RENAME_COLS = {
     "calitp_agency_name": "agency",
     "route_name_used": "route_name",
 }
-
-
-def attach_route_name(df: dd.DataFrame, route_info_df: dd.DataFrame) -> dd.DataFrame:
-    """
-    Function to attach route_info using route_id
-
-    Parameters:
-    df: pandas.DataFrame
-        each row is unique to itp_id-route_id
-    route_info_df: pandas.DataFrame
-                    each row is unique to route_id-route_name_used
-                    portfolio_utils selects 1 from route_short_name, 
-                    route_long_name, and route_desc
-    """
-    # Attach route info from gtfs_schedule.routes, using route_id
-    route_info_unique = (route_info_df
-                         .sort_values(["calitp_itp_id", "route_id", "route_name_used"])
-                         .drop_duplicates(subset=["calitp_itp_id", "route_id"])
-                        )
-    
-    routes = dd.merge(
-        df, 
-        route_info_unique,
-        on = ["calitp_itp_id", "route_id"],
-        how = "left",
-        #validate = "m:1",
-    )
-
-    return routes

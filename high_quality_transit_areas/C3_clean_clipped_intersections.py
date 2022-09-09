@@ -28,15 +28,17 @@ def process_clipped_intersections() -> dg.GeoDataFrame:
     gdf = gdf.assign(
         geometry = gdf.geometry.buffer(50)
     )
-        
+    '''
     gdf2 = gdf.assign(
         # need to use tuple to assign a name to this new series (called geom here)
         # and the dtype, which is geometry
         geometry = gdf.geometry.apply(drop_big_areas, meta=("geom", 'geometry'))
     ).dropna(subset="geometry").reset_index(drop=True)
-    
+    '''
     return gdf 
 
+
+'''
 # Don't drop big areas for now and see how it turns out
 def drop_big_areas(geometry: sh.multipolygon.MultiPolygon | sh.polygon.Polygon
                   ) -> sh.MultiPolygon | sh.polygon.Polygon:
@@ -50,4 +52,4 @@ def drop_big_areas(geometry: sh.multipolygon.MultiPolygon | sh.polygon.Polygon
             return geometry
     else:
         return np.nan
-   
+'''

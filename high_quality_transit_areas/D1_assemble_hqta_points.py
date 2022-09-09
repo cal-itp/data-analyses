@@ -2,11 +2,17 @@
 Combine all the points for HQ transit open data portal.
 
 From combine_and_visualize.ipynb
+
+Request: Thank you for this data. It would be useful for us to get the 
+HQTA stops as a point data file, not a polygon. Also, if you could 
+differentiate between train, bus, BRT, and ferry stop that would be 
+immensely helpful. Let me know if it is possible to get the data in this format.  
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
+import intake
 import numpy as np
 import os
 import pandas as pd
@@ -17,18 +23,56 @@ from loguru import logger
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
 from shared_utils import utils, geography_utils, portfolio_utils
-from update_vars import analysis_date
+from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 logger.add("./logs/D1_assemble_hqta_points.log")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
 
+catalog = intake.open_catalog("*.yml")
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 
 # Input files
 MAJOR_STOP_BUS_FILE = utilities.catalog_filepath("major_stop_bus")
 STOPS_IN_CORRIDOR_FILE = utilities.catalog_filepath("stops_in_hq_corr")
+    
+
+def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
+    """
+    Use calitp_itp_id-stop_id to add route_id back in, 
+    using the trips and stop_times table.
+    """    
+    stop_times = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+    trips = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+    
+    stop_cols = ["calitp_itp_id", "stop_id"]
+    trip_cols = ["calitp_itp_id", "trip_id"]
+    
+    one_trip = (stop_times[stop_cols + ["trip_id"]]
+                .drop_duplicates(subset=stop_cols)
+                .reset_index(drop=True)
+               )
+    
+    with_route_info = dd.merge(
+        one_trip,
+        trips[trip_cols + ["route_id"]].drop_duplicates(),
+        on = trip_cols,
+        how = "inner"
+    ).rename(columns = {"calitp_itp_id": "calitp_itp_id_primary"})
+
+    hqta_points_with_route = dd.merge(
+        hqta_points,
+        with_route_info,
+        on = ["calitp_itp_id_primary", "stop_id"],
+        how = "inner",
+    ).drop(columns = "trip_id")
+    
+    # Clip to CA
+    ca_hqta_points = utilities.clip_to_ca(hqta_points_with_route)
+    
+    return ca_hqta_points
+
     
     
 def get_agency_names() -> pd.DataFrame:
@@ -77,22 +121,17 @@ def add_agency_names_hqta_details(gdf: dg.GeoDataFrame) -> gpd.GeoDataFrame:
                     hqta_details = with_names.apply(utilities.hqta_details, axis=1)
                 )
     return with_names
-
+    
 
 def clean_up_hqta_points(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     gdf2 = (gdf.drop_duplicates(
                     subset=["calitp_itp_id_primary", "hqta_type", "stop_id"])
-                   .sort_values(["calitp_itp_id_primary", "hqta_type", "stop_id"])
-                   .reset_index(drop=True)
-                   .to_crs(geography_utils.WGS84)
+                .sort_values(["calitp_itp_id_primary", "hqta_type", "stop_id"])
+                .reset_index(drop=True)
+            .to_crs(geography_utils.WGS84)
     )
     
     return gdf2
-
-
-def delete_local_files():
-    os.remove(MAJOR_STOP_BUS_FILE)
-    os.remove(STOPS_IN_CORRIDOR_FILE)
     
     
 if __name__=="__main__":
@@ -114,27 +153,52 @@ if __name__=="__main__":
     time1 = dt.datetime.now()
     logger.info(f"combined points: {time1 - start}")
     
-    # Add agency names, hqta_details, project back to WGS84
-    gdf = add_agency_names_hqta_details(hqta_points_combined)
-    gdf = clean_up_hqta_points(gdf)
+    # Add in route_id 
+    hqta_points_with_route_info = add_route_info(hqta_points_combined)
     
     time2 = dt.datetime.now()
-    logger.info(f"add agency names / compute: {time2 - time1}")
+    logger.info(f"add route info: {time2 - time1}")
+
+    # Add agency names, hqta_details, project back to WGS84
+    gdf = add_agency_names_hqta_details(hqta_points_with_route_info)
+    gdf = clean_up_hqta_points(gdf)
+    
+    time3 = dt.datetime.now()
+    logger.info(f"add agency names / compute: {time3 - time2}")
     
     # Export to GCS
-    # Stash this date's into its own folder, to convert to geojson, geojsonl
+    # Stash this date's into its own folder, to convert to geojson, geojsonl later
     utils.geoparquet_gcs_export(gdf,
                                 EXPORT_PATH,
                                 'ca_hq_transit_stops'
                                )  
     
+    logger.info("export as geoparquet in date folder")
+   
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(gdf, 
                                 utilities.GCS_FILE_PATH,
                                 'hqta_points'
                                )
     
-    delete_local_files()
+    logger.info("export as geoparquet")
+        
+    # Add geojson / geojsonl exports
+    utils.geojson_gcs_export(gdf, 
+                             EXPORT_PATH,
+                             'ca_hq_transit_stops', 
+                             geojson_type = "geojson"
+                            )
     
+    logger.info("export as geojson")
+    
+    utils.geojson_gcs_export(gdf, 
+                             EXPORT_PATH,
+                             'ca_hq_transit_stops', 
+                             geojson_type = "geojsonl"
+                            )
+    
+    logger.info("export as geojsonl")
+
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

@@ -727,3 +727,709 @@
 2022-08-31 10:04:46.512 | INFO     | __main__:<module>:242 - successful export: 485
 2022-08-31 10:04:46.513 | INFO     | __main__:<module>:246 - execution time for 485: 0:00:04.013125
 2022-08-31 10:04:46.514 | INFO     | __main__:<module>:249 - total execution time: 0:56:09.006151
+2022-09-08 09:40:43.481 | INFO     | __main__:<module>:221 - Analysis date: 2022-08-17
+2022-09-08 09:40:45.419 | INFO     | __main__:<module>:234 - read in cached files: 4
+2022-09-08 09:45:14.900 | INFO     | __main__:<module>:238 - created single operator hqta: 4
+2022-09-08 09:45:16.260 | INFO     | __main__:<module>:244 - successful export: 4
+2022-09-08 09:45:16.262 | INFO     | __main__:<module>:248 - execution time for 4: 0:04:32.736308
+2022-09-08 09:45:17.793 | INFO     | __main__:<module>:234 - read in cached files: 6
+2022-09-08 09:45:21.278 | INFO     | __main__:<module>:238 - created single operator hqta: 6
+2022-09-08 09:45:21.455 | INFO     | __main__:<module>:244 - successful export: 6
+2022-09-08 09:45:21.457 | INFO     | __main__:<module>:248 - execution time for 6: 0:00:05.193786
+2022-09-08 09:45:23.002 | INFO     | __main__:<module>:234 - read in cached files: 10
+2022-09-08 09:45:25.432 | INFO     | __main__:<module>:238 - created single operator hqta: 10
+2022-09-08 09:45:25.565 | INFO     | __main__:<module>:244 - successful export: 10
+2022-09-08 09:45:25.566 | INFO     | __main__:<module>:248 - execution time for 10: 0:00:04.108031
+2022-09-08 09:45:27.038 | INFO     | __main__:<module>:234 - read in cached files: 11
+2022-09-08 09:45:33.425 | INFO     | __main__:<module>:238 - created single operator hqta: 11
+2022-09-08 09:45:33.608 | INFO     | __main__:<module>:244 - successful export: 11
+2022-09-08 09:45:33.610 | INFO     | __main__:<module>:248 - execution time for 11: 0:00:08.043670
+2022-09-08 09:45:35.122 | INFO     | __main__:<module>:234 - read in cached files: 14
+2022-09-08 09:47:30.313 | INFO     | __main__:<module>:238 - created single operator hqta: 14
+2022-09-08 09:47:30.546 | INFO     | __main__:<module>:244 - successful export: 14
+2022-09-08 09:47:30.548 | INFO     | __main__:<module>:248 - execution time for 14: 0:01:56.936843
+2022-09-08 09:47:32.076 | INFO     | __main__:<module>:234 - read in cached files: 15
+2022-09-08 09:47:34.459 | INFO     | __main__:<module>:238 - created single operator hqta: 15
+2022-09-08 09:47:34.565 | INFO     | __main__:<module>:244 - successful export: 15
+2022-09-08 09:47:34.567 | INFO     | __main__:<module>:248 - execution time for 15: 0:00:04.018470
+2022-09-08 09:47:36.126 | INFO     | __main__:<module>:234 - read in cached files: 16
+2022-09-08 09:47:51.736 | INFO     | __main__:<module>:238 - created single operator hqta: 16
+2022-09-08 09:47:51.985 | INFO     | __main__:<module>:244 - successful export: 16
+2022-09-08 09:47:51.989 | INFO     | __main__:<module>:248 - execution time for 16: 0:00:17.421461
+2022-09-08 09:47:53.486 | INFO     | __main__:<module>:234 - read in cached files: 17
+2022-09-08 09:47:57.176 | INFO     | __main__:<module>:238 - created single operator hqta: 17
+2022-09-08 09:47:57.344 | INFO     | __main__:<module>:244 - successful export: 17
+2022-09-08 09:47:57.345 | INFO     | __main__:<module>:248 - execution time for 17: 0:00:05.353757
+2022-09-08 09:47:58.812 | INFO     | __main__:<module>:234 - read in cached files: 18
+2022-09-08 09:48:09.885 | INFO     | __main__:<module>:238 - created single operator hqta: 18
+2022-09-08 09:48:10.107 | INFO     | __main__:<module>:244 - successful export: 18
+2022-09-08 09:48:10.108 | INFO     | __main__:<module>:248 - execution time for 18: 0:00:12.762673
+2022-09-08 09:48:12.105 | INFO     | __main__:<module>:234 - read in cached files: 23
+2022-09-08 09:48:14.821 | INFO     | __main__:<module>:238 - created single operator hqta: 23
+2022-09-08 09:48:14.989 | INFO     | __main__:<module>:244 - successful export: 23
+2022-09-08 09:48:14.992 | INFO     | __main__:<module>:248 - execution time for 23: 0:00:04.883278
+2022-09-08 09:48:16.513 | INFO     | __main__:<module>:234 - read in cached files: 24
+2022-09-08 09:48:19.294 | INFO     | __main__:<module>:238 - created single operator hqta: 24
+2022-09-08 09:48:19.512 | INFO     | __main__:<module>:244 - successful export: 24
+2022-09-08 09:48:19.513 | INFO     | __main__:<module>:248 - execution time for 24: 0:00:04.519637
+2022-09-08 09:48:21.038 | INFO     | __main__:<module>:234 - read in cached files: 29
+2022-09-08 09:48:25.125 | INFO     | __main__:<module>:238 - created single operator hqta: 29
+2022-09-08 09:48:25.308 | INFO     | __main__:<module>:244 - successful export: 29
+2022-09-08 09:48:25.309 | INFO     | __main__:<module>:248 - execution time for 29: 0:00:05.796123
+2022-09-08 09:48:26.806 | INFO     | __main__:<module>:234 - read in cached files: 30
+2022-09-08 09:48:30.900 | INFO     | __main__:<module>:238 - created single operator hqta: 30
+2022-09-08 09:48:31.072 | INFO     | __main__:<module>:244 - successful export: 30
+2022-09-08 09:48:31.073 | INFO     | __main__:<module>:248 - execution time for 30: 0:00:05.763546
+2022-09-08 09:48:32.572 | INFO     | __main__:<module>:234 - read in cached files: 34
+2022-09-08 09:48:37.877 | INFO     | __main__:<module>:238 - created single operator hqta: 34
+2022-09-08 09:48:38.049 | INFO     | __main__:<module>:244 - successful export: 34
+2022-09-08 09:48:38.052 | INFO     | __main__:<module>:248 - execution time for 34: 0:00:06.978017
+2022-09-08 09:48:40.176 | INFO     | __main__:<module>:234 - read in cached files: 35
+2022-09-08 09:48:42.768 | INFO     | __main__:<module>:238 - created single operator hqta: 35
+2022-09-08 09:48:42.885 | INFO     | __main__:<module>:244 - successful export: 35
+2022-09-08 09:48:42.886 | INFO     | __main__:<module>:248 - execution time for 35: 0:00:04.832882
+2022-09-08 09:48:44.345 | INFO     | __main__:<module>:234 - read in cached files: 36
+2022-09-08 09:48:46.854 | INFO     | __main__:<module>:238 - created single operator hqta: 36
+2022-09-08 09:48:46.982 | INFO     | __main__:<module>:244 - successful export: 36
+2022-09-08 09:48:46.984 | INFO     | __main__:<module>:248 - execution time for 36: 0:00:04.097674
+2022-09-08 09:48:48.489 | INFO     | __main__:<module>:234 - read in cached files: 37
+2022-09-08 09:48:51.691 | INFO     | __main__:<module>:238 - created single operator hqta: 37
+2022-09-08 09:48:51.860 | INFO     | __main__:<module>:244 - successful export: 37
+2022-09-08 09:48:51.861 | INFO     | __main__:<module>:248 - execution time for 37: 0:00:04.875934
+2022-09-08 09:48:53.329 | INFO     | __main__:<module>:234 - read in cached files: 42
+2022-09-08 09:49:04.269 | INFO     | __main__:<module>:238 - created single operator hqta: 42
+2022-09-08 09:49:04.482 | INFO     | __main__:<module>:244 - successful export: 42
+2022-09-08 09:49:04.483 | INFO     | __main__:<module>:248 - execution time for 42: 0:00:12.622026
+2022-09-08 09:49:05.983 | INFO     | __main__:<module>:234 - read in cached files: 45
+2022-09-08 09:49:09.732 | INFO     | __main__:<module>:238 - created single operator hqta: 45
+2022-09-08 09:49:09.903 | INFO     | __main__:<module>:244 - successful export: 45
+2022-09-08 09:49:09.904 | INFO     | __main__:<module>:248 - execution time for 45: 0:00:05.420389
+2022-09-08 09:49:11.473 | INFO     | __main__:<module>:234 - read in cached files: 48
+2022-09-08 09:49:25.646 | INFO     | __main__:<module>:238 - created single operator hqta: 48
+2022-09-08 09:49:25.864 | INFO     | __main__:<module>:244 - successful export: 48
+2022-09-08 09:49:25.867 | INFO     | __main__:<module>:248 - execution time for 48: 0:00:15.962209
+2022-09-08 09:49:27.361 | INFO     | __main__:<module>:234 - read in cached files: 49
+2022-09-08 09:49:33.299 | INFO     | __main__:<module>:238 - created single operator hqta: 49
+2022-09-08 09:49:33.490 | INFO     | __main__:<module>:244 - successful export: 49
+2022-09-08 09:49:33.492 | INFO     | __main__:<module>:248 - execution time for 49: 0:00:07.622860
+2022-09-08 09:49:35.008 | INFO     | __main__:<module>:234 - read in cached files: 50
+2022-09-08 09:49:38.891 | INFO     | __main__:<module>:238 - created single operator hqta: 50
+2022-09-08 09:49:39.065 | INFO     | __main__:<module>:244 - successful export: 50
+2022-09-08 09:49:39.066 | INFO     | __main__:<module>:248 - execution time for 50: 0:00:05.574196
+2022-09-08 09:49:40.621 | INFO     | __main__:<module>:234 - read in cached files: 56
+2022-09-08 09:49:45.373 | INFO     | __main__:<module>:238 - created single operator hqta: 56
+2022-09-08 09:49:45.549 | INFO     | __main__:<module>:244 - successful export: 56
+2022-09-08 09:49:45.551 | INFO     | __main__:<module>:248 - execution time for 56: 0:00:06.483984
+2022-09-08 09:49:47.158 | INFO     | __main__:<module>:234 - read in cached files: 61
+2022-09-08 09:50:37.332 | INFO     | __main__:<module>:238 - created single operator hqta: 61
+2022-09-08 09:50:37.915 | INFO     | __main__:<module>:244 - successful export: 61
+2022-09-08 09:50:37.917 | INFO     | __main__:<module>:248 - execution time for 61: 0:00:52.365126
+2022-09-08 09:50:39.473 | INFO     | __main__:<module>:234 - read in cached files: 70
+2022-09-08 09:50:57.523 | INFO     | __main__:<module>:238 - created single operator hqta: 70
+2022-09-08 09:50:57.869 | INFO     | __main__:<module>:244 - successful export: 70
+2022-09-08 09:50:57.871 | INFO     | __main__:<module>:248 - execution time for 70: 0:00:19.952780
+2022-09-08 09:50:59.355 | INFO     | __main__:<module>:234 - read in cached files: 71
+2022-09-08 09:51:02.613 | INFO     | __main__:<module>:238 - created single operator hqta: 71
+2022-09-08 09:51:02.812 | INFO     | __main__:<module>:244 - successful export: 71
+2022-09-08 09:51:02.813 | INFO     | __main__:<module>:248 - execution time for 71: 0:00:04.941257
+2022-09-08 09:51:04.330 | INFO     | __main__:<module>:234 - read in cached files: 75
+2022-09-08 09:51:09.411 | INFO     | __main__:<module>:238 - created single operator hqta: 75
+2022-09-08 09:51:09.601 | INFO     | __main__:<module>:244 - successful export: 75
+2022-09-08 09:51:09.602 | INFO     | __main__:<module>:248 - execution time for 75: 0:00:06.788202
+2022-09-08 09:51:11.038 | INFO     | __main__:<module>:234 - read in cached files: 76
+2022-09-08 09:51:43.818 | INFO     | __main__:<module>:238 - created single operator hqta: 76
+2022-09-08 09:51:44.065 | INFO     | __main__:<module>:244 - successful export: 76
+2022-09-08 09:51:44.066 | INFO     | __main__:<module>:248 - execution time for 76: 0:00:34.463151
+2022-09-08 09:51:45.563 | INFO     | __main__:<module>:234 - read in cached files: 77
+2022-09-08 09:51:50.892 | INFO     | __main__:<module>:238 - created single operator hqta: 77
+2022-09-08 09:51:51.080 | INFO     | __main__:<module>:244 - successful export: 77
+2022-09-08 09:51:51.081 | INFO     | __main__:<module>:248 - execution time for 77: 0:00:07.014728
+2022-09-08 09:51:52.607 | INFO     | __main__:<module>:234 - read in cached files: 79
+2022-09-08 09:51:55.884 | INFO     | __main__:<module>:238 - created single operator hqta: 79
+2022-09-08 09:51:56.057 | INFO     | __main__:<module>:244 - successful export: 79
+2022-09-08 09:51:56.059 | INFO     | __main__:<module>:248 - execution time for 79: 0:00:04.976875
+2022-09-08 09:51:57.545 | INFO     | __main__:<module>:234 - read in cached files: 81
+2022-09-08 09:52:02.074 | INFO     | __main__:<module>:238 - created single operator hqta: 81
+2022-09-08 09:52:02.254 | INFO     | __main__:<module>:244 - successful export: 81
+2022-09-08 09:52:02.255 | INFO     | __main__:<module>:248 - execution time for 81: 0:00:06.195750
+2022-09-08 09:52:03.781 | INFO     | __main__:<module>:234 - read in cached files: 82
+2022-09-08 09:52:15.455 | INFO     | __main__:<module>:238 - created single operator hqta: 82
+2022-09-08 09:52:15.653 | INFO     | __main__:<module>:244 - successful export: 82
+2022-09-08 09:52:15.654 | INFO     | __main__:<module>:248 - execution time for 82: 0:00:13.398763
+2022-09-08 09:52:17.138 | INFO     | __main__:<module>:234 - read in cached files: 83
+2022-09-08 09:52:24.618 | INFO     | __main__:<module>:238 - created single operator hqta: 83
+2022-09-08 09:52:24.800 | INFO     | __main__:<module>:244 - successful export: 83
+2022-09-08 09:52:24.802 | INFO     | __main__:<module>:248 - execution time for 83: 0:00:09.146693
+2022-09-08 09:52:26.272 | INFO     | __main__:<module>:234 - read in cached files: 86
+2022-09-08 09:52:28.795 | INFO     | __main__:<module>:238 - created single operator hqta: 86
+2022-09-08 09:52:28.966 | INFO     | __main__:<module>:244 - successful export: 86
+2022-09-08 09:52:28.967 | INFO     | __main__:<module>:248 - execution time for 86: 0:00:04.164520
+2022-09-08 09:52:30.754 | INFO     | __main__:<module>:234 - read in cached files: 87
+2022-09-08 09:52:38.920 | INFO     | __main__:<module>:238 - created single operator hqta: 87
+2022-09-08 09:52:39.114 | INFO     | __main__:<module>:244 - successful export: 87
+2022-09-08 09:52:39.115 | INFO     | __main__:<module>:248 - execution time for 87: 0:00:10.147640
+2022-09-08 09:52:40.642 | INFO     | __main__:<module>:234 - read in cached files: 95
+2022-09-08 09:52:47.345 | INFO     | __main__:<module>:238 - created single operator hqta: 95
+2022-09-08 09:52:47.541 | INFO     | __main__:<module>:244 - successful export: 95
+2022-09-08 09:52:47.542 | INFO     | __main__:<module>:248 - execution time for 95: 0:00:08.427080
+2022-09-08 09:52:49.023 | INFO     | __main__:<module>:234 - read in cached files: 98
+2022-09-08 09:52:52.662 | INFO     | __main__:<module>:238 - created single operator hqta: 98
+2022-09-08 09:52:52.834 | INFO     | __main__:<module>:244 - successful export: 98
+2022-09-08 09:52:52.835 | INFO     | __main__:<module>:248 - execution time for 98: 0:00:05.292146
+2022-09-08 09:52:54.413 | INFO     | __main__:<module>:234 - read in cached files: 99
+2022-09-08 09:53:04.346 | INFO     | __main__:<module>:238 - created single operator hqta: 99
+2022-09-08 09:53:04.521 | INFO     | __main__:<module>:244 - successful export: 99
+2022-09-08 09:53:04.524 | INFO     | __main__:<module>:248 - execution time for 99: 0:00:11.688342
+2022-09-08 09:53:06.140 | INFO     | __main__:<module>:234 - read in cached files: 101
+2022-09-08 09:53:15.279 | INFO     | __main__:<module>:238 - created single operator hqta: 101
+2022-09-08 09:53:15.582 | INFO     | __main__:<module>:244 - successful export: 101
+2022-09-08 09:53:15.585 | INFO     | __main__:<module>:248 - execution time for 101: 0:00:11.059790
+2022-09-08 09:53:18.246 | INFO     | __main__:<module>:234 - read in cached files: 102
+2022-09-08 09:53:27.569 | INFO     | __main__:<module>:238 - created single operator hqta: 102
+2022-09-08 09:53:27.747 | INFO     | __main__:<module>:244 - successful export: 102
+2022-09-08 09:53:27.748 | INFO     | __main__:<module>:248 - execution time for 102: 0:00:12.162959
+2022-09-08 09:53:30.017 | INFO     | __main__:<module>:234 - read in cached files: 103
+2022-09-08 09:53:33.792 | INFO     | __main__:<module>:238 - created single operator hqta: 103
+2022-09-08 09:53:33.970 | INFO     | __main__:<module>:244 - successful export: 103
+2022-09-08 09:53:33.971 | INFO     | __main__:<module>:248 - execution time for 103: 0:00:06.222327
+2022-09-08 09:53:36.235 | INFO     | __main__:<module>:234 - read in cached files: 105
+2022-09-08 09:53:53.034 | INFO     | __main__:<module>:238 - created single operator hqta: 105
+2022-09-08 09:53:53.336 | INFO     | __main__:<module>:244 - successful export: 105
+2022-09-08 09:53:53.337 | INFO     | __main__:<module>:248 - execution time for 105: 0:00:19.364913
+2022-09-08 09:53:55.234 | INFO     | __main__:<module>:234 - read in cached files: 106
+2022-09-08 09:54:02.515 | INFO     | __main__:<module>:238 - created single operator hqta: 106
+2022-09-08 09:54:02.771 | INFO     | __main__:<module>:244 - successful export: 106
+2022-09-08 09:54:02.774 | INFO     | __main__:<module>:248 - execution time for 106: 0:00:09.436639
+2022-09-08 09:54:04.368 | INFO     | __main__:<module>:234 - read in cached files: 107
+2022-09-08 09:54:07.163 | INFO     | __main__:<module>:238 - created single operator hqta: 107
+2022-09-08 09:54:07.416 | INFO     | __main__:<module>:244 - successful export: 107
+2022-09-08 09:54:07.417 | INFO     | __main__:<module>:248 - execution time for 107: 0:00:04.642744
+2022-09-08 09:54:09.201 | INFO     | __main__:<module>:234 - read in cached files: 108
+2022-09-08 09:54:20.684 | INFO     | __main__:<module>:238 - created single operator hqta: 108
+2022-09-08 09:54:20.903 | INFO     | __main__:<module>:244 - successful export: 108
+2022-09-08 09:54:20.905 | INFO     | __main__:<module>:248 - execution time for 108: 0:00:13.486762
+2022-09-08 09:54:22.411 | INFO     | __main__:<module>:234 - read in cached files: 110
+2022-09-08 09:54:37.396 | INFO     | __main__:<module>:238 - created single operator hqta: 110
+2022-09-08 09:54:37.749 | INFO     | __main__:<module>:244 - successful export: 110
+2022-09-08 09:54:37.751 | INFO     | __main__:<module>:248 - execution time for 110: 0:00:16.845208
+2022-09-08 09:54:39.648 | INFO     | __main__:<module>:234 - read in cached files: 112
+2022-09-08 09:55:21.965 | INFO     | __main__:<module>:238 - created single operator hqta: 112
+2022-09-08 09:55:22.418 | INFO     | __main__:<module>:244 - successful export: 112
+2022-09-08 09:55:22.420 | INFO     | __main__:<module>:248 - execution time for 112: 0:00:44.668298
+2022-09-08 09:55:23.989 | INFO     | __main__:<module>:234 - read in cached files: 116
+2022-09-08 09:55:38.648 | INFO     | __main__:<module>:238 - created single operator hqta: 116
+2022-09-08 09:55:38.871 | INFO     | __main__:<module>:244 - successful export: 116
+2022-09-08 09:55:38.873 | INFO     | __main__:<module>:248 - execution time for 116: 0:00:16.453343
+2022-09-08 09:55:40.398 | INFO     | __main__:<module>:234 - read in cached files: 117
+2022-09-08 09:55:46.833 | INFO     | __main__:<module>:238 - created single operator hqta: 117
+2022-09-08 09:55:47.013 | INFO     | __main__:<module>:244 - successful export: 117
+2022-09-08 09:55:47.015 | INFO     | __main__:<module>:248 - execution time for 117: 0:00:08.140170
+2022-09-08 09:55:48.532 | INFO     | __main__:<module>:234 - read in cached files: 120
+2022-09-08 09:55:56.951 | INFO     | __main__:<module>:238 - created single operator hqta: 120
+2022-09-08 09:55:57.126 | INFO     | __main__:<module>:244 - successful export: 120
+2022-09-08 09:55:57.127 | INFO     | __main__:<module>:248 - execution time for 120: 0:00:10.111615
+2022-09-08 09:55:58.623 | INFO     | __main__:<module>:234 - read in cached files: 121
+2022-09-08 09:56:02.341 | INFO     | __main__:<module>:238 - created single operator hqta: 121
+2022-09-08 09:56:02.510 | INFO     | __main__:<module>:244 - successful export: 121
+2022-09-08 09:56:02.511 | INFO     | __main__:<module>:248 - execution time for 121: 0:00:05.383419
+2022-09-08 09:56:04.055 | INFO     | __main__:<module>:234 - read in cached files: 122
+2022-09-08 09:56:06.715 | INFO     | __main__:<module>:238 - created single operator hqta: 122
+2022-09-08 09:56:06.882 | INFO     | __main__:<module>:244 - successful export: 122
+2022-09-08 09:56:06.885 | INFO     | __main__:<module>:248 - execution time for 122: 0:00:04.372678
+2022-09-08 09:56:08.430 | INFO     | __main__:<module>:234 - read in cached files: 123
+2022-09-08 09:56:27.044 | INFO     | __main__:<module>:238 - created single operator hqta: 123
+2022-09-08 09:56:27.368 | INFO     | __main__:<module>:244 - successful export: 123
+2022-09-08 09:56:27.370 | INFO     | __main__:<module>:248 - execution time for 123: 0:00:20.484616
+2022-09-08 09:56:28.890 | INFO     | __main__:<module>:234 - read in cached files: 126
+2022-09-08 09:56:42.126 | INFO     | __main__:<module>:238 - created single operator hqta: 126
+2022-09-08 09:56:42.362 | INFO     | __main__:<module>:244 - successful export: 126
+2022-09-08 09:56:42.363 | INFO     | __main__:<module>:248 - execution time for 126: 0:00:14.991729
+2022-09-08 09:56:43.903 | INFO     | __main__:<module>:234 - read in cached files: 127
+2022-09-08 09:57:13.658 | INFO     | __main__:<module>:238 - created single operator hqta: 127
+2022-09-08 09:57:13.965 | INFO     | __main__:<module>:244 - successful export: 127
+2022-09-08 09:57:13.967 | INFO     | __main__:<module>:248 - execution time for 127: 0:00:31.603218
+2022-09-08 09:57:15.514 | INFO     | __main__:<module>:234 - read in cached files: 129
+2022-09-08 09:57:18.653 | INFO     | __main__:<module>:238 - created single operator hqta: 129
+2022-09-08 09:57:18.851 | INFO     | __main__:<module>:244 - successful export: 129
+2022-09-08 09:57:18.852 | INFO     | __main__:<module>:248 - execution time for 129: 0:00:04.884283
+2022-09-08 09:57:20.426 | INFO     | __main__:<module>:234 - read in cached files: 135
+2022-09-08 09:57:34.253 | INFO     | __main__:<module>:238 - created single operator hqta: 135
+2022-09-08 09:57:34.554 | INFO     | __main__:<module>:244 - successful export: 135
+2022-09-08 09:57:34.557 | INFO     | __main__:<module>:248 - execution time for 135: 0:00:15.704363
+2022-09-08 09:57:36.025 | INFO     | __main__:<module>:234 - read in cached files: 137
+2022-09-08 09:57:38.731 | INFO     | __main__:<module>:238 - created single operator hqta: 137
+2022-09-08 09:57:38.848 | INFO     | __main__:<module>:244 - successful export: 137
+2022-09-08 09:57:38.850 | INFO     | __main__:<module>:248 - execution time for 137: 0:00:04.292375
+2022-09-08 09:57:40.447 | INFO     | __main__:<module>:234 - read in cached files: 142
+2022-09-08 09:58:43.998 | INFO     | __main__:<module>:238 - created single operator hqta: 142
+2022-09-08 09:58:44.633 | INFO     | __main__:<module>:244 - successful export: 142
+2022-09-08 09:58:44.634 | INFO     | __main__:<module>:248 - execution time for 142: 0:01:05.782808
+2022-09-08 09:58:46.150 | INFO     | __main__:<module>:234 - read in cached files: 146
+2022-09-08 09:58:57.727 | INFO     | __main__:<module>:238 - created single operator hqta: 146
+2022-09-08 09:58:57.908 | INFO     | __main__:<module>:244 - successful export: 146
+2022-09-08 09:58:57.910 | INFO     | __main__:<module>:248 - execution time for 146: 0:00:13.274958
+2022-09-08 09:58:59.574 | INFO     | __main__:<module>:234 - read in cached files: 148
+2022-09-08 09:59:12.150 | INFO     | __main__:<module>:238 - created single operator hqta: 148
+2022-09-08 09:59:12.351 | INFO     | __main__:<module>:244 - successful export: 148
+2022-09-08 09:59:12.353 | INFO     | __main__:<module>:248 - execution time for 148: 0:00:14.441768
+2022-09-08 09:59:13.994 | INFO     | __main__:<module>:234 - read in cached files: 152
+2022-09-08 09:59:17.487 | INFO     | __main__:<module>:238 - created single operator hqta: 152
+2022-09-08 09:59:17.659 | INFO     | __main__:<module>:244 - successful export: 152
+2022-09-08 09:59:17.662 | INFO     | __main__:<module>:248 - execution time for 152: 0:00:05.307441
+2022-09-08 09:59:19.282 | INFO     | __main__:<module>:234 - read in cached files: 154
+2022-09-08 09:59:23.253 | INFO     | __main__:<module>:238 - created single operator hqta: 154
+2022-09-08 09:59:23.382 | INFO     | __main__:<module>:244 - successful export: 154
+2022-09-08 09:59:23.383 | INFO     | __main__:<module>:248 - execution time for 154: 0:00:05.719305
+2022-09-08 09:59:25.041 | INFO     | __main__:<module>:234 - read in cached files: 159
+2022-09-08 09:59:34.514 | INFO     | __main__:<module>:238 - created single operator hqta: 159
+2022-09-08 09:59:34.694 | INFO     | __main__:<module>:244 - successful export: 159
+2022-09-08 09:59:34.695 | INFO     | __main__:<module>:248 - execution time for 159: 0:00:11.312085
+2022-09-08 09:59:36.242 | INFO     | __main__:<module>:234 - read in cached files: 162
+2022-09-08 09:59:41.442 | INFO     | __main__:<module>:238 - created single operator hqta: 162
+2022-09-08 09:59:41.616 | INFO     | __main__:<module>:244 - successful export: 162
+2022-09-08 09:59:41.617 | INFO     | __main__:<module>:248 - execution time for 162: 0:00:06.921160
+2022-09-08 09:59:43.089 | INFO     | __main__:<module>:234 - read in cached files: 165
+2022-09-08 09:59:48.657 | INFO     | __main__:<module>:238 - created single operator hqta: 165
+2022-09-08 09:59:48.833 | INFO     | __main__:<module>:244 - successful export: 165
+2022-09-08 09:59:48.835 | INFO     | __main__:<module>:248 - execution time for 165: 0:00:07.217811
+2022-09-08 09:59:50.415 | INFO     | __main__:<module>:234 - read in cached files: 167
+2022-09-08 10:00:15.216 | INFO     | __main__:<module>:238 - created single operator hqta: 167
+2022-09-08 10:00:15.818 | INFO     | __main__:<module>:244 - successful export: 167
+2022-09-08 10:00:15.819 | INFO     | __main__:<module>:248 - execution time for 167: 0:00:26.981979
+2022-09-08 10:00:17.385 | INFO     | __main__:<module>:234 - read in cached files: 168
+2022-09-08 10:00:26.241 | INFO     | __main__:<module>:238 - created single operator hqta: 168
+2022-09-08 10:00:26.423 | INFO     | __main__:<module>:244 - successful export: 168
+2022-09-08 10:00:26.425 | INFO     | __main__:<module>:248 - execution time for 168: 0:00:10.605410
+2022-09-08 10:00:27.884 | INFO     | __main__:<module>:234 - read in cached files: 169
+2022-09-08 10:00:33.364 | INFO     | __main__:<module>:238 - created single operator hqta: 169
+2022-09-08 10:00:33.537 | INFO     | __main__:<module>:244 - successful export: 169
+2022-09-08 10:00:33.538 | INFO     | __main__:<module>:248 - execution time for 169: 0:00:07.112912
+2022-09-08 10:00:35.088 | INFO     | __main__:<module>:234 - read in cached files: 170
+2022-09-08 10:01:11.344 | INFO     | __main__:<module>:238 - created single operator hqta: 170
+2022-09-08 10:01:11.821 | INFO     | __main__:<module>:244 - successful export: 170
+2022-09-08 10:01:11.822 | INFO     | __main__:<module>:248 - execution time for 170: 0:00:38.283751
+2022-09-08 10:01:13.370 | INFO     | __main__:<module>:234 - read in cached files: 171
+2022-09-08 10:01:28.092 | INFO     | __main__:<module>:238 - created single operator hqta: 171
+2022-09-08 10:01:28.334 | INFO     | __main__:<module>:244 - successful export: 171
+2022-09-08 10:01:28.337 | INFO     | __main__:<module>:248 - execution time for 171: 0:00:16.513614
+2022-09-08 10:01:29.843 | INFO     | __main__:<module>:234 - read in cached files: 172
+2022-09-08 10:01:44.489 | INFO     | __main__:<module>:238 - created single operator hqta: 172
+2022-09-08 10:01:44.722 | INFO     | __main__:<module>:244 - successful export: 172
+2022-09-08 10:01:44.724 | INFO     | __main__:<module>:248 - execution time for 172: 0:00:16.385766
+2022-09-08 10:01:46.271 | INFO     | __main__:<module>:234 - read in cached files: 173
+2022-09-08 10:02:01.104 | INFO     | __main__:<module>:238 - created single operator hqta: 173
+2022-09-08 10:02:01.344 | INFO     | __main__:<module>:244 - successful export: 173
+2022-09-08 10:02:01.345 | INFO     | __main__:<module>:248 - execution time for 173: 0:00:16.620274
+2022-09-08 10:02:02.822 | INFO     | __main__:<module>:234 - read in cached files: 174
+2022-09-08 10:02:17.474 | INFO     | __main__:<module>:238 - created single operator hqta: 174
+2022-09-08 10:02:17.722 | INFO     | __main__:<module>:244 - successful export: 174
+2022-09-08 10:02:17.724 | INFO     | __main__:<module>:248 - execution time for 174: 0:00:16.377962
+2022-09-08 10:02:19.215 | INFO     | __main__:<module>:234 - read in cached files: 176
+2022-09-08 10:02:34.739 | INFO     | __main__:<module>:238 - created single operator hqta: 176
+2022-09-08 10:02:35.037 | INFO     | __main__:<module>:244 - successful export: 176
+2022-09-08 10:02:35.039 | INFO     | __main__:<module>:248 - execution time for 176: 0:00:17.314257
+2022-09-08 10:02:36.590 | INFO     | __main__:<module>:234 - read in cached files: 177
+2022-09-08 10:02:51.309 | INFO     | __main__:<module>:238 - created single operator hqta: 177
+2022-09-08 10:02:51.537 | INFO     | __main__:<module>:244 - successful export: 177
+2022-09-08 10:02:51.540 | INFO     | __main__:<module>:248 - execution time for 177: 0:00:16.500323
+2022-09-08 10:02:53.040 | INFO     | __main__:<module>:234 - read in cached files: 178
+2022-09-08 10:03:07.602 | INFO     | __main__:<module>:238 - created single operator hqta: 178
+2022-09-08 10:03:07.857 | INFO     | __main__:<module>:244 - successful export: 178
+2022-09-08 10:03:07.858 | INFO     | __main__:<module>:248 - execution time for 178: 0:00:16.316688
+2022-09-08 10:03:09.511 | INFO     | __main__:<module>:234 - read in cached files: 179
+2022-09-08 10:03:24.160 | INFO     | __main__:<module>:238 - created single operator hqta: 179
+2022-09-08 10:03:24.386 | INFO     | __main__:<module>:244 - successful export: 179
+2022-09-08 10:03:24.387 | INFO     | __main__:<module>:248 - execution time for 179: 0:00:16.528481
+2022-09-08 10:03:25.899 | INFO     | __main__:<module>:234 - read in cached files: 181
+2022-09-08 10:03:40.551 | INFO     | __main__:<module>:238 - created single operator hqta: 181
+2022-09-08 10:03:40.780 | INFO     | __main__:<module>:244 - successful export: 181
+2022-09-08 10:03:40.781 | INFO     | __main__:<module>:248 - execution time for 181: 0:00:16.393517
+2022-09-08 10:03:42.349 | INFO     | __main__:<module>:234 - read in cached files: 182
+2022-09-08 10:07:58.406 | INFO     | __main__:<module>:238 - created single operator hqta: 182
+2022-09-08 10:07:58.916 | INFO     | __main__:<module>:244 - successful export: 182
+2022-09-08 10:07:58.916 | INFO     | __main__:<module>:248 - execution time for 182: 0:04:18.134518
+2022-09-08 10:08:00.490 | INFO     | __main__:<module>:234 - read in cached files: 183
+2022-09-08 10:08:59.497 | INFO     | __main__:<module>:238 - created single operator hqta: 183
+2022-09-08 10:09:00.024 | INFO     | __main__:<module>:244 - successful export: 183
+2022-09-08 10:09:00.025 | INFO     | __main__:<module>:248 - execution time for 183: 0:01:01.108138
+2022-09-08 10:09:01.549 | INFO     | __main__:<module>:234 - read in cached files: 187
+2022-09-08 10:09:05.338 | INFO     | __main__:<module>:238 - created single operator hqta: 187
+2022-09-08 10:09:05.508 | INFO     | __main__:<module>:244 - successful export: 187
+2022-09-08 10:09:05.511 | INFO     | __main__:<module>:248 - execution time for 187: 0:00:05.485095
+2022-09-08 10:09:06.990 | INFO     | __main__:<module>:234 - read in cached files: 188
+2022-09-08 10:09:12.138 | INFO     | __main__:<module>:238 - created single operator hqta: 188
+2022-09-08 10:09:12.310 | INFO     | __main__:<module>:244 - successful export: 188
+2022-09-08 10:09:12.311 | INFO     | __main__:<module>:248 - execution time for 188: 0:00:06.799066
+2022-09-08 10:09:13.869 | INFO     | __main__:<module>:234 - read in cached files: 190
+2022-09-08 10:09:23.275 | INFO     | __main__:<module>:238 - created single operator hqta: 190
+2022-09-08 10:09:23.450 | INFO     | __main__:<module>:244 - successful export: 190
+2022-09-08 10:09:23.453 | INFO     | __main__:<module>:248 - execution time for 190: 0:00:11.140712
+2022-09-08 10:09:24.973 | INFO     | __main__:<module>:234 - read in cached files: 194
+2022-09-08 10:10:04.366 | INFO     | __main__:<module>:238 - created single operator hqta: 194
+2022-09-08 10:10:04.793 | INFO     | __main__:<module>:244 - successful export: 194
+2022-09-08 10:10:04.794 | INFO     | __main__:<module>:248 - execution time for 194: 0:00:41.339885
+2022-09-08 10:10:06.276 | INFO     | __main__:<module>:234 - read in cached files: 198
+2022-09-08 10:10:16.170 | INFO     | __main__:<module>:238 - created single operator hqta: 198
+2022-09-08 10:10:16.352 | INFO     | __main__:<module>:244 - successful export: 198
+2022-09-08 10:10:16.353 | INFO     | __main__:<module>:248 - execution time for 198: 0:00:11.558352
+2022-09-08 10:10:17.897 | INFO     | __main__:<module>:234 - read in cached files: 201
+2022-09-08 10:10:22.413 | INFO     | __main__:<module>:238 - created single operator hqta: 201
+2022-09-08 10:10:22.586 | INFO     | __main__:<module>:244 - successful export: 201
+2022-09-08 10:10:22.587 | INFO     | __main__:<module>:248 - execution time for 201: 0:00:06.233022
+2022-09-08 10:10:24.135 | INFO     | __main__:<module>:234 - read in cached files: 204
+2022-09-08 10:10:27.106 | INFO     | __main__:<module>:238 - created single operator hqta: 204
+2022-09-08 10:10:27.225 | INFO     | __main__:<module>:244 - successful export: 204
+2022-09-08 10:10:27.227 | INFO     | __main__:<module>:248 - execution time for 204: 0:00:04.639802
+2022-09-08 10:10:28.779 | INFO     | __main__:<module>:234 - read in cached files: 206
+2022-09-08 10:10:36.656 | INFO     | __main__:<module>:238 - created single operator hqta: 206
+2022-09-08 10:10:37.014 | INFO     | __main__:<module>:244 - successful export: 206
+2022-09-08 10:10:37.016 | INFO     | __main__:<module>:248 - execution time for 206: 0:00:09.787903
+2022-09-08 10:10:38.913 | INFO     | __main__:<module>:234 - read in cached files: 207
+2022-09-08 10:10:44.743 | INFO     | __main__:<module>:238 - created single operator hqta: 207
+2022-09-08 10:10:44.932 | INFO     | __main__:<module>:244 - successful export: 207
+2022-09-08 10:10:44.933 | INFO     | __main__:<module>:248 - execution time for 207: 0:00:07.916879
+2022-09-08 10:10:46.485 | INFO     | __main__:<module>:234 - read in cached files: 208
+2022-09-08 10:11:09.990 | INFO     | __main__:<module>:238 - created single operator hqta: 208
+2022-09-08 10:11:10.278 | INFO     | __main__:<module>:244 - successful export: 208
+2022-09-08 10:11:10.279 | INFO     | __main__:<module>:248 - execution time for 208: 0:00:25.344968
+2022-09-08 10:11:11.732 | INFO     | __main__:<module>:234 - read in cached files: 210
+2022-09-08 10:11:15.152 | INFO     | __main__:<module>:238 - created single operator hqta: 210
+2022-09-08 10:11:15.367 | INFO     | __main__:<module>:244 - successful export: 210
+2022-09-08 10:11:15.368 | INFO     | __main__:<module>:248 - execution time for 210: 0:00:05.088212
+2022-09-08 10:11:16.880 | INFO     | __main__:<module>:234 - read in cached files: 212
+2022-09-08 10:11:23.280 | INFO     | __main__:<module>:238 - created single operator hqta: 212
+2022-09-08 10:11:23.452 | INFO     | __main__:<module>:244 - successful export: 212
+2022-09-08 10:11:23.454 | INFO     | __main__:<module>:248 - execution time for 212: 0:00:08.084533
+2022-09-08 10:11:24.924 | INFO     | __main__:<module>:234 - read in cached files: 214
+2022-09-08 10:11:30.859 | INFO     | __main__:<module>:238 - created single operator hqta: 214
+2022-09-08 10:11:31.035 | INFO     | __main__:<module>:244 - successful export: 214
+2022-09-08 10:11:31.036 | INFO     | __main__:<module>:248 - execution time for 214: 0:00:07.581068
+2022-09-08 10:11:32.511 | INFO     | __main__:<module>:234 - read in cached files: 217
+2022-09-08 10:11:47.250 | INFO     | __main__:<module>:238 - created single operator hqta: 217
+2022-09-08 10:11:47.562 | INFO     | __main__:<module>:244 - successful export: 217
+2022-09-08 10:11:47.563 | INFO     | __main__:<module>:248 - execution time for 217: 0:00:16.525725
+2022-09-08 10:11:49.078 | INFO     | __main__:<module>:234 - read in cached files: 218
+2022-09-08 10:11:57.659 | INFO     | __main__:<module>:238 - created single operator hqta: 218
+2022-09-08 10:11:57.841 | INFO     | __main__:<module>:244 - successful export: 218
+2022-09-08 10:11:57.843 | INFO     | __main__:<module>:248 - execution time for 218: 0:00:10.278746
+2022-09-08 10:11:59.345 | INFO     | __main__:<module>:234 - read in cached files: 220
+2022-09-08 10:12:01.925 | INFO     | __main__:<module>:238 - created single operator hqta: 220
+2022-09-08 10:12:02.096 | INFO     | __main__:<module>:244 - successful export: 220
+2022-09-08 10:12:02.097 | INFO     | __main__:<module>:248 - execution time for 220: 0:00:04.253589
+2022-09-08 10:12:03.528 | INFO     | __main__:<module>:234 - read in cached files: 221
+2022-09-08 10:12:10.012 | INFO     | __main__:<module>:238 - created single operator hqta: 221
+2022-09-08 10:12:10.189 | INFO     | __main__:<module>:244 - successful export: 221
+2022-09-08 10:12:10.190 | INFO     | __main__:<module>:248 - execution time for 221: 0:00:08.092561
+2022-09-08 10:12:11.805 | INFO     | __main__:<module>:234 - read in cached files: 226
+2022-09-08 10:12:44.745 | INFO     | __main__:<module>:238 - created single operator hqta: 226
+2022-09-08 10:12:45.030 | INFO     | __main__:<module>:244 - successful export: 226
+2022-09-08 10:12:45.032 | INFO     | __main__:<module>:248 - execution time for 226: 0:00:34.841391
+2022-09-08 10:12:46.526 | INFO     | __main__:<module>:234 - read in cached files: 228
+2022-09-08 10:12:53.150 | INFO     | __main__:<module>:238 - created single operator hqta: 228
+2022-09-08 10:12:53.323 | INFO     | __main__:<module>:244 - successful export: 228
+2022-09-08 10:12:53.324 | INFO     | __main__:<module>:248 - execution time for 228: 0:00:08.291854
+2022-09-08 10:12:54.816 | INFO     | __main__:<module>:234 - read in cached files: 231
+2022-09-08 10:13:47.530 | INFO     | __main__:<module>:238 - created single operator hqta: 231
+2022-09-08 10:13:47.987 | INFO     | __main__:<module>:244 - successful export: 231
+2022-09-08 10:13:47.990 | INFO     | __main__:<module>:248 - execution time for 231: 0:00:54.664938
+2022-09-08 10:13:49.549 | INFO     | __main__:<module>:234 - read in cached files: 232
+2022-09-08 10:14:14.212 | INFO     | __main__:<module>:238 - created single operator hqta: 232
+2022-09-08 10:14:14.523 | INFO     | __main__:<module>:244 - successful export: 232
+2022-09-08 10:14:14.526 | INFO     | __main__:<module>:248 - execution time for 232: 0:00:26.534448
+2022-09-08 10:14:16.089 | INFO     | __main__:<module>:234 - read in cached files: 235
+2022-09-08 10:15:19.815 | INFO     | __main__:<module>:238 - created single operator hqta: 235
+2022-09-08 10:15:20.416 | INFO     | __main__:<module>:244 - successful export: 235
+2022-09-08 10:15:20.417 | INFO     | __main__:<module>:248 - execution time for 235: 0:01:05.889492
+2022-09-08 10:15:21.893 | INFO     | __main__:<module>:234 - read in cached files: 238
+2022-09-08 10:15:27.267 | INFO     | __main__:<module>:238 - created single operator hqta: 238
+2022-09-08 10:15:27.448 | INFO     | __main__:<module>:244 - successful export: 238
+2022-09-08 10:15:27.451 | INFO     | __main__:<module>:248 - execution time for 238: 0:00:07.033228
+2022-09-08 10:15:28.932 | INFO     | __main__:<module>:234 - read in cached files: 239
+2022-09-08 10:15:32.394 | INFO     | __main__:<module>:238 - created single operator hqta: 239
+2022-09-08 10:15:32.568 | INFO     | __main__:<module>:244 - successful export: 239
+2022-09-08 10:15:32.569 | INFO     | __main__:<module>:248 - execution time for 239: 0:00:05.116680
+2022-09-08 10:15:34.169 | INFO     | __main__:<module>:234 - read in cached files: 243
+2022-09-08 10:15:42.219 | INFO     | __main__:<module>:238 - created single operator hqta: 243
+2022-09-08 10:15:42.410 | INFO     | __main__:<module>:244 - successful export: 243
+2022-09-08 10:15:42.412 | INFO     | __main__:<module>:248 - execution time for 243: 0:00:09.843150
+2022-09-08 10:15:43.880 | INFO     | __main__:<module>:234 - read in cached files: 246
+2022-09-08 10:15:53.126 | INFO     | __main__:<module>:238 - created single operator hqta: 246
+2022-09-08 10:15:53.312 | INFO     | __main__:<module>:244 - successful export: 246
+2022-09-08 10:15:53.313 | INFO     | __main__:<module>:248 - execution time for 246: 0:00:10.899626
+2022-09-08 10:15:54.877 | INFO     | __main__:<module>:234 - read in cached files: 247
+2022-09-08 10:16:04.508 | INFO     | __main__:<module>:238 - created single operator hqta: 247
+2022-09-08 10:16:04.693 | INFO     | __main__:<module>:244 - successful export: 247
+2022-09-08 10:16:04.694 | INFO     | __main__:<module>:248 - execution time for 247: 0:00:11.379963
+2022-09-08 10:16:06.233 | INFO     | __main__:<module>:234 - read in cached files: 251
+2022-09-08 10:16:14.557 | INFO     | __main__:<module>:238 - created single operator hqta: 251
+2022-09-08 10:16:14.739 | INFO     | __main__:<module>:244 - successful export: 251
+2022-09-08 10:16:14.740 | INFO     | __main__:<module>:248 - execution time for 251: 0:00:10.045298
+2022-09-08 10:16:16.231 | INFO     | __main__:<module>:234 - read in cached files: 257
+2022-09-08 10:16:19.653 | INFO     | __main__:<module>:238 - created single operator hqta: 257
+2022-09-08 10:16:19.906 | INFO     | __main__:<module>:244 - successful export: 257
+2022-09-08 10:16:19.908 | INFO     | __main__:<module>:248 - execution time for 257: 0:00:05.167806
+2022-09-08 10:16:21.473 | INFO     | __main__:<module>:234 - read in cached files: 259
+2022-09-08 10:16:33.581 | INFO     | __main__:<module>:238 - created single operator hqta: 259
+2022-09-08 10:16:33.776 | INFO     | __main__:<module>:244 - successful export: 259
+2022-09-08 10:16:33.777 | INFO     | __main__:<module>:248 - execution time for 259: 0:00:13.868221
+2022-09-08 10:16:35.364 | INFO     | __main__:<module>:234 - read in cached files: 260
+2022-09-08 10:16:40.705 | INFO     | __main__:<module>:238 - created single operator hqta: 260
+2022-09-08 10:16:40.921 | INFO     | __main__:<module>:244 - successful export: 260
+2022-09-08 10:16:40.922 | INFO     | __main__:<module>:248 - execution time for 260: 0:00:07.143910
+2022-09-08 10:16:42.596 | INFO     | __main__:<module>:234 - read in cached files: 261
+2022-09-08 10:16:50.451 | INFO     | __main__:<module>:238 - created single operator hqta: 261
+2022-09-08 10:16:50.643 | INFO     | __main__:<module>:244 - successful export: 261
+2022-09-08 10:16:50.644 | INFO     | __main__:<module>:248 - execution time for 261: 0:00:09.722018
+2022-09-08 10:16:52.140 | INFO     | __main__:<module>:234 - read in cached files: 264
+2022-09-08 10:16:55.329 | INFO     | __main__:<module>:238 - created single operator hqta: 264
+2022-09-08 10:16:55.459 | INFO     | __main__:<module>:244 - successful export: 264
+2022-09-08 10:16:55.460 | INFO     | __main__:<module>:248 - execution time for 264: 0:00:04.815200
+2022-09-08 10:16:57.030 | INFO     | __main__:<module>:234 - read in cached files: 269
+2022-09-08 10:17:48.254 | INFO     | __main__:<module>:238 - created single operator hqta: 269
+2022-09-08 10:17:48.777 | INFO     | __main__:<module>:244 - successful export: 269
+2022-09-08 10:17:48.778 | INFO     | __main__:<module>:248 - execution time for 269: 0:00:53.317161
+2022-09-08 10:17:50.261 | INFO     | __main__:<module>:234 - read in cached files: 270
+2022-09-08 10:17:54.460 | INFO     | __main__:<module>:238 - created single operator hqta: 270
+2022-09-08 10:17:54.650 | INFO     | __main__:<module>:244 - successful export: 270
+2022-09-08 10:17:54.651 | INFO     | __main__:<module>:248 - execution time for 270: 0:00:05.871986
+2022-09-08 10:17:56.159 | INFO     | __main__:<module>:234 - read in cached files: 271
+2022-09-08 10:18:23.974 | INFO     | __main__:<module>:238 - created single operator hqta: 271
+2022-09-08 10:18:24.188 | INFO     | __main__:<module>:244 - successful export: 271
+2022-09-08 10:18:24.189 | INFO     | __main__:<module>:248 - execution time for 271: 0:00:29.537499
+2022-09-08 10:18:25.655 | INFO     | __main__:<module>:234 - read in cached files: 274
+2022-09-08 10:18:29.023 | INFO     | __main__:<module>:238 - created single operator hqta: 274
+2022-09-08 10:18:29.195 | INFO     | __main__:<module>:244 - successful export: 274
+2022-09-08 10:18:29.196 | INFO     | __main__:<module>:248 - execution time for 274: 0:00:05.006415
+2022-09-08 10:18:30.765 | INFO     | __main__:<module>:234 - read in cached files: 278
+2022-09-08 10:20:27.700 | INFO     | __main__:<module>:238 - created single operator hqta: 278
+2022-09-08 10:20:28.093 | INFO     | __main__:<module>:244 - successful export: 278
+2022-09-08 10:20:28.094 | INFO     | __main__:<module>:248 - execution time for 278: 0:01:58.897343
+2022-09-08 10:20:29.590 | INFO     | __main__:<module>:234 - read in cached files: 280
+2022-09-08 10:20:39.621 | INFO     | __main__:<module>:238 - created single operator hqta: 280
+2022-09-08 10:20:39.743 | INFO     | __main__:<module>:244 - successful export: 280
+2022-09-08 10:20:39.744 | INFO     | __main__:<module>:248 - execution time for 280: 0:00:11.649724
+2022-09-08 10:20:41.251 | INFO     | __main__:<module>:234 - read in cached files: 281
+2022-09-08 10:20:49.567 | INFO     | __main__:<module>:238 - created single operator hqta: 281
+2022-09-08 10:20:49.805 | INFO     | __main__:<module>:244 - successful export: 281
+2022-09-08 10:20:49.806 | INFO     | __main__:<module>:248 - execution time for 281: 0:00:10.061094
+2022-09-08 10:20:51.429 | INFO     | __main__:<module>:234 - read in cached files: 282
+2022-09-08 10:23:20.630 | INFO     | __main__:<module>:238 - created single operator hqta: 282
+2022-09-08 10:23:20.987 | INFO     | __main__:<module>:244 - successful export: 282
+2022-09-08 10:23:20.989 | INFO     | __main__:<module>:248 - execution time for 282: 0:02:31.181915
+2022-09-08 10:23:22.583 | INFO     | __main__:<module>:234 - read in cached files: 284
+2022-09-08 10:23:56.397 | INFO     | __main__:<module>:238 - created single operator hqta: 284
+2022-09-08 10:23:56.700 | INFO     | __main__:<module>:244 - successful export: 284
+2022-09-08 10:23:56.703 | INFO     | __main__:<module>:248 - execution time for 284: 0:00:35.714227
+2022-09-08 10:23:58.275 | INFO     | __main__:<module>:234 - read in cached files: 287
+2022-09-08 10:24:04.233 | INFO     | __main__:<module>:238 - created single operator hqta: 287
+2022-09-08 10:24:04.417 | INFO     | __main__:<module>:244 - successful export: 287
+2022-09-08 10:24:04.418 | INFO     | __main__:<module>:248 - execution time for 287: 0:00:07.713908
+2022-09-08 10:24:05.960 | INFO     | __main__:<module>:234 - read in cached files: 289
+2022-09-08 10:24:20.740 | INFO     | __main__:<module>:238 - created single operator hqta: 289
+2022-09-08 10:24:20.987 | INFO     | __main__:<module>:244 - successful export: 289
+2022-09-08 10:24:20.988 | INFO     | __main__:<module>:248 - execution time for 289: 0:00:16.569732
+2022-09-08 10:24:22.593 | INFO     | __main__:<module>:234 - read in cached files: 290
+2022-09-08 10:25:49.901 | INFO     | __main__:<module>:238 - created single operator hqta: 290
+2022-09-08 10:25:50.484 | INFO     | __main__:<module>:244 - successful export: 290
+2022-09-08 10:25:50.487 | INFO     | __main__:<module>:248 - execution time for 290: 0:01:29.498042
+2022-09-08 10:25:52.013 | INFO     | __main__:<module>:234 - read in cached files: 293
+2022-09-08 10:26:09.812 | INFO     | __main__:<module>:238 - created single operator hqta: 293
+2022-09-08 10:26:10.068 | INFO     | __main__:<module>:244 - successful export: 293
+2022-09-08 10:26:10.070 | INFO     | __main__:<module>:248 - execution time for 293: 0:00:19.581655
+2022-09-08 10:26:11.681 | INFO     | __main__:<module>:234 - read in cached files: 294
+2022-09-08 10:27:59.532 | INFO     | __main__:<module>:238 - created single operator hqta: 294
+2022-09-08 10:28:00.131 | INFO     | __main__:<module>:244 - successful export: 294
+2022-09-08 10:28:00.132 | INFO     | __main__:<module>:248 - execution time for 294: 0:01:50.061917
+2022-09-08 10:28:02.051 | INFO     | __main__:<module>:234 - read in cached files: 295
+2022-09-08 10:28:35.060 | INFO     | __main__:<module>:238 - created single operator hqta: 295
+2022-09-08 10:28:35.442 | INFO     | __main__:<module>:244 - successful export: 295
+2022-09-08 10:28:35.444 | INFO     | __main__:<module>:248 - execution time for 295: 0:00:35.311016
+2022-09-08 10:28:37.085 | INFO     | __main__:<module>:234 - read in cached files: 296
+2022-09-08 10:28:58.426 | INFO     | __main__:<module>:238 - created single operator hqta: 296
+2022-09-08 10:28:58.768 | INFO     | __main__:<module>:244 - successful export: 296
+2022-09-08 10:28:58.769 | INFO     | __main__:<module>:248 - execution time for 296: 0:00:23.324897
+2022-09-08 10:29:00.478 | INFO     | __main__:<module>:234 - read in cached files: 298
+2022-09-08 10:29:16.132 | INFO     | __main__:<module>:238 - created single operator hqta: 298
+2022-09-08 10:29:16.367 | INFO     | __main__:<module>:244 - successful export: 298
+2022-09-08 10:29:16.369 | INFO     | __main__:<module>:248 - execution time for 298: 0:00:17.599042
+2022-09-08 10:29:18.158 | INFO     | __main__:<module>:234 - read in cached files: 300
+2022-09-08 10:29:34.858 | INFO     | __main__:<module>:238 - created single operator hqta: 300
+2022-09-08 10:29:35.095 | INFO     | __main__:<module>:244 - successful export: 300
+2022-09-08 10:29:35.097 | INFO     | __main__:<module>:248 - execution time for 300: 0:00:18.727305
+2022-09-08 10:29:36.859 | INFO     | __main__:<module>:234 - read in cached files: 301
+2022-09-08 10:29:48.673 | INFO     | __main__:<module>:238 - created single operator hqta: 301
+2022-09-08 10:29:48.875 | INFO     | __main__:<module>:244 - successful export: 301
+2022-09-08 10:29:48.876 | INFO     | __main__:<module>:248 - execution time for 301: 0:00:13.778581
+2022-09-08 10:29:50.454 | INFO     | __main__:<module>:234 - read in cached files: 305
+2022-09-08 10:29:53.067 | INFO     | __main__:<module>:238 - created single operator hqta: 305
+2022-09-08 10:29:53.240 | INFO     | __main__:<module>:244 - successful export: 305
+2022-09-08 10:29:53.242 | INFO     | __main__:<module>:248 - execution time for 305: 0:00:04.364902
+2022-09-08 10:29:54.852 | INFO     | __main__:<module>:234 - read in cached files: 308
+2022-09-08 10:29:58.960 | INFO     | __main__:<module>:238 - created single operator hqta: 308
+2022-09-08 10:29:59.136 | INFO     | __main__:<module>:244 - successful export: 308
+2022-09-08 10:29:59.137 | INFO     | __main__:<module>:248 - execution time for 308: 0:00:05.895313
+2022-09-08 10:30:00.855 | INFO     | __main__:<module>:234 - read in cached files: 310
+2022-09-08 10:30:17.794 | INFO     | __main__:<module>:238 - created single operator hqta: 310
+2022-09-08 10:30:18.067 | INFO     | __main__:<module>:244 - successful export: 310
+2022-09-08 10:30:18.070 | INFO     | __main__:<module>:248 - execution time for 310: 0:00:18.931751
+2022-09-08 10:30:19.629 | INFO     | __main__:<module>:234 - read in cached files: 312
+2022-09-08 10:30:22.848 | INFO     | __main__:<module>:238 - created single operator hqta: 312
+2022-09-08 10:30:23.043 | INFO     | __main__:<module>:244 - successful export: 312
+2022-09-08 10:30:23.044 | INFO     | __main__:<module>:248 - execution time for 312: 0:00:04.972651
+2022-09-08 10:30:24.675 | INFO     | __main__:<module>:234 - read in cached files: 314
+2022-09-08 10:30:59.299 | INFO     | __main__:<module>:238 - created single operator hqta: 314
+2022-09-08 10:30:59.812 | INFO     | __main__:<module>:244 - successful export: 314
+2022-09-08 10:30:59.813 | INFO     | __main__:<module>:248 - execution time for 314: 0:00:36.769164
+2022-09-08 10:31:02.151 | INFO     | __main__:<module>:234 - read in cached files: 315
+2022-09-08 10:31:06.566 | INFO     | __main__:<module>:238 - created single operator hqta: 315
+2022-09-08 10:31:06.740 | INFO     | __main__:<module>:244 - successful export: 315
+2022-09-08 10:31:06.742 | INFO     | __main__:<module>:248 - execution time for 315: 0:00:06.927408
+2022-09-08 10:31:08.173 | INFO     | __main__:<module>:234 - read in cached files: 320
+2022-09-08 10:31:11.690 | INFO     | __main__:<module>:238 - created single operator hqta: 320
+2022-09-08 10:31:11.804 | INFO     | __main__:<module>:244 - successful export: 320
+2022-09-08 10:31:11.805 | INFO     | __main__:<module>:248 - execution time for 320: 0:00:05.063166
+2022-09-08 10:31:13.316 | INFO     | __main__:<module>:234 - read in cached files: 323
+2022-09-08 10:31:19.796 | INFO     | __main__:<module>:238 - created single operator hqta: 323
+2022-09-08 10:31:19.965 | INFO     | __main__:<module>:244 - successful export: 323
+2022-09-08 10:31:19.966 | INFO     | __main__:<module>:248 - execution time for 323: 0:00:08.160002
+2022-09-08 10:31:21.652 | INFO     | __main__:<module>:234 - read in cached files: 324
+2022-09-08 10:31:39.883 | INFO     | __main__:<module>:238 - created single operator hqta: 324
+2022-09-08 10:31:40.185 | INFO     | __main__:<module>:244 - successful export: 324
+2022-09-08 10:31:40.186 | INFO     | __main__:<module>:248 - execution time for 324: 0:00:20.219601
+2022-09-08 10:31:41.896 | INFO     | __main__:<module>:234 - read in cached files: 327
+2022-09-08 10:31:59.971 | INFO     | __main__:<module>:238 - created single operator hqta: 327
+2022-09-08 10:32:00.237 | INFO     | __main__:<module>:244 - successful export: 327
+2022-09-08 10:32:00.238 | INFO     | __main__:<module>:248 - execution time for 327: 0:00:20.051536
+2022-09-08 10:32:01.770 | INFO     | __main__:<module>:234 - read in cached files: 329
+2022-09-08 10:32:09.078 | INFO     | __main__:<module>:238 - created single operator hqta: 329
+2022-09-08 10:32:09.266 | INFO     | __main__:<module>:244 - successful export: 329
+2022-09-08 10:32:09.268 | INFO     | __main__:<module>:248 - execution time for 329: 0:00:09.029193
+2022-09-08 10:32:10.862 | INFO     | __main__:<module>:234 - read in cached files: 331
+2022-09-08 10:32:22.237 | INFO     | __main__:<module>:238 - created single operator hqta: 331
+2022-09-08 10:32:22.458 | INFO     | __main__:<module>:244 - successful export: 331
+2022-09-08 10:32:22.459 | INFO     | __main__:<module>:248 - execution time for 331: 0:00:13.191276
+2022-09-08 10:32:24.000 | INFO     | __main__:<module>:234 - read in cached files: 334
+2022-09-08 10:32:31.419 | INFO     | __main__:<module>:238 - created single operator hqta: 334
+2022-09-08 10:32:31.597 | INFO     | __main__:<module>:244 - successful export: 334
+2022-09-08 10:32:31.599 | INFO     | __main__:<module>:248 - execution time for 334: 0:00:09.138743
+2022-09-08 10:32:33.196 | INFO     | __main__:<module>:234 - read in cached files: 336
+2022-09-08 10:32:46.554 | INFO     | __main__:<module>:238 - created single operator hqta: 336
+2022-09-08 10:32:46.811 | INFO     | __main__:<module>:244 - successful export: 336
+2022-09-08 10:32:46.813 | INFO     | __main__:<module>:248 - execution time for 336: 0:00:15.213140
+2022-09-08 10:32:48.314 | INFO     | __main__:<module>:234 - read in cached files: 337
+2022-09-08 10:32:54.593 | INFO     | __main__:<module>:238 - created single operator hqta: 337
+2022-09-08 10:32:54.791 | INFO     | __main__:<module>:244 - successful export: 337
+2022-09-08 10:32:54.792 | INFO     | __main__:<module>:248 - execution time for 337: 0:00:07.978941
+2022-09-08 10:32:56.375 | INFO     | __main__:<module>:234 - read in cached files: 339
+2022-09-08 10:33:08.138 | INFO     | __main__:<module>:238 - created single operator hqta: 339
+2022-09-08 10:33:08.403 | INFO     | __main__:<module>:244 - successful export: 339
+2022-09-08 10:33:08.404 | INFO     | __main__:<module>:248 - execution time for 339: 0:00:13.611185
+2022-09-08 10:33:09.899 | INFO     | __main__:<module>:234 - read in cached files: 341
+2022-09-08 10:33:15.029 | INFO     | __main__:<module>:238 - created single operator hqta: 341
+2022-09-08 10:33:15.231 | INFO     | __main__:<module>:244 - successful export: 341
+2022-09-08 10:33:15.233 | INFO     | __main__:<module>:248 - execution time for 341: 0:00:06.828543
+2022-09-08 10:33:16.794 | INFO     | __main__:<module>:234 - read in cached files: 343
+2022-09-08 10:33:40.166 | INFO     | __main__:<module>:238 - created single operator hqta: 343
+2022-09-08 10:33:40.547 | INFO     | __main__:<module>:244 - successful export: 343
+2022-09-08 10:33:40.549 | INFO     | __main__:<module>:248 - execution time for 343: 0:00:25.314710
+2022-09-08 10:33:42.125 | INFO     | __main__:<module>:234 - read in cached files: 344
+2022-09-08 10:33:47.528 | INFO     | __main__:<module>:238 - created single operator hqta: 344
+2022-09-08 10:33:47.711 | INFO     | __main__:<module>:244 - successful export: 344
+2022-09-08 10:33:47.712 | INFO     | __main__:<module>:248 - execution time for 344: 0:00:07.163046
+2022-09-08 10:33:49.191 | INFO     | __main__:<module>:234 - read in cached files: 346
+2022-09-08 10:33:58.502 | INFO     | __main__:<module>:238 - created single operator hqta: 346
+2022-09-08 10:33:58.680 | INFO     | __main__:<module>:244 - successful export: 346
+2022-09-08 10:33:58.681 | INFO     | __main__:<module>:248 - execution time for 346: 0:00:10.968639
+2022-09-08 10:34:00.327 | INFO     | __main__:<module>:234 - read in cached files: 349
+2022-09-08 10:34:06.028 | INFO     | __main__:<module>:238 - created single operator hqta: 349
+2022-09-08 10:34:06.207 | INFO     | __main__:<module>:244 - successful export: 349
+2022-09-08 10:34:06.208 | INFO     | __main__:<module>:248 - execution time for 349: 0:00:07.526391
+2022-09-08 10:34:07.722 | INFO     | __main__:<module>:234 - read in cached files: 350
+2022-09-08 10:34:19.726 | INFO     | __main__:<module>:238 - created single operator hqta: 350
+2022-09-08 10:34:19.924 | INFO     | __main__:<module>:244 - successful export: 350
+2022-09-08 10:34:19.925 | INFO     | __main__:<module>:248 - execution time for 350: 0:00:13.716372
+2022-09-08 10:34:21.575 | INFO     | __main__:<module>:234 - read in cached files: 351
+2022-09-08 10:34:34.073 | INFO     | __main__:<module>:238 - created single operator hqta: 351
+2022-09-08 10:34:34.260 | INFO     | __main__:<module>:244 - successful export: 351
+2022-09-08 10:34:34.262 | INFO     | __main__:<module>:248 - execution time for 351: 0:00:14.336057
+2022-09-08 10:34:35.802 | INFO     | __main__:<module>:234 - read in cached files: 356
+2022-09-08 10:34:45.061 | INFO     | __main__:<module>:238 - created single operator hqta: 356
+2022-09-08 10:34:45.260 | INFO     | __main__:<module>:244 - successful export: 356
+2022-09-08 10:34:45.261 | INFO     | __main__:<module>:248 - execution time for 356: 0:00:10.998708
+2022-09-08 10:34:46.785 | INFO     | __main__:<module>:234 - read in cached files: 360
+2022-09-08 10:35:10.969 | INFO     | __main__:<module>:238 - created single operator hqta: 360
+2022-09-08 10:35:11.258 | INFO     | __main__:<module>:244 - successful export: 360
+2022-09-08 10:35:11.260 | INFO     | __main__:<module>:248 - execution time for 360: 0:00:25.997560
+2022-09-08 10:35:12.974 | INFO     | __main__:<module>:234 - read in cached files: 361
+2022-09-08 10:35:24.241 | INFO     | __main__:<module>:238 - created single operator hqta: 361
+2022-09-08 10:35:24.476 | INFO     | __main__:<module>:244 - successful export: 361
+2022-09-08 10:35:24.477 | INFO     | __main__:<module>:248 - execution time for 361: 0:00:13.216783
+2022-09-08 10:35:26.057 | INFO     | __main__:<module>:234 - read in cached files: 366
+2022-09-08 10:35:30.193 | INFO     | __main__:<module>:238 - created single operator hqta: 366
+2022-09-08 10:35:30.386 | INFO     | __main__:<module>:244 - successful export: 366
+2022-09-08 10:35:30.387 | INFO     | __main__:<module>:248 - execution time for 366: 0:00:05.909377
+2022-09-08 10:35:31.935 | INFO     | __main__:<module>:234 - read in cached files: 367
+2022-09-08 10:35:35.707 | INFO     | __main__:<module>:238 - created single operator hqta: 367
+2022-09-08 10:35:35.889 | INFO     | __main__:<module>:244 - successful export: 367
+2022-09-08 10:35:35.892 | INFO     | __main__:<module>:248 - execution time for 367: 0:00:05.504308
+2022-09-08 10:35:37.395 | INFO     | __main__:<module>:234 - read in cached files: 368
+2022-09-08 10:35:53.098 | INFO     | __main__:<module>:238 - created single operator hqta: 368
+2022-09-08 10:35:53.305 | INFO     | __main__:<module>:244 - successful export: 368
+2022-09-08 10:35:53.306 | INFO     | __main__:<module>:248 - execution time for 368: 0:00:17.413395
+2022-09-08 10:35:54.828 | INFO     | __main__:<module>:234 - read in cached files: 372
+2022-09-08 10:36:09.046 | INFO     | __main__:<module>:238 - created single operator hqta: 372
+2022-09-08 10:36:09.285 | INFO     | __main__:<module>:244 - successful export: 372
+2022-09-08 10:36:09.286 | INFO     | __main__:<module>:248 - execution time for 372: 0:00:15.979352
+2022-09-08 10:36:10.799 | INFO     | __main__:<module>:234 - read in cached files: 374
+2022-09-08 10:36:16.534 | INFO     | __main__:<module>:238 - created single operator hqta: 374
+2022-09-08 10:36:16.717 | INFO     | __main__:<module>:244 - successful export: 374
+2022-09-08 10:36:16.719 | INFO     | __main__:<module>:248 - execution time for 374: 0:00:07.432219
+2022-09-08 10:36:18.152 | INFO     | __main__:<module>:234 - read in cached files: 376
+2022-09-08 10:36:29.356 | INFO     | __main__:<module>:238 - created single operator hqta: 376
+2022-09-08 10:36:29.552 | INFO     | __main__:<module>:244 - successful export: 376
+2022-09-08 10:36:29.553 | INFO     | __main__:<module>:248 - execution time for 376: 0:00:12.832545
+2022-09-08 10:36:31.108 | INFO     | __main__:<module>:234 - read in cached files: 380
+2022-09-08 10:36:53.732 | INFO     | __main__:<module>:238 - created single operator hqta: 380
+2022-09-08 10:36:53.943 | INFO     | __main__:<module>:244 - successful export: 380
+2022-09-08 10:36:53.946 | INFO     | __main__:<module>:248 - execution time for 380: 0:00:24.392104
+2022-09-08 10:36:55.379 | INFO     | __main__:<module>:234 - read in cached files: 381
+2022-09-08 10:37:11.471 | INFO     | __main__:<module>:238 - created single operator hqta: 381
+2022-09-08 10:37:11.733 | INFO     | __main__:<module>:244 - successful export: 381
+2022-09-08 10:37:11.736 | INFO     | __main__:<module>:248 - execution time for 381: 0:00:17.789670
+2022-09-08 10:37:13.221 | INFO     | __main__:<module>:234 - read in cached files: 386
+2022-09-08 10:37:20.879 | INFO     | __main__:<module>:238 - created single operator hqta: 386
+2022-09-08 10:37:21.061 | INFO     | __main__:<module>:244 - successful export: 386
+2022-09-08 10:37:21.062 | INFO     | __main__:<module>:248 - execution time for 386: 0:00:09.325317
+2022-09-08 10:37:22.548 | INFO     | __main__:<module>:234 - read in cached files: 389
+2022-09-08 10:37:33.735 | INFO     | __main__:<module>:238 - created single operator hqta: 389
+2022-09-08 10:37:33.949 | INFO     | __main__:<module>:244 - successful export: 389
+2022-09-08 10:37:33.951 | INFO     | __main__:<module>:248 - execution time for 389: 0:00:12.888522
+2022-09-08 10:37:35.429 | INFO     | __main__:<module>:234 - read in cached files: 473
+2022-09-08 10:37:43.365 | INFO     | __main__:<module>:238 - created single operator hqta: 473
+2022-09-08 10:37:43.565 | INFO     | __main__:<module>:244 - successful export: 473
+2022-09-08 10:37:43.567 | INFO     | __main__:<module>:248 - execution time for 473: 0:00:09.614335
+2022-09-08 10:37:45.070 | INFO     | __main__:<module>:234 - read in cached files: 474
+2022-09-08 10:38:05.225 | INFO     | __main__:<module>:238 - created single operator hqta: 474
+2022-09-08 10:38:05.455 | INFO     | __main__:<module>:244 - successful export: 474
+2022-09-08 10:38:05.457 | INFO     | __main__:<module>:248 - execution time for 474: 0:00:21.889724
+2022-09-08 10:38:06.979 | INFO     | __main__:<module>:234 - read in cached files: 481
+2022-09-08 10:38:10.102 | INFO     | __main__:<module>:238 - created single operator hqta: 481
+2022-09-08 10:38:10.282 | INFO     | __main__:<module>:244 - successful export: 481
+2022-09-08 10:38:10.283 | INFO     | __main__:<module>:248 - execution time for 481: 0:00:04.825316
+2022-09-08 10:38:11.813 | INFO     | __main__:<module>:234 - read in cached files: 482
+2022-09-08 10:38:16.188 | INFO     | __main__:<module>:238 - created single operator hqta: 482
+2022-09-08 10:38:16.373 | INFO     | __main__:<module>:244 - successful export: 482
+2022-09-08 10:38:16.374 | INFO     | __main__:<module>:248 - execution time for 482: 0:00:06.090598
+2022-09-08 10:38:17.911 | INFO     | __main__:<module>:234 - read in cached files: 483
+2022-09-08 10:38:24.134 | INFO     | __main__:<module>:238 - created single operator hqta: 483
+2022-09-08 10:38:24.308 | INFO     | __main__:<module>:244 - successful export: 483
+2022-09-08 10:38:24.309 | INFO     | __main__:<module>:248 - execution time for 483: 0:00:07.934568
+2022-09-08 10:38:25.852 | INFO     | __main__:<module>:234 - read in cached files: 484
+2022-09-08 10:38:46.318 | INFO     | __main__:<module>:238 - created single operator hqta: 484
+2022-09-08 10:38:46.541 | INFO     | __main__:<module>:244 - successful export: 484
+2022-09-08 10:38:46.542 | INFO     | __main__:<module>:248 - execution time for 484: 0:00:22.233004
+2022-09-08 10:38:48.031 | INFO     | __main__:<module>:234 - read in cached files: 485
+2022-09-08 10:38:50.330 | INFO     | __main__:<module>:238 - created single operator hqta: 485
+2022-09-08 10:38:50.438 | INFO     | __main__:<module>:244 - successful export: 485
+2022-09-08 10:38:50.439 | INFO     | __main__:<module>:248 - execution time for 485: 0:00:03.896072
+2022-09-08 10:38:50.439 | INFO     | __main__:<module>:251 - total execution time: 0:58:06.913460

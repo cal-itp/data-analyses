@@ -8,3 +8,9 @@
 2022-08-31 14:18:40.062 | INFO     | __main__:<module>:70 - grabbed ferry: 0:00:11.473023
 2022-08-31 14:18:40.067 | INFO     | __main__:<module>:79 - concatenated datasets
 2022-08-31 14:18:40.406 | INFO     | __main__:<module>:88 - execution time: 0:00:54.474263
+2022-09-08 09:39:33.634 | INFO     | __main__:<module>:41 - Analysis date: 2022-08-17
+2022-09-08 09:39:49.876 | INFO     | __main__:<module>:48 - grabbed rail: 0:00:16.240670
+2022-09-08 09:40:20.993 | INFO     | __main__:<module>:66 - grabbed brt: 0:00:31.116253
+2022-09-08 09:40:32.103 | INFO     | __main__:<module>:72 - grabbed ferry: 0:00:11.110210
+2022-09-08 09:40:32.108 | INFO     | __main__:<module>:81 - concatenated datasets
+2022-09-08 09:40:32.406 | INFO     | __main__:<module>:90 - execution time: 0:00:58.770387
