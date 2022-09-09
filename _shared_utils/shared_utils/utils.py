@@ -11,43 +11,81 @@ from calitp.storage import get_fs
 fs = get_fs()
 
 
-def geoparquet_gcs_export(gdf: gpd.GeoDataFrame, GCS_FILE_PATH: str, FILE_NAME: str):
+def geoparquet_gcs_export(gdf: gpd.GeoDataFrame, gcs_file_path: str, file_name: str):
     """
     Save geodataframe as parquet locally,
     then move to GCS bucket and delete local file.
 
     gdf: geopandas.GeoDataFrame
-    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
-    FILE_NAME: str. Filename.
+    gcs_file_path: str
+                    Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    file_name: str
+                Filename, with or without .parquet.
     """
-    file_name_sanitized = FILE_NAME.replace(".parquet", "")
+    file_name_sanitized = file_name.replace(".parquet", "")
     gdf.to_parquet(f"./{file_name_sanitized}.parquet")
     fs.put(
         f"./{file_name_sanitized}.parquet",
-        f"{GCS_FILE_PATH}{file_name_sanitized}.parquet",
+        f"{gcs_file_path}{file_name_sanitized}.parquet",
     )
     os.remove(f"./{file_name_sanitized}.parquet")
 
 
 def download_geoparquet(
-    GCS_FILE_PATH: str, FILE_NAME: str, save_locally: bool = False
+    gcs_file_path: str, file_name: str, save_locally: bool = False
 ) -> gpd.GeoDataFrame:
     """
     Parameters:
-    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
-    FILE_NAME: str, name of file (without the .parquet).
-                Ex: test_file (not test_file.parquet)
-    save_locally: bool, defaults to False. if True, will save geoparquet locally.
+    gcs_file_path: str
+                    Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    file_name: str
+                name of file (with or without the .parquet).
+    save_locally: bool
+                    defaults to False. if True, will save geoparquet locally.
     """
-    file_name_sanitized = FILE_NAME.replace(".parquet", "")
+    file_name_sanitized = file_name.replace(".parquet", "")
 
-    object_path = fs.open(f"{GCS_FILE_PATH}{file_name_sanitized}.parquet")
+    object_path = fs.open(f"{gcs_file_path}{file_name_sanitized}.parquet")
     gdf = gpd.read_parquet(object_path)
 
     if save_locally is True:
-        gdf.to_parquet(f"./{FILE_NAME}.parquet")
+        gdf.to_parquet(f"./{file_name}.parquet")
 
     return gdf
+
+
+def geojson_gcs_export(
+    gdf: gpd.GeoDataFrame,
+    gcs_file_path: str,
+    file_name: str,
+    geojson_type: str = "geojson",
+):
+    """
+    Save geodataframe as geojson locally,
+    then move to GCS bucket and delete local file.
+
+    gcs_file_path: str
+                    Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    file_name: str
+                name of file (with .geojson or .geojsonl).
+    """
+
+    if geojson_type == "geojson":
+        DRIVER = "GeoJSON"
+    elif geojson_type == "geojsonl":
+        DRIVER = "GeoJSONSeq"
+    else:
+        raise ValueError("Not a valid geojson type! Use `geojson` or `geojsonl`")
+
+    file_name_sanitized = file_name.replace(f".{geojson_type}", "")
+
+    gdf.to_file(f"./{file_name_sanitized}.{geojson_type}", driver=DRIVER)
+
+    fs.put(
+        f"./{file_name}",
+        f"{gcs_file_path}{file_name_sanitized}.{geojson_type}",
+    )
+    os.remove(f"./{file_name_sanitized}.{geojson_type}")
 
 
 # Make zipped shapefile
