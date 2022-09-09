@@ -150,7 +150,7 @@ def groupby_onecol(df, groupbycol, aggcol):
         grouped = grouped.sort_values('month')
         return grouped
 
-    elif groupbycol == "":
+    else:
         grouped2 = df>>group_by(_[groupbycol])>>summarize(avg = _[aggcol].mean())
         return grouped2
 
@@ -215,3 +215,10 @@ def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_t
     chart = dla_utils.add_tooltip(chart, x_col, y_col)
     return chart
 
+def total_average_chart(df_avg):
+    base = alt.Chart(df_avg).properties(width=550)
+
+    chart = (base.mark_line().encode(x=alt.X('service_date', title=labeling('service_date'), sort=("x")),
+                                     y=alt.Y('avg', title= labeling('avg'), axis=alt.Axis(format='%')),
+                                     ).properties(title= 'Overall Average for Percent Trips with Vehicle Positions Data'))
+    return chart
