@@ -6,9 +6,6 @@ Calculate once for each operator, then concatenate and save.
 Based on rt_delay/rt_filter_map_plot.py,
 and just expand to do grouping across trips / operators.
 
-The rt_trips parquets have speed by trip-level
-#df = pd.read_parquet(f"{GCS_FILE_PATH}rt_trips/{itp_id}_{date}.parquet")
-
 Need this script to keep it at stop-id level, speed for stop-to-stop segments.
 This is still point data, calculated at the stop-id level.
 """
@@ -20,9 +17,7 @@ import pandas as pd
 from shared_utils import (rt_utils, rt_dates, 
                           geography_utils, gtfs_utils, utils)
 from G1_get_buses_on_shn import ANALYSIS_DATE
-
-month = ANALYSIS_DATE.split('-')[1]
-day = ANALYSIS_DATE.split('-')[2]
+from G2_aggregated_route_stats import ANALYSIS_MONTH_DAY
 
 
 def generate_speeds(df, itp_id):
@@ -99,8 +94,6 @@ if __name__ == "__main__":
     
     for itp_id in ALL_ITP_IDS:
 
-        filename = f"{itp_id}_{date}.parquet"
-
         path = rt_utils.check_cached(filename, 
                                      GCS_FILE_PATH = rt_utils.GCS_FILE_PATH, 
                                      subfolder = "stop_delay_views/")
@@ -111,7 +104,7 @@ if __name__ == "__main__":
             df2 = generate_speeds(df, itp_id).to_crs(geography_utils.WGS84)
             print(f"{itp_id}: finished")
             
-            df.to_parquet(f"./data/speeds_{itp_id}_{date}.parquet")
+            df.to_parquet(f"./data/speeds_{itp_id}_{ANALYSIS_MONTH_DAY}.parquet")
   
             gdf = pd.concat([gdf, df2], axis=0, ignore_index=True)
 
@@ -132,22 +125,4 @@ if __name__ == "__main__":
     print("Remove all local parquets")        
     
     
-    # (2) If there's a rt_trips df for the operator, concatenate for all operators
-    df = pd.DataFrame()
-    
-    for itp_id in ALL_ITP_IDS:
-        try:
-            trip_df = pd.read_parquet(
-                f"{rt_utils.GCS_FILE_PATH}rt_trips/{itp_id}_{date}.parquet")
 
-            df = pd.concat([df, trip_df], axis=0, ignore_index=True)
-        except:
-            continue
-        
-    df = df.sort_values(["calitp_itp_id", "route_id", "trip_id"]).reset_index(drop=True)
-    
-    df.to_parquet(
-        f"{rt_utils.GCS_FILE_PATH}rt_trips/all_operators_{ANALYSIS_DATE}.parquet")
-
-    print("Concatenated all parquets for rt_trips")        
-    

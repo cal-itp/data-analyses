@@ -24,10 +24,57 @@ from shared_utils import (geography_utils, gtfs_utils,
                           rt_dates, rt_utils
                          )
 from utils import GCS_FILE_PATH
+from G1_get_buses_on_shn import ANALYSIS_DATE
 
-ANALYSIS_DATE = rt_dates.DATES["may2022"]
+month = ANALYSIS_DATE.split('-')[1]
+day = ANALYSIS_DATE.split('-')[2]
+ANALYSIS_MONTH_DAY = f"{month}_{day}"
+
 catalog = intake.open_catalog("*.yml")
-COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
+COMPILED_CACHED_FOLDER = "compiled_cached_views/"
+COMPILED_CACHED_GCS = f"{rt_utils.GCS_FILE_PATH}{COMPILED_CACHED_FOLDER}" 
+
+
+#--------------------------------------------------------------------#
+## Trips / Stop Times for Routes on SHN
+#--------------------------------------------------------------------#
+def import_trips_and_stop_times(analysis_date: str) -> tuple[dd.DataFrame]:
+    st_path = rt_utils.check_cached(f"st_{analysis_date}.parquet", 
+                                 rt_utils.GCS_FILE_PATH,
+                                 subfolder=COMPILED_CACHED_FOLDER
+                                )
+    if st_path:
+        stop_times = dd.read_parquet(st_path)
+    else:
+        gtfs_utils.all_trips_or_stoptimes_with_cached(
+            dataset="st",
+            analysis_date = analysis_date,
+            itp_id_list = keep_itp_ids,
+            # export to bus_service_increase/, not rt_delay/, since this is a subset of operators
+            export_path = GCS_FILE_PATH
+        )
+        
+        stop_times = dd.read_parquet(f"{GCS_FILE_PATH}st_{analysis_date}.parquet")
+    
+    trip_path = rt_utils.check_cached(f"trips_{analysis_date}.parquet",
+                                      rt_utils.GCS_FILE_PATH,
+                                      subfolder=COMPILED_CACHED_FOLDER
+                                     )
+    
+    if trip_path:
+        trips = dd.read_parquet(trip_path)
+    else:
+        gtfs_utils.all_trips_or_stoptimes_with_cached(
+            dataset="st",
+            analysis_date = analysis_date,
+            itp_id_list = keep_itp_ids,
+            export_path = GCS_FILE_PATH
+        )
+        
+        trips = dd.read_parquet(f"{GCS_FILE_PATH}trips_{analysis_date}.parquet")
+    
+    return stop_times, trips
+
 
 def subset_trips_and_stop_times(trips: dd.DataFrame, 
                                 stop_times: dd.DataFrame,
@@ -75,6 +122,9 @@ def subset_trips_and_stop_times(trips: dd.DataFrame,
     return stop_times_binned
 
 
+#--------------------------------------------------------------------#
+## General Aggregation and Wrangling Functions
+#--------------------------------------------------------------------#
 def aggregate_stat_by_time_of_day(df: dd.DataFrame, 
                                   group_cols: list, 
                                   stat_cols: dict = {"trip_id": "nunique", 
@@ -257,6 +307,56 @@ def compile_peak_all_day_aggregated_stats(
     return df_wide
 
 
+#--------------------------------------------------------------------#
+## RT speeds by trips
+#--------------------------------------------------------------------#
+def compile_rt_trips_all_operators(analysis_date: str):
+    """
+    If there's a rt_trips df for the operator, concatenate it and save in GCS.
+    """
+    df = pd.DataFrame()
+
+    for itp_id in gtfs_utils.ALL_ITP_IDS:
+        try:
+            trip_df = pd.read_parquet(
+                f"{rt_utils.GCS_FILE_PATH}rt_trips/{itp_id}_{ANALYSIS_MONTH_DAY}.parquet")
+
+            df = pd.concat([df, trip_df], axis=0, ignore_index=True)
+        except:
+            continue
+        
+    df = (df.sort_values(["calitp_itp_id", "route_id", "trip_id"])
+          .reset_index(drop=True)
+         )
+    
+    df.to_parquet(
+        f"{rt_utils.GCS_FILE_PATH}rt_trips/all_operators_{analysis_date}.parquet")
+
+    print("Concatenated all parquets for rt_trips")        
+    
+
+def calculate_mean_speed_by_route(group_cols: list) -> pd.DataFrame:
+    """
+    Aggregate trip-level RT mean speed to route-level.
+    Take in any set of group_cols to calculate unweighted average.
+    """
+    df = pd.read_parquet(
+        f"{rt_utils.GCS_FILE_PATH}rt_trips/all_operators_{ANALYSIS_DATE}.parquet")
+        
+    # Each trip is 1 observation, just take the average (not weighted)
+    # to get route-level mean_speed_mph
+    mean_speed = geography_utils.aggregate_by_geography(
+        df,
+        group_cols = group_cols,
+        mean_cols = ["mean_speed_mph"]
+    )
+    
+    return mean_speed
+
+
+#--------------------------------------------------------------------#
+## Competitive Routes (from E5_make_stripplot_data)
+#--------------------------------------------------------------------#
 def get_competitive_routes() -> pd.DataFrame:
     """
     Trip-level data for whether the trip is competitive or not,
@@ -280,29 +380,21 @@ def get_competitive_routes() -> pd.DataFrame:
     )
     
     return route_df
-
+    
 
 if __name__=="__main__":
-    # (1) Read in bus routes that run on highways to use for filtering in dask df
+    # (1) Import data
+    # (1a) Read in bus routes that run on highways to use for filtering in dask df
     bus_routes = catalog.bus_routes_on_hwys.read()
     
     keep_itp_ids = bus_routes.itp_id.unique().tolist()
     keep_routes = bus_routes.route_id.unique().tolist()
     
-    '''
-    gtfs_utils.all_trips_or_stoptimes_with_cached(
-        dataset="st",
-        analysis_date = ANALYSIS_DATE,
-        itp_id_list = keep_itp_ids,
-        export_path = COMPILED_CACHED_GCS
-    )
+    # (1b) Check if there's already a cached file for stop_times and trips
+    # should exist for 5/4. if not, generate an export.
+    stop_times, trips = import_trips_and_stop_times(ANALYSIS_DATE)
     
-    # stops already cached for 5/4
-    '''
     # (2) Combine stop_times and trips, and filter to routes that appear in bus_routes
-    stop_times = dd.read_parquet(f"{COMPILED_CACHED_GCS}st_{ANALYSIS_DATE}.parquet")
-    trips = dd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}.parquet")
-        
     # Subset stop times and merge with trips
     stop_times_with_hr = subset_trips_and_stop_times(
         trips, stop_times, 
@@ -312,30 +404,40 @@ if __name__=="__main__":
     
     stop_times_with_hr.compute().to_parquet(f"./data/stop_times_for_routes_on_shn.parquet")
 
-    # (3) Aggregate to route-level
-    route_cols = ["calitp_itp_id", "service_date", "route_id"]
+    # (3) Compile route-level stats
+    # (3a) Compile RT trips for all operators and aggregate to route-level
+    route_cols = ["calitp_itp_id", "route_id"]
+
+    #compile_rt_trips_all_operators(ANALYSIS_DATE)
+    route_mean_speed = calculate_mean_speed_by_route(route_cols + ["route_type"])
     
-    by_route = compile_peak_all_day_aggregated_stats(
-        stop_times_with_hr, route_cols, stat_cols = {"trip_id": "nunique"})
+    # (3b) Aggregate stop_times to route-level
+    trips_by_route = compile_peak_all_day_aggregated_stats(
+        stop_times_with_hr, route_cols + ["service_date"], 
+        stat_cols = {"trip_id": "nunique"})
     
-    by_route.to_parquet(
-        f"{GCS_FILE_PATH}bus_routes_on_hwys_aggregated_stats.parquet")    
-    
-    
-    # Merge in the competitive trip variability dataset
+    # (3c) Get competitive trip variability dataset at route-level
     # This contains, at the route-level, % trips competitive, num_trips competitive
     # whether it's a short/medium/long route, etc
-    '''
+    # Also do left merge because may not always appear in this dataset 
+    # There were some that couldn't be processed in Google Maps
     competitive_stats_by_route = get_competitive_routes()
     
-    by_route_with_competitive_stats = pd.merge(
-        by_route,
-        competitive_stats_by_route,
-        on = ["calitp_itp_id", "route_id"],
-        # do left join to keep all the stop_times and trips info
-        # inner join means that those routes that didn't have Google Map 
-        # responses will get left out
-        how = "left",
+    # (4) Merge together route-level stats
+    # Put trips_by_route on left because we may not always have mean speed
+    trips_with_speed = pd.merge(
+        trips_by_route,
+        route_mean_speed,
+        on = route_cols,
+        how = "left"
     )
-    '''
-
+    
+    stats_by_route = pd.merge(
+        trips_with_speed,
+        competitive_stats_by_route,
+        on = route_cols,
+        how = "left"
+    )
+    
+    stats_by_route.to_parquet(
+        f"{GCS_FILE_PATH}bus_routes_on_hwys_aggregated_stats.parquet")    
