@@ -20,3 +20,10 @@
 2022-09-09 10:50:16.543 | INFO     | __main__:<module>:132 - Analysis date: 2022-08-17
 2022-09-09 10:50:44.793 | INFO     | __main__:<module>:143 - filter and buffer: 0:00:28.246097
 2022-09-09 10:50:47.997 | INFO     | __main__:<module>:162 - execution time: 0:00:31.450036
+2022-09-09 13:00:59.978 | INFO     | __main__:<module>:136 - Analysis date: 2022-08-17
+2022-09-09 13:01:23.004 | INFO     | __main__:<module>:147 - filter and buffer: 0:00:23.023111
+2022-09-09 13:01:25.030 | INFO     | __main__:<module>:158 - export as geoparquet in date folder
+2022-09-09 13:01:26.927 | INFO     | __main__:<module>:166 - export as geoparquet
+2022-09-09 13:02:12.756 | INFO     | __main__:<module>:175 - export as geojson
+2022-09-09 13:03:02.363 | INFO     | __main__:<module>:183 - export as geojsonl
+2022-09-09 13:03:02.366 | INFO     | __main__:<module>:186 - execution time: 0:02:02.384813

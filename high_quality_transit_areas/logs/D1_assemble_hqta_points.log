@@ -51,3 +51,25 @@
 2022-09-09 10:50:16.543 | INFO     | __main__:<module>:132 - Analysis date: 2022-08-17
 2022-09-09 10:50:44.793 | INFO     | __main__:<module>:143 - filter and buffer: 0:00:28.246097
 2022-09-09 10:50:47.997 | INFO     | __main__:<module>:162 - execution time: 0:00:31.450036
+2022-09-09 12:57:15.396 | INFO     | __main__:<module>:138 - Analysis date: 2022-08-17
+2022-09-09 12:57:16.758 | INFO     | __main__:<module>:154 - combined points: 0:00:01.359458
+2022-09-09 12:57:18.088 | INFO     | __main__:<module>:160 - add route info: 0:00:01.330623
+2022-09-09 12:57:45.237 | INFO     | __main__:<module>:167 - add agency names / compute: 0:00:27.148938
+2022-09-09 12:57:45.649 | INFO     | __main__:<module>:176 - export as geoparquet in date folder
+2022-09-09 12:57:45.978 | INFO     | __main__:<module>:184 - export as geoparquet
+2022-09-09 12:59:26.751 | INFO     | __main__:<module>:138 - Analysis date: 2022-08-17
+2022-09-09 12:59:28.085 | INFO     | __main__:<module>:154 - combined points: 0:00:01.332842
+2022-09-09 12:59:29.295 | INFO     | __main__:<module>:160 - add route info: 0:00:01.210012
+2022-09-09 12:59:54.961 | INFO     | __main__:<module>:167 - add agency names / compute: 0:00:25.666115
+2022-09-09 12:59:55.490 | INFO     | __main__:<module>:176 - export as geoparquet in date folder
+2022-09-09 12:59:56.028 | INFO     | __main__:<module>:184 - export as geoparquet
+2022-09-09 13:00:25.917 | INFO     | __main__:<module>:193 - export as geojson
+2022-09-09 13:00:46.797 | INFO     | __main__:<module>:201 - export as geojsonl
+2022-09-09 13:00:46.798 | INFO     | __main__:<module>:204 - execution time: 0:01:20.045269
+2022-09-09 13:00:59.978 | INFO     | __main__:<module>:136 - Analysis date: 2022-08-17
+2022-09-09 13:01:23.004 | INFO     | __main__:<module>:147 - filter and buffer: 0:00:23.023111
+2022-09-09 13:01:25.030 | INFO     | __main__:<module>:158 - export as geoparquet in date folder
+2022-09-09 13:01:26.927 | INFO     | __main__:<module>:166 - export as geoparquet
+2022-09-09 13:02:12.756 | INFO     | __main__:<module>:175 - export as geojson
+2022-09-09 13:03:02.363 | INFO     | __main__:<module>:183 - export as geojsonl
+2022-09-09 13:03:02.366 | INFO     | __main__:<module>:186 - execution time: 0:02:02.384813
