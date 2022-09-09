@@ -7,6 +7,7 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
+import intake
 import pandas as pd
 import sys
 
@@ -25,6 +26,7 @@ logger.add(sys.stderr,
            level="INFO")
 
 HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
+catalog = intake.open_catalog("*.yml")
 
 ## drop incorrect HMB data, TODO investigate
 ## drop incorrect Cheviot data, TODO investigate refactor (run shapes in frequency order...)
@@ -107,6 +109,7 @@ def drop_bad_stops_final_processing(gdf: gpd.GeoDataFrame,
     Input a list of known bad stops in the script to 
     exclude from the polygons.
     """
+    
     keep_cols = [
         "calitp_itp_id_primary", "calitp_itp_id_secondary", 
         "agency_name_primary", "agency_name_secondary",

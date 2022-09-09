@@ -124,9 +124,9 @@ def routes_to_stops(routes_tbl: siuba.sql.verbs.LazyTbl,
     ).drop(columns = "stop_key") # can drop stop_key once we've joined everything
     
     # Clip to CA
-    ca = catalog.ca_boundary.read().to_crs(geography_utils.CA_NAD83Albers)
+    ca_stops = utilities.clip_to_ca(stops)
 
-    return stops.clip(ca)
+    return ca_stops
 
 
 def grab_rail_data(analysis_date: dt.date) -> gpd.GeoDataFrame:
