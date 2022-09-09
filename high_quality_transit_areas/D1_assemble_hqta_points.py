@@ -2,6 +2,11 @@
 Combine all the points for HQ transit open data portal.
 
 From combine_and_visualize.ipynb
+
+Request: Thank you for this data. It would be useful for us to get the 
+HQTA stops as a point data file, not a polygon. Also, if you could 
+differentiate between train, bus, BRT, and ferry stop that would be 
+immensely helpful. Let me know if it is possible to get the data in this format.  
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
@@ -174,5 +179,18 @@ if __name__=="__main__":
                                 'hqta_points'
                                )
         
+    # Add geojson / geojsonl exports
+    utils.geojson_gcs_export(gdf, 
+                             EXPORT_PATH,
+                             'ca_hq_transit_stops', 
+                             geojson_type = "geojson"
+                            )
+    
+    utils.geojson_gcs_export(gdf, 
+                             EXPORT_PATH,
+                             'ca_hq_transit_stops', 
+                             geojson_type = "geojsonl"
+                            )
+    
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
