@@ -28,10 +28,14 @@ logger.add(sys.stderr,
 HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 catalog = intake.open_catalog("*.yml")
 
-## drop incorrect HMB data, TODO investigate
-## drop incorrect Cheviot data, TODO investigate refactor (run shapes in frequency order...)
-bad_stops = ['315604', '315614', '689']
+## drop incorrect Half Moon Bay data, TODO investigate
+## drop incorrect Cheviot Hills (Motor Ave, south of Pico) showing up data, TODO investigate refactor (run shapes in frequency order...)
 
+# check3_hqta_points...first 2 stops don't exist
+# 689 is ok, shows up for multiple operators, but where it's landing is ok
+# bad_stops = ['315604', '315614', '689']
+
+bad_stops = []
 
 def get_dissolved_hq_corridor_bus(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """
@@ -151,12 +155,15 @@ if __name__=="__main__":
                                 EXPORT_PATH, 
                                 'ca_hq_transit_areas'
                                )
-    
+    logger.info("export as geoparquet in date folder")
+
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(gdf2,
                                 utilities.GCS_FILE_PATH,
                                 'hqta_areas'
                                )    
+    
+    logger.info("export as geoparquet")
     
     # Add geojson / geojsonl exports
     utils.geojson_gcs_export(gdf2, 
@@ -165,11 +172,15 @@ if __name__=="__main__":
                              geojson_type = "geojson"
                             )
     
+    logger.info("export as geojson")
+
     utils.geojson_gcs_export(gdf2, 
                          EXPORT_PATH,
                          'ca_hq_transit_areas', 
                          geojson_type = "geojsonl"
                         )
+    
+    logger.info("export as geojsonl")
         
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

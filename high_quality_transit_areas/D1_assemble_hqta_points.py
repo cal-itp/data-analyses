@@ -173,11 +173,15 @@ if __name__=="__main__":
                                 'ca_hq_transit_stops'
                                )  
     
+    logger.info("export as geoparquet in date folder")
+   
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(gdf, 
                                 utilities.GCS_FILE_PATH,
                                 'hqta_points'
                                )
+    
+    logger.info("export as geoparquet")
         
     # Add geojson / geojsonl exports
     utils.geojson_gcs_export(gdf, 
@@ -186,11 +190,15 @@ if __name__=="__main__":
                              geojson_type = "geojson"
                             )
     
+    logger.info("export as geojson")
+    
     utils.geojson_gcs_export(gdf, 
                              EXPORT_PATH,
                              'ca_hq_transit_stops', 
                              geojson_type = "geojsonl"
                             )
     
+    logger.info("export as geojsonl")
+
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

@@ -82,7 +82,7 @@ def geojson_gcs_export(
     gdf.to_file(f"./{file_name_sanitized}.{geojson_type}", driver=DRIVER)
 
     fs.put(
-        f"./{file_name}",
+        f"./{file_name_sanitized}.{geojson_type}",
         f"{gcs_file_path}{file_name_sanitized}.{geojson_type}",
     )
     os.remove(f"./{file_name_sanitized}.{geojson_type}")
