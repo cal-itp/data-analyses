@@ -56,6 +56,5 @@ if __name__=="__main__":
         # Zip the shapefile
         utils.make_zipped_shapefile(gdf, f"{d}.zip")
     
-    # Clean up local files
-    #remove_zipped_shapefiles()
+
 
