@@ -157,6 +157,19 @@ if __name__=="__main__":
                                 utilities.GCS_FILE_PATH,
                                 'hqta_areas'
                                )    
+    
+    # Add geojson / geojsonl exports
+    utils.geojson_gcs_export(gdf2, 
+                             EXPORT_PATH,
+                             'ca_hq_transit_areas', 
+                             geojson_type = "geojson"
+                            )
+    
+    utils.geojson_gcs_export(gdf2, 
+                         EXPORT_PATH,
+                         'ca_hq_transit_areas', 
+                         geojson_type = "geojsonl"
+                        )
         
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
