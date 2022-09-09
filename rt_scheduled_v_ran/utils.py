@@ -32,6 +32,7 @@ from shared_utils import altair_utils
 from shared_utils import geography_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
+from dla_utils import _dla_utils as dla_utils
 
 
 # Read in complete data table
@@ -211,5 +212,6 @@ def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_t
         ).properties(title=title_txt))
     
     chart = styleguide.preset_chart_config(bar)
+    chart = dla_utils.add_tooltip(chart, x_col, y_col)
     return chart
 
