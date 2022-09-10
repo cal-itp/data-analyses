@@ -84,9 +84,6 @@ def generate_speeds(df, itp_id):
 if __name__ == "__main__":
     
     ALL_ITP_IDS = gtfs_utils.ALL_ITP_IDS
-
-    # get the date format, which uses underscore, not hyphens
-    date = f"{month}_{day}"
     
     # (1) If there's a stop_delay df for the operator, run it through more processing
     # Concatenate for all operators
