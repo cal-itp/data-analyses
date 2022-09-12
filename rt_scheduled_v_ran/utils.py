@@ -51,6 +51,8 @@ def read_data():
     
     #filtering for now to avoid the expired calitp_urls
     df = df[((df["calitp_itp_id"]==290) & (df["calitp_url_number"]==1)) | ((df["calitp_itp_id"]==300))]
+    
+    assert len(df>>filter(_.agency_name.isnull())) == 0, "PASS"
 
     return df
 
