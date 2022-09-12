@@ -14,12 +14,63 @@ from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
 """
+Functions
+"""
+# Grabs an estimate of the number of ZEV purchased 
+# in a column and tags what type of ZEV was purchased
+def grab_zev_count(df, description_col: str):
+
+    # Change the description to lower case
+    # so string search will be more accurate
+    df[description_col] = df[description_col].str.lower()
+
+    # Some numbers are spelled out: replace them
+    # Replace numbers that are written out into integers
+    df[description_col] = (
+        df[description_col]
+        .str.replace("seven", "7")
+        .str.replace("two", "2")
+        .str.replace("three", "3")
+        .str.replace("four", "4")
+        .str.replace("five", "5")
+        .str.replace("six", "6")
+        .str.replace("eight", "8")
+        .str.replace("eleven", "11")
+        .str.replace("fifteen", "15")
+        .str.replace("twenty", "20")
+    )
+
+    # Extract numbers from description into a new column
+    # cast as float, fill in zeroes
+    df["number_of_zev"] = (
+        df[description_col].str.extract("(\d+)").astype("float64").fillna(0)
+    )
+
+    # Tag whether the ZEV is a LRV/bus/other into a new column
+    # Other includes trolleys, ferries, the general 'vehicles', and more
+    df["lrv_or_bus"] = (
+        df[description_col]
+        .str.extract(
+            "(lrv|bus|buses|light rail vehicle|coach|rail)",
+            expand=False,
+        )
+        .fillna("other")
+    )
+
+    # Replace values to create broader categories
+    df["lrv_or_bus"] = df["lrv_or_bus"].replace(
+        {"lrv": "light rail vehicle", "coach": "bus", "rail": "light rail vehicle"}
+    )
+
+    return df
+
+"""
 Summary table for ZEV
 """
 # Format numbers to currency in uuu8
-def currency_format(df, col_name: str):
-    df[col_name] = "$" + (df[col_name].astype(float)).round(0).astype(str)
-    return df
+#def currency_format(df, col_name: str):
+ #   df[col_name] = "$" + (df[col_name].astype(float)).round(0).astype(str)
+  #  return df
 
 def zev_summary(
     df_zev,
@@ -99,7 +150,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
     )
 
     chart=styleguide.preset_chart_config(chart)
-    chart.save(f"./bar_{chart_title}.png")
+    # chart.save(f"./bar_{chart_title}.png")
     return chart
 
 
