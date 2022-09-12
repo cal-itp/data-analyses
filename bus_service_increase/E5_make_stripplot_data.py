@@ -251,11 +251,18 @@ def merge_in_airtable(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         validate = "m:1",
     )
     
-    return df2
+    # If there are any missing district info for ITP IDs, fill it in now
+    df3 = df2.assign(
+        caltrans_district = df2.caltrans_district.fillna(
+            df2.calitp_itp_id.map(utils.missing_itp_id_district))
+    )
+    
+    return df3
 
 
 def add_route_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:    
-    route_names = shared_utils.portfolio_utils.add_route_name(SELECTED_DATE=SELECTED_DATE)
+    route_names = shared_utils.portfolio_utils.add_route_name(
+        SELECTED_DATE=SELECTED_DATE)
     route_names_short = (
         tbl.views.gtfs_schedule_dim_routes()
         >> filter(_.calitp_extracted_at < SELECTED_DATE, 
