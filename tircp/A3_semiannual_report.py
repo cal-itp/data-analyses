@@ -174,7 +174,8 @@ def summary_SAR_table(df):
 """
 Complete Semiannual Report
 """
-def create_sar_report():
+def full_sar_report():
+    
     # Load in raw sheets
     df_project = A1_data_prep.clean_project()
     df_allocation = A1_data_prep.clean_allocation()
@@ -264,6 +265,9 @@ def create_sar_report():
     # So the highlighted differences will be more accurate. 
     previous_sar = previous_sar[previous_sar["project_project_title"].isin(current_project_names)]
     
+    # Reset index 
+    previous_sar= previous_sar.reset_index()
+    
     # Stack current SAR and previous SAR and differentiate them between the keys 
     df_all = pd.concat(
         [previous_sar, df_current], keys=[ "Previous_SAR","Current_SAR"], axis=1
@@ -278,6 +282,6 @@ def create_sar_report():
         df_pivoted.to_excel(writer, sheet_name="FY", index=True)
         df_current.to_excel(writer, sheet_name="Unpivoted_Current_Version", index=False)
         df_highlighted.to_excel(writer, sheet_name="highlighted")
-    
+        
     print("Successfully saved Semi Annual Report to GCS") 
     return df_current, df_pivoted, summary, df_highlighted
