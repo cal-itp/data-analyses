@@ -32,6 +32,7 @@ from shared_utils import altair_utils
 from shared_utils import geography_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
+from dla_utils import _dla_utils as dla_utils
 
 
 # Read in complete data table
@@ -40,7 +41,7 @@ def read_data():
     df = query_sql(
     """
     SELECT *
-    FROM `cal-itp-data-infra-staging.natalie_views.gtfs_rt_vs_schedule_trips_sample`
+    FROM `cal-itp-data-infra.views.gtfs_rt_vs_schedule_trips_sample`
     """
     )
     
@@ -149,7 +150,7 @@ def groupby_onecol(df, groupbycol, aggcol):
         grouped = grouped.sort_values('month')
         return grouped
 
-    elif groupbycol == "":
+    else:
         grouped2 = df>>group_by(_[groupbycol])>>summarize(avg = _[aggcol].mean())
         return grouped2
 
@@ -211,5 +212,51 @@ def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_t
         ).properties(title=title_txt))
     
     chart = styleguide.preset_chart_config(bar)
+    chart = dla_utils.add_tooltip(chart, x_col, y_col)
     return chart
 
+#easy chart for full average 
+def total_average_chart(full_df):
+    
+    # get the average 
+    agg_all = (utils.groupby_onecol(full_df, 'service_date', 'pct_w_vp')).rename(columns={'avg':'total_average'})
+      
+    base = alt.Chart(df_avg).properties(width=550)
+
+    chart = (base.mark_line().encode(x=alt.X('service_date', title=labeling('service_date'), sort=("x")),
+                                     y=alt.Y('avg', title= labeling('avg'), axis=alt.Axis(format='%')),
+                                     ).properties(title= 'Overall Average for Percent Trips with Vehicle Positions Data'))
+    return chart
+
+#chart for Single operator vs total average
+def total_average_with_1op_chart(full_df, calitp_id):
+    #
+    agg_all = (groupby_onecol(full_df, 'service_date', 'pct_w_vp')).rename(columns={'avg':'total_average'})
+    
+    one_op = (groupby_twocol((full_df >> filter(_.calitp_itp_id == calitp_id)), 'agency_name', 'service_date', 'pct_w_vp', ''))
+    one_op = one_op.rename(columns={'avg':f'{(one_op.iloc[0]["agency_name"])} Average'})
+    
+    
+    by_date = pd.merge(agg_all, one_op, on= 'service_date', how='left')
+    by_date = by_date.rename(columns={'total_average':'Total Average'})
+    
+    by_date_long =  (by_date >>select(_.service_date,
+                                 _['Total Average'],
+                                  _[f'{(one_op.iloc[0]["agency_name"])} Average'])
+                 >>gather('measure',
+                                   'value',
+                                   _['Total Average'],
+                                   _[f'{(one_op.iloc[0]["agency_name"])} Average']))
+    by_date_long = by_date_long.rename(columns={'measure':'Averages',
+                                           'value':'Percent with Vehicle Position Data'})
+    
+    chart = (bar_chart_over_time(by_date_long, 
+                           'service_date', 
+                           'Percent with Vehicle Position Data', 
+                           'Averages',
+                           '%', 
+                           "x", 
+                           '')).mark_line().properties(
+        title=(f'{(one_op.iloc[0]["agency_name"])} Average Compared to Overall Average')
+                                                  )
+    return chart.properties(width=550)
