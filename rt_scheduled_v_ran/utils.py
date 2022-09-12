@@ -49,6 +49,9 @@ def read_data():
     df['weekday'] = pd.Series(df.service_date).dt.day_name()
     df['month'] =  pd.Series(df.service_date).dt.month_name()
     
+    #filtering for now to avoid the expired calitp_urls
+    df = df[((df["calitp_itp_id"]==290) & (df["calitp_url_number"]==1)) | ((df["calitp_itp_id"]==300))]
+
     return df
 
 # Get the data for Scheduled Trips and RT Trips  
