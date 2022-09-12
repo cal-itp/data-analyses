@@ -2,21 +2,15 @@
 Semiannual Report
 '''
 import pandas as pd
+import numpy as np
 from calitp import *
-
-#GCS File Path:
+import A5_crosswalks as crosswalks
+import A1_data_prep
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
 FILE_NAME = "TIRCP_July_8_2022.xlsx"
 
-#Crosswalk
-import A5_crosswalks as crosswalks
-
-#Import cleaned up data
-import A1_data_prep
-
 """
 Columns
-
 """
 # Columns to keep
 allocation_cols = [
@@ -252,15 +246,31 @@ def full_sar_report():
     )
 
     """
-    Apply styling to show difference between current SAR and previous SAR
+    Apply a pink background to show what has changed 
+    between the previous and current SAR
     https://stackoverflow.com/questions/17095101/compare-two-dataframes-and-output-their-differences-side-by-side
     """
+    # Clean up the SAR dataframe a bit before applying styling.
     # Reset index from dataframe above
     df_current = df_pivoted.reset_index()
     
+    # Delete project # from both dfs to avoid confusion
+    df_current = df_current.drop(columns = ["project_project_#"]) 
+    previous_sar = previous_sar.drop(columns = ["project_project_#"]) 
+    
+    # Create a list of current PPNO/projects
+    current_project_names = df_current['project_project_title'].unique().tolist()
+    
+    # Filter out any project titles that aren't in the current SAR in the previous SAR
+    # So the highlighted differences will be more accurate. 
+    previous_sar = previous_sar[previous_sar["project_project_title"].isin(current_project_names)]
+    
+    # Reset index 
+    previous_sar= previous_sar.reset_index()
+    
     # Stack current SAR and previous SAR and differentiate them between the keys 
     df_all = pd.concat(
-        [df_current, previous_sar], keys=["Current_SAR", "Previous_SAR"], axis=1
+        [previous_sar, df_current], keys=[ "Previous_SAR","Current_SAR"], axis=1
     )
     df_all = df_all.swaplevel(axis="columns")[df_current.columns[1:]]
     
@@ -272,5 +282,6 @@ def full_sar_report():
         df_pivoted.to_excel(writer, sheet_name="FY", index=True)
         df_current.to_excel(writer, sheet_name="Unpivoted_Current_Version", index=False)
         df_highlighted.to_excel(writer, sheet_name="highlighted")
-    
+        
+    print("Successfully saved Semi Annual Report to GCS") 
     return df_current, df_pivoted, summary, df_highlighted
