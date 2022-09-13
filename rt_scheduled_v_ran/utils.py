@@ -236,14 +236,16 @@ def total_average_chart(full_df):
 #chart for Single operator vs total average
 def total_average_with_1op_chart(full_df, calitp_id):
     #
-    agg_all = (groupby_onecol(full_df, 'service_date', 'pct_w_vp')).rename(columns={'avg':'total_average'})
+    agg_all = ((full_df>>group_by(_.service_date)>>summarize(tot_sched =_.num_sched.sum(),
+                                            tot_vp = _.num_vp.sum())) >> mutate(avg = _.tot_vp/_.tot_sched))>>select(_.service_date, _.avg)
+    agg_all= agg_all.rename(columns={'avg':'Total Average'})
     
-    one_op = (groupby_twocol((full_df >> filter(_.calitp_itp_id == calitp_id)), 'agency_name', 'service_date', 'pct_w_vp', ''))
-    one_op = one_op.rename(columns={'avg':f'{(one_op.iloc[0]["agency_name"])} Average'})
+    one_op = (agg_by_date((full_df>>filter(_.calitp_itp_id==calitp_id)), 'num_sched', 'num_vp'))>>select(_.agency_name, _.service_date, _.pct_w_vp)
+    one_op = one_op.rename(columns={'pct_w_vp':f'{(one_op.iloc[0]["agency_name"])} Average'})
     
     
     by_date = pd.merge(agg_all, one_op, on= 'service_date', how='left')
-    by_date = by_date.rename(columns={'total_average':'Total Average'})
+
     
     by_date_long =  (by_date >>select(_.service_date,
                                  _['Total Average'],
