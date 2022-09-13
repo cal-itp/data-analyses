@@ -231,38 +231,26 @@ def merge_in_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
 def merge_in_airtable(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Don't use name from Airtable. But, use district.
-    airtable_organizations = (
-        tbl.airtable.california_transit_organizations()
-        >> select(_.itp_id, _.caltrans_district)
-        >> distinct()
-        >> collect()
-        >> filter(_.itp_id.notna())
-    ).sort_values(["itp_id", "caltrans_district"]).drop_duplicates(
-        subset="itp_id").reset_index(drop=True)
+    caltrans_districts = portfolio_utils.add_caltrans_district()
                             
     # Airtable gives us fewer duplicates than doing tbl.gtfs_schedule.agency()
     # But naming should be done with tbl.gtfs_schedule.agency because that's what's used
     # in speedmaps already. Need standardization
     df2 = pd.merge(
         df,
-        airtable_organizations.rename(columns = {"itp_id": "calitp_itp_id"}),
+        caltrans_districts,
         on = "calitp_itp_id",
         how = "left",
         validate = "m:1",
     )
     
-    # If there are any missing district info for ITP IDs, fill it in now
-    df3 = df2.assign(
-        caltrans_district = df2.caltrans_district.fillna(
-            df2.calitp_itp_id.map(utils.missing_itp_id_district))
-    )
-    
-    return df3
+    return df2
 
 
 def add_route_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:    
     route_names = shared_utils.portfolio_utils.add_route_name(
-        SELECTED_DATE=SELECTED_DATE)
+        selected_date=SELECTED_DATE)
+    
     route_names_short = (
         tbl.views.gtfs_schedule_dim_routes()
         >> filter(_.calitp_extracted_at < SELECTED_DATE, 

@@ -21,7 +21,7 @@ import pandas as pd
 from calitp.sql import to_snakecase
 
 from shared_utils import (geography_utils, gtfs_utils, 
-                          rt_dates, rt_utils
+                          rt_dates, rt_utils, portfolio_utils
                          )
 from utils import GCS_FILE_PATH
 from G1_get_buses_on_shn import ANALYSIS_DATE
@@ -437,6 +437,14 @@ if __name__=="__main__":
         competitive_stats_by_route,
         on = route_cols,
         how = "left"
+    )
+    
+    # Add in district info
+    itp_id_with_district = portfolio_utils.add_caltrans_district()
+    stats_by_route = stats_by_route.merge(
+        itp_id_with_district,
+        on = "calitp_itp_id",
+        how = "left",
     )
     
     stats_by_route.to_parquet(
