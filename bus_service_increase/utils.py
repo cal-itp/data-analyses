@@ -135,14 +135,3 @@ def open_request_json(name: str,
     my_dict = json.load(open(f"{DATA_PATH}{name}.json"))
     
     return my_dict
-
-
-# Some ITP IDs are missing district info
-missing_itp_id_district = {
-    48: "03 - Marysville", # B-Line in Butte County
-    70: "04 - Oakland", # Cloverdale Transit in Sonoma County
-    82: "02 - Redding", # Burney Express in Redding
-    142: "12 - Irvine", # Irvine Shuttle
-    171: "07 - Los Angeles", # Avocado Heights/Bassett/West Valinda Shuttle
-    473: "05 - San Luis Obispo", # Clean Air Express in Santa Barbara
-} 

@@ -17,7 +17,7 @@ from siuba import *
 
 
 def add_agency_name(
-    SELECTED_DATE: str | dt.date = dt.date.today() + dt.timedelta(days=-1),
+    selected_date: str | dt.date = dt.date.today() + dt.timedelta(days=-1),
 ) -> pd.DataFrame:
     """
     Returns a dataframe with calitp_itp_id and the agency name used in portfolio.
@@ -29,8 +29,8 @@ def add_agency_name(
         (
             tbl.views.gtfs_schedule_dim_feeds()
             >> filter(
-                _.calitp_extracted_at < SELECTED_DATE,
-                _.calitp_deleted_at >= SELECTED_DATE,
+                _.calitp_extracted_at < selected_date,
+                _.calitp_deleted_at >= selected_date,
             )
             >> select(_.calitp_itp_id, _.calitp_agency_name)
             >> distinct()
@@ -64,15 +64,36 @@ def add_caltrans_district() -> pd.DataFrame:
         .reset_index(drop=True)
     )
 
-    return df
+    # Some ITP IDs are missing district info
+    missing_itp_id_district = {
+        48: "03 - Marysville",  # B-Line in Butte County
+        70: "04 - Oakland",  # Cloverdale Transit in Sonoma County
+        82: "02 - Redding",  # Burney Express in Redding
+        142: "12 - Irvine",  # Irvine Shuttle
+        171: "07 - Los Angeles",  # Avocado Heights/Bassett/West Valinda Shuttle
+        473: "05 - San Luis Obispo",  # Clean Air Express in Santa Barbara
+    }
+
+    missing_ones = pd.DataFrame(
+        missing_itp_id_district.items(), columns=["calitp_itp_id", "caltrans_district"]
+    )
+
+    # If there are any missing district info for ITP IDs, fill it in now
+    df2 = (
+        pd.concat([df, missing_ones], axis=0)
+        .sort_values("calitp_itp_id")
+        .reset_index(drop=True)
+    )
+
+    return df2
 
 
 # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/utils.py
 def add_route_name(
-    SELECTED_DATE: str | dt.date = dt.date.today() + dt.timedelta(days=-1),
+    selected_date: str | dt.date = dt.date.today() + dt.timedelta(days=-1),
 ) -> pd.DataFrame:
     """
-    SELECTED_DATE: datetime or str.
+    selected_date: datetime or str.
         Defaults to yesterday's date.
         Should match the date of the analysis.
     """
@@ -80,7 +101,7 @@ def add_route_name(
     route_names = (
         tbl.views.gtfs_schedule_dim_routes()
         >> filter(
-            _.calitp_extracted_at < SELECTED_DATE, _.calitp_deleted_at >= SELECTED_DATE
+            _.calitp_extracted_at < selected_date, _.calitp_deleted_at >= selected_date
         )
         >> select(
             _.calitp_itp_id,
