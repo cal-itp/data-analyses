@@ -11,11 +11,13 @@ from calitp.tables import tbl
 from siuba import *
 
 import create_parallel_corridors
+import pmac_utils
 import utils
-from shared_utils import gtfs_utils, geography_utils, portfolio_utils, rt_dates
+from shared_utils import (gtfs_utils, geography_utils, 
+                          portfolio_utils, rt_dates)
 
-COMPILED_CACHED_GCS = f"gs://{utils.BUCKET_NAME}/data-analyses/rt_delay/compiled_cached_views/"
 ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"] 
+COMPILED_CACHED_GCS = pmac_utils.COMPILED_CACHED_GCS
 
 def merge_routelines_with_trips(selected_date):
     routelines = gpd.read_parquet(
@@ -72,6 +74,35 @@ def get_total_service_hours(selected_date):
     os.remove(f"./data/trips_with_hrs_staging_{selected_date}.parquet")
 
 
+def add_route_geom(analysis_date: str)-> gpd.GeoDataFrame:
+    """
+    Combine df with parallel/on_shn/other designation
+    with route line geom.
+    """
+    df = pmac_utils.flag_parallel_intersecting_routes(analysis_date)
+    
+    trips_with_geom = merge_routelines_with_trips(analysis_date)
+    
+    bus_route_with_geom = create_parallel_corridors.process_transit_routes(
+        alternate_df = trips_with_geom)
+    
+    gdf = pd.merge(
+        bus_route_with_geom[["itp_id", "route_id", "route_length", "geometry"]], 
+        df,
+        on = ["itp_id", "route_id"],
+        how = "left",
+    )    
+    
+    gdf = gdf.assign(
+        total_service_hours = gdf.total_service_hours.round(2),
+        # simplify geom to make it faster to plot?
+        geometry = gdf.geometry.simplify(tolerance = 20),
+        route_length_mi = round(gdf.route_length / geography_utils.FEET_PER_MI, 2),
+    ).drop(columns = "route_length")
+    
+    return gdf
+    
+    
 if __name__ == "__main__":    
     
     # Use concatenated routelines and trips from traffic_ops work

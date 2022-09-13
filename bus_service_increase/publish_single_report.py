@@ -29,8 +29,9 @@ DEFAULT_COMMITTER = {
 notebooks_to_run = {
     # key: name of notebook in directory
     # value: name of the notebook papermill execution (can be renamed)
-    "highways-no-parallel-routes-gh.ipynb": "highways-no-parallel-routes.ipynb",
-    "highways-low-competitive-routes.ipynb": "highways-low-competitive-routes.ipynb"
+    #"highways-no-parallel-routes-gh.ipynb": "highways-no-parallel-routes.ipynb",
+    #"highways-low-competitive-routes.ipynb": "highways-low-competitive-routes.ipynb"
+    "D2_pmac.ipynb": "routes-on-shn.ipynb"
 }
 
 def publish_notebooks(notebooks_to_run):
@@ -60,7 +61,7 @@ def publish_notebooks(notebooks_to_run):
         # Move the html file into the same folder as where it's stored for GH pages rendering
         # Can't move before because functions won't import 
         os.rename(f"{html_file_name}", f"{REPORT_FOLDER}{html_file_name}")
-        
+        '''
         utils.upload_file_to_github(
             TOKEN,
             REPO,
@@ -71,7 +72,7 @@ def publish_notebooks(notebooks_to_run):
             DEFAULT_COMMITTER
         )
         print("Successful upload to GitHub")
-        
+        '''
         # Clean up - since I renamed file, I don't want executed notebook to stay in directory
         if input_file != output_file:
             os.remove(output_file)
