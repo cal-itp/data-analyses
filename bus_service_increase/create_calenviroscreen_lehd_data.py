@@ -42,7 +42,7 @@ def define_equity_groups(df: pd.DataFrame,
         # -999 should be replaced as NaN, so it doesn't throw off the binning of groups
         df = (df.assign(
                 col = df[col].replace(-999, np.nan),
-                new_col = pd.cut(df[col], bins=num_groups, labels=False) + 1
+                new_col = (pd.cut(df[col], bins=num_groups, labels=False, duplicates="drop") + 1).astype("Int64")
             ).drop(columns = col) # drop original column and use the one with replaced values
             .rename(columns = {
                 "col": col, 

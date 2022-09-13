@@ -143,7 +143,7 @@ def add_district(df: pd.DataFrame, date_str: str) -> pd.DataFrame:
         on = route_cols,
         how = "left",
         validate = "1:1"
-    )
+    ).astype({"District": "Int64"})
     
     return df2
 
