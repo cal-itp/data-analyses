@@ -17,7 +17,7 @@ from utils import GCS_FILE_PATH
 
 catalog = intake.open_catalog("./*.yml")
 ANALYSIS_DATE = rt_dates.DATES["may2022"]
-TRAFFIC_OPS_GCS = 'gs://calitp-analytics-data/data-analyses/traffic_ops/'
+COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
 
 
 # From D1_pmac_routes.py, routes_on_shn_{ANALYSIS_DATE}.parquet was created
@@ -105,7 +105,7 @@ if __name__=="__main__":
         geometry = bus_routes.geometry.buffer(100)
     )
     
-    stops = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}stops_{ANALYSIS_DATE}.parquet")
+    stops = gpd.read_parquet(f"{COMPILED_CACHED_GCS}stops_{ANALYSIS_DATE}.parquet")
     
     stops_on_hwy = gpd.sjoin(
         stops.to_crs(geography_utils.CA_StatePlane),

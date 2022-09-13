@@ -17,6 +17,24 @@ from shared_utils import gtfs_utils, geography_utils, portfolio_utils, rt_dates
 COMPILED_CACHED_GCS = f"gs://{utils.BUCKET_NAME}/data-analyses/rt_delay/compiled_cached_views/"
 ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"] 
 
+def merge_routelines_with_trips(selected_date):
+    routelines = gpd.read_parquet(
+        f"{COMPILED_CACHED_GCS}routelines_{selected_date}_all.parquet")
+    trips = pd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{selected_date}_all.parquet")
+
+    shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
+
+    trips_with_geom = pd.merge(
+        routelines[shape_id_cols + ["geometry"]].drop_duplicates(subset=shape_id_cols),
+        trips,
+        on = shape_id_cols,
+        how = "inner",
+        validate = "1:m",
+    ).rename(columns = {"calitp_itp_id": "itp_id"})
+    
+    return trips_with_geom
+
+
 def get_total_service_hours(selected_date):
     # Run a query that aggregates service hours to shape_id level
     trip_cols = ["calitp_itp_id", "calitp_url_number", 
@@ -58,20 +76,8 @@ if __name__ == "__main__":
     
     # Use concatenated routelines and trips from traffic_ops work
     # Use the datasets with Amtrak added back in (rt_delay always excludes Amtrak)
-    routelines = gpd.read_parquet(
-        f"{COMPILED_CACHED_GCS}routelines_{ANALYSIS_DATE}_all.parquet")
-    trips = pd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}_all.parquet")
+    trips_with_geom = merge_routelines_with_trips(ANALYSIS_DATE)
     
-    shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
-    
-    trips_with_geom = pd.merge(
-        routelines[shape_id_cols + ["geometry"]].drop_duplicates(subset=shape_id_cols),
-        trips,
-        on = shape_id_cols,
-        how = "inner",
-        validate = "1:m",
-    ).rename(columns = {"calitp_itp_id": "itp_id"})
-
     create_parallel_corridors.make_analysis_data(
         hwy_buffer_feet= geography_utils.FEET_PER_MI, 
         alternate_df = trips_with_geom,
