@@ -5,9 +5,10 @@ import altair as alt
 import geopandas as gpd
 import pandas as pd
 
-from D1_pmac_routes import COMPILED_CACHED_GCS
-from utils import GCS_FILE_PATH
+from utils import GCS_FILE_PATH, BUCKET_NAME
 from shared_utils import geography_utils
+
+COMPILED_CACHED_GCS = f"gs://{BUCKET_NAME}/data-analyses/rt_delay/compiled_cached_views/"
 
 route_cols = ["itp_id", "route_id"]
 #---------------------------------------------------------------#
