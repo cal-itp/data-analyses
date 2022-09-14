@@ -241,47 +241,47 @@ class RtFilterMapper:
                 self.pbar.reset(total=len(gdf.shape_id.unique()))
                 self.pbar.desc = 'Generating segment speeds'
             for shape_id in gdf.shape_id.unique():
-                # try:
-                this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
-                self.debug_dict[f'{shape_id}_segments'] = this_shape
-                # Siuba errors unless you do this twice? TODO make upstream issue...
-                this_shape = this_shape >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
-                stop_speeds = (this_shape
-                             >> group_by(_.trip_id)
-                             >> arrange(_.stop_sequence)
-                             >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
-                             >> mutate(last_loc = _.shape_meters.shift(1))
-                             >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
-                             >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
-                             >> mutate(delay_chg_sec = (_.delay_seconds - _.delay_seconds.shift(1)))
-                             >> ungroup()
-                            )
-                # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
-                stop_speeds.geometry = stop_speeds.apply(
-                    lambda x: shapely.ops.substring(
-                                (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
-                                x.last_loc,
-                                x.shape_meters),
-                                                axis = 1)
-                stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
+                try:
+                    this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
+                    self.debug_dict[f'{shape_id}_segments'] = this_shape
+                    # Siuba errors unless you do this twice? TODO make upstream issue...
+                    this_shape = this_shape >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
+                    stop_speeds = (this_shape
+                                 >> group_by(_.trip_id)
+                                 >> arrange(_.stop_sequence)
+                                 >> mutate(seconds_from_last = (_.actual_time - _.actual_time.shift(1)).apply(lambda x: x.seconds))
+                                 >> mutate(last_loc = _.shape_meters.shift(1))
+                                 >> mutate(meters_from_last = (_.shape_meters - _.last_loc))
+                                 >> mutate(speed_from_last = _.meters_from_last / _.seconds_from_last)
+                                 >> mutate(delay_chg_sec = (_.delay_seconds - _.delay_seconds.shift(1)))
+                                 >> ungroup()
+                                )
+                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
+                    stop_speeds.geometry = stop_speeds.apply(
+                        lambda x: shapely.ops.substring(
+                                    (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
+                                    x.last_loc,
+                                    x.shape_meters),
+                                                    axis = 1)
+                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
 
-                stop_speeds = (stop_speeds
-                     >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
-                     >> group_by(_.stop_sequence)
-                     >> mutate(n_trips = _.stop_sequence.size,
-                                avg_mph = _.speed_mph.mean(),
-                              _20p_mph = _.speed_mph.quantile(.2),
-                               trips_per_hour = _.n_trips / self.hr_duration_in_filter
-                              )
-                     >> ungroup()
-                     >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
-                    )
-                self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
-                assert not stop_speeds.empty, 'stop speeds gdf is empty!'
-                # except Exception as e:
-                #     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
-                #     print(e)
-                #     continue
+                    stop_speeds = (stop_speeds
+                         >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
+                         >> group_by(_.stop_sequence)
+                         >> mutate(n_trips = _.stop_sequence.size,
+                                    avg_mph = _.speed_mph.mean(),
+                                  _20p_mph = _.speed_mph.quantile(.2),
+                                   trips_per_hour = _.n_trips / self.hr_duration_in_filter
+                                  )
+                         >> ungroup()
+                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
+                        )
+                    self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
+                    assert not stop_speeds.empty, 'stop speeds gdf is empty!'
+                except Exception as e:
+                    print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
+                    print(e)
+                    continue
                 
                 stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
                 if stop_speeds.avg_mph.max() > 80:
