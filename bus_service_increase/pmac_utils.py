@@ -197,7 +197,7 @@ def add_percent(df: pd.DataFrame, col_list: list) -> pd.DataFrame:
     """
     for c in col_list:
         new_col = f"pct_{c}"
-        df[new_col] = (df[c] / df[c].sum()).round(3) * 100
+        df[new_col] = (df[c] / df[c].sum()).round(3)
         df[c] = df[c].round(0)
         
     return df
@@ -212,6 +212,19 @@ def sort_by_column(df: pd.DataFrame,
                         key=lambda c: c.map(lambda e: sort_key.index(e)))
     return df
 
+
+def clean_up_category_values(df: pd.DataFrame) -> pd.DataFrame:
+    category_values = {
+        "parallel": "Parallel", 
+        "on_shn": "On SHN",
+        "other": "Other"
+    }
+    
+    df = df.assign(
+        category = df.category.map(category_values)
+    )
+    
+    return df
 
 def get_summary_table(df: pd.DataFrame)-> pd.DataFrame: 
     """

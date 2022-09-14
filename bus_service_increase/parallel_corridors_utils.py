@@ -35,7 +35,8 @@ def operator_parallel_competitive_stats(itp_id: int,
                                     Ex: if 75% of trips are within 2x bus_multiplier, 
                                     set this to 0.75
     pct_trips_cutoff: float
-                        Ex: if 25% trips are within the bus_difference cut-off for route_group,
+                        Ex: if 25% trips are within the bus_difference 
+                        cut-off for route_group,
                         set this to 0.25
     """
     
