@@ -363,7 +363,7 @@ class OperatorDayAnalysis:
         self.position_interpolators = {}
         if type(self.pbar) != type(None):
             self.pbar.reset(total=self.vehicle_positions.trip_id.nunique())
-            self.pbar.desc = 'Generating position interpolators'
+            self.pbar.desc = f'Generating position interpolators itp_id: {self.calitp_itp_id}'
         for trip_id in self.vehicle_positions.trip_id.unique():
             # print(trip_id)
             trip = self.trips.copy() >> filter(_.trip_id == trip_id)
@@ -433,7 +433,7 @@ class OperatorDayAnalysis:
         
         if type(self.pbar) != type(None):
             self.pbar.reset(total=len(delays.trip_id.unique()))
-            self.pbar.desc = 'Generating stop delay view'
+            self.pbar.desc = f'Generating stop delay view itp_id: {self.calitp_itp_id}'
         for trip_id in delays.trip_id.unique():
             try:
                 _delay = delays.copy() >> filter(_.trip_id == trip_id) >> distinct(_.stop_id, _keep_all = True)
