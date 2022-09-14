@@ -123,7 +123,7 @@ def get_pct_ran_df(itp_id, list_of_dates, gtfs_daily, rt):
     pcts = pcts>>arrange(_.date)
     return pd.DataFrame(pcts)
 
-
+#to be retired
 def agg_by_date(df, sum1_sched, sum2_vp):
     agg_df = (df
      >>group_by(_.calitp_itp_id,
@@ -136,6 +136,19 @@ def agg_by_date(df, sum1_sched, sum2_vp):
              total_num_vp = (_[sum2_vp].sum()))
      >>mutate(pct_w_vp = (_.total_num_vp)/(_.total_num_sched))
             )
+    return agg_df
+
+#same as agg_by_date but allows more flexibility in group columns
+def get_agg_pct(df,
+                groupings: list,
+                sum_sched: list,
+                sum_vp: list,
+               ):
+    
+    agg_df = (geography_utils.aggregate_by_geography(df,
+                                       group_cols = groupings,
+                                       sum_cols = [sum_sched, sum_vp]
+                                       ))>>mutate(avg = _[sum_vp]/_[sum_sched])
     return agg_df
 
 
@@ -235,17 +248,22 @@ def total_average_chart(full_df):
 
 #chart for Single operator vs total average
 def total_average_with_1op_chart(full_df, calitp_id):
-    #
-    agg_all = ((full_df>>group_by(_.service_date)>>summarize(tot_sched =_.num_sched.sum(),
-                                            tot_vp = _.num_vp.sum())) >> mutate(avg = _.tot_vp/_.tot_sched))>>select(_.service_date, _.avg)
-    agg_all= agg_all.rename(columns={'avg':'Total Average'})
     
-    one_op = (agg_by_date((full_df>>filter(_.calitp_itp_id==calitp_id)), 'num_sched', 'num_vp'))>>select(_.agency_name, _.service_date, _.pct_w_vp)
-    one_op = one_op.rename(columns={'pct_w_vp':f'{(one_op.iloc[0]["agency_name"])} Average'})
+    agg_all = ((get_agg_pct(full_df,
+                  groupings = ['service_date'],
+                  sum_sched = 'num_sched',
+                  sum_vp = 'num_vp'))>>arrange(_.service_date)).rename(columns={'avg':'total_average'})
+    
+    one_op = (get_agg_pct((full_df>>filter(_.calitp_itp_id==300)),
+                  groupings = ['service_date', 'agency_name'],
+                  sum_sched = 'num_sched',
+                  sum_vp = 'num_vp'))>>arrange(_.service_date)
+    
+    one_op = one_op.rename(columns={'avg':f'{(one_op.iloc[0]["agency_name"])} Average'})
     
     
     by_date = pd.merge(agg_all, one_op, on= 'service_date', how='left')
-
+    by_date = by_date.rename(columns={'total_average':'Total Average'})
     
     by_date_long =  (by_date >>select(_.service_date,
                                  _['Total Average'],
