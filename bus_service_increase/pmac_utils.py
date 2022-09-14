@@ -5,9 +5,10 @@ import altair as alt
 import geopandas as gpd
 import pandas as pd
 
-from D1_pmac_routes import COMPILED_CACHED_GCS
-from utils import GCS_FILE_PATH
+from utils import GCS_FILE_PATH, BUCKET_NAME
 from shared_utils import geography_utils
+
+COMPILED_CACHED_GCS = f"gs://{BUCKET_NAME}/data-analyses/rt_delay/compiled_cached_views/"
 
 route_cols = ["itp_id", "route_id"]
 #---------------------------------------------------------------#
@@ -196,7 +197,7 @@ def add_percent(df: pd.DataFrame, col_list: list) -> pd.DataFrame:
     """
     for c in col_list:
         new_col = f"pct_{c}"
-        df[new_col] = (df[c] / df[c].sum()).round(3) * 100
+        df[new_col] = (df[c] / df[c].sum()).round(3)
         df[c] = df[c].round(0)
         
     return df
@@ -211,6 +212,19 @@ def sort_by_column(df: pd.DataFrame,
                         key=lambda c: c.map(lambda e: sort_key.index(e)))
     return df
 
+
+def clean_up_category_values(df: pd.DataFrame) -> pd.DataFrame:
+    category_values = {
+        "parallel": "Parallel", 
+        "on_shn": "On SHN",
+        "other": "Other"
+    }
+    
+    df = df.assign(
+        category = df.category.map(category_values)
+    )
+    
+    return df
 
 def get_summary_table(df: pd.DataFrame)-> pd.DataFrame: 
     """
