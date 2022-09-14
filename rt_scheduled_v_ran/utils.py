@@ -227,7 +227,8 @@ def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_t
             x=alt.X(x_col, title=labeling(x_col), sort=(sort)),
             y=alt.Y(y_col, stack = None, title=labeling(y_col), axis=alt.Axis(format=yaxis_format)),
             color = color_col,
-        ).properties(title=title_txt))
+        )
+           # .properties(title=title_txt))
     
     chart = styleguide.preset_chart_config(bar)
     chart = dla_utils.add_tooltip(chart, x_col, y_col)
@@ -243,7 +244,8 @@ def total_average_chart(full_df):
 
     chart = (base.mark_line().encode(x=alt.X('service_date', title=labeling('service_date'), sort=("x")),
                                      y=alt.Y('avg', title= labeling('avg'), axis=alt.Axis(format='%')),
-                                     ).properties(title= 'Overall Average for Percent Trips with Vehicle Positions Data'))
+                                     )
+             # .properties(title= 'Overall Average for Percent Trips with Vehicle Positions Data'))
     return chart
 
 #chart for Single operator vs total average
@@ -281,7 +283,8 @@ def total_average_with_1op_chart(full_df, calitp_id):
                            'Averages',
                            '%', 
                            "x", 
-                           '')).mark_line().properties(
-        title=(f'{(one_op.iloc[0]["agency_name"])} Average Compared to Overall Average')
-                                                  )
+                           '')).mark_line()
+             # .properties(
+        # title=(f'{(one_op.iloc[0]["agency_name"])} Average Compared to Overall Average')
+                                                  )#
     return chart.properties(width=550)
