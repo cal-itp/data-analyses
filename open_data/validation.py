@@ -12,6 +12,8 @@ in `metadata_update`.
 """
 import pandas as pd
 
+from shared_utils import rt_dates
+
 # Function to put in list of keywords (MINIMUM 5 needed)
 def fill_in_keyword_list(topic='transportation', keyword_list = []):
     if len(keyword_list) >= 5:
@@ -84,13 +86,16 @@ def check_dates(string):
         
 # First time metadata is generated off of template, it holds '-999' as value
 # Subsequent updates, pull it, and add 1
+# Can't get edition to show up when exporting file gdb, so it always gets reset to 1
 def check_edition_add_one(metadata):
     input_edition = metadata["idinfo"]["citation"]["citeinfo"]["edition"]
     
     if input_edition == '-999':
         new_edition = str(1)
-    else:
-        new_edition = str(int(input_edition) + 1)
+        
+        # Replace to largest 
+        possible_editions = list(rt_dates.METADATA_EDITION.values())        
+        new_edition = str(max(possible_editions))
     
     return new_edition
 

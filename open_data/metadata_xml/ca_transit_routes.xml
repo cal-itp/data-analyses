@@ -4,7 +4,7 @@
 		<citation>
 			<citeinfo>
 				<title>ca_transit_routes</title>
-				<edition>3</edition>
+				<edition>4</edition>
 				<geoform>vector digital data</geoform>
 				<pubinfo>
 					<publish>California Integrated Travel Project</publish>
@@ -70,7 +70,7 @@
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>String</sdtstype>
-				<ptvctcnt>7456</ptvctcnt>
+				<ptvctcnt>7791</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
