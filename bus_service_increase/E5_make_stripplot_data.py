@@ -16,7 +16,7 @@ from siuba import *
 
 import E1_setup_parallel_trips_with_stops as setup_parallel_trips_with_stops
 import shared_utils
-import utils
+from bus_service_utils import utils
 
 catalog = intake.open_catalog("./*.yml")
 
@@ -93,7 +93,7 @@ def add_quantiles_timeofday(df: pd.DataFrame) -> pd.DataFrame:
 def merge_in_competitive_routes(df: pd.DataFrame) -> gpd.GeoDataFrame:
     # Tag as competitive
     gdf = catalog.gmaps_results.read()
-    CRS = gdf.crs
+    CRS = gdf.crs.to_epsg()
     
     route_cols = ["calitp_itp_id", "route_id"]
     trip_cols = route_cols + ["shape_id", "trip_id"]
@@ -136,7 +136,7 @@ def merge_in_competitive_routes(df: pd.DataFrame) -> gpd.GeoDataFrame:
         pct_trips_competitive = df4.num_competitive.divide(df4.num_trips).round(3)
     ).drop(columns = ["is_competitive"])
     
-    df4 = gpd.GeoDataFrame(df4, crs=CRS)
+    df4 = gpd.GeoDataFrame(df4, crs=f"EPSG: {CRS}")
     
     return df4
 
@@ -209,14 +209,7 @@ def designate_plot_group(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def merge_in_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # This is the agency_name used in RT maps
     # rt_delay/rt_analysis.py#L309
-    agency_names = (
-        tbl.views.gtfs_schedule_dim_feeds() 
-        >> select(_.calitp_itp_id, _.calitp_agency_name)
-        >> distinct()
-        >> collect()
-    ).sort_values(["calitp_itp_id", "calitp_agency_name"]).drop_duplicates(
-        subset="calitp_itp_id"
-    ).reset_index(drop=True)
+    agency_names = portfolio_utils.add_agency_name(selected_date = SELECTED_DATE)
     
     df2 = pd.merge(
         df,

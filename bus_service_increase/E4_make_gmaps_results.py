@@ -11,11 +11,10 @@ import pandas as pd
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(50_000_000_000)
 
-from calitp.tables import tbl
 from datetime import datetime
 from siuba import *
 
-import utils
+from bus_service_utils import utils
 import shared_utils
 
 DATA_PATH = "./gmaps_cache/"
