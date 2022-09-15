@@ -28,10 +28,8 @@ from tqdm import tqdm_notebook
 from tqdm.notebook import trange, tqdm
 
 import altair as alt
-from shared_utils import altair_utils
-from shared_utils import geography_utils
+from shared_utils import altair_utils, portfolio_utils, geography_utils, styleguide
 from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
 from dla_utils import _dla_utils as dla_utils
 
 
@@ -52,78 +50,80 @@ def read_data():
     #filtering for now to avoid the expired calitp_urls
     df = df[((df["calitp_itp_id"]==290) & (df["calitp_url_number"]==1)) | ((df["calitp_itp_id"]==300))]
     
+    itpid_district = portfolio_utils.add_caltrans_district()
+    df = pd.merge(df, itpid_district, on='calitp_itp_id', how='left')
+    
     assert len(df>>filter(_.agency_name.isnull())) == 0, "PASS"
 
     return df
 
-# Get the data for Scheduled Trips and RT Trips  
+# # Get the data for Scheduled Trips and RT Trips long format
+# def load_schedule_data(start_date, end_date, itp_id):
+#     gtfs_daily = (
+#         tbl.views.gtfs_schedule_fact_daily_trips()
+#         >> filter(_.calitp_itp_id == itp_id)
+#         >> filter((_.service_date >= start_date),
+#                  (_.service_date <= end_date))
+#         >> filter(_.is_in_service == True)
+#         >> collect()
+#     )
+#     return gtfs_daily
 
-def load_schedule_data(start_date, end_date, itp_id):
-    gtfs_daily = (
-        tbl.views.gtfs_schedule_fact_daily_trips()
-        >> filter(_.calitp_itp_id == itp_id)
-        >> filter((_.service_date >= start_date),
-                 (_.service_date <= end_date))
-        >> filter(_.is_in_service == True)
-        >> collect()
-    )
-    return gtfs_daily
+# def load_rt_data(start_date, end_date):
+#     rt = query_sql(
+#         f"""
+#         SELECT * FROM `cal-itp-data-infra-staging.natalie_views.gtfs_rt_distinct_trips`
+#         WHERE date BETWEEN '{start_date}' AND '{end_date}'
+#         """
+#     )
+#     return rt
 
-def load_rt_data(start_date, end_date):
-    rt = query_sql(
-        f"""
-        SELECT * FROM `cal-itp-data-infra-staging.natalie_views.gtfs_rt_distinct_trips`
-        WHERE date BETWEEN '{start_date}' AND '{end_date}'
-        """
-    )
-    return rt
+# # Get a DF with Percent Ran for each Day long format
 
-# Get a DF with Percent Ran for each Day
-
-def get_pct_ran_df(itp_id, list_of_dates, gtfs_daily, rt):
+# def get_pct_ran_df(itp_id, list_of_dates, gtfs_daily, rt):
     
-    pcts = []
+#     pcts = []
     
-    # loop through list of dates
-    for single_date in list_of_dates:
+#     # loop through list of dates
+#     for single_date in list_of_dates:
         
-        #filter for single day
+#         #filter for single day
         
-        gtfs_daily2 = (gtfs_daily>>filter(_.service_date == single_date))
-        rt2 = (rt>>filter(_.date == single_date))
+#         gtfs_daily2 = (gtfs_daily>>filter(_.service_date == single_date))
+#         rt2 = (rt>>filter(_.date == single_date))
         
-        #outer join schedule and rt data 
-        sched_rt_df = (pd.merge(gtfs_daily2, rt2, how='outer', on='trip_id', indicator='have_rt'))
+#         #outer join schedule and rt data 
+#         sched_rt_df = (pd.merge(gtfs_daily2, rt2, how='outer', on='trip_id', indicator='have_rt'))
 
         
-        day_pct_ran = {}
-        day_pct_ran['date'] = single_date
-        if ((len(sched_rt_df))!=0):
-            day_pct_ran['pct_trips_ran'] = ((len(sched_rt_df>>filter(_.have_rt=='both')))/(len(gtfs_daily2)))
-        elif ((len(sched_rt_df))==0):
-            day_pct_ran['pct_trips_ran'] = ''
-        pct_ran = pd.DataFrame([day_pct_ran])
+#         day_pct_ran = {}
+#         day_pct_ran['date'] = single_date
+#         if ((len(sched_rt_df))!=0):
+#             day_pct_ran['pct_trips_ran'] = ((len(sched_rt_df>>filter(_.have_rt=='both')))/(len(gtfs_daily2)))
+#         elif ((len(sched_rt_df))==0):
+#             day_pct_ran['pct_trips_ran'] = ''
+#         pct_ran = pd.DataFrame([day_pct_ran])
         
-        # add columns with counts 
-        pct_ran['n_have_rt'] = (len(sched_rt_df>>filter(_.have_rt=='both')))
-        pct_ran['n_missing_rt'] = (len(sched_rt_df>>filter(_.have_rt=='right_only')))
-        pct_ran['unmatched_rt'] = (len(sched_rt_df>>filter(_.have_rt=='left_only')))
+#         # add columns with counts 
+#         pct_ran['n_have_rt'] = (len(sched_rt_df>>filter(_.have_rt=='both')))
+#         pct_ran['n_missing_rt'] = (len(sched_rt_df>>filter(_.have_rt=='right_only')))
+#         pct_ran['unmatched_rt'] = (len(sched_rt_df>>filter(_.have_rt=='left_only')))
         
-        # add columns for number of unique trip_ids
-        pct_ran['nunique_sched'] = (gtfs_daily2.trip_id.nunique())
-        pct_ran['nunique_rt'] = (rt2.trip_id.nunique())
+#         # add columns for number of unique trip_ids
+#         pct_ran['nunique_sched'] = (gtfs_daily2.trip_id.nunique())
+#         pct_ran['nunique_rt'] = (rt2.trip_id.nunique())
 
-        pcts.append(pct_ran)                                                    
-        #code help from: https://stackoverflow.com/questions/28669482/appending-pandas-dataframes-generated-in-a-for-loop
+#         pcts.append(pct_ran)                                                    
+#         #code help from: https://stackoverflow.com/questions/28669482/appending-pandas-dataframes-generated-in-a-for-loop
    
-    #add each date together 
-    pcts = pd.concat(pcts)
+#     #add each date together 
+#     pcts = pd.concat(pcts)
     
-    #arrange by date
-    pcts = pcts>>arrange(_.date)
-    return pd.DataFrame(pcts)
+#     #arrange by date
+#     pcts = pcts>>arrange(_.date)
+#     return pd.DataFrame(pcts)
 
-#to be retired
+#can be retired
 def agg_by_date(df, sum1_sched, sum2_vp):
     agg_df = (df
      >>group_by(_.calitp_itp_id,
@@ -253,21 +253,24 @@ def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_t
         .mark_bar(size=8)
         .encode(
             x=alt.X(x_col, title=labeling(x_col), sort=(sort)),
-            y=alt.Y(y_col, stack = None, title=labeling(y_col), axis=alt.Axis(format=yaxis_format)),
+            y=alt.Y(y_col, title=labeling(y_col), axis=alt.Axis(format=yaxis_format)),
             color = color_col,
         )
            # .properties(title=title_txt)
           )
     
-    chart = styleguide.preset_chart_config(bar)
-    chart = dla_utils.add_tooltip(chart, x_col, y_col)
-    return chart
+    #chart = styleguide.preset_chart_config(bar)
+    chart = dla_utils.add_tooltip(bar, x_col, y_col)
+    return (chart.properties(width=550))
 
 #easy chart for full average 
 def total_average_chart(full_df):
     
     # get the average 
-    agg_all = (utils.groupby_onecol(full_df, 'service_date', 'pct_w_vp')).rename(columns={'avg':'total_average'})
+    agg_all = ((get_agg_pct(full_df,
+                  groupings = ['service_date'],
+                  sum_sched = 'num_sched',
+                  sum_vp = 'num_vp'))>>arrange(_.service_date)).rename(columns={'avg':'total_average'})
       
     base = (alt.Chart(df_avg).properties(width=550))
 
