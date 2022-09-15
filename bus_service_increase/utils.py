@@ -18,6 +18,22 @@ GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 DATA_PATH = "./data/"
 IMG_PATH = "./img/"
 
+
+def import_csv_export_parquet(dataset_name: str, output_file_name: str, 
+                              GCS_FILE_PATH: str, GCS: bool = True):
+    """
+    DATASET_NAME: str. Name of csv dataset.
+    OUTPUT_FILE_NAME: str. Name of output parquet dataset.
+    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    """
+    df = pd.read_csv(f"{dataset_name}.csv")
+
+    if GCS is True:
+        df.to_parquet(f"{GCS_FILE_PATH}{output_file_name}.parquet")
+    else:
+        df.to_parquet(f"./{output_file_name}.parquet")
+        
+
 def import_export(DATASET_NAME: str, OUTPUT_FILE_NAME: str, GCS:bool=True): 
     """
     DATASET_NAME: str. Name of csv dataset.
