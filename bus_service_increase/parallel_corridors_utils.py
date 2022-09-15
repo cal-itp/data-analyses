@@ -13,7 +13,7 @@ import pandas as pd
 from IPython.display import Markdown, HTML, display_html
 
 import E1_setup_parallel_trips_with_stops as setup_parallel_trips_with_stops
-import utils
+from bus_service_utils import utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide, map_utils
 from E5_make_stripplot_data import diff_cutoffs

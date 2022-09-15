@@ -5,7 +5,7 @@ import pandas as pd
 from calitp.tables import tbl
 from siuba import *
 
-import utils
+from bus_service_utils import utils
 import shared_utils
 import warehouse_queries
 

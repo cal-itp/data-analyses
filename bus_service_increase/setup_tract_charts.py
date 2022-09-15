@@ -4,9 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-import utils
 import shared_utils
-
+from bus_service_utils import utils, chart_utils
 from shared_utils import styleguide, geography_utils
 from shared_utils import calitp_color_palette as cp
 
@@ -40,7 +39,7 @@ LEGEND_LABELS = {
     3: "High",
 }
 
-LEGEND_ORDER = list(LEGEND_LABELS.values())
+LEGEND_ORDER = chart_utils.set_legend_order(LEGEND_LABELS)
 
 CHART_LABELING = {
     "arrivals_per_1k_pj" : "Arrivals per 1k by Pop / Job Density",
@@ -49,11 +48,8 @@ CHART_LABELING = {
 }
 
 def labeling(word: str) -> str:
-    if word in CHART_LABELING.keys():
-        word = CHART_LABELING[word]
-    else: 
-        word = word.replace('_', ' ').title()
-    return word
+    return chart_utils.labeling(word, CHART_LABELING)
+
 
 
 def chartnaming(word: str) -> str:
@@ -154,7 +150,10 @@ def make_scatterplot(df: pd.DataFrame,
     
     def colname_label(col: str) -> (str, str):
         colname = col.split(":")[0]
-        coltitle = colname.replace('_', ' ').replace(' pj', '').replace('popjobs', 'pop/job')
+        coltitle = (colname.replace('_', ' ')
+                    .replace(' pj', '')
+                    .replace('popjobs', 'pop/job')
+                   )
         return colname, coltitle
     
     x_colname, x_title = colname_label(x_col)
