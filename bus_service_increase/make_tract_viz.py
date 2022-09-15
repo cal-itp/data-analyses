@@ -3,7 +3,7 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
-import utils
+from bus_service_utils import utils
 from setup_tract_charts import *
 from shared_utils import geography_utils, map_utils
 from shared_utils import calitp_color_palette as cp
