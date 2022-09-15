@@ -4,6 +4,7 @@ Overwrite XML metadata using JSON.
 Analyst inputs a dictionary of values to overwrite.
 Convert JSON back to XML to feed in ArcGIS.
 """
+import os
 import pandas as pd
 import xml.etree.ElementTree as ET
 import xmltodict
@@ -205,6 +206,9 @@ def update_metadata_xml(XML_FILE, DATASET_INFO, first_run=False):
     
     # Overwrite existing XML file
     OUTPUT_FOLDER = "run_in_esri/"
+    if not os.path.exists(f"./{METADATA_FOLDER}{OUTPUT_FOLDER}"):
+        os.makedirs(f"./{METADATA_FOLDER}{OUTPUT_FOLDER}")
+    
     FILE = f"{XML_FILE.split(METADATA_FOLDER)[1]}"
         
     with open(f"{METADATA_FOLDER}{OUTPUT_FOLDER}{FILE}", 'w') as f:
