@@ -49,6 +49,11 @@ def read_data():
     df['weekday'] = pd.Series(df.service_date).dt.day_name()
     df['month'] =  pd.Series(df.service_date).dt.month_name()
     
+    #filtering for now to avoid the expired calitp_urls
+    df = df[((df["calitp_itp_id"]==290) & (df["calitp_url_number"]==1)) | ((df["calitp_itp_id"]==300))]
+    
+    assert len(df>>filter(_.agency_name.isnull())) == 0, "PASS"
+
     return df
 
 # Get the data for Scheduled Trips and RT Trips  
@@ -118,7 +123,7 @@ def get_pct_ran_df(itp_id, list_of_dates, gtfs_daily, rt):
     pcts = pcts>>arrange(_.date)
     return pd.DataFrame(pcts)
 
-
+#to be retired
 def agg_by_date(df, sum1_sched, sum2_vp):
     agg_df = (df
      >>group_by(_.calitp_itp_id,
@@ -131,6 +136,19 @@ def agg_by_date(df, sum1_sched, sum2_vp):
              total_num_vp = (_[sum2_vp].sum()))
      >>mutate(pct_w_vp = (_.total_num_vp)/(_.total_num_sched))
             )
+    return agg_df
+
+#same as agg_by_date but allows more flexibility in group columns
+def get_agg_pct(df,
+                groupings: list,
+                sum_sched: list,
+                sum_vp: list,
+               ):
+    
+    agg_df = (geography_utils.aggregate_by_geography(df,
+                                       group_cols = groupings,
+                                       sum_cols = [sum_sched, sum_vp]
+                                       ))>>mutate(avg = _[sum_vp]/_[sum_sched])
     return agg_df
 
 
@@ -200,16 +218,46 @@ def labeling(word):
 
 ## Charting Functions 
 
+#adding selection and highlight for charts
+# allows users to interact with chart and look at a singular line
+def add_chart_selection(chart, selection1):
+    
+    selection = (alt.selection_multi(fields=[selection1], bind='legend'))
+    
+    chart = chart.encode(opacity=alt.condition(selection, alt.value(1), alt.value(0))).add_selection(selection)  
+    
+    return chart
+
+## working on this still
+# def add_chart_highlight(chart, highlight1):
+    
+#     highlight = (alt.selection(type = 'single', on='mouseover',
+#                                fields=[highlight1], nearest=True))
+    
+#     chart = chart.encode(size=alt.condition(~highlight, alt.value(2), alt.value(5))).add_selection(highlight)
+    
+#     return chart
+
+#adding tooltip for three options
+def add_tooltip(chart, tooltip1, tooltip2, tooltip3):
+    chart=chart.encode([alt.Tooltip(tooltip1, title=labeling(tooltip1)),
+                        alt.Tooltip(tooltip2, title=labeling(tooltip2)),
+                        alt.Tooltip(tooltip2, title=labeling(tooltip2))])
+    return chart
+
 # Bar chart over time 
 #need to specify color scheme outside of charting function which can be done with .encode()
 def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_txt):
+    
     bar = (alt.Chart(df)
         .mark_bar(size=8)
         .encode(
             x=alt.X(x_col, title=labeling(x_col), sort=(sort)),
             y=alt.Y(y_col, stack = None, title=labeling(y_col), axis=alt.Axis(format=yaxis_format)),
             color = color_col,
-        ).properties(title=title_txt))
+        )
+           # .properties(title=title_txt)
+          )
     
     chart = styleguide.preset_chart_config(bar)
     chart = dla_utils.add_tooltip(chart, x_col, y_col)
@@ -221,19 +269,28 @@ def total_average_chart(full_df):
     # get the average 
     agg_all = (utils.groupby_onecol(full_df, 'service_date', 'pct_w_vp')).rename(columns={'avg':'total_average'})
       
-    base = alt.Chart(df_avg).properties(width=550)
+    base = (alt.Chart(df_avg).properties(width=550))
 
     chart = (base.mark_line().encode(x=alt.X('service_date', title=labeling('service_date'), sort=("x")),
                                      y=alt.Y('avg', title= labeling('avg'), axis=alt.Axis(format='%')),
-                                     ).properties(title= 'Overall Average for Percent Trips with Vehicle Positions Data'))
+                                     ))
+             # .properties(title= 'Overall Average for Percent Trips with Vehicle Positions Data')
+           
     return chart
 
 #chart for Single operator vs total average
 def total_average_with_1op_chart(full_df, calitp_id):
-    #
-    agg_all = (groupby_onecol(full_df, 'service_date', 'pct_w_vp')).rename(columns={'avg':'total_average'})
     
-    one_op = (groupby_twocol((full_df >> filter(_.calitp_itp_id == calitp_id)), 'agency_name', 'service_date', 'pct_w_vp', ''))
+    agg_all = ((get_agg_pct(full_df,
+                  groupings = ['service_date'],
+                  sum_sched = 'num_sched',
+                  sum_vp = 'num_vp'))>>arrange(_.service_date)).rename(columns={'avg':'total_average'})
+    
+    one_op = (get_agg_pct((full_df>>filter(_.calitp_itp_id==300)),
+                  groupings = ['service_date', 'agency_name'],
+                  sum_sched = 'num_sched',
+                  sum_vp = 'num_vp'))>>arrange(_.service_date)
+    
     one_op = one_op.rename(columns={'avg':f'{(one_op.iloc[0]["agency_name"])} Average'})
     
     
@@ -256,7 +313,7 @@ def total_average_with_1op_chart(full_df, calitp_id):
                            'Averages',
                            '%', 
                            "x", 
-                           '')).mark_line().properties(
-        title=(f'{(one_op.iloc[0]["agency_name"])} Average Compared to Overall Average')
-                                                  )
+                           '')).mark_line()
+             # .properties(
+        # title=(f'{(one_op.iloc[0]["agency_name"])} Average Compared to Overall Average'))
     return chart.properties(width=550)
