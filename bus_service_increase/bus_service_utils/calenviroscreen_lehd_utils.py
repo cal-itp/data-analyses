@@ -10,15 +10,13 @@ https://datacatalog.urban.org/dataset/longitudinal-employer-household-dynamics-o
 LEHD Data Dictionary:
 https://datacatalog.urban.org/sites/default/files/data-dictionary-files/LODESTechDoc7.5.pdf
 """
+import fsspec
 import geopandas as gpd
-import intake
 import numpy as np
 import pandas as pd
 
 import shared_utils
-import utils
-
-catalog = intake.open_catalog("./catalog.yml")
+from bus_service_utils import utils
 
 #--------------------------------------------------------#
 ### CalEnviroScreen functions
@@ -42,8 +40,10 @@ def define_equity_groups(df: pd.DataFrame,
         # -999 should be replaced as NaN, so it doesn't throw off the binning of groups
         df = (df.assign(
                 col = df[col].replace(-999, np.nan),
-                new_col = (pd.cut(df[col], bins=num_groups, labels=False, duplicates="drop") + 1).astype("Int64")
-            ).drop(columns = col) # drop original column and use the one with replaced values
+                new_col = (pd.cut(df[col], bins=num_groups, 
+                                  labels=False, duplicates="drop") + 1).astype("Int64")
+            ).drop(columns = col) 
+              # drop original column and use the one with replaced values
             .rename(columns = {
                 "col": col, 
                 "new_col": f"{col}_group"})
@@ -52,7 +52,9 @@ def define_equity_groups(df: pd.DataFrame,
     return df
 
 
-def prep_calenviroscreen(df: pd.DataFrame)-> pd.DataFrame:
+def prep_calenviroscreen(df: gpd.GeoDataFrame, 
+                         quartile_groups: int = 3,
+                        )-> gpd.GeoDataFrame:
     # Fix tract ID and calculate pop density
     df = (df.assign(
             Tract = df.Tract.apply(lambda x: '0' + str(x)[:-2]).astype(str),
@@ -67,7 +69,7 @@ def prep_calenviroscreen(df: pd.DataFrame)-> pd.DataFrame:
     df2 = define_equity_groups(
         df,
         percentile_col =  ["CIscoreP", "PolBurdP", "PopCharP"], 
-        num_groups = 3)
+        num_groups = quartile_groups)
     
     # Rename columns
     keep_cols = [
@@ -98,7 +100,15 @@ def prep_calenviroscreen(df: pd.DataFrame)-> pd.DataFrame:
 #--------------------------------------------------------#
 ### LEHD functions
 #--------------------------------------------------------#
-def download_lehd_data(download_date: str):
+LEHD_DATASETS = [
+    "wac_all_se01_tract_minus_fed", 
+    "wac_all_se02_tract_minus_fed",
+    "wac_all_se03_tract_minus_fed", 
+    "wac_fed_tract"
+]
+
+def download_lehd_data(download_date: str, 
+                       lehd_datasets: list = LEHD_DATASETS):
     """
     Download LEHD data from Urban Institute
     """
@@ -106,16 +116,12 @@ def download_lehd_data(download_date: str):
 
     # Doing all_se01-se03 is the same as primary jobs
     # summing up to tract level gives same df.describe() results
-    LEHD_DATASETS = ["wac_all_se01_tract_minus_fed", 
-                "wac_all_se02_tract_minus_fed",
-                "wac_all_se03_tract_minus_fed", 
-                "wac_fed_tract"]
 
 
-    for dataset in LEHD_DATASETS:
+    for dataset in lehd_datasets:
         utils.import_csv_export_parquet(
-            DATASET_NAME = f"{URBAN_URL}{download_date}{dataset}",
-            OUTPUT_FILE_NAME = dataset, 
+            dataset_name = f"{URBAN_URL}{download_date}{dataset}",
+            output_file_name = dataset, 
             GCS_FILE_PATH = utils.GCS_FILE_PATH,
             GCS=True
         )
@@ -200,14 +206,23 @@ def merge_calenviroscreen_lehd(calenviroscreen: pd.DataFrame,
 
 
 ## Put all functions above together to generate cleaned CalEnviroScreen + LEHD data
-def generate_calenviroscreen_lehd_data() -> pd.DataFrame:
+def generate_calenviroscreen_lehd_data(
+    calenviroscreen_quartile_groups: int = 3,
+    lehd_datasets: list = LEHD_DATASETS,
+    GCS: bool = True
+) -> gpd.GeoDataFrame:
+    
     # CalEnviroScreen data (gdf)
-    gdf = catalog.calenviroscreen_raw.read()
-    gdf = prep_calenviroscreen(gdf)
+    CALENVIROSCREEN_PATH = f"{utils.GCS_FILE_PATH}calenviroscreen40shpf2021shp.zip"
+    
+    with fsspec.open(CALENVIROSCREEN_PATH) as file:
+        gdf = gpd.read_file(file)
+    
+    gdf = prep_calenviroscreen(gdf, calenviroscreen_quartile_groups)
     
     # LEHD Data
     lehd_dfs = {}
-    for d in LEHD_DATASETS:
+    for d in lehd_datasets:
         lehd_dfs[d] = pd.read_parquet(f"{utils.GCS_FILE_PATH}{d}.parquet")
     
     cleaned_dfs = []
@@ -218,11 +233,13 @@ def generate_calenviroscreen_lehd_data() -> pd.DataFrame:
     lehd = merge_and_process(data_to_merge = cleaned_dfs)
     
     # Merge together
-    df = merge_calenviroscreen_lehd(gdf, lehd)
+    final = merge_calenviroscreen_lehd(gdf, lehd)
     
-    return df
-
-if __name__ == "__main__":
-    LEHD_DATE_DOWNLOAD = "2021/04/19/"
-
-    download_lehd_data(LEHD_DATE_DOWNLOAD)
+    if GCS is True:
+        shared_utils.utils.geoparquet_gcs_export(
+            final,
+            utils.GCS_FILE_PATH,
+            "calenviroscreen_lehd_by_tract"
+        )
+    
+    return final
