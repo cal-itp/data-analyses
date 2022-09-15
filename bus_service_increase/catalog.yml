@@ -14,6 +14,12 @@ sources:
           url: https://gis.data.ca.gov/data.json
           items:
               county_boundaries: https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries   
+  calenviroscreen_lehd_by_tract:
+    driver: geoparquet
+    description: CalEnviroScreen 4.0 + LEHD 2021 data by tract
+    args:
+      # source: bus_service_utils/generate_calenviroscreen_lehd_data.py 
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen_lehd_by_tract.parquet
   ## PROCESSED DATA: SERVICE INCREASE ANALYSIS
   bus_stop_times_by_tract:
     driver: geoparquet
