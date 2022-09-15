@@ -14,7 +14,7 @@ import glob
 import os
 import pandas as pd
 
-import utils
+from bus_service_utils import utils
 
 dotenv.load_dotenv("_env")
 
