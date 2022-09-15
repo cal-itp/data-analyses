@@ -4,7 +4,7 @@
 		<citation>
 			<citeinfo>
 				<title>ca_hq_transit_stops</title>
-				<edition>3</edition>
+				<edition>4</edition>
 				<geoform>vector digital data</geoform>
 				<pubinfo>
 					<publish>California Integrated Travel Project</publish>
@@ -33,9 +33,9 @@
 		<spdom>
 			<bounding>
 				<westbc>-124.196667</westbc>
-				<eastbc>-114.490902</eastbc>
-				<northbc>45.325336</northbc>
-				<southbc>32.544258</southbc>
+				<eastbc>-114.599841</eastbc>
+				<northbc>41.756498</northbc>
+				<southbc>32.544566</southbc>
 			</bounding>
 		</spdom>
 		<keywords>
@@ -72,7 +72,7 @@
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>Entity point</sdtstype>
-				<ptvctcnt>61138</ptvctcnt>
+				<ptvctcnt>64104</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -125,6 +125,9 @@
 			</attr>
 			<attr>
 				<attrlabl>hqta_type</attrlabl>
+			</attr>
+			<attr>
+				<attrlabl>route_id</attrlabl>
 			</attr>
 			<attr>
 				<attrlabl>agency_primary</attrlabl>

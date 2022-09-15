@@ -17,8 +17,6 @@ import os
 
 arcpy.env.workspace = "C:\Users\s153936\Documents\ArcGIS"
 #arcpy.env.workspace = ARCGIS_PATH
-ENTERPRISE_PATH  = 'C:\Users\s153936\Documents\ArcGIS\AppData\Roaming\ESRI\Desktop10.8\ArcCatalog\HQrail(edit)@sv03tmcsqlprd1.sde'
-
 
 # Set local variables
 in_features = [
@@ -150,4 +148,12 @@ for f in in_features:
     except:
         pass
 
-## (8) Move from file gdb to enterprise gdb?
+## (8) Move from file gdb to enterprise gdb
+# License Select must be set to Advanced for this to work
+ENTERPRISE_DATABASE = "Database Connections/HQrail(edit)@sv03tmcsqlprd1.sde"
+
+for f in in_features:
+    arcpy.FeatureClassToFeatureClass_conversion(
+        in_features = out_location + '/' + f,
+        out_path = ENTERPRISE_DATABASE,
+        out_name = f)
