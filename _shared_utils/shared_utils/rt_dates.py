@@ -15,6 +15,14 @@ DATES = {
 }
 
 
+# Metadata edition for open data portal datasets
+METADATA_EDITION = {
+    "may2022": 1,
+    "jun2022": 2,
+    "jul2022": 3,
+    "aug2022": 4,
+}
+
 # Planning and Modal Advisory Committee (PMAC) - quarterly
 PMAC = {
     "Q1_2022": "2022-02-08",
