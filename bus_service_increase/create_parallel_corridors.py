@@ -8,15 +8,17 @@ export to GCS, put in catalog.
 
 Transit Routes: Use `traffic_ops/export_shapefiles.py` that 
 creates `routes_assembled.parquet` in GCS, put in catalog.
+
+Instead of catalog[file_name].read(), put in GCS path
+because it's easier to import once these utility functions need to 
+be importable across directories.
 """
 import geopandas as gpd
-import intake
 import pandas as pd
 
 import shared_utils
-import utils
+from bus_service_utils import utils
 
-catalog = intake.open_catalog("*.yml")
 
 DATA_PATH = "./data/"
 IMG_PATH = "./img/"
@@ -56,7 +58,8 @@ def clean_highways():
 def process_transit_routes(alternate_df: 
                            gpd.GeoDataFrame = None) -> gpd.GeoDataFrame:
     if alternate_df is None:
-        df = catalog.transit_routes.read()
+        df = gpd.read_parquet(
+            f"{utils.GCS_FILE_PATH}2022_Jan/shapes_processed.parquet")
     else:
         df = alternate_df
     
@@ -94,7 +97,7 @@ def prep_highway_directions_for_dissolve(
     Put in a list of group_cols, and aggregate highway segments with 
     the direction info up to the group_col level.
     '''
-    df = (catalog.state_highway_network.read()
+    df = (gpd.read_parquet(f"{utils.GCS_FILE_PATH}state_highway_network.parquet")
           .to_crs(shared_utils.geography_utils.CA_StatePlane))
     
     # Get dummies for direction
