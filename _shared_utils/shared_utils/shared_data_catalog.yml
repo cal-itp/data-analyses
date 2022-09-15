@@ -1,0 +1,38 @@
+metadata:
+  version: 1
+sources:
+  ca_counties:
+    driver: geojson
+    description: CA county polygons
+    args:
+      urlpath: https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson
+  ca_county_centroids:
+    driver: geoparquet
+    description: CA county centroids
+    args:
+      # source: shared_utils/shared_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/ca_county_centroids.parquet
+  ca_transit_routes:
+    driver: geoparquet
+    description: CA transit routes with line geometry (open data)
+    args:
+      # source: traffic_ops/make_routes_stops_shapefiles.py.py
+      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet
+  ca_transit_stops:
+    driver: geoparquet
+    description: CA transit stops with point geometry (open data)
+    args:
+      # source: traffic_ops/make_routes_stops_shapefiles.py.py
+      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_stops.parquet
+  hqta_stops:
+    driver: geoparquet
+    description: CA high quality transit areas with point geometry (open data)
+    args:
+      # source: high_quality_transit_areas/D1_assemble_hqta_points.py
+      urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_points.parquet
+  hqta_areas:
+    driver: geoparquet
+    description: CA high quality transit areas with polygon geometry (open data)
+    args:
+      # source: high_quality_transit_areas/D2_assemble_hqta_polygons.py
+      urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_areas.parquet
