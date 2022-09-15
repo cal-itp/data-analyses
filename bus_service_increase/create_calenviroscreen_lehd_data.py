@@ -98,26 +98,28 @@ def prep_calenviroscreen(df: pd.DataFrame)-> pd.DataFrame:
 #--------------------------------------------------------#
 ### LEHD functions
 #--------------------------------------------------------#
-# Download LEHD data from Urban Institute
-URBAN_URL = "https://urban-data-catalog.s3.amazonaws.com/drupal-root-live/"
-DATE_DOWNLOAD = "2021/04/19/"
+def download_lehd_data(download_date: str):
+    """
+    Download LEHD data from Urban Institute
+    """
+    URBAN_URL = "https://urban-data-catalog.s3.amazonaws.com/drupal-root-live/"
 
-# Doing all_se01-se03 is the same as primary jobs
-# summing up to tract level gives same df.describe() results
-LEHD_DATASETS = ["wac_all_se01_tract_minus_fed", 
-            "wac_all_se02_tract_minus_fed",
-            "wac_all_se03_tract_minus_fed", 
-            "wac_fed_tract"]
+    # Doing all_se01-se03 is the same as primary jobs
+    # summing up to tract level gives same df.describe() results
+    LEHD_DATASETS = ["wac_all_se01_tract_minus_fed", 
+                "wac_all_se02_tract_minus_fed",
+                "wac_all_se03_tract_minus_fed", 
+                "wac_fed_tract"]
 
-'''
-for dataset in LEHD_DATASETS:
-    shared_utils.utils.import_csv_export_parquet(
-        DATASET_NAME = f"{URBAN_URL}{DATE_DOWNLOAD}{dataset}",
-        OUTPUT_FILE_NAME = dataset, 
-        GCS_FILE_PATH = utils.GCS_FILE_PATH,
-        GCS=True
-    )
-'''
+
+    for dataset in LEHD_DATASETS:
+        utils.import_csv_export_parquet(
+            DATASET_NAME = f"{URBAN_URL}{download_date}{dataset}",
+            OUTPUT_FILE_NAME = dataset, 
+            GCS_FILE_PATH = utils.GCS_FILE_PATH,
+            GCS=True
+        )
+
 
 def process_lehd(df: pd.DataFrame) -> pd.DataFrame:
     # Subset to CA, keep maxiumum year, and only keep total jobs
@@ -220,7 +222,7 @@ def generate_calenviroscreen_lehd_data() -> pd.DataFrame:
     
     return df
 
+if __name__ == "__main__":
+    LEHD_DATE_DOWNLOAD = "2021/04/19/"
 
-
-
-
+    download_lehd_data(LEHD_DATE_DOWNLOAD)
