@@ -4,7 +4,7 @@
 		<citation>
 			<citeinfo>
 				<title>ca_transit_stops</title>
-				<edition>3</edition>
+				<edition>4</edition>
 				<geoform>vector digital data</geoform>
 				<pubinfo>
 					<publish>California Integrated Travel Project</publish>
@@ -70,7 +70,7 @@
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>Entity point</sdtstype>
-				<ptvctcnt>108010</ptvctcnt>
+				<ptvctcnt>109643</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>

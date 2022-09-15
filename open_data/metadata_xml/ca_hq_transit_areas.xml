@@ -4,7 +4,7 @@
 		<citation>
 			<citeinfo>
 				<title>ca_hq_transit_areas</title>
-				<edition>3</edition>
+				<edition>4</edition>
 				<geoform>vector digital data</geoform>
 				<pubinfo>
 					<publish>California Integrated Travel Project</publish>
@@ -33,9 +33,9 @@
 		<spdom>
 			<bounding>
 				<westbc>-124.207791</westbc>
-				<eastbc>-114.481010</eastbc>
-				<northbc>45.333621</northbc>
-				<southbc>32.536991</southbc>
+				<eastbc>-114.590865</eastbc>
+				<northbc>41.767820</northbc>
+				<southbc>32.537144</southbc>
 			</bounding>
 		</spdom>
 		<keywords>
@@ -72,7 +72,7 @@
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>GT-polygon composed of chains</sdtstype>
-				<ptvctcnt>64917</ptvctcnt>
+				<ptvctcnt>27597</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -131,6 +131,9 @@
 			</attr>
 			<attr>
 				<attrlabl>hqta_details</attrlabl>
+			</attr>
+			<attr>
+				<attrlabl>route_id</attrlabl>
 			</attr>
 			<attr>
 				<attrlabl>Shape_Length</attrlabl>
