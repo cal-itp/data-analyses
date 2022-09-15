@@ -19,9 +19,7 @@ import pandas as pd
 import shared_utils
 from bus_service_utils import utils
 
-
 DATA_PATH = "./data/"
-IMG_PATH = "./img/"
 
 #--------------------------------------------------------#
 ### State Highway Network
