@@ -14,24 +14,27 @@ import pmac_utils
 from bus_service_utils import create_parallel_corridors
 from update_vars import COMPILED_CACHED_GCS
 from shared_utils import gtfs_utils, geography_utils, portfolio_utils
+from bus_service_utils import gtfs_build
 
 
-def merge_routelines_with_trips(selected_date: str) -> gpd.GeoDataFrame:
+def merge_routelines_with_trips(selected_date: str) -> gpd.GeoDataFrame: 
     routelines = gpd.read_parquet(
         f"{COMPILED_CACHED_GCS}routelines_{selected_date}_all.parquet")
     trips = pd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{selected_date}_all.parquet")
-
-    shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
-
-    trips_with_geom = pd.merge(
-        routelines[shape_id_cols + ["geometry"]].drop_duplicates(subset=shape_id_cols),
-        trips,
-        on = shape_id_cols,
-        how = "inner",
-        validate = "1:m",
-    ).rename(columns = {"calitp_itp_id": "itp_id"})
     
-    return trips_with_geom
+    EPSG_CODE = routelines.crs.to_epsg()
+    
+    df = gtfs_build.merge_routes_trips(
+        routelines, trips, 
+        merge_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"],
+        crs = f"EPSG: {EPSG_CODE}")
+    
+    df2 = (df[df._merge=="both"]
+          .rename(columns = {"calitp_itp_id": "itp_id"})
+          .reset_index(drop=True)
+         )
+    
+    return df2
 
 
 def get_total_service_hours(selected_date):
