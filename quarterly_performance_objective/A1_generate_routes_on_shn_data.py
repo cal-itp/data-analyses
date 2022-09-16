@@ -10,16 +10,13 @@ import pandas as pd
 from calitp.tables import tbl
 from siuba import *
 
-import create_parallel_corridors
 import pmac_utils
-import utils
-from shared_utils import (gtfs_utils, geography_utils, 
-                          portfolio_utils, rt_dates)
+from bus_service_utils import create_parallel_corridors
+from update_vars import COMPILED_CACHED_GCS
+from shared_utils import gtfs_utils, geography_utils, portfolio_utils
 
-ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"] 
-COMPILED_CACHED_GCS = pmac_utils.COMPILED_CACHED_GCS
 
-def merge_routelines_with_trips(selected_date):
+def merge_routelines_with_trips(selected_date: str) -> gpd.GeoDataFrame:
     routelines = gpd.read_parquet(
         f"{COMPILED_CACHED_GCS}routelines_{selected_date}_all.parquet")
     trips = pd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{selected_date}_all.parquet")
@@ -68,7 +65,7 @@ def get_total_service_hours(selected_date):
     )
 
     aggregated_hrs.to_parquet(
-        f"{utils.GCS_FILE_PATH}trips_with_hrs_{selected_date}.parquet")
+        f"{BUS_SERVICE_GCS}trips_with_hrs_{selected_date}.parquet")
     
     # Once aggregated dataset written to GCS, remove local cache
     os.remove(f"./data/trips_with_hrs_staging_{selected_date}.parquet")
@@ -109,24 +106,26 @@ if __name__ == "__main__":
     # Use the datasets with Amtrak added back in (rt_delay always excludes Amtrak)
     trips_with_geom = merge_routelines_with_trips(ANALYSIS_DATE)
     
-    create_parallel_corridors.make_analysis_data(
-        hwy_buffer_feet= geography_utils.FEET_PER_MI, 
-        alternate_df = trips_with_geom,
-        pct_route_threshold = 0.3,
-        pct_highway_threshold = 0.1,
-        DATA_PATH = utils.GCS_FILE_PATH, 
-        FILE_NAME = f"parallel_or_intersecting_{ANALYSIS_DATE}"
-    )
-    
-    # 50 ft buffers, get routes that are 
+    # 50 ft buffers, get routes that are on SHN
     create_parallel_corridors.make_analysis_data(
         hwy_buffer_feet=50, 
         alternate_df = trips_with_geom,
-        pct_route_threshold = 0.1, 
+        pct_route_threshold = 0.2, 
         pct_highway_threshold = 0,
-        DATA_PATH = utils.GCS_FILE_PATH, 
+        DATA_PATH = BUS_SERVICE_GCS, 
         FILE_NAME = f"routes_on_shn_{ANALYSIS_DATE}"
-    )    
+    )  
+    
+    # Grab other routes where at least 30% of route is within 0.5 mile of SHN
+    create_parallel_corridors.make_analysis_data(
+        hwy_buffer_feet= geography_utils.FEET_PER_MI * 0.5, 
+        alternate_df = trips_with_geom,
+        pct_route_threshold = 0.3,
+        pct_highway_threshold = 0,
+        DATA_PATH = BUS_SERVICE_GCS, 
+        FILE_NAME = f"parallel_or_intersecting_{ANALYSIS_DATE}"
+    )
+    
     
     # Get aggregated service hours by shape_id
-    get_total_service_hours(ANALYSIS_DATE)
+    #get_total_service_hours(ANALYSIS_DATE)

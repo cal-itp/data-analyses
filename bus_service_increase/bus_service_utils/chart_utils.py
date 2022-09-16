@@ -3,12 +3,6 @@ Common chart / viz functions.
 """
 import pandas as pd
 
-CHART_LABELING = {
-    "arrivals_per_1k_pj" : "Arrivals per 1k by Pop / Job Density",
-    "equity_group": "CalEnviroScreen",
-    "popjobdensity_group": "Pop / Job Density",
-}
-
 def labeling(word: str, labeling_dict: dict) -> str:
     """
     Supply a labeling dictionary where 

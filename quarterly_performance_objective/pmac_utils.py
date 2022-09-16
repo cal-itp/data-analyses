@@ -5,13 +5,11 @@ import altair as alt
 import geopandas as gpd
 import pandas as pd
 
-from bus_service_utils import utils
+from bus_service_utils.utils import GCS_FILE_PATH
 from shared_utils import geography_utils
 
-GCS_FILE_PATH = utils.GCS_FILE_PATH
-COMPILED_CACHED_GCS = f"gs://{utils.BUCKET_NAME}/data-analyses/rt_delay/compiled_cached_views/"
-
 route_cols = ["itp_id", "route_id"]
+
 #---------------------------------------------------------------#
 # Data processing - merge trips dfs, tag a route as parallel/on shn/other
 #---------------------------------------------------------------#
