@@ -174,7 +174,7 @@ def summary_SAR_table(df):
 """
 Complete Semiannual Report
 """
-def full_sar_report():
+def create_sar_report():
     
     # Load in raw sheets
     df_project = A1_data_prep.clean_project()
@@ -197,7 +197,7 @@ def full_sar_report():
     )
     
     # Drop duplicates
-    m1 = m1.drop_duplicates()
+    m1 = m1.drop_duplicates().reset_index()
 
     # Fill in missing dates with a fake one so it'll show up in the group by
     for i in dates:
@@ -227,6 +227,8 @@ def full_sar_report():
         (m1.allocation_allocation_amount > 0)
         & (m1.Percent_of_Allocation_Expended < 0.99)
     ]
+    
+    m1 = m1.reset_index()
 
     # Fill in null values based on datatype of each column
     m1 = m1.fillna(m1.dtypes.replace({"float64": 0.0, "int64": 0}))
@@ -254,8 +256,8 @@ def full_sar_report():
     # Reset index from dataframe above
     df_current = df_pivoted.reset_index()
     
-    # Delete project # from both dfs to avoid confusion
-    df_current = df_current.drop(columns = ["project_project_#"]) 
+    # Delete project # column from both dfs to avoid confusion
+    df_current = df_current.drop(columns = ["project_project_#"])
     previous_sar = previous_sar.drop(columns = ["project_project_#"]) 
     
     # Create a list of current PPNO/projects
