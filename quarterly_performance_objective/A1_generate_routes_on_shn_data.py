@@ -9,17 +9,21 @@ import sys
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
 
+from loguru import logger
+
 from bus_service_utils import create_parallel_corridors, gtfs_build
 from shared_utils import gtfs_utils, geography_utils, portfolio_utils
 from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS, COMPILED_CACHED_GCS
 
-from loguru import logger
 
 logger.add("./logs/A1_generate_routes_on_shn_data.log")
 logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
 
 def merge_routelines_with_trips(selected_date: str) -> gpd.GeoDataFrame: 
+    """
+    Merge routes and trips to get line geometry.
+    """
     routelines = gpd.read_parquet(
         f"{COMPILED_CACHED_GCS}routelines_{selected_date}_all.parquet")
     trips = pd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{selected_date}_all.parquet")
@@ -98,7 +102,7 @@ if __name__ == "__main__":
     time1 = datetime.datetime.now()
     logger.info(f"routes on SHN created: {time1 - start}")
 
-    # Grab other routes where at least 30% of route is within 0.5 mile of SHN
+    # Grab other routes where at least 35% of route is within 0.5 mile of SHN
     create_parallel_corridors.make_analysis_data(
         hwy_buffer_feet= geography_utils.FEET_PER_MI * 0.5, 
         alternate_df = trips_with_geom,
