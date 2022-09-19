@@ -8,7 +8,7 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
 from calitp.tables import tbl
 from siuba import *
 
-import utils
+from bus_service_utils import utils
 import shared_utils
 
 '''

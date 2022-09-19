@@ -1,10 +1,10 @@
 import datetime as dt
 import geopandas as gpd
+import intake
 import numpy as np
 import pandas as pd
 
-import create_calenviroscreen_lehd_data
-import utils
+from bus_service_utils import utils
 import shared_utils
 import warehouse_queries
 
@@ -13,6 +13,8 @@ from siuba import *
 
 # Use sub-folder for Jan 2022
 DATA_PATH = warehouse_queries.DATA_PATH
+
+catalog = intake.open_catalog("*.yml")
 
 #------------------------------------------------------------------#
 ## Functions to create operator-route-level dataset
@@ -273,7 +275,7 @@ def generate_shape_categories(shapes_df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     )
     
     ## quick fix for invalid geometries?
-    ces_df = (create_calenviroscreen_lehd_data.generate_calenviroscreen_lehd_data()
+    ces_df = (catalog.calenviroscreen_lehd_by_tract.read()
               .to_crs(shared_utils.geography_utils.CA_NAD83Albers)
              )
 
@@ -356,7 +358,7 @@ def create_bus_arrivals_by_tract_data():
     aggregated_stops_with_geom = pd.read_parquet(
         f"{utils.DATA_PATH}aggregated_stops_with_geom.parquet")
 
-    census_tracts = create_calenviroscreen_lehd_data.generate_calenviroscreen_lehd_data()
+    census_tracts = catalog.calenviroscreen_lehd_by_tract.read()
     
     # If there are the same stops with multiple lat/lon values
     # Drop duplicates

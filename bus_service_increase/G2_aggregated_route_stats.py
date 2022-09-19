@@ -23,7 +23,7 @@ from calitp.sql import to_snakecase
 from shared_utils import (geography_utils, gtfs_utils, 
                           rt_dates, rt_utils, portfolio_utils
                          )
-from utils import GCS_FILE_PATH
+from bus_service_utils.utils import GCS_FILE_PATH
 from G1_get_buses_on_shn import ANALYSIS_DATE
 
 month = ANALYSIS_DATE.split('-')[1]
