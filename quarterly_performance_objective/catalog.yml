@@ -1,0 +1,45 @@
+metadata:
+  version: 1
+  parameters:
+    analysis_date:
+      type: str
+      description: Analysis date, specified in update_vars.py
+      default: "2022-05-04"
+sources:
+  routes_on_shn:
+    driver: geoparquet
+    description: Each row is route_id-Hwy Route combination. The transit routes that meet criteria for being categorized as `on_shn` is flagged as 1, all else are zero. Can adjust thresholds later.
+    args:
+      # source: A1_generate_routes_on_shn_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/routes_on_shn_{{analysis_date}}.parquet 
+  parallel_or_intersecting_routes:
+    driver: geoparquet
+    description: Each row is route_id-Hwy Route combination. The transit routes that meet criteria for being categorized as `intersecting_shn` is flagged as 1, all else are zero. Can adjust thresholds later.
+    args:
+      # source: A1_generate_routes_on_shn_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/parallel_or_intersecting_{{analysis_date}}.parquet 
+  service_hours_by_shape_id:
+    driver: parquet
+    description: Total service hours at shape-id level
+    args:
+      # source: A1_generate_routes_on_shn_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/trips_with_hrs_{{analysis_date}}.parquet 
+  routes_categorized:
+    driver: geoparquet
+    description: Routes categorized into mutually exclusive groups: `on_shn`, `intersects_shn`, `other`. The transit route line geometry is also provided.
+    args:
+      # source: A2_categorize_routes.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/routes_categorized_{{analysis_date}}.parquet 
+  endpoint_delays:
+    driver: geoparquet
+    description: Operator-stop-level endpoint delays generated using `rt_map_filter_plot`
+    args:
+      # source: A3_generate_endpoint_delay.py
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/endpoint_delays_{{analysis_date}}.parquet 
+  routes_categorized_with_delay:
+    driver: geoparquet
+    description: Route-level service hours, delay, category, and line geometry, ready for report.
+    args:
+      # source: A4_route_service_hours_delay.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/routes_categorized_with_delay_{{analysis_date}}.parquet       
+      

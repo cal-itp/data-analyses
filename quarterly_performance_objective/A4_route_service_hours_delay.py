@@ -9,7 +9,7 @@ import sys
 
 from loguru import logger
 
-from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS
+from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS, COMPILED_CACHED_GCS
 from shared_utils import geography_utils, utils
 
 logger.add("./logs/A4_route_service_hours_delay.log")
@@ -17,7 +17,8 @@ logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {messag
 
 
 def calculate_route_level_delays(selected_date: str) -> pd.DataFrame:
-    delay_df = gpd.read_parquet(f"./data/endpoint_delays_{selected_date}.parquet")
+    delay_df = gpd.read_parquet(
+        f"{COMPILED_CACHED_GCS}endpoint_delays_{selected_date}.parquet")
     
     # Drop duplicates
     delay_df2 = delay_df.drop_duplicates(
@@ -32,7 +33,7 @@ def calculate_route_level_delays(selected_date: str) -> pd.DataFrame:
     return route_delay
 
 
-def merge_delay_with_parallel_routes(route_delay_df: pd.DataFrame, 
+def merge_delay_with_route_categories(route_delay_df: pd.DataFrame, 
                                      routes_categorized: gpd.GeoDataFrame
                                     ) -> gpd.GeoDataFrame:
         
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     # Keep merge variable to understand why some don't have delay info
     # (it's ok, since not every route will have RT...but why are there some
     # that are in RT but not found in schedule?)
-    df = merge_delay_with_parallel_routes(route_delay, routes_categorized)
+    df = merge_delay_with_route_categories(route_delay, routes_categorized)
     
     logger.info(f"schedule-RT delay outer join merge: {df.merge_delay.value_counts()}")
     
