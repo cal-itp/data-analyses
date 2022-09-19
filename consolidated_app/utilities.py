@@ -3,10 +3,8 @@ from siuba import *
 from calitp import *
 from plotnine import *
 import intake
-from shared_utils import geography_utils
 
 import altair as alt
-import altair_saver
 from shared_utils import geography_utils
 from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
