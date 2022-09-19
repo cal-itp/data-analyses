@@ -14,14 +14,12 @@ from siuba import *
 from loguru import logger
 
 import rt_filter_map_plot
-from shared_utils import rt_utils
-from update_vars import ANALYSIS_DATE
+from shared_utils import rt_utils, utils
+from update_vars import ANALYSIS_DATE, COMPILED_CACHED_GCS
 
 logger.add("./logs/A3_generate_endpoint_delay.log")
 logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
-
-DATA_PATH = "./data/"
 fs = gcsfs.GCSFileSystem()
 
 MONTH_DAY = f"{ANALYSIS_DATE.split('-')[1]}_{ANALYSIS_DATE.split('-')[2]}"
@@ -73,8 +71,11 @@ if __name__=="__main__":
     time1 = datetime.datetime.now()
     logger.info(f"concatenate all endpoint delays for operators: {time1 - start}")
 
-    aggregate_endpoint_delays.to_parquet(
-        f"{DATA_PATH}endpoint_delays_{ANALYSIS_DATE}.parquet")
+    utils.geoparquet_gcs_export(
+        aggregate_endpoint_delays,
+        COMPILED_CACHED_GCS,
+        f"endpoint_delays_{ANALYSIS_DATE}"
+    )
  
     logger.info(f"execution time: {datetime.datetime.now() - start}")
 
