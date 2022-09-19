@@ -46,7 +46,7 @@ def calculate_route_level_service_hours(analysis_date: str) -> pd.DataFrame:
     ) 
     
     # Aggregate trips (at trip_id level) to route_id
-    routes = trips[route_cols].drop_duplicates().reset_index(drop=True)
+    routes = trips[route_cols + ["route_type"]].drop_duplicates().reset_index(drop=True)
     
     # there are multiple trips sharing same shape_id
     # that's fine, but since trips_with_hrs is already aggregated up to
