@@ -315,7 +315,9 @@ class RtFilterMapper:
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
         # Further reduce map size on speedmap site
         if self._time_only_filter:
-            gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id, -_.trip_key)
+            gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
+                                -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
+                               -_.delay_chg_sec)
         orig_rows = gdf.shape[0]
         self.debug_dict['_show_gdf'] = gdf
         gdf['shape_miles'] = gdf.shape_meters / 1609
@@ -332,7 +334,6 @@ class RtFilterMapper:
         
         ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(try_parallel)
-        self.detailed_map_view = gdf.copy()
         ## create clips, integrate buffer+simplify?
         gdf.geometry = gdf.geometry.apply(arrowize_segment).simplify(tolerance=5)
         gdf = gdf >> filter(gdf.geometry.is_valid)
@@ -340,6 +341,7 @@ class RtFilterMapper:
         
         assert gdf.shape[0] >= orig_rows*.99, 'over 1% of geometries invalid after buffer+simplify'
         gdf = gdf.to_crs(WGS84)
+        self.detailed_map_view = gdf.copy()
         centroid = (gdf.geometry.centroid.x.mean(), gdf.geometry.centroid.y.mean())
         # centroid = gdf.dissolve().centroid 
         name = self.calitp_agency_name

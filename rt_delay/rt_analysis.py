@@ -108,6 +108,7 @@ class TripPositionInterpolator:
         gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape,
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
+        return gdf ## debug return
         ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(lambda x:
             x.parallel_offset(25, 'right') if isinstance(x, shapely.geometry.LineString) else x)
@@ -317,21 +318,7 @@ class OperatorDayAnalysis:
         self.pct_trips_valid_rt = self.rt_trips.trip_id.nunique() / self.trips.trip_id.nunique()
 
         self._generate_stop_delay_view()
-        self.endpoint_delay_view = (self.stop_delay_view
-                      >> group_by(_.trip_id)
-                      >> filter(_.stop_sequence == _.stop_sequence.max())
-                      >> ungroup()
-                      >> mutate(arrival_hour = _.arrival_time.apply(lambda x: x.hour))
-                      >> inner_join(_, self.rt_trips >> select(_.trip_id, _.mean_speed_mph), on = 'trip_id')
-                     )
-        self.endpoint_delay_summary = (self.endpoint_delay_view
-                      >> group_by(_.direction_id, _.route_id, _.arrival_hour)
-                      >> summarize(n_trips = _.route_id.size, mean_end_delay = _.delay.mean())
-                     )
-        self.filter = None
-        self.filter_formatted = ''
-        self.hr_duration_in_filter = (self.vehicle_positions.vehicle_timestamp.max() - 
-                                         self.vehicle_positions.vehicle_timestamp.min()).seconds / 60**2
+
         self.calitp_agency_name = (tbl.views.gtfs_schedule_dim_feeds()
              >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
              >> collect()
@@ -421,8 +408,7 @@ class OperatorDayAnalysis:
         ''' Creates a (filtered) view with delays for each trip at each stop
         '''
         
-        trips = self.trips >> select(_.trip_id, _.route_id, _.route_short_name, _.direction_id, _.shape_id)
-        trips = trips >> filter(_.trip_id.isin(list(self.position_interpolators.keys())))
+        trips = self.rt_trips >> select(_.trip_id, _.route_id, _.route_short_name, _.direction_id, _.shape_id)
         st = self.stop_times >> select(_.trip_key, _.trip_id, _.stop_id, _.stop_sequence, _.arrival_time)
         delays = self.trs >> inner_join(_, st, on = 'stop_id')
         delays = delays >> inner_join(_, trips, on = ['trip_id', 'shape_id'])
@@ -454,11 +440,11 @@ class OperatorDayAnalysis:
                 _delay['delay_seconds'] = _delay.delay.map(lambda x: x.seconds)
                 
                 self.debug_dict[f'{trip_id}_stopsegs'] = _delay
-                # try:
-                _delay = self._add_km_segments(_delay)
-                # except:
-                #     print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
-                #     continue
+                try:
+                    _delay = self._add_km_segments(_delay)
+                except:
+                    print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
+                    continue
                 
                 _delays = pd.concat((_delays, _delay))
                 self.debug_dict[f'{trip_id}_delay'] = _delay
