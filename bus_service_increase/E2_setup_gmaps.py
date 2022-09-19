@@ -9,7 +9,7 @@ import pandas as pd
 
 from datetime import timedelta
 
-import utils
+from bus_service_utils import utils
 
 catalog = intake.open_catalog("./*.yml")
 

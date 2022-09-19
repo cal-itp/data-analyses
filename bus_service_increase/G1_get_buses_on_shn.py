@@ -11,9 +11,10 @@ import intake
 import pandas as pd
 import zlib
 
-import create_parallel_corridors
+from bus_service_utils import create_parallel_corridors, utils
+from bus_service_utils.utils import GCS_FILE_PATH
 from shared_utils import geography_utils, rt_dates, utils
-from utils import GCS_FILE_PATH
+
 
 catalog = intake.open_catalog("./*.yml")
 ANALYSIS_DATE = rt_dates.DATES["may2022"]

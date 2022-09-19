@@ -17,6 +17,8 @@ from shared_utils import geography_utils, portfolio_utils
 # are datetime and will get rejected in the zipped shapefile conversion anyway
 remove_trip_cols = ["service_date", "calitp_extracted_at", "calitp_deleted_at"]
 
+
+
 def merge_trips_to_routes(trips: dd.DataFrame, 
                           routes: dg.GeoDataFrame) -> dg.GeoDataFrame:
     # Routes or trips can contain multiple calitp_url_numbers 
@@ -32,6 +34,7 @@ def merge_trips_to_routes(trips: dd.DataFrame,
     trips = (trips.sort_values("calitp_url_number")
              .drop_duplicates(subset=["calitp_itp_id", "trip_id"])
              .reset_index(drop=True)
+            .drop(columns = remove_trip_cols)
     )
     
     # Left only means in trips, but shape_id not found in shapes.txt
@@ -42,21 +45,18 @@ def merge_trips_to_routes(trips: dd.DataFrame,
         'route_type', 'geometry',
     ]
     
-    m1 = dd.merge(
-            trips.drop(columns = remove_trip_cols),
-            routes[shape_id_cols + ["geometry"]].drop_duplicates(),
-            on = shape_id_cols,
-            how = "inner",
-            #validate = "m:1",
-        )[keep_cols].drop_duplicates().compute()
     
-    # routes is a gdf, but we lost it putting it as right df in merge, 
-    # so turn it back into gdf, don't assume we know what CRS it was
-    orig_crs = routes.crs.to_epsg()
+    m1 = gtfs_build.merge_routes_trips(
+        routes, 
+        trips, 
+        shape_id_cols,
+        crs = f"EPSG: {routes.crs.to_epsg()}"
+    )
     
-    m2 = gpd.GeoDataFrame(m1, geometry="geometry", 
-                          crs = f"EPSG: {orig_crs}"
-                         ).to_crs(geography_utils.WGS84)
+    m2 = (m1[m1._merge=="both"][keep_cols]
+          .reset_index(drop=True) 
+          .to_crs(geography_utils.WGS84)
+         )
         
     return m2
 
@@ -64,7 +64,7 @@ def merge_trips_to_routes(trips: dd.DataFrame,
 def add_route_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     route_name_used = portfolio_utils.add_route_name(
-        SELECTED_DATE = prep_data.ANALYSIS_DATE,
+        selected_date = prep_data.ANALYSIS_DATE,
     )
     
     route_cols_to_drop = ["route_short_name", "route_long_name", "route_desc"]
@@ -82,7 +82,7 @@ def add_route_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     # Attach agency_name
     agency_names = portfolio_utils.add_agency_name(
-        SELECTED_DATE = prep_data.ANALYSIS_DATE)
+        selected_date = prep_data.ANALYSIS_DATE)
     
     with_agency_name = pd.merge(
         with_route_name,

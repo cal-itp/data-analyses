@@ -8,7 +8,7 @@ import pandas as pd
 
 import G2_aggregated_route_stats
 from shared_utils import geography_utils, utils
-from utils import GCS_FILE_PATH
+from bus_service_utils.utils import GCS_FILE_PATH
 from G1_get_buses_on_shn import ANALYSIS_DATE, COMPILED_CACHED_GCS
 
 catalog = intake.open_catalog("*.yml")
