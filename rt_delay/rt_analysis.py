@@ -421,38 +421,36 @@ class OperatorDayAnalysis:
             self.pbar.reset(total=len(delays.trip_id.unique()))
             self.pbar.desc = f'Generating stop delay view itp_id: {self.calitp_itp_id}'
         for trip_id in delays.trip_id.unique():
+            # try:
+            _delay = delays.copy() >> filter(_.trip_id == trip_id) >> distinct(_.stop_id, _keep_all = True)
+            _delay['actual_time'] = _delay.apply(lambda x: 
+                            self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
+                            axis = 1)
+            _delay = _delay.dropna(subset=['actual_time'])
+            _delay.arrival_time = _delay.arrival_time.map(lambda x: fix_arrival_time(x)[0]) ## reformat 25:xx GTFS timestamps to standard 24 hour time
+            _delay['arrival_time'] = _delay.apply(lambda x:
+                                dt.datetime.combine(x.actual_time.date(),
+                                                    dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time()),
+                                                    axis = 1) ## format scheduled arrival times
+            _delay = _delay >> filter(_.arrival_time.apply(lambda x: x.date()) == _.actual_time.iloc[0].date())
+            _delay['arrival_time'] = _delay.arrival_time.astype('datetime64')
+            # self.debug_dict[f'{trip_id}_times'] = _delay
+            _delay['delay'] = _delay.actual_time - _delay.arrival_time
+            _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
+            _delay['delay_seconds'] = _delay.delay.map(lambda x: x.seconds)
+
+            self.debug_dict[f'{trip_id}_stopsegs'] = _delay
             try:
-                _delay = delays.copy() >> filter(_.trip_id == trip_id) >> distinct(_.stop_id, _keep_all = True)
-                _delay['actual_time'] = _delay.apply(lambda x: 
-                                self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
-                                axis = 1)
-                _delay = _delay.dropna(subset=['actual_time'])
-                _delay.arrival_time = _delay.arrival_time.map(lambda x: fix_arrival_time(x)[0]) ## reformat 25:xx GTFS timestamps to standard 24 hour time
-                _delay['arrival_time'] = _delay.apply(lambda x:
-                                    dt.datetime.combine(x.actual_time.date(),
-                                                        dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time()),
-                                                        axis = 1) ## format scheduled arrival times
-                _delay = _delay >> filter(_.arrival_time.apply(lambda x: x.date()) == _.actual_time.iloc[0].date())
-                _delay['arrival_time'] = _delay.arrival_time.astype('datetime64')
-                # self.debug_dict[f'{trip_id}_times'] = _delay
-                _delay['delay'] = _delay.actual_time - _delay.arrival_time
-                _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
-                _delay['delay_seconds'] = _delay.delay.map(lambda x: x.seconds)
-                
-                self.debug_dict[f'{trip_id}_stopsegs'] = _delay
-                try:
-                    _delay = self._add_km_segments(_delay)
-                except:
-                    print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
-                    continue
-                
-                _delays = pd.concat((_delays, _delay))
-                self.debug_dict[f'{trip_id}_delay'] = _delay
-                # return
-            except Exception as e:
-                print(f'could not generate delays for trip {trip_id}')
-                print(e)
-                # return
+                _delay = self._add_km_segments(_delay)
+            except:
+                print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
+                continue
+
+            _delays = pd.concat((_delays, _delay))
+            self.debug_dict[f'{trip_id}_delay'] = _delay
+            # except Exception as e:
+            #     print(f'could not generate delays for trip {trip_id}')
+            #     print(e)
                 
             if type(self.pbar) != type(None):
                 self.pbar.update()
