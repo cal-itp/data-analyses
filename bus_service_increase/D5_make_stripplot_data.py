@@ -116,7 +116,7 @@ def merge_in_competitive_routes(df: pd.DataFrame, threshold: float) -> gpd.GeoDa
     gmaps_results = catalog.gmaps_results.read()
 
     # Merge in the competitive trip info
-    gdf = pd.merge(gmaps_results[route_cols + ["car_duration_hours"]],
+    gdf = pd.merge(gmaps_results[route_cols + ["car_duration_hours", "geometry"]],
                    df, 
                    on = route_cols,
                    how = "outer",

@@ -11,21 +11,19 @@ import intake
 import pandas as pd
 import zlib
 
+from E0_bus_oppor_vars import GCS_FILE_PATH, ANALYSIS_DATE, COMPILED_CACHED_GCS
 from bus_service_utils import create_parallel_corridors, utils
-from bus_service_utils.utils import GCS_FILE_PATH
-from shared_utils import geography_utils, rt_dates, utils
-
+from shared_utils import geography_utils, utils
 
 catalog = intake.open_catalog("./*.yml")
-ANALYSIS_DATE = rt_dates.DATES["may2022"]
-COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
 
 
-# From D1_pmac_routes.py, routes_on_shn_{ANALYSIS_DATE}.parquet was created
+# From quarterly_performance_objective/A1_generate_routes_on_shn_data.py, 
+# routes_on_shn_{ANALYSIS_DATE}.parquet was created
 # Can adjust thresholds here using same file
 def grab_bus_routes_running_on_highways(
-    analysis_date: str, pct_route: float = 0.5, 
-    pct_highway: float = 0.2) -> gpd.GeoDataFrame:
+    analysis_date: str, pct_route: float = 0.2, 
+    pct_highway: float = 0) -> gpd.GeoDataFrame:
     """
     Increase threshold for how much route overlaps with SHN
     to identify ones actually running on SHN.
@@ -96,7 +94,7 @@ if __name__=="__main__":
     # (1) Grab bus routes that actually run on the highway
     # a row is calitp_itp_id-route_id-hwy, geometry is transit route geom
     bus_routes = grab_bus_routes_running_on_highways(
-        ANALYSIS_DATE, pct_route = 0.5, pct_highway = 0.2)
+        ANALYSIS_DATE, pct_route = 0.2, pct_highway = 0)
     
     utils.geoparquet_gcs_export(bus_routes, GCS_FILE_PATH, "bus_routes_on_hwys")
     
