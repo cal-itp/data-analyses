@@ -14,9 +14,9 @@ from calitp.tables import tbl
 from siuba import *
 
 import shared_utils
-import E2_setup_gmaps as setup_gmaps
+import D2_setup_gmaps as setup_gmaps
 from bus_service_utils import utils
-from E1_setup_parallel_trips_with_stops import (ANALYSIS_DATE, COMPILED_CACHED,
+from D1_setup_parallel_trips_with_stops import (ANALYSIS_DATE, COMPILED_CACHED,
                                                 merge_trips_with_service_hours)
 
 catalog = intake.open_catalog("./*.yml")

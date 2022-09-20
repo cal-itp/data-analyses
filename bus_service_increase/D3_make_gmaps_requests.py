@@ -18,7 +18,7 @@ import sys
 from loguru import logger
 
 from bus_service_utils import utils
-from E1_setup_parallel_trips_with_stops import ANALYSIS_DATE
+from D1_setup_parallel_trips_with_stops import ANALYSIS_DATE
 
 logger.add("./logs/make_gmaps_requests.log")
 logger.add(sys.stderr, 
