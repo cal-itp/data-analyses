@@ -92,9 +92,11 @@ def fix_arrival_time(gtfs_timestring: str) -> tuple[str, int]:
     24 to mark service day continuity)
     to standard 24-hour time.
     """
+    extra_day = 0
+    if not gtfs_timestring: # preserve none if time not provided
+        return None, extra_day
     split = gtfs_timestring.split(":")
     hour = int(split[0])
-    extra_day = 0
 
     if hour >= 24:
         extra_day = 1
