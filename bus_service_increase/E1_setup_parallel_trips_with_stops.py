@@ -21,6 +21,7 @@ from bus_service_utils import utils
 ANALYSIS_DATE = shared_utils.rt_dates.PMAC["Q2_2022"]
 COMPILED_CACHED = f"{shared_utils.rt_utils.GCS_FILE_PATH}compiled_cached_views/"
 
+
 def grab_service_hours(selected_date: str, 
                        valid_trip_keys: list) -> pd.DataFrame:
     daily_service_hours = shared_utils.gtfs_utils.get_trips(
@@ -37,7 +38,24 @@ def grab_service_hours(selected_date: str,
     daily_service_hours.to_parquet(
         f"{utils.GCS_FILE_PATH}service_hours_{selected_date}.parquet")
 
+    
+def merge_trips_with_service_hours(selected_date: str)-> pd.DataFrame:
+    
+    trips = dd.read_parquet(
+        f"{COMPILED_CACHED}trips_{selected_date}.parquet")
+    
+    daily_service_hours = pd.read_parquet(
+        f"{utils.GCS_FILE_PATH}service_hours_{selected_date}.parquet")
 
+    df = dd.merge(
+        trips, 
+        daily_service_hours[["trip_key", "service_hours"]],
+        on = "trip_key",
+        how = "inner",
+    ).compute()
+    
+    return df
+    
 def select_one_trip(df: pd.DataFrame) -> pd.DataFrame:
         
     # Across trip_ids, for the same route_id, there are differing max_stop_sequence
@@ -119,15 +137,7 @@ if __name__ == "__main__":
     valid_trip_keys = trips.trip_key.unique().compute().tolist()
     #grab_service_hours(ANALYSIS_DATE, valid_trip_keys)
     
-    daily_service_hours = pd.read_parquet(
-        f"{utils.GCS_FILE_PATH}service_hours_{ANALYSIS_DATE}.parquet")
-
-    df = dd.merge(
-        trips, 
-        daily_service_hours[["trip_key", "service_hours"]],
-        on = "trip_key",
-        how = "inner",
-    ).compute()
+    df = merge_trips_with_service_hours(ANALYSIS_DATE)
     
     one_trip = select_one_trip(df)
 
