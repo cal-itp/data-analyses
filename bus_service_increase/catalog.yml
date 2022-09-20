@@ -50,26 +50,20 @@ sources:
     driver: geoparquet
     description: State highway network.
     args:
-    # source: bus_service_increase/create_parallel_corridors.py
+    # source: bus_service_utils/create_parallel_corridors.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/state_highway_network.parquet
   highways_cleaned:
     driver: geoparquet
     description: SHN dissolved and added 250 ft buffer. Use this for plotting on maps.
     args:
-      # source: bus_service_increase/create_parallel_corridors.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet
-  parallel_or_intersecting_routes:
-    driver: geoparquet
-    description: All transit routes with intersection to SHN (each route-highway route segment kept).
-    args:
-      # source: bus_service_increase/create_parallel_corridors.py
+      # source: bus_service_utils/create_parallel_corridors.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/parallel_or_intersecting.parquet
-  parallel_trips_with_stops:
+  trips_with_stops:
     driver: geoparquet
-    description: Parallel routes to SHN, 1 trip selected for each route, with stop info.
+    description: Pick 1 trip for each route, the 25th percentile trip, and expand trips to include stop info with stop point geom.
     args:
       # source: bus_service_increase/E1_setup_parallel_trips_with_stops.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/parallel_trips_with_stops.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/trips_with_stops_2022-05-04.parquet
   gmaps_results:
     driver: geoparquet
     description: Parallel routes to SHN with car travel time
