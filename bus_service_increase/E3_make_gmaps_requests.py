@@ -25,7 +25,6 @@ logger.add(sys.stderr,
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
 
-
 dotenv.load_dotenv("_env")
 
 GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
@@ -80,7 +79,7 @@ if __name__ == "__main__":
                 data_path = DATA_PATH,
                 gcs_file_path = GCS_FILE_PATH
             )
-            logger.info(f"Saved {identifier_str[i]})
+            logger.info(f"Saved {identifier_str[i]}")
             
         except:
             logger.info(f"No result: {identifiers[i]}")
