@@ -22,59 +22,60 @@ catalog = intake.open_catalog("./*.yml")
 trip_group = ["calitp_itp_id", "route_id", "trip_id", "shape_id", "service_hours"]
 
 
+def grab_first_stop_time(stop_times: dd.DataFrame) -> pd.DataFrame:
+    # Only keep first stop
+    first_stop = (stop_times.groupby("trip_key")["stop_sequence"].min()
+            .reset_index()
+    )
+        
+    first_stop_time = dd.merge(
+        stop_times,
+        first_stop,
+        on = ["trip_key", "stop_sequence"],
+        how = "inner"
+    ).rename(columns = {"departure_ts": "trip_first_departure"}
+            ).compute()
+    
+    df = first_stop_time.assign(
+        trip_departure = pd.to_datetime(
+            first_stop_time.trip_first_departure, 
+            unit = "s", errors = "coerce").dt.time,
+        trip_first_departure_hour = pd.to_datetime(
+            first_stop_time.trip_first_departure, unit='s', 
+            errors="coerce").dt.hour.astype("Int64"),
+    
+    )
+    
+    # trip first departure shows 1970 date. Reconstruct with service date 
+    # and change to datetime
+    df2 = df.assign(
+        trip_first_departure = df.apply(
+            lambda x: str(x.service_date) + " " + str(x.trip_departure), 
+            axis=1),
+    )
+
+    df2 = df2.assign(
+        trip_first_departure = pd.to_datetime(
+            df2.trip_first_departure, errors="coerce")
+    )
+    
+    return df2
+    
+    
+
 def stop_time_for_selected_trip(stop_times: dd.DataFrame, 
                                 selected_trip: pd.DataFrame
                                ) -> gpd.GeoDataFrame:
     stop_times_for_one_trip = dd.merge(
-        stop_times,
         selected_trip[["trip_key"]].drop_duplicates(),
+        stop_times,
         on = "trip_key",
         how = "inner",
     )
     
-    # Only keep first stop
-    first_stop = (stop_times_for_one_trip.groupby("trip_key")["stop_sequence"].min()
-            .reset_index()
-    )
-    
-    keep_cols = ["trip_key", "departure_ts"]
-    
-    first_stop_time = dd.merge(
-        stop_times_for_one_trip,
-        first_stop,
-        on = ["trip_key", "stop_sequence"],
-        how = "inner"
-    )[keep_cols].rename(columns = {"departure_ts": "trip_first_departure"})
-    
-    # Merge selected trip with stop info to trip's first stop time info
-    df2 = dd.merge(
-        selected_trip,
-        first_stop_time,
-        on = "trip_key",
-        how = "inner"
-    ).compute()
+    df = grab_first_stop_time(stop_times_for_one_trip)
         
-    df2 = df2.assign(
-        trip_departure = pd.to_datetime(
-            df2.trip_first_departure, unit='s').dt.time,
-        trip_first_departure_hour = pd.to_datetime(
-            df2.trip_first_departure, unit='s').dt.hour.astype("Int64"),
-    )
-    
-    df3 = df2.assign(
-        # trip first departure shows 1970 date. Reconstruct with service date 
-        # and change to datetime
-        trip_first_departure = df2.apply(
-            lambda x: str(x.service_date) + " " + str(x.trip_departure), 
-            axis=1),
-    )
-    
-    df3 = df3.assign(
-        trip_first_departure = pd.to_datetime(
-            df3.trip_first_departure, errors="coerce")
-    )
-        
-    return df3
+    return df
     
 
 def data_wrangling(df: gpd.GeoDataFrame) ->pd.DataFrame:
@@ -123,7 +124,8 @@ def subset_stops(df: pd.DataFrame) -> pd.DataFrame:
     def tag_waypoints(row):
         flag = 0
         if row.max_stop <= dest3_max:
-            # Want remainder of 1, because if we are keeping stop 1, then 3rd stop is stop 4.
+            # Want remainder of 1, because if we are keeping stop 1, 
+            # then 3rd stop is stop 4.
             if row.stop_rank % 3 == 1:
                 flag=1
         elif (row.max_stop > dest3_max) and (row.max_stop <= dest4_max):
@@ -152,7 +154,8 @@ def subset_stops(df: pd.DataFrame) -> pd.DataFrame:
 def select_origin_destination(df: pd.DataFrame) -> pd.DataFrame:
     df = df[df.is_od==1].reset_index(drop=True)
     
-    # Wrangle it so there are columns with previous point and current point in the same row
+    # Wrangle it so there are columns with previous point and 
+    # current point in the same row
     df = df.assign(
         previous = (df.sort_values(trip_group + ["stop_sequence"])
                         .groupby(trip_group)["geom_flipped"]
@@ -196,7 +199,7 @@ if __name__ == "__main__":
     
     stop_times = dd.read_parquet(
         f"{COMPILED_CACHED}st_{ANALYSIS_DATE}.parquet")
-    
+
     df = stop_time_for_selected_trip(stop_times, trip)
 
     df2 = data_wrangling(df)
@@ -218,14 +221,13 @@ if __name__ == "__main__":
         validate = "1:1"
     ).sort_values(trip_group).reset_index(drop=True)
     
-    # all the "geometry" kind of columns are tuples or lists now
-    #final = pd.DataFrame(od_and_waypoints)
-    
+    # all the "geometry" kind of columns are tuples or lists now    
     final = final.assign(
         identifier = final.calitp_itp_id.astype(str).str.cat(
             [final.route_id, final.trip_id, final.shape_id], sep = "__"
         ),
-        # this checksum hash always give same value if the same combination of strings are given
+        # this checksum hash always give same value if the same 
+        # combination of strings are given
         identifier_num = final.apply(
             lambda x: zlib.crc32(
                 (str(x.calitp_itp_id) + 

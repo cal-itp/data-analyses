@@ -1,5 +1,10 @@
 metadata:
   version: 1
+  parameters:
+    analysis_date:
+      type: str
+      description: Analysis date, used for certain analyses such as 100 bus recs.
+      default: "2022-05-04"
 sources:
   # CalEnviroScreen
   calenviroscreen_raw:
@@ -63,19 +68,19 @@ sources:
     description: Pick 1 trip for each route, the 25th percentile trip, and expand trips to include stop info with stop point geom.
     args:
       # source: bus_service_increase/E1_setup_parallel_trips_with_stops.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/trips_with_stops_2022-05-04.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/trips_with_stops_{{analysis_date}}.parquet
   gmaps_results:
     driver: geoparquet
     description: Parallel routes to SHN with car travel time
     args:
       # source: bus_service_increase/E4_make_gmaps_results.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/gmaps_results.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/gmaps_results_{{analysis_date}}.parquet
   competitive_route_variability:
     driver: geoparquet
     description: gmaps_results, wrangled to attach trip info back, to visualize competitive route variability in trip times
     args:
       # source: bus_service_increase/E5_make_stripplot_data.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/competitive_route_variability.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/competitive_route_variability_{{analysis_date}}.parquet
   ## PROCESSED DATA: 100 RECOMMENDATIONS FOR BETTER BUSES
   bus_routes_on_hwys:
     driver: geoparquet
@@ -112,13 +117,13 @@ sources:
     description: Speed calculated at the stop-level for all operators. Based on rt_filter_map_plot.py.
     args:
       # source: bus_service_increase/G3_calculate_speeds_all_operators.py
-      urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/segment_speed_views/all_operators_2022-05-04.parquet     
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/segment_speed_views/all_operators_{{analysis_date}}.parquet     
   speeds_by_trip:
     driver: parquet
     description: Speed summary stat at the trip-level for all operators. 
     args:
       # source: bus_service_increase/G3_calculate_speeds_all_operators.py
-      urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/rt_trips/all_operators_2022-05-04.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/rt_trips/all_operators_{{analysis_date}}.parquet
   highway_segment_stats:
     driver: geoparquet
     description: At highway 1 mile segment level, have the number of trips, stop arrivals, and stops across operators.

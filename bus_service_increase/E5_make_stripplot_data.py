@@ -4,56 +4,77 @@ Use this df to back the stripplot
 showing variability of trip service hours 
 (bus_multiplier) compared to car travel.
 """
+import dask.dataframe as dd
 import geopandas as gpd
 import intake
-import math 
 import os
 import pandas as pd
-import re
 
 from calitp.tables import tbl
 from siuba import *
 
-import E1_setup_parallel_trips_with_stops as setup_parallel_trips_with_stops
 import shared_utils
+import E2_setup_gmaps as setup_gmaps
 from bus_service_utils import utils
+from E1_setup_parallel_trips_with_stops import (ANALYSIS_DATE, COMPILED_CACHED,
+                                                merge_trips_with_service_hours)
 
 catalog = intake.open_catalog("./*.yml")
+route_cols = ["calitp_itp_id", "route_id"]
 
-def pare_down_trips(df: pd.DataFrame) -> pd.DataFrame:
-    # This dataset is trip-stop level
-    # Keep unique trip
-    df2 = (df.drop(columns = ["stop_id", "stop_sequence", "date", 
-                              "is_in_service", "day_name", "departure_time"])
-           .drop_duplicates(subset=["calitp_itp_id", "route_id", "trip_id"])
-           .reset_index(drop=True)
-          )
+def add_trip_time_of_day(trips: pd.DataFrame) -> pd.DataFrame:
+    """
+    Take trips table that has service hours,
+    find the first departure time for trip (in stop_times)
+    and add in time_of_day.
+    """
+    # Grab 
+    stop_times = dd.read_parquet(
+        f"{COMPILED_CACHED}st_{ANALYSIS_DATE}.parquet")
     
-    return df2
-
-
-def time_of_day(row: int) -> str:
-    if (row.departure_hour <= 6) or (row.departure_hour >= 20):
-        return "Owl Service"
-    elif (row.departure_hour > 6) and (row.departure_hour <= 9):
-        return "AM Peak"
-    elif (row.departure_hour > 9) and (row.departure_hour <= 16):
-        return "Midday"
-    elif (row.departure_hour > 16) and (row.departure_hour <= 19):
-        return "PM Peak"
-
+    stop_times2 = setup_gmaps.grab_first_stop_time(stop_times)
     
-def add_quantiles_timeofday(df: pd.DataFrame) -> pd.DataFrame:
+    keep_cols = ["trip_key", "trip_first_departure",
+                 "trip_departure", "trip_first_departure_hour"]
+    
+    # Somehow, stop_times2 is not unique
+    # There are multiple route_keys, feed_keys, but departure hour is the same
+    # but the departure time is slightly different - keep the later departure time
+    stop_times3 = (stop_times2[keep_cols]
+                   .sort_values(["trip_key", "trip_first_departure"], 
+                               ascending=[True, False])
+                   .drop_duplicates(subset=["trip_key"])
+                   .reset_index(drop=True)
+                  )
+    
+    df = pd.merge(
+        trips, 
+        stop_times3,
+        on = "trip_key",
+        how = "inner",
+        # many on left because trip_key / trip_id can be shared across 
+        # multiple route_names
+        validate = "m:1"
+    )
+    
+    # Add time-of-day
     df = df.assign(
-        departure_hour = pd.to_datetime(
-            df.trip_first_departure_ts, unit='s').dt.hour,
+        time_of_day = df.apply(
+            lambda x: shared_utils.rt_utils.categorize_time_of_day(
+                x.trip_first_departure), 
+            axis=1)
+    )
+    
+    return df
+    
+    
+def add_quantiles(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.assign(
         service_hours = df.service_hours.round(2),
     )
     
     group_cols = ["calitp_itp_id", "route_id"]
-    
-    df["time_of_day"] = df.apply(lambda x: time_of_day(x), axis=1)        
-    
+        
     # Sort routes within an operator a certain way - fastest trip in ascending order?
     # Just plot routes 10 at a time for readability
     df2 = (df.sort_values(group_cols + ["service_hours"], 
@@ -88,69 +109,48 @@ def add_quantiles_timeofday(df: pd.DataFrame) -> pd.DataFrame:
     ).drop(columns = ["abs_diff", "min_diff"])
     
     return df3
+    
 
-
-def merge_in_competitive_routes(df: pd.DataFrame) -> gpd.GeoDataFrame:
+def merge_in_competitive_routes(df: pd.DataFrame, threshold: float) -> gpd.GeoDataFrame:
     # Tag as competitive
-    gdf = catalog.gmaps_results.read()
-    CRS = gdf.crs.to_epsg()
-    
-    route_cols = ["calitp_itp_id", "route_id"]
-    trip_cols = route_cols + ["shape_id", "trip_id"]
-    
+    gmaps_results = catalog.gmaps_results.read()
+
     # Merge in the competitive trip info
-    df2 = pd.merge(df, 
-                   gdf[trip_cols + ["competitive"]],
-                   on = trip_cols,
-                   how = "left",
-                   validate = "m:1",
-    ).rename(columns = {"competitive": "fastest_trip"})
-    
-    # Merge in route-level info
-    df3 = pd.merge(df2,
-                   gdf[route_cols + ["car_duration_hours", "competitive", "geometry"]],
+    gdf = pd.merge(gmaps_results[route_cols + ["car_duration_hours"]],
+                   df, 
                    on = route_cols,
-                   how = "left",
-                   validate = "m:1"
-    ).rename(columns = {"competitive": "competitive_route"})
-    
-    df3 = df3.assign(
-        competitive_route = df3.competitive_route.fillna(0).astype(int),
-        fastest_trip = df3.fastest_trip.fillna(0).astype(int),
-        bus_multiplier = df3.service_hours.divide(df3.car_duration_hours).round(2),
+                   how = "outer",
+                   validate = "1:m",
+                   indicator=True
+    )
+
+    gdf = gdf.assign(
+        bus_multiplier = gdf.service_hours.divide(gdf.car_duration_hours).round(2),
         # difference (in minutes) between car and bus
-        bus_difference = ((df3.service_hours - df3.car_duration_hours) * 60).round(1),
+        bus_difference = ((gdf.service_hours - gdf.car_duration_hours) * 60).round(1),
+        num_trips = gdf.groupby(route_cols)["trip_id"].transform("nunique")
     )
-    
-    
+
+    gdf = gdf.assign(
+        competitive = gdf.apply(lambda x: 1 if x.bus_multiplier <= threshold 
+                               else 0, axis=1)
+    )
+        
     # Calculate % of trips below threshold
-    df4 = df3.assign(
-        num_trips = df3.groupby(route_cols)["trip_id"].transform("nunique"),
-        is_competitive = df3.apply(lambda x: 1 if x.bus_multiplier <= 2 
-                                   else 0, axis=1)    
+    gdf = gdf.assign(
+        num_competitive = gdf.groupby(route_cols)["competitive"].transform("sum")
+   
     )
+        
+    gdf = gdf.assign(
+        pct_trips_competitive = gdf.num_competitive.divide(gdf.num_trips).round(3)
+    )    
     
-    df4["num_competitive"] = df4.groupby(route_cols)["is_competitive"].transform("sum")
-    
-    df4 = df4.assign(
-        pct_trips_competitive = df4.num_competitive.divide(df4.num_trips).round(3)
-    ).drop(columns = ["is_competitive"])
-    
-    df4 = gpd.GeoDataFrame(df4, crs=f"EPSG: {CRS}")
-    
-    return df4
+    return gdf
 
 
-diff_cutoffs = {
-    "short": 20,
-    "medium": 30,
-    "long": 40,
-}
-
-
-def designate_plot_group(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def designate_plot_group(df: gpd.GeoDataFrame, diff_cutoffs: dict) -> gpd.GeoDataFrame:
     # Add plot group, since stripplot can get crowded, plot 15 max?
-    route_cols = ["calitp_itp_id", "route_id"]
     
     for c in ["bus_difference"]:
         df = df.assign(
@@ -159,7 +159,8 @@ def designate_plot_group(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         )
         df = df.assign(
             spread = (df.maximum - df.minimum) 
-        ).rename(columns = {"spread": f"{c}_spread"}).drop(columns = ["minimum", "maximum"])
+        ).rename(columns = {"spread": f"{c}_spread"}
+                ).drop(columns = ["minimum", "maximum"])
 
     df2 = (df.assign(
                # Break it up into short / medium / long routes instead of plot group
@@ -205,11 +206,11 @@ def designate_plot_group(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     return df4
 
+
 # Use agency_name from our views.gtfs_schedule.agency instead of Airtable?
 def merge_in_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    # This is the agency_name used in RT maps
-    # rt_delay/rt_analysis.py#L309
-    agency_names = portfolio_utils.add_agency_name(selected_date = SELECTED_DATE)
+    agency_names = shared_utils.portfolio_utils.add_agency_name(
+        selected_date = ANALYSIS_DATE)
     
     df2 = pd.merge(
         df,
@@ -224,7 +225,7 @@ def merge_in_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
 def merge_in_airtable(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Don't use name from Airtable. But, use district.
-    caltrans_districts = portfolio_utils.add_caltrans_district()
+    caltrans_districts = shared_utils.portfolio_utils.add_caltrans_district()
                             
     # Airtable gives us fewer duplicates than doing tbl.gtfs_schedule.agency()
     # But naming should be done with tbl.gtfs_schedule.agency because that's what's used
@@ -238,68 +239,37 @@ def merge_in_airtable(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     )
     
     return df2
-
-
-def add_route_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:    
-    route_names = shared_utils.portfolio_utils.add_route_name(
-        selected_date=SELECTED_DATE)
-    
-    route_names_short = (
-        tbl.views.gtfs_schedule_dim_routes()
-        >> filter(_.calitp_extracted_at < SELECTED_DATE, 
-                  _.calitp_deleted_at >= SELECTED_DATE)
-        >> select(_.calitp_itp_id, _.route_id, _.route_short_name,)
-        >> distinct()
-        >> collect()
-    )
-    
-    # Also need route_short_name, which is not available in portfolio_utils
-    route_names = pd.merge(route_names, 
-                           route_names_short,
-                           on = ["calitp_itp_id", "route_id"], 
-                           how = "left"
-                          )
-    
-    df2 = pd.merge(
-        df, 
-        route_names[route_names.route_name_used != ""][
-            ["calitp_itp_id", "route_id", "route_name_used", 
-             # add route_short_name to use in charts, perhaps more descriptive than route_id
-            "route_short_name"]].drop_duplicates(),
-        on = ["calitp_itp_id", "route_id"],
-        how = "left",
-        # many on the left because df is unique at itp_id-route_id-shape_id
-        validate = "m:1",
-    )
-    
-    return df2
-
     
 
-if __name__ == "__main__":
-    '''
-    DATA_PATH = f"{utils.GCS_FILE_PATH}2022_Jan/"
-    # Read in intermediate parquet for trips on selected date
-    trips = pd.read_parquet(f"{DATA_PATH}trips_joined_thurs.parquet")
-    '''
-    SELECTED_DATE = '2022-1-6' #warehouse_queries.dates['thurs']
-    '''
-    # Attach service hours
-    # This df is trip_id-stop_id level
-    trips_with_service_hrs = setup_parallel_trips_with_stops.grab_service_hours(
-        trips, SELECTED_DATE)
-    trips_with_service_hrs.to_parquet("./data/trips_with_service_hours.parquet")
-    '''
+if __name__ == "__main__":    
     
-    df = pd.read_parquet(
-        "./data/trips_with_service_hours.parquet")
-    df2 = pare_down_trips(df)
-    df3 = add_quantiles_timeofday(df2)
-    df4 = merge_in_competitive_routes(df3)
-    df5 = designate_plot_group(df4)
-    df6 = merge_in_agency_name(df5)
-    df7 = merge_in_airtable(df6)
-    df8 = add_route_name(df7)
+    # Import all service hours associated with trip
+    trip_service_hours = merge_trips_with_service_hours(ANALYSIS_DATE)
+
+    # Grab first stop time for each trip, get departure hour
+    df = add_trip_time_of_day(trip_service_hours)
+    
+    # Calculate p25, p50, p75 quantiles for the route
+    df2 = add_quantiles(df)
+    
+    # Tag competitive routes based on threshold specified (service_hours/car_duration_hours)
+    df3 = merge_in_competitive_routes(df2, threshold=1.2)
+    
+    # Break up plot groups by route travel time
+    diff_cutoffs = {
+        "short": 20,
+        "medium": 30,
+        "long": 40,
+    }
+    df4 = designate_plot_group(df3, diff_cutoffs)
+    
+    # Merge in agency name
+    df5 = merge_in_agency_name(df4)
+    
+    # Merge in Caltrans district from Airtable
+    df6 = merge_in_airtable(df5)
     
     shared_utils.utils.geoparquet_gcs_export(
-        df8, utils.GCS_FILE_PATH, "competitive_route_variability")
+        df6, 
+        utils.GCS_FILE_PATH, 
+        f"competitive_route_variability_{ANALYSIS_DATE}")
