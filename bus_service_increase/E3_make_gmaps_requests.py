@@ -1,7 +1,7 @@
 """
 Google Directions API
 
-Save request response (dict) as pickles to cache.
+Save request response (dict) as json to cache.
 Each request (one trip / route) can take up to 25 waypoints 
 before being broken up into 2 separate requests.
 
@@ -13,19 +13,29 @@ import googlemaps
 import glob
 import os
 import pandas as pd
+import sys
+
+from loguru import logger
 
 from bus_service_utils import utils
+from E1_setup_parallel_trips_with_stops import ANALYSIS_DATE
+
+logger.add("./logs/make_gmaps_requests.log")
+logger.add(sys.stderr, 
+           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+           level="INFO")
+
 
 dotenv.load_dotenv("_env")
 
 GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
 
 DATA_PATH = "./gmaps_cache/"
-GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}gmaps_cache/"
+GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}gmaps_cache_{ANALYSIS_DATE}/"
 
 
 if __name__ == "__main__":
-    df = pd.read_parquet(f"{utils.GCS_FILE_PATH}gmaps_df.parquet")
+    df = pd.read_parquet(f"{utils.GCS_FILE_PATH}gmaps_df_{ANALYSIS_DATE}.parquet")
     gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
 
     # Check if there are any identifiers already cached
@@ -36,16 +46,17 @@ if __name__ == "__main__":
         file = f.strip(f'{DATA_PATH}').strip('.json')
         filenames.append(file)
 
-    print(f"# rows: {len(df)}")
+    logger.info(f"# rows: {len(df)}")
     df = df[~df.identifier.isin(filenames)]
-    print(f"# rows after local caches included: {len(df)}")
+    logger.info(f"# rows after local caches included: {len(df)}")
 
     origin = df.origin.tolist()
     destination = df.destination.tolist()
     departures = df.departure_in_one_year.tolist()
     waypoints = df.waypoints.tolist()
-    identifiers = df.identifier.tolist()
-
+    identifiers = df.identifier_num.tolist()
+    identifier_str = df.identifier.tolist()
+    
     for i, (o, d) in enumerate(zip(origin, destination)):
         try:
             result = gmaps.directions(
@@ -66,9 +77,10 @@ if __name__ == "__main__":
             utils.save_request_json(
                 result, identifiers[i], 
                 # Using different paths than utils.DATA_PATH, utils.GCS_FILE_PATH
-                DATA_PATH = DATA_PATH,
-                GCS_FILE_PATH = GCS_FILE_PATH
+                data_path = DATA_PATH,
+                gcs_file_path = GCS_FILE_PATH
             )
+            logger.info(f"Saved {identifier_str[i]})
             
         except:
-            print(f"No result: {identifiers[i]}")
+            logger.info(f"No result: {identifiers[i]}")

@@ -3,45 +3,92 @@ Additional data processing to get df into
 structure that's needed to make Google Directions API requests,
 with `origin`, `destination`, `departure_time`, `waypoints` args.
 """
+import dask.dataframe as dd
 import geopandas as gpd
 import intake
 import pandas as pd
+import zlib
 
 from datetime import timedelta
+from calitp.storage import get_fs
 
 from bus_service_utils import utils
+from E1_setup_parallel_trips_with_stops import ANALYSIS_DATE, COMPILED_CACHED
 
+fs = get_fs()
 catalog = intake.open_catalog("./*.yml")
 
 # Define grouping of cols that captures each trip
 trip_group = ["calitp_itp_id", "route_id", "trip_id", "shape_id", "service_hours"]
 
-def data_wrangling(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    df["first_departure"] = pd.to_datetime(df.trip_first_departure_ts, unit='s').dt.time
-    
-    # If departure_time isn't available, or, when parsed, will be outside 0-23 hrs
-    # use trip_first_departure_ts instead.
-    def assemble_trip_departure_datetime(x):
-        if (x.departure_time != None) and int(x.departure_time.split(':')[0]) < 23:
-            return  str(x.date) + " " + str(x.departure_time)
-        else: 
-            return str(x.date) + " " + str(x.first_departure)
 
-
-    df["trip_departure"] = df.apply(lambda x: assemble_trip_departure_datetime(x), axis=1)    
+def stop_time_for_selected_trip(stop_times: dd.DataFrame, 
+                                selected_trip: pd.DataFrame
+                               ) -> gpd.GeoDataFrame:
+    stop_times_for_one_trip = dd.merge(
+        stop_times,
+        selected_trip[["trip_key"]].drop_duplicates(),
+        on = "trip_key",
+        how = "inner",
+    )
     
+    # Only keep first stop
+    first_stop = (stop_times_for_one_trip.groupby("trip_key")["stop_sequence"].min()
+            .reset_index()
+    )
+    
+    keep_cols = ["trip_key", "departure_ts"]
+    
+    first_stop_time = dd.merge(
+        stop_times_for_one_trip,
+        first_stop,
+        on = ["trip_key", "stop_sequence"],
+        how = "inner"
+    )[keep_cols].rename(columns = {"departure_ts": "trip_first_departure"})
+    
+    # Merge selected trip with stop info to trip's first stop time info
+    df2 = dd.merge(
+        selected_trip,
+        first_stop_time,
+        on = "trip_key",
+        how = "inner"
+    ).compute()
+        
+    df2 = df2.assign(
+        trip_departure = pd.to_datetime(
+            df2.trip_first_departure, unit='s').dt.time,
+        trip_first_departure_hour = pd.to_datetime(
+            df2.trip_first_departure, unit='s').dt.hour.astype("Int64"),
+    )
+    
+    df3 = df2.assign(
+        # trip first departure shows 1970 date. Reconstruct with service date 
+        # and change to datetime
+        trip_first_departure = df2.apply(
+            lambda x: str(x.service_date) + " " + str(x.trip_departure), 
+            axis=1),
+    )
+    
+    df3 = df3.assign(
+        trip_first_departure = pd.to_datetime(
+            df3.trip_first_departure, errors="coerce")
+    )
+        
+    return df3
+    
+
+def data_wrangling(df: gpd.GeoDataFrame) ->pd.DataFrame:
     # Turn shapely point geometry into floats, then tuples for gmaps
     # Make tuples instead of just floats
     df2 = (df.assign(
-            trip_departure = pd.to_datetime(df.trip_departure, errors="coerce"),
             # Typically, it's (x, y) = (lon, lat), but Google Maps takes (lat, lon)
-            geometry = df.apply(lambda row: (row.geometry.y, row.geometry.x), axis=1)        
-        ).drop(columns = ["date", "is_in_service", 
-                          "departure_time", "trip_first_departure_ts", 
-                          "first_departure"])
+            geom_flipped = df.apply(lambda row: [row.geometry.y, row.geometry.x], axis=1)        
+        ).drop(columns = "geometry")
     )
+    
+    df3 = pd.DataFrame(df2)
         
-    return df2
+    return df3
 
 
 # If you have more than 25 waypoints, you have to break it into 2 requests
@@ -60,7 +107,7 @@ def last_waypoint_and_destination_rank(divisible_by: int) -> (int, int):
     return x, x + divisible_by
 
 
-def subset_stops(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def subset_stops(df: pd.DataFrame) -> pd.DataFrame:
     # https://stackoverflow.com/questions/25055712/pandas-every-nth-row
     # df = df.iloc[::3]
     df["stop_rank"] = df.groupby(trip_group).cumcount() + 1
@@ -102,32 +149,33 @@ def subset_stops(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return subset
 
 
-def select_origin_destination(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def select_origin_destination(df: pd.DataFrame) -> pd.DataFrame:
     df = df[df.is_od==1].reset_index(drop=True)
     
     # Wrangle it so there are columns with previous point and current point in the same row
     df = df.assign(
         previous = (df.sort_values(trip_group + ["stop_sequence"])
-                        .groupby(trip_group)["geometry"]
+                        .groupby(trip_group)["geom_flipped"]
                         .apply(lambda x: x.shift(1))
                        ),
     )
     
     # Only keep the observation that has start_geom (drop the first obs for each trip grouping)
     df2 = (df[df.previous.notna()]
-           [trip_group + ["day_name", "trip_departure", "geometry", "previous"]]
+           [trip_group + ["trip_departure", "trip_first_departure", 
+                          "trip_first_departure_hour", "geom_flipped", "previous"]]
            .assign(
                departure_in_one_year = df.apply(
-                   lambda x: x.trip_departure + timedelta(weeks=52), axis=1)
+                   lambda x: x.trip_first_departure + timedelta(weeks=52), axis=1)
            ).reset_index(drop=True)
-           .rename(columns = {"geometry": "destination", 
+           .rename(columns = {"geom_flipped": "destination", 
                               "previous": "origin"})
           )
-    
+        
     return df2
 
 
-def assemble_waypoints(df: gpd.GeoDataFrame) -> pd.DataFrame:
+def assemble_waypoints(df: pd.DataFrame) -> pd.DataFrame:
     df = df[(df.is_waypoint==1) & (df.is_od==0)].reset_index(drop=True)
     
     # Take all the stops in between origin/destination, put tuples into a list
@@ -135,20 +183,26 @@ def assemble_waypoints(df: gpd.GeoDataFrame) -> pd.DataFrame:
     waypoint_df = (
         df.sort_values(trip_group + ["stop_sequence"])
         .groupby(trip_group)
-        .agg({"geometry": lambda x: list(x)})
+        .agg({"geom_flipped": lambda x: list(x)})
         .reset_index()
-        .rename(columns = {"geometry": "waypoints"})
+        .rename(columns = {"geom_flipped": "waypoints"})
     )
     
     return waypoint_df
 
 
-def make_gmaps_df():
-    df = catalog.parallel_trips_with_stops.read()
-    df = data_wrangling(df)
+if __name__ == "__main__":
+    trip = catalog.trips_with_stops.read()
     
+    stop_times = dd.read_parquet(
+        f"{COMPILED_CACHED}st_{ANALYSIS_DATE}.parquet")
+    
+    df = stop_time_for_selected_trip(stop_times, trip)
+
+    df2 = data_wrangling(df)
+
     # Subset to every 3rd
-    subset = subset_stops(df)
+    subset = subset_stops(df2)
     
     # Grab origin/destination pair, and wrangle into separate columns
     od = select_origin_destination(subset)
@@ -160,17 +214,25 @@ def make_gmaps_df():
         od, 
         waypoints, 
         on = trip_group, 
-        how = "inner", validate = "1:1"
+        how = "inner", 
+        validate = "1:1"
     ).sort_values(trip_group).reset_index(drop=True)
     
     # all the "geometry" kind of columns are tuples or lists now
-    final = pd.DataFrame(final)
+    #final = pd.DataFrame(od_and_waypoints)
     
-    final["identifier"] = (
-        final.calitp_itp_id.astype(str).str.cat(
-            [final.route_id, final.trip_id, final.shape_id], sep ="__")
+    final = final.assign(
+        identifier = final.calitp_itp_id.astype(str).str.cat(
+            [final.route_id, final.trip_id, final.shape_id], sep = "__"
+        ),
+        # this checksum hash always give same value if the same combination of strings are given
+        identifier_num = final.apply(
+            lambda x: zlib.crc32(
+                (str(x.calitp_itp_id) + 
+                 x.route_id + x.trip_id + x.shape_id)
+                .encode("utf-8")), axis=1),
     )
-    
+
     # These weird characters are preventing the name from being used in GCS
     final = final.assign(
         identifier = (
@@ -181,11 +243,9 @@ def make_gmaps_df():
                   .str.replace('/', '', regex=False)
                      
                  )
-    )
+    ) 
     
-    final.to_parquet(f"{utils.GCS_FILE_PATH}gmaps_df.parquet")
+    
+    final.to_parquet(f"{utils.GCS_FILE_PATH}gmaps_df_{ANALYSIS_DATE}.parquet")
     print("Exported to GCS")
-    
-if __name__ == "__main__":
-    make_gmaps_df()
     
