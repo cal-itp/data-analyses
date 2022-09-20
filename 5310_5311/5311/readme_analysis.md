@@ -7,7 +7,6 @@
 2. [utils](./_utils.py): functions for charts and aggregating the merged data frames. 
 3. [agency crosswalk](./_agency_crosswalk.py): a crosswalk created to match agency names against the data sources, when the Cal ITP/NTD ID were not available. 
 4. [add_inflation](./5311/add_inflation.ipynb)
-5. [add_rtpa.ipynb](./5311/add_rtpa.ipynb)
 
 ### Analyses
 1. [5311.ipynb](./5311/5311.ipynb): 5311 organizations first pass
