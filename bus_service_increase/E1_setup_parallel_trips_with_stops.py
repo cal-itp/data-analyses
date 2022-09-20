@@ -77,7 +77,7 @@ def select_one_trip(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def grab_stops_for_trip_selected(trip_df: dd.DataFrame, 
-                                 selected_date: str) -> dg.GeoDataFrame:
+                                 selected_date: str) -> gpd.GeoDataFrame:
     
     stop_times = dd.read_parquet(
         f"{COMPILED_CACHED}st_{selected_date}.parquet")
@@ -106,7 +106,7 @@ def grab_stops_for_trip_selected(trip_df: dd.DataFrame,
         columns = ["calitp_extracted_at", "calitp_deleted_at"])
         .sort_values(["calitp_itp_id", "route_id", "trip_id", "stop_sequence"])
         .reset_index(drop=True)
-    )
+    ).compute()
     
     return stop_times_with_geom2
 
@@ -136,5 +136,5 @@ if __name__ == "__main__":
     shared_utils.utils.geoparquet_gcs_export(
         trips_with_stops,
         utils.GCS_FILE_PATH,
-        "parallel_trips_with_stops"
+        f"trips_with_stops_{ANALYSIS_DATE}"
     )

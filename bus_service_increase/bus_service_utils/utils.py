@@ -117,8 +117,8 @@ def fix_gtfs_time(gtfs_timestring: str) -> str:
 # https://stackoverflow.com/questions/25052980/use-pickle-to-save-dictionary-in-python
 def save_request_json(my_list: list, 
                       name: str, 
-                      DATA_PATH: str = DATA_PATH, 
-                      GCS_FILE_PATH: str = GCS_FILE_PATH):
+                      data_path: str = DATA_PATH, 
+                      gcs_file_path: str = GCS_FILE_PATH):
     """
     Input a json response that comes back as a list.
     Write it to GCS bucket
@@ -131,23 +131,23 @@ def save_request_json(my_list: list,
     json_obj = json.loads(json.dumps(my_dict, default=str))
     
     # Save json locally
-    json.dump(json_obj, open(f"{DATA_PATH}{name}.json", "w", encoding='utf-8'))
+    json.dump(json_obj, open(f"{data_path}{name}.json", "w", encoding='utf-8'))
     
     # Put the json object in GCS. 
-    fs.put(f"{DATA_PATH}{name}.json", f"{GCS_FILE_PATH}{name}.json")
+    fs.put(f"{data_path}{name}.json", f"{gcs_file_path}{name}.json")
     print(f"Saved {name}")
     
     
 def open_request_json(name: str, 
-                      DATA_PATH: str = DATA_PATH, 
-                      GCS_FILE_PATH: str = GCS_FILE_PATH) -> dict:
+                      data_path: str = DATA_PATH, 
+                      gcs_file_path: str = GCS_FILE_PATH) -> dict:
     """
     Grab the json object from GCS and import it.
     
     Returns a dict.
     """
     # Download object from GCS bucket
-    gcs_json = fs.get(f"{GCS_FILE_PATH}{name}.json", f"{DATA_PATH}{name}.json")
-    my_dict = json.load(open(f"{DATA_PATH}{name}.json"))
+    gcs_json = fs.get(f"{gcs_file_path}{name}.json", f"{data_path}{name}.json")
+    my_dict = json.load(open(f"{data_path}{name}.json"))
     
     return my_dict
