@@ -6,10 +6,9 @@ import intake
 import geopandas as gpd
 import pandas as pd
 
-import G2_aggregated_route_stats
+import G2_aggregated_route_stats as aggregated_route_stats
 from shared_utils import geography_utils, utils
-from bus_service_utils.utils import GCS_FILE_PATH
-from G1_get_buses_on_shn import ANALYSIS_DATE, COMPILED_CACHED_GCS
+from E0_bus_oppor_vars import GCS_FILE_PATH, ANALYSIS_DATE, COMPILED_CACHED_GCS
 
 catalog = intake.open_catalog("*.yml")
 
@@ -61,7 +60,8 @@ def average_speed_by_stop():
         mean_cols = ["speed_mph"],
         nunique_cols = ["trip_id"]
     ).rename(columns = {"speed_mph": "mean_speed_mph", 
-                        "trip_id": "num_trips"}).astype({"num_trips": "Int64"})
+                        "trip_id": "num_trips"}
+            ).astype({"num_trips": "Int64"})
     
     return mean_speed
         
@@ -170,7 +170,8 @@ def aggregate_to_hwy_segment(df: pd.DataFrame,
     
     segment_with_geom = geography_utils.attach_geometry(
         segment,
-        highway_segment_gdf[group_cols + other_hwy_cols + ["geometry"]].drop_duplicates(),
+        highway_segment_gdf[group_cols + other_hwy_cols + 
+                            ["geometry"]].drop_duplicates(),
         merge_col = group_cols,
         join = "inner"
     )
@@ -200,7 +201,7 @@ if __name__=="__main__":
     stop_times_on_hwy = filter_stop_times_to_stops_on_hwy(stops_on_hwy)
     
     # (4b) Aggregate stops and stop_times to segments 
-    by_route_segment = G2_aggregated_route_stats.compile_peak_all_day_aggregated_stats(
+    by_route_segment = aggregated_route_stats.compile_peak_all_day_aggregated_stats(
         stop_times_on_hwy, route_segment_cols, 
         stat_cols = {"trip_id": "nunique", 
                      "departure_hour": "count", 
@@ -209,8 +210,8 @@ if __name__=="__main__":
     
     # (5a) Now aggregate to hwy_segment_id, since there can be multiple routes 
     # on same segment_id
-    segments_with_geom = aggregate_to_hwy_segment(by_route_segment, highways, 
-                                                  ["hwy_segment_id"])
+    segments_with_geom = aggregate_to_hwy_segment(
+        by_route_segment, highways, ["hwy_segment_id"])
     
     # (5b) Add in average speed, aggregated to hwy_segment_id
     weighted_speeds = calculate_trip_weighted_speed(

@@ -67,19 +67,19 @@ sources:
     driver: geoparquet
     description: Pick 1 trip for each route, the 25th percentile trip, and expand trips to include stop info with stop point geom.
     args:
-      # source: bus_service_increase/E1_setup_parallel_trips_with_stops.py
+      # source: bus_service_increase/D1_setup_parallel_trips_with_stops.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/trips_with_stops_{{analysis_date}}.parquet
   gmaps_results:
     driver: geoparquet
     description: Parallel routes to SHN with car travel time
     args:
-      # source: bus_service_increase/E4_make_gmaps_results.py
+      # source: bus_service_increase/D4_make_gmaps_results.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/gmaps_results_{{analysis_date}}.parquet
   competitive_route_variability:
     driver: geoparquet
     description: gmaps_results, wrangled to attach trip info back, to visualize competitive route variability in trip times
     args:
-      # source: bus_service_increase/E5_make_stripplot_data.py
+      # source: bus_service_increase/D5_make_stripplot_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/competitive_route_variability_{{analysis_date}}.parquet
   ## PROCESSED DATA: 100 RECOMMENDATIONS FOR BETTER BUSES
   bus_routes_on_hwys:
@@ -90,7 +90,7 @@ sources:
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_routes_on_hwys.parquet
   bus_stops_on_hwys:
     driver: geoparquet
-    description: Bus routes that run a significant portion of their route on the hwy.
+    description: For bus routes that run a significant portion of their route on the hwy, grab the stops within 100 ft buffer of these routes.
     args:
       # source: bus_service_increase/G1_better_buses_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/stops_on_hwys.parquet
@@ -107,7 +107,7 @@ sources:
       # source: bus_service_increase/G2_aggregated_route_stats.py
       urlpath: ./data/stop_times_for_routes_on_shn.parquet  
   bus_routes_aggregated_stats:
-    driver: parquet
+    driver: geoparquet
     description: Aggregated stats, number of trips, stop arrivals, mean speed, competitive trips, etc by route_id for routes on SHN.
     args:
       # source: bus_service_increase/G2_aggregated_route_stats.py
