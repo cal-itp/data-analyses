@@ -63,32 +63,6 @@ def calculate_route_level_service_hours(analysis_date: str) -> pd.DataFrame:
     
     return route_full_info
 
-    
-def get_on_shn_routes(date_str: str) -> pd.DataFrame:
-     # If it is on shn, we want to flag as 1
-    df = gpd.read_parquet(
-        f"{BUS_SERVICE_GCS}routes_on_shn_{date_str}.parquet")
-    
-    df2 = df[df.parallel==1]
-    
-    df3 = get_unique_routes(df2)
-    
-    return df3
-
-
-def get_intersecting_routes(date_str: str) -> pd.DataFrame:
-    # These are routes that are affected by SHN
-    # Since the requirements here are less stringent than on_shn
-    # So, remove those that are already tagged as on_shn
-    df = gpd.read_parquet(
-        f"{BUS_SERVICE_GCS}parallel_or_intersecting_{date_str}.parquet"
-    )
-    df2 = df[df.parallel == 1]
-
-    df3 = get_unique_routes(df2)
-    
-    return df3
-
 
 def get_unique_routes(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -162,33 +136,41 @@ def flag_shn_intersecting_routes(analysis_date: str) -> pd.DataFrame:
     (aggregated to shape_id), merge together,
     and flag whether a transit route is on SHN, intersects SHN, or other.
     """
+    on_shn = gpd.read_parquet(
+        f"{BUS_SERVICE_GCS}routes_on_shn_{analysis_date}.parquet")
+
+    on_shn_routes = get_unique_routes(on_shn[on_shn.parallel==1])
+    
+    intersecting = gpd.read_parquet(
+        f"{BUS_SERVICE_GCS}parallel_or_intersecting_{analysis_date}.parquet"
+    )
+    
+    intersecting_routes = get_unique_routes(intersecting[intersecting.parallel==1])
+    
+    # Create route-level df
     # Merge trips and trips_with_hrs dfs, and aggregate to route_level
-    route_level_df = calculate_route_level_service_hours(analysis_date)
+    route_service_hours = calculate_route_level_service_hours(analysis_date)
     
-    # Flag routes if they're parallel or on SHN
-    on_shn_routes = get_on_shn_routes(analysis_date)
-    intersecting_routes = get_intersecting_routes(analysis_date)
-    
-    # Merge the parallel and on_shn dummy variables in
-    with_on_shn_flag = pd.merge(route_level_df, 
-                                on_shn_routes,
-                                on = route_cols,
-                                how = "left",
-                                validate = "1:1",
-                                indicator="in_on_shn"
+    # Merge dummy variables in
+    with_on_shn_intersecting = pd.merge(
+        route_service_hours,
+        on_shn_routes,
+        on = route_cols,
+        how = "left",
+        validate = "1:1",
+        indicator = "in_on_shn"
+    ).merge(
+        intersecting_routes,
+        on = route_cols,
+        how = "left",
+        validate = "1:1",
+        indicator = "in_intersecting"
     )
-    
-    with_intersecting_flag = pd.merge(with_on_shn_flag,
-                                      intersecting_routes,
-                                      on = route_cols,
-                                      how = "left", 
-                                      validate = "1:1",
-                                      indicator="in_intersecting"
-    )
+
     
     # Make sure on_shn, intersects_shn, and other are mutually exclusive categories
     # A route can only fall into 1 of these groups
-    with_categories = mutually_exclusive_groups(with_intersecting_flag)
+    with_categories = mutually_exclusive_groups(with_on_shn_intersecting)
     with_categories = add_district(with_categories, analysis_date)
     
     return with_categories
