@@ -117,9 +117,9 @@ if __name__=="__main__":
     utils.geoparquet_gcs_export(stops_on_hwy, GCS_FILE_PATH, "stops_on_hwys")
     
     
-    # (3) Cut highway segments at 1 mi segment lengths
+    # (3) Cut highway segments at 5 mi segment lengths
     # We are already in EPSG:2229 (CA State Plane - ft)
-    SEGMENT_DISTANCE = geography_utils.FEET_PER_MI
+    SEGMENT_DISTANCE = geography_utils.FEET_PER_MI * 5
     
     highways = cut_highway_segments(SEGMENT_DISTANCE)
     
