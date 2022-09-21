@@ -18,12 +18,11 @@ import intake
 import geopandas as gpd
 import pandas as pd
 
-from calitp.sql import to_snakecase
-
 from shared_utils import (geography_utils, gtfs_utils, 
                           rt_utils, portfolio_utils, utils
                          )
 from E0_bus_oppor_vars import GCS_FILE_PATH, ANALYSIS_DATE, COMPILED_CACHED_GCS
+from bus_service_utils import gtfs_build
 
 month = ANALYSIS_DATE.split('-')[1]
 day = ANALYSIS_DATE.split('-')[2]
@@ -123,97 +122,6 @@ def subset_trips_and_stop_times(trips: dd.DataFrame,
 #--------------------------------------------------------------------#
 ## General Aggregation and Wrangling Functions
 #--------------------------------------------------------------------#
-def aggregate_stat_by_time_of_day(df: dd.DataFrame, 
-                                  group_cols: list, 
-                                  stat_cols: dict = {"trip_id": "nunique", 
-                                                    "departure_hour": "count",
-                                                    "stop_id": "nunique"}
-                                 ) -> pd.DataFrame:
-    """
-    Aggregate given different group_cols.
-    """    
-    
-    def group_and_aggregate(df: dd.DataFrame, 
-                            group_cols: list, 
-                            agg_col: str, agg_func: str) -> pd.DataFrame:
-        # nunique seems to not work in groupby.agg
-        # even though https://github.com/dask/dask/pull/8479 seems to resolve it?
-        # alternative is to use nunique as series
-        if agg_func=="nunique":
-            agg_df = (df.groupby(group_cols)[agg_col].nunique()
-                    .reset_index()
-                 )
-        else:
-            agg_df = (df.groupby(group_cols)
-                      .agg({agg_col: agg_func})
-                      .reset_index()
-                     )
-        
-        # return pd.DataFrame for now, since it's not clear what the metadata should be
-        # if we are inputting different things in stats_col
-        return agg_df.compute()
-    
-    final = pd.DataFrame()
-    
-    for agg_col, agg_func in stat_cols.items():
-        agg_df = group_and_aggregate(df, group_cols, agg_col, agg_func)
-        
-        # If it's empty, just add our new table of aggregations in with concat
-        if final.empty:
-            final = pd.concat([final, agg_df], axis=0, ignore_index=True)
-        
-        # If it's not empty, do a merge
-        else:
-            final = pd.merge(
-                final, agg_df, on = group_cols, how = "left"
-            )
-    
-    return final
-        
-
-def reshape_long_to_wide(df: pd.DataFrame, 
-                         group_cols: list,
-                         long_col: str = 'time_of_day',
-                         value_col: str = 'trips',
-                         long_col_sort_order: list = ['owl', 'early_am', 
-                                                      'am_peak', 'midday', 
-                                                      'pm_peak', 'evening'],
-                        )-> pd.DataFrame:
-    """
-    To reshape from long to wide, use df.pivot.
-    Args in this function correspond this way:
-    
-    df.pivot(index=group_cols, columns = long_col, values = value_col)
-    """
-    # To reshape, cannot contain duplicate entries
-    # Get it down to non-duplicate form
-    # For stop-level, if you're reshaping on value_col==trip, that stop contains
-    # the same trip info multiple times.
-    df2 = df[group_cols + [long_col, value_col]].drop_duplicates()
-    
-    #https://stackoverflow.com/questions/22798934/pandas-long-to-wide-reshape-by-two-variables
-    reshaped = df2.pivot(
-        index=group_cols, columns=long_col,
-        values=value_col
-    ).reset_index().pipe(to_snakecase)
-
-    # set the order instead of list comprehension, which will just do alphabetical
-    add_prefix_cols = long_col_sort_order
-
-    # Change the column order
-    reshaped = reshaped.reindex(columns=group_cols + add_prefix_cols)
-
-    # If there are NaNs, fill it with 0, then coerce to int
-    reshaped[add_prefix_cols] = reshaped[add_prefix_cols].fillna(0).astype(int)
-
-    # Now, instead columns named am_peak, pm_peak, add a prefix 
-    # to distinguish between num_trips and num_stop_arrivals
-    reshaped.columns = [f"{value_col}_{c}" if c in add_prefix_cols else c
-                            for c in reshaped.columns]
-
-    return reshaped
-
-
 def long_to_wide_format(df: pd.DataFrame, 
                         group_cols: list, 
                         stat_cols: list = ["trips", "stop_arrivals", "stops"]
@@ -237,7 +145,7 @@ def long_to_wide_format(df: pd.DataFrame,
     df_wide = pd.DataFrame()
     
     for c in stat_cols:
-        one_stat_wide = reshape_long_to_wide(
+        one_stat_wide = gtfs_build.reshape_long_to_wide(
             df, group_cols = group_cols,
             long_col = "time_of_day",
             value_col = c, long_col_sort_order = time_of_day_sorted
@@ -277,7 +185,7 @@ def compile_peak_all_day_aggregated_stats(
         stop_times_with_time_of_day.time_of_day.isin(peak_bins)
     ].assign(time_of_day="peak")
     
-    peak_table = aggregate_stat_by_time_of_day(
+    peak_table = gtfs_build.aggregate_stat_by_group(
         stop_times_peak, 
         group_cols + ["time_of_day"], 
         stat_cols = stat_cols
@@ -286,7 +194,7 @@ def compile_peak_all_day_aggregated_stats(
     # All day    
     stop_times_all_day = stop_times_with_time_of_day.assign(time_of_day="all_day")
 
-    all_day_table = aggregate_stat_by_time_of_day(
+    all_day_table = gtfs_build.aggregate_stat_by_group(
         stop_times_all_day, 
         group_cols + ["time_of_day"],
         stat_cols = stat_cols
@@ -407,14 +315,16 @@ def build_route_level_table(bus_routes: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         trips_by_route,
         route_mean_speed,
         on = route_cols,
-        how = "left"
+        how = "left",
+        validate = "1:1"
     )
     
     stats_by_route = pd.merge(
         trips_with_speed,
         competitive_stats_by_route,
         on = route_cols,
-        how = "left"
+        how = "left",
+        validate = "1:1"
     )
     
     # Add in district info
@@ -423,24 +333,21 @@ def build_route_level_table(bus_routes: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         itp_id_with_district,
         on = "calitp_itp_id",
         how = "left",
+        validate = "m:1"
     )
     
     # Now merge back bus_routes geometry
     stats_by_route_with_geom = pd.merge(
-        bus_routes.rename(columns = {"itp_id": "calitp_itp_id"}),
+        bus_routes.rename(
+            columns = {"itp_id": "calitp_itp_id"}
+        )[route_cols + ["geometry"]].drop_duplicates(),
         stats_by_route,
         on = route_cols,
         how = "inner",
+        validate = "1:1",
     )
     
-    utils.geoparquet_gcs_export(
-        stats_by_route_with_geom, 
-        GCS_FILE_PATH,
-        "bus_routes_on_hwys_aggregated_stats"
-    )
-    #stats_by_route2.to_parquet(
-    #    f"{GCS_FILE_PATH}bus_routes_on_hwys_aggregated_stats.parquet")    
-
+    return stats_by_route_with_geom
     
     
 if __name__=="__main__":
@@ -466,4 +373,10 @@ if __name__=="__main__":
     stop_times_with_hr.compute().to_parquet(f"./data/stop_times_for_routes_on_shn.parquet")
 
     # (3) Assemble route-level table and export
-    build_route_level_table(bus_routes)
+    stats_by_route = build_route_level_table(bus_routes)
+    
+    utils.geoparquet_gcs_export(
+        stats_by_route, 
+        GCS_FILE_PATH,
+        "bus_routes_on_hwys_aggregated_stats"
+    )

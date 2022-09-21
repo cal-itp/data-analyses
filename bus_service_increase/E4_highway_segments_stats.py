@@ -49,6 +49,9 @@ def sjoin_bus_routes_to_hwy_segments(highways: gpd.GeoDataFrame) -> gpd.GeoDataF
 
 
 def average_speed_by_stop():   
+    # Stop-level speeds
+    # Can take straight average, since each trip has equal weight?
+    # There's no distance metric when it's a snapshot of a speed at a location
     speed_by_stops = catalog.speeds_by_stop.read()
         
     # Drop observations with way too fast speeds
@@ -66,13 +69,13 @@ def average_speed_by_stop():
     return mean_speed
         
 
-def spatial_join_stops_to_highway_segments(
+def sjoin_stops_to_highway_segments(
     highways: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Spatial join highway segments polygon to stops.
     """
     stops = gpd.read_parquet(f"{COMPILED_CACHED_GCS}stops_{ANALYSIS_DATE}.parquet")
-    
+
     stops_on_hwys = gpd.sjoin(
         stops.to_crs(geography_utils.CA_StatePlane), 
         highways.to_crs(geography_utils.CA_StatePlane)[["hwy_segment_id", "geometry"]],
@@ -99,22 +102,25 @@ def spatial_join_stops_to_highway_segments(
     return stops_with_speeds
 
 
-def filter_stop_times_to_stops_on_hwy(stops_on_hwy: gpd.GeoDataFrame) -> dd.DataFrame:
+def sjoin_stops_to_highway_segments_get_stop_times(
+    highways: gpd.GeoDataFrame) -> dd.DataFrame:
     """
-    Filter stop times table down to the stops that have been attached
-    to hwy segments.
+    Spatial join highway segments polygon to stops
+    and merge in stop_times info for these stops
+    """    
+    stops_with_speeds = sjoin_stops_to_highway_segments(highways)
     
-    Turn into dask dataframe by the end.
-    """
+    # Join in stop_times for stops for routes on SHN
+    # Use the filtered stop times for stops that do get attached to hwy_segments    
     stop_times_with_hr = catalog.stop_times_for_routes_on_shn.read()
-    
     stop_times_on_hwy = pd.merge(
-        stop_times_with_hr, 
-        stops_on_hwy[["calitp_itp_id", "stop_id", "hwy_segment_id"]],
-        on = ["calitp_itp_id", "stop_id"],
-        how = "inner"
-    )
+            stop_times_with_hr, 
+            stops_with_speeds[["calitp_itp_id", "stop_id", "hwy_segment_id"]],
+            on = ["calitp_itp_id", "stop_id"],
+            how = "inner"
+        )
     
+    # Turn into dask df to put into aggregation function
     stop_times_on_hwy = dd.from_pandas(stop_times_on_hwy, npartitions=1)
     
     return stop_times_on_hwy
@@ -185,6 +191,52 @@ def aggregate_to_hwy_segment(df: pd.DataFrame,
     return segment_with_geom
 
 
+def build_highway_segment_table(segment_stats: pd.DataFrame,
+                                highway_segments: gpd.GeoDataFrame,
+                                highway_polygons: gpd.GeoDataFrame,
+                               ) -> gpd.GeoDataFrame:
+
+    segment_stats1 = aggregate_to_hwy_segment(
+        segment_stats, highway_segments, ["hwy_segment_id"])
+
+    # Add in average speed, aggregated to hwy_segment_id
+    stops_on_hwy = sjoin_stops_to_highway_segments(highway_polygons)
+    
+    # Note: speeds are weighted for trips present in GTFS schedule
+    # not for GTFS RT. GTFS RT speeds are a sample, and it may not 
+    # reflect 100% of all scheduled trips
+    weighted_speeds = calculate_trip_weighted_speed(
+        stops_on_hwy, ["hwy_segment_id"])
+    
+    segment_stats2 = pd.merge(
+        segment_stats1,
+        weighted_speeds,
+        on = "hwy_segment_id",
+        how = "left",
+        validate = "1:1"
+    )
+    
+    hwy_cols_except_id = [c for c in highway_cols if c != 'hwy_segment_id']
+    
+    # Merge in geometry for highway segments
+    gdf = pd.merge(
+        highways, 
+        segment_stats2.drop(columns = hwy_cols_except_id + ["geometry"]), 
+        on = "hwy_segment_id",
+        how = "left",
+        validate = "1:1"
+    )
+    
+    # Clean up columns by filling in missing values with 0's
+    integrify_me = [c for c in gdf.columns if c != "geometry" and 
+                    c not in highway_cols and "speed" not in c]
+    
+    gdf[integrify_me] = gdf[integrify_me].fillna(0).astype(int)
+    gdf["mean_speed_mph_trip_weighted"] = gdf.mean_speed_mph_trip_weighted.round(2)
+    
+    return gdf
+
+
 if __name__=="__main__":
 
     # (1) Highway segments, draw buffer of 50 ft
@@ -193,37 +245,37 @@ if __name__=="__main__":
     
     # (2) Spatial join to keep highway segments that have buses running on SHN
     highway_segments_with_bus = sjoin_bus_routes_to_hwy_segments(highways_polygon)
-    
-    # (3) Spatial join stops to highway segments
-    stops_on_hwy = spatial_join_stops_to_highway_segments(highways_polygon)
-    
-    # (4a) Filter the stop_times table down to stops attached to hwy segments
-    stop_times_on_hwy = filter_stop_times_to_stops_on_hwy(stops_on_hwy)
-    
-    # (4b) Aggregate stops and stop_times to segments 
+        
+    # (3) Spatial join stops to highway segments, also attach stop_times for those stops
+    stop_times_on_hwy = sjoin_stops_to_highway_segments_get_stop_times(highways_polygon)
+        
+    # (4a) Aggregate stops and stop_times to segments 
     by_route_segment = aggregated_route_stats.compile_peak_all_day_aggregated_stats(
         stop_times_on_hwy, route_segment_cols, 
-        stat_cols = {"trip_id": "nunique", 
-                     "departure_hour": "count", 
+        stat_cols = {"departure_hour": "count", 
                      "stop_id": "nunique"})
     
+    # (4b) Merge in number of trips for that route to segments
+    # Trips are different than stops and stop_times, because we
+    # want all the trips passing through to count
+    # not just count the ones where the physical stop is present in segment
+    trips_by_route = (catalog.bus_routes_aggregated_stats.read()
+                      [route_cols + ["trips_all_day", "trips_peak"]]
+                     )
     
-    # (5a) Now aggregate to hwy_segment_id, since there can be multiple routes 
-    # on same segment_id
-    segments_with_geom = aggregate_to_hwy_segment(
-        by_route_segment, highways, ["hwy_segment_id"])
-    
-    # (5b) Add in average speed, aggregated to hwy_segment_id
-    weighted_speeds = calculate_trip_weighted_speed(
-        stops_on_hwy, ["hwy_segment_id"])
-    
-    segments_with_geom_and_speed = pd.merge(
-        segments_with_geom, 
-        weighted_speeds, 
-        on = "hwy_segment_id",
-        how = "inner",
+    by_route_segment2 = pd.merge(
+        by_route_segment,
+        trips_by_route,
+        on = route_cols,
+        how = "left",
+        # many on left because a route_id can be sjoined to multiple hwy_segment_ids
+        validate = "m:1"
     )
     
-    utils.geoparquet_gcs_export(segments_with_geom_and_speed, 
-                                GCS_FILE_PATH, 
-                                "highway_segment_stats")
+    segments_stats_with_geom = build_highway_segment_table(
+        by_route_segment2, highways, highways_polygon)
+    
+    utils.geoparquet_gcs_export(
+        segments_stats_with_geom.to_crs(geography_utils.WGS84), 
+        GCS_FILE_PATH, 
+        "highway_segment_stats")
