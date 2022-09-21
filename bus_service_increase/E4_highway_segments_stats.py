@@ -6,7 +6,7 @@ import intake
 import geopandas as gpd
 import pandas as pd
 
-import G2_aggregated_route_stats as aggregated_route_stats
+import E2_aggregated_route_stats as aggregated_route_stats
 from shared_utils import geography_utils, utils
 from E0_bus_oppor_vars import GCS_FILE_PATH, ANALYSIS_DATE, COMPILED_CACHED_GCS
 

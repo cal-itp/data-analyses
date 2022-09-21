@@ -17,7 +17,7 @@ import pandas as pd
 from shared_utils import (rt_utils, geography_utils, 
                           gtfs_utils, utils)
 from E0_bus_oppor_vars import ANALYSIS_DATE, COMPILED_CACHED_GCS
-from G2_aggregated_route_stats import ANALYSIS_MONTH_DAY
+from E2_aggregated_route_stats import ANALYSIS_MONTH_DAY
 
 def generate_speeds(df, itp_id):
     trip_cols = [
