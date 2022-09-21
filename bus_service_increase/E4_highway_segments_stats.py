@@ -228,15 +228,33 @@ def build_highway_segment_table(segment_stats: pd.DataFrame,
     )
     
     # Clean up columns by filling in missing values with 0's
-    integrify_me = [c for c in gdf.columns if c != "geometry" and 
-                    c not in highway_cols and "speed" not in c]
+    exclude_me = ["segment_sequence", "geometry", "mean_speed_mph_trip_weighted", ]
+    integrify_me = [c for c in gdf.columns if c not in highway_cols and 
+                   c not in exclude_me]
     
     gdf[integrify_me] = gdf[integrify_me].fillna(0).astype(int)
     gdf["mean_speed_mph_trip_weighted"] = gdf.mean_speed_mph_trip_weighted.round(2)
     
-    return gdf
+    # Add per mi metrics
+    gdf2 = normalize_stats(gdf, integrify_me)
+    
+    return gdf2
 
 
+def normalize_stats(df: gpd.GeoDataFrame, 
+                    stats_cols: list) -> gpd.GeoDataFrame:
+    df = df.assign(
+        # route_length is in feet
+        route_length = df.geometry.to_crs(geography_utils.CA_StatePlane).length
+    )
+    # Calculate per mile stats
+    for c in stats_cols:
+        df[f"{c}_per_mi"] = round(
+            df[c].divide(df.route_length) * geography_utils.FEET_PER_MI, 2)
+
+    return df
+
+        
 if __name__=="__main__":
 
     # (1) Highway segments, draw buffer of 50 ft
