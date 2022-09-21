@@ -2,9 +2,6 @@ import pandas as pd
 from calitp import *
 import A1_data_prep
 
-from plotnine import *
-import intake
-
 import altair as alt
 from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
