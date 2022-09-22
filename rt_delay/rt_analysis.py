@@ -108,7 +108,7 @@ class TripPositionInterpolator:
         gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape,
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
-        return gdf ## debug return
+        # return gdf ## debug return
         ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(lambda x:
             x.parallel_offset(25, 'right') if isinstance(x, shapely.geometry.LineString) else x)
