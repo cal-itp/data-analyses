@@ -1,46 +1,15 @@
 import altair as alt
-import altair_saver
 from shared_utils import geography_utils
 from shared_utils import calitp_color_palette as cp
-# from shared_utils import styleguide
 from shared_utils import altair_utils
-
-'''
-Other Functions
-'''
-#Grab value counts and turn it into a dataframe
-def value_counts_df(df, col_of_interest):
-    df = (
-    df[col_of_interest]
-    .value_counts()
-    .to_frame()
-    .reset_index()
-    )
-    return df 
-
-'''
-Crosswalks
-'''
-# Adjust CT district to full names
-full_ct_district = {
-    7: "District 7: Los Angeles",
-    4: "District 4: Bay Area / Oakland",
-    "VAR": "Various",
-    10: "District 10: Stockton",
-    11: "District 11: San Diego",
-    3: "District 3: Marysville / Sacramento",
-    12: "District 12: Orange County",
-    8: "District 8: San Bernardino / Riverside",
-    5: "District 5: San Luis Obispo / Santa Barbara",
-    6: "District 6: Fresno / Bakersfield",
-    1: "District 1: Eureka",
-}
 
 '''
 Chart Functions
 '''
-chart_width = 400
-chart_height = 250
+# Make chart 75% smaller than ours
+# Since the webpage is kind of small
+chart_width = 300
+chart_height = 188
 
 def preset_chart_config(chart: alt.Chart) -> alt.Chart:
     chart = chart.properties(
@@ -74,12 +43,12 @@ def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, char
                                       range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
                                       legend=alt.Legend(title=(labeling(colorcol)))
                                   ),
-                tooltip = [x_col, tooltip_col])
+                tooltip = [tooltip_col])
              .properties( 
                        title=chart_title)
     )
+    chart = preset_chart_config(chart)
 
-    chart= preset_chart_config(chart)
     return chart
 
 def dual_bar_chart(df, control_field:str, chart1_nominal:str,
@@ -117,5 +86,52 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
         tooltip = [chart2_nominal,chart2_quant,])
         .transform_filter(category_selector))
-
+    
+    chart1 = preset_chart_config(chart1)
+    chart2 = preset_chart_config(chart2)
+    
     return(chart1 | chart2)
+
+def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
+                   chart_title:str):
+    """
+    quant_col should be "Column Name:Q"
+    nominal_col should be "Column Name:N"
+    label_col should be "Column Name:N"
+    """
+    # Bar Chart
+    base = (alt.Chart(df)
+            .encode(theta=alt.Theta(quant_col, stack=True), 
+            color=alt.Color(nominal_col, 
+            scale = alt.Scale(range = cp.CALITP_CATEGORY_BRIGHT_COLORS),
+            legend = alt.Legend(title=labeling(label_col))),
+            tooltip = [nominal_col,label_col])
+            .properties(title=chart_title)
+           )
+    # Create pie 
+    pie = base.mark_arc(outerRadius=120)
+    
+    # Add text
+    text = base.mark_text(radius=150, size=12).encode(text=label_col)
+    
+    chart =  preset_chart_config(pie + text).configure_view(strokeOpacity=0)
+    return chart
+
+'''
+Other Functions
+'''
+# Grab value counts and turn it into a dataframe
+def value_counts_df(df, col_of_interest):
+    df = (
+    df[col_of_interest]
+    .value_counts()
+    .to_frame()
+    .reset_index()
+    )
+    return df 
+
+# Strip snakecase
+def clean_up_columns(df):
+    df.columns = df.columns.str.replace("_", " ").str.title().str.strip()
+    return df
+
