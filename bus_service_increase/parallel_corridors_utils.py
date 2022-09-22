@@ -12,19 +12,19 @@ import pandas as pd
 
 from IPython.display import Markdown, HTML, display_html
 
-import E1_setup_parallel_trips_with_stops as setup_parallel_trips_with_stops
-from bus_service_utils import utils
+import D1_setup_parallel_trips_with_stops as setup_parallel_trips_with_stops
 from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide, map_utils
-from E5_make_stripplot_data import diff_cutoffs
+from shared_utils import styleguide #, map_utils
+from D5_make_stripplot_data import DIFF_CUTOFFS
+from E0_bus_oppor_vars import ANALYSIS_DATE, GCS_FILE_PATH
 
 alt.themes.register("calitp_theme", styleguide.calitp_theme)
 
 catalog = intake.open_catalog("./*.yml")
 
-SELECTED_DATE = '2022-1-6' #warehouse_queries.dates['thurs']
-PCT_COMPETITIVE_THRESHOLD = 0.75
-PCT_TRIPS_BELOW_CUTOFF = 1.0
+PCT_COMPETITIVE_THRESHOLD = 0.25
+PCT_TRIPS_BELOW_CUTOFF = 0.5
+
 
 def operator_parallel_competitive_stats(itp_id: int, 
                                         pct_trips_competitive_cutoff: float, 
@@ -39,40 +39,23 @@ def operator_parallel_competitive_stats(itp_id: int,
                         cut-off for route_group,
                         set this to 0.25
     """
-    
-    '''
-    DATA_PATH = f"{utils.GCS_FILE_PATH}2022_Jan/"
+    df = catalog.competitive_route_variability.read()
 
-    # Read in intermediate parquet for trips on selected date
-    trips = pd.read_parquet(f"{DATA_PATH}trips_joined_thurs.parquet")
-
-    # Attach service hours
-    # This df is trip_id-stop_id level
-    trips_with_service_hrs = setup_parallel_trips_with_stops.grab_service_hours(
-        trips, SELECTED_DATE)
-
-    trips_with_service_hrs.to_parquet("./data/trips_with_service_hours.parquet")
-    '''    
-    df = pd.read_parquet("./data/trips_with_service_hours.parquet")
-    df = df[df.calitp_itp_id==itp_id]
-    
-    parallel_df = setup_parallel_trips_with_stops.subset_to_parallel_routes(df)
-    
-    competitive_df = catalog.competitive_route_variability.read()
-    competitive_df2 = competitive_df[
-        (competitive_df.calitp_itp_id == itp_id) & 
-        (competitive_df.pct_trips_competitive > pct_trips_competitive_cutoff)
+    df2 = df[
+        (df.calitp_itp_id == itp_id) & 
+        (df.pct_trips_competitive > pct_trips_competitive_cutoff)
     ]
     
-    competitive_viable_df = competitive_df2[
-        (competitive_df2.pct_below_cutoff >= pct_trips_cutoff) 
+    df3 = df2[
+        (df2.pct_below_cutoff >= pct_trips_cutoff) 
     ]
     
+    include_me = ["on_shn", "intersects_shn"]
+
     operator_dict = {
         "num_routes": df.route_id.nunique(),
-        "parallel_routes": parallel_df.route_id.nunique(),
-        "competitive_routes": competitive_df2.route_id.nunique(),
-        "viable_competitive_routes": competitive_viable_df.route_id.nunique(),
+        "on_shn_or_intersecting_routes": df[df.category.isin(include_me)].route_id.nunique(),
+        "viable_competitive_routes": df3.route_id.nunique(),
     }
     
     return operator_dict
@@ -117,7 +100,7 @@ def make_stripplot(df: pd.DataFrame | gpd.GeoDataFrame,
     # Instead of doing +25% travel time, just use set cut-offs because it's easier
     # to write caption for across operators    
     df = df.assign(
-        cutoff2 = diff_cutoffs[df.route_group.iloc[0]]
+        cutoff2 = DIFF_CUTOFFS[df.route_group.iloc[0]]
     )
     
     # We want to draw horizontal line on chart
@@ -169,7 +152,7 @@ def make_stripplot(df: pd.DataFrame | gpd.GeoDataFrame,
                      "bus_multiplier", "bus_difference", 
                      "num_trips", "num_competitive",
                      "pct_trips_competitive", "pct_below_cutoff",
-                     "p25", "p50", "p75"
+                     "p25", "p50", "p75", "category",
                     ]
           )
         ).transform_calculate(
@@ -243,13 +226,13 @@ def competitive_route_level_stats(df: pd.DataFrame | gpd.GeoDataFrame) -> pd.Dat
     # from make_stripplot_data, set this to hours 17-19
     pm_peak_hours = 3 
     
-    route_cols = ["calitp_itp_id", "route_id", "route_id2", "route_name"]
+    route_cols = ["calitp_itp_id", "route_id", "route_id2", "route_short_name"]
     
     keep_cols = route_cols + [
         "route_group",
         "num_trips", "pct_trips_competitive", 
         "below_cutoff", "pct_below_cutoff",
-        "p25", "p50", "p75",
+        "p25", "p50", "p75", "category",
     ]
     
     df2 = df[keep_cols].drop_duplicates().reset_index(drop=True)

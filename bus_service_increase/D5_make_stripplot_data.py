@@ -22,6 +22,12 @@ from D1_setup_parallel_trips_with_stops import (ANALYSIS_DATE, COMPILED_CACHED,
 catalog = intake.open_catalog("./*.yml")
 route_cols = ["calitp_itp_id", "route_id"]
 
+DIFF_CUTOFFS = {
+    "short": 20,
+    "medium": 30,
+    "long": 40,
+}
+
 def add_trip_time_of_day(trips: pd.DataFrame) -> pd.DataFrame:
     """
     Take trips table that has service hours,
@@ -240,7 +246,29 @@ def merge_in_airtable(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     return df2
     
-
+    
+def add_route_categories(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Add in route categories that are flagged 
+    under quarterly performance objective work.
+    """
+    route_categories = (gpd.read_parquet(
+        f"{utils.GCS_FILE_PATH}routes_categorized_{ANALYSIS_DATE}.parquet")
+        .rename(columns = {"itp_id": "calitp_itp_id"})
+    )
+    
+    gdf2 = pd.merge(
+        gdf,
+        route_categories[["calitp_itp_id", "route_id", "category"]],
+        on = route_cols,
+        how = "left",
+        validate = "m:1"
+    )
+    
+    return gdf2
+    
+    
+    
 if __name__ == "__main__":    
     
     # Import all service hours associated with trip
@@ -253,15 +281,10 @@ if __name__ == "__main__":
     df2 = add_quantiles(df)
     
     # Tag competitive routes based on threshold specified (service_hours/car_duration_hours)
-    df3 = merge_in_competitive_routes(df2, threshold=1.2)
+    df3 = merge_in_competitive_routes(df2, threshold=1.5)
     
     # Break up plot groups by route travel time
-    diff_cutoffs = {
-        "short": 20,
-        "medium": 30,
-        "long": 40,
-    }
-    df4 = designate_plot_group(df3, diff_cutoffs)
+    df4 = designate_plot_group(df3, DIFF_CUTOFFS)
     
     # Merge in agency name
     df5 = merge_in_agency_name(df4)
@@ -269,7 +292,10 @@ if __name__ == "__main__":
     # Merge in Caltrans district from Airtable
     df6 = merge_in_airtable(df5)
     
+    # Merge in route categories from Quarterly Performance Objective work
+    df7 = add_route_categories(df6)
+    
     shared_utils.utils.geoparquet_gcs_export(
-        df6, 
+        df7, 
         utils.GCS_FILE_PATH, 
         f"competitive_route_variability_{ANALYSIS_DATE}")
