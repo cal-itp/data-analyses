@@ -56,6 +56,7 @@ def merge_trips_with_service_hours(selected_date: str)-> pd.DataFrame:
     
     return df
     
+    
 def select_one_trip(df: pd.DataFrame) -> pd.DataFrame:
         
     # Across trip_ids, for the same route_id, there are differing max_stop_sequence
