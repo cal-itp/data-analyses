@@ -120,6 +120,20 @@ def gtfs_time_to_dt(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def interpolate_arrival_times(df):
+    '''
+    Interpolate between provided arrival_times linearly with distance
+    '''
+    interp_df = df.dropna(subset=['arrival_time'])
+    yp = interp_df.arrival_time.to_numpy()
+    yp = yp.astype('datetime64[s]').astype('float64')
+    xp = interp_df.shape_meters.to_numpy()
+
+    interpolator = lambda x: np.interp(x, xp, yp)
+    df.arrival_time = df.apply(lambda x: interpolator(x.shape_meters) if pd.isnull(x.arrival_time) else x.arrival_time,
+                               axis = 1)
+    df.arrival_time = df.arrival_time.to_numpy().astype('datetime64[s]')
+    return df
 
 def check_cached(
     filename: str,

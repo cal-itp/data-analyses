@@ -478,11 +478,5 @@ class OperatorDayAnalysis:
                                         f'{self.calitp_itp_id}_{month}_{day}'
                                         )
         self.rt_trips.to_parquet(f'{GCS_FILE_PATH}rt_trips/{self.calitp_itp_id}_{month}_{day}.parquet')
-        end_delay_to_parquet = self.endpoint_delay_view.copy()
-        end_delay_to_parquet['delay_seconds'] = end_delay_to_parquet.delay.map(lambda x: x.seconds)
-        end_delay_to_parquet = end_delay_to_parquet >> select(-_.delay)
-        shared_utils.utils.geoparquet_gcs_export(end_delay_to_parquet,
-                                         f'{GCS_FILE_PATH}endpoint_delay_views/',
-                                        f'{self.calitp_itp_id}_{month}_{day}_pm_peak'
-                                        )
+
         return
