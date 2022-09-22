@@ -12,23 +12,18 @@ import pandas as pd
 
 from IPython.display import Markdown, HTML, display_html
 
-import D1_setup_parallel_trips_with_stops as setup_parallel_trips_with_stops
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide #, map_utils
-from D5_make_stripplot_data import DIFF_CUTOFFS
-from E0_bus_oppor_vars import ANALYSIS_DATE, GCS_FILE_PATH
+from D1_setup_parallel_trips_with_stops import ANALYSIS_DATE
 
 alt.themes.register("calitp_theme", styleguide.calitp_theme)
 
 catalog = intake.open_catalog("./*.yml")
 
 PCT_COMPETITIVE_THRESHOLD = 0.25
-PCT_TRIPS_BELOW_CUTOFF = 0.5
-
 
 def operator_parallel_competitive_stats(itp_id: int, 
-                                        pct_trips_competitive_cutoff: float, 
-                                        pct_trips_cutoff: float) -> dict:
+                                        competitive_cutoff: float) -> dict:
     """
     itp_id: int
     pct_trips_competitive_cutoff: float
@@ -41,21 +36,17 @@ def operator_parallel_competitive_stats(itp_id: int,
     """
     df = catalog.competitive_route_variability.read()
 
-    df2 = df[
-        (df.calitp_itp_id == itp_id) & 
-        (df.pct_trips_competitive > pct_trips_competitive_cutoff)
-    ]
-    
-    df3 = df2[
-        (df2.pct_below_cutoff >= pct_trips_cutoff) 
-    ]
+    df = df[(df.calitp_itp_id == itp_id)]
     
     include_me = ["on_shn", "intersects_shn"]
-
+    df2 = df[df.category.isin(include_me)]
+                
     operator_dict = {
         "num_routes": df.route_id.nunique(),
-        "on_shn_or_intersecting_routes": df[df.category.isin(include_me)].route_id.nunique(),
-        "viable_competitive_routes": df3.route_id.nunique(),
+        "on_shn_or_intersecting_routes": df2.route_id.nunique(),
+        "competitive_routes": df[df.pct_trips_competitive > competitive_cutoff].route_id.nunique(),
+        "competitive_routes_on_shn_or_intersecting": df2[df2.pct_trips_competitive > competitive_cutoff].route_id.nunique()
+        
     }
     
     return operator_dict
@@ -96,26 +87,19 @@ def specific_point(y_col: str) -> alt.Chart:
 
 def make_stripplot(df: pd.DataFrame | gpd.GeoDataFrame, 
                    y_col: str = "bus_multiplier", 
-                   Y_MIN: int = 0, Y_MAX: int = 5) -> alt.Chart:
+                   Y_MIN: int = 0, Y_MAX: int = 2) -> alt.Chart:
     # Instead of doing +25% travel time, just use set cut-offs because it's easier
     # to write caption for across operators    
-    df = df.assign(
-        cutoff2 = DIFF_CUTOFFS[df.route_group.iloc[0]]
-    )
-    
+        
     # We want to draw horizontal line on chart
     if y_col == "bus_multiplier":
-        df = df.assign(cutoff=2)
+        df = df.assign(cutoff=1.5)
         # if that operator falls well below cut-off, we want the horiz lines to be shown
         # take the max and add some buffer so horiz line can be seen
-        Y_MAX = max(df.cutoff.iloc[0] + 1, Y_MAX)
+        Y_MAX = max(df.cutoff.iloc[0] + 0.5, Y_MAX)
         Y_MIN = min(0, Y_MIN)
         
-    elif y_col == "bus_difference":
-        df = df.assign(cutoff=0)
-        Y_MAX = max(df.cutoff2.iloc[0] + 5, Y_MAX)
-        Y_MIN = min(-5, Y_MIN)
-        
+  
     # Use the same sorting done in the wrangling
     route_sort_order = list(df.sort_values(["calitp_itp_id", 
                                             "pct_trips_competitive", 
@@ -147,12 +131,15 @@ def make_stripplot(df: pd.DataFrame | gpd.GeoDataFrame,
                             )
                            ),
             tooltip=[alt.Tooltip("route_id2", title = "route_id"), 
-                     "route_name", "trip_id", 
+                     "route_name", 
+                     "trip_id", 
                      "service_hours", "car_duration_hours",
-                     "bus_multiplier", "bus_difference", 
-                     "num_trips", "num_competitive",
-                     "pct_trips_competitive", "pct_below_cutoff",
-                     "p25", "p50", "p75", "category",
+                     "bus_multiplier", 
+                     alt.Tooltip("bus_difference", title= "bus_difference_minutes"), 
+                     #"num_trips", "num_competitive",
+                     #"pct_trips_competitive",
+                     #"p25", "p50", "p75", 
+                     "category",
                     ]
           )
         ).transform_calculate(
@@ -194,12 +181,8 @@ def make_stripplot(df: pd.DataFrame | gpd.GeoDataFrame,
            ).transform_filter(alt.datum.fastest_trip==1)
         
     # Must define data with top-level configuration to be able to facet
-    if y_col == "bus_difference":
-        horiz_charts = (horiz_line + horiz_line2)
-        other_charts = p50 + text
-    else:
-        horiz_charts = horiz_line
-        other_charts = p50 + text
+    horiz_charts = horiz_line
+    other_charts = p50 + text
     
     chart = (
         (horiz_charts + 
@@ -226,12 +209,13 @@ def competitive_route_level_stats(df: pd.DataFrame | gpd.GeoDataFrame) -> pd.Dat
     # from make_stripplot_data, set this to hours 17-19
     pm_peak_hours = 3 
     
-    route_cols = ["calitp_itp_id", "route_id", "route_id2", "route_short_name"]
+    route_cols = ["calitp_itp_id", 
+                  #"route_id", "route_id2", 
+                  "route_name"]
     
     keep_cols = route_cols + [
         "route_group",
-        "num_trips", "pct_trips_competitive", 
-        "below_cutoff", "pct_below_cutoff",
+        "num_trips", "pct_trips_competitive",
         "p25", "p50", "p75", "category",
     ]
     

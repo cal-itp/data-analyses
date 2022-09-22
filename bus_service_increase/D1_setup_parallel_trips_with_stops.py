@@ -54,6 +54,8 @@ def merge_trips_with_service_hours(selected_date: str)-> pd.DataFrame:
         how = "inner",
     ).compute()
     
+    df = df.drop(columns = ["calitp_extracted_at", "calitp_deleted_at"])
+    
     return df
     
     
