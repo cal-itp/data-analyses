@@ -29,6 +29,8 @@ day = ANALYSIS_DATE.split('-')[2]
 ANALYSIS_MONTH_DAY = f"{month}_{day}"
 
 catalog = intake.open_catalog("*.yml")
+mtpo_catalog = intake.open_catalog("../quarterly_performance_objective/*.yml")
+
 COMPILED_CACHED_FOLDER = "compiled_cached_views/"
 
 #--------------------------------------------------------------------#
@@ -288,7 +290,8 @@ def get_competitive_routes() -> pd.DataFrame:
     return route_df
     
     
-def build_route_level_table(bus_routes: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def build_route_level_table(bus_routes: gpd.GeoDataFrame, 
+                            stop_times_with_hr: dd.DataFrame) -> gpd.GeoDataFrame:
     # (1) Compile route-level stats
     # (1a) Compile RT trips for all operators and aggregate to route-level
     route_cols = ["calitp_itp_id", "route_id"]
@@ -340,10 +343,10 @@ def build_route_level_table(bus_routes: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     stats_by_route_with_geom = pd.merge(
         bus_routes.rename(
             columns = {"itp_id": "calitp_itp_id"}
-        )[route_cols + ["geometry"]].drop_duplicates(),
+        )[route_cols + ["category", "geometry"]].drop_duplicates(),
         stats_by_route,
         on = route_cols,
-        how = "inner",
+        how = "left",
         validate = "1:1",
     )
     
@@ -353,8 +356,10 @@ def build_route_level_table(bus_routes: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 if __name__=="__main__":
     # (1) Import data
     # (1a) Read in bus routes that run on highways to use for filtering in dask df
-    bus_routes = catalog.bus_routes_on_hwys.read()
-    
+    #bus_routes = catalog.bus_routes_on_hwys.read()
+    # Change this to all routes, filter at the end
+    bus_routes = mtpo_catalog.routes_categorized(analysis_date=ANALYSIS_DATE).read()
+
     keep_itp_ids = bus_routes.itp_id.unique().tolist()
     keep_routes = bus_routes.route_id.unique().tolist()
     
@@ -373,10 +378,16 @@ if __name__=="__main__":
     stop_times_with_hr.compute().to_parquet(f"./data/stop_times_for_routes_on_shn.parquet")
 
     # (3) Assemble route-level table and export
-    stats_by_route = build_route_level_table(bus_routes)
+    stats_by_route = build_route_level_table(bus_routes, stop_times_with_hr)
     
     utils.geoparquet_gcs_export(
         stats_by_route, 
+        GCS_FILE_PATH,
+        "bus_routes_aggregated_stats"
+    )
+    
+    utils.geoparquet_gcs_export(
+        stats_by_route[stats_by_route.category=="on_shn"].reset_index(drop=True),
         GCS_FILE_PATH,
         "bus_routes_on_hwys_aggregated_stats"
     )

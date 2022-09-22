@@ -34,13 +34,15 @@ def sjoin_bus_routes_to_hwy_segments(highways: gpd.GeoDataFrame) -> gpd.GeoDataF
     """
     bus_routes = catalog.bus_routes_on_hwys.read().rename(
         columns = {"itp_id": "calitp_itp_id"})
-    
+        
     # Spatial join to find the highway segments with buses that run on SHN  
     # Highways is polygon, bus_routes is linestring 
     # Put highways on left because that's the geom I want to keep
     s1 = gpd.sjoin(
-        highways[highway_cols + ["geometry"]].drop_duplicates(),
-        bus_routes[route_cols + ["geometry"]].drop_duplicates(),
+        highways[highway_cols + ["geometry"]].drop_duplicates().to_crs(
+            geography_utils.CA_StatePlane),
+        bus_routes[route_cols + ["geometry"]].drop_duplicates().to_crs(
+            geography_utils.CA_StatePlane),
         how = "inner",
         predicate="intersects"
     ).drop(columns = "index_right")
