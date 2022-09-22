@@ -28,23 +28,11 @@ def grab_bus_routes_running_on_highways(
     Increase threshold for how much route overlaps with SHN
     to identify ones actually running on SHN.
     """
-    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}routes_on_shn_{analysis_date}.parquet")
+    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}routes_categorized_{analysis_date}.parquet")
         
-    gdf = gdf.assign(
-        parallel = gdf.apply(lambda x: 
-                             1 if ((x.pct_route > pct_route) and 
-                                   (x.pct_highway > pct_highway)) 
-                             else 0, axis=1),
-    )    
-    
-    parallel = (gdf[gdf.parallel == 1]
-                .reset_index(drop=True)
-               )
-    
-    integrify_me = ["Route", "District", "NB", "SB", "EB", "WB"]
-    parallel[integrify_me] = parallel[integrify_me].astype(int)
-    
-    return parallel 
+    on_shn = gdf[gdf.category=="on_shn"]
+        
+    return on_shn 
 
 
 def cut_highway_segments(segment_distance: int) -> gpd.GeoDataFrame:
