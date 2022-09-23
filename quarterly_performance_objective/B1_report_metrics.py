@@ -43,7 +43,7 @@ def clean_up_category_values(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def get_summary_table(df: pd.DataFrame)-> pd.DataFrame: 
+def get_service_hours_summary_table(df: pd.DataFrame)-> pd.DataFrame: 
     """
     Aggregate by parallel/on_shn/other category.
     Calculate number and pct of service hours, routes.
@@ -58,9 +58,37 @@ def get_summary_table(df: pd.DataFrame)-> pd.DataFrame:
     
     summary = sort_by_column(summary).pipe(clean_up_category_values)
     
+    summary = summary.assign(
+        service_hrs_per_route = round(summary.total_service_hours / 
+                                      summary.unique_route, 2)
+    )
+    
     return summary
 
 
-def seconds_to_hours(df: pd.DataFrame, col: str) -> float:
-    return df[col].sum() / 60 **2
-  
+def get_delay_summary_table(df: pd.DataFrame) -> pd.DataFrame:
+    # Note: merge_delay both narrows down the dataset quite a bit
+    delay_df = df[df.merge_delay=="both"]
+
+    delay_summary = geography_utils.aggregate_by_geography(
+        delay_df, 
+        group_cols = ["category"],
+        sum_cols = ["delay_seconds", "unique_route"],
+    ).astype({"delay_seconds": int})
+    
+    delay_summary = (sort_by_column(delay_summary)
+                     .pipe(clean_up_category_values)
+                    )
+
+    delay_summary = delay_summary.assign(
+        delay_hours = round(delay_summary.delay_seconds / 60 ** 2, 2)
+    ).drop(columns = "delay_seconds")
+
+    delay_summary = delay_summary.assign(
+        delay_hours_per_route = round(delay_summary.delay_hours / 
+                                      delay_summary.unique_route, 2)
+    )
+    
+    delay_summary = add_percent(delay_summary, ["delay_hours", "unique_route"])
+    
+    return delay_summary
