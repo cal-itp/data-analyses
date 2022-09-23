@@ -13,14 +13,14 @@ import pandas as pd
 from IPython.display import Markdown, HTML, display_html
 
 from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide #, map_utils
+from shared_utils import styleguide
 from D1_setup_parallel_trips_with_stops import ANALYSIS_DATE
 
 alt.themes.register("calitp_theme", styleguide.calitp_theme)
 
 catalog = intake.open_catalog("./*.yml")
 
-PCT_COMPETITIVE_THRESHOLD = 0.25
+PCT_COMPETITIVE_THRESHOLD = 0.5
 
 def operator_parallel_competitive_stats(itp_id: int, 
                                         competitive_cutoff: float) -> dict:
@@ -175,10 +175,10 @@ def make_stripplot(df: pd.DataFrame | gpd.GeoDataFrame,
             .mark_text(align='center', baseline='middle')
             .encode(
                 x=alt.value(30),
-                y=alt.value(15),
+                y=alt.value(25),
                 text=alt.Text('pct_trips_competitive:Q', format='.0%'), 
                 color=alt.value("black"))
-           ).transform_filter(alt.datum.fastest_trip==1)
+           ).transform_filter(alt.datum.p50_trip==1)
         
     # Must define data with top-level configuration to be able to facet
     horiz_charts = horiz_line
