@@ -1,5 +1,5 @@
 directory: ./bus_service_increase/
-notebook: ./bus_service_increase/competitive-parallel-routes.ipynb
+notebook: ./bus_service_increase/competitive-routes.ipynb
 parts:
 - chapters:
   - caption: District 01 - Eureka
@@ -117,4 +117,4 @@ parts:
     sections:
     - itp_id: 235
 readme: ./bus_service_increase/README.md
-title: Parallel Bus Corridors to State Highway Network
+title: Competitive Bus Routes near State Highway Network
