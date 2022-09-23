@@ -96,7 +96,7 @@ sources:
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/stops_on_hwys.parquet
   segmented_highways:
     driver: geoparquet
-    description: Highways cut at 1 mi segments.
+    description: Highways cut at 5 mi segments.
     args:
       # source: bus_service_increase/E1_get_buses_on_shn.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/segmented_highways.parquet

@@ -27,20 +27,15 @@ Scripts associated with data creation and visualization / output generation. The
 1. [create_parallel_corridors](./create_parallel_corridors.py): find transit routes that are considered parallel to State Highway Network
 1. [setup_corridors_stats](./setup_corridors_stats.py): aggregate summary stats by operator or highway route
 
-### Planning and Modal Advisory Committee (PMAC)
-
-1. [script](./D1_current_routes.py)
-1. [analysis notebook](./D2_pmac.ipynb)
-Note: these were run with latest dates prior to `dim_shapes` table creation.  
 
 ### Data Assembly
 
-1. [setup_parallel_trips_with_stops](./E1_setup_parallel_trips_with_stops.py): set up parallel routes, select 1 representative trip per route (fastest trip), to compare against car 
-1. [setup_gmaps](./E2_setup_gmaps.py): set up df to be used in Google Directions API with origin, destination, waypoint, and departure times
-1. [make_gmaps_requests](./E3_make_gmaps_requests.py): make Google Directions API requests and cache results in GCS
-1. [make_gmaps_results](./E4_make_gmaps_results.py): grab cached JSON results and assemble into df
-1. [make_stripplot_data](./E5_make_stripplot_data.py): merge competitive routes info from Google Directions API back to trip-level data and wrangle data for making stripplots showing trip variability.
-1. [definitions-competitive-viable](./E6_definitions-competitive-viable.ipynb): descriptives to justify cut-offs in competitive-parallel-routes report
+1. [setup_parallel_trips_with_stops](./D1_setup_parallel_trips_with_stops.py): set up parallel routes, select 1 representative trip per route (25th percentile trip), to compare against car 
+1. [setup_gmaps](./D2_setup_gmaps.py): set up df to be used in Google Directions API with origin, destination, waypoint, and departure times
+1. [make_gmaps_requests](./D3_make_gmaps_requests.py): make Google Directions API requests and cache results in GCS
+1. [make_gmaps_results](./D4_make_gmaps_results.py): grab cached JSON results and assemble into df
+1. [make_stripplot_data](./D5_make_stripplot_data.py): merge competitive routes info from Google Directions API back to trip-level data and wrangle data for making stripplots showing trip variability.
+1. [definitions-competitive-viable](./D6_definitions-competitive-viable.ipynb): descriptives to justify cut-offs in competitive-parallel-routes report
 
 
 ### Reports
@@ -49,4 +44,3 @@ Note: these were run with latest dates prior to `dim_shapes` table creation.
 1. [competitive-parallel-routes](./competitive-parallel-routes.ipynb): parameterized report at operator-level showing which parallel routes are viable competitive routes to prioritize for service improvements
 1. [publish_single_report](./publish_single_report.py): nbconvert notebook into html, then upload it to GitHub and host as GH pages
 1. [highways-no-parallel-routes-gh](./highways-no-parallel-routes-gh.ipynb): unparameterized report at state-level showing highway corridors by district with no parallel routes. [Report here.](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-no-parallel-routes.html)
-1. [highways-low-competitive-routes.ipynb](./highways-low-competitive-routes.ipynb): unparameterized report at state-level showing highway corridors by district with high parallel routes, but low competitive routes. [Report here.](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-low-competitive-routes.html)
