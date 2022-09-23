@@ -26,14 +26,12 @@ def operator_parallel_competitive_stats(itp_id: int,
                                         competitive_cutoff: float) -> dict:
     """
     itp_id: int
-    pct_trips_competitive_cutoff: float
-                                    Ex: if 75% of trips are within 2x bus_multiplier, 
-                                    set this to 0.75
-    pct_trips_cutoff: float
-                        Ex: if 25% trips are within the bus_difference 
-                        cut-off for route_group,
-                        set this to 0.25
+    competitive_cutoff: float
+                        Ex: if 75% of trips are within 1.5x bus_multiplier, 
+                        set this to 0.75
     """
+    c = competitive_cutoff
+    
     df = catalog.competitive_route_variability.read()
 
     df = df[(df.calitp_itp_id == itp_id)]
@@ -44,8 +42,10 @@ def operator_parallel_competitive_stats(itp_id: int,
     operator_dict = {
         "num_routes": df.route_id.nunique(),
         "on_shn_or_intersecting_routes": df2.route_id.nunique(),
-        "competitive_routes": df[df.pct_trips_competitive > competitive_cutoff].route_id.nunique(),
-        "competitive_routes_on_shn_or_intersecting": df2[df2.pct_trips_competitive > competitive_cutoff].route_id.nunique()
+        "competitive_routes": df[
+            df.pct_trips_competitive > c].route_id.nunique(),
+        "competitive_routes_on_shn_or_intersecting": df2[
+            df2.pct_trips_competitive > c].route_id.nunique()
         
     }
     
@@ -210,8 +210,9 @@ def competitive_route_level_stats(df: pd.DataFrame | gpd.GeoDataFrame) -> pd.Dat
     pm_peak_hours = 3 
     
     route_cols = ["calitp_itp_id", 
-                  #"route_id", "route_id2", 
-                  "route_name"]
+                  "route_id", "route_id2", 
+                  "route_short_name", 
+    ]
     
     keep_cols = route_cols + [
         "route_group",
