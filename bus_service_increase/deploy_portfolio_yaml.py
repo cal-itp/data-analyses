@@ -9,15 +9,13 @@ import pandas as pd
 import yaml
 
 from pathlib import Path
-
-import utils
+from bus_service_utils import utils
 
 catalog = intake.open_catalog("./bus_service_increase/*.yml")
 
 # these come from parallel_corridors_utils
 # but, importing these throws error because of directories when the Makefile is run
-PCT_COMPETITIVE_THRESHOLD = 0.75
-PCT_TRIPS_BELOW_CUTOFF = 1.0
+PCT_COMPETITIVE_THRESHOLD = 0.25
 
 PORTFOLIO_SITE_YAML = Path("./portfolio/sites/parallel_corridors.yml")
 
@@ -25,10 +23,7 @@ PORTFOLIO_SITE_YAML = Path("./portfolio/sites/parallel_corridors.yml")
 # From UI/UX perspective, it's confusing to readers because they think it's an error that
 # more routes aren't showing up, rather than deliberately showing results that meet certain criteria
 def valid_operators(df: pd.DataFrame | gpd.GeoDataFrame) -> list:
-    t1 = df[(df.route_group.notna()) &
-            (df.pct_trips_competitive > PCT_COMPETITIVE_THRESHOLD) &
-            (df.pct_below_cutoff >= PCT_TRIPS_BELOW_CUTOFF)
-           ]
+    t1 = df[df.pct_trips_competitive > PCT_COMPETITIVE_THRESHOLD]
     
     # Count unique routes that show up by operator-route_group
     t2 = (t1.groupby(["calitp_itp_id", "route_group"])
@@ -96,7 +91,6 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML: Path) -> list:
 
     # Make this into a list item
     parts_list = [{'chapters': chapters_list}]
-
 
     analyses_data['parts'] = parts_list
     

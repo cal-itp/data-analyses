@@ -1,18 +1,17 @@
-# Parallel Corridors Analysis
+# Transit near the State Highway Network
 
-**Motivation**: Identify the bus routes that are parallel to the State Highway Network (SHN). 
+**Motivation**: Identify the most competitive bus routes near the State Highway Network (SHN).
 
 ## Important Definitions
 
 The [Methodology section](#methodology) explains why these definitions are needed. 
 
-**Parallel routes**: routes where at least 30% of the bus route falls within 1 mile of the SHN *and* cover at least 10% of the highway segment's length.
+**Routes on SHN**: routes where at least 20% of the bus route takes place on the SHN (within a 50 ft buffer).
+**Routes Intersecting SHN**: routes where at least 35% of the bus route falls within 0.5 mile of the SHN. 
+**Routes Near SHN**: the sum of routes on the SHN and intersecting the SHN. In some way, these routes are impacted by the SHN, either through traffic conditions or simply because they pass through freeway on-ramps and underpasses.
 
-**Competitive routes**: routes where at least 75% of the trips take no longer than 2x a car. 
+**Competitive routes**: routes where at least 25% of the trips take no longer than 1.5x a car. A multiplier of 1 means that the bus and the car take the same amount of time. A multiplier of 1.5 means that the bus takes 50% longer than the car.
 
-**Viable competitive routes**: competitive routes where at least 75% of the trips take no longer than 2x a car *and* 100% of the trips take no longer than an additional 20, 30, or 40 min cut-off time (depending on route length). 
-
-In CA, nearly 2/3 of bus routes are parallel, accounting for 55% of the service hours (typical weekday, 2/8/22).
 
 Caltrans perspective:
 * If Caltrans were to sponsor an express bus, which highway corridors have no parallel transit routes?
@@ -20,41 +19,28 @@ Caltrans perspective:
 Transit operator perspective:
 * Of the parallel bus routes, which ones are competitive against car travel and should be targeted for future service improvements? 
 * Operators with GTFS Real-Time feeds: explore these competitive bus routes and [see where the bottlenecks are](https://analysis.calitp.org/rt/README.html).
-* Which highway corridors have some parallel routes but [few competitive routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-low-competitive-routes.html)?
 * Which highway corridors have [no parallel routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-no-parallel-routes.html)?
 
 
 ## Data
 
-* GTFS schedule data - trips on a typical weekday, 1/6/22.
+* GTFS schedule data - trips on a typical weekday, 5/3/22.
 * State highway network
 * [Data catalog](https://github.com/cal-itp/data-analyses/blob/main/bus_service_increase/catalog.yml)
 * [Data cleaning scripts](https://github.com/cal-itp/data-analyses/blob/main/bus_service_increase/README_analysis.md) 
 
 ## Methodology
-### Identifying Competitive Routes Amongst Parallel Routes
+### Identifying Competitive Routes 
 
 The idea is to take parallel routes and narrow in on a set of competitive routes. An operator would not be able to improve bus service along all its parallel routes, but could more readily improve service frequency on the routes most competitive with car travel.
 
-The fastest trip for the bus route is selected and a comparison is made to car travel (since each Google Directions API request costs money). The car is constrained to following every 3rd, 4th, or 5th bus stop as waypoints (depending on the route length), and travels at the same departure hour on the same day as the bus.
+A faster trip (25th percentile) for the bus route is selected and a comparison is made to car travel (since each Google Directions API request costs money). The car is constrained to following every 3rd, 4th, or 5th bus stop as waypoints (depending on the route length), and travels at the same departure hour on the same day as the bus.
 
 Relative to this car travel time, all the trips for a bus route is compared, and a ratio, the `bus_multiplier` is calculated. Actual bus service hours are available in GTFS schedule data. But, each bus route is associated with only one car travel time (Google Directions API). A ratio of 1 means that the bus trip takes the same amount of time as a car; a ratio of 2 means that the bus trip takes twice as long as the car. 
 
-**Competitive routes**: routes where at least 75% of the trips take no longer than 2x a car. 
+**Competitive routes**: routes where at least 25% of the trips take no longer than 1.5x than a car. 
 
-### Identifying the Most Viable Competitive Routes
-Within an operator, there is additional variability in the type of routes it serves. For a short route to take no more than an hour to make a trip, staying within the 2x car travel time means the route is completed within 2 hours. For a long route that takes 2 hours, staying within the 2x car travel time means the route is completed within 4 hours. 
-
-Bus riders would not accept such a high discrepancy for travel time. Therefore, a new metric, `bus_difference` is calculated, showing the difference, in minutes, between bus and car travel time for that bus trip. 
-
-The `bus_multiplier` metric is then paired with a `bus_difference` metric. All of the bus route's trips must be within this `bus_difference` threshold. For a short route, all of the bus route's trips cannot take longer than an additional 20 min compared to a car. These thresholds are used to show an operator its most viable competitive routes. **For each route group, the operator must have at least 2 routes, and up to 15 routes are recommended.** 
-
-* Short (< 1 hr): +20 min for bus
-* Medium (1-1.5 hrs): +30 min
-* Long (> 1.5 hrs): +40 min
-
-**Viable competitive routes**: competitive routes where at least 75% of the trips take no longer than 2x a car *and* 100% of the trips take no longer than an additional 20, 30, or 40 min cut-off time (depending on route length). 
-
+**For each route group, the operator must have at least 2 routes, and up to 15 routes are recommended.** 
 
 ### Notes
 
