@@ -1,8 +1,9 @@
 # Run this in data-analyses
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 build_competitive_corridors:
-	pip install -r portfolio/requirements.txt
-	#git rm portfolio/parallel_corridors/ -rf
+	#pip install -r portfolio/requirements.txt
+	#git rm portfolio/competitive_corridors/ -rf
+	#need git rm because otherwise, just local removal, but git change is untracked
 	python portfolio/portfolio.py clean competitive_corridors
 	python bus_service_increase/deploy_portfolio_yaml.py   
 	python portfolio/portfolio.py build competitive_corridors --deploy 
