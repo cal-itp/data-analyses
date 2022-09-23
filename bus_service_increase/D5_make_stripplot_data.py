@@ -134,7 +134,7 @@ def merge_in_competitive_routes(df: pd.DataFrame, threshold: float) -> gpd.GeoDa
         bus_multiplier = gdf.service_hours.divide(gdf.car_duration_hours).round(2),
         # difference (in minutes) between car and bus
         bus_difference = ((gdf.service_hours - gdf.car_duration_hours) * 60).round(1),
-        num_trips = gdf.groupby(route_cols)["trip_id"].transform("nunique")
+        num_trips = gdf.groupby(route_cols)["trip_id"].transform("count")
     )
 
     gdf = gdf.assign(
@@ -246,11 +246,14 @@ def add_route_categories(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf3
     
     
-    
-if __name__ == "__main__":    
+def assemble_data(analysis_date: str, threshold: float = 1.5, 
+                  service_time_cutoffs: dict = {
+                    "short": 1.0,
+                    "medium": 1.5}
+               ) -> gpd.GeoDataFrame:   
     
     # Import all service hours associated with trip
-    trip_service_hours = merge_trips_with_service_hours(ANALYSIS_DATE)
+    trip_service_hours = merge_trips_with_service_hours(analysis_date)
 
     # Grab first stop time for each trip, get departure hour
     df = add_trip_time_of_day(trip_service_hours)
@@ -259,14 +262,10 @@ if __name__ == "__main__":
     df2 = add_quantiles(df)
     
     # Tag competitive routes based on threshold specified (service_hours/car_duration_hours)
-    df3 = merge_in_competitive_routes(df2, threshold=1.5)
+    df3 = merge_in_competitive_routes(df2, threshold=threshold)
     
     # Break up plot groups by route travel time
-    SERVICE_TIME_CUTOFFS = {
-        "short": 1.0,
-        "medium": 1.5,
-    }
-    df4 = add_route_group(df3, SERVICE_TIME_CUTOFFS)
+    df4 = add_route_group(df3, service_time_cutoffs)
     
     # Merge in agency name
     df5 = merge_in_agency_name(df4)
@@ -277,7 +276,19 @@ if __name__ == "__main__":
     # Merge in route categories from Quarterly Performance Objective work
     df7 = add_route_categories(df6)
     
+    return df7
+
+    
+if __name__ == "__main__":    
+    SERVICE_TIME_CUTOFFS = {
+        "short": 1.0,
+        "medium": 1.5,
+    }
+    
+    gdf = assemble_data(ANALYSIS_DATE, threshold = 1.5, 
+                        service_time_cutoffs = SERVICE_TIME_CUTOFFS)
+    
     shared_utils.utils.geoparquet_gcs_export(
-        df7, 
+        gdf, 
         utils.GCS_FILE_PATH, 
         f"competitive_route_variability_{ANALYSIS_DATE}")
