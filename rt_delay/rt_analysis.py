@@ -108,7 +108,7 @@ class TripPositionInterpolator:
         gdf.geometry = gdf.apply(lambda x: shapely.ops.substring(self.shape,
                                                                 x.last_loc,
                                                                 x.shape_meters), axis = 1)
-        return gdf ## debug return
+        # return gdf ## debug return
         ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(lambda x:
             x.parallel_offset(25, 'right') if isinstance(x, shapely.geometry.LineString) else x)
@@ -430,29 +430,29 @@ class OperatorDayAnalysis:
                 _delay.arrival_time = _delay.arrival_time.map(lambda x: fix_arrival_time(x)[0]) ## reformat 25:xx GTFS timestamps to standard 24 hour time
                 _delay['arrival_time'] = _delay.apply(lambda x:
                                     dt.datetime.combine(x.actual_time.date(),
-                                                        dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time()),
+                                                        dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time()) if x.arrival_time else np.nan,
                                                         axis = 1) ## format scheduled arrival times
                 _delay = _delay >> filter(_.arrival_time.apply(lambda x: x.date()) == _.actual_time.iloc[0].date())
+                if _delay.arrival_time.isnull().any():
+                    _delay = interpolate_arrival_times(_delay)
                 _delay['arrival_time'] = _delay.arrival_time.astype('datetime64')
                 # self.debug_dict[f'{trip_id}_times'] = _delay
                 _delay['delay'] = _delay.actual_time - _delay.arrival_time
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
                 _delay['delay_seconds'] = _delay.delay.map(lambda x: x.seconds)
-                
+
                 self.debug_dict[f'{trip_id}_stopsegs'] = _delay
                 try:
                     _delay = self._add_km_segments(_delay)
                 except:
                     print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
                     continue
-                
+
                 _delays = pd.concat((_delays, _delay))
                 self.debug_dict[f'{trip_id}_delay'] = _delay
-                # return
             except Exception as e:
                 print(f'could not generate delays for trip {trip_id}')
                 print(e)
-                # return
                 
             if type(self.pbar) != type(None):
                 self.pbar.update()
@@ -478,11 +478,5 @@ class OperatorDayAnalysis:
                                         f'{self.calitp_itp_id}_{month}_{day}'
                                         )
         self.rt_trips.to_parquet(f'{GCS_FILE_PATH}rt_trips/{self.calitp_itp_id}_{month}_{day}.parquet')
-        end_delay_to_parquet = self.endpoint_delay_view.copy()
-        end_delay_to_parquet['delay_seconds'] = end_delay_to_parquet.delay.map(lambda x: x.seconds)
-        end_delay_to_parquet = end_delay_to_parquet >> select(-_.delay)
-        shared_utils.utils.geoparquet_gcs_export(end_delay_to_parquet,
-                                         f'{GCS_FILE_PATH}endpoint_delay_views/',
-                                        f'{self.calitp_itp_id}_{month}_{day}_pm_peak'
-                                        )
+
         return

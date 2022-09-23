@@ -161,8 +161,11 @@ class RtFilterMapper:
             trips = trips >> filter(_.direction == self.filter['direction'])
         return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
     
-    def add_corridor(self, corridor_gdf):
+    def add_corridor(self, corridor_gdf, hotspot=False):
         '''
+        hotspot: ignore requirement for a set number of shape stops within corridor,
+        appropriate for evaluating intersection delay, etc
+        
         Add ability to filter stop_delay_view and subsequently generated stop_segment_speed_views
         to trips running within a corridor, as specified by a polygon bounding box (corridor gdf).
         Enables calculation of metrics for SCCP, LPP.
@@ -175,13 +178,16 @@ class RtFilterMapper:
                           >> distinct(_.shape_id, _.stop_sequence)
                           >> arrange(_.shape_id, _.stop_sequence)
                          )
-        stops_per_shape = shape_sequences >> group_by(_.shape_id) >> summarize(n_stops = _.shape_id.size)
-        # can use this as # of stops in corr...
-        stops_in_corr = clipped >> group_by(_.shape_id) >> summarize(in_corr = _.shape_id.size)
-        stop_comparison = stops_per_shape >> inner_join(_, stops_in_corr, on='shape_id')
-        # only keep shapes with at least half of stops in corridor
-        stop_comparison = stop_comparison >> mutate(corr_shape = _.in_corr > _.n_stops / 2)
-        corr_shapes = stop_comparison >> filter(_.corr_shape)
+        if hotspot:
+            corr_shapes = clipped
+        else:
+            stops_per_shape = shape_sequences >> group_by(_.shape_id) >> summarize(n_stops = _.shape_id.size)
+            # can use this as # of stops in corr...
+            stops_in_corr = clipped >> group_by(_.shape_id) >> summarize(in_corr = _.shape_id.size)
+            stop_comparison = stops_per_shape >> inner_join(_, stops_in_corr, on='shape_id')
+            # only keep shapes with at least 10% of stops in corridor
+            stop_comparison = stop_comparison >> mutate(corr_shape = _.in_corr > _.n_stops / 10)
+            corr_shapes = stop_comparison >> filter(_.corr_shape)
         self._shape_sequence_filter = {}
         for shape_id in corr_shapes.shape_id.unique():
             self._shape_sequence_filter[shape_id] = {}
@@ -199,6 +205,7 @@ class RtFilterMapper:
              )
         self.stop_delay_view['corridor'] = self.stop_delay_view.apply(fn, axis=1)
         corridor_filtered = self.stop_delay_view >> filter(_.corridor)
+        assert not corridor_filtered.empty
         first_stops = corridor_filtered >> group_by(_.trip_id) >> summarize(stop_sequence = _.stop_sequence.min())
         entry_delays = (first_stops
                 >> inner_join(_, corridor_filtered, on = ['trip_id', 'stop_sequence'])
@@ -381,40 +388,6 @@ class RtFilterMapper:
             },
             reduce_precision = False
         )
-
-# Adding corridor to map works OK, if needed would just have to tweak opacity, handle legend 
-        
-#         layers_dict = {
-#             "Speed Data": {"df": gdf,
-#                 "plot_col": how_speed_col[how],
-#                 "popup_dict": popup_dict,
-#                 "tooltip_dict": popup_dict,
-#                 "colorscale": colorscale
-#                 }
-#         }
-        
-#         if corridor:
-#             layers_dict["Corridor"] = {"df": self.corridor,
-#                 "plot_col": self.corridor.columns[0],
-#                 "popup_dict": {},
-#                 "tooltip_dict": {},
-#                 "colorscale": branca.colormap.StepColormap(colors=shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS)
-#                 }
-        
-#         g = make_folium_multiple_layers_map(
-#             layers_dict,
-#             fig_width = size[0],
-#             fig_height = size[1],
-#             zoom = 13,
-#             centroid = [centroid[1], centroid[0]],
-#             title = title, 
-#             legend_name = "Speed (miles per hour)",
-#             highlight_function=lambda x: {
-#                 'fillColor': '#DD1C77',
-#                 "fillOpacity": 0.6,
-#             },
-#             reduce_precision = False
-#         )
         
         return g  
 
@@ -592,8 +565,8 @@ class RtFilterMapper:
               >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
              )
         speed_metric = df.target_delay_seconds.sum() / 60
-        return {'schedule_metric': schedule_metric,
-               'speed_metric': speed_metric}
+        return {'schedule_metric_minutes': schedule_metric,
+               'speed_metric_minutes': speed_metric}
     
 def from_gcs(itp_id, analysis_date, pbar = None):
     ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_analysis.OperatorDayAnalysis.export_views_gcs()
