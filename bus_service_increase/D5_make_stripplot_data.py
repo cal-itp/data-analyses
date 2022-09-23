@@ -22,6 +22,12 @@ from D1_setup_parallel_trips_with_stops import (ANALYSIS_DATE, COMPILED_CACHED,
 catalog = intake.open_catalog("./*.yml")
 route_cols = ["calitp_itp_id", "route_id"]
 
+#DIFF_CUTOFFS = {
+#    "short": 20,
+#    "medium": 30,
+#    "long": 40,
+#}
+
 def add_trip_time_of_day(trips: pd.DataFrame) -> pd.DataFrame:
     """
     Take trips table that has service hours,
@@ -116,7 +122,7 @@ def merge_in_competitive_routes(df: pd.DataFrame, threshold: float) -> gpd.GeoDa
     gmaps_results = catalog.gmaps_results.read()
 
     # Merge in the competitive trip info
-    gdf = pd.merge(gmaps_results[route_cols + ["car_duration_hours"]],
+    gdf = pd.merge(gmaps_results[route_cols + ["car_duration_hours", "geometry"]],
                    df, 
                    on = route_cols,
                    how = "outer",
@@ -128,7 +134,7 @@ def merge_in_competitive_routes(df: pd.DataFrame, threshold: float) -> gpd.GeoDa
         bus_multiplier = gdf.service_hours.divide(gdf.car_duration_hours).round(2),
         # difference (in minutes) between car and bus
         bus_difference = ((gdf.service_hours - gdf.car_duration_hours) * 60).round(1),
-        num_trips = gdf.groupby(route_cols)["trip_id"].transform("nunique")
+        num_trips = gdf.groupby(route_cols)["trip_id"].transform("count")
     )
 
     gdf = gdf.assign(
@@ -144,67 +150,35 @@ def merge_in_competitive_routes(df: pd.DataFrame, threshold: float) -> gpd.GeoDa
         
     gdf = gdf.assign(
         pct_trips_competitive = gdf.num_competitive.divide(gdf.num_trips).round(3)
-    )    
+    )      
     
     return gdf
 
 
-def designate_plot_group(df: gpd.GeoDataFrame, diff_cutoffs: dict) -> gpd.GeoDataFrame:
-    # Add plot group, since stripplot can get crowded, plot 15 max?
+def add_route_group(df: gpd.GeoDataFrame, 
+                    service_time_cutoff: dict = {"short": 1, "medium": 1.5}
+                   ) -> gpd.GeoDataFrame:
     
-    for c in ["bus_difference"]:
-        df = df.assign(
-            minimum = df.groupby(route_cols)[c].transform("min"),
-            maximum = df.groupby(route_cols)[c].transform("max"),
-        )
-        df = df.assign(
-            spread = (df.maximum - df.minimum) 
-        ).rename(columns = {"spread": f"{c}_spread"}
-                ).drop(columns = ["minimum", "maximum"])
-
-    df2 = (df.assign(
-               # Break it up into short / medium / long routes instead of plot group
-               max_trip_hrs = df.groupby(route_cols)["service_hours"].transform("max"),
-          )
-           .reset_index(drop=True)
+    max_service_hours = (df.groupby(route_cols)["service_hours"]
+                         .max().reset_index()
+                        )
+    
+    max_service_hours["route_group"] = max_service_hours.apply(
+        lambda x: "short" if x.service_hours <= service_time_cutoff["short"]
+        else "medium" if ((x.service_hours > service_time_cutoff["short"]) and                  
+        (x.service_hours <= service_time_cutoff["medium"]) )
+        else "long", axis=1
     )
     
-    
-    df2 = df2.assign(
-        route_group = df2.apply(lambda x: "short" if x.max_trip_hrs <= 1.0
-                               else "medium" if x.max_trip_hrs <=1.5
-                               else "long", axis=1)
-    )
-    
-    df2 = df2.assign(
-        max_trip_route_group = df2.groupby(route_cols)["service_hours"].transform("max") 
-    )
-    
-    # Merge back in
-    df3 = pd.merge(
-        df, 
-        df2[["calitp_itp_id", "route_id", "route_group", 
-             "max_trip_hrs", "max_trip_route_group"]].drop_duplicates(), 
+    df2 = pd.merge(
+        df,
+        max_service_hours.drop(columns = "service_hours"), # drop the max service hours
         on = route_cols,
         how = "left",
         validate = "m:1"
     )
     
-    # Add cut-off thresholds by route_group
-    # Calculate a certain threshold of competitive trips within that cut-off, and
-    # call those "viable"
-    df4 = df3.assign(
-        below_cutoff = df3.apply(lambda x: 
-                                 1 if x.bus_difference <= diff_cutoffs[x.route_group]
-                                 else 0, axis=1),
-        num_trips = df3.groupby(route_cols)["trip_id"].transform("count")
-    )
-    
-
-    df4["below_cutoff"] = df4.groupby(route_cols)["below_cutoff"].transform("sum")
-    df4["pct_below_cutoff"] = df4.below_cutoff.divide(df4.num_trips)
-    
-    return df4
+    return df2
 
 
 # Use agency_name from our views.gtfs_schedule.agency instead of Airtable?
@@ -240,11 +214,46 @@ def merge_in_airtable(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     return df2
     
-
-if __name__ == "__main__":    
+    
+def add_route_categories(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Add in route categories that are flagged 
+    under quarterly performance objective work.
+    """
+    route_categories = (gpd.read_parquet(
+        f"{utils.GCS_FILE_PATH}routes_categorized_{ANALYSIS_DATE}.parquet")
+        .rename(columns = {"itp_id": "calitp_itp_id"})
+    )
+    
+    gdf2 = pd.merge(
+        gdf,
+        route_categories[["calitp_itp_id", "route_id", "category"]],
+        on = route_cols,
+        how = "left",
+        validate = "m:1"
+    )
+    
+    # Clean up route_name
+    route_names = shared_utils.portfolio_utils.add_route_name(ANALYSIS_DATE)
+    
+    gdf3 = pd.merge(
+        gdf2,
+        route_names,
+        on = ["calitp_itp_id", "route_id"],
+        how = "left"
+    )
+    
+    return gdf3
+    
+    
+def assemble_data(analysis_date: str, threshold: float = 1.5, 
+                  service_time_cutoffs: dict = {
+                    "short": 1.0,
+                    "medium": 1.5}
+               ) -> gpd.GeoDataFrame:   
     
     # Import all service hours associated with trip
-    trip_service_hours = merge_trips_with_service_hours(ANALYSIS_DATE)
+    trip_service_hours = merge_trips_with_service_hours(analysis_date)
 
     # Grab first stop time for each trip, get departure hour
     df = add_trip_time_of_day(trip_service_hours)
@@ -253,15 +262,10 @@ if __name__ == "__main__":
     df2 = add_quantiles(df)
     
     # Tag competitive routes based on threshold specified (service_hours/car_duration_hours)
-    df3 = merge_in_competitive_routes(df2, threshold=1.2)
+    df3 = merge_in_competitive_routes(df2, threshold=threshold)
     
     # Break up plot groups by route travel time
-    diff_cutoffs = {
-        "short": 20,
-        "medium": 30,
-        "long": 40,
-    }
-    df4 = designate_plot_group(df3, diff_cutoffs)
+    df4 = add_route_group(df3, service_time_cutoffs)
     
     # Merge in agency name
     df5 = merge_in_agency_name(df4)
@@ -269,7 +273,22 @@ if __name__ == "__main__":
     # Merge in Caltrans district from Airtable
     df6 = merge_in_airtable(df5)
     
+    # Merge in route categories from Quarterly Performance Objective work
+    df7 = add_route_categories(df6)
+    
+    return df7
+
+    
+if __name__ == "__main__":    
+    SERVICE_TIME_CUTOFFS = {
+        "short": 1.0,
+        "medium": 1.5,
+    }
+    
+    gdf = assemble_data(ANALYSIS_DATE, threshold = 1.5, 
+                        service_time_cutoffs = SERVICE_TIME_CUTOFFS)
+    
     shared_utils.utils.geoparquet_gcs_export(
-        df6, 
+        gdf, 
         utils.GCS_FILE_PATH, 
         f"competitive_route_variability_{ANALYSIS_DATE}")

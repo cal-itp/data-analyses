@@ -26,13 +26,13 @@ sources:
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/trips_with_hrs_{{analysis_date}}.parquet 
   routes_categorized:
     driver: geoparquet
-    description: Routes categorized into mutually exclusive groups: `on_shn`, `intersects_shn`, `other`. The transit route line geometry is also provided.
+    description: Routes categorized into mutually exclusive groups. on_shn, intersects_shn, other. The transit route line geometry is also provided.
     args:
       # source: A2_categorize_routes.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/routes_categorized_{{analysis_date}}.parquet 
   endpoint_delays:
     driver: geoparquet
-    description: Operator-stop-level endpoint delays generated using `rt_map_filter_plot`
+    description: Operator-stop-level endpoint delays generated using rt_map_filter_plot
     args:
       # source: A3_generate_endpoint_delay.py
       urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/endpoint_delays_{{analysis_date}}.parquet 
