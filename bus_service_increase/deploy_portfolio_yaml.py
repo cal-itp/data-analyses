@@ -15,9 +15,9 @@ catalog = intake.open_catalog("./bus_service_increase/*.yml")
 
 # these come from parallel_corridors_utils
 # but, importing these throws error because of directories when the Makefile is run
-PCT_COMPETITIVE_THRESHOLD = 0.25
+PCT_COMPETITIVE_THRESHOLD = 0.5
 
-PORTFOLIO_SITE_YAML = Path("./portfolio/sites/parallel_corridors.yml")
+PORTFOLIO_SITE_YAML = Path("./portfolio/sites/competitive_corridors.yml")
 
 # Do a quick check and suppress operators that just show 1 route in each route_group
 # From UI/UX perspective, it's confusing to readers because they think it's an error that
@@ -112,14 +112,17 @@ def check_if_rt_data_available(PORTFOLIO_SITE_YAML: Path) -> list:
     
     rt_chapters = analyses_data['parts'][0]["chapters"]
 
-    rt_itp_ids = []
-
+    # Use a dict to capture what rank ITP ID is within that section
+    # need to use it to construct URL
+    rt_itp_ids_dict = {}
+    
     for x, chapter in enumerate(rt_chapters):
         section_dict = chapter["sections"]
         for i, list_item in enumerate(section_dict):
-            rt_itp_ids.append(list_item['itp_id'])
-            
-    return rt_itp_ids
+            rt_itp_ids_dict[list_item["itp_id"]] = i
+
+    return rt_itp_ids_dict
+
 
 
 if __name__ == "__main__":

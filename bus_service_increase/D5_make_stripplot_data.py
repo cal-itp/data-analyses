@@ -108,13 +108,27 @@ def add_quantiles(df: pd.DataFrame) -> pd.DataFrame:
           )
     
     df3["abs_diff"] = abs(df3.service_hours - df3.p50)
-    df3["min_diff"] = df3.groupby(group_cols)["abs_diff"].transform("min")
-    df3 = df3.assign(
-        p50_trip = df3.apply(lambda x: 1 if x.min_diff == x.abs_diff
-                                else 0, axis=1)
-    ).drop(columns = ["abs_diff", "min_diff"])
     
-    return df3
+    # Sort so that the smallest abs_diff is kept (1 trip kept for p50_trip)
+    # since multiple trips can have be 50th percentile trip
+    p50_trip = (df3.sort_values(group_cols + ["abs_diff", "trip_id"], 
+                          ascending=[True, True, True, True])
+           .drop_duplicates(subset=group_cols)
+                [group_cols + ["trip_id"]]
+          )
+    
+    df4 = pd.merge(
+        df3,
+        p50_trip.assign(p50_trip = 1),
+        on = group_cols + ["trip_id"],
+        how = "left",
+    )
+    
+    df4 = df4.assign(
+        p50_trip = df4.p50_trip.fillna(0).astype(int)
+    ).drop(columns = ["abs_diff"])
+    
+    return df4
     
 
 def merge_in_competitive_routes(df: pd.DataFrame, threshold: float) -> gpd.GeoDataFrame:

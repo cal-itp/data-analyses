@@ -1,0 +1,91 @@
+directory: ./bus_service_increase/
+notebook: ./bus_service_increase/competitive-routes.ipynb
+parts:
+- chapters:
+  - caption: District 01 - Eureka
+    params:
+      district: 01 - Eureka
+    sections:
+    - itp_id: 159
+  - caption: District 02 - Redding
+    params:
+      district: 02 - Redding
+    sections:
+    - itp_id: 259
+  - caption: District 03 - Marysville
+    params:
+      district: 03 - Marysville
+    sections:
+    - itp_id: 48
+    - itp_id: 273
+    - itp_id: 331
+    - itp_id: 372
+    - itp_id: 376
+  - caption: District 04 - Oakland
+    params:
+      district: 04 - Oakland
+    sections:
+    - itp_id: 4
+    - itp_id: 61
+    - itp_id: 70
+    - itp_id: 76
+    - itp_id: 127
+    - itp_id: 194
+    - itp_id: 282
+    - itp_id: 290
+    - itp_id: 294
+    - itp_id: 314
+    - itp_id: 368
+  - caption: District 05 - San Luis Obispo
+    params:
+      district: 05 - San Luis Obispo
+    sections:
+    - itp_id: 208
+    - itp_id: 289
+    - itp_id: 296
+    - itp_id: 473
+  - caption: District 06 - Fresno
+    params:
+      district: 06 - Fresno
+    sections:
+    - itp_id: 146
+    - itp_id: 346
+    - itp_id: 474
+  - caption: District 07 - Los Angeles
+    params:
+      district: 07 - Los Angeles
+    sections:
+    - itp_id: 170
+    - itp_id: 171
+    - itp_id: 179
+    - itp_id: 182
+    - itp_id: 183
+    - itp_id: 231
+    - itp_id: 295
+    - itp_id: 380
+  - caption: District 08 - San Bernardino
+    params:
+      district: 08 - San Bernardino
+    sections:
+    - itp_id: 232
+    - itp_id: 269
+    - itp_id: 360
+  - caption: District 10 - Stockton
+    params:
+      district: 10 - Stockton
+    sections:
+    - itp_id: 284
+  - caption: District 11 - San Diego
+    params:
+      district: 11 - San Diego
+    sections:
+    - itp_id: 278
+    - itp_id: 386
+  - caption: District 12 - Irvine
+    params:
+      district: 12 - Irvine
+    sections:
+    - itp_id: 142
+    - itp_id: 235
+readme: ./bus_service_increase/README.md
+title: Competitive Bus Routes near State Highway Network
