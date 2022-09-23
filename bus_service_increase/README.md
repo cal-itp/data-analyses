@@ -10,7 +10,7 @@ The [Methodology section](#methodology) explains why these definitions are neede
 **Routes Intersecting SHN**: routes where at least 35% of the bus route falls within 0.5 mile of the SHN. 
 **Routes Near SHN**: the sum of routes on the SHN and intersecting the SHN. In some way, these routes are impacted by the SHN, either through traffic conditions or simply because they pass through freeway on-ramps and underpasses.
 
-**Competitive routes**: routes where at least 50% of the trips take no longer than 1.5x a car. A multiplier of 1 means that the bus and the car take the same amount of time. A multiplier of 1.5 means that the bus takes 50% longer than the car.
+**Competitive routes**: routes where at least 25% of the trips take no longer than 1.5x a car. A multiplier of 1 means that the bus and the car take the same amount of time. A multiplier of 1.5 means that the bus takes 50% longer than the car.
 
 
 Caltrans perspective:
@@ -38,7 +38,7 @@ A faster trip (25th percentile) for the bus route is selected and a comparison i
 
 Relative to this car travel time, all the trips for a bus route is compared, and a ratio, the `bus_multiplier` is calculated. Actual bus service hours are available in GTFS schedule data. But, each bus route is associated with only one car travel time (Google Directions API). A ratio of 1 means that the bus trip takes the same amount of time as a car; a ratio of 2 means that the bus trip takes twice as long as the car. 
 
-**Competitive routes**: routes where at least 50% of the trips take no longer than 1.5x than a car. 
+**Competitive routes**: routes where at least 25% of the trips take no longer than 1.5x than a car. 
 
 **For each route group, the operator must have at least 2 routes, and up to 15 routes are recommended.** 
 
