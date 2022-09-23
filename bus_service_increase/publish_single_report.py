@@ -29,11 +29,11 @@ DEFAULT_COMMITTER = {
 notebooks_to_run = {
     # key: name of notebook in directory
     # value: name of the notebook papermill execution (can be renamed)
-    #"highways-no-parallel-routes-gh.ipynb": "highways-no-parallel-routes.ipynb",
+    "highways-no-parallel-routes-gh.ipynb": "highways-no-parallel-routes.ipynb",
     #"highways-low-competitive-routes.ipynb": "highways-low-competitive-routes.ipynb"
-    "E5_plot_hwy_segments.ipynb": "highway_recs.ipynb",
-    "E6_marginal_route_improvements.ipynb": "marginal_route_recs.ipynb",
-    "E7_major_route_improvements.ipynb": "major_route_recs.ipynb",
+    #"E5_plot_hwy_segments.ipynb": "highway_recs.ipynb",
+    #"E6_marginal_route_improvements.ipynb": "marginal_route_recs.ipynb",
+    #"E7_major_route_improvements.ipynb": "major_route_recs.ipynb",
 }
 
 def publish_notebooks(notebooks_to_run):

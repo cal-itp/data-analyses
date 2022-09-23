@@ -37,7 +37,7 @@ def grab_bus_routes_running_on_highways(
 
 def cut_highway_segments(segment_distance: int) -> gpd.GeoDataFrame:
     """
-    Cut highways into 1 mi segments.
+    Cut highways into 5 mi segments.
     
     Figure out a way to layer how many total trips are running 
     across multiple operators for all bus routes, to get a 
