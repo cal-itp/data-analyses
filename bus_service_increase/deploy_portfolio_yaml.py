@@ -112,14 +112,17 @@ def check_if_rt_data_available(PORTFOLIO_SITE_YAML: Path) -> list:
     
     rt_chapters = analyses_data['parts'][0]["chapters"]
 
-    rt_itp_ids = []
-
+    # Use a dict to capture what rank ITP ID is within that section
+    # need to use it to construct URL
+    rt_itp_ids_dict = {}
+    
     for x, chapter in enumerate(rt_chapters):
         section_dict = chapter["sections"]
         for i, list_item in enumerate(section_dict):
-            rt_itp_ids.append(list_item['itp_id'])
-            
-    return rt_itp_ids
+            rt_itp_ids_dict[list_item["itp_id"]] = i
+
+    return rt_itp_ids_dict
+
 
 
 if __name__ == "__main__":
