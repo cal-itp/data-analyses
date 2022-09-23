@@ -15,9 +15,9 @@ catalog = intake.open_catalog("./bus_service_increase/*.yml")
 
 # these come from parallel_corridors_utils
 # but, importing these throws error because of directories when the Makefile is run
-PCT_COMPETITIVE_THRESHOLD = 0.25
+PCT_COMPETITIVE_THRESHOLD = 0.5
 
-PORTFOLIO_SITE_YAML = Path("./portfolio/sites/parallel_corridors.yml")
+PORTFOLIO_SITE_YAML = Path("./portfolio/sites/competitive_corridors.yml")
 
 # Do a quick check and suppress operators that just show 1 route in each route_group
 # From UI/UX perspective, it's confusing to readers because they think it's an error that
