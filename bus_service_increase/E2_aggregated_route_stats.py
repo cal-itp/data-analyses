@@ -243,13 +243,14 @@ def compile_rt_trips_all_operators(analysis_date: str):
     print("Concatenated all parquets for rt_trips")        
     
 
-def calculate_mean_speed_by_route(group_cols: list) -> pd.DataFrame:
+def calculate_mean_speed_by_route(analysis_date: str, 
+                                  group_cols: list) -> pd.DataFrame:
     """
     Aggregate trip-level RT mean speed to route-level.
     Take in any set of group_cols to calculate unweighted average.
     """
     df = pd.read_parquet(
-        f"{rt_utils.GCS_FILE_PATH}rt_trips/all_operators_{ANALYSIS_DATE}.parquet")
+        f"{rt_utils.GCS_FILE_PATH}rt_trips/all_operators_{analysis_date}.parquet")
         
     # Each trip is 1 observation, just take the average (not weighted)
     # to get route-level mean_speed_mph
