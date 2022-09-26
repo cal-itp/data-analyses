@@ -108,6 +108,7 @@ def export_district_need_assistance(df):
     
     ## export to internal GCS bucket (can change)
     needs_assistance.to_excel(f"{GCS_FILE_PATH}needs_assistance/needs_assistance_districts.xlsx")
+    print(f"There are {len(needs_assistance)} Legislative District entries needing assistance")
     
     
 #change most of the columns with zeros to NaNs
@@ -168,6 +169,8 @@ def check_counties(df):
                                                          'county_name':'locode_list_county_name'})
     #export failed matched to gcs
     no_county_match.to_excel(f"{GCS_FILE_PATH}needs_assistance/failed_locode_county_check.xlsx")
+    
+    print(f"There are {len(no_county_match)} Locode Matching entries needing assistance")
 
 
 # function to find potential locode matches
@@ -221,6 +224,8 @@ def find_potential_locode_matches(df):
     # export potential match list
     potential_matches.to_excel(f"{GCS_FILE_PATH}needs_assistance/needs_assistance_potential_match_locodes.xlsx")
 
+    print(f"There are {len(potential_matches)} potential locode matching entries needing assistance")
+
 
 def clean_data(df):
         
@@ -262,5 +267,21 @@ def clean_data(df):
     #export to GCS
     gdf.to_excel(f"{GCS_FILE_PATH}cleaned_df.xlsx")
     
+    print(f"Data cleaning complete. There are {len(gdf)} entries in dataframe")    
+    
     #also return in notebook
     return gdf
+
+
+# function to check for unique PPNO#. To use after reading in data for selected projects
+def check_unique_ppno(df, district, ppno):
+    
+    # counts how many districts the PPNO number appears in:
+    count_ppno = (df>>group_by(_.project_cycle, _[district])>>count(_[ppno]))
+    
+    #tested with 
+    assert (count_ppno['n'] == 1).all(), "PASS"
+    return count_ppno
+
+    
+    
