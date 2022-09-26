@@ -8,4 +8,4 @@ Creation of scripts to clean and prepare data for easier reporting.
 
 ## Data Cleaning and Exploration
 1. [data_exploration](./data_exploration.ipynb): Notebook to explore data and create functions.
-2. [test_script](./test_script.py): Notebook to test data_cleaning script.
+2. [test_script](./test_script.ipynb): Notebook to test data_cleaning script.
