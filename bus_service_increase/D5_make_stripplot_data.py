@@ -15,18 +15,14 @@ from siuba import *
 
 import shared_utils
 import D2_setup_gmaps as setup_gmaps
+import E2_aggregated_route_stats as aggregated_route_stats 
 from bus_service_utils import utils
 from D1_setup_parallel_trips_with_stops import (ANALYSIS_DATE, COMPILED_CACHED,
                                                 merge_trips_with_service_hours)
 
+
 catalog = intake.open_catalog("./*.yml")
 route_cols = ["calitp_itp_id", "route_id"]
-
-#DIFF_CUTOFFS = {
-#    "short": 20,
-#    "medium": 30,
-#    "long": 40,
-#}
 
 def add_trip_time_of_day(trips: pd.DataFrame) -> pd.DataFrame:
     """
@@ -260,6 +256,35 @@ def add_route_categories(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf3
     
     
+def add_mean_speed_by_route(
+    competitive_df: gpd.GeoDataFrame, analysis_date: str) -> gpd.GeoDataFrame:
+    
+    mean_speed_by_route = aggregated_route_stats.calculate_mean_speed_by_route(
+        analysis_date,                                                               
+        ["calitp_itp_id", "route_id"])
+
+    gdf = pd.merge(
+        competitive_df, 
+        mean_speed_by_route,
+        on = ["calitp_itp_id", "route_id"],
+        how = "left",
+        validate = "m:1",
+        indicator="merge_speed"
+    )
+    
+    print("merge: competitive to speeds; left_only means no speeds available")
+    print(gdf.merge_speed.value_counts())
+    
+    gdf = gdf.assign(
+        mean_speed_mph = gdf.mean_speed_mph.round(1),
+        num_trips = gdf.num_trips.astype("Int64"),
+        competitive = gdf.competitive.astype("Int64"),
+        num_competitive = gdf.num_competitive.astype("Int64")         
+    )
+    
+    return gdf
+    
+    
 def assemble_data(analysis_date: str, threshold: float = 1.5, 
                   service_time_cutoffs: dict = {
                     "short": 1.0,
@@ -290,7 +315,10 @@ def assemble_data(analysis_date: str, threshold: float = 1.5,
     # Merge in route categories from Quarterly Performance Objective work
     df7 = add_route_categories(df6)
     
-    return df7
+    # Merge in avg speed by route from 100 Recs
+    df8 = add_mean_speed_by_route(df7, analysis_date)
+    
+    return df8
 
     
 if __name__ == "__main__":    

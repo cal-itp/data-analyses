@@ -16,6 +16,7 @@ from bus_service_utils import utils
 from D1_setup_parallel_trips_with_stops import ANALYSIS_DATE, COMPILED_CACHED
 
 fs = get_fs()
+
 catalog = intake.open_catalog("./*.yml")
 
 # Define grouping of cols that captures each trip
@@ -247,7 +248,7 @@ if __name__ == "__main__":
                  )
     ) 
     
-    
     final.to_parquet(f"{utils.GCS_FILE_PATH}gmaps_df_{ANALYSIS_DATE}.parquet")
     print("Exported to GCS")
+
     
