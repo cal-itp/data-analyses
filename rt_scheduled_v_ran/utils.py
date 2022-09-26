@@ -57,6 +57,27 @@ def read_data():
 
     return df
 
+def get_correct_url(df):
+    
+    d4 = df>>filter(_.caltrans_district=='04 - Oakland')>>count(_.calitp_itp_id, _.agency_name)>>arrange(-_.n)
+    d4_agencies = d4.agency_name.to_list()
+    df['d4_agencies'] = df['agency_name'].isin(d4_agencies)
+    
+    #for agencies in D4
+    df = df.drop(df[(df.d4_agencies == True) & (df.calitp_url_number == 0) | (df.calitp_url_number == 2)].index)
+    df = df.drop(df[(df.calitp_itp_id == 10) & (df.calitp_url_number == 0)].index)
+
+    #dropping two others that have multiple urls
+    ##Victor Valley Transit Authority
+    df = df.drop(df[(df.calitp_itp_id == 360) & (df.calitp_url_number == 1)].index)
+
+    ##Orange County Transportation Authority
+    df = df.drop(df[(df.calitp_itp_id == 235) & (df.calitp_url_number == 0)].index)
+    
+    df = df.drop(columns = ['d4_agencies'])
+    
+    return df
+
 # # Get the data for Scheduled Trips and RT Trips long format
 # def load_schedule_data(start_date, end_date, itp_id):
 #     gtfs_daily = (
