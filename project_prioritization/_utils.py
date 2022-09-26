@@ -2,6 +2,7 @@ import altair as alt
 from shared_utils import geography_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import altair_utils
+from babel.numbers import format_currency
 
 '''
 Chart Functions
@@ -14,7 +15,7 @@ chart_height = 188
 def preset_chart_config(chart: alt.Chart) -> alt.Chart:
     chart = chart.properties(
         width=chart_width,
-        height=chart_height,
+        height=chart_height
     )
 
     return chart
@@ -29,14 +30,14 @@ def labeling(word):
         word = word.replace('_', ' ').title()
     return word
 
-# Bar chart with interactive tooltip: x_col and y_col will show up 
+# Bar chart where the tooltip values is another column that isn't x_col or y_col 
 def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, chart_title=''):
     if chart_title == "":
         chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
     chart = (alt.Chart(df)
              .mark_bar()
              .encode(
-                 x=alt.X(x_col, title=labeling(x_col), ),
+                 x=alt.X(x_col, title=labeling(x_col), axis=alt.Axis(labels=False)),
                  y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
                  color = alt.Color(colorcol, 
                                   scale=alt.Scale(
@@ -65,14 +66,14 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         chart2_nominal (str): nominal column for 2nd bar chart. should be in format 'column_name:N'
         chart2_quant (str): quantitive column for 2nd bar chart. should be in format 'column_name:Q'
     Returns:
-        Returns two horizontally concated bar charts. The first bar chart controls the second bar chart.
+        Returns two horizontally concated bar charts: the first bar chart controls the second bar chart.
     """
     # Column that controls the bar charts
     category_selector = alt.selection_multi(fields=[control_field])
     
     # Build Chart one
     chart1 = (alt.Chart(df).mark_bar().encode(
-        x=alt.X(chart1_quant),
+        x=alt.X(chart1_quant, axis=alt.Axis(labels=False)),
         y=alt.Y(chart1_nominal), 
         color = alt.Color(chart1_quant, scale=alt.Scale(
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
@@ -80,8 +81,8 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         .add_selection(category_selector))
 
     chart2 = (alt.Chart(df).mark_bar().encode(
-        x=alt.X(chart2_quant),
-        y=alt.Y(chart2_nominal), 
+        x=alt.X(chart2_quant, axis=alt.Axis(labels=False)),
+        y=alt.Y(chart2_nominal, ), 
         color = alt.Color(chart2_quant, scale=alt.Scale(
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
         tooltip = [chart2_nominal,chart2_quant,])
@@ -105,16 +106,17 @@ def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
             color=alt.Color(nominal_col, 
             scale = alt.Scale(range = cp.CALITP_CATEGORY_BRIGHT_COLORS),
             legend = alt.Legend(title=labeling(label_col))),
-            tooltip = [nominal_col,label_col])
+            tooltip = [label_col,quant_col])
             .properties(title=chart_title)
            )
     # Create pie 
-    pie = base.mark_arc(outerRadius=120)
+    pie = base.mark_arc(outerRadius=80)
     
     # Add text
-    text = base.mark_text(radius=150, size=12).encode(text=label_col)
+    text = base.mark_text(radius=100, size=10).encode(text=label_col)
     
-    chart =  preset_chart_config(pie + text).configure_view(strokeOpacity=0)
+    chart =  preset_chart_config(pie + text)
+    
     return chart
 
 '''
@@ -130,8 +132,50 @@ def value_counts_df(df, col_of_interest):
     )
     return df 
 
-# Strip snakecase
+# Strip snakecase when dataframe is finalized
 def clean_up_columns(df):
     df.columns = df.columns.str.replace("_", " ").str.title().str.strip()
     return df
 
+"""
+Style the dataframe by removing the index and gray banding, dropping certain columns
+and centering text.
+"""
+def style_dataframe(df, hide_cols: list):
+    df_styled = (
+        df.drop(columns=hide_cols)
+        .style.hide(axis="index")
+        .set_properties(**{"background-color": "white"})
+        .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
+        .set_properties(**{"text-align": "center"})
+    )
+    return df_styled
+
+"""
+Create summary table: returns total projects and total cost
+by the column of your choice. 
+"""
+def summarize_by_project_names(df, col_wanted: str):
+    """
+    df: original dataframe to summarize
+    col_wanted: to column to groupby
+    """
+    df = (
+        df.groupby([col_wanted])
+        .agg({"project_name": "count", "total_project_cost__$1,000_": "sum"})
+        .reset_index()
+        .sort_values("project_name", ascending=False)
+        .rename(columns={"project_name": "Total Projects"})
+    )
+
+    df = df.reset_index(drop=True)
+
+    # Create a formatted monetary col
+    df["Total Project ($1000) Formatted"] = df["total_project_cost__$1,000_"].apply(
+        lambda x: format_currency(x, currency="USD", locale="en_US")
+    )
+
+    # Clean up column names, remove snakecase
+    df = clean_up_columns(df)
+
+    return df
