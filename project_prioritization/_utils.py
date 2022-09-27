@@ -54,7 +54,8 @@ def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, char
 
 def dual_bar_chart(df, control_field:str, chart1_nominal:str,
                   chart1_quant: str, chart2_nominal:str, 
-                  chart2_quant:str, ):
+                  chart2_quant:str, chart1_tooltip_cols: list,
+                  chart2_tooltip_cols: list):
     """An interactive dual bar chart
     https://stackoverflow.com/questions/53404826/how-to-link-two-bar-charts-in-altair
     
@@ -65,6 +66,8 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         chart1_quant (str): quantitive column for 1st bar chart. should be in format 'column_name:Q'
         chart2_nominal (str): nominal column for 2nd bar chart. should be in format 'column_name:N'
         chart2_quant (str): quantitive column for 2nd bar chart. should be in format 'column_name:Q'
+        chart1_tooltip_cols (list): list of columns to place in tooltip in chart 1
+        chart2_tooltip_cols (list): list of columns to place in tooltip chart 2
     Returns:
         Returns two horizontally concated bar charts: the first bar chart controls the second bar chart.
     """
@@ -77,7 +80,7 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         y=alt.Y(chart1_nominal), 
         color = alt.Color(chart1_quant, scale=alt.Scale(
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
-        tooltip = [chart1_nominal, chart1_quant,])
+        tooltip = chart1_tooltip_cols)
         .add_selection(category_selector))
 
     chart2 = (alt.Chart(df).mark_bar().encode(
@@ -85,7 +88,7 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         y=alt.Y(chart2_nominal, ), 
         color = alt.Color(chart2_quant, scale=alt.Scale(
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
-        tooltip = [chart2_nominal,chart2_quant,])
+        tooltip = chart2_tooltip_cols)
         .transform_filter(category_selector))
     
     chart1 = preset_chart_config(chart1)
@@ -119,9 +122,9 @@ def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
     
     return chart
 
-'''
+"""
 Other Functions
-'''
+"""
 # Grab value counts and turn it into a dataframe
 def value_counts_df(df, col_of_interest):
     df = (

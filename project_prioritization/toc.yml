@@ -1,0 +1,9 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: district_1__district_title_district-1-eureka/0__dla_district_report__district_1__district_title_district-1-eureka.ipynb
+    -   file: district_2__district_title_district-2-redding/0__dla_district_report__district_2__district_title_district-2-redding.ipynb
+    -   file: district_3__district_title_district-3-marysville/0__dla_district_report__district_3__district_title_district-3-marysville.ipynb
+
+root: README
