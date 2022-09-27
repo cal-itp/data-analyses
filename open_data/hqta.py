@@ -49,15 +49,9 @@ HQTA_TRANSIT_STOPS_DICT["dataset_name"] = "ca_hq_transit_stops"
 
 # Rename columns
 RENAME_CA_HQTA = {
-    # ca_hq_transit_areas
-    "calitp_itp": "itp_id_primary",
-    "agency_nam": "agency_primary",
-    "calitp_i_1": "itp_id_secondary",
-    "agency_n_1": "agency_secondary",
-    # ca_hq_transit_stops
-    "calitp_id_": "itp_id_primary",
+    "itp_id_pri": "itp_id_primary",
     "agency_pri": "agency_primary",
-    "calitp_i_1": "itp_id_secondary",
+    "itp_id_sec": "itp_id_secondary",
     "agency_sec": "agency_secondary",
     "hqta_detai": "hqta_details",
 }
