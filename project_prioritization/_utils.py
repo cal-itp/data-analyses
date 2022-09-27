@@ -4,10 +4,10 @@ from shared_utils import calitp_color_palette as cp
 from shared_utils import altair_utils
 from babel.numbers import format_currency
 
-'''
+"""
 Chart Functions
-'''
-# Make chart 75% smaller than ours
+"""
+# Preset to make chart 25% smaller than shared_utils
 # Since the webpage is kind of small
 chart_width = 300
 chart_height = 188
@@ -17,10 +17,9 @@ def preset_chart_config(chart: alt.Chart) -> alt.Chart:
         width=chart_width,
         height=chart_height
     )
-
     return chart
 
-#Labels for charts 
+# Labels for charts 
 def labeling(word):
     # Add specific use cases where it's not just first letter capitalized
     if (word == "mpo") or (word == "rtpa"):
@@ -30,7 +29,11 @@ def labeling(word):
         word = word.replace('_', ' ').title()
     return word
 
-# Bar chart where the tooltip values is another column that isn't x_col or y_col 
+"""
+Bar chart where the tooltip's value is another column that isn't x_col or y_col.
+Convenient for graphs regarding monetary values because the tooltip will show the formatted
+version.
+"""
 def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, chart_title=''):
     if chart_title == "":
         chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
@@ -74,7 +77,7 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
     # Column that controls the bar charts
     category_selector = alt.selection_multi(fields=[control_field])
     
-    # Build Chart one
+    # Build first chart
     chart1 = (alt.Chart(df).mark_bar().encode(
         x=alt.X(chart1_quant, axis=alt.Axis(labels=False)),
         y=alt.Y(chart1_nominal), 
@@ -82,7 +85,8 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
         tooltip = chart1_tooltip_cols)
         .add_selection(category_selector))
-
+    
+    # Build second chart
     chart2 = (alt.Chart(df).mark_bar().encode(
         x=alt.X(chart2_quant, axis=alt.Axis(labels=False)),
         y=alt.Y(chart2_nominal, ), 
@@ -90,10 +94,8 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
         tooltip = chart2_tooltip_cols)
         .transform_filter(category_selector))
-    
     chart1 = preset_chart_config(chart1)
     chart2 = preset_chart_config(chart2)
-    
     return(chart1 | chart2)
 
 def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
@@ -103,7 +105,7 @@ def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
     nominal_col should be "Column Name:N"
     label_col should be "Column Name:N"
     """
-    # Bar Chart
+    # Base Chart
     base = (alt.Chart(df)
             .encode(theta=alt.Theta(quant_col, stack=True), 
             color=alt.Color(nominal_col, 
@@ -112,12 +114,13 @@ def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
             tooltip = [label_col,quant_col])
             .properties(title=chart_title)
            )
-    # Create pie 
+    # Set size of the pie 
     pie = base.mark_arc(outerRadius=80)
     
-    # Add text
+    # Add labels
     text = base.mark_text(radius=100, size=10).encode(text=label_col)
     
+    # Combine the chart and labels
     chart =  preset_chart_config(pie + text)
     
     return chart

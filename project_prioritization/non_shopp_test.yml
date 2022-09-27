@@ -1,0 +1,19 @@
+title: 10 Year Non-SHOPP
+directory: ./project_prioritization/
+readme: ./project_prioritization/README.md
+notebook: ./project_prioritization/project.ipynb
+parts:
+   - caption: Introduction
+   - chapters:
+     - params:
+          project_parameter: 1217
+          project_name: Forrester Rd Widening And Realignment
+     - params:
+          project_parameter: 2589
+          project_name: Eureka-Arcata Sea Level Rise Project 1.0
+     - params:
+          project_parameter: '0361M'
+          project_name: Marin Sonoma Narrows (Msn B7) Hov Lanes
+      - params:
+          project_parameter: '0195J'
+          project_name: Us 395 Freight Mobility And Safety Project
