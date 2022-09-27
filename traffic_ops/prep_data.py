@@ -16,7 +16,7 @@ from siuba import *
 
 from shared_utils import geography_utils, gtfs_utils, utils, rt_dates
 
-ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["aug2022"])
+ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["sep2022"])
 
 GCS = "gs://calitp-analytics-data/data-analyses/"
 TRAFFIC_OPS_GCS = f"{GCS}traffic_ops/"

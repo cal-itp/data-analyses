@@ -73,3 +73,19 @@
 2022-09-09 13:02:12.756 | INFO     | __main__:<module>:175 - export as geojson
 2022-09-09 13:03:02.363 | INFO     | __main__:<module>:183 - export as geojsonl
 2022-09-09 13:03:02.366 | INFO     | __main__:<module>:186 - execution time: 0:02:02.384813
+2022-09-27 14:57:47.896 | INFO     | __main__:<module>:138 - Analysis date: 2022-09-14
+2022-09-27 14:57:49.463 | INFO     | __main__:<module>:154 - combined points: 0:00:01.553819
+2022-09-27 14:57:50.916 | INFO     | __main__:<module>:160 - add route info: 0:00:01.452499
+2022-09-27 14:58:19.850 | INFO     | __main__:<module>:167 - add agency names / compute: 0:00:28.934589
+2022-09-27 14:58:20.454 | INFO     | __main__:<module>:176 - export as geoparquet in date folder
+2022-09-27 14:58:20.862 | INFO     | __main__:<module>:184 - export as geoparquet
+2022-09-27 14:58:33.012 | INFO     | __main__:<module>:193 - export as geojson
+2022-09-27 14:58:48.712 | INFO     | __main__:<module>:201 - export as geojsonl
+2022-09-27 14:58:48.713 | INFO     | __main__:<module>:204 - execution time: 0:01:00.803684
+2022-09-27 14:58:59.286 | INFO     | __main__:<module>:136 - Analysis date: 2022-09-14
+2022-09-27 14:59:16.665 | INFO     | __main__:<module>:147 - filter and buffer: 0:00:17.354884
+2022-09-27 14:59:18.054 | INFO     | __main__:<module>:158 - export as geoparquet in date folder
+2022-09-27 14:59:19.357 | INFO     | __main__:<module>:166 - export as geoparquet
+2022-09-27 14:59:59.225 | INFO     | __main__:<module>:175 - export as geojson
+2022-09-27 15:00:29.044 | INFO     | __main__:<module>:183 - export as geojsonl
+2022-09-27 15:00:29.047 | INFO     | __main__:<module>:186 - execution time: 0:01:29.736540
