@@ -59,9 +59,13 @@ def read_data():
 
 def get_correct_url(df):
     
-    d4 = df>>filter(_.caltrans_district=='04 - Oakland')>>count(_.calitp_itp_id, _.agency_name)>>arrange(-_.n)
-    d4_agencies = d4.agency_name.to_list()
-    df['d4_agencies'] = df['agency_name'].isin(d4_agencies)
+    all_multiple = (df>>group_by(_.calitp_itp_id, _.agency_name)>>summarize(n_itp_url = _.calitp_url_number.nunique()) >>filter(_.n_itp_url>1))
+    
+    all_multiple_agencies = all_multiple.calitp_itp_id.to_list()
+    
+    #d4 = df>>filter(_.caltrans_district=='04 - Oakland')>>count(_.calitp_itp_id, _.agency_name)>>arrange(-_.n)
+    #d4_agencies = d4.agency_name.to_list()
+    #df['d4_agencies'] = df['agency_name'].isin(d4_agencies)
     
     #for agencies in D4
     df = df.drop(df[(df.d4_agencies == True) & (df.calitp_url_number == 0) | (df.calitp_url_number == 2)].index)
