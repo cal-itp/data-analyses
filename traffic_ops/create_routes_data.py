@@ -11,12 +11,12 @@ from datetime import datetime
 
 import prep_data
 from shared_utils import geography_utils, portfolio_utils
+from bus_service_utils import gtfs_build
 
 # List of cols to drop from trips table
 # Didn't remove after switching to gtfs_utils, but these 
 # are datetime and will get rejected in the zipped shapefile conversion anyway
 remove_trip_cols = ["service_date", "calitp_extracted_at", "calitp_deleted_at"]
-
 
 
 def merge_trips_to_routes(trips: dd.DataFrame, 
