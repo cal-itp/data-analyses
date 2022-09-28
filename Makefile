@@ -12,6 +12,16 @@ build_competitive_corridors:
     #--config=./portfolio/test-analyses.yml
 
 
+build_100_recs:
+	#pip install -r portfolio/requirements.txt
+	#git rm portfolio/one_hundred_recs/ -rf
+	#python portfolio/portfolio.py clean one_hundred_recs
+	python portfolio/portfolio.py build one_hundred_recs --deploy 
+	git add portfolio/one_hundred_recs/*.ipynb portfolio/one_hundred_recs/*.yml portfolio/one_hundred_recs/*.md 
+	git add portfolio/sites/ 
+    #--config=./portfolio/test-analyses.yml
+
+
 build_dla_reports:
 	pip install -r portfolio/requirements.txt
 	git rm portfolio/dla/ -rf

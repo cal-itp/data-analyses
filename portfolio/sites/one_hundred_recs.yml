@@ -1,0 +1,11 @@
+title: 100 Routes to Better Buses
+directory: ./bus_service_increase/
+readme: ./bus_service_increase/README_100recs.md
+parts:
+- caption: Introduction
+- chapters:
+  - notebook: ./bus_service_increase/major_route_improvements.ipynb
+  - notebook: ./bus_service_increase/marginal_route_improvements.ipynb
+  - notebook: ./bus_service_increase/highways-existing-transit.ipynb  
+  - notebook: ./bus_service_increase/highways-transit-deserts.ipynb
+  - notebook: ./bus_service_increase/highways-uncompetitive-routes.ipynb

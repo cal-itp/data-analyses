@@ -6,5 +6,6 @@ We recommend three opportunity categories:
 * Transit Corridor Improvements
 * Spot Transit Improvements
 * State Highway Network Service Gaps 
+    * Existing Transit Service (Express Service) on the SHN
     * Transit Service Deserts
     * Uncompetitive Transit 
