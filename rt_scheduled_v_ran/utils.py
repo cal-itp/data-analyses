@@ -93,6 +93,8 @@ def get_correct_url(df):
     df.loc[((df['calitp_itp_id']==360) & (df['calitp_url_number'] == 0)), 'drop_record']  = ""
     df.loc[((df['calitp_itp_id']==315) & (df['calitp_url_number'] == 0)), 'drop_record']  = ""
     
+    df = df >> filter(_.drop_record!='drop')
+    df = df.drop(columns = ['multiple_url','drop_record'])
     
     return df
 
