@@ -3,6 +3,8 @@ from . import (
     chart_utils,
     create_parallel_corridors,
     gtfs_build,
+    publish_single_report,
+    recs_utils,
     utils,
 )
 
@@ -12,6 +14,8 @@ __all__ = [
     "calenviroscreen_lehd_utils",
     "chart_utils",
     "create_parallel_corridors",
-    "gtfs_build",  
+    "gtfs_build", 
+    "publish_single_report",
+    "recs_utils",
     "utils",
 ]
