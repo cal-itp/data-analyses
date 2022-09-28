@@ -228,7 +228,10 @@ class Site(BaseModel):
 
     @validator('readme', pre=True, always=True)
     def default_readme(cls, v, *, values, **kwargs):
-        return v or (values['directory'] / Path("README.md"))
+        if v: 
+            return Path(v)
+        else:
+            return (values['directory'] / Path("README.md"))
 
     @property
     def slug(self) -> str:
