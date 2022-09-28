@@ -56,6 +56,7 @@ def merge_trips_to_routes(trips: dd.DataFrame,
     m2 = (m1[m1._merge=="both"][keep_cols]
           .reset_index(drop=True) 
           .to_crs(geography_utils.WGS84)
+          .drop_duplicates()
          )
         
     return m2
@@ -126,6 +127,7 @@ def make_routes_shapefile():
     routes_with_names = (add_route_agency_name(df)
                          .sort_values(["itp_id", "route_id"])
                          .reset_index(drop=True)
+                         .drop_duplicates()
                         )
     
     time3 = datetime.now()

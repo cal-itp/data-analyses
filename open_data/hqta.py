@@ -21,8 +21,8 @@ HQTA_TRANSIT_AREAS_DICT = {
     "abstract": "Public. EPSG: 4326",
     "purpose": PURPOSE, 
 
-    "beginning_date": "20220713",
-    "end_date": "20220813",
+    "beginning_date": "20220914",
+    "end_date": "20221014",
     "place": "California",
 
     "status": "Complete", 
