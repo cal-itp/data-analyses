@@ -1,9 +1,17 @@
-import altair as alt
+# Geography
+import geopandas as gpd
+
+# Charts
 from shared_utils import geography_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import altair_utils
-from babel.numbers import format_currency
+import altair as alt
 
+# Format
+from babel.numbers import format_currency
+from IPython.display import HTML, Image, Markdown, display, display_html
+
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/"
 """
 Chart Functions
 """
@@ -144,18 +152,23 @@ def clean_up_columns(df):
     return df
 
 """
-Style the dataframe by removing the index and gray banding, dropping certain columns
-and centering text.
+Style the dataframe by removing the index and gray banding,
+dropping certain columns and centering text. Adds scrollbar
 """
-def style_dataframe(df, hide_cols: list):
-    df_styled = (
-        df.drop(columns=hide_cols)
-        .style.hide(axis="index")
-        .set_properties(**{"background-color": "white"})
-        .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
-        .set_properties(**{"text-align": "center"})
-    )
-    return df_styled
+def styled_df(df):
+    display(
+    HTML(
+        "<div style='height: 500px; overflow: auto; width: fit-content'>"
+        + (
+            (df)
+            .style.set_properties(**{"background-color": "white"})
+            .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
+            .set_properties(**{"text-align": "center"})
+            .hide(axis="index")
+            .render()
+        )
+        + "</div>"
+    ))
 
 """
 Create summary table: returns total projects and total cost
@@ -185,3 +198,23 @@ def summarize_by_project_names(df, col_wanted: str):
     df = clean_up_columns(df)
 
     return df
+
+"""
+Merge a dataframe with Caltrans District Map 
+to return a gdf
+"""
+Caltrans_shape = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
+
+def create_caltrans_map(df):
+    
+    # Load in Caltrans shape
+    ct_geojson = gpd.read_file(f"{Caltrans_shape}").to_crs(epsg=4326)
+    
+    # Keep only the columns we want
+    ct_geojson = ct_geojson[["DISTRICT", "Shape_Length", "Shape_Area", "geometry"]]
+    
+    # Inner merge 
+    districts_gdf = ct_geojson.merge(
+    df, how="inner", left_on="DISTRICT", right_on="District")
+    
+    return districts_gdf
