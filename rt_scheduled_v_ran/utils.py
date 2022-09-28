@@ -63,22 +63,36 @@ def get_correct_url(df):
     
     all_multiple_agencies = all_multiple.calitp_itp_id.to_list()
     
-    #d4 = df>>filter(_.caltrans_district=='04 - Oakland')>>count(_.calitp_itp_id, _.agency_name)>>arrange(-_.n)
-    #d4_agencies = d4.agency_name.to_list()
-    #df['d4_agencies'] = df['agency_name'].isin(d4_agencies)
-    
-    #for agencies in D4
-    df = df.drop(df[(df.d4_agencies == True) & (df.calitp_url_number == 0) | (df.calitp_url_number == 2)].index)
-    df = df.drop(df[(df.calitp_itp_id == 10) & (df.calitp_url_number == 0)].index)
+    df['multiple_url'] = df['calitp_itp_id'].isin(all_multiple_agencies)
 
-    #dropping two others that have multiple urls
-    ##Victor Valley Transit Authority
-    df = df.drop(df[(df.calitp_itp_id == 360) & (df.calitp_url_number == 1)].index)
+    def remove_rows(row):
+        
+        #Emery Go-Round
+        if (row.multiple_url == True) and (row.calitp_itp_id == 106) | (row.calitp_url_number == 2):
+            return "drop"        
+        
+        #SMART or Sonoma Marin Area Rail Transit
+        if (row.multiple_url == True) and (row.calitp_itp_id == 315) and (row.calitp_url_number == 1) | (row.calitp_url_number == 2):
+            return "drop"
+        
+        #  Union City Transit
+        elif (row.multiple_url == True) and (row.calitp_itp_id == 350) and (row.calitp_url_number == 2):
+            return "drop"
+        
+        # Victor Valley Transit Authority
+        elif (row.multiple_url == True) and (row.calitp_itp_id == 360) and (row.calitp_url_number == 1):
+            return "drop"
+        
+        # drop others with only two: 
+        elif (row.multiple_url == True) and (row.calitp_url_number == 0):
+            return "drop"
 
-    ##Orange County Transportation Authority
-    df = df.drop(df[(df.calitp_itp_id == 235) & (df.calitp_url_number == 0)].index)
+    df['drop_record'] = df.apply(lambda x: remove_rows(x), axis=1)
     
-    df = df.drop(columns = ['d4_agencies'])
+    df.loc[((df['calitp_itp_id']==106) & (df['calitp_url_number'] == 1)), 'drop_record']  = ""
+    df.loc[((df['calitp_itp_id']==360) & (df['calitp_url_number'] == 0)), 'drop_record']  = ""
+    df.loc[((df['calitp_itp_id']==315) & (df['calitp_url_number'] == 0)), 'drop_record']  = ""
+    
     
     return df
 
