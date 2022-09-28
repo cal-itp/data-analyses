@@ -26,7 +26,7 @@ launch_buttons:
 repository:
   url: https://github.com/cal-itp/data-analyses/  # Online location of your book
 #  path_to_book: docs  # Optional path to your book, relative to the repository root
-  path_to_book: bus_service_increase
+  path_to_book: one_hundred_recs
   branch: main  # Which branch of the repository should be used when creating links (optional)
 
 # Add GitHub buttons to your book
