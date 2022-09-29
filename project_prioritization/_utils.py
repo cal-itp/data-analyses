@@ -1,9 +1,10 @@
-
-import geopandas as gpd
 import pandas as pd
 
-# Charts
+# Geography
 from shared_utils import geography_utils
+import geopandas as gpd
+
+# Charts
 from shared_utils import calitp_color_palette as cp
 from shared_utils import altair_utils
 import altair as alt
@@ -174,6 +175,60 @@ x_axis: str, y_axis:str, color_col: str, chart_tooltip_cols,chart_title:str):
     chart =  preset_chart_config(chart)
     return chart
 
+def dual_chart_with_dropdown(
+    df,
+    dropdown_list: list,
+    dropdown_field: str,
+    x_axis_chart1: str,
+    y_axis_chart1: str,
+    color_col1: str,
+    chart1_tooltip_cols: list,
+    x_axis_chart2: str,
+    y_axis_chart2: str,
+    color_col2: str,
+    chart2_tooltip_cols: list,
+    chart_title: str,
+):
+
+    # Create drop down menu
+    input_dropdown = alt.binding_select(options=dropdown_list, name="Select an Input")
+
+    # The field tied to the drop down menu
+    selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
+
+    chart1 = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=x_axis_chart1,
+            y=y_axis_chart1,
+            color=alt.Color(
+                color_col1, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+            ),
+            tooltip=chart1_tooltip_cols,
+        )
+        .properties(title=chart_title)
+        .add_selection(selection)
+        .transform_filter(selection)
+    )
+
+    chart2 = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=x_axis_chart2,
+            y=y_axis_chart2,
+            color=alt.Color(
+                color_col2, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+            ),
+            tooltip=chart2_tooltip_cols,
+        )
+        .add_selection(selection)
+        .transform_filter(selection)
+    )
+    chart1 = preset_chart_config(chart1)
+    chart2 = preset_chart_config(chart2)
+    return chart1 | chart2
 """
 Other Functions
 """
@@ -225,6 +280,7 @@ def create_caltrans_map(df):
     # Keep only the columns we want
     ct_geojson = ct_geojson[["DISTRICT", "Shape_Length", "Shape_Area", "geometry"]]
     
+   
     # Inner merge 
     districts_gdf = ct_geojson.merge(
     df, how="inner", left_on="DISTRICT", right_on="District")
@@ -246,6 +302,22 @@ def create_county_map(df, left_df_merge_col:str,
     # Keep only the columns we want
     county_geojson = county_geojson[['COUNTY_NAME', 'COUNTY_ABBREV','geometry']]
     
+    # Replace abbreviations to Non SHOPP
+    county_geojson["COUNTY_ABBREV"] = county_geojson["COUNTY_ABBREV"].replace(
+        {
+        "LOS": "LA",
+        "DEL": "DN",
+        "SFO": "SF",
+        "SMT": "SM",
+        "MNT": "MON",
+        "SDG": "SD",
+        "CON": "CC",
+        "SCZ": "SCR",
+        "SJQ": "SJ",
+        "SBA": "SB",
+    }
+    )
+    
     # Inner merge 
     county_df = county_geojson.merge(
     df, how="inner", left_on=left_df_merge_col, right_on=right_df_merge_col)
@@ -258,7 +330,7 @@ Functions specific to this project
 # Create a fake scorecard
 def create_fake_score_card(df):
     # Subset 
-    df = df[
+    df2 = df[
     [
         "project_name",
         "increase_peak_person_throughput",
@@ -272,11 +344,12 @@ def create_fake_score_card(df):
         "improve_air_quality",
         "impact_natural_resources",
         "support_of_trasnportation",
+       
     ]]
     
     # Melt
-    df = pd.melt(
-    df,
+    df2 = pd.melt(
+    df2,
     id_vars=["project_name"],
     value_vars=[
         "increase_peak_person_throughput",
@@ -293,12 +366,12 @@ def create_fake_score_card(df):
     ])
     
     # Remove underscores off of old column names
-    df["variable"] = df["variable"].str.replace("_", " ").str.title()
+    df2["variable"] = df2["variable"].str.replace("_", " ").str.title()
     
     # New column with broader Measures
-    df["Category"] = df["variable"]
+    df2["Category"] = df2["variable"]
 
-    df["Category"] = df["Category"].replace(
+    df2["Category"] = df2["Category"].replace(
     {
         "Increase Peak Person Throughput": "Congestion Mitigation",
         "Reduction In Peak Period Delay": "Congestion Mitigation",
@@ -315,20 +388,45 @@ def create_fake_score_card(df):
     
     # Get total scores
     total = (
-    df.groupby(["project_name", "Category"])
+    df2.groupby(["project_name", "Category"])
     .agg({"value": "sum"})
     .rename(columns={"value": "Total Category Score"})
     .reset_index())
     
     # Merge
-    df = pd.merge(
-    df, total, how="left", on=["project_name", "Category"])
+    df2 = pd.merge(
+    df2, total, how="left", on=["project_name", "Category"])
     
     # Add fake descriptions
     for i in ["Measure Description","Factor Weight","Weighted Factor Value","Category Description",]:
-        df[i] = "Text Here"
-        
-    return df 
+        df2[i] = "Text Here"
+    
+    # Second subset
+    df3 = df[["total_project_cost__$1,000_",
+        "current_fake_fund_requested",
+         "project_name",
+        "project_description"]]
+    
+    # Melt
+    df3 = pd.melt(
+    df3,
+    id_vars=["project_name","project_description",],
+    value_vars=[
+        "total_project_cost__$1,000_",
+        "current_fake_fund_requested",
+    ])
+    
+    # Change names
+    df3 = df3.rename(columns = {'variable':'monetary',
+                                'values':'monetary   values'})
+    
+     # Final Merge
+    final = pd.merge(
+    df2, df3, how="inner",  on = ["project_name"])
+    
+    # Remove underscores off of old column names
+    final["monetary"] = final["monetary"].str.replace("_", "  ").str.title()
+    return final
         
 
 """
