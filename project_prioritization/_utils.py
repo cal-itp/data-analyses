@@ -398,7 +398,10 @@ def create_fake_score_card(df):
     df2, total, how="left", on=["project_name", "Category"])
     
     # Add fake descriptions
-    for i in ["Measure Description","Factor Weight","Weighted Factor Value","Category Description",]:
+    for i in ["Measure Description",
+              "Factor Weight",
+              "Weighted Factor Value",
+              "Category Description",]:
         df2[i] = "Text Here"
     
     # Second subset
