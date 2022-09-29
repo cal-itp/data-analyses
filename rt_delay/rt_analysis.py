@@ -24,29 +24,32 @@ import matplotlib.pyplot as plt
 import logging
 logging.basicConfig(filename = 'rt.log')
 
-class TripPositionInterpolator:
-    ''' Interpolates the location of a specific trip using either rt or schedule data
+class VehiclePositionsInterpolator:
+    ''' Interpolates the location of a specific trip using GTFS-RT Vehicle Positions data
     '''
-    def __init__(self, position_gdf, shape_gdf, addl_info_cols = []):
-        ''' positions_gdf: a gdf with either rt vehicle positions or joined stops+stop_times
+    def __init__(self, vehicle_positions_gdf, shape_gdf, addl_info_cols = []):
+        ''' vehicle_positions_gdf: a gdf with rt vehicle positions data
         shape_gdf: a gdf with line geometries for each shape
         '''
         # self.debug_dict = {}
-        self.logassert(type(position_gdf) == type(gpd.GeoDataFrame()) and not position_gdf.empty, "positions gdf must not be empty")
+        self.logassert(type(vehicle_positions_gdf) == type(gpd.GeoDataFrame()) and not vehicle_positions_gdf.empty, "vehicle positions gdf must not be empty")
         self.logassert(type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty")
-        self.logassert(position_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"position and shape CRS must be {CA_NAD83Albers}")
-        self.logassert(position_gdf.trip_key.nunique() == 1, "non-unique trip key in position gdf")
-        
+        self.logassert(vehicle_positions_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"position and shape CRS must be {CA_NAD83Albers}")
+        self.logassert(vehicle_positions_gdf.trip_id.nunique() == 1, "non-unique trip id in position gdf")
+        self.debug_dict = {}
+        self.position_type = 'rt'
+        self.time_col = 'vehicle_timestamp'
         trip_info_cols = ['service_date', 'trip_key', 'trip_id', 'route_id', 'route_short_name',
-                          'shape_id', 'direction_id', 'calitp_itp_id'] + addl_info_cols
-        self.logassert(set(trip_info_cols).issubset(position_gdf.columns), f"position_gdf must contain columns: {trip_info_cols}")
+                          'shape_id', 'direction_id', 'calitp_itp_id', 'entity_id', 'vehicle_id']
+        self.logassert(set(trip_info_cols).issubset(vehicle_positions_gdf.columns), f"vehicle_positions_gdf must contain columns: {trip_info_cols}")
         for col in trip_info_cols:
-            setattr(self, col, position_gdf[col].iloc[0]) ## allow access to trip_id, etc. using self.trip_id
+            setattr(self, col, vehicle_positions_gdf[col].iloc[0]) ## allow access to trip_id, etc. using self.trip_id
             
-        self.logassert((shape_gdf.calitp_itp_id == self.calitp_itp_id).all(), "position_gdf and shape_gdf itp_id should match")
-        self.position_gdf = position_gdf.drop(columns = trip_info_cols)
+        self.logassert((shape_gdf.calitp_itp_id == self.calitp_itp_id).all(), "vehicle_positions_gdf and shape_gdf itp_id should match")
+        self.vehicle_positions_gdf = vehicle_positions_gdf >> distinct(_.vehicle_timestamp, _keep_all=True)
+        self.vehicle_positions_gdf = self.vehicle_positions_gdf.drop(columns = trip_info_cols)
         self._attach_shape(shape_gdf)
-        self.median_time = self.position_gdf[self.time_col].median()
+        self.median_time = self.vehicle_positions_gdf[self.time_col].median()
         self.time_of_day = categorize_time_of_day(self.median_time)
         self.total_meters = (self.cleaned_positions.shape_meters.max() - self.cleaned_positions.shape_meters.min())
         self.total_seconds = (self.cleaned_positions.vehicle_timestamp.max() - self.cleaned_positions.vehicle_timestamp.min()).seconds
@@ -63,6 +66,51 @@ class TripPositionInterpolator:
         else:
             logging.error(message)
             raise AssertionError  
+            
+    def _loop_shape_filter(self):
+        '''
+        Determines if the start of the shape is near the end of the shape,
+        if so drops vehicle positions points in this area to avoid incorrect projection.
+        Functions as intended but does not fully solve issue, since midway loops can
+        also cause issue if GTFS shape has low definition. Also need to further review
+        intergration with the progression filter step
+        '''
+        shape_start = np.array(self.shape.coords[0])
+        shape_end = np.array(self.shape.coords[-1])
+        # fast way to get euclidian distance using numpy!
+        start_end_dist = np.linalg.norm(shape_start - shape_end)
+        distance_threshold = 150 # meters
+        if start_end_dist < distance_threshold:
+            start_point = Point(self.shape.coords[0])
+            self.start_buffered = start_point.buffer(75) # meters
+            self.vehicle_positions_gdf = (self.vehicle_positions_gdf
+                                 >> mutate(too_close_to_start = _.geometry.apply(lambda x: self.start_buffered.contains(x)))
+                                 >> mutate(too_close_to_loop = _.geometry.apply(lambda x: self.hardcode_buffered.contains(x)))
+                                )
+            self.vehicle_positions_gdf = self.vehicle_positions_gdf >> filter(-_.too_close_to_start)   
+            
+    def _linear_reference(self):
+        # self._loop_shape_filter() # not yet usable as intended
+        raw_positions = self.vehicle_positions_gdf.copy()
+        raw_positions = raw_positions >> arrange(self.time_col)
+        raw_position_array = raw_positions.shape_meters.to_numpy()
+        # filter to positions that have progressed from the most recent position
+        cast_monotonic = np.maximum.accumulate(raw_position_array)
+        raw_positions.shape_meters = cast_monotonic
+        raw_positions = raw_positions.drop_duplicates(subset=['shape_meters'], keep = 'last')
+        raw_positions['secs_from_last'] = raw_positions[self.time_col].diff()
+        raw_positions.secs_from_last = (raw_positions.secs_from_last
+                                        .apply(lambda x: x.seconds))
+        raw_positions['meters_from_last'] = raw_positions.shape_meters.diff()
+        raw_positions['speed_from_last'] = (raw_positions.meters_from_last
+                                                     / raw_positions.secs_from_last) ## meters/second
+        self.cleaned_positions = raw_positions
+        self._shape_array = self.cleaned_positions.shape_meters.to_numpy()
+        self._dt_array = (self.cleaned_positions[self.time_col].to_numpy()
+                                          .astype('datetime64[s]')
+                                          .astype('float64')
+                                         )
+        return
     
     def _attach_shape(self, shape_gdf):
         ''' Filters gtfs shapes to the shape served by this trip. Additionally, projects positions_gdf to a linear
@@ -72,13 +120,13 @@ class TripPositionInterpolator:
         shape_geo = (shape_gdf >> filter(_.shape_id == self.shape_id)).geometry
         self.logassert(len(shape_geo) > 0 and shape_geo.iloc[0], f'shape empty for trip {self.trip_id}!')
         self.shape = shape_geo.iloc[0]
-        self.position_gdf['shape_meters'] = (self.position_gdf.geometry
+        self.vehicle_positions_gdf['shape_meters'] = (self.vehicle_positions_gdf.geometry
                                 .apply(lambda x: self.shape.project(x)))
         self._linear_reference()
         
-        origin = (self.position_gdf >> filter(_.shape_meters == _.shape_meters.min())
+        origin = (self.vehicle_positions_gdf >> filter(_.shape_meters == _.shape_meters.min())
         ).geometry.iloc[0]
-        destination = (self.position_gdf >> filter(_.shape_meters == _.shape_meters.max())
+        destination = (self.vehicle_positions_gdf >> filter(_.shape_meters == _.shape_meters.max())
         ).geometry.iloc[0]
         self.direction = primary_cardinal_direction(origin, destination)
         
@@ -174,93 +222,6 @@ class TripPositionInterpolator:
         '''
         m = self.detailed_speed_map()
         m.save(f'./{folder_name}/{self.calitp_itp_id}_rt_{self.route_id}_tr_{self.trip_id}.html')
-
-class VehiclePositionsInterpolator(TripPositionInterpolator):
-    '''Interpolate arrival times along a trip from GTFS-RT Vehicle Positions data.
-    '''
-    def __init__(self, vp_gdf, shape_gdf):
-        # print(vp_gdf.head(1))
-        # print(shape_gdf.head(1))
-        self.logassert(type(vp_gdf) == type(gpd.GeoDataFrame()) and not vp_gdf.empty, "vehicle positions gdf must not be empty")
-        self.logassert(type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty")
-        
-        self.debug_dict = {}
-        
-        self.position_type = 'rt'
-        self.time_col = 'vehicle_timestamp'
-        TripPositionInterpolator.__init__(self, position_gdf = vp_gdf, shape_gdf = shape_gdf,
-                                          addl_info_cols = ['entity_id', 'vehicle_id'])
-        self.position_gdf = self.position_gdf >> distinct(_.vehicle_timestamp, _keep_all=True)
-    
-    def _loop_shape_filter(self):
-        '''
-        Determines if the start of the shape is near the end of the shape,
-        if so drops vehicle positions points in this area to avoid incorrect projection.
-        Functions as intended but does not fully solve issue, since midway loops can
-        also cause issue if GTFS shape has low definition. Also need to further review
-        intergration with the progression filter step
-        '''
-        shape_start = np.array(self.shape.coords[0])
-        shape_end = np.array(self.shape.coords[-1])
-        # fast way to get euclidian distance using numpy!
-        start_end_dist = np.linalg.norm(shape_start - shape_end)
-        distance_threshold = 150 # meters
-        if start_end_dist < distance_threshold:
-            start_point = Point(self.shape.coords[0])
-            self.start_buffered = start_point.buffer(75) # meters
-            self.position_gdf = (self.position_gdf
-                                 >> mutate(too_close_to_start = _.geometry.apply(lambda x: self.start_buffered.contains(x)))
-                                 >> mutate(too_close_to_loop = _.geometry.apply(lambda x: self.hardcode_buffered.contains(x)))
-                                )
-            self.position_gdf = self.position_gdf >> filter(-_.too_close_to_start)            
-        
-    def _linear_reference(self):
-        # self._loop_shape_filter() # not yet usable as intended
-        raw_positions = self.position_gdf.copy()
-        raw_positions = raw_positions >> arrange(self.time_col)
-        raw_position_array = raw_positions.shape_meters.to_numpy()
-        # filter to positions that have progressed from the most recent position
-        cast_monotonic = np.maximum.accumulate(raw_position_array)
-        raw_positions.shape_meters = cast_monotonic
-        raw_positions = raw_positions.drop_duplicates(subset=['shape_meters'], keep = 'last')
-        raw_positions['secs_from_last'] = raw_positions[self.time_col].diff()
-        raw_positions.secs_from_last = (raw_positions.secs_from_last
-                                        .apply(lambda x: x.seconds))
-        raw_positions['meters_from_last'] = raw_positions.shape_meters.diff()
-        raw_positions['speed_from_last'] = (raw_positions.meters_from_last
-                                                     / raw_positions.secs_from_last) ## meters/second
-        self.cleaned_positions = raw_positions
-        self._shape_array = self.cleaned_positions.shape_meters.to_numpy()
-        self._dt_array = (self.cleaned_positions[self.time_col].to_numpy()
-                                          .astype('datetime64[s]')
-                                          .astype('float64')
-                                         )
-        return
-
-class ScheduleInterpolator(TripPositionInterpolator):
-    '''Interpolate arrival times along a trip from schedule data.
-    '''
-    def __init__(self, trip_st_gdf, shape_gdf):
-        '''trip_st_gdf: gdf of GTFS trip (filtered to 1 trip) joined w/ GTFS stop times and stops,
-        shape_gdf: gdf of geometries for each shape'''
-        self.position_type = 'schedule'
-        self.time_col = 'arrival_dt'
-        trip_st_gdf = trip_st_gdf.apply(gtfs_time_to_dt, axis=1)
-        TripPositionInterpolator.__init__(self, position_gdf = trip_st_gdf, shape_gdf = shape_gdf)
-    
-    def _linear_reference(self):
-        
-        self.position_gdf['last_time'] = self.position_gdf[self.time_col].shift(1)
-        self.position_gdf['last_loc'] = self.position_gdf.shape_meters.shift(1)
-        self.position_gdf['secs_from_last'] = self.position_gdf[self.time_col] - self.position_gdf.last_time
-        self.position_gdf.secs_from_last = (self.position_gdf.secs_from_last
-                                        .apply(lambda x: x.seconds))
-        self.position_gdf['meters_from_last'] = (self.position_gdf.shape_meters
-                                                      - self.position_gdf.last_loc)
-        self.position_gdf['speed_from_last'] = (self.position_gdf.meters_from_last
-                                                     / self.position_gdf.secs_from_last) ## meters/second
-        self.cleaned_positions = self.position_gdf ## for position and map methods in TripPositionInterpolator
-        self.cleaned_positions = self.cleaned_positions >> arrange(self.time_col)
 
 class OperatorDayAnalysis:
     '''New top-level class for rt delay/speed analysis of a single operator on a single day
@@ -364,9 +325,7 @@ class OperatorDayAnalysis:
             # self.debug_dict[f'{trip_id}_st'] = st_trip_joined
             # self.debug_dict[f'{trip_id}_vp'] = trip_positions_joined
             try:
-                self.position_interpolators[trip_id] = {'rt': VehiclePositionsInterpolator(trip_positions_joined, self.routelines),
-                                                           # 'schedule': ScheduleInterpolator(st_trip_joined, self.routelines) ## probably need to save memory for now ?
-                                                       }
+                self.position_interpolators[trip_id] = {'rt': VehiclePositionsInterpolator(trip_positions_joined, self.routelines)}
             except AssertionError as e:
                 # print(e)
                 continue
