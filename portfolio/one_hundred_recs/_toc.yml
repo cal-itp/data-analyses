@@ -1,6 +1,0 @@
-format: jb-book
-parts:
--   caption: null
-    chapters:
-    -   file: 0__major-route-improvements__.ipynb
-root: README
