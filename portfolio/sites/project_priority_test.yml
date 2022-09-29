@@ -7,17 +7,17 @@ parts:
    - caption: Introduction
    - chapters:
      - params:
-          county_parameter: "Riverside"
+          parameter_county: "Riverside"
           county_title: "Riverside County"
     chapters:
      - params:
-          county_parameter: "Yolo"
+          parameter_county: "Yolo"
           county_title: "Yolo County"
     chapters:
      - params:
-          county_parameter: "Humboldt"
+          parameter_county: "Humboldt"
           county_title: "Humboldt County"
     chapters:
      - params:
-          county_parameter: "Alameda"
+          parameter_county: "Alameda"
           county_title: "Alameda County"
