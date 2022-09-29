@@ -1,6 +1,6 @@
-title: 100 Routes to Better Buses
+title: One Hundred Routes to Better Buses
 directory: ./one_hundred_recs/
-readme: ./one_hundred_recs/README.md
+readme: README.md
 parts:
 - caption: Introduction
 - chapters:
