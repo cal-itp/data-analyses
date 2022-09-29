@@ -320,11 +320,10 @@ class RtFilterMapper:
         # gdf = self._filter(gdf)
         # essential here for reasonable map size!
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
-        # Further reduce map size on speedmap site
-        if self._time_only_filter:
-            gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
-                                -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
-                               -_.delay_chg_sec)
+        # Further reduce map size
+        gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
+                            -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
+                           -_.delay_chg_sec)
         orig_rows = gdf.shape[0]
         self.debug_dict['_show_gdf'] = gdf
         gdf['shape_miles'] = gdf.shape_meters / 1609
@@ -525,7 +524,7 @@ class RtFilterMapper:
     
     def quick_map_corridor(self):
         
-        mappable_stops = (self.stop_delay_view
+        mappable_stops = (self.stop_delay_view.dropna(subset=['stop_id'])
                   >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
                   >> filter(_.corridor)
                   >> select(_.stop_id, _.geometry, _.stop_sequence)
