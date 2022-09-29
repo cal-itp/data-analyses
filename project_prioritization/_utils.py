@@ -50,7 +50,7 @@ def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, char
     chart = (alt.Chart(df)
              .mark_bar()
              .encode(
-                 x=alt.X(x_col, title=labeling(x_col), axis=alt.Axis(labels=False)),
+                 x=alt.X(x_col, title=labeling(x_col)),
                  y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
                  color = alt.Color(colorcol, 
                                   scale=alt.Scale(
@@ -69,7 +69,7 @@ def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, char
 def dual_bar_chart(df, control_field:str, chart1_nominal:str,
                   chart1_quant: str, chart2_nominal:str, 
                   chart2_quant:str, chart1_tooltip_cols: list,
-                  chart2_tooltip_cols: list):
+                  chart2_tooltip_cols: list, chart_title: str):
     """An interactive dual bar chart
     https://stackoverflow.com/questions/53404826/how-to-link-two-bar-charts-in-altair
     
@@ -83,31 +83,33 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         chart1_tooltip_cols (list): list of columns to place in tooltip in chart 1
         chart2_tooltip_cols (list): list of columns to place in tooltip chart 2
     Returns:
-        Returns two horizontally concated bar charts: the first bar chart controls the second bar chart.
+        Returns two vertically concated bar charts: the first bar chart controls the second bar chart.
     """
     # Column that controls the bar charts
     category_selector = alt.selection_multi(fields=[control_field])
     
     # Build first chart
     chart1 = (alt.Chart(df).mark_bar().encode(
-        x=alt.X(chart1_quant, axis=alt.Axis(labels=False)),
+        x=alt.X(chart1_quant),
         y=alt.Y(chart1_nominal), 
         color = alt.Color(chart1_nominal, scale=alt.Scale(
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
         tooltip = chart1_tooltip_cols)
+        .properties(title=chart_title)
         .add_selection(category_selector))
     
     # Build second chart
     chart2 = (alt.Chart(df).mark_bar().encode(
-        x=alt.X(chart2_quant, axis=alt.Axis(labels=False)),
+        x=alt.X(chart2_quant),
         y=alt.Y(chart2_nominal, ), 
         color = alt.Color(chart2_nominal, scale=alt.Scale(
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
         tooltip = chart2_tooltip_cols)
         .transform_filter(category_selector))
+    
     chart1 = preset_chart_config(chart1)
     chart2 = preset_chart_config(chart2)
-    return(chart1 | chart2)
+    return(chart1 & chart2)
 
 def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
                    chart_title:str):
@@ -136,45 +138,6 @@ def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
     
     return chart
 
-
-"""
-A bar chart with an interactive drop down menu
-    https://altair-viz.github.io/user_guide/interactions.html
-    
-    Args:
-        df: the dataframe
-        dropdown_list (str): a list of values for dropdown menu.
-        dropdown_field (str): the column in the df that is tied with the menu
-        chart_x (str): x axis column for 1st bar chart. should be in format 'column_name:N'
-        chart_y (str): y axis column for 1st bar chart. should be in format 'column_name:Q'
-        chart_tooltip_cols (list): list of columns to place in the tooltip
-    Returns:
-        One barchart
- """
-def bar_chart_with_dropdown(df, dropdown_list: list, dropdown_field: str,
-x_axis: str, y_axis:str, color_col: str, chart_tooltip_cols,chart_title:str):
-    
-    # Create drop down menu
-    input_dropdown = alt.binding_select(options=dropdown_list, name='Select an Input')
-    
-    # The field tied to the drop down menu
-    selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
-
-    chart = (alt.Chart(df).mark_bar().encode(
-        x=x_axis,
-        y=y_axis,
-        color= alt.Color(color_col, 
-                     scale=alt.Scale(
-                    range=cp.CALITP_CATEGORY_BRIGHT_COLORS)),
-        tooltip=chart_tooltip_cols)
-       .properties(title=chart_title)
-       .add_selection(selection)
-             .transform_filter(
-        selection))
-    
-    chart =  preset_chart_config(chart)
-    return chart
-
 def dual_chart_with_dropdown(
     df,
     dropdown_list: list,
@@ -189,9 +152,25 @@ def dual_chart_with_dropdown(
     chart2_tooltip_cols: list,
     chart_title: str,
 ):
-
+    """Two bar charts controlled by a dropdown
+    Args:
+        df: the dataframe
+        dropdown_list(list): a list of all the values in the dropdown menu,
+        dropdown_field(str): column where the dropdown menu's values are drawn from,
+        x_axis_chart1(str): x axis value for chart 1 encode as Q or N,
+        y_axis_chart1(str): y axis valuefor chart 1 encode as Q or N,
+        color_col1(str): column to color the graphs for chart 1,
+        chart1_tooltip_cols(list): list of all the columns to populate the tooltip,
+        x_axis_chart2(str): x axis value for chart 2 encode as Q or N,
+        y_axis_chart2(str): x axis value for chart 2 encode as Q or N,
+        color_col2(str): column to color the graphs for chart 2,
+        chart2_tooltip_cols(list): list of all the columns to populate the tooltip,
+        chart_title(str):chart title,
+    Returns:
+        Returns two  bar charts that are controlled by a dropdown
+    """
     # Create drop down menu
-    input_dropdown = alt.binding_select(options=dropdown_list, name="Select an Input")
+    input_dropdown = alt.binding_select(options=dropdown_list, name="Select")
 
     # The field tied to the drop down menu
     selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
@@ -204,6 +183,7 @@ def dual_chart_with_dropdown(
             y=y_axis_chart1,
             color=alt.Color(
                 color_col1, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+                , legend = None
             ),
             tooltip=chart1_tooltip_cols,
         )
@@ -220,6 +200,7 @@ def dual_chart_with_dropdown(
             y=y_axis_chart2,
             color=alt.Color(
                 color_col2, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+                , legend = None
             ),
             tooltip=chart2_tooltip_cols,
         )
@@ -229,6 +210,7 @@ def dual_chart_with_dropdown(
     chart1 = preset_chart_config(chart1)
     chart2 = preset_chart_config(chart2)
     return chart1 | chart2
+
 """
 Other Functions
 """
@@ -257,7 +239,7 @@ def styled_df(df):
         "<div style='height: 300px; overflow: auto; width: 800px'>"
         + (
             (df)
-            .style.set_properties(**{"background-color": "white"})
+            .style.set_properties(**{"background-color": "white", "font-size": "10pt",})
             .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
             .set_properties(**{"text-align": "center"})
             .hide(axis="index")
