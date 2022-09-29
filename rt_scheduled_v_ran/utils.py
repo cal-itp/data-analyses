@@ -68,11 +68,11 @@ def get_correct_url(df):
     def remove_rows(row):
         
         #Emery Go-Round
-        if (row.multiple_url == True) and (row.calitp_itp_id == 106) | (row.calitp_url_number == 2):
+        if (row.multiple_url == True) and (row.calitp_itp_id == 106) and (row.calitp_url_number == 2):
             return "drop"        
         
         #SMART or Sonoma Marin Area Rail Transit
-        if (row.multiple_url == True) and (row.calitp_itp_id == 315) and (row.calitp_url_number == 1) | (row.calitp_url_number == 2):
+        if (row.multiple_url == True) and (row.calitp_itp_id == 315) and (row.calitp_url_number == 2):
             return "drop"
         
         #  Union City Transit
@@ -89,9 +89,9 @@ def get_correct_url(df):
 
     df['drop_record'] = df.apply(lambda x: remove_rows(x), axis=1)
     
-    df.loc[((df['calitp_itp_id']==106) & (df['calitp_url_number'] == 1)), 'drop_record']  = ""
+    ##commenting 106 out to maintain 511 MTC
+    #df.loc[((df['calitp_itp_id']==106) & (df['calitp_url_number'] == 1)), 'drop_record']  = ""
     df.loc[((df['calitp_itp_id']==360) & (df['calitp_url_number'] == 0)), 'drop_record']  = ""
-    df.loc[((df['calitp_itp_id']==315) & (df['calitp_url_number'] == 0)), 'drop_record']  = ""
     
     df = df >> filter(_.drop_record!='drop')
     df = df.drop(columns = ['multiple_url','drop_record'])
@@ -242,7 +242,9 @@ def labeling(word):
         "pct_w_vp": "Percent of Scheduled Trips with Vehicle Postions",
         "avg_pct_w_vp":"Average Percent of Scheduled Trips with Vehicle Positions",
         "primary_agency_name": "Agency",
-        "avg":"Average"
+        "avg":"Average",
+        "num_vp":"Number of Trips with Vehicle Positions Data",
+        "num_sched":"Number of Trips with Scheduled Data"
     }
 
     if (word == "mpo") or (word == "rtpa"):
