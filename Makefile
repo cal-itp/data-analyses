@@ -20,6 +20,7 @@ build_100_recs:
 	git add portfolio/one_hundred_recs/*.ipynb portfolio/one_hundred_recs/*.yml portfolio/one_hundred_recs/*.md 
 	git add portfolio/sites/ 
 
+
 build_dla_reports:
 	pip install -r portfolio/requirements.txt
 	git rm portfolio/dla/ -rf
