@@ -1,5 +1,6 @@
-# Geography
+
 import geopandas as gpd
+import pandas as pd
 
 # Charts
 from shared_utils import geography_utils
@@ -63,6 +64,7 @@ def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, char
 
     return chart
 
+# An interactive dual bar chart
 def dual_bar_chart(df, control_field:str, chart1_nominal:str,
                   chart1_quant: str, chart2_nominal:str, 
                   chart2_quant:str, chart1_tooltip_cols: list,
@@ -89,7 +91,7 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
     chart1 = (alt.Chart(df).mark_bar().encode(
         x=alt.X(chart1_quant, axis=alt.Axis(labels=False)),
         y=alt.Y(chart1_nominal), 
-        color = alt.Color(chart1_quant, scale=alt.Scale(
+        color = alt.Color(chart1_nominal, scale=alt.Scale(
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
         tooltip = chart1_tooltip_cols)
         .add_selection(category_selector))
@@ -98,7 +100,7 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
     chart2 = (alt.Chart(df).mark_bar().encode(
         x=alt.X(chart2_quant, axis=alt.Axis(labels=False)),
         y=alt.Y(chart2_nominal, ), 
-        color = alt.Color(chart2_quant, scale=alt.Scale(
+        color = alt.Color(chart2_nominal, scale=alt.Scale(
         range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
         tooltip = chart2_tooltip_cols)
         .transform_filter(category_selector))
@@ -109,9 +111,9 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
 def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
                    chart_title:str):
     """
-    quant_col should be "Column Name:Q"
-    nominal_col should be "Column Name:N"
-    label_col should be "Column Name:N"
+    quant_col (str): should be "Column Name:Q"
+    nominal_col (str): should be "Column Name:N"
+    label_col (str): should be "Column Name:N"
     """
     # Base Chart
     base = (alt.Chart(df)
@@ -126,11 +128,50 @@ def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
     pie = base.mark_arc(outerRadius=80)
     
     # Add labels
-    text = base.mark_text(radius=100, size=10).encode(text=label_col)
+    text = base.mark_text(radius=90, size=10).encode(text=label_col)
     
     # Combine the chart and labels
     chart =  preset_chart_config(pie + text)
     
+    return chart
+
+
+"""
+A bar chart with an interactive drop down menu
+    https://altair-viz.github.io/user_guide/interactions.html
+    
+    Args:
+        df: the dataframe
+        dropdown_list (str): a list of values for dropdown menu.
+        dropdown_field (str): the column in the df that is tied with the menu
+        chart_x (str): x axis column for 1st bar chart. should be in format 'column_name:N'
+        chart_y (str): y axis column for 1st bar chart. should be in format 'column_name:Q'
+        chart_tooltip_cols (list): list of columns to place in the tooltip
+    Returns:
+        One barchart
+ """
+def bar_chart_with_dropdown(df, dropdown_list: list, dropdown_field: str,
+x_axis: str, y_axis:str, color_col: str, chart_tooltip_cols,chart_title:str):
+    
+    # Create drop down menu
+    input_dropdown = alt.binding_select(options=dropdown_list, name='Select an Input')
+    
+    # The field tied to the drop down menu
+    selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
+
+    chart = (alt.Chart(df).mark_bar().encode(
+        x=x_axis,
+        y=y_axis,
+        color= alt.Color(color_col, 
+                     scale=alt.Scale(
+                    range=cp.CALITP_CATEGORY_BRIGHT_COLORS)),
+        tooltip=chart_tooltip_cols)
+       .properties(title=chart_title)
+       .add_selection(selection)
+             .transform_filter(
+        selection))
+    
+    chart =  preset_chart_config(chart)
     return chart
 
 """
@@ -158,7 +199,7 @@ dropping certain columns and centering text. Adds scrollbar
 def styled_df(df):
     display(
     HTML(
-        "<div style='height: 500px; overflow: auto; width: fit-content'>"
+        "<div style='height: 300px; overflow: auto; width: 800px'>"
         + (
             (df)
             .style.set_properties(**{"background-color": "white"})
@@ -169,6 +210,126 @@ def styled_df(df):
         )
         + "</div>"
     ))
+
+"""
+Merge a dataframe with Caltrans District Map 
+to return a gdf
+"""
+Caltrans_shape = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
+
+def create_caltrans_map(df):
+    
+    # Load in Caltrans shape
+    ct_geojson = gpd.read_file(f"{Caltrans_shape}").to_crs(epsg=4326)
+    
+    # Keep only the columns we want
+    ct_geojson = ct_geojson[["DISTRICT", "Shape_Length", "Shape_Area", "geometry"]]
+    
+    # Inner merge 
+    districts_gdf = ct_geojson.merge(
+    df, how="inner", left_on="DISTRICT", right_on="District")
+    
+    return districts_gdf
+
+"""
+Merge a dataframe with County
+to return a gdf
+"""
+ca_gdf = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
+
+def create_county_map(df, left_df_merge_col:str, 
+                      right_df_merge_col:str):
+    
+    # Load in Caltrans shape
+    county_geojson = gpd.read_file(f"{ca_gdf}").to_crs(epsg=4326)
+    
+    # Keep only the columns we want
+    county_geojson = county_geojson[['COUNTY_NAME', 'COUNTY_ABBREV','geometry']]
+    
+    # Inner merge 
+    county_df = county_geojson.merge(
+    df, how="inner", left_on=left_df_merge_col, right_on=right_df_merge_col)
+
+    return county_df
+
+"""
+Functions specific to this project
+"""
+# Create a fake scorecard
+def create_fake_score_card(df):
+    # Subset 
+    df = df[
+    [
+        "project_name",
+        "increase_peak_person_throughput",
+        "reduction_in_peak_period_delay",
+        "reduction_in_fatal_and_injury_crashes",
+        "reduction_in_injury_rates",
+        "increase_access_to_jobs",
+        "increase_access_jobs_to_DAC",
+        "commercial_dev_developed",
+        "tons_of_goods_impacted",
+        "improve_air_quality",
+        "impact_natural_resources",
+        "support_of_trasnportation",
+    ]]
+    
+    # Melt
+    df = pd.melt(
+    df,
+    id_vars=["project_name"],
+    value_vars=[
+        "increase_peak_person_throughput",
+        "reduction_in_peak_period_delay",
+        "reduction_in_fatal_and_injury_crashes",
+        "reduction_in_injury_rates",
+        "increase_access_to_jobs",
+        "increase_access_jobs_to_DAC",
+        "commercial_dev_developed",
+        "tons_of_goods_impacted",
+        "improve_air_quality",
+        "impact_natural_resources",
+        "support_of_trasnportation",
+    ])
+    
+    # Remove underscores off of old column names
+    df["variable"] = df["variable"].str.replace("_", " ").str.title()
+    
+    # New column with broader Measures
+    df["Category"] = df["variable"]
+
+    df["Category"] = df["Category"].replace(
+    {
+        "Increase Peak Person Throughput": "Congestion Mitigation",
+        "Reduction In Peak Period Delay": "Congestion Mitigation",
+        "Reduction In Fatal And Injury Crashes": "Safety",
+        "Reduction In Injury Rates": "Safety",
+        "Increase Access To Jobs": "Accessibility Increase",
+        "Increase Access Jobs To Dac": "Accessibility Increase",
+        "Commercial Dev Developed": "Economic Dev.",
+        "Tons Of Goods Impacted": "Economic Dev.",
+        "Improve Air Quality": "Environment",
+        "Impact Natural Resources": "Environment",
+        "Support Of Trasnportation": "Land Use",
+    })
+    
+    # Get total scores
+    total = (
+    df.groupby(["project_name", "Category"])
+    .agg({"value": "sum"})
+    .rename(columns={"value": "Total Category Score"})
+    .reset_index())
+    
+    # Merge
+    df = pd.merge(
+    df, total, how="left", on=["project_name", "Category"])
+    
+    # Add fake descriptions
+    for i in ["Measure Description","Factor Weight","Weighted Factor Value","Category Description",]:
+        df[i] = "Text Here"
+        
+    return df 
+        
 
 """
 Create summary table: returns total projects and total cost
@@ -198,23 +359,3 @@ def summarize_by_project_names(df, col_wanted: str):
     df = clean_up_columns(df)
 
     return df
-
-"""
-Merge a dataframe with Caltrans District Map 
-to return a gdf
-"""
-Caltrans_shape = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
-
-def create_caltrans_map(df):
-    
-    # Load in Caltrans shape
-    ct_geojson = gpd.read_file(f"{Caltrans_shape}").to_crs(epsg=4326)
-    
-    # Keep only the columns we want
-    ct_geojson = ct_geojson[["DISTRICT", "Shape_Length", "Shape_Area", "geometry"]]
-    
-    # Inner merge 
-    districts_gdf = ct_geojson.merge(
-    df, how="inner", left_on="DISTRICT", right_on="District")
-    
-    return districts_gdf
