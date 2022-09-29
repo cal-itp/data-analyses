@@ -290,7 +290,13 @@ def add_tooltip(chart, tooltip1, tooltip2, tooltip3):
 
 # Bar chart over time 
 #need to specify color scheme outside of charting function which can be done with .encode()
-def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_txt):
+def bar_chart_over_time(df,
+                        x_col,
+                        y_col,
+                        color_col,
+                        yaxis_format,
+                        sort,
+                        title_txt):
     
     bar = (alt.Chart(df)
         .mark_bar(size=8)
@@ -315,10 +321,10 @@ def total_average_chart(full_df):
                   sum_sched = 'num_sched',
                   sum_vp = 'num_vp'))>>arrange(_.service_date)).rename(columns={'avg':'total_average'})
       
-    base = (alt.Chart(df_avg).properties(width=550))
+    base = (alt.Chart(agg_all).properties(width=550))
 
-    chart = (base.mark_line().encode(x=alt.X('service_date', title=labeling('service_date'), sort=("x")),
-                                     y=alt.Y('avg', title= labeling('avg'), axis=alt.Axis(format='%')),
+    chart = (base.mark_line().encode(x=alt.X('service_date:O', title=labeling('service_date'), sort=("x")),
+                                     y=alt.Y('avg:Q', title= labeling('avg'), axis=alt.Axis(format='%')),
                                      ))
              # .properties(title= 'Overall Average for Percent Trips with Vehicle Positions Data')
            
