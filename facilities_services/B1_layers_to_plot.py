@@ -31,7 +31,7 @@ def subset_hqta() -> gpd.GeoDataFrame:
     return hqta2
 
 
-def spatial_join_facilities_hqta(): gpd.GeoDataFrame:
+def spatial_join_facilities_hqta() -> gpd.GeoDataFrame:
     facilities = catalog.tier1_facilities_processed.read()
     hqta = subset_hqta()    
     
