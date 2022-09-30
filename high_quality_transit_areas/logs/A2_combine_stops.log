@@ -14,3 +14,9 @@
 2022-09-08 09:40:32.103 | INFO     | __main__:<module>:72 - grabbed ferry: 0:00:11.110210
 2022-09-08 09:40:32.108 | INFO     | __main__:<module>:81 - concatenated datasets
 2022-09-08 09:40:32.406 | INFO     | __main__:<module>:90 - execution time: 0:00:58.770387
+2022-09-27 10:56:38.641 | INFO     | __main__:<module>:41 - Analysis date: 2022-09-14
+2022-09-27 10:56:53.708 | INFO     | __main__:<module>:48 - grabbed rail: 0:00:15.047832
+2022-09-27 10:57:20.442 | INFO     | __main__:<module>:66 - grabbed brt: 0:00:26.734119
+2022-09-27 10:57:30.399 | INFO     | __main__:<module>:72 - grabbed ferry: 0:00:09.957291
+2022-09-27 10:57:30.402 | INFO     | __main__:<module>:81 - concatenated datasets
+2022-09-27 10:57:30.684 | INFO     | __main__:<module>:90 - execution time: 0:00:52.023976

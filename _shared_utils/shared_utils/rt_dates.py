@@ -12,6 +12,7 @@ DATES = {
     "jun2022": "2022-06-15",
     "jul2022": "2022-07-13",
     "aug2022": "2022-08-17",
+    "sep2022": "2022-09-14",
 }
 
 
@@ -21,6 +22,7 @@ METADATA_EDITION = {
     "jun2022": 2,
     "jul2022": 3,
     "aug2022": 4,
+    "sep2022": 5,
 }
 
 # Planning and Modal Advisory Committee (PMAC) - quarterly
