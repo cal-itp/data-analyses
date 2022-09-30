@@ -1,11 +1,11 @@
 title: 100 Routes to Better Buses
 directory: ./one_hundred_recs/
-readme: ./bus_service_increase/README_100recs.md
+readme: README.md # not sure how to get README to copy correctly in JB build if it's called something else (can read the path correctly if it's README_othersuffix.md, but Sphinx is looking for README.rst
 parts:
 - caption: Introduction
 - chapters:
-  - notebook: ./bus_service_increase/major_route_improvements.ipynb
-  #- notebook: ./bus_service_increase/marginal_route_improvements.ipynb
-  #- notebook: ./bus_service_increase/highways-existing-transit.ipynb  
-  #- notebook: ./bus_service_increase/highways-transit-deserts.ipynb
-  #- notebook: ./bus_service_increase/highways-uncompetitive-routes.ipynb
+  - notebook: ./one_hundred_recs/major-route-improvements.ipynb
+  - notebook: ./one_hundred_recs/marginal-route-improvements.ipynb
+  - notebook: ./bus_service_increase/highways-existing-transit.ipynb  
+  - notebook: ./bus_service_increase/highways-transit-deserts.ipynb
+  - notebook: ./bus_service_increase/highways-uncompetitive-routes.ipynb
