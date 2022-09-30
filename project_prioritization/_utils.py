@@ -14,6 +14,7 @@ from babel.numbers import format_currency
 from IPython.display import HTML, Image, Markdown, display, display_html
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/"
+
 """
 Chart Functions
 """
