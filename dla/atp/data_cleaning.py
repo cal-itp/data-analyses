@@ -11,6 +11,13 @@ from dla_utils import _dla_utils
 
 from calitp import to_snakecase
 
+#for logging
+import sys
+from loguru import logger
+
+logger.add("./logs/data_cleaning.log")
+logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
+
 GCS_FILE_PATH = 'gs://calitp-analytics-data/data-analyses/dla/atp/'
 
 locodes = to_snakecase(pd.read_excel("gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
@@ -109,7 +116,8 @@ def export_district_need_assistance(df):
     ## export to internal GCS bucket (can change)
     needs_assistance.to_excel(f"{GCS_FILE_PATH}needs_assistance/needs_assistance_districts.xlsx")
     print(f"There are {len(needs_assistance)} Legislative District entries needing assistance")
-    
+    logger.info(f"got District matches: There are {len(needs_assistance)} Legislative District entries needing assistance")
+
     
 #change most of the columns with zeros to NaNs
 ## keeping some of the columns for check purposes and other analyses (ex. pct columns and counts). 
@@ -171,6 +179,8 @@ def check_counties(df):
     no_county_match.to_excel(f"{GCS_FILE_PATH}needs_assistance/failed_locode_county_check.xlsx")
     
     print(f"There are {len(no_county_match)} Locode Matching entries needing assistance")
+    logger.info(f"got Locode matches: There are {len(no_county_match)} Locode Matching entries needing assistance")
+
 
 
 # function to find potential locode matches
@@ -225,6 +235,7 @@ def find_potential_locode_matches(df):
     potential_matches.to_excel(f"{GCS_FILE_PATH}needs_assistance/needs_assistance_potential_match_locodes.xlsx")
 
     print(f"There are {len(potential_matches)} potential locode matching entries needing assistance")
+    logger.info(f"got potential Locode matches: There are {len(potential_matches)} potential locode matching entries needing assistance")
 
 
 def clean_data(df):
@@ -267,7 +278,8 @@ def clean_data(df):
     #export to GCS
     gdf.to_excel(f"{GCS_FILE_PATH}cleaned_df.xlsx")
     
-    print(f"Data cleaning complete. There are {len(gdf)} entries in dataframe")    
+    print(f"Data cleaning complete. There are {len(gdf)} entries in dataframe")  
+    logger.info(f"got clean data: {len(gdf)} entries")
     
     #also return in notebook
     return gdf
@@ -284,4 +296,8 @@ def check_unique_ppno(df, district, ppno):
     return count_ppno
 
     
-    
+def read_clean_data():
+    df = read_in_data()
+    clean_df = clean_data(df)
+    return clean_df
+
