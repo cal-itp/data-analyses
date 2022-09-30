@@ -4,7 +4,7 @@
 		<citation>
 			<citeinfo>
 				<title>ca_transit_routes</title>
-				<edition>4</edition>
+				<edition>5</edition>
 				<geoform>vector digital data</geoform>
 				<pubinfo>
 					<publish>California Integrated Travel Project</publish>
@@ -18,8 +18,8 @@
 		<timeperd>
 			<timeinfo>
 				<rngdates>
-					<begdate>20220713</begdate>
-					<enddate>20220813</enddate>
+					<begdate>20220914</begdate>
+					<enddate>20221014</enddate>
 				</rngdates>
 			</timeinfo>
 			<current>California</current>
@@ -30,10 +30,10 @@
 		</status>
 		<spdom>
 			<bounding>
-				<westbc>-124.226362</westbc>
-				<eastbc>-69.965466</eastbc>
-				<northbc>48.716492</northbc>
-				<southbc>25.849554</southbc>
+				<westbc>-124.423914</westbc>
+				<eastbc>-113.465232</eastbc>
+				<northbc>45.362934</northbc>
+				<southbc>32.441061</southbc>
 			</bounding>
 		</spdom>
 		<keywords>
@@ -70,22 +70,38 @@
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>String</sdtstype>
-				<ptvctcnt>7791</ptvctcnt>
+				<ptvctcnt>0</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
 	<spref>
 		<horizsys>
-			<geograph>
-				<latres>8.983152841195215e-09</latres>
-				<longres>8.983152841195215e-09</longres>
-				<geogunit>Decimal Degrees</geogunit>
-			</geograph>
+			<planar>
+				<mapproj>
+					<mapprojn>NAD 1983 California Teale Albers</mapprojn>
+					<albers>
+						<stdparll>34.0</stdparll>
+						<stdparll>40.5</stdparll>
+						<longcm>-120.0</longcm>
+						<latprjo>0.0</latprjo>
+						<feast>0.0</feast>
+						<fnorth>-4000000.0</fnorth>
+					</albers>
+				</mapproj>
+				<planci>
+					<plance>coordinate pair</plance>
+					<coordrep>
+						<absres>0.0001</absres>
+						<ordres>0.0001</ordres>
+					</coordrep>
+					<plandu>meter</plandu>
+				</planci>
+			</planar>
 			<geodetic>
-				<horizdn>D WGS 1984</horizdn>
-				<ellips>WGS 1984</ellips>
+				<horizdn>D North American 1983</horizdn>
+				<ellips>GRS 1980</ellips>
 				<semiaxis>6378137.0</semiaxis>
-				<denflat>298.257223563</denflat>
+				<denflat>298.257222101</denflat>
 			</geodetic>
 		</horizsys>
 	</spref>

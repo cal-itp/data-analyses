@@ -73,7 +73,22 @@ for f in need_renaming:
         if field.name in RENAME_CA_HQTA:  #look for the name elev
             arcpy.AlterField_management(
                 this_feature_class, 
-                field.name, RENAME_CA_HQTA[field.name])\
+                field.name, RENAME_CA_HQTA[field.name], # new_field_name
+                RENAME_CA_HQTA[field.name]) # new_field_alias
+            
+            
+# Double check it's done
+# TODO: this does look like it renames it...but when XML is exported in next step
+# the new field names are not retained
+for f in need_renaming:
+    this_feature_class = os.path.join(staging_location, f)
+
+    # Print field names, just in case it needs renaming
+    field_list = arcpy.ListFields(this_feature_class)  #get a list of fields for each feature class
+    
+    print(this_feature_class)
+    for field in field_list: #loop through each field
+        print(field.name)
 
 
 ## (3) Export metadata associated with file gdb feature class in FGDC format    
@@ -94,3 +109,45 @@ for f in in_features:
     
     print(f"successful export: {f}")
 
+
+### (4) UPDATE XML METADATA SEPARATELY IN PYTHON OUTSIDE OF ARCGIS
+## Note: now there are some parts, bounding boxes, etc that isn't
+# present in XML. Just comment those parts out in metadata_update.py
+
+## (5) Copy the feature class from staging location to out location
+# In the out location, we can drop the new XML and use it to sync
+# Use staging location and out location because otherwise, arcpy errors when it detects
+# another XML when you try and update the layer in a subsequent update
+
+
+## (6) Sync the XML with the feature class    
+for f in in_features:
+    # This is the one after it's manually changed. Keep separate to see what works.
+    # There's already XML files for each feature class, so just copy and paste 
+    # the new XML from metadata_xml/run_in_esri and replace those
+    updated_xml_file = f"{working_dir}{f}.xml"
+
+    out_feature_class = feature_class_in_gdb_path(out_location, f)
+    
+    # Import the updated xml, then overwrite the metadata in the file gdb 
+    meta = md.Metadata(out_feature_class)
+
+    meta.importMetadata(updated_xml_file, "FGDC_CSDGM")
+    meta.save()
+
+    
+## (7) Old #7 is to clear the XML from staging...not needed, since 
+# ArcGIS Pro can't write to staging or open data gdb, but has
+# to write to working_dir
+
+## (7) Move from file gdb to enterprise gdb
+# License Select must be set to Advanced for this to work
+ENTERPRISE_DATABASE = "Database Connections/HQrail(edit)@sv03tmcsqlprd1.sde"
+
+for f in in_features:
+    out_feature_class = feature_class_in_gdb_path(out_location, f)
+    
+    arcpy.FeatureClassToFeatureClass_conversion(
+        in_features = out_feature_class,
+        out_path = ENTERPRISE_DATABASE,
+        out_name = f)
