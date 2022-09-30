@@ -46,19 +46,22 @@ def make_donut_chart(df: pd.DataFrame, y_col: str, color_col: str) -> alt.Chart:
 def make_bar_chart(df: pd.DataFrame, x_col: str) -> alt.Chart:
     x_label = f"{x_col.replace('_name', '').title()}"
     
+    y_col = "num_facilities"
+    #Y_MAX = df[y_col].max()
+    
     chart = (alt.Chart(df)
              .mark_bar(binSpacing=10)
              .encode(
                  x=alt.X(f"{x_col}:N", title = f"{x_label}"),
-                 y=alt.Y(f"num_facilities:Q", title="# Facilities", 
-                         scale=alt.Scale(domain=[0, 14])
+                 y=alt.Y(f"{y_col}:Q", title="# Facilities", 
+                         #scale=alt.Scale(domain=[0, Y_MAX])
                         ),
                  color=alt.Color("category:N",
                                  scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
                                 ),
                  tooltip=[alt.Tooltip(x_col, title=x_label),
                           "category",
-                          alt.Tooltip("num_facilities", title="# Facilities"),  
+                          alt.Tooltip(f"{y_col}", title="# Facilities"),  
                  ]
              ).properties(title = f"Number of Facilities by {x_label}")
             )
