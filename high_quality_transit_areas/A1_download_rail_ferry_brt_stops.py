@@ -4,132 +4,78 @@ Download rail, ferry, BRT stops.
 From rail_ferry_brt.ipynb into script.
 """
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
+os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
 
-import datetime as dt
+import dask.dataframe as dd
+import dask_geopandas as dg
 import geopandas as gpd
-import intake
 import pandas as pd
-import siuba
 
 from calitp.tables import tbl
 from siuba import *
 
 import utilities
-from shared_utils import geography_utils, gtfs_utils
-from update_vars import analysis_date
-
-catalog = intake.open_catalog("./*.yml")
-
-def operators_with_route_type(route_type_list: list) -> list:
-    """
-    Function to just find a subset of operators, 
-    given any route_type list of values.
-    
-    Use this to pare down which operators to use when
-    calling `gtfs_utils`.
-    """
-
-    ids_with_route_type = (
-        tbl.views.gtfs_schedule_dim_routes() 
-        >> filter(_.route_type.isin(route_type_list))
-        >> select(_.calitp_itp_id)
-        # Always exclude 200 in favor of agency feeds
-        >> filter(_.calitp_itp_id != 200)
-        >> distinct()
-        >> collect()
-    ).calitp_itp_id.tolist()
-    
-    return ids_with_route_type
+from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 
-def routes_to_stops(routes_tbl: siuba.sql.verbs.LazyTbl, 
-                    analysis_date: dt.date) -> gpd.GeoDataFrame:
-    """
-    Takes routes LazyTbl, and bring in trips and index tables
-    to find which stops were present on selected date.
+def trip_keys_for_route_type(analysis_date: str, 
+                             route_type_list: list) -> pd.DataFrame: 
+    trips = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}_all.parquet")
     
-    Clip stop point geom to CA boundary.
+    # Choose to output df instead of list because we need route_type later on
+    trip_keys_for_type = (trips[trips.route_type.isin(route_type_list)]
+                          [["trip_key", "route_type"]]
+                          .drop_duplicates()
+                          .compute()
+                         )
     
-    Returns gpd.GeoDataFrame
-    """
-    # Get list of ITP IDs to filter trips against, and exclude 200
-    subset_itp_ids = (routes_tbl 
-         >> filter(_.calitp_itp_id != 200)
-         >> select(_.calitp_itp_id)
-         >> distinct()
-         >> collect()
-        ).calitp_itp_id.tolist()
-
-    # Query to find trips on selected day for those rail routes selected 
-    trips_query = (tbl.views.gtfs_schedule_fact_daily_trips()
-                   >> filter(_.calitp_extracted_at <= analysis_date, 
-                             _.calitp_deleted_at >= analysis_date, 
-                             _.service_date == analysis_date, 
-                             _.is_in_service == True)
-                   >> select(_.calitp_itp_id, _.service_date, 
-                            _.route_id, _.trip_key)
-                   >> filter(_.calitp_itp_id != 200)
-                  >> inner_join(_, routes_tbl, 
-                            on = ['calitp_itp_id', 'route_id'])
-                  >> inner_join(_, 
-                                tbl.views.gtfs_schedule_index_feed_trip_stops() 
-                                >> select(_.trip_key, _.stop_key), 
-                                on = "trip_key")
-                 )
-    
-    # Get list of stop_keys to do custom filtering
-    subset_stop_keys = (trips_query 
-         >> select(_.stop_key) 
-         >> distinct()
-         >> collect()
-        ).stop_key.tolist()
-    
-    keep_stop_cols = [
-        "calitp_itp_id", "stop_id", 
-        "stop_lat", "stop_lon", 
-        "stop_name", "stop_key", 
-    ]
-    
-    # Get gdf of stops
-    stops = gtfs_utils.get_stops(
-        selected_date = analysis_date,
-        itp_id_list = subset_itp_ids,
-        get_df = True,
-        stop_cols = keep_stop_cols,
-        crs = geography_utils.CA_NAD83Albers,
-        custom_filtering={"stop_key": subset_stop_keys}
-    ) 
-    
-    # trips_query is where route_type is stored
-    keep_trip_cols = [
-        "calitp_itp_id", "service_date",
-        "route_type", "route_id",
-        "route_short_name", "route_long_name", "route_desc",
-        "stop_key", # need this to join to stops
-    ]
-    
-    trip_info = (trips_query 
-                 >> filter(_.stop_key.isin(subset_stop_keys))
-                 >> select(*keep_trip_cols)
-                 >> distinct()
-                 >> collect()
-                )
-    
-    # Merge that back in to stops
-    stops = pd.merge(stops,
-                     trip_info,
-                     on = ["calitp_itp_id", "stop_key"],
-                     how = "inner",
-    ).drop(columns = "stop_key") # can drop stop_key once we've joined everything
-    
-    # Clip to CA
-    ca_stops = utilities.clip_to_ca(stops)
-
-    return ca_stops
+    return trip_keys_for_type
 
 
-def grab_rail_data(analysis_date: dt.date) -> gpd.GeoDataFrame:
+def trip_keys_to_stop_keys(trip_key_df: pd.DataFrame) -> pd.DataFrame:
+    
+    stop_keys_list = (tbl.views.gtfs_schedule_index_feed_trip_stops() 
+                      >> filter(_.trip_key.isin(trip_key_df.trip_key))
+                      >> select(_.trip_key, _.stop_key)
+                      >> distinct()
+                      >> collect()
+    )
+    
+    stop_keys_df = pd.merge(stop_keys_list, 
+                            trip_key_df,
+                            on = "trip_key",
+                            how = "left",
+    )
+    
+    return stop_keys_df
+
+
+def grab_stops_by_stop_key(analysis_date: str, 
+                           trip_stop_df: pd.DataFrame
+                          ) -> gpd.GeoDataFrame:
+    stops = dg.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
+    
+    stops_for_route_type = dd.merge(
+        stops,
+        trip_stop_df,
+        on = "stop_key",
+        how = "inner"
+    )
+    
+    # Drop trip_key and drop duplicates
+    stops_for_route_type2 = (stops_for_route_type
+                             .drop(columns = "trip_key")
+                             .drop_duplicates()
+                             .reset_index(drop=True)
+                             .compute()
+                            )
+    
+    return stops_for_route_type2
+    
+
+def grab_rail_data(analysis_date: str) -> gpd.GeoDataFrame:
     """
     Grab all the rail routes by subsetting routes table down to certain route types.
     
@@ -139,47 +85,34 @@ def grab_rail_data(analysis_date: dt.date) -> gpd.GeoDataFrame:
     # Grab the different route types for rail from route tables
     rail_route_types = ['0', '1', '2']
     
-    # Grab the subset of operators that have these route types
-    # and use in gtfs_utils.get_route_info
-    rail_operators = operators_with_route_type(rail_route_types)
+    # Grab trip_keys associated with this route_type
+    rail_trip_keys = trip_keys_for_route_type(analysis_date, rail_route_types)
     
-    keep_route_cols = [
-        "feed_key", "route_key", 
-        "calitp_itp_id", "date", "route_id", 
-        "route_short_name", "route_long_name", "route_desc", "route_type",
-        "calitp_extracted_at", "calitp_deleted_at"
-    ]
-
-    rail_routes = gtfs_utils.get_route_info(
-        selected_date = analysis_date,
-        itp_id_list = rail_operators,
-        route_cols = keep_route_cols,
-        get_df = False,
-        custom_filtering = {"route_type": rail_route_types}
-    )
-            
-    # Grab rail stops and clip to CA    
-    rail_stops = routes_to_stops(rail_routes, analysis_date)
+    # Go from trip_keys to stop_keys to stops
+    rail_stop_keys = trip_keys_to_stop_keys(rail_trip_keys)
+    
+    rail_stops = grab_stops_by_stop_key(analysis_date, rail_stop_keys)
+    
+    rail_stops = utilities.clip_to_ca(rail_stops)
     
     return rail_stops
 
 
-def grab_operator_brt(itp_id: int, analysis_date: dt.date):
+def grab_operator_brt(itp_id: int, analysis_date: str):
     """
     Grab BRT routes, stops data for certain operators in CA by analysis date.
     """
+        
+    trips = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}_all.parquet")
+    
+    operator_trips = trips[trips.calitp_itp_id==itp_id]
     
     # Filter within specific operator, each operator has specific filtering condition
     # If it's not one of the ones listed, raise an error
     BRT_OPERATORS = [
         182, 4, 282, 
         # 232, # Omni BRT too infrequent 
-    ]
-    
-    keep_route_cols = [
-        "calitp_itp_id", "route_id", 
-        "route_short_name", "route_long_name", 
-        "route_desc", "route_type",
     ]
     
     BRT_ROUTE_FILTERING = {
@@ -194,18 +127,24 @@ def grab_operator_brt(itp_id: int, analysis_date: dt.date):
         282: {"route_short_name": ['49']}
     }
     
-    operator_brt = gtfs_utils.get_route_info(
-        selected_date = analysis_date,
-        itp_id_list = [itp_id],
-        route_cols = keep_route_cols,
-        get_df = False,
-        custom_filtering = BRT_ROUTE_FILTERING[itp_id]
-    )
+    col, filtering_list = list(BRT_ROUTE_FILTERING[itp_id].items())[0]     
+    brt_trips = operator_trips[operator_trips[col].isin(filtering_list)]
         
+    # Grab trip_keys associated with this operator's BRT routes
+    brt_trip_keys = (brt_trips[["trip_key", "route_type"]]
+                     .drop_duplicates()
+                     .compute()
+                    )
+    
+    # Go from trip_keys to stop_keys to stops
+    brt_stop_keys = trip_keys_to_stop_keys(brt_trip_keys)
+    
+    brt_stops = grab_stops_by_stop_key(analysis_date, brt_stop_keys)
+    
+    operator_brt_stops = utilities.clip_to_ca(brt_stops)    
+    
     if itp_id not in BRT_OPERATORS:
         raise KeyError("Operator does not have BRT route filtering condition set.")
-
-    operator_brt_stops = routes_to_stops(operator_brt, analysis_date)
     
     return operator_brt_stops
 
@@ -228,29 +167,17 @@ def additional_brt_filtering_out_stops(df: gpd.GeoDataFrame,
     return brt_df_stops
 
 
-def grab_ferry_data(analysis_date: dt.date):
+def grab_ferry_data(analysis_date: str):
     ferry_route_types = ['4']
-    ferry_operators = operators_with_route_type(ferry_route_types)
-
-    # For analysis date, grab the different route types from route tables    
-    keep_route_cols = [
-        "feed_key", "route_key", 
-        "calitp_itp_id", "date", "route_id", 
-        "route_short_name", "route_long_name", "route_desc", "route_type",
-        "calitp_extracted_at", "calitp_deleted_at"
-    ]
     
-    ferry = gtfs_utils.get_route_info(
-        selected_date = analysis_date,
-        itp_id_list = ferry_operators,
-        route_cols = keep_route_cols,
-        get_df = False,
-        custom_filtering = {"route_type": ['4']}
-    )    
-    
-    # Grab ferry stops and clip to CA    
-    ferry_stops = routes_to_stops(ferry, analysis_date)
+    # Grab trip_keys associated with this route_type
+    ferry_trip_keys = trip_keys_for_route_type(analysis_date, ferry_route_types)
 
+    # Go from trip_keys to stop_keys to stops
+    ferry_stop_keys = trip_keys_to_stop_keys(ferry_trip_keys)
+    
+    ferry_stops = grab_stops_by_stop_key(analysis_date, ferry_stop_keys)
+        
     # TODO: only stops without bus service, implement algorithm
     angel_and_alcatraz = ['2483552', '2483550', '43002'] 
     
