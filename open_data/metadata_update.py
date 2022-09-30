@@ -40,13 +40,13 @@ def lift_necessary_dataset_elements(metadata_json):
     
     # Bounding box
     d["idinfo"] = {}
-    d["idinfo"]["spdom"] = m["idinfo"]["spdom"] 
+    #d["idinfo"]["spdom"] = m["idinfo"]["spdom"] 
     
     # Some description about geospatial layer
     d["spdoinfo"] = m["spdoinfo"] 
     
     # Spatial reference info
-    d["spref"] = m["spref"] 
+    #d["spref"] = m["spref"] 
     
     # Field and entity attributes
     d["eainfo"] = m["eainfo"]
@@ -67,10 +67,10 @@ def overwrite_default_with_dataset_elements(metadata_json):
         if key in necessary_elements.keys() and key != "idinfo":
             default[key] = necessary_elements[key]
         
-        elif key == "idinfo":
-            for k, v in value.items():
-                if k == "spdom":
-                    default[key][k] = necessary_elements[key][k]
+        #elif key == "idinfo":
+            #for k, v in value.items():
+                #if k == "spdom":
+                #    default[key][k] = necessary_elements[key][k]
            
             
     # Return the default template, but now with our dataset's info populated
