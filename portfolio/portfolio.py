@@ -207,7 +207,7 @@ class Part(BaseModel):
 
 class Site(BaseModel):
     output_dir: Path
-    name: Optional[str]
+    name: str
     title: str
     directory: Path
     readme: Optional[Path] = "README.md"
@@ -221,9 +221,17 @@ class Site(BaseModel):
         for part in self.parts:
             part.site = self
 
+    @validator("name")
+    def convert_to_underscores(cls, v):
+        # netlify converts stuff to underscores so we should do it too
+        return v.replace("_", "-")
+
     @validator('readme', pre=True, always=True)
     def default_readme(cls, v, *, values, **kwargs):
-        return v or (values['directory'] / Path("README.md"))
+        if "./" in v: 
+            return Path(v)
+        else:
+            return (values['directory'] / Path("README.md")) or (values['directory'] / Path(v))
 
     @property
     def slug(self) -> str:
@@ -355,16 +363,15 @@ def build(
     """
     Builds a static site from parameterized notebooks as defined in a site YAML file.
     """
-    site_name = site.value
-    site_output_dir = PORTFOLIO_DIR / Path(site_name)
+    site_yml_name = site.value
+    site_output_dir = PORTFOLIO_DIR / Path(site_yml_name)
     site_output_dir.mkdir(parents=True, exist_ok=True)
 
-    with open(SITES_DIR / Path(f"{site_name}.yml")) as f:
-        site = Site(output_dir=site_output_dir, **yaml.safe_load(f))
+    with open(SITES_DIR / Path(f"{site_yml_name}.yml")) as f:
+        site = Site(output_dir=site_output_dir, name=site_yml_name, **yaml.safe_load(f))
 
     typer.echo(f"copying readme from {site.directory} to {site_output_dir}")
     shutil.copy(site.readme, site_output_dir / site.readme.name)
-
 
     fname = site_output_dir / Path("_config.yml")
     with open(fname, "w") as f:
@@ -408,8 +415,8 @@ def build(
             "netlify",
             "deploy",
             "--site=cal-itp-data-analyses",
-            f"--dir=portfolio/{site_name}/_build/html/",
-            f"--alias={site_name}",
+            f"--dir=portfolio/{site_yml_name}/_build/html/",
+            f"--alias={site.name}",
         ]
         typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
         subprocess.run(args).check_returncode()

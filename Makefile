@@ -19,7 +19,6 @@ build_100_recs:
 	python portfolio/portfolio.py build one_hundred_recs --deploy 
 	git add portfolio/one_hundred_recs/*.ipynb portfolio/one_hundred_recs/*.yml portfolio/one_hundred_recs/*.md 
 	git add portfolio/sites/ 
-    #--config=./portfolio/test-analyses.yml
 
 
 build_dla_reports:
