@@ -7,19 +7,21 @@
 The [Methodology section](#methodology) explains why these definitions are needed. 
 
 **Routes on SHN**: routes where at least 20% of the bus route takes place on the SHN (within a 50 ft buffer).
+
 **Routes Intersecting SHN**: routes where at least 35% of the bus route falls within 0.5 mile of the SHN. 
+
 **Routes Near SHN**: the sum of routes on the SHN and intersecting the SHN. In some way, these routes are impacted by the SHN, either through traffic conditions or simply because they pass through freeway on-ramps and underpasses.
 
 **Competitive routes**: routes where at least 50% of the trips take no longer than 1.5x a car. A multiplier of 1 means that the bus and the car take the same amount of time. A multiplier of 1.5 means that the bus takes 50% longer than the car.
 
 
 Caltrans perspective:
-* If Caltrans were to sponsor an express bus, which highway corridors have no parallel transit routes?
+* If Caltrans were to sponsor an express bus, which highway corridors have [no transit routes within 2 miles](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-no-parallel-routes.html)?
+* Which highway corridors have [no competitive transit](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-uncompetitive-routes.html) (looser definition of within 2x of car travel) within 2 miles?
 
 Transit operator perspective:
-* Of the parallel bus routes, which ones are competitive against car travel and should be targeted for future service improvements? 
+* Of the bus routes near the SHN, which ones are competitive against car travel and should be targeted for future service improvements? 
 * Operators with GTFS Real-Time feeds: explore these competitive bus routes and [see where the bottlenecks are](https://analysis.calitp.org/rt/README.html).
-* Which highway corridors have [no parallel routes](https://docs.calitp.org/data-analyses/bus_service_increase/img/highways-no-parallel-routes.html)?
 
 
 ## Data
