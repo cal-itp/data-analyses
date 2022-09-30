@@ -1,0 +1,15 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: parameter_county_riverside__county_title_riverside-county/0__county_landing_page__parameter_county_riverside__county_title_riverside-county.ipynb
+-   caption: null
+    chapters:
+    -   file: parameter_county_yolo__county_title_yolo-county/0__county_landing_page__parameter_county_yolo__county_title_yolo-county.ipynb
+-   caption: null
+    chapters:
+    -   file: parameter_county_humboldt__county_title_humboldt-county/0__county_landing_page__parameter_county_humboldt__county_title_humboldt-county.ipynb
+-   caption: null
+    chapters:
+    -   file: parameter_county_alameda__county_title_alameda-county/0__county_landing_page__parameter_county_alameda__county_title_alameda-county.ipynb
+root: README
