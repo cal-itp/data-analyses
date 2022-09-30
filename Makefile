@@ -21,6 +21,15 @@ build_100_recs:
 	git add portfolio/sites/ 
 
 
+build_hqta:
+	#pip install -r portfolio/requirements.txt
+	git rm portfolio/hqta/ -rf
+	python portfolio/portfolio.py clean hqta
+	python portfolio/portfolio.py build hqta --deploy 
+	git add portfolio/hqta/*.ipynb portfolio/hqta/*.yml portfolio/hqta/*.md 
+	git add portfolio/sites/ 
+
+
 build_dla_reports:
 	pip install -r portfolio/requirements.txt
 	git rm portfolio/dla/ -rf
