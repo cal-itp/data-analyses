@@ -26,7 +26,7 @@ sources:
     description: High quality transit areas (polygons)
     args:
       # source: high_quality_transit_areas/
-      urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/export/2022-05-04/ca_hq_transit_areas.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_areas.parquet
   ## OPEN DATA
   ca_counties:
     driver: geojson

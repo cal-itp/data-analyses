@@ -211,7 +211,7 @@ def competitive_route_level_stats(df: pd.DataFrame | gpd.GeoDataFrame) -> pd.Dat
     
     route_cols = ["calitp_itp_id", 
                   "route_id", "route_id2", 
-                  "route_short_name", 
+                  "route_short_name", "mean_speed_mph"
     ]
     
     keep_cols = route_cols + [

@@ -2,7 +2,7 @@
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 build_competitive_corridors:
 	#pip install -r portfolio/requirements.txt
-	git rm portfolio/competitive_corridors/ -rf
+	#git rm portfolio/competitive_corridors/ -rf
 	#need git rm because otherwise, just local removal, but git change is untracked
 	python portfolio/portfolio.py clean competitive_corridors
 	python bus_service_increase/deploy_portfolio_yaml.py   
@@ -10,6 +10,15 @@ build_competitive_corridors:
 	git add portfolio/competitive_corridors/district_*/ portfolio/competitive_corridors/*.yml portfolio/competitive_corridors/*.md 
 	git add portfolio/sites/ 
     #--config=./portfolio/test-analyses.yml
+
+
+build_100_recs:
+	#pip install -r portfolio/requirements.txt
+	#git rm portfolio/one_hundred_recs/ -rf
+	python portfolio/portfolio.py clean one_hundred_recs
+	python portfolio/portfolio.py build one_hundred_recs --deploy 
+	git add portfolio/one_hundred_recs/*.ipynb portfolio/one_hundred_recs/*.yml portfolio/one_hundred_recs/*.md 
+	git add portfolio/sites/ 
 
 
 build_dla_reports:
