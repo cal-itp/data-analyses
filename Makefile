@@ -21,15 +21,6 @@ build_100_recs:
 	git add portfolio/sites/ 
 
 
-build_hqta:
-	#pip install -r portfolio/requirements.txt
-	git rm portfolio/hqta/ -rf
-	python portfolio/portfolio.py clean hqta
-	python portfolio/portfolio.py build hqta --deploy 
-	git add portfolio/hqta/*.ipynb portfolio/hqta/*.yml portfolio/hqta/*.md 
-	git add portfolio/sites/ 
-
-
 build_dla_reports:
 	pip install -r portfolio/requirements.txt
 	git rm portfolio/dla/ -rf
@@ -50,3 +41,11 @@ add_precommit:
 	pip install pre-commit
 	pre-commit install 
 	#pre-commit run --all-files 
+
+
+make_env:
+	cd _shared_utils && make setup_env && cd ..
+	cd bus_service_increase && make bus_service_utils 
+
+# Add to _.bash_profile outside of data-analyses
+#alias go='cd ~/data-analyses/portfolio && pip install -r requirements.txt && cd #../_shared_utils && make setup_env && cd ..'
