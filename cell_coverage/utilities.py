@@ -7,7 +7,7 @@ from calitp import *
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 
-# Function to clip the data coverage map to California only.
+# Clip the data coverage map to California only.
 def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     # Open zip file first
@@ -88,6 +88,7 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
     
     # Filter out for any Amtrak records
     unique_route = unique_route.loc[unique_route["agency"] != "Amtrak"]
+    
     return unique_route
 
 # Overlap
