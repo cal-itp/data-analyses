@@ -55,7 +55,7 @@ def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, char
                  y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
                  color = alt.Color(colorcol, 
                                   scale=alt.Scale(
-                                      range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
+                                      range=cp.CALITP_DIVERGING_COLORS),
                                       legend=alt.Legend(title=(labeling(colorcol)))
                                   ),
                 tooltip = [tooltip_col])
@@ -94,7 +94,7 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
         x=alt.X(chart1_quant),
         y=alt.Y(chart1_nominal), 
         color = alt.Color(chart1_nominal, scale=alt.Scale(
-        range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
+        range=cp.CALITP_DIVERGING_COLORS), legend = None),
         tooltip = chart1_tooltip_cols)
         .properties(title=chart_title)
         .add_selection(category_selector))
@@ -102,9 +102,9 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
     # Build second chart
     chart2 = (alt.Chart(df).mark_bar().encode(
         x=alt.X(chart2_quant),
-        y=alt.Y(chart2_nominal, ), 
+        y=alt.Y(chart2_nominal), 
         color = alt.Color(chart2_nominal, scale=alt.Scale(
-        range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend = None),
+        range=cp.CALITP_DIVERGING_COLORS), legend = None),
         tooltip = chart2_tooltip_cols)
         .transform_filter(category_selector))
     
@@ -123,7 +123,7 @@ def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
     base = (alt.Chart(df)
             .encode(theta=alt.Theta(quant_col, stack=True), 
             color=alt.Color(nominal_col, 
-            scale = alt.Scale(range = cp.CALITP_CATEGORY_BRIGHT_COLORS),
+            scale = alt.Scale(range = cp.CALITP_DIVERGING_COLORS),
             legend = alt.Legend(title=labeling(label_col))),
             tooltip = [label_col,quant_col])
             .properties(title=chart_title)
@@ -158,12 +158,12 @@ def dual_chart_with_dropdown(
         df: the dataframe
         dropdown_list(list): a list of all the values in the dropdown menu,
         dropdown_field(str): column where the dropdown menu's values are drawn from,
-        x_axis_chart1(str): x axis value for chart 1 encode as Q or N,
-        y_axis_chart1(str): y axis valuefor chart 1 encode as Q or N,
+        x_axis_chart1(str): x axis value for chart 1 - encode as Q or N,
+        y_axis_chart1(str): y axis valuefor chart 1 - encode as Q or N,
         color_col1(str): column to color the graphs for chart 1,
         chart1_tooltip_cols(list): list of all the columns to populate the tooltip,
-        x_axis_chart2(str): x axis value for chart 2 encode as Q or N,
-        y_axis_chart2(str): x axis value for chart 2 encode as Q or N,
+        x_axis_chart2(str): x axis value for chart 2 - encode as Q or N,
+        y_axis_chart2(str): x axis value for chart 2 - encode as Q or N,
         color_col2(str): column to color the graphs for chart 2,
         chart2_tooltip_cols(list): list of all the columns to populate the tooltip,
         chart_title(str):chart title,
@@ -171,7 +171,7 @@ def dual_chart_with_dropdown(
         Returns two  bar charts that are controlled by a dropdown
     """
     # Create drop down menu
-    input_dropdown = alt.binding_select(options=dropdown_list, name="Select")
+    input_dropdown = alt.binding_select(options=dropdown_list, name="Select ")
 
     # The field tied to the drop down menu
     selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
@@ -181,9 +181,9 @@ def dual_chart_with_dropdown(
         .mark_bar()
         .encode(
             x=x_axis_chart1,
-            y=y_axis_chart1,
+            y=(y_axis_chart1),
             color=alt.Color(
-                color_col1, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+                color_col1, scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS)
                 , legend = None
             ),
             tooltip=chart1_tooltip_cols,
@@ -198,9 +198,9 @@ def dual_chart_with_dropdown(
         .mark_bar()
         .encode(
             x=x_axis_chart2,
-            y=y_axis_chart2,
+            y=(y_axis_chart2),
             color=alt.Color(
-                color_col2, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+                color_col2, scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS)
                 , legend = None
             ),
             tooltip=chart2_tooltip_cols,
@@ -261,7 +261,7 @@ def create_caltrans_map(df):
     ct_geojson = gpd.read_file(f"{Caltrans_shape}").to_crs(epsg=4326)
     
     # Keep only the columns we want
-    ct_geojson = ct_geojson[["DISTRICT", "Shape_Length", "Shape_Area", "geometry"]]
+    # ct_geojson = ct_geojson[["DISTRICT", "Shape_Length", "Shape_Area", "geometry"]]
     
    
     # Inner merge 
