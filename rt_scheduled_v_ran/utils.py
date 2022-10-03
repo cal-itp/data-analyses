@@ -338,7 +338,7 @@ def total_average_with_1op_chart(full_df, calitp_id):
                   sum_sched = 'num_sched',
                   sum_vp = 'num_vp'))>>arrange(_.service_date)).rename(columns={'avg':'total_average'})
     
-    one_op = (get_agg_pct((full_df>>filter(_.calitp_itp_id==300)),
+    one_op = (get_agg_pct((full_df>>filter(_.calitp_itp_id==calitp_id)),
                   groupings = ['service_date', 'agency_name'],
                   sum_sched = 'num_sched',
                   sum_vp = 'num_vp'))>>arrange(_.service_date)
