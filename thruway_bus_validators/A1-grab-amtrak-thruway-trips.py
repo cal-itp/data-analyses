@@ -94,8 +94,54 @@ def array_stop_times_into_linestrings(
     
     gdf = gpd.GeoDataFrame(gdf, geometry="geometry", 
                            crs = geography_utils.WGS84)
+    
+    origin = get_origin_and_destination(stop_times_gdf, category="origin")
+    destination = get_origin_and_destination(stop_times_gdf, category="destination")
+    
+    gdf_with_od = pd.merge(
+        gdf, 
+        origin,
+        on = trip_cols,
+        how = "inner",
+        validate = "1:1"
+    ).merge(destination,
+            on = trip_cols,
+            how = "inner",
+            validate = "1:1"
+    )
+    
+    return gdf_with_od
 
-    return gdf
+
+def get_origin_and_destination(stop_times: gpd.GeoDataFrame, 
+                               category="origin") -> gpd.GeoDataFrame:
+    """
+    Get the origin or destination by for each trip. 
+    Merge this into stop_times with line geom.
+    
+    Might want origin/destination to find other local bus routes that run
+    along same cities.
+    """
+    if category=="origin": 
+        stop = (stop_times.groupby(trip_cols).stop_sequence_rank.min()
+                .reset_index()
+               )
+    elif category=="destination": 
+        stop = (stop_times.groupby(trip_cols).stop_sequence_rank.max()
+                .reset_index()
+               )
+
+    one_stop_with_geom = pd.merge(
+        stop_times, 
+        stop,
+        on = trip_cols + ["stop_sequence_rank"],
+        how = "inner",
+        validate = "1:1"
+    ).rename(columns = {"geometry": category})
+    
+    one_stop_with_geom = one_stop_with_geom[trip_cols + [category]]
+    
+    return one_stop_with_geom
 
 
 def merge_trips_with_linestring(
