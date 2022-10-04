@@ -68,11 +68,11 @@ def get_correct_url(df):
     def remove_rows(row):
         
         #Emery Go-Round
-        if (row.multiple_url == True) and (row.calitp_itp_id == 106) | (row.calitp_url_number == 2):
+        if (row.multiple_url == True) and (row.calitp_itp_id == 106) and (row.calitp_url_number == 2):
             return "drop"        
         
         #SMART or Sonoma Marin Area Rail Transit
-        if (row.multiple_url == True) and (row.calitp_itp_id == 315) and (row.calitp_url_number == 1) | (row.calitp_url_number == 2):
+        if (row.multiple_url == True) and (row.calitp_itp_id == 315) and (row.calitp_url_number == 2):
             return "drop"
         
         #  Union City Transit
@@ -89,9 +89,9 @@ def get_correct_url(df):
 
     df['drop_record'] = df.apply(lambda x: remove_rows(x), axis=1)
     
-    df.loc[((df['calitp_itp_id']==106) & (df['calitp_url_number'] == 1)), 'drop_record']  = ""
+    ##commenting 106 out to maintain 511 MTC
+    #df.loc[((df['calitp_itp_id']==106) & (df['calitp_url_number'] == 1)), 'drop_record']  = ""
     df.loc[((df['calitp_itp_id']==360) & (df['calitp_url_number'] == 0)), 'drop_record']  = ""
-    df.loc[((df['calitp_itp_id']==315) & (df['calitp_url_number'] == 0)), 'drop_record']  = ""
     
     df = df >> filter(_.drop_record!='drop')
     df = df.drop(columns = ['multiple_url','drop_record'])
@@ -242,7 +242,9 @@ def labeling(word):
         "pct_w_vp": "Percent of Scheduled Trips with Vehicle Postions",
         "avg_pct_w_vp":"Average Percent of Scheduled Trips with Vehicle Positions",
         "primary_agency_name": "Agency",
-        "avg":"Average"
+        "avg":"Average",
+        "num_vp":"Number of Trips with Vehicle Positions Data",
+        "num_sched":"Number of Trips with Scheduled Data"
     }
 
     if (word == "mpo") or (word == "rtpa"):
@@ -288,7 +290,13 @@ def add_tooltip(chart, tooltip1, tooltip2, tooltip3):
 
 # Bar chart over time 
 #need to specify color scheme outside of charting function which can be done with .encode()
-def bar_chart_over_time(df, x_col, y_col, color_col, yaxis_format, sort, title_txt):
+def bar_chart_over_time(df,
+                        x_col,
+                        y_col,
+                        color_col,
+                        yaxis_format,
+                        sort,
+                        title_txt):
     
     bar = (alt.Chart(df)
         .mark_bar(size=8)
@@ -313,10 +321,10 @@ def total_average_chart(full_df):
                   sum_sched = 'num_sched',
                   sum_vp = 'num_vp'))>>arrange(_.service_date)).rename(columns={'avg':'total_average'})
       
-    base = (alt.Chart(df_avg).properties(width=550))
+    base = (alt.Chart(agg_all).properties(width=550))
 
-    chart = (base.mark_line().encode(x=alt.X('service_date', title=labeling('service_date'), sort=("x")),
-                                     y=alt.Y('avg', title= labeling('avg'), axis=alt.Axis(format='%')),
+    chart = (base.mark_line().encode(x=alt.X('service_date:O', title=labeling('service_date'), sort=("x")),
+                                     y=alt.Y('avg:Q', title= labeling('avg'), axis=alt.Axis(format='%')),
                                      ))
              # .properties(title= 'Overall Average for Percent Trips with Vehicle Positions Data')
            
@@ -330,7 +338,7 @@ def total_average_with_1op_chart(full_df, calitp_id):
                   sum_sched = 'num_sched',
                   sum_vp = 'num_vp'))>>arrange(_.service_date)).rename(columns={'avg':'total_average'})
     
-    one_op = (get_agg_pct((full_df>>filter(_.calitp_itp_id==300)),
+    one_op = (get_agg_pct((full_df>>filter(_.calitp_itp_id==calitp_id)),
                   groupings = ['service_date', 'agency_name'],
                   sum_sched = 'num_sched',
                   sum_vp = 'num_vp'))>>arrange(_.service_date)
