@@ -12,12 +12,13 @@ import papermill as pm
 import requests
 
 from shared_utils import utils
-
+'''
 dotenv.load_dotenv("_env")
 
 TOKEN = os.environ["GITHUB_API_KEY"]
 REPO = "cal-itp/data-analyses"
 BRANCH = "main"
+'''
 REPO_FOLDER = "bus_service_increase/"
 REPORT_FOLDER = "img/"
 

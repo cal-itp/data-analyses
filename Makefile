@@ -45,7 +45,7 @@ add_precommit:
 
 make_env:
 	cd _shared_utils && make setup_env && cd ..
-	cd bus_service_increase && make bus_service_utils 
+	cd bus_service_increase && make setup_bus_service_utils 
 
 # Add to _.bash_profile outside of data-analyses
 #alias go='cd ~/data-analyses/portfolio && pip install -r requirements.txt && cd #../_shared_utils && make setup_env && cd ..'
