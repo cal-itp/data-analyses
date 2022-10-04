@@ -7,7 +7,7 @@ from calitp import *
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 
-# Clip the data coverage map to California only.
+# Clip the data coverage map for California only.
 def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     # Open zip file first
@@ -30,7 +30,7 @@ def create_california_coverage(file_zip_name:str, new_file_name:str):
     # Save this into a parquet so don't have to clip all the time
     utils.geoparquet_gcs_export(fcc_ca_gdf, GCS_FILE_PATH, new_file_name)
 
-# Return a cleaned up NTD dataframe 
+# Return a cleaned up NTD dataframe for bus only 
 def ntd_vehicles():
     
     # Open sheet
@@ -89,9 +89,12 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
     # Filter out for any Amtrak records
     unique_route = unique_route.loc[unique_route["agency"] != "Amtrak"]
     
+    # Fill in NA for route names
+    unique_route["route_name"] = unique_route["route_name"].replace({"": "None"})
+    
     return unique_route
 
-# Overlap
+# Overlay FCC map with routes.
 def comparison(gdf_left, gdf_right):
 
     # Overlay
@@ -99,7 +102,22 @@ def comparison(gdf_left, gdf_right):
         gdf_left, gdf_right, how="intersection", keep_geom_type=False
     )
 
-    # Create route length again? Why?
+    # Create a new route length
+    overlay_df = overlay_df.assign(
+        route_length=overlay_df.geometry.to_crs(geography_utils.CA_StatePlane).length
+    )
+
+    return overlay_df
+
+# Overlay FCC map with routes.
+def comparison(gdf_left, gdf_right):
+
+    # Overlay
+    overlay_df = gpd.overlay(
+        gdf_left, gdf_right, how="intersection", keep_geom_type=False
+    )
+
+    # Create a new route length
     overlay_df = overlay_df.assign(
         route_length=overlay_df.geometry.to_crs(geography_utils.CA_StatePlane).length
     )
