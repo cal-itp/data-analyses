@@ -137,9 +137,12 @@ def get_origin_and_destination(stop_times: gpd.GeoDataFrame,
         on = trip_cols + ["stop_sequence_rank"],
         how = "inner",
         validate = "1:1"
-    ).rename(columns = {"geometry": category})
+    ).rename(columns = {"geometry": category, 
+                        "stop_name": f"{category}_stop_name"
+                       })
     
-    one_stop_with_geom = one_stop_with_geom[trip_cols + [category]]
+    one_stop_with_geom = one_stop_with_geom[trip_cols + 
+                                            [category, f"{category}_stop_name"]]
     
     return one_stop_with_geom
 
