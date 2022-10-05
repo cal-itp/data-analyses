@@ -185,9 +185,10 @@ class RtFilterMapper:
             # can use this as # of stops in corr...
             stops_in_corr = clipped >> group_by(_.shape_id) >> summarize(in_corr = _.shape_id.size)
             stop_comparison = stops_per_shape >> inner_join(_, stops_in_corr, on='shape_id')
-            # only keep shapes with at least 10% of stops in corridor
-            stop_comparison = stop_comparison >> mutate(corr_shape = _.in_corr > _.n_stops / 10)
-            corr_shapes = stop_comparison >> filter(_.corr_shape)
+            # # only keep shapes with at least 10% of stops in corridor
+            # stop_comparison = stop_comparison >> mutate(corr_shape = _.in_corr > _.n_stops / 10)
+            # corr_shapes = stop_comparison >> filter(_.corr_shape)
+            corr_shapes = stop_comparison # actually keep all
         self._shape_sequence_filter = {}
         for shape_id in corr_shapes.shape_id.unique():
             self._shape_sequence_filter[shape_id] = {}
