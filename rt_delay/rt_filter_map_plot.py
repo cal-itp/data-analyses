@@ -51,18 +51,24 @@ class RtFilterMapper:
         self.reset_filter()
 
     def set_filter(self, start_time = None, end_time = None, route_names = None,
-                   shape_ids = None, direction_id = None, direction = None, trip_ids = None):
+                   shape_ids = None, direction_id = None, direction = None, trip_ids = None,
+                   route_types = None
+                  ):
         '''
         start_time, end_time: string %H:%M, for example '11:00' and '14:00'
         route_names: list or pd.Series of route_names (GTFS route_short_name)
         direction_id: '0' or '1'
         direction: string 'Northbound', 'Eastbound', 'Southbound', 'Westbound' (experimental)
         trip_ids: list or pd.Series of trip_ids (GTFS trip_ids)
+        route_types: list or pd.Series of route_type
         '''
-        assert start_time or end_time or route_names or direction_id or direction or shape_ids or trip_ids, 'must supply at least 1 argument to filter'
+        assert start_time or end_time or route_names or direction_id or direction or shape_ids or trip_ids or route_types, 'must supply at least 1 argument to filter'
         assert not start_time or type(dt.datetime.strptime(start_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not end_time or type(dt.datetime.strptime(end_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not route_names or type(route_names) == list or type(route_names) == tuple or type(route_names) == type(pd.Series())
+        assert not route_types or type(route_types) == list or type(route_types) == tuple or type(route_types) == type(pd.Series())
+        if route_types:
+            assert pd.Series(route_types).isin(self.rt_trips.route_type).all(), 'at least 1 route type not found in self.rt_trips'
         if route_names:
             # print(route_names)
             # print(type(route_names))
@@ -78,12 +84,12 @@ class RtFilterMapper:
         else:
             self.filter['end_time'] = None
         self.filter['route_names'] = route_names
+        self.filter['route_types'] = route_types
         self.filter['shape_ids'] = shape_ids
         self.filter['trip_ids'] = trip_ids
         if shape_ids:
             shape_trips = (self.rt_trips >> filter(_.shape_id.isin(shape_ids))
                            >> distinct(_.route_short_name, _keep_all=True)
-                           >> collect()
                           )
             self.filter['route_names'] = list(shape_trips.route_short_name)
             if len(shape_ids) == 1:
@@ -91,7 +97,6 @@ class RtFilterMapper:
         if trip_ids:
             trips = (self.rt_trips >> filter(_.trip_id.isin(trip_ids))
                            >> distinct(_.route_short_name, _keep_all=True)
-                           >> collect()
                           )
             self.filter['route_names'] = list(trips.route_short_name)
             if len(trip_ids) == 1:
@@ -112,6 +117,27 @@ class RtFilterMapper:
         elif not self.filter['route_names']:
             rts = 'All Routes'
             
+        route_type_names = {
+            "0" : "Tram, Streetcar, Light rail",
+            "1" : "Subway, Metro",
+            "2" : "Rail",
+            "3" : "Bus",
+            "4" : "Ferry",
+            "5" : "Cable tram",
+            "6" : "Aerial lift, suspended cable car",
+            "7" : "Funicular",
+            "11" : "Trolleybus",
+            "12" : "Monorail"
+        }
+                
+        if self.filter['route_types'] and len(self.filter['route_types']) < 3:
+            typename = [route_type_names[rttyp] for rttyp in self.filter['route_types']]
+            typename_print = ' & '.join(typename)
+        elif self.filter['route_types'] and len(self.filter['route_types']) < 3:
+            typename_print = 'Multiple Route Types'
+        elif not self.filter['route_types']:
+            typename_print = 'All Route Types'
+            
         if start_time and end_time and start_time == '15:00' and end_time == '19:00':
             self.filter_period = 'PM_Peak'
         elif start_time and end_time and start_time == '06:00' and end_time == '09:00':
@@ -122,7 +148,7 @@ class RtFilterMapper:
             self.filter_period = 'All_Day'
         else:
             self.filter_period = f'{start_time}–{end_time}'
-        elements_ordered = [rts, direction, self.filter_period, self.display_date]
+        elements_ordered = [typename_print, rts, direction, self.filter_period, self.display_date]
         self.filter_formatted = ', ' + ', '.join([str(x).replace('_', ' ') for x in elements_ordered if x])
         
         self._time_only_filter = not route_names and not shape_ids and not direction_id and not direction and not trip_ids
@@ -151,6 +177,8 @@ class RtFilterMapper:
             trips = trips >> filter(_.median_time < self.filter['end_time'])
         if self.filter['route_names']:
             trips = trips >> filter(_.route_short_name.isin(self.filter['route_names']))
+        if self.filter['route_types']:
+            trips = trips >> filter(_.route_type.isin(self.filter['route_types']))
         if self.filter['shape_ids']:
             trips = trips >> filter(_.shape_id.isin(self.filter['shape_ids']))
         if self.filter['trip_ids']:
