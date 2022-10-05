@@ -1,8 +1,8 @@
 """
 Use cached parquets to find regional bus network.
 
-Amtrak thruway buses + local buses that run the same
-origin/destination.
+Since Amtrak thruway buses don't have shape_id, construct it
+using stops and stop_times.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
