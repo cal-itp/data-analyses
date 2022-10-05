@@ -8,6 +8,7 @@ import geopandas as gpd
 import pandas as pd
 
 from calitp.sql import to_snakecase
+from typing import Literal
 
 from shared_utils import geography_utils
 
@@ -15,7 +16,8 @@ def merge_routes_trips(
     routelines: gpd.GeoDataFrame | dg.GeoDataFrame, 
     trips: pd.DataFrame | dd.DataFrame,
     merge_cols: list = ["calitp_itp_id", "calitp_url_number", "shape_id"],
-    crs: str = geography_utils.WGS84
+    crs: str = geography_utils.WGS84,
+    join: Literal["left", "inner", "outer", "right", "cross"] = "left",
 ) -> gpd.GeoDataFrame:
     """
     Merge routes (which has shape_id, geometry) with trips
@@ -32,7 +34,7 @@ def merge_routes_trips(
             routes,
             trips,
             on = merge_cols,
-            how = "left",
+            how = join,
             indicator=True
         ).to_crs(crs).compute()  
         
@@ -41,7 +43,7 @@ def merge_routes_trips(
             routes,            
             trips,
             on = merge_cols,
-            how = "left",
+            how = join,
             indicator=True
         ).to_crs(crs)
    
