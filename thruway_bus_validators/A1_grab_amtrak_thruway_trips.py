@@ -181,7 +181,8 @@ if __name__=="__main__":
     # Combine trip's line geom with trip-level df
     gdf = merge_trips_with_linestring(trips, trips_with_line_geom)
     
-    utils.geoparquet_gcs_export(gdf, 
-                                GCS_FILE_PATH,
-                                f"amtrak_thruway_trips_{SELECTED_DATE}"
-                               )
+    utils.geoparquet_gcs_export(
+        gdf, 
+        GCS_FILE_PATH,
+        f"amtrak_thruway_trips_{SELECTED_DATE}"
+    )
