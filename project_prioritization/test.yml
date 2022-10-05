@@ -1,209 +1,157 @@
-- parts:
-  - chapters: null
-    params:
+- chapters:
+  - params:
       county_title: Alameda County
       parameter_county: Alameda
-  - chapters: null
-    params:
+  - params:
       county_title: Amador County
       parameter_county: Amador
-  - chapters: null
-    params:
+  - params:
       county_title: Butte County
       parameter_county: Butte
-  - chapters: null
-    params:
+  - params:
       county_title: Calaveras County
       parameter_county: Calaveras
-  - chapters: null
-    params:
+  - params:
       county_title: Contra Costa County
       parameter_county: Contra Costa
-  - chapters: null
-    params:
+  - params:
       county_title: Del Norte County
       parameter_county: Del Norte
-  - chapters: null
-    params:
+  - params:
       county_title: Fresno County
       parameter_county: Fresno
-  - chapters: null
-    params:
+  - params:
       county_title: Humboldt County
       parameter_county: Humboldt
-  - chapters: null
-    params:
+  - params:
       county_title: Imperial County
       parameter_county: Imperial
-  - chapters: null
-    params:
+  - params:
       county_title: Inyo County
       parameter_county: Inyo
-  - chapters: null
-    params:
+  - params:
       county_title: Kern County
       parameter_county: Kern
-  - chapters: null
-    params:
+  - params:
       county_title: Kings County
       parameter_county: Kings
-  - chapters: null
-    params:
+  - params:
       county_title: Lake County
       parameter_county: Lake
-  - chapters: null
-    params:
+  - params:
       county_title: Lassen County
       parameter_county: Lassen
-  - chapters: null
-    params:
+  - params:
       county_title: Los Angeles County
       parameter_county: Los Angeles
-  - chapters: null
-    params:
+  - params:
       county_title: Madera County
       parameter_county: Madera
-  - chapters: null
-    params:
+  - params:
       county_title: Marin County
       parameter_county: Marin
-  - chapters: null
-    params:
+  - params:
       county_title: Mendocino County
       parameter_county: Mendocino
-  - chapters: null
-    params:
+  - params:
       county_title: Merced County
       parameter_county: Merced
-  - chapters: null
-    params:
+  - params:
       county_title: Modoc County
       parameter_county: Modoc
-  - chapters: null
-    params:
+  - params:
       county_title: Mono County
       parameter_county: Mono
-  - chapters: null
-    params:
+  - params:
       county_title: Monterey County
       parameter_county: Monterey
-  - chapters: null
-    params:
+  - params:
       county_title: Napa County
       parameter_county: Napa
-  - chapters: null
-    params:
+  - params:
       county_title: Nevada County
       parameter_county: Nevada
-  - chapters: null
-    params:
+  - params:
       county_title: Orange County
       parameter_county: Orange
-  - chapters: null
-    params:
+  - params:
       county_title: Placer County
       parameter_county: Placer
-  - chapters: null
-    params:
+  - params:
       county_title: Riverside County
       parameter_county: Riverside
-  - chapters: null
-    params:
+  - params:
       county_title: Sacramento County
       parameter_county: Sacramento
-  - chapters: null
-    params:
+  - params:
       county_title: San Benito County
       parameter_county: San Benito
-  - chapters: null
-    params:
+  - params:
       county_title: San Bernardino County
       parameter_county: San Bernardino
-  - chapters: null
-    params:
+  - params:
       county_title: San Diego County
       parameter_county: San Diego
-  - chapters: null
-    params:
+  - params:
       county_title: San Francisco County
       parameter_county: San Francisco
-  - chapters: null
-    params:
+  - params:
       county_title: San Joaquin County
       parameter_county: San Joaquin
-  - chapters: null
-    params:
+  - params:
       county_title: San Luis Obispo County
       parameter_county: San Luis Obispo
-  - chapters: null
-    params:
+  - params:
       county_title: San Mateo County
       parameter_county: San Mateo
-  - chapters: null
-    params:
+  - params:
       county_title: Santa Barbara County
       parameter_county: Santa Barbara
-  - chapters: null
-    params:
+  - params:
       county_title: Santa Clara County
       parameter_county: Santa Clara
-  - chapters: null
-    params:
+  - params:
       county_title: Santa Cruz County
       parameter_county: Santa Cruz
-  - chapters: null
-    params:
+  - params:
       county_title: Shasta County
       parameter_county: Shasta
-  - chapters: null
-    params:
+  - params:
       county_title: Siskiyou County
       parameter_county: Siskiyou
-  - chapters: null
-    params:
+  - params:
       county_title: Solano County
       parameter_county: Solano
-  - chapters: null
-    params:
+  - params:
       county_title: Sonoma County
       parameter_county: Sonoma
-  - chapters: null
-    params:
+  - params:
       county_title: Stanislaus County
       parameter_county: Stanislaus
-  - chapters: null
-    params:
+  - params:
       county_title: Sutter County
       parameter_county: Sutter
-  - chapters: null
-    params:
+  - params:
       county_title: Tehama County
       parameter_county: Tehama
-  - chapters: null
-    params:
+  - params:
       county_title: Trinity County
       parameter_county: Trinity
-  - chapters: null
-    params:
+  - params:
       county_title: Tulare County
       parameter_county: Tulare
-  - chapters: null
-    params:
+  - params:
       county_title: Tuolumne County
       parameter_county: Tuolumne
-  - chapters: null
-    params:
+  - params:
       county_title: Various County
       parameter_county: Various
-  - chapters: null
-    params:
+  - params:
       county_title: Ventura County
       parameter_county: Ventura
-  - chapters: null
-    params:
+  - params:
       county_title: Yolo County
       parameter_county: Yolo
-  - chapters: null
-    params:
+  - params:
       county_title: Yuba County
       parameter_county: Yuba
