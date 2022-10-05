@@ -561,9 +561,11 @@ def all_routelines_or_stops_with_cached(
 
         if path:
             operator = dg.read_parquet(path)
-            gdf = dd.multi.concat([gdf, operator], axis=0, ignore_index=True)
+            gdf = dd.multi.concat(
+                [gdf, operator], axis=0, ignore_index=True
+            ).drop_duplicates()
 
-    gdf = gdf.compute().reset_index(drop=True)
+    gdf = gdf.drop_duplicates().compute().reset_index(drop=True)
 
     utils.geoparquet_gcs_export(gdf, export_path, f"{dataset}_{date_str}")
 
@@ -577,8 +579,6 @@ def all_trips_or_stoptimes_with_cached(
     """
     Use cached files whenever possible, instead of running fresh query.
     Trips and stop times are tabular, import and export with pandas.
-
-    Unlikely that stop times will ever need to be concatenated?
     """
     date_str = format_date(analysis_date)
 
@@ -586,6 +586,7 @@ def all_trips_or_stoptimes_with_cached(
     df = pd.read_parquet(
         f"{rt_utils.EXPORT_PATH}{dataset}_182_{date_str}.parquet"
     ).head(0)
+
     df = dd.from_pandas(df, npartitions=1)
 
     for itp_id in sorted(itp_id_list):
@@ -595,8 +596,10 @@ def all_trips_or_stoptimes_with_cached(
 
         if path:
             operator = pd.read_parquet(path)
-            df = dd.multi.concat([df, operator], axis=0, ignore_index=True)
+            df = dd.multi.concat(
+                [df, operator], axis=0, ignore_index=True
+            ).drop_duplicates()
 
-    df = df.compute().reset_index(drop=True)
+    df = df.drop_duplicates().compute().reset_index(drop=True)
 
     df.to_parquet(f"{export_path}{dataset}_{date_str}.parquet")
