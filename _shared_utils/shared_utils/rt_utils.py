@@ -712,3 +712,17 @@ def describe_slowest(row):
     )
     row["full_description"] = full_description
     return row
+
+
+route_type_names = {
+    "0": "Tram, Streetcar, Light rail",
+    "1": "Subway, Metro",
+    "2": "Rail",
+    "3": "Bus",
+    "4": "Ferry",
+    "5": "Cable tram",
+    "6": "Aerial lift, suspended cable car",
+    "7": "Funicular",
+    "11": "Trolleybus",
+    "12": "Monorail",
+}
