@@ -1,0 +1,18 @@
+directory: ./project_prioritization/
+notebook: ./project_prioritization/my-notebook.ipynb
+parts:
+- chapters:
+  - caption: District 0
+    params:
+      district: 0
+    sections:
+    - county: Various
+  - caption: District 1
+    params:
+      district: 1
+    sections:
+    - county: Del Norte
+    - county: Humboldt
+    - county: Lake
+    - county: Mendocino
+    - county: Various

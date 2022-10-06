@@ -40,11 +40,7 @@ def labeling(word):
         word = word.replace('_', ' ').title()
     return word
 
-"""
-Bar chart where the tooltip's value is another column that isn't x_col or y_col.
-Convenient for graphs regarding monetary values because the tooltip will show the formatted
-version.
-"""
+#Basic Bar Chart
 def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, chart_title=''):
     if chart_title == "":
         chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
@@ -159,7 +155,7 @@ def dual_chart_with_dropdown(
         dropdown_list(list): a list of all the values in the dropdown menu,
         dropdown_field(str): column where the dropdown menu's values are drawn from,
         x_axis_chart1(str): x axis value for chart 1 - encode as Q or N,
-        y_axis_chart1(str): y axis valuefor chart 1 - encode as Q or N,
+        y_axis_chart1(str): y axis value for chart 1 - encode as Q or N,
         color_col1(str): column to color the graphs for chart 1,
         chart1_tooltip_cols(list): list of all the columns to populate the tooltip,
         x_axis_chart2(str): x axis value for chart 2 - encode as Q or N,
@@ -173,7 +169,7 @@ def dual_chart_with_dropdown(
     # Create drop down menu
     input_dropdown = alt.binding_select(options=dropdown_list, name="Select ")
 
-    # The field tied to the drop down menu
+    # The column tied to the drop down menu
     selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
 
     chart1 = (
@@ -214,7 +210,6 @@ def dual_chart_with_dropdown(
 
 """
 Create 3 charts
-with the same y axis, but different x axis
 """
 def repeated_charts(
     df,
@@ -265,7 +260,8 @@ def clean_up_columns(df):
 
 """
 Style the dataframe by removing the index and gray banding,
-dropping certain columns and centering text. Adds scrollbar
+dropping certain columns, and centering text. Adds scrollbar
+and a maximum height & width.
 """
 def styled_df(df):
     display(
@@ -292,10 +288,6 @@ def create_caltrans_map(df):
     
     # Load in Caltrans shape
     ct_geojson = gpd.read_file(f"{Caltrans_shape}").to_crs(epsg=4326)
-    
-    # Keep only the columns we want
-    # ct_geojson = ct_geojson[["DISTRICT", "Shape_Length", "Shape_Area", "geometry"]]
-    
    
     # Inner merge 
     districts_gdf = ct_geojson.merge(
@@ -304,7 +296,7 @@ def create_caltrans_map(df):
     return districts_gdf
 
 """
-Merge a dataframe with County
+Merge a dataframe with county geography
 to return a gdf
 """
 ca_gdf = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
@@ -449,8 +441,8 @@ def create_fake_score_card(df):
         
 
 """
-Create summary table: returns total projects and total cost
-by the column of your choice. 
+Create summary table: returns total projects, total cost,
+and money requested by the column of your choice. 
 """
 def summarize_by_project_names(df, col_wanted: str):
     """
@@ -485,8 +477,7 @@ def summarize_by_project_names(df, col_wanted: str):
 
 """
 Concat summary stats of 
-parameter county & district
-into one dataframe 
+parameter  county & parameter district into one dataframe 
 """
 def county_district_comparison(df_parameter_county, df_parameter_district):
     # Grab the full district name
