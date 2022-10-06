@@ -17,7 +17,7 @@ ROUTES_DICT = {
     "publish_entity": "California Integrated Travel Project", 
 
     "abstract": "Public. EPSG: 4326",
-    "purpose": PURPOSE, 
+    "purpose": PURPOSE, # purpose, also repeat for description?
 
     "beginning_date": "20220914",
     "end_date": "20221014",
@@ -26,7 +26,7 @@ ROUTES_DICT = {
     "status": "Complete", 
     "frequency": "Monthly",
     
-    "theme_keywords": KEYWORDS, 
+    "theme_keywords": KEYWORDS, #tags
 
     "methodology": METHODOLOGY, 
     

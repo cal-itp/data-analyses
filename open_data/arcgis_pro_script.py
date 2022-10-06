@@ -102,10 +102,13 @@ for f in in_features:
 
     # Export metadata XML    
     meta_output = os.path.join(working_dir, f"{f}.xml")
-    TRANSLATOR = "FGDC_CSDGM" 
     
-    source_metadata.exportMetadata(outputPath = meta_output, 
-                               metadata_export_option=TRANSLATOR)
+    # In ArcGIS Pro, instead of FGDC for Desktop, use ISO 19139 GML 3.2
+    # https://sv03tmcpo.ct.dot.ca.gov/portal/apps/sites/#/geep/pages/open-data-request
+    TRANSLATOR = "ISO19139_GML32" 
+    
+    source_metadata.exportMetadata(outputPath = meta_output,
+                                   metadata_export_option=TRANSLATOR)
     
     print(f"successful export: {f}")
 
