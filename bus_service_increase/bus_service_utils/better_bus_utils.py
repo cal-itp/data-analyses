@@ -1,13 +1,31 @@
 """
 Pull datasets needed for 100 Recs for Better Buses
 the same way, across directories.
+
+1. transit routes needing major, corridor improvements:
+    select_transit_routes_corridor_improvements()
+
+2. transit routes needing marginal, hot spot improvements:
+    select_transit_routes_hotspot_improvements()
+
+3. sorted transit routes on speed and % trips competitive.
+   used when districts don't meet criteria, but we still want to 
+   make some recommendation.
+    get_sorted_transit_routes()
+
+4. highway segments with transit, but slow speeds:
+    select_highway_corridors
+
 """
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import geography_utils
-from bus_service_utils import calenviroscreen_lehd_utils, utils
+from typing import Literal
 
+from shared_utils import geography_utils
+from bus_service_utils import calenviroscreen_lehd_utils
+
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/bus_service_increase/"
 
 def subset_by_speed_and_trip(gdf: gpd.GeoDataFrame, 
                              speed_dict: dict = {"speed": 10}, 
@@ -43,11 +61,13 @@ def select_transit_routes_corridor_improvements(
     
     Speeds LESS THAN OR EQUAL TO cut-off are selected.
     % trips competitive GREATER THAN OR EQUAL TO cut-off are selected.    
-    
+       
+    If the district doesn't have data available, use `get_sorted_transit_routes()`.
+
     Used in one_hundred_recs/major-route-improvements.ipynb
     """
     gdf = (gpd.read_parquet(
-        f"{utils.GCS_FILE_PATH}bus_routes_aggregated_stats.parquet")
+        f"{GCS_FILE_PATH}bus_routes_aggregated_stats.parquet")
         .to_crs(geography_utils.WGS84))
     
     # Only keep routes that intersect SHN
@@ -69,12 +89,14 @@ def select_transit_routes_hotspot_improvements(
         value: column value 
     
     Speeds GREATER THAN OR EQUAL TO cut-off are selected.
-    % trips competitive GREATER THAN OR EQUAL TO cut-off are selected.    
+    % trips competitive GREATER THAN OR EQUAL TO cut-off are selected. 
+    
+    If the district doesn't have data available, use `get_sorted_transit_routes()`.
     
     Used in one_hundred_recs/marginal-route-improvements.ipynb
     """
     gdf = (gpd.read_parquet(
-        f"{utils.GCS_FILE_PATH}bus_routes_aggregated_stats.parquet")
+        f"{GCS_FILE_PATH}bus_routes_aggregated_stats.parquet")
         .to_crs(geography_utils.WGS84))
     
     # Since this is the only case selecting speeds higher than a threshold
@@ -90,7 +112,37 @@ def select_transit_routes_hotspot_improvements(
     return gdf2
 
 
-def select_highway_corridors_100recs(
+def get_sorted_transit_routes(
+    recommendation_category: Literal["corridor", "hotspot"] = "corridor"
+) -> gpd.GeoDataFrame:
+    """
+    Some districts don't meet the criteria. 
+    Simply return a sorted df.
+    """
+    gdf = (gpd.read_parquet(
+        f"{GCS_FILE_PATH}bus_routes_aggregated_stats.parquet")
+        .to_crs(geography_utils.WGS84))
+    
+    if recommendation_category == "corridor":
+        include_me = ["intersects_shn"]
+    elif recommendation_category == "hotspot": 
+        include_me = ["intersects_shn", "other"]
+    else:
+        include_me = ["on_shn", "intersects_shn", "other"]
+    
+    # There are NaN for caltrans_districts, because those routes exist, 
+    # but since we can't plot anything from them...drop now
+    gdf2 = (gdf[(gdf.category.isin(include_me)) & 
+                (gdf.caltrans_district.notna())]
+            .sort_values(["caltrans_district", "mean_speed_mph", "pct_trips_competitive"],
+                         ascending = [True, True, True])
+            .reset_index(drop=True)
+           )
+
+    return gdf2
+
+
+def select_highway_corridors(
     speed_dict: dict = {"mean_speed_mph_trip_weighted": 12}, 
     trip_dict: dict = {"trips_all_day_per_mi": 2}
 ) -> gpd.GeoDataFrame:
