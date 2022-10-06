@@ -1,157 +1,19 @@
-- chapters:
-  - params:
-      county_title: Alameda County
-      parameter_county: Alameda
-  - params:
-      county_title: Amador County
-      parameter_county: Amador
-  - params:
-      county_title: Butte County
-      parameter_county: Butte
-  - params:
-      county_title: Calaveras County
-      parameter_county: Calaveras
-  - params:
-      county_title: Contra Costa County
-      parameter_county: Contra Costa
-  - params:
-      county_title: Del Norte County
-      parameter_county: Del Norte
-  - params:
-      county_title: Fresno County
-      parameter_county: Fresno
-  - params:
-      county_title: Humboldt County
-      parameter_county: Humboldt
-  - params:
-      county_title: Imperial County
-      parameter_county: Imperial
-  - params:
-      county_title: Inyo County
-      parameter_county: Inyo
-  - params:
-      county_title: Kern County
-      parameter_county: Kern
-  - params:
-      county_title: Kings County
-      parameter_county: Kings
-  - params:
-      county_title: Lake County
-      parameter_county: Lake
-  - params:
-      county_title: Lassen County
-      parameter_county: Lassen
-  - params:
-      county_title: Los Angeles County
-      parameter_county: Los Angeles
-  - params:
-      county_title: Madera County
-      parameter_county: Madera
-  - params:
-      county_title: Marin County
-      parameter_county: Marin
-  - params:
-      county_title: Mendocino County
-      parameter_county: Mendocino
-  - params:
-      county_title: Merced County
-      parameter_county: Merced
-  - params:
-      county_title: Modoc County
-      parameter_county: Modoc
-  - params:
-      county_title: Mono County
-      parameter_county: Mono
-  - params:
-      county_title: Monterey County
-      parameter_county: Monterey
-  - params:
-      county_title: Napa County
-      parameter_county: Napa
-  - params:
-      county_title: Nevada County
-      parameter_county: Nevada
-  - params:
-      county_title: Orange County
-      parameter_county: Orange
-  - params:
-      county_title: Placer County
-      parameter_county: Placer
-  - params:
-      county_title: Riverside County
-      parameter_county: Riverside
-  - params:
-      county_title: Sacramento County
-      parameter_county: Sacramento
-  - params:
-      county_title: San Benito County
-      parameter_county: San Benito
-  - params:
-      county_title: San Bernardino County
-      parameter_county: San Bernardino
-  - params:
-      county_title: San Diego County
-      parameter_county: San Diego
-  - params:
-      county_title: San Francisco County
-      parameter_county: San Francisco
-  - params:
-      county_title: San Joaquin County
-      parameter_county: San Joaquin
-  - params:
-      county_title: San Luis Obispo County
-      parameter_county: San Luis Obispo
-  - params:
-      county_title: San Mateo County
-      parameter_county: San Mateo
-  - params:
-      county_title: Santa Barbara County
-      parameter_county: Santa Barbara
-  - params:
-      county_title: Santa Clara County
-      parameter_county: Santa Clara
-  - params:
-      county_title: Santa Cruz County
-      parameter_county: Santa Cruz
-  - params:
-      county_title: Shasta County
-      parameter_county: Shasta
-  - params:
-      county_title: Siskiyou County
-      parameter_county: Siskiyou
-  - params:
-      county_title: Solano County
-      parameter_county: Solano
-  - params:
-      county_title: Sonoma County
-      parameter_county: Sonoma
-  - params:
-      county_title: Stanislaus County
-      parameter_county: Stanislaus
-  - params:
-      county_title: Sutter County
-      parameter_county: Sutter
-  - params:
-      county_title: Tehama County
-      parameter_county: Tehama
-  - params:
-      county_title: Trinity County
-      parameter_county: Trinity
-  - params:
-      county_title: Tulare County
-      parameter_county: Tulare
-  - params:
-      county_title: Tuolumne County
-      parameter_county: Tuolumne
-  - params:
-      county_title: Various County
-      parameter_county: Various
-  - params:
-      county_title: Ventura County
-      parameter_county: Ventura
-  - params:
-      county_title: Yolo County
-      parameter_county: Yolo
-  - params:
-      county_title: Yuba County
-      parameter_county: Yuba
+- parts:
+  - -chapters: null
+    -params:
+      county: Los Angeles
+  - -chapters: null
+    -params:
+      county: Orange
+  - -chapters: null
+    -params:
+      county: San Diego
+  - -chapters: null
+    -params:
+      county: Stanislaus
+  - -chapters: null
+    -params:
+      county: Various
+  - -chapters: null
+    -params:
+      county: Ventura

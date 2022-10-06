@@ -213,6 +213,39 @@ def dual_chart_with_dropdown(
     return chart1 | chart2
 
 """
+Create 3 charts
+with the same y axis, but different x axis
+"""
+def repeated_charts(
+    df,
+    color_col: str,
+    y_encoding_list: list,
+    x_encoding_list: list,
+    chart_title: str,
+    tooltip_col: list,
+):
+    base = (
+        alt.Chart()
+        .mark_bar()
+        .encode(
+            color=alt.Color(
+                color_col, scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS)
+            ),
+            tooltip= y_encoding_list + tooltip_col,
+        )
+        .properties(width=200, height=200)
+        .interactive()
+    )
+
+    chart = alt.vconcat(data=df)
+    for y_encoding in y_encoding_list:
+        row = alt.hconcat()
+        for x_encoding in x_encoding_list:
+            row |= base.encode(x=x_encoding, y=y_encoding)
+        chart &= row
+
+    return chart.properties(title=chart_title)
+"""
 Other Functions
 """
 # Grab value counts and turn it into a dataframe
@@ -426,7 +459,9 @@ def summarize_by_project_names(df, col_wanted: str):
     """
     df = (
         df.groupby([col_wanted])
-        .agg({"project_name": "count", "total_project_cost__$1,000_": "sum"})
+        .agg({"project_name": "count", 
+              "total_project_cost__$1,000_": "sum",
+              "current_fake_fund_requested":"sum"})
         .reset_index()
         .sort_values("project_name", ascending=False)
         .rename(columns={"project_name": "Total Projects"})
@@ -439,7 +474,68 @@ def summarize_by_project_names(df, col_wanted: str):
         lambda x: format_currency(x, currency="USD", locale="en_US")
     )
 
+    # Create a formatted monetary col
+    df["Fake Fund Formatted"] = df["current_fake_fund_requested"].apply(
+        lambda x: format_currency(x, currency="USD", locale="en_US")
+    )
     # Clean up column names, remove snakecase
     df = clean_up_columns(df)
 
     return df
+
+"""
+Concat summary stats of 
+parameter county & district
+into one dataframe 
+"""
+def county_district_comparison(df_parameter_county, df_parameter_district):
+    # Grab the full district name
+    district_full_name = df_parameter_district["district_full_name"][0]
+
+    # Grab the full county name
+    county_full_name = df_parameter_county["full_county_name"][0]
+
+    # Create summary table for district
+    district =  summarize_by_project_names(df_parameter_district, "primary_mode")
+
+    # Create summary table for county
+    county = summarize_by_project_names(df_parameter_county, "primary_mode")
+
+    # Append grand total and keep only that row...doesn't work when I try to do this with a for loop
+    district = (
+        district.append(district.sum(numeric_only=True), ignore_index=True)
+        .tail(1)
+        .reset_index(drop=True)
+    )
+    county = (
+        county.append(county.sum(numeric_only=True), ignore_index=True)
+        .tail(1)
+        .reset_index(drop=True)
+    )
+
+    # Concat
+    concat1 = pd.concat([district, county]).reset_index(drop=True)
+
+    # Declare a list that is to be converted into a column
+    geography = [district_full_name, county_full_name]
+    concat1["Geography"] = geography
+
+    # Drop old cols
+    concat1 = concat1.drop(
+        columns=[
+            "Primary Mode",
+            "Fake Fund Formatted",
+            "Total Project ($1000) Formatted",
+        ]
+    )
+
+    # Create new formatted monetary cols
+    concat1["Total Project ($1000) Formatted"] = concat1[
+        "Total Project Cost  $1,000"
+    ].apply(lambda x: format_currency(x, currency="USD", locale="en_US"))
+
+    concat1["Fake Fund Formatted"] = concat1["Current Fake Fund Requested"].apply(
+        lambda x: format_currency(x, currency="USD", locale="en_US")
+    )
+
+    return concat1
