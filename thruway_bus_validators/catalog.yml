@@ -1,0 +1,20 @@
+metadata:
+  version: 1
+  parameters:
+    analysis_date:
+      type: str
+      description: Analysis date, used for certain analyses such as regional bus network.
+      default: "2022-09-14"
+sources:
+  amtrak_thruway_trips:
+    driver: geoparquet
+    description: Amtrak thruway trips on a given day.
+    args:
+      # source: A1_grab_amtrak_thruway_trips.py 
+      urlpath: gs://calitp-analytics-data/data-analyses/regional_bus_network/amtrak_thruway_trips_{{analysis_date}}.parquet
+  amtrak_thruway_routes_with_od:
+    driver: geoparquet
+    description: Amtrak thruway routes with origin and destination info.
+    args:
+      # source: A3_add_origin_destination.py 
+      urlpath: gs://calitp-analytics-data/data-analyses/regional_bus_network/amtrak_thruway_routes_with_od.parquet

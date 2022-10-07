@@ -1,39 +1,20 @@
 """
-Script to publish single notebooks.
-Run this in data-analyses/bus_service_increase directory.
+Script to publish single notebooks,
+convert ipynb to html with nbconvert
 """
-import dotenv
-import os
-import subprocess
-import sys
-
 import pandas as pd
 import papermill as pm 
 import requests
+import subprocess
 
 from shared_utils import utils
 
-dotenv.load_dotenv("_env")
-
-TOKEN = os.environ["GITHUB_API_KEY"]
-REPO = "cal-itp/data-analyses"
-BRANCH = "main"
-REPO_FOLDER = "bus_service_increase/"
 REPORT_FOLDER = "img/"
-
-DEFAULT_COMMITTER = {
-    "name": "Cal-ITP service user",
-    "email": "hello@calitp.org",
-}
 
 notebooks_to_run = {
     # key: name of notebook in directory
     # value: name of the notebook papermill execution (can be renamed)
-    #"highways-no-parallel-routes-gh.ipynb": "highways-no-parallel-routes.ipynb",
     "highways-uncompetitive-routes.ipynb": "highways-uncompetitive-routes.ipynb"
-    #"E5_plot_hwy_segments.ipynb": "highway_recs.ipynb",
-    #"E6_marginal_route_improvements.ipynb": "marginal_route_recs.ipynb",
-    #"E7_major_route_improvements.ipynb": "major_route_recs.ipynb",
 }
 
 def publish_notebooks(notebooks_to_run):
@@ -60,22 +41,13 @@ def publish_notebooks(notebooks_to_run):
         # Now find the HTML file and upload
         html_file_name = output_file.replace(".ipynb", ".html")
     
-        # Move the html file into the same folder as where it's stored for GH pages rendering
+        # Move the html file into the same folder as where it's stored 
+        # for GH pages rendering
         # Can't move before because functions won't import 
         os.rename(f"{html_file_name}", f"{REPORT_FOLDER}{html_file_name}")
-        '''
-        utils.upload_file_to_github(
-            TOKEN,
-            REPO,
-            BRANCH,
-            f"{REPO_FOLDER}{REPORT_FOLDER}{html_file_name}",
-            f"{REPORT_FOLDER}{html_file_name}",
-            f"Upload {html_file_name}",
-            DEFAULT_COMMITTER
-        )
-        print("Successful upload to GitHub")
-        '''
-        # Clean up - since I renamed file, I don't want executed notebook to stay in directory
+        
+        # Clean up - since I renamed file, I don't want executed notebook 
+        # to stay in directory
         if input_file != output_file:
             os.remove(output_file)
     
