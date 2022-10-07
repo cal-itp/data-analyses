@@ -27,13 +27,18 @@ def draw_buffer(gdf: gpd.GeoDataFrame, buffer: int = 50):
     return gdf_poly
 
 
-def sjoin_bus_routes_to_hwy_segments(highways: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def sjoin_bus_routes_to_hwy_segments(highways: gpd.GeoDataFrame, 
+                                     bus_routes: gpd.GeoDataFrame = None,
+                                    ) -> gpd.GeoDataFrame:
     """
     Highways segments are for all CA.
     Bus routes contains the routes where at least 50% of route runs on SHN.
+    
+    Another bus_route gdf can be supplied. If not, use the one in the catalog. 
     """
-    bus_routes = catalog.bus_routes_on_hwys.read().rename(
-        columns = {"itp_id": "calitp_itp_id"})
+    if bus_routes is None:
+        bus_routes = catalog.bus_routes_on_hwys.read().rename(
+            columns = {"itp_id": "calitp_itp_id"})
         
     # Spatial join to find the highway segments with buses that run on SHN  
     # Highways is polygon, bus_routes is linestring 
@@ -256,7 +261,35 @@ def normalize_stats(df: gpd.GeoDataFrame,
 
     return df
 
-        
+
+#--------------------------------------------------------------#
+# Function used in notebook to find which highways have no transit
+# or uncompetitive transit only
+#--------------------------------------------------------------#
+def remove_too_short_segments(gdf: gpd.GeoDataFrame, 
+                              segment_distance: int) -> gpd.GeoDataFrame: 
+    """
+    Remove highway corridor segments that are too short.
+    If Route, RouteType change in the middle of a highway
+    the corridor could get cut to a length shorter than the desired.
+    
+    Too short means if it's less than 75% of the desired segment_length.
+    For a 10 mi highway corridor, segment needs to be 7.5 mi long.
+    """
+    gdf = gdf.to_crs(geography_utils.CA_StatePlane)
+    
+    gdf = gdf.assign(
+        length = gdf.geometry.length
+    )
+    
+    gdf2 = (gdf[gdf.length >= segment_distance * 0.75]
+                 .drop(columns = ["length"])
+                 .reset_index(drop=True)
+                )
+    
+    return gdf2
+    
+    
 if __name__=="__main__":
 
     # (1) Highway segments, draw buffer of 50 ft
