@@ -136,3 +136,15 @@ sources:
     args:
       # source: bus_service_increase/E4_highway_segment_stats.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highway_segment_stats.parquet
+  highway_transit_deserts:
+    driver: geoparquet
+    description: At highway 10 mile segment level, show which corridors have no transit within 2 miles of SHN (processed data for report) and uses different corridor length than highway_segment_stats.
+    args:
+      # source: bus_service_increase/E5_highway_processed_data_for_reports.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highway_segments_no_transit_{{analysis_date}}.parquet
+  highway_uncompetitive_transit:
+    driver: geoparquet
+    description: At highway 10 mile segment level, show which corridors have no transit within 2 miles of SHN (processed data for report) and uses different corridor length than highway_segment_stats.
+    args:
+      # source: bus_service_increase/E5_highway_processed_data_for_reports.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highway_segments_by_competitive_category_{{analysis_date}}.parquet

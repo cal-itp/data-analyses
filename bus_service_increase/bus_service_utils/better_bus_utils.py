@@ -158,7 +158,7 @@ def select_highway_corridors(
     Used in bus_service_increase/highways-existing-transit.ipynb
     """
     gdf = gpd.read_parquet(
-        f"{utils.GCS_FILE_PATH}highway_segment_stats.parquet")
+        f"{GCS_FILE_PATH}highway_segment_stats.parquet")
     
     gdf2 = subset_by_speed_and_trip(gdf, speed_dict, trip_dict)
     
