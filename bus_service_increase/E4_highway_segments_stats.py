@@ -260,34 +260,6 @@ def normalize_stats(df: gpd.GeoDataFrame,
             df[c].divide(df.route_length) * geography_utils.FEET_PER_MI, 2)
 
     return df
-
-
-#--------------------------------------------------------------#
-# Function used in notebook to find which highways have no transit
-# or uncompetitive transit only
-#--------------------------------------------------------------#
-def remove_too_short_segments(gdf: gpd.GeoDataFrame, 
-                              segment_distance: int) -> gpd.GeoDataFrame: 
-    """
-    Remove highway corridor segments that are too short.
-    If Route, RouteType change in the middle of a highway
-    the corridor could get cut to a length shorter than the desired.
-    
-    Too short means if it's less than 75% of the desired segment_length.
-    For a 10 mi highway corridor, segment needs to be 7.5 mi long.
-    """
-    gdf = gdf.to_crs(geography_utils.CA_StatePlane)
-    
-    gdf = gdf.assign(
-        length = gdf.geometry.length
-    )
-    
-    gdf2 = (gdf[gdf.length >= segment_distance * 0.75]
-                 .drop(columns = ["length"])
-                 .reset_index(drop=True)
-                )
-    
-    return gdf2
     
     
 if __name__=="__main__":
