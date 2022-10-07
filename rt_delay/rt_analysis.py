@@ -422,7 +422,7 @@ class OperatorDayAnalysis:
         return
     
     def export_views_gcs(self):
-        ''' Exports stop delay view, rt_trips, and endpoint delay view to GCS. Supports robust mapping and analysis without intensive regeneration of interpolator objects.
+        ''' Exports stop delay view, rt_trips. Supports robust mapping and analysis without intensive regeneration of interpolator objects.
         '''
         day = str(self.analysis_date.day).zfill(2)
         month = str(self.analysis_date.month).zfill(2)
