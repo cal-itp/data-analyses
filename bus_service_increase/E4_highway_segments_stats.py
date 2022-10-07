@@ -27,13 +27,18 @@ def draw_buffer(gdf: gpd.GeoDataFrame, buffer: int = 50):
     return gdf_poly
 
 
-def sjoin_bus_routes_to_hwy_segments(highways: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def sjoin_bus_routes_to_hwy_segments(highways: gpd.GeoDataFrame, 
+                                     bus_routes: gpd.GeoDataFrame = None,
+                                    ) -> gpd.GeoDataFrame:
     """
     Highways segments are for all CA.
     Bus routes contains the routes where at least 50% of route runs on SHN.
+    
+    Another bus_route gdf can be supplied. If not, use the one in the catalog. 
     """
-    bus_routes = catalog.bus_routes_on_hwys.read().rename(
-        columns = {"itp_id": "calitp_itp_id"})
+    if bus_routes is None:
+        bus_routes = catalog.bus_routes_on_hwys.read().rename(
+            columns = {"itp_id": "calitp_itp_id"})
         
     # Spatial join to find the highway segments with buses that run on SHN  
     # Highways is polygon, bus_routes is linestring 
@@ -255,8 +260,8 @@ def normalize_stats(df: gpd.GeoDataFrame,
             df[c].divide(df.route_length) * geography_utils.FEET_PER_MI, 2)
 
     return df
-
-        
+    
+    
 if __name__=="__main__":
 
     # (1) Highway segments, draw buffer of 50 ft
