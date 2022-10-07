@@ -335,13 +335,13 @@ class RtFilterMapper:
         gdf = self.stop_segment_speed_view.copy()
         # essential here for reasonable map size!
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
+        gdf['shape_miles'] = gdf.shape_meters / 1609
         # Further reduce map size
         gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
                             -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
                            -_.delay_chg_sec, -_.service_date, -_.last_loc, -_.shape_meters,
                            -_.meters_from_last, -_.n_trips)
         orig_rows = gdf.shape[0]
-        gdf['shape_miles'] = gdf.shape_meters / 1609
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_miles': 1,
                         'trips_per_hour': 1}) ##round for display
         
