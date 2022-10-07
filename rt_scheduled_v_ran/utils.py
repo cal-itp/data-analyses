@@ -83,9 +83,14 @@ def get_correct_url(df):
         elif (row.multiple_url == True) and (row.calitp_itp_id == 360) and (row.calitp_url_number == 1):
             return "drop"
         
+        # MTS has two agency names for itp id
+        elif (row.calitp_itp_id == 278) and (row.agency_name == ('San Diego International Airport')):
+            return "drop"
+        
         # drop others with only two: 
         elif (row.multiple_url == True) and (row.calitp_url_number == 0):
             return "drop"
+
 
     df['drop_record'] = df.apply(lambda x: remove_rows(x), axis=1)
     
