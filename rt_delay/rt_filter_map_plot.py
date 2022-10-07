@@ -89,14 +89,14 @@ class RtFilterMapper:
         self.filter['trip_ids'] = trip_ids
         if shape_ids:
             shape_trips = (self.rt_trips >> filter(_.shape_id.isin(shape_ids))
-                           >> distinct(_.route_short_name, _keep_all=True)
+                           >> distinct(_.route_short_name)
                           )
             self.filter['route_names'] = list(shape_trips.route_short_name)
             if len(shape_ids) == 1:
                 direction = (self.rt_trips >> filter(_.shape_id == shape_ids[0])).direction.iloc[0]
         if trip_ids:
             trips = (self.rt_trips >> filter(_.trip_id.isin(trip_ids))
-                           >> distinct(_.route_short_name, _keep_all=True)
+                           >> distinct(_.route_short_name)
                           )
             self.filter['route_names'] = list(trips.route_short_name)
             if len(trip_ids) == 1:
@@ -110,25 +110,13 @@ class RtFilterMapper:
         else:
             self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
                                          self.stop_delay_view.actual_time.min()).seconds / 60**2
+        
         if self.filter['route_names'] and len(self.filter['route_names']) < 5:
             rts = 'Route(s) ' + ', '.join(self.filter['route_names'])
         elif self.filter['route_names'] and len(self.filter['route_names']) > 5:
             rts = 'Multiple Routes'
         elif not self.filter['route_names']:
             rts = 'All Routes'
-            
-        route_type_names = {
-            "0" : "Tram, Streetcar, Light rail",
-            "1" : "Subway, Metro",
-            "2" : "Rail",
-            "3" : "Bus",
-            "4" : "Ferry",
-            "5" : "Cable tram",
-            "6" : "Aerial lift, suspended cable car",
-            "7" : "Funicular",
-            "11" : "Trolleybus",
-            "12" : "Monorail"
-        }
                 
         if self.filter['route_types'] and len(self.filter['route_types']) < 3:
             typename = [route_type_names[rttyp] for rttyp in self.filter['route_types']]
@@ -139,7 +127,7 @@ class RtFilterMapper:
             typename_print = 'All Route Types'
             
         if start_time and end_time and start_time == '15:00' and end_time == '19:00':
-            self.filter_period = 'PM_Peak'
+            self.filter_period = 'PM_Peak' # underscores enable use in filenames
         elif start_time and end_time and start_time == '06:00' and end_time == '09:00':
             self.filter_period = 'AM_Peak'
         elif start_time and end_time and start_time == '10:00' and end_time == '14:00':
@@ -151,7 +139,7 @@ class RtFilterMapper:
         elements_ordered = [typename_print, rts, direction, self.filter_period, self.display_date]
         self.filter_formatted = ', ' + ', '.join([str(x).replace('_', ' ') for x in elements_ordered if x])
         
-        self._time_only_filter = not route_names and not shape_ids and not direction_id and not direction and not trip_ids
+        self._time_only_filter = not route_types and not route_names and not shape_ids and not direction_id and not direction and not trip_ids
             
     def reset_filter(self):
         self.filter = None
@@ -338,7 +326,6 @@ class RtFilterMapper:
             export_path = f'{GCS_FILE_PATH}segment_speed_views/'
             if self._time_only_filter and self.filter_period in ['AM_Peak', 'PM_Peak', 'Midday', 'All_Day']:
                 shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
-        # self.speed_map_params = {'how': how, 'colorscale': colorscale, 'size': size, 'no_title': no_title, 'corridor': corridor}
         self.speed_map_params = (how, colorscale, size, no_title, corridor)
         return self._show_speed_map()
     
@@ -346,24 +333,21 @@ class RtFilterMapper:
         
         how, colorscale, size, no_title, corridor = self.speed_map_params
         gdf = self.stop_segment_speed_view.copy()
-        # gdf = self._filter(gdf)
         # essential here for reasonable map size!
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
+        gdf['shape_miles'] = gdf.shape_meters / 1609
         # Further reduce map size
         gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
                             -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
-                           -_.delay_chg_sec)
+                           -_.delay_chg_sec, -_.service_date, -_.last_loc, -_.shape_meters,
+                           -_.meters_from_last, -_.n_trips)
         orig_rows = gdf.shape[0]
-        self.debug_dict['_show_gdf'] = gdf
-        gdf['shape_miles'] = gdf.shape_meters / 1609
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_miles': 1,
                         'trips_per_hour': 1}) ##round for display
         
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
 
-        gdf = gdf >> select(-_.service_date, -_.last_loc, -_.shape_meters,
-                           -_.meters_from_last, -_.n_trips) ## drop unused cols for smaller map size
         gdf = gdf >> arrange(_.trips_per_hour)
         gdf = gdf.set_crs(CA_NAD83Albers)
         
@@ -378,7 +362,6 @@ class RtFilterMapper:
         gdf = gdf.to_crs(WGS84)
         self.detailed_map_view = gdf.copy()
         centroid = (gdf.geometry.centroid.x.mean(), gdf.geometry.centroid.y.mean())
-        # centroid = gdf.dissolve().centroid 
         name = self.calitp_agency_name
 
         popup_dict = {
