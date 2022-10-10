@@ -80,6 +80,12 @@ def load_verizon():
     gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{verizon_file}")
     return gdf
 
+# Open AT&T coverage shapefile that's already clipped to California
+def load_tmobile(): 
+    tmobile_file =  "tmobile_california.parquet"
+    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{tmobile_file}")
+    return gdf
+
 # Open routes file, find unique routes
 def load_unique_routes_df():
     routes_file =  "gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet"
@@ -133,11 +139,12 @@ def comparison(gdf_left, gdf_right):
 # Take the FCC provider shape file, compare it against the original df
 # Find % of route covered by a provider compared to the original route length.
 
-def route_cell_coverage(provider_gdf, original_routes_df):
+def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     """
     Args:
         provider_gdf: the provider gdf clipped to CA
         original_routes_df: the original df with all the routes
+        suffix (str): suffix to add behind dataframe
     Returns:
         Returns a gdf with the percentage of the routes covered by a provider
     """
@@ -152,7 +159,7 @@ def route_cell_coverage(provider_gdf, original_routes_df):
     )
 
     # Merge original dataframe with old route with provider-route overlay
-    # To get original route length and old route length
+    # To compare original route length and old route length
     m1 = pd.merge(
         overlay2,
         original_routes_df,
@@ -170,6 +177,7 @@ def route_cell_coverage(provider_gdf, original_routes_df):
     bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     m1["binned"] = pd.cut(m1["percentage"], bins)
     
+    m1 =  m1.add_suffix(suffix)
     return m1
 
 """
