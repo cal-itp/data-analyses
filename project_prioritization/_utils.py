@@ -40,11 +40,7 @@ def labeling(word):
         word = word.replace('_', ' ').title()
     return word
 
-"""
-Bar chart where the tooltip's value is another column that isn't x_col or y_col.
-Convenient for graphs regarding monetary values because the tooltip will show the formatted
-version.
-"""
+#Basic Bar Chart
 def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, chart_title=''):
     if chart_title == "":
         chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
@@ -159,7 +155,7 @@ def dual_chart_with_dropdown(
         dropdown_list(list): a list of all the values in the dropdown menu,
         dropdown_field(str): column where the dropdown menu's values are drawn from,
         x_axis_chart1(str): x axis value for chart 1 - encode as Q or N,
-        y_axis_chart1(str): y axis valuefor chart 1 - encode as Q or N,
+        y_axis_chart1(str): y axis value for chart 1 - encode as Q or N,
         color_col1(str): column to color the graphs for chart 1,
         chart1_tooltip_cols(list): list of all the columns to populate the tooltip,
         x_axis_chart2(str): x axis value for chart 2 - encode as Q or N,
@@ -173,7 +169,7 @@ def dual_chart_with_dropdown(
     # Create drop down menu
     input_dropdown = alt.binding_select(options=dropdown_list, name="Select ")
 
-    # The field tied to the drop down menu
+    # The column tied to the drop down menu
     selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
 
     chart1 = (
@@ -213,6 +209,38 @@ def dual_chart_with_dropdown(
     return chart1 | chart2
 
 """
+Create 3 charts
+"""
+def repeated_charts(
+    df,
+    color_col: str,
+    y_encoding_list: list,
+    x_encoding_list: list,
+    chart_title: str,
+    tooltip_col: list,
+):
+    base = (
+        alt.Chart()
+        .mark_bar()
+        .encode(
+            color=alt.Color(
+                color_col, scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS)
+            ),
+            tooltip= y_encoding_list + tooltip_col,
+        )
+        .properties(width=200, height=200)
+        .interactive()
+    )
+
+    chart = alt.vconcat(data=df)
+    for y_encoding in y_encoding_list:
+        row = alt.hconcat()
+        for x_encoding in x_encoding_list:
+            row |= base.encode(x=x_encoding, y=y_encoding)
+        chart &= row
+
+    return chart.properties(title=chart_title)
+"""
 Other Functions
 """
 # Grab value counts and turn it into a dataframe
@@ -232,7 +260,8 @@ def clean_up_columns(df):
 
 """
 Style the dataframe by removing the index and gray banding,
-dropping certain columns and centering text. Adds scrollbar
+dropping certain columns, and centering text. Adds scrollbar
+and a maximum height & width.
 """
 def styled_df(df):
     display(
@@ -259,10 +288,6 @@ def create_caltrans_map(df):
     
     # Load in Caltrans shape
     ct_geojson = gpd.read_file(f"{Caltrans_shape}").to_crs(epsg=4326)
-    
-    # Keep only the columns we want
-    # ct_geojson = ct_geojson[["DISTRICT", "Shape_Length", "Shape_Area", "geometry"]]
-    
    
     # Inner merge 
     districts_gdf = ct_geojson.merge(
@@ -271,7 +296,7 @@ def create_caltrans_map(df):
     return districts_gdf
 
 """
-Merge a dataframe with County
+Merge a dataframe with county geography
 to return a gdf
 """
 ca_gdf = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
@@ -416,8 +441,8 @@ def create_fake_score_card(df):
         
 
 """
-Create summary table: returns total projects and total cost
-by the column of your choice. 
+Create summary table: returns total projects, total cost,
+and money requested by the column of your choice. 
 """
 def summarize_by_project_names(df, col_wanted: str):
     """
@@ -426,7 +451,9 @@ def summarize_by_project_names(df, col_wanted: str):
     """
     df = (
         df.groupby([col_wanted])
-        .agg({"project_name": "count", "total_project_cost__$1,000_": "sum"})
+        .agg({"project_name": "count", 
+              "total_project_cost__$1,000_": "sum",
+              "current_fake_fund_requested":"sum"})
         .reset_index()
         .sort_values("project_name", ascending=False)
         .rename(columns={"project_name": "Total Projects"})
@@ -439,7 +466,67 @@ def summarize_by_project_names(df, col_wanted: str):
         lambda x: format_currency(x, currency="USD", locale="en_US")
     )
 
+    # Create a formatted monetary col
+    df["Fake Fund Formatted"] = df["current_fake_fund_requested"].apply(
+        lambda x: format_currency(x, currency="USD", locale="en_US")
+    )
     # Clean up column names, remove snakecase
     df = clean_up_columns(df)
 
     return df
+
+"""
+Concat summary stats of 
+parameter  county & parameter district into one dataframe 
+"""
+def county_district_comparison(df_parameter_county, df_parameter_district):
+    # Grab the full district name
+    district_full_name = df_parameter_district["district_full_name"][0]
+
+    # Grab the full county name
+    county_full_name = df_parameter_county["full_county_name"][0]
+
+    # Create summary table for district
+    district =  summarize_by_project_names(df_parameter_district, "primary_mode")
+
+    # Create summary table for county
+    county = summarize_by_project_names(df_parameter_county, "primary_mode")
+
+    # Append grand total and keep only that row...doesn't work when I try to do this with a for loop
+    district = (
+        district.append(district.sum(numeric_only=True), ignore_index=True)
+        .tail(1)
+        .reset_index(drop=True)
+    )
+    county = (
+        county.append(county.sum(numeric_only=True), ignore_index=True)
+        .tail(1)
+        .reset_index(drop=True)
+    )
+
+    # Concat
+    concat1 = pd.concat([district, county]).reset_index(drop=True)
+
+    # Declare a list that is to be converted into a column
+    geography = [district_full_name, county_full_name]
+    concat1["Geography"] = geography
+
+    # Drop old cols
+    concat1 = concat1.drop(
+        columns=[
+            "Primary Mode",
+            "Fake Fund Formatted",
+            "Total Project ($1000) Formatted",
+        ]
+    )
+
+    # Create new formatted monetary cols
+    concat1["Total Project ($1000) Formatted"] = concat1[
+        "Total Project Cost  $1,000"
+    ].apply(lambda x: format_currency(x, currency="USD", locale="en_US"))
+
+    concat1["Fake Fund Formatted"] = concat1["Current Fake Fund Requested"].apply(
+        lambda x: format_currency(x, currency="USD", locale="en_US")
+    )
+
+    return concat1
