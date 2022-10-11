@@ -40,7 +40,7 @@
 </CI_ResponsibleParty>
 </contact>
 <dateStamp>
-<gco:Date>2022-10-06</gco:Date>
+<gco:Date>2022-10-11</gco:Date>
 </dateStamp>
 <metadataStandardName>
 <gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
@@ -191,7 +191,7 @@
 <temporalElement>
 <EX_TemporalExtent>
 <extent>
-<gml:TimePeriod gml:id="IDYVJX4GX2PAGVP5C5HNYDOFYQIM5XWX3PRDWWDFM0IBRDZLVUIWY">
+<gml:TimePeriod gml:id="IDTHEUOADE3DTXN0JZLJJCKB3KYOXZW24IO50YYMN4CF4PCK32AIZO">
 <gml:beginPosition>2022-09-14T00:00:00</gml:beginPosition>
 <gml:endPosition>2022-10-14T00:00:00</gml:endPosition>
 </gml:TimePeriod>
@@ -219,15 +219,6 @@
 <DQ_DataQuality>
 <scope gco:nilReason="missing">
 </scope>
-<report>
-<DQ_RelativeInternalPositionalAccuracy>
-<measureDescription>
-<gco:CharacterString>4 meters</gco:CharacterString>
-</measureDescription>
-<result gco:nilReason="missing">
-</result>
-</DQ_RelativeInternalPositionalAccuracy>
-</report>
 <report>
 <DQ_RelativeInternalPositionalAccuracy>
 <measureDescription>
