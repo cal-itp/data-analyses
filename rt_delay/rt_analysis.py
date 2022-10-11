@@ -27,29 +27,29 @@ logging.basicConfig(filename = 'rt.log')
 class VehiclePositionsInterpolator:
     ''' Interpolates the location of a specific trip using GTFS-RT Vehicle Positions data
     '''
-    def __init__(self, vehicle_positions_gdf, shape_gdf, addl_info_cols = []):
-        ''' vehicle_positions_gdf: a gdf with rt vehicle positions data
+    def __init__(self, vp_trip_gdf, shape_gdf):
+        ''' vp_trip_gdf: a gdf with rt vehicle positions data, joined with trip/route info from GTFS Schedule
         shape_gdf: a gdf with line geometries for each shape
         '''
         # self.debug_dict = {}
-        self.logassert(type(vehicle_positions_gdf) == type(gpd.GeoDataFrame()) and not vehicle_positions_gdf.empty, "vehicle positions gdf must not be empty")
+        self.logassert(type(vp_trip_gdf) == type(gpd.GeoDataFrame()) and not vp_trip_gdf.empty, "vp_trip_gdf must not be empty")
         self.logassert(type(shape_gdf) == type(gpd.GeoDataFrame()) and not shape_gdf.empty, "shape gdf must not be empty")
-        self.logassert(vehicle_positions_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"position and shape CRS must be {CA_NAD83Albers}")
-        self.logassert(vehicle_positions_gdf.trip_id.nunique() == 1, "non-unique trip id in position gdf")
+        self.logassert(vp_trip_gdf.crs == CA_NAD83Albers and shape_gdf.crs == CA_NAD83Albers, f"position and shape CRS must be {CA_NAD83Albers}")
+        self.logassert(vp_trip_gdf.trip_id.nunique() == 1, "non-unique trip id in position gdf")
         self.debug_dict = {}
         self.position_type = 'rt'
         self.time_col = 'vehicle_timestamp'
         trip_info_cols = ['service_date', 'trip_key', 'trip_id', 'route_id', 'route_short_name',
                           'shape_id', 'direction_id', 'calitp_itp_id', 'entity_id', 'vehicle_id']
-        self.logassert(set(trip_info_cols).issubset(vehicle_positions_gdf.columns), f"vehicle_positions_gdf must contain columns: {trip_info_cols}")
+        self.logassert(set(trip_info_cols).issubset(vp_trip_gdf.columns), f"vp_trip_gdf must contain columns: {trip_info_cols}")
         for col in trip_info_cols:
-            setattr(self, col, vehicle_positions_gdf[col].iloc[0]) ## allow access to trip_id, etc. using self.trip_id
+            setattr(self, col, vp_trip_gdf[col].iloc[0]) ## allow access to trip_id, etc. using self.trip_id
             
-        self.logassert((shape_gdf.calitp_itp_id == self.calitp_itp_id).all(), "vehicle_positions_gdf and shape_gdf itp_id should match")
-        self.vehicle_positions_gdf = vehicle_positions_gdf >> distinct(_.vehicle_timestamp, _keep_all=True)
-        self.vehicle_positions_gdf = self.vehicle_positions_gdf.drop(columns = trip_info_cols)
+        self.logassert((shape_gdf.calitp_itp_id == self.calitp_itp_id).all(), "vp_trip_gdf and shape_gdf itp_id should match")
+        self.vp_trip_gdf = vp_trip_gdf >> distinct(_.vehicle_timestamp, _keep_all=True)
+        self.vp_trip_gdf = self.vp_trip_gdf.drop(columns = trip_info_cols)
         self._attach_shape(shape_gdf)
-        self.median_time = self.vehicle_positions_gdf[self.time_col].median()
+        self.median_time = self.vp_trip_gdf[self.time_col].median()
         self.time_of_day = categorize_time_of_day(self.median_time)
         self.total_meters = (self.cleaned_positions.shape_meters.max() - self.cleaned_positions.shape_meters.min())
         self.total_seconds = (self.cleaned_positions.vehicle_timestamp.max() - self.cleaned_positions.vehicle_timestamp.min()).seconds
@@ -67,31 +67,9 @@ class VehiclePositionsInterpolator:
             logging.error(message)
             raise AssertionError  
             
-    def _loop_shape_filter(self):
-        '''
-        Determines if the start of the shape is near the end of the shape,
-        if so drops vehicle positions points in this area to avoid incorrect projection.
-        Functions as intended but does not fully solve issue, since midway loops can
-        also cause issue if GTFS shape has low definition. Also need to further review
-        intergration with the progression filter step
-        '''
-        shape_start = np.array(self.shape.coords[0])
-        shape_end = np.array(self.shape.coords[-1])
-        # fast way to get euclidian distance using numpy!
-        start_end_dist = np.linalg.norm(shape_start - shape_end)
-        distance_threshold = 150 # meters
-        if start_end_dist < distance_threshold:
-            start_point = Point(self.shape.coords[0])
-            self.start_buffered = start_point.buffer(75) # meters
-            self.vehicle_positions_gdf = (self.vehicle_positions_gdf
-                                 >> mutate(too_close_to_start = _.geometry.apply(lambda x: self.start_buffered.contains(x)))
-                                 >> mutate(too_close_to_loop = _.geometry.apply(lambda x: self.hardcode_buffered.contains(x)))
-                                )
-            self.vehicle_positions_gdf = self.vehicle_positions_gdf >> filter(-_.too_close_to_start)   
-            
     def _linear_reference(self):
         # self._loop_shape_filter() # not yet usable as intended
-        raw_positions = self.vehicle_positions_gdf.copy()
+        raw_positions = self.vp_trip_gdf.copy()
         raw_positions = raw_positions >> arrange(self.time_col)
         raw_position_array = raw_positions.shape_meters.to_numpy()
         # filter to positions that have progressed from the most recent position
@@ -120,13 +98,13 @@ class VehiclePositionsInterpolator:
         shape_geo = (shape_gdf >> filter(_.shape_id == self.shape_id)).geometry
         self.logassert(len(shape_geo) > 0 and shape_geo.iloc[0], f'shape empty for trip {self.trip_id}!')
         self.shape = shape_geo.iloc[0]
-        self.vehicle_positions_gdf['shape_meters'] = (self.vehicle_positions_gdf.geometry
+        self.vp_trip_gdf['shape_meters'] = (self.vp_trip_gdf.geometry
                                 .apply(lambda x: self.shape.project(x)))
         self._linear_reference()
         
-        origin = (self.vehicle_positions_gdf >> filter(_.shape_meters == _.shape_meters.min())
+        origin = (self.vp_trip_gdf >> filter(_.shape_meters == _.shape_meters.min())
         ).geometry.iloc[0]
-        destination = (self.vehicle_positions_gdf >> filter(_.shape_meters == _.shape_meters.max())
+        destination = (self.vp_trip_gdf >> filter(_.shape_meters == _.shape_meters.max())
         ).geometry.iloc[0]
         self.direction = primary_cardinal_direction(origin, destination)
         
@@ -313,16 +291,7 @@ class OperatorDayAnalysis:
             self.pbar.reset(total=self.vehicle_positions.trip_id.nunique())
             self.pbar.desc = f'Generating position interpolators itp_id: {self.calitp_itp_id}'
         for trip_id in self.vehicle_positions.trip_id.unique():
-            # print(trip_id)
-            trip = self.trips.copy() >> filter(_.trip_id == trip_id)
-            # self.debug_dict[f'{trip_id}_trip'] = trip
-            st_trip_joined = (trip
-                              >> inner_join(_, self.stop_times, on = ['calitp_itp_id', 'trip_id', 'trip_key'])
-                              >> inner_join(_, self.stops, on = ['stop_id', 'calitp_itp_id'])
-                             )
-            st_trip_joined = gpd.GeoDataFrame(st_trip_joined, geometry=st_trip_joined.geometry, crs=CA_NAD83Albers)
             trip_positions_joined = self.trips_positions_joined >> filter(_.trip_id == trip_id)
-            # self.debug_dict[f'{trip_id}_st'] = st_trip_joined
             # self.debug_dict[f'{trip_id}_vp'] = trip_positions_joined
             try:
                 self.position_interpolators[trip_id] = {'rt': VehiclePositionsInterpolator(trip_positions_joined, self.routelines)}
@@ -333,8 +302,6 @@ class OperatorDayAnalysis:
                 self.pbar.update()
         if type(self.pbar) != type(None):
             self.pbar.refresh()
-
-            # TODO better checking for incomplete trips (either here or in interpolator...)
             
     def _add_km_segments(self, _delay):
         ''' Experimental to break up long segments
