@@ -90,17 +90,15 @@ def style_table(
     
     
     def add_custom_format(
-        df_style, #: styler object , 
-        format_str: str, cols_to_format: list,): #-> #styler object: 
+        df_style: pd.io.formats.style.Styler , 
+        format_str: str, cols_to_format: list,) -> pd.io.formats.style.Styler: 
         """
         Appends any additional formatting needs.
             key: format string, such as '{:.1%}'
             value: list of columns to apply that formatter to.
         """
         new_styler = (df_style
-                      .format(subset = cols_to_format,
-                              formatter = {c: format_str for c in cols_to_format})
-                     )
+                      .format(formatter = {c: format_str for c in cols_to_format}))
 
         return new_styler
     
