@@ -166,10 +166,17 @@ def style_table(
     right_align_cols: list = [],
     custom_format_cols: dict = {},
     display_table: bool = True,
-) -> pd.io.formats.style.Styler | str:
+) -> pd.io.formats.style.Styler:
     """
     Returns a pandas Styler object with some basic formatting.
-    Any other tweaks for currency, percentages, etc should be done before / after.
+    Even if display_table is True, pandas Styler object returned,
+    just with a display() happening in the notebook cell.
+    Any other tweaks for currency, percentages, etc should be done before / after,
+    if it can't be put into custom_format_cols.
+
+    custom_format_cols = {
+        '{:,.1%}': ['colA', 'colB']
+    }
 
     Generalize with dict comprehension or list comprehension
     list comprehension: df.style.format(subset=percent_cols,  **{'formatter': '{:,.2%}'})
