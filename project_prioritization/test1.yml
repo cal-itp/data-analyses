@@ -1,8 +1,5 @@
-title: Project Prioritization - 10 Year Non-SHOPP 
 directory: ./project_prioritization/
-readme: ./project_prioritization/README.md
 notebook: ./project_prioritization/county_landing_page.ipynb
-
 parts:
 - chapters:
   - caption: District 0
@@ -150,3 +147,5 @@ parts:
     - county: Various
     - county: Ventura
     - county: Yolo
+readme: ./project_prioritization/README.md
+title: Project Prioritization - 10 Year Non-SHOPP
