@@ -1,19 +1,24 @@
 """
-Standardize operator level naming for reports.
+Common functions for standardizing how outputs are displayed in portfolio.
 
+1. Standardize operator level naming for reports.
 With GTFS data, analysis is done with identifiers (calitp_itp_id, route_id, etc).
 When publishing reports, we should be referring to operator name,
 route name, Caltrans district the same way.
 
-Based on `rt_delay/speedmaps.ipynb`,
-`bus_service_increase/competitive-parallel-routes.ipynb`
+2. Table styling for pandas styler objects
+
 """
 import datetime as dt
 
 import pandas as pd
+import pandas.io.formats.style
 from calitp.tables import tbl
+from IPython.display import HTML
 from shared_utils import rt_utils
 from siuba import *
+
+# need to import different pandas to add type hint for styler object (https://github.com/pandas-dev/pandas/issues/24884)
 
 
 def add_agency_name(
@@ -144,3 +149,84 @@ def latest_itp_id() -> pd.DataFrame:
     )
 
     return df
+
+
+def style_table(
+    df: pd.DataFrame,
+    rename_cols: dict = {},
+    drop_cols: list = [],
+    integer_cols: list = [],
+    one_decimal_cols: list = [],
+    two_decimal_cols: list = [],
+    three_decimal_cols: list = [],
+    currency_cols: list = [],
+    percent_cols: list = [],
+    left_align_cols: list = "first",  # by default, left align first col
+    center_align_cols: list = "all",  # by default, center align all other cols
+    right_align_cols: list = [],
+    custom_format_cols: dict = {},
+    display_table: bool = True,
+) -> pd.io.formats.style.Styler:
+    """
+    Returns a pandas Styler object with some basic formatting.
+    Even if display_table is True, pandas Styler object returned,
+    just with a display() happening in the notebook cell.
+    Any other tweaks for currency, percentages, etc should be done before / after,
+    if it can't be put into custom_format_cols.
+
+    custom_format_cols = {
+        '{:,.1%}': ['colA', 'colB']
+    }
+
+    Generalize with dict comprehension or list comprehension
+    list comprehension: df.style.format(subset=percent_cols,  **{'formatter': '{:,.2%}'})
+    dict comprehension: df.style.format(formatter = {c: '{:,.2%}' for c in percent_cols})
+    """
+    df = df.drop(columns=drop_cols).rename(columns=rename_cols)
+
+    if len(integer_cols) > 0:
+        df = df.astype({c: "Int64" for c in integer_cols})
+
+    if left_align_cols == "first":
+        left_align_cols = list(df.columns)[0]
+    if center_align_cols == "all":
+        center_align_cols = list(df.columns)
+        # all other columns except first one is center aligned
+        center_align_cols = [c for c in center_align_cols if c not in left_align_cols]
+
+    df_style = (
+        df.style.format(formatter={c: "{:,g}" for c in integer_cols})
+        .format(formatter={c: "{:,.1f}" for c in one_decimal_cols})
+        .format(formatter={c: "{:,.2f}" for c in two_decimal_cols})
+        .format(formatter={c: "{:,.3f}" for c in three_decimal_cols})
+        .format(formatter={c: "{:,.2%}" for c in percent_cols})
+        .format(formatter={c: "$ {:,.2f}" for c in currency_cols})
+        .set_properties(subset=left_align_cols, **{"text-align": "left"})
+        .set_properties(subset=center_align_cols, **{"text-align": "center"})
+        .set_properties(subset=right_align_cols, **{"text-align": "right"})
+        .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
+        .hide(axis="index")
+    )
+
+    def add_custom_format(
+        df_style: pd.io.formats.style.Styler,
+        format_str: str,
+        cols_to_format: list,
+    ) -> pd.io.formats.style.Styler:
+        """
+        Appends any additional formatting needs.
+            key: format string, such as '{:.1%}'
+            value: list of columns to apply that formatter to.
+        """
+        new_styler = df_style.format(formatter={c: format_str for c in cols_to_format})
+
+        return new_styler
+
+    if len(list(custom_format_cols.keys())) > 0:
+        for format_str, cols_to_format in custom_format_cols.items():
+            df_style = add_custom_format(df_style, format_str, cols_to_format)
+
+    if display_table is True:
+        display(HTML(df_style.to_html()))
+
+    return df_style

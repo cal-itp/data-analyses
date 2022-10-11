@@ -9,6 +9,7 @@ import sys
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
 
+from siuba import *
 from loguru import logger
 
 from bus_service_utils import create_parallel_corridors, gtfs_build
@@ -33,7 +34,9 @@ def merge_routelines_with_trips(selected_date: str) -> gpd.GeoDataFrame:
     df = gtfs_build.merge_routes_trips(
         routelines, trips, 
         merge_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"],
-        crs = f"EPSG: {EPSG_CODE}")
+        crs = f"EPSG: {EPSG_CODE}",
+        join = "inner"
+    )
     
     df2 = (df[df._merge=="both"]
           .rename(columns = {"calitp_itp_id": "itp_id"})
@@ -60,7 +63,7 @@ def get_total_service_hours(selected_date):
     trips_with_hrs = gtfs_utils.get_trips(
         selected_date = selected_date,
         itp_id_list = ITP_IDS,
-        trip_cols = None,
+        trip_cols = trip_cols + ["service_hours", "direction_id"],
         get_df = True # only when it's True can the Metrolink fix get applied
     ) 
     
@@ -116,7 +119,7 @@ if __name__ == "__main__":
     logger.info(f"routes within half mile buffer created: {time2 - time1}")
     
     # Get aggregated service hours by shape_id
-    #get_total_service_hours(ANALYSIS_DATE)
+    get_total_service_hours(ANALYSIS_DATE)
     
     time3 = datetime.datetime.now()
     logger.info(f"downloaded service hours at shape_id level: {time3 - time2}")

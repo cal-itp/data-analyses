@@ -5,6 +5,7 @@ from . import (
     create_parallel_corridors,
     gtfs_build,
     #publish_single_report,
+    report_utils,
     utils,
 )
 
@@ -17,5 +18,6 @@ __all__ = [
     "create_parallel_corridors",
     "gtfs_build", 
     #"publish_single_report",
+    "report_utils",
     "utils",
 ]
