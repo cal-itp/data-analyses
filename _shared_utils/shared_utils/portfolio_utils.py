@@ -18,7 +18,7 @@ from IPython.display import HTML
 from shared_utils import rt_utils
 from siuba import *
 
-# to add type hint (https://github.com/pandas-dev/pandas/issues/24884)
+# need to import different pandas to add type hint for styler object (https://github.com/pandas-dev/pandas/issues/24884)
 
 
 def add_agency_name(
