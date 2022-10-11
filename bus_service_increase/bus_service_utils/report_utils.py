@@ -3,6 +3,8 @@ Common functions for styling notebooks
 published as reports.
 """
 import pandas as pd
+import pandas.io.formats.style # to add type hint (https://github.com/pandas-dev/pandas/issues/24884)
+
 from IPython.display import HTML
 
 '''
@@ -26,6 +28,7 @@ two_decimal_cols = ["C"]
 
 '''
 
+
 def style_table(
     df: pd.DataFrame, 
     rename_cols: dict = {}, 
@@ -39,35 +42,39 @@ def style_table(
     left_align_cols: list = "first", # by default, left align first col
     center_align_cols: list = "all", # by default, center align all other cols
     right_align_cols: list = [],
-) -> pd.io.formats.style.Styler:
+    custom_format_cols: dict = {},
+    display_table: bool = True
+) -> pd.io.formats.style.Styler | str: 
     """
     Returns a pandas Styler object with some basic formatting.
     Any other tweaks for currency, percentages, etc should be done before / after.
     """
     df = (df.drop(columns = drop_cols)
            .rename(columns = rename_cols)
-           .astype({c: "Int64" for c in integer_cols})
           )
     
-    if left_align_cols == "first":
-        left_align_cols = list(df.columns[0])
+    if len(integer_cols) > 0:
+        df = df.astype({c: "Int64" for c in integer_cols})
         
+    if left_align_cols == "first":
+        left_align_cols = list(df.columns)[0]
     if center_align_cols == "all":
         center_align_cols = list(df.columns)
         # all other columns except first one is center aligned
         center_align_cols = [c for c in center_align_cols if c not in left_align_cols]
-
     
     df_style = (df.style
-                .format(subset = one_decimal_cols, 
-                        formatter = {c: ':,.1f' for c in one_decimal_cols})
-                .format(subset = two_decimal_cols,
-                       formatter = {c: ':,.2f' for c in two_decimal_cols})
-                .format(subset = three_decimal_cols,
-                        formatter = {c: ':,.3f' for c in three_decimal_cols})
-                 .format(subset = percent_cols,
-                         formatter = {c: '{:,%}' for c in percent_cols})
-                .format(subset = currency_cols,
+                .format(#subset = integer_cols, 
+                        formatter = {c: '{:,g}' for c in integer_cols})
+                .format(#subset = one_decimal_cols, 
+                        formatter = {c: '{:,.1f}' for c in one_decimal_cols})
+                .format(#subset = two_decimal_cols,
+                       formatter = {c: '{:,.2f}' for c in two_decimal_cols})
+                .format(#subset = three_decimal_cols,
+                        formatter = {c: '{:,.3f}' for c in three_decimal_cols})
+                .format(#subset = percent_cols,
+                         formatter = {c: '{:,.2%}' for c in percent_cols})
+                .format(#subset = currency_cols,
                         formatter = {c: '$ {:,.2f}' for c in currency_cols})
                 .set_properties(subset=left_align_cols, 
                                 **{'text-align': 'left'})
@@ -79,8 +86,31 @@ def style_table(
                                         props=[('text-align', 'center')])
                                         ])
            .hide(axis="index")
-           .to_html()
           )
+    
+    
+    def add_custom_format(
+        df_style, #: styler object , 
+        format_str: str, cols_to_format: list,): #-> #styler object: 
+        """
+        Appends any additional formatting needs.
+            key: format string, such as '{:.1%}'
+            value: list of columns to apply that formatter to.
+        """
+        new_styler = (df_style
+                      .format(subset = cols_to_format,
+                              formatter = {c: format_str for c in cols_to_format})
+                     )
+
+        return new_styler
+    
+    
+    if len(list(custom_format_cols.keys())) > 0:
+        for format_str, cols_to_format in custom_format_cols.items():
+            df_style = add_custom_format(df_style, format_str, cols_to_format)
+
+    if display_table is True: 
+        display(HTML(df_style.to_html()))
     
     return df_style
         
