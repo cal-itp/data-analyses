@@ -32,46 +32,39 @@ def xml_to_json(path: str) -> dict:
 
 
 # Lift necessary stuff from 1st time through shp to file gdb
-def lift_necessary_dataset_elements(metadata_json):
-    m = metadata_json["metadata"]
+def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
+    m = metadata_json["ns0:MD_Metadata"]
     
     # Store this info in a dictionary
     d = {}
+        
+    # Date Stamp
+    d["ns0:dateStamp"] = m["ns0:dateStamp"] 
     
-    # Bounding box
-    d["idinfo"] = {}
-    d["idinfo"]["spdom"] = m["idinfo"]["spdom"] 
+    # Spatial Representation Info
+    d["ns0:spatialRepresentationInfo"] = m["ns0:spatialRepresentationInfo"] 
+   
+    # Coordinate Reference System Info
+    d["ns0:referenceSystemInfo"] = m["ns0:referenceSystemInfo"] 
     
-    # Some description about geospatial layer
-    d["spdoinfo"] = m["spdoinfo"] 
-    
-    # Spatial reference info
-    d["spref"] = m["spref"] 
-    
-    # Field and entity attributes
-    d["eainfo"] = m["eainfo"]
+    # Distribution Info
+    d["ns0:distributionInfo"] = m["ns0:distributionInfo"]   
     
     return d
 
 
-def overwrite_default_with_dataset_elements(metadata_json):
-    DEFAULT_XML = f"./{METADATA_FOLDER}default_desktop.xml"
+def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
+    DEFAULT_XML = f"./{METADATA_FOLDER}default_pro.xml"
     default_template = xml_to_json(DEFAULT_XML)
-    default = default_template["metadata"]
+    default = default_template["ns0:MD_Metadata"]
     
     # Grab the necessary elements from my dataset
     necessary_elements = lift_necessary_dataset_elements(metadata_json)
     
     # Overwrite it in the default template
     for key, value in default.items():
-        if key in necessary_elements.keys() and key != "idinfo":
-            default[key] = necessary_elements[key]
-        
-        elif key == "idinfo":
-            for k, v in value.items():
-                if k == "spdom":
-                    default[key][k] = necessary_elements[key][k]
-           
+        if key in necessary_elements.keys():
+            default[key] = necessary_elements[key]     
             
     # Return the default template, but now with our dataset's info populated
     return default_template
@@ -97,7 +90,7 @@ class metadata_input(BaseModel):
     contact_organization: str = "Caltrans"
     contact_person: str
     contact_email: str = "hello@calitp.org"
-    horiz_accuracy: str = "0.00004 decimal degrees"
+    horiz_accuracy: str = "4 meters"
     
 
 def fix_values_in_validated_dict(d: dict) -> dict:
@@ -118,47 +111,11 @@ def fix_values_in_validated_dict(d: dict) -> dict:
 
 
 # Overwrite the metadata after dictionary of dataset info is supplied
-def overwrite_metadata_json(metadata_json: dict, dataset_info: dict):
+def overwrite_metadata_json(metadata_json: dict, dataset_info: dict) -> dict:
     d = dataset_info
     new_metadata = metadata_json.copy()
     m = new_metadata["metadata"]
-    
-    m["idinfo"]["citation"]["citeinfo"]["title"] = d["dataset_name"]
-    m["idinfo"]["citation"]["citeinfo"]["pubinfo"]["publish"] = d["publish_entity"]
-    ## Need edition and resource contact added to be approved 
-    # Add edition 
-    # Use number instead of date (shows up when exported in FGDC)
-    NEW_EDITION = validation.check_edition_add_one(m)
-    m["idinfo"]["citation"]["citeinfo"]["edition"] = NEW_EDITION
-    
-    m["idinfo"]["descript"]["abstract"] = d["abstract"]
-    m["idinfo"]["descript"]["purpose"] = d["purpose"]
-    
-    m["idinfo"]["timeperd"]["timeinfo"]["rngdates"]["begdate"] = d["beginning_date"]
-    m["idinfo"]["timeperd"]["timeinfo"]["rngdates"]["enddate"] = d["end_date"]
-    m["idinfo"]["timeperd"]["current"] = d["place"]
-    
-    m["idinfo"]["status"]["progress"] = d["status"]
-    m["idinfo"]["status"]["update"] = d["frequency"]
 
-    m["idinfo"]["keywords"] = d["theme_topics"]    
-
-    m["idinfo"]["ptcontac"]["cntinfo"]["cntorgp"]["cntorg"] = d["contact_organization"]
-    m["idinfo"]["ptcontac"]["cntinfo"]["cntorgp"]["cntper"] = d["contact_person"]
-    m["idinfo"]["ptcontac"]["cntinfo"]["cntpos"] = d["publish_entity"]
-    m["idinfo"]["ptcontac"]["cntinfo"]["cntemail"] = d["contact_email"]    
-    
-    m["dataqual"]["posacc"]["horizpa"]["horizpar"] = d["horiz_accuracy"]
-    m["dataqual"]["lineage"]["procstep"]["procdesc"] = d["methodology"]    
-    
-    m["eainfo"]["detailed"]["enttyp"]["enttypl"] = d["dataset_name"]    
-    m["eainfo"]["detailed"]["enttyp"]["enttypd"] = d["data_dict_type"]    
-    m["eainfo"]["detailed"]["enttyp"]["enttypds"] = d["data_dict_url"]    
-  
-    m["metainfo"]["metc"]["cntinfo"]["cntorgp"]["cntorg"] = d["contact_organization"]    
-    m["metainfo"]["metc"]["cntinfo"]["cntorgp"]["cntper"] = d["contact_person"]    
-    m["metainfo"]["metc"]["cntinfo"]["cntpos"] = d["publish_entity"]    
-    m["metainfo"]["metc"]["cntinfo"]["cntemail"] = d["contact_email"]    
     
     return new_metadata 
 
@@ -194,7 +151,7 @@ def update_metadata_xml(xml_file: str, dataset_info: dict,
         print("Skip default template.")
     
     # These rely on functions, so they can't be used in pydantic easily
-    DATASET_INFO = fix_values_in_validated_dict(dataset_info) 
+    dataset_info = fix_values_in_validated_dict(dataset_info) 
     
     # Validate the dict input with pydantic
     DATASET_INFO_VALIDATED = metadata_input(**dataset_info).dict()
