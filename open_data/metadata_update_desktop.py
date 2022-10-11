@@ -67,10 +67,10 @@ def overwrite_default_with_dataset_elements(metadata_json):
         if key in necessary_elements.keys() and key != "idinfo":
             default[key] = necessary_elements[key]
         
-        #elif key == "idinfo":
-            #for k, v in value.items():
-                #if k == "spdom":
-                #    default[key][k] = necessary_elements[key][k]
+        elif key == "idinfo":
+            for k, v in value.items():
+                if k == "spdom":
+                    default[key][k] = necessary_elements[key][k]
            
             
     # Return the default template, but now with our dataset's info populated
