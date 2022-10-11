@@ -177,6 +177,7 @@ def flag_shn_intersecting_routes(analysis_date: str) -> pd.DataFrame:
 
 
 if __name__=="__main__":
+    logger.info(f"Analysis date: {ANALYSIS_DATE}")
     
     start = datetime.datetime.now()
     
