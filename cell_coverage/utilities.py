@@ -138,7 +138,6 @@ def comparison(gdf_left, gdf_right):
 
 # Take the FCC provider shape file, compare it against the original df
 # Find % of route covered by a provider compared to the original route length.
-
 def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     """
     Args:
@@ -151,22 +150,23 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     # Overlay the dfs
     overlay = comparison(original_routes_df, provider_gdf)
 
-    # Sum up lengths of routes by route id, name, agency, and itp_id
-    overlay2 = (
-        overlay.groupby(["route_id", "route_name", "agency", "itp_id"])
-        .agg({"route_length": "sum"})
-        .reset_index()
-    )
+    # Aggregate lengths of routes by route id, name, agency, and itp_id
+    overlay2 = (overlay.dissolve(
+         by=["route_id", "route_name", "agency", "itp_id"],
+         aggfunc={
+         "route_length": "sum"}).reset_index()) 
 
     # Merge original dataframe with old route with provider-route overlay
     # To compare original route length and old route length
-    m1 = pd.merge(
-        overlay2,
+    m1 = overlay2.merge(
         original_routes_df,
         how="inner",
         on=["agency", "route_id", "route_name", "itp_id"],
         suffixes=["_overlay", "_original_df"],
     )
+    
+    # Ensure m1 is a GDF 
+    m1 = gpd.GeoDataFrame(m1, geometry = "geometry_overlay", crs = "EPSG:4326") 
     
     # Create % of route covered vs. not 
     m1["percentage"] = (
@@ -203,7 +203,7 @@ def ntd_vehicles():
     
     # Open sheet
     df = pd.read_excel(
-    f"gs://calitp-analytics-data/data-analyses/5311 /2020-Vehicles_1.xlsm",
+    "gs://calitp-analytics-data/data-analyses/5311 /2020-Vehicles_1.xlsm",
     sheet_name="Vehicle Type Count by Agency",)
     
     # Only grab California
