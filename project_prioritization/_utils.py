@@ -108,6 +108,7 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
     chart2 = preset_chart_config(chart2)
     return(chart1 & chart2)
 
+# A basic pie chart
 def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
                    chart_title:str):
     """
@@ -135,6 +136,7 @@ def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
     
     return chart
 
+# 2 charts that are controlled by a dropdown menu.
 def dual_chart_with_dropdown(
     df,
     dropdown_list: list,
@@ -208,9 +210,8 @@ def dual_chart_with_dropdown(
     chart2 = preset_chart_config(chart2)
     return chart1 | chart2
 
-"""
-Create 3 charts
-"""
+
+# Create 3 charts
 def repeated_charts(
     df,
     color_col: str,
@@ -224,11 +225,12 @@ def repeated_charts(
         .mark_bar()
         .encode(
             color=alt.Color(
-                color_col, scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS)
+                color_col, scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS), 
+                legend = None
             ),
             tooltip= y_encoding_list + tooltip_col,
         )
-        .properties(width=200, height=200)
+        .properties(width=150, height=100)
         .interactive()
     )
 
@@ -240,6 +242,7 @@ def repeated_charts(
         chart &= row
 
     return chart.properties(title=chart_title)
+
 """
 Other Functions
 """
