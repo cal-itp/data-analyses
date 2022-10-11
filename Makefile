@@ -34,20 +34,11 @@ add_precommit:
 	pre-commit install 
 	#pre-commit run --all-files 
 
-<<<<<<< HEAD
-
-make_env:
-	cd _shared_utils && make setup_env && cd ..
-	cd bus_service_increase && make setup_bus_service_utils 
 
 # Add to _.bash_profile outside of data-analyses
 #alias go='cd ~/data-analyses/portfolio && pip install -r requirements.txt && cd #../_shared_utils && make setup_env && cd ..'
-=======
-#alias go='cd ~/data-analyses/portfolio && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..'
 
 install_env:
 	cd ~/data-analyses/_shared_utils && make setup_env && cd ..
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	#pip install -r portfolio/requirements.txt
-    
->>>>>>> b964d540 ((report_utils): add function to style tables, Run Q3 2022 quarterly performance)
