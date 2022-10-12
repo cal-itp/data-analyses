@@ -1,7 +1,10 @@
 from shared_utils import geography_utils
 from shared_utils import utils
 import geopandas as gpd
+
 import pandas as pd
+
+# Open zip files 
 import fsspec
 from calitp import *
 
@@ -10,7 +13,7 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 """
 FCC data
 """
-# Clip the data coverage map for California only.
+# Clip the cell provider coverage map for California only.
 def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     # Open zip file first
@@ -56,7 +59,7 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
     # Filter out for bus only 
     unique_route = unique_route.loc[unique_route["route_type"] == "3"]
     
-    # Filter out for any Amtrak records
+    # Filter out any Amtrak records
     unique_route = unique_route.loc[unique_route["agency"] != "Amtrak"]
     
     # Fill in NA for route names
@@ -80,7 +83,8 @@ def load_verizon():
     gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{verizon_file}")
     return gdf
 
-# Open AT&T coverage shapefile that's already clipped to California
+# Open T-Mobile shapefile - NOT clipped to California b/c it took too long. 
+# Includes parts of other states on the West Coast
 def load_tmobile(): 
     tmobile_file =  "tmobile_california.parquet"
     gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{tmobile_file}")
@@ -99,7 +103,8 @@ def load_unique_routes_df():
     
     return df
 
-def load_clean_trips_df():
+# Find number of trips ran per route by route ID. 
+def trip_df():
     
     # Read in file
     trips_file = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/trips_2022-05-04_all.parquet"
@@ -108,15 +113,23 @@ def load_clean_trips_df():
     # Standardize route id  
     df["route_id"] = df["route_id"].str.lower().str.strip()
     
-    # Aggregate trips_df: count each trip id based on unique? 
+    # Aggregate trips_df: aggregate trip_id by ITP ID and Route ID
     df2 = (df
              .groupby(['calitp_itp_id', 'route_id'])
              .agg({'trip_id':'nunique'})
              .reset_index()
-             .rename(columns = {'trip_id':'total_trips'})
+             .rename(columns = {'trip_id':'total_trips_by_route'})
+            )
+    # Aggregate trips_df: count number of trips an agency makes
+    # across all routes 
+    df3 = (df
+             .groupby(['calitp_itp_id'])
+             .agg({'trip_id':'nunique'})
+             .reset_index()
+             .rename(columns = {'trip_id':'total_trips_by_agency'})
             )
     
-    return df2
+    return df2, df3
     
 """
 Analysis Functions
@@ -129,7 +142,7 @@ def comparison(gdf_left, gdf_right):
         gdf_left, gdf_right, how="intersection", keep_geom_type=False
     )
 
-    # Create a new route length
+    # Create a new route length for portions covered by cell coverage
     overlay_df = overlay_df.assign(
         route_length=overlay_df.geometry.to_crs(geography_utils.CA_StatePlane).length
     )
@@ -168,15 +181,16 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     # Ensure m1 is a GDF 
     m1 = gpd.GeoDataFrame(m1, geometry = "geometry_overlay", crs = "EPSG:4326") 
     
-    # Create % of route covered vs. not 
+    # Create % of route covered by data vs. not 
     m1["percentage"] = (
         m1["route_length_overlay"] / m1["route_length_original_df"]
     ) * 100
     
-    # Create bins for analysis
+    # Create bins  
     bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     m1["binned"] = pd.cut(m1["percentage"], bins)
     
+    # Add suffix to df to distinguish which provider 
     m1 =  m1.add_suffix(suffix)
     return m1
 
