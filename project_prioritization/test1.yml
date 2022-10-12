@@ -1,10 +1,12 @@
-title: Project Prioritization - 10 Year Non-SHOPP
 directory: ./project_prioritization/
-readme: ./project_prioritization/README.md
 notebook: ./project_prioritization/county_landing_page.ipynb
-
 parts:
 - chapters:
+  - caption: District 0
+    params:
+      district: 0
+    sections:
+    - county: Various
   - caption: District 1
     params:
       district: 1
@@ -32,7 +34,6 @@ parts:
     - county: Nevada
     - county: Placer
     - county: Sacramento
-    - county: Sutter
     - county: Various
     - county: Yolo
     - county: Yuba
@@ -121,4 +122,30 @@ parts:
     params:
       district: 75
     sections:
+    - county: Alameda
+    - county: Contra Costa
+    - county: Fresno
+    - county: Kern
+    - county: Los Angeles
+    - county: Madera
+    - county: Merced
+    - county: Monterey
+    - county: Orange
+    - county: Sacramento
+    - county: San Bernardino
+    - county: San Diego
+    - county: San Francisco
+    - county: San Joaquin
+    - county: San Luis Obispo
+    - county: San Mateo
+    - county: Santa Barbara
+    - county: Santa Clara
+    - county: Santa Cruz
+    - county: Sonoma
+    - county: Stanislaus
+    - county: Sutter
     - county: Various
+    - county: Ventura
+    - county: Yolo
+readme: ./project_prioritization/README.md
+title: Project Prioritization - 10 Year Non-SHOPP
