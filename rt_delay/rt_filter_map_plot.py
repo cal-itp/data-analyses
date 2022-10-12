@@ -177,11 +177,8 @@ class RtFilterMapper:
             trips = trips >> filter(_.direction == self.filter['direction'])
         return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
     
-    def add_corridor(self, corridor_gdf, hotspot=False):
+    def add_corridor(self, corridor_gdf):
         '''
-        hotspot: ignore requirement for a set number of shape stops within corridor,
-        appropriate for evaluating intersection delay, etc
-        
         Add ability to filter stop_delay_view and subsequently generated stop_segment_speed_views
         to trips running within a corridor, as specified by a polygon bounding box (corridor gdf).
         Enables calculation of metrics for SCCP, LPP.
@@ -189,22 +186,8 @@ class RtFilterMapper:
         corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
         self.corridor = corridor_gdf
         to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence']).dropna(subset=['stop_id'])
-        clipped = to_clip.clip(corridor_gdf)
-        shape_sequences = (self.stop_delay_view.dropna(subset=['stop_id'])
-                          >> distinct(_.shape_id, _.stop_sequence)
-                          >> arrange(_.shape_id, _.stop_sequence)
-                         )
-        if hotspot:
-            corr_shapes = clipped
-        else:
-            stops_per_shape = shape_sequences >> group_by(_.shape_id) >> summarize(n_stops = _.shape_id.size)
-            # can use this as # of stops in corr...
-            stops_in_corr = clipped >> group_by(_.shape_id) >> summarize(in_corr = _.shape_id.size)
-            stop_comparison = stops_per_shape >> inner_join(_, stops_in_corr, on='shape_id')
-            # # only keep shapes with at least 10% of stops in corridor
-            # stop_comparison = stop_comparison >> mutate(corr_shape = _.in_corr > _.n_stops / 10)
-            # corr_shapes = stop_comparison >> filter(_.corr_shape)
-            corr_shapes = stop_comparison # actually keep all
+        corr_shapes = to_clip.clip(corridor_gdf)
+
         self._shape_sequence_filter = {}
         for shape_id in corr_shapes.shape_id.unique():
             self._shape_sequence_filter[shape_id] = {}
