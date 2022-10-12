@@ -68,7 +68,6 @@ class VehiclePositionsInterpolator:
             raise AssertionError  
             
     def _linear_reference(self):
-        # self._loop_shape_filter() # not yet usable as intended
         raw_positions = self.vp_trip_gdf.copy()
         raw_positions = raw_positions >> arrange(self.time_col)
         raw_position_array = raw_positions.shape_meters.to_numpy()
@@ -221,10 +220,8 @@ class OperatorDayAnalysis:
         self.stops = get_stops(self.calitp_itp_id, self.analysis_date)
         trips = self.trips >> select(-_.calitp_url_number, -_.calitp_extracted_at, -_.calitp_deleted_at)
         positions = self.vehicle_positions >> select(-_.calitp_url_number)
-        self.trips_positions_joined = (trips
-                                        >> inner_join(_, positions, on= ['trip_id', 'calitp_itp_id'])
-                                       ) ##TODO check info cols here...
-        assert not self.trips_positions_joined.empty, 'vehicle positions trip ids not in schedule'
+        self.trips_positions_joined = (trips >> inner_join(_, positions, on= ['trip_id', 'calitp_itp_id']))
+        assert not self.trips_positions_joined.empty, 'vehicle positions empty, or vp trip ids not in schedule'
         self.trips_positions_joined = gpd.GeoDataFrame(self.trips_positions_joined,
                                     geometry=gpd.points_from_xy(self.trips_positions_joined.vehicle_longitude,
                                                                 self.trips_positions_joined.vehicle_latitude),
@@ -236,19 +233,19 @@ class OperatorDayAnalysis:
         self.trs = self.trs >> inner_join(_, self.stop_times >> select(_.trip_id, _.stop_id), on = 'trip_id')
         self.trs = self.trs >> distinct(_.stop_id, _.shape_id)
         self.trs = self.stops >> select(_.stop_id, _.stop_name, _.geometry) >> inner_join(_, self.trs, on = 'stop_id')
-        # print(f'projecting')
         if not self.trs.shape_id.isin(self.routelines.shape_id).all():
             no_shape_trs = self.trs >> filter(-_.shape_id.isin(self.routelines.shape_id))
             print(f'{no_shape_trs.shape[0]} scheduled trips out of {self.trs.shape[0]} have no shape, dropping')
             assert no_shape_trs.shape[0] < self.trs.shape[0] / 10, '>10% of trips have no shape!'
             self.trs = self.trs >> filter(_.shape_id.isin(self.routelines.shape_id))
+        ## project scheduled stops to shape, TODO evaluate accuracy/replace alongside improving vp projection
         self.trs['shape_meters'] = (self.trs.apply(lambda x:
                 (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
          axis = 1))
-        # print(f'done')
         self.routelines = self.routelines.apply(self._ix_from_routeline, axis=1)
         self.vp_obs_by_trip = self.vehicle_positions >> count(_.trip_id) >> arrange(-_.n)
-        self._generate_position_interpolators() ## comment out for first test
+        
+        self._generate_position_interpolators()
         self.rt_trips = self.trips.copy() >> filter(_.trip_id.isin(self.position_interpolators.keys()))
         self.debug_dict['rt_trips'] = self.rt_trips
         self.rt_trips['median_time'] = self.rt_trips.apply(lambda x: self.position_interpolators[x.trip_id]['rt'].median_time.time(), axis = 1)
@@ -257,7 +254,7 @@ class OperatorDayAnalysis:
         self.pct_trips_valid_rt = self.rt_trips.trip_id.nunique() / self.trips.trip_id.nunique()
 
         self._generate_stop_delay_view()
-
+        ## TODO replace/include in initial queries, avoid seperate warehouse call
         self.calitp_agency_name = (tbl.views.gtfs_schedule_dim_feeds()
              >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
              >> collect()
@@ -271,7 +268,6 @@ class OperatorDayAnalysis:
                               >> filter(_.shape_id == routeline.shape_id)
                               >> arrange(_.shape_meters))
             stop_loc_array = stops_filtered.shape_meters.to_numpy()
-            # print(stop_loc_array)
             # https://stackoverflow.com/questions/56024634/minimum-distance-for-each-value-in-array-respect-to-other
             # get minimum distance to any existing stop for each kilometer segment
             idx = np.searchsorted(stop_loc_array, km_index, side='right')
