@@ -11,6 +11,8 @@ import altair as alt
 
 # Format
 from babel.numbers import format_currency
+
+# Style a df
 from IPython.display import HTML, Image, Markdown, display, display_html
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/"
@@ -24,6 +26,7 @@ chart_width = 300
 chart_height = 188
 
 def preset_chart_config(chart: alt.Chart) -> alt.Chart:
+    
     chart = chart.properties(
         width=chart_width,
         height=chart_height
@@ -71,12 +74,19 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
     https://stackoverflow.com/questions/53404826/how-to-link-two-bar-charts-in-altair
     
     Args:
+        Universal args
         df: the dataframe
         control_field (str): the field of the 1st chart that controls your 2nd chart.
+        
+        Chart 1 Args
         chart1_nominal (str): nominal column for 1st bar chart. should be in format 'column_name:N'
         chart1_quant (str): quantitive column for 1st bar chart. should be in format 'column_name:Q'
+        
+        Chart 2 Args
         chart2_nominal (str): nominal column for 2nd bar chart. should be in format 'column_name:N'
         chart2_quant (str): quantitive column for 2nd bar chart. should be in format 'column_name:Q'
+        
+        Tooltips
         chart1_tooltip_cols (list): list of columns to place in tooltip in chart 1
         chart2_tooltip_cols (list): list of columns to place in tooltip chart 2
     Returns:
@@ -112,9 +122,9 @@ def dual_bar_chart(df, control_field:str, chart1_nominal:str,
 def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
                    chart_title:str):
     """
-    quant_col (str): should be "Column Name:Q"
-    nominal_col (str): should be "Column Name:N"
-    label_col (str): should be "Column Name:N"
+    quant_col (str): format as  "Column Name:Q"
+    nominal_col (str):  format as "Column Name:N"
+    label_col (str): format as "Column Name:N"
     """
     # Base Chart
     base = (alt.Chart(df)
@@ -153,17 +163,24 @@ def dual_chart_with_dropdown(
 ):
     """Two bar charts controlled by a dropdown
     Args:
+        Universal args
         df: the dataframe
         dropdown_list(list): a list of all the values in the dropdown menu,
         dropdown_field(str): column where the dropdown menu's values are drawn from,
+        
+        Chart 1 Args
         x_axis_chart1(str): x axis value for chart 1 - encode as Q or N,
         y_axis_chart1(str): y axis value for chart 1 - encode as Q or N,
         color_col1(str): column to color the graphs for chart 1,
         chart1_tooltip_cols(list): list of all the columns to populate the tooltip,
+        
+        Chart 2 Args 
         x_axis_chart2(str): x axis value for chart 2 - encode as Q or N,
         y_axis_chart2(str): x axis value for chart 2 - encode as Q or N,
         color_col2(str): column to color the graphs for chart 2,
         chart2_tooltip_cols(list): list of all the columns to populate the tooltip,
+        
+        Chart Title
         chart_title(str):chart title,
     Returns:
         Returns two  bar charts that are controlled by a dropdown
