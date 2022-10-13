@@ -101,6 +101,7 @@ class metadata_input(BaseModel):
     contact_person: str
     contact_email: str = "hello@calitp.org"
     horiz_accuracy: str = "4 meters"
+    edition: str
     
 
 def fix_values_in_validated_dict(d: dict) -> dict:
@@ -109,6 +110,7 @@ def fix_values_in_validated_dict(d: dict) -> dict:
     d["frequency"] = validation_pro.check_update_frequency(d["frequency"])
     
     #d["data_dict_type"] = validation.check_data_dict_format(d["data_dict_type"])
+    d["edition"] = validation_pro.add_edition()
     
     d["beginning_date"] = validation_pro.check_dates(d["beginning_date"])
     d["end_date"] = validation_pro.check_dates(d["end_date"])
@@ -140,7 +142,7 @@ def overwrite_identification_info(metadata: dict, dataset_info: dict) -> dict:
     citation_info = id_info[f"{x}citation"][f"{x}CI_Citation"]
     citation_info[f"{x}title"][key] = d["dataset_name"]
     citation_info[f"{x}date"][f"{x}CI_Date"][f"{x}date"][key_dt] = d["beginning_date"]
-    citation_info[f"{x}edition"][key] = validation_pro.add_edition()
+    citation_info[f"{x}edition"][key] = d["edition"]
         
     status_info = id_info[f"{x}status"][f"{x}MD_ProgressCode"]
     status_info["codeListValue"] = d["status"]
