@@ -10,11 +10,14 @@ import xml.etree.ElementTree as ET
 import xmltodict
 
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Literal
 
-import validation 
+import validation_pro
 
 METADATA_FOLDER = "metadata_xml/"
+
+# This prefix keeps coming up, but xmltodict has trouble processing or replacing it
+x = "ns:0"
 
 # Convert XML to JSON
 # https://stackoverflow.com/questions/48821725/xml-parsers-expat-expaterror-not-well-formed-invalid-token
@@ -33,22 +36,22 @@ def xml_to_json(path: str) -> dict:
 
 # Lift necessary stuff from 1st time through shp to file gdb
 def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
-    m = metadata_json["ns0:MD_Metadata"]
+    m = metadata_json[f"{x}MD_Metadata"]
     
     # Store this info in a dictionary
     d = {}
         
     # Date Stamp
-    d["ns0:dateStamp"] = m["ns0:dateStamp"] 
+    d[f"{x}dateStamp"] = m[f"{x}dateStamp"] 
     
     # Spatial Representation Info
-    d["ns0:spatialRepresentationInfo"] = m["ns0:spatialRepresentationInfo"] 
+    d[f"{x}spatialRepresentationInfo"] = m[f"{x}spatialRepresentationInfo"] 
    
     # Coordinate Reference System Info
-    d["ns0:referenceSystemInfo"] = m["ns0:referenceSystemInfo"] 
+    d[f"{x}referenceSystemInfo"] = m[f"{x}referenceSystemInfo"] 
     
     # Distribution Info
-    d["ns0:distributionInfo"] = m["ns0:distributionInfo"]   
+    d[f"{x}distributionInfo"] = m[f"{x}distributionInfo"]   
     
     return d
 
@@ -56,7 +59,7 @@ def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
 def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
     DEFAULT_XML = f"./{METADATA_FOLDER}default_pro.xml"
     default_template = xml_to_json(DEFAULT_XML)
-    default = default_template["ns0:MD_Metadata"]
+    default = default_template[f"{x}MD_Metadata"]
     
     # Grab the necessary elements from my dataset
     necessary_elements = lift_necessary_dataset_elements(metadata_json)
@@ -81,13 +84,19 @@ class metadata_input(BaseModel):
     beginning_date: str
     end_date: str
     place: str = "California"
-    status: str = "Complete"
-    frequency: str = "Monthly"
+    status: Literal["completed", "historicalArchive", "obsolete", 
+                    "onGoing", "planned", "required", 
+                    "underDevelopment"] = "completed"
+    frequency: Literal["continual", "daily", "weekly",
+                       "fortnightly", "monthly", "quarterly", 
+                       "biannually", "annually", 
+                       "asNeeded", "irregular", "notPlanned", 
+                       "unknown"] = "monthly"
     theme_topic: str = "transportation"
     theme_keywords: list    
     methodology: str
-    data_dict_type: str
-    data_dict_url: str
+    #data_dict_type: str
+    #data_dict_url: str
     contact_organization: str = "Caltrans"
     contact_person: str
     contact_email: str = "hello@calitp.org"
@@ -95,32 +104,118 @@ class metadata_input(BaseModel):
     
 
 def fix_values_in_validated_dict(d: dict) -> dict:
-    d["theme_keywords"] = validation.fill_in_keyword_list_pro(d["theme_keywords"])
-    # Construct the theme_topics dict from keyword list
-    #d["theme_topics"] = validation.fill_in_keyword_list(
-    #    topic="transportation", keyword_list=d["theme_keywords"])
+    d["theme_keywords"] = validation_pro.fill_in_keyword_list(d["theme_keywords"])
     
-    d["frequency"] = validation.check_update_frequency(d["frequency"])
+    d["frequency"] = validation_pro.check_update_frequency(d["frequency"])
     
-    d["data_dict_type"] = validation.check_data_dict_format(d["data_dict_type"])
+    #d["data_dict_type"] = validation.check_data_dict_format(d["data_dict_type"])
     
-    d["beginning_date"] = validation.check_dates(d["beginning_date"])
-    d["end_date"] = validation.check_dates(d["end_date"])
+    d["beginning_date"] = validation_pro.check_dates(d["beginning_date"])
+    d["end_date"] = validation_pro.check_dates(d["end_date"])
     
-    d["horiz_accuracy"] = validation.check_horiz_accuracy(d["horiz_accuracy"])
+    # Can we get away with 4 meters in EPSG:4326?
+    #d["horiz_accuracy"] = validation.check_horiz_accuracy(d["horiz_accuracy"])
     
     return d
 
 
 # Overwrite the metadata after dictionary of dataset info is supplied
-def overwrite_metadata_json(metadata_json: dict, dataset_info: dict) -> dict:
+def overwrite_identification_info(metadata: dict, dataset_info: dict) -> dict:
     d = dataset_info
-    new_metadata = metadata_json.copy()
-    m = new_metadata["metadata"]
+    # This is how most values are keyed in for last dict
+    key = "ns1:CharacterString"
+    key_dt = "ns1:Date"
+    
+    ## Identification Info
+    id_info = metadata[f"{x}identificationInfo"][f"{x}MD_DataIdentification"]
+    
+    id_info[f"{x}abstract"][key] = d["abstract"]
+    id_info[f"{x}purpose"][key] = d["purpose"]
+    (id_info[f"{x}descriptiveKeywords"][1]
+     [f"{x}MD_Keywords"][f"{x}keyword"]) = d["theme_keywords"]
+    id_info[f"{x}topicCategory"][f"{x}MD_TopicCategoryCode"] = d["theme_topic"]
+    id_info[f"{x}extent"][f"{x}EX_Extent"][f"{x}description"][key] = d["place"]
 
     
-    return new_metadata 
+    citation_info = id_info[f"{x}citation"][f"{x}CI_Citation"]
+    citation_info[f"{x}title"][key] = d["dataset_name"]
+    citation_info[f"{x}date"][f"{x}CI_Date"][f"{x}date"][key_dt] = d["beginning_date"]
+    
+    status_info = id_info[f"{x}status"][f"{x}MD_ProgressCode"]
+    status_info["codeListValue"] = d["status"]
+    status_info["text"] = d["status"]
+    
+    maint_info = id_info[f"{x}resourceMaintenance"][f"{x}MD_MaintenanceInformation"]
+    (maint_info[f"{x}maintenanceAndUpdateFrequency"]
+     [f"{x}MD_MaintenanceFrequencyCode"]["codeListValue"]) = d["frequency"]
+    (maint_info[f"{x}maintenanceAndUpdateFrequency"]
+     [f"{x}MD_MaintenanceFrequencyCode"]["text"]) = d["frequency"]
+    maint_info[f"{x}dateOfNextUpdate"][key_dt] = d["end_date"]
+    
+    extent_info = (id_info[f"{x}extent"][f"{x}EX_Extent"]
+                   [f"{x}temporalElement"][f"{x}EX_TemporalExtent"]
+                   [f"{x}extent"]["ns2:TimePeriod"])
+ 
+    extent_info["ns2:beginPosition"] = d["beginning_date"] + "T00:00:00"
+    extent_info["ns2:endPosition"] = d["end_date"] + "T00:00:00"
+    
+    return metadata
+    
+    
+def overwrite_contact_info(metadata: dict, dataset_info: dict) -> dict: 
+    d = dataset_info
+    key = "ns1:CharacterString"
 
+    ## Contact Info
+    contact_info = metadata[f"{x}contact"][f"{x}CI_ResponsibleParty"]
+    
+    contact_info[f"{x}positionName"][key] = d["publish_entity"]
+    contact_info[f"{x}organisationName"][key] = d["contact_organization"]
+    contact_info[f"{x}individualName"][key] = d["contact_person"]
+    
+    (contact_info[f"{x}contactInfo"][f"{x}CI_Contact"]
+     [f"{x}address"][f"{x}CI_Address"]
+     [f"{x}electronicMailAddress"][key]) = d["contact_email"] 
+    
+    return metadata
+
+
+def overwrite_data_quality_info(metadata: dict, dataset_info: dict) -> dict:
+    d = dataset_info
+    key = "ns1:CharacterString"
+    
+    ## Data Quality
+    data_qual_info = metadata[f"{x}dataQualityInfo"][f"{x}DQ_DataQuality"]
+    (data_qual_info[f"{x}report"][f"{x}DQ_RelativeInternalPositionalAccuracy"]
+     [f"{x}measureDescription"][key]) = d["horiz_accuracy"]
+    
+    (data_qual_info[f"{x}lineage"][f"{x}LI_Lineage"]
+     [f"{x}processStep"][f"{x}LI_ProcessStep"]
+     [f"{x}description"][key]) = d["methodology"]
+    
+    return metadata
+    
+
+def overwrite_metadata_json(metadata_json: dict, 
+                            dataset_info: dict) -> dict:
+    d = dataset_info
+    new_metadata = metadata_json.copy()
+    m = new_metadata[f"{x}MD_Metadata"]
+    
+    m = overwrite_identification_info(m, d)
+    m = overwrite_contact_info(m, d)
+    m = overwrite_contact_info(m, d)
+
+    ## Need edition and resource contact added to be approved 
+    # Add edition 
+    # Use number instead of date (shows up when exported in FGDC)
+    #NEW_EDITION = validation.check_edition_add_one(m)
+    #m["idinfo"]["citation"]["citeinfo"]["edition"] = NEW_EDITION
+                
+    #m["eainfo"]["detailed"]["enttyp"]["enttypd"] = d["data_dict_type"]    
+    #m["eainfo"]["detailed"]["enttyp"]["enttypds"] = d["data_dict_url"]    
+      
+    return new_metadata 
 
 
 def update_metadata_xml(xml_file: str, dataset_info: dict, 
