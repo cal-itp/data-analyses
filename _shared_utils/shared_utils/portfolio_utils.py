@@ -166,6 +166,10 @@ def style_table(
     right_align_cols: list = [],
     custom_format_cols: dict = {},
     display_table: bool = True,
+    display_scrollbar: bool = False,
+    scrollbar_font: str = "12px",
+    scrollbar_height: str = "400px",
+    scrollbar_width: str = "fit-content",
 ) -> pd.io.formats.style.Styler:
     """
     Returns a pandas Styler object with some basic formatting.
@@ -227,6 +231,23 @@ def style_table(
             df_style = add_custom_format(df_style, format_str, cols_to_format)
 
     if display_table is True:
-        display(HTML(df_style.to_html()))
+        if display_scrollbar is True:
+            display(
+                HTML(
+                    f"<div style='height: {scrollbar_height}; overflow: auto; width: {scrollbar_width}'>"
+                    + (
+                        (df_style)
+                        .set_properties(
+                            **{
+                                "font-size": scrollbar_font,
+                            }
+                        )
+                        .render()
+                    )
+                    + "</div>"
+                )
+            )
+        else:
+            display(HTML(df_style.to_html()))
 
     return df_style
