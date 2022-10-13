@@ -83,7 +83,8 @@ class metadata_input(BaseModel):
     place: str = "California"
     status: str = "Complete"
     frequency: str = "Monthly"
-    theme_topics: Dict
+    theme_topic: str = "transportation"
+    theme_keywords: list    
     methodology: str
     data_dict_type: str
     data_dict_url: str
@@ -94,9 +95,10 @@ class metadata_input(BaseModel):
     
 
 def fix_values_in_validated_dict(d: dict) -> dict:
+    d["theme_keywords"] = validation.fill_in_keyword_list_pro(d["theme_keywords"])
     # Construct the theme_topics dict from keyword list
-    d["theme_topics"] = validation.fill_in_keyword_list(
-        topic="transportation", keyword_list=d["theme_keywords"])
+    #d["theme_topics"] = validation.fill_in_keyword_list(
+    #    topic="transportation", keyword_list=d["theme_keywords"])
     
     d["frequency"] = validation.check_update_frequency(d["frequency"])
     

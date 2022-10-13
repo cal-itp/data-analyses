@@ -102,7 +102,7 @@ class metadata_input(BaseModel):
 
 def fix_values_in_validated_dict(d: dict) -> dict:
     # Construct the theme_topics dict from keyword list
-    d["theme_topics"] = validation.fill_in_keyword_list(
+    d["theme_topics"] = validation.fill_in_keyword_list_desktop(
         topic="transportation", keyword_list=d["theme_keywords"])
     
     d["frequency"] = validation.check_update_frequency(d["frequency"])
