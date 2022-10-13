@@ -17,7 +17,7 @@ import validation_pro
 METADATA_FOLDER = "metadata_xml/"
 
 # This prefix keeps coming up, but xmltodict has trouble processing or replacing it
-x = "ns:0"
+x = "ns0:"
 
 # Convert XML to JSON
 # https://stackoverflow.com/questions/48821725/xml-parsers-expat-expaterror-not-well-formed-invalid-token
@@ -140,7 +140,8 @@ def overwrite_identification_info(metadata: dict, dataset_info: dict) -> dict:
     citation_info = id_info[f"{x}citation"][f"{x}CI_Citation"]
     citation_info[f"{x}title"][key] = d["dataset_name"]
     citation_info[f"{x}date"][f"{x}CI_Date"][f"{x}date"][key_dt] = d["beginning_date"]
-    
+    citation_info[f"{x}edition"][key] = validation_pro.add_edition()
+        
     status_info = id_info[f"{x}status"][f"{x}MD_ProgressCode"]
     status_info["codeListValue"] = d["status"]
     status_info["text"] = d["status"]
@@ -205,12 +206,6 @@ def overwrite_metadata_json(metadata_json: dict,
     m = overwrite_identification_info(m, d)
     m = overwrite_contact_info(m, d)
     m = overwrite_contact_info(m, d)
-
-    ## Need edition and resource contact added to be approved 
-    # Add edition 
-    # Use number instead of date (shows up when exported in FGDC)
-    #NEW_EDITION = validation.check_edition_add_one(m)
-    #m["idinfo"]["citation"]["citeinfo"]["edition"] = NEW_EDITION
                 
     #m["eainfo"]["detailed"]["enttyp"]["enttypd"] = d["data_dict_type"]    
     #m["eainfo"]["detailed"]["enttyp"]["enttypds"] = d["data_dict_url"]    

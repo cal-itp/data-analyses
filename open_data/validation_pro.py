@@ -33,3 +33,11 @@ def check_dates(string: str)-> str:
     date5 = '20200830'
     """
     return pd.to_datetime(string).date().isoformat()            
+
+
+def add_edition():
+    # Replace to largest 
+    possible_editions = list(rt_dates.METADATA_EDITION.values())        
+    new_edition = str(max(possible_editions))
+    
+    return new_edition

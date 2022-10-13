@@ -40,7 +40,7 @@
 </CI_ResponsibleParty>
 </contact>
 <dateStamp>
-<gco:Date>2022-10-11</gco:Date>
+<gco:Date>2022-10-13</gco:Date>
 </dateStamp>
 <metadataStandardName>
 <gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
@@ -96,6 +96,9 @@
 </dateType>
 </CI_Date>
 </date>
+<edition>
+<gco:CharacterString>1</gco:CharacterString>
+</edition>
 <citedResponsibleParty>
 <CI_ResponsibleParty>
 <individualName>
@@ -191,7 +194,7 @@
 <temporalElement>
 <EX_TemporalExtent>
 <extent>
-<gml:TimePeriod gml:id="IDTHEUOADE3DTXN0JZLJJCKB3KYOXZW24IO50YYMN4CF4PCK32AIZO">
+<gml:TimePeriod gml:id="IDDWYVT5UGET0XIDOZ10J1NEM1TJ4BG4DJ4XQHJCJYNE1G53PQBC5H">
 <gml:beginPosition>2022-09-14T00:00:00</gml:beginPosition>
 <gml:endPosition>2022-10-14T00:00:00</gml:endPosition>
 </gml:TimePeriod>

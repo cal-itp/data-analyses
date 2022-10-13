@@ -19,12 +19,12 @@ ROUTES_DICT = {
     "abstract": "Public. EPSG: 4326",
     "purpose": PURPOSE, # purpose, also repeat for description?
 
-    "beginning_date": "20220914",
-    "end_date": "20221014",
+    "beginning_date": "2022-09-14",
+    "end_date": "2022-10-14",
     "place": "California",
 
-    "status": "Complete", 
-    "frequency": "Monthly",
+    "status": "completed", 
+    "frequency": "monthly",
     
     "theme_keywords": KEYWORDS, #tags
 
@@ -37,7 +37,7 @@ ROUTES_DICT = {
     "contact_person": "Tiffany Chu", 
     "contact_email": "tiffany.chu@dot.ca.gov",
     
-    "horiz_accuracy": "0.00004 decimal degrees",
+    "horiz_accuracy": "4 meters",
 }
 
 # Use same data dictionary with tiny modifications
