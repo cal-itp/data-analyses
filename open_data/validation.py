@@ -15,7 +15,8 @@ import pandas as pd
 from shared_utils import rt_dates
 
 # Function to put in list of keywords (MINIMUM 5 needed)
-def fill_in_keyword_list(topic='transportation', keyword_list = []):
+def fill_in_keyword_list_desktop(topic: str ='transportation', 
+                                 keyword_list: list = []) -> list[dict]:
     if len(keyword_list) >= 5:
         filled_out_list = [
             {'themekt': 'ISO 19115 Topic Categories',
@@ -29,6 +30,13 @@ def fill_in_keyword_list(topic='transportation', keyword_list = []):
     else:
         return "Input minimum 5 keywords"
 
+def fill_in_keyword_list_pro(keyword_list: list = []) -> list[dict]:
+    if len(keyword_list) >= 5:
+        filled_out_list =  [{"ns1:CharacterString": i} for i in keyword_list]
+        return filled_out_list
+    else:
+        return "Input minimum 5 keywords"
+    
     
 # Validate the data dict format (CSV or XML, for our case)
 # But be more lenient and take 'csv', 'xml' and fix it
