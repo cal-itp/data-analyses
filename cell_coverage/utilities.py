@@ -56,11 +56,11 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
         ]
     )
     
-    # Filter out for bus only 
-    unique_route = unique_route.loc[unique_route["route_type"] == "3"]
-    
     # Filter out any Amtrak records
     unique_route = unique_route.loc[unique_route["agency"] != "Amtrak"]
+    
+    # Filter out for bus only 
+    unique_route = unique_route.loc[unique_route["route_type"] == "3"]
     
     # Fill in NA for route names
     unique_route["route_name"] = unique_route["route_name"].replace({"": "None"})
@@ -103,33 +103,37 @@ def load_unique_routes_df():
     
     return df
 
-# Find number of trips ran per route by route ID. 
+# Find number of trips ran per route by route ID and by the agency as a whole. 
 def trip_df():
-    
+
     # Read in file
     trips_file = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/trips_2022-05-04_all.parquet"
     df = pd.read_parquet(trips_file)
-    
-    # Standardize route id  
+
+    # Standardize route id
     df["route_id"] = df["route_id"].str.lower().str.strip()
-    
+
     # Aggregate trips_df: aggregate trip_id by ITP ID and Route ID
-    df2 = (df
-             .groupby(['calitp_itp_id', 'route_id'])
-             .agg({'trip_id':'nunique'})
-             .reset_index()
-             .rename(columns = {'trip_id':'total_trips_by_route'})
-            )
+    df2 = (
+        df.groupby(["calitp_itp_id", "route_id"])
+        .agg({"trip_id": "nunique"})
+        .reset_index()
+        .rename(columns={"trip_id": "total_trips_by_route"})
+    )
     # Aggregate trips_df: count number of trips an agency makes
-    # across all routes 
-    df3 = (df
-             .groupby(['calitp_itp_id'])
-             .agg({'trip_id':'nunique'})
-             .reset_index()
-             .rename(columns = {'trip_id':'total_trips_by_agency'})
-            )
+    # across all routes
+    df3 = (
+        df.groupby(["calitp_itp_id"])
+        .agg({"trip_id": "nunique"})
+        .reset_index()
+        .rename(columns={"trip_id": "total_trips_by_agency"})
+    )
+
+    # Merge to get one comprehensive one
+    m1 = pd.merge(df2, df3, how="inner", on="calitp_itp_id")
+
+    return m1
     
-    return df2, df3
     
 """
 Analysis Functions
@@ -161,7 +165,7 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
         Returns a gdf with the percentage of the routes covered by a provider
     """
     # Overlay the dfs
-    overlay = comparison(original_routes_df, provider_gdf)
+    overlay =  comparison(original_routes_df, provider_gdf)
 
     # Aggregate lengths of routes by route id, name, agency, and itp_id
     overlay2 = (overlay.dissolve(
@@ -190,8 +194,18 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     m1["binned"] = pd.cut(m1["percentage"], bins)
     
-    # Add suffix to df to distinguish which provider 
-    m1 =  m1.add_suffix(suffix)
+    # Drop unwanted cols 
+    unwanted_cols = ["route_type", "geometry_original_df"]
+    m1 = m1.drop(columns = unwanted_cols)
+    
+    # Sort
+    m1 = m1.sort_values(["route_id","route_name", "agency"]) 
+    
+    # Add suffix to certain columns to distinguish which provider 
+    # https://stackoverflow.com/questions/53380310/how-to-add-suffix-to-column-names-except-some-columns
+    m1 = m1.rename(columns={c: c+ suffix for c in m1.columns if c in ['percentage', 'binned', 'route_length_overlay',
+                                                                     'geometry_overlay']})
+
     return m1
 
 """
