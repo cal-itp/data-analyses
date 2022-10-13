@@ -42,7 +42,7 @@ def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
     d = {}
         
     # Date Stamp
-    d[f"{x}dateStamp"] = m[f"{x}dateStamp"] 
+    d[f"{x}dateStamp"] = m[f"{x}dateStamp"]
     
     # Spatial Representation Info
     d[f"{x}spatialRepresentationInfo"] = m[f"{x}spatialRepresentationInfo"] 
@@ -59,15 +59,17 @@ def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
 def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
     DEFAULT_XML = f"./{METADATA_FOLDER}default_pro.xml"
     default_template = xml_to_json(DEFAULT_XML)
-    default = default_template[f"{x}MD_Metadata"]
+    #default = default_template[f"{x}MD_Metadata"]
     
     # Grab the necessary elements from my dataset
     necessary_elements = lift_necessary_dataset_elements(metadata_json)
     
     # Overwrite it in the default template
-    for key, value in default.items():
+    for key, value in default_template[f"{x}MD_Metadata"].items():
         if key in necessary_elements.keys():
-            default[key] = necessary_elements[key]     
+            default_template[f"{x}MD_Metadata"][key] = necessary_elements[key]    
+        else:
+            default_template[f"{x}MD_Metadata"][key] = default_template[f"{x}MD_Metadata"][key]
             
     # Return the default template, but now with our dataset's info populated
     return default_template
@@ -122,7 +124,7 @@ def fix_values_in_validated_dict(d: dict) -> dict:
 
 
 # Overwrite the metadata after dictionary of dataset info is supplied
-def overwrite_identification_info(metadata: dict, dataset_info: dict) -> dict:
+def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
     d = dataset_info
     # This is how most values are keyed in for last dict
     key = "ns1:CharacterString"
@@ -200,14 +202,14 @@ def overwrite_data_quality_info(metadata: dict, dataset_info: dict) -> dict:
     
 
 def overwrite_metadata_json(metadata_json: dict, 
-                            dataset_info: dict) -> dict:
+                            dataset_info: dict, first_run: bool = False) -> dict:
     d = dataset_info
     new_metadata = metadata_json.copy()
-    m = new_metadata[f"{x}MD_Metadata"]
+    #m = new_metadata#[f"{x}MD_Metadata"]
     
-    m = overwrite_identification_info(m, d)
-    m = overwrite_contact_info(m, d)
-    m = overwrite_contact_info(m, d)
+    new_metadata[f"{x}MD_Metadata"] = overwrite_id_info(new_metadata[f"{x}MD_Metadata"], d)
+    new_metadata[f"{x}MD_Metadata"] = overwrite_contact_info(new_metadata[f"{x}MD_Metadata"], d)
+    new_metadata[f"{x}MD_Metadata"] = overwrite_data_quality_info(new_metadata[f"{x}MD_Metadata"], d)
                 
     #m["eainfo"]["detailed"]["enttyp"]["enttypd"] = d["data_dict_type"]    
     #m["eainfo"]["detailed"]["enttyp"]["enttypds"] = d["data_dict_url"]    
@@ -236,7 +238,7 @@ def update_metadata_xml(xml_file: str, dataset_info: dict,
     esri_metadata = xml_to_json(xml_file)
     print("Read in XML as JSON")
     
-    if first_run is True:
+    if first_run:
         # Apply template
         metadata_templated = overwrite_default_with_dataset_elements(esri_metadata)
         print("Default template applied.")

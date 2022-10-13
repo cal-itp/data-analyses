@@ -46,5 +46,5 @@ if __name__=="__main__":
                                                 first_run=True)
     
     # Clean up local files
-    remove_zipped_shapefiles()
+    #remove_zipped_shapefiles()
     print("Remove local zipped shapefiles")
