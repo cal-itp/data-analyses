@@ -1,10 +1,9 @@
 import pandas as pd
 from calitp import *
-import shared_utils
 
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-FILE_NAME = "TIRCP_August_24_2022.xlsx"
+FILE_NAME = "TIRCP_October_14_2022.xlsx"
 
 #Crosswalk
 import A5_crosswalks as crosswalks
@@ -157,7 +156,7 @@ def clean_project():
     df["award_cycle"].replace({"FY 21/22": 4}, inplace=True)
 
     # Coerce cols that are supposed to be numeric
-    df["other_funds_involved"] = df["other_funds_involved"].apply(
+    df[["other_funds_involved","total_project_cost"]] = df[["other_funds_involved","total_project_cost"]].apply(
         pd.to_numeric, errors="coerce"
     )
 
