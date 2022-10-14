@@ -26,7 +26,8 @@ def xml_to_json(path: str) -> dict:
         print(f"Loading XML as JSON from {path}")
         xml = ET.tostring(ET.parse(path).getroot())
         return xmltodict.parse(xml, 
-                               attr_prefix="", cdata_key="text", 
+                               #attr_prefix="", 
+                               cdata_key="text", 
                                #process_namespaces=True,
                                dict_constructor=dict)
     except:
@@ -36,7 +37,7 @@ def xml_to_json(path: str) -> dict:
 
 # Lift necessary stuff from 1st time through shp to file gdb
 def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
-    m = metadata_json[f"{x}MD_Metadata"]
+    m = metadata_json
     
     # Store this info in a dictionary
     d = {}
@@ -62,7 +63,7 @@ def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
     #default = default_template[f"{x}MD_Metadata"]
     
     # Grab the necessary elements from my dataset
-    necessary_elements = lift_necessary_dataset_elements(metadata_json)
+    necessary_elements = lift_necessary_dataset_elements(metadata_json[f"{x}MD_Metadata"])
     
     # Overwrite it in the default template
     for key, value in default_template[f"{x}MD_Metadata"].items():
@@ -256,7 +257,7 @@ def update_metadata_xml(xml_file: str, dataset_info: dict,
     new_metadata = overwrite_metadata_json(metadata_templated, DATASET_INFO_VALIDATED)
     print("Overwrite JSON using dict")
 
-    new_xml = xmltodict.unparse(new_metadata, pretty=True)
+    new_xml = xmltodict.unparse(new_metadata, encoding='utf-8', pretty=True)
     print("Convert JSON back to XML")
     
     # Overwrite existing XML file
