@@ -16,6 +16,10 @@ from numba import jit
 from shared_utils import geography_utils, gtfs_utils, map_utils, utils
 from siuba import *
 
+# temporary fix converting to own module
+import sys
+sys.path.append('../../rt_delay')
+import rt_analysis as rt
 # from zoneinfo import ZoneInfo
 # import warnings
 
@@ -728,15 +732,16 @@ route_type_names = {
 }
 
 
-def get_operators(analysis_date, operator_list, generate_new=False):
+def get_operators(analysis_date, operator_list, generate_new=False, pbar=None):
     """
     Function for checking the existence of rt_trips and stop_delay_views in GCS for operators on a given day.
 
     analysis_date: datetime.date
     operator_list: list of itp_id's
     generate_new: 'True' to generate OperatorDayAnalysis and export to GCS, 'False' to not generate
+    pbar: tqdm.notebook.tqdm(), optional progress bar for generation
     """
-    fs_list = fs.ls(f"{shared_utils.rt_utils.GCS_FILE_PATH}rt_trips/")
+    fs_list = fs.ls(f"{GCS_FILE_PATH}rt_trips/")
     day = str(analysis_date.day).zfill(2)
     month = str(analysis_date.month).zfill(2)
     # now finds ran operators on specific analysis date
@@ -761,7 +766,7 @@ def get_operators(analysis_date, operator_list, generate_new=False):
             elif generate_new:
                 print(f"calculating for agency: {itp_id}...")
                 try:
-                    rt_day = rt.OperatorDayAnalysis(itp_id, analysis_date)
+                    rt_day = rt.OperatorDayAnalysis(itp_id, analysis_date, pbar)
                     rt_day.export_views_gcs()
                     print(f"complete for agency: {itp_id}")
                     op_list_runstatus[itp_id] = "newly_run"
