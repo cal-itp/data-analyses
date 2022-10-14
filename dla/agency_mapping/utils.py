@@ -22,6 +22,8 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 
 import re
 
+GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
+
 #function to add locodes
 
 def add_name_from_locode(df, df_locode_extract_col):
@@ -44,7 +46,45 @@ def add_name_from_locode(df, df_locode_extract_col):
     
     return df_all
 
+#add project information for all projects
+def identify_agency(df, identifier_col):
+    #projects wtih locodes
+    locode_proj = ((df[~df[identifier_col].str.contains(" ")]))
+    locode_proj = locode_proj>>filter(_[identifier_col]!='None')
+    
+    locode_proj = (add_name_from_locode(locode_proj, 'summary_recipient_defined_text_field_1_value'))
+    
 
+    #projects with no locodes
+    no_locode = ((df[df[identifier_col].str.contains(" ")]))
+    no_entry = df>>filter(_[identifier_col]=='None')
+    
+    #concat no locodes and those with no entry
+    no_locode = pd.concat([no_locode, no_entry])
+    
+    #add county codes:
+    county_base = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/Copy of County.xlsx", sheet_name='County', header=[1]))
+    county_base.drop(columns =['unnamed:_0', 'unnamed:_4'], axis=1, inplace=True)
+    county_base['county_description'] = county_base['county_description'] + " County"
+    
+    #read in locode info
+    locodes = to_snakecase(pd.read_excel(f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
+    county_district = locodes>>group_by(_.district, _.county_name)>>count(_.county_name)>>select(_.district, _.county_name)>>filter(_.county_name!='Multi-County', _.district !=53)
+    
+    # merge county information to add districts
+    county_info = (pd.merge(county_base, county_district, how='left', left_on= 'county_description', right_on = 'county_name'))
+    county_info.drop(columns =['county_name'], axis=1, inplace=True)
+    
+    #merge with county info - note - most are state projects but good to know what county project is located in
+    no_locode = (pd.merge(no_locode, county_info, on='county_code', how='left'))
+    no_locode = no_locode.rename(columns = {"recipient_name":"implementing_agency", "county_description":"county_name"})
+
+    full_df = pd.concat([locode_proj, no_locode])
+    
+    return full_df
+
+
+#get column names in Title Format (for exporting)
 def title_column_names(df):
     df.columns = df.columns.map(str.title) 
     df.columns = df.columns.map(lambda x : x.replace("_", " "))
@@ -52,6 +92,10 @@ def title_column_names(df):
     return df
 
 
+
+'''
+Word Analysis Functions
+'''
 
 def tokenize(texts):
     return [nltk.tokenize.word_tokenize(t) for t in texts]
@@ -85,6 +129,10 @@ def get_list_of_words(df, col):
 
 def add_description(df, col):
     ##using np.where. code help: https://stackoverflow.com/questions/43905930/conditional-if-statement-if-value-in-row-contains-string-set-another-column
+    
+    ## make sure column is in ALL CAPS
+    df[col] = df[col].str.upper()
+    
     ## method for project in first column
     df['project_method'] = (np.where(df[col].str.contains("INSTALL"), "Install",
                         np.where(df[col].str.contains("CONSTRUCT"), "Construct",
@@ -121,9 +169,10 @@ def add_description(df, col):
                         np.where(df[col].str.contains("SIGNAL"), "Signals",
                         np.where(df[col].str.contains("SIGN"), "Signage",
                         np.where(df[col].str.contains("BRIDGE"), "Bridge",
+                        np.where(df[col].str.contains("LIGHT"), "Lighting",         
                         np.where(df[col].str.contains("SAFETY ") & df[col].str.contains("IMPROVE") , "Safety Improvemnts",
                                  'Project')
-                                   ))))))))))))))))))))#)
+                                   )))))))))))))))))))))#)
     
     ## need to expand this to include more. maybe try a list. but capture entries with multiple projects
     df['other'] = (np.where(df[col].str.contains("CURB") & df[col].str.contains("SIDEWALK") | df[col].str.contains("BIKE"), "Multiple Road",
