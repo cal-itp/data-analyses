@@ -18,6 +18,7 @@ METADATA_FOLDER = "metadata_xml/"
 
 # This prefix keeps coming up, but xmltodict has trouble processing or replacing it
 x = "ns0:"
+main = f"{x}MD_Metadata"
 
 # Convert XML to JSON
 # https://stackoverflow.com/questions/48821725/xml-parsers-expat-expaterror-not-well-formed-invalid-token
@@ -60,17 +61,16 @@ def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
 def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
     DEFAULT_XML = f"./{METADATA_FOLDER}default_pro.xml"
     default_template = xml_to_json(DEFAULT_XML)
-    #default = default_template[f"{x}MD_Metadata"]
     
     # Grab the necessary elements from my dataset
-    necessary_elements = lift_necessary_dataset_elements(metadata_json[f"{x}MD_Metadata"])
+    necessary_elements = lift_necessary_dataset_elements(metadata_json[main])
     
     # Overwrite it in the default template
-    for key, value in default_template[f"{x}MD_Metadata"].items():
+    for key, value in default_template[main].items():
         if key in necessary_elements.keys():
-            default_template[f"{x}MD_Metadata"][key] = necessary_elements[key]    
+            default_template[main][key] = necessary_elements[key]    
         else:
-            default_template[f"{x}MD_Metadata"][key] = default_template[f"{x}MD_Metadata"][key]
+            default_template[main][key] = default_template[main][key]
             
     # Return the default template, but now with our dataset's info populated
     return default_template
@@ -206,11 +206,10 @@ def overwrite_metadata_json(metadata_json: dict,
                             dataset_info: dict, first_run: bool = False) -> dict:
     d = dataset_info
     new_metadata = metadata_json.copy()
-    #m = new_metadata#[f"{x}MD_Metadata"]
     
-    new_metadata[f"{x}MD_Metadata"] = overwrite_id_info(new_metadata[f"{x}MD_Metadata"], d)
-    new_metadata[f"{x}MD_Metadata"] = overwrite_contact_info(new_metadata[f"{x}MD_Metadata"], d)
-    new_metadata[f"{x}MD_Metadata"] = overwrite_data_quality_info(new_metadata[f"{x}MD_Metadata"], d)
+    new_metadata[main] = overwrite_id_info(new_metadata[main], d)
+    new_metadata[main] = overwrite_contact_info(new_metadata[main], d)
+    new_metadata[main] = overwrite_data_quality_info(new_metadata[main], d)
                 
     #m["eainfo"]["detailed"]["enttyp"]["enttypd"] = d["data_dict_type"]    
     #m["eainfo"]["detailed"]["enttyp"]["enttypds"] = d["data_dict_url"]    
