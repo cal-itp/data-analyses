@@ -19,6 +19,7 @@ out_location = 'open_data.gdb'
 
 # Path to Metadata stylesheet
 directory = arcpy.GetInstallInfo("desktop")["InstallDir"] 
+TRANSLATOR = "ISO19139_GML32" 
 
 def feature_class_in_gdb_path(my_gdb, file_name):
     return os.path.join(my_gdb, file_name)
@@ -102,10 +103,13 @@ for f in in_features:
 
     # Export metadata XML    
     meta_output = os.path.join(working_dir, f"{f}.xml")
-    TRANSLATOR = "FGDC_CSDGM" 
+        
+    # In ArcGIS Pro, instead of FGDC for Desktop, use ISO 19139 GML 3.2
+    # https://sv03tmcpo.ct.dot.ca.gov/portal/apps/sites/#/geep/pages/open-data-request
+    TRANSLATOR = "ISO19139_GML32" 
     
-    source_metadata.exportMetadata(outputPath = meta_output, 
-                               metadata_export_option=TRANSLATOR)
+    source_metadata.exportMetadata(outputPath = meta_output,
+                                   metadata_export_option=TRANSLATOR)
     
     print(f"successful export: {f}")
 
@@ -118,9 +122,23 @@ for f in in_features:
 # In the out location, we can drop the new XML and use it to sync
 # Use staging location and out location because otherwise, arcpy errors when it detects
 # another XML when you try and update the layer in a subsequent update
+for f in in_features:
+    # Delete the feature class in this gdb, because we don't want _1 appended to end
+    staging_feature_class = feature_class_in_gdb_path(staging_location, f)
+    out_feature_class = feature_class_in_gdb_path(out_location, f)
 
+    if arcpy.Exists(out_feature_class): 
+        arcpy.management.Delete(out_feature_class)
 
+    # Copy over the feature class from staging.gdb to open_data.gdb
+    arcpy.conversion.FeatureClassToFeatureClass(staging_feature_class, 
+                                                out_location, 
+                                                f)
+
+    
 ## (6) Sync the XML with the feature class    
+## THIS DOES NOT WORK -- manually import does work
+# https://esriaustraliatechblog.wordpress.com/2022/07/06/where-is-the-synchronize-metadata-tool-in-arcgis-pro/#:~:text=In%20ArcGIS%20Pro%2C%20to%20access,Open%20the%20catalog%20view.&text=Browse%20to%2C%20and%20select%20the,the%20Metadata%20group%2C%20click%20Synchronize.
 for f in in_features:
     # This is the one after it's manually changed. Keep separate to see what works.
     # There's already XML files for each feature class, so just copy and paste 
@@ -131,9 +149,13 @@ for f in in_features:
     
     # Import the updated xml, then overwrite the metadata in the file gdb 
     meta = md.Metadata(out_feature_class)
-
-    meta.importMetadata(updated_xml_file, "FGDC_CSDGM")
+    
+    # It can import the metadata, but it seems to import as ArcGIS format...
+    meta.importMetadata(updated_xml_file, "DEFAULT")
+    
+    meta.synchronize("ALWAYS")
     meta.save()
+
 
     
 ## (7) Old #7 is to clear the XML from staging...not needed, since 

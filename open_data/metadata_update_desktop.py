@@ -40,13 +40,13 @@ def lift_necessary_dataset_elements(metadata_json):
     
     # Bounding box
     d["idinfo"] = {}
-    #d["idinfo"]["spdom"] = m["idinfo"]["spdom"] 
+    d["idinfo"]["spdom"] = m["idinfo"]["spdom"] 
     
     # Some description about geospatial layer
     d["spdoinfo"] = m["spdoinfo"] 
     
     # Spatial reference info
-    #d["spref"] = m["spref"] 
+    d["spref"] = m["spref"] 
     
     # Field and entity attributes
     d["eainfo"] = m["eainfo"]
@@ -55,7 +55,7 @@ def lift_necessary_dataset_elements(metadata_json):
 
 
 def overwrite_default_with_dataset_elements(metadata_json):
-    DEFAULT_XML = f"./{METADATA_FOLDER}default.xml"
+    DEFAULT_XML = f"./{METADATA_FOLDER}default_desktop.xml"
     default_template = xml_to_json(DEFAULT_XML)
     default = default_template["metadata"]
     
@@ -67,10 +67,10 @@ def overwrite_default_with_dataset_elements(metadata_json):
         if key in necessary_elements.keys() and key != "idinfo":
             default[key] = necessary_elements[key]
         
-        #elif key == "idinfo":
-            #for k, v in value.items():
-                #if k == "spdom":
-                #    default[key][k] = necessary_elements[key][k]
+        elif key == "idinfo":
+            for k, v in value.items():
+                if k == "spdom":
+                    default[key][k] = necessary_elements[key][k]
            
             
     # Return the default template, but now with our dataset's info populated
@@ -100,9 +100,9 @@ class metadata_input(BaseModel):
     horiz_accuracy: str = "0.00004 decimal degrees"
     
 
-def fix_values_in_validated_dict(d):
+def fix_values_in_validated_dict(d: dict) -> dict:
     # Construct the theme_topics dict from keyword list
-    d["theme_topics"] = validation.fill_in_keyword_list(
+    d["theme_topics"] = validation.fill_in_keyword_list_desktop(
         topic="transportation", keyword_list=d["theme_keywords"])
     
     d["frequency"] = validation.check_update_frequency(d["frequency"])
@@ -118,8 +118,8 @@ def fix_values_in_validated_dict(d):
 
 
 # Overwrite the metadata after dictionary of dataset info is supplied
-def overwrite_metadata_json(metadata_json, DATASET_INFO):
-    d = DATASET_INFO
+def overwrite_metadata_json(metadata_json: dict, dataset_info: dict):
+    d = dataset_info
     new_metadata = metadata_json.copy()
     m = new_metadata["metadata"]
     
@@ -164,13 +164,15 @@ def overwrite_metadata_json(metadata_json, DATASET_INFO):
 
 
 
-def update_metadata_xml(XML_FILE, DATASET_INFO, first_run=False):
+def update_metadata_xml(xml_file: str, dataset_info: dict, 
+                        first_run: bool = False, 
+                        metadata_folder: str = METADATA_FOLDER):
     """
-    XML_FILE: string.
+    xml_file: string.
         Path to the XML metadata file.
         Ex: ./data/my_metadata.xml
         
-    DATASET_INFO: dict.
+    dataset_info: dict.
         Dictionary with values to overwrite in metadata. 
         Analyst needs to replace the values where needed.
     
@@ -180,7 +182,7 @@ def update_metadata_xml(XML_FILE, DATASET_INFO, first_run=False):
     """
     
     # Read in original XML as JSON
-    esri_metadata = xml_to_json(XML_FILE)
+    esri_metadata = xml_to_json(xml_file)
     print("Read in XML as JSON")
     
     if first_run is True:
@@ -192,10 +194,10 @@ def update_metadata_xml(XML_FILE, DATASET_INFO, first_run=False):
         print("Skip default template.")
     
     # These rely on functions, so they can't be used in pydantic easily
-    DATASET_INFO = fix_values_in_validated_dict(DATASET_INFO) 
+    DATASET_INFO = fix_values_in_validated_dict(dataset_info) 
     
     # Validate the dict input with pydantic
-    DATASET_INFO_VALIDATED = metadata_input(**DATASET_INFO).dict()
+    DATASET_INFO_VALIDATED = metadata_input(**dataset_info).dict()
     
     # Overwrite the metadata with dictionary input
     new_metadata = overwrite_metadata_json(metadata_templated, DATASET_INFO_VALIDATED)
@@ -206,11 +208,11 @@ def update_metadata_xml(XML_FILE, DATASET_INFO, first_run=False):
     
     # Overwrite existing XML file
     OUTPUT_FOLDER = "run_in_esri/"
-    if not os.path.exists(f"./{METADATA_FOLDER}{OUTPUT_FOLDER}"):
-        os.makedirs(f"./{METADATA_FOLDER}{OUTPUT_FOLDER}")
+    if not os.path.exists(f"./{metadata_folder}{OUTPUT_FOLDER}"):
+        os.makedirs(f"./{metadata_folder}{OUTPUT_FOLDER}")
     
-    FILE = f"{XML_FILE.split(METADATA_FOLDER)[1]}"
+    FILE = f"{xml_file.split(metadata_folder)[1]}"
         
-    with open(f"{METADATA_FOLDER}{OUTPUT_FOLDER}{FILE}", 'w') as f:
+    with open(f"./{metadata_folder}{OUTPUT_FOLDER}{FILE}", 'w') as f:
         f.write(new_xml)
     print("Save over existing XML")
