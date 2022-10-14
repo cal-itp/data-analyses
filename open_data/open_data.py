@@ -3,7 +3,7 @@ Track the metadata updates for all open data portal datasets.
 """
 import os
 
-import metadata_update
+import metadata_update_pro
 from gcs_to_esri import remove_zipped_shapefiles
 
 # Import various dictionaries
@@ -41,7 +41,7 @@ if __name__=="__main__":
         if name in RUN_ME:
             print(name)
             print("-------------------------------------------")
-            metadata_update.update_metadata_xml(dataset["path"], 
+            metadata_update_pro.update_metadata_xml(dataset["path"], 
                                                 dataset["metadata_dict"], 
                                                 first_run=True)
     

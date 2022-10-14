@@ -6,3 +6,5 @@ dask_geopandas==0.2.0
 dask-bigquery==2022.05.0
 loguru==0.6.0
 mapclassify==2.4.3
+matplotlib<3.6.0
+#plotnine broken with mpl 3.6, can upgrade plotnine version later: https://github.com/has2k1/plotnine/commit/c48d5a26ab0d0a54ed47bbefc6a83b5fcb2af616
