@@ -1,6 +1,9 @@
 import datetime as dt
 import os
 import re
+
+# temporary fix converting to own module
+import sys
 import time
 from pathlib import Path
 
@@ -16,10 +19,9 @@ from numba import jit
 from shared_utils import geography_utils, gtfs_utils, map_utils, utils
 from siuba import *
 
-# temporary fix converting to own module
-import sys
-sys.path.append('../../rt_delay')
-import rt_analysis as rt
+sys.path.append("../../rt_delay")  # noqa
+import rt_analysis as rt  # noqa
+
 # from zoneinfo import ZoneInfo
 # import warnings
 
