@@ -19,7 +19,7 @@ HQTA_TRANSIT_AREAS_DICT = {
     "publish_entity": "California Integrated Travel Project", 
 
     "abstract": "Public. EPSG: 4326",
-    "purpose": "this is the purpose statement", #PURPOSE, 
+    "purpose": PURPOSE, 
 
     "beginning_date": "2022-09-14",
     "end_date": "2022-10-14",
@@ -30,7 +30,7 @@ HQTA_TRANSIT_AREAS_DICT = {
     
     "theme_keywords": KEYWORDS, 
 
-    "methodology": "this is the methodology statement", #METHODOLOGY, 
+    "methodology": METHODOLOGY, 
     
     "data_dict_type": "CSV",
     "data_dict_url": "some_url", 

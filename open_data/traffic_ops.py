@@ -17,7 +17,7 @@ ROUTES_DICT = {
     "publish_entity": "California Integrated Travel Project", 
 
     "abstract": "Public. EPSG: 4326",
-    "purpose": "some purpose....", #PURPOSE, # purpose, also repeat for description?
+    "purpose": PURPOSE, 
 
     "beginning_date": "2022-09-14",
     "end_date": "2022-10-14",
@@ -28,7 +28,7 @@ ROUTES_DICT = {
     
     "theme_keywords": KEYWORDS, #tags
 
-    "methodology": "this is methodology!", #METHODOLOGY, 
+    "methodology": METHODOLOGY, 
     
     "data_dict_type": "CSV",
     "data_dict_url": "some_url", 
