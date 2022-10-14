@@ -1,7 +1,7 @@
 import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.map_utils import make_folium_choropleth_map
-from shared_utils.rt_utils import *
+# from shared_utils.rt_utils import *
 
 import branca
 
@@ -50,12 +50,12 @@ class VehiclePositionsInterpolator:
         self.vp_trip_gdf = self.vp_trip_gdf.drop(columns = trip_info_cols)
         self._attach_shape(shape_gdf)
         self.median_time = self.vp_trip_gdf[self.time_col].median()
-        self.time_of_day = categorize_time_of_day(self.median_time)
+        self.time_of_day = shared_utils.rt_utils.categorize_time_of_day(self.median_time)
         self.total_meters = (self.cleaned_positions.shape_meters.max() - self.cleaned_positions.shape_meters.min())
         self.total_seconds = (self.cleaned_positions.vehicle_timestamp.max() - self.cleaned_positions.vehicle_timestamp.min()).seconds
         self.logassert(self.total_meters > 1000, "less than 1km of data")
         self.logassert(self.total_seconds > 60, "less than 60 seconds of data")
-        self.mean_speed_mph = (self.total_meters / self.total_seconds) * MPH_PER_MPS
+        self.mean_speed_mph = (self.total_meters / self.total_seconds) * shared_utils.rt_utils.MPH_PER_MPS
         
     def logassert(self, conditon, message):
         if conditon:
@@ -105,7 +105,7 @@ class VehiclePositionsInterpolator:
         ).geometry.iloc[0]
         destination = (self.vp_trip_gdf >> filter(_.shape_meters == _.shape_meters.max())
         ).geometry.iloc[0]
-        self.direction = primary_cardinal_direction(origin, destination)
+        self.direction = shared_utils.rt_utils.primary_cardinal_direction(origin, destination)
         
         
     def time_at_position(self, desired_position):
@@ -113,7 +113,7 @@ class VehiclePositionsInterpolator:
         on the nearest two positions.
         desired_position: int (meters from start of shape)
         '''
-        interpolation = time_at_position_numba(desired_position, self._shape_array, self._dt_array)
+        interpolation = shared_utils.rt_utils.time_at_position_numba(desired_position, self._shape_array, self._dt_array)
         if interpolation:
             return dt.datetime.utcfromtimestamp(interpolation)
         else:
@@ -123,7 +123,7 @@ class VehiclePositionsInterpolator:
         ''' Generates a detailed map of speeds along the trip based on all valid position data
         '''
         gdf = self.cleaned_positions.copy()
-        gdf['speed_mph'] = gdf.speed_from_last * MPH_PER_MPS
+        gdf['speed_mph'] = gdf.speed_from_last * shared_utils.rt_utils.MPH_PER_MPS
         gdf = gdf.round({'speed_mph': 1, 'shape_meters': 0})
         gdf['time'] = gdf[self.time_col].apply(lambda x: x.strftime('%H:%M:%S'))
         gdf = gdf >> select(_.geometry, _.time,
@@ -139,7 +139,7 @@ class VehiclePositionsInterpolator:
             x.parallel_offset(25, 'right') if isinstance(x, shapely.geometry.LineString) else x)
         self.detailed_map_view = gdf.copy()
         ## create clips, integrate buffer+simplify?
-        gdf.geometry = gdf.geometry.apply(arrowize_segment).simplify(tolerance=5)
+        gdf.geometry = gdf.geometry.apply(shared_utils.rt_utils.arrowize_segment).simplify(tolerance=5)
         gdf = gdf >> filter(gdf.geometry.is_valid)
         # gdf.geometry = gdf.geometry.apply(clip_along_shape)
         gdf = gdf >> filter(-gdf.geometry.is_empty)
@@ -214,10 +214,10 @@ class OperatorDayAnalysis:
         assert type(analysis_date) == dt.date, 'analysis date must be a datetime.date object'
         self.analysis_date = analysis_date
         self.display_date = self.analysis_date.strftime('%b %d (%a)')
-        self.vehicle_positions = get_vehicle_positions(self.calitp_itp_id, self.analysis_date)
-        self.trips = get_trips(self.calitp_itp_id, self.analysis_date)
-        self.stop_times = get_stop_times(self.calitp_itp_id, self.analysis_date)
-        self.stops = get_stops(self.calitp_itp_id, self.analysis_date)
+        self.vehicle_positions = shared_utils.rt_utils.get_vehicle_positions(self.calitp_itp_id, self.analysis_date)
+        self.trips = shared_utils.rt_utils.get_trips(self.calitp_itp_id, self.analysis_date)
+        self.stop_times = shared_utils.rt_utils.get_stop_times(self.calitp_itp_id, self.analysis_date)
+        self.stops = shared_utils.rt_utils.get_stops(self.calitp_itp_id, self.analysis_date)
         trips = self.trips >> select(-_.calitp_url_number, -_.calitp_extracted_at, -_.calitp_deleted_at)
         positions = self.vehicle_positions >> select(-_.calitp_url_number)
         self.trips_positions_joined = (trips >> inner_join(_, positions, on= ['trip_id', 'calitp_itp_id']))
@@ -226,7 +226,7 @@ class OperatorDayAnalysis:
                                     geometry=gpd.points_from_xy(self.trips_positions_joined.vehicle_longitude,
                                                                 self.trips_positions_joined.vehicle_latitude),
                                     crs=WGS84).to_crs(CA_NAD83Albers)
-        self.routelines = get_routelines(self.calitp_itp_id, self.analysis_date)
+        self.routelines = shared_utils.rt_utils.get_routelines(self.calitp_itp_id, self.analysis_date)
         self.routelines = self.routelines.dropna(subset=['geometry']) ## invalid geos are nones in new df...
         assert type(self.routelines) == type(gpd.GeoDataFrame()) and not self.routelines.empty, 'routelines must not be empty'
         self.trs = self.trips >> select(_.shape_id, _.trip_id)
@@ -349,14 +349,14 @@ class OperatorDayAnalysis:
                                 self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
                                 axis = 1)
                 _delay = _delay.dropna(subset=['actual_time'])
-                _delay.arrival_time = _delay.arrival_time.map(lambda x: fix_arrival_time(x)[0]) ## reformat 25:xx GTFS timestamps to standard 24 hour time
+                _delay.arrival_time = _delay.arrival_time.map(lambda x: shared_utils.rt_utils.fix_arrival_time(x)[0]) ## reformat 25:xx GTFS timestamps to standard 24 hour time
                 _delay['arrival_time'] = _delay.apply(lambda x:
                                     dt.datetime.combine(x.actual_time.date(),
                                                         dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time()) if x.arrival_time else np.nan,
                                                         axis = 1) ## format scheduled arrival times
                 _delay = _delay >> filter(_.arrival_time.apply(lambda x: x.date()) == _.actual_time.iloc[0].date())
                 if _delay.arrival_time.isnull().any():
-                    _delay = interpolate_arrival_times(_delay)
+                    _delay = shared_utils.rt_utils.interpolate_arrival_times(_delay)
                 _delay['arrival_time'] = _delay.arrival_time.astype('datetime64')
                 # self.debug_dict[f'{trip_id}_times'] = _delay
                 _delay['delay'] = _delay.actual_time - _delay.arrival_time
@@ -396,9 +396,9 @@ class OperatorDayAnalysis:
         stop_delay_to_parquet['actual_time'] = stop_delay_to_parquet.actual_time.map(lambda x: x.isoformat())
         stop_delay_to_parquet = stop_delay_to_parquet >> select(-_.delay)
         shared_utils.utils.geoparquet_gcs_export(stop_delay_to_parquet,
-                                         f'{GCS_FILE_PATH}stop_delay_views/',
+                                         f'{shared_utils.rt_utils.GCS_FILE_PATH}stop_delay_views/',
                                         f'{self.calitp_itp_id}_{month}_{day}'
                                         )
-        self.rt_trips.to_parquet(f'{GCS_FILE_PATH}rt_trips/{self.calitp_itp_id}_{month}_{day}.parquet')
+        self.rt_trips.to_parquet(f'{shared_utils.rt_utils.GCS_FILE_PATH}rt_trips/{self.calitp_itp_id}_{month}_{day}.parquet')
 
         return
