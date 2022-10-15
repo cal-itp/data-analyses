@@ -4045,3 +4045,1363 @@
 2022-09-27 12:14:54.955 | INFO     | __main__:<module>:33 - Analysis date: 2022-09-14
 2022-09-27 12:16:22.381 | INFO     | __main__:<module>:47 - Concatenated all operators
 2022-09-27 12:17:10.376 | INFO     | __main__:<module>:58 - Execution time: 0:02:15.400391
+2022-10-14 12:09:48.150 | INFO     | __main__:<module>:236 - # operators to run: 194
+2022-10-14 12:09:48.248 | INFO     | __main__:<module>:241 - *********** Download data for: 4 ***********
+2022-10-14 12:09:53.641 | INFO     | __main__:primary_trip_query:56 - 4: trips saved locally
+2022-10-14 12:10:30.058 | INFO     | __main__:get_routelines:87 - 4: routelines exported to GCS
+2022-10-14 12:10:32.340 | INFO     | __main__:get_trips:135 - 4: trips exported to GCS
+2022-10-14 12:10:36.223 | INFO     | __main__:get_stops:166 - 4: stops exported to GCS
+2022-10-14 12:11:55.267 | INFO     | __main__:get_stop_times:191 - 4: st exported to GCS
+2022-10-14 12:11:55.458 | INFO     | __main__:<module>:262 - download files for 4: 0:02:07.209639
+2022-10-14 12:11:55.458 | INFO     | __main__:<module>:241 - *********** Download data for: 6 ***********
+2022-10-14 12:11:57.920 | INFO     | __main__:primary_trip_query:56 - 6: trips saved locally
+2022-10-14 12:12:01.805 | INFO     | __main__:get_routelines:87 - 6: routelines exported to GCS
+2022-10-14 12:12:03.730 | INFO     | __main__:get_trips:135 - 6: trips exported to GCS
+2022-10-14 12:12:05.831 | INFO     | __main__:get_stops:166 - 6: stops exported to GCS
+2022-10-14 12:12:10.876 | INFO     | __main__:get_stop_times:191 - 6: st exported to GCS
+2022-10-14 12:12:10.879 | INFO     | __main__:<module>:262 - download files for 6: 0:00:15.420226
+2022-10-14 12:12:10.879 | INFO     | __main__:<module>:241 - *********** Download data for: 10 ***********
+2022-10-14 12:12:12.765 | INFO     | __main__:primary_trip_query:56 - 10: trips saved locally
+2022-10-14 12:12:14.370 | INFO     | __main__:get_routelines:87 - 10: routelines exported to GCS
+2022-10-14 12:12:16.335 | INFO     | __main__:get_trips:135 - 10: trips exported to GCS
+2022-10-14 12:12:18.144 | INFO     | __main__:get_stops:166 - 10: stops exported to GCS
+2022-10-14 12:12:25.187 | INFO     | __main__:get_stop_times:191 - 10: st exported to GCS
+2022-10-14 12:12:25.190 | INFO     | __main__:<module>:262 - download files for 10: 0:00:14.310874
+2022-10-14 12:12:25.191 | INFO     | __main__:<module>:241 - *********** Download data for: 11 ***********
+2022-10-14 12:12:27.055 | INFO     | __main__:primary_trip_query:56 - 11: trips saved locally
+2022-10-14 12:12:31.109 | INFO     | __main__:get_routelines:87 - 11: routelines exported to GCS
+2022-10-14 12:12:32.869 | INFO     | __main__:get_trips:135 - 11: trips exported to GCS
+2022-10-14 12:12:34.748 | INFO     | __main__:get_stops:166 - 11: stops exported to GCS
+2022-10-14 12:12:37.433 | INFO     | __main__:get_stop_times:191 - 11: st exported to GCS
+2022-10-14 12:12:37.437 | INFO     | __main__:<module>:262 - download files for 11: 0:00:12.245843
+2022-10-14 12:12:37.438 | INFO     | __main__:<module>:241 - *********** Download data for: 14 ***********
+2022-10-14 12:12:42.930 | INFO     | __main__:primary_trip_query:56 - 14: trips saved locally
+2022-10-14 12:12:49.118 | INFO     | __main__:get_routelines:87 - 14: routelines exported to GCS
+2022-10-14 12:12:51.030 | INFO     | __main__:get_trips:135 - 14: trips exported to GCS
+2022-10-14 12:12:52.929 | INFO     | __main__:get_stops:166 - 14: stops exported to GCS
+2022-10-14 12:13:04.401 | INFO     | __main__:get_stop_times:191 - 14: st exported to GCS
+2022-10-14 12:13:04.414 | INFO     | __main__:<module>:262 - download files for 14: 0:00:26.975982
+2022-10-14 12:13:04.416 | INFO     | __main__:<module>:241 - *********** Download data for: 15 ***********
+2022-10-14 12:13:06.382 | INFO     | __main__:primary_trip_query:56 - 15: trips saved locally
+2022-10-14 12:13:07.804 | INFO     | __main__:get_routelines:87 - 15: routelines exported to GCS
+2022-10-14 12:13:09.574 | INFO     | __main__:get_trips:135 - 15: trips exported to GCS
+2022-10-14 12:13:11.511 | INFO     | __main__:get_stops:166 - 15: stops exported to GCS
+2022-10-14 12:13:13.718 | INFO     | __main__:get_stop_times:191 - 15: st exported to GCS
+2022-10-14 12:13:13.721 | INFO     | __main__:<module>:262 - download files for 15: 0:00:09.304307
+2022-10-14 12:13:13.721 | INFO     | __main__:<module>:241 - *********** Download data for: 16 ***********
+2022-10-14 12:13:15.836 | INFO     | __main__:primary_trip_query:56 - 16: trips saved locally
+2022-10-14 12:13:20.777 | INFO     | __main__:get_routelines:87 - 16: routelines exported to GCS
+2022-10-14 12:13:22.636 | INFO     | __main__:get_trips:135 - 16: trips exported to GCS
+2022-10-14 12:13:24.720 | INFO     | __main__:get_stops:166 - 16: stops exported to GCS
+2022-10-14 12:13:30.512 | INFO     | __main__:get_stop_times:191 - 16: st exported to GCS
+2022-10-14 12:13:30.519 | INFO     | __main__:<module>:262 - download files for 16: 0:00:16.797083
+2022-10-14 12:13:30.519 | INFO     | __main__:<module>:241 - *********** Download data for: 17 ***********
+2022-10-14 12:13:32.443 | INFO     | __main__:primary_trip_query:56 - 17: trips saved locally
+2022-10-14 12:13:34.205 | INFO     | __main__:get_routelines:87 - 17: routelines exported to GCS
+2022-10-14 12:13:36.123 | INFO     | __main__:get_trips:135 - 17: trips exported to GCS
+2022-10-14 12:13:38.086 | INFO     | __main__:get_stops:166 - 17: stops exported to GCS
+2022-10-14 12:13:40.671 | INFO     | __main__:get_stop_times:191 - 17: st exported to GCS
+2022-10-14 12:13:40.675 | INFO     | __main__:<module>:262 - download files for 17: 0:00:10.155835
+2022-10-14 12:13:40.677 | INFO     | __main__:<module>:241 - *********** Download data for: 18 ***********
+2022-10-14 12:13:42.650 | INFO     | __main__:primary_trip_query:56 - 18: trips saved locally
+2022-10-14 12:13:48.429 | INFO     | __main__:get_routelines:87 - 18: routelines exported to GCS
+2022-10-14 12:13:50.099 | INFO     | __main__:get_trips:135 - 18: trips exported to GCS
+2022-10-14 12:13:51.971 | INFO     | __main__:get_stops:166 - 18: stops exported to GCS
+2022-10-14 12:13:55.702 | INFO     | __main__:get_stop_times:191 - 18: st exported to GCS
+2022-10-14 12:13:55.706 | INFO     | __main__:<module>:262 - download files for 18: 0:00:15.029313
+2022-10-14 12:13:55.708 | INFO     | __main__:<module>:241 - *********** Download data for: 21 ***********
+2022-10-14 12:13:57.340 | INFO     | __main__:primary_trip_query:56 - 21: trips saved locally
+2022-10-14 12:14:02.121 | INFO     | __main__:get_stops:166 - 21: stops exported to GCS
+2022-10-14 12:14:02.418 | INFO     | __main__:<module>:262 - download files for 21: 0:00:06.710581
+2022-10-14 12:14:02.419 | INFO     | __main__:<module>:241 - *********** Download data for: 23 ***********
+2022-10-14 12:14:03.814 | INFO     | __main__:primary_trip_query:56 - 23: trips saved locally
+2022-10-14 12:14:08.504 | INFO     | __main__:get_stops:166 - 23: stops exported to GCS
+2022-10-14 12:14:08.826 | INFO     | __main__:<module>:262 - download files for 23: 0:00:06.407467
+2022-10-14 12:14:08.827 | INFO     | __main__:<module>:241 - *********** Download data for: 24 ***********
+2022-10-14 12:14:10.633 | INFO     | __main__:primary_trip_query:56 - 24: trips saved locally
+2022-10-14 12:14:12.038 | INFO     | __main__:get_routelines:87 - 24: routelines exported to GCS
+2022-10-14 12:14:13.669 | INFO     | __main__:get_trips:135 - 24: trips exported to GCS
+2022-10-14 12:14:15.516 | INFO     | __main__:get_stops:166 - 24: stops exported to GCS
+2022-10-14 12:14:18.104 | INFO     | __main__:get_stop_times:191 - 24: st exported to GCS
+2022-10-14 12:14:18.112 | INFO     | __main__:<module>:262 - download files for 24: 0:00:09.284358
+2022-10-14 12:14:18.114 | INFO     | __main__:<module>:241 - *********** Download data for: 29 ***********
+2022-10-14 12:14:20.029 | INFO     | __main__:primary_trip_query:56 - 29: trips saved locally
+2022-10-14 12:14:21.780 | INFO     | __main__:get_routelines:87 - 29: routelines exported to GCS
+2022-10-14 12:14:23.587 | INFO     | __main__:get_trips:135 - 29: trips exported to GCS
+2022-10-14 12:14:25.292 | INFO     | __main__:get_stops:166 - 29: stops exported to GCS
+2022-10-14 12:14:29.187 | INFO     | __main__:get_stop_times:191 - 29: st exported to GCS
+2022-10-14 12:14:29.190 | INFO     | __main__:<module>:262 - download files for 29: 0:00:11.075472
+2022-10-14 12:14:29.190 | INFO     | __main__:<module>:241 - *********** Download data for: 30 ***********
+2022-10-14 12:14:30.996 | INFO     | __main__:primary_trip_query:56 - 30: trips saved locally
+2022-10-14 12:14:32.900 | INFO     | __main__:get_routelines:87 - 30: routelines exported to GCS
+2022-10-14 12:14:34.624 | INFO     | __main__:get_trips:135 - 30: trips exported to GCS
+2022-10-14 12:14:36.611 | INFO     | __main__:get_stops:166 - 30: stops exported to GCS
+2022-10-14 12:14:39.084 | INFO     | __main__:get_stop_times:191 - 30: st exported to GCS
+2022-10-14 12:14:39.086 | INFO     | __main__:<module>:262 - download files for 30: 0:00:09.895571
+2022-10-14 12:14:39.087 | INFO     | __main__:<module>:241 - *********** Download data for: 33 ***********
+2022-10-14 12:14:40.477 | INFO     | __main__:primary_trip_query:56 - 33: trips saved locally
+2022-10-14 12:14:45.127 | INFO     | __main__:get_stops:166 - 33: stops exported to GCS
+2022-10-14 12:14:45.457 | INFO     | __main__:<module>:262 - download files for 33: 0:00:06.370323
+2022-10-14 12:14:45.458 | INFO     | __main__:<module>:241 - *********** Download data for: 34 ***********
+2022-10-14 12:14:47.247 | INFO     | __main__:primary_trip_query:56 - 34: trips saved locally
+2022-10-14 12:14:49.218 | INFO     | __main__:get_routelines:87 - 34: routelines exported to GCS
+2022-10-14 12:14:51.021 | INFO     | __main__:get_trips:135 - 34: trips exported to GCS
+2022-10-14 12:14:52.836 | INFO     | __main__:get_stops:166 - 34: stops exported to GCS
+2022-10-14 12:14:55.821 | INFO     | __main__:get_stop_times:191 - 34: st exported to GCS
+2022-10-14 12:14:55.823 | INFO     | __main__:<module>:262 - download files for 34: 0:00:10.364942
+2022-10-14 12:14:55.823 | INFO     | __main__:<module>:241 - *********** Download data for: 35 ***********
+2022-10-14 12:14:57.610 | INFO     | __main__:primary_trip_query:56 - 35: trips saved locally
+2022-10-14 12:14:59.173 | INFO     | __main__:get_routelines:87 - 35: routelines exported to GCS
+2022-10-14 12:15:01.003 | INFO     | __main__:get_trips:135 - 35: trips exported to GCS
+2022-10-14 12:15:02.664 | INFO     | __main__:get_stops:166 - 35: stops exported to GCS
+2022-10-14 12:15:04.735 | INFO     | __main__:get_stop_times:191 - 35: st exported to GCS
+2022-10-14 12:15:04.742 | INFO     | __main__:<module>:262 - download files for 35: 0:00:08.918718
+2022-10-14 12:15:04.743 | INFO     | __main__:<module>:241 - *********** Download data for: 36 ***********
+2022-10-14 12:15:06.542 | INFO     | __main__:primary_trip_query:56 - 36: trips saved locally
+2022-10-14 12:15:07.940 | INFO     | __main__:get_routelines:87 - 36: routelines exported to GCS
+2022-10-14 12:15:09.577 | INFO     | __main__:get_trips:135 - 36: trips exported to GCS
+2022-10-14 12:15:11.328 | INFO     | __main__:get_stops:166 - 36: stops exported to GCS
+2022-10-14 12:15:13.830 | INFO     | __main__:get_stop_times:191 - 36: st exported to GCS
+2022-10-14 12:15:13.832 | INFO     | __main__:<module>:262 - download files for 36: 0:00:09.089253
+2022-10-14 12:15:13.833 | INFO     | __main__:<module>:241 - *********** Download data for: 37 ***********
+2022-10-14 12:15:15.517 | INFO     | __main__:primary_trip_query:56 - 37: trips saved locally
+2022-10-14 12:15:17.039 | INFO     | __main__:get_routelines:87 - 37: routelines exported to GCS
+2022-10-14 12:15:18.837 | INFO     | __main__:get_trips:135 - 37: trips exported to GCS
+2022-10-14 12:15:20.604 | INFO     | __main__:get_stops:166 - 37: stops exported to GCS
+2022-10-14 12:15:22.990 | INFO     | __main__:get_stop_times:191 - 37: st exported to GCS
+2022-10-14 12:15:22.993 | INFO     | __main__:<module>:262 - download files for 37: 0:00:09.159816
+2022-10-14 12:15:22.993 | INFO     | __main__:<module>:241 - *********** Download data for: 41 ***********
+2022-10-14 12:15:24.498 | INFO     | __main__:primary_trip_query:56 - 41: trips saved locally
+2022-10-14 12:15:29.140 | INFO     | __main__:get_stops:166 - 41: stops exported to GCS
+2022-10-14 12:15:29.438 | INFO     | __main__:<module>:262 - download files for 41: 0:00:06.444644
+2022-10-14 12:15:29.439 | INFO     | __main__:<module>:241 - *********** Download data for: 42 ***********
+2022-10-14 12:15:31.452 | INFO     | __main__:primary_trip_query:56 - 42: trips saved locally
+2022-10-14 12:15:37.154 | INFO     | __main__:get_routelines:87 - 42: routelines exported to GCS
+2022-10-14 12:15:39.374 | INFO     | __main__:get_trips:135 - 42: trips exported to GCS
+2022-10-14 12:15:41.319 | INFO     | __main__:get_stops:166 - 42: stops exported to GCS
+2022-10-14 12:15:45.269 | INFO     | __main__:get_stop_times:191 - 42: st exported to GCS
+2022-10-14 12:15:45.272 | INFO     | __main__:<module>:262 - download files for 42: 0:00:15.833637
+2022-10-14 12:15:45.273 | INFO     | __main__:<module>:241 - *********** Download data for: 45 ***********
+2022-10-14 12:15:47.042 | INFO     | __main__:primary_trip_query:56 - 45: trips saved locally
+2022-10-14 12:15:48.518 | INFO     | __main__:get_routelines:87 - 45: routelines exported to GCS
+2022-10-14 12:15:50.440 | INFO     | __main__:get_trips:135 - 45: trips exported to GCS
+2022-10-14 12:15:52.228 | INFO     | __main__:get_stops:166 - 45: stops exported to GCS
+2022-10-14 12:15:54.616 | INFO     | __main__:get_stop_times:191 - 45: st exported to GCS
+2022-10-14 12:15:54.621 | INFO     | __main__:<module>:262 - download files for 45: 0:00:09.348043
+2022-10-14 12:15:54.623 | INFO     | __main__:<module>:241 - *********** Download data for: 48 ***********
+2022-10-14 12:15:56.703 | INFO     | __main__:primary_trip_query:56 - 48: trips saved locally
+2022-10-14 12:15:58.600 | INFO     | __main__:get_routelines:87 - 48: routelines exported to GCS
+2022-10-14 12:16:00.292 | INFO     | __main__:get_trips:135 - 48: trips exported to GCS
+2022-10-14 12:16:02.174 | INFO     | __main__:get_stops:166 - 48: stops exported to GCS
+2022-10-14 12:16:07.045 | INFO     | __main__:get_stop_times:191 - 48: st exported to GCS
+2022-10-14 12:16:07.060 | INFO     | __main__:<module>:262 - download files for 48: 0:00:12.436862
+2022-10-14 12:16:07.061 | INFO     | __main__:<module>:241 - *********** Download data for: 49 ***********
+2022-10-14 12:16:09.043 | INFO     | __main__:primary_trip_query:56 - 49: trips saved locally
+2022-10-14 12:16:11.048 | INFO     | __main__:get_routelines:87 - 49: routelines exported to GCS
+2022-10-14 12:16:12.932 | INFO     | __main__:get_trips:135 - 49: trips exported to GCS
+2022-10-14 12:16:14.705 | INFO     | __main__:get_stops:166 - 49: stops exported to GCS
+2022-10-14 12:16:16.969 | INFO     | __main__:get_stop_times:191 - 49: st exported to GCS
+2022-10-14 12:16:16.973 | INFO     | __main__:<module>:262 - download files for 49: 0:00:09.912036
+2022-10-14 12:16:16.975 | INFO     | __main__:<module>:241 - *********** Download data for: 50 ***********
+2022-10-14 12:16:18.587 | INFO     | __main__:primary_trip_query:56 - 50: trips saved locally
+2022-10-14 12:16:21.927 | INFO     | __main__:get_routelines:87 - 50: routelines exported to GCS
+2022-10-14 12:16:23.636 | INFO     | __main__:get_trips:135 - 50: trips exported to GCS
+2022-10-14 12:16:25.410 | INFO     | __main__:get_stops:166 - 50: stops exported to GCS
+2022-10-14 12:16:27.599 | INFO     | __main__:get_stop_times:191 - 50: st exported to GCS
+2022-10-14 12:16:27.602 | INFO     | __main__:<module>:262 - download files for 50: 0:00:10.627297
+2022-10-14 12:16:27.603 | INFO     | __main__:<module>:241 - *********** Download data for: 54 ***********
+2022-10-14 12:16:29.072 | INFO     | __main__:primary_trip_query:56 - 54: trips saved locally
+2022-10-14 12:16:33.673 | INFO     | __main__:get_stops:166 - 54: stops exported to GCS
+2022-10-14 12:16:33.976 | INFO     | __main__:<module>:262 - download files for 54: 0:00:06.372446
+2022-10-14 12:16:33.977 | INFO     | __main__:<module>:241 - *********** Download data for: 56 ***********
+2022-10-14 12:16:35.822 | INFO     | __main__:primary_trip_query:56 - 56: trips saved locally
+2022-10-14 12:16:37.566 | INFO     | __main__:get_routelines:87 - 56: routelines exported to GCS
+2022-10-14 12:16:39.377 | INFO     | __main__:get_trips:135 - 56: trips exported to GCS
+2022-10-14 12:16:41.186 | INFO     | __main__:get_stops:166 - 56: stops exported to GCS
+2022-10-14 12:16:43.377 | INFO     | __main__:get_stop_times:191 - 56: st exported to GCS
+2022-10-14 12:16:43.381 | INFO     | __main__:<module>:262 - download files for 56: 0:00:09.404108
+2022-10-14 12:16:43.385 | INFO     | __main__:<module>:241 - *********** Download data for: 61 ***********
+2022-10-14 12:16:46.154 | INFO     | __main__:primary_trip_query:56 - 61: trips saved locally
+2022-10-14 12:17:02.529 | INFO     | __main__:get_routelines:87 - 61: routelines exported to GCS
+2022-10-14 12:17:04.243 | INFO     | __main__:get_trips:135 - 61: trips exported to GCS
+2022-10-14 12:17:06.509 | INFO     | __main__:get_stops:166 - 61: stops exported to GCS
+2022-10-14 12:17:15.936 | INFO     | __main__:get_stop_times:191 - 61: st exported to GCS
+2022-10-14 12:17:15.949 | INFO     | __main__:<module>:262 - download files for 61: 0:00:32.564552
+2022-10-14 12:17:15.950 | INFO     | __main__:<module>:241 - *********** Download data for: 70 ***********
+2022-10-14 12:17:18.052 | INFO     | __main__:primary_trip_query:56 - 70: trips saved locally
+2022-10-14 12:17:21.446 | INFO     | __main__:get_routelines:87 - 70: routelines exported to GCS
+2022-10-14 12:17:23.144 | INFO     | __main__:get_trips:135 - 70: trips exported to GCS
+2022-10-14 12:17:25.520 | INFO     | __main__:get_stops:166 - 70: stops exported to GCS
+2022-10-14 12:17:30.718 | INFO     | __main__:get_stop_times:191 - 70: st exported to GCS
+2022-10-14 12:17:30.722 | INFO     | __main__:<module>:262 - download files for 70: 0:00:14.772130
+2022-10-14 12:17:30.723 | INFO     | __main__:<module>:241 - *********** Download data for: 71 ***********
+2022-10-14 12:17:32.532 | INFO     | __main__:primary_trip_query:56 - 71: trips saved locally
+2022-10-14 12:17:34.111 | INFO     | __main__:get_routelines:87 - 71: routelines exported to GCS
+2022-10-14 12:17:35.724 | INFO     | __main__:get_trips:135 - 71: trips exported to GCS
+2022-10-14 12:17:37.520 | INFO     | __main__:get_stops:166 - 71: stops exported to GCS
+2022-10-14 12:17:40.258 | INFO     | __main__:get_stop_times:191 - 71: st exported to GCS
+2022-10-14 12:17:40.259 | INFO     | __main__:<module>:262 - download files for 71: 0:00:09.536711
+2022-10-14 12:17:40.261 | INFO     | __main__:<module>:241 - *********** Download data for: 75 ***********
+2022-10-14 12:17:42.420 | INFO     | __main__:primary_trip_query:56 - 75: trips saved locally
+2022-10-14 12:17:43.938 | INFO     | __main__:get_routelines:87 - 75: routelines exported to GCS
+2022-10-14 12:17:45.665 | INFO     | __main__:get_trips:135 - 75: trips exported to GCS
+2022-10-14 12:17:47.575 | INFO     | __main__:get_stops:166 - 75: stops exported to GCS
+2022-10-14 12:17:51.690 | INFO     | __main__:get_stop_times:191 - 75: st exported to GCS
+2022-10-14 12:17:51.693 | INFO     | __main__:<module>:262 - download files for 75: 0:00:11.432399
+2022-10-14 12:17:51.694 | INFO     | __main__:<module>:241 - *********** Download data for: 76 ***********
+2022-10-14 12:17:53.782 | INFO     | __main__:primary_trip_query:56 - 76: trips saved locally
+2022-10-14 12:18:02.451 | INFO     | __main__:get_routelines:87 - 76: routelines exported to GCS
+2022-10-14 12:18:04.148 | INFO     | __main__:get_trips:135 - 76: trips exported to GCS
+2022-10-14 12:18:05.984 | INFO     | __main__:get_stops:166 - 76: stops exported to GCS
+2022-10-14 12:18:10.449 | INFO     | __main__:get_stop_times:191 - 76: st exported to GCS
+2022-10-14 12:18:10.452 | INFO     | __main__:<module>:262 - download files for 76: 0:00:18.758226
+2022-10-14 12:18:10.453 | INFO     | __main__:<module>:241 - *********** Download data for: 77 ***********
+2022-10-14 12:18:13.525 | INFO     | __main__:primary_trip_query:56 - 77: trips saved locally
+2022-10-14 12:18:15.226 | INFO     | __main__:get_routelines:87 - 77: routelines exported to GCS
+2022-10-14 12:18:16.906 | INFO     | __main__:get_trips:135 - 77: trips exported to GCS
+2022-10-14 12:18:18.667 | INFO     | __main__:get_stops:166 - 77: stops exported to GCS
+2022-10-14 12:18:23.390 | INFO     | __main__:get_stop_times:191 - 77: st exported to GCS
+2022-10-14 12:18:23.400 | INFO     | __main__:<module>:262 - download files for 77: 0:00:12.946650
+2022-10-14 12:18:23.404 | INFO     | __main__:<module>:241 - *********** Download data for: 79 ***********
+2022-10-14 12:18:25.813 | INFO     | __main__:primary_trip_query:56 - 79: trips saved locally
+2022-10-14 12:18:27.479 | INFO     | __main__:get_routelines:87 - 79: routelines exported to GCS
+2022-10-14 12:18:29.179 | INFO     | __main__:get_trips:135 - 79: trips exported to GCS
+2022-10-14 12:18:31.143 | INFO     | __main__:get_stops:166 - 79: stops exported to GCS
+2022-10-14 12:18:34.099 | INFO     | __main__:get_stop_times:191 - 79: st exported to GCS
+2022-10-14 12:18:34.102 | INFO     | __main__:<module>:262 - download files for 79: 0:00:10.698598
+2022-10-14 12:18:34.103 | INFO     | __main__:<module>:241 - *********** Download data for: 81 ***********
+2022-10-14 12:18:35.946 | INFO     | __main__:primary_trip_query:56 - 81: trips saved locally
+2022-10-14 12:18:40.332 | INFO     | __main__:get_routelines:87 - 81: routelines exported to GCS
+2022-10-14 12:18:42.328 | INFO     | __main__:get_trips:135 - 81: trips exported to GCS
+2022-10-14 12:18:44.136 | INFO     | __main__:get_stops:166 - 81: stops exported to GCS
+2022-10-14 12:18:46.746 | INFO     | __main__:get_stop_times:191 - 81: st exported to GCS
+2022-10-14 12:18:46.747 | INFO     | __main__:<module>:262 - download files for 81: 0:00:12.644472
+2022-10-14 12:18:46.748 | INFO     | __main__:<module>:241 - *********** Download data for: 82 ***********
+2022-10-14 12:18:49.065 | INFO     | __main__:primary_trip_query:56 - 82: trips saved locally
+2022-10-14 12:18:55.846 | INFO     | __main__:get_routelines:87 - 82: routelines exported to GCS
+2022-10-14 12:18:57.585 | INFO     | __main__:get_trips:135 - 82: trips exported to GCS
+2022-10-14 12:18:59.416 | INFO     | __main__:get_stops:166 - 82: stops exported to GCS
+2022-10-14 12:19:03.874 | INFO     | __main__:get_stop_times:191 - 82: st exported to GCS
+2022-10-14 12:19:03.878 | INFO     | __main__:<module>:262 - download files for 82: 0:00:17.129931
+2022-10-14 12:19:03.878 | INFO     | __main__:<module>:241 - *********** Download data for: 83 ***********
+2022-10-14 12:19:05.823 | INFO     | __main__:primary_trip_query:56 - 83: trips saved locally
+2022-10-14 12:19:10.050 | INFO     | __main__:get_routelines:87 - 83: routelines exported to GCS
+2022-10-14 12:19:11.814 | INFO     | __main__:get_trips:135 - 83: trips exported to GCS
+2022-10-14 12:19:13.626 | INFO     | __main__:get_stops:166 - 83: stops exported to GCS
+2022-10-14 12:19:16.356 | INFO     | __main__:get_stop_times:191 - 83: st exported to GCS
+2022-10-14 12:19:16.358 | INFO     | __main__:<module>:262 - download files for 83: 0:00:12.479603
+2022-10-14 12:19:16.359 | INFO     | __main__:<module>:241 - *********** Download data for: 86 ***********
+2022-10-14 12:19:18.120 | INFO     | __main__:primary_trip_query:56 - 86: trips saved locally
+2022-10-14 12:19:19.514 | INFO     | __main__:get_routelines:87 - 86: routelines exported to GCS
+2022-10-14 12:19:21.175 | INFO     | __main__:get_trips:135 - 86: trips exported to GCS
+2022-10-14 12:19:22.998 | INFO     | __main__:get_stops:166 - 86: stops exported to GCS
+2022-10-14 12:19:25.256 | INFO     | __main__:get_stop_times:191 - 86: st exported to GCS
+2022-10-14 12:19:25.259 | INFO     | __main__:<module>:262 - download files for 86: 0:00:08.900119
+2022-10-14 12:19:25.260 | INFO     | __main__:<module>:241 - *********** Download data for: 87 ***********
+2022-10-14 12:19:28.140 | INFO     | __main__:primary_trip_query:56 - 87: trips saved locally
+2022-10-14 12:19:36.779 | INFO     | __main__:get_routelines:87 - 87: routelines exported to GCS
+2022-10-14 12:19:38.518 | INFO     | __main__:get_trips:135 - 87: trips exported to GCS
+2022-10-14 12:19:40.342 | INFO     | __main__:get_stops:166 - 87: stops exported to GCS
+2022-10-14 12:19:46.333 | INFO     | __main__:get_stop_times:191 - 87: st exported to GCS
+2022-10-14 12:19:46.340 | INFO     | __main__:<module>:262 - download files for 87: 0:00:21.080076
+2022-10-14 12:19:46.342 | INFO     | __main__:<module>:241 - *********** Download data for: 91 ***********
+2022-10-14 12:19:47.820 | INFO     | __main__:primary_trip_query:56 - 91: trips saved locally
+2022-10-14 12:19:52.354 | INFO     | __main__:get_stops:166 - 91: stops exported to GCS
+2022-10-14 12:19:52.648 | INFO     | __main__:<module>:262 - download files for 91: 0:00:06.306182
+2022-10-14 12:19:52.648 | INFO     | __main__:<module>:241 - *********** Download data for: 95 ***********
+2022-10-14 12:19:54.429 | INFO     | __main__:primary_trip_query:56 - 95: trips saved locally
+2022-10-14 12:19:56.249 | INFO     | __main__:get_routelines:87 - 95: routelines exported to GCS
+2022-10-14 12:19:57.948 | INFO     | __main__:get_trips:135 - 95: trips exported to GCS
+2022-10-14 12:19:59.900 | INFO     | __main__:get_stops:166 - 95: stops exported to GCS
+2022-10-14 12:20:02.881 | INFO     | __main__:get_stop_times:191 - 95: st exported to GCS
+2022-10-14 12:20:02.887 | INFO     | __main__:<module>:262 - download files for 95: 0:00:10.238485
+2022-10-14 12:20:02.889 | INFO     | __main__:<module>:241 - *********** Download data for: 98 ***********
+2022-10-14 12:20:04.739 | INFO     | __main__:primary_trip_query:56 - 98: trips saved locally
+2022-10-14 12:20:07.456 | INFO     | __main__:get_routelines:87 - 98: routelines exported to GCS
+2022-10-14 12:20:09.182 | INFO     | __main__:get_trips:135 - 98: trips exported to GCS
+2022-10-14 12:20:11.140 | INFO     | __main__:get_stops:166 - 98: stops exported to GCS
+2022-10-14 12:20:14.376 | INFO     | __main__:get_stop_times:191 - 98: st exported to GCS
+2022-10-14 12:20:14.378 | INFO     | __main__:<module>:262 - download files for 98: 0:00:11.489031
+2022-10-14 12:20:14.379 | INFO     | __main__:<module>:241 - *********** Download data for: 99 ***********
+2022-10-14 12:20:16.908 | INFO     | __main__:primary_trip_query:56 - 99: trips saved locally
+2022-10-14 12:20:19.803 | INFO     | __main__:get_routelines:87 - 99: routelines exported to GCS
+2022-10-14 12:20:21.497 | INFO     | __main__:get_trips:135 - 99: trips exported to GCS
+2022-10-14 12:20:23.412 | INFO     | __main__:get_stops:166 - 99: stops exported to GCS
+2022-10-14 12:20:27.629 | INFO     | __main__:get_stop_times:191 - 99: st exported to GCS
+2022-10-14 12:20:27.632 | INFO     | __main__:<module>:262 - download files for 99: 0:00:13.253470
+2022-10-14 12:20:27.634 | INFO     | __main__:<module>:241 - *********** Download data for: 101 ***********
+2022-10-14 12:20:29.612 | INFO     | __main__:primary_trip_query:56 - 101: trips saved locally
+2022-10-14 12:20:32.520 | INFO     | __main__:get_routelines:87 - 101: routelines exported to GCS
+2022-10-14 12:20:34.388 | INFO     | __main__:get_trips:135 - 101: trips exported to GCS
+2022-10-14 12:20:36.414 | INFO     | __main__:get_stops:166 - 101: stops exported to GCS
+2022-10-14 12:20:39.260 | INFO     | __main__:get_stop_times:191 - 101: st exported to GCS
+2022-10-14 12:20:39.263 | INFO     | __main__:<module>:262 - download files for 101: 0:00:11.628906
+2022-10-14 12:20:39.263 | INFO     | __main__:<module>:241 - *********** Download data for: 102 ***********
+2022-10-14 12:20:41.796 | INFO     | __main__:primary_trip_query:56 - 102: trips saved locally
+2022-10-14 12:20:43.338 | INFO     | __main__:get_routelines:87 - 102: routelines exported to GCS
+2022-10-14 12:20:45.079 | INFO     | __main__:get_trips:135 - 102: trips exported to GCS
+2022-10-14 12:20:46.960 | INFO     | __main__:get_stops:166 - 102: stops exported to GCS
+2022-10-14 12:20:51.109 | INFO     | __main__:get_stop_times:191 - 102: st exported to GCS
+2022-10-14 12:20:51.112 | INFO     | __main__:<module>:262 - download files for 102: 0:00:11.848985
+2022-10-14 12:20:51.113 | INFO     | __main__:<module>:241 - *********** Download data for: 103 ***********
+2022-10-14 12:20:52.864 | INFO     | __main__:primary_trip_query:56 - 103: trips saved locally
+2022-10-14 12:20:54.317 | INFO     | __main__:get_routelines:87 - 103: routelines exported to GCS
+2022-10-14 12:20:56.014 | INFO     | __main__:get_trips:135 - 103: trips exported to GCS
+2022-10-14 12:20:57.977 | INFO     | __main__:get_stops:166 - 103: stops exported to GCS
+2022-10-14 12:21:00.464 | INFO     | __main__:get_stop_times:191 - 103: st exported to GCS
+2022-10-14 12:21:00.466 | INFO     | __main__:<module>:262 - download files for 103: 0:00:09.352980
+2022-10-14 12:21:00.466 | INFO     | __main__:<module>:241 - *********** Download data for: 105 ***********
+2022-10-14 12:21:03.099 | INFO     | __main__:primary_trip_query:56 - 105: trips saved locally
+2022-10-14 12:21:06.205 | INFO     | __main__:get_routelines:87 - 105: routelines exported to GCS
+2022-10-14 12:21:07.976 | INFO     | __main__:get_trips:135 - 105: trips exported to GCS
+2022-10-14 12:21:09.888 | INFO     | __main__:get_stops:166 - 105: stops exported to GCS
+2022-10-14 12:21:13.852 | INFO     | __main__:get_stop_times:191 - 105: st exported to GCS
+2022-10-14 12:21:13.857 | INFO     | __main__:<module>:262 - download files for 105: 0:00:13.390287
+2022-10-14 12:21:13.858 | INFO     | __main__:<module>:241 - *********** Download data for: 106 ***********
+2022-10-14 12:21:15.868 | INFO     | __main__:primary_trip_query:56 - 106: trips saved locally
+2022-10-14 12:21:17.584 | INFO     | __main__:get_routelines:87 - 106: routelines exported to GCS
+2022-10-14 12:21:19.347 | INFO     | __main__:get_trips:135 - 106: trips exported to GCS
+2022-10-14 12:21:21.312 | INFO     | __main__:get_stops:166 - 106: stops exported to GCS
+2022-10-14 12:21:25.738 | INFO     | __main__:get_stop_times:191 - 106: st exported to GCS
+2022-10-14 12:21:25.741 | INFO     | __main__:<module>:262 - download files for 106: 0:00:11.883049
+2022-10-14 12:21:25.742 | INFO     | __main__:<module>:241 - *********** Download data for: 107 ***********
+2022-10-14 12:21:27.798 | INFO     | __main__:primary_trip_query:56 - 107: trips saved locally
+2022-10-14 12:21:29.444 | INFO     | __main__:get_routelines:87 - 107: routelines exported to GCS
+2022-10-14 12:21:31.514 | INFO     | __main__:get_trips:135 - 107: trips exported to GCS
+2022-10-14 12:21:33.326 | INFO     | __main__:get_stops:166 - 107: stops exported to GCS
+2022-10-14 12:21:35.809 | INFO     | __main__:get_stop_times:191 - 107: st exported to GCS
+2022-10-14 12:21:35.811 | INFO     | __main__:<module>:262 - download files for 107: 0:00:10.069227
+2022-10-14 12:21:35.812 | INFO     | __main__:<module>:241 - *********** Download data for: 108 ***********
+2022-10-14 12:21:37.782 | INFO     | __main__:primary_trip_query:56 - 108: trips saved locally
+2022-10-14 12:21:43.856 | INFO     | __main__:get_routelines:87 - 108: routelines exported to GCS
+2022-10-14 12:21:45.630 | INFO     | __main__:get_trips:135 - 108: trips exported to GCS
+2022-10-14 12:21:47.525 | INFO     | __main__:get_stops:166 - 108: stops exported to GCS
+2022-10-14 12:21:51.105 | INFO     | __main__:get_stop_times:191 - 108: st exported to GCS
+2022-10-14 12:21:51.108 | INFO     | __main__:<module>:262 - download files for 108: 0:00:15.296100
+2022-10-14 12:21:51.108 | INFO     | __main__:<module>:241 - *********** Download data for: 110 ***********
+2022-10-14 12:21:53.199 | INFO     | __main__:primary_trip_query:56 - 110: trips saved locally
+2022-10-14 12:21:56.566 | INFO     | __main__:get_routelines:87 - 110: routelines exported to GCS
+2022-10-14 12:21:58.407 | INFO     | __main__:get_trips:135 - 110: trips exported to GCS
+2022-10-14 12:22:00.263 | INFO     | __main__:get_stops:166 - 110: stops exported to GCS
+2022-10-14 12:22:04.650 | INFO     | __main__:get_stop_times:191 - 110: st exported to GCS
+2022-10-14 12:22:04.652 | INFO     | __main__:<module>:262 - download files for 110: 0:00:13.543950
+2022-10-14 12:22:04.653 | INFO     | __main__:<module>:241 - *********** Download data for: 112 ***********
+2022-10-14 12:22:08.252 | INFO     | __main__:primary_trip_query:56 - 112: trips saved locally
+2022-10-14 12:22:16.077 | INFO     | __main__:get_routelines:87 - 112: routelines exported to GCS
+2022-10-14 12:22:17.785 | INFO     | __main__:get_trips:135 - 112: trips exported to GCS
+2022-10-14 12:22:20.009 | INFO     | __main__:get_stops:166 - 112: stops exported to GCS
+2022-10-14 12:22:33.771 | INFO     | __main__:get_stop_times:191 - 112: st exported to GCS
+2022-10-14 12:22:33.792 | INFO     | __main__:<module>:262 - download files for 112: 0:00:29.139424
+2022-10-14 12:22:33.793 | INFO     | __main__:<module>:241 - *********** Download data for: 116 ***********
+2022-10-14 12:22:36.164 | INFO     | __main__:primary_trip_query:56 - 116: trips saved locally
+2022-10-14 12:22:39.367 | INFO     | __main__:get_routelines:87 - 116: routelines exported to GCS
+2022-10-14 12:22:41.085 | INFO     | __main__:get_trips:135 - 116: trips exported to GCS
+2022-10-14 12:22:43.168 | INFO     | __main__:get_stops:166 - 116: stops exported to GCS
+2022-10-14 12:22:53.183 | INFO     | __main__:get_stop_times:191 - 116: st exported to GCS
+2022-10-14 12:22:53.194 | INFO     | __main__:<module>:262 - download files for 116: 0:00:19.401405
+2022-10-14 12:22:53.195 | INFO     | __main__:<module>:241 - *********** Download data for: 117 ***********
+2022-10-14 12:22:54.958 | INFO     | __main__:primary_trip_query:56 - 117: trips saved locally
+2022-10-14 12:22:56.798 | INFO     | __main__:get_routelines:87 - 117: routelines exported to GCS
+2022-10-14 12:22:58.673 | INFO     | __main__:get_trips:135 - 117: trips exported to GCS
+2022-10-14 12:23:00.545 | INFO     | __main__:get_stops:166 - 117: stops exported to GCS
+2022-10-14 12:23:03.085 | INFO     | __main__:get_stop_times:191 - 117: st exported to GCS
+2022-10-14 12:23:03.087 | INFO     | __main__:<module>:262 - download files for 117: 0:00:09.892077
+2022-10-14 12:23:03.088 | INFO     | __main__:<module>:241 - *********** Download data for: 118 ***********
+2022-10-14 12:23:04.646 | INFO     | __main__:primary_trip_query:56 - 118: trips saved locally
+2022-10-14 12:23:10.670 | INFO     | __main__:get_stops:166 - 118: stops exported to GCS
+2022-10-14 12:23:10.976 | INFO     | __main__:<module>:262 - download files for 118: 0:00:07.888135
+2022-10-14 12:23:10.976 | INFO     | __main__:<module>:241 - *********** Download data for: 120 ***********
+2022-10-14 12:23:13.431 | INFO     | __main__:primary_trip_query:56 - 120: trips saved locally
+2022-10-14 12:23:15.822 | INFO     | __main__:get_routelines:87 - 120: routelines exported to GCS
+2022-10-14 12:23:17.543 | INFO     | __main__:get_trips:135 - 120: trips exported to GCS
+2022-10-14 12:23:19.514 | INFO     | __main__:get_stops:166 - 120: stops exported to GCS
+2022-10-14 12:23:24.708 | INFO     | __main__:get_stop_times:191 - 120: st exported to GCS
+2022-10-14 12:23:24.711 | INFO     | __main__:<module>:262 - download files for 120: 0:00:13.734963
+2022-10-14 12:23:24.712 | INFO     | __main__:<module>:241 - *********** Download data for: 121 ***********
+2022-10-14 12:23:26.540 | INFO     | __main__:primary_trip_query:56 - 121: trips saved locally
+2022-10-14 12:23:28.140 | INFO     | __main__:get_routelines:87 - 121: routelines exported to GCS
+2022-10-14 12:23:29.886 | INFO     | __main__:get_trips:135 - 121: trips exported to GCS
+2022-10-14 12:23:31.738 | INFO     | __main__:get_stops:166 - 121: stops exported to GCS
+2022-10-14 12:23:34.341 | INFO     | __main__:get_stop_times:191 - 121: st exported to GCS
+2022-10-14 12:23:34.342 | INFO     | __main__:<module>:262 - download files for 121: 0:00:09.630291
+2022-10-14 12:23:34.343 | INFO     | __main__:<module>:241 - *********** Download data for: 122 ***********
+2022-10-14 12:23:36.078 | INFO     | __main__:primary_trip_query:56 - 122: trips saved locally
+2022-10-14 12:23:37.864 | INFO     | __main__:get_routelines:87 - 122: routelines exported to GCS
+2022-10-14 12:23:39.704 | INFO     | __main__:get_trips:135 - 122: trips exported to GCS
+2022-10-14 12:23:41.646 | INFO     | __main__:get_stops:166 - 122: stops exported to GCS
+2022-10-14 12:23:44.151 | INFO     | __main__:get_stop_times:191 - 122: st exported to GCS
+2022-10-14 12:23:44.154 | INFO     | __main__:<module>:262 - download files for 122: 0:00:09.811113
+2022-10-14 12:23:44.155 | INFO     | __main__:<module>:241 - *********** Download data for: 123 ***********
+2022-10-14 12:23:46.339 | INFO     | __main__:primary_trip_query:56 - 123: trips saved locally
+2022-10-14 12:23:49.255 | INFO     | __main__:get_routelines:87 - 123: routelines exported to GCS
+2022-10-14 12:23:50.995 | INFO     | __main__:get_trips:135 - 123: trips exported to GCS
+2022-10-14 12:23:52.876 | INFO     | __main__:get_stops:166 - 123: stops exported to GCS
+2022-10-14 12:23:59.166 | INFO     | __main__:get_stop_times:191 - 123: st exported to GCS
+2022-10-14 12:23:59.173 | INFO     | __main__:<module>:262 - download files for 123: 0:00:15.017714
+2022-10-14 12:23:59.173 | INFO     | __main__:<module>:241 - *********** Download data for: 126 ***********
+2022-10-14 12:24:01.836 | INFO     | __main__:primary_trip_query:56 - 126: trips saved locally
+2022-10-14 12:24:14.601 | INFO     | __main__:get_routelines:87 - 126: routelines exported to GCS
+2022-10-14 12:24:16.323 | INFO     | __main__:get_trips:135 - 126: trips exported to GCS
+2022-10-14 12:24:18.333 | INFO     | __main__:get_stops:166 - 126: stops exported to GCS
+2022-10-14 12:24:24.495 | INFO     | __main__:get_stop_times:191 - 126: st exported to GCS
+2022-10-14 12:24:24.503 | INFO     | __main__:<module>:262 - download files for 126: 0:00:25.329455
+2022-10-14 12:24:24.503 | INFO     | __main__:<module>:241 - *********** Download data for: 127 ***********
+2022-10-14 12:24:27.281 | INFO     | __main__:primary_trip_query:56 - 127: trips saved locally
+2022-10-14 12:24:35.904 | INFO     | __main__:get_routelines:87 - 127: routelines exported to GCS
+2022-10-14 12:24:37.775 | INFO     | __main__:get_trips:135 - 127: trips exported to GCS
+2022-10-14 12:24:39.750 | INFO     | __main__:get_stops:166 - 127: stops exported to GCS
+2022-10-14 12:24:44.928 | INFO     | __main__:get_stop_times:191 - 127: st exported to GCS
+2022-10-14 12:24:44.931 | INFO     | __main__:<module>:262 - download files for 127: 0:00:20.427517
+2022-10-14 12:24:44.931 | INFO     | __main__:<module>:241 - *********** Download data for: 129 ***********
+2022-10-14 12:24:46.646 | INFO     | __main__:primary_trip_query:56 - 129: trips saved locally
+2022-10-14 12:24:48.085 | INFO     | __main__:get_routelines:87 - 129: routelines exported to GCS
+2022-10-14 12:24:49.848 | INFO     | __main__:get_trips:135 - 129: trips exported to GCS
+2022-10-14 12:24:51.713 | INFO     | __main__:get_stops:166 - 129: stops exported to GCS
+2022-10-14 12:24:54.442 | INFO     | __main__:get_stop_times:191 - 129: st exported to GCS
+2022-10-14 12:24:54.444 | INFO     | __main__:<module>:262 - download files for 129: 0:00:09.512840
+2022-10-14 12:24:54.446 | INFO     | __main__:<module>:241 - *********** Download data for: 135 ***********
+2022-10-14 12:24:56.409 | INFO     | __main__:primary_trip_query:56 - 135: trips saved locally
+2022-10-14 12:25:05.983 | INFO     | __main__:get_routelines:87 - 135: routelines exported to GCS
+2022-10-14 12:25:07.862 | INFO     | __main__:get_trips:135 - 135: trips exported to GCS
+2022-10-14 12:25:09.989 | INFO     | __main__:get_stops:166 - 135: stops exported to GCS
+2022-10-14 12:25:14.130 | INFO     | __main__:get_stop_times:191 - 135: st exported to GCS
+2022-10-14 12:25:14.135 | INFO     | __main__:<module>:262 - download files for 135: 0:00:19.688885
+2022-10-14 12:25:14.136 | INFO     | __main__:<module>:241 - *********** Download data for: 137 ***********
+2022-10-14 12:25:16.025 | INFO     | __main__:primary_trip_query:56 - 137: trips saved locally
+2022-10-14 12:25:17.565 | INFO     | __main__:get_routelines:87 - 137: routelines exported to GCS
+2022-10-14 12:25:19.248 | INFO     | __main__:get_trips:135 - 137: trips exported to GCS
+2022-10-14 12:25:21.470 | INFO     | __main__:get_stops:166 - 137: stops exported to GCS
+2022-10-14 12:25:24.845 | INFO     | __main__:get_stop_times:191 - 137: st exported to GCS
+2022-10-14 12:25:24.848 | INFO     | __main__:<module>:262 - download files for 137: 0:00:10.711829
+2022-10-14 12:25:24.849 | INFO     | __main__:<module>:241 - *********** Download data for: 142 ***********
+2022-10-14 12:25:28.672 | INFO     | __main__:primary_trip_query:56 - 142: trips saved locally
+2022-10-14 12:25:35.684 | INFO     | __main__:get_routelines:87 - 142: routelines exported to GCS
+2022-10-14 12:25:37.582 | INFO     | __main__:get_trips:135 - 142: trips exported to GCS
+2022-10-14 12:25:40.391 | INFO     | __main__:get_stops:166 - 142: stops exported to GCS
+2022-10-14 12:26:04.071 | INFO     | __main__:get_stop_times:191 - 142: st exported to GCS
+2022-10-14 12:26:04.111 | INFO     | __main__:<module>:262 - download files for 142: 0:00:39.262220
+2022-10-14 12:26:04.111 | INFO     | __main__:<module>:241 - *********** Download data for: 146 ***********
+2022-10-14 12:26:06.091 | INFO     | __main__:primary_trip_query:56 - 146: trips saved locally
+2022-10-14 12:26:10.003 | INFO     | __main__:get_routelines:87 - 146: routelines exported to GCS
+2022-10-14 12:26:11.833 | INFO     | __main__:get_trips:135 - 146: trips exported to GCS
+2022-10-14 12:26:14.026 | INFO     | __main__:get_stops:166 - 146: stops exported to GCS
+2022-10-14 12:26:16.972 | INFO     | __main__:get_stop_times:191 - 146: st exported to GCS
+2022-10-14 12:26:16.975 | INFO     | __main__:<module>:262 - download files for 146: 0:00:12.863879
+2022-10-14 12:26:16.977 | INFO     | __main__:<module>:241 - *********** Download data for: 148 ***********
+2022-10-14 12:26:19.088 | INFO     | __main__:primary_trip_query:56 - 148: trips saved locally
+2022-10-14 12:26:21.888 | INFO     | __main__:get_routelines:87 - 148: routelines exported to GCS
+2022-10-14 12:26:23.669 | INFO     | __main__:get_trips:135 - 148: trips exported to GCS
+2022-10-14 12:26:25.765 | INFO     | __main__:get_stops:166 - 148: stops exported to GCS
+2022-10-14 12:26:30.490 | INFO     | __main__:get_stop_times:191 - 148: st exported to GCS
+2022-10-14 12:26:30.492 | INFO     | __main__:<module>:262 - download files for 148: 0:00:13.515706
+2022-10-14 12:26:30.493 | INFO     | __main__:<module>:241 - *********** Download data for: 152 ***********
+2022-10-14 12:26:32.508 | INFO     | __main__:primary_trip_query:56 - 152: trips saved locally
+2022-10-14 12:26:34.176 | INFO     | __main__:get_routelines:87 - 152: routelines exported to GCS
+2022-10-14 12:26:36.080 | INFO     | __main__:get_trips:135 - 152: trips exported to GCS
+2022-10-14 12:26:37.975 | INFO     | __main__:get_stops:166 - 152: stops exported to GCS
+2022-10-14 12:26:40.816 | INFO     | __main__:get_stop_times:191 - 152: st exported to GCS
+2022-10-14 12:26:40.820 | INFO     | __main__:<module>:262 - download files for 152: 0:00:10.326617
+2022-10-14 12:26:40.821 | INFO     | __main__:<module>:241 - *********** Download data for: 154 ***********
+2022-10-14 12:26:42.588 | INFO     | __main__:primary_trip_query:56 - 154: trips saved locally
+2022-10-14 12:26:44.168 | INFO     | __main__:get_routelines:87 - 154: routelines exported to GCS
+2022-10-14 12:26:45.933 | INFO     | __main__:get_trips:135 - 154: trips exported to GCS
+2022-10-14 12:26:47.797 | INFO     | __main__:get_stops:166 - 154: stops exported to GCS
+2022-10-14 12:26:50.568 | INFO     | __main__:get_stop_times:191 - 154: st exported to GCS
+2022-10-14 12:26:50.570 | INFO     | __main__:<module>:262 - download files for 154: 0:00:09.748775
+2022-10-14 12:26:50.571 | INFO     | __main__:<module>:241 - *********** Download data for: 159 ***********
+2022-10-14 12:26:52.465 | INFO     | __main__:primary_trip_query:56 - 159: trips saved locally
+2022-10-14 12:26:55.736 | INFO     | __main__:get_routelines:87 - 159: routelines exported to GCS
+2022-10-14 12:26:57.458 | INFO     | __main__:get_trips:135 - 159: trips exported to GCS
+2022-10-14 12:26:59.315 | INFO     | __main__:get_stops:166 - 159: stops exported to GCS
+2022-10-14 12:27:03.149 | INFO     | __main__:get_stop_times:191 - 159: st exported to GCS
+2022-10-14 12:27:03.151 | INFO     | __main__:<module>:262 - download files for 159: 0:00:12.580545
+2022-10-14 12:27:03.152 | INFO     | __main__:<module>:241 - *********** Download data for: 162 ***********
+2022-10-14 12:27:05.003 | INFO     | __main__:primary_trip_query:56 - 162: trips saved locally
+2022-10-14 12:27:08.641 | INFO     | __main__:get_routelines:87 - 162: routelines exported to GCS
+2022-10-14 12:27:10.345 | INFO     | __main__:get_trips:135 - 162: trips exported to GCS
+2022-10-14 12:27:12.127 | INFO     | __main__:get_stops:166 - 162: stops exported to GCS
+2022-10-14 12:27:15.349 | INFO     | __main__:get_stop_times:191 - 162: st exported to GCS
+2022-10-14 12:27:15.353 | INFO     | __main__:<module>:262 - download files for 162: 0:00:12.201368
+2022-10-14 12:27:15.355 | INFO     | __main__:<module>:241 - *********** Download data for: 165 ***********
+2022-10-14 12:27:17.159 | INFO     | __main__:primary_trip_query:56 - 165: trips saved locally
+2022-10-14 12:27:18.698 | INFO     | __main__:get_routelines:87 - 165: routelines exported to GCS
+2022-10-14 12:27:20.525 | INFO     | __main__:get_trips:135 - 165: trips exported to GCS
+2022-10-14 12:27:22.375 | INFO     | __main__:get_stops:166 - 165: stops exported to GCS
+2022-10-14 12:27:25.024 | INFO     | __main__:get_stop_times:191 - 165: st exported to GCS
+2022-10-14 12:27:25.027 | INFO     | __main__:<module>:262 - download files for 165: 0:00:09.672346
+2022-10-14 12:27:25.028 | INFO     | __main__:<module>:241 - *********** Download data for: 167 ***********
+2022-10-14 12:27:27.643 | INFO     | __main__:primary_trip_query:56 - 167: trips saved locally
+2022-10-14 12:27:36.682 | INFO     | __main__:get_routelines:87 - 167: routelines exported to GCS
+2022-10-14 12:27:38.562 | INFO     | __main__:get_trips:135 - 167: trips exported to GCS
+2022-10-14 12:27:40.601 | INFO     | __main__:get_stops:166 - 167: stops exported to GCS
+2022-10-14 12:27:46.894 | INFO     | __main__:get_stop_times:191 - 167: st exported to GCS
+2022-10-14 12:27:46.900 | INFO     | __main__:<module>:262 - download files for 167: 0:00:21.872406
+2022-10-14 12:27:46.901 | INFO     | __main__:<module>:241 - *********** Download data for: 168 ***********
+2022-10-14 12:27:48.768 | INFO     | __main__:primary_trip_query:56 - 168: trips saved locally
+2022-10-14 12:27:50.405 | INFO     | __main__:get_routelines:87 - 168: routelines exported to GCS
+2022-10-14 12:27:52.181 | INFO     | __main__:get_trips:135 - 168: trips exported to GCS
+2022-10-14 12:27:54.076 | INFO     | __main__:get_stops:166 - 168: stops exported to GCS
+2022-10-14 12:27:56.804 | INFO     | __main__:get_stop_times:191 - 168: st exported to GCS
+2022-10-14 12:27:56.808 | INFO     | __main__:<module>:262 - download files for 168: 0:00:09.907120
+2022-10-14 12:27:56.809 | INFO     | __main__:<module>:241 - *********** Download data for: 169 ***********
+2022-10-14 12:27:58.646 | INFO     | __main__:primary_trip_query:56 - 169: trips saved locally
+2022-10-14 12:28:00.456 | INFO     | __main__:get_routelines:87 - 169: routelines exported to GCS
+2022-10-14 12:28:02.153 | INFO     | __main__:get_trips:135 - 169: trips exported to GCS
+2022-10-14 12:28:03.973 | INFO     | __main__:get_stops:166 - 169: stops exported to GCS
+2022-10-14 12:28:06.591 | INFO     | __main__:get_stop_times:191 - 169: st exported to GCS
+2022-10-14 12:28:06.593 | INFO     | __main__:<module>:262 - download files for 169: 0:00:09.784266
+2022-10-14 12:28:06.593 | INFO     | __main__:<module>:241 - *********** Download data for: 170 ***********
+2022-10-14 12:28:08.927 | INFO     | __main__:primary_trip_query:56 - 170: trips saved locally
+2022-10-14 12:28:14.409 | INFO     | __main__:get_routelines:87 - 170: routelines exported to GCS
+2022-10-14 12:28:16.131 | INFO     | __main__:get_trips:135 - 170: trips exported to GCS
+2022-10-14 12:28:18.204 | INFO     | __main__:get_stops:166 - 170: stops exported to GCS
+2022-10-14 12:28:33.961 | INFO     | __main__:get_stop_times:191 - 170: st exported to GCS
+2022-10-14 12:28:33.990 | INFO     | __main__:<module>:262 - download files for 170: 0:00:27.396198
+2022-10-14 12:28:33.990 | INFO     | __main__:<module>:241 - *********** Download data for: 171 ***********
+2022-10-14 12:28:36.097 | INFO     | __main__:primary_trip_query:56 - 171: trips saved locally
+2022-10-14 12:28:39.008 | INFO     | __main__:get_routelines:87 - 171: routelines exported to GCS
+2022-10-14 12:28:40.697 | INFO     | __main__:get_trips:135 - 171: trips exported to GCS
+2022-10-14 12:28:42.652 | INFO     | __main__:get_stops:166 - 171: stops exported to GCS
+2022-10-14 12:28:46.973 | INFO     | __main__:get_stop_times:191 - 171: st exported to GCS
+2022-10-14 12:28:46.979 | INFO     | __main__:<module>:262 - download files for 171: 0:00:12.989020
+2022-10-14 12:28:46.980 | INFO     | __main__:<module>:241 - *********** Download data for: 172 ***********
+2022-10-14 12:28:49.085 | INFO     | __main__:primary_trip_query:56 - 172: trips saved locally
+2022-10-14 12:28:51.970 | INFO     | __main__:get_routelines:87 - 172: routelines exported to GCS
+2022-10-14 12:28:53.863 | INFO     | __main__:get_trips:135 - 172: trips exported to GCS
+2022-10-14 12:28:55.736 | INFO     | __main__:get_stops:166 - 172: stops exported to GCS
+2022-10-14 12:29:00.122 | INFO     | __main__:get_stop_times:191 - 172: st exported to GCS
+2022-10-14 12:29:00.126 | INFO     | __main__:<module>:262 - download files for 172: 0:00:13.145887
+2022-10-14 12:29:00.126 | INFO     | __main__:<module>:241 - *********** Download data for: 173 ***********
+2022-10-14 12:29:02.109 | INFO     | __main__:primary_trip_query:56 - 173: trips saved locally
+2022-10-14 12:29:04.786 | INFO     | __main__:get_routelines:87 - 173: routelines exported to GCS
+2022-10-14 12:29:06.685 | INFO     | __main__:get_trips:135 - 173: trips exported to GCS
+2022-10-14 12:29:08.430 | INFO     | __main__:get_stops:166 - 173: stops exported to GCS
+2022-10-14 12:29:12.816 | INFO     | __main__:get_stop_times:191 - 173: st exported to GCS
+2022-10-14 12:29:12.822 | INFO     | __main__:<module>:262 - download files for 173: 0:00:12.695095
+2022-10-14 12:29:12.823 | INFO     | __main__:<module>:241 - *********** Download data for: 174 ***********
+2022-10-14 12:29:14.724 | INFO     | __main__:primary_trip_query:56 - 174: trips saved locally
+2022-10-14 12:29:17.469 | INFO     | __main__:get_routelines:87 - 174: routelines exported to GCS
+2022-10-14 12:29:19.235 | INFO     | __main__:get_trips:135 - 174: trips exported to GCS
+2022-10-14 12:29:21.370 | INFO     | __main__:get_stops:166 - 174: stops exported to GCS
+2022-10-14 12:29:26.947 | INFO     | __main__:get_stop_times:191 - 174: st exported to GCS
+2022-10-14 12:29:26.951 | INFO     | __main__:<module>:262 - download files for 174: 0:00:14.128188
+2022-10-14 12:29:26.952 | INFO     | __main__:<module>:241 - *********** Download data for: 176 ***********
+2022-10-14 12:29:29.046 | INFO     | __main__:primary_trip_query:56 - 176: trips saved locally
+2022-10-14 12:29:32.405 | INFO     | __main__:get_routelines:87 - 176: routelines exported to GCS
+2022-10-14 12:29:34.075 | INFO     | __main__:get_trips:135 - 176: trips exported to GCS
+2022-10-14 12:29:35.970 | INFO     | __main__:get_stops:166 - 176: stops exported to GCS
+2022-10-14 12:29:40.702 | INFO     | __main__:get_stop_times:191 - 176: st exported to GCS
+2022-10-14 12:29:40.709 | INFO     | __main__:<module>:262 - download files for 176: 0:00:13.757014
+2022-10-14 12:29:40.711 | INFO     | __main__:<module>:241 - *********** Download data for: 177 ***********
+2022-10-14 12:29:42.737 | INFO     | __main__:primary_trip_query:56 - 177: trips saved locally
+2022-10-14 12:29:45.453 | INFO     | __main__:get_routelines:87 - 177: routelines exported to GCS
+2022-10-14 12:29:47.182 | INFO     | __main__:get_trips:135 - 177: trips exported to GCS
+2022-10-14 12:29:49.030 | INFO     | __main__:get_stops:166 - 177: stops exported to GCS
+2022-10-14 12:29:53.238 | INFO     | __main__:get_stop_times:191 - 177: st exported to GCS
+2022-10-14 12:29:53.242 | INFO     | __main__:<module>:262 - download files for 177: 0:00:12.531623
+2022-10-14 12:29:53.243 | INFO     | __main__:<module>:241 - *********** Download data for: 178 ***********
+2022-10-14 12:29:55.309 | INFO     | __main__:primary_trip_query:56 - 178: trips saved locally
+2022-10-14 12:29:58.145 | INFO     | __main__:get_routelines:87 - 178: routelines exported to GCS
+2022-10-14 12:29:59.893 | INFO     | __main__:get_trips:135 - 178: trips exported to GCS
+2022-10-14 12:30:01.927 | INFO     | __main__:get_stops:166 - 178: stops exported to GCS
+2022-10-14 12:30:07.241 | INFO     | __main__:get_stop_times:191 - 178: st exported to GCS
+2022-10-14 12:30:07.246 | INFO     | __main__:<module>:262 - download files for 178: 0:00:14.003150
+2022-10-14 12:30:07.246 | INFO     | __main__:<module>:241 - *********** Download data for: 179 ***********
+2022-10-14 12:30:09.223 | INFO     | __main__:primary_trip_query:56 - 179: trips saved locally
+2022-10-14 12:30:12.121 | INFO     | __main__:get_routelines:87 - 179: routelines exported to GCS
+2022-10-14 12:30:13.915 | INFO     | __main__:get_trips:135 - 179: trips exported to GCS
+2022-10-14 12:30:15.796 | INFO     | __main__:get_stops:166 - 179: stops exported to GCS
+2022-10-14 12:30:20.927 | INFO     | __main__:get_stop_times:191 - 179: st exported to GCS
+2022-10-14 12:30:20.931 | INFO     | __main__:<module>:262 - download files for 179: 0:00:13.684840
+2022-10-14 12:30:20.932 | INFO     | __main__:<module>:241 - *********** Download data for: 181 ***********
+2022-10-14 12:30:22.865 | INFO     | __main__:primary_trip_query:56 - 181: trips saved locally
+2022-10-14 12:30:25.663 | INFO     | __main__:get_routelines:87 - 181: routelines exported to GCS
+2022-10-14 12:30:27.357 | INFO     | __main__:get_trips:135 - 181: trips exported to GCS
+2022-10-14 12:30:29.339 | INFO     | __main__:get_stops:166 - 181: stops exported to GCS
+2022-10-14 12:30:34.005 | INFO     | __main__:get_stop_times:191 - 181: st exported to GCS
+2022-10-14 12:30:34.010 | INFO     | __main__:<module>:262 - download files for 181: 0:00:13.077938
+2022-10-14 12:30:34.011 | INFO     | __main__:<module>:241 - *********** Download data for: 182 ***********
+2022-10-14 12:30:39.764 | INFO     | __main__:primary_trip_query:56 - 182: trips saved locally
+2022-10-14 12:31:00.162 | INFO     | __main__:get_routelines:87 - 182: routelines exported to GCS
+2022-10-14 12:31:02.097 | INFO     | __main__:get_trips:135 - 182: trips exported to GCS
+2022-10-14 12:31:05.373 | INFO     | __main__:get_stops:166 - 182: stops exported to GCS
+2022-10-14 12:32:55.681 | INFO     | __main__:get_stop_times:191 - 182: st exported to GCS
+2022-10-14 12:32:55.889 | INFO     | __main__:<module>:262 - download files for 182: 0:02:21.878895
+2022-10-14 12:32:55.890 | INFO     | __main__:<module>:241 - *********** Download data for: 183 ***********
+2022-10-14 12:32:59.531 | INFO     | __main__:primary_trip_query:56 - 183: trips saved locally
+2022-10-14 12:33:03.708 | INFO     | __main__:get_routelines:87 - 183: routelines exported to GCS
+2022-10-14 12:33:05.717 | INFO     | __main__:get_trips:135 - 183: trips exported to GCS
+2022-10-14 12:33:07.982 | INFO     | __main__:get_stops:166 - 183: stops exported to GCS
+2022-10-14 12:33:23.021 | INFO     | __main__:get_stop_times:191 - 183: st exported to GCS
+2022-10-14 12:33:23.047 | INFO     | __main__:<module>:262 - download files for 183: 0:00:27.156593
+2022-10-14 12:33:23.048 | INFO     | __main__:<module>:241 - *********** Download data for: 186 ***********
+2022-10-14 12:33:24.706 | INFO     | __main__:primary_trip_query:56 - 186: trips saved locally
+2022-10-14 12:33:29.517 | INFO     | __main__:get_stops:166 - 186: stops exported to GCS
+2022-10-14 12:33:29.853 | INFO     | __main__:<module>:262 - download files for 186: 0:00:06.805240
+2022-10-14 12:33:29.858 | INFO     | __main__:<module>:241 - *********** Download data for: 187 ***********
+2022-10-14 12:33:32.276 | INFO     | __main__:primary_trip_query:56 - 187: trips saved locally
+2022-10-14 12:33:34.006 | INFO     | __main__:get_routelines:87 - 187: routelines exported to GCS
+2022-10-14 12:33:35.782 | INFO     | __main__:get_trips:135 - 187: trips exported to GCS
+2022-10-14 12:33:37.668 | INFO     | __main__:get_stops:166 - 187: stops exported to GCS
+2022-10-14 12:33:40.382 | INFO     | __main__:get_stop_times:191 - 187: st exported to GCS
+2022-10-14 12:33:40.384 | INFO     | __main__:<module>:262 - download files for 187: 0:00:10.526289
+2022-10-14 12:33:40.385 | INFO     | __main__:<module>:241 - *********** Download data for: 188 ***********
+2022-10-14 12:33:42.056 | INFO     | __main__:primary_trip_query:56 - 188: trips saved locally
+2022-10-14 12:33:43.823 | INFO     | __main__:get_routelines:87 - 188: routelines exported to GCS
+2022-10-14 12:33:45.530 | INFO     | __main__:get_trips:135 - 188: trips exported to GCS
+2022-10-14 12:33:47.288 | INFO     | __main__:get_stops:166 - 188: stops exported to GCS
+2022-10-14 12:33:49.614 | INFO     | __main__:get_stop_times:191 - 188: st exported to GCS
+2022-10-14 12:33:49.616 | INFO     | __main__:<module>:262 - download files for 188: 0:00:09.231242
+2022-10-14 12:33:49.617 | INFO     | __main__:<module>:241 - *********** Download data for: 190 ***********
+2022-10-14 12:33:51.523 | INFO     | __main__:primary_trip_query:56 - 190: trips saved locally
+2022-10-14 12:33:54.396 | INFO     | __main__:get_routelines:87 - 190: routelines exported to GCS
+2022-10-14 12:33:56.083 | INFO     | __main__:get_trips:135 - 190: trips exported to GCS
+2022-10-14 12:33:57.935 | INFO     | __main__:get_stops:166 - 190: stops exported to GCS
+2022-10-14 12:34:01.388 | INFO     | __main__:get_stop_times:191 - 190: st exported to GCS
+2022-10-14 12:34:01.393 | INFO     | __main__:<module>:262 - download files for 190: 0:00:11.776523
+2022-10-14 12:34:01.395 | INFO     | __main__:<module>:241 - *********** Download data for: 192 ***********
+2022-10-14 12:34:02.831 | INFO     | __main__:primary_trip_query:56 - 192: trips saved locally
+2022-10-14 12:34:07.579 | INFO     | __main__:get_stops:166 - 192: stops exported to GCS
+2022-10-14 12:34:07.919 | INFO     | __main__:<module>:262 - download files for 192: 0:00:06.524175
+2022-10-14 12:34:07.920 | INFO     | __main__:<module>:241 - *********** Download data for: 194 ***********
+2022-10-14 12:34:10.273 | INFO     | __main__:primary_trip_query:56 - 194: trips saved locally
+2022-10-14 12:34:22.814 | INFO     | __main__:get_routelines:87 - 194: routelines exported to GCS
+2022-10-14 12:34:24.478 | INFO     | __main__:get_trips:135 - 194: trips exported to GCS
+2022-10-14 12:34:26.322 | INFO     | __main__:get_stops:166 - 194: stops exported to GCS
+2022-10-14 12:34:33.004 | INFO     | __main__:get_stop_times:191 - 194: st exported to GCS
+2022-10-14 12:34:33.019 | INFO     | __main__:<module>:262 - download files for 194: 0:00:25.098566
+2022-10-14 12:34:33.019 | INFO     | __main__:<module>:241 - *********** Download data for: 198 ***********
+2022-10-14 12:34:34.970 | INFO     | __main__:primary_trip_query:56 - 198: trips saved locally
+2022-10-14 12:34:38.974 | INFO     | __main__:get_routelines:87 - 198: routelines exported to GCS
+2022-10-14 12:34:40.628 | INFO     | __main__:get_trips:135 - 198: trips exported to GCS
+2022-10-14 12:34:42.588 | INFO     | __main__:get_stops:166 - 198: stops exported to GCS
+2022-10-14 12:34:46.131 | INFO     | __main__:get_stop_times:191 - 198: st exported to GCS
+2022-10-14 12:34:46.134 | INFO     | __main__:<module>:262 - download files for 198: 0:00:13.114648
+2022-10-14 12:34:46.135 | INFO     | __main__:<module>:241 - *********** Download data for: 199 ***********
+2022-10-14 12:34:47.651 | INFO     | __main__:primary_trip_query:56 - 199: trips saved locally
+2022-10-14 12:34:52.340 | INFO     | __main__:get_stops:166 - 199: stops exported to GCS
+2022-10-14 12:34:52.646 | INFO     | __main__:<module>:262 - download files for 199: 0:00:06.511132
+2022-10-14 12:34:52.648 | INFO     | __main__:<module>:241 - *********** Download data for: 201 ***********
+2022-10-14 12:34:54.404 | INFO     | __main__:primary_trip_query:56 - 201: trips saved locally
+2022-10-14 12:34:55.963 | INFO     | __main__:get_routelines:87 - 201: routelines exported to GCS
+2022-10-14 12:34:57.727 | INFO     | __main__:get_trips:135 - 201: trips exported to GCS
+2022-10-14 12:34:59.493 | INFO     | __main__:get_stops:166 - 201: stops exported to GCS
+2022-10-14 12:35:01.746 | INFO     | __main__:get_stop_times:191 - 201: st exported to GCS
+2022-10-14 12:35:01.748 | INFO     | __main__:<module>:262 - download files for 201: 0:00:09.100004
+2022-10-14 12:35:01.749 | INFO     | __main__:<module>:241 - *********** Download data for: 204 ***********
+2022-10-14 12:35:03.468 | INFO     | __main__:primary_trip_query:56 - 204: trips saved locally
+2022-10-14 12:35:06.264 | INFO     | __main__:get_routelines:87 - 204: routelines exported to GCS
+2022-10-14 12:35:07.920 | INFO     | __main__:get_trips:135 - 204: trips exported to GCS
+2022-10-14 12:35:09.818 | INFO     | __main__:get_stops:166 - 204: stops exported to GCS
+2022-10-14 12:35:11.977 | INFO     | __main__:get_stop_times:191 - 204: st exported to GCS
+2022-10-14 12:35:11.980 | INFO     | __main__:<module>:262 - download files for 204: 0:00:10.231372
+2022-10-14 12:35:11.981 | INFO     | __main__:<module>:241 - *********** Download data for: 206 ***********
+2022-10-14 12:35:13.896 | INFO     | __main__:primary_trip_query:56 - 206: trips saved locally
+2022-10-14 12:35:17.547 | INFO     | __main__:get_routelines:87 - 206: routelines exported to GCS
+2022-10-14 12:35:19.201 | INFO     | __main__:get_trips:135 - 206: trips exported to GCS
+2022-10-14 12:35:21.017 | INFO     | __main__:get_stops:166 - 206: stops exported to GCS
+2022-10-14 12:35:26.565 | INFO     | __main__:get_stop_times:191 - 206: st exported to GCS
+2022-10-14 12:35:26.571 | INFO     | __main__:<module>:262 - download files for 206: 0:00:14.590160
+2022-10-14 12:35:26.571 | INFO     | __main__:<module>:241 - *********** Download data for: 207 ***********
+2022-10-14 12:35:28.331 | INFO     | __main__:primary_trip_query:56 - 207: trips saved locally
+2022-10-14 12:35:29.769 | INFO     | __main__:get_routelines:87 - 207: routelines exported to GCS
+2022-10-14 12:35:31.517 | INFO     | __main__:get_trips:135 - 207: trips exported to GCS
+2022-10-14 12:35:33.391 | INFO     | __main__:get_stops:166 - 207: stops exported to GCS
+2022-10-14 12:35:36.949 | INFO     | __main__:get_stop_times:191 - 207: st exported to GCS
+2022-10-14 12:35:36.952 | INFO     | __main__:<module>:262 - download files for 207: 0:00:10.380526
+2022-10-14 12:35:36.952 | INFO     | __main__:<module>:241 - *********** Download data for: 208 ***********
+2022-10-14 12:35:39.152 | INFO     | __main__:primary_trip_query:56 - 208: trips saved locally
+2022-10-14 12:35:45.351 | INFO     | __main__:get_routelines:87 - 208: routelines exported to GCS
+2022-10-14 12:35:47.071 | INFO     | __main__:get_trips:135 - 208: trips exported to GCS
+2022-10-14 12:35:48.910 | INFO     | __main__:get_stops:166 - 208: stops exported to GCS
+2022-10-14 12:35:54.002 | INFO     | __main__:get_stop_times:191 - 208: st exported to GCS
+2022-10-14 12:35:54.009 | INFO     | __main__:<module>:262 - download files for 208: 0:00:17.056397
+2022-10-14 12:35:54.010 | INFO     | __main__:<module>:241 - *********** Download data for: 210 ***********
+2022-10-14 12:35:55.717 | INFO     | __main__:primary_trip_query:56 - 210: trips saved locally
+2022-10-14 12:35:57.330 | INFO     | __main__:get_routelines:87 - 210: routelines exported to GCS
+2022-10-14 12:35:59.004 | INFO     | __main__:get_trips:135 - 210: trips exported to GCS
+2022-10-14 12:36:00.848 | INFO     | __main__:get_stops:166 - 210: stops exported to GCS
+2022-10-14 12:36:03.441 | INFO     | __main__:get_stop_times:191 - 210: st exported to GCS
+2022-10-14 12:36:03.443 | INFO     | __main__:<module>:262 - download files for 210: 0:00:09.432955
+2022-10-14 12:36:03.444 | INFO     | __main__:<module>:241 - *********** Download data for: 212 ***********
+2022-10-14 12:36:05.106 | INFO     | __main__:primary_trip_query:56 - 212: trips saved locally
+2022-10-14 12:36:10.441 | INFO     | __main__:get_stops:166 - 212: stops exported to GCS
+2022-10-14 12:36:10.742 | INFO     | __main__:<module>:262 - download files for 212: 0:00:07.298314
+2022-10-14 12:36:10.744 | INFO     | __main__:<module>:241 - *********** Download data for: 213 ***********
+2022-10-14 12:36:12.147 | INFO     | __main__:primary_trip_query:56 - 213: trips saved locally
+2022-10-14 12:36:16.786 | INFO     | __main__:get_stops:166 - 213: stops exported to GCS
+2022-10-14 12:36:17.164 | INFO     | __main__:<module>:262 - download files for 213: 0:00:06.420486
+2022-10-14 12:36:17.165 | INFO     | __main__:<module>:241 - *********** Download data for: 214 ***********
+2022-10-14 12:36:18.902 | INFO     | __main__:primary_trip_query:56 - 214: trips saved locally
+2022-10-14 12:36:21.842 | INFO     | __main__:get_routelines:87 - 214: routelines exported to GCS
+2022-10-14 12:36:23.570 | INFO     | __main__:get_trips:135 - 214: trips exported to GCS
+2022-10-14 12:36:25.315 | INFO     | __main__:get_stops:166 - 214: stops exported to GCS
+2022-10-14 12:36:27.876 | INFO     | __main__:get_stop_times:191 - 214: st exported to GCS
+2022-10-14 12:36:27.882 | INFO     | __main__:<module>:262 - download files for 214: 0:00:10.716911
+2022-10-14 12:36:27.884 | INFO     | __main__:<module>:241 - *********** Download data for: 217 ***********
+2022-10-14 12:36:29.788 | INFO     | __main__:primary_trip_query:56 - 217: trips saved locally
+2022-10-14 12:36:32.869 | INFO     | __main__:get_routelines:87 - 217: routelines exported to GCS
+2022-10-14 12:36:34.546 | INFO     | __main__:get_trips:135 - 217: trips exported to GCS
+2022-10-14 12:36:36.336 | INFO     | __main__:get_stops:166 - 217: stops exported to GCS
+2022-10-14 12:36:39.567 | INFO     | __main__:get_stop_times:191 - 217: st exported to GCS
+2022-10-14 12:36:39.578 | INFO     | __main__:<module>:262 - download files for 217: 0:00:11.694541
+2022-10-14 12:36:39.583 | INFO     | __main__:<module>:241 - *********** Download data for: 218 ***********
+2022-10-14 12:36:41.593 | INFO     | __main__:primary_trip_query:56 - 218: trips saved locally
+2022-10-14 12:36:45.694 | INFO     | __main__:get_routelines:87 - 218: routelines exported to GCS
+2022-10-14 12:36:47.339 | INFO     | __main__:get_trips:135 - 218: trips exported to GCS
+2022-10-14 12:36:49.223 | INFO     | __main__:get_stops:166 - 218: stops exported to GCS
+2022-10-14 12:36:53.216 | INFO     | __main__:get_stop_times:191 - 218: st exported to GCS
+2022-10-14 12:36:53.221 | INFO     | __main__:<module>:262 - download files for 218: 0:00:13.638229
+2022-10-14 12:36:53.221 | INFO     | __main__:<module>:241 - *********** Download data for: 220 ***********
+2022-10-14 12:36:54.929 | INFO     | __main__:primary_trip_query:56 - 220: trips saved locally
+2022-10-14 12:36:56.380 | INFO     | __main__:get_routelines:87 - 220: routelines exported to GCS
+2022-10-14 12:36:58.068 | INFO     | __main__:get_trips:135 - 220: trips exported to GCS
+2022-10-14 12:36:59.905 | INFO     | __main__:get_stops:166 - 220: stops exported to GCS
+2022-10-14 12:37:02.240 | INFO     | __main__:get_stop_times:191 - 220: st exported to GCS
+2022-10-14 12:37:02.243 | INFO     | __main__:<module>:262 - download files for 220: 0:00:09.022067
+2022-10-14 12:37:02.244 | INFO     | __main__:<module>:241 - *********** Download data for: 221 ***********
+2022-10-14 12:37:04.040 | INFO     | __main__:primary_trip_query:56 - 221: trips saved locally
+2022-10-14 12:37:07.226 | INFO     | __main__:get_routelines:87 - 221: routelines exported to GCS
+2022-10-14 12:37:08.920 | INFO     | __main__:get_trips:135 - 221: trips exported to GCS
+2022-10-14 12:37:10.794 | INFO     | __main__:get_stops:166 - 221: stops exported to GCS
+2022-10-14 12:37:13.283 | INFO     | __main__:get_stop_times:191 - 221: st exported to GCS
+2022-10-14 12:37:13.285 | INFO     | __main__:<module>:262 - download files for 221: 0:00:11.041118
+2022-10-14 12:37:13.286 | INFO     | __main__:<module>:241 - *********** Download data for: 226 ***********
+2022-10-14 12:37:15.993 | INFO     | __main__:primary_trip_query:56 - 226: trips saved locally
+2022-10-14 12:37:20.547 | INFO     | __main__:get_routelines:87 - 226: routelines exported to GCS
+2022-10-14 12:37:22.297 | INFO     | __main__:get_trips:135 - 226: trips exported to GCS
+2022-10-14 12:37:24.383 | INFO     | __main__:get_stops:166 - 226: stops exported to GCS
+2022-10-14 12:37:33.445 | INFO     | __main__:get_stop_times:191 - 226: st exported to GCS
+2022-10-14 12:37:33.459 | INFO     | __main__:<module>:262 - download files for 226: 0:00:20.173295
+2022-10-14 12:37:33.460 | INFO     | __main__:<module>:241 - *********** Download data for: 228 ***********
+2022-10-14 12:37:35.538 | INFO     | __main__:primary_trip_query:56 - 228: trips saved locally
+2022-10-14 12:37:39.371 | INFO     | __main__:get_routelines:87 - 228: routelines exported to GCS
+2022-10-14 12:37:41.232 | INFO     | __main__:get_trips:135 - 228: trips exported to GCS
+2022-10-14 12:37:43.136 | INFO     | __main__:get_stops:166 - 228: stops exported to GCS
+2022-10-14 12:37:48.672 | INFO     | __main__:get_stop_times:191 - 228: st exported to GCS
+2022-10-14 12:37:48.677 | INFO     | __main__:<module>:262 - download files for 228: 0:00:15.217026
+2022-10-14 12:37:48.681 | INFO     | __main__:<module>:241 - *********** Download data for: 231 ***********
+2022-10-14 12:37:50.971 | INFO     | __main__:primary_trip_query:56 - 231: trips saved locally
+2022-10-14 12:37:56.779 | INFO     | __main__:get_routelines:87 - 231: routelines exported to GCS
+2022-10-14 12:37:58.561 | INFO     | __main__:get_trips:135 - 231: trips exported to GCS
+2022-10-14 12:38:00.685 | INFO     | __main__:get_stops:166 - 231: stops exported to GCS
+2022-10-14 12:38:07.156 | INFO     | __main__:get_stop_times:191 - 231: st exported to GCS
+2022-10-14 12:38:07.164 | INFO     | __main__:<module>:262 - download files for 231: 0:00:18.482786
+2022-10-14 12:38:07.166 | INFO     | __main__:<module>:241 - *********** Download data for: 232 ***********
+2022-10-14 12:38:09.524 | INFO     | __main__:primary_trip_query:56 - 232: trips saved locally
+2022-10-14 12:38:13.835 | INFO     | __main__:get_routelines:87 - 232: routelines exported to GCS
+2022-10-14 12:38:15.726 | INFO     | __main__:get_trips:135 - 232: trips exported to GCS
+2022-10-14 12:38:18.004 | INFO     | __main__:get_stops:166 - 232: stops exported to GCS
+2022-10-14 12:38:26.978 | INFO     | __main__:get_stop_times:191 - 232: st exported to GCS
+2022-10-14 12:38:26.989 | INFO     | __main__:<module>:262 - download files for 232: 0:00:19.823191
+2022-10-14 12:38:26.990 | INFO     | __main__:<module>:241 - *********** Download data for: 235 ***********
+2022-10-14 12:38:30.606 | INFO     | __main__:primary_trip_query:56 - 235: trips saved locally
+2022-10-14 12:38:42.057 | INFO     | __main__:get_routelines:87 - 235: routelines exported to GCS
+2022-10-14 12:38:43.842 | INFO     | __main__:get_trips:135 - 235: trips exported to GCS
+2022-10-14 12:38:46.412 | INFO     | __main__:get_stops:166 - 235: stops exported to GCS
+2022-10-14 12:39:10.782 | INFO     | __main__:get_stop_times:191 - 235: st exported to GCS
+2022-10-14 12:39:10.831 | INFO     | __main__:<module>:262 - download files for 235: 0:00:43.841117
+2022-10-14 12:39:10.831 | INFO     | __main__:<module>:241 - *********** Download data for: 238 ***********
+2022-10-14 12:39:12.740 | INFO     | __main__:primary_trip_query:56 - 238: trips saved locally
+2022-10-14 12:39:14.511 | INFO     | __main__:get_routelines:87 - 238: routelines exported to GCS
+2022-10-14 12:39:16.277 | INFO     | __main__:get_trips:135 - 238: trips exported to GCS
+2022-10-14 12:39:18.196 | INFO     | __main__:get_stops:166 - 238: stops exported to GCS
+2022-10-14 12:39:20.658 | INFO     | __main__:get_stop_times:191 - 238: st exported to GCS
+2022-10-14 12:39:20.660 | INFO     | __main__:<module>:262 - download files for 238: 0:00:09.828219
+2022-10-14 12:39:20.660 | INFO     | __main__:<module>:241 - *********** Download data for: 239 ***********
+2022-10-14 12:39:22.536 | INFO     | __main__:primary_trip_query:56 - 239: trips saved locally
+2022-10-14 12:39:25.140 | INFO     | __main__:get_routelines:87 - 239: routelines exported to GCS
+2022-10-14 12:39:26.976 | INFO     | __main__:get_trips:135 - 239: trips exported to GCS
+2022-10-14 12:39:29.211 | INFO     | __main__:get_stops:166 - 239: stops exported to GCS
+2022-10-14 12:39:31.730 | INFO     | __main__:get_stop_times:191 - 239: st exported to GCS
+2022-10-14 12:39:31.732 | INFO     | __main__:<module>:262 - download files for 239: 0:00:11.071803
+2022-10-14 12:39:31.734 | INFO     | __main__:<module>:241 - *********** Download data for: 243 ***********
+2022-10-14 12:39:34.028 | INFO     | __main__:primary_trip_query:56 - 243: trips saved locally
+2022-10-14 12:39:37.202 | INFO     | __main__:get_routelines:87 - 243: routelines exported to GCS
+2022-10-14 12:39:38.966 | INFO     | __main__:get_trips:135 - 243: trips exported to GCS
+2022-10-14 12:39:40.892 | INFO     | __main__:get_stops:166 - 243: stops exported to GCS
+2022-10-14 12:39:45.249 | INFO     | __main__:get_stop_times:191 - 243: st exported to GCS
+2022-10-14 12:39:45.254 | INFO     | __main__:<module>:262 - download files for 243: 0:00:13.520766
+2022-10-14 12:39:45.255 | INFO     | __main__:<module>:241 - *********** Download data for: 246 ***********
+2022-10-14 12:39:47.347 | INFO     | __main__:primary_trip_query:56 - 246: trips saved locally
+2022-10-14 12:39:51.333 | INFO     | __main__:get_routelines:87 - 246: routelines exported to GCS
+2022-10-14 12:39:52.978 | INFO     | __main__:get_trips:135 - 246: trips exported to GCS
+2022-10-14 12:39:54.842 | INFO     | __main__:get_stops:166 - 246: stops exported to GCS
+2022-10-14 12:39:58.704 | INFO     | __main__:get_stop_times:191 - 246: st exported to GCS
+2022-10-14 12:39:58.708 | INFO     | __main__:<module>:262 - download files for 246: 0:00:13.452584
+2022-10-14 12:39:58.710 | INFO     | __main__:<module>:241 - *********** Download data for: 247 ***********
+2022-10-14 12:40:00.678 | INFO     | __main__:primary_trip_query:56 - 247: trips saved locally
+2022-10-14 12:40:03.351 | INFO     | __main__:get_routelines:87 - 247: routelines exported to GCS
+2022-10-14 12:40:05.054 | INFO     | __main__:get_trips:135 - 247: trips exported to GCS
+2022-10-14 12:40:06.837 | INFO     | __main__:get_stops:166 - 247: stops exported to GCS
+2022-10-14 12:40:10.894 | INFO     | __main__:get_stop_times:191 - 247: st exported to GCS
+2022-10-14 12:40:10.898 | INFO     | __main__:<module>:262 - download files for 247: 0:00:12.188264
+2022-10-14 12:40:10.898 | INFO     | __main__:<module>:241 - *********** Download data for: 251 ***********
+2022-10-14 12:40:12.695 | INFO     | __main__:primary_trip_query:56 - 251: trips saved locally
+2022-10-14 12:40:16.033 | INFO     | __main__:get_routelines:87 - 251: routelines exported to GCS
+2022-10-14 12:40:17.669 | INFO     | __main__:get_trips:135 - 251: trips exported to GCS
+2022-10-14 12:40:19.511 | INFO     | __main__:get_stops:166 - 251: stops exported to GCS
+2022-10-14 12:40:22.828 | INFO     | __main__:get_stop_times:191 - 251: st exported to GCS
+2022-10-14 12:40:22.830 | INFO     | __main__:<module>:262 - download files for 251: 0:00:11.931968
+2022-10-14 12:40:22.831 | INFO     | __main__:<module>:241 - *********** Download data for: 254 ***********
+2022-10-14 12:40:24.248 | INFO     | __main__:primary_trip_query:56 - 254: trips saved locally
+2022-10-14 12:40:29.820 | INFO     | __main__:get_stops:166 - 254: stops exported to GCS
+2022-10-14 12:40:30.150 | INFO     | __main__:<module>:262 - download files for 254: 0:00:07.319001
+2022-10-14 12:40:30.151 | INFO     | __main__:<module>:241 - *********** Download data for: 257 ***********
+2022-10-14 12:40:31.878 | INFO     | __main__:primary_trip_query:56 - 257: trips saved locally
+2022-10-14 12:40:33.284 | INFO     | __main__:get_routelines:87 - 257: routelines exported to GCS
+2022-10-14 12:40:34.946 | INFO     | __main__:get_trips:135 - 257: trips exported to GCS
+2022-10-14 12:40:36.746 | INFO     | __main__:get_stops:166 - 257: stops exported to GCS
+2022-10-14 12:40:39.499 | INFO     | __main__:get_stop_times:191 - 257: st exported to GCS
+2022-10-14 12:40:39.502 | INFO     | __main__:<module>:262 - download files for 257: 0:00:09.351274
+2022-10-14 12:40:39.503 | INFO     | __main__:<module>:241 - *********** Download data for: 259 ***********
+2022-10-14 12:40:41.406 | INFO     | __main__:primary_trip_query:56 - 259: trips saved locally
+2022-10-14 12:40:43.437 | INFO     | __main__:get_routelines:87 - 259: routelines exported to GCS
+2022-10-14 12:40:45.201 | INFO     | __main__:get_trips:135 - 259: trips exported to GCS
+2022-10-14 12:40:47.072 | INFO     | __main__:get_stops:166 - 259: stops exported to GCS
+2022-10-14 12:40:50.869 | INFO     | __main__:get_stop_times:191 - 259: st exported to GCS
+2022-10-14 12:40:50.875 | INFO     | __main__:<module>:262 - download files for 259: 0:00:11.372174
+2022-10-14 12:40:50.876 | INFO     | __main__:<module>:241 - *********** Download data for: 260 ***********
+2022-10-14 12:40:52.528 | INFO     | __main__:primary_trip_query:56 - 260: trips saved locally
+2022-10-14 12:40:54.020 | INFO     | __main__:get_routelines:87 - 260: routelines exported to GCS
+2022-10-14 12:40:55.694 | INFO     | __main__:get_trips:135 - 260: trips exported to GCS
+2022-10-14 12:40:57.509 | INFO     | __main__:get_stops:166 - 260: stops exported to GCS
+2022-10-14 12:41:00.993 | INFO     | __main__:get_stop_times:191 - 260: st exported to GCS
+2022-10-14 12:41:00.998 | INFO     | __main__:<module>:262 - download files for 260: 0:00:10.121842
+2022-10-14 12:41:00.999 | INFO     | __main__:<module>:241 - *********** Download data for: 261 ***********
+2022-10-14 12:41:02.820 | INFO     | __main__:primary_trip_query:56 - 261: trips saved locally
+2022-10-14 12:41:05.599 | INFO     | __main__:get_routelines:87 - 261: routelines exported to GCS
+2022-10-14 12:41:07.567 | INFO     | __main__:get_trips:135 - 261: trips exported to GCS
+2022-10-14 12:41:09.362 | INFO     | __main__:get_stops:166 - 261: stops exported to GCS
+2022-10-14 12:41:12.161 | INFO     | __main__:get_stop_times:191 - 261: st exported to GCS
+2022-10-14 12:41:12.165 | INFO     | __main__:<module>:262 - download files for 261: 0:00:11.165853
+2022-10-14 12:41:12.166 | INFO     | __main__:<module>:241 - *********** Download data for: 263 ***********
+2022-10-14 12:41:13.626 | INFO     | __main__:primary_trip_query:56 - 263: trips saved locally
+2022-10-14 12:41:18.321 | INFO     | __main__:get_stops:166 - 263: stops exported to GCS
+2022-10-14 12:41:18.625 | INFO     | __main__:<module>:262 - download files for 263: 0:00:06.458942
+2022-10-14 12:41:18.627 | INFO     | __main__:<module>:241 - *********** Download data for: 264 ***********
+2022-10-14 12:41:20.311 | INFO     | __main__:primary_trip_query:56 - 264: trips saved locally
+2022-10-14 12:41:21.849 | INFO     | __main__:get_routelines:87 - 264: routelines exported to GCS
+2022-10-14 12:41:23.470 | INFO     | __main__:get_trips:135 - 264: trips exported to GCS
+2022-10-14 12:41:25.271 | INFO     | __main__:get_stops:166 - 264: stops exported to GCS
+2022-10-14 12:41:27.512 | INFO     | __main__:get_stop_times:191 - 264: st exported to GCS
+2022-10-14 12:41:27.514 | INFO     | __main__:<module>:262 - download files for 264: 0:00:08.886950
+2022-10-14 12:41:27.515 | INFO     | __main__:<module>:241 - *********** Download data for: 265 ***********
+2022-10-14 12:41:29.015 | INFO     | __main__:primary_trip_query:56 - 265: trips saved locally
+2022-10-14 12:41:33.584 | INFO     | __main__:get_stops:166 - 265: stops exported to GCS
+2022-10-14 12:41:34.048 | INFO     | __main__:<module>:262 - download files for 265: 0:00:06.533533
+2022-10-14 12:41:34.049 | INFO     | __main__:<module>:241 - *********** Download data for: 269 ***********
+2022-10-14 12:41:37.041 | INFO     | __main__:primary_trip_query:56 - 269: trips saved locally
+2022-10-14 12:41:55.902 | INFO     | __main__:get_routelines:87 - 269: routelines exported to GCS
+2022-10-14 12:41:57.774 | INFO     | __main__:get_trips:135 - 269: trips exported to GCS
+2022-10-14 12:41:59.752 | INFO     | __main__:get_stops:166 - 269: stops exported to GCS
+2022-10-14 12:42:09.386 | INFO     | __main__:get_stop_times:191 - 269: st exported to GCS
+2022-10-14 12:42:09.399 | INFO     | __main__:<module>:262 - download files for 269: 0:00:35.350234
+2022-10-14 12:42:09.400 | INFO     | __main__:<module>:241 - *********** Download data for: 270 ***********
+2022-10-14 12:42:11.193 | INFO     | __main__:primary_trip_query:56 - 270: trips saved locally
+2022-10-14 12:42:12.670 | INFO     | __main__:get_routelines:87 - 270: routelines exported to GCS
+2022-10-14 12:42:14.434 | INFO     | __main__:get_trips:135 - 270: trips exported to GCS
+2022-10-14 12:42:16.282 | INFO     | __main__:get_stops:166 - 270: stops exported to GCS
+2022-10-14 12:42:18.725 | INFO     | __main__:get_stop_times:191 - 270: st exported to GCS
+2022-10-14 12:42:18.729 | INFO     | __main__:<module>:262 - download files for 270: 0:00:09.329048
+2022-10-14 12:42:18.731 | INFO     | __main__:<module>:241 - *********** Download data for: 271 ***********
+2022-10-14 12:42:20.579 | INFO     | __main__:primary_trip_query:56 - 271: trips saved locally
+2022-10-14 12:42:25.813 | INFO     | __main__:get_routelines:87 - 271: routelines exported to GCS
+2022-10-14 12:42:27.455 | INFO     | __main__:get_trips:135 - 271: trips exported to GCS
+2022-10-14 12:42:29.319 | INFO     | __main__:get_stops:166 - 271: stops exported to GCS
+2022-10-14 12:42:32.316 | INFO     | __main__:get_stop_times:191 - 271: st exported to GCS
+2022-10-14 12:42:32.318 | INFO     | __main__:<module>:262 - download files for 271: 0:00:13.586481
+2022-10-14 12:42:32.318 | INFO     | __main__:<module>:241 - *********** Download data for: 273 ***********
+2022-10-14 12:42:34.739 | INFO     | __main__:primary_trip_query:56 - 273: trips saved locally
+2022-10-14 12:42:43.196 | INFO     | __main__:get_routelines:87 - 273: routelines exported to GCS
+2022-10-14 12:42:44.882 | INFO     | __main__:get_trips:135 - 273: trips exported to GCS
+2022-10-14 12:42:47.127 | INFO     | __main__:get_stops:166 - 273: stops exported to GCS
+2022-10-14 12:43:00.514 | INFO     | __main__:get_stop_times:191 - 273: st exported to GCS
+2022-10-14 12:43:00.532 | INFO     | __main__:<module>:262 - download files for 273: 0:00:28.213663
+2022-10-14 12:43:00.532 | INFO     | __main__:<module>:241 - *********** Download data for: 274 ***********
+2022-10-14 12:43:02.359 | INFO     | __main__:primary_trip_query:56 - 274: trips saved locally
+2022-10-14 12:43:04.179 | INFO     | __main__:get_routelines:87 - 274: routelines exported to GCS
+2022-10-14 12:43:05.903 | INFO     | __main__:get_trips:135 - 274: trips exported to GCS
+2022-10-14 12:43:07.848 | INFO     | __main__:get_stops:166 - 274: stops exported to GCS
+2022-10-14 12:43:10.528 | INFO     | __main__:get_stop_times:191 - 274: st exported to GCS
+2022-10-14 12:43:10.530 | INFO     | __main__:<module>:262 - download files for 274: 0:00:09.997845
+2022-10-14 12:43:10.531 | INFO     | __main__:<module>:241 - *********** Download data for: 278 ***********
+2022-10-14 12:43:15.035 | INFO     | __main__:primary_trip_query:56 - 278: trips saved locally
+2022-10-14 12:43:22.934 | INFO     | __main__:get_routelines:87 - 278: routelines exported to GCS
+2022-10-14 12:43:24.771 | INFO     | __main__:get_trips:135 - 278: trips exported to GCS
+2022-10-14 12:43:27.149 | INFO     | __main__:get_stops:166 - 278: stops exported to GCS
+2022-10-14 12:44:13.116 | INFO     | __main__:get_stop_times:191 - 278: st exported to GCS
+2022-10-14 12:44:13.255 | INFO     | __main__:<module>:262 - download files for 278: 0:01:02.724511
+2022-10-14 12:44:13.256 | INFO     | __main__:<module>:241 - *********** Download data for: 279 ***********
+2022-10-14 12:44:17.148 | INFO     | __main__:primary_trip_query:56 - 279: trips saved locally
+2022-10-14 12:44:23.381 | INFO     | __main__:get_routelines:87 - 279: routelines exported to GCS
+2022-10-14 12:44:25.338 | INFO     | __main__:get_trips:135 - 279: trips exported to GCS
+2022-10-14 12:44:27.510 | INFO     | __main__:get_stops:166 - 279: stops exported to GCS
+2022-10-14 12:44:34.748 | INFO     | __main__:get_stop_times:191 - 279: st exported to GCS
+2022-10-14 12:44:34.761 | INFO     | __main__:<module>:262 - download files for 279: 0:00:21.504318
+2022-10-14 12:44:34.761 | INFO     | __main__:<module>:241 - *********** Download data for: 280 ***********
+2022-10-14 12:44:36.678 | INFO     | __main__:primary_trip_query:56 - 280: trips saved locally
+2022-10-14 12:44:38.429 | INFO     | __main__:get_routelines:87 - 280: routelines exported to GCS
+2022-10-14 12:44:40.225 | INFO     | __main__:get_trips:135 - 280: trips exported to GCS
+2022-10-14 12:44:42.213 | INFO     | __main__:get_stops:166 - 280: stops exported to GCS
+2022-10-14 12:44:44.463 | INFO     | __main__:get_stop_times:191 - 280: st exported to GCS
+2022-10-14 12:44:44.466 | INFO     | __main__:<module>:262 - download files for 280: 0:00:09.705134
+2022-10-14 12:44:44.467 | INFO     | __main__:<module>:241 - *********** Download data for: 281 ***********
+2022-10-14 12:44:46.383 | INFO     | __main__:primary_trip_query:56 - 281: trips saved locally
+2022-10-14 12:44:49.330 | INFO     | __main__:get_routelines:87 - 281: routelines exported to GCS
+2022-10-14 12:44:51.123 | INFO     | __main__:get_trips:135 - 281: trips exported to GCS
+2022-10-14 12:44:52.989 | INFO     | __main__:get_stops:166 - 281: stops exported to GCS
+2022-10-14 12:44:57.412 | INFO     | __main__:get_stop_times:191 - 281: st exported to GCS
+2022-10-14 12:44:57.418 | INFO     | __main__:<module>:262 - download files for 281: 0:00:12.950869
+2022-10-14 12:44:57.419 | INFO     | __main__:<module>:241 - *********** Download data for: 282 ***********
+2022-10-14 12:45:03.321 | INFO     | __main__:primary_trip_query:56 - 282: trips saved locally
+2022-10-14 12:45:24.899 | INFO     | __main__:get_routelines:87 - 282: routelines exported to GCS
+2022-10-14 12:45:26.847 | INFO     | __main__:get_trips:135 - 282: trips exported to GCS
+2022-10-14 12:45:29.541 | INFO     | __main__:get_stops:166 - 282: stops exported to GCS
+2022-10-14 12:46:57.024 | INFO     | __main__:get_stop_times:191 - 282: st exported to GCS
+2022-10-14 12:46:57.238 | INFO     | __main__:<module>:262 - download files for 282: 0:01:59.818979
+2022-10-14 12:46:57.239 | INFO     | __main__:<module>:241 - *********** Download data for: 284 ***********
+2022-10-14 12:46:59.751 | INFO     | __main__:primary_trip_query:56 - 284: trips saved locally
+2022-10-14 12:47:06.034 | INFO     | __main__:get_routelines:87 - 284: routelines exported to GCS
+2022-10-14 12:47:08.086 | INFO     | __main__:get_trips:135 - 284: trips exported to GCS
+2022-10-14 12:47:10.297 | INFO     | __main__:get_stops:166 - 284: stops exported to GCS
+2022-10-14 12:47:15.708 | INFO     | __main__:get_stop_times:191 - 284: st exported to GCS
+2022-10-14 12:47:15.713 | INFO     | __main__:<module>:262 - download files for 284: 0:00:18.473757
+2022-10-14 12:47:15.713 | INFO     | __main__:<module>:241 - *********** Download data for: 287 ***********
+2022-10-14 12:47:17.825 | INFO     | __main__:primary_trip_query:56 - 287: trips saved locally
+2022-10-14 12:47:21.885 | INFO     | __main__:get_routelines:87 - 287: routelines exported to GCS
+2022-10-14 12:47:23.688 | INFO     | __main__:get_trips:135 - 287: trips exported to GCS
+2022-10-14 12:47:25.850 | INFO     | __main__:get_stops:166 - 287: stops exported to GCS
+2022-10-14 12:47:29.980 | INFO     | __main__:get_stop_times:191 - 287: st exported to GCS
+2022-10-14 12:47:29.983 | INFO     | __main__:<module>:262 - download files for 287: 0:00:14.269283
+2022-10-14 12:47:29.983 | INFO     | __main__:<module>:241 - *********** Download data for: 289 ***********
+2022-10-14 12:47:31.888 | INFO     | __main__:primary_trip_query:56 - 289: trips saved locally
+2022-10-14 12:47:38.869 | INFO     | __main__:get_routelines:87 - 289: routelines exported to GCS
+2022-10-14 12:47:40.660 | INFO     | __main__:get_trips:135 - 289: trips exported to GCS
+2022-10-14 12:47:42.476 | INFO     | __main__:get_stops:166 - 289: stops exported to GCS
+2022-10-14 12:47:46.576 | INFO     | __main__:get_stop_times:191 - 289: st exported to GCS
+2022-10-14 12:47:46.579 | INFO     | __main__:<module>:262 - download files for 289: 0:00:16.596181
+2022-10-14 12:47:46.580 | INFO     | __main__:<module>:241 - *********** Download data for: 290 ***********
+2022-10-14 12:47:50.147 | INFO     | __main__:primary_trip_query:56 - 290: trips saved locally
+2022-10-14 12:47:59.318 | INFO     | __main__:get_routelines:87 - 290: routelines exported to GCS
+2022-10-14 12:48:01.167 | INFO     | __main__:get_trips:135 - 290: trips exported to GCS
+2022-10-14 12:48:03.588 | INFO     | __main__:get_stops:166 - 290: stops exported to GCS
+2022-10-14 12:48:18.830 | INFO     | __main__:get_stop_times:191 - 290: st exported to GCS
+2022-10-14 12:48:18.856 | INFO     | __main__:<module>:262 - download files for 290: 0:00:32.275727
+2022-10-14 12:48:18.856 | INFO     | __main__:<module>:241 - *********** Download data for: 293 ***********
+2022-10-14 12:48:21.309 | INFO     | __main__:primary_trip_query:56 - 293: trips saved locally
+2022-10-14 12:48:26.947 | INFO     | __main__:get_routelines:87 - 293: routelines exported to GCS
+2022-10-14 12:48:28.801 | INFO     | __main__:get_trips:135 - 293: trips exported to GCS
+2022-10-14 12:48:30.802 | INFO     | __main__:get_stops:166 - 293: stops exported to GCS
+2022-10-14 12:48:36.402 | INFO     | __main__:get_stop_times:191 - 293: st exported to GCS
+2022-10-14 12:48:36.411 | INFO     | __main__:<module>:262 - download files for 293: 0:00:17.554913
+2022-10-14 12:48:36.414 | INFO     | __main__:<module>:241 - *********** Download data for: 294 ***********
+2022-10-14 12:48:40.860 | INFO     | __main__:primary_trip_query:56 - 294: trips saved locally
+2022-10-14 12:48:57.039 | INFO     | __main__:get_routelines:87 - 294: routelines exported to GCS
+2022-10-14 12:48:58.915 | INFO     | __main__:get_trips:135 - 294: trips exported to GCS
+2022-10-14 12:49:01.244 | INFO     | __main__:get_stops:166 - 294: stops exported to GCS
+2022-10-14 12:49:41.886 | INFO     | __main__:get_stop_times:191 - 294: st exported to GCS
+2022-10-14 12:49:42.199 | INFO     | __main__:<module>:262 - download files for 294: 0:01:05.785170
+2022-10-14 12:49:42.202 | INFO     | __main__:<module>:241 - *********** Download data for: 295 ***********
+2022-10-14 12:49:44.574 | INFO     | __main__:primary_trip_query:56 - 295: trips saved locally
+2022-10-14 12:49:49.352 | INFO     | __main__:get_routelines:87 - 295: routelines exported to GCS
+2022-10-14 12:49:51.273 | INFO     | __main__:get_trips:135 - 295: trips exported to GCS
+2022-10-14 12:49:53.310 | INFO     | __main__:get_stops:166 - 295: stops exported to GCS
+2022-10-14 12:49:58.580 | INFO     | __main__:get_stop_times:191 - 295: st exported to GCS
+2022-10-14 12:49:58.585 | INFO     | __main__:<module>:262 - download files for 295: 0:00:16.382854
+2022-10-14 12:49:58.587 | INFO     | __main__:<module>:241 - *********** Download data for: 296 ***********
+2022-10-14 12:50:00.847 | INFO     | __main__:primary_trip_query:56 - 296: trips saved locally
+2022-10-14 12:50:05.897 | INFO     | __main__:get_routelines:87 - 296: routelines exported to GCS
+2022-10-14 12:50:07.677 | INFO     | __main__:get_trips:135 - 296: trips exported to GCS
+2022-10-14 12:50:09.557 | INFO     | __main__:get_stops:166 - 296: stops exported to GCS
+2022-10-14 12:50:14.920 | INFO     | __main__:get_stop_times:191 - 296: st exported to GCS
+2022-10-14 12:50:14.928 | INFO     | __main__:<module>:262 - download files for 296: 0:00:16.341593
+2022-10-14 12:50:14.930 | INFO     | __main__:<module>:241 - *********** Download data for: 298 ***********
+2022-10-14 12:50:16.860 | INFO     | __main__:primary_trip_query:56 - 298: trips saved locally
+2022-10-14 12:50:20.897 | INFO     | __main__:get_routelines:87 - 298: routelines exported to GCS
+2022-10-14 12:50:22.671 | INFO     | __main__:get_trips:135 - 298: trips exported to GCS
+2022-10-14 12:50:24.505 | INFO     | __main__:get_stops:166 - 298: stops exported to GCS
+2022-10-14 12:50:28.060 | INFO     | __main__:get_stop_times:191 - 298: st exported to GCS
+2022-10-14 12:50:28.063 | INFO     | __main__:<module>:262 - download files for 298: 0:00:13.132698
+2022-10-14 12:50:28.063 | INFO     | __main__:<module>:241 - *********** Download data for: 300 ***********
+2022-10-14 12:50:30.365 | INFO     | __main__:primary_trip_query:56 - 300: trips saved locally
+2022-10-14 12:50:33.610 | INFO     | __main__:get_routelines:87 - 300: routelines exported to GCS
+2022-10-14 12:50:35.303 | INFO     | __main__:get_trips:135 - 300: trips exported to GCS
+2022-10-14 12:50:37.313 | INFO     | __main__:get_stops:166 - 300: stops exported to GCS
+2022-10-14 12:50:45.858 | INFO     | __main__:get_stop_times:191 - 300: st exported to GCS
+2022-10-14 12:50:45.870 | INFO     | __main__:<module>:262 - download files for 300: 0:00:17.806104
+2022-10-14 12:50:45.871 | INFO     | __main__:<module>:241 - *********** Download data for: 301 ***********
+2022-10-14 12:50:47.811 | INFO     | __main__:primary_trip_query:56 - 301: trips saved locally
+2022-10-14 12:50:50.809 | INFO     | __main__:get_routelines:87 - 301: routelines exported to GCS
+2022-10-14 12:50:52.504 | INFO     | __main__:get_trips:135 - 301: trips exported to GCS
+2022-10-14 12:50:54.375 | INFO     | __main__:get_stops:166 - 301: stops exported to GCS
+2022-10-14 12:50:59.210 | INFO     | __main__:get_stop_times:191 - 301: st exported to GCS
+2022-10-14 12:50:59.217 | INFO     | __main__:<module>:262 - download files for 301: 0:00:13.345790
+2022-10-14 12:50:59.218 | INFO     | __main__:<module>:241 - *********** Download data for: 305 ***********
+2022-10-14 12:51:00.973 | INFO     | __main__:primary_trip_query:56 - 305: trips saved locally
+2022-10-14 12:51:02.306 | INFO     | __main__:get_routelines:87 - 305: routelines exported to GCS
+2022-10-14 12:51:04.024 | INFO     | __main__:get_trips:135 - 305: trips exported to GCS
+2022-10-14 12:51:05.787 | INFO     | __main__:get_stops:166 - 305: stops exported to GCS
+2022-10-14 12:51:07.989 | INFO     | __main__:get_stop_times:191 - 305: st exported to GCS
+2022-10-14 12:51:07.992 | INFO     | __main__:<module>:262 - download files for 305: 0:00:08.774102
+2022-10-14 12:51:07.993 | INFO     | __main__:<module>:241 - *********** Download data for: 308 ***********
+2022-10-14 12:51:09.802 | INFO     | __main__:primary_trip_query:56 - 308: trips saved locally
+2022-10-14 12:51:11.568 | INFO     | __main__:get_routelines:87 - 308: routelines exported to GCS
+2022-10-14 12:51:13.303 | INFO     | __main__:get_trips:135 - 308: trips exported to GCS
+2022-10-14 12:51:15.143 | INFO     | __main__:get_stops:166 - 308: stops exported to GCS
+2022-10-14 12:51:18.174 | INFO     | __main__:get_stop_times:191 - 308: st exported to GCS
+2022-10-14 12:51:18.177 | INFO     | __main__:<module>:262 - download files for 308: 0:00:10.184221
+2022-10-14 12:51:18.178 | INFO     | __main__:<module>:241 - *********** Download data for: 310 ***********
+2022-10-14 12:51:20.337 | INFO     | __main__:primary_trip_query:56 - 310: trips saved locally
+2022-10-14 12:51:25.691 | INFO     | __main__:get_routelines:87 - 310: routelines exported to GCS
+2022-10-14 12:51:27.442 | INFO     | __main__:get_trips:135 - 310: trips exported to GCS
+2022-10-14 12:51:29.407 | INFO     | __main__:get_stops:166 - 310: stops exported to GCS
+2022-10-14 12:51:33.926 | INFO     | __main__:get_stop_times:191 - 310: st exported to GCS
+2022-10-14 12:51:33.931 | INFO     | __main__:<module>:262 - download files for 310: 0:00:15.753247
+2022-10-14 12:51:33.932 | INFO     | __main__:<module>:241 - *********** Download data for: 312 ***********
+2022-10-14 12:51:35.705 | INFO     | __main__:primary_trip_query:56 - 312: trips saved locally
+2022-10-14 12:51:37.462 | INFO     | __main__:get_routelines:87 - 312: routelines exported to GCS
+2022-10-14 12:51:39.136 | INFO     | __main__:get_trips:135 - 312: trips exported to GCS
+2022-10-14 12:51:40.985 | INFO     | __main__:get_stops:166 - 312: stops exported to GCS
+2022-10-14 12:51:43.201 | INFO     | __main__:get_stop_times:191 - 312: st exported to GCS
+2022-10-14 12:51:43.203 | INFO     | __main__:<module>:262 - download files for 312: 0:00:09.270955
+2022-10-14 12:51:43.206 | INFO     | __main__:<module>:241 - *********** Download data for: 314 ***********
+2022-10-14 12:51:45.229 | INFO     | __main__:primary_trip_query:56 - 314: trips saved locally
+2022-10-14 12:51:49.590 | INFO     | __main__:get_routelines:87 - 314: routelines exported to GCS
+2022-10-14 12:51:51.434 | INFO     | __main__:get_trips:135 - 314: trips exported to GCS
+2022-10-14 12:51:53.430 | INFO     | __main__:get_stops:166 - 314: stops exported to GCS
+2022-10-14 12:51:59.239 | INFO     | __main__:get_stop_times:191 - 314: st exported to GCS
+2022-10-14 12:51:59.246 | INFO     | __main__:<module>:262 - download files for 314: 0:00:16.039832
+2022-10-14 12:51:59.246 | INFO     | __main__:<module>:241 - *********** Download data for: 315 ***********
+2022-10-14 12:52:01.059 | INFO     | __main__:primary_trip_query:56 - 315: trips saved locally
+2022-10-14 12:52:02.854 | INFO     | __main__:get_routelines:87 - 315: routelines exported to GCS
+2022-10-14 12:52:04.568 | INFO     | __main__:get_trips:135 - 315: trips exported to GCS
+2022-10-14 12:52:06.412 | INFO     | __main__:get_stops:166 - 315: stops exported to GCS
+2022-10-14 12:52:09.155 | INFO     | __main__:get_stop_times:191 - 315: st exported to GCS
+2022-10-14 12:52:09.159 | INFO     | __main__:<module>:262 - download files for 315: 0:00:09.912856
+2022-10-14 12:52:09.160 | INFO     | __main__:<module>:241 - *********** Download data for: 320 ***********
+2022-10-14 12:52:10.924 | INFO     | __main__:primary_trip_query:56 - 320: trips saved locally
+2022-10-14 12:52:12.321 | INFO     | __main__:get_routelines:87 - 320: routelines exported to GCS
+2022-10-14 12:52:13.969 | INFO     | __main__:get_trips:135 - 320: trips exported to GCS
+2022-10-14 12:52:15.798 | INFO     | __main__:get_stops:166 - 320: stops exported to GCS
+2022-10-14 12:52:18.015 | INFO     | __main__:get_stop_times:191 - 320: st exported to GCS
+2022-10-14 12:52:18.017 | INFO     | __main__:<module>:262 - download files for 320: 0:00:08.856834
+2022-10-14 12:52:18.017 | INFO     | __main__:<module>:241 - *********** Download data for: 323 ***********
+2022-10-14 12:52:20.752 | INFO     | __main__:primary_trip_query:56 - 323: trips saved locally
+2022-10-14 12:52:22.310 | INFO     | __main__:get_routelines:87 - 323: routelines exported to GCS
+2022-10-14 12:52:24.052 | INFO     | __main__:get_trips:135 - 323: trips exported to GCS
+2022-10-14 12:52:25.887 | INFO     | __main__:get_stops:166 - 323: stops exported to GCS
+2022-10-14 12:52:29.070 | INFO     | __main__:get_stop_times:191 - 323: st exported to GCS
+2022-10-14 12:52:29.073 | INFO     | __main__:<module>:262 - download files for 323: 0:00:11.055527
+2022-10-14 12:52:29.073 | INFO     | __main__:<module>:241 - *********** Download data for: 324 ***********
+2022-10-14 12:52:31.089 | INFO     | __main__:primary_trip_query:56 - 324: trips saved locally
+2022-10-14 12:52:32.854 | INFO     | __main__:get_routelines:87 - 324: routelines exported to GCS
+2022-10-14 12:52:34.496 | INFO     | __main__:get_trips:135 - 324: trips exported to GCS
+2022-10-14 12:52:36.345 | INFO     | __main__:get_stops:166 - 324: stops exported to GCS
+2022-10-14 12:52:40.351 | INFO     | __main__:get_stop_times:191 - 324: st exported to GCS
+2022-10-14 12:52:40.356 | INFO     | __main__:<module>:262 - download files for 324: 0:00:11.282616
+2022-10-14 12:52:40.358 | INFO     | __main__:<module>:241 - *********** Download data for: 327 ***********
+2022-10-14 12:52:42.391 | INFO     | __main__:primary_trip_query:56 - 327: trips saved locally
+2022-10-14 12:52:45.627 | INFO     | __main__:get_routelines:87 - 327: routelines exported to GCS
+2022-10-14 12:52:47.318 | INFO     | __main__:get_trips:135 - 327: trips exported to GCS
+2022-10-14 12:52:49.224 | INFO     | __main__:get_stops:166 - 327: stops exported to GCS
+2022-10-14 12:52:54.758 | INFO     | __main__:get_stop_times:191 - 327: st exported to GCS
+2022-10-14 12:52:54.765 | INFO     | __main__:<module>:262 - download files for 327: 0:00:14.407396
+2022-10-14 12:52:54.767 | INFO     | __main__:<module>:241 - *********** Download data for: 329 ***********
+2022-10-14 12:52:56.482 | INFO     | __main__:primary_trip_query:56 - 329: trips saved locally
+2022-10-14 12:52:58.331 | INFO     | __main__:get_routelines:87 - 329: routelines exported to GCS
+2022-10-14 12:53:00.042 | INFO     | __main__:get_trips:135 - 329: trips exported to GCS
+2022-10-14 12:53:01.716 | INFO     | __main__:get_stops:166 - 329: stops exported to GCS
+2022-10-14 12:53:04.086 | INFO     | __main__:get_stop_times:191 - 329: st exported to GCS
+2022-10-14 12:53:04.088 | INFO     | __main__:<module>:262 - download files for 329: 0:00:09.321207
+2022-10-14 12:53:04.088 | INFO     | __main__:<module>:241 - *********** Download data for: 331 ***********
+2022-10-14 12:53:05.868 | INFO     | __main__:primary_trip_query:56 - 331: trips saved locally
+2022-10-14 12:53:08.330 | INFO     | __main__:get_routelines:87 - 331: routelines exported to GCS
+2022-10-14 12:53:10.013 | INFO     | __main__:get_trips:135 - 331: trips exported to GCS
+2022-10-14 12:53:11.772 | INFO     | __main__:get_stops:166 - 331: stops exported to GCS
+2022-10-14 12:53:14.288 | INFO     | __main__:get_stop_times:191 - 331: st exported to GCS
+2022-10-14 12:53:14.291 | INFO     | __main__:<module>:262 - download files for 331: 0:00:10.202653
+2022-10-14 12:53:14.293 | INFO     | __main__:<module>:241 - *********** Download data for: 334 ***********
+2022-10-14 12:53:16.033 | INFO     | __main__:primary_trip_query:56 - 334: trips saved locally
+2022-10-14 12:53:17.961 | INFO     | __main__:get_routelines:87 - 334: routelines exported to GCS
+2022-10-14 12:53:19.632 | INFO     | __main__:get_trips:135 - 334: trips exported to GCS
+2022-10-14 12:53:21.381 | INFO     | __main__:get_stops:166 - 334: stops exported to GCS
+2022-10-14 12:53:23.513 | INFO     | __main__:get_stop_times:191 - 334: st exported to GCS
+2022-10-14 12:53:23.516 | INFO     | __main__:<module>:262 - download files for 334: 0:00:09.223322
+2022-10-14 12:53:23.516 | INFO     | __main__:<module>:241 - *********** Download data for: 336 ***********
+2022-10-14 12:53:25.630 | INFO     | __main__:primary_trip_query:56 - 336: trips saved locally
+2022-10-14 12:53:31.558 | INFO     | __main__:get_routelines:87 - 336: routelines exported to GCS
+2022-10-14 12:53:33.200 | INFO     | __main__:get_trips:135 - 336: trips exported to GCS
+2022-10-14 12:53:35.151 | INFO     | __main__:get_stops:166 - 336: stops exported to GCS
+2022-10-14 12:53:41.241 | INFO     | __main__:get_stop_times:191 - 336: st exported to GCS
+2022-10-14 12:53:41.248 | INFO     | __main__:<module>:262 - download files for 336: 0:00:17.731711
+2022-10-14 12:53:41.250 | INFO     | __main__:<module>:241 - *********** Download data for: 337 ***********
+2022-10-14 12:53:42.954 | INFO     | __main__:primary_trip_query:56 - 337: trips saved locally
+2022-10-14 12:53:46.120 | INFO     | __main__:get_routelines:87 - 337: routelines exported to GCS
+2022-10-14 12:53:47.840 | INFO     | __main__:get_trips:135 - 337: trips exported to GCS
+2022-10-14 12:53:49.615 | INFO     | __main__:get_stops:166 - 337: stops exported to GCS
+2022-10-14 12:53:51.903 | INFO     | __main__:get_stop_times:191 - 337: st exported to GCS
+2022-10-14 12:53:51.906 | INFO     | __main__:<module>:262 - download files for 337: 0:00:10.656165
+2022-10-14 12:53:51.906 | INFO     | __main__:<module>:241 - *********** Download data for: 338 ***********
+2022-10-14 12:53:53.377 | INFO     | __main__:primary_trip_query:56 - 338: trips saved locally
+2022-10-14 12:53:57.952 | INFO     | __main__:get_stops:166 - 338: stops exported to GCS
+2022-10-14 12:53:58.257 | INFO     | __main__:<module>:262 - download files for 338: 0:00:06.350636
+2022-10-14 12:53:58.257 | INFO     | __main__:<module>:241 - *********** Download data for: 339 ***********
+2022-10-14 12:54:00.180 | INFO     | __main__:primary_trip_query:56 - 339: trips saved locally
+2022-10-14 12:54:05.538 | INFO     | __main__:get_routelines:87 - 339: routelines exported to GCS
+2022-10-14 12:54:07.231 | INFO     | __main__:get_trips:135 - 339: trips exported to GCS
+2022-10-14 12:54:09.387 | INFO     | __main__:get_stops:166 - 339: stops exported to GCS
+2022-10-14 12:54:14.696 | INFO     | __main__:get_stop_times:191 - 339: st exported to GCS
+2022-10-14 12:54:14.702 | INFO     | __main__:<module>:262 - download files for 339: 0:00:16.444610
+2022-10-14 12:54:14.704 | INFO     | __main__:<module>:241 - *********** Download data for: 341 ***********
+2022-10-14 12:54:16.267 | INFO     | __main__:primary_trip_query:56 - 341: trips saved locally
+2022-10-14 12:54:26.414 | INFO     | __main__:get_stops:166 - 341: stops exported to GCS
+2022-10-14 12:54:26.731 | INFO     | __main__:<module>:262 - download files for 341: 0:00:12.026921
+2022-10-14 12:54:26.732 | INFO     | __main__:<module>:241 - *********** Download data for: 343 ***********
+2022-10-14 12:54:28.917 | INFO     | __main__:primary_trip_query:56 - 343: trips saved locally
+2022-10-14 12:54:36.766 | INFO     | __main__:get_routelines:87 - 343: routelines exported to GCS
+2022-10-14 12:54:38.600 | INFO     | __main__:get_trips:135 - 343: trips exported to GCS
+2022-10-14 12:54:40.533 | INFO     | __main__:get_stops:166 - 343: stops exported to GCS
+2022-10-14 12:54:44.659 | INFO     | __main__:get_stop_times:191 - 343: st exported to GCS
+2022-10-14 12:54:44.665 | INFO     | __main__:<module>:262 - download files for 343: 0:00:17.932818
+2022-10-14 12:54:44.666 | INFO     | __main__:<module>:241 - *********** Download data for: 344 ***********
+2022-10-14 12:54:46.396 | INFO     | __main__:primary_trip_query:56 - 344: trips saved locally
+2022-10-14 12:54:48.937 | INFO     | __main__:get_routelines:87 - 344: routelines exported to GCS
+2022-10-14 12:54:50.664 | INFO     | __main__:get_trips:135 - 344: trips exported to GCS
+2022-10-14 12:54:52.380 | INFO     | __main__:get_stops:166 - 344: stops exported to GCS
+2022-10-14 12:54:54.517 | INFO     | __main__:get_stop_times:191 - 344: st exported to GCS
+2022-10-14 12:54:54.521 | INFO     | __main__:<module>:262 - download files for 344: 0:00:09.855125
+2022-10-14 12:54:54.523 | INFO     | __main__:<module>:241 - *********** Download data for: 346 ***********
+2022-10-14 12:54:56.400 | INFO     | __main__:primary_trip_query:56 - 346: trips saved locally
+2022-10-14 12:54:59.401 | INFO     | __main__:get_routelines:87 - 346: routelines exported to GCS
+2022-10-14 12:55:01.093 | INFO     | __main__:get_trips:135 - 346: trips exported to GCS
+2022-10-14 12:55:03.012 | INFO     | __main__:get_stops:166 - 346: stops exported to GCS
+2022-10-14 12:55:05.358 | INFO     | __main__:get_stop_times:191 - 346: st exported to GCS
+2022-10-14 12:55:05.359 | INFO     | __main__:<module>:262 - download files for 346: 0:00:10.836452
+2022-10-14 12:55:05.359 | INFO     | __main__:<module>:241 - *********** Download data for: 349 ***********
+2022-10-14 12:55:07.217 | INFO     | __main__:primary_trip_query:56 - 349: trips saved locally
+2022-10-14 12:55:08.713 | INFO     | __main__:get_routelines:87 - 349: routelines exported to GCS
+2022-10-14 12:55:10.400 | INFO     | __main__:get_trips:135 - 349: trips exported to GCS
+2022-10-14 12:55:12.174 | INFO     | __main__:get_stops:166 - 349: stops exported to GCS
+2022-10-14 12:55:15.653 | INFO     | __main__:get_stop_times:191 - 349: st exported to GCS
+2022-10-14 12:55:15.656 | INFO     | __main__:<module>:262 - download files for 349: 0:00:10.296807
+2022-10-14 12:55:15.657 | INFO     | __main__:<module>:241 - *********** Download data for: 350 ***********
+2022-10-14 12:55:17.784 | INFO     | __main__:primary_trip_query:56 - 350: trips saved locally
+2022-10-14 12:55:24.309 | INFO     | __main__:get_routelines:87 - 350: routelines exported to GCS
+2022-10-14 12:55:26.142 | INFO     | __main__:get_trips:135 - 350: trips exported to GCS
+2022-10-14 12:55:27.956 | INFO     | __main__:get_stops:166 - 350: stops exported to GCS
+2022-10-14 12:55:33.263 | INFO     | __main__:get_stop_times:191 - 350: st exported to GCS
+2022-10-14 12:55:33.269 | INFO     | __main__:<module>:262 - download files for 350: 0:00:17.612365
+2022-10-14 12:55:33.270 | INFO     | __main__:<module>:241 - *********** Download data for: 351 ***********
+2022-10-14 12:55:35.367 | INFO     | __main__:primary_trip_query:56 - 351: trips saved locally
+2022-10-14 12:55:37.341 | INFO     | __main__:get_routelines:87 - 351: routelines exported to GCS
+2022-10-14 12:55:39.069 | INFO     | __main__:get_trips:135 - 351: trips exported to GCS
+2022-10-14 12:55:40.979 | INFO     | __main__:get_stops:166 - 351: stops exported to GCS
+2022-10-14 12:55:44.893 | INFO     | __main__:get_stop_times:191 - 351: st exported to GCS
+2022-10-14 12:55:44.898 | INFO     | __main__:<module>:262 - download files for 351: 0:00:11.628412
+2022-10-14 12:55:44.900 | INFO     | __main__:<module>:241 - *********** Download data for: 356 ***********
+2022-10-14 12:55:46.935 | INFO     | __main__:primary_trip_query:56 - 356: trips saved locally
+2022-10-14 12:55:48.813 | INFO     | __main__:get_routelines:87 - 356: routelines exported to GCS
+2022-10-14 12:55:50.559 | INFO     | __main__:get_trips:135 - 356: trips exported to GCS
+2022-10-14 12:55:52.358 | INFO     | __main__:get_stops:166 - 356: stops exported to GCS
+2022-10-14 12:55:56.145 | INFO     | __main__:get_stop_times:191 - 356: st exported to GCS
+2022-10-14 12:55:56.149 | INFO     | __main__:<module>:262 - download files for 356: 0:00:11.249329
+2022-10-14 12:55:56.150 | INFO     | __main__:<module>:241 - *********** Download data for: 360 ***********
+2022-10-14 12:55:58.477 | INFO     | __main__:primary_trip_query:56 - 360: trips saved locally
+2022-10-14 12:56:05.500 | INFO     | __main__:get_routelines:87 - 360: routelines exported to GCS
+2022-10-14 12:56:07.170 | INFO     | __main__:get_trips:135 - 360: trips exported to GCS
+2022-10-14 12:56:09.101 | INFO     | __main__:get_stops:166 - 360: stops exported to GCS
+2022-10-14 12:56:16.127 | INFO     | __main__:get_stop_times:191 - 360: st exported to GCS
+2022-10-14 12:56:16.137 | INFO     | __main__:<module>:262 - download files for 360: 0:00:19.987458
+2022-10-14 12:56:16.138 | INFO     | __main__:<module>:241 - *********** Download data for: 361 ***********
+2022-10-14 12:56:18.130 | INFO     | __main__:primary_trip_query:56 - 361: trips saved locally
+2022-10-14 12:56:20.033 | INFO     | __main__:get_routelines:87 - 361: routelines exported to GCS
+2022-10-14 12:56:21.777 | INFO     | __main__:get_trips:135 - 361: trips exported to GCS
+2022-10-14 12:56:23.608 | INFO     | __main__:get_stops:166 - 361: stops exported to GCS
+2022-10-14 12:56:28.053 | INFO     | __main__:get_stop_times:191 - 361: st exported to GCS
+2022-10-14 12:56:28.060 | INFO     | __main__:<module>:262 - download files for 361: 0:00:11.921587
+2022-10-14 12:56:28.060 | INFO     | __main__:<module>:241 - *********** Download data for: 365 ***********
+2022-10-14 12:56:29.548 | INFO     | __main__:primary_trip_query:56 - 365: trips saved locally
+2022-10-14 12:56:34.199 | INFO     | __main__:get_stops:166 - 365: stops exported to GCS
+2022-10-14 12:56:34.503 | INFO     | __main__:<module>:262 - download files for 365: 0:00:06.443187
+2022-10-14 12:56:34.504 | INFO     | __main__:<module>:241 - *********** Download data for: 366 ***********
+2022-10-14 12:56:36.182 | INFO     | __main__:primary_trip_query:56 - 366: trips saved locally
+2022-10-14 12:56:40.705 | INFO     | __main__:get_routelines:87 - 366: routelines exported to GCS
+2022-10-14 12:56:42.433 | INFO     | __main__:get_trips:135 - 366: trips exported to GCS
+2022-10-14 12:56:44.166 | INFO     | __main__:get_stops:166 - 366: stops exported to GCS
+2022-10-14 12:56:46.739 | INFO     | __main__:get_stop_times:191 - 366: st exported to GCS
+2022-10-14 12:56:46.741 | INFO     | __main__:<module>:262 - download files for 366: 0:00:12.236727
+2022-10-14 12:56:46.742 | INFO     | __main__:<module>:241 - *********** Download data for: 367 ***********
+2022-10-14 12:56:48.493 | INFO     | __main__:primary_trip_query:56 - 367: trips saved locally
+2022-10-14 12:56:55.081 | INFO     | __main__:get_routelines:87 - 367: routelines exported to GCS
+2022-10-14 12:56:56.718 | INFO     | __main__:get_trips:135 - 367: trips exported to GCS
+2022-10-14 12:56:58.472 | INFO     | __main__:get_stops:166 - 367: stops exported to GCS
+2022-10-14 12:57:00.848 | INFO     | __main__:get_stop_times:191 - 367: st exported to GCS
+2022-10-14 12:57:00.850 | INFO     | __main__:<module>:262 - download files for 367: 0:00:14.108613
+2022-10-14 12:57:00.851 | INFO     | __main__:<module>:241 - *********** Download data for: 368 ***********
+2022-10-14 12:57:02.879 | INFO     | __main__:primary_trip_query:56 - 368: trips saved locally
+2022-10-14 12:57:06.170 | INFO     | __main__:get_routelines:87 - 368: routelines exported to GCS
+2022-10-14 12:57:07.927 | INFO     | __main__:get_trips:135 - 368: trips exported to GCS
+2022-10-14 12:57:09.716 | INFO     | __main__:get_stops:166 - 368: stops exported to GCS
+2022-10-14 12:57:13.806 | INFO     | __main__:get_stop_times:191 - 368: st exported to GCS
+2022-10-14 12:57:13.810 | INFO     | __main__:<module>:262 - download files for 368: 0:00:12.958827
+2022-10-14 12:57:13.810 | INFO     | __main__:<module>:241 - *********** Download data for: 372 ***********
+2022-10-14 12:57:15.651 | INFO     | __main__:primary_trip_query:56 - 372: trips saved locally
+2022-10-14 12:57:17.150 | INFO     | __main__:get_routelines:87 - 372: routelines exported to GCS
+2022-10-14 12:57:18.794 | INFO     | __main__:get_trips:135 - 372: trips exported to GCS
+2022-10-14 12:57:20.620 | INFO     | __main__:get_stops:166 - 372: stops exported to GCS
+2022-10-14 12:57:24.386 | INFO     | __main__:get_stop_times:191 - 372: st exported to GCS
+2022-10-14 12:57:24.389 | INFO     | __main__:<module>:262 - download files for 372: 0:00:10.578626
+2022-10-14 12:57:24.390 | INFO     | __main__:<module>:241 - *********** Download data for: 374 ***********
+2022-10-14 12:57:26.222 | INFO     | __main__:primary_trip_query:56 - 374: trips saved locally
+2022-10-14 12:57:30.514 | INFO     | __main__:get_routelines:87 - 374: routelines exported to GCS
+2022-10-14 12:57:32.191 | INFO     | __main__:get_trips:135 - 374: trips exported to GCS
+2022-10-14 12:57:34.086 | INFO     | __main__:get_stops:166 - 374: stops exported to GCS
+2022-10-14 12:57:36.100 | INFO     | __main__:get_stop_times:191 - 374: st exported to GCS
+2022-10-14 12:57:36.103 | INFO     | __main__:<module>:262 - download files for 374: 0:00:11.713680
+2022-10-14 12:57:36.104 | INFO     | __main__:<module>:241 - *********** Download data for: 376 ***********
+2022-10-14 12:57:38.046 | INFO     | __main__:primary_trip_query:56 - 376: trips saved locally
+2022-10-14 12:57:40.886 | INFO     | __main__:get_routelines:87 - 376: routelines exported to GCS
+2022-10-14 12:57:42.577 | INFO     | __main__:get_trips:135 - 376: trips exported to GCS
+2022-10-14 12:57:44.346 | INFO     | __main__:get_stops:166 - 376: stops exported to GCS
+2022-10-14 12:57:47.686 | INFO     | __main__:get_stop_times:191 - 376: st exported to GCS
+2022-10-14 12:57:47.689 | INFO     | __main__:<module>:262 - download files for 376: 0:00:11.585458
+2022-10-14 12:57:47.691 | INFO     | __main__:<module>:241 - *********** Download data for: 380 ***********
+2022-10-14 12:57:49.833 | INFO     | __main__:primary_trip_query:56 - 380: trips saved locally
+2022-10-14 12:57:58.333 | INFO     | __main__:get_routelines:87 - 380: routelines exported to GCS
+2022-10-14 12:57:59.959 | INFO     | __main__:get_trips:135 - 380: trips exported to GCS
+2022-10-14 12:58:01.947 | INFO     | __main__:get_stops:166 - 380: stops exported to GCS
+2022-10-14 12:58:08.785 | INFO     | __main__:get_stop_times:191 - 380: st exported to GCS
+2022-10-14 12:58:08.797 | INFO     | __main__:<module>:262 - download files for 380: 0:00:21.106123
+2022-10-14 12:58:08.801 | INFO     | __main__:<module>:241 - *********** Download data for: 381 ***********
+2022-10-14 12:58:10.969 | INFO     | __main__:primary_trip_query:56 - 381: trips saved locally
+2022-10-14 12:58:19.611 | INFO     | __main__:get_routelines:87 - 381: routelines exported to GCS
+2022-10-14 12:58:21.390 | INFO     | __main__:get_trips:135 - 381: trips exported to GCS
+2022-10-14 12:58:23.270 | INFO     | __main__:get_stops:166 - 381: stops exported to GCS
+2022-10-14 12:58:26.867 | INFO     | __main__:get_stop_times:191 - 381: st exported to GCS
+2022-10-14 12:58:26.870 | INFO     | __main__:<module>:262 - download files for 381: 0:00:18.068707
+2022-10-14 12:58:26.871 | INFO     | __main__:<module>:241 - *********** Download data for: 386 ***********
+2022-10-14 12:58:28.778 | INFO     | __main__:primary_trip_query:56 - 386: trips saved locally
+2022-10-14 12:58:30.512 | INFO     | __main__:get_routelines:87 - 386: routelines exported to GCS
+2022-10-14 12:58:32.112 | INFO     | __main__:get_trips:135 - 386: trips exported to GCS
+2022-10-14 12:58:33.871 | INFO     | __main__:get_stops:166 - 386: stops exported to GCS
+2022-10-14 12:58:37.218 | INFO     | __main__:get_stop_times:191 - 386: st exported to GCS
+2022-10-14 12:58:37.224 | INFO     | __main__:<module>:262 - download files for 386: 0:00:10.353107
+2022-10-14 12:58:37.226 | INFO     | __main__:<module>:241 - *********** Download data for: 389 ***********
+2022-10-14 12:58:39.172 | INFO     | __main__:primary_trip_query:56 - 389: trips saved locally
+2022-10-14 12:58:42.718 | INFO     | __main__:get_routelines:87 - 389: routelines exported to GCS
+2022-10-14 12:58:44.436 | INFO     | __main__:get_trips:135 - 389: trips exported to GCS
+2022-10-14 12:58:46.205 | INFO     | __main__:get_stops:166 - 389: stops exported to GCS
+2022-10-14 12:58:49.501 | INFO     | __main__:get_stop_times:191 - 389: st exported to GCS
+2022-10-14 12:58:49.506 | INFO     | __main__:<module>:262 - download files for 389: 0:00:12.280207
+2022-10-14 12:58:49.506 | INFO     | __main__:<module>:241 - *********** Download data for: 394 ***********
+2022-10-14 12:58:50.891 | INFO     | __main__:primary_trip_query:56 - 394: trips saved locally
+2022-10-14 12:58:55.179 | INFO     | __main__:get_stops:166 - 394: stops exported to GCS
+2022-10-14 12:58:55.492 | INFO     | __main__:<module>:262 - download files for 394: 0:00:05.985716
+2022-10-14 12:58:55.493 | INFO     | __main__:<module>:241 - *********** Download data for: 473 ***********
+2022-10-14 12:58:57.292 | INFO     | __main__:primary_trip_query:56 - 473: trips saved locally
+2022-10-14 12:59:00.923 | INFO     | __main__:get_routelines:87 - 473: routelines exported to GCS
+2022-10-14 12:59:02.640 | INFO     | __main__:get_trips:135 - 473: trips exported to GCS
+2022-10-14 12:59:04.464 | INFO     | __main__:get_stops:166 - 473: stops exported to GCS
+2022-10-14 12:59:06.430 | INFO     | __main__:get_stop_times:191 - 473: st exported to GCS
+2022-10-14 12:59:06.434 | INFO     | __main__:<module>:262 - download files for 473: 0:00:10.940780
+2022-10-14 12:59:06.434 | INFO     | __main__:<module>:241 - *********** Download data for: 474 ***********
+2022-10-14 12:59:08.440 | INFO     | __main__:primary_trip_query:56 - 474: trips saved locally
+2022-10-14 12:59:13.477 | INFO     | __main__:get_routelines:87 - 474: routelines exported to GCS
+2022-10-14 12:59:15.054 | INFO     | __main__:get_trips:135 - 474: trips exported to GCS
+2022-10-14 12:59:16.838 | INFO     | __main__:get_stops:166 - 474: stops exported to GCS
+2022-10-14 12:59:22.027 | INFO     | __main__:get_stop_times:191 - 474: st exported to GCS
+2022-10-14 12:59:22.031 | INFO     | __main__:<module>:262 - download files for 474: 0:00:15.596929
+2022-10-14 12:59:22.032 | INFO     | __main__:<module>:241 - *********** Download data for: 481 ***********
+2022-10-14 12:59:23.700 | INFO     | __main__:primary_trip_query:56 - 481: trips saved locally
+2022-10-14 12:59:25.042 | INFO     | __main__:get_routelines:87 - 481: routelines exported to GCS
+2022-10-14 12:59:26.773 | INFO     | __main__:get_trips:135 - 481: trips exported to GCS
+2022-10-14 12:59:28.516 | INFO     | __main__:get_stops:166 - 481: stops exported to GCS
+2022-10-14 12:59:30.638 | INFO     | __main__:get_stop_times:191 - 481: st exported to GCS
+2022-10-14 12:59:30.642 | INFO     | __main__:<module>:262 - download files for 481: 0:00:08.609815
+2022-10-14 12:59:30.643 | INFO     | __main__:<module>:241 - *********** Download data for: 482 ***********
+2022-10-14 12:59:32.371 | INFO     | __main__:primary_trip_query:56 - 482: trips saved locally
+2022-10-14 12:59:34.886 | INFO     | __main__:get_routelines:87 - 482: routelines exported to GCS
+2022-10-14 13:09:44.926 | INFO     | __main__:<module>:21 - # operators to run: 23
+2022-10-14 13:15:57.606 | INFO     | __main__:<module>:234 - # operators to run: 23
+2022-10-14 13:15:57.607 | INFO     | __main__:<module>:241 - *********** Download data for: 482 ***********
+2022-10-14 13:15:59.436 | INFO     | __main__:primary_trip_query:55 - 482: trips saved locally
+2022-10-14 13:16:01.586 | INFO     | __main__:get_routelines:86 - 482: routelines exported to GCS
+2022-10-14 13:42:04.267 | INFO     | __main__:<module>:234 - # operators to run: 23
+2022-10-14 13:42:04.268 | INFO     | __main__:<module>:241 - *********** Download data for: 482 ***********
+2022-10-14 13:42:06.194 | INFO     | __main__:primary_trip_query:55 - 482: trips saved locally
+2022-10-14 13:42:08.063 | INFO     | __main__:get_routelines:86 - 482: routelines exported to GCS
+2022-10-14 13:42:09.929 | INFO     | __main__:get_trips:134 - 482: trips exported to GCS
+2022-10-14 13:42:11.848 | INFO     | __main__:get_stops:165 - 482: stops exported to GCS
+2022-10-14 13:42:14.383 | INFO     | __main__:get_stop_times:190 - 482: st exported to GCS
+2022-10-14 13:42:14.386 | INFO     | __main__:<module>:262 - download files for 482: 0:00:10.117769
+2022-10-14 13:42:14.387 | INFO     | __main__:<module>:241 - *********** Download data for: 483 ***********
+2022-10-14 13:42:16.238 | INFO     | __main__:primary_trip_query:55 - 483: trips saved locally
+2022-10-14 13:42:17.811 | INFO     | __main__:get_routelines:86 - 483: routelines exported to GCS
+2022-10-14 13:42:19.696 | INFO     | __main__:get_trips:134 - 483: trips exported to GCS
+2022-10-14 13:42:21.644 | INFO     | __main__:get_stops:165 - 483: stops exported to GCS
+2022-10-14 13:42:24.875 | INFO     | __main__:get_stop_times:190 - 483: st exported to GCS
+2022-10-14 13:42:24.878 | INFO     | __main__:<module>:262 - download files for 483: 0:00:10.491185
+2022-10-14 13:42:24.878 | INFO     | __main__:<module>:241 - *********** Download data for: 484 ***********
+2022-10-14 13:42:27.111 | INFO     | __main__:primary_trip_query:55 - 484: trips saved locally
+2022-10-14 13:42:31.032 | INFO     | __main__:get_routelines:86 - 484: routelines exported to GCS
+2022-10-14 13:42:32.796 | INFO     | __main__:get_trips:134 - 484: trips exported to GCS
+2022-10-14 13:42:34.695 | INFO     | __main__:get_stops:165 - 484: stops exported to GCS
+2022-10-14 13:42:41.133 | INFO     | __main__:get_stop_times:190 - 484: st exported to GCS
+2022-10-14 13:42:41.143 | INFO     | __main__:<module>:262 - download files for 484: 0:00:16.264384
+2022-10-14 13:42:41.144 | INFO     | __main__:<module>:241 - *********** Download data for: 485 ***********
+2022-10-14 13:42:42.793 | INFO     | __main__:primary_trip_query:55 - 485: trips saved locally
+2022-10-14 13:42:44.123 | INFO     | __main__:get_routelines:86 - 485: routelines exported to GCS
+2022-10-14 13:42:45.814 | INFO     | __main__:get_trips:134 - 485: trips exported to GCS
+2022-10-14 13:42:47.754 | INFO     | __main__:get_stops:165 - 485: stops exported to GCS
+2022-10-14 13:42:49.664 | INFO     | __main__:get_stop_times:190 - 485: st exported to GCS
+2022-10-14 13:42:49.668 | INFO     | __main__:<module>:262 - download files for 485: 0:00:08.523784
+2022-10-14 13:42:49.670 | INFO     | __main__:<module>:266 - execution time: 0:01:24.337609
+2022-10-14 17:04:02.515 | INFO     | __main__:<module>:67 - Analysis date: 2022-10-12
+2022-10-15 11:36:53.734 | INFO     | __main__:<module>:65 - Analysis date: 2022-10-12
+2022-10-15 12:03:39.830 | INFO     | __main__:<module>:65 - Analysis date: 2022-10-12
+2022-10-15 12:13:35.619 | INFO     | __main__:<module>:65 - Analysis date: 2022-10-12
+2022-10-15 13:12:51.117 | INFO     | __main__:<module>:54 - Analysis date: 2022-10-12
+2022-10-15 13:13:21.045 | INFO     | __main__:<module>:54 - Analysis date: 2022-10-12
+2022-10-15 13:18:35.530 | INFO     | __main__:grab_selected_date:49 - st compiled and cached
+2022-10-15 13:18:35.531 | INFO     | __main__:<module>:65 - execution time: 0:05:14.484791
+2022-10-15 13:58:59.788 | INFO     | __main__:<module>:221 - Analysis date: 2022-10-12
+2022-10-15 13:59:01.548 | INFO     | __main__:<module>:234 - read in cached files: 4
+2022-10-15 14:06:21.851 | INFO     | __main__:<module>:238 - created single operator hqta: 4
+2022-10-15 14:06:23.082 | INFO     | __main__:<module>:244 - successful export: 4
+2022-10-15 14:06:23.086 | INFO     | __main__:<module>:248 - execution time for 4: 0:07:23.280889
+2022-10-15 14:06:24.554 | INFO     | __main__:<module>:234 - read in cached files: 6
+2022-10-15 14:06:28.043 | INFO     | __main__:<module>:238 - created single operator hqta: 6
+2022-10-15 14:06:28.310 | INFO     | __main__:<module>:244 - successful export: 6
+2022-10-15 14:06:28.311 | INFO     | __main__:<module>:248 - execution time for 6: 0:00:05.223469
+2022-10-15 14:06:29.875 | INFO     | __main__:<module>:234 - read in cached files: 10
+2022-10-15 14:06:32.621 | INFO     | __main__:<module>:238 - created single operator hqta: 10
+2022-10-15 14:06:32.750 | INFO     | __main__:<module>:244 - successful export: 10
+2022-10-15 14:06:32.751 | INFO     | __main__:<module>:248 - execution time for 10: 0:00:04.439329
+2022-10-15 14:06:34.273 | INFO     | __main__:<module>:234 - read in cached files: 11
+2022-10-15 14:06:41.639 | INFO     | __main__:<module>:238 - created single operator hqta: 11
+2022-10-15 14:06:41.832 | INFO     | __main__:<module>:244 - successful export: 11
+2022-10-15 14:06:41.833 | INFO     | __main__:<module>:248 - execution time for 11: 0:00:09.080617
+2022-10-15 14:06:43.495 | INFO     | __main__:<module>:234 - read in cached files: 14
+2022-10-15 14:09:08.474 | INFO     | __main__:<module>:238 - created single operator hqta: 14
+2022-10-15 14:09:08.705 | INFO     | __main__:<module>:244 - successful export: 14
+2022-10-15 14:09:08.706 | INFO     | __main__:<module>:248 - execution time for 14: 0:02:26.873088
+2022-10-15 14:09:10.303 | INFO     | __main__:<module>:234 - read in cached files: 15
+2022-10-15 14:09:13.048 | INFO     | __main__:<module>:238 - created single operator hqta: 15
+2022-10-15 14:09:13.156 | INFO     | __main__:<module>:244 - successful export: 15
+2022-10-15 14:09:13.159 | INFO     | __main__:<module>:248 - execution time for 15: 0:00:04.452410
+2022-10-15 14:09:14.807 | INFO     | __main__:<module>:234 - read in cached files: 16
+2022-10-15 14:09:31.801 | INFO     | __main__:<module>:238 - created single operator hqta: 16
+2022-10-15 14:09:32.057 | INFO     | __main__:<module>:244 - successful export: 16
+2022-10-15 14:09:32.058 | INFO     | __main__:<module>:248 - execution time for 16: 0:00:18.897332
+2022-10-15 14:09:33.696 | INFO     | __main__:<module>:234 - read in cached files: 17
+2022-10-15 14:09:37.769 | INFO     | __main__:<module>:238 - created single operator hqta: 17
+2022-10-15 14:09:37.944 | INFO     | __main__:<module>:244 - successful export: 17
+2022-10-15 14:09:37.945 | INFO     | __main__:<module>:248 - execution time for 17: 0:00:05.885488
+2022-10-15 14:09:39.431 | INFO     | __main__:<module>:234 - read in cached files: 18
+2022-10-15 14:09:53.603 | INFO     | __main__:<module>:238 - created single operator hqta: 18
+2022-10-15 14:09:53.920 | INFO     | __main__:<module>:244 - successful export: 18
+2022-10-15 14:09:53.920 | INFO     | __main__:<module>:248 - execution time for 18: 0:00:15.974322
+2022-10-15 14:44:23.660 | INFO     | __main__:<module>:117 - get list of cached ITP IDs: 0:00:37.803287
+2022-10-15 14:51:36.886 | INFO     | __main__:<module>:127 - check files for completeness, save as json: 0:07:13.226129
+2022-10-15 14:51:36.888 | INFO     | __main__:<module>:130 - execution time: 0:07:51.030914
