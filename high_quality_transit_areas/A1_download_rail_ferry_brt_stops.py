@@ -21,7 +21,7 @@ from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 def trip_keys_for_route_type(analysis_date: str, 
                              route_type_list: list) -> pd.DataFrame: 
     trips = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}_all.parquet")
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
     # Choose to output df instead of list because we need route_type later on
     trip_keys_for_type = (trips[trips.route_type.isin(route_type_list)]
@@ -104,7 +104,7 @@ def grab_operator_brt(itp_id: int, analysis_date: str):
     """
         
     trips = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}_all.parquet")
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
     operator_trips = trips[trips.calitp_itp_id==itp_id]
     

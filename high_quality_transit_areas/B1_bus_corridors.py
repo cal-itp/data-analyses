@@ -29,7 +29,7 @@ from utilities import GCS_FILE_PATH
 from update_vars import (analysis_date, CACHED_VIEWS_EXPORT_PATH, 
                          VALID_OPERATORS_FILE)
 
-logger.add("./logs/B1_bus_corridors.log")
+logger.add("./logs/B1_bus_corridors.log", retention="6 months")
 logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
 fs = gcsfs.GCSFileSystem()

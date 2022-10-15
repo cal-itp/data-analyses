@@ -13,7 +13,7 @@ from utilities import catalog_filepath
 
 
 # Input files
-COMBINED_CLIPPED = catalog_filepath("combined_clipped_intersections")
+COMBINED_CLIPPED = catalog_filepath("combined_clipped_intersections", retention="6 months")
 
 
 def process_clipped_intersections() -> dg.GeoDataFrame: 
