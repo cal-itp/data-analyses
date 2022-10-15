@@ -28,7 +28,7 @@ import operators_for_hqta
 from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH
 from shared_utils import gtfs_utils, geography_utils, rt_utils, utils
 
-logger.add("./logs/download_data.log")
+logger.add("./logs/download_data.log", retention="6 months")
 logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
 
 LOCAL_PATH = "./data/"
@@ -214,7 +214,7 @@ def check_route_trips_stops_are_cached(itp_id: int, analysis_date: str):
 
         
 if __name__=="__main__":
-    
+
     start = dt.datetime.now()
     
     ALL_IDS = (tbl.gtfs_schedule.agency()
@@ -228,12 +228,12 @@ if __name__=="__main__":
     
     # ITP IDs already run in the script
     CACHED_IDS = operators_for_hqta.get_list_of_cached_itp_ids(
-        analysis_date, ALL_ITP_IDS = ALL_IDS)
+        analysis_date, all_itp_ids = ALL_IDS)
     
     IDS_TO_RUN = list(set(ALL_IDS).difference(set(CACHED_IDS)))
     logger.info(f"# operators to run: {len(IDS_TO_RUN)}")
-    
-    for itp_id in sorted(ALL_IDS): #sorted(IDS_TO_RUN):
+        
+    for itp_id in sorted(IDS_TO_RUN):
         time0 = dt.datetime.now()
         
         logger.info(f"*********** Download data for: {itp_id} ***********")

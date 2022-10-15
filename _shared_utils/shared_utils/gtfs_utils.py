@@ -546,12 +546,13 @@ def all_routelines_or_stops_with_cached(
     Use cached files whenever possible, instead of running fresh query.
     Routelines and stops are geospatial, import and export with geopandas.
     """
-
     date_str = format_date(analysis_date)
 
     # Set metadata
+    first_operator = sorted(itp_id_list)[0]
+
     gdf = dg.read_parquet(
-        f"{rt_utils.EXPORT_PATH}{dataset}_182_{date_str}.parquet"
+        f"{rt_utils.EXPORT_PATH}{dataset}_{first_operator}_{date_str}.parquet"
     ).head(0)
 
     for itp_id in sorted(itp_id_list):
@@ -561,11 +562,11 @@ def all_routelines_or_stops_with_cached(
 
         if path:
             operator = dg.read_parquet(path)
-            gdf = dd.multi.concat(
-                [gdf, operator], axis=0, ignore_index=True
-            ).drop_duplicates()
+            gdf = dd.multi.concat([gdf, operator], axis=0)
 
-    gdf = gdf.drop_duplicates().compute().reset_index(drop=True)
+            print(f"concatenated {itp_id}")
+
+    gdf = gdf.drop_duplicates().reset_index(drop=True).compute()
 
     utils.geoparquet_gcs_export(gdf, export_path, f"{dataset}_{date_str}")
 
@@ -583,8 +584,9 @@ def all_trips_or_stoptimes_with_cached(
     date_str = format_date(analysis_date)
 
     # Set metadata
+    first_operator = sorted(itp_id_list)[0]
     df = pd.read_parquet(
-        f"{rt_utils.EXPORT_PATH}{dataset}_182_{date_str}.parquet"
+        f"{rt_utils.EXPORT_PATH}{dataset}_{first_operator}_{date_str}.parquet"
     ).head(0)
 
     df = dd.from_pandas(df, npartitions=1)
@@ -595,11 +597,11 @@ def all_trips_or_stoptimes_with_cached(
         path = rt_utils.check_cached(filename)
 
         if path:
-            operator = pd.read_parquet(path)
-            df = dd.multi.concat(
-                [df, operator], axis=0, ignore_index=True
-            ).drop_duplicates()
+            operator = dd.read_parquet(path)
+            df = dd.multi.concat([df, operator], axis=0)
 
-    df = df.drop_duplicates().compute().reset_index(drop=True)
+            print(f"concatenated {itp_id}")
+
+    df = df.drop_duplicates().reset_index(drop=True).compute()
 
     df.to_parquet(f"{export_path}{dataset}_{date_str}.parquet")

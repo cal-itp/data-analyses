@@ -27,7 +27,7 @@ from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/C2_clip_bus_intersections.log")
+logger.add("./logs/C2_clip_bus_intersections.log", retention="6 months")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")

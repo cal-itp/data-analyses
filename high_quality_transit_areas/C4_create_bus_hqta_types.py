@@ -25,7 +25,7 @@ from shared_utils import utils, geography_utils, gtfs_utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/C4_create_bus_hqta_types.log")
+logger.add("./logs/C4_create_bus_hqta_types.log", retention="6 months")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
