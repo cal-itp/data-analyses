@@ -121,32 +121,39 @@ def concatenate_amtrak(
     trips = dd.read_parquet(f"{export_path}trips_{date_str}.parquet")
     trips_all = (dd.multi.concat([trips, amtrak_trips], axis=0)
                  .astype({"trip_key": int})
+                 .drop_duplicates()
+                 .reset_index()
                 )
     trips_all.compute().to_parquet(f"{export_path}trips_{date_str}_all.parquet")
     
     stops = dg.read_parquet(f"{export_path}stops_{date_str}.parquet")
     stops_all = (dd.multi.concat([
                 stops.to_crs(geography_utils.WGS84), 
-                amtrak_stops.to_crs(geography_utils.WGS84)
-            ], axis=0)
+                amtrak_stops.to_crs(geography_utils.WGS84)], axis=0)
             .astype({"stop_key": "Int64"})
+            .drop_duplicates()
+            .reset_index()
     ).compute()
     utils.geoparquet_gcs_export(stops_all, export_path, f"stops_{date_str}_all")
         
     routelines = dg.read_parquet(f"{export_path}routelines_{date_str}.parquet")        
     routelines_all = (dd.multi.concat([
                         routelines.to_crs(geography_utils.WGS84), 
-                        amtrak_routelines.to_crs(geography_utils.WGS84)
-                    ], axis=0)
-                    .astype({"trip_key": "Int64"})
+                        amtrak_routelines.to_crs(geography_utils.WGS84)], axis=0)
+                      .astype({"trip_key": "Int64"})
+                      .drop_duplicates()
+                      .reset_index()
                 ).compute()
     utils.geoparquet_gcs_export(routelines_all, 
                                 export_path, f"routelines_{date_str}_all")
     
     st = dd.read_parquet(f"{export_path}st_{date_str}.parquet")
     st_all = (dd.multi.concat([
-                st, amtrak_st], axis=0).astype({
-                "stop_time_key": "Int64", "trip_key": "Int64"})
+                st, amtrak_st], axis=0)
+              .astype({"stop_time_key": "Int64", 
+                       "trip_key": "Int64"})
+              .drop_duplicates()
+              .reset_index()
     )
     st_all.compute().to_parquet(f"{export_path}st_{date_str}_all.parquet")
     
