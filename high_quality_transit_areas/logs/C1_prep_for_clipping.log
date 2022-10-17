@@ -1130,3 +1130,15 @@
 2022-10-17 11:51:36.566 | INFO     | __main__:clip_by_itp_id:111 - clipping for 484: 0:00:08.049951
 2022-10-17 12:28:13.667 | INFO     | __main__:<module>:158 - compute for full clipped df: 2:50:50.902230
 2022-10-17 12:28:17.181 | INFO     | __main__:<module>:168 - execution time: 2:50:55.985915
+2022-10-17 14:03:23.692 | INFO     | __main__:<module>:202 - Analysis date: 2022-10-12
+2022-10-17 14:03:46.071 | INFO     | __main__:<module>:215 - grab all stops
+2022-10-17 14:03:46.274 | INFO     | __main__:<module>:219 - create major stop bus
+2022-10-17 14:03:47.129 | INFO     | __main__:<module>:223 - create hq corridor bus
+2022-10-17 14:04:02.813 | INFO     | __main__:<module>:240 - execution time: 0:00:39.106271
+2022-10-17 14:10:03.008 | INFO     | __main__:<module>:136 - Analysis date: 2022-10-12
+2022-10-17 14:10:37.654 | INFO     | __main__:<module>:147 - filter and buffer: 0:00:34.624432
+2022-10-17 14:10:39.849 | INFO     | __main__:<module>:158 - export as geoparquet in date folder
+2022-10-17 14:10:41.706 | INFO     | __main__:<module>:166 - export as geoparquet
+2022-10-17 14:11:51.671 | INFO     | __main__:<module>:175 - export as geojson
+2022-10-17 14:13:16.508 | INFO     | __main__:<module>:183 - export as geojsonl
+2022-10-17 14:13:16.511 | INFO     | __main__:<module>:186 - execution time: 0:03:13.481041

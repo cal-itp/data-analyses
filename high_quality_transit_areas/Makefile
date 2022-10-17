@@ -4,7 +4,6 @@ download_hqta_data:
 	python compile_operators_data.py    
 	python A2_combine_stops.py
     
-
 grab_corridors_and_clip:
 	python B1_bus_corridors.py
 	python B2_combine_operator_corridors.py
@@ -14,8 +13,4 @@ grab_corridors_and_clip:
 
 export_data:
 	python D1_assemble_hqta_points.py
-	python D2_assemble_hqta_polygons.py
-
-    
-
-        
+	python D2_assemble_hqta_polygons.py 
