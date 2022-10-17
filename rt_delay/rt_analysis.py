@@ -1,7 +1,6 @@
 import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.map_utils import make_folium_choropleth_map
-# from shared_utils.rt_utils import *
 
 import branca
 
@@ -23,6 +22,9 @@ import matplotlib.pyplot as plt
 
 import logging
 logging.basicConfig(filename = 'rt.log')
+
+import gcsfs
+fs = gcsfs.GCSFileSystem()
 
 class VehiclePositionsInterpolator:
     ''' Interpolates the location of a specific trip using GTFS-RT Vehicle Positions data
@@ -402,3 +404,47 @@ class OperatorDayAnalysis:
         self.rt_trips.to_parquet(f'{shared_utils.rt_utils.GCS_FILE_PATH}rt_trips/{self.calitp_itp_id}_{month}_{day}.parquet')
 
         return
+    
+def get_operators(analysis_date, operator_list, generate_new=False, pbar=None):
+    """
+    Function for checking the existence of rt_trips and stop_delay_views in GCS for operators on a given day.
+
+    analysis_date: datetime.date
+    operator_list: list of itp_id's
+    generate_new: 'True' to generate OperatorDayAnalysis and export to GCS, 'False' to not generate
+    pbar: tqdm.notebook.tqdm(), optional progress bar for generation
+    """
+    fs_list = fs.ls(f"{shared_utils.rt_utils.GCS_FILE_PATH}rt_trips/")
+    day = str(analysis_date.day).zfill(2)
+    month = str(analysis_date.month).zfill(2)
+    # now finds ran operators on specific analysis date
+    ran_operators = [
+        int(path.split("rt_trips/")[1].split("_")[0])
+        for path in fs_list
+        if path.split("rt_trips/")[1]
+        and path.split("rt_trips/")[1].split("_")[1] == month
+        and path.split("rt_trips/")[1].split("_")[2][:2] == day
+    ]
+
+    op_list_runstatus = {}
+    for itp_id in operator_list:
+        if itp_id in ran_operators:
+            print(f"already ran: {itp_id}")
+            op_list_runstatus[itp_id] = "already_ran"
+            continue
+        else:
+            if not generate_new:
+                print(f"not yet run: {itp_id}")
+                op_list_runstatus[itp_id] = "not_yet_run"
+            elif generate_new:
+                print(f"calculating for agency: {itp_id}...")
+                try:
+                    rt_day = OperatorDayAnalysis(itp_id, analysis_date, pbar)
+                    rt_day.export_views_gcs()
+                    print(f"complete for agency: {itp_id}")
+                    op_list_runstatus[itp_id] = "newly_run"
+                except Exception as e:
+                    print(f"rt failed for agency {itp_id}")
+                    op_list_runstatus[itp_id] = "new_failed_run"
+                    print(e)
+    return op_list_runstatus
