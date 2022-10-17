@@ -161,6 +161,7 @@ def single_operator_hqta(routelines: dg.GeoDataFrame,
     
     # Loop through each row to segment that route's line geom into hqta segments
     # Looping because corridor_utils.segment_route function cuts 1 line geom into several lines
+    # TODO: can this use dask to parallelize?
     all_routes = gpd.GeoDataFrame()
     
     for i in route_shapes.index:
@@ -203,15 +204,15 @@ def single_operator_hqta(routelines: dg.GeoDataFrame,
     
 
 
-def import_data(itp_id, date_str):
+def import_data(itp_id, date):
     routelines = dg.read_parquet(
-                f"{CACHED_VIEWS_EXPORT_PATH}routelines_{itp_id}_{date_str}.parquet")
+                f"{CACHED_VIEWS_EXPORT_PATH}routelines_{itp_id}_{date}.parquet")
     trips = dd.read_parquet(
-        f"{CACHED_VIEWS_EXPORT_PATH}trips_{itp_id}_{date_str}.parquet")
+        f"{CACHED_VIEWS_EXPORT_PATH}trips_{itp_id}_{date}.parquet")
     stop_times = dd.read_parquet(
-        f"{CACHED_VIEWS_EXPORT_PATH}st_{itp_id}_{date_str}.parquet")
+        f"{CACHED_VIEWS_EXPORT_PATH}st_{itp_id}_{date}.parquet")
     stops = dg.read_parquet(
-        f"{CACHED_VIEWS_EXPORT_PATH}stops_{itp_id}_{date_str}.parquet")
+        f"{CACHED_VIEWS_EXPORT_PATH}stops_{itp_id}_{date}.parquet")
     
     return routelines, trips, stop_times, stops
     
@@ -222,8 +223,7 @@ if __name__=="__main__":
 
     start_time = dt.datetime.now()
     
-    # TODO: add back in? clear cache each month?
-    # fs.rm(f'{GCS_FILE_PATH}bus_corridors/*')        
+    #https://stackoverflow.com/questions/69884348/use-dask-to-chunkwise-work-with-smaller-pandas-df-breaks-memory-limits
     
     for itp_id in ITP_IDS_IN_GCS:
 

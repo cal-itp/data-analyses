@@ -25,7 +25,7 @@ def trip_keys_for_route_type(analysis_date: str,
     
     # Choose to output df instead of list because we need route_type later on
     trip_keys_for_type = (trips[trips.route_type.isin(route_type_list)]
-                          [["trip_key", "route_type"]]
+                          [["trip_key", "route_id", "route_type"]]
                           .drop_duplicates()
                           .compute()
                          )
@@ -131,7 +131,7 @@ def grab_operator_brt(itp_id: int, analysis_date: str):
     brt_trips = operator_trips[operator_trips[col].isin(filtering_list)]
         
     # Grab trip_keys associated with this operator's BRT routes
-    brt_trip_keys = (brt_trips[["trip_key", "route_type"]]
+    brt_trip_keys = (brt_trips[["trip_key", "route_id", "route_type"]]
                      .drop_duplicates()
                      .compute()
                     )
