@@ -353,13 +353,13 @@ class OperatorDayAnalysis:
                 _delay = _delay.dropna(subset=['actual_time'])
                 _delay.arrival_time = _delay.arrival_time.map(lambda x: shared_utils.rt_utils.fix_arrival_time(x)[0]) ## reformat 25:xx GTFS timestamps to standard 24 hour time
                 _delay['arrival_time'] = _delay.apply(lambda x:
-                                    dt.datetime.combine(x.actual_time.date(),
-                                                        dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time()) if x.arrival_time else np.nan,
+                                    pd.Timestamp(dt.datetime.combine(x.actual_time.date(),
+                                                        dt.datetime.strptime(x.arrival_time, '%H:%M:%S').time())) if x.arrival_time else np.nan,
                                                         axis = 1) ## format scheduled arrival times
                 _delay = _delay >> filter(_.arrival_time.apply(lambda x: x.date()) == _.actual_time.iloc[0].date())
                 if _delay.arrival_time.isnull().any():
                     _delay = shared_utils.rt_utils.interpolate_arrival_times(_delay)
-                _delay['arrival_time'] = _delay.arrival_time.astype('datetime64')
+                # _delay['arrival_time'] = _delay.arrival_time.astype('datetime64') # deprecated, replace with pd.Timestamp constuctor
                 # self.debug_dict[f'{trip_id}_times'] = _delay
                 _delay['delay'] = _delay.actual_time - _delay.arrival_time
                 _delay['delay'] = _delay.delay.apply(lambda x: dt.timedelta(seconds=0) if x.days == -1 else x)
