@@ -142,6 +142,9 @@ class RtFilterMapper:
         self._time_only_filter = not route_types and not route_names and not shape_ids and not direction_id and not direction and not trip_ids
             
     def reset_filter(self):
+        '''
+        Clear filter.
+        '''
         self.filter = None
         self._time_only_filter = True
         self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
