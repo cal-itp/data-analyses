@@ -68,7 +68,7 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
         gdf.sort_values(
             ["itp_id", "route_id", "route_length"], ascending=[True, True, False]
         )
-        .drop_duplicates(subset=["itp_id", "route_id"])
+        .drop_duplicates(subset=["route_name", "route_id"]) #10/18 Changed from itp_id to route name
         .reset_index(drop=True)[
             ["itp_id", "route_id", "geometry", "route_type",
              "route_name", "agency", "route_length"]
@@ -187,21 +187,22 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     overlay =  comparison(original_routes_df, provider_gdf)
 
     # Aggregate lengths of routes by route id, name, agency, and itp_id
+    # 10/18: removed route name
     overlay2 = (overlay.dissolve(
-         by=["route_id", "route_name", "agency", "itp_id"],
+         by=["route_id","agency", "itp_id"],
          aggfunc={
          "route_length": "sum"}).reset_index()) 
 
     # Merge original dataframe with old route with provider-route overlay
     # To compare original route length and old route length
+    # 10/18: removed route name
     m1 = overlay2.merge(
         original_routes_df,
         how="inner",
-        on=["agency", "route_id", "route_name", "itp_id"],
+        on=["route_id","agency", "itp_id"],
         suffixes=["_overlay", "_original_df"],
     )
     
-     
     
     # Create % of route covered by data vs. not 
     m1["percentage"] = (
