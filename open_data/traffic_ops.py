@@ -1,3 +1,5 @@
+from gcs_to_esri import open_data_dates
+
 # Traffic Ops routes and stops data dictionary
 KEYWORDS = [
     'Transportation',
@@ -19,8 +21,8 @@ ROUTES_DICT = {
     "abstract": "Public. EPSG: 4326",
     "purpose": PURPOSE, 
 
-    "beginning_date": "2022-09-14",
-    "end_date": "2022-10-14",
+    "beginning_date": open_data_dates()[0],
+    "end_date": open_data_dates()[1],
     "place": "California",
 
     "status": "completed", 
