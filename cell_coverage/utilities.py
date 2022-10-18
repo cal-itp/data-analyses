@@ -7,8 +7,27 @@ import pandas as pd
 # Open zip files 
 import fsspec
 from calitp import *
+from calitp.storage import get_fs
+fs = get_fs()
+import os
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
+
+"""
+Other Functions
+"""
+def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
+    """
+    Save geodataframe as parquet locally,
+    then move to GCS bucket and delete local file.
+
+    gdf: geopandas.GeoDataFrame
+    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    FILE_NAME: str. Filename.
+    """
+    gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
+    fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
+    os.remove(f"./{FILE_NAME}.geojson")
 
 """
 FCC data
@@ -107,7 +126,7 @@ def load_unique_routes_df():
 def trip_df():
 
     # Read in file
-    trips_file = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/trips_2022-05-04_all.parquet"
+    trips_file = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/trips_2022-09-14_all.parquet"
     df = pd.read_parquet(trips_file)
 
     # Standardize route id
@@ -129,7 +148,7 @@ def trip_df():
         .rename(columns={"trip_id": "total_trips_by_agency"})
     )
 
-    # Merge to get one comprehensive one
+    # Merge to get one comprehensive df
     m1 = pd.merge(df2, df3, how="inner", on="calitp_itp_id")
 
     return m1
@@ -182,8 +201,7 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
         suffixes=["_overlay", "_original_df"],
     )
     
-    # Ensure m1 is a GDF 
-    m1 = gpd.GeoDataFrame(m1, geometry = "geometry_overlay", crs = "EPSG:4326") 
+     
     
     # Create % of route covered by data vs. not 
     m1["percentage"] = (
@@ -206,6 +224,8 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     m1 = m1.rename(columns={c: c+ suffix for c in m1.columns if c in ['percentage', 'binned', 'route_length_overlay',
                                                                      'geometry_overlay']})
 
+    # Ensure m1 is a GDF 
+    m1 = gpd.GeoDataFrame(m1, geometry = f"geometry_overlay{suffix}", crs = "EPSG:4326")
     return m1
 
 """
