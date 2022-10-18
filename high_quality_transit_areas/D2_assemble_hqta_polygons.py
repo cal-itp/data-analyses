@@ -20,7 +20,7 @@ from shared_utils import utils, geography_utils
 from D1_assemble_hqta_points import EXPORT_PATH, add_route_info
 from update_vars import analysis_date
 
-logger.add("./logs/D2_assemble_hqta_polygons.log")
+logger.add("./logs/D2_assemble_hqta_polygons.log", retention="6 months")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")

@@ -25,7 +25,7 @@ import utilities
 from shared_utils import utils, geography_utils, portfolio_utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
-logger.add("./logs/D1_assemble_hqta_points.log")
+logger.add("./logs/D1_assemble_hqta_points.log", retention="6 months")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
