@@ -41,9 +41,10 @@ if __name__=="__main__":
         if name in RUN_ME:
             print(name)
             print("-------------------------------------------")
-            metadata_update_pro.update_metadata_xml(dataset["path"], 
-                                                dataset["metadata_dict"], 
-                                                first_run=True)
+            metadata_update_pro.update_metadata_xml(
+                dataset["path"], 
+                dataset["metadata_dict"], 
+                first_run=True)
     
     # Clean up local files
     remove_zipped_shapefiles()

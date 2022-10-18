@@ -8,60 +8,58 @@ import datetime as dt
 import sys
 
 from loguru import logger
+from typing import Literal
 
-from shared_utils import rt_dates, gtfs_utils
+from operators_for_hqta import itp_ids_from_json
+from shared_utils import rt_dates, gtfs_utils, rt_utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
-logger.add("./logs/compile_operators_data.log")
+logger.add("./logs/compile_operators_data.log", retention="6 months")
 logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
 
 
-def grab_selected_date(selected_date: str):
+def grab_selected_date(selected_date: str, 
+                       dataset: Literal["stops", "trips", "routelines", "st"], 
+                       itp_ids: list) -> None:
     """
     Create the cached files for stops, trips, stop_times, routes, and route_info
     """
-    
-    gtfs_utils.all_routelines_or_stops_with_cached(
-        dataset = "stops",
-        analysis_date = selected_date,
-        export_path = COMPILED_CACHED_VIEWS
-    )
-    
-    logger.info("stops compiled and cached")
-    
-    gtfs_utils.all_trips_or_stoptimes_with_cached(
-        dataset = "trips",
-        analysis_date = selected_date,
-        export_path = COMPILED_CACHED_VIEWS
-    )
-    
-    logger.info("trips compiled and cached")
+    compiled_path = rt_utils.check_cached(
+        f"{COMPILED_CACHED_VIEWS}{dataset}_{selected_date}.parquet")
 
-    gtfs_utils.all_routelines_or_stops_with_cached(
-        dataset = "routelines",
-        analysis_date = selected_date,
-        export_path = COMPILED_CACHED_VIEWS
-    )
-    
-    logger.info("routelines compiled and cached")
+    if not compiled_path and dataset in ["stops", "routelines"]:
 
-    gtfs_utils.all_trips_or_stoptimes_with_cached(
-        dataset = "st",
-        analysis_date = selected_date,
-        export_path = COMPILED_CACHED_VIEWS
-    )
+        gtfs_utils.all_routelines_or_stops_with_cached(
+            dataset = dataset,
+            analysis_date = selected_date,
+            itp_id_list = itp_ids,
+            export_path = COMPILED_CACHED_VIEWS
+        )
     
-    logger.info("stop times compiled and cached")
-
-    # stops, trips, stop_times, and routes save directly to GCS already
+        logger.info(f"{dataset} compiled and cached")
+    
+    if not compiled_path and dataset in ["trips", "st"]:
+        gtfs_utils.all_trips_or_stoptimes_with_cached(
+            dataset = dataset,
+            analysis_date = selected_date,
+            itp_id_list = itp_ids,
+            export_path = COMPILED_CACHED_VIEWS
+        )
+    
+        logger.info(f"{dataset} compiled and cached")
     
     
 if __name__=="__main__":
+    
     logger.info(f"Analysis date: {analysis_date}")    
 
     start = dt.datetime.now()
+    ITP_IDS = itp_ids_from_json()
     
-    grab_selected_date(analysis_date)
+    grab_selected_date(analysis_date, "stops", ITP_IDS)
+    grab_selected_date(analysis_date, "trips", ITP_IDS)
+    grab_selected_date(analysis_date, "routelines", ITP_IDS)
+    grab_selected_date(analysis_date, "st", ITP_IDS)
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

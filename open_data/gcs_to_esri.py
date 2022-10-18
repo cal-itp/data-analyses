@@ -8,16 +8,27 @@ import geopandas as gpd
 import glob
 import intake
 import os
+import pendulum
 import sys
 
 from loguru import logger
 
-from shared_utils import utils, geography_utils
+from shared_utils import utils, geography_utils, rt_dates
 
-logger.add("./logs/gcs_to_esri.log")
+analysis_date = rt_dates.DATES["oct2022"]
+
+logger.add("./logs/gcs_to_esri.log", retention="6 months")
 logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
 catalog = intake.open_catalog("./*.yml")
+
+def open_data_dates(analysis_date: str = analysis_date) -> tuple[str]:
+    # From analysis date, return beginning date and end date (in 1 month)
+    beginning_date = analysis_date    
+    end_date = pendulum.parse(beginning_date).add(months=1).to_date_string()
+    
+    return beginning_date, end_date
+    
 
 def standardize_column_names(df):
     df.columns = df.columns.str.replace('calitp_itp_id', 'itp_id')

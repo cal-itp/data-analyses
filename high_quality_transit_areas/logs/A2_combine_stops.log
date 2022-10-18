@@ -20,3 +20,18 @@
 2022-09-27 10:57:30.399 | INFO     | __main__:<module>:72 - grabbed ferry: 0:00:09.957291
 2022-09-27 10:57:30.402 | INFO     | __main__:<module>:81 - concatenated datasets
 2022-09-27 10:57:30.684 | INFO     | __main__:<module>:90 - execution time: 0:00:52.023976
+2022-10-15 13:49:57.402 | INFO     | __main__:<module>:41 - Analysis date: 2022-10-12
+2022-10-15 13:56:26.041 | INFO     | __main__:<module>:41 - Analysis date: 2022-10-12
+2022-10-15 13:56:37.217 | INFO     | __main__:<module>:48 - grabbed rail: 0:00:11.175200
+2022-10-15 13:57:36.453 | INFO     | __main__:<module>:41 - Analysis date: 2022-10-12
+2022-10-15 13:57:44.912 | INFO     | __main__:<module>:48 - grabbed rail: 0:00:08.458032
+2022-10-15 13:58:01.094 | INFO     | __main__:<module>:66 - grabbed brt: 0:00:16.181957
+2022-10-15 13:58:04.053 | INFO     | __main__:<module>:72 - grabbed ferry: 0:00:02.959271
+2022-10-15 13:58:04.059 | INFO     | __main__:<module>:81 - concatenated datasets
+2022-10-15 13:58:04.346 | INFO     | __main__:<module>:90 - execution time: 0:00:27.891752
+2022-10-17 13:51:27.523 | INFO     | __main__:<module>:41 - Analysis date: 2022-10-12
+2022-10-17 13:51:38.078 | INFO     | __main__:<module>:48 - grabbed rail: 0:00:10.533923
+2022-10-17 13:51:56.214 | INFO     | __main__:<module>:66 - grabbed brt: 0:00:18.135762
+2022-10-17 13:51:59.444 | INFO     | __main__:<module>:72 - grabbed ferry: 0:00:03.229273
+2022-10-17 13:51:59.450 | INFO     | __main__:<module>:81 - concatenated datasets
+2022-10-17 13:51:59.760 | INFO     | __main__:<module>:90 - execution time: 0:00:32.215216

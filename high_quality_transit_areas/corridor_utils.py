@@ -121,10 +121,9 @@ def find_longest_route_shapes(
     # Keep the longest shape_id for each direction
     longest_shape_by_direction = (
         merged_routelines_trips.groupby(route_dir_cols)
-        .route_length.max().compute()
-    ).reset_index()
+        .route_length.max()
+    )
     
-
     longest_shapes = dd.merge(
         merged_routelines_trips, 
         longest_shape_by_direction,
@@ -242,7 +241,10 @@ def symmetric_difference_for_operator(longest_shapes: dg.GeoDataFrame
         
         all_routes = pd.concat([all_routes, one_route], 
                                axis=0, ignore_index=True)
-        
+    
+    all_routes = all_routes.sort_values(
+        ["calitp_itp_id", "route_id"]).reset_index(drop=True)
+    
     longest_shape = dg.from_geopandas(all_routes, npartitions=1)
     
     return longest_shape
@@ -300,9 +302,12 @@ def select_needed_shapes_for_route_network(
     # Do a gpd.overlay to combine the 2 shape_ids into 1 row for each route_id
     longest_shape = symmetric_difference_for_operator(longest_shapes)
     
-    longest_shape_with_dir = add_route_cardinal_direction(longest_shape).compute()
-        
-    return longest_shape_with_dir
+    longest_shape_with_dir = add_route_cardinal_direction(longest_shape)
+    
+    # use persist to keep it for further use in dask, 
+    # but don't have to evaluate to gpd.GeoDataFrame
+    # https://stackoverflow.com/questions/41806850/dask-difference-between-client-persist-and-client-compute
+    return longest_shape_with_dir.persist() 
 
 
 def add_buffer(gdf: gpd.GeoDataFrame, 

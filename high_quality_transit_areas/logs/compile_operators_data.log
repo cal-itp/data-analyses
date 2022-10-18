@@ -10,3 +10,18 @@
 2022-09-27 10:54:31.100 | INFO     | __main__:grab_selected_date:46 - routelines compiled and cached
 2022-09-27 10:56:26.814 | INFO     | __main__:grab_selected_date:54 - stop times compiled and cached
 2022-09-27 10:56:26.814 | INFO     | __main__:<module>:67 - execution time: 0:07:34.500982
+2022-10-14 13:52:13.652 | INFO     | __main__:<module>:62 - Analysis date: 2022-10-12
+2022-10-14 13:53:43.146 | INFO     | __main__:<module>:63 - Analysis date: 2022-10-12
+2022-10-14 13:54:30.401 | INFO     | __main__:<module>:63 - Analysis date: 2022-10-12
+2022-10-14 13:58:02.921 | INFO     | __main__:grab_selected_date:32 - stops compiled and cached
+2022-10-14 14:00:22.732 | INFO     | __main__:grab_selected_date:40 - trips compiled and cached
+2022-10-14 14:05:08.221 | INFO     | __main__:grab_selected_date:48 - routelines compiled and cached
+2022-10-14 15:05:26.747 | INFO     | __main__:<module>:61 - Analysis date: 2022-10-12
+2022-10-14 17:04:02.515 | INFO     | __main__:<module>:67 - Analysis date: 2022-10-12
+2022-10-15 11:36:53.734 | INFO     | __main__:<module>:65 - Analysis date: 2022-10-12
+2022-10-15 12:03:39.830 | INFO     | __main__:<module>:65 - Analysis date: 2022-10-12
+2022-10-15 12:13:35.619 | INFO     | __main__:<module>:65 - Analysis date: 2022-10-12
+2022-10-15 13:12:51.117 | INFO     | __main__:<module>:54 - Analysis date: 2022-10-12
+2022-10-15 13:13:21.045 | INFO     | __main__:<module>:54 - Analysis date: 2022-10-12
+2022-10-15 13:18:35.530 | INFO     | __main__:grab_selected_date:49 - st compiled and cached
+2022-10-15 13:18:35.531 | INFO     | __main__:<module>:65 - execution time: 0:05:14.484791
