@@ -138,14 +138,17 @@ def add_description(df, col):
                         np.where(df[col].str.contains("CONSTRUCT"), "Construct",
                         np.where(df[col].str.contains("UPGRADE"), "Upgrade",
                         np.where(df[col].str.contains("IMPROVE"), "Improve",
+                        np.where(df[col].str.contains("ADD "), "Add",
                         np.where(df[col].str.contains("REPAIR"), "Repair",
                         np.where(df[col].str.contains("REPLACE"), "Replace",
                         np.where(df[col].str.contains("REPLACE ")& df[col].str.contains("BRIDGE"), "",
                         np.where(df[col].str.contains("REPLACE")& df[col].str.contains("GUARDRAIL"), "Replace",
                         np.where(df[col].str.contains("PAVE")| df[col].str.contains("PAVING"), "Pave",
-                        np.where(df[col].str.contains("NEW"), "New",
+                        np.where(df[col].str.contains("NEW "), "New",
+                        np.where(df[col].str.contains("EXTEND"), "Extend",
+                        np.where(df[col].str.contains("IMPLEMENT"), "Implement",
                         
-                                    "")))))))))))
+                                    ""))))))))))))))
     
     ## types of projects in second column
     df['project_type'] = (
@@ -157,9 +160,14 @@ def add_description(df, col):
                         np.where(df[col].str.contains("SIDEWALK"), "Sidewalk",
                         np.where(df[col].str.contains("SCOUR"), "Erosion Countermeasures",
                         np.where(df[col].str.contains("ROUNDABOUT"), "Roundabout",
+                        np.where(df[col].str.contains("TURN LANE"), "Turn Lane",
                         np.where(df[col].str.contains("GUARDRAI"), "Guardrails", ##removing the "L"from Guardrail in case the word is cut off
                         np.where(df[col].str.contains("VIDEO DETECTION EQUIPMENT"), "Video Detection Equipment",
                         np.where(df[col].str.contains("PEDESTRIAN") & df[col].str.contains("BIKE") , "Pedestrian  & Bike Safety Improvements",
+                        np.where(df[col].str.contains("CONSTRUCT HOV"), "HOV Lane",
+                        np.where(df[col].str.contains("CONVERT EXISTING HOV LANES TO EXPRESS LANES"), "Convert HOV Lanes to Express Lanes",    
+                        np.where(df[col].str.contains("EXPRESS LANES"), "Express Lanes",         
+                        np.where(df[col].str.contains("HOV") | df[col].str.contains("HIGH-OCCUPANCY LANE"), "HOV Lane", 
                         np.where(df[col].str.contains("BRIDGE") & df[col].str.contains("REHAB") , "Bridge Rehabilitation",
                         np.where(df[col].str.contains("PAVEMENT") & df[col].str.contains("REHAB") , "Pavement Rehabilitation",
                         np.where(df[col].str.contains("PEDESTRIAN"), "Pedestrian Safety Improvements",
@@ -168,15 +176,28 @@ def add_description(df, col):
                         np.where(df[col].str.contains("BIKE"), "Bike Lanes",                  
                         np.where(df[col].str.contains("SIGNAL"), "Signals",
                         np.where(df[col].str.contains("SIGN"), "Signage",
-                        np.where(df[col].str.contains("BRIDGE"), "Bridge",
+                        np.where(df[col].str.contains("BRIDGE REPLACEMENT") | df[col].str.contains("REPLACE EXISTING BRIDGE") | df[col].str.contains("REPLACE BRIDGE"), "Bridge",
                         np.where(df[col].str.contains("LIGHT"), "Lighting",         
                         np.where(df[col].str.contains("SAFETY ") & df[col].str.contains("IMPROVE") , "Safety Improvemnts",
+                        np.where(df[col].str.contains("ROAD REHAB") | df[col].str.contains("ROADWAY REHAB"), "Road Rehabiliation",
+                        np.where(df[col].str.contains("RAISED") & df[col].str.contains("MEDIAN"), "Raised Median",
+                        np.where(df[col].str.contains("MEDIAN"), "Median",
+                        np.where(df[col].str.contains("AUXILIARY LANE"), "Auxiliary Lane",
+                        np.where(df[col].str.contains("TO EXPRESS LANES"), "Express Lanes",
+                        np.where(df[col].str.contains("STORMWATER TRE"), "Storm Water Mitigation",
+                        np.where(df[col].str.contains("WIDEN"), "Widen Road",
+                        np.where(df[col].str.contains("REGIONAL PLANNING ACTIVITIES AND PLANNING, PROGRAMMING"), "Regional Planning Activities",
+                        np.where(df[col].str.contains("RAMP"), "Ramp",
+                        np.where(df[col].str.contains("SEISMIC RETROFIT"), "Seismic Retrofit",        
+                        np.where(df[col].str.contains("INTELLIGENT TRANSPORTATION SYSTEM"), "Intelligent Transportation Systems",         
+                        np.where(df[col].str.contains("OC STRUCTURES"), "OC Structures",       # Maybe On-Center
+                                 
                                  'Project')
-                                   )))))))))))))))))))))#)
+                                   ))))))))))))))))))))))))))))))))))))))
     
     ## need to expand this to include more. maybe try a list. but capture entries with multiple projects
-    df['other'] = (np.where(df[col].str.contains("CURB") & df[col].str.contains("SIDEWALK") | df[col].str.contains("BIKE"), "Multiple Road",
-                                 "Other Projects"))
+    # df['other'] = (np.where(df[col].str.contains("CURB") & df[col].str.contains("SIDEWALK") | df[col].str.contains("BIKE"), "Multiple Road",
+    #                              "Other Projects"))
     
     return df
 
