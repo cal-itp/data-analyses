@@ -48,9 +48,9 @@ def valid_operators(df: pd.DataFrame | gpd.GeoDataFrame) -> list:
     return list(t4.calitp_itp_id)
     
     
-def overwrite_yaml(PORTFOLIO_SITE_YAML: Path) -> list:
+def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     """
-    PORTFOLIO_SITE_YAML: str
+    portfolio_site_yaml: str
                         relative path to where the yaml is for portfolio
                         '../portfolio/analyses.yml' or '../portfolio/sites/parallel_corridors.yml'
     SITE_NAME: str
@@ -68,7 +68,7 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML: Path) -> list:
     # Eric's example
     # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
 
-    with open(PORTFOLIO_SITE_YAML) as analyses:
+    with open(portfolio_site_yaml) as analyses:
         analyses_data = yaml.load(analyses, yaml.Loader)
     
     # list any ITP IDs to be excluded, either because of invalid data or just too few results
@@ -96,7 +96,7 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML: Path) -> list:
     
     output = yaml.dump(analyses_data)
 
-    with open(PORTFOLIO_SITE_YAML, 'w') as analyses:
+    with open(portfolio_site_yaml, 'w') as analyses:
         analyses.write(output)
     
     print("YAML for site generated")
@@ -106,8 +106,8 @@ def overwrite_yaml(PORTFOLIO_SITE_YAML: Path) -> list:
 
 # Compare the ITP IDs for parallel corridors and RT
 # If URL available for RT analysis, embed in parameterized notebook
-def check_if_rt_data_available(PORTFOLIO_SITE_YAML: Path) -> list:
-    with open(PORTFOLIO_SITE_YAML) as analyses:
+def check_if_rt_data_available(portfolio_site_yaml: Path) -> dict:
+    with open(portfolio_site_yaml) as analyses:
         analyses_data = yaml.load(analyses, yaml.Loader)
     
     rt_chapters = analyses_data['parts'][0]["chapters"]
