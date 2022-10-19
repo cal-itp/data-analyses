@@ -26,6 +26,19 @@ GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
 
 #function to add locodes
 
+def read_data_all():
+    proj = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/CopyofFMIS_Projects_Universe_IIJA_Reporting_4.xls", 
+                           # sheet_name='FMIS 5 Projects  ', header=[3]
+                           sheet_name='IIJA',
+                           # sheet_name='FMIS 5 Projects  ',
+                           ))
+    proj.drop(columns =['unnamed:_0', 'unnamed:_13', 'unnamed:_14'], axis=1, inplace=True)
+    proj = proj.dropna(how='all') 
+    proj['summary_recipient_defined_text_field_1_value'] = proj['summary_recipient_defined_text_field_1_value'].fillna(value='None')
+    
+    return proj
+
+#for use in the following function identify_agency
 def add_name_from_locode(df, df_locode_extract_col):
     #read in locode sheet
     locodes = to_snakecase(pd.read_excel(f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
@@ -80,6 +93,8 @@ def identify_agency(df, identifier_col):
     no_locode = no_locode.rename(columns = {"recipient_name":"implementing_agency", "county_description":"county_name"})
 
     full_df = pd.concat([locode_proj, no_locode])
+    
+    full_df.loc[full_df.county_name == "Statewide County", 'county_name'] = "Statewide"
     
     return full_df
 
@@ -260,8 +275,8 @@ def update_no_matched(df, flag_col, desc_col, name_col):
         elif (df[flag_col] == "Project") & (df[desc_col] == "Traffic Management/Engineering - HOV"):
             return ("Traffic Management Project in " + df[name_col])
         
-        elif (df[flag_col] == "Project") & (df[desc_col] != "Other"):
-            return (df[desc_col] + " in " + df[name_col])
+        # elif (df[flag_col] == "Project") & (df[desc_col] != "Other") | (df[desc_col] != "Right of Way"):
+        #     return (df[desc_col] + " in " + df[name_col])
         
         else:
             return "" #(df[desc_col] + " in " + df[name_col])
