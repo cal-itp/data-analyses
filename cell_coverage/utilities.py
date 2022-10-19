@@ -61,17 +61,17 @@ Routes DF
 # Find unique routes 
 def unique_routes(gdf) -> gpd.GeoDataFrame:
     gdf = gdf.assign(
-        route_length=(gdf.geometry.to_crs(geography_utils.CA_StatePlane).length)
+        original_route_length=(gdf.geometry.to_crs(geography_utils.CA_StatePlane).length)
     )
 
     unique_route = (
         gdf.sort_values(
-            ["itp_id", "route_id", "route_length"], ascending=[True, True, False]
+            ["itp_id", "route_id", "original_route_length"], ascending=[True, True, False]
         )
-        .drop_duplicates(subset=["route_name", "route_id"]) #10/18 Changed from itp_id to route name
+        .drop_duplicates(subset=["route_name", "route_id", "itp_id"])  
         .reset_index(drop=True)[
             ["itp_id", "route_id", "geometry", "route_type",
-             "route_name", "agency", "route_length"]
+             "route_name", "agency", "original_route_length"]
         ]
     )
     
@@ -80,6 +80,9 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
     
     # Filter out for bus only 
     unique_route = unique_route.loc[unique_route["route_type"] == "3"]
+    
+    # Drop route type
+    unique_route = unique_route.drop(columns = ["route_type"]) 
     
     # Fill in NA for route names
     unique_route["route_name"] = unique_route["route_name"].replace({"": "None"})
@@ -106,7 +109,7 @@ def load_verizon():
 # Includes parts of other states on the West Coast
 def load_tmobile(): 
     tmobile_file =  "tmobile_california.parquet"
-    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{tmobile_file}")
+    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{tmobile_file}")[['geometry']]
     return gdf
 
 # Open routes file, find unique routes
@@ -119,6 +122,7 @@ def load_unique_routes_df():
     
     # Standardize route id  
     df["route_id"] = df["route_id"].str.lower().str.strip()
+    
     
     return df
 
