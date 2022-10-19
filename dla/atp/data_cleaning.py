@@ -276,7 +276,10 @@ def clean_data(df):
     gdf = (geography_utils.create_point_geometry(df, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
     
     #export to GCS
-    gdf.to_excel(f"{GCS_FILE_PATH}cleaned_df.xlsx")
+    gdf.to_excel(f"{GCS_FILE_PATH}cleaned_cycle5&6.xlsx")
+    
+    #export to GCS
+    gdf.to_csv(f"{GCS_FILE_PATH}cleaned_cycle5&6.csv")
     
     print(f"Data cleaning complete. There are {len(gdf)} entries in dataframe")  
     logger.info(f"got clean data: {len(gdf)} entries")
