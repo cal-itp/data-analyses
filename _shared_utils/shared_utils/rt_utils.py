@@ -727,6 +727,7 @@ route_type_names = {
     "12": "Monorail",
 }
 
+
 def get_operators(analysis_date, operator_list):
     """
     Function for checking the existence of rt_trips and stop_delay_views in GCS for operators on a given day.
@@ -753,5 +754,5 @@ def get_operators(analysis_date, operator_list):
             continue
         else:
             print(f"not yet run: {itp_id}")
-            op_list_runstatus[itp_id] = "not_yet_run"    
+            op_list_runstatus[itp_id] = "not_yet_run"
     return op_list_runstatus
