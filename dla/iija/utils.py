@@ -88,8 +88,14 @@ def identify_agency(df, identifier_col):
     county_info = (pd.merge(county_base, county_district, how='left', left_on= 'county_description', right_on = 'county_name'))
     county_info.drop(columns =['county_name'], axis=1, inplace=True)
     
-    #merge with county info - note - most are state projects but good to know what county project is located in
-    no_locode = (pd.merge(no_locode, county_info, on='county_code', how='left'))
+    mapping1 = dict(county_info[['county_code', 'county_description']].values)
+    mapping2 = dict(county_info[['county_code', 'recipient_name']].values)
+    mapping3 = dict(county_info[['county_code', 'district']].values)
+    
+    no_locode['county_description'] = no_locode.county_code.map(mapping1)
+    no_locode['recipient_name'] = no_locode.county_code.map(mapping2)
+    no_locode['district'] = no_locode.county_code.map(mapping3)
+    
     no_locode = no_locode.rename(columns = {"recipient_name":"implementing_agency", "county_description":"county_name"})
 
     full_df = pd.concat([locode_proj, no_locode])
@@ -162,8 +168,9 @@ def add_description(df, col):
                         np.where(df[col].str.contains("NEW "), "New",
                         np.where(df[col].str.contains("EXTEND"), "Extend",
                         np.where(df[col].str.contains("IMPLEMENT"), "Implement",
+                        np.where(df[col].str.contains("RESTORATION"), "Restoration",
                         
-                                    ""))))))))))))))
+                                    "")))))))))))))))
     
     ## types of projects in second column
     df['project_type'] = (
@@ -206,23 +213,28 @@ def add_description(df, col):
                         np.where(df[col].str.contains("SEISMIC RETROFIT"), "Seismic Retrofit",        
                         np.where(df[col].str.contains("INTELLIGENT TRANSPORTATION SYSTEM"), "Intelligent Transportation Systems",         
                         np.where(df[col].str.contains("OC STRUCTURES"), "OC Structures",       # Maybe On-Center
-                        np.where(df[col].str.contains("WITH 2-LANE BRIDGE") ,"Bridge",
+                        np.where(df[col].str.contains("WITH 2-LANE BRIDGE") | df[col].str.contains("WITH 2 LANE BRIDGE") | df[col].str.contains("REPLACE EXISTING ONE LANE BRIDGE") | df[col].str.contains("REPLACE EXISTING ONE-LANE BRIDGE"),"Bridge",
                         np.where(df[col].str.contains("RESTORE WETLANDS") ,"Restore Wetlands",
                         np.where(df[col].str.contains("CLEAN AIR TRANSPORTATION PROGRAM") ,"Clean Air Transportation Program",
                         np.where(df[col].str.contains("STREETS AND ROADS PROGRAM") ,"Streets and Roads Program",
-                        np.where(df[col].str.contains("MAPPING") ,"Mapping Project",         
+                        np.where(df[col].str.contains("MAPPING") ,"Mapping Project",
+                        np.where(df[col].str.contains("VIADUCT") ,"Viaduct",
+                        np.where(df[col].str.contains("OVERHEAD") ,"Overhead",         
+                        np.where(df[col].str.contains("SHORELINE EMBANKMENT") ,"Shoreline Embankment", 
+                        np.where(df[col].str.contains("NON-INFRAS") ,"Non-Infrastructure Project",
+                        np.where(df[col].str.contains("PILOT PROGRAM") ,"Pilot Program", 
+                        np.where(df[col].str.contains("PLANNING") ,"Planning", 
+                        np.where(df[col].str.contains("REC TRAILS") ,"Recreational Trails", 
+                                  
       
                                  'Project')
-                                   )))))))))))))))))))))))))))))))))))))))))))
+                                   ))))))))))))))))))))))))))))))))))))))))))))))))))
     
-    ## need to expand this to include more. maybe try a list. but capture entries with multiple projects
-    # df['other'] = (np.where(df[col].str.contains("CURB") & df[col].str.contains("SIDEWALK") | df[col].str.contains("BIKE"), "Multiple Road",
-    #                              "Other Projects"))
     
     return df
 
 
-def update_no_matched(df, flag_col, desc_col, name_col):
+def update_no_matched(df, flag_col, desc_col, name_col, program_code_desc_col): 
     """
     function to itreate over projects that did not match the first time
     using an existing project's short description of project type. 
@@ -275,8 +287,15 @@ def update_no_matched(df, flag_col, desc_col, name_col):
         elif (df[flag_col] == "Project") & (df[desc_col] == "Traffic Management/Engineering - HOV"):
             return ("Traffic Management Project in " + df[name_col])
         
-        # elif (df[flag_col] == "Project") & (df[desc_col] != "Other") | (df[desc_col] != "Right of Way"):
-        #     return (df[desc_col] + " in " + df[name_col])
+        elif (df[flag_col] == "Project") & (df[desc_col] == "Right of Way"):
+            return (df[desc_col] + " Project in " + df[name_col])
+        
+        elif (df[flag_col] == "Project") & (df[program_code_desc_col]== "NATIONAL HIGHWAY PERF IIJA"): 
+            return ("National Highway System Support in " + df[name_col]) 
+        
+        elif (df[flag_col] == "Project") & (df[desc_col] != "Other"):
+            return (df[desc_col] + " in " + df[name_col])
+    
         
         else:
             return "" #(df[desc_col] + " in " + df[name_col])
@@ -292,15 +311,78 @@ def update_no_matched(df, flag_col, desc_col, name_col):
 
 #function for getting title column
 
-def add_new_title(df, first_col_method, second_col_type, third_col_name):
+def add_new_title(df, first_col_method, second_col_type, third_col_name, alt_col_name):
     """
     Function to add new title. 
     Expected output example: "New Bike Lane in Eureka"
     """
-    #combining strings.
-    df['project_name_new'] = df[first_col_method] + " " + df[second_col_type] + " in " + df[third_col_name]
+    def return_name(df):
+        
+        if (df[third_col_name] == "California") & (df[alt_col_name] == "Statewide"):
+            return (df[first_col_method] + " " + df[second_col_type] +" " + df[alt_col_name])
+        
+        elif (df[third_col_name] == "California"):
+            return (df[first_col_method] + " " + df[second_col_type] + " in " + df[alt_col_name])
+        
+        elif (df[third_col_name] != "California"):
+            return (df[first_col_method] + " " + df[second_col_type] + " in " + df[third_col_name])
+        
+        # elif (df[third_col_name] == "Metropolitan Transportation Commission"):
+        #     return (df[first_col_method] + " " + df[second_col_type] + " in The " + df[third_col_name])
+
+        return df
+
+    df['project_name_new'] = df.apply(return_name, axis = 1)
     
     return df
+
+
+def get_new_desc_title(df):
+    '''
+    function takes the unique project ids and uses the title functions above to create a
+    unique title for each project (each project can have multiple phases).
+    this function then maps back to the original df
+    
+    note: we can only use this function once in the notebook. second time running will throw an error. 
+    '''
+    
+    #first get one row for each project
+    #df is full df
+
+    proj_one_row = df.groupby(['project_number', 'project_title'])['obligations_amount'].max().reset_index()
+    merge_cols = ['project_number','project_title','obligations_amount']
+    
+    proj_unique = (pd.merge(proj_one_row, df, how='left', on=merge_cols))
+    
+    
+    #add descriptions
+    proj_unique_cat = add_description(proj_unique, 'project_title')
+    
+    # #add title - first round
+    # proj_unique_cat_title = utils.add_new_title(proj_unique_cat, "project_method", 'project_type', 'implementing_agency')
+    
+    #add title - second round to account for statewide projects
+    proj_unique_cat_title = add_new_title(proj_unique_cat, "project_method", "project_type", "implementing_agency", "county_name")
+    
+    #update for the projects not in the first round of descriptions
+    proj_unique_cat_title = update_no_matched(proj_unique_cat_title, 'project_type', 'improvement_type_description', 'implementing_agency', 'program_code_description')
+
+    # convert "" to na and fill with the projects in first category
+    proj_unique_cat_title['project_name_new2'] = proj_unique_cat_title['project_name_new2'].replace('', np.NaN)
+
+    proj_unique_cat_title.project_name_new2.fillna(proj_unique_cat_title.project_name_new, inplace=True)
+    
+    # drop original column name and rename new one
+    proj_unique_cat_title.drop(columns =['project_name_new'], axis=1, inplace=True)
+    proj_unique_cat_title = proj_unique_cat_title.rename(columns={'project_name_new2':'project_title_new'})
+    
+    #map the title back to df
+    proj_title_mapping = (dict(proj_unique_cat_title[['project_number', 'project_title_new']].values))
+    
+    df['project_title_new'] = df.project_number.map(proj_title_mapping)
+
+    return df
+
 
 '''
 another approach (not as effective for creating new titles)
