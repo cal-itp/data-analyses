@@ -36,6 +36,10 @@ def read_data_all():
     proj = proj.dropna(how='all') 
     proj['summary_recipient_defined_text_field_1_value'] = proj['summary_recipient_defined_text_field_1_value'].fillna(value='None')
     
+    new_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/FY21-22ProgramCodesAsOf5-25-2022.v2.xlsx"))
+    code_map = dict(new_codes[['iija_program_code', 'new_description']].values)
+    proj['program_code_description'] = proj.program_code.map(code_map)
+    
     return proj
 
 #for use in the following function identify_agency
@@ -226,7 +230,6 @@ def add_description(df, col):
                         np.where(df[col].str.contains("PLANNING") ,"Planning", 
                         np.where(df[col].str.contains("REC TRAILS") ,"Recreational Trails", 
                                   
-      
                                  'Project')
                                    ))))))))))))))))))))))))))))))))))))))))))))))))))
     
@@ -287,8 +290,8 @@ def update_no_matched(df, flag_col, desc_col, program_code_desc_col):
         elif (df[flag_col] == "Project") & (df[desc_col] == "Right of Way"):
             return (df[desc_col] + " Project")
         
-        elif (df[flag_col] == "Project") & (df[program_code_desc_col]== "NATIONAL HIGHWAY PERF IIJA"): 
-            return ("National Highway System Support") 
+        elif (df[flag_col] == "Project") & (df[program_code_desc_col]== "National Highway Performance Program (NHPP)"): 
+            return ("National Highway Performance Program Support") 
         
         elif (df[flag_col] == "Project") & (df[desc_col] != "Other"):
             return (df[desc_col])
