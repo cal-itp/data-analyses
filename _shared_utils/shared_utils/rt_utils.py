@@ -726,3 +726,33 @@ route_type_names = {
     "11": "Trolleybus",
     "12": "Monorail",
 }
+
+
+def get_operators(analysis_date, operator_list):
+    """
+    Function for checking the existence of rt_trips and stop_delay_views in GCS for operators on a given day.
+
+    analysis_date: datetime.date
+    operator_list: list of itp_id's
+    """
+    fs_list = fs.ls(f"{GCS_FILE_PATH}rt_trips/")
+    day = str(analysis_date.day).zfill(2)
+    month = str(analysis_date.month).zfill(2)
+    # now finds ran operators on specific analysis date
+    ran_operators = [
+        int(path.split("rt_trips/")[1].split("_")[0])
+        for path in fs_list
+        if path.split("rt_trips/")[1]
+        and path.split("rt_trips/")[1].split("_")[1] == month
+        and path.split("rt_trips/")[1].split("_")[2][:2] == day
+    ]
+    op_list_runstatus = {}
+    for itp_id in operator_list:
+        if itp_id in ran_operators:
+            print(f"already ran: {itp_id}")
+            op_list_runstatus[itp_id] = "already_ran"
+            continue
+        else:
+            print(f"not yet run: {itp_id}")
+            op_list_runstatus[itp_id] = "not_yet_run"
+    return op_list_runstatus
