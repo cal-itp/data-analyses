@@ -234,7 +234,7 @@ def add_description(df, col):
     return df
 
 
-def update_no_matched(df, flag_col, desc_col, name_col, program_code_desc_col): 
+def update_no_matched(df, flag_col, desc_col, program_code_desc_col): 
     """
     function to itreate over projects that did not match the first time
     using an existing project's short description of project type. 
@@ -243,70 +243,63 @@ def update_no_matched(df, flag_col, desc_col, name_col, program_code_desc_col):
     def return_project_type(df):
         
         if (df[flag_col] == "Project") & (df[desc_col] == "Bridge Rehabilitation") | (df[desc_col] =="Bridge Rehabilitation - No Added Capacity") | (df[desc_col] =="Bridge Rehabilitation - Added Capacity"):
-            return ("Bridge Rehabilitation in " + df[name_col])
+            return ("Bridge Rehabilitation")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "Facilities for Pedestrians and Bicycles"):
-            return (df[desc_col] + " in " + df[name_col])
+            return (df[desc_col])
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "Safety"):
-            return (df[desc_col] + " Improvements in " + df[name_col])
-        
-        # elif (df[flag_col] == "Project") & (df[flag_col] == "Planning") & (df[title_col].str.contains("REGION CONSOLIDATED PLANNING GRANT")):
-        #     return ("Regional Planning Grant in " + df[name_col])
+            return (df[desc_col] + " Improvements")
             
         elif (df[flag_col] == "Project") & (df[desc_col] == "Planning "):
-            return "Project Planning in " + df[name_col]
+            return "Project Planning" 
             
         elif (df[flag_col] == "Project") & (df[desc_col] == "Preliminary Engineering"):
-            return (df[desc_col] + " Projects in " + df[name_col])
+            return (df[desc_col] + " Projects ")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "Construction Engineering"):
-            return (df[desc_col] + " Projects in " + df[name_col])
+            return (df[desc_col] + " Projects")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Restoration & Rehabilitation"):
-            return ("Road Restoration & Rehabilitation in " + df[name_col])
+            return ("Road Restoration & Rehabilitation")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Maintenance  Resurfacing"):
-            return ("Maintenance Resurfacing in " + df[name_col])
+            return ("Maintenance Resurfacing")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "Bridge Replacement - Added Capacity") | (df[desc_col] == "Bridge Replacement - No Added Capacity") | (df[desc_col] == "Bridge New Construction") | (df[desc_col] == "Special Bridge"):
-            return ("Bridge Replacement in " + df[name_col])
+            return ("Bridge Replacement")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "Mitigation of Water Pollution due to Highway Runoff"):
-            return (df[desc_col] + " in " + df[name_col])
+            return (df[desc_col])
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Added Capacity"):
-            return ("Added Roadway Capacity in " + df[name_col])
+            return ("Added Roadway Capacity")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - No Added Capacity"):
-            return ("Road Construction in " + df[name_col])
+            return ("Road Construction")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "New  Construction Roadway"):
-            return ("New Construction Roadway in " + df[name_col])
+            return ("New Construction Roadway")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "Traffic Management/Engineering - HOV"):
-            return ("Traffic Management Project in " + df[name_col])
+            return ("Traffic Management Project")
         
         elif (df[flag_col] == "Project") & (df[desc_col] == "Right of Way"):
-            return (df[desc_col] + " Project in " + df[name_col])
+            return (df[desc_col] + " Project")
         
         elif (df[flag_col] == "Project") & (df[program_code_desc_col]== "NATIONAL HIGHWAY PERF IIJA"): 
-            return ("National Highway System Support in " + df[name_col]) 
+            return ("National Highway System Support") 
         
         elif (df[flag_col] == "Project") & (df[desc_col] != "Other"):
-            return (df[desc_col] + " in " + df[name_col])
+            return (df[desc_col])
     
-        
         else:
-            return "" #(df[desc_col] + " in " + df[name_col])
+            return df[flag_col] 
 
         return df
 
+    df['project_type'] = df.apply(return_project_type, axis = 1)
 
-    df['project_name_new2'] = df.apply(return_project_type, axis = 1)
-    
-    #df.apply(func, axis=1)
-    
     return df
 
 #function for getting title column
@@ -346,35 +339,25 @@ def get_new_desc_title(df):
     note: we can only use this function once in the notebook. second time running will throw an error. 
     '''
     
-    #first get one row for each project
-    #df is full df
-
     proj_one_row = df.groupby(['project_number', 'project_title'])['obligations_amount'].max().reset_index()
     merge_cols = ['project_number','project_title','obligations_amount']
     
     proj_unique = (pd.merge(proj_one_row, df, how='left', on=merge_cols))
     
-    
     #add descriptions
     proj_unique_cat = add_description(proj_unique, 'project_title')
     
-    # #add title - first round
-    # proj_unique_cat_title = utils.add_new_title(proj_unique_cat, "project_method", 'project_type', 'implementing_agency')
+    #remove project method column values so that the title function wont double count
+    proj_unique_cat.loc[proj_unique_cat['project_type'] == 'Project', 'project_method'] = ""
+    
+     #update for the projects not in the first round of descriptions
+    proj_unique_cat_title = update_no_matched(proj_unique_cat, "project_type", 'improvement_type_description', 'program_code_description')
     
     #add title - second round to account for statewide projects
     proj_unique_cat_title = add_new_title(proj_unique_cat, "project_method", "project_type", "implementing_agency", "county_name")
     
-    #update for the projects not in the first round of descriptions
-    proj_unique_cat_title = update_no_matched(proj_unique_cat_title, 'project_type', 'improvement_type_description', 'implementing_agency', 'program_code_description')
-
-    # convert "" to na and fill with the projects in first category
-    proj_unique_cat_title['project_name_new2'] = proj_unique_cat_title['project_name_new2'].replace('', np.NaN)
-
-    proj_unique_cat_title.project_name_new2.fillna(proj_unique_cat_title.project_name_new, inplace=True)
-    
-    # drop original column name and rename new one
-    proj_unique_cat_title.drop(columns =['project_name_new'], axis=1, inplace=True)
-    proj_unique_cat_title = proj_unique_cat_title.rename(columns={'project_name_new2':'project_title_new'})
+    # rename new title one
+    proj_unique_cat_title = proj_unique_cat_title.rename(columns={'project_name_new':'project_title_new'})
     
     #map the title back to df
     proj_title_mapping = (dict(proj_unique_cat_title[['project_number', 'project_title_new']].values))
@@ -384,6 +367,14 @@ def get_new_desc_title(df):
     return df
 
 
+
+def get_clean_data():
+    df = read_data_all()
+    full_df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
+    full_df = get_new_desc_title(full_df)
+    
+    return full_df
+    
 '''
 another approach (not as effective for creating new titles)
 '''
