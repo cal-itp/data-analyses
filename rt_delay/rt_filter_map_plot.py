@@ -157,7 +157,7 @@ class RtFilterMapper:
     def _filter(self, df):
         '''Filters a df (containing trip_id) on trip_id based on any set filter.
         '''
-        if self.filter == None:
+        if not self.filter:
             return df
         else:
             trips = self.rt_trips.copy()
@@ -279,6 +279,8 @@ class RtFilterMapper:
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> group_by(_.stop_sequence)
                          >> mutate(n_trips = _.stop_sequence.size,
+                                    avg_sec = _.seconds_from_last.mean(),
+                                  _20p_sec = _.seconds_from_last.quantile(.2),
                                     avg_mph = _.speed_mph.mean(),
                                   _20p_mph = _.speed_mph.quantile(.2),
                                    trips_per_hour = _.n_trips / self.hr_duration_in_filter
@@ -321,7 +323,7 @@ class RtFilterMapper:
         gdf = self.stop_segment_speed_view.copy()
         # essential here for reasonable map size!
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
-        gdf['shape_miles'] = gdf.shape_meters / 1609
+        gdf['miles_from_last'] = gdf.meters_from_last / 1609
         # Further reduce map size
         gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
                             -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
@@ -329,9 +331,10 @@ class RtFilterMapper:
                            -_.meters_from_last, -_.n_trips)
         orig_rows = gdf.shape[0]
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_miles': 1,
-                        'trips_per_hour': 1}) ##round for display
+                        'trips_per_hour': 1, 'avg_sec': 0, '_20p_sec': 0,}) ##round for display
         
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
+        how_time_col = {'average': 'avg_sec', 'low_speeds': '_20p_sec'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
 
         gdf = gdf >> arrange(_.trips_per_hour)
@@ -352,17 +355,11 @@ class RtFilterMapper:
 
         popup_dict = {
             how_speed_col[how]: "Speed (miles per hour)",
+            how_time_col[how]: "Travel time (seconds)",
+            "miles_from_last": "Segment distance (miles)",
             "route_short_name": "Route",
-            # "shape_id": "Shape ID",
-            # "direction_id": "Direction ID",
-            # "stop_id": "Next Stop ID",
-            # "stop_sequence": "Next Stop Sequence",
-            "trips_per_hour": "Frequency (trips per hour)" ,
-            "shape_miles": "Distance from start of route (miles)"
+            "trips_per_hour": "Frequency (trips per hour)"
         }
-        # if singletrip:
-        #     popup_dict["delay_seconds"] = "Current Delay (seconds)"
-        #     popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
         if no_title:
             title = ''
         else:
@@ -535,14 +532,16 @@ class RtFilterMapper:
         Generate schedule based and speed based metrics for SCCP/LPP programs.
         '''
         assert hasattr(self, 'corridor'), 'must add corridor before generating corridor metrics'
-        schedule_metric = (self.corridor_stop_delays
+        if self.filter:
+            print('warning: filter set -- for SCCP/LPP reset filter first')
+        schedule_metric = (self._filter(self.corridor_stop_delays)
              >> group_by(_.trip_id)
              >> summarize(median_corridor_delay_seconds = _.corridor_delay_seconds.median())
              >> summarize(sum_of_medians_minutes = _.median_corridor_delay_seconds.sum() / 60)
             ).sum_of_medians_minutes.iloc[0]
         
         self.stop_delay_view = self.stop_delay_view >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
-        corridor_trip_speeds = (self.stop_delay_view
+        corridor_trip_speeds = (self._filter(self.stop_delay_view)
              >> filter(_.corridor)
              >> group_by(_.trip_id)
              >> mutate(entry_time = _.actual_time.min())
