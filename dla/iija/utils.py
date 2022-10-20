@@ -118,10 +118,6 @@ def title_column_names(df):
 
 
 
-'''
-Word Analysis Functions
-'''
-
 def tokenize(texts):
     return [nltk.tokenize.word_tokenize(t) for t in texts]
 
