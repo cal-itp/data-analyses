@@ -11,6 +11,8 @@ from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 DASK_GCS = "gs://calitp-analytics-data/data-analyses/dask_test/"
 
+HQTA_SEGMENT_LENGTH = 1_250 # meters
+
 ## These should all be functions that handle everything that can be done at once
 # Put in corridor_utils?
 def max_trips_by_group(df: dd.DataFrame, 
@@ -153,7 +155,9 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
 
 
 def symmetric_difference_by_route(longest_shapes: gpd.GeoDataFrame, 
-                                  route: str) -> gpd.GeoDataFrame:
+                                  route: str, 
+                                  segment_length: int
+                                 ) -> gpd.GeoDataFrame:
     """
     For a given route, take the 2 longest shapes (1 for each direction),
     find the symmetric difference.
@@ -193,16 +197,24 @@ def symmetric_difference_by_route(longest_shapes: gpd.GeoDataFrame,
         route_identifier = route,
     )
     
-    CUTOFF = 750 # 750 m is pretty close to how long our hqta segments are,
+    CUTOFF = segment_length * 0.5
+    # 750 m is pretty close to how long our hqta segments are,
     # which are 1,250 m. Maybe these segments are long enough to be included.
     
     exploded_long_enough = exploded2[exploded2.overlay_length > CUTOFF]
    
+    # Now, dissolve it, so it becomes 1 row again
+    # Without this initial dissolve, hqta segments will have tiny segments towards ends
+    segments_to_attach = (exploded_long_enough[["route_identifier", "geometry"]]
+                          .dissolve(by="route_identifier")
+                          .reset_index()
+                         )
+
     # Now, combine the segments to attach with the longest shape in one direction
     # this gives us full route network
     # dissolve it, so it becomes 1 row at route-level (no longer direction dependent)
     combined = (pd.concat(
-                [first, exploded_long_enough], axis=0)
+                [first, segments_to_attach], axis=0)
                 [["route_identifier", "geometry"]]
                 .dissolve(by="route_identifier")
                 .reset_index()
@@ -212,7 +224,8 @@ def symmetric_difference_by_route(longest_shapes: gpd.GeoDataFrame,
 
 
 def dissolve_two_directions_into_one(
-    longest_shapes: dg.GeoDataFrame) -> gpd.GeoDataFrame:
+    longest_shapes: dg.GeoDataFrame, 
+    segment_length: int) -> gpd.GeoDataFrame:
     """
     If 2 observations are kept, 1 in each direction,
     take the symmetric difference.
@@ -239,7 +252,8 @@ def dissolve_two_directions_into_one(
     two_directions_dissolved = gpd.GeoDataFrame()
 
     for route in routes_with_both_directions:
-        exploded = symmetric_difference_by_route(two_directions, route)
+        exploded = symmetric_difference_by_route(two_directions, 
+                                                 route, segment_length)
     
         two_directions_dissolved = pd.concat(
             [two_directions_dissolved, exploded], axis=0)    
@@ -257,7 +271,7 @@ def dissolve_two_directions_into_one(
     
     longest_shape = (pd.concat([
         one_direction[route_cols + ["geometry"]], 
-        two_directions_dissolved2], axis=0)
+        two_directions_dissolved2[route_cols + ["geometry"]]], axis=0)
         .sort_values(["calitp_itp_id", "route_id"])
         .reset_index(drop=True)
     )
@@ -284,7 +298,7 @@ def find_primary_direction_across_hqta_segments(
     drop_cols = ["origin", "destination", "route_primary_direction"]
     
     routes_with_primary_direction = pd.merge(
-        hqta_segments_gdf, 
+        hqta_segments_gdf.drop(columns = "route_direction"), 
         predominant_direction_by_route,
         on = "route_identifier",
         how = "left",
@@ -295,7 +309,10 @@ def find_primary_direction_across_hqta_segments(
     
 
     
-def select_longest_shapes_for_route_network(analysis_date: str) -> gpd.GeoDataFrame:
+def select_longest_shapes_for_route_network(
+    analysis_date: str, segment_length: int = HQTA_SEGMENT_LENGTH
+) -> gpd.GeoDataFrame:
+    
     routelines = dg.read_parquet(
         f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet")
     trips = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
@@ -306,17 +323,19 @@ def select_longest_shapes_for_route_network(analysis_date: str) -> gpd.GeoDataFr
     # Do a symmetric overlay, then dissolve
     # so that there's only 1 line geom for each route, and it captures both directions
     # symmetric overlay needed because otherwise hqta segments will be cut too tiny
-    longest_shape = dissolve_two_directions_into_one(longest_shapes)
+    longest_shape = dissolve_two_directions_into_one(longest_shapes, segment_length)
     
     return longest_shape
 
 
-def cut_route_network_into_hqta_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def cut_route_network_into_hqta_segments(
+    gdf: gpd.GeoDataFrame, segment_length: int = HQTA_SEGMENT_LENGTH
+) -> gpd.GeoDataFrame:
     # HQTA segments are 1,250 m long
     hqta_segments = geography_utils.cut_segments(
         gdf,
         group_cols = ["calitp_itp_id", "route_id", "route_identifier"],
-        segment_distance = 1_250
+        segment_distance = segment_length
     )
     
     # compute (hopefully unique) hash of segment id that can be used
@@ -336,8 +355,11 @@ def cut_route_network_into_hqta_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFr
     # for a given route, use the segments to determine the primary direction
     hqta_segments2 = find_primary_direction_across_hqta_segments(with_direction)
     
+    # Re-order columns and put geometry last
+    cols = list(hqta_segments2.columns)
+    hqta_segments2 = hqta_segments2.reindex(columns = cols[1:] + ["geometry"])
+    
     return hqta_segments2
-
 
 
 ## Join HQTA segment to stop
@@ -368,7 +390,7 @@ def hqta_segment_to_stop(hqta_segments: dg.GeoDataFrame,
 
 def hqta_segment_keep_one_stop(
     hqta_segments: dg.GeoDataFrame, 
-    stop_times: pd.DataFrame) -> dg.GeoDataFrame:
+    stop_times: pd.DataFrame) -> gpd.GeoDataFrame:
     
     stop_cols = ["calitp_itp_id", "stop_id"]
     # Keep the stop in the segment with highest trips (sum across AM and PM)
@@ -380,7 +402,6 @@ def hqta_segment_keep_one_stop(
             on = stop_cols
         )
                       
-        
     # Can't sort by multiple columns in dask,
     # so, find the max, then inner merge
     max_trips_by_segment = max_trips_by_group(
@@ -397,9 +418,20 @@ def hqta_segment_keep_one_stop(
         max_trips_by_segment,
         on = ["hqta_segment_id", "n_trips"],
         how = "inner"
-    ).drop_duplicates(subset="hqta_segment_id")
+    ).drop_duplicates(subset=["hqta_segment_id", "am_max_trips", "pm_max_trips"])
     
-    return segment_to_stop_unique
+    # In the case of same number of trips overall, do a sort
+    # with descending order for AM, then PM trips
+    segment_to_stop_gdf = segment_to_stop_unique.compute()
+    segment_to_stop_gdf = (segment_to_stop_gdf
+                           .sort_values(["hqta_segment_id",
+                                         "am_max_trips", "pm_max_trips"], 
+                                        ascending=[True, False, False])
+                            .drop_duplicates(subset="hqta_segment_id")
+                           .reset_index(drop=True)
+                          )
+    
+    return segment_to_stop_gdf
 
 
 
@@ -409,11 +441,8 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     stop_times: pd.DataFrame | dd.DataFrame,
     buffer_size: int = 50,
     hq_transit_threshold: int = 4,
-) -> gpd.GeoDataFrame:
-    
-    # Convert to dask gdf
-    #hqta_segments = dg.from_geopandas(hqta_segments, npartitions=1)
-    
+) -> dg.GeoDataFrame:
+        
     # Draw 50 m buffer to capture stops around hqta segments
     hqta_segments2 = hqta_segments.assign(
         geometry = hqta_segments.geometry.buffer(buffer_size)
@@ -434,7 +463,7 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
         hq_transit_corr = segment_to_stop_unique.apply(
             lambda x: True if (x.am_max_trips > hq_transit_threshold and 
                                (x.pm_max_trips > hq_transit_threshold))
-            else False, axis=1, meta=("hq_transit_corr", "bool"))
+            else False, axis=1)
     ).drop(columns = drop_cols)
     
 
@@ -443,38 +472,48 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
 
 if __name__=="__main__":
     '''
+
     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
+    # takes 1 min
     stop_times = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
     max_arrivals_by_stop = stop_times_aggregation_max_by_stop(stop_times)
     
     max_arrivals_by_stop.compute().to_parquet(f"{DASK_GCS}max_arrivals_by_stop.parquet")
-    print("stop time aggregation saved to GCS")
-
+    
+    time1 = datetime.datetime.now()
+    print(f"stop time aggregation saved to GCS: {time1 - start}")
+    '''
+    time1 = datetime.datetime.now()
+    
     # (2) Grab longest shapes for route network
     # Only longest shape in each direction -> dissolved into 1 line geom per route
-    longest_shape = select_longest_shapes_for_route_network(analysis_date) 
+    # Takes <7 min
+    longest_shape = select_longest_shapes_for_route_network(analysis_date, 
+                                                            HQTA_SEGMENT_LENGTH) 
     
     utils.geoparquet_gcs_export(longest_shape,
                                 DASK_GCS,
                                 "longest_shape_with_dir"
                                )
     
-    print("routelines dissolved saved to GCS")
-
+    time2 = datetime.datetime.now()
+    print(f"routelines dissolved saved to GCS: {time2 - time1}")
     
     # (3) Cut route network into hqta segments, add route_direction
-    # Takes 20 min to run
+    # Takes 23 min to run
     routes = gpd.read_parquet(f"{DASK_GCS}longest_shape_with_dir.parquet")
     
-    hqta_segments = cut_route_network_into_hqta_segments(routes)
+    hqta_segments = cut_route_network_into_hqta_segments(routes, HQTA_SEGMENT_LENGTH)
 
     utils.geoparquet_gcs_export(hqta_segments, 
                                 DASK_GCS,
                                 "hqta_segments"
                                )
-    '''
-    start = datetime.datetime.now()
-
+    time3 = datetime.datetime.now()
+    print(f"cut segments: {time3 - time2}")
+    
+    ## (4) Spatial join stops and stop times to hqta segments
+    # this takes < 2 min
     hqta_segments = dg.read_parquet(f"{DASK_GCS}hqta_segments.parquet")
     stops = dg.read_parquet(f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
     max_arrivals_by_stop = pd.read_parquet(f"{DASK_GCS}max_arrivals_by_stop.parquet") 
@@ -486,15 +525,14 @@ if __name__=="__main__":
         buffer_size = 50, #50meters
         hq_transit_threshold = 4
     )
-    
-    hqta_df = hqta_corr.compute()
-    
-    hqta_df.to_parquet("./all_bus.parquet")
+        
+    hqta_corr.to_parquet("./all_bus.parquet")
     utils.geoparquet_gcs_export(
-        hqta_df,
+        hqta_corr,
         DASK_GCS,
         "all_bus"
     )
      
     end = datetime.datetime.now()
-    print(f"execution: {end-start}")
+    print(f"sjoin stops and stop times: {end-time3}")
+    print(f"execution: {end-time1}")
