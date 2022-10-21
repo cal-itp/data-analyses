@@ -131,7 +131,7 @@ burndown_cols_to_keep = [
     "allocation_phase",
     "allocation_allocation_amount",
     "allocation_expended_amount",
-    "allocation_completion_date",
+    "allocation_phase_completion_date",
 ]
 
 """
