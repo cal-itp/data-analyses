@@ -189,7 +189,19 @@ class RtFilterMapper:
         corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
         self.corridor = corridor_gdf
         to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence']).dropna(subset=['stop_id'])
-        corr_shapes = to_clip.clip(corridor_gdf)
+        clipped = to_clip.clip(corridor_gdf)
+        shape_sequences = (self.stop_delay_view.dropna(subset=['stop_id'])
+                          >> distinct(_.shape_id, _.stop_sequence)
+                          >> arrange(_.shape_id, _.stop_sequence)
+                         )
+        stops_per_shape = shape_sequences >> group_by(_.shape_id) >> summarize(n_stops = _.shape_id.size)
+        # can use this as # of stops in corr...
+        stops_in_corr = clipped >> group_by(_.shape_id) >> summarize(in_corr = _.shape_id.size)
+        stop_comparison = stops_per_shape >> inner_join(_, stops_in_corr, on='shape_id')
+        # # only keep shapes with at least 10% of stops in corridor
+        # stop_comparison = stop_comparison >> mutate(corr_shape = _.in_corr > _.n_stops / 10)
+        # corr_shapes = stop_comparison >> filter(_.corr_shape)
+        corr_shapes = stop_comparison # actually keep all
 
         self._shape_sequence_filter = {}
         for shape_id in corr_shapes.shape_id.unique():
@@ -274,13 +286,11 @@ class RtFilterMapper:
                                     x.shape_meters),
                                                     axis = 1)
                     stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
-
+                    self.debug_dict[f'{shape_id}_st_spd1'] = stop_speeds
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> group_by(_.stop_sequence)
                          >> mutate(n_trips = _.stop_sequence.size,
-                                    avg_sec = _.seconds_from_last.mean(),
-                                  _20p_sec = _.seconds_from_last.quantile(.2),
                                     avg_mph = _.speed_mph.mean(),
                                   _20p_mph = _.speed_mph.quantile(.2),
                                    trips_per_hour = _.n_trips / self.hr_duration_in_filter
@@ -330,12 +340,14 @@ class RtFilterMapper:
                            -_.delay_chg_sec, -_.service_date, -_.last_loc, -_.shape_meters,
                            -_.meters_from_last, -_.n_trips)
         orig_rows = gdf.shape[0]
-        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_miles': 1,
+        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'miles_from_last': 1,
                         'trips_per_hour': 1, 'avg_sec': 0, '_20p_sec': 0,}) ##round for display
         
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
-        how_time_col = {'average': 'avg_sec', 'low_speeds': '_20p_sec'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
+        
+        gdf['time_formatted'] = (gdf.miles_from_last / gdf[how_speed_col[how]]) * 60**2 #seconds
+        gdf['time_formatted'] = gdf['time_formatted'].apply(lambda x: f'{int(x)//60}' + f':{int(x)%60:02}')
 
         gdf = gdf >> arrange(_.trips_per_hour)
         gdf = gdf.set_crs(CA_NAD83Albers)
@@ -355,7 +367,7 @@ class RtFilterMapper:
 
         popup_dict = {
             how_speed_col[how]: "Speed (miles per hour)",
-            how_time_col[how]: "Travel time (seconds)",
+            "time_formatted": "Travel time",
             "miles_from_last": "Segment distance (miles)",
             "route_short_name": "Route",
             "trips_per_hour": "Frequency (trips per hour)"
