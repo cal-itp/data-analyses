@@ -73,7 +73,6 @@ def stop_times_aggregation_max_by_stop(stop_times: dd.DataFrame) -> dd.DataFrame
         n_trips = (max_trips_by_stop.am_max_trips.fillna(0) + 
                    max_trips_by_stop.pm_max_trips.fillna(0))
     )
-    
         
     return max_trips_by_stop
 
@@ -320,9 +319,9 @@ def cut_route_network_into_hqta_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFr
         segment_distance = 1_250
     )
     
-    # compute (hopefully unique) hash of segment id that can be used 
+    # compute (hopefully unique) hash of segment id that can be used
     # across routes/operators
-    # this checksum hash always give same value if the same combination of strings are given
+    # this checksum hash always give same value if the same combo of strings are given
     hqta_segments = hqta_segments.assign(
         hqta_segment_id = hqta_segments.apply(
             lambda x: zlib.crc32(
@@ -367,24 +366,41 @@ def hqta_segment_to_stop(hqta_segments: dg.GeoDataFrame,
     return segment_to_stop2
 
 
-def hqta_segment_keep_one_stop(hqta_segments: dg.GeoDataFrame, 
-                               stop_times: pd.DataFrame
-                              ) -> dg.GeoDataFrame:
+def hqta_segment_keep_one_stop(
+    hqta_segments: dg.GeoDataFrame, 
+    stop_times: pd.DataFrame) -> dg.GeoDataFrame:
     
     stop_cols = ["calitp_itp_id", "stop_id"]
     # Keep the stop in the segment with highest trips (sum across AM and PM)
     # dd.merge between dask dataframes can be expensive
     # put pd.DataFrame on right if possible
-    segment_to_stop = (dd.merge(
+    segment_to_stop_times = dd.merge(
             hqta_segments, 
             stop_times,
             on = stop_cols
-        ).sort_values(["hqta_segment_id", "n_trips"], ascending=[True, False])
-        .drop_duplicates(subset="hqta_segment_id")
-        .reset_index(drop=True)
-    )
+        )
+                      
+        
+    # Can't sort by multiple columns in dask,
+    # so, find the max, then inner merge
+    max_trips_by_segment = max_trips_by_group(
+        segment_to_stop_times,
+        group_cols = ["hqta_segment_id"],
+        max_col = "n_trips"
+    ).compute()
     
-    return segment_to_stop
+    # Merge in and keep max trips observation
+    # Since there might be duplicates still, where multiple stops all 
+    # share 2 trips for that segment, do a drop duplicates at the end 
+    segment_to_stop_unique = dd.merge(
+        segment_to_stop_times,
+        max_trips_by_segment,
+        on = ["hqta_segment_id", "n_trips"],
+        how = "inner"
+    ).drop_duplicates(subset="hqta_segment_id")
+    
+    return segment_to_stop_unique
+
 
 
 def sjoin_stops_and_stop_times_to_hqta_segments(
@@ -393,10 +409,10 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     stop_times: pd.DataFrame | dd.DataFrame,
     buffer_size: int = 50,
     hq_transit_threshold: int = 4,
-) -> gpd.GeoDataFrame | dg.GeoDataFrame:
+) -> gpd.GeoDataFrame:
     
     # Convert to dask gdf
-    hqta_segments = dg.from_geopandas(hqta_segments, npartitions=1)
+    #hqta_segments = dg.from_geopandas(hqta_segments, npartitions=1)
     
     # Draw 50 m buffer to capture stops around hqta segments
     hqta_segments2 = hqta_segments.assign(
@@ -404,19 +420,23 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     )
     
     # Join hqta segment to stops
-    segment_to_stop = hqta_segment_to_stop(hqta_segments, stops)
+    segment_to_stop = hqta_segment_to_stop(hqta_segments2, stops)
     
-    segment_to_stop_unique = hqta_segment_keep_one_stop(segment_to_stop, stop_times)
+    segment_to_stop_unique = hqta_segment_keep_one_stop(
+        segment_to_stop, stop_times)
 
     # Identify hq transit corridor
     # Tag segment as being hq_transit_corr if it has at least 4 trips in AM and PM 
     # (before 12pm, after 12pm, whatever is max in each period)
+    drop_cols = ["n_trips"]
+
     segment_hq_corr = segment_to_stop_unique.assign(
         hq_transit_corr = segment_to_stop_unique.apply(
             lambda x: True if (x.am_max_trips > hq_transit_threshold and 
                                (x.pm_max_trips > hq_transit_threshold))
-            else False, axis=1, meta=("hq_transit_corr", "boolean"))
-    )
+            else False, axis=1, meta=("hq_transit_corr", "bool"))
+    ).drop(columns = drop_cols)
+    
 
     return segment_hq_corr
     
@@ -441,8 +461,7 @@ if __name__=="__main__":
     
     print("routelines dissolved saved to GCS")
 
-    '''
-    start = datetime.datetime.now()
+    
     # (3) Cut route network into hqta segments, add route_direction
     # Takes 20 min to run
     routes = gpd.read_parquet(f"{DASK_GCS}longest_shape_with_dir.parquet")
@@ -453,16 +472,29 @@ if __name__=="__main__":
                                 DASK_GCS,
                                 "hqta_segments"
                                )
-    
-    end = datetime.datetime.now()
-    print(f"execution: {end-start}")
-    
     '''
+    start = datetime.datetime.now()
+
     hqta_segments = dg.read_parquet(f"{DASK_GCS}hqta_segments.parquet")
+    stops = dg.read_parquet(f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
     max_arrivals_by_stop = pd.read_parquet(f"{DASK_GCS}max_arrivals_by_stop.parquet") 
-    # hqta_corr = sjoin_stops_and_stop_times_to_hqta_segments(hqta_segments, 
+    
+    hqta_corr = sjoin_stops_and_stop_times_to_hqta_segments(
+        hqta_segments, 
         stops,
         max_arrivals_by_stop,
         buffer_size = 50, #50meters
-        hq_transit_threshold=4)
-    '''
+        hq_transit_threshold = 4
+    )
+    
+    hqta_df = hqta_corr.compute()
+    
+    hqta_df.to_parquet("./all_bus.parquet")
+    utils.geoparquet_gcs_export(
+        hqta_df,
+        DASK_GCS,
+        "all_bus"
+    )
+     
+    end = datetime.datetime.now()
+    print(f"execution: {end-start}")
