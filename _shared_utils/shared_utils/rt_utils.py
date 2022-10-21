@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 
 import branca
+import dask_geopandas as dg
 import folium
 import gcsfs
 import geopandas as gpd
@@ -80,6 +81,88 @@ def primary_cardinal_direction(origin, destination) -> str:
             return "Northbound"
         else:
             return "Southbound"
+
+
+def add_origin_destination(
+    gdf: gpd.GeoDataFrame | dg.GeoDataFrame,
+) -> gpd.GeoDataFrame | dg.GeoDataFrame:
+    """
+    For a gdf, add the origin, destination columns given a linestring.
+    Note: multilinestring may not work!
+    https://gis.stackexchange.com/questions/358584/how-to-extract-long-and-lat-of-start-and-end-points-to-seperate-columns-from-t
+    """
+    if isinstance(gdf, dg.GeoDataFrame):
+        gdf = gdf.assign(
+            origin=gdf.geometry.apply(
+                lambda x: shapely.geometry.Point(x.coords[0]),
+                meta=("origin", "geometry"),
+            ),
+            destination=gdf.geometry.apply(
+                lambda x: shapely.geometry.Point(x.coords[-1]),
+                meta=("destination", "geometry"),
+            ),
+        )
+
+    elif isinstance(gdf, gpd.GeoDataFrame):
+        gdf = gdf.assign(
+            origin=gdf.geometry.apply(lambda x: shapely.geometry.Point(x.coords[0])),
+            destination=gdf.geometry.apply(
+                lambda x: shapely.geometry.Point(x.coords[-1])
+            ),
+        )
+
+    return gdf
+
+
+def add_route_cardinal_direction(
+    df: gpd.GeoDataFrame | dg.GeoDataFrame,
+    origin: str = "origin",
+    destination: str = "destination",
+) -> gpd.GeoDataFrame | dg.GeoDataFrame:
+    """
+    Apply cardinal direction to gdf.
+
+    Returns gdf with new columns: route_primary_direction and route_direction
+
+       route_primary_direction: Northbound, Southbound, Eastbound, Westbound
+       route_direction: north-south, east-west
+    """
+    NORTH_SOUTH = ["Northbound", "Southbound"]
+
+    # Stick the origin/destination of a route_id and return the primary cardinal direction
+    if isinstance(df, dg.GeoDataFrame):
+        df = df.assign(
+            route_primary_direction=df.apply(
+                lambda x: primary_cardinal_direction(x[origin], x[destination]),
+                axis=1,
+                meta=("route_direction", "str"),
+            )
+        )
+
+        # In cases where you don't care exactly if it's southbound or northbound,
+        # but care that it's north-south, such as
+        # testing for orthogonality of 2 bus routes intersecting
+        df = df.assign(
+            route_direction=df.route_primary_direction.apply(
+                lambda x: "north-south" if x in NORTH_SOUTH else "east-west",
+                meta=("route_direction", "str"),
+            ),
+        )
+
+    elif isinstance(df, gpd.GeoDataFrame):
+        df = df.assign(
+            route_primary_direction=df.apply(
+                lambda x: primary_cardinal_direction(x[origin], x[destination]), axis=1
+            )
+        )
+
+        df = df.assign(
+            route_direction=df.route_primary_direction.apply(
+                lambda x: "north-south" if x in NORTH_SOUTH else "east-west"
+            ),
+        )
+
+    return df
 
 
 def show_full_df(df: pd.DataFrame):
