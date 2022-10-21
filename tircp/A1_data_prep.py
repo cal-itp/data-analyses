@@ -174,7 +174,7 @@ Allocation Sheet
 # List for columns that should be date 
 date_columns = [
     "allocation_date",
-    "completion_date",
+    "phase_completion_date",
     "_3rd_party_award_date",
     "led",
     "date_regional_coordinator_receives_psa",
@@ -196,7 +196,7 @@ def clean_allocation_manual(df):
         crosswalks.allocation_3rd_party_date
     )
     df["led"] = df["led"].replace(crosswalks.allocation_led)
-    df["completion_date"] = df["completion_date"].replace(
+    df["phase_completion_date"] = df["phase_completion_date"].replace(
         crosswalks.allocation_completion_date
     )
 
