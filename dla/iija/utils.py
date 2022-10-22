@@ -24,6 +24,15 @@ import re
 
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
 
+
+#get column names in Title Format (for exporting)
+def title_column_names(df):
+    df.columns = df.columns.map(str.title) 
+    df.columns = df.columns.map(lambda x : x.replace("_", " "))
+    
+    return df
+
+
 #function to add locodes
 
 def read_data_all():
@@ -109,14 +118,39 @@ def identify_agency(df, identifier_col):
     return full_df
 
 
-#get column names in Title Format (for exporting)
-def title_column_names(df):
-    df.columns = df.columns.map(str.title) 
-    df.columns = df.columns.map(lambda x : x.replace("_", " "))
+
+
+def condense_df(df):
+    """
+    Function to return one row for each project and keep valuable unique information for the project
+    """
+    # make sure columns are in string format
+    df[['county_code', 'improvement_type',
+     'implementing_agency_locode', 'district',
+     'program_code_description', 'recipient_project_number']] = df[['county_code', 'improvement_type',
+                                                                     'implementing_agency_locode', 'district',
+                                                                     'program_code_description', 'recipient_project_number']].astype(str)
+    # aggreate df using .agg function and join in the unique values into one row
+    df_agg = (df
+           .assign(count=1)
+           .groupby(['fmis_transaction_date','project_number', 'implementing_agency', 'summary_recipient_defined_text_field_1_value'])
+           .agg({'program_code':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'program_code_description':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'recipient_project_number':lambda x:' | '.join(x.unique()), #'first',
+                 'improvement_type':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'improvement_type_description':lambda x:' | '.join(x.unique()),  # get unique values to concatenate
+                 'project_title':'first', #should be the same                 
+                 'obligations_amount':'sum', #sum of the obligations amount
+                 'congressional_district':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'district':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'county_code':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'county_name':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'implementing_agency_locode':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'rtpa_name':'first', #should be the same
+                 'mpo_name':'first',  #should be the same
+                }).reset_index())
     
-    return df
-
-
+    return df_agg
 
 def tokenize(texts):
     return [nltk.tokenize.word_tokenize(t) for t in texts]
@@ -144,8 +178,6 @@ def get_list_of_words(df, col):
     clean_text_list = pd.DataFrame(np.array(clean_text_list))
 
     return clean_text_list
-
-
 
 
 def add_description(df, col):
@@ -181,7 +213,7 @@ def add_description(df, col):
                         np.where(df[col].str.contains("BRIDGE PREVENTIVE MAINTENANCE"), "Bridge Preventive Maintenance",
                         np.where(df[col].str.contains("SIDEWALK"), "Sidewalk",
                         np.where(df[col].str.contains("SCOUR"), "Erosion Countermeasures",
-                        np.where(df[col].str.contains("ROUNDABOUT"), "Roundabout",
+                        np.where(df[col].str.contains("ROUNDABOUT") | df[col].str.contains("ROUDABOUT"), "Roundabout",
                         np.where(df[col].str.contains("TURN LANE"), "Turn Lane",
                         np.where(df[col].str.contains("GUARDRAI"), "Guardrails", ##removing the "L"from Guardrail in case the word is cut off
                         np.where(df[col].str.contains("VIDEO DETECTION EQUIPMENT"), "Video Detection Equipment",
@@ -223,83 +255,45 @@ def add_description(df, col):
                         np.where(df[col].str.contains("SHORELINE EMBANKMENT") ,"Shoreline Embankment", 
                         np.where(df[col].str.contains("NON-INFRAS") ,"Non-Infrastructure Project",
                         np.where(df[col].str.contains("PILOT PROGRAM") ,"Pilot Program", 
-                        np.where(df[col].str.contains("PLANNING") ,"Planning", 
-                        np.where(df[col].str.contains("REC TRAILS") ,"Recreational Trails", 
+                       # np.where(df[col].str.contains("PLANNING") ,"Planning", 
+                        np.where(df[col].str.contains("REC TRAILS") ,"Recreational Trails Project", 
+                        np.where(df[col].str.contains("PLANT") & df[col].str.contains("IRRIGATION") ,"Planting and Irrigation Systems", 
+                        np.where(df[col].str.contains("PLANT") & df[col].str.contains("VE") ,"Plant Vegetation",
                                   
                                  'Project')
-                                   ))))))))))))))))))))))))))))))))))))))))))))))))))
+                                   )))))))))))))))))))))))))))))))))))))))))))))))))))#)
     
     
     return df
 
 
-def update_no_matched(df, flag_col, desc_col, program_code_desc_col): 
-    """
-    function to itreate over projects that did not match the first time
-    using an existing project's short description of project type. 
-    """
+def add_description_4_no_match(df, desc_col):
+    ##using np.where. code help: https://stackoverflow.com/questions/43905930/conditional-if-statement-if-value-in-row-contains-string-set-another-column
+
     
-    def return_project_type(df):
-        
-        if (df[flag_col] == "Project") & (df[desc_col] == "Bridge Rehabilitation") | (df[desc_col] =="Bridge Rehabilitation - No Added Capacity") | (df[desc_col] =="Bridge Rehabilitation - Added Capacity"):
-            return ("Bridge Rehabilitation")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "Facilities for Pedestrians and Bicycles"):
-            return (df[desc_col])
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "Safety"):
-            return (df[desc_col] + " Improvements")
-            
-        elif (df[flag_col] == "Project") & (df[desc_col] == "Planning "):
-            return "Project Planning" 
-            
-        elif (df[flag_col] == "Project") & (df[desc_col] == "Preliminary Engineering"):
-            return (df[desc_col] + " Projects ")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "Construction Engineering"):
-            return (df[desc_col] + " Projects")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Restoration & Rehabilitation"):
-            return ("Road Restoration & Rehabilitation")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Maintenance  Resurfacing"):
-            return ("Maintenance Resurfacing")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "Bridge Replacement - Added Capacity") | (df[desc_col] == "Bridge Replacement - No Added Capacity") | (df[desc_col] == "Bridge New Construction") | (df[desc_col] == "Special Bridge"):
-            return ("Bridge Replacement")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "Mitigation of Water Pollution due to Highway Runoff"):
-            return (df[desc_col])
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Added Capacity"):
-            return ("Added Roadway Capacity")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "4R - No Added Capacity"):
-            return ("Road Construction")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "New  Construction Roadway"):
-            return ("New Construction Roadway")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "Traffic Management/Engineering - HOV"):
-            return ("Traffic Management Project")
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] == "Right of Way"):
-            return (df[desc_col] + " Project")
-        
-        elif (df[flag_col] == "Project") & (df[program_code_desc_col]== "National Highway Performance Program (NHPP)"): 
-            return ("National Highway Performance Program Support") 
-        
-        elif (df[flag_col] == "Project") & (df[desc_col] != "Other"):
-            return (df[desc_col])
+    ## method for project in first column
+    df['project_type2'] = (np.where(df[desc_col].str.contains("Bridge Rehabilitation"),"Bridge Rehabilitation",
+                        np.where(df[desc_col].str.contains("Bridge Rehabilitation - No Added Capacity") | df[desc_col].str.contains("Bridge Rehabilitation - Added Capacity"), "Bridge Rehabilitation",
+                        np.where(df[desc_col].str.contains("Bridge Replacement - Added Capacity")| df[desc_col].str.contains("Bridge Replacement - No Added Capacity"), "Bridge Replacement",
+                        np.where(df[desc_col].str.contains("Bridge New Construction")| df[desc_col].str.contains("Special Bridge"), "Bridge Replacement",
+                        np.where(df[desc_col].str.contains("Facilities for Pedestrians and Bicycles"), "Facilities for Pedestrians and Bicycles",
+                        np.where(df[desc_col].str.contains("Mitigation of Water Pollution due to Highway Runoff"), "Mitigation of Water Pollution due to Highway Runoff",
+                        np.where(df[desc_col].str.contains("Traffic Management/Engineering - HOV"), "Traffic Management Project",
+                        np.where(df[desc_col].str.contains("Planning "), "Project Planning",
+                        np.where(df[desc_col].str.contains("4R - Restoration & Rehabilitation"), "Road Restoration & Rehabilitation",
+                        np.where(df[desc_col].str.contains("4R - Maintenance  Resurfacing"), "Maintenance Resurfacing",
+                        np.where(df[desc_col].str.contains("4R - Added Capacity"), "Added Roadway Capacity",
+                        np.where(df[desc_col].str.contains("4R - No Added Capacity"), "Road Construction",
+                        np.where(df[desc_col].str.contains("Safety"), "Safety Improvements",
+                        np.where(df[desc_col].str.contains("New  Construction Roadway"), "New Construction Roadway",
+                        np.where(df[desc_col].str.contains("Preliminary Engineering"), "Preliminary Engineering Projects",
+                        np.where(df[desc_col].str.contains("Construction Engineering"), "Construction Engineering Projects",
+                        np.where(df[desc_col].str.contains("Right of Way"), "Right of Way Project",
+                                    "Project"))))))))))))))))))
     
-        else:
-            return df[flag_col] 
-
-        return df
-
-    df['project_type'] = df.apply(return_project_type, axis = 1)
-
     return df
+
+
 
 #function for getting title column
 
@@ -337,26 +331,27 @@ def get_new_desc_title(df):
     
     note: we can only use this function once in the notebook. second time running will throw an error. 
     '''
-    
-    proj_one_row = df.groupby(['project_number', 'project_title'])['obligations_amount'].max().reset_index()
-    merge_cols = ['project_number','project_title','obligations_amount']
-    
-    proj_unique = (pd.merge(proj_one_row, df, how='left', on=merge_cols))
-    
+    df_copy = df.copy()
     #add descriptions
-    proj_unique_cat = add_description(proj_unique, 'project_title')
+    proj_unique_cat = add_description(df_copy, 'project_title')
     
     #remove project method column values so that the title function wont double count
     proj_unique_cat.loc[proj_unique_cat['project_type'] == 'Project', 'project_method'] = ""
+    proj_unique_cat['project_type'] = proj_unique_cat['project_type'].replace('Project', np.NaN)
     
-     #update for the projects not in the first round of descriptions
-    proj_unique_cat_title = update_no_matched(proj_unique_cat, "project_type", 'improvement_type_description', 'program_code_description')
+    #update for the projects not in the first round of descriptions
+    proj_unique_cat_title =  add_description_4_no_match(proj_unique_cat, 'improvement_type_description')
+    ## proj_unique_cat_title = update_no_matched(proj_unique_cat, "project_type", 'improvement_type_description', 'program_code_description')
+    
+    #fill nan values in 'Project_type' with values from 'project_type2' from add_description_4_no_match function
+    proj_unique_cat_title['project_type'] = proj_unique_cat_title['project_type'].fillna(proj_unique_cat_title['project_type2'])
     
     #add title - second round to account for statewide projects
     proj_unique_cat_title = add_new_title(proj_unique_cat, "project_method", "project_type", "implementing_agency", "county_name")
     
     # rename new title one
     proj_unique_cat_title = proj_unique_cat_title.rename(columns={'project_name_new':'project_title_new'})
+    proj_unique_cat_title.drop(columns =['project_method', 'project_type', 'project_type2'], axis=1, inplace=True)
     
     #map the title back to df
     proj_title_mapping = (dict(proj_unique_cat_title[['project_number', 'project_title_new']].values))
@@ -367,12 +362,67 @@ def get_new_desc_title(df):
 
 
 
-def get_clean_data():
-    df = read_data_all()
-    full_df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
-    full_df = get_new_desc_title(full_df)
+def get_clean_data(full_or_agg = ''):
     
-    return full_df
+    '''
+    Function putting together all the functions. 
+    Returns data with new title, known agency name, and agency information.
+    
+    full_or_agg = 'agg' 
+        To return an aggregated df (one row for each project)
+        
+    full_or_agg = 'full' 
+        To return a full df with all rows
+        
+    default- return agg df
+    '''
+    
+    if full_or_agg == 'agg':
+        
+        ## function reads in data from GCS
+        df = read_data_all()
+    
+        ## function that adds known agency name to df 
+        df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
+    
+        aggdf = condense_df(df)
+    
+        ## get new title (str parser) 
+        aggdf = get_new_desc_title(aggdf)
+    
+        return aggdf
+    
+    elif full_or_agg == 'full':
+        ## function reads in data from GCS
+        df = read_data_all()
+    
+        ## function that adds known agency name to df 
+        df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
+        
+        aggdf = condense_df(df)
+        
+        aggdf = get_new_desc_title(aggdf)
+        
+        #map title back to full df
+        proj_title_mapping = (dict(aggdf[['project_number', 'project_title_new']].values))
+    
+        df['project_title_new'] = df.project_number.map(proj_title_mapping)
+
+    
+        return df
+    
+#     else: 
+#         df = read_data_all()
+    
+#         ## function that adds known agency name to df 
+#         df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
+    
+#         aggdf = condense_df(df)
+    
+#         ## get new title (str parser) 
+#         aggdf = get_new_desc_title(aggdf)
+    
+#         return full_df
     
 '''
 another approach (not as effective for creating new titles)
@@ -401,3 +451,78 @@ def key_word_intersection(df, text_col):
     
         summaries.append(np.array(x)[[i for i, keyword in enumerate(x) if keyword in keywords]])
     return summaries 
+
+
+
+
+
+"""
+old functions
+"""
+# def update_no_matched(df, flag_col, desc_col, program_code_desc_col): 
+#     """
+#     function to itreate over projects that did not match the first time
+#     using an existing project's short description of project type. 
+#     """
+    
+#     def return_project_type(df):
+        
+#         if (df[flag_col] == "Project") & (df[desc_col] == "Bridge Rehabilitation") | (df[desc_col] =="Bridge Rehabilitation - No Added Capacity") | (df[desc_col] =="Bridge Rehabilitation - Added Capacity"):
+#             return ("Bridge Rehabilitation")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "Facilities for Pedestrians and Bicycles"):
+#             return (df[desc_col])
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "Safety"):
+#             return (df[desc_col] + " Improvements")
+            
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "Planning "):
+#             return "Project Planning" 
+            
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "Preliminary Engineering"):
+#             return (df[desc_col] + " Projects ")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "Construction Engineering"):
+#             return (df[desc_col] + " Projects")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Restoration & Rehabilitation"):
+#             return ("Road Restoration & Rehabilitation")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Maintenance  Resurfacing"):
+#             return ("Maintenance Resurfacing")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "Bridge Replacement - Added Capacity") | (df[desc_col] == "Bridge Replacement - No Added Capacity") | (df[desc_col] == "Bridge New Construction") | (df[desc_col] == "Special Bridge"):
+#             return ("Bridge Replacement")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "Mitigation of Water Pollution due to Highway Runoff"):
+#             return (df[desc_col])
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Added Capacity"):
+#             return ("Added Roadway Capacity")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - No Added Capacity"):
+#             return ("Road Construction")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "New  Construction Roadway"):
+#             return ("New Construction Roadway")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "Traffic Management/Engineering - HOV"):
+#             return ("Traffic Management Project")
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] == "Right of Way"):
+#             return (df[desc_col] + " Project")
+        
+#         elif (df[flag_col] == "Project") & (df[program_code_desc_col]== "National Highway Performance Program (NHPP)"): 
+#             return ("National Highway Performance Program Support") 
+        
+#         elif (df[flag_col] == "Project") & (df[desc_col] != "Other"):
+#             return (df[desc_col])
+    
+#         else:
+#             return df[flag_col] 
+
+#         return df
+
+#     df['project_type'] = df.apply(return_project_type, axis = 1)
+
+#     return df
