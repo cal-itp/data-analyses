@@ -1,5 +1,6 @@
 setup_bus_service_utils:
 	pip install -r requirements.txt
+	conda install --yes -c conda-forge --file conda-requirements.txt
     
 data_for_100_recs:
 	python E1_get_buses_on_shn.py
