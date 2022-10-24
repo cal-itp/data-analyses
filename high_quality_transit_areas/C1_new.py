@@ -3,7 +3,7 @@ Prep components needed for clipping.
 Find pairwise hqta_segment_ids / route_ids with dask_geopandas.sjoin
 to narrow down the rows to pass through clipping.
 
-This takes 15 min to run. 
+This takes 21 min to run. 
 
 From combine_and_visualize.ipynb
 """
@@ -17,10 +17,10 @@ import sys
 from loguru import logger
 
 from shared_utils import utils
-from utilities import catalog_filepath, GCS_FILE_PATH
+#from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/C1_prep_for_clipping.log", retention="6 months")
+logger.add("./logs/test_C1.log")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
@@ -30,9 +30,13 @@ segment_cols = ["calitp_itp_id", "hqta_segment_id", "route_direction"]
 intersect_segment_cols = ["intersect_calitp_itp_id", 
                         "intersect_hqta_segment_id", "intersect_route_direction"]
 
+DASK_GCS = "gs://calitp-analytics-data/data-analyses/dask_test/"
+
+GCS_FILE_PATH = DASK_GCS
 
 # Input files
-ALL_BUS = catalog_filepath("all_bus")
+#ALL_BUS = catalog_filepath("all_bus")
+ALL_BUS = f"{DASK_GCS}all_bus.parquet"
 
 def prep_bus_corridors() -> dg.GeoDataFrame:
     """

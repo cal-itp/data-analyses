@@ -301,7 +301,7 @@ if __name__=="__main__":
     
     # Since route_direction at the route-level could yield both north-south and east-west 
     # for a given route, use the segments to determine the primary direction
-    hqta_segments_with_dir= find_primary_direction_across_hqta_segments(hqta_segments)
+    hqta_segments_with_dir = find_primary_direction_across_hqta_segments(hqta_segments)
     
     utils.geoparquet_gcs_export(hqta_segments_with_dir, 
                                 DASK_GCS,
