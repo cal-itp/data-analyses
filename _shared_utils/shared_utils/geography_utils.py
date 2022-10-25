@@ -384,6 +384,9 @@ def cut_segments(
             temp_index=(segmented.sort_values(group_cols).reset_index(drop=True).index)
         )
 
+    # TODO: Investigate when a NaN would occur
+    segmented = segmented[segmented.temp_index.notna()]
+
     segmented = (
         segmented.assign(
             segment_sequence=(

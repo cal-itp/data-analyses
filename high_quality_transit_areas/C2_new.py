@@ -22,12 +22,13 @@ import sys
 
 from loguru import logger
 
-import C1_prep_for_clipping as prep_clip
+#import C1_prep_for_clipping as prep_clip
+import C1_new as prep_clip
 from shared_utils import utils
-from utilities import catalog_filepath, GCS_FILE_PATH
+#from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/C2_clip_bus_intersections.log", retention="6 months")
+logger.add("./logs/C2_new.log")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
@@ -37,9 +38,13 @@ segment_cols = ["calitp_itp_id", "hqta_segment_id"]
 intersect_segment_cols = ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]
 
 # Input files
-PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
-SUBSET_CORRIDORS = catalog_filepath("subset_corridors")
+#PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
+#SUBSET_CORRIDORS = catalog_filepath("subset_corridors")
+DASK_GCS = "gs://calitp-analytics-data/data-analyses/dask_test/"
+GCS_FILE_PATH = DASK_GCS
 
+PAIRWISE_FILE = f"{DASK_GCS}intermediate/pairwise.parquet"
+SUBSET_CORRIDORS = f"{DASK_GCS}intermediate/subset_corridors.parquet"
 
 def get_operator_intersections_as_clipping_mask(
     corridors_df: dg.GeoDataFrame, intersecting_pairs: dd.DataFrame, 
@@ -119,7 +124,9 @@ def delete_local_clipped_files():
     for f in temp_operator_files:
         os.remove(f)
     
-
+# Ex: how to split it up, then apply using map_partitions
+# https://stackoverflow.com/questions/61920105/dask-applying-a-function-over-a-large-dataframe-which-is-more-than-ram
+    
 if __name__ == "__main__":
     logger.info(f"Analysis date: {analysis_date}")
 
