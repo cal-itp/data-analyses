@@ -17,7 +17,7 @@ from update_vars import analysis_date, COMPILED_CACHED_VIEWS,
                         
 HQTA_SEGMENT_LENGTH = 1_250 # meters
     
-logger.add("./logs/B1_bus_corridors.log", retention="6 months")
+logger.add("./logs/B1_create_hqta_segments.log", retention="6 months")
 logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
 

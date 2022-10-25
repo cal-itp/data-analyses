@@ -124,7 +124,9 @@ def delete_local_clipped_files():
     for f in temp_operator_files:
         os.remove(f)
     
-
+# Ex: how to split it up, then apply using map_partitions
+# https://stackoverflow.com/questions/61920105/dask-applying-a-function-over-a-large-dataframe-which-is-more-than-ram
+    
 if __name__ == "__main__":
     logger.info(f"Analysis date: {analysis_date}")
 
