@@ -15,7 +15,7 @@
 <contact>
 <CI_ResponsibleParty>
 <individualName>
-<gco:CharacterString>My Name</gco:CharacterString>
+<gco:CharacterString>Eric Dasmalchi</gco:CharacterString>
 </individualName>
 <organisationName>
 <gco:CharacterString>Caltrans</gco:CharacterString>
@@ -28,7 +28,7 @@
 <address>
 <CI_Address>
 <electronicMailAddress>
-<gco:CharacterString>hello@calitp.org</gco:CharacterString>
+<gco:CharacterString>eric.dasmalchi@dot.ca.gov</gco:CharacterString>
 </electronicMailAddress>
 </CI_Address>
 </address>
@@ -40,7 +40,7 @@
 </CI_ResponsibleParty>
 </contact>
 <dateStamp>
-<gco:Date>2022-10-13</gco:Date>
+<gco:Date>2022-10-25</gco:Date>
 </dateStamp>
 <metadataStandardName>
 <gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
@@ -56,8 +56,11 @@
 <geometricObjects>
 <MD_GeometricObjects>
 <geometricObjectType>
-<MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="point" codeSpace="ISOTC211/19115">point</MD_GeometricObjectTypeCode>
+<MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="composite" codeSpace="ISOTC211/19115">composite</MD_GeometricObjectTypeCode>
 </geometricObjectType>
+<geometricObjectCount>
+<gco:Integer>28466</gco:Integer>
+</geometricObjectCount>
 </MD_GeometricObjects>
 </geometricObjects>
 </MD_VectorSpatialRepresentation>
@@ -84,12 +87,12 @@
 <citation>
 <CI_Citation>
 <title>
-<gco:CharacterString>ca_hq_transit_stops</gco:CharacterString>
+<gco:CharacterString>ca_hq_transit_areas</gco:CharacterString>
 </title>
 <date>
 <CI_Date>
 <date>
-<gco:Date>2022-09-14</gco:Date>
+<gco:Date>2022-10-12</gco:Date>
 </date>
 <dateType>
 <CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">creation</CI_DateTypeCode>
@@ -97,16 +100,30 @@
 </CI_Date>
 </date>
 <edition>
-<gco:CharacterString>1</gco:CharacterString>
+<gco:CharacterString>6</gco:CharacterString>
 </edition>
 <citedResponsibleParty>
 <CI_ResponsibleParty>
 <individualName>
-<gco:CharacterString>My Name</gco:CharacterString>
+<gco:CharacterString>Eric Dasmalchi</gco:CharacterString>
 </individualName>
 <organisationName>
 <gco:CharacterString>Caltrans</gco:CharacterString>
 </organisationName>
+<positionName>
+<gco:CharacterString>California Integrated Travel Project</gco:CharacterString>
+</positionName>
+<contactInfo>
+<CI_Contact>
+<address>
+<CI_Address>
+<electronicMailAddress>
+<gco:CharacterString>eric.dasmalchi@dot.ca.gov</gco:CharacterString>
+</electronicMailAddress>
+</CI_Address>
+</address>
+</CI_Contact>
+</contactInfo>
 <role>
 <CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher" codeSpace="ISOTC211/19115">publisher</CI_RoleCode>
 </role>
@@ -118,10 +135,12 @@
 </CI_Citation>
 </citation>
 <abstract>
-<gco:CharacterString>abstract.</gco:CharacterString>
+<gco:CharacterString>Public. EPSG: 4326</gco:CharacterString>
 </abstract>
 <purpose>
-<gco:CharacterString>summary.</gco:CharacterString>
+<gco:CharacterString>
+    Estimated High Quality Transit Areas as described in Public Resources Code 21155, 21064.3, 21060.2.
+    </gco:CharacterString>
 </purpose>
 <status>
 <MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">completed</MD_ProgressCode>
@@ -132,10 +151,29 @@
 <MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="monthly" codeSpace="ISOTC211/19115">monthly</MD_MaintenanceFrequencyCode>
 </maintenanceAndUpdateFrequency>
 <dateOfNextUpdate>
-<gco:Date>2022-10-14</gco:Date>
+<gco:Date>2022-11-12</gco:Date>
 </dateOfNextUpdate>
 </MD_MaintenanceInformation>
 </resourceMaintenance>
+<descriptiveKeywords>
+<MD_Keywords>
+<keyword>
+<gco:CharacterString>Transportation</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>Land Use</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>Transit-Oriented Development</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>TOD</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>High Quality Transit</gco:CharacterString>
+</keyword>
+</MD_Keywords>
+</descriptiveKeywords>
 <descriptiveKeywords>
 <MD_Keywords>
 <keyword>
@@ -143,25 +181,6 @@
 </keyword>
 <thesaurusName uuidref="723f6998-058e-11dc-8314-0800200c9a66">
 </thesaurusName>
-</MD_Keywords>
-</descriptiveKeywords>
-<descriptiveKeywords>
-<MD_Keywords>
-<keyword>
-<gco:CharacterString>tag1</gco:CharacterString>
-</keyword>
-<keyword>
-<gco:CharacterString>tag2</gco:CharacterString>
-</keyword>
-<keyword>
-<gco:CharacterString>tag3</gco:CharacterString>
-</keyword>
-<keyword>
-<gco:CharacterString>tag4</gco:CharacterString>
-</keyword>
-<keyword>
-<gco:CharacterString>tag5</gco:CharacterString>
-</keyword>
 </MD_Keywords>
 </descriptiveKeywords>
 <resourceConstraints>
@@ -189,18 +208,41 @@
 <extent>
 <EX_Extent>
 <description>
-<gco:CharacterString>Place!</gco:CharacterString>
+<gco:CharacterString>California</gco:CharacterString>
 </description>
 <temporalElement>
 <EX_TemporalExtent>
 <extent>
 <gml:TimePeriod gml:id="IDDWYVT5UGET0XIDOZ10J1NEM1TJ4BG4DJ4XQHJCJYNE1G53PQBC5H">
-<gml:beginPosition>2022-09-14T00:00:00</gml:beginPosition>
-<gml:endPosition>2022-10-14T00:00:00</gml:endPosition>
+<gml:beginPosition>2022-10-12T00:00:00</gml:beginPosition>
+<gml:endPosition>2022-11-12T00:00:00</gml:endPosition>
 </gml:TimePeriod>
 </extent>
 </EX_TemporalExtent>
 </temporalElement>
+</EX_Extent>
+</extent>
+<extent>
+<EX_Extent>
+<geographicElement>
+<EX_GeographicBoundingBox>
+<extentTypeCode>
+<gco:Boolean>true</gco:Boolean>
+</extentTypeCode>
+<westBoundLongitude>
+<gco:Decimal>-124.210151</gco:Decimal>
+</westBoundLongitude>
+<eastBoundLongitude>
+<gco:Decimal>-114.590865</gco:Decimal>
+</eastBoundLongitude>
+<southBoundLatitude>
+<gco:Decimal>32.537144</gco:Decimal>
+</southBoundLatitude>
+<northBoundLatitude>
+<gco:Decimal>41.763711</gco:Decimal>
+</northBoundLatitude>
+</EX_GeographicBoundingBox>
+</geographicElement>
 </EX_Extent>
 </extent>
 </MD_DataIdentification>
@@ -236,7 +278,7 @@
 <processStep>
 <LI_ProcessStep>
 <description>
-<gco:CharacterString>Methodology.</gco:CharacterString>
+<gco:CharacterString>This data was estimated using a spatial process derived from General Transit Feed Specification (GTFS) schedule data. To find high-quality bus corridors, we split each corridor into 1,250 meter segments and counted frequencies at the stop within that segment with the highest number of transit trips. If that stop saw at least 4 trips per hour for at least one hour in the morning, and again for at least one hour in the afternoon, we consider that segment a high-quality bus corridor. Segments without a stop are not considered high-quality corridors. Major transit stops were identified as either the intersection of two high-quality corridors from the previous step, a rail or bus rapid transit station, or a ferry terminal with bus service. Note that the definition of `bus rapid transit` in Public Resources Code 21060.2 includes features not captured by available data sources, these features were captured manually using information from transit agency sources and imagery. We believe this data to be broadly accurate, and fit for purposes including overall dashboards, locating facilities in relation to high quality transit areas, and assessing community transit coverage. However, the spatial determination of high-quality transit areas from GTFS data necessarily involves some assumptions as described above. Any critical determinations of whether a specific parcel is located within a high-quality transit area should be made in conjunction with local sources, such as transit agency timetables.  Notes: Null values may be present. The `hqta_details` columns defines which part of the Public Resources Code definition the HQTA classification was based on. If `hqta_details` references a single operator, then `itp_id_secondary` and `agency_secondary` are null. If `hqta_details` references the same operator, then `itp_id_secondary` and `agency_secondary` are the same as `itp_id_primary` and `agency_primary`.</gco:CharacterString>
 </description>
 </LI_ProcessStep>
 </processStep>
