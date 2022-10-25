@@ -157,7 +157,7 @@ class RtFilterMapper:
     def _filter(self, df):
         '''Filters a df (containing trip_id) on trip_id based on any set filter.
         '''
-        if self.filter == None:
+        if not self.filter:
             return df
         else:
             trips = self.rt_trips.copy()
@@ -189,7 +189,19 @@ class RtFilterMapper:
         corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
         self.corridor = corridor_gdf
         to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence']).dropna(subset=['stop_id'])
-        corr_shapes = to_clip.clip(corridor_gdf)
+        clipped = to_clip.clip(corridor_gdf)
+        shape_sequences = (self.stop_delay_view.dropna(subset=['stop_id'])
+                          >> distinct(_.shape_id, _.stop_sequence)
+                          >> arrange(_.shape_id, _.stop_sequence)
+                         )
+        stops_per_shape = shape_sequences >> group_by(_.shape_id) >> summarize(n_stops = _.shape_id.size)
+        # can use this as # of stops in corr...
+        stops_in_corr = clipped >> group_by(_.shape_id) >> summarize(in_corr = _.shape_id.size)
+        stop_comparison = stops_per_shape >> inner_join(_, stops_in_corr, on='shape_id')
+        # # only keep shapes with at least 10% of stops in corridor
+        # stop_comparison = stop_comparison >> mutate(corr_shape = _.in_corr > _.n_stops / 10)
+        # corr_shapes = stop_comparison >> filter(_.corr_shape)
+        corr_shapes = stop_comparison # actually keep all
 
         self._shape_sequence_filter = {}
         for shape_id in corr_shapes.shape_id.unique():
@@ -274,7 +286,7 @@ class RtFilterMapper:
                                     x.shape_meters),
                                                     axis = 1)
                     stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
-
+                    self.debug_dict[f'{shape_id}_st_spd1'] = stop_speeds
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> group_by(_.stop_sequence)
@@ -321,18 +333,21 @@ class RtFilterMapper:
         gdf = self.stop_segment_speed_view.copy()
         # essential here for reasonable map size!
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
-        gdf['shape_miles'] = gdf.shape_meters / 1609
+        gdf['miles_from_last'] = gdf.meters_from_last / 1609
         # Further reduce map size
         gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
                             -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
                            -_.delay_chg_sec, -_.service_date, -_.last_loc, -_.shape_meters,
                            -_.meters_from_last, -_.n_trips)
         orig_rows = gdf.shape[0]
-        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_miles': 1,
-                        'trips_per_hour': 1}) ##round for display
+        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'miles_from_last': 1,
+                        'trips_per_hour': 1, 'avg_sec': 0, '_20p_sec': 0,}) ##round for display
         
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
+        
+        gdf['time_formatted'] = (gdf.miles_from_last / gdf[how_speed_col[how]]) * 60**2 #seconds
+        gdf['time_formatted'] = gdf['time_formatted'].apply(lambda x: f'{int(x)//60}' + f':{int(x)%60:02}')
 
         gdf = gdf >> arrange(_.trips_per_hour)
         gdf = gdf.set_crs(CA_NAD83Albers)
@@ -352,17 +367,11 @@ class RtFilterMapper:
 
         popup_dict = {
             how_speed_col[how]: "Speed (miles per hour)",
+            "time_formatted": "Travel time",
+            "miles_from_last": "Segment distance (miles)",
             "route_short_name": "Route",
-            # "shape_id": "Shape ID",
-            # "direction_id": "Direction ID",
-            # "stop_id": "Next Stop ID",
-            # "stop_sequence": "Next Stop Sequence",
-            "trips_per_hour": "Frequency (trips per hour)" ,
-            "shape_miles": "Distance from start of route (miles)"
+            "trips_per_hour": "Frequency (trips per hour)"
         }
-        # if singletrip:
-        #     popup_dict["delay_seconds"] = "Current Delay (seconds)"
-        #     popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
         if no_title:
             title = ''
         else:
@@ -535,14 +544,16 @@ class RtFilterMapper:
         Generate schedule based and speed based metrics for SCCP/LPP programs.
         '''
         assert hasattr(self, 'corridor'), 'must add corridor before generating corridor metrics'
-        schedule_metric = (self.corridor_stop_delays
+        if self.filter:
+            print('warning: filter set -- for SCCP/LPP reset filter first')
+        schedule_metric = (self._filter(self.corridor_stop_delays)
              >> group_by(_.trip_id)
              >> summarize(median_corridor_delay_seconds = _.corridor_delay_seconds.median())
              >> summarize(sum_of_medians_minutes = _.median_corridor_delay_seconds.sum() / 60)
             ).sum_of_medians_minutes.iloc[0]
         
         self.stop_delay_view = self.stop_delay_view >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
-        corridor_trip_speeds = (self.stop_delay_view
+        corridor_trip_speeds = (self._filter(self.stop_delay_view)
              >> filter(_.corridor)
              >> group_by(_.trip_id)
              >> mutate(entry_time = _.actual_time.min())
