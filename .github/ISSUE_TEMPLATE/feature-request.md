@@ -3,7 +3,7 @@ name: Feature Request - Data or Tooling
 about: Suggest an idea for the warehouse or our analytics tooling.
 title: 'Feature Request: [description]'
 labels: ["feature request", "admin"]
-assignees: 'charlie-costanzo'
+assignees: ''
 
 ---
 **Where does your feature apply?**
