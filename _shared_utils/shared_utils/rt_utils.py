@@ -818,6 +818,10 @@ def get_operators(analysis_date, operator_list):
     analysis_date: datetime.date
     operator_list: list of itp_id's
     """
+
+    if isinstance(analysis_date, str):
+        analysis_date = pd.to_datetime(analysis_date).date()
+
     fs_list = fs.ls(f"{GCS_FILE_PATH}rt_trips/")
     day = str(analysis_date.day).zfill(2)
     month = str(analysis_date.month).zfill(2)
