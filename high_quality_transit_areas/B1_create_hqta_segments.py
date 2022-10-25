@@ -1,15 +1,5 @@
 """
-Draw bus corridors (routes -> segments) for each operator,
-and attach number of trips that pass through each stop.
-Use this to flag whether a segment is an high quality transit corridor.
-
-This takes 56 min to run.
-
-Picking just the longest route takes 21 min to run.
-Keeping all shapes and dissolving takes 2.5 hrs to run, but 
-has problems with how points in a line are ordered,
-and choppy hqta segments are not useful, because they may not attach
-properly to stops.
+Draw bus corridors (routes -> segments) across all operators.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
