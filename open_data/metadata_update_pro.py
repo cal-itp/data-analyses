@@ -27,6 +27,7 @@ def xml_to_json(path: str) -> dict:
         print(f"Loading XML as JSON from {path}")
         xml = ET.tostring(ET.parse(path).getroot())
         return xmltodict.parse(xml, 
+                               # this needs to be commented out for ArcGIS pro version to work
                                #attr_prefix="", 
                                cdata_key="text", 
                                #process_namespaces=True,
@@ -139,7 +140,7 @@ def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
     (id_info[f"{x}descriptiveKeywords"][1]
      [f"{x}MD_Keywords"][f"{x}keyword"]) = d["theme_keywords"]
     id_info[f"{x}topicCategory"][f"{x}MD_TopicCategoryCode"] = d["theme_topic"]
-    id_info[f"{x}extent"][f"{x}EX_Extent"][f"{x}description"][key] = d["place"]
+    id_info[f"{x}extent"][0][f"{x}EX_Extent"][f"{x}description"][key] = d["place"]
 
     
     citation_info = id_info[f"{x}citation"][f"{x}CI_Citation"]
@@ -165,7 +166,7 @@ def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
      [f"{x}MD_MaintenanceFrequencyCode"]["text"]) = d["frequency"]
     maint_info[f"{x}dateOfNextUpdate"][key_dt] = d["end_date"]
     
-    extent_info = (id_info[f"{x}extent"][f"{x}EX_Extent"]
+    extent_info = (id_info[f"{x}extent"][0][f"{x}EX_Extent"]
                    [f"{x}temporalElement"][f"{x}EX_TemporalExtent"]
                    [f"{x}extent"]["ns2:TimePeriod"])
  
