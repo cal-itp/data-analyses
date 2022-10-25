@@ -31,7 +31,7 @@ HQTA data is updated at a monthly frequency for the open data portal. Check the 
 In terminal: `make download_hqta_data`
 
 1. [Download data](./download_data.py) and cache parquets in GCS
-1. [Create JSONs](./operators_for_hqta.py) storing a dictionary with [all the operators](./hqta_operators.json) that have cached files, and [valid operators](./valid_hqta_operators.json). 
+1. [Create JSONs](./operators_for_hqta.py) storing a dictionary with all the operators that have cached files for all 4 datasets. These are the [valid operators](./valid_hqta_operators.json). 
     * It's possible in downloading the `routes`, `trips`, `stops`, and `stop_times`, one of the files is not able to be successfully downloaded, but the other 3 are. 
     * Also, it's possible that files with no rows are downloaded.
     * A check for complete information (all 4 files are present and are non-empty)
@@ -45,10 +45,13 @@ In terminal: `make download_hqta_data`
 
 In terminal: `make grab_corridors_and_clip`
 
-1. [Draw bus corridors, from routes to HQTA segments](./B1_bus_corridors.py)
-    * Every segment is 1,250 m. 
+1. [Draw bus corridors, from routes to HQTA segments](./B1_create_hqta_segments.py)
+    * Across all operators, find the longest shapes in each direction. Use a symmetric difference to grab the components that make up the route network.
+    * Cut route into HQTA segments. Every segment is 1,250 m. 
+    * Add in route direction.
+1. [Combine operator HQTA areas across operators](./B2_sjoin_stops_to_segments.py)
     * Attach number of stop arrivals that occur in the AM and PM and find the max
-1. [Combine operator HQTA areas across operators](./B2_combine_operator_corridors.py)
+    * Do spatial join of stops to HQTA segments. Where multiple stops are present, keep the stop with the highest number of trips.
 1. [Prep for clipping](./C1_prep_for_clipping.py) 
     * Find which routes actually do intersect, and store that in a pairwise table.
     * Only these valid routes go on to do the clipping
