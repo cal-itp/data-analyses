@@ -114,12 +114,11 @@ for f in in_features:
     print(f"successful export: {f}")
 
 
-### (4) UPDATE XML METADATA SEPARATELY IN PYTHON OUTSIDE OF ARCGIS
-## Note: now there are some parts, bounding boxes, etc that isn't
-# present in XML. Just comment those parts out in metadata_update.py
+### (4) UPDATE XML METADATA SEPARATELY IN PYTHON OUTSIDE OF ARCGIS IN JUPYTERHUB
+
+## Do a manual import metadata in ArcGIS Pro to update XML for staging feature classes
 
 ## (5) Copy the feature class from staging location to out location
-# In the out location, we can drop the new XML and use it to sync
 # Use staging location and out location because otherwise, arcpy errors when it detects
 # another XML when you try and update the layer in a subsequent update
 for f in in_features:
@@ -131,36 +130,12 @@ for f in in_features:
         arcpy.management.Delete(out_feature_class)
 
     # Copy over the feature class from staging.gdb to open_data.gdb
+    # Since we already manually imported XML in staging, 
+    # when this feature class is moved to out_location, it takes the new XML with it
     arcpy.conversion.FeatureClassToFeatureClass(staging_feature_class, 
                                                 out_location, 
                                                 f)
 
-    
-## (6) Sync the XML with the feature class    
-## THIS DOES NOT WORK -- manually import does work
-# https://esriaustraliatechblog.wordpress.com/2022/07/06/where-is-the-synchronize-metadata-tool-in-arcgis-pro/#:~:text=In%20ArcGIS%20Pro%2C%20to%20access,Open%20the%20catalog%20view.&text=Browse%20to%2C%20and%20select%20the,the%20Metadata%20group%2C%20click%20Synchronize.
-for f in in_features:
-    # This is the one after it's manually changed. Keep separate to see what works.
-    # There's already XML files for each feature class, so just copy and paste 
-    # the new XML from metadata_xml/run_in_esri and replace those
-    updated_xml_file = f"{working_dir}{f}.xml"
-
-    out_feature_class = feature_class_in_gdb_path(out_location, f)
-    
-    # Import the updated xml, then overwrite the metadata in the file gdb 
-    meta = md.Metadata(out_feature_class)
-    
-    # It can import the metadata, but it seems to import as ArcGIS format...
-    meta.importMetadata(updated_xml_file, "DEFAULT")
-    
-    meta.synchronize("ALWAYS")
-    meta.save()
-
-
-    
-## (7) Old #7 is to clear the XML from staging...not needed, since 
-# ArcGIS Pro can't write to staging or open data gdb, but has
-# to write to working_dir
 
 ## (7) Move from file gdb to enterprise gdb
 # License Select must be set to Advanced for this to work
