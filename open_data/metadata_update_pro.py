@@ -146,7 +146,14 @@ def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
     citation_info[f"{x}title"][key] = d["dataset_name"]
     citation_info[f"{x}date"][f"{x}CI_Date"][f"{x}date"][key_dt] = d["beginning_date"]
     citation_info[f"{x}edition"][key] = d["edition"]
-        
+    
+    citation_contact = citation_info[f"{x}citedResponsibleParty"][f"{x}CI_ResponsibleParty"]
+    citation_contact[f"{x}individualName"][key] = d["contact_person"]
+    citation_contact[f"{x}organisationName"][key] = d["contact_organization"]  
+    citation_contact[f"{x}positionName"][key] = d["publish_entity"]
+    (citation_contact[f"{x}contactInfo"][f"{x}CI_Contact"][f"{x}address"]
+     [f"{x}CI_Address"][f"{x}electronicMailAddress"][key]) = d["contact_email"]
+    
     status_info = id_info[f"{x}status"][f"{x}MD_ProgressCode"]
     status_info["codeListValue"] = d["status"]
     status_info["text"] = d["status"]
