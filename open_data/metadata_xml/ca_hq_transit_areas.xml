@@ -48,7 +48,7 @@
 		</ns0:CI_ResponsibleParty>
 	</ns0:contact>
 	<ns0:dateStamp>
-		<ns1:Date>2022-10-17</ns1:Date>
+		<ns1:Date>2022-10-25</ns1:Date>
 	</ns0:dateStamp>
 	<ns0:metadataStandardName>
 		<ns1:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</ns1:CharacterString>
@@ -70,6 +70,9 @@
 							<text>composite</text>
 						</ns0:MD_GeometricObjectTypeCode>
 					</ns0:geometricObjectType>
+					<ns0:geometricObjectCount>
+						<ns1:Integer>28466</ns1:Integer>
+					</ns0:geometricObjectCount>
 				</ns0:MD_GeometricObjects>
 			</ns0:geometricObjects>
 		</ns0:MD_VectorSpatialRepresentation>
@@ -116,11 +119,25 @@
 					<ns0:citedResponsibleParty>
 						<ns0:CI_ResponsibleParty>
 							<ns0:individualName>
-								<ns1:CharacterString>My Name</ns1:CharacterString>
+								<ns1:CharacterString>Eric Dasmalchi</ns1:CharacterString>
 							</ns0:individualName>
 							<ns0:organisationName>
 								<ns1:CharacterString>Caltrans</ns1:CharacterString>
 							</ns0:organisationName>
+							<ns0:positionName>
+								<ns1:CharacterString>California Integrated Travel Project</ns1:CharacterString>
+							</ns0:positionName>
+							<ns0:contactInfo>
+								<ns0:CI_Contact>
+									<ns0:address>
+										<ns0:CI_Address>
+											<ns0:electronicMailAddress>
+												<ns1:CharacterString>eric.dasmalchi@dot.ca.gov</ns1:CharacterString>
+											</ns0:electronicMailAddress>
+										</ns0:CI_Address>
+									</ns0:address>
+								</ns0:CI_Contact>
+							</ns0:contactInfo>
 							<ns0:role>
 								<ns0:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher" codeSpace="ISOTC211/19115">
 									<text>publisher</text>
@@ -165,9 +182,20 @@
 			<ns0:descriptiveKeywords>
 				<ns0:MD_Keywords>
 					<ns0:keyword>
-						<ns1:CharacterString>Downloadable Data</ns1:CharacterString>
+						<ns1:CharacterString>Transportation</ns1:CharacterString>
 					</ns0:keyword>
-					<ns0:thesaurusName uuidref="723f6998-058e-11dc-8314-0800200c9a66"></ns0:thesaurusName>
+					<ns0:keyword>
+						<ns1:CharacterString>Land Use</ns1:CharacterString>
+					</ns0:keyword>
+					<ns0:keyword>
+						<ns1:CharacterString>Transit-Oriented Development</ns1:CharacterString>
+					</ns0:keyword>
+					<ns0:keyword>
+						<ns1:CharacterString>TOD</ns1:CharacterString>
+					</ns0:keyword>
+					<ns0:keyword>
+						<ns1:CharacterString>High Quality Transit</ns1:CharacterString>
+					</ns0:keyword>
 				</ns0:MD_Keywords>
 			</ns0:descriptiveKeywords>
 			<ns0:descriptiveKeywords>
@@ -187,6 +215,7 @@
 					<ns0:keyword>
 						<ns1:CharacterString>High Quality Transit</ns1:CharacterString>
 					</ns0:keyword>
+					<ns0:thesaurusName uuidref="723f6998-058e-11dc-8314-0800200c9a66"></ns0:thesaurusName>
 				</ns0:MD_Keywords>
 			</ns0:descriptiveKeywords>
 			<ns0:resourceConstraints>
@@ -234,6 +263,29 @@
 							</ns0:extent>
 						</ns0:EX_TemporalExtent>
 					</ns0:temporalElement>
+				</ns0:EX_Extent>
+			</ns0:extent>
+			<ns0:extent>
+				<ns0:EX_Extent>
+					<ns0:geographicElement>
+						<ns0:EX_GeographicBoundingBox>
+							<ns0:extentTypeCode>
+								<ns1:Boolean>true</ns1:Boolean>
+							</ns0:extentTypeCode>
+							<ns0:westBoundLongitude>
+								<ns1:Decimal>-124.210151</ns1:Decimal>
+							</ns0:westBoundLongitude>
+							<ns0:eastBoundLongitude>
+								<ns1:Decimal>-114.590865</ns1:Decimal>
+							</ns0:eastBoundLongitude>
+							<ns0:southBoundLatitude>
+								<ns1:Decimal>32.537144</ns1:Decimal>
+							</ns0:southBoundLatitude>
+							<ns0:northBoundLatitude>
+								<ns1:Decimal>41.763711</ns1:Decimal>
+							</ns0:northBoundLatitude>
+						</ns0:EX_GeographicBoundingBox>
+					</ns0:geographicElement>
 				</ns0:EX_Extent>
 			</ns0:extent>
 		</ns0:MD_DataIdentification>
