@@ -29,7 +29,7 @@ def read_in_data():
     
     df = pd.merge(main_details, project_details, how="outer", on=["project_app_id", "project_cycle"], indicator='matches')
     columns_to_drop = ['a1_imp_agcy_contact','a1_imp_agcy_email','a1_imp_agcy_phone',
-                      'a1_proj_partner_contact', 'a1_proj_partner_email', 'a1_proj_partner_phone']
+                      'a1_proj_partner_contact', 'a1_proj_partner_email', 'a1_proj_partner_phone', 'awarded_x', 'awarded_y']
     df = df.drop(columns = columns_to_drop)
     #inplace=True)
     return df
