@@ -8,7 +8,7 @@ import geopandas as gpd
 import pandas as pd
 import shapely
 from calitp import query_sql
-from calitp.tables import tbl
+from calitp.tables import tbls
 from siuba import *
 
 WGS84 = "EPSG:4326"
@@ -58,18 +58,18 @@ def aggregate_by_geography(
         final_df: pd.DataFrame,
         group_cols: list,
         agg_cols: list,
-        AGGREGATE_FUNCTION: str,
+        aggregate_function: str,
     ):
 
         agg_df = df.pivot_table(
-            index=group_cols, values=agg_cols, aggfunc=AGGREGATE_FUNCTION
+            index=group_cols, values=agg_cols, aggfunc=aggregate_function
         ).reset_index()
 
         if rename_cols is True:
             # https://stackoverflow.com/questions/34049618/how-to-add-a-suffix-or-prefix-to-each-column-name
             # Why won't .add_prefix or .add_suffix work?
             for c in agg_cols:
-                agg_df = agg_df.rename(columns={c: f"{c}_{AGGREGATE_FUNCTION}"})
+                agg_df = agg_df.rename(columns={c: f"{c}_{aggregate_function}"})
 
         final_df = pd.merge(final_df, agg_df, on=group_cols, how="left", validate="1:1")
         return final_df
@@ -121,13 +121,13 @@ def attach_geometry(
 
 # Function to construct the SQL condition for make_routes_gdf()
 def construct_condition(
-    SELECTED_DATE: str | datetime.datetime, INCLUDE_ITP_LIST: list
+    selected_date: str | datetime.datetime, include_itp_list: list
 ) -> str:
-    def unpack_list_make_or_statement(INCLUDE_ITP_LIST: list) -> str:
+    def unpack_list_make_or_statement(include_itp_list: list) -> str:
         new_cond = ""
 
-        for i in range(0, len(INCLUDE_ITP_LIST)):
-            cond = f"calitp_itp_id = {INCLUDE_ITP_LIST[i]}"
+        for i in range(0, len(include_itp_list)):
+            cond = f"calitp_itp_id = {include_itp_list[i]}"
             if i == 0:
                 new_cond = cond
             else:
@@ -137,11 +137,11 @@ def construct_condition(
 
         return new_cond
 
-    operator_or_statement = unpack_list_make_or_statement(INCLUDE_ITP_LIST)
+    operator_or_statement = unpack_list_make_or_statement(include_itp_list)
 
     date_condition = (
-        f'(calitp_extracted_at <= "{SELECTED_DATE}" AND '
-        f'calitp_deleted_at > "{SELECTED_DATE}")'
+        f'(calitp_extracted_at <= "{selected_date}" AND '
+        f'calitp_deleted_at > "{selected_date}")'
     )
 
     condition = operator_or_statement + " AND " + date_condition
@@ -151,9 +151,9 @@ def construct_condition(
 
 # Run the sql query with the condition in long-form
 def create_shapes_for_subset(
-    SELECTED_DATE: str | datetime.datetime, ITP_ID_LIST: list
+    selected_date: str | datetime.datetime, itp_id_list: list
 ) -> pd.DataFrame:
-    condition = construct_condition(SELECTED_DATE, ITP_ID_LIST)
+    condition = construct_condition(selected_date, itp_id_list)
 
     sql_statement = f"""
         SELECT
@@ -185,43 +185,43 @@ def make_linestring(x: str) -> shapely.geometry.LineString:
 
 
 def make_routes_gdf(
-    SELECTED_DATE: str | datetime.datetime,
-    CRS: str = "EPSG:4326",
-    ITP_ID_LIST: list = None,
+    selected_date: str | datetime.datetime,
+    crs: str = "EPSG:4326",
+    itp_id_list: list = None,
 ):
     """
     Parameters:
 
-    SELECTED_DATE: str or datetime
+    selected_date: str or datetime
         Ex: '2022-1-1' or datetime.date(2022, 1, 1)
-    CRS: str, a projected coordinate reference system.
+    crs: str, a projected coordinate reference system.
         Defaults to EPSG:4326 (WGS84)
-    ITP_ID_LIST: list or None
+    itp_id_list: list or None
             Defaults to all ITP_IDs except ITP_ID==200.
             For a subset of operators, include a list, such as [182, 100].
 
     All operators for selected date: ~11 minutes
     """
 
-    if ITP_ID_LIST is None:
+    if itp_id_list is None:
         df = (
-            tbl.views.gtfs_schedule_dim_shapes_geo()
+            tbls.views.gtfs_schedule_dim_shapes_geo()
             >> filter(
-                _.calitp_extracted_at <= SELECTED_DATE,
-                _.calitp_deleted_at > SELECTED_DATE,
+                _.calitp_extracted_at <= selected_date,
+                _.calitp_deleted_at > selected_date,
             )
             >> filter(_.calitp_itp_id != 200)
             >> select(_.calitp_itp_id, _.calitp_url_number, _.shape_id, _.pt_array)
             >> collect()
         )
     else:
-        df = create_shapes_for_subset(SELECTED_DATE, ITP_ID_LIST)
+        df = create_shapes_for_subset(selected_date, itp_id_list)
 
     # apply the function
     df["geometry"] = df.pt_array.apply(make_linestring)
 
     # convert to geopandas; geometry column contains the linestring, re-project if needed
-    gdf = gpd.GeoDataFrame(df, geometry="geometry", crs=WGS84).to_crs(CRS)
+    gdf = gpd.GeoDataFrame(df, geometry="geometry", crs=WGS84).to_crs(crs)
 
     return gdf
 
@@ -229,7 +229,7 @@ def make_routes_gdf(
 # Function to deal with edge cases where operators do not submit the optional shapes.txt
 # Use stops data / stop sequence to handle
 def make_routes_line_geom_for_missing_shapes(
-    df: pd.DataFrame, CRS: str = "EPSG:4326"
+    df: pd.DataFrame, crs: str = "EPSG:4326"
 ) -> gpd.GeoDataFrame:
     """
     Parameters:
@@ -239,7 +239,7 @@ def make_routes_line_geom_for_missing_shapes(
         https://github.com/cal-itp/data-analyses/blob/main/traffic_ops/create_routes_data.py#L63-L69
         Use that dataframe here.
 
-    CRS: str, a projected coordinated reference system.
+    crs: str, a projected coordinated reference system.
             Defaults to EPSG:4326 (WGS84)
     """
     if "shape_id" not in df.columns:
@@ -280,7 +280,7 @@ def make_routes_line_geom_for_missing_shapes(
     gdf2 = gpd.GeoDataFrame(gdf2, geometry="geometry", crs=WGS84).reset_index()
 
     gdf2 = (
-        gdf2.to_crs(CRS)
+        gdf2.to_crs(crs)
         .sort_values(["calitp_itp_id", "calitp_url_number", "shape_id"])
         .drop_duplicates()
         .reset_index(drop=True)
