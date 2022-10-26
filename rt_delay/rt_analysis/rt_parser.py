@@ -16,7 +16,7 @@ import datetime as dt
 from tqdm import tqdm
 
 # import numpy as np
-from calitp.tables import tbl
+from calitp.tables import tbls
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -257,7 +257,7 @@ class OperatorDayAnalysis:
 
         self._generate_stop_delay_view()
         ## TODO replace/include in initial queries, avoid seperate warehouse call
-        self.calitp_agency_name = (tbl.views.gtfs_schedule_dim_feeds()
+        self.calitp_agency_name = (tbls.views.gtfs_schedule_dim_feeds()
              >> filter(_.calitp_itp_id == self.calitp_itp_id, _.calitp_deleted_at == _.calitp_deleted_at.max())
              >> collect()
             ).calitp_agency_name.iloc[0]

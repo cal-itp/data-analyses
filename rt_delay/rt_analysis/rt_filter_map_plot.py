@@ -15,7 +15,6 @@ import datetime as dt
 from tqdm import tqdm
 
 import numpy as np
-from calitp.tables import tbl
 import seaborn as sns
 import matplotlib.pyplot as plt
 
