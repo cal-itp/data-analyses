@@ -203,7 +203,7 @@ def make_routes_gdf(
     All operators for selected date: ~11 minutes
     """
 
-    if ITP_ID_LIST is None:
+    if itp_id_list is None:
         df = (
             tbls.views.gtfs_schedule_dim_shapes_geo()
             >> filter(
