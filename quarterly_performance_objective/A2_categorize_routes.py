@@ -205,11 +205,11 @@ if __name__=="__main__":
     
     # (3) Some cleanup for visualization, as well as simplifying geom for faster mapping
     gdf = gdf.assign(
-        total_service_hours = gdf.total_service_hours.round(2),
+        service_hours = gdf.total_service_hours.round(2),
         # simplify geom to make it faster to plot?
         geometry = gdf.geometry.simplify(tolerance = 20),
         route_length_mi = round(gdf.route_length / geography_utils.FEET_PER_MI, 2),
-    ).drop(columns = ["route_length"]).to_crs(geography_utils.WGS84)
+    ).drop(columns = ["route_length", "total_service_hours"]).to_crs(geography_utils.WGS84)
     
     # Export to GCS (use date suffix because we will want historical comparisons)
     utils.geoparquet_gcs_export(
