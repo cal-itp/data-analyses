@@ -11,7 +11,7 @@ import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 import siuba  # need this to do type hint in functions
-from calitp.tables import tbl
+from calitp.tables import tbls
 from shared_utils import geography_utils, rt_utils, utils
 from siuba import *
 
@@ -119,9 +119,6 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
     Otherwise, skip.
 
     TODO: Expand beyond 3. Does piping mean that order of conditions matter?
-
-    Placement/order for where this filter happens...for stop_times..is it too late in the query?
-    Should a check be included to run the filter if it finds the column in the first query it can?
     """
     if (filter_dict != {}) and (filter_dict is not None):
 
@@ -162,11 +159,13 @@ def get_route_info(
 
     # Route info query
     dim_routes = (
-        tbl.views.gtfs_schedule_dim_routes() >> filter_itp_id(itp_id_list) >> distinct()
+        tbls.views.gtfs_schedule_dim_routes()
+        >> filter_itp_id(itp_id_list)
+        >> distinct()
     )
 
     routes = (
-        tbl.views.gtfs_schedule_fact_daily_feed_routes()
+        tbls.views.gtfs_schedule_fact_daily_feed_routes()
         >> filter(
             _.date == selected_date,
             _.calitp_extracted_at <= selected_date,
@@ -228,7 +227,7 @@ def get_route_shapes(
 
     route_shapes = (
         geography_utils.make_routes_gdf(
-            SELECTED_DATE=selected_date, CRS=crs, ITP_ID_LIST=itp_id_list
+            selected_date=selected_date, crs=crs, itp_id_list=itp_id_list
         )
         .drop(columns=["pt_array"])
         .drop_duplicates()
@@ -262,11 +261,11 @@ def get_stops(
 
     # Stops query
     dim_stops = (
-        tbl.views.gtfs_schedule_dim_stops() >> filter_itp_id(itp_id_list) >> distinct()
+        tbls.views.gtfs_schedule_dim_stops() >> filter_itp_id(itp_id_list) >> distinct()
     )
 
     stops = (
-        tbl.views.gtfs_schedule_fact_daily_feed_stops()
+        tbls.views.gtfs_schedule_fact_daily_feed_stops()
         >> filter(
             _.date == selected_date,
             _.calitp_extracted_at <= selected_date,
@@ -304,11 +303,11 @@ def get_trips(
 
     # Trips query
     dim_trips = (
-        tbl.views.gtfs_schedule_dim_trips() >> filter_itp_id(itp_id_list) >> distinct()
+        tbls.views.gtfs_schedule_dim_trips() >> filter_itp_id(itp_id_list) >> distinct()
     )
 
     trips = (
-        tbl.views.gtfs_schedule_fact_daily_trips()
+        tbls.views.gtfs_schedule_fact_daily_trips()
         >> filter(
             _.service_date == selected_date,
             _.calitp_extracted_at <= selected_date,
@@ -448,7 +447,7 @@ def get_stop_times(
             trips_on_day = trip_df[keep_cols]
 
     stop_times_query = (
-        tbl.views.gtfs_schedule_dim_stop_times()
+        tbls.views.gtfs_schedule_dim_stop_times()
         >> filter_itp_id(itp_id_list)
         >> select(-_.calitp_url_number)
         >> distinct()
@@ -462,7 +461,7 @@ def get_stop_times(
 
         # This table only has keys, no itp_id or date to filter on
         trips_stops_ix_query = (
-            tbl.views.gtfs_schedule_index_feed_trip_stops()
+            tbls.views.gtfs_schedule_index_feed_trip_stops()
             >> select(_.trip_key, _.stop_time_key)
             >> distinct()
             # When it's pd.DataFrame, let's use filtering against a pd.Series to accomplish this
@@ -472,7 +471,7 @@ def get_stop_times(
 
     else:
         trips_stops_ix_query = (
-            tbl.views.gtfs_schedule_index_feed_trip_stops()
+            tbls.views.gtfs_schedule_index_feed_trip_stops()
             >> select(_.trip_key, _.stop_time_key)
             >> distinct()
         ) >> inner_join(_, trips_on_day, on="trip_key")
@@ -532,7 +531,7 @@ def format_date(analysis_date: datetime.date | str) -> str:
 
 
 ALL_ITP_IDS = (
-    tbl.gtfs_schedule.agency() >> select(_.calitp_itp_id) >> distinct() >> collect()
+    tbls.gtfs_schedule.agency() >> select(_.calitp_itp_id) >> distinct() >> collect()
 ).calitp_itp_id.tolist()
 
 
