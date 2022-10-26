@@ -13,7 +13,7 @@ import datetime as dt
 
 import pandas as pd
 import pandas.io.formats.style
-from calitp.tables import tbl
+from calitp.tables import tbls
 from IPython.display import HTML
 from shared_utils import rt_utils
 from siuba import *
@@ -32,7 +32,7 @@ def add_agency_name(
     """
     df = (
         (
-            tbl.views.gtfs_schedule_dim_feeds()
+            tbls.views.gtfs_schedule_dim_feeds()
             >> filter(
                 _.calitp_extracted_at < selected_date,
                 _.calitp_deleted_at >= selected_date,
@@ -56,7 +56,7 @@ def add_caltrans_district() -> pd.DataFrame:
     """
     df = (
         (
-            tbl.airtable.california_transit_organizations()
+            tbls.airtable.california_transit_organizations()
             >> select(_.itp_id, _.caltrans_district)
             >> distinct()
             >> collect()
@@ -104,7 +104,7 @@ def add_route_name(
     """
 
     route_names = (
-        tbl.views.gtfs_schedule_dim_routes()
+        tbls.views.gtfs_schedule_dim_routes()
         >> filter(
             _.calitp_extracted_at < selected_date, _.calitp_deleted_at >= selected_date
         )
@@ -141,7 +141,7 @@ def latest_itp_id() -> pd.DataFrame:
     Returns a dataframe of 1 column with the latest calitp_itp_ids.
     """
     df = (
-        tbl.views.gtfs_schedule_dim_feeds()
+        tbls.views.gtfs_schedule_dim_feeds()
         >> filter(_.calitp_id_in_latest == True)
         >> select(_.calitp_itp_id)
         >> distinct()
@@ -236,13 +236,9 @@ def style_table(
                 HTML(
                     f"<div style='height: {scrollbar_height}; overflow: auto; width: {scrollbar_width}'>"
                     + (
-                        (df_style)
-                        .set_properties(
-                            **{
-                                "font-size": scrollbar_font,
-                            }
-                        )
-                        .render()
+                        df_style.set_properties(
+                            **{"font-size": scrollbar_font}
+                        ).render()
                     )
                     + "</div>"
                 )
