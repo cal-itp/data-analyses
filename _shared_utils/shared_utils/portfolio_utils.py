@@ -199,12 +199,21 @@ def style_table(
         center_align_cols = [c for c in center_align_cols if c not in left_align_cols]
 
     df_style = (
-        df.style.format(formatter={c: "{:,g}" for c in integer_cols})
-        .format(formatter={c: "{:,.1f}" for c in one_decimal_cols})
-        .format(formatter={c: "{:,.2f}" for c in two_decimal_cols})
-        .format(formatter={c: "{:,.3f}" for c in three_decimal_cols})
-        .format(formatter={c: "{:,.2%}" for c in percent_cols})
-        .format(formatter={c: "$ {:,.2f}" for c in currency_cols})
+        df.style.format(
+            subset=integer_cols, formatter={c: "{:,g}" for c in integer_cols}
+        )
+        .format(
+            subset=one_decimal_cols, formatter={c: "{:,.1f}" for c in one_decimal_cols}
+        )
+        .format(
+            subset=two_decimal_cols, formatter={c: "{:,.2f}" for c in two_decimal_cols}
+        )
+        .format(
+            subset=three_decimal_cols,
+            formatter={c: "{:,.3f}" for c in three_decimal_cols},
+        )
+        .format(subset=percent_cols, formatter={c: "{:,.2%}" for c in percent_cols})
+        .format(subset=currency_cols, formatter={c: "$ {:,.2f}" for c in currency_cols})
         .set_properties(subset=left_align_cols, **{"text-align": "left"})
         .set_properties(subset=center_align_cols, **{"text-align": "center"})
         .set_properties(subset=right_align_cols, **{"text-align": "right"})
@@ -230,8 +239,8 @@ def style_table(
         for format_str, cols_to_format in custom_format_cols.items():
             df_style = add_custom_format(df_style, format_str, cols_to_format)
 
-    if display_table is True:
-        if display_scrollbar is True:
+    if display_table:
+        if display_scrollbar:
             display(
                 HTML(
                     f"<div style='height: {scrollbar_height}; overflow: auto; width: {scrollbar_width}'>"
