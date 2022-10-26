@@ -41,4 +41,5 @@ add_precommit:
 install_env:
 	cd ~/data-analyses/_shared_utils && make setup_env && cd ..
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
+	cd rt_delay/ && make setup_rt_analysis && cd ..    
 	#pip install -r portfolio/requirements.txt

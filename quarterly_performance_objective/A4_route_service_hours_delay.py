@@ -17,6 +17,9 @@ logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {messag
 
 
 def calculate_route_level_delays(selected_date: str) -> pd.DataFrame:
+    """
+    Aggregate endpoint_delays to route-level, from trip-level.
+    """
     delay_df = gpd.read_parquet(
         f"{COMPILED_CACHED_GCS}endpoint_delays_{selected_date}.parquet")
     
@@ -33,9 +36,18 @@ def calculate_route_level_delays(selected_date: str) -> pd.DataFrame:
     return route_delay
 
 
-def merge_delay_with_route_categories(route_delay_df: pd.DataFrame, 
-                                     routes_categorized: gpd.GeoDataFrame
-                                    ) -> gpd.GeoDataFrame:
+def merge_delay_with_route_categories(
+    route_delay_df: pd.DataFrame, 
+    routes_categorized: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    """
+    Merge service hours df with delay df. 
+    Service hours contains the route categories: on_shn, intersects_shn, other.
+    
+    Use an outer join because not every route with service hours (GTFS schedule)
+    would have delay hours (GTFS RT). It's also of interest what 
+    appears in GTFS-RT, where a GTFS schedule corresponding match wasn't found.
+    """
         
     delay_on_shn_routes = pd.merge(
         routes_categorized.rename(columns = {"itp_id": "calitp_itp_id"}),
