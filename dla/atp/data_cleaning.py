@@ -266,7 +266,7 @@ def clean_data(df):
     #add columns in cleaned df that were not in project details or main detail sheets.
     df["#"] = ""
     df["atp_id"] = ""
-    df["awarded"] = ""
+    df["awarded"] = "N"
     df["ppno"] = ""
     df["ppno_1"] = ""
     
