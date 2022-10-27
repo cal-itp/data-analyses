@@ -3,7 +3,7 @@ Common chart / viz functions.
 """
 import pandas as pd
 
-def labeling(word: str, labeling_dict: dict) -> str:
+def labeling(word: str, labeling_dict: dict = {}) -> str:
     """
     Supply a labeling dictionary where 
     keys are existing column names and 
