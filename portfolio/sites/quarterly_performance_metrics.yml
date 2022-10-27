@@ -1,9 +1,8 @@
-title: High Quality Transit Areas
-directory: ./facilities_services/
-readme: ./facilities_services/README.md
+title: Quarterly Performance Metrics
+directory: ./quarterly_performance_objective/
+readme: ./quarterly_performance_objective/README.md
 parts:
 - caption: Introduction
 - chapters:
-  - notebook: ./facilities_services/tier1-facilities-hqta.ipynb
-  - notebook: ./high_quality_transit_areas/hqta_green_SACOG.ipynb
-  - notebook: ./high_quality_transit_areas/hqta-map.ipynb
+  - notebook: ./quarterly_performance_objective/current_quarter_report.ipynb
+  - notebook: ./quarterly_performance_objective/historical_report.ipynb
