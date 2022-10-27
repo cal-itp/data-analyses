@@ -110,17 +110,17 @@ class RtFilterMapper:
             self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
                                          self.stop_delay_view.actual_time.min()).seconds / 60**2
         
-        if self.filter['route_names'] and len(self.filter['route_names']) < 5:
+        if self.filter['route_names'] and len(self.filter['route_names']) <= 5:
             rts = 'Route(s) ' + ', '.join(self.filter['route_names'])
         elif self.filter['route_names'] and len(self.filter['route_names']) > 5:
             rts = 'Multiple Routes'
         elif not self.filter['route_names']:
             rts = 'All Routes'
                 
-        if self.filter['route_types'] and len(self.filter['route_types']) < 3:
+        if self.filter['route_types'] and len(self.filter['route_types']) <= 3:
             typename = [route_type_names[rttyp] for rttyp in self.filter['route_types']]
             typename_print = ' & '.join(typename)
-        elif self.filter['route_types'] and len(self.filter['route_types']) < 3:
+        elif self.filter['route_types'] and len(self.filter['route_types']) > 3:
             typename_print = 'Multiple Route Types'
         elif not self.filter['route_types']:
             typename_print = 'All Route Types'
