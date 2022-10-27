@@ -128,6 +128,22 @@ def read_in_joined_data():
                                    sort_values_cols = ['project_app_id','a2_proj_scope_summary', 'project_cycle', 'awarded'],
                                    subset_cols = ['project_app_id','a2_proj_scope_summary','project_cycle'])
     
+    
+    ## Reorder cols to get app id in the front of the data frame
+    ## https://stackoverflow.com/questions/41968732/set-order-of-columns-in-pandas-dataframe
+    cols_to_order = [ 'project_app_id', 'project_cycle', 'a1_locode',
+                 '#', 'atp_id', 'awarded', 'ppno', 'ppno_1',
+                 'data_origin', 'geometry','project_status',
+                 'solicitation_abv', 'solicitation', 'soliciting_agency', 'project_size',
+                 'a1_imp_agcy_city', 'a1_imp_agcy_name', 
+                 'a1_proj_partner_agcy', 'a1_proj_partner_exists',
+                 'assembly_district', 'congressional_district', 'senate_district', 'a2_county', 'a2_ct_dist', 
+                 'a2_info_proj_descr', 'a2_info_proj_loc', 'a2_info_proj_name', 'a2_mop_uza_population',
+                 'a2_mpo', 'a2_rtpa',  'a2_proj_scope_summary']
+        
+    new_columns = cols_to_order + (df.columns.drop(cols_to_order).tolist())
+    df = df[new_columns]
+    
     return df
 
 
