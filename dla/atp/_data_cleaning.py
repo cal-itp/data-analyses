@@ -269,11 +269,20 @@ def clean_data(df):
     df["awarded"] = "N"
     df["ppno"] = ""
     df["ppno_1"] = ""
+    df["data_origin"]="Application"
     
     df = df.drop(columns=['matches'])
     
     #add geometry for lat long column
     gdf = (geography_utils.create_point_geometry(df, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
+    
+    
+    #convert cols
+    gdf.loc[gdf['project_cycle'] == 'CYCLE 5', 'project_cycle'] = 5
+    gdf.loc[gdf['project_cycle'] == 'CYCLE 6', 'project_cycle'] = 6
+    gdf[['a2_ct_dist','project_cycle']] = gdf[['a2_ct_dist','project_cycle']].astype(int)
+    gdf[['a1_locode']] = gdf[['a1_locode']].astype(object)
+
     
     #export to GCS
     gdf.to_excel(f"{GCS_FILE_PATH}cleaned_cycle5&6.xlsx")
