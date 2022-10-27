@@ -2,6 +2,8 @@
 Download RT endpoint delay
 """
 import datetime
+import glob
+import os
 import pandas as pd
 import sys
 
@@ -45,7 +47,13 @@ def aggregate_endpoint_delays(itp_id_list: list) -> pd.DataFrame:
     return endpoint_delay_all
 
 
+def remove_local_files():
+    files = glob.glob("../data/endpoint_*.parquet")
+    
+    for f in files:
+        os.remove(f)
 
+        
 if __name__=="__main__":
     
     logger.info(f"Analysis date: {ANALYSIS_DATE}")
@@ -54,9 +62,9 @@ if __name__=="__main__":
     operators_status_dict = rt_utils.get_operators(
         ANALYSIS_DATE, gtfs_utils.ALL_ITP_IDS)
     
-    erroring_operators = [14, 206]
+    #erroring_operators = [14, 206]
     ran_operators = [k for k, v in operators_status_dict.items() 
-                     if v == 'already_ran' and k not in erroring_operators]
+                     if v == 'already_ran']
 
     aggregate_endpoint_delays = aggregate_endpoint_delays(ran_operators)
     
@@ -69,5 +77,7 @@ if __name__=="__main__":
         COMPILED_CACHED_GCS,
         f"endpoint_delays_{ANALYSIS_DATE}"
     )
+    
+    remove_local_files()
  
     logger.info(f"execution time: {datetime.datetime.now() - start}")
