@@ -151,6 +151,23 @@ def latest_itp_id() -> pd.DataFrame:
     return df
 
 
+def add_custom_format(
+    df_style: pd.io.formats.style.Styler,
+    format_str: str,
+    cols_to_format: list,
+) -> pd.io.formats.style.Styler:
+    """
+    Appends any additional formatting needs.
+        key: format string, such as '{:.1%}'
+        value: list of columns to apply that formatter to.
+    """
+    new_styler = df_style.format(
+        subset=cols_to_format, formatter={c: format_str for c in cols_to_format}
+    )
+
+    return new_styler
+
+
 def style_table(
     df: pd.DataFrame,
     rename_cols: dict = {},
@@ -186,10 +203,11 @@ def style_table(
     list comprehension: df.style.format(subset=percent_cols,  **{'formatter': '{:,.2%}'})
     dict comprehension: df.style.format(formatter = {c: '{:,.2%}' for c in percent_cols})
     """
-    df = df.drop(columns=drop_cols).rename(columns=rename_cols)
-
-    if len(integer_cols) > 0:
-        df = df.astype({c: "Int64" for c in integer_cols})
+    df = (
+        df.drop(columns=drop_cols)
+        .rename(columns=rename_cols)
+        .astype({c: "Int64" for c in integer_cols})
+    )
 
     if left_align_cols == "first":
         left_align_cols = list(df.columns)[0]
@@ -198,46 +216,31 @@ def style_table(
         # all other columns except first one is center aligned
         center_align_cols = [c for c in center_align_cols if c not in left_align_cols]
 
+    # Use dictionary to do mapping of formatter to columns
+    formatter_dict = {
+        "{:,g}": integer_cols,
+        "{:,.1f}": one_decimal_cols,
+        "{:,.2f}": two_decimal_cols,
+        "{:,.3f}": three_decimal_cols,
+        "{:,.2%}": percent_cols,
+        "$ {:,.2f}": currency_cols,
+    }
+
+    # Add in custom format dict
+    entire_formatter_dict = {**formatter_dict, **custom_format_cols}
+
     df_style = (
-        df.style.format(
-            subset=integer_cols, formatter={c: "{:,g}" for c in integer_cols}
-        )
-        .format(
-            subset=one_decimal_cols, formatter={c: "{:,.1f}" for c in one_decimal_cols}
-        )
-        .format(
-            subset=two_decimal_cols, formatter={c: "{:,.2f}" for c in two_decimal_cols}
-        )
-        .format(
-            subset=three_decimal_cols,
-            formatter={c: "{:,.3f}" for c in three_decimal_cols},
-        )
-        .format(subset=percent_cols, formatter={c: "{:,.2%}" for c in percent_cols})
-        .format(subset=currency_cols, formatter={c: "$ {:,.2f}" for c in currency_cols})
-        .set_properties(subset=left_align_cols, **{"text-align": "left"})
+        df.style.set_properties(subset=left_align_cols, **{"text-align": "left"})
         .set_properties(subset=center_align_cols, **{"text-align": "center"})
         .set_properties(subset=right_align_cols, **{"text-align": "right"})
         .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
         .hide(axis="index")
     )
 
-    def add_custom_format(
-        df_style: pd.io.formats.style.Styler,
-        format_str: str,
-        cols_to_format: list,
-    ) -> pd.io.formats.style.Styler:
-        """
-        Appends any additional formatting needs.
-            key: format string, such as '{:.1%}'
-            value: list of columns to apply that formatter to.
-        """
-        new_styler = df_style.format(formatter={c: format_str for c in cols_to_format})
+    for format_str, cols_to_format in entire_formatter_dict.items():
+        df_style = add_custom_format(df_style, format_str, cols_to_format)
 
-        return new_styler
-
-    if len(list(custom_format_cols.keys())) > 0:
-        for format_str, cols_to_format in custom_format_cols.items():
-            df_style = add_custom_format(df_style, format_str, cols_to_format)
+    # https://stackoverflow.com/questions/63686157/flexible-chaining-in-python-pandas
 
     if display_table:
         if display_scrollbar:

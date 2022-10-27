@@ -26,11 +26,17 @@ def aggregate_endpoint_delays(itp_id_list: list) -> pd.DataFrame:
     analysis_date = pd.to_datetime(ANALYSIS_DATE).date()
     
     for itp_id in itp_id_list:
-        rt_day = rt_filter_map_plot.from_gcs(itp_id, analysis_date)
-        df = rt_day.endpoint_delay_view
-        df['calitp_itp_id'] = itp_id
-        
-        endpoint_delay_all = pd.concat([endpoint_delay_all, df], axis=0)
+        try:
+            logger.info(f"start {itp_id}")
+            rt_day = rt_filter_map_plot.from_gcs(itp_id, analysis_date)
+            df = rt_day.endpoint_delay_view
+
+            df['calitp_itp_id'] = itp_id
+            df.to_parquet(f"./data/endpoint_{itp_id}.parquet")
+            endpoint_delay_all = pd.concat([endpoint_delay_all, df], axis=0)
+        except:
+            logger.warning(f"error: {itp_id}")
+            continue
     
     endpoint_delay_all = (endpoint_delay_all.sort_values("calitp_itp_id")
                           .reset_index(drop=True)
@@ -48,6 +54,10 @@ if __name__=="__main__":
     operators_status_dict = rt_utils.get_operators(
         ANALYSIS_DATE, gtfs_utils.ALL_ITP_IDS)
     
+    erroring_operators = [14, 206]
+    ran_operators = [k for k, v in operators_status_dict.items() 
+                     if v == 'already_ran' and k not in erroring_operators]
+
     aggregate_endpoint_delays = aggregate_endpoint_delays(ran_operators)
     
     time1 = datetime.datetime.now()

@@ -6,10 +6,12 @@ Since we need to the same dataset across notebooks,
 generate the various pieces needed in the report too.
 """
 import geopandas as gpd
+import intake
 import pandas as pd
 
 from shared_utils import geography_utils
-from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS
+
+catalog = intake.open_catalog("*.yml")
 
 def add_percent(df: pd.DataFrame, col_list: list) -> pd.DataFrame:
     """
@@ -143,8 +145,9 @@ def route_type_names(row):
 
     
 def prep_data_for_report(analysis_date: str) -> gpd.GeoDataFrame:
-    df = gpd.read_parquet(
-        f"{BUS_SERVICE_GCS}routes_categorized_with_delay_{analysis_date}.parquet")
+    # https://stackoverflow.com/questions/69781678/intake-catalogue-level-parameters
+    df = catalog.routes_categorized_with_delay(
+        analysis_date = analysis_date).read()
     
     # Some interest in excluding modes like rail from District 4
     df = df.assign(
