@@ -85,14 +85,13 @@ def get_delay_summary_table(df: pd.DataFrame) -> pd.DataFrame:
     delay_summary = (sort_by_column(delay_summary)
                      .pipe(clean_up_category_values)
                     )
-
-
+    
+    delay_summary = add_percent(delay_summary, ["delay_hours", "unique_route"])
+    
     delay_summary = delay_summary.assign(
         delay_hours_per_route = round(delay_summary.delay_hours / 
                                       delay_summary.unique_route, 2)
     )
-    
-    delay_summary = add_percent(delay_summary, ["delay_hours", "unique_route"])
     
     return delay_summary
 

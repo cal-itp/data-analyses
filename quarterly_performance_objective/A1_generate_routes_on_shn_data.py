@@ -38,8 +38,7 @@ def merge_routelines_with_trips(selected_date: str) -> gpd.GeoDataFrame:
         join = "inner"
     )
     
-    df2 = (df[df._merge=="both"]
-          .rename(columns = {"calitp_itp_id": "itp_id"})
+    df2 = (df.rename(columns = {"calitp_itp_id": "itp_id"})
           .reset_index(drop=True)
          )
     
