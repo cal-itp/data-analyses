@@ -4,6 +4,9 @@ import gcsfs
 import os
 import pandas as pd
 
+RT_GCS = 'gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/'
+DASK_GCS = 'gs://calitp-analytics-data/data-analyses/dask_test/'
+
 analysis_date = "2022-10-12"
 
 def categorize_time_of_day(value: int ) -> str:
@@ -56,7 +59,6 @@ def aggregation_function(df: dd.DataFrame) -> dd.DataFrame:
 
 
 def import_data_combined(date):
-    RT_GCS = 'gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/'
     stop_times = dd.read_parquet(f"{RT_GCS}st_{date}.parquet")
     trips = dd.read_parquet(f"{RT_GCS}trips_{date}.parquet")
     
@@ -64,20 +66,23 @@ def import_data_combined(date):
 
 
 if __name__=="__main__":
-    #from dask.distributed import Client
+    from dask.distributed import Client
 
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     all_stop_times, all_trips = import_data_combined(analysis_date)
         
     merged = merge_stop_times_to_trips(all_stop_times, all_trips)
     
     merged = merged.repartition(npartitions=4)
+    print("partitioned")
     
     # Save to parquet
-    merged.to_parquet(f"test")
-    
-    df = dd.read_parquet(f"test")
+    merged.to_parquet(f"{DASK_GCS}test")
+    print("save to GCS as partitioned")
+
+    df = dd.read_parquet(f"{DASK_GCS}test")
+    print("read from GCS as partitioned")
     
     df = df.map_partitions(aggregation_function, 
                            meta = {
@@ -86,7 +91,9 @@ if __name__=="__main__":
                                "time_of_day": "str",
                                "stop_id": "int",
                                }) # Be sure not to '.compute' here
-    
-    df.compute().to_parquet(f'preprocesed.parquet')
-    
-    #client.close()
+    print("aggregation function")
+
+    df.compute().to_parquet(f'{DASK_GCS}preprocesed.parquet')
+    print("saved preprocessed")
+
+    client.close()
