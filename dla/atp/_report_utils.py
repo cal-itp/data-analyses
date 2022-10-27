@@ -15,6 +15,8 @@ from siuba import *
 
 import altair as alt
 
+import _data_cleaning
+
 #import data_cleaning
 
 
@@ -98,7 +100,7 @@ def join_funding_and_app_data(df_funding,
     sort_values_cols = ['project_app_id','a2_proj_scope_summary', 'project_cycle', 'awarded'],
     subset_cols = ['project_app_id','a2_proj_scope_summary','project_cycle']
     '''
-
+    
     # concat the funding and app dataframes
     df = (pd.concat([df_app, df_funding]))
     
@@ -115,7 +117,18 @@ def join_funding_and_app_data(df_funding,
     return df_final
     
 
-
+## read in the joined data so we only have to use one function
+def read_in_joined_data():
+    app_data = _data_cleaning.read_clean_data()
+    funded_data = read_SUR_funding_data()
+    
+    df = join_funding_and_app_data(funded_data,
+                                   app_data, 
+                                   awarded_col= ['awarded'],
+                                   sort_values_cols = ['project_app_id','a2_proj_scope_summary', 'project_cycle', 'awarded'],
+                                   subset_cols = ['project_app_id','a2_proj_scope_summary','project_cycle'])
+    
+    return df
 
 
 '''
