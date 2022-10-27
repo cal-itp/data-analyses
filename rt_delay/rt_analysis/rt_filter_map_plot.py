@@ -277,8 +277,8 @@ class RtFilterMapper:
                                  >> mutate(delay_chg_sec = (_.delay_seconds - _.delay_seconds.shift(1)))
                                  >> ungroup()
                                 )
-                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
-                    stop_speeds.geometry = stop_speeds.apply(
+                    # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds ##TODO move to rt_parser
+                    stop_speeds['geometry'] = stop_speeds.apply(
                         lambda x: shapely.ops.substring(
                                     (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
                                     x.last_loc,
@@ -580,7 +580,7 @@ def from_gcs(itp_id, analysis_date, pbar = None):
     '''
     month_day = analysis_date.strftime('%m_%d')
     trips = pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{month_day}.parquet')
-    stop_delay = gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{month_day}.parquet')
+    stop_delay = pd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{month_day}.parquet')
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
     routelines = get_routelines(itp_id, analysis_date)
