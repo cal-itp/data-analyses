@@ -17,7 +17,6 @@ import altair as alt
 
 import _data_cleaning
 
-#import data_cleaning
 
 
 '''
@@ -87,6 +86,7 @@ def read_SUR_funding_data():
     
     return df
 
+
 ## put together funding data and application data
 def join_funding_and_app_data(df_funding,
                               df_app,
@@ -128,6 +128,23 @@ def read_in_joined_data():
                                    sort_values_cols = ['project_app_id','a2_proj_scope_summary', 'project_cycle', 'awarded'],
                                    subset_cols = ['project_app_id','a2_proj_scope_summary','project_cycle'])
     
+    ## read in county names to change acronym names
+    ## using place names
+    county_place_names = (to_snakecase(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/2020-place-names-locode.xlsx', sheet_name=1)))
+    
+    county_place_names = county_place_names>>select(_.county_name, _.co__name_abbr_)
+    county_place_names['co__name_abbr_'] = county_place_names['co__name_abbr_'].str.upper()
+    ## create dictionary to map full county names
+    county_map = dict(county_place_names[['co__name_abbr_', 'county_name']].values)
+    
+    #map and fillna values with full county names from original column
+    df['a2_county_2'] = df.a2_county.map(county_map)
+    df['a2_county_2'] = df['a2_county_2'].fillna(df['a2_county'])
+    
+    # drop original column and rename county column
+    columns_to_drop = ['a2_county']
+    df = df.drop(columns = columns_to_drop)
+    df = df.rename(columns= {'a2_county_2':'a2_county'})
     
     ## Reorder cols to get app id in the front of the data frame
     ## https://stackoverflow.com/questions/41968732/set-order-of-columns-in-pandas-dataframe
