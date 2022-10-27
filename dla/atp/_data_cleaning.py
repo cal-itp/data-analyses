@@ -6,10 +6,17 @@ import numpy as np
 import pandas as pd
 from siuba import *
 
-from shared_utils import geography_utils
-from dla_utils import _dla_utils
+#from shared_utils import geography_utils
+#from dla_utils import _dla_utils
 
 from calitp import to_snakecase
+
+#for logging
+import sys
+from loguru import logger
+
+logger.add("./logs/data_cleaning.log")
+logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
 GCS_FILE_PATH = 'gs://calitp-analytics-data/data-analyses/dla/atp/'
 
@@ -22,7 +29,7 @@ def read_in_data():
     
     df = pd.merge(main_details, project_details, how="outer", on=["project_app_id", "project_cycle"], indicator='matches')
     columns_to_drop = ['a1_imp_agcy_contact','a1_imp_agcy_email','a1_imp_agcy_phone',
-                      'a1_proj_partner_contact', 'a1_proj_partner_email', 'a1_proj_partner_phone']
+                      'a1_proj_partner_contact', 'a1_proj_partner_email', 'a1_proj_partner_phone', 'awarded_x', 'awarded_y']
     df = df.drop(columns = columns_to_drop)
     #inplace=True)
     return df
@@ -109,7 +116,8 @@ def export_district_need_assistance(df):
     ## export to internal GCS bucket (can change)
     needs_assistance.to_excel(f"{GCS_FILE_PATH}needs_assistance/needs_assistance_districts.xlsx")
     print(f"There are {len(needs_assistance)} Legislative District entries needing assistance")
-    
+    logger.info(f"got District matches: There are {len(needs_assistance)} Legislative District entries needing assistance")
+
     
 #change most of the columns with zeros to NaNs
 ## keeping some of the columns for check purposes and other analyses (ex. pct columns and counts). 
@@ -171,6 +179,8 @@ def check_counties(df):
     no_county_match.to_excel(f"{GCS_FILE_PATH}needs_assistance/failed_locode_county_check.xlsx")
     
     print(f"There are {len(no_county_match)} Locode Matching entries needing assistance")
+    logger.info(f"got Locode matches: There are {len(no_county_match)} Locode Matching entries needing assistance")
+
 
 
 # function to find potential locode matches
@@ -225,6 +235,7 @@ def find_potential_locode_matches(df):
     potential_matches.to_excel(f"{GCS_FILE_PATH}needs_assistance/needs_assistance_potential_match_locodes.xlsx")
 
     print(f"There are {len(potential_matches)} potential locode matching entries needing assistance")
+    logger.info(f"got potential Locode matches: There are {len(potential_matches)} potential locode matching entries needing assistance")
 
 
 def clean_data(df):
@@ -255,19 +266,32 @@ def clean_data(df):
     #add columns in cleaned df that were not in project details or main detail sheets.
     df["#"] = ""
     df["atp_id"] = ""
-    df["awarded"] = ""
+    df["awarded"] = "N"
     df["ppno"] = ""
     df["ppno_1"] = ""
+    df["data_origin"]="Application"
     
     df = df.drop(columns=['matches'])
     
     #add geometry for lat long column
     gdf = (geography_utils.create_point_geometry(df, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
     
-    #export to GCS
-    gdf.to_excel(f"{GCS_FILE_PATH}cleaned_df.xlsx")
     
-    print(f"Data cleaning complete. There are {len(gdf)} entries in dataframe")    
+    #convert cols
+    gdf.loc[gdf['project_cycle'] == 'CYCLE 5', 'project_cycle'] = 5
+    gdf.loc[gdf['project_cycle'] == 'CYCLE 6', 'project_cycle'] = 6
+    gdf[['a2_ct_dist','project_cycle']] = gdf[['a2_ct_dist','project_cycle']].astype(int)
+    gdf[['a1_locode']] = gdf[['a1_locode']].astype(object)
+
+    
+    #export to GCS
+    gdf.to_excel(f"{GCS_FILE_PATH}cleaned_cycle5&6.xlsx")
+    
+    #export to GCS
+    gdf.to_csv(f"{GCS_FILE_PATH}cleaned_cycle5&6.csv")
+    
+    print(f"Data cleaning complete. There are {len(gdf)} entries in dataframe")  
+    logger.info(f"got clean data: {len(gdf)} entries")
     
     #also return in notebook
     return gdf
@@ -284,4 +308,8 @@ def check_unique_ppno(df, district, ppno):
     return count_ppno
 
     
-    
+def read_clean_data():
+    df = read_in_data()
+    clean_df = clean_data(df)
+    return clean_df
+
