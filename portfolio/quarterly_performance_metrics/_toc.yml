@@ -1,0 +1,7 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: 0__current_quarter_report__.ipynb
+    -   file: 0__historical_report__.ipynb
+root: README
