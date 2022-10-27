@@ -65,7 +65,7 @@ def get_service_hours_summary_table(df: pd.DataFrame)-> pd.DataFrame:
     summary = sort_by_column(summary).pipe(clean_up_category_values)
     
     summary = summary.assign(
-        service_hrs_per_route = round(summary.service_hours / 
+        service_hours_per_route = round(summary.service_hours / 
                                       summary.unique_route, 2)
     )
     
@@ -164,3 +164,65 @@ def prep_data_for_report(analysis_date: str) -> gpd.GeoDataFrame:
     plot_df = df[df._merge=="both"].reset_index(drop=True)
     
     return plot_df
+
+
+
+def quarterly_summary_long(analysis_date: str) -> pd.DataFrame: 
+    """
+    For historical report, get a long df of service hours and delay hours 
+    summary tables.
+    """
+    df = prep_data_for_report(analysis_date)
+    
+    service_summary = get_service_hours_summary_table(df)                      
+    delay_summary = get_delay_summary_table(df)
+                         
+    # Make long
+    service_value_vars = [c for c in service_summary.columns if c != "category"]
+    delay_value_vars = [c for c in delay_summary.columns if c != "category"]
+
+    service_long = pd.melt(
+        service_summary,
+        id_vars = "category",
+        value_vars = service_value_vars,
+    )
+
+    delay_long = pd.melt(
+        delay_summary, 
+        id_vars = "category", 
+        value_vars = delay_value_vars
+    )
+
+    # Concatenante
+    summary = pd.concat([service_long, delay_long], axis=0)
+    summary = summary.assign(
+        service_date = analysis_date
+    )
+    
+    return summary
+
+
+def concatenate_summary_across_dates(rt_dates_dict: dict) -> pd.DataFrame:
+    """
+    Loop across dates available for quarterly performance metrics,
+    and concatenate into 1 long df.
+    """
+    df = pd.DataFrame()
+    
+    rt_dates_reversed = {value: key for key, value in rt_dates_dict.items()}
+    
+    for date, quarter in rt_dates_reversed.items():
+        one_quarter = quarterly_summary_long(date)
+        df = pd.concat([df, one_quarter], axis=0)
+    
+    df = df.assign(
+        year_quarter = df.service_date.map(rt_dates_reversed)
+    )
+
+    df = df.assign(
+        quarter = df.year_quarter.str.split('_', expand=True)[0],
+        year = df.year_quarter.str.split('_', expand=True)[1].astype(int),
+    )
+    
+    return df
+    
