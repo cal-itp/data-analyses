@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 from siuba import *
 
-from shared_utils import geography_utils
-from dla_utils import _dla_utils
+#from shared_utils import geography_utils
+#from dla_utils import _dla_utils
 
 from calitp import to_snakecase
 
