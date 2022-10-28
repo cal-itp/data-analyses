@@ -1,0 +1,12 @@
+title: Test 100 Recs
+directory: ./one_hundred_recs/
+parts:
+- caption: Introduction
+- chapters:
+  - caption: District 04 - Oakland
+    params: 
+      district: District 04 - Oakland
+    sections: &sections
+    - notebook: ./bus_service_increase/transit-on-shn.ipynb
+    - notebook: ./bus_service_increase/transit-on-shn2.ipynb
+readme: ./one_hundred_recs/README.md
