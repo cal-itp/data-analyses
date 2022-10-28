@@ -14,12 +14,14 @@ the same way, across directories.
     get_sorted_transit_routes()
 
 4. highway segments with transit, but slow speeds:
-    select_highway_corridors
+    select_highway_corridors()
 
 """
 import geopandas as gpd
 import pandas as pd
 
+from calitp.tables import tbls
+from siuba import *
 from typing import Literal
 
 from shared_utils import geography_utils
@@ -142,6 +144,39 @@ def get_sorted_transit_routes(
     return gdf2
 
 
+def add_district_description(
+    df: pd.DataFrame | gpd.GeoDataFrame
+) -> pd.DataFrame | gpd.GeoDataFrame: 
+    """
+    Add in caltrans_district column.
+    Go from numeric district column (District = 1, 2, 3) to
+    the full description used in portfolio.
+    """
+    district_description = (
+        tbls.airtable.california_transit_organizations()
+        >> select(_.caltrans_district)
+        >> distinct()
+        >> collect()
+        >> filter(_.caltrans_district.notna())
+    )
+    
+    district_description = district_description.assign(
+        District = (district_description.caltrans_district
+                    .str.split(' -', expand=True)[0]
+                    .astype(int)
+                   )
+    )
+    
+    df = pd.merge(
+        df,
+        district_description,
+        on = "District",
+        how = "left",
+    )
+    
+    return df
+    
+
 def select_highway_corridors(
     speed_dict: dict = {"mean_speed_mph_trip_weighted": 12}, 
     trip_dict: dict = {"trips_all_day_per_mi": 2}
@@ -161,7 +196,29 @@ def select_highway_corridors(
         f"{GCS_FILE_PATH}highway_segment_stats.parquet")
     
     gdf2 = subset_by_speed_and_trip(gdf, speed_dict, trip_dict)
+    gdf2 = add_district_description(gdf2)
     
+    return gdf2
+
+
+def get_sorted_highway_corridors(
+) -> gpd.GeoDataFrame:
+    """
+    Some districts don't meet the criteria. 
+    Simply return a sorted df.
+    """
+    gdf = gpd.read_parquet(
+        f"{GCS_FILE_PATH}highway_segment_stats.parquet")
+    
+    gdf = add_district_description(gdf)
+
+    gdf2 = (gdf.sort_values(["District", 
+                          "mean_speed_mph_trip_weighted", 
+                          "trips_all_day_per_mi"],
+                         ascending = [True, True, False])
+            .reset_index(drop=True)
+           )
+
     return gdf2
 
 
