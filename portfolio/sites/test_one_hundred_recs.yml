@@ -8,5 +8,5 @@ parts:
       district: District 04 - Oakland
     sections: &sections
     - notebook: ./bus_service_increase/transit-on-shn.ipynb
-    - notebook: ./bus_service_increase/transit-on-shn2.ipynb
+    - notebook: ./bus_service_increase/transit-deserts-uncompetitive.ipynb
 readme: ./one_hundred_recs/README.md
