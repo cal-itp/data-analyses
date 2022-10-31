@@ -26,15 +26,12 @@ def make_bar(df: pd.DataFrame, y_col: str) -> alt.Chart:
     
     if y_col == "service_hours":
         value_format = ",.0f"
-        y_buffer = 1_400
     elif y_col == "avg_delay_hours": 
         value_format = ",.1f"
-        y_buffer = 1
     else:
         value_format = ",.1f"
-        y_buffer = 5
     
-    Y_MAX = df[y_col].max() + y_buffer
+    Y_MAX = df[y_col].max() * 1.1
     
     bar = base_bar(df)
     
