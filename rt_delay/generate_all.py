@@ -11,37 +11,22 @@ from tqdm import tqdm_notebook
 from tqdm.notebook import trange, tqdm
 
 import shared_utils
-import rt_analysis as rt
+from rt_analysis import rt_parser as rt
 
 fs = gcsfs.GCSFileSystem()
 
-date = shared_utils.rt_dates.DATES["aug2022"]
+date = shared_utils.rt_dates.DATES["feb2022"]
 analysis_date = pd.to_datetime(date).date()
 pbar = tqdm()
 
-from calitp.tables import tbl
+from calitp.tables import tbls
 from siuba import *
 
 
 if __name__=="__main__":
 
-    '''
-    airtable_organizations = (
-        tbl.airtable.california_transit_organizations()
-        >> select(_.itp_id)
-        >> filter(_.itp_id != 200)
-        >> collect()
-    )
-
-
-    (airtable_organizations[airtable_organizations.itp_id.notna()]
-     .astype({"itp_id": int})
-     .rename(columns = {"itp_id": "calitp_itp_id"})
-     .to_parquet(f"{date}_working_organizations.parquet")
-    )
-    '''
     air_joined = pd.read_parquet(
-        f"{date}_working_organizations.parquet")
+        f"2022-10-12_working_organizations.parquet")
     
     day = str(analysis_date.day).zfill(2)
     month = str(analysis_date.month).zfill(2)
@@ -52,7 +37,8 @@ if __name__=="__main__":
     operators_status_dict = shared_utils.rt_utils.get_operators(
         date, list(air_joined.calitp_itp_id))
     
-    ran_operators = [k for k, v in operators_status_dict.items() if v == 'already_ran']
+    ran_operators = [k for k, v in operators_status_dict.items() 
+                     if v == 'already_ran']
     #{k: v for k, v in operators_status_dict.items() if v == 'not_yet_run'}
     
     not_ran_operators = []
