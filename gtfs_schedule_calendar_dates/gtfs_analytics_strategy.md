@@ -86,11 +86,11 @@ Metro example:
 * `time_of_day`: based off of when the trip start time falls in, same as in [rt_utils](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py#L567-L583)
     * Add 3 new aggregated categories
     * (1) `all_day` - sum(all time_of_day bins)
-    * (2) `peak`, sum(am_peak, pm_peak)
-    * (3) `offpeak`, sum(early_am, midday, evening, owl)
+    * (2) `peak` - sum(am_peak, pm_peak)
+    * (3) `offpeak` - sum(early_am, midday, evening, owl)
 * `service_hours`. `n_stops`, `n_stop_times`:  calculated same way as in [fact daily trips](https://github.com/cal-itp/data-infra/blob/main/warehouse/models/gtfs_views/gtfs_schedule_fact_daily_trips.sql)
 * `n_trips`: calculated same way as in [fact daily service](https://github.com/cal-itp/data-infra/blob/main/warehouse/models/gtfs_views/gtfs_schedule_fact_daily_service.sql)
-* `n_days`: count how many weekday or weekend/holiday rows went into the aggregation for each month. Analysts will want to use average weekday service hours, so have a way to figure out denominator, when Jan weekdays differ from Feb weekdays. 
+* `n_days`: count how many weekday or weekend/holiday rows went into the aggregation for each month. Analysts will want to use average weekday service hours, and this column provides a way to get the denominator, esp since Jan weekdays differ from Feb weekdays. 
 * Optional: `avg_service_hours`: `service_hours` / `n_days`? leaning towards not doing this, just in case an analyst takes this table and aggregates to business quarters, and the average columns gets accidentally miscalculated. 
 
 
