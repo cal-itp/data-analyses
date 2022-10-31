@@ -1,12 +1,16 @@
-title: Test 100 Recs
 directory: ./one_hundred_recs/
 parts:
-- caption: Introduction
 - chapters:
-  - caption: District 04 - Oakland
-    params: 
-      district: District 04 - Oakland
+  - caption: District 01 - Eureka
+    params:
+      district: 01 - Eureka
     sections: &sections
-    - notebook: ./bus_service_increase/transit-on-shn.ipynb
+    #- notebook: ./bus_service_increase/transit-on-shn.ipynb
     - notebook: ./bus_service_increase/transit-deserts-uncompetitive.ipynb
+  - caption: District 02 - Redding
+    params:
+      district: 02 - Redding
+    sections: *sections
+
 readme: ./one_hundred_recs/README.md
+title: Test 100 Recs
