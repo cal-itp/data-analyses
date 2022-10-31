@@ -9,20 +9,31 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
+from typing import Literal
+
 from shared_utils import geography_utils
 
 catalog = intake.open_catalog("*.yml")
 
-def add_percent(df: pd.DataFrame, col_list: list) -> pd.DataFrame:
+def aggregate_calculate_percent_and_average(
+    df: pd.DataFrame, 
+    group_cols: list,
+    sum_cols: list) -> pd.DataFrame:
     """
     Create columns with pct values. 
     """
-    for c in col_list:
+    agg_df = geography_utils.aggregate_by_geography(
+        df, 
+        group_cols = group_cols,
+        sum_cols = sum_cols,
+    )
+    
+    for c in sum_cols:
         new_col = f"pct_{c}"
-        df[new_col] = (df[c] / df[c].sum()).round(3)
-        df[c] = df[c].round(0)
+        agg_df[new_col] = (agg_df[c] / agg_df[c].sum()).round(3)
+        agg_df[c] = agg_df[c].round(0)
         
-    return df
+    return agg_df
 
 #https://stackoverflow.com/questions/23482668/sorting-by-a-custom-list-in-pandas
 def sort_by_column(df: pd.DataFrame, 
@@ -54,13 +65,12 @@ def get_service_hours_summary_table(df: pd.DataFrame)-> pd.DataFrame:
     Aggregate by parallel/on_shn/other category.
     Calculate number and pct of service hours, routes.
     """
-    summary = geography_utils.aggregate_by_geography(
-        df, 
-        group_cols = ["category"],
-        sum_cols = ["service_hours", "unique_route"],
-    ).astype({"service_hours": int, "unique_route": int})
     
-    summary = add_percent(summary, ["service_hours", "unique_route"])
+    summary = aggregate_calculate_percent_and_average(
+        df,
+        group_cols = ["category"],
+        sum_cols = ["service_hours", "unique_route"]
+    ).astype({"service_hours": int, "unique_route": int})
     
     summary = sort_by_column(summary).pipe(clean_up_category_values)
     
@@ -76,8 +86,8 @@ def get_delay_summary_table(df: pd.DataFrame) -> pd.DataFrame:
     # Note: merge_delay both narrows down the dataset quite a bit
     delay_df = df[df.merge_delay=="both"]
 
-    delay_summary = geography_utils.aggregate_by_geography(
-        delay_df, 
+    delay_summary = aggregate_calculate_percent_and_average(
+        delay_df,
         group_cols = ["category"],
         sum_cols = ["delay_hours", "unique_route"],
     ).astype({"unique_route": int})
@@ -85,9 +95,7 @@ def get_delay_summary_table(df: pd.DataFrame) -> pd.DataFrame:
     delay_summary = (sort_by_column(delay_summary)
                      .pipe(clean_up_category_values)
                     )
-    
-    delay_summary = add_percent(delay_summary, ["delay_hours", "unique_route"])
-    
+        
     delay_summary = delay_summary.assign(
         delay_hours_per_route = round(delay_summary.delay_hours / 
                                       delay_summary.unique_route, 2)
@@ -96,27 +104,17 @@ def get_delay_summary_table(df: pd.DataFrame) -> pd.DataFrame:
     return delay_summary
 
 
-def by_district_on_shn_breakdown(df: pd.DataFrame, sum_cols: list) -> pd.DataFrame:
+def by_district_on_shn_breakdown(df: pd.DataFrame,
+                                 sum_cols: list) -> pd.DataFrame:
     """
     Get service hours or delay hours by district, and 
     add in percent and average metrics.
     """
-    by_district = geography_utils.aggregate_by_geography(
+    by_district = aggregate_calculate_percent_and_average(
         df[df.category=="on_shn"],
         group_cols = ["District"],
         sum_cols = sum_cols
-    ).astype(int)
-
-    by_district = (add_percent(
-        by_district, 
-        sum_cols)
-        .sort_values("District")
-    )
-    
-    pct_cols = [f"pct_{c}" for c in sum_cols]
-    
-    for c in pct_cols:
-        by_district[c] = by_district[c].round(3)
+    ).astype(int).sort_values("District").reset_index(drop=True)
     
     # Calculate average
     if "service_hours" in by_district.columns:
@@ -200,9 +198,50 @@ def quarterly_summary_long(analysis_date: str) -> pd.DataFrame:
     )
     
     return summary
+    
+    
+def district_breakdown_long(analysis_date: str) -> pd.DataFrame: 
+    """
+    For historical report, get a long df of service hours and delay hours 
+    summary tables.
+    """
+    df = prep_data_for_report(analysis_date)
+    
+    by_district_summary = by_district_on_shn_breakdown(
+        df, sum_cols = ["service_hours", "unique_route"])
+
+    by_district_delay = by_district_on_shn_breakdown(
+        df, sum_cols = ["delay_hours", "unique_route"]
+    )
+                         
+    # Make long
+    service_value_vars = [c for c in by_district_summary.columns if c != 'District']
+    delay_value_vars = [c for c in by_district_delay.columns if c != 'District']
+
+    service_long = pd.melt(
+        by_district_summary,
+        id_vars = "District",
+        value_vars = service_value_vars,
+    )
+
+    delay_long = pd.melt(
+        by_district_delay, 
+        id_vars = "District", 
+        value_vars = delay_value_vars
+    )
+
+    # Concatenante
+    summary = pd.concat([service_long, delay_long], axis=0)
+    summary = summary.assign(
+        service_date = analysis_date
+    )
+    
+    return summary
 
 
-def concatenate_summary_across_dates(rt_dates_dict: dict) -> pd.DataFrame:
+def concatenate_summary_across_dates(rt_dates_dict: dict, 
+                                     summary_dataset: Literal["summary", "district"],
+                                    ) -> pd.DataFrame:
     """
     Loop across dates available for quarterly performance metrics,
     and concatenate into 1 long df.
@@ -212,7 +251,11 @@ def concatenate_summary_across_dates(rt_dates_dict: dict) -> pd.DataFrame:
     rt_dates_reversed = {value: key for key, value in rt_dates_dict.items()}
     
     for date, quarter in rt_dates_reversed.items():
-        one_quarter = quarterly_summary_long(date)
+        if summary_dataset == "summary":
+            one_quarter = quarterly_summary_long(date)
+            
+        elif summary_dataset == "district":
+            one_quarter = district_breakdown_long(date)
         df = pd.concat([df, one_quarter], axis=0)
     
     df = df.assign(
@@ -225,4 +268,3 @@ def concatenate_summary_across_dates(rt_dates_dict: dict) -> pd.DataFrame:
     )
     
     return df
-    
