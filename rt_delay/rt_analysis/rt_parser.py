@@ -25,7 +25,6 @@ logging.basicConfig(filename = 'rt.log')
 
 import gcsfs
 fs = gcsfs.GCSFileSystem()
-import warnings
 
 class VehiclePositionsInterpolator:
     ''' Interpolates the location of a specific trip using GTFS-RT Vehicle Positions data
@@ -340,18 +339,14 @@ class OperatorDayAnalysis:
         ## changed to stop sequence which should catch more duplicates, but a pain point from url number handling...
         delays = delays >> distinct(_.trip_id, _.stop_sequence, _keep_all=True) 
         self.debug_dict['delays'] = delays
-        _delays = []
+        _delays = gpd.GeoDataFrame()
         
         if type(self.pbar) != type(None):
             self.pbar.reset(total=len(delays.trip_id.unique()))
             self.pbar.desc = f'Generating stop delay view itp_id: {self.calitp_itp_id}'
         for trip_id in delays.trip_id.unique():
             try:
-                _delay = (delays.copy()
-                          >> filter(_.trip_id == trip_id)
-                          >> distinct(_.stop_id, _keep_all = True)
-                          >> select(-_.geometry)  # remove stop geometry since interpolated segments have none
-                         )
+                _delay = delays.copy() >> filter(_.trip_id == trip_id) >> distinct(_.stop_id, _keep_all = True)
                 _delay['actual_time'] = _delay.apply(lambda x: 
                                 self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
                                 axis = 1)
@@ -376,7 +371,8 @@ class OperatorDayAnalysis:
                 except:
                     print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
                     continue
-                _delays = _delays + [_delay]
+
+                _delays = pd.concat((_delays, _delay))
                 self.debug_dict[f'{trip_id}_delay'] = _delay
             except Exception as e:
                 print(f'could not generate delays for trip {trip_id}')
@@ -387,7 +383,7 @@ class OperatorDayAnalysis:
         if type(self.pbar) != type(None):
             self.pbar.refresh()
                 
-        self.stop_delay_view = pd.concat(_delays)
+        self.stop_delay_view = _delays
         return
     
     def export_views_gcs(self):
