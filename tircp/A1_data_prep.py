@@ -3,7 +3,7 @@ from calitp import *
 
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-FILE_NAME = "TIRCP_10_19_2022.xlsx"
+FILE_NAME = "TIRCP Tracking Sheets 2.0_10-30-2022.xlsx"
 
 #Crosswalk
 import A5_crosswalks as crosswalks
@@ -107,6 +107,26 @@ def load_invoice():
     
     return df
 
+# GIS Sheet 
+def load_gis():
+
+    # Load in
+    df = to_snakecase(
+        pd.read_excel(
+            f"{GCS_FILE_PATH}{FILE_NAME}", sheet_name="GIS Info"
+        )
+    )
+    
+    # Clean Project ID, all should be 10 characters
+    df = ppno_slice(df)
+    
+    # Clean up some column names
+    df = df.rename(
+    columns={
+        "senate\ndistricts": "senate_districts",
+        "assembly\ndistricts": "assembly_districts",
+    })
+    return df
 """
 Clean Project Sheet 
 """
