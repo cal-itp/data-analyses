@@ -3,15 +3,17 @@
 Our warehouse for GTFS schedule data is more mature than GTFS real-time. At present, it's going through a rewrite (GTFS schedule warehouse v2). 
 
 **Summary**:
-1. Current analyst use patterns for accessing GTFS schedule tables in the warehouse
+1. [Current analyst use patterns](#current-analyst-use-patterns) for accessing GTFS schedule tables in the warehouse
     * [gtfs_utils](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/gtfs_utils.py)
-    * Addresses need for query templates, standardization in putting tables together, and cached parquets cuts down on time for pre-assembling data for analysts
-    * Discussion: What is the best caching strategy then for single day, granular tables under warehouse v2?
-    * Discussion: moving from single day to averages framework, what steps can be taken to prepare for future `mart` table?
+    * Addresses need for [query templates](#templated-queries), [standardization](#standardization) in putting tables together, and [cached parquets](#caching-results) cuts down on time for pre-assembling data for analysts
+    * Discussion: What is the best caching strategy then for single day, granular tables under warehouse v2?   
+    * Discussion: moving from [single day to averages](#single-day-to-averages) framework, what steps can be taken to prepare for future `mart` table?
+              
 1. Identify opportunities, under warehouse v2, where `mart` tables would be created
-    * `gtfs_utils`
+    * `gtfs_utils` - we can materialize these transforms and joins in dbt under warehouse v2. `mart` does not necessarily mean simply a replacement for `views`, but can be more heavily-modeled, like the joins in `gtfs_utils`. 
     * `rt_utils` - `fct_daily_vehicle_positions`
-    * monthly averages
+    * monthly averages -  * Result: We can We can create a table with these averages soon (less immediate priority, but still a small task of warehouse v2). Use the dbt concept of `metrics`, which sits over the fact tables.
+        * Tiffany to give Laurie an outline of what this table should look like along with logic of how columns are constructed. 
     
     
 ## Current Analyst Use Patterns
@@ -66,13 +68,50 @@ Freed from the single day framework, if we move toward averages (average weekday
 * `time_of_day` - owl, early AM, AM peak, midday, pm peak, evening. add in all day, peak, non-peak. 
 
 **Discussion**: moving from single day to averages framework, what steps can be taken to prepare for future `mart` table?
-* I'll be at least working out a prototype of what I'd like to see, maybe exploring `ibis` to help with moving Python to SQL. 
-* `dask-bigquery`
-    * parse the timestamp to get `departure_hour` and aggregate to `time_of_day` bins. 
-    * parse date to also attach weekday or weekend or holiday?
-    * ideas for how to do the testing that doesn't require hitting BQ constantly?
-    * will probably do it on all our cached parquets as fake data to test
 * A `mart` table would probably run monthly to add a new monthly average?
+* parse the timestamp to get `departure_hour` and aggregate to `time_of_day` bins. 
+
+#### Sample Table Schema
+
+* Putting it as 2 separate tables for readability in Markdown...but should be read as 1 table
+* Hoping the math checks out here
+
+Metro example:
+* 1 route (`720`) with 2 paths, a long route and a short route, captured in `shape_id`
+* January 2022 has 20 weekdays and 11 weekend + holidays. 
+    * 10 weekend days
+    * 1 observed holiday that fall on weekday. New Year's falls on Sat, would get observed on Fri in Dec, but MLK always falls on Mon.
+    * TODO for Tiffany: supply a [holidays parquet table](./holidays.parquet) for years 2015-2050 (that should cover us!)....and get the observed holidays converted. The table currently contains all of CA's holidays. But, I will convert the Sat holidays (observed on Fri) and Sun holidays (observed on Mon) to be associated with the correct date.
+* `day_of_week`: weekday, weekend (in reality: weekend_holiday) 
+* `time_of_day`: based off of when the trip start time falls in, same as in [rt_utils](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py#L567-L583)
+    * Add 3 new aggregated categories
+    * (1) `all_day` - sum(all time_of_day bins)
+    * (2) `peak` - sum(am_peak, pm_peak)
+    * (3) `offpeak` - sum(early_am, midday, evening, owl)
+* `service_hours`. `n_stops`, `n_stop_times`:  calculated same way as in [fact daily trips](https://github.com/cal-itp/data-infra/blob/main/warehouse/models/gtfs_views/gtfs_schedule_fact_daily_trips.sql)
+* `n_trips`: calculated same way as in [fact daily service](https://github.com/cal-itp/data-infra/blob/main/warehouse/models/gtfs_views/gtfs_schedule_fact_daily_service.sql)
+* `n_days`: count how many weekday or weekend/holiday rows went into the aggregation for each month. Analysts will want to use average weekday service hours, and this column provides a way to get the denominator, esp since Jan weekdays differ from Feb weekdays. 
+* Optional: `avg_service_hours`: `service_hours` / `n_days`? leaning towards not doing this, just in case an analyst takes this table and aggregates to business quarters, and the average columns gets accidentally miscalculated. 
+
+
+| month | year | feed_key | organization_name | route_id | shape_id  |
+|-------|------|----------|-------------------|----------|-----------|
+|   1   | 2022 |  feed1   |      Metro        |   720    | 720-long  |
+|   1   | 2022 |  feed1   |      Metro        |   720    | 720-long  |
+|   1   | 2022 |  feed1   |      Metro        |   720    | 720-short |
+|   1   | 2022 |  feed1   |      Metro        |   720    | 720-short |
+
+
+| time_of_day | day_of_week | service_hours | n_days | n_trips | n_stops | n_stop_times |
+|-------------|-------------|---------------|--------|---------|---------|--------------|
+|   am_peak   |   weekday   |   1,000       |  20    |   500   |   50    |    25,000    |
+|   midday    |   weekend   |    200        |  11    |   100   |   50    |     5,000    |
+|   am_peak   |   weekday   |    750        |  20    |    75   |   30    |     2,250    |
+|   midday    |   weekend   |    150        |  11    |    15   |   30    |       450    |
+
+
 
 ### References
 * [Weekday Aggregations Epic](https://github.com/cal-itp/data-analyses/issues/512)
+* [gtfs schedule fact daily trips](https://github.com/cal-itp/data-infra/blob/main/warehouse/models/gtfs_views/gtfs_schedule_fact_daily_trips.sql)
+* [gtfs schedule fact daily service](https://github.com/cal-itp/data-infra/blob/main/warehouse/models/gtfs_views/gtfs_schedule_fact_daily_service.sql)
