@@ -3,15 +3,17 @@
 Our warehouse for GTFS schedule data is more mature than GTFS real-time. At present, it's going through a rewrite (GTFS schedule warehouse v2). 
 
 **Summary**:
-1. Current analyst use patterns for accessing GTFS schedule tables in the warehouse
+1. [Current analyst use patterns](#current-analyst-use-patterns) for accessing GTFS schedule tables in the warehouse
     * [gtfs_utils](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/gtfs_utils.py)
-    * Addresses need for query templates, standardization in putting tables together, and cached parquets cuts down on time for pre-assembling data for analysts
-    * Discussion: What is the best caching strategy then for single day, granular tables under warehouse v2?
-    * Discussion: moving from single day to averages framework, what steps can be taken to prepare for future `mart` table?
+    * Addresses need for [query templates](#templated-queries), [standardization](#standardization) in putting tables together, and [cached parquets](#caching-results) cuts down on time for pre-assembling data for analysts
+    * Discussion: What is the best caching strategy then for single day, granular tables under warehouse v2?   
+    * Discussion: moving from [single day to averages](#single-day-to-averages) framework, what steps can be taken to prepare for future `mart` table?
+              
 1. Identify opportunities, under warehouse v2, where `mart` tables would be created
-    * `gtfs_utils`
+    * `gtfs_utils` - we can materialize these transforms and joins in dbt under warehouse v2. `mart` does not necessarily mean simply a replacement for `views`, but can be more heavily-modeled, like the joins in `gtfs_utils`. 
     * `rt_utils` - `fct_daily_vehicle_positions`
-    * monthly averages
+    * monthly averages -  * Result: We can We can create a table with these averages soon (less immediate priority, but still a small task of warehouse v2). Use the dbt concept of `metrics`, which sits over the fact tables.
+        * Tiffany to give Laurie an outline of what this table should look like along with logic of how columns are constructed. 
     
     
 ## Current Analyst Use Patterns
