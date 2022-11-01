@@ -3,7 +3,7 @@ from calitp import *
 
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-FILE_NAME = "TIRCP Tracking Sheets 2.0_10-30-2022.xlsx"
+FILE_NAME = "TIRCP_10-31-2022.xlsx"
 
 #Crosswalk
 import A5_crosswalks as crosswalks
