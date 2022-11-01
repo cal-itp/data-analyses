@@ -6,18 +6,17 @@ from typing import List, Literal
 from shared_utils import styleguide
 from shared_utils import calitp_color_palette as cp
 
-
-def base_bar(df: pd.DataFrame) -> alt.Chart:
+def base_bar(df: pd.DataFrame, x_col: str) -> alt.Chart:
     chart = (alt.Chart(df)
              .mark_bar()
              .encode(
-                 x=alt.X("District:N", title="District")
+                 x=alt.X(f"{x_col}:N", title=f"{x_col.title()}")
              )
             )
     return chart
 
 
-def make_bar(df: pd.DataFrame, y_col: str) -> alt.Chart:
+def make_district_bar(df: pd.DataFrame, y_col: str) -> alt.Chart:
     """
     Make bar chart that's total service hours or 
     average service hours by district.
@@ -33,7 +32,7 @@ def make_bar(df: pd.DataFrame, y_col: str) -> alt.Chart:
     
     Y_MAX = df[y_col].max() * 1.1
     
-    bar = base_bar(df)
+    bar = base_bar(df, x_col="District")
     
     bar = (bar.encode(
         y=alt.Y(f"{y_col}:Q", title=f"{y_title}", 

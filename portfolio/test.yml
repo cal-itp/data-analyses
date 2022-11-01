@@ -1,0 +1,82 @@
+title: Test - Multiple Async Params
+directory: ./quarterly_performance_objective/
+readme: ./quarterly_performance_objective/README.md
+#notebook: ./quarterly_performance_objective/test_one_param.ipynb
+parts:
+- caption: Introduction
+- chapters:
+  - caption: District 04 - Oakland
+    params:
+      district: 4
+    notebook: ./quarterly_performance_objective/test_one_param.ipynb
+    sections:
+    - county: Alameda
+    - county: Contra Costa
+    notebook: ./quarterly_performance_objective/test_two_param.ipynb
+
+
+# this will execute the last notebook listed, which is two_param
+title: Test - Multiple Async Params
+directory: ./quarterly_performance_objective/
+readme: ./quarterly_performance_objective/README.md
+parts:
+- caption: Introduction
+- chapters:
+  - caption: District 04 - Oakland
+    params:
+      district: 4
+      notebook: ./quarterly_performance_objective/test_one_param.ipynb
+    sections:
+    - county: Alameda
+    - county: Contra Costa
+    notebook: ./quarterly_performance_objective/test_two_param.ipynb
+    
+    
+    
+# This will run one_param notebook twice, because there are 2 sections listed
+title: Test - Multiple Async Params
+directory: ./quarterly_performance_objective/
+readme: ./quarterly_performance_objective/README.md
+parts:
+- caption: Introduction
+- chapters:
+  - caption: District 04 - Oakland
+    params:
+      district: 4
+    notebook: ./quarterly_performance_objective/test_one_param.ipynb
+    sections:
+    - county: Alameda
+    - county: Contra Costa
+    
+# this will run the one param notebook twice, but inject only the param 
+title: Test - Multiple Async Params
+directory: ./quarterly_performance_objective/
+readme: ./quarterly_performance_objective/README.md
+notebook: ./quarterly_performance_objective/test_one_param.ipynb
+parts:
+- caption: Introduction
+- chapters:
+  - caption: District 04 - Oakland
+    params:
+      district: 4
+    sections:
+    - county: Alameda
+    - county: Contra Costa
+    
+    
+# this is probably the closest to what we want 
+# run the two param notebook, twice, one for each county, 
+# but add a flag for district overview?
+title: Test - Multiple Async Params
+directory: ./quarterly_performance_objective/
+readme: ./quarterly_performance_objective/README.md
+notebook: ./quarterly_performance_objective/test_two_param.ipynb
+parts:
+- caption: Introduction
+- chapters:
+  - caption: District 04 - Oakland
+    params:
+      district: 4
+    sections:
+    - county: Alameda
+    - county: Contra Costa
