@@ -1,6 +1,6 @@
 # Mass Transit Performance Objectives
 
-## MT.PO.01: increase total amount of service on the SHN and reliability of that service by 2024
+## Performance Objective 01: Increase total amount of service on the SHN and reliability of that service by 2024
 
 Transit routes along the SHN can be categorized into 3 groups:
 
