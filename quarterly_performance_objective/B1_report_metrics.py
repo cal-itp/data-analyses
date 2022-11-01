@@ -173,7 +173,9 @@ def quarterly_summary_long(analysis_date: str) -> pd.DataFrame:
     df = prep_data_for_report(analysis_date)
     
     service_summary = get_service_hours_summary_table(df)                      
-    delay_summary = get_delay_summary_table(df)
+    delay_summary = (get_delay_summary_table(df)
+                     .rename(columns = {"unique_route": "delay_unique_route"})
+                    )
                          
     # Make long
     service_value_vars = [c for c in service_summary.columns if c != "category"]
@@ -212,7 +214,7 @@ def district_breakdown_long(analysis_date: str) -> pd.DataFrame:
 
     by_district_delay = by_district_on_shn_breakdown(
         df, sum_cols = ["delay_hours", "unique_route"]
-    )
+    ).rename(columns = {"unique_route": "delay_unique_route"})
                          
     # Make long
     service_value_vars = [c for c in by_district_summary.columns if c != 'District']
