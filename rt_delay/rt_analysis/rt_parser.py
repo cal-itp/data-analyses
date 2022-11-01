@@ -383,7 +383,7 @@ class OperatorDayAnalysis:
         if type(self.pbar) != type(None):
             self.pbar.refresh()
                 
-        self.stop_delay_view = _delays
+        self.stop_delay_view = _delays.reset_index(drop=True)
         return
     
     def export_views_gcs(self):
