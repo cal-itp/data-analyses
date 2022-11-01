@@ -1,14 +1,14 @@
 title: Test - Multiple Async Params
 directory: ./quarterly_performance_objective/
 readme: ./quarterly_performance_objective/README.md
+notebook: ./quarterly_performance_objective/test_one_param.ipynb
 parts:
 - caption: Introduction
 - chapters:
   - caption: District 04 - Oakland
     params:
       district: 4
-      notebook: ./quarterly_performance_objective/test_one_param.ipynb
     sections:
     - county: Alameda
     - county: Contra Costa
-    notebook: ./quarterly_performance_objective/test_two_param.ipynb
+    #notebook: ./quarterly_performance_objective/test_two_param.ipynb
