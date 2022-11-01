@@ -8,6 +8,6 @@ setup(
     author="Cal-ITP",
     license="Apache",
     include_package_data=True,
-    py_modules = ['rt_parser', 'rt_filter_map_plot'],
+    py_modules = ['rt_parser', 'rt_filter_map_plot', 'sccp_tools'],
     package_dir={"rt_delay": "rt_analysis"}
 )
