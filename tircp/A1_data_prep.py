@@ -1,10 +1,9 @@
 import pandas as pd
 from calitp import *
-import shared_utils
 
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-FILE_NAME = "TIRCP_August_24_2022.xlsx"
+FILE_NAME = "TIRCP_10-31-2022.xlsx"
 
 #Crosswalk
 import A5_crosswalks as crosswalks
@@ -108,6 +107,26 @@ def load_invoice():
     
     return df
 
+# GIS Sheet 
+def load_gis():
+
+    # Load in
+    df = to_snakecase(
+        pd.read_excel(
+            f"{GCS_FILE_PATH}{FILE_NAME}", sheet_name="GIS Info"
+        )
+    )
+    
+    # Clean Project ID, all should be 10 characters
+    df = ppno_slice(df)
+    
+    # Clean up some column names
+    df = df.rename(
+    columns={
+        "senate\ndistricts": "senate_districts",
+        "assembly\ndistricts": "assembly_districts",
+    })
+    return df
 """
 Clean Project Sheet 
 """
@@ -157,7 +176,7 @@ def clean_project():
     df["award_cycle"].replace({"FY 21/22": 4}, inplace=True)
 
     # Coerce cols that are supposed to be numeric
-    df["other_funds_involved"] = df["other_funds_involved"].apply(
+    df[["other_funds_involved","total_project_cost"]] = df[["other_funds_involved","total_project_cost"]].apply(
         pd.to_numeric, errors="coerce"
     )
 
@@ -175,7 +194,7 @@ Allocation Sheet
 # List for columns that should be date 
 date_columns = [
     "allocation_date",
-    "completion_date",
+    "phase_completion_date",
     "_3rd_party_award_date",
     "led",
     "date_regional_coordinator_receives_psa",
@@ -197,7 +216,7 @@ def clean_allocation_manual(df):
         crosswalks.allocation_3rd_party_date
     )
     df["led"] = df["led"].replace(crosswalks.allocation_led)
-    df["completion_date"] = df["completion_date"].replace(
+    df["phase_completion_date"] = df["phase_completion_date"].replace(
         crosswalks.allocation_completion_date
     )
 
