@@ -27,7 +27,7 @@ build_test_100_recs:
 	python one_hundred_recs/deploy_portfolio_yaml.py   
 	python portfolio/portfolio.py clean test_one_hundred_recs
 	python portfolio/portfolio.py build test_one_hundred_recs --deploy 
-	git add portfolio/test_one_hundred_recs/*.ipynb portfolio/test_one_hundred_recs/*.yml portfolio/one_hundred_recs/*.md 
+	git add portfolio/test_one_hundred_recs/*.ipynb portfolio/test_one_hundred_recs/*.yml portfolio/test_one_hundred_recs/*.md 
 	git add portfolio/sites/ 
 
 
