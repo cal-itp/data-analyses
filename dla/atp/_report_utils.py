@@ -168,5 +168,30 @@ def read_in_joined_data():
 Report Functions
 '''
 
+def reorder_namecol(df,
+                    og_name_col,
+                    new_name_col, 
+                    split_on,
+                   order_on):
+    
+    df_copy = df>>filter(_[og_name_col].str.contains(split_on))>>select(_[og_name_col])
+    df_copy[['name_pt1', 'name_pt2']] = df_copy[og_name_col].str.split(split_on, 1, expand=True)
+    
+    def order_new_name(df):
+        if order_on == "pt1_pt2":
+            return (df['name_pt1'] + ' ' + df['name_pt2'])
+        elif order_on == "pt2_pt1":
+            return (df['name_pt2'] + ' ' + df['name_pt1'])
+        else:
+            return (df['name_pt1'] + ' ' + df['name_pt2'])
+        
+    df_copy[new_name_col] = df_copy.apply(order_new_name, axis = 1)
+    
+    new_name_mapping = (dict(df_copy[[og_name_col, new_name_col]].values))
+    
+    df[new_name_col] = df[og_name_col].map(new_name_mapping)
 
+    df[new_name_col] = df[new_name_col].fillna(df[og_name_col])
+    
+    return df
 
