@@ -543,6 +543,7 @@ class RtFilterMapper:
         Generate schedule based and speed based metrics for SCCP/LPP programs.
         '''
         assert hasattr(self, 'corridor'), 'must add corridor before generating corridor metrics'
+        assert not self._filter(self.corridor_stop_delays).empty, 'filter does not include any corridor trips'
         if self.filter:
             print('warning: filter set -- for SCCP/LPP reset filter first')
         schedule_metric = (self._filter(self.corridor_stop_delays)
