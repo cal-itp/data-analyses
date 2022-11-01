@@ -12,4 +12,4 @@ parts:
     sections:
     - county: Alameda
     - county: Contra Costa
-    #notebook: ./quarterly_performance_objective/test_two_param.ipynb
+    notebook: ./quarterly_performance_objective/test_two_param.ipynb
