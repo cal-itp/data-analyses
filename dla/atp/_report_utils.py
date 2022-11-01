@@ -119,7 +119,7 @@ def join_funding_and_app_data(df_funding,
 
 ## read in the joined data so we only have to use one function
 def read_in_joined_data():
-    app_data = _data_cleaning.read_clean_data()
+    app_data = pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/atp/cleaned_cycle5&6.xlsx',  index_col=[0])
     funded_data = read_SUR_funding_data()
     
     df = join_funding_and_app_data(funded_data,
