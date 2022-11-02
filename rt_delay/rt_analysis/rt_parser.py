@@ -391,6 +391,7 @@ class OperatorDayAnalysis:
         '''
         day = str(self.analysis_date.day).zfill(2)
         month = str(self.analysis_date.month).zfill(2)
+        date_iso = self.analysis_date.isoformat()
         
         stop_delay_to_parquet = self.stop_delay_view.copy()
         stop_delay_to_parquet['delay_seconds'] = stop_delay_to_parquet.delay.map(lambda x: x.seconds)
@@ -399,9 +400,9 @@ class OperatorDayAnalysis:
         stop_delay_to_parquet = stop_delay_to_parquet >> select(-_.delay)
         shared_utils.utils.geoparquet_gcs_export(stop_delay_to_parquet,
                                          f'{shared_utils.rt_utils.GCS_FILE_PATH}stop_delay_views/',
-                                        f'{self.calitp_itp_id}_{month}_{day}'
+                                        f'{self.calitp_itp_id}_{date_iso}'
                                         )
-        self.rt_trips.to_parquet(f'{shared_utils.rt_utils.GCS_FILE_PATH}rt_trips/{self.calitp_itp_id}_{month}_{day}.parquet')
+        self.rt_trips.to_parquet(f'{shared_utils.rt_utils.GCS_FILE_PATH}rt_trips/{self.calitp_itp_id}_{date_iso}.parquet')
 
         return
     
