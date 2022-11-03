@@ -57,6 +57,7 @@ full_ct_district = {
     10: "District 10: Stockton",
     11: "District 11: San Diego",
     3: "District 3: Marysville / Sacramento",
+     2: "District 2:Redding",
     12: "District 12: Orange County",
     8: "District 8: San Bernardino / Riverside",
     5: "District 5: San Luis Obispo / Santa Barbara",

@@ -7,12 +7,10 @@ from calitp import *
 import A5_crosswalks as crosswalks
 import A1_data_prep
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-
 """
 Functions
 """
-# Categorize a project by percentiles
+# Categorize a project by percentiles of whatever column you want
 def project_size_rating(dataframe, original_column: str, new_column: str):
     """Rate a project by percentiles and returning small/medium/large for any column
     
@@ -25,7 +23,7 @@ def project_size_rating(dataframe, original_column: str, new_column: str):
         the dataframe with the new column with the categorization.
 
     """
-    # Get percentiles in objects for total vehicle.
+    # Get percentiles 
     p75 = dataframe[original_column].quantile(0.75).astype(float)
     p25 = dataframe[original_column].quantile(0.25).astype(float)
     p50 = dataframe[original_column].quantile(0.50).astype(float)
@@ -111,6 +109,20 @@ def progress(df):
     ) | (df["Expended_Percent_Group"] == "76-99"):
         return "Ahead"
 
+    # 2022
+    elif (df["project_award_year"] == 2022) and (
+        df["Expended_Percent_Group"] == "1-25"
+    ):
+        return "On Track"
+    elif (df["project_award_year"] == 2022) and (
+        df["Expended_Percent_Group"] == "26-50"
+    ):
+        return "Ahead"
+    elif (df["project_award_year"] == 2022) and (
+        df["Expended_Percent_Group"] == "51-75"
+    ) | (df["Expended_Percent_Group"] == "76-99"):
+        return "Ahead"
+    
     # 0 Expenditures
     elif df["Expended_Percent_Group"] == "0":
         return "No expenditures recorded"
@@ -145,7 +157,7 @@ def tableau_dashboard():
     df["project_district"] = df["project_district"].replace(crosswalks.full_ct_district)
     df["project_county"] = df["project_county"].replace(crosswalks.full_county)
 
-    # Create new cols
+    # Create new cols for percentages
     df = df.assign(
         Expended_Percent=(
             df["project_expended_amount"] / df["project_allocated_amount"]
@@ -172,9 +184,8 @@ def tableau_dashboard():
 
     # Categorize projects whether they are large/small/med based on TIRCP amount
     df = df.rename(columns={"project_tircp_award_amount__$_": "tircp"})
-
-    # Categorize projects by project size
-    df = project_size_rating(df, "tircp", "Project_Category")
+    
+    df = project_size_rating(df, "tircp", "Project_Size")
 
     # Clean Up Column Names
     df = A1_data_prep.clean_up_columns(df)
@@ -212,7 +223,7 @@ def complete_tableau():
     tableau = tableau_dashboard()
     
     # Write to GCS
-    with pd.ExcelWriter(f"{GCS_FILE_PATH}Tableau_Workbook.xlsx") as writer:
+    with pd.ExcelWriter(f"{A1_data_prep.GCS_FILE_PATH}Tableau_Workbook.xlsx") as writer:
         tableau.to_excel(writer, sheet_name="main", index=False)
         burndown.to_excel(writer, sheet_name = "burndown", index=False)
         
