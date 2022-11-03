@@ -38,9 +38,9 @@ def organization_cleaning(df, column_wanted: str):
     df[column_wanted] = (
         df[column_wanted]
         .str.strip()
-        .str.split(",")
+        .str.split(",") 
         .str[0]
-        .str.replace("/", "")
+        .str.replace("/", "") 
         .str.split("(")
         .str[0]
         .str.split("/")
@@ -127,6 +127,7 @@ def load_gis():
         "assembly\ndistricts": "assembly_districts",
     })
     return df
+
 """
 Clean Project Sheet 
 """
@@ -158,12 +159,10 @@ def clean_project_manual(df):
 
 # Clean up project sheet completely 
 def clean_project():
+    
     df = load_project()
-
-    """
-    Some grant recipients have multiple spellings of their name. 
-    E.g. BART versus Bay Area Rapid Transit. Fix this.
-    """
+    
+    # Some grant recipients have multiple spellings of their name. 
     df = organization_cleaning(df, "grant_recipient")
     df["grant_recipient"] = df["grant_recipient"].replace(
         crosswalks.grant_recipients_projects
@@ -180,7 +179,7 @@ def clean_project():
         pd.to_numeric, errors="coerce"
     )
 
-    # As this is manual data, correct in a separate function
+    # As this is manually entered data, correct in a separate function
     df = clean_project_manual(df)
 
     # Add prefix
@@ -191,7 +190,7 @@ def clean_project():
 """
 Allocation Sheet
 """
-# List for columns that should be date 
+# List for columns that should be coerced to date-time
 date_columns = [
     "allocation_date",
     "phase_completion_date",

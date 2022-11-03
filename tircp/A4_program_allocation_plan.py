@@ -1,8 +1,6 @@
 import A1_data_prep
 import pandas as pd
 from calitp import *
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-
 """
 Variables
 """
@@ -166,7 +164,7 @@ def create_program_allocation_plan():
     # df_2022 = pivot(m1.loc[m1["Award Year"] == 2022])
  
     # GCS
-    with pd.ExcelWriter(f"{GCS_FILE_PATH}Script_Program_Allocation_Plan.xlsx") as writer:
+    with pd.ExcelWriter(f"{A1_data_prep.GCS_FILE_PATH}Script_Program_Allocation_Plan.xlsx") as writer:
         df_2015.to_excel(writer, sheet_name="2015_Cycle_1", index=True)
         df_2016.to_excel(writer, sheet_name="2016_Cycle_2", index=True)
         df_2018.to_excel(writer, sheet_name="2018_Cycle_3", index=True)

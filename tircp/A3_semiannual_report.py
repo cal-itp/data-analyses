@@ -6,8 +6,7 @@ import numpy as np
 from calitp import *
 import A5_crosswalks as crosswalks
 import A1_data_prep
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-FILE_NAME = "TIRCP_July_8_2022.xlsx"
+
 
 """
 Columns
@@ -205,7 +204,7 @@ def create_sar_report():
 
     """
     Add columns with percentages and to flag whether an allocation date is
-    AFTER  7-31-2020 then blank, if BEFORE 7-31-2020 then X
+    AFTER  7-31-2020 then blank  if BEFORE 7-31-2020 then X
     """ 
     m1 = m1.assign(
         Percent_of_Allocation_Expended=(
@@ -279,7 +278,7 @@ def create_sar_report():
     df_highlighted = df_all.style.apply(highlight_differences, axis=None)
 
     # Save to GCS
-    with pd.ExcelWriter(f"{GCS_FILE_PATH}Script_Semi_Annual_Report.xlsx") as writer:
+    with pd.ExcelWriter(f"{A1_data_prep.GCS_FILE_PATH}Script_Semi_Annual_Report.xlsx") as writer:
         summary.to_excel(writer, sheet_name="Summary", index=True)
         df_pivoted.to_excel(writer, sheet_name="FY", index=True)
         df_current.to_excel(writer, sheet_name="Unpivoted_Current_Version", index=False)
