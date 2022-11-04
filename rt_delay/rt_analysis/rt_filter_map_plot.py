@@ -216,7 +216,7 @@ class RtFilterMapper:
              )
         self.stop_delay_view['corridor'] = self.stop_delay_view.apply(fn, axis=1)
         corridor_filtered = self.stop_delay_view >> filter(_.corridor)
-        assert not corridor_filtered.empty
+        assert not corridor_filtered.empty, 'no stops in corridor!'
         first_stops = corridor_filtered >> group_by(_.trip_id) >> summarize(stop_sequence = _.stop_sequence.min())
         entry_delays = (first_stops
                 >> inner_join(_, corridor_filtered, on = ['trip_id', 'stop_sequence'])
