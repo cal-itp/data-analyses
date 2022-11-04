@@ -25,11 +25,6 @@ logger.add(sys.stderr,
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
 
-segment_cols = ["calitp_itp_id", "hqta_segment_id", "route_direction"]
-
-intersect_segment_cols = ["intersect_calitp_itp_id", 
-                        "intersect_hqta_segment_id", "intersect_route_direction"]
-
 DASK_GCS = "gs://calitp-analytics-data/data-analyses/dask_test/"
 
 GCS_FILE_PATH = DASK_GCS
@@ -84,7 +79,9 @@ def sjoin_against_other_operators(
     Compile all of them, because clipping is computationally expensive,
     so we want to do it on fewer rows. 
     """
-    route_cols = ["route_identifier", "route_direction"]
+    route_cols = ["hqta_segment_id", 
+                  #"route_identifier", 
+                  "route_direction"]
     
     s1 = dg.sjoin(
         in_group_df[[#"calitp_itp_id",
@@ -98,13 +95,16 @@ def sjoin_against_other_operators(
     s2 = s1[s1.route_direction_left != s1.route_direction_right]
     
     keep_cols = route_cols + [#"calitp_itp_id", 
-                              "intersect_route_identifier", 
+                              #"intersect_route_identifier", 
+                                "intersect_hqta_segment_id",
                               "intersect_route_direction"] 
     route_pairs = (
         s2.rename(
             columns = {
-                "route_identifier_left": "route_identifier",
-                "route_identifier_right": "intersect_route_identifier", 
+                "hqta_segment_id_left": "hqta_segment_id",
+                "hqta_segment_id_right": "intersect_hqta_segment_id",
+                #"route_identifier_left": "route_identifier",
+                #"route_identifier_right": "intersect_route_identifier", 
                 "route_direction_left": "route_direction",
                 "route_direction_right": "intersect_route_direction",
             })
@@ -143,6 +143,14 @@ def compile_across_operator_intersections(
     
 def compile_within_operator_intersections(
     gdf: dg.GeoDataFrame, itp_id_list: list) -> dd.DataFrame:
+    """
+    Grab one operator's routes, and do sjoin against the other routes of same operator.
+    Look WITHIN operators.
+    
+    Concatenate all the small dask dfs into 1 dask df by the end.
+    
+    https://stackoverflow.com/questions/56072129/scale-and-concatenate-pandas-dataframe-into-a-dask-dataframe
+    """
     results = []
     
     for itp_id in sorted(itp_id_list):
@@ -169,20 +177,20 @@ if __name__=="__main__":
     start = dt.datetime.now()
 
     corridors = prep_bus_corridors()   
-    longest_shape = grab_line_geom_for_hq_routes(corridors)
+    #longest_shape = grab_line_geom_for_hq_routes(corridors)
     
     ITP_IDS = list(corridors.calitp_itp_id.unique())
 
     # Route intersections across operators
     across_operator_results = compile_across_operator_intersections(
-        longest_shape, ITP_IDS)
+        corridors, ITP_IDS)
 
     time1 = dt.datetime.now()
     logger.info(f"across operator intersections: {time1 - start}")
 
     # Route intersections within operators
     within_operator_results = compile_within_operator_intersections(
-        longest_shape, ITP_IDS)
+        corridors, ITP_IDS)
     
     time2 = dt.datetime.now()
     logger.info(f"within operator intersections: {time2 - time1}")
@@ -191,15 +199,18 @@ if __name__=="__main__":
     pairwise_intersections = dd.multi.concat(
         [across_operator_results, within_operator_results], axis=0).compute()
     
-    routes_p1 = pairwise_intersections.route_identifier.unique().tolist()
-    routes_p2 = pairwise_intersections.intersect_route_identifier.unique().tolist()
+    routes_p1 = pairwise_intersections.hqta_segment_id.unique().tolist()
+    routes_p2 = pairwise_intersections.intersect_hqta_segment_id.unique().tolist()
+
+    #routes_p1 = pairwise_intersections.route_identifier.unique().tolist()
+    #routes_p2 = pairwise_intersections.intersect_route_identifier.unique().tolist()
         
     # Subset the hqta segments that do have hq_transit_corr == True 
     # down to the ones where routes have with sjoin intersections
     subset_corridors = (
         corridors[
-            (corridors.route_identifier.isin(routes_p1)) | 
-            (corridors.route_identifier.isin(routes_p2))]
+            (corridors.hqta_segment_id.isin(routes_p1)) | 
+            (corridors.hqta_segment_id.isin(routes_p2))]
         .drop_duplicates()
         .reset_index(drop=True)
     ).compute()
