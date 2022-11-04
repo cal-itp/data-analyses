@@ -823,15 +823,14 @@ def get_operators(analysis_date, operator_list):
         analysis_date = pd.to_datetime(analysis_date).date()
 
     fs_list = fs.ls(f"{GCS_FILE_PATH}rt_trips/")
-    #day = str(analysis_date.day).zfill(2)
-    #month = str(analysis_date.month).zfill(2)
+    # day = str(analysis_date.day).zfill(2)
+    # month = str(analysis_date.month).zfill(2)
     date_iso = analysis_date.isoformat()
     # now finds ran operators on specific analysis date
     ran_operators = [
         int(path.split("rt_trips/")[1].split("_")[0])
         for path in fs_list
-        if path.split("rt_trips/")[1]
-        and path.split("rt_trips/")[1].split("_")[1] == date_iso
+        if date_iso in path.split("rt_trips/")[1]
     ]
     op_list_runstatus = {}
     for itp_id in operator_list:
