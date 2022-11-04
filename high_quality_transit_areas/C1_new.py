@@ -132,7 +132,12 @@ def compile_across_operator_intersections(
         operator = gdf[gdf.calitp_itp_id==itp_id]
         not_operator = gdf[gdf.calitp_itp_id != itp_id]
         
-        results.append(sjoin_against_other_operators(operator, not_operator)) 
+        results.append(sjoin_against_other_operators(
+            operator[operator.route_direction=="east-west"], 
+            not_operator[not_operator.route_direction=="north-south"])) 
+        results.append(sjoin_against_other_operators(
+            operator[operator.route_direction=="north-south"], 
+            not_operator[not_operator.route_direction=="east-west"])) 
     
     # Concatenate all the dask dfs in the list and get it into one dask df
     ddf = dd.multi.concat(results, axis=0).drop_duplicates()
@@ -155,15 +160,12 @@ def compile_within_operator_intersections(
     
     for itp_id in sorted(itp_id_list):
         operator_df = gdf[gdf.calitp_itp_id==itp_id]
+                
+        this_route = operator_df[operator_df.route_direction=="east-west"]
+        other_routes = operator_df[operator_df.route_identifier=="north-south"]
         
-        operator_routes = list(operator_df.route_identifier.unique())
-        
-        for r in operator_routes:
-            this_route = operator_df[operator_df.route_identifier == r]
-            other_routes = operator_df[operator_df.route_identifier != r]
-        
-            results.append(sjoin_against_other_operators(
-                this_route, other_routes)) 
+        results.append(sjoin_against_other_operators(
+            this_route, other_routes)) 
     
     # Concatenate all the dask dfs in the list and get it into one dask df
     ddf = dd.multi.concat(results, axis=0).drop_duplicates()
@@ -177,10 +179,12 @@ if __name__=="__main__":
     start = dt.datetime.now()
 
     corridors = prep_bus_corridors()   
-    #longest_shape = grab_line_geom_for_hq_routes(corridors)
     
     ITP_IDS = list(corridors.calitp_itp_id.unique())
 
+    # Repartition
+    corridors = corridors.repartition(npartitions=5)
+    
     # Route intersections across operators
     across_operator_results = compile_across_operator_intersections(
         corridors, ITP_IDS)
