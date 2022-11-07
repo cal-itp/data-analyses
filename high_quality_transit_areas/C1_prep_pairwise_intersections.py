@@ -1,7 +1,7 @@
 """
-Prep components needed for clipping.
+Prep components needed for finding where bus corridors intersect.
 Find pairwise hqta_segment_ids / route_ids with dask_geopandas.sjoin
-to narrow down the rows to pass through clipping.
+because sjoin is less computationally expensive than geopandas.clip
 
 This takes <1 min to run. 
 
@@ -20,7 +20,7 @@ from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/C1_prep_for_intersections.log")
+logger.add("./logs/C1_prep_pairwise_intersections.log")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
@@ -170,10 +170,10 @@ if __name__=="__main__":
     logger.info(f"compute for pairwise/subset_corridors: {time2 - time1}")
     
     pairwise_intersections.to_parquet(
-        f"{GCS_FILE_PATH}intermediate/pairwise.parquet")
+        f"{GCS_FILE_PATH}pairwise.parquet")
     
     utils.geoparquet_gcs_export(subset_corridors,
-                        f'{GCS_FILE_PATH}intermediate/',
+                        GCS_FILE_PATH,
                         'subset_corridors'
                        )
     
