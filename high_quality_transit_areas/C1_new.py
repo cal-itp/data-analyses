@@ -3,7 +3,7 @@ Prep components needed for clipping.
 Find pairwise hqta_segment_ids / route_ids with dask_geopandas.sjoin
 to narrow down the rows to pass through clipping.
 
-This takes 21 min to run. 
+This takes <1 min to run. 
 
 From combine_and_visualize.ipynb
 """
@@ -64,7 +64,7 @@ def sjoin_against_other_operators(
     Compile all of them, because clipping is computationally expensive,
     so we want to do it on fewer rows. 
     """
-    route_cols = ["hqta_segment_id"]
+    route_cols = ["hqta_segment_id", "route_direction"]
     
     s1 = dg.sjoin(
         in_group_df[route_cols + ["geometry"]], 
@@ -73,13 +73,16 @@ def sjoin_against_other_operators(
         predicate = "intersects"
     ).drop(columns = ["index_right", "geometry"])
     
+    # In case there are some that still end up not being orthogonal
+    s2 = s1[s1.route_direction_left != s1.route_direction_right]
         
     route_pairs = (
-        s1.rename(
+        s2.rename(
             columns = {
                 "hqta_segment_id_left": "hqta_segment_id",
-                "hqta_segment_id_right": "intersect_hqta_segment_id"})
-          [route_cols + ["intersect_hqta_segment_id"]]
+                "hqta_segment_id_right": "intersect_hqta_segment_id",
+            })
+          [["hqta_segment_id", "intersect_hqta_segment_id"]]
           .drop_duplicates()
           .reset_index(drop=True)
     )    
@@ -88,7 +91,7 @@ def sjoin_against_other_operators(
 
 
 def compile_operator_intersections(
-    gdf: dg.GeoDataFrame, itp_id_list: list) -> dd.DataFrame:
+    gdf: dg.GeoDataFrame) -> dd.DataFrame:
     """
     Grab one operator's routes, and do sjoin against all other operators' routes.
     Look BETWEEN operators and WITHIN operators at the same time.
@@ -103,8 +106,9 @@ def compile_operator_intersections(
     https://stackoverflow.com/questions/56072129/scale-and-concatenate-pandas-dataframe-into-a-dask-dataframe
     """
     results = []
+    ITP_IDS = gdf.calitp_itp_id.unique()
 
-    for itp_id in sorted(itp_id_list):
+    for itp_id in sorted(ITP_IDS):
         
         # Part 1: take east-west routes for an operator, and compare against
         # all north-south routes for itself and other operators
@@ -141,19 +145,15 @@ if __name__=="__main__":
 
     corridors = prep_bus_corridors()   
     
-    ITP_IDS = list(corridors.calitp_itp_id.unique())
-
     # Repartition
     #corridors = corridors.repartition(npartitions=5)
     
     # Route intersections across operators
-    intersection_pairs = compile_across_operator_intersections(
-        corridors, ITP_IDS)
+    intersection_pairs = compile_operator_intersections(corridors)
 
     time1 = dt.datetime.now()
     logger.info(f"across operator intersections: {time1 - start}")
 
-    
     pairwise_intersections = intersection_pairs.compute()
     
     routes_p1 = pairwise_intersections.hqta_segment_id.unique().tolist()
@@ -175,8 +175,8 @@ if __name__=="__main__":
                     .reset_index(drop=True)
     )
 
-    time3 = dt.datetime.now()
-    logger.info(f"compute for pairwise/subset_corridors: {time3 - time2}")
+    time2 = dt.datetime.now()
+    logger.info(f"compute for pairwise/subset_corridors: {time2 - time1}")
     
     pairwise_intersections.to_parquet(
         f"{GCS_FILE_PATH}intermediate/pairwise.parquet")
