@@ -1,5 +1,12 @@
 """
 Draw bus corridors (routes -> segments) across all operators.
+
+Takes 8 min to run 
+- down from 1 hr in v2 
+- down from several hours v1
+
+TODO: speed up geography_utils.cut_segments to be faster.7
+7.5 min is spent on this step.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
@@ -7,13 +14,14 @@ import datetime as dt
 import geopandas as gpd
 import pandas as pd
 import sys
+import zlib
 
 from loguru import logger
 
 import operators_for_hqta
-from shared_utils import utils, geography_utils
+from shared_utils import utils, geography_utils, rt_utils
 from utilities import GCS_FILE_PATH
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS, 
+from update_vars import analysis_date, COMPILED_CACHED_VIEWS
                         
 HQTA_SEGMENT_LENGTH = 1_250 # meters
     
@@ -155,8 +163,9 @@ def symmetric_difference_overlay_by_route(
     return longest_shape_portions
 
 
-def select_shapes_and_segment(longest_shapes: dg.GeoDataFrame, 
-                             segment_length: int) -> gpd.GeoDataFrame: 
+def select_shapes_and_segment(
+    longest_shapes: dg.GeoDataFrame, 
+    segment_length: int) -> gpd.GeoDataFrame: 
     """
     For routes where only 1 shape_id was chosen for longest route_length,
     it's ready to cut into segments.
@@ -182,9 +191,9 @@ def select_shapes_and_segment(longest_shapes: dg.GeoDataFrame,
     
     two_directions_symmetric_overlay = gpd.GeoDataFrame()
 
-    for route in routes_with_both_directions:
+    for r in routes_both_dir:
         exploded = symmetric_difference_overlay_by_route(
-            two_directions, route, segment_length)
+            two_directions, r, segment_length)
     
         two_directions_symmetric_overlay = pd.concat(
             [two_directions_symmetric_overlay, exploded], axis=0)    
@@ -212,7 +221,7 @@ def select_shapes_and_segment(longest_shapes: dg.GeoDataFrame,
     # Attach other route info
     hqta_segments = pd.merge(
         segmented,
-        longest_shapes[route_cols].drop_duplicates(),
+        gdf[route_cols].drop_duplicates(subset="route_identifier"),
         on = "route_identifier",
         how = "inner",
         validate = "m:1"
@@ -297,19 +306,21 @@ def dissolved_to_longest_shape(hqta_segments: gpd.GeoDataFrame):
 if __name__=="__main__":   
     logger.info(f"Analysis date: {analysis_date}")
 
-    start_time = dt.datetime.now()
+    start = dt.datetime.now()
     
     #https://stackoverflow.com/questions/69884348/use-dask-to-chunkwise-work-with-smaller-pandas-df-breaks-memory-limits
         
     # (1) Merge routelines with trips, find the longest shape in 
     # each direction, and after symmetric difference, cut HQTA segments
-    # < 8min
     routelines = dg.read_parquet(
         f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet")
     trips = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
 
     # Keep longest shape in each direction
     longest_shapes = merge_routes_to_trips(routelines, trips)
+    
+    time1 = dt.datetime.now()
+    logger.info(f"merge routes to trips: {time1 - start}")
     
     # Cut into HQTA segments
     hqta_segments = select_shapes_and_segment(longest_shapes, HQTA_SEGMENT_LENGTH)
@@ -323,8 +334,8 @@ if __name__=="__main__":
                                 "hqta_segments"
                                )
     
-    time1 = dt.datetime.now()
-    print(f"cut segments: {time1 - start}")
+    time2 = dt.datetime.now()
+    logger.info(f"cut segments: {time2 - time1}")
     
     # In addition to segments, let's keep a version where line geom is at route-level
     # Dissolve across directions so that each route is 1 row, 1 line
@@ -335,8 +346,8 @@ if __name__=="__main__":
                                 "longest_shape_with_dir"
                                ) 
 
-    end_time = dt.datetime.now()
-    logger.info(f"dissolve: {end_time - time1}")
-    logger.info(f"total execution time: {end_time-start_time}")
+    end = dt.datetime.now()
+    logger.info(f"dissolve: {end - time2}")
+    logger.info(f"total execution time: {end - start}")
 
         
