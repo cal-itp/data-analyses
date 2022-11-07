@@ -22,8 +22,6 @@ logger.add(sys.stderr,
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
 
-
-
 def max_trips_by_group(df: dd.DataFrame, 
                        group_cols: list,
                        max_col: str = "n_trips"

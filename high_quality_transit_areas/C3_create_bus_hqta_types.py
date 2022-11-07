@@ -21,7 +21,7 @@ import sys
 from loguru import logger
 
 import C1_prep_pairwise_intersections as prep_clip
-from shared_utils import utils, geography_utils, gtfs_utils
+from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
