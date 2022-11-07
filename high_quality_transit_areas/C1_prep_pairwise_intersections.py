@@ -173,8 +173,8 @@ if __name__=="__main__":
         f"{GCS_FILE_PATH}pairwise.parquet")
     
     utils.geoparquet_gcs_export(subset_corridors,
-                        GCS_FILE_PATH,
-                        'subset_corridors'
+                                GCS_FILE_PATH,
+                                'subset_corridors'
                        )
     
     end = dt.datetime.now()
