@@ -163,6 +163,28 @@ def read_in_joined_data():
     
     return df
 
+'''
+Map geometry cleaning
+'''
+
+def check_point_in_state(df,
+                        state_col,
+                        state_col_value):
+    df[state_col] = df[state_col].fillna('None')
+    def validate_point(df):
+        if (df[state_col] == 'None'):
+            return 'Point Not In State'
+        
+        elif (df[state_col] == state_col_value):
+            return 'Point In State'
+        
+        return df
+    
+    df['point_check'] = df.apply(validate_point, axis = 1)
+    
+    return df
+
+
 
 '''
 Report Functions
