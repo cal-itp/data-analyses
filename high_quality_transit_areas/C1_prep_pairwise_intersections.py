@@ -3,9 +3,9 @@ Prep components needed for finding where bus corridors intersect.
 Find pairwise hqta_segment_ids / route_ids with dask_geopandas.sjoin
 because sjoin is less computationally expensive than geopandas.clip
 
-This takes <1 min to run. 
-
-From combine_and_visualize.ipynb
+Takes 1 min to run. 
+- down from 30 min in v2
+- down from several hours in v1 in combine_and_visualize.ipynb
 """
 import dask.dataframe as dd
 import dask_geopandas as dg

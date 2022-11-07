@@ -9,10 +9,12 @@ the highest trip count
 # Ex: how to split it up, then apply using map_partitions
 # https://stackoverflow.com/questions/61920105/dask-applying-a-function-over-a-large-dataframe-which-is-more-than-ram
 
-From combine_and_visualize.ipynb
+Takes 1 min to run without dask. Dask compute pushes it to 2 min.
+Remove query, use cached stops file.
+
+- <1 min in v2, but left the query in
+- v1 in combine_and_visualize.ipynb
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import pandas as pd
@@ -25,7 +27,7 @@ from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
-logger.add("./logs/C4_create_bus_hqta_types.log", retention="6 months")
+logger.add("./logs/C3_create_bus_hqta_types.log", retention="6 months")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
@@ -33,15 +35,15 @@ logger.add(sys.stderr,
 # Input files
 ALL_INTERSECTIONS = catalog_filepath("all_intersections")
 
-def buffer_around_intersections(buffer_size: int = 50) -> dg.GeoDataFrame: 
+def buffer_around_intersections(buffer_size: int = 50) -> gpd.GeoDataFrame: 
     """
     Draw 50 m buffers around intersections to better catch stops
     that might fall within it.
     """
-    gdf = dg.read_parquet(ALL_INTERSECTIONS)
+    gdf = gpd.read_parquet(ALL_INTERSECTIONS)
     
     gdf = gdf.assign(
-        geometry = gdf.geometry.buffer(50)
+        geometry = gdf.geometry.buffer(buffer_size)
     )
 
     return gdf 
@@ -63,7 +65,7 @@ def create_major_stop_bus(all_stops: gpd.GeoDataFrame,
     major_stops = all_stops[all_stops.calitp_itp_id.isin(included_operators)]
     
     major_bus_stops_in_intersections = (
-        dg.sjoin(
+        gpd.sjoin(
             major_stops,
             bus_intersections[["calitp_itp_id", "geometry"]],
             how = "inner",
@@ -96,11 +98,13 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
     They may also be stops that don't meet the HQ corridor threshold, but
     are stops that physically reside in the corridor.
     """
-    bus_corridors = prep_clip.prep_bus_corridors()
+    bus_corridors = (prep_clip.prep_bus_corridors()
+                     [["hqta_segment_id", "geometry"]].compute()
+                    )
     
     stop_cols = ["calitp_itp_id", "stop_id"]
     
-    stops_in_hq_corr = (dg.sjoin(
+    stops_in_hq_corr = (gpd.sjoin(
                             all_stops, 
                             bus_corridors[["geometry"]],
                             how = "inner", 
@@ -139,16 +143,13 @@ if __name__ == "__main__":
     stops_in_hq_corr = create_stops_along_corridors(all_stops)
     logger.info("create hq corridor bus")
     
-    # Export to GCS
-    major_stop_bus_df = major_stop_bus.compute()
-    stops_in_hq_corr_df = stops_in_hq_corr.compute()
-    
-    utils.geoparquet_gcs_export(major_stop_bus_df, 
+    # Export to GCS    
+    utils.geoparquet_gcs_export(major_stop_bus, 
                                 GCS_FILE_PATH,
                                 'major_stop_bus'
                                )
     
-    utils.geoparquet_gcs_export(stops_in_hq_corr_df,
+    utils.geoparquet_gcs_export(stops_in_hq_corr,
                                 GCS_FILE_PATH,
                                 'stops_in_hq_corr'
                                )

@@ -19,7 +19,7 @@ import pandas as pd
 import siuba
 import sys 
 
-from calitp.tables import tbl
+from calitp.tables import tbls
 from siuba import *
 from loguru import logger
 
@@ -217,7 +217,7 @@ if __name__=="__main__":
 
     start = dt.datetime.now()
     
-    ALL_IDS = (tbl.gtfs_schedule.agency()
+    ALL_IDS = (tbls.gtfs_schedule.agency()
                >> distinct(_.calitp_itp_id)
                >> filter(_.calitp_itp_id != 200, 
                          # Amtrak is always filtered out

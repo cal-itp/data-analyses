@@ -18,7 +18,7 @@ import sys
 from loguru import logger
 from siuba import *
 
-from calitp.tables import tbl
+from calitp.tables import tbls
 from shared_utils import rt_utils
 from update_vars import (analysis_date, CACHED_VIEWS_EXPORT_PATH, 
                         VALID_OPERATORS_FILE)
@@ -35,7 +35,7 @@ def get_list_of_cached_itp_ids(analysis_date: str, all_itp_ids: list = None) -> 
                 If list is not specified, then run a fresh query.    
     """
     if all_itp_ids is None:
-        all_itp_ids = (tbl.gtfs_schedule.agency()
+        all_itp_ids = (tbls.gtfs_schedule.agency()
                    >> distinct(_.calitp_itp_id)
                    >> filter(_.calitp_itp_id != 200, 
                              # Amtrak is always filtered out

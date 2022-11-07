@@ -6,12 +6,13 @@ find the area of intersection between
 an hqta_segment_id and its intersect_hqta_segment_id.
 
 Takes 2.5 min to run.
-
-From combine_and_visualize.ipynb
+- down from ranging from 1 hr 45 min - 2 hr 50 min in v2 
+- down from several hours in v1 in combine_and_visualize.ipynb
 """
 import datetime as dt
 import geopandas as gpd
 import glob
+import intake
 import os
 import pandas as pd
 import sys
@@ -27,9 +28,7 @@ logger.add(sys.stderr,
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
 
-# Input files
-PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
-SUBSET_CORRIDORS = catalog_filepath("subset_corridors")
+catalog = intake.open_catalog("*.yml")
 
 def attach_geometry_to_pairs(corridors: gpd.GeoDataFrame, 
                              intersecting_pairs: pd.DataFrame) -> gpd.GeoDataFrame:
@@ -116,8 +115,8 @@ if __name__ == "__main__":
 
     start = dt.datetime.now()
         
-    intersecting_pairs = pd.read_parquet(PAIRWISE_FILE)
-    corridors = gpd.read_parquet(SUBSET_CORRIDORS)
+    intersecting_pairs = catalog.pairwise_intersections.read()
+    corridors = catalog.subset_corridors.read()
     
     pairs_table = attach_geometry_to_pairs(corridors, intersecting_pairs)
     
