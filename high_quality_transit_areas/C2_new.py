@@ -1,18 +1,14 @@
 """
-Do clipping to find where bus corridors intersect.
+Find where bus corridors intersect.
 
-With hqta_segment_id clipping, but looping across route_id, 
-it takes 42 min to run.
-LA Metro takes 3.5 min to run.
+With hqta_segment_id clipping, and using iterrtuples to
+find the area of intersection between 
+an hqta_segment_id and its intersect_hqta_segment_id.
 
-With route_id clipping, takes 1 hr 52 min to run: 
-LA Metro takes 6 min to run, and ITP ID 4 takes 4 min to run.
-Big Blue Bus takes 10 min to run.
+Takes 2.5 min to run.
 
 From combine_and_visualize.ipynb
 """
-#import dask.dataframe as dd
-#import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import glob
@@ -22,8 +18,6 @@ import sys
 
 from loguru import logger
 
-#import C1_prep_for_clipping as prep_clip
-import C1_new as prep_clip
 from shared_utils import utils
 #from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
@@ -54,12 +48,13 @@ def attach_geometry_to_pairs(corridors: gpd.GeoDataFrame,
     rename_cols = {
         "hqta_segment_id": "intersect_hqta_segment_id", 
         "geometry": "intersect_geometry"
+        
     }
     
-    col_order = segment_cols + list(rename_cols.values())
+    col_order = ["calitp_itp_id"] + segment_cols + list(rename_cols.values())
     
     pairs_with_geom1 = pd.merge(
-        corridors[segment_cols],
+        corridors[["calitp_itp_id"] + segment_cols],
         intersecting_pairs, 
         on = "hqta_segment_id",
         how = "inner"
@@ -74,7 +69,7 @@ def attach_geometry_to_pairs(corridors: gpd.GeoDataFrame,
     )
 
     gdf = (pairs_with_geom2.reindex(columns = col_order)
-           .sort_values(["hqta_segment_id", "intersect_hqta_segment_id"])
+           .sort_values(["calitp_itp_id", "hqta_segment_id", "intersect_hqta_segment_id"])
            .reset_index(drop=True)
           )
     
@@ -114,6 +109,10 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                              0: "hqta_segment_id", 
                              1: "geometry"})
                         )
+    
+    intersect_results = intersect_results.assign(
+        calitp_itp_id = pairs_table.calitp_itp_id
+    )
                          
     return intersect_results    
 
@@ -137,9 +136,9 @@ if __name__ == "__main__":
     logger.info(f"find intersections: {time2 - time1}")
         
     utils.geoparquet_gcs_export(
-        results_gdf,
+        results,
         DASK_GCS,
-        "all_clipped"
+        "all_intersections"
     )
  
     end = dt.datetime.now()

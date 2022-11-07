@@ -14,30 +14,30 @@ sources:
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/ca_boundary.parquet
     ## INTERMEDIATE DATA
-    # Source: A2_combine.py
+    # Source: A2_combine_stops.py
     rail_brt_ferry_initial:
         driver: geoparquet
-        description: Rail / BRT / Ferry points created in A2_combine.py
+        description: Rail / BRT / Ferry points created in A2_combine_stops.py
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/rail_brt_ferry.parquet
-    # Source: B2_combine_operator_corridors.py
+    # Source: B2_sjoin_stops_to_segments.py
     all_bus:
         driver: geoparquet
         description: Combined corridors across all operators. Created in B2_combine_operators_corridors.py.
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/intermediate/all_bus.parquet  
-    # Source: C1_prep_for_clipping.py
+    # Source: C1_prep_pairwise_intersections.py
     pairwise_intersections:
         driver: parquet
         description: Use dask_geopandas.sjoin to find which hqta segments do intersect at some point. Created in C1_prep_for_clipping.py. 
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/intermediate/pairwise.parquet   
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/pairwise.parquet   
     # Source: C1_prep_for_clipping.py
     subset_corridors:
         driver: geoparquet
         description: Narrow down `all_bus` to hqta segments that are found in `pairwise_intersections`. Created in C1_prep_for_clipping.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/intermediate/subset_corridors.parquet 
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/subset_corridors.parquet 
     # Source: C2_clip_bus_intersections.py
     combined_clipped_intersections:
         driver: geoparquet

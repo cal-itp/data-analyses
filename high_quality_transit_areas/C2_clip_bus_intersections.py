@@ -1,18 +1,14 @@
 """
-Do clipping to find where bus corridors intersect.
+Find where bus corridors intersect.
 
-With hqta_segment_id clipping, but looping across route_id, 
-it takes 42 min to run.
-LA Metro takes 3.5 min to run.
+With hqta_segment_id clipping, and using iterrtuples to
+find the area of intersection between 
+an hqta_segment_id and its intersect_hqta_segment_id.
 
-With route_id clipping, takes 1 hr 52 min to run: 
-LA Metro takes 6 min to run, and ITP ID 4 takes 4 min to run.
-Big Blue Bus takes 10 min to run.
+Takes 2.5 min to run.
 
 From combine_and_visualize.ipynb
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import glob
@@ -22,147 +18,122 @@ import sys
 
 from loguru import logger
 
-import C1_prep_for_clipping as prep_clip
 from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/C2_clip_bus_intersections.log", retention="6 months")
+logger.add("./logs/C2_find_intersections.log")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
-
-segment_cols = ["calitp_itp_id", "hqta_segment_id"]
-
-intersect_segment_cols = ["intersect_calitp_itp_id", "intersect_hqta_segment_id"]
 
 # Input files
 PAIRWISE_FILE = catalog_filepath("pairwise_intersections")
 SUBSET_CORRIDORS = catalog_filepath("subset_corridors")
 
-
-def get_operator_intersections_as_clipping_mask(
-    corridors_df: dg.GeoDataFrame, intersecting_pairs: dd.DataFrame, 
-    itp_id: int) -> gpd.GeoDataFrame:
+def attach_geometry_to_pairs(corridors: gpd.GeoDataFrame, 
+                             intersecting_pairs: pd.DataFrame) -> gpd.GeoDataFrame:
     """
-    For an operator, look in the pairwise table and find the intersections.
-    Attach the line geom back on, which is needed for clipping.
-    
-    Return a gpd.GeoDataFrame 
-    The clipping mask can be gpd.GeoDataFrame, cannot be dg.GeoDataFrame
+    Take pairwise table and attach geometry to hqta_segment_id and 
+    intersect_hqta_segment_id.
     """
-    intersecting_pairs = (intersecting_pairs[
-        intersecting_pairs.calitp_itp_id == itp_id]
-        [intersect_segment_cols]
-        .drop_duplicates()
-        .reset_index(drop=True)
-    )
+    segment_cols = ["hqta_segment_id", "geometry"]
     
-    # Rename columns so it's not intersect_
-    operator_pairs = prep_clip.rename_cols(intersecting_pairs, with_intersect=False)
-    
-    # Merge back into dask gdf to get geom
-    # Can't use isin with dask
-    operator_pairs_with_geom = dd.merge(
-        corridors_df,
-        operator_pairs,
-        on = segment_cols,
-        how = "inner",
-    )
-    
-    # Run compute() because masking df has to be gdf
-    return operator_pairs_with_geom.compute()
-    
-    
-def clip_by_itp_id(corridors_df: dg.GeoDataFrame, 
-                   intersecting_pairs: dd.DataFrame, 
-                   itp_id: int) -> dg.GeoDataFrame:
-    """
-    Do the clipping for each operator.
-    Loop through by route_id (more aggregated than hqta_segments, but not as
-    aggregated as entire operator, which could be really slow to do the clipping).
-    """
-    start = dt.datetime.now()
-    
-    operator = corridors_df[corridors_df.calitp_itp_id == itp_id]
-    
-    corresponding_pairs = get_operator_intersections_as_clipping_mask(
-        corridors_df, intersecting_pairs, itp_id)
-    
-    # These are the possible segments that should be used as the masking df in the clip
-    # Do it at the operator-level
-    # Since 1 segment is selected in the loop, it doesn't matter if the masking df is large    
-    operator_segments = list(operator.route_id.unique())
-    
-    # Set the dask metadata
-    intersections = operator.head(0)
-    
-    for i in operator_segments:
-        clipped_segment = dg.clip(
-            operator[operator.route_id == i],
-            corresponding_pairs[corresponding_pairs.route_id != i], 
-            keep_geom_type = True
-        )
+    rename_cols = {
+        "hqta_segment_id": "intersect_hqta_segment_id", 
+        "geometry": "intersect_geometry"
         
-        intersections = dd.multi.concat([intersections, 
-                                         clipped_segment], axis=0)
-                            
-    end = dt.datetime.now()
-    logger.info(f"clipping for {itp_id}: {end-start}")
+    }
     
-    return intersections
-
-
-def delete_local_clipped_files():
-    temp_operator_files = [f for f in glob.glob("./data/intersections/clipped_*.parquet")]
+    col_order = ["calitp_itp_id"] + segment_cols + list(rename_cols.values())
     
-    for f in temp_operator_files:
-        os.remove(f)
-    
+    pairs_with_geom1 = pd.merge(
+        corridors[["calitp_itp_id"] + segment_cols],
+        intersecting_pairs, 
+        on = "hqta_segment_id",
+        how = "inner"
+    )
 
+    pairs_with_geom2 = pd.merge(
+        (corridors[segment_cols]
+         .rename(columns = rename_cols)),
+        pairs_with_geom1, 
+        on = "intersect_hqta_segment_id",
+        how = "inner"
+    )
+
+    gdf = (pairs_with_geom2.reindex(columns = col_order)
+           .sort_values(["calitp_itp_id", "hqta_segment_id", "intersect_hqta_segment_id"])
+           .reset_index(drop=True)
+          )
+    
+    return gdf
+   
+    
+def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    We have pairwise table already, and now there's geometry attached to 
+    both the hqta_segment_id and the intersect_hqta_segment_id.
+    
+    Use iterrtuples to loop through and store results.
+    Convert back to gdf at the end.
+    
+    https://stackoverflow.com/questions/33817190/intersection-of-two-linestrings-geopandas
+    https://stackoverflow.com/questions/43221208/iterate-over-pandas-dataframe-using-itertuples
+    """
+    results = []
+    segments = []
+
+    EPSG_CODE = pairs_table.crs.to_epsg()
+    
+    for row in pairs_table.itertuples():
+        this_segment = getattr(row, "hqta_segment_id")
+        this_segment_geom = getattr(row, 'geometry')
+        intersecting_segment_geom = getattr(row, 'intersect_geometry')
+
+        intersect_result = this_segment_geom.intersection(intersecting_segment_geom)
+
+        results.append(intersect_result)
+        segments.append(this_segment)
+        
+    intersect_results = (gpd.GeoDataFrame(
+        segments, geometry = results,
+        crs = f"EPSG: {EPSG_CODE}")
+                         .rename(columns = {
+                             0: "hqta_segment_id", 
+                             1: "geometry"})
+                        )
+    
+    intersect_results = intersect_results.assign(
+        calitp_itp_id = pairs_table.calitp_itp_id
+    )
+                         
+    return intersect_results    
+
+    
 if __name__ == "__main__":
     logger.info(f"Analysis date: {analysis_date}")
 
     start = dt.datetime.now()
         
-    intersecting_pairs = dd.read_parquet(PAIRWISE_FILE)
-    corridors = dg.read_parquet(SUBSET_CORRIDORS)
+    intersecting_pairs = pd.read_parquet(PAIRWISE_FILE)
+    corridors = gpd.read_parquet(SUBSET_CORRIDORS)
     
-    # Use the subsetted down list of ITP IDS
-    VALID_ITP_IDS = list(corridors.calitp_itp_id.unique())
+    pairs_table = attach_geometry_to_pairs(corridors, intersecting_pairs)
     
     time1 = dt.datetime.now()
-    logger.info(f"read in data, assemble valid ITP_IDS: {time1 - start}")
+    logger.info(f"attach geometry to pairwise table: {time1 - start}")
     
-    clipped = corridors.head(0)
-
-    for itp_id in sorted(VALID_ITP_IDS):
-        intersection = clip_by_itp_id(corridors, intersecting_pairs, itp_id)
-        
-        # If there are no clips, then skip the concatenation
-        if len(intersection.index) > 0:
-            intersection2 = intersection.compute()
-            intersection2.to_parquet(f"./data/intersections/clipped_{itp_id}.parquet")
-            
-            clipped = dd.multi.concat([clipped, intersection], axis=0)
-        else:
-            continue
-    
-    
-    clipped2 = (clipped.compute()
-                .sort_values(segment_cols, ascending=[True, True])
-                .reset_index(drop=True)
-               )
+    results = find_intersections(pairs_table)
     
     time2 = dt.datetime.now()
-    logger.info(f"compute for full clipped df: {time2 - time1}")
-    
-    utils.geoparquet_gcs_export(clipped2,
-                                GCS_FILE_PATH,
-                                'all_clipped')    
-    
-    # Delete the temporary clipped files for each operator
-    delete_local_clipped_files()
-    
+    logger.info(f"find intersections: {time2 - time1}")
+        
+    utils.geoparquet_gcs_export(
+        results,
+        GCS_FILE_PATH,
+        "all_intersections"
+    )
+ 
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
