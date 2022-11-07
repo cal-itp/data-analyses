@@ -17,21 +17,16 @@ import sys
 from loguru import logger
 
 from shared_utils import utils
-#from utilities import catalog_filepath, GCS_FILE_PATH
+from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/test_C1.log")
+logger.add("./logs/C1_prep_for_intersections.log")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
 
-DASK_GCS = "gs://calitp-analytics-data/data-analyses/dask_test/"
-
-GCS_FILE_PATH = DASK_GCS
-
 # Input files
-#ALL_BUS = catalog_filepath("all_bus")
-ALL_BUS = f"{DASK_GCS}all_bus.parquet"
+ALL_BUS = catalog_filepath("all_bus")
 
 def prep_bus_corridors() -> dg.GeoDataFrame:
     """
@@ -144,10 +139,7 @@ if __name__=="__main__":
     start = dt.datetime.now()
 
     corridors = prep_bus_corridors()   
-    
-    # Repartition
-    #corridors = corridors.repartition(npartitions=5)
-    
+        
     # Route intersections across operators
     intersection_pairs = compile_operator_intersections(corridors)
 
