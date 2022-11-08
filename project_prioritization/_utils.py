@@ -275,7 +275,7 @@ def value_counts_df(df, col_of_interest):
 
 # Strip snakecase when dataframe is finalized
 def clean_up_columns(df):
-    df.columns = df.columns.str.replace("_", " ").str.title().str.strip()
+    df.columns = df.columns.str.replace("_", " ").str.strip().str.title()
     return df
 
 """
@@ -434,7 +434,7 @@ def create_fake_score_card(df):
     
     # Second subset
     df3 = df[["total_project_cost__$1,000_",
-        "current_fake_fund_requested",
+        "total_unfunded_need__$1,000_",
          "project_name",
         "project_description"]]
     
@@ -444,7 +444,7 @@ def create_fake_score_card(df):
     id_vars=["project_name","project_description",],
     value_vars=[
         "total_project_cost__$1,000_",
-        "current_fake_fund_requested",
+        "total_unfunded_need__$1,000_",
     ])
     
     # Change names
@@ -473,7 +473,7 @@ def summarize_by_project_names(df, col_wanted: str):
         df.groupby([col_wanted])
         .agg({"project_name": "count", 
               "total_project_cost__$1,000_": "sum",
-              "current_fake_fund_requested":"sum"})
+              "total_unfunded_need__$1,000_":"sum"})
         .reset_index()
         .sort_values("project_name", ascending=False)
         .rename(columns={"project_name": "Total Projects"})
@@ -487,7 +487,7 @@ def summarize_by_project_names(df, col_wanted: str):
     )
 
     # Create a formatted monetary col
-    df["Fake Fund Formatted"] = df["current_fake_fund_requested"].apply(
+    df["Fake Fund Formatted"] = df["total_unfunded_need__$1,000_"].apply(
         lambda x: format_currency(x, currency="USD", locale="en_US")
     )
     # Clean up column names, remove snakecase
