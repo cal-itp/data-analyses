@@ -1,6 +1,9 @@
 """
 Attach stop times table to HQTA segments, 
 and flag which segments are HQ transit corridors.
+
+Takes 2.5 min to run.
+- down from 1 hr in v2 (was part of B1)
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
@@ -21,8 +24,6 @@ logger.add("./logs/B2_sjoin_stops_to_segments.log", retention="6 months")
 logger.add(sys.stderr, 
            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
            level="INFO")
-
-
 
 def max_trips_by_group(df: dd.DataFrame, 
                        group_cols: list,
