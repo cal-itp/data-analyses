@@ -13,7 +13,7 @@ import sys
 
 from loguru import logger
 
-import C1_prep_for_clipping as prep_clip
+import C1_prep_pairwise_intersections as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
 from shared_utils import utils, geography_utils
@@ -77,9 +77,9 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     corridors = get_dissolved_hq_corridor_bus(corridor_segments)
     
     # General buffer distance: 1/2mi ~= 805 meters
-    # Bus corridors are already buffered 50 meters, so will buffer 755 meters
+    # Bus corridors are already buffered 100 meters, so will buffer 705 meters
     stops = stops.assign(
-        geometry = stops.geometry.buffer(805)
+        geometry = stops.geometry.buffer(705)
     )
     
     corridor_cols = [
