@@ -161,6 +161,8 @@ def read_in_joined_data():
     new_columns = cols_to_order + (df.columns.drop(cols_to_order).tolist())
     df = df[new_columns]
     
+    df['a1_imp_agcy_city'] = df['a1_imp_agcy_city'].str.title()
+    
     return df
 
 '''
@@ -214,6 +216,8 @@ def reorder_namecol(df,
     df[new_name_col] = df[og_name_col].map(new_name_mapping)
 
     df[new_name_col] = df[new_name_col].fillna(df[og_name_col])
+    
+
     
     return df
 
