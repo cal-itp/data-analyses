@@ -31,7 +31,7 @@ logger.add(sys.stderr,
            level="INFO")
 
 catalog = intake.open_catalog("*.yml")
-EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}-v3/"
+EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 
 # Input files
 MAJOR_STOP_BUS_FILE = utilities.catalog_filepath("major_stop_bus")
