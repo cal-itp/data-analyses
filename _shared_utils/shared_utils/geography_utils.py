@@ -319,7 +319,11 @@ def create_point_geometry(
     return gdf
 
 
-def create_segments(geometry: gpd.GeoSeries, segment_distance: int) -> gpd.GeoSeries:
+def create_segments(
+    geometry: shapely.geometry.linestring.LineString
+    | shapely.geometry.multilinestring.MultiLineString,
+    segment_distance: int,
+) -> gpd.GeoSeries:
     """
     Splits a Shapely LineString into smaller LineStrings.
     If a MultiLineString passed, splits each LineString in that collection.
@@ -329,7 +333,6 @@ def create_segments(geometry: gpd.GeoSeries, segment_distance: int) -> gpd.GeoSe
     Double check: segment_distance must be given in the same units as the CRS!
     """
     lines = []
-    geometry = geometry.iloc[0]
 
     if hasattr(geometry, "geoms"):  # check if MultiLineString
         linestrings = geometry.geoms
@@ -366,25 +369,25 @@ def cut_segments(
 
     segmented = gpd.GeoDataFrame()
 
-    # create_segments() must take a row.geometry (gpd.GeoDataFrame)
-    gdf = gdf.reset_index(drop=True)
+    gdf = gdf[group_cols + ["geometry"]].drop_duplicates().reset_index(drop=True)
 
-    for index in gdf.index:
-        one_row = gdf[gdf.index == index]
-        segment = create_segments(one_row.geometry, int(segment_distance))
+    for row in gdf.itertuples():
+        row_geom = getattr(row, "geometry")
+        segment = create_segments(row_geom, int(segment_distance))
 
         to_append = pd.DataFrame()
         to_append["geometry"] = segment
         for c in group_cols:
-            to_append[c] = one_row[c].iloc[0]
+            to_append[c] = getattr(row, c)
 
         segmented = pd.concat([segmented, to_append], axis=0, ignore_index=True)
 
         segmented = segmented.assign(
-            temp_index=(segmented.sort_values(group_cols).reset_index(drop=True).index)
+            temp_index=segmented.sort_values(group_cols).reset_index(drop=True).index
         )
 
-    # TODO: Investigate when a NaN would occur
+    # Why would there be NaNs?
+    # could this be coming from group_cols...one of the cols has a NaN in some rows?
     segmented = segmented[segmented.temp_index.notna()]
 
     segmented = (
