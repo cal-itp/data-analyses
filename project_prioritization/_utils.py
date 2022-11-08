@@ -22,8 +22,8 @@ Chart Functions
 """
 # Preset to make chart 25% smaller than shared_utils
 # Since the webpage is kind of small
-chart_width = 300
-chart_height = 188
+chart_width = 400
+chart_height = 250
 
 def preset_chart_config(chart: alt.Chart) -> alt.Chart:
     
@@ -286,7 +286,7 @@ and a maximum height & width.
 def styled_df(df):
     display(
     HTML(
-        "<div style='height: 300px; overflow: auto; width: 800px'>"
+        "<div style='height: 300px; overflow: auto; width: 1000px'>"
         + (
             (df)
             .style.set_properties(**{"background-color": "white", "font-size": "10pt",})
