@@ -52,11 +52,10 @@ In terminal: `make grab_corridors_and_clip`
 1. [Combine operator HQTA areas across operators](./B2_sjoin_stops_to_segments.py)
     * Attach number of stop arrivals that occur in the AM and PM and find the max
     * Do spatial join of stops to HQTA segments. Where multiple stops are present, keep the stop with the highest number of trips.
-1. [Prep for clipping](./C1_prep_for_clipping.py) 
+1. [Use pairwise table to store which segments intersect](./C1_prep_pairwise_intersections.py) 
     * Find which routes actually do intersect, and store that in a pairwise table.
-    * Only these valid routes go on to do the clipping
-1. [Find where corridors intersect by clipping](./C2_clip_bus_intersections.py)
-1. [Create datasets for each of the hqta types](./C4_create_bus_hqta_types.py)
+1. [Find where corridors intersect](./C2_get_intersections.py)
+1. [Create datasets for each of the hqta types](./C3_create_bus_hqta_types.py)
     * `major_stop_bus`: the bus stop within the above intersection does not necessarily have
 the highest trip count
     * `hq_corridor_bus`: stops along the HQ transit corr (may not be highest trip count)
