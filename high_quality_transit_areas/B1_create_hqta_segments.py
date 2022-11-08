@@ -315,7 +315,7 @@ if __name__=="__main__":
     routelines = dg.read_parquet(
         f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet")
     trips = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
-
+    
     # Keep longest shape in each direction
     longest_shapes = merge_routes_to_trips(routelines, trips)
     
@@ -340,12 +340,12 @@ if __name__=="__main__":
     # In addition to segments, let's keep a version where line geom is at route-level
     # Dissolve across directions so that each route is 1 row, 1 line
     longest_shape = dissolved_to_longest_shape(hqta_segments_with_dir)
-
+    
     utils.geoparquet_gcs_export(longest_shape,
                                 GCS_FILE_PATH,
                                 "longest_shape_with_dir"
                                ) 
-
+    
     end = dt.datetime.now()
     logger.info(f"dissolve: {end - time2}")
     logger.info(f"total execution time: {end - start}")
