@@ -81,7 +81,7 @@ Metro example:
 * January 2022 has 20 weekdays and 11 weekend + holidays. 
     * 10 weekend days
     * 1 observed holiday that fall on weekday. New Year's falls on Sat, would get observed on Fri in Dec, but MLK always falls on Mon.
-    * TODO for Tiffany: supply a [holidays parquet table](./holidays.parquet) for years 2015-2050 (that should cover us!)....and get the observed holidays converted. The table currently contains all of CA's holidays. But, I will convert the Sat holidays (observed on Fri) and Sun holidays (observed on Mon) to be associated with the correct date.
+    * Use [holidays parquet table](./holidays.parquet) for years 2015-2050
 * `day_of_week`: weekday, weekend (in reality: weekend_holiday) 
 * `time_of_day`: based off of when the trip start time falls in, same as in [rt_utils](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py#L567-L583)
     * Add 3 new aggregated categories
