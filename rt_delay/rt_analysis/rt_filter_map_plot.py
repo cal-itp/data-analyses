@@ -15,7 +15,6 @@ import datetime as dt
 from tqdm import tqdm
 
 import numpy as np
-from calitp.tables import tbl
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -111,17 +110,17 @@ class RtFilterMapper:
             self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
                                          self.stop_delay_view.actual_time.min()).seconds / 60**2
         
-        if self.filter['route_names'] and len(self.filter['route_names']) < 5:
+        if self.filter['route_names'] and len(self.filter['route_names']) <= 5:
             rts = 'Route(s) ' + ', '.join(self.filter['route_names'])
         elif self.filter['route_names'] and len(self.filter['route_names']) > 5:
             rts = 'Multiple Routes'
         elif not self.filter['route_names']:
             rts = 'All Routes'
                 
-        if self.filter['route_types'] and len(self.filter['route_types']) < 3:
+        if self.filter['route_types'] and len(self.filter['route_types']) <= 3:
             typename = [route_type_names[rttyp] for rttyp in self.filter['route_types']]
             typename_print = ' & '.join(typename)
-        elif self.filter['route_types'] and len(self.filter['route_types']) < 3:
+        elif self.filter['route_types'] and len(self.filter['route_types']) > 3:
             typename_print = 'Multiple Route Types'
         elif not self.filter['route_types']:
             typename_print = 'All Route Types'
@@ -142,6 +141,9 @@ class RtFilterMapper:
         self._time_only_filter = not route_types and not route_names and not shape_ids and not direction_id and not direction and not trip_ids
             
     def reset_filter(self):
+        '''
+        Clear filter.
+        '''
         self.filter = None
         self._time_only_filter = True
         self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
@@ -154,7 +156,7 @@ class RtFilterMapper:
     def _filter(self, df):
         '''Filters a df (containing trip_id) on trip_id based on any set filter.
         '''
-        if self.filter == None:
+        if not self.filter:
             return df
         else:
             trips = self.rt_trips.copy()
@@ -199,6 +201,7 @@ class RtFilterMapper:
         # stop_comparison = stop_comparison >> mutate(corr_shape = _.in_corr > _.n_stops / 10)
         # corr_shapes = stop_comparison >> filter(_.corr_shape)
         corr_shapes = stop_comparison # actually keep all
+
         self._shape_sequence_filter = {}
         for shape_id in corr_shapes.shape_id.unique():
             self._shape_sequence_filter[shape_id] = {}
@@ -216,7 +219,7 @@ class RtFilterMapper:
              )
         self.stop_delay_view['corridor'] = self.stop_delay_view.apply(fn, axis=1)
         corridor_filtered = self.stop_delay_view >> filter(_.corridor)
-        assert not corridor_filtered.empty
+        assert not corridor_filtered.empty, 'no stops in corridor!'
         first_stops = corridor_filtered >> group_by(_.trip_id) >> summarize(stop_sequence = _.stop_sequence.min())
         entry_delays = (first_stops
                 >> inner_join(_, corridor_filtered, on = ['trip_id', 'stop_sequence'])
@@ -242,7 +245,7 @@ class RtFilterMapper:
         assert segments in ['stops', 'detailed']
         assert how in ['average', 'low_speeds']
         
-        gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.strftime("%m_%d")}_{self.filter_period}'
+        gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.isoformat()}_{self.filter_period}'
         subfolder = 'segment_speed_views/'
         cached_periods = ['PM_Peak', 'AM_Peak', 'Midday', 'All_Day']
         if (check_cached (f'{gcs_filename}.parquet', subfolder) and self.filter_period in cached_periods
@@ -282,7 +285,7 @@ class RtFilterMapper:
                                     x.shape_meters),
                                                     axis = 1)
                     stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
-
+                    self.debug_dict[f'{shape_id}_st_spd1'] = stop_speeds
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> group_by(_.stop_sequence)
@@ -329,18 +332,21 @@ class RtFilterMapper:
         gdf = self.stop_segment_speed_view.copy()
         # essential here for reasonable map size!
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
-        gdf['shape_miles'] = gdf.shape_meters / 1609
+        gdf['miles_from_last'] = gdf.meters_from_last / 1609
         # Further reduce map size
         gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
                             -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
                            -_.delay_chg_sec, -_.service_date, -_.last_loc, -_.shape_meters,
                            -_.meters_from_last, -_.n_trips)
         orig_rows = gdf.shape[0]
-        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'shape_miles': 1,
-                        'trips_per_hour': 1}) ##round for display
+        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'miles_from_last': 1,
+                        'trips_per_hour': 1, 'avg_sec': 0, '_20p_sec': 0,}) ##round for display
         
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
+        
+        gdf['time_formatted'] = (gdf.miles_from_last / gdf[how_speed_col[how]]) * 60**2 #seconds
+        gdf['time_formatted'] = gdf['time_formatted'].apply(lambda x: f'{int(x)//60}' + f':{int(x)%60:02}')
 
         gdf = gdf >> arrange(_.trips_per_hour)
         gdf = gdf.set_crs(CA_NAD83Albers)
@@ -360,17 +366,11 @@ class RtFilterMapper:
 
         popup_dict = {
             how_speed_col[how]: "Speed (miles per hour)",
+            "time_formatted": "Travel time",
+            "miles_from_last": "Segment distance (miles)",
             "route_short_name": "Route",
-            # "shape_id": "Shape ID",
-            # "direction_id": "Direction ID",
-            # "stop_id": "Next Stop ID",
-            # "stop_sequence": "Next Stop Sequence",
-            "trips_per_hour": "Frequency (trips per hour)" ,
-            "shape_miles": "Distance from start of route (miles)"
+            "trips_per_hour": "Frequency (trips per hour)"
         }
-        # if singletrip:
-        #     popup_dict["delay_seconds"] = "Current Delay (seconds)"
-        #     popup_dict["delay_chg_sec"] = "Change in Delay (seconds)"
         if no_title:
             title = ''
         else:
@@ -543,14 +543,17 @@ class RtFilterMapper:
         Generate schedule based and speed based metrics for SCCP/LPP programs.
         '''
         assert hasattr(self, 'corridor'), 'must add corridor before generating corridor metrics'
-        schedule_metric = (self.corridor_stop_delays
+        assert not self._filter(self.corridor_stop_delays).empty, 'filter does not include any corridor trips'
+        if self.filter:
+            print('warning: filter set -- for SCCP/LPP reset filter first')
+        schedule_metric = (self._filter(self.corridor_stop_delays)
              >> group_by(_.trip_id)
              >> summarize(median_corridor_delay_seconds = _.corridor_delay_seconds.median())
              >> summarize(sum_of_medians_minutes = _.median_corridor_delay_seconds.sum() / 60)
             ).sum_of_medians_minutes.iloc[0]
         
         self.stop_delay_view = self.stop_delay_view >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
-        corridor_trip_speeds = (self.stop_delay_view
+        corridor_trip_speeds = (self._filter(self.stop_delay_view)
              >> filter(_.corridor)
              >> group_by(_.trip_id)
              >> mutate(entry_time = _.actual_time.min())
@@ -569,7 +572,6 @@ class RtFilterMapper:
               >> mutate(target_seconds = _.meters_from_entry / target_speed_mps)
               >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
              )
-        self.corridor_speed_delays = df
         speed_metric = df.target_delay_seconds.sum() / 60
         return {'schedule_metric_minutes': schedule_metric,
                'speed_metric_minutes': speed_metric}
