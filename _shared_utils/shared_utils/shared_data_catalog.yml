@@ -14,10 +14,16 @@ sources:
       urlpath: gs://calitp-analytics-data/data-analyses/ca_county_centroids.parquet
   ca_transit_routes:
     driver: geoparquet
-    description: CA transit routes with line geometry (open data)
+    description: CA transit routes with line geometry at the operator-level (open data)
     args:
       # source: traffic_ops/make_routes_stops_shapefiles.py.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet
+  ca_transit_routes_feed:
+    driver: geoparquet
+    description: CA transit routes with line geometry at the feed-level (not on open data)
+    args:
+      # source: traffic_ops/make_routes_stops_shapefiles.py.py
+      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes_feed.parquet
   ca_transit_stops:
     driver: geoparquet
     description: CA transit stops with point geometry (open data)
