@@ -245,7 +245,7 @@ class RtFilterMapper:
         assert segments in ['stops', 'detailed']
         assert how in ['average', 'low_speeds']
         
-        gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.strftime("%m_%d")}_{self.filter_period}'
+        gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.isoformat()}_{self.filter_period}'
         subfolder = 'segment_speed_views/'
         cached_periods = ['PM_Peak', 'AM_Peak', 'Midday', 'All_Day']
         if (check_cached (f'{gcs_filename}.parquet', subfolder) and self.filter_period in cached_periods
