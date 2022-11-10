@@ -206,6 +206,7 @@ def get_sorted_highway_corridors(
     """
     Some districts don't meet the criteria. 
     Simply return a sorted df.
+    Hwy egments are 5 mile long segments.
     """
     gdf = gpd.read_parquet(
         f"{GCS_FILE_PATH}highway_segment_stats.parquet")
@@ -216,6 +217,10 @@ def get_sorted_highway_corridors(
                           "mean_speed_mph_trip_weighted", 
                           "trips_all_day_per_mi"],
                          ascending = [True, True, False])
+            # There's a Float64, which displays as NA, but this will cause error
+            # when exporting as geojson
+            # https://stackoverflow.com/questions/69201668/pandas-float64-vs-float64-dtypes-note-capitalization-causing-non-numeric-error
+            .astype({"mean_speed_mph_trip_weighted": "float"})
             .reset_index(drop=True)
            )
 
