@@ -141,10 +141,13 @@ sources:
     description: At highway 10 mile segment level, show which corridors have no transit within 2 miles of SHN (processed data for report) and uses different corridor length than highway_segment_stats.
     args:
       # source: bus_service_increase/E5_highway_processed_data_for_reports.py
+      # this uses 1.5x travel time cutoff. 
+      # this is used in unparam notebook portfolio, but not district portfolio
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highway_segments_no_transit_{{analysis_date}}.parquet
   highway_uncompetitive_transit:
     driver: geoparquet
     description: At highway 10 mile segment level, show which corridors have no transit within 2 miles of SHN (processed data for report) and uses different corridor length than highway_segment_stats.
     args:
       # source: bus_service_increase/E5_highway_processed_data_for_reports.py
+      # this uses 2x travel time cutoff. use this to back district portfolio
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/highway_segments_by_competitive_category_{{analysis_date}}.parquet
