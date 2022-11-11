@@ -8,8 +8,11 @@ From there was can use the functions for the report
 import intake
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 from calitp import to_snakecase
 from dla_utils import _dla_utils
+from shared_utils import geography_utils
+
 from IPython.display import HTML, Markdown
 from siuba import *
 
@@ -17,7 +20,6 @@ import altair as alt
 
 import _data_cleaning
 
-#import data_cleaning
 
 
 '''
@@ -87,6 +89,7 @@ def read_SUR_funding_data():
     
     return df
 
+
 ## put together funding data and application data
 def join_funding_and_app_data(df_funding,
                               df_app,
@@ -119,7 +122,7 @@ def join_funding_and_app_data(df_funding,
 
 ## read in the joined data so we only have to use one function
 def read_in_joined_data():
-    app_data = _data_cleaning.read_clean_data()
+    app_data = pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/atp/cleaned_cycle5&6.xlsx',  index_col=[0])
     funded_data = read_SUR_funding_data()
     
     df = join_funding_and_app_data(funded_data,
@@ -128,6 +131,23 @@ def read_in_joined_data():
                                    sort_values_cols = ['project_app_id','a2_proj_scope_summary', 'project_cycle', 'awarded'],
                                    subset_cols = ['project_app_id','a2_proj_scope_summary','project_cycle'])
     
+    ## read in county names to change acronym names
+    ## using place names
+    county_place_names = (to_snakecase(pd.read_excel('gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/2020-place-names-locode.xlsx', sheet_name=1)))
+    
+    county_place_names = county_place_names>>select(_.county_name, _.co__name_abbr_)
+    county_place_names['co__name_abbr_'] = county_place_names['co__name_abbr_'].str.upper()
+    ## create dictionary to map full county names
+    county_map = dict(county_place_names[['co__name_abbr_', 'county_name']].values)
+    
+    #map and fillna values with full county names from original column
+    df['a2_county_2'] = df.a2_county.map(county_map)
+    df['a2_county_2'] = df['a2_county_2'].fillna(df['a2_county'])
+    
+    # drop original column and rename county column
+    columns_to_drop = ['a2_county']
+    df = df.drop(columns = columns_to_drop)
+    df = df.rename(columns= {'a2_county_2':'a2_county'})
     
     ## Reorder cols to get app id in the front of the data frame
     ## https://stackoverflow.com/questions/41968732/set-order-of-columns-in-pandas-dataframe
@@ -144,12 +164,169 @@ def read_in_joined_data():
     new_columns = cols_to_order + (df.columns.drop(cols_to_order).tolist())
     df = df[new_columns]
     
+    df['a1_imp_agcy_city'] = df['a1_imp_agcy_city'].str.title()
+    
     return df
+
+'''
+Map geometry cleaning
+'''
+
+def check_point_in_state(df,
+                        state_col,
+                        state_col_value):
+    df[state_col] = df[state_col].fillna('None')
+    def validate_point(df):
+        if (df[state_col] == 'None'):
+            return 'Point Not In State'
+        
+        elif (df[state_col] == state_col_value):
+            return 'Point In State'
+        
+        return df
+    
+    df['point_check'] = df.apply(validate_point, axis = 1)
+    
+    return df
+
+## determine if the point is within CA State boundary
+def join_state_with_points(gdf):
+    
+    if 'index_right' in gdf.columns:
+        gdf = gdf.drop(columns=['index_right','State','point_check'])
+
+    #read in state polygon
+    ca_bounds = gpd.read_parquet('gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/ca_boundary.parquet')
+    
+    #join together with geodf
+    joined = (gdf.sjoin(ca_bounds, how='left'))
+    
+    joined_check = check_point_in_state(joined,
+                        'State',
+                        'CA')
+    
+    return joined_check
+
+
+
+##use city place names to get correct point geometries for implementing agencies
+
+def get_latlong_from_placenames(df, city_col):
+    #read in place names data
+    places = "https://data.ca.gov/dataset/e212e397-1277-4df3-8c22-40721b095f33/resource/436fc714-831c-4070-b44b-b06dcde6bf18/download/ca-places-boundaries.zip"
+    places_ca = gpd.read_file(places)
+    
+    #get centroid and subset columns
+    places_ca['geometry2'] = places_ca['geometry'].centroid
+    places_ca= places_ca>>select(_.NAME, _.NAMELSAD, _.INTPTLAT, _.INTPTLON)
+    
+    df = df.drop(columns=['index_right','State','point_check', 'geometry','a2_proj_lat','a2_proj_long']) 
+    
+    df_fixed = (pd.merge(df, places_ca,
+           how = 'left',
+           left_on= [city_col],
+           right_on='NAME'))
+    
+    
+    df_fixed = (geography_utils.create_point_geometry(df_fixed,
+                                                    longitude_col = 'INTPTLON',
+                                                    latitude_col = 'INTPTLAT'))
+    df_fixed = df_fixed.rename(columns={'INTPTLAT':'a2_proj_lat',
+                                       'INTPTLON':'a2_proj_long'})
+    
+    df_fixed = df_fixed.drop(columns=['NAME','NAMELSAD']) 
+
+    
+    return df_fixed
+
+## fix all geo data points in one function. returns geodataframe with points in CA Bounds
+def fix_geom_issues(df, subset_col_list):
+    
+    ## susbet dataframe based on a list of columns
+    df_map = df[df.columns.intersection(subset_col_list)]
+    ## create geometry points from lat long col
+    df_map = (geography_utils.create_point_geometry(df_map, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
+    
+    ##use join_state_with_points to determine which points are in state or not 
+    ##will add the fixed geometries back to this in after
+    joined = ((join_state_with_points(df_map))>>filter(_.point_check=='Point In State'))
+    ## subset the rows that have incorrect lat longs 
+    need_help = ((join_state_with_points(df_map))>>filter(_.point_check=='Point Not In State'))
+    
+    ## get those that have a negative long
+    need_help_pt1 = need_help>>filter(_.a2_proj_long<0)
+    ## get those with a positive long (to change into a negative long)
+    need_help_pt2 = need_help>>filter(_.a2_proj_long>0)
+    
+    ## get those with abnormal lats 
+    need_help_pt3 = need_help_pt2[(need_help_pt2['a2_proj_lat'] > 300) | (need_help_pt2['a2_proj_long'] < 50)]
+    ## get those with normal lats and positive longs
+    need_help_pt2 = need_help_pt2[(need_help_pt2['a2_proj_lat'] < 300) & (need_help_pt2['a2_proj_long'] > 50)]
+    
+    ## concat need_help1 and need-help3 to have a some that we can use the implementing agency's city. 
+    need_help_pt1 = (pd.concat([need_help_pt1, need_help_pt3])).drop_duplicates()
+    
+    ## multiply longs by -1 to get correct long 
+    need_help_pt2['a2_proj_long'] = need_help_pt2['a2_proj_long'] * (-1)
+    ## redo geom points for fixed longs
+    need_help_pt2 = (geography_utils.create_point_geometry(need_help_pt2, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
+    
+    ## recheck if points are fixed to be in state
+    need_help_pt2 = (join_state_with_points(need_help_pt2))
+    
+    ## add in those with points not in state to the other entries
+    need_help_pt1 = pd.concat([need_help_pt1, (need_help_pt2>>filter(_.point_check=='Point Not In State'))])
+    
+    ## get those just with in state points as finished.
+    need_help_pt2_done = need_help_pt2>>filter(_.point_check=='Point In State')
+    
+    ## use place names
+    need_help_pt1 = get_latlong_from_placenames(need_help_pt1, 'a1_imp_agcy_city')
+    ## make sure points are in state again
+    need_help_pt1_done = (join_state_with_points(need_help_pt1))
+    
+    ##concat together
+    fixed = pd.concat([need_help_pt1_done, need_help_pt2_done])
+    
+    ## assert there are no "Point Not In State" Values in columns
+    assert (len(fixed>>filter(_.point_check=='Point Not In State')))==0
+    
+    final_df = pd.concat([joined, fixed])
+
+    return final_df
+
 
 
 '''
 Report Functions
 '''
 
+def reorder_namecol(df,
+                    og_name_col,
+                    new_name_col, 
+                    split_on,
+                   order_on):
+    
+    df_copy = df>>filter(_[og_name_col].str.contains(split_on))>>select(_[og_name_col])
+    df_copy[['name_pt1', 'name_pt2']] = df_copy[og_name_col].str.split(split_on, 1, expand=True)
+    
+    def order_new_name(df):
+        if order_on == "pt1_pt2":
+            return (df['name_pt1'] + ' ' + df['name_pt2'])
+        elif order_on == "pt2_pt1":
+            return (df['name_pt2'] + ' ' + df['name_pt1'])
+        else:
+            return (df['name_pt1'] + ' ' + df['name_pt2'])
+        
+    df_copy[new_name_col] = df_copy.apply(order_new_name, axis = 1)
+    
+    new_name_mapping = (dict(df_copy[[og_name_col, new_name_col]].values))
+    
+    df[new_name_col] = df[og_name_col].map(new_name_mapping)
 
+    df[new_name_col] = df[new_name_col].fillna(df[og_name_col])
+    
+
+    
+    return df
 
