@@ -8,8 +8,11 @@ From there was can use the functions for the report
 import intake
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 from calitp import to_snakecase
 from dla_utils import _dla_utils
+from shared_utils import geography_utils
+
 from IPython.display import HTML, Markdown
 from siuba import *
 
@@ -185,6 +188,56 @@ def check_point_in_state(df,
     df['point_check'] = df.apply(validate_point, axis = 1)
     
     return df
+
+## determine if the point is within CA State boundary
+def join_state_with_points(gdf):
+    
+    if 'index_right' in gdf.columns:
+        gdf = gdf.drop(columns=['index_right','State','point_check'])
+
+    #read in state polygon
+    ca_bounds = gpd.read_parquet('gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/ca_boundary.parquet')
+    
+    #join together with geodf
+    joined = (gdf.sjoin(ca_bounds, how='left'))
+    
+    joined_check = check_point_in_state(joined,
+                        'State',
+                        'CA')
+    
+    return joined_check
+
+
+
+##use city place names to get correct point geometries for implementing agencies
+
+def get_latlong_from_placenames(df, city_col):
+    #read in place names data
+    places = "https://data.ca.gov/dataset/e212e397-1277-4df3-8c22-40721b095f33/resource/436fc714-831c-4070-b44b-b06dcde6bf18/download/ca-places-boundaries.zip"
+    places_ca = gpd.read_file(places)
+    
+    #get centroid and subset columns
+    places_ca['geometry2'] = places_ca['geometry'].centroid
+    places_ca= places_ca>>select(_.NAME, _.NAMELSAD, _.INTPTLAT, _.INTPTLON)
+    
+    df = df.drop(columns=['index_right','State','point_check', 'geometry','a2_proj_lat','a2_proj_long']) 
+    
+    df_fixed = (pd.merge(df, places_ca,
+           how = 'left',
+           left_on= [city_col],
+           right_on='NAME'))
+    
+    
+    df_fixed = (geography_utils.create_point_geometry(df_fixed,
+                                                    longitude_col = 'INTPTLON',
+                                                    latitude_col = 'INTPTLAT'))
+    df_fixed = df_fixed.rename(columns={'INTPTLAT':'a2_proj_lat',
+                                       'INTPTLON':'a2_proj_long'})
+    
+    df_fixed = df_fixed.drop(columns=['NAME','NAMELSAD']) 
+
+    
+    return df_fixed
 
 
 
