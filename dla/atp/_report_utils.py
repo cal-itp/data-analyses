@@ -239,6 +239,62 @@ def get_latlong_from_placenames(df, city_col):
     
     return df_fixed
 
+## fix all geo data points in one function. returns geodataframe with points in CA Bounds
+def fix_geom_issues(df, subset_col_list):
+    
+    ## susbet dataframe based on a list of columns
+    df_map = df[df.columns.intersection(subset_col_list)]
+    ## create geometry points from lat long col
+    df_map = (geography_utils.create_point_geometry(df_map, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
+    
+    ##use join_state_with_points to determine which points are in state or not 
+    ##will add the fixed geometries back to this in after
+    joined = ((join_state_with_points(df_map))>>filter(_.point_check=='Point In State'))
+    ## subset the rows that have incorrect lat longs 
+    need_help = ((join_state_with_points(df_map))>>filter(_.point_check=='Point Not In State'))
+    
+    ## get those that have a negative long
+    need_help_pt1 = need_help>>filter(_.a2_proj_long<0)
+    ## get those with a positive long (to change into a negative long)
+    need_help_pt2 = need_help>>filter(_.a2_proj_long>0)
+    
+    ## get those with abnormal lats 
+    need_help_pt3 = need_help_pt2[(need_help_pt2['a2_proj_lat'] > 300) | (need_help_pt2['a2_proj_long'] < 50)]
+    ## get those with normal lats and positive longs
+    need_help_pt2 = need_help_pt2[(need_help_pt2['a2_proj_lat'] < 300) & (need_help_pt2['a2_proj_long'] > 50)]
+    
+    ## concat need_help1 and need-help3 to have a some that we can use the implementing agency's city. 
+    need_help_pt1 = (pd.concat([need_help_pt1, need_help_pt3])).drop_duplicates()
+    
+    ## multiply longs by -1 to get correct long 
+    need_help_pt2['a2_proj_long'] = need_help_pt2['a2_proj_long'] * (-1)
+    ## redo geom points for fixed longs
+    need_help_pt2 = (geography_utils.create_point_geometry(need_help_pt2, longitude_col = 'a2_proj_long', latitude_col = 'a2_proj_lat'))
+    
+    ## recheck if points are fixed to be in state
+    need_help_pt2 = (join_state_with_points(need_help_pt2))
+    
+    ## add in those with points not in state to the other entries
+    need_help_pt1 = pd.concat([need_help_pt1, (need_help_pt2>>filter(_.point_check=='Point Not In State'))])
+    
+    ## get those just with in state points as finished.
+    need_help_pt2_done = need_help_pt2>>filter(_.point_check=='Point In State')
+    
+    ## use place names
+    need_help_pt1 = get_latlong_from_placenames(need_help_pt1, 'a1_imp_agcy_city')
+    ## make sure points are in state again
+    need_help_pt1_done = (join_state_with_points(need_help_pt1))
+    
+    ##concat together
+    fixed = pd.concat([need_help_pt1_done, need_help_pt2_done])
+    
+    ## assert there are no "Point Not In State" Values in columns
+    assert (len(fixed>>filter(_.point_check=='Point Not In State')))==0
+    
+    final_df = pd.concat([joined, fixed])
+
+    return final_df
+
 
 
 '''
