@@ -11,7 +11,6 @@ Takes 2.5 min to run.
 """
 import datetime as dt
 import geopandas as gpd
-import glob
 import intake
 import os
 import pandas as pd
@@ -80,34 +79,23 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     https://stackoverflow.com/questions/33817190/intersection-of-two-linestrings-geopandas
     https://stackoverflow.com/questions/43221208/iterate-over-pandas-dataframe-using-itertuples
     """
-    results = []
-    segments = []
-
-    EPSG_CODE = pairs_table.crs.to_epsg()
+    # Find intersection with 2 GeoSeries,
+    # if align=True, then it's a row-wise comparison
+    intersect_results = pairs_table.geometry.intersection(
+        pairs_table.intersect_geometry, align=True)
     
-    for row in pairs_table.itertuples():
-        this_segment = getattr(row, "hqta_segment_id")
-        this_segment_geom = getattr(row, 'geometry')
-        intersecting_segment_geom = getattr(row, 'intersect_geometry')
-
-        intersect_result = this_segment_geom.intersection(intersecting_segment_geom)
-
-        results.append(intersect_result)
-        segments.append(this_segment)
-        
-    intersect_results = (gpd.GeoDataFrame(
-        segments, geometry = results,
-        crs = f"EPSG: {EPSG_CODE}")
-                         .rename(columns = {
-                             0: "hqta_segment_id", 
-                             1: "geometry"})
-                        )
+    # Turn GeoSeries to gdf
+    results_df = (gpd.GeoDataFrame(intersect_results)
+                  .rename(columns={0:'geometry'})
+                  .set_geometry('geometry')
+                 )
+    # Concatenate and add this column to pairs_table, join by index 
+    gdf = pd.concat([
+        pairs_table[["calitp_itp_id", "hqta_segment_id"]], 
+        results_df
+    ], axis=1)
     
-    intersect_results = intersect_results.assign(
-        calitp_itp_id = pairs_table.calitp_itp_id
-    )
-                         
-    return intersect_results    
+    return gdf    
 
     
 if __name__ == "__main__":
@@ -128,11 +116,11 @@ if __name__ == "__main__":
     time2 = dt.datetime.now()
     logger.info(f"find intersections: {time2 - time1}")
         
-    utils.geoparquet_gcs_export(
-        results,
-        GCS_FILE_PATH,
-        "all_intersections"
-    )
+    #utils.geoparquet_gcs_export(
+    #    results,
+    #    GCS_FILE_PATH,
+    #    "all_intersections"
+    #)
  
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
