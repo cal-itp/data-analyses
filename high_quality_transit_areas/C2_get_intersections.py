@@ -5,7 +5,7 @@ With hqta_segment_id clipping, and using iterrtuples to
 find the area of intersection between 
 an hqta_segment_id and its intersect_hqta_segment_id.
 
-Takes 2.5 min to run.
+Takes 1.5 min to run.
 - down from ranging from 1 hr 45 min - 2 hr 50 min in v2 
 - down from several hours in v1 in combine_and_visualize.ipynb
 """
@@ -80,7 +80,7 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     https://stackoverflow.com/questions/43221208/iterate-over-pandas-dataframe-using-itertuples
     """
     # Find intersection with 2 GeoSeries,
-    # if align=True, then it's a row-wise comparison
+    # if align=True, then it's a row-wise comparison to find the intersection
     intersect_results = pairs_table.geometry.intersection(
         pairs_table.intersect_geometry, align=True)
     
@@ -89,10 +89,11 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                   .rename(columns={0:'geometry'})
                   .set_geometry('geometry')
                  )
+    
     # Concatenate and add this column to pairs_table, join by index 
     gdf = pd.concat([
+        results_df,
         pairs_table[["calitp_itp_id", "hqta_segment_id"]], 
-        results_df
     ], axis=1)
     
     return gdf    
@@ -116,11 +117,11 @@ if __name__ == "__main__":
     time2 = dt.datetime.now()
     logger.info(f"find intersections: {time2 - time1}")
         
-    #utils.geoparquet_gcs_export(
-    #    results,
-    #    GCS_FILE_PATH,
-    #    "all_intersections"
-    #)
+    utils.geoparquet_gcs_export(
+        results,
+        GCS_FILE_PATH,
+        "all_intersections"
+    )
  
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
