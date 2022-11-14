@@ -1,7 +1,0 @@
-title: Altair versus Ipywidgets
-directory: ./project_prioritization/
-readme: ./project_prioritization/README.md
-parts:
-- caption: Introduction
-- chapters:
-  - notebook: ./project_prioritization/project_v2.ipynb
