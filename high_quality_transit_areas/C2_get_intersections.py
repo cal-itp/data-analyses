@@ -5,13 +5,12 @@ With hqta_segment_id clipping, and using iterrtuples to
 find the area of intersection between 
 an hqta_segment_id and its intersect_hqta_segment_id.
 
-Takes 2.5 min to run.
+Takes 1.5 min to run.
 - down from ranging from 1 hr 45 min - 2 hr 50 min in v2 
 - down from several hours in v1 in combine_and_visualize.ipynb
 """
 import datetime as dt
 import geopandas as gpd
-import glob
 import intake
 import os
 import pandas as pd
@@ -80,34 +79,24 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     https://stackoverflow.com/questions/33817190/intersection-of-two-linestrings-geopandas
     https://stackoverflow.com/questions/43221208/iterate-over-pandas-dataframe-using-itertuples
     """
-    results = []
-    segments = []
-
-    EPSG_CODE = pairs_table.crs.to_epsg()
+    # Find intersection with 2 GeoSeries,
+    # if align=True, then it's a row-wise comparison to find the intersection
+    intersect_results = pairs_table.geometry.intersection(
+        pairs_table.intersect_geometry, align=True)
     
-    for row in pairs_table.itertuples():
-        this_segment = getattr(row, "hqta_segment_id")
-        this_segment_geom = getattr(row, 'geometry')
-        intersecting_segment_geom = getattr(row, 'intersect_geometry')
-
-        intersect_result = this_segment_geom.intersection(intersecting_segment_geom)
-
-        results.append(intersect_result)
-        segments.append(this_segment)
-        
-    intersect_results = (gpd.GeoDataFrame(
-        segments, geometry = results,
-        crs = f"EPSG: {EPSG_CODE}")
-                         .rename(columns = {
-                             0: "hqta_segment_id", 
-                             1: "geometry"})
-                        )
+    # Turn GeoSeries to gdf
+    results_df = (gpd.GeoDataFrame(intersect_results)
+                  .rename(columns={0:'geometry'})
+                  .set_geometry('geometry')
+                 )
     
-    intersect_results = intersect_results.assign(
-        calitp_itp_id = pairs_table.calitp_itp_id
-    )
-                         
-    return intersect_results    
+    # Concatenate and add this column to pairs_table, join by index 
+    gdf = pd.concat([
+        results_df,
+        pairs_table[["calitp_itp_id", "hqta_segment_id"]], 
+    ], axis=1)
+    
+    return gdf    
 
     
 if __name__ == "__main__":
