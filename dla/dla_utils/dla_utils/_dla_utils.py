@@ -33,6 +33,15 @@ pd.options.display.float_format = '{:,.2f}'.format
 # alt.themes.register("calitp_theme", styleguide.calitp_theme)
 # alt.themes.enable("calitp_theme")
 
+
+#get column names in Title Format (for exporting)
+def title_column_names(df):
+    df.columns = df.columns.map(str.title) 
+    df.columns = df.columns.map(lambda x : x.replace("_", " "))
+    
+    return df
+
+
 # aggfunc for specified columns
 
 def calculate_data_all(df, col, aggregate_by=["dist"], aggfunc="sum"):
