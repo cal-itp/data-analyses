@@ -16,6 +16,7 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 """
 Other Functions
 """
+# Export geospatial file to a geojson 
 def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     """
     Save geodataframe as parquet locally,
@@ -29,10 +30,11 @@ def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
     os.remove(f"./{FILE_NAME}.geojson")
 
+
 """
 FCC data
 """
-# Clip the cell provider coverage map for California only.
+# Clip the cell provider coverage map to California only.
 def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     # Open zip file first
@@ -93,6 +95,20 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
 """
 Open/Clean Files
 """
+# Open a file with shapes of CA counties
+def get_counties():
+    # California counties.
+    ca_gdf = (
+        "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
+    )
+    
+    my_gdf = to_snakecase(gpd.read_file(f"{ca_gdf}")
+                          .to_crs("EPSG:4326"))[
+        ["county_name", "geometry"]
+    ]
+    
+    return my_gdf
+
 # Open AT&T coverage shapefile that's already clipped to California
 def load_att(): 
     att_file =  "att_ca_only.parquet"
@@ -123,9 +139,11 @@ def load_unique_routes_df():
     # Standardize route id  
     df["route_id"] = df["route_id"].str.lower().str.strip()
     
-    
     return df
 
+"""
+# of Trips
+""" 
 # Find number of trips ran per route by route ID and by the agency as a whole. 
 def trip_df():
 
@@ -157,7 +175,63 @@ def trip_df():
 
     return m1
     
+"""
+NTD
+"""
+# Clean organization names - strip them of dba, etc
+def organization_cleaning(df, column_wanted: str):
+    df[column_wanted] = (
+        df[column_wanted]
+        .str.strip()
+        .str.split(",")
+        .str[0]
+        .str.replace("/", "")
+        .str.split("(")
+        .str[0]
+        .str.split("/")
+        .str[0]
+    )
+    return df
+
+# Return a cleaned up NTD dataframe for bus only 
+def ntd_vehicles():
     
+    # Open sheet
+    df = pd.read_excel(
+    "gs://calitp-analytics-data/data-analyses/5311 /2020-Vehicles_1.xlsm",
+    sheet_name="Vehicle Type Count by Agency",)
+    
+    # Only grab California
+    df = df.loc[df["State"] == "CA"]
+    
+    # Only get bus related columns
+    columns_wanted = [
+    "Agency",
+    "State",
+    "Bus",
+    "Over-The-Road Bus",
+    "Articulated Bus",
+    "Double Decker Bus",
+    "School Bus",
+    "Van",
+    "Cutaway",
+    "Minivan"]
+    
+    # Have to add snakecase after b/c some columns have integers
+    # Drop unwanted columns
+    df = to_snakecase(df[columns_wanted])
+    
+    # Clean org names
+    df = organization_cleaning(df, 'agency') 
+    
+    # Add up buses
+    df["total_buses"] = df.sum(numeric_only=True, axis=1)
+    
+    # Drop agencies with 0 buses
+    df = df.loc[df['total_buses'] !=0]
+    
+    return df
+ 
 """
 Analysis Functions
 """
@@ -175,6 +249,7 @@ def comparison(gdf_left, gdf_right):
     )
 
     return overlay_df
+
 
 # Take the FCC provider shape file, compare it against the original df
 # Find % of route covered by a provider compared to the original route length.
@@ -233,59 +308,3 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     m1 = gpd.GeoDataFrame(m1, geometry = f"geometry_overlay{suffix}", crs = "EPSG:4326")
     return m1
 
-"""
-NTD
-"""
-# Clean organization names - strip them of dba, etc
-def organization_cleaning(df, column_wanted: str):
-    df[column_wanted] = (
-        df[column_wanted]
-        .str.strip()
-        .str.split(",")
-        .str[0]
-        .str.replace("/", "")
-        .str.split("(")
-        .str[0]
-        .str.split("/")
-        .str[0]
-    )
-    return df
-
-# Return a cleaned up NTD dataframe for bus only 
-def ntd_vehicles():
-    
-    # Open sheet
-    df = pd.read_excel(
-    "gs://calitp-analytics-data/data-analyses/5311 /2020-Vehicles_1.xlsm",
-    sheet_name="Vehicle Type Count by Agency",)
-    
-    # Only grab California
-    df = df.loc[df["State"] == "CA"]
-    
-    # Only get bus related columns
-    columns_wanted = [
-    "Agency",
-    "State",
-    "Bus",
-    "Over-The-Road Bus",
-    "Articulated Bus",
-    "Double Decker Bus",
-    "School Bus",
-    "Van",
-    "Cutaway",
-    "Minivan"]
-    
-    # Have to add snakecase after b/c some columns have integers
-    # Drop unwanted columns
-    df = to_snakecase(df[columns_wanted])
-    
-    # Clean org names
-    df = organization_cleaning(df, 'agency') 
-    
-    # Add up buses
-    df["total_buses"] = df.sum(numeric_only=True, axis=1)
-    
-    # Drop agencies with 0 buses
-    df = df.loc[df['total_buses'] !=0]
-    
-    return df
