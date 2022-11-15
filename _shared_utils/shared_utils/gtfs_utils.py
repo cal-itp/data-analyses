@@ -234,12 +234,14 @@ def get_route_shapes(
         .reset_index(drop=True)
     )
 
+    shape_id_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
+
     route_shapes_on_day = pd.merge(
         route_shapes,
-        trips,
-        on=["calitp_itp_id", "calitp_url_number", "shape_id"],
+        trips[shape_id_cols].drop_duplicates(),
+        on=shape_id_cols,
         how="inner",
-    )
+    ).drop_duplicates()
 
     route_shapes_on_day = route_shapes_on_day >> filter_custom_col(custom_filtering)
 
@@ -530,15 +532,10 @@ def format_date(analysis_date: datetime.date | str) -> str:
         return datetime.datetime.strptime(analysis_date, rt_utils.FULL_DATE_FMT).date()
 
 
-ALL_ITP_IDS = (
-    tbls.gtfs_schedule.agency() >> select(_.calitp_itp_id) >> distinct() >> collect()
-).calitp_itp_id.tolist()
-
-
 def all_routelines_or_stops_with_cached(
     dataset: Literal["routelines", "stops"] = "routelines",
     analysis_date: datetime.date | str = "2022-06-15",
-    itp_id_list: list = ALL_ITP_IDS,
+    itp_id_list: list = None,
     export_path="gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/",
 ):
     """
@@ -546,6 +543,14 @@ def all_routelines_or_stops_with_cached(
     Routelines and stops are geospatial, import and export with geopandas.
     """
     date_str = format_date(analysis_date)
+
+    if itp_id_list is None:
+        itp_id_list = (
+            tbls.gtfs_schedule.agency()
+            >> select(_.calitp_itp_id)
+            >> distinct()
+            >> collect()
+        ).calitp_itp_id.tolist()
 
     # Set metadata
     first_operator = sorted(itp_id_list)[0]
@@ -573,7 +578,7 @@ def all_routelines_or_stops_with_cached(
 def all_trips_or_stoptimes_with_cached(
     dataset: Literal["trips", "st"] = "trips",
     analysis_date: datetime.date | str = "2022-06-15",
-    itp_id_list: list = ALL_ITP_IDS,
+    itp_id_list: list = None,
     export_path="gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/",
 ):
     """
@@ -581,6 +586,14 @@ def all_trips_or_stoptimes_with_cached(
     Trips and stop times are tabular, import and export with pandas.
     """
     date_str = format_date(analysis_date)
+
+    if itp_id_list is None:
+        itp_id_list = (
+            tbls.gtfs_schedule.agency()
+            >> select(_.calitp_itp_id)
+            >> distinct()
+            >> collect()
+        ).calitp_itp_id.tolist()
 
     # Set metadata
     first_operator = sorted(itp_id_list)[0]

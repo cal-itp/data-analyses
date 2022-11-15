@@ -27,7 +27,13 @@
 
 HQTA data is updated at a monthly frequency for the open data portal. Check the [Makefile](./Makefile) for the most up-to-date order to run the scripts. Run the `Makefile` commands from within the `high_quality_transit_areas` directory.
 
+### Document Monthly Variable
+
+1. Pick a Wednesday in the of the month and put this in [rt_dates](../_shared_utils/shared_utils/rt_dates.py). Update the `DATES` and `METADATA_EDITION` variables.
+1. Update this month's `analysis_date` in [update_vars](./update_vars.py)
+
 ### Download Data
+
 In terminal: `make download_hqta_data`
 
 1. [Download data](./download_data.py) and cache parquets in GCS
