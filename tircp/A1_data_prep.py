@@ -131,6 +131,7 @@ def load_gis():
 """
 Clean Project Sheet 
 """
+
 # Manual cleaning portion of project that will change with each sheet
 def clean_project_manual(df):
 
