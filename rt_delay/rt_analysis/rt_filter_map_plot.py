@@ -289,10 +289,10 @@ class RtFilterMapper:
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> group_by(_.stop_sequence)
-                         >> mutate(n_trips = _.stop_sequence.size,
+                         >> mutate(n_trips_shp = _.stop_sequence.size, # filtered to shape
                                     avg_mph = _.speed_mph.mean(),
                                   _20p_mph = _.speed_mph.quantile(.2),
-                                   trips_per_hour = _.n_trips / self.hr_duration_in_filter
+                                   # trips_per_hour = _.n_trips / self.hr_duration_in_filter
                                   )
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
@@ -319,6 +319,13 @@ class RtFilterMapper:
                     self.pbar.update()
                 if type(self.pbar) != type(None):
                     self.pbar.refresh
+            # count all trips in direction with RT data for a better gauge of frequency
+            direction_counts = (self._filter(self.rt_trips)
+                 >> count(_.route_id, _.direction_id)
+                 >> mutate(trips_per_hour = _.n / self.hr_duration_in_filter)
+                 >> select(-_.n)
+                )
+            all_stop_speeds = all_stop_speeds >> inner_join(_, direction_counts, on = ['route_id', 'direction_id'])
             self.stop_segment_speed_view = all_stop_speeds
             export_path = f'{GCS_FILE_PATH}segment_speed_views/'
             if self._time_only_filter and self.filter_period in ['AM_Peak', 'PM_Peak', 'Midday', 'All_Day']:
@@ -337,7 +344,7 @@ class RtFilterMapper:
         gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
                             -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
                            -_.delay_chg_sec, -_.service_date, -_.last_loc, -_.shape_meters,
-                           -_.meters_from_last, -_.n_trips)
+                           -_.meters_from_last, -_.n_trips_shp)
         orig_rows = gdf.shape[0]
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'miles_from_last': 1,
                         'trips_per_hour': 1, 'avg_sec': 0, '_20p_sec': 0,}) ##round for display
@@ -354,7 +361,9 @@ class RtFilterMapper:
         ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(try_parallel)
         ## create clips, integrate buffer+simplify?
-        gdf.geometry = gdf.geometry.apply(arrowize_segment).simplify(tolerance=5)
+        # gdf.geometry = gdf.geometry.apply(arrowize_segment)
+        gdf = gdf.apply(arrowize_by_frequency, axis=1)
+        gdf.geometry = gdf.geometry.simplify(tolerance=5)
         gdf = gdf >> filter(gdf.geometry.is_valid)
         gdf = gdf >> filter(-gdf.geometry.is_empty)
         
@@ -577,11 +586,13 @@ class RtFilterMapper:
                'speed_metric_minutes': speed_metric}
     
 def from_gcs(itp_id, analysis_date, pbar = None):
-    ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_analysis.OperatorDayAnalysis.export_views_gcs()
+    ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_parser.OperatorDayAnalysis.export_views_gcs()
     '''
     date_iso = analysis_date.isoformat()
-    trips = pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
-    stop_delay = gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
+    trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
+            .reset_index(drop=True))
+    stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
+                 .reset_index(drop=True))
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
     routelines = get_routelines(itp_id, analysis_date)
