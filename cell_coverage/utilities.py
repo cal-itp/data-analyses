@@ -1,7 +1,8 @@
 from shared_utils import geography_utils
 from shared_utils import utils
 import geopandas as gpd
-
+import dask.dataframe as dd
+import dask_geopandas as dg
 import pandas as pd
 
 # Open zip files 
@@ -308,3 +309,18 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     m1 = gpd.GeoDataFrame(m1, geometry = f"geometry_overlay{suffix}", crs = "EPSG:4326")
     return m1
 
+# Clip the provider map to a county and return the areas of a county
+# that is NOT covered by the provider.
+def find_difference_and_clip(
+    gdf: dg.GeoDataFrame, boundary: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    # Clip cell provider to some boundary
+    clipped = dg.clip(gdf, boundary).reset_index(drop=True)  # use dask to clip
+    clipped_gdf = clipped.compute()  # compute converts from dask gdf to gdf
+
+    # Now find the overlay, and find the difference
+    # Notice which df is on the left and which is on the right
+    # https://geopandas.org/en/stable/docs/user_guide/set_operations.html
+    no_coverage = gpd.overlay(boundary, clipped_gdf, how="difference",  keep_geom_type=False)
+
+    return no_coverage
