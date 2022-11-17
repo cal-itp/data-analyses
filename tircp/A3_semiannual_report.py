@@ -4,10 +4,8 @@ Semiannual Report
 import pandas as pd
 import numpy as np
 from calitp import *
-import A5_crosswalks as crosswalks
 import A1_data_prep
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-FILE_NAME = "TIRCP_July_8_2022.xlsx"
+import A5_crosswalks as crosswalks
 
 """
 Columns
@@ -24,7 +22,7 @@ allocation_cols = [
     "allocation_phase",
     "allocation_led",
     "allocation_allocation_date",
-    "allocation_completion_date",
+    "allocation_phase_completion_date",
     "allocation__3rd_party_award_date",
     "allocation_ea",
     "allocation_sb1_funding",
@@ -43,6 +41,7 @@ project_cols = [
     "project_grant_recipient",
 ]
 
+# Columns by type
 numeric_cols = [
     "allocation_expended_amount",
     "allocation_allocation_amount",
@@ -55,10 +54,11 @@ numeric_cols = [
 dates = [
     "allocation_allocation_date",
     "allocation__3rd_party_award_date",
-    "allocation_completion_date",
+    "allocation_phase_completion_date",
     "allocation_led",
 ]
 
+# Columns grouped by aggregation method
 group_by_cols = [
     "project_award_year",
     "project_project_#",
@@ -94,6 +94,8 @@ list_to_add = [
     "Number_of_Awarded_Projects",
 ]
 
+# Some projects have missing allocation dates
+# Fill them in with this fake one.
 missing_date = pd.to_datetime("2100-01-01")
 
 """
@@ -196,17 +198,16 @@ def create_sar_report():
         right_on=["project_ppno", "project_award_year"],
     )
     
-    # Drop duplicates
-    m1 = m1.drop_duplicates().reset_index()
+    # Drop duplicates & reset index
+    m1 = m1.drop_duplicates().reset_index(drop = True)
 
     # Fill in missing dates with a fake one so it'll show up in the group by
     for i in dates:
         m1[i] = m1[i].fillna(missing_date).apply(pd.to_datetime)
 
-    """
-    Add columns with percentages and to flag whether an allocation date is
-    AFTER  7-31-2020 then blank, if BEFORE 7-31-2020 then X
-    """ 
+   
+    # Add columns with percentages and to flag whether an allocation date is
+    # AFTER  7-31-2020 then blank  if BEFORE 7-31-2020 then X
     m1 = m1.assign(
         Percent_of_Allocation_Expended=(
             m1["allocation_expended_amount"] / m1["allocation_allocation_amount"]
@@ -222,13 +223,14 @@ def create_sar_report():
         ),
     )
 
-    # Filter out projects that are excluded
+    # Filter out projects that are excluded: projects with no expenditures
+    # are not included and projects that have spent all allocated $ won't appear as well. 
     m1 = m1[
         (m1.allocation_allocation_amount > 0)
         & (m1.Percent_of_Allocation_Expended < 0.99)
     ]
     
-    m1 = m1.reset_index()
+    m1 = m1.reset_index(drop = True)
 
     # Fill in null values based on datatype of each column
     m1 = m1.fillna(m1.dtypes.replace({"float64": 0.0, "int64": 0}))
@@ -242,7 +244,7 @@ def create_sar_report():
         }
     )
 
-    # Pivot
+    # Group by
     df_pivoted = m1.groupby(group_by_cols).agg(
         {**{e: "max" for e in max_cols}, **{e: "sum" for e in sum_cols}}
     )
@@ -268,7 +270,7 @@ def create_sar_report():
     previous_sar = previous_sar[previous_sar["project_project_title"].isin(current_project_names)]
     
     # Reset index 
-    previous_sar= previous_sar.reset_index()
+    previous_sar= previous_sar.reset_index(drop = True)
     
     # Stack current SAR and previous SAR and differentiate them between the keys 
     df_all = pd.concat(
@@ -279,7 +281,7 @@ def create_sar_report():
     df_highlighted = df_all.style.apply(highlight_differences, axis=None)
 
     # Save to GCS
-    with pd.ExcelWriter(f"{GCS_FILE_PATH}Script_Semi_Annual_Report.xlsx") as writer:
+    with pd.ExcelWriter(f"{A1_data_prep.GCS_FILE_PATH}Script_Semi_Annual_Report.xlsx") as writer:
         summary.to_excel(writer, sheet_name="Summary", index=True)
         df_pivoted.to_excel(writer, sheet_name="FY", index=True)
         df_current.to_excel(writer, sheet_name="Unpivoted_Current_Version", index=False)

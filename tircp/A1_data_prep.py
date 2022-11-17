@@ -3,17 +3,17 @@ from calitp import *
 
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-FILE_NAME = "TIRCP_10-31-2022.xlsx"
+FILE_NAME = "TIRCP_11-16-2022.xlsx"
 
 #Crosswalk
 import A5_crosswalks as crosswalks
 
 """
-Functions
+Project ID/PPNO Cleaning
 """
 # Some PPNO numbers are 5+. Slice them down to <= 5.
 def ppno_slice(df):
-    df = df.assign(ppno=df["ppno"].str.slice(start=0, stop=5))
+    df = df.assign(ppno=df["ppno"].str.upper().str.slice(start=0, stop=5))
     return df
 
 # Some Project IDs numbers are 10+ & contains random characters
@@ -22,7 +22,7 @@ def project_id_slice(df):
     df = df.assign(project_id=df["project_id"].str.slice(start=0, stop=10))
     return df
 
-# Function to clean cols before exporting
+# Function to clean columns before exporting reports/Tableau source
 def clean_up_columns(df):
     df.columns = (
         df.columns.str.replace("_", " ")
@@ -33,14 +33,18 @@ def clean_up_columns(df):
     )
     return df
 
+"""
+Other 
+Functions
+"""
 # Function to clean agency/organization names 
 def organization_cleaning(df, column_wanted: str):
     df[column_wanted] = (
         df[column_wanted]
         .str.strip()
-        .str.split(",")
+        .str.split(",") 
         .str[0]
-        .str.replace("/", "")
+        .str.replace("/", "") 
         .str.split("(")
         .str[0]
         .str.split("/")
@@ -51,7 +55,7 @@ def organization_cleaning(df, column_wanted: str):
     )
     return df
 
-# Format a column to a currency format
+# Format a column to currency format
 def currency_format(df, col_name: str):
     df[col_name] = "$" + (df[col_name].astype(float)).round(0).astype(str)
     return df
@@ -85,6 +89,8 @@ def load_allocation():
 
 
 # Previous SAR - this one is fake
+# This is for the Semi Annual Report script (A3_semiannual_report.py) 
+# where the current SAR is compared with the previous one.
 def load_previous_sar():
     file_to_sar = "fake_sar.xlsx"
     df = to_snakecase(
@@ -127,6 +133,7 @@ def load_gis():
         "assembly\ndistricts": "assembly_districts",
     })
     return df
+
 """
 Clean Project Sheet 
 """
@@ -135,21 +142,10 @@ def clean_project_manual(df):
 
     # Replace agencies with the right PPNO
     df.loc[
-        (
-            df["grant_recipient"]
-            == "San Bernardino County Transportation Authority (SBCTA)"
-        ),
+        (df["grant_recipient"] == "San Bernardino County Transportation Authority (SBCTA)")
+        & (df["award_year"] == 2016),
         "ppno",
     ] = 1230
-    df.loc[
-        (df["grant_recipient"] == "Bay Area Rapid Transit District (BART)"), "ppno"
-    ] = "CP060"
-    df.loc[(df["grant_recipient"] == "Santa Monica Big Blue Bus"), "ppno"] = "CP071"
-    df.loc[
-        (df["grant_recipient"] == "Antelope Valley Transit Authority (AVTA)")
-        & (df["award_year"] == 2020),
-        "ppno",
-    ] = "CP059"
 
     # Replace FY 21/22 with Cycle 4
     df["award_cycle"].replace({"FY 21/22": 4}, inplace=True)
@@ -158,12 +154,10 @@ def clean_project_manual(df):
 
 # Clean up project sheet completely 
 def clean_project():
+    
     df = load_project()
-
-    """
-    Some grant recipients have multiple spellings of their name. 
-    E.g. BART versus Bay Area Rapid Transit. Fix this.
-    """
+    
+    # Some grant recipients have multiple spellings of their name. 
     df = organization_cleaning(df, "grant_recipient")
     df["grant_recipient"] = df["grant_recipient"].replace(
         crosswalks.grant_recipients_projects
@@ -180,7 +174,7 @@ def clean_project():
         pd.to_numeric, errors="coerce"
     )
 
-    # As this is manual data, correct in a separate function
+    # As this is manually entered data, correct in a separate function
     df = clean_project_manual(df)
 
     # Add prefix
@@ -191,7 +185,7 @@ def clean_project():
 """
 Allocation Sheet
 """
-# List for columns that should be date 
+# List for columns that should be coerced to date-time
 date_columns = [
     "allocation_date",
     "phase_completion_date",
@@ -211,13 +205,17 @@ date_columns = [
 # Manual portion of cleaning the allocation
 def clean_allocation_manual(df):
     
-    # Replace some string values that are in date columns
+    # Replace some string values that are in the date columns
     df["_3rd_party_award_date"] = df["_3rd_party_award_date"].replace(
         crosswalks.allocation_3rd_party_date
     )
     df["led"] = df["led"].replace(crosswalks.allocation_led)
     df["phase_completion_date"] = df["phase_completion_date"].replace(
         crosswalks.allocation_completion_date
+    )
+    
+    df["allocation_date"] = df["allocation_date"].replace(
+        crosswalks.allocation_allocation_date
     )
 
     # Replace PPNO using clean project as the source of truth
