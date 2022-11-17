@@ -51,7 +51,7 @@ def expended_percent(row):
         return "26-50"
     elif (row.Expended_Percent > 0.50) and (row.Expended_Percent < 0.76):
         return "51-75"
-    elif (row.Expended_Percent > 0.75) and (row.Expended_Percent < 0.95):
+    elif (row.Expended_Percent > 0.75) and (row.Expended_Percent < 0.99):
         return "76-99"
     elif row.Expended_Percent == 0.0:
         return "0"
@@ -149,6 +149,7 @@ burndown_cols_to_keep = [
 """
 Script
 """
+# Create first page of Tableau dashboard: based on project sheet 
 def tableau_dashboard():
     # Load in cleaned project sheets
     df = A1_data_prep.clean_project()
@@ -192,6 +193,7 @@ def tableau_dashboard():
 
     return df
 
+# Prepare the data for the burndown chart
 def create_burndown():
     project = A1_data_prep.clean_project()
     allocation = A1_data_prep.clean_allocation()
