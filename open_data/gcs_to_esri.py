@@ -15,7 +15,7 @@ from loguru import logger
 
 from shared_utils import utils, geography_utils, rt_dates
 
-analysis_date = rt_dates.DATES["oct2022"]
+analysis_date = rt_dates.DATES["nov2022"]
 
 logger.add("./logs/gcs_to_esri.log", retention="6 months")
 logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
