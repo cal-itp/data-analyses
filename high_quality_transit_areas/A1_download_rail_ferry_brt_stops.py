@@ -11,7 +11,7 @@ import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
-from calitp.tables import tbl
+from calitp.tables import tbls
 from siuba import *
 
 import utilities
@@ -35,7 +35,7 @@ def trip_keys_for_route_type(analysis_date: str,
 
 def trip_keys_to_stop_keys(trip_key_df: pd.DataFrame) -> pd.DataFrame:
     
-    stop_keys_list = (tbl.views.gtfs_schedule_index_feed_trip_stops() 
+    stop_keys_list = (tbls.views.gtfs_schedule_index_feed_trip_stops() 
                       >> filter(_.trip_key.isin(trip_key_df.trip_key))
                       >> select(_.trip_key, _.stop_key)
                       >> distinct()
