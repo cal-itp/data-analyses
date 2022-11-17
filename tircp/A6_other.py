@@ -90,6 +90,16 @@ other_list = [
 """
 Functions
 """
+# Turn value counts into a dataframe
+def value_counts_df(df, col_of_interest):
+    df = (
+    df[col_of_interest]
+    .value_counts()
+    .to_frame()
+    .reset_index()
+    )
+    return df 
+
 # Place project status all on one row & Remove duplicate statuses
 def summarize_rows(df, col_to_group: str, col_to_summarize: str):
     df = (df

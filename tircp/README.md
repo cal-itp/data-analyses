@@ -10,14 +10,19 @@
 5. [Sb1 GIS](./request_sb1_gis_template.ipynb): Populating SB1 GIS template using TIRCP that is used to create [this map](http://rebuildingca.ca.gov/map/). 
 
 ###  Scripts:
-TIRCP work is based entirely on TIRCP Tracking Sheet 2.0 Excel Workbook in the GCS (saved as TIRCP_10-31-2022.xlsx with the updated date in the filename). 
-1. [Data Prep](./A1_data_prep.py): Cleans the sheets (allocation, project, GIS, and invoice) in the TIRCP workbook before creating other reports & the Excel file that feeds into Tableau. This file also contains functions used across this project. Functions for cleaning each sheet can be broken apart by sections that manually clean the data by replacing values versus sections that don't require manual intervention. The manual portions require intervention when the workbook is updated: 
-    * Ensure PPNO numbers are unique to every project in the "Project Sheet." As of writing, there are 5 cycles of projects and 96 projects. 
-    * Make sure PPNO numbers match across the "Allocation" and "Project" Sheets using sets and lists.  
-    * Dates in the "Allocation" sheet are read in correctly and manually correct them if they are not. 
-2. [Tableau](./A2_tableau.py): Excel workbook that serves as the data source for the TIRCP Tableau dashboard. 
-3. [Semiannual Report](./A3_semiannual_report.py): Automates the Semiannual Report prepared by TIRCP's coordinator. 
-4. [Program Allocation Plan Report](./A4_program_allocation_plan.py): Automates the Program Allocation Plan Report that is submitted every few months.
-5. [Crosswalks](./A5_crosswalks.py): There are manual portions of cleaning up this data and all the crosswalks are located here. 
+TIRCP scripts are based entirely on TIRCP Tracking Sheet 2.0 which is an Excel Workbook. The workbook is uploaded to GCS amd is saved as TIRCP_10-31-2022.xlsx with the updated date in the filename. 
+
+<b>Before running the scripts</b>: open the Workbook and delete row 1:6 which are the header rows.
+
+1. [Data Prep](./A1_data_prep.py): Cleans the sheets (allocation, project, GIS, and invoice) in the TIRCP workbook before creating other reports & the Excel file that feeds into Tableau. This file also contains functions used across this project. 
+    * Replace FILE_NAME at the top with the latest file name. 
+    * Run and follow the instructions in [this notebook](./script_manual.ipynb). The `Allocation` and `Project` sheets of the TIRCP workbook have areas that need to be manually looked over. The notebook does the following: 
+        * Ensure PPNO numbers are unique to every project in the "Project Sheet." Sometimes projects are under different names in different cycles. There are 96 projects in total, as of writing.
+        * Make sure PPNO numbers match across the "Allocation" and "Project" Sheets using sets and lists.  
+        * Dates in the "Allocation" sheet are read in correctly and manually correct them if they are not. 
+2. [Tableau](./A2_tableau.py): Run the function `complete_tableau()` to return an Excel workbook that serves as the data source for the TIRCP Tableau dashboard. 
+3. [Semiannual Report](./A3_semiannual_report.py): Run `create_sar_report()` to create the Semiannual Report prepared by TIRCP's coordinator.
+4. [Program Allocation Plan Report](./A4_program_allocation_plan.py): Automates the Program Allocation Plan Report (an Excel workbook) that is submitted every few months.
+5. [Crosswalks](./A5_crosswalks.py): Some portions of the manual cleaning up are located here. 
 6. [Other](./A6_other.py): Functions for the requests/presentations, such as basic charting, searching for keywords in the project descriptions, and extracting numbers from the project descriptions.  
 

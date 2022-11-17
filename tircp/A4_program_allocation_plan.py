@@ -47,6 +47,7 @@ allocation_cols = [
     "allocation_allocation_amount",
 ]
 
+# Columns by aggregation method
 group_by_cols = [
     "Project #",
     "Award No",
@@ -91,12 +92,12 @@ Program Allocation Plan
 def create_program_allocation_plan():
 
     # Load in Sheets
-    df_project = A1_data_prep.clean_project()
-    df_allocation = A1_data_prep.clean_allocation()
+    df_project = A1_data_prep.clean_project()[project_cols]
+    df_allocation = A1_data_prep.clean_allocation()[allocation_cols]
 
     # Only keeping certain columns
-    df_project = df_project[project_cols]
-    df_allocation = df_allocation[allocation_cols]
+    # df_project = df_project[project_cols]
+    # df_allocation = df_allocation[allocation_cols]
 
     # Merge
     m1 = df_allocation.merge(
@@ -106,7 +107,7 @@ def create_program_allocation_plan():
         right_on=["project_ppno"],
     )
 
-    # Clean Up
+    
     # Delete one of the PPNO and Award Year Columns
     m1 = m1.drop(
         columns=[
@@ -172,4 +173,4 @@ def create_program_allocation_plan():
         # df_2022.to_excel(writer, sheet_name="2022_Cycle_5", index=True)
         
     print("Successfully saved Program Allocation Plan to GCS") 
-    return m1
+    
