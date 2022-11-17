@@ -17,13 +17,30 @@ from IPython.display import HTML, Image, Markdown, display, display_html
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/"
 
+# Wordcloud
+import matplotlib.pyplot as plt  # plot package
+import seaborn as sns  # statist graph package
+import wordcloud  # will use for the word cloud plot
+from wordcloud import (  # optional to filter out the stopwords
+    STOPWORDS,
+    ImageColorGenerator,
+    WordCloud,
+)
+
+# Strings
+import re
+from collections import Counter
+from nltk import ngrams
+from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize, word_tokenize
+
 """
 Chart Functions
 """
 # Preset to make chart 25% smaller than shared_utils
 # Since the webpage is kind of small
-chart_width = 300
-chart_height = 188
+chart_width = 400
+chart_height = 250
 
 def preset_chart_config(chart: alt.Chart) -> alt.Chart:
     
@@ -275,9 +292,79 @@ def value_counts_df(df, col_of_interest):
 
 # Strip snakecase when dataframe is finalized
 def clean_up_columns(df):
-    df.columns = df.columns.str.replace("_", " ").str.title().str.strip()
+    df.columns = df.columns.str.replace("_", " ").str.strip().str.title()
     return df
 
+# Generate wordcloud
+# From: https://www.kaggle.com/code/olgaberezovsky/word-cloud-using-python-pandas/notebook
+def wordcloud(df, desc_column: str, max_words: int, additional_stop_words:list):
+    
+    wordstring = " ".join(df[desc_column].str.lower())
+    
+    plt.figure(figsize=(15, 15))
+    wc = WordCloud(
+    background_color="white",
+    stopwords=STOPWORDS.update(additional_stop_words),
+    max_words=50,
+    max_font_size=200,
+    width=650,
+    height=650,)
+    
+    wc.generate(wordstring)
+    # plt.imshow(wc.recolor(colormap="tab10", random_state=30), interpolation="bilinear")
+    plt.axis("off")
+    
+    return plt.imshow(wc.recolor(colormap="tab10", random_state=30), interpolation="bilinear")
+
+# Grab a list of all the string that appear in a column
+# Natalie's function
+def get_list_of_words(df, col: str, additional_words_to_remove: list):
+
+    # get just the one col
+    column = df[[col]]
+    # remove single-dimensional entries from the shape of an array
+    col_text = column.squeeze()
+    # get list of words
+    text_list = col_text.tolist()
+
+    # Join all the column into one large text blob, lower text
+    text_list = " ".join(text_list).lower()
+
+    # remove punctuation
+    text_list = re.sub(r"[^\w\s]", "", text_list)
+
+    # List of stopwords
+    swords = [re.sub(r"[^A-z\s]", "", sword) for sword in stopwords.words("english")]
+
+    # Append additionally words to remove from results
+    swords.extend(additional_words_to_remove)
+
+    # Remove stopwords
+    clean_text_list = [
+        word for word in word_tokenize(text_list.lower()) if word not in swords
+    ]
+
+    return clean_text_list
+
+"""
+After using the function get_list_of_words() to return a cleaned 
+list of text, find the most common phrases that pop up in 
+the projects' descriptions.
+"""
+def common_phrases(df, clean_text_list: list, phrase_length: int):
+
+    c = Counter(
+        [" ".join(y) for x in [phrase_length] for y in ngrams(clean_text_list, x)]
+    )
+    df = pd.DataFrame({"phrases": list(c.keys()), "total": list(c.values())})
+    
+    # Sort by most common phrases to least
+    df = df.sort_values("total", ascending=False)
+    
+    # Filter out any phrases with less than 2 occurences
+    df = (df.loc[df["total"] > 1]).reset_index()
+    
+    return df
 """
 Style the dataframe by removing the index and gray banding,
 dropping certain columns, and centering text. Adds scrollbar
@@ -286,7 +373,7 @@ and a maximum height & width.
 def styled_df(df):
     display(
     HTML(
-        "<div style='height: 300px; overflow: auto; width: 800px'>"
+        "<div style='height: 300px; overflow: auto; width: 1000px'>"
         + (
             (df)
             .style.set_properties(**{"background-color": "white", "font-size": "10pt",})
@@ -434,7 +521,7 @@ def create_fake_score_card(df):
     
     # Second subset
     df3 = df[["total_project_cost__$1,000_",
-        "current_fake_fund_requested",
+        "total_unfunded_need__$1,000_",
          "project_name",
         "project_description"]]
     
@@ -444,7 +531,7 @@ def create_fake_score_card(df):
     id_vars=["project_name","project_description",],
     value_vars=[
         "total_project_cost__$1,000_",
-        "current_fake_fund_requested",
+        "total_unfunded_need__$1,000_",
     ])
     
     # Change names
@@ -473,7 +560,7 @@ def summarize_by_project_names(df, col_wanted: str):
         df.groupby([col_wanted])
         .agg({"project_name": "count", 
               "total_project_cost__$1,000_": "sum",
-              "current_fake_fund_requested":"sum"})
+              "total_unfunded_need__$1,000_":"sum"})
         .reset_index()
         .sort_values("project_name", ascending=False)
         .rename(columns={"project_name": "Total Projects"})
@@ -487,7 +574,7 @@ def summarize_by_project_names(df, col_wanted: str):
     )
 
     # Create a formatted monetary col
-    df["Fake Fund Formatted"] = df["current_fake_fund_requested"].apply(
+    df["Fake Fund Formatted"] = df["total_unfunded_need__$1,000_"].apply(
         lambda x: format_currency(x, currency="USD", locale="en_US")
     )
     # Clean up column names, remove snakecase
