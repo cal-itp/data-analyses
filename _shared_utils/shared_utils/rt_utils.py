@@ -285,13 +285,11 @@ def get_vehicle_positions(
 
     filename = f"vp_{itp_id}_{date_str}.parquet"
     path = check_cached(filename)
-    
+
     # these times should now be Pacific?
     st_combined = dt.datetime.combine(analysis_date, dt.time(0))
     st_ts_utc = int(st_combined.timestamp())
-    end_combined = dt.datetime.combine(
-        analysis_date + dt.timedelta(days=1), dt.time(2)
-    )
+    end_combined = dt.datetime.combine(analysis_date + dt.timedelta(days=1), dt.time(2))
     end_ts_utc = int(end_combined.timestamp())
 
     if path:
@@ -599,19 +597,15 @@ def try_parallel(geometry):
         return geometry
 
 
-def arrowize_segment(
-    line_geometry, buffer_distance: int = 20
-):
+def arrowize_segment(line_geometry, buffer_distance: int = 20):
     """Given a linestring segment from a gtfs shape,
     buffer and clip to show direction of progression"""
-    arrow_distance = buffer_distance * .75
+    arrow_distance = buffer_distance * 0.75
     try:
         segment = line_geometry.simplify(tolerance=5)
         if segment.length < 50:  # return short segments unmodified, for now
             return segment.buffer(buffer_distance)
-        arrow_distance = max(
-            arrow_distance, line_geometry.length / 20
-        )
+        arrow_distance = max(arrow_distance, line_geometry.length / 20)
         shift_distance = buffer_distance + 1
 
         begin_segment = shapely.ops.substring(
@@ -645,7 +639,7 @@ def arrowize_segment(
         )  # triangles to cut top of arrow
         t2 = shapely.geometry.Polygon((r_pt2, end, r_pt))
         segment_clip_mask = shapely.geometry.MultiPolygon((poly, t1, t2))
-        
+
         # buffer, then clip segment with arrow shape
         differences = segment.buffer(buffer_distance).difference(segment_clip_mask)
         # of resulting geometries, pick largest (actual segment, not any scraps...)
@@ -656,8 +650,11 @@ def arrowize_segment(
     except Exception:
         return line_geometry.simplify(tolerance=5).buffer(buffer_distance)
 
-def arrowize_by_frequency(row, frequency_col = 'trips_per_hour', frequency_thresholds = (1.5, 3, 6)):
-    
+
+def arrowize_by_frequency(
+    row, frequency_col="trips_per_hour", frequency_thresholds=(1.5, 3, 6)
+):
+
     if row[frequency_col] < frequency_thresholds[0]:
         row.geometry = arrowize_segment(row.geometry, buffer_distance=15)
     elif row[frequency_col] < frequency_thresholds[1]:
@@ -667,6 +664,7 @@ def arrowize_by_frequency(row, frequency_col = 'trips_per_hour', frequency_thres
     else:
         row.geometry = arrowize_segment(row.geometry, buffer_distance=30)
     return row
+
 
 def layer_points(rt_interpolator):
     keep_cols = [
