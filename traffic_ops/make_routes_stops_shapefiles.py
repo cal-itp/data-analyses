@@ -8,7 +8,6 @@ export as zipped shapefile or geojson
 """
 import geopandas as gpd
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(20_000_000_000)
 
 from datetime import datetime
 

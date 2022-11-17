@@ -4,7 +4,6 @@ Track the metadata updates for all open data portal datasets.
 import os
 
 import metadata_update_pro
-from gcs_to_esri import remove_zipped_shapefiles
 
 # Import various dictionaries
 import hqta
@@ -46,6 +45,3 @@ if __name__=="__main__":
                 dataset["metadata_dict"], 
                 first_run=True)
     
-    # Clean up local files
-    remove_zipped_shapefiles()
-    print("Remove local zipped shapefiles")
