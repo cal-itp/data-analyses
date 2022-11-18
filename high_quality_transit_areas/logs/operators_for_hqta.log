@@ -7505,3 +7505,7 @@
 2022-11-17 10:54:37.618 | INFO     | __main__:<module>:338 - cut segments: 0:08:10.146025
 2022-11-17 10:54:55.491 | INFO     | __main__:<module>:350 - dissolve: 0:00:17.873265
 2022-11-17 10:54:55.492 | INFO     | __main__:<module>:351 - total execution time: 0:08:29.644187
+2022-11-18 12:27:39.308 | INFO     | __main__:<module>:114 - Analysis date: 2022-11-16
+2022-11-18 12:28:16.350 | INFO     | __main__:<module>:121 - get list of cached ITP IDs: 0:00:37.040566
+2022-11-18 12:30:06.032 | INFO     | __main__:<module>:131 - check files for completeness, save as json: 0:01:49.681938
+2022-11-18 12:30:06.033 | INFO     | __main__:<module>:134 - execution time: 0:02:26.722986
