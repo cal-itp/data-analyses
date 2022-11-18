@@ -20,11 +20,6 @@ from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/C1_prep_pairwise_intersections.log")
-logger.add(sys.stderr, 
-           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-           level="INFO")
-
 # Input files
 ALL_BUS = catalog_filepath("all_bus")
 
@@ -134,6 +129,11 @@ def compile_operator_intersections(
 
 
 if __name__=="__main__":
+    logger.add("./logs/C1_prep_pairwise_intersections.log")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+               level="INFO")
+    
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
 

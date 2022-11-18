@@ -24,9 +24,6 @@ from utilities import GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
                         
 HQTA_SEGMENT_LENGTH = 1_250 # meters
-    
-logger.add("./logs/B1_create_hqta_segments.log", retention="6 months")
-logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
 
 def merge_routes_to_trips(routelines: dg.GeoDataFrame, 
@@ -304,6 +301,11 @@ def dissolved_to_longest_shape(hqta_segments: gpd.GeoDataFrame):
     
     
 if __name__=="__main__":   
+    logger.add("./logs/B1_create_hqta_segments.log", retention="6 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
     logger.info(f"Analysis date: {analysis_date}")
 
     start = dt.datetime.now()
@@ -314,7 +316,8 @@ if __name__=="__main__":
     # each direction, and after symmetric difference, cut HQTA segments
     routelines = dg.read_parquet(
         f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet")
-    trips = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+    trips = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
     # Keep longest shape in each direction
     longest_shapes = merge_routes_to_trips(routelines, trips)
@@ -325,7 +328,8 @@ if __name__=="__main__":
     # Cut into HQTA segments
     hqta_segments = select_shapes_and_segment(longest_shapes, HQTA_SEGMENT_LENGTH)
     
-    # Since route_direction at the route-level could yield both north-south and east-west 
+    # Since route_direction at the route-level could yield both 
+    # north-south and east-west 
     # for a given route, use the segments to determine the primary direction
     hqta_segments_with_dir = find_primary_direction_across_hqta_segments(hqta_segments)
     

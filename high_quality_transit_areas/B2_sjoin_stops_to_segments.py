@@ -19,12 +19,6 @@ from shared_utils import utils, gtfs_utils
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
-
-logger.add("./logs/B2_sjoin_stops_to_segments.log", retention="6 months")
-logger.add(sys.stderr, 
-           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-           level="INFO")
-
 def max_trips_by_group(df: dd.DataFrame, 
                        group_cols: list,
                        max_col: str = "n_trips"
@@ -208,6 +202,11 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
 
 
 if __name__ == "__main__":
+    logger.add("./logs/B2_sjoin_stops_to_segments.log", retention="6 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
@@ -222,8 +221,10 @@ if __name__ == "__main__":
     ## (2) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
     hqta_segments = dg.read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
-    stops = dg.read_parquet(f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
-    max_arrivals_by_stop = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet") 
+    stops = dg.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
+    max_arrivals_by_stop = pd.read_parquet(
+        f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet") 
     
     hqta_corr = sjoin_stops_and_stop_times_to_hqta_segments(
         hqta_segments, 

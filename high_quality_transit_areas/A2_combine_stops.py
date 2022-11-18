@@ -18,9 +18,6 @@ from shared_utils import utils
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/A2_combine_stops.log", retention="6 months")
-logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
-
 metro_street_running =[
     '141012', '13805', '5397', '13803',
     '13804', '5396', '13802', '5395', '5410', '5411', '13817',
@@ -38,6 +35,11 @@ van_ness_ids = [
 
 
 if __name__ == "__main__":
+    logger.add("./logs/A2_combine_stops.log", retention="6 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+
     logger.info(f"Analysis date: {analysis_date}")
     start = datetime.datetime.now()
     
