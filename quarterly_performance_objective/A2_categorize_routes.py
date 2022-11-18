@@ -14,9 +14,6 @@ from shared_utils import geography_utils, utils
 from bus_service_utils import create_parallel_corridors
 from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS, COMPILED_CACHED_GCS
 
-logger.add("./logs/A2_categorize_routes.log")
-logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
-
 route_cols = ["itp_id", "route_id"]
 
 #---------------------------------------------------------------#
@@ -177,8 +174,12 @@ def flag_shn_intersecting_routes(analysis_date: str) -> pd.DataFrame:
 
 
 if __name__=="__main__":
+    logger.add("./logs/A2_categorize_routes.log")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+
     logger.info(f"Analysis date: {ANALYSIS_DATE}")
-    
     start = datetime.datetime.now()
     
     # (1) Categorize into each group
