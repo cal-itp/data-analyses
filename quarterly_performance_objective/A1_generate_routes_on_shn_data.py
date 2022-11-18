@@ -17,17 +17,14 @@ from shared_utils import gtfs_utils, geography_utils, portfolio_utils
 from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS, COMPILED_CACHED_GCS
 
 
-logger.add("./logs/A1_generate_routes_on_shn_data.log")
-logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
-
-
 def merge_routelines_with_trips(selected_date: str) -> gpd.GeoDataFrame: 
     """
     Merge routes and trips to get line geometry.
     """
     routelines = gpd.read_parquet(
         f"{COMPILED_CACHED_GCS}routelines_{selected_date}_all.parquet")
-    trips = pd.read_parquet(f"{COMPILED_CACHED_GCS}trips_{selected_date}_all.parquet")
+    trips = pd.read_parquet(
+        f"{COMPILED_CACHED_GCS}trips_{selected_date}_all.parquet")
     
     EPSG_CODE = routelines.crs.to_epsg()
     
@@ -66,12 +63,14 @@ def get_total_service_hours(selected_date):
         get_df = True # only when it's True can the Metrolink fix get applied
     ) 
     
-    trips_with_hrs.to_parquet(f"./data/trips_with_hrs_staging_{selected_date}.parquet")
+    trips_with_hrs.to_parquet(
+        f"./data/trips_with_hrs_staging_{selected_date}.parquet")
     
     aggregated_hrs = (trips_with_hrs.groupby(trip_cols)
                       .agg({"service_hours": "sum"})
                       .reset_index()
-                      .rename(columns = {"service_hours": "total_service_hours"})
+                      .rename(columns = {
+                          "service_hours": "total_service_hours"})
                       .drop_duplicates()
     )
 
@@ -84,7 +83,12 @@ def get_total_service_hours(selected_date):
     
     
 if __name__ == "__main__":    
+    logger.add("./logs/A1_generate_routes_on_shn_data.log")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
     
+    logger.info(f"Analysis date: {ANALYSIS_DATE}")
     start = datetime.datetime.now()
     
     # Use concatenated routelines and trips from traffic_ops work

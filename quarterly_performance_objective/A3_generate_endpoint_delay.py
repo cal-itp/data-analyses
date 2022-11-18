@@ -8,15 +8,13 @@ import pandas as pd
 import sys
 
 from loguru import logger
+from calitp.tables import tbls
+from siuba import *
 
 from shared_utils import rt_utils, utils, gtfs_utils
 from rt_analysis import rt_filter_map_plot
 
 from update_vars import ANALYSIS_DATE, COMPILED_CACHED_GCS
-
-logger.add("./logs/A3_generate_endpoint_delay.log")
-logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
-
 
 def aggregate_endpoint_delays(itp_id_list: list) -> pd.DataFrame:
     """
@@ -56,11 +54,24 @@ def remove_local_files():
         
 if __name__=="__main__":
     
+    logger.add("./logs/A3_generate_endpoint_delay.log")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+               level="INFO")
+    
     logger.info(f"Analysis date: {ANALYSIS_DATE}")
     start = datetime.datetime.now()
     
+    ALL_ITP_IDS = (
+            tbls.gtfs_schedule.agency()
+            >> select(_.calitp_itp_id)
+            >> filter(_.calitp_itp_id != 200)
+            >> distinct()
+            >> collect()
+        ).calitp_itp_id.tolist()
+    
     operators_status_dict = rt_utils.get_operators(
-        ANALYSIS_DATE, gtfs_utils.ALL_ITP_IDS)
+        ANALYSIS_DATE, ALL_ITP_IDS)
     
     #erroring_operators = [14, 206]
     ran_operators = [k for k, v in operators_status_dict.items() 
