@@ -28,9 +28,6 @@ import operators_for_hqta
 from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH
 from shared_utils import gtfs_utils, geography_utils, rt_utils, utils
 
-logger.add("./logs/download_data.log", retention="6 months")
-logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
-
 LOCAL_PATH = "./data/"
 
 def primary_trip_query(itp_id: int, analysis_date: str):
@@ -215,6 +212,12 @@ def check_route_trips_stops_are_cached(itp_id: int, analysis_date: str):
         
 if __name__=="__main__":
 
+    logger.add("./logs/download_data.log", retention="6 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     ALL_IDS = (tbls.gtfs_schedule.agency()

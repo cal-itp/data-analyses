@@ -16,7 +16,7 @@ from siuba import *
 
 from shared_utils import geography_utils, gtfs_utils, utils, rt_dates
 
-ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["oct2022"])
+ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["nov2022"])
 
 GCS = "gs://calitp-analytics-data/data-analyses/"
 TRAFFIC_OPS_GCS = f"{GCS}traffic_ops/"
@@ -140,7 +140,6 @@ def concatenate_amtrak(
     routelines_all = (dd.multi.concat([
                         routelines.to_crs(geography_utils.WGS84), 
                         amtrak_routelines.to_crs(geography_utils.WGS84)], axis=0)
-                      .astype({"trip_key": "Int64"})
                       .drop_duplicates()
                       .reset_index()
                 ).compute()
