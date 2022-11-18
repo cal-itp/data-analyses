@@ -18,7 +18,8 @@ from shared_utils import utils
 from utilities import GCS_FILE_PATH, clip_to_ca
 from update_vars import analysis_date
 
-metro_street_running =[
+
+metro_street_running = [
     '141012', '13805', '5397', '13803',
     '13804', '5396', '13802', '5395', '5410', '5411', '13817',
     '12304', '5408', '3821', '2603', '3153', '3124', '378', '65300039',
@@ -31,7 +32,13 @@ metro_street_running =[
 van_ness_ids = [
     '8096', '8097', '18095', '18098', '8094', '8099', '18093', '8100',
     '18092', '18101', '18102', '18091', '18103', '8090', '18104', '18089',
-    '18105', '18088'] 
+    '18105', '18088'
+]
+
+BRT_STOPS_FILTER = {
+    182: metro_street_running,
+    282: van_ness_ids
+}
 
 
 if __name__ == "__main__":
@@ -45,38 +52,23 @@ if __name__ == "__main__":
     
     # Rail
     rail_ferry_brt.grab_rail_data(analysis_date)
-    rail_stops = gpd.read_parquet(f"./data/rail_stops.parquet")
+    rail_stops = gpd.read_parquet("./data/rail_stops.parquet")
     
     time1 = datetime.datetime.now()
     logger.info(f"grabbed rail: {time1-start}")
 
     # BRT
-    # LA Metro
-    itp_id = 182
-    rail_ferry_brt.grab_operator_brt(itp_id, analysis_date)
-    metro_brt_stops = gpd.read_parquet(f"./data/brt_stops_{itp_id}.parquet")
-    metro_brt_stops = rail_ferry_brt.additional_brt_filtering_out_stops(
-        metro_brt_stops, itp_id, metro_street_running)
-    
-    # AC Transit
-    itp_id = 4
-    rail_ferry_brt.grab_operator_brt(itp_id, analysis_date)
-    act_brt_stops = gpd.read_parquet(f"./data/brt_stops_{itp_id}.parquet")
-    
-    # SF Muni
-    itp_id = 282
-    rail_ferry_brt.grab_operator_brt(itp_id, analysis_date)
-    muni_brt_stops = gpd.read_parquet(f"./data/brt_stops_{itp_id}.parquet")
-    
-    muni_brt_stops = rail_ferry_brt.additional_brt_filtering_out_stops(
-        muni_brt_stops, itp_id, van_ness_ids)
+    rail_ferry_brt.grab_operator_brt(analysis_date)
+    brt_stops = gpd.read_parquet("./data/brt_stops.parquet")
+    brt_stops = rail_ferry_brt.additional_brt_filtering_out_stops(
+        brt_stops, BRT_STOPS_FILTER)
 
     time2 = datetime.datetime.now()
     logger.info(f"grabbed brt: {time2-time1}")
     
     # Ferry
     rail_ferry_brt.grab_ferry_data(analysis_date)
-    ferry_stops = gpd.read_parquet(f"./data/ferry_stops.parquet")
+    ferry_stops = gpd.read_parquet("./data/ferry_stops.parquet")
     
     time3 = datetime.datetime.now()
     logger.info(f"grabbed ferry: {time3-time2}")
@@ -84,7 +76,7 @@ if __name__ == "__main__":
     # Concatenate datasets that need to be clipped to CA
     rail_brt = pd.concat([
         rail_stops,
-        metro_brt_stops, act_brt_stops, muni_brt_stops,
+        brt_stops
     ], axis=0, ignore_index= True)
     
     rail_brt = clip_to_ca(rail_brt)
