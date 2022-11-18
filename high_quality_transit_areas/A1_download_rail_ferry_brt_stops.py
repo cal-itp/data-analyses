@@ -108,8 +108,10 @@ def grab_rail_data(analysis_date: str) -> gpd.GeoDataFrame:
     rail_stops.to_parquet("./data/rail_stops.parquet")
     
 
-def grab_operator_brt_NEW(analysis_date: str) -> gpd.GeoDataFrame:
-
+def grab_operator_brt(analysis_date: str) -> gpd.GeoDataFrame:
+    """
+    Grab BRT routes, stops data for certain operators in CA by analysis date.
+    """
     trips = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
@@ -151,57 +153,33 @@ def grab_operator_brt_NEW(analysis_date: str) -> gpd.GeoDataFrame:
     brt_stops.to_parquet("./data/brt_stops.parquet")
 
 
-
-def grab_operator_brt(itp_id: int, analysis_date: str):
-    """
-    Grab BRT routes, stops data for certain operators in CA by analysis date.
-    """
-        
-    trips = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
-    
-    operator_trips = trips[trips.calitp_itp_id==itp_id]
-    
-    # Filter within specific operator, each operator has specific filtering condition
-    # If it's not one of the ones listed, raise an error
-    BRT_OPERATORS = [
-        182, 4, 282, 
-        # 232, # Omni BRT too infrequent 
-    ]
-    
-
-    
-    col, filtering_list = list(BRT_ROUTE_FILTERING[itp_id].items())[0]     
-    brt_trips = operator_trips[operator_trips[col].isin(filtering_list)]
-        
-    # Grab trip_keys associated with this operator's BRT routes
-    brt_trip_keys = (brt_trips[["trip_key", "route_id", "route_type"]]
-                     .drop_duplicates()
-                     .compute()
-                    )
-        
-    brt_stops = grab_stops(analysis_date, brt_trip_keys)
-        
-    if itp_id not in BRT_OPERATORS:
-        raise KeyError("Operator does not have BRT route filtering condition set.")
-    
-    brt_stops.to_parquet(f"./data/brt_stops_{itp_id}.parquet")
-
-
-def additional_brt_filtering_out_stops(df: gpd.GeoDataFrame, 
-                                       itp_id: int, 
-                                       filtering_list: list) -> gpd.GeoDataFrame:
+def additional_brt_filtering_out_stops(
+    df: gpd.GeoDataFrame, filtering_dict: dict
+) -> gpd.GeoDataFrame:
     """
     df: geopandas.GeoDataFrame
-        Input BRT stops data
-    itp_id: int
-    filtering_list: list of stop_ids
+        Input BRT stops data (combined across operators)
+    filtering_dict: dict
+        key: itp_id
+        value: list of stop_ids that need filtering
+        Note: Metro is filtering for stops to drop 
+            Muni is filtering for stops to keep
     """
-    if itp_id == 182:
-        brt_df_stops = df >> filter(-_.stop_id.isin(filtering_list))
-        
-    elif itp_id == 282:
-        brt_df_stops = df >> filter(_.stop_id.isin(filtering_list))
+    operators_to_filter = list(filtering_dict.keys())
+    
+    metro = df[df.calitp_itp_id == 182]
+    muni = df[df.calitp_itp_id == 282]
+    subset_no_filtering = df[~df.calitp_itp_id.isin(operators_to_filter)]
+    
+    # For Metro, unable to filter out non-station stops using GTFS, manual list
+    metro2 = metro >> filter(-_.stop_id.isin(filtering_dict[182]))
+    
+    muni2 = muni >> filter(_.stop_id.isin(filtering_dict[282]))
+
+    brt_df_stops = pd.concat(
+        [metro2, muni2, subset_no_filtering], 
+        axis=0
+    ).sort_values(["calitp_itp_id"]).reset_index(drop=True)
     
     return brt_df_stops
 
