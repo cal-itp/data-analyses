@@ -12,10 +12,6 @@ from loguru import logger
 from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS, COMPILED_CACHED_GCS
 from shared_utils import geography_utils, utils
 
-logger.add("./logs/A4_route_service_hours_delay.log")
-logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
-
-
 def calculate_route_level_delays(selected_date: str) -> pd.DataFrame:
     """
     Aggregate endpoint_delays to route-level, from trip-level.
@@ -62,6 +58,11 @@ def merge_delay_with_route_categories(
 
 
 if __name__ == "__main__":
+    
+    logger.add("./logs/A4_route_service_hours_delay.log")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+               level="INFO")
     
     logger.info(f"Analysis date: {ANALYSIS_DATE}")
     start = datetime.datetime.now()
