@@ -14,10 +14,6 @@ from operators_for_hqta import itp_ids_from_json
 from shared_utils import rt_dates, gtfs_utils, rt_utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
-logger.add("./logs/compile_operators_data.log", retention="6 months")
-logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
-
-
 def grab_selected_date(selected_date: str, 
                        dataset: Literal["stops", "trips", "routelines", "st"], 
                        itp_ids: list) -> None:
@@ -27,7 +23,7 @@ def grab_selected_date(selected_date: str,
     compiled_path = rt_utils.check_cached(
         f"{COMPILED_CACHED_VIEWS}{dataset}_{selected_date}.parquet")
 
-    if not compiled_path and dataset in ["stops", "routelines"]:
+    if (dataset in ["stops", "routelines"]) and (not compiled_path):
 
         gtfs_utils.all_routelines_or_stops_with_cached(
             dataset = dataset,
@@ -38,7 +34,7 @@ def grab_selected_date(selected_date: str,
     
         logger.info(f"{dataset} compiled and cached")
     
-    if not compiled_path and dataset in ["trips", "st"]:
+    if (dataset in ["trips", "st"]) and (not compiled_path):
         gtfs_utils.all_trips_or_stoptimes_with_cached(
             dataset = dataset,
             analysis_date = selected_date,
@@ -51,6 +47,11 @@ def grab_selected_date(selected_date: str,
     
 if __name__=="__main__":
     
+    logger.add("./logs/compile_operators_data.log", retention="6 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+
     logger.info(f"Analysis date: {analysis_date}")    
 
     start = dt.datetime.now()

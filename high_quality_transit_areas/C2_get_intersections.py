@@ -22,15 +22,11 @@ from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
-logger.add("./logs/C2_find_intersections.log")
-logger.add(sys.stderr, 
-           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-           level="INFO")
-
 catalog = intake.open_catalog("*.yml")
 
 def attach_geometry_to_pairs(corridors: gpd.GeoDataFrame, 
-                             intersecting_pairs: pd.DataFrame) -> gpd.GeoDataFrame:
+                             intersecting_pairs: pd.DataFrame
+                            ) -> gpd.GeoDataFrame:
     """
     Take pairwise table and attach geometry to hqta_segment_id and 
     intersect_hqta_segment_id.
@@ -61,7 +57,8 @@ def attach_geometry_to_pairs(corridors: gpd.GeoDataFrame,
     )
 
     gdf = (pairs_with_geom2.reindex(columns = col_order)
-           .sort_values(["calitp_itp_id", "hqta_segment_id", "intersect_hqta_segment_id"])
+           .sort_values(["calitp_itp_id", "hqta_segment_id", 
+                         "intersect_hqta_segment_id"])
            .reset_index(drop=True)
           )
     
@@ -100,6 +97,11 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     
 if __name__ == "__main__":
+    logger.add("./logs/C2_find_intersections.log")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
     logger.info(f"Analysis date: {analysis_date}")
 
     start = dt.datetime.now()

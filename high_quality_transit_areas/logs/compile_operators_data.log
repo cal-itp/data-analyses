@@ -25,3 +25,9 @@
 2022-10-15 13:13:21.045 | INFO     | __main__:<module>:54 - Analysis date: 2022-10-12
 2022-10-15 13:18:35.530 | INFO     | __main__:grab_selected_date:49 - st compiled and cached
 2022-10-15 13:18:35.531 | INFO     | __main__:<module>:65 - execution time: 0:05:14.484791
+2022-11-17 09:37:46.106 | INFO     | __main__:<module>:54 - Analysis date: 2022-11-16
+2022-11-17 09:39:52.670 | INFO     | __main__:grab_selected_date:39 - stops compiled and cached
+2022-11-17 09:41:24.889 | INFO     | __main__:grab_selected_date:49 - trips compiled and cached
+2022-11-17 09:43:46.764 | INFO     | __main__:grab_selected_date:39 - routelines compiled and cached
+2022-11-17 09:48:03.737 | INFO     | __main__:grab_selected_date:49 - st compiled and cached
+2022-11-17 09:48:03.739 | INFO     | __main__:<module>:65 - execution time: 0:10:17.586165

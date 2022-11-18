@@ -11,15 +11,17 @@ import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
-from calitp.tables import tbl
 from siuba import *
 
-import utilities
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 
 def trip_keys_for_route_type(analysis_date: str, 
                              route_type_list: list) -> pd.DataFrame: 
+    """
+    Subset the trips table for specified route types.
+    Keep route info (route_id, route_type) that's needed.
+    """
     trips = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
@@ -33,46 +35,59 @@ def trip_keys_for_route_type(analysis_date: str,
     return trip_keys_for_type
 
 
-def trip_keys_to_stop_keys(trip_key_df: pd.DataFrame) -> pd.DataFrame:
+def trip_keys_to_stop_ids(trip_key_df: pd.DataFrame) -> dd.DataFrame:
+    """
+    Use the cached stop times table to avoid running query with the 
+    tbls.index. This function is called in `grab_stops`.
     
-    stop_keys_list = (tbl.views.gtfs_schedule_index_feed_trip_stops() 
-                      >> filter(_.trip_key.isin(trip_key_df.trip_key))
-                      >> select(_.trip_key, _.stop_key)
-                      >> distinct()
-                      >> collect()
-    )
+    Keep the subset of trips we're interested in based on route_type 
+    filter in the stop_times table.
     
-    stop_keys_df = pd.merge(stop_keys_list, 
-                            trip_key_df,
-                            on = "trip_key",
-                            how = "left",
-    )
+    Only keep unique stop_id combo. 
+    """
+    stop_times = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+        
+    # Do a merge to narrow down stop_ids based on trip_keys
+    # Keep unique stop (instead of stop_time combo)
+    # and also retain route type that came from trip_key_df
+    keep_cols = ["calitp_itp_id", "stop_id", "route_id", "route_type"]
     
-    return stop_keys_df
+    stop_ids_present = dd.merge(
+        stop_times[stop_times.trip_key.isin(trip_key_df.trip_key)],
+        trip_key_df,
+        on = ["trip_key"],
+        how = "inner"
+    )[keep_cols].drop_duplicates()
+    
+    return stop_ids_present
 
 
-def grab_stops_by_stop_key(analysis_date: str, 
-                           trip_stop_df: pd.DataFrame
-                          ) -> gpd.GeoDataFrame:
+def grab_stops(analysis_date: str, 
+               trip_key_df: pd.DataFrame) -> gpd.GeoDataFrame:
+    """
+    Merge stops table to get point geom attached to stop_ids 
+    for specified route_types.
+    """
     stops = dg.read_parquet(
         f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
     
-    stops_for_route_type = dd.merge(
-        stops,
-        trip_stop_df,
-        on = "stop_key",
-        how = "inner"
+    # Based on subset of trips, grab the stop_ids present.
+    stops_present = trip_keys_to_stop_ids(trip_key_df)
+    
+    # merge stops table and get point geom
+    stops_for_route_type = (
+        dd.merge(
+            stops,
+            stops_present,
+            on = ["calitp_itp_id", "stop_id"],
+            how = "inner"
+        ).drop_duplicates()
+        .reset_index(drop=True)
+        .compute()
     )
     
-    # Drop trip_key and drop duplicates
-    stops_for_route_type2 = (stops_for_route_type
-                             .drop(columns = "trip_key")
-                             .drop_duplicates()
-                             .reset_index(drop=True)
-                             .compute()
-                            )
-    
-    return stops_for_route_type2
+    return stops_for_route_type
     
 
 def grab_rail_data(analysis_date: str) -> gpd.GeoDataFrame:
@@ -87,33 +102,18 @@ def grab_rail_data(analysis_date: str) -> gpd.GeoDataFrame:
     
     # Grab trip_keys associated with this route_type
     rail_trip_keys = trip_keys_for_route_type(analysis_date, rail_route_types)
+        
+    rail_stops = grab_stops(analysis_date, rail_trip_keys)
+        
+    rail_stops.to_parquet("./data/rail_stops.parquet")
     
-    # Go from trip_keys to stop_keys to stops
-    rail_stop_keys = trip_keys_to_stop_keys(rail_trip_keys)
-    
-    rail_stops = grab_stops_by_stop_key(analysis_date, rail_stop_keys)
-    
-    rail_stops = utilities.clip_to_ca(rail_stops)
-    
-    return rail_stops
 
-
-def grab_operator_brt(itp_id: int, analysis_date: str):
+def grab_operator_brt(analysis_date: str) -> gpd.GeoDataFrame:
     """
     Grab BRT routes, stops data for certain operators in CA by analysis date.
     """
-        
     trips = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
-    
-    operator_trips = trips[trips.calitp_itp_id==itp_id]
-    
-    # Filter within specific operator, each operator has specific filtering condition
-    # If it's not one of the ones listed, raise an error
-    BRT_OPERATORS = [
-        182, 4, 282, 
-        # 232, # Omni BRT too infrequent 
-    ]
     
     BRT_ROUTE_FILTERING = {
         # LA Metro BRT
@@ -127,42 +127,59 @@ def grab_operator_brt(itp_id: int, analysis_date: str):
         282: {"route_short_name": ['49']}
     }
     
-    col, filtering_list = list(BRT_ROUTE_FILTERING[itp_id].items())[0]     
-    brt_trips = operator_trips[operator_trips[col].isin(filtering_list)]
+    BRT_OPERATORS = list(BRT_ROUTE_FILTERING.keys())
+    operator_trips = trips[trips.calitp_itp_id.isin(BRT_OPERATORS)]
+    
+    # Set metadata for dask
+    all_brt_trips = operator_trips.head(0)
+    
+    for itp_id, filtering_cond in BRT_ROUTE_FILTERING.items():
+        trips_subset = operator_trips[operator_trips.calitp_itp_id==itp_id]
         
+        for col, filtering_list in filtering_cond.items():
+            operator_brt = trips_subset[trips_subset[col].isin(filtering_list)]
+        
+        all_brt_trips = dd.multi.concat([all_brt_trips, operator_brt], axis=0)
+    
+    
     # Grab trip_keys associated with this operator's BRT routes
-    brt_trip_keys = (brt_trips[["trip_key", "route_id", "route_type"]]
+    brt_trip_keys = (all_brt_trips[["trip_key", "route_id", "route_type"]]
                      .drop_duplicates()
                      .compute()
                     )
+        
+    brt_stops = grab_stops(analysis_date, brt_trip_keys)
     
-    # Go from trip_keys to stop_keys to stops
-    brt_stop_keys = trip_keys_to_stop_keys(brt_trip_keys)
-    
-    brt_stops = grab_stops_by_stop_key(analysis_date, brt_stop_keys)
-    
-    operator_brt_stops = utilities.clip_to_ca(brt_stops)    
-    
-    if itp_id not in BRT_OPERATORS:
-        raise KeyError("Operator does not have BRT route filtering condition set.")
-    
-    return operator_brt_stops
+    brt_stops.to_parquet("./data/brt_stops.parquet")
 
 
-def additional_brt_filtering_out_stops(df: gpd.GeoDataFrame, 
-                                       itp_id: int, 
-                                       filtering_list: list) -> gpd.GeoDataFrame:
+def additional_brt_filtering_out_stops(
+    df: gpd.GeoDataFrame, filtering_dict: dict
+) -> gpd.GeoDataFrame:
     """
     df: geopandas.GeoDataFrame
-        Input BRT stops data
-    itp_id: int
-    filtering_list: list of stop_ids
+        Input BRT stops data (combined across operators)
+    filtering_dict: dict
+        key: itp_id
+        value: list of stop_ids that need filtering
+        Note: Metro is filtering for stops to drop 
+            Muni is filtering for stops to keep
     """
-    if itp_id == 182:
-        brt_df_stops = df >> filter(-_.stop_id.isin(filtering_list))
-        
-    elif itp_id == 282:
-        brt_df_stops = df >> filter(_.stop_id.isin(filtering_list))
+    operators_to_filter = list(filtering_dict.keys())
+    
+    metro = df[df.calitp_itp_id == 182]
+    muni = df[df.calitp_itp_id == 282]
+    subset_no_filtering = df[~df.calitp_itp_id.isin(operators_to_filter)]
+    
+    # For Metro, unable to filter out non-station stops using GTFS, manual list
+    metro2 = metro >> filter(-_.stop_id.isin(filtering_dict[182]))
+    
+    muni2 = muni >> filter(_.stop_id.isin(filtering_dict[282]))
+
+    brt_df_stops = pd.concat(
+        [metro2, muni2, subset_no_filtering], 
+        axis=0
+    ).sort_values(["calitp_itp_id"]).reset_index(drop=True)
     
     return brt_df_stops
 
@@ -172,15 +189,12 @@ def grab_ferry_data(analysis_date: str):
     
     # Grab trip_keys associated with this route_type
     ferry_trip_keys = trip_keys_for_route_type(analysis_date, ferry_route_types)
-
-    # Go from trip_keys to stop_keys to stops
-    ferry_stop_keys = trip_keys_to_stop_keys(ferry_trip_keys)
     
-    ferry_stops = grab_stops_by_stop_key(analysis_date, ferry_stop_keys)
+    ferry_stops = grab_stops(analysis_date, ferry_trip_keys)
         
     # TODO: only stops without bus service, implement algorithm
     angel_and_alcatraz = ['2483552', '2483550', '43002'] 
     
     ferry_stops = ferry_stops >> filter(-_.stop_id.isin(angel_and_alcatraz))
     
-    return ferry_stops
+    ferry_stops.to_parquet("./data/ferry_stops.parquet")

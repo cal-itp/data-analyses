@@ -27,11 +27,6 @@ from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
-logger.add("./logs/C3_create_bus_hqta_types.log", retention="6 months")
-logger.add(sys.stderr, 
-           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-           level="INFO")
-
 # Input files
 ALL_INTERSECTIONS = catalog_filepath("all_intersections")
 
@@ -124,6 +119,11 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 
 if __name__ == "__main__":
+    logger.add("./logs/C3_create_bus_hqta_types.log", retention="6 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+               level="INFO")
+    
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     

@@ -20,22 +20,9 @@ from shared_utils import utils, geography_utils
 from D1_assemble_hqta_points import EXPORT_PATH, add_route_info
 from update_vars import analysis_date
 
-logger.add("./logs/D2_assemble_hqta_polygons.log", retention="6 months")
-logger.add(sys.stderr, 
-           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-           level="INFO")
 
 HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 catalog = intake.open_catalog("*.yml")
-
-## drop incorrect Half Moon Bay data, TODO investigate
-## drop incorrect Cheviot Hills (Motor Ave, south of Pico) showing up data, TODO investigate refactor (run shapes in frequency order...)
-
-# check3_hqta_points...first 2 stops don't exist
-# 689 is ok, shows up for multiple operators, but where it's landing is ok
-# bad_stops = ['315604', '315614', '689']
-
-bad_stops = []
 
 def get_dissolved_hq_corridor_bus(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """
@@ -107,11 +94,10 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     return hqta_polygons
 
 
-def drop_bad_stops_final_processing(gdf: gpd.GeoDataFrame, 
-                                    bad_stop_list: list) -> gpd.GeoDataFrame:
+def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Input a list of known bad stops in the script to 
-    exclude from the polygons.
+    Drop extra columns, get sorting done.
+    Used to drop bad stops, but these all look ok.
     """
     
     keep_cols = [
@@ -121,8 +107,7 @@ def drop_bad_stops_final_processing(gdf: gpd.GeoDataFrame,
     ]
     
     # Drop bad stops, subset columns
-    gdf2 = (gdf[~gdf.stop_id.isin(bad_stop_list)]
-            [keep_cols]
+    gdf2 = (gdf[keep_cols]
             .sort_values(["hqta_type", "calitp_itp_id_primary", 
                           "calitp_itp_id_secondary",
                           "hqta_details", "route_id"])
@@ -133,6 +118,11 @@ def drop_bad_stops_final_processing(gdf: gpd.GeoDataFrame,
 
 
 if __name__=="__main__":
+    logger.add("./logs/D2_assemble_hqta_polygons.log", retention="6 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+               level="INFO")
+    
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
@@ -147,7 +137,7 @@ if __name__=="__main__":
     logger.info(f"filter and buffer: {time1 - start}")
     
     # Drop bad stops, subset, get ready for export
-    gdf2 = drop_bad_stops_final_processing(gdf, bad_stops)    
+    gdf2 = final_processing(gdf)    
     
     # Export to GCS
     # Stash this date's into its own folder, to convert to geojson, geojsonl
