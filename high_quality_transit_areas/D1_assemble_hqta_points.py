@@ -25,11 +25,6 @@ import utilities
 from shared_utils import utils, geography_utils, portfolio_utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
-logger.add("./logs/D1_assemble_hqta_points.log", retention="6 months")
-logger.add(sys.stderr, 
-           format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-           level="INFO")
-
 catalog = intake.open_catalog("*.yml")
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 
@@ -135,6 +130,11 @@ def clean_up_hqta_points(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     
 if __name__=="__main__":
+    logger.add("./logs/D1_assemble_hqta_points.log", retention="6 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+               level="INFO")
+    
     logger.info(f"Analysis date: {analysis_date}")    
     start = dt.datetime.now()
     
