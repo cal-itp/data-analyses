@@ -31,6 +31,8 @@ class RtFilterMapper:
         self.rt_trips = rt_trips
         self.calitp_itp_id = self.rt_trips.calitp_itp_id.iloc[0]
         self.stop_delay_view = stop_delay_view
+        # below line fixes interpolated segment mapping for 10/12 data, fixed upstream for future dates
+        self.stop_delay_view = self.stop_delay_view >> group_by(_.shape_id) >> mutate(direction_id = _.direction_id.ffill()) >> ungroup()
         self.routelines = routelines
         self.calitp_agency_name = rt_trips.calitp_agency_name.iloc[0]
         self.analysis_date = rt_trips.service_date.iloc[0]
@@ -288,11 +290,11 @@ class RtFilterMapper:
                     self.debug_dict[f'{shape_id}_st_spd1'] = stop_speeds
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
+                         >> filter(_.speed_mph < 80, _.speed_mph > 0) ## drop impossible speeds, TODO logging?
                          >> group_by(_.stop_sequence)
                          >> mutate(n_trips_shp = _.stop_sequence.size, # filtered to shape
                                     avg_mph = _.speed_mph.mean(),
                                   _20p_mph = _.speed_mph.quantile(.2),
-                                   # trips_per_hour = _.n_trips / self.hr_duration_in_filter
                                   )
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
@@ -303,15 +305,6 @@ class RtFilterMapper:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
                     print(e)
                     continue
-                
-                stop_speeds = stop_speeds >> filter(_.speed_mph < 80) ## drop impossibly high speeds
-                if stop_speeds.avg_mph.max() > 80:
-                    # print(f'speed above 80 for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                    stop_speeds = stop_speeds >> filter(_.avg_mph < 80)
-                
-                if stop_speeds._20p_mph.min() < 0:
-                    # print(f'negative speed for shape {stop_speeds.shape_id.iloc[0]}, dropping')
-                    stop_speeds = stop_speeds >> filter(_._20p_mph > 0)
                 
                 all_stop_speeds = pd.concat((all_stop_speeds, stop_speeds))
 

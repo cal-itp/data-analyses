@@ -2,6 +2,7 @@ import numpy as np
 import datetime as dt
 import geopandas as gpd
 from rt_analysis import rt_filter_map_plot
+from tqdm.notebook import tqdm
 
 def sccp_average_metrics(itp_id: int, date_range: np.arange, corridor: gpd.GeoDataFrame,
                         filter_dict: dict = None):
