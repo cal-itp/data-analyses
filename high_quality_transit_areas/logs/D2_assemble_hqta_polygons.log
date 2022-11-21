@@ -62,3 +62,10 @@
 2022-11-18 09:24:51.900 | INFO     | __main__:<module>:165 - export as geojson
 2022-11-18 09:25:34.393 | INFO     | __main__:<module>:173 - export as geojsonl
 2022-11-18 09:25:34.395 | INFO     | __main__:<module>:176 - execution time: 0:02:17.113728
+2022-11-21 14:19:56.823 | INFO     | __main__:<module>:126 - Analysis date: 2022-11-16
+2022-11-21 14:20:30.390 | INFO     | __main__:<module>:137 - filter and buffer: 0:00:33.536832
+2022-11-21 14:20:34.683 | INFO     | __main__:<module>:148 - export as geoparquet in date folder
+2022-11-21 14:20:37.849 | INFO     | __main__:<module>:156 - export as geoparquet
+2022-11-21 14:21:35.275 | INFO     | __main__:<module>:165 - export as geojson
+2022-11-21 14:22:17.998 | INFO     | __main__:<module>:173 - export as geojsonl
+2022-11-21 14:22:18.000 | INFO     | __main__:<module>:176 - execution time: 0:02:21.146658
