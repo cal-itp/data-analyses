@@ -39,3 +39,10 @@
 2022-11-21 13:11:25.437 | INFO     | __main__:<module>:144 - across operator intersections: 0:00:29.551388
 2022-11-21 13:11:57.426 | INFO     | __main__:<module>:168 - compute for pairwise/subset_corridors: 0:00:31.989003
 2022-11-21 13:12:00.473 | INFO     | __main__:<module>:179 - execution time: 0:01:04.587994
+2022-11-21 16:40:32.366 | INFO     | __main__:<module>:126 - Analysis date: 2022-11-16
+2022-11-21 16:40:33.475 | INFO     | __main__:<module>:135 - across operator intersections: 0:00:01.107124
+2022-11-21 16:40:51.929 | INFO     | __main__:<module>:159 - compute for pairwise/subset_corridors: 0:00:18.454631
+2022-11-21 16:41:17.765 | INFO     | __main__:<module>:126 - Analysis date: 2022-11-16
+2022-11-21 16:41:18.766 | INFO     | __main__:<module>:135 - get pairwise table: 0:00:00.999581
+2022-11-21 16:41:36.801 | INFO     | __main__:<module>:159 - compute for pairwise/subset_corridors: 0:00:18.035015
+2022-11-21 16:41:39.484 | INFO     | __main__:<module>:170 - execution time: 0:00:21.717351
