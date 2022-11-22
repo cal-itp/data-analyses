@@ -35,3 +35,7 @@
 2022-11-17 11:11:13.334 | INFO     | __main__:<module>:175 - export as geojson
 2022-11-17 11:11:55.826 | INFO     | __main__:<module>:183 - export as geojsonl
 2022-11-17 11:11:55.829 | INFO     | __main__:<module>:186 - execution time: 0:02:09.565677
+2022-11-21 13:10:55.883 | INFO     | __main__:<module>:135 - Analysis date: 2022-11-16
+2022-11-21 13:11:25.437 | INFO     | __main__:<module>:144 - across operator intersections: 0:00:29.551388
+2022-11-21 13:11:57.426 | INFO     | __main__:<module>:168 - compute for pairwise/subset_corridors: 0:00:31.989003
+2022-11-21 13:12:00.473 | INFO     | __main__:<module>:179 - execution time: 0:01:04.587994
