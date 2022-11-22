@@ -95,33 +95,24 @@ def compile_operator_intersections(
     https://stackoverflow.com/questions/56072129/scale-and-concatenate-pandas-dataframe-into-a-dask-dataframe
     """
     results = []
-    ITP_IDS = gdf.calitp_itp_id.unique()
 
-    for itp_id in sorted(ITP_IDS):
+    # Part 1: take east-west routes for an operator, and compare against
+    # all north-south routes for itself and other operators
+    all_east_west = gdf[gdf.route_direction=="east-west"]
+    all_north_south = gdf[gdf.route_direction=="north-south"]
+
+    results.append(sjoin_against_other_operators(
+        all_east_west, all_north_south))
         
-        # Part 1: take east-west routes for an operator, and compare against
-        # all north-south routes for itself and other operators
-        operator_east_west = gdf[(gdf.calitp_itp_id==itp_id) & 
-                          (gdf.route_direction=="east-west")]
-        all_north_south = gdf[gdf.route_direction=="north-south"]
-        
-        results.append(sjoin_against_other_operators(
-            operator_east_west, all_north_south))
-        
-        # Part 2: take north-south routes for an operator, and compare against
-        # all east-west routes for itself and other operators
-        # Even though this necessarily would repeat results from earlier, just swapped, 
-        # like RouteA-RouteB becomes RouteB-RouteA, use this to key in easier later.
-        operator_north_south = gdf[(gdf.calitp_itp_id==itp_id) & 
-                          (gdf.route_direction=="north-south")]
-        all_east_west = gdf[gdf.route_direction=="east-west"]
-        
-        results.append(sjoin_against_other_operators(
-            operator_north_south, all_east_west)) 
+    # Part 2: take north-south routes for an operator, and compare against
+    # all east-west routes for itself and other operators
+    # Even though this necessarily would repeat results from earlier, just swapped, 
+    # like RouteA-RouteB becomes RouteB-RouteA, use this to key in easier later.
+    results.append(sjoin_against_other_operators(
+        all_north_south, all_east_west)) 
     
     # Concatenate all the dask dfs in the list and get it into one dask df
-    ddf = dd.multi.concat(results, axis=0).drop_duplicates()
-    #df = ddf.reset_index(drop=True).compute()
+    ddf = dd.multi.concat(results, axis=0).drop_duplicates().reset_index(drop=True)
     
     return ddf    
 
@@ -141,7 +132,7 @@ if __name__=="__main__":
     intersection_pairs = compile_operator_intersections(corridors)
 
     time1 = dt.datetime.now()
-    logger.info(f"across operator intersections: {time1 - start}")
+    logger.info(f"get pairwise table: {time1 - start}")
 
     pairwise_intersections = intersection_pairs.compute()
     
