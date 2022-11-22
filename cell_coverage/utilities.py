@@ -47,7 +47,8 @@ def create_california_coverage(file_zip_name:str, new_file_name:str):
     ca_gdf = gpd.read_file(
     "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson")
     
-    # Clip 
+    # Clip to only California 
+    # https://fcc.maps.arcgis.com/apps/webappviewer/index.html?id=6c1b2e73d9d749cdb7bc88a0d1bdd25b
     fcc_ca_gdf = gpd.clip(fcc_gdf, ca_gdf)
   
     # Snake case & drop columns
@@ -131,7 +132,8 @@ def load_tmobile():
 
 # Open routes file, find unique routes
 def load_unique_routes_df():
-    routes_file =  "gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet"
+    # traffic_ops/export/ca_transit_routes_[date].parquet
+    routes_file =  "gs://calitp-analytics-data/data-analyses/traffic_ops/export/ca_transit_routes_2022-09-14.parquet"
     df = gpd.read_parquet(routes_file)
     
     # Find unique routes
@@ -147,7 +149,7 @@ def load_unique_routes_df():
 """ 
 # Find number of trips ran per route by route ID and by the agency as a whole. 
 def trip_df():
-
+    
     # Read in file
     trips_file = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/trips_2022-09-14_all.parquet"
     df = pd.read_parquet(trips_file)
@@ -236,7 +238,7 @@ def ntd_vehicles():
 """
 Analysis Functions
 """
-# Overlay FCC map with original bus routes df.
+# Overlay Federal Communications Commission map with original bus routes df.
 def comparison(gdf_left, gdf_right):
 
     # Overlay
