@@ -101,25 +101,23 @@ def compile_operator_intersections(
         
         # Part 1: take east-west routes for an operator, and compare against
         # all north-south routes for itself and other operators
-        operator_ew = gdf[(gdf.calitp_itp_id==itp_id) & 
+        operator_east_west = gdf[(gdf.calitp_itp_id==itp_id) & 
                           (gdf.route_direction=="east-west")]
-        not_operator_ns = gdf[(gdf.calitp_itp_id != itp_id) | 
-                           (gdf.route_direction=="north-south")]
+        all_north_south = gdf[gdf.route_direction=="north-south"]
         
         results.append(sjoin_against_other_operators(
-            operator_ew, not_operator_ns))
+            operator_east_west, all_north_south))
         
         # Part 2: take north-south routes for an operator, and compare against
         # all east-west routes for itself and other operators
         # Even though this necessarily would repeat results from earlier, just swapped, 
         # like RouteA-RouteB becomes RouteB-RouteA, use this to key in easier later.
-        operator_ns = gdf[(gdf.calitp_itp_id==itp_id) & 
+        operator_north_south = gdf[(gdf.calitp_itp_id==itp_id) & 
                           (gdf.route_direction=="north-south")]
-        not_operator_ew = gdf[(gdf.calitp_itp_id != itp_id) | 
-                           (gdf.route_direction=="east-west")]
+        all_east_west = gdf[gdf.route_direction=="east-west"]
         
         results.append(sjoin_against_other_operators(
-            operator_ns, not_operator_ew)) 
+            operator_north_south, all_east_west)) 
     
     # Concatenate all the dask dfs in the list and get it into one dask df
     ddf = dd.multi.concat(results, axis=0).drop_duplicates()
