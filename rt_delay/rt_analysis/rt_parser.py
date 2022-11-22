@@ -314,10 +314,9 @@ class OperatorDayAnalysis:
             new_df = pd.DataFrame(index=new_ix)
             new_df.index.name = 'shape_meters'
             appended = pd.concat([_delay, new_df])
-            appended.trip_id = appended.trip_id.fillna(method='ffill').fillna(method='bfill')
-            appended.shape_id = appended.shape_id.fillna(method='ffill').fillna(method='bfill')
-            appended.route_id = appended.route_id.fillna(method='ffill').fillna(method='bfill')
-            appended.route_short_name = appended.route_short_name.fillna(method='ffill').fillna(method='bfill')                                              
+            fill = lambda col: appended[col].fillna(method='ffill').fillna(method='bfill')
+            for col in ['trip_id', 'shape_id', 'route_id', 'direction_id', 'route_short_name']:
+                appended[col] = fill(col)                                              
             appended = appended >> arrange(_.shape_meters)
             appended.stop_sequence = appended.stop_sequence.interpolate()
             appended = appended.reset_index()
