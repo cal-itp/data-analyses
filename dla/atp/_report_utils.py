@@ -297,6 +297,62 @@ def fix_geom_issues(df, subset_col_list):
 
 
 
+
+'''
+create dfs for mapping geographies for districts (ct, congressional, assembly, etc)
+'''
+## join a geodf and a main data df
+def nunique_by_geography(df,
+                         geodf,
+                         geog_col,
+                         agg_col,
+                         geodf_mergeon_col):
+    
+    sum_df = (df>>group_by(_[geog_col])
+              >>summarize(n_unique = _[agg_col].nunique()))
+    
+    joined_df = geodf.merge(sum_df, 
+                            how='left',
+                            left_on=[geodf_mergeon_col],
+                            right_on=[geog_col])
+    
+    return joined_df
+              
+    
+## explode columns that haven multiple districts listed in them
+def explode_and_join_geo(df,
+                         geo_df, 
+                         explode_cols: list = [],
+                         groupby_cols: list = [],
+                         count_col: list = [],
+                         geo_df_merge_col: list = []):
+    
+    list_of_cols = groupby_cols + [explode_cols]
+    
+    df_subset = df>>select(*list_of_cols)
+    
+    df_subset = df_subset.replace('Needs Manual Assistance', 0)
+    
+    df_subset[explode_cols] = df_subset[explode_cols].astype(str)
+
+    df_subset[['first_dist', 'second_dist', 'third_dist']] = df_subset[explode_cols].str.split(', ', expand=True)
+    
+    select_cols = groupby_cols + ['dist']
+    agg_df = (df_subset 
+              >> gather('measure', 'dist',_.first_dist, _.second_dist, _.third_dist)
+              >> select(*select_cols)
+              >> filter(_.dist.notnull())
+             )
+    
+    final_df = nunique_by_geography(agg_df,
+                         geo_df,
+                         'dist',
+                         count_col,
+                         geo_df_merge_col)
+
+    return final_df
+    
+
 '''
 Report Functions
 '''
