@@ -33,7 +33,8 @@ def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
 
 
 """
-FCC data
+Federal Communications Commission
+Data Wrangling
 """
 # Clip the cell provider coverage map to California only.
 def create_california_coverage(file_zip_name:str, new_file_name:str):
@@ -58,6 +59,91 @@ def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     # Save this into a parquet so don't have to clip all the time
     utils.geoparquet_gcs_export(fcc_ca_gdf, GCS_FILE_PATH, new_file_name)
+
+
+# Clip the provider map to a county and return the areas of a county
+# that is NOT covered by the provider.
+def find_difference_and_clip(
+    gdf: dg.GeoDataFrame, boundary: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    # Clip cell provider to some boundary
+    clipped = dg.clip(gdf, boundary).reset_index(drop=True)  # use dask to clip
+    clipped_gdf = clipped.compute()  # compute converts from dask gdf to gdf
+
+    # Now find the overlay, and find the difference
+    # Notice which df is on the left and which is on the right
+    # https://geopandas.org/en/stable/docs/user_guide/set_operations.html
+    no_coverage = gpd.overlay(boundary, clipped_gdf, how="difference",  keep_geom_type=False)
+
+    return no_coverage
+
+# CT shapefile
+caltrans_shape = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
+    
+# Breakout cell provider gdf by district, find the areas of each district
+# that doesn't have coverage, concat everything and dissolve to one row.
+def breakout_districts(provider, gcs_file_path:str, file_name:str, districts_wanted:list):
+    
+    ct_districts = to_snakecase(gpd.read_file(f'{caltrans_shape}')
+               .to_crs(epsg=4326))[['district','geometry']]
+    
+    # Empty dataframe to hold each district after clipping
+    full_gdf = pd.DataFrame()
+
+    for i in districts_wanted:
+        district_gdf = ct_districts[ct_districts.district==i]
+        
+        district_gdf_clipped = find_difference_and_clip(provider, district_gdf) 
+        full_gdf = pd.concat([full_gdf, district_gdf_clipped], axis=0)
+        
+    full_gdf = full_gdf.dissolve().drop(columns = ['district'])
+    
+    utils.geoparquet_gcs_export(full_gdf, gcs_file_path,file_name) 
+    return full_gdf
+
+# Breakout cell provider gdf by counties, find the areas of each district
+# that doesn't have coverage, and concat everything.
+def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wanted:list):
+    counties = utilities.get_counties()
+    
+    # Empty dataframe to hold each district after clipping
+    full_gdf = pd.DataFrame()
+
+    for i in counties_wanted:
+        county_gdf = counties[counties.county_name==i].reset_index(drop = True)
+        
+        county_gdf_clipped = utilities.find_difference_and_clip(verizon, county_gdf) 
+        full_gdf = dd.multi.concat([full_gdf, county_gdf_clipped], axis=0)
+        print(f'done concating for {i}')
+    
+    # Turn this into a GDF
+    full_gdf = full_gdf.compute()
+    
+    # Save to GCS
+    utils.geoparquet_gcs_export(full_gdf, gcs_file_path, file_name) 
+    print('saved to GCS')
+    
+    return full_gdf
+
+# California is separated out into different gdfs that contain 
+# portions of districts/counties. Concat them all together 
+# to get the entirety of California again.
+def concat_all_areas(all_gdf:list, gcs_file_path: str, file_name:str):
+    
+    # Empty dataframe
+    full_gdf = pd.DataFrame()
+    
+    # Concat all the districts that were broken out into one
+    full_gdf = dd.multi.concat(all_gdf, axis=0)
+    
+    # Turn it into a gdf
+    full_gdf = full_gdf.compute()
+    
+    # Export
+    utils.geoparquet_gcs_export(full_gdf, gcs_file_path,file_name)
+
+    print('Saved to GCS')
+    return full_gdf 
 
 """
 Routes DF
@@ -239,29 +325,6 @@ def ntd_vehicles():
 """
 Analysis Functions
 """
-# CT shapefile
-caltrans_shape = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
-    
-# Breakout cell provider gdf by district, find the areas of each district
-# that doesn't have coverage, concat everything and dissolve to one row.
-def breakout_districts(provider, gcs_file_path:str, file_name:str, districts_wanted:list):
-    
-    ct_districts = to_snakecase(gpd.read_file(f'{caltrans_shape}')
-               .to_crs(epsg=4326))[['district','geometry']]
-    
-    # Empty dataframe to hold each district after clipping
-    full_gdf = pd.DataFrame()
-
-    for i in districts_wanted:
-        district_gdf = ct_districts[ct_districts.district==i]
-        
-        district_gdf_clipped = find_difference_and_clip(provider, district_gdf) 
-        full_gdf = pd.concat([full_gdf, district_gdf_clipped], axis=0)
-        
-    full_gdf = full_gdf.dissolve().drop(columns = ['district'])
-    
-    utils.geoparquet_gcs_export(full_gdf, gcs_file_path,file_name) 
-    return full_gdf
 
 # Overlay Federal Communications Commission map with original bus routes df.
 def comparison(gdf_left, gdf_right):
@@ -336,18 +399,3 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     m1 = gpd.GeoDataFrame(m1, geometry = f"geometry_overlay{suffix}", crs = "EPSG:4326")
     return m1
 
-# Clip the provider map to a county and return the areas of a county
-# that is NOT covered by the provider.
-def find_difference_and_clip(
-    gdf: dg.GeoDataFrame, boundary: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
-    # Clip cell provider to some boundary
-    clipped = dg.clip(gdf, boundary).reset_index(drop=True)  # use dask to clip
-    clipped_gdf = clipped.compute()  # compute converts from dask gdf to gdf
-
-    # Now find the overlay, and find the difference
-    # Notice which df is on the left and which is on the right
-    # https://geopandas.org/en/stable/docs/user_guide/set_operations.html
-    no_coverage = gpd.overlay(boundary, clipped_gdf, how="difference",  keep_geom_type=False)
-
-    return no_coverage
