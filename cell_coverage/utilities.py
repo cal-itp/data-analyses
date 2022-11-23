@@ -144,6 +144,7 @@ def load_unique_routes_df():
     
     return df
 
+
 """
 # of Trips
 """ 
@@ -238,6 +239,30 @@ def ntd_vehicles():
 """
 Analysis Functions
 """
+# CT shapefile
+caltrans_shape = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
+    
+# Breakout cell provider gdf by district, find the areas of each district
+# that doesn't have coverage, concat everything and dissolve to one row.
+def breakout_districts(provider, gcs_file_path:str, file_name:str, districts_wanted:list):
+    
+    ct_districts = to_snakecase(gpd.read_file(f'{caltrans_shape}')
+               .to_crs(epsg=4326))[['district','geometry']]
+    
+    # Empty dataframe to hold each district after clipping
+    full_gdf = pd.DataFrame()
+
+    for i in districts_wanted:
+        district_gdf = ct_districts[ct_districts.district==i]
+        
+        district_gdf_clipped = find_difference_and_clip(provider, district_gdf) 
+        full_gdf = pd.concat([full_gdf, district_gdf_clipped], axis=0)
+        
+    full_gdf = full_gdf.dissolve().drop(columns = ['district'])
+    
+    utils.geoparquet_gcs_export(full_gdf, gcs_file_path,file_name) 
+    return full_gdf
+
 # Overlay Federal Communications Commission map with original bus routes df.
 def comparison(gdf_left, gdf_right):
 
