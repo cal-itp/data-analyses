@@ -32,7 +32,8 @@ from shared_utils import gtfs_utils, geography_utils, rt_utils, utils
 
 LOCAL_PATH = "./data/"
 
-def primary_trip_query(itp_id: int, analysis_date: str):
+def primary_trip_query(itp_id: int, analysis_date: str, 
+                       additional_filters: dict = None):
     """
     Run a trips query. 
     Save as parquet.
@@ -47,14 +48,16 @@ def primary_trip_query(itp_id: int, analysis_date: str):
         selected_date = analysis_date,
         itp_id_list = [itp_id],
         trip_cols = None,
-        get_df = True
+        get_df = True,
+        custom_filtering = additional_filters
     )
     
     full_trips.to_parquet(f"{LOCAL_PATH}temp_{filename}")
     logger.info(f"{itp_id}: {dataset} saved locally")
 
 
-def get_routelines(itp_id: int, analysis_date: str) -> Delayed:
+def get_routelines(itp_id: int, analysis_date: str, 
+                   additional_filters: dict = None) -> Delayed:
     """
     Download the route shapes (line geom) from dim_shapes_geo
     associated with shape_ids / trips that ran on selected day.
@@ -68,13 +71,15 @@ def get_routelines(itp_id: int, analysis_date: str) -> Delayed:
         itp_id_list = [itp_id],
         get_df = True,
         crs = geography_utils.CA_NAD83Albers,
-        trip_df = full_trips
+        trip_df = full_trips, 
+        custom_filtering = additional_filters
     )[["calitp_itp_id", "calitp_url_number", "shape_id", "geometry"]]
     
     return routelines
     
     
-def get_trips(itp_id: int, analysis_date: str) -> Delayed:
+def get_trips(itp_id: int, analysis_date: str, 
+              additional_filters: dict) -> Delayed:
     """
     Download the trips that ran on selected day.
     """
@@ -107,18 +112,21 @@ def get_trips(itp_id: int, analysis_date: str) -> Delayed:
         selected_date = analysis_date,
         itp_id_list = [itp_id],
         route_cols = keep_route_cols,
-        get_df = True
+        get_df = True, 
+        custom_filtering = additional_filters
     )
 
     trips = (trips
              >> inner_join(_, routes, 
                           on = ["calitp_itp_id", "route_id"])
+             >> gtfs_utils.filter_custom_col(additional_filters)
     )
     
     return trips
     
     
-def get_stops(itp_id: int, analysis_date: str) -> Delayed:
+def get_stops(itp_id: int, analysis_date: str, 
+              additional_filters: dict) -> Delayed:
     """
     Download stops for the trips that ran on selected date.
     """        
@@ -133,7 +141,8 @@ def get_stops(itp_id: int, analysis_date: str) -> Delayed:
             itp_id_list = [itp_id],
             stop_cols = keep_stop_cols,
             get_df = True,
-            crs = geography_utils.CA_NAD83Albers
+            crs = geography_utils.CA_NAD83Albers,
+            custom_filtering = additional_filters
         )# should be ok to drop duplicates, but must use stop_id for future joins...
         .drop_duplicates(subset=["calitp_itp_id", "stop_id"])
         .reset_index(drop=True)
@@ -142,7 +151,8 @@ def get_stops(itp_id: int, analysis_date: str) -> Delayed:
     return stops
     
         
-def get_stop_times(itp_id: int, analysis_date: str):
+def get_stop_times(itp_id: int, analysis_date: str, 
+                   additional_filters: dict = None):
     """
     Download stop times for the trips that ran on selected date.
         
@@ -160,7 +170,8 @@ def get_stop_times(itp_id: int, analysis_date: str):
         stop_time_cols = None,
         get_df = True,
         departure_hours = None,
-        trip_df = full_trips
+        trip_df = full_trips,
+        custom_filtering = additional_filters
     )
     
     if not stop_times.empty:
@@ -231,7 +242,6 @@ def compute_delayed(itp_id: int, analysis_date: str,
         )    
         logger.info(f"{itp_id}: stops exported to GCS")
 
-        
         
 if __name__=="__main__":
 
