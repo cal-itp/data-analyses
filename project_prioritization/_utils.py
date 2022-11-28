@@ -280,6 +280,37 @@ def repeated_charts(
 """
 Other Functions
 """
+# Categorize a project by percentiles of whatever column you want
+def project_size_rating(dataframe, original_column: str, new_column: str):
+    """Rate a project by percentiles and returning small/medium/large for any column
+    
+    Args:
+        dataframe
+        original_column (str): column to create the metric off of
+        new_column (str): new column to hold results
+    Returns:
+        the dataframe with the new column with the categorization.
+    """
+    # Get percentiles 
+    p75 = dataframe[original_column].quantile(0.75).astype(float)
+    p25 = dataframe[original_column].quantile(0.25).astype(float)
+    p50 = dataframe[original_column].quantile(0.50).astype(float)
+
+    # Function for fleet size
+    def project_size(row):
+        if (row[original_column] > 0) and (row[original_column] <= p25):
+            return "25th percentile"
+        elif (row[original_column] > p25) and (row[original_column] <= p75):
+            return "50th percentile"
+        elif row[original_column] > p75:
+            return "75th percentile"
+        else:
+            return "No Info"
+
+    dataframe[new_column] = dataframe.apply(lambda x: project_size(x), axis=1)
+
+    return dataframe
+
 # Grab value counts and turn it into a dataframe
 def value_counts_df(df, col_of_interest):
     df = (
