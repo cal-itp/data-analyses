@@ -4,6 +4,9 @@ import gcsfs
 import os
 import pandas as pd
 
+from calitp.storage import get_fs, is_cloud
+fs = get_fs()
+
 RT_GCS = 'gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/'
 DASK_GCS = 'gs://calitp-analytics-data/data-analyses/dask_test/'
 
@@ -38,6 +41,8 @@ def merge_stop_times_to_trips(stop_times: dd.DataFrame,
     
     return merged
 
+
+
 def aggregation_function(df: dd.DataFrame) -> dd.DataFrame:
     shape_id_cols = ["calitp_itp_id", "shape_id"]
 
@@ -58,27 +63,23 @@ def aggregation_function(df: dd.DataFrame) -> dd.DataFrame:
     return arrivals
 
 
-def import_data_combined(date):
-    stop_times = dd.read_parquet(f"{RT_GCS}st_{date}.parquet")
-    trips = dd.read_parquet(f"{RT_GCS}trips_{date}.parquet")
-    
-    return stop_times, trips
-
-
 if __name__=="__main__":
     from dask.distributed import Client
 
     client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    all_stop_times, all_trips = import_data_combined(analysis_date)
+    stop_times = dd.read_parquet(f"{RT_GCS}st_{analysis_date}.parquet")
+    trips = dd.read_parquet(f"{RT_GCS}trips_{analysis_date}.parquet")
         
-    merged = merge_stop_times_to_trips(all_stop_times, all_trips)
-    
-    merged = merged.repartition(npartitions=4)
+    merged = merge_stop_times_to_trips(stop_times, trips)    
+    merged = merged.repartition(npartitions=3)
     print("partitioned")
     
     # Save to parquet
-    merged.to_parquet(f"{DASK_GCS}test")
+    merged.to_parquet(
+        f"{DASK_GCS}test", 
+        storage_options={'token': fs.credentials.credentials}
+    )
     print("save to GCS as partitioned")
 
     df = dd.read_parquet(f"{DASK_GCS}test")
@@ -93,7 +94,9 @@ if __name__=="__main__":
                                }) # Be sure not to '.compute' here
     print("aggregation function")
 
-    df.compute().to_parquet(f'{DASK_GCS}preprocesed.parquet')
+    df.compute().to_parquet(f'{DASK_GCS}preprocesed.parquet', 
+                            storage_options={'token': fs.credentials.credentials}
+                           )
     print("saved preprocessed")
 
     client.close()
