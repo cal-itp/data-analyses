@@ -304,17 +304,25 @@ create dfs for mapping geographies for districts (ct, congressional, assembly, e
 ## join a geodf and a main data df
 def nunique_by_geography(df,
                          geodf,
-                         geog_col,
-                         agg_col,
-                         geodf_mergeon_col):
+                         groupby_cols: list = [],
+                         agg_col: list = [],
+                         geodf_merge_on_col: list = [],
+                         sum_merge_on_col: list = []):
     
-    sum_df = (df>>group_by(_[geog_col])
+    sum_df = (df>>group_by(*groupby_cols)
               >>summarize(n_unique = _[agg_col].nunique()))
+    
+    sum_df = (sum_df>> group_by(_[sum_merge_on_col]) >>spread(_.data_origin, _.n_unique)).apply(lambda x: x) 
     
     joined_df = geodf.merge(sum_df, 
                             how='left',
-                            left_on=[geodf_mergeon_col],
-                            right_on=[geog_col])
+                            left_on=[geodf_merge_on_col],
+                            right_on=[sum_merge_on_col])
+    
+    joined_df = joined_df.fillna(0)
+    
+    joined_df['Total'] = joined_df['Application'] + joined_df['Funded']
+    joined_df['Success Rate'] = (joined_df['Funded'] / joined_df['Application'])
     
     return joined_df
               
@@ -337,7 +345,7 @@ def explode_and_join_geo(df,
 
     df_subset[['first_dist', 'second_dist', 'third_dist']] = df_subset[explode_cols].str.split(', ', expand=True)
     
-    select_cols = groupby_cols + ['dist']
+    select_cols = groupby_cols + ['dist'] + ['data_origin']
     agg_df = (df_subset 
               >> gather('measure', 'dist',_.first_dist, _.second_dist, _.third_dist)
               >> select(*select_cols)
@@ -346,9 +354,10 @@ def explode_and_join_geo(df,
     
     final_df = nunique_by_geography(agg_df,
                          geo_df,
-                         'dist',
-                         count_col,
-                         geo_df_merge_col)
+                         groupby_cols = ['dist', 'data_origin'],
+                         agg_col = count_col,
+                         geodf_merge_on_col = geo_df_merge_col,
+                         sum_merge_on_col = 'dist')
 
     return final_df
     
