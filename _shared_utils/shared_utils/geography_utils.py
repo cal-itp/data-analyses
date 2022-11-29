@@ -3,6 +3,7 @@ Utility functions for geospatial data.
 Some functions for dealing with census tract or other geographic unit dfs.
 """
 import datetime
+from typing import Union
 
 import geopandas as gpd
 import pandas as pd
@@ -21,7 +22,7 @@ SQ_FT_PER_SQ_MI = 2.788 * 10**7
 
 
 def aggregate_by_geography(
-    df: pd.DataFrame | gpd.GeoDataFrame,
+    df: Union[pd.DataFrame, gpd.GeoDataFrame],
     group_cols: list,
     sum_cols: list = [],
     mean_cols: list = [],
@@ -54,7 +55,7 @@ def aggregate_by_geography(
     final_df = df[group_cols].drop_duplicates().reset_index()
 
     def aggregate_and_merge(
-        df: pd.DataFrame | gpd.GeoDataFrame,
+        df: Union[pd.DataFrame, gpd.GeoDataFrame],
         final_df: pd.DataFrame,
         group_cols: list,
         agg_cols: list,
@@ -121,7 +122,7 @@ def attach_geometry(
 
 # Function to construct the SQL condition for make_routes_gdf()
 def construct_condition(
-    selected_date: str | datetime.datetime, include_itp_list: list
+    selected_date: Union[str, datetime.datetime], include_itp_list: list
 ) -> str:
     def unpack_list_make_or_statement(include_itp_list: list) -> str:
         new_cond = ""
@@ -151,7 +152,7 @@ def construct_condition(
 
 # Run the sql query with the condition in long-form
 def create_shapes_for_subset(
-    selected_date: str | datetime.datetime, itp_id_list: list
+    selected_date: Union[str, datetime.datetime], itp_id_list: list
 ) -> pd.DataFrame:
     condition = construct_condition(selected_date, itp_id_list)
 
@@ -185,7 +186,7 @@ def make_linestring(x: str) -> shapely.geometry.LineString:
 
 
 def make_routes_gdf(
-    selected_date: str | datetime.datetime,
+    selected_date: Union[str, datetime.datetime],
     crs: str = "EPSG:4326",
     itp_id_list: list = None,
 ):
@@ -320,8 +321,10 @@ def create_point_geometry(
 
 
 def create_segments(
-    geometry: shapely.geometry.linestring.LineString
-    | shapely.geometry.multilinestring.MultiLineString,
+    geometry: Union[
+        shapely.geometry.linestring.LineString,
+        shapely.geometry.multilinestring.MultiLineString,
+    ],
     segment_distance: int,
 ) -> gpd.GeoSeries:
     """

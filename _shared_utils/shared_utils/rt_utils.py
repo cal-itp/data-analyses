@@ -3,6 +3,7 @@ import os
 import re
 import time
 from pathlib import Path
+from typing import Union
 
 import branca
 import dask_geopandas as dg
@@ -84,8 +85,8 @@ def primary_cardinal_direction(origin, destination) -> str:
 
 
 def add_origin_destination(
-    gdf: gpd.GeoDataFrame | dg.GeoDataFrame,
-) -> gpd.GeoDataFrame | dg.GeoDataFrame:
+    gdf: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
+) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
     """
     For a gdf, add the origin, destination columns given a linestring.
     Note: multilinestring may not work!
@@ -115,10 +116,10 @@ def add_origin_destination(
 
 
 def add_route_cardinal_direction(
-    df: gpd.GeoDataFrame | dg.GeoDataFrame,
+    df: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
     origin: str = "origin",
     destination: str = "destination",
-) -> gpd.GeoDataFrame | dg.GeoDataFrame:
+) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
     """
     Apply cardinal direction to gdf.
 
@@ -230,9 +231,9 @@ def interpolate_arrival_times(df):
 
 def check_cached(
     filename: str,
-    GCS_FILE_PATH: str | Path = GCS_FILE_PATH,
-    subfolder: str | Path = "cached_views/",
-) -> str | Path:
+    GCS_FILE_PATH: Union[str, Path] = GCS_FILE_PATH,
+    subfolder: Union[str, Path] = "cached_views/",
+) -> Union[str, Path]:
     """
     Check GCS bucket to see if a file already is there.
     Returns the path, if it exists.
@@ -262,7 +263,7 @@ def trips_cached(itp_id: int, date_str: str) -> pd.DataFrame:
 
 
 def get_vehicle_positions(
-    itp_id: int, analysis_date: dt.date, export_path: str | Path = EXPORT_PATH
+    itp_id: int, analysis_date: dt.date, export_path: Union[str, Path] = EXPORT_PATH
 ) -> pd.DataFrame:
     """
     itp_id: an itp_id (string or integer)
@@ -358,7 +359,7 @@ def get_trips(
     analysis_date: dt.date,
     force_clear: bool = False,
     route_types: list = None,
-    export_path: str | Path = EXPORT_PATH,
+    export_path: Union[str, Path] = EXPORT_PATH,
 ) -> pd.DataFrame:
     """
     itp_id: an itp_id (string or integer)
@@ -440,7 +441,7 @@ def get_stop_times(
     itp_id: int,
     analysis_date: dt.date,
     force_clear: bool = False,
-    export_path: str | Path = EXPORT_PATH,
+    export_path: Union[str, Path] = EXPORT_PATH,
 ) -> pd.DataFrame:
     """
     itp_id: an itp_id (string or integer)
@@ -483,7 +484,7 @@ def get_stops(
     itp_id: int,
     analysis_date: dt.date,
     force_clear: bool = False,
-    export_path: str | Path = EXPORT_PATH,
+    export_path: Union[str, Path] = EXPORT_PATH,
 ) -> gpd.GeoDataFrame:
     """
     itp_id: an itp_id (string or integer)
@@ -531,7 +532,7 @@ def get_routelines(
     itp_id: int,
     analysis_date: dt.date,
     force_clear: bool = False,
-    export_path: str | Path = EXPORT_PATH,
+    export_path: Union[str, Path] = EXPORT_PATH,
 ) -> gpd.GeoDataFrame:
 
     date_str = analysis_date.strftime(FULL_DATE_FMT)
@@ -563,7 +564,7 @@ def get_routelines(
         return routelines
 
 
-def categorize_time_of_day(value: int | dt.datetime) -> str:
+def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
     if isinstance(value, int):
         hour = value
     elif isinstance(value, dt.datetime):
