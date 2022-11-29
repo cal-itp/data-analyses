@@ -4,7 +4,7 @@ GTFS utils.
 Queries to grab trips, stops, routes.
 """
 import datetime
-from typing import Literal
+from typing import Literal, Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
@@ -150,12 +150,12 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
 
 
 def get_route_info(
-    selected_date: str | datetime.date = YESTERDAY_DATE,
+    selected_date: Union[str, datetime.date] = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
     route_cols: list[str] = None,
     get_df: bool = True,
     custom_filtering: dict = None,
-) -> pd.DataFrame | siuba.sql.verbs.LazyTbl:
+) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
 
     # Route info query
     dim_routes = (
@@ -187,11 +187,11 @@ def get_route_info(
 
 
 def get_route_shapes(
-    selected_date: str | datetime.date,
+    selected_date: Union[str, datetime.date],
     itp_id_list: list[int] = None,
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
-    trip_df: siuba.sql.verbs.LazyTbl | pd.DataFrame = None,
+    trip_df: Union[siuba.sql.verbs.LazyTbl, pd.DataFrame] = None,
     custom_filtering: dict = None,
 ) -> gpd.GeoDataFrame:
     """
@@ -253,13 +253,13 @@ def get_route_shapes(
 # ----------------------------------------------------------------#
 # views.gtfs_schedule_dim_stops + views.gtfs_schedule_fact_daily_feed_stops
 def get_stops(
-    selected_date: str | datetime.date = YESTERDAY_DATE,
+    selected_date: Union[str, datetime.date] = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
     stop_cols: list[str] = None,
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     custom_filtering: dict = None,
-) -> gpd.GeoDataFrame | siuba.sql.verbs.LazyTbl:
+) -> Union[gpd.GeoDataFrame, siuba.sql.verbs.LazyTbl]:
 
     # Stops query
     dim_stops = (
@@ -296,12 +296,12 @@ def get_stops(
 # ----------------------------------------------------------------#
 # views.gtfs_schedule_dim_trips + views.gtfs_schedule_fact_daily_trips + handle metrolink
 def get_trips(
-    selected_date: str | datetime.date = YESTERDAY_DATE,
+    selected_date: Union[str, datetime.date] = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
     trip_cols: list[str] = None,
     get_df: bool = True,
     custom_filtering: dict = None,
-) -> pd.DataFrame | siuba.sql.verbs.LazyTbl:
+) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
 
     # Trips query
     dim_trips = (
@@ -391,7 +391,7 @@ def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
     return ddf
 
 
-def check_departure_hours_input(departure_hours: tuple | list) -> list:
+def check_departure_hours_input(departure_hours: Union[tuple, list]) -> list:
     """
     If given a tuple(start_hour, end_hour), it will return a list of the values.
     Ex: (0, 4) will return [0, 1, 2, 3]
@@ -405,14 +405,14 @@ def check_departure_hours_input(departure_hours: tuple | list) -> list:
 
 
 def get_stop_times(
-    selected_date: str | datetime.date = YESTERDAY_DATE,
+    selected_date: Union[str, datetime.date] = YESTERDAY_DATE,
     itp_id_list: list[int] = None,
     stop_time_cols: list[str] = None,
     get_df: bool = False,
-    departure_hours: tuple | list = None,
-    trip_df: pd.DataFrame | siuba.sql.verbs.LazyTbl = None,
+    departure_hours: Union[tuple, list] = None,
+    trip_df: Union[pd.DataFrame, siuba.sql.verbs.LazyTbl] = None,
     custom_filtering: dict = None,
-) -> dd.DataFrame | pd.DataFrame:
+) -> Union[dd.DataFrame, pd.DataFrame]:
     """
     Download stop times table for operator on a day.
 
@@ -522,7 +522,7 @@ def get_stop_times(
 # "universe" of operators whenever we can
 
 
-def format_date(analysis_date: datetime.date | str) -> str:
+def format_date(analysis_date: Union[datetime.date, str]) -> str:
     """
     Get date formatted correctly in all the queries
     """
@@ -534,7 +534,7 @@ def format_date(analysis_date: datetime.date | str) -> str:
 
 def all_routelines_or_stops_with_cached(
     dataset: Literal["routelines", "stops"] = "routelines",
-    analysis_date: datetime.date | str = "2022-06-15",
+    analysis_date: Union[datetime.date, str] = "2022-06-15",
     itp_id_list: list = None,
     export_path="gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/",
 ):
@@ -577,7 +577,7 @@ def all_routelines_or_stops_with_cached(
 
 def all_trips_or_stoptimes_with_cached(
     dataset: Literal["trips", "st"] = "trips",
-    analysis_date: datetime.date | str = "2022-06-15",
+    analysis_date: Union[datetime.date, str] = "2022-06-15",
     itp_id_list: list = None,
     export_path="gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/",
 ):
