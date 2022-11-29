@@ -1,7 +1,11 @@
+"""
+General utility functions.
+"""
 import base64
 import os
 import shutil
 from pathlib import Path
+from typing import Union
 
 import fsspec
 import geopandas as gpd
@@ -90,7 +94,7 @@ def geojson_gcs_export(
 
 # Make zipped shapefile
 # https://github.com/CityOfLosAngeles/planning-entitlements/blob/master/notebooks/utils.py
-def make_shapefile(gdf: gpd.GeoDataFrame, path: str | Path) -> tuple[Path, str]:
+def make_shapefile(gdf: gpd.GeoDataFrame, path: Union[str, Path]) -> tuple[Path, str]:
     """
     Make a zipped shapefile and save locally
     Parameters
@@ -125,7 +129,7 @@ def make_shapefile(gdf: gpd.GeoDataFrame, path: str | Path) -> tuple[Path, str]:
     return dirname, shapefile_name
 
 
-def make_zipped_shapefile(gdf: gpd.GeoDataFrame, path: str | Path):
+def make_zipped_shapefile(gdf: gpd.GeoDataFrame, path: Union[str, Path]):
     """
     Make a zipped shapefile and save locally
     Parameters

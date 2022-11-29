@@ -10,6 +10,7 @@ route name, Caltrans district the same way.
 
 """
 import datetime as dt
+from typing import Union
 
 import pandas as pd
 import pandas.io.formats.style
@@ -22,7 +23,7 @@ from siuba import *
 
 
 def add_agency_name(
-    selected_date: str | dt.date = dt.date.today() + dt.timedelta(days=-1),
+    selected_date: Union[str, dt.date] = dt.date.today() + dt.timedelta(days=-1),
 ) -> pd.DataFrame:
     """
     Returns a dataframe with calitp_itp_id and the agency name used in portfolio.
@@ -95,7 +96,7 @@ def add_caltrans_district() -> pd.DataFrame:
 
 # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/utils.py
 def add_route_name(
-    selected_date: str | dt.date = dt.date.today() + dt.timedelta(days=-1),
+    selected_date: Union[str, dt.date] = dt.date.today() + dt.timedelta(days=-1),
 ) -> pd.DataFrame:
     """
     selected_date: datetime or str.
