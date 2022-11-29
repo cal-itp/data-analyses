@@ -34,6 +34,12 @@ from nltk import ngrams
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 
+# Saving Geojson
+from calitp import *
+from calitp.storage import get_fs
+fs = get_fs()
+import os
+
 """
 Chart Functions
 """
@@ -280,9 +286,24 @@ def repeated_charts(
 """
 Other Functions
 """
+# Export a GDF as a geojson to GCS
+def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
+    """
+    Save geodataframe as parquet locally,
+    then move to GCS bucket and delete local file.
+
+    gdf: geopandas.GeoDataFrame
+    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    FILE_NAME: str. Filename.
+    """
+    gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
+    fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
+    os.remove(f"./{FILE_NAME}.geojson")
+
+    
 # Categorize a project by percentiles of whatever column you want
 def project_size_rating(dataframe, original_column: str, new_column: str):
-    """Rate a project by percentiles and returning small/medium/large for any column
+    """Rate a project by percentiles and returning percentiles for any column
     
     Args:
         dataframe
@@ -429,7 +450,7 @@ def create_caltrans_map(df):
    
     # Inner merge 
     districts_gdf = ct_geojson.merge(
-    df, how="inner", left_on="DISTRICT", right_on="District")
+    df, how="inner", left_on="DISTRICT", right_on="district_number")
     
     return districts_gdf
 
@@ -589,23 +610,23 @@ def summarize_by_project_names(df, col_wanted: str):
     """
     df = (
         df.groupby([col_wanted])
-        .agg({"project_name": "count", 
-              "total_project_cost__$1,000_": "sum",
-              "total_unfunded_need__$1,000_":"sum"})
+        .agg({"Project Name": "count", 
+              "Total Project Cost  $1,000": "sum",
+              "Total Unfunded Need  $1,000":"sum"})
         .reset_index()
-        .sort_values("project_name", ascending=False)
-        .rename(columns={"project_name": "Total Projects"})
+        .sort_values("Project Name", ascending=False)
+        .rename(columns={"Project Name": "Total Projects"})
     )
 
     df = df.reset_index(drop=True)
 
     # Create a formatted monetary col
-    df["Total Project ($1000) Formatted"] = df["total_project_cost__$1,000_"].apply(
+    df["Total Project Cost  $1,000"] = df["Total Project Cost  $1,000"].apply(
         lambda x: format_currency(x, currency="USD", locale="en_US")
     )
 
     # Create a formatted monetary col
-    df["Fake Fund Formatted"] = df["total_unfunded_need__$1,000_"].apply(
+    df["Total Unfunded Need  $1,000"] = df["Total Unfunded Need  $1,000"].apply(
         lambda x: format_currency(x, currency="USD", locale="en_US")
     )
     # Clean up column names, remove snakecase
