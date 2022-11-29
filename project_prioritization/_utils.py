@@ -34,14 +34,14 @@ from nltk import ngrams
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 
-# Saving Geojson
+# Save Geojson
 from calitp import *
 from calitp.storage import get_fs
 fs = get_fs()
 import os
 
 """
-Chart Functions
+Chart & Styling Functions
 """
 # Preset to make chart 25% smaller than shared_utils
 # Since the webpage is kind of small
@@ -283,6 +283,27 @@ def repeated_charts(
 
     return chart.properties(title=chart_title)
 
+
+"""
+Style the dataframe by removing the index and gray banding,
+dropping certain columns, and centering text. Adds scrollbar
+and a maximum height & width.
+"""
+def styled_df(df):
+    display(
+    HTML(
+        "<div style='height: 300px; overflow: auto; width: 1000px'>"
+        + (
+            (df)
+            .style.set_properties(**{"background-color": "white", "font-size": "10pt",})
+            .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
+            .set_properties(**{"text-align": "center"})
+            .hide(axis="index")
+            .render()
+        )
+        + "</div>"
+    ))
+
 """
 Other Functions
 """
@@ -417,29 +438,28 @@ def common_phrases(df, clean_text_list: list, phrase_length: int):
     df = (df.loc[df["total"] > 1]).reset_index()
     
     return df
-"""
-Style the dataframe by removing the index and gray banding,
-dropping certain columns, and centering text. Adds scrollbar
-and a maximum height & width.
-"""
-def styled_df(df):
-    display(
-    HTML(
-        "<div style='height: 300px; overflow: auto; width: 1000px'>"
-        + (
-            (df)
-            .style.set_properties(**{"background-color": "white", "font-size": "10pt",})
-            .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
-            .set_properties(**{"text-align": "center"})
-            .hide(axis="index")
-            .render()
-        )
-        + "</div>"
-    ))
+
+# Official Caltrans District names
+district_dictionary = {
+    7: "07 - Los Angeles",
+    4: "04 - Oakland",
+    2: "02 - Redding",
+    9: "09 - Bishop",
+    10: "10 - Stockton",
+    11: "11 - San Diego",
+    3: "03 - Marysville",
+    12: "12 - Irvine",
+    8: "08 - San Bernardino",
+    5: "05 - San Luis Obispo",
+    6: "06 - Fresno",
+    1: "01 - Eureka",
+    75: "75 - HQ",
+    74: "74 - HQ",
+    0: "None",
+}
 
 """
-Merge a dataframe with Caltrans District Map 
-to return a gdf
+Geography Functions
 """
 Caltrans_shape = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
 
@@ -454,10 +474,7 @@ def create_caltrans_map(df):
     
     return districts_gdf
 
-"""
-Merge a dataframe with county geography
-to return a gdf
-"""
+# Merge a dataframe with county geography to return a gdf
 ca_gdf = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
 
 def create_county_map(df, left_df_merge_col:str, 
@@ -490,6 +507,52 @@ def create_county_map(df, left_df_merge_col:str,
     df, how="inner", left_on=left_df_merge_col, right_on=right_df_merge_col)
 
     return county_df
+
+# Create Tableau Map with district information
+def tableau_district_map(df, col_wanted):
+    """
+    df: original dataframe to summarize
+    col_wanted: to column to groupby
+    """
+    df_districts = summarize_districts(df, col_wanted)
+
+    # Reverse the dictionary with district names because
+    # final DF has the full names like 04-Bay Area and I only need 4
+    # https://stackoverflow.com/questions/483666/reverse-invert-a-dictionary-mapping
+    inv_district_map = {v: k for k, v in district_dictionary.items()}
+
+    # Remap districts to just the number
+    df_districts["district_number"] = df_districts["District"]
+
+    # Map the inverse
+    df_districts["district_number"] = df_districts["district_number"].replace(
+        inv_district_map
+    )
+
+    # Join df above with Caltrans shape
+    districts_gdf = create_caltrans_map(df_districts)
+
+    # Drop cols
+    unwanted_cols = [
+        "DISTRICT",
+        "OBJECTID",
+        "Region",
+        "district_number",
+        "Shape_Length",
+        "Shape_Area",
+    ]
+    districts_gdf = districts_gdf.drop(columns=unwanted_cols)
+
+    # Save to GCS
+    geojson_gcs_export(
+        districts_gdf,
+        GCS_FILE_PATH,
+        "districts",
+    )
+    
+    print('Saved to GCS') 
+    
+    return districts_gdf
 
 """
 Functions specific to this project
@@ -598,7 +661,6 @@ def create_fake_score_card(df):
     final["monetary"] = final["monetary"].str.replace("_", "  ").str.title()
     return final
         
-
 """
 Create summary table: returns total projects, total cost,
 and money requested by the column of your choice. 
@@ -689,3 +751,30 @@ def county_district_comparison(df_parameter_county, df_parameter_district):
     )
 
     return concat1
+
+# Summarize districts
+def summarize_districts(df, col_wanted: str):
+    """
+    df: original dataframe to summarize
+    col_wanted: to column to groupby
+    """
+    df = (
+        df.groupby([col_wanted])
+        .agg(
+            {
+                "Project Name": "count",
+                "Total Project Cost  $1,000": "sum",
+                "Total Unfunded Need  $1,000": "sum",
+            }
+        )
+        .reset_index()
+        .sort_values("Project Name", ascending=False)
+        .rename(columns={"Project Name": "Total Projects"})
+    )
+
+    df = df.reset_index(drop=True)
+
+    # Clean up column names, remove snakecase
+    df =  clean_up_columns(df)
+
+    return df
