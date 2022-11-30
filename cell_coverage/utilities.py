@@ -14,22 +14,6 @@ import os
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 
-"""
-Other Functions
-"""
-# Export geospatial file to a geojson 
-def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
-    """
-    Save geodataframe as parquet locally,
-    then move to GCS bucket and delete local file.
-
-    gdf: geopandas.GeoDataFrame
-    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
-    FILE_NAME: str. Filename.
-    """
-    gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
-    fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
-    os.remove(f"./{FILE_NAME}.geojson")
 
 
 """
@@ -37,6 +21,7 @@ Federal Communications Commission
 Data Wrangling
 """
 # Clip the cell provider coverage map to California only.
+# This only worked for AT&T and Verizon. T-Mobile uses a different function.
 def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     # Open zip file first
@@ -80,8 +65,11 @@ def find_difference_and_clip(
 # CT shapefile
 caltrans_shape = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
     
-# Breakout cell provider gdf by district, find the areas of each district
-# that doesn't have coverage, concat everything and dissolve to one row.
+"""
+Breakout cell provider gdf by district, find the areas of each district
+that doesn't have coverage, concat everything and dissolve to one row.
+This was used for AT&T.
+"""
 def breakout_districts(provider, gcs_file_path:str, file_name:str, districts_wanted:list):
     
     ct_districts = to_snakecase(gpd.read_file(f'{caltrans_shape}')
@@ -101,8 +89,11 @@ def breakout_districts(provider, gcs_file_path:str, file_name:str, districts_wan
     utils.geoparquet_gcs_export(full_gdf, gcs_file_path,file_name) 
     return full_gdf
 
-# Breakout cell provider gdf by counties, find the areas of each district
-# that doesn't have coverage, and concat everything.
+"""
+Breakout cell provider gdf by counties, find the areas of each county
+that doesn't have coverage, concat everything and dissolve to one row.
+This was used for Verizon.
+"""
 def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wanted:list):
     counties = utilities.get_counties()
     
@@ -112,7 +103,7 @@ def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wante
     for i in counties_wanted:
         county_gdf = counties[counties.county_name==i].reset_index(drop = True)
         
-        county_gdf_clipped = utilities.find_difference_and_clip(verizon, county_gdf) 
+        county_gdf_clipped = find_difference_and_clip(verizon, county_gdf) 
         full_gdf = dd.multi.concat([full_gdf, county_gdf_clipped], axis=0)
         print(f'done concating for {i}')
     
@@ -120,7 +111,7 @@ def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wante
     full_gdf = full_gdf.compute()
     
     # Save to GCS
-    utils.geoparquet_gcs_export(full_gdf, gcs_file_path, file_name) 
+    geoparquet_gcs_export(full_gdf, gcs_file_path, file_name) 
     print('saved to GCS')
     
     return full_gdf
@@ -140,48 +131,13 @@ def concat_all_areas(all_gdf:list, gcs_file_path: str, file_name:str):
     full_gdf = full_gdf.compute()
     
     # Export
-    utils.geoparquet_gcs_export(full_gdf, gcs_file_path,file_name)
+    geoparquet_gcs_export(full_gdf, gcs_file_path,file_name)
 
     print('Saved to GCS')
     return full_gdf 
 
 """
-Routes DF
-"""
-# Find unique routes 
-def unique_routes(gdf) -> gpd.GeoDataFrame:
-    gdf = gdf.assign(
-        original_route_length=(gdf.geometry.to_crs(geography_utils.CA_StatePlane).length)
-    )
-
-    unique_route = (
-        gdf.sort_values(
-            ["itp_id", "route_id", "original_route_length"], ascending=[True, True, False]
-        )
-        .drop_duplicates(subset=["route_name", "route_id", "itp_id"])  
-        .reset_index(drop=True)[
-            ["itp_id", "route_id", "geometry", "route_type",
-             "route_name", "agency", "original_route_length"]
-        ]
-    )
-    
-    # Filter out any Amtrak records
-    unique_route = unique_route.loc[unique_route["agency"] != "Amtrak"]
-    
-    # Filter out for bus only 
-    unique_route = unique_route.loc[unique_route["route_type"] == "3"]
-    
-    # Drop route type
-    unique_route = unique_route.drop(columns = ["route_type"]) 
-    
-    # Fill in NA for route names
-    unique_route["route_name"] = unique_route["route_name"].replace({"": "None"})
-    
-    return unique_route
-
-
-"""
-Open/Clean Files
+Open Files
 """
 # Open a file with shapes of CA counties
 def get_counties():
@@ -216,10 +172,46 @@ def load_tmobile():
     gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{tmobile_file}")[['geometry']]
     return gdf
 
-# Open routes file, find unique routes
+"""
+Unique Routes each agency runs
+"""
+# Find unique routes 
+def unique_routes(gdf) -> gpd.GeoDataFrame:
+    gdf = gdf.assign(
+        original_route_length=(gdf.geometry.to_crs(geography_utils.CA_StatePlane).length)
+    )
+
+    unique_route = (
+        gdf.sort_values(
+            ["itp_id", "route_id", "original_route_length"], ascending=[True, True, False]
+        )
+        .drop_duplicates(subset=["route_name", "route_id", "itp_id"])  
+        .reset_index(drop=True)[
+            ["itp_id", "route_id", "geometry", "route_type",
+             "route_name", "agency", "original_route_length"]
+        ]
+    )
+    
+    # Filter out any Amtrak records
+    unique_route = unique_route.loc[unique_route["agency"] != "Amtrak"]
+    
+    # Filter out for bus only 
+    unique_route = unique_route.loc[unique_route["route_type"] == "3"]
+    
+    # Drop route type
+    unique_route = unique_route.drop(columns = ["route_type"]) 
+    
+    # Fill in NA for route names
+    unique_route["route_name"] = unique_route["route_name"].replace({"": "None"})
+    
+    return unique_route
+
+# traffic_ops/export/ca_transit_routes_[date].parquet
+routes_file =  "gs://calitp-analytics-data/data-analyses/traffic_ops/export/ca_transit_routes_2022-09-14.parquet"
+    
+# Open routes file and find unique routes
 def load_unique_routes_df():
-    # traffic_ops/export/ca_transit_routes_[date].parquet
-    routes_file =  "gs://calitp-analytics-data/data-analyses/traffic_ops/export/ca_transit_routes_2022-09-14.parquet"
+    
     df = gpd.read_parquet(routes_file)
     
     # Find unique routes
@@ -232,13 +224,15 @@ def load_unique_routes_df():
 
 
 """
-# of Trips
+# of Trips run by an agency
 """ 
+# File for trips
+trips_file = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/trips_2022-09-14_all.parquet"
+
 # Find number of trips ran per route by route ID and by the agency as a whole. 
 def trip_df():
     
     # Read in file
-    trips_file = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/trips_2022-09-14_all.parquet"
     df = pd.read_parquet(trips_file)
 
     # Standardize route id
@@ -266,23 +260,8 @@ def trip_df():
     return m1
     
 """
-NTD
+NTD Data - how many buses does an agency owns?
 """
-# Clean organization names - strip them of dba, etc
-def organization_cleaning(df, column_wanted: str):
-    df[column_wanted] = (
-        df[column_wanted]
-        .str.strip()
-        .str.split(",")
-        .str[0]
-        .str.replace("/", "")
-        .str.split("(")
-        .str[0]
-        .str.split("/")
-        .str[0]
-    )
-    return df
-
 # Return a cleaned up NTD dataframe for bus only 
 def ntd_vehicles():
     
@@ -325,7 +304,6 @@ def ntd_vehicles():
 """
 Analysis Functions
 """
-
 # Overlay Federal Communications Commission map with original bus routes df.
 def comparison(gdf_left, gdf_right):
 
@@ -399,3 +377,34 @@ def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
     m1 = gpd.GeoDataFrame(m1, geometry = f"geometry_overlay{suffix}", crs = "EPSG:4326")
     return m1
 
+"""
+Other Functions
+"""
+# Export geospatial file to a geojson 
+def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
+    """
+    Save geodataframe as parquet locally,
+    then move to GCS bucket and delete local file.
+
+    gdf: geopandas.GeoDataFrame
+    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    FILE_NAME: str. Filename.
+    """
+    gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
+    fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
+    os.remove(f"./{FILE_NAME}.geojson")
+
+# Clean organization names - strip them of dba, etc
+def organization_cleaning(df, column_wanted: str):
+    df[column_wanted] = (
+        df[column_wanted]
+        .str.strip()
+        .str.split(",")
+        .str[0]
+        .str.replace("/", "")
+        .str.split("(")
+        .str[0]
+        .str.split("/")
+        .str[0]
+    )
+    return df
