@@ -67,7 +67,20 @@ def read_SUR_funding_data():
     
     #merge sur_funding and sur_details
     merge_on = ['project_app_id', 'project_cycle', 'a2_ct_dist', 'a1_locode']
-    df = (pd.merge(sur_details, sur_funding, how="outer", on = merge_on, indicator=True))
+    
+#     sur_details['a1_locode'] = sur_details['a1_locode'].replace('None', 0)
+#     sur_funding['a1_locode'] = sur_funding['a1_locode'].replace('None', 0)
+    
+    sur_details['a1_locode'] = pd.to_numeric(sur_details.a1_locode, errors='coerce')  
+    sur_funding['a1_locode'] = pd.to_numeric(sur_funding.a1_locode, errors='coerce')
+#     fix_merge_cols = ['project_cycle', 'a2_ct_dist', 'a1_locode']
+    
+#     sur_funding[fix_merge_cols] = sur_funding[fix_merge_cols].astype('Int64')
+#     sur_details[fix_merge_cols] = sur_details[fix_merge_cols].astype('Int64')
+    
+    
+    ### CHANGING TO INNER CHECK LATER
+    df = (pd.merge(sur_details, sur_funding, how="inner", on = merge_on, indicator=True))
     
     #keep entries that merge. Right_only rows are misentered and more informational columns  
     df = df>>filter(_._merge=='both')
@@ -330,14 +343,14 @@ def nunique_by_geography(df,
 ## explode columns that haven multiple districts listed in them
 def explode_and_join_geo(df,
                          geo_df, 
-                         explode_cols: list = [],
+                         explode_cols: str,
                          groupby_cols: list = [],
                          count_col: list = [],
                          geo_df_merge_col: list = []):
     
     list_of_cols = groupby_cols + [explode_cols]
     
-    df_subset = df>>select(*list_of_cols)
+    df_subset = df>>select(*list_of_cols) 
     
     df_subset = df_subset.replace('Needs Manual Assistance', 0)
     
