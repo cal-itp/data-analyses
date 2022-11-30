@@ -2,9 +2,13 @@
 
 All High Quality Transit Area (HQTA) related analysis is shown on this site.
 
-**Open data portal**
-* [Open data portal: HQTA Polygons](https://data.ca.gov/dataset/ca-hq-transit-areas1)
-* [Open data portal: HQTA Points](https://data.ca.gov/dataset/ca-hq-transit-stops1)
+## Open Data Portal
+1. [HQTA Areas](https://gis.data.ca.gov/datasets/863e61eacbf3463ab239beb3cee4a2c3_0)
+1. [HQTA Stops](https://gis.data.ca.gov/datasets/f6c30480f0e84be699383192c099a6a4_0)
+1. [CA Transit Routes](https://gis.data.ca.gov/datasets/dd7cb74665a14859a59b8c31d3bc5a3e_0)
+1. [CA Transit Stops](https://gis.data.ca.gov/datasets/900992cc94ab49dbbb906d8f147c2a72_0)
+
+## [PyData Global 2022 Slides](https://github.com/cal-itp/data-analyses/blob/main/high_quality_transit_areas/pydata_dask_slides.pdf)
 
 ## Facilities Services
 Working with Facilities Strategic Initiative (FSI) to understand potential retrofits of Caltrans facilities.
