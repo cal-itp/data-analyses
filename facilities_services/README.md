@@ -26,7 +26,7 @@ The facility types include office buildings, equipment shops, maintenance statio
 ### Data
 
 * Tier 1 facilities with addresses
-* [Open data portal: HQTA Polygons](https://data.ca.gov/dataset/ca-hq-transit-areas1)
+* [HQTA (polygons)](https://gis.data.ca.gov/datasets/863e61eacbf3463ab239beb3cee4a2c3_0)
 * [State highway network postmiles](https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/SHN_Postmiles_Tenth/FeatureServer/0/) 
 * [Caltrans districts (polygons)](https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D)
 * [CA counties (polygons)](https://gis.data.cnra.ca.gov/datasets/CALFIRE-Forestry::california-counties-1.geojson?outSR=%7B)
@@ -52,4 +52,4 @@ Show the overlap of high quality transit routes and REAP/LEAP funding (proxy via
 
 ### Data
 * [SACOG Green Means Go](https://sacog.maps.arcgis.com/apps/webappviewer/index.html?id=9fbf73e744c84aecbf7313fc74a04334&extent=-13552958.356,4656731.9575,-13481680.8271,4685930.9023,102100)
-* [Open data portal: HQTA Polygons](https://data.ca.gov/dataset/ca-hq-transit-areas1)
+* [HQTA (polygons)](https://gis.data.ca.gov/datasets/863e61eacbf3463ab239beb3cee4a2c3_0)
