@@ -153,6 +153,20 @@ def get_counties():
     
     return my_gdf
 
+# Kern County plots incorrectly - correct it 
+def correct_kern():
+    counties = get_counties()
+    
+    # Grab only Kern County
+    kern = counties.loc[counties.county_name == "Kern"].reset_index(drop=True)
+    
+    # Non node intersection line string error - fix Kern County
+    # https://github.com/geopandas/geopandas/issues/1724
+    kern["geometry"] = kern["geometry"].apply(
+    lambda x: shapely.wkt.loads(shapely.wkt.dumps(x, rounding_precision=4)))
+    
+    return kern 
+
 # Open AT&T coverage shapefile that's already clipped to California
 def load_att(): 
     att_file =  "att_ca_only.parquet"
