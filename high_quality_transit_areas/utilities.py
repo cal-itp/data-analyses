@@ -9,6 +9,7 @@ import shapely
 from ipyleaflet import (GeoData, LayersControl, Map, 
                         WidgetControl, basemaps)
 from ipywidgets import HTML, Text
+from typing import Union
 from shared_utils import calitp_color_palette, geography_utils
 
 fs = gcsfs.GCSFileSystem()
@@ -121,7 +122,8 @@ def hqta_details(row):
         return row.hqta_type + "_single_operator"
     
     
-def clip_to_ca(gdf: gpd.GeoDataFrame | dg.GeoDataFrame):
+def clip_to_ca(gdf: Union[gpd.GeoDataFrame, dg.GeoDataFrame]
+              ) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
     """
     Clip to CA boundaries. 
     Can take dask gdf or geopandas gdf
