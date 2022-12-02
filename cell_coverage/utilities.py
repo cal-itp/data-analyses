@@ -95,7 +95,7 @@ that doesn't have coverage, concat everything and dissolve to one row.
 This was used for Verizon.
 """
 def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wanted:list):
-    counties = utilities.get_counties()
+    counties = get_counties()
     
     # Empty dataframe to hold each district after clipping
     full_gdf = pd.DataFrame()
