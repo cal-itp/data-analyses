@@ -13,8 +13,8 @@ import pandas as pd
 
 from siuba import *
 
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS
-
+from shared_utils import utils
+from update_vars import analysis_date, COMPILED_CACHED_VIEWS, TEMP_GCS
 
 def trip_keys_for_route_type(analysis_date: str, 
                              route_type_list: list) -> pd.DataFrame: 
@@ -104,8 +104,12 @@ def grab_rail_data(analysis_date: str) -> gpd.GeoDataFrame:
     rail_trip_keys = trip_keys_for_route_type(analysis_date, rail_route_types)
         
     rail_stops = grab_stops(analysis_date, rail_trip_keys)
-        
-    rail_stops.to_parquet("./data/rail_stops.parquet")
+    
+    utils.geoparquet_gcs_export(
+        rail_stops,
+        TEMP_GCS,
+        "rail_stops"
+    )
     
 
 def grab_operator_brt(analysis_date: str) -> gpd.GeoDataFrame:
@@ -150,8 +154,12 @@ def grab_operator_brt(analysis_date: str) -> gpd.GeoDataFrame:
         
     brt_stops = grab_stops(analysis_date, brt_trip_keys)
     
-    brt_stops.to_parquet("./data/brt_stops.parquet")
-
+    utils.geoparquet_gcs_export(
+        brt_stops,
+        TEMP_GCS,
+        "brt_stops"
+    )
+    
 
 def additional_brt_filtering_out_stops(
     df: gpd.GeoDataFrame, filtering_dict: dict
@@ -197,4 +205,8 @@ def grab_ferry_data(analysis_date: str):
     
     ferry_stops = ferry_stops >> filter(-_.stop_id.isin(angel_and_alcatraz))
     
-    ferry_stops.to_parquet("./data/ferry_stops.parquet")
+    utils.geoparquet_gcs_export(
+        ferry_stops,
+        TEMP_GCS,
+        "ferry_stops"
+    )
