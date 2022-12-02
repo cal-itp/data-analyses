@@ -132,7 +132,8 @@ if __name__ == "__main__":
     bus_intersections = buffer_around_intersections(buffer_size=100)
 
     # Grab point geom with all stops
-    all_stops = gpd.read_parquet(f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
+    all_stops = gpd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
     logger.info("grab all stops")
     
     # Create hqta_type == major_stop_bus
@@ -144,15 +145,17 @@ if __name__ == "__main__":
     logger.info("create hq corridor bus")
     
     # Export to GCS    
-    utils.geoparquet_gcs_export(major_stop_bus, 
-                                GCS_FILE_PATH,
-                                'major_stop_bus'
-                               )
+    utils.geoparquet_gcs_export(
+        major_stop_bus, 
+        GCS_FILE_PATH,
+        'major_stop_bus'
+    )
     
-    utils.geoparquet_gcs_export(stops_in_hq_corr,
-                                GCS_FILE_PATH,
-                                'stops_in_hq_corr'
-                               )
+    utils.geoparquet_gcs_export(
+        stops_in_hq_corr,
+        GCS_FILE_PATH,
+        'stops_in_hq_corr'
+    )
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

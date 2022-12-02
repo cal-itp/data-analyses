@@ -13,8 +13,8 @@ import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
 
 import datetime as dt
+import gcsfs
 import geopandas as gpd
-import glob
 import pandas as pd
 import siuba
 import sys 
@@ -27,10 +27,9 @@ from loguru import logger
 
 import operators_for_hqta
 
-from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH
+from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH, TEMP_GCS
 from shared_utils import gtfs_utils, geography_utils, rt_utils, utils
 
-LOCAL_PATH = "./data/"
 
 def primary_trip_query(itp_id: int, analysis_date: str, 
                        additional_filters: dict = None):
@@ -52,8 +51,8 @@ def primary_trip_query(itp_id: int, analysis_date: str,
         custom_filtering = additional_filters
     )
     
-    full_trips.to_parquet(f"{LOCAL_PATH}temp_{filename}")
-    logger.info(f"{itp_id}: {dataset} saved locally")
+    full_trips.to_parquet(f"{TEMP_GCS}temp_{filename}")
+    logger.info(f"{itp_id}: {dataset} saved in temp GCS")
 
 
 def get_routelines(itp_id: int, analysis_date: str, 
@@ -64,7 +63,7 @@ def get_routelines(itp_id: int, analysis_date: str,
     """    
     # Read in the full trips table
     full_trips = pd.read_parquet(
-        f"{LOCAL_PATH}temp_trips_{itp_id}_{analysis_date}.parquet")
+        f"{TEMP_GCS}temp_trips_{itp_id}_{analysis_date}.parquet")
     
     routelines = gtfs_utils.get_route_shapes(
         selected_date = analysis_date,
@@ -87,7 +86,7 @@ def get_trips(itp_id: int, analysis_date: str,
     filename = f"{dataset}_{itp_id}_{analysis_date}.parquet"
     
     # Read in the full trips table
-    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_{filename}")
+    full_trips = pd.read_parquet(f"{TEMP_GCS}temp_{filename}")
     
     keep_trip_cols = [
             "calitp_itp_id", "calitp_url_number", 
@@ -162,7 +161,7 @@ def get_stop_times(itp_id: int, analysis_date: str,
     filename = f"{dataset}_{itp_id}_{analysis_date}.parquet"
 
     full_trips = pd.read_parquet(
-        f"{LOCAL_PATH}temp_trips_{itp_id}_{analysis_date}.parquet")
+        f"{TEMP_GCS}temp_trips_{itp_id}_{analysis_date}.parquet")
     
     stop_times = gtfs_utils.get_stop_times(
         selected_date = analysis_date,
@@ -243,6 +242,19 @@ def compute_delayed(itp_id: int, analysis_date: str,
         logger.info(f"{itp_id}: stops exported to GCS")
 
         
+def remove_temp_trip_files(gcs_folder: str = TEMP_GCS):
+    """
+    Remove the temporary full trips file saved in GCS.
+    """
+    fs_list = fs.ls(gcs_folder)
+
+    # Remove full trips file
+    temp_trip_files = [i for i in fs_list if 'temp_' in i]
+    
+    for f in temp_trip_files:
+        fs.rm(f)
+
+
 if __name__=="__main__":
 
     logger.add("./logs/download_data.log", retention="6 months")
@@ -252,6 +264,8 @@ if __name__=="__main__":
     
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
+    
+    fs = gcsfs.GCSFileSystem()
     
     ALL_IDS = (tbls.gtfs_schedule.agency()
                >> distinct(_.calitp_itp_id)
@@ -287,17 +301,16 @@ if __name__=="__main__":
 
         # Check that routes, trips, stops were downloaded successfully
         # If all 3 are present, then download stop_times. Otherwise, skip stop_times.
-        if check_route_trips_stops_are_cached(itp_id, analysis_date) is True:
+        if check_route_trips_stops_are_cached(itp_id, analysis_date):
             get_stop_times(itp_id, analysis_date)
-
-        # Remove full trips file
-        trip_file = glob.glob(f"{LOCAL_PATH}temp_trips_{itp_id}_*.parquet")
-        for f in trip_file:
-            os.remove(f)
 
         time1 = dt.datetime.now()
         logger.info(f"download files for {itp_id}: {time1-time0}")
 
-    end = dt.datetime.now()
+    # Delete temp trip files
+    # TODO: in v2, if entirety of table is stored in dbt, we won't have to cache
+    # and pull from caches across other tables
+    remove_temp_trip_files(TEMP_GCS)
     
+    end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
