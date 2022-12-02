@@ -61,12 +61,9 @@ def sjoin_against_other_operators(
         how = "inner",
         predicate = "intersects"
     ).drop(columns = ["index_right", "geometry"])
-    
-    # In case there are some that still end up not being orthogonal
-    s2 = s1[s1.route_direction_left != s1.route_direction_right]
-        
+            
     route_pairs = (
-        s2.rename(
+        s1.rename(
             columns = {
                 "hqta_segment_id_left": "hqta_segment_id",
                 "hqta_segment_id_right": "intersect_hqta_segment_id",
