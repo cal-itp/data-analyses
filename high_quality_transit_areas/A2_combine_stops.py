@@ -55,6 +55,10 @@ if __name__ == "__main__":
     rail_ferry_brt.grab_rail_data(analysis_date)
     rail_stops = gpd.read_parquet(f"{TEMP_GCS}rail_stops.parquet")
     
+    # Handle Muni separately - temp, can remove in 2023
+    muni_weekend_rail.download_muni_stops(282)
+    muni_rail_stops = gpd.read_parquet(f"{TEMP_GCS}muni_rail_stops.parquet")
+    
     time1 = datetime.datetime.now()
     logger.info(f"grabbed rail: {time1-start}")
 
@@ -77,6 +81,7 @@ if __name__ == "__main__":
     # Concatenate datasets that need to be clipped to CA
     rail_brt = pd.concat([
         rail_stops,
+        muni_rail_stops,
         brt_stops
     ], axis=0, ignore_index= True)
     
@@ -92,9 +97,11 @@ if __name__ == "__main__":
 
     
     # Export to GCS
-    utils.geoparquet_gcs_export(rail_brt_ferry, 
-                                GCS_FILE_PATH, 
-                                'rail_brt_ferry')
+    utils.geoparquet_gcs_export(
+        rail_brt_ferry, 
+        GCS_FILE_PATH, 
+        'rail_brt_ferry'
+    )
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
