@@ -27,9 +27,10 @@ from loguru import logger
 
 import operators_for_hqta
 
-from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH, TEMP_GCS
+from update_vars import analysis_date, TEMP_GCS #CACHED_VIEWS_EXPORT_PATH, TEMP_GCS
 from shared_utils import gtfs_utils, geography_utils, rt_utils, utils
 
+CACHED_VIEWS_EXPORT_PATH = "gs://calitp-analytics-data/data-analyses/dask_test/"
 
 def primary_trip_query(itp_id: int, analysis_date: str, 
                        additional_filters: dict = None):
@@ -256,7 +257,11 @@ def remove_temp_trip_files(gcs_folder: str = TEMP_GCS):
 
 
 if __name__=="__main__":
-
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    
     logger.add("./logs/download_data.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -281,6 +286,7 @@ if __name__=="__main__":
         analysis_date, all_itp_ids = ALL_IDS)
     
     IDS_TO_RUN = list(set(ALL_IDS).difference(set(CACHED_IDS)))
+    
     logger.info(f"# operators to run: {len(IDS_TO_RUN)}")
         
     for itp_id in sorted(IDS_TO_RUN):
@@ -314,3 +320,5 @@ if __name__=="__main__":
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+
+    client.close()
