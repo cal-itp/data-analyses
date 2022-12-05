@@ -14,6 +14,7 @@ import pandas as pd
 import sys
 
 from loguru import logger
+from typing import Union
 
 from shared_utils import utils, gtfs_utils
 from utilities import GCS_FILE_PATH
@@ -165,9 +166,9 @@ def hqta_segment_keep_one_stop(
 
 
 def sjoin_stops_and_stop_times_to_hqta_segments(
-    hqta_segments: gpd.GeoDataFrame | dg.GeoDataFrame, 
-    stops: gpd.GeoDataFrame | dg.GeoDataFrame,
-    stop_times: pd.DataFrame | dd.DataFrame,
+    hqta_segments: Union[gpd.GeoDataFrame, dg.GeoDataFrame], 
+    stops: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
+    stop_times: Union[pd.DataFrame, dd.DataFrame],
     buffer_size: int = 50,
     hq_transit_threshold: int = 4,
 ) -> dg.GeoDataFrame:
@@ -202,6 +203,10 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
 
 
 if __name__ == "__main__":
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    
     logger.add("./logs/B2_sjoin_stops_to_segments.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -242,3 +247,5 @@ if __name__ == "__main__":
     
     end = dt.datetime.now()
     logger.info(f"Execution time: {end-start}")
+    
+    client.close()
