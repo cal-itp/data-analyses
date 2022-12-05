@@ -97,6 +97,10 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     
 if __name__ == "__main__":
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+
     logger.add("./logs/C2_find_intersections.log")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -127,3 +131,5 @@ if __name__ == "__main__":
  
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+    
+    client.close()

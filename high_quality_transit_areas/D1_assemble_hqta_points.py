@@ -18,8 +18,7 @@ import os
 import pandas as pd
 import sys
 
-# need this to pass GCS credential to dask cluster
-from calitp.storage import get_fs, is_cloud
+#from calitp.storage import get_fs, is_cloud # pass GCS credential to dask cluster?
 from loguru import logger
 
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
@@ -27,7 +26,7 @@ import utilities
 from shared_utils import utils, geography_utils, portfolio_utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
-fs = get_fs()
+#fs = get_fs()
 
 catalog = intake.open_catalog("*.yml")
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
@@ -42,8 +41,10 @@ def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
     Use calitp_itp_id-stop_id to add route_id back in, 
     using the trips and stop_times table.
     """    
-    stop_times = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
-    trips = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+    stop_times = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+    trips = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
     stop_cols = ["calitp_itp_id", "stop_id"]
     trip_cols = ["calitp_itp_id", "trip_id"]
