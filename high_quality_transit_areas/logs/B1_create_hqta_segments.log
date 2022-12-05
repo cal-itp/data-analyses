@@ -67,3 +67,24 @@
 2022-11-17 10:54:37.618 | INFO     | __main__:<module>:338 - cut segments: 0:08:10.146025
 2022-11-17 10:54:55.491 | INFO     | __main__:<module>:350 - dissolve: 0:00:17.873265
 2022-11-17 10:54:55.492 | INFO     | __main__:<module>:351 - total execution time: 0:08:29.644187
+2022-12-05 13:54:11.480 | INFO     | __main__:<module>:309 - Analysis date: 2022-11-16
+2022-12-05 13:54:13.021 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.540453
+2022-12-05 13:55:24.798 | INFO     | __main__:<module>:311 - Analysis date: 2022-11-16
+2022-12-05 13:55:26.318 | INFO     | __main__:<module>:328 - merge routes to trips: 0:00:01.518592
+2022-12-05 14:00:13.086 | INFO     | __main__:<module>:309 - Analysis date: 2022-11-16
+2022-12-05 14:00:14.614 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.527584
+2022-12-05 14:04:03.358 | INFO     | __main__:<module>:343 - cut segments: 0:03:48.743244
+2022-12-05 14:04:12.577 | INFO     | __main__:<module>:355 - dissolve: 0:00:09.219766
+2022-12-05 14:04:12.578 | INFO     | __main__:<module>:356 - total execution time: 0:03:59.490594
+2022-12-05 14:15:42.287 | INFO     | __main__:<module>:309 - Analysis date: 2022-11-16
+2022-12-05 14:15:43.863 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.575932
+2022-12-05 14:16:19.965 | INFO     | __main__:<module>:309 - Analysis date: 2022-11-16
+2022-12-05 14:16:21.550 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.583829
+2022-12-05 14:20:12.988 | INFO     | __main__:<module>:343 - cut segments: 0:03:51.438531
+2022-12-05 14:20:22.071 | INFO     | __main__:<module>:355 - dissolve: 0:00:09.082768
+2022-12-05 14:20:22.072 | INFO     | __main__:<module>:356 - total execution time: 0:04:02.105128
+2022-12-05 14:25:15.022 | INFO     | __main__:<module>:311 - Analysis date: 2022-11-16
+2022-12-05 14:25:16.556 | INFO     | __main__:<module>:328 - merge routes to trips: 0:00:01.533457
+2022-12-05 14:29:01.638 | INFO     | __main__:<module>:345 - cut segments: 0:03:45.081873
+2022-12-05 14:29:08.852 | INFO     | __main__:<module>:357 - dissolve: 0:00:07.214117
+2022-12-05 14:29:08.852 | INFO     | __main__:<module>:358 - total execution time: 0:03:53.829447
