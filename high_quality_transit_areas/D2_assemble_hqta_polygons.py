@@ -11,6 +11,7 @@ import intake
 import pandas as pd
 import sys
 
+from calitp.storage import get_fs, is_cloud
 from loguru import logger
 
 import C1_prep_pairwise_intersections as prep_clip
@@ -20,9 +21,10 @@ from shared_utils import utils, geography_utils
 from D1_assemble_hqta_points import EXPORT_PATH, add_route_info
 from update_vars import analysis_date
 
+fs = get_fs()
 
-HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 catalog = intake.open_catalog("*.yml")
+HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 
 def get_dissolved_hq_corridor_bus(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """
@@ -67,7 +69,7 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     # Bus corridors are already buffered 100 meters, so will buffer 705 meters
     stops = stops.assign(
         geometry = stops.geometry.buffer(705)
-    )
+    ).compute()
     
     corridor_cols = [
         "calitp_itp_id_primary", "hqta_type", "route_id", "geometry"
@@ -78,18 +80,18 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
         # overwrite hqta_type for this polygon
         hqta_type = "hq_corridor_bus",
         calitp_itp_id_primary = corridors.calitp_itp_id.astype(int),
-    )[corridor_cols]
+    )[corridor_cols].compute()
     
     corridors["hqta_details"] = corridors.apply(
-        utilities.hqta_details, meta=("hqta_details", "str"), 
+        utilities.hqta_details,#, meta=("hqta_details", "str"), 
         axis=1)
     
     
-    hqta_polygons = (dd.multi.concat([corridors, stops], axis=0)
+    hqta_polygons = (pd.concat([corridors, stops], axis=0)
                      .to_crs(geography_utils.WGS84)
                      # Make sure dtype is still int after concat
                      .astype({"calitp_itp_id_primary": int})
-                    ).compute()
+                    )#.compute()
     
     return hqta_polygons
 
@@ -118,6 +120,11 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 if __name__=="__main__":
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    
     logger.add("./logs/D2_assemble_hqta_polygons.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
@@ -179,3 +186,5 @@ if __name__=="__main__":
         
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+    
+    client.close()

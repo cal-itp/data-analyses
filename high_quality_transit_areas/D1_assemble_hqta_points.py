@@ -18,12 +18,16 @@ import os
 import pandas as pd
 import sys
 
+# need this to pass GCS credential to dask cluster
+from calitp.storage import get_fs, is_cloud
 from loguru import logger
 
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
 from shared_utils import utils, geography_utils, portfolio_utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+
+fs = get_fs()
 
 catalog = intake.open_catalog("*.yml")
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
@@ -130,6 +134,11 @@ def clean_up_hqta_points(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     
 if __name__=="__main__":
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    
     logger.add("./logs/D1_assemble_hqta_points.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
@@ -206,3 +215,5 @@ if __name__=="__main__":
 
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+    
+    client.close()
