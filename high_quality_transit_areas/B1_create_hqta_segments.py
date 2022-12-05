@@ -348,7 +348,8 @@ if __name__=="__main__":
     time2 = dt.datetime.now()
     logger.info(f"cut segments: {time2 - time1}")
     
-    # In addition to segments, let's keep a version where line geom is at route-level
+    # In addition to segments, let's keep a version where line geom is 
+    # at route-level
     # Dissolve across directions so that each route is 1 row, 1 line
     longest_shape = dissolved_to_longest_shape(hqta_segments_with_dir)
     

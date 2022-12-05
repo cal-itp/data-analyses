@@ -213,6 +213,7 @@ if __name__ == "__main__":
                level="INFO")
     
     logger.info(f"Analysis date: {analysis_date}")
+
     start = dt.datetime.now()
     
     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
