@@ -71,13 +71,15 @@ def map_hqta(gdf: gpd.GeoDataFrame, mouseover: bool = None, name: str = "gdf"):
 
     if "hq_transit_corr" in gdf.columns:
         geo_data_hq = GeoData(
-            geo_dataframe=(gdf[gdf["hq_transit_corr"]].to_crs(geography_utils.WGS84)),
+            geo_dataframe =(gdf[gdf["hq_transit_corr"]]
+                            .to_crs(geography_utils.WGS84)),
             style={**{"fillColor": BLUE}, **LAYER_STYLE},
             hover_style={**HOVER_STYLE},
             name="HQTA",
         )
         geo_data_not_hq = GeoData(
-            geo_dataframe=(gdf[~gdf["hq_transit_corr"]].to_crs(geography_utils.WGS84)),
+            geo_dataframe =(gdf[~gdf["hq_transit_corr"]]
+                            .to_crs(geography_utils.WGS84)),
             style={**{"fillColor": ORANGE}, **LAYER_STYLE},
             hover_style={**HOVER_STYLE},
             name="non-HQTA",
