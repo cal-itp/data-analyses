@@ -75,6 +75,7 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
         "calitp_itp_id_primary", "hqta_type", "route_id", "geometry"
     ]
     
+    # Compute and get gdfs here, otherwise dask cluster can't find utilities import
     corridors = corridors.assign(
         geometry = corridors.geometry.buffer(755),
         # overwrite hqta_type for this polygon
@@ -83,15 +84,14 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     )[corridor_cols].compute()
     
     corridors["hqta_details"] = corridors.apply(
-        utilities.hqta_details,#, meta=("hqta_details", "str"), 
-        axis=1)
+        utilities.hqta_details, axis=1)
     
     
     hqta_polygons = (pd.concat([corridors, stops], axis=0)
                      .to_crs(geography_utils.WGS84)
                      # Make sure dtype is still int after concat
                      .astype({"calitp_itp_id_primary": int})
-                    )#.compute()
+                    )
     
     return hqta_polygons
 
