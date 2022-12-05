@@ -27,6 +27,7 @@ from shared_utils import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
+
 # Input files
 ALL_INTERSECTIONS = catalog_filepath("all_intersections")
 
@@ -119,6 +120,10 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 
 if __name__ == "__main__":
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     logger.add("./logs/C3_create_bus_hqta_types.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
@@ -132,7 +137,8 @@ if __name__ == "__main__":
     bus_intersections = buffer_around_intersections(buffer_size=100)
 
     # Grab point geom with all stops
-    all_stops = gpd.read_parquet(f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
+    all_stops = gpd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
     logger.info("grab all stops")
     
     # Create hqta_type == major_stop_bus
@@ -144,15 +150,19 @@ if __name__ == "__main__":
     logger.info("create hq corridor bus")
     
     # Export to GCS    
-    utils.geoparquet_gcs_export(major_stop_bus, 
-                                GCS_FILE_PATH,
-                                'major_stop_bus'
-                               )
+    utils.geoparquet_gcs_export(
+        major_stop_bus, 
+        GCS_FILE_PATH,
+        'major_stop_bus'
+    )
     
-    utils.geoparquet_gcs_export(stops_in_hq_corr,
-                                GCS_FILE_PATH,
-                                'stops_in_hq_corr'
-                               )
+    utils.geoparquet_gcs_export(
+        stops_in_hq_corr,
+        GCS_FILE_PATH,
+        'stops_in_hq_corr'
+    )
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+    
+    client.close()

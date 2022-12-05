@@ -11,6 +11,7 @@ import intake
 import pandas as pd
 import sys
 
+from calitp.storage import get_fs, is_cloud
 from loguru import logger
 
 import C1_prep_pairwise_intersections as prep_clip
@@ -20,9 +21,10 @@ from shared_utils import utils, geography_utils
 from D1_assemble_hqta_points import EXPORT_PATH, add_route_info
 from update_vars import analysis_date
 
+fs = get_fs()
 
-HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 catalog = intake.open_catalog("*.yml")
+HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 
 def get_dissolved_hq_corridor_bus(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """
@@ -67,29 +69,29 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     # Bus corridors are already buffered 100 meters, so will buffer 705 meters
     stops = stops.assign(
         geometry = stops.geometry.buffer(705)
-    )
+    ).compute()
     
     corridor_cols = [
         "calitp_itp_id_primary", "hqta_type", "route_id", "geometry"
     ]
     
+    # Compute and get gdfs here, otherwise dask cluster can't find utilities import
     corridors = corridors.assign(
         geometry = corridors.geometry.buffer(755),
         # overwrite hqta_type for this polygon
         hqta_type = "hq_corridor_bus",
         calitp_itp_id_primary = corridors.calitp_itp_id.astype(int),
-    )[corridor_cols]
+    )[corridor_cols].compute()
     
     corridors["hqta_details"] = corridors.apply(
-        utilities.hqta_details, meta=("hqta_details", "str"), 
-        axis=1)
+        utilities.hqta_details, axis=1)
     
     
-    hqta_polygons = (dd.multi.concat([corridors, stops], axis=0)
+    hqta_polygons = (pd.concat([corridors, stops], axis=0)
                      .to_crs(geography_utils.WGS84)
                      # Make sure dtype is still int after concat
                      .astype({"calitp_itp_id_primary": int})
-                    ).compute()
+                    )
     
     return hqta_polygons
 
@@ -118,6 +120,11 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 if __name__=="__main__":
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    
     logger.add("./logs/D2_assemble_hqta_polygons.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
@@ -141,36 +148,43 @@ if __name__=="__main__":
     
     # Export to GCS
     # Stash this date's into its own folder, to convert to geojson, geojsonl
-    utils.geoparquet_gcs_export(gdf2, 
-                                EXPORT_PATH, 
-                                'ca_hq_transit_areas'
-                               )
+    utils.geoparquet_gcs_export(
+        gdf2, 
+        EXPORT_PATH, 
+        'ca_hq_transit_areas'
+    )
+    
     logger.info("export as geoparquet in date folder")
 
     # Overwrite most recent version (other catalog entry constantly changes)
-    utils.geoparquet_gcs_export(gdf2,
-                                utilities.GCS_FILE_PATH,
-                                'hqta_areas'
-                               )    
+    utils.geoparquet_gcs_export(
+        gdf2,
+        utilities.GCS_FILE_PATH,
+        'hqta_areas'
+   )    
     
     logger.info("export as geoparquet")
     
     # Add geojson / geojsonl exports
-    utils.geojson_gcs_export(gdf2, 
-                             EXPORT_PATH,
-                             'ca_hq_transit_areas', 
-                             geojson_type = "geojson"
-                            )
+    utils.geojson_gcs_export(
+        gdf2, 
+        EXPORT_PATH,
+        'ca_hq_transit_areas', 
+        geojson_type = "geojson"
+    )
     
     logger.info("export as geojson")
 
-    utils.geojson_gcs_export(gdf2, 
-                         EXPORT_PATH,
-                         'ca_hq_transit_areas', 
-                         geojson_type = "geojsonl"
-                        )
+    utils.geojson_gcs_export(
+        gdf2, 
+        EXPORT_PATH,
+        'ca_hq_transit_areas', 
+        geojson_type = "geojsonl"
+    )
     
     logger.info("export as geojsonl")
         
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+    
+    client.close()
