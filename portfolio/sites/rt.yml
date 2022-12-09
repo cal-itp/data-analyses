@@ -20,6 +20,8 @@ parts:
           - itp_id: 221
           - itp_id: 372
           - itp_id: 273
+          - itp_id: 105
+          - itp_id: 351
       - caption: District 04 - Oakland
         params:
           district: 04 - Oakland
@@ -38,6 +40,7 @@ parts:
           - itp_id: 290
           - itp_id: 61
           - itp_id: 301
+          - itp_id: 218
       - caption: District 05 - San Luis Obispo
         params:
           district: 05 - San Luis Obispo
