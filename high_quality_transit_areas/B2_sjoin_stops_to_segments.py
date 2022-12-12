@@ -213,11 +213,13 @@ if __name__ == "__main__":
                level="INFO")
     
     logger.info(f"Analysis date: {analysis_date}")
+
     start = dt.datetime.now()
     
     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
     # takes 1 min
-    stop_times = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+    stop_times = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
     max_arrivals_by_stop = stop_times_aggregation_max_by_stop(stop_times)
     
     max_arrivals_by_stop.compute().to_parquet(

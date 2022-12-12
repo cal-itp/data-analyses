@@ -1,6 +1,14 @@
 """
 Draw bus corridors (routes -> segments) across all operators.
 
+Use difference instead of symmetric difference, and we'll
+end up with similar results, since we cut segments
+across both direction == 0 and direction == 1 now.
+
+Cannot use symmetric difference unless we downgrade pandas to 1.1.3
+https://gis.stackexchange.com/questions/414317/gpd-overlay-throws-intcastingnanerror.
+Too complicated to change between pandas versions.
+
 Takes 8 min to run 
 - down from 1 hr in v2 
 - down from several hours v1
@@ -96,16 +104,16 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
     return longest_shapes
 
 
-def symmetric_difference_overlay_by_route(
+def difference_overlay_by_route(
     longest_shapes: gpd.GeoDataFrame, route: str, 
     segment_length: int
 ) -> gpd.GeoDataFrame:
     """
     For each route that has 2 directions, do an overlay and 
-    find the symmetric difference. 
+    find the difference. 
     
     The longest shape is kept. 
-    The second shape, which has the symmetric difference, should be 
+    The second shape, which has the difference, should be 
     exploded and expanded to make sure the lengths are long enough.
     If it is, dissolve it.
     
@@ -120,10 +128,9 @@ def symmetric_difference_overlay_by_route(
     first = one_route[one_route.index==0]
     second = one_route[one_route.index==1]
     
-    # Find the symmetric difference 
-    # This takes away the parts that are overlapping
-    # and keeps the differences -- this still isn't what we fully want, but gets closer
-    overlay = first.overlay(second, how = "symmetric_difference")
+    # Find the difference
+    # We'll combine it with the first segment anyway
+    overlay = first.overlay(second, how = "difference")
     
     # Notice that overlay keeps a lot of short segments that are in the
     # middle of the route. Drop these. We mostly want
@@ -167,13 +174,17 @@ def select_shapes_and_segment(
     For routes where only 1 shape_id was chosen for longest route_length,
     it's ready to cut into segments.
     
-    For routes where 2 shape_ids were chosen...1 in each direction, find the
-    symmetric difference.
+    For routes where 2 shape_ids were chosen...1 in each direction, 
+    find thedifference.
     
     Concatenate these 2 portions and then cut HQTA segments.
     Returns the hqta_segments for all the routes across all operators.
+    
+    gpd.overlay(how = 'symmetric_difference') is causing error, 
+    either need to downgrade pandas or switch to 'difference'
+    https://gis.stackexchange.com/questions/414317/gpd-overlay-throws-intcastingnanerror
     """
-    # Since the symmetric difference needs to be geopandas,
+    # Since the difference needs to be geopandas,
     # convert it now, and leave it as geopandas
     gdf = longest_shapes.compute()
         
@@ -186,18 +197,18 @@ def select_shapes_and_segment(
     
     two_directions = gdf[gdf.route_identifier.isin(routes_both_dir)]    
     
-    two_directions_symmetric_overlay = gpd.GeoDataFrame()
+    two_directions_overlay = gpd.GeoDataFrame()
 
     for r in routes_both_dir:
-        exploded = symmetric_difference_overlay_by_route(
+        exploded = difference_overlay_by_route(
             two_directions, r, segment_length)
     
-        two_directions_symmetric_overlay = pd.concat(
-            [two_directions_symmetric_overlay, exploded], axis=0)    
+        two_directions_overlay = pd.concat(
+            [two_directions_overlay, exploded], axis=0)    
     
     
     ready_for_segmenting = pd.concat(
-        [one_direction, two_directions_symmetric_overlay], 
+        [one_direction, two_directions_overlay], 
         axis=0)[["route_identifier", "geometry"]]
     
     # Cut segments 
@@ -225,8 +236,10 @@ def select_shapes_and_segment(
     )
     
     # Reindex and change column order, put geometry at the end
-    cols = [c for c in hqta_segments.columns if c not in route_cols and c != "geometry"]
-    hqta_segments = hqta_segments.reindex(columns = route_cols + cols + ["geometry"])
+    cols = [c for c in hqta_segments.columns 
+            if c not in route_cols and c != "geometry"]
+    hqta_segments = hqta_segments.reindex(columns = route_cols + cols + 
+                                          ["geometry"])
     
     # compute (hopefully unique) hash of segment id that can be used
     # across routes/operators
@@ -284,7 +297,7 @@ def find_primary_direction_across_hqta_segments(
 
 def dissolved_to_longest_shape(hqta_segments: gpd.GeoDataFrame):
     """
-    Since HQTA segments were cut right after the symmetric difference
+    Since HQTA segments were cut right after the overlay difference
     was taken, do a dissolve so that each route is just 1 line geom.
     
     Keep this version to plot the route.
@@ -301,6 +314,10 @@ def dissolved_to_longest_shape(hqta_segments: gpd.GeoDataFrame):
     
     
 if __name__=="__main__":   
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    
     logger.add("./logs/B1_create_hqta_segments.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -313,7 +330,7 @@ if __name__=="__main__":
     #https://stackoverflow.com/questions/69884348/use-dask-to-chunkwise-work-with-smaller-pandas-df-breaks-memory-limits
         
     # (1) Merge routelines with trips, find the longest shape in 
-    # each direction, and after symmetric difference, cut HQTA segments
+    # each direction, and after overlay difference, cut HQTA segments
     routelines = dg.read_parquet(
         f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet")
     trips = dd.read_parquet(
@@ -342,7 +359,8 @@ if __name__=="__main__":
     time2 = dt.datetime.now()
     logger.info(f"cut segments: {time2 - time1}")
     
-    # In addition to segments, let's keep a version where line geom is at route-level
+    # In addition to segments, let's keep a version where line geom is 
+    # at route-level
     # Dissolve across directions so that each route is 1 row, 1 line
     longest_shape = dissolved_to_longest_shape(hqta_segments_with_dir)
     
@@ -355,4 +373,4 @@ if __name__=="__main__":
     logger.info(f"dissolve: {end - time2}")
     logger.info(f"total execution time: {end - start}")
 
-        
+    client.close()
