@@ -121,12 +121,5 @@ def download_muni_stops(
     )
 
     muni_stops.to_parquet(f"{TEMP_GCS}muni_rail_stops.parquet")
-    '''
-    #Don't need routelines for just stops...double check before removing?
-    weekend_shapes = muni_trips.shape_id.unique().tolist()
 
-    muni_routelines = gtfs_utils.get_routelines(
-        itp_id, previous_sat, 
-        additional_filters = {"shape_id": weekend_shapes})
-    '''
     return muni_stops
