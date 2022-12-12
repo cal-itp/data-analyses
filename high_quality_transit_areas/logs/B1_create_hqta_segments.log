@@ -88,3 +88,13 @@
 2022-12-05 14:29:01.638 | INFO     | __main__:<module>:345 - cut segments: 0:03:45.081873
 2022-12-05 14:29:08.852 | INFO     | __main__:<module>:357 - dissolve: 0:00:07.214117
 2022-12-05 14:29:08.852 | INFO     | __main__:<module>:358 - total execution time: 0:03:53.829447
+2022-12-12 10:51:03.298 | INFO     | __main__:<module>:315 - Analysis date: 2022-11-16
+2022-12-12 10:51:05.023 | INFO     | __main__:<module>:332 - merge routes to trips: 0:00:01.723693
+2022-12-12 10:56:41.061 | INFO     | __main__:<module>:349 - cut segments: 0:05:36.038082
+2022-12-12 10:56:52.982 | INFO     | __main__:<module>:362 - dissolve: 0:00:11.920927
+2022-12-12 10:56:52.983 | INFO     | __main__:<module>:363 - total execution time: 0:05:49.682702
+2022-12-12 11:44:10.963 | INFO     | __main__:<module>:326 - Analysis date: 2022-11-16
+2022-12-12 11:44:12.580 | INFO     | __main__:<module>:343 - merge routes to trips: 0:00:01.616279
+2022-12-12 11:49:47.975 | INFO     | __main__:<module>:360 - cut segments: 0:05:35.394745
+2022-12-12 11:49:58.707 | INFO     | __main__:<module>:373 - dissolve: 0:00:10.732026
+2022-12-12 11:49:58.708 | INFO     | __main__:<module>:374 - total execution time: 0:05:47.743050
