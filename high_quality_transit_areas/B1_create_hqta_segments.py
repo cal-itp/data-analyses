@@ -1,6 +1,14 @@
 """
 Draw bus corridors (routes -> segments) across all operators.
 
+Use difference instead of symmetric difference, and we'll
+end up with similar results, since we cut segments
+across both direction == 0 and direction == 1 now.
+
+Cannot use symmetric difference unless we downgrade pandas to 1.1.3
+https://gis.stackexchange.com/questions/414317/gpd-overlay-throws-intcastingnanerror.
+Too complicated to change between pandas versions.
+
 Takes 8 min to run 
 - down from 1 hr in v2 
 - down from several hours v1
@@ -306,6 +314,9 @@ def dissolved_to_longest_shape(hqta_segments: gpd.GeoDataFrame):
     
     
 if __name__=="__main__":   
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/B1_create_hqta_segments.log", retention="6 months")
     logger.add(sys.stderr, 
@@ -361,3 +372,5 @@ if __name__=="__main__":
     end = dt.datetime.now()
     logger.info(f"dissolve: {end - time2}")
     logger.info(f"total execution time: {end - start}")
+
+    client.close()
