@@ -84,7 +84,7 @@ def load_allocation():
     df = ppno_slice(df)
     
     # Clean Project ID, all should be 10 characters
-    df = project_id_slice(df)
+    # df = project_id_slice(df)
     return df
 
 
@@ -190,6 +190,7 @@ date_columns = [
     "allocation_date",
     "phase_completion_date",
     "_3rd_party_award_date",
+    "date_branch_chief_receives_psa",
     "led",
     "date_regional_coordinator_receives_psa",
     "date_oc_receives_psa",
@@ -199,7 +200,7 @@ date_columns = [
     "date_psa_approved_by_local_agency",
     "date_signed_by_drmt",
     "psa_expiry_date",
-    "date_branch_chief_receives_psa",
+    
 ]
 
 # Manual portion of cleaning the allocation
@@ -255,8 +256,7 @@ def clean_allocation():
     df = df.fillna(df.dtypes.replace({"float64": 0.0, "object": "None"}))
 
     # Coerce dates to datetime
-    for c in date_columns:
-        df[c] = df[c].apply(pd.to_datetime, errors="coerce")
+    df[date_columns] = df[date_columns].apply(pd.to_datetime, errors="coerce")
 
     # Clean organization name/de duplicate
     df = organization_cleaning(df, "grant_recipient")
