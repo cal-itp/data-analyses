@@ -36,6 +36,13 @@ van_ness_ids = [
     '18105', '18088'
 ]
 
+new_muni_stops = [
+    '17876', '17875', # Chinatown-Rose Pak 
+    '17877', '17874', # Union Square/Market Street
+    '17873', '17878', # Yerba Buena/Moscone
+    '13156', '3156', # 4th & Brannan
+]
+
 BRT_STOPS_FILTER = {
     182: metro_street_running,
     282: van_ness_ids
@@ -63,6 +70,8 @@ if __name__ == "__main__":
     # Handle Muni separately - temp, can remove in 2023
     muni_weekend_rail.download_muni_stops(282)
     muni_rail_stops = gpd.read_parquet(f"{TEMP_GCS}muni_rail_stops.parquet")
+    new_muni_rail_stops = muni_rail_stops[
+        muni_rail_stops.stop_id.isin(new_muni_stops)].reset_index(drop=True)
     
     time1 = datetime.datetime.now()
     logger.info(f"grabbed rail: {time1-start}")
@@ -86,7 +95,7 @@ if __name__ == "__main__":
     # Concatenate datasets that need to be clipped to CA
     rail_brt = pd.concat([
         rail_stops,
-        muni_rail_stops,
+        new_muni_rail_stops,
         brt_stops
     ], axis=0, ignore_index= True)
     

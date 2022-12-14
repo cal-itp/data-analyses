@@ -14,13 +14,17 @@ downloaded unless trips, routelines, and stops is present.
 import pandas as pd
 import pendulum
 
-from shared_utils import gtfs_utils, geography_utils
+from shared_utils import gtfs_utils, geography_utils, rt_utils
 from update_vars import analysis_date, TEMP_GCS
 
-previous_sat = (pendulum.from_format(analysis_date, fmt="YYYY-MM-DD")
+date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
+
+previous_sat = (pendulum.from_format(
+                date_str, 
+                fmt = "YYYY-MM-DD")
                 .date()
                 .previous(pendulum.SATURDAY)
-                .strftime('%Y-%m-%d')
+                .strftime(rt_utils.FULL_DATE_FMT)
                )
 
 # Muni weekend trips, instead of going from primary_trip_query, 
