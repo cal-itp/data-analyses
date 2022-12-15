@@ -4512,3 +4512,1404 @@
 2022-11-17 09:29:40.819 | INFO     | __main__:get_stop_times:190 - 487: st exported to GCS
 2022-11-17 09:29:40.821 | INFO     | __main__:<module>:260 - download files for 487: 0:00:13.064281
 2022-11-17 09:29:40.822 | INFO     | __main__:<module>:264 - execution time: 0:53:08.422830
+2022-12-15 07:45:37.035 | INFO     | __main__:<module>:265 - Analysis date: 2022-12-14
+2022-12-15 07:47:16.926 | INFO     | __main__:<module>:284 - # operators to run: 202
+2022-12-15 07:47:16.928 | INFO     | __main__:<module>:289 - *********** Download data for: 4 ***********
+2022-12-15 07:47:23.500 | INFO     | __main__:primary_trip_query:55 - 4: trips saved in temp GCS
+2022-12-15 07:53:10.712 | INFO     | __main__:<module>:265 - Analysis date: 2022-12-14
+2022-12-15 07:54:47.239 | INFO     | __main__:<module>:284 - # operators to run: 202
+2022-12-15 07:54:47.240 | INFO     | __main__:<module>:289 - *********** Download data for: 4 ***********
+2022-12-15 07:54:53.779 | INFO     | __main__:primary_trip_query:55 - 4: trips saved in temp GCS
+2022-12-15 07:55:27.985 | INFO     | __main__:compute_delayed:231 - 4: routelines exported to GCS
+2022-12-15 07:55:28.499 | INFO     | __main__:compute_delayed:235 - 4: trips exported to GCS
+2022-12-15 07:55:28.997 | INFO     | __main__:compute_delayed:242 - 4: stops exported to GCS
+2022-12-15 07:56:27.133 | INFO     | __main__:get_stop_times:178 - 4: st exported to GCS
+2022-12-15 07:56:27.259 | INFO     | __main__:<module>:308 - download files for 4: 0:01:40.018573
+2022-12-15 07:56:27.260 | INFO     | __main__:<module>:289 - *********** Download data for: 6 ***********
+2022-12-15 07:56:29.899 | INFO     | __main__:primary_trip_query:55 - 6: trips saved in temp GCS
+2022-12-15 07:56:38.079 | INFO     | __main__:compute_delayed:231 - 6: routelines exported to GCS
+2022-12-15 07:56:38.445 | INFO     | __main__:compute_delayed:235 - 6: trips exported to GCS
+2022-12-15 07:56:38.813 | INFO     | __main__:compute_delayed:242 - 6: stops exported to GCS
+2022-12-15 07:56:43.418 | INFO     | __main__:get_stop_times:178 - 6: st exported to GCS
+2022-12-15 07:56:43.419 | INFO     | __main__:<module>:308 - download files for 6: 0:00:16.159774
+2022-12-15 07:56:43.420 | INFO     | __main__:<module>:289 - *********** Download data for: 10 ***********
+2022-12-15 07:56:45.779 | INFO     | __main__:primary_trip_query:55 - 10: trips saved in temp GCS
+2022-12-15 07:56:51.808 | INFO     | __main__:compute_delayed:231 - 10: routelines exported to GCS
+2022-12-15 07:56:52.175 | INFO     | __main__:compute_delayed:235 - 10: trips exported to GCS
+2022-12-15 07:56:52.539 | INFO     | __main__:compute_delayed:242 - 10: stops exported to GCS
+2022-12-15 07:56:55.619 | INFO     | __main__:get_stop_times:178 - 10: st exported to GCS
+2022-12-15 07:56:55.620 | INFO     | __main__:<module>:308 - download files for 10: 0:00:12.199080
+2022-12-15 07:56:55.620 | INFO     | __main__:<module>:289 - *********** Download data for: 11 ***********
+2022-12-15 07:56:58.078 | INFO     | __main__:primary_trip_query:55 - 11: trips saved in temp GCS
+2022-12-15 07:57:04.307 | INFO     | __main__:compute_delayed:231 - 11: routelines exported to GCS
+2022-12-15 07:57:04.705 | INFO     | __main__:compute_delayed:235 - 11: trips exported to GCS
+2022-12-15 07:57:05.062 | INFO     | __main__:compute_delayed:242 - 11: stops exported to GCS
+2022-12-15 07:57:08.363 | INFO     | __main__:get_stop_times:178 - 11: st exported to GCS
+2022-12-15 07:57:08.364 | INFO     | __main__:<module>:308 - download files for 11: 0:00:12.744235
+2022-12-15 07:57:08.365 | INFO     | __main__:<module>:289 - *********** Download data for: 14 ***********
+2022-12-15 07:57:13.952 | INFO     | __main__:primary_trip_query:55 - 14: trips saved in temp GCS
+2022-12-15 07:57:23.607 | INFO     | __main__:compute_delayed:231 - 14: routelines exported to GCS
+2022-12-15 07:57:24.064 | INFO     | __main__:compute_delayed:235 - 14: trips exported to GCS
+2022-12-15 07:57:24.423 | INFO     | __main__:compute_delayed:242 - 14: stops exported to GCS
+2022-12-15 07:57:33.856 | INFO     | __main__:get_stop_times:178 - 14: st exported to GCS
+2022-12-15 07:57:33.868 | INFO     | __main__:<module>:308 - download files for 14: 0:00:25.503485
+2022-12-15 07:57:33.869 | INFO     | __main__:<module>:289 - *********** Download data for: 15 ***********
+2022-12-15 07:57:35.571 | INFO     | __main__:primary_trip_query:55 - 15: trips saved in temp GCS
+2022-12-15 07:57:41.503 | INFO     | __main__:compute_delayed:231 - 15: routelines exported to GCS
+2022-12-15 07:57:41.774 | INFO     | __main__:compute_delayed:235 - 15: trips exported to GCS
+2022-12-15 07:57:42.140 | INFO     | __main__:compute_delayed:242 - 15: stops exported to GCS
+2022-12-15 07:57:44.230 | INFO     | __main__:<module>:308 - download files for 15: 0:00:10.360909
+2022-12-15 07:57:44.230 | INFO     | __main__:<module>:289 - *********** Download data for: 16 ***********
+2022-12-15 07:57:46.761 | INFO     | __main__:primary_trip_query:55 - 16: trips saved in temp GCS
+2022-12-15 07:57:54.317 | INFO     | __main__:compute_delayed:231 - 16: routelines exported to GCS
+2022-12-15 07:57:54.715 | INFO     | __main__:compute_delayed:235 - 16: trips exported to GCS
+2022-12-15 07:57:55.080 | INFO     | __main__:compute_delayed:242 - 16: stops exported to GCS
+2022-12-15 07:58:00.956 | INFO     | __main__:get_stop_times:178 - 16: st exported to GCS
+2022-12-15 07:58:00.969 | INFO     | __main__:<module>:308 - download files for 16: 0:00:16.738437
+2022-12-15 07:58:00.969 | INFO     | __main__:<module>:289 - *********** Download data for: 17 ***********
+2022-12-15 07:58:03.401 | INFO     | __main__:primary_trip_query:55 - 17: trips saved in temp GCS
+2022-12-15 07:58:09.251 | INFO     | __main__:compute_delayed:231 - 17: routelines exported to GCS
+2022-12-15 07:58:09.762 | INFO     | __main__:compute_delayed:235 - 17: trips exported to GCS
+2022-12-15 07:58:10.124 | INFO     | __main__:compute_delayed:242 - 17: stops exported to GCS
+2022-12-15 07:58:13.351 | INFO     | __main__:get_stop_times:178 - 17: st exported to GCS
+2022-12-15 07:58:13.352 | INFO     | __main__:<module>:308 - download files for 17: 0:00:12.382746
+2022-12-15 07:58:13.353 | INFO     | __main__:<module>:289 - *********** Download data for: 18 ***********
+2022-12-15 07:58:15.828 | INFO     | __main__:primary_trip_query:55 - 18: trips saved in temp GCS
+2022-12-15 07:58:26.329 | INFO     | __main__:compute_delayed:231 - 18: routelines exported to GCS
+2022-12-15 07:58:26.819 | INFO     | __main__:compute_delayed:235 - 18: trips exported to GCS
+2022-12-15 07:58:27.180 | INFO     | __main__:compute_delayed:242 - 18: stops exported to GCS
+2022-12-15 07:58:31.194 | INFO     | __main__:get_stop_times:178 - 18: st exported to GCS
+2022-12-15 07:58:31.198 | INFO     | __main__:<module>:308 - download files for 18: 0:00:17.844952
+2022-12-15 07:58:31.199 | INFO     | __main__:<module>:289 - *********** Download data for: 20 ***********
+2022-12-15 07:58:33.309 | INFO     | __main__:primary_trip_query:55 - 20: trips saved in temp GCS
+2022-12-15 07:58:38.966 | INFO     | __main__:compute_delayed:231 - 20: routelines exported to GCS
+2022-12-15 07:58:39.374 | INFO     | __main__:compute_delayed:235 - 20: trips exported to GCS
+2022-12-15 07:58:39.731 | INFO     | __main__:compute_delayed:242 - 20: stops exported to GCS
+2022-12-15 07:58:41.495 | INFO     | __main__:<module>:308 - download files for 20: 0:00:10.296280
+2022-12-15 07:58:41.496 | INFO     | __main__:<module>:289 - *********** Download data for: 21 ***********
+2022-12-15 07:58:43.324 | INFO     | __main__:primary_trip_query:55 - 21: trips saved in temp GCS
+2022-12-15 07:58:48.939 | INFO     | __main__:compute_delayed:231 - 21: routelines exported to GCS
+2022-12-15 07:58:49.594 | INFO     | __main__:compute_delayed:235 - 21: trips exported to GCS
+2022-12-15 07:58:49.958 | INFO     | __main__:compute_delayed:242 - 21: stops exported to GCS
+2022-12-15 07:58:51.823 | INFO     | __main__:<module>:308 - download files for 21: 0:00:10.327456
+2022-12-15 07:58:51.824 | INFO     | __main__:<module>:289 - *********** Download data for: 23 ***********
+2022-12-15 07:58:53.633 | INFO     | __main__:primary_trip_query:55 - 23: trips saved in temp GCS
+2022-12-15 07:58:58.699 | INFO     | __main__:compute_delayed:231 - 23: routelines exported to GCS
+2022-12-15 07:58:59.061 | INFO     | __main__:compute_delayed:235 - 23: trips exported to GCS
+2022-12-15 07:58:59.426 | INFO     | __main__:compute_delayed:242 - 23: stops exported to GCS
+2022-12-15 07:59:01.422 | INFO     | __main__:<module>:308 - download files for 23: 0:00:09.598061
+2022-12-15 07:59:01.424 | INFO     | __main__:<module>:289 - *********** Download data for: 24 ***********
+2022-12-15 07:59:03.548 | INFO     | __main__:primary_trip_query:55 - 24: trips saved in temp GCS
+2022-12-15 07:59:08.668 | INFO     | __main__:compute_delayed:231 - 24: routelines exported to GCS
+2022-12-15 07:59:09.131 | INFO     | __main__:compute_delayed:235 - 24: trips exported to GCS
+2022-12-15 07:59:09.501 | INFO     | __main__:compute_delayed:242 - 24: stops exported to GCS
+2022-12-15 07:59:12.099 | INFO     | __main__:get_stop_times:178 - 24: st exported to GCS
+2022-12-15 07:59:12.100 | INFO     | __main__:<module>:308 - download files for 24: 0:00:10.676264
+2022-12-15 07:59:12.101 | INFO     | __main__:<module>:289 - *********** Download data for: 29 ***********
+2022-12-15 07:59:14.419 | INFO     | __main__:primary_trip_query:55 - 29: trips saved in temp GCS
+2022-12-15 07:59:19.878 | INFO     | __main__:compute_delayed:231 - 29: routelines exported to GCS
+2022-12-15 07:59:20.252 | INFO     | __main__:compute_delayed:235 - 29: trips exported to GCS
+2022-12-15 07:59:20.622 | INFO     | __main__:compute_delayed:242 - 29: stops exported to GCS
+2022-12-15 07:59:24.180 | INFO     | __main__:get_stop_times:178 - 29: st exported to GCS
+2022-12-15 07:59:24.182 | INFO     | __main__:<module>:308 - download files for 29: 0:00:12.081365
+2022-12-15 07:59:24.182 | INFO     | __main__:<module>:289 - *********** Download data for: 30 ***********
+2022-12-15 07:59:26.396 | INFO     | __main__:primary_trip_query:55 - 30: trips saved in temp GCS
+2022-12-15 07:59:31.869 | INFO     | __main__:compute_delayed:231 - 30: routelines exported to GCS
+2022-12-15 07:59:32.274 | INFO     | __main__:compute_delayed:235 - 30: trips exported to GCS
+2022-12-15 07:59:32.635 | INFO     | __main__:compute_delayed:242 - 30: stops exported to GCS
+2022-12-15 07:59:35.326 | INFO     | __main__:get_stop_times:178 - 30: st exported to GCS
+2022-12-15 07:59:35.328 | INFO     | __main__:<module>:308 - download files for 30: 0:00:11.145483
+2022-12-15 07:59:35.328 | INFO     | __main__:<module>:289 - *********** Download data for: 33 ***********
+2022-12-15 07:59:37.812 | INFO     | __main__:primary_trip_query:55 - 33: trips saved in temp GCS
+2022-12-15 07:59:43.095 | INFO     | __main__:compute_delayed:231 - 33: routelines exported to GCS
+2022-12-15 07:59:43.393 | INFO     | __main__:compute_delayed:235 - 33: trips exported to GCS
+2022-12-15 07:59:43.752 | INFO     | __main__:compute_delayed:242 - 33: stops exported to GCS
+2022-12-15 07:59:46.783 | INFO     | __main__:get_stop_times:178 - 33: st exported to GCS
+2022-12-15 07:59:46.785 | INFO     | __main__:<module>:308 - download files for 33: 0:00:11.456135
+2022-12-15 07:59:46.785 | INFO     | __main__:<module>:289 - *********** Download data for: 34 ***********
+2022-12-15 07:59:49.358 | INFO     | __main__:primary_trip_query:55 - 34: trips saved in temp GCS
+2022-12-15 07:59:54.945 | INFO     | __main__:compute_delayed:231 - 34: routelines exported to GCS
+2022-12-15 07:59:55.239 | INFO     | __main__:compute_delayed:235 - 34: trips exported to GCS
+2022-12-15 07:59:55.597 | INFO     | __main__:compute_delayed:242 - 34: stops exported to GCS
+2022-12-15 08:00:00.457 | INFO     | __main__:get_stop_times:178 - 34: st exported to GCS
+2022-12-15 08:00:00.460 | INFO     | __main__:<module>:308 - download files for 34: 0:00:13.674836
+2022-12-15 08:00:00.461 | INFO     | __main__:<module>:289 - *********** Download data for: 35 ***********
+2022-12-15 08:00:02.709 | INFO     | __main__:primary_trip_query:55 - 35: trips saved in temp GCS
+2022-12-15 08:00:08.120 | INFO     | __main__:compute_delayed:231 - 35: routelines exported to GCS
+2022-12-15 08:00:08.495 | INFO     | __main__:compute_delayed:235 - 35: trips exported to GCS
+2022-12-15 08:00:08.695 | INFO     | __main__:compute_delayed:242 - 35: stops exported to GCS
+2022-12-15 08:00:11.794 | INFO     | __main__:get_stop_times:178 - 35: st exported to GCS
+2022-12-15 08:00:11.796 | INFO     | __main__:<module>:308 - download files for 35: 0:00:11.334970
+2022-12-15 08:00:11.797 | INFO     | __main__:<module>:289 - *********** Download data for: 36 ***********
+2022-12-15 08:00:14.218 | INFO     | __main__:primary_trip_query:55 - 36: trips saved in temp GCS
+2022-12-15 08:00:19.266 | INFO     | __main__:compute_delayed:231 - 36: routelines exported to GCS
+2022-12-15 08:00:19.636 | INFO     | __main__:compute_delayed:235 - 36: trips exported to GCS
+2022-12-15 08:00:19.854 | INFO     | __main__:compute_delayed:242 - 36: stops exported to GCS
+2022-12-15 08:00:22.487 | INFO     | __main__:get_stop_times:178 - 36: st exported to GCS
+2022-12-15 08:00:22.488 | INFO     | __main__:<module>:308 - download files for 36: 0:00:10.691058
+2022-12-15 08:00:22.489 | INFO     | __main__:<module>:289 - *********** Download data for: 37 ***********
+2022-12-15 08:00:24.650 | INFO     | __main__:primary_trip_query:55 - 37: trips saved in temp GCS
+2022-12-15 08:00:29.713 | INFO     | __main__:compute_delayed:231 - 37: routelines exported to GCS
+2022-12-15 08:00:29.933 | INFO     | __main__:compute_delayed:235 - 37: trips exported to GCS
+2022-12-15 08:00:30.130 | INFO     | __main__:compute_delayed:242 - 37: stops exported to GCS
+2022-12-15 08:00:32.933 | INFO     | __main__:get_stop_times:178 - 37: st exported to GCS
+2022-12-15 08:00:32.934 | INFO     | __main__:<module>:308 - download files for 37: 0:00:10.445444
+2022-12-15 08:00:32.935 | INFO     | __main__:<module>:289 - *********** Download data for: 41 ***********
+2022-12-15 08:00:34.746 | INFO     | __main__:primary_trip_query:55 - 41: trips saved in temp GCS
+2022-12-15 08:00:39.901 | INFO     | __main__:compute_delayed:231 - 41: routelines exported to GCS
+2022-12-15 08:00:40.502 | INFO     | __main__:compute_delayed:235 - 41: trips exported to GCS
+2022-12-15 08:00:40.700 | INFO     | __main__:compute_delayed:242 - 41: stops exported to GCS
+2022-12-15 08:00:42.635 | INFO     | __main__:<module>:308 - download files for 41: 0:00:09.700116
+2022-12-15 08:00:42.636 | INFO     | __main__:<module>:289 - *********** Download data for: 42 ***********
+2022-12-15 08:00:44.965 | INFO     | __main__:primary_trip_query:55 - 42: trips saved in temp GCS
+2022-12-15 08:00:54.488 | INFO     | __main__:compute_delayed:231 - 42: routelines exported to GCS
+2022-12-15 08:00:54.878 | INFO     | __main__:compute_delayed:235 - 42: trips exported to GCS
+2022-12-15 08:00:55.080 | INFO     | __main__:compute_delayed:242 - 42: stops exported to GCS
+2022-12-15 08:00:58.797 | INFO     | __main__:get_stop_times:178 - 42: st exported to GCS
+2022-12-15 08:00:58.799 | INFO     | __main__:<module>:308 - download files for 42: 0:00:16.162514
+2022-12-15 08:00:58.799 | INFO     | __main__:<module>:289 - *********** Download data for: 45 ***********
+2022-12-15 08:01:01.167 | INFO     | __main__:primary_trip_query:55 - 45: trips saved in temp GCS
+2022-12-15 08:01:06.360 | INFO     | __main__:compute_delayed:231 - 45: routelines exported to GCS
+2022-12-15 08:01:06.730 | INFO     | __main__:compute_delayed:235 - 45: trips exported to GCS
+2022-12-15 08:01:06.925 | INFO     | __main__:compute_delayed:242 - 45: stops exported to GCS
+2022-12-15 08:01:10.004 | INFO     | __main__:get_stop_times:178 - 45: st exported to GCS
+2022-12-15 08:01:10.006 | INFO     | __main__:<module>:308 - download files for 45: 0:00:11.206467
+2022-12-15 08:01:10.007 | INFO     | __main__:<module>:289 - *********** Download data for: 48 ***********
+2022-12-15 08:01:11.858 | INFO     | __main__:primary_trip_query:55 - 48: trips saved in temp GCS
+2022-12-15 08:01:17.388 | INFO     | __main__:compute_delayed:231 - 48: routelines exported to GCS
+2022-12-15 08:01:17.685 | INFO     | __main__:compute_delayed:235 - 48: trips exported to GCS
+2022-12-15 08:01:17.895 | INFO     | __main__:compute_delayed:242 - 48: stops exported to GCS
+2022-12-15 08:01:19.837 | INFO     | __main__:<module>:308 - download files for 48: 0:00:09.830705
+2022-12-15 08:01:19.839 | INFO     | __main__:<module>:289 - *********** Download data for: 49 ***********
+2022-12-15 08:01:22.343 | INFO     | __main__:primary_trip_query:55 - 49: trips saved in temp GCS
+2022-12-15 08:01:28.045 | INFO     | __main__:compute_delayed:231 - 49: routelines exported to GCS
+2022-12-15 08:01:28.257 | INFO     | __main__:compute_delayed:235 - 49: trips exported to GCS
+2022-12-15 08:01:28.454 | INFO     | __main__:compute_delayed:242 - 49: stops exported to GCS
+2022-12-15 08:01:31.467 | INFO     | __main__:get_stop_times:178 - 49: st exported to GCS
+2022-12-15 08:01:31.469 | INFO     | __main__:<module>:308 - download files for 49: 0:00:11.629298
+2022-12-15 08:01:31.469 | INFO     | __main__:<module>:289 - *********** Download data for: 50 ***********
+2022-12-15 08:01:34.356 | INFO     | __main__:primary_trip_query:55 - 50: trips saved in temp GCS
+2022-12-15 08:01:40.501 | INFO     | __main__:compute_delayed:231 - 50: routelines exported to GCS
+2022-12-15 08:01:40.870 | INFO     | __main__:compute_delayed:235 - 50: trips exported to GCS
+2022-12-15 08:01:41.065 | INFO     | __main__:compute_delayed:242 - 50: stops exported to GCS
+2022-12-15 08:01:44.400 | INFO     | __main__:get_stop_times:178 - 50: st exported to GCS
+2022-12-15 08:01:44.402 | INFO     | __main__:<module>:308 - download files for 50: 0:00:12.932917
+2022-12-15 08:01:44.403 | INFO     | __main__:<module>:289 - *********** Download data for: 54 ***********
+2022-12-15 08:01:46.266 | INFO     | __main__:primary_trip_query:55 - 54: trips saved in temp GCS
+2022-12-15 08:01:52.643 | INFO     | __main__:compute_delayed:231 - 54: routelines exported to GCS
+2022-12-15 08:01:53.003 | INFO     | __main__:compute_delayed:235 - 54: trips exported to GCS
+2022-12-15 08:01:53.200 | INFO     | __main__:compute_delayed:242 - 54: stops exported to GCS
+2022-12-15 08:01:55.021 | INFO     | __main__:<module>:308 - download files for 54: 0:00:10.617624
+2022-12-15 08:01:55.022 | INFO     | __main__:<module>:289 - *********** Download data for: 56 ***********
+2022-12-15 08:01:57.635 | INFO     | __main__:primary_trip_query:55 - 56: trips saved in temp GCS
+2022-12-15 08:02:03.726 | INFO     | __main__:compute_delayed:231 - 56: routelines exported to GCS
+2022-12-15 08:02:03.963 | INFO     | __main__:compute_delayed:235 - 56: trips exported to GCS
+2022-12-15 08:02:04.168 | INFO     | __main__:compute_delayed:242 - 56: stops exported to GCS
+2022-12-15 08:02:07.062 | INFO     | __main__:get_stop_times:178 - 56: st exported to GCS
+2022-12-15 08:02:07.063 | INFO     | __main__:<module>:308 - download files for 56: 0:00:12.040788
+2022-12-15 08:02:07.064 | INFO     | __main__:<module>:289 - *********** Download data for: 59 ***********
+2022-12-15 08:02:09.316 | INFO     | __main__:primary_trip_query:55 - 59: trips saved in temp GCS
+2022-12-15 08:02:14.340 | INFO     | __main__:compute_delayed:231 - 59: routelines exported to GCS
+2022-12-15 08:02:14.703 | INFO     | __main__:compute_delayed:235 - 59: trips exported to GCS
+2022-12-15 08:02:14.896 | INFO     | __main__:compute_delayed:242 - 59: stops exported to GCS
+2022-12-15 08:02:17.329 | INFO     | __main__:get_stop_times:178 - 59: st exported to GCS
+2022-12-15 08:02:17.330 | INFO     | __main__:<module>:308 - download files for 59: 0:00:10.266196
+2022-12-15 08:02:17.330 | INFO     | __main__:<module>:289 - *********** Download data for: 61 ***********
+2022-12-15 08:02:20.755 | INFO     | __main__:primary_trip_query:55 - 61: trips saved in temp GCS
+2022-12-15 08:02:42.188 | INFO     | __main__:compute_delayed:231 - 61: routelines exported to GCS
+2022-12-15 08:02:42.701 | INFO     | __main__:compute_delayed:235 - 61: trips exported to GCS
+2022-12-15 08:02:43.150 | INFO     | __main__:compute_delayed:242 - 61: stops exported to GCS
+2022-12-15 08:02:51.246 | INFO     | __main__:get_stop_times:178 - 61: st exported to GCS
+2022-12-15 08:02:51.255 | INFO     | __main__:<module>:308 - download files for 61: 0:00:33.924935
+2022-12-15 08:02:51.256 | INFO     | __main__:<module>:289 - *********** Download data for: 63 ***********
+2022-12-15 08:02:53.874 | INFO     | __main__:primary_trip_query:55 - 63: trips saved in temp GCS
+2022-12-15 08:02:59.443 | INFO     | __main__:compute_delayed:231 - 63: routelines exported to GCS
+2022-12-15 08:02:59.841 | INFO     | __main__:compute_delayed:235 - 63: trips exported to GCS
+2022-12-15 08:03:00.196 | INFO     | __main__:compute_delayed:242 - 63: stops exported to GCS
+2022-12-15 08:03:03.267 | INFO     | __main__:get_stop_times:178 - 63: st exported to GCS
+2022-12-15 08:03:03.268 | INFO     | __main__:<module>:308 - download files for 63: 0:00:12.012428
+2022-12-15 08:03:03.269 | INFO     | __main__:<module>:289 - *********** Download data for: 70 ***********
+2022-12-15 08:03:05.768 | INFO     | __main__:primary_trip_query:55 - 70: trips saved in temp GCS
+2022-12-15 08:03:13.060 | INFO     | __main__:compute_delayed:231 - 70: routelines exported to GCS
+2022-12-15 08:03:13.428 | INFO     | __main__:compute_delayed:235 - 70: trips exported to GCS
+2022-12-15 08:03:13.823 | INFO     | __main__:compute_delayed:242 - 70: stops exported to GCS
+2022-12-15 08:03:18.812 | INFO     | __main__:get_stop_times:178 - 70: st exported to GCS
+2022-12-15 08:03:18.816 | INFO     | __main__:<module>:308 - download files for 70: 0:00:15.547462
+2022-12-15 08:03:18.817 | INFO     | __main__:<module>:289 - *********** Download data for: 71 ***********
+2022-12-15 08:03:21.382 | INFO     | __main__:primary_trip_query:55 - 71: trips saved in temp GCS
+2022-12-15 08:03:26.930 | INFO     | __main__:compute_delayed:231 - 71: routelines exported to GCS
+2022-12-15 08:03:27.296 | INFO     | __main__:compute_delayed:235 - 71: trips exported to GCS
+2022-12-15 08:03:27.662 | INFO     | __main__:compute_delayed:242 - 71: stops exported to GCS
+2022-12-15 08:03:31.301 | INFO     | __main__:get_stop_times:178 - 71: st exported to GCS
+2022-12-15 08:03:31.304 | INFO     | __main__:<module>:308 - download files for 71: 0:00:12.486648
+2022-12-15 08:03:31.305 | INFO     | __main__:<module>:289 - *********** Download data for: 75 ***********
+2022-12-15 08:03:33.720 | INFO     | __main__:primary_trip_query:55 - 75: trips saved in temp GCS
+2022-12-15 08:03:39.116 | INFO     | __main__:compute_delayed:231 - 75: routelines exported to GCS
+2022-12-15 08:03:39.423 | INFO     | __main__:compute_delayed:235 - 75: trips exported to GCS
+2022-12-15 08:03:39.790 | INFO     | __main__:compute_delayed:242 - 75: stops exported to GCS
+2022-12-15 08:03:43.905 | INFO     | __main__:get_stop_times:178 - 75: st exported to GCS
+2022-12-15 08:03:43.908 | INFO     | __main__:<module>:308 - download files for 75: 0:00:12.603445
+2022-12-15 08:03:43.909 | INFO     | __main__:<module>:289 - *********** Download data for: 76 ***********
+2022-12-15 08:03:46.842 | INFO     | __main__:primary_trip_query:55 - 76: trips saved in temp GCS
+2022-12-15 08:03:55.110 | INFO     | __main__:compute_delayed:231 - 76: routelines exported to GCS
+2022-12-15 08:03:55.402 | INFO     | __main__:compute_delayed:235 - 76: trips exported to GCS
+2022-12-15 08:03:55.776 | INFO     | __main__:compute_delayed:242 - 76: stops exported to GCS
+2022-12-15 08:03:59.600 | INFO     | __main__:get_stop_times:178 - 76: st exported to GCS
+2022-12-15 08:03:59.604 | INFO     | __main__:<module>:308 - download files for 76: 0:00:15.695019
+2022-12-15 08:03:59.605 | INFO     | __main__:<module>:289 - *********** Download data for: 77 ***********
+2022-12-15 08:04:02.199 | INFO     | __main__:primary_trip_query:55 - 77: trips saved in temp GCS
+2022-12-15 08:04:07.414 | INFO     | __main__:compute_delayed:231 - 77: routelines exported to GCS
+2022-12-15 08:04:07.642 | INFO     | __main__:compute_delayed:235 - 77: trips exported to GCS
+2022-12-15 08:04:08.004 | INFO     | __main__:compute_delayed:242 - 77: stops exported to GCS
+2022-12-15 08:04:11.176 | INFO     | __main__:get_stop_times:178 - 77: st exported to GCS
+2022-12-15 08:04:11.177 | INFO     | __main__:<module>:308 - download files for 77: 0:00:11.572169
+2022-12-15 08:04:11.178 | INFO     | __main__:<module>:289 - *********** Download data for: 79 ***********
+2022-12-15 08:04:13.316 | INFO     | __main__:primary_trip_query:55 - 79: trips saved in temp GCS
+2022-12-15 08:04:18.786 | INFO     | __main__:compute_delayed:231 - 79: routelines exported to GCS
+2022-12-15 08:04:19.082 | INFO     | __main__:compute_delayed:235 - 79: trips exported to GCS
+2022-12-15 08:04:19.443 | INFO     | __main__:compute_delayed:242 - 79: stops exported to GCS
+2022-12-15 08:04:22.443 | INFO     | __main__:get_stop_times:178 - 79: st exported to GCS
+2022-12-15 08:04:22.445 | INFO     | __main__:<module>:308 - download files for 79: 0:00:11.266768
+2022-12-15 08:04:22.445 | INFO     | __main__:<module>:289 - *********** Download data for: 81 ***********
+2022-12-15 08:04:24.719 | INFO     | __main__:primary_trip_query:55 - 81: trips saved in temp GCS
+2022-12-15 08:04:30.164 | INFO     | __main__:compute_delayed:231 - 81: routelines exported to GCS
+2022-12-15 08:04:30.634 | INFO     | __main__:compute_delayed:235 - 81: trips exported to GCS
+2022-12-15 08:04:30.998 | INFO     | __main__:compute_delayed:242 - 81: stops exported to GCS
+2022-12-15 08:04:33.521 | INFO     | __main__:get_stop_times:178 - 81: st exported to GCS
+2022-12-15 08:04:33.522 | INFO     | __main__:<module>:308 - download files for 81: 0:00:11.076468
+2022-12-15 08:04:33.522 | INFO     | __main__:<module>:289 - *********** Download data for: 82 ***********
+2022-12-15 08:04:36.365 | INFO     | __main__:primary_trip_query:55 - 82: trips saved in temp GCS
+2022-12-15 08:04:42.022 | INFO     | __main__:compute_delayed:231 - 82: routelines exported to GCS
+2022-12-15 08:04:42.249 | INFO     | __main__:compute_delayed:235 - 82: trips exported to GCS
+2022-12-15 08:04:42.608 | INFO     | __main__:compute_delayed:242 - 82: stops exported to GCS
+2022-12-15 08:04:46.582 | INFO     | __main__:get_stop_times:178 - 82: st exported to GCS
+2022-12-15 08:04:46.584 | INFO     | __main__:<module>:308 - download files for 82: 0:00:13.061567
+2022-12-15 08:04:46.584 | INFO     | __main__:<module>:289 - *********** Download data for: 83 ***********
+2022-12-15 08:04:48.716 | INFO     | __main__:primary_trip_query:55 - 83: trips saved in temp GCS
+2022-12-15 08:04:56.461 | INFO     | __main__:compute_delayed:231 - 83: routelines exported to GCS
+2022-12-15 08:04:56.821 | INFO     | __main__:compute_delayed:235 - 83: trips exported to GCS
+2022-12-15 08:04:57.026 | INFO     | __main__:compute_delayed:242 - 83: stops exported to GCS
+2022-12-15 08:04:59.667 | INFO     | __main__:get_stop_times:178 - 83: st exported to GCS
+2022-12-15 08:04:59.669 | INFO     | __main__:<module>:308 - download files for 83: 0:00:13.084642
+2022-12-15 08:04:59.670 | INFO     | __main__:<module>:289 - *********** Download data for: 86 ***********
+2022-12-15 08:05:01.753 | INFO     | __main__:primary_trip_query:55 - 86: trips saved in temp GCS
+2022-12-15 08:05:06.673 | INFO     | __main__:compute_delayed:231 - 86: routelines exported to GCS
+2022-12-15 08:05:07.163 | INFO     | __main__:compute_delayed:235 - 86: trips exported to GCS
+2022-12-15 08:05:07.361 | INFO     | __main__:compute_delayed:242 - 86: stops exported to GCS
+2022-12-15 08:05:10.128 | INFO     | __main__:get_stop_times:178 - 86: st exported to GCS
+2022-12-15 08:05:10.129 | INFO     | __main__:<module>:308 - download files for 86: 0:00:10.459343
+2022-12-15 08:05:10.130 | INFO     | __main__:<module>:289 - *********** Download data for: 87 ***********
+2022-12-15 08:05:13.202 | INFO     | __main__:primary_trip_query:55 - 87: trips saved in temp GCS
+2022-12-15 08:05:20.683 | INFO     | __main__:compute_delayed:231 - 87: routelines exported to GCS
+2022-12-15 08:05:20.986 | INFO     | __main__:compute_delayed:235 - 87: trips exported to GCS
+2022-12-15 08:05:21.194 | INFO     | __main__:compute_delayed:242 - 87: stops exported to GCS
+2022-12-15 08:05:26.199 | INFO     | __main__:get_stop_times:178 - 87: st exported to GCS
+2022-12-15 08:05:26.203 | INFO     | __main__:<module>:308 - download files for 87: 0:00:16.073579
+2022-12-15 08:05:26.204 | INFO     | __main__:<module>:289 - *********** Download data for: 91 ***********
+2022-12-15 08:05:28.014 | INFO     | __main__:primary_trip_query:55 - 91: trips saved in temp GCS
+2022-12-15 08:05:33.136 | INFO     | __main__:compute_delayed:231 - 91: routelines exported to GCS
+2022-12-15 08:05:33.509 | INFO     | __main__:compute_delayed:235 - 91: trips exported to GCS
+2022-12-15 08:05:33.708 | INFO     | __main__:compute_delayed:242 - 91: stops exported to GCS
+2022-12-15 08:05:35.723 | INFO     | __main__:<module>:308 - download files for 91: 0:00:09.519322
+2022-12-15 08:05:35.724 | INFO     | __main__:<module>:289 - *********** Download data for: 95 ***********
+2022-12-15 08:05:37.997 | INFO     | __main__:primary_trip_query:55 - 95: trips saved in temp GCS
+2022-12-15 08:05:43.312 | INFO     | __main__:compute_delayed:231 - 95: routelines exported to GCS
+2022-12-15 08:05:43.603 | INFO     | __main__:compute_delayed:235 - 95: trips exported to GCS
+2022-12-15 08:05:43.795 | INFO     | __main__:compute_delayed:242 - 95: stops exported to GCS
+2022-12-15 08:05:46.565 | INFO     | __main__:get_stop_times:178 - 95: st exported to GCS
+2022-12-15 08:05:46.566 | INFO     | __main__:<module>:308 - download files for 95: 0:00:10.841797
+2022-12-15 08:05:46.566 | INFO     | __main__:<module>:289 - *********** Download data for: 98 ***********
+2022-12-15 08:05:49.035 | INFO     | __main__:primary_trip_query:55 - 98: trips saved in temp GCS
+2022-12-15 08:05:54.427 | INFO     | __main__:compute_delayed:231 - 98: routelines exported to GCS
+2022-12-15 08:05:54.717 | INFO     | __main__:compute_delayed:235 - 98: trips exported to GCS
+2022-12-15 08:05:54.914 | INFO     | __main__:compute_delayed:242 - 98: stops exported to GCS
+2022-12-15 08:05:58.060 | INFO     | __main__:get_stop_times:178 - 98: st exported to GCS
+2022-12-15 08:05:58.062 | INFO     | __main__:<module>:308 - download files for 98: 0:00:11.495254
+2022-12-15 08:05:58.062 | INFO     | __main__:<module>:289 - *********** Download data for: 99 ***********
+2022-12-15 08:06:00.439 | INFO     | __main__:primary_trip_query:55 - 99: trips saved in temp GCS
+2022-12-15 08:06:07.016 | INFO     | __main__:compute_delayed:231 - 99: routelines exported to GCS
+2022-12-15 08:06:07.393 | INFO     | __main__:compute_delayed:235 - 99: trips exported to GCS
+2022-12-15 08:06:07.597 | INFO     | __main__:compute_delayed:242 - 99: stops exported to GCS
+2022-12-15 08:06:10.898 | INFO     | __main__:get_stop_times:178 - 99: st exported to GCS
+2022-12-15 08:06:10.900 | INFO     | __main__:<module>:308 - download files for 99: 0:00:12.837888
+2022-12-15 08:06:10.901 | INFO     | __main__:<module>:289 - *********** Download data for: 101 ***********
+2022-12-15 08:06:13.343 | INFO     | __main__:primary_trip_query:55 - 101: trips saved in temp GCS
+2022-12-15 08:06:21.235 | INFO     | __main__:compute_delayed:231 - 101: routelines exported to GCS
+2022-12-15 08:06:21.583 | INFO     | __main__:compute_delayed:235 - 101: trips exported to GCS
+2022-12-15 08:06:21.944 | INFO     | __main__:compute_delayed:242 - 101: stops exported to GCS
+2022-12-15 08:06:25.429 | INFO     | __main__:get_stop_times:178 - 101: st exported to GCS
+2022-12-15 08:06:25.430 | INFO     | __main__:<module>:308 - download files for 101: 0:00:14.529586
+2022-12-15 08:06:25.431 | INFO     | __main__:<module>:289 - *********** Download data for: 102 ***********
+2022-12-15 08:06:27.725 | INFO     | __main__:primary_trip_query:55 - 102: trips saved in temp GCS
+2022-12-15 08:06:33.359 | INFO     | __main__:compute_delayed:231 - 102: routelines exported to GCS
+2022-12-15 08:06:33.584 | INFO     | __main__:compute_delayed:235 - 102: trips exported to GCS
+2022-12-15 08:06:33.785 | INFO     | __main__:compute_delayed:242 - 102: stops exported to GCS
+2022-12-15 08:06:37.806 | INFO     | __main__:get_stop_times:178 - 102: st exported to GCS
+2022-12-15 08:06:37.808 | INFO     | __main__:<module>:308 - download files for 102: 0:00:12.377536
+2022-12-15 08:06:37.809 | INFO     | __main__:<module>:289 - *********** Download data for: 103 ***********
+2022-12-15 08:06:39.764 | INFO     | __main__:primary_trip_query:55 - 103: trips saved in temp GCS
+2022-12-15 08:06:45.291 | INFO     | __main__:compute_delayed:231 - 103: routelines exported to GCS
+2022-12-15 08:06:45.590 | INFO     | __main__:compute_delayed:235 - 103: trips exported to GCS
+2022-12-15 08:06:45.953 | INFO     | __main__:compute_delayed:242 - 103: stops exported to GCS
+2022-12-15 08:06:49.151 | INFO     | __main__:get_stop_times:178 - 103: st exported to GCS
+2022-12-15 08:06:49.154 | INFO     | __main__:<module>:308 - download files for 103: 0:00:11.344643
+2022-12-15 08:06:49.154 | INFO     | __main__:<module>:289 - *********** Download data for: 105 ***********
+2022-12-15 08:06:51.722 | INFO     | __main__:primary_trip_query:55 - 105: trips saved in temp GCS
+2022-12-15 08:06:58.738 | INFO     | __main__:compute_delayed:231 - 105: routelines exported to GCS
+2022-12-15 08:06:59.013 | INFO     | __main__:compute_delayed:235 - 105: trips exported to GCS
+2022-12-15 08:06:59.378 | INFO     | __main__:compute_delayed:242 - 105: stops exported to GCS
+2022-12-15 08:07:04.006 | INFO     | __main__:get_stop_times:178 - 105: st exported to GCS
+2022-12-15 08:07:04.009 | INFO     | __main__:<module>:308 - download files for 105: 0:00:14.854597
+2022-12-15 08:07:04.009 | INFO     | __main__:<module>:289 - *********** Download data for: 106 ***********
+2022-12-15 08:07:06.843 | INFO     | __main__:primary_trip_query:55 - 106: trips saved in temp GCS
+2022-12-15 08:07:12.609 | INFO     | __main__:compute_delayed:231 - 106: routelines exported to GCS
+2022-12-15 08:07:12.888 | INFO     | __main__:compute_delayed:235 - 106: trips exported to GCS
+2022-12-15 08:07:13.282 | INFO     | __main__:compute_delayed:242 - 106: stops exported to GCS
+2022-12-15 08:07:18.467 | INFO     | __main__:get_stop_times:178 - 106: st exported to GCS
+2022-12-15 08:07:18.470 | INFO     | __main__:<module>:308 - download files for 106: 0:00:14.460432
+2022-12-15 08:07:18.470 | INFO     | __main__:<module>:289 - *********** Download data for: 107 ***********
+2022-12-15 08:07:20.699 | INFO     | __main__:primary_trip_query:55 - 107: trips saved in temp GCS
+2022-12-15 08:07:26.062 | INFO     | __main__:compute_delayed:231 - 107: routelines exported to GCS
+2022-12-15 08:07:26.389 | INFO     | __main__:compute_delayed:235 - 107: trips exported to GCS
+2022-12-15 08:07:26.753 | INFO     | __main__:compute_delayed:242 - 107: stops exported to GCS
+2022-12-15 08:07:29.803 | INFO     | __main__:get_stop_times:178 - 107: st exported to GCS
+2022-12-15 08:07:29.804 | INFO     | __main__:<module>:308 - download files for 107: 0:00:11.333903
+2022-12-15 08:07:29.805 | INFO     | __main__:<module>:289 - *********** Download data for: 108 ***********
+2022-12-15 08:07:32.352 | INFO     | __main__:primary_trip_query:55 - 108: trips saved in temp GCS
+2022-12-15 08:07:41.952 | INFO     | __main__:compute_delayed:231 - 108: routelines exported to GCS
+2022-12-15 08:07:42.252 | INFO     | __main__:compute_delayed:235 - 108: trips exported to GCS
+2022-12-15 08:07:42.454 | INFO     | __main__:compute_delayed:242 - 108: stops exported to GCS
+2022-12-15 08:07:46.426 | INFO     | __main__:get_stop_times:178 - 108: st exported to GCS
+2022-12-15 08:07:46.428 | INFO     | __main__:<module>:308 - download files for 108: 0:00:16.622915
+2022-12-15 08:07:46.428 | INFO     | __main__:<module>:289 - *********** Download data for: 110 ***********
+2022-12-15 08:07:48.894 | INFO     | __main__:primary_trip_query:55 - 110: trips saved in temp GCS
+2022-12-15 08:07:55.411 | INFO     | __main__:compute_delayed:231 - 110: routelines exported to GCS
+2022-12-15 08:07:55.705 | INFO     | __main__:compute_delayed:235 - 110: trips exported to GCS
+2022-12-15 08:07:55.919 | INFO     | __main__:compute_delayed:242 - 110: stops exported to GCS
+2022-12-15 08:08:00.147 | INFO     | __main__:get_stop_times:178 - 110: st exported to GCS
+2022-12-15 08:08:00.149 | INFO     | __main__:<module>:308 - download files for 110: 0:00:13.720849
+2022-12-15 08:08:00.149 | INFO     | __main__:<module>:289 - *********** Download data for: 112 ***********
+2022-12-15 08:08:04.169 | INFO     | __main__:primary_trip_query:55 - 112: trips saved in temp GCS
+2022-12-15 08:08:15.929 | INFO     | __main__:compute_delayed:231 - 112: routelines exported to GCS
+2022-12-15 08:08:16.279 | INFO     | __main__:compute_delayed:235 - 112: trips exported to GCS
+2022-12-15 08:08:16.583 | INFO     | __main__:compute_delayed:242 - 112: stops exported to GCS
+2022-12-15 08:08:31.099 | INFO     | __main__:get_stop_times:178 - 112: st exported to GCS
+2022-12-15 08:08:31.113 | INFO     | __main__:<module>:308 - download files for 112: 0:00:30.963364
+2022-12-15 08:08:31.114 | INFO     | __main__:<module>:289 - *********** Download data for: 116 ***********
+2022-12-15 08:08:33.165 | INFO     | __main__:primary_trip_query:55 - 116: trips saved in temp GCS
+2022-12-15 08:08:41.333 | INFO     | __main__:compute_delayed:231 - 116: routelines exported to GCS
+2022-12-15 08:08:41.685 | INFO     | __main__:compute_delayed:235 - 116: trips exported to GCS
+2022-12-15 08:08:42.085 | INFO     | __main__:compute_delayed:242 - 116: stops exported to GCS
+2022-12-15 08:08:44.128 | INFO     | __main__:<module>:308 - download files for 116: 0:00:13.014050
+2022-12-15 08:08:44.129 | INFO     | __main__:<module>:289 - *********** Download data for: 117 ***********
+2022-12-15 08:08:46.547 | INFO     | __main__:primary_trip_query:55 - 117: trips saved in temp GCS
+2022-12-15 08:08:52.513 | INFO     | __main__:compute_delayed:231 - 117: routelines exported to GCS
+2022-12-15 08:08:52.882 | INFO     | __main__:compute_delayed:235 - 117: trips exported to GCS
+2022-12-15 08:08:53.240 | INFO     | __main__:compute_delayed:242 - 117: stops exported to GCS
+2022-12-15 08:08:55.855 | INFO     | __main__:get_stop_times:178 - 117: st exported to GCS
+2022-12-15 08:08:55.857 | INFO     | __main__:<module>:308 - download files for 117: 0:00:11.727678
+2022-12-15 08:08:55.858 | INFO     | __main__:<module>:289 - *********** Download data for: 118 ***********
+2022-12-15 08:08:57.805 | INFO     | __main__:primary_trip_query:55 - 118: trips saved in temp GCS
+2022-12-15 08:09:05.169 | INFO     | __main__:compute_delayed:231 - 118: routelines exported to GCS
+2022-12-15 08:09:05.617 | INFO     | __main__:compute_delayed:235 - 118: trips exported to GCS
+2022-12-15 08:09:06.040 | INFO     | __main__:compute_delayed:242 - 118: stops exported to GCS
+2022-12-15 08:09:08.380 | INFO     | __main__:<module>:308 - download files for 118: 0:00:12.522298
+2022-12-15 08:09:08.381 | INFO     | __main__:<module>:289 - *********** Download data for: 120 ***********
+2022-12-15 08:09:11.250 | INFO     | __main__:primary_trip_query:55 - 120: trips saved in temp GCS
+2022-12-15 08:09:17.451 | INFO     | __main__:compute_delayed:231 - 120: routelines exported to GCS
+2022-12-15 08:09:17.780 | INFO     | __main__:compute_delayed:235 - 120: trips exported to GCS
+2022-12-15 08:09:18.142 | INFO     | __main__:compute_delayed:242 - 120: stops exported to GCS
+2022-12-15 08:09:23.906 | INFO     | __main__:get_stop_times:178 - 120: st exported to GCS
+2022-12-15 08:09:23.909 | INFO     | __main__:<module>:308 - download files for 120: 0:00:15.528032
+2022-12-15 08:09:23.909 | INFO     | __main__:<module>:289 - *********** Download data for: 121 ***********
+2022-12-15 08:09:26.268 | INFO     | __main__:primary_trip_query:55 - 121: trips saved in temp GCS
+2022-12-15 08:09:31.990 | INFO     | __main__:compute_delayed:231 - 121: routelines exported to GCS
+2022-12-15 08:09:32.288 | INFO     | __main__:compute_delayed:235 - 121: trips exported to GCS
+2022-12-15 08:09:32.652 | INFO     | __main__:compute_delayed:242 - 121: stops exported to GCS
+2022-12-15 08:09:35.200 | INFO     | __main__:get_stop_times:178 - 121: st exported to GCS
+2022-12-15 08:09:35.202 | INFO     | __main__:<module>:308 - download files for 121: 0:00:11.292900
+2022-12-15 08:09:35.203 | INFO     | __main__:<module>:289 - *********** Download data for: 122 ***********
+2022-12-15 08:09:37.279 | INFO     | __main__:primary_trip_query:55 - 122: trips saved in temp GCS
+2022-12-15 08:09:42.831 | INFO     | __main__:compute_delayed:231 - 122: routelines exported to GCS
+2022-12-15 08:09:43.127 | INFO     | __main__:compute_delayed:235 - 122: trips exported to GCS
+2022-12-15 08:09:43.479 | INFO     | __main__:compute_delayed:242 - 122: stops exported to GCS
+2022-12-15 08:09:45.424 | INFO     | __main__:<module>:308 - download files for 122: 0:00:10.221293
+2022-12-15 08:09:45.425 | INFO     | __main__:<module>:289 - *********** Download data for: 123 ***********
+2022-12-15 08:09:48.178 | INFO     | __main__:primary_trip_query:55 - 123: trips saved in temp GCS
+2022-12-15 08:09:56.131 | INFO     | __main__:compute_delayed:231 - 123: routelines exported to GCS
+2022-12-15 08:09:56.500 | INFO     | __main__:compute_delayed:235 - 123: trips exported to GCS
+2022-12-15 08:09:56.864 | INFO     | __main__:compute_delayed:242 - 123: stops exported to GCS
+2022-12-15 08:10:03.351 | INFO     | __main__:get_stop_times:178 - 123: st exported to GCS
+2022-12-15 08:10:03.358 | INFO     | __main__:<module>:308 - download files for 123: 0:00:17.933231
+2022-12-15 08:10:03.360 | INFO     | __main__:<module>:289 - *********** Download data for: 126 ***********
+2022-12-15 08:10:06.475 | INFO     | __main__:primary_trip_query:55 - 126: trips saved in temp GCS
+2022-12-15 08:10:13.767 | INFO     | __main__:compute_delayed:231 - 126: routelines exported to GCS
+2022-12-15 08:10:14.133 | INFO     | __main__:compute_delayed:235 - 126: trips exported to GCS
+2022-12-15 08:10:14.501 | INFO     | __main__:compute_delayed:242 - 126: stops exported to GCS
+2022-12-15 08:10:19.711 | INFO     | __main__:get_stop_times:178 - 126: st exported to GCS
+2022-12-15 08:10:19.716 | INFO     | __main__:<module>:308 - download files for 126: 0:00:16.356404
+2022-12-15 08:10:19.717 | INFO     | __main__:<module>:289 - *********** Download data for: 127 ***********
+2022-12-15 08:10:22.723 | INFO     | __main__:primary_trip_query:55 - 127: trips saved in temp GCS
+2022-12-15 08:10:34.715 | INFO     | __main__:compute_delayed:231 - 127: routelines exported to GCS
+2022-12-15 08:10:35.011 | INFO     | __main__:compute_delayed:235 - 127: trips exported to GCS
+2022-12-15 08:10:35.368 | INFO     | __main__:compute_delayed:242 - 127: stops exported to GCS
+2022-12-15 08:10:40.485 | INFO     | __main__:get_stop_times:178 - 127: st exported to GCS
+2022-12-15 08:10:40.489 | INFO     | __main__:<module>:308 - download files for 127: 0:00:20.771489
+2022-12-15 08:10:40.490 | INFO     | __main__:<module>:289 - *********** Download data for: 129 ***********
+2022-12-15 08:10:42.885 | INFO     | __main__:primary_trip_query:55 - 129: trips saved in temp GCS
+2022-12-15 08:10:47.925 | INFO     | __main__:compute_delayed:231 - 129: routelines exported to GCS
+2022-12-15 08:10:48.327 | INFO     | __main__:compute_delayed:235 - 129: trips exported to GCS
+2022-12-15 08:10:48.685 | INFO     | __main__:compute_delayed:242 - 129: stops exported to GCS
+2022-12-15 08:10:51.396 | INFO     | __main__:get_stop_times:178 - 129: st exported to GCS
+2022-12-15 08:10:51.398 | INFO     | __main__:<module>:308 - download files for 129: 0:00:10.908358
+2022-12-15 08:10:51.399 | INFO     | __main__:<module>:289 - *********** Download data for: 135 ***********
+2022-12-15 08:10:53.689 | INFO     | __main__:primary_trip_query:55 - 135: trips saved in temp GCS
+2022-12-15 08:11:02.968 | INFO     | __main__:compute_delayed:231 - 135: routelines exported to GCS
+2022-12-15 08:11:03.259 | INFO     | __main__:compute_delayed:235 - 135: trips exported to GCS
+2022-12-15 08:11:03.621 | INFO     | __main__:compute_delayed:242 - 135: stops exported to GCS
+2022-12-15 08:11:07.345 | INFO     | __main__:get_stop_times:178 - 135: st exported to GCS
+2022-12-15 08:11:07.349 | INFO     | __main__:<module>:308 - download files for 135: 0:00:15.949670
+2022-12-15 08:11:07.353 | INFO     | __main__:<module>:289 - *********** Download data for: 137 ***********
+2022-12-15 08:11:09.572 | INFO     | __main__:primary_trip_query:55 - 137: trips saved in temp GCS
+2022-12-15 08:11:14.436 | INFO     | __main__:compute_delayed:231 - 137: routelines exported to GCS
+2022-12-15 08:11:14.736 | INFO     | __main__:compute_delayed:235 - 137: trips exported to GCS
+2022-12-15 08:11:15.096 | INFO     | __main__:compute_delayed:242 - 137: stops exported to GCS
+2022-12-15 08:11:17.783 | INFO     | __main__:get_stop_times:178 - 137: st exported to GCS
+2022-12-15 08:11:17.785 | INFO     | __main__:<module>:308 - download files for 137: 0:00:10.432235
+2022-12-15 08:11:17.786 | INFO     | __main__:<module>:289 - *********** Download data for: 139 ***********
+2022-12-15 08:11:19.869 | INFO     | __main__:primary_trip_query:55 - 139: trips saved in temp GCS
+2022-12-15 08:11:24.823 | INFO     | __main__:compute_delayed:231 - 139: routelines exported to GCS
+2022-12-15 08:11:25.039 | INFO     | __main__:compute_delayed:235 - 139: trips exported to GCS
+2022-12-15 08:11:25.411 | INFO     | __main__:compute_delayed:242 - 139: stops exported to GCS
+2022-12-15 08:11:27.905 | INFO     | __main__:get_stop_times:178 - 139: st exported to GCS
+2022-12-15 08:11:27.906 | INFO     | __main__:<module>:308 - download files for 139: 0:00:10.120348
+2022-12-15 08:11:27.907 | INFO     | __main__:<module>:289 - *********** Download data for: 142 ***********
+2022-12-15 08:11:32.303 | INFO     | __main__:primary_trip_query:55 - 142: trips saved in temp GCS
+2022-12-15 08:11:45.167 | INFO     | __main__:compute_delayed:231 - 142: routelines exported to GCS
+2022-12-15 08:11:45.505 | INFO     | __main__:compute_delayed:235 - 142: trips exported to GCS
+2022-12-15 08:11:46.013 | INFO     | __main__:compute_delayed:242 - 142: stops exported to GCS
+2022-12-15 08:12:08.908 | INFO     | __main__:get_stop_times:178 - 142: st exported to GCS
+2022-12-15 08:12:08.946 | INFO     | __main__:<module>:308 - download files for 142: 0:00:41.039452
+2022-12-15 08:12:08.947 | INFO     | __main__:<module>:289 - *********** Download data for: 146 ***********
+2022-12-15 08:12:11.480 | INFO     | __main__:primary_trip_query:55 - 146: trips saved in temp GCS
+2022-12-15 08:12:20.701 | INFO     | __main__:compute_delayed:231 - 146: routelines exported to GCS
+2022-12-15 08:12:20.975 | INFO     | __main__:compute_delayed:235 - 146: trips exported to GCS
+2022-12-15 08:12:21.257 | INFO     | __main__:compute_delayed:242 - 146: stops exported to GCS
+2022-12-15 08:12:24.402 | INFO     | __main__:get_stop_times:178 - 146: st exported to GCS
+2022-12-15 08:12:24.403 | INFO     | __main__:<module>:308 - download files for 146: 0:00:15.456045
+2022-12-15 08:12:24.404 | INFO     | __main__:<module>:289 - *********** Download data for: 148 ***********
+2022-12-15 08:12:26.779 | INFO     | __main__:primary_trip_query:55 - 148: trips saved in temp GCS
+2022-12-15 08:12:34.072 | INFO     | __main__:compute_delayed:231 - 148: routelines exported to GCS
+2022-12-15 08:12:34.418 | INFO     | __main__:compute_delayed:235 - 148: trips exported to GCS
+2022-12-15 08:12:34.781 | INFO     | __main__:compute_delayed:242 - 148: stops exported to GCS
+2022-12-15 08:12:39.226 | INFO     | __main__:get_stop_times:178 - 148: st exported to GCS
+2022-12-15 08:12:39.228 | INFO     | __main__:<module>:308 - download files for 148: 0:00:14.824150
+2022-12-15 08:12:39.229 | INFO     | __main__:<module>:289 - *********** Download data for: 152 ***********
+2022-12-15 08:12:41.509 | INFO     | __main__:primary_trip_query:55 - 152: trips saved in temp GCS
+2022-12-15 08:12:46.733 | INFO     | __main__:compute_delayed:231 - 152: routelines exported to GCS
+2022-12-15 08:12:47.132 | INFO     | __main__:compute_delayed:235 - 152: trips exported to GCS
+2022-12-15 08:12:47.414 | INFO     | __main__:compute_delayed:242 - 152: stops exported to GCS
+2022-12-15 08:12:50.258 | INFO     | __main__:get_stop_times:178 - 152: st exported to GCS
+2022-12-15 08:12:50.259 | INFO     | __main__:<module>:308 - download files for 152: 0:00:11.030079
+2022-12-15 08:12:50.259 | INFO     | __main__:<module>:289 - *********** Download data for: 154 ***********
+2022-12-15 08:12:52.453 | INFO     | __main__:primary_trip_query:55 - 154: trips saved in temp GCS
+2022-12-15 08:12:58.170 | INFO     | __main__:compute_delayed:231 - 154: routelines exported to GCS
+2022-12-15 08:12:58.523 | INFO     | __main__:compute_delayed:235 - 154: trips exported to GCS
+2022-12-15 08:12:58.887 | INFO     | __main__:compute_delayed:242 - 154: stops exported to GCS
+2022-12-15 08:13:01.666 | INFO     | __main__:get_stop_times:178 - 154: st exported to GCS
+2022-12-15 08:13:01.667 | INFO     | __main__:<module>:308 - download files for 154: 0:00:11.407479
+2022-12-15 08:13:01.667 | INFO     | __main__:<module>:289 - *********** Download data for: 159 ***********
+2022-12-15 08:13:03.947 | INFO     | __main__:primary_trip_query:55 - 159: trips saved in temp GCS
+2022-12-15 08:13:11.524 | INFO     | __main__:compute_delayed:231 - 159: routelines exported to GCS
+2022-12-15 08:13:11.892 | INFO     | __main__:compute_delayed:235 - 159: trips exported to GCS
+2022-12-15 08:13:12.257 | INFO     | __main__:compute_delayed:242 - 159: stops exported to GCS
+2022-12-15 08:13:16.325 | INFO     | __main__:get_stop_times:178 - 159: st exported to GCS
+2022-12-15 08:13:16.327 | INFO     | __main__:<module>:308 - download files for 159: 0:00:14.659378
+2022-12-15 08:13:16.327 | INFO     | __main__:<module>:289 - *********** Download data for: 162 ***********
+2022-12-15 08:13:18.531 | INFO     | __main__:primary_trip_query:55 - 162: trips saved in temp GCS
+2022-12-15 08:13:25.428 | INFO     | __main__:compute_delayed:231 - 162: routelines exported to GCS
+2022-12-15 08:13:25.653 | INFO     | __main__:compute_delayed:235 - 162: trips exported to GCS
+2022-12-15 08:13:26.017 | INFO     | __main__:compute_delayed:242 - 162: stops exported to GCS
+2022-12-15 08:13:29.027 | INFO     | __main__:get_stop_times:178 - 162: st exported to GCS
+2022-12-15 08:13:29.029 | INFO     | __main__:<module>:308 - download files for 162: 0:00:12.701196
+2022-12-15 08:13:29.029 | INFO     | __main__:<module>:289 - *********** Download data for: 165 ***********
+2022-12-15 08:13:31.376 | INFO     | __main__:primary_trip_query:55 - 165: trips saved in temp GCS
+2022-12-15 08:13:36.890 | INFO     | __main__:compute_delayed:231 - 165: routelines exported to GCS
+2022-12-15 08:13:37.241 | INFO     | __main__:compute_delayed:235 - 165: trips exported to GCS
+2022-12-15 08:13:37.594 | INFO     | __main__:compute_delayed:242 - 165: stops exported to GCS
+2022-12-15 08:13:40.728 | INFO     | __main__:get_stop_times:178 - 165: st exported to GCS
+2022-12-15 08:13:40.731 | INFO     | __main__:<module>:308 - download files for 165: 0:00:11.701653
+2022-12-15 08:13:40.732 | INFO     | __main__:<module>:289 - *********** Download data for: 167 ***********
+2022-12-15 08:13:43.774 | INFO     | __main__:primary_trip_query:55 - 167: trips saved in temp GCS
+2022-12-15 08:13:58.056 | INFO     | __main__:compute_delayed:231 - 167: routelines exported to GCS
+2022-12-15 08:13:58.594 | INFO     | __main__:compute_delayed:235 - 167: trips exported to GCS
+2022-12-15 08:13:58.965 | INFO     | __main__:compute_delayed:242 - 167: stops exported to GCS
+2022-12-15 08:14:04.394 | INFO     | __main__:get_stop_times:178 - 167: st exported to GCS
+2022-12-15 08:14:04.398 | INFO     | __main__:<module>:308 - download files for 167: 0:00:23.666628
+2022-12-15 08:14:04.399 | INFO     | __main__:<module>:289 - *********** Download data for: 168 ***********
+2022-12-15 08:14:06.486 | INFO     | __main__:primary_trip_query:55 - 168: trips saved in temp GCS
+2022-12-15 08:14:11.708 | INFO     | __main__:compute_delayed:231 - 168: routelines exported to GCS
+2022-12-15 08:14:12.000 | INFO     | __main__:compute_delayed:235 - 168: trips exported to GCS
+2022-12-15 08:14:12.355 | INFO     | __main__:compute_delayed:242 - 168: stops exported to GCS
+2022-12-15 08:14:15.017 | INFO     | __main__:get_stop_times:178 - 168: st exported to GCS
+2022-12-15 08:14:15.021 | INFO     | __main__:<module>:308 - download files for 168: 0:00:10.621774
+2022-12-15 08:14:15.023 | INFO     | __main__:<module>:289 - *********** Download data for: 169 ***********
+2022-12-15 08:14:17.352 | INFO     | __main__:primary_trip_query:55 - 169: trips saved in temp GCS
+2022-12-15 08:14:22.987 | INFO     | __main__:compute_delayed:231 - 169: routelines exported to GCS
+2022-12-15 08:14:23.358 | INFO     | __main__:compute_delayed:235 - 169: trips exported to GCS
+2022-12-15 08:14:23.716 | INFO     | __main__:compute_delayed:242 - 169: stops exported to GCS
+2022-12-15 08:14:26.536 | INFO     | __main__:get_stop_times:178 - 169: st exported to GCS
+2022-12-15 08:14:26.538 | INFO     | __main__:<module>:308 - download files for 169: 0:00:11.515062
+2022-12-15 08:14:26.540 | INFO     | __main__:<module>:289 - *********** Download data for: 170 ***********
+2022-12-15 08:14:28.707 | INFO     | __main__:primary_trip_query:55 - 170: trips saved in temp GCS
+2022-12-15 08:14:38.132 | INFO     | __main__:compute_delayed:231 - 170: routelines exported to GCS
+2022-12-15 08:14:38.362 | INFO     | __main__:compute_delayed:235 - 170: trips exported to GCS
+2022-12-15 08:14:38.683 | INFO     | __main__:compute_delayed:242 - 170: stops exported to GCS
+2022-12-15 08:14:40.868 | INFO     | __main__:<module>:308 - download files for 170: 0:00:14.328135
+2022-12-15 08:14:40.870 | INFO     | __main__:<module>:289 - *********** Download data for: 171 ***********
+2022-12-15 08:14:43.557 | INFO     | __main__:primary_trip_query:55 - 171: trips saved in temp GCS
+2022-12-15 08:14:50.828 | INFO     | __main__:compute_delayed:231 - 171: routelines exported to GCS
+2022-12-15 08:14:51.191 | INFO     | __main__:compute_delayed:235 - 171: trips exported to GCS
+2022-12-15 08:14:51.521 | INFO     | __main__:compute_delayed:242 - 171: stops exported to GCS
+2022-12-15 08:14:57.403 | INFO     | __main__:get_stop_times:178 - 171: st exported to GCS
+2022-12-15 08:14:57.406 | INFO     | __main__:<module>:308 - download files for 171: 0:00:16.535952
+2022-12-15 08:14:57.407 | INFO     | __main__:<module>:289 - *********** Download data for: 172 ***********
+2022-12-15 08:14:59.877 | INFO     | __main__:primary_trip_query:55 - 172: trips saved in temp GCS
+2022-12-15 08:15:06.412 | INFO     | __main__:compute_delayed:231 - 172: routelines exported to GCS
+2022-12-15 08:15:06.780 | INFO     | __main__:compute_delayed:235 - 172: trips exported to GCS
+2022-12-15 08:15:07.070 | INFO     | __main__:compute_delayed:242 - 172: stops exported to GCS
+2022-12-15 08:15:11.740 | INFO     | __main__:get_stop_times:178 - 172: st exported to GCS
+2022-12-15 08:15:11.746 | INFO     | __main__:<module>:308 - download files for 172: 0:00:14.339014
+2022-12-15 08:15:11.747 | INFO     | __main__:<module>:289 - *********** Download data for: 173 ***********
+2022-12-15 08:15:14.127 | INFO     | __main__:primary_trip_query:55 - 173: trips saved in temp GCS
+2022-12-15 08:15:21.483 | INFO     | __main__:compute_delayed:231 - 173: routelines exported to GCS
+2022-12-15 08:15:21.705 | INFO     | __main__:compute_delayed:235 - 173: trips exported to GCS
+2022-12-15 08:15:21.905 | INFO     | __main__:compute_delayed:242 - 173: stops exported to GCS
+2022-12-15 08:15:26.957 | INFO     | __main__:get_stop_times:178 - 173: st exported to GCS
+2022-12-15 08:15:26.963 | INFO     | __main__:<module>:308 - download files for 173: 0:00:15.216210
+2022-12-15 08:15:26.965 | INFO     | __main__:<module>:289 - *********** Download data for: 174 ***********
+2022-12-15 08:15:29.444 | INFO     | __main__:primary_trip_query:55 - 174: trips saved in temp GCS
+2022-12-15 08:15:35.996 | INFO     | __main__:compute_delayed:231 - 174: routelines exported to GCS
+2022-12-15 08:15:36.290 | INFO     | __main__:compute_delayed:235 - 174: trips exported to GCS
+2022-12-15 08:15:36.503 | INFO     | __main__:compute_delayed:242 - 174: stops exported to GCS
+2022-12-15 08:15:41.134 | INFO     | __main__:get_stop_times:178 - 174: st exported to GCS
+2022-12-15 08:15:41.139 | INFO     | __main__:<module>:308 - download files for 174: 0:00:14.173703
+2022-12-15 08:15:41.139 | INFO     | __main__:<module>:289 - *********** Download data for: 176 ***********
+2022-12-15 08:15:43.552 | INFO     | __main__:primary_trip_query:55 - 176: trips saved in temp GCS
+2022-12-15 08:15:50.265 | INFO     | __main__:compute_delayed:231 - 176: routelines exported to GCS
+2022-12-15 08:15:50.491 | INFO     | __main__:compute_delayed:235 - 176: trips exported to GCS
+2022-12-15 08:15:50.702 | INFO     | __main__:compute_delayed:242 - 176: stops exported to GCS
+2022-12-15 08:15:55.513 | INFO     | __main__:get_stop_times:178 - 176: st exported to GCS
+2022-12-15 08:15:55.517 | INFO     | __main__:<module>:308 - download files for 176: 0:00:14.377526
+2022-12-15 08:15:55.518 | INFO     | __main__:<module>:289 - *********** Download data for: 177 ***********
+2022-12-15 08:15:57.988 | INFO     | __main__:primary_trip_query:55 - 177: trips saved in temp GCS
+2022-12-15 08:16:04.760 | INFO     | __main__:compute_delayed:231 - 177: routelines exported to GCS
+2022-12-15 08:16:05.052 | INFO     | __main__:compute_delayed:235 - 177: trips exported to GCS
+2022-12-15 08:16:05.268 | INFO     | __main__:compute_delayed:242 - 177: stops exported to GCS
+2022-12-15 08:16:10.165 | INFO     | __main__:get_stop_times:178 - 177: st exported to GCS
+2022-12-15 08:16:10.170 | INFO     | __main__:<module>:308 - download files for 177: 0:00:14.652022
+2022-12-15 08:16:10.171 | INFO     | __main__:<module>:289 - *********** Download data for: 178 ***********
+2022-12-15 08:16:13.143 | INFO     | __main__:primary_trip_query:55 - 178: trips saved in temp GCS
+2022-12-15 08:16:20.030 | INFO     | __main__:compute_delayed:231 - 178: routelines exported to GCS
+2022-12-15 08:16:20.402 | INFO     | __main__:compute_delayed:235 - 178: trips exported to GCS
+2022-12-15 08:16:20.616 | INFO     | __main__:compute_delayed:242 - 178: stops exported to GCS
+2022-12-15 08:16:25.668 | INFO     | __main__:get_stop_times:178 - 178: st exported to GCS
+2022-12-15 08:16:25.672 | INFO     | __main__:<module>:308 - download files for 178: 0:00:15.500564
+2022-12-15 08:16:25.672 | INFO     | __main__:<module>:289 - *********** Download data for: 179 ***********
+2022-12-15 08:16:28.298 | INFO     | __main__:primary_trip_query:55 - 179: trips saved in temp GCS
+2022-12-15 08:16:35.275 | INFO     | __main__:compute_delayed:231 - 179: routelines exported to GCS
+2022-12-15 08:16:35.571 | INFO     | __main__:compute_delayed:235 - 179: trips exported to GCS
+2022-12-15 08:16:35.797 | INFO     | __main__:compute_delayed:242 - 179: stops exported to GCS
+2022-12-15 08:16:40.678 | INFO     | __main__:get_stop_times:178 - 179: st exported to GCS
+2022-12-15 08:16:40.683 | INFO     | __main__:<module>:308 - download files for 179: 0:00:15.010662
+2022-12-15 08:16:40.684 | INFO     | __main__:<module>:289 - *********** Download data for: 181 ***********
+2022-12-15 08:16:43.477 | INFO     | __main__:primary_trip_query:55 - 181: trips saved in temp GCS
+2022-12-15 08:16:50.417 | INFO     | __main__:compute_delayed:231 - 181: routelines exported to GCS
+2022-12-15 08:16:50.712 | INFO     | __main__:compute_delayed:235 - 181: trips exported to GCS
+2022-12-15 08:16:50.921 | INFO     | __main__:compute_delayed:242 - 181: stops exported to GCS
+2022-12-15 08:16:55.265 | INFO     | __main__:get_stop_times:178 - 181: st exported to GCS
+2022-12-15 08:16:55.268 | INFO     | __main__:<module>:308 - download files for 181: 0:00:14.583694
+2022-12-15 08:16:55.269 | INFO     | __main__:<module>:289 - *********** Download data for: 182 ***********
+2022-12-15 08:17:01.392 | INFO     | __main__:primary_trip_query:55 - 182: trips saved in temp GCS
+2022-12-15 08:17:24.469 | INFO     | __main__:compute_delayed:231 - 182: routelines exported to GCS
+2022-12-15 08:17:25.016 | INFO     | __main__:compute_delayed:235 - 182: trips exported to GCS
+2022-12-15 08:17:25.489 | INFO     | __main__:compute_delayed:242 - 182: stops exported to GCS
+2022-12-15 08:19:08.752 | INFO     | __main__:get_stop_times:178 - 182: st exported to GCS
+2022-12-15 08:19:08.950 | INFO     | __main__:<module>:308 - download files for 182: 0:02:13.681834
+2022-12-15 08:19:08.951 | INFO     | __main__:<module>:289 - *********** Download data for: 183 ***********
+2022-12-15 08:19:13.760 | INFO     | __main__:primary_trip_query:55 - 183: trips saved in temp GCS
+2022-12-15 08:19:23.041 | INFO     | __main__:compute_delayed:231 - 183: routelines exported to GCS
+2022-12-15 08:19:23.485 | INFO     | __main__:compute_delayed:235 - 183: trips exported to GCS
+2022-12-15 08:19:23.863 | INFO     | __main__:compute_delayed:242 - 183: stops exported to GCS
+2022-12-15 08:19:44.842 | INFO     | __main__:get_stop_times:178 - 183: st exported to GCS
+2022-12-15 08:19:44.878 | INFO     | __main__:<module>:308 - download files for 183: 0:00:35.927123
+2022-12-15 08:19:44.879 | INFO     | __main__:<module>:289 - *********** Download data for: 186 ***********
+2022-12-15 08:19:47.245 | INFO     | __main__:primary_trip_query:55 - 186: trips saved in temp GCS
+2022-12-15 08:19:53.808 | INFO     | __main__:compute_delayed:231 - 186: routelines exported to GCS
+2022-12-15 08:19:54.276 | INFO     | __main__:compute_delayed:235 - 186: trips exported to GCS
+2022-12-15 08:19:54.648 | INFO     | __main__:compute_delayed:242 - 186: stops exported to GCS
+2022-12-15 08:19:58.175 | INFO     | __main__:get_stop_times:178 - 186: st exported to GCS
+2022-12-15 08:19:58.178 | INFO     | __main__:<module>:308 - download files for 186: 0:00:13.298638
+2022-12-15 08:19:58.179 | INFO     | __main__:<module>:289 - *********** Download data for: 187 ***********
+2022-12-15 08:20:00.618 | INFO     | __main__:primary_trip_query:55 - 187: trips saved in temp GCS
+2022-12-15 08:20:07.226 | INFO     | __main__:compute_delayed:231 - 187: routelines exported to GCS
+2022-12-15 08:20:07.652 | INFO     | __main__:compute_delayed:235 - 187: trips exported to GCS
+2022-12-15 08:20:07.932 | INFO     | __main__:compute_delayed:242 - 187: stops exported to GCS
+2022-12-15 08:20:11.877 | INFO     | __main__:get_stop_times:178 - 187: st exported to GCS
+2022-12-15 08:20:11.880 | INFO     | __main__:<module>:308 - download files for 187: 0:00:13.700944
+2022-12-15 08:20:11.882 | INFO     | __main__:<module>:289 - *********** Download data for: 188 ***********
+2022-12-15 08:20:14.436 | INFO     | __main__:primary_trip_query:55 - 188: trips saved in temp GCS
+2022-12-15 08:20:21.319 | INFO     | __main__:compute_delayed:231 - 188: routelines exported to GCS
+2022-12-15 08:20:21.560 | INFO     | __main__:compute_delayed:235 - 188: trips exported to GCS
+2022-12-15 08:20:21.861 | INFO     | __main__:compute_delayed:242 - 188: stops exported to GCS
+2022-12-15 08:20:24.815 | INFO     | __main__:get_stop_times:178 - 188: st exported to GCS
+2022-12-15 08:20:24.816 | INFO     | __main__:<module>:308 - download files for 188: 0:00:12.934112
+2022-12-15 08:20:24.817 | INFO     | __main__:<module>:289 - *********** Download data for: 190 ***********
+2022-12-15 08:20:27.581 | INFO     | __main__:primary_trip_query:55 - 190: trips saved in temp GCS
+2022-12-15 08:20:35.174 | INFO     | __main__:compute_delayed:231 - 190: routelines exported to GCS
+2022-12-15 08:20:35.672 | INFO     | __main__:compute_delayed:235 - 190: trips exported to GCS
+2022-12-15 08:20:35.970 | INFO     | __main__:compute_delayed:242 - 190: stops exported to GCS
+2022-12-15 08:20:42.937 | INFO     | __main__:get_stop_times:178 - 190: st exported to GCS
+2022-12-15 08:20:42.944 | INFO     | __main__:<module>:308 - download files for 190: 0:00:18.127155
+2022-12-15 08:20:42.946 | INFO     | __main__:<module>:289 - *********** Download data for: 192 ***********
+2022-12-15 08:20:45.213 | INFO     | __main__:primary_trip_query:55 - 192: trips saved in temp GCS
+2022-12-15 08:20:52.156 | INFO     | __main__:compute_delayed:231 - 192: routelines exported to GCS
+2022-12-15 08:20:52.482 | INFO     | __main__:compute_delayed:235 - 192: trips exported to GCS
+2022-12-15 08:20:52.863 | INFO     | __main__:compute_delayed:242 - 192: stops exported to GCS
+2022-12-15 08:20:56.086 | INFO     | __main__:get_stop_times:178 - 192: st exported to GCS
+2022-12-15 08:20:56.090 | INFO     | __main__:<module>:308 - download files for 192: 0:00:13.144043
+2022-12-15 08:20:56.097 | INFO     | __main__:<module>:289 - *********** Download data for: 194 ***********
+2022-12-15 08:20:59.395 | INFO     | __main__:primary_trip_query:55 - 194: trips saved in temp GCS
+2022-12-15 08:21:22.588 | INFO     | __main__:compute_delayed:231 - 194: routelines exported to GCS
+2022-12-15 08:21:23.026 | INFO     | __main__:compute_delayed:235 - 194: trips exported to GCS
+2022-12-15 08:21:23.258 | INFO     | __main__:compute_delayed:242 - 194: stops exported to GCS
+2022-12-15 08:21:33.033 | INFO     | __main__:get_stop_times:178 - 194: st exported to GCS
+2022-12-15 08:21:33.054 | INFO     | __main__:<module>:308 - download files for 194: 0:00:36.956993
+2022-12-15 08:21:33.055 | INFO     | __main__:<module>:289 - *********** Download data for: 196 ***********
+2022-12-15 08:21:35.288 | INFO     | __main__:primary_trip_query:55 - 196: trips saved in temp GCS
+2022-12-15 08:21:41.069 | INFO     | __main__:compute_delayed:231 - 196: routelines exported to GCS
+2022-12-15 08:21:41.341 | INFO     | __main__:compute_delayed:235 - 196: trips exported to GCS
+2022-12-15 08:21:41.539 | INFO     | __main__:compute_delayed:242 - 196: stops exported to GCS
+2022-12-15 08:21:44.649 | INFO     | __main__:get_stop_times:178 - 196: st exported to GCS
+2022-12-15 08:21:44.651 | INFO     | __main__:<module>:308 - download files for 196: 0:00:11.595726
+2022-12-15 08:21:44.652 | INFO     | __main__:<module>:289 - *********** Download data for: 198 ***********
+2022-12-15 08:21:47.056 | INFO     | __main__:primary_trip_query:55 - 198: trips saved in temp GCS
+2022-12-15 08:21:55.851 | INFO     | __main__:compute_delayed:231 - 198: routelines exported to GCS
+2022-12-15 08:21:56.078 | INFO     | __main__:compute_delayed:235 - 198: trips exported to GCS
+2022-12-15 08:21:56.276 | INFO     | __main__:compute_delayed:242 - 198: stops exported to GCS
+2022-12-15 08:22:00.939 | INFO     | __main__:get_stop_times:178 - 198: st exported to GCS
+2022-12-15 08:22:00.943 | INFO     | __main__:<module>:308 - download files for 198: 0:00:16.291242
+2022-12-15 08:22:00.944 | INFO     | __main__:<module>:289 - *********** Download data for: 199 ***********
+2022-12-15 08:22:02.826 | INFO     | __main__:primary_trip_query:55 - 199: trips saved in temp GCS
+2022-12-15 08:22:08.623 | INFO     | __main__:compute_delayed:231 - 199: routelines exported to GCS
+2022-12-15 08:22:08.916 | INFO     | __main__:compute_delayed:235 - 199: trips exported to GCS
+2022-12-15 08:22:09.279 | INFO     | __main__:compute_delayed:242 - 199: stops exported to GCS
+2022-12-15 08:22:11.829 | INFO     | __main__:<module>:308 - download files for 199: 0:00:10.885730
+2022-12-15 08:22:11.830 | INFO     | __main__:<module>:289 - *********** Download data for: 201 ***********
+2022-12-15 08:22:14.961 | INFO     | __main__:primary_trip_query:55 - 201: trips saved in temp GCS
+2022-12-15 08:22:21.004 | INFO     | __main__:compute_delayed:231 - 201: routelines exported to GCS
+2022-12-15 08:22:21.323 | INFO     | __main__:compute_delayed:235 - 201: trips exported to GCS
+2022-12-15 08:22:21.600 | INFO     | __main__:compute_delayed:242 - 201: stops exported to GCS
+2022-12-15 08:22:24.675 | INFO     | __main__:get_stop_times:178 - 201: st exported to GCS
+2022-12-15 08:22:24.677 | INFO     | __main__:<module>:308 - download files for 201: 0:00:12.846568
+2022-12-15 08:22:24.677 | INFO     | __main__:<module>:289 - *********** Download data for: 204 ***********
+2022-12-15 08:22:27.212 | INFO     | __main__:primary_trip_query:55 - 204: trips saved in temp GCS
+2022-12-15 08:22:34.275 | INFO     | __main__:compute_delayed:231 - 204: routelines exported to GCS
+2022-12-15 08:22:34.591 | INFO     | __main__:compute_delayed:235 - 204: trips exported to GCS
+2022-12-15 08:22:34.870 | INFO     | __main__:compute_delayed:242 - 204: stops exported to GCS
+2022-12-15 08:22:37.635 | INFO     | __main__:get_stop_times:178 - 204: st exported to GCS
+2022-12-15 08:22:37.636 | INFO     | __main__:<module>:308 - download files for 204: 0:00:12.958675
+2022-12-15 08:22:37.636 | INFO     | __main__:<module>:289 - *********** Download data for: 206 ***********
+2022-12-15 08:22:40.539 | INFO     | __main__:primary_trip_query:55 - 206: trips saved in temp GCS
+2022-12-15 08:22:49.190 | INFO     | __main__:compute_delayed:231 - 206: routelines exported to GCS
+2022-12-15 08:22:49.416 | INFO     | __main__:compute_delayed:235 - 206: trips exported to GCS
+2022-12-15 08:22:49.713 | INFO     | __main__:compute_delayed:242 - 206: stops exported to GCS
+2022-12-15 08:22:56.173 | INFO     | __main__:get_stop_times:178 - 206: st exported to GCS
+2022-12-15 08:22:56.186 | INFO     | __main__:<module>:308 - download files for 206: 0:00:18.549558
+2022-12-15 08:22:56.187 | INFO     | __main__:<module>:289 - *********** Download data for: 207 ***********
+2022-12-15 08:22:58.803 | INFO     | __main__:primary_trip_query:55 - 207: trips saved in temp GCS
+2022-12-15 08:23:04.550 | INFO     | __main__:compute_delayed:231 - 207: routelines exported to GCS
+2022-12-15 08:23:04.825 | INFO     | __main__:compute_delayed:235 - 207: trips exported to GCS
+2022-12-15 08:23:05.098 | INFO     | __main__:compute_delayed:242 - 207: stops exported to GCS
+2022-12-15 08:23:08.457 | INFO     | __main__:get_stop_times:178 - 207: st exported to GCS
+2022-12-15 08:23:08.460 | INFO     | __main__:<module>:308 - download files for 207: 0:00:12.272800
+2022-12-15 08:23:08.460 | INFO     | __main__:<module>:289 - *********** Download data for: 208 ***********
+2022-12-15 08:23:11.520 | INFO     | __main__:primary_trip_query:55 - 208: trips saved in temp GCS
+2022-12-15 08:23:23.896 | INFO     | __main__:compute_delayed:231 - 208: routelines exported to GCS
+2022-12-15 08:23:24.170 | INFO     | __main__:compute_delayed:235 - 208: trips exported to GCS
+2022-12-15 08:23:24.566 | INFO     | __main__:compute_delayed:242 - 208: stops exported to GCS
+2022-12-15 08:23:32.038 | INFO     | __main__:get_stop_times:178 - 208: st exported to GCS
+2022-12-15 08:23:32.049 | INFO     | __main__:<module>:308 - download files for 208: 0:00:23.588775
+2022-12-15 08:23:32.050 | INFO     | __main__:<module>:289 - *********** Download data for: 210 ***********
+2022-12-15 08:23:34.405 | INFO     | __main__:primary_trip_query:55 - 210: trips saved in temp GCS
+2022-12-15 08:23:40.152 | INFO     | __main__:compute_delayed:231 - 210: routelines exported to GCS
+2022-12-15 08:23:40.376 | INFO     | __main__:compute_delayed:235 - 210: trips exported to GCS
+2022-12-15 08:23:40.577 | INFO     | __main__:compute_delayed:242 - 210: stops exported to GCS
+2022-12-15 08:23:43.662 | INFO     | __main__:get_stop_times:178 - 210: st exported to GCS
+2022-12-15 08:23:43.664 | INFO     | __main__:<module>:308 - download files for 210: 0:00:11.614228
+2022-12-15 08:23:43.665 | INFO     | __main__:<module>:289 - *********** Download data for: 212 ***********
+2022-12-15 08:23:45.992 | INFO     | __main__:primary_trip_query:55 - 212: trips saved in temp GCS
+2022-12-15 08:23:51.944 | INFO     | __main__:compute_delayed:231 - 212: routelines exported to GCS
+2022-12-15 08:23:52.162 | INFO     | __main__:compute_delayed:235 - 212: trips exported to GCS
+2022-12-15 08:23:52.349 | INFO     | __main__:compute_delayed:242 - 212: stops exported to GCS
+2022-12-15 08:23:55.056 | INFO     | __main__:get_stop_times:178 - 212: st exported to GCS
+2022-12-15 08:23:55.058 | INFO     | __main__:<module>:308 - download files for 212: 0:00:11.393144
+2022-12-15 08:23:55.059 | INFO     | __main__:<module>:289 - *********** Download data for: 213 ***********
+2022-12-15 08:23:56.976 | INFO     | __main__:primary_trip_query:55 - 213: trips saved in temp GCS
+2022-12-15 08:24:02.065 | INFO     | __main__:compute_delayed:231 - 213: routelines exported to GCS
+2022-12-15 08:24:02.377 | INFO     | __main__:compute_delayed:235 - 213: trips exported to GCS
+2022-12-15 08:24:02.573 | INFO     | __main__:compute_delayed:242 - 213: stops exported to GCS
+2022-12-15 08:24:04.345 | INFO     | __main__:<module>:308 - download files for 213: 0:00:09.286307
+2022-12-15 08:24:04.346 | INFO     | __main__:<module>:289 - *********** Download data for: 214 ***********
+2022-12-15 08:24:06.904 | INFO     | __main__:primary_trip_query:55 - 214: trips saved in temp GCS
+2022-12-15 08:24:13.511 | INFO     | __main__:compute_delayed:231 - 214: routelines exported to GCS
+2022-12-15 08:24:13.880 | INFO     | __main__:compute_delayed:235 - 214: trips exported to GCS
+2022-12-15 08:24:14.074 | INFO     | __main__:compute_delayed:242 - 214: stops exported to GCS
+2022-12-15 08:24:18.244 | INFO     | __main__:get_stop_times:178 - 214: st exported to GCS
+2022-12-15 08:24:18.246 | INFO     | __main__:<module>:308 - download files for 214: 0:00:13.900859
+2022-12-15 08:24:18.265 | INFO     | __main__:<module>:289 - *********** Download data for: 217 ***********
+2022-12-15 08:24:20.751 | INFO     | __main__:primary_trip_query:55 - 217: trips saved in temp GCS
+2022-12-15 08:24:28.050 | INFO     | __main__:compute_delayed:231 - 217: routelines exported to GCS
+2022-12-15 08:24:28.351 | INFO     | __main__:compute_delayed:235 - 217: trips exported to GCS
+2022-12-15 08:24:28.634 | INFO     | __main__:compute_delayed:242 - 217: stops exported to GCS
+2022-12-15 08:24:31.504 | INFO     | __main__:get_stop_times:178 - 217: st exported to GCS
+2022-12-15 08:24:31.506 | INFO     | __main__:<module>:308 - download files for 217: 0:00:13.241483
+2022-12-15 08:24:31.507 | INFO     | __main__:<module>:289 - *********** Download data for: 218 ***********
+2022-12-15 08:24:34.101 | INFO     | __main__:primary_trip_query:55 - 218: trips saved in temp GCS
+2022-12-15 08:24:43.173 | INFO     | __main__:compute_delayed:231 - 218: routelines exported to GCS
+2022-12-15 08:24:43.401 | INFO     | __main__:compute_delayed:235 - 218: trips exported to GCS
+2022-12-15 08:24:43.610 | INFO     | __main__:compute_delayed:242 - 218: stops exported to GCS
+2022-12-15 08:24:48.494 | INFO     | __main__:get_stop_times:178 - 218: st exported to GCS
+2022-12-15 08:24:48.498 | INFO     | __main__:<module>:308 - download files for 218: 0:00:16.991221
+2022-12-15 08:24:48.498 | INFO     | __main__:<module>:289 - *********** Download data for: 220 ***********
+2022-12-15 08:24:50.685 | INFO     | __main__:primary_trip_query:55 - 220: trips saved in temp GCS
+2022-12-15 08:24:56.317 | INFO     | __main__:compute_delayed:231 - 220: routelines exported to GCS
+2022-12-15 08:24:56.589 | INFO     | __main__:compute_delayed:235 - 220: trips exported to GCS
+2022-12-15 08:24:56.948 | INFO     | __main__:compute_delayed:242 - 220: stops exported to GCS
+2022-12-15 08:24:59.929 | INFO     | __main__:get_stop_times:178 - 220: st exported to GCS
+2022-12-15 08:24:59.930 | INFO     | __main__:<module>:308 - download files for 220: 0:00:11.431978
+2022-12-15 08:24:59.931 | INFO     | __main__:<module>:289 - *********** Download data for: 221 ***********
+2022-12-15 08:25:02.742 | INFO     | __main__:primary_trip_query:55 - 221: trips saved in temp GCS
+2022-12-15 08:25:10.250 | INFO     | __main__:compute_delayed:231 - 221: routelines exported to GCS
+2022-12-15 08:25:10.558 | INFO     | __main__:compute_delayed:235 - 221: trips exported to GCS
+2022-12-15 08:25:10.784 | INFO     | __main__:compute_delayed:242 - 221: stops exported to GCS
+2022-12-15 08:25:14.246 | INFO     | __main__:get_stop_times:178 - 221: st exported to GCS
+2022-12-15 08:25:14.247 | INFO     | __main__:<module>:308 - download files for 221: 0:00:14.316209
+2022-12-15 08:25:14.248 | INFO     | __main__:<module>:289 - *********** Download data for: 226 ***********
+2022-12-15 08:25:18.212 | INFO     | __main__:primary_trip_query:55 - 226: trips saved in temp GCS
+2022-12-15 08:25:27.237 | INFO     | __main__:compute_delayed:231 - 226: routelines exported to GCS
+2022-12-15 08:25:27.516 | INFO     | __main__:compute_delayed:235 - 226: trips exported to GCS
+2022-12-15 08:25:27.914 | INFO     | __main__:compute_delayed:242 - 226: stops exported to GCS
+2022-12-15 08:25:37.095 | INFO     | __main__:get_stop_times:178 - 226: st exported to GCS
+2022-12-15 08:25:37.107 | INFO     | __main__:<module>:308 - download files for 226: 0:00:22.859232
+2022-12-15 08:25:37.108 | INFO     | __main__:<module>:289 - *********** Download data for: 228 ***********
+2022-12-15 08:25:40.248 | INFO     | __main__:primary_trip_query:55 - 228: trips saved in temp GCS
+2022-12-15 08:25:48.349 | INFO     | __main__:compute_delayed:231 - 228: routelines exported to GCS
+2022-12-15 08:25:48.659 | INFO     | __main__:compute_delayed:235 - 228: trips exported to GCS
+2022-12-15 08:25:48.952 | INFO     | __main__:compute_delayed:242 - 228: stops exported to GCS
+2022-12-15 08:25:55.555 | INFO     | __main__:get_stop_times:178 - 228: st exported to GCS
+2022-12-15 08:25:55.561 | INFO     | __main__:<module>:308 - download files for 228: 0:00:18.453547
+2022-12-15 08:25:55.563 | INFO     | __main__:<module>:289 - *********** Download data for: 231 ***********
+2022-12-15 08:25:58.995 | INFO     | __main__:primary_trip_query:55 - 231: trips saved in temp GCS
+2022-12-15 08:26:09.375 | INFO     | __main__:compute_delayed:231 - 231: routelines exported to GCS
+2022-12-15 08:26:09.673 | INFO     | __main__:compute_delayed:235 - 231: trips exported to GCS
+2022-12-15 08:26:10.060 | INFO     | __main__:compute_delayed:242 - 231: stops exported to GCS
+2022-12-15 08:26:17.951 | INFO     | __main__:get_stop_times:178 - 231: st exported to GCS
+2022-12-15 08:26:17.961 | INFO     | __main__:<module>:308 - download files for 231: 0:00:22.397921
+2022-12-15 08:26:17.963 | INFO     | __main__:<module>:289 - *********** Download data for: 232 ***********
+2022-12-15 08:26:21.369 | INFO     | __main__:primary_trip_query:55 - 232: trips saved in temp GCS
+2022-12-15 08:26:30.281 | INFO     | __main__:compute_delayed:231 - 232: routelines exported to GCS
+2022-12-15 08:26:30.584 | INFO     | __main__:compute_delayed:235 - 232: trips exported to GCS
+2022-12-15 08:26:30.850 | INFO     | __main__:compute_delayed:242 - 232: stops exported to GCS
+2022-12-15 08:26:40.417 | INFO     | __main__:get_stop_times:178 - 232: st exported to GCS
+2022-12-15 08:26:40.432 | INFO     | __main__:<module>:308 - download files for 232: 0:00:22.469612
+2022-12-15 08:26:40.434 | INFO     | __main__:<module>:289 - *********** Download data for: 235 ***********
+2022-12-15 08:26:45.862 | INFO     | __main__:primary_trip_query:55 - 235: trips saved in temp GCS
+2022-12-15 08:27:02.481 | INFO     | __main__:compute_delayed:231 - 235: routelines exported to GCS
+2022-12-15 08:27:03.092 | INFO     | __main__:compute_delayed:235 - 235: trips exported to GCS
+2022-12-15 08:27:03.582 | INFO     | __main__:compute_delayed:242 - 235: stops exported to GCS
+2022-12-15 08:27:23.919 | INFO     | __main__:get_stop_times:178 - 235: st exported to GCS
+2022-12-15 08:27:23.960 | INFO     | __main__:<module>:308 - download files for 235: 0:00:43.525428
+2022-12-15 08:27:23.960 | INFO     | __main__:<module>:289 - *********** Download data for: 238 ***********
+2022-12-15 08:27:26.463 | INFO     | __main__:primary_trip_query:55 - 238: trips saved in temp GCS
+2022-12-15 08:27:32.821 | INFO     | __main__:compute_delayed:231 - 238: routelines exported to GCS
+2022-12-15 08:27:33.100 | INFO     | __main__:compute_delayed:235 - 238: trips exported to GCS
+2022-12-15 08:27:33.470 | INFO     | __main__:compute_delayed:242 - 238: stops exported to GCS
+2022-12-15 08:27:36.945 | INFO     | __main__:get_stop_times:178 - 238: st exported to GCS
+2022-12-15 08:27:36.946 | INFO     | __main__:<module>:308 - download files for 238: 0:00:12.985413
+2022-12-15 08:27:36.946 | INFO     | __main__:<module>:289 - *********** Download data for: 239 ***********
+2022-12-15 08:27:40.625 | INFO     | __main__:primary_trip_query:55 - 239: trips saved in temp GCS
+2022-12-15 08:27:47.850 | INFO     | __main__:compute_delayed:231 - 239: routelines exported to GCS
+2022-12-15 08:27:48.223 | INFO     | __main__:compute_delayed:235 - 239: trips exported to GCS
+2022-12-15 08:27:48.577 | INFO     | __main__:compute_delayed:242 - 239: stops exported to GCS
+2022-12-15 08:27:51.613 | INFO     | __main__:get_stop_times:178 - 239: st exported to GCS
+2022-12-15 08:27:51.615 | INFO     | __main__:<module>:308 - download files for 239: 0:00:14.668061
+2022-12-15 08:27:51.615 | INFO     | __main__:<module>:289 - *********** Download data for: 243 ***********
+2022-12-15 08:27:55.277 | INFO     | __main__:primary_trip_query:55 - 243: trips saved in temp GCS
+2022-12-15 08:28:01.839 | INFO     | __main__:compute_delayed:231 - 243: routelines exported to GCS
+2022-12-15 08:28:02.235 | INFO     | __main__:compute_delayed:235 - 243: trips exported to GCS
+2022-12-15 08:28:02.595 | INFO     | __main__:compute_delayed:242 - 243: stops exported to GCS
+2022-12-15 08:28:08.333 | INFO     | __main__:get_stop_times:178 - 243: st exported to GCS
+2022-12-15 08:28:08.338 | INFO     | __main__:<module>:308 - download files for 243: 0:00:16.723075
+2022-12-15 08:28:08.339 | INFO     | __main__:<module>:289 - *********** Download data for: 246 ***********
+2022-12-15 08:28:11.284 | INFO     | __main__:primary_trip_query:55 - 246: trips saved in temp GCS
+2022-12-15 08:28:20.084 | INFO     | __main__:compute_delayed:231 - 246: routelines exported to GCS
+2022-12-15 08:28:20.451 | INFO     | __main__:compute_delayed:235 - 246: trips exported to GCS
+2022-12-15 08:28:20.811 | INFO     | __main__:compute_delayed:242 - 246: stops exported to GCS
+2022-12-15 08:28:23.458 | INFO     | __main__:get_stop_times:178 - 246: st exported to GCS
+2022-12-15 08:28:23.461 | INFO     | __main__:<module>:308 - download files for 246: 0:00:15.121211
+2022-12-15 08:28:23.462 | INFO     | __main__:<module>:289 - *********** Download data for: 247 ***********
+2022-12-15 08:28:26.598 | INFO     | __main__:primary_trip_query:55 - 247: trips saved in temp GCS
+2022-12-15 08:28:33.990 | INFO     | __main__:compute_delayed:231 - 247: routelines exported to GCS
+2022-12-15 08:28:34.275 | INFO     | __main__:compute_delayed:235 - 247: trips exported to GCS
+2022-12-15 08:28:34.638 | INFO     | __main__:compute_delayed:242 - 247: stops exported to GCS
+2022-12-15 08:28:39.891 | INFO     | __main__:get_stop_times:178 - 247: st exported to GCS
+2022-12-15 08:28:39.895 | INFO     | __main__:<module>:308 - download files for 247: 0:00:16.432935
+2022-12-15 08:28:39.895 | INFO     | __main__:<module>:289 - *********** Download data for: 251 ***********
+2022-12-15 08:28:42.507 | INFO     | __main__:primary_trip_query:55 - 251: trips saved in temp GCS
+2022-12-15 08:28:50.613 | INFO     | __main__:compute_delayed:231 - 251: routelines exported to GCS
+2022-12-15 08:28:50.914 | INFO     | __main__:compute_delayed:235 - 251: trips exported to GCS
+2022-12-15 08:28:51.112 | INFO     | __main__:compute_delayed:242 - 251: stops exported to GCS
+2022-12-15 08:28:54.847 | INFO     | __main__:get_stop_times:178 - 251: st exported to GCS
+2022-12-15 08:28:54.849 | INFO     | __main__:<module>:308 - download files for 251: 0:00:14.954163
+2022-12-15 08:28:54.850 | INFO     | __main__:<module>:289 - *********** Download data for: 252 ***********
+2022-12-15 08:28:57.105 | INFO     | __main__:primary_trip_query:55 - 252: trips saved in temp GCS
+2022-12-15 08:29:02.606 | INFO     | __main__:compute_delayed:231 - 252: routelines exported to GCS
+2022-12-15 08:29:02.918 | INFO     | __main__:compute_delayed:235 - 252: trips exported to GCS
+2022-12-15 08:29:03.121 | INFO     | __main__:compute_delayed:242 - 252: stops exported to GCS
+2022-12-15 08:29:05.725 | INFO     | __main__:get_stop_times:178 - 252: st exported to GCS
+2022-12-15 08:29:05.727 | INFO     | __main__:<module>:308 - download files for 252: 0:00:10.877222
+2022-12-15 08:29:05.728 | INFO     | __main__:<module>:289 - *********** Download data for: 254 ***********
+2022-12-15 08:29:08.199 | INFO     | __main__:primary_trip_query:55 - 254: trips saved in temp GCS
+2022-12-15 08:29:15.254 | INFO     | __main__:compute_delayed:231 - 254: routelines exported to GCS
+2022-12-15 08:29:15.624 | INFO     | __main__:compute_delayed:235 - 254: trips exported to GCS
+2022-12-15 08:29:15.821 | INFO     | __main__:compute_delayed:242 - 254: stops exported to GCS
+2022-12-15 08:29:18.209 | INFO     | __main__:get_stop_times:178 - 254: st exported to GCS
+2022-12-15 08:29:18.211 | INFO     | __main__:<module>:308 - download files for 254: 0:00:12.483664
+2022-12-15 08:29:18.212 | INFO     | __main__:<module>:289 - *********** Download data for: 257 ***********
+2022-12-15 08:29:20.501 | INFO     | __main__:primary_trip_query:55 - 257: trips saved in temp GCS
+2022-12-15 08:29:25.968 | INFO     | __main__:compute_delayed:231 - 257: routelines exported to GCS
+2022-12-15 08:29:26.197 | INFO     | __main__:compute_delayed:235 - 257: trips exported to GCS
+2022-12-15 08:29:26.560 | INFO     | __main__:compute_delayed:242 - 257: stops exported to GCS
+2022-12-15 08:29:29.391 | INFO     | __main__:get_stop_times:178 - 257: st exported to GCS
+2022-12-15 08:29:29.392 | INFO     | __main__:<module>:308 - download files for 257: 0:00:11.180231
+2022-12-15 08:29:29.393 | INFO     | __main__:<module>:289 - *********** Download data for: 259 ***********
+2022-12-15 08:29:32.485 | INFO     | __main__:primary_trip_query:55 - 259: trips saved in temp GCS
+2022-12-15 08:29:38.680 | INFO     | __main__:compute_delayed:231 - 259: routelines exported to GCS
+2022-12-15 08:29:38.981 | INFO     | __main__:compute_delayed:235 - 259: trips exported to GCS
+2022-12-15 08:29:39.186 | INFO     | __main__:compute_delayed:242 - 259: stops exported to GCS
+2022-12-15 08:29:43.143 | INFO     | __main__:get_stop_times:178 - 259: st exported to GCS
+2022-12-15 08:29:43.147 | INFO     | __main__:<module>:308 - download files for 259: 0:00:13.753768
+2022-12-15 08:29:43.147 | INFO     | __main__:<module>:289 - *********** Download data for: 260 ***********
+2022-12-15 08:29:45.659 | INFO     | __main__:primary_trip_query:55 - 260: trips saved in temp GCS
+2022-12-15 08:29:50.905 | INFO     | __main__:compute_delayed:231 - 260: routelines exported to GCS
+2022-12-15 08:29:51.210 | INFO     | __main__:compute_delayed:235 - 260: trips exported to GCS
+2022-12-15 08:29:51.410 | INFO     | __main__:compute_delayed:242 - 260: stops exported to GCS
+2022-12-15 08:29:55.218 | INFO     | __main__:get_stop_times:178 - 260: st exported to GCS
+2022-12-15 08:29:55.222 | INFO     | __main__:<module>:308 - download files for 260: 0:00:12.074309
+2022-12-15 08:29:55.223 | INFO     | __main__:<module>:289 - *********** Download data for: 261 ***********
+2022-12-15 08:29:57.652 | INFO     | __main__:primary_trip_query:55 - 261: trips saved in temp GCS
+2022-12-15 08:30:05.142 | INFO     | __main__:compute_delayed:231 - 261: routelines exported to GCS
+2022-12-15 08:30:05.441 | INFO     | __main__:compute_delayed:235 - 261: trips exported to GCS
+2022-12-15 08:30:05.665 | INFO     | __main__:compute_delayed:242 - 261: stops exported to GCS
+2022-12-15 08:30:08.248 | INFO     | __main__:get_stop_times:178 - 261: st exported to GCS
+2022-12-15 08:30:08.249 | INFO     | __main__:<module>:308 - download files for 261: 0:00:13.026559
+2022-12-15 08:30:08.250 | INFO     | __main__:<module>:289 - *********** Download data for: 263 ***********
+2022-12-15 08:30:10.112 | INFO     | __main__:primary_trip_query:55 - 263: trips saved in temp GCS
+2022-12-15 08:30:15.489 | INFO     | __main__:compute_delayed:231 - 263: routelines exported to GCS
+2022-12-15 08:30:15.724 | INFO     | __main__:compute_delayed:235 - 263: trips exported to GCS
+2022-12-15 08:30:15.925 | INFO     | __main__:compute_delayed:242 - 263: stops exported to GCS
+2022-12-15 08:30:17.788 | INFO     | __main__:<module>:308 - download files for 263: 0:00:09.538189
+2022-12-15 08:30:17.789 | INFO     | __main__:<module>:289 - *********** Download data for: 264 ***********
+2022-12-15 08:30:19.921 | INFO     | __main__:primary_trip_query:55 - 264: trips saved in temp GCS
+2022-12-15 08:30:25.339 | INFO     | __main__:compute_delayed:231 - 264: routelines exported to GCS
+2022-12-15 08:30:25.597 | INFO     | __main__:compute_delayed:235 - 264: trips exported to GCS
+2022-12-15 08:30:26.005 | INFO     | __main__:compute_delayed:242 - 264: stops exported to GCS
+2022-12-15 08:30:28.382 | INFO     | __main__:get_stop_times:178 - 264: st exported to GCS
+2022-12-15 08:30:28.383 | INFO     | __main__:<module>:308 - download files for 264: 0:00:10.593677
+2022-12-15 08:30:28.384 | INFO     | __main__:<module>:289 - *********** Download data for: 265 ***********
+2022-12-15 08:30:30.182 | INFO     | __main__:primary_trip_query:55 - 265: trips saved in temp GCS
+2022-12-15 08:30:36.019 | INFO     | __main__:compute_delayed:231 - 265: routelines exported to GCS
+2022-12-15 08:30:36.341 | INFO     | __main__:compute_delayed:235 - 265: trips exported to GCS
+2022-12-15 08:30:36.536 | INFO     | __main__:compute_delayed:242 - 265: stops exported to GCS
+2022-12-15 08:30:38.838 | INFO     | __main__:<module>:308 - download files for 265: 0:00:10.454439
+2022-12-15 08:30:38.839 | INFO     | __main__:<module>:289 - *********** Download data for: 269 ***********
+2022-12-15 08:30:42.480 | INFO     | __main__:primary_trip_query:55 - 269: trips saved in temp GCS
+2022-12-15 08:31:02.953 | INFO     | __main__:compute_delayed:231 - 269: routelines exported to GCS
+2022-12-15 08:31:03.552 | INFO     | __main__:compute_delayed:235 - 269: trips exported to GCS
+2022-12-15 08:31:03.923 | INFO     | __main__:compute_delayed:242 - 269: stops exported to GCS
+2022-12-15 08:31:12.894 | INFO     | __main__:get_stop_times:178 - 269: st exported to GCS
+2022-12-15 08:31:12.913 | INFO     | __main__:<module>:308 - download files for 269: 0:00:34.074255
+2022-12-15 08:31:12.918 | INFO     | __main__:<module>:289 - *********** Download data for: 270 ***********
+2022-12-15 08:31:15.444 | INFO     | __main__:primary_trip_query:55 - 270: trips saved in temp GCS
+2022-12-15 08:31:21.281 | INFO     | __main__:compute_delayed:231 - 270: routelines exported to GCS
+2022-12-15 08:31:21.777 | INFO     | __main__:compute_delayed:235 - 270: trips exported to GCS
+2022-12-15 08:31:21.977 | INFO     | __main__:compute_delayed:242 - 270: stops exported to GCS
+2022-12-15 08:31:25.250 | INFO     | __main__:get_stop_times:178 - 270: st exported to GCS
+2022-12-15 08:31:25.252 | INFO     | __main__:<module>:308 - download files for 270: 0:00:12.333928
+2022-12-15 08:31:25.252 | INFO     | __main__:<module>:289 - *********** Download data for: 271 ***********
+2022-12-15 08:31:27.651 | INFO     | __main__:primary_trip_query:55 - 271: trips saved in temp GCS
+2022-12-15 08:31:37.485 | INFO     | __main__:compute_delayed:231 - 271: routelines exported to GCS
+2022-12-15 08:31:37.763 | INFO     | __main__:compute_delayed:235 - 271: trips exported to GCS
+2022-12-15 08:31:37.969 | INFO     | __main__:compute_delayed:242 - 271: stops exported to GCS
+2022-12-15 08:31:41.234 | INFO     | __main__:get_stop_times:178 - 271: st exported to GCS
+2022-12-15 08:31:41.236 | INFO     | __main__:<module>:308 - download files for 271: 0:00:15.983846
+2022-12-15 08:31:41.237 | INFO     | __main__:<module>:289 - *********** Download data for: 273 ***********
+2022-12-15 08:31:45.888 | INFO     | __main__:primary_trip_query:55 - 273: trips saved in temp GCS
+2022-12-15 08:31:57.179 | INFO     | __main__:compute_delayed:231 - 273: routelines exported to GCS
+2022-12-15 08:31:57.587 | INFO     | __main__:compute_delayed:235 - 273: trips exported to GCS
+2022-12-15 08:31:57.950 | INFO     | __main__:compute_delayed:242 - 273: stops exported to GCS
+2022-12-15 08:32:11.599 | INFO     | __main__:get_stop_times:178 - 273: st exported to GCS
+2022-12-15 08:32:11.614 | INFO     | __main__:<module>:308 - download files for 273: 0:00:30.377172
+2022-12-15 08:32:11.615 | INFO     | __main__:<module>:289 - *********** Download data for: 274 ***********
+2022-12-15 08:32:14.009 | INFO     | __main__:primary_trip_query:55 - 274: trips saved in temp GCS
+2022-12-15 08:32:20.122 | INFO     | __main__:compute_delayed:231 - 274: routelines exported to GCS
+2022-12-15 08:32:20.474 | INFO     | __main__:compute_delayed:235 - 274: trips exported to GCS
+2022-12-15 08:32:20.677 | INFO     | __main__:compute_delayed:242 - 274: stops exported to GCS
+2022-12-15 08:32:23.906 | INFO     | __main__:get_stop_times:178 - 274: st exported to GCS
+2022-12-15 08:32:23.908 | INFO     | __main__:<module>:308 - download files for 274: 0:00:12.292609
+2022-12-15 08:32:23.908 | INFO     | __main__:<module>:289 - *********** Download data for: 278 ***********
+2022-12-15 08:32:29.780 | INFO     | __main__:primary_trip_query:55 - 278: trips saved in temp GCS
+2022-12-15 08:32:42.584 | INFO     | __main__:compute_delayed:231 - 278: routelines exported to GCS
+2022-12-15 08:32:42.919 | INFO     | __main__:compute_delayed:235 - 278: trips exported to GCS
+2022-12-15 08:32:43.381 | INFO     | __main__:compute_delayed:242 - 278: stops exported to GCS
+2022-12-15 08:33:22.048 | INFO     | __main__:get_stop_times:178 - 278: st exported to GCS
+2022-12-15 08:33:22.109 | INFO     | __main__:<module>:308 - download files for 278: 0:00:58.200678
+2022-12-15 08:33:22.110 | INFO     | __main__:<module>:289 - *********** Download data for: 279 ***********
+2022-12-15 08:33:26.288 | INFO     | __main__:primary_trip_query:55 - 279: trips saved in temp GCS
+2022-12-15 08:33:36.841 | INFO     | __main__:compute_delayed:231 - 279: routelines exported to GCS
+2022-12-15 08:33:37.214 | INFO     | __main__:compute_delayed:235 - 279: trips exported to GCS
+2022-12-15 08:33:37.587 | INFO     | __main__:compute_delayed:242 - 279: stops exported to GCS
+2022-12-15 08:33:44.205 | INFO     | __main__:get_stop_times:178 - 279: st exported to GCS
+2022-12-15 08:33:44.214 | INFO     | __main__:<module>:308 - download files for 279: 0:00:22.104234
+2022-12-15 08:33:44.214 | INFO     | __main__:<module>:289 - *********** Download data for: 280 ***********
+2022-12-15 08:33:47.333 | INFO     | __main__:primary_trip_query:55 - 280: trips saved in temp GCS
+2022-12-15 08:33:53.821 | INFO     | __main__:compute_delayed:231 - 280: routelines exported to GCS
+2022-12-15 08:33:54.213 | INFO     | __main__:compute_delayed:235 - 280: trips exported to GCS
+2022-12-15 08:33:54.573 | INFO     | __main__:compute_delayed:242 - 280: stops exported to GCS
+2022-12-15 08:33:57.199 | INFO     | __main__:get_stop_times:178 - 280: st exported to GCS
+2022-12-15 08:33:57.200 | INFO     | __main__:<module>:308 - download files for 280: 0:00:12.986000
+2022-12-15 08:33:57.201 | INFO     | __main__:<module>:289 - *********** Download data for: 281 ***********
+2022-12-15 08:34:00.362 | INFO     | __main__:primary_trip_query:55 - 281: trips saved in temp GCS
+2022-12-15 08:34:07.821 | INFO     | __main__:compute_delayed:231 - 281: routelines exported to GCS
+2022-12-15 08:34:08.200 | INFO     | __main__:compute_delayed:235 - 281: trips exported to GCS
+2022-12-15 08:34:08.564 | INFO     | __main__:compute_delayed:242 - 281: stops exported to GCS
+2022-12-15 08:34:14.029 | INFO     | __main__:get_stop_times:178 - 281: st exported to GCS
+2022-12-15 08:34:14.034 | INFO     | __main__:<module>:308 - download files for 281: 0:00:16.833188
+2022-12-15 08:34:14.035 | INFO     | __main__:<module>:289 - *********** Download data for: 282 ***********
+2022-12-15 08:34:21.057 | INFO     | __main__:primary_trip_query:55 - 282: trips saved in temp GCS
+2022-12-15 08:34:40.012 | INFO     | __main__:compute_delayed:231 - 282: routelines exported to GCS
+2022-12-15 08:34:40.569 | INFO     | __main__:compute_delayed:235 - 282: trips exported to GCS
+2022-12-15 08:34:40.881 | INFO     | __main__:compute_delayed:242 - 282: stops exported to GCS
+2022-12-15 08:36:23.775 | INFO     | __main__:get_stop_times:178 - 282: st exported to GCS
+2022-12-15 08:36:23.948 | INFO     | __main__:<module>:308 - download files for 282: 0:02:09.912768
+2022-12-15 08:36:23.949 | INFO     | __main__:<module>:289 - *********** Download data for: 284 ***********
+2022-12-15 08:36:27.232 | INFO     | __main__:primary_trip_query:55 - 284: trips saved in temp GCS
+2022-12-15 08:36:38.770 | INFO     | __main__:compute_delayed:231 - 284: routelines exported to GCS
+2022-12-15 08:36:39.081 | INFO     | __main__:compute_delayed:235 - 284: trips exported to GCS
+2022-12-15 08:36:39.523 | INFO     | __main__:compute_delayed:242 - 284: stops exported to GCS
+2022-12-15 08:36:45.989 | INFO     | __main__:get_stop_times:178 - 284: st exported to GCS
+2022-12-15 08:36:45.996 | INFO     | __main__:<module>:308 - download files for 284: 0:00:22.046568
+2022-12-15 08:36:45.997 | INFO     | __main__:<module>:289 - *********** Download data for: 287 ***********
+2022-12-15 08:36:48.953 | INFO     | __main__:primary_trip_query:55 - 287: trips saved in temp GCS
+2022-12-15 08:36:54.380 | INFO     | __main__:compute_delayed:231 - 287: routelines exported to GCS
+2022-12-15 08:36:54.683 | INFO     | __main__:compute_delayed:235 - 287: trips exported to GCS
+2022-12-15 08:36:55.044 | INFO     | __main__:compute_delayed:242 - 287: stops exported to GCS
+2022-12-15 08:36:59.812 | INFO     | __main__:get_stop_times:178 - 287: st exported to GCS
+2022-12-15 08:36:59.814 | INFO     | __main__:<module>:308 - download files for 287: 0:00:13.816392
+2022-12-15 08:36:59.814 | INFO     | __main__:<module>:289 - *********** Download data for: 289 ***********
+2022-12-15 08:37:02.336 | INFO     | __main__:primary_trip_query:55 - 289: trips saved in temp GCS
+2022-12-15 08:37:09.454 | INFO     | __main__:compute_delayed:231 - 289: routelines exported to GCS
+2022-12-15 08:37:09.807 | INFO     | __main__:compute_delayed:235 - 289: trips exported to GCS
+2022-12-15 08:37:10.175 | INFO     | __main__:compute_delayed:242 - 289: stops exported to GCS
+2022-12-15 08:37:14.478 | INFO     | __main__:get_stop_times:178 - 289: st exported to GCS
+2022-12-15 08:37:14.481 | INFO     | __main__:<module>:308 - download files for 289: 0:00:14.666881
+2022-12-15 08:37:14.488 | INFO     | __main__:<module>:289 - *********** Download data for: 290 ***********
+2022-12-15 08:37:19.052 | INFO     | __main__:primary_trip_query:55 - 290: trips saved in temp GCS
+2022-12-15 08:37:36.342 | INFO     | __main__:compute_delayed:231 - 290: routelines exported to GCS
+2022-12-15 08:37:36.787 | INFO     | __main__:compute_delayed:235 - 290: trips exported to GCS
+2022-12-15 08:37:37.207 | INFO     | __main__:compute_delayed:242 - 290: stops exported to GCS
+2022-12-15 08:37:51.762 | INFO     | __main__:get_stop_times:178 - 290: st exported to GCS
+2022-12-15 08:37:51.779 | INFO     | __main__:<module>:308 - download files for 290: 0:00:37.291255
+2022-12-15 08:37:51.780 | INFO     | __main__:<module>:289 - *********** Download data for: 293 ***********
+2022-12-15 08:37:55.539 | INFO     | __main__:primary_trip_query:55 - 293: trips saved in temp GCS
+2022-12-15 08:38:06.009 | INFO     | __main__:compute_delayed:231 - 293: routelines exported to GCS
+2022-12-15 08:38:06.380 | INFO     | __main__:compute_delayed:235 - 293: trips exported to GCS
+2022-12-15 08:38:06.755 | INFO     | __main__:compute_delayed:242 - 293: stops exported to GCS
+2022-12-15 08:38:13.652 | INFO     | __main__:get_stop_times:178 - 293: st exported to GCS
+2022-12-15 08:38:13.659 | INFO     | __main__:<module>:308 - download files for 293: 0:00:21.879518
+2022-12-15 08:38:13.660 | INFO     | __main__:<module>:289 - *********** Download data for: 294 ***********
+2022-12-15 08:38:19.501 | INFO     | __main__:primary_trip_query:55 - 294: trips saved in temp GCS
+2022-12-15 08:38:40.255 | INFO     | __main__:compute_delayed:231 - 294: routelines exported to GCS
+2022-12-15 08:38:40.672 | INFO     | __main__:compute_delayed:235 - 294: trips exported to GCS
+2022-12-15 08:38:41.161 | INFO     | __main__:compute_delayed:242 - 294: stops exported to GCS
+2022-12-15 08:39:17.200 | INFO     | __main__:get_stop_times:178 - 294: st exported to GCS
+2022-12-15 08:39:17.280 | INFO     | __main__:<module>:308 - download files for 294: 0:01:03.619859
+2022-12-15 08:39:17.281 | INFO     | __main__:<module>:289 - *********** Download data for: 295 ***********
+2022-12-15 08:39:20.368 | INFO     | __main__:primary_trip_query:55 - 295: trips saved in temp GCS
+2022-12-15 08:39:29.802 | INFO     | __main__:compute_delayed:231 - 295: routelines exported to GCS
+2022-12-15 08:39:30.414 | INFO     | __main__:compute_delayed:235 - 295: trips exported to GCS
+2022-12-15 08:39:30.795 | INFO     | __main__:compute_delayed:242 - 295: stops exported to GCS
+2022-12-15 08:39:36.568 | INFO     | __main__:get_stop_times:178 - 295: st exported to GCS
+2022-12-15 08:39:36.573 | INFO     | __main__:<module>:308 - download files for 295: 0:00:19.292773
+2022-12-15 08:39:36.574 | INFO     | __main__:<module>:289 - *********** Download data for: 296 ***********
+2022-12-15 08:39:39.658 | INFO     | __main__:primary_trip_query:55 - 296: trips saved in temp GCS
+2022-12-15 08:39:49.514 | INFO     | __main__:compute_delayed:231 - 296: routelines exported to GCS
+2022-12-15 08:39:49.934 | INFO     | __main__:compute_delayed:235 - 296: trips exported to GCS
+2022-12-15 08:39:50.310 | INFO     | __main__:compute_delayed:242 - 296: stops exported to GCS
+2022-12-15 08:39:56.144 | INFO     | __main__:get_stop_times:178 - 296: st exported to GCS
+2022-12-15 08:39:56.152 | INFO     | __main__:<module>:308 - download files for 296: 0:00:19.577689
+2022-12-15 08:39:56.152 | INFO     | __main__:<module>:289 - *********** Download data for: 298 ***********
+2022-12-15 08:39:59.028 | INFO     | __main__:primary_trip_query:55 - 298: trips saved in temp GCS
+2022-12-15 08:40:06.860 | INFO     | __main__:compute_delayed:231 - 298: routelines exported to GCS
+2022-12-15 08:40:07.382 | INFO     | __main__:compute_delayed:235 - 298: trips exported to GCS
+2022-12-15 08:40:07.748 | INFO     | __main__:compute_delayed:242 - 298: stops exported to GCS
+2022-12-15 08:40:11.663 | INFO     | __main__:get_stop_times:178 - 298: st exported to GCS
+2022-12-15 08:40:11.665 | INFO     | __main__:<module>:308 - download files for 298: 0:00:15.512775
+2022-12-15 08:40:11.666 | INFO     | __main__:<module>:289 - *********** Download data for: 300 ***********
+2022-12-15 08:40:14.880 | INFO     | __main__:primary_trip_query:55 - 300: trips saved in temp GCS
+2022-12-15 08:40:23.280 | INFO     | __main__:compute_delayed:231 - 300: routelines exported to GCS
+2022-12-15 08:40:23.589 | INFO     | __main__:compute_delayed:235 - 300: trips exported to GCS
+2022-12-15 08:40:23.961 | INFO     | __main__:compute_delayed:242 - 300: stops exported to GCS
+2022-12-15 08:40:32.919 | INFO     | __main__:get_stop_times:178 - 300: st exported to GCS
+2022-12-15 08:40:32.934 | INFO     | __main__:<module>:308 - download files for 300: 0:00:21.268130
+2022-12-15 08:40:32.935 | INFO     | __main__:<module>:289 - *********** Download data for: 301 ***********
+2022-12-15 08:40:35.760 | INFO     | __main__:primary_trip_query:55 - 301: trips saved in temp GCS
+2022-12-15 08:40:43.392 | INFO     | __main__:compute_delayed:231 - 301: routelines exported to GCS
+2022-12-15 08:40:43.773 | INFO     | __main__:compute_delayed:235 - 301: trips exported to GCS
+2022-12-15 08:40:44.144 | INFO     | __main__:compute_delayed:242 - 301: stops exported to GCS
+2022-12-15 08:40:48.976 | INFO     | __main__:get_stop_times:178 - 301: st exported to GCS
+2022-12-15 08:40:48.979 | INFO     | __main__:<module>:308 - download files for 301: 0:00:16.044444
+2022-12-15 08:40:48.980 | INFO     | __main__:<module>:289 - *********** Download data for: 305 ***********
+2022-12-15 08:40:51.129 | INFO     | __main__:primary_trip_query:55 - 305: trips saved in temp GCS
+2022-12-15 08:40:57.176 | INFO     | __main__:compute_delayed:231 - 305: routelines exported to GCS
+2022-12-15 08:40:57.539 | INFO     | __main__:compute_delayed:235 - 305: trips exported to GCS
+2022-12-15 08:40:57.900 | INFO     | __main__:compute_delayed:242 - 305: stops exported to GCS
+2022-12-15 08:41:00.404 | INFO     | __main__:get_stop_times:178 - 305: st exported to GCS
+2022-12-15 08:41:00.405 | INFO     | __main__:<module>:308 - download files for 305: 0:00:11.425723
+2022-12-15 08:41:00.406 | INFO     | __main__:<module>:289 - *********** Download data for: 308 ***********
+2022-12-15 08:41:02.761 | INFO     | __main__:primary_trip_query:55 - 308: trips saved in temp GCS
+2022-12-15 08:41:08.871 | INFO     | __main__:compute_delayed:231 - 308: routelines exported to GCS
+2022-12-15 08:41:09.170 | INFO     | __main__:compute_delayed:235 - 308: trips exported to GCS
+2022-12-15 08:41:09.531 | INFO     | __main__:compute_delayed:242 - 308: stops exported to GCS
+2022-12-15 08:41:13.186 | INFO     | __main__:get_stop_times:178 - 308: st exported to GCS
+2022-12-15 08:41:13.188 | INFO     | __main__:<module>:308 - download files for 308: 0:00:12.781573
+2022-12-15 08:41:13.188 | INFO     | __main__:<module>:289 - *********** Download data for: 310 ***********
+2022-12-15 08:41:16.643 | INFO     | __main__:primary_trip_query:55 - 310: trips saved in temp GCS
+2022-12-15 08:41:28.303 | INFO     | __main__:compute_delayed:231 - 310: routelines exported to GCS
+2022-12-15 08:41:28.671 | INFO     | __main__:compute_delayed:235 - 310: trips exported to GCS
+2022-12-15 08:41:29.039 | INFO     | __main__:compute_delayed:242 - 310: stops exported to GCS
+2022-12-15 08:41:33.979 | INFO     | __main__:get_stop_times:178 - 310: st exported to GCS
+2022-12-15 08:41:33.985 | INFO     | __main__:<module>:308 - download files for 310: 0:00:20.796561
+2022-12-15 08:41:33.986 | INFO     | __main__:<module>:289 - *********** Download data for: 312 ***********
+2022-12-15 08:41:37.036 | INFO     | __main__:primary_trip_query:55 - 312: trips saved in temp GCS
+2022-12-15 08:41:42.899 | INFO     | __main__:compute_delayed:231 - 312: routelines exported to GCS
+2022-12-15 08:41:43.272 | INFO     | __main__:compute_delayed:235 - 312: trips exported to GCS
+2022-12-15 08:41:43.639 | INFO     | __main__:compute_delayed:242 - 312: stops exported to GCS
+2022-12-15 08:41:46.851 | INFO     | __main__:get_stop_times:178 - 312: st exported to GCS
+2022-12-15 08:41:46.854 | INFO     | __main__:<module>:308 - download files for 312: 0:00:12.868065
+2022-12-15 08:41:46.854 | INFO     | __main__:<module>:289 - *********** Download data for: 314 ***********
+2022-12-15 08:41:49.813 | INFO     | __main__:primary_trip_query:55 - 314: trips saved in temp GCS
+2022-12-15 08:41:59.618 | INFO     | __main__:compute_delayed:231 - 314: routelines exported to GCS
+2022-12-15 08:42:00.114 | INFO     | __main__:compute_delayed:235 - 314: trips exported to GCS
+2022-12-15 08:42:00.527 | INFO     | __main__:compute_delayed:242 - 314: stops exported to GCS
+2022-12-15 08:42:06.972 | INFO     | __main__:get_stop_times:178 - 314: st exported to GCS
+2022-12-15 08:42:06.980 | INFO     | __main__:<module>:308 - download files for 314: 0:00:20.126007
+2022-12-15 08:42:06.981 | INFO     | __main__:<module>:289 - *********** Download data for: 315 ***********
+2022-12-15 08:42:09.634 | INFO     | __main__:primary_trip_query:55 - 315: trips saved in temp GCS
+2022-12-15 08:42:15.368 | INFO     | __main__:compute_delayed:231 - 315: routelines exported to GCS
+2022-12-15 08:42:15.689 | INFO     | __main__:compute_delayed:235 - 315: trips exported to GCS
+2022-12-15 08:42:16.130 | INFO     | __main__:compute_delayed:242 - 315: stops exported to GCS
+2022-12-15 08:42:19.420 | INFO     | __main__:get_stop_times:178 - 315: st exported to GCS
+2022-12-15 08:42:19.422 | INFO     | __main__:<module>:308 - download files for 315: 0:00:12.440938
+2022-12-15 08:42:19.422 | INFO     | __main__:<module>:289 - *********** Download data for: 320 ***********
+2022-12-15 08:42:22.045 | INFO     | __main__:primary_trip_query:55 - 320: trips saved in temp GCS
+2022-12-15 08:42:28.010 | INFO     | __main__:compute_delayed:231 - 320: routelines exported to GCS
+2022-12-15 08:42:28.285 | INFO     | __main__:compute_delayed:235 - 320: trips exported to GCS
+2022-12-15 08:42:28.648 | INFO     | __main__:compute_delayed:242 - 320: stops exported to GCS
+2022-12-15 08:42:32.035 | INFO     | __main__:get_stop_times:178 - 320: st exported to GCS
+2022-12-15 08:42:32.036 | INFO     | __main__:<module>:308 - download files for 320: 0:00:12.613608
+2022-12-15 08:42:32.037 | INFO     | __main__:<module>:289 - *********** Download data for: 323 ***********
+2022-12-15 08:42:35.910 | INFO     | __main__:primary_trip_query:55 - 323: trips saved in temp GCS
+2022-12-15 08:42:41.953 | INFO     | __main__:compute_delayed:231 - 323: routelines exported to GCS
+2022-12-15 08:42:42.270 | INFO     | __main__:compute_delayed:235 - 323: trips exported to GCS
+2022-12-15 08:42:42.637 | INFO     | __main__:compute_delayed:242 - 323: stops exported to GCS
+2022-12-15 08:42:47.295 | INFO     | __main__:get_stop_times:178 - 323: st exported to GCS
+2022-12-15 08:42:47.296 | INFO     | __main__:<module>:308 - download files for 323: 0:00:15.259545
+2022-12-15 08:42:47.297 | INFO     | __main__:<module>:289 - *********** Download data for: 324 ***********
+2022-12-15 08:42:50.063 | INFO     | __main__:primary_trip_query:55 - 324: trips saved in temp GCS
+2022-12-15 08:42:56.101 | INFO     | __main__:compute_delayed:231 - 324: routelines exported to GCS
+2022-12-15 08:42:56.446 | INFO     | __main__:compute_delayed:235 - 324: trips exported to GCS
+2022-12-15 08:42:56.810 | INFO     | __main__:compute_delayed:242 - 324: stops exported to GCS
+2022-12-15 08:43:01.689 | INFO     | __main__:get_stop_times:178 - 324: st exported to GCS
+2022-12-15 08:43:01.691 | INFO     | __main__:<module>:308 - download files for 324: 0:00:14.394274
+2022-12-15 08:43:01.692 | INFO     | __main__:<module>:289 - *********** Download data for: 327 ***********
+2022-12-15 08:43:04.617 | INFO     | __main__:primary_trip_query:55 - 327: trips saved in temp GCS
+2022-12-15 08:43:12.743 | INFO     | __main__:compute_delayed:231 - 327: routelines exported to GCS
+2022-12-15 08:43:13.104 | INFO     | __main__:compute_delayed:235 - 327: trips exported to GCS
+2022-12-15 08:43:13.471 | INFO     | __main__:compute_delayed:242 - 327: stops exported to GCS
+2022-12-15 08:43:18.452 | INFO     | __main__:get_stop_times:178 - 327: st exported to GCS
+2022-12-15 08:43:18.457 | INFO     | __main__:<module>:308 - download files for 327: 0:00:16.765695
+2022-12-15 08:43:18.459 | INFO     | __main__:<module>:289 - *********** Download data for: 329 ***********
+2022-12-15 08:43:20.697 | INFO     | __main__:primary_trip_query:55 - 329: trips saved in temp GCS
+2022-12-15 08:43:26.873 | INFO     | __main__:compute_delayed:231 - 329: routelines exported to GCS
+2022-12-15 08:43:27.242 | INFO     | __main__:compute_delayed:235 - 329: trips exported to GCS
+2022-12-15 08:43:27.643 | INFO     | __main__:compute_delayed:242 - 329: stops exported to GCS
+2022-12-15 08:43:30.320 | INFO     | __main__:get_stop_times:178 - 329: st exported to GCS
+2022-12-15 08:43:30.322 | INFO     | __main__:<module>:308 - download files for 329: 0:00:11.862988
+2022-12-15 08:43:30.322 | INFO     | __main__:<module>:289 - *********** Download data for: 331 ***********
+2022-12-15 08:43:32.752 | INFO     | __main__:primary_trip_query:55 - 331: trips saved in temp GCS
+2022-12-15 08:43:38.735 | INFO     | __main__:compute_delayed:231 - 331: routelines exported to GCS
+2022-12-15 08:43:39.107 | INFO     | __main__:compute_delayed:235 - 331: trips exported to GCS
+2022-12-15 08:43:39.467 | INFO     | __main__:compute_delayed:242 - 331: stops exported to GCS
+2022-12-15 08:43:42.347 | INFO     | __main__:get_stop_times:178 - 331: st exported to GCS
+2022-12-15 08:43:42.348 | INFO     | __main__:<module>:308 - download files for 331: 0:00:12.025341
+2022-12-15 08:43:42.348 | INFO     | __main__:<module>:289 - *********** Download data for: 334 ***********
+2022-12-15 08:43:44.724 | INFO     | __main__:primary_trip_query:55 - 334: trips saved in temp GCS
+2022-12-15 08:43:50.298 | INFO     | __main__:compute_delayed:231 - 334: routelines exported to GCS
+2022-12-15 08:43:50.672 | INFO     | __main__:compute_delayed:235 - 334: trips exported to GCS
+2022-12-15 08:43:51.035 | INFO     | __main__:compute_delayed:242 - 334: stops exported to GCS
+2022-12-15 08:43:53.799 | INFO     | __main__:get_stop_times:178 - 334: st exported to GCS
+2022-12-15 08:43:53.801 | INFO     | __main__:<module>:308 - download files for 334: 0:00:11.452602
+2022-12-15 08:43:53.801 | INFO     | __main__:<module>:289 - *********** Download data for: 336 ***********
+2022-12-15 08:43:56.797 | INFO     | __main__:primary_trip_query:55 - 336: trips saved in temp GCS
+2022-12-15 08:44:04.855 | INFO     | __main__:compute_delayed:231 - 336: routelines exported to GCS
+2022-12-15 08:44:05.233 | INFO     | __main__:compute_delayed:235 - 336: trips exported to GCS
+2022-12-15 08:44:05.605 | INFO     | __main__:compute_delayed:242 - 336: stops exported to GCS
+2022-12-15 08:44:11.054 | INFO     | __main__:get_stop_times:178 - 336: st exported to GCS
+2022-12-15 08:44:11.060 | INFO     | __main__:<module>:308 - download files for 336: 0:00:17.258648
+2022-12-15 08:44:11.061 | INFO     | __main__:<module>:289 - *********** Download data for: 337 ***********
+2022-12-15 08:44:13.433 | INFO     | __main__:primary_trip_query:55 - 337: trips saved in temp GCS
+2022-12-15 08:44:20.098 | INFO     | __main__:compute_delayed:231 - 337: routelines exported to GCS
+2022-12-15 08:44:20.665 | INFO     | __main__:compute_delayed:235 - 337: trips exported to GCS
+2022-12-15 08:44:21.031 | INFO     | __main__:compute_delayed:242 - 337: stops exported to GCS
+2022-12-15 08:44:23.939 | INFO     | __main__:get_stop_times:178 - 337: st exported to GCS
+2022-12-15 08:44:23.940 | INFO     | __main__:<module>:308 - download files for 337: 0:00:12.879338
+2022-12-15 08:44:23.940 | INFO     | __main__:<module>:289 - *********** Download data for: 338 ***********
+2022-12-15 08:44:25.790 | INFO     | __main__:primary_trip_query:55 - 338: trips saved in temp GCS
+2022-12-15 08:44:31.537 | INFO     | __main__:compute_delayed:231 - 338: routelines exported to GCS
+2022-12-15 08:44:31.888 | INFO     | __main__:compute_delayed:235 - 338: trips exported to GCS
+2022-12-15 08:44:32.268 | INFO     | __main__:compute_delayed:242 - 338: stops exported to GCS
+2022-12-15 08:44:34.467 | INFO     | __main__:<module>:308 - download files for 338: 0:00:10.526499
+2022-12-15 08:44:34.468 | INFO     | __main__:<module>:289 - *********** Download data for: 339 ***********
+2022-12-15 08:44:37.285 | INFO     | __main__:primary_trip_query:55 - 339: trips saved in temp GCS
+2022-12-15 08:44:49.304 | INFO     | __main__:compute_delayed:231 - 339: routelines exported to GCS
+2022-12-15 08:44:49.601 | INFO     | __main__:compute_delayed:235 - 339: trips exported to GCS
+2022-12-15 08:44:49.970 | INFO     | __main__:compute_delayed:242 - 339: stops exported to GCS
+2022-12-15 08:44:56.388 | INFO     | __main__:get_stop_times:178 - 339: st exported to GCS
+2022-12-15 08:44:56.394 | INFO     | __main__:<module>:308 - download files for 339: 0:00:21.925767
+2022-12-15 08:44:56.394 | INFO     | __main__:<module>:289 - *********** Download data for: 341 ***********
+2022-12-15 08:44:58.136 | INFO     | __main__:primary_trip_query:55 - 341: trips saved in temp GCS
+2022-12-15 08:45:03.827 | INFO     | __main__:compute_delayed:231 - 341: routelines exported to GCS
+2022-12-15 08:45:04.192 | INFO     | __main__:compute_delayed:235 - 341: trips exported to GCS
+2022-12-15 08:45:04.558 | INFO     | __main__:compute_delayed:242 - 341: stops exported to GCS
+2022-12-15 08:45:06.539 | INFO     | __main__:<module>:308 - download files for 341: 0:00:10.144342
+2022-12-15 08:45:06.539 | INFO     | __main__:<module>:289 - *********** Download data for: 343 ***********
+2022-12-15 08:45:09.111 | INFO     | __main__:primary_trip_query:55 - 343: trips saved in temp GCS
+2022-12-15 08:45:16.872 | INFO     | __main__:compute_delayed:231 - 343: routelines exported to GCS
+2022-12-15 08:45:17.242 | INFO     | __main__:compute_delayed:235 - 343: trips exported to GCS
+2022-12-15 08:45:17.620 | INFO     | __main__:compute_delayed:242 - 343: stops exported to GCS
+2022-12-15 08:45:22.787 | INFO     | __main__:get_stop_times:178 - 343: st exported to GCS
+2022-12-15 08:45:22.790 | INFO     | __main__:<module>:308 - download files for 343: 0:00:16.250805
+2022-12-15 08:45:22.791 | INFO     | __main__:<module>:289 - *********** Download data for: 344 ***********
+2022-12-15 08:45:24.943 | INFO     | __main__:primary_trip_query:55 - 344: trips saved in temp GCS
+2022-12-15 08:45:31.618 | INFO     | __main__:compute_delayed:231 - 344: routelines exported to GCS
+2022-12-15 08:45:31.908 | INFO     | __main__:compute_delayed:235 - 344: trips exported to GCS
+2022-12-15 08:45:32.277 | INFO     | __main__:compute_delayed:242 - 344: stops exported to GCS
+2022-12-15 08:45:36.454 | INFO     | __main__:get_stop_times:178 - 344: st exported to GCS
+2022-12-15 08:45:36.455 | INFO     | __main__:<module>:308 - download files for 344: 0:00:13.664542
+2022-12-15 08:45:36.456 | INFO     | __main__:<module>:289 - *********** Download data for: 346 ***********
+2022-12-15 08:45:38.678 | INFO     | __main__:primary_trip_query:55 - 346: trips saved in temp GCS
+2022-12-15 08:45:46.108 | INFO     | __main__:compute_delayed:231 - 346: routelines exported to GCS
+2022-12-15 08:45:46.502 | INFO     | __main__:compute_delayed:235 - 346: trips exported to GCS
+2022-12-15 08:45:46.868 | INFO     | __main__:compute_delayed:242 - 346: stops exported to GCS
+2022-12-15 08:45:50.018 | INFO     | __main__:get_stop_times:178 - 346: st exported to GCS
+2022-12-15 08:45:50.020 | INFO     | __main__:<module>:308 - download files for 346: 0:00:13.563870
+2022-12-15 08:45:50.021 | INFO     | __main__:<module>:289 - *********** Download data for: 349 ***********
+2022-12-15 08:45:52.499 | INFO     | __main__:primary_trip_query:55 - 349: trips saved in temp GCS
+2022-12-15 08:45:57.935 | INFO     | __main__:compute_delayed:231 - 349: routelines exported to GCS
+2022-12-15 08:45:58.237 | INFO     | __main__:compute_delayed:235 - 349: trips exported to GCS
+2022-12-15 08:45:58.605 | INFO     | __main__:compute_delayed:242 - 349: stops exported to GCS
+2022-12-15 08:46:03.465 | INFO     | __main__:get_stop_times:178 - 349: st exported to GCS
+2022-12-15 08:46:03.467 | INFO     | __main__:<module>:308 - download files for 349: 0:00:13.446062
+2022-12-15 08:46:03.468 | INFO     | __main__:<module>:289 - *********** Download data for: 350 ***********
+2022-12-15 08:46:06.605 | INFO     | __main__:primary_trip_query:55 - 350: trips saved in temp GCS
+2022-12-15 08:46:12.601 | INFO     | __main__:compute_delayed:231 - 350: routelines exported to GCS
+2022-12-15 08:46:12.975 | INFO     | __main__:compute_delayed:235 - 350: trips exported to GCS
+2022-12-15 08:46:13.355 | INFO     | __main__:compute_delayed:242 - 350: stops exported to GCS
+2022-12-15 08:46:19.842 | INFO     | __main__:get_stop_times:178 - 350: st exported to GCS
+2022-12-15 08:46:19.849 | INFO     | __main__:<module>:308 - download files for 350: 0:00:16.380945
+2022-12-15 08:46:19.850 | INFO     | __main__:<module>:289 - *********** Download data for: 351 ***********
+2022-12-15 08:46:22.904 | INFO     | __main__:primary_trip_query:55 - 351: trips saved in temp GCS
+2022-12-15 08:46:29.307 | INFO     | __main__:compute_delayed:231 - 351: routelines exported to GCS
+2022-12-15 08:46:29.638 | INFO     | __main__:compute_delayed:235 - 351: trips exported to GCS
+2022-12-15 08:46:30.008 | INFO     | __main__:compute_delayed:242 - 351: stops exported to GCS
+2022-12-15 08:46:34.240 | INFO     | __main__:get_stop_times:178 - 351: st exported to GCS
+2022-12-15 08:46:34.242 | INFO     | __main__:<module>:308 - download files for 351: 0:00:14.391703
+2022-12-15 08:46:34.242 | INFO     | __main__:<module>:289 - *********** Download data for: 356 ***********
+2022-12-15 08:46:36.683 | INFO     | __main__:primary_trip_query:55 - 356: trips saved in temp GCS
+2022-12-15 08:46:42.677 | INFO     | __main__:compute_delayed:231 - 356: routelines exported to GCS
+2022-12-15 08:46:43.070 | INFO     | __main__:compute_delayed:235 - 356: trips exported to GCS
+2022-12-15 08:46:43.440 | INFO     | __main__:compute_delayed:242 - 356: stops exported to GCS
+2022-12-15 08:46:48.784 | INFO     | __main__:get_stop_times:178 - 356: st exported to GCS
+2022-12-15 08:46:48.786 | INFO     | __main__:<module>:308 - download files for 356: 0:00:14.543730
+2022-12-15 08:46:48.787 | INFO     | __main__:<module>:289 - *********** Download data for: 360 ***********
+2022-12-15 08:46:52.140 | INFO     | __main__:primary_trip_query:55 - 360: trips saved in temp GCS
+2022-12-15 08:47:05.805 | INFO     | __main__:compute_delayed:231 - 360: routelines exported to GCS
+2022-12-15 08:47:06.140 | INFO     | __main__:compute_delayed:235 - 360: trips exported to GCS
+2022-12-15 08:47:06.546 | INFO     | __main__:compute_delayed:242 - 360: stops exported to GCS
+2022-12-15 08:47:14.918 | INFO     | __main__:get_stop_times:178 - 360: st exported to GCS
+2022-12-15 08:47:14.929 | INFO     | __main__:<module>:308 - download files for 360: 0:00:26.141777
+2022-12-15 08:47:14.931 | INFO     | __main__:<module>:289 - *********** Download data for: 361 ***********
+2022-12-15 08:47:17.585 | INFO     | __main__:primary_trip_query:55 - 361: trips saved in temp GCS
+2022-12-15 08:47:24.263 | INFO     | __main__:compute_delayed:231 - 361: routelines exported to GCS
+2022-12-15 08:47:24.571 | INFO     | __main__:compute_delayed:235 - 361: trips exported to GCS
+2022-12-15 08:47:24.937 | INFO     | __main__:compute_delayed:242 - 361: stops exported to GCS
+2022-12-15 08:47:31.501 | INFO     | __main__:get_stop_times:178 - 361: st exported to GCS
+2022-12-15 08:47:31.508 | INFO     | __main__:<module>:308 - download files for 361: 0:00:16.577202
+2022-12-15 08:47:31.511 | INFO     | __main__:<module>:289 - *********** Download data for: 365 ***********
+2022-12-15 08:47:33.296 | INFO     | __main__:primary_trip_query:55 - 365: trips saved in temp GCS
+2022-12-15 08:47:39.223 | INFO     | __main__:compute_delayed:231 - 365: routelines exported to GCS
+2022-12-15 08:47:39.590 | INFO     | __main__:compute_delayed:235 - 365: trips exported to GCS
+2022-12-15 08:47:39.949 | INFO     | __main__:compute_delayed:242 - 365: stops exported to GCS
+2022-12-15 08:47:41.865 | INFO     | __main__:<module>:308 - download files for 365: 0:00:10.354542
+2022-12-15 08:47:41.867 | INFO     | __main__:<module>:289 - *********** Download data for: 366 ***********
+2022-12-15 08:47:44.744 | INFO     | __main__:primary_trip_query:55 - 366: trips saved in temp GCS
+2022-12-15 08:47:50.654 | INFO     | __main__:compute_delayed:231 - 366: routelines exported to GCS
+2022-12-15 08:47:51.029 | INFO     | __main__:compute_delayed:235 - 366: trips exported to GCS
+2022-12-15 08:47:51.394 | INFO     | __main__:compute_delayed:242 - 366: stops exported to GCS
+2022-12-15 08:47:54.337 | INFO     | __main__:get_stop_times:178 - 366: st exported to GCS
+2022-12-15 08:47:54.339 | INFO     | __main__:<module>:308 - download files for 366: 0:00:12.472151
+2022-12-15 08:47:54.341 | INFO     | __main__:<module>:289 - *********** Download data for: 367 ***********
+2022-12-15 08:47:56.628 | INFO     | __main__:primary_trip_query:55 - 367: trips saved in temp GCS
+2022-12-15 08:48:02.501 | INFO     | __main__:compute_delayed:231 - 367: routelines exported to GCS
+2022-12-15 08:48:02.871 | INFO     | __main__:compute_delayed:235 - 367: trips exported to GCS
+2022-12-15 08:48:03.235 | INFO     | __main__:compute_delayed:242 - 367: stops exported to GCS
+2022-12-15 08:48:06.719 | INFO     | __main__:get_stop_times:178 - 367: st exported to GCS
+2022-12-15 08:48:06.722 | INFO     | __main__:<module>:308 - download files for 367: 0:00:12.380884
+2022-12-15 08:48:06.723 | INFO     | __main__:<module>:289 - *********** Download data for: 368 ***********
+2022-12-15 08:48:09.753 | INFO     | __main__:primary_trip_query:55 - 368: trips saved in temp GCS
+2022-12-15 08:48:18.988 | INFO     | __main__:compute_delayed:231 - 368: routelines exported to GCS
+2022-12-15 08:48:19.288 | INFO     | __main__:compute_delayed:235 - 368: trips exported to GCS
+2022-12-15 08:48:19.659 | INFO     | __main__:compute_delayed:242 - 368: stops exported to GCS
+2022-12-15 08:48:25.265 | INFO     | __main__:get_stop_times:178 - 368: st exported to GCS
+2022-12-15 08:48:25.271 | INFO     | __main__:<module>:308 - download files for 368: 0:00:18.547364
+2022-12-15 08:48:25.273 | INFO     | __main__:<module>:289 - *********** Download data for: 372 ***********
+2022-12-15 08:48:27.951 | INFO     | __main__:primary_trip_query:55 - 372: trips saved in temp GCS
+2022-12-15 08:48:33.770 | INFO     | __main__:compute_delayed:231 - 372: routelines exported to GCS
+2022-12-15 08:48:34.074 | INFO     | __main__:compute_delayed:235 - 372: trips exported to GCS
+2022-12-15 08:48:34.446 | INFO     | __main__:compute_delayed:242 - 372: stops exported to GCS
+2022-12-15 08:48:39.080 | INFO     | __main__:get_stop_times:178 - 372: st exported to GCS
+2022-12-15 08:48:39.084 | INFO     | __main__:<module>:308 - download files for 372: 0:00:13.811853
+2022-12-15 08:48:39.086 | INFO     | __main__:<module>:289 - *********** Download data for: 374 ***********
+2022-12-15 08:48:41.310 | INFO     | __main__:primary_trip_query:55 - 374: trips saved in temp GCS
+2022-12-15 08:48:48.763 | INFO     | __main__:compute_delayed:231 - 374: routelines exported to GCS
+2022-12-15 08:48:49.267 | INFO     | __main__:compute_delayed:235 - 374: trips exported to GCS
+2022-12-15 08:48:49.638 | INFO     | __main__:compute_delayed:242 - 374: stops exported to GCS
+2022-12-15 08:48:52.582 | INFO     | __main__:get_stop_times:178 - 374: st exported to GCS
+2022-12-15 08:48:52.584 | INFO     | __main__:<module>:308 - download files for 374: 0:00:13.497139
+2022-12-15 08:48:52.584 | INFO     | __main__:<module>:289 - *********** Download data for: 376 ***********
+2022-12-15 08:48:55.217 | INFO     | __main__:primary_trip_query:55 - 376: trips saved in temp GCS
+2022-12-15 08:49:02.244 | INFO     | __main__:compute_delayed:231 - 376: routelines exported to GCS
+2022-12-15 08:49:02.615 | INFO     | __main__:compute_delayed:235 - 376: trips exported to GCS
+2022-12-15 08:49:02.977 | INFO     | __main__:compute_delayed:242 - 376: stops exported to GCS
+2022-12-15 08:49:07.132 | INFO     | __main__:get_stop_times:178 - 376: st exported to GCS
+2022-12-15 08:49:07.135 | INFO     | __main__:<module>:308 - download files for 376: 0:00:14.550703
+2022-12-15 08:49:07.136 | INFO     | __main__:<module>:289 - *********** Download data for: 380 ***********
+2022-12-15 08:49:10.309 | INFO     | __main__:primary_trip_query:55 - 380: trips saved in temp GCS
+2022-12-15 08:49:26.860 | INFO     | __main__:compute_delayed:231 - 380: routelines exported to GCS
+2022-12-15 08:49:27.308 | INFO     | __main__:compute_delayed:235 - 380: trips exported to GCS
+2022-12-15 08:49:27.703 | INFO     | __main__:compute_delayed:242 - 380: stops exported to GCS
+2022-12-15 08:49:34.635 | INFO     | __main__:get_stop_times:178 - 380: st exported to GCS
+2022-12-15 08:49:34.642 | INFO     | __main__:<module>:308 - download files for 380: 0:00:27.505599
+2022-12-15 08:49:34.642 | INFO     | __main__:<module>:289 - *********** Download data for: 381 ***********
+2022-12-15 08:49:37.324 | INFO     | __main__:primary_trip_query:55 - 381: trips saved in temp GCS
+2022-12-15 08:49:46.079 | INFO     | __main__:compute_delayed:231 - 381: routelines exported to GCS
+2022-12-15 08:49:46.846 | INFO     | __main__:compute_delayed:235 - 381: trips exported to GCS
+2022-12-15 08:49:47.222 | INFO     | __main__:compute_delayed:242 - 381: stops exported to GCS
+2022-12-15 08:49:51.771 | INFO     | __main__:get_stop_times:178 - 381: st exported to GCS
+2022-12-15 08:49:51.776 | INFO     | __main__:<module>:308 - download files for 381: 0:00:17.133523
+2022-12-15 08:49:51.777 | INFO     | __main__:<module>:289 - *********** Download data for: 386 ***********
+2022-12-15 08:49:54.106 | INFO     | __main__:primary_trip_query:55 - 386: trips saved in temp GCS
+2022-12-15 08:50:00.022 | INFO     | __main__:compute_delayed:231 - 386: routelines exported to GCS
+2022-12-15 08:50:00.323 | INFO     | __main__:compute_delayed:235 - 386: trips exported to GCS
+2022-12-15 08:50:00.695 | INFO     | __main__:compute_delayed:242 - 386: stops exported to GCS
+2022-12-15 08:50:07.214 | INFO     | __main__:get_stop_times:178 - 386: st exported to GCS
+2022-12-15 08:50:07.217 | INFO     | __main__:<module>:308 - download files for 386: 0:00:15.440343
+2022-12-15 08:50:07.218 | INFO     | __main__:<module>:289 - *********** Download data for: 389 ***********
+2022-12-15 08:50:09.763 | INFO     | __main__:primary_trip_query:55 - 389: trips saved in temp GCS
+2022-12-15 08:50:17.960 | INFO     | __main__:compute_delayed:231 - 389: routelines exported to GCS
+2022-12-15 08:50:18.332 | INFO     | __main__:compute_delayed:235 - 389: trips exported to GCS
+2022-12-15 08:50:18.696 | INFO     | __main__:compute_delayed:242 - 389: stops exported to GCS
+2022-12-15 08:50:22.951 | INFO     | __main__:get_stop_times:178 - 389: st exported to GCS
+2022-12-15 08:50:22.953 | INFO     | __main__:<module>:308 - download files for 389: 0:00:15.734671
+2022-12-15 08:50:22.954 | INFO     | __main__:<module>:289 - *********** Download data for: 394 ***********
+2022-12-15 08:50:24.735 | INFO     | __main__:primary_trip_query:55 - 394: trips saved in temp GCS
+2022-12-15 08:50:29.920 | INFO     | __main__:compute_delayed:231 - 394: routelines exported to GCS
+2022-12-15 08:50:30.403 | INFO     | __main__:compute_delayed:235 - 394: trips exported to GCS
+2022-12-15 08:50:30.759 | INFO     | __main__:compute_delayed:242 - 394: stops exported to GCS
+2022-12-15 08:50:32.997 | INFO     | __main__:<module>:308 - download files for 394: 0:00:10.043000
+2022-12-15 08:50:32.998 | INFO     | __main__:<module>:289 - *********** Download data for: 473 ***********
+2022-12-15 08:50:35.234 | INFO     | __main__:primary_trip_query:55 - 473: trips saved in temp GCS
+2022-12-15 08:50:43.366 | INFO     | __main__:compute_delayed:231 - 473: routelines exported to GCS
+2022-12-15 08:50:43.885 | INFO     | __main__:compute_delayed:235 - 473: trips exported to GCS
+2022-12-15 08:50:44.245 | INFO     | __main__:compute_delayed:242 - 473: stops exported to GCS
+2022-12-15 08:50:47.444 | INFO     | __main__:get_stop_times:178 - 473: st exported to GCS
+2022-12-15 08:50:47.445 | INFO     | __main__:<module>:308 - download files for 473: 0:00:14.447533
+2022-12-15 08:50:47.446 | INFO     | __main__:<module>:289 - *********** Download data for: 474 ***********
+2022-12-15 08:50:50.055 | INFO     | __main__:primary_trip_query:55 - 474: trips saved in temp GCS
+2022-12-15 08:50:57.768 | INFO     | __main__:compute_delayed:231 - 474: routelines exported to GCS
+2022-12-15 08:50:58.146 | INFO     | __main__:compute_delayed:235 - 474: trips exported to GCS
+2022-12-15 08:50:58.515 | INFO     | __main__:compute_delayed:242 - 474: stops exported to GCS
+2022-12-15 08:51:03.826 | INFO     | __main__:get_stop_times:178 - 474: st exported to GCS
+2022-12-15 08:51:03.829 | INFO     | __main__:<module>:308 - download files for 474: 0:00:16.383194
+2022-12-15 08:51:03.829 | INFO     | __main__:<module>:289 - *********** Download data for: 481 ***********
+2022-12-15 08:51:05.973 | INFO     | __main__:primary_trip_query:55 - 481: trips saved in temp GCS
+2022-12-15 08:51:11.174 | INFO     | __main__:compute_delayed:231 - 481: routelines exported to GCS
+2022-12-15 08:51:11.471 | INFO     | __main__:compute_delayed:235 - 481: trips exported to GCS
+2022-12-15 08:51:11.847 | INFO     | __main__:compute_delayed:242 - 481: stops exported to GCS
+2022-12-15 08:51:14.497 | INFO     | __main__:get_stop_times:178 - 481: st exported to GCS
+2022-12-15 08:51:14.499 | INFO     | __main__:<module>:308 - download files for 481: 0:00:10.669643
+2022-12-15 08:51:14.500 | INFO     | __main__:<module>:289 - *********** Download data for: 482 ***********
+2022-12-15 08:51:17.280 | INFO     | __main__:primary_trip_query:55 - 482: trips saved in temp GCS
+2022-12-15 08:51:24.075 | INFO     | __main__:compute_delayed:231 - 482: routelines exported to GCS
+2022-12-15 08:51:24.423 | INFO     | __main__:compute_delayed:235 - 482: trips exported to GCS
+2022-12-15 08:51:24.793 | INFO     | __main__:compute_delayed:242 - 482: stops exported to GCS
+2022-12-15 08:51:27.906 | INFO     | __main__:get_stop_times:178 - 482: st exported to GCS
+2022-12-15 08:51:27.907 | INFO     | __main__:<module>:308 - download files for 482: 0:00:13.407420
+2022-12-15 08:51:27.908 | INFO     | __main__:<module>:289 - *********** Download data for: 483 ***********
+2022-12-15 08:51:30.405 | INFO     | __main__:primary_trip_query:55 - 483: trips saved in temp GCS
+2022-12-15 08:51:36.678 | INFO     | __main__:compute_delayed:231 - 483: routelines exported to GCS
+2022-12-15 08:51:37.050 | INFO     | __main__:compute_delayed:235 - 483: trips exported to GCS
+2022-12-15 08:51:37.410 | INFO     | __main__:compute_delayed:242 - 483: stops exported to GCS
+2022-12-15 08:51:41.831 | INFO     | __main__:get_stop_times:178 - 483: st exported to GCS
+2022-12-15 08:51:41.833 | INFO     | __main__:<module>:308 - download files for 483: 0:00:13.925925
+2022-12-15 08:51:41.834 | INFO     | __main__:<module>:289 - *********** Download data for: 484 ***********
+2022-12-15 08:51:44.737 | INFO     | __main__:primary_trip_query:55 - 484: trips saved in temp GCS
+2022-12-15 08:51:53.159 | INFO     | __main__:compute_delayed:231 - 484: routelines exported to GCS
+2022-12-15 08:51:53.543 | INFO     | __main__:compute_delayed:235 - 484: trips exported to GCS
+2022-12-15 08:51:53.911 | INFO     | __main__:compute_delayed:242 - 484: stops exported to GCS
+2022-12-15 08:52:00.184 | INFO     | __main__:get_stop_times:178 - 484: st exported to GCS
+2022-12-15 08:52:00.191 | INFO     | __main__:<module>:308 - download files for 484: 0:00:18.356694
+2022-12-15 08:52:00.192 | INFO     | __main__:<module>:289 - *********** Download data for: 485 ***********
+2022-12-15 08:52:02.381 | INFO     | __main__:primary_trip_query:55 - 485: trips saved in temp GCS
+2022-12-15 08:52:07.824 | INFO     | __main__:compute_delayed:231 - 485: routelines exported to GCS
+2022-12-15 08:52:08.195 | INFO     | __main__:compute_delayed:235 - 485: trips exported to GCS
+2022-12-15 08:52:08.472 | INFO     | __main__:compute_delayed:242 - 485: stops exported to GCS
+2022-12-15 08:52:11.588 | INFO     | __main__:get_stop_times:178 - 485: st exported to GCS
+2022-12-15 08:52:11.590 | INFO     | __main__:<module>:308 - download files for 485: 0:00:11.398185
+2022-12-15 08:52:11.592 | INFO     | __main__:<module>:289 - *********** Download data for: 486 ***********
+2022-12-15 08:52:13.914 | INFO     | __main__:primary_trip_query:55 - 486: trips saved in temp GCS
+2022-12-15 08:52:20.457 | INFO     | __main__:compute_delayed:231 - 486: routelines exported to GCS
+2022-12-15 08:52:20.982 | INFO     | __main__:compute_delayed:235 - 486: trips exported to GCS
+2022-12-15 08:52:21.408 | INFO     | __main__:compute_delayed:242 - 486: stops exported to GCS
+2022-12-15 08:52:24.327 | INFO     | __main__:get_stop_times:178 - 486: st exported to GCS
+2022-12-15 08:52:24.328 | INFO     | __main__:<module>:308 - download files for 486: 0:00:12.736194
+2022-12-15 08:52:24.329 | INFO     | __main__:<module>:289 - *********** Download data for: 487 ***********
+2022-12-15 08:52:27.227 | INFO     | __main__:primary_trip_query:55 - 487: trips saved in temp GCS
+2022-12-15 08:52:35.209 | INFO     | __main__:compute_delayed:231 - 487: routelines exported to GCS
+2022-12-15 08:52:35.575 | INFO     | __main__:compute_delayed:235 - 487: trips exported to GCS
+2022-12-15 08:52:35.952 | INFO     | __main__:compute_delayed:242 - 487: stops exported to GCS
+2022-12-15 08:52:38.917 | INFO     | __main__:get_stop_times:178 - 487: st exported to GCS
+2022-12-15 08:52:38.918 | INFO     | __main__:<module>:308 - download files for 487: 0:00:14.589743
+2022-12-15 08:52:49.484 | INFO     | __main__:<module>:316 - execution time: 0:59:38.771280
