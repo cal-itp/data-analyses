@@ -7,9 +7,12 @@ import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
+from datetime import datetime
+
 import prep_data
-from shared_utils import geography_utils, portfolio_utils
+from shared_utils import utils, geography_utils, portfolio_utils
 from bus_service_utils import gtfs_build
+
 
 # List of cols to drop from trips table
 # Didn't remove after switching to gtfs_utils, but these 
@@ -17,10 +20,11 @@ from bus_service_utils import gtfs_build
 remove_trip_cols = ["service_date", "calitp_extracted_at", "calitp_deleted_at"]
 
 
-def merge_trips_to_routes(trips: dd.DataFrame, 
-                          routes: dg.GeoDataFrame, 
-                          group_cols: list = ["calitp_itp_id", "shape_id"]
-                         ) -> dg.GeoDataFrame:
+def merge_trips_to_routes(
+    trips: dd.DataFrame, 
+    routes: dg.GeoDataFrame, 
+    group_cols: list = ["calitp_itp_id", "shape_id"]
+) -> dg.GeoDataFrame:
     # Routes or trips can contain multiple calitp_url_numbers 
     # for same calitp_itp_id-shape_id. Drop these now
     # dask can only sort by 1 column!
@@ -140,3 +144,43 @@ def create_routes_file_for_export(analysis_date: str,
                 )
     
     return routes_with_names
+
+
+if __name__ == "__main__":
+    time0 = datetime.now()
+    
+    # Make an operator level file (this is published)
+    operator_level_cols = ["calitp_itp_id", "shape_id"]
+    
+    routes = create_routes_file_for_export(
+        prep_data.ANALYSIS_DATE, operator_level_cols)  
+    
+    utils.geoparquet_gcs_export(
+        routes, 
+        prep_data.TRAFFIC_OPS_GCS, 
+        "ca_transit_routes"
+    )
+    
+    prep_data.export_to_subfolder(
+        "ca_transit_routes", prep_data.ANALYSIS_DATE)
+
+    
+    # Make a feed level file (not published externally, 
+    # publish to GCS for internal use)
+    feed_level_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
+    
+    feed_routes = create_routes_file_for_export(
+        prep_data.ANALYSIS_DATE, feed_level_cols
+    )
+    
+    utils.geoparquet_gcs_export(
+        feed_routes, 
+        prep_data.TRAFFIC_OPS_GCS, 
+        "ca_transit_routes_feed"
+    )
+    
+    prep_data.export_to_subfolder(
+        "ca_transit_routes_feed", prep_data.ANALYSIS_DATE)
+    
+    time1 = datetime.now()
+    print(f"Execution time for routes script: {time1-time0}")

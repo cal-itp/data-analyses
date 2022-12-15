@@ -7509,3 +7509,7 @@
 2022-11-18 12:28:16.350 | INFO     | __main__:<module>:121 - get list of cached ITP IDs: 0:00:37.040566
 2022-11-18 12:30:06.032 | INFO     | __main__:<module>:131 - check files for completeness, save as json: 0:01:49.681938
 2022-11-18 12:30:06.033 | INFO     | __main__:<module>:134 - execution time: 0:02:26.722986
+2022-12-15 08:53:13.292 | INFO     | __main__:<module>:114 - Analysis date: 2022-12-14
+2022-12-15 08:53:48.974 | INFO     | __main__:<module>:121 - get list of cached ITP IDs: 0:00:35.636268
+2022-12-15 08:55:49.160 | INFO     | __main__:<module>:131 - check files for completeness, save as json: 0:02:00.185547
+2022-12-15 08:55:49.161 | INFO     | __main__:<module>:134 - execution time: 0:02:35.822443

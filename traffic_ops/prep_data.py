@@ -13,23 +13,123 @@ import geopandas as gpd
 import pandas as pd
 
 from siuba import *
+from typing import Union
 
 from shared_utils import geography_utils, gtfs_utils, utils, rt_dates
 
-ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["nov2022"])
+ANALYSIS_DATE = gtfs_utils.format_date(rt_dates.DATES["dec2022"])
 
 GCS = "gs://calitp-analytics-data/data-analyses/"
 TRAFFIC_OPS_GCS = f"{GCS}traffic_ops/"
 COMPILED_CACHED_GCS = f"{GCS}rt_delay/compiled_cached_views/"
 DATA_PATH = "./data/"
+    
 
-def grab_amtrak(selected_date: datetime.date | str
-               ) -> tuple[gpd.GeoDataFrame, pd.DataFrame, gpd.GeoDataFrame]:
+def concatenate_amtrak(
+    selected_date: Union[str, datetime.date], 
+    export_path: str = COMPILED_CACHED_GCS):
+    """
+    Grab the cached file on selected date for trips, stops, routelines.
+    Concatenate Amtrak.
+    Save a new cached file in GCS.
+    """
+    date_str = gtfs_utils.format_date(selected_date)
+    
+    amtrak_trips = dd.read_parquet("amtrak_trips.parquet")
+    amtrak_routelines = dg.read_parquet("amtrak_routelines.parquet")
+    amtrak_stops = dg.read_parquet("amtrak_stops.parquet")
+    amtrak_st = dd.read_parquet("amtrak_st.parquet")
+    
+    
+    trips = dd.read_parquet(f"{export_path}trips_{date_str}.parquet")
+    trips_all = (dd.multi.concat([trips, amtrak_trips], axis=0)
+                 .astype({"trip_key": int})
+                 .drop_duplicates()
+                 .reset_index()
+                )
+    trips_all.compute().to_parquet(f"{export_path}trips_{date_str}_all.parquet")
+    
+    stops = dg.read_parquet(f"{export_path}stops_{date_str}.parquet")
+    stops_all = (dd.multi.concat([
+                stops.to_crs(geography_utils.WGS84), 
+                amtrak_stops.to_crs(geography_utils.WGS84)], axis=0)
+            .astype({"stop_key": "Int64"})
+            .drop_duplicates()
+            .reset_index()
+    ).compute()
+    utils.geoparquet_gcs_export(
+        stops_all, 
+        export_path, 
+        f"stops_{date_str}_all"
+    )
+        
+    routelines = dg.read_parquet(f"{export_path}routelines_{date_str}.parquet")        
+    routelines_all = (dd.multi.concat([
+                        routelines.to_crs(geography_utils.WGS84), 
+                        amtrak_routelines.to_crs(geography_utils.WGS84)], axis=0)
+                      .drop_duplicates()
+                      .reset_index()
+                ).compute()
+    utils.geoparquet_gcs_export(
+        routelines_all, 
+        export_path, 
+        f"routelines_{date_str}_all"
+    )
+    
+    st = dd.read_parquet(f"{export_path}st_{date_str}.parquet")
+    st_all = (dd.multi.concat([
+                st, amtrak_st], axis=0)
+              .astype({"stop_time_key": "Int64", 
+                       "trip_key": "Int64"})
+              .drop_duplicates()
+              .reset_index()
+    )
+    st_all.compute().to_parquet(f"{export_path}st_{date_str}_all.parquet")
+
+    
+def remove_local_parquets():
+    # Remove Amtrak now that full dataset made
+    for dataset in ["trips", "routelines", "stops", "st"]:
+        os.remove(f"amtrak_{dataset}.parquet")
+
+
+def export_to_subfolder(file_name: str, analysis_date: str):
+    """
+    We always overwrite the same geoparquets each month, and point our
+    shared_utils/shared_data_catalog.yml to the latest file.
+    
+    But, save historical exports just in case.
+    """
+    file_name_sanitized = file_name.replace('.parquet', '')
+    
+    gdf = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}{file_name_sanitized}.parquet")
+        
+    utils.geoparquet_gcs_export(
+        gdf, 
+        f"{TRAFFIC_OPS_GCS}export/", 
+        f"{file_name_sanitized}_{analysis_date}"
+    )
+        
+        
+#----------------------------------------------------#        
+# Functions are used in 
+# `create_routes_data.py` and `create_stops_data.py`
+#----------------------------------------------------#
+# Define column names, must fit ESRI 10 character limits
+RENAME_COLS = {
+    "calitp_itp_id": "itp_id",
+    "calitp_agency_name": "agency",
+    "route_name_used": "route_name",
+}
+
+
+if __name__ == "__main__":
     """
     Amtrak (ITP_ID 13) is always excluded from queries for hqta and rt_delay
     
     Add back in now for our open data portal dataset
     """
+    
     itp_id = 13
     
     keep_stop_cols = [
@@ -100,79 +200,8 @@ def grab_amtrak(selected_date: datetime.date | str
     )
     
     amtrak_st.to_parquet("amtrak_st.parquet")
-
-
-def concatenate_amtrak(
-    selected_date: datetime.date | str = "2022-05-04", 
-    export_path: str = COMPILED_CACHED_GCS):
-    """
-    Grab the cached file on selected date for trips, stops, routelines.
-    Concatenate Amtrak.
-    Save a new cached file in GCS.
-    """
-    date_str = gtfs_utils.format_date(selected_date)
     
-    amtrak_trips = dd.read_parquet("amtrak_trips.parquet")
-    amtrak_routelines = dg.read_parquet("amtrak_routelines.parquet")
-    amtrak_stops = dg.read_parquet("amtrak_stops.parquet")
-    amtrak_st = dd.read_parquet("amtrak_st.parquet")
+    # Concatenate Amtrak
+    concatenate_amtrak(ANALYSIS_DATE, COMPILED_CACHED_GCS)
     
-    
-    trips = dd.read_parquet(f"{export_path}trips_{date_str}.parquet")
-    trips_all = (dd.multi.concat([trips, amtrak_trips], axis=0)
-                 .astype({"trip_key": int})
-                 .drop_duplicates()
-                 .reset_index()
-                )
-    trips_all.compute().to_parquet(f"{export_path}trips_{date_str}_all.parquet")
-    
-    stops = dg.read_parquet(f"{export_path}stops_{date_str}.parquet")
-    stops_all = (dd.multi.concat([
-                stops.to_crs(geography_utils.WGS84), 
-                amtrak_stops.to_crs(geography_utils.WGS84)], axis=0)
-            .astype({"stop_key": "Int64"})
-            .drop_duplicates()
-            .reset_index()
-    ).compute()
-    utils.geoparquet_gcs_export(stops_all, export_path, f"stops_{date_str}_all")
-        
-    routelines = dg.read_parquet(f"{export_path}routelines_{date_str}.parquet")        
-    routelines_all = (dd.multi.concat([
-                        routelines.to_crs(geography_utils.WGS84), 
-                        amtrak_routelines.to_crs(geography_utils.WGS84)], axis=0)
-                      .drop_duplicates()
-                      .reset_index()
-                ).compute()
-    utils.geoparquet_gcs_export(routelines_all, 
-                                export_path, f"routelines_{date_str}_all")
-    
-    st = dd.read_parquet(f"{export_path}st_{date_str}.parquet")
-    st_all = (dd.multi.concat([
-                st, amtrak_st], axis=0)
-              .astype({"stop_time_key": "Int64", 
-                       "trip_key": "Int64"})
-              .drop_duplicates()
-              .reset_index()
-    )
-    st_all.compute().to_parquet(f"{export_path}st_{date_str}_all.parquet")
-    
-    # Remove Amtrak now that full dataset made
-    for dataset in ["trips", "routelines", "stops", "st"]:
-        os.remove(f"amtrak_{dataset}.parquet")
-
-
-def create_local_parquets(selected_date):
-    grab_amtrak(selected_date)
-    concatenate_amtrak(selected_date, COMPILED_CACHED_GCS)
-
-        
-#----------------------------------------------------#        
-# Functions are used in 
-# `create_routes_data.py` and `create_stops_data.py`
-#----------------------------------------------------#
-# Define column names, must fit ESRI 10 character limits
-RENAME_COLS = {
-    "calitp_itp_id": "itp_id",
-    "calitp_agency_name": "agency",
-    "route_name_used": "route_name",
-}
+    remove_local_parquets()
