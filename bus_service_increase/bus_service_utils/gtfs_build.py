@@ -8,13 +8,13 @@ import geopandas as gpd
 import pandas as pd
 
 from calitp.sql import to_snakecase
-from typing import Literal
+from typing import Literal, Union
 
 from shared_utils import geography_utils
 
 def merge_routes_trips(
-    routelines: gpd.GeoDataFrame | dg.GeoDataFrame, 
-    trips: pd.DataFrame | dd.DataFrame,
+    routelines: Union[gpd.GeoDataFrame, dg.GeoDataFrame], 
+    trips: Union[pd.DataFrame, dd.DataFrame],
     merge_cols: list = ["calitp_itp_id", "calitp_url_number", "shape_id"],
     crs: str = geography_utils.WGS84,
     join: Literal["left", "inner", "outer", "right", "cross"] = "left",
@@ -77,8 +77,8 @@ def aggregate_stat_by_group(
                       .reset_index()
                      )
         
-        # return pd.DataFrame for now, since it's not clear what the metadata should be
-        # if we are inputting different things in stats_col
+        # return pd.DataFrame for now, since it's not clear what the 
+        # metadata should be if we are inputting different things in stats_col
         return agg_df.compute()
     
     final = pd.DataFrame()

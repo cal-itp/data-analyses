@@ -79,7 +79,7 @@ def get_routelines(itp_id: int, analysis_date: str,
     
     
 def get_trips(itp_id: int, analysis_date: str, 
-              additional_filters: dict) -> Delayed:
+              additional_filters: dict = None) -> Delayed:
     """
     Download the trips that ran on selected day.
     """
@@ -126,7 +126,7 @@ def get_trips(itp_id: int, analysis_date: str,
     
     
 def get_stops(itp_id: int, analysis_date: str, 
-              additional_filters: dict) -> Delayed:
+              additional_filters: dict = None) -> Delayed:
     """
     Download stops for the trips that ran on selected date.
     """        
@@ -211,6 +211,7 @@ def compute_delayed(itp_id: int, analysis_date: str,
                     stops_df: Delayed):
     """
     Unpack the result from the dask delayed function. 
+    Unpack routelines, trips, and stops first.
     The delayed object is a tuple, and since we just have 1 object, use 
     [0] to grab it.
     
@@ -242,6 +243,24 @@ def compute_delayed(itp_id: int, analysis_date: str,
         )    
         logger.info(f"{itp_id}: stops exported to GCS")
 
+        
+def compute_delayed_stop_times(
+    itp_id: int, 
+    analysis_date: str, 
+    stop_times_df: Delayed, 
+):
+    """
+    Unpack the stop_times table from the dask delayed function. 
+    """
+    stop_times = compute(stop_times_df)[0]
+    
+    if not stop_times.empty:
+
+        stop_times.to_parquet(
+            f"{CACHED_VIEWS_EXPORT_PATH}st_{itp_id}_{analysis_date}.parquet")
+        logger.info(f"{itp_id}: st exported to GCS")
+        
+        
         
 def remove_temp_trip_files(gcs_folder: str = TEMP_GCS):
     """
@@ -288,7 +307,10 @@ if __name__=="__main__":
     IDS_TO_RUN = list(set(ALL_IDS).difference(set(CACHED_IDS)))
     
     logger.info(f"# operators to run: {len(IDS_TO_RUN)}")
-        
+    
+    # Store a list where operators have 3 complete files - need stop_times later
+    IDS_NEED_STOP_TIMES = []
+    
     for itp_id in sorted(IDS_TO_RUN):
         time0 = dt.datetime.now()
         
@@ -304,15 +326,23 @@ if __name__=="__main__":
         
         # Turn the delayed dask objects into df or gdf and export to GCS
         compute_delayed(itp_id, analysis_date, routelines, trips, stops)
-
-        # Check that routes, trips, stops were downloaded successfully
-        # If all 3 are present, then download stop_times. Otherwise, skip stop_times.
+        
         if check_route_trips_stops_are_cached(itp_id, analysis_date):
-            get_stop_times(itp_id, analysis_date)
-
+            IDS_NEED_STOP_TIMES.append(itp_id)
+        
         time1 = dt.datetime.now()
         logger.info(f"download files for {itp_id}: {time1-time0}")
+    
+    
+    # Check that routes, trips, stops were downloaded successfully
+    # If all 3 are present, then download stop_times. Otherwise, skip stop_times.
+    for itp_id in IDS_NEED_STOP_TIMES:
+        stop_times = delayed(get_stop_times)(itp_id, analysis_date)
+        
+        # Turn the delayed dask objects into df or gdf and export to GCS
+        compute_delayed_stop_times(itp_id, analysis_date, stop_times)
 
+        
     # Delete temp trip files
     # TODO: in v2, if entirety of table is stored in dbt, we won't have to cache
     # and pull from caches across other tables

@@ -25,6 +25,10 @@ def feature_class_in_gdb_path(my_gdb, file_name):
     return os.path.join(my_gdb, file_name)
 
 
+# Clean up last run (if applicable)
+for f in in_features:
+    os.remove(f"{f}.xml")
+
 ## (1) Convert shapefile layer to gdb feature class
 for f in in_features:
     # construct the filename, which is takes form of routes_assembled/routes_assembled.shp
