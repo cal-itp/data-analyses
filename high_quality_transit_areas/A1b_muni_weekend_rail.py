@@ -14,7 +14,7 @@ downloaded unless trips, routelines, and stops is present.
 import pandas as pd
 import pendulum
 
-from shared_utils import gtfs_utils, geography_utils, rt_utils
+from shared_utils import utils, gtfs_utils, geography_utils, rt_utils
 from update_vars import analysis_date, TEMP_GCS
 
 date_str = analysis_date.strftime(rt_utils.FULL_DATE_FMT)
@@ -95,6 +95,9 @@ def download_muni_stops(
         additional_filters = {"route_type": ['0', '1', '2']}
     )
     
+    muni_weekend_rail_trips.to_parquet(
+        f"{TEMP_GCS}muni_weekend_rail_trips.parquet")
+    
     muni_stop_times = gtfs_utils.get_stop_times(
         selected_date = analysis_date,
         itp_id_list = [itp_id],
@@ -104,7 +107,7 @@ def download_muni_stops(
         trip_df = muni_weekend_rail_trips
     )
     
-    unique_muni_weekend_rail_stops = muni_stop_times.stop_key.unique().tolist()
+    unique_muni_weekend_rail_stops = muni_stop_times.stop_id.unique().tolist()
     
     keep_stop_cols = [
         "calitp_itp_id", "stop_id", 
@@ -118,12 +121,15 @@ def download_muni_stops(
         stop_cols = keep_stop_cols,
         get_df = True,
         crs = geography_utils.CA_NAD83Albers,
-        custom_filtering = {"stop_key": unique_muni_weekend_rail_stops}
-        )# should be ok to drop duplicates, but must use stop_id for future joins...
-        .drop_duplicates(subset=["calitp_itp_id", "stop_id"])
+        custom_filtering = {"stop_id": unique_muni_weekend_rail_stops}
+        ).drop_duplicates(subset=["calitp_itp_id", "stop_id"])
         .reset_index(drop=True)
     )
-
-    muni_stops.to_parquet(f"{TEMP_GCS}muni_rail_stops.parquet")
-
+    
+    utils.geoparquet_gcs_export(
+        muni_stops, 
+        TEMP_GCS,
+        "muni_rail_stops"
+    )
+ 
     return muni_stops
