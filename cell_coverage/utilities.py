@@ -234,6 +234,9 @@ def load_unique_routes_df():
     # Standardize route id  
     df["route_id"] = df["route_id"].str.lower().str.strip()
     
+    # B/c route names and route ids can be the same across different agencies,
+    # Add these 3 different columns so the route will have a unique identifier.
+    df['long_route_name'] = (df['route_name'] + ' ' + df['route_id'] + ' '  + ' ' + df['agency'])
     return df
 
 
