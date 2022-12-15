@@ -22,7 +22,7 @@ import pandas as pd
 
 from calitp.tables import tbls
 from siuba import *
-from typing import Literal
+from typing import Literal, Union
 
 from shared_utils import geography_utils
 from bus_service_utils import calenviroscreen_lehd_utils
@@ -145,8 +145,8 @@ def get_sorted_transit_routes(
 
 
 def add_district_description(
-    df: pd.DataFrame | gpd.GeoDataFrame
-) -> pd.DataFrame | gpd.GeoDataFrame: 
+    df: Union[pd.DataFrame, gpd.GeoDataFrame]
+) -> Union[pd.DataFrame, gpd.GeoDataFrame]: 
     """
     Add in caltrans_district column.
     Go from numeric district column (District = 1, 2, 3) to
@@ -237,7 +237,7 @@ def get_quartiles_by_district(
     """
 
     def subset_by_district(gdf: gpd.GeoDataFrame, 
-                           district: str | int, 
+                           district: Union[str, int], 
                            stat_col: str) -> gpd.GeoDataFrame:
         # extra filtering to only keep if trips > 0
         gdf2 = gdf[(gdf[district_col] == district) & 
