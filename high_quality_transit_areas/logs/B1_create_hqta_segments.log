@@ -98,3 +98,8 @@
 2022-12-12 11:49:47.975 | INFO     | __main__:<module>:360 - cut segments: 0:05:35.394745
 2022-12-12 11:49:58.707 | INFO     | __main__:<module>:373 - dissolve: 0:00:10.732026
 2022-12-12 11:49:58.708 | INFO     | __main__:<module>:374 - total execution time: 0:05:47.743050
+2022-12-15 10:15:00.670 | INFO     | __main__:<module>:326 - Analysis date: 2022-12-14
+2022-12-15 10:15:02.281 | INFO     | __main__:<module>:343 - merge routes to trips: 0:00:01.608873
+2022-12-15 10:21:58.098 | INFO     | __main__:<module>:360 - cut segments: 0:06:55.817672
+2022-12-15 10:22:09.002 | INFO     | __main__:<module>:373 - dissolve: 0:00:10.903203
+2022-12-15 10:22:09.002 | INFO     | __main__:<module>:374 - total execution time: 0:07:08.329748

@@ -175,7 +175,7 @@ def select_shapes_and_segment(
     it's ready to cut into segments.
     
     For routes where 2 shape_ids were chosen...1 in each direction, 
-    find thedifference.
+    find the difference.
     
     Concatenate these 2 portions and then cut HQTA segments.
     Returns the hqta_segments for all the routes across all operators.

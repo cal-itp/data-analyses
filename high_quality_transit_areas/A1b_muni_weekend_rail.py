@@ -59,6 +59,8 @@ def download_muni_weekend_rail_trips(
         custom_filtering = additional_filters
     )
     
+    routes.to_parquet(f"{TEMP_GCS}muni_weekend_rail_route_info.parquet")
+    
     # Just grab the route_ids in the trip table
     subset_routes = routes.route_id.unique().tolist()
     
@@ -107,6 +109,8 @@ def download_muni_stops(
         trip_df = muni_weekend_rail_trips
     )
     
+    muni_stop_times.to_parquet(f"{TEMP_GCS}muni_weekend_rail_stop_times.parquet")
+    
     unique_muni_weekend_rail_stops = muni_stop_times.stop_id.unique().tolist()
     
     keep_stop_cols = [
@@ -129,7 +133,7 @@ def download_muni_stops(
     utils.geoparquet_gcs_export(
         muni_stops, 
         TEMP_GCS,
-        "muni_rail_stops"
+        "muni_weekend_rail_stops"
     )
  
     return muni_stops

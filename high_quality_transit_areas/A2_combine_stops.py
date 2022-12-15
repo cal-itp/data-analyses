@@ -69,7 +69,7 @@ if __name__ == "__main__":
     
     # Handle Muni separately - temp, can remove in 2023
     muni_weekend_rail.download_muni_stops(282)
-    muni_rail_stops = gpd.read_parquet(f"{TEMP_GCS}muni_rail_stops.parquet")
+    muni_rail_stops = gpd.read_parquet(f"{TEMP_GCS}muni_weekend_rail_stops.parquet")
     new_muni_rail_stops = muni_rail_stops[
         muni_rail_stops.stop_id.isin(new_muni_stops)].reset_index(drop=True)
     

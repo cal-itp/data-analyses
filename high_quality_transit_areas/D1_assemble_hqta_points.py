@@ -24,7 +24,7 @@ from loguru import logger
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
 from shared_utils import utils, geography_utils, portfolio_utils
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+from update_vars import analysis_date, TEMP_GCS, COMPILED_CACHED_VIEWS
 
 #fs = get_fs()
 
@@ -35,7 +35,27 @@ EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 MAJOR_STOP_BUS_FILE = utilities.catalog_filepath("major_stop_bus")
 STOPS_IN_CORRIDOR_FILE = utilities.catalog_filepath("stops_in_hq_corr")
     
+def merge_muni_trips_route_info():
+    """
+    Temporarily attach Muni with its route_info back in.
+    Remove in Jan 2023.
+    """
+    muni_trips = pd.read_parquet(
+        f"{TEMP_GCS}muni_weekend_rail_trips.parquet")
+    muni_route_info = pd.read_parquet(
+        f"{TEMP_GCS}muni_weekend_rail_route_info.parquet")
+    
+    trips_with_route_info = pd.merge(
+        muni_trips, 
+        muni_route_info.drop_duplicates(subset="route_id"),
+        on = ["calitp_itp_id", "route_id"],
+        how = "inner",
+        validate = "m:1"
+    )
+    
+    return trips_with_route_info
 
+    
 def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """
     Use calitp_itp_id-stop_id to add route_id back in, 
@@ -43,8 +63,14 @@ def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """    
     stop_times = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+    muni_stop_times = dd.read_parquet(
+        f"{TEMP_GCS}muni_weekend_rail_stop_times.parquet")
     trips = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+    muni_trips = merge_muni_trips_route_info()
+
+    stop_times = dd.multi.concat([stop_times, muni_stop_times], axis=0)
+    trips = dd.multi.concat([trips, muni_trips], axis=0)
     
     stop_cols = ["calitp_itp_id", "stop_id"]
     trip_cols = ["calitp_itp_id", "trip_id"]
@@ -73,7 +99,6 @@ def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
     
     return ca_hqta_points
 
-    
     
 def get_agency_names() -> pd.DataFrame:
     names = portfolio_utils.add_agency_name(analysis_date)
