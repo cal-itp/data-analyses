@@ -164,3 +164,12 @@
 2022-12-05 09:43:09.514 | INFO     | __main__:<module>:205 - export as geojson
 2022-12-05 09:43:19.452 | INFO     | __main__:<module>:214 - export as geojsonl
 2022-12-05 09:43:19.452 | INFO     | __main__:<module>:217 - execution time: 0:00:47.035499
+2022-12-15 10:54:48.462 | INFO     | __main__:<module>:174 - Analysis date: 2022-12-14
+2022-12-15 10:54:51.296 | INFO     | __main__:<module>:190 - combined points: 0:00:02.807698
+2022-12-15 10:54:56.852 | INFO     | __main__:<module>:196 - add route info: 0:00:05.555562
+2022-12-15 10:58:38.741 | INFO     | __main__:<module>:203 - add agency names / compute: 0:03:41.889438
+2022-12-15 10:58:39.621 | INFO     | __main__:<module>:213 - export as geoparquet in date folder
+2022-12-15 10:58:40.224 | INFO     | __main__:<module>:222 - export as geoparquet
+2022-12-15 10:59:01.088 | INFO     | __main__:<module>:232 - export as geojson
+2022-12-15 10:59:23.855 | INFO     | __main__:<module>:241 - export as geojsonl
+2022-12-15 10:59:23.858 | INFO     | __main__:<module>:244 - execution time: 0:04:35.369101
