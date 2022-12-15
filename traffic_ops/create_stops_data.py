@@ -10,15 +10,19 @@ import pandas as pd
 from datetime import datetime
 
 import prep_data
-from shared_utils import geography_utils, gtfs_utils, portfolio_utils, rt_utils
+from shared_utils import utils, geography_utils, gtfs_utils, portfolio_utils
 from create_routes_data import add_route_agency_name, remove_trip_cols
 
 
-# Attach all the various route information    
-def attach_route_info_to_stops(stops: dg.GeoDataFrame, 
-                               trips: dg.GeoDataFrame, 
-                               stop_times: dd.DataFrame
-                              ) -> gpd.GeoDataFrame:
+def attach_route_info_to_stops(
+    stops: dg.GeoDataFrame, 
+    trips: dg.GeoDataFrame, 
+    stop_times: dd.DataFrame
+) -> gpd.GeoDataFrame:
+    """
+    Attach all the various route information (route_id, route_type)
+    to the stops file.
+    """
     
     # Keep the route characteristics associated with trip_id
     trips2 = (trips.drop(columns = remove_trip_cols)
@@ -68,11 +72,14 @@ def make_stops_shapefile():
 
     # Read in local parquets
     stops = dg.read_parquet(
-        f"{prep_data.COMPILED_CACHED_GCS}stops_{prep_data.ANALYSIS_DATE}_all.parquet")
+        f"{prep_data.COMPILED_CACHED_GCS}"
+        f"stops_{prep_data.ANALYSIS_DATE}_all.parquet")
     trips = dd.read_parquet(
-        f"{prep_data.COMPILED_CACHED_GCS}trips_{prep_data.ANALYSIS_DATE}_all.parquet")
+        f"{prep_data.COMPILED_CACHED_GCS}"
+        f"trips_{prep_data.ANALYSIS_DATE}_all.parquet")
     stop_times = dd.read_parquet(
-        f"{prep_data.COMPILED_CACHED_GCS}st_{prep_data.ANALYSIS_DATE}_all.parquet")
+        f"{prep_data.COMPILED_CACHED_GCS}"
+        f"st_{prep_data.ANALYSIS_DATE}_all.parquet")
     
     time1 = datetime.now()
     print(f"Get rid of duplicates: {time1-time0}")
@@ -89,3 +96,21 @@ def make_stops_shapefile():
     print(f"Stops script total execution time: {time2-time0}")
     
     return stops_assembled
+
+
+if __name__ == "__main__":
+    time0 = datetime.now()
+    # Make stops file
+    stops = make_stops_shapefile()  
+    
+    utils.geoparquet_gcs_export(
+        stops, 
+        prep_data.TRAFFIC_OPS_GCS, 
+        "ca_transit_stops"
+    )
+    
+    prep_data.export_to_subfolder(
+        "ca_transit_stops", prep_data.ANALYSIS_DATE)
+    
+    time1 = datetime.now()
+    print(f"Execution time for stops script: {time1-time0}")
