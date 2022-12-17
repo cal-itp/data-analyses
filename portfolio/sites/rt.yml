@@ -41,6 +41,8 @@ parts:
           - itp_id: 61
           - itp_id: 301
           - itp_id: 218
+          - itp_id: 314
+          - itp_id: 98
       - caption: District 05 - San Luis Obispo
         params:
           district: 05 - San Luis Obispo
