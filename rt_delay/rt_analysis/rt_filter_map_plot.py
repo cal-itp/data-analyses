@@ -3,6 +3,7 @@ from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.map_utils import make_folium_choropleth_map, make_folium_multiple_layers_map
 from shared_utils.rt_utils import *
 import branca
+import mapclassify
 
 from siuba import *
 
@@ -239,13 +240,13 @@ class RtFilterMapper:
         or 20th percentile speeds.
         
         segments: 'stops' or 'detailed' (detailed not yet implemented)
-        how: 'average' or 'low_speeds' (low_speeds is 20%ile)
+        how: 'average', 'low_speeds' (20%ile), or 'variance'
         colorscale: branca.colormap
         size: [x, y]
         
         '''
         assert segments in ['stops', 'detailed']
-        assert how in ['average', 'low_speeds']
+        assert how in ['average', 'low_speeds', 'variance']
         
         gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.isoformat()}_{self.filter_period}'
         subfolder = 'segment_speed_views/'
@@ -294,7 +295,8 @@ class RtFilterMapper:
                          >> group_by(_.stop_sequence)
                          >> mutate(n_trips_shp = _.stop_sequence.size, # filtered to shape
                                     avg_mph = _.speed_mph.mean(),
-                                  _20p_mph = _.speed_mph.quantile(.2),
+                                    _20p_mph = _.speed_mph.quantile(.2),
+                                    var_mph = _.speed_mph.var()
                                   )
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
@@ -371,7 +373,7 @@ class RtFilterMapper:
             "time_formatted": "Travel time",
             "miles_from_last": "Segment distance (miles)",
             "route_short_name": "Route",
-            "trips_per_hour": "Frequency (trips per hour)"
+            "trips_per_hour": "Frequency (trips per hour)",
         }
         if no_title:
             title = ''
@@ -397,7 +399,22 @@ class RtFilterMapper:
         )
         
         return g  
-
+    
+    def map_variance(self):
+        '''
+        A quick map of relative speed variance across stop segments. Currently symbolized
+        with five quantiles.
+        '''
+        assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
+        gdf = self.detailed_map_view.dropna(subset=['var_mph']) >> arrange(-_.var_mph)
+        bins = list(mapclassify.Quantiles(gdf.var_mph).bins)
+        cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins, vmin = gdf.var_mph.min(),
+                                    vmax = gdf.var_mph.max())
+        cmap.caption = 'Segment Variance (miles per hour squared)'
+        style_dict = {'opacity': 0.8, 'fillOpacity': 0.8}
+        return gdf.explore(column='var_mph', cmap = cmap, tiles = 'CartoDB positron',
+                   style_kwds = style_dict)
+        
     def chart_delays(self, no_title = False):
         '''
         A bar chart showing delays grouped by arrival hour for current filtered selection.
@@ -555,7 +572,7 @@ class RtFilterMapper:
             ).sum_of_medians_minutes.iloc[0]
         
         self.stop_delay_view = self.stop_delay_view >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
-        corridor_trip_speeds = (self._filter(self.stop_delay_view)
+        self.corridor_trip_speeds = (self._filter(self.stop_delay_view)
              >> filter(_.corridor)
              >> group_by(_.trip_id)
              >> mutate(entry_time = _.actual_time.min())
@@ -569,7 +586,7 @@ class RtFilterMapper:
              >> distinct(_.trip_id, _keep_all=True)
             )
         target_speed_mps = 16 / MPH_PER_MPS
-        df = (corridor_trip_speeds
+        df = (self.corridor_trip_speeds
               >> mutate(corridor_speed_mph = _.speed_from_entry * MPH_PER_MPS)
               >> mutate(target_seconds = _.meters_from_entry / target_speed_mps)
               >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
