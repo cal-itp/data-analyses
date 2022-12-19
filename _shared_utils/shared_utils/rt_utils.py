@@ -38,6 +38,7 @@ MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 # Colorscale
 ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
 ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
+VARIANCE_COLORS = branca.colormap.step.Blues_06.colors[1:]  # actual breaks will vary
 
 # Datetime formats
 DATE_WEEKDAY_FMT = "%b %d (%a)"  # Jun 01 (Wed) for 6/1/22
