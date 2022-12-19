@@ -10,6 +10,7 @@ from shared_utils import styleguide
 import re
 from nltk import ngrams
 from nltk.corpus import stopwords
+
 """
 Lists
 """

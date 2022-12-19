@@ -16,12 +16,6 @@ def ppno_slice(df):
     df = df.assign(ppno=df["ppno"].str.upper().str.slice(start=0, stop=5))
     return df
 
-# Some Project IDs numbers are 10+ & contains random characters
-def project_id_slice(df):
-    df["project_id"] = df["project_id"].str.replace("\n", "")
-    df = df.assign(project_id=df["project_id"].str.slice(start=0, stop=10))
-    return df
-
 # Function to clean columns before exporting reports/Tableau source
 def clean_up_columns(df):
     df.columns = (
