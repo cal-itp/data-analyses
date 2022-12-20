@@ -180,6 +180,9 @@ def read_in_joined_data():
     
     df['a1_imp_agcy_city'] = df['a1_imp_agcy_city'].str.title()
     
+    df['a2_county'] = df['a2_county'].str.replace('MPA ','Mariposa')
+
+    
     return df
 
 '''
@@ -531,3 +534,33 @@ def map_districts(df,
                                name=(f"Number of Applications by {(district_type)}"))
     
     return df_map
+
+def map_couty_proj(df):
+    ## rename cols
+    df = df.rename(columns={'imp_agency_name_new':'Implemeting Agency Name',
+                                'a2_county':'County',
+                               'a2_info_proj_name':'Project Name',
+                               'total_atp_$':'Total Funds',
+                               'project_app_id':'Project ID'})
+    
+    #get list of unique counties
+    county_list = list(df['County'].unique())
+
+    #get dropdown menu
+    county_dropdown = alt.binding_select(options=county_list)
+    county_select = alt.selection_single(fields=['County'], bind=county_dropdown, name = 'County Name')
+    
+    #county bar chart 
+    county_charts = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=('Total Funds'),
+            y=('Implemeting Agency Name'),
+            color=alt.Color('Project Name', scale=alt.Scale(range=altair_utils.CALITP_DIVERGING_COLORS), legend = None),
+            tooltip=['Project Name','Total Funds'])
+        .properties(title="Total ATP Funds by Project")
+        .add_selection(county_select)
+        .transform_filter(county_select))
+    
+    return county_charts
