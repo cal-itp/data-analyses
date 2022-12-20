@@ -12,6 +12,7 @@ import geopandas as gpd
 from calitp import to_snakecase
 from dla_utils import _dla_utils
 from shared_utils import geography_utils
+from shared_utils import altair_utils
 
 from IPython.display import HTML, Markdown
 from siuba import *
@@ -373,8 +374,8 @@ def explode_and_join_geo(df,
                          sum_merge_on_col = 'dist')
 
     return final_df
-    
 
+    
 '''
 Report Functions
 '''
@@ -408,3 +409,125 @@ def reorder_namecol(df,
     
     return df
 
+def prep_mapping_data(df):
+    mapsubset_cols= ['awarded','project_app_id', 'project_cycle', 'data_origin', 'geometry',
+               'a1_imp_agcy_city','a1_imp_agcy_name','a1_proj_partner_agcy', 
+               'assembly_district','congressional_district','senate_district',
+              'a2_county', 'a2_ct_dist','a2_info_proj_name','a3_proj_type', 'total_atp_$', 'a2_proj_lat','a2_proj_long']
+    df_map = fix_geom_issues(df, mapsubset_cols)
+    df_map = df_map.drop(columns='index_right')
+    
+    return df_map
+
+def clean_df_shapes(shapes):
+    shapes_clean = to_snakecase(gpd.read_file(f"{shapes}").to_crs(epsg=4326))
+    shapes_clean = shapes_clean >>select(_.district, _.population, _.geometry)
+    
+    return shapes_clean
+
+## function to read in congressional, senate and assembly shape data
+
+def read_in_district_shapes(gdf):
+    #clean df shapes function 
+    assemblyshapes = clean_df_shapes("https://gis.data.ca.gov/datasets/f173bfa16514414ab6130c248fdd9d28_0.geojson")
+    congressionalshapes = clean_df_shapes("https://gis.data.ca.gov/datasets/f173bfa16514414ab6130c248fdd9d28_2.geojson")
+    senateshapes = clean_df_shapes("https://gis.data.ca.gov/datasets/f173bfa16514414ab6130c248fdd9d28_1.geojson")
+    
+    #use function explode_and_join to combine shapes and data
+    assembly_districts = explode_and_join_geo(gdf,
+                                                      assemblyshapes,
+                                                      explode_cols = 'assembly_district',
+                                                      groupby_cols=['project_app_id','project_cycle','data_origin','a1_imp_agcy_city'],
+                                                      count_col= 'project_app_id',
+                                                      geo_df_merge_col = 'district')
+    congressional_districts = explode_and_join_geo(gdf,
+                         congressionalshapes,
+                         explode_cols = 'congressional_district',
+                         groupby_cols=['project_app_id','project_cycle','data_origin','a1_imp_agcy_city'],
+                         count_col= 'project_app_id',
+                         geo_df_merge_col = 'district')
+    senate_districts = explode_and_join_geo(gdf,
+                                                      senateshapes,
+                                                      explode_cols = 'senate_district',
+                                                      groupby_cols=['project_app_id','project_cycle','data_origin','a1_imp_agcy_city'],
+                                                      count_col= 'project_app_id',
+                                                      geo_df_merge_col = 'district')
+    return assembly_districts, congressional_districts, senate_districts
+
+
+## function to get concated df of district levels
+def get_district_level_data(df_ct_district, gdf):
+    '''
+    for district levels: Congressional, Sentate, Assembley and Caltranse
+    function gets shapes of various district levels and puts them into one dataframe. 
+    
+    '''
+    # read in district levels
+    assembly_districts, congressional_districts, senate_districts = read_in_district_shapes(gdf)
+    
+    #clean by_dist dataframe to match other district dfs
+    ct_districts = df_ct_district>>select(_.DISTRICT, _.geometry, _.a2_ct_dist, _.Application, _.Funded, _.Total, _['Success Rate']) 
+    ct_districts = ct_districts.rename(columns={'DISTRICT':'district','a2_ct_dist':'dist'})
+    ct_districts = ct_districts.astype({"district":str,"dist": str, 
+                                    "Application": float, "Funded": float, "Total": float})
+    
+    #add district type col
+    ct_districts['dist_type'] = 'Caltrans District'
+    assembly_districts['dist_type'] = 'Assembly District'
+    senate_districts['dist_type'] = 'Senate District'
+    congressional_districts['dist_type'] = 'Congressional District'
+    
+    districts = pd.concat([assembly_districts,  senate_districts, congressional_districts, ct_districts])
+    
+    districts = districts.rename(columns= {'district':'District',
+                                       'population':'Population',
+                                       'dist':'dist',
+                                       'dist_type':'District Type'})
+    
+    return districts
+
+
+def add_dropdown_map(districts_df):
+    '''
+    this function requires the function ______ to be ran 
+    
+    districts_df needs to be a district level df (Assembly, Senate, Congressional and CT)
+    
+    code help: ### Using Altair: https://altair-viz.github.io/gallery/multiple_interactions.html
+    '''
+
+    #identify options
+    dist_options = ['Assembly District','Congressional District','Senate District','Caltrans District']
+    
+    #bind and add dropdown option
+    dist_dropdown = alt.binding_select(options=dist_options)
+    dist_select = alt.selection_single(fields=['District Type'], bind=dist_dropdown, name = 'District Type')
+    
+    
+    #add base map
+    base1 = (alt.Chart(districts_df).mark_geoshape().encode(
+    color=alt.Color("Total",scale=alt.Scale(range=altair_utils.CALITP_SEQUENTIAL_COLORS)),
+    tooltip=['District Type', 'District', 'Total']))
+    
+    #add in selections
+    filter_by_dist = base1.add_selection(dist_select).transform_filter(dist_select)
+    
+    #return map
+    return filter_by_dist
+
+def map_districts(df, 
+                 district_type= '',
+                 district_type_col: list = [],
+                 mapping_col: list = [],
+                 tool_tip_cols: list = []):
+    
+    df_subset =(df>>filter(_[district_type_col]== district_type))
+    
+    df_map = df_subset.explore(mapping_col,
+                               cmap='Oranges',
+                               legend=True,
+                               legend_kwds=dict(colorbar=True),
+                               tooltip= tool_tip_cols, 
+                               name=(f"Number of Applications by {(district_type)}"))
+    
+    return df_map
