@@ -182,8 +182,7 @@ def split_ggrf_sb1_expenditures(
 # The final dataframe for expenditures:
 # split the data by GGRF and Sb1 so the df can go from long
 # to wide
-
-def aggregate_expenditures():
+def final_expenditures():
     df = prep_expenditures()
 
     # Find and sum up GGRF funds
@@ -248,7 +247,7 @@ def merge_allocation_expenditures():
     
     alloc = final_allocation()
     
-    expenditure = aggregate_expenditures()
+    expenditure = final_expenditures()
     
     m1 = pd.merge(
         alloc.drop(columns=["_merge"]),
@@ -360,6 +359,15 @@ right_col_order = [
     "Allocation Project Status Merge",
 ]
 
+rename_cols = {
+        "Id": "Project ID",
+        "Sb1 Funding": "Sum of Sb1 Funding",
+        "Ggrf Funding": "Sum of GGRF Funding",
+        "101 Tot Exp": "Sum of SB1 (0046, xx101 Expenditure)",
+        "301R Tot Exp": "Sum of GGRF (0046, xx301R expenditure)",
+        "Billed": "Sum Billed",
+        "Reimbursements": "Sum of Reimbursements",
+    }
 # Using m2 produced from merge2_project_status(), create the 
 # entire report plus a summary table by count of projects & 
 # remaining allocations grouped by the "Comments" column.
@@ -370,16 +378,7 @@ def final_accounting_analysis():
     # Clean up columns
     df = A1_data_prep.clean_up_columns(df)
     
-    df = df.rename(
-    columns={
-        "Id": "Project ID",
-        "Sb1 Funding": "Sum of Sb1 Funding",
-        "Ggrf Funding": "Sum of GGRF Funding",
-        "101 Tot Exp": "Sum of SB1 (0046, xx101 Expenditure)",
-        "301R Tot Exp": "Sum of GGRF (0046, xx301R expenditure)",
-        "Billed": "Sum Billed",
-        "Reimbursements": "Sum of Reimbursements",
-    })
+    df = df.rename(columns=rename_cols)
     
     # Create sum columns
     df["Sum of Expenditure"] = df["Sum of SB1 (0046, xx101 Expenditure)"] + df["Sum of GGRF (0046, xx301R expenditure)"]
