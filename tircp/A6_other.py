@@ -10,6 +10,7 @@ from shared_utils import styleguide
 import re
 from nltk import ngrams
 from nltk.corpus import stopwords
+
 """
 Lists
 """
@@ -114,7 +115,7 @@ def summarize_rows(df, col_to_group: str, col_to_summarize: str):
     )
     return df
 
-# Simplify descriptions to make it easier to find metrics 
+
 def prep_descriptions_for_extraction(
     df, description_column: str, new_column: str, unwanted_words: list
 ):
@@ -395,9 +396,9 @@ def zev_summary(
 
     return m1
 
-'''
+"""
 Charts Functions
-'''
+"""
 #Labels for charts 
 def labeling(word):
     # Add specific use cases where it's not just first letter capitalized
