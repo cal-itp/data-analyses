@@ -18,10 +18,12 @@ def clean_project_ids(df, project_id_col: str):
     df[project_id_col] = df[project_id_col].str.slice(start=0, stop=8)
     return df
 
-# Prepare allocation sheet of the TIRCP Tracking 2.0
-def prep_allocation():
-    # Narrow down only relevant columns
-    alloc_subset = [
+"""
+Allocation sheet of the TIRCP Tracking 2.0
+Prepare & Clean
+"""
+# Narrow down only relevant columns
+alloc_subset = [
         "allocation_project_#",
         "allocation_ppno",
         "allocation_components",
@@ -33,6 +35,20 @@ def prep_allocation():
         "allocation_ggrf_funding",
     ]
 
+# Groupby cols
+group_by_cols = [
+        "allocation_project_id",
+        "allocation_ppno",
+        "allocation_ea",
+        "allocation_project_#",
+        "allocation_components",
+        "allocation_award_year",
+        "allocation_phase",
+    ]
+
+   
+def prep_allocation():
+    
     df = A1_data_prep.clean_allocation()[alloc_subset]
 
     # Filter out project IDs that are none and projects starting in 2018
@@ -44,16 +60,6 @@ def prep_allocation():
     df = clean_project_ids(df, "allocation_project_id")
 
     # Group multiple project ID and phase into one row: sum up SB1 and GGRF
-    group_by_cols = [
-        "allocation_project_id",
-        "allocation_ppno",
-        "allocation_ea",
-        "allocation_project_#",
-        "allocation_components",
-        "allocation_award_year",
-        "allocation_phase",
-    ]
-
    
     df = (
         df.groupby(group_by_cols)
@@ -68,12 +74,12 @@ def prep_allocation():
 
     return df
 
-"""
-After prepping allocation sheet, join it with projects tab of TIRCP Tracking 2.0
-to grab the project titles.
-"""
-def final_allocation():
 
+def final_allocation():
+    """
+    After prepping allocation sheet, join it with projects tab of TIRCP Tracking 2.0
+    to grab the project titles.
+    """
     # Prepared allocation sheet
     alloc = prep_allocation()
 
@@ -110,7 +116,10 @@ def final_allocation():
 
     return m1
 
-# Prepare expenditures data from Data Link/AMS
+"""
+Expenditures data from Data Link/AMS
+Prepare & Clean
+"""
 def prep_expenditures():
     # Load in original sheet
     df = pd.read_excel(
@@ -142,12 +151,10 @@ def prep_expenditures():
 
     return df
 
-"""
-Filter out the appr_unit code that corresponds with either SB1/GGRF 
-(end ins 301R or 101) then aggregate the results by project ID and name.
-The same project ID can have mulitple rows, but we only want one row
-for one project ID.
-"""
+# Filter out the appr_unit code that corresponds with either SB1/GGRF 
+# (end ins 301R or 101) then aggregate the results by project ID and name.
+# The same project ID can have mulitple rows, but we only want one row
+# for one project ID.
 def split_ggrf_sb1_expenditures(
     df,
     appr_unit_wanted: str,
@@ -172,11 +179,10 @@ def split_ggrf_sb1_expenditures(
 
     return df
 
-"""
-The final dataframe for expenditures:
-split the data by GGRF and Sb1 so the df can go from long
-to wide
-"""
+# The final dataframe for expenditures:
+# split the data by GGRF and Sb1 so the df can go from long
+# to wide
+
 def aggregate_expenditures():
     df = prep_expenditures()
 
@@ -197,7 +203,8 @@ def aggregate_expenditures():
     return m1
 
 """
-Prepare projects data from Datalink/AMS
+Projects Status Data
+Prepare & Clean
 """
 def prep_project_status():
     df = pd.read_excel(
@@ -234,7 +241,8 @@ def prep_project_status():
     return df
 
 """
-First merge: merging allocation data with expenditures 
+First merge
+merging allocation data with expenditures 
 """
 def merge_allocation_expenditures():
     
@@ -294,6 +302,9 @@ def merge2_project_status():
     
     return m2
 
+"""
+Final Accounting Analysis
+"""
 # Tag projects with the appropriate comment
 def comments(row):
 
@@ -349,11 +360,9 @@ right_col_order = [
     "Allocation Project Status Merge",
 ]
 
-"""
-Using m2 produced from merge2_project_status(), create the 
-entire report plus a summary table by count of projects & 
-remaining allocations grouped by the "Comments" column.
-"""
+# Using m2 produced from merge2_project_status(), create the 
+# entire report plus a summary table by count of projects & 
+# remaining allocations grouped by the "Comments" column.
 def final_accounting_analysis():
     
     df = merge2_project_status()
