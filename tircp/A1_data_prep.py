@@ -151,7 +151,7 @@ def clean_project():
     
     df = load_project()
     
-    # Some grant recipients have multiple spellings of their name. 
+    # Some grant recipients have multiple spellings of their name. Correct this
     df = organization_cleaning(df, "grant_recipient")
     df["grant_recipient"] = df["grant_recipient"].replace(
         crosswalks.grant_recipients_projects
