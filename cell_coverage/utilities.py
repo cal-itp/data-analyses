@@ -18,14 +18,10 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 Federal Communications Commission
 Data Wrangling
 """
-
-"""
-Clip the cell provider coverage map to California only.
-This only worked for AT&T and Verizon. T-Mobile uses a different function.
-"""
+# Clip the cell provider coverage map to California only.
+# This only worked for AT&T and Verizon. T-Mobile uses a different function.
 def create_california_coverage(file_zip_name:str, new_file_name:str):
     
-    # Open zip file first
     PATH = f"{GCS_FILE_PATH}{file_zip_name}"
     with fsspec.open(PATH) as file:
         fcc_gdf = gpd.read_file(file)
@@ -69,7 +65,7 @@ def find_difference_and_clip(
 """
 Breakout provider gdf by counties, find the areas of each county
 that doesn't have coverage, concat everything and dissolve to one row.
-This was used for Verizon.
+This was used for Verizon ONLY.
 """
 def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wanted:list):
     counties = get_counties()
@@ -93,13 +89,13 @@ def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wante
     
     return full_gdf
 
-"""
-Districts/counties are separated out into different gdfs that contain 
-portions of districts/counties. Concat them all together 
-to get the entirety of California.
-"""
+
 def concat_all_areas(all_gdf:list, gcs_file_path: str, file_name:str):
-    
+    """
+    Districts/counties are separated out into different gdfs that contain 
+    portions of districts/counties. Concat them all together 
+    to get the entirety of California.
+    """
     # Empty dataframe
     full_gdf = pd.DataFrame()
     
@@ -203,7 +199,6 @@ def get_districts():
 
 # Open a file with shapes of CA counties
 def get_counties():
-    # California counties.
     ca_gdf = (
         "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
     )
@@ -230,28 +225,51 @@ def correct_kern():
     return kern 
 
 """
-Open Final Provider Files
+Final Provider Files
 """
 def load_att(): 
     att_file =  "ATT_no_coverage_complete_CA.parquet"
     gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{att_file}")
     return gdf
 
-# Open Verizon coverage shapefile that's already clipped to California
 def load_verizon(): 
     gdf = gpd.read_parquet("gs://calitp-analytics-data/data-analyses/cellular_coverage/verizon_all_counties.parquet")
     return gdf
 
-# Open T-Mobile shapefile - NOT clipped to California b/c it took too long. 
-# Includes parts of other states on the West Coast
 def load_tmobile(): 
     tmobile_file =  "tmobile_no_coverage_complete_CA.parquet"
     gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{tmobile_file}")[['geometry']]
     return gdf
 
+# Simplify provider maps
+def simplify_geometry(provider: gpd.GeoDataFrame):
+    # Turn to 229
+    provider = provider.to_crs(geography_utils.CA_StatePlane)
+
+    # Simplify
+    provider["geometry"] = provider.geometry.simplify(tolerance=15)
+
+    provider = provider.to_crs(geography_utils.WGS84)
+
+    # Keep only valid geometries
+    provider = provider[provider.is_valid]
+
+    return provider
+
+# Load in simplified versions of all the providers
+def simplify_geometry_all_providers():
+    verizon = simplify_geometry(load_verizon())
+    att = simplify_geometry(load_att())
+    tmobile = simplify_geometry(load_tmobile())
+    return verizon, att, tmobile
+
 """
 Unique Routes
 """
+
+# traffic_ops/export/ca_transit_routes_[date].parquet
+routes_file =  "gs://calitp-analytics-data/data-analyses/traffic_ops/export/ca_transit_routes_2022-09-14.parquet"
+
 # Find unique routes 
 def unique_routes(gdf) -> gpd.GeoDataFrame:
     gdf = gdf.assign(
@@ -283,8 +301,6 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
     
     return unique_route
 
-# traffic_ops/export/ca_transit_routes_[date].parquet
-routes_file =  "gs://calitp-analytics-data/data-analyses/traffic_ops/export/ca_transit_routes_2022-09-14.parquet"
     
 # Open routes file and find unique routes
 def load_unique_routes_df():
