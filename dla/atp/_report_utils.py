@@ -556,7 +556,7 @@ def map_couty_proj(df):
         .mark_bar()
         .encode(
             x=('Total Funds'),
-            y=('Implemeting Agency Name'),
+            y=('Implemeting Agency Name:N'),
             color=alt.Color('Project Name', scale=alt.Scale(range=altair_utils.CALITP_DIVERGING_COLORS), legend = None),
             tooltip=['Project Name','Total Funds'])
         .properties(title="Total ATP Funds by Project")
