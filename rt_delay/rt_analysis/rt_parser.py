@@ -19,6 +19,7 @@ from tqdm import tqdm
 from calitp.tables import tbls
 import seaborn as sns
 import matplotlib.pyplot as plt
+import folium
 
 import logging
 logging.basicConfig(filename = 'rt.log')
@@ -166,32 +167,28 @@ class VehiclePositionsInterpolator:
                      vmax=gdf.speed_mph.max())
         colorscale.caption = "Speed (miles per hour)"
 
-        popup_dict = {
-            "speed_mph": "Speed (miles per hour)",
-            "shape_meters": "Distance along route (meters)",
-            "shape_id": "Shape ID",
-            "direction_id": "Direction ID",
-            "trip_id": "Trip ID",
-            "time": "Time"
-        }
+        display_cols = ['speed_mph', 'shape_meters', 'shape_id',
+                       'direction_id', 'trip_id', 'time']
+        display_aliases = ['Speed (miles per hour)', 'Distance along route (meters)',
+                           'Shape ID', 'Direction ID', 'Trip ID', 'Time']
+        tooltip_dict = {'aliases': display_aliases}
+        title=f"Trip Speed Map (Route {self.route_short_name}, {self.direction}, {self.time_of_day})"
+        style_dict = {'opacity': 0, 'fillOpacity': 0.8}
 
-        g = make_folium_choropleth_map(
-            gdf,
-            plot_col = 'speed_mph',
-            popup_dict = popup_dict,
-            tooltip_dict = popup_dict,
-            colorscale = colorscale,
-            fig_width = 1000, fig_height = 700,
-            zoom = 13,
-            centroid = [centroid.y, centroid.x],
-            title=f"Trip Speed Map (Route {self.route_short_name}, {self.direction}, {self.time_of_day})",
-            legend_name = "Speed (miles per hour)",
-            highlight_function=lambda x: {
-                'fillColor': '#DD1C77',
-                "fillOpacity": 0.6,
-            }
-        )
-
+        g = gdf.explore(column='speed_mph',
+                        cmap = colorscale,
+                        tiles = 'CartoDB positron',
+                        style_kwds = style_dict,
+                        tooltip = display_cols, popup = display_cols,
+                        tooltip_kwds = tooltip_dict, popup_kwds = tooltip_dict,
+                        highlight_kwds = {'fillColor': '#DD1C77',"fillOpacity": 0.6},
+                        width = 900, height = 550, zoom_start = 13,
+                        location = [centroid.y, centroid.x])
+        
+        title_html = f"""
+         <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
+         """
+        g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
         return g
     
     def export_detailled_map(self, folder_name):
