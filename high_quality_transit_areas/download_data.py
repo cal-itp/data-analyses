@@ -13,24 +13,26 @@ import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
 
 import datetime as dt
+import gcsfs
 import geopandas as gpd
-import glob
 import pandas as pd
 import siuba
 import sys 
 
 from calitp.tables import tbls
+from dask import delayed, compute
+from dask.delayed import Delayed # use this for type hint
 from siuba import *
 from loguru import logger
 
 import operators_for_hqta
 
-from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH
+from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH, TEMP_GCS
 from shared_utils import gtfs_utils, geography_utils, rt_utils, utils
 
-LOCAL_PATH = "./data/"
 
-def primary_trip_query(itp_id: int, analysis_date: str):
+def primary_trip_query(itp_id: int, analysis_date: str, 
+                       additional_filters: dict = None):
     """
     Run a trips query. 
     Save as parquet.
@@ -45,56 +47,46 @@ def primary_trip_query(itp_id: int, analysis_date: str):
         selected_date = analysis_date,
         itp_id_list = [itp_id],
         trip_cols = None,
-        get_df = True
+        get_df = True,
+        custom_filtering = additional_filters
     )
     
-    full_trips.to_parquet(f"{LOCAL_PATH}temp_{filename}")
-    logger.info(f"{itp_id}: {dataset} saved locally")
+    full_trips.to_parquet(f"{TEMP_GCS}temp_{filename}")
+    logger.info(f"{itp_id}: {dataset} saved in temp GCS")
 
 
-def get_routelines(itp_id: int, 
-                   analysis_date: str):
+def get_routelines(itp_id: int, analysis_date: str, 
+                   additional_filters: dict = None) -> Delayed:
     """
     Download the route shapes (line geom) from dim_shapes_geo
     associated with shape_ids / trips that ran on selected day.
-    
-    Write gpd.GeoDataFrame to GCS.
-    """
-    dataset = "routelines"
-    filename = f'{dataset}_{itp_id}_{analysis_date}.parquet'
-    
+    """    
     # Read in the full trips table
     full_trips = pd.read_parquet(
-        f"{LOCAL_PATH}temp_trips_{itp_id}_{analysis_date}.parquet")
+        f"{TEMP_GCS}temp_trips_{itp_id}_{analysis_date}.parquet")
     
     routelines = gtfs_utils.get_route_shapes(
         selected_date = analysis_date,
         itp_id_list = [itp_id],
         get_df = True,
         crs = geography_utils.CA_NAD83Albers,
-        trip_df = full_trips
+        trip_df = full_trips, 
+        custom_filtering = additional_filters
     )[["calitp_itp_id", "calitp_url_number", "shape_id", "geometry"]]
     
-    if not routelines.empty:
-        utils.geoparquet_gcs_export(routelines, 
-                                    CACHED_VIEWS_EXPORT_PATH, 
-                                    filename)
-
-        logger.info(f"{itp_id}: {dataset} exported to GCS")
+    return routelines
     
     
-def get_trips(itp_id: int, analysis_date: str):
+def get_trips(itp_id: int, analysis_date: str, 
+              additional_filters: dict) -> Delayed:
     """
     Download the trips that ran on selected day.
-    TODO: filter for route_types? Or do later?
-    
-    Write pd.DataFrame to GCS.
     """
     dataset = "trips"
     filename = f"{dataset}_{itp_id}_{analysis_date}.parquet"
     
     # Read in the full trips table
-    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_{filename}")
+    full_trips = pd.read_parquet(f"{TEMP_GCS}temp_{filename}")
     
     keep_trip_cols = [
             "calitp_itp_id", "calitp_url_number", 
@@ -119,27 +111,24 @@ def get_trips(itp_id: int, analysis_date: str):
         selected_date = analysis_date,
         itp_id_list = [itp_id],
         route_cols = keep_route_cols,
-        get_df = True
+        get_df = True, 
+        custom_filtering = additional_filters
     )
 
     trips = (trips
              >> inner_join(_, routes, 
                           on = ["calitp_itp_id", "route_id"])
+             >> gtfs_utils.filter_custom_col(additional_filters)
     )
-    if not trips.empty:
-        trips.to_parquet(f"{CACHED_VIEWS_EXPORT_PATH}{filename}")
-        logger.info(f"{itp_id}: {dataset} exported to GCS")
+    
+    return trips
     
     
-def get_stops(itp_id: int, analysis_date: str):
+def get_stops(itp_id: int, analysis_date: str, 
+              additional_filters: dict) -> Delayed:
     """
     Download stops for the trips that ran on selected date.
-    
-    Write gpd.GeoDataFrame in GCS.
-    """
-    dataset = "stops"
-    filename = f"{dataset}_{itp_id}_{analysis_date}.parquet"
-        
+    """        
     keep_stop_cols = [
         "calitp_itp_id", "stop_id", 
         "stop_lat", "stop_lon",
@@ -151,18 +140,18 @@ def get_stops(itp_id: int, analysis_date: str):
             itp_id_list = [itp_id],
             stop_cols = keep_stop_cols,
             get_df = True,
-            crs = geography_utils.CA_NAD83Albers
+            crs = geography_utils.CA_NAD83Albers,
+            custom_filtering = additional_filters
         )# should be ok to drop duplicates, but must use stop_id for future joins...
         .drop_duplicates(subset=["calitp_itp_id", "stop_id"])
         .reset_index(drop=True)
     )
     
-    if not stops.empty:
-        utils.geoparquet_gcs_export(stops, CACHED_VIEWS_EXPORT_PATH, filename)
-        logger.info(f"{itp_id}: {dataset} exported to GCS")
-
+    return stops
+    
         
-def get_stop_times(itp_id: int, analysis_date: str):
+def get_stop_times(itp_id: int, analysis_date: str, 
+                   additional_filters: dict = None):
     """
     Download stop times for the trips that ran on selected date.
         
@@ -171,7 +160,8 @@ def get_stop_times(itp_id: int, analysis_date: str):
     dataset = "st"
     filename = f"{dataset}_{itp_id}_{analysis_date}.parquet"
 
-    full_trips = pd.read_parquet(f"{LOCAL_PATH}temp_trips_{itp_id}_{analysis_date}.parquet")
+    full_trips = pd.read_parquet(
+        f"{TEMP_GCS}temp_trips_{itp_id}_{analysis_date}.parquet")
     
     stop_times = gtfs_utils.get_stop_times(
         selected_date = analysis_date,
@@ -179,7 +169,8 @@ def get_stop_times(itp_id: int, analysis_date: str):
         stop_time_cols = None,
         get_df = True,
         departure_hours = None,
-        trip_df = full_trips
+        trip_df = full_trips,
+        custom_filtering = additional_filters
     )
     
     if not stop_times.empty:
@@ -196,11 +187,14 @@ def check_route_trips_stops_are_cached(itp_id: int, analysis_date: str):
     always missing at least 2.
     """
     response1 = rt_utils.check_cached(
-            f"routelines_{itp_id}_{analysis_date}.parquet", subfolder="cached_views/")
+        f"routelines_{itp_id}_{analysis_date}.parquet", 
+        subfolder="cached_views/")
     response2 = rt_utils.check_cached(
-        f"trips_{itp_id}_{analysis_date}.parquet", subfolder="cached_views/")
+        f"trips_{itp_id}_{analysis_date}.parquet", 
+        subfolder="cached_views/")
     response3 = rt_utils.check_cached(
-        f"stops_{itp_id}_{analysis_date}.parquet", subfolder="cached_views/")    
+        f"stops_{itp_id}_{analysis_date}.parquet", 
+        subfolder="cached_views/")    
     
     all_responses = [response1, response2, response3]
     
@@ -209,7 +203,58 @@ def check_route_trips_stops_are_cached(itp_id: int, analysis_date: str):
     else:
         return False
 
+    
+def compute_delayed(itp_id: int, analysis_date: str, 
+                    routelines_df: Delayed, 
+                    trips_df: Delayed, 
+                    stops_df: Delayed):
+    """
+    Unpack the result from the dask delayed function. 
+    The delayed object is a tuple, and since we just have 1 object, use 
+    [0] to grab it.
+    
+    Export the pd.DataFrame or gpd.GeoDataFrame to GCS.
+    
+    https://stackoverflow.com/questions/44602766/unpacking-result-of-delayed-function
+    """
+    routelines = compute(routelines_df)[0]
+    trips = compute(trips_df)[0]
+    stops = compute(stops_df)[0]    
+    
+    if not ((routelines.empty) and (trips.empty) and (stops.empty)):
         
+        utils.geoparquet_gcs_export(
+            routelines,
+            CACHED_VIEWS_EXPORT_PATH,
+            f"routelines_{itp_id}_{analysis_date}"
+        )
+        logger.info(f"{itp_id}: routelines exported to GCS")
+
+        trips.to_parquet(
+            f"{CACHED_VIEWS_EXPORT_PATH}trips_{itp_id}_{analysis_date}.parquet")
+        logger.info(f"{itp_id}: trips exported to GCS")
+        
+        utils.geoparquet_gcs_export(
+            stops,
+            CACHED_VIEWS_EXPORT_PATH,
+            f"stops_{itp_id}_{analysis_date}"
+        )    
+        logger.info(f"{itp_id}: stops exported to GCS")
+
+        
+def remove_temp_trip_files(gcs_folder: str = TEMP_GCS):
+    """
+    Remove the temporary full trips file saved in GCS.
+    """
+    fs_list = fs.ls(gcs_folder)
+
+    # Remove full trips file
+    temp_trip_files = [i for i in fs_list if 'temp_' in i]
+    
+    for f in temp_trip_files:
+        fs.rm(f)
+
+
 if __name__=="__main__":
 
     logger.add("./logs/download_data.log", retention="6 months")
@@ -219,6 +264,8 @@ if __name__=="__main__":
     
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
+    
+    fs = gcsfs.GCSFileSystem()
     
     ALL_IDS = (tbls.gtfs_schedule.agency()
                >> distinct(_.calitp_itp_id)
@@ -244,24 +291,26 @@ if __name__=="__main__":
         # Stash a trips table locally to use
         primary_trip_query(itp_id, analysis_date)
 
-        # Download routes, trips, stops, stop_times and save in GCS
-        get_routelines(itp_id, analysis_date)
-        get_trips(itp_id, analysis_date)
-        get_stops(itp_id, analysis_date)
+        # Download routes, trips, stops, stop_times and save as delayed objects
+        routelines = delayed(get_routelines)(itp_id, analysis_date)
+        trips = delayed(get_trips)(itp_id, analysis_date)
+        stops = delayed(get_stops)(itp_id, analysis_date)
+        
+        # Turn the delayed dask objects into df or gdf and export to GCS
+        compute_delayed(itp_id, analysis_date, routelines, trips, stops)
 
         # Check that routes, trips, stops were downloaded successfully
         # If all 3 are present, then download stop_times. Otherwise, skip stop_times.
-        if check_route_trips_stops_are_cached(itp_id, analysis_date) is True:
+        if check_route_trips_stops_are_cached(itp_id, analysis_date):
             get_stop_times(itp_id, analysis_date)
-
-        # Remove full trips file
-        trip_file = glob.glob(f"{LOCAL_PATH}temp_trips_{itp_id}_*.parquet")
-        for f in trip_file:
-            os.remove(f)
 
         time1 = dt.datetime.now()
         logger.info(f"download files for {itp_id}: {time1-time0}")
 
-    end = dt.datetime.now()
+    # Delete temp trip files
+    # TODO: in v2, if entirety of table is stored in dbt, we won't have to cache
+    # and pull from caches across other tables
+    remove_temp_trip_files(TEMP_GCS)
     
+    end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

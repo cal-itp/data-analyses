@@ -4,14 +4,7 @@ Crosswalks
 """
 # There are a few different ways the same agency is spelled in our project sheet.
 grant_recipients_projects = {
-    "Bay Area Rapid Transit District": "Bay Area Rapid Transit",
-    "Los Angeles County Metropolitan Transportation Authority": "Los Angeles County Metropolitan Transportation",
-    "Monterey-Salinas Transit District )Mst) And Transportation Agency For Monterey Count":
-    "Monterey-Salinas Transit District and Transportation Agency For Monterey County",
-    "San Joaquin Regional\nRail Commission  San Joaquin Joint Powers Authority":
-    "San Joaquin Regional Rail Commission  San Joaquin Joint Powers Authority",
-    "Southern California Regional Rail Authority":"Southern California  Regional Rail Authority",
-    "San Francisco Municipal  Transportation Agency": "San Francisco Municipal Transportation Authority",
+   "Southern California  Regional Rail Authority": "Southern California Regional Rail Authority"
 }
 
 
@@ -79,10 +72,11 @@ ppno_crosswalk_allocation = {
     "CP301": "CP031",
     "CP042": "CP031",
     "CP002": "CP000",
-    "CP018": "CP005",
+    "CP018": "CP019",
     "CP053": "CP052",
     "CP032": "CP034",
     "1155N": "1155A"
+    "CP002": "CP000"
 
 }
 

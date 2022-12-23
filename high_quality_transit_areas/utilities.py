@@ -9,6 +9,7 @@ import shapely
 from ipyleaflet import (GeoData, LayersControl, Map, 
                         WidgetControl, basemaps)
 from ipywidgets import HTML, Text
+from typing import Union
 from shared_utils import calitp_color_palette, geography_utils
 
 fs = gcsfs.GCSFileSystem()
@@ -70,13 +71,15 @@ def map_hqta(gdf: gpd.GeoDataFrame, mouseover: bool = None, name: str = "gdf"):
 
     if "hq_transit_corr" in gdf.columns:
         geo_data_hq = GeoData(
-            geo_dataframe=(gdf[gdf["hq_transit_corr"]].to_crs(geography_utils.WGS84)),
+            geo_dataframe =(gdf[gdf["hq_transit_corr"]]
+                            .to_crs(geography_utils.WGS84)),
             style={**{"fillColor": BLUE}, **LAYER_STYLE},
             hover_style={**HOVER_STYLE},
             name="HQTA",
         )
         geo_data_not_hq = GeoData(
-            geo_dataframe=(gdf[~gdf["hq_transit_corr"]].to_crs(geography_utils.WGS84)),
+            geo_dataframe =(gdf[~gdf["hq_transit_corr"]]
+                            .to_crs(geography_utils.WGS84)),
             style={**{"fillColor": ORANGE}, **LAYER_STYLE},
             hover_style={**HOVER_STYLE},
             name="non-HQTA",
@@ -121,7 +124,8 @@ def hqta_details(row):
         return row.hqta_type + "_single_operator"
     
     
-def clip_to_ca(gdf: gpd.GeoDataFrame | dg.GeoDataFrame):
+def clip_to_ca(gdf: Union[gpd.GeoDataFrame, dg.GeoDataFrame]
+              ) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
     """
     Clip to CA boundaries. 
     Can take dask gdf or geopandas gdf
