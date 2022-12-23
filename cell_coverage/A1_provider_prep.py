@@ -235,11 +235,11 @@ def load_tmobile():
 
 # Simplify provider maps
 def simplify_geometry(provider: gpd.GeoDataFrame):
-    # Turn to 229
+    # Turn to 2229
     provider = provider.to_crs(geography_utils.CA_StatePlane)
 
     # Simplify
-    provider["geometry"] = provider.geometry.simplify(tolerance=50)
+    provider["geometry"] = provider.geometry.simplify(tolerance=15)
 
     provider = provider.to_crs(geography_utils.WGS84)
 
