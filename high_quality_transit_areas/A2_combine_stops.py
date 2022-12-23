@@ -14,9 +14,10 @@ import sys
 from loguru import logger
 
 import A1_download_rail_ferry_brt_stops as rail_ferry_brt
+import A1b_muni_weekend_rail as muni_weekend_rail
 from shared_utils import utils
 from utilities import GCS_FILE_PATH, clip_to_ca
-from update_vars import analysis_date
+from update_vars import analysis_date, TEMP_GCS
 
 
 metro_street_running = [
@@ -52,14 +53,18 @@ if __name__ == "__main__":
     
     # Rail
     rail_ferry_brt.grab_rail_data(analysis_date)
-    rail_stops = gpd.read_parquet("./data/rail_stops.parquet")
+    rail_stops = gpd.read_parquet(f"{TEMP_GCS}rail_stops.parquet")
+    
+    # Handle Muni separately - temp, can remove in 2023
+    muni_weekend_rail.download_muni_stops(282)
+    muni_rail_stops = gpd.read_parquet(f"{TEMP_GCS}muni_rail_stops.parquet")
     
     time1 = datetime.datetime.now()
     logger.info(f"grabbed rail: {time1-start}")
 
     # BRT
     rail_ferry_brt.grab_operator_brt(analysis_date)
-    brt_stops = gpd.read_parquet("./data/brt_stops.parquet")
+    brt_stops = gpd.read_parquet(f"{TEMP_GCS}brt_stops.parquet")
     brt_stops = rail_ferry_brt.additional_brt_filtering_out_stops(
         brt_stops, BRT_STOPS_FILTER)
 
@@ -68,7 +73,7 @@ if __name__ == "__main__":
     
     # Ferry
     rail_ferry_brt.grab_ferry_data(analysis_date)
-    ferry_stops = gpd.read_parquet("./data/ferry_stops.parquet")
+    ferry_stops = gpd.read_parquet(f"{TEMP_GCS}ferry_stops.parquet")
     
     time3 = datetime.datetime.now()
     logger.info(f"grabbed ferry: {time3-time2}")
@@ -76,6 +81,7 @@ if __name__ == "__main__":
     # Concatenate datasets that need to be clipped to CA
     rail_brt = pd.concat([
         rail_stops,
+        muni_rail_stops,
         brt_stops
     ], axis=0, ignore_index= True)
     
@@ -91,9 +97,11 @@ if __name__ == "__main__":
 
     
     # Export to GCS
-    utils.geoparquet_gcs_export(rail_brt_ferry, 
-                                GCS_FILE_PATH, 
-                                'rail_brt_ferry')
+    utils.geoparquet_gcs_export(
+        rail_brt_ferry, 
+        GCS_FILE_PATH, 
+        'rail_brt_ferry'
+    )
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")

@@ -18,12 +18,15 @@ import os
 import pandas as pd
 import sys
 
+#from calitp.storage import get_fs, is_cloud # pass GCS credential to dask cluster?
 from loguru import logger
 
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
 from shared_utils import utils, geography_utils, portfolio_utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+
+#fs = get_fs()
 
 catalog = intake.open_catalog("*.yml")
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
@@ -38,8 +41,10 @@ def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
     Use calitp_itp_id-stop_id to add route_id back in, 
     using the trips and stop_times table.
     """    
-    stop_times = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
-    trips = dd.read_parquet(f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+    stop_times = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+    trips = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
     stop_cols = ["calitp_itp_id", "stop_id"]
     trip_cols = ["calitp_itp_id", "trip_id"]
@@ -130,6 +135,11 @@ def clean_up_hqta_points(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     
 if __name__=="__main__":
+    # Connect to dask distributed client, put here so it only runs for this script
+    from dask.distributed import Client
+    
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    
     logger.add("./logs/D1_assemble_hqta_points.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
@@ -168,37 +178,43 @@ if __name__=="__main__":
     
     # Export to GCS
     # Stash this date's into its own folder, to convert to geojson, geojsonl later
-    utils.geoparquet_gcs_export(gdf,
-                                EXPORT_PATH,
-                                'ca_hq_transit_stops'
-                               )  
+    utils.geoparquet_gcs_export(
+        gdf,
+        EXPORT_PATH,
+        'ca_hq_transit_stops'
+    )  
     
     logger.info("export as geoparquet in date folder")
    
     # Overwrite most recent version (other catalog entry constantly changes)
-    utils.geoparquet_gcs_export(gdf, 
-                                utilities.GCS_FILE_PATH,
-                                'hqta_points'
-                               )
+    utils.geoparquet_gcs_export(
+        gdf, 
+        utilities.GCS_FILE_PATH,
+        'hqta_points'
+   )
     
     logger.info("export as geoparquet")
         
     # Add geojson / geojsonl exports
-    utils.geojson_gcs_export(gdf, 
-                             EXPORT_PATH,
-                             'ca_hq_transit_stops', 
-                             geojson_type = "geojson"
-                            )
+    utils.geojson_gcs_export(
+        gdf, 
+        EXPORT_PATH,
+        'ca_hq_transit_stops', 
+        geojson_type = "geojson"
+    )
     
     logger.info("export as geojson")
     
-    utils.geojson_gcs_export(gdf, 
-                             EXPORT_PATH,
-                             'ca_hq_transit_stops', 
-                             geojson_type = "geojsonl"
-                            )
+    utils.geojson_gcs_export(
+        gdf, 
+        EXPORT_PATH,
+        'ca_hq_transit_stops', 
+        geojson_type = "geojsonl"
+    )
     
     logger.info("export as geojsonl")
 
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+    
+    client.close()

@@ -235,14 +235,14 @@ def style_table(
         .set_properties(subset=center_align_cols, **{"text-align": "center"})
         .set_properties(subset=right_align_cols, **{"text-align": "right"})
         .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
-        .hide(axis="index")
+        # .hide(axis="index") # pandas >= 1.4
+        .hide_index()  # pandas < 1.4
     )
 
     for format_str, cols_to_format in entire_formatter_dict.items():
         df_style = add_custom_format(df_style, format_str, cols_to_format)
 
     # https://stackoverflow.com/questions/63686157/flexible-chaining-in-python-pandas
-
     if display_table:
         if display_scrollbar:
             display(
