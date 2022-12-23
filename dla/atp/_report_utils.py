@@ -414,7 +414,7 @@ def reorder_namecol(df,
 
 def prep_mapping_data(df):
     mapsubset_cols= ['awarded','project_app_id', 'project_cycle', 'data_origin', 'geometry',
-               'a1_imp_agcy_city','a1_imp_agcy_name','a1_proj_partner_agcy', 
+               'a1_imp_agcy_city','imp_agency_name_new','a1_proj_partner_agcy', 
                'assembly_district','congressional_district','senate_district',
               'a2_county', 'a2_ct_dist','a2_info_proj_name','a3_proj_type', 'total_atp_$', 'a2_proj_lat','a2_proj_long']
     df_map = fix_geom_issues(df, mapsubset_cols)
@@ -564,3 +564,65 @@ def map_couty_proj(df):
         .transform_filter(county_select))
     
     return county_charts
+
+def success_rate_by_dist(df, agency_name_col, district):
+    
+    successes = (df>>group_by(_.awarded)>>count(_[agency_name_col]))>>spread("awarded", "n")>>arrange(-_.Y)
+    successes['total'] = (successes['N'] + successes['Y'])
+    successes['success_rate'] = (successes['Y']/successes['total'])
+    
+    successes = successes.rename(columns={"N":"Projects Not Funded",
+                                    "Y":"Funded Projects", "total":"Total Applications"})
+    
+    #successes_top = successes>>filter(_.success_rate>0)
+    #successes_top['success_rate'] = successes_top['success_rate'].transform(lambda x: '{:,.2%}'.format(x))
+    successes['success_rate'] = successes['success_rate'].transform(lambda x: '{:,.2%}'.format(x))
+    
+    display(HTML(f"</br><h4> Success Rates for Agencies in District {district} </h4>"))
+    display(HTML(_dla_utils.pretify_tables(successes>>select(_[agency_name_col], _['Total Applications'], _.success_rate))))
+    
+
+def map_dist_proj(df_funded, df_all, district):
+    ## rename cols
+    df_funded = df_funded.rename(columns={'imp_agency_name_new':'Implemeting Agency Name',
+                                'a2_county':'County',
+                               'a2_info_proj_name':'Project Name',
+                               'total_atp_$':'Total ATP Funds',
+                               'project_app_id':'Project ID',
+                           'total_project_cost':'Total Project Cost'})
+    df_all = df_all.rename(columns={'imp_agency_name_new':'Implemeting Agency Name',
+                                'a2_county':'County',
+                               'a2_info_proj_name':'Project Name',
+                               'total_atp_$':'Total ATP Funds',
+                               'project_app_id':'Project ID',
+                           'total_project_cost':'Total Project Cost'})
+
+    #filter
+    df_funded = df_funded>>filter(_.a2_ct_dist==district) 
+    df_all = df_all>>filter(_.a2_ct_dist==district) 
+    
+    #district bar chart 
+    dist_charts = (
+        alt.Chart(df_funded)
+        .mark_bar()
+        .encode(
+            x=('Total ATP Funds'),
+            y=('Implemeting Agency Name:N'),
+            color=alt.Color('Project Name', scale=alt.Scale(range=altair_utils.CALITP_DIVERGING_COLORS), legend = None),
+            tooltip=['Project Name','Total ATP Funds'])
+        .properties(title="Total ATP Funds by Project"))
+
+    #district funded proj information
+    quick_view = df_funded>>select(_['Implemeting Agency Name'], _['Project Name'], 
+                                   _['County'], _['Total ATP Funds'], _['Total Project Cost'])
+    
+    quick_view['Total ATP Funds'] = quick_view['Total ATP Funds'].map('$ {:0,.2f}'.format)
+    quick_view['Total Project Cost'] = quick_view['Total Project Cost'].map('$ {:0,.2f}'.format)
+    
+    quick_view = _dla_utils.pretify_tables(quick_view)
+        
+    display(dist_charts)
+    display(HTML("<h4>Funded Project Information</h4>"))
+    display(HTML(quick_view))
+    
+    success_rate_table = success_rate_by_dist(df_all, 'Implemeting Agency Name', district)
