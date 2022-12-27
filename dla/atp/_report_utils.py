@@ -580,9 +580,30 @@ def success_rate_by_dist(df, agency_name_col, district):
     
     display(HTML(f"</br><h4> Success Rates for Agencies in District {district} </h4>"))
     display(HTML(_dla_utils.pretify_tables(successes>>select(_[agency_name_col], _['Total Applications'], _.success_rate))))
+
+
+#district map
+def get_district_map(gdf, district):
+    df = gdf>>filter(_.a2_ct_dist==district)
+    
+    df =df.rename(columns = {"a2_ct_dist":"District", "awarded":"Awarded",
+                             "a2_info_proj_name":"Project Name", "a3_proj_type":"Project Type",
+                             "imp_agency_name_new":"Implementing Agency"})
+    
+    df['Awarded'] = df['Awarded'].map({'N': 'Not Funded', 'Y':'Funded'})
+    
+    dist_map = (df.explore(column="Awarded", 
+            cmap= 'tab20b',
+            marker_kwds=dict(radius=5),
+            legend=True,
+            legend_kwds=dict(colorbar=True),
+            highlight= True,
+            tooltip=["Implementing Agency", "Awarded", "Project Name", "Project Type"], 
+            ))
+    return dist_map
     
 
-def map_dist_proj(df_funded, df_all, district):
+def map_dist_proj(df_funded, df_all, gdf, district):
     ## rename cols
     df_funded = df_funded.rename(columns={'imp_agency_name_new':'Implemeting Agency Name',
                                 'a2_county':'County',
@@ -600,6 +621,9 @@ def map_dist_proj(df_funded, df_all, district):
     #filter
     df_funded = df_funded>>filter(_.a2_ct_dist==district) 
     df_all = df_all>>filter(_.a2_ct_dist==district) 
+
+    display(HTML(f"<strong>Out of {len(df_all)} project applications in District {district}, "
+             f"{len(df_funded)}m projects were funded <br><br><br></strong>"))
     
     #district bar chart 
     dist_charts = (
@@ -626,3 +650,6 @@ def map_dist_proj(df_funded, df_all, district):
     display(HTML(quick_view))
     
     success_rate_table = success_rate_by_dist(df_all, 'Implemeting Agency Name', district)
+    
+    district_map = get_district_map(gdf, district)
+    display(district_map)
