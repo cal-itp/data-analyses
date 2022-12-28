@@ -311,7 +311,7 @@ def pretify_tables(df):
     r_cols = {'Count','Sum Allocated','Sum Allocated By Year'}
     
     df = df.rename(columns=labeling)
-    df_styler = (df.style.hide(axis='index')
+    df_styler = (df.style.hide_index()
               .set_properties(**{'text-align': 'center'})
               .set_table_styles([dict(selector='th', props=[('text-align', 'center')])])
              )
@@ -322,7 +322,7 @@ def pretify_tables(df):
                   .set_properties(subset= [col], **{"text-align":"right"})
                  )
             
-    return (df_styler.to_html(index=False))
+    return (df_styler.to_html())
 
 def display_side_by_side(*args):
         html_str=''
