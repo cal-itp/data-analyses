@@ -537,7 +537,7 @@ def map_districts(df,
 
 def map_couty_proj(df):
     ## rename cols
-    df = df.rename(columns={'imp_agency_name_new':'Implemeting Agency Name',
+    df = df.rename(columns={'imp_agency_name_new':'Implementing Agency Name',
                                 'a2_county':'County',
                                'a2_info_proj_name':'Project Name',
                                'total_atp_$':'Total Funds',
@@ -556,7 +556,7 @@ def map_couty_proj(df):
         .mark_bar()
         .encode(
             x=('Total Funds'),
-            y=('Implemeting Agency Name:N'),
+            y=('Implementing Agency Name:N'),
             color=alt.Color('Project Name', scale=alt.Scale(range=altair_utils.CALITP_DIVERGING_COLORS), legend = None),
             tooltip=['Project Name','Total Funds'])
         .properties(title="Total ATP Funds by Project")
@@ -605,13 +605,13 @@ def get_district_map(gdf, district):
 
 def map_dist_proj(df_funded, df_all, gdf, district):
     ## rename cols
-    df_funded = df_funded.rename(columns={'imp_agency_name_new':'Implemeting Agency Name',
+    df_funded = df_funded.rename(columns={'imp_agency_name_new':'Implementing Agency Name',
                                 'a2_county':'County',
                                'a2_info_proj_name':'Project Name',
                                'total_atp_$':'Total ATP Funds',
                                'project_app_id':'Project ID',
                            'total_project_cost':'Total Project Cost'})
-    df_all = df_all.rename(columns={'imp_agency_name_new':'Implemeting Agency Name',
+    df_all = df_all.rename(columns={'imp_agency_name_new':'Implementing Agency Name',
                                 'a2_county':'County',
                                'a2_info_proj_name':'Project Name',
                                'total_atp_$':'Total ATP Funds',
@@ -623,7 +623,7 @@ def map_dist_proj(df_funded, df_all, gdf, district):
     df_all = df_all>>filter(_.a2_ct_dist==district) 
 
     display(HTML(f"<strong>Out of {len(df_all)} project applications in District {district}, "
-             f"{len(df_funded)}m projects were funded <br><br><br></strong>"))
+             f"{len(df_funded)} projects were funded <br><br><br></strong>"))
     
     #district bar chart 
     dist_charts = (
@@ -631,13 +631,13 @@ def map_dist_proj(df_funded, df_all, gdf, district):
         .mark_bar()
         .encode(
             x=('Total ATP Funds'),
-            y=('Implemeting Agency Name:N'),
+            y=('Implementing Agency Name:N'),
             color=alt.Color('Project Name', scale=alt.Scale(range=altair_utils.CALITP_DIVERGING_COLORS), legend = None),
             tooltip=['Project Name','Total ATP Funds'])
         .properties(title="Total ATP Funds by Project"))
 
     #district funded proj information
-    quick_view = df_funded>>select(_['Implemeting Agency Name'], _['Project Name'], 
+    quick_view = df_funded>>select(_['Implementing Agency Name'], _['Project Name'], 
                                    _['County'], _['Total ATP Funds'], _['Total Project Cost'])
     
     quick_view['Total ATP Funds'] = quick_view['Total ATP Funds'].map('$ {:0,.2f}'.format)
@@ -649,7 +649,7 @@ def map_dist_proj(df_funded, df_all, gdf, district):
     display(HTML("<h4>Funded Project Information</h4>"))
     display(HTML(quick_view))
     
-    success_rate_table = success_rate_by_dist(df_all, 'Implemeting Agency Name', district)
+    success_rate_table = success_rate_by_dist(df_all, 'Implementing Agency Name', district)
     
     district_map = get_district_map(gdf, district)
     display(district_map)
