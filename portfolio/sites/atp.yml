@@ -1,8 +1,10 @@
 title: Active Transportation Program
 directory: ./dla/atp/
 readme: ./dla/atp/README.md
+notebook: ./dla/atp/report_analysis.ipynb
 parts:
-- caption: Introduction
+- caption: 
 - chapters:
-    - notebook: ./dla/atp/report_analysis.ipynb
-     
+     - params:
+          cycle_parameter: 5
+          cycle_title: Cycle 5
