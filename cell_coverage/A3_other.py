@@ -13,6 +13,8 @@ from calitp.storage import get_fs
 fs = get_fs()
 import os
 
+import A1_provider_prep
+
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 
 """
@@ -69,6 +71,98 @@ def load_unique_routes_df():
     df['long_route_name'] = (df['route_name'] + ' ' + df['route_id'] + ' '  + ' ' + df['agency'])
     return df
 
+def clip_route_district(district_df):
+    """
+    Find which routes fall 100% in an district and
+    which cross district boundaries.
+    """
+    # Load unique routes & districts
+    unique_routes = load_unique_routes_df()
+    
+    # Clip routes against a district
+    clipped = gpd.clip(unique_routes, district_df)
+
+    # Get route length after doing clip
+    clipped = clipped.assign(
+        clipped_route_length=clipped.geometry.to_crs(
+            geography_utils.CA_StatePlane
+        ).length
+    )
+
+    # Get %
+    clipped["route_percentage"] = (
+        (clipped["clipped_route_length"] / clipped["original_route_length"]) * 100
+    ).astype("int64")
+
+    return clipped
+
+def complete_clip_route_district() -> dg.GeoDataFrame:
+    """
+    For each district, find which routes fall 100% neatly
+    in an district and which cross district boundaries. 
+    Stack the seperated district results back together.
+    """
+    # Load districts
+    district_df = A1_provider_prep.get_districts()
+
+    full_gdf = pd.DataFrame()
+    
+    all_districts = [*range(1, 13, 1)]
+    
+    for i in all_districts:
+        result = clip_route_district(district_df[district_df.district == i])
+
+        full_gdf = dd.multi.concat([full_gdf, result], axis=0)
+
+    full_gdf = full_gdf.compute()
+
+    return full_gdf
+
+def turn_counts_to_df(df, col_of_interest:str):
+    """
+    Takes a column, finds value counts,
+    and turns the results into a dataframe.
+    """
+    df = (
+    df[col_of_interest]
+    .value_counts()
+    .to_frame()
+    .reset_index()
+    .rename(columns = 
+        { col_of_interest:'total',
+         'index':col_of_interest})
+    )
+    return df
+
+def find_multi_district_routes():
+    """
+    Find and filter which routes are in one district versus 
+    those that run in various districts. Returns
+    a df with multi-district routes, a df with one-district
+    routes, and the original clipped df
+    """
+    # Clip the routes against districts
+    clipped_df = complete_clip_route_district()
+    
+    # Get value counts for long route names
+    # to figure out which routes has 1+ row. 
+    # if a route has 1+ row, that means its runs in 
+    # 1+ district
+    value_counts_df = turn_counts_to_df(clipped_df, 'long_route_name')
+    
+    # Find routes w/ 1+ row
+    routes_in_multi_district = ((value_counts_df[value_counts_df.total > 1])[['long_route_name']]).reset_index(drop = True)
+    
+    # Place the values into a list
+    routes_in_multi_districts_list = routes_in_multi_district.long_route_name.tolist()
+    
+    # Filter the original dataframe for routes in multiple districts
+    routes_in_multi_district = (clipped_df[clipped_df.long_route_name.isin(routes_in_multi_districts_list)]).reset_index(drop = True)
+    
+    # Filter the original dataframe for routes in only one districts
+    routes_in_one_district = (clipped_df[~clipped_df.long_route_name.isin(routes_in_multi_districts_list)]).reset_index(drop = True)
+    
+    return routes_in_one_district, routes_in_multi_district, clipped_df
 
 """
 # of Trips
