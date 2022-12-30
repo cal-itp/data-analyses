@@ -233,6 +233,32 @@ class RtFilterMapper:
         with_entry_delay = with_entry_delay >> mutate(corridor_delay_seconds = _.delay_seconds - _.entry_delay_seconds)
         self.corridor_stop_delays = with_entry_delay
     
+    def autocorridor(self, shape_id: str, stop_seq_range: list):
+        '''
+        Defines a corridor for delay analysis using existing GTFS Shapes data,
+        without the need for externally defining the corridor bounding box.
+        Designed to be used alongside segment_speed_map in a notebook, i.e.
+        by viewing speeds to decide on bounds and inputting the corresponding
+        shape_id and stop sequence range. Attaches corridor for corridor maps/metrics.
+        
+        shape_id: string, GTFS shape_id
+        stop_seq_range: list, containing 2 ints/floats, any order
+        
+        example:
+        shape_id = '27_3_87'
+        stop_range = [16, 31]
+        '''
+        corridor = (self.stop_segment_speed_view
+         >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
+         >> filter(_.shape_id == shape_id,
+                   _.stop_sequence >= min(stop_seq_range),
+                   _.stop_sequence <= max(stop_seq_range))
+        )
+        corridor.geometry = corridor.buffer(100)
+        corridor = corridor.dissolve()
+        self.add_corridor(corridor)
+        return
+    
     def segment_speed_map(self, segments = 'stops', how = 'low_speeds',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
                          no_title = False, corridor = False):
@@ -369,9 +395,11 @@ class RtFilterMapper:
         name = self.calitp_agency_name
 
         display_cols = ['_20p_mph', 'time_formatted', 'miles_from_last',
-                       'route_short_name', 'trips_per_hour']
+                       'route_short_name', 'trips_per_hour', 'shape_id',
+                       'stop_sequence']
         display_aliases = ['Speed (miles per hour)', 'Travel time', 'Segment distance (miles)',
-                          'Route', 'Frequency (trips per hour)']
+                          'Route', 'Frequency (trips per hour)', 'Shape ID',
+                          'Stop Sequence']
         tooltip_dict = {'aliases': display_aliases}
         if no_title:
             title = ''
@@ -544,8 +572,14 @@ class RtFilterMapper:
         return
     
     def quick_map_corridor(self):
+        '''
+        Maps currently attached corridor, with stops just before/
+        in/just after corridor for all routes in current filter, if any
+        '''
         
-        mappable_stops = (self.stop_delay_view.dropna(subset=['stop_id'])
+        assert hasattr(self, 'corridor'), 'Must attach a corridor first'
+        filtered_stops = self._filter(self.stop_delay_view)
+        mappable_stops = (filtered_stops.dropna(subset=['stop_id'])
                   >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
                   >> filter(_.corridor)
                   >> select(_.stop_id, _.geometry, _.stop_sequence)
