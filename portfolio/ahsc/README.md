@@ -31,7 +31,7 @@ To aggregate socioeconomic and demographic variables to each stop, census tracts
 
 ### Job Density Data
 
-This statistical model also controls for job density, which is derived from the Urban Institute’s summary files for Longitudinal Employer-Household Dynamics (LEHD) Origin-Destination Employment Statistics. The analysis uses Workplace Area Characteristic (WAC) tables to sum federal and non-federal jobs for each census tract. Additional documentation is available on the Urban Institute’s [website](https://datacatalog.urban.org/sites/default/files/data-dictionary-files/Urban-LODES Description.pdf). These figures are aggregated in the same way as the ACS data, above.
+This statistical model also controls for job density, which is derived from the Urban Institute’s summary files for Longitudinal Employer-Household Dynamics (LEHD) Origin-Destination Employment Statistics. The analysis uses Workplace Area Characteristic (WAC) tables to sum federal and non-federal jobs for each census tract. Additional documentation is available on the Urban Institute’s [website](https://datacatalog.urban.org/dataset/longitudinal-employer-household-dynamics-origin-destination-employment-statistics-lodes). These figures are aggregated in the same way as the ACS data, above.
 
 ## Statistical Modeling
 
