@@ -1,5 +1,7 @@
 title: AHSC Methodology Documentation
-directory: ./ahsc/
-readme: ./ahsc/README.md
+directory: ./ahsc_grant/
+readme: ./ahsc_grant/README.md
 parts:
 - caption: AHSC Ridership Prediction Methodology
+- chapters:
+    - notebook: ./ahsc_grant/empty_nb.ipynb
