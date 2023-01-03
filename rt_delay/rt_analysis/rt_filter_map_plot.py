@@ -240,13 +240,13 @@ class RtFilterMapper:
         or 20th percentile speeds.
         
         segments: 'stops' or 'detailed' (detailed not yet implemented)
-        how: 'average', 'low_speeds' (20%ile), or 'variance'
+        how: 'average', 'low_speeds' (20%ile)
         colorscale: branca.colormap
         size: [x, y]
         
         '''
         assert segments in ['stops', 'detailed']
-        assert how in ['average', 'low_speeds', 'variance']
+        assert how in ['average', 'low_speeds']
         
         gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.isoformat()}_{self.filter_period}'
         subfolder = 'segment_speed_views/'
@@ -365,40 +365,36 @@ class RtFilterMapper:
         assert gdf.shape[0] >= orig_rows*.99, 'over 1% of geometries invalid after buffer+simplify'
         gdf = gdf.to_crs(WGS84)
         self.detailed_map_view = gdf.copy()
-        centroid = (gdf.geometry.centroid.x.mean(), gdf.geometry.centroid.y.mean())
+        centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
         name = self.calitp_agency_name
 
-        popup_dict = {
-            how_speed_col[how]: "Speed (miles per hour)",
-            "time_formatted": "Travel time",
-            "miles_from_last": "Segment distance (miles)",
-            "route_short_name": "Route",
-            "trips_per_hour": "Frequency (trips per hour)",
-        }
+        display_cols = ['_20p_mph', 'time_formatted', 'miles_from_last',
+                       'route_short_name', 'trips_per_hour']
+        display_aliases = ['Speed (miles per hour)', 'Travel time', 'Segment distance (miles)',
+                          'Route', 'Frequency (trips per hour)']
+        tooltip_dict = {'aliases': display_aliases}
         if no_title:
             title = ''
         else:
-            title = f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}"
+            title = f"{name} 20th Percentile Vehicle Speeds Between Stops{self.filter_formatted}"
+        colorscale.caption = "Speed (miles per hour)"
+        style_dict = {'opacity': 0, 'fillOpacity': 0.8}
 
-        g = make_folium_choropleth_map(
-            gdf,
-            plot_col = how_speed_col[how],
-            popup_dict = popup_dict,
-            tooltip_dict = popup_dict,
-            colorscale = colorscale,
-            fig_width = size[0], fig_height = size[1],
-            zoom = 13,
-            centroid = [centroid[1], centroid[0]],
-            title = title,
-            legend_name = "Speed (miles per hour)",
-            highlight_function=lambda x: {
-                'fillColor': '#DD1C77',
-                "fillOpacity": 0.6,
-            },
-            reduce_precision = False
-        )
+        g = gdf.explore(column='_20p_mph',
+                        cmap = colorscale,
+                        tiles = 'CartoDB positron',
+                        style_kwds = style_dict,
+                        tooltip = display_cols, popup = display_cols,
+                        tooltip_kwds = tooltip_dict, popup_kwds = tooltip_dict,
+                        highlight_kwds = {'fillColor': '#DD1C77',"fillOpacity": 0.6},
+                        width = size[0], height = size[1], zoom_start = 13,
+                        location = centroid)
         
-        return g  
+        title_html = f"""
+         <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
+         """
+        g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
+        return g   
     
     def map_variance(self):
         '''
