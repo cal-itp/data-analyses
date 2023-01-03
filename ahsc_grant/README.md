@@ -31,11 +31,11 @@ To aggregate socioeconomic and demographic variables to each stop, census tracts
 
 ### Job Density Data
 
-This statistical model also controls for job density, which is derived from the Urban Institute’s summary files for Longitudinal Employer-Household Dynamics (LEHD) Origin-Destination Employment Statistics. The analysis uses Workplace Area Characteristic (WAC) tables to sum federal and non-federal jobs for each census tract. Additional documentation is available on the Urban Institute’s [website](https://datacatalog.urban.org/sites/default/files/data-dictionary-files/Urban-LODES Description.pdf). These figures are aggregated in the same way as the ACS data, above.
+This statistical model also controls for job density, which is derived from the Urban Institute’s summary files for Longitudinal Employer-Household Dynamics (LEHD) Origin-Destination Employment Statistics. The analysis uses Workplace Area Characteristic (WAC) tables to sum federal and non-federal jobs for each census tract. Additional documentation is available on the Urban Institute’s [website](https://datacatalog.urban.org/dataset/longitudinal-employer-household-dynamics-origin-destination-employment-statistics-lodes). These figures are aggregated in the same way as the ACS data, above.
 
 ## Statistical Modeling
 
-In order to estimate the effect of bus service on bus ridership at each stop, this analysis employs the following log-linear OLS regression model on the training data: ln⁡〖annual boardings〗= β_0+ β_1 (n daily trips)+ β_2 (n daily routes)+ β_3 (population density)+ β_4 (job density)+ β_5 (pct noncitizens)+β_6 (pct youth)+ β_7 (pct seniors)+β_8 (pct workers w/o car)+ β_9 (pct poverty)+e . Versions of this model are generated for weekday, Saturday, and Sunday ridership and corresponding service. In all three models, one additional daily trip corresponds to a roughly 2% increase in ridership at a given bus stop.
+In order to estimate the effect of bus service on bus ridership at each stop, this analysis employs the following log-linear OLS regression model on the training data: *ln⁡(annual boardings)= β0 + β1(n daily trips) + β2(n daily routes) + β3(population density)+ β4(job density)+ β5(pct noncitizens) + β6(pct youth) + β7(pct seniors) + β8(pct workers w/o car) + β9(pct poverty) + e . Versions of this model are generated for weekday, Saturday, and Sunday ridership and corresponding service. In all three models, one additional daily trip corresponds to a roughly 2% increase in ridership at a given bus stop.
 
 ## Predictions from Model
 
