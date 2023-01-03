@@ -35,7 +35,7 @@ This statistical model also controls for job density, which is derived from the 
 
 ## Statistical Modeling
 
-In order to estimate the effect of bus service on bus ridership at each stop, this analysis employs the following log-linear OLS regression model on the training data: *ln⁡(annual boardings)= β0 + β1(n daily trips) + β2(n daily routes) + β3(population density)+ β4(job density)+ β5(pct noncitizens) + β6(pct youth) + β7(pct seniors) + β8(pct workers w/o car) + β9(pct poverty) + e . Versions of this model are generated for weekday, Saturday, and Sunday ridership and corresponding service. In all three models, one additional daily trip corresponds to a roughly 2% increase in ridership at a given bus stop.
+In order to estimate the effect of bus service on bus ridership at each stop, this analysis employs the following log-linear OLS regression model on the training data: *ln⁡(annual boardings)= β0 + β1(n daily trips) + β2(n daily routes) + β3(population density)+ β4(job density)+ β5(pct noncitizens) + β6(pct youth) + β7(pct seniors) + β8(pct workers w/o car) + β9(pct poverty) + e* . Versions of this model are generated for weekday, Saturday, and Sunday ridership and corresponding service. In all three models, one additional daily trip corresponds to a roughly 2% increase in ridership at a given bus stop.
 
 ## Predictions from Model
 
