@@ -58,18 +58,17 @@ def overlay_single_routes(
             pass
             print(f"{i}")
 
-    utils.geoparquet_gcs_export(
-        all_intersected_routes,
-        utilities.GCS_FILE_PATH,
-        f"{provider_name}_overlaid_with_unique_routes",
-    )
+    #utils.geoparquet_gcs_export(
+    #    all_intersected_routes,
+     #   utilities.GCS_FILE_PATH,
+      #  f"{provider_name}_overlaid_with_unique_routes",
+    #)
 
     return all_intersected_routes
 
 def dissolve_summarize(provider: gpd.GeoDataFrame):
     """
-    Drop duplicate rows of the provider map overlaid
-    with unique routes. Aggregate so there's only
+    Aggregate so there's only
     one row for each route-agency-route ID combo. 
     Find % of new route length compared with original 
     route length.
@@ -156,7 +155,7 @@ def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
     fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
     os.remove(f"./{FILE_NAME}.geojson")
-
+    
 # Clean organization names - strip them of dba, etc
 def organization_cleaning(df, column_wanted: str):
     df[column_wanted] = (

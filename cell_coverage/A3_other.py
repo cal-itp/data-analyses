@@ -73,7 +73,7 @@ def load_unique_routes_df():
 
 def clip_route_district(district_df):
     """
-    Find which routes fall 100% in an district and
+    Find which routes fall 100% in one district and
     which cross district boundaries.
     """
     # Load unique routes & districts
@@ -144,13 +144,11 @@ def find_multi_district_routes():
     # Clip the routes against districts
     clipped_df = complete_clip_route_district()
     
-    # Get value counts for long route names
-    # to figure out which routes has 1+ row. 
-    # if a route has 1+ row, that means its runs in 
-    # 1+ district
+    # Get value counts for long route names to figure out which routes has 1+ row. 
+    # if a route has 1+ row, that means its runs in 1+ district
     value_counts_df = turn_counts_to_df(clipped_df, 'long_route_name')
     
-    # Find routes w/ 1+ row
+    # Filter for routes w/ 1+ row
     routes_in_multi_district = ((value_counts_df[value_counts_df.total > 1])[['long_route_name']]).reset_index(drop = True)
     
     # Place the values into a list
