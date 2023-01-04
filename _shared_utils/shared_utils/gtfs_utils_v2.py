@@ -92,6 +92,50 @@ def daily_feed_to_organization(
     return fact_feeds
 
 
+def prep_daily_feeds(
+    selected_date: Union[str, datetime.datetime],
+    include: dict = "All",
+    exclude: dict = {
+        "name": ["Bay Area 511 Regional Schedule"],
+        "regional_feed_type": ["Regional Precursor Feed"],
+    },
+) -> pd.DataFrame:
+    """
+    Allow dict of feeds to include OR feeds to exclude.
+    include: dict
+        Takes form
+        {"this_col": list_of_values_to_include}
+    exclude: dict
+        Takes form
+    """
+    # Replace this with the table
+    daily_feeds = daily_feed_to_organization(selected_date=selected_date, get_df=True)
+
+    daily_feeds["exclude_me"] = 0
+
+    for col, values in exclude.items():
+        daily_feeds = daily_feeds.assign(
+            exclude_me=daily_feeds.apply(
+                lambda x: 1 if x[col] in values else x.exclude_me, axis=1
+            )
+        )
+
+    daily_feeds = daily_feeds[daily_feeds.exclude_me == 0].drop(columns="exclude_me")
+
+    if include != "All":
+        keep = pd.DataFrame()
+
+        for col, values in include.items():
+            subset = daily_feeds[daily_feeds[col].isin(values)]
+            keep = pd.concat([keep, subset], axis=0)
+
+        daily_feeds = keep
+
+    daily_feeds = daily_feeds.sort_values("name").reset_index(drop=True)
+
+    return daily_feeds
+
+
 def get_trips(
     selected_date: Union[str, datetime.date],
     subset_feeds: list = None,
