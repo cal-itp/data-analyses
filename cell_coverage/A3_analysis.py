@@ -12,12 +12,29 @@ from calitp.storage import get_fs
 fs = get_fs()
 import os
 
+
+def dissolve_summarize(provider: gpd.GeoDataFrame):
+    """
+    Aggregate so there's only
+    one row for each route-agency-route ID combo. 
+    Find % of new route length compared with original 
+    route length.
+    """
+    provider = provider.dissolve(
+         by=["agency","long_route_name"],
+         aggfunc={
+         "route_length": "sum", "original_route_length":"max"}).reset_index()
+    
+    provider["percentage_route_covered"] = ((provider["route_length"] / provider["original_route_length"])* 100).astype('int64')
+    
+    return provider
+
 # Overlay Federal Communications Commission map with original bus routes df.
-def comparison(gdf_left, gdf_right):
+def comparison(routes_gdf, provider_gdf):
 
     # Overlay
     overlay_df = gpd.overlay(
-        gdf_left, gdf_right, how="intersection", keep_geom_type=False
+        routes_gdf, provider_gdf, how="intersection", keep_geom_type=False
     )
 
     # Create a new route length for portions covered by cell coverage
@@ -26,7 +43,9 @@ def comparison(gdf_left, gdf_right):
     )
     
     overlay_df = overlay_df.drop_duplicates().reset_index(drop = True)
-    # utils.geoparquet_gcs_export(overlay_df, GCS_FILE_PATH, f"{provider_name}_overlaid_with_unique_routes")
+   
+    overlay_df = dissolve_summarize(overlay_df)
+    
     return overlay_df
 
 def overlay_single_routes(
@@ -65,22 +84,6 @@ def overlay_single_routes(
     #)
 
     return all_intersected_routes
-
-def dissolve_summarize(provider: gpd.GeoDataFrame):
-    """
-    Aggregate so there's only
-    one row for each route-agency-route ID combo. 
-    Find % of new route length compared with original 
-    route length.
-    """
-    provider = provider.dissolve(
-         by=["agency","long_route_name"],
-         aggfunc={
-         "route_length": "sum", "original_route_length":"max"}).reset_index()
-    
-    provider["percentage_route_covered"] = ((provider["route_length"] / provider["original_route_length"])* 100).astype('int64')
-    
-    return provider
 
 # Take the FCC provider shape file, compare it against the original df
 # Find % of route covered by a provider compared to the original route length.

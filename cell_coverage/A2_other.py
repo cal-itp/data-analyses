@@ -134,6 +134,17 @@ def turn_counts_to_df(df, col_of_interest:str):
     )
     return df
 
+def aggregate_routes(gdf):
+    # Return one row for each route
+    dissolved = gdf.dissolve(
+        by=["agency", "long_route_name"],
+        aggfunc={
+            "original_route_length": "max",
+        },
+    ).reset_index()
+
+    return dissolved
+
 def find_multi_district_routes():
     """
     Find and filter which routes are in one district versus 
@@ -159,6 +170,10 @@ def find_multi_district_routes():
     
     # Filter the original dataframe for routes in only one districts
     routes_in_one_district = (clipped_df[~clipped_df.long_route_name.isin(routes_in_multi_districts_list)]).reset_index(drop = True)
+    
+    # Because routes that run in multi districts are split in 1+ row, aggregate them abck
+    routes_in_multi_district = aggregate_routes(routes_in_multi_district)
+    clipped_df = aggregate_routes(clipped_df)
     
     return routes_in_one_district, routes_in_multi_district, clipped_df
 

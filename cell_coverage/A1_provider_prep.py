@@ -61,7 +61,7 @@ def find_difference_and_clip(
 
     return no_coverage
 
-def concat_all_areas(all_gdf:list, gcs_file_path: str, file_name:str):
+def concat_all_areas(all_gdf:list, file_name:str):
     """
     Districts/counties are separated out into different gdfs that contain 
     portions of districts/counties. Concat them all together 
@@ -77,7 +77,7 @@ def concat_all_areas(all_gdf:list, gcs_file_path: str, file_name:str):
     full_gdf = full_gdf.compute()
     
     # Export
-    utils.geoparquet_gcs_export(full_gdf, gcs_file_path,file_name)
+    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name)
 
     print('Saved to GCS')
     return full_gdf 
@@ -85,7 +85,7 @@ def concat_all_areas(all_gdf:list, gcs_file_path: str, file_name:str):
 # Breakout provider gdf by counties, find the areas of each county
 # that doesn't have coverage, concat everything and dissolve to one row.
 # This was used for Verizon ONLY to create its final map.
-def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wanted:list):
+def breakout_counties(provider, file_name:str, counties_wanted:list):
     counties = get_counties()
     
     # Empty dataframe to hold each district after clipping
@@ -102,7 +102,7 @@ def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wante
     full_gdf = full_gdf.compute()
     
     # Save to GCS
-    utils.geoparquet_gcs_export(full_gdf, gcs_file_path, file_name) 
+    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name) 
     print('saved to GCS')
     
     return full_gdf
@@ -150,16 +150,17 @@ def iloc_find_difference_district(
     
     return no_coverage
 
-# For the entirety of California by districts get areas without coverage.
-# This was used for AT&T and T-Mobile's final maps.
+# For the entirety of California by districts get areas without coverage
+# with the iloc_find_difference_district function
 def complete_difference_provider_district_level(
     provider_df: dg.GeoDataFrame, 
     district_df: gpd.GeoDataFrame,
-    provider_name: str) -> dg.GeoDataFrame:
+    file_name: str,
+    districts_needed:list) -> dg.GeoDataFrame:
     
     full_gdf = pd.DataFrame()
     
-    for i in [*range(1, 13, 1)]:
+    for i in districts_needed:
         result = iloc_find_difference_district(
             provider_df, 
             district_df[district_df.district==i],
@@ -170,7 +171,7 @@ def complete_difference_provider_district_level(
     
     full_gdf = full_gdf.compute()
     
-    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, f"{provider_name}_no_coverage_complete_CA")
+    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name)
     return full_gdf
 
 
