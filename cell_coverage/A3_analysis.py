@@ -21,7 +21,7 @@ def dissolve_summarize(provider: gpd.GeoDataFrame):
     route length.
     """
     provider = provider.dissolve(
-         by=["agency","long_route_name"],
+         by=["agency","long_route_name", "District"],
          aggfunc={
          "route_length": "sum", "original_route_length":"max"}).reset_index()
     
@@ -44,8 +44,12 @@ def comparison(routes_gdf, provider_gdf):
     
     overlay_df = overlay_df.drop_duplicates().reset_index(drop = True)
    
-    overlay_df = dissolve_summarize(overlay_df)
+    overlay_df = overlay_df.dissolve(
+         by=["agency","long_route_name", "District"],
+         aggfunc={
+         "route_length": "sum", "original_route_length":"max"}).reset_index()
     
+    overlay_df["percentage_route_covered"] = ((overlay_df["route_length"] / overlay_df["original_route_length"])* 100).astype('int64')
     return overlay_df
 
 def overlay_single_routes(
