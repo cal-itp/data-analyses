@@ -111,7 +111,9 @@ def complete_clip_route_district() -> dg.GeoDataFrame:
     
     for i in all_districts:
         result = clip_route_district(district_df[district_df.district == i])
-
+        # Add column to indicate which district this route runs in
+        result["District"] = f"D-{i}"
+        
         full_gdf = dd.multi.concat([full_gdf, result], axis=0)
 
     full_gdf = full_gdf.compute()
@@ -137,7 +139,7 @@ def turn_counts_to_df(df, col_of_interest:str):
 def aggregate_routes(gdf):
     # Return one row for each route
     dissolved = gdf.dissolve(
-        by=["agency", "long_route_name"],
+        by=["agency", "long_route_name", "District"],
         aggfunc={
             "original_route_length": "max",
         },
@@ -171,7 +173,7 @@ def find_multi_district_routes():
     # Filter the original dataframe for routes in only one districts
     routes_in_one_district = (clipped_df[~clipped_df.long_route_name.isin(routes_in_multi_districts_list)]).reset_index(drop = True)
     
-    # Because routes that run in multi districts are split in 1+ row, aggregate them abck
+    # Because routes that run in multi districts are split in 1+ row, aggregate them back
     routes_in_multi_district = aggregate_routes(routes_in_multi_district)
     clipped_df = aggregate_routes(clipped_df)
     
