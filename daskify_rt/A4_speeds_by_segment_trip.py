@@ -253,12 +253,14 @@ def import_segments(itp_id: int) -> dg.GeoDataFrame:
     """
     Import segments and subset to operator segments.
     """
-    segments = dg.read_parquet(f"{DASK_TEST}longest_shape_segments.parquet")
-    segments_subset = segments[segments.calitp_itp_id == itp_id]
+    segments = dg.read_parquet(
+        f"{DASK_TEST}longest_shape_segments.parquet", 
+        filters = [[("calitp_itp_id", "==", itp_id)]]
+    )
     
-    segments_subset = segments_subset.repartition(npartitions=1)
+    segments = segments.repartition(npartitions=1)
     
-    return segments_subset
+    return segments
 
 
 if __name__ == "__main__": 
@@ -295,21 +297,20 @@ if __name__ == "__main__":
         start_id = datetime.datetime.now()
 
         # https://docs.dask.org/en/stable/delayed-collections.html
-        operator_vp_segments = import_vehicle_positions(itp_id).persist()
-        segments_subset = import_segments(itp_id).persist()
+        operator_vp_segments = import_vehicle_positions(itp_id)
+        segments_subset = import_segments(itp_id)
         
         vp_linear_ref = merge_in_segment_shape(
             operator_vp_segments, segments_subset).persist()
         
-        operator_speeds = calculate_speed_by_segment_trip(vp_linear_ref)
-        results.append(operator_speeds)
+        operator_speeds = calculate_speed_by_segment_trip(vp_linear_ref).persist()
+        
+        compute_and_export(operator_speeds)
         
         end_id = datetime.datetime.now()
         
         logger.info(f"ITP ID: {itp_id}: {end_id-start_id}")
-     
-    for i in results:
-        compute_and_export(i)
+
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
