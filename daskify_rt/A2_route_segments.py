@@ -81,6 +81,27 @@ def get_longest_shapes(analysis_date: str):
     return longest_shapes
 
 
+def route_direction_to_segments_crosswalk():
+    """
+    Create a table where route_id-direction_id can be used
+    to find route_dir_identifier. 
+    
+    Trips table has route_id-direction_id, and needs a route_dir_identifier
+    attached to help do trip aggregations once vehicle positions
+    are joined to segments.
+    """
+    segments = dg.read_parquet(f"{DASK_TEST}longest_shape_segments.parquet")
+
+    keep_cols = ["calitp_itp_id", "calitp_url_number", 
+                 "route_id", "direction_id",
+                 "route_dir_identifier"
+                ]
+    
+    segments2 = segments[keep_cols].drop_duplicates().reset_index(drop=True)
+    
+    return segments2
+    
+
 if __name__ == "__main__":
     
     longest_shapes = get_longest_shapes(analysis_date)
@@ -101,4 +122,7 @@ if __name__ == "__main__":
         DASK_TEST,
         "longest_shape_segments"
     )
-
+    
+    segment_crosswalk = route_direction_to_segments_crosswalk()
+    segment_crosswalk.compute().to_parquet(
+        f"{DASK_TEST}segments_route_direction_crosswalk.parquet")

@@ -1,0 +1,83 @@
+2023-01-06 20:17:01.930 | INFO     | __main__:<module>:212 - Analysis date: 2022-10-12
+2023-01-06 20:17:04.448 | INFO     | __main__:<module>:219 - get unique operators to loop over: 0:00:02.518114
+2023-01-06 20:17:43.519 | INFO     | __main__:compute_and_export:197 - exported 110: 0:00:07.773585
+2023-01-06 20:17:43.521 | INFO     | __main__:<module>:255 - 110: 0:00:34.054261
+2023-01-06 20:18:30.782 | INFO     | __main__:compute_and_export:197 - exported 126: 0:00:19.533146
+2023-01-06 20:18:30.784 | INFO     | __main__:<module>:255 - 126: 0:00:47.262439
+2023-01-06 20:19:15.845 | INFO     | __main__:compute_and_export:197 - exported 127: 0:00:20.738473
+2023-01-06 20:19:15.845 | INFO     | __main__:<module>:255 - 127: 0:00:45.060401
+2023-01-06 20:20:05.373 | INFO     | __main__:compute_and_export:197 - exported 135: 0:00:23.764493
+2023-01-06 20:20:05.374 | INFO     | __main__:<module>:255 - 135: 0:00:49.527693
+2023-01-06 20:20:41.818 | INFO     | __main__:compute_and_export:197 - exported 148: 0:00:11.680940
+2023-01-06 20:20:41.819 | INFO     | __main__:<module>:255 - 148: 0:00:36.445361
+2023-01-06 20:21:19.284 | INFO     | __main__:compute_and_export:197 - exported 159: 0:00:11.163049
+2023-01-06 20:21:19.286 | INFO     | __main__:<module>:255 - 159: 0:00:37.466419
+2023-01-06 20:21:57.594 | INFO     | __main__:compute_and_export:197 - exported 167: 0:00:11.912895
+2023-01-06 20:21:57.594 | INFO     | __main__:<module>:255 - 167: 0:00:38.307445
+2023-01-06 20:22:30.724 | INFO     | __main__:compute_and_export:197 - exported 188: 0:00:08.199328
+2023-01-06 20:22:30.724 | INFO     | __main__:<module>:255 - 188: 0:00:33.129887
+2023-01-06 20:23:35.386 | INFO     | __main__:compute_and_export:197 - exported 194: 0:00:37.223529
+2023-01-06 20:23:35.387 | INFO     | __main__:<module>:255 - 194: 0:01:04.662080
+2023-01-06 20:24:24.106 | INFO     | __main__:compute_and_export:197 - exported 218: 0:00:19.704896
+2023-01-06 20:24:24.108 | INFO     | __main__:<module>:255 - 218: 0:00:48.720765
+2023-01-06 20:24:57.538 | INFO     | __main__:compute_and_export:197 - exported 221: 0:00:08.198487
+2023-01-06 20:24:57.539 | INFO     | __main__:<module>:255 - 221: 0:00:33.430829
+2023-01-06 20:27:23.300 | INFO     | __main__:compute_and_export:197 - exported 226: 0:01:55.886465
+2023-01-06 20:27:23.301 | INFO     | __main__:<module>:255 - 226: 0:02:25.761794
+2023-01-06 20:55:39.601 | INFO     | __main__:<module>:212 - Analysis date: 2022-10-12
+2023-01-06 20:55:42.877 | INFO     | __main__:<module>:219 - get unique operators to loop over: 0:00:03.235513
+2023-01-06 21:06:15.316 | INFO     | __main__:<module>:212 - Analysis date: 2022-10-12
+2023-01-06 21:06:18.431 | INFO     | __main__:<module>:219 - get unique operators to loop over: 0:00:03.112715
+2023-01-06 21:07:16.918 | INFO     | __main__:compute_and_export:197 - exported 243: 0:00:18.078234
+2023-01-06 21:07:16.920 | INFO     | __main__:<module>:255 - 243: 0:00:50.658567
+2023-01-06 21:08:05.448 | INFO     | __main__:compute_and_export:197 - exported 246: 0:00:12.671640
+2023-01-06 21:08:05.449 | INFO     | __main__:<module>:255 - 246: 0:00:48.524641
+2023-01-06 21:08:49.892 | INFO     | __main__:compute_and_export:197 - exported 247: 0:00:10.179339
+2023-01-06 21:08:49.894 | INFO     | __main__:<module>:255 - 247: 0:00:44.444917
+2023-01-06 21:09:37.412 | INFO     | __main__:compute_and_export:197 - exported 259: 0:00:16.063575
+2023-01-06 21:09:37.413 | INFO     | __main__:<module>:255 - 259: 0:00:47.518286
+2023-01-06 21:12:13.272 | INFO     | __main__:compute_and_export:197 - exported 269: 0:01:58.107990
+2023-01-06 21:12:13.274 | INFO     | __main__:<module>:255 - 269: 0:02:35.860558
+2023-01-06 21:13:15.439 | INFO     | __main__:compute_and_export:197 - exported 284: 0:00:29.366643
+2023-01-06 21:13:15.440 | INFO     | __main__:<module>:255 - 284: 0:01:02.165339
+2023-01-06 21:14:18.836 | INFO     | __main__:compute_and_export:197 - exported 290: 0:00:31.697425
+2023-01-06 21:14:18.838 | INFO     | __main__:<module>:255 - 290: 0:01:03.398408
+2023-01-06 21:15:04.069 | INFO     | __main__:compute_and_export:197 - exported 293: 0:00:15.304397
+2023-01-06 21:15:04.070 | INFO     | __main__:<module>:255 - 293: 0:00:45.231037
+2023-01-06 21:15:55.108 | INFO     | __main__:compute_and_export:197 - exported 295: 0:00:21.170220
+2023-01-06 21:15:55.110 | INFO     | __main__:<module>:255 - 295: 0:00:51.039545
+2023-01-06 21:16:43.696 | INFO     | __main__:compute_and_export:197 - exported 300: 0:00:21.141222
+2023-01-06 21:16:43.697 | INFO     | __main__:<module>:255 - 300: 0:00:48.586826
+2023-01-06 21:17:31.510 | INFO     | __main__:compute_and_export:197 - exported 301: 0:00:21.769190
+2023-01-06 21:17:31.511 | INFO     | __main__:<module>:255 - 301: 0:00:47.813611
+2023-01-06 21:18:10.157 | INFO     | __main__:compute_and_export:197 - exported 30: 0:00:08.878877
+2023-01-06 21:18:10.158 | INFO     | __main__:<module>:255 - 30: 0:00:38.646692
+2023-01-06 21:18:48.565 | INFO     | __main__:compute_and_export:197 - exported 310: 0:00:11.568141
+2023-01-06 21:18:48.568 | INFO     | __main__:<module>:255 - 310: 0:00:38.408699
+2023-01-06 21:19:25.519 | INFO     | __main__:compute_and_export:197 - exported 314: 0:00:10.654149
+2023-01-06 21:19:25.520 | INFO     | __main__:<module>:255 - 314: 0:00:36.950928
+2023-01-06 21:19:56.121 | INFO     | __main__:compute_and_export:197 - exported 315: 0:00:07.345102
+2023-01-06 21:19:56.121 | INFO     | __main__:<module>:255 - 315: 0:00:30.599994
+2023-01-06 21:20:55.865 | INFO     | __main__:compute_and_export:197 - exported 336: 0:00:32.660162
+2023-01-06 21:20:55.866 | INFO     | __main__:<module>:255 - 336: 0:00:59.744250
+2023-01-06 21:21:30.061 | INFO     | __main__:compute_and_export:197 - exported 349: 0:00:08.626603
+2023-01-06 21:21:30.063 | INFO     | __main__:<module>:255 - 349: 0:00:34.196876
+2023-01-06 21:22:06.248 | INFO     | __main__:compute_and_export:197 - exported 350: 0:00:10.542453
+2023-01-06 21:22:06.249 | INFO     | __main__:<module>:255 - 350: 0:00:36.185394
+2023-01-06 21:23:02.896 | INFO     | __main__:compute_and_export:197 - exported 361: 0:00:27.617254
+2023-01-06 21:23:02.897 | INFO     | __main__:<module>:255 - 361: 0:00:56.647392
+2023-01-06 21:24:11.825 | INFO     | __main__:compute_and_export:197 - exported 372: 0:00:40.835415
+2023-01-06 21:24:11.827 | INFO     | __main__:<module>:255 - 372: 0:01:08.929424
+2023-01-06 21:24:59.779 | INFO     | __main__:compute_and_export:197 - exported 45: 0:00:20.634716
+2023-01-06 21:24:59.780 | INFO     | __main__:<module>:255 - 45: 0:00:47.951885
+2023-01-06 21:37:17.170 | INFO     | __main__:<module>:212 - Analysis date: 2022-10-12
+2023-01-06 21:37:19.466 | INFO     | __main__:<module>:219 - get unique operators to loop over: 0:00:02.272514
+2023-01-06 21:38:28.166 | INFO     | __main__:compute_and_export:197 - exported 75: 0:00:29.432619
+2023-01-06 21:38:28.167 | INFO     | __main__:<module>:261 - 75: 0:01:08.699033
+2023-01-06 21:38:28.167 | INFO     | __main__:<module>:264 - execution time: 0:01:10.972955
+2023-01-06 21:39:47.530 | INFO     | __main__:<module>:212 - Analysis date: 2022-10-12
+2023-01-06 21:39:50.104 | INFO     | __main__:<module>:219 - get unique operators to loop over: 0:00:02.573770
+2023-01-06 21:40:21.062 | INFO     | __main__:<module>:212 - Analysis date: 2022-10-12
+2023-01-06 21:40:23.552 | INFO     | __main__:<module>:219 - get unique operators to loop over: 0:00:02.489039
+2023-01-06 22:04:02.403 | INFO     | __main__:<module>:220 - Analysis date: 2022-10-12
+2023-01-06 22:04:05.631 | INFO     | __main__:<module>:227 - get unique operators to loop over: 0:00:03.194686
