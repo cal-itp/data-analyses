@@ -61,6 +61,7 @@ def operators_with_data(gcs_folder: str = f"{DASK_TEST}vp_sjoin/") -> list:
 
 # https://stackoverflow.com/questions/58145700/using-groupby-to-store-value-counts-in-new-column-in-dask-dataframe
 # https://github.com/dask/dask/pull/5327
+@delayed
 def keep_min_max_timestamps_by_segment(
     vp_to_seg: dd.DataFrame) -> dd.DataFrame:
     """
@@ -93,14 +94,14 @@ def keep_min_max_timestamps_by_segment(
         enter_exit,
         on = segment_trip_cols + ["vehicle_timestamp"],
         how = "inner"
-    ).repartition(npartitions=1)
+    ).reset_index(drop=True)
     
     return enter_exit_full_info
     
     
 @delayed
 def merge_in_segment_shape(
-    vp: dd.DataFrame, segments: dg.GeoDataFrame) -> dd.DataFrame:
+    vp: dd.DataFrame, segments: gpd.GeoDataFrame) -> dd.DataFrame:
     """
     Do linear referencing and calculate `shape_meters` for the 
     enter/exit points on the segment. 
@@ -114,17 +115,20 @@ def merge_in_segment_shape(
     segments2 = segments[segment_cols + ["geometry"]]
     
     # https://stackoverflow.com/questions/71685387/faster-methods-to-create-geodataframe-from-a-dask-or-pandas-dataframe
+    # https://github.com/geopandas/dask-geopandas/issues/197
+    vp = vp.assign(
+        geometry = dg.points_from_xy(vp, "lon", "lat", crs = "EPSG:3310"), 
+    )
+    
+    # Refer to the geometry column by name
     vp_gddf = dg.from_dask_dataframe(
         vp, 
-        geometry = dg.points_from_xy(
-            vp, 
-            x = "lon", y = "lat", 
-            crs = "EPSG:3310")
-    ).drop(columns = ["lat", "lon"])
-            
+        geometry="geometry"
+    )
+                
     linear_ref_vp_to_shape = dd.merge(
         vp_gddf, 
-        segments2,
+        segments[segment_cols + ["geometry"]],
         on = segment_cols,
         how = "inner"
     ).rename(
@@ -137,7 +141,7 @@ def merge_in_segment_shape(
         meta = ('shape_meters', 'float'))
     
     linear_ref_df = (linear_ref_vp_to_shape.drop(
-                        columns = ["geometry", "shape_geometry"])
+                        columns = ["geometry", "shape_geometry", "lon", "lat"])
                      .drop_duplicates()
                      .reset_index(drop=True)
     )
@@ -219,15 +223,35 @@ def calculate_speed_by_segment_trip(
     return segment_speeds
 
 
-def compute_and_export(df_delayed: Delayed):
+def concat_and_export(filename: str, filetype: str = "df"):
+    """
+    Read in a folder of partitioned parquets and export as 1 parquet.
+    """
+    if filetype == "df":
+        ddf = dd.read_parquet(filename)
+        ddf.compute().to_parquet(filename)
+        # Remove the folder version, not the single parquet
+        fs.rm(f"{filename}/", recursive=True)
+        
+    elif filetype == "gdf":
+        ddf = dg.read_parquet(filename)
+        
+
+def compute_and_export(results: list):
     time0 = datetime.datetime.now()
     
-    df = compute(df_delayed)[0] #df_delayed.compute()
-    itp_id = df.calitp_itp_id.unique().compute().iloc[0]
+    results2 = [compute(i)[0] for i in results]
+
+    ddf = dd.multi.concat(results2, axis=0).reset_index(drop=True)
     
-    #df = df.repartition(partition_size="75MB")
+    #ddf = compute(df_delayed)[0] #df_delayed.compute()
+    itp_id = ddf.calitp_itp_id.unique().compute().iloc[0]
     
-    df.compute().to_parquet(
+    ddf = ddf.repartition(partition_size="25MB")
+    
+    ddf.to_parquet(
+        f"{DASK_TEST}vp_sjoin/speeds_{itp_id}_{analysis_date}.parquet")
+    concat_and_export(
         f"{DASK_TEST}vp_sjoin/speeds_{itp_id}_{analysis_date}.parquet")
     
     time1 = datetime.datetime.now()
@@ -237,36 +261,32 @@ def compute_and_export(df_delayed: Delayed):
 @delayed    
 def import_vehicle_positions(itp_id: int)-> dd.DataFrame:
     """
-    Import vehicle positions spatially joind to segments for 
+    Import vehicle positions spatially joined to segments for 
     each operator.
     """
-    operator_vp_segments = dd.read_parquet(
+    vp_segments = dd.read_parquet(
             f"{DASK_TEST}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet")
     
-    vp_pared = keep_min_max_timestamps_by_segment(operator_vp_segments)
-        
-    return vp_pared
+    return vp_segments
 
 
 @delayed
-def import_segments(itp_id: int) -> dg.GeoDataFrame:
+def import_segments(itp_id: int) -> gpd.GeoDataFrame:
     """
     Import segments and subset to operator segments.
     """
-    segments = dg.read_parquet(
+    segments = gpd.read_parquet(
         f"{DASK_TEST}longest_shape_segments.parquet", 
         filters = [[("calitp_itp_id", "==", itp_id)]]
     )
-    
-    segments = segments.repartition(npartitions=1)
-    
+        
     return segments
 
 
 if __name__ == "__main__": 
-    from dask.distributed import Client
+    #from dask.distributed import Client
     
-    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/A4_speeds_by_segment_trip.log", retention="3 months")
     logger.add(sys.stderr, 
@@ -277,43 +297,59 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    ALL_ITP_IDS = operators_with_data(f"{DASK_TEST}vp_sjoin/")  
+    #ITP_IDS = operators_with_data(f"{DASK_TEST}vp_sjoin/")  
     
-    DONE = [45, 126, 246, 310, 300, 135, 30, 188, 336, 221, 
-            110, 127, 148, 159, 167, 194, 218, 226,
-            235, 243, 247, 259, 269, 273, 
-            282, # 282 SF muni takes 40 min!!
-            284, 290, 293, 294, 295, 301, 314, 315,
-            349, 350, 361, 372, 75,
+    DONE = [110, 126, 127, 135, 148, 159, 167,
+            #282, # 282 SF muni takes 40 min!!
             #182 LA Metro skipped because it is too big to do in 1 partition
             # delayed can handle LA Metro...but it takes 2 hrs!
            ]
     
-    #ITP_IDS = [i for i in ALL_ITP_IDS if i not in DONE]
-    ITP_IDS = [4]
+    EXCLUDE = [182, 282, 4]
+    #ITP_IDS = [i for i in ITP_IDS if i not in DONE and i not in EXCLUDE]
     
-    results = []
-    for itp_id in ITP_IDS:
+    for itp_id in EXCLUDE:
+        logger.info(f"start {itp_id}")
+        
         start_id = datetime.datetime.now()
 
         # https://docs.dask.org/en/stable/delayed-collections.html
-        operator_vp_segments = import_vehicle_positions(itp_id)
+        operator_vp_segments = import_vehicle_positions(itp_id).persist()
         segments_subset = import_segments(itp_id)
+
+        routes = operator_vp_segments.route_dir_identifier.unique().compute()
+
+        results = []
         
-        vp_linear_ref = merge_in_segment_shape(
-            operator_vp_segments, segments_subset).persist()
+        for r in routes:
+            start_route = datetime.datetime.now()
+            
+            vp_on_route = operator_vp_segments[
+                operator_vp_segments.route_dir_identifier == r
+            ].reset_index(drop=True)
         
-        operator_speeds = calculate_speed_by_segment_trip(vp_linear_ref).persist()
+            vp_pared = keep_min_max_timestamps_by_segment(vp_on_route).persist()
+            
+            vp_linear_ref = merge_in_segment_shape(
+                vp_pared, segments_subset)
         
-        compute_and_export(operator_speeds)
+            operator_speeds = calculate_speed_by_segment_trip(
+                vp_linear_ref).persist()
+            
+            results.append(operator_speeds)
+            
+            end_route = datetime.datetime.now()
+            logger.info(f"route: {r} finished")
+            logger.info(f"route delayed execution: {end_route - start_route}")
+                        
+        compute_and_export(results)
         
         end_id = datetime.datetime.now()
         
         logger.info(f"ITP ID: {itp_id}: {end_id-start_id}")
 
-    
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
     
-    client.close()
+    #client.close()
         
