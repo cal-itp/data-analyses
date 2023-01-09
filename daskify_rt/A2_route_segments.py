@@ -92,7 +92,7 @@ def route_direction_to_segments_crosswalk():
     """
     segments = dg.read_parquet(f"{DASK_TEST}longest_shape_segments.parquet")
 
-    keep_cols = ["calitp_itp_id", "calitp_url_number", 
+    keep_cols = ["calitp_itp_id", 
                  "route_id", "direction_id",
                  "route_dir_identifier"
                 ]
