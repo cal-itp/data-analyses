@@ -131,17 +131,19 @@ def merge_in_segment_shape(
         segments[segment_cols + ["geometry"]],
         on = segment_cols,
         how = "inner"
-    ).rename(
-        columns = {"geometry_x": "geometry",
-                   "geometry_y": "shape_geometry"}
-    )
+    )#.rename(
+     #   columns = {"geometry_x": "geometry",
+     #              "geometry_y": "shape_geometry"}
+    #)
 
     linear_ref_vp_to_shape['shape_meters'] = linear_ref_vp_to_shape.apply(
-        lambda x: x.shape_geometry.project(x.geometry), axis=1,
+        lambda x: x.geometry_y.project(x.geometry_x), axis=1,
         meta = ('shape_meters', 'float'))
     
     linear_ref_df = (linear_ref_vp_to_shape.drop(
-                        columns = ["geometry", "shape_geometry", "lon", "lat"])
+                        columns = ["geometry_x", "geometry_y",
+                            #"geometry", "shape_geometry", 
+                            "lon", "lat"])
                      .drop_duplicates()
                      .reset_index(drop=True)
     )
@@ -156,7 +158,7 @@ def derive_speed(df: dd.DataFrame,
     Derive meters and sec elapsed to calculate speed_mph.
     """
         
-    df = df.assign(
+    df2 = df.assign(
         meters_elapsed = df[distance_cols[1]] - df[distance_cols[0]],
         sec_elapsed = (df[time_cols[1]] - df[time_cols[0]]).divide(
                        np.timedelta64(1, 's')),
@@ -164,11 +166,11 @@ def derive_speed(df: dd.DataFrame,
     
     MPH_PER_MPS = 2.237
 
-    df = df.assign(
-        speed_mph = df.meters_elapsed.divide(df.sec_elapsed) * MPH_PER_MPS
+    df2 = df2.assign(
+        speed_mph = df2.meters_elapsed.divide(df2.sec_elapsed) * MPH_PER_MPS
     )
     
-    return df
+    return df2
 
 
 @delayed
@@ -214,10 +216,14 @@ def calculate_speed_by_segment_trip(
     ).reset_index(drop=True)
     
     
-    segment_speeds = derive_speed(
-        segment_trip_agg, 
-        distance_cols = ("min_dist", "max_dist"), 
-        time_cols = ("min_time", "max_time")
+    segment_speeds = segment_trip_agg.apply(
+        derive_speed, 
+        distance_cols = ("min_dist", "max_dist"),
+        time_cols = ("min_time", "max_time"),
+        axis=1, 
+        meta = {"meters_elapsed": "float",
+                "sec_elapsed": "int",
+                "speed_mph": "float"}
     )
     
     return segment_speeds
@@ -237,17 +243,16 @@ def concat_and_export(filename: str, filetype: str = "df"):
         ddf = dg.read_parquet(filename)
         
 
-def compute_and_export(results: list):
+def compute_and_export(results: list, itp_id: int):
     time0 = datetime.datetime.now()
     
-    results2 = [compute(i)[0] for i in results]
+    results = [compute(i)[0] for i in results]
 
-    ddf = dd.multi.concat(results2, axis=0).reset_index(drop=True)
+    ddf = dd.multi.concat(results, axis=0).reset_index(drop=True)
     
-    #ddf = compute(df_delayed)[0] #df_delayed.compute()
-    itp_id = ddf.calitp_itp_id.unique().compute().iloc[0]
+    #itp_id = ddf.calitp_itp_id.unique().compute().iloc[0]
     
-    ddf = ddf.repartition(partition_size="25MB")
+    ddf = ddf.repartition(partition_size="50MB")
     
     ddf.to_parquet(
         f"{DASK_TEST}vp_sjoin/speeds_{itp_id}_{analysis_date}.parquet")
@@ -266,6 +271,8 @@ def import_vehicle_positions(itp_id: int)-> dd.DataFrame:
     """
     vp_segments = dd.read_parquet(
             f"{DASK_TEST}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet")
+    
+    vp_segments = vp_segments.repartition(partition_size = "25MB")
     
     return vp_segments
 
@@ -315,34 +322,37 @@ if __name__ == "__main__":
 
         # https://docs.dask.org/en/stable/delayed-collections.html
         operator_vp_segments = import_vehicle_positions(itp_id).persist()
-        segments_subset = import_segments(itp_id)
+        segments_subset = import_segments(itp_id)        
+    
+        vp_pared  = operator_vp_segments.map_partitions(
+            keep_min_max_timestamps_by_segment,
+            meta = operator_vp_segments
+        ).clear_divisions().repartition(npartitions=1).persist()
+        
+        vp_linear_ref = merge_in_segment_shape( 
+            vp_pared, segments_subset).persist()
+        
+        vp_linear_ref = vp_linear_ref.repartition(partition_size = "25MB")
+        
+        operator_speeds = vp_linear_ref.map_partitions(
+            calculate_speed_by_segment_trip,
+            meta = {
+                'calitp_itp_id': 'int64',
+                'trip_id': 'object',
+                'route_dir_identifier': 'int64',
+                'segment_sequence': 'object',
+                'min_time': 'datetime64[ns]',
+                'max_time': 'datetime64[ns]',
+                'min_dist': 'float', 
+                'max_dist': 'float',
+                'meters_elapsed': 'float',
+                'sec_elapsed': 'int',
+                'speed_mph': 'float'}).persist()
 
-        routes = operator_vp_segments.route_dir_identifier.unique().compute()
-
-        results = []
-        
-        for r in routes:
-            start_route = datetime.datetime.now()
-            
-            vp_on_route = operator_vp_segments[
-                operator_vp_segments.route_dir_identifier == r
-            ].reset_index(drop=True)
-        
-            vp_pared = keep_min_max_timestamps_by_segment(vp_on_route).persist()
-            
-            vp_linear_ref = merge_in_segment_shape(
-                vp_pared, segments_subset)
-        
-            operator_speeds = calculate_speed_by_segment_trip(
-                vp_linear_ref).persist()
-            
-            results.append(operator_speeds)
-            
-            end_route = datetime.datetime.now()
-            logger.info(f"route: {r} finished")
-            logger.info(f"route delayed execution: {end_route - start_route}")
+        #operator_speeds = calculate_speed_by_segment_trip(
+        #    vp_linear_ref).persist()
                         
-        compute_and_export(results)
+        compute_and_export([operator_speeds], itp_id)
         
         end_id = datetime.datetime.now()
         
