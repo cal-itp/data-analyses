@@ -243,14 +243,14 @@ def concat_and_export(filename: str, filetype: str = "df"):
         ddf = dg.read_parquet(filename)
         
 
-def compute_and_export(results: list, itp_id: int):
+def compute_and_export(results: list, itp_id: int, file_name: str):
     time0 = datetime.datetime.now()
     
     ddf = compute(results)[0]    
     ddf2 = ddf.repartition(partition_size="85MB")
     
     ddf2.to_parquet(
-        f"{DASK_TEST}vp_sjoin/speeds_{itp_id}_{analysis_date}.parquet"
+        f"{DASK_TEST}vp_sjoin/{file_name}_{itp_id}_{analysis_date}.parquet"
     )
     
     '''
@@ -268,9 +268,9 @@ def compute_and_export(results: list, itp_id: int):
         "speed_mph": "float",
     }
     '''
-    
-    concat_and_export(
-        f"{DASK_TEST}vp_sjoin/speeds_{itp_id}_{analysis_date}.parquet")
+    if file_name == "speeds":
+        concat_and_export(
+            f"{DASK_TEST}vp_sjoin/{file_name}_{itp_id}_{analysis_date}.parquet")
     
     time1 = datetime.datetime.now()
     logger.info(f"exported: {itp_id}: {time1 - time0}")
@@ -326,25 +326,28 @@ if __name__ == "__main__":
         start_id = datetime.datetime.now()
 
         # https://docs.dask.org/en/stable/delayed-collections.html
-        operator_vp_segments = import_vehicle_positions(itp_id)
+        #operator_vp_segments = import_vehicle_positions(itp_id)
         segments_subset = import_segments(itp_id)        
         
         time1 = datetime.datetime.now()
         logger.info(f"imported data: {time1 - start_id}")
-        
+        '''
         vp_pared = keep_min_max_timestamps_by_segment(
             operator_vp_segments)
         
-        vp_pared = vp_pared.repartition(partition_size = "85MB").persist()
-        
+        compute_and_export(vp_pared, itp_id, "vp_pared")
+        '''
         time2 = datetime.datetime.now()
         logger.info(f"keep enter/exit points by segment-trip: {time2 - time1}")
+        
+        vp_pared = delayed(dd.read_parquet)(
+            f"{DASK_TEST}vp_sjoin/vp_pared_{itp_id}_{analysis_date}.parquet")
         
         vp_linear_ref = merge_in_segment_shape( 
             vp_pared, segments_subset)
         
         vp_linear_ref = vp_linear_ref.repartition(
-            partition_size = "85MB")
+            partition_size = "85MB").persist()
 
         time3 = datetime.datetime.now()
         logger.info(f"merge in segment shapes and do linear referencing: "
@@ -356,7 +359,7 @@ if __name__ == "__main__":
         time4 = datetime.datetime.now()
         logger.info(f"calculate speed: {time4 - time3}")
                 
-        compute_and_export(operator_speeds, itp_id)
+        compute_and_export(operator_speeds, itp_id, "speeds")
         
         end_id = datetime.datetime.now()
         

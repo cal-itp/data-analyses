@@ -44,3 +44,18 @@
 2023-01-10 16:43:37.032 | INFO     | __main__:<module>:341 - keep enter/exit points by segment-trip: 0:02:02.065553
 2023-01-10 16:43:37.068 | INFO     | __main__:<module>:350 - merge in segment shapes and do linear referencing: 0:00:00.036020
 2023-01-10 16:43:37.069 | INFO     | __main__:<module>:357 - calculate speed: 0:00:00.000640
+2023-01-10 19:43:27.504 | INFO     | __main__:<module>:316 - Analysis date: 2022-10-12
+2023-01-10 19:43:27.506 | INFO     | __main__:<module>:324 - start 182
+2023-01-10 19:43:27.507 | INFO     | __main__:<module>:333 - imported data: 0:00:00.000600
+2023-01-10 19:43:27.508 | INFO     | __main__:<module>:341 - keep enter/exit points by segment-trip: 0:00:00.000494
+2023-01-10 19:43:28.181 | INFO     | __main__:<module>:353 - merge in segment shapes and do linear referencing: 0:00:00.673711
+2023-01-10 19:43:28.182 | INFO     | __main__:<module>:360 - calculate speed: 0:00:00.000496
+2023-01-10 19:47:05.532 | INFO     | __main__:<module>:316 - Analysis date: 2022-10-12
+2023-01-10 19:47:05.532 | INFO     | __main__:<module>:324 - start 182
+2023-01-10 19:47:05.533 | INFO     | __main__:<module>:333 - imported data: 0:00:00.000523
+2023-01-10 19:47:05.533 | INFO     | __main__:<module>:341 - keep enter/exit points by segment-trip: 0:00:00.000462
+2023-01-10 20:11:59.563 | INFO     | __main__:<module>:353 - merge in segment shapes and do linear referencing: 0:24:54.029834
+2023-01-10 20:11:59.564 | INFO     | __main__:<module>:360 - calculate speed: 0:00:00.001013
+2023-01-10 22:37:28.002 | INFO     | __main__:compute_and_export:276 - exported: 182: 2:25:28.437116
+2023-01-10 22:37:28.062 | INFO     | __main__:<module>:366 - ITP ID: 182: 2:50:22.529838
+2023-01-10 22:37:28.063 | INFO     | __main__:<module>:369 - execution time: 2:50:22.530679
