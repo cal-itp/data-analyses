@@ -26,6 +26,7 @@ from shared_utils import rt_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
+COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
 
 analysis_date = "2022-10-12"
 fs = gcsfs.GCSFileSystem()
@@ -47,6 +48,7 @@ def categorize_scheduled_trips_time_of_day(trips: pd.DataFrame):
     )
     
     return trips
+
 
 
 @delayed
@@ -137,7 +139,11 @@ if __name__ == "__main__":
     all_files = fs.ls(f"{DASK_TEST}vp_sjoin/")
     
     vp_seg_files = [f"gs://{i}" for i in all_files 
-                    if 'vp_segment' in i]
+                    if 'vp_segment' in i and 
+                    'vp_segment_182_' not in i and 
+                    'vp_segment_4_' not in i and
+                   'vp_segment_282_' not in i
+                   ]
     
     results = []
     
@@ -145,7 +151,7 @@ if __name__ == "__main__":
         logger.info(f"start file: {f}")
         
         df = import_vehicle_positions_on_segments(f)
-        trip_agg = delayed(get_trip_stats)(df).persist()
+        trip_agg = get_trip_stats(df)#.persist()
         compute_and_export(trip_agg, analysis_date)
     
             
