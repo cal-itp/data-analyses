@@ -30,6 +30,9 @@ https://stackoverflow.com/questions/71736681/possible-overhead-on-dask-computati
 https://docs.dask.org/en/stable/delayed-collections.html
 https://distributed.dask.org/en/latest/manage-computation.html
 https://docs.dask.org/en/latest/delayed-best-practices.html
+
+Map partitions has trouble computing result.
+Just use partitioned df and don't use `ddf.map_partitions`.
 """
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
@@ -95,7 +98,7 @@ def keep_min_max_timestamps_by_segment(
         on = segment_trip_cols + ["vehicle_timestamp"],
         how = "inner"
     ).reset_index(drop=True)
-    
+        
     return enter_exit_full_info
     
     
@@ -112,7 +115,6 @@ def merge_in_segment_shape(
     Merge in segment geometry later before plotting.
     """
     segment_cols = ["route_dir_identifier", "segment_sequence"]
-    segments2 = segments[segment_cols + ["geometry"]]
     
     # https://stackoverflow.com/questions/71685387/faster-methods-to-create-geodataframe-from-a-dask-or-pandas-dataframe
     # https://github.com/geopandas/dask-geopandas/issues/197
@@ -157,20 +159,22 @@ def derive_speed(df: dd.DataFrame,
     """
     Derive meters and sec elapsed to calculate speed_mph.
     """
-        
-    df2 = df.assign(
-        meters_elapsed = df[distance_cols[1]] - df[distance_cols[0]],
-        sec_elapsed = (df[time_cols[1]] - df[time_cols[0]]).divide(
+    min_dist, max_dist = distance_cols[0], distance_cols[1]
+    min_time, max_time = time_cols[0], time_cols[1]    
+    
+    df = df.assign(
+        meters_elapsed = df[max_dist] - df[min_dist],
+        sec_elapsed = (df[max_time] - df[min_time]).divide(
                        np.timedelta64(1, 's')),
     )
     
     MPH_PER_MPS = 2.237
 
-    df2 = df2.assign(
-        speed_mph = df2.meters_elapsed.divide(df2.sec_elapsed) * MPH_PER_MPS
+    df = df.assign(
+        speed_mph = df.meters_elapsed.divide(df.sec_elapsed) * MPH_PER_MPS
     )
     
-    return df2
+    return df
 
 
 @delayed
@@ -205,27 +209,23 @@ def calculate_speed_by_segment_trip(
                 .shape_meters.max()
                 .compute()
                 .reset_index(name="max_dist")
-               )    
+               )  
     
+    base_agg = gdf[segment_trip_cols].drop_duplicates().reset_index(drop=True)
     segment_trip_agg = (
-        gdf[segment_trip_cols].drop_duplicates()
+        base_agg
         .merge(min_time, on = segment_trip_cols, how = "left")
         .merge(max_time, on = segment_trip_cols, how = "left")
         .merge(min_dist, on = segment_trip_cols, how = "left")
         .merge(max_dist, on = segment_trip_cols, how = "left")
-    ).reset_index(drop=True)
-    
-    
-    segment_speeds = segment_trip_agg.apply(
-        derive_speed, 
-        distance_cols = ("min_dist", "max_dist"),
-        time_cols = ("min_time", "max_time"),
-        axis=1, 
-        meta = {"meters_elapsed": "float",
-                "sec_elapsed": "int",
-                "speed_mph": "float"}
     )
     
+    segment_speeds = derive_speed(
+        segment_trip_agg,
+        distance_cols = ("min_dist", "max_dist"),
+        time_cols = ("min_time", "max_time")
+    )
+        
     return segment_speeds
 
 
@@ -246,16 +246,29 @@ def concat_and_export(filename: str, filetype: str = "df"):
 def compute_and_export(results: list, itp_id: int):
     time0 = datetime.datetime.now()
     
-    results = [compute(i)[0] for i in results]
-
-    ddf = dd.multi.concat(results, axis=0).reset_index(drop=True)
+    ddf = compute(results)[0]    
+    ddf2 = ddf.repartition(partition_size="85MB")
     
-    #itp_id = ddf.calitp_itp_id.unique().compute().iloc[0]
+    ddf2.to_parquet(
+        f"{DASK_TEST}vp_sjoin/speeds_{itp_id}_{analysis_date}.parquet"
+    )
     
-    ddf = ddf.repartition(partition_size="50MB")
+    '''
+    custom_metadata = {
+        "calitp_itp_id": "int64",
+        "trip_id": "object",
+        "route_dir_identifier": "int64",
+        "segment_sequence": "string",
+        "min_time": "timestamp[ns]",
+        "max_time": "timestamp[ns]",
+        "min_dist": "float",
+        "max_dist": "float",
+        "meters_elapsed": "float",
+        "sec_elapsed": "float",
+        "speed_mph": "float",
+    }
+    '''
     
-    ddf.to_parquet(
-        f"{DASK_TEST}vp_sjoin/speeds_{itp_id}_{analysis_date}.parquet")
     concat_and_export(
         f"{DASK_TEST}vp_sjoin/speeds_{itp_id}_{analysis_date}.parquet")
     
@@ -271,8 +284,8 @@ def import_vehicle_positions(itp_id: int)-> dd.DataFrame:
     """
     vp_segments = dd.read_parquet(
             f"{DASK_TEST}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet")
-    
-    vp_segments = vp_segments.repartition(partition_size = "25MB")
+
+    vp_segments = vp_segments.repartition(partition_size = "85MB")
     
     return vp_segments
 
@@ -305,54 +318,45 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     #ITP_IDS = operators_with_data(f"{DASK_TEST}vp_sjoin/")  
-    
-    DONE = [110, 126, 127, 135, 148, 159, 167,
-            #282, # 282 SF muni takes 40 min!!
-            #182 LA Metro skipped because it is too big to do in 1 partition
-            # delayed can handle LA Metro...but it takes 2 hrs!
-           ]
-    
-    EXCLUDE = [182, 282, 4]
     #ITP_IDS = [i for i in ITP_IDS if i not in DONE and i not in EXCLUDE]
     
-    for itp_id in EXCLUDE:
+    for itp_id in [182]:
         logger.info(f"start {itp_id}")
         
         start_id = datetime.datetime.now()
 
         # https://docs.dask.org/en/stable/delayed-collections.html
-        operator_vp_segments = import_vehicle_positions(itp_id).persist()
+        operator_vp_segments = import_vehicle_positions(itp_id)
         segments_subset = import_segments(itp_id)        
-    
-        vp_pared  = operator_vp_segments.map_partitions(
-            keep_min_max_timestamps_by_segment,
-            meta = operator_vp_segments
-        ).clear_divisions().repartition(npartitions=1).persist()
+        
+        time1 = datetime.datetime.now()
+        logger.info(f"imported data: {time1 - start_id}")
+        
+        vp_pared = keep_min_max_timestamps_by_segment(
+            operator_vp_segments)
+        
+        vp_pared = vp_pared.repartition(partition_size = "85MB").persist()
+        
+        time2 = datetime.datetime.now()
+        logger.info(f"keep enter/exit points by segment-trip: {time2 - time1}")
         
         vp_linear_ref = merge_in_segment_shape( 
-            vp_pared, segments_subset).persist()
+            vp_pared, segments_subset)
         
-        vp_linear_ref = vp_linear_ref.repartition(partition_size = "25MB")
-        
-        operator_speeds = vp_linear_ref.map_partitions(
-            calculate_speed_by_segment_trip,
-            meta = {
-                'calitp_itp_id': 'int64',
-                'trip_id': 'object',
-                'route_dir_identifier': 'int64',
-                'segment_sequence': 'object',
-                'min_time': 'datetime64[ns]',
-                'max_time': 'datetime64[ns]',
-                'min_dist': 'float', 
-                'max_dist': 'float',
-                'meters_elapsed': 'float',
-                'sec_elapsed': 'int',
-                'speed_mph': 'float'}).persist()
+        vp_linear_ref = vp_linear_ref.repartition(
+            partition_size = "85MB")
 
-        #operator_speeds = calculate_speed_by_segment_trip(
-        #    vp_linear_ref).persist()
-                        
-        compute_and_export([operator_speeds], itp_id)
+        time3 = datetime.datetime.now()
+        logger.info(f"merge in segment shapes and do linear referencing: "
+                    f"{time3 - time2}")
+    
+        operator_speeds = calculate_speed_by_segment_trip(
+            vp_linear_ref)
+        
+        time4 = datetime.datetime.now()
+        logger.info(f"calculate speed: {time4 - time3}")
+                
+        compute_and_export(operator_speeds, itp_id)
         
         end_id = datetime.datetime.now()
         
