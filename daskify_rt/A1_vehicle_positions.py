@@ -1,6 +1,10 @@
 """
 Concatenate vehicle positions for operators on a single day.
-Set linear reference for vehicle positions along shape_id.
+
+Note: vehicle positions get changed back to tabular df 
+because adding a geometry column makes the file large.
+This script could be changed to just do the concatenation
+without making the geometry, and save the geometry making for later.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg

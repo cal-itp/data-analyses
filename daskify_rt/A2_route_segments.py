@@ -1,3 +1,18 @@
+"""
+Create route segments. 
+
+For now, use the code from HQTA and lift it completely.
+This is v1 RT data, so it'll be fine for now as a stand-in.
+
+Create a crosswalk where a trip's `route_id-direction_id` can 
+be merged to find the `route_dir_identifier`. 
+The `route_dir_identifier` is used for segments to cut segments
+for both directions the route runs.
+
+From the trip table, rather than going to shape_id, as long as route
+and direction info is present, we have already cut the segments 
+and stored what the longest_shape_id is for that route.
+"""
 import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
@@ -81,6 +96,27 @@ def get_longest_shapes(analysis_date: str):
     return longest_shapes
 
 
+def route_direction_to_segments_crosswalk():
+    """
+    Create a table where route_id-direction_id can be used
+    to find route_dir_identifier. 
+    
+    Trips table has route_id-direction_id, and needs a route_dir_identifier
+    attached to help do trip aggregations once vehicle positions
+    are joined to segments.
+    """
+    segments = dg.read_parquet(f"{DASK_TEST}longest_shape_segments.parquet")
+
+    keep_cols = ["calitp_itp_id", 
+                 "route_id", "direction_id",
+                 "route_dir_identifier"
+                ]
+    
+    segments2 = segments[keep_cols].drop_duplicates().reset_index(drop=True)
+    
+    return segments2
+    
+
 if __name__ == "__main__":
     
     longest_shapes = get_longest_shapes(analysis_date)
@@ -101,4 +137,7 @@ if __name__ == "__main__":
         DASK_TEST,
         "longest_shape_segments"
     )
-
+    
+    segment_crosswalk = route_direction_to_segments_crosswalk()
+    segment_crosswalk.compute().to_parquet(
+        f"{DASK_TEST}segments_route_direction_crosswalk.parquet")

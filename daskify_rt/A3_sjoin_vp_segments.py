@@ -1,39 +1,153 @@
 """
-Skip the linear reference until sjoin to segments is done.
-If linear reference is to derive distance elapsed between
-two timestamps, then can we reference it against the segment?
+Spatial join vehicle positions to route segments.
 
-We only need the enter/exit timestamps, rather than between each
-point within a segment.
+Use a loop + dask.delayed to do the spatial join by
+route-direction. Otherwise, points can be attached to other
+routes that also travel on the same road.
 
-But, what to do with a segment that only has 1 point? 
-It would still need a calculation derived, as an average, across the 
-previous segment? or the post segment? But at that point, it 
-can take the average for speed_mph...may not necessarily need
-a shape_meters calculation?
-
-https://stackoverflow.com/questions/24415806/coordinates-of-the-closest-points-of-two-geometries-in-shapely
-
-https://github.com/dask/dask/issues/8042
+Note: persist seems to help when delayed object is computed, but
+it might not be necessary, since we don't actually compute anything 
+beyond saving the parquet out.
 """
 
 import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
-import pandas as pd
+import gcsfs
 import geopandas as gpd
+import pandas as pd
+import sys
 
 from dask import delayed, compute
+from loguru import logger
 
-from shared_utils import utils, geography_utils
+import dask_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
+COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
 analysis_date = "2022-10-12"
-  
 
+fs = gcsfs.GCSFileSystem()
+
+def get_scheduled_trips(analysis_date: str) -> dd.DataFrame:
+    """
+    Get scheduled trips info (all operators) for single day, 
+    and keep subset of columns.
+    """
+    trips = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+    
+    keep_cols = ["calitp_itp_id", 
+                 "trip_id", "shape_id",
+                 "route_id", "direction_id"
+                ] 
+    
+    trips2 = (trips[keep_cols]
+              .reset_index(drop=True)
+             )
+    
+    return trips2.compute()
+
+              
+def merge_scheduled_trips_with_segment_crosswalk(
+    analysis_date: str) -> dd.DataFrame:
+    """
+    Merge scheduled trips with segments crosswalk to get 
+    the route_dir_identifier for each trip.
+    
+    The route_dir_identifier is a more aggregated grouping 
+    over which vehicle positions should be spatially joined to segments.
+    """
+    trips = get_scheduled_trips(analysis_date)
+    
+    segments_crosswalk = pd.read_parquet(
+        f"{DASK_TEST}segments_route_direction_crosswalk.parquet")
+               
+    trips_with_route_dir_identifier = dd.merge(
+        trips, 
+        segments_crosswalk,
+        on = ["calitp_itp_id", "route_id", "direction_id"],
+        how = "inner",
+    )
+              
+    return trips_with_route_dir_identifier
+      
+    
+def get_unique_operators_route_directions(analysis_date: str) -> pd.DataFrame:
+    """
+    Import vehicle positions and merge onto scheduled trips and segments
+    crosswalk to get route_dir_identifiers.
+    
+    Use this to break up the loop with dask delayed, by operator and
+    by route_direction.
+    """
+    vp = pd.read_parquet(
+        f"{DASK_TEST}vp_{analysis_date}.parquet", 
+        columns = ["calitp_itp_id", "trip_id"]
+    ).drop_duplicates().reset_index(drop=True)
+              
+    scheduled_trips_route_dir = merge_scheduled_trips_with_segment_crosswalk(
+        analysis_date)
+              
+    trips_with_route_dir = pd.merge(
+        vp,
+        scheduled_trips_route_dir,
+        on = ["calitp_itp_id", "trip_id"],
+        how = "inner"
+    ).drop_duplicates()
+    
+    keep_cols2 = ["calitp_itp_id",
+                  "route_dir_identifier", "trip_id"]
+    
+    return trips_with_route_dir[keep_cols2]              
+     
+
+@delayed(nout=2)
+def import_vehicle_positions_and_segments(
+    vp_crosswalk: pd.DataFrame,
+    itp_id: int, analysis_date: str,
+    buffer_size: int = 50
+) -> tuple[dg.GeoDataFrame]:
+    """
+    Import vehicle positions, filter to operator.
+    Import route segments, filter to operator.
+    """
+    vp = dg.read_parquet(
+        f"{DASK_TEST}vp_{analysis_date}.parquet", 
+        filters = [[("calitp_itp_id", "==", itp_id)]]
+    ).to_crs("EPSG:3310")
+    
+    vp2 = vp.drop_duplicates().reset_index(drop=True)
+    
+    vp_with_route_dir = dd.merge(
+        vp2,
+        vp_crosswalk,
+        on = ["calitp_itp_id", "trip_id"],
+        how = "inner"
+    ).reset_index(drop=True).repartition(npartitions=1)
+    
+    segments = (dg.read_parquet(
+                f"{DASK_TEST}longest_shape_segments.parquet", 
+                filters = [[("calitp_itp_id", "==", itp_id)]]
+            ).drop(columns = "calitp_url_number")
+            .drop_duplicates()
+            .reset_index(drop=True)
+    )
+    
+    segments_buff = segments.assign(
+        geometry = segments.geometry.buffer(buffer_size)
+    )
+    
+    return vp_with_route_dir, segments_buff
+
+
+@delayed
 def sjoin_vehicle_positions_to_segments(
-    itp_id: int, analysis_date: str, buffer_size: int = 50) -> dd.DataFrame:
+    vehicle_positions: dg.GeoDataFrame, 
+    segments: dg.GeoDataFrame,
+    route_identifier: int
+) -> dd.DataFrame:
     """
     Spatial join vehicle positions for an operator
     to buffered route segments.
@@ -42,87 +156,126 @@ def sjoin_vehicle_positions_to_segments(
     compute extremely large. 
     Do more aggregation at segment-level before bringing 
     point geom back in for linear referencing.
-    """
+    """    
+    vehicle_positions_subset = (vehicle_positions[
+        vehicle_positions.route_dir_identifier==route_identifier]
+        .reset_index(drop=True))
         
-    vp = dg.read_parquet(
-        f"{DASK_TEST}vp_{analysis_date}.parquet").to_crs(
-        geography_utils.CA_NAD83Albers)
-    vp = vp[vp.calitp_itp_id==itp_id]
+    segments_subset = (segments[
+        segments.route_dir_identifier==route_identifier]
+       .reset_index(drop=True)
+      )
     
-    segments = dg.read_parquet(f"{DASK_TEST}longest_shape_segments.parquet")
-    segments = segments[segments.calitp_itp_id==itp_id]
-    
-    segments_buff = segments.assign(
-        geometry = segments.geometry.buffer(buffer_size)
-    )
-    
-    segment_cols = ["route_dir_identifier", "segment_sequence"]    
+    # Once we filter for the route_dir_identifier, don't need to include
+    # it into segment_cols, otherwise, it'll show up as _x and _y
+    segment_cols = ["segment_sequence"]    
 
     vp_to_seg = dg.sjoin(
-        vp,
-        segments_buff[
+        vehicle_positions_subset,
+        segments_subset[
             segment_cols + ["geometry"]],
         how = "inner",
         predicate = "within"
-    ).drop(columns = "index_right").drop_duplicates()
+    ).drop(columns = "index_right").drop_duplicates().reset_index(drop=True)
+    
     
     # Drop geometry and return a df...eventually,
     # can attach point geom back on, after enter/exit points are kept
     # geometry seems to be a big issue in the compute
-    vp_to_seg = vp_to_seg.assign(
+    vp_to_seg2 = vp_to_seg.assign(
         lon = vp_to_seg.geometry.x,
         lat = vp_to_seg.geometry.y,
     )
     
     drop_cols = ["geometry", "vehicle_id", "entity_id"]
-    ddf = vp_to_seg.drop(columns = drop_cols)
+    ddf = vp_to_seg2.drop(columns = drop_cols)
     
     return ddf
-        
+       
+    
+def compute_and_export(results: list):
+    time0 = datetime.datetime.now()
+    
+    results2 = [compute(i)[0] for i in results]
+    ddf = dd.multi.concat(results2, axis=0).reset_index(drop=True)
+    # is this only grabbing the first of the many delayed objects in the list?
+    #df = dd.compute(*results2)[0]
 
-def compute_and_export(df_delayed):
-    df = compute(df_delayed)[0]
+    itp_id = ddf.calitp_itp_id.unique().compute().iloc[0]
     
-    itp_id = df.calitp_itp_id.unique().compute()[0]
-    
-    df.to_parquet(
+    ddf = ddf.repartition(partition_size = "25MB")
+    ddf.to_parquet(
         f"{DASK_TEST}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet")
-    
-    import_ddf = dd.read_parquet(
-        f"{DASK_TEST}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet"
-    )
-    
-    import_ddf.compute().to_parquet(
-        f"{DASK_TEST}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet"
-    )
-    
-    #TODO: need to figure out how to delete the directory version with 
-    # part0, part1
-    
-    
+    concat_and_export(
+        f"{DASK_TEST}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet")
+        
+    time1 = datetime.datetime.now()
+    logger.info(f"exported {itp_id}: {time1-time0}")
+              
+
+
 if __name__ == "__main__":
+    #from dask.distributed import Client
+    
+    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    
+    analysis_date = "2022-10-12"
+    
+    logger.add("./logs/A3_sjoin_vp_segments.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    logger.info(f"Analysis date: {analysis_date}")
+    
     start = datetime.datetime.now()
-    vp = dg.read_parquet(
-        f"{DASK_TEST}vp_{analysis_date}.parquet")
     
-    ITP_IDS = vp.calitp_itp_id.unique()
+    vp_df = get_unique_operators_route_directions(analysis_date)
     
-    results = []
+    time1 = datetime.datetime.now()
+    logger.info(f"get unique operators to loop over: {time1 - start}")
+    
+    ITP_IDS = vp_df.calitp_itp_id.unique()
     
     for itp_id in ITP_IDS:
         start_id = datetime.datetime.now()
         
-        vp_to_segment = delayed(sjoin_vehicle_positions_to_segments)(
-            itp_id, analysis_date, buffer_size=50)
+        operator_routes = (vp_df[vp_df.calitp_itp_id == itp_id]
+                           .route_dir_identifier.unique())
         
-        results.append(vp_to_segment)
+        operator_vp_df = (vp_df[vp_df.calitp_itp_id == itp_id]
+                          .reset_index(drop=True))
+        
+        vp, segments = import_vehicle_positions_and_segments(
+            operator_vp_df, 
+            itp_id, 
+            analysis_date, buffer_size=50).persist()
+        
+        results = []
+        
+        for route_identifier in operator_routes:
+            
+            vp_to_segment = sjoin_vehicle_positions_to_segments(
+                vp,
+                segments, 
+                route_identifier
+            ).persist()
+            
+            results.append(vp_to_segment)
+            
+        # Compute the list of delayed objects
+        #compute_and_export(results)
+        dask_utils.compute_and_export(
+            results,
+            gcs_folder = f"{DASK_TEST}vp_sjoin/",
+            file_name = f"vp_segment_{itp_id}_{analysis_date}.parquet",
+            export_single_parquet = True
+        )
         
         end_id = datetime.datetime.now()
-        print(f"{itp_id}: {end_id-start_id}")
+        logger.info(f"{itp_id}: {end_id-start_id}")
         
-    time1 = datetime.datetime.now()
-
-    # For each item in the list of delayed objects,
-    # turn it into a ddf and export
-    [compute_and_export(i) for i in results]
-
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end-start}")
+    
+    #client.close()
