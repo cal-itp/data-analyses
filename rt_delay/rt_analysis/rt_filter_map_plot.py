@@ -189,7 +189,7 @@ class RtFilterMapper:
         Enables calculation of metrics for SCCP, LPP.
         '''
         corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
-        self.corridor = corridor_gdf
+        self.corridor = corridor_gdf >> select(_.geometry)
         to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence']).dropna(subset=['stop_id'])
         clipped = to_clip.clip(corridor_gdf)
         shape_sequences = (self.stop_delay_view.dropna(subset=['stop_id'])
@@ -622,6 +622,9 @@ class RtFilterMapper:
               >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
              )
         speed_metric = df.target_delay_seconds.sum() / 60
+        self.corridor['schedule_metric_minutes'] = schedule_metric
+        self.corridor['speed_metric_minutes'] = speed_metric
+        self.corridor['filter'] = self.filter_formatted
         return {'schedule_metric_minutes': schedule_metric,
                'speed_metric_minutes': speed_metric}
     
