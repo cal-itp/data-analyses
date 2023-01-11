@@ -8,8 +8,11 @@ from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
 import re
+# import nltk
 from nltk import ngrams
 from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize, word_tokenize
+from autocorrect import Speller
 
 """
 Lists
@@ -17,6 +20,7 @@ Lists
 # Adjectives to delete
 description_words_to_delete = [
     "per day",
+    "road",
     "electric",
     "new",
     "additional",
@@ -53,75 +57,50 @@ description_words_to_delete = [
 ]
 
 # List of vehicles 
-bus_list = ["buses","busses", "vans", "van"]
+bus_list = ["buses","van"]
 
 lrv_list = [
     "light rail",
     "light rail vehicles",
     "lrv",
-    "lrvs",
 ]
+
+train_list = [
+    "trains",
+    "rail",
+    "locomotives",
+]
+
 other_vehicles_list = [
     "ferry",
     "vessels",
     "trolley",
-    "car",
-    "trains",
     "vehicles",
-    "rail",
     "vessels",
-    "locomotives",
     "vehicles",
     "emus",
     "trolleys",
 ]
 
+#  "parking spaces",
 other_list = [
     "turnouts",
     "routes",
     "station",
-    "parking spaces",
-    "stations",
-    "transit station",
+    "signals",
     "facility",
     "locations",
 ]
 
-
 """
 Functions
 """
-# Turn value counts into a dataframe
-def value_counts_df(df, col_of_interest):
-    df = (
-    df[col_of_interest]
-    .value_counts()
-    .to_frame()
-    .reset_index()
-    )
-    return df 
-
-# Place project status all on one row & Remove duplicate statuses
-def summarize_rows(df, col_to_group: str, col_to_summarize: str):
-    df = (df
-          .groupby(col_to_group)[col_to_summarize]
-          .apply(",".join)
-          .reset_index())
-
-    df[col_to_summarize] = (
-        df[col_to_summarize]
-        .apply(lambda x: ", ".join(set([y.strip() for y in x.split(",")])))
-        .str.strip()
-    )
-    return df
-
-
-def prep_descriptions_for_extraction(
+def simplify_descriptions(
     df, description_column: str, new_column: str, unwanted_words: list
 ):
-    """This function simplifies descriptions by lowering the strings, replacing hyphens, 
-      and removing certain words such as stop words to help with tallying
-      up metrics such as # of buses purchased.
+    """This function simplifies descriptions by lowering the strings,
+      replacing hyphens, autocorrects typos, and 
+      removing certain words such as stop words
 
     Args:
         df: the dataframe
@@ -153,7 +132,7 @@ def prep_descriptions_for_extraction(
     # Place all words to remove in one huge blob
     pat = r"\b(?:{})\b".format("|".join(unwanted_words))
     
-    # Replace all those words with nothing
+    # Replace all the words above words with nothing
     df[new_column] = df[new_column].str.replace(pat, "", regex=True)
     
     # Replace numbers to digits.
@@ -185,19 +164,23 @@ def prep_descriptions_for_extraction(
     # Remove all four digit numbers - usually those are years
     df[new_column] = df[new_column].str.replace(r'(?<!\d)\d{4}(?!\d)', '', regex=True)
     
+    # Correct spelling 
+    # https://stackoverflow.com/questions/49364664/how-to-use-autocorrect-in-pandas-column-of-sentences
+    spell = Speller(lang='en')
+    df[new_column] = df[new_column].apply(lambda x: " ".join([spell(i) for i in x.split()]))
     return df
 
 def extract_totals_one_category(df, description_column: str, new_col: str, keywords: list):
     """Extracts digits before a word in keywords list.
     Args:
         df: the dataframe
-        description_column (str): the column that holds a description.
+        description_column (str): the column that holds a project description.
         new_column (str): name of the new column that holds results.
         keywords (list): all the keywords you want such as ['buses','vans','cutaway']
     Returns:
-        A new column with all the digits before a certain keyword.
+        A new column.
         Ex: a project's description states "purchased 3 vans and bought 5 buses." 
-        3 and 5 will be returned.
+        [3,5] will be returned in the new column. 
     """
     # Delinate items in keywords list using |
     keywords = f"{'|'.join(keywords)}"
@@ -244,15 +227,25 @@ def grand_totals(df, original_column: str):
 
 def total_procurement_estimates(df, description_column: str, keywords_list: list, new_columns: list):
     
-    """Extracts digits before certain keywords and sum them up to get grand total estimates.
+    """Extracts digits before certain keywords and sum them up to get grand total estimates. 
     Args:
         df: the dataframe
+        
         description_column (str): column with project description.
-        keywords_list (list):  all the keywords you want. 
+        keywords_list (list):  list containing the lists of your keywords. 
+        EX: bus and vans is in the list "buses"
+        "Ferry and boats" belong in the list "water_vessels". 
+        Your keywords_list would be [buses, water_vessels].
+        
         new_columns (list): strings - what you your new columns to be named.
+        EX: ["total_buses","total_water_vessels"]
     Returns:
         A dataframe with totals based on your keywords. 
-        Ex: My keywords are ['buses','lrvs','ferries']. This function will return my
+        EX: I want to find total buses purchased. Buses can be vans/bus/buses. 
+        Search through a project's desc. like "purchased 14 zero emission buses, 30 45-foot vans.' 
+        This function will return "44" in the new column "total_buses". 
+        
+        My keywords are ['buses','lrvs','ferries']. This function will return my
         df with "total_bus", "total_lrvs", and "total_ferries" columns which 
         contain the sum of however many X were purchased per row/project.
     """
@@ -304,139 +297,37 @@ def project_description_search(df, description_column: str, keywords: list):
 
     return df
 
-"""
-Old
-Functions
-"""
-# Grabs an estimate of the number of ZEV purchased 
-# in a column and tags what type of ZEV was purchased
-def grab_zev_count(df, description_col: str):
+# Natalie's function to clean and place words in a project description column
+# into a list
+def get_list_of_words(df, col: str):
 
-    # Change the description to lower case
-    # so string search will be more accurate
-    df[description_col] = df[description_col].str.lower()
-
-    # Some numbers are spelled out: replace them
-    # Replace numbers that are written out into integers
-    df[description_col] = (
-        df[description_col]
-        .str.replace("two", "2")
-        .str.replace("three", "3")
-        .str.replace("four", "4")
-        .str.replace("five", "5")
-        .str.replace("six", "6")
-        .str.replace("seven", "7")
-        .str.replace("eight", "8")
-        .str.replace("nine", "9")
-        .str.replace("eleven", "11")
-        .str.replace("fifteen", "15")
-        .str.replace("twenty", "20")
-    )
-
-    # Extract numbers from description into a new column
-    # cast as float, fill in NA with 0
-    df["number_of_zev"] = (
-        df[description_col].str.extract("(\d+)").astype("float64").fillna(0)
-    )
-
-    # Tag whether the ZEV is a LRV/bus/other into a new column
-    # Other includes trolleys, ferries, the general 'vehicles', and more
-    df["lrv_or_bus"] = (
-        df[description_col]
-        .str.extract(
-            "(lrv|bus|buses|light rail vehicle|coach|rail)",
-            expand=False,
-        )
-        .fillna("other")
-    )
-
-    # Replace values to create broader categories
-    df["lrv_or_bus"] = df["lrv_or_bus"].replace(
-        {"lrv": "light rail vehicle", "coach": "bus", "rail": "light rail vehicle"}
-    )
-
-    return df
-
-"""
-Summary table for ZEV
-"""
-def zev_summary(
-    df_zev,
-    df_all_projects,
-    group_by_cols: list,
-    sum_cols: list,
-    count_cols: list,
-    monetary_cols: list,
-):
-    # Group by
-    zev_summary = df_zev.groupby(group_by_cols).agg(
-        {**{e: "sum" for e in sum_cols}, **{e: "count" for e in count_cols}}
-    )
-
-    zev_summary = zev_summary.reset_index()
-
-    # Aggregate the original dataframe with ALL projects, even non ZEV in grant program
-    all_projects = (
-        df_all_projects.groupby(group_by_cols)
-        .agg({**{e: "count" for e in count_cols}})
-        .reset_index()
-    )
-
-    # Merge the summaries together to calculate % of zev projects out of total projects
-    m1 = pd.merge(zev_summary, all_projects, how="inner", on=group_by_cols)
-
-    # Get grand totals
-    m1 = m1.append(m1.sum(numeric_only=True), ignore_index=True)
-
-    # Format to currency
-    m1 = A1_data_prep.currency_format(m1, monetary_cols)
-
-    # Clean cols
-    m1 = A1_data_prep.clean_up_columns(m1)
-
-    return m1
-
-"""
-Charts Functions
-"""
-#Labels for charts 
-def labeling(word):
-    # Add specific use cases where it's not just first letter capitalized
-    LABEL_DICT = { "prepared_y": "Year",
-              "dist": "District",
-              "nunique":"Number of Unique",
-              "project_no": "Project Number"}
+    # get just the one col
+    column = df[[col]]
     
-    if (word == "mpo") or (word == "rtpa"):
-        word = word.upper()
-    elif word in LABEL_DICT.keys():
-        word = LABEL_DICT[word]
-    else:
-        word = word.replace('unique_', "Number of Unique ").title()
-        word = word.replace('_', ' ').title()
+    # Correct spelling 
+    # https://stackoverflow.com/questions/49364664/how-to-use-autocorrect-in-pandas-column-of-sentences
+    spell = Speller(lang='en')
+    df[col] = df[col].apply(lambda x: " ".join([spell(i) for i in x.split()]))
     
-    return word
+    # remove single-dimensional entries from the shape of an array
+    col_text = column.squeeze()
+    # get list of words
+    text_list = col_text.tolist()
 
-# Bar chart with interactive tooltip: x_col and y_col will show up
-def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
-    if chart_title == "":
-        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
-    chart = (alt.Chart(df)
-             .mark_bar()
-             .encode(
-                 x=alt.X(x_col, title=labeling(x_col), ),
-                 y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
-                 color = alt.Color(colorcol, 
-                                  scale=alt.Scale(
-                                      range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
-                                      legend=alt.Legend(title=(labeling(colorcol)))
-                                  ),
-                tooltip = [x_col, y_col])
-             .properties( 
-                       title=chart_title)
-    )
+    # Join all the column into one large text blob, lower text
+    text_list = " ".join(text_list).lower()
 
-    chart=styleguide.preset_chart_config(chart)
-    return chart
+    # remove punctuation
+    text_list = re.sub(r"[^\w\s]", "", text_list)
 
+    # List of stopwords
+    swords = [re.sub(r"[^A-z\s]", "", sword) for sword in stopwords.words("english")]
 
+    # Append additionally words to remove from results
+
+    # Remove stopwords
+    clean_text_list = [
+        word for word in word_tokenize(text_list.lower()) if word not in swords
+    ]
+
+    return clean_text_list
