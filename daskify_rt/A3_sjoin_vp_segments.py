@@ -1,20 +1,13 @@
 """
-Skip the linear reference until sjoin to segments is done.
-If linear reference is to derive distance elapsed between
-two timestamps, then can we reference it against the segment?
+Spatial join vehicle positions to route segments.
 
-We only need the enter/exit timestamps, rather than between each
-point within a segment.
+Use a loop + dask.delayed to do the spatial join by
+route-direction. Otherwise, points can be attached to other
+routes that also travel on the same road.
 
-But, what to do with a segment that only has 1 point? 
-It would still need a calculation derived, as an average, across the 
-previous segment? or the post segment? But at that point, it 
-can take the average for speed_mph...may not necessarily need
-a shape_meters calculation?
-
-https://stackoverflow.com/questions/24415806/coordinates-of-the-closest-points-of-two-geometries-in-shapely
-
-https://github.com/dask/dask/issues/8042
+Note: persist seems to help when delayed object is computed, but
+it might not be necessary, since we don't actually compute anything 
+beyond saving the parquet out.
 """
 
 import dask.dataframe as dd
@@ -28,7 +21,7 @@ import sys
 from dask import delayed, compute
 from loguru import logger
 
-#from shared_utils import geography_utils
+import dask_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
@@ -198,21 +191,7 @@ def sjoin_vehicle_positions_to_segments(
     ddf = vp_to_seg2.drop(columns = drop_cols)
     
     return ddf
-        
-
-def concat_and_export(filename: str, filetype: str = "df"):
-    """
-    Read in a folder of partitioned parquets and export as 1 parquet.
-    """
-    if filetype == "df":
-        ddf = dd.read_parquet(filename)
-        ddf.compute().to_parquet(filename)
-        # Remove the folder version, not the single parquet
-        fs.rm(f"{filename}/", recursive=True)
-        
-    elif filetype == "gdf":
-        ddf = dg.read_parquet(filename)
-        
+       
     
 def compute_and_export(results: list):
     time0 = datetime.datetime.now()
@@ -285,7 +264,13 @@ if __name__ == "__main__":
             results.append(vp_to_segment)
             
         # Compute the list of delayed objects
-        compute_and_export(results)
+        #compute_and_export(results)
+        dask_utils.compute_and_export(
+            results,
+            gcs_folder = f"{DASK_TEST}vp_sjoin/",
+            file_name = f"vp_segment_{itp_id}_{analysis_date}.parquet",
+            export_single_parquet = True
+        )
         
         end_id = datetime.datetime.now()
         logger.info(f"{itp_id}: {end_id-start_id}")
