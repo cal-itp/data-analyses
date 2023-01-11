@@ -1,3 +1,18 @@
+"""
+Create route segments. 
+
+For now, use the code from HQTA and lift it completely.
+This is v1 RT data, so it'll be fine for now as a stand-in.
+
+Create a crosswalk where a trip's `route_id-direction_id` can 
+be merged to find the `route_dir_identifier`. 
+The `route_dir_identifier` is used for segments to cut segments
+for both directions the route runs.
+
+From the trip table, rather than going to shape_id, as long as route
+and direction info is present, we have already cut the segments 
+and stored what the longest_shape_id is for that route.
+"""
 import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
