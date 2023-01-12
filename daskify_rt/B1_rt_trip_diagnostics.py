@@ -31,7 +31,6 @@ analysis_date = "2022-10-12"
 fs = gcsfs.GCSFileSystem()
 
 
-@delayed
 def get_trip_stats(ddf: dd.DataFrame) -> pd.DataFrame:
     """
     Calculate trip-level RT stats, 
@@ -44,14 +43,12 @@ def get_trip_stats(ddf: dd.DataFrame) -> pd.DataFrame:
             .vehicle_timestamp.min()
             .reset_index()
             .rename(columns = {"vehicle_timestamp": "trip_start"})
-            .compute()
            )
 
     max_time = (ddf.groupby(trip_cols)
                 .vehicle_timestamp.max()
                 .reset_index()
                 .rename(columns = {"vehicle_timestamp": "trip_end"})
-                .compute()
                )
     
     segments_with_vp = (ddf.groupby(trip_cols)
@@ -59,10 +56,9 @@ def get_trip_stats(ddf: dd.DataFrame) -> pd.DataFrame:
                     .nunique().reset_index()
                     .rename(columns = {
                         "segment_sequence": "num_segments_with_vp"})
-                    .compute()
                    )
     
-    trip_stats = pd.merge(
+    trip_stats = dd.merge(
         min_time,
         max_time,
         on = trip_cols,
@@ -74,6 +70,7 @@ def get_trip_stats(ddf: dd.DataFrame) -> pd.DataFrame:
     )
     
     return trip_stats
+
 
     
 if __name__ == "__main__":
@@ -91,27 +88,22 @@ if __name__ == "__main__":
     
     vp_seg_files = [f"gs://{i}" for i in all_files if 'vp_segment' in i]
     
-    results = []
+    dfs = [delayed(pd.read_parquet)(f) for f in vp_seg_files]
+    ddf = dd.from_delayed(dfs) 
     
-    for f in vp_seg_files:
-        logger.info(f"start file: {f}")
-        
-        df = delayed(pd.read_parquet)(f)
-        trip_agg = get_trip_stats(df)
-        results.append(trip_agg)
-        
-    time1 = datetime.datetime.now()
-    logger.info(f"start compute and export of results")
+    # Try map_partitions here
+    trip_stats = ddf.map_partitions(get_trip_stats, 
+                   meta= {
+                       "calitp_itp_id": "int64",
+                       "trip_id": "object",
+                       "route_dir_identifier": "int64",
+                       "trip_start": "datetime64[ns]",
+                       "trip_end": "datetime64[ns]",
+                       "num_segments_with_vp": "int64",
+                   })   
     
-    dask_utils.compute_and_export(
-        results,
-        gcs_folder = DASK_TEST,
-        file_name = f"trip_diagnostics_{analysis_date}",
-        export_single_parquet = True
-    )
-    
-    time2 = datetime.datetime.now() 
-    logger.info(f"computed and exported trip_diagnostics: {time2 - time1}")
+    trip_stats.compute().to_parquet(
+        f"{DASK_TEST}trip_diagnostics_{analysis_date}.parquet")
 
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
