@@ -129,8 +129,11 @@ def import_vehicle_positions_and_segments(
     
     segments = (dg.read_parquet(
                 f"{DASK_TEST}longest_shape_segments.parquet", 
+                columns = ["calitp_itp_id", 
+                           "route_dir_identifier", "segment_sequence",
+                          "geometry"],
                 filters = [[("calitp_itp_id", "==", itp_id)]]
-            ).drop(columns = "calitp_url_number")
+            )
             .drop_duplicates()
             .reset_index(drop=True)
     )
@@ -193,27 +196,6 @@ def sjoin_vehicle_positions_to_segments(
     return ddf
        
     
-def compute_and_export(results: list):
-    time0 = datetime.datetime.now()
-    
-    results2 = [compute(i)[0] for i in results]
-    ddf = dd.multi.concat(results2, axis=0).reset_index(drop=True)
-    # is this only grabbing the first of the many delayed objects in the list?
-    #df = dd.compute(*results2)[0]
-
-    itp_id = ddf.calitp_itp_id.unique().compute().iloc[0]
-    
-    ddf = ddf.repartition(partition_size = "25MB")
-    ddf.to_parquet(
-        f"{DASK_TEST}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet")
-    concat_and_export(
-        f"{DASK_TEST}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet")
-        
-    time1 = datetime.datetime.now()
-    logger.info(f"exported {itp_id}: {time1-time0}")
-              
-
-
 if __name__ == "__main__":
     #from dask.distributed import Client
     

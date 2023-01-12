@@ -171,8 +171,10 @@ def import_segments(itp_id: int) -> gpd.GeoDataFrame:
     """
     segments = gpd.read_parquet(
         f"{DASK_TEST}longest_shape_segments.parquet", 
+        columns = ["calitp_itp_id", "route_dir_identifier", 
+                   "segment_sequence", "geometry"],
         filters = [[("calitp_itp_id", "==", itp_id)]]
-    )
+    ).drop_duplicates().reset_index(drop=True)
         
     return segments
 
