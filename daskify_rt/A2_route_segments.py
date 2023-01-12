@@ -21,7 +21,7 @@ import pandas as pd
 import zlib
 
 import A1_vehicle_positions as A1
-from shared_utils import geography_utils, utils
+from shared_utils import geography_utils, utils, rt_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
@@ -96,6 +96,33 @@ def get_longest_shapes(analysis_date: str):
     return longest_shapes
 
 
+def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
+    """
+    Add a column where the route segment is arrowized.
+    """
+    if isinstance(gdf, gpd.GeoDataFrame):
+        gdf = dg.from_geopandas(gdf, npartitions=3) 
+        
+    gdf = gdf.assign(
+        geometry_arrowized = gdf.apply(
+            lambda x: rt_utils.try_parallel(x.geometry), 
+            axis=1, 
+            meta = ("geometry_arrowized", "geometry")
+        )
+    )
+    
+    gdf = gdf.assign(
+        geometry_arrowized = gdf.apply(
+            lambda x: rt_utils.arrowize_segment(
+                x.geometry_arrowized, buffer_distance = 20),
+            axis = 1,
+            meta = ('geometry_arrowized', 'geometry')
+        )
+    )
+
+    return gdf
+
+
 def route_direction_to_segments_crosswalk():
     """
     Create a table where route_id-direction_id can be used
@@ -132,12 +159,15 @@ if __name__ == "__main__":
         segment_distance = 1_000
     )
     
+    arrowized_segments = add_arrowized_geometry(segments).compute()
+
     utils.geoparquet_gcs_export(
-        segments,
+        arrowized_segments,
         DASK_TEST,
         "longest_shape_segments"
     )
-    
+    '''
     segment_crosswalk = route_direction_to_segments_crosswalk()
     segment_crosswalk.compute().to_parquet(
         f"{DASK_TEST}segments_route_direction_crosswalk.parquet")
+    '''
