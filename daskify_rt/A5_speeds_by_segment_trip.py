@@ -157,7 +157,7 @@ def calculate_speed_by_segment_trip(
 
 @delayed
 def import_vehicle_positions(itp_id: int) -> dd.DataFrame:
-    vp = dd.read_parquet(f"{DASK_TEST}vp_pared_{analysis_date}.parquet/")
+    vp = dd.read_parquet(f"{DASK_TEST}vp_pared_{analysis_date}/")
     
     subset = vp[vp.calitp_itp_id == itp_id].reset_index(drop=True)
     
@@ -230,8 +230,7 @@ if __name__ == "__main__":
     
     time5 = datetime.datetime.now()
         
-    linear_ref_df = delayed(
-            dd.read_parquet)(
+    linear_ref_df = delayed(dd.read_parquet)(
             f"{DASK_TEST}vp_linear_ref_{analysis_date}/")
 
     operator_speeds = calculate_speed_by_segment_trip(

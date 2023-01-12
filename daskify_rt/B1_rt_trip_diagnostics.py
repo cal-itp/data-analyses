@@ -6,9 +6,6 @@ good or bad batch.
 
 Get aggregations, like time elapsed for trip, 
 how many vehicle positions are present, etc.
-
-Use this to understand dask.delayed and persist
-behaviors.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
