@@ -1,0 +1,67 @@
+metadata:
+  version: 1
+  parameters:
+    analysis_date:
+      type: str
+      description: Analysis date for v1 diagnostics
+      default: "2022-10-12"
+sources:  
+    # GTFS RT VEHICLE POSITIONS 
+    raw_vp_single_day:
+    # Source: A1_vehicle_positions.py
+        driver: geoparquet
+        description: Raw vehicle positions with point geometry for all operators on a single day.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/vp_{{analysis_date}}.parquet
+    operator_vp_to_segments:
+    # Source: A3_sjoin_vp_segments.py
+    # How to get this to open by injecting parameter?
+        driver: geoparquet
+        description: Individual operator files for vehicle positions spatially joined to route segments.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/vp_sjoin/vp_segment_{{itp_id}}_{{analysis_date}}.parquet 
+    vp_valid:
+    # Source: A4_valid_vehicle_positions.py
+        driver: parquet
+        description: Vehicle positions pared down, only the enter and exit points are kept within for each segment-trip. Future iteration - unsuable trips discarded.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/vp_pared_{{analysis_date}}/
+    vp_with_linear_reference:
+    # Source: A5_speeds_by_segment_trip.py
+        driver: parquet
+        description: Vehicle positions with linear referencing done within each segment-trip to find, in `shape_meters`, its distance elapsed within the segment. Also find the time elapsed.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/vp_linear_ref_{{analysis_date}}/
+    # SEGMENT SPEEDS 
+    speeds_by_segment_trip:
+    # Source: A5_speeds_by_segment_trip.py
+        driver: parquet
+        description: Speeds by segment-trip for a single day.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/speeds_{{analysis_date}}/                    
+    # ROUTE SEGMENTS
+    longest_shape_segments:
+    # Source: A2_route_segments.py
+        driver: geoparquet
+        description: Longest shape_id for each operator-route_id-direction_id, segmented into 1,000 m segments. Create `route_dir_identifier` and `segment_sequence` to uniquely identify route segments.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/longest_shape_segments.parquet
+    trips_to_segments_crosswalk:
+    # Source: A2_route_segments.py
+        driver: parquet
+        description: Trips table has operator, route, and direction info. Use this crosswalk to directly attach `route_dir_identifier`from trips table. 
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/segments_route_direction_crosswalk.parquet
+    # EXPLORATORY OR DIAGNOSTIC RESULTS
+    rt_trip_diagnostics:
+    # Source: B1_rt_trip_diagnostics.py
+        driver: parquet
+        description: Get aggregations at the trip-level, trip start time, trip end time, and number of segments the vehicle positions touch to decide whether that batch of trips should be kept. 
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/trip_diagnostics_{{analysis_date}}.parquet
+    # ROAD SEGMENTS
+    ca_roads:
+        driver: geoparquet
+        description: All CA roads (concatenated)
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/all_roads_2020_state06.parquet
