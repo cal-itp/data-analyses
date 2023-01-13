@@ -1,3 +1,6 @@
+import A1_provider_prep
+import A2_other
+
 from shared_utils import geography_utils
 from shared_utils import utils
 import geopandas as gpd
@@ -5,33 +8,27 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import pandas as pd
 import shapely.wkt
+
 # Open zip files 
 import fsspec
 from calitp import *
+
+# Storage
 from calitp.storage import get_fs
 fs = get_fs()
 import os
 
+import datetime
+from loguru import logger
 
-def dissolve_summarize(provider: gpd.GeoDataFrame):
+def routes_1_dist_comparison(routes_gdf, provider_gdf, suffix:str):
     """
-    Aggregate so there's only
-    one row for each route-agency-route ID combo. 
-    Find % of new route length compared with original 
-    route length.
+    Overlay routes that run in only one district against 
+    the provider map that has no coverage to find %
+    of route that run in areas without coverage. 
     """
-    provider = provider.dissolve(
-         by=["agency","long_route_name", "District"],
-         aggfunc={
-         "route_length": "sum", "original_route_length":"max"}).reset_index()
+    start = datetime.datetime.now()
     
-    provider["percentage_route_covered"] = ((provider["route_length"] / provider["original_route_length"])* 100).astype('int64')
-    
-    return provider
-
-# Overlay Federal Communications Commission map with original bus routes df.
-def comparison(routes_gdf, provider_gdf):
-
     # Overlay
     overlay_df = gpd.overlay(
         routes_gdf, provider_gdf, how="intersection", keep_geom_type=False
@@ -39,19 +36,144 @@ def comparison(routes_gdf, provider_gdf):
 
     # Create a new route length for portions covered by cell coverage
     overlay_df = overlay_df.assign(
-        route_length=overlay_df.geometry.to_crs(geography_utils.CA_StatePlane).length
+        no_coverage_route_length=overlay_df.geometry.to_crs(geography_utils.CA_StatePlane).length
     )
     
     overlay_df = overlay_df.drop_duplicates().reset_index(drop = True)
    
+   # Dissolve to make sure each route only belongs to one line.
     overlay_df = overlay_df.dissolve(
-         by=["agency","long_route_name", "District"],
+         by=["agency","itp_id", "route_id", "long_route_name", "District"],
          aggfunc={
-         "route_length": "sum", "original_route_length":"max"}).reset_index()
+         "no_coverage_route_length": "sum", "original_route_length":"max"}).reset_index()
     
-    overlay_df["percentage_route_covered"] = ((overlay_df["route_length"] / overlay_df["original_route_length"])* 100).astype('int64')
+    overlay_df["percentage_of_route_wo_coverage"] = ((overlay_df["no_coverage_route_length"] /   overlay_df["original_route_length"])* 100).astype('int64')
+    
+    overlay_df = overlay_df.rename(columns={c: c+ suffix for c in overlay_df.columns if c in ['percentage_of_route_wo_coverage', 'original_route_length', 'no_coverage_route_length']})
+    
+    end = datetime.datetime.now()
+        
+    logger.info(f"execution time: {end-start}")
+    
+    utils.geoparquet_gcs_export(overlay_df, A1_provider_prep.GCS_FILE_PATH, f"{suffix}_overlay_routes_in_1_dist")
     return overlay_df
 
+
+def group_multi_dist_routes(df):
+    
+    df = df.dissolve(by=["agency","itp_id","route_id","long_route_name"],
+         aggfunc={
+         "no_coverage_route_length": "sum",
+         "original_route_length": "max"}).reset_index()
+    
+    return df
+
+def summarize_rows(df, col_to_group: list, col_to_summarize: str):
+    df_col_to_summarize = (
+        df.groupby(col_to_group)[col_to_summarize].apply(",".join).reset_index()
+    )
+    return df_col_to_summarize
+
+def multi_dist_route_comparison(routes_gdf, provider_gdf, suffix:str):
+    """
+    Overlay routes that run in 1+ district against 
+    the provider map that has no coverage. 
+    """
+    start = datetime.datetime.now()
+    
+    # Overlay
+    multi_route = gpd.overlay(
+        routes_gdf, provider_gdf, how="intersection", keep_geom_type=False
+    )
+    
+    # Get length of new geometry after overlaid
+    multi_route = multi_route.assign(
+        no_coverage_route_length=multi_route.geometry.to_crs(geography_utils.CA_StatePlane).length
+    )
+    
+    # Group the routes and sum up the areas without coverage, regardless of district
+    multi_route_grouped = group_multi_dist_routes(multi_route)
+    
+    # The district information of each route is on a different line. Group them onto the same.
+    multi_route_summed = summarize_rows(multi_route, ["long_route_name"], "District")
+    
+    # Merge these two 
+    merge1 = multi_route_grouped.merge(multi_route_summed, how="inner", on="long_route_name")
+    
+    # Calculate % of route that crosses a no-data coverage zone. 
+    merge1["percentage_of_route_wo_coverage"] = ((merge1["no_coverage_route_length"] / merge1["original_route_length"])* 100).astype('int64')
+    
+    # Add a suffix. 
+    merge1 = merge1.rename(columns={c: c+ suffix for c in merge1.columns if c in ['percentage_of_route_wo_coverage', 'original_route_length', 'no_coverage_route_length']})
+    
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end-start}")
+    
+    utils.geoparquet_gcs_export(merge1, A1_provider_prep.GCS_FILE_PATH, f"{suffix}_overlay_routes_in_multi_dist")
+    
+    return merge1
+
+def stack_all_routes(provider_gdf, provider: str):
+    """
+    Stack the routes in multiple districts and one 
+    district into one gdf by provider.
+    """
+    start = datetime.datetime.now()
+    
+    # Grab all routes
+    one_dist_routes, multi_dist_routes, all_routes = A2_other.find_multi_district_routes()
+    
+    # Run the routes
+    multi_dist_o =  multi_dist_route_comparison(multi_dist_routes, provider_gdf, provider)
+    one_dist_o =  routes_1_dist_comparison(one_dist_routes, provider_gdf, provider)
+    
+    # Concat the routes
+    df_list = [multi_dist_o, one_dist_o]
+
+    # Concat files
+    stacked_df = dd.multi.concat(df_list)
+    stacked_df = stacked_df.compute()
+    
+    utils.geoparquet_gcs_export(stacked_df, A1_provider_prep.GCS_FILE_PATH, f"{provider}_overlaid_all_routes")
+    
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end-start}")
+        
+    return stacked_df
+
+def merge_all_providers():
+    
+    # Read files
+    verizon_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_verizon_overlaid_all_routes.parquet")
+    att_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_att_overlaid_all_routes.parquet")
+    tmobile_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_tmobile_overlaid_all_routes.parquet")
+    
+    # Merge on the common cols
+    common_cols = ['agency', 'itp_id', 'route_id', 'long_route_name', 'District',]
+    
+    m1 = verizon_o.merge(att_o, how="inner", on=common_cols).merge(
+    tmobile_o, how="outer", on=common_cols)
+    
+    # Grab percentages
+    percentage_cols = ["percentage_of_route_wo_coverage_att", "percentage_of_route_wo_coverage_verizon",  "percentage_of_route_wo_coverage_tmobile"]
+    
+    # Fill NA
+    m1[percentage_cols] = m1[percentage_cols].fillna(0)
+    
+    # Get median percentage of route w/o coverage across ATT, Tmobile, and Verizon
+    m1["median_percent_no_coverage"] = m1[percentage_cols].median(axis=1)
+    
+    # Subtract by 100 for percent of route w/ coverage
+    m1["median_percent_with_coverage"] = 100-m1["median_percent_no_coverage"]
+    
+    # Set geometry 
+    m1 = m1.set_geometry("geometry_x")
+    
+    return m1
+
+"""
+OLD
+"""
 def overlay_single_routes(
     provider: gpd.GeoDataFrame, routes: gpd.GeoDataFrame, provider_name: str
 ):
@@ -89,63 +211,6 @@ def overlay_single_routes(
 
     return all_intersected_routes
 
-# Take the FCC provider shape file, compare it against the original df
-# Find % of route covered by a provider compared to the original route length.
-def route_cell_coverage(provider_gdf, original_routes_df, suffix: str):
-    """
-    Args:
-        provider_gdf: the provider gdf clipped to CA
-        original_routes_df: the original df with all the routes
-        suffix (str): suffix to add behind dataframe
-    Returns:
-        Returns a gdf with the percentage of the routes covered by a provider
-    """
-    # Overlay the dfs
-    overlay =  comparison(original_routes_df, provider_gdf)
-
-    # Aggregate lengths of routes by route id, name, agency, and itp_id
-    # 10/18: removed route name
-    overlay2 = (overlay.dissolve(
-         by=["route_id","agency", "itp_id"],
-         aggfunc={
-         "route_length": "sum"}).reset_index()) 
-
-    # Merge original dataframe with old route with provider-route overlay
-    # To compare original route length and old route length
-    # 10/18: removed route name
-    m1 = overlay2.merge(
-        original_routes_df,
-        how="inner",
-        on=["route_id","agency", "itp_id"],
-        suffixes=["_overlay", "_original_df"],
-    )
-    
-    
-    # Create % of route covered by data vs. not 
-    m1["percentage"] = (
-        m1["route_length_overlay"] / m1["route_length_original_df"]
-    ) * 100
-    
-    # Create bins  
-    bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    m1["binned"] = pd.cut(m1["percentage"], bins)
-    
-    # Drop unwanted cols 
-    unwanted_cols = ["route_type", "geometry_original_df"]
-    m1 = m1.drop(columns = unwanted_cols)
-    
-    # Sort
-    m1 = m1.sort_values(["route_id","route_name", "agency"]) 
-    
-    # Add suffix to certain columns to distinguish which provider 
-    # https://stackoverflow.com/questions/53380310/how-to-add-suffix-to-column-names-except-some-columns
-    m1 = m1.rename(columns={c: c+ suffix for c in m1.columns if c in ['percentage', 'binned', 'route_length_overlay',
-                                                                     'geometry_overlay']})
-
-    # Ensure m1 is a GDF 
-    m1 = gpd.GeoDataFrame(m1, geometry = f"geometry_overlay{suffix}", crs = "EPSG:4326")
-    return m1
-
 """
 Other Functions
 """
@@ -162,18 +227,3 @@ def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
     fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
     os.remove(f"./{FILE_NAME}.geojson")
-    
-# Clean organization names - strip them of dba, etc
-def organization_cleaning(df, column_wanted: str):
-    df[column_wanted] = (
-        df[column_wanted]
-        .str.strip()
-        .str.split(",")
-        .str[0]
-        .str.replace("/", "")
-        .str.split("(")
-        .str[0]
-        .str.split("/")
-        .str[0]
-    )
-    return df

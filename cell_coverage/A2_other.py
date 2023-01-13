@@ -18,6 +18,24 @@ import A1_provider_prep
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 
 """
+Other
+"""
+# Clean organization names - strip them of dba, etc
+def organization_cleaning(df, column_wanted: str):
+    df[column_wanted] = (
+        df[column_wanted]
+        .str.strip()
+        .str.split(",")
+        .str[0]
+        .str.replace("/", "")
+        .str.split("(")
+        .str[0]
+        .str.split("/")
+        .str[0]
+    )
+    return df
+
+"""
 Unique Routes
 """
 # traffic_ops/export/ca_transit_routes_[date].parquet
@@ -139,7 +157,7 @@ def turn_counts_to_df(df, col_of_interest:str):
 def aggregate_routes(gdf):
     # Return one row for each route
     dissolved = gdf.dissolve(
-        by=["agency", "long_route_name", "District"],
+        by=["agency", "itp_id", "route_id", "long_route_name", "District"],
         aggfunc={
             "original_route_length": "max",
         },
