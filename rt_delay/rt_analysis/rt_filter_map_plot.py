@@ -64,16 +64,16 @@ class RtFilterMapper:
         trip_ids: list or pd.Series of trip_ids (GTFS trip_ids)
         route_types: list or pd.Series of route_type
         '''
-        assert start_time or end_time or route_names or direction_id or direction or shape_ids or trip_ids or route_types, 'must supply at least 1 argument to filter'
+        route_names = list(route_names) if isinstance(route_names, pd.Series) else route_names
+        route_types = list(route_types) if isinstance(route_types, pd.Series) else route_types
+        trip_ids = list(trip_ids) if isinstance(trip_ids, pd.Series) else trip_ids
+        args = [start_time, end_time, route_names, direction_id, direction, shape_ids, trip_ids, route_types]
+        assert any(args), 'must supply at least 1 argument to filter'
         assert not start_time or type(dt.datetime.strptime(start_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not end_time or type(dt.datetime.strptime(end_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
-        assert not route_names or type(route_names) == list or type(route_names) == tuple or type(route_names) == type(pd.Series())
-        assert not route_types or type(route_types) == list or type(route_types) == tuple or type(route_types) == type(pd.Series())
         if route_types:
             assert pd.Series(route_types).isin(self.rt_trips.route_type).all(), 'at least 1 route type not found in self.rt_trips'
         if route_names:
-            # print(route_names)
-            # print(type(route_names))
             assert pd.Series(route_names).isin(self.rt_trips.route_short_name).all(), 'at least 1 route not found in self.rt_trips'
         assert not direction_id or type(direction_id) == str and len(direction_id) == 1
         self.filter = {}
