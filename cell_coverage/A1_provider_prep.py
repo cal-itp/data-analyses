@@ -19,8 +19,10 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 Federal Communications Commission
 Data Wrangling
 """
+
 # Clip the cell provider coverage map to California only.
-# This only worked for AT&T and Verizon. T-Mobile uses a different function.
+# This only worked for AT&T and Verizon. 
+# T-Mobile uses the function concat_all_areas().
 def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     PATH = f"{GCS_FILE_PATH}{file_zip_name}"
@@ -59,7 +61,7 @@ def find_difference_and_clip(
 
     return no_coverage
 
-def concat_all_areas(all_gdf:list, gcs_file_path: str, file_name:str):
+def concat_all_areas(all_gdf:list, file_name:str):
     """
     Districts/counties are separated out into different gdfs that contain 
     portions of districts/counties. Concat them all together 
@@ -75,7 +77,7 @@ def concat_all_areas(all_gdf:list, gcs_file_path: str, file_name:str):
     full_gdf = full_gdf.compute()
     
     # Export
-    geoparquet_gcs_export(full_gdf, gcs_file_path,file_name)
+    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name)
 
     print('Saved to GCS')
     return full_gdf 
@@ -83,7 +85,7 @@ def concat_all_areas(all_gdf:list, gcs_file_path: str, file_name:str):
 # Breakout provider gdf by counties, find the areas of each county
 # that doesn't have coverage, concat everything and dissolve to one row.
 # This was used for Verizon ONLY to create its final map.
-def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wanted:list):
+def breakout_counties(provider, file_name:str, counties_wanted:list):
     counties = get_counties()
     
     # Empty dataframe to hold each district after clipping
@@ -100,7 +102,7 @@ def breakout_counties(provider, gcs_file_path:str, file_name:str, counties_wante
     full_gdf = full_gdf.compute()
     
     # Save to GCS
-    geoparquet_gcs_export(full_gdf, gcs_file_path, file_name) 
+    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name) 
     print('saved to GCS')
     
     return full_gdf
@@ -148,16 +150,17 @@ def iloc_find_difference_district(
     
     return no_coverage
 
-# For the entirety of California by districts get areas without coverage.
-# This was used for AT&T and T-Mobile's final maps.
+# For the entirety of California by districts get areas without coverage
+# with the iloc_find_difference_district function
 def complete_difference_provider_district_level(
     provider_df: dg.GeoDataFrame, 
     district_df: gpd.GeoDataFrame,
-    provider_name: str) -> dg.GeoDataFrame:
+    file_name: str,
+    districts_needed:list) -> dg.GeoDataFrame:
     
     full_gdf = pd.DataFrame()
     
-    for i in [*range(1, 13, 1)]:
+    for i in districts_needed:
         result = iloc_find_difference_district(
             provider_df, 
             district_df[district_df.district==i],
@@ -168,7 +171,7 @@ def complete_difference_provider_district_level(
     
     full_gdf = full_gdf.compute()
     
-    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, f"{provider_name}_no_coverage_complete_CA")
+    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name)
     return full_gdf
 
 
@@ -219,13 +222,13 @@ Final Provider Files
 # att_all_counties.parquet was created using breakout_counties
 # ATT_no_coverage_complete_CA.parquet was created using complete_difference_provider_district_level
 def load_att(): 
-    att_file =  "att_all_counties.parquet"
+    att_file =  "ATT_no_coverage_complete_CA.parquet"
     gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{att_file}")
     return gdf
 
 # Areas that don't have Verizon cell coverage across CA
 def load_verizon(): 
-    gdf = gpd.read_parquet("gs://calitp-analytics-data/data-analyses/cellular_coverage/verizon_all_counties.parquet")
+    gdf = gpd.read_parquet("gs://calitp-analytics-data/data-analyses/cellular_coverage/verizon_clipped_dissolved.parquet")
     return gdf
 
 # Areas that don't have T-mobile cell coverage across CA
@@ -233,25 +236,3 @@ def load_tmobile():
     tmobile_file =  "tmobile_no_coverage_complete_CA.parquet"
     gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{tmobile_file}")[['geometry']]
     return gdf
-
-# Simplify provider maps
-def simplify_geometry(provider: gpd.GeoDataFrame):
-    # Turn to 2229
-    provider = provider.to_crs(geography_utils.CA_StatePlane)
-
-    # Simplify
-    provider["geometry"] = provider.geometry.simplify(tolerance=15)
-
-    provider = provider.to_crs(geography_utils.WGS84)
-
-    # Keep only valid geometries
-    provider = provider[provider.is_valid]
-
-    return provider
-
-# Load in simplified versions of all the providers
-def simplify_geometry_all_providers():
-    verizon = simplify_geometry(load_verizon())
-    att = simplify_geometry(load_att())
-    tmobile = simplify_geometry(load_tmobile())
-    return verizon, att, tmobile
