@@ -157,7 +157,7 @@ def calculate_speed_by_segment_trip(
 
 @delayed
 def import_vehicle_positions(itp_id: int) -> dd.DataFrame:
-    vp = dd.read_parquet(f"{DASK_TEST}vp_pared_{analysis_date}.parquet/")
+    vp = dd.read_parquet(f"{DASK_TEST}vp_pared_{analysis_date}/")
     
     subset = vp[vp.calitp_itp_id == itp_id].reset_index(drop=True)
     
@@ -171,8 +171,10 @@ def import_segments(itp_id: int) -> gpd.GeoDataFrame:
     """
     segments = gpd.read_parquet(
         f"{DASK_TEST}longest_shape_segments.parquet", 
+        columns = ["calitp_itp_id", "route_dir_identifier", 
+                   "segment_sequence", "geometry"],
         filters = [[("calitp_itp_id", "==", itp_id)]]
-    )
+    ).drop_duplicates().reset_index(drop=True)
         
     return segments
 
@@ -230,8 +232,7 @@ if __name__ == "__main__":
     
     time5 = datetime.datetime.now()
         
-    linear_ref_df = delayed(
-            dd.read_parquet)(
+    linear_ref_df = delayed(dd.read_parquet)(
             f"{DASK_TEST}vp_linear_ref_{analysis_date}/")
 
     operator_speeds = calculate_speed_by_segment_trip(
