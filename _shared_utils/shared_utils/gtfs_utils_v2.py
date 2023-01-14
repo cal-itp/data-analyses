@@ -309,28 +309,31 @@ def get_trips(
 
     # subset of columns must happen after Metrolink fix...otherwise,
     # Metrolink fix may depend on more columns that after, we're not interested in
-
-    # Handle Metrolink when we need to
-    if (metrolink_feed_key in operator_feeds) and (get_df):
-        metrolink_feed_key = gtfs_utils_v2.get_metrolink_feed_key(
-            selected_date=analysis_date, get_df=False
+    if get_df:
+        metrolink_feed_key = get_metrolink_feed_key(
+            selected_date=selected_date, get_df=False
         )
+        # Handle Metrolink when we need to
+        if metrolink_feed_key in operator_feeds:
+            metrolink_trips = (
+                trips >> filter(_.feed_key == metrolink_feed_key) >> collect()
+            )
+            not_metrolink_trips = (
+                trips >> filter(_.feed_key != metrolink_feed_key) >> collect()
+            )
 
-        metrolink_trips = trips >> filter(_.feed_key == metrolink_feed_key) >> collect()
-        not_metrolink_trips = (
-            trips >> filter(_.feed_key != metrolink_feed_key) >> collect()
-        )
+            # Fix Metrolink trips as a pd.DataFrame, then concatenate
+            # This means that LazyTbl output will not show correct results
+            corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(
+                metrolink_trips, metrolink_feed_key
+            )
 
-        # Fix Metrolink trips as a pd.DataFrame, then concatenate
-        # This means that LazyTbl output will not show correct results
-        corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(metrolink_trips)
+            trips = pd.concat(
+                [not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True
+            )[trip_cols].reset_index(drop=True)
 
-        trips = pd.concat(
-            [not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True
-        )[trip_cols].reset_index(drop=True)
-
-    elif (metrolink_feed_key not in operator_feeds) and (get_df):
-        trips = trips >> subset_cols(trip_cols) >> collect()
+        elif metrolink_feed_key not in operator_feeds:
+            trips = trips >> subset_cols(trip_cols) >> collect()
 
     return trips >> subset_cols(trip_cols)
 
@@ -444,15 +447,15 @@ def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
 
 
 def filter_start_end_ts(
-    time_col: Literal["arrival", "departure"]
+    time_filters: dict, time_col: Literal["arrival", "departure"]
 ) -> siuba.dply.verbs.Pipeable:
     """
     For arrival or departure, grab the hours to subset and
     convert the (start_hour, end_hour) tuple into seconds,
     and return the siuba filter
     """
-
-    (start_sec, end_sec) = hour_tuple_to_seconds[time_filters[time_col]]
+    desired_hour_tuple = time_filters[time_col]
+    (start_sec, end_sec) = hour_tuple_to_seconds(desired_hour_tuple)
 
     return filter(_[f"{time_col}_sec"] >= start_sec, _[f"{time_col}_sec"] <= end_sec)
 
@@ -487,6 +490,10 @@ def get_stop_times(
     """
     check_operator_feeds(operator_feeds)
 
+    # Fill in time_filters dict so arrival and departure are both there
+    time_filters.setdefault("arrival", (0, 26))
+    time_filters.setdefault("departure", (0, 26))
+
     trip_id_cols = ["feed_key", "trip_id"]
 
     if trip_df is None:
@@ -507,10 +514,10 @@ def get_stop_times(
         stop_times = (
             tbls.mart_gtfs.dim_stop_times()
             >> filter_operator(operator_feeds)
-            >> filter_start_end_ts(time_filters["arrival"])
-            >> filter_start_end_ts(time_filters["departure"])
-            >> filter_custom_col(custom_filtering)
             >> inner_join(_, trips_on_day, on=trip_id_cols)
+            >> filter_start_end_ts(time_filters, "arrival")
+            >> filter_start_end_ts(time_filters, "departure")
+            >> filter_custom_col(custom_filtering)
             >> subset_cols(stop_time_cols)
         )
 
@@ -520,10 +527,11 @@ def get_stop_times(
         stop_times = (
             tbls.mart_gtfs.dim_stop_times()
             >> filter_operator(operator_feeds)
-            >> filter_start_end_ts(time_filters["arrival"])
-            >> filter_start_end_ts(time_filters["departure"])
             >> filter(_.trip_id.isin(trips_on_day.trip_id))
+            >> filter_start_end_ts(time_filters, "arrival")
+            >> filter_start_end_ts(time_filters, "departure")
             >> filter_custom_col(custom_filtering)
+            >> subset_cols(stop_time_cols)
         )
 
     if get_df:
