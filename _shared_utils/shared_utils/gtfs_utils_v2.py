@@ -55,7 +55,7 @@ Status: dbt table in progress, function updated here
 # os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
 
 import datetime
-from typing import Union
+from typing import Literal, Union
 
 import dask.dataframe as dd
 import geopandas as gpd
@@ -66,8 +66,6 @@ from shared_utils import geography_utils
 from siuba import *
 
 GCS_PROJECT = "cal-itp-data-infra"
-
-# YESTERDAY_DATE = datetime.date.today() + datetime.timedelta(days=-1)
 
 # ----------------------------------------------------------------#
 # Convenience siuba filtering functions for querying
@@ -429,3 +427,106 @@ def get_stops(
 
 
 # TODO: stop_times.
+def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
+    """
+    If given a tuple(start_hour, end_hour), it will return
+    tuple of (start_seconds, end_seconds)
+    Let's use this to filter with the arrival_time and departure_time .
+
+    For just 1 hour, use the same hour for start and end in the tuple.
+    Ex: departure_hours = (12, 12)
+    """
+    SEC_IN_HOUR = 60 * 60
+    start_sec = hour_tuple[0] * SEC_IN_HOUR
+    end_sec = hour_tuple[1] * SEC_IN_HOUR - 1  # 1 sec before the next hour
+
+    return (start_sec, end_sec)
+
+
+def filter_start_end_ts(
+    time_col: Literal["arrival", "departure"]
+) -> siuba.dply.verbs.Pipeable:
+    """
+    For arrival or departure, grab the hours to subset and
+    convert the (start_hour, end_hour) tuple into seconds,
+    and return the siuba filter
+    """
+
+    (start_sec, end_sec) = hour_tuple_to_seconds[time_filters[time_col]]
+
+    return filter(_[f"{time_col}_sec"] >= start_sec, _[f"{time_col}_sec"] <= end_sec)
+
+
+def get_stop_times(
+    selected_date: Union[str, datetime.date],
+    operator_feeds: list[str] = [],
+    stop_time_cols: list[str] = None,
+    get_df: bool = False,
+    time_filters: dict = {
+        "arrival": (0, 26),
+        "departure": (0, 26),
+    },  # since some trips wrap past midnight,
+    # let's capture all the way through the 25th hour
+    trip_df: Union[pd.DataFrame, siuba.sql.verbs.LazyTbl] = None,
+    custom_filtering: dict = None,
+) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+    """
+    Download stop times table for operator on a day.
+
+    Since it's huge, return dask dataframe by default, to
+    allow for more wrangling before turning it back to pd.DataFrame.
+
+    Allow a pre-existing trips table to be supplied.
+    If not, run a fresh trips query.
+
+    get_df: bool.
+            If True, return pd.DataFrame
+            If False, return dd.DataFrame
+
+    TODO: custom_filtering...is it placed too late in the query?
+    """
+    check_operator_feeds(operator_feeds)
+
+    trip_id_cols = ["feed_key", "trip_id"]
+
+    if trip_df is None:
+        # Grab the trips for that day
+        trips_on_day = get_trips(
+            selected_date=selected_date, trip_cols=trip_id_cols, get_df=False
+        )
+
+    elif trip_df is not None:
+        if isinstance(trip_df, siuba.sql.verbs.LazyTbl):
+            trips_on_day = trip_df >> select(trip_id_cols)
+
+        # Have to handle pd.DataFrame separately later
+        elif isinstance(trip_df, pd.DataFrame):
+            trips_on_day = trip_df[trip_id_cols]
+
+    if not isinstance(trips_on_day, pd.DataFrame):
+        stop_times = (
+            tbls.mart_gtfs.dim_stop_times()
+            >> filter_operator(operator_feeds)
+            >> filter_start_end_ts(time_filters["arrival"])
+            >> filter_start_end_ts(time_filters["departure"])
+            >> filter_custom_col(custom_filtering)
+            >> inner_join(_, trips_on_day, on=trip_id_cols)
+            >> subset_cols(stop_time_cols)
+        )
+
+    elif isinstance(trips_on_day, pd.DataFrame):
+        # if trips is pd.DataFrame, can't use inner_join because that needs LazyTbl
+        # on both sides. Use .isin then
+        stop_times = (
+            tbls.mart_gtfs.dim_stop_times()
+            >> filter_operator(operator_feeds)
+            >> filter_start_end_ts(time_filters["arrival"])
+            >> filter_start_end_ts(time_filters["departure"])
+            >> filter(_.trip_id.isin(trips_on_day.trip_id))
+            >> filter_custom_col(custom_filtering)
+        )
+
+    if get_df:
+        stop_times = stop_times >> collect()
+
+    return stop_times
