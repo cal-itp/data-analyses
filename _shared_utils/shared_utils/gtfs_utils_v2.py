@@ -390,7 +390,7 @@ def get_shapes(
 
     if get_df:
         shapes2 = shapes.compute()
-        shapes_gdf = make_routes_gdf(shapes2, crs=crs)[shape_cols]
+        shapes_gdf = make_routes_gdf(shapes2, crs=crs)[shape_cols + ["geometry"]]
 
         return shapes_gdf
 
@@ -429,7 +429,6 @@ def get_stops(
     return stops
 
 
-# TODO: stop_times.
 def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
     """
     If given a tuple(start_hour, end_hour), it will return
@@ -538,3 +537,82 @@ def get_stop_times(
         stop_times = stop_times >> collect()
 
     return stop_times
+
+
+# ----------------------------------------------------------------#
+# Concatenate all stashed files in GCS
+# ----------------------------------------------------------------#
+# Moving forward, should use cached files whenever possible
+# especially for external-facing analysis
+# get the most use out of caching and create the same
+# "universe" of operators whenever we can
+
+
+def format_date(analysis_date: Union[datetime.date, str]) -> str:
+    """
+    Get date formatted correctly in all the queries
+    """
+    if isinstance(analysis_date, datetime.date):
+        return analysis_date.strftime(rt_utils.FULL_DATE_FMT)
+    elif isinstance(analysis_date, str):
+        return datetime.datetime.strptime(analysis_date, rt_utils.FULL_DATE_FMT).date()
+
+
+def all_routelines_or_stops_with_cached(
+    dataset: Literal["routelines", "stops"],
+    analysis_date: Union[datetime.date, str],
+    operator_feeds: list = [],
+    export_path="gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/",
+):
+    """
+    Use cached files whenever possible, instead of running fresh query.
+    Routelines and stops are geospatial, import and export with geopandas.
+    """
+    date_str = format_date(analysis_date)
+
+    gdf = gpd.GeoDataFrame()
+
+    for feed_key in sorted(operator_feeds):
+
+        filename = f"{dataset}_{feed_key}_{date_str}.parquet"
+        path = rt_utils.check_cached(filename)
+
+        if path:
+            operator = gpd.read_parquet(path)
+            gdf = pd.concat([gdf, operator], axis=0).drop_duplicates()
+
+            print(f"concatenated {feed_key}")
+
+    gdf = gdf.drop_duplicates().reset_index(drop=True)
+
+    utils.geoparquet_gcs_export(gdf, export_path, f"{dataset}_{date_str}")
+
+
+def all_trips_or_stoptimes_with_cached(
+    dataset: Literal["trips", "st"],
+    analysis_date: Union[datetime.date, str],
+    operator_feeds: list = [],
+    export_path="gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/",
+):
+    """
+    Use cached files whenever possible, instead of running fresh query.
+    Trips and stop times are tabular, import and export with pandas.
+    """
+    date_str = format_date(analysis_date)
+
+    df = pd.DataFrame()
+
+    for feed_key in sorted(operator_feeds):
+
+        filename = f"{dataset}_{itp_id}_{date_str}.parquet"
+        path = rt_utils.check_cached(filename)
+
+        if path:
+            operator = pd.read_parquet(path)
+            df = pd.concat([df, operator], axis=0).drop_duplicates()
+
+            print(f"concatenated {feed_key}")
+
+    df = df.drop_duplicates().reset_index(drop=True)
+
+    df.to_parquet(f"{export_path}{dataset}_{date_str}.parquet")
