@@ -16,75 +16,92 @@ from siuba import *
 from shared_utils import utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS, TEMP_GCS
 
-def trip_keys_for_route_type(analysis_date: str, 
-                             route_type_list: list) -> pd.DataFrame: 
+
+def trip_ids_for_route_type(analysis_date: str, 
+                            route_type_list: list) -> pd.DataFrame: 
     """
     Subset the trips table for specified route types.
     Keep route info (route_id, route_type) that's needed.
     """
-    trips = dd.read_parquet(
+    trips = pd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
     # Choose to output df instead of list because we need route_type later on
-    trip_keys_for_type = (trips[trips.route_type.isin(route_type_list)]
-                          [["trip_key", "route_id", "route_type"]]
+    trip_ids_for_type = (trips[trips.route_type.isin(route_type_list)]
+                          [["feed_key", "trip_id", "route_id", "route_type"]]
                           .drop_duplicates()
-                          .compute()
                          )
     
-    return trip_keys_for_type
+    return trip_ids_for_type
 
 
-def trip_keys_to_stop_ids(trip_key_df: pd.DataFrame) -> dd.DataFrame:
+def trip_ids_to_stop_ids(trip_id_df: pd.DataFrame) -> pd.DataFrame:
     """
-    Use the cached stop times table to avoid running query with the 
-    tbls.index. This function is called in `grab_stops`.
+    This function is called in `grab_stops`.
     
     Keep the subset of trips we're interested in based on route_type 
     filter in the stop_times table.
     
     Only keep unique stop_id combo. 
     """
-    stop_times = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+    stop_times = pd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet", 
+        columns = ["feed_key", "trip_id", "stop_id"]
+    ).drop_duplicates()
         
     # Do a merge to narrow down stop_ids based on trip_keys
     # Keep unique stop (instead of stop_time combo)
     # and also retain route type that came from trip_key_df
-    keep_cols = ["calitp_itp_id", "stop_id", "route_id", "route_type"]
+    keep_cols = ["feed_key", "stop_id", "route_id", "route_type"]
     
-    stop_ids_present = dd.merge(
-        stop_times[stop_times.trip_key.isin(trip_key_df.trip_key)],
-        trip_key_df,
-        on = ["trip_key"],
+    stop_ids_present = pd.merge(
+        stop_times[stop_times.trip_id.isin(trip_id_df.trip_id)],
+        trip_id_df,
+        on = ["feed_key", "trip_id"],
         how = "inner"
     )[keep_cols].drop_duplicates()
     
     return stop_ids_present
 
 
-def grab_stops(analysis_date: str, 
-               trip_key_df: pd.DataFrame) -> gpd.GeoDataFrame:
+def grab_stops(analysis_date: str, trip_id_df: pd.DataFrame,
+               route_types: list) -> gpd.GeoDataFrame:
     """
     Merge stops table to get point geom attached to stop_ids 
     for specified route_types.
     """
-    stops = dg.read_parquet(
+    stops = gpd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
     
-    # Based on subset of trips, grab the stop_ids present.
-    stops_present = trip_keys_to_stop_ids(trip_key_df)
+    route_type_cols = [f"route_type_{i}" for i in route_types]
     
-    # merge stops table and get point geom
-    stops_for_route_type = (
-        dd.merge(
+    # Grab stops for just the specific route types
+    stops = stop.assign(
+        route_type_present = stops[route_type_cols].sum(axis=1)
+    )
+    
+    # Only keep stops for subset of route types
+    stops = stops[(stops.route_type_present > 0)]
+
+    # Need to attach route_id info too
+    stops_present = trip_ids_to_stop_ids(trip_id_df)
+    
+    
+    # Double check which columns are kept in this script
+    keep_cols = ["feed_key", 
+                 "stop_id", "stop_name", "stop_key", 
+                 "geometry", 
+                 "route_id", "route_type"
+    ]
+        
+    stops_for_route_type = (pd.merge(
             stops,
             stops_present,
-            on = ["calitp_itp_id", "stop_id"],
+            on = ["feed_key", "stop_id"],
             how = "inner"
-        ).drop_duplicates()
+        )[keep_cols]
+        .drop_duplicates()
         .reset_index(drop=True)
-        .compute()
     )
     
     return stops_for_route_type
@@ -101,10 +118,10 @@ def grab_rail_data(analysis_date: str) -> gpd.GeoDataFrame:
     rail_route_types = ['0', '1', '2']
     
     # Grab trip_keys associated with this route_type
-    rail_trip_keys = trip_keys_for_route_type(analysis_date, rail_route_types)
+    rail_trip_ids = trip_ids_for_route_type(analysis_date, rail_route_types)
         
-    rail_stops = grab_stops(analysis_date, rail_trip_keys)
-    
+    rail_stops = grab_stops(analysis_date, rail_trip_ids, rail_route_types)
+                
     utils.geoparquet_gcs_export(
         rail_stops,
         TEMP_GCS,

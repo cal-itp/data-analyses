@@ -14,7 +14,7 @@ COMPILED_RAIL_BRT_FERRY = catalog_filepath("rail_brt_ferry_initial")
 def get_rail_ferry_brt_extract():
     df = dg.read_parquet(COMPILED_RAIL_BRT_FERRY)
 
-    keep_cols = ["calitp_itp_id", "stop_id", 
+    keep_cols = ["feed_key", "stop_id", 
                 "route_type", "geometry"]
     
     # Temporarily assign route_type for new Muni stops to be rail
