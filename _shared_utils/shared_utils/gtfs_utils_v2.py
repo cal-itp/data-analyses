@@ -1,5 +1,5 @@
 """
-Migrate gtfs_utils from v1 to v2 warehouse.
+GTFS utils for v2 warehouse
 """
 
 # import os
@@ -136,7 +136,7 @@ def filter_feed_options(
 
 def check_operator_feeds(operator_feeds: list[str]):
     if len(operator_feeds) == 0:
-        raise ValueError("Supply list of feed keys!")
+        raise ValueError("Supply list of feed keys or operator names!")
 
 
 # ----------------------------------------------------------------#
@@ -258,14 +258,10 @@ def schedule_daily_feed_to_organization(
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
     """
     Select a date, find what feeds are present, and
-    merge in organization name.
-
-    Analysts start here to decide how to filter down.
-
-    Custom filtering doesn't work well here...esp with booleans and NaN/Nones
-    Returns incorrect results.
+    merge in organization name
 
     Analyst would manually include or exclude feeds based on any of the columns.
+    Custom filtering doesn't work well, with all the NaNs/Nones/booleans.
 
     As we move down the options, generally, more rows should be returned.
 
