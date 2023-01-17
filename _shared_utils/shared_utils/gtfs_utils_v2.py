@@ -142,6 +142,48 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
         return filter()
 
 
+def filter_feed_options(
+    feed_option: Literal[
+        "customer_facing",
+        "use_subfeeds",
+        "current_feeds",
+        "include_precursor",
+        "include_precursor_and_future",
+    ]
+) -> siuba.dply.verbs.Pipeable:
+
+    exclude_future = filter(_.is_future == False)
+    exclude_precursor = filter(_.regional_feed_type != "Regional Precursor Feed")
+
+    if feed_option == "customer_facing":
+        return (
+            filter(_.regional_feed_type != "Regional Subfeed")
+            >> exclude_future
+            >> exclude_precursor
+        )
+
+    elif feed_option == "use_subfeeds":
+        return (
+            filter(
+                _.name != "Bay Area 511 Regional Schedule"
+            )  # keep VCTC combined because the combined feed is the only feed
+            >> exclude_future
+            >> exclude_precursor
+        )
+
+    elif feed_option == "current_feeds":
+        return exclude_future >> exclude_precursor
+
+    elif feed_option == "include_precursor":
+        return exclude_future
+
+    elif feed_option == "include_precursor_and_future":
+        return filter()
+
+    else:
+        return filter()
+
+
 def check_operator_feeds(operator_feeds: list[str]):
     if len(operator_feeds) == 0:
         raise ValueError("Supply list of feed keys!")
@@ -256,6 +298,13 @@ def schedule_daily_feed_to_organization(
     selected_date: Union[str, datetime.date],
     keep_cols: list[str] = None,
     get_df: bool = True,
+    feed_option: Literal[
+        "customer_facing",
+        "use_subfeeds",
+        "current_feeds",
+        "include_precursor",
+        "include_precursor_and_future",
+    ] = "use_subfeeds",
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
     """
     Select a date, find what feeds are present, and
@@ -263,11 +312,28 @@ def schedule_daily_feed_to_organization(
 
     Analysts start here to decide how to filter down.
 
-    Custom filtering doesn't work well here...esp with
-    None or booleans, which don't unpack well, even as items in a list.
+    Custom filtering doesn't work well here...esp with booleans and NaN/Nones
     Returns incorrect results.
 
     Analyst would manually include or exclude feeds based on any of the columns.
+
+    As we move down the options, generally, more rows should be returned.
+
+    * customer_facing: when there are multiple feeds for an organization,
+            favor the customer facing one.
+            Applies to: Bay Area 511 combined feed favored over subfeeds
+
+    * use_subfeeds: when there are multiple feeds for an organization,
+            favor the subfeeds.
+            Applies to: Bay Area 511 subfeeds favored over combind feed
+
+    * current_feeds: all current feeds (combined and subfeeds present)
+
+    * include_precursor: include precursor feeds
+                Caution: would result in duplicate organization names
+
+    * include_precursor_and_future: include precursor feeds and future feeds.
+                Caution: would result in duplicate organization names
     """
     # Get GTFS schedule datasets from Airtable
     dim_gtfs_datasets = get_transit_organizations_gtfs_dataset_keys(
@@ -278,13 +344,13 @@ def schedule_daily_feed_to_organization(
     # Merge on gtfs_dataset_key to get organization name
     fact_feeds = (
         tbls.mart_gtfs.fct_daily_schedule_feeds()
-        >> filter(_.date == selected_date, _.is_future == False)
+        >> filter(_.date == selected_date)
         >> inner_join(_, dim_gtfs_datasets, on="gtfs_dataset_key")
         >> subset_cols(keep_cols)
     )
 
     if get_df:
-        fact_feeds = fact_feeds >> collect()
+        fact_feeds = fact_feeds >> filter_feed_options(feed_option) >> collect()
 
     return fact_feeds
 
