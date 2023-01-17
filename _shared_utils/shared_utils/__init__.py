@@ -1,6 +1,7 @@
 from . import (
     calitp_color_palette,
     geography_utils,
+    gtfs_utils,
     gtfs_utils_v2,
     map_utils,
     portfolio_utils,
@@ -13,6 +14,7 @@ from . import (
 __all__ = [
     "calitp_color_palette",
     "geography_utils",
+    "gtfs_utils",
     "gtfs_utils_v2",
     "map_utils",
     "portfolio_utils",
