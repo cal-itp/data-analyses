@@ -77,7 +77,7 @@ def filter_operator(operator_feeds: list) -> siuba.dply.verbs.Pipeable:
     Filter if operator_list is present.
     Otherwise, skip.
     """
-    return filter(_.feed_key.isin(operator_feeds))
+    return filter(_.feed_key.isin(operator_feeds) | _.name.isin(operator_feeds))
 
 
 def filter_date(selected_date: Union[str, datetime.date]) -> siuba.dply.verbs.Pipeable:
@@ -386,11 +386,11 @@ def get_shapes(
         >> filter_date(selected_date)
         >> filter_operator(operator_feeds)
         >> filter_custom_col(custom_filtering)
+        >> collect()
     )
 
     if get_df:
-        shapes2 = shapes.compute()
-        shapes_gdf = make_routes_gdf(shapes2, crs=crs)[shape_cols + ["geometry"]]
+        shapes_gdf = make_routes_gdf(shapes, crs=crs)[shape_cols + ["geometry"]]
 
         return shapes_gdf
 
@@ -409,7 +409,7 @@ def get_stops(
     """
     Query fct_daily_scheduled_stops.
 
-    Must supply a list of feed_keys returned from
+    Must supply a list of feed_keys or organization names returned from
     schedule_daily_feed_to_organization() or subset of those results.
     """
     check_operator_feeds(operator_feeds)
@@ -475,17 +475,11 @@ def get_stop_times(
     """
     Download stop times table for operator on a day.
 
-    Since it's huge, return dask dataframe by default, to
-    allow for more wrangling before turning it back to pd.DataFrame.
-
     Allow a pre-existing trips table to be supplied.
     If not, run a fresh trips query.
 
     get_df: bool.
             If True, return pd.DataFrame
-            If False, return dd.DataFrame
-
-    TODO: custom_filtering...is it placed too late in the query?
     """
     check_operator_feeds(operator_feeds)
 
