@@ -17,9 +17,35 @@ from IPython.display import HTML
 from shared_utils import rt_utils
 from siuba import *
 
+
+def add_agency_name(
+    selected_date: str,
+) -> pd.DataFrame:
+    """
+    Returns a dataframe with calitp_itp_id and the agency name used in portfolio.
+    This is the agency_name used in RT maps
+    rt_delay/rt_analysis.py#L309
+    """
+    df = (
+        (
+            tbls.views.gtfs_schedule_dim_feeds()
+            >> filter(
+                _.calitp_extracted_at < selected_date,
+                _.calitp_deleted_at >= selected_date,
+            )
+            >> select(_.calitp_itp_id, _.calitp_agency_name)
+            >> distinct()
+            >> collect()
+        )
+        .sort_values(["calitp_itp_id", "calitp_agency_name"])
+        .drop_duplicates(subset="calitp_itp_id")
+        .reset_index(drop=True)
+    )
+
+    return df
+
+
 # https://github.com/cal-itp/data-analyses/blob/main/bus_service_increase/E5_make_stripplot_data.py
-
-
 def add_caltrans_district() -> pd.DataFrame:
     """
     Returns a dataframe with calitp_itp_id and the caltrans district
