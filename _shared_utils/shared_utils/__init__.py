@@ -1,8 +1,7 @@
 from . import (
-    altair_utils,
     calitp_color_palette,
     geography_utils,
-    gtfs_utils,
+    gtfs_utils_v2,
     map_utils,
     portfolio_utils,
     rt_dates,
@@ -14,10 +13,9 @@ from . import (
 __version__ = "1.0"
 
 __all__ = [
-    "altair_utils",
     "calitp_color_palette",
     "geography_utils",
-    "gtfs_utils",
+    "gtfs_utils_v2",
     "map_utils",
     "portfolio_utils",
     "rt_dates",
