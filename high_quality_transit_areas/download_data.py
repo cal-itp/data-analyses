@@ -27,10 +27,9 @@ from loguru import logger
 
 import operators_for_hqta
 
-from update_vars import analysis_date, TEMP_GCS #CACHED_VIEWS_EXPORT_PATH, TEMP_GCS
+from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH, TEMP_GCS
 from shared_utils import gtfs_utils, geography_utils, rt_utils, utils
 
-CACHED_VIEWS_EXPORT_PATH = "gs://calitp-analytics-data/data-analyses/dask_test/"
 
 def primary_trip_query(itp_id: int, analysis_date: str, 
                        additional_filters: dict = None):
