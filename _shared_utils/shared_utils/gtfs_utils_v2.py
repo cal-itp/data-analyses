@@ -77,7 +77,11 @@ def filter_operator(operator_feeds: list) -> siuba.dply.verbs.Pipeable:
     Filter if operator_list is present.
     Otherwise, skip.
     """
-    return filter(_.feed_key.isin(operator_feeds) | _.name.isin(operator_feeds))
+    # in testing, using _.feed_key or _.name came up with a
+    # siuba verb not implemented
+    # https://github.com/machow/siuba/issues/407
+    # put brackets around should work
+    return filter(_["feed_key"].isin(operator_feeds) | _["name"].isin(operator_feeds))
 
 
 def filter_date(selected_date: Union[str, datetime.date]) -> siuba.dply.verbs.Pipeable:
