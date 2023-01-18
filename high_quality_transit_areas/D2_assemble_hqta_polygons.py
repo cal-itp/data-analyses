@@ -36,7 +36,7 @@ def get_dissolved_hq_corridor_bus(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     # Can keep route_id in dissolve, but route_id is not kept in final 
     # export, so there would be multiple rows for multiple route_ids, 
     # and no way to distinguish between them
-    keep_cols = ['calitp_itp_id', 'hq_transit_corr', 'route_id']
+    keep_cols = ['feed_key', 'hq_transit_corr', 'route_id']
     
     gdf2 = gdf[keep_cols + ['geometry']].compute()
     
@@ -72,7 +72,7 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
     ).compute()
     
     corridor_cols = [
-        "calitp_itp_id_primary", "hqta_type", "route_id", "geometry"
+        "feed_key_primary", "hqta_type", "route_id", "geometry"
     ]
     
     # Compute and get gdfs here, otherwise dask cluster can't find utilities import
@@ -103,15 +103,15 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     
     keep_cols = [
-        "calitp_itp_id_primary", "calitp_itp_id_secondary", 
+        "feed_key_primary", "feed_key_secondary", 
         "agency_name_primary", "agency_name_secondary",
         "hqta_type", "hqta_details", "route_id", "geometry"
     ]
     
     # Drop bad stops, subset columns
     gdf2 = (gdf[keep_cols]
-            .sort_values(["hqta_type", "calitp_itp_id_primary", 
-                          "calitp_itp_id_secondary",
+            .sort_values(["hqta_type", "feed_key_primary", 
+                          "feed_key_secondary",
                           "hqta_details", "route_id"])
             .reset_index(drop=True)
            )
