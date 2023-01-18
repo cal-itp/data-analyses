@@ -14,7 +14,6 @@ import sys
 from loguru import logger
 
 import A1_download_rail_ferry_brt_stops as rail_ferry_brt
-import A1b_muni_weekend_rail as muni_weekend_rail
 from shared_utils import utils
 from utilities import GCS_FILE_PATH, clip_to_ca
 from update_vars import analysis_date, TEMP_GCS
