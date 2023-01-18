@@ -237,6 +237,36 @@ def trip_df():
 NTD Data
 Answer how many buses does an agency owns?
 """
+agencies_dict = {
+        "Trinity County": "Trinity Transit",
+        "City of Calabasas": "Calabasas Transit System",
+        "County of Sonoma": "Sonoma County Transit",
+        "Tehama County": "Tehama Rural Area eXpress",
+        "Los Angeles County Department of Public Works - East L.A.": "East Los Angeles Shuttle",
+        "Sacramento Regional Transit District": "Sacramento Regional Transit District",
+        "City of Lompoc": "City of Lompoc Transit",
+        "San Luis Obispo Regional Transit Authority": "South County Transit Link",
+        "City of Roseville": "Roseville Transit",
+        "Los Angeles County Dept. of Public Works - Athens Shuttle Service": "the Link-Athens",
+        "Los Angeles County Department of Public Works - Avocado Heights": "Avocado Heights/Bassett/West Valinda Shuttle",
+        "Susanville Indian Rancheria": "Susanville Indian Rancheria Public Transportation Program",
+        "Transit Joint Powers Authority for Merced County": "Merced The Bus",
+        "City of Eureka": "Eureka Transit Service",
+        "Nevada County Transit Services": "Gold Country Stage",
+        "San Mateo County Transit District": "SamTrans",
+        "Redwood Coast Transit Authority": "Redwood Coast Transit",
+        "City of Avalon": "Avalon Transit",
+        "City of Lodi": "Grapeline",
+        "Golden Gate Bridge": "Golden Gate Bridge Highway and Transportation District",
+        "City of Santa Maria": "Santa Maria Area Transit",
+        'City and County of San Francisco': 'MUNI',
+        'Alameda-Contra Costa Transit District': 'AC Transit',
+        'Kern Regional Transit': 'Kern Transit',
+        'County of Placer': 'Tahoe Transportation',
+        'County of Placer':'Tahoe Truckee Area Regional Transportation',
+        'City of Tulare':'Tulare County Regional Transit Agency'
+    }
+
 # Return a cleaned up NTD dataframe for bus only 
 def ntd_vehicles():
     
@@ -267,6 +297,9 @@ def ntd_vehicles():
     
     # Clean org names
     df = organization_cleaning(df, 'agency') 
+    
+    # Replace some manually to match routes df
+    df.agency = df.agency.replace(agencies_dict)
     
     # Add up buses
     df["total_buses"] = df.sum(numeric_only=True, axis=1)
