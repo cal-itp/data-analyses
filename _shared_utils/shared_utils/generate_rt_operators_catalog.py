@@ -1,6 +1,8 @@
 """
+Create catalog for `rt_trips_{itp_id}_*` parquets available.
+See which dates are available for each operator.
 
-
+v1 warehouse.
 """
 import gcsfs
 import yaml
