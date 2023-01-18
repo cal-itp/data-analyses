@@ -1,88 +1,97 @@
 """
 Do a check of the operators to run and return a list.
 
-Setting a list ahead of time vs running the tbl.gtfs_schedule.agency query
 Want to be explicit in what operators should be able to run, ones we
 expect not to run, and ones we expect should run and are erroring.
 
-Return a list of operators that have cached files, and 
+Return a dict of operator names to operator feed_keys that have cached files, and 
 thus should be able to have their HQTA corridors compiled.
 """
 import dask.dataframe as dd
-import dask_geopandas
 import datetime as dt
 import json
 import pandas as pd
 import sys
 
 from loguru import logger
-from siuba import *
 
-from calitp.tables import tbls
-from shared_utils import rt_utils
-from update_vars import (analysis_date, CACHED_VIEWS_EXPORT_PATH, 
+from shared_utils import rt_utils, gtfs_utils_v2
+from update_vars import (analysis_date, CACHED_VIEWS_EXPORT_PATH, TEMP_GCS,
                         VALID_OPERATORS_FILE)
 
-def get_list_of_cached_itp_ids(analysis_date: str, 
-                               all_itp_ids: list = None) -> list:
+
+def scheduled_operators_for_hqta(analysis_date: str):
     """
-    ALL_ITP_IDS: list. 
-                Allow passing an alternate list of IDs in. 
-                If list is not specified, then run a fresh query.    
-    """
-    if all_itp_ids is None:
-        all_itp_ids = (tbls.gtfs_schedule.agency()
-                   >> distinct(_.calitp_itp_id)
-                   >> filter(_.calitp_itp_id != 200, 
-                             # Amtrak is always filtered out
-                             _.calitp_itp_id != 13)
-                   >> collect()
-        ).calitp_itp_id.tolist()
+    From schedule daily feeds to organization names table, 
+    exclude Bay Area 511 combined regional feed and Amtrak.
+    All other feed_keys are ones we would use.
     
-    ITP_IDS_WITH_CACHED_FILES = []
+    Cache this df into GCS, and clear it once it goes into the json. 
+    """
+    path = rt_utils.check_cached(
+        filename = "operators_for_hqta.parquet", 
+        subfolder="temp/"
+    )    
 
-    for itp_id in all_itp_ids:
-        response1 = rt_utils.check_cached(
-            f"routelines_{itp_id}_{analysis_date}.parquet", 
-            subfolder="cached_views/")
-        response2 = rt_utils.check_cached(
-            f"trips_{itp_id}_{analysis_date}.parquet", subfolder="cached_views/")
-        response3 = rt_utils.check_cached(
-            f"st_{itp_id}_{analysis_date}.parquet", subfolder="cached_views/")
-        response4 = rt_utils.check_cached(
-            f"stops_{itp_id}_{analysis_date}.parquet", subfolder="cached_views/")
-        
-        all_responses = [response1, response2, response3, response4]
-        if all(r is not None for r in all_responses):
-            ITP_IDS_WITH_CACHED_FILES.append(itp_id)
+    if path:
+        operators_to_include = pd.read_parquet(
+            f"{TEMP_GCS}operators_for_hqta.parquet")
+    else:
     
-    return sorted(ITP_IDS_WITH_CACHED_FILES)
+        all_operators = gtfs_utils_v2.schedule_daily_feed_to_organization(
+            selected_date = analysis_date,
+            keep_cols = None,
+            get_df = True
+        )
+
+        exclude = ["Bay Area 511 Regional Schedule", #we favor regional subfeeds
+                   "Amtrak Schedule"]
+
+        keep_cols = ["feed_key", "name"]
+
+        operators_to_include = all_operators[
+            ~(all_operators.name.isin(exclude)) &
+            (all_operators.regional_feed_type != "Regional Precursor Feed")
+        ][keep_cols]
+    
+        # There shouldn't be any duplicates by name, since we got rid 
+        # of precursor feeds. But, just in case, don't allow dup names.
+        operators_to_include = (operators_to_include
+                                .drop_duplicates(subset="name")
+                                .reset_index(drop=True)
+                               )
+
+        operators_to_include.to_parquet(f"{TEMP_GCS}operators_for_hqta.parquet")
+
+    return operators_to_include
 
 
-def list_to_json(my_list: list, file: str):
-    """
-    Turn list to json
-    """
+def name_feed_key_dict_to_json(operators_df: pd.DataFrame,
+                               file: str):
+    # Put name as the key, in case feed_key for operator changes
+    # over time, we still have a way to catalog this
+    name_feed_key_dict = dict(zip(operators_df.name, operators_df.feed_key))
+    
     MY_DICT = {}
-    MY_DICT["VALID_ITP_IDS"] = my_list
+    MY_DICT["VALID_FEED_KEYS"] = name_feed_key_dict
     
     with open(f"./{file.replace('.json', '')}.json", "w") as f:
         json.dump(MY_DICT, f)
         
     
-def itp_ids_from_json(file: str = VALID_OPERATORS_FILE) -> list:
+def feed_keys_from_json(file: str = VALID_OPERATORS_FILE) -> dict:
     # First, open the JSON with all the operators
     with open(f"./{file}") as f:
         data = json.load(f)
     
-    return data["VALID_ITP_IDS"]
+    return data["VALID_FEED_KEYS"]
 
 
 def check_for_completeness(
     export_path: str = CACHED_VIEWS_EXPORT_PATH, 
-    all_itp_ids: list = [],
-    analysis_date: str = analysis_date,
-    valid_operators_file: str = VALID_OPERATORS_FILE) -> list:
+    all_feeds: list = [],
+    analysis_date: str = analysis_date
+) -> list:
     """
     Go through and check that the files are non-empty for all 4.
     
@@ -92,16 +101,16 @@ def check_for_completeness(
     Returns a potentially smaller list of operators that 
     we expect to run through rest of the HQTA workflow
     """
-    IDS_WITH_FULL_INFO = [] 
+    FEEDS_WITH_FULL_INFO = [] 
     
-    for itp_id in all_itp_ids:  
+    for feed_key in all_feeds:  
         stop_times = dd.read_parquet(
-            f"{export_path}st_{itp_id}_{analysis_date}.parquet")
+            f"{export_path}st_{feed_key}_{analysis_date}.parquet")
 
         if len(stop_times.index) > 0:  
-            IDS_WITH_FULL_INFO.append(itp_id)
+            FEEDS_WITH_FULL_INFO.append(feed_key)
     
-    return IDS_WITH_FULL_INFO
+    return FEEDS_WITH_FULL_INFO
 
     
 if __name__=="__main__":
@@ -115,17 +124,24 @@ if __name__=="__main__":
     start = dt.datetime.now()
     
     # These are all the IDs that have some cached files in GCS
-    ITP_IDS = get_list_of_cached_itp_ids(analysis_date)
+    operators_for_hqta = pd.read_parquet(
+        f"{TEMP_GCS}operators_for_hqta.parquet")
+    
+    FEED_KEYS = operators_for_hqta.feed_keys.unique().tolist()
     
     time1 = dt.datetime.now()
     logger.info(f"get list of cached ITP IDs: {time1-start}")
     
     # Now check whether an operator has a complete set of files (len > 0)
-    IDS_WITH_FULL_INFO = check_for_completeness(
-        CACHED_VIEWS_EXPORT_PATH, ITP_IDS, analysis_date, VALID_OPERATORS_FILE)
+    FEEDS_WITH_FULL_INFO = check_for_completeness(
+        CACHED_VIEWS_EXPORT_PATH, FEED_KEYS, analysis_date)
     
-    # Save that list to json, should be smaller than all operators with cached
-    list_to_json(IDS_WITH_FULL_INFO, VALID_OPERATORS_FILE)
+    # Save that our dictionary to json, 
+    # should be smaller than all operators with cached
+    complete_operators = operators_for_hqta[
+        opearators_for_hqta.feed_key.isin(FEEDS_WITH_FULL_INFO)]
+    
+    name_feed_key_dict_to_json(complete_operators, VALID_OPERATORS_FILE)
     
     time2 = dt.datetime.now()
     logger.info(f"check files for completeness, save as json: {time2-time1}")

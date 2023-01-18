@@ -16,7 +16,7 @@ from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 def grab_selected_date(selected_date: str, 
                        dataset: Literal["stops", "trips", "routelines", "st"], 
-                       itp_ids: list) -> None:
+                       feed_keys: list) -> None:
     """
     Create the cached files for stops, trips, stop_times, routes, and route_info
     """
@@ -25,20 +25,20 @@ def grab_selected_date(selected_date: str,
 
     if (dataset in ["stops", "routelines"]) and (not compiled_path):
 
-        gtfs_utils.all_routelines_or_stops_with_cached(
+        gtfs_utils_v2.all_routelines_or_stops_with_cached(
             dataset = dataset,
             analysis_date = selected_date,
-            itp_id_list = itp_ids,
+            operator_feeds = feed_keys,
             export_path = COMPILED_CACHED_VIEWS
         )
     
         logger.info(f"{dataset} compiled and cached")
     
     if (dataset in ["trips", "st"]) and (not compiled_path):
-        gtfs_utils.all_trips_or_stoptimes_with_cached(
+        gtfs_utils_v2.all_trips_or_stoptimes_with_cached(
             dataset = dataset,
             analysis_date = selected_date,
-            itp_id_list = itp_ids,
+            operator_feeds = feed_keys,
             export_path = COMPILED_CACHED_VIEWS
         )
     
@@ -55,12 +55,13 @@ if __name__=="__main__":
     logger.info(f"Analysis date: {analysis_date}")    
 
     start = dt.datetime.now()
-    ITP_IDS = itp_ids_from_json()
+    NAME_FEED_KEY_DICT = feed_keys_from_json()
+    FEED_KEYS = list(NAME_FEED_KEY_DICT.values())
     
-    grab_selected_date(analysis_date, "stops", ITP_IDS)
-    grab_selected_date(analysis_date, "trips", ITP_IDS)
-    grab_selected_date(analysis_date, "routelines", ITP_IDS)
-    grab_selected_date(analysis_date, "st", ITP_IDS)
+    grab_selected_date(analysis_date, "stops", FEED_KEYS)
+    grab_selected_date(analysis_date, "trips", FEED_KEYS)
+    grab_selected_date(analysis_date, "routelines", FEED_KEYS)
+    grab_selected_date(analysis_date, "st", FEED_KEYS)
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
