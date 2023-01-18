@@ -44,21 +44,18 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
     this pares it down to ~115 route_ids.
     Use this pared down shape_ids to get hqta_segments.
     """
-    shape_id_cols = ["calitp_itp_id", "shape_id"]
-    route_dir_cols = ["calitp_itp_id", "route_id", "direction_id"]
+    shape_id_cols = ["shape_array_key"]
+    route_dir_cols = ["feed_key", "route_key", "route_id", "direction_id"]
 
     routelines_ddf = routelines.assign(
         route_length = routelines.geometry.length,
-    )
+    )[shape_id_cols + ["geometry", "route_length"]]
         
     # Merge routes to trips with using trip_id
     # Keep route_id and shape_id, but drop trip_id by the end
     m1 = (dd.merge(
             routelines_ddf,
-            # Don't merge using calitp_url_number because ITP ID 282 (SFMTA)
-            # can use calitp_url_number = 1
-            # Just keep calitp_url_number = 0 from routelines_ddf
-            trips[shape_id_cols + ["route_id", "direction_id"]],
+            trips[shape_id_cols + ["route_key", "route_id", "direction_id"]],
             on = shape_id_cols,
             how = "inner",
         ).drop_duplicates(subset = route_dir_cols + ["route_length"])
@@ -77,35 +74,29 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
         # dask can only sort by 1 column
         # so, let's combine route-dir into 1 column and drop_duplicates
         route_dir_identifier = m1.apply(
-            lambda x: zlib.crc32((str(x.calitp_itp_id) + 
-                x.route_id + str(x.direction_id)).encode("utf-8")), 
+            lambda x: zlib.crc32(
+                (x.route_key + str(x.direction_id)
+                ).encode("utf-8")), 
             axis=1, meta=("route_dir_identifier", "int"))
     )
     
     # Keep the longest shape_id for each direction
     # with missing direction_id filled in
-    longest_shapes = (m1.sort_values("shape_id")
+    longest_shapes = (m1.sort_values("shape_array_key")
                       .drop_duplicates("route_dir_identifier")
                       .drop(columns = "route_dir_identifier")
+                      .reset_index(drop=True)
                      )
 
-    # Let's add a route-identifier...to use downstream as partitioning index?
-    # Do this on the longest shape_id, because once it is dissolved, becomes multi-part geom
-    # dask can't do the shapely Point(x.coords) operation
-    # Grab the start / endpoint of a linestring
-    #https://gis.stackexchange.com/questions/358584/how-to-extract-long-and-lat-of-start-and-end-points-to-seperate-columns-from-t
-    longest_shapes = longest_shapes.assign(    
-        route_identifier = longest_shapes.apply(
-            lambda x: zlib.crc32((str(x.calitp_itp_id) + 
-                                  x.route_id).encode("utf-8")), axis=1, 
-            meta=("route_identifier", "int")),
-    )
+    # A route is uniquely identified by route_key (feed_key + route_id)
+    # Once we keep just 1 shape for each route direction, go back to route_key
         
     return longest_shapes
 
 
 def difference_overlay_by_route(
-    longest_shapes: gpd.GeoDataFrame, route: str, 
+    longest_shapes: gpd.GeoDataFrame, 
+    route: str, 
     segment_length: int
 ) -> gpd.GeoDataFrame:
     """
@@ -120,7 +111,7 @@ def difference_overlay_by_route(
     Keep these portions for a route, and then cut it into segments. 
     """
     # Start with the longest direction (doesn't matter if it's 0 or 1)
-    one_route = (longest_shapes[longest_shapes.route_identifier == route]
+    one_route = (longest_shapes[longest_shapes.route_key == route]
                  .sort_values("route_length", ascending=False)
                  .reset_index(drop=True)
             )
@@ -143,7 +134,7 @@ def difference_overlay_by_route(
     
     exploded2 = exploded.assign(
         overlay_length = exploded.geometry.length,
-        route_identifier = route,
+        route_key = route,
     )
     
     CUTOFF = segment_length * 0.5
@@ -154,14 +145,14 @@ def difference_overlay_by_route(
     
     # Now, dissolve it, so it becomes 1 row again
     # Without this initial dissolve, hqta segments will have tiny segments towards ends
-    segments_to_attach = (exploded_long_enough[["route_identifier", "geometry"]]
-                          .dissolve(by="route_identifier")
+    segments_to_attach = (exploded_long_enough[["route_key", "geometry"]]
+                          .dissolve(by="route_key")
                           .reset_index()
                          )
     
     longest_shape_portions = (pd.concat(
         [first, segments_to_attach], axis=0)
-        [["route_identifier", "geometry"]]
+        [["route_key", "geometry"]]
     )
     
     return longest_shape_portions
@@ -188,14 +179,14 @@ def select_shapes_and_segment(
     # convert it now, and leave it as geopandas
     gdf = longest_shapes.compute()
         
-    routes_both_dir = (gdf.route_identifier
+    routes_both_dir = (gdf.route_key
                        .value_counts()
                        .loc[lambda x: x > 1]
                        .index).tolist()  
 
-    one_direction = gdf[~gdf.route_identifier.isin(routes_both_dir)]
+    one_direction = gdf[~gdf.route_key.isin(routes_both_dir)]
     
-    two_directions = gdf[gdf.route_identifier.isin(routes_both_dir)]    
+    two_directions = gdf[gdf.route_key.isin(routes_both_dir)]    
     
     two_directions_overlay = gpd.GeoDataFrame()
 
@@ -209,28 +200,28 @@ def select_shapes_and_segment(
     
     ready_for_segmenting = pd.concat(
         [one_direction, two_directions_overlay], 
-        axis=0)[["route_identifier", "geometry"]]
+        axis=0)[["route_key", "geometry"]]
     
     # Cut segments 
     segmented = geography_utils.cut_segments(
         ready_for_segmenting,
-        group_cols = ["route_identifier"],
+        group_cols = ["route_key"],
         segment_distance = segment_length
     ).astype({"segment_sequence": int})
     
     
     segmented = segmented.assign(
-        segment_sequence = (segmented.groupby("route_identifier")
+        segment_sequence = (segmented.groupby("route_key")
                             ["segment_sequence"].cumcount()).astype(str)
     )
     
-    route_cols = ["calitp_itp_id", "route_id", "route_identifier"]
+    route_cols = ["feed_key", "route_id", "route_key"]
 
     # Attach other route info
     hqta_segments = pd.merge(
         segmented,
-        gdf[route_cols].drop_duplicates(subset="route_identifier"),
-        on = "route_identifier",
+        gdf[route_cols].drop_duplicates(subset="route_key"),
+        on = "route_key",
         how = "inner",
         validate = "m:1"
     )
@@ -247,7 +238,7 @@ def select_shapes_and_segment(
     hqta_segments = hqta_segments.assign(
         hqta_segment_id = hqta_segments.apply(
             lambda x: zlib.crc32(
-                (str(x.calitp_itp_id) + x.route_id + 
+                (x.route_key + 
                  x.segment_sequence).encode("utf-8")), axis=1),
     )
     
@@ -264,6 +255,11 @@ def find_primary_direction_across_hqta_segments(
     Since routes, depending on where you pick origin / destination,
     could have shown both north-south and east-west, doing it this way
     will be more accurate.
+    
+    dask can't do the shapely Point(x.coords) operation, 
+    so do it on here on segments, which is linestrings.
+    Grab the start / endpoint of a linestring
+    https://gis.stackexchange.com/questions/358584/how-to-extract-long-and-lat-of-start-and-end-points-to-seperate-columns-from-t
     """
     
     with_od = rt_utils.add_origin_destination(hqta_segments_gdf)
@@ -271,15 +267,15 @@ def find_primary_direction_across_hqta_segments(
     
     # Get predominant direction based on segments
     predominant_direction_by_route = (
-        with_direction.groupby(["route_identifier", "route_direction"])
+        with_direction.groupby(["route_key", "route_direction"])
         .agg({"route_primary_direction": "count"})
         .reset_index()
-        .sort_values(["route_identifier", "route_primary_direction"], 
+        .sort_values(["route_key", "route_primary_direction"], 
         # descending order, the one with most counts at the top
         ascending=[True, False])
-        .drop_duplicates(subset="route_identifier")
+        .drop_duplicates(subset="route_key")
         .reset_index(drop=True)
-        [["route_identifier", "route_direction"]]
+        [["route_key", "route_direction"]]
      )
     
     drop_cols = ["origin", "destination", "route_primary_direction"]
@@ -287,7 +283,7 @@ def find_primary_direction_across_hqta_segments(
     routes_with_primary_direction = pd.merge(
         with_direction.drop(columns = "route_direction"), 
         predominant_direction_by_route,
-        on = "route_identifier",
+        on = "route_key",
         how = "left",
         validate = "m:1"
     ).drop(columns = drop_cols)
@@ -302,8 +298,8 @@ def dissolved_to_longest_shape(hqta_segments: gpd.GeoDataFrame):
     
     Keep this version to plot the route.
     """
-    route_cols = ["calitp_itp_id", "route_id", 
-                  "route_identifier", "route_direction"]
+    route_cols = ["feed_key", "route_id", 
+                  "route_key", "route_direction"]
     
     dissolved = (hqta_segments[route_cols + ["geometry"]]
                  .dissolve(by=route_cols)
