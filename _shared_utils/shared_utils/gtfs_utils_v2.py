@@ -28,7 +28,8 @@ def filter_operator(
 ) -> siuba.dply.verbs.Pipeable:
     """
     Filter if operator_list is present.
-    Otherwise, skip.
+    For trips table, operator_feeds can be a list of names or feed_keys.
+    For stops, shapes, stop_times, operator_feeds can only be a list of feed_keys.
     """
     # in testing, using _.feed_key or _.name came up with a
     # siuba verb not implemented
@@ -545,6 +546,9 @@ def get_stop_times(
 
     if get_df:
         stop_times = stop_times >> collect()
+
+        # Since we can parse by arrival or departure hour, let's
+        # make it available when df is returned
         stop_times = stop_times.assign(
             arrival_hour=pd.to_datetime(stop_times.arrival_sec, unit="s").dt.hour,
             departure_hour=pd.to_datetime(stop_times.departure_sec, unit="s").dt.hour,
