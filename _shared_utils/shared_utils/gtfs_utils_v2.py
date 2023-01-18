@@ -10,6 +10,7 @@ from typing import Literal, Union
 
 import geopandas as gpd
 import pandas as pd
+import shapely
 import siuba  # need this to do type hint in functions
 from calitp.tables import tbls
 from shared_utils import geography_utils
@@ -22,7 +23,9 @@ GCS_PROJECT = "cal-itp-data-infra"
 # ----------------------------------------------------------------#
 
 
-def filter_operator(operator_feeds: list) -> siuba.dply.verbs.Pipeable:
+def filter_operator(
+    operator_feeds: list, include_name: bool = False
+) -> siuba.dply.verbs.Pipeable:
     """
     Filter if operator_list is present.
     Otherwise, skip.
@@ -31,7 +34,12 @@ def filter_operator(operator_feeds: list) -> siuba.dply.verbs.Pipeable:
     # siuba verb not implemented
     # https://github.com/machow/siuba/issues/407
     # put brackets around should work
-    return filter(_["feed_key"].isin(operator_feeds) | _["name"].isin(operator_feeds))
+    if include_name:
+        return filter(
+            _["feed_key"].isin(operator_feeds) | _["name"].isin(operator_feeds)
+        )
+    else:
+        return filter(_["feed_key"].isin(operator_feeds))
 
 
 def filter_date(selected_date: Union[str, datetime.date]) -> siuba.dply.verbs.Pipeable:
@@ -102,7 +110,7 @@ def filter_feed_options(
     ]
 ) -> siuba.dply.verbs.Pipeable:
 
-    exclude_future = filter(_.is_future == False)
+    exclude_future = filter(_["is_future"] == False)
     exclude_precursor = filter(_.regional_feed_type != "Regional Precursor Feed")
 
     if feed_option == "customer_facing":
@@ -115,7 +123,7 @@ def filter_feed_options(
     elif feed_option == "use_subfeeds":
         return (
             filter(
-                _.name != "Bay Area 511 Regional Schedule"
+                _["name"] != "Bay Area 511 Regional Schedule"
             )  # keep VCTC combined because the combined feed is the only feed
             >> exclude_future
             >> exclude_precursor
@@ -214,9 +222,7 @@ def fill_in_metrolink_trips_df_with_shape_id(
     # OCin and OCout are not distinguished in dictionary
     df = df.assign(
         shape_id=df.apply(
-            lambda x: x.shape_id + "out"
-            if x.direction_id == "0"
-            else x.shape_id + "in",
+            lambda x: x.shape_id + "out" if x.direction_id == 0 else x.shape_id + "in",
             axis=1,
         )
     )
@@ -292,13 +298,12 @@ def schedule_daily_feed_to_organization(
         tbls.mart_gtfs.fct_daily_schedule_feeds()
         >> filter(_.date == selected_date)
         >> inner_join(_, dim_gtfs_datasets, on="gtfs_dataset_key")
-        >> subset_cols(keep_cols)
     )
 
     if get_df:
         fact_feeds = fact_feeds >> filter_feed_options(feed_option) >> collect()
 
-    return fact_feeds
+    return fact_feeds >> subset_cols(keep_cols)
 
 
 def get_trips(
@@ -319,18 +324,21 @@ def get_trips(
     trips = (
         tbls.mart_gtfs.fct_daily_scheduled_trips()
         >> filter_date(selected_date)
-        >> filter_operator(operator_feeds)
+        >> filter_operator(operator_feeds, include_name=True)
         >> filter_custom_col(custom_filtering)
     )
 
     # subset of columns must happen after Metrolink fix...otherwise,
     # Metrolink fix may depend on more columns that after, we're not interested in
     if get_df:
-        metrolink_feed_key = get_metrolink_feed_key(
-            selected_date=selected_date, get_df=False
+        metrolink_feed_key_name_df = get_metrolink_feed_key(
+            selected_date=selected_date, get_df=True
         )
+        metrolink_feed_key = metrolink_feed_key_name_df.feed_key.iloc[0]
+        metrolink_name = metrolink_feed_key_name_df.name.iloc[0]
+
         # Handle Metrolink when we need to
-        if metrolink_feed_key in operator_feeds:
+        if (metrolink_feed_key in operator_feeds) or (metrolink_name in operator_feeds):
             metrolink_trips = (
                 trips >> filter(_.feed_key == metrolink_feed_key) >> collect()
             )
@@ -373,12 +381,13 @@ def get_shapes(
     shapes = (
         tbls.mart_gtfs.fct_daily_scheduled_shapes()
         >> filter_date(selected_date)
-        >> filter_operator(operator_feeds)
+        >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
-        >> collect()
     )
 
     if get_df:
+        shapes = shapes >> collect()
+
         shapes_gdf = geography_utils.make_routes_gdf(shapes, crs=crs)[
             shape_cols + ["geometry"]
         ]
@@ -405,19 +414,35 @@ def get_stops(
     """
     check_operator_feeds(operator_feeds)
 
+    # If pt_geom is not kept in the final, we still need it
+    # to turn this into a gdf
+    if (stop_cols is not None) and ("pt_geom" not in stop_cols):
+        stop_cols_with_geom = stop_cols + ["pt_geom"]
+    else:
+        stop_cols_with_geom = stop_cols[:]
+
     stops = (
         tbls.mart_gtfs.fct_daily_scheduled_stops()
         >> filter_date(selected_date)
-        >> filter_operator(operator_feeds)
+        >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
-        >> subset_cols(stop_cols)
+        >> subset_cols(stop_cols_with_geom)
     )
 
     if get_df:
         stops = stops >> collect()
-        stops = stops.to_crs(crs)
 
-    return stops
+        geom = [shapely.wkt.loads(x) for x in stops.pt_geom]
+
+        stops = (
+            gpd.GeoDataFrame(stops, geometry=geom, crs="EPSG:4326")
+            .to_crs(crs)
+            .drop(columns="pt_geom")
+        )
+
+        return stops
+    else:
+        return stops >> subset_cols(stop_cols)
 
 
 def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
@@ -497,7 +522,7 @@ def get_stop_times(
     if not isinstance(trips_on_day, pd.DataFrame):
         stop_times = (
             tbls.mart_gtfs.dim_stop_times()
-            >> filter_operator(operator_feeds)
+            >> filter_operator(operator_feeds, include_name=True)
             >> inner_join(_, trips_on_day, on=trip_id_cols)
             >> filter_start_end_ts(time_filters, "arrival")
             >> filter_start_end_ts(time_filters, "departure")
@@ -510,7 +535,7 @@ def get_stop_times(
         # on both sides. Use .isin then
         stop_times = (
             tbls.mart_gtfs.dim_stop_times()
-            >> filter_operator(operator_feeds)
+            >> filter_operator(operator_feeds, include_name=False)
             >> filter(_.trip_id.isin(trips_on_day.trip_id))
             >> filter_start_end_ts(time_filters, "arrival")
             >> filter_start_end_ts(time_filters, "departure")
@@ -520,6 +545,10 @@ def get_stop_times(
 
     if get_df:
         stop_times = stop_times >> collect()
+        stop_times = stop_times.assign(
+            arrival_hour=pd.to_datetime(stop_times.arrival_sec, unit="s").dt.hour,
+            departure_hour=pd.to_datetime(stop_times.departure_sec, unit="s").dt.hour,
+        )
 
     return stop_times
 
