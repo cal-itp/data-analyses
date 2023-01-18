@@ -4,10 +4,10 @@ Some functions for dealing with census tract or other geographic unit dfs.
 """
 from typing import Union
 
+import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
 import shapely
-from siuba import *
 
 WGS84 = "EPSG:4326"
 CA_StatePlane = "EPSG:2229"  # units are in feet
@@ -63,13 +63,14 @@ def aggregate_by_geography(
             index=group_cols, values=agg_cols, aggfunc=aggregate_function
         ).reset_index()
 
-        if rename_cols is True:
-            # https://stackoverflow.com/questions/34049618/how-to-add-a-suffix-or-prefix-to-each-column-name
-            # Why won't .add_prefix or .add_suffix work?
+        # https://stackoverflow.com/questions/34049618/how-to-add-a-suffix-or-prefix-to-each-column-name
+        # Why won't .add_prefix or .add_suffix work?
+        if rename_cols:
             for c in agg_cols:
                 agg_df = agg_df.rename(columns={c: f"{c}_{aggregate_function}"})
 
         final_df = pd.merge(final_df, agg_df, on=group_cols, how="left", validate="1:1")
+
         return final_df
 
     if len(sum_cols) > 0:
@@ -119,7 +120,7 @@ def make_routes_gdf(
 
     # convert to geopandas; re-project if needed
     gdf = gpd.GeoDataFrame(
-        shapes.drop(columns="pt_array"), geometry="geometry", crs=geography_utils.WGS84
+        shapes.drop(columns="pt_array"), geometry="geometry", crs=WGS84
     ).to_crs(crs)
 
     return gdf
