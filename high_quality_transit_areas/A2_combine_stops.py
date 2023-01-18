@@ -44,8 +44,8 @@ new_muni_stops = [
 ]
 
 BRT_STOPS_FILTER = {
-    182: metro_street_running,
-    282: van_ness_ids
+    "LA Metro Bus Schedule": metro_street_running,
+    "Bay Area 511 Muni Schedule": van_ness_ids
 }
 
 
@@ -66,12 +66,6 @@ if __name__ == "__main__":
     # Rail
     rail_ferry_brt.grab_rail_data(analysis_date)
     rail_stops = gpd.read_parquet(f"{TEMP_GCS}rail_stops.parquet")
-    
-    # Handle Muni separately - temp, can remove in 2023
-    muni_weekend_rail.download_muni_stops(282)
-    muni_rail_stops = gpd.read_parquet(f"{TEMP_GCS}muni_weekend_rail_stops.parquet")
-    new_muni_rail_stops = muni_rail_stops[
-        muni_rail_stops.stop_id.isin(new_muni_stops)].reset_index(drop=True)
     
     time1 = datetime.datetime.now()
     logger.info(f"grabbed rail: {time1-start}")
@@ -95,7 +89,6 @@ if __name__ == "__main__":
     # Concatenate datasets that need to be clipped to CA
     rail_brt = pd.concat([
         rail_stops,
-        new_muni_rail_stops,
         brt_stops
     ], axis=0, ignore_index= True)
     

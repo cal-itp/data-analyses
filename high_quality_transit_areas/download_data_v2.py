@@ -240,7 +240,8 @@ if __name__=="__main__":
     
     fs = gcsfs.GCSFileSystem()
     
-    hqta_operators_df = operators_for_hqta.scheduled_operators_for_hqta(analysis_date)
+    hqta_operators_df = operators_for_hqta.scheduled_operators_for_hqta(
+        analysis_date)
     FEEDS_TO_RUN = hqta_operators_df.feed_key.unique().tolist()    
         
     logger.info(f"# operators to run: {len(FEEDS_TO_RUN)}")
