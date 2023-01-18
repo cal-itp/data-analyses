@@ -17,69 +17,13 @@ from bus_service_utils import gtfs_build
 # List of cols to drop from trips table
 # Didn't remove after switching to gtfs_utils, but these 
 # are datetime and will get rejected in the zipped shapefile conversion anyway
-remove_trip_cols = ["service_date", "calitp_extracted_at", "calitp_deleted_at"]
+remove_trip_cols = ["service_date"]
 
-
-def merge_trips_to_routes(
-    trips: dd.DataFrame, 
-    routes: dg.GeoDataFrame, 
-    group_cols: list = ["calitp_itp_id", "shape_id"]
-) -> dg.GeoDataFrame:
-    # Routes or trips can contain multiple calitp_url_numbers 
-    # for same calitp_itp_id-shape_id. Drop these now
-    # dask can only sort by 1 column!
-    # when publishing to open data portal, we want it at operator level, not feed level
-    if group_cols == ["calitp_itp_id", "shape_id"]:
-        routes = (routes.sort_values("calitp_url_number")
-              .drop_duplicates(subset=group_cols)
-              .reset_index(drop=True)
-        )
-        
-        trips = (trips.sort_values("calitp_url_number")
-             .drop_duplicates(subset=["calitp_itp_id", "trip_id"])
-             .reset_index(drop=True)
-            .drop(columns = remove_trip_cols)
-        )
-        
-    else:
-        routes = (routes
-          .drop_duplicates(subset=group_cols)
-          .reset_index(drop=True)
-        )
-        trips = (trips.drop_duplicates(
-            subset=["calitp_itp_id", "calitp_url_number", "trip_id"])
-             .reset_index(drop=True)
-            .drop(columns = remove_trip_cols)
-        )
-
-    
-    # Left only means in trips, but shape_id not found in shapes.txt
-    # right only means in routes, but no route that has that shape_id 
-    # only 1% falls into right_only
-    keep_cols = group_cols + ['route_id', 
-        'route_type', 'geometry',
-    ]
-    
-    m1 = gtfs_build.merge_routes_trips(
-        routes, 
-        trips, 
-        group_cols,
-        crs = f"EPSG: {routes.crs.to_epsg()}"
-    )
-    
-    m2 = (m1[m1._merge=="both"][keep_cols]
-          .reset_index(drop=True) 
-          .to_crs(geography_utils.WGS84)
-          .drop_duplicates()
-         )
-        
-    return m2
 
 
 def add_route_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     route_name_used = portfolio_utils.add_route_name(
-        selected_date = prep_data.ANALYSIS_DATE,
     )
     
     route_cols_to_drop = ["route_short_name", "route_long_name", "route_desc"]
@@ -107,8 +51,6 @@ def add_route_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         validate = "m:1"
     )
     
-    # Only keep latest ITP IDS
-    latest_itp_id = portfolio_utils.latest_itp_id()
     
     with_latest_id = (pd.merge(
         with_agency_name, 
