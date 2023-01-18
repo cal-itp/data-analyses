@@ -12,6 +12,10 @@ COMPILED_RAIL_BRT_FERRY = catalog_filepath("rail_brt_ferry_initial")
    
 
 def get_rail_ferry_brt_extract():
+    """
+    Prepare the rail / ferry / BRT stops to be assembled with
+    the bus_hqta types and saved into the hqta_points file.
+    """
     df = dg.read_parquet(COMPILED_RAIL_BRT_FERRY)
 
     keep_cols = ["feed_key", "name", "stop_id", 

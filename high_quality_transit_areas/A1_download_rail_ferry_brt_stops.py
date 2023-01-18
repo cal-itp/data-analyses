@@ -70,7 +70,6 @@ def grab_rail_data(analysis_date: str) -> gpd.GeoDataFrame:
         "rail_stops"
     )
     
-
     
 def filter_to_brt_trips(analysis_date: str) -> pd.DataFrame:
     """
@@ -150,9 +149,8 @@ def grab_operator_brt(analysis_date: str) -> gpd.GeoDataFrame:
         brt_stops_present,
         on = ["feed_key", "stop_id"],
         how = "inner"
-    )[keep_stop_cols].drop_duplicates().reset_index(drop=True)
-        
-        
+    )[keep_stop_cols + ["name"]].drop_duplicates().reset_index(drop=True)
+            
     utils.geoparquet_gcs_export(
         brt_stops,
         TEMP_GCS,
@@ -185,10 +183,16 @@ def additional_brt_filtering_out_stops(
     muni2 = muni >> filter(_.stop_id.isin(
         filtering_dict["Bay Area 511 Muni Schedule"]))
 
-    brt_df_stops = pd.concat(
-        [metro2, muni2, subset_no_filtering], 
-        axis=0
-    ).sort_values(["feed_key", "name"]).reset_index(drop=True)
+    brt_df_stops = (pd.concat([
+            metro2,
+            muni2, 
+            subset_no_filtering
+        ], axis=0)
+        .sort_values(["feed_key", "name"])
+        .drop(columns = "name") # drop name because we add it later,
+                                # rail/ferry don't come with this column
+        .reset_index(drop=True)
+    )
     
     return brt_df_stops
 
