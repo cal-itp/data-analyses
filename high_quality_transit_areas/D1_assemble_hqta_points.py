@@ -35,45 +35,19 @@ EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 MAJOR_STOP_BUS_FILE = utilities.catalog_filepath("major_stop_bus")
 STOPS_IN_CORRIDOR_FILE = utilities.catalog_filepath("stops_in_hq_corr")
     
-def merge_muni_trips_route_info():
-    """
-    Temporarily attach Muni with its route_info back in.
-    Remove in Jan 2023.
-    """
-    muni_trips = pd.read_parquet(
-        f"{TEMP_GCS}muni_weekend_rail_trips.parquet")
-    muni_route_info = pd.read_parquet(
-        f"{TEMP_GCS}muni_weekend_rail_route_info.parquet")
-    
-    trips_with_route_info = pd.merge(
-        muni_trips, 
-        muni_route_info.drop_duplicates(subset="route_id"),
-        on = ["calitp_itp_id", "route_id"],
-        how = "inner",
-        validate = "m:1"
-    )
-    
-    return trips_with_route_info
-
     
 def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """
-    Use calitp_itp_id-stop_id to add route_id back in, 
+    Use feed_key-stop_id to add route_id back in, 
     using the trips and stop_times table.
     """    
     stop_times = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
-    muni_stop_times = dd.read_parquet(
-        f"{TEMP_GCS}muni_weekend_rail_stop_times.parquet")
     trips = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
-    muni_trips = merge_muni_trips_route_info()
-
-    stop_times = dd.multi.concat([stop_times, muni_stop_times], axis=0)
-    trips = dd.multi.concat([trips, muni_trips], axis=0)
     
-    stop_cols = ["calitp_itp_id", "stop_id"]
-    trip_cols = ["calitp_itp_id", "trip_id"]
+    stop_cols = ["feed_key", "stop_id"]
+    trip_cols = ["feed_key", "name", "trip_id"]
     
     one_trip = (stop_times[stop_cols + ["trip_id"]]
                 .drop_duplicates(subset=stop_cols)
@@ -85,12 +59,12 @@ def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
         trips[trip_cols + ["route_id"]].drop_duplicates(),
         on = trip_cols,
         how = "inner"
-    ).rename(columns = {"calitp_itp_id": "calitp_itp_id_primary"})
+    ).rename(columns = {"feed_key": "feed_key_primary"})
 
     hqta_points_with_route = dd.merge(
         hqta_points,
         with_route_info,
-        on = ["calitp_itp_id_primary", "stop_id"],
+        on = ["feed_key_primary", "stop_id"],
         how = "inner",
     ).drop(columns = "trip_id")
     
@@ -101,36 +75,38 @@ def add_route_info(hqta_points: dg.GeoDataFrame) -> dg.GeoDataFrame:
 
     
 def get_agency_names() -> pd.DataFrame:
-    names = portfolio_utils.add_agency_name(analysis_date)
+    feed_to_name = (pd.read_parquet(
+            f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
+            columns = ["feed_key", "name"]
+        ).drop_duplicates()
+        .reset_index(drop=True)
+        .rename(columns = {
+            "feed_key": "feed_key_primary", 
+            "name": "agency_name_primary"})
+    )
     
-    names = (names.astype({"calitp_itp_id": int})
-             .rename(columns = {
-                 "calitp_itp_id": "calitp_itp_id_primary", 
-                 "calitp_agency_name": "agency_name_primary"})
-            )
-    
-    return names
+    return feed_to_name
 
 
 def add_agency_names_hqta_details(gdf: dg.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Add agency names by merging it in with our crosswalk
-    to get the primary ITP ID and primary agency name.
+    to get the primary feed_key and primary agency name.
     
-    Then use a function to add secondary ITP ID and secondary agency name 
+    Then use a function to add secondary feed_key and secondary agency name 
     and hqta_details column.
     hqta_details makes it clearer for open data portal users why
     some ID / agency name columns show the same info or are missing.
     """
     names_df = get_agency_names()
     
-    name_dict = (names_df.set_index('calitp_itp_id_primary')
+    name_dict = (names_df.set_index("feed_key_primary")
                  .to_dict()['agency_name_primary']
                 )
     
     gdf2 = dd.merge(gdf, 
                     names_df, 
-                    on = "calitp_itp_id_primary",
+                    on = "feed_key_primary",
                     how = "inner"
                    )
     
@@ -138,20 +114,21 @@ def add_agency_names_hqta_details(gdf: dg.GeoDataFrame) -> gpd.GeoDataFrame:
     
     with_names = with_names.assign(
                     agency_name_secondary = with_names.apply(
-                        lambda x: name_dict[int(x.calitp_itp_id_secondary)] if 
-                        (not np.isnan(x.calitp_itp_id_secondary) and 
-                         int(x.calitp_itp_id_secondary) in name_dict.keys()) 
+                        lambda x: name_dict[x.feed_key_secondary] if 
+                        (not np.isnan(x.feed_key_secondary) and 
+                         x.feed_key_secondary in name_dict.keys()) 
                          else None, axis = 1, 
                      ), 
-                    hqta_details = with_names.apply(utilities.hqta_details, axis=1)
+                    hqta_details = with_names.apply(
+                        utilities.hqta_details, axis=1)
                 )
     return with_names
     
 
 def clean_up_hqta_points(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     gdf2 = (gdf.drop_duplicates(
-                    subset=["calitp_itp_id_primary", "hqta_type", "stop_id"])
-                .sort_values(["calitp_itp_id_primary", "hqta_type", "stop_id"])
+                    subset=["agency_name_primary", "hqta_type", "stop_id"])
+                .sort_values(["agency_name_primary", "hqta_type", "stop_id"])
                 .reset_index(drop=True)
             .to_crs(geography_utils.WGS84)
     )
