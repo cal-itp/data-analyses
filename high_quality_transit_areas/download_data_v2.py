@@ -98,7 +98,6 @@ def get_stops(feed_key: str, analysis_date: str,
     keep_stop_cols = [
         "feed_key",
         "stop_id", "stop_key", "stop_name", 
-        "pt_geom",
     ] + route_type_cols 
 
     

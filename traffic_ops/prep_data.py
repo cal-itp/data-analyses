@@ -95,7 +95,6 @@ def export_to_subfolder(file_name: str, analysis_date: str):
 #----------------------------------------------------#
 # Define column names, must fit ESRI 10 character limits
 RENAME_COLS = {
-    "feed_key": "feed_id",
     "name": "agency",
     "route_name_used": "route_name",
 }
