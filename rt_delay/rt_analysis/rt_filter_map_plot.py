@@ -64,16 +64,16 @@ class RtFilterMapper:
         trip_ids: list or pd.Series of trip_ids (GTFS trip_ids)
         route_types: list or pd.Series of route_type
         '''
-        assert start_time or end_time or route_names or direction_id or direction or shape_ids or trip_ids or route_types, 'must supply at least 1 argument to filter'
+        route_names = list(route_names) if isinstance(route_names, pd.Series) else route_names
+        route_types = list(route_types) if isinstance(route_types, pd.Series) else route_types
+        trip_ids = list(trip_ids) if isinstance(trip_ids, pd.Series) else trip_ids
+        args = [start_time, end_time, route_names, direction_id, direction, shape_ids, trip_ids, route_types]
+        assert any(args), 'must supply at least 1 argument to filter'
         assert not start_time or type(dt.datetime.strptime(start_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
         assert not end_time or type(dt.datetime.strptime(end_time, '%H:%M') == type(dt.datetime)), 'invalid time string'
-        assert not route_names or type(route_names) == list or type(route_names) == tuple or type(route_names) == type(pd.Series())
-        assert not route_types or type(route_types) == list or type(route_types) == tuple or type(route_types) == type(pd.Series())
         if route_types:
             assert pd.Series(route_types).isin(self.rt_trips.route_type).all(), 'at least 1 route type not found in self.rt_trips'
         if route_names:
-            # print(route_names)
-            # print(type(route_names))
             assert pd.Series(route_names).isin(self.rt_trips.route_short_name).all(), 'at least 1 route not found in self.rt_trips'
         assert not direction_id or type(direction_id) == str and len(direction_id) == 1
         self.filter = {}
@@ -189,7 +189,7 @@ class RtFilterMapper:
         Enables calculation of metrics for SCCP, LPP.
         '''
         corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
-        self.corridor = corridor_gdf
+        self.corridor = corridor_gdf >> select(_.geometry)
         to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence']).dropna(subset=['stop_id'])
         clipped = to_clip.clip(corridor_gdf)
         shape_sequences = (self.stop_delay_view.dropna(subset=['stop_id'])
@@ -232,6 +232,32 @@ class RtFilterMapper:
         with_entry_delay = corridor_filtered >> inner_join(_, entry_delays, on='trip_id')
         with_entry_delay = with_entry_delay >> mutate(corridor_delay_seconds = _.delay_seconds - _.entry_delay_seconds)
         self.corridor_stop_delays = with_entry_delay
+    
+    def autocorridor(self, shape_id: str, stop_seq_range: list):
+        '''
+        Defines a corridor for delay analysis using existing GTFS Shapes data,
+        without the need for externally defining the corridor bounding box.
+        Designed to be used alongside segment_speed_map in a notebook, i.e.
+        by viewing speeds to decide on bounds and inputting the corresponding
+        shape_id and stop sequence range. Attaches corridor for corridor maps/metrics.
+        
+        shape_id: string, GTFS shape_id
+        stop_seq_range: list, containing 2 ints/floats, any order
+        
+        example:
+        shape_id = '27_3_87'
+        stop_range = [16, 31]
+        '''
+        corridor = (self.stop_segment_speed_view
+         >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
+         >> filter(_.shape_id == shape_id,
+                   _.stop_sequence >= min(stop_seq_range),
+                   _.stop_sequence <= max(stop_seq_range))
+        )
+        corridor.geometry = corridor.buffer(100)
+        corridor = corridor.dissolve()
+        self.add_corridor(corridor)
+        return
     
     def segment_speed_map(self, segments = 'stops', how = 'low_speeds',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
@@ -369,9 +395,11 @@ class RtFilterMapper:
         name = self.calitp_agency_name
 
         display_cols = ['_20p_mph', 'time_formatted', 'miles_from_last',
-                       'route_short_name', 'trips_per_hour']
+                       'route_short_name', 'trips_per_hour', 'shape_id',
+                       'stop_sequence']
         display_aliases = ['Speed (miles per hour)', 'Travel time', 'Segment distance (miles)',
-                          'Route', 'Frequency (trips per hour)']
+                          'Route', 'Frequency (trips per hour)', 'Shape ID',
+                          'Stop Sequence']
         tooltip_dict = {'aliases': display_aliases}
         if no_title:
             title = ''
@@ -544,8 +572,14 @@ class RtFilterMapper:
         return
     
     def quick_map_corridor(self):
+        '''
+        Maps currently attached corridor, with stops just before/
+        in/just after corridor for all routes in current filter, if any
+        '''
         
-        mappable_stops = (self.stop_delay_view.dropna(subset=['stop_id'])
+        assert hasattr(self, 'corridor'), 'Must attach a corridor first'
+        filtered_stops = self._filter(self.stop_delay_view)
+        mappable_stops = (filtered_stops.dropna(subset=['stop_id'])
                   >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
                   >> filter(_.corridor)
                   >> select(_.stop_id, _.geometry, _.stop_sequence)
@@ -588,6 +622,9 @@ class RtFilterMapper:
               >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
              )
         speed_metric = df.target_delay_seconds.sum() / 60
+        self.corridor['schedule_metric_minutes'] = schedule_metric
+        self.corridor['speed_metric_minutes'] = speed_metric
+        self.corridor['filter'] = self.filter_formatted
         return {'schedule_metric_minutes': schedule_metric,
                'speed_metric_minutes': speed_metric}
     
