@@ -18,7 +18,9 @@ import A1_provider_prep
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 
 """
-Other
+Scripts for 
+Other Data Sources
+(Routes/Trips/NTD)
 """
 # Clean organization names - strip them of dba, etc
 def organization_cleaning(df, column_wanted: str):
