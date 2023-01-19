@@ -23,8 +23,8 @@ def get_rail_ferry_brt_extract():
         
     df2 = (df[keep_cols].assign(
             hqta_type = df.route_type.map(
-                lambda x: "major_stop_rail" if x in ["0", "1", "2"]
-                else "major_stop_brt" if x == "3" 
+                lambda x: "major_stop_rail" if x in [0, 1, 2]
+                else "major_stop_brt" if x == 3 
                 else "major_stop_ferry")
         ).rename(columns = {"name": "name_primary"})
        .drop(columns = "route_type")
