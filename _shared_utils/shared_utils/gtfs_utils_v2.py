@@ -335,8 +335,9 @@ def get_trips(
         >> filter_custom_col(custom_filtering)
     )
 
-    # subset of columns must happen after Metrolink fix...otherwise,
-    # Metrolink fix may depend on more columns that after, we're not interested in
+    # subset of columns must happen after Metrolink fix...
+    # otherwise, the Metrolink fix may depend on more columns that
+    # get subsetted out
     if get_df:
         metrolink_feed_key_name_df = get_metrolink_feed_key(
             selected_date=selected_date, get_df=True

@@ -30,8 +30,6 @@ if __name__=="__main__":
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
-    fs = gcsfs.GCSFileSystem()
-
     hqta_operators_df = operators_for_hqta.scheduled_operators_for_hqta(
         analysis_date)
     
@@ -55,7 +53,7 @@ if __name__=="__main__":
     
     trips = gtfs_utils_v2.get_trips(
         selected_date = analysis_date,
-        operator_feeds = [FEEDS_TO_RUN],
+        operator_feeds = FEEDS_TO_RUN,
         trip_cols = keep_trip_cols,
         get_df = True,
     ) 
