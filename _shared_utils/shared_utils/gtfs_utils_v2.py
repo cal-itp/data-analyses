@@ -302,7 +302,13 @@ def schedule_daily_feed_to_organization(
     )
 
     if get_df:
-        fact_feeds = fact_feeds >> filter_feed_options(feed_option) >> collect()
+        fact_feeds = (
+            fact_feeds
+            >> collect()
+            # apparently order matters - if this is placed before
+            # the collect(), it filters out wayyyy too many
+            >> filter_feed_options(feed_option)
+        )
 
     return fact_feeds >> subset_cols(keep_cols)
 

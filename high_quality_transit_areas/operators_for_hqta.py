@@ -9,6 +9,7 @@ thus should be able to have their HQTA corridors compiled.
 """
 import dask.dataframe as dd
 import datetime as dt
+import gcsfs
 import json
 import pandas as pd
 import sys
@@ -19,6 +20,7 @@ from shared_utils import rt_utils, gtfs_utils_v2
 from update_vars import (analysis_date, CACHED_VIEWS_EXPORT_PATH, TEMP_GCS,
                         VALID_OPERATORS_FILE)
 
+fs = gcsfs.GCSFileSystem()
 
 def scheduled_operators_for_hqta(analysis_date: str):
     """
@@ -29,30 +31,28 @@ def scheduled_operators_for_hqta(analysis_date: str):
     Cache this df into GCS, and clear it once it goes into the json. 
     """
     path = rt_utils.check_cached(
-        filename = "operators_for_hqta.parquet", 
+        filename = f"operators_for_hqta_{analysis_date}.parquet", 
         subfolder="temp/"
     )    
 
     if path:
         operators_to_include = pd.read_parquet(
-            f"{TEMP_GCS}operators_for_hqta.parquet")
+            f"{TEMP_GCS}operators_for_hqta_{analysis_date}.parquet")
     else:
     
         all_operators = gtfs_utils_v2.schedule_daily_feed_to_organization(
             selected_date = analysis_date,
             keep_cols = None,
-            get_df = True
+            get_df = True,
+            feed_option = "use_subfeeds"
         )
 
-        exclude = ["Bay Area 511 Regional Schedule", #we favor regional subfeeds
-                   "Amtrak Schedule"]
+        exclude = ["Amtrak Schedule"]
 
         keep_cols = ["feed_key", "name"]
 
         operators_to_include = all_operators[
-            ~(all_operators.name.isin(exclude)) &
-            (all_operators.regional_feed_type != "Regional Precursor Feed")
-        ][keep_cols]
+            ~all_operators.name.isin(exclude)][keep_cols]
     
         # There shouldn't be any duplicates by name, since we got rid 
         # of precursor feeds. But, just in case, don't allow dup names.
@@ -61,10 +61,48 @@ def scheduled_operators_for_hqta(analysis_date: str):
                                 .reset_index(drop=True)
                                )
 
-        operators_to_include.to_parquet(f"{TEMP_GCS}operators_for_hqta.parquet")
+        operators_to_include.to_parquet(
+            f"{TEMP_GCS}operators_for_hqta_{analysis_date}.parquet")
 
     return operators_to_include
 
+
+
+def feed_keys_ran(analysis_date: str, 
+                  gcs_folder: str = CACHED_VIEWS_EXPORT_PATH) -> list:
+    """
+    Find the feed_keys that already have cached files in GCS
+    """
+    all_files = fs.ls(gcs_folder)
+    files_for_date = [f for f in all_files if str(analysis_date) in all_files]
+
+    
+    def parse_for_word_split_at_date(my_list: list, word: str, 
+                                     analysis_date: str) -> list: 
+        subset_list = [i for i in my_list if word in i]
+        cleaned_list = [(i.split(f"{word}_")[1].split(f'_{analysis_date}')[0]) 
+                        for i in subset_list
+                       ]
+        
+        return cleaned_list
+        
+    trip_feeds = parse_for_word_split_at_date(
+        files_for_date, "trips", analysis_date
+    )
+
+    stop_feeds = parse_for_word_split_at_date(
+        files_for_date, "stops", analysis_date
+    )
+    
+    shape_feeds = parse_for_word_split_at_date(
+        files_for_date, "shapes", analysis_date
+    )
+    
+    
+    already_ran = list(set(trip_feeds) & set(shape_feeds) & set(stop_feeds))
+    
+    return already_ran
+    
 
 def name_feed_key_dict_to_json(operators_df: pd.DataFrame,
                                file: str):
@@ -125,7 +163,7 @@ if __name__=="__main__":
     
     # These are all the IDs that have some cached files in GCS
     operators_for_hqta = pd.read_parquet(
-        f"{TEMP_GCS}operators_for_hqta.parquet")
+        f"{TEMP_GCS}operators_for_hqta_{analysis_date}.parquet")
     
     FEED_KEYS = operators_for_hqta.feed_keys.unique().tolist()
     
