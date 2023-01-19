@@ -7,7 +7,6 @@ expect not to run, and ones we expect should run and are erroring.
 Return a dict of operator names to operator feed_keys that have cached files, and 
 thus should be able to have their HQTA corridors compiled.
 """
-import dask.dataframe as dd
 import datetime as dt
 import gcsfs
 import json
@@ -15,9 +14,10 @@ import pandas as pd
 import sys
 
 from loguru import logger
+from typing import Literal
 
 from shared_utils import rt_utils, gtfs_utils_v2
-from update_vars import (analysis_date, CACHED_VIEWS_EXPORT_PATH, TEMP_GCS,
+from update_vars import (analysis_date, COMPILED_CACHED_VIEWS, TEMP_GCS,
                         VALID_OPERATORS_FILE)
 
 fs = gcsfs.GCSFileSystem()
@@ -67,38 +67,32 @@ def scheduled_operators_for_hqta(analysis_date: str):
     return operators_to_include
 
 
-
 def feed_keys_ran(analysis_date: str, 
-                  gcs_folder: str = CACHED_VIEWS_EXPORT_PATH) -> list:
+                  gcs_folder: str = COMPILED_CACHED_VIEWS) -> list:
     """
     Find the feed_keys that already have cached files in GCS
     """
     all_files = fs.ls(gcs_folder)
     files_for_date = [f for f in all_files if str(analysis_date) in all_files]
-
     
-    def parse_for_word_split_at_date(my_list: list, word: str, 
-                                     analysis_date: str) -> list: 
-        subset_list = [i for i in my_list if word in i]
-        cleaned_list = [(i.split(f"{word}_")[1].split(f'_{analysis_date}')[0]) 
-                        for i in subset_list
-                       ]
+    def feeds_from_dataset(
+        dataset: Literal["trips", "routelines", "stops"], 
+        *args, **kwargs
+    ) -> list:
+        # Can use pd because we only keep feed_key...so there's no geometry col
+        df = pd.read_parquet(
+            f"{gcs_folder}{dataset}_{analysis_date}.parquet", 
+            columns = ["feed_key"]
+        ).drop_duplicates()
         
-        return cleaned_list
-        
-    trip_feeds = parse_for_word_split_at_date(
-        files_for_date, "trips", analysis_date
-    )
-
-    stop_feeds = parse_for_word_split_at_date(
-        files_for_date, "stops", analysis_date
-    )
+        return df.feed_key.tolist()
     
-    shape_feeds = parse_for_word_split_at_date(
-        files_for_date, "shapes", analysis_date
-    )
+    trip_feeds = feeds_from_dataset("trips")
+    shape_feeds = feeds_from_dataset("routelines")
+    stop_feeds = feeds_from_dataset("stops")
     
-    
+    # The set of all the feeds are the feeds in common
+    # BUG / TODO: shape_feeds has 1 less feed...missing Metrolink
     already_ran = list(set(trip_feeds) & set(shape_feeds) & set(stop_feeds))
     
     return already_ran
@@ -126,8 +120,7 @@ def feed_keys_from_json(file: str = VALID_OPERATORS_FILE) -> dict:
 
 
 def check_for_completeness(
-    export_path: str = CACHED_VIEWS_EXPORT_PATH, 
-    all_feeds: list = [],
+    export_path: str = COMPILED_CACHED_VIEWS, 
     analysis_date: str = analysis_date
 ) -> list:
     """
@@ -139,16 +132,13 @@ def check_for_completeness(
     Returns a potentially smaller list of operators that 
     we expect to run through rest of the HQTA workflow
     """
-    FEEDS_WITH_FULL_INFO = [] 
     
-    for feed_key in all_feeds:  
-        stop_times = dd.read_parquet(
-            f"{export_path}st_{feed_key}_{analysis_date}.parquet")
-
-        if len(stop_times.index) > 0:  
-            FEEDS_WITH_FULL_INFO.append(feed_key)
+    feeds_with_st = pd.read_parquet(
+        f"{export_path}st_{analysis_date}.parquet", 
+        columns = ["feed_key"]
+    ).drop_duplicates().feed_key.tolist()
     
-    return FEEDS_WITH_FULL_INFO
+    return feeds_with_st
 
     
 if __name__=="__main__":
@@ -165,19 +155,21 @@ if __name__=="__main__":
     operators_for_hqta = pd.read_parquet(
         f"{TEMP_GCS}operators_for_hqta_{analysis_date}.parquet")
     
-    FEED_KEYS = operators_for_hqta.feed_keys.unique().tolist()
+    FEED_KEYS = operators_for_hqta.feed_key.unique().tolist()
     
     time1 = dt.datetime.now()
     logger.info(f"get list of cached ITP IDs: {time1-start}")
     
     # Now check whether an operator has a complete set of files (len > 0)
-    FEEDS_WITH_FULL_INFO = check_for_completeness(
-        CACHED_VIEWS_EXPORT_PATH, FEED_KEYS, analysis_date)
+    FEEDS_FULL_INFO = check_for_completeness(
+        COMPILED_CACHED_VIEWS, analysis_date)
     
     # Save that our dictionary to json, 
     # should be smaller than all operators with cached
-    complete_operators = operators_for_hqta[
-        opearators_for_hqta.feed_key.isin(FEEDS_WITH_FULL_INFO)]
+    complete_operators = (operators_for_hqta[
+        operators_for_hqta.feed_key.isin(FEEDS_FULL_INFO)]
+        .sort_values("name").reset_index(drop=True)
+    )
     
     name_feed_key_dict_to_json(complete_operators, VALID_OPERATORS_FILE)
     
