@@ -241,7 +241,7 @@ if __name__=="__main__":
     # Store a list where operators have 3 complete files - need stop_times later
     #FEEDS_NEED_STOP_TIMES = []
     
-    for feed_key in FEEDS_TO_RUN[2:]:
+    for feed_key in FEEDS_TO_RUN:
         time0 = dt.datetime.now()
         
         logger.info(f"*********** Download data for: {feed_key} ***********")
