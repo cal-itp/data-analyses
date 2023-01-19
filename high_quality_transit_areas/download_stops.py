@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
   
     # keep all the route_types, use for filtering for rail/brt/ferry later
-    route_type_vals = [1, 2, 3, 4, 5, 6, 7, 11, 12]
+    route_type_vals = [0, 1, 2, 3, 4, 5, 6, 7, 11, 12]
     route_type_cols = [f"route_type_{i}" for i in route_type_vals] 
     
     keep_stop_cols = [

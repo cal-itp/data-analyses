@@ -6079,3 +6079,7 @@
 2023-01-19 12:19:31.115 | INFO     | __main__:<module>:70 - # operators to run: 140
 2023-01-19 12:19:31.116 | INFO     | __main__:<module>:80 - *********** Download st data ***********
 2023-01-19 12:20:56.776 | INFO     | __main__:<module>:101 - execution time: 0:01:26.787253
+2023-01-19 14:06:34.567 | INFO     | __main__:<module>:27 - Analysis date: 2023-01-18
+2023-01-19 14:06:35.243 | INFO     | __main__:<module>:35 - # operators to run: 184
+2023-01-19 14:06:35.243 | INFO     | __main__:<module>:38 - *********** Download stops data ***********
+2023-01-19 14:06:46.436 | INFO     | __main__:<module>:66 - execution time: 0:00:11.868638

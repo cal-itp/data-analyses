@@ -70,7 +70,7 @@ if __name__ == "__main__":
     logger.info(f"grabbed rail: {time1-start}")
 
     # BRT
-    rail_ferry_brt.grab_operator_brt(analysis_date)
+    rail_ferry_brt.grab_brt_data(analysis_date)
     brt_stops = gpd.read_parquet(f"{TEMP_GCS}brt_stops.parquet")
     brt_stops = rail_ferry_brt.additional_brt_filtering_out_stops(
         brt_stops, BRT_STOPS_FILTER)
