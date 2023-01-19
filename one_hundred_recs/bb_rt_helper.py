@@ -4,6 +4,7 @@ from siuba import *
 import datetime as dt
 
 from bus_service_utils import better_bus_utils
+from shared_utils.rt_utils import ZERO_THIRTY_COLORSCALE
 from rt_analysis import rt_filter_map_plot, rt_parser
 
 
@@ -28,6 +29,9 @@ def fm_from_bbutils(ct_dist, category, get_sorted = False,
     
     bbutil_gdf = bbutil_gdf >> filter(_.caltrans_district==ct_dist)
     if bbutil_gdf.empty:
+        if get_sorted:
+            print('no routes at all')
+            return
         print(f"{ct_dist} {category} empty with default util, retrying with get_sorted")
         return fm_from_bbutils(ct_dist = ct_dist, category = category, get_sorted = True,
                               fm_dict = fm_dict, analysis_date = analysis_date)
@@ -54,3 +58,37 @@ def fm_from_bbutils(ct_dist, category, get_sorted = False,
         fm_dict_new[itp_id] = fm
     print(fm_dict_new)
     return fm_dict_new
+
+def map_from_combined(gdf, district):
+        colorscale = ZERO_THIRTY_COLORSCALE
+        centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
+
+        display_cols = ['_20p_mph', 'time_formatted', 'miles_from_last',
+                       'route_short_name', 'trips_per_hour', 'shape_id',
+                       'stop_sequence']
+        display_aliases = ['Speed (miles per hour)', 'Travel time', 'Segment distance (miles)',
+                          'Route', 'Frequency (trips per hour)', 'Shape ID',
+                          'Stop Sequence']
+        tooltip_dict = {'aliases': display_aliases}
+        if no_title:
+            title = ''
+        else:
+            title = f"{district} 20th Percentile Vehicle Speeds Between Stops"
+        colorscale.caption = "Speed (miles per hour)"
+        style_dict = {'opacity': 0, 'fillOpacity': 0.8}
+
+        g = gdf.explore(column='_20p_mph',
+                        cmap = colorscale,
+                        tiles = 'CartoDB positron',
+                        style_kwds = style_dict,
+                        tooltip = display_cols, popup = display_cols,
+                        tooltip_kwds = tooltip_dict, popup_kwds = tooltip_dict,
+                        highlight_kwds = {'fillColor': '#DD1C77',"fillOpacity": 0.6},
+                        width = size[0], height = size[1], zoom_start = 13,
+                        location = centroid)
+        
+        title_html = f"""
+         <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
+         """
+        g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
+        return g
