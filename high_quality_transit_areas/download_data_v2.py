@@ -10,7 +10,7 @@ Use the hqta_operators.json later to check whether cache exists.
 
 """
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
+os.environ["CALITP_BQ_MAX_BYTES"] = str(500_000_000_000)
 
 import datetime as dt
 import gcsfs
@@ -31,8 +31,7 @@ from update_vars import analysis_date, CACHED_VIEWS_EXPORT_PATH
 from shared_utils import gtfs_utils_v2, geography_utils, rt_utils, utils
 
 @delayed
-def get_trips(feed_key: str, analysis_date: str, 
-              custom_filtering: dict = None) -> pd.DataFrame:
+def get_trips(feed_key: str, analysis_date: str) -> pd.DataFrame:
     """
     Download the trips that ran on selected day.
     """        
@@ -52,15 +51,13 @@ def get_trips(feed_key: str, analysis_date: str,
         operator_feeds = [feed_key],
         trip_cols = keep_trip_cols,
         get_df = True,
-        custom_filtering = custom_filtering
     )
     
     return trips
 
 
 @delayed
-def get_routelines(feed_key: str, analysis_date: str, 
-                   custom_filtering: dict = None) -> gpd.GeoDataFrame:
+def get_routelines(feed_key: str, analysis_date: str) -> gpd.GeoDataFrame:
     """
     Download the route shapes (line geom) from dim_shapes_geo
     associated with shape_ids / trips that ran on selected day.
@@ -79,26 +76,24 @@ def get_routelines(feed_key: str, analysis_date: str,
         shape_cols = keep_shape_cols,
         get_df = True,
         crs = geography_utils.CA_NAD83Albers,
-        custom_filtering = custom_filtering
     )
     
     return routelines
 
 
 @delayed
-def get_stops(feed_key: str, analysis_date: str, 
-              custom_filtering: dict = None) -> gpd.GeoDataFrame:
+def get_stops(feed_key: str, analysis_date: str) -> gpd.GeoDataFrame:
     """
     Download stops for the trips that ran on selected date.
     """       
     # keep all the route_types, use for filtering for rail/brt/ferry later
-    route_type_vals = [1, 2, 3, 4, 5, 6, 7, 11, 12, 1_000]
-    route_type_cols = [f"route_type_{i}" for i in route_type_vals]
+    route_type_vals = [1, 2, 3, 4, 5, 6, 7, 11, 12]
+    route_type_cols = [f"route_type_{i}" for i in route_type_vals] 
     
     keep_stop_cols = [
         "feed_key",
         "stop_id", "stop_key", "stop_name", 
-    ] + route_type_cols 
+    ] + route_type_cols + ["missing_route_type"]
 
     
     stops = gtfs_utils_v2.get_stops(
@@ -107,25 +102,23 @@ def get_stops(feed_key: str, analysis_date: str,
         stop_cols = keep_stop_cols,
         get_df = True,
         crs = geography_utils.CA_NAD83Albers,
-        custom_filtering = custom_filtering
     )
     
     return stops
 
 
 @delayed
-def get_stop_times(feed_key: str, analysis_date: str, 
-                   custom_filtering: dict = None) -> pd.DataFrame:
+def get_stop_times(feed_key: str, analysis_date: str) -> pd.DataFrame:
     """
     Download stop times for the trips that ran on selected date.
         
     Write pd.DataFrame in GCS.
     """
     dataset = "st"
-    filename = f"{dataset}_{itp_id}_{analysis_date}.parquet"
+    filename = f"{dataset}_{feed_key}_{analysis_date}.parquet"
 
     full_trips = pd.read_parquet(
-        f"{CACHED_VIEWS_EXPORT_PATH}trips_{itp_id}_{analysis_date}.parquet")
+        f"{CACHED_VIEWS_EXPORT_PATH}trips_{feed_key}_{analysis_date}.parquet")
     
     stop_times = gtfs_utils_v2.get_stop_times(
         selected_date = analysis_date,
@@ -133,12 +126,11 @@ def get_stop_times(feed_key: str, analysis_date: str,
         stop_time_cols = None,
         get_df = True,
         trip_df = full_trips,
-        custom_filtering = custom_filtering
     )
     
     if not stop_times.empty:
         stop_times.to_parquet(f"{CACHED_VIEWS_EXPORT_PATH}{filename}")
-        logger.info(f"{itp_id}: {dataset} exported to GCS")
+        logger.info(f"{feed_key}: {dataset} exported to GCS")
 
 
 def check_route_trips_stops_are_cached(feed_key: str, analysis_date: str):
@@ -214,20 +206,20 @@ def compute_delayed_stop_times(
     """
     Unpack the stop_times table from the dask delayed function. 
     """
-    stop_times = compute(stop_times_df)[0]
+    df = compute(stop_times_df)[0]
     
     if not stop_times.empty:
 
-        stop_times.to_parquet(
+        df.to_parquet(
             f"{CACHED_VIEWS_EXPORT_PATH}st_{feed_key}_{analysis_date}.parquet")
         logger.info(f"{feed_key}: st exported to GCS")
 
 
 if __name__=="__main__":
     # Connect to dask distributed client, put here so it only runs for this script
-    from dask.distributed import Client
+    #from dask.distributed import Client
     
-    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/download_data.log", retention="6 months")
     logger.add(sys.stderr, 
@@ -238,17 +230,18 @@ if __name__=="__main__":
     start = dt.datetime.now()
     
     fs = gcsfs.GCSFileSystem()
-    
+
     hqta_operators_df = operators_for_hqta.scheduled_operators_for_hqta(
         analysis_date)
-    FEEDS_TO_RUN = hqta_operators_df.feed_key.unique().tolist()    
-        
+    
+    FEEDS_TO_RUN = sorted(hqta_operators_df.feed_key.unique().tolist())    
+    
     logger.info(f"# operators to run: {len(FEEDS_TO_RUN)}")
     
     # Store a list where operators have 3 complete files - need stop_times later
-    FEEDS_NEED_STOP_TIMES = []
+    #FEEDS_NEED_STOP_TIMES = []
     
-    for feed_key in sorted(FEEDS_TO_RUN):
+    for feed_key in FEEDS_TO_RUN[2:]:
         time0 = dt.datetime.now()
         
         logger.info(f"*********** Download data for: {feed_key} ***********")
@@ -261,22 +254,22 @@ if __name__=="__main__":
         # Turn the delayed dask objects into df or gdf and export to GCS
         compute_delayed(feed_key, analysis_date, routelines, trips, stops)
         
-        if check_route_trips_stops_are_cached(feed_key, analysis_date):
-            IDS_NEED_STOP_TIMES.append(feed_key)
+        #if check_route_trips_stops_are_cached(feed_key, analysis_date):
+        #    FEEDS_NEED_STOP_TIMES.append(feed_key)
         
         time1 = dt.datetime.now()
-        logger.info(f"download files for {itp_id}: {time1-time0}")
+        logger.info(f"download files for {feed_key}: {time1-time0}")
     
-    
+    '''
     # Check that routes, trips, stops were downloaded successfully
     # If all 3 are present, then download stop_times. Otherwise, skip stop_times.
-    for feed_key in IDS_NEED_STOP_TIMES:
+    for feed_key in FEEDS_NEED_STOP_TIMES:
         stop_times = get_stop_times(feed_key, analysis_date)
         
         # Turn the delayed dask objects into df or gdf and export to GCS
         compute_delayed_stop_times(feed_key, analysis_date, stop_times)
-    
+    '''
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
 
-    client.close()
+    #client.close()

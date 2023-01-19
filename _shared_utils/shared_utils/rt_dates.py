@@ -16,6 +16,7 @@ DATES = {
     "oct2022": "2022-10-12",
     "nov2022": "2022-11-16",
     "dec2022": "2022-12-14",
+    "jan2023": "2023-01-18",  # start of v2
 }
 
 
@@ -29,6 +30,7 @@ METADATA_EDITION = {
     "oct2022": 6,
     "nov2022": 7,
     "dec2022": 8,
+    "jan2023": 9,
 }
 
 # Planning and Modal Advisory Committee (PMAC) - quarterly
