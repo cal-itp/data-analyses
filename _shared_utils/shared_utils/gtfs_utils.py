@@ -522,16 +522,6 @@ def get_stop_times(
 # "universe" of operators whenever we can
 
 
-def format_date(analysis_date: Union[datetime.date, str]) -> str:
-    """
-    Get date formatted correctly in all the queries
-    """
-    if isinstance(analysis_date, datetime.date):
-        return analysis_date.strftime(rt_utils.FULL_DATE_FMT)
-    elif isinstance(analysis_date, str):
-        return datetime.datetime.strptime(analysis_date, rt_utils.FULL_DATE_FMT).date()
-
-
 def all_routelines_or_stops_with_cached(
     dataset: Literal["routelines", "stops"] = "routelines",
     analysis_date: Union[datetime.date, str] = "2022-06-15",
@@ -542,7 +532,7 @@ def all_routelines_or_stops_with_cached(
     Use cached files whenever possible, instead of running fresh query.
     Routelines and stops are geospatial, import and export with geopandas.
     """
-    date_str = format_date(analysis_date)
+    date_str = rt_utils.format_date(analysis_date)
 
     if itp_id_list is None:
         itp_id_list = (

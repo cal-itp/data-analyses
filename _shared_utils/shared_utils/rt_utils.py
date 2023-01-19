@@ -50,6 +50,16 @@ HOUR_MIN_SEC_FMT = (
 FULL_DATE_FMT = "%Y-%m-%d"  # 2022-06-01 for 6/1/22
 
 
+def format_date(analysis_date: Union[dt.date, str]) -> str:
+    """
+    Get date formatted correctly in all the queries
+    """
+    if isinstance(analysis_date, dt.date):
+        return analysis_date.strftime(FULL_DATE_FMT)
+    elif isinstance(analysis_date, str):
+        return dt.datetime.strptime(analysis_date, FULL_DATE_FMT).date()
+
+
 def convert_ts(ts: int) -> dt.datetime:
     pacific_dt = dt.datetime.fromtimestamp(ts)
     return pacific_dt
