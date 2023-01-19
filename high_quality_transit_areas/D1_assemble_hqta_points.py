@@ -80,12 +80,15 @@ def get_agency_names() -> pd.DataFrame:
             columns = ["feed_key", "name"]
         ).drop_duplicates()
         .reset_index(drop=True)
+    )
+    
+    cleaned_names = (portfolio_utils.clean_organization_name(feed_to_name)
         .rename(columns = {
             "feed_key": "feed_key_primary", 
             "name": "agency_name_primary"})
     )
     
-    return feed_to_name
+    return cleaned_names
 
 
 def add_agency_names_hqta_details(gdf: dg.GeoDataFrame) -> gpd.GeoDataFrame:

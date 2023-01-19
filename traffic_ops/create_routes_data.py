@@ -26,7 +26,10 @@ def import_trips(analysis_date: str) -> pd.DataFrame:
         columns = keep_cols
     )
     
-    return trips
+    # Clean organization name
+    trips2 = portfolio_utils.clean_organization_name(trips)
+    
+    return trips2
     
     
 def import_shapes(analysis_date: str) -> gpd.GeodataFrame:
@@ -61,17 +64,17 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
                  "route_desc", "service_date", 
                  "feed_key"
                 ]
-
-    df_with_route_names = (portfolio_utils.add_route_name(df)
-                           .drop(columns = drop_cols)
-                           .sort_values(["name", "route_id"])
-                           .drop_duplicates(subset=["name", 
-                                                    "route_id", "shape_id"])
-                           .reset_index(drop=True)
-                           .rename(columns = prep_data.RENAME_COLS)
-                          )
-
-    return df_with_route_names
+    
+    routes_assembled = (portfolio_utils.add_route_name(df)
+                       .drop(columns = drop_cols)
+                       .sort_values(["name", "route_id"])
+                       .drop_duplicates(subset=["name", 
+                                                "route_id", "shape_id"])
+                       .reset_index(drop=True)
+                       .rename(columns = prep_data.RENAME_COLS)
+                      )
+    
+    return routes_assembled
 
 
 if __name__ == "__main__":
