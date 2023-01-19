@@ -35,7 +35,7 @@ def grab_stops(analysis_date: str,
     route_type_cols = [f"route_type_{i}" for i in route_types]
 
     # Grab stops for just the specific route types
-    stops = stop.assign(
+    stops = stops.assign(
         route_type_present = stops[route_type_cols].sum(axis=1)
     )
     
