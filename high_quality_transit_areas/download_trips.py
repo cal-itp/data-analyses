@@ -1,94 +1,23 @@
 """
-Separate the steps in downloading data, caching file in GCS,
-from checking whether that file is there.
-HQTA will run monthly, more frequent than rt_delay will,
-so this is caching it for the first time.
-
-Then run the script to populate hqta_operators.json.
-
-Use the hqta_operators.json later to check whether cache exists.
-
+Download all trips for a day.
 """
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(500_000_000_000)
+os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
 
 import datetime as dt
-import gcsfs
-import geopandas as gpd
 import pandas as pd
-import siuba
 import sys 
 
-from calitp.tables import tbls
-from dask import delayed, compute
-from dask.delayed import Delayed # use this for type hint
-from siuba import *
 from loguru import logger
 
 import operators_for_hqta
-
-from update_vars import (analysis_date, CACHED_VIEWS_EXPORT_PATH, 
-                         COMPILED_CACHED_VIEWS
-                        )
-from shared_utils import gtfs_utils_v2, geography_utils, rt_utils, utils
-
-@delayed
-def get_trips(feed_key: str, analysis_date: str) -> pd.DataFrame:
-    """
-    Download the trips that ran on selected day.
-    """        
-
-        
-
-    
-    return trips
-
-
-
-
-def compute_delayed(feed_key: str, analysis_date: str, 
-                    routelines_df: Delayed, 
-                    trips_df: Delayed, 
-                    stops_df: Delayed):
-    """
-    Unpack the result from the dask delayed function. 
-    Unpack routelines, trips, and stops first.
-    The delayed object is a tuple, and since we just have 1 object, use 
-    [0] to grab it.
-    
-    Export the pd.DataFrame or gpd.GeoDataFrame to GCS.
-    
-    https://stackoverflow.com/questions/44602766/unpacking-result-of-delayed-function
-    """
-    routelines = compute(routelines_df)[0]
-    trips = compute(trips_df)[0]
-    stops = compute(stops_df)[0]    
-    
-    if not ((routelines.empty) and (trips.empty) and (stops.empty)):
-        
-        utils.geoparquet_gcs_export(
-            routelines,
-            CACHED_VIEWS_EXPORT_PATH,
-            f"routelines_{feed_key}_{analysis_date}"
-        )
-        logger.info(f"{feed_key}: routelines exported to GCS")
-
-        trips.to_parquet(
-            f"{CACHED_VIEWS_EXPORT_PATH}trips_{feed_key}_{analysis_date}.parquet")
-        logger.info(f"{feed_key}: trips exported to GCS")
-        
-        utils.geoparquet_gcs_export(
-            stops,
-            CACHED_VIEWS_EXPORT_PATH,
-            f"stops_{feed_key}_{analysis_date}"
-        )    
-        logger.info(f"{feed_key}: stops exported to GCS")
-
-
+from shared_utils import gtfs_utils_v2
+from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 
 if __name__=="__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
+    # Connect to dask distributed client, put here so it only runs 
+    # for this script
     #from dask.distributed import Client
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
@@ -131,7 +60,7 @@ if __name__=="__main__":
         get_df = True,
     ) 
     
-    trips.to_parquet(f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")    
+    trips.to_parquet(f"{COMPILED_CACHED_VIEWS}{dataset}_{analysis_date}.parquet") 
 
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
