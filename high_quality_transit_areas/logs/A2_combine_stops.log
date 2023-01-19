@@ -77,19 +77,15 @@
 2022-12-15 09:17:25.782 | INFO     | __main__:<module>:88 - grabbed ferry: 0:00:22.086815
 2022-12-15 09:17:29.083 | INFO     | __main__:<module>:105 - concatenated datasets
 2022-12-15 09:17:29.323 | INFO     | __main__:<module>:116 - execution time: 0:00:53.955792
-2023-01-19 13:09:56.996 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
-2023-01-19 13:47:04.228 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
-2023-01-19 14:44:20.272 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
-2023-01-19 14:45:16.342 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
-2023-01-19 14:45:26.773 | INFO     | __main__:<module>:70 - grabbed rail: 0:00:10.429157
-2023-01-19 14:46:21.008 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
-2023-01-19 14:46:31.823 | INFO     | __main__:<module>:70 - grabbed rail: 0:00:10.814226
-2023-01-19 14:47:46.929 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
-2023-01-19 14:48:47.340 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
-2023-01-19 14:48:56.425 | INFO     | __main__:<module>:70 - grabbed rail: 0:00:09.083559
-2023-01-19 14:52:09.007 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
-2023-01-19 14:52:18.435 | INFO     | __main__:<module>:70 - grabbed rail: 0:00:09.426443
-2023-01-19 14:52:26.895 | INFO     | __main__:<module>:79 - grabbed brt: 0:00:08.460062
-2023-01-19 14:52:34.663 | INFO     | __main__:<module>:86 - grabbed ferry: 0:00:07.767764
-2023-01-19 14:52:37.329 | INFO     | __main__:<module>:102 - concatenated datasets
-2023-01-19 14:52:37.534 | INFO     | __main__:<module>:113 - execution time: 0:00:28.525726
+2023-01-19 14:57:16.202 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
+2023-01-19 14:57:25.197 | INFO     | __main__:<module>:70 - grabbed rail: 0:00:08.994382
+2023-01-19 14:57:33.466 | INFO     | __main__:<module>:79 - grabbed brt: 0:00:08.268384
+2023-01-19 14:57:41.235 | INFO     | __main__:<module>:86 - grabbed ferry: 0:00:07.769671
+2023-01-19 14:57:43.938 | INFO     | __main__:<module>:102 - concatenated datasets
+2023-01-19 14:57:44.142 | INFO     | __main__:<module>:113 - execution time: 0:00:27.939520
+2023-01-19 15:04:35.070 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
+2023-01-19 15:04:44.361 | INFO     | __main__:<module>:70 - grabbed rail: 0:00:09.289631
+2023-01-19 15:04:53.182 | INFO     | __main__:<module>:79 - grabbed brt: 0:00:08.820910
+2023-01-19 15:05:01.233 | INFO     | __main__:<module>:86 - grabbed ferry: 0:00:08.051277
+2023-01-19 15:05:04.201 | INFO     | __main__:<module>:102 - concatenated datasets
+2023-01-19 15:05:04.408 | INFO     | __main__:<module>:113 - execution time: 0:00:29.336647

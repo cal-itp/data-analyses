@@ -28,7 +28,8 @@ def filter_trips_to_route_type(analysis_date: str,
     elif route_types == "brt": 
         trips_subset = filter_to_brt_trips(trips)
         
-    keep_cols = ["feed_key", "name", "trip_id", "route_type"]
+    keep_cols = ["feed_key", "name", "trip_id", 
+                 "route_id", "route_type"]
     
     trips_subset = (trips_subset[keep_cols]
                     .drop_duplicates()
@@ -51,7 +52,7 @@ def filter_to_brt_trips(trips: pd.DataFrame) -> pd.DataFrame:
         "Bay Area 511 Muni Schedule": {"route_short_name": 
                                        ['49']},
         # Omni BRT -- too infrequent!
-        "OmniTrans Schedule": {"route_short_name": ["sbX"]}
+        #"OmniTrans Schedule": {"route_short_name": ["sbX"]}
     }             
     
     all_brt_trips = pd.DataFrame()
@@ -85,7 +86,8 @@ def filter_unique_stops_for_trips(analysis_date: str,
         on = ["feed_key", "trip_id"],
         how = "inner"
     )[["feed_key", "name",
-       "stop_id", "route_type"]].drop_duplicates().reset_index(drop=True)
+       "stop_id", 
+       "route_id",  "route_type"]].drop_duplicates().reset_index(drop=True)
     
     stops_present = stops_for_trips.compute()
     
@@ -97,7 +99,8 @@ def filter_unique_stops_for_trips(analysis_date: str,
         "feed_key", "name",
         "stop_id", "stop_name", "stop_key", 
         "geometry", 
-        "route_type"
+        "route_type", "route_id" 
+        # let's keep route_id, since we double check in a notebook
     ]
     
     stops_with_geom = pd.merge(
