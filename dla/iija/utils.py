@@ -188,6 +188,8 @@ def add_description(df, col):
     
     ## method for project in first column
     df['project_method'] = (np.where(df[col].str.contains("INSTALL"), "Install",
+                        np.where(df[col].str.contains("RECONSTRUCT"), "Reconstruct",
+                        np.where(df[col].str.contains("CONSTRUCT") & df[col].str.contains("PERMANENT RESTORATION") , "",
                         np.where(df[col].str.contains("CONSTRUCT"), "Construct",
                         np.where(df[col].str.contains("UPGRADE"), "Upgrade",
                         np.where(df[col].str.contains("IMPROVE"), "Improve",
@@ -196,18 +198,22 @@ def add_description(df, col):
                         np.where(df[col].str.contains("REPLACE"), "Replace",
                         np.where(df[col].str.contains("REPLACE ")& df[col].str.contains("BRIDGE"), "",
                         np.where(df[col].str.contains("REPLACE")& df[col].str.contains("GUARDRAIL"), "Replace",
-                        np.where(df[col].str.contains("PAVE")| df[col].str.contains("PAVING"), "Pave",
+                        np.where(df[col].str.contains("REPAVE")| df[col].str.contains("REPAVING"), "Repave",
                         np.where(df[col].str.contains("NEW "), "New",
                         np.where(df[col].str.contains("EXTEND"), "Extend",
                         np.where(df[col].str.contains("IMPLEMENT"), "Implement",
+                        np.where(df[col].str.contains("RESTORATION") & df[col].str.contains("PERMANENT RESTORATION") , "",
                         np.where(df[col].str.contains("RESTORATION"), "Restoration",
                         
-                                    "")))))))))))))))
+                                    ""))))))))))))))))))
     
     ## types of projects in second column
     df['project_type'] = (
                         #np.where(df.col.str.contains("BRIDGE REPLACEMENT") , "Bridge Replacement",
+                        np.where(df[col].str.contains("SHOULDER") & df[col].str.contains("RESTORE") | df[col].str.contains("RESTORATON"), "Restore Shoulders",
+                        np.where(df[col].str.contains("WIDEN SHOULDER"), "Widen Shoulders",
                         np.where(df[col].str.contains("SHOULDER"), "Shoulders",
+                        np.where(df[col].str.contains("RESTORE ROADWAY"),"Road Restoration & Rehabilitation", 
                         np.where(df[col].str.contains("SYNCHRONIZE CORRIDOR"), "Synchronize Corridor",
                         np.where(df[col].str.contains("COMPLETE STREET"), "Complete Streets",
                         np.where(df[col].str.contains("BRIDGE PREVENTIVE MAINTENANCE"), "Bridge Preventive Maintenance",
@@ -229,7 +235,7 @@ def add_description(df, col):
                         np.where(df[col].str.contains("BIKE SHARE"), "Bike Share Program",
                         np.where(df[col].str.contains("BIKE"), "Bike Lanes",                  
                         np.where(df[col].str.contains("SIGNAL"), "Signals",
-                        np.where(df[col].str.contains("SIGN"), "Signage",
+                        np.where(df[col].str.contains("SIGN") & ~df[col].str.contains('DESIGN'), "Signage",
                         np.where(df[col].str.contains("BRIDGE REPLACEMENT") | df[col].str.contains("REPLACE EXISTING BRIDGE") | df[col].str.contains("REPLACE BRIDGE"), "Bridge",
                         np.where(df[col].str.contains("LIGHT"), "Lighting",         
                         np.where(df[col].str.contains("SAFETY ") & df[col].str.contains("IMPROVE") , "Safety Improvemnts",
@@ -241,6 +247,10 @@ def add_description(df, col):
                         np.where(df[col].str.contains("STORMWATER TRE"), "Storm Water Mitigation",
                         np.where(df[col].str.contains("WIDEN"), "Widen Road",
                         np.where(df[col].str.contains("REGIONAL PLANNING ACTIVITIES AND PLANNING, PROGRAMMING"), "Regional Planning Activities",
+                        np.where(df[col].str.contains("SLIDE REPAIR"), "Slide Repair",  
+                        np.where(df[col].str.contains("STABILIZE") & df[col].str.contains("EMBANKMENT"), "Stabilize Embankment", 
+                        np.where(df[col].str.contains("EMBANKMENT RESTORATION") , "Restore Embankment", 
+                        np.where(df[col].str.contains("EMBANKMENT RECONSTRUCTION") , "Reconstruct Embankment", 
                         np.where(df[col].str.contains("RAMP"), "Ramp",
                         np.where(df[col].str.contains("SEISMIC RETROFIT"), "Seismic Retrofit",        
                         np.where(df[col].str.contains("INTELLIGENT TRANSPORTATION SYSTEM"), "Intelligent Transportation Systems",         
@@ -250,7 +260,7 @@ def add_description(df, col):
                         np.where(df[col].str.contains("CLEAN AIR TRANSPORTATION PROGRAM") ,"Clean Air Transportation Program",
                         np.where(df[col].str.contains("STREETS AND ROADS PROGRAM") ,"Streets and Roads Program",
                         np.where(df[col].str.contains("MAPPING") ,"Mapping Project",
-                        np.where(df[col].str.contains("VIADUCT") ,"Viaduct",
+                     #   np.where(df[col].str.contains("VIADUCT") ,"Viaduct",
                         np.where(df[col].str.contains("OVERHEAD") ,"Overhead",         
                         np.where(df[col].str.contains("SHORELINE EMBANKMENT") ,"Shoreline Embankment", 
                         np.where(df[col].str.contains("NON-INFRAS") ,"Non-Infrastructure Project",
@@ -259,9 +269,12 @@ def add_description(df, col):
                         np.where(df[col].str.contains("REC TRAILS") ,"Recreational Trails Project", 
                         np.where(df[col].str.contains("PLANT") & df[col].str.contains("IRRIGATION") ,"Planting and Irrigation Systems", 
                         np.where(df[col].str.contains("PLANT") & df[col].str.contains("VE") ,"Plant Vegetation",
-                                  
+                        np.where(df[col].str.contains("PERMANENT RESTORATION"),"Road Restoration & Rehabilitation",
+                        np.where(df[col].str.contains("PLANNING GRANT"),"Planning and Research",
+                        np.where(df[col].str.contains("PLANNING AND RESEARCH"),"Planning and Research",
+
                                  'Project')
-                                   )))))))))))))))))))))))))))))))))))))))))))))))))))#)
+                                   ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))#)
     
     
     return df
