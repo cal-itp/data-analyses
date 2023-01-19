@@ -89,7 +89,6 @@ def create_stops_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
 
     # Read in local parquets
     stops = import_stops(analysis_date)
-
     trips = import_trips(analysis_date)
     stop_times = import_stop_times(analysis_date)
     
