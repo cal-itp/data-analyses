@@ -120,7 +120,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 if __name__=="__main__":    
     
-    logger.add("./logs/D2_assemble_hqta_polygons.log", retention="6 months")
+    logger.add("./logs/D2_assemble_hqta_polygons.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
