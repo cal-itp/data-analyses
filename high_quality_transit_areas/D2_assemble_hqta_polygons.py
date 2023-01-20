@@ -3,9 +3,8 @@ Make a polygon version of HQ transit corridors for open data portal.
 
 From combine_and_visualize.ipynb
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime as dt
+import dask_geopandas as dg
 import geopandas as gpd
 import intake
 import pandas as pd
@@ -24,9 +23,8 @@ from update_vars import analysis_date
 fs = get_fs()
 
 catalog = intake.open_catalog("*.yml")
-HQTA_POINTS_FILE = utilities.catalog_filepath("hqta_points")
 
-def get_dissolved_hq_corridor_bus(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
+def get_dissolved_hq_corridor_bus(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Take each segment, then dissolve by operator,
     and use this dissolved polygon in hqta_polygons.
@@ -36,21 +34,17 @@ def get_dissolved_hq_corridor_bus(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     # Can keep route_id in dissolve, but route_id is not kept in final 
     # export, so there would be multiple rows for multiple route_ids, 
     # and no way to distinguish between them
-    keep_cols = ['calitp_itp_id', 'hq_transit_corr', 'route_id']
+    keep_cols = ['feed_key', 'hq_transit_corr', 'route_id']
     
-    gdf2 = gdf[keep_cols + ['geometry']].compute()
-    
-    dissolved = (gdf2.dissolve(by=keep_cols)
+    dissolved = (gdf[keep_cols + ["geometry"]]
+                 .dissolve(by=keep_cols)
                  .reset_index()
                 )
     
-    # Turn back into dask gdf
-    dissolved_gddf = dg.from_geopandas(dissolved, npartitions=1)
-
-    return dissolved_gddf
+    return dissolved
 
 
-def filter_and_buffer(hqta_points: dg.GeoDataFrame, 
+def filter_and_buffer(hqta_points: gpd.GeoDataFrame, 
                       hqta_segments: dg.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Convert the HQTA point geom into polygon geom.
@@ -62,36 +56,41 @@ def filter_and_buffer(hqta_points: dg.GeoDataFrame,
              .to_crs(geography_utils.CA_NAD83Albers)
             )
     
-    corridor_segments = hqta_segments.to_crs(geography_utils.CA_NAD83Albers)
+    corridor_segments = hqta_segments.to_crs(
+        geography_utils.CA_NAD83Albers).compute()
     corridors = get_dissolved_hq_corridor_bus(corridor_segments)
     
     # General buffer distance: 1/2mi ~= 805 meters
     # Bus corridors are already buffered 100 meters, so will buffer 705 meters
     stops = stops.assign(
         geometry = stops.geometry.buffer(705)
-    ).compute()
+    )
     
+    # For hq_corridor_bus, we have feed_key again, and need to 
+    # add agency_name, or else this category will have missing name values
     corridor_cols = [
-        "calitp_itp_id_primary", "hqta_type", "route_id", "geometry"
+        "feed_key", "hqta_type", "route_id", "geometry"
     ]
-    
-    # Compute and get gdfs here, otherwise dask cluster can't find utilities import
     corridors = corridors.assign(
         geometry = corridors.geometry.buffer(755),
         # overwrite hqta_type for this polygon
         hqta_type = "hq_corridor_bus",
-        calitp_itp_id_primary = corridors.calitp_itp_id.astype(int),
-    )[corridor_cols].compute()
+    )[corridor_cols]
     
-    corridors["hqta_details"] = corridors.apply(
-        utilities.hqta_details, axis=1)
+    names_dict = assemble_hqta_points.get_agency_names()
     
+    corridors2 = corridors.assign(
+        agency_name_primary = corridors.feed_key.map(names_dict),
+        hqta_details = corridors.apply(utilities.hqta_details, axis=1)
+    )
     
-    hqta_polygons = (pd.concat([corridors, stops], axis=0)
-                     .to_crs(geography_utils.WGS84)
-                     # Make sure dtype is still int after concat
-                     .astype({"calitp_itp_id_primary": int})
-                    )
+    hqta_polygons = (
+        pd.concat([
+            corridors, 
+            stops
+        ], axis=0)
+        .to_crs(geography_utils.WGS84)
+    )
     
     return hqta_polygons
 
@@ -103,15 +102,15 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     
     keep_cols = [
-        "calitp_itp_id_primary", "calitp_itp_id_secondary", 
         "agency_name_primary", "agency_name_secondary",
         "hqta_type", "hqta_details", "route_id", "geometry"
     ]
     
     # Drop bad stops, subset columns
     gdf2 = (gdf[keep_cols]
-            .sort_values(["hqta_type", "calitp_itp_id_primary", 
-                          "calitp_itp_id_secondary",
+            .drop_duplicates()
+            .sort_values(["hqta_type", "agency_name_primary", 
+                          "agency_name_secondary",
                           "hqta_details", "route_id"])
             .reset_index(drop=True)
            )
@@ -119,13 +118,9 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf2
 
 
-if __name__=="__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
-    from dask.distributed import Client
+if __name__=="__main__":    
     
-    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
-    
-    logger.add("./logs/D2_assemble_hqta_polygons.log", retention="6 months")
+    logger.add("./logs/D2_assemble_hqta_polygons.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
@@ -133,7 +128,7 @@ if __name__=="__main__":
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
-    hqta_points = dg.read_parquet(HQTA_POINTS_FILE)
+    hqta_points = catalog.hqta_points.read()
     bus_hq_corr = prep_clip.prep_bus_corridors()
     
     # Filter and buffer for stops (805 m) and corridors (755 m)
@@ -143,13 +138,13 @@ if __name__=="__main__":
     time1 = dt.datetime.now()
     logger.info(f"filter and buffer: {time1 - start}")
     
-    # Drop bad stops, subset, get ready for export
-    gdf2 = final_processing(gdf)    
+    # Subset, get ready for export
+    gdf = final_processing(gdf)    
     
     # Export to GCS
     # Stash this date's into its own folder, to convert to geojson, geojsonl
     utils.geoparquet_gcs_export(
-        gdf2, 
+        gdf, 
         EXPORT_PATH, 
         'ca_hq_transit_areas'
     )
@@ -158,7 +153,7 @@ if __name__=="__main__":
 
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(
-        gdf2,
+        gdf,
         utilities.GCS_FILE_PATH,
         'hqta_areas'
    )    
@@ -167,7 +162,7 @@ if __name__=="__main__":
     
     # Add geojson / geojsonl exports
     utils.geojson_gcs_export(
-        gdf2, 
+        gdf, 
         EXPORT_PATH,
         'ca_hq_transit_areas', 
         geojson_type = "geojson"
@@ -176,7 +171,7 @@ if __name__=="__main__":
     logger.info("export as geojson")
 
     utils.geojson_gcs_export(
-        gdf2, 
+        gdf, 
         EXPORT_PATH,
         'ca_hq_transit_areas', 
         geojson_type = "geojsonl"
@@ -186,5 +181,3 @@ if __name__=="__main__":
         
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
-    
-    client.close()

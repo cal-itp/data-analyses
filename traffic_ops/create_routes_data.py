@@ -1,6 +1,6 @@
 """
 Create routes file with identifiers including
-route_id, route_name, agency_id, agency_name.
+route_id, route_name, operator name.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
@@ -11,149 +11,79 @@ from datetime import datetime
 
 import prep_data
 from shared_utils import utils, geography_utils, portfolio_utils
-from bus_service_utils import gtfs_build
 
 
-# List of cols to drop from trips table
-# Didn't remove after switching to gtfs_utils, but these 
-# are datetime and will get rejected in the zipped shapefile conversion anyway
-remove_trip_cols = ["service_date", "calitp_extracted_at", "calitp_deleted_at"]
-
-
-def merge_trips_to_routes(
-    trips: dd.DataFrame, 
-    routes: dg.GeoDataFrame, 
-    group_cols: list = ["calitp_itp_id", "shape_id"]
-) -> dg.GeoDataFrame:
-    # Routes or trips can contain multiple calitp_url_numbers 
-    # for same calitp_itp_id-shape_id. Drop these now
-    # dask can only sort by 1 column!
-    # when publishing to open data portal, we want it at operator level, not feed level
-    if group_cols == ["calitp_itp_id", "shape_id"]:
-        routes = (routes.sort_values("calitp_url_number")
-              .drop_duplicates(subset=group_cols)
-              .reset_index(drop=True)
-        )
-        
-        trips = (trips.sort_values("calitp_url_number")
-             .drop_duplicates(subset=["calitp_itp_id", "trip_id"])
-             .reset_index(drop=True)
-            .drop(columns = remove_trip_cols)
-        )
-        
-    else:
-        routes = (routes
-          .drop_duplicates(subset=group_cols)
-          .reset_index(drop=True)
-        )
-        trips = (trips.drop_duplicates(
-            subset=["calitp_itp_id", "calitp_url_number", "trip_id"])
-             .reset_index(drop=True)
-            .drop(columns = remove_trip_cols)
-        )
-
+def import_trips(analysis_date: str) -> pd.DataFrame:
+    keep_cols = ["feed_key", "name", 
+                 "trip_id", 
+                 "route_id", "shape_id", 
+                 "route_long_name", "route_short_name", "route_desc"
+                ]
     
-    # Left only means in trips, but shape_id not found in shapes.txt
-    # right only means in routes, but no route that has that shape_id 
-    # only 1% falls into right_only
-    keep_cols = group_cols + ['route_id', 
-        'route_type', 'geometry',
-    ]
-    
-    m1 = gtfs_build.merge_routes_trips(
-        routes, 
-        trips, 
-        group_cols,
-        crs = f"EPSG: {routes.crs.to_epsg()}"
+    trips = pd.read_parquet(
+        f"{prep_data.COMPILED_CACHED_GCS}"
+        f"trips_{analysis_date}_all.parquet", 
+        columns = keep_cols
     )
     
-    m2 = (m1[m1._merge=="both"][keep_cols]
-          .reset_index(drop=True) 
-          .to_crs(geography_utils.WGS84)
-          .drop_duplicates()
-         )
-        
-    return m2
+    # Clean organization name
+    trips2 = portfolio_utils.clean_organization_name(trips)
+    
+    return trips2
+    
+    
+def import_shapes(analysis_date: str) -> gpd.GeodataFrame:
+    keep_cols = ["feed_key", "shape_id", "n_trips", "geometry"]
+    
+    shapes = gpd.read_parquet(
+        f"{prep_data.COMPILED_CACHED_GCS}"
+        f"routelines_{analysis_date}_all.parquet", 
+        columns = keep_cols
+    ).to_crs(geography_utils.WGS84)
+    
+    return shapes
+    
 
-
-def add_route_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     
-    route_name_used = portfolio_utils.add_route_name(
-        selected_date = prep_data.ANALYSIS_DATE,
-    )
-    
-    route_cols_to_drop = ["route_short_name", "route_long_name", "route_desc"]
-    for c in route_cols_to_drop:
-        if c in df.columns:
-            df = df.drop(columns = c)
-    
-    with_route_name = pd.merge(
-        df, 
-        route_name_used.drop_duplicates(subset=["calitp_itp_id", "route_id"]),
-        on = ["calitp_itp_id", "route_id"],
-        how = "inner",
-        validate = "m:1"
-    )
-    
-    # Attach agency_name
-    agency_names = portfolio_utils.add_agency_name(
-        selected_date = prep_data.ANALYSIS_DATE)
-    
-    with_agency_name = pd.merge(
-        with_route_name,
-        agency_names,
-        on = "calitp_itp_id",
-        how = "left",
-        validate = "m:1"
-    )
-    
-    # Only keep latest ITP IDS
-    latest_itp_id = portfolio_utils.latest_itp_id()
-    
-    with_latest_id = (pd.merge(
-        with_agency_name, 
-        latest_itp_id,
-        on = "calitp_itp_id",
-        how = "inner",
-        validate = "m:1")
-        # Any renaming to be done before exporting
-        .rename(columns = prep_data.RENAME_COLS)
-    )
-    
-    return with_latest_id
-
-
-def create_routes_file_for_export(analysis_date: str, 
-                                  group_cols: list) -> gpd.GeoDataFrame:
     # Read in local parquets
-    trips = dd.read_parquet(
-        f"{prep_data.COMPILED_CACHED_GCS}trips_{analysis_date}_all.parquet")
-    routes = dg.read_parquet(
-        f"{prep_data.COMPILED_CACHED_GCS}routelines_{analysis_date}_all.parquet")
+    trips = import_trips(analysis_date)
+    shapes = import_shapes(analysis_date)
 
-    df = merge_trips_to_routes(
-        trips, 
-        routes, 
-        group_cols = group_cols
+    shape_cols = ["feed_key", "shape_id"]
+    
+    df = pd.merge(
+        shapes,
+        trips,
+        on = shape_cols, 
+        # if we use shape_array_key, metrolink doesn't have anything
+        how = "inner"
     )
     
-    routes_with_names = (add_route_agency_name(df)
-                 .sort_values(["itp_id", "route_id"])
-                 .reset_index(drop=True)
-                 .drop_duplicates()
-                )
+    drop_cols = ["route_short_name", "route_long_name", 
+                 "route_desc", "service_date", 
+                 "feed_key"
+                ]
     
-    return routes_with_names
+    routes_assembled = (portfolio_utils.add_route_name(df)
+                       .drop(columns = drop_cols)
+                       .sort_values(["name", "route_id"])
+                       .drop_duplicates(subset=["name", 
+                                                "route_id", "shape_id"])
+                       .reset_index(drop=True)
+                       .rename(columns = prep_data.RENAME_COLS)
+                      )
+    
+    return routes_assembled
 
 
 if __name__ == "__main__":
     time0 = datetime.now()
     
-    # Make an operator level file (this is published)
-    operator_level_cols = ["calitp_itp_id", "shape_id"]
-    
+    # Make an operator-feed level file (this is published)    
+    # This is feed-level already, but we already keep only 1 feed per operator
     routes = create_routes_file_for_export(
-        prep_data.ANALYSIS_DATE, operator_level_cols)  
+        prep_data.ANALYSIS_DATE)  
     
     utils.geoparquet_gcs_export(
         routes, 
@@ -163,24 +93,6 @@ if __name__ == "__main__":
     
     prep_data.export_to_subfolder(
         "ca_transit_routes", prep_data.ANALYSIS_DATE)
-
-    
-    # Make a feed level file (not published externally, 
-    # publish to GCS for internal use)
-    feed_level_cols = ["calitp_itp_id", "calitp_url_number", "shape_id"]
-    
-    feed_routes = create_routes_file_for_export(
-        prep_data.ANALYSIS_DATE, feed_level_cols
-    )
-    
-    utils.geoparquet_gcs_export(
-        feed_routes, 
-        prep_data.TRAFFIC_OPS_GCS, 
-        "ca_transit_routes_feed"
-    )
-    
-    prep_data.export_to_subfolder(
-        "ca_transit_routes_feed", prep_data.ANALYSIS_DATE)
     
     time1 = datetime.now()
     print(f"Execution time for routes script: {time1-time0}")
