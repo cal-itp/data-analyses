@@ -54,7 +54,7 @@ if __name__ == "__main__":
     
     client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("./logs/A2_combine_stops.log", retention="6 months")
+    logger.add("./logs/A2_combine_stops.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")

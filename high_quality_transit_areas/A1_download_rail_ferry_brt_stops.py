@@ -80,14 +80,19 @@ def filter_unique_stops_for_trips(analysis_date: str,
     stop_times = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
     
+    keep_stop_cols = [
+        "feed_key", "name", 
+        "stop_id", 
+        "route_id", "route_type",         
+        # let's keep route_id, since we double check in a notebook
+    ]
+    
     stops_for_trips = dd.merge(
         stop_times,
         trip_df,
         on = ["feed_key", "trip_id"],
         how = "inner"
-    )[["feed_key", "name",
-       "stop_id", 
-       "route_id",  "route_type"]].drop_duplicates().reset_index(drop=True)
+    )[keep_stop_cols].drop_duplicates().reset_index(drop=True)
     
     stops_present = stops_for_trips.compute()
     
@@ -95,20 +100,12 @@ def filter_unique_stops_for_trips(analysis_date: str,
     stops = gpd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
     
-    keep_stop_cols = [
-        "feed_key", "name",
-        "stop_id", "stop_name", "stop_key", 
-        "geometry", 
-        "route_type", "route_id" 
-        # let's keep route_id, since we double check in a notebook
-    ]
-    
     stops_with_geom = pd.merge(
         stops, 
         stops_present,
         on = ["feed_key", "stop_id"],
         how = "inner"
-    )[keep_stop_cols]
+    )[keep_stop_cols + ["stop_name", "geometry"]]
     
     return stops_with_geom
     
@@ -117,8 +114,8 @@ def grab_rail_data(analysis_date: str) -> gpd.GeoDataFrame:
     """
     Grab all the rail stops.
     """
-    rail_route_types = [0, 1, 2]
-            
+    rail_route_types = ['0', '1', '2']            
+    
     rail_trips = filter_trips_to_route_type(analysis_date, rail_route_types)
     rail_stops = filter_unique_stops_for_trips(analysis_date, rail_trips)
                     
@@ -185,7 +182,7 @@ def grab_ferry_data(analysis_date: str) -> gpd.GeoDataFrame:
     """
     Grab all the ferry stops.
     """
-    ferry_route_types = [4]
+    ferry_route_types = ['4']
         
     ferry_trips = filter_trips_to_route_type(analysis_date, ferry_route_types)
     ferry_stops = filter_unique_stops_for_trips(analysis_date, ferry_trips)
