@@ -151,7 +151,7 @@ if __name__=="__main__":
     ).compute()
     
     subset_corridors = (subset_corridors.sort_values(
-                    ["feed_key", "route_key", "route_id", "hqta_segment_id"], 
+                    ["feed_key", "route_id", "hqta_segment_id"], 
                     ascending = [True, True, True])
                     .reset_index(drop=True)
     )
