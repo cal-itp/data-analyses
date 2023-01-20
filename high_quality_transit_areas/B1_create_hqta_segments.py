@@ -55,7 +55,8 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
     # Keep route_id and shape_id, but drop trip_id by the end
     m1 = (dd.merge(
             routelines_ddf,
-            trips[shape_id_cols + ["route_key", "route_id", "direction_id"]],
+            trips[shape_id_cols + ["feed_key", "route_key", 
+                                   "route_id", "direction_id"]],
             on = shape_id_cols,
             how = "inner",
         ).drop_duplicates(subset = route_dir_cols + ["route_length"])
@@ -67,7 +68,7 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
     # Don't really care what direction is, since we will replace it with north-south
     # Just need a value to stand-in, treat it as the same direction
     m1 = m1.assign(
-        direction_id = m1.direction_id.fillna('0')
+        direction_id = m1.direction_id.fillna(0)
     )
     
     m1 = m1.assign(    

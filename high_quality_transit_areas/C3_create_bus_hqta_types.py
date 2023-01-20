@@ -6,12 +6,6 @@ These are hqta_types:
 the highest trip count
 * hq_corridor_bus: stops along the HQ transit corr (may not be highest trip count)
 
-# Ex: how to split it up, then apply using map_partitions
-# https://stackoverflow.com/questions/61920105/dask-applying-a-function-over-a-large-dataframe-which-is-more-than-ram
-
-Takes 1 min to run without dask. Dask compute pushes it to 2 min.
-Remove query, use cached stops file.
-
 - <1 min in v2, but left the query in
 - v1 in combine_and_visualize.ipynb
 """
