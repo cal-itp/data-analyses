@@ -16,13 +16,13 @@ import os
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
 
 """
-Federal Communications Commission
-Data Wrangling
+Clip original provider maps
+to California
 """
-
 # Clip the cell provider coverage map to California only.
 # This only worked for AT&T and Verizon. 
-# T-Mobile uses the function concat_all_areas().
+# T-Mobile was concatted as it was spread across 
+# several files instead of one. 
 def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     PATH = f"{GCS_FILE_PATH}{file_zip_name}"
@@ -44,71 +44,30 @@ def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     # Save this into a parquet so don't have to clip all the time
     utils.geoparquet_gcs_export(fcc_ca_gdf, GCS_FILE_PATH, new_file_name)
-
-# Clip the provider map to a boundary and return the areas of a boundary
-# that is NOT covered by the provider.
-def find_difference_and_clip(
-    gdf: dg.GeoDataFrame, boundary: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
-    # Clip cell provider to some boundary
-    clipped = dg.clip(gdf, boundary).reset_index(drop=True)  # use dask to clip
-    clipped_gdf = clipped.compute()  # compute converts from dask gdf to gdf
-
-    # Now find the overlay, and find the difference
-    # Notice which df is on the left and which is on the right
-    # https://geopandas.org/en/stable/docs/user_guide/set_operations.html
-    no_coverage = gpd.overlay(boundary, clipped_gdf, how="difference",  keep_geom_type=False)
-
-    return no_coverage
-
-def concat_all_areas(all_gdf:list, file_name:str):
+    
+"""
+Take clipped California 
+maps and manipulate them. 
+"""
+def find_specific_files(phrase_to_find:str):
     """
-    Districts/counties are separated out into different gdfs that contain 
-    portions of districts/counties. Concat them all together 
-    to get the entirety of California.
+    Grab a list of files that contain the 
+    phrase inputted. E.g. "tmobile_no_coverage"
     """
-    # Empty dataframe
-    full_gdf = pd.DataFrame()
+    # Create a list of all the files in my folder
+    all_files_in_folder = fs.ls(A1_provider_prep.GCS_FILE_PATH)
     
-    # Concat all the districts that were broken out into one
-    full_gdf = dd.multi.concat(all_gdf, axis=0)
+    # Grab only files with the string "Verizon_no_coverage_"
+    my_files = [i for i in all_files_in_folder if phrase_to_find in i]
     
-    # Turn it into a gdf
-    full_gdf = full_gdf.compute()
-    
-    # Export
-    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name)
+    # String to add to read the files
+    my_string = "gs://"
+    my_files = [my_string + i for i in my_files]
+   
+    return my_files
 
-    print('Saved to GCS')
-    return full_gdf 
-
-# Breakout provider gdf by counties, find the areas of each county
-# that doesn't have coverage, concat everything and dissolve to one row.
-# This was used for Verizon ONLY to create its final map.
-def breakout_counties(provider, file_name:str, counties_wanted:list):
-    counties = get_counties()
-    
-    # Empty dataframe to hold each district after clipping
-    full_gdf = pd.DataFrame()
-
-    for i in counties_wanted:
-        county_gdf = counties[counties.county_name==i].reset_index(drop = True)
-        
-        county_gdf_clipped = find_difference_and_clip(verizon, county_gdf) 
-        full_gdf = dd.multi.concat([full_gdf, county_gdf_clipped], axis=0)
-        print(f'done concating for {i}')
-    
-    # Turn this into a GDF
-    full_gdf = full_gdf.compute()
-    
-    # Save to GCS
-    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name) 
-    print('saved to GCS')
-    
-    return full_gdf
-
-# Sjoin the provider gdf to a single district then & find the difference
-def iloc_find_difference_district(
+# Sjoin the original provider gdf to a single district 
+def sjoin_district(
     provider_df: dg.GeoDataFrame, 
     district_df: gpd.GeoDataFrame,
     provider_name: str,
@@ -130,29 +89,10 @@ def iloc_find_difference_district(
     utils.geoparquet_gcs_export(provider_district, GCS_FILE_PATH, f"{provider_name}_d{d}")
     print(f"saved {provider_name}_d{d} parquet") 
     
-    # Get areas without coverage
-    no_coverage = provider_district.difference(
-        district_df.geometry.iloc[0], 
-    ).reset_index()
-    
-    # Turn to gdf
-    no_coverage = (no_coverage.reset_index()
-                  .dissolve()
-                  .rename(columns = {0: 'geometry'})
-                  [["geometry"]]
-                 )
-    # Set geometry
-    no_coverage = no_coverage.set_geometry('geometry')
-    
-    utils.geoparquet_gcs_export(no_coverage, GCS_FILE_PATH, f"{provider_name}_no_coverage_d{d}")
-    
-    print(f"{provider_name}_no_coverage_d{d} parquet")
-    
-    return no_coverage
+    return provider_district
 
-# For the entirety of California by districts get areas without coverage
-# with the iloc_find_difference_district function
-def complete_difference_provider_district_level(
+
+def sjoin_gdf(
     provider_df: dg.GeoDataFrame, 
     district_df: gpd.GeoDataFrame,
     file_name: str,
@@ -161,7 +101,7 @@ def complete_difference_provider_district_level(
     full_gdf = pd.DataFrame()
     
     for i in districts_needed:
-        result = iloc_find_difference_district(
+        result = sjoin_district(
             provider_df, 
             district_df[district_df.district==i],
             provider_name
@@ -174,6 +114,177 @@ def complete_difference_provider_district_level(
     utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name)
     return full_gdf
 
+def clip_sjoin_gdf(files_to_find:str, provider: str):
+    """
+    Provider maps were spatially joined against each Caltrans
+    District using the function `sjoin_district`. 
+    However, these sjoin gdfs include areas that don't belong 
+    to that district, which throw off results.
+    Clip these files by provider against the the original CT
+    shapefile to clean up the edges. 
+    
+    files_to_find: find files that were spatially joined
+    to the CT districts. 
+    
+    provider: the provider
+    """
+    # Open original Caltrans districts shapefile
+    # Get rid of A1_provider_prep once I export this
+    ct_districts = get_districts()
+    
+    # Get a list of files I want
+    provider_files_list = find_specific_files(files_to_find)
+    
+    # Loop over every file
+    # Put provider_files_list later.
+    for file in provider_files_list:
+        # Find which district each file contains. 
+        # https://stackoverflow.com/questions/11339210/how-to-get-integer-values-from-a-string-in-python
+        relevant_district = ''.join(i for i in file if i.isdigit())
+        
+        # Turn this into an integer
+        relevant_district = int(relevant_district)
+        
+        # Filter out districts for the file's district
+        relevant_district_gdf =  ct_districts[ct_districts.district == relevant_district]
+        
+        # Open file
+        sjoin_file = gpd.read_parquet(file)
+        
+        # Clip the sjoin file against the original district shapefile
+        clipped_gdf = sjoin_file.clip(relevant_district_gdf)
+        
+        # Save
+        utils.geoparquet_gcs_export(clipped_gdf, GCS_FILE_PATH, f"{provider}_clip_d{relevant_district}")
+        
+        print(f"Done for {relevant_district}") 
+
+def dissolve_clipped_gdf(phrase_to_find:str, provider: str):
+    """
+    Input files created by `clip_sjoin_gdf` 
+    and dissolve all the rows by district.
+    """
+    # Get a list of files I want
+    provider_files_list = find_specific_files(phrase_to_find)
+    
+    # Loop over every file
+    # Put provider_files_list later.
+    for file in provider_files_list:
+        
+        start = datetime.datetime.now()
+        
+        # Open file
+        clipped_dask = dg.read_parquet(file)
+        
+        # Grab the district
+        relevant_district = ''.join(i for i in file if i.isdigit())
+        
+        # Turn this into an integer for the file name
+        relevant_district = int(relevant_district)
+        
+        # Dissolve by district
+        dissolved_dask = clipped_dask.dissolve("district")
+        
+        # Turn back to gdf
+        dissolved_gdf = dissolved_dask.compute()
+        
+        # Save
+        utils.geoparquet_gcs_export(dissolved_gdf, GCS_FILE_PATH, f"{provider}_dissolve_d{relevant_district}")
+        
+        end = datetime.datetime.now()
+        
+        logger.info(f"execution time: {end-start}")
+        print(f"Done for {relevant_district}") 
+        
+def find_difference_gdf(phrase_to_find:str, provider: str):
+    """
+    Input the files created by `dissolve_clipped_gdf` 
+    and find the difference with the original Caltrans
+    district. 
+    """
+    # Open original Caltrans districts shapefile
+    # Get rid of A1_provider_prep once I export this
+    ct_districts = A1_provider_prep.get_districts()
+    
+    # Get a list of files I want
+    provider_files_list = find_specific_files(phrase_to_find)
+    
+    start = datetime.datetime.now()
+    
+    # Loop over every file
+    for file in provider_files_list:
+        
+        relevant_district = ''.join(i for i in file if i.isdigit())
+        
+        relevant_district = int(relevant_district)
+        
+        # Filter out districts for the file's district
+        relevant_district_gdf =  ct_districts[ct_districts.district == relevant_district]
+        
+        # Open file
+        dissolved_file = gpd.read_parquet(file)
+        
+        # Clip the dissolved file against the original district shapefile
+        no_coverage = relevant_district_gdf.difference(dissolved_file.geometry.iloc[0]).reset_index()
+        
+        try:
+            # Some are geodataframes without column names: have to rename them. 
+            no_coverage = no_coverage.rename(columns = {0: 'geometry'})
+            utils.geoparquet_gcs_export(no_coverage, GCS_FILE_PATH, f"{provider}_difference_d{relevant_district}")
+        except:
+            # Some become geoseries - turn them into a gdf
+            # https://gis.stackexchange.com/questions/266098/how-to-convert-a-geoseries-to-a-geodataframe-with-geopandas
+            no_coverage_gdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(no_coverage))
+            utils.geoparquet_gcs_export(no_coverage_gdf, GCS_FILE_PATH, f"{provider}_difference_d{relevant_district}")
+        
+        print(f"Done for {relevant_district}") 
+            
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end-start}")
+        
+    return no_coverage
+
+def stack_all_maps(phrase_to_find:str, provider: str):
+    """
+    After running `find_difference_gdf`, the results are 
+    seperated out by districts. Stack all the district files to create 
+    one complete California file for this provider.
+    """
+    # Get a list of files I want
+    provider_files_list = find_specific_files(phrase_to_find)
+    
+    start = datetime.datetime.now()
+    
+    # Concat files
+    california_map = dd.multi.concat([gpd.read_parquet(file) for file in provider_files_list])
+    california_map = california_map.compute()
+    
+    utils.geoparquet_gcs_export(california_map, GCS_FILE_PATH, f"{provider}_no_coverage_cal")
+    
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end-start}")
+        
+    return california_map
+
+"""
+Final Provider Files
+"""
+def load_att(): 
+    att_file =  "att_no_coverage_cal.parquet"
+    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{att_file}")
+    return gdf
+
+# Areas that don't have Verizon cell coverage across CA
+def load_verizon(): 
+    verizon_file =  "verizon_no_coverage_cal.parquet"
+    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{verizon_file}")
+    return gdf
+
+# Areas that don't have T-mobile cell coverage across CA
+def load_tmobile(): 
+    tmobile_file =  "tmobile_no_coverage_cal.parquet"
+    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{tmobile_file}")
+    return gdf
 
 """
 CA Counties & Districts Files
@@ -216,23 +327,41 @@ def correct_kern():
     return kern 
 
 """
-Final Provider Files
+Old
 """
-# Areas that don't have AT&T cell coverage across CA
-# att_all_counties.parquet was created using breakout_counties
-# ATT_no_coverage_complete_CA.parquet was created using complete_difference_provider_district_level
-def load_att(): 
-    att_file =  "ATT_no_coverage_complete_CA.parquet"
-    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{att_file}")
-    return gdf
+# Clip the provider map to a boundary and return the areas of a boundary
+# that is NOT covered by the provider.
+def find_difference_and_clip(
+    gdf: dg.GeoDataFrame, boundary: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    # Clip cell provider to some boundary
+    clipped = dg.clip(gdf, boundary).reset_index(drop=True)  # use dask to clip
+    clipped_gdf = clipped.compute()  # compute converts from dask gdf to gdf
 
-# Areas that don't have Verizon cell coverage across CA
-def load_verizon(): 
-    gdf = gpd.read_parquet("gs://calitp-analytics-data/data-analyses/cellular_coverage/verizon_clipped_dissolved.parquet")
-    return gdf
+    # Now find the overlay, and find the difference
+    # Notice which df is on the left and which is on the right
+    # https://geopandas.org/en/stable/docs/user_guide/set_operations.html
+    no_coverage = gpd.overlay(boundary, clipped_gdf, how="difference",  keep_geom_type=False)
 
-# Areas that don't have T-mobile cell coverage across CA
-def load_tmobile(): 
-    tmobile_file =  "tmobile_no_coverage_complete_CA.parquet"
-    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{tmobile_file}")[['geometry']]
-    return gdf
+    return no_coverage
+
+def concat_all_areas(all_gdf:list, file_name:str):
+    """
+    Districts/counties are separated out into different gdfs that contain 
+    portions of districts/counties. Concat them all together 
+    to get the entirety of California.
+    """
+    # Empty dataframe
+    full_gdf = pd.DataFrame()
+    
+    # Concat all the districts that were broken out into one
+    full_gdf = dd.multi.concat(all_gdf, axis=0)
+    
+    # Turn it into a gdf
+    full_gdf = full_gdf.compute()
+    
+    # Export
+    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name)
+
+    print('Saved to GCS')
+    return full_gdf 
