@@ -176,8 +176,8 @@ def merge_all_providers():
     common_cols = ['agency', 'itp_id', 'route_id', 'long_route_name', 'District',]
     
     # Inner merge - or outer?
-    m1 = verizon_o.merge(att_o, how="inner", on=common_cols).merge(
-    tmobile_o, how="inner", on=common_cols)
+    m1 = verizon_o.merge(att_o, how="outer", on=common_cols).merge(
+    tmobile_o, how="outer", on=common_cols)
     
     # Grab percentages to calculate median percentage
     # w/o coverage across ATT, Tmobile, and Verizon
@@ -251,7 +251,7 @@ def merge_ntd(gdf):
     indicator=True,)
     
     # Fill agencies with NA buses with median total buses
-    median_total_buses = m1["total_buses"].median()
+    median_total_buses = ntd["total_buses"].median()
     m1["total_buses"] = m1["total_buses"].fillna(median_total_buses)
     
     # To get an estimate of buses that run in a low data zone.
@@ -286,6 +286,9 @@ def final_merge(routes_gdf):
     
     # Clean up % values
     m2["Percentage Of Trips W Low Cell Service"] = (m2["Percentage Of Trips W Low Cell Service"] * 100)
+    
+    # Remove districts that repeat a few times 
+    m2["District"] = (m2["District"].apply(lambda x: ", ".join(set([y.strip() for y in x.split(",")]))).str.strip())
     
     # Ensure this remains a GDF
     m2 = m2.rename(columns =  {"Geometry X":"Geometry"})
