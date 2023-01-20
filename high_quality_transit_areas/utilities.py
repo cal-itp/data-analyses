@@ -30,7 +30,7 @@ ITP_BLUE = calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[0]
 # and which cases of HQTA definitions those correspond to
 def hqta_details(row):
     if row.hqta_type == "major_stop_bus":
-        if row.calitp_itp_id_primary != int(row.calitp_itp_id_secondary):
+        if row.feed_key_primary != row.feed_key_secondary:
             return "intersection_2_bus_routes_different_operators"
         else:
             return "intersection_2_bus_routes_same_operator"
