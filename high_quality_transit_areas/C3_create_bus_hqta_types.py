@@ -6,12 +6,6 @@ These are hqta_types:
 the highest trip count
 * hq_corridor_bus: stops along the HQ transit corr (may not be highest trip count)
 
-# Ex: how to split it up, then apply using map_partitions
-# https://stackoverflow.com/questions/61920105/dask-applying-a-function-over-a-large-dataframe-which-is-more-than-ram
-
-Takes 1 min to run without dask. Dask compute pushes it to 2 min.
-Remove query, use cached stops file.
-
 - <1 min in v2, but left the query in
 - v1 in combine_and_visualize.ipynb
 """
@@ -57,28 +51,28 @@ def create_major_stop_bus(all_stops: gpd.GeoDataFrame,
     """
     # Narrow down all stops to only include stops from operators
     # that also have some bus corridor intersection result
-    included_operators = bus_intersections.calitp_itp_id.unique()
-    major_stops = all_stops[all_stops.calitp_itp_id.isin(included_operators)]
+    included_operators = bus_intersections.feed_key.unique()
+    major_stops = all_stops[all_stops.feed_key.isin(included_operators)]
     
     major_bus_stops_in_intersections = (
         gpd.sjoin(
             major_stops,
-            bus_intersections[["calitp_itp_id", "geometry"]],
+            bus_intersections[["feed_key", "geometry"]],
             how = "inner",
             predicate = "within"
         ).drop(columns = "index_right")
         .drop_duplicates(
-            subset=["calitp_itp_id_left", "stop_id", "calitp_itp_id_right"])
+            subset=["feed_key_left", "stop_id", "feed_key_right"])
     ).reset_index(drop=True)
     
     stops_in_intersection = (
         major_bus_stops_in_intersections.assign(
             hqta_type = "major_stop_bus",
             ).rename(columns = 
-                     {"calitp_itp_id_left": "calitp_itp_id_primary", 
-                      "calitp_itp_id_right": "calitp_itp_id_secondary",
+                     {"feed_key_left": "feed_key_primary", 
+                      "feed_key_right": "feed_key_secondary",
                      })
-          [["calitp_itp_id_primary", "calitp_itp_id_secondary", 
+          [["feed_key_primary", "feed_key_secondary", 
             "stop_id", "geometry", "hqta_type"]]
     )
     
@@ -98,7 +92,7 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
                      [["hqta_segment_id", "geometry"]].compute()
                     )
     
-    stop_cols = ["calitp_itp_id", "stop_id"]
+    stop_cols = ["feed_key", "stop_id"]
     
     stops_in_hq_corr = (gpd.sjoin(
                             all_stops, 
@@ -113,7 +107,7 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
     stops_in_hq_corr2 = (stops_in_hq_corr.assign(
                             hqta_type = "hq_corridor_bus",
                         )[stop_cols + ["hqta_type", "geometry"]]
-                         .rename(columns = {"calitp_itp_id": "calitp_itp_id_primary"})
+                         .rename(columns = {"feed_key": "feed_key_primary"})
                         )
     
     return stops_in_hq_corr2

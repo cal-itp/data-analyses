@@ -14,7 +14,6 @@ import sys
 from loguru import logger
 
 import A1_download_rail_ferry_brt_stops as rail_ferry_brt
-import A1b_muni_weekend_rail as muni_weekend_rail
 from shared_utils import utils
 from utilities import GCS_FILE_PATH, clip_to_ca
 from update_vars import analysis_date, TEMP_GCS
@@ -44,8 +43,8 @@ new_muni_stops = [
 ]
 
 BRT_STOPS_FILTER = {
-    182: metro_street_running,
-    282: van_ness_ids
+    "LA Metro Bus Schedule": metro_street_running,
+    "Bay Area 511 Muni Schedule": van_ness_ids
 }
 
 
@@ -55,7 +54,7 @@ if __name__ == "__main__":
     
     client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("./logs/A2_combine_stops.log", retention="6 months")
+    logger.add("./logs/A2_combine_stops.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -67,17 +66,11 @@ if __name__ == "__main__":
     rail_ferry_brt.grab_rail_data(analysis_date)
     rail_stops = gpd.read_parquet(f"{TEMP_GCS}rail_stops.parquet")
     
-    # Handle Muni separately - temp, can remove in 2023
-    muni_weekend_rail.download_muni_stops(282)
-    muni_rail_stops = gpd.read_parquet(f"{TEMP_GCS}muni_weekend_rail_stops.parquet")
-    new_muni_rail_stops = muni_rail_stops[
-        muni_rail_stops.stop_id.isin(new_muni_stops)].reset_index(drop=True)
-    
     time1 = datetime.datetime.now()
     logger.info(f"grabbed rail: {time1-start}")
 
     # BRT
-    rail_ferry_brt.grab_operator_brt(analysis_date)
+    rail_ferry_brt.grab_brt_data(analysis_date)
     brt_stops = gpd.read_parquet(f"{TEMP_GCS}brt_stops.parquet")
     brt_stops = rail_ferry_brt.additional_brt_filtering_out_stops(
         brt_stops, BRT_STOPS_FILTER)
@@ -95,7 +88,6 @@ if __name__ == "__main__":
     # Concatenate datasets that need to be clipped to CA
     rail_brt = pd.concat([
         rail_stops,
-        new_muni_rail_stops,
         brt_stops
     ], axis=0, ignore_index= True)
     

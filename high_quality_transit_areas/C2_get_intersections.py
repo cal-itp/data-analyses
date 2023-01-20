@@ -39,10 +39,10 @@ def attach_geometry_to_pairs(corridors: gpd.GeoDataFrame,
         
     }
     
-    col_order = ["calitp_itp_id"] + segment_cols + list(rename_cols.values())
+    col_order = ["feed_key"] + segment_cols + list(rename_cols.values())
     
     pairs_with_geom1 = pd.merge(
-        corridors[["calitp_itp_id"] + segment_cols],
+        corridors[["feed_key"] + segment_cols],
         intersecting_pairs, 
         on = "hqta_segment_id",
         how = "inner"
@@ -57,7 +57,7 @@ def attach_geometry_to_pairs(corridors: gpd.GeoDataFrame,
     )
 
     gdf = (pairs_with_geom2.reindex(columns = col_order)
-           .sort_values(["calitp_itp_id", "hqta_segment_id", 
+           .sort_values(["feed_key", "hqta_segment_id", 
                          "intersect_hqta_segment_id"])
            .reset_index(drop=True)
           )
@@ -90,7 +90,7 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Concatenate and add this column to pairs_table, join by index 
     gdf = pd.concat([
         results_df,
-        pairs_table[["calitp_itp_id", "hqta_segment_id"]], 
+        pairs_table[["feed_key", "hqta_segment_id"]], 
     ], axis=1)
     
     return gdf    

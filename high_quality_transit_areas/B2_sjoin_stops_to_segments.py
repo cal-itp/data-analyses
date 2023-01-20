@@ -43,12 +43,15 @@ def stop_times_aggregation_max_by_stop(stop_times: dd.DataFrame) -> dd.DataFrame
     and group by stop_id-departure hour
     and count how many trips occur.
     """
-    stop_cols = ["calitp_itp_id", "stop_id"]
+    stop_cols = ["feed_key", "stop_id"]
 
-    ddf = gtfs_utils.fix_departure_time(stop_times)
-        
+    stop_times = stop_times.assign(
+        departure_hour = dd.to_datetime(
+            stop_times.departure_sec, unit="s").dt.hour
+    )
+            
     # Aggregate how many trips are made at that stop by departure hour
-    trips_per_hour = (ddf.groupby(stop_cols + ["departure_hour"])
+    trips_per_hour = (stop_times.groupby(stop_cols + ["departure_hour"])
                       .agg({'trip_id': 'count'})
                       .reset_index()
                       .rename(columns = {"trip_id": "n_trips"})
@@ -122,7 +125,7 @@ def hqta_segment_keep_one_stop(
     
     Returns gdf where each segment only appears once.
     """
-    stop_cols = ["calitp_itp_id", "stop_id"]
+    stop_cols = ["feed_key", "stop_id"]
     # dd.merge between dask dataframes can be expensive
     # put pd.DataFrame on right if possible
     segment_to_stop_times = dd.merge(
@@ -173,7 +176,11 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     hq_transit_threshold: int = 4,
 ) -> dg.GeoDataFrame:
     """
-    
+    Take HQTA segments, draw a buffer around the linestrings.
+    Spatial join the stops (points) to segments (now polygons).
+    If there are multiple stops in a segment, keep the stop
+    with more trips.
+    Tag the segment as hq_transit_corr (boolean)
     """
     # Draw 50 m buffer to capture stops around hqta segments
     hqta_segments2 = hqta_segments.assign(

@@ -5912,4 +5912,174 @@
 2022-12-15 08:52:35.952 | INFO     | __main__:compute_delayed:242 - 487: stops exported to GCS
 2022-12-15 08:52:38.917 | INFO     | __main__:get_stop_times:178 - 487: st exported to GCS
 2022-12-15 08:52:38.918 | INFO     | __main__:<module>:308 - download files for 487: 0:00:14.589743
-2022-12-15 08:52:49.484 | INFO     | __main__:<module>:316 - execution time: 0:59:38.771280
+2022-12-15 08:52:49.484 | INFO     | __main__:<module>:316 - execution time: 0:59:38.7712802023-01-19 08:55:08.008 | INFO     | __main__:<module>:229 - Analysis date: 2023-01-18
+2023-01-19 08:55:08.721 | INFO     | __main__:<module>:240 - # operators to run: 36
+2023-01-19 08:55:08.722 | INFO     | __main__:<module>:248 - *********** Download data for: 1523384dc06c3d8147eeffadbcfad049 ***********
+2023-01-19 08:55:13.957 | INFO     | __main__:compute_delayed:187 - 1523384dc06c3d8147eeffadbcfad049: routelines exported to GCS
+2023-01-19 08:55:14.311 | INFO     | __main__:compute_delayed:191 - 1523384dc06c3d8147eeffadbcfad049: trips exported to GCS
+2023-01-19 08:55:14.517 | INFO     | __main__:compute_delayed:198 - 1523384dc06c3d8147eeffadbcfad049: stops exported to GCS
+2023-01-19 08:59:36.821 | INFO     | __main__:<module>:229 - Analysis date: 2023-01-18
+2023-01-19 08:59:39.053 | INFO     | __main__:<module>:240 - # operators to run: 36
+2023-01-19 08:59:39.053 | INFO     | __main__:<module>:248 - *********** Download data for: 1523384dc06c3d8147eeffadbcfad049 ***********
+2023-01-19 08:59:44.027 | INFO     | __main__:compute_delayed:187 - 1523384dc06c3d8147eeffadbcfad049: routelines exported to GCS
+2023-01-19 08:59:44.328 | INFO     | __main__:compute_delayed:191 - 1523384dc06c3d8147eeffadbcfad049: trips exported to GCS
+2023-01-19 08:59:44.532 | INFO     | __main__:compute_delayed:198 - 1523384dc06c3d8147eeffadbcfad049: stops exported to GCS
+2023-01-19 08:59:44.737 | INFO     | __main__:<module>:262 - download files for 1523384dc06c3d8147eeffadbcfad049: 0:00:05.683448
+2023-01-19 08:59:44.738 | INFO     | __main__:<module>:248 - *********** Download data for: 1c78afa6c7ce96a5f5aefca2e0a07d78 ***********
+2023-01-19 08:59:54.967 | INFO     | __main__:compute_delayed:187 - 1c78afa6c7ce96a5f5aefca2e0a07d78: routelines exported to GCS
+2023-01-19 08:59:55.271 | INFO     | __main__:compute_delayed:191 - 1c78afa6c7ce96a5f5aefca2e0a07d78: trips exported to GCS
+2023-01-19 08:59:55.788 | INFO     | __main__:compute_delayed:198 - 1c78afa6c7ce96a5f5aefca2e0a07d78: stops exported to GCS
+2023-01-19 08:59:55.995 | INFO     | __main__:<module>:262 - download files for 1c78afa6c7ce96a5f5aefca2e0a07d78: 0:00:11.257550
+2023-01-19 09:00:00.263 | INFO     | __main__:get_stop_times:133 - 1523384dc06c3d8147eeffadbcfad049: st exported to GCS
+2023-01-19 09:18:16.369 | INFO     | __main__:<module>:229 - Analysis date: 2023-01-18
+2023-01-19 09:18:18.701 | INFO     | __main__:<module>:240 - # operators to run: 184
+2023-01-19 09:18:18.702 | INFO     | __main__:<module>:248 - *********** Download data for: 008d5112a7e531d0562d26e34d77869d ***********
+2023-01-19 09:18:31.315 | INFO     | __main__:compute_delayed:187 - 008d5112a7e531d0562d26e34d77869d: routelines exported to GCS
+2023-01-19 09:18:31.676 | INFO     | __main__:compute_delayed:191 - 008d5112a7e531d0562d26e34d77869d: trips exported to GCS
+2023-01-19 09:18:32.163 | INFO     | __main__:compute_delayed:198 - 008d5112a7e531d0562d26e34d77869d: stops exported to GCS
+2023-01-19 09:18:32.376 | INFO     | __main__:<module>:262 - download files for 008d5112a7e531d0562d26e34d77869d: 0:00:13.674127
+2023-01-19 09:18:32.376 | INFO     | __main__:<module>:248 - *********** Download data for: 04a2bb9727f58083d3622ca13e5ab97c ***********
+2023-01-19 09:18:40.355 | INFO     | __main__:compute_delayed:187 - 04a2bb9727f58083d3622ca13e5ab97c: routelines exported to GCS
+2023-01-19 09:18:40.635 | INFO     | __main__:compute_delayed:191 - 04a2bb9727f58083d3622ca13e5ab97c: trips exported to GCS
+2023-01-19 09:18:41.008 | INFO     | __main__:compute_delayed:198 - 04a2bb9727f58083d3622ca13e5ab97c: stops exported to GCS
+2023-01-19 09:18:41.223 | INFO     | __main__:<module>:262 - download files for 04a2bb9727f58083d3622ca13e5ab97c: 0:00:08.846536
+2023-01-19 09:18:52.860 | INFO     | __main__:get_stop_times:133 - 008d5112a7e531d0562d26e34d77869d: st exported to GCS
+2023-01-19 09:28:41.723 | INFO     | __main__:<module>:229 - Analysis date: 2023-01-18
+2023-01-19 09:28:42.475 | INFO     | __main__:<module>:239 - # operators to run: 184
+2023-01-19 09:28:42.477 | INFO     | __main__:<module>:247 - *********** Download data for: 008d5112a7e531d0562d26e34d77869d ***********
+2023-01-19 09:28:53.275 | INFO     | __main__:compute_delayed:187 - 008d5112a7e531d0562d26e34d77869d: routelines exported to GCS
+2023-01-19 09:28:53.693 | INFO     | __main__:compute_delayed:191 - 008d5112a7e531d0562d26e34d77869d: trips exported to GCS
+2023-01-19 09:28:54.022 | INFO     | __main__:compute_delayed:198 - 008d5112a7e531d0562d26e34d77869d: stops exported to GCS
+2023-01-19 09:28:54.026 | INFO     | __main__:<module>:261 - download files for 008d5112a7e531d0562d26e34d77869d: 0:00:11.549146
+2023-01-19 09:28:54.027 | INFO     | __main__:<module>:247 - *********** Download data for: 04a2bb9727f58083d3622ca13e5ab97c ***********
+2023-01-19 09:28:59.564 | INFO     | __main__:compute_delayed:187 - 04a2bb9727f58083d3622ca13e5ab97c: routelines exported to GCS
+2023-01-19 09:28:59.866 | INFO     | __main__:compute_delayed:191 - 04a2bb9727f58083d3622ca13e5ab97c: trips exported to GCS
+2023-01-19 09:29:00.083 | INFO     | __main__:compute_delayed:198 - 04a2bb9727f58083d3622ca13e5ab97c: stops exported to GCS
+2023-01-19 09:29:00.086 | INFO     | __main__:<module>:261 - download files for 04a2bb9727f58083d3622ca13e5ab97c: 0:00:06.059095
+2023-01-19 09:29:00.088 | INFO     | __main__:<module>:273 - execution time: 0:00:18.363907
+2023-01-19 09:30:07.909 | INFO     | __main__:<module>:229 - Analysis date: 2023-01-18
+2023-01-19 09:30:08.686 | INFO     | __main__:<module>:239 - # operators to run: 184
+2023-01-19 09:30:08.691 | INFO     | __main__:<module>:247 - *********** Download data for: 062563b11ac99ddec6d3bec6f613b78d ***********
+2023-01-19 09:30:13.485 | INFO     | __main__:<module>:261 - download files for 062563b11ac99ddec6d3bec6f613b78d: 0:00:04.793587
+2023-01-19 09:30:13.487 | INFO     | __main__:<module>:247 - *********** Download data for: 071827dbd8e30629592144127920fdac ***********
+2023-01-19 09:30:17.638 | INFO     | __main__:<module>:261 - download files for 071827dbd8e30629592144127920fdac: 0:00:04.150183
+2023-01-19 09:30:17.640 | INFO     | __main__:<module>:247 - *********** Download data for: 07316915441e02c19df7b74101e27129 ***********
+2023-01-19 09:30:23.275 | INFO     | __main__:compute_delayed:187 - 07316915441e02c19df7b74101e27129: routelines exported to GCS
+2023-01-19 09:30:23.638 | INFO     | __main__:compute_delayed:191 - 07316915441e02c19df7b74101e27129: trips exported to GCS
+2023-01-19 09:30:24.015 | INFO     | __main__:compute_delayed:198 - 07316915441e02c19df7b74101e27129: stops exported to GCS
+2023-01-19 09:30:24.018 | INFO     | __main__:<module>:261 - download files for 07316915441e02c19df7b74101e27129: 0:00:06.377134
+2023-01-19 09:30:24.019 | INFO     | __main__:<module>:247 - *********** Download data for: 0b417946df6f116aae0ed70e08d286ce ***********
+2023-01-19 09:30:36.062 | INFO     | __main__:compute_delayed:187 - 0b417946df6f116aae0ed70e08d286ce: routelines exported to GCS
+2023-01-19 09:30:36.439 | INFO     | __main__:compute_delayed:191 - 0b417946df6f116aae0ed70e08d286ce: trips exported to GCS
+2023-01-19 09:30:36.891 | INFO     | __main__:compute_delayed:198 - 0b417946df6f116aae0ed70e08d286ce: stops exported to GCS
+2023-01-19 09:30:36.902 | INFO     | __main__:<module>:261 - download files for 0b417946df6f116aae0ed70e08d286ce: 0:00:12.883259
+2023-01-19 09:30:36.906 | INFO     | __main__:<module>:247 - *********** Download data for: 0e373a97a257a48970c0350421303cd9 ***********
+2023-01-19 09:30:42.308 | INFO     | __main__:compute_delayed:187 - 0e373a97a257a48970c0350421303cd9: routelines exported to GCS
+2023-01-19 09:30:42.658 | INFO     | __main__:compute_delayed:191 - 0e373a97a257a48970c0350421303cd9: trips exported to GCS
+2023-01-19 09:30:43.039 | INFO     | __main__:compute_delayed:198 - 0e373a97a257a48970c0350421303cd9: stops exported to GCS
+2023-01-19 09:30:43.042 | INFO     | __main__:<module>:261 - download files for 0e373a97a257a48970c0350421303cd9: 0:00:06.136138
+2023-01-19 09:30:43.043 | INFO     | __main__:<module>:247 - *********** Download data for: 0eb8bd7801da3aa651f52f74f8bb3ebb ***********
+2023-01-19 09:30:46.757 | INFO     | __main__:<module>:261 - download files for 0eb8bd7801da3aa651f52f74f8bb3ebb: 0:00:03.713373
+2023-01-19 09:30:46.758 | INFO     | __main__:<module>:247 - *********** Download data for: 0fef3ef6dbc02a343b57956b3c972c77 ***********
+2023-01-19 09:30:53.683 | INFO     | __main__:compute_delayed:187 - 0fef3ef6dbc02a343b57956b3c972c77: routelines exported to GCS
+2023-01-19 09:30:54.056 | INFO     | __main__:compute_delayed:191 - 0fef3ef6dbc02a343b57956b3c972c77: trips exported to GCS
+2023-01-19 09:30:54.461 | INFO     | __main__:compute_delayed:198 - 0fef3ef6dbc02a343b57956b3c972c77: stops exported to GCS
+2023-01-19 09:30:54.465 | INFO     | __main__:<module>:261 - download files for 0fef3ef6dbc02a343b57956b3c972c77: 0:00:07.706969
+2023-01-19 09:30:54.467 | INFO     | __main__:<module>:247 - *********** Download data for: 11c7894906a05418f52ea30fe8318762 ***********
+2023-01-19 09:31:00.220 | INFO     | __main__:compute_delayed:187 - 11c7894906a05418f52ea30fe8318762: routelines exported to GCS
+2023-01-19 09:31:00.518 | INFO     | __main__:compute_delayed:191 - 11c7894906a05418f52ea30fe8318762: trips exported to GCS
+2023-01-19 09:31:00.900 | INFO     | __main__:compute_delayed:198 - 11c7894906a05418f52ea30fe8318762: stops exported to GCS
+2023-01-19 09:31:00.907 | INFO     | __main__:<module>:261 - download files for 11c7894906a05418f52ea30fe8318762: 0:00:06.439958
+2023-01-19 09:31:00.909 | INFO     | __main__:<module>:247 - *********** Download data for: 1523384dc06c3d8147eeffadbcfad049 ***********
+2023-01-19 09:31:05.244 | INFO     | __main__:compute_delayed:187 - 1523384dc06c3d8147eeffadbcfad049: routelines exported to GCS
+2023-01-19 09:31:05.624 | INFO     | __main__:compute_delayed:191 - 1523384dc06c3d8147eeffadbcfad049: trips exported to GCS
+2023-01-19 09:31:05.835 | INFO     | __main__:compute_delayed:198 - 1523384dc06c3d8147eeffadbcfad049: stops exported to GCS
+2023-01-19 09:31:05.839 | INFO     | __main__:<module>:261 - download files for 1523384dc06c3d8147eeffadbcfad049: 0:00:04.929379
+2023-01-19 09:31:05.841 | INFO     | __main__:<module>:247 - *********** Download data for: 183318cdba4ab20f3e92375ca9eb014b ***********
+2023-01-19 09:31:11.346 | INFO     | __main__:compute_delayed:187 - 183318cdba4ab20f3e92375ca9eb014b: routelines exported to GCS
+2023-01-19 09:31:11.623 | INFO     | __main__:compute_delayed:191 - 183318cdba4ab20f3e92375ca9eb014b: trips exported to GCS
+2023-01-19 09:31:12.018 | INFO     | __main__:compute_delayed:198 - 183318cdba4ab20f3e92375ca9eb014b: stops exported to GCS
+2023-01-19 09:31:12.022 | INFO     | __main__:<module>:261 - download files for 183318cdba4ab20f3e92375ca9eb014b: 0:00:06.180474
+2023-01-19 09:31:12.022 | INFO     | __main__:<module>:247 - *********** Download data for: 1870483194c4d49a5e8177ddcd3a843b ***********
+2023-01-19 09:31:20.038 | INFO     | __main__:compute_delayed:187 - 1870483194c4d49a5e8177ddcd3a843b: routelines exported to GCS
+2023-01-19 09:31:20.339 | INFO     | __main__:compute_delayed:191 - 1870483194c4d49a5e8177ddcd3a843b: trips exported to GCS
+2023-01-19 09:31:20.777 | INFO     | __main__:compute_delayed:198 - 1870483194c4d49a5e8177ddcd3a843b: stops exported to GCS
+2023-01-19 09:31:20.783 | INFO     | __main__:<module>:261 - download files for 1870483194c4d49a5e8177ddcd3a843b: 0:00:08.761014
+2023-01-19 09:31:20.786 | INFO     | __main__:<module>:247 - *********** Download data for: 1b77ef49f5bc70038cbf15e4f5f98477 ***********
+2023-01-19 09:31:24.846 | INFO     | __main__:<module>:261 - download files for 1b77ef49f5bc70038cbf15e4f5f98477: 0:00:04.059932
+2023-01-19 09:31:24.847 | INFO     | __main__:<module>:247 - *********** Download data for: 1bf8c8218e170a12c3fb5ed164afdd2d ***********
+2023-01-19 09:31:33.616 | INFO     | __main__:compute_delayed:187 - 1bf8c8218e170a12c3fb5ed164afdd2d: routelines exported to GCS
+2023-01-19 09:31:33.915 | INFO     | __main__:compute_delayed:191 - 1bf8c8218e170a12c3fb5ed164afdd2d: trips exported to GCS
+2023-01-19 09:31:34.298 | INFO     | __main__:compute_delayed:198 - 1bf8c8218e170a12c3fb5ed164afdd2d: stops exported to GCS
+2023-01-19 09:31:34.302 | INFO     | __main__:<module>:261 - download files for 1bf8c8218e170a12c3fb5ed164afdd2d: 0:00:09.455262
+2023-01-19 09:31:34.304 | INFO     | __main__:<module>:247 - *********** Download data for: 1c65c57588483c12c85dac228efe4dfd ***********
+2023-01-19 09:31:39.501 | INFO     | __main__:compute_delayed:187 - 1c65c57588483c12c85dac228efe4dfd: routelines exported to GCS
+2023-01-19 09:31:39.820 | INFO     | __main__:compute_delayed:191 - 1c65c57588483c12c85dac228efe4dfd: trips exported to GCS
+2023-01-19 09:31:40.193 | INFO     | __main__:compute_delayed:198 - 1c65c57588483c12c85dac228efe4dfd: stops exported to GCS
+2023-01-19 09:31:40.197 | INFO     | __main__:<module>:261 - download files for 1c65c57588483c12c85dac228efe4dfd: 0:00:05.893055
+2023-01-19 09:31:40.198 | INFO     | __main__:<module>:247 - *********** Download data for: 1c78afa6c7ce96a5f5aefca2e0a07d78 ***********
+2023-01-19 09:31:50.142 | INFO     | __main__:compute_delayed:187 - 1c78afa6c7ce96a5f5aefca2e0a07d78: routelines exported to GCS
+2023-01-19 09:31:50.452 | INFO     | __main__:compute_delayed:191 - 1c78afa6c7ce96a5f5aefca2e0a07d78: trips exported to GCS
+2023-01-19 09:31:50.708 | INFO     | __main__:compute_delayed:198 - 1c78afa6c7ce96a5f5aefca2e0a07d78: stops exported to GCS
+2023-01-19 09:31:50.716 | INFO     | __main__:<module>:261 - download files for 1c78afa6c7ce96a5f5aefca2e0a07d78: 0:00:10.517421
+2023-01-19 09:31:50.718 | INFO     | __main__:<module>:247 - *********** Download data for: 1e9c3816ddf4ae752fa11e95875d3a1d ***********
+2023-01-19 09:31:58.749 | INFO     | __main__:compute_delayed:187 - 1e9c3816ddf4ae752fa11e95875d3a1d: routelines exported to GCS
+2023-01-19 09:31:59.029 | INFO     | __main__:compute_delayed:191 - 1e9c3816ddf4ae752fa11e95875d3a1d: trips exported to GCS
+2023-01-19 09:31:59.245 | INFO     | __main__:compute_delayed:198 - 1e9c3816ddf4ae752fa11e95875d3a1d: stops exported to GCS
+2023-01-19 09:31:59.247 | INFO     | __main__:<module>:261 - download files for 1e9c3816ddf4ae752fa11e95875d3a1d: 0:00:08.529771
+2023-01-19 09:31:59.248 | INFO     | __main__:<module>:247 - *********** Download data for: 21fa0b125d801eb5058da2ec5d748bda ***********
+2023-01-19 09:32:04.345 | INFO     | __main__:compute_delayed:187 - 21fa0b125d801eb5058da2ec5d748bda: routelines exported to GCS
+2023-01-19 09:32:04.653 | INFO     | __main__:compute_delayed:191 - 21fa0b125d801eb5058da2ec5d748bda: trips exported to GCS
+2023-01-19 09:32:04.891 | INFO     | __main__:compute_delayed:198 - 21fa0b125d801eb5058da2ec5d748bda: stops exported to GCS
+2023-01-19 09:32:04.908 | INFO     | __main__:<module>:261 - download files for 21fa0b125d801eb5058da2ec5d748bda: 0:00:05.659572
+2023-01-19 09:32:04.913 | INFO     | __main__:<module>:247 - *********** Download data for: 227c21ddaeb14e27fc2e6ba1076d9d5e ***********
+2023-01-19 09:32:14.150 | INFO     | __main__:compute_delayed:187 - 227c21ddaeb14e27fc2e6ba1076d9d5e: routelines exported to GCS
+2023-01-19 09:32:14.530 | INFO     | __main__:compute_delayed:191 - 227c21ddaeb14e27fc2e6ba1076d9d5e: trips exported to GCS
+2023-01-19 09:32:14.762 | INFO     | __main__:compute_delayed:198 - 227c21ddaeb14e27fc2e6ba1076d9d5e: stops exported to GCS
+2023-01-19 09:32:14.767 | INFO     | __main__:<module>:261 - download files for 227c21ddaeb14e27fc2e6ba1076d9d5e: 0:00:09.853472
+2023-01-19 09:32:14.769 | INFO     | __main__:<module>:247 - *********** Download data for: 23662f7cd5ee8ff6d696e4cd02553a0d ***********
+2023-01-19 09:32:20.387 | INFO     | __main__:compute_delayed:187 - 23662f7cd5ee8ff6d696e4cd02553a0d: routelines exported to GCS
+2023-01-19 09:32:20.663 | INFO     | __main__:compute_delayed:191 - 23662f7cd5ee8ff6d696e4cd02553a0d: trips exported to GCS
+2023-01-19 09:32:20.922 | INFO     | __main__:compute_delayed:198 - 23662f7cd5ee8ff6d696e4cd02553a0d: stops exported to GCS
+2023-01-19 09:32:20.927 | INFO     | __main__:<module>:261 - download files for 23662f7cd5ee8ff6d696e4cd02553a0d: 0:00:06.157702
+2023-01-19 09:32:20.929 | INFO     | __main__:<module>:247 - *********** Download data for: 244b96b75ab6da1462aadfe8b95d54b9 ***********
+2023-01-19 11:18:53.762 | INFO     | __main__:<module>:84 - Analysis date: 2023-01-18
+2023-01-19 11:18:54.575 | INFO     | __main__:<module>:94 - # operators to run: 184
+2023-01-19 11:18:54.575 | INFO     | __main__:<module>:97 - *********** Download trips data ***********
+2023-01-19 11:19:00.097 | INFO     | __main__:<module>:120 - execution time: 0:00:06.334395
+2023-01-19 11:26:04.483 | INFO     | __main__:<module>:27 - Analysis date: 2023-01-18
+2023-01-19 11:26:05.147 | INFO     | __main__:<module>:35 - # operators to run: 184
+2023-01-19 11:26:05.148 | INFO     | __main__:<module>:38 - *********** Download stops data ***********
+2023-01-19 11:26:07.973 | INFO     | __main__:<module>:66 - execution time: 0:00:03.488554
+2023-01-19 11:29:28.828 | INFO     | __main__:<module>:27 - Analysis date: 2023-01-18
+2023-01-19 11:29:29.482 | INFO     | __main__:<module>:35 - # operators to run: 184
+2023-01-19 11:29:29.483 | INFO     | __main__:<module>:39 - *********** Download routelines data ***********
+2023-01-19 11:34:25.542 | INFO     | __main__:<module>:27 - Analysis date: 2023-01-18
+2023-01-19 11:34:26.200 | INFO     | __main__:<module>:35 - # operators to run: 184
+2023-01-19 11:34:26.201 | INFO     | __main__:<module>:39 - *********** Download routelines data ***********
+2023-01-19 11:34:34.041 | INFO     | __main__:<module>:66 - execution time: 0:00:08.497830
+2023-01-19 11:46:40.502 | INFO     | __main__:<module>:30 - Analysis date: 2023-01-18
+2023-01-19 11:47:35.662 | INFO     | __main__:<module>:30 - Analysis date: 2023-01-18
+2023-01-19 11:47:36.334 | INFO     | __main__:<module>:38 - # operators to run: 184
+2023-01-19 11:47:36.335 | INFO     | __main__:<module>:41 - *********** Download trips data ***********
+2023-01-19 11:47:53.090 | INFO     | __main__:<module>:64 - execution time: 0:00:17.427151
+2023-01-19 11:48:52.433 | INFO     | __main__:<module>:27 - Analysis date: 2023-01-18
+2023-01-19 11:48:53.097 | INFO     | __main__:<module>:35 - # operators to run: 184
+2023-01-19 11:48:53.097 | INFO     | __main__:<module>:38 - *********** Download stops data ***********
+2023-01-19 11:49:05.187 | INFO     | __main__:<module>:66 - execution time: 0:00:12.753364
+2023-01-19 11:49:24.141 | INFO     | __main__:<module>:27 - Analysis date: 2023-01-18
+2023-01-19 11:49:24.801 | INFO     | __main__:<module>:35 - # operators to run: 184
+2023-01-19 11:49:24.802 | INFO     | __main__:<module>:39 - *********** Download routelines data ***********
+2023-01-19 11:51:44.539 | INFO     | __main__:<module>:66 - execution time: 0:02:20.397486
+2023-01-19 12:15:35.438 | INFO     | __main__:<module>:62 - Analysis date: 2023-01-18
+2023-01-19 12:15:36.761 | INFO     | __main__:<module>:71 - # operators to run: 140
+2023-01-19 12:15:36.763 | INFO     | __main__:<module>:81 - *********** Download st data ***********
+2023-01-19 12:17:21.619 | INFO     | __main__:<module>:102 - execution time: 0:01:46.179744
+2023-01-19 12:19:29.988 | INFO     | __main__:<module>:61 - Analysis date: 2023-01-18
+2023-01-19 12:19:31.115 | INFO     | __main__:<module>:70 - # operators to run: 140
+2023-01-19 12:19:31.116 | INFO     | __main__:<module>:80 - *********** Download st data ***********
+2023-01-19 12:20:56.776 | INFO     | __main__:<module>:101 - execution time: 0:01:26.787253
+2023-01-19 14:06:34.567 | INFO     | __main__:<module>:27 - Analysis date: 2023-01-18
+2023-01-19 14:06:35.243 | INFO     | __main__:<module>:35 - # operators to run: 184
+2023-01-19 14:06:35.243 | INFO     | __main__:<module>:38 - *********** Download stops data ***********
+2023-01-19 14:06:46.436 | INFO     | __main__:<module>:66 - execution time: 0:00:11.868638

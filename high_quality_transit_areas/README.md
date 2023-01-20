@@ -42,14 +42,12 @@ HQTA data is updated at a monthly frequency for the open data portal. Check the 
 
 In terminal: `make download_hqta_data`
 
-1. [Download data](./download_data.py) and cache parquets in GCS
+1. Download data for [trips](./download_trips.py), [stops](./download_stops.py), [shapes](./download_shapes.py), and [stop times](./download_stop_times.py) and cache parquets in GCS
 1. [Create JSONs](./operators_for_hqta.py) storing a dictionary with all the operators that have cached files for all 4 datasets. These are the [valid operators](./valid_hqta_operators.json). 
     * It's possible in downloading the `routes`, `trips`, `stops`, and `stop_times`, one of the files is not able to be successfully downloaded, but the other 3 are. 
     * Also, it's possible that files with no rows are downloaded.
     * A check for complete information (all 4 files are present and are non-empty)
     * These valid operators are the ones that continue on in the HQTA workflow.
-1. [Compile and cache datasets for all operators](./compile_operators_data.py)
-    * To add `route_id` based on `stop_id`, it requires `trips` and `stop_times` intermediary tables. Need it compiled across operators, because we don't know which `stop_id` values are present by the end.
 1. [Download rail, ferry, brt data](./A2_combine_stops.py)
     * Sanity check: [check 1: downloads](./check1_downloads.ipynb)
 

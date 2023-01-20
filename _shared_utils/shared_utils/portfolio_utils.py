@@ -18,28 +18,19 @@ from shared_utils import rt_utils
 from siuba import *
 
 
-def add_agency_name(
-    selected_date: str,
-) -> pd.DataFrame:
+def clean_organization_name(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Returns a dataframe with calitp_itp_id and the agency name used in portfolio.
-    This is the agency_name used in RT maps
-    rt_delay/rt_analysis.py#L309
+    Clean up organization name used in portfolio.
     """
-    df = (
-        (
-            tbls.views.gtfs_schedule_dim_feeds()
-            >> filter(
-                _.calitp_extracted_at < selected_date,
-                _.calitp_deleted_at >= selected_date,
-            )
-            >> select(_.calitp_itp_id, _.calitp_agency_name)
-            >> distinct()
-            >> collect()
+    df = df.assign(
+        name=(
+            df.name.str.replace("Schedule", "")
+            .str.replace("Vehicle Positions", "")
+            .str.replace("Trip Updates", "")
+            .str.replace("Service Alerts", "")
+            .str.replace("Bay Area 511", "")
+            .str.strip()
         )
-        .sort_values(["calitp_itp_id", "calitp_agency_name"])
-        .drop_duplicates(subset="calitp_itp_id")
-        .reset_index(drop=True)
     )
 
     return df
