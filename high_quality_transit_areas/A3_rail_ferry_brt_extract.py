@@ -4,19 +4,17 @@ and get it ready to be combined with other bus-related points.
 
 From combine_and_visualize.ipynb
 """
-import dask_geopandas as dg
-from utilities import catalog_filepath
-from A2_combine_stops import new_muni_stops
+import geopandas as gpd
+import intake
 
-COMPILED_RAIL_BRT_FERRY = catalog_filepath("rail_brt_ferry_initial")
+catalog = intake.open_catalog("*.yml")
    
-
 def get_rail_ferry_brt_extract():
     """
     Prepare the rail / ferry / BRT stops to be assembled with
     the bus_hqta types and saved into the hqta_points file.
     """
-    df = dg.read_parquet(COMPILED_RAIL_BRT_FERRY)
+    df = catalog.rail_brt_ferry_initial.read()
 
     keep_cols = ["feed_key", "name", "stop_id", 
                  "route_type", "geometry"]
@@ -26,7 +24,8 @@ def get_rail_ferry_brt_extract():
                 lambda x: "major_stop_rail" if x in [0, 1, 2]
                 else "major_stop_brt" if x == 3 
                 else "major_stop_ferry")
-        ).rename(columns = {"name": "name_primary"})
+        ).rename(columns = {"name": "name_primary", 
+                            "feed_key": "feed_key_primary"})
        .drop(columns = "route_type")
     )
 
