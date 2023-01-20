@@ -15,11 +15,8 @@ import os
 
 import A1_provider_prep
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/cellular_coverage/"
-
 """
-Scripts for 
-Other Data Sources
+Prepping Other Data Sources
 (Routes/Trips/NTD)
 """
 # Clean organization names - strip them of dba, etc
@@ -131,7 +128,7 @@ def complete_clip_route_district() -> dg.GeoDataFrame:
     
     for i in all_districts:
         result = clip_route_district(district_df[district_df.district == i])
-        # Add column to indicate which district this route runs in
+        # Column to indicate which district this route runs in
         result["District"] = f"D-{i}"
         
         full_gdf = dd.multi.concat([full_gdf, result], axis=0)
@@ -237,7 +234,6 @@ def trip_df():
     
 """
 NTD Data
-Answer how many buses does an agency owns?
 """
 agencies_dict = {
         "Trinity County": "Trinity Transit",
