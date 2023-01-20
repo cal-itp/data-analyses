@@ -28,6 +28,7 @@ def clean_organization_name(df: pd.DataFrame) -> pd.DataFrame:
             .str.replace("Vehicle Positions", "")
             .str.replace("Trip Updates", "")
             .str.replace("Service Alerts", "")
+            .str.replace("Bay Area 511", "")
             .str.strip()
         )
     )
