@@ -1,6 +1,5 @@
 import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
-from shared_utils.map_utils import make_folium_choropleth_map, make_folium_multiple_layers_map
 from shared_utils.rt_utils import *
 import branca
 import mapclassify
@@ -624,6 +623,7 @@ class RtFilterMapper:
         speed_metric = df.target_delay_seconds.sum() / 60
         self.corridor['schedule_metric_minutes'] = schedule_metric
         self.corridor['speed_metric_minutes'] = speed_metric
+        self.corridor['routes'] = self.filter['route_names'] if self.filter['route_names'] else 'All'
         self.corridor['filter'] = self.filter_formatted
         return {'schedule_metric_minutes': schedule_metric,
                'speed_metric_minutes': speed_metric}
