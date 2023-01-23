@@ -16,19 +16,8 @@ def ppno_slice(df):
     df = df.assign(ppno=df["ppno"].str.upper().str.slice(start=0, stop=5))
     return df
 
-# Function to clean columns before exporting reports/Tableau source
-def clean_up_columns(df):
-    df.columns = (
-        df.columns.str.replace("_", " ")
-        .str.replace("project", "")
-        .str.replace("allocation", "")
-        .str.title()
-        .str.strip()
-    )
-    return df
-
 """
-Other 
+Formatting 
 Functions
 """
 # Function to clean agency/organization names 
@@ -54,6 +43,17 @@ def currency_format(df, col_name: str):
     df[col_name] = "$" + (df[col_name].astype(float)).round(0).astype(str)
     return df
 
+
+# Function to clean columns before exporting reports/Tableau source
+def clean_up_columns(df):
+    df.columns = (
+        df.columns.str.replace("_", " ")
+        .str.replace("project", "")
+        .str.replace("allocation", "")
+        .str.title()
+        .str.strip()
+    )
+    return df
 """
 Import the Data
 """
@@ -173,7 +173,7 @@ def clean_project():
 
     # Add prefix
     df = df.add_prefix("project_")
-
+    
     return df
 
 """
@@ -260,7 +260,7 @@ def clean_allocation():
     
     # Add prefix
     df = df.add_prefix("allocation_")
-
+    
     return df
 
 """
@@ -308,3 +308,39 @@ def clean_invoice():
     df = df.add_prefix("invoice_")
     
     return df
+
+"""
+Other
+"""
+def save_cleaned_sheets():
+    """
+    Save the cleaned up project and allocation
+    sheet to GCS.
+    """
+    project = clean_up_columns(clean_project())
+    allocation = clean_up_columns(clean_allocation())
+    
+    # Write clean version to GCS
+    with pd.ExcelWriter(f"{GCS_FILE_PATH}clean_tircp.xlsx") as writer:
+        allocation.to_excel(writer, sheet_name="clean_allocation", index=False)
+        project.to_excel(writer, sheet_name="clean_project", index=False)
+    return project, allocation
+
+def merge_allocation_project(project_subset_cols: list, allocation_subset_cols: list, merge_type: str):
+    """
+    Merge project and allocation sheet together.
+    """
+    project = clean_project()
+    allocation = clean_allocation()
+
+    # Merge the sheets on PPNO & Award Year
+    m1 = pd.merge(
+        allocation,
+        project,
+        how=merge_type,
+        left_on=["allocation_ppno", "allocation_award_year"],
+        right_on=["project_ppno", "project_award_year"],
+        indicator=True,
+    )
+
+    return m1
