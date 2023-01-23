@@ -599,6 +599,7 @@ class RtFilterMapper:
              >> summarize(median_corridor_delay_seconds = _.corridor_delay_seconds.median())
              >> summarize(sum_of_medians_minutes = _.median_corridor_delay_seconds.sum() / 60)
             ).sum_of_medians_minutes.iloc[0]
+        schedule_metric = int(round(schedule_metric))
         
         self.stop_delay_view = self.stop_delay_view >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
         self.corridor_trip_speeds = (self._filter(self.stop_delay_view)
@@ -621,6 +622,7 @@ class RtFilterMapper:
               >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
              )
         speed_metric = df.target_delay_seconds.sum() / 60
+        speed_metric = int(round(speed_metric))
         self.corridor['schedule_metric_minutes'] = schedule_metric
         self.corridor['speed_metric_minutes'] = speed_metric
         self.corridor['routes'] = self.filter['route_names'] if self.filter['route_names'] else 'All'
