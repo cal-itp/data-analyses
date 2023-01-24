@@ -22,8 +22,8 @@ def subset_hqta() -> gpd.GeoDataFrame:
     hqta = hqta[~hqta.hqta_type.isin(exclude_me)]
 
     hqta_cols = [
-        'calitp_itp_id_primary', 'agency_name_primary', 'hqta_type',
-        'calitp_itp_id_secondary', 'agency_name_secondary'
+        'agency_name_primary', 'hqta_type',
+        'agency_name_secondary'
     ]
     
     hqta2 = hqta.dissolve(by=hqta_cols).reset_index()
@@ -71,7 +71,9 @@ def fill_in_missing_district(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         how = "inner",
     )
     
-    df2 = pd.concat([non_missing_df, missing_df], axis=0, ignore_index=True)
+    df2 = pd.concat(
+        [non_missing_df, missing_df], 
+        axis=0, ignore_index=True)
     
     return df2
 
@@ -102,10 +104,8 @@ def layers_to_plot()-> (gpd.GeoDataFrame, gpd.GeoDataFrame):
     
     # Which HQTA corridors (polygon geom)
     hqta_cols = [
-        'calitp_itp_id_primary',
         'agency_name_primary', 
         'hqta_type', 
-        'calitp_itp_id_secondary',
         'agency_name_secondary'
     ]
 
@@ -117,6 +117,7 @@ def layers_to_plot()-> (gpd.GeoDataFrame, gpd.GeoDataFrame):
                        )
                 )
 
-    hqta_corr = gpd.GeoDataFrame(hqta_corr).to_crs(geography_utils.WGS84)
+    hqta_corr = gpd.GeoDataFrame(
+        hqta_corr).to_crs(geography_utils.WGS84)
         
     return facilities, hqta_corr
