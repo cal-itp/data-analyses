@@ -1,8 +1,8 @@
 # Run this in data-analyses
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 build_competitive_corridors:
-	#pip install -r portfolio/requirements.txt
-	#git rm portfolio/competitive_corridors/ -rf
+	pip install -r portfolio/requirements.txt
+	git rm portfolio/competitive_corridors/ -rf
 	#need git rm because otherwise, just local removal, but git change is untracked
 	python portfolio/portfolio.py clean competitive_corridors
 	python bus_service_increase/deploy_portfolio_yaml.py   
@@ -58,6 +58,6 @@ add_precommit:
 
 install_env:
 	cd ~/data-analyses/_shared_utils && make setup_env && cd ..
-	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	cd rt_delay/ && make setup_rt_analysis && cd ..    
+	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
+	#cd rt_delay/ && make setup_rt_analysis && cd ..    
 	#pip install -r portfolio/requirements.txt
