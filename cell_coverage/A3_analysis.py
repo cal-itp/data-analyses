@@ -18,9 +18,13 @@ from calitp.storage import get_fs
 fs = get_fs()
 import os
 
+# Times
 import datetime
 from loguru import logger
 
+# Charts
+from shared_utils import calitp_color_palette as cp
+import altair as alt
 """
 Overlay Routes against Provider Maps
 """
@@ -297,6 +301,69 @@ def final_merge(routes_gdf):
 
     return m2
 
+def count_values(df, columns_to_count:list):
+    """
+    Count # of values delinated by comma
+    in a list of columns. Input results into 
+    a new column
+    """
+    for c in columns_to_count:
+        # Create a new column for counted elements
+        df[f"number_of_{c}"] =  (df[c]
+        .apply(lambda x: len(x.split(","))) 
+        .astype("int64")
+        ) 
+    return df 
+
+def district_tagging_graph(row):
+    """
+    After applying the function above, if there are 
+    2+ districts counted, label as "Various Districts."
+    Else return original District
+    """
+    if row["number_of_District"] == 2:
+        return "Various Districts"
+    else:
+        return row["District"]
+
+def summarize_districts(df):
+    """
+    Summarize the total # of routes by median percent cell
+    coverage by district
+    """
+    summary = (
+        df.groupby(["District", "Binned"])
+        .agg({"Long Route Name": "count"})
+        .reset_index()
+        .rename(
+            columns={
+                "Long Route Name": "Total Routes",
+                "Binned": "Median Percent of Route with Cell Coverage",
+            }
+        )
+    )
+    
+    summary = count_values(summary, ["District"])
+    summary["District Simplified"] = summary.apply(lambda x: district_tagging_graph(x), axis=1)
+    return summary
+
+def summarize_operators(df):
+    """
+    Summarize the total # of routes by median percent cell
+    coverage by operators
+    """
+    operator = (
+    df.groupby(["Agency", "Binned"])
+    .agg({"Long Route Name": "nunique"})
+    .reset_index()
+    .rename(
+        columns={
+            "Binned": "Median Percent of Route with Cell Coverage",
+            "Long Route Name": "Total Routes",
+        }
+    ))
+    
+    return operator
 """
 Other Functions
 """
@@ -313,7 +380,67 @@ def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
     fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
     os.remove(f"./{FILE_NAME}.geojson")
- 
+
+# Preset to make chart 25% smaller than shared_utils
+# Since the webpage is kind of small
+chart_width = 600
+chart_height = 400
+
+def preset_chart_config(chart: alt.Chart) -> alt.Chart:
+    
+    chart = chart.properties(
+        width=chart_width,
+        height=chart_height
+    )
+    return chart
+
+def chart_with_dropdown(
+    df,
+    dropdown_list: list,
+    dropdown_field: str,
+    x_axis_chart1: str,
+    y_axis_chart1: str,
+    color_col1: str,
+    chart1_tooltip_cols: list,
+    chart_title: str,
+):
+    """A bar chart controlled by a dropdown filter.
+    Args:
+        df: the dataframe
+        dropdown_list(list): a list of all the values in the dropdown menu,
+        dropdown_field(str): column where the dropdown menu's values are drawn from,
+        x_axis_chart1(str): x axis value for chart 1 - encode as Q or N,
+        y_axis_chart1(str): y axis value for chart 1 - encode as Q or N,
+        color_col1(str): column to color the graphs for chart 1,
+        chart1_tooltip_cols(list): list of all the columns to populate the tooltip,
+        chart_title(str):chart title,
+    """
+    # Create drop down menu
+    input_dropdown = alt.binding_select(options=dropdown_list, name="Select ")
+
+    # The column tied to the drop down menu
+    selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
+
+    chart1 = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=x_axis_chart1,
+            y=(y_axis_chart1),
+            color=alt.Color(
+                color_col1, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+                , legend = None
+            ),
+            tooltip=chart1_tooltip_cols,
+        )
+        .properties(title=chart_title)
+        .add_selection(selection)
+        .transform_filter(selection)
+    )
+
+    chart1 = preset_chart_config(chart1)
+
+    return chart1
 """
 OLD
 """
