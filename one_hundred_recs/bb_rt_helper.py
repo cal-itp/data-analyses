@@ -51,12 +51,19 @@ def fm_from_bbutils(ct_dist, category, get_sorted = False,
         if itp_id in fm_dict.keys():
             fm = fm_dict[itp_id]
         else:
-            fm = rt_filter_map_plot.from_gcs(itp_id=itp_id, analysis_date=analysis_date)
+            try:
+                fm = rt_filter_map_plot.from_gcs(itp_id=itp_id, analysis_date=analysis_date)
+            except:
+                print(f"no filtermapper for {itp_id}")
+                continue
         rt_id_names = (fm.rt_trips
                  >> distinct(_.route_id, _.route_short_name)
                  >> inner_join(_, bbutil_gdf >> select(_.route_id), on = 'route_id')
                 )
-        fm.set_filter(route_names = rt_id_names.route_short_name)
+        try:
+            fm.set_filter(route_names = rt_id_names.route_short_name)
+        except:
+            print(f"no route filter on {itp_id}")
         fm_dict_new[itp_id] = fm
     print(fm_dict_new)
     return fm_dict_new
