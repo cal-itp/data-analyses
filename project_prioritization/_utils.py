@@ -6,7 +6,6 @@ import geopandas as gpd
 
 # Charts
 from shared_utils import calitp_color_palette as cp
-from shared_utils import altair_utils
 import altair as alt
 
 # Format
