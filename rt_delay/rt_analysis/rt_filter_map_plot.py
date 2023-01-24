@@ -92,14 +92,16 @@ class RtFilterMapper:
             shape_trips = (self.rt_trips >> filter(_.shape_id.isin(shape_ids))
                            >> distinct(_.route_short_name)
                           )
-            self.filter['route_names'] = list(shape_trips.route_short_name)
+            if not shape_trips.route_short_name.isnull().all():
+                self.filter['route_names'] = list(shape_trips.route_short_name)
             if len(shape_ids) == 1:
                 direction = (self.rt_trips >> filter(_.shape_id == shape_ids[0])).direction.iloc[0]
         if trip_ids:
             trips = (self.rt_trips >> filter(_.trip_id.isin(trip_ids))
                            >> distinct(_.route_short_name)
                           )
-            self.filter['route_names'] = list(trips.route_short_name)
+            if not trips.route_short_name.isnull().all():
+                self.filter['route_names'] = list(trips.route_short_name)
             if len(trip_ids) == 1:
                 direction = (self.rt_trips >> filter(_.trip_id == trip_ids[0])).direction.iloc[0]
         self.filter['direction_id'] = direction_id
