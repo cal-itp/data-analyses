@@ -1,0 +1,7 @@
+title: Real-Time Speeds by Segment
+directory: ./daskify_rt/
+readme: ./daskify_rt/README.md
+parts:
+- caption: Introduction
+- chapters:
+  - notebook: ./daskify_rt/ca_segment_speeds.ipynb

@@ -1,7 +1,7 @@
 # Book settings
 # Learn more at https://jupyterbook.org/customize/config.html
 
-title: {{ site.title }}
+title: Real-Time Speeds by Segment
 author: Cal-ITP
 copyright: "2022"
 #logo: calitp_logo_MAIN.png
@@ -26,7 +26,7 @@ launch_buttons:
 repository:
   url: https://github.com/cal-itp/data-analyses/  # Online location of your book
 #  path_to_book: docs  # Optional path to your book, relative to the repository root
-  path_to_book: {{ site.directory }}
+  path_to_book: daskify_rt
   branch: main  # Which branch of the repository should be used when creating links (optional)
 
 # Add GitHub buttons to your book

@@ -1,3 +1,0 @@
-{% for site in sites -%}
-/{{ site.name }}/* https://{{ site.name }}--cal-itp-data-analyses.netlify.app//:splat  200
-{% endfor %}

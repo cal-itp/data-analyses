@@ -11,6 +11,7 @@ import intake
 import pandas as pd
 
 from IPython.display import Markdown, HTML, display_html
+from typing import Union
 
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
@@ -85,7 +86,7 @@ def specific_point(y_col: str) -> alt.Chart:
     return chart
 
 
-def make_stripplot(df: pd.DataFrame | gpd.GeoDataFrame, 
+def make_stripplot(df: Union[pd.DataFrame, gpd.GeoDataFrame], 
                    y_col: str = "bus_multiplier", 
                    Y_MIN: int = 0, Y_MAX: int = 2) -> alt.Chart:
     # Instead of doing +25% travel time, just use set cut-offs because it's easier
@@ -205,7 +206,7 @@ def make_stripplot(df: pd.DataFrame | gpd.GeoDataFrame,
 # Add competitive route stats to display in report
 # Create these stats ahead of time
 # Subset later in the notebook by route_group
-def competitive_route_level_stats(df: pd.DataFrame | gpd.GeoDataFrame) -> pd.DataFrame:
+def competitive_route_level_stats(df: Union[pd.DataFrame, gpd.GeoDataFrame]) -> pd.DataFrame:
     # from make_stripplot_data, set this to hours 17-19
     pm_peak_hours = 3 
     
