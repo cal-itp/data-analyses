@@ -9,6 +9,7 @@ import pandas as pd
 import yaml
 
 from pathlib import Path
+from typing import Union
 from bus_service_utils import utils
 
 catalog = intake.open_catalog("./bus_service_increase/*.yml")
@@ -22,7 +23,7 @@ PORTFOLIO_SITE_YAML = Path("./portfolio/sites/competitive_corridors.yml")
 # Do a quick check and suppress operators that just show 1 route in each route_group
 # From UI/UX perspective, it's confusing to readers because they think it's an error that
 # more routes aren't showing up, rather than deliberately showing results that meet certain criteria
-def valid_operators(df: pd.DataFrame | gpd.GeoDataFrame) -> list:
+def valid_operators(df: Union[pd.DataFrame, gpd.GeoDataFrame]) -> list:
     t1 = df[df.pct_trips_competitive > PCT_COMPETITIVE_THRESHOLD]
     
     # Count unique routes that show up by operator-route_group

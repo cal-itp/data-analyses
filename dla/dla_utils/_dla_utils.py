@@ -16,7 +16,6 @@ import altair_saver
 from IPython.display import Markdown, HTML, display_html, display
 from IPython.core.display import display
 
-from shared_utils import altair_utils
 from shared_utils import geography_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
@@ -227,7 +226,7 @@ def project_cat(df, i, district):
             y=alt.Y("Agency"),
             color=alt.Color(
                 "Categories:N",
-                scale=alt.Scale(range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+                scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
             ),
             row="Categories:N",
         )
@@ -343,7 +342,7 @@ def basic_bar_chart(df, x_col, y_col, color_col, subset):
                  y=alt.Y(y_col, title=labeling(y_col)),
                  color = (alt.Color(color_col,
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+                                      range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
                                       legend=alt.Legend(title=(labeling(color_col)), symbolLimit=10)
                                   )),
                  tooltip=[alt.Tooltip(x_col, title=labeling(x_col)),
@@ -369,7 +368,7 @@ def basic_scatter_chart(df, x_col, y_col, color_col, subset, chart_title=""):
                  y=alt.Y(y_col, title=labeling(y_col)),
                  color = alt.Color(color_col,
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_SEQUENTIAL_COLORS),
+                                      range=cp.CALITP_SEQUENTIAL_COLORS),
                                       legend=alt.Legend(title=(labeling(color_col)))
                                   ))
              .properties( 

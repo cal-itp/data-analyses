@@ -8,5 +8,5 @@ setup(
     author="Cal-ITP",
     license="Apache",
     include_package_data=True,
-    package_dir={"_dla_utils": "dla_utils"},
+    package_dir={"dla_utils": "dla_utils"},
 )
