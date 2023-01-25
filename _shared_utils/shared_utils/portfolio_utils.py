@@ -10,6 +10,8 @@ route name, Caltrans district the same way.
 need to import different pandas to add type hint for styler object
 
 """
+import dask.dataframe as dd
+import dask_geopandas as dg
 import pandas as pd
 import pandas.io.formats.style  # for type hint: https://github.com/pandas-dev/pandas/issues/24884
 from calitp.tables import tbls
@@ -87,15 +89,24 @@ def add_route_name(df: pd.DataFrame) -> pd.DataFrame:
     """
     route_cols = ["route_id", "route_short_name", "route_long_name", "route_desc"]
 
-    if route_cols not in list(df.columns):
+    if not (set(route_cols).issubset(set(list(df.columns)))):
         raise ValueError(f"Input a df that contains {route_cols}")
 
-    df = df.assign(route_name_used=df.apply(lambda x: rt_utils.which_desc(x), axis=1))
+    if isinstance(df, pd.DataFrame):
+        ddf = dd.from_pandas(df, npartitions=2)
+    elif isinstance(df, gpd.GeoDataFrame):
+        ddf = dg.from_geopandas(df, npartitions=2)
+
+    ddf = ddf.assign(
+        route_name_used=ddf.apply(
+            lambda x: rt_utils.which_desc(x), axis=1, meta=("route_name_used", "str")
+        )
+    )
+
+    df = ddf.compute()
 
     # If route names show up with leading comma
-    df = df.assign(
-        route_name_used=route_names.route_name_used.str.lstrip(",").str.strip()
-    )
+    df = df.assign(route_name_used=df.route_name_used.str.lstrip(",").str.strip())
 
     return df
 
