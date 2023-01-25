@@ -4,4 +4,4 @@ readme: ./daskify_rt/README.md
 parts:
 - caption: Introduction
 - chapters:
-  - notebook: ./daskify_rt/ca_speeds_by_segment.ipynb
+  - notebook: ./daskify_rt/ca_segment_speeds.ipynb
