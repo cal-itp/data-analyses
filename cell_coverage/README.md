@@ -15,7 +15,7 @@ The AT&T, Verizon, and T-Mobile files is downloaded [here](https://us-fcc.app.bo
 3. The initial approach using `overlay` on `unique_routes` and the `provider maps` clipped to California yielded inaccurate results. For example, routes running in highly urbanized areas such as the middle of Los Angeles County and San Francisco's Golden Gate Bridge showed up as having poor cellular coverage. Additionally, the original provider maps were large, spanning hundreds of rows.  Thus, the provider maps were further manipulated in several steps, looping over by Caltrans Districts. 
     * Step 1 `A1.sjoin_gdf`: `sjoin` the provider map against the Caltrans districts shapefile. 
     * Step 2 `A1.clip_sjoin_gdf`: the results from the `sjoin` are scraggly and includes other portions of neighboring districts. Use `clip` to clean up the edges. 
-    * Step 3 `A1.dissolve_clipped_gdf`: provider maps are still large and unwieldy. `dissolve` the results above. 
+    * Step 3 `A1.dissolve_clipped_gdf`: provider maps are still large. `dissolve` the results above. 
     * Step 4 `A1.find_difference_gdf`: the maps originally show areas <b>with</b> coverage. However, as explained above, this led to wrong results. The other approach is to use `difference` to depict areas <b>without</b> coverage. 
     * Step 5 `A1.stack_all_maps`: after running step 4, the provider maps are scattered among 12 files. `Concat` them to create a map for all of California. 
 
