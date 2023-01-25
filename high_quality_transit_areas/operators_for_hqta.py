@@ -66,6 +66,12 @@ def scheduled_operators_for_hqta(analysis_date: str):
     
 def name_feed_key_dict_to_json(operators_df: pd.DataFrame,
                                file: str):
+    # Exclude Amtrak from making it into JSON 
+    # (we want the data downloaded, but not continue on in the analysis)
+    exclude = ["Amtrak Schedule"]
+    operators_df = operators_df[~operators_df.name.isin(exclude)
+                               ].reset_index(drop=True)
+    
     # Put name as the key, in case feed_key for operator changes
     # over time, we still have a way to catalog this
     name_feed_key_dict = dict(zip(operators_df.name, operators_df.feed_key))
