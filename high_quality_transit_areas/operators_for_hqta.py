@@ -47,12 +47,9 @@ def scheduled_operators_for_hqta(analysis_date: str):
             feed_option = "use_subfeeds"
         )
 
-        exclude = ["Amtrak Schedule"]
-
         keep_cols = ["feed_key", "name"]
 
-        operators_to_include = all_operators[
-            ~all_operators.name.isin(exclude)][keep_cols]
+        operators_to_include = all_operators[keep_cols]
     
         # There shouldn't be any duplicates by name, since we got rid 
         # of precursor feeds. But, just in case, don't allow dup names.
@@ -66,38 +63,7 @@ def scheduled_operators_for_hqta(analysis_date: str):
 
     return operators_to_include
 
-
-def feed_keys_ran(analysis_date: str, 
-                  gcs_folder: str = COMPILED_CACHED_VIEWS) -> list:
-    """
-    Find the feed_keys that already have cached files in GCS
-    """
-    all_files = fs.ls(gcs_folder)
-    files_for_date = [f for f in all_files if str(analysis_date) in all_files]
     
-    def feeds_from_dataset(
-        dataset: Literal["trips", "routelines", "stops"], 
-        *args, **kwargs
-    ) -> list:
-        # Can use pd because we only keep feed_key...so there's no geometry col
-        df = pd.read_parquet(
-            f"{gcs_folder}{dataset}_{analysis_date}.parquet", 
-            columns = ["feed_key"]
-        ).drop_duplicates()
-        
-        return df.feed_key.tolist()
-    
-    trip_feeds = feeds_from_dataset("trips")
-    shape_feeds = feeds_from_dataset("routelines")
-    stop_feeds = feeds_from_dataset("stops")
-    
-    # The set of all the feeds are the feeds in common
-    # BUG / TODO: shape_feeds has 1 less feed...missing Metrolink
-    already_ran = list(set(trip_feeds) & set(shape_feeds) & set(stop_feeds))
-    
-    return already_ran
-    
-
 def name_feed_key_dict_to_json(operators_df: pd.DataFrame,
                                file: str):
     # Put name as the key, in case feed_key for operator changes
