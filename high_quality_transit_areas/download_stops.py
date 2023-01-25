@@ -14,10 +14,7 @@ import operators_for_hqta
 from shared_utils import gtfs_utils_v2, geography_utils, utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
-if __name__ == "__main__":
-    #from dask.distributed import Client
-    
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+if __name__ == "__main__":    
     
     logger.add("./logs/download_data.log", retention="3 months")
     logger.add(sys.stderr, 
