@@ -35,7 +35,7 @@ def organization_cleaning(df, column_wanted: str):
     return df
 
 """
-Unique Routes
+Get Unique Routes
 """
 # traffic_ops/export/ca_transit_routes_[date].parquet
 routes_file =  "gs://calitp-analytics-data/data-analyses/traffic_ops/export/ca_transit_routes_2022-09-14.parquet"
@@ -116,7 +116,7 @@ def clip_route_district(district_df):
 def complete_clip_route_district() -> dg.GeoDataFrame:
     """
     For each district, find which routes fall 100% neatly
-    in an district and which cross district boundaries. 
+    in a district and which cross districts. 
     Stack the seperated district results back together.
     """
     # Load districts
@@ -166,7 +166,7 @@ def aggregate_routes(gdf):
 
 def find_multi_district_routes():
     """
-    Find and filter which routes are in one district versus 
+    Find which routes are in one district versus 
     those that run in various districts. Returns
     a df with multi-district routes, a df with one-district
     routes, and the original clipped df

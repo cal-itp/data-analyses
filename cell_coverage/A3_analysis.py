@@ -2,12 +2,12 @@ import A1_provider_prep
 import A2_other
 
 from shared_utils import geography_utils
-from shared_utils import utils
 import geopandas as gpd
-import dask.dataframe as dd
-import dask_geopandas as dg
-import pandas as pd
 import shapely.wkt
+
+import dask.dataframe as dd
+import pandas as pd
+from shared_utils import utils
 
 # Open zip files 
 import fsspec
@@ -25,13 +25,14 @@ from loguru import logger
 # Charts
 from shared_utils import calitp_color_palette as cp
 import altair as alt
+
 """
 Overlay Routes against Provider Maps
 """
 def routes_1_dist_comparison(routes_gdf, provider_gdf, suffix:str):
     """
     Overlay routes that run in only one district against 
-    the provider map that has no coverage to find %
+    the provider map to find %
     of route that run in areas without coverage. 
     
     routes_gdf: routes that run in 1 district.
@@ -167,9 +168,7 @@ subset_cols = ["agency", 'itp_id', 'route_id', "long_route_name", "District", "m
 def merge_all_providers():
     """
     Merge all the overlaid unique routes among all 
-    3 providers into one large dataframe. Use an inner
-    merge, since those are routes that
-    touch a no data zone for every provider.
+    3 providers into one large dataframe.
     """
     # Read files
     verizon_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_verizon_overlaid_all_routes.parquet")
@@ -260,7 +259,7 @@ def merge_ntd(gdf):
     
     # To get an estimate of buses that run in a low data zone.
     # Multiply the agency's total buses by the % of its total trips that 
-    # run a "low data coverage route." 
+    # run in a "low data coverage route." 
     m1["estimate_of_buses_in_low_cell_zones"] = (m1.total_buses * m1.percentage_of_trips_w_low_cell_service).astype('int64')
     
     # Replace estimate of buses from 0 to 1.
@@ -298,7 +297,6 @@ def final_merge(routes_gdf):
     m2 = m2.rename(columns =  {"Geometry X":"Geometry"})
     m2 = m2.set_geometry("Geometry")
     
-
     return m2
 
 def count_values(df, columns_to_count:list):
@@ -364,6 +362,7 @@ def summarize_operators(df):
     ))
     
     return operator
+
 """
 Other Functions
 """
@@ -381,10 +380,21 @@ def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
     os.remove(f"./{FILE_NAME}.geojson")
 
-# Preset to make chart 25% smaller than shared_utils
-# Since the webpage is kind of small
-chart_width = 600
-chart_height = 400
+subset_for_results = [
+    "Agency",
+    "Long Route Name",
+    "District",
+    "Median Percent With Coverage",
+    "Median Percent No Coverage",
+    "Total Trips By Route",
+    "Total Buses",
+    "Estimate Of Buses In Low Cell Zones",
+]
+"""
+Chart Functions
+"""
+chart_width = 450
+chart_height = 250
 
 def preset_chart_config(chart: alt.Chart) -> alt.Chart:
     
@@ -441,6 +451,7 @@ def chart_with_dropdown(
     chart1 = preset_chart_config(chart1)
 
     return chart1
+
 """
 OLD
 """
@@ -472,11 +483,5 @@ def overlay_single_routes(
         except:
             pass
             print(f"{i}")
-
-    #utils.geoparquet_gcs_export(
-    #    all_intersected_routes,
-     #   utilities.GCS_FILE_PATH,
-      #  f"{provider_name}_overlaid_with_unique_routes",
-    #)
 
     return all_intersected_routes
