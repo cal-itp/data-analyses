@@ -14,7 +14,6 @@ ANALYSIS_DATE = rt_utils.format_date(rt_dates.DATES["jan2023"])
 GCS = "gs://calitp-analytics-data/data-analyses/"
 TRAFFIC_OPS_GCS = f"{GCS}traffic_ops/"
 COMPILED_CACHED_GCS = f"{GCS}rt_delay/compiled_cached_views/"
-DATA_PATH = "./data/"
     
 def import_trips(analysis_date: str) -> pd.DataFrame:
     keep_cols = ["feed_key", "name", 
@@ -28,10 +27,7 @@ def import_trips(analysis_date: str) -> pd.DataFrame:
         columns = keep_cols
     )
     
-    # Clean organization name
-    trips2 = portfolio_utils.clean_organization_name(trips)
-    
-    return trips2
+    return trips
     
     
 def import_shapes(analysis_date: str) -> gpd.GeoDataFrame:
@@ -73,6 +69,19 @@ def import_stop_times(analysis_date: str) -> pd.DataFrame:
     
     return stop_times
 
+    
+def standardize_operator_info_for_exports(df: pd.DataFrame) -> pd.DataFrame:
+    
+    # Add a decoded version for base64_url
+    df2 = portfolio_utils.add_agency_identifiers(df)
+    
+    # Clean organization name
+    df3 = (portfolio_utils.clean_organization_name(df2) 
+           .rename(columns = RENAME_COLS)
+          )
+    
+    return df3
+    
     
 def export_to_subfolder(file_name: str, analysis_date: str):
     """
