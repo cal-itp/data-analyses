@@ -28,19 +28,27 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     )
     
     drop_cols = ["route_short_name", "route_long_name", 
-                 "route_desc", "feed_key"
+                 "route_desc", "feed_key", "trip_id"
                 ]
     
     routes_assembled = (portfolio_utils.add_route_name(df)
-                       .drop(columns = drop_cols)
-                       .sort_values(["name", "route_id"])
-                       .drop_duplicates(subset=["name", 
-                                                "route_id", "shape_id"])
+                        .drop(columns = drop_cols)
+                        .sort_values(["name", "route_id"])
+                       .drop_duplicates(subset=[
+                           "name", "route_id", "shape_id"])
                        .reset_index(drop=True)
                       )
     
+    
+    # Change column order
+    col_order = [
+        'agency', 'route_id', 'route_type', 'route_name', 
+        'shape_id', 'n_trips', 
+        'feed_url', 'geometry'
+    ]
+    
     routes_assembled2 = prep_data.standardize_operator_info_for_exports(
-        routes_assembled)
+        routes_assembled)[col_order].reindex(columns = col_order)               
     
     return routes_assembled2
 

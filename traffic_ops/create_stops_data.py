@@ -52,8 +52,15 @@ def attach_route_info_to_stops(
                        .reset_index(drop=True)
                       )
     
+    # Change column order
+    col_order = [
+        'agency', 'route_id', 'route_type', 
+        'stop_id', 'stop_name', 
+        'feed_url', 'geometry'
+    ]
+    
     stops_assembled2 = prep_data.standardize_operator_info_for_exports(
-        stops_assembled)
+        stops_assembled)[col_order].reindex(columns = col_order)               
     
     return stops_assembled2
 
