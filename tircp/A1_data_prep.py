@@ -245,6 +245,10 @@ def clean_allocation():
     df["expended_amount"] = (
         df["expended_amount"].replace({"Deallocation": 0}).astype("int64")
     )
+    
+    # Change negative numbers to be floats
+    df["allocation_amount"] = (
+        df["allocation_amount"].replace(',','').astype(float))
 
     # Fill in NA based on data type
     df = df.fillna(df.dtypes.replace({"float64": 0.0, "object": "None"}))
