@@ -37,10 +37,12 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
                        .drop_duplicates(subset=["name", 
                                                 "route_id", "shape_id"])
                        .reset_index(drop=True)
-                       .rename(columns = prep_data.RENAME_COLS)
                       )
     
-    return routes_assembled
+    routes_assembled2 = prep_data.standardize_operator_info_for_exports(
+        routes_assembled)
+    
+    return routes_assembled2
 
 
 if __name__ == "__main__":

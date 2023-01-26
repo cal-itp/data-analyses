@@ -52,7 +52,10 @@ def attach_route_info_to_stops(
                        .reset_index(drop=True)
                       )
     
-    return stops_assembled
+    stops_assembled2 = prep_data.standardize_operator_info_for_exports(
+        stops_assembled)
+    
+    return stops_assembled2
 
 
 def create_stops_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
