@@ -395,7 +395,7 @@ class RtFilterMapper:
         centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
         name = self.calitp_agency_name
 
-        display_cols = ['_20p_mph', 'time_formatted', 'miles_from_last',
+        display_cols = [how_speed_col[how], 'time_formatted', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
                        'stop_sequence']
         display_aliases = ['Speed (miles per hour)', 'Travel time', 'Segment distance (miles)',
@@ -405,11 +405,11 @@ class RtFilterMapper:
         if no_title:
             title = ''
         else:
-            title = f"{name} 20th Percentile Vehicle Speeds Between Stops{self.filter_formatted}"
+            title = f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}"
         colorscale.caption = "Speed (miles per hour)"
         style_dict = {'opacity': 0, 'fillOpacity': 0.8}
 
-        g = gdf.explore(column='_20p_mph',
+        g = gdf.explore(column=how_speed_col[how],
                         cmap = colorscale,
                         tiles = 'CartoDB positron',
                         style_kwds = style_dict,
@@ -627,7 +627,7 @@ class RtFilterMapper:
         speed_metric = int(round(speed_metric))
         self.corridor['schedule_metric_minutes'] = schedule_metric
         self.corridor['speed_metric_minutes'] = speed_metric
-        self.corridor['routes'] = self.filter['route_names'] if self.filter['route_names'] else 'All'
+        self.corridor['routes'] = self.filter['route_names'] if self.filter and self.filter['route_names'] else 'All'
         self.corridor['filter'] = self.filter_formatted
         return {'schedule_metric_minutes': schedule_metric,
                'speed_metric_minutes': speed_metric}
