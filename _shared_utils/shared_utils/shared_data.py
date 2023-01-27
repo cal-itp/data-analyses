@@ -4,11 +4,17 @@ One-off functions, run once, save datasets for shared use.
 import geopandas as gpd
 import pandas as pd
 
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 
-# Function to set the county centroids and zoom levels
-# used in folium and ipyleaflet maps
+
 def make_county_centroids():
-    URL = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
+    """
+    Find a county's centroids from county polygons.
+    """
+    URL = (
+        "https://opendata.arcgis.com/datasets/"
+        "8713ced9b78a4abb97dc130a691a8695_0.geojson"
+    )
 
     gdf = gpd.read_file(URL).to_crs(geography_utils.CA_StatePlane)
     gdf.columns = gdf.columns.str.lower()
@@ -46,11 +52,35 @@ def make_county_centroids():
     print("County centroids dataset created")
 
     # Save as parquet, because lat/lon held in list, not point geometry anymore
-    gdf2.to_parquet(
-        "gs://calitp-analytics-data/data-analyses/ca_county_centroids.parquet"
-    )
+    gdf2.to_parquet(f"{GCS_FILE_PATH}ca_county_centroids.parquet")
 
     print("County centroids exported to GCS")
+
+
+def make_clean_state_highway_network():
+    """
+    Create State Highway Network dataset.
+    """
+    HIGHWAY_URL = (
+        "https://opendata.arcgis.com/datasets/"
+        "77f2d7ba94e040a78bfbe36feb6279da_0.geojson"
+    )
+    gdf = gpd.read_file(HIGHWAY_URL)
+
+    keep_cols = ["Route", "County", "District", "RouteType", "Direction", "geometry"]
+
+    gdf = gdf[keep_cols]
+    print(f"# rows before dissolve: {len(gdf)}")
+
+    # See if we can dissolve further - use all cols except geometry
+    # Should we dissolve further and use even longer lines?
+    dissolve_cols = [c for c in list(gdf.columns) if c != "geometry"]
+
+    gdf2 = gdf.dissolve(by=dissolve_cols).reset_index()
+    print(f"# rows after dissolve: {len(gdf2)}")
+
+    # Export to GCS
+    utils.geoparquet_gcs_export(gdf2, GCS_FILE_PATH, "state_highway_network")
 
 
 # Run functions to create these datasets...store in GCS
@@ -58,5 +88,8 @@ if __name__ == "__main__":
     # Don't use from shared_utils import geography_utils
     # Those have other dependencies...like map_utils imports from geography_utils
     import geography_utils
+    import utils
 
     make_county_centroids()
+
+    make_clean_state_highway_network()
