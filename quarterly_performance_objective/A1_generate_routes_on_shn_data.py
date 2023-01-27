@@ -9,7 +9,7 @@ import sys
 from loguru import logger
 from typing import Literal
 
-from bus_service_utils import create_parallel_corridors_v2
+from bus_service_utils import create_parallel_corridors
 from shared_utils import geography_utils
 from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS, COMPILED_CACHED_GCS
 
@@ -26,12 +26,15 @@ def merge_routelines_with_trips(
     trips = pd.read_parquet(
         f"{COMPILED_CACHED_GCS}trips_{selected_date}.parquet")
 
+    cols_to_keep = ["route_id", "shape_id", "geometry"]
+    
     if warehouse_version == "v1":
         operator_cols = ["calitp_itp_id"]
+        keep_cols = operator_cols + cols_to_keep
+        
     elif warehouse_version == "v2":
-        operator_cols = ["feed_key", "name"]
-    
-    keep_cols = operator_cols + ["route_id", "shape_id", "geometry"]
+        operator_cols = ["feed_key"]
+        keep_cols = operator_cols + ["name"] + cols_to_keep
     
     df = (pd.merge(
             shapes,
@@ -55,12 +58,12 @@ if __name__ == "__main__":
     logger.info(f"Analysis date: {ANALYSIS_DATE}")
     start = datetime.datetime.now()
     
-    VERSION = "v1"
+    VERSION = "v2"
     shapes_with_route_info = merge_routelines_with_trips(
         ANALYSIS_DATE, warehouse_version = VERSION)
     
     # 50 ft buffers, get routes that are on SHN
-    create_parallel_corridors_v2.make_analysis_data(
+    create_parallel_corridors.make_analysis_data(
         hwy_buffer_feet = 50, 
         transit_routes_df = shapes_with_route_info,
         pct_route_threshold = 0.2, 
@@ -74,7 +77,7 @@ if __name__ == "__main__":
     logger.info(f"routes on SHN created: {time1 - start}")
 
     # Grab other routes where at least 35% of route is within 0.5 mile of SHN
-    create_parallel_corridors_v2.make_analysis_data(
+    create_parallel_corridors.make_analysis_data(
         hwy_buffer_feet = geography_utils.FEET_PER_MI * 0.5, 
         transit_routes_df = shapes_with_route_info,
         pct_route_threshold = 0.2,

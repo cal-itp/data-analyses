@@ -6,6 +6,11 @@ sources:
     description: CA county polygons
     args:
       urlpath: https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson
+  caltrans_districts:
+    driver: geojson
+    description: Caltrans district polygons
+    args:
+      urlpath: https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHboundary/District_Tiger_Lines/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
   ca_county_centroids:
     driver: parquet
     description: CA county centroids
