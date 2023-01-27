@@ -29,6 +29,8 @@ import altair as alt
 """
 Overlay Routes against Provider Maps
 """
+suffix_cols = ['percentage_of_route_wo_coverage', 'original_route_length', 'no_coverage_route_length']
+
 def routes_1_dist_comparison(routes_gdf, provider_gdf, suffix:str):
     """
     Overlay routes that run in only one district against 
@@ -60,10 +62,10 @@ def routes_1_dist_comparison(routes_gdf, provider_gdf, suffix:str):
          aggfunc={
          "no_coverage_route_length": "sum", "original_route_length":"max"}).reset_index()
     
-    # Find percentage of route enters a no coverage zone. 
-    overlay_df["percentage_of_route_wo_coverage"] = ((overlay_df["no_coverage_route_length"] /   overlay_df["original_route_length"])* 100).astype('int64')
+    # Find percentage of route that enters a no coverage zone. 
+    overlay_df["percentage_of_route_wo_coverage"] = ((overlay_df["no_coverage_route_length"]/overlay_df["original_route_length"])* 100).astype('int64')
     
-    overlay_df = overlay_df.rename(columns={c: c+ suffix for c in overlay_df.columns if c in ['percentage_of_route_wo_coverage', 'original_route_length', 'no_coverage_route_length']})
+    overlay_df = overlay_df.rename(columns={c: c+ suffix for c in overlay_df.columns if c in suffix_cols})
     
     end = datetime.datetime.now()
         
@@ -86,9 +88,11 @@ def summarize_rows(df, col_to_group: list, col_to_summarize: str):
     )
     return df_col_to_summarize
 
+
 def multi_dist_route_comparison(routes_gdf, provider_gdf, suffix:str):
     """
-    Overlay routes that run in 1+ district against 
+    Overlay provider maps & routes 
+    that run in 1+ district against 
     the provider map that has no coverage. 
     
     routes_gdf: routes that run in 1+ districts.
@@ -103,7 +107,7 @@ def multi_dist_route_comparison(routes_gdf, provider_gdf, suffix:str):
         routes_gdf, provider_gdf, how="intersection", keep_geom_type=False
     )
     
-    # Get length of new geometry after overlaid
+    # Get length of new geometry after overlay
     multi_route = multi_route.assign(
         no_coverage_route_length=multi_route.geometry.to_crs(geography_utils.CA_StatePlane).length
     )
@@ -121,7 +125,7 @@ def multi_dist_route_comparison(routes_gdf, provider_gdf, suffix:str):
     merge1["percentage_of_route_wo_coverage"] = ((merge1["no_coverage_route_length"] / merge1["original_route_length"])* 100).astype('int64')
     
     # Add a suffix. 
-    merge1 = merge1.rename(columns={c: c+ suffix for c in merge1.columns if c in ['percentage_of_route_wo_coverage', 'original_route_length', 'no_coverage_route_length']})
+    merge1 = merge1.rename(columns={c: c+ suffix for c in merge1.columns if c in suffix_cols})
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
@@ -163,8 +167,15 @@ def stack_all_routes(provider_gdf, provider: str):
         
     return stacked_df
 
-subset_cols = ["agency", 'itp_id', 'route_id', "long_route_name", "District", "median_percent_with_coverage", "median_percent_no_coverage", "geometry_x","percentage_of_route_wo_coverage_att", "percentage_of_route_wo_coverage_verizon",  "percentage_of_route_wo_coverage_tmobile"]
+subset_cols = ["agency", 'itp_id', 'route_id', "long_route_name", "District",
+               "median_percent_with_coverage", "median_percent_no_coverage",
+               "geometry_x","percentage_of_route_wo_coverage_att", 
+               "percentage_of_route_wo_coverage_verizon", 
+               "percentage_of_route_wo_coverage_tmobile"]
 
+percentage_cols = ["percentage_of_route_wo_coverage_att", 
+                "percentage_of_route_wo_coverage_verizon", 
+                     "percentage_of_route_wo_coverage_tmobile"]
 def merge_all_providers():
     """
     Merge all the overlaid unique routes among all 
@@ -184,9 +195,6 @@ def merge_all_providers():
     
     # Grab percentages to calculate median percentage
     # w/o coverage across ATT, Tmobile, and Verizon
-    percentage_cols = ["percentage_of_route_wo_coverage_att", "percentage_of_route_wo_coverage_verizon",  "percentage_of_route_wo_coverage_tmobile"]
-    
-    # Fill NA
     m1[percentage_cols] = m1[percentage_cols].fillna(0)
     
     m1["median_percent_no_coverage"] = m1[percentage_cols].median(axis=1)
@@ -280,24 +288,28 @@ def final_merge(routes_gdf):
     # Merge with NTD df to get # of buses
     m2 = merge_ntd(m1)
     
+    # Merge with GTFS to get GTFS status.
+    gtfs = A2_other.load_gtfs() 
+    m3 = m2.merge(gtfs, how="left", on=["itp_id"])
+    
     # Drop columns
     cols_to_drop = ['itp_id', 'route_id', '_merge', 'calitp_itp_id']
-    m2 = m2.drop(columns = cols_to_drop)
+    m3 = m3.drop(columns = cols_to_drop)
     
     # Clean up columns
-    m2.columns = m2.columns.str.replace("_", " ").str.strip().str.title()
+    m3.columns = m3.columns.str.replace("_", " ").str.strip().str.title()
     
     # Clean up % values
-    m2["Percentage Of Trips W Low Cell Service"] = (m2["Percentage Of Trips W Low Cell Service"] * 100)
+    m3["Percentage Of Trips W Low Cell Service"] = (m3["Percentage Of Trips W Low Cell Service"] * 100)
     
     # Remove districts that repeat a few times 
-    m2["District"] = (m2["District"].apply(lambda x: ", ".join(set([y.strip() for y in x.split(",")]))).str.strip())
+    m3["District"] = (m3["District"].apply(lambda x: ", ".join(set([y.strip() for y in x.split(",")]))).str.strip())
     
     # Ensure this remains a GDF
-    m2 = m2.rename(columns =  {"Geometry X":"Geometry"})
-    m2 = m2.set_geometry("Geometry")
+    m3 = m3.rename(columns =  {"Geometry X":"Geometry"})
+    m3 = m3.set_geometry("Geometry")
     
-    return m2
+    return m3
 
 def count_values(df, columns_to_count:list):
     """
@@ -327,7 +339,7 @@ def district_tagging_graph(row):
 def summarize_districts(df):
     """
     Summarize the total # of routes by median percent cell
-    coverage by district
+    coverage by districtb
     """
     summary = (
         df.groupby(["District", "Binned"])
@@ -389,6 +401,7 @@ subset_for_results = [
     "Total Trips By Route",
     "Total Buses",
     "Estimate Of Buses In Low Cell Zones",
+    "Gtfs Status"
 ]
 """
 Chart Functions
