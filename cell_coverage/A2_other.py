@@ -71,7 +71,6 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
     
     return unique_route
 
-    
 # Open routes file and find unique routes
 def load_unique_routes_df():
     
@@ -306,3 +305,26 @@ def ntd_vehicles():
     df = df.loc[df['total_buses'] !=0]
     
     return df
+
+"""
+Add GTFS
+"""
+# Downloaded from Airtable "Organizations"
+# https://airtable.com/appPnJWrQ7ui4UmIl/tblFsd8D5oFRqep8Z/viwVBVSd0ZhYu8Ewm?blocks=hide
+def load_gtfs(): 
+ 
+    subset_gtfs = ["itp_id", "name", "gtfs_static_status", "gtfs_realtime_status"]
+    
+    df = to_snakecase(
+    pd.read_csv(f"{A1_provider_prep.GCS_FILE_PATH}airtable_organizations.csv"))[subset_gtfs]
+    
+    df.itp_id = df.itp_id.fillna(0).astype(int)
+    
+    df.name = df.name.replace(
+    {"Eastern Sierra Transit Authority": "Mammoth Lakes Transit System"})
+    
+    # Consolidate GTFS into one col
+    df["gtfs_status"] = df.gtfs_static_status + '/' + df.gtfs_realtime_status
+    
+    df = df.drop(columns = ["gtfs_static_status", "gtfs_realtime_status"])
+    return df 
