@@ -23,7 +23,7 @@ DATA_PATH = "./data/"
 #--------------------------------------------------------#
 def process_transit_routes(
     df: gpd.GeoDataFrame, 
-    warehouse_version: Literal["v1", "v2"] = "v2"
+    warehouse_version: Literal["v1", "v2"]
 ) -> gpd.GeoDataFrame:
     """
     At operator level, pick the route with the longest length 
@@ -52,6 +52,7 @@ def process_transit_routes(
     
     # Then count how many unique route_ids appear for operator (that's denominator)
     route_cols = ["route_id", "total_routes", "route_length", "geometry"]
+    
     if warehouse_version == "v2":
         keep_cols = operator_cols + ["name"] + route_cols
     else:
