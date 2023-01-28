@@ -5,11 +5,8 @@ from . import (
     create_parallel_corridors,
     gtfs_build,
     #publish_single_report,
-    report_utils,
     utils,
 )
-
-__version__ = "0.1.1"
 
 __all__ = [
     "better_bus_utils",
@@ -18,6 +15,5 @@ __all__ = [
     "create_parallel_corridors",
     "gtfs_build", 
     #"publish_single_report",
-    "report_utils",
     "utils",
 ]

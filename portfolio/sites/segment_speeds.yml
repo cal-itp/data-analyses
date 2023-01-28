@@ -1,7 +1,31 @@
 title: Real-Time Speeds by Segment
 directory: ./daskify_rt/
 readme: ./daskify_rt/README.md
+notebook: ./daskify_rt/ca_segment_speeds.ipynb
 parts:
 - caption: Introduction
 - chapters:
-  - notebook: ./daskify_rt/ca_segment_speeds.ipynb
+  - params:
+      district: 1
+  - params:
+      district: 2
+  - params:
+      district: 3
+  - params:
+      district: 4
+  - params:
+      district: 5
+  - params:
+      district: 6
+  - params:
+      district: 7
+  - params:
+      district: 8
+  - params:
+      district: 9
+  - params:
+      district: 10
+  - params:
+      district: 11
+  - params:
+      district: 12

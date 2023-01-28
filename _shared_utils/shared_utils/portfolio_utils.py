@@ -10,11 +10,15 @@ route name, Caltrans district the same way.
 need to import different pandas to add type hint for styler object
 
 """
+import base64
+
+import dask.dataframe as dd
+import dask_geopandas as dg
 import pandas as pd
 import pandas.io.formats.style  # for type hint: https://github.com/pandas-dev/pandas/issues/24884
 from calitp.tables import tbls
 from IPython.display import HTML
-from shared_utils import rt_utils
+from shared_utils import gtfs_utils_v2, rt_utils
 from siuba import *
 
 
@@ -34,6 +38,54 @@ def clean_organization_name(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     return df
+
+
+def decode_base64_url(row):
+    """
+    Provide decoded version of URL as ASCII.
+    WeHo gets an incorrect padding, but urlsafe_b64decode works.
+    Just in case, return uri truncated.
+    """
+    try:
+        decoded = base64.urlsafe_b64decode(row.base64_url).decode("ascii")
+    except base64.binascii.Error:
+        decoded = row.uri.split("?")[0]
+
+    return decoded
+
+
+def add_agency_identifiers(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Find the current base64_url for the organization name and
+    decode it as ASCII (Chad Baker request for CKAN data).
+    The encoded version might not be as usable for users.
+    """
+    dim_gtfs_datasets = gtfs_utils_v2.get_transit_organizations_gtfs_dataset_keys(
+        keep_cols=None, get_df=True
+    )
+
+    current_feeds = (
+        dim_gtfs_datasets[
+            (dim_gtfs_datasets.data_quality_pipeline == True)
+            & (dim_gtfs_datasets._is_current == True)
+        ]
+        .drop_duplicates(subset="name")
+        .reset_index(drop=True)
+    )
+
+    current_feeds2 = current_feeds.assign(
+        feed_url=current_feeds.apply(lambda x: decode_base64_url(x), axis=1)
+    )
+
+    df2 = pd.merge(
+        df,
+        current_feeds2[["name", "base64_url", "feed_url"]],
+        on="name",
+        how="inner",
+        validate="m:1",
+    )
+
+    return df2
 
 
 # https://github.com/cal-itp/data-analyses/blob/main/bus_service_increase/E5_make_stripplot_data.py
@@ -87,15 +139,24 @@ def add_route_name(df: pd.DataFrame) -> pd.DataFrame:
     """
     route_cols = ["route_id", "route_short_name", "route_long_name", "route_desc"]
 
-    if route_cols not in list(df.columns):
+    if not (set(route_cols).issubset(set(list(df.columns)))):
         raise ValueError(f"Input a df that contains {route_cols}")
 
-    df = df.assign(route_name_used=df.apply(lambda x: rt_utils.which_desc(x), axis=1))
+    if isinstance(df, pd.DataFrame):
+        ddf = dd.from_pandas(df, npartitions=2)
+    elif isinstance(df, gpd.GeoDataFrame):
+        ddf = dg.from_geopandas(df, npartitions=2)
+
+    ddf = ddf.assign(
+        route_name_used=ddf.apply(
+            lambda x: rt_utils.which_desc(x), axis=1, meta=("route_name_used", "str")
+        )
+    )
+
+    df = ddf.compute()
 
     # If route names show up with leading comma
-    df = df.assign(
-        route_name_used=route_names.route_name_used.str.lstrip(",").str.strip()
-    )
+    df = df.assign(route_name_used=df.route_name_used.str.lstrip(",").str.strip())
 
     return df
 

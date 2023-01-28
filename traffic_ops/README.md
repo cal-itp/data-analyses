@@ -3,7 +3,7 @@
 Traffic Ops had a request for all transit routes and transit stops to be published in the open data portal. 
 
 ## Scripts
-1. [prep_data](./prep_data.py): prep warehouse queries for GTFS schedule tables
+1. [prep_data](./prep_data.py): helper functions for creating `routes` and `stops` datasets
 1. [create_routes_data](./create_routes_data.py): functions to assemble routes that appear in `shapes`
 1. [create_stops_data](./create_stops_data.py): functions to assemble stop data
 
