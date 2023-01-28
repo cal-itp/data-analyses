@@ -14,40 +14,6 @@ from shared_utils import geography_utils
 from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS, COMPILED_CACHED_GCS
 
 
-def merge_routelines_with_trips(
-    selected_date: str, 
-    warehouse_version: Literal["v1", "v2"]
-) -> gpd.GeoDataFrame: 
-    """
-    Merge routes and trips to get line geometry.
-    """
-    shapes = gpd.read_parquet(
-        f"{COMPILED_CACHED_GCS}routelines_{selected_date}.parquet")
-    trips = pd.read_parquet(
-        f"{COMPILED_CACHED_GCS}trips_{selected_date}.parquet")
-
-    cols_to_keep = ["route_id", "shape_id", "geometry"]
-    
-    if warehouse_version == "v1":
-        operator_cols = ["calitp_itp_id"]
-        keep_cols = operator_cols + cols_to_keep
-        
-    elif warehouse_version == "v2":
-        operator_cols = ["feed_key"]
-        keep_cols = operator_cols + ["name"] + cols_to_keep
-    
-    df = (pd.merge(
-            shapes,
-            trips,
-            on = operator_cols + ["shape_id"],
-            how = "inner",
-        )[keep_cols]
-        .drop_duplicates(subset=operator_cols + ["shape_id"])
-        .reset_index(drop=True)
-    )
-    
-    return df
-    
     
 if __name__ == "__main__":    
     logger.add("./logs/A1_generate_routes_on_shn_data.log", retention="6 months")

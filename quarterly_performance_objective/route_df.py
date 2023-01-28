@@ -137,9 +137,9 @@ if __name__ == "__main__":
     
     # Import data
     trips = pd.read_parquet(
-        f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}_v2.parquet")
+        f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}_all.parquet")
     routelines = gpd.read_parquet(
-        f"{COMPILED_CACHED_GCS}routelines_{ANALYSIS_DATE}_v2.parquet")
+        f"{COMPILED_CACHED_GCS}routelines_{ANALYSIS_DATE}_all.parquet")
     
     # Merge to get shape_level geometry, then pare down to route-level geometry
     route_geom = shape_geom_to_route_geom(

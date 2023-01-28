@@ -120,46 +120,7 @@ def mutually_exclusive_groups(df: pd.DataFrame) -> pd.DataFrame:
     return df2
     
 
-def add_district(route_df: gpd.GeoDataFrame, 
-                 route_cols: list) -> gpd.GeoDataFrame:
-    """
-    Merge in district info (only 1 district per route_id)
-    """
-    districts = (catalog.caltrans_districts.read()
-                 [["DISTRICT", "geometry"]]
-                 .rename(columns = {"DISTRICT": "district"})
-                ).to_crs(route_df.crs)
-    
-    # Find overlay and calculate overlay length
-    # Keep the district with longest overlay for that route_id
-    overlay_results = gpd.overlay(
-        route_df[route_cols + ["geometry"]].drop_duplicates(),
-        districts,
-        how = "intersection",
-        keep_geom_type = False
-    )
-  
-    overlay_results = overlay_results.assign(
-        overlay_length = overlay_results.geometry.to_crs(
-            geography_utils.CA_StatePlane).length
-    )
-    
-    longest_overlay = (overlay_results
-                       .sort_values(route_cols + ["overlay_length"])
-                       .drop_duplicates(subset=route_cols, keep="last")
-                       .reset_index(drop=True)
-    )
-    
-    
-    # Only keep 1 district per route
-    gdf = pd.merge(
-        route_df,
-        longest_overlay[route_cols + ["district"]],
-        on = route_cols,
-        how = "left"
-    )
-    
-    return gdf
+
 
     
 def flag_shn_intersecting_routes(
