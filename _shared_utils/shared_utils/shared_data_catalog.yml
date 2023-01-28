@@ -6,29 +6,34 @@ sources:
     description: CA county polygons
     args:
       urlpath: https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson
+  caltrans_districts:
+    driver: geojson
+    description: Caltrans district polygons
+    args:
+      urlpath: https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHboundary/District_Tiger_Lines/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
   ca_county_centroids:
-    driver: geoparquet
+    driver: parquet
     description: CA county centroids
     args:
       # source: shared_utils/shared_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/ca_county_centroids.parquet
+  state_highway_network:
+    driver: geoparquet
+    description: Cleaned State Highway Network
+    args:
+      # source: shared_utils/shared_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/state_highway_network.parquet
   ca_transit_routes:
     driver: geoparquet
     description: CA transit routes with line geometry at the operator-level (open data)
     args:
-      # source: traffic_ops/make_routes_stops_shapefiles.py.py
+      # source: traffic_ops/create_routes_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet
-  ca_transit_routes_feed:
-    driver: geoparquet
-    description: CA transit routes with line geometry at the feed-level (not on open data)
-    args:
-      # source: traffic_ops/make_routes_stops_shapefiles.py.py
-      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes_feed.parquet
   ca_transit_stops:
     driver: geoparquet
     description: CA transit stops with point geometry (open data)
     args:
-      # source: traffic_ops/make_routes_stops_shapefiles.py.py
+      # source: traffic_ops/create_stops_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_stops.parquet
   hqta_stops:
     driver: geoparquet

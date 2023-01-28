@@ -233,8 +233,8 @@ def fill_in_metrolink_trips_df_with_shape_id(
 
 
 def get_transit_organizations_gtfs_dataset_keys(
-    keep_cols: list[str], custom_filtering: dict = None
-):
+    keep_cols: list[str], custom_filtering: dict = None, get_df: bool = False
+) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
     """
     From Airtable GTFS datasets, get the datasets (and gtfs_dataset_key)
     for usable feeds.
@@ -248,6 +248,9 @@ def get_transit_organizations_gtfs_dataset_keys(
         >> filter_custom_col(custom_filtering)
         >> rename(gtfs_dataset_key="key")
     )
+
+    if get_df:
+        dim_gtfs_datasets = dim_gtfs_datasets >> collect()
 
     return dim_gtfs_datasets
 
@@ -293,6 +296,7 @@ def schedule_daily_feed_to_organization(
     dim_gtfs_datasets = get_transit_organizations_gtfs_dataset_keys(
         keep_cols=["key", "name", "type", "regional_feed_type"],
         custom_filtering={"type": ["schedule"]},
+        get_df=False,
     )
 
     # Merge on gtfs_dataset_key to get organization name

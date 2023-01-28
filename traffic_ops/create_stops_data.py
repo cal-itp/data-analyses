@@ -3,48 +3,19 @@ Create stops file with identifiers including
 route_id, route_name, agency_id, agency_name.
 """
 import dask.dataframe as dd
-import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
 from datetime import datetime
 
 import prep_data
-from shared_utils import utils, geography_utils, portfolio_utils
-from create_routes_data import import_trips
-
-def import_stops(analysis_date: str) -> gpd.GeoDataFrame:
-    # Instead of keeping route_type_0, route_type_1, etc
-    # keep stops table long, instead of wide
-    # attach route_id, route_type as before
-    keep_cols = [
-        "feed_key",
-        "stop_id", "stop_name", 
-    ] 
-    
-    stops = gpd.read_parquet(
-        f"{prep_data.COMPILED_CACHED_GCS}"
-        f"stops_{analysis_date}_all.parquet",
-        columns = keep_cols
-    )
-    
-    
-def import_stop_times(analysis_date: str) -> pd.DataFrame:
-    keep_cols = ["feed_key", "trip_id", "stop_id"]
-    
-    stop_times = pd.read_parquet(
-        f"{prep_data.COMPILED_CACHED_GCS}"
-        f"st_{analysis_date}_all.parquet",
-        columns = keep_cols
-    ).drop_duplicates().reset_index(drop=True)
-    
-    return stop_times
+from shared_utils import utils
     
     
 def attach_route_info_to_stops(
     stops: gpd.GeoDataFrame, 
     trips: pd.DataFrame, 
-    stop_times: pd.DataFrame
+    stop_times: dd.DataFrame
 ) -> gpd.GeoDataFrame:
     """
     Attach all the various route information (route_id, route_type)
@@ -58,7 +29,7 @@ def attach_route_info_to_stops(
                 ]
     
     stops_with_route_info = (
-        pd.merge(
+        dd.merge(
             stop_times,
             trips[trip_cols], 
             on = ["feed_key", "trip_id"]
@@ -68,12 +39,12 @@ def attach_route_info_to_stops(
         .reset_index(drop=True)
     )
     
-    stops_with_geom = pd.merge(
+    stops_with_geom = dd.merge(
         stops,
         stops_with_route_info,
         on = ["feed_key", "stop_id"],
         how = "inner",
-    )
+    ).compute()
     
     # Drop feed_key and just sort on name
     stops_assembled = (stops_with_geom.drop(columns = "feed_key")
@@ -81,24 +52,31 @@ def attach_route_info_to_stops(
                        .reset_index(drop=True)
                       )
     
-    return stops_assembled
+    # Change column order
+    col_order = [
+        'agency', 'route_id', 'route_type', 
+        'stop_id', 'stop_name', 
+        'feed_url', 'geometry'
+    ]
+    
+    stops_assembled2 = prep_data.standardize_operator_info_for_exports(
+        stops_assembled)[col_order].reindex(columns = col_order)               
+    
+    return stops_assembled2
 
 
 def create_stops_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     time0 = datetime.now()
 
-    # Read in local parquets
-    stops = import_stops(analysis_date)
-    trips = import_trips(analysis_date)
-    stop_times = import_stop_times(analysis_date)
-    
-    time1 = datetime.now()
-    print(f"Get rid of duplicates: {time1-time0}")
-    
+    # Read in parquets
+    stops = prep_data.import_stops(analysis_date)
+    trips = prep_data.import_trips(analysis_date)
+    stop_times = prep_data.import_stop_times(analysis_date)
+        
     stops_assembled = attach_route_info_to_stops(stops, trips, stop_times)
     
-    time2 = datetime.now()
-    print(f"Attach route and operator info to stops: {time2-time1}")
+    time1 = datetime.now()
+    print(f"Attach route and operator info to stops: {time1-time0}")
     
     return stops_assembled
 

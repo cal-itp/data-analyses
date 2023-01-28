@@ -2,53 +2,20 @@
 Create routes file with identifiers including
 route_id, route_name, operator name.
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
 from datetime import datetime
 
 import prep_data
-from shared_utils import utils, geography_utils, portfolio_utils
+from shared_utils import utils, portfolio_utils
 
-
-def import_trips(analysis_date: str) -> pd.DataFrame:
-    keep_cols = ["feed_key", "name", 
-                 "trip_id", 
-                 "route_id", "shape_id", 
-                 "route_long_name", "route_short_name", "route_desc"
-                ]
-    
-    trips = pd.read_parquet(
-        f"{prep_data.COMPILED_CACHED_GCS}"
-        f"trips_{analysis_date}_all.parquet", 
-        columns = keep_cols
-    )
-    
-    # Clean organization name
-    trips2 = portfolio_utils.clean_organization_name(trips)
-    
-    return trips2
-    
-    
-def import_shapes(analysis_date: str) -> gpd.GeodataFrame:
-    keep_cols = ["feed_key", "shape_id", "n_trips", "geometry"]
-    
-    shapes = gpd.read_parquet(
-        f"{prep_data.COMPILED_CACHED_GCS}"
-        f"routelines_{analysis_date}_all.parquet", 
-        columns = keep_cols
-    ).to_crs(geography_utils.WGS84)
-    
-    return shapes
-    
 
 def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     
     # Read in local parquets
-    trips = import_trips(analysis_date)
-    shapes = import_shapes(analysis_date)
+    trips = prep_data.import_trips(analysis_date)
+    shapes = prep_data.import_shapes(analysis_date)
 
     shape_cols = ["feed_key", "shape_id"]
     
@@ -61,20 +28,29 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     )
     
     drop_cols = ["route_short_name", "route_long_name", 
-                 "route_desc", "service_date", 
-                 "feed_key"
+                 "route_desc", "feed_key", "trip_id"
                 ]
     
     routes_assembled = (portfolio_utils.add_route_name(df)
-                       .drop(columns = drop_cols)
-                       .sort_values(["name", "route_id"])
-                       .drop_duplicates(subset=["name", 
-                                                "route_id", "shape_id"])
+                        .drop(columns = drop_cols)
+                        .sort_values(["name", "route_id"])
+                       .drop_duplicates(subset=[
+                           "name", "route_id", "shape_id"])
                        .reset_index(drop=True)
-                       .rename(columns = prep_data.RENAME_COLS)
                       )
     
-    return routes_assembled
+    
+    # Change column order
+    col_order = [
+        'agency', 'route_id', 'route_type', 'route_name', 
+        'shape_id', 'n_trips', 
+        'feed_url', 'geometry'
+    ]
+    
+    routes_assembled2 = prep_data.standardize_operator_info_for_exports(
+        routes_assembled)[col_order].reindex(columns = col_order)               
+    
+    return routes_assembled2
 
 
 if __name__ == "__main__":

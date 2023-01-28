@@ -3,52 +3,9 @@ Functions for combining various tables
 from `gtfs_utils` queries. 
 """
 import dask.dataframe as dd
-import dask_geopandas as dg
-import geopandas as gpd
 import pandas as pd
 
 from calitp.sql import to_snakecase
-from typing import Literal, Union
-
-from shared_utils import geography_utils
-
-def merge_routes_trips(
-    routelines: Union[gpd.GeoDataFrame, dg.GeoDataFrame], 
-    trips: Union[pd.DataFrame, dd.DataFrame],
-    merge_cols: list = ["calitp_itp_id", "calitp_url_number", "shape_id"],
-    crs: str = geography_utils.WGS84,
-    join: Literal["left", "inner", "outer", "right", "cross"] = "left",
-) -> gpd.GeoDataFrame:
-    """
-    Merge routes (which has shape_id, geometry) with trips
-    and returns a trips table with line geometry
-    """
-
-    routes = (routelines.drop_duplicates(subset=merge_cols)
-              .reset_index(drop=True)
-              [merge_cols + ["geometry"]]
-             )
-    
-    if isinstance(routes, dg.GeoDataFrame):
-        trips_with_geom = dd.merge(
-            routes,
-            trips,
-            on = merge_cols,
-            how = join,
-            indicator=True
-        ).to_crs(crs).compute()  
-        
-    else:
-        trips_with_geom = pd.merge(
-            routes,            
-            trips,
-            on = merge_cols,
-            how = join,
-            indicator=True
-        ).to_crs(crs)
-   
-    return trips_with_geom
-
 
 def aggregate_stat_by_group(
     df: dd.DataFrame,  
