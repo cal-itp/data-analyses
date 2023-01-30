@@ -124,11 +124,16 @@ def bb_map_all(hotspots, corridors, combined_speeds, district):
     tooltip_dict = {'aliases': display_aliases}
     style_dict = {'opacity': 0, 'fillOpacity': 0.8}
     
-    all_corr = pd.concat(corridors)
-    all_corr['location_type'] = 'corridor'
-    all_hs = pd.concat(hotspots)
-    all_hs['location_type'] = 'hotspot'
-    combined = pd.concat([all_corr, all_hs])
+    if corridors:
+        all_corr = pd.concat(corridors)
+        all_corr['location_type'] = 'corridor'
+        combined = all_corr
+    if hotspots:
+        all_hs = pd.concat(hotspots)
+        all_hs['location_type'] = 'hotspot'
+        combined = all_hs
+    if corridors and hotspots:
+        combined = pd.concat([all_corr, all_hs])
     cmap = ['#1b9e77', '#d95f02']
     
     m = combined.explore(tiles = 'CartoDB positron',
