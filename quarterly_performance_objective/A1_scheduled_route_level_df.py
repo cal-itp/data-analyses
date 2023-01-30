@@ -29,7 +29,7 @@ def shape_geom_to_route_geom(
     """
     Merge routes and trips to get line geometry.
     """
-    cols_to_keep = ["route_id", "route_type", "shape_id", "geometry"]
+    cols_to_keep = ["route_id", "shape_id", "geometry"]
     
     if warehouse_version == "v1":
         operator_cols = ["calitp_itp_id"]
@@ -37,7 +37,7 @@ def shape_geom_to_route_geom(
         
     elif warehouse_version == "v2":
         operator_cols = ["feed_key"]
-        keep_cols = operator_cols + ["name"] + cols_to_keep
+        keep_cols = operator_cols + ["name", "route_type"] + cols_to_keep 
     
     # Merge trips with the shape's line geom, and get it to shape_id level
     df = (pd.merge(
@@ -118,7 +118,7 @@ def add_district(route_df: gpd.GeoDataFrame,
 
 if __name__ == "__main__":
     
-    ANALYSIS_DATE = rt_dates.PMAC["Q4_2022"]
+    ANALYSIS_DATE = rt_dates.PMAC["Q3_2022"]
     VERSION = "v2"
     
     logger.add("./logs/assemble_route_df.log", retention="6 months")
@@ -137,9 +137,9 @@ if __name__ == "__main__":
     
     # Import data
     trips = pd.read_parquet(
-        f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}_all.parquet")
+        f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}_{VERSION}.parquet")
     routelines = gpd.read_parquet(
-        f"{COMPILED_CACHED_GCS}routelines_{ANALYSIS_DATE}_all.parquet")
+        f"{COMPILED_CACHED_GCS}routelines_{ANALYSIS_DATE}_{VERSION}.parquet")
     
     # Merge to get shape_level geometry, then pare down to route-level geometry
     route_geom = shape_geom_to_route_geom(

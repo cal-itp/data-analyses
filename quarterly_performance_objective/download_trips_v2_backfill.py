@@ -49,7 +49,7 @@ if __name__=="__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    analysis_date = rt_dates.PMAC["Q3_2022"]
+    analysis_date = rt_dates.PMAC["Q4_2022"]
     VERSION = "v1"
     logger.info(f"Analysis date: {analysis_date}  warehouse {VERSION}")
     
@@ -65,7 +65,7 @@ if __name__=="__main__":
         IDS_TO_RUN = sorted(ITP_IDS)    
         
         logger.info(f"# operators to run: {len(IDS_TO_RUN)}")
-    
+        
         dataset = "trips"
         logger.info(f"*********** Download {dataset} data ***********")
 
@@ -88,7 +88,7 @@ if __name__=="__main__":
 
         trips.to_parquet(
             f"{COMPILED_CACHED_GCS}{dataset}_{analysis_date}_{VERSION}.parquet") 
-        '''
+        
         trips = pd.read_parquet(
             f"{COMPILED_CACHED_GCS}trips_{analysis_date}_{VERSION}.parquet")
         
@@ -108,9 +108,9 @@ if __name__=="__main__":
             COMPILED_CACHED_GCS,
             f"{dataset}_{analysis_date}_{VERSION}.parquet"
         )
-        '''
+        
     
-    '''
+    
     elif VERSION == "v2":
         operators_df = scheduled_operators(analysis_date)
     
@@ -167,6 +167,6 @@ if __name__=="__main__":
             COMPILED_CACHED_GCS,
             f"{dataset}_{analysis_date}_{VERSION}.parquet"
         )
-    '''
+    
     end = dt.datetime.now()
     logger.info(f"execution time: {end - start}")
