@@ -291,6 +291,7 @@ def final_merge(routes_gdf):
     # Merge with GTFS to get GTFS status.
     gtfs = A2_other.load_gtfs() 
     m3 = m2.merge(gtfs, how="left", on=["itp_id"])
+    m3.gtfs_status = m3.gtfs_status.fillna('No Info')
     
     # Drop columns
     cols_to_drop = ['itp_id', 'route_id', '_merge', 'calitp_itp_id']
@@ -374,6 +375,18 @@ def summarize_operators(df):
     ))
     
     return operator
+
+def summarize_routes_gtfs(df):
+    """
+    Count total routes by its range of cellular coverage
+    and GTFS status
+    """
+    routes_gtfs = (
+        df.groupby(['Binned', 'Gtfs Status'])
+        .agg({'Long Route Name':'count'})
+        .reset_index()
+        .rename(columns = {'Long Route Name':'Total Routes'}))
+    return routes_gtfs
 
 """
 Other Functions
