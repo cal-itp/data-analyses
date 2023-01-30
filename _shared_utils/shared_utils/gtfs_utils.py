@@ -10,12 +10,16 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
+import shapely
 import siuba  # need this to do type hint in functions
+from calitp import query_sql
 from calitp.tables import tbls
 from shared_utils import geography_utils, rt_utils, utils
 from siuba import *
 
 GCS_PROJECT = "cal-itp-data-infra"
+
+WGS84 = "EPSG:4326"
 
 # import os
 # os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
@@ -226,9 +230,7 @@ def get_route_shapes(
             trips = trip_df
 
     route_shapes = (
-        geography_utils.make_routes_gdf(
-            selected_date=selected_date, crs=crs, itp_id_list=itp_id_list
-        )
+        make_routes_gdf(selected_date=selected_date, crs=crs, itp_id_list=itp_id_list)
         .drop(columns=["pt_array"])
         .drop_duplicates()
         .reset_index(drop=True)
@@ -607,3 +609,110 @@ def all_trips_or_stoptimes_with_cached(
     df = df.drop_duplicates().reset_index(drop=True).compute()
 
     df.to_parquet(f"{export_path}{dataset}_{date_str}.parquet")
+
+
+# ----------------------------------------------------------------#
+# v1 Geography Utils for v1 speedmaps, dependencies
+# ----------------------------------------------------------------#
+
+# Function to construct the SQL condition for make_routes_gdf()
+def construct_condition(
+    selected_date: Union[str, datetime.datetime], include_itp_list: list
+) -> str:
+    def unpack_list_make_or_statement(include_itp_list: list) -> str:
+        new_cond = ""
+
+        for i in range(0, len(include_itp_list)):
+            cond = f"calitp_itp_id = {include_itp_list[i]}"
+            if i == 0:
+                new_cond = cond
+            else:
+                new_cond = new_cond + " OR " + cond
+
+        new_cond = "(" + new_cond + ")"
+
+        return new_cond
+
+    operator_or_statement = unpack_list_make_or_statement(include_itp_list)
+
+    date_condition = (
+        f'(calitp_extracted_at <= "{selected_date}" AND '
+        f'calitp_deleted_at > "{selected_date}")'
+    )
+
+    condition = operator_or_statement + " AND " + date_condition
+
+    return condition
+
+
+# Run the sql query with the condition in long-form
+def create_shapes_for_subset(
+    selected_date: Union[str, datetime.datetime], itp_id_list: list
+) -> pd.DataFrame:
+    condition = construct_condition(selected_date, itp_id_list)
+
+    sql_statement = f"""
+        SELECT
+            calitp_itp_id,
+            calitp_url_number,
+            shape_id,
+            pt_array
+        FROM `views.gtfs_schedule_dim_shapes_geo`
+        WHERE
+            {condition}
+        """
+
+    df = query_sql(sql_statement)
+
+    return df
+
+
+# Laurie's example: https://github.com/cal-itp/data-analyses/blob/752eb5639771cb2cd5f072f70a06effd232f5f22/gtfs_shapes_geo_examples/example_shapes_geo_handling.ipynb
+# have to convert to linestring
+def make_linestring(x: str) -> shapely.geometry.LineString:
+    # shapely errors if the array contains only one point
+    if len(x) > 1:
+        # each point in the array is wkt
+        # so convert them to shapely points via list comprehension
+        as_wkt = [shapely.wkt.loads(i) for i in x]
+        return shapely.geometry.LineString(as_wkt)
+
+
+def make_routes_gdf(
+    selected_date: Union[str, datetime.datetime],
+    crs: str = "EPSG:4326",
+    itp_id_list: list = None,
+):
+    """
+    Parameters:
+    selected_date: str or datetime
+        Ex: '2022-1-1' or datetime.date(2022, 1, 1)
+    crs: str, a projected coordinate reference system.
+        Defaults to EPSG:4326 (WGS84)
+    itp_id_list: list or None
+            Defaults to all ITP_IDs except ITP_ID==200.
+            For a subset of operators, include a list, such as [182, 100].
+    All operators for selected date: ~11 minutes
+    """
+
+    if itp_id_list is None:
+        df = (
+            tbls.views.gtfs_schedule_dim_shapes_geo()
+            >> filter(
+                _.calitp_extracted_at <= selected_date,
+                _.calitp_deleted_at > selected_date,
+            )
+            >> filter(_.calitp_itp_id != 200)
+            >> select(_.calitp_itp_id, _.calitp_url_number, _.shape_id, _.pt_array)
+            >> collect()
+        )
+    else:
+        df = create_shapes_for_subset(selected_date, itp_id_list)
+
+    # apply the function
+    df["geometry"] = df.pt_array.apply(make_linestring)
+
+    # convert to geopandas; geometry column contains the linestring, re-project if needed
+    gdf = gpd.GeoDataFrame(df, geometry="geometry", crs=WGS84).to_crs(crs)
+
+    return gdf
