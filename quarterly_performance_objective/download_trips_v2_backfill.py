@@ -49,8 +49,8 @@ if __name__=="__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    analysis_date = rt_dates.PMAC["Q4_2022"]
-    VERSION = "v1"
+    analysis_date = rt_dates.PMAC["Q2_2022"]
+    VERSION = "v2"
     logger.info(f"Analysis date: {analysis_date}  warehouse {VERSION}")
     
     start = dt.datetime.now()

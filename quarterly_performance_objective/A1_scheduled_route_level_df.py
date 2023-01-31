@@ -118,8 +118,8 @@ def add_district(route_df: gpd.GeoDataFrame,
 
 if __name__ == "__main__":
     
-    ANALYSIS_DATE = rt_dates.PMAC["Q3_2022"]
-    VERSION = "v2"
+    ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"]
+    VERSION = "v1"
     
     logger.add("./logs/assemble_route_df.log", retention="6 months")
     logger.add(sys.stderr, 

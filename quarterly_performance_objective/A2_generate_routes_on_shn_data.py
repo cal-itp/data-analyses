@@ -7,12 +7,10 @@ import pandas as pd
 import sys
 
 from loguru import logger
-from typing import Literal
 
 from bus_service_utils import create_parallel_corridors
-from shared_utils import geography_utils
-from update_vars import ANALYSIS_DATE, BUS_SERVICE_GCS, COMPILED_CACHED_GCS
-
+from shared_utils import geography_utils, rt_dates
+from update_vars import BUS_SERVICE_GCS
 
     
 if __name__ == "__main__":    
@@ -21,21 +19,23 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {ANALYSIS_DATE}")
+    ANALYSIS_DATE = rt_dates.PMAC["Q4_2022"]
+    VERSION = "v1"
+
+    logger.info(f"Analysis date: {ANALYSIS_DATE}   warehouse {VERSION}")
     start = datetime.datetime.now()
     
-    VERSION = "v2"
-    shapes_with_route_info = merge_routelines_with_trips(
-        ANALYSIS_DATE, warehouse_version = VERSION)
+    transit_routes = gpd.read_parquet(
+        f"{BUS_SERVICE_GCS}routes_{ANALYSIS_DATE}_{VERSION}.parquet")
     
     # 50 ft buffers, get routes that are on SHN
     create_parallel_corridors.make_analysis_data(
         hwy_buffer_feet = 50, 
-        transit_routes_df = shapes_with_route_info,
+        transit_routes_df = transit_routes,
         pct_route_threshold = 0.2, 
         pct_highway_threshold = 0,
         data_path = BUS_SERVICE_GCS, 
-        file_name = f"routes_on_shn_{ANALYSIS_DATE}",
+        file_name = f"routes_on_shn_{ANALYSIS_DATE}_{VERSION}",
         warehouse_version = VERSION
     )  
     
@@ -45,11 +45,11 @@ if __name__ == "__main__":
     # Grab other routes where at least 35% of route is within 0.5 mile of SHN
     create_parallel_corridors.make_analysis_data(
         hwy_buffer_feet = geography_utils.FEET_PER_MI * 0.5, 
-        transit_routes_df = shapes_with_route_info,
+        transit_routes_df = transit_routes,
         pct_route_threshold = 0.2,
         pct_highway_threshold = 0,
         data_path = BUS_SERVICE_GCS, 
-        file_name = f"parallel_or_intersecting_{ANALYSIS_DATE}",
+        file_name = f"parallel_or_intersecting_{ANALYSIS_DATE}_{VERSION}",
         warehouse_version = VERSION
     )
     
