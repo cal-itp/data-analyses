@@ -309,6 +309,16 @@ def ntd_vehicles():
 """
 Add GTFS
 """
+# Agencies that were left out
+# https://github.com/cal-itp/data-infra/blob/e8a2332562628508f13310eb4ffaaf4d4017e9f3/airflow/data/agencies.yml
+data = [
+    [177, "the Link Florence-Firestone/Walnut Park", "GTFS but no additional details"],
+    [181, "the Link Willowbrook", "GTFS but no additional details"],
+    [176, "the Link-Athens", "GTFS but no additional details"],
+    [179, "the Link Lennox", "GTFS but no additional details"],
+    [178, "the Link King Medical Center", "GTFS but no additional details"],
+]
+    
 # Downloaded from Airtable "Organizations"
 # https://airtable.com/appPnJWrQ7ui4UmIl/tblFsd8D5oFRqep8Z/viwVBVSd0ZhYu8Ewm?blocks=hide
 def load_gtfs(): 
@@ -326,5 +336,11 @@ def load_gtfs():
     # Consolidate GTFS into one col
     df["gtfs_status"] = df.gtfs_static_status + '/' + df.gtfs_realtime_status
     
+    # Drop old cols
     df = df.drop(columns = ["gtfs_static_status", "gtfs_realtime_status"])
+    
+    # Manually add some agencies that didn't show up
+    additional_agencies = pd.DataFrame(data, columns=['itp_id', 'name', 'gtfs_status'])
+    df = pd.concat([df, additional_agencies], ignore_index=True)
+    
     return df 
