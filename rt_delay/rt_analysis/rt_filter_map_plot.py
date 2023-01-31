@@ -627,8 +627,8 @@ class RtFilterMapper:
         speed_metric = int(round(speed_metric))
         self.corridor['schedule_metric_minutes'] = schedule_metric
         self.corridor['speed_metric_minutes'] = speed_metric
-        # self.corridor['routes'] = self.filter['route_names'] if self.filter and self.filter['route_names'] else 'All'
-        self.corridor['filter'] = self.filter_formatted
+        self.corridor['agency'] = self.calitp_agency_name
+        self.corridor['routes_included'] = self.filter_formatted
         return {'schedule_metric_minutes': schedule_metric,
                'speed_metric_minutes': speed_metric}
     
