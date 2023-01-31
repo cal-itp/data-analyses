@@ -194,8 +194,8 @@ def overlay_transit_to_highways(
 
 def parallel_or_intersecting(
     df: gpd.GeoDataFrame, 
-    pct_route_threshold: float = 0.5, 
-    pct_highway_threshold: float = 0.1
+    pct_route_threshold: float = 0, 
+    pct_highway_threshold: float = 0
 ) -> gpd.GeoDataFrame:
     
     # Play with various thresholds to decide how to designate parallel

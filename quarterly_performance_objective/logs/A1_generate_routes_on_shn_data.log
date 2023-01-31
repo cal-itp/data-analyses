@@ -80,3 +80,27 @@
 2023-01-27 11:18:14.702 | INFO     | __main__:<module>:77 - routes on SHN created: 0:00:38.181143
 2023-01-27 11:18:55.066 | INFO     | __main__:<module>:91 - routes within half mile buffer created: 0:00:40.364499
 2023-01-27 11:18:55.069 | INFO     | __main__:<module>:94 - execution time: 0:01:18.547957
+2023-01-30 15:57:54.492 | INFO     | __main__:<module>:25 - Analysis date: 2022-05-04   warehouse v2
+2023-01-30 15:58:20.036 | INFO     | __main__:<module>:43 - routes on SHN created: 0:00:25.543536
+2023-01-30 15:58:44.756 | INFO     | __main__:<module>:57 - routes within half mile buffer created: 0:00:24.720542
+2023-01-30 15:58:44.757 | INFO     | __main__:<module>:60 - execution time: 0:00:50.264974
+2023-01-30 15:59:20.516 | INFO     | __main__:<module>:25 - Analysis date: 2022-08-17   warehouse v2
+2023-01-30 15:59:41.703 | INFO     | __main__:<module>:43 - routes on SHN created: 0:00:21.186672
+2023-01-30 16:00:03.493 | INFO     | __main__:<module>:57 - routes within half mile buffer created: 0:00:21.789997
+2023-01-30 16:00:03.494 | INFO     | __main__:<module>:60 - execution time: 0:00:42.977456
+2023-01-30 16:02:08.405 | INFO     | __main__:<module>:25 - Analysis date: 2022-10-12   warehouse v2
+2023-01-30 16:02:29.942 | INFO     | __main__:<module>:43 - routes on SHN created: 0:00:21.537248
+2023-01-30 16:02:53.180 | INFO     | __main__:<module>:57 - routes within half mile buffer created: 0:00:23.237251
+2023-01-30 16:02:53.181 | INFO     | __main__:<module>:60 - execution time: 0:00:44.775851
+2023-01-30 16:03:19.294 | INFO     | __main__:<module>:25 - Analysis date: 2022-05-04   warehouse v1
+2023-01-30 16:03:39.555 | INFO     | __main__:<module>:43 - routes on SHN created: 0:00:20.260523
+2023-01-30 16:04:01.522 | INFO     | __main__:<module>:57 - routes within half mile buffer created: 0:00:21.967119
+2023-01-30 16:04:01.523 | INFO     | __main__:<module>:60 - execution time: 0:00:42.228312
+2023-01-30 16:05:32.061 | INFO     | __main__:<module>:25 - Analysis date: 2022-08-17   warehouse v1
+2023-01-30 16:05:52.388 | INFO     | __main__:<module>:43 - routes on SHN created: 0:00:20.326995
+2023-01-30 16:06:13.878 | INFO     | __main__:<module>:57 - routes within half mile buffer created: 0:00:21.489626
+2023-01-30 16:06:13.879 | INFO     | __main__:<module>:60 - execution time: 0:00:41.818041
+2023-01-30 16:06:33.661 | INFO     | __main__:<module>:25 - Analysis date: 2022-10-12   warehouse v1
+2023-01-30 16:06:55.160 | INFO     | __main__:<module>:43 - routes on SHN created: 0:00:21.497293
+2023-01-30 16:07:17.181 | INFO     | __main__:<module>:57 - routes within half mile buffer created: 0:00:22.021284
+2023-01-30 16:07:17.182 | INFO     | __main__:<module>:60 - execution time: 0:00:43.519189
