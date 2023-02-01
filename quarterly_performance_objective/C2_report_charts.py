@@ -32,14 +32,14 @@ def make_district_bar(df: pd.DataFrame, y_col: str) -> alt.Chart:
     
     Y_MAX = df[y_col].max() * 1.1
     
-    bar = base_bar(df, x_col="District")
+    bar = base_bar(df, x_col="district")
     
     bar = (bar.encode(
         y=alt.Y(f"{y_col}:Q", title=f"{y_title}", 
                 scale=alt.Scale(domain=[0, Y_MAX]),
                 axis=None
                ),
-        color=alt.Color("District:N", 
+        color=alt.Color("district:N", 
                         scale=alt.Scale(
                             range=cp.CALITP_CATEGORY_BRIGHT_COLORS
                         ), legend=None
@@ -55,7 +55,7 @@ def make_district_bar(df: pd.DataFrame, y_col: str) -> alt.Chart:
                     # Set color here, because encoding for mark_text gets 
                     # superseded by alt.Color
                    color=alt.value("black"), 
-                   tooltip=["District:N", 
+                   tooltip=["district:N", 
                             alt.Tooltip(f"{y_col}:Q", format=",",
                                         title=f"{y_col.replace('_', ' '.title())}"
                                        )] 
