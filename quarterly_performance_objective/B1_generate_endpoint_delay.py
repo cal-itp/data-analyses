@@ -54,7 +54,7 @@ def remove_local_files():
         
 if __name__=="__main__":
     
-    logger.add("./logs/A3_generate_endpoint_delay.log")
+    logger.add("./logs/B1_generate_endpoint_delay.log")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
