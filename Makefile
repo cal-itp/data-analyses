@@ -42,7 +42,8 @@ build_dla_reports:
 	git add portfolio/sites/dla.yml
     
 build_quarterly_performance_metrics:
-	#pip install -r portfolio/requirements.txt
+	pip install -r portfolio/requirements.txt
+	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	git rm portfolio/quarterly_performance_metrics/ -rf
 	python portfolio/portfolio.py clean quarterly_performance_metrics
 	python portfolio/portfolio.py build quarterly_performance_metrics --deploy 
