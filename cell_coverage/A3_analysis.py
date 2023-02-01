@@ -9,15 +9,6 @@ import dask.dataframe as dd
 import pandas as pd
 from shared_utils import utils
 
-# Open zip files 
-import fsspec
-from calitp import *
-
-# Storage
-from calitp.storage import get_fs
-fs = get_fs()
-import os
-
 # Times
 import datetime
 from loguru import logger
@@ -34,8 +25,7 @@ suffix_cols = ['percentage_of_route_wo_coverage', 'original_route_length', 'no_c
 def routes_1_dist_comparison(routes_gdf, provider_gdf, suffix:str):
     """
     Overlay routes that run in only one district against 
-    the provider map to find %
-    of route that run in areas without coverage. 
+    the provider map to find % of route that run in areas without coverage. 
     
     routes_gdf: routes that run in 1 district.
     provider_gdf: the provider map.
@@ -91,8 +81,7 @@ def summarize_rows(df, col_to_group: list, col_to_summarize: str):
 
 def multi_dist_route_comparison(routes_gdf, provider_gdf, suffix:str):
     """
-    Overlay provider maps & routes 
-    that run in 1+ district against 
+    Overlay provider maps & routes that run in 1+ district against 
     the provider map that has no coverage. 
     
     routes_gdf: routes that run in 1+ districts.
@@ -176,12 +165,13 @@ subset_cols = ["agency", 'itp_id', 'route_id', "long_route_name", "District",
 percentage_cols = ["percentage_of_route_wo_coverage_att", 
                 "percentage_of_route_wo_coverage_verizon", 
                      "percentage_of_route_wo_coverage_tmobile"]
+
 def merge_all_providers():
     """
     Merge all the overlaid unique routes among all 
     3 providers into one large dataframe.
     """
-    # Read files
+    # Read files created by `stack_all_routes` above.
     verizon_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_verizon_overlaid_all_routes.parquet")
     att_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_att_overlaid_all_routes.parquet")
     tmobile_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_tmobile_overlaid_all_routes.parquet")
@@ -312,6 +302,9 @@ def final_merge(routes_gdf):
     
     return m3
 
+"""
+Summary Functions
+"""
 def count_values(df, columns_to_count:list):
     """
     Count # of values delinated by comma
@@ -388,22 +381,6 @@ def summarize_routes_gtfs(df):
         .rename(columns = {'Long Route Name':'Total Routes'}))
     return routes_gtfs
 
-"""
-Other Functions
-"""
-# Export geospatial file to a geojson 
-def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
-    """
-    Save geodataframe as parquet locally,
-    then move to GCS bucket and delete local file.
-
-    gdf: geopandas.GeoDataFrame
-    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
-    FILE_NAME: str. Filename.
-    """
-    gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
-    fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
-    os.remove(f"./{FILE_NAME}.geojson")
 
 subset_for_results = [
     "Agency",
@@ -416,6 +393,7 @@ subset_for_results = [
     "Estimate Of Buses In Low Cell Zones",
     "Gtfs Status"
 ]
+
 """
 Chart Functions
 """
@@ -478,36 +456,3 @@ def chart_with_dropdown(
 
     return chart1
 
-"""
-OLD
-"""
-def overlay_single_routes(
-    provider: gpd.GeoDataFrame, routes: gpd.GeoDataFrame, provider_name: str
-):
-    """
-    For any provider or routes that may cause an issue,
-    use this function to pass and print out the names of
-    problematic routes.
-    """
-
-    # Empty dataframe to hold results
-    all_intersected_routes = pd.DataFrame()
-
-    # List of long route names
-    unique_routes_list = routes.long_route_name.unique().tolist()
-
-    # Intersect route by route, skipping those that don't work
-    for i in unique_routes_list:
-        filtered = routes[routes.long_route_name == i].reset_index(drop=True)
-        try:
-            intersected = gpd.overlay(
-                provider, filtered, how="intersection", keep_geom_type=False
-            )
-            all_intersected_routes = pd.concat(
-                [all_intersected_routes, intersected], axis=0
-            )
-        except:
-            pass
-            print(f"{i}")
-
-    return all_intersected_routes

@@ -26,8 +26,7 @@ to California
 """
 # Clip the cell provider coverage map to California only.
 # This only worked for AT&T and Verizon. 
-# T-Mobile was concatted as it was spread across 
-# several files instead of one. 
+# T-Mobile was concatted as it was spread across several files instead of one. 
 def create_california_coverage(file_zip_name:str, new_file_name:str):
     
     PATH = f"{GCS_FILE_PATH}{file_zip_name}"
@@ -71,7 +70,7 @@ def find_specific_files(phrase_to_find:str):
    
     return my_files
 
-# Sjoin the original provider gdf to a single district 
+# Sjoin the original provider gdf to a single district.
 def sjoin_district(
     provider_df: dg.GeoDataFrame, 
     district_df: gpd.GeoDataFrame,
@@ -96,6 +95,7 @@ def sjoin_district(
     
     return provider_district
 
+# Sjoin all districts to the provider map.
 def sjoin_gdf(
     provider_df: dg.GeoDataFrame, 
     district_df: gpd.GeoDataFrame,
@@ -329,43 +329,3 @@ def correct_kern():
     lambda x: shapely.wkt.loads(shapely.wkt.dumps(x, rounding_precision=4)))
     
     return kern 
-
-"""
-Old
-"""
-# Clip the provider map to a boundary and return the areas of a boundary
-# that is NOT covered by the provider.
-def find_difference_and_clip(
-    gdf: dg.GeoDataFrame, boundary: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
-    # Clip cell provider to some boundary
-    clipped = dg.clip(gdf, boundary).reset_index(drop=True)  # use dask to clip
-    clipped_gdf = clipped.compute()  # compute converts from dask gdf to gdf
-
-    # Now find the overlay, and find the difference
-    # Notice which df is on the left and which is on the right
-    # https://geopandas.org/en/stable/docs/user_guide/set_operations.html
-    no_coverage = gpd.overlay(boundary, clipped_gdf, how="difference",  keep_geom_type=False)
-
-    return no_coverage
-
-def concat_all_areas(all_gdf:list, file_name:str):
-    """
-    Districts/counties are separated out into different gdfs that contain 
-    portions of districts/counties. Concat them all together 
-    to get the entirety of California.
-    """
-    # Empty dataframe
-    full_gdf = pd.DataFrame()
-    
-    # Concat all the districts that were broken out into one
-    full_gdf = dd.multi.concat(all_gdf, axis=0)
-    
-    # Turn it into a gdf
-    full_gdf = full_gdf.compute()
-    
-    # Export
-    utils.geoparquet_gcs_export(full_gdf, GCS_FILE_PATH, file_name)
-
-    print('Saved to GCS')
-    return full_gdf 
