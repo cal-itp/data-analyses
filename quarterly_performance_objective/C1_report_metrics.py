@@ -70,7 +70,7 @@ def get_service_hours_summary_table(df: pd.DataFrame)-> pd.DataFrame:
         df,
         group_cols = ["category"],
         sum_cols = ["service_hours", "unique_route"]
-    ).astype({"service_hours": int, "unique_route": int})
+    ).astype({"unique_route": int})
     
     summary = sort_by_column(summary).pipe(clean_up_category_values)
     
@@ -112,9 +112,9 @@ def by_district_on_shn_breakdown(df: pd.DataFrame,
     """
     by_district = aggregate_calculate_percent_and_average(
         df[df.category=="on_shn"],
-        group_cols = ["District"],
+        group_cols = ["district"],
         sum_cols = sum_cols
-    ).astype(int).sort_values("District").reset_index(drop=True)
+    ).astype(int).sort_values("district").reset_index(drop=True)
     
     # Calculate average
     if "service_hours" in by_district.columns:
@@ -130,38 +130,23 @@ def by_district_on_shn_breakdown(df: pd.DataFrame,
     return by_district
 
 
-def route_type_names(row): 
-    if row.route_type in ['0', '1', '2']:
-        return "Rail"
-    elif row.route_type == '3':
-        return "Bus"
-    elif row.route_type == '4':
-        return "Ferry"
-    else:
-        return "Unknown"
-
     
 def prep_data_for_report(analysis_date: str) -> gpd.GeoDataFrame:
     # https://stackoverflow.com/questions/69781678/intake-catalogue-level-parameters
+    
     df = catalog.routes_categorized_with_delay(
         analysis_date = analysis_date).read()
+
+    # TODO: Some interest in excluding modes like rail from District 4
+    # Don't have route_type...but maybe we want to exclude rail
     
-    # Some interest in excluding modes like rail from District 4
     df = df.assign(
-        route_type_name = df.apply(lambda x: route_type_names(x), axis=1),
         delay_hours = round(df.delay_seconds / 60 ** 2, 2)
     ).drop(columns = "delay_seconds")
-
-    #df[df.category=="on_shn"].route_type_name.value_counts()
-    # This shows that only Bus and Unknown are present for on_shn
     
-    # Should I subset to df[df._merge=="both"]?
-    # both means that it found a corresponding match in itp_id-route_id 
-    # since it's been aggregated up to route_id level (shape_id can mismatch more easily)
-    # Decide here, this is the subset of data I will use for rest of notebook
-    plot_df = df[df._merge=="both"].reset_index(drop=True)
+    df = df[df.merge_delay != "right_only"].reset_index(drop=True)
     
-    return plot_df
+    return df
 
 
 
@@ -217,18 +202,18 @@ def district_breakdown_long(analysis_date: str) -> pd.DataFrame:
     ).rename(columns = {"unique_route": "delay_unique_route"})
                          
     # Make long
-    service_value_vars = [c for c in by_district_summary.columns if c != 'District']
-    delay_value_vars = [c for c in by_district_delay.columns if c != 'District']
+    service_value_vars = [c for c in by_district_summary.columns if c != 'district']
+    delay_value_vars = [c for c in by_district_delay.columns if c != 'district']
 
     service_long = pd.melt(
         by_district_summary,
-        id_vars = "District",
+        id_vars = "district",
         value_vars = service_value_vars,
     )
 
     delay_long = pd.melt(
         by_district_delay, 
-        id_vars = "District", 
+        id_vars = "district", 
         value_vars = delay_value_vars
     )
 
