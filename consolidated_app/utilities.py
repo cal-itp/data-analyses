@@ -6,7 +6,7 @@ import intake
 
 import altair as alt
 from shared_utils import geography_utils
-from shared_utils import altair_utils
+# from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
