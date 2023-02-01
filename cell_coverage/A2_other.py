@@ -35,7 +35,7 @@ def organization_cleaning(df, column_wanted: str):
     return df
 
 """
-Unique Routes
+Get Unique Routes
 """
 # traffic_ops/export/ca_transit_routes_[date].parquet
 routes_file =  "gs://calitp-analytics-data/data-analyses/traffic_ops/export/ca_transit_routes_2022-09-14.parquet"
@@ -71,7 +71,6 @@ def unique_routes(gdf) -> gpd.GeoDataFrame:
     
     return unique_route
 
-    
 # Open routes file and find unique routes
 def load_unique_routes_df():
     
@@ -115,9 +114,8 @@ def clip_route_district(district_df):
 
 def complete_clip_route_district() -> dg.GeoDataFrame:
     """
-    For each district, find which routes fall 100% neatly
-    in an district and which cross district boundaries. 
-    Stack the seperated district results back together.
+    Find which routes are in only 1 or 1+ districts
+    for each district. 
     """
     # Load districts
     district_df = A1_provider_prep.get_districts()
@@ -166,10 +164,10 @@ def aggregate_routes(gdf):
 
 def find_multi_district_routes():
     """
-    Find and filter which routes are in one district versus 
+    Definitively summarize which routes are in one district versus 
     those that run in various districts. Returns
     a df with multi-district routes, a df with one-district
-    routes, and the original clipped df
+    routes, and the original clipped df.
     """
     # Clip the routes against districts
     clipped_df = complete_clip_route_district()
@@ -306,3 +304,41 @@ def ntd_vehicles():
     df = df.loc[df['total_buses'] !=0]
     
     return df
+
+"""
+Add GTFS
+"""
+# Agencies that were left out
+data = [
+    [177, "the Link Florence-Firestone/Walnut Park", "GTFS but no additional details"],
+    [181, "the Link Willowbrook", "GTFS but no additional details"],
+    [176, "the Link-Athens", "GTFS but no additional details"],
+    [179, "the Link Lennox", "GTFS but no additional details"],
+    [178, "the Link King Medical Center", "GTFS but no additional details"],
+]
+    
+# Downloaded from Airtable "Organizations"
+# https://airtable.com/appPnJWrQ7ui4UmIl/tblFsd8D5oFRqep8Z/viwVBVSd0ZhYu8Ewm?blocks=hide
+def load_gtfs(): 
+ 
+    subset_gtfs = ["itp_id", "name", "gtfs_static_status", "gtfs_realtime_status"]
+    
+    df = to_snakecase(
+    pd.read_csv(f"{A1_provider_prep.GCS_FILE_PATH}airtable_organizations.csv"))[subset_gtfs]
+    
+    df.itp_id = df.itp_id.fillna(0).astype(int)
+    
+    df.name = df.name.replace(
+    {"Eastern Sierra Transit Authority": "Mammoth Lakes Transit System"})
+    
+    # Consolidate GTFS into one col
+    df["gtfs_status"] = df.gtfs_static_status + '/' + df.gtfs_realtime_status
+    
+    # Drop old cols
+    df = df.drop(columns = ["gtfs_static_status", "gtfs_realtime_status"])
+    
+    # Manually add some agencies that didn't show up
+    additional_agencies = pd.DataFrame(data, columns=['itp_id', 'name', 'gtfs_status'])
+    df = pd.concat([df, additional_agencies], ignore_index=True)
+    
+    return df 

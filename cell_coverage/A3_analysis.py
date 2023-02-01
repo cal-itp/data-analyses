@@ -2,33 +2,30 @@ import A1_provider_prep
 import A2_other
 
 from shared_utils import geography_utils
-from shared_utils import utils
 import geopandas as gpd
-import dask.dataframe as dd
-import dask_geopandas as dg
-import pandas as pd
 import shapely.wkt
 
-# Open zip files 
-import fsspec
-from calitp import *
+import dask.dataframe as dd
+import pandas as pd
+from shared_utils import utils
 
-# Storage
-from calitp.storage import get_fs
-fs = get_fs()
-import os
-
+# Times
 import datetime
 from loguru import logger
+
+# Charts
+from shared_utils import calitp_color_palette as cp
+import altair as alt
 
 """
 Overlay Routes against Provider Maps
 """
+suffix_cols = ['percentage_of_route_wo_coverage', 'original_route_length', 'no_coverage_route_length']
+
 def routes_1_dist_comparison(routes_gdf, provider_gdf, suffix:str):
     """
     Overlay routes that run in only one district against 
-    the provider map that has no coverage to find %
-    of route that run in areas without coverage. 
+    the provider map to find % of route that run in areas without coverage. 
     
     routes_gdf: routes that run in 1 district.
     provider_gdf: the provider map.
@@ -55,10 +52,10 @@ def routes_1_dist_comparison(routes_gdf, provider_gdf, suffix:str):
          aggfunc={
          "no_coverage_route_length": "sum", "original_route_length":"max"}).reset_index()
     
-    # Find percentage of route enters a no coverage zone. 
-    overlay_df["percentage_of_route_wo_coverage"] = ((overlay_df["no_coverage_route_length"] /   overlay_df["original_route_length"])* 100).astype('int64')
+    # Find percentage of route that enters a no coverage zone. 
+    overlay_df["percentage_of_route_wo_coverage"] = ((overlay_df["no_coverage_route_length"]/overlay_df["original_route_length"])* 100).astype('int64')
     
-    overlay_df = overlay_df.rename(columns={c: c+ suffix for c in overlay_df.columns if c in ['percentage_of_route_wo_coverage', 'original_route_length', 'no_coverage_route_length']})
+    overlay_df = overlay_df.rename(columns={c: c+ suffix for c in overlay_df.columns if c in suffix_cols})
     
     end = datetime.datetime.now()
         
@@ -81,9 +78,10 @@ def summarize_rows(df, col_to_group: list, col_to_summarize: str):
     )
     return df_col_to_summarize
 
+
 def multi_dist_route_comparison(routes_gdf, provider_gdf, suffix:str):
     """
-    Overlay routes that run in 1+ district against 
+    Overlay provider maps & routes that run in 1+ district against 
     the provider map that has no coverage. 
     
     routes_gdf: routes that run in 1+ districts.
@@ -98,7 +96,7 @@ def multi_dist_route_comparison(routes_gdf, provider_gdf, suffix:str):
         routes_gdf, provider_gdf, how="intersection", keep_geom_type=False
     )
     
-    # Get length of new geometry after overlaid
+    # Get length of new geometry after overlay
     multi_route = multi_route.assign(
         no_coverage_route_length=multi_route.geometry.to_crs(geography_utils.CA_StatePlane).length
     )
@@ -116,7 +114,7 @@ def multi_dist_route_comparison(routes_gdf, provider_gdf, suffix:str):
     merge1["percentage_of_route_wo_coverage"] = ((merge1["no_coverage_route_length"] / merge1["original_route_length"])* 100).astype('int64')
     
     # Add a suffix. 
-    merge1 = merge1.rename(columns={c: c+ suffix for c in merge1.columns if c in ['percentage_of_route_wo_coverage', 'original_route_length', 'no_coverage_route_length']})
+    merge1 = merge1.rename(columns={c: c+ suffix for c in merge1.columns if c in suffix_cols})
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
@@ -158,16 +156,22 @@ def stack_all_routes(provider_gdf, provider: str):
         
     return stacked_df
 
-subset_cols = ["agency", 'itp_id', 'route_id', "long_route_name", "District", "median_percent_with_coverage", "median_percent_no_coverage", "geometry_x","percentage_of_route_wo_coverage_att", "percentage_of_route_wo_coverage_verizon",  "percentage_of_route_wo_coverage_tmobile"]
+subset_cols = ["agency", 'itp_id', 'route_id', "long_route_name", "District",
+               "median_percent_with_coverage", "median_percent_no_coverage",
+               "geometry_x","percentage_of_route_wo_coverage_att", 
+               "percentage_of_route_wo_coverage_verizon", 
+               "percentage_of_route_wo_coverage_tmobile"]
+
+percentage_cols = ["percentage_of_route_wo_coverage_att", 
+                "percentage_of_route_wo_coverage_verizon", 
+                     "percentage_of_route_wo_coverage_tmobile"]
 
 def merge_all_providers():
     """
     Merge all the overlaid unique routes among all 
-    3 providers into one large dataframe. Use an inner
-    merge, since those are routes that
-    touch a no data zone for every provider.
+    3 providers into one large dataframe.
     """
-    # Read files
+    # Read files created by `stack_all_routes` above.
     verizon_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_verizon_overlaid_all_routes.parquet")
     att_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_att_overlaid_all_routes.parquet")
     tmobile_o = gpd.read_parquet(f"{A1_provider_prep.GCS_FILE_PATH}_tmobile_overlaid_all_routes.parquet")
@@ -181,9 +185,6 @@ def merge_all_providers():
     
     # Grab percentages to calculate median percentage
     # w/o coverage across ATT, Tmobile, and Verizon
-    percentage_cols = ["percentage_of_route_wo_coverage_att", "percentage_of_route_wo_coverage_verizon",  "percentage_of_route_wo_coverage_tmobile"]
-    
-    # Fill NA
     m1[percentage_cols] = m1[percentage_cols].fillna(0)
     
     m1["median_percent_no_coverage"] = m1[percentage_cols].median(axis=1)
@@ -256,7 +257,7 @@ def merge_ntd(gdf):
     
     # To get an estimate of buses that run in a low data zone.
     # Multiply the agency's total buses by the % of its total trips that 
-    # run a "low data coverage route." 
+    # run in a "low data coverage route." 
     m1["estimate_of_buses_in_low_cell_zones"] = (m1.total_buses * m1.percentage_of_trips_w_low_cell_service).astype('int64')
     
     # Replace estimate of buses from 0 to 1.
@@ -277,79 +278,181 @@ def final_merge(routes_gdf):
     # Merge with NTD df to get # of buses
     m2 = merge_ntd(m1)
     
+    # Merge with GTFS to get GTFS status.
+    gtfs = A2_other.load_gtfs() 
+    m3 = m2.merge(gtfs, how="left", on=["itp_id"])
+    m3.gtfs_status = m3.gtfs_status.fillna('No Info')
+    
     # Drop columns
     cols_to_drop = ['itp_id', 'route_id', '_merge', 'calitp_itp_id']
-    m2 = m2.drop(columns = cols_to_drop)
+    m3 = m3.drop(columns = cols_to_drop)
     
     # Clean up columns
-    m2.columns = m2.columns.str.replace("_", " ").str.strip().str.title()
+    m3.columns = m3.columns.str.replace("_", " ").str.strip().str.title()
     
     # Clean up % values
-    m2["Percentage Of Trips W Low Cell Service"] = (m2["Percentage Of Trips W Low Cell Service"] * 100)
+    m3["Percentage Of Trips W Low Cell Service"] = (m3["Percentage Of Trips W Low Cell Service"] * 100)
     
     # Remove districts that repeat a few times 
-    m2["District"] = (m2["District"].apply(lambda x: ", ".join(set([y.strip() for y in x.split(",")]))).str.strip())
+    m3["District"] = (m3["District"].apply(lambda x: ", ".join(set([y.strip() for y in x.split(",")]))).str.strip())
     
     # Ensure this remains a GDF
-    m2 = m2.rename(columns =  {"Geometry X":"Geometry"})
-    m2 = m2.set_geometry("Geometry")
+    m3 = m3.rename(columns =  {"Geometry X":"Geometry"})
+    m3 = m3.set_geometry("Geometry")
     
-
-    return m2
+    return m3
 
 """
-Other Functions
+Summary Functions
 """
-# Export geospatial file to a geojson 
-def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
+def count_values(df, columns_to_count:list):
     """
-    Save geodataframe as parquet locally,
-    then move to GCS bucket and delete local file.
-
-    gdf: geopandas.GeoDataFrame
-    GCS_FILE_PATH: str. Ex: gs://calitp-analytics-data/data-analyses/my-folder/
-    FILE_NAME: str. Filename.
+    Count # of values delinated by comma
+    in a list of columns. Input results into 
+    a new column
     """
-    gdf.to_file(f"./{FILE_NAME}.geojson", driver="GeoJSON")
-    fs.put(f"./{FILE_NAME}.geojson", f"{GCS_FILE_PATH}{FILE_NAME}.geojson")
-    os.remove(f"./{FILE_NAME}.geojson")
- 
+    for c in columns_to_count:
+        # Create a new column for counted elements
+        df[f"number_of_{c}"] =  (df[c]
+        .apply(lambda x: len(x.split(","))) 
+        .astype("int64")
+        ) 
+    return df 
+
+def district_tagging_graph(row):
+    """
+    After applying the function above, if there are 
+    2+ districts counted, label as "Various Districts."
+    Else return original District
+    """
+    if row["number_of_District"] == 2:
+        return "Various Districts"
+    else:
+        return row["District"]
+
+def summarize_districts(df):
+    """
+    Summarize the total # of routes by median percent cell
+    coverage by districtb
+    """
+    summary = (
+        df.groupby(["District", "Binned"])
+        .agg({"Long Route Name": "count"})
+        .reset_index()
+        .rename(
+            columns={
+                "Long Route Name": "Total Routes",
+                "Binned": "Median Percent of Route with Cell Coverage",
+            }
+        )
+    )
+    
+    summary = count_values(summary, ["District"])
+    summary["District Simplified"] = summary.apply(lambda x: district_tagging_graph(x), axis=1)
+    return summary
+
+def summarize_operators(df):
+    """
+    Summarize the total # of routes by median percent cell
+    coverage by operators
+    """
+    operator = (
+    df.groupby(["Agency", "Binned"])
+    .agg({"Long Route Name": "nunique"})
+    .reset_index()
+    .rename(
+        columns={
+            "Binned": "Median Percent of Route with Cell Coverage",
+            "Long Route Name": "Total Routes",
+        }
+    ))
+    
+    return operator
+
+def summarize_routes_gtfs(df):
+    """
+    Count total routes by its range of cellular coverage
+    and GTFS status
+    """
+    routes_gtfs = (
+        df.groupby(['Binned', 'Gtfs Status'])
+        .agg({'Long Route Name':'count'})
+        .reset_index()
+        .rename(columns = {'Long Route Name':'Total Routes'}))
+    return routes_gtfs
+
+
+subset_for_results = [
+    "Agency",
+    "Long Route Name",
+    "District",
+    "Median Percent With Coverage",
+    "Median Percent No Coverage",
+    "Total Trips By Route",
+    "Total Buses",
+    "Estimate Of Buses In Low Cell Zones",
+    "Gtfs Status"
+]
+
 """
-OLD
+Chart Functions
 """
-def overlay_single_routes(
-    provider: gpd.GeoDataFrame, routes: gpd.GeoDataFrame, provider_name: str
+chart_width = 450
+chart_height = 250
+
+def preset_chart_config(chart: alt.Chart) -> alt.Chart:
+    
+    chart = chart.properties(
+        width=chart_width,
+        height=chart_height
+    )
+    return chart
+
+def chart_with_dropdown(
+    df,
+    dropdown_list: list,
+    dropdown_field: str,
+    x_axis_chart1: str,
+    y_axis_chart1: str,
+    color_col1: str,
+    chart1_tooltip_cols: list,
+    chart_title: str,
 ):
+    """A bar chart controlled by a dropdown filter.
+    Args:
+        df: the dataframe
+        dropdown_list(list): a list of all the values in the dropdown menu,
+        dropdown_field(str): column where the dropdown menu's values are drawn from,
+        x_axis_chart1(str): x axis value for chart 1 - encode as Q or N,
+        y_axis_chart1(str): y axis value for chart 1 - encode as Q or N,
+        color_col1(str): column to color the graphs for chart 1,
+        chart1_tooltip_cols(list): list of all the columns to populate the tooltip,
+        chart_title(str):chart title,
     """
-    For any provider or routes that may cause an issue,
-    use this function to pass and print out the names of
-    problematic routes.
-    """
+    # Create drop down menu
+    input_dropdown = alt.binding_select(options=dropdown_list, name="Select ")
 
-    # Empty dataframe to hold results
-    all_intersected_routes = pd.DataFrame()
+    # The column tied to the drop down menu
+    selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
 
-    # List of long route names
-    unique_routes_list = routes.long_route_name.unique().tolist()
+    chart1 = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=x_axis_chart1,
+            y=(y_axis_chart1),
+            color=alt.Color(
+                color_col1, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+                , legend = None
+            ),
+            tooltip=chart1_tooltip_cols,
+        )
+        .properties(title=chart_title)
+        .add_selection(selection)
+        .transform_filter(selection)
+    )
 
-    # Intersect route by route, skipping those that don't work
-    for i in unique_routes_list:
-        filtered = routes[routes.long_route_name == i].reset_index(drop=True)
-        try:
-            intersected = gpd.overlay(
-                provider, filtered, how="intersection", keep_geom_type=False
-            )
-            all_intersected_routes = pd.concat(
-                [all_intersected_routes, intersected], axis=0
-            )
-        except:
-            pass
-            print(f"{i}")
+    chart1 = preset_chart_config(chart1)
 
-    #utils.geoparquet_gcs_export(
-    #    all_intersected_routes,
-     #   utilities.GCS_FILE_PATH,
-      #  f"{provider_name}_overlaid_with_unique_routes",
-    #)
+    return chart1
 
-    return all_intersected_routes
