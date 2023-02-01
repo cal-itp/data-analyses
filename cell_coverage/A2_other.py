@@ -114,9 +114,8 @@ def clip_route_district(district_df):
 
 def complete_clip_route_district() -> dg.GeoDataFrame:
     """
-    For each district, find which routes fall 100% neatly
-    in a district and which cross districts. 
-    Stack the seperated district results back together.
+    Find which routes are in only 1 or 1+ districts
+    for each district. 
     """
     # Load districts
     district_df = A1_provider_prep.get_districts()
@@ -165,10 +164,10 @@ def aggregate_routes(gdf):
 
 def find_multi_district_routes():
     """
-    Find which routes are in one district versus 
+    Definitively summarize which routes are in one district versus 
     those that run in various districts. Returns
     a df with multi-district routes, a df with one-district
-    routes, and the original clipped df
+    routes, and the original clipped df.
     """
     # Clip the routes against districts
     clipped_df = complete_clip_route_district()
@@ -310,7 +309,6 @@ def ntd_vehicles():
 Add GTFS
 """
 # Agencies that were left out
-# https://github.com/cal-itp/data-infra/blob/e8a2332562628508f13310eb4ffaaf4d4017e9f3/airflow/data/agencies.yml
 data = [
     [177, "the Link Florence-Firestone/Walnut Park", "GTFS but no additional details"],
     [181, "the Link Willowbrook", "GTFS but no additional details"],
