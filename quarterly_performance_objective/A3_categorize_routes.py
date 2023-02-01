@@ -92,9 +92,9 @@ def flag_shn_intersecting_routes(
 if __name__=="__main__":
     
     ANALYSIS_DATE = rt_dates.PMAC["Q4_2022"]
-    VERSION = "v2"
+    VERSION = "v1"
 
-    logger.add("./logs/A2_categorize_routes.log", retention = "6 months")
+    logger.add("./logs/A3_categorize_routes.log", retention = "6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -146,7 +146,7 @@ if __name__=="__main__":
     gdf = (df.assign(
         service_hours = df.service_hours.round(2),
         route_length_mi = round(df.route_length / geography_utils.FEET_PER_MI, 2),
-        ).drop(columns = ["route_length", "service_hours"])
+        ).drop(columns = ["route_length"])
         .to_crs(geography_utils.WGS84)
     )
     

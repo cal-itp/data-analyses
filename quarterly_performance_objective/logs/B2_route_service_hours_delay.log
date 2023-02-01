@@ -138,3 +138,25 @@ right_only       0
 Name: merge_delay, dtype: int64
 2022-11-18 08:26:25.856 | INFO     | __main__:<module>:99 - exported to GCS
 2022-11-18 08:26:25.857 | INFO     | __main__:<module>:100 - execution time: 0:00:03.492852
+2023-01-31 15:06:52.537 | INFO     | __main__:<module>:72 - Analysis date: 2022-05-04  warehouse v1
+2023-01-31 15:06:56.217 | INFO     | __main__:<module>:94 - schedule-RT delay outer join merge: left_only     1585
+both          1154
+right_only      88
+Name: merge_delay, dtype: int64
+2023-01-31 15:06:58.346 | INFO     | __main__:<module>:102 - exported to GCS
+2023-01-31 15:06:58.346 | INFO     | __main__:<module>:103 - execution time: 0:00:05.789849
+2023-01-31 16:17:52.220 | INFO     | __main__:<module>:72 - Analysis date: 2022-08-17  warehouse v1
+2023-01-31 16:17:55.314 | INFO     | __main__:<module>:94 - schedule-RT delay outer join merge: left_only     1382
+both          1306
+right_only     149
+Name: merge_delay, dtype: int64
+2023-01-31 16:17:57.929 | INFO     | __main__:<module>:102 - exported to GCS
+2023-01-31 16:17:57.931 | INFO     | __main__:<module>:103 - execution time: 0:00:05.691691
+2023-01-31 16:19:32.971 | INFO     | __main__:<module>:72 - Analysis date: 2022-10-12  warehouse v1
+2023-01-31 16:19:36.540 | INFO     | __main__:<module>:94 - schedule-RT delay outer join merge: both          1499
+left_only     1419
+right_only     134
+Name: merge_delay, dtype: int64
+2023-01-31 16:19:39.041 | INFO     | __main__:<module>:102 - exported to GCS
+2023-01-31 16:19:39.043 | INFO     | __main__:<module>:103 - execution time: 0:00:06.071078
+2023-01-31 16:20:03.549 | INFO     | __main__:<module>:72 - Analysis date: 2022-05-04  warehouse v2
