@@ -20,12 +20,12 @@ The AT&T, Verizon, and T-Mobile files is downloaded [here](https://us-fcc.app.bo
     * Step 5 `A1.stack_all_maps`: after running step 4, the provider maps are scattered among 12 files. `Concat` them to create a map for all of California. 
 
 ### Other Data Sources Prep
-To answer how many buses run in a low coverage area, this requires bringing other data sets: `traffic_ops/export/ca_transit_routes`, `rt_delay/compiled_cached_views/trips_2022-09-14` and NTD Vehicle data. 
-1. First, we need to find unique routes with `A2.load_unique_routes_df`. Dig deeper to find whether a route runs in one or multiple districts using `A2.find_multi_district_routes`.
-2. Load `A2.trip_df` to find the number of trips an operator runs across all routes on September 14, 2022. 
+To answer how many buses run in a low coverage area, this requires bringing other data sets.
+1. Find unique routes with `A2.load_unique_routes_df`. Dig deeper to find whether a route runs in one or multiple districts using `A2.find_multi_district_routes`.
+2. Load `A2.trip_df` for the number of trips an operator runs across all routes on September 14, 2022. 
 3. Use `A2.ntd_vehicles` to find the number of buses each agency owns. 
+4. Use `A2.load_gtfs` to add on the GTFS statuses by agency. 
 
 ### Analysis 
-After preparing all the data, it's time to answer the question. 
 1. `Overlay` all the unique routes for each provider with `A3_analysis.stack_all_routes`. Now, there are 3 different dataframes. Use `A3.merge_all_providers` to return a single dataframe with routes that cross an area without data cellular among all three providers. 
-2. To add NTD and Trips information and find an estimate of total buses that are running in poor cellular coverage routes, `merge` the dataframe above using `A3.final_merge`. 
+2. To add NTD, GTFS, and Trips information and find an estimate of total buses that are running in poor cellular coverage routes, `merge` the dataframe above using `A3.final_merge`. 
