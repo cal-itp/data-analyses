@@ -1,0 +1,71 @@
+districts:
+ - district: 03 - Marysville
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override: '2022-02-08'
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: False
+   # blank/None or list [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay
+   corr_extra_fm:
+   hs_extra_fm:
+   corridors:
+     - corridor:
+         itp_id: 273
+         route_filter:
+         parts:
+         # can define each corridor with multiple parts if desired (i.e. one-way couplets)
+           - part:
+             shape_id: '40769'
+             stop_bounds: [3, 39]
+           - part:
+             shape_id: '40768'
+             stop_bounds: [19, 34]
+     - corridor:
+         itp_id: 273
+         route_filter:
+         parts:
+           - part:
+             shape_id: '40783'
+             stop_bounds: [28, 58]
+           - part:
+             shape_id: '40784'
+             stop_bounds: [11, 19]
+     - corridor:
+         itp_id: 273
+         route_filter:
+         parts:
+           - part:
+             shape_id: '40744'
+             stop_bounds: [22, 36]
+     - corridor:
+         itp_id: 273
+         route_filter:
+         parts:
+           - part:
+             shape_id: '40735'
+             stop_bounds: [7, 34]
+   hotspots:
+   # can define each hotspot with multiple parts if desired (i.e. one-way couplets)
+     - hotspot:
+         itp_id: 273
+         route_filter:
+         parts:
+           - part:
+             shape_id: '40735'
+             stop_bounds: [22, 25]
+     - hotspot:
+         itp_id: 273
+         route_filter:
+         parts:
+           - part:
+             shape_id: '40759'
+             stop_bounds: [21, 24]
+     - hotspot:
+         itp_id: 273
+         route_filter:
+         parts:
+           - part:
+             shape_id: '40759'
+             stop_bounds: [7, 12]
