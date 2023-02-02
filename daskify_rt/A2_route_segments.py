@@ -29,8 +29,9 @@ COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
 
 analysis_date = "2022-10-12"
 
-def merge_routes_to_trips(routelines: dg.GeoDataFrame, 
-                          trips: dd.DataFrame) -> dg.GeoDataFrame:   
+def merge_routes_to_trips(
+    routelines: dg.GeoDataFrame, trips: dd.DataFrame
+) -> dg.GeoDataFrame:   
     """
     Merge routes and trips tables.
     Keep the longest shape by route_length in each direction.
@@ -41,40 +42,46 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
     """
     shape_id_cols = ["calitp_itp_id", "shape_id"]
     route_dir_cols = ["calitp_itp_id", "route_id", "direction_id"]
-
-    routelines_ddf = routelines.assign(
-        route_length = routelines.geometry.length,
-    )
-        
+    
     # Merge routes to trips with using trip_id
     # Keep route_id and shape_id, but drop trip_id by the end
-    m1 = (dd.merge(
-            routelines_ddf,
-            # Don't merge using calitp_url_number because ITP ID 282 (SFMTA)
-            # can use calitp_url_number = 1
-            # Just keep calitp_url_number = 0 from routelines_ddf
-            trips[shape_id_cols + ["route_id", "direction_id"]],
-            on = shape_id_cols,
-            how = "inner",
-        ).drop_duplicates(subset = route_dir_cols + ["route_length"])
-        .reset_index(drop=True)
-    )
+    # Use pandas instead of dask because we want to sort by multiple columns
+    # and then drop_duplicates and longest route_length
+    trips_with_geom = dd.merge(
+        routelines,
+        # Don't merge using calitp_url_number because ITP ID 282 (SFMTA)
+        # can use calitp_url_number = 1
+        # Just keep calitp_url_number = 0 from routelines
+        trips,
+        on = shape_id_cols,
+        how = "inner",
+    ).compute()
+    
+    
+    trips_with_geom = (trips_with_geom
+                       .assign(
+                            route_length = trips_with_geom.geometry.length
+                       ).sort_values(route_dir_cols + ["route_length"], 
+                                     ascending=[True, True, True, False])
+                       .drop_duplicates(subset = route_dir_cols)
+                       .reset_index(drop=True)
+                      )
+    
+    m1 = dg.from_geopandas(trips_with_geom, npartitions=2)
     
     # If direction_id is missing, then later code will break, because
     # we need to find the longest route_length
     # Don't really care what direction is, since we will replace it with north-south
     # Just need a value to stand-in, treat it as the same direction
     m1 = m1.assign(
-        direction_id = m1.direction_id.fillna('0')
+        direction_id = m1.direction_id.fillna('0'),
     )
     
     m1 = m1.assign(    
-        # dask can only sort by 1 column
-        # so, let's combine route-dir into 1 column and drop_duplicates
         route_dir_identifier = m1.apply(
             lambda x: zlib.crc32((str(x.calitp_itp_id) + 
-                x.route_id + str(x.direction_id)).encode("utf-8")), 
-            axis=1, meta=("route_dir_identifier", "int"))
+                x.route_id + str(x.direction_id)).encode("utf-8")), axis=1, 
+            meta=('route_dir_identifier', 'int64'))
     )
     
     # Keep the longest shape_id for each direction
@@ -87,8 +94,11 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
     return longest_shapes
 
 
-def get_longest_shapes(analysis_date: str):
-    trips = A1.get_scheduled_trips(analysis_date)
+def get_longest_shapes(analysis_date: str) -> dg.GeoDataFrame:
+    trips = (A1.get_scheduled_trips(analysis_date)
+             [["calitp_itp_id", "shape_id", 
+               "route_id", "direction_id"]]
+            )
     routelines = A1.get_routelines(analysis_date)
 
     longest_shapes = merge_routes_to_trips(routelines, trips)
@@ -147,18 +157,19 @@ def route_direction_to_segments_crosswalk():
 if __name__ == "__main__":
     
     longest_shapes = get_longest_shapes(analysis_date)
+    print("Get longest shapes")
     
     # Cut segments
-    longest_shapes_gdf = longest_shapes.compute()
-
     segments = geography_utils.cut_segments(
-        longest_shapes_gdf,
+        longest_shapes,
         group_cols = ["calitp_itp_id", "calitp_url_number", 
                       "route_id", "direction_id", "longest_shape_id",
                       "route_dir_identifier", "route_length"],
         segment_distance = 1_000
     )
     
+    print("Cut route segments")
+
     arrowized_segments = add_arrowized_geometry(segments).compute()
 
     utils.geoparquet_gcs_export(
@@ -166,8 +177,9 @@ if __name__ == "__main__":
         DASK_TEST,
         "longest_shape_segments"
     )
-    '''
+    print("Export longest_shape_segments")
+
     segment_crosswalk = route_direction_to_segments_crosswalk()
     segment_crosswalk.compute().to_parquet(
         f"{DASK_TEST}segments_route_direction_crosswalk.parquet")
-    '''
+    print("Export segment crosswalk")
