@@ -8,8 +8,6 @@ from shared_utils.rt_utils import ZERO_THIRTY_COLORSCALE
 from rt_analysis import rt_filter_map_plot, rt_parser
 import folium
 
-
-
 def fm_from_bbutils(ct_dist, category, get_sorted = False,
                     fm_dict = {}, analysis_date = dt.date(2022, 5, 4)):
     '''
@@ -117,10 +115,10 @@ def bb_map_all(hotspots, corridors, combined_speeds, district):
     '''
     
     display_cols = ['schedule_metric_minutes', 'speed_metric_minutes',
-                   'routes']
+                   'routes_included', 'agency']
     display_aliases = ['Schedule-Based Delay Metric (minutes)',
                       'Speed-Based Delay Metric (minutes)',
-                      'Routes Included']
+                      'Routes Included', 'Agency']
     tooltip_dict = {'aliases': display_aliases}
     style_dict = {'opacity': 0, 'fillOpacity': 0.8}
     
