@@ -15,7 +15,9 @@ from typing import Literal
 
 from shared_utils import geography_utils, utils, rt_dates
 from bus_service_utils import create_parallel_corridors
-from update_vars import BUS_SERVICE_GCS, COMPILED_CACHED_GCS #,ANALYSIS_DATE
+from update_vars import (BUS_SERVICE_GCS, COMPILED_CACHED_GCS,
+                         get_filename #,ANALYSIS_DATE
+                        )
 
 catalog = intake.open_catalog(
     "../_shared_utils/shared_utils/shared_data_catalog.yml")
@@ -116,12 +118,34 @@ def add_district(route_df: gpd.GeoDataFrame,
     return gdf
 
 
+def import_data(analysis_date: str, 
+                warehouse_version: Literal["v1", "v2"]
+               ) -> tuple[pd.DataFrame, gpd.GeoDataFrame]: 
+    """
+    During v1 to v2 warehouse transition, stage comparisons 
+    in both versions for a given date.
+    
+    But, after v1 warehouse is not updated, just use v2, but
+    don't always name it v2.
+    """
+    trips_file_path = get_filename(
+        f"{COMPILED_CACHED_GCS}trips_", analysis_date, warehouse_version)
+    routelines_file_path = get_filename(
+        f"{COMPILED_CACHED_GCS}routelines_", analysis_date, warehouse_version
+    )
+    
+    trips = pd.read_parquet(trips_file_path)
+    routelines = gpd.read_parquet(routelines_file_path)
+        
+    return trips, routelines
+
+
 if __name__ == "__main__":
     
-    ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"]
-    VERSION = "v1"
+    ANALYSIS_DATE = rt_dates.PMAC["Q1_2023"]
+    VERSION = "v2"
     
-    logger.add("./logs/assemble_route_df.log", retention="6 months")
+    logger.add("./logs/A1_scheduled_route_level_df.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -136,10 +160,7 @@ if __name__ == "__main__":
         route_cols = ["feed_key", "name", "route_id"]
     
     # Import data
-    trips = pd.read_parquet(
-        f"{COMPILED_CACHED_GCS}trips_{ANALYSIS_DATE}_{VERSION}.parquet")
-    routelines = gpd.read_parquet(
-        f"{COMPILED_CACHED_GCS}routelines_{ANALYSIS_DATE}_{VERSION}.parquet")
+    trips, routelines = import_data(ANALYSIS_DATE, VERSION)
     
     # Merge to get shape_level geometry, then pare down to route-level geometry
     route_geom = shape_geom_to_route_geom(
@@ -165,7 +186,7 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(
         gdf, 
         BUS_SERVICE_GCS,
-        f"routes_{ANALYSIS_DATE}_{VERSION}"
+        get_filename("routes_", ANALYSIS_DATE, VERSION)
     )
     
     end = datetime.datetime.now()
