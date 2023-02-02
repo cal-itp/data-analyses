@@ -2,12 +2,17 @@
 Download vehicle positions for a day.
 """
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(900_000_000_000)
+os.environ["CALITP_BQ_MAX_BYTES"] = str(1_000_000_000_000)
 
+import datetime
 import geopandas as gpd
 import pandas as pd
+import sys
 
 from calitp.sql import query_sql
+from calitp.tables import tbls
+from loguru import logger
+from siuba import *
 
 #from shared_utils import rt_dates
 
@@ -17,34 +22,87 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
 
 
+def determine_batches(rt_names: list) -> dict:
+    #https://stackoverflow.com/questions/4843158/how-to-check-if-a-string-is-a-substring-of-items-in-a-list-of-strings
+    large_operator_names = [
+        "LA Metro Bus",
+        "LA Metro Rail",
+        "AC Transit", 
+        "Muni"
+    ]
+
+    # If any of the large operator name substring is 
+    # found in our list of names, grab those
+    # be flexible bc "Vehicle Positions" and "VehiclePositions" present
+    matching = [i for i in rt_names 
+                if any(name in i for name in large_operator_names)]
+    remaining = [i for i in rt_names if i not in matching]
+    
+    # For each of the large operators, they will run in query individually,
+    # and batch up the remaining together
+    # if there are 4 large operators, then enumerate gives us 0, 1, 2, 3. 
+    # so final batch is the 4th
+    batch_dict = {}
+    last_i = len(matching)
+    
+    for i, name in enumerate(matching):
+        batch_dict[i] = [name]
+    
+    batch_dict[last_i] = remaining
+    
+    return batch_dict
+
+
 def download_vehicle_positions(
     date: str,
-    hour_range: tuple
+    operator_names: list
 ) -> pd.DataFrame:    
-    
-    start_hour = str(hour_range[0]).zfill(2)
-    end_hour = str(hour_range[1]).zfill(2)
 
+    name = operator_names[0]
+    
+    df = (tbls.mart_gtfs.fct_vehicle_locations()
+          >> filter(_.dt == date)
+          >> filter(_._gtfs_dataset_name.isin(operator_names))
+          >> select(_.gtfs_dataset_key, 
+                    _.trip_id,
+                    _.location_timestamp,
+                    _.location)
+              >> collect()
+         )
+    
     #https://www.yuichiotsuka.com/bigquery-timestamp-datetime/
     sql_statement = f"""
-        SELECT *
+        SELECT 
+            gtfs_dataset_key,
+            trip_id,
+            location_timestamp,
+            location
         FROM `cal-itp-data-infra.mart_gtfs.fct_vehicle_locations`
         WHERE
             (dt = '{date}' AND
-            hour >= TIMESTAMP('{date} {start_hour}:00:00') AND
-            hour <= TIMESTAMP('{date} {end_hour}:00:00') 
-            )
+             _gtfs_dataset_name = '{name}')
     """
-
-    df = query_sql(sql_statement).to_parquet(
-        f"{DASK_TEST}vp_raw_{analysis_date}_"
-        f"hr{start_hour}-{end_hour}.parquet")
+    # _gtfs_dataset_name in {tuple(operator_names)}
+    #df = query_sql(sql_statement)
     
     #print(sql_statement)
-    #return df
+    return df
 
 
 if __name__ == "__main__":
+    from dask.distributed import Client
+    
+    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    
+    logger.add("./logs/download_vp_v2.log", 
+               retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    logger.info(f"Analysis date: {analysis_date}")
+    
+    start = datetime.datetime.now()
     
     # Get rt_datasets that are available for that day
     '''
@@ -56,16 +114,35 @@ if __name__ == "__main__":
 
     rt_datasets.to_parquet("./data/rt_datasets.parquet")
     '''
+    rt_datasets = pd.read_parquet("./data/rt_datasets.parquet")
     
-    hour_range1 = (0, 4)
-    #hour_range2 = (6, 10)
-    #hour_range3 = (11, 15)
-    #hour_range4 = (16, 20)
-    #hour_range5 = (21, 25)
+    # Exclude regional feed and precursors
+    exclude = ["Bay Area 511 Regional VehiclePositions"]
+    rt_datasets = rt_datasets[
+        ~(rt_datasets.name.isin(exclude)) & 
+        (rt_datasets.regional_feed_type != "Regional Precursor Feed")
+    ].reset_index(drop=True)
     
-    df = download_vehicle_positions(analysis_date, hour_range1)
+    rt_dataset_names = rt_datasets.name.unique().tolist()
+
+    batches = determine_batches(rt_dataset_names)
+    
+    for i, subset_operators in batches.items():
         
-    df.to_parquet(
-        f"{DASK_TEST}vp_raw_{analysis_date}_"
-        f"hr{hour_range[0]}-{hour_range[1]}.parquet")
+        time0 = datetime.datetime.now()
+        
+        if i > 1 and i < 4:
+            logger.info(f"batch {i}: {subset_operators}")
+            df = download_vehicle_positions(
+                analysis_date, subset_operators)
+
+            df.to_parquet(
+                f"{DASK_TEST}vp_raw_{analysis_date}_batch{i}.parquet")
+
+            time1 = datetime.datetime.now()
+            logger.info(f"exported batch {i} to GCS: {time1 - time0}")
     
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end - start}")
+        
+    client.close()
