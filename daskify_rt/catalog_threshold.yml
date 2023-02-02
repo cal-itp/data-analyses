@@ -1,0 +1,28 @@
+metadata:
+  version: 1
+  parameters:
+    analysis_date:
+      type: str
+      description: Analysis date for v1 diagnostics
+      default: "2022-10-12"
+sources:  
+    route_lines:
+        driver: geoparquet
+        description: description
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/routelines_{{analysis_date}}.parquet
+    trips:
+        driver: parquet
+        description: description
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/trips_{{analysis_date}}.parquet
+    longest_shape:
+        driver: geoparquet
+        description: description
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/longest_shape_segments.parquet
+    crosswalk:
+        driver: parquet
+        description: description
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/segments_route_direction_crosswalk.parquet
