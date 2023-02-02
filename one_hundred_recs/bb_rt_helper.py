@@ -8,8 +8,6 @@ from shared_utils.rt_utils import ZERO_THIRTY_COLORSCALE
 from rt_analysis import rt_filter_map_plot, rt_parser
 import folium
 
-
-
 def fm_from_bbutils(ct_dist, category, get_sorted = False,
                     fm_dict = {}, analysis_date = dt.date(2022, 5, 4)):
     '''
@@ -117,18 +115,23 @@ def bb_map_all(hotspots, corridors, combined_speeds, district):
     '''
     
     display_cols = ['schedule_metric_minutes', 'speed_metric_minutes',
-                   'routes']
+                   'routes_included', 'agency']
     display_aliases = ['Schedule-Based Delay Metric (minutes)',
                       'Speed-Based Delay Metric (minutes)',
-                      'Routes Included']
+                      'Routes Included', 'Agency']
     tooltip_dict = {'aliases': display_aliases}
     style_dict = {'opacity': 0, 'fillOpacity': 0.8}
     
-    all_corr = pd.concat(corridors)
-    all_corr['location_type'] = 'corridor'
-    all_hs = pd.concat(hotspots)
-    all_hs['location_type'] = 'hotspot'
-    combined = pd.concat([all_corr, all_hs])
+    if corridors:
+        all_corr = pd.concat(corridors)
+        all_corr['location_type'] = 'corridor'
+        combined = all_corr
+    if hotspots:
+        all_hs = pd.concat(hotspots)
+        all_hs['location_type'] = 'hotspot'
+        combined = all_hs
+    if corridors and hotspots:
+        combined = pd.concat([all_corr, all_hs])
     cmap = ['#1b9e77', '#d95f02']
     
     m = combined.explore(tiles = 'CartoDB positron',
