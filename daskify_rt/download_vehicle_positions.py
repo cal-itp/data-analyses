@@ -2,14 +2,13 @@
 Download vehicle positions for a day.
 """
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(1_000_000_000_000)
+os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 
 import datetime
 import geopandas as gpd
 import pandas as pd
 import sys
 
-from calitp.sql import query_sql
 from calitp.tables import tbls
 from loguru import logger
 from siuba import *
@@ -57,8 +56,6 @@ def download_vehicle_positions(
     date: str,
     operator_names: list
 ) -> pd.DataFrame:    
-
-    name = operator_names[0]
     
     df = (tbls.mart_gtfs.fct_vehicle_locations()
           >> filter(_.dt == date)
@@ -70,22 +67,9 @@ def download_vehicle_positions(
               >> collect()
          )
     
+    # query_sql, parsing by the hour timestamp BQ column confusing
     #https://www.yuichiotsuka.com/bigquery-timestamp-datetime/
-    sql_statement = f"""
-        SELECT 
-            gtfs_dataset_key,
-            trip_id,
-            location_timestamp,
-            location
-        FROM `cal-itp-data-infra.mart_gtfs.fct_vehicle_locations`
-        WHERE
-            (dt = '{date}' AND
-             _gtfs_dataset_name = '{name}')
-    """
-    # _gtfs_dataset_name in {tuple(operator_names)}
-    #df = query_sql(sql_statement)
     
-    #print(sql_statement)
     return df
 
 
@@ -105,7 +89,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     # Get rt_datasets that are available for that day
-    '''
+    
     rt_datasets = gtfs_utils_v2.get_transit_organizations_gtfs_dataset_keys(
         keep_cols=["key", "name", "type", "regional_feed_type"],
         custom_filtering={"type": ["vehicle_positions"]},
@@ -113,7 +97,7 @@ if __name__ == "__main__":
     ) >> collect()
 
     rt_datasets.to_parquet("./data/rt_datasets.parquet")
-    '''
+    
     rt_datasets = pd.read_parquet("./data/rt_datasets.parquet")
     
     # Exclude regional feed and precursors
@@ -131,7 +115,7 @@ if __name__ == "__main__":
         
         time0 = datetime.datetime.now()
         
-        if i > 1 and i < 4:
+        if i > 1:
             logger.info(f"batch {i}: {subset_operators}")
             df = download_vehicle_positions(
                 analysis_date, subset_operators)
