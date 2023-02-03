@@ -8,6 +8,13 @@ Work related to using `dask` to produce speeds by segments from GTFS RT vehicle 
 * GitHub Epics
     * [Initial daskifying and exploration](https://github.com/cal-itp/data-analyses/issues/592)
 
+| warehouse         | gcs                                                       | github                                                  |
+|-------------------|-----------------------------------------------------------|---------------------------------------------------------|
+| schedule          | gtfs_schedule (make dir when we start)                                       | gtfs_schedule (existing as gtfs_schedule_calendar_dates, need to rename)                |
+| rt_segment_speeds | rt_segment_speeds (existing as dask_test, need to rename) | rt_segment_speeds (existing daskify_rt, need to rename) |
+| rt_vs_schedule    | rt_vs_schedule                                            | rt_scheduled_v_ran (existing)                           |
+| rt_predictions    | rt_predictions                                            | rt_predictions (make dir when we start)                 |
+
 
 ## Steps
 1. concat vehicle positions for a single day - change df to gdf (`A1`)
