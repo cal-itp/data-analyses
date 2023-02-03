@@ -8,7 +8,7 @@ import pandas as pd
 def grab_region_centroids() -> dict:
     # This parquet is created in shared_utils/shared_data.py
     df = pd.read_parquet(
-        "gs://calitp-analytics-data/data-analyses/ca_county_centroids.parquet"
+        "gs://calitp-analytics-data/data-analyses/shared_data/ca_county_centroids.parquet"
     )
 
     df = df.assign(centroid=df.centroid.apply(lambda x: x.tolist()))

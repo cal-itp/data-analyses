@@ -35,8 +35,8 @@ def merge_routes_to_trips(
     this pares it down to ~115 route_ids.
     Use this pared down shape_ids to get hqta_segments.
     """
-    shape_id_cols = ["calitp_itp_id", "shape_id"]
-    route_dir_cols = ["calitp_itp_id", "route_id", "direction_id"]
+    shape_id_cols = ["shape_array_key"]
+    route_dir_cols = ["feed_key", "route_key", "route_id", "direction_id"]
     
     # Merge routes to trips with using trip_id
     # Keep route_id and shape_id, but drop trip_id by the end
@@ -57,7 +57,7 @@ def merge_routes_to_trips(
                        .assign(
                             route_length = trips_with_geom.geometry.length
                        ).sort_values(route_dir_cols + ["route_length"], 
-                                     ascending=[True, True, True, False])
+                                     ascending=[True, True, True, True, False])
                        .drop_duplicates(subset = route_dir_cols)
                        .reset_index(drop=True)
                       )
@@ -74,9 +74,10 @@ def merge_routes_to_trips(
     
     m1 = m1.assign(    
         route_dir_identifier = m1.apply(
-            lambda x: zlib.crc32((str(x.calitp_itp_id) + 
-                x.route_id + str(x.direction_id)).encode("utf-8")), axis=1, 
-            meta=('route_dir_identifier', 'int64'))
+            lambda x: zlib.crc32(
+                (x.route_key + str(x.direction_id)
+                ).encode("utf-8")), 
+            axis=1, meta=('route_dir_identifier', 'int'))
     )
     
     # Keep the longest shape_id for each direction
@@ -91,8 +92,8 @@ def merge_routes_to_trips(
 
 def get_longest_shapes(analysis_date: str) -> dg.GeoDataFrame:
     trips = (A1.get_scheduled_trips(analysis_date)
-             [["calitp_itp_id", "shape_id", 
-               "route_id", "direction_id"]]
+             [["feed_key", "name", "shape_id", 
+               "route_key", "route_id", "direction_id"]]
             )
     routelines = A1.get_routelines(analysis_date)
 
@@ -170,11 +171,11 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(
         arrowized_segments,
         DASK_TEST,
-        "longest_shape_segments"
+        f"longest_shape_segments_{analysis_date}"
     )
     print("Export longest_shape_segments")
 
     segment_crosswalk = route_direction_to_segments_crosswalk()
     segment_crosswalk.compute().to_parquet(
-        f"{DASK_TEST}segments_route_direction_crosswalk.parquet")
+        f"{DASK_TEST}segments_route_direction_crosswalk_{analysis_date}.parquet")
     print("Export segment crosswalk")

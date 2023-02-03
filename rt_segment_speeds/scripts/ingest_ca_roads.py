@@ -22,7 +22,7 @@ import geopandas as gpd
 
 from shared_utils import utils
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/dask_test/"
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 
 def download_ca_osm():
     file_name = "hotosm_usa_california_roads_lines_shp"
