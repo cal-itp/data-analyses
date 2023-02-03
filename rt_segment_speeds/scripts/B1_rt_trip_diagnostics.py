@@ -19,12 +19,8 @@ from dask import delayed
 from loguru import logger
 
 import dask_utils
+from update_vars import SEGMENT_GCS, analysis_date
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-
-analysis_date = "2022-10-12"
 fs = gcsfs.GCSFileSystem()
 
 
@@ -81,7 +77,7 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    all_files = fs.ls(f"{DASK_TEST}vp_sjoin/")
+    all_files = fs.ls(f"{SEGMENT_GCS}vp_sjoin/")
     
     vp_seg_files = [f"gs://{i}" for i in all_files if 'vp_segment' in i]
     
@@ -100,7 +96,7 @@ if __name__ == "__main__":
                    })   
     
     trip_stats.compute().to_parquet(
-        f"{DASK_TEST}trip_diagnostics_{analysis_date}.parquet")
+        f"{SEGMENT_GCS}trip_diagnostics_{analysis_date}.parquet")
 
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")

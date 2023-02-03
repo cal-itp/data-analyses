@@ -19,12 +19,8 @@ warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 import dask_utils
 from A4_valid_vehicle_positions import operators_with_data
+from update_vars import SEGMENT_GCS, analysis_date
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-
-analysis_date = "2022-10-12"
 fs = gcsfs.GCSFileSystem()                    
 
     
@@ -157,7 +153,7 @@ def calculate_speed_by_segment_trip(
 
 @delayed
 def import_vehicle_positions(itp_id: int) -> dd.DataFrame:
-    vp = dd.read_parquet(f"{DASK_TEST}vp_pared_{analysis_date}/")
+    vp = dd.read_parquet(f"{SEGMENT_GCS}vp_pared_{analysis_date}/")
     
     subset = vp[vp.calitp_itp_id == itp_id].reset_index(drop=True)
     
@@ -170,7 +166,7 @@ def import_segments(itp_id: int) -> gpd.GeoDataFrame:
     Import segments and subset to operator segments.
     """
     segments = gpd.read_parquet(
-        f"{DASK_TEST}longest_shape_segments.parquet", 
+        f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet", 
         columns = ["calitp_itp_id", "route_dir_identifier", 
                    "segment_sequence", "geometry"],
         filters = [[("calitp_itp_id", "==", itp_id)]]
@@ -193,7 +189,7 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    ITP_IDS = operators_with_data(f"{DASK_TEST}vp_sjoin/")  
+    ITP_IDS = operators_with_data(f"{SEGMENT_GCS}vp_sjoin/")  
     
     results_linear_ref = []
     
@@ -222,7 +218,7 @@ if __name__ == "__main__":
 
     dask_utils.compute_and_export(
         results_linear_ref,
-        gcs_folder = f"{DASK_TEST}",
+        gcs_folder = f"{SEGMENT_GCS}",
         file_name = f"vp_linear_ref_{analysis_date}",
         export_single_parquet = False
     )
@@ -233,7 +229,7 @@ if __name__ == "__main__":
     time5 = datetime.datetime.now()
         
     linear_ref_df = delayed(dd.read_parquet)(
-            f"{DASK_TEST}vp_linear_ref_{analysis_date}/")
+            f"{SEGMENT_GCS}vp_linear_ref_{analysis_date}/")
 
     operator_speeds = calculate_speed_by_segment_trip(
         linear_ref_df)
@@ -249,7 +245,7 @@ if __name__ == "__main__":
     
     dask_utils.compute_and_export(
         results_speed, 
-        gcs_folder = f"{DASK_TEST}", 
+        gcs_folder = f"{SEGMENT_GCS}", 
         file_name = f"speeds_{analysis_date}",
         export_single_parquet = False
     )
@@ -258,14 +254,14 @@ if __name__ == "__main__":
     logger.info(f"exported all speeds: {time8 - time7}")
     
     # Now write out individual parquets for speeds
-    speeds_df = dd.read_parquet(f"{DASK_TEST}speeds_{analysis_date}/").compute()
+    speeds_df = dd.read_parquet(f"{SEGMENT_GCS}speeds_{analysis_date}/").compute()
 
     for itp_id in speeds_df.calitp_itp_id.unique():
         subset = (speeds_df[speeds_df.calitp_itp_id == itp_id]
                   .reset_index(drop=True)
                  )
         subset.to_parquet(
-            f"{DASK_TEST}speeds_by_operator/"
+            f"{SEGMENT_GCS}speeds_by_operator/"
             f"speeds_{itp_id}_{analysis_date}.parquet")
     
     time9 = datetime.datetime.now()

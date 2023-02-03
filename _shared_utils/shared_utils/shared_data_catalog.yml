@@ -16,13 +16,13 @@ sources:
     description: CA county centroids
     args:
       # source: shared_utils/shared_data.py
-      urlpath: gs://calitp-analytics-data/data-analyses/ca_county_centroids.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/shared_data/ca_county_centroids.parquet
   state_highway_network:
     driver: geoparquet
     description: Cleaned State Highway Network
     args:
       # source: shared_utils/shared_data.py
-      urlpath: gs://calitp-analytics-data/data-analyses/state_highway_network.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/shared_data/state_highway_network.parquet
   ca_transit_routes:
     driver: geoparquet
     description: CA transit routes with line geometry at the operator-level (open data)
