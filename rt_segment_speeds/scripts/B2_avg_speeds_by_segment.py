@@ -6,7 +6,7 @@ import geopandas as gpd
 import pandas as pd
 
 from shared_utils import utils
-from update_vars import DASK_TEST, analysis_date
+from update_vars import SEGMENT_GCS, analysis_date
 
 def avg_speeds_with_segment_geom(
     analysis_date: str, 
@@ -17,7 +17,7 @@ def avg_speeds_with_segment_geom(
     Average the speed_mph across all trips present in the segment.
     """
     df = dd.read_parquet(
-        f"{DASK_TEST}speeds_{analysis_date}/")
+        f"{SEGMENT_GCS}speeds_{analysis_date}/")
     
     # Take the average after dropping unusually high speeds
     segment_cols = ["calitp_itp_id", "route_dir_identifier", 
@@ -38,7 +38,7 @@ def avg_speeds_with_segment_geom(
     
     # Merge in segment geometry
     segments = gpd.read_parquet(
-        f"{DASK_TEST}longest_shape_segments.parquet",
+        f"{SEGMENT_GCS}longest_shape_segments.parquet",
         columns = segment_cols + ["geometry", "geometry_arrowized"]
     ).drop_duplicates().reset_index(drop=True)
     
@@ -101,6 +101,6 @@ if __name__ == "__main__":
 
     utils.geoparquet_gcs_export(
         gdf2,
-        DASK_TEST,
+        SEGMENT_GCS,
         f"avg_speeds_{analysis_date}"
     )
