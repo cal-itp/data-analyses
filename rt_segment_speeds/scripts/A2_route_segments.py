@@ -44,9 +44,6 @@ def merge_routes_to_trips(
     # and then drop_duplicates and longest route_length
     trips_with_geom = dd.merge(
         routelines,
-        # Don't merge using calitp_url_number because ITP ID 282 (SFMTA)
-        # can use calitp_url_number = 1
-        # Just keep calitp_url_number = 0 from routelines
         trips,
         on = shape_id_cols,
         how = "inner",
@@ -68,8 +65,9 @@ def merge_routes_to_trips(
     # we need to find the longest route_length
     # Don't really care what direction is, since we will replace it with north-south
     # Just need a value to stand-in, treat it as the same direction
+    # in v2, direction_id is float
     m1 = m1.assign(
-        direction_id = m1.direction_id.fillna('0'),
+        direction_id = m1.direction_id.fillna(0),
     )
     
     m1 = m1.assign(    
@@ -91,10 +89,7 @@ def merge_routes_to_trips(
 
 
 def get_longest_shapes(analysis_date: str) -> dg.GeoDataFrame:
-    trips = (A1.get_scheduled_trips(analysis_date)
-             [["feed_key", "name", "shape_id", 
-               "route_key", "route_id", "direction_id"]]
-            )
+    trips = A1.get_scheduled_trips(analysis_date)        
     routelines = A1.get_routelines(analysis_date)
 
     longest_shapes = merge_routes_to_trips(routelines, trips)
@@ -152,7 +147,7 @@ def route_direction_to_segments_crosswalk(analysis_date: str):
     
 
 if __name__ == "__main__":
-    
+    '''
     longest_shapes = get_longest_shapes(analysis_date)
     print("Get longest shapes")
     
@@ -166,16 +161,18 @@ if __name__ == "__main__":
     )
     
     print("Cut route segments")
-
+    '''
+    segments = gpd.read_parquet(
+        f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet")
     arrowized_segments = add_arrowized_geometry(segments).compute()
-
+    
     utils.geoparquet_gcs_export(
         arrowized_segments,
         SEGMENT_GCS,
         f"longest_shape_segments_{analysis_date}"
     )
     print("Export longest_shape_segments")
-
+    '''
     segment_crosswalk = route_direction_to_segments_crosswalk(analysis_date)
     (segment_crosswalk.compute().to_parquet(
         f"{SEGMENT_GCS}"
