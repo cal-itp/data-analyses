@@ -278,3 +278,91 @@
 2023-01-11 09:20:36.926 | INFO     | __main__:<module>:189 - Analysis date: 2022-10-12
 2023-01-11 09:23:07.428 | INFO     | __main__:<module>:270 - exported operator speed parquets: 0:02:30.498675
 2023-01-11 09:23:07.429 | INFO     | __main__:<module>:273 - execution time: 0:02:30.499537
+2023-02-02 10:25:29.797 | INFO     | __main__:<module>:192 - Analysis date: 2022-10-12
+2023-02-02 10:25:29.861 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000572
+2023-02-02 10:25:29.863 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.002080
+2023-02-02 10:25:29.864 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000169
+2023-02-02 10:25:29.865 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000890
+2023-02-02 10:25:29.866 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000137
+2023-02-02 10:25:29.867 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000968
+2023-02-02 10:25:29.868 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000168
+2023-02-02 10:25:29.869 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000843
+2023-02-02 10:25:29.870 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000164
+2023-02-02 10:25:29.871 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000871
+2023-02-02 10:25:29.872 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000152
+2023-02-02 10:25:29.872 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000874
+2023-02-02 10:25:29.873 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000131
+2023-02-02 10:25:29.874 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000851
+2023-02-02 10:25:29.875 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000129
+2023-02-02 10:25:29.876 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000845
+2023-02-02 10:25:29.877 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000152
+2023-02-02 10:25:29.878 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000808
+2023-02-02 10:25:29.879 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000170
+2023-02-02 10:25:29.879 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000854
+2023-02-02 10:25:29.880 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000130
+2023-02-02 10:25:29.882 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.001102
+2023-02-02 10:25:29.882 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000129
+2023-02-02 10:25:29.883 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000838
+2023-02-02 10:25:29.884 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000129
+2023-02-02 10:25:29.885 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000906
+2023-02-02 10:25:29.886 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000185
+2023-02-02 10:25:29.887 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000776
+2023-02-02 10:25:29.888 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000189
+2023-02-02 10:25:29.889 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000802
+2023-02-02 10:25:29.890 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000152
+2023-02-02 10:25:29.890 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000763
+2023-02-02 10:25:29.891 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000279
+2023-02-02 10:25:29.891 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000429
+2023-02-02 10:25:29.892 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000202
+2023-02-02 10:25:29.894 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.001861
+2023-02-02 10:25:29.895 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000195
+2023-02-02 10:25:29.897 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.001726
+2023-02-02 10:25:29.897 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000167
+2023-02-02 10:25:29.898 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000457
+2023-02-02 10:25:29.898 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000162
+2023-02-02 10:25:29.899 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000468
+2023-02-02 10:25:29.899 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000172
+2023-02-02 10:25:29.900 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000460
+2023-02-02 10:25:29.900 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000169
+2023-02-02 10:25:29.901 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000505
+2023-02-02 10:25:29.901 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000208
+2023-02-02 10:25:29.902 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000490
+2023-02-02 10:25:29.903 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000183
+2023-02-02 10:25:29.903 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000585
+2023-02-02 10:25:29.904 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000176
+2023-02-02 10:25:29.904 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000574
+2023-02-02 10:25:29.905 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000264
+2023-02-02 10:25:29.906 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000478
+2023-02-02 10:25:29.906 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000274
+2023-02-02 10:25:29.907 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000449
+2023-02-02 10:25:29.907 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000233
+2023-02-02 10:25:29.908 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000471
+2023-02-02 10:25:29.909 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000217
+2023-02-02 10:25:29.909 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000489
+2023-02-02 10:25:29.910 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000226
+2023-02-02 10:25:29.910 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000487
+2023-02-02 10:25:29.911 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000268
+2023-02-02 10:25:29.911 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000527
+2023-02-02 10:25:29.912 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000216
+2023-02-02 10:25:29.913 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000487
+2023-02-02 10:25:29.913 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000217
+2023-02-02 10:25:29.914 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000451
+2023-02-02 10:25:29.914 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000175
+2023-02-02 10:25:29.915 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000555
+2023-02-02 10:25:29.916 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000212
+2023-02-02 10:25:29.916 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000501
+2023-02-02 10:25:29.917 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000284
+2023-02-02 10:25:29.917 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000478
+2023-02-02 10:25:29.918 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000241
+2023-02-02 10:25:29.918 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000462
+2023-02-02 10:25:29.919 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000174
+2023-02-02 10:25:29.920 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000516
+2023-02-02 10:25:29.920 | INFO     | __main__:<module>:208 - imported data: 0:00:00.000228
+2023-02-02 10:25:29.921 | INFO     | __main__:<module>:216 - merge in segment shapes and do linear referencing: 0:00:00.000443
+2023-02-02 10:25:29.921 | INFO     | __main__:<module>:221 - start compute and export of results
+2023-02-02 11:58:08.083 | INFO     | __main__:<module>:231 - computed and exported linear ref: 1:32:38.161550
+2023-02-02 11:58:08.143 | INFO     | __main__:<module>:245 - calculate speed: 0:00:00.000690
+2023-02-02 11:58:08.143 | INFO     | __main__:<module>:248 - start compute and export of results
+2023-02-02 12:00:40.611 | INFO     | __main__:<module>:258 - exported all speeds: 0:02:32.467972
+2023-02-02 12:01:11.156 | INFO     | __main__:<module>:272 - exported operator speed parquets: 0:00:30.545165
+2023-02-02 12:01:11.157 | INFO     | __main__:<module>:275 - execution time: 1:35:41.346828

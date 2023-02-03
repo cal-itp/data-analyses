@@ -22,12 +22,7 @@ import zlib
 
 import A1_vehicle_positions as A1
 from shared_utils import geography_utils, utils, rt_utils
-
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-
-analysis_date = "2022-10-12"
+from update_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, analysis_date
 
 def merge_routes_to_trips(
     routelines: dg.GeoDataFrame, trips: dd.DataFrame
@@ -40,8 +35,8 @@ def merge_routes_to_trips(
     this pares it down to ~115 route_ids.
     Use this pared down shape_ids to get hqta_segments.
     """
-    shape_id_cols = ["calitp_itp_id", "shape_id"]
-    route_dir_cols = ["calitp_itp_id", "route_id", "direction_id"]
+    shape_id_cols = ["shape_array_key"]
+    route_dir_cols = ["feed_key", "route_key", "route_id", "direction_id"]
     
     # Merge routes to trips with using trip_id
     # Keep route_id and shape_id, but drop trip_id by the end
@@ -62,7 +57,7 @@ def merge_routes_to_trips(
                        .assign(
                             route_length = trips_with_geom.geometry.length
                        ).sort_values(route_dir_cols + ["route_length"], 
-                                     ascending=[True, True, True, False])
+                                     ascending=[True, True, True, True, False])
                        .drop_duplicates(subset = route_dir_cols)
                        .reset_index(drop=True)
                       )
@@ -79,9 +74,10 @@ def merge_routes_to_trips(
     
     m1 = m1.assign(    
         route_dir_identifier = m1.apply(
-            lambda x: zlib.crc32((str(x.calitp_itp_id) + 
-                x.route_id + str(x.direction_id)).encode("utf-8")), axis=1, 
-            meta=('route_dir_identifier', 'int64'))
+            lambda x: zlib.crc32(
+                (x.route_key + str(x.direction_id)
+                ).encode("utf-8")), 
+            axis=1, meta=('route_dir_identifier', 'int'))
     )
     
     # Keep the longest shape_id for each direction
@@ -96,8 +92,8 @@ def merge_routes_to_trips(
 
 def get_longest_shapes(analysis_date: str) -> dg.GeoDataFrame:
     trips = (A1.get_scheduled_trips(analysis_date)
-             [["calitp_itp_id", "shape_id", 
-               "route_id", "direction_id"]]
+             [["feed_key", "name", "shape_id", 
+               "route_key", "route_id", "direction_id"]]
             )
     routelines = A1.get_routelines(analysis_date)
 
@@ -133,7 +129,7 @@ def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     return gdf
 
 
-def route_direction_to_segments_crosswalk():
+def route_direction_to_segments_crosswalk(analysis_date: str):
     """
     Create a table where route_id-direction_id can be used
     to find route_dir_identifier. 
@@ -142,9 +138,10 @@ def route_direction_to_segments_crosswalk():
     attached to help do trip aggregations once vehicle positions
     are joined to segments.
     """
-    segments = dg.read_parquet(f"{DASK_TEST}longest_shape_segments.parquet")
+    segments = dg.read_parquet(
+        f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet")
 
-    keep_cols = ["calitp_itp_id", 
+    keep_cols = ["feed_key", "name",
                  "route_id", "direction_id",
                  "route_dir_identifier"
                 ]
@@ -162,7 +159,7 @@ if __name__ == "__main__":
     # Cut segments
     segments = geography_utils.cut_segments(
         longest_shapes,
-        group_cols = ["calitp_itp_id", "calitp_url_number", 
+        group_cols = ["feed_key", "name", 
                       "route_id", "direction_id", "longest_shape_id",
                       "route_dir_identifier", "route_length"],
         segment_distance = 1_000
@@ -174,12 +171,14 @@ if __name__ == "__main__":
 
     utils.geoparquet_gcs_export(
         arrowized_segments,
-        DASK_TEST,
-        "longest_shape_segments"
+        SEGMENT_GCS,
+        f"longest_shape_segments_{analysis_date}"
     )
     print("Export longest_shape_segments")
 
-    segment_crosswalk = route_direction_to_segments_crosswalk()
-    segment_crosswalk.compute().to_parquet(
-        f"{DASK_TEST}segments_route_direction_crosswalk.parquet")
+    segment_crosswalk = route_direction_to_segments_crosswalk(analysis_date)
+    (segment_crosswalk.compute().to_parquet(
+        f"{SEGMENT_GCS}"
+        f"segments_route_direction_crosswalk_{analysis_date}.parquet")
+    )
     print("Export segment crosswalk")
