@@ -6,11 +6,7 @@ import geopandas as gpd
 import pandas as pd
 
 from shared_utils import utils
-
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
-
-analysis_date = "2022-10-12"
+from update_vars import DASK_TEST, analysis_date
 
 def avg_speeds_with_segment_geom(
     analysis_date: str, 

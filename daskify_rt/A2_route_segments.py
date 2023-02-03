@@ -22,12 +22,7 @@ import zlib
 
 import A1_vehicle_positions as A1
 from shared_utils import geography_utils, utils, rt_utils
-
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-
-analysis_date = "2022-10-12"
+from update_vars import DASK_TEST, COMPILED_CACHED_VIEWS, analysis_date
 
 def merge_routes_to_trips(
     routelines: dg.GeoDataFrame, trips: dd.DataFrame

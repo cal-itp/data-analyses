@@ -19,6 +19,9 @@ from shapely.errors import ShapelyDeprecationWarning
 warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 import dask_utils
+from update_vars import DASK_TEST, analysis_date
+
+fs = gcsfs.GCSFileSystem()
 
 """
 References
@@ -40,13 +43,6 @@ https://docs.dask.org/en/latest/delayed-best-practices.html
 Map partitions has trouble computing result.
 Just use partitioned df and don't use `ddf.map_partitions`.
 """
-
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-
-analysis_date = "2022-10-12"
-fs = gcsfs.GCSFileSystem()
                     
 
 def operators_with_data(gcs_folder: str = f"{DASK_TEST}vp_sjoin/") -> list:

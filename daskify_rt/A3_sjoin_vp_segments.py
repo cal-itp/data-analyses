@@ -22,11 +22,7 @@ from dask import delayed, compute
 from loguru import logger
 
 import dask_utils
-
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-analysis_date = "2022-10-12"
+from update_vars import DASK_TEST, COMPILED_CACHED_VIEWS, analysis_date
 
 fs = gcsfs.GCSFileSystem()
 
@@ -200,9 +196,7 @@ if __name__ == "__main__":
     #from dask.distributed import Client
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
-    
-    analysis_date = "2022-10-12"
-    
+        
     logger.add("./logs/A3_sjoin_vp_segments.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 

@@ -19,12 +19,8 @@ warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 import dask_utils
 from A4_valid_vehicle_positions import operators_with_data
+from update_vars import DASK_TEST, analysis_date
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-
-analysis_date = "2022-10-12"
 fs = gcsfs.GCSFileSystem()                    
 
     
