@@ -10,13 +10,13 @@ Work related to using `dask` to produce speeds by segments from GTFS RT vehicle 
 
 | warehouse         | gcs                                                       | github                                                  |
 |-------------------|-----------------------------------------------------------|---------------------------------------------------------|
-| schedule          | gtfs_schedule (a)                                       | gtfs_schedule (b, `gtfs_schedule_calendar_dates`)                |
-| rt_segment_speeds | rt_segment_speeds (b, `dask_test`) | rt_segment_speeds (b, `daskify_rt`) |
+| schedule          | gtfs_schedule (a)                                       | gtfs_schedule               |
+| rt_segment_speeds | rt_segment_speeds | rt_segment_speeds |
 | rt_vs_schedule    | rt_vs_schedule                                            | rt_scheduled_v_ran                            |
 | rt_predictions    | rt_predictions                                            | rt_predictions (a)                 |
 
 **Legend**:
-(a) make directory when we start, (b) existing directory, rename!
+(a) make directory when we start
 
 
 ## Steps
