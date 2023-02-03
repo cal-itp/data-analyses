@@ -46,22 +46,29 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
     """
     shape_id_cols = ["shape_array_key"]
     route_dir_cols = ["feed_key", "route_key", "route_id", "direction_id"]
-
-    routelines_ddf = routelines.assign(
-        route_length = routelines.geometry.length,
-    )[shape_id_cols + ["geometry", "route_length"]]
         
     # Merge routes to trips with using trip_id
     # Keep route_id and shape_id, but drop trip_id by the end
-    m1 = (dd.merge(
-            routelines_ddf,
-            trips[shape_id_cols + ["feed_key", "route_key", 
-                                   "route_id", "direction_id"]],
-            on = shape_id_cols,
-            how = "inner",
-        ).drop_duplicates(subset = route_dir_cols + ["route_length"])
-        .reset_index(drop=True)
-    )
+    trips_with_geom = dd.merge(
+        routelines,
+        # Don't merge using calitp_url_number because ITP ID 282 (SFMTA)
+        # can use calitp_url_number = 1
+        # Just keep calitp_url_number = 0 from routelines
+        trips,
+        on = shape_id_cols,
+        how = "inner",
+    ).compute()
+    
+    trips_with_geom = (trips_with_geom
+                       .assign(
+                            route_length = trips_with_geom.geometry.length
+                       ).sort_values(route_dir_cols + ["route_length"], 
+                                     ascending=[True, True, True, False])
+                       .drop_duplicates(subset = route_dir_cols)
+                       .reset_index(drop=True)
+                      )
+    
+    m1 = dg.from_geopandas(trips_with_geom, npartitions=2)
     
     # If direction_id is missing, then later code will break, because
     # we need to find the longest route_length
