@@ -13,7 +13,7 @@ from calitp.tables import tbls
 from loguru import logger
 from siuba import *
 
-from update_vars import DASK_TEST, analysis_date
+from update_vars import SEGMENT_GCS, analysis_date
 
 def determine_batches(rt_names: list) -> dict:
     #https://stackoverflow.com/questions/4843158/how-to-check-if-a-string-is-a-substring-of-items-in-a-list-of-strings
@@ -107,7 +107,7 @@ if __name__ == "__main__":
             analysis_date, subset_operators)
 
         df.to_parquet(
-            f"{DASK_TEST}vp_raw_{analysis_date}_batch{i}.parquet")
+            f"{SEGMENT_GCS}vp_raw_{analysis_date}_batch{i}.parquet")
 
         time1 = datetime.datetime.now()
         logger.info(f"exported batch {i} to GCS: {time1 - time0}")

@@ -22,7 +22,7 @@ import zlib
 
 import A1_vehicle_positions as A1
 from shared_utils import geography_utils, utils, rt_utils
-from update_vars import DASK_TEST, COMPILED_CACHED_VIEWS, analysis_date
+from update_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, analysis_date
 
 def merge_routes_to_trips(
     routelines: dg.GeoDataFrame, trips: dd.DataFrame
@@ -129,7 +129,7 @@ def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     return gdf
 
 
-def route_direction_to_segments_crosswalk():
+def route_direction_to_segments_crosswalk(analysis_date: str):
     """
     Create a table where route_id-direction_id can be used
     to find route_dir_identifier. 
@@ -138,9 +138,10 @@ def route_direction_to_segments_crosswalk():
     attached to help do trip aggregations once vehicle positions
     are joined to segments.
     """
-    segments = dg.read_parquet(f"{DASK_TEST}longest_shape_segments.parquet")
+    segments = dg.read_parquet(
+        f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet")
 
-    keep_cols = ["calitp_itp_id", 
+    keep_cols = ["feed_key", "name",
                  "route_id", "direction_id",
                  "route_dir_identifier"
                 ]
@@ -158,7 +159,7 @@ if __name__ == "__main__":
     # Cut segments
     segments = geography_utils.cut_segments(
         longest_shapes,
-        group_cols = ["calitp_itp_id", "calitp_url_number", 
+        group_cols = ["feed_key", "name", 
                       "route_id", "direction_id", "longest_shape_id",
                       "route_dir_identifier", "route_length"],
         segment_distance = 1_000
@@ -170,12 +171,14 @@ if __name__ == "__main__":
 
     utils.geoparquet_gcs_export(
         arrowized_segments,
-        DASK_TEST,
+        SEGMENT_GCS,
         f"longest_shape_segments_{analysis_date}"
     )
     print("Export longest_shape_segments")
 
-    segment_crosswalk = route_direction_to_segments_crosswalk()
-    segment_crosswalk.compute().to_parquet(
-        f"{DASK_TEST}segments_route_direction_crosswalk_{analysis_date}.parquet")
+    segment_crosswalk = route_direction_to_segments_crosswalk(analysis_date)
+    (segment_crosswalk.compute().to_parquet(
+        f"{SEGMENT_GCS}"
+        f"segments_route_direction_crosswalk_{analysis_date}.parquet")
+    )
     print("Export segment crosswalk")

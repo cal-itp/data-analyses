@@ -22,7 +22,7 @@ from dask import delayed, compute
 from loguru import logger
 
 import dask_utils
-from update_vars import DASK_TEST, COMPILED_CACHED_VIEWS, analysis_date
+from update_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, analysis_date
 
 fs = gcsfs.GCSFileSystem()
 
@@ -58,7 +58,7 @@ def merge_scheduled_trips_with_segment_crosswalk(
     trips = get_scheduled_trips(analysis_date)
     
     segments_crosswalk = pd.read_parquet(
-        f"{DASK_TEST}segments_route_direction_crosswalk.parquet")
+        f"{SEGMENT_GCS}segments_route_direction_crosswalk_{analysis_date}.parquet")
                
     trips_with_route_dir_identifier = dd.merge(
         trips, 
@@ -79,7 +79,7 @@ def get_unique_operators_route_directions(analysis_date: str) -> pd.DataFrame:
     by route_direction.
     """
     vp = pd.read_parquet(
-        f"{DASK_TEST}vp_{analysis_date}.parquet", 
+        f"{SEGMENT_GCS}vp_{analysis_date}.parquet", 
         columns = ["calitp_itp_id", "trip_id"]
     ).drop_duplicates().reset_index(drop=True)
               
@@ -110,7 +110,7 @@ def import_vehicle_positions_and_segments(
     Import route segments, filter to operator.
     """
     vp = dg.read_parquet(
-        f"{DASK_TEST}vp_{analysis_date}.parquet", 
+        f"{SEGMENT_GCS}vp_{analysis_date}.parquet", 
         filters = [[("calitp_itp_id", "==", itp_id)]]
     ).to_crs("EPSG:3310")
     
@@ -124,7 +124,7 @@ def import_vehicle_positions_and_segments(
     ).reset_index(drop=True).repartition(npartitions=1)
     
     segments = (dg.read_parquet(
-                f"{DASK_TEST}longest_shape_segments.parquet", 
+                f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet", 
                 columns = ["calitp_itp_id", 
                            "route_dir_identifier", "segment_sequence",
                           "geometry"],
@@ -243,7 +243,7 @@ if __name__ == "__main__":
         #compute_and_export(results)
         dask_utils.compute_and_export(
             results,
-            gcs_folder = f"{DASK_TEST}vp_sjoin/",
+            gcs_folder = f"{SEGMENT_GCS}vp_sjoin/",
             file_name = f"vp_segment_{itp_id}_{analysis_date}.parquet",
             export_single_parquet = True
         )

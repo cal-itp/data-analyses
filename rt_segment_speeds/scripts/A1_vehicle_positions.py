@@ -15,7 +15,7 @@ import geopandas as gpd
 import shapely
 
 from shared_utils import geography_utils, utils
-from update_vars import COMPILED_CACHED_VIEWS, DASK_TEST, analysis_date
+from update_vars import COMPILED_CACHED_VIEWS, SEGMENT_GCS, analysis_date
 
 
 def get_scheduled_trips(analysis_date: str) -> dd.DataFrame:
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     # Append individual operator vehicle position parquets together
     # and cache a single vehicle positions parquet
     fs = gcsfs.GCSFileSystem()
-    fs_list = fs.ls(f"{DASK_TEST}")
+    fs_list = fs.ls(f"{SEGMENT_GCS}")
 
     vp_files = [i for i in fs_list if "vp_raw" in i 
                 and f"{analysis_date}_batch" in i]
@@ -89,10 +89,9 @@ if __name__ == "__main__":
     
     utils.geoparquet_gcs_export(
         gdf, 
-        DASK_TEST,
+        SEGMENT_GCS,
         f"vp_{analysis_date}"
     )
     
-    #df.to_parquet(f"{DASK_TEST}vp_{analysis_date}.parquet")
     end = datetime.datetime.now()
     print(f"execution time: {end-start}")
