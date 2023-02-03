@@ -26,7 +26,7 @@ def get_scheduled_trips(analysis_date: str) -> dd.DataFrame:
     trips = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
-    keep_cols = ["calitp_itp_id", "calitp_url_number", 
+    keep_cols = ["feed_key", "name", 
                  "trip_id", "shape_id",
                  "route_id", "direction_id"
                 ] 
@@ -75,6 +75,9 @@ if __name__ == "__main__":
     time1 = datetime.datetime.now()
     print(f"appended all batch parquets: {time1 - start}")
     
+    # Drop Nones or else shapely will error
+    df = df[df.location.notna()].reset_index(drop=True)
+    
     geom = [shapely.wkt.loads(x) for x in df.location]
 
     gdf = gpd.GeoDataFrame(
@@ -90,5 +93,6 @@ if __name__ == "__main__":
         f"vp_{analysis_date}"
     )
     
+    #df.to_parquet(f"{DASK_TEST}vp_{analysis_date}.parquet")
     end = datetime.datetime.now()
     print(f"execution time: {end-start}")

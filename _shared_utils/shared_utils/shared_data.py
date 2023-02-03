@@ -4,7 +4,7 @@ One-off functions, run once, save datasets for shared use.
 import geopandas as gpd
 import pandas as pd
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 
 
 def make_county_centroids():
