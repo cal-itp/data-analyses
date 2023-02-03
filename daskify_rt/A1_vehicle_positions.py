@@ -8,19 +8,14 @@ without making the geometry, and save the geometry making for later.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
+import datetime
 import pandas as pd
 import gcsfs
 import geopandas as gpd
-
-from dask import delayed, compute
-from dask.delayed import Delayed # use this for type hint
+import shapely
 
 from shared_utils import geography_utils, utils
-
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-DASK_TEST = f"{GCS_FILE_PATH}dask_test/"
-analysis_date = "2022-10-12"
+from update_vars import COMPILED_CACHED_VIEWS, DASK_TEST, analysis_date
 
 
 def get_scheduled_trips(analysis_date: str) -> dd.DataFrame:
@@ -61,34 +56,39 @@ def get_routelines(
 
 if __name__ == "__main__":
     
+    start = datetime.datetime.now()
+    
     # Append individual operator vehicle position parquets together
     # and cache a single vehicle positions parquet
     fs = gcsfs.GCSFileSystem()
-    fs_list = fs.ls(f"{DASK_TEST}vp/")
+    fs_list = fs.ls(f"{DASK_TEST}")
 
-    vp_files = [i for i in fs_list if "vp_" in i and analysis_date in i]
+    vp_files = [i for i in fs_list if "vp_raw" in i 
+                and f"{analysis_date}_batch" in i]
+    
+    df = pd.DataFrame()
+    
+    for f in vp_files:
+        batch_df = pd.read_parquet(f"gs://{f}")
+        df = pd.concat([df, batch_df], axis=0)
+    
+    time1 = datetime.datetime.now()
+    print(f"appended all batch parquets: {time1 - start}")
+    
+    geom = [shapely.wkt.loads(x) for x in df.location]
 
-    full_df = dd.read_parquet(f"gs://{vp_files[0]}")
-
-    for f in vp_files[1:]:    
-        df = dd.read_parquet(f"gs://{f}")
-        full_df = dd.multi.concat([full_df, df], axis=0)
-
-
-    full_df = (full_df.drop_duplicates()
-               .reset_index(drop=True)
-               .compute()
-              )
-
-    gdf = geography_utils.create_point_geometry(
-        full_df, 
-        longitude_col = "vehicle_longitude",
-        latitude_col = "vehicle_latitude",
-    ).drop(columns = ["vehicle_longitude", "vehicle_latitude"])
-         
-                  
+    gdf = gpd.GeoDataFrame(
+        df, geometry=geom, 
+        crs="EPSG:4326").drop(columns="location")
+    
+    time2 = datetime.datetime.now()
+    print(f"change to gdf: {time2 - time1}")
+    
     utils.geoparquet_gcs_export(
-        gdf,
+        gdf, 
         DASK_TEST,
         f"vp_{analysis_date}"
     )
+    
+    end = datetime.datetime.now()
+    print(f"execution time: {end-start}")
