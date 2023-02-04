@@ -20,9 +20,10 @@ sources:
         driver: geoparquet
         description: description
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/longest_shape_segments_{{analysis_date}}.parquet
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/longest_shape_segments_{{analysis_date}}.parquet 
+  
     crosswalk:
         driver: parquet
         description: description
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/segments_route_direction_crosswalk_{{analysis_date}}.parquet
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/segments_route_direction_crosswalk_{{analysis_date}}.parquet 
