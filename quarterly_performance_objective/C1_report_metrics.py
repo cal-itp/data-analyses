@@ -254,4 +254,9 @@ def concatenate_summary_across_dates(rt_dates_dict: dict,
         year = df.year_quarter.str.split('_', expand=True)[1].astype(int),
     )
     
+    # Get it to be year first
+    df = df.assign(
+        year_quarter = df.year.astype(str) + ' ' + df.quarter
+    )
+    
     return df

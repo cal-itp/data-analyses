@@ -10,23 +10,26 @@ from loguru import logger
 
 from bus_service_utils import create_parallel_corridors
 from shared_utils import geography_utils, rt_dates
-from update_vars import BUS_SERVICE_GCS
+from update_vars import BUS_SERVICE_GCS, get_filename
 
     
 if __name__ == "__main__":    
-    logger.add("./logs/A1_generate_routes_on_shn_data.log", retention="6 months")
+    logger.add("./logs/A2_generate_routes_on_shn_data.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    ANALYSIS_DATE = rt_dates.PMAC["Q4_2022"]
-    VERSION = "v1"
+    ANALYSIS_DATE = rt_dates.PMAC["Q1_2023"]
+    VERSION = "v2"
 
     logger.info(f"Analysis date: {ANALYSIS_DATE}   warehouse {VERSION}")
     start = datetime.datetime.now()
     
-    transit_routes = gpd.read_parquet(
-        f"{BUS_SERVICE_GCS}routes_{ANALYSIS_DATE}_{VERSION}.parquet")
+    transit_routes_file = get_filename(
+        f"{BUS_SERVICE_GCS}routes_", ANALYSIS_DATE, VERSION
+    )   
+    transit_routes = gpd.read_parquet(transit_routes_file)
+
     
     # 50 ft buffers, get routes that are on SHN
     create_parallel_corridors.make_analysis_data(
@@ -35,7 +38,7 @@ if __name__ == "__main__":
         pct_route_threshold = 0.2, 
         pct_highway_threshold = 0,
         data_path = BUS_SERVICE_GCS, 
-        file_name = f"routes_on_shn_{ANALYSIS_DATE}_{VERSION}",
+        file_name = get_filename(f"routes_on_shn_", ANALYSIS_DATE, VERSION),
         warehouse_version = VERSION
     )  
     
@@ -49,7 +52,7 @@ if __name__ == "__main__":
         pct_route_threshold = 0.2,
         pct_highway_threshold = 0,
         data_path = BUS_SERVICE_GCS, 
-        file_name = f"parallel_or_intersecting_{ANALYSIS_DATE}_{VERSION}",
+        file_name = get_filename(f"parallel_or_intersecting_", ANALYSIS_DATE, VERSION),
         warehouse_version = VERSION
     )
     

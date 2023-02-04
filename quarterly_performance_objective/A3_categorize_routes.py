@@ -10,7 +10,33 @@ import sys
 from loguru import logger
 
 from shared_utils import geography_utils, utils, rt_dates
-from update_vars import BUS_SERVICE_GCS
+from update_vars import BUS_SERVICE_GCS, get_filename
+
+def import_data(analysis_date: str, warehouse_version: str) -> tuple[gpd.GeoDataFrame]:
+    """
+    Import the data needed, and account for different naming when 
+    warehouse is in transition.
+    """
+    transit_routes_file = get_filename(
+        f"{BUS_SERVICE_GCS}routes_", 
+        analysis_date, warehouse_version
+    )
+    
+    on_shn_file = get_filename(
+        f"{BUS_SERVICE_GCS}routes_on_shn_", 
+        analysis_date, warehouse_version
+    )
+    
+    intersecting_file = get_filename(
+        f"{BUS_SERVICE_GCS}parallel_or_intersecting_",
+        analysis_date, warehouse_version)
+    
+    transit_routes = gpd.read_parquet(transit_routes_file)
+    on_shn_routes = gpd.read_parquet(on_shn_file)
+    intersecting_routes = gpd.read_parquet(intersecting_file)
+    
+    return transit_routes, on_shn_routes, intersecting_routes
+    
 
 #---------------------------------------------------------------#
 # Data processing - merge trips dfs, tag a route as parallel/on shn/other
@@ -91,8 +117,8 @@ def flag_shn_intersecting_routes(
 
 if __name__=="__main__":
     
-    ANALYSIS_DATE = rt_dates.PMAC["Q4_2022"]
-    VERSION = "v1"
+    ANALYSIS_DATE = rt_dates.PMAC["Q1_2023"]
+    VERSION = "v2"
 
     logger.add("./logs/A3_categorize_routes.log", retention = "6 months")
     logger.add(sys.stderr, 
@@ -109,19 +135,13 @@ if __name__=="__main__":
         route_cols = ["feed_key", "name", "route_id"]
     
     # (1) Get unique transit routes 
-    transit_routes = gpd.read_parquet(
-        f"{BUS_SERVICE_GCS}routes_{ANALYSIS_DATE}_{VERSION}.parquet")
-    
-    on_shn_routes = gpd.read_parquet(
-        f"{BUS_SERVICE_GCS}routes_on_shn_{ANALYSIS_DATE}_{VERSION}.parquet")
+    transit_routes, on_shn_routes, intersecting_routes = import_data(
+        ANALYSIS_DATE, VERSION)
     
     on_shn = get_unique_routes(
         on_shn_routes[on_shn_routes.parallel==1],
         route_cols
     )
-    
-    intersecting_routes = gpd.read_parquet(
-        f"{BUS_SERVICE_GCS}parallel_or_intersecting_{ANALYSIS_DATE}_{VERSION}.parquet")
     
     intersecting = get_unique_routes(
         intersecting_routes[intersecting_routes.parallel==1],
@@ -151,10 +171,13 @@ if __name__=="__main__":
     )
     
     # Export to GCS (use date suffix because we will want historical comparisons)
+    routes_categorized_file = get_filename(
+        "routes_categorized_", ANALYSIS_DATE, VERSION)
+    
     utils.geoparquet_gcs_export(
         gdf, 
         BUS_SERVICE_GCS,
-        f"routes_categorized_{ANALYSIS_DATE}_{VERSION}"
+        routes_categorized_file
     )
     
     logger.info("exported dataset to GCS")

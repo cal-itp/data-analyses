@@ -159,4 +159,3 @@ right_only     134
 Name: merge_delay, dtype: int64
 2023-01-31 16:19:39.041 | INFO     | __main__:<module>:102 - exported to GCS
 2023-01-31 16:19:39.043 | INFO     | __main__:<module>:103 - execution time: 0:00:06.071078
-2023-01-31 16:20:03.549 | INFO     | __main__:<module>:72 - Analysis date: 2022-05-04  warehouse v2

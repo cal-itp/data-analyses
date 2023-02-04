@@ -61,8 +61,8 @@ def merge_delay_with_route_categories(
 
 if __name__ == "__main__":
     
-    ANALYSIS_DATE = rt_dates.PMAC["Q4_2022"]
-    VERSION = "v1"
+    ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"]
+    VERSION = "v2"
     
     logger.add("./logs/B2_route_service_hours_delay.log")
     logger.add(sys.stderr, 
