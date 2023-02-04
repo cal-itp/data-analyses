@@ -147,7 +147,7 @@ def route_direction_to_segments_crosswalk(analysis_date: str):
     
 
 if __name__ == "__main__":
-    '''
+    
     longest_shapes = get_longest_shapes(analysis_date)
     print("Get longest shapes")
     
@@ -161,9 +161,8 @@ if __name__ == "__main__":
     )
     
     print("Cut route segments")
-    '''
-    segments = gpd.read_parquet(
-        f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet")
+    
+    # Add arrowized geometry
     arrowized_segments = add_arrowized_geometry(segments).compute()
     
     utils.geoparquet_gcs_export(
@@ -172,7 +171,7 @@ if __name__ == "__main__":
         f"longest_shape_segments_{analysis_date}"
     )
     print("Export longest_shape_segments")
-    '''
+    
     segment_crosswalk = route_direction_to_segments_crosswalk(analysis_date)
     (segment_crosswalk.compute().to_parquet(
         f"{SEGMENT_GCS}"
