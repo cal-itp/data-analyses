@@ -30,18 +30,20 @@ def get_trip_stats(ddf: dd.DataFrame) -> pd.DataFrame:
     such as minimum / maximum vehicle_timestamp and 
     number of segments it has vehicle positions in.
     """
-    trip_cols = ["calitp_itp_id", "trip_id", "route_dir_identifier"]
-        
+    trip_cols = ["gtfs_dataset_key", "_gtfs_dataset_name", 
+                 "trip_id", "route_dir_identifier"]    
+    timestamp_col = "location_timestamp"
+    
     min_time = (ddf.groupby(trip_cols)
-            .vehicle_timestamp.min()
+            [timestamp_col].min()
             .reset_index()
-            .rename(columns = {"vehicle_timestamp": "trip_start"})
+            .rename(columns = {timestamp_col: "trip_start"})
            )
 
     max_time = (ddf.groupby(trip_cols)
-                .vehicle_timestamp.max()
+                [timestamp_col].max()
                 .reset_index()
-                .rename(columns = {"vehicle_timestamp": "trip_end"})
+                .rename(columns = {timestamp_col: "trip_end"})
                )
     
     segments_with_vp = (ddf.groupby(trip_cols)
@@ -68,7 +70,7 @@ def get_trip_stats(ddf: dd.DataFrame) -> pd.DataFrame:
     
 if __name__ == "__main__":
 
-    logger.add("./logs/B1_rt_trip_diagnostics.log", retention="3 months")
+    logger.add("../logs/B1_rt_trip_diagnostics.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -79,7 +81,9 @@ if __name__ == "__main__":
     
     all_files = fs.ls(f"{SEGMENT_GCS}vp_sjoin/")
     
-    vp_seg_files = [f"gs://{i}" for i in all_files if 'vp_segment' in i]
+    vp_seg_files = [f"gs://{i}" for i in all_files if 'vp_segment' in i 
+                    and analysis_date in i
+                   ]
     
     dfs = [delayed(pd.read_parquet)(f) for f in vp_seg_files]
     ddf = dd.from_delayed(dfs) 
@@ -87,7 +91,8 @@ if __name__ == "__main__":
     # Try map_partitions here
     trip_stats = ddf.map_partitions(get_trip_stats, 
                    meta= {
-                       "calitp_itp_id": "int64",
+                       "gtfs_dataset_key": "object",
+                       "_gtfs_dataset_name": "object",
                        "trip_id": "object",
                        "route_dir_identifier": "int64",
                        "trip_start": "datetime64[ns]",

@@ -54,21 +54,21 @@ def operators_with_data(gcs_folder: str = f"{SEGMENT_GCS}vp_sjoin/") -> list:
     
     files = [i for i in all_files_in_folder if "vp_segment_" in i]
     
-    ITP_IDS = [int(i.split('vp_segment_')[1]
-               .split(f'_{analysis_date}')[0]) 
-           for i in files]
+    RT_OPERATORS = [i.split('vp_segment_')[1]
+                    .split(f'_{analysis_date}')[0] 
+                    for i in files if analysis_date in i]
     
-    return ITP_IDS
+    return RT_OPERATORS
     
 
 @delayed    
-def import_vehicle_positions(itp_id: int) -> dd.DataFrame:
+def import_vehicle_positions(feed_key: str) -> dd.DataFrame:
     """
     Import vehicle positions spatially joined to segments for 
     each operator.
     """
     vp_segments = dd.read_parquet(
-            f"{SEGMENT_GCS}vp_sjoin/vp_segment_{itp_id}_{analysis_date}.parquet")
+            f"{SEGMENT_GCS}vp_sjoin/vp_segment_{feed_key}_{analysis_date}.parquet")
 
     vp_segments = vp_segments.repartition(partition_size = "85MB")
     
@@ -96,18 +96,19 @@ def keep_min_max_timestamps_by_segment(
     keep the enter/exit points for the segment.
     """
     segment_cols = ["route_dir_identifier", "segment_sequence"]
-    segment_trip_cols = ["calitp_itp_id", "trip_id"] + segment_cols
+    segment_trip_cols = ["gtfs_dataset_key", "trip_id"] + segment_cols
+    timestamp_col = "location_timestamp"
     
     # https://stackoverflow.com/questions/52552066/dask-compute-gives-attributeerror-series-object-has-no-attribute-encode    
     # comment out .compute() and just .reset_index()
     enter = (vp_to_seg.groupby(segment_trip_cols)
-             .vehicle_timestamp.min()
+             [timestamp_col].min()
              #.compute()
              .reset_index()
             )
 
     exit = (vp_to_seg.groupby(segment_trip_cols)
-            .vehicle_timestamp.max()
+            [timestamp_col].max()
             #.compute()
             .reset_index()
            )
@@ -119,7 +120,7 @@ def keep_min_max_timestamps_by_segment(
     enter_exit_full_info = dd.merge(
         vp_to_seg,
         enter_exit,
-        on = segment_trip_cols + ["vehicle_timestamp"],
+        on = segment_trip_cols + [timestamp_col],
         how = "inner"
     ).reset_index(drop=True)
         
@@ -131,7 +132,7 @@ if __name__ == "__main__":
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("./logs/A4_valid_vehicle_positions.log", 
+    logger.add("../logs/A4_valid_vehicle_positions.log", 
                retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -141,17 +142,17 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    ITP_IDS = operators_with_data(f"{SEGMENT_GCS}vp_sjoin/")  
+    RT_OPERATORS = operators_with_data(f"{SEGMENT_GCS}vp_sjoin/")  
     
     results = []
     
-    for itp_id in ITP_IDS:
-        logger.info(f"start {itp_id}")
+    for feed_key in RT_OPERATORS:
+        logger.info(f"start {feed_key}")
         
         start_id = datetime.datetime.now()
 
         # https://docs.dask.org/en/stable/delayed-collections.html
-        operator_vp_segments = import_vehicle_positions(itp_id)
+        operator_vp_segments = import_vehicle_positions(feed_key)
         
         time1 = datetime.datetime.now()
         logger.info(f"imported data: {time1 - start_id}")
@@ -171,7 +172,7 @@ if __name__ == "__main__":
         logger.info(f"keep enter/exit points by segment-trip: {time2 - time1}")
         
         end_id = datetime.datetime.now()
-        logger.info(f"ITP ID: {itp_id}: {end_id-start_id}")
+        logger.info(f"gtfs_dataset_key: {feed_key}: {end_id-start_id}")
 
     
     time3 = datetime.datetime.now()
