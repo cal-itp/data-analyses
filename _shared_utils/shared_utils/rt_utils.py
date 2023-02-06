@@ -13,9 +13,11 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
+import siuba  # need for type hints
 from calitp import query_sql
+from calitp.tables import tbls
 from numba import jit
-from shared_utils import geography_utils, gtfs_utils, map_utils, utils
+from shared_utils import geography_utils, gtfs_utils, gtfs_utils_v2, map_utils, utils
 from siuba import *
 
 # from zoneinfo import ZoneInfo
@@ -864,3 +866,23 @@ def get_operators(analysis_date, operator_list):
             print(f"not yet run: {itp_id}")
             op_list_runstatus[itp_id] = "not_yet_run"
     return op_list_runstatus
+
+
+def get_rt_schedule_feeds_crosswalk(
+    date: str, keep_cols: list, get_df: bool = True, custom_filtering: dict = None
+) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+    """
+    Get fct_daily_rt_feeds, which provides the schedule_feed_key
+    to use when merging with schedule data.
+    """
+    fct_rt_feeds = tbls.mart_gtfs.fct_daily_rt_feed_files() >> filter(_.date == date)
+
+    if get_df:
+        fct_rt_feeds = (
+            fct_rt_feeds
+            >> collect()
+            >> gtfs_utils_v2.filter_custom_col(custom_filtering)
+            >> gtfs_utils_v2.subset_cols(keep_cols)
+        )
+
+    return fct_rt_feeds >> gtfs_utils_v2.subset_cols(keep_cols)

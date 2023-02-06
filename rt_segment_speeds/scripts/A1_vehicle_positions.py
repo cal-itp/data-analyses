@@ -26,9 +26,9 @@ def get_scheduled_trips(analysis_date: str) -> dd.DataFrame:
     trips = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
-    keep_cols = ["feed_key", "name", 
-                 "trip_id", "shape_id",
-                 "route_id", "direction_id"
+    keep_cols = ["feed_key", "name",
+                 "trip_id", "shape_id", "shape_array_key",
+                 "route_id", "route_key", "direction_id"
                 ] 
     trips = trips[keep_cols]
     
@@ -45,11 +45,15 @@ def get_routelines(
     routelines = dg.read_parquet(
         f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet"
     ).to_crs(geography_utils.CA_NAD83Albers)
-                 
+             
+    keep_cols = ["shape_array_key", "route_length", 
+                 "geometry", "shape_geometry_buffered"
+                ]
+    
     routelines = routelines.assign(
         route_length = routelines.geometry.length,
         shape_geometry_buffered = routelines.geometry.buffer(buffer_size)
-    )
+    )[keep_cols]
     
     return routelines
         
