@@ -107,16 +107,18 @@ def calculate_speed_by_segment_trip(
     and min/max shape_meters. Use that to derive speed column.
     """ 
     segment_cols = ["route_dir_identifier", "segment_sequence"]
-    segment_trip_cols = ["calitp_itp_id", "trip_id"] + segment_cols
+    segment_trip_cols = ["gtfs_dataset_key", "_gtfs_dataset_name", 
+                         "trip_id"] + segment_cols
+    timestamp_col = "location_timestamp"
     
     min_time = (gdf.groupby(segment_trip_cols)
-                .vehicle_timestamp.min()
+                [timestamp_col].min()
                 .compute()
                 .reset_index(name="min_time")
     )
     
     max_time = (gdf.groupby(segment_trip_cols)
-                .vehicle_timestamp.max()
+                [timestamp_col].max()
                 .compute()
                 .reset_index(name="max_time")
                )
@@ -152,25 +154,26 @@ def calculate_speed_by_segment_trip(
 
 
 @delayed
-def import_vehicle_positions(itp_id: int) -> dd.DataFrame:
+def import_vehicle_positions(feed_key: str) -> dd.DataFrame:
     vp = dd.read_parquet(f"{SEGMENT_GCS}vp_pared_{analysis_date}/")
     
-    subset = vp[vp.calitp_itp_id == itp_id].reset_index(drop=True)
+    subset = vp[vp.gtfs_dataset_key == feed_key].reset_index(drop=True)
     
     return subset
 
 
 @delayed
-def import_segments(itp_id: int) -> gpd.GeoDataFrame:
+def import_segments(feed_key: int) -> gpd.GeoDataFrame:
     """
     Import segments and subset to operator segments.
     """
+    cols = ["gtfs_dataset_key", "route_dir_identifier", 
+            "segment_sequence", "geometry"]
+
     segments = gpd.read_parquet(
         f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet", 
-        columns = ["calitp_itp_id", "route_dir_identifier", 
-                   "segment_sequence", "geometry"],
-        filters = [[("calitp_itp_id", "==", itp_id)]]
-    ).drop_duplicates().reset_index(drop=True)
+        filters = [[("gtfs_dataset_key", "==", feed_key)]]
+    )[cols].drop_duplicates().reset_index(drop=True)
         
     return segments
 
@@ -180,7 +183,7 @@ if __name__ == "__main__":
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("./logs/A5_speeds_by_segment_trip.log", retention="3 months")
+    logger.add("../logs/A5_speeds_by_segment_trip.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -189,16 +192,16 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    ITP_IDS = operators_with_data(f"{SEGMENT_GCS}vp_sjoin/")  
+    RT_OPERATORS = operators_with_data(f"{SEGMENT_GCS}vp_sjoin/")  
     
     results_linear_ref = []
     
-    for itp_id in ITP_IDS:
+    for feed_key in RT_OPERATORS:
         time0 = datetime.datetime.now()
         
         # https://docs.dask.org/en/stable/delayed-collections.html
-        operator_vp = import_vehicle_positions(itp_id)
-        operator_segments = import_segments(itp_id)        
+        operator_vp = import_vehicle_positions(feed_key)
+        operator_segments = import_segments(feed_key)        
         
         time1 = datetime.datetime.now()
         logger.info(f"imported data: {time1 - time0}")
@@ -255,18 +258,18 @@ if __name__ == "__main__":
     
     # Now write out individual parquets for speeds
     speeds_df = dd.read_parquet(f"{SEGMENT_GCS}speeds_{analysis_date}/").compute()
-
-    for itp_id in speeds_df.calitp_itp_id.unique():
-        subset = (speeds_df[speeds_df.calitp_itp_id == itp_id]
+    
+    for feed_key in speeds_df.gtfs_dataset_key.unique():
+        subset = (speeds_df[speeds_df.gtfs_dataset_key == feed_key]
                   .reset_index(drop=True)
                  )
         subset.to_parquet(
             f"{SEGMENT_GCS}speeds_by_operator/"
-            f"speeds_{itp_id}_{analysis_date}.parquet")
+            f"speeds_{feed_key}_{analysis_date}.parquet")
     
     time9 = datetime.datetime.now()
     logger.info(f"exported operator speed parquets: {time9 - time8}")
-
+    
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
     

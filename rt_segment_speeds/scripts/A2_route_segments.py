@@ -2,7 +2,6 @@
 Create route segments. 
 
 For now, use the code from HQTA and lift it completely.
-This is v1 RT data, so it'll be fine for now as a stand-in.
 
 Create a crosswalk where a trip's `route_id-direction_id` can 
 be merged to find the `route_dir_identifier`. 
@@ -94,6 +93,21 @@ def get_longest_shapes(analysis_date: str) -> dg.GeoDataFrame:
 
     longest_shapes = merge_routes_to_trips(routelines, trips)
     
+    # Get the schedule feed_key and RT gtfs_dataset_key and add it to crosswalk
+    fct_rt_feeds = rt_utils.get_rt_schedule_feeds_crosswalk(
+        analysis_date, 
+        keep_cols = ["gtfs_dataset_key", "schedule_feed_key", "feed_type"], 
+        get_df = True,
+        custom_filtering = {"feed_type": ["vehicle_positions"]}
+    ).rename(columns = {"schedule_feed_key": "feed_key"})
+    
+    longest_shapes_with_rt_key = dd.merge(
+        longest_shapes,
+        fct_rt_feeds,
+        on = "feed_key",
+        how = "inner"
+    )
+    
     return longest_shapes
 
 
@@ -124,6 +138,7 @@ def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     return gdf
 
 
+
 def route_direction_to_segments_crosswalk(analysis_date: str):
     """
     Create a table where route_id-direction_id can be used
@@ -136,7 +151,8 @@ def route_direction_to_segments_crosswalk(analysis_date: str):
     segments = dg.read_parquet(
         f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet")
 
-    keep_cols = ["feed_key", "name",
+    keep_cols = ["feed_key", "name", 
+                 "gtfs_dataset_key", # RT vehicle positions gtfs_dataset_key
                  "route_id", "direction_id",
                  "route_dir_identifier"
                 ]
@@ -154,7 +170,7 @@ if __name__ == "__main__":
     # Cut segments
     segments = geography_utils.cut_segments(
         longest_shapes,
-        group_cols = ["feed_key", "name", 
+        group_cols = ["gtfs_dataset_key", "feed_key", "name",
                       "route_id", "direction_id", "longest_shape_id",
                       "route_dir_identifier", "route_length"],
         segment_distance = 1_000
