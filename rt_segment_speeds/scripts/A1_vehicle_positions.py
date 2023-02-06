@@ -26,7 +26,7 @@ def get_scheduled_trips(analysis_date: str) -> dd.DataFrame:
     trips = dd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
     
-    keep_cols = ["feed_key", "name", 
+    keep_cols = ["feed_key", "name",
                  "trip_id", "shape_id", "shape_array_key",
                  "route_id", "route_key", "direction_id"
                 ] 

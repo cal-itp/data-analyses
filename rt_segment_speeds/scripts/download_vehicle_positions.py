@@ -48,7 +48,7 @@ def download_vehicle_positions(
     df = (tbls.mart_gtfs.fct_vehicle_locations()
           >> filter(_.dt == date)
           >> filter(_._gtfs_dataset_name.isin(operator_names))
-          >> select(_.gtfs_dataset_key, 
+          >> select(_.gtfs_dataset_key, _._gtfs_dataset_name,
                     _.trip_id,
                     _.location_timestamp,
                     _.location)
@@ -66,8 +66,7 @@ if __name__ == "__main__":
     
     client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("./logs/download_vp_v2.log", 
-               retention="3 months")
+    logger.add("../logs/download_vp_v2.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
