@@ -69,3 +69,110 @@ districts:
            - part:
              shape_id: '40759'
              stop_bounds: [7, 12]
+
+ - district: 07 - Los Angeles
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override:
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: True
+   # blank/None or list [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay
+   corr_extra_fm:
+   hs_extra_fm:
+   corridors:
+     - corridor:
+         itp_id: 182
+         route_filter: ['217']
+         parts:
+         # can define each corridor with multiple parts if desired (i.e. one-way couplets)
+           - part:
+             shape_id: '2070290_FEB22'
+             stop_bounds: [20, 57]
+     - corridor:
+         itp_id: 182
+         route_filter: ['4']
+         parts:
+           - part:
+             shape_id: '40319_FEB22'
+             stop_bounds: [3, 50]
+     - corridor:
+         itp_id: 182
+         route_filter: ['233']
+         parts:
+           - part:
+             shape_id: '2330157_FEB22'
+             stop_bounds: [17, 48]
+     - corridor:
+         itp_id: 182
+         route_filter: ['108']
+         parts:
+           - part:
+             shape_id: '1080303_FEB22'
+             stop_bounds: [4, 52]
+     - corridor:
+         itp_id: 182
+         route_filter: ['260']
+         parts:
+           - part:
+             shape_id: '2600271_FEB22'
+             stop_bounds: [4, 39]
+   hotspots:
+   # can define each hotspot with multiple parts if desired (i.e. one-way couplets)
+     - hotspot:
+         itp_id: 182
+         route_filter: ['4']
+         parts:
+           - part:
+             shape_id: '40320_FEB22'
+             stop_bounds: [77, 81]
+     - hotspot:
+         itp_id: 182
+         route_filter: ['217']
+         parts:
+           - part:
+             shape_id: '2170310_FEB22'
+             stop_bounds: [18, 22]
+     - hotspot:
+         itp_id: 182
+         route_filter: ['4']
+         parts:
+           - part:
+             shape_id: '40314_FEB22'
+             stop_bounds: [20, 21]
+     - hotspot:
+         itp_id: 182
+         route_filter: ['720', '20']
+         parts:
+           - part:
+             shape_id: '200782_FEB22'
+             stop_bounds: [13, 21]
+     - hotspot:
+         itp_id: 170
+         route_filter: ['121']
+         parts:
+           - part:
+             shape_id: '1210150'
+             stop_bounds: [26, 33]
+     - hotspot:
+         itp_id: 170
+         route_filter: ['51']
+         parts:
+           - part:
+             shape_id: '510074'
+             stop_bounds: [6, 10]
+     - hotspot:
+         itp_id: 183
+         route_filter:
+         parts:
+           - part:
+             shape_id: '15715'
+             stop_bounds: [20, 22]
+     - hotspot:
+         itp_id: 183
+         route_filter:
+         parts:
+           - part:
+             shape_id: '9255'
+             stop_bounds: [44, 45]
