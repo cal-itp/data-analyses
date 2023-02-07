@@ -21,6 +21,21 @@ from IPython.display import HTML
 from shared_utils import gtfs_utils_v2, rt_utils
 from siuba import *
 
+district_name_dict = {
+    1: "District 1 - Eureka",
+    2: "District 2 - Redding",
+    3: "District 3 - Marysville",
+    4: "District 4 - Oakland",
+    5: "District 5 - San Luis Obispo",
+    6: "District 6 - Fresno",
+    7: "District 7 - Los Angeles",
+    8: "District 8 - San Bernardino",
+    9: "District 9 - Bishop",
+    10: "District 10 - Stockton",
+    11: "District 11 - San Diego",
+    12: "District 12 - Irvine",
+}
+
 
 def clean_organization_name(df: pd.DataFrame) -> pd.DataFrame:
     """
