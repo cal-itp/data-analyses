@@ -21,9 +21,13 @@ sources:
         description: description
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/longest_shape_segments_{{analysis_date}}.parquet 
-  
     crosswalk:
         driver: parquet
         description: description
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/segments_route_direction_crosswalk_{{analysis_date}}.parquet 
+    trip_stats:
+        driver: parquet
+        description: description
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/trip_diagnostics_{{analysis_date}}.parquet
