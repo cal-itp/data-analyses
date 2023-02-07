@@ -4,15 +4,8 @@ import pandas as pd
 from shared_utils import geography_utils
 import geopandas as gpd
 
-# Charts
-from shared_utils import calitp_color_palette as cp
-import altair as alt
-
-# Format
+# Format currency
 from babel.numbers import format_currency
-
-# Style a df
-from IPython.display import HTML, Image, Markdown, display, display_html
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/"
 
@@ -22,273 +15,37 @@ from calitp.storage import get_fs
 fs = get_fs()
 import os
 
-"""
-Chart & Styling Functions
-"""
-# Preset to make chart 25% smaller than shared_utils
-# Since the webpage is kind of small
-chart_width = 400
-chart_height = 250
-
-def preset_chart_config(chart: alt.Chart) -> alt.Chart:
-    
-    chart = chart.properties(
-        width=chart_width,
-        height=chart_height
-    )
-    return chart
-
-# Labels for charts 
-def labeling(word):
-    # Add specific use cases where it's not just first letter capitalized
-    if (word == "mpo") or (word == "rtpa"):
-        word = word.upper()
-    else:
-        word = word.replace('unique_', "Number of Unique ").title()
-        word = word.replace('_', ' ').title()
-    return word
-
-#Basic Bar Chart
-def basic_bar_chart_custom_tooltip(df, x_col, y_col, tooltip_col, colorcol, chart_title=''):
-    if chart_title == "":
-        chart_title = (f"{labeling(x_col)} by {labeling(y_col)}")
-    chart = (alt.Chart(df)
-             .mark_bar()
-             .encode(
-                 x=alt.X(x_col, title=labeling(x_col)),
-                 y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
-                 color = alt.Color(colorcol, 
-                                  scale=alt.Scale(
-                                      range=cp.CALITP_DIVERGING_COLORS),
-                                      legend=alt.Legend(title=(labeling(colorcol)))
-                                  ),
-                tooltip = [tooltip_col])
-             .properties( 
-                       title=chart_title)
-    )
-    chart = preset_chart_config(chart)
-
-    return chart
-
-# An interactive dual bar chart
-def dual_bar_chart(df, control_field:str, chart1_nominal:str,
-                  chart1_quant: str, chart2_nominal:str, 
-                  chart2_quant:str, chart1_tooltip_cols: list,
-                  chart2_tooltip_cols: list, chart_title: str):
-    """An interactive dual bar chart
-    https://stackoverflow.com/questions/53404826/how-to-link-two-bar-charts-in-altair
-    
-    Args:
-        Universal args
-        df: the dataframe
-        control_field (str): the field of the 1st chart that controls your 2nd chart.
-        
-        Chart 1 Args
-        chart1_nominal (str): nominal column for 1st bar chart. should be in format 'column_name:N'
-        chart1_quant (str): quantitive column for 1st bar chart. should be in format 'column_name:Q'
-        
-        Chart 2 Args
-        chart2_nominal (str): nominal column for 2nd bar chart. should be in format 'column_name:N'
-        chart2_quant (str): quantitive column for 2nd bar chart. should be in format 'column_name:Q'
-        
-        Tooltips
-        chart1_tooltip_cols (list): list of columns to place in tooltip in chart 1
-        chart2_tooltip_cols (list): list of columns to place in tooltip chart 2
-    Returns:
-        Returns two vertically concated bar charts: the first bar chart controls the second bar chart.
+def simplify_project_names(df, column_wanted: str):
     """
-    # Column that controls the bar charts
-    category_selector = alt.selection_multi(fields=[control_field])
-    
-    # Build first chart
-    chart1 = (alt.Chart(df).mark_bar().encode(
-        x=alt.X(chart1_quant),
-        y=alt.Y(chart1_nominal), 
-        color = alt.Color(chart1_nominal, scale=alt.Scale(
-        range=cp.CALITP_DIVERGING_COLORS), legend = None),
-        tooltip = chart1_tooltip_cols)
-        .properties(title=chart_title)
-        .add_selection(category_selector))
-    
-    # Build second chart
-    chart2 = (alt.Chart(df).mark_bar().encode(
-        x=alt.X(chart2_quant),
-        y=alt.Y(chart2_nominal), 
-        color = alt.Color(chart2_nominal, scale=alt.Scale(
-        range=cp.CALITP_DIVERGING_COLORS), legend = None),
-        tooltip = chart2_tooltip_cols)
-        .transform_filter(category_selector))
-    
-    chart1 = preset_chart_config(chart1)
-    chart2 = preset_chart_config(chart2)
-    return(chart1 & chart2)
-
-# A basic pie chart
-def basic_pie_chart(df, quant_col:str, nominal_col:str, label_col:str,
-                   chart_title:str):
+    Simplify project names for string matching.
     """
-    quant_col (str): format as  "Column Name:Q"
-    nominal_col (str):  format as "Column Name:N"
-    label_col (str): format as "Column Name:N"
+    df[column_wanted] = (
+        df[column_wanted]
+        .str.strip()
+        .str.lower()
+        .str.replace("/", "")
+        .str.replace("-", "")
+        .str.replace("!", "")
+        .str.replace("&", "")
+        .str.replace("#", "")
+        .str.replace("(", "")
+        .str.replace(")", "")
+        .str.replace(":", "")
+        .str.replace("the", "")
+        .str.strip()  # strip again after getting rid of certain things
+    )
+    return df
+
+# Natalie's function
+def align_funding_numbers(df, list_of_cols):
     """
-    # Base Chart
-    base = (alt.Chart(df)
-            .encode(theta=alt.Theta(quant_col, stack=True), 
-            color=alt.Color(nominal_col, 
-            scale = alt.Scale(range = cp.CALITP_DIVERGING_COLORS),
-            legend = alt.Legend(title=labeling(label_col))),
-            tooltip = [label_col,quant_col])
-            .properties(title=chart_title)
-           )
-    # Set size of the pie 
-    pie = base.mark_arc(outerRadius=80)
-    
-    # Add labels
-    text = base.mark_text(radius=90, size=10).encode(text=label_col)
-    
-    # Combine the chart and labels
-    chart =  preset_chart_config(pie + text)
-    
-    return chart
-
-# 2 charts that are controlled by a dropdown menu.
-def dual_chart_with_dropdown(
-    df,
-    dropdown_list: list,
-    dropdown_field: str,
-    x_axis_chart1: str,
-    y_axis_chart1: str,
-    color_col1: str,
-    chart1_tooltip_cols: list,
-    x_axis_chart2: str,
-    y_axis_chart2: str,
-    color_col2: str,
-    chart2_tooltip_cols: list,
-    chart_title: str,
-):
-    """Two bar charts controlled by a dropdown
-    Args:
-        Universal args
-        df: the dataframe
-        dropdown_list(list): a list of all the values in the dropdown menu,
-        dropdown_field(str): column where the dropdown menu's values are drawn from,
-        
-        Chart 1 Args
-        x_axis_chart1(str): x axis value for chart 1 - encode as Q or N,
-        y_axis_chart1(str): y axis value for chart 1 - encode as Q or N,
-        color_col1(str): column to color the graphs for chart 1,
-        chart1_tooltip_cols(list): list of all the columns to populate the tooltip,
-        
-        Chart 2 Args 
-        x_axis_chart2(str): x axis value for chart 2 - encode as Q or N,
-        y_axis_chart2(str): x axis value for chart 2 - encode as Q or N,
-        color_col2(str): column to color the graphs for chart 2,
-        chart2_tooltip_cols(list): list of all the columns to populate the tooltip,
-        
-        Chart Title
-        chart_title(str):chart title,
-    Returns:
-        Returns two  bar charts that are controlled by a dropdown
+    Round dollar amounts by thousands.
     """
-    # Create drop down menu
-    input_dropdown = alt.binding_select(options=dropdown_list, name="Select ")
+    for col in list_of_cols:
+        df[col] = df[col] / 1000
 
-    # The column tied to the drop down menu
-    selection = alt.selection_single(fields=[dropdown_field], bind=input_dropdown)
+    return df
 
-    chart1 = (
-        alt.Chart(df)
-        .mark_bar()
-        .encode(
-            x=x_axis_chart1,
-            y=(y_axis_chart1),
-            color=alt.Color(
-                color_col1, scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS)
-                , legend = None
-            ),
-            tooltip=chart1_tooltip_cols,
-        )
-        .properties(title=chart_title)
-        .add_selection(selection)
-        .transform_filter(selection)
-    )
-
-    chart2 = (
-        alt.Chart(df)
-        .mark_bar()
-        .encode(
-            x=x_axis_chart2,
-            y=(y_axis_chart2),
-            color=alt.Color(
-                color_col2, scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS)
-                , legend = None
-            ),
-            tooltip=chart2_tooltip_cols,
-        )
-        .add_selection(selection)
-        .transform_filter(selection)
-    )
-    chart1 = preset_chart_config(chart1)
-    chart2 = preset_chart_config(chart2)
-    return chart1 | chart2
-
-
-# Create 3 charts
-def repeated_charts(
-    df,
-    color_col: str,
-    y_encoding_list: list,
-    x_encoding_list: list,
-    chart_title: str,
-    tooltip_col: list,
-):
-    base = (
-        alt.Chart()
-        .mark_bar()
-        .encode(
-            color=alt.Color(
-                color_col, scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS), 
-                legend = None
-            ),
-            tooltip= y_encoding_list + tooltip_col,
-        )
-        .properties(width=150, height=100)
-        .interactive()
-    )
-
-    chart = alt.vconcat(data=df)
-    for y_encoding in y_encoding_list:
-        row = alt.hconcat()
-        for x_encoding in x_encoding_list:
-            row |= base.encode(x=x_encoding, y=y_encoding)
-        chart &= row
-
-    return chart.properties(title=chart_title)
-
-
-"""
-Style the dataframe by removing the index and gray banding,
-dropping certain columns, and centering text. Adds scrollbar
-and a maximum height & width.
-"""
-def styled_df(df):
-    display(
-    HTML(
-        "<div style='height: 300px; overflow: auto; width: 1000px'>"
-        + (
-            (df)
-            .style.set_properties(**{"background-color": "white", "font-size": "10pt",})
-            .set_table_styles([dict(selector="th", props=[("text-align", "center")])])
-            .set_properties(**{"text-align": "center"})
-            .hide(axis="index")
-            .render()
-        )
-        + "</div>"
-    ))
-
-"""
-Other Functions
-"""
 # Export a GDF as a geojson to GCS
 def geojson_gcs_export(gdf, GCS_FILE_PATH, FILE_NAME):
     """
@@ -349,7 +106,6 @@ def value_counts_df(df, col_of_interest):
 def clean_up_columns(df):
     df.columns = df.columns.str.replace("_", " ").str.strip().str.title()
     return df
-
 
 # Official Caltrans District names
 district_dictionary = {
@@ -466,227 +222,3 @@ def tableau_district_map(df, col_wanted):
     
     return districts_gdf
 
-"""
-Functions specific to this project
-"""
-# Create a fake scorecard
-def create_fake_score_card(df):
-    # Subset 
-    df2 = df[
-    [
-        "project_name",
-        "increase_peak_person_throughput",
-        "reduction_in_peak_period_delay",
-        "reduction_in_fatal_and_injury_crashes",
-        "reduction_in_injury_rates",
-        "increase_access_to_jobs",
-        "increase_access_jobs_to_DAC",
-        "commercial_dev_developed",
-        "tons_of_goods_impacted",
-        "improve_air_quality",
-        "impact_natural_resources",
-        "support_of_trasnportation",
-       
-    ]]
-    
-    # Melt
-    df2 = pd.melt(
-    df2,
-    id_vars=["project_name"],
-    value_vars=[
-        "increase_peak_person_throughput",
-        "reduction_in_peak_period_delay",
-        "reduction_in_fatal_and_injury_crashes",
-        "reduction_in_injury_rates",
-        "increase_access_to_jobs",
-        "increase_access_jobs_to_DAC",
-        "commercial_dev_developed",
-        "tons_of_goods_impacted",
-        "improve_air_quality",
-        "impact_natural_resources",
-        "support_of_trasnportation",
-    ])
-    
-    # Remove underscores off of old column names
-    df2["variable"] = df2["variable"].str.replace("_", " ").str.title()
-    
-    # New column with broader Measures
-    df2["Category"] = df2["variable"]
-
-    df2["Category"] = df2["Category"].replace(
-    {
-        "Increase Peak Person Throughput": "Congestion Mitigation",
-        "Reduction In Peak Period Delay": "Congestion Mitigation",
-        "Reduction In Fatal And Injury Crashes": "Safety",
-        "Reduction In Injury Rates": "Safety",
-        "Increase Access To Jobs": "Accessibility Increase",
-        "Increase Access Jobs To Dac": "Accessibility Increase",
-        "Commercial Dev Developed": "Economic Dev.",
-        "Tons Of Goods Impacted": "Economic Dev.",
-        "Improve Air Quality": "Environment",
-        "Impact Natural Resources": "Environment",
-        "Support Of Trasnportation": "Land Use",
-    })
-    
-    # Get total scores
-    total = (
-    df2.groupby(["project_name", "Category"])
-    .agg({"value": "sum"})
-    .rename(columns={"value": "Total Category Score"})
-    .reset_index())
-    
-    # Merge
-    df2 = pd.merge(
-    df2, total, how="left", on=["project_name", "Category"])
-    
-    # Add fake descriptions
-    for i in ["Measure Description",
-              "Factor Weight",
-              "Weighted Factor Value",
-              "Category Description",]:
-        df2[i] = "Text Here"
-    
-    # Second subset
-    df3 = df[["total_project_cost__$1,000_",
-        "total_unfunded_need__$1,000_",
-         "project_name",
-        "project_description"]]
-    
-    # Melt
-    df3 = pd.melt(
-    df3,
-    id_vars=["project_name","project_description",],
-    value_vars=[
-        "total_project_cost__$1,000_",
-        "total_unfunded_need__$1,000_",
-    ])
-    
-    # Change names
-    df3 = df3.rename(columns = {'variable':'monetary',
-                                'values':'monetary   values'})
-    
-     # Final Merge
-    final = pd.merge(
-    df2, df3, how="inner",  on = ["project_name"])
-    
-    # Remove underscores off of old column names
-    final["monetary"] = final["monetary"].str.replace("_", "  ").str.title()
-    return final
-        
-"""
-Create summary table: returns total projects, total cost,
-and money requested by the column of your choice. 
-"""
-def summarize_by_project_names(df, col_wanted: str):
-    """
-    df: original dataframe to summarize
-    col_wanted: to column to groupby
-    """
-    df = (
-        df.groupby([col_wanted])
-        .agg({"Project Name": "count", 
-              "Total Project Cost  $1,000": "sum",
-              "Total Unfunded Need  $1,000":"sum"})
-        .reset_index()
-        .sort_values("Project Name", ascending=False)
-        .rename(columns={"Project Name": "Total Projects"})
-    )
-
-    df = df.reset_index(drop=True)
-
-    # Create a formatted monetary col
-    df["Total Project Cost  $1,000"] = df["Total Project Cost  $1,000"].apply(
-        lambda x: format_currency(x, currency="USD", locale="en_US")
-    )
-
-    # Create a formatted monetary col
-    df["Total Unfunded Need  $1,000"] = df["Total Unfunded Need  $1,000"].apply(
-        lambda x: format_currency(x, currency="USD", locale="en_US")
-    )
-    # Clean up column names, remove snakecase
-    df = clean_up_columns(df)
-
-    return df
-
-"""
-Concat summary stats of 
-parameter  county & parameter district into one dataframe 
-"""
-def county_district_comparison(df_parameter_county, df_parameter_district):
-    # Grab the full district name
-    district_full_name = df_parameter_district["district_full_name"][0]
-
-    # Grab the full county name
-    county_full_name = df_parameter_county["full_county_name"][0]
-
-    # Create summary table for district
-    district =  summarize_by_project_names(df_parameter_district, "primary_mode")
-
-    # Create summary table for county
-    county = summarize_by_project_names(df_parameter_county, "primary_mode")
-
-    # Append grand total and keep only that row...doesn't work when I try to do this with a for loop
-    district = (
-        district.append(district.sum(numeric_only=True), ignore_index=True)
-        .tail(1)
-        .reset_index(drop=True)
-    )
-    county = (
-        county.append(county.sum(numeric_only=True), ignore_index=True)
-        .tail(1)
-        .reset_index(drop=True)
-    )
-
-    # Concat
-    concat1 = pd.concat([district, county]).reset_index(drop=True)
-
-    # Declare a list that is to be converted into a column
-    geography = [district_full_name, county_full_name]
-    concat1["Geography"] = geography
-
-    # Drop old cols
-    concat1 = concat1.drop(
-        columns=[
-            "Primary Mode",
-            "Fake Fund Formatted",
-            "Total Project ($1000) Formatted",
-        ]
-    )
-
-    # Create new formatted monetary cols
-    concat1["Total Project ($1000) Formatted"] = concat1[
-        "Total Project Cost  $1,000"
-    ].apply(lambda x: format_currency(x, currency="USD", locale="en_US"))
-
-    concat1["Fake Fund Formatted"] = concat1["Current Fake Fund Requested"].apply(
-        lambda x: format_currency(x, currency="USD", locale="en_US")
-    )
-
-    return concat1
-
-# Summarize districts
-def summarize_districts(df, col_wanted: str):
-    """
-    df: original dataframe to summarize
-    col_wanted: to column to groupby
-    """
-    df = (
-        df.groupby([col_wanted])
-        .agg(
-            {
-                "Project Name": "count",
-                "Total Project Cost  $1,000": "sum",
-                "Total Unfunded Need  $1,000": "sum",
-            }
-        )
-        .reset_index()
-        .sort_values("Project Name", ascending=False)
-        .rename(columns={"Project Name": "Total Projects"})
-    )
-
-    df = df.reset_index(drop=True)
-
-    # Clean up column names, remove snakecase
-    df =  clean_up_columns(df)
-
-    return df
