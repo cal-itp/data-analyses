@@ -11,7 +11,7 @@ import re
 from nltk import ngrams
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
-from autocorrect import Speller
+# from autocorrect import Speller
 
 """
 Lists
@@ -58,6 +58,7 @@ description_words_to_delete = [
     "replacement",
     "transit",
     "passenger rev",
+    "long-range",
 
 ]
 
@@ -173,8 +174,8 @@ def simplify_descriptions(
     
     # Correct spelling 
     # https://stackoverflow.com/questions/49364664/how-to-use-autocorrect-in-pandas-column-of-sentences
-    spell = Speller(lang='en')
-    df[new_column] = df[new_column].apply(lambda x: " ".join([spell(i) for i in x.split()]))
+    #spell = Speller(lang='en')
+    #df[new_column] = df[new_column].apply(lambda x: " ".join([spell(i) for i in x.split()]))
     return df
 
 def extract_totals_one_category(df, description_column: str, new_col: str, keywords: list):
