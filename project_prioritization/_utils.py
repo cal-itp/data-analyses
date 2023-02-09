@@ -1,5 +1,5 @@
 import pandas as pd
-
+import _portfolio_utils 
 # Geography
 from shared_utils import geography_utils
 import geopandas as gpd
@@ -182,7 +182,7 @@ def tableau_district_map(df, col_wanted):
     df: original dataframe to summarize
     col_wanted: to column to groupby
     """
-    df_districts = summarize_districts(df, col_wanted)
+    df_districts = _portfolio_utils.summarize_districts(df, col_wanted)
 
     # Reverse the dictionary with district names because
     # final DF has the full names like 04-Bay Area and I only need 4

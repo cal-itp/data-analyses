@@ -1,4 +1,5 @@
 import pandas as pd
+import _utils 
 
 # Geography
 from shared_utils import geography_utils
@@ -145,7 +146,7 @@ def summarize_by_project_names(df, col_wanted: str):
         lambda x: format_currency(x, currency="USD", locale="en_US")
     )
     # Clean up column names, remove snakecase
-    df = clean_up_columns(df)
+    df = _utils.clean_up_columns(df)
 
     return df
 
@@ -228,6 +229,6 @@ def summarize_districts(df, col_wanted: str):
     df = df.reset_index(drop=True)
 
     # Clean up column names, remove snakecase
-    df =  clean_up_columns(df)
+    df =  _utils.clean_up_columns(df)
 
     return df
