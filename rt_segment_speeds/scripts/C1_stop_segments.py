@@ -20,7 +20,7 @@ import pandas as pd
 import shapely
 import sys
 
-from dask import delayed, compute
+from dask import delayed
 from loguru import logger
 
 import dask_utils
@@ -146,10 +146,34 @@ def merge_in_shape_geom_and_project(
     return stops_with_shape
 
 
-@delayed
+def make_shape_meters_wide(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    shape_cols = ["shape_array_key"]
+    
+    unique_shapes = (gdf.set_geometry("shape_geometry")
+                     [shape_cols + ["shape_geometry"]]
+                     .drop_duplicates()
+                    )
+    
+    gdf_wide = (gdf.groupby(shape_cols)
+                .shape_meters.apply(list)
+                .reset_index()
+               )
+    
+    gdf_wide2 = pd.merge(
+        unique_shapes,
+        gdf_wide,
+        on = shape_cols,
+        how = "inner"
+    )
+    
+    return gdf_wide2
+
+
 def cut_shape_geom_by_stops(
+    break_distances: list,
+    line_geom: str,
     shape_key: str
-) -> pd.DataFrame:
+) -> dg.GeoDataFrame:
     """
     Cut a shape_id's line geometry into segments that correspond to 
     stop-to-stop segments.
@@ -161,27 +185,25 @@ def cut_shape_geom_by_stops(
     
     Once it's cut, save the shape_array_key, easier to merge on shapes table.
     """
-    gdf = gpd.read_parquet(
-        "./data/stops_projected.parquet", 
-        filters = [[("shape_array_key", "==", shape_key)]]
-    )
+    break_distances = list(break_distances)
     
-    break_distances = gdf.shape_meters.tolist()
-    line_geom = gdf.shape_geometry.iloc[0]    
-   
     # https://gis.stackexchange.com/questions/203048/split-lines-at-points-using-shapely/203068
     # First coords of line (start + end)
     coords = [line_geom.coords[0], line_geom.coords[-1]] 
     
     break_points = [line_geom.interpolate(i).coords[0] 
                     for i in break_distances]
-    coords_with_breaks = coords + break_points
+    
+    coords_with_breaks = [line_geom.coords[0]] + break_points + [line_geom.coords[-1]]
     
     # Add the origin/destination shape_meters (0 and whatever the length is)
     break_distances_with_endpoints = break_distances + [0, line_geom.length]
     
-    coords_ordered = [p for (d, p) in 
-          sorted(zip(break_distances_with_endpoints, coords_with_breaks))]
+    # Don't use sorted() because it cuts segments weird
+    coords_ordered = [
+        p for (d, p) in #sorted(
+        zip(break_distances_with_endpoints, coords_with_breaks)  #)
+    ]
  
     lines = [shapely.geometry.LineString(
                 [coords_ordered[i], coords_ordered[i+1]]
@@ -191,29 +213,31 @@ def cut_shape_geom_by_stops(
     # https://shapely.readthedocs.io/en/stable/migration.html#creating-numpy-arrays-of-geometry-objects
     # To avoid shapely deprecation warning, create an empty array
     # and then fill it list's elements (shapely linestrings)
-    arr = np.empty(len(lines), dtype="object")
-    arr[:] = lines
+    #arr = np.empty(len(lines), dtype="object")
+    #arr[:] = lines
+    # the warnings still come up even when we use arrays
     
-    lines_geo = pd.DataFrame(
-        arr, columns = ["stop_segment_geometry"],
-        #crs = "EPSG:3310"
+    lines_geo = gpd.GeoDataFrame(
+        lines,
+        columns = ["geometry"],
+        crs = "EPSG:3310"
     )
     
     lines_geo = lines_geo.assign(
         shape_array_key = shape_key,
         segment_sequence = lines_geo.index
-    ).astype({"stop_segment_geometry": "object"})#.set_geometry("geometry")
+    ).set_geometry("geometry")
   
-    ddf = dd.from_pandas(lines_geo, npartitions=1)
+    gddf = dg.from_geopandas(lines_geo, npartitions=1)
     
-    return ddf
+    return gddf
 
 
 if __name__=="__main__":
     import warnings
     
     warnings.filterwarnings(
-        "once",
+        "ignore",
         category=shapely.errors.ShapelyDeprecationWarning) 
 
     logger.add("../logs/C1_stop_to_stop_segments.log", retention="3 months")
@@ -222,9 +246,9 @@ if __name__=="__main__":
                level="INFO")
     
     logger.info(f"Analysis date: {analysis_date}")
-    '''
-    start = datetime.datetime.now()
     
+    start = datetime.datetime.now()
+    '''
     stops = stop_times_with_stop_geom(analysis_date)
     
     time1 = datetime.datetime.now()
@@ -237,62 +261,40 @@ if __name__=="__main__":
     logger.info(f"linear referencing of stops to the shape's line_geom: {time2-time1}")
     
     stops_projected.to_parquet("./data/stops_projected.parquet")
+    
+    stops_projected_wide = make_shape_meters_wide(stops_projected)
+    
+    stops_projected_wide.to_parquet("./data/stops_projected_wide.parquet")
     '''
     time2 = datetime.datetime.now()
-    stops_projected = dg.read_parquet("./data/stops_projected.parquet")
-    
-    ALL_OPERATORS = stops_projected.feed_key.unique().compute().tolist()
-    #all_shapes = stops_projected.shape_array_key.unique()
-    
-    for feed_key in ALL_OPERATORS[:2]:
-        results = []
+    stops_projected = gpd.read_parquet("./data/stops_projected_wide.parquet")
         
-        start_operator = datetime.datetime.now()
+    results = []
+
+    for shape_row in stops_projected.itertuples():
+        start_row = datetime.datetime.now()
         
-        shapes_for_operator = stops_projected[
-            stops_projected.feed_key==feed_key].shape_array_key.unique()
+        break_distances = getattr(shape_row, "shape_meters")
+        shape_line_geom = getattr(shape_row, "shape_geometry")
+        shape_key = getattr(shape_row, "shape_array_key")
+                
+        shape_stop_segments = delayed(cut_shape_geom_by_stops)(
+            break_distances, shape_line_geom, shape_key)
+
+        results.append(shape_stop_segments)
         
-        for shape_key in shapes_for_operator:
-        
-            shape_stop_segments = cut_shape_geom_by_stops(shape_key)
-        
-            results.append(shape_stop_segments)
-        
-        end_operator = datetime.datetime.now()
-        logger.info(f"finished {feed_key}: {end_operator - start_operator}")
-        
-        start_export = datetime.datetime.now()
-        logger.info(f"start exporting: {feed_key}")
-        
-        dask_utils.compute_and_export(
-            results, 
-            gcs_folder = SEGMENT_GCS, 
-            file_name = f"stop_segments_{feed_key}_{analysis_date}", 
-            export_single_parquet = False
-        )
-        
-        end_export = datetime.datetime.now()
-        logger.info(f"exported {feed_key}  {end_export - start_export}")
-        
-    # The list of delayed(pd.DataFrame) can be read as ddf with from_delayed
-    # only works if elements in list are pd.DataFrame, not dd.DataFrame
-    #ddf = dd.from_delayed(results)
-        
+        end_row = datetime.datetime.now()
+        logger.info(f"finished {shape_key}:  {end_row-start_row}")
+                        
     time3 = datetime.datetime.now()
     logger.info(f"cut stop-to-stop segments for shapes: {time3-time2}")
-
-    # Save a partitioned version of results
-    # Decide how to join back to routelines
-    '''
+    
     dask_utils.compute_and_export(
         results, 
         gcs_folder = SEGMENT_GCS, 
         file_name = f"stop_segments_{analysis_date}", 
         export_single_parquet = False
     )
-    '''
-    #ddf = ddf.repartition(partition_size="85MB")
-    #ddf.to_parquet(f"{SEGMENT_GCS}stop_segments_{analysis_date}")
-    
+        
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
