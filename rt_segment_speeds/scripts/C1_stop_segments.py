@@ -10,6 +10,7 @@ References:
 * https://stackoverflow.com/questions/31072945/shapely-cut-a-piece-from-a-linestring-at-two-cutting-points
 * https://gis.stackexchange.com/questions/210220/break-a-shapely-linestring-at-multiple-points
 * https://gis.stackexchange.com/questions/416284/splitting-multiline-or-linestring-into-equal-segments-of-particular-length-using
+* https://stackoverflow.com/questions/62053253/how-to-split-a-linestring-to-segments
 """
 import datetime
 import dask.dataframe as dd
@@ -131,16 +132,16 @@ def merge_in_shape_geom_and_project(
         
         point_projected_and_interpolated_along_shape = row_shape_geom.interpolate(
             row_shape_geom.project(row_stop_geom))
-        #interpolated.append(point_projected_and_interpolated_along_shape)
+        interpolated.append(point_projected_and_interpolated_along_shape)
     
-    #shape_meters_x = [shapely.geometry.Point(i).x for i in interpolated]
-    #shape_meters_y = [shapely.geometry.Point(i).y for i in interpolated]
+    shape_meters_x = [shapely.geometry.Point(i).x for i in interpolated]
+    shape_meters_y = [shapely.geometry.Point(i).y for i in interpolated]
     
     stops_with_shape = stops_with_shape.assign(
         shape_meters = projected,
-        #stop_interpolated = gpd.points_from_xy(shape_meters_x, 
-                                               #shape_meters_y,
-                                               #crs = "EPSG:3310")
+        stop_interpolated = gpd.points_from_xy(shape_meters_x, 
+                                               shape_meters_y,
+                                               crs = "EPSG:3310")
     )
         
     return stops_with_shape
@@ -155,8 +156,10 @@ def make_shape_meters_wide(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                     )
     
     gdf_wide = (gdf.groupby(shape_cols)
-                .shape_meters.apply(list)
-                .reset_index()
+                .agg({
+                    "shape_meters": lambda x: list(x), 
+                    "stop_sequence": lambda x: list(x)
+                }).reset_index()
                )
     
     gdf_wide2 = pd.merge(
@@ -170,9 +173,7 @@ def make_shape_meters_wide(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def cut_shape_geom_by_stops(
-    break_distances: list,
-    line_geom: str,
-    shape_key: str
+    row: gpd.GeoDataFrame
 ) -> dg.GeoDataFrame:
     """
     Cut a shape_id's line geometry into segments that correspond to 
@@ -185,7 +186,10 @@ def cut_shape_geom_by_stops(
     
     Once it's cut, save the shape_array_key, easier to merge on shapes table.
     """
-    break_distances = list(break_distances)
+    break_distances = getattr(row, "shape_meters").tolist()
+    line_geom = getattr(row, "shape_geometry")
+    shape_key = getattr(row, "shape_array_key")
+    stop_sequences = getattr(row, "stop_sequence").tolist()
     
     # https://gis.stackexchange.com/questions/203048/split-lines-at-points-using-shapely/203068
     # First coords of line (start + end)
@@ -225,7 +229,8 @@ def cut_shape_geom_by_stops(
     
     lines_geo = lines_geo.assign(
         shape_array_key = shape_key,
-        segment_sequence = lines_geo.index
+        segment_sequence = lines_geo.index,
+        stop_sequence = pd.Series(stop_sequences)
     ).set_geometry("geometry")
   
     gddf = dg.from_geopandas(lines_geo, npartitions=1)
@@ -262,24 +267,21 @@ if __name__=="__main__":
     
     stops_projected.to_parquet("./data/stops_projected.parquet")
     
+    #stops_projected = gpd.read_parquet("./data/stops_projected.parquet")
     stops_projected_wide = make_shape_meters_wide(stops_projected)
     
     stops_projected_wide.to_parquet("./data/stops_projected_wide.parquet")
     '''
     time2 = datetime.datetime.now()
-    stops_projected = gpd.read_parquet("./data/stops_projected_wide.parquet")
+    gdf = gpd.read_parquet("./data/stops_projected_wide.parquet").head(2)
         
     results = []
 
-    for shape_row in stops_projected.itertuples():
+    for shape_row in gdf.itertuples():
         start_row = datetime.datetime.now()
-        
-        break_distances = getattr(shape_row, "shape_meters")
-        shape_line_geom = getattr(shape_row, "shape_geometry")
         shape_key = getattr(shape_row, "shape_array_key")
-                
-        shape_stop_segments = delayed(cut_shape_geom_by_stops)(
-            break_distances, shape_line_geom, shape_key)
+        
+        shape_stop_segments = delayed(cut_shape_geom_by_stops)(shape_row)
 
         results.append(shape_stop_segments)
         
@@ -292,9 +294,10 @@ if __name__=="__main__":
     dask_utils.compute_and_export(
         results, 
         gcs_folder = SEGMENT_GCS, 
-        file_name = f"stop_segments_{analysis_date}", 
+        file_name = f"test_stop_segments_{analysis_date}", 
         export_single_parquet = False
     )
-        
+       
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
+    

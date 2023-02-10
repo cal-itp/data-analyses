@@ -12634,3 +12634,32 @@
 2023-02-09 11:45:20.942 | INFO     | __main__:<module>:287 - finished a26c1986369757461b5becb278f56657:  0:00:00.000162
 2023-02-09 11:45:20.942 | INFO     | __main__:<module>:290 - cut stop-to-stop segments for shapes: 0:00:07.911954
 2023-02-09 11:49:39.907 | INFO     | __main__:<module>:300 - execution time: 0:04:26.876229
+2023-02-09 13:01:08.000 | INFO     | __main__:<module>:251 - Analysis date: 2023-01-18
+2023-02-09 13:02:05.926 | INFO     | __main__:<module>:251 - Analysis date: 2023-01-18
+2023-02-09 13:02:06.759 | INFO     | __main__:<module>:286 - finished b315bbbd7eff442b38f52615fde4a2d2:  0:00:00.000518
+2023-02-09 13:02:06.760 | INFO     | __main__:<module>:286 - finished 9b91e8a8a48f69a5e935ae3781f773cc:  0:00:00.000244
+2023-02-09 13:02:06.760 | INFO     | __main__:<module>:289 - cut stop-to-stop segments for shapes: 0:00:00.833864
+2023-02-09 13:03:29.487 | INFO     | __main__:<module>:251 - Analysis date: 2023-01-18
+2023-02-09 13:05:21.287 | INFO     | __main__:<module>:251 - Analysis date: 2023-01-18
+2023-02-09 13:06:11.429 | INFO     | __main__:<module>:251 - Analysis date: 2023-01-18
+2023-02-09 13:06:53.814 | INFO     | __main__:<module>:287 - finished b315bbbd7eff442b38f52615fde4a2d2:  0:00:00.000637
+2023-02-09 13:06:53.815 | INFO     | __main__:<module>:287 - finished 9b91e8a8a48f69a5e935ae3781f773cc:  0:00:00.000269
+2023-02-09 13:06:53.816 | INFO     | __main__:<module>:290 - cut stop-to-stop segments for shapes: 0:00:00.827398
+2023-02-09 13:09:23.817 | INFO     | __main__:<module>:252 - Analysis date: 2023-01-18
+2023-02-09 13:10:17.905 | INFO     | __main__:<module>:252 - Analysis date: 2023-01-18
+2023-02-09 13:10:18.743 | INFO     | __main__:<module>:288 - finished b315bbbd7eff442b38f52615fde4a2d2:  0:00:00.000583
+2023-02-09 13:10:18.744 | INFO     | __main__:<module>:288 - finished 9b91e8a8a48f69a5e935ae3781f773cc:  0:00:00.000312
+2023-02-09 13:10:18.745 | INFO     | __main__:<module>:291 - cut stop-to-stop segments for shapes: 0:00:00.838315
+2023-02-09 13:10:19.494 | INFO     | __main__:<module>:301 - execution time: 0:00:01.587643
+2023-02-09 13:12:01.989 | INFO     | __main__:<module>:253 - Analysis date: 2023-01-18
+2023-02-09 13:12:02.812 | INFO     | __main__:<module>:289 - finished b315bbbd7eff442b38f52615fde4a2d2:  0:00:00.000531
+2023-02-09 13:12:02.813 | INFO     | __main__:<module>:289 - finished 9b91e8a8a48f69a5e935ae3781f773cc:  0:00:00.000230
+2023-02-09 13:12:02.814 | INFO     | __main__:<module>:292 - cut stop-to-stop segments for shapes: 0:00:00.824674
+2023-02-09 13:12:27.516 | INFO     | __main__:<module>:253 - Analysis date: 2023-01-18
+2023-02-09 13:12:28.328 | INFO     | __main__:<module>:289 - finished b315bbbd7eff442b38f52615fde4a2d2:  0:00:00.000518
+2023-02-09 13:12:28.329 | INFO     | __main__:<module>:289 - finished 9b91e8a8a48f69a5e935ae3781f773cc:  0:00:00.000311
+2023-02-09 13:12:28.329 | INFO     | __main__:<module>:292 - cut stop-to-stop segments for shapes: 0:00:00.812066
+2023-02-09 13:12:28.897 | INFO     | __main__:<module>:302 - execution time: 0:00:01.380283
+2023-02-09 16:16:20.095 | INFO     | __main__:<module>:253 - Analysis date: 2023-01-18
+2023-02-09 16:16:32.775 | INFO     | __main__:<module>:260 - add stop geom to stop_times: 0:00:12.643653
+2023-02-09 16:18:13.154 | INFO     | __main__:<module>:266 - linear referencing of stops to the shape's line_geom: 0:01:40.379508
