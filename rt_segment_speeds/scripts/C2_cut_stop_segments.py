@@ -117,79 +117,28 @@ def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> pd.DataFrame:
 
 
 
-def cut_shape_geom_by_stops(
-    row: gpd.GeoDataFrame
-) -> dg.GeoDataFrame:
-    """
-    Cut a shape_id's line geometry into segments that correspond to 
-    stop-to-stop segments.
-    The shape_meters returned from merge_in_shape_geom_and_project()
-    gives the distance that stop_id corresponds to somewhere along that line geometry.
-    
-    We want to cut the line at varying distances that correspond to stops.
-    Use interpolate to turn those distances into point geom.
-    
-    Once it's cut, save the shape_array_key, easier to merge on shapes table.
-    """
-    break_distances = getattr(row, "shape_meters").tolist()
-    line_geom = getattr(row, "shape_geometry")
-    shape_key = getattr(row, "shape_array_key")
-    stop_sequences = getattr(row, "stop_sequence").tolist()
-    
-    # https://gis.stackexchange.com/questions/203048/split-lines-at-points-using-shapely/203068
-    # First coords of line (start + end)
-    coords = [line_geom.coords[0], line_geom.coords[-1]] 
-    
-    break_points = [line_geom.interpolate(i).coords[0] 
-                    for i in break_distances]
-    
-    coords_with_breaks = [line_geom.coords[0]] + break_points + [line_geom.coords[-1]]
-    
-    # Add the origin/destination shape_meters (0 and whatever the length is)
-    break_distances_with_endpoints = break_distances + [0, line_geom.length]
-    
-    # Don't use sorted() because it cuts segments weird
-    coords_ordered = [
-        p for (d, p) in #sorted(
-        zip(break_distances_with_endpoints, coords_with_breaks)  #)
-    ]
- 
-    lines = [shapely.geometry.LineString(
-                [coords_ordered[i], coords_ordered[i+1]]
-            ) for i in range(len(coords_ordered)-1)]
-    
-    
-    # https://shapely.readthedocs.io/en/stable/migration.html#creating-numpy-arrays-of-geometry-objects
-    # To avoid shapely deprecation warning, create an empty array
-    # and then fill it list's elements (shapely linestrings)
-    #arr = np.empty(len(lines), dtype="object")
-    #arr[:] = lines
-    # the warnings still come up even when we use arrays
-    
-    lines_geo = gpd.GeoDataFrame(
-        lines,
-        columns = ["geometry"],
-        crs = "EPSG:3310"
-    )
-    
-    lines_geo = lines_geo.assign(
-        shape_array_key = shape_key,
-        segment_sequence = lines_geo.index,
-        stop_sequence = pd.Series(stop_sequences)
-    ).set_geometry("geometry")
-  
-    gddf = dg.from_geopandas(lines_geo, npartitions=1)
-    
-    return gddf
+
 
 
 
 
 if __name__ == "__main__":
+    import warnings
+    
+    warnings.filterwarnings(
+        "ignore",
+        category=shapely.errors.ShapelyDeprecationWarning) 
+
+    logger.add("../logs/C2_cut_stop_segments.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    logger.info(f"Analysis date: {analysis_date}")
     
     start = datetime.datetime.now()
 
-    gdf = gpd.read_parquet("./data/stops_projected_wide.parquet")
+    df = gpd.read_parquet("./data/stops_projected_wide.parquet")
         
     segment_cutoffs = pd.DataFrame()
 
@@ -200,26 +149,9 @@ if __name__ == "__main__":
         [segment_cutoffs, shape_segment_cutoffs], 
         axis=0, ignore_index=True)
     
-    
-    for shape_row in gdf.itertuples():
-        start_row = datetime.datetime.now()
-        shape_key = getattr(shape_row, "shape_array_key")
-        
-        shape_stop_segments = delayed(cut_shape_geom_by_stops)(shape_row)
-
-        results.append(shape_stop_segments)
-        
-        end_row = datetime.datetime.now()
-        logger.info(f"finished {shape_key}:  {end_row-start_row}")
                         
     time3 = datetime.datetime.now()
     logger.info(f"cut stop-to-stop segments for shapes: {time3-time2}")
     
-    dask_utils.compute_and_export(
-        results, 
-        gcs_folder = SEGMENT_GCS, 
-        file_name = f"stop_segments_{analysis_date}", 
-        export_single_parquet = False
-    )
     
     end = datetime.datetime.now()
