@@ -1,12 +1,16 @@
 """
-Stop-to-stop segments by shape_id.
+Prep dfs to cut stop-to-stop segments by shape_id.
+
+Use np.arrays and store shape_geometry as meters from origin.
+An individual stop-to-stop segment has starting point of previous stop's projected coord and end point at current stop's projected coord.
+Also add in the shape's coords present (which adds more detail, including curves).
 
 gtfs_schedule.01_stop_route_table.ipynb
 shows that stop_sequence would probably be unique at shape_id level, but
 not anything more aggregated than that (not route-direction).
 
 References:
-* Used this one (method 4): https://gis.stackexchange.com/questions/203048/split-lines-at-points-using-shapely
+* Tried method 4: https://gis.stackexchange.com/questions/203048/split-lines-at-points-using-shapely -- debug because we lost curves
 * https://stackoverflow.com/questions/31072945/shapely-cut-a-piece-from-a-linestring-at-two-cutting-points
 * https://gis.stackexchange.com/questions/210220/break-a-shapely-linestring-at-multiple-points
 * https://gis.stackexchange.com/questions/416284/splitting-multiline-or-linestring-into-equal-segments-of-particular-length-using
@@ -20,7 +24,9 @@ import sys
 
 from loguru import logger
 
-from update_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, analysis_date
+from update_vars import (SEGMENT_GCS, COMPILED_CACHED_VIEWS, 
+                         analysis_date, PROJECT_CRS)
+from shared_utils import utils
 
 
 def attach_shape_id_to_stop_times(analysis_date: str) -> pd.DataFrame:
@@ -136,13 +142,13 @@ def merge_in_shape_geom_and_project(
         shape_meters = projected,
         #stop_interpolated = gpd.points_from_xy(shape_meters_x, 
         #                                       shape_meters_y,
-        #                                       crs = "EPSG:3310")
+        #                                       crs = PROJECT_CRS)
     )
         
     return stops_with_shape
 
 
-def make_shape_meters_wide(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def make_shapes_wide(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     shape_cols = ["shape_array_key"]
     
     unique_shapes = (gdf.set_geometry("shape_geometry")
@@ -190,14 +196,26 @@ if __name__=="__main__":
     
     stops_projected = merge_in_shape_geom_and_project(
         stops, analysis_date)
-    stops_projected.to_parquet("./data/stops_projected.parquet")
+    
+    utils.geoparquet_gcs_export(
+        stops_projected,
+        SEGMENT_GCS,
+        f"stops_projected_{analysis_date}"
+    )
+    #stops_projected.to_parquet("./data/stops_projected.parquet")
 
     time2 = datetime.datetime.now()
     logger.info(f"linear referencing of stops to the shape's line_geom: {time2-time1}")
     
     # Turn df from long to wide (just 1 row per shape_array_key)
-    stops_projected_wide = make_shape_meters_wide(stops_projected)
-    stops_projected_wide.to_parquet("./data/stops_projected_wide.parquet")    
+    stops_projected_wide = make_shapes_wide(stops_projected)
+    
+    utils.geoparquet_gcs_export(
+        stops_projected_wide,
+        SEGMENT_GCS,
+        f"stops_projected_wide_{analysis_date}"
+    )
+    #stops_projected_wide.to_parquet("./data/stops_projected_wide.parquet")    
        
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
