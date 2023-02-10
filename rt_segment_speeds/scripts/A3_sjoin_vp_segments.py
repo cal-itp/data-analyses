@@ -22,7 +22,8 @@ from loguru import logger
 
 import dask_utils
 import A1_vehicle_positions as A1
-from update_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, analysis_date
+from update_vars import (SEGMENT_GCS, COMPILED_CACHED_VIEWS, 
+                         analysis_date, PROJECT_CRS)
 
 fs = gcsfs.GCSFileSystem()
 
@@ -93,7 +94,7 @@ def import_vehicle_positions_and_segments(
     vp = dg.read_parquet(
         f"{SEGMENT_GCS}vp_{analysis_date}.parquet", 
         filters = [[("gtfs_dataset_key", "==", feed_key)]]
-    ).to_crs("EPSG:3310")
+    ).to_crs(PROJECT_CRS)
     
     vp2 = vp.drop_duplicates().reset_index(drop=True)
     
