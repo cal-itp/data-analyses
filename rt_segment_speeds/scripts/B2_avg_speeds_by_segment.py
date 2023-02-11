@@ -5,7 +5,7 @@ import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import utils
+from shared_utils import utils, portfolio_utils
 from update_vars import SEGMENT_GCS, analysis_date
 
 def avg_speeds_with_segment_geom(
@@ -65,23 +65,9 @@ if __name__ == "__main__":
     
     caltrans_districts = gpd.read_file(URL)[["DISTRICT", "geometry"]]
     
-    district_name_dict = {
-        1: "District 1 - Eureka", 
-        2: "District 2 - Redding", 
-        3: "District 3 - Marysville", 
-        4: "District 4 - Oakland", 
-        5: "District 5 - San Luis Obispo", 
-        6: "District 6 - Fresno", 
-        7: "District 7 - Los Angeles", 
-        8: "District 8 - San Bernardino", 
-        9: "District 9 - Bishop", 
-        10: "District 10 - Stockton", 
-        11: "District 11 - San Diego", 
-        12: "District 12 - Irvine", 
-    }
-    
     caltrans_districts = caltrans_districts.assign(
-        district_name = caltrans_districts.DISTRICT.map(district_name_dict)
+        district_name = caltrans_districts.DISTRICT.map(
+            portfolio_utils.district_name_dict)
     ).rename(columns = {"DISTRICT": "district"})
     
     # Average the speeds for segment for entire day

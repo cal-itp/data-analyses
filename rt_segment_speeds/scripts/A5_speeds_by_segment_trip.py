@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 import dask_utils
 from A4_valid_vehicle_positions import operators_with_data
-from update_vars import SEGMENT_GCS, analysis_date
+from update_vars import SEGMENT_GCS, analysis_date, PROJECT_CRS
 
 fs = gcsfs.GCSFileSystem()                    
 
@@ -41,7 +41,7 @@ def merge_in_segment_shape(
     # https://stackoverflow.com/questions/71685387/faster-methods-to-create-geodataframe-from-a-dask-or-pandas-dataframe
     # https://github.com/geopandas/dask-geopandas/issues/197
     vp = vp.assign(
-        geometry = dg.points_from_xy(vp, "lon", "lat", crs = "EPSG:3310"), 
+        geometry = dg.points_from_xy(vp, "lon", "lat", crs = PROJECT_CRS), 
     )
     
     # Refer to the geometry column by name

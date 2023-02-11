@@ -5,3 +5,4 @@ RT_SCHED_GCS = f"{GCS_FILE_PATH}rt_vs_schedule/"
 #SCHED_GCS = f"{GCS_FILE_PATH}gtfs_schedule/" -- not in GCS yet
 #PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/" -- not in GCS yet
 analysis_date = "2023-01-18"
+PROJECT_CRS = "EPSG:3310"
