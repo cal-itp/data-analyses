@@ -42,8 +42,12 @@ def attach_shape_id_to_stop_times(analysis_date: str) -> pd.DataFrame:
     
     trips = pd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
-        columns = ["feed_key", "trip_id", "shape_id", "shape_array_key"]
+        columns = ["feed_key", "name",
+                   "trip_id", "shape_id", "shape_array_key"]
     )
+    
+    exclude = ["Amtrak Schedule"]
+    trips = trips[~trips.name.isin(exclude)].reset_index(drop=True)
     
     st_with_shape = pd.merge(
         stop_times, 
