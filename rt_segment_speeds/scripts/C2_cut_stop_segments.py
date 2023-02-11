@@ -48,10 +48,11 @@ def get_shape_inputs(row: gpd.GeoDataFrame) -> tuple:
 
 
 def get_shape_coords_up_to_stop(
+    shape_geom: shapely.geometry.LineString,
     shape_path_dist: list, 
     stop_break_dist: list,
     start_end_tuple: tuple
-) -> list:
+) -> shapely.geometry.LineString:
     """
     For every pair of start/end shape_meters, grab all the 
     shape path's coords in between.
@@ -75,11 +76,20 @@ def get_shape_coords_up_to_stop(
     shape_subset_with_endpoints = np.unique(np.array(
             [start_dist] + shape_path_subset.tolist() + [end_dist]))
     
+    # In each row, get the array, and interpolate it to convert 
+    # distances to points and string together into line geometry
+    segment_points = [shape_geom.interpolate(i) 
+                      for i in shape_subset_with_endpoints]
+
+    if len(segment_points) >= 2:
+        segment_line = shapely.geometry.LineString(segment_points)
+    else:
+        segment_line = shapely.geometry.LineString()
     
-    return shape_subset_with_endpoints
+    return segment_line
 
 
-def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> dd.DataFrame:
+def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     For a row (shape_id), grab the shape_geom, array of 
     stop's shape_meters.
@@ -90,10 +100,12 @@ def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> dd.DataFrame:
     stop_break_dist, shape_path_dist = get_shape_inputs(row)
     
     shape_key = getattr(row, "shape_array_key")
+    shape_geom = getattr(row, "shape_geometry")
     
     shape_segments = []
     
-    for i, _ in enumerate(stop_break_dist):
+    # Use np.indices instead of enumerate
+    for i in np.indices(stop_break_dist.shape).flatten():
         # Skip if i == 0, because that's the start of the shape
         # and it has prior element to look against
         
@@ -102,6 +114,7 @@ def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> dd.DataFrame:
             # grab the element prior and the current element
             # [, i+1 ] works similar to range(), it just includes i, not i+1
             one_segment = get_shape_coords_up_to_stop(
+                shape_geom,
                 shape_path_dist, 
                 stop_break_dist,
                 stop_break_dist[i-1: i+1]
@@ -115,52 +128,13 @@ def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> dd.DataFrame:
     shape_segment_cutoffs = pd.DataFrame()
     
     shape_segment_cutoffs = shape_segment_cutoffs.assign(
-        segment_cutoff_dist = shape_segments,
+        stop_segment_geometry = shape_segments,
         shape_meters = pd.Series(stop_break_dist),
         shape_array_key = shape_key,
     )
-
-    #ddf = dd.from_pandas(shape_segment_cutoffs, npartitions=1)
     
     return shape_segment_cutoffs
-    
-    
-def interpolate_segment_coords_to_line(
-    gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    """
-    The input we have is a column with arrays of segment_cutoff_dist.
-    The array of shape_meters that make up the segment.
-    Now, convert shape_meters (distance from origin) back into point geom,
-    and string it together into a line geom.
-    """
-    # Store shapely LineString result
-    segment_line_geometry = []
-        
-    for row in gdf.itertuples():
-        shape_geom = getattr(row, "shape_geometry")
-        segment_dist = getattr(row, "segment_cutoff_dist")
-        
-        # In each row, get the array, and interpolate it to convert 
-        # distances to points
-        segment_points = [shape_geom.interpolate(i) for i in segment_dist]
-        
-        if len(segment_points) >= 2:
-            segment_line = shapely.geometry.LineString(segment_points)
-        else:
-            segment_line = shapely.geometry.LineString()
-            
-        segment_line_geometry.append(segment_line)
-        
-    gdf = gdf.assign(
-        stop_segment_geometry = segment_line_geometry
-    ).set_geometry("stop_segment_geometry", crs=PROJECT_CRS)
-    
-    # Drop the array columns
-    drop_cols = ["segment_cutoff_dist", "shape_geometry"]
-    gdf2 = gdf.drop(columns = drop_cols)
-    
-    return gdf
-    
+     
     
 if __name__ == "__main__":
     import warnings
@@ -178,50 +152,31 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
 
-    df = gpd.read_parquet("./data/stops_projected_wide.parquet")
+    df = gpd.read_parquet(
+        f"{SEGMENT_GCS}stops_projected_wide_{analysis_date}.parquet")
     
-    segment_cutoffs = pd.DataFrame()
-    #segment_cutoffs_results = []
+    segment_cutoffs = gpd.GeoDataFrame()
     
     for row in df.itertuples():
         start_row = datetime.datetime.now()
         
         shape_segment_cutoffs = cut_stop_segments_for_shape(row)
-        #segment_cutoffs_results.append(shape_segment_cutoffs)
+        
         segment_cutoffs = pd.concat(
             [segment_cutoffs, shape_segment_cutoffs], 
             axis=0, ignore_index=True)
         
         end_row = datetime.datetime.now()
-        logger.info(f"finish {getattr(row, 'shape_array_key')}  {end_row - start_row}")
-    '''
-    dask_utils.compute_and_export(
-        segment_cutoffs_results,
-        SEGMENT_GCS,
-        f"temp_segment_cutoffs_{analysis_date}"
-    )
-    
-    segment_cutoffs = dd.read_parquet(
-        f"{SEGMENT_GCS}temp_segment_cutoffs_{analysis_date}"
-    ).compute()
-    '''
+        logger.info(f"finish {row.Index} "
+                    f"{getattr(row, 'shape_array_key')}  {end_row - start_row}")
+
     time1 = datetime.datetime.now()
     logger.info(f"cut stop-to-stop segments and save projected coords: {time1-start}")
     
-    # Attach shape_geometry to segments
-    segment_cutoffs_with_shape = pd.merge(
-        df[["shape_array_key", "shape_geometry"]],
-        segment_cutoffs,
-        on = "shape_array_key",
-        how = "inner",
-        validate = "1:m"
-    )
-    
-    # Convert distances into points again, and string those points into linestring
-    segments_assembled = interpolate_segment_coords_to_line(segment_cutoffs_with_shape)
-    
-    time2 = datetime.datetime.now()
-    logger.info(f"interpolate projected coords into linestrings: {time2-time1}")
+    segments_assembled = gpd.GeoDataFrame(
+        segment_cutoffs[segment_cutoffs.shape_meters > 0].reset_index(drop=True),
+        geometry = "stop_segment_geometry", 
+        crs = PROJECT_CRS)
     
     utils.geoparquet_gcs_export(
         segments_assembled, 
