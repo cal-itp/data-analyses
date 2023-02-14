@@ -14,49 +14,9 @@ import gcsfs
 import geopandas as gpd
 import shapely
 
-from shared_utils import geography_utils, utils
-from update_vars import COMPILED_CACHED_VIEWS, SEGMENT_GCS, analysis_date
+from shared_utils import utils
+from update_vars import SEGMENT_GCS, analysis_date
 
-
-def get_scheduled_trips(analysis_date: str) -> dd.DataFrame:
-    """
-    Get scheduled trips info (all operators) for single day, 
-    and keep subset of columns.
-    """
-    trips = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
-    
-    keep_cols = ["feed_key", "name",
-                 "trip_id", "shape_id", "shape_array_key",
-                 "route_id", "route_key", "direction_id"
-                ] 
-    trips = trips[keep_cols]
-    
-    return trips
-
-
-def get_routelines(
-    analysis_date: str, buffer_size: int = 50
-) -> dg.GeoDataFrame: 
-    """
-    Import routelines (shape_ids) and add route_length and buffer by 
-    some specified size (50 m to start)
-    """
-    routelines = dg.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet"
-    ).to_crs(geography_utils.CA_NAD83Albers)
-             
-    keep_cols = ["shape_array_key", "route_length", 
-                 "geometry", "shape_geometry_buffered"
-                ]
-    
-    routelines = routelines.assign(
-        route_length = routelines.geometry.length,
-        shape_geometry_buffered = routelines.geometry.buffer(buffer_size)
-    )[keep_cols]
-    
-    return routelines
-        
 
 if __name__ == "__main__":
     
