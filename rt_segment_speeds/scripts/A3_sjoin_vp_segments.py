@@ -21,109 +21,65 @@ from dask import delayed, compute
 from loguru import logger
 
 import dask_utils
-import A1_vehicle_positions as A1
-from update_vars import (SEGMENT_GCS, COMPILED_CACHED_VIEWS, 
-                         analysis_date, PROJECT_CRS)
+import sched_rt_utils
+from update_vars import SEGMENT_GCS, analysis_date, PROJECT_CRS
 
 fs = gcsfs.GCSFileSystem()
 
-              
-def merge_scheduled_trips_with_segment_crosswalk(
-    analysis_date: str) -> pd.DataFrame:
-    """
-    Merge scheduled trips with segments crosswalk to get 
-    the route_dir_identifier for each trip.
-    
-    The route_dir_identifier is a more aggregated grouping 
-    over which vehicle positions should be spatially joined to segments.
-    """
-    trips = A1.get_scheduled_trips(analysis_date)
-    
-    segments_crosswalk = pd.read_parquet(
-        f"{SEGMENT_GCS}segments_route_direction_crosswalk_{analysis_date}.parquet")
-               
-    trips_with_route_dir_identifier = dd.merge(
-        trips, 
-        segments_crosswalk,
-        on = ["feed_key", "name", "route_id", "direction_id"],
-        how = "inner",
-    ).compute()
-              
-    return trips_with_route_dir_identifier
-      
-    
-def get_unique_operators_route_directions(analysis_date: str) -> pd.DataFrame:
-    """
-    Import vehicle positions and merge onto scheduled trips and segments
-    crosswalk to get route_dir_identifiers.
-    
-    Use this to break up the loop with dask delayed, by operator and
-    by route_direction.
-    """
-    vp = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_{analysis_date}.parquet", 
-        columns = ["gtfs_dataset_key", "_gtfs_dataset_name", "trip_id"]
-    ).drop_duplicates().reset_index(drop=True)
-              
-    scheduled_trips_route_dir = merge_scheduled_trips_with_segment_crosswalk(
-        analysis_date)
-              
-    trips_with_route_dir = pd.merge(
-        vp,
-        scheduled_trips_route_dir,
-        on = ["gtfs_dataset_key", "trip_id"],
-        how = "inner"
-    ).drop_duplicates()
-    
-    keep_cols2 = ["gtfs_dataset_key",
-                  "route_dir_identifier", "trip_id"]
-    
-    return trips_with_route_dir[keep_cols2]              
-     
 
 @delayed(nout=2)
 def import_vehicle_positions_and_segments(
-    vp_crosswalk: pd.DataFrame,
-    feed_key: int, analysis_date: str,
+    rt_dataset_key: int, 
+    analysis_date: str,
     buffer_size: int = 50
 ) -> tuple[dg.GeoDataFrame]:
     """
     Import vehicle positions, filter to operator.
     Import route segments, filter to operator.
     """
-    vp = dg.read_parquet(
-        f"{SEGMENT_GCS}vp_{analysis_date}.parquet", 
-        filters = [[("gtfs_dataset_key", "==", feed_key)]]
-    ).to_crs(PROJECT_CRS)
-    
-    vp2 = vp.drop_duplicates().reset_index(drop=True)
-    
-    # vp_crosswalk contains the trip_ids that are present for this operator
-    # Do merge to get the route_dir_identifiers that remain
-    vp_with_route_dir = dd.merge(
-        vp2,
-        vp_crosswalk,
-        on = ["gtfs_dataset_key", "trip_id"],
-        how = "inner"
-    ).reset_index(drop=True).repartition(npartitions=1)
-    
-    operator_routes_present = (vp_with_route_dir.route_dir_identifier.unique()
-                               .compute().tolist())
-    
     # For the route_dir_identifiers present, subset segments
     # vp can only be spatially joined to segments for that route
     segments = dg.read_parquet(
                 f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet", 
-                filters = [[("gtfs_dataset_key", "==", feed_key)]],
-                columns = ["gtfs_dataset_key", 
-                           "route_dir_identifier", "segment_sequence",
-                          "geometry"]
+                filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
     ).drop_duplicates().reset_index(drop=True)
     
     # Buffer the segment for vehicle positions (points) to fall in polygons
     segments_buff = segments.assign(
         geometry = segments.geometry.buffer(buffer_size)
+    ).drop(columns = ["route_id", "direction_id"])
+    
+    
+    vp = dg.read_parquet(
+        f"{SEGMENT_GCS}vp_{analysis_date}.parquet", 
+        filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
+    ).to_crs(PROJECT_CRS)
+    
+    vp2 = vp.drop_duplicates().reset_index(drop=True)
+    
+    # Get crosswalk
+    trip_route_dir_cols =  ["feed_key", "trip_id", "route_id", "direction_id"]
+    crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
+        analysis_date, trip_route_dir_cols
     )
+    
+    segments_route_dir = segments[[
+        "gtfs_dataset_key", 
+        "route_id", "direction_id", 
+        "route_dir_identifier"]].drop_duplicates()
+    
+    # vp_crosswalk contains the trip_ids that are present for this operator
+    # Do merge to get the route_dir_identifiers that remain
+    vp_with_route_dir = dd.merge(
+        vp2,
+        crosswalk,
+        on = ["gtfs_dataset_key", "trip_id"],
+        how = "inner"
+    ).merge(
+        segments_route_dir,
+        on = ["gtfs_dataset_key", "route_id", "direction_id"],
+        how = "inner"
+    ).reset_index(drop=True).repartition(npartitions=1)
     
     return vp_with_route_dir, segments_buff
 
@@ -192,7 +148,10 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    vp_df = get_unique_operators_route_directions(analysis_date)
+    vp_df = dg.read_parquet(
+        f"{SEGMENT_GCS}vp_{analysis_date}.parquet", 
+        columns = ["gtfs_dataset_key"]
+    ).drop_duplicates().compute()
     
     time1 = datetime.datetime.now()
     logger.info(f"get unique operators to loop over: {time1 - start}")
@@ -202,16 +161,14 @@ if __name__ == "__main__":
     for rt_dataset_key in RT_OPERATORS:
         start_id = datetime.datetime.now()
         
-        operator_vp_df = (vp_df[vp_df.gtfs_dataset_key == rt_dataset_key]
-                          .reset_index(drop=True))
-        
-        operator_routes = operator_vp_df.route_dir_identifier.unique()
-        
         vp, segments = import_vehicle_positions_and_segments(
-            operator_vp_df, 
             rt_dataset_key, 
-            analysis_date, buffer_size=50).persist()
+            analysis_date, 
+            buffer_size=50
+        ).persist()
         
+        operator_routes = vp.route_dir_identifier.unique().compute()
+
         results = []
         
         for route_identifier in operator_routes:

@@ -14,14 +14,18 @@ and stored what the longest_shape_id is for that route.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
+import datetime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import sys
 import zlib
 
-import A1_vehicle_positions as A1
+from loguru import logger
+
+import sched_rt_utils
 from shared_utils import geography_utils, utils, rt_utils
-from update_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, analysis_date
+from update_vars import SEGMENT_GCS, analysis_date
 
 def merge_routes_to_trips(
     routelines: dg.GeoDataFrame, trips: dd.DataFrame
@@ -88,27 +92,38 @@ def merge_routes_to_trips(
 
 
 def get_longest_shapes(analysis_date: str) -> dg.GeoDataFrame:
-    trips = A1.get_scheduled_trips(analysis_date)        
-    routelines = A1.get_routelines(analysis_date)
+    trips = sched_rt_utils.get_scheduled_trips(analysis_date)        
+    routelines = sched_rt_utils.get_routelines(analysis_date)
 
     longest_shapes = merge_routes_to_trips(routelines, trips)
+        
+    return longest_shapes
+
+
+def add_rt_keys_to_segments(
+    segments: gpd.GeoDataFrame, 
+    analysis_date: str
+) -> gpd.GeoDataFrame:
+    """
+    Once segments are cut, add the RT gtfs_dataset_key 
+    using sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key
+    function.
+    """
+    route_dir_cols = ["feed_key", "route_id", "direction_id"]
     
-    # Get the schedule feed_key and RT gtfs_dataset_key and add it to crosswalk
-    fct_rt_feeds = rt_utils.get_rt_schedule_feeds_crosswalk(
+    crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
         analysis_date, 
-        keep_cols = ["gtfs_dataset_key", "schedule_feed_key", "feed_type"], 
-        get_df = True,
-        custom_filtering = {"feed_type": ["vehicle_positions"]}
-    ).rename(columns = {"schedule_feed_key": "feed_key"})
-    
-    longest_shapes_with_rt_key = dd.merge(
-        longest_shapes,
-        fct_rt_feeds,
-        on = "feed_key",
-        how = "inner"
+        route_dir_cols
     )
     
-    return longest_shapes
+    segments_with_crosswalk = pd.merge(
+        segments,
+        crosswalk,
+        on = route_dir_cols,
+        how = "inner",
+    )
+    
+    return segments_with_crosswalk
 
 
 def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
@@ -138,59 +153,46 @@ def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     return gdf
 
 
-
-def route_direction_to_segments_crosswalk(analysis_date: str):
-    """
-    Create a table where route_id-direction_id can be used
-    to find route_dir_identifier. 
-    
-    Trips table has route_id-direction_id, and needs a route_dir_identifier
-    attached to help do trip aggregations once vehicle positions
-    are joined to segments.
-    """
-    segments = dg.read_parquet(
-        f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet")
-
-    keep_cols = ["feed_key", "name", 
-                 "gtfs_dataset_key", # RT vehicle positions gtfs_dataset_key
-                 "route_id", "direction_id",
-                 "route_dir_identifier"
-                ]
-    
-    segments2 = segments[keep_cols].drop_duplicates().reset_index(drop=True)
-    
-    return segments2
-    
-
 if __name__ == "__main__":
+    logger.add("../logs/A2_cut_route_segments.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    logger.info(f"Analysis date: {analysis_date}")
+    
+    start = datetime.datetime.now()
     
     longest_shapes = get_longest_shapes(analysis_date)
-    print("Get longest shapes")
+    
+    time1 = datetime.datetime.now()
+    logger.info(f"Get longest shapes: {time1 - start}")
     
     # Cut segments
     segments = geography_utils.cut_segments(
         longest_shapes,
-        group_cols = ["gtfs_dataset_key", "feed_key", "name",
+        group_cols = ["feed_key", "name",
                       "route_id", "direction_id", "longest_shape_id",
                       "route_dir_identifier", "route_length"],
         segment_distance = 1_000
     )
     
-    print("Cut route segments")
+    segments = add_rt_keys_to_segments(segments)
+    
+    time2 = datetime.datetime.now()
+    logger.info(f"Cut route segments {time2 - time1}")
     
     # Add arrowized geometry
     arrowized_segments = add_arrowized_geometry(segments).compute()
     
+    time3 = datetime.datetime.now()
+    logger.info(f"Add arrowized geometry: {time3 - time2}")
+
     utils.geoparquet_gcs_export(
         arrowized_segments,
         SEGMENT_GCS,
         f"longest_shape_segments_{analysis_date}"
     )
-    print("Export longest_shape_segments")
     
-    segment_crosswalk = route_direction_to_segments_crosswalk(analysis_date)
-    (segment_crosswalk.compute().to_parquet(
-        f"{SEGMENT_GCS}"
-        f"segments_route_direction_crosswalk_{analysis_date}.parquet")
-    )
-    print("Export segment crosswalk")
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end - start}")
