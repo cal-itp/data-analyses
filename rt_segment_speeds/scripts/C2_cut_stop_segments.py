@@ -128,13 +128,13 @@ def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     shape_segment_cutoffs = pd.DataFrame()
     
     shape_segment_cutoffs = shape_segment_cutoffs.assign(
-        stop_segment_geometry = shape_segments,
+        geometry = shape_segments,
         shape_meters = pd.Series(stop_break_dist),
         shape_array_key = shape_key,
     )
     
     return shape_segment_cutoffs
-     
+   
     
 def clean_up_stop_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
@@ -143,7 +143,7 @@ def clean_up_stop_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Handle them here.
     """
     # Drop None geometries
-    gdf = gdf[gdf.stop_segment_geometry.notna()].reset_index(drop=True)
+    gdf = gdf[gdf.geometry.notna()].reset_index(drop=True)
 
     # Look for duplicates - split df into duplicated and not duplicated
     # https://stackoverflow.com/questions/22904523/select-rows-with-duplicate-observations-in-pandas
@@ -174,7 +174,6 @@ def clean_up_stop_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                  )
     
     return cleaned_df    
-    
     
 if __name__ == "__main__":
     import warnings
@@ -213,14 +212,8 @@ if __name__ == "__main__":
         geometry = "stop_segment_geometry", 
         crs = PROJECT_CRS)
     
-    utils.geoparquet_gcs_export(
-        segments_assembled, 
-        SEGMENT_GCS,
-        f"stop_segments_{analysis_date}"
-    )
-    
     time2 = datetime.datetime.now()
-    logger.info(f"assemble stop-to-stop segments and export: {time2-time1}")
+    logger.info(f"assemble stop-to-stop segments: {time2-time1}")
     
     # Clean up stop-to-stop segments
     cleaned_segments = clean_up_stop_segments(segments_assembled)
@@ -230,7 +223,7 @@ if __name__ == "__main__":
     stops_projected = gpd.read_parquet(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet")
     
-    stops_with_new_stop_segments = pd.merge(
+    stops_with_cleaned_segments = pd.merge(
         stops_projected.drop(columns = "shape_geometry"),
         cleaned_segments,
         on = ["shape_array_key", "shape_meters"],
@@ -241,14 +234,21 @@ if __name__ == "__main__":
         validate = "m:1",
     )
     
+    # Rename columns because we want the segment geometry to be primary
+    stops_with_cleaned_segments = stops_with_cleaned_segments.rename(
+        columns = {
+            "geometry": "stop_geometry", 
+            "stop_segment_geometry": "geometry",
+        })
+    
     utils.geoparquet_gcs_export(
-        stops_with_new_stop_segments,
+        stops_with_cleaned_segments,
         SEGMENT_GCS,
-        f"stops_with_stop_segments_{analysis_date}"
+        f"stop_segments_{analysis_date}"
     )
 
     time3 = datetime.datetime.now()
-    logger.info(f"Clean up stop segments and attach to stop-level df: {time3-time2}")
+    logger.info(f"Clean up stop segments and attach to stop geom and export: {time3-time2}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
