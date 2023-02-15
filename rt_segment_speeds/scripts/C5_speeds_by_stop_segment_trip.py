@@ -41,7 +41,7 @@ if __name__ == "__main__":
     
     results_linear_ref = []
     
-    for rt_dataset_key in RT_OPERATORS[:2]:
+    for rt_dataset_key in RT_OPERATORS:
         time0 = datetime.datetime.now()
         
         # https://docs.dask.org/en/stable/delayed-collections.html
