@@ -8,15 +8,15 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 import sys
-#import warnings
+import warnings
 
 from dask import delayed
 from loguru import logger
-#from shapely.errors import ShapelyDeprecationWarning
-#warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
+from shapely.errors import ShapelyDeprecationWarning
+warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 from shared_utils import dask_utils
-from segment_speed_utils import helpers, wrangle_shapes
+from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               PROJECT_CRS)
 
