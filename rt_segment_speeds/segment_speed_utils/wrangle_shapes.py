@@ -50,18 +50,16 @@ def merge_in_segment_shape(
         how = "inner"
     )
     
+    # Convert to geoseries so that we can do the project
     vp_geoseries = gpd.GeoSeries(linear_ref_vp_to_shape.geometry_x.compute())
     shape_geoseries = gpd.GeoSeries(linear_ref_vp_to_shape.geometry_y.compute())
     
+    # Project, save results, then convert to dask array, 
+    # otherwise can't add a column to the dask df
     shape_meters_geoseries = da.array(shape_geoseries.project(vp_geoseries))
 
+    # https://www.appsloveworld.com/coding/dataframe/6/add-a-dask-array-column-to-a-dask-dataframe
     linear_ref_vp_to_shape['shape_meters'] = shape_meters_geoseries
-
-    #linear_ref_vp_to_shape = linear_ref_vp_to_shape.assign(
-    #    shape_meters = shape_meters_geoseries
-    #)#.apply(
-        #lambda x: x.geometry_y.project(x.geometry_x), axis=1,
-        #meta = ('shape_meters', 'float'))
     
     linear_ref_df = (linear_ref_vp_to_shape.drop(
         columns = ["geometry_x", "geometry_y",
