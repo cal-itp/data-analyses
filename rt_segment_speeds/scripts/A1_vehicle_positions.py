@@ -15,7 +15,7 @@ import geopandas as gpd
 import shapely
 
 from shared_utils import utils
-from update_vars import SEGMENT_GCS, analysis_date
+from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
 
 if __name__ == "__main__":

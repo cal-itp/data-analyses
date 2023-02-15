@@ -16,9 +16,10 @@ import sys
 from dask import delayed
 from loguru import logger
 
-import dask_utils
-from update_vars import SEGMENT_GCS, analysis_date, PROJECT_CRS
-from shared_utils import utils
+from shared_utils import dask_utils, utils
+from segment_speed_utils import sched_rt_utils
+from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
+                                              PROJECT_CRS)
 
 def get_shape_inputs(row: gpd.GeoDataFrame) -> tuple:
     """
@@ -157,7 +158,7 @@ def clean_up_stop_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # If there are duplicates, we will keep the row with more 
     # coords (more points) to form the line
     duplicated_df = duplicated_df.assign(
-        num_coords = duplicated_df.stop_segment_geometry.apply(
+        num_coords = duplicated_df.geometry.apply(
             lambda x: len(x.coords))
     )
     
@@ -171,9 +172,10 @@ def clean_up_stop_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     cleaned_df = (pd.concat([rest_of_df, no_dups], axis=0)
                   .sort_values(shape_cols)
                   .reset_index(drop=True)
-                 )
+                 ) 
     
     return cleaned_df    
+    
     
 if __name__ == "__main__":
     import warnings
@@ -208,8 +210,10 @@ if __name__ == "__main__":
     logger.info(f"cut stop-to-stop segments and save projected coords: {time1-start}")
     
     segments_assembled = gpd.GeoDataFrame(
-        segment_cutoffs[segment_cutoffs.shape_meters > 0].reset_index(drop=True),
-        geometry = "stop_segment_geometry", 
+        segment_cutoffs[
+            segment_cutoffs.shape_meters > 0
+        ].reset_index(drop=True),
+        geometry = "geometry", 
         crs = PROJECT_CRS)
     
     time2 = datetime.datetime.now()
@@ -224,7 +228,8 @@ if __name__ == "__main__":
         f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet")
     
     stops_with_cleaned_segments = pd.merge(
-        stops_projected.drop(columns = "shape_geometry"),
+        stops_projected.drop(columns = "shape_geometry").rename(
+            columns = {"geometry": "stop_geometry"}),
         cleaned_segments,
         on = ["shape_array_key", "shape_meters"],
         # we want to keep left only, because in generating 
@@ -234,15 +239,13 @@ if __name__ == "__main__":
         validate = "m:1",
     )
     
-    # Rename columns because we want the segment geometry to be primary
-    stops_with_cleaned_segments = stops_with_cleaned_segments.rename(
-        columns = {
-            "geometry": "stop_geometry", 
-            "stop_segment_geometry": "geometry",
-        })
+    stop_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
+        stops_with_cleaned_segments, 
+        analysis_date, 
+        ["feed_key", "shape_array_key"])
     
     utils.geoparquet_gcs_export(
-        stops_with_cleaned_segments,
+        stop_segments_with_rt_key,
         SEGMENT_GCS,
         f"stop_segments_{analysis_date}"
     )
