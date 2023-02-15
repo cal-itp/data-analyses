@@ -17,9 +17,10 @@ from loguru import logger
 from shapely.errors import ShapelyDeprecationWarning
 warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
-import dask_utils
-from A4_valid_vehicle_positions import operators_with_data
-from update_vars import SEGMENT_GCS, analysis_date, PROJECT_CRS
+from shared_utils import dask_utils
+from segment_speed_utils import helpers
+from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
+                                              PROJECT_CRS)
 
 fs = gcsfs.GCSFileSystem()                    
 
@@ -101,15 +102,16 @@ def derive_speed(df: dd.DataFrame,
 
 @delayed
 def calculate_speed_by_segment_trip(
-    gdf: dg.GeoDataFrame) -> dd.DataFrame:
+    gdf: dg.GeoDataFrame, 
+    segment_cols: list = ["route_dir_identifier", "segment_sequence"],
+    timestamp_col: str = "location_timestamp"
+) -> dd.DataFrame:
     """
     For each segment-trip pair, calculate find the min/max timestamp
     and min/max shape_meters. Use that to derive speed column.
     """ 
-    segment_cols = ["route_dir_identifier", "segment_sequence"]
     segment_trip_cols = ["gtfs_dataset_key", "_gtfs_dataset_name", 
                          "trip_id"] + segment_cols
-    timestamp_col = "location_timestamp"
     
     min_time = (gdf.groupby(segment_trip_cols)
                 [timestamp_col].min()
@@ -162,22 +164,6 @@ def import_vehicle_positions(feed_key: str) -> dd.DataFrame:
     return subset
 
 
-@delayed
-def import_segments(feed_key: int) -> gpd.GeoDataFrame:
-    """
-    Import segments and subset to operator segments.
-    """
-    cols = ["gtfs_dataset_key", "route_dir_identifier", 
-            "segment_sequence", "geometry"]
-
-    segments = gpd.read_parquet(
-        f"{SEGMENT_GCS}longest_shape_segments_{analysis_date}.parquet", 
-        filters = [[("gtfs_dataset_key", "==", feed_key)]]
-    )[cols].drop_duplicates().reset_index(drop=True)
-        
-    return segments
-
-
 if __name__ == "__main__": 
     #from dask.distributed import Client
     
@@ -192,17 +178,34 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    RT_OPERATORS = operators_with_data(f"{SEGMENT_GCS}vp_sjoin/")  
+    RT_OPERATORS = helpers.operators_with_data(
+        f"{SEGMENT_GCS}vp_sjoin/", 'vp_segment_', analysis_date)  
     
     results_linear_ref = []
     
-    for feed_key in RT_OPERATORS:
+    for rt_dataset_key in RT_OPERATORS:
         time0 = datetime.datetime.now()
         
         # https://docs.dask.org/en/stable/delayed-collections.html
-        operator_vp = import_vehicle_positions(feed_key)
-        operator_segments = import_segments(feed_key)        
+        # Adapt this import to take folder of partitioned parquets
+        operator_vp = delayed(
+            helpers.import_vehicle_positions)(SEGMENT_GCS,
+                               f"vp_pared_{analysis_date}/"
+                               file_type = "df"
+                              )
+
+        keep_segment_cols = [
+            "gtfs_dataset_key", "route_dir_identifier", 
+            "segment_sequence", "geometry"
+        ]
         
+        operator_segments = delayed(helpers.import_segments)(
+            SEGMENT_GCS,
+            f"longest_shape_segments_{analysis_date}", 
+            filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]], 
+            columns = keep_segment_cols
+        )
+         
         time1 = datetime.datetime.now()
         logger.info(f"imported data: {time1 - time0}")
         

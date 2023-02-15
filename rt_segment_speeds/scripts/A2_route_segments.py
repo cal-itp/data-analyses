@@ -23,9 +23,10 @@ import zlib
 
 from loguru import logger
 
-import sched_rt_utils
 from shared_utils import geography_utils, utils, rt_utils
-from update_vars import SEGMENT_GCS, analysis_date
+from segment_speed_utils import sched_rt_utils
+from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
+
 
 def merge_routes_to_trips(
     routelines: dg.GeoDataFrame, trips: dd.DataFrame
@@ -100,32 +101,6 @@ def get_longest_shapes(analysis_date: str) -> dg.GeoDataFrame:
     return longest_shapes
 
 
-def add_rt_keys_to_segments(
-    segments: gpd.GeoDataFrame, 
-    analysis_date: str
-) -> gpd.GeoDataFrame:
-    """
-    Once segments are cut, add the RT gtfs_dataset_key 
-    using sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key
-    function.
-    """
-    route_dir_cols = ["feed_key", "route_id", "direction_id"]
-    
-    crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
-        analysis_date, 
-        route_dir_cols
-    )
-    
-    segments_with_crosswalk = pd.merge(
-        segments,
-        crosswalk,
-        on = route_dir_cols,
-        how = "inner",
-    )
-    
-    return segments_with_crosswalk
-
-
 def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """
     Add a column where the route segment is arrowized.
@@ -177,7 +152,11 @@ if __name__ == "__main__":
         segment_distance = 1_000
     )
     
-    segments = add_rt_keys_to_segments(segments)
+    segments = sched_rt_utils.add_rt_keys_to_segments(
+        segments, 
+        analysis_date,
+        ["feed_key", "route_id", "direction_id"]
+    )
     
     time2 = datetime.datetime.now()
     logger.info(f"Cut route segments {time2 - time1}")

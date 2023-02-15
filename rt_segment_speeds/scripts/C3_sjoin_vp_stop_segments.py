@@ -8,12 +8,9 @@ import sys
 from dask import delayed
 from loguru import logger
 
-import sched_rt_utils
-import vp_segment_utils
-import dask_utils
-from update_vars import SEGMENT_GCS, analysis_date, PROJECT_CRS
-from shared_utils import utils
-from A3_sjoin_vp_segments import sjoin_vehicle_positions_to_segments
+from shared_utils import dask_utils, utils
+from segment_speed_utils import helpers, sched_rt_utils
+from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
 @delayed(nout=2)
 def import_vehicle_positions_and_segments(
@@ -27,7 +24,7 @@ def import_vehicle_positions_and_segments(
     """
     # For the route_dir_identifiers present, subset segments
     # vp can only be spatially joined to segments for that route    
-    segments = vp_segment_utils.import_segments(
+    segments = helpers.import_segments(
         SEGMENT_GCS, 
         f"stop_segments_{analysis_date}",
         filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]], 
@@ -38,10 +35,10 @@ def import_vehicle_positions_and_segments(
     # Buffer the segment for vehicle positions (points) to fall in polygons
     segments_buff = segments.assign(
         geometry = segments.geometry.buffer(buffer_size)
-    ).rename(columns = {"stop_sequence": "segment_sequence"})
+    )
     
     
-    vp = vp_segment_utils.import_vehicle_positions(
+    vp = helpers.import_vehicle_positions(
         SEGMENT_GCS,
         f"vp_{analysis_date}",
         file_type = "gdf",
@@ -109,10 +106,12 @@ if __name__ == "__main__":
         
         for shape_key in operator_routes:
             
-            vp_to_segment = sjoin_vehicle_positions_to_segments(
+            vp_to_segment = delayed(
+                helpers.sjoin_vehicle_positions_to_segments)(
                 vp,
                 segments, 
-                ("shape_array_key", shape_key)
+                route_tuple = ("shape_array_key", shape_key),
+                segment_identifier_cols = ["stop_sequence"]
             ).persist()
             
             results.append(vp_to_segment)
@@ -122,7 +121,8 @@ if __name__ == "__main__":
             dask_utils.compute_and_export(
                 results,
                 gcs_folder = f"{SEGMENT_GCS}vp_sjoin/",
-                file_name = f"vp_stop_segment_{rt_dataset_key}_{analysis_date}.parquet",
+                file_name = (f"vp_stop_segment_"
+                             f"{rt_dataset_key}_{analysis_date}.parquet"),
                 export_single_parquet = True
             )
         
