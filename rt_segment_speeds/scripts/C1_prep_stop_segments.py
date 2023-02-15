@@ -24,9 +24,11 @@ import sys
 
 from loguru import logger
 
-from update_vars import (SEGMENT_GCS, COMPILED_CACHED_VIEWS, 
-                         analysis_date, PROJECT_CRS)
 from shared_utils import utils
+from segment_speed_utils import sched_rt_utils
+from segment_speed_utils.project_vars import (SEGMENT_GCS, 
+                                              COMMPILED_CACHED_VIEWS, 
+                                              analysis_date, PROJECT_CRS)
 
 
 def attach_shape_id_to_stop_times(analysis_date: str) -> pd.DataFrame:
@@ -40,11 +42,11 @@ def attach_shape_id_to_stop_times(analysis_date: str) -> pd.DataFrame:
         columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"]
     )
     
-    trips = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
-        columns = ["feed_key", "name",
-                   "trip_id", "shape_id", "shape_array_key"]
-    )
+    trips = (sched_rt_utils.get_scheduled_trips(analysis_date)
+             [["feed_key", "name",
+               "trip_id", "shape_id", "shape_array_key"]]
+             .compute()
+            )
     
     exclude = ["Amtrak Schedule"]
     trips = trips[~trips.name.isin(exclude)].reset_index(drop=True)
