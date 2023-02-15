@@ -1,5 +1,6 @@
 from . import (
     calitp_color_palette,
+    dask_utils,
     geography_utils,
     gtfs_utils,
     gtfs_utils_v2,
@@ -13,6 +14,7 @@ from . import (
 
 __all__ = [
     "calitp_color_palette",
+    "dask_utils",
     "geography_utils",
     "gtfs_utils",
     "gtfs_utils_v2",

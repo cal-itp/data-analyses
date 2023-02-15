@@ -16,9 +16,10 @@ import sys
 from dask import delayed
 from loguru import logger
 
-import dask_utils
-from update_vars import SEGMENT_GCS, analysis_date, PROJECT_CRS
-from shared_utils import utils
+from shared_utils import dask_utils, utils
+from segment_speed_utils import sched_rt_utils
+from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
+                                              PROJECT_CRS)
 
 def get_shape_inputs(row: gpd.GeoDataFrame) -> tuple:
     """
@@ -84,7 +85,7 @@ def get_shape_coords_up_to_stop(
     if len(segment_points) >= 2:
         segment_line = shapely.geometry.LineString(segment_points)
     else:
-        segment_line = shapely.geometry.LineString()
+        segment_line = np.nan
     
     return segment_line
 
@@ -109,7 +110,9 @@ def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # Skip if i == 0, because that's the start of the shape
         # and it has prior element to look against
         
-        if i > 0:
+        # We want to skip the first element and the last element
+        # The last point on the shape runs just past the last stop
+        if (i > 0) and (i < np.indices(stop_break_dist.shape).flatten().argmax()):
             # grab the elements in the array
             # grab the element prior and the current element
             # [, i+1 ] works similar to range(), it just includes i, not i+1
@@ -120,21 +123,59 @@ def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                 stop_break_dist[i-1: i+1]
             )
             
-        elif i == 0:
-            one_segment = []
-        
-        shape_segments.append(one_segment)
+            shape_segments.append(one_segment)
+ 
     
     shape_segment_cutoffs = pd.DataFrame()
     
     shape_segment_cutoffs = shape_segment_cutoffs.assign(
-        stop_segment_geometry = shape_segments,
+        geometry = shape_segments,
         shape_meters = pd.Series(stop_break_dist),
         shape_array_key = shape_key,
     )
     
     return shape_segment_cutoffs
-     
+   
+    
+def clean_up_stop_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    After cutting stop-to-stop segments, do some cleanup.
+    There will be some None geometries and possibly duplicates.
+    Handle them here.
+    """
+    # Drop None geometries
+    gdf = gdf[gdf.geometry.notna()].reset_index(drop=True)
+
+    # Look for duplicates - split df into duplicated and not duplicated
+    # https://stackoverflow.com/questions/22904523/select-rows-with-duplicate-observations-in-pandas
+    shape_cols = ["shape_array_key", "shape_meters"]
+    
+    duplicated_df = gdf[gdf.duplicated(
+        subset=shape_cols, keep=False) == True]
+    
+    rest_of_df = gdf[~gdf.duplicated(subset=shape_cols, keep=False)]
+        
+    # If there are duplicates, we will keep the row with more 
+    # coords (more points) to form the line
+    duplicated_df = duplicated_df.assign(
+        num_coords = duplicated_df.geometry.apply(
+            lambda x: len(x.coords))
+    )
+    
+    no_dups = (duplicated_df.sort_values(
+        shape_cols + ["num_coords"], ascending=[True, True, False])
+        .drop_duplicates(subset=shape_cols)
+        .drop(columns = "num_coords")
+    )
+        
+    # Concatenate 
+    cleaned_df = (pd.concat([rest_of_df, no_dups], axis=0)
+                  .sort_values(shape_cols)
+                  .reset_index(drop=True)
+                 ) 
+    
+    return cleaned_df    
+    
     
 if __name__ == "__main__":
     import warnings
@@ -158,31 +199,59 @@ if __name__ == "__main__":
     segment_cutoffs = gpd.GeoDataFrame()
     
     for row in df.itertuples():
-        start_row = datetime.datetime.now()
-        
         shape_segment_cutoffs = cut_stop_segments_for_shape(row)
         
         segment_cutoffs = pd.concat(
             [segment_cutoffs, shape_segment_cutoffs], 
             axis=0, ignore_index=True)
         
-        end_row = datetime.datetime.now()
-        logger.info(f"finish {row.Index} "
-                    f"{getattr(row, 'shape_array_key')}  {end_row - start_row}")
 
     time1 = datetime.datetime.now()
     logger.info(f"cut stop-to-stop segments and save projected coords: {time1-start}")
     
     segments_assembled = gpd.GeoDataFrame(
-        segment_cutoffs[segment_cutoffs.shape_meters > 0].reset_index(drop=True),
-        geometry = "stop_segment_geometry", 
+        segment_cutoffs[
+            segment_cutoffs.shape_meters > 0
+        ].reset_index(drop=True),
+        geometry = "geometry", 
         crs = PROJECT_CRS)
     
+    time2 = datetime.datetime.now()
+    logger.info(f"assemble stop-to-stop segments: {time2-time1}")
+    
+    # Clean up stop-to-stop segments
+    cleaned_segments = clean_up_stop_segments(segments_assembled)
+
+    # Merge in the stop projected geom so that each stop can be 
+    # attached to the segment leading up to that stop
+    stops_projected = gpd.read_parquet(
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet")
+    
+    stops_with_cleaned_segments = pd.merge(
+        stops_projected.drop(columns = "shape_geometry").rename(
+            columns = {"geometry": "stop_geometry"}),
+        cleaned_segments,
+        on = ["shape_array_key", "shape_meters"],
+        # we want to keep left only, because in generating 
+        # stop segments, we intentionally skipped first stop, 
+        # so there's definitely going to be left_only observations
+        how = "left",
+        validate = "m:1",
+    )
+    
+    stop_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
+        stops_with_cleaned_segments, 
+        analysis_date, 
+        ["feed_key", "shape_array_key"])
+    
     utils.geoparquet_gcs_export(
-        segments_assembled, 
+        stop_segments_with_rt_key,
         SEGMENT_GCS,
         f"stop_segments_{analysis_date}"
     )
+
+    time3 = datetime.datetime.now()
+    logger.info(f"Clean up stop segments and attach to stop geom and export: {time3-time2}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
