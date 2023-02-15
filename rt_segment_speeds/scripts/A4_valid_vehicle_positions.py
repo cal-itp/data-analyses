@@ -74,7 +74,7 @@ if __name__ == "__main__":
         file_name_prefix = f'{INPUT_FILE_PREFIX}_',
         analysis_date = analysis_date
     )  
-    
+        
     results = []
     
     for rt_dataset_key in RT_OPERATORS:

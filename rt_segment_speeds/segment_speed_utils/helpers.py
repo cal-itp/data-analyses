@@ -41,22 +41,26 @@ def import_vehicle_positions(
     gcs_folder: str = SEGMENT_GCS, 
     file_name: str = "",
     file_type: Literal["df", "gdf"] = "df", 
-    filters = None,
-    columns = None,
+    filters: tuple = None,
+    columns: list = None,
+    partitioned: bool = False,
 ) -> Union[dd.DataFrame, dg.GeoDataFrame]:
     
-    file_name_sanitized = sanitize_parquet_filename(file_name)
+    if partitioned:
+        file_name_sanitized = f"{sanitize_parquet_filename(file_name)}"
+    else:
+        file_name_sanitized = f"{sanitize_parquet_filename(file_name)}.parquet"
     
     if file_type == "df":
         df = dd.read_parquet(
-            f"{gcs_folder}{file_name_sanitized}.parquet", 
+            f"{gcs_folder}{file_name_sanitized}", 
             filters = filters,
             columns = columns
         ).drop_duplicates().reset_index(drop=True)
     
     elif file_type == "gdf":
         df = dg.read_parquet(
-            f"{gcs_folder}{file_name_sanitized}.parquet", 
+            f"{gcs_folder}{file_name_sanitized}", 
             filters = filters,
             columns = columns
         ).drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)
@@ -67,14 +71,18 @@ def import_vehicle_positions(
 def import_segments(
     gcs_folder: str = SEGMENT_GCS, 
     file_name: str = "",
-    filters = None,
-    columns = None
+    filters: tuple = None,
+    columns: list = None,
+    partitioned: bool = False
 ) -> dg.GeoDataFrame:
     
-    file_name_sanitized = sanitize_parquet_filename(file_name)
-
+    if partitioned:
+        file_name_sanitized = f"{sanitize_parquet_filename(file_name)}"
+    else:
+        file_name_sanitized = f"{sanitize_parquet_filename(file_name)}.parquet"
+        
     df = dg.read_parquet(
-        f"{gcs_folder}{file_name_sanitized}.parquet", 
+        f"{gcs_folder}{file_name_sanitized}", 
         filters = filters,
         columns = columns
     ).drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)

@@ -1,5 +1,5 @@
 """
-Do linear referencing by segment-trip 
+Do linear referencing by stop_segment-trip 
 and derive speed.
 """
 import dask.dataframe as dd
@@ -8,15 +8,15 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 import sys
-#import warnings
+import warnings
 
 from dask import delayed
 from loguru import logger
-#from shapely.errors import ShapelyDeprecationWarning
-#warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
+from shapely.errors import ShapelyDeprecationWarning
+warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 from shared_utils import dask_utils
-from segment_speed_utils import helpers, wrangle_shapes
+from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               PROJECT_CRS)
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("../logs/A5_speeds_by_segment_trip.log", retention="3 months")
+    logger.add("../logs/C5_speeds_by_stop_segment_trip.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -35,13 +35,13 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     RT_OPERATORS = helpers.operators_with_data(
-        f"{SEGMENT_GCS}vp_sjoin/", 'vp_segment_', analysis_date)  
+        f"{SEGMENT_GCS}vp_sjoin/", 'vp_stop_segment_', analysis_date)  
     
-    SEGMENT_IDENTIFIER_COLS = ["route_dir_identifier", "segment_sequence"]
+    SEGMENT_IDENTIFIER_COLS = ["shape_array_key", "stop_sequence"]
     
     results_linear_ref = []
     
-    for rt_dataset_key in RT_OPERATORS:
+    for rt_dataset_key in RT_OPERATORS[:2]:
         time0 = datetime.datetime.now()
         
         # https://docs.dask.org/en/stable/delayed-collections.html
@@ -49,15 +49,15 @@ if __name__ == "__main__":
         operator_vp = delayed(
             helpers.import_vehicle_positions)(
             SEGMENT_GCS,
-            f"vp_pared_{analysis_date}/",
+            f"vp_pared_stops_{analysis_date}/",
             file_type = "df",
             filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]],
             partitioned = True
-        )
+        )        
         
         operator_segments = delayed(helpers.import_segments)(
             SEGMENT_GCS,
-            f"longest_shape_segments_{analysis_date}", 
+            f"stop_segments_{analysis_date}", 
             filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]], 
             columns = ["gtfs_dataset_key",  
                        "geometry"] + SEGMENT_IDENTIFIER_COLS,
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     dask_utils.compute_and_export(
         results_linear_ref,
         gcs_folder = SEGMENT_GCS,
-        file_name = f"vp_linear_ref_{analysis_date}",
+        file_name = f"vp_linear_ref_stops_{analysis_date}",
         export_single_parquet = False
     )
     
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         
     linear_ref_df = delayed(helpers.import_vehicle_positions)(
         SEGMENT_GCS, 
-        f"vp_linear_ref_{analysis_date}/",
+        f"vp_linear_ref_stops_{analysis_date}/",
         file_type = "df", 
         partitioned= True,
     )    
@@ -107,7 +107,6 @@ if __name__ == "__main__":
         timestamp_col = "location_timestamp"
     )
     
-        
     # Save as list to use in compute_and_export
     results_speed = [operator_speeds]
         
@@ -117,7 +116,7 @@ if __name__ == "__main__":
     time7 = datetime.datetime.now()
     logger.info(f"start compute and export of speed results")
     
-    EXPORTED_SPEED_FILE = f"speeds_{analysis_date}"
+    EXPORTED_SPEED_FILE = f"speed_stops_{analysis_date}"
     
     dask_utils.compute_and_export(
         results_speed, 
@@ -137,7 +136,6 @@ if __name__ == "__main__":
         subset = (speeds_df[speeds_df.gtfs_dataset_key == rt_dataset_key]
                   .reset_index(drop=True)
                  )
-    
         subset.to_parquet(
             f"{SEGMENT_GCS}speeds_by_operator/"
             f"{EXPORTED_SPEED_FILE.split(f'_{analysis_date}')[0]}_"
