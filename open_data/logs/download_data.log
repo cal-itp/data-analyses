@@ -6118,3 +6118,34 @@
 2023-01-25 12:40:59.702 | INFO     | __main__:<module>:33 - # operators to run: 142
 2023-01-25 12:40:59.702 | INFO     | __main__:<module>:37 - *********** Download st data ***********
 2023-01-25 12:42:28.283 | INFO     | __main__:<module>:58 - execution time: 0:01:29.855088
+2023-02-16 09:02:56.515 | INFO     | __main__:<module>:49 - Analysis date: 2023-02-15
+2023-02-16 09:02:58.259 | INFO     | __main__:<module>:56 - # operators to run: 195
+2023-02-16 09:02:58.259 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
+2023-02-16 09:03:13.913 | INFO     | __main__:<module>:82 - execution time: 0:00:17.397414
+2023-02-16 09:06:39.832 | INFO     | __main__:<module>:24 - Analysis date: 2023-02-15
+2023-02-16 09:06:41.622 | INFO     | __main__:<module>:31 - # operators to run: 195
+2023-02-16 09:06:41.623 | INFO     | __main__:<module>:34 - *********** Download stops data ***********
+2023-02-16 09:06:53.516 | INFO     | __main__:<module>:62 - execution time: 0:00:13.682750
+2023-02-16 09:10:06.381 | INFO     | __main__:<module>:24 - Analysis date: 2023-02-15
+2023-02-16 09:10:08.138 | INFO     | __main__:<module>:31 - # operators to run: 195
+2023-02-16 09:10:08.139 | INFO     | __main__:<module>:35 - *********** Download routelines data ***********
+2023-02-16 09:10:59.653 | INFO     | __main__:<module>:24 - Analysis date: 2023-02-15
+2023-02-16 09:11:01.102 | INFO     | __main__:<module>:31 - # operators to run: 195
+2023-02-16 09:11:01.103 | INFO     | __main__:<module>:35 - *********** Download routelines data ***********
+2023-02-16 09:12:32.814 | INFO     | __main__:<module>:23 - Analysis date: 2023-02-15
+2023-02-16 09:12:34.404 | INFO     | __main__:<module>:30 - # operators to run: 195
+2023-02-16 09:12:34.404 | INFO     | __main__:<module>:34 - *********** Download routelines data ***********
+2023-02-16 09:14:21.560 | INFO     | __main__:<module>:25 - Analysis date: 2023-02-15
+2023-02-16 09:14:22.780 | INFO     | __main__:<module>:33 - # operators to run: 152
+2023-02-16 09:14:22.780 | INFO     | __main__:<module>:37 - *********** Download st data ***********
+2023-02-16 09:15:58.534 | INFO     | __main__:<module>:58 - execution time: 0:01:36.973269
+2023-02-16 09:17:08.619 | INFO     | __main__:<module>:25 - Analysis date: 2023-02-15
+2023-02-16 09:17:10.252 | INFO     | __main__:<module>:32 - # operators to run: 195
+2023-02-16 09:17:10.253 | INFO     | __main__:<module>:36 - *********** Download routelines data ***********
+2023-02-16 09:20:35.265 | INFO     | __main__:<module>:27 - Analysis date: 2023-02-15
+2023-02-16 09:20:36.772 | INFO     | __main__:<module>:34 - # operators to run: 195
+2023-02-16 09:20:36.774 | INFO     | __main__:<module>:38 - *********** Download routelines data ***********
+2023-02-16 09:22:12.352 | INFO     | __main__:<module>:24 - Analysis date: 2023-02-15
+2023-02-16 09:22:14.015 | INFO     | __main__:<module>:31 - # operators to run: 195
+2023-02-16 09:22:14.017 | INFO     | __main__:<module>:35 - *********** Download routelines data ***********
+2023-02-16 09:26:44.219 | INFO     | __main__:<module>:62 - execution time: 0:04:31.866559
