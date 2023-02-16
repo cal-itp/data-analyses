@@ -5,15 +5,20 @@ import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 
 import datetime
+import gcsfs
 import geopandas as gpd
 import pandas as pd
+import shapely
 import sys
 
 from calitp.tables import tbls
 from loguru import logger
 from siuba import *
 
+from shared_utils import utils
 from update_vars import SEGMENT_GCS, analysis_date
+
+fs = gcsfs.GCSFileSystem()
 
 def determine_batches(rt_names: list) -> dict:
     #https://stackoverflow.com/questions/4843158/how-to-check-if-a-string-is-a-substring-of-items-in-a-list-of-strings
@@ -59,6 +64,42 @@ def download_vehicle_positions(
     #https://www.yuichiotsuka.com/bigquery-timestamp-datetime/
     
     return df
+
+
+def concat_batches(analysis_date: str) -> gpd.GeoDataFrame:
+    # Append individual operator vehicle position parquets together
+    # and cache a single vehicle positions parquet
+    fs_list = fs.ls(f"{SEGMENT_GCS}")
+
+    vp_files = [i for i in fs_list if "vp_raw" in i 
+                and f"{analysis_date}_batch" in i]
+    
+    df = pd.DataFrame()
+    
+    for f in vp_files:
+        batch_df = pd.read_parquet(f"gs://{f}")
+        df = pd.concat([df, batch_df], axis=0)
+        
+    # Drop Nones or else shapely will error
+    df = df[df.location.notna()].reset_index(drop=True)
+    
+    geom = [shapely.wkt.loads(x) for x in df.location]
+
+    gdf = gpd.GeoDataFrame(
+        df, geometry=geom, 
+        crs="EPSG:4326").drop(columns="location")
+    
+    return gdf
+
+
+def remove_batched_parquets(analysis_date):
+    fs_list = fs.ls(f"{SEGMENT_GCS}")
+
+    vp_files = [i for i in fs_list if "vp_raw" in i 
+                and f"{analysis_date}_batch" in i]
+    
+    for f in vp_files:
+        fs.rm(f)
 
 
 if __name__ == "__main__":
@@ -110,6 +151,21 @@ if __name__ == "__main__":
 
         time1 = datetime.datetime.now()
         logger.info(f"exported batch {i} to GCS: {time1 - time0}")
+    
+    
+    all_vp = concat_batches(analysis_date)
+    logger.info(f"concatenated all batched data")
+    
+    utils.geoparquet_gcs_export(
+        all_vp, 
+        SEGMENT_GCS,
+        f"vp_{analysis_date}"
+    )
+    
+    logger.info(f"export concatenated vp")
+
+    
+    #remove_batched_parquets(analysis_date)
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")

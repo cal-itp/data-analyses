@@ -2,7 +2,7 @@
 Download all trips for a day.
 """
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
+os.environ["CALITP_BQ_MAX_BYTES"] = str(400_000_000_000)
 
 import datetime as dt
 import pandas as pd

@@ -10,7 +10,7 @@ import sys
 
 from loguru import logger
 
-import operators_for_hqta
+from download_trips import get_operators
 from shared_utils import gtfs_utils_v2, geography_utils, utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
@@ -24,10 +24,9 @@ if __name__ == "__main__":
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
-    hqta_operators_df = operators_for_hqta.scheduled_operators_for_hqta(
-        analysis_date)
+    operators_df = get_operators(analysis_date)
     
-    FEEDS_TO_RUN = sorted(hqta_operators_df.feed_key.unique().tolist())    
+    FEEDS_TO_RUN = sorted(operators_df.feed_key.unique().tolist())    
     
     logger.info(f"# operators to run: {len(FEEDS_TO_RUN)}")
     
