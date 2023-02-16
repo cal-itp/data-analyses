@@ -378,6 +378,7 @@ class RtFilterMapper:
         
         gdf = gdf[gdf[how_speed_col[how]] > 0.0] # remove any rounding error zero mph speeds
         # avoid div by 0 "inf time" error, rare, only 1 obs for all of LA Metro...
+
         gdf['time_formatted'] = (gdf.miles_from_last / gdf[how_speed_col[how]]) * 60**2 #seconds
         gdf['time_formatted'] = gdf['time_formatted'].apply(lambda x: f'{int(x)//60}' + f':{int(x)%60:02}')
 
