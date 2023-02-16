@@ -10,9 +10,33 @@ import sys
 
 from loguru import logger
 
-import operators_for_hqta
 from shared_utils import gtfs_utils_v2
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+
+
+def get_operators(analysis_date: str):
+    """
+    Operators to download: favor subfeeds over combined regional feed.
+    """
+    all_operators = gtfs_utils_v2.schedule_daily_feed_to_organization(
+                selected_date = analysis_date,
+                keep_cols = None,
+                get_df = True,
+                feed_option = "use_subfeeds"
+            )
+
+    keep_cols = ["feed_key", "name"]
+
+    operators_to_include = all_operators[keep_cols]
+
+    # There shouldn't be any duplicates by name, since we got rid 
+    # of precursor feeds. But, just in case, don't allow dup names.
+    operators_to_include = (operators_to_include
+                            .drop_duplicates(subset="name")
+                            .reset_index(drop=True)
+                           )
+    
+    return operators_to_include
 
 
 if __name__=="__main__":
@@ -25,10 +49,9 @@ if __name__=="__main__":
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
-    hqta_operators_df = operators_for_hqta.scheduled_operators_for_hqta(
-        analysis_date)
+    operators_df = get_operators(analysis_date)
     
-    FEEDS_TO_RUN = sorted(hqta_operators_df.feed_key.unique().tolist())    
+    FEEDS_TO_RUN = sorted(operators_df.feed_key.unique().tolist())    
     
     logger.info(f"# operators to run: {len(FEEDS_TO_RUN)}")
     
