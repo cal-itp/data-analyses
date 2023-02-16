@@ -374,6 +374,9 @@ class RtFilterMapper:
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
         
+        # filter out 0's in distance, speed-- issue arises from rounding error
+        gdf = (gdf >> filter(_.miles_from_last > 0, _._20p_mph > 0, _.avg_mph > 0))
+        
         gdf['time_formatted'] = (gdf.miles_from_last / gdf[how_speed_col[how]]) * 60**2 #seconds
         gdf['time_formatted'] = gdf['time_formatted'].apply(lambda x: f'{int(x)//60}' + f':{int(x)%60:02}')
 
