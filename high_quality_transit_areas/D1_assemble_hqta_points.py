@@ -20,7 +20,7 @@ from loguru import logger
 
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
-from shared_utils import utils, geography_utils, portfolio_utils
+from shared_utils import utils, geography_utils, gtfs_utils_v2, portfolio_utils
 from update_vars import analysis_date, TEMP_GCS, COMPILED_CACHED_VIEWS
 
 #fs = get_fs()
@@ -78,13 +78,44 @@ def get_agency_names() -> dict:
     )
     
     cleaned_names = portfolio_utils.clean_organization_name(feed_to_name)
+    cleaned_names = portfolio_utils.standardize_gtfs_dataset_names(cleaned_names)
     
     names_dict = dict(zip(cleaned_names.feed_key, cleaned_names.name))
         
     return names_dict
 
 
-def add_agency_names_hqta_details(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def attach_base64_url_to_feed_key(
+    df: pd.DataFrame, analysis_date: str,
+    feed_key_cols: list = ["feed_key_primary", "feed_key_secondary"]
+) -> pd.DataFrame:
+    """
+    We will not use feed_key in the published data, but rather, 
+    include base64_url, which should be more stable and acts like itp_id.
+    Agency name is already gtfs_dataset_name, but gtfs_dataset_key is not 
+    going to be as stable as base64_url.
+    """
+    feed_to_orgs = gtfs_utils_v2.schedule_daily_feed_to_organization(
+        selected_date = analysis_date,
+        keep_cols = ["base64_url", "feed_key"],
+        get_df = True,
+        feed_option = "use_subfeeds"
+    )
+    
+    base64_url_dict = dict(zip(feed_to_orgs.feed_key, 
+                               feed_to_orgs.base64_url))
+
+    for c in feed_key_cols:
+        # new column will be called base64_url_primary if the column was feed_key_primary
+        new_col = f"{c.replace('feed_key', 'base64_url')}"
+        df[new_col] = df[c].map(base64_url_dict)
+    
+    return df
+    
+
+def add_agency_names_hqta_details(
+    gdf: gpd.GeoDataFrame, analysis_date: str
+) -> gpd.GeoDataFrame:
     """
     Add agency names by merging it in with our crosswalk
     to get the primary feed_key and primary agency name.
@@ -102,13 +133,19 @@ def add_agency_names_hqta_details(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         hqta_details = gdf.apply(utilities.hqta_details, axis=1),
     )
     
+    # Add base64_urls
+    gdf = attach_base64_url_to_feed_key(gdf, analysis_date)
+    
     return gdf  
 
 
 def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     keep_cols = [
-        "agency_name_primary", "hqta_type", "stop_id", "route_id",
-        "hqta_details", "agency_name_secondary", "geometry"
+        "agency_name_primary", 
+        "hqta_type", "stop_id", "route_id",
+        "hqta_details", "agency_name_secondary",
+        "base64_url_primary", "base64_url_secondary", # include these as stable IDs?
+        "geometry"
     ]
     
     gdf2 = (gdf.reindex(columns = keep_cols)
@@ -156,7 +193,7 @@ if __name__=="__main__":
     logger.info(f"add route info: {time2 - time1}")
 
     # Add agency names, hqta_details, project back to WGS84
-    gdf = add_agency_names_hqta_details(hqta_points_with_route_info)
+    gdf = add_agency_names_hqta_details(hqta_points_with_route_info, analysis_date)
     gdf = final_processing(gdf)
     
     time3 = dt.datetime.now()
