@@ -150,7 +150,7 @@ if __name__=="__main__":
     )
     
     logger.info("export as geoparquet in date folder")
-    '''
+    
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(
         gdf,
@@ -159,7 +159,7 @@ if __name__=="__main__":
     )    
     
     logger.info("export as geoparquet")
-    '''
+    
     # Add geojson / geojsonl exports
     utils.geojson_gcs_export(
         gdf, 
