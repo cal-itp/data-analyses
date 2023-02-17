@@ -41,11 +41,12 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     
     
     # Change column order
-    col_order = [
-        'agency', 'route_id', 'route_type', 'route_name', 
-        'shape_id', 'n_trips', 
-        'uri', 'feed_url', 'geometry'
-    ]
+    route_cols = ['agency', 'route_id', 'route_type']
+    agency_ids = ['base64_url', 'uri', 'feed_url']
+
+    col_order = route_cols + ['route_name', 
+        'shape_id', 'n_trips'
+    ] + agency_ids + ['geometry']
     
     routes_assembled2 = (
         prep_traffic_ops.standardize_operator_info_for_exports(

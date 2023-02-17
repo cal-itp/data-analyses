@@ -105,6 +105,23 @@ def add_agency_identifiers(df: pd.DataFrame) -> pd.DataFrame:
     return df2
 
 
+def standardize_gtfs_dataset_names(
+    df: pd.DataFrame, name_col: str = "name"
+) -> pd.DataFrame:
+    """
+    Have gtfs_dataset_name reflect the operator.
+    Remove the distinction between LA Metro Bus and LA Metro Rail (which
+    show up as 2 feeds, 2 feed_keys, 2 gtfs_dataset_keys in our warehouse).
+    """
+    df[name_col] = (
+        df[name_col]
+        .str.replace("LA Metro Bus", "LA Metro")
+        .str.replace("LA Metro Rail", "LA Metro")
+    )
+
+    return df
+
+
 # https://github.com/cal-itp/data-analyses/blob/main/bus_service_increase/E5_make_stripplot_data.py
 def add_caltrans_district() -> pd.DataFrame:
     """
