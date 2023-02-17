@@ -17,14 +17,19 @@ import C1_prep_pairwise_intersections as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
 from shared_utils import utils, geography_utils
-from D1_assemble_hqta_points import EXPORT_PATH, add_route_info
+from D1_assemble_hqta_points import (EXPORT_PATH, 
+                                     add_route_info, 
+                                     attach_base64_url_to_feed_key)
 from update_vars import analysis_date
 
 fs = get_fs()
 
 catalog = intake.open_catalog("*.yml")
 
-def get_dissolved_hq_corridor_bus(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def get_dissolved_hq_corridor_bus(
+    gdf: gpd.GeoDataFrame, 
+    analysis_date: str
+) -> gpd.GeoDataFrame:
     """
     Take each segment, then dissolve by operator,
     and use this dissolved polygon in hqta_polygons.
@@ -41,11 +46,37 @@ def get_dissolved_hq_corridor_bus(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                  .reset_index()
                 )
     
-    return dissolved
+    # For hq_corridor_bus, we have feed_key again, and need to 
+    # add agency_name, or else this category will have missing name values
+    corridor_cols = [
+        "feed_key", "hqta_type", "route_id", "geometry"
+    ]
+    corridors = dissolved.assign(
+        geometry = dissolved.geometry.buffer(755),
+        # overwrite hqta_type for this polygon
+        hqta_type = "hq_corridor_bus",
+    )[corridor_cols]
+    
+    names_dict = assemble_hqta_points.get_agency_names()
+    
+    corridors = corridors.assign(
+        agency_name_primary = corridors.feed_key.map(names_dict),
+        hqta_details = corridors.apply(utilities.hqta_details, axis=1)
+    ).rename(columns = {"feed_key": "feed_key_primary"})
+    
+    corridors = attach_base64_url_to_feed_key(
+        corridors, 
+        analysis_date,
+        feed_key_cols = ["feed_key_primary"]
+    )
+
+    return corridors
 
 
 def filter_and_buffer(hqta_points: gpd.GeoDataFrame, 
-                      hqta_segments: dg.GeoDataFrame) -> gpd.GeoDataFrame:
+                      hqta_segments: dg.GeoDataFrame, 
+                      analysis_date: str
+                     ) -> gpd.GeoDataFrame:
     """
     Convert the HQTA point geom into polygon geom.
     
@@ -58,30 +89,13 @@ def filter_and_buffer(hqta_points: gpd.GeoDataFrame,
     
     corridor_segments = hqta_segments.to_crs(
         geography_utils.CA_NAD83Albers).compute()
-    corridors = get_dissolved_hq_corridor_bus(corridor_segments)
+    
+    corridors = get_dissolved_hq_corridor_bus(corridor_segments, analysis_date)
     
     # General buffer distance: 1/2mi ~= 805 meters
     # Bus corridors are already buffered 100 meters, so will buffer 705 meters
     stops = stops.assign(
         geometry = stops.geometry.buffer(705)
-    )
-    
-    # For hq_corridor_bus, we have feed_key again, and need to 
-    # add agency_name, or else this category will have missing name values
-    corridor_cols = [
-        "feed_key", "hqta_type", "route_id", "geometry"
-    ]
-    corridors = corridors.assign(
-        geometry = corridors.geometry.buffer(755),
-        # overwrite hqta_type for this polygon
-        hqta_type = "hq_corridor_bus",
-    )[corridor_cols]
-    
-    names_dict = assemble_hqta_points.get_agency_names()
-    
-    corridors2 = corridors.assign(
-        agency_name_primary = corridors.feed_key.map(names_dict),
-        hqta_details = corridors.apply(utilities.hqta_details, axis=1)
     )
     
     hqta_polygons = (
@@ -103,7 +117,9 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     keep_cols = [
         "agency_name_primary", "agency_name_secondary",
-        "hqta_type", "hqta_details", "route_id", "geometry"
+        "hqta_type", "hqta_details", "route_id", 
+        "base64_url_primary", "base64_url_secondary",
+        "geometry"
     ]
     
     # Drop bad stops, subset columns
@@ -133,7 +149,7 @@ if __name__=="__main__":
     
     # Filter and buffer for stops (805 m) and corridors (755 m)
     # and add agency_names
-    gdf = filter_and_buffer(hqta_points, bus_hq_corr)
+    gdf = filter_and_buffer(hqta_points, bus_hq_corr, analysis_date)
     
     time1 = dt.datetime.now()
     logger.info(f"filter and buffer: {time1 - start}")
@@ -150,13 +166,13 @@ if __name__=="__main__":
     )
     
     logger.info("export as geoparquet in date folder")
-
+    
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(
         gdf,
         utilities.GCS_FILE_PATH,
         'hqta_areas'
-   )    
+    )    
     
     logger.info("export as geoparquet")
     

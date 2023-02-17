@@ -15,6 +15,13 @@ from calitp.storage import get_fs
 fs = get_fs()
 
 
+def sanitize_file_path(file_name: str) -> str:
+    """
+    Remove the .parquet or .geojson in a filepath.
+    """
+    return file_name.split(".")[0]
+
+
 def geoparquet_gcs_export(gdf: gpd.GeoDataFrame, gcs_file_path: str, file_name: str):
     """
     Save geodataframe as parquet locally,
@@ -26,7 +33,7 @@ def geoparquet_gcs_export(gdf: gpd.GeoDataFrame, gcs_file_path: str, file_name: 
     file_name: str
                 Filename, with or without .parquet.
     """
-    file_name_sanitized = file_name.replace(".parquet", "")
+    file_name_sanitized = sanitize_file_path(file_name)
     gdf.to_parquet(f"./{file_name_sanitized}.parquet")
     fs.put(
         f"./{file_name_sanitized}.parquet",
@@ -47,7 +54,7 @@ def download_geoparquet(
     save_locally: bool
                     defaults to False. if True, will save geoparquet locally.
     """
-    file_name_sanitized = file_name.replace(".parquet", "")
+    file_name_sanitized = sanitize_file_path(file_name)
 
     object_path = fs.open(f"{gcs_file_path}{file_name_sanitized}.parquet")
     gdf = gpd.read_parquet(object_path)
@@ -81,7 +88,7 @@ def geojson_gcs_export(
     else:
         raise ValueError("Not a valid geojson type! Use `geojson` or `geojsonl`")
 
-    file_name_sanitized = file_name.replace(f".{geojson_type}", "")
+    file_name_sanitized = sanitize_file_path(file_name)
 
     gdf.to_file(f"./{file_name_sanitized}.{geojson_type}", driver=DRIVER)
 

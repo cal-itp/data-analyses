@@ -5,15 +5,20 @@ import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 
 import datetime
+import gcsfs
 import geopandas as gpd
 import pandas as pd
+import shapely
 import sys
 
 from calitp.tables import tbls
 from loguru import logger
 from siuba import *
 
+from shared_utils import utils, gtfs_utils_v2
 from update_vars import SEGMENT_GCS, analysis_date
+
+fs = gcsfs.GCSFileSystem()
 
 def determine_batches(rt_names: list) -> dict:
     #https://stackoverflow.com/questions/4843158/how-to-check-if-a-string-is-a-substring-of-items-in-a-list-of-strings
@@ -23,19 +28,30 @@ def determine_batches(rt_names: list) -> dict:
         "AC Transit", 
         "Muni"
     ]
+    
+    bay_area_names = [
+        "Bay Area 511"
+    ]
 
     # If any of the large operator name substring is 
     # found in our list of names, grab those
     # be flexible bc "Vehicle Positions" and "VehiclePositions" present
     matching = [i for i in rt_names 
                 if any(name in i for name in large_operator_names)]
-    remaining = [i for i in rt_names if i not in matching]
+    
+    remaining_bay_area = [i for i in rt_names 
+                          if any(name in i for name in bay_area_names) and 
+                          i not in matching
+                         ]
+    remaining = [i for i in rt_names if 
+                 i not in matching and i not in remaining_bay_area]
     
     # Batch large operators together and run remaining in 2nd query
     batch_dict = {}
     
     batch_dict[0] = matching
-    batch_dict[1] = remaining
+    batch_dict[1] = remaining_bay_area
+    batch_dict[2] = remaining
     
     return batch_dict
 
@@ -61,6 +77,42 @@ def download_vehicle_positions(
     return df
 
 
+def concat_batches(analysis_date: str) -> gpd.GeoDataFrame:
+    # Append individual operator vehicle position parquets together
+    # and cache a single vehicle positions parquet
+    fs_list = fs.ls(f"{SEGMENT_GCS}")
+
+    vp_files = [i for i in fs_list if "vp_raw" in i 
+                and f"{analysis_date}_batch" in i]
+    
+    df = pd.DataFrame()
+    
+    for f in vp_files:
+        batch_df = pd.read_parquet(f"gs://{f}")
+        df = pd.concat([df, batch_df], axis=0)
+        
+    # Drop Nones or else shapely will error
+    df = df[df.location.notna()].reset_index(drop=True)
+    
+    geom = [shapely.wkt.loads(x) for x in df.location]
+
+    gdf = gpd.GeoDataFrame(
+        df, geometry=geom, 
+        crs="EPSG:4326").drop(columns="location")
+    
+    return gdf
+
+
+def remove_batched_parquets(analysis_date):
+    fs_list = fs.ls(f"{SEGMENT_GCS}")
+
+    vp_files = [i for i in fs_list if "vp_raw" in i 
+                and f"{analysis_date}_batch" in i]
+    
+    for f in vp_files:
+        fs.rm(f)
+
+
 if __name__ == "__main__":
     from dask.distributed import Client
     
@@ -81,10 +133,7 @@ if __name__ == "__main__":
         custom_filtering={"type": ["vehicle_positions"]},
         get_df = True
     ) >> collect()
-
-    rt_datasets.to_parquet("./data/rt_datasets.parquet")
     
-    rt_datasets = pd.read_parquet("./data/rt_datasets.parquet")
     
     # Exclude regional feed and precursors
     exclude = ["Bay Area 511 Regional VehiclePositions"]
@@ -98,9 +147,8 @@ if __name__ == "__main__":
     batches = determine_batches(rt_dataset_names)
     
     for i, subset_operators in batches.items():
-        
         time0 = datetime.datetime.now()
-        
+
         logger.info(f"batch {i}: {subset_operators}")
         df = download_vehicle_positions(
             analysis_date, subset_operators)
@@ -110,6 +158,21 @@ if __name__ == "__main__":
 
         time1 = datetime.datetime.now()
         logger.info(f"exported batch {i} to GCS: {time1 - time0}")
+    
+    
+    all_vp = concat_batches(analysis_date)
+    logger.info(f"concatenated all batched data")
+    
+    utils.geoparquet_gcs_export(
+        all_vp, 
+        SEGMENT_GCS,
+        f"vp_{analysis_date}"
+    )
+    
+    logger.info(f"export concatenated vp")
+    
+    remove_batched_parquets(analysis_date)
+    logger.info(f"remove batched parquets")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")

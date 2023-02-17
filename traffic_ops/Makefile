@@ -1,3 +1,0 @@
-gtfs_schedule_geospatial_open_data:
-	python create_routes_data.py
-	python create_stops_data.py

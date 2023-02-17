@@ -124,8 +124,7 @@ if __name__=="__main__":
     start = dt.datetime.now()
     
     # These are all the IDs that have some cached files in GCS
-    operators_for_hqta = pd.read_parquet(
-        f"{TEMP_GCS}operators_for_hqta_{analysis_date}.parquet")
+    operators_for_hqta = scheduled_operators_for_hqta(analysis_date)
     
     FEED_KEYS = operators_for_hqta.feed_key.unique().tolist()
     
