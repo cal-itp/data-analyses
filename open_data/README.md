@@ -71,5 +71,5 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
 1. [High Quality Transit Areas (HQTA)](./metadata_hqta.py)
 1. [Transit Stops and Routes (Traffic Ops request)](./metadata_traffic_ops.py)
 
-## Open Data Intake Process
-Open a ticket on the Intranet to update or add new services and provide [justification](./intake_justification.md)
+## Open Data Intake Process 
+* Open a [ticket](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNUo1NjRNRFpIOVRBMVFFTFJDM1JKNkY0SC4u) on the Intranet to update or add new services and provide [justification](./intake_justification.md)
