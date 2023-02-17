@@ -3,18 +3,14 @@
 Document links, justification, for why datasets need to be made public. Submit this information every time a ticket is open to update the existing layers.
 
 ## Intranet Links
-1. [Geospatial open data request](https://sv03tmcpo.ct.dot.ca.gov/portal/apps/sites/#/geep/pages/open-data-request)
+1. [Geospatial open data request](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNUo1NjRNRFpIOVRBMVFFTFJDM1JKNkY0SC4u)
     * District: `Sacramento HQ`
     * Division / Program: `Rail and Mass Transportation`
     * Update or New: `Update existing service`
-    * Data Repository Type: `file geodatabase`
     * Enterprise Geodatabase Name: `HQ`
-    * Feature Class Name: `ca_hq_transit_stops, ca_hq_transit_areas, ca_transit_stops, ca_transit_routes`
-    * Available for download: `Yes`
-    * [Intake Justification](#intake-justification)
-    * Attach email justification as pdf 
+    * Feature Class Name: `HQ.ca_hq_transit_stops, HQ.ca_hq_transit_areas, HQ.ca_transit_stops, HQ.ca_transit_routes`
     
-1. [Open support ticket for GIS](https://sv03tmcpo.ct.dot.ca.gov/portal/apps/sites/#/geep/pages/support-request)
+1. [Open support ticket for GIS](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNkI2T0hGWElZMUcwTDRUOUNCU0VWMTUxWi4u)
 
 ## Intake Justification
 ### High Quality Transit Areas
