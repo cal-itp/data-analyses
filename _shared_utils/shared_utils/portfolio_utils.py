@@ -45,7 +45,9 @@ def clean_organization_name(df: pd.DataFrame) -> pd.DataFrame:
         name=(
             df.name.str.replace("Schedule", "")
             .str.replace("Vehicle Positions", "")
+            .str.replace("VehiclePositions", "")
             .str.replace("Trip Updates", "")
+            .str.replace("TripUpdates", "")
             .str.replace("Service Alerts", "")
             .str.replace("Bay Area 511", "")
             .str.strip()
@@ -94,7 +96,7 @@ def add_agency_identifiers(df: pd.DataFrame) -> pd.DataFrame:
 
     df2 = pd.merge(
         df,
-        current_feeds2[["name", "base64_url", "feed_url"]],
+        current_feeds2[["name", "base64_url", "feed_url", "uri"]],
         on="name",
         how="inner",
         validate="m:1",
