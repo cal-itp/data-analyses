@@ -42,7 +42,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
 3. Export metadata associated with feature class as XML
 4. [Convert XML to JSON using xmltodict](https://stackoverflow.com/questions/48821725/xml-parsers-expat-expaterror-not-well-formed-invalid-token)
 5. Supply a dictionary with the relevant info 
-* Create a Python script to store dictionary (ex: `hqta.py`)
+* Create a Python script to store dictionary (ex: `metadata_hqta.py`)
 6. Overwrite values with dictionary in the JSON 
 7. [Convert JSON back to XML](https://gis.stackexchange.com/questions/202978/converting-xml-dict-xml-using-python) and overwrite XML
 8. Overwrite the XML and import this, overwrite/sync this metadata with feature class
@@ -67,9 +67,9 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
 1. Run [arcgis_pro_script](./arcgis_pro_script.py) for Step 8.
 1. Zip the file gdb manually - can't get zipping file gdb code to work
 
-## Open Data Portal Datasets
-1. [High Quality Transit Areas (HQTA)](./hqta.py)
-1. [Transit Stops and Routes (Traffic Ops request)](./traffic_ops.py)
+### Metadata
+1. [High Quality Transit Areas (HQTA)](./metadata_hqta.py)
+1. [Transit Stops and Routes (Traffic Ops request)](./metadata_traffic_ops.py)
 
 ## Open Data Intake Process
 Open a ticket on the Intranet to update or add new services and provide [justification](./intake_justification.md)

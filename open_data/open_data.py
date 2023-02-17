@@ -6,25 +6,25 @@ import os
 import metadata_update_pro
 
 # Import various dictionaries
-import hqta
-import traffic_ops
+import metadata_hqta
+import metadata_traffic_ops
 
 OPEN_DATA = {
     "hqta_areas": {
         "path": "./metadata_xml/ca_hq_transit_areas.xml", 
-        "metadata_dict": hqta.HQTA_TRANSIT_AREAS_DICT,
+        "metadata_dict": metadata_hqta.HQTA_TRANSIT_AREAS_DICT,
     },
     "hqta_stops": {
         "path": "./metadata_xml/ca_hq_transit_stops.xml",
-        "metadata_dict": hqta.HQTA_TRANSIT_STOPS_DICT,
+        "metadata_dict": metadata_hqta.HQTA_TRANSIT_STOPS_DICT,
     },
     "transit_stops": {
         "path": "./metadata_xml/ca_transit_stops.xml",
-        "metadata_dict": traffic_ops.STOPS_DICT,
+        "metadata_dict": metadata_traffic_ops.STOPS_DICT,
     },
     "transit_routes": {
         "path": "./metadata_xml/ca_transit_routes.xml",
-        "metadata_dict": traffic_ops.ROUTES_DICT,
+        "metadata_dict": metadata_traffic_ops.ROUTES_DICT,
     },
 }
 
