@@ -54,11 +54,12 @@ def attach_route_info_to_stops(
                       )
     
     # Change column order
-    col_order = [
-        'agency', 'route_id', 'route_type', 
-        'stop_id', 'stop_name', 
-        'uri', 'feed_url', 'geometry'
-    ]
+    route_cols = ['agency', 'route_id', 'route_type']
+    agency_ids = ['base64_url', 'uri', 'feed_url']
+    
+    col_order = route_cols + [
+        'stop_id', 'stop_name',
+    ] + agency_ids + ['geometry']
     
     stops_assembled2 = (
         prep_traffic_ops.standardize_operator_info_for_exports(

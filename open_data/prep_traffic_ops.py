@@ -9,12 +9,10 @@ import pandas as pd
 from shared_utils import (utils, rt_dates, rt_utils, 
                           geography_utils, portfolio_utils)
 
-ANALYSIS_DATE = rt_utils.format_date(rt_dates.DATES["jan2023"])
+from update_vars import (TRAFFIC_OPS_GCS, 
+                         COMPILED_CACHED_VIEWS, analysis_date)
 
-GCS = "gs://calitp-analytics-data/data-analyses/"
-TRAFFIC_OPS_GCS = f"{GCS}traffic_ops/"
-COMPILED_CACHED_GCS = f"{GCS}rt_delay/compiled_cached_views/"
-    
+
 def import_trips(analysis_date: str) -> pd.DataFrame:
     keep_cols = ["feed_key", "name", 
                  "trip_id", 
@@ -23,7 +21,7 @@ def import_trips(analysis_date: str) -> pd.DataFrame:
                 ]
     
     trips = pd.read_parquet(
-        f"{COMPILED_CACHED_GCS}trips_{analysis_date}.parquet", 
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
         columns = keep_cols
     )
     
@@ -34,7 +32,7 @@ def import_shapes(analysis_date: str) -> gpd.GeoDataFrame:
     keep_cols = ["feed_key", "shape_id", "n_trips", "geometry"]
     
     shapes = gpd.read_parquet(
-        f"{COMPILED_CACHED_GCS}routelines_{analysis_date}.parquet", 
+        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet", 
         columns = keep_cols
     ).to_crs(geography_utils.WGS84)
     
@@ -52,7 +50,7 @@ def import_stops(analysis_date: str) -> gpd.GeoDataFrame:
     ] 
     
     stops = gpd.read_parquet(
-        f"{COMPILED_CACHED_GCS}stops_{analysis_date}.parquet",
+        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet",
         columns = keep_cols
     ).to_crs(geography_utils.WGS84)
     
@@ -63,7 +61,7 @@ def import_stop_times(analysis_date: str) -> pd.DataFrame:
     keep_cols = ["feed_key", "trip_id", "stop_id"]
     
     stop_times = dd.read_parquet(
-        f"{COMPILED_CACHED_GCS}st_{analysis_date}.parquet",
+        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet",
         columns = keep_cols
     ).drop_duplicates().reset_index(drop=True)
     
@@ -76,7 +74,8 @@ def standardize_operator_info_for_exports(df: pd.DataFrame) -> pd.DataFrame:
     df2 = portfolio_utils.add_agency_identifiers(df)
     
     # Clean organization name
-    df3 = (portfolio_utils.clean_organization_name(df2) 
+    df3 = portfolio_utils.clean_organization_name(df2) 
+    df3 = (portfolio_utils.standardize_gtfs_dataset_names(df3)
            .rename(columns = RENAME_COLS)
           )
     
@@ -90,9 +89,10 @@ def export_to_subfolder(file_name: str, analysis_date: str):
     
     But, save historical exports just in case.
     """
-    file_name_sanitized = file_name.replace('.parquet', '')
+    file_name_sanitized = utils.sanitize_file_path(file_name)
     
-    gdf = gpd.read_parquet(f"{TRAFFIC_OPS_GCS}{file_name_sanitized}.parquet")
+    gdf = gpd.read_parquet(
+        f"{TRAFFIC_OPS_GCS}{file_name_sanitized}.parquet")
         
     utils.geoparquet_gcs_export(
         gdf, 
