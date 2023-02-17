@@ -8,9 +8,10 @@ import pandas as pd
 
 from datetime import datetime
 
-import prep_data
+import prep_traffic_ops
 from shared_utils import utils
-    
+from update_vars import analysis_date, TRAFFIC_OPS_GCS
+
     
 def attach_route_info_to_stops(
     stops: gpd.GeoDataFrame, 
@@ -56,11 +57,15 @@ def attach_route_info_to_stops(
     col_order = [
         'agency', 'route_id', 'route_type', 
         'stop_id', 'stop_name', 
-        'feed_url', 'geometry'
+        'uri', 'feed_url', 'geometry'
     ]
     
-    stops_assembled2 = prep_data.standardize_operator_info_for_exports(
-        stops_assembled)[col_order].reindex(columns = col_order)               
+    stops_assembled2 = (
+        prep_traffic_ops.standardize_operator_info_for_exports(
+        stops_assembled)
+        [col_order]
+        .reindex(columns = col_order)    
+    )
     
     return stops_assembled2
 
@@ -69,9 +74,9 @@ def create_stops_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     time0 = datetime.now()
 
     # Read in parquets
-    stops = prep_data.import_stops(analysis_date)
-    trips = prep_data.import_trips(analysis_date)
-    stop_times = prep_data.import_stop_times(analysis_date)
+    stops = prep_traffic_ops.import_stops(analysis_date)
+    trips = prep_traffic_ops.import_trips(analysis_date)
+    stop_times = prep_traffic_ops.import_stop_times(analysis_date)
         
     stops_assembled = attach_route_info_to_stops(stops, trips, stop_times)
     
@@ -84,16 +89,16 @@ def create_stops_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
 if __name__ == "__main__":
     time0 = datetime.now()
 
-    stops = create_stops_file_for_export(prep_data.ANALYSIS_DATE)  
+    stops = create_stops_file_for_export(analysis_date)  
     
     utils.geoparquet_gcs_export(
         stops, 
-        prep_data.TRAFFIC_OPS_GCS, 
+        TRAFFIC_OPS_GCS, 
         "ca_transit_stops"
     )
     
-    prep_data.export_to_subfolder(
-        "ca_transit_stops", prep_data.ANALYSIS_DATE)
+    prep_traffic_ops.export_to_subfolder(
+        "ca_transit_stops", analysis_date)
     
     time1 = datetime.now()
     print(f"Execution time for stops script: {time1-time0}")
