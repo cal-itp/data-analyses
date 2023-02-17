@@ -14,11 +14,7 @@ import sys
 from loguru import logger
 
 from shared_utils import utils, geography_utils, rt_dates
-
-analysis_date = rt_dates.DATES["dec2022"]
-
-logger.add("./logs/gcs_to_esri.log", retention="6 months")
-logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
+from update_vars import analysis_date
 
 catalog = intake.open_catalog("./*.yml")
 
@@ -31,7 +27,6 @@ def open_data_dates(analysis_date: str = analysis_date) -> tuple[str]:
     
 
 def standardize_column_names(df):
-    df.columns = df.columns.str.replace('calitp_itp_id', 'itp_id')
     df.columns = df.columns.str.replace('agency_name', 'agency')
     return df
 
@@ -55,6 +50,11 @@ def remove_zipped_shapefiles():
 if __name__=="__main__":
     assert os.getcwd().endswith("open_data"), "this script must be run from open_data directory!"
 
+    logger.add("./logs/gcs_to_esri.log", retention="6 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
     datasets = list(dict(catalog).keys())
     
     for d in datasets:

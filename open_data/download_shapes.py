@@ -2,7 +2,7 @@
 Download all shapes for a day.
 """
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(300_000_000_000)
+os.environ["CALITP_BQ_MAX_BYTES"] = str(400_000_000_000)
 
 import datetime as dt
 import pandas as pd
@@ -10,12 +10,12 @@ import sys
 
 from loguru import logger
 
-import operators_for_hqta
+from download_trips import get_operators
 from shared_utils import gtfs_utils_v2, geography_utils, utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 if __name__ == "__main__":
-    
+
     logger.add("./logs/download_data.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -24,10 +24,9 @@ if __name__ == "__main__":
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
-    hqta_operators_df = operators_for_hqta.scheduled_operators_for_hqta(
-        analysis_date)
+    operators_df = get_operators(analysis_date)
     
-    FEEDS_TO_RUN = sorted(hqta_operators_df.feed_key.unique().tolist())    
+    FEEDS_TO_RUN = sorted(operators_df.feed_key.unique().tolist())    
     
     logger.info(f"# operators to run: {len(FEEDS_TO_RUN)}")
     
@@ -61,3 +60,4 @@ if __name__ == "__main__":
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+    

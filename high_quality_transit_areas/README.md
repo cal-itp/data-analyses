@@ -42,7 +42,6 @@ HQTA data is updated at a monthly frequency for the open data portal. Check the 
 
 In terminal: `make download_hqta_data`
 
-1. Download data for [trips](./download_trips.py), [stops](./download_stops.py), [shapes](./download_shapes.py), and [stop times](./download_stop_times.py) and cache parquets in GCS
 1. [Create JSONs](./operators_for_hqta.py) storing a dictionary with all the operators that have cached files for all 4 datasets. These are the [valid operators](./valid_hqta_operators.json). 
     * It's possible in downloading the `routes`, `trips`, `stops`, and `stop_times`, one of the files is not able to be successfully downloaded, but the other 3 are. 
     * Also, it's possible that files with no rows are downloaded.
@@ -53,7 +52,7 @@ In terminal: `make download_hqta_data`
 
 ### Bus Corridor Intersections
 
-In terminal: `make grab_corridors_and_clip`
+In terminal: `make grab_corridors_and_find_intersections`
 
 1. [Draw bus corridors, from routes to HQTA segments](./B1_create_hqta_segments.py)
     * Across all operators, find the longest shapes in each direction. Use a symmetric difference to grab the components that make up the route network.

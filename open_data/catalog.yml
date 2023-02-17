@@ -17,11 +17,11 @@ sources:
     driver: geoparquet
     description: All CA transit routes (lines)
     args:
-      # source: traffic_ops/make_routes_stops_shapefiles.py
+      # source: open_data/create_routes_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet
   ca_transit_stops:
     driver: geoparquet
     description: All CA transit stops (points)
     args:
-      # source: traffic_ops/make_routes_stops_shapefiles.py
+      # source: open_data/create_stops_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_stops.parquet
