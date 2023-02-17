@@ -1,5 +1,5 @@
 import pandas as pd
-
+import _portfolio_utils 
 # Geography
 from shared_utils import geography_utils
 import geopandas as gpd
@@ -15,26 +15,24 @@ from calitp.storage import get_fs
 fs = get_fs()
 import os
 
-def simplify_project_names(df, column_wanted: str):
-    """
-    Simplify project names for string matching.
-    """
+# Function to clean agency/organization names
+def organization_cleaning(df, column_wanted: str):
     df[column_wanted] = (
         df[column_wanted]
         .str.strip()
-        .str.lower()
+        .str.split(",")
+        .str[0]
         .str.replace("/", "")
-        .str.replace("-", "")
-        .str.replace("!", "")
-        .str.replace("&", "")
-        .str.replace("#", "")
-        .str.replace("(", "")
-        .str.replace(")", "")
-        .str.replace(":", "")
-        .str.replace("the", "")
+        .str.split("(")
+        .str[0]
+        .str.split("/")
+        .str[0]
+        .str.title()
+        .str.replace("Trasit", "Transit")
         .str.strip()  # strip again after getting rid of certain things
     )
     return df
+
 
 # Natalie's function
 def align_funding_numbers(df, list_of_cols):
@@ -182,7 +180,7 @@ def tableau_district_map(df, col_wanted):
     df: original dataframe to summarize
     col_wanted: to column to groupby
     """
-    df_districts = summarize_districts(df, col_wanted)
+    df_districts = _portfolio_utils.summarize_districts(df, col_wanted)
 
     # Reverse the dictionary with district names because
     # final DF has the full names like 04-Bay Area and I only need 4
