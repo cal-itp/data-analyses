@@ -8,14 +8,25 @@ and can be modularized in the future.
 import dask.dataframe as dd
 import dask_geopandas as dg
 import gcsfs
+import yaml
 
 from typing import Literal, Union
 from update_vars import SEGMENT_GCS, PROJECT_CRS
+from shared_utils import utils
 
 fs = gcsfs.GCSFileSystem()
 
-def sanitize_parquet_filename(file_name: str): 
-    return file_name.replace('.parquet', '')
+def get_parameters(
+    config_file: str, 
+    segment_type: Union["route_segments", "stop_segments"]
+) -> dict:
+    #https://aaltoscicomp.github.io/python-for-scicomp/scripts/
+    f = open(config_file)
+    my_dict = yaml.safe_load(f)
+    params_dict = my_dict[segment_type]
+    
+    return params_dict
+    
 
 def operators_with_data(
     gcs_folder: str, 
@@ -47,9 +58,9 @@ def import_vehicle_positions(
 ) -> Union[dd.DataFrame, dg.GeoDataFrame]:
     
     if partitioned:
-        file_name_sanitized = f"{sanitize_parquet_filename(file_name)}"
+        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}"
     else:
-        file_name_sanitized = f"{sanitize_parquet_filename(file_name)}.parquet"
+        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}.parquet"
     
     if file_type == "df":
         df = dd.read_parquet(
@@ -77,9 +88,9 @@ def import_segments(
 ) -> dg.GeoDataFrame:
     
     if partitioned:
-        file_name_sanitized = f"{sanitize_parquet_filename(file_name)}"
+        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}"
     else:
-        file_name_sanitized = f"{sanitize_parquet_filename(file_name)}.parquet"
+        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}.parquet"
         
     df = dg.read_parquet(
         f"{gcs_folder}{file_name_sanitized}", 
