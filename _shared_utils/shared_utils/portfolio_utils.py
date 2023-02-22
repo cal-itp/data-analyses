@@ -16,7 +16,7 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import pandas as pd
 import pandas.io.formats.style  # for type hint: https://github.com/pandas-dev/pandas/issues/24884
-from calitp.tables import tbls
+from calitp_data_analysis.tables import tbls
 from IPython.display import HTML
 from shared_utils import gtfs_utils_v2, rt_utils
 from siuba import *
@@ -77,22 +77,15 @@ def add_agency_identifiers(df: pd.DataFrame) -> pd.DataFrame:
     decode it as ASCII (Chad Baker request for CKAN data).
     The encoded version might not be as usable for users.
     """
-    dim_gtfs_datasets = gtfs_utils_v2.get_transit_organizations_gtfs_dataset_keys(
-        keep_cols=None, get_df=True
-    )
+    dim_gtfs_datasets = gtfs_utils_v2.get_transit_organizations_gtfs_dataset_keys(keep_cols=None, get_df=True)
 
     current_feeds = (
-        dim_gtfs_datasets[
-            (dim_gtfs_datasets.data_quality_pipeline == True)
-            & (dim_gtfs_datasets._is_current == True)
-        ]
+        dim_gtfs_datasets[(dim_gtfs_datasets.data_quality_pipeline == True) & (dim_gtfs_datasets._is_current == True)]
         .drop_duplicates(subset="name")
         .reset_index(drop=True)
     )
 
-    current_feeds2 = current_feeds.assign(
-        feed_url=current_feeds.apply(lambda x: decode_base64_url(x), axis=1)
-    )
+    current_feeds2 = current_feeds.assign(feed_url=current_feeds.apply(lambda x: decode_base64_url(x), axis=1))
 
     df2 = pd.merge(
         df,
@@ -105,19 +98,13 @@ def add_agency_identifiers(df: pd.DataFrame) -> pd.DataFrame:
     return df2
 
 
-def standardize_gtfs_dataset_names(
-    df: pd.DataFrame, name_col: str = "name"
-) -> pd.DataFrame:
+def standardize_gtfs_dataset_names(df: pd.DataFrame, name_col: str = "name") -> pd.DataFrame:
     """
     Have gtfs_dataset_name reflect the operator.
     Remove the distinction between LA Metro Bus and LA Metro Rail (which
     show up as 2 feeds, 2 feed_keys, 2 gtfs_dataset_keys in our warehouse).
     """
-    df[name_col] = (
-        df[name_col]
-        .str.replace("LA Metro Bus", "LA Metro")
-        .str.replace("LA Metro Rail", "LA Metro")
-    )
+    df[name_col] = df[name_col].str.replace("LA Metro Bus", "LA Metro").str.replace("LA Metro Rail", "LA Metro")
 
     return df
 
@@ -152,16 +139,10 @@ def add_caltrans_district() -> pd.DataFrame:
         473: "05 - San Luis Obispo",  # Clean Air Express in Santa Barbara
     }
 
-    missing_ones = pd.DataFrame(
-        missing_itp_id_district.items(), columns=["calitp_itp_id", "caltrans_district"]
-    )
+    missing_ones = pd.DataFrame(missing_itp_id_district.items(), columns=["calitp_itp_id", "caltrans_district"])
 
     # If there are any missing district info for ITP IDs, fill it in now
-    df2 = (
-        pd.concat([df, missing_ones], axis=0)
-        .sort_values("calitp_itp_id")
-        .reset_index(drop=True)
-    )
+    df2 = pd.concat([df, missing_ones], axis=0).sort_values("calitp_itp_id").reset_index(drop=True)
 
     return df2
 
@@ -182,9 +163,7 @@ def add_route_name(df: pd.DataFrame) -> pd.DataFrame:
         ddf = dg.from_geopandas(df, npartitions=2)
 
     ddf = ddf.assign(
-        route_name_used=ddf.apply(
-            lambda x: rt_utils.which_desc(x), axis=1, meta=("route_name_used", "str")
-        )
+        route_name_used=ddf.apply(lambda x: rt_utils.which_desc(x), axis=1, meta=("route_name_used", "str"))
     )
 
     df = ddf.compute()
@@ -205,9 +184,7 @@ def add_custom_format(
         key: format string, such as '{:.1%}'
         value: list of columns to apply that formatter to.
     """
-    new_styler = df_style.format(
-        subset=cols_to_format, formatter={c: format_str for c in cols_to_format}
-    )
+    new_styler = df_style.format(subset=cols_to_format, formatter={c: format_str for c in cols_to_format})
 
     return new_styler
 
@@ -247,11 +224,7 @@ def style_table(
     list comprehension: df.style.format(subset=percent_cols,  **{'formatter': '{:,.2%}'})
     dict comprehension: df.style.format(formatter = {c: '{:,.2%}' for c in percent_cols})
     """
-    df = (
-        df.drop(columns=drop_cols)
-        .rename(columns=rename_cols)
-        .astype({c: "Int64" for c in integer_cols})
-    )
+    df = df.drop(columns=drop_cols).rename(columns=rename_cols).astype({c: "Int64" for c in integer_cols})
 
     if left_align_cols == "first":
         left_align_cols = list(df.columns)[0]
@@ -291,11 +264,7 @@ def style_table(
             display(
                 HTML(
                     f"<div style='height: {scrollbar_height}; overflow: auto; width: {scrollbar_width}'>"
-                    + (
-                        df_style.set_properties(
-                            **{"font-size": scrollbar_font}
-                        ).render()
-                    )
+                    + (df_style.set_properties(**{"font-size": scrollbar_font}).render())
                     + "</div>"
                 )
             )

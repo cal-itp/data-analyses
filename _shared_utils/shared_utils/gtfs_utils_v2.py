@@ -12,7 +12,7 @@ import geopandas as gpd
 import pandas as pd
 import shapely
 import siuba  # need this to do type hint in functions
-from calitp.tables import tbls
+from calitp_data_analysis.tables import tbls
 from dask import compute, delayed
 from shared_utils import geography_utils, rt_utils
 from siuba import *
@@ -24,9 +24,7 @@ GCS_PROJECT = "cal-itp-data-infra"
 # ----------------------------------------------------------------#
 
 
-def filter_operator(
-    operator_feeds: list, include_name: bool = False
-) -> siuba.dply.verbs.Pipeable:
+def filter_operator(operator_feeds: list, include_name: bool = False) -> siuba.dply.verbs.Pipeable:
     """
     Filter if operator_list is present.
     For trips table, operator_feeds can be a list of names or feed_keys.
@@ -37,9 +35,7 @@ def filter_operator(
     # https://github.com/machow/siuba/issues/407
     # put brackets around should work
     if include_name:
-        return filter(
-            _["feed_key"].isin(operator_feeds) | _["name"].isin(operator_feeds)
-        )
+        return filter(_["feed_key"].isin(operator_feeds) | _["name"].isin(operator_feeds))
     else:
         return filter(_["feed_key"].isin(operator_feeds))
 
@@ -74,7 +70,6 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
     Otherwise, skip.
     """
     if (filter_dict != {}) and (filter_dict is not None):
-
         keys, values = zip(*filter_dict.items())
 
         # Accommodate 3 filtering conditions for now
@@ -111,16 +106,11 @@ def filter_feed_options(
         "include_precursor_and_future",
     ]
 ) -> siuba.dply.verbs.Pipeable:
-
     exclude_future = filter(_["is_future"] == False)
     exclude_precursor = filter(_.regional_feed_type != "Regional Precursor Feed")
 
     if feed_option == "customer_facing":
-        return (
-            filter(_.regional_feed_type != "Regional Subfeed")
-            >> exclude_future
-            >> exclude_precursor
-        )
+        return filter(_.regional_feed_type != "Regional Subfeed") >> exclude_future >> exclude_precursor
 
     elif feed_option == "use_subfeeds":
         return (
@@ -175,9 +165,7 @@ METROLINK_SHAPE_TO_ROUTE = {
 METROLINK_ROUTE_TO_SHAPE = dict((v, k) for k, v in METROLINK_SHAPE_TO_ROUTE.items())
 
 
-def get_metrolink_feed_key(
-    selected_date: Union[str, datetime.date], get_df: bool = False
-) -> pd.DataFrame:
+def get_metrolink_feed_key(selected_date: Union[str, datetime.date], get_df: bool = False) -> pd.DataFrame:
     """
     Get Metrolink's feed_key value.
     """
@@ -199,9 +187,7 @@ def get_metrolink_feed_key(
         return metrolink_feed.feed_key.iloc[0]
 
 
-def fill_in_metrolink_trips_df_with_shape_id(
-    trips: pd.DataFrame, metrolink_feed_key: str
-) -> pd.DataFrame:
+def fill_in_metrolink_trips_df_with_shape_id(trips: pd.DataFrame, metrolink_feed_key: str) -> pd.DataFrame:
     """
     trips: pandas.DataFrame.
             What is returned from tbls.mart_gtfs.fct_daily_scheduled_trips
@@ -216,9 +202,7 @@ def fill_in_metrolink_trips_df_with_shape_id(
     # direction_id==0 (outbound), toward Irvine/Oceanside, etc
 
     df = df.assign(
-        shape_id=df.route_id.apply(lambda x: METROLINK_ROUTE_TO_SHAPE[x])
-        .str.replace("in", "")
-        .str.replace("out", "")
+        shape_id=df.route_id.apply(lambda x: METROLINK_ROUTE_TO_SHAPE[x]).str.replace("in", "").str.replace("out", "")
     )
 
     # OCin and OCout are not distinguished in dictionary
@@ -344,30 +328,22 @@ def get_trips(
     # otherwise, the Metrolink fix may depend on more columns that
     # get subsetted out
     if get_df:
-        metrolink_feed_key_name_df = get_metrolink_feed_key(
-            selected_date=selected_date, get_df=True
-        )
+        metrolink_feed_key_name_df = get_metrolink_feed_key(selected_date=selected_date, get_df=True)
         metrolink_feed_key = metrolink_feed_key_name_df.feed_key.iloc[0]
         metrolink_name = metrolink_feed_key_name_df.name.iloc[0]
 
         # Handle Metrolink when we need to
         if (metrolink_feed_key in operator_feeds) or (metrolink_name in operator_feeds):
-            metrolink_trips = (
-                trips >> filter(_.feed_key == metrolink_feed_key) >> collect()
-            )
-            not_metrolink_trips = (
-                trips >> filter(_.feed_key != metrolink_feed_key) >> collect()
-            )
+            metrolink_trips = trips >> filter(_.feed_key == metrolink_feed_key) >> collect()
+            not_metrolink_trips = trips >> filter(_.feed_key != metrolink_feed_key) >> collect()
 
             # Fix Metrolink trips as a pd.DataFrame, then concatenate
             # This means that LazyTbl output will not show correct results
-            corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(
-                metrolink_trips, metrolink_feed_key
-            )
+            corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(metrolink_trips, metrolink_feed_key)
 
-            trips = pd.concat(
-                [not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True
-            )[trip_cols].reset_index(drop=True)
+            trips = pd.concat([not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True)[
+                trip_cols
+            ].reset_index(drop=True)
 
         elif metrolink_feed_key not in operator_feeds:
             trips = trips >> subset_cols(trip_cols) >> collect()
@@ -401,9 +377,7 @@ def get_shapes(
     if get_df:
         shapes = shapes >> collect()
 
-        shapes_gdf = geography_utils.make_routes_gdf(shapes, crs=crs)[
-            shape_cols + ["geometry"]
-        ]
+        shapes_gdf = geography_utils.make_routes_gdf(shapes, crs=crs)[shape_cols + ["geometry"]]
 
         return shapes_gdf
 
@@ -447,11 +421,7 @@ def get_stops(
 
         geom = [shapely.wkt.loads(x) for x in stops.pt_geom]
 
-        stops = (
-            gpd.GeoDataFrame(stops, geometry=geom, crs="EPSG:4326")
-            .to_crs(crs)
-            .drop(columns="pt_geom")
-        )
+        stops = gpd.GeoDataFrame(stops, geometry=geom, crs="EPSG:4326").to_crs(crs).drop(columns="pt_geom")
 
         return stops
     else:
@@ -474,9 +444,7 @@ def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
     return (start_sec, end_sec)
 
 
-def filter_start_end_ts(
-    time_filters: dict, time_col: Literal["arrival", "departure"]
-) -> siuba.dply.verbs.Pipeable:
+def filter_start_end_ts(time_filters: dict, time_col: Literal["arrival", "departure"]) -> siuba.dply.verbs.Pipeable:
     """
     For arrival or departure, grab the hours to subset and
     convert the (start_hour, end_hour) tuple into seconds,
@@ -520,9 +488,7 @@ def get_stop_times(
 
     if trip_df is None:
         # Grab the trips for that day
-        trips_on_day = get_trips(
-            selected_date=selected_date, trip_cols=trip_id_cols, get_df=False
-        )
+        trips_on_day = get_trips(selected_date=selected_date, trip_cols=trip_id_cols, get_df=False)
 
     elif trip_df is not None:
         if isinstance(trip_df, siuba.sql.verbs.LazyTbl):
@@ -597,7 +563,6 @@ def compiled_cached(
         dfs = [delayed(pd.read_parquet)(filename) for feed_key in operator_feeds]
 
     elif dataset in ["routelines", "stops"]:
-
         dfs = [delayed(gpd.read_parquet)(filename) for feed_key in operator_feeds]
 
     # after reading in a list of delayed dfs/gdfs, compute them, and concat

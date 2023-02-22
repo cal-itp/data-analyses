@@ -20,7 +20,6 @@ def grab_itp_id_and_date(filename: str):
 
 
 if __name__ == "__main__":
-
     GCS_RT_TRIPS = "gs://calitp-analytics-data/data-analyses/rt_delay/rt_trips/"
 
     YAML_FILE = "rt_trips_catalog.yaml"

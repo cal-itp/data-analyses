@@ -7,7 +7,7 @@ import requests
 os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 
 from calitp.tables import tbl
-from calitp import query_sql
+from calitp_data_analysis.sql import query_sql
 from siuba import *
 
 import utils

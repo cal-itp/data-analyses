@@ -10,7 +10,7 @@ from typing import Union
 import fsspec
 import geopandas as gpd
 import requests
-from calitp.storage import get_fs
+from calitp_data.storage import get_fs
 
 fs = get_fs()
 
@@ -42,9 +42,7 @@ def geoparquet_gcs_export(gdf: gpd.GeoDataFrame, gcs_file_path: str, file_name: 
     os.remove(f"./{file_name_sanitized}.parquet")
 
 
-def download_geoparquet(
-    gcs_file_path: str, file_name: str, save_locally: bool = False
-) -> gpd.GeoDataFrame:
+def download_geoparquet(gcs_file_path: str, file_name: str, save_locally: bool = False) -> gpd.GeoDataFrame:
     """
     Parameters:
     gcs_file_path: str
