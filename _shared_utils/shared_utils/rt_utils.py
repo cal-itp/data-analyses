@@ -34,7 +34,9 @@ BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/rt_delay"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 EXPORT_PATH = f"{GCS_FILE_PATH}cached_views/"
-SHN_PATH = f"gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet"
+SHN_PATH = (
+    "gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet"
+)
 
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 
