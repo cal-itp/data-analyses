@@ -70,6 +70,43 @@ districts:
              shape_id: '40759'
              stop_bounds: [7, 12]
 
+ - district: 05 - San Luis Obispo
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override: '2022-07-04'
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: False
+   # blank/None or list [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay
+   corr_extra_fm:
+   hs_extra_fm:
+   corridors:
+     - corridor:
+         itp_id: 208
+         route_filter:
+         parts:
+         # can define each corridor with multiple parts if desired (i.e. one-way couplets)
+           - part:
+             shape_id: 'B092'
+             stop_bounds: [14, 21]
+     - corridor:
+         itp_id: 208
+         route_filter:
+         parts:
+           - part:
+             shape_id: '41090'
+             stop_bounds: [2, 11]
+   hotspots:
+   # can define each hotspot with multiple parts if desired (i.e. one-way couplets)
+     - hotspot:
+         itp_id: 208
+         route_filter:
+         parts:
+           - part:
+             shape_id: '45027'
+             stop_bounds: [5, 7]
+
  - district: 07 - Los Angeles
    # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
    # useful for d3 where we have no recent, usable RT data for SacRT
@@ -176,3 +213,112 @@ districts:
            - part:
              shape_id: '9255'
              stop_bounds: [44, 45]
+             
+ - district: 09 - Bishop
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override:
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: False
+   # blank/None or list [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay
+   corr_extra_fm:
+   hs_extra_fm:
+   corridors:
+   hotspots:
+   # can define each hotspot with multiple parts if desired (i.e. one-way couplets)
+     - hotspot:
+         itp_id: 99
+         route_filter:
+         shape_filter: ['p_176471', 'p_178387', 'p_9452', 'p_9208', 'p_9210']
+         parts:
+           - part:
+             shape_id: 'p_9208'
+             stop_bounds: [19, 21]
+             
+ - district: 11 - San Diego
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override:
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: False
+   # blank/None or list [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay
+   corr_extra_fm:
+   hs_extra_fm:
+   corridors:
+     - corridor:
+         itp_id: 278
+         route_filter:
+         parts:
+         # can define each corridor with multiple parts if desired (i.e. one-way couplets)
+           - part:
+             shape_id: '28_2_48'
+             stop_bounds: [2, 18]
+     - corridor:
+         itp_id: 278
+         route_filter:
+         parts:
+           - part:
+             shape_id: '815_2_21'
+             stop_bounds: [2, 18]
+     - corridor:
+         itp_id: 278
+         route_filter:
+         parts:
+           - part:
+             shape_id: '10_2_68'
+             stop_bounds: [6, 21]
+     - corridor:
+         itp_id: 278
+         route_filter:
+         parts:
+           - part:
+             shape_id: '27_2_81'
+             stop_bounds: [3, 16]
+     - corridor:
+         itp_id: 278
+         route_filter:
+         parts:
+           - part:
+             shape_id: '12_2_13'
+             stop_bounds: [3, 31]
+   hotspots:
+   # can define each hotspot with multiple parts if desired (i.e. one-way couplets)
+     - hotspot:
+         itp_id: 278
+         route_filter:
+         parts:
+           - part:
+             shape_id: '27_2_81'
+             stop_bounds: [19, 23]
+     - hotspot:
+         itp_id: 278
+         route_filter:
+         parts:
+           - part:
+             shape_id: '10_3_67'
+             stop_bounds: [21, 22]
+     - hotspot:
+         itp_id: 278
+         route_filter:
+         parts:
+           - part:
+             shape_id: '35_3_50'
+             stop_bounds: [5, 9]
+     - hotspot:
+         itp_id: 278
+         route_filter:
+         parts:
+           - part:
+             shape_id: '14_2_96'
+             stop_bounds: [28, 29]
+     - hotspot:
+         itp_id: 278
+         route_filter:
+         parts:
+           - part:
+             shape_id: '3_0_90'
+             stop_bounds: [27, 32]
