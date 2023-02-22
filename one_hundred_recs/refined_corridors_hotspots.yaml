@@ -106,6 +106,66 @@ districts:
            - part:
              shape_id: '45027'
              stop_bounds: [5, 7]
+ 
+ - district: 06 - Fresno
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override: 
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: False
+   # blank/None or list of lists [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay 
+   corr_extra_fm: 
+   hs_extra_fm:
+   # below useful for situation where we want a specific corridor/hs not returned by utility for same operator-- clears filter
+   unfiltered_fm: [126]
+   corridors:
+     - corridor:
+         itp_id: 126
+         route_filter:
+         parts:
+         # can define each corridor with multiple parts if desired (i.e. one-way couplets)
+           - part:
+             shape_id: '32'
+             stop_bounds: [25, 31]
+     - corridor:
+         itp_id: 126
+         route_filter:
+         parts:
+           - part:
+             shape_id: '7'
+             stop_bounds: [3, 8]
+     - corridor:
+         itp_id: 126
+         route_filter:
+         parts:
+           - part:
+             shape_id: '9'
+             stop_bounds: [17, 19]
+     - corridor:
+         itp_id: 126
+         route_filter:
+         parts:
+           - part:
+             shape_id: '25'
+             stop_bounds: [11, 17]
+   hotspots:
+   # can define each hotspot with multiple parts if desired (i.e. one-way couplets)
+     - hotspot:
+         itp_id: 126
+         route_filter:
+         parts:
+           - part:
+             shape_id: '16'
+             stop_bounds: [18, 19]
+     - hotspot:
+         itp_id: 126
+         route_filter:
+         parts:
+           - part:
+             shape_id: '16'
+             stop_bounds: [14, 15]
 
  - district: 07 - Los Angeles
    # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
