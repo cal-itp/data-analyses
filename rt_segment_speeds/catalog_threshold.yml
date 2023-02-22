@@ -4,7 +4,7 @@ metadata:
     analysis_date:
       type: str
       description: Analysis date for v1 diagnostics
-      default: "2022-10-12"
+      default: "2023-01-18"
 sources:  
     route_lines:
         driver: geoparquet
@@ -20,9 +20,14 @@ sources:
         driver: geoparquet
         description: description
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/longest_shape_segments_{{analysis_date}}.parquet
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/longest_shape_segments_{{analysis_date}}.parquet 
     crosswalk:
         driver: parquet
         description: description
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/dask_test/segments_route_direction_crosswalk_{{analysis_date}}.parquet
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/segments_route_direction_crosswalk_{{analysis_date}}.parquet 
+    trip_stats:
+        driver: parquet
+        description: description
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/trip_diagnostics_{{analysis_date}}.parquet

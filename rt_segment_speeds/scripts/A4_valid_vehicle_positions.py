@@ -7,8 +7,6 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
 import geopandas as gpd
-import gcsfs
-import numpy as np
 import pandas as pd
 import sys
 import warnings
@@ -18,10 +16,10 @@ from loguru import logger
 from shapely.errors import ShapelyDeprecationWarning
 warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
-import dask_utils
-from update_vars import SEGMENT_GCS, analysis_date
+from shared_utils import dask_utils
+from segment_speed_utils import helpers, segment_calcs
+from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
-fs = gcsfs.GCSFileSystem()
 
 """
 References
@@ -44,37 +42,6 @@ Map partitions has trouble computing result.
 Just use partitioned df and don't use `ddf.map_partitions`.
 """
                     
-
-def operators_with_data(gcs_folder: str = f"{SEGMENT_GCS}vp_sjoin/") -> list:
-    """
-    Return a list of operators with RT vehicle positions 
-    spatially joined to route segments.
-    """
-    all_files_in_folder = fs.ls(gcs_folder)
-    
-    files = [i for i in all_files_in_folder if "vp_segment_" in i]
-    
-    RT_OPERATORS = [i.split('vp_segment_')[1]
-                    .split(f'_{analysis_date}')[0] 
-                    for i in files if analysis_date in i]
-    
-    return RT_OPERATORS
-    
-
-@delayed    
-def import_vehicle_positions(feed_key: str) -> dd.DataFrame:
-    """
-    Import vehicle positions spatially joined to segments for 
-    each operator.
-    """
-    vp_segments = dd.read_parquet(
-            f"{SEGMENT_GCS}vp_sjoin/vp_segment_{feed_key}_{analysis_date}.parquet")
-
-    vp_segments = vp_segments.repartition(partition_size = "85MB")
-    
-    return vp_segments
-
-
 @delayed
 def exclude_unusable_trips(vp_df: dd.DataFrame, 
                            valid_trip_ids: list) -> dd.DataFrame:
@@ -84,47 +51,6 @@ def exclude_unusable_trips(vp_df: dd.DataFrame,
     Supply a list of valid trips or trips to exclude?
     """
     return vp_df[vp_df.trip_id.isin(trips_list)].reset_index(drop=True)
-    
-    
-# https://stackoverflow.com/questions/58145700/using-groupby-to-store-value-counts-in-new-column-in-dask-dataframe
-# https://github.com/dask/dask/pull/5327
-@delayed
-def keep_min_max_timestamps_by_segment(
-    vp_to_seg: dd.DataFrame) -> dd.DataFrame:
-    """
-    For each segment-trip combination, throw away excess points, just 
-    keep the enter/exit points for the segment.
-    """
-    segment_cols = ["route_dir_identifier", "segment_sequence"]
-    segment_trip_cols = ["gtfs_dataset_key", "trip_id"] + segment_cols
-    timestamp_col = "location_timestamp"
-    
-    # https://stackoverflow.com/questions/52552066/dask-compute-gives-attributeerror-series-object-has-no-attribute-encode    
-    # comment out .compute() and just .reset_index()
-    enter = (vp_to_seg.groupby(segment_trip_cols)
-             [timestamp_col].min()
-             #.compute()
-             .reset_index()
-            )
-
-    exit = (vp_to_seg.groupby(segment_trip_cols)
-            [timestamp_col].max()
-            #.compute()
-            .reset_index()
-           )
-    
-    enter_exit = dd.multi.concat([enter, exit], axis=0)
-    
-    # Merge back in with original to only keep the min/max timestamps
-    # dask can't sort by multiple columns to drop
-    enter_exit_full_info = dd.merge(
-        vp_to_seg,
-        enter_exit,
-        on = segment_trip_cols + [timestamp_col],
-        how = "inner"
-    ).reset_index(drop=True)
-        
-    return enter_exit_full_info
 
 
 if __name__ == "__main__": 
@@ -142,29 +68,45 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    RT_OPERATORS = operators_with_data(f"{SEGMENT_GCS}vp_sjoin/")  
-    
+    INPUT_FILE_PREFIX = "vp_segment"
+    RT_OPERATORS = helpers.operators_with_data(
+        gcs_folder = f"{SEGMENT_GCS}vp_sjoin/",
+        file_name_prefix = f'{INPUT_FILE_PREFIX}_',
+        analysis_date = analysis_date
+    )  
+        
     results = []
     
-    for feed_key in RT_OPERATORS:
+    for rt_dataset_key in RT_OPERATORS:
         logger.info(f"start {feed_key}")
         
         start_id = datetime.datetime.now()
 
         # https://docs.dask.org/en/stable/delayed-collections.html
-        operator_vp_segments = import_vehicle_positions(feed_key)
+        operator_vp_segments = delayed(
+            helpers.import_vehicle_positions)(
+            f"{SEGMENT_GCS}vp_sjoin/",
+            f"{INPUT_FILE_PREFIX}_{rt_dataset_key}_{analysis_date}",
+            file_type = "df",
+        )
+        
+        operator_vp_segments = operator_vp_segments.repartition(
+            partition_size = "85MB")
         
         time1 = datetime.datetime.now()
         logger.info(f"imported data: {time1 - start_id}")
         
         # filter to usable trips
         # pass valid_operator_vp down 
-        # valid_operator_vp = exclude_unusable_trips(
+        # valid_operator_vp = delayed(helpers.exclude_unusable_trips)(
         # operator_vp_segments, trips_list)
         #logger.info(f"filter out to only valid trips: {}")
         
-        vp_pared = keep_min_max_timestamps_by_segment(
-            operator_vp_segments)
+        vp_pared = delayed(segment_calcs.keep_min_max_timestamps_by_segment)(
+            operator_vp_segments, 
+            segment_cols = ["route_dir_identifier", "segment_sequence"],
+            timestamp_col = "location_timestamp"
+        )
         
         results.append(vp_pared)
         

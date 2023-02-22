@@ -34,7 +34,7 @@ from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 HQTA_SEGMENT_LENGTH = 1_250 # meters
 
 
-def merge_routes_to_trips(routelines: dg.GeoDataFrame, 
+def merge_routes_to_trips(routelines: gpd.GeoDataFrame, 
                           trips: dd.DataFrame) -> dg.GeoDataFrame:   
     """
     Merge routes and trips tables.
@@ -59,14 +59,15 @@ def merge_routes_to_trips(routelines: dg.GeoDataFrame,
         how = "inner",
     ).compute()
     
-    trips_with_geom = (trips_with_geom
-                       .assign(
-                            route_length = trips_with_geom.geometry.length
-                       ).sort_values(route_dir_cols + ["route_length"], 
-                                     ascending=[True, True, True, False])
-                       .drop_duplicates(subset = route_dir_cols)
-                       .reset_index(drop=True)
-                      )
+    trips_with_geom = (
+        trips_with_geom
+        .assign(
+            route_length = trips_with_geom.geometry.length
+       ).sort_values(route_dir_cols + ["route_length"], 
+                     ascending = [True for i in route_dir_cols] + [False])
+        .drop_duplicates(subset = route_dir_cols)
+        .reset_index(drop=True)
+    )
     
     m1 = dg.from_geopandas(trips_with_geom, npartitions=2)
     
@@ -167,7 +168,7 @@ def difference_overlay_by_route(
 
 
 def select_shapes_and_segment(
-    longest_shapes: dg.GeoDataFrame, 
+    longest_shapes_gddf: dg.GeoDataFrame, 
     segment_length: int) -> gpd.GeoDataFrame: 
     """
     For routes where only 1 shape_id was chosen for longest route_length,
@@ -185,7 +186,8 @@ def select_shapes_and_segment(
     """
     # Since the difference needs to be geopandas,
     # convert it now, and leave it as geopandas
-    gdf = longest_shapes.compute()
+    # ensure it is computed as gdf...sometimes it's computed as df
+    gdf = gpd.GeoDataFrame(longest_shapes_gddf.compute())
         
     routes_both_dir = (gdf.route_key
                        .value_counts()
@@ -215,12 +217,11 @@ def select_shapes_and_segment(
         ready_for_segmenting,
         group_cols = ["route_key"],
         segment_distance = segment_length
-    ).astype({"segment_sequence": int})
-    
+    )
     
     segmented = segmented.assign(
         segment_sequence = (segmented.groupby("route_key")
-                            ["segment_sequence"].cumcount()).astype(str)
+                            ["segment_sequence"].cumcount())
     )
     
     route_cols = ["feed_key", "route_id", "route_key"]
@@ -247,7 +248,7 @@ def select_shapes_and_segment(
         hqta_segment_id = hqta_segments.apply(
             lambda x: zlib.crc32(
                 (x.route_key + 
-                 x.segment_sequence).encode("utf-8")), axis=1),
+                 str(x.segment_sequence)).encode("utf-8")), axis=1),
     )
     
     return hqta_segments
@@ -318,10 +319,7 @@ def dissolved_to_longest_shape(hqta_segments: gpd.GeoDataFrame):
     
     
 if __name__=="__main__":   
-    # Connect to dask distributed client, put here so it only runs for this script
-    from dask.distributed import Client
-    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
-    
+
     logger.add("./logs/B1_create_hqta_segments.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -336,9 +334,15 @@ if __name__=="__main__":
     # (1) Merge routelines with trips, find the longest shape in 
     # each direction, and after overlay difference, cut HQTA segments
     routelines = dg.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet")
+        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet", 
+        columns = ["shape_array_key", "geometry"]
+    ).drop_duplicates()
+    
     trips = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
+        columns = ["feed_key", "route_key", 
+                   "route_id", "direction_id", "shape_array_key"]
+    ).drop_duplicates()
     
     # Keep longest shape in each direction
     longest_shapes = merge_routes_to_trips(routelines, trips)
@@ -347,7 +351,8 @@ if __name__=="__main__":
     logger.info(f"merge routes to trips: {time1 - start}")
     
     # Cut into HQTA segments
-    hqta_segments = select_shapes_and_segment(longest_shapes, HQTA_SEGMENT_LENGTH)
+    hqta_segments = select_shapes_and_segment(
+        longest_shapes, HQTA_SEGMENT_LENGTH)
     
     # Since route_direction at the route-level could yield both 
     # north-south and east-west 
@@ -376,5 +381,3 @@ if __name__=="__main__":
     end = dt.datetime.now()
     logger.info(f"dissolve: {end - time2}")
     logger.info(f"total execution time: {end - start}")
-
-    client.close()

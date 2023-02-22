@@ -1,8 +1,4 @@
 download_hqta_data:
-	python download_trips.py
-	python download_stops.py
-	python download_shapes.py
-	python download_stop_times.py
 	python operators_for_hqta.py
 	python A2_combine_stops.py
     

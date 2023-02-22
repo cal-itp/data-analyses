@@ -48,7 +48,7 @@
 		</ns0:CI_ResponsibleParty>
 	</ns0:contact>
 	<ns0:dateStamp>
-		<ns1:Date>2022-12-15</ns1:Date>
+		<ns1:Date>2023-02-17</ns1:Date>
 	</ns0:dateStamp>
 	<ns0:metadataStandardName>
 		<ns1:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</ns1:CharacterString>
@@ -101,7 +101,7 @@
 					<ns0:date>
 						<ns0:CI_Date>
 							<ns0:date>
-								<ns1:Date>2022-12-14</ns1:Date>
+								<ns1:Date>2023-02-15</ns1:Date>
 							</ns0:date>
 							<ns0:dateType>
 								<ns0:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">
@@ -111,7 +111,7 @@
 						</ns0:CI_Date>
 					</ns0:date>
 					<ns0:edition>
-						<ns1:CharacterString>8</ns1:CharacterString>
+						<ns1:CharacterString>10</ns1:CharacterString>
 					</ns0:edition>
 					<ns0:citedResponsibleParty>
 						<ns0:CI_ResponsibleParty>
@@ -170,7 +170,7 @@
 						</ns0:MD_MaintenanceFrequencyCode>
 					</ns0:maintenanceAndUpdateFrequency>
 					<ns0:dateOfNextUpdate>
-						<ns1:Date>2023-01-14</ns1:Date>
+						<ns1:Date>2023-03-15</ns1:Date>
 					</ns0:dateOfNextUpdate>
 				</ns0:MD_MaintenanceInformation>
 			</ns0:resourceMaintenance>
@@ -252,8 +252,8 @@
 						<ns0:EX_TemporalExtent>
 							<ns0:extent>
 								<ns2:TimePeriod ns2:id="IDDWYVT5UGET0XIDOZ10J1NEM1TJ4BG4DJ4XQHJCJYNE1G53PQBC5H">
-									<ns2:beginPosition>2022-12-14T00:00:00</ns2:beginPosition>
-									<ns2:endPosition>2023-01-14T00:00:00</ns2:endPosition>
+									<ns2:beginPosition>2023-02-15T00:00:00</ns2:beginPosition>
+									<ns2:endPosition>2023-03-15T00:00:00</ns2:endPosition>
 								</ns2:TimePeriod>
 							</ns0:extent>
 						</ns0:EX_TemporalExtent>

@@ -233,9 +233,7 @@ def cut_segments(
         segmented.assign(
             segment_sequence=(
                 segmented.groupby(group_cols)["temp_index"].transform("rank") - 1
-            )
-            .astype(int)
-            .astype(str)
+            ).astype(int)
         )
         .sort_values(group_cols)
         .reset_index(drop=True)
