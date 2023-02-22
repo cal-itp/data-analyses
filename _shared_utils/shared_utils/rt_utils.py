@@ -14,8 +14,8 @@ import numpy as np
 import pandas as pd
 import shapely
 import siuba  # need for type hints
-from calitp import query_sql
-from calitp.tables import tbls
+from calitp_data_analysis.sql import query_sql
+from calitp_data_analysis.tables import tbls
 from numba import jit
 from shared_utils import geography_utils, gtfs_utils, gtfs_utils_v2, map_utils, utils
 from siuba import *
@@ -34,9 +34,7 @@ BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/rt_delay"
 GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 EXPORT_PATH = f"{GCS_FILE_PATH}cached_views/"
-SHN_PATH = (
-    "gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet"
-)
+SHN_PATH = "gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet"
 
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 
@@ -49,9 +47,7 @@ VARIANCE_COLORS = branca.colormap.step.Blues_06.colors[1:]  # actual breaks will
 DATE_WEEKDAY_FMT = "%b %d (%a)"  # Jun 01 (Wed) for 6/1/22
 MONTH_DAY_FMT = "%m_%d"  # 6_01 for 6/1/22
 HOUR_MIN_FMT = "%H:%M"  # 08:00 for 8 am, 13:00 for 1pm
-HOUR_MIN_SEC_FMT = (
-    "%H:%M:%S"  # 08:15:05 for 8:15 am + 5 sec, 13:15:05 for 1:15pm + 5 sec
-)
+HOUR_MIN_SEC_FMT = "%H:%M:%S"  # 08:15:05 for 8:15 am + 5 sec, 13:15:05 for 1:15pm + 5 sec
 FULL_DATE_FMT = "%Y-%m-%d"  # 2022-06-01 for 6/1/22
 
 
@@ -123,9 +119,7 @@ def add_origin_destination(
     elif isinstance(gdf, gpd.GeoDataFrame):
         gdf = gdf.assign(
             origin=gdf.geometry.apply(lambda x: shapely.geometry.Point(x.coords[0])),
-            destination=gdf.geometry.apply(
-                lambda x: shapely.geometry.Point(x.coords[-1])
-            ),
+            destination=gdf.geometry.apply(lambda x: shapely.geometry.Point(x.coords[-1])),
         )
 
     return gdf
@@ -168,9 +162,7 @@ def add_route_cardinal_direction(
 
     elif isinstance(df, gpd.GeoDataFrame):
         df = df.assign(
-            route_primary_direction=df.apply(
-                lambda x: primary_cardinal_direction(x[origin], x[destination]), axis=1
-            )
+            route_primary_direction=df.apply(lambda x: primary_cardinal_direction(x[origin], x[destination]), axis=1)
         )
 
         df = df.assign(
@@ -233,9 +225,7 @@ def interpolate_arrival_times(df):
     interpolator = lambda x: np.interp(x, xp, yp)
     df = df.assign(
         arrival_time=df.apply(
-            lambda x: interpolator(x.shape_meters)
-            if pd.isnull(x.arrival_time)
-            else x.arrival_time,
+            lambda x: interpolator(x.shape_meters) if pd.isnull(x.arrival_time) else x.arrival_time,
             axis=1,
         )
     )
@@ -401,9 +391,7 @@ def get_trips(
             trips = cached
         else:
             print("cached parquet empty, will try a fresh query")
-            return get_trips(
-                itp_id, analysis_date, force_clear=True, route_types=route_types
-            )
+            return get_trips(itp_id, analysis_date, force_clear=True, route_types=route_types)
     else:
         print("getting trips...")
 
@@ -435,9 +423,7 @@ def get_trips(
         )
 
         # Keep both as LazyTbl to do inner join
-        trips = (
-            trips >> inner_join(_, routes, on=["calitp_itp_id", "route_id"])
-        ) >> collect()
+        trips = (trips >> inner_join(_, routes, on=["calitp_itp_id", "route_id"])) >> collect()
 
         # Drop duplicates (not able to drop when querying trips table
         # without forcing a collect()
@@ -550,7 +536,6 @@ def get_routelines(
     force_clear: bool = False,
     export_path: Union[str, Path] = EXPORT_PATH,
 ) -> gpd.GeoDataFrame:
-
     date_str = analysis_date.strftime(FULL_DATE_FMT)
     filename = f"routelines_{itp_id}_{date_str}.parquet"
 
@@ -564,7 +549,6 @@ def get_routelines(
         else:
             print("cached parquet empty, will try a fresh query")
     else:
-
         trip_df_setting = trips_cached(itp_id, date_str)
 
         routelines = gtfs_utils.get_route_shapes(
@@ -625,9 +609,7 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
         arrow_distance = max(arrow_distance, line_geometry.length / 20)
         shift_distance = buffer_distance + 1
 
-        begin_segment = shapely.ops.substring(
-            segment, segment.length - 50, segment.length
-        )
+        begin_segment = shapely.ops.substring(segment, segment.length - 50, segment.length)
         r_shift = begin_segment.parallel_offset(shift_distance, "right")
         r_pt = shapely.ops.substring(r_shift, 0, 0)
         l_shift = begin_segment.parallel_offset(shift_distance, "left")
@@ -637,23 +619,17 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
             begin_segment.length - arrow_distance,
             begin_segment.length - arrow_distance,
         )
-        poly = shapely.geometry.Polygon(
-            (r_pt, end, l_pt)
-        )  # triangle to cut bottom of arrow
+        poly = shapely.geometry.Polygon((r_pt, end, l_pt))  # triangle to cut bottom of arrow
         # ends to the left
         end_segment = shapely.ops.substring(segment, 0, 50)
         end = shapely.ops.substring(end_segment, 0, 0)  # correct
         r_shift = end_segment.parallel_offset(shift_distance, "right")
         r_pt = shapely.ops.substring(r_shift, r_shift.length, r_shift.length)
-        r_pt2 = shapely.ops.substring(
-            r_shift, r_shift.length - arrow_distance, r_shift.length - arrow_distance
-        )
+        r_pt2 = shapely.ops.substring(r_shift, r_shift.length - arrow_distance, r_shift.length - arrow_distance)
         l_shift = end_segment.parallel_offset(shift_distance, "left")
         l_pt = shapely.ops.substring(l_shift, 0, 0)
         l_pt2 = shapely.ops.substring(l_shift, arrow_distance, arrow_distance)
-        t1 = shapely.geometry.Polygon(
-            (l_pt2, end, l_pt)
-        )  # triangles to cut top of arrow
+        t1 = shapely.geometry.Polygon((l_pt2, end, l_pt))  # triangles to cut top of arrow
         t2 = shapely.geometry.Polygon((r_pt2, end, r_pt))
         segment_clip_mask = shapely.geometry.MultiPolygon((poly, t1, t2))
 
@@ -668,10 +644,7 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
         return line_geometry.simplify(tolerance=5).buffer(buffer_distance)
 
 
-def arrowize_by_frequency(
-    row, frequency_col="trips_per_hour", frequency_thresholds=(1.5, 3, 6)
-):
-
+def arrowize_by_frequency(row, frequency_col="trips_per_hour", frequency_thresholds=(1.5, 3, 6)):
     if row[frequency_col] < frequency_thresholds[0]:
         row.geometry = arrowize_segment(row.geometry, buffer_distance=15)
     elif row[frequency_col] < frequency_thresholds[1]:
@@ -692,17 +665,9 @@ def layer_points(rt_interpolator):
         "meters_from_last",
     ]
 
-    initial_bk_noise = (
-        rt_interpolator.position_gdf
-        >> filter(_.meters_from_last < 0)
-        >> select(*keep_cols)
-    )
+    initial_bk_noise = rt_interpolator.position_gdf >> filter(_.meters_from_last < 0) >> select(*keep_cols)
 
-    initial_deduped = (
-        rt_interpolator.position_gdf
-        >> distinct(_.shape_meters, _keep_all=True)
-        >> select(*keep_cols)
-    )
+    initial_deduped = rt_interpolator.position_gdf >> distinct(_.shape_meters, _keep_all=True) >> select(*keep_cols)
 
     cleaned = rt_interpolator.cleaned_positions >> select(*keep_cols)
 
@@ -754,9 +719,7 @@ def map_line(gdf):
     # gdf = gdf.buffer(1)
     gdf = gdf.to_crs(geography_utils.WGS84)
     centroid = gdf.geometry.iloc[0].centroid
-    m = folium.Map(
-        location=[centroid.y, centroid.x], zoom_start=13, tiles="cartodbpositron"
-    )
+    m = folium.Map(location=[centroid.y, centroid.x], zoom_start=13, tiles="cartodbpositron")
 
     folium.GeoJson(gdf.to_json()).add_to(m)
 
@@ -766,9 +729,7 @@ def map_line(gdf):
 def categorize_cleaning(rt_operator_day, interpolator_key):
     rt_interpolator = rt_operator_day.position_interpolators[interpolator_key]["rt"]
     raw = rt_interpolator.position_gdf.shape[0]
-    same_loc_dropped = (rt_interpolator.position_gdf >> distinct(_.shape_meters)).shape[
-        0
-    ]
+    same_loc_dropped = (rt_interpolator.position_gdf >> distinct(_.shape_meters)).shape[0]
     cleaned = rt_interpolator.cleaned_positions.shape[0]
 
     return (interpolator_key, cleaned / raw, cleaned / same_loc_dropped)
@@ -855,9 +816,7 @@ def get_operators(analysis_date, operator_list):
     date_iso = analysis_date.isoformat()
     # now finds ran operators on specific analysis date
     ran_operators = [
-        int(path.split("rt_trips/")[1].split("_")[0])
-        for path in fs_list
-        if date_iso in path.split("rt_trips/")[1]
+        int(path.split("rt_trips/")[1].split("_")[0]) for path in fs_list if date_iso in path.split("rt_trips/")[1]
     ]
     op_list_runstatus = {}
     for itp_id in operator_list:

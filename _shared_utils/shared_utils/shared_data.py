@@ -11,10 +11,7 @@ def make_county_centroids():
     """
     Find a county's centroids from county polygons.
     """
-    URL = (
-        "https://opendata.arcgis.com/datasets/"
-        "8713ced9b78a4abb97dc130a691a8695_0.geojson"
-    )
+    URL = "https://opendata.arcgis.com/datasets/" "8713ced9b78a4abb97dc130a691a8695_0.geojson"
 
     gdf = gpd.read_file(URL).to_crs(geography_utils.CA_StatePlane)
     gdf.columns = gdf.columns.str.lower()
@@ -61,10 +58,7 @@ def make_clean_state_highway_network():
     """
     Create State Highway Network dataset.
     """
-    HIGHWAY_URL = (
-        "https://opendata.arcgis.com/datasets/"
-        "77f2d7ba94e040a78bfbe36feb6279da_0.geojson"
-    )
+    HIGHWAY_URL = "https://opendata.arcgis.com/datasets/" "77f2d7ba94e040a78bfbe36feb6279da_0.geojson"
     gdf = gpd.read_file(HIGHWAY_URL)
 
     keep_cols = ["Route", "County", "District", "RouteType", "Direction", "geometry"]

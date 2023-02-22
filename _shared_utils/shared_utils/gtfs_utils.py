@@ -12,8 +12,8 @@ import geopandas as gpd
 import pandas as pd
 import shapely
 import siuba  # need this to do type hint in functions
-from calitp import query_sql
-from calitp.tables import tbls
+from calitp_data_analysis.sql import query_sql
+from calitp_data_analysis.tables import tbls
 from shared_utils import geography_utils, rt_utils, utils
 from siuba import *
 
@@ -68,17 +68,13 @@ def fill_in_metrolink_trips_df_with_shape_id(trips: pd.DataFrame) -> pd.DataFram
     # direction_id==0 (outbound), toward Irvine/Oceanside, etc
 
     df = df.assign(
-        shape_id=df.route_id.apply(lambda x: METROLINK_ROUTE_TO_SHAPE[x])
-        .str.replace("in", "")
-        .str.replace("out", "")
+        shape_id=df.route_id.apply(lambda x: METROLINK_ROUTE_TO_SHAPE[x]).str.replace("in", "").str.replace("out", "")
     )
 
     # OCin and OCout are not distinguished in dictionary
     df = df.assign(
         shape_id=df.apply(
-            lambda x: x.shape_id + "out"
-            if x.direction_id == "0"
-            else x.shape_id + "in",
+            lambda x: x.shape_id + "out" if x.direction_id == "0" else x.shape_id + "in",
             axis=1,
         )
     )
@@ -125,7 +121,6 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
     TODO: Expand beyond 3. Does piping mean that order of conditions matter?
     """
     if (filter_dict != {}) and (filter_dict is not None):
-
         keys, values = zip(*filter_dict.items())
 
         # Accommodate 3 filtering conditions for now
@@ -160,13 +155,8 @@ def get_route_info(
     get_df: bool = True,
     custom_filtering: dict = None,
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
-
     # Route info query
-    dim_routes = (
-        tbls.views.gtfs_schedule_dim_routes()
-        >> filter_itp_id(itp_id_list)
-        >> distinct()
-    )
+    dim_routes = tbls.views.gtfs_schedule_dim_routes() >> filter_itp_id(itp_id_list) >> distinct()
 
     routes = (
         tbls.views.gtfs_schedule_fact_daily_feed_routes()
@@ -262,11 +252,8 @@ def get_stops(
     crs: str = geography_utils.WGS84,
     custom_filtering: dict = None,
 ) -> Union[gpd.GeoDataFrame, siuba.sql.verbs.LazyTbl]:
-
     # Stops query
-    dim_stops = (
-        tbls.views.gtfs_schedule_dim_stops() >> filter_itp_id(itp_id_list) >> distinct()
-    )
+    dim_stops = tbls.views.gtfs_schedule_dim_stops() >> filter_itp_id(itp_id_list) >> distinct()
 
     stops = (
         tbls.views.gtfs_schedule_fact_daily_feed_stops()
@@ -286,9 +273,7 @@ def get_stops(
 
     if get_df is True:
         stops = stops >> collect()
-        stops = geography_utils.create_point_geometry(stops, crs=crs).drop(
-            columns=["stop_lon", "stop_lat"]
-        )
+        stops = geography_utils.create_point_geometry(stops, crs=crs).drop(columns=["stop_lon", "stop_lat"])
 
     return stops
 
@@ -304,11 +289,8 @@ def get_trips(
     get_df: bool = True,
     custom_filtering: dict = None,
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
-
     # Trips query
-    dim_trips = (
-        tbls.views.gtfs_schedule_dim_trips() >> filter_itp_id(itp_id_list) >> distinct()
-    )
+    dim_trips = tbls.views.gtfs_schedule_dim_trips() >> filter_itp_id(itp_id_list) >> distinct()
 
     trips = (
         tbls.views.gtfs_schedule_fact_daily_trips()
@@ -349,9 +331,7 @@ def get_trips(
         # If Metrolink is not in itp_id_list, then this is empty dataframe, and that's ok
         corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(metrolink_trips)
 
-        trips = pd.concat(
-            [not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True
-        ).reset_index(drop=True)
+        trips = pd.concat([not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True).reset_index(drop=True)
 
     elif (itp_id_list is not None) and (323 not in itp_id_list) and (get_df is True):
         trips = trips >> collect()
@@ -381,9 +361,7 @@ def fix_departure_time(stop_times: dd.DataFrame) -> dd.DataFrame:
 
     stop_times2 = stop_times[~stop_times.departure_time.isna()].reset_index(drop=True)
 
-    ddf = stop_times2.assign(
-        departure_hour=stop_times2.departure_time.str.partition(":")[0].astype(int)
-    )
+    ddf = stop_times2.assign(departure_hour=stop_times2.departure_time.str.partition(":")[0].astype(int))
 
     # Since hours past 24 are allowed for overnight trips
     # coerce these to fall between 0-23
@@ -475,9 +453,7 @@ def get_stop_times(
 
     else:
         trips_stops_ix_query = (
-            tbls.views.gtfs_schedule_index_feed_trip_stops()
-            >> select(_.trip_key, _.stop_time_key)
-            >> distinct()
+            tbls.views.gtfs_schedule_index_feed_trip_stops() >> select(_.trip_key, _.stop_time_key) >> distinct()
         ) >> inner_join(_, trips_on_day, on="trip_key")
 
     stop_times = (
@@ -538,21 +514,15 @@ def all_routelines_or_stops_with_cached(
 
     if itp_id_list is None:
         itp_id_list = (
-            tbls.gtfs_schedule.agency()
-            >> select(_.calitp_itp_id)
-            >> distinct()
-            >> collect()
+            tbls.gtfs_schedule.agency() >> select(_.calitp_itp_id) >> distinct() >> collect()
         ).calitp_itp_id.tolist()
 
     # Set metadata
     first_operator = sorted(itp_id_list)[0]
 
-    gdf = dg.read_parquet(
-        f"{rt_utils.EXPORT_PATH}{dataset}_{first_operator}_{date_str}.parquet"
-    ).head(0)
+    gdf = dg.read_parquet(f"{rt_utils.EXPORT_PATH}{dataset}_{first_operator}_{date_str}.parquet").head(0)
 
     for itp_id in sorted(itp_id_list):
-
         filename = f"{dataset}_{itp_id}_{date_str}.parquet"
         path = rt_utils.check_cached(filename)
 
@@ -581,22 +551,16 @@ def all_trips_or_stoptimes_with_cached(
 
     if itp_id_list is None:
         itp_id_list = (
-            tbls.gtfs_schedule.agency()
-            >> select(_.calitp_itp_id)
-            >> distinct()
-            >> collect()
+            tbls.gtfs_schedule.agency() >> select(_.calitp_itp_id) >> distinct() >> collect()
         ).calitp_itp_id.tolist()
 
     # Set metadata
     first_operator = sorted(itp_id_list)[0]
-    df = pd.read_parquet(
-        f"{rt_utils.EXPORT_PATH}{dataset}_{first_operator}_{date_str}.parquet"
-    ).head(0)
+    df = pd.read_parquet(f"{rt_utils.EXPORT_PATH}{dataset}_{first_operator}_{date_str}.parquet").head(0)
 
     df = dd.from_pandas(df, npartitions=1)
 
     for itp_id in sorted(itp_id_list):
-
         filename = f"{dataset}_{itp_id}_{date_str}.parquet"
         path = rt_utils.check_cached(filename)
 
@@ -615,10 +579,9 @@ def all_trips_or_stoptimes_with_cached(
 # v1 Geography Utils for v1 speedmaps, dependencies
 # ----------------------------------------------------------------#
 
+
 # Function to construct the SQL condition for make_routes_gdf()
-def construct_condition(
-    selected_date: Union[str, datetime.datetime], include_itp_list: list
-) -> str:
+def construct_condition(selected_date: Union[str, datetime.datetime], include_itp_list: list) -> str:
     def unpack_list_make_or_statement(include_itp_list: list) -> str:
         new_cond = ""
 
@@ -635,10 +598,7 @@ def construct_condition(
 
     operator_or_statement = unpack_list_make_or_statement(include_itp_list)
 
-    date_condition = (
-        f'(calitp_extracted_at <= "{selected_date}" AND '
-        f'calitp_deleted_at > "{selected_date}")'
-    )
+    date_condition = f'(calitp_extracted_at <= "{selected_date}" AND ' f'calitp_deleted_at > "{selected_date}")'
 
     condition = operator_or_statement + " AND " + date_condition
 
@@ -646,9 +606,7 @@ def construct_condition(
 
 
 # Run the sql query with the condition in long-form
-def create_shapes_for_subset(
-    selected_date: Union[str, datetime.datetime], itp_id_list: list
-) -> pd.DataFrame:
+def create_shapes_for_subset(selected_date: Union[str, datetime.datetime], itp_id_list: list) -> pd.DataFrame:
     condition = construct_condition(selected_date, itp_id_list)
 
     sql_statement = f"""
