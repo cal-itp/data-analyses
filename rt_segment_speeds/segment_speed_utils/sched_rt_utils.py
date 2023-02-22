@@ -7,44 +7,60 @@ from shared_utils import rt_utils
 from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS, PROJECT_CRS
                                               
 
-def get_scheduled_trips(analysis_date: str) -> dd.DataFrame:
+def get_scheduled_trips(
+    analysis_date: str, 
+    filters: tuple = None,
+    trip_cols: list = [
+        "feed_key", "name", "trip_id", 
+        "shape_id", "shape_array_key", 
+        "route_id", "route_key", "direction_id"
+    ]
+) -> dd.DataFrame:
     """
     Get scheduled trips info (all operators) for single day, 
     and keep subset of columns.
     """
     trips = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
-    
-    keep_cols = ["feed_key", "name",
-                 "trip_id", "shape_id", "shape_array_key",
-                 "route_id", "route_key", "direction_id"
-                ] 
-    trips = trips[keep_cols]
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
+        filters = filters,
+        columns = trip_cols
+    )
     
     return trips
 
 
 def get_routelines(
-    analysis_date: str, buffer_size: int = 50
+    analysis_date: str, 
+    filters: tuple = None,
+    shape_cols: list = ["shape_array_key", "geometry"]
 ) -> dg.GeoDataFrame: 
     """
-    Import routelines (shape_ids) and add route_length and buffer by 
-    some specified size (50 m to start)
+    Import routelines and add route_length.
     """
-    routelines = dg.read_parquet(
+    shapes = dg.read_parquet(
         f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet"
+        filters = filters,
+        columns = shape_cols
     ).to_crs(PROJECT_CRS)
-             
-    keep_cols = ["shape_array_key", "route_length", 
-                 "geometry", "shape_geometry_buffered"
-                ]
     
-    routelines = routelines.assign(
-        route_length = routelines.geometry.length,
-        shape_geometry_buffered = routelines.geometry.buffer(buffer_size)
-    )[keep_cols]
+    return shapes
+
+
+def get_scheduled_stop_times(
+    analysis_date: str, 
+    filters: tuple = None,
+    stop_time_cols: list = None
+) -> dd.DataFrame:
+    """
+    Get scheduled stop times.
+    """
+    stop_times = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet", 
+        filters = filters,
+        columns = stop_time_cols
+    )
     
-    return routelines
+    return stop_times
 
     
 def crosswalk_scheduled_trip_grouping_with_rt_key(

@@ -129,3 +129,20 @@ def calculate_speed_by_segment_trip(
     )
         
     return segment_speeds
+
+
+def derive_stop_delay(
+    df: dd.DataFrame, 
+    rt_sched_time_cols: tuple = ("max_time_sec", "arrival_sec")
+) -> dd.DataFrame:
+    """
+    Calculate the difference in actual arrival time 
+    and scheduled arrival time.
+    """
+    actual, scheduled = rt_sched_time_cols[0], rt_sched_time_cols[1]
+    
+    df = df.assign(
+        actual_minus_scheduled_sec = df[actual] - df[scheduled]
+    )
+    
+    return df
