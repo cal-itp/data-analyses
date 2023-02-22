@@ -3,7 +3,6 @@ from calitp import *
 import A1_data_prep
 
 import altair as alt
-from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
@@ -12,7 +11,7 @@ import re
 from nltk import ngrams
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
-from autocorrect import Speller
+# from autocorrect import Speller
 
 """
 Lists
@@ -38,8 +37,12 @@ description_words_to_delete = [
     "fuel efficient",
     "brt",
     "commuter",
+    "40'",
+    "school",
     "feeder",
     "coach style",
+    "heavy duty",
+    "microtrasit ze",
     "cng",
     "utdc",
     "micro transit",
@@ -48,11 +51,17 @@ description_words_to_delete = [
     "hybrid",
     "diesel",
     "high speed", 
+    "long-range",
     "zenith",
+    "\n",
     "low emission",
+    "long range",
+    "low floor",
     "passenger shuttle",
     "replacement",
-    "transit"
+    "transit",
+    "passenger rev",
+    "long-range",
 
 ]
 
@@ -75,8 +84,6 @@ other_vehicles_list = [
     "ferry",
     "vessels",
     "trolley",
-    "vehicles",
-    "vessels",
     "vehicles",
     "emus",
     "trolleys",
@@ -137,7 +144,6 @@ def simplify_descriptions(
     
     # Replace numbers to digits.
     df[new_column] = (df[new_column]
-    .str.replace("two", "2", regex=True)
     .str.replace("three", "3", regex=True)
     .str.replace("four", "4", regex=True)
     .str.replace("five", "5", regex=True)
@@ -151,9 +157,14 @@ def simplify_descriptions(
     df[new_column] = [
             re.sub(r"\bone\b", "1", str(x)) for x in df[new_column]
         ]
-        # Replace ten
+    # Replace ten
     df[new_column] = [
             re.sub(r"\bten\b", "10", str(x)) for x in df[new_column]
+        ]
+    
+     # Replace ten
+    df[new_column] = [
+            re.sub(r"\btwo\b", "2", str(x)) for x in df[new_column]
         ]
 
     # Replace a with 1. 
@@ -166,8 +177,8 @@ def simplify_descriptions(
     
     # Correct spelling 
     # https://stackoverflow.com/questions/49364664/how-to-use-autocorrect-in-pandas-column-of-sentences
-    spell = Speller(lang='en')
-    df[new_column] = df[new_column].apply(lambda x: " ".join([spell(i) for i in x.split()]))
+    #spell = Speller(lang='en')
+    #df[new_column] = df[new_column].apply(lambda x: " ".join([spell(i) for i in x.split()]))
     return df
 
 def extract_totals_one_category(df, description_column: str, new_col: str, keywords: list):
@@ -215,7 +226,7 @@ def grand_totals(df, original_column: str):
     # df_total = df_total.apply(pd.to_numeric, errors = 'coerce').fillna(0)
 
     # Sum up all columns to get a grand total.
-    df_total[f"total_{original_column}"] = df_total.sum(axis=1)
+    df_total[f"total_{original_column}"] = df_total.sum(axis=1).astype(int)
 
     # Drop other columns except the Grand Total one
     df_total = df_total[[f"total_{original_column}"]]
@@ -262,7 +273,7 @@ def total_procurement_estimates(df, description_column: str, keywords_list: list
 
     # Drop the old columns, retain only totals.
     df = df.drop(columns=new_columns)
-
+    
     return df
 
 def project_description_search(df, description_column: str, keywords: list):

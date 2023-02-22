@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name="shared_utils",
     packages=find_packages(),
-    version="1.0.0",
+    version="1.1.0",
     description="Shared utility functions for data analyses",
     author="Cal-ITP",
     license="Apache",

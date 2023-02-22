@@ -167,7 +167,6 @@ def hqta_segment_keep_one_stop(
     return segment_to_stop_gdf
 
 
-
 def sjoin_stops_and_stop_times_to_hqta_segments(
     hqta_segments: Union[gpd.GeoDataFrame, dg.GeoDataFrame], 
     stops: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
@@ -211,8 +210,8 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
 
 if __name__ == "__main__":
     # Connect to dask distributed client, put here so it only runs for this script
-    from dask.distributed import Client
-    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    #from dask.distributed import Client
+    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/B2_sjoin_stops_to_segments.log", retention="6 months")
     logger.add(sys.stderr, 
@@ -257,4 +256,4 @@ if __name__ == "__main__":
     end = dt.datetime.now()
     logger.info(f"Execution time: {end-start}")
     
-    client.close()
+    #client.close()

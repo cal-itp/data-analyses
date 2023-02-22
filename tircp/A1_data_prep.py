@@ -3,7 +3,7 @@ from calitp import *
 
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
-FILE_NAME = "TIRCP_11-16-2022.xlsx"
+FILE_NAME = "TIRCP_2023_02_03.xlsx"
 
 #Crosswalk
 import A5_crosswalks as crosswalks
@@ -336,14 +336,15 @@ def merge_allocation_project(project_subset_cols: list, allocation_subset_cols: 
     """
     project = clean_project()
     allocation = clean_allocation()
-
+        
     # Merge the sheets on PPNO & Award Year
     m1 = pd.merge(
-        allocation,
-        project,
+        project[project_subset_cols],
+        allocation[allocation_subset_cols],
         how=merge_type,
-        left_on=["allocation_ppno", "allocation_award_year"],
-        right_on=["project_ppno", "project_award_year"],
+
+        left_on=["project_ppno", "project_award_year"],
+        right_on =["allocation_ppno", "allocation_award_year"],
         indicator=True,
     )
 
