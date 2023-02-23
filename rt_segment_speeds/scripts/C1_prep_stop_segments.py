@@ -140,10 +140,6 @@ def transform_wide_by_shape_array_key(
     return gdf_wide2
 
 
-def cut_stop_segments(stops_by_shape_wide: gpd.GeoDataFrame):
-    return
-
-
 if __name__=="__main__":
     import warnings
     
@@ -151,7 +147,7 @@ if __name__=="__main__":
         "ignore",
         category=shapely.errors.ShapelyDeprecationWarning) 
 
-    LOG_FILE = "../logs/cut_stop_segments.log"
+    LOG_FILE = "../logs/prep_stop_segments.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -163,6 +159,9 @@ if __name__=="__main__":
     
     stops_by_shape = prep_stop_segments(analysis_date).compute()
     
+    time1 = datetime.datetime.now()
+    logger.info(f"Prep stop segment df: {time1-start}")
+    
     utils.geoparquet_gcs_export(
         stops_by_shape,
         SEGMENT_GCS,
@@ -171,6 +170,9 @@ if __name__=="__main__":
     
     # Turn df from long to wide (just 1 row per shape_array_key)
     stops_by_shape_wide = transform_wide_by_shape_array_key(stops_by_shape)
+    
+    time2 = datetime.datetime.now()
+    logger.info(f"Make stop segment wide: {time2-time1}")
     
     utils.geoparquet_gcs_export(
         stops_by_shape_wide,

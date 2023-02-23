@@ -26,7 +26,8 @@ from loguru import logger
 from shared_utils import geography_utils, utils
 from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
                                  sched_rt_utils, wrangle_shapes)
-from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date, CONFIG_PATH
+from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
+                                              CONFIG_PATH)
 
 
 def longest_shape_and_add_route_dir_identifier(
@@ -142,8 +143,10 @@ def prep_and_cut_route_segments(analysis_date: str):
     return segments
 
 
-def finalize_route_segments(route_segments: gpd.GeoDataFrame):
-    
+def finalize_route_segments(route_segments: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """    
+    Arrowize geometry and also add gtfs_dataset_key.
+    """
     route_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
         route_segments, 
         analysis_date, 
