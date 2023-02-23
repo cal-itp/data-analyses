@@ -198,6 +198,7 @@ def calitp_theme(
 # Let's add in more top-level chart configuratinos
 # Need to add more since altair_saver will lose a lot of the theme applied
 
+
 # Apply top-level chart config but do not set properties (before hconcat, vconcat, etc)
 def apply_chart_config(chart: alt.Chart) -> alt.Chart:
     chart = (
@@ -268,18 +269,12 @@ def preset_plotnine_config(chart):
             panel_grid_major_y=element_line(color=axisColor, linetype="solid", size=1),
             panel_grid_major_x=element_blank(),
             figure_size=(7.0, 4.4),
-            title=element_text(
-                weight="bold", size=font_size, family=font, color=blackTitle
-            ),
+            title=element_text(weight="bold", size=font_size, family=font, color=blackTitle),
             axis_title=element_text(family=labelFont, size=12, color=guideTitleColor),
-            axis_text=element_text(
-                family=labelFont, size=10, color=guideLabelColor, margin={"r": 4}
-            ),
+            axis_text=element_text(family=labelFont, size=10, color=guideLabelColor, margin={"r": 4}),
             axis_title_x=element_text(margin={"t": 10}),
             axis_title_y=element_text(margin={"r": 10}),
-            legend_title=element_text(
-                font=labelFont, size=14, color=blackTitle, margin={"b": 10}
-            ),
+            legend_title=element_text(font=labelFont, size=14, color=blackTitle, margin={"b": 10}),
             legend_text=element_text(
                 font=labelFont,
                 size=11,

@@ -13,9 +13,7 @@ from shared_utils import utils
 fs = gcsfs.GCSFileSystem()
 
 
-def concat_and_export(
-    gcs_folder: str, file_name: str, filetype: Literal["df", "gdf"] = "df"
-):
+def concat_and_export(gcs_folder: str, file_name: str, filetype: Literal["df", "gdf"] = "df"):
     """
     Read in a folder of partitioned parquets and export as 1 parquet.
     In the filename, include the full GCS path.

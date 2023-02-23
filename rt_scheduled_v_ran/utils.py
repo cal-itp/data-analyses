@@ -6,7 +6,7 @@ import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000) ## 800GB?
 
 from calitp.tables import tbl
-from calitp import query_sql
+from calitp_data_analysis.sql import query_sql
 import calitp.magics
 import branca
 
