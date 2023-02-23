@@ -13,6 +13,23 @@ import pandas as pd
 from shared_utils import rt_utils
 from segment_speed_utils.project_vars import PROJECT_CRS
 
+
+def arrowize_column(
+    geom_col: gpd.GeoSeries, 
+    buffer_distance: int = 20
+) -> gpd.GeoSeries:
+    
+    geom_parallel = da.array(
+        [rt_utils.try_parallel(x) for x in geom_col]
+    )
+    geom_arrowized = da.array(
+        [rt_utils.arrowize_segment(
+            x, buffer_distance = buffer_distance
+        ) for x in geom_parallel]
+    )
+    
+    return geom_arrowized
+
 def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     """
     Add a column where the segment is arrowized.
@@ -20,22 +37,9 @@ def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
     if isinstance(gdf, gpd.GeoDataFrame):
         gdf = dg.from_geopandas(gdf, npartitions=3) 
         
-    gdf = gdf.assign(
-        geometry_arrowized = gdf.apply(
-            lambda x: rt_utils.try_parallel(x.geometry), 
-            axis=1, 
-            meta = ("geometry_arrowized", "geometry")
-        )
-    )
-    
-    gdf = gdf.assign(
-        geometry_arrowized = gdf.apply(
-            lambda x: rt_utils.arrowize_segment(
-                x.geometry_arrowized, buffer_distance = 20),
-            axis = 1,
-            meta = ('geometry_arrowized', 'geometry')
-        )
-    )
+    gdf["geometry_arrowized"] = arrowize_column(
+        "geometry",
+        buffer_distance = 20)
 
     return gdf
 
