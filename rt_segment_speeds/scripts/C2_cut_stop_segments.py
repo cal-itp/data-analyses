@@ -5,7 +5,6 @@ Start with np.arrays that distance break points for that segment.
 Use interpolate to convert distances into shapely points.
 Combine shapely points into shapely linestring.
 """
-import dask.dataframe as dd
 import datetime
 import geopandas as gpd
 import numpy as np
@@ -13,13 +12,13 @@ import pandas as pd
 import shapely
 import sys
 
-from dask import delayed
 from loguru import logger
 
-from shared_utils import dask_utils, utils
-from segment_speed_utils import sched_rt_utils
+from shared_utils import utils
+from segment_speed_utils import helpers, sched_rt_utils, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
-                                              PROJECT_CRS)
+                                              PROJECT_CRS, CONFIG_PATH)
+
 
 def get_shape_inputs(row: gpd.GeoDataFrame) -> tuple:
     """
@@ -177,6 +176,77 @@ def clean_up_stop_segments(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return cleaned_df    
     
     
+def cut_stop_segments(gdf_wide: gpd.GeoDataFrame):
+    """
+    Cut stop-to-stop segments, which includes looping through each row
+    of a wide df.
+    For a given shape geometry (and all its coords), 
+    subset by two stops, and find all the coords (from shape) 
+    in between those 2 stops.
+    """
+    segment_cutoffs = gpd.GeoDataFrame()
+    
+    # cut stop-to-stop segments and save projected coords
+    # since df is wide, loop with itertuples to cut the segments and assemble
+    for row in gdf_wide.itertuples():
+        shape_segment_cutoffs = cut_stop_segments_for_shape(row)
+        
+        segment_cutoffs = pd.concat(
+            [segment_cutoffs, shape_segment_cutoffs], 
+            axis=0, ignore_index=True)
+    
+    # assemble and set as gdf
+    segments_assembled = gpd.GeoDataFrame(
+        segment_cutoffs[
+            segment_cutoffs.shape_meters > 0
+        ].reset_index(drop=True),
+        geometry = "geometry", 
+        crs = PROJECT_CRS
+    )
+    
+    # Clean up stop-to-stop segments
+    cleaned_segments = clean_up_stop_segments(segments_assembled)
+
+    return cleaned_segments
+    
+    
+def finalize_stop_segments(
+    stops_long: gpd.GeoDataFrame,
+    stop_segments: gpd.GeoDataFrame, 
+):
+    """
+    Finalize stop segments by merging the "long" stops file with 
+    the associated segments.
+    For a given stop, the segment associated is the portion from the prior
+    stop to the current stop.
+    
+    Arrowize geometry and also add gtfs_dataset_key.
+    """
+    stops_with_segments = pd.merge(
+        stops_long.drop(columns = "geometry"),
+        stop_segments,
+        on = ["shape_array_key", "shape_meters"],
+        # we want to keep left only, because in generating 
+        # stop segments, we intentionally skipped first stop, 
+        # so there's definitely going to be left_only observations
+        how = "left",
+        validate = "m:1",
+    ).set_geometry("geometry")
+    
+    # Add gtfs_dataset_key to this segment data (from schedule)
+    stop_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
+        stops_with_segments, 
+        analysis_date, 
+        ["feed_key", "shape_array_key"]
+    )
+    
+    # arrowize
+    arrowized_segments = wrangle_shapes.add_arrowized_geometry(
+        stop_segments_with_rt_key).compute()
+
+    return arrowized_segments
+    
+    
 if __name__ == "__main__":
     import warnings
     
@@ -184,7 +254,8 @@ if __name__ == "__main__":
         "ignore",
         category=shapely.errors.ShapelyDeprecationWarning) 
 
-    logger.add("../logs/C2_cut_stop_segments.log", retention="3 months")
+    LOG_FILE = "../logs/cut_stop_segments.log"
+    logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -193,66 +264,35 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
 
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    EXPORT_FILE = STOP_SEG_DICT["segments_file"]
+    
     df = gpd.read_parquet(
         f"{SEGMENT_GCS}stops_projected_wide_{analysis_date}.parquet")
     
-    segment_cutoffs = gpd.GeoDataFrame()
+    stop_segments = cut_stop_segments(df)
     
-    for row in df.itertuples():
-        shape_segment_cutoffs = cut_stop_segments_for_shape(row)
-        
-        segment_cutoffs = pd.concat(
-            [segment_cutoffs, shape_segment_cutoffs], 
-            axis=0, ignore_index=True)
-        
-
     time1 = datetime.datetime.now()
-    logger.info(f"cut stop-to-stop segments and save projected "
-                f"coords: {time1-start}")
+    logger.info(f"Cut stop segments: {time1-start}")
     
-    segments_assembled = gpd.GeoDataFrame(
-        segment_cutoffs[
-            segment_cutoffs.shape_meters > 0
-        ].reset_index(drop=True),
-        geometry = "geometry", 
-        crs = PROJECT_CRS)
-    
-    time2 = datetime.datetime.now()
-    logger.info(f"assemble stop-to-stop segments: {time2-time1}")
-    
-    # Clean up stop-to-stop segments
-    cleaned_segments = clean_up_stop_segments(segments_assembled)
-
     # Merge in the stop projected geom so that each stop can be 
     # attached to the segment leading up to that stop
     stops_projected = gpd.read_parquet(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet")
     
-    stops_with_cleaned_segments = pd.merge(
-        stops_projected.drop(columns = "shape_geometry").rename(
-            columns = {"geometry": "stop_geometry"}),
-        cleaned_segments,
-        on = ["shape_array_key", "shape_meters"],
-        # we want to keep left only, because in generating 
-        # stop segments, we intentionally skipped first stop, 
-        # so there's definitely going to be left_only observations
-        how = "left",
-        validate = "m:1",
+    arrowized_segments = finalize_stop_segments(
+        stops_projected, 
+        stop_segments
     )
     
-    stop_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
-        stops_with_cleaned_segments, 
-        analysis_date, 
-        ["feed_key", "shape_array_key"])
+    time2 = datetime.datetime.now()
+    logger.info(f"Add arrowized geometry and rt_dataset_key: {time2-time1}")
     
     utils.geoparquet_gcs_export(
-        stop_segments_with_rt_key,
+        arrowized_segments,
         SEGMENT_GCS,
-        f"stop_segments_{analysis_date}"
+        f"{EXPORT_FILE}_{analysis_date}"
     )
 
-    time3 = datetime.datetime.now()
-    logger.info(f"Clean up stop segments and attach to stop geom and export: {time3-time2}")
-    
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
