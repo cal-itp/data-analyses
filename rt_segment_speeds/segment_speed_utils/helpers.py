@@ -11,7 +11,7 @@ import gcsfs
 import yaml
 
 from typing import Literal, Union
-from update_vars import SEGMENT_GCS, PROJECT_CRS
+from update_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, PROJECT_CRS
 from shared_utils import utils
 
 fs = gcsfs.GCSFileSystem()
@@ -20,6 +20,14 @@ def get_parameters(
     config_file: str, 
     segment_type: Union["route_segments", "stop_segments"]
 ) -> dict:
+    """
+    Parse the config.yml file to get the parameters needed
+    for working with route or stop segments.
+    These parameters will be passed through the scripts when working 
+    with vehicle position data.
+    
+    Returns a dictionary of parameters.
+    """
     #https://aaltoscicomp.github.io/python-for-scicomp/scripts/
     f = open(config_file)
     my_dict = yaml.safe_load(f)
@@ -99,6 +107,79 @@ def import_segments(
     ).drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)
     
     return df
+
+
+def import_scheduled_trips(
+    analysis_date: str, 
+    filters: tuple = None,
+    columns: list = [
+        "feed_key", "name", "trip_id", 
+        "shape_id", "shape_array_key", 
+        "route_id", "route_key", "direction_id"
+    ]
+) -> dd.DataFrame:
+    """
+    Get scheduled trips info (all operators) for single day, 
+    and keep subset of columns.
+    """
+    trips = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
+        filters = filters,
+        columns = columns
+    )
+    
+    return trips
+
+
+def import_scheduled_shapes(
+    analysis_date: str, 
+    filters: tuple = None,
+    columns: list = ["shape_array_key", "geometry"]
+) -> dg.GeoDataFrame: 
+    """
+    Import routelines and add route_length.
+    """
+    shapes = dg.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet",
+        filters = filters,
+        columns = columns
+    ).to_crs(PROJECT_CRS)
+    
+    return shapes
+
+
+def import_scheduled_stop_times(
+    analysis_date: str, 
+    filters: tuple = None,
+    columns: list = None
+) -> dd.DataFrame:
+    """
+    Get scheduled stop times.
+    """
+    stop_times = dd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet", 
+        filters = filters,
+        columns = columns
+    )
+    
+    return stop_times
+
+
+def import_scheduled_stops(
+    analysis_date: str,
+    filters: tuple = None,
+    columns: list = None
+) -> dg.GeoDataFrame:
+    """
+    Get scheduled stops
+    """
+    stops = dg.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet",
+        filters = filters,
+        columns = columns
+    ).to_crs(PROJECT_CRS)
+    
+    return stops
 
 
 def sjoin_vehicle_positions_to_segments(

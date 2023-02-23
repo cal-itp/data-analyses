@@ -10,9 +10,55 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+from shared_utils import rt_utils
 from segment_speed_utils.project_vars import PROJECT_CRS
 
-def merge_in_segment_shape(
+def add_arrowized_geometry(gdf: dg.GeoDataFrame) -> dg.GeoDataFrame:
+    """
+    Add a column where the segment is arrowized.
+    """
+    if isinstance(gdf, gpd.GeoDataFrame):
+        gdf = dg.from_geopandas(gdf, npartitions=3) 
+        
+    gdf = gdf.assign(
+        geometry_arrowized = gdf.apply(
+            lambda x: rt_utils.try_parallel(x.geometry), 
+            axis=1, 
+            meta = ("geometry_arrowized", "geometry")
+        )
+    )
+    
+    gdf = gdf.assign(
+        geometry_arrowized = gdf.apply(
+            lambda x: rt_utils.arrowize_segment(
+                x.geometry_arrowized, buffer_distance = 20),
+            axis = 1,
+            meta = ('geometry_arrowized', 'geometry')
+        )
+    )
+
+    return gdf
+
+
+def project_point_geom_onto_linestring(
+    shape_geoseries: gpd.GeoSeries,
+    point_geoseries: gpd.GeoSeries,
+    get_dask_array: bool = True
+) -> pd.Series:
+    """
+    Use shapely.project to turn point coordinates into numeric.
+    The point coordinates will be converted to the distance along the linestring.
+    https://shapely.readthedocs.io/en/stable/manual.html?highlight=project#object.project
+    """
+    shape_meters_geoseries = shape_geoseries.project(point_geoseries)
+    
+    if get_dask_array:
+        shape_meters_geoseries = da.array(shape_meters_geoseries)
+    
+    return shape_meters_geoseries
+
+
+def linear_reference_vp_against_segment(
     vp: dd.DataFrame, 
     segments: gpd.GeoDataFrame, 
     segment_identifier_cols: list
@@ -56,7 +102,11 @@ def merge_in_segment_shape(
     
     # Project, save results, then convert to dask array, 
     # otherwise can't add a column to the dask df
-    shape_meters_geoseries = da.array(shape_geoseries.project(vp_geoseries))
+    shape_meters_geoseries = project_point_geom_onto_linestring(
+        shape_geoseries,
+        vp_geoseries,
+        get_dask_array=True
+    )
 
     # https://www.appsloveworld.com/coding/dataframe/6/add-a-dask-array-column-to-a-dask-dataframe
     linear_ref_vp_to_shape['shape_meters'] = shape_meters_geoseries

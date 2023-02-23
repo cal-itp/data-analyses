@@ -47,7 +47,7 @@ def linear_referencing_and_speed_by_segment(
                    "geometry"] + SEGMENT_IDENTIFIER_COLS,
     )
     
-    vp_linear_ref = delayed(wrangle_shapes.merge_in_segment_shape)( 
+    vp_linear_ref = delayed(wrangle_shapes.linear_reference_vp_against_segment)( 
         vp, 
         segments, 
         segment_identifier_cols = SEGMENT_IDENTIFIER_COLS
