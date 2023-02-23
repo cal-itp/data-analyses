@@ -23,10 +23,10 @@ import zlib
 
 from loguru import logger
 
-import gtfs_schedule_wrangling
-from shared_utils import geography_utils, utils, rt_utils
-from segment_speed_utils import helpers, wrangle_shapes
-from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
+from shared_utils import geography_utils, utils
+from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
+                                 sched_rt_utils, wrangle_shapes)
+from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date, CONFIG_PATH
 
 
 def longest_shape_and_add_route_dir_identifier(
@@ -140,7 +140,24 @@ def prep_and_cut_route_segments(analysis_date: str):
     )
     
     return segments
+
+
+def finalize_route_segments(route_segments: gpd.GeoDataFrame):
     
+    route_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
+        route_segments, 
+        analysis_date, 
+        ["feed_key", "route_id", "direction_id"]
+    )
+    
+    # arrowize 
+    arrowized_segments = wrangle_shapes.add_arrowized_geometry(
+        route_segments_with_rt_key).compute()
+    
+    return arrowized_segments
+
+
+
     
 if __name__ == "__main__":
     LOG_FILE = "../logs/cut_route_segments.log"
@@ -160,11 +177,12 @@ if __name__ == "__main__":
     # Merge dfs and cut into equally sized segments
     segments = prep_and_cut_route_segments(analysis_date)
     
-    # Add arrowized geometry
-    arrowized_segments = wrangle_shapes.add_arrowized_geometry(segments).compute()
+    time1 = datetime.datetime.now()
+    logger.info(f"Prep and cut equally sized route segments: {time1 - start}")
     
-    time3 = datetime.datetime.now()
-    logger.info(f"Add arrowized geometry: {time3 - time2}")
+    arrowized_segments = finalize_route_segments(segments)
+    time2 = datetime.datetime.now()
+    logger.info(f"Add rt key and arrowized geometry: {time2 - time1}")
 
     utils.geoparquet_gcs_export(
         arrowized_segments,
