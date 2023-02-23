@@ -58,10 +58,7 @@ def aggregate_by_geography(
         agg_cols: list,
         aggregate_function: str,
     ):
-
-        agg_df = df.pivot_table(
-            index=group_cols, values=agg_cols, aggfunc=aggregate_function
-        ).reset_index()
+        agg_df = df.pivot_table(index=group_cols, values=agg_cols, aggfunc=aggregate_function).reset_index()
 
         # https://stackoverflow.com/questions/34049618/how-to-add-a-suffix-or-prefix-to-each-column-name
         # Why won't .add_prefix or .add_suffix work?
@@ -83,9 +80,7 @@ def aggregate_by_geography(
         final_df = aggregate_and_merge(df, final_df, group_cols, count_cols, "count")
 
     if len(nunique_cols) > 0:
-        final_df = aggregate_and_merge(
-            df, final_df, group_cols, nunique_cols, "nunique"
-        )
+        final_df = aggregate_and_merge(df, final_df, group_cols, nunique_cols, "nunique")
 
     return final_df.drop(columns="index")
 
@@ -119,9 +114,7 @@ def make_routes_gdf(
     shapes = ddf.compute()
 
     # convert to geopandas; re-project if needed
-    gdf = gpd.GeoDataFrame(
-        shapes.drop(columns="pt_array"), geometry="geometry", crs=WGS84
-    ).to_crs(crs)
+    gdf = gpd.GeoDataFrame(shapes.drop(columns="pt_array"), geometry="geometry", crs=WGS84).to_crs(crs)
 
     return gdf
 
@@ -146,9 +139,7 @@ def create_point_geometry(
     crs: str, coordinate reference system for point geometry
     """
     # Default CRS for stop_lon, stop_lat is WGS84
-    df = df.assign(
-        geometry=gpd.points_from_xy(df[longitude_col], df[latitude_col], crs=WGS84)
-    )
+    df = df.assign(geometry=gpd.points_from_xy(df[longitude_col], df[latitude_col], crs=WGS84))
 
     # ALlow projection to different CRS
     gdf = gpd.GeoDataFrame(df).to_crs(crs)
@@ -221,9 +212,7 @@ def cut_segments(
 
         segmented = pd.concat([segmented, to_append], axis=0, ignore_index=True)
 
-        segmented = segmented.assign(
-            temp_index=segmented.sort_values(group_cols).reset_index(drop=True).index
-        )
+        segmented = segmented.assign(temp_index=segmented.sort_values(group_cols).reset_index(drop=True).index)
 
     # Why would there be NaNs?
     # could this be coming from group_cols...one of the cols has a NaN in some rows?
@@ -231,9 +220,7 @@ def cut_segments(
 
     segmented = (
         segmented.assign(
-            segment_sequence=(
-                segmented.groupby(group_cols)["temp_index"].transform("rank") - 1
-            ).astype(int)
+            segment_sequence=(segmented.groupby(group_cols)["temp_index"].transform("rank") - 1).astype(int)
         )
         .sort_values(group_cols)
         .reset_index(drop=True)
