@@ -32,7 +32,7 @@ def get_shape_inputs(row: gpd.GeoDataFrame) -> tuple:
     all the coords for the shape's path.
     """
     stop_break_dist = getattr(row, "shape_meters")
-    shape_geom = getattr(row, "shape_geometry")
+    shape_geom = getattr(row, "geometry")
     
     stop_break_dist_with_endpoints = np.array(
         [0] + stop_break_dist.tolist() + [shape_geom.length]
@@ -101,7 +101,7 @@ def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     stop_break_dist, shape_path_dist = get_shape_inputs(row)
     
     shape_key = getattr(row, "shape_array_key")
-    shape_geom = getattr(row, "shape_geometry")
+    shape_geom = getattr(row, "geometry")
     
     shape_segments = []
     
@@ -207,7 +207,8 @@ if __name__ == "__main__":
         
 
     time1 = datetime.datetime.now()
-    logger.info(f"cut stop-to-stop segments and save projected coords: {time1-start}")
+    logger.info(f"cut stop-to-stop segments and save projected "
+                f"coords: {time1-start}")
     
     segments_assembled = gpd.GeoDataFrame(
         segment_cutoffs[

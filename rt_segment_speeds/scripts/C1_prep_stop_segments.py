@@ -16,6 +16,8 @@ References:
 * https://gis.stackexchange.com/questions/416284/splitting-multiline-or-linestring-into-equal-segments-of-particular-length-using
 * https://stackoverflow.com/questions/62053253/how-to-split-a-linestring-to-segments
 """
+import dask.dataframe as dd
+import dask_geopandas as dg
 import datetime
 import geopandas as gpd
 import pandas as pd
@@ -25,140 +27,99 @@ import sys
 from loguru import logger
 
 from shared_utils import utils
-from segment_speed_utils import sched_rt_utils
-from segment_speed_utils.project_vars import (SEGMENT_GCS, 
-                                              COMMPILED_CACHED_VIEWS, 
-                                              analysis_date, PROJECT_CRS)
+from segment_speed_utils import helpers, gtfs_schedule_wrangling, wrangle_shapes
+from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
 
-def attach_shape_id_to_stop_times(analysis_date: str) -> pd.DataFrame:
+def stop_times_aggregated_to_shape_array_key(
+    analysis_date: str
+) -> dg.GeoDataFrame:
     """
-    Merge stop_times and trips to get shape_id.
+    For stop-to-stop segments, we need to aggregate stop_times,
+    which comes at trip-level, to shape level. 
+    From trips, attach shape_array_key, then merge to stop_times.
+    Then attach stop's point geom.
+    """
     
-    Keep unique stop_id-stop_sequence combo at shape-level. 
-    """
-    stop_times = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet",
+    shapes = helpers.import_scheduled_shapes(analysis_date)
+
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["feed_key", "name", "trip_id", "shape_array_key"]
+    )
+
+    trips_with_geom = gtfs_schedule_wrangling.merge_shapes_to_trips(shapes, trips)
+
+    stop_times = helpers.import_scheduled_stop_times(
+        analysis_date,
         columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"]
     )
-    
-    trips = (sched_rt_utils.get_scheduled_trips(analysis_date)
-             [["feed_key", "name",
-               "trip_id", "shape_id", "shape_array_key"]]
-             .compute()
-            )
-    
-    exclude = ["Amtrak Schedule"]
-    trips = trips[~trips.name.isin(exclude)].reset_index(drop=True)
-    
-    st_with_shape = pd.merge(
-        stop_times, 
-        trips,
-        on = ["feed_key", "trip_id"],
-        how = "inner",
-        validate = "m:1"
+
+    # Attach shapes 
+    stop_times_with_shape = gtfs_schedule_wrangling.merge_shapes_to_stop_times(
+        trips_with_geom,
+        stop_times
     )
-    
-    st_by_shape = (st_with_shape.drop_duplicates(
-        subset=["feed_key", "shape_id", 
+
+    # For each shape_array_key, keep the unique stop_id-stop_sequence combo
+    # to cut into stop-to-stop segments
+    stop_times_with_shape = (stop_times_with_shape.drop_duplicates(
+        subset=["shape_array_key", 
                 "stop_id", "stop_sequence"]
          ).drop(columns = "trip_id")
-        .sort_values(["feed_key", "shape_id", "stop_sequence"])
+        .sort_values(["shape_array_key", "stop_sequence"])
         .reset_index(drop=True)
     )
     
-    return st_by_shape
-
-
-def stop_times_with_stop_geom(analysis_date: str) -> gpd.GeoDataFrame:
-    """
-    Attach stop's point geometry to stop_times table.
-    Use trips in between to get it attached via shape_id.
-    
-    Keep stop_time's stops at the `shape_id` level.
-    """
-    stop_times = attach_shape_id_to_stop_times(analysis_date)
-    
-    stops = gpd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet",
+    # Attach stop geom
+    stops = helpers.import_scheduled_stops(
+        analysis_date,
         columns = ["feed_key", "stop_id", "stop_name", "geometry"]
-    ).drop_duplicates(subset=["feed_key", "stop_id"]).reset_index(drop=True)
+    )
     
-    gdf = pd.merge(
-        stops, 
-        stop_times,
-        on = ["feed_key", "stop_id"],
-        how = "inner",
-        validate = "1:m"
-    ).sort_values(["feed_key", "shape_id", 
-                   "stop_sequence"]
-                 ).drop_duplicates(
-        subset=["feed_key", "shape_id", "stop_id"]
-    ).reset_index(drop=True)
+    # Renaming geometry column before causes error, so rename after the merge
+    st_with_shape_stop_geom = gtfs_schedule_wrangling.attach_stop_geometry(
+        stop_times_with_shape,
+        stops,
+    ).rename(columns = {
+        "geometry_x": "geometry", 
+        "geometry_y": "stop_geometry"
+    }).set_geometry("geometry")
+
     
-    return gdf
+    return st_with_shape_stop_geom
 
 
-def merge_in_shape_geom_and_project(
-    stops: gpd.GeoDataFrame, 
-    analysis_date: str
+def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
+    stop_times_with_geom = stop_times_aggregated_to_shape_array_key(analysis_date)
+    
+    # Turn the stop_geometry and shape_geometry columns into geoseries
+    shape_geoseries = gpd.GeoSeries(stop_times_with_geom.geometry.compute())
+    stop_geoseries = gpd.GeoSeries(stop_times_with_geom.stop_geometry.compute())
+    
+    # Get projected shape_meters as dask array
+    shape_meters_geoseries = wrangle_shapes.project_point_geom_onto_linestring(
+        shape_geoseries,
+        stop_geoseries,
+        get_dask_array=True
+    )
+    
+    # Attach dask array as a column
+    stop_times_with_geom["shape_meters"] = shape_meters_geoseries
+    
+    return stop_times_with_geom
+
+
+def transform_wide_by_shape_array_key(
+    gdf: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
     """
-    Merge in shape's line geometry.
-    shapely.project(x) returns the distance along the line geometry
-    nearest the stop point geometry.
-    
-    From Eric: projecting the stop's point geom onto the shape_id's line geom
-    https://github.com/cal-itp/data-analyses/blob/f4c9c3607069da6ea96e70c485d0ffe1af6d7a47/rt_delay/rt_analysis/rt_parser.py#L102-L103
+    Make the gdf wide so that we can save certain columns as arrays or lists.
     """
-    shapes = gpd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet", 
-        columns = ["shape_array_key", "geometry"]
-    )
-    
-    stops_with_shape = pd.merge(
-        stops,
-        shapes.rename(columns = {"geometry": "shape_geometry"}),
-        on = ["shape_array_key"],
-        how = "inner",
-        validate = "m:1"
-    )
-        
-    # Once we merge in shape's line geometry, we can do the project
-    # with itertuples, since shapely does it element by element
-    # https://gis.stackexchange.com/questions/306838/snap-points-shapefile-to-line-shapefile-using-shapely
-    projected = []
-    #interpolated = []
-    
-    for row in stops_with_shape.itertuples():
-        row_shape_geom = getattr(row, "shape_geometry")
-        row_stop_geom = getattr(row, "geometry")
-        
-        point_projected_along_shape = row_shape_geom.project(row_stop_geom)
-        projected.append(point_projected_along_shape)
-        
-        #point_projected_and_interpolated_along_shape = row_shape_geom.interpolate(
-        #    row_shape_geom.project(row_stop_geom))
-        #interpolated.append(point_projected_and_interpolated_along_shape)
-    
-    #shape_meters_x = [shapely.geometry.Point(i).x for i in interpolated]
-    #shape_meters_y = [shapely.geometry.Point(i).y for i in interpolated]
-    
-    stops_with_shape = stops_with_shape.assign(
-        shape_meters = projected,
-        #stop_interpolated = gpd.points_from_xy(shape_meters_x, 
-        #                                       shape_meters_y,
-        #                                       crs = PROJECT_CRS)
-    )
-        
-    return stops_with_shape
-
-
-def make_shapes_wide(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     shape_cols = ["shape_array_key"]
     
-    unique_shapes = (gdf.set_geometry("shape_geometry")
-                     [shape_cols + ["shape_geometry"]]
+    unique_shapes = (gdf
+                     [shape_cols + ["geometry"]]
                      .drop_duplicates()
                     )
     
@@ -179,6 +140,10 @@ def make_shapes_wide(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf_wide2
 
 
+def cut_stop_segments(stops_by_shape_wide: gpd.GeoDataFrame):
+    return
+
+
 if __name__=="__main__":
     import warnings
     
@@ -186,7 +151,8 @@ if __name__=="__main__":
         "ignore",
         category=shapely.errors.ShapelyDeprecationWarning) 
 
-    logger.add("../logs/C1_prep_stop_segments.log", retention="3 months")
+    LOG_FILE = "../logs/cut_stop_segments.log"
+    logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -195,33 +161,22 @@ if __name__=="__main__":
     
     start = datetime.datetime.now()
     
-    stops = stop_times_with_stop_geom(analysis_date)
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"add stop geom to stop_times: {time1-start}")
-    
-    stops_projected = merge_in_shape_geom_and_project(
-        stops, analysis_date)
+    stops_by_shape = prep_stop_segments(analysis_date).compute()
     
     utils.geoparquet_gcs_export(
-        stops_projected,
+        stops_by_shape,
         SEGMENT_GCS,
         f"stops_projected_{analysis_date}"
     )
-    #stops_projected.to_parquet("./data/stops_projected.parquet")
-
-    time2 = datetime.datetime.now()
-    logger.info(f"linear referencing of stops to the shape's line_geom: {time2-time1}")
     
     # Turn df from long to wide (just 1 row per shape_array_key)
-    stops_projected_wide = make_shapes_wide(stops_projected)
+    stops_by_shape_wide = transform_wide_by_shape_array_key(stops_by_shape)
     
     utils.geoparquet_gcs_export(
-        stops_projected_wide,
+        stops_by_shape_wide,
         SEGMENT_GCS,
         f"stops_projected_wide_{analysis_date}"
     )
-    #stops_projected_wide.to_parquet("./data/stops_projected_wide.parquet")    
        
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")

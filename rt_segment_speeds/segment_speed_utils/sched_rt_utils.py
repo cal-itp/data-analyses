@@ -1,3 +1,10 @@
+"""
+Functions for bridging schedule and RT data.
+From RT data, gtfs_dataset_key is used.
+From schedule data, feed_key is used.
+
+These functions start with schedule data and add the RT gtfs_dataset_key.
+"""
 import dask_geopandas as dg
 import dask.dataframe as dd
 import geopandas as gpd
