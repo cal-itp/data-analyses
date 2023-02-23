@@ -49,12 +49,15 @@ def project_point_geom_onto_linestring(
     Use shapely.project to turn point coordinates into numeric.
     The point coordinates will be converted to the distance along the linestring.
     https://shapely.readthedocs.io/en/stable/manual.html?highlight=project#object.project
+    https://gis.stackexchange.com/questions/306838/snap-points-shapefile-to-line-shapefile-using-shapely
     """
     shape_meters_geoseries = shape_geoseries.project(point_geoseries)
     
     if get_dask_array:
         shape_meters_geoseries = da.array(shape_meters_geoseries)
     
+    # To add this as a column to a dask df
+    # https://www.appsloveworld.com/coding/dataframe/6/add-a-dask-array-column-to-a-dask-dataframe
     return shape_meters_geoseries
 
 
@@ -66,6 +69,9 @@ def linear_reference_vp_against_segment(
     """
     Do linear referencing and calculate `shape_meters` for the 
     enter/exit points on the segment. 
+    
+    From Eric: projecting the stop's point geom onto the shape_id's line geom
+    https://github.com/cal-itp/data-analyses/blob/f4c9c3607069da6ea96e70c485d0ffe1af6d7a47/rt_delay/rt_analysis/rt_parser.py#L102-L103
     
     This allows us to calculate the distance_elapsed.
     

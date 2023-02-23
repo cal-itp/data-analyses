@@ -75,9 +75,10 @@ def longest_shape_and_add_route_dir_identifier(
     return longest_shapes   
 
 
-def prep_and_cut_route_segments(analysis_date: str):
+def prep_route_segments(analysis_date: str):
     """
-    Prep route segments.
+    Prep route segments gdf by merging trips with shapes.
+    Pare this down to the longest shape_id by each route-direction.
     """
     shape_id_cols = ["shape_array_key"]
     route_dir_cols = ["feed_key", "route_key", 
@@ -103,22 +104,44 @@ def prep_and_cut_route_segments(analysis_date: str):
     
     longest_shapes = longest_shape_and_add_route_dir_identifier(trips_with_geom)
     
+    return longest_shapes
+    
+
+def cut_route_segments(
+    gdf: gpd.GeoDataFrame,
+    group_cols: list,
+    segment_distance: int = 1_000
+) -> gpd.GeoDataFrame:
+    """
+    Cut route segments by splitting the shape into equally sized segments.
+    """
+    segments = geography_utils.cut_segments(
+        gdf,
+        group_cols = group_cols,
+        segment_distance = segment_distance
+    )
+    
+    return segments
+ 
+    
+def prep_and_cut_route_segments(analysis_date: str): 
+    longest_shapes = prep_route_segments(analysis_date)
+    
     group_cols = [
         "feed_key", "name",
         "route_id", "direction_id", "longest_shape_id",
         "route_dir_identifier"
     ]
     
-    # Cut segments
-    segments = geography_utils.cut_segments(
-        longest_shapes,
-        group_cols = group_cols,
+    segments = cut_route_segments(
+        longest_shapes, 
+        group_cols = group_cols, 
         segment_distance = 1_000
     )
     
     return segments
     
-
+    
 if __name__ == "__main__":
     LOG_FILE = "../logs/cut_route_segments.log"
     
@@ -131,6 +154,10 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
+    ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
+    EXPORT_FILE = ROUTE_SEG_DICT["segments_file"]
+    
+    # Merge dfs and cut into equally sized segments
     segments = prep_and_cut_route_segments(analysis_date)
     
     # Add arrowized geometry
@@ -142,7 +169,7 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(
         arrowized_segments,
         SEGMENT_GCS,
-        f"longest_shape_segments_{analysis_date}"
+        f"{EXPORT_FILE}_{analysis_date}"
     )
     
     end = datetime.datetime.now()
