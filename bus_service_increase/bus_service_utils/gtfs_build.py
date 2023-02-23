@@ -5,7 +5,7 @@ from `gtfs_utils` queries.
 import dask.dataframe as dd
 import pandas as pd
 
-from calitp.sql import to_snakecase
+from calitp_data_analysis.sql import to_snakecase
 
 def aggregate_stat_by_group(
     df: dd.DataFrame,  

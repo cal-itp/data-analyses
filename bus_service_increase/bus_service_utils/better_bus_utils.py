@@ -20,7 +20,7 @@ the same way, across directories.
 import geopandas as gpd
 import pandas as pd
 
-from calitp.tables import tbls
+from calitp_data_analysis.tables import tbls
 from siuba import *
 from typing import Literal, Union
 
