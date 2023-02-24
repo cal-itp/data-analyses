@@ -155,7 +155,7 @@ def finalize_route_segments(route_segments: gpd.GeoDataFrame) -> gpd.GeoDataFram
     
     # arrowize 
     arrowized_segments = wrangle_shapes.add_arrowized_geometry(
-        route_segments_with_rt_key).compute()
+        route_segments_with_rt_key)
     
     return arrowized_segments
 
