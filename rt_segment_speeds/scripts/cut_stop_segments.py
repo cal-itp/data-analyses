@@ -20,33 +20,6 @@ from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
                                               PROJECT_CRS, CONFIG_PATH)
 
 
-def get_shape_inputs(row: gpd.GeoDataFrame) -> tuple:
-    """
-    Since we're using itertuples, use getattr to get that row's column values.
-    
-    Set up stop_break_dist array with endpoints. 
-    We already have shape_meters as an array, just add 0 and the line's length.
-    
-    Also back out an array for the shape's line geometry to get 
-    all the coords for the shape's path.
-    """
-    stop_break_dist = getattr(row, "shape_meters")
-    shape_geom = getattr(row, "geometry")
-    
-    stop_break_dist_with_endpoints = np.array(
-        [0] + stop_break_dist.tolist() + [shape_geom.length]
-    )
-    
-    # Get all the distances for all the 
-    # coordinate points included in shape line geom
-    shape_path_dist = np.array(
-        [shape_geom.project(shapely.geometry.Point(p)) 
-        for p in shape_geom.coords]
-    )
-    
-    return stop_break_dist_with_endpoints, shape_path_dist
-
-
 def get_shape_coords_up_to_stop(
     shape_geom: shapely.geometry.LineString,
     shape_path_dist: list, 
@@ -97,10 +70,11 @@ def cut_stop_segments_for_shape(row: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Loop over each stop's shape_meters and grab the subset of relevant
     shape's array values.
     """
-    stop_break_dist, shape_path_dist = get_shape_inputs(row)
     
     shape_key = getattr(row, "shape_array_key")
     shape_geom = getattr(row, "geometry")
+    stop_break_dist = getattr(row, "stop_break_distances")
+    shape_path_dist = getattr(row, "shape_distances")
     
     shape_segments = []
     
@@ -189,6 +163,7 @@ def cut_stop_segments(gdf_wide: gpd.GeoDataFrame):
     # cut stop-to-stop segments and save projected coords
     # since df is wide, loop with itertuples to cut the segments and assemble
     for row in gdf_wide.itertuples():
+        print(f"start shape: {getattr(row, 'shape_array_key')}")
         shape_segment_cutoffs = cut_stop_segments_for_shape(row)
         
         segment_cutoffs = pd.concat(
@@ -242,7 +217,7 @@ def finalize_stop_segments(
     
     # arrowize
     arrowized_segments = wrangle_shapes.add_arrowized_geometry(
-        stop_segments_with_rt_key).compute()
+        stop_segments_with_rt_key)
 
     return arrowized_segments
     

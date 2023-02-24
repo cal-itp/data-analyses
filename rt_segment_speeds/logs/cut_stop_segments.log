@@ -1,0 +1,5 @@
+2023-02-23 14:05:46.498 | INFO     | __main__:<module>:268 - Analysis date: 2023-01-18
+2023-02-23 17:34:36.847 | INFO     | __main__:<module>:238 - Analysis date: 2023-01-18
+2023-02-23 17:38:58.647 | INFO     | __main__:<module>:251 - Cut stop segments: 0:04:21.799072
+2023-02-23 17:40:03.454 | INFO     | __main__:<module>:264 - Add arrowized geometry and rt_dataset_key: 0:01:04.807251
+2023-02-23 17:40:12.628 | INFO     | __main__:<module>:273 - execution time: 0:05:35.780101

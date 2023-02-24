@@ -20,6 +20,7 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import shapely
 import sys
@@ -46,6 +47,11 @@ def stop_times_aggregated_to_shape_array_key(
     trips = helpers.import_scheduled_trips(
         analysis_date,
         columns = ["feed_key", "name", "trip_id", "shape_array_key"]
+    )
+    
+    trips = gtfs_schedule_wrangling.exclude_scheduled_operators(
+        trips, 
+        exclude_me = ["Amtrak Schedule"]
     )
 
     trips_with_geom = gtfs_schedule_wrangling.merge_shapes_to_trips(shapes, trips)
@@ -107,6 +113,11 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
     # Attach dask array as a column
     stop_times_with_geom["shape_meters"] = shape_meters_geoseries
     
+    # Drop stop geometry, now that we have shape_meters
+    # We can easily merge stop geom back in...but keeping it
+    # will make this gdf too large with 2 geometry columns
+    stop_times_with_geom = stop_times_with_geom.drop(columns = ["stop_geometry"])
+    
     return stop_times_with_geom
 
 
@@ -137,6 +148,50 @@ def transform_wide_by_shape_array_key(
         how = "inner"
     )
     
+    gdf_wide3 = add_columns_with_projected_coords_for_shape_geom(gdf_wide2)
+    
+    return gdf_wide3
+
+
+def add_columns_with_projected_coords_for_shape_geom(
+    gdf_wide: gpd.GeoDataFrame) -> gpd.GeoDataFrame: 
+    """
+    Add 2 columns, one with the stop's "break" / where we want to cut
+    points with the shape's start/end distances and 
+    all the distances along a shape's coordinate sequence
+    Expand the shape's line geom to get the projected distances
+    """
+    stop_break_distances = []
+    shape_path_distances = []
+    
+    for row in gdf_wide.itertuples():
+        stop_breaks = getattr(row, "shape_meters")
+        shape_geom = getattr(row, "geometry")
+        
+        stop_breaks_with_endpoints = np.unique(
+            np.array(
+                [0] + list(stop_breaks) + [shape_geom.length]
+            )
+        )
+        
+        stop_break_distances.append(stop_breaks_with_endpoints)
+        
+        # Get all the distances for all the 
+        # coordinate points included in shape line geom
+        shape_path_dist = np.unique(
+            np.array(
+                [shape_geom.project(shapely.geometry.Point(p)) 
+                for p in shape_geom.coords]
+            )
+        )
+    
+        shape_path_distances.append(shape_path_dist)
+    
+    gdf_wide2 = gdf_wide.assign(
+        stop_break_distances = stop_break_distances,
+        shape_distances = shape_path_distances
+    )
+    
     return gdf_wide2
 
 
@@ -157,17 +212,20 @@ if __name__=="__main__":
     
     start = datetime.datetime.now()
     
-    stops_by_shape = prep_stop_segments(analysis_date).compute()
+    #stops_by_shape = prep_stop_segments(analysis_date).compute()
     
     time1 = datetime.datetime.now()
     logger.info(f"Prep stop segment df: {time1-start}")
-    
+    '''
     utils.geoparquet_gcs_export(
         stops_by_shape,
         SEGMENT_GCS,
         f"stops_projected_{analysis_date}"
     )
+    '''
     
+    stops_by_shape = gpd.read_parquet(
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet")
     # Turn df from long to wide (just 1 row per shape_array_key)
     stops_by_shape_wide = transform_wide_by_shape_array_key(stops_by_shape)
     
