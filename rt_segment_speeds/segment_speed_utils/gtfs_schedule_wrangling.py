@@ -54,7 +54,8 @@ def merge_shapes_to_stop_times(
     )
     
     # Sometimes, geometry is lost...need to set it so it remains dg.GeoDataFrame
-    st_with_shape = st_with_shape.set_geometry("geometry")
+    if "geometry" in st_with_shape.columns:
+        st_with_shape = st_with_shape.set_geometry("geometry")
     
     return st_with_shape
     
@@ -80,9 +81,9 @@ def attach_stop_geometry(
     
     
     
-def merge_in_stop_segments(
+def merge_speeds_to_segment_geom(
     speeds_df: dd.DataFrame,
-    analysis_date: str
+    segments_df: gpd.GeoDataFrame,
 ) -> dg.GeoDataFrame:
     """
     Merge in stop segment geometry
