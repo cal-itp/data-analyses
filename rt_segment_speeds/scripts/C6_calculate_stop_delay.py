@@ -53,7 +53,6 @@ def calculate_delay_for_stop_segments(
     Merge scheduled stop times with stop-to-stop segment speeds / times 
     and calculate stop delay.
     """
-    SEGMENTS_FILE = dict_inputs["segments_file"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     GROUPING_COL = dict_inputs["grouping_col"]
     
@@ -93,13 +92,26 @@ def calculate_delay_for_stop_segments(
         df, 
         ("max_time_sec", "arrival_sec")
     )
+   
+    return df_with_delay
     
+    
+    
+def merge_segment_geom_with_speed(
+    df_with_delay
+):
+    """
+    TODO: move this to right before visualizing.
+    Ok to save in different files, otherwise it's fairly big to wrangle
+    """
+    SEGMENTS_FILE = dict_inputs["segments_file"]
+
     # Import segments geom
     segments = helpers.import_segments(
         SEGMENT_GCS,
         f"{SEGMENTS_FILE}_{analysis_date}",
         columns = ["gtfs_dataset_key"] + SEGMENT_IDENTIFIER_COLS + [
-            "stop_name", "geometry"],
+            "stop_name", "geometry", "geometry_arrowized"],
     )
     
     # Merge in segment geom with speed and delay metrics
@@ -108,11 +120,10 @@ def calculate_delay_for_stop_segments(
         segments,
         segment_identifier_cols = SEGMENT_IDENTIFIER_COLS
     )
-   
+    
     return speed_and_delay_with_geom
     
-
-
+    
 if __name__ == "__main__":
     
     LOG_FILE = "../logs/C6_calculate_stop_delay.log"
@@ -136,13 +147,11 @@ if __name__ == "__main__":
     logger.info("merge scheduled and RT stop times and "
                 f"calculate delay: {time1 - start}")
     
-    gdf = speed_delay_by_stop_segment.compute()
+    df = speed_delay_by_stop_segment.compute()
     
-    utils.geoparquet_gcs_export(
-        gdf,
-        SEGMENT_GCS,
-        f"stop_segments_with_speed_delay_{analysis_date}"
-    )    
+    df.to_parquet(
+        f"{SEGMENT_GCS}stop_segments_with_speed_delay_{analysis_date}.parquet")
+
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")
