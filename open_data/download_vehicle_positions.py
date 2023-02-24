@@ -11,7 +11,7 @@ import pandas as pd
 import shapely
 import sys
 
-from calitp.tables import tbls
+from calitp_data_analysis.tables import tbls
 from loguru import logger
 from siuba import *
 

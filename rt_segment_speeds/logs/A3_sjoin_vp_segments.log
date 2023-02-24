@@ -255,4 +255,36 @@
 2023-02-14 11:48:40.968 | INFO     | __main__:<module>:147 - Analysis date: 2023-01-18
 2023-02-14 11:48:49.953 | INFO     | __main__:<module>:157 - get unique operators to loop over: 0:00:08.984608
 2023-02-14 11:51:35.056 | INFO     | __main__:<module>:194 - 02af2d11f5bd44434c581540e9e857d8: 0:02:45.097944
-2023-02-14 11:51:35.058 | INFO     | __main__:<module>:197 - execution time: 0:02:54.089118
+2023-02-14 11:51:35.058 | INFO     | __main__:<module>:197 - execution time: 0:02:54.0891182023-02-19 18:23:48.699 
+
+2023-02-21 13:35:50.811 | INFO     | __main__:<module>:221 - Analysis date: 2023-01-18
+2023-02-21 13:36:01.088 | INFO     | __main__:sjoin_vp_to_segments:159 - start operator: 74fe15010f17ff576045422f9bb38b00: 2023-02-21 13:36:01.088692
+2023-02-21 13:38:07.543 | INFO     | __main__:<module>:221 - Analysis date: 2023-01-18
+2023-02-21 13:38:17.010 | INFO     | __main__:sjoin_vp_to_segments:159 - start operator: 0faa34840bb65e96b7f83b7f379c2edd: 2023-02-21 13:38:17.010779
+2023-02-21 13:40:56.184 | INFO     | __main__:<module>:222 - Analysis date: 2023-01-18
+2023-02-21 13:41:04.971 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 73ebf252af88c41aaf4426c6d3dc586c: 2023-02-21 13:41:04.971844
+2023-02-21 13:44:33.746 | INFO     | __main__:<module>:224 - Analysis date: 2023-01-18
+2023-02-21 13:44:42.292 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 6e460d0f1aec519c62478f4ed4c269d1: 2023-02-21 13:44:42.292468
+2023-02-21 13:45:46.255 | INFO     | __main__:<module>:225 - Analysis date: 2023-01-18
+2023-02-21 13:45:55.305 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 9b19dee2eacd2a4e70c2750056c005ff: 2023-02-21 13:45:55.305160
+2023-02-21 13:46:40.217 | INFO     | __main__:<module>:225 - Analysis date: 2023-01-18
+2023-02-21 13:46:49.287 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 5839b6a0ea1e93dc44574053e990d51e: 2023-02-21 13:46:49.287156
+2023-02-21 13:47:49.402 | INFO     | __main__:<module>:223 - Analysis date: 2023-01-18
+2023-02-21 13:47:58.462 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 17b259a4ae767d3ef5478964851cabb8: 2023-02-21 13:47:58.462047
+2023-02-21 13:48:49.063 | INFO     | __main__:<module>:223 - Analysis date: 2023-01-18
+2023-02-21 13:48:58.105 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 707fef642f609018a05f649ffd491563: 2023-02-21 13:48:58.105685
+2023-02-21 13:49:17.468 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: ee4a7698aa24503c4058d10c238e6f8a: 2023-02-21 13:49:17.468756
+2023-02-21 13:49:32.476 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: ddc9965fcbf3beaba6d2cb40a3e67c1e: 2023-02-21 13:49:32.476184
+2023-02-21 13:49:47.241 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 30e5260fa62b36db8c1dea91fc0c130d: 2023-02-21 13:49:47.241800
+2023-02-21 13:50:04.085 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 8ee6ecf3c45ac2669ee96ae4c8550950: 2023-02-21 13:50:04.084975
+2023-02-21 13:50:18.271 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 4bb240cf480589e58c6e58d06d6fb72c: 2023-02-21 13:50:18.271359
+2023-02-21 13:50:40.894 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 48b51d6d96bb01c42c87e40824248fe4: 2023-02-21 13:50:40.894319
+2023-02-21 13:50:56.195 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 8f0b9daf627c4f17cbe7f4460208a1af: 2023-02-21 13:50:56.195882
+2023-02-21 13:51:10.599 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: ac86302bad2b6f66bb6d5aae35ffb52f: 2023-02-21 13:51:10.599094
+2023-02-21 13:51:25.754 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 65793dff25c6e0d53703911d49d797ea: 2023-02-21 13:51:25.754416
+2023-02-21 13:51:38.729 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: d41e4cfdd42950bde9876c5dc670017d: 2023-02-21 13:51:38.729613
+2023-02-21 13:51:53.404 | INFO     | __main__:sjoin_vp_to_segments:160 - start operator: 74fe15010f17ff576045422f9bb38b00: 2023-02-21 13:51:53.404305
+2023-02-21 13:52:57.948 | INFO     | __main__:<module>:214 - Analysis date: 2023-01-18
+2023-02-21 14:57:40.778 | INFO     | __main__:<module>:228 - attach vp to route segments: 1:04:42.828047
+2023-02-21 16:19:35.102 | INFO     | __main__:<module>:237 - attach vp to stop-to-stop segments: 1:21:54.324827
+2023-02-21 16:19:35.121 | INFO     | __main__:<module>:240 - execution time: 2:26:37.171837

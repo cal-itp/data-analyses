@@ -8,6 +8,8 @@ from typing import Union
 
 from shared_utils import rt_utils
 
+PACIFIC_TIMEZONE = "US/Pacific"
+
 # https://stackoverflow.com/questions/58145700/using-groupby-to-store-value-counts-in-new-column-in-dask-dataframe
 # https://github.com/dask/dask/pull/5327
 def keep_min_max_timestamps_by_segment(
@@ -129,3 +131,63 @@ def calculate_speed_by_segment_trip(
     )
         
     return segment_speeds
+
+    
+def localize_vp_timestamp(df: dd.DataFrame) -> dd.DataFrame:
+    """
+    RT vehicle timestamps are given in UTC. 
+    Localize these to Pacific Time and then convert it 
+    to seconds.
+    """
+    #https://stackoverflow.com/questions/62992863/trying-to-convert-aware-local-datetime-to-naive-local-datetime-in-panda-datafram
+    df = df.assign(
+        max_time = (dd.to_datetime(
+            df.max_time, utc=True)
+            .dt.tz_convert(PACIFIC_TIMEZONE)
+            .apply(lambda t: t.replace(tzinfo=None), 
+                   meta = ('max_time', 'datetime64[ns]'))
+        )
+    )
+    
+    df = df.assign(
+        max_time_sec = ((df.max_time.dt.hour * 3_600) + 
+                        (df.max_time.dt.minute * 60) + 
+                        (df.max_time.dt.second)
+                   ),
+    )
+    
+    return df
+
+def derive_stop_delay(
+    df: dd.DataFrame, 
+    rt_sched_time_cols: tuple = ("max_time_sec", "arrival_sec")
+) -> dd.DataFrame:
+    """
+    Calculate the difference in actual arrival time 
+    and scheduled arrival time.
+    """
+    actual, scheduled = rt_sched_time_cols[0], rt_sched_time_cols[1]
+    
+    df = df.assign(
+        actual_minus_scheduled_sec = df[actual] - df[scheduled]
+    )
+    
+    return df
+
+
+def merge_speeds_to_segment_geom(
+    speeds_df: dd.DataFrame,
+    segments_gdf: gpd.GeoDataFrame,
+    segment_identifier_cols: list
+) -> dg.GeoDataFrame:
+    """
+    Merge in segment geometry
+    """
+    speed_with_segment_geom = dd.merge(
+        segments_gdf,
+        speeds_df,
+        on = ["gtfs_dataset_key"] + segment_identifier_cols,
+        how = "inner",
+    )
+    
+    return speed_with_segment_geom

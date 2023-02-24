@@ -2,30 +2,79 @@
 Do linear referencing by segment-trip 
 and derive speed.
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime
-import geopandas as gpd
 import pandas as pd
 import sys
-import warnings
 
 from dask import delayed
 from loguru import logger
-from shapely.errors import ShapelyDeprecationWarning
-warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 
 from shared_utils import dask_utils
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
-                                              PROJECT_CRS)
+                                              CONFIG_PATH)
+  
+
+def linear_referencing_and_speed_by_segment(
+    analysis_date: str,
+    dict_inputs: dict = {}
+):
+    """
+    With just enter / exit points on segments, 
+    do the linear referencing to get shape_meters, and then derive speed.
+    """
+    VP_FILE = dict_inputs["stage3"]
+    SEGMENT_FILE = dict_inputs["segment_file_name"]
+    SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
+    TIMESTAMP_COL = dict_inputs["timestamp_col"]    
+    EXPORT_FILE = dict_inputs["stage4"]
+
+    
+    # https://docs.dask.org/en/stable/delayed-collections.html
+    # Adapt this import to take folder of partitioned parquets
+    vp = delayed(
+        helpers.import_vehicle_positions)(
+        SEGMENT_GCS,
+        f"{VP_FILE}_{analysis_date}/",
+        file_type = "df",
+        partitioned = True
+    )
+
+    segments = delayed(helpers.import_segments)(
+        SEGMENT_GCS,
+        f"{SEGMENT_FILE}_{analysis_date}", 
+        columns = ["gtfs_dataset_key",  
+                   "geometry"] + SEGMENT_IDENTIFIER_COLS,
+    )
+    
+    vp_linear_ref = delayed(wrangle_shapes.linear_reference_vp_against_segment)( 
+        vp, 
+        segments, 
+        segment_identifier_cols = SEGMENT_IDENTIFIER_COLS
+    )
+        
+    speeds = delayed(segment_calcs.calculate_speed_by_segment_trip)(
+        vp_linear_ref, 
+        segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
+        timestamp_col = TIMESTAMP_COL
+    )    
+    
+    # Put results into a list to use dask_utils
+    results = [speeds]
+    dask_utils.compute_and_export(
+        results, 
+        gcs_folder = SEGMENT_GCS, 
+        file_name = f"{EXPORT_FILE}_{analysis_date}",
+        export_single_parquet = False
+    )
+
 
 if __name__ == "__main__": 
     #from dask.distributed import Client
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
-    
-    logger.add("../logs/A5_speeds_by_segment_trip.log", retention="3 months")
+    LOG_FILE = "../logs/A5_speeds_by_segment_trip.log"
+    logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -33,122 +82,31 @@ if __name__ == "__main__":
     logger.info(f"Analysis date: {analysis_date}")
     
     start = datetime.datetime.now()
-    
-    RT_OPERATORS = helpers.operators_with_data(
-        f"{SEGMENT_GCS}vp_sjoin/", 'vp_segment_', analysis_date)  
-    
-    SEGMENT_IDENTIFIER_COLS = ["route_dir_identifier", "segment_sequence"]
-    
-    results_linear_ref = []
-    
-    for rt_dataset_key in RT_OPERATORS:
-        time0 = datetime.datetime.now()
-        
-        # https://docs.dask.org/en/stable/delayed-collections.html
-        # Adapt this import to take folder of partitioned parquets
-        operator_vp = delayed(
-            helpers.import_vehicle_positions)(
-            SEGMENT_GCS,
-            f"vp_pared_{analysis_date}/",
-            file_type = "df",
-            filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]],
-            partitioned = True
-        )
-        
-        operator_segments = delayed(helpers.import_segments)(
-            SEGMENT_GCS,
-            f"longest_shape_segments_{analysis_date}", 
-            filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]], 
-            columns = ["gtfs_dataset_key",  
-                       "geometry"] + SEGMENT_IDENTIFIER_COLS,
-        )
-         
-        time1 = datetime.datetime.now()
-        logger.info(f"imported data: {time1 - time0}")
-        
-        vp_linear_ref = delayed(wrangle_shapes.merge_in_segment_shape)( 
-            operator_vp, 
-            operator_segments, 
-            segment_identifier_cols = SEGMENT_IDENTIFIER_COLS
-        )
-        
-        results_linear_ref.append(vp_linear_ref)
 
-        time2 = datetime.datetime.now()
-        logger.info(f"merge in segment shapes and do linear referencing: "
-                    f"{time2 - time1}")
-    
-    
-    time3 = datetime.datetime.now()
-    logger.info(f"start compute and export of linear referenced results")
+    ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
 
-    dask_utils.compute_and_export(
-        results_linear_ref,
-        gcs_folder = SEGMENT_GCS,
-        file_name = f"vp_linear_ref_{analysis_date}",
-        export_single_parquet = False
+    linear_referencing_and_speed_by_segment(
+        analysis_date, 
+        dict_inputs = ROUTE_SEG_DICT
     )
     
-    time4 = datetime.datetime.now()
-    logger.info(f"computed and exported linear ref: {time4 - time3}")
+    time1 = datetime.datetime.now()
+    logger.info(f"linear ref and calculate speeds "
+                f"for route segments: {time1 - start}")
     
-    time5 = datetime.datetime.now()
-        
-    linear_ref_df = delayed(helpers.import_vehicle_positions)(
-        SEGMENT_GCS, 
-        f"vp_linear_ref_{analysis_date}/",
-        file_type = "df", 
-        partitioned= True,
-    )    
-
-    operator_speeds = delayed(segment_calcs.calculate_speed_by_segment_trip)(
-        linear_ref_df, 
-        segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
-        timestamp_col = "location_timestamp"
+    linear_referencing_and_speed_by_segment(
+        analysis_date, 
+        dict_inputs = STOP_SEG_DICT
     )
     
-        
-    # Save as list to use in compute_and_export
-    results_speed = [operator_speeds]
-        
-    time6 = datetime.datetime.now()
-    logger.info(f"calculate speed: {time6 - time5}")
-                
-    time7 = datetime.datetime.now()
-    logger.info(f"start compute and export of speed results")
+    time2 = datetime.datetime.now()
+    logger.info(f"linear ref and calculate speeds "
+                f"for stop segments: {time2 - time1}")
     
-    EXPORTED_SPEED_FILE = f"speeds_{analysis_date}"
-    
-    dask_utils.compute_and_export(
-        results_speed, 
-        gcs_folder = f"{SEGMENT_GCS}", 
-        file_name = EXPORTED_SPEED_FILE,
-        export_single_parquet = False
-    )
-    
-    time8 = datetime.datetime.now()
-    logger.info(f"exported all speeds: {time8 - time7}")
-    
-    # Now write out individual parquets for speeds
-    speeds_df = dd.read_parquet(
-        f"{SEGMENT_GCS}{EXPORTED_SPEED_FILE}/").compute()
-    
-    for rt_dataset_key in speeds_df.gtfs_dataset_key.unique():
-        subset = (speeds_df[speeds_df.gtfs_dataset_key == rt_dataset_key]
-                  .reset_index(drop=True)
-                 )
-    
-        subset.to_parquet(
-            f"{SEGMENT_GCS}speeds_by_operator/"
-            f"{EXPORTED_SPEED_FILE.split(f'_{analysis_date}')[0]}_"
-            f"{rt_dataset_key}_{analysis_date}.parquet"
-        )
-    
-    time9 = datetime.datetime.now()
-    logger.info(f"exported operator speed parquets: {time9 - time8}")
     
     end = datetime.datetime.now()
-    logger.info(f"execution time: {end-start}")
+    logger.info(f"execution time: {time2-start}")
     
     #client.close()
         

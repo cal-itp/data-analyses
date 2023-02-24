@@ -1,52 +1,20 @@
+"""
+Functions for bridging schedule and RT data.
+From RT data, gtfs_dataset_key is used.
+From schedule data, feed_key is used.
+
+These functions start with schedule data and add the RT gtfs_dataset_key.
+"""
 import dask_geopandas as dg
 import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
 
 from shared_utils import rt_utils
+from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS, PROJECT_CRS
-                                              
-
-def get_scheduled_trips(analysis_date: str) -> dd.DataFrame:
-    """
-    Get scheduled trips info (all operators) for single day, 
-    and keep subset of columns.
-    """
-    trips = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
-    
-    keep_cols = ["feed_key", "name",
-                 "trip_id", "shape_id", "shape_array_key",
-                 "route_id", "route_key", "direction_id"
-                ] 
-    trips = trips[keep_cols]
-    
-    return trips
 
 
-def get_routelines(
-    analysis_date: str, buffer_size: int = 50
-) -> dg.GeoDataFrame: 
-    """
-    Import routelines (shape_ids) and add route_length and buffer by 
-    some specified size (50 m to start)
-    """
-    routelines = dg.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet"
-    ).to_crs(PROJECT_CRS)
-             
-    keep_cols = ["shape_array_key", "route_length", 
-                 "geometry", "shape_geometry_buffered"
-                ]
-    
-    routelines = routelines.assign(
-        route_length = routelines.geometry.length,
-        shape_geometry_buffered = routelines.geometry.buffer(buffer_size)
-    )[keep_cols]
-    
-    return routelines
-
-    
 def crosswalk_scheduled_trip_grouping_with_rt_key(
     analysis_date: str, 
     keep_trip_cols: list = ["feed_key", "trip_id"],
@@ -59,10 +27,10 @@ def crosswalk_scheduled_trip_grouping_with_rt_key(
     This is our crosswalk that we can stick in the middle of vp or segments
     and that allows us to get feed_key and gtfs_dataset_key
     """
-    trips = (get_scheduled_trips(analysis_date)
-            [keep_trip_cols]
-             .drop_duplicates()
-            )
+    trips = helpers.import_scheduled_trips(
+        analysis_date, 
+        columns = keep_trip_cols
+    ).drop_duplicates()
     
     # Get the schedule feed_key and RT gtfs_dataset_key and add it to crosswalk
     fct_rt_feeds = (rt_utils.get_rt_schedule_feeds_crosswalk(
