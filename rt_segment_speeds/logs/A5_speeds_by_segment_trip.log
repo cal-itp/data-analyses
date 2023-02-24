@@ -824,3 +824,11 @@
 2023-02-15 13:48:47.117 | INFO     | __main__:<module>:130 - exported all speeds: 0:01:21.557213
 2023-02-15 13:49:33.601 | INFO     | __main__:<module>:148 - exported operator speed parquets: 0:00:46.484019
 2023-02-15 13:49:33.602 | INFO     | __main__:<module>:151 - execution time: 0:08:07.186539
+2023-02-21 11:07:29.819 | INFO     | __main__:<module>:96 - Analysis date: 2023-01-18
+2023-02-21 11:08:08.179 | INFO     | __main__:<module>:96 - Analysis date: 2023-01-18
+2023-02-21 11:08:44.022 | INFO     | __main__:<module>:96 - Analysis date: 2023-01-18
+2023-02-21 11:13:03.534 | INFO     | __main__:<module>:109 - linear ref and calculate speeds for route segments: 0:04:19.511348
+2023-02-21 11:23:46.717 | INFO     | __main__:<module>:96 - Analysis date: 2023-01-18
+2023-02-21 11:28:00.437 | INFO     | __main__:<module>:109 - linear ref and calculate speeds for route segments: 0:04:13.719849
+2023-02-21 11:36:04.120 | INFO     | __main__:<module>:118 - linear ref and calculate speeds for stop segments: 0:08:03.682667
+2023-02-21 11:36:04.135 | INFO     | __main__:<module>:123 - execution time: 0:12:17.402516

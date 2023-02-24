@@ -1,8 +1,0 @@
-2023-02-10 18:13:53.710 | INFO     | __main__:<module>:182 - Analysis date: 2023-01-18
-2023-02-10 18:14:06.472 | INFO     | __main__:<module>:189 - add stop geom to stop_times: 0:00:12.760502
-2023-02-10 18:15:27.329 | INFO     | __main__:<module>:196 - linear referencing of stops to the shape's line_geom: 0:01:20.857160
-2023-02-10 18:15:41.661 | INFO     | __main__:<module>:203 - execution time: 0:01:47.949137
-2023-02-10 16:33:36.597 | INFO     | __main__:<module>:192 - Analysis date: 2023-01-18
-2023-02-10 16:33:46.740 | INFO     | __main__:<module>:199 - add stop geom to stop_times: 0:00:10.141835
-2023-02-10 16:34:58.466 | INFO     | __main__:<module>:212 - linear referencing of stops to the shape's line_geom: 0:01:11.725787
-2023-02-10 16:35:09.304 | INFO     | __main__:<module>:225 - execution time: 0:01:32.705422

@@ -10,9 +10,52 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+from shared_utils import rt_utils
 from segment_speed_utils.project_vars import PROJECT_CRS
 
-def merge_in_segment_shape(
+
+def add_arrowized_geometry(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Add a column where the segment is arrowized.
+    """
+
+    segment_geom = gpd.GeoSeries(gdf.geometry)
+    
+    geom_parallel = rt_utils.try_parallel(segment_geom)
+    geom_arrowized = rt_utils.arrowize_segment(
+        geom_parallel, 
+        buffer_distance = 20
+    )
+    
+    gdf = gdf.assign(
+        geometry_arrowized = geom_arrowized
+    )
+
+    return gdf
+
+
+def project_point_geom_onto_linestring(
+    shape_geoseries: gpd.GeoSeries,
+    point_geoseries: gpd.GeoSeries,
+    get_dask_array: bool = True
+) -> pd.Series:
+    """
+    Use shapely.project to turn point coordinates into numeric.
+    The point coordinates will be converted to the distance along the linestring.
+    https://shapely.readthedocs.io/en/stable/manual.html?highlight=project#object.project
+    https://gis.stackexchange.com/questions/306838/snap-points-shapefile-to-line-shapefile-using-shapely
+    """
+    shape_meters_geoseries = shape_geoseries.project(point_geoseries)
+    
+    if get_dask_array:
+        shape_meters_geoseries = da.array(shape_meters_geoseries)
+    
+    # To add this as a column to a dask df
+    # https://www.appsloveworld.com/coding/dataframe/6/add-a-dask-array-column-to-a-dask-dataframe
+    return shape_meters_geoseries
+
+
+def linear_reference_vp_against_segment(
     vp: dd.DataFrame, 
     segments: gpd.GeoDataFrame, 
     segment_identifier_cols: list
@@ -20,6 +63,9 @@ def merge_in_segment_shape(
     """
     Do linear referencing and calculate `shape_meters` for the 
     enter/exit points on the segment. 
+    
+    From Eric: projecting the stop's point geom onto the shape_id's line geom
+    https://github.com/cal-itp/data-analyses/blob/f4c9c3607069da6ea96e70c485d0ffe1af6d7a47/rt_delay/rt_analysis/rt_parser.py#L102-L103
     
     This allows us to calculate the distance_elapsed.
     
@@ -56,7 +102,11 @@ def merge_in_segment_shape(
     
     # Project, save results, then convert to dask array, 
     # otherwise can't add a column to the dask df
-    shape_meters_geoseries = da.array(shape_geoseries.project(vp_geoseries))
+    shape_meters_geoseries = project_point_geom_onto_linestring(
+        shape_geoseries,
+        vp_geoseries,
+        get_dask_array=True
+    )
 
     # https://www.appsloveworld.com/coding/dataframe/6/add-a-dask-array-column-to-a-dask-dataframe
     linear_ref_vp_to_shape['shape_meters'] = shape_meters_geoseries

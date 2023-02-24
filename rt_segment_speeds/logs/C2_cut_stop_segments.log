@@ -1,5 +1,0 @@
-2023-02-14 13:10:39.138 | INFO     | __main__:<module>:192 - Analysis date: 2023-01-18
-2023-02-14 13:17:49.616 | INFO     | __main__:<module>:210 - cut stop-to-stop segments and save projected coords: 0:07:10.476268
-2023-02-14 13:17:53.733 | INFO     | __main__:<module>:218 - assemble stop-to-stop segments: 0:00:04.117344
-2023-02-14 13:18:21.737 | INFO     | __main__:<module>:252 - Clean up stop segments and attach to stop geom and export: 0:00:28.003739
-2023-02-14 13:18:21.738 | INFO     | __main__:<module>:255 - execution time: 0:07:42.598125
