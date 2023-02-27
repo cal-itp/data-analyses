@@ -1,8 +1,7 @@
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from calitp.sql import to_snakecase
-
+from calitp_data_analysis.sql import to_snakecase
 
 import altair as alt
 from shared_utils import calitp_color_palette as cp
@@ -63,7 +62,7 @@ def clean_longest_shape():
     return df
 
 """
-Creating insights
+Merge
 """
 def merge_trips_routes_longest_shape():
     """
@@ -116,8 +115,8 @@ def merge_trips_routes_longest_shape():
 def summary_stats_route_length():
     """
     Get mean, median, max, and min longest shape_id
-    versus actual shape_id  of route length for every operator.
-    All in one dataframe.
+    versus actual shape_id  of route length 
+    for every operator.
     """
     df = merge_trips_routes_longest_shape()
 
@@ -136,7 +135,8 @@ def summary_stats_route_length():
     
     # Drop index
     df.columns = df.columns.droplevel()
- 
+    
+    # Rename columns.
     df.columns.values[0] = "name"
     df.columns.values[1] = "gtfs_dataset_key"
     
@@ -156,7 +156,7 @@ def summary_stats_route_length():
 
 def merge_trip_diagnostics_with_total_segments():
     """
-    Find trip time. Find total segments that 
+    Find trip time and total segments that 
     actually appear versus segments that appear
     in the longest shape
     """
@@ -228,8 +228,9 @@ def load_dataframes(time_cutoff:list, segment_cutoffs:list):
     Load all relevant manipulated dataframes
     in one go. 
     """
-    #  Operator # Load in dataframe that has  route lengths
+    # Load in dataframe that has oute lengths
     # based on shape id and longest shape id
+    # and neaten the dataframe.
     route_df =  pre_clean(summary_stats_route_length())
     
     # Load in dataframe with trip times and 
@@ -237,7 +238,7 @@ def load_dataframes(time_cutoff:list, segment_cutoffs:list):
     time_segments_df = merge_trip_diagnostics_with_total_segments()
     
     # Find thresholds number and percentage of trips 
-    # after thresholds
+    # after thresholds and neaten the dataframe. 
     valid_stats_df = pre_clean(summary_valid_trips_by_cutoff(time_segments_df, time_cutoff, segment_cutoffs))
 
     # Filter out any operators without RT information
@@ -290,6 +291,7 @@ def create_dot_plot(df, col_for_dots: str,
 def create_text_table(df, chart_title:str):
    
     # Create a column for 0 to for the x axis
+    # So text will be centerd in the middle.
     df["Zero"] = 0
     
     chart = (
@@ -361,7 +363,7 @@ Operator Visuals
 """
 def route_summary_stats(df, column1:str, column2: str):
     """
-    Dataframe that displays
+    Create chart that displays
     max, mean, median, and min of 
     route lengths for each operator.
     """
@@ -372,9 +374,10 @@ def route_summary_stats(df, column1:str, column2: str):
 
 def valid_stats_leniency(df):
     """
-    Return a df with the % of trips cut 
+    Create a chart with the % of trips cut 
     when applying the most strigent
-    and the  most leninent thresholds.
+    and the  most leninent thresholds for 
+    each operator.
     """
     # Grab only max and min into the df 
     df = df.groupby(["Name"]).agg({"Percentage Usable Trips": ["max", "min"]}).reset_index()
@@ -388,13 +391,14 @@ def valid_stats_leniency(df):
     
     return df
 
-def create_operator_visuals(height:int, width:int):
+def create_operator_visuals(height:int, width:int,time_cutoff:list, segment_cutoffs:list ):
     """
     Create all 4 charts
     for the operators
     """
-    route_length, time_segments, valid_stats = load_dataframes(TIME_CUTOFFS, SEGMENT_CUTOFFS)
+    route_length, time_segments, valid_stats = load_dataframes(time_cutoff,segment_cutoffs)
     
+    # Create dropdown menu. 
     dropdown_list = route_length["Name"].sort_values().unique().tolist()
     dropdown = alt.binding_select(options=[None] + dropdown_list, labels = ['All'] + dropdown_list, name = "Operator")    
     selection = alt.selection_single(fields=["Name"], bind=dropdown)
@@ -423,6 +427,9 @@ def create_operator_visuals(height:int, width:int):
     return route_length_chart & route_text_chart &  valid_stats_chart & leniency_text_chart
 
 def operator_brush(df):
+    """
+    Second view, a brush graph.
+    """
     brush = alt.selection(type='interval')
     
     # Create chart
@@ -554,7 +561,7 @@ def create_statewide_visuals(height:int, width:int):
 def find_cut_routes(trip_time:int, segments_pct: float):
     """
     Find which routes are missing 
-    after applying thresholds
+    for certain thresholds.
     """
     trips_routes_shape = merge_trips_routes_longest_shape()
     trip_stats = catalog.trip_stats.read()
