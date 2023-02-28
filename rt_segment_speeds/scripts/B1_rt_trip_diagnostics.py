@@ -11,20 +11,20 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
 import pandas as pd
-import gcsfs
 import geopandas as gpd
 import sys
 
-from dask import delayed
 from loguru import logger
 
-import dask_utils
-from update_vars import SEGMENT_GCS, analysis_date
+from shared_utils import dask_utils
+from segment_speed_utils import helpers
+from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
-fs = gcsfs.GCSFileSystem()
 
-
-def get_trip_stats(ddf: dd.DataFrame) -> pd.DataFrame:
+def trip_time_elapsed_segments_touched(
+    ddf: dd.DataFrame,
+    timestamp_col: str
+) -> pd.DataFrame:
     """
     Calculate trip-level RT stats, 
     such as minimum / maximum vehicle_timestamp and 
@@ -32,7 +32,6 @@ def get_trip_stats(ddf: dd.DataFrame) -> pd.DataFrame:
     """
     trip_cols = ["gtfs_dataset_key", "_gtfs_dataset_name", 
                  "trip_id", "route_dir_identifier"]    
-    timestamp_col = "location_timestamp"
     
     min_time = (ddf.groupby(trip_cols)
             [timestamp_col].min()
@@ -67,10 +66,49 @@ def get_trip_stats(ddf: dd.DataFrame) -> pd.DataFrame:
     return trip_stats
 
 
+def get_trip_stats(analysis_date: str,
+                   dict_inputs: dict):
+    """
+    Import vehicle positions data, 
+    get trip stats with map_partitions, and export.
+    """
+    VP_FILE = dict_inputs["stage2"]
+    TIMESTAMP_COL = dict_inputs["timestamp_col"]
+    EXPORT_FILE = dict_inputs["rt_trip_diagnostics"]
+    
+    ddf = helpers.import_vehicle_positions(
+        gcs_folder = SEGMENT_GCS,
+        file_name = f"vp_sjoin/{VP_FILE}_{analysis_date}/",
+        file_type = "df",
+        columns = ["gtfs_dataset_key", "_gtfs_dataset_name", 
+                   "trip_id", "route_dir_identifier",
+                   "segment_sequence",
+                   "location_timestamp"],
+        partitioned = True
+    ).repartition(partition_size="85MB")
+    
+    # Try map_partitions here
+    trip_stats = ddf.map_partitions(
+        trip_time_elapsed_segments_touched,
+        TIMESTAMP_COL,
+        meta= {
+           "gtfs_dataset_key": "object",
+           "_gtfs_dataset_name": "object",
+           "trip_id": "object",
+           "route_dir_identifier": "int64",
+           "trip_start": "datetime64[ns]",
+           "trip_end": "datetime64[ns]",
+           "num_segments_with_vp": "int64",
+       }).compute()
+    
+    trip_stats.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet")
+    
     
 if __name__ == "__main__":
-
-    logger.add("../logs/B1_rt_trip_diagnostics.log", retention="3 months")
+    
+    LOG_FILE = "../logs/B1_rt_trip_diagnostics.log"
+    logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -79,29 +117,12 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    all_files = fs.ls(f"{SEGMENT_GCS}vp_sjoin/")
+    ROUTE_SEG_DICT = helpers.get_parameters(
+        "../scripts/config.yml",
+        "route_segments"
+    )
     
-    vp_seg_files = [f"gs://{i}" for i in all_files if 'vp_segment' in i 
-                    and analysis_date in i
-                   ]
-    
-    dfs = [delayed(pd.read_parquet)(f) for f in vp_seg_files]
-    ddf = dd.from_delayed(dfs) 
-    
-    # Try map_partitions here
-    trip_stats = ddf.map_partitions(get_trip_stats, 
-                   meta= {
-                       "gtfs_dataset_key": "object",
-                       "_gtfs_dataset_name": "object",
-                       "trip_id": "object",
-                       "route_dir_identifier": "int64",
-                       "trip_start": "datetime64[ns]",
-                       "trip_end": "datetime64[ns]",
-                       "num_segments_with_vp": "int64",
-                   })   
-    
-    trip_stats.compute().to_parquet(
-        f"{SEGMENT_GCS}trip_diagnostics_{analysis_date}.parquet")
+    get_trip_stats(analysis_date, ROUTE_SEG_DICT)
 
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
