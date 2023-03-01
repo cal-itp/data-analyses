@@ -47,7 +47,7 @@ def clean_routelines():
 
     df = df.drop(columns=["shape_array_key"])
     
-    df = (df.drop_duplicates()).reset_index(drop=True)
+    df = df.drop_duplicates().reset_index(drop=True)
 
     # Calculate length of geometry
     df = df.assign(actual_route_length=(df.geometry.length))
@@ -56,8 +56,11 @@ def clean_routelines():
 
 def clean_longest_shape():
     df = catalog.longest_shape.read()
-
-    df = df.rename(columns={"route_length": "longest_route_length"})
+    df = df.drop(columns = ['geometry_arrowized'])
+    
+    # Calculate out length of the longest shape id
+    df = df.dissolve(['longest_shape_id']).reset_index()
+    df = df.assign(longest_route_length=(df.geometry.length))
 
     return df
 
@@ -71,22 +74,14 @@ def merge_trips_routes_longest_shape():
     Count segments.
     """
     trips = clean_trips()
-    crosswalk = catalog.crosswalk.read()
     routelines = clean_routelines()
     longest_shape = clean_longest_shape()
-
     m1 = (
         trips.merge(
-            crosswalk, how="inner", on=["feed_key", "route_id", "name", "direction_id"]
+            longest_shape.drop(columns=["geometry"]), how="inner", on=["feed_key", "route_id", "name", "direction_id"]
         )
         .merge(routelines, how="inner", on=["feed_key", "shape_id"])
-        .merge(
-            longest_shape.drop(columns=["geometry"]),
-            how="inner",
-            on=[ "feed_key","gtfs_dataset_key","direction_id","route_id","route_dir_identifier","name"],
-        )
     )
-
     # Calculate out proportion of actual route length against longest route length.
     m1["route_length_percentage"] = (
         (m1["actual_route_length"] / m1["longest_route_length"]) * 100
@@ -241,11 +236,11 @@ def load_dataframes(time_cutoff:list, segment_cutoffs:list):
     # after thresholds and neaten the dataframe. 
     valid_stats_df = pre_clean(summary_valid_trips_by_cutoff(time_segments_df, time_cutoff, segment_cutoffs))
 
-    # Filter out any operators without RT information
+    # Filter out operators without RT information
     routelengthlist = set(route_df.Name.unique().tolist())
     tripslist = set(valid_stats_df.Name.unique().tolist())
     operators_wo_rt = list(routelengthlist - tripslist)
-    route_length = route_df.loc[~route_df.Name.isin(operators_wo_rt)].reset_index(drop = True)
+    route_df = route_df.loc[~route_df.Name.isin(operators_wo_rt)].reset_index(drop = True)
     
     return route_df, time_segments_df, valid_stats_df
     
@@ -258,7 +253,6 @@ def pre_clean(df):
     df = df.round(1)
     df.columns = df.columns.str.replace("_", " ").str.strip().str.title()
     return df
-
 
 """
 General Chart Functions
@@ -371,10 +365,15 @@ def route_summary_stats(df, column1:str, column2: str):
 
 def valid_stats_leniency(df):
     """
-    Create a chart with the % of trips cut 
+    Create a df with the % of trips cut 
     when applying the most strigent
     and the  most leninent thresholds for 
     each operator.
+    
+    I am not creating a text chart like 
+    route_summary_stats above because
+    I need a dataframe to recommend a 
+    statewide threshold
     """
     # Grab only max and min into the df 
     df = df.groupby(["Name"]).agg({"Percentage Usable Trips": ["max", "min"]}).reset_index()
@@ -413,13 +412,13 @@ def create_operator_visuals(height:int, width:int,time_cutoff:list, segment_cuto
                                   ['Gtfs Dataset Key', 'Name', 'Total Trips', 'N Trips','Cutoff', 'Percentage Usable Trips'],
                                   "Percentage of Usable Trips")
     
-    leniency_text_chart = create_text_table(valid_stats_leniency(valid_stats), "Percentage of Trips Kept")
+    leniency_text_chart = create_text_table(valid_stats_leniency(valid_stats), 'Percentage of Trips Kept')
     
     # Resize charts and add the filter
-    route_length_chart= chart_size(route_length_chart, height, width).add_selection(selection).transform_filter(selection)
-    route_text_chart= chart_size(route_text_chart, height, width).add_selection(selection).transform_filter(selection)
-    valid_stats_chart= chart_size(valid_stats_chart, height, width).add_selection(selection).transform_filter(selection)
-    leniency_text_chart= chart_size(leniency_text_chart, height, width).add_selection(selection).transform_filter(selection)
+    route_length_chart= chart_size(route_length_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
+    route_text_chart= chart_size(route_text_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
+    valid_stats_chart= chart_size(valid_stats_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
+    leniency_text_chart= chart_size(leniency_text_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
     
     return route_length_chart & route_text_chart &  valid_stats_chart & leniency_text_chart
 
@@ -440,7 +439,7 @@ def operator_brush(df):
     tooltip = ['Name', 'Gtfs Dataset Key', 'Variable', 'Route Length Percentage'])
      .properties(title = "Length of Shape ID versus Longest Shape ID").add_selection(brush))
    
-    chart = chart_size(chart,500, 1000)
+    chart = chart_size(chart,500, 1000).interactive()
     
     # Create text table that corresponds with chart
     ranked_text = alt.Chart(df).mark_text().encode(
@@ -548,8 +547,8 @@ def create_statewide_visuals(height:int, width:int):
        "Route Cutoff", ["Route Cutoff","Percentage Of Routes Left","Missing Routes"], 
         "Percentage of Routes Left after Applying Thresholds")
     
-    statewide_chart= chart_size(statewide_chart, height, width)
-    routes_chart= chart_size(routes_chart, height, width)
+    statewide_chart= chart_size(statewide_chart, height, width).interactive()
+    routes_chart= chart_size(routes_chart, height, width).interactive()
     
     return statewide_chart & routes_chart
 
