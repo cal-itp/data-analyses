@@ -1,5 +1,6 @@
 import pandas as pd
-import _portfolio_utils 
+import _portfolio_utils
+
 # Geography
 from shared_utils import geography_utils
 import geopandas as gpd
