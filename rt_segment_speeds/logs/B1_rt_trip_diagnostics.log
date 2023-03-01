@@ -49,8 +49,5 @@
 2023-02-04 10:41:43.314 | INFO     | __main__:<module>:78 - Analysis date: 2023-01-18
 2023-02-04 10:42:46.460 | INFO     | __main__:<module>:78 - Analysis date: 2023-01-18
 2023-02-04 10:43:19.736 | INFO     | __main__:<module>:107 - execution time: 0:00:33.274819
-2023-02-28 10:24:13.457 | INFO     | __main__:<module>:75 - Analysis date: 2023-01-18
-2023-02-28 10:25:50.602 | INFO     | __main__:<module>:78 - Analysis date: 2023-01-18
-2023-02-28 10:27:33.297 | INFO     | __main__:<module>:118 - execution time: 0:01:42.693663
-2023-02-28 10:32:14.473 | INFO     | __main__:<module>:113 - Analysis date: 2023-01-18
-2023-02-28 10:33:56.329 | INFO     | __main__:<module>:127 - execution time: 0:01:41.854886
+2023-02-28 10:37:15.323 | INFO     | __main__:<module>:116 - Analysis date: 2023-01-18
+2023-02-28 10:39:02.146 | INFO     | __main__:<module>:128 - execution time: 0:01:46.821763
