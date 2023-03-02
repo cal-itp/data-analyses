@@ -77,8 +77,8 @@ def get_trip_stats(analysis_date: str,
     EXPORT_FILE = dict_inputs["rt_trip_diagnostics"]
     
     ddf = helpers.import_vehicle_positions(
-        gcs_folder = SEGMENT_GCS,
-        file_name = f"vp_sjoin/{VP_FILE}_{analysis_date}/",
+        gcs_folder = f"{SEGMENT_GCS}vp_sjoin/",
+        file_name = f"{VP_FILE}_{analysis_date}/",
         file_type = "df",
         columns = ["gtfs_dataset_key", "_gtfs_dataset_name", 
                    "trip_id", "route_dir_identifier",
