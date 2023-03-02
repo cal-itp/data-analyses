@@ -76,9 +76,11 @@ def merge_trips_routes_longest_shape():
     trips = clean_trips()
     routelines = clean_routelines()
     longest_shape = clean_longest_shape()
+    
+    trips_shape = ["feed_key", "route_id", "name", "direction_id"]
     m1 = (
         trips.merge(
-            longest_shape.drop(columns=["geometry"]), how="inner", on=["feed_key", "route_id", "name", "direction_id"]
+            longest_shape.drop(columns=["geometry"]), how="inner", on= trips_shape
         )
         .merge(routelines, how="inner", on=["feed_key", "shape_id"])
     )
@@ -86,7 +88,10 @@ def merge_trips_routes_longest_shape():
     m1["route_length_percentage"] = (
         (m1["actual_route_length"] / m1["longest_route_length"]) * 100
     ).astype(int)
-
+    
+    # For only percentage greater than 100, replace it with 100
+    m1["route_length_percentage"] = m1["route_length_percentage"].mask(m1["route_length_percentage"] > 100, 100)
+    
     # Count number of segments that appear in the longest shape.
     m1 = (
         m1.groupby(
@@ -570,7 +575,6 @@ def find_cut_routes(trip_time:int, segments_pct: float):
         pct_vp_segments=m1.num_segments_with_vp.divide(m1.total_segments),
         trip_time=((m1.trip_end - m1.trip_start) / np.timedelta64(1, "s")) / 60,
     )
-    
     # Find routes that are retained
     kept_routes = m1[(m1["trip_time"] >= trip_time ) & (m1["pct_vp_segments"] >= segments_pct)][['name','route_id']].drop_duplicates()
     
@@ -583,15 +587,16 @@ def find_cut_routes(trip_time:int, segments_pct: float):
     # Find routes that are cut out after applying thresholds
     missing_routes_list = list(all_routes - routes_left_after_threshold)
     missing_routes_df = (m1[m1["route_id"]
-                            .isin(missing_routes_list)][['name','gtfs_dataset_key','route_id',]]
-                           .drop_duplicates()
-                         .reset_index(drop = True)
-                         .sort_values(by=['name','route_id'])
+                        .isin(missing_routes_list)]
+                        .drop_duplicates()
+                        .reset_index(drop = True)
+                        .sort_values(by=['name','route_id'])
                         )
     
     # Clean up the dataframe
     missing_routes_df = pre_clean(missing_routes_df)
     
+    # Aggregate
     missing_routes_df = (missing_routes_df
                          .groupby(['Name', 'Gtfs Dataset Key','Route Id'])
                          .agg({'Route Id':'nunique'})
