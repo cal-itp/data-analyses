@@ -24,7 +24,7 @@ def linear_referencing_and_speed_by_segment(
     do the linear referencing to get shape_meters, and then derive speed.
     """
     VP_FILE = dict_inputs["stage3"]
-    SEGMENT_FILE = dict_inputs["segment_file_name"]
+    SEGMENT_FILE = dict_inputs["segments_file"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]    
     EXPORT_FILE = dict_inputs["stage4"]
@@ -92,8 +92,7 @@ if __name__ == "__main__":
     )
     
     time1 = datetime.datetime.now()
-    logger.info(f"linear ref and calculate speeds "
-                f"for route segments: {time1 - start}")
+    logger.info(f"speeds for route segments: {time1 - start}")
     
     linear_referencing_and_speed_by_segment(
         analysis_date, 
@@ -101,9 +100,7 @@ if __name__ == "__main__":
     )
     
     time2 = datetime.datetime.now()
-    logger.info(f"linear ref and calculate speeds "
-                f"for stop segments: {time2 - time1}")
-    
+    logger.info(f"speeds for stop segments: {time2 - time1}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {time2-start}")

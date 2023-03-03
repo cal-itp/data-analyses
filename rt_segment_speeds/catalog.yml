@@ -15,7 +15,7 @@ sources:
           urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_{{analysis_date}}/
     vp_route_segment:
     # Source: A3_sjoin_vp_segments.py
-        driver: geoparquet
+        driver: parquet
         description: Vehicle positions joined to route segments
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_sjoin/vp_route_segment_{{analysis_date}}/ 

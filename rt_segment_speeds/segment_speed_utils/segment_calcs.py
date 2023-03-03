@@ -133,30 +133,48 @@ def calculate_speed_by_segment_trip(
     return segment_speeds
 
     
-def localize_vp_timestamp(df: dd.DataFrame) -> dd.DataFrame:
+def localize_vp_timestamp(
+    df: dd.DataFrame, 
+    timestamp_col: Union[str, list]
+) -> dd.DataFrame:
     """
     RT vehicle timestamps are given in UTC. 
-    Localize these to Pacific Time and then convert it 
-    to seconds.
+    Localize these to Pacific Time.
     """
     #https://stackoverflow.com/questions/62992863/trying-to-convert-aware-local-datetime-to-naive-local-datetime-in-panda-datafram
-    df = df.assign(
-        max_time = (dd.to_datetime(
-            df.max_time, utc=True)
-            .dt.tz_convert(PACIFIC_TIMEZONE)
-            .apply(lambda t: t.replace(tzinfo=None), 
-                   meta = ('max_time', 'datetime64[ns]'))
-        )
-    )
     
-    df = df.assign(
-        max_time_sec = ((df.max_time.dt.hour * 3_600) + 
-                        (df.max_time.dt.minute * 60) + 
-                        (df.max_time.dt.second)
-                   ),
-    )
+    if isinstance(timestamp_col, str):
+        timestamp_col = [timestamp_col]
+    
+    for c in timestamp_col:
+        localized_timestamp_col = (dd.to_datetime(
+                df[c], utc=True)
+                .dt.tz_convert(PACIFIC_TIMEZONE)
+                .apply(lambda t: t.replace(tzinfo=None), 
+                       meta=(None, "datetime64[ns]"))
+                )
+
+        df[f"{c}_local"] = localized_timestamp_col
     
     return df
+
+                                   
+def convert_timestamp_to_seconds(
+    df: pd.DataFrame, 
+    timestamp_col: str,
+) -> dd.DataFrame: 
+    """
+    Convert timestamp into seconds.
+    """
+    df = df.assign(
+        time_sec = ((df[timestamp_col].dt.hour * 3_600) + 
+                        (df[timestamp_col].dt.minute * 60) + 
+                        (df[timestamp_col].dt.second)
+                   ),
+    ).rename(columns = {"time_sec": f"{timestamp_col}_sec"})
+    
+    return df
+
 
 def derive_stop_delay(
     df: dd.DataFrame, 
