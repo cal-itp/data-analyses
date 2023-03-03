@@ -40,8 +40,12 @@ def import_segment_speeds_and_localize_timestamp(
             "max_time", "speed_mph"]
     )
     
-    speeds_local_time = segment_calcs.localize_vp_timestamp(speeds)
+    speeds_local_time = segment_calcs.localize_vp_timestamp(
+        speeds, ["max_time"])
     
+    speeds_local_time = segment_calcs.convert_timestamp_to_seconds(
+        speeds_local_time, "max_time")
+        
     return speeds_local_time
     
     

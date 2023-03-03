@@ -20,8 +20,7 @@ Work related to using `dask` to produce speeds by segments from GTFS RT vehicle 
 
 
 ## Scripts
-1. concat vehicle positions for a single day - change df to gdf (`A1`)
-1. cut route segments, make crosswalk for trips table (with `route_id` and `direction_id` to be linked to a `route_direction_identifier` used for segments (`A2`)
-1. spatial join vehicle positions by route-direction to the segments (use delayed after looping within routes for operator to assemble operator parquets) (`A3`)
-1. pare down vehicle positions to just enter/exit within a segment + placeholder for dropping unusable trips. should exclude trips with too little info or `trip_id is None` at the start, then pare down
-1. do linear referencing within segments to get `distance_elapsed` and `time_elapsed`, and calculate speeds. save both partitioned parquets and individual operator parquets for now
+1. cut segments (route segments or stop segments)
+1. spatial join vehicle positions to the segments  (`A3`)
+1. pare down vehicle positions to just enter/exit within a segment + placeholder for dropping unusable trips. should exclude trips with too little info or `trip_id is None` at the start, then pare down (`A4`)
+1. do linear referencing within segments to get `distance_elapsed` and `time_elapsed`, and calculate speeds. save as partitioned parquets (`A5`)

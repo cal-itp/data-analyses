@@ -212,17 +212,16 @@ if __name__=="__main__":
     
     start = datetime.datetime.now()
     
-    #stops_by_shape = prep_stop_segments(analysis_date).compute()
+    stops_by_shape = prep_stop_segments(analysis_date).compute()
     
     time1 = datetime.datetime.now()
     logger.info(f"Prep stop segment df: {time1-start}")
-    '''
+    
     utils.geoparquet_gcs_export(
         stops_by_shape,
         SEGMENT_GCS,
         f"stops_projected_{analysis_date}"
     )
-    '''
     
     stops_by_shape = gpd.read_parquet(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet")

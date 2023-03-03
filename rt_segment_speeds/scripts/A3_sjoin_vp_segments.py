@@ -9,6 +9,7 @@ Otherwise, vp will be joined to other segments that share the same road.
 import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
+import gcsfs
 import geopandas as gpd
 import pandas as pd
 import sys
@@ -21,6 +22,7 @@ from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (analysis_date, SEGMENT_GCS, 
                                               CONFIG_PATH)
 
+fs = gcsfs.GCSFileSystem()
 
 def import_vp_and_merge_crosswalk( 
     rt_dataset_key: str,
@@ -114,7 +116,38 @@ def add_grouping_col_to_vp(
     
     return vp_with_grouping_col
       
+    
+def loop_over_route_groupings_within_operator(
+    operator_vp: dd.DataFrame,
+    operator_segments: dg.GeoDataFrame,
+    route_groupings: list,
+    grouping_col: list,
+    segment_identifier_cols: list
+): # returns dask delayed object
+    """
+    Do the loop within an operator. Loop by route_dir_identifier
+    or shape_array_key.
+    
+    Only the vehicle positions for that grouping can sjoin
+    to those segments.
+    """
+    operator_results = []
+    
+    for i, one_value in enumerate(route_groupings):
 
+        vp_to_segment = delayed(helpers.sjoin_vehicle_positions_to_segments)(
+            operator_vp,
+            operator_segments, 
+            route_tuple = (grouping_col, one_value), 
+            segment_identifier_cols = segment_identifier_cols
+        )
+
+        # Store each route's results in the operator's results list.
+        operator_results.append(vp_to_segment)
+    
+    return operator_results
+    
+    
 def sjoin_vp_to_segments(
     analysis_date: str,
     buffer_size: int = 50,
@@ -151,10 +184,10 @@ def sjoin_vp_to_segments(
     in_vp = vp_df.gtfs_dataset_key.compute().tolist()
     in_segments = segment_df.gtfs_dataset_key.compute().tolist()
     RT_OPERATORS = list(set(in_vp) & set(in_segments))
-    
-    results = []
-    
-    for rt_dataset_key in RT_OPERATORS:
+        
+    for rt_dataset_key in sorted(RT_OPERATORS):
+        
+        start_id = datetime.datetime.now()
         
         vp = delayed(import_vp_and_merge_crosswalk)(
             rt_dataset_key,
@@ -177,32 +210,70 @@ def sjoin_vp_to_segments(
         ).persist()
         
         # persist the vehicle positions and segments so we can 
-        # easily loop by route_dir_identifier or shape_array_key
+        # easily loop by route_dir_identifier or shape_array_key        
+        SINGLE_SEGMENT_COL = [c for c in SEGMENT_IDENTIFIER_COLS 
+                      if c!= GROUPING_COL]
         
-        for i in vp2[GROUPING_COL].unique().compute():
-            SINGLE_SEGMENT_COL = [c for c in SEGMENT_IDENTIFIER_COLS 
-                                  if c!= GROUPING_COL]
-            
-            vp_to_segment = delayed(
-                helpers.sjoin_vehicle_positions_to_segments)(
-                vp2,
-                segments, 
-                route_tuple = (GROUPING_COL, i), 
-                segment_identifier_cols = SINGLE_SEGMENT_COL
+        all_groups = vp2[GROUPING_COL].unique().compute()
+        
+        operator_results = loop_over_route_groupings_within_operator(
+            vp2,
+            segments,
+            all_groups, 
+            GROUPING_COL,
+            SINGLE_SEGMENT_COL
+        )
+        
+        if len(operator_results) > 0:
+        
+            # Compute the list of delayed objects
+            dask_utils.compute_and_export(
+                operator_results,
+                gcs_folder = f"{SEGMENT_GCS}vp_sjoin/",
+                file_name = f"{EXPORT_FILE}_{rt_dataset_key}_{analysis_date}",
+                export_single_parquet = False
             )
-
-            results.append(vp_to_segment)
-
-    # Compute the list of delayed objects
+            
+            end_id = datetime.datetime.now()
+            logger.info(f"exported: {rt_dataset_key} {end_id - start_id}")
+     
+    
+    
+def compile_partitioned_parquets_for_operators(
+    gcs_folder: str,
+    file_name: str,
+    analysis_date: str, 
+):
+    """
+    Once we've saved out indiv operator partitioned parquets,
+    read those in and save as one partitioned parquet
+    """
+    all_files = fs.ls(f"{gcs_folder}")
+    
+    # The files to compile need format
+    # {file_name}_{rt_dataset_key}_{analysis_date}.
+    # do not include {file_name}_{analysis_date} (bc that is concat version)
+    files_to_compile = [f for f in all_files 
+                        if file_name in f and 
+                        analysis_date in f and 
+                        f"{file_name}_{analysis_date}" not in f
+                       ]
+    
+    results = [delayed(pd.read_parquet)(f"gs://{f}") 
+                 for f in files_to_compile]
+    
     dask_utils.compute_and_export(
         results,
-        gcs_folder = f"{SEGMENT_GCS}vp_sjoin/",
-        file_name = f"{EXPORT_FILE}_{analysis_date}",
+        gcs_folder = gcs_folder,
+        file_name = f"{file_name}_{analysis_date}",
         export_single_parquet = False
     )
     
-    
-    
+    # Remove these partitioned parquets (folders, set recursive = True)
+    for f in files_to_compile:
+        fs.rm(f"gs://{f}", recursive=True)
+        
+        
 if __name__ == "__main__":
     
     LOG_FILE = "../logs/A3_sjoin_vp_segments.log"
@@ -217,12 +288,18 @@ if __name__ == "__main__":
     
     ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-        
+    
     vp_route_seg = sjoin_vp_to_segments(
         analysis_date = analysis_date,
         buffer_size = 50,
         dict_inputs = ROUTE_SEG_DICT,
     )
+    
+    compile_partitioned_parquets_for_operators(
+        f"{SEGMENT_GCS}vp_sjoin/", 
+        ROUTE_SEG_DICT["stage2"], 
+        analysis_date
+    ) 
     
     time1 = datetime.datetime.now()
     logger.info(f"attach vp to route segments: {time1 - start}")
@@ -233,6 +310,11 @@ if __name__ == "__main__":
         dict_inputs = STOP_SEG_DICT
     )
     
+    compile_partitioned_parquets_for_operators(
+        f"{SEGMENT_GCS}vp_sjoin/", 
+        STOP_SEG_DICT["stage2"], 
+        analysis_date
+    ) 
     time2 = datetime.datetime.now()
     logger.info(f"attach vp to stop-to-stop segments: {time2 - time1}")
     
