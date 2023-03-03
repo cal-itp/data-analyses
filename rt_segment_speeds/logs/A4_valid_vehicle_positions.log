@@ -1188,3 +1188,7 @@
 2023-02-21 11:41:35.303 | INFO     | __main__:<module>:121 - pare down vp by route segments 0:04:53.618341
 2023-02-21 11:47:01.400 | INFO     | __main__:<module>:129 - pare down vp by stop segments 0:05:26.096652
 2023-02-21 11:47:01.401 | INFO     | __main__:<module>:132 - execution time: 0:10:19.715831
+2023-03-03 09:26:30.749 | INFO     | __main__:<module>:95 - Analysis date: 2023-02-15
+2023-03-03 09:30:30.350 | INFO     | __main__:<module>:109 - pare down vp by route segments 0:03:59.594572
+2023-03-03 09:35:24.105 | INFO     | __main__:<module>:117 - pare down vp by stop segments 0:04:53.754809
+2023-03-03 09:35:24.106 | INFO     | __main__:<module>:120 - execution time: 0:08:53.356474
