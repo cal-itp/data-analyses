@@ -15,7 +15,7 @@ import datetime as dt
 from tqdm import tqdm
 
 # import numpy as np
-from calitp.tables import tbls
+from calitp_data_analysis.tables import tbls
 import seaborn as sns
 import matplotlib.pyplot as plt
 import folium
