@@ -12,9 +12,9 @@ import pandas as pd
 from siuba import *
 
 from shared_utils import geography_utils
-from dla_utils import _dla_utils
+import dla_utils
 
-from calitp import to_snakecase
+from calitp_data_analysis.sql import to_snakecase
 
 import nltk
 from nltk.corpus import stopwords
