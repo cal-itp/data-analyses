@@ -7,11 +7,13 @@ and can be modularized in the future.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
+import datetime
 import gcsfs
+import pandas as pd
 import yaml
 
 from typing import Literal, Union
-from update_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, PROJECT_CRS
+from segment_speed_utils.project_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, PROJECT_CRS
 from shared_utils import utils
 
 fs = gcsfs.GCSFileSystem()
@@ -55,6 +57,19 @@ def operators_with_data(
     
     return rt_operators
 
+
+def find_day_after(analysis_date: str) -> str:
+    """
+    RT is UTC, so let's also download the day after.
+    That way, when we localize to Pacific time, we don't lose
+    info after 4pm Pacific (which is midnight UTC).
+    """
+    one_day_later = (pd.to_datetime(analysis_date).date() + 
+                     datetime.timedelta(days=1)
+                    )
+    
+    return one_day_later.isoformat()
+        
 
 def import_vehicle_positions(
     gcs_folder: str = SEGMENT_GCS, 
