@@ -20,14 +20,14 @@ from segment_speed_utils.project_vars import (analysis_date, SEGMENT_GCS,
                                               CONFIG_PATH)
                                               
     
-def import_segment_speeds_and_localize_timestamp(
+def import_segment_speeds_and_convert_timestamp_to_seconds(
     analysis_date: str, 
     dict_inputs: dict = {}
 ) -> dd.DataFrame:
     """
     Import speeds by stop segments.
-    Localize the max_time (which should be the time closest to the stop_id) 
-    from UTC and then convert it to seconds.
+    Convert max_time (which should be the time closest to the stop_id) 
+    to seconds.
     """
     SPEED_FILE = dict_inputs["stage4"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
@@ -40,13 +40,10 @@ def import_segment_speeds_and_localize_timestamp(
             "max_time", "speed_mph"]
     )
     
-    speeds_local_time = segment_calcs.localize_vp_timestamp(
-        speeds, ["max_time"])
-    
-    speeds_local_time = segment_calcs.convert_timestamp_to_seconds(
-        speeds_local_time, "max_time")
+    speeds_add_rt_arrival = segment_calcs.convert_timestamp_to_seconds(
+        speeds, "max_time")
         
-    return speeds_local_time
+    return speeds_add_rt_arrival
     
     
 def calculate_delay_for_stop_segments(
@@ -60,7 +57,7 @@ def calculate_delay_for_stop_segments(
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     GROUPING_COL = dict_inputs["grouping_col"]
     
-    rt_speeds = import_segment_speeds_and_localize_timestamp(
+    rt_speeds = import_segment_speeds_and_convert_timestamp_to_seconds(
         analysis_date, dict_inputs)
     
     trips = helpers.import_scheduled_trips(
@@ -80,7 +77,7 @@ def calculate_delay_for_stop_segments(
     )
     
     scheduled_stop_times = gtfs_schedule_wrangling.merge_shapes_to_stop_times(
-        stop_times, trips) 
+        trips, stop_times) 
     
     # Merge scheduled and RT stop times
     df = dd.merge(
@@ -113,6 +110,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    EXPORT_FILE = STOP_SEG_DICT["stop_delay_diagnostics"]
     
     speed_delay_by_stop_segment = calculate_delay_for_stop_segments(
         analysis_date, 
@@ -126,7 +124,7 @@ if __name__ == "__main__":
     df = speed_delay_by_stop_segment.compute()
     
     df.to_parquet(
-        f"{SEGMENT_GCS}stop_segments_with_speed_delay_{analysis_date}.parquet")
+        f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet")
 
     
     end = datetime.datetime.now()

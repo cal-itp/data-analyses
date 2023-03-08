@@ -20,3 +20,7 @@
 2023-03-07 16:25:36.977 | INFO     | __main__:<module>:111 - Analysis date: 2023-02-15
 2023-03-07 16:25:39.930 | INFO     | __main__:<module>:123 - merge scheduled and RT stop times and calculate delay: 0:00:02.931881
 2023-03-07 16:26:38.425 | INFO     | __main__:<module>:133 - execution time: 0:01:01.426652
+2023-03-07 16:41:20.828 | INFO     | __main__:<module>:108 - Analysis date: 2023-02-15
+2023-03-07 16:46:06.724 | INFO     | __main__:<module>:108 - Analysis date: 2023-02-15
+2023-03-07 16:46:09.356 | INFO     | __main__:<module>:120 - merge scheduled and RT stop times and calculate delay: 0:00:02.631370
+2023-03-07 16:46:39.205 | INFO     | __main__:<module>:130 - execution time: 0:00:32.480597
