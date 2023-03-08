@@ -47,7 +47,7 @@ def clean_routelines():
 
     df = df.drop(columns=["shape_array_key"])
     
-    df = (df.drop_duplicates()).reset_index(drop=True)
+    df = df.drop_duplicates().reset_index(drop=True)
 
     # Calculate length of geometry
     df = df.assign(actual_route_length=(df.geometry.length))
@@ -56,8 +56,11 @@ def clean_routelines():
 
 def clean_longest_shape():
     df = catalog.longest_shape.read()
-
-    df = df.rename(columns={"route_length": "longest_route_length"})
+    df = df.drop(columns = ['geometry_arrowized'])
+    
+    # Calculate out length of the longest shape id
+    df = df.dissolve(['longest_shape_id']).reset_index()
+    df = df.assign(longest_route_length=(df.geometry.length))
 
     return df
 
@@ -66,32 +69,29 @@ Merge
 """
 def merge_trips_routes_longest_shape():
     """
-    Merge and find the shape_id's length
+    Find the shape_id's length
     versus the longest shape_id's length.
     Count segments.
     """
     trips = clean_trips()
-    crosswalk = catalog.crosswalk.read()
     routelines = clean_routelines()
     longest_shape = clean_longest_shape()
-
+    
+    trips_shape = ["feed_key", "route_id", "name", "direction_id"]
     m1 = (
         trips.merge(
-            crosswalk, how="inner", on=["feed_key", "route_id", "name", "direction_id"]
+            longest_shape.drop(columns=["geometry"]), how="inner", on= trips_shape
         )
         .merge(routelines, how="inner", on=["feed_key", "shape_id"])
-        .merge(
-            longest_shape.drop(columns=["geometry"]),
-            how="inner",
-            on=[ "feed_key","gtfs_dataset_key","direction_id","route_id","route_dir_identifier","name"],
-        )
     )
-
-    # Calculate out proportion of route length against longest.
+    # Calculate out proportion of actual route length against longest route length.
     m1["route_length_percentage"] = (
         (m1["actual_route_length"] / m1["longest_route_length"]) * 100
     ).astype(int)
-
+    
+    # For only percentage greater than 100, replace it with 100
+    m1["route_length_percentage"] = m1["route_length_percentage"].mask(m1["route_length_percentage"] > 100, 100)
+    
     # Count number of segments that appear in the longest shape.
     m1 = (
         m1.groupby(
@@ -126,7 +126,7 @@ def summary_stats_route_length():
         .reset_index()
     )
     
-    # Get summary stats
+    # Get summary stats for each operator.
     df = (
         df.groupby(["name", "gtfs_dataset_key"])
         .agg({"route_length_percentage": ["mean", "median", "min", "max"]})
@@ -136,7 +136,7 @@ def summary_stats_route_length():
     # Drop index
     df.columns = df.columns.droplevel()
     
-    # Rename columns.
+    # Rename columns
     df.columns.values[0] = "name"
     df.columns.values[1] = "gtfs_dataset_key"
     
@@ -225,7 +225,7 @@ def summary_valid_trips_by_cutoff(df, time_cutoffs: list, segment_cutoffs: list)
 
 def load_dataframes(time_cutoff:list, segment_cutoffs:list):
     """
-    Load all relevant manipulated dataframes
+    Load all manipulated dataframes
     in one go. 
     """
     # Load in dataframe that has oute lengths
@@ -241,11 +241,11 @@ def load_dataframes(time_cutoff:list, segment_cutoffs:list):
     # after thresholds and neaten the dataframe. 
     valid_stats_df = pre_clean(summary_valid_trips_by_cutoff(time_segments_df, time_cutoff, segment_cutoffs))
 
-    # Filter out any operators without RT information
+    # Filter out operators without RT information
     routelengthlist = set(route_df.Name.unique().tolist())
     tripslist = set(valid_stats_df.Name.unique().tolist())
     operators_wo_rt = list(routelengthlist - tripslist)
-    route_length = route_df.loc[~route_df.Name.isin(operators_wo_rt)].reset_index(drop = True)
+    route_df = route_df.loc[~route_df.Name.isin(operators_wo_rt)].reset_index(drop = True)
     
     return route_df, time_segments_df, valid_stats_df
     
@@ -256,11 +256,6 @@ Other
 # charts and graphs.
 def pre_clean(df):
     df = df.round(1)
-    df = clean_up_columns(df)
-    return df
-
-# Reverse snake_case
-def clean_up_columns(df):
     df.columns = df.columns.str.replace("_", " ").str.strip().str.title()
     return df
 
@@ -280,7 +275,8 @@ def create_dot_plot(df, col_for_dots: str,
     id='rank()',
     groupby=[col_for_dots]).encode(
     alt.X(f'{x_axis_col}:O', sort='ascending',
-          scale=alt.Scale(domain=[0,10,20,30,40,50,60,70,80,90,100]), axis=alt.Axis(ticks=False, grid=True)),
+          scale=alt.Scale(domain=[0,10,20,30,40,50,60,70,80,90,100]), 
+          axis=alt.Axis(ticks=False, grid=True)),
     alt.Y(f'{y_axis_col}:N'), 
     color=alt.Color(f"{col_for_dots}:N", scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS), legend=None),
     tooltip = tooltip_cols)
@@ -374,10 +370,15 @@ def route_summary_stats(df, column1:str, column2: str):
 
 def valid_stats_leniency(df):
     """
-    Create a chart with the % of trips cut 
+    Create a df with the % of trips cut 
     when applying the most strigent
     and the  most leninent thresholds for 
     each operator.
+    
+    I am not creating a text chart like 
+    route_summary_stats above because
+    I need a dataframe to recommend a 
+    statewide threshold
     """
     # Grab only max and min into the df 
     df = df.groupby(["Name"]).agg({"Percentage Usable Trips": ["max", "min"]}).reset_index()
@@ -416,13 +417,13 @@ def create_operator_visuals(height:int, width:int,time_cutoff:list, segment_cuto
                                   ['Gtfs Dataset Key', 'Name', 'Total Trips', 'N Trips','Cutoff', 'Percentage Usable Trips'],
                                   "Percentage of Usable Trips")
     
-    leniency_text_chart = create_text_table(valid_stats_leniency(valid_stats), "Percentage of Trips Kept")
+    leniency_text_chart = create_text_table(valid_stats_leniency(valid_stats), 'Percentage of Trips Kept')
     
-    
-    route_length_chart= chart_size(route_length_chart, height, width).add_selection(selection).transform_filter(selection)
-    route_text_chart= chart_size(route_text_chart, height, width).add_selection(selection).transform_filter(selection)
-    valid_stats_chart= chart_size(valid_stats_chart, height, width).add_selection(selection).transform_filter(selection)
-    leniency_text_chart= chart_size(leniency_text_chart, height, width).add_selection(selection).transform_filter(selection)
+    # Resize charts and add the filter
+    route_length_chart= chart_size(route_length_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
+    route_text_chart= chart_size(route_text_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
+    valid_stats_chart= chart_size(valid_stats_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
+    leniency_text_chart= chart_size(leniency_text_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
     
     return route_length_chart & route_text_chart &  valid_stats_chart & leniency_text_chart
 
@@ -443,7 +444,7 @@ def operator_brush(df):
     tooltip = ['Name', 'Gtfs Dataset Key', 'Variable', 'Route Length Percentage'])
      .properties(title = "Length of Shape ID versus Longest Shape ID").add_selection(brush))
    
-    chart = chart_size(chart,500, 1000)
+    chart = chart_size(chart,500, 1000).interactive()
     
     # Create text table that corresponds with chart
     ranked_text = alt.Chart(df).mark_text().encode(
@@ -466,6 +467,7 @@ def operator_brush(df):
     text = alt.hconcat(operator, variable, route_length_percentage) 
     
     return alt.vconcat(chart, text)
+
 """
 Statewide Visuals 
 & Analysis
@@ -544,17 +546,14 @@ def create_statewide_visuals(height:int, width:int):
         "Percentage of Usable Trips Across All Operators")
     
     # Find routes that are left after applying thresholds
-    routes_left = routes_left_thresholds()
-    
-    # Clean up columns
-    routes_left = pre_clean(routes_left)
+    routes_left = pre_clean(routes_left_thresholds())
     
     routes_chart = bar_chart_wo_dropdown(routes_left, "Percentage Of Routes Left",
        "Route Cutoff", ["Route Cutoff","Percentage Of Routes Left","Missing Routes"], 
         "Percentage of Routes Left after Applying Thresholds")
     
-    statewide_chart= chart_size(statewide_chart, height, width)
-    routes_chart= chart_size(routes_chart, height, width)
+    statewide_chart= chart_size(statewide_chart, height, width).interactive()
+    routes_chart= chart_size(routes_chart, height, width).interactive()
     
     return statewide_chart & routes_chart
 
@@ -576,7 +575,6 @@ def find_cut_routes(trip_time:int, segments_pct: float):
         pct_vp_segments=m1.num_segments_with_vp.divide(m1.total_segments),
         trip_time=((m1.trip_end - m1.trip_start) / np.timedelta64(1, "s")) / 60,
     )
-    
     # Find routes that are retained
     kept_routes = m1[(m1["trip_time"] >= trip_time ) & (m1["pct_vp_segments"] >= segments_pct)][['name','route_id']].drop_duplicates()
     
@@ -589,16 +587,18 @@ def find_cut_routes(trip_time:int, segments_pct: float):
     # Find routes that are cut out after applying thresholds
     missing_routes_list = list(all_routes - routes_left_after_threshold)
     missing_routes_df = (m1[m1["route_id"]
-                            .isin(missing_routes_list)][['name','gtfs_dataset_key','route_id',]]
-                           .drop_duplicates()
-                         .reset_index(drop = True)
-                         .sort_values(by=['name','route_id'])
+                        .isin(missing_routes_list)]
+                        .drop_duplicates()
+                        .reset_index(drop = True)
+                        .sort_values(by=['name','route_id'])
                         )
     
+    # Clean up the dataframe
     missing_routes_df = pre_clean(missing_routes_df)
     
+    # Aggregate
     missing_routes_df = (missing_routes_df
-                         .groupby(['Gtfs Dataset Key','Name', 'Route Id'])
+                         .groupby(['Name', 'Gtfs Dataset Key','Route Id'])
                          .agg({'Route Id':'nunique'})
                          .drop(columns=['Route Id'])
                         )
