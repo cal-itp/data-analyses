@@ -235,7 +235,7 @@ def sjoin_vp_to_segments(
             )
             
             end_id = datetime.datetime.now()
-            logger.info(f"exported: {rt_dataset_key} {end_id - start_id}")
+            print(f"exported: {rt_dataset_key} {end_id - start_id}")
      
     
     
