@@ -245,11 +245,21 @@ def sjoin_vehicle_positions_to_segments(
     return ddf
 
 
-def exclude_unusable_trips(vp_df: dd.DataFrame, 
-                           valid_trip_ids: list) -> dd.DataFrame:
+def exclude_unusable_trips(
+    vp_df: dd.DataFrame, 
+    valid_trips: pd.DataFrame
+) -> dd.DataFrame:
     """
-    PLACEHOLDER FUNCTION
-    Figure out trip-level diagnostics first.
-    Supply a list of valid trips or trips to exclude?
+    Supply a df of valid trips.
+    Do an inner merge and pare down the vehicle positions df.
+    `trip_id` may not be unique across operators, so 
+    use `gtfs_dataset_key` and `trip_id`.
     """
-    return vp_df[vp_df.trip_id.isin(trips_list)].reset_index(drop=True)
+    valid_vp_df = dd.merge(
+        vp_df,
+        valid_trips,
+        on = ["gtfs_dataset_key", "trip_id"],
+        how = "inner"
+    ).reset_index(drop=True)
+    
+    return valid_vp_df

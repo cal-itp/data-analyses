@@ -1192,3 +1192,9 @@
 2023-03-03 09:30:30.350 | INFO     | __main__:<module>:109 - pare down vp by route segments 0:03:59.594572
 2023-03-03 09:35:24.105 | INFO     | __main__:<module>:117 - pare down vp by stop segments 0:04:53.754809
 2023-03-03 09:35:24.106 | INFO     | __main__:<module>:120 - execution time: 0:08:53.356474
+2023-03-07 14:12:59.857 | INFO     | __main__:<module>:166 - Analysis date: 2023-02-15
+2023-03-07 14:12:59.864 | INFO     | __main__:pare_down_vp_to_valid_trips:138 - filter out to only valid trips
+2023-03-07 14:13:59.705 | INFO     | __main__:<module>:180 - pare down vp by route segments 0:00:59.841522
+2023-03-07 14:13:59.707 | INFO     | __main__:pare_down_vp_to_valid_trips:138 - filter out to only valid trips
+2023-03-07 14:15:20.496 | INFO     | __main__:<module>:188 - pare down vp by stop segments 0:01:20.791105
+2023-03-07 14:15:20.496 | INFO     | __main__:<module>:191 - execution time: 0:02:20.638298
