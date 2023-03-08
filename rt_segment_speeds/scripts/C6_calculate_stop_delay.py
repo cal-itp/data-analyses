@@ -100,34 +100,6 @@ def calculate_delay_for_stop_segments(
     return df_with_delay
     
     
-    
-def merge_segment_geom_with_speed(
-    df_with_delay
-):
-    """
-    TODO: move this to right before visualizing.
-    Ok to save in different files, otherwise it's fairly big to wrangle
-    """
-    SEGMENTS_FILE = dict_inputs["segments_file"]
-
-    # Import segments geom
-    segments = helpers.import_segments(
-        SEGMENT_GCS,
-        f"{SEGMENTS_FILE}_{analysis_date}",
-        columns = ["gtfs_dataset_key"] + SEGMENT_IDENTIFIER_COLS + [
-            "stop_name", "geometry", "geometry_arrowized"],
-    )
-    
-    # Merge in segment geom with speed and delay metrics
-    speed_and_delay_with_geom = segment_calcs.merge_speeds_to_segment_geom(
-        df_with_delay,
-        segments,
-        segment_identifier_cols = SEGMENT_IDENTIFIER_COLS
-    )
-    
-    return speed_and_delay_with_geom
-    
-    
 if __name__ == "__main__":
     
     LOG_FILE = "../logs/C6_calculate_stop_delay.log"
