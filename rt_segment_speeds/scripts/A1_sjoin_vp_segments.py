@@ -276,7 +276,7 @@ def compile_partitioned_parquets_for_operators(
         
 if __name__ == "__main__":
     
-    LOG_FILE = "../logs/A3_sjoin_vp_segments.log"
+    LOG_FILE = "../logs/sjoin_vp_segments.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
