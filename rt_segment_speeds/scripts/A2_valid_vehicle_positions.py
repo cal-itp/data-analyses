@@ -157,7 +157,7 @@ def pare_down_vp_to_valid_trips(
     
 if __name__ == "__main__":
     
-    LOG_FILE = "../logs/A4_valid_vehicle_positions.log"
+    LOG_FILE = "../logs/valid_vehicle_positions.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 

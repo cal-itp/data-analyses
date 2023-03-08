@@ -102,7 +102,7 @@ def calculate_delay_for_stop_segments(
     
 if __name__ == "__main__":
     
-    LOG_FILE = "../logs/C6_calculate_stop_delay.log"
+    LOG_FILE = "../logs/calculate_stop_delay.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 

@@ -73,7 +73,7 @@ if __name__ == "__main__":
     #from dask.distributed import Client
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
-    LOG_FILE = "../logs/A5_speeds_by_segment_trip.log"
+    LOG_FILE = "../logs/speeds_by_segment_trip.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 

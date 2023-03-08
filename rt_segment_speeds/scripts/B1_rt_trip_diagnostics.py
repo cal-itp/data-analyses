@@ -99,7 +99,7 @@ def get_trip_stats(analysis_date: str,
     
 if __name__ == "__main__":
     
-    LOG_FILE = "../logs/B1_rt_trip_diagnostics.log"
+    LOG_FILE = "../logs/rt_trip_diagnostics.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
