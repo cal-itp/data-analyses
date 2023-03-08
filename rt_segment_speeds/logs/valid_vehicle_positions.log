@@ -1,0 +1,1200 @@
+2023-02-04 09:08:03.213 | INFO     | __main__:<module>:140 - Analysis date: 2023-01-18
+2023-02-04 09:08:03.314 | INFO     | __main__:<module>:149 - start 02af2d11f5bd44434c581540e9e857d8
+2023-02-04 09:08:03.315 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000461
+2023-02-04 09:08:03.316 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000689
+2023-02-04 09:08:03.316 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 02af2d11f5bd44434c581540e9e857d8: 0:00:00.001495
+2023-02-04 09:08:03.317 | INFO     | __main__:<module>:149 - start 03cadbffef6f3cd4ce839b218bc65e82
+2023-02-04 09:08:03.317 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000155
+2023-02-04 09:08:03.318 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000423
+2023-02-04 09:08:03.318 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 03cadbffef6f3cd4ce839b218bc65e82: 0:00:00.000888
+2023-02-04 09:08:03.318 | INFO     | __main__:<module>:149 - start 087e5ecdcf65499829e681a60e606637
+2023-02-04 09:08:03.319 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000178
+2023-02-04 09:08:03.319 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000421
+2023-02-04 09:08:03.320 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 087e5ecdcf65499829e681a60e606637: 0:00:00.000889
+2023-02-04 09:08:03.320 | INFO     | __main__:<module>:149 - start 08c4e0555b1b90cd7464ac801157a167
+2023-02-04 09:08:03.320 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000120
+2023-02-04 09:08:03.321 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000355
+2023-02-04 09:08:03.321 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 08c4e0555b1b90cd7464ac801157a167: 0:00:00.000778
+2023-02-04 09:08:03.321 | INFO     | __main__:<module>:149 - start 0a3c3013dc4baff072e14f8ae8a796bb
+2023-02-04 09:08:03.322 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000081
+2023-02-04 09:08:03.322 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000434
+2023-02-04 09:08:03.322 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 0a3c3013dc4baff072e14f8ae8a796bb: 0:00:00.000787
+2023-02-04 09:08:03.323 | INFO     | __main__:<module>:149 - start 0da5a62ebe57a31bce87abf9fbb2857a
+2023-02-04 09:08:03.323 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.323 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000448
+2023-02-04 09:08:03.324 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 0da5a62ebe57a31bce87abf9fbb2857a: 0:00:00.000827
+2023-02-04 09:08:03.324 | INFO     | __main__:<module>:149 - start 0f68ec4d97d179570b494c74b6fca55d
+2023-02-04 09:08:03.324 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000095
+2023-02-04 09:08:03.325 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000367
+2023-02-04 09:08:03.325 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 0f68ec4d97d179570b494c74b6fca55d: 0:00:00.000760
+2023-02-04 09:08:03.325 | INFO     | __main__:<module>:149 - start 0faa34840bb65e96b7f83b7f379c2edd
+2023-02-04 09:08:03.326 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000088
+2023-02-04 09:08:03.326 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000378
+2023-02-04 09:08:03.326 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 0faa34840bb65e96b7f83b7f379c2edd: 0:00:00.000840
+2023-02-04 09:08:03.327 | INFO     | __main__:<module>:149 - start 110_2022-10-12.parquet
+2023-02-04 09:08:03.327 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000127
+2023-02-04 09:08:03.328 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000441
+2023-02-04 09:08:03.328 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 110_2022-10-12.parquet: 0:00:00.000881
+2023-02-04 09:08:03.328 | INFO     | __main__:<module>:149 - start 115fa7bd31a65b3210945ee884f36132
+2023-02-04 09:08:03.329 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000093
+2023-02-04 09:08:03.329 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000430
+2023-02-04 09:08:03.329 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 115fa7bd31a65b3210945ee884f36132: 0:00:00.000862
+2023-02-04 09:08:03.330 | INFO     | __main__:<module>:149 - start 126_2022-10-12.parquet
+2023-02-04 09:08:03.330 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000088
+2023-02-04 09:08:03.331 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000358
+2023-02-04 09:08:03.331 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 126_2022-10-12.parquet: 0:00:00.000807
+2023-02-04 09:08:03.331 | INFO     | __main__:<module>:149 - start 127_2022-10-12.parquet
+2023-02-04 09:08:03.332 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000081
+2023-02-04 09:08:03.332 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000439
+2023-02-04 09:08:03.332 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 127_2022-10-12.parquet: 0:00:00.000797
+2023-02-04 09:08:03.333 | INFO     | __main__:<module>:149 - start 135_2022-10-12.parquet
+2023-02-04 09:08:03.333 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.333 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000370
+2023-02-04 09:08:03.334 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 135_2022-10-12.parquet: 0:00:00.000820
+2023-02-04 09:08:03.334 | INFO     | __main__:<module>:149 - start 13c6e9f58e53c12416b7754352fa1acd
+2023-02-04 09:08:03.334 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000089
+2023-02-04 09:08:03.335 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000394
+2023-02-04 09:08:03.335 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 13c6e9f58e53c12416b7754352fa1acd: 0:00:00.000845
+2023-02-04 09:08:03.336 | INFO     | __main__:<module>:149 - start 148_2022-10-12.parquet
+2023-02-04 09:08:03.336 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000088
+2023-02-04 09:08:03.336 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000438
+2023-02-04 09:08:03.337 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 148_2022-10-12.parquet: 0:00:00.000875
+2023-02-04 09:08:03.337 | INFO     | __main__:<module>:149 - start 159_2022-10-12.parquet
+2023-02-04 09:08:03.337 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000087
+2023-02-04 09:08:03.338 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000378
+2023-02-04 09:08:03.338 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 159_2022-10-12.parquet: 0:00:00.000738
+2023-02-04 09:08:03.338 | INFO     | __main__:<module>:149 - start 167_2022-10-12.parquet
+2023-02-04 09:08:03.339 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000114
+2023-02-04 09:08:03.339 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000345
+2023-02-04 09:08:03.339 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 167_2022-10-12.parquet: 0:00:00.000830
+2023-02-04 09:08:03.340 | INFO     | __main__:<module>:149 - start 16ee668743cb1ea540bf833d301a1686
+2023-02-04 09:08:03.340 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.341 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000412
+2023-02-04 09:08:03.341 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 16ee668743cb1ea540bf833d301a1686: 0:00:00.000807
+2023-02-04 09:08:03.341 | INFO     | __main__:<module>:149 - start 17b259a4ae767d3ef5478964851cabb8
+2023-02-04 09:08:03.341 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000085
+2023-02-04 09:08:03.342 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000444
+2023-02-04 09:08:03.342 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 17b259a4ae767d3ef5478964851cabb8: 0:00:00.000813
+2023-02-04 09:08:03.343 | INFO     | __main__:<module>:149 - start 182_2022-10-12.parquet
+2023-02-04 09:08:03.343 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000086
+2023-02-04 09:08:03.343 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000354
+2023-02-04 09:08:03.344 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 182_2022-10-12.parquet: 0:00:00.000710
+2023-02-04 09:08:03.344 | INFO     | __main__:<module>:149 - start 188_2022-10-12.parquet
+2023-02-04 09:08:03.344 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000109
+2023-02-04 09:08:03.345 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000362
+2023-02-04 09:08:03.345 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 188_2022-10-12.parquet: 0:00:00.000840
+2023-02-04 09:08:03.345 | INFO     | __main__:<module>:149 - start 194_2022-10-12.parquet
+2023-02-04 09:08:03.346 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.346 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000440
+2023-02-04 09:08:03.346 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 194_2022-10-12.parquet: 0:00:00.000805
+2023-02-04 09:08:03.347 | INFO     | __main__:<module>:149 - start 1a4e07032b35ff5aae9438fefc374b55
+2023-02-04 09:08:03.347 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000138
+2023-02-04 09:08:03.347 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000374
+2023-02-04 09:08:03.348 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 1a4e07032b35ff5aae9438fefc374b55: 0:00:00.000816
+2023-02-04 09:08:03.348 | INFO     | __main__:<module>:149 - start 218_2022-10-12.parquet
+2023-02-04 09:08:03.348 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000080
+2023-02-04 09:08:03.349 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000360
+2023-02-04 09:08:03.349 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 218_2022-10-12.parquet: 0:00:00.000846
+2023-02-04 09:08:03.350 | INFO     | __main__:<module>:149 - start 221_2022-10-12.parquet
+2023-02-04 09:08:03.350 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000084
+2023-02-04 09:08:03.350 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000347
+2023-02-04 09:08:03.351 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 221_2022-10-12.parquet: 0:00:00.000805
+2023-02-04 09:08:03.351 | INFO     | __main__:<module>:149 - start 226_2022-10-12.parquet
+2023-02-04 09:08:03.351 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000163
+2023-02-04 09:08:03.352 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000384
+2023-02-04 09:08:03.352 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 226_2022-10-12.parquet: 0:00:00.000914
+2023-02-04 09:08:03.353 | INFO     | __main__:<module>:149 - start 235_2022-10-12.parquet
+2023-02-04 09:08:03.353 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000154
+2023-02-04 09:08:03.353 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000373
+2023-02-04 09:08:03.354 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 235_2022-10-12.parquet: 0:00:00.000929
+2023-02-04 09:08:03.354 | INFO     | __main__:<module>:149 - start 243_2022-10-12.parquet
+2023-02-04 09:08:03.354 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000111
+2023-02-04 09:08:03.355 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000465
+2023-02-04 09:08:03.355 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 243_2022-10-12.parquet: 0:00:00.000857
+2023-02-04 09:08:03.355 | INFO     | __main__:<module>:149 - start 246_2022-10-12.parquet
+2023-02-04 09:08:03.356 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000092
+2023-02-04 09:08:03.356 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000344
+2023-02-04 09:08:03.356 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 246_2022-10-12.parquet: 0:00:00.000717
+2023-02-04 09:08:03.357 | INFO     | __main__:<module>:149 - start 247_2022-10-12.parquet
+2023-02-04 09:08:03.357 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.358 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000347
+2023-02-04 09:08:03.358 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 247_2022-10-12.parquet: 0:00:00.000729
+2023-02-04 09:08:03.358 | INFO     | __main__:<module>:149 - start 259_2022-10-12.parquet
+2023-02-04 09:08:03.359 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.359 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000371
+2023-02-04 09:08:03.359 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 259_2022-10-12.parquet: 0:00:00.000787
+2023-02-04 09:08:03.360 | INFO     | __main__:<module>:149 - start 269_2022-10-12.parquet
+2023-02-04 09:08:03.360 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.360 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000447
+2023-02-04 09:08:03.361 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 269_2022-10-12.parquet: 0:00:00.000811
+2023-02-04 09:08:03.361 | INFO     | __main__:<module>:149 - start 273_2022-10-12.parquet
+2023-02-04 09:08:03.361 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000097
+2023-02-04 09:08:03.362 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000361
+2023-02-04 09:08:03.362 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 273_2022-10-12.parquet: 0:00:00.000743
+2023-02-04 09:08:03.362 | INFO     | __main__:<module>:149 - start 282_2022-10-12.parquet
+2023-02-04 09:08:03.363 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000108
+2023-02-04 09:08:03.363 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000485
+2023-02-04 09:08:03.364 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 282_2022-10-12.parquet: 0:00:00.000948
+2023-02-04 09:08:03.364 | INFO     | __main__:<module>:149 - start 284_2022-10-12.parquet
+2023-02-04 09:08:03.364 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000091
+2023-02-04 09:08:03.365 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000442
+2023-02-04 09:08:03.365 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 284_2022-10-12.parquet: 0:00:00.000893
+2023-02-04 09:08:03.365 | INFO     | __main__:<module>:149 - start 290_2022-10-12.parquet
+2023-02-04 09:08:03.366 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000091
+2023-02-04 09:08:03.366 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000367
+2023-02-04 09:08:03.366 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 290_2022-10-12.parquet: 0:00:00.000745
+2023-02-04 09:08:03.367 | INFO     | __main__:<module>:149 - start 293_2022-10-12.parquet
+2023-02-04 09:08:03.367 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000131
+2023-02-04 09:08:03.368 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000374
+2023-02-04 09:08:03.368 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 293_2022-10-12.parquet: 0:00:00.000876
+2023-02-04 09:08:03.368 | INFO     | __main__:<module>:149 - start 294_2022-10-12.parquet
+2023-02-04 09:08:03.369 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000103
+2023-02-04 09:08:03.369 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000431
+2023-02-04 09:08:03.370 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 294_2022-10-12.parquet: 0:00:00.000844
+2023-02-04 09:08:03.370 | INFO     | __main__:<module>:149 - start 295_2022-10-12.parquet
+2023-02-04 09:08:03.370 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000142
+2023-02-04 09:08:03.371 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000362
+2023-02-04 09:08:03.371 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 295_2022-10-12.parquet: 0:00:00.000817
+2023-02-04 09:08:03.371 | INFO     | __main__:<module>:149 - start 2c82eb917900d5d8b69237702f68ab77
+2023-02-04 09:08:03.372 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000081
+2023-02-04 09:08:03.372 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000373
+2023-02-04 09:08:03.372 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 2c82eb917900d5d8b69237702f68ab77: 0:00:00.000731
+2023-02-04 09:08:03.373 | INFO     | __main__:<module>:149 - start 300_2022-10-12.parquet
+2023-02-04 09:08:03.373 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000077
+2023-02-04 09:08:03.373 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000358
+2023-02-04 09:08:03.374 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 300_2022-10-12.parquet: 0:00:00.000820
+2023-02-04 09:08:03.374 | INFO     | __main__:<module>:149 - start 301_2022-10-12.parquet
+2023-02-04 09:08:03.374 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000102
+2023-02-04 09:08:03.375 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000453
+2023-02-04 09:08:03.375 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 301_2022-10-12.parquet: 0:00:00.000829
+2023-02-04 09:08:03.375 | INFO     | __main__:<module>:149 - start 30_2022-10-12.parquet
+2023-02-04 09:08:03.376 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000102
+2023-02-04 09:08:03.376 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000366
+2023-02-04 09:08:03.376 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 30_2022-10-12.parquet: 0:00:00.000784
+2023-02-04 09:08:03.377 | INFO     | __main__:<module>:149 - start 30e5260fa62b36db8c1dea91fc0c130d
+2023-02-04 09:08:03.377 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000101
+2023-02-04 09:08:03.378 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000425
+2023-02-04 09:08:03.378 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 30e5260fa62b36db8c1dea91fc0c130d: 0:00:00.000889
+2023-02-04 09:08:03.378 | INFO     | __main__:<module>:149 - start 310_2022-10-12.parquet
+2023-02-04 09:08:03.379 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.379 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000442
+2023-02-04 09:08:03.379 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 310_2022-10-12.parquet: 0:00:00.000900
+2023-02-04 09:08:03.380 | INFO     | __main__:<module>:149 - start 314_2022-10-12.parquet
+2023-02-04 09:08:03.380 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000126
+2023-02-04 09:08:03.380 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000358
+2023-02-04 09:08:03.381 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 314_2022-10-12.parquet: 0:00:00.000770
+2023-02-04 09:08:03.381 | INFO     | __main__:<module>:149 - start 315_2022-10-12.parquet
+2023-02-04 09:08:03.381 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000084
+2023-02-04 09:08:03.382 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000366
+2023-02-04 09:08:03.382 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 315_2022-10-12.parquet: 0:00:00.000728
+2023-02-04 09:08:03.382 | INFO     | __main__:<module>:149 - start 3166ec2b9b4c75e31471d0c19384d97e
+2023-02-04 09:08:03.383 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000101
+2023-02-04 09:08:03.383 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000358
+2023-02-04 09:08:03.383 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 3166ec2b9b4c75e31471d0c19384d97e: 0:00:00.000816
+2023-02-04 09:08:03.384 | INFO     | __main__:<module>:149 - start 318c6bc87acccb67fb00aa9180aa5a12
+2023-02-04 09:08:03.384 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.385 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000462
+2023-02-04 09:08:03.385 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 318c6bc87acccb67fb00aa9180aa5a12: 0:00:00.000850
+2023-02-04 09:08:03.385 | INFO     | __main__:<module>:149 - start 336_2022-10-12.parquet
+2023-02-04 09:08:03.386 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000137
+2023-02-04 09:08:03.386 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000390
+2023-02-04 09:08:03.386 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 336_2022-10-12.parquet: 0:00:00.000797
+2023-02-04 09:08:03.386 | INFO     | __main__:<module>:149 - start 349_2022-10-12.parquet
+2023-02-04 09:08:03.387 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000093
+2023-02-04 09:08:03.387 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000344
+2023-02-04 09:08:03.388 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 349_2022-10-12.parquet: 0:00:00.000731
+2023-02-04 09:08:03.388 | INFO     | __main__:<module>:149 - start 34b027e071739231b3a2bc0828b6e581
+2023-02-04 09:08:03.388 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.389 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000353
+2023-02-04 09:08:03.389 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 34b027e071739231b3a2bc0828b6e581: 0:00:00.000776
+2023-02-04 09:08:03.389 | INFO     | __main__:<module>:149 - start 350_2022-10-12.parquet
+2023-02-04 09:08:03.390 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000110
+2023-02-04 09:08:03.390 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000673
+2023-02-04 09:08:03.390 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 350_2022-10-12.parquet: 0:00:00.001073
+2023-02-04 09:08:03.391 | INFO     | __main__:<module>:149 - start 361_2022-10-12.parquet
+2023-02-04 09:08:03.391 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000085
+2023-02-04 09:08:03.392 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000378
+2023-02-04 09:08:03.392 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 361_2022-10-12.parquet: 0:00:00.000818
+2023-02-04 09:08:03.392 | INFO     | __main__:<module>:149 - start 372_2022-10-12.parquet
+2023-02-04 09:08:03.393 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.393 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000379
+2023-02-04 09:08:03.393 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 372_2022-10-12.parquet: 0:00:00.000820
+2023-02-04 09:08:03.394 | INFO     | __main__:<module>:149 - start 3a508d597e0f71941bd18367262a9cbc
+2023-02-04 09:08:03.394 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.394 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000414
+2023-02-04 09:08:03.395 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 3a508d597e0f71941bd18367262a9cbc: 0:00:00.000807
+2023-02-04 09:08:03.395 | INFO     | __main__:<module>:149 - start 3ab660737c49a3d77b2d418fa8f123fb
+2023-02-04 09:08:03.395 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.396 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000369
+2023-02-04 09:08:03.396 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 3ab660737c49a3d77b2d418fa8f123fb: 0:00:00.000717
+2023-02-04 09:08:03.396 | INFO     | __main__:<module>:149 - start 3aded1f694ac384eb4f98f2d42498950
+2023-02-04 09:08:03.397 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000100
+2023-02-04 09:08:03.397 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000366
+2023-02-04 09:08:03.398 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 3aded1f694ac384eb4f98f2d42498950: 0:00:00.000865
+2023-02-04 09:08:03.398 | INFO     | __main__:<module>:149 - start 3c1b68c3dd8983c8fb8d2661fb7eb398
+2023-02-04 09:08:03.398 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000098
+2023-02-04 09:08:03.399 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000448
+2023-02-04 09:08:03.399 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 3c1b68c3dd8983c8fb8d2661fb7eb398: 0:00:00.000843
+2023-02-04 09:08:03.399 | INFO     | __main__:<module>:149 - start 4340d7ccf61d3a169068ffef1e310daf
+2023-02-04 09:08:03.400 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000166
+2023-02-04 09:08:03.400 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000368
+2023-02-04 09:08:03.400 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 4340d7ccf61d3a169068ffef1e310daf: 0:00:00.000899
+2023-02-04 09:08:03.401 | INFO     | __main__:<module>:149 - start 443649972c5f581abf6ea43a6f6fa7a7
+2023-02-04 09:08:03.401 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000092
+2023-02-04 09:08:03.402 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000361
+2023-02-04 09:08:03.402 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 443649972c5f581abf6ea43a6f6fa7a7: 0:00:00.000805
+2023-02-04 09:08:03.402 | INFO     | __main__:<module>:149 - start 4594028c6c1ebbb6dbfb4284d7510b4e
+2023-02-04 09:08:03.403 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000115
+2023-02-04 09:08:03.403 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000419
+2023-02-04 09:08:03.404 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 4594028c6c1ebbb6dbfb4284d7510b4e: 0:00:00.000816
+2023-02-04 09:08:03.404 | INFO     | __main__:<module>:149 - start 45_2022-10-12.parquet
+2023-02-04 09:08:03.404 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000086
+2023-02-04 09:08:03.405 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000353
+2023-02-04 09:08:03.405 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 45_2022-10-12.parquet: 0:00:00.000732
+2023-02-04 09:08:03.405 | INFO     | __main__:<module>:149 - start 485c1365977842af8bfdab28fa07ba47
+2023-02-04 09:08:03.406 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000080
+2023-02-04 09:08:03.406 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000366
+2023-02-04 09:08:03.406 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 485c1365977842af8bfdab28fa07ba47: 0:00:00.000860
+2023-02-04 09:08:03.407 | INFO     | __main__:<module>:149 - start 48b51d6d96bb01c42c87e40824248fe4
+2023-02-04 09:08:03.407 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000088
+2023-02-04 09:08:03.408 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000431
+2023-02-04 09:08:03.408 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 48b51d6d96bb01c42c87e40824248fe4: 0:00:00.000825
+2023-02-04 09:08:03.408 | INFO     | __main__:<module>:149 - start 49fe49431d07dfa2a7342c73e46b6931
+2023-02-04 09:08:03.409 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000089
+2023-02-04 09:08:03.409 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000372
+2023-02-04 09:08:03.409 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 49fe49431d07dfa2a7342c73e46b6931: 0:00:00.000731
+2023-02-04 09:08:03.410 | INFO     | __main__:<module>:149 - start 4_2022-10-12.parquet
+2023-02-04 09:08:03.410 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000085
+2023-02-04 09:08:03.410 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000373
+2023-02-04 09:08:03.411 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 4_2022-10-12.parquet: 0:00:00.000815
+2023-02-04 09:08:03.411 | INFO     | __main__:<module>:149 - start 4a9d71507be65ce2f46e0beb26418b1a
+2023-02-04 09:08:03.411 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.412 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000418
+2023-02-04 09:08:03.412 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 4a9d71507be65ce2f46e0beb26418b1a: 0:00:00.000793
+2023-02-04 09:08:03.412 | INFO     | __main__:<module>:149 - start 4bb240cf480589e58c6e58d06d6fb72c
+2023-02-04 09:08:03.413 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000085
+2023-02-04 09:08:03.413 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000432
+2023-02-04 09:08:03.413 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 4bb240cf480589e58c6e58d06d6fb72c: 0:00:00.000790
+2023-02-04 09:08:03.414 | INFO     | __main__:<module>:149 - start 5839b6a0ea1e93dc44574053e990d51e
+2023-02-04 09:08:03.414 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000086
+2023-02-04 09:08:03.414 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000380
+2023-02-04 09:08:03.415 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 5839b6a0ea1e93dc44574053e990d51e: 0:00:00.000741
+2023-02-04 09:08:03.415 | INFO     | __main__:<module>:149 - start 5fcec68478fd5427be6bb2c4a3b240a6
+2023-02-04 09:08:03.415 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000091
+2023-02-04 09:08:03.416 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000492
+2023-02-04 09:08:03.416 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 5fcec68478fd5427be6bb2c4a3b240a6: 0:00:00.000964
+2023-02-04 09:08:03.417 | INFO     | __main__:<module>:149 - start 609173a0aa18c6e168c54b8731584ffa
+2023-02-04 09:08:03.417 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000090
+2023-02-04 09:08:03.417 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000459
+2023-02-04 09:08:03.418 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 609173a0aa18c6e168c54b8731584ffa: 0:00:00.000849
+2023-02-04 09:08:03.418 | INFO     | __main__:<module>:149 - start 644cf39285755e8ba2dc68597faa48aa
+2023-02-04 09:08:03.419 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000252
+2023-02-04 09:08:03.419 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000369
+2023-02-04 09:08:03.419 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 644cf39285755e8ba2dc68597faa48aa: 0:00:00.000893
+2023-02-04 09:08:03.420 | INFO     | __main__:<module>:149 - start 651832dd0d35804ce4e30063d095e3e5
+2023-02-04 09:08:03.420 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000105
+2023-02-04 09:08:03.420 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000329
+2023-02-04 09:08:03.421 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 651832dd0d35804ce4e30063d095e3e5: 0:00:00.000791
+2023-02-04 09:08:03.421 | INFO     | __main__:<module>:149 - start 65793dff25c6e0d53703911d49d797ea
+2023-02-04 09:08:03.421 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000097
+2023-02-04 09:08:03.422 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000406
+2023-02-04 09:08:03.422 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 65793dff25c6e0d53703911d49d797ea: 0:00:00.000779
+2023-02-04 09:08:03.422 | INFO     | __main__:<module>:149 - start 6d1991ecbdee1e06031cda8761757f03
+2023-02-04 09:08:03.423 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.423 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000472
+2023-02-04 09:08:03.423 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 6d1991ecbdee1e06031cda8761757f03: 0:00:00.000822
+2023-02-04 09:08:03.424 | INFO     | __main__:<module>:149 - start 6e460d0f1aec519c62478f4ed4c269d1
+2023-02-04 09:08:03.424 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.424 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000430
+2023-02-04 09:08:03.425 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 6e460d0f1aec519c62478f4ed4c269d1: 0:00:00.000787
+2023-02-04 09:08:03.425 | INFO     | __main__:<module>:149 - start 6ef1ef238c89b672380a82b091df9a2b
+2023-02-04 09:08:03.426 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000090
+2023-02-04 09:08:03.426 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000413
+2023-02-04 09:08:03.426 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 6ef1ef238c89b672380a82b091df9a2b: 0:00:00.000855
+2023-02-04 09:08:03.427 | INFO     | __main__:<module>:149 - start 707fef642f609018a05f649ffd491563
+2023-02-04 09:08:03.427 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000087
+2023-02-04 09:08:03.427 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000435
+2023-02-04 09:08:03.428 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 707fef642f609018a05f649ffd491563: 0:00:00.000818
+2023-02-04 09:08:03.428 | INFO     | __main__:<module>:149 - start 70c6ca7a0f9df3109381cd55950cd99a
+2023-02-04 09:08:03.428 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000166
+2023-02-04 09:08:03.429 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000399
+2023-02-04 09:08:03.429 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 70c6ca7a0f9df3109381cd55950cd99a: 0:00:00.000849
+2023-02-04 09:08:03.429 | INFO     | __main__:<module>:149 - start 73ebf252af88c41aaf4426c6d3dc586c
+2023-02-04 09:08:03.430 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000087
+2023-02-04 09:08:03.430 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000375
+2023-02-04 09:08:03.430 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 73ebf252af88c41aaf4426c6d3dc586c: 0:00:00.000749
+2023-02-04 09:08:03.431 | INFO     | __main__:<module>:149 - start 74fe15010f17ff576045422f9bb38b00
+2023-02-04 09:08:03.431 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.431 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000378
+2023-02-04 09:08:03.432 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 74fe15010f17ff576045422f9bb38b00: 0:00:00.000830
+2023-02-04 09:08:03.432 | INFO     | __main__:<module>:149 - start 75_2022-10-12.parquet
+2023-02-04 09:08:03.432 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000085
+2023-02-04 09:08:03.433 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000438
+2023-02-04 09:08:03.433 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 75_2022-10-12.parquet: 0:00:00.000794
+2023-02-04 09:08:03.433 | INFO     | __main__:<module>:149 - start 7c48cc5675c9266fb6851070489c53e9
+2023-02-04 09:08:03.434 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000151
+2023-02-04 09:08:03.434 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000360
+2023-02-04 09:08:03.434 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 7c48cc5675c9266fb6851070489c53e9: 0:00:00.000798
+2023-02-04 09:08:03.435 | INFO     | __main__:<module>:149 - start 82d94402b3325d1e93e2a1f5b80a300d
+2023-02-04 09:08:03.435 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.436 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000382
+2023-02-04 09:08:03.436 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 82d94402b3325d1e93e2a1f5b80a300d: 0:00:00.000831
+2023-02-04 09:08:03.436 | INFO     | __main__:<module>:149 - start 8ee6ecf3c45ac2669ee96ae4c8550950
+2023-02-04 09:08:03.437 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000084
+2023-02-04 09:08:03.437 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000361
+2023-02-04 09:08:03.437 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 8ee6ecf3c45ac2669ee96ae4c8550950: 0:00:00.000778
+2023-02-04 09:08:03.437 | INFO     | __main__:<module>:149 - start 8f0b9daf627c4f17cbe7f4460208a1af
+2023-02-04 09:08:03.438 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000084
+2023-02-04 09:08:03.438 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000463
+2023-02-04 09:08:03.439 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 8f0b9daf627c4f17cbe7f4460208a1af: 0:00:00.000839
+2023-02-04 09:08:03.439 | INFO     | __main__:<module>:149 - start 910fbc31da89056bdee9ef48b235ef44
+2023-02-04 09:08:03.439 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000085
+2023-02-04 09:08:03.440 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000361
+2023-02-04 09:08:03.440 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 910fbc31da89056bdee9ef48b235ef44: 0:00:00.000745
+2023-02-04 09:08:03.440 | INFO     | __main__:<module>:149 - start 927430a256c4d23e37cf417362df9e7f
+2023-02-04 09:08:03.441 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000091
+2023-02-04 09:08:03.441 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000388
+2023-02-04 09:08:03.441 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 927430a256c4d23e37cf417362df9e7f: 0:00:00.000743
+2023-02-04 09:08:03.442 | INFO     | __main__:<module>:149 - start 9b19dee2eacd2a4e70c2750056c005ff
+2023-02-04 09:08:03.442 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000081
+2023-02-04 09:08:03.442 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000334
+2023-02-04 09:08:03.443 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 9b19dee2eacd2a4e70c2750056c005ff: 0:00:00.000753
+2023-02-04 09:08:03.443 | INFO     | __main__:<module>:149 - start 9bd1e0098ba62c06837bf2330db605c2
+2023-02-04 09:08:03.443 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.444 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000416
+2023-02-04 09:08:03.444 | INFO     | __main__:<module>:174 - gtfs_dataset_key: 9bd1e0098ba62c06837bf2330db605c2: 0:00:00.000804
+2023-02-04 09:08:03.444 | INFO     | __main__:<module>:149 - start aa9fe79adc8edf93ebfb1ab83c8acc69
+2023-02-04 09:08:03.445 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000176
+2023-02-04 09:08:03.445 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000365
+2023-02-04 09:08:03.445 | INFO     | __main__:<module>:174 - gtfs_dataset_key: aa9fe79adc8edf93ebfb1ab83c8acc69: 0:00:00.000803
+2023-02-04 09:08:03.446 | INFO     | __main__:<module>:149 - start ac86302bad2b6f66bb6d5aae35ffb52f
+2023-02-04 09:08:03.446 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.446 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000368
+2023-02-04 09:08:03.447 | INFO     | __main__:<module>:174 - gtfs_dataset_key: ac86302bad2b6f66bb6d5aae35ffb52f: 0:00:00.000722
+2023-02-04 09:08:03.447 | INFO     | __main__:<module>:149 - start ae93720f3c32c12f9ed912e465066bfc
+2023-02-04 09:08:03.447 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000109
+2023-02-04 09:08:03.448 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000343
+2023-02-04 09:08:03.448 | INFO     | __main__:<module>:174 - gtfs_dataset_key: ae93720f3c32c12f9ed912e465066bfc: 0:00:00.000822
+2023-02-04 09:08:03.448 | INFO     | __main__:<module>:149 - start b04260a7725206fcd69b4e4a68b13aae
+2023-02-04 09:08:03.449 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.449 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000428
+2023-02-04 09:08:03.449 | INFO     | __main__:<module>:174 - gtfs_dataset_key: b04260a7725206fcd69b4e4a68b13aae: 0:00:00.000807
+2023-02-04 09:08:03.450 | INFO     | __main__:<module>:149 - start bc21582ac1ad2b7de0647dfd5b76f67c
+2023-02-04 09:08:03.450 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000089
+2023-02-04 09:08:03.450 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000359
+2023-02-04 09:08:03.451 | INFO     | __main__:<module>:174 - gtfs_dataset_key: bc21582ac1ad2b7de0647dfd5b76f67c: 0:00:00.000773
+2023-02-04 09:08:03.451 | INFO     | __main__:<module>:149 - start bdfa3214963bbc4ad4b08e3d5f726744
+2023-02-04 09:08:03.452 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000082
+2023-02-04 09:08:03.452 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000366
+2023-02-04 09:08:03.452 | INFO     | __main__:<module>:174 - gtfs_dataset_key: bdfa3214963bbc4ad4b08e3d5f726744: 0:00:00.000785
+2023-02-04 09:08:03.453 | INFO     | __main__:<module>:149 - start c5b2bf3815a12d5f7242923ed399d1ea
+2023-02-04 09:08:03.453 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000083
+2023-02-04 09:08:03.453 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000414
+2023-02-04 09:08:03.454 | INFO     | __main__:<module>:174 - gtfs_dataset_key: c5b2bf3815a12d5f7242923ed399d1ea: 0:00:00.000889
+2023-02-04 09:08:03.454 | INFO     | __main__:<module>:149 - start c866d1f427084d94bfa3831d0014d775
+2023-02-04 09:08:03.454 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000152
+2023-02-04 09:08:03.455 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000438
+2023-02-04 09:08:03.455 | INFO     | __main__:<module>:174 - gtfs_dataset_key: c866d1f427084d94bfa3831d0014d775: 0:00:00.000889
+2023-02-04 09:08:03.456 | INFO     | __main__:<module>:149 - start c9ec81d837b7ef2feedcea2c940f15d4
+2023-02-04 09:08:03.456 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000085
+2023-02-04 09:08:03.456 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000388
+2023-02-04 09:08:03.457 | INFO     | __main__:<module>:174 - gtfs_dataset_key: c9ec81d837b7ef2feedcea2c940f15d4: 0:00:00.000830
+2023-02-04 09:08:03.457 | INFO     | __main__:<module>:149 - start cb28d936a30d08f64661c81751af4382
+2023-02-04 09:08:03.457 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000085
+2023-02-04 09:08:03.458 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000993
+2023-02-04 09:08:03.459 | INFO     | __main__:<module>:174 - gtfs_dataset_key: cb28d936a30d08f64661c81751af4382: 0:00:00.001381
+2023-02-04 09:08:03.459 | INFO     | __main__:<module>:149 - start d2f0224819832ba7d0039ff5e84c5bdd
+2023-02-04 09:08:03.459 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000092
+2023-02-04 09:08:03.460 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000460
+2023-02-04 09:08:03.460 | INFO     | __main__:<module>:174 - gtfs_dataset_key: d2f0224819832ba7d0039ff5e84c5bdd: 0:00:00.000857
+2023-02-04 09:08:03.461 | INFO     | __main__:<module>:149 - start d41e4cfdd42950bde9876c5dc670017d
+2023-02-04 09:08:03.461 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000092
+2023-02-04 09:08:03.463 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.001560
+2023-02-04 09:08:03.463 | INFO     | __main__:<module>:174 - gtfs_dataset_key: d41e4cfdd42950bde9876c5dc670017d: 0:00:00.001993
+2023-02-04 09:08:03.463 | INFO     | __main__:<module>:149 - start dac1d3922d8cb62f5feba57d5fdfb012
+2023-02-04 09:08:03.464 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000126
+2023-02-04 09:08:03.464 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000450
+2023-02-04 09:08:03.464 | INFO     | __main__:<module>:174 - gtfs_dataset_key: dac1d3922d8cb62f5feba57d5fdfb012: 0:00:00.000882
+2023-02-04 09:08:03.465 | INFO     | __main__:<module>:149 - start ddc9965fcbf3beaba6d2cb40a3e67c1e
+2023-02-04 09:08:03.465 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000089
+2023-02-04 09:08:03.466 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000443
+2023-02-04 09:08:03.466 | INFO     | __main__:<module>:174 - gtfs_dataset_key: ddc9965fcbf3beaba6d2cb40a3e67c1e: 0:00:00.000843
+2023-02-04 09:08:03.466 | INFO     | __main__:<module>:149 - start e70b24e4d4931a9ada95fc76a2b53e9b
+2023-02-04 09:08:03.467 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000086
+2023-02-04 09:08:03.467 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000463
+2023-02-04 09:08:03.467 | INFO     | __main__:<module>:174 - gtfs_dataset_key: e70b24e4d4931a9ada95fc76a2b53e9b: 0:00:00.000839
+2023-02-04 09:08:03.468 | INFO     | __main__:<module>:149 - start e88d7f9e3c43ddf41c75c94d12a440a9
+2023-02-04 09:08:03.471 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000193
+2023-02-04 09:08:03.472 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000725
+2023-02-04 09:08:03.472 | INFO     | __main__:<module>:174 - gtfs_dataset_key: e88d7f9e3c43ddf41c75c94d12a440a9: 0:00:00.001261
+2023-02-04 09:08:03.473 | INFO     | __main__:<module>:149 - start ee4a7698aa24503c4058d10c238e6f8a
+2023-02-04 09:08:03.473 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000140
+2023-02-04 09:08:03.474 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000502
+2023-02-04 09:08:03.474 | INFO     | __main__:<module>:174 - gtfs_dataset_key: ee4a7698aa24503c4058d10c238e6f8a: 0:00:00.000956
+2023-02-04 09:08:03.474 | INFO     | __main__:<module>:149 - start ee901494c3e6dabe62812966c94fa34c
+2023-02-04 09:08:03.475 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000134
+2023-02-04 09:08:03.475 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000366
+2023-02-04 09:08:03.475 | INFO     | __main__:<module>:174 - gtfs_dataset_key: ee901494c3e6dabe62812966c94fa34c: 0:00:00.000851
+2023-02-04 09:08:03.476 | INFO     | __main__:<module>:149 - start f09062d4bb1cb04b59bdc8232f0cfc90
+2023-02-04 09:08:03.476 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000101
+2023-02-04 09:08:03.477 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000450
+2023-02-04 09:08:03.477 | INFO     | __main__:<module>:174 - gtfs_dataset_key: f09062d4bb1cb04b59bdc8232f0cfc90: 0:00:00.000857
+2023-02-04 09:08:03.477 | INFO     | __main__:<module>:149 - start f1497340b654f3ce925f8b8c2f83e1c2
+2023-02-04 09:08:03.478 | INFO     | __main__:<module>:157 - imported data: 0:00:00.000094
+2023-02-04 09:08:03.478 | INFO     | __main__:<module>:171 - keep enter/exit points by segment-trip: 0:00:00.000367
+2023-02-04 09:08:03.481 | INFO     | __main__:<module>:174 - gtfs_dataset_key: f1497340b654f3ce925f8b8c2f83e1c2: 0:00:00.003828
+2023-02-04 09:08:03.482 | INFO     | __main__:<module>:178 - start compute and export of results
+2023-02-04 09:09:26.065 | INFO     | __main__:<module>:141 - Analysis date: 2023-01-18
+2023-02-04 09:09:26.163 | INFO     | __main__:<module>:150 - start 02af2d11f5bd44434c581540e9e857d8
+2023-02-04 09:09:26.163 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000372
+2023-02-04 09:09:26.164 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000702
+2023-02-04 09:09:26.165 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 02af2d11f5bd44434c581540e9e857d8: 0:00:00.001536
+2023-02-04 09:09:26.165 | INFO     | __main__:<module>:150 - start 03cadbffef6f3cd4ce839b218bc65e82
+2023-02-04 09:09:26.166 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000194
+2023-02-04 09:09:26.166 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000527
+2023-02-04 09:09:26.166 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 03cadbffef6f3cd4ce839b218bc65e82: 0:00:00.001055
+2023-02-04 09:09:26.167 | INFO     | __main__:<module>:150 - start 087e5ecdcf65499829e681a60e606637
+2023-02-04 09:09:26.168 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000171
+2023-02-04 09:09:26.168 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000499
+2023-02-04 09:09:26.168 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 087e5ecdcf65499829e681a60e606637: 0:00:00.001000
+2023-02-04 09:09:26.169 | INFO     | __main__:<module>:150 - start 08c4e0555b1b90cd7464ac801157a167
+2023-02-04 09:09:26.169 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000116
+2023-02-04 09:09:26.170 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000548
+2023-02-04 09:09:26.170 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 08c4e0555b1b90cd7464ac801157a167: 0:00:00.000985
+2023-02-04 09:09:26.170 | INFO     | __main__:<module>:150 - start 0a3c3013dc4baff072e14f8ae8a796bb
+2023-02-04 09:09:26.171 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000102
+2023-02-04 09:09:26.172 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000529
+2023-02-04 09:09:26.172 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 0a3c3013dc4baff072e14f8ae8a796bb: 0:00:00.001004
+2023-02-04 09:09:26.172 | INFO     | __main__:<module>:150 - start 0da5a62ebe57a31bce87abf9fbb2857a
+2023-02-04 09:09:26.173 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000163
+2023-02-04 09:09:26.173 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000414
+2023-02-04 09:09:26.174 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 0da5a62ebe57a31bce87abf9fbb2857a: 0:00:00.000997
+2023-02-04 09:09:26.174 | INFO     | __main__:<module>:150 - start 0f68ec4d97d179570b494c74b6fca55d
+2023-02-04 09:09:26.174 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000145
+2023-02-04 09:09:26.175 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000431
+2023-02-04 09:09:26.175 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 0f68ec4d97d179570b494c74b6fca55d: 0:00:00.000974
+2023-02-04 09:09:26.176 | INFO     | __main__:<module>:150 - start 0faa34840bb65e96b7f83b7f379c2edd
+2023-02-04 09:09:26.176 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000141
+2023-02-04 09:09:26.177 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000413
+2023-02-04 09:09:26.177 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 0faa34840bb65e96b7f83b7f379c2edd: 0:00:00.001008
+2023-02-04 09:09:26.177 | INFO     | __main__:<module>:150 - start 110_2022-10-12.parquet
+2023-02-04 09:09:26.178 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000101
+2023-02-04 09:09:26.178 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000448
+2023-02-04 09:09:26.179 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 110_2022-10-12.parquet: 0:00:00.001065
+2023-02-04 09:09:26.179 | INFO     | __main__:<module>:150 - start 115fa7bd31a65b3210945ee884f36132
+2023-02-04 09:09:26.180 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000167
+2023-02-04 09:09:26.180 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000473
+2023-02-04 09:09:26.181 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 115fa7bd31a65b3210945ee884f36132: 0:00:00.001025
+2023-02-04 09:09:26.181 | INFO     | __main__:<module>:150 - start 126_2022-10-12.parquet
+2023-02-04 09:09:26.181 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000138
+2023-02-04 09:09:26.182 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000514
+2023-02-04 09:09:26.182 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 126_2022-10-12.parquet: 0:00:00.001031
+2023-02-04 09:09:26.183 | INFO     | __main__:<module>:150 - start 127_2022-10-12.parquet
+2023-02-04 09:09:26.183 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000132
+2023-02-04 09:09:26.184 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000400
+2023-02-04 09:09:26.184 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 127_2022-10-12.parquet: 0:00:00.000956
+2023-02-04 09:09:26.184 | INFO     | __main__:<module>:150 - start 135_2022-10-12.parquet
+2023-02-04 09:09:26.185 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000107
+2023-02-04 09:09:26.185 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000478
+2023-02-04 09:09:26.186 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 135_2022-10-12.parquet: 0:00:00.000988
+2023-02-04 09:09:26.186 | INFO     | __main__:<module>:150 - start 13c6e9f58e53c12416b7754352fa1acd
+2023-02-04 09:09:26.187 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000132
+2023-02-04 09:09:26.187 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000484
+2023-02-04 09:09:26.187 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 13c6e9f58e53c12416b7754352fa1acd: 0:00:00.001005
+2023-02-04 09:09:26.188 | INFO     | __main__:<module>:150 - start 148_2022-10-12.parquet
+2023-02-04 09:09:26.188 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000089
+2023-02-04 09:09:26.189 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000445
+2023-02-04 09:09:26.189 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 148_2022-10-12.parquet: 0:00:00.000898
+2023-02-04 09:09:26.189 | INFO     | __main__:<module>:150 - start 159_2022-10-12.parquet
+2023-02-04 09:09:26.190 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000194
+2023-02-04 09:09:26.190 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000401
+2023-02-04 09:09:26.191 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 159_2022-10-12.parquet: 0:00:00.001040
+2023-02-04 09:09:26.191 | INFO     | __main__:<module>:150 - start 167_2022-10-12.parquet
+2023-02-04 09:09:26.192 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000158
+2023-02-04 09:09:26.192 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000458
+2023-02-04 09:09:26.192 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 167_2022-10-12.parquet: 0:00:00.000990
+2023-02-04 09:09:26.193 | INFO     | __main__:<module>:150 - start 16ee668743cb1ea540bf833d301a1686
+2023-02-04 09:09:26.193 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000125
+2023-02-04 09:09:26.194 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000484
+2023-02-04 09:09:26.194 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 16ee668743cb1ea540bf833d301a1686: 0:00:00.000987
+2023-02-04 09:09:26.195 | INFO     | __main__:<module>:150 - start 17b259a4ae767d3ef5478964851cabb8
+2023-02-04 09:09:26.195 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000084
+2023-02-04 09:09:26.196 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000522
+2023-02-04 09:09:26.196 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 17b259a4ae767d3ef5478964851cabb8: 0:00:00.000947
+2023-02-04 09:09:26.196 | INFO     | __main__:<module>:150 - start 182_2022-10-12.parquet
+2023-02-04 09:09:26.197 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000109
+2023-02-04 09:09:26.197 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000447
+2023-02-04 09:09:26.198 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 182_2022-10-12.parquet: 0:00:00.000971
+2023-02-04 09:09:26.198 | INFO     | __main__:<module>:150 - start 188_2022-10-12.parquet
+2023-02-04 09:09:26.198 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000123
+2023-02-04 09:09:26.199 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000551
+2023-02-04 09:09:26.199 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 188_2022-10-12.parquet: 0:00:00.000989
+2023-02-04 09:09:26.200 | INFO     | __main__:<module>:150 - start 194_2022-10-12.parquet
+2023-02-04 09:09:26.200 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000086
+2023-02-04 09:09:26.201 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000477
+2023-02-04 09:09:26.201 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 194_2022-10-12.parquet: 0:00:00.000920
+2023-02-04 09:09:26.201 | INFO     | __main__:<module>:150 - start 1a4e07032b35ff5aae9438fefc374b55
+2023-02-04 09:09:26.202 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000112
+2023-02-04 09:09:26.202 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000451
+2023-02-04 09:09:26.203 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 1a4e07032b35ff5aae9438fefc374b55: 0:00:00.001003
+2023-02-04 09:09:26.203 | INFO     | __main__:<module>:150 - start 218_2022-10-12.parquet
+2023-02-04 09:09:26.204 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000123
+2023-02-04 09:09:26.204 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000456
+2023-02-04 09:09:26.204 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 218_2022-10-12.parquet: 0:00:00.000953
+2023-02-04 09:09:26.205 | INFO     | __main__:<module>:150 - start 221_2022-10-12.parquet
+2023-02-04 09:09:26.205 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000131
+2023-02-04 09:09:26.206 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000466
+2023-02-04 09:09:26.206 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 221_2022-10-12.parquet: 0:00:00.000929
+2023-02-04 09:09:26.206 | INFO     | __main__:<module>:150 - start 226_2022-10-12.parquet
+2023-02-04 09:09:26.207 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000163
+2023-02-04 09:09:26.207 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000394
+2023-02-04 09:09:26.208 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 226_2022-10-12.parquet: 0:00:00.000975
+2023-02-04 09:09:26.208 | INFO     | __main__:<module>:150 - start 235_2022-10-12.parquet
+2023-02-04 09:09:26.209 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000119
+2023-02-04 09:09:26.209 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000524
+2023-02-04 09:09:26.209 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 235_2022-10-12.parquet: 0:00:00.000980
+2023-02-04 09:09:26.210 | INFO     | __main__:<module>:150 - start 243_2022-10-12.parquet
+2023-02-04 09:09:26.210 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000129
+2023-02-04 09:09:26.211 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000531
+2023-02-04 09:09:26.211 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 243_2022-10-12.parquet: 0:00:00.000994
+2023-02-04 09:09:26.212 | INFO     | __main__:<module>:150 - start 246_2022-10-12.parquet
+2023-02-04 09:09:26.212 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000087
+2023-02-04 09:09:26.212 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000445
+2023-02-04 09:09:26.213 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 246_2022-10-12.parquet: 0:00:00.000963
+2023-02-04 09:09:26.213 | INFO     | __main__:<module>:150 - start 247_2022-10-12.parquet
+2023-02-04 09:09:26.214 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000104
+2023-02-04 09:09:26.214 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000483
+2023-02-04 09:09:26.215 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 247_2022-10-12.parquet: 0:00:00.000935
+2023-02-04 09:09:26.215 | INFO     | __main__:<module>:150 - start 259_2022-10-12.parquet
+2023-02-04 09:09:26.215 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000125
+2023-02-04 09:09:26.216 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000500
+2023-02-04 09:09:26.216 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 259_2022-10-12.parquet: 0:00:00.001029
+2023-02-04 09:09:26.217 | INFO     | __main__:<module>:150 - start 269_2022-10-12.parquet
+2023-02-04 09:09:26.217 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000086
+2023-02-04 09:09:26.218 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000473
+2023-02-04 09:09:26.218 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 269_2022-10-12.parquet: 0:00:00.000967
+2023-02-04 09:09:26.218 | INFO     | __main__:<module>:150 - start 273_2022-10-12.parquet
+2023-02-04 09:09:26.219 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000086
+2023-02-04 09:09:26.219 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000469
+2023-02-04 09:09:26.220 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 273_2022-10-12.parquet: 0:00:00.000989
+2023-02-04 09:09:26.220 | INFO     | __main__:<module>:150 - start 282_2022-10-12.parquet
+2023-02-04 09:09:26.221 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000133
+2023-02-04 09:09:26.221 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000521
+2023-02-04 09:09:26.222 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 282_2022-10-12.parquet: 0:00:00.001081
+2023-02-04 09:09:26.222 | INFO     | __main__:<module>:150 - start 284_2022-10-12.parquet
+2023-02-04 09:09:26.222 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000130
+2023-02-04 09:09:26.223 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000496
+2023-02-04 09:09:26.223 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 284_2022-10-12.parquet: 0:00:00.000961
+2023-02-04 09:09:26.224 | INFO     | __main__:<module>:150 - start 290_2022-10-12.parquet
+2023-02-04 09:09:26.224 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000097
+2023-02-04 09:09:26.225 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000494
+2023-02-04 09:09:26.225 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 290_2022-10-12.parquet: 0:00:00.001004
+2023-02-04 09:09:26.225 | INFO     | __main__:<module>:150 - start 293_2022-10-12.parquet
+2023-02-04 09:09:26.226 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000097
+2023-02-04 09:09:26.226 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000467
+2023-02-04 09:09:26.227 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 293_2022-10-12.parquet: 0:00:00.001005
+2023-02-04 09:09:26.227 | INFO     | __main__:<module>:150 - start 294_2022-10-12.parquet
+2023-02-04 09:09:26.228 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000144
+2023-02-04 09:09:26.228 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000395
+2023-02-04 09:09:26.229 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 294_2022-10-12.parquet: 0:00:00.000919
+2023-02-04 09:09:26.229 | INFO     | __main__:<module>:150 - start 295_2022-10-12.parquet
+2023-02-04 09:09:26.229 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000131
+2023-02-04 09:09:26.230 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000526
+2023-02-04 09:09:26.230 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 295_2022-10-12.parquet: 0:00:00.001045
+2023-02-04 09:09:26.231 | INFO     | __main__:<module>:150 - start 2c82eb917900d5d8b69237702f68ab77
+2023-02-04 09:09:26.231 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000129
+2023-02-04 09:09:26.232 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000415
+2023-02-04 09:09:26.232 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 2c82eb917900d5d8b69237702f68ab77: 0:00:00.000972
+2023-02-04 09:09:26.232 | INFO     | __main__:<module>:150 - start 300_2022-10-12.parquet
+2023-02-04 09:09:26.233 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000089
+2023-02-04 09:09:26.233 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000446
+2023-02-04 09:09:26.234 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 300_2022-10-12.parquet: 0:00:00.000948
+2023-02-04 09:09:26.234 | INFO     | __main__:<module>:150 - start 301_2022-10-12.parquet
+2023-02-04 09:09:26.234 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000088
+2023-02-04 09:09:26.235 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000493
+2023-02-04 09:09:26.235 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 301_2022-10-12.parquet: 0:00:00.000920
+2023-02-04 09:09:26.236 | INFO     | __main__:<module>:150 - start 30_2022-10-12.parquet
+2023-02-04 09:09:26.236 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000089
+2023-02-04 09:09:26.237 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000441
+2023-02-04 09:09:26.237 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 30_2022-10-12.parquet: 0:00:00.000974
+2023-02-04 09:09:26.237 | INFO     | __main__:<module>:150 - start 30e5260fa62b36db8c1dea91fc0c130d
+2023-02-04 09:09:26.238 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000102
+2023-02-04 09:09:26.238 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000324
+2023-02-04 09:09:26.238 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 30e5260fa62b36db8c1dea91fc0c130d: 0:00:00.000669
+2023-02-04 09:09:26.238 | INFO     | __main__:<module>:150 - start 310_2022-10-12.parquet
+2023-02-04 09:09:26.239 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000071
+2023-02-04 09:09:26.239 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000348
+2023-02-04 09:09:26.239 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 310_2022-10-12.parquet: 0:00:00.000663
+2023-02-04 09:09:26.239 | INFO     | __main__:<module>:150 - start 314_2022-10-12.parquet
+2023-02-04 09:09:26.240 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000096
+2023-02-04 09:09:26.240 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000252
+2023-02-04 09:09:26.240 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 314_2022-10-12.parquet: 0:00:00.000529
+2023-02-04 09:09:26.240 | INFO     | __main__:<module>:150 - start 315_2022-10-12.parquet
+2023-02-04 09:09:26.241 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000059
+2023-02-04 09:09:26.241 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000269
+2023-02-04 09:09:26.241 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 315_2022-10-12.parquet: 0:00:00.000512
+2023-02-04 09:09:26.241 | INFO     | __main__:<module>:150 - start 3166ec2b9b4c75e31471d0c19384d97e
+2023-02-04 09:09:26.242 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000053
+2023-02-04 09:09:26.242 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000306
+2023-02-04 09:09:26.242 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3166ec2b9b4c75e31471d0c19384d97e: 0:00:00.000560
+2023-02-04 09:09:26.242 | INFO     | __main__:<module>:150 - start 318c6bc87acccb67fb00aa9180aa5a12
+2023-02-04 09:09:26.242 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000053
+2023-02-04 09:09:26.243 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000258
+2023-02-04 09:09:26.243 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 318c6bc87acccb67fb00aa9180aa5a12: 0:00:00.000556
+2023-02-04 09:09:26.243 | INFO     | __main__:<module>:150 - start 336_2022-10-12.parquet
+2023-02-04 09:09:26.243 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000082
+2023-02-04 09:09:26.244 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000393
+2023-02-04 09:09:26.244 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 336_2022-10-12.parquet: 0:00:00.000731
+2023-02-04 09:09:26.244 | INFO     | __main__:<module>:150 - start 349_2022-10-12.parquet
+2023-02-04 09:09:26.245 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000085
+2023-02-04 09:09:26.245 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000563
+2023-02-04 09:09:26.246 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 349_2022-10-12.parquet: 0:00:00.001017
+2023-02-04 09:09:26.246 | INFO     | __main__:<module>:150 - start 34b027e071739231b3a2bc0828b6e581
+2023-02-04 09:09:26.246 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000091
+2023-02-04 09:09:26.247 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000441
+2023-02-04 09:09:26.247 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 34b027e071739231b3a2bc0828b6e581: 0:00:00.000775
+2023-02-04 09:09:26.247 | INFO     | __main__:<module>:150 - start 350_2022-10-12.parquet
+2023-02-04 09:09:26.248 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000091
+2023-02-04 09:09:26.248 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000321
+2023-02-04 09:09:26.248 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 350_2022-10-12.parquet: 0:00:00.000680
+2023-02-04 09:09:26.249 | INFO     | __main__:<module>:150 - start 361_2022-10-12.parquet
+2023-02-04 09:09:26.249 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000083
+2023-02-04 09:09:26.250 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000466
+2023-02-04 09:09:26.250 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 361_2022-10-12.parquet: 0:00:00.000938
+2023-02-04 09:09:26.250 | INFO     | __main__:<module>:150 - start 372_2022-10-12.parquet
+2023-02-04 09:09:26.251 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000154
+2023-02-04 09:09:26.251 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000449
+2023-02-04 09:09:26.252 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 372_2022-10-12.parquet: 0:00:00.000964
+2023-02-04 09:09:26.252 | INFO     | __main__:<module>:150 - start 3a508d597e0f71941bd18367262a9cbc
+2023-02-04 09:09:26.252 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000121
+2023-02-04 09:09:26.253 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000441
+2023-02-04 09:09:26.253 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3a508d597e0f71941bd18367262a9cbc: 0:00:00.000925
+2023-02-04 09:09:26.254 | INFO     | __main__:<module>:150 - start 3ab660737c49a3d77b2d418fa8f123fb
+2023-02-04 09:09:26.254 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000083
+2023-02-04 09:09:26.255 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000469
+2023-02-04 09:09:26.255 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3ab660737c49a3d77b2d418fa8f123fb: 0:00:00.000944
+2023-02-04 09:09:26.255 | INFO     | __main__:<module>:150 - start 3aded1f694ac384eb4f98f2d42498950
+2023-02-04 09:09:26.256 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000083
+2023-02-04 09:09:26.256 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000428
+2023-02-04 09:09:26.257 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3aded1f694ac384eb4f98f2d42498950: 0:00:00.000938
+2023-02-04 09:09:26.257 | INFO     | __main__:<module>:150 - start 3c1b68c3dd8983c8fb8d2661fb7eb398
+2023-02-04 09:09:26.258 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000151
+2023-02-04 09:09:26.258 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000418
+2023-02-04 09:09:26.258 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3c1b68c3dd8983c8fb8d2661fb7eb398: 0:00:00.000939
+2023-02-04 09:09:26.259 | INFO     | __main__:<module>:150 - start 4340d7ccf61d3a169068ffef1e310daf
+2023-02-04 09:09:26.259 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000085
+2023-02-04 09:09:26.260 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000492
+2023-02-04 09:09:26.260 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 4340d7ccf61d3a169068ffef1e310daf: 0:00:00.001002
+2023-02-04 09:09:26.261 | INFO     | __main__:<module>:150 - start 443649972c5f581abf6ea43a6f6fa7a7
+2023-02-04 09:09:26.261 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000088
+2023-02-04 09:09:26.262 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000474
+2023-02-04 09:09:26.262 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 443649972c5f581abf6ea43a6f6fa7a7: 0:00:00.000962
+2023-02-04 09:09:26.262 | INFO     | __main__:<module>:150 - start 4594028c6c1ebbb6dbfb4284d7510b4e
+2023-02-04 09:09:26.263 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000146
+2023-02-04 09:09:26.263 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000477
+2023-02-04 09:09:26.264 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 4594028c6c1ebbb6dbfb4284d7510b4e: 0:00:00.001051
+2023-02-04 09:09:26.264 | INFO     | __main__:<module>:150 - start 45_2022-10-12.parquet
+2023-02-04 09:09:26.265 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000116
+2023-02-04 09:09:26.265 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000510
+2023-02-04 09:09:26.265 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 45_2022-10-12.parquet: 0:00:00.001032
+2023-02-04 09:09:26.266 | INFO     | __main__:<module>:150 - start 485c1365977842af8bfdab28fa07ba47
+2023-02-04 09:09:26.266 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000083
+2023-02-04 09:09:26.267 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000501
+2023-02-04 09:09:26.267 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 485c1365977842af8bfdab28fa07ba47: 0:00:00.000963
+2023-02-04 09:09:26.268 | INFO     | __main__:<module>:150 - start 48b51d6d96bb01c42c87e40824248fe4
+2023-02-04 09:09:26.268 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000085
+2023-02-04 09:09:26.269 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000515
+2023-02-04 09:09:26.269 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 48b51d6d96bb01c42c87e40824248fe4: 0:00:00.000967
+2023-02-04 09:09:26.269 | INFO     | __main__:<module>:150 - start 49fe49431d07dfa2a7342c73e46b6931
+2023-02-04 09:09:26.270 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000084
+2023-02-04 09:09:26.270 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000429
+2023-02-04 09:09:26.271 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 49fe49431d07dfa2a7342c73e46b6931: 0:00:00.000867
+2023-02-04 09:09:26.271 | INFO     | __main__:<module>:150 - start 4_2022-10-12.parquet
+2023-02-04 09:09:26.271 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000080
+2023-02-04 09:09:26.272 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000449
+2023-02-04 09:09:26.272 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 4_2022-10-12.parquet: 0:00:00.000893
+2023-02-04 09:09:26.273 | INFO     | __main__:<module>:150 - start 4a9d71507be65ce2f46e0beb26418b1a
+2023-02-04 09:09:26.273 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000131
+2023-02-04 09:09:26.274 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000395
+2023-02-04 09:09:26.274 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 4a9d71507be65ce2f46e0beb26418b1a: 0:00:00.000970
+2023-02-04 09:09:26.274 | INFO     | __main__:<module>:150 - start 4bb240cf480589e58c6e58d06d6fb72c
+2023-02-04 09:09:26.275 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000099
+2023-02-04 09:09:26.275 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000456
+2023-02-04 09:09:26.276 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 4bb240cf480589e58c6e58d06d6fb72c: 0:00:00.000958
+2023-02-04 09:09:26.276 | INFO     | __main__:<module>:150 - start 5839b6a0ea1e93dc44574053e990d51e
+2023-02-04 09:09:26.277 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000082
+2023-02-04 09:09:26.277 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000492
+2023-02-04 09:09:26.277 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 5839b6a0ea1e93dc44574053e990d51e: 0:00:00.000905
+2023-02-04 09:09:26.278 | INFO     | __main__:<module>:150 - start 5fcec68478fd5427be6bb2c4a3b240a6
+2023-02-04 09:09:26.278 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000091
+2023-02-04 09:09:26.279 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000460
+2023-02-04 09:09:26.279 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 5fcec68478fd5427be6bb2c4a3b240a6: 0:00:00.000925
+2023-02-04 09:09:26.279 | INFO     | __main__:<module>:150 - start 609173a0aa18c6e168c54b8731584ffa
+2023-02-04 09:09:26.280 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000085
+2023-02-04 09:09:26.280 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000429
+2023-02-04 09:09:26.281 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 609173a0aa18c6e168c54b8731584ffa: 0:00:00.000980
+2023-02-04 09:09:26.281 | INFO     | __main__:<module>:150 - start 644cf39285755e8ba2dc68597faa48aa
+2023-02-04 09:09:26.282 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000155
+2023-02-04 09:09:26.282 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000411
+2023-02-04 09:09:26.282 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 644cf39285755e8ba2dc68597faa48aa: 0:00:00.000941
+2023-02-04 09:09:26.283 | INFO     | __main__:<module>:150 - start 651832dd0d35804ce4e30063d095e3e5
+2023-02-04 09:09:26.283 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000135
+2023-02-04 09:09:26.284 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000497
+2023-02-04 09:09:26.284 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 651832dd0d35804ce4e30063d095e3e5: 0:00:00.000963
+2023-02-04 09:09:26.285 | INFO     | __main__:<module>:150 - start 65793dff25c6e0d53703911d49d797ea
+2023-02-04 09:09:26.285 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000082
+2023-02-04 09:09:26.286 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000428
+2023-02-04 09:09:26.286 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 65793dff25c6e0d53703911d49d797ea: 0:00:00.000901
+2023-02-04 09:09:26.286 | INFO     | __main__:<module>:150 - start 6d1991ecbdee1e06031cda8761757f03
+2023-02-04 09:09:26.287 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000077
+2023-02-04 09:09:26.287 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000378
+2023-02-04 09:09:26.287 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 6d1991ecbdee1e06031cda8761757f03: 0:00:00.000706
+2023-02-04 09:09:26.287 | INFO     | __main__:<module>:150 - start 6e460d0f1aec519c62478f4ed4c269d1
+2023-02-04 09:09:26.288 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000133
+2023-02-04 09:09:26.288 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000404
+2023-02-04 09:09:26.289 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 6e460d0f1aec519c62478f4ed4c269d1: 0:00:00.000971
+2023-02-04 09:09:26.289 | INFO     | __main__:<module>:150 - start 6ef1ef238c89b672380a82b091df9a2b
+2023-02-04 09:09:26.289 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000124
+2023-02-04 09:09:26.290 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000447
+2023-02-04 09:09:26.290 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 6ef1ef238c89b672380a82b091df9a2b: 0:00:00.000946
+2023-02-04 09:09:26.291 | INFO     | __main__:<module>:150 - start 707fef642f609018a05f649ffd491563
+2023-02-04 09:09:26.291 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000131
+2023-02-04 09:09:26.292 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000468
+2023-02-04 09:09:26.292 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 707fef642f609018a05f649ffd491563: 0:00:00.000995
+2023-02-04 09:09:26.292 | INFO     | __main__:<module>:150 - start 70c6ca7a0f9df3109381cd55950cd99a
+2023-02-04 09:09:26.293 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000100
+2023-02-04 09:09:26.293 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000459
+2023-02-04 09:09:26.294 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 70c6ca7a0f9df3109381cd55950cd99a: 0:00:00.001016
+2023-02-04 09:09:26.294 | INFO     | __main__:<module>:150 - start 73ebf252af88c41aaf4426c6d3dc586c
+2023-02-04 09:09:26.295 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000177
+2023-02-04 09:09:26.295 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000511
+2023-02-04 09:09:26.295 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 73ebf252af88c41aaf4426c6d3dc586c: 0:00:00.001019
+2023-02-04 09:09:26.296 | INFO     | __main__:<module>:150 - start 74fe15010f17ff576045422f9bb38b00
+2023-02-04 09:09:26.296 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000087
+2023-02-04 09:09:26.297 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000553
+2023-02-04 09:09:26.297 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 74fe15010f17ff576045422f9bb38b00: 0:00:00.000951
+2023-02-04 09:09:26.298 | INFO     | __main__:<module>:150 - start 75_2022-10-12.parquet
+2023-02-04 09:09:26.298 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000092
+2023-02-04 09:09:26.299 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000533
+2023-02-04 09:09:26.299 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 75_2022-10-12.parquet: 0:00:00.000982
+2023-02-04 09:09:26.299 | INFO     | __main__:<module>:150 - start 7c48cc5675c9266fb6851070489c53e9
+2023-02-04 09:09:26.300 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000091
+2023-02-04 09:09:26.300 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000439
+2023-02-04 09:09:26.301 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 7c48cc5675c9266fb6851070489c53e9: 0:00:00.000912
+2023-02-04 09:09:26.301 | INFO     | __main__:<module>:150 - start 82d94402b3325d1e93e2a1f5b80a300d
+2023-02-04 09:09:26.302 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000160
+2023-02-04 09:09:26.302 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000478
+2023-02-04 09:09:26.302 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 82d94402b3325d1e93e2a1f5b80a300d: 0:00:00.000928
+2023-02-04 09:09:26.303 | INFO     | __main__:<module>:150 - start 8ee6ecf3c45ac2669ee96ae4c8550950
+2023-02-04 09:09:26.303 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000088
+2023-02-04 09:09:26.304 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000480
+2023-02-04 09:09:26.304 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 8ee6ecf3c45ac2669ee96ae4c8550950: 0:00:00.000949
+2023-02-04 09:09:26.304 | INFO     | __main__:<module>:150 - start 8f0b9daf627c4f17cbe7f4460208a1af
+2023-02-04 09:09:26.305 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000087
+2023-02-04 09:09:26.305 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000430
+2023-02-04 09:09:26.306 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 8f0b9daf627c4f17cbe7f4460208a1af: 0:00:00.000946
+2023-02-04 09:09:26.306 | INFO     | __main__:<module>:150 - start 910fbc31da89056bdee9ef48b235ef44
+2023-02-04 09:09:26.307 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000155
+2023-02-04 09:09:26.307 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000419
+2023-02-04 09:09:26.307 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 910fbc31da89056bdee9ef48b235ef44: 0:00:00.000933
+2023-02-04 09:09:26.308 | INFO     | __main__:<module>:150 - start 927430a256c4d23e37cf417362df9e7f
+2023-02-04 09:09:26.308 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000136
+2023-02-04 09:09:26.309 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000465
+2023-02-04 09:09:26.309 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 927430a256c4d23e37cf417362df9e7f: 0:00:00.000971
+2023-02-04 09:09:26.310 | INFO     | __main__:<module>:150 - start 9b19dee2eacd2a4e70c2750056c005ff
+2023-02-04 09:09:26.311 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000217
+2023-02-04 09:09:26.311 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000603
+2023-02-04 09:09:26.312 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 9b19dee2eacd2a4e70c2750056c005ff: 0:00:00.001253
+2023-02-04 09:09:26.312 | INFO     | __main__:<module>:150 - start 9bd1e0098ba62c06837bf2330db605c2
+2023-02-04 09:09:26.313 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000132
+2023-02-04 09:09:26.313 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000456
+2023-02-04 09:09:26.314 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 9bd1e0098ba62c06837bf2330db605c2: 0:00:00.000991
+2023-02-04 09:09:26.314 | INFO     | __main__:<module>:150 - start aa9fe79adc8edf93ebfb1ab83c8acc69
+2023-02-04 09:09:26.314 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000087
+2023-02-04 09:09:26.315 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000467
+2023-02-04 09:09:26.315 | INFO     | __main__:<module>:175 - gtfs_dataset_key: aa9fe79adc8edf93ebfb1ab83c8acc69: 0:00:00.000942
+2023-02-04 09:09:26.316 | INFO     | __main__:<module>:150 - start ac86302bad2b6f66bb6d5aae35ffb52f
+2023-02-04 09:09:26.316 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000125
+2023-02-04 09:09:26.317 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000452
+2023-02-04 09:09:26.317 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ac86302bad2b6f66bb6d5aae35ffb52f: 0:00:00.000957
+2023-02-04 09:09:26.317 | INFO     | __main__:<module>:150 - start ae93720f3c32c12f9ed912e465066bfc
+2023-02-04 09:09:26.318 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000140
+2023-02-04 09:09:26.318 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000464
+2023-02-04 09:09:26.319 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ae93720f3c32c12f9ed912e465066bfc: 0:00:00.000927
+2023-02-04 09:09:26.319 | INFO     | __main__:<module>:150 - start b04260a7725206fcd69b4e4a68b13aae
+2023-02-04 09:09:26.320 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000121
+2023-02-04 09:09:26.320 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000527
+2023-02-04 09:09:26.320 | INFO     | __main__:<module>:175 - gtfs_dataset_key: b04260a7725206fcd69b4e4a68b13aae: 0:00:00.001005
+2023-02-04 09:09:26.321 | INFO     | __main__:<module>:150 - start bc21582ac1ad2b7de0647dfd5b76f67c
+2023-02-04 09:09:26.321 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000078
+2023-02-04 09:09:26.322 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000414
+2023-02-04 09:09:26.322 | INFO     | __main__:<module>:175 - gtfs_dataset_key: bc21582ac1ad2b7de0647dfd5b76f67c: 0:00:00.000910
+2023-02-04 09:09:26.322 | INFO     | __main__:<module>:150 - start bdfa3214963bbc4ad4b08e3d5f726744
+2023-02-04 09:09:26.323 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000168
+2023-02-04 09:09:26.323 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000384
+2023-02-04 09:09:26.324 | INFO     | __main__:<module>:175 - gtfs_dataset_key: bdfa3214963bbc4ad4b08e3d5f726744: 0:00:00.000922
+2023-02-04 09:09:26.324 | INFO     | __main__:<module>:150 - start c5b2bf3815a12d5f7242923ed399d1ea
+2023-02-04 09:09:26.324 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000108
+2023-02-04 09:09:26.325 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000341
+2023-02-04 09:09:26.325 | INFO     | __main__:<module>:175 - gtfs_dataset_key: c5b2bf3815a12d5f7242923ed399d1ea: 0:00:00.000891
+2023-02-04 09:09:26.325 | INFO     | __main__:<module>:150 - start c866d1f427084d94bfa3831d0014d775
+2023-02-04 09:09:26.326 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000134
+2023-02-04 09:09:26.326 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000458
+2023-02-04 09:09:26.327 | INFO     | __main__:<module>:175 - gtfs_dataset_key: c866d1f427084d94bfa3831d0014d775: 0:00:00.000991
+2023-02-04 09:09:26.327 | INFO     | __main__:<module>:150 - start c9ec81d837b7ef2feedcea2c940f15d4
+2023-02-04 09:09:26.328 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000126
+2023-02-04 09:09:26.328 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000510
+2023-02-04 09:09:26.328 | INFO     | __main__:<module>:175 - gtfs_dataset_key: c9ec81d837b7ef2feedcea2c940f15d4: 0:00:00.000958
+2023-02-04 09:09:26.329 | INFO     | __main__:<module>:150 - start cb28d936a30d08f64661c81751af4382
+2023-02-04 09:09:26.329 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000084
+2023-02-04 09:09:26.330 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000438
+2023-02-04 09:09:26.330 | INFO     | __main__:<module>:175 - gtfs_dataset_key: cb28d936a30d08f64661c81751af4382: 0:00:00.000941
+2023-02-04 09:09:26.330 | INFO     | __main__:<module>:150 - start d2f0224819832ba7d0039ff5e84c5bdd
+2023-02-04 09:09:26.331 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000119
+2023-02-04 09:09:26.331 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000428
+2023-02-04 09:09:26.332 | INFO     | __main__:<module>:175 - gtfs_dataset_key: d2f0224819832ba7d0039ff5e84c5bdd: 0:00:00.000885
+2023-02-04 09:09:26.332 | INFO     | __main__:<module>:150 - start d41e4cfdd42950bde9876c5dc670017d
+2023-02-04 09:09:26.332 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000120
+2023-02-04 09:09:26.333 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000492
+2023-02-04 09:09:26.333 | INFO     | __main__:<module>:175 - gtfs_dataset_key: d41e4cfdd42950bde9876c5dc670017d: 0:00:00.000925
+2023-02-04 09:09:26.334 | INFO     | __main__:<module>:150 - start dac1d3922d8cb62f5feba57d5fdfb012
+2023-02-04 09:09:26.334 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000083
+2023-02-04 09:09:26.334 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000327
+2023-02-04 09:09:26.335 | INFO     | __main__:<module>:175 - gtfs_dataset_key: dac1d3922d8cb62f5feba57d5fdfb012: 0:00:00.000706
+2023-02-04 09:09:26.335 | INFO     | __main__:<module>:150 - start ddc9965fcbf3beaba6d2cb40a3e67c1e
+2023-02-04 09:09:26.336 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000080
+2023-02-04 09:09:26.336 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000473
+2023-02-04 09:09:26.336 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ddc9965fcbf3beaba6d2cb40a3e67c1e: 0:00:00.000888
+2023-02-04 09:09:26.337 | INFO     | __main__:<module>:150 - start e70b24e4d4931a9ada95fc76a2b53e9b
+2023-02-04 09:09:26.337 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000083
+2023-02-04 09:09:26.338 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000426
+2023-02-04 09:09:26.338 | INFO     | __main__:<module>:175 - gtfs_dataset_key: e70b24e4d4931a9ada95fc76a2b53e9b: 0:00:00.000871
+2023-02-04 09:09:26.338 | INFO     | __main__:<module>:150 - start e88d7f9e3c43ddf41c75c94d12a440a9
+2023-02-04 09:09:26.339 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000080
+2023-02-04 09:09:26.339 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000487
+2023-02-04 09:09:26.340 | INFO     | __main__:<module>:175 - gtfs_dataset_key: e88d7f9e3c43ddf41c75c94d12a440a9: 0:00:00.000963
+2023-02-04 09:09:26.340 | INFO     | __main__:<module>:150 - start ee4a7698aa24503c4058d10c238e6f8a
+2023-02-04 09:09:26.340 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000079
+2023-02-04 09:09:26.341 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000490
+2023-02-04 09:09:26.341 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ee4a7698aa24503c4058d10c238e6f8a: 0:00:00.000889
+2023-02-04 09:09:26.341 | INFO     | __main__:<module>:150 - start ee901494c3e6dabe62812966c94fa34c
+2023-02-04 09:09:26.342 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000121
+2023-02-04 09:09:26.342 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000388
+2023-02-04 09:09:26.343 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ee901494c3e6dabe62812966c94fa34c: 0:00:00.000897
+2023-02-04 09:09:26.343 | INFO     | __main__:<module>:150 - start f09062d4bb1cb04b59bdc8232f0cfc90
+2023-02-04 09:09:26.344 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000121
+2023-02-04 09:09:26.344 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000416
+2023-02-04 09:09:26.344 | INFO     | __main__:<module>:175 - gtfs_dataset_key: f09062d4bb1cb04b59bdc8232f0cfc90: 0:00:00.000894
+2023-02-04 09:09:26.345 | INFO     | __main__:<module>:150 - start f1497340b654f3ce925f8b8c2f83e1c2
+2023-02-04 09:09:26.345 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000124
+2023-02-04 09:09:26.348 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.002736
+2023-02-04 09:09:26.348 | INFO     | __main__:<module>:175 - gtfs_dataset_key: f1497340b654f3ce925f8b8c2f83e1c2: 0:00:00.003121
+2023-02-04 09:09:26.348 | INFO     | __main__:<module>:179 - start compute and export of results
+2023-02-04 09:13:55.351 | INFO     | __main__:<module>:141 - Analysis date: 2023-01-18
+2023-02-04 09:13:55.452 | INFO     | __main__:<module>:150 - start 02af2d11f5bd44434c581540e9e857d8
+2023-02-04 09:13:55.454 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000321
+2023-02-04 09:13:55.455 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.001133
+2023-02-04 09:13:55.456 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 02af2d11f5bd44434c581540e9e857d8: 0:00:00.002266
+2023-02-04 09:13:55.457 | INFO     | __main__:<module>:150 - start 03cadbffef6f3cd4ce839b218bc65e82
+2023-02-04 09:13:55.458 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000142
+2023-02-04 09:13:55.459 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000704
+2023-02-04 09:13:55.459 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 03cadbffef6f3cd4ce839b218bc65e82: 0:00:00.001425
+2023-02-04 09:13:55.460 | INFO     | __main__:<module>:150 - start 087e5ecdcf65499829e681a60e606637
+2023-02-04 09:13:55.461 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000090
+2023-02-04 09:13:55.461 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000756
+2023-02-04 09:13:55.462 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 087e5ecdcf65499829e681a60e606637: 0:00:00.001503
+2023-02-04 09:13:55.463 | INFO     | __main__:<module>:150 - start 08c4e0555b1b90cd7464ac801157a167
+2023-02-04 09:13:55.463 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000099
+2023-02-04 09:13:55.464 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000752
+2023-02-04 09:13:55.465 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 08c4e0555b1b90cd7464ac801157a167: 0:00:00.001477
+2023-02-04 09:13:55.466 | INFO     | __main__:<module>:150 - start 0a3c3013dc4baff072e14f8ae8a796bb
+2023-02-04 09:13:55.466 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000152
+2023-02-04 09:13:55.467 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000681
+2023-02-04 09:13:55.468 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 0a3c3013dc4baff072e14f8ae8a796bb: 0:00:00.001415
+2023-02-04 09:13:55.468 | INFO     | __main__:<module>:150 - start 0da5a62ebe57a31bce87abf9fbb2857a
+2023-02-04 09:13:55.469 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000121
+2023-02-04 09:13:55.469 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000657
+2023-02-04 09:13:55.470 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 0da5a62ebe57a31bce87abf9fbb2857a: 0:00:00.001496
+2023-02-04 09:13:55.471 | INFO     | __main__:<module>:150 - start 0f68ec4d97d179570b494c74b6fca55d
+2023-02-04 09:13:55.471 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000095
+2023-02-04 09:13:55.472 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000451
+2023-02-04 09:13:55.472 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 0f68ec4d97d179570b494c74b6fca55d: 0:00:00.000999
+2023-02-04 09:13:55.472 | INFO     | __main__:<module>:150 - start 0faa34840bb65e96b7f83b7f379c2edd
+2023-02-04 09:13:55.473 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000178
+2023-02-04 09:13:55.473 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000422
+2023-02-04 09:13:55.474 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 0faa34840bb65e96b7f83b7f379c2edd: 0:00:00.001063
+2023-02-04 09:13:55.474 | INFO     | __main__:<module>:150 - start 115fa7bd31a65b3210945ee884f36132
+2023-02-04 09:13:55.475 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000198
+2023-02-04 09:13:55.475 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000432
+2023-02-04 09:13:55.476 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 115fa7bd31a65b3210945ee884f36132: 0:00:00.000954
+2023-02-04 09:13:55.476 | INFO     | __main__:<module>:150 - start 13c6e9f58e53c12416b7754352fa1acd
+2023-02-04 09:13:55.476 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000123
+2023-02-04 09:13:55.477 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000485
+2023-02-04 09:13:55.477 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 13c6e9f58e53c12416b7754352fa1acd: 0:00:00.000991
+2023-02-04 09:13:55.478 | INFO     | __main__:<module>:150 - start 16ee668743cb1ea540bf833d301a1686
+2023-02-04 09:13:55.478 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000086
+2023-02-04 09:13:55.478 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000447
+2023-02-04 09:13:55.479 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 16ee668743cb1ea540bf833d301a1686: 0:00:00.000921
+2023-02-04 09:13:55.479 | INFO     | __main__:<module>:150 - start 17b259a4ae767d3ef5478964851cabb8
+2023-02-04 09:13:55.480 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000081
+2023-02-04 09:13:55.480 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000460
+2023-02-04 09:13:55.481 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 17b259a4ae767d3ef5478964851cabb8: 0:00:00.000918
+2023-02-04 09:13:55.481 | INFO     | __main__:<module>:150 - start 1a4e07032b35ff5aae9438fefc374b55
+2023-02-04 09:13:55.481 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000085
+2023-02-04 09:13:55.482 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000516
+2023-02-04 09:13:55.482 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 1a4e07032b35ff5aae9438fefc374b55: 0:00:00.000941
+2023-02-04 09:13:55.483 | INFO     | __main__:<module>:150 - start 2c82eb917900d5d8b69237702f68ab77
+2023-02-04 09:13:55.483 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000110
+2023-02-04 09:13:55.483 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000460
+2023-02-04 09:13:55.484 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 2c82eb917900d5d8b69237702f68ab77: 0:00:00.000943
+2023-02-04 09:13:55.484 | INFO     | __main__:<module>:150 - start 30e5260fa62b36db8c1dea91fc0c130d
+2023-02-04 09:13:55.485 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000102
+2023-02-04 09:13:55.485 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000450
+2023-02-04 09:13:55.486 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 30e5260fa62b36db8c1dea91fc0c130d: 0:00:00.000892
+2023-02-04 09:13:55.486 | INFO     | __main__:<module>:150 - start 3166ec2b9b4c75e31471d0c19384d97e
+2023-02-04 09:13:55.486 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000151
+2023-02-04 09:13:55.487 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000526
+2023-02-04 09:13:55.487 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3166ec2b9b4c75e31471d0c19384d97e: 0:00:00.000986
+2023-02-04 09:13:55.488 | INFO     | __main__:<module>:150 - start 318c6bc87acccb67fb00aa9180aa5a12
+2023-02-04 09:13:55.488 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000160
+2023-02-04 09:13:55.489 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000409
+2023-02-04 09:13:55.489 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 318c6bc87acccb67fb00aa9180aa5a12: 0:00:00.000956
+2023-02-04 09:13:55.489 | INFO     | __main__:<module>:150 - start 34b027e071739231b3a2bc0828b6e581
+2023-02-04 09:13:55.490 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000159
+2023-02-04 09:13:55.490 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000446
+2023-02-04 09:13:55.491 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 34b027e071739231b3a2bc0828b6e581: 0:00:00.001032
+2023-02-04 09:13:55.491 | INFO     | __main__:<module>:150 - start 3a508d597e0f71941bd18367262a9cbc
+2023-02-04 09:13:55.491 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000139
+2023-02-04 09:13:55.492 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000511
+2023-02-04 09:13:55.492 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3a508d597e0f71941bd18367262a9cbc: 0:00:00.000982
+2023-02-04 09:13:55.493 | INFO     | __main__:<module>:150 - start 3ab660737c49a3d77b2d418fa8f123fb
+2023-02-04 09:13:55.493 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000093
+2023-02-04 09:13:55.494 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000484
+2023-02-04 09:13:55.494 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3ab660737c49a3d77b2d418fa8f123fb: 0:00:00.000928
+2023-02-04 09:13:55.494 | INFO     | __main__:<module>:150 - start 3aded1f694ac384eb4f98f2d42498950
+2023-02-04 09:13:55.495 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000130
+2023-02-04 09:13:55.495 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000468
+2023-02-04 09:13:55.496 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3aded1f694ac384eb4f98f2d42498950: 0:00:00.000926
+2023-02-04 09:13:55.496 | INFO     | __main__:<module>:150 - start 3c1b68c3dd8983c8fb8d2661fb7eb398
+2023-02-04 09:13:55.496 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000083
+2023-02-04 09:13:55.497 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000522
+2023-02-04 09:13:55.497 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 3c1b68c3dd8983c8fb8d2661fb7eb398: 0:00:00.000988
+2023-02-04 09:13:55.498 | INFO     | __main__:<module>:150 - start 4340d7ccf61d3a169068ffef1e310daf
+2023-02-04 09:13:55.498 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000130
+2023-02-04 09:13:55.498 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000395
+2023-02-04 09:13:55.499 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 4340d7ccf61d3a169068ffef1e310daf: 0:00:00.000862
+2023-02-04 09:13:55.499 | INFO     | __main__:<module>:150 - start 443649972c5f581abf6ea43a6f6fa7a7
+2023-02-04 09:13:55.500 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000132
+2023-02-04 09:13:55.500 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000456
+2023-02-04 09:13:55.500 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 443649972c5f581abf6ea43a6f6fa7a7: 0:00:00.001024
+2023-02-04 09:13:55.501 | INFO     | __main__:<module>:150 - start 4594028c6c1ebbb6dbfb4284d7510b4e
+2023-02-04 09:13:55.501 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000132
+2023-02-04 09:13:55.502 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000500
+2023-02-04 09:13:55.502 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 4594028c6c1ebbb6dbfb4284d7510b4e: 0:00:00.000952
+2023-02-04 09:13:55.503 | INFO     | __main__:<module>:150 - start 485c1365977842af8bfdab28fa07ba47
+2023-02-04 09:13:55.503 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000169
+2023-02-04 09:13:55.504 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000461
+2023-02-04 09:13:55.504 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 485c1365977842af8bfdab28fa07ba47: 0:00:00.001075
+2023-02-04 09:13:55.504 | INFO     | __main__:<module>:150 - start 48b51d6d96bb01c42c87e40824248fe4
+2023-02-04 09:13:55.505 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000086
+2023-02-04 09:13:55.505 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000457
+2023-02-04 09:13:55.506 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 48b51d6d96bb01c42c87e40824248fe4: 0:00:00.000914
+2023-02-04 09:13:55.506 | INFO     | __main__:<module>:150 - start 49fe49431d07dfa2a7342c73e46b6931
+2023-02-04 09:13:55.507 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000171
+2023-02-04 09:13:55.507 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000472
+2023-02-04 09:13:55.507 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 49fe49431d07dfa2a7342c73e46b6931: 0:00:00.000977
+2023-02-04 09:13:55.508 | INFO     | __main__:<module>:150 - start 4a9d71507be65ce2f46e0beb26418b1a
+2023-02-04 09:13:55.508 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000147
+2023-02-04 09:13:55.509 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000520
+2023-02-04 09:13:55.509 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 4a9d71507be65ce2f46e0beb26418b1a: 0:00:00.001042
+2023-02-04 09:13:55.510 | INFO     | __main__:<module>:150 - start 4bb240cf480589e58c6e58d06d6fb72c
+2023-02-04 09:13:55.510 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000130
+2023-02-04 09:13:55.511 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000453
+2023-02-04 09:13:55.511 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 4bb240cf480589e58c6e58d06d6fb72c: 0:00:00.000988
+2023-02-04 09:13:55.511 | INFO     | __main__:<module>:150 - start 5839b6a0ea1e93dc44574053e990d51e
+2023-02-04 09:13:55.512 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000126
+2023-02-04 09:13:55.512 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000395
+2023-02-04 09:13:55.513 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 5839b6a0ea1e93dc44574053e990d51e: 0:00:00.000871
+2023-02-04 09:13:55.513 | INFO     | __main__:<module>:150 - start 5fcec68478fd5427be6bb2c4a3b240a6
+2023-02-04 09:13:55.513 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000102
+2023-02-04 09:13:55.514 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000488
+2023-02-04 09:13:55.514 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 5fcec68478fd5427be6bb2c4a3b240a6: 0:00:00.000946
+2023-02-04 09:13:55.515 | INFO     | __main__:<module>:150 - start 609173a0aa18c6e168c54b8731584ffa
+2023-02-04 09:13:55.515 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000123
+2023-02-04 09:13:55.516 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000391
+2023-02-04 09:13:55.516 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 609173a0aa18c6e168c54b8731584ffa: 0:00:00.001051
+2023-02-04 09:13:55.516 | INFO     | __main__:<module>:150 - start 644cf39285755e8ba2dc68597faa48aa
+2023-02-04 09:13:55.517 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000099
+2023-02-04 09:13:55.517 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000428
+2023-02-04 09:13:55.518 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 644cf39285755e8ba2dc68597faa48aa: 0:00:00.000938
+2023-02-04 09:13:55.518 | INFO     | __main__:<module>:150 - start 651832dd0d35804ce4e30063d095e3e5
+2023-02-04 09:13:55.518 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000127
+2023-02-04 09:13:55.519 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000427
+2023-02-04 09:13:55.519 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 651832dd0d35804ce4e30063d095e3e5: 0:00:00.000950
+2023-02-04 09:13:55.520 | INFO     | __main__:<module>:150 - start 65793dff25c6e0d53703911d49d797ea
+2023-02-04 09:13:55.520 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000088
+2023-02-04 09:13:55.521 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000449
+2023-02-04 09:13:55.521 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 65793dff25c6e0d53703911d49d797ea: 0:00:00.000965
+2023-02-04 09:13:55.521 | INFO     | __main__:<module>:150 - start 6d1991ecbdee1e06031cda8761757f03
+2023-02-04 09:13:55.522 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000124
+2023-02-04 09:13:55.522 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000423
+2023-02-04 09:13:55.523 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 6d1991ecbdee1e06031cda8761757f03: 0:00:00.000872
+2023-02-04 09:13:55.523 | INFO     | __main__:<module>:150 - start 6e460d0f1aec519c62478f4ed4c269d1
+2023-02-04 09:13:55.523 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000123
+2023-02-04 09:13:55.524 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000383
+2023-02-04 09:13:55.524 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 6e460d0f1aec519c62478f4ed4c269d1: 0:00:00.000843
+2023-02-04 09:13:55.525 | INFO     | __main__:<module>:150 - start 6ef1ef238c89b672380a82b091df9a2b
+2023-02-04 09:13:55.525 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000122
+2023-02-04 09:13:55.526 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000431
+2023-02-04 09:13:55.526 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 6ef1ef238c89b672380a82b091df9a2b: 0:00:00.000970
+2023-02-04 09:13:55.526 | INFO     | __main__:<module>:150 - start 707fef642f609018a05f649ffd491563
+2023-02-04 09:13:55.527 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000148
+2023-02-04 09:13:55.527 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000489
+2023-02-04 09:13:55.528 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 707fef642f609018a05f649ffd491563: 0:00:00.001001
+2023-02-04 09:13:55.528 | INFO     | __main__:<module>:150 - start 70c6ca7a0f9df3109381cd55950cd99a
+2023-02-04 09:13:55.529 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000088
+2023-02-04 09:13:55.529 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000524
+2023-02-04 09:13:55.530 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 70c6ca7a0f9df3109381cd55950cd99a: 0:00:00.000922
+2023-02-04 09:13:55.530 | INFO     | __main__:<module>:150 - start 73ebf252af88c41aaf4426c6d3dc586c
+2023-02-04 09:13:55.530 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000135
+2023-02-04 09:13:55.531 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000533
+2023-02-04 09:13:55.531 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 73ebf252af88c41aaf4426c6d3dc586c: 0:00:00.001065
+2023-02-04 09:13:55.532 | INFO     | __main__:<module>:150 - start 74fe15010f17ff576045422f9bb38b00
+2023-02-04 09:13:55.532 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000081
+2023-02-04 09:13:55.533 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000489
+2023-02-04 09:13:55.533 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 74fe15010f17ff576045422f9bb38b00: 0:00:00.000897
+2023-02-04 09:13:55.533 | INFO     | __main__:<module>:150 - start 7c48cc5675c9266fb6851070489c53e9
+2023-02-04 09:13:55.534 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000199
+2023-02-04 09:13:55.534 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000384
+2023-02-04 09:13:55.535 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 7c48cc5675c9266fb6851070489c53e9: 0:00:00.000979
+2023-02-04 09:13:55.535 | INFO     | __main__:<module>:150 - start 82d94402b3325d1e93e2a1f5b80a300d
+2023-02-04 09:13:55.536 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000087
+2023-02-04 09:13:55.536 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000589
+2023-02-04 09:13:55.536 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 82d94402b3325d1e93e2a1f5b80a300d: 0:00:00.001003
+2023-02-04 09:13:55.537 | INFO     | __main__:<module>:150 - start 8ee6ecf3c45ac2669ee96ae4c8550950
+2023-02-04 09:13:55.537 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000121
+2023-02-04 09:13:55.538 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000371
+2023-02-04 09:13:55.538 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 8ee6ecf3c45ac2669ee96ae4c8550950: 0:00:00.000888
+2023-02-04 09:13:55.538 | INFO     | __main__:<module>:150 - start 8f0b9daf627c4f17cbe7f4460208a1af
+2023-02-04 09:13:55.539 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000100
+2023-02-04 09:13:55.539 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000424
+2023-02-04 09:13:55.540 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 8f0b9daf627c4f17cbe7f4460208a1af: 0:00:00.000925
+2023-02-04 09:13:55.540 | INFO     | __main__:<module>:150 - start 910fbc31da89056bdee9ef48b235ef44
+2023-02-04 09:13:55.540 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000074
+2023-02-04 09:13:55.541 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000529
+2023-02-04 09:13:55.541 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 910fbc31da89056bdee9ef48b235ef44: 0:00:00.000964
+2023-02-04 09:13:55.542 | INFO     | __main__:<module>:150 - start 927430a256c4d23e37cf417362df9e7f
+2023-02-04 09:13:55.542 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000135
+2023-02-04 09:13:55.543 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000402
+2023-02-04 09:13:55.543 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 927430a256c4d23e37cf417362df9e7f: 0:00:00.000919
+2023-02-04 09:13:55.543 | INFO     | __main__:<module>:150 - start 9b19dee2eacd2a4e70c2750056c005ff
+2023-02-04 09:13:55.544 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000113
+2023-02-04 09:13:55.544 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000509
+2023-02-04 09:13:55.545 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 9b19dee2eacd2a4e70c2750056c005ff: 0:00:00.001007
+2023-02-04 09:13:55.545 | INFO     | __main__:<module>:150 - start 9bd1e0098ba62c06837bf2330db605c2
+2023-02-04 09:13:55.546 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000177
+2023-02-04 09:13:55.546 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000409
+2023-02-04 09:13:55.546 | INFO     | __main__:<module>:175 - gtfs_dataset_key: 9bd1e0098ba62c06837bf2330db605c2: 0:00:00.000911
+2023-02-04 09:13:55.547 | INFO     | __main__:<module>:150 - start aa9fe79adc8edf93ebfb1ab83c8acc69
+2023-02-04 09:13:55.547 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000084
+2023-02-04 09:13:55.548 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000457
+2023-02-04 09:13:55.548 | INFO     | __main__:<module>:175 - gtfs_dataset_key: aa9fe79adc8edf93ebfb1ab83c8acc69: 0:00:00.000981
+2023-02-04 09:13:55.549 | INFO     | __main__:<module>:150 - start ac86302bad2b6f66bb6d5aae35ffb52f
+2023-02-04 09:13:55.549 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000170
+2023-02-04 09:13:55.549 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000457
+2023-02-04 09:13:55.550 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ac86302bad2b6f66bb6d5aae35ffb52f: 0:00:00.001003
+2023-02-04 09:13:55.550 | INFO     | __main__:<module>:150 - start ae93720f3c32c12f9ed912e465066bfc
+2023-02-04 09:13:55.551 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000125
+2023-02-04 09:13:55.551 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000457
+2023-02-04 09:13:55.552 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ae93720f3c32c12f9ed912e465066bfc: 0:00:00.001001
+2023-02-04 09:13:55.552 | INFO     | __main__:<module>:150 - start b04260a7725206fcd69b4e4a68b13aae
+2023-02-04 09:13:55.552 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000089
+2023-02-04 09:13:55.553 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000452
+2023-02-04 09:13:55.553 | INFO     | __main__:<module>:175 - gtfs_dataset_key: b04260a7725206fcd69b4e4a68b13aae: 0:00:00.000888
+2023-02-04 09:13:55.554 | INFO     | __main__:<module>:150 - start bc21582ac1ad2b7de0647dfd5b76f67c
+2023-02-04 09:13:55.554 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000092
+2023-02-04 09:13:55.555 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000433
+2023-02-04 09:13:55.555 | INFO     | __main__:<module>:175 - gtfs_dataset_key: bc21582ac1ad2b7de0647dfd5b76f67c: 0:00:00.000942
+2023-02-04 09:13:55.555 | INFO     | __main__:<module>:150 - start bdfa3214963bbc4ad4b08e3d5f726744
+2023-02-04 09:13:55.556 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000107
+2023-02-04 09:13:55.556 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000408
+2023-02-04 09:13:55.557 | INFO     | __main__:<module>:175 - gtfs_dataset_key: bdfa3214963bbc4ad4b08e3d5f726744: 0:00:00.000872
+2023-02-04 09:13:55.557 | INFO     | __main__:<module>:150 - start c5b2bf3815a12d5f7242923ed399d1ea
+2023-02-04 09:13:55.557 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000123
+2023-02-04 09:13:55.558 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000389
+2023-02-04 09:13:55.558 | INFO     | __main__:<module>:175 - gtfs_dataset_key: c5b2bf3815a12d5f7242923ed399d1ea: 0:00:00.000848
+2023-02-04 09:13:55.558 | INFO     | __main__:<module>:150 - start c866d1f427084d94bfa3831d0014d775
+2023-02-04 09:13:55.559 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000080
+2023-02-04 09:13:55.559 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000487
+2023-02-04 09:13:55.560 | INFO     | __main__:<module>:175 - gtfs_dataset_key: c866d1f427084d94bfa3831d0014d775: 0:00:00.000949
+2023-02-04 09:13:55.560 | INFO     | __main__:<module>:150 - start c9ec81d837b7ef2feedcea2c940f15d4
+2023-02-04 09:13:55.561 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000167
+2023-02-04 09:13:55.561 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000416
+2023-02-04 09:13:55.562 | INFO     | __main__:<module>:175 - gtfs_dataset_key: c9ec81d837b7ef2feedcea2c940f15d4: 0:00:00.000983
+2023-02-04 09:13:55.562 | INFO     | __main__:<module>:150 - start cb28d936a30d08f64661c81751af4382
+2023-02-04 09:13:55.562 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000128
+2023-02-04 09:13:55.563 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000390
+2023-02-04 09:13:55.563 | INFO     | __main__:<module>:175 - gtfs_dataset_key: cb28d936a30d08f64661c81751af4382: 0:00:00.000873
+2023-02-04 09:13:55.564 | INFO     | __main__:<module>:150 - start d2f0224819832ba7d0039ff5e84c5bdd
+2023-02-04 09:13:55.564 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000120
+2023-02-04 09:13:55.564 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000461
+2023-02-04 09:13:55.565 | INFO     | __main__:<module>:175 - gtfs_dataset_key: d2f0224819832ba7d0039ff5e84c5bdd: 0:00:00.000995
+2023-02-04 09:13:55.565 | INFO     | __main__:<module>:150 - start d41e4cfdd42950bde9876c5dc670017d
+2023-02-04 09:13:55.566 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000148
+2023-02-04 09:13:55.566 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000651
+2023-02-04 09:13:55.567 | INFO     | __main__:<module>:175 - gtfs_dataset_key: d41e4cfdd42950bde9876c5dc670017d: 0:00:00.001195
+2023-02-04 09:13:55.567 | INFO     | __main__:<module>:150 - start dac1d3922d8cb62f5feba57d5fdfb012
+2023-02-04 09:13:55.568 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000132
+2023-02-04 09:13:55.568 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000462
+2023-02-04 09:13:55.569 | INFO     | __main__:<module>:175 - gtfs_dataset_key: dac1d3922d8cb62f5feba57d5fdfb012: 0:00:00.000958
+2023-02-04 09:13:55.569 | INFO     | __main__:<module>:150 - start ddc9965fcbf3beaba6d2cb40a3e67c1e
+2023-02-04 09:13:55.569 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000130
+2023-02-04 09:13:55.570 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000388
+2023-02-04 09:13:55.570 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ddc9965fcbf3beaba6d2cb40a3e67c1e: 0:00:00.000881
+2023-02-04 09:13:55.570 | INFO     | __main__:<module>:150 - start e70b24e4d4931a9ada95fc76a2b53e9b
+2023-02-04 09:13:55.571 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000083
+2023-02-04 09:13:55.571 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000498
+2023-02-04 09:13:55.572 | INFO     | __main__:<module>:175 - gtfs_dataset_key: e70b24e4d4931a9ada95fc76a2b53e9b: 0:00:00.000898
+2023-02-04 09:13:55.572 | INFO     | __main__:<module>:150 - start e88d7f9e3c43ddf41c75c94d12a440a9
+2023-02-04 09:13:55.573 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000079
+2023-02-04 09:13:55.573 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000462
+2023-02-04 09:13:55.573 | INFO     | __main__:<module>:175 - gtfs_dataset_key: e88d7f9e3c43ddf41c75c94d12a440a9: 0:00:00.000904
+2023-02-04 09:13:55.574 | INFO     | __main__:<module>:150 - start ee4a7698aa24503c4058d10c238e6f8a
+2023-02-04 09:13:55.574 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000079
+2023-02-04 09:13:55.575 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000474
+2023-02-04 09:13:55.575 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ee4a7698aa24503c4058d10c238e6f8a: 0:00:00.000987
+2023-02-04 09:13:55.575 | INFO     | __main__:<module>:150 - start ee901494c3e6dabe62812966c94fa34c
+2023-02-04 09:13:55.576 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000127
+2023-02-04 09:13:55.576 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000407
+2023-02-04 09:13:55.577 | INFO     | __main__:<module>:175 - gtfs_dataset_key: ee901494c3e6dabe62812966c94fa34c: 0:00:00.000900
+2023-02-04 09:13:55.577 | INFO     | __main__:<module>:150 - start f09062d4bb1cb04b59bdc8232f0cfc90
+2023-02-04 09:13:55.577 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000087
+2023-02-04 09:13:55.578 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000336
+2023-02-04 09:13:55.578 | INFO     | __main__:<module>:175 - gtfs_dataset_key: f09062d4bb1cb04b59bdc8232f0cfc90: 0:00:00.000758
+2023-02-04 09:13:55.578 | INFO     | __main__:<module>:150 - start f1497340b654f3ce925f8b8c2f83e1c2
+2023-02-04 09:13:55.579 | INFO     | __main__:<module>:158 - imported data: 0:00:00.000177
+2023-02-04 09:13:55.579 | INFO     | __main__:<module>:172 - keep enter/exit points by segment-trip: 0:00:00.000385
+2023-02-04 09:13:55.580 | INFO     | __main__:<module>:175 - gtfs_dataset_key: f1497340b654f3ce925f8b8c2f83e1c2: 0:00:00.000952
+2023-02-04 09:13:55.580 | INFO     | __main__:<module>:179 - start compute and export of results
+2023-02-04 09:16:30.389 | INFO     | __main__:<module>:190 - exported all vp pared: 0:02:34.809217
+2023-02-04 09:16:30.391 | INFO     | __main__:<module>:193 - execution time: 0:02:35.039148
+2023-02-21 10:08:42.803 | INFO     | __main__:<module>:107 - Analysis date: 2023-01-18
+2023-02-21 10:09:42.395 | INFO     | __main__:<module>:109 - Analysis date: 2023-01-18
+2023-02-21 10:15:28.367 | INFO     | __main__:<module>:109 - Analysis date: 2023-01-18
+2023-02-21 10:22:49.699 | INFO     | __main__:<module>:123 - pare down vp by route segments 0:07:21.330961
+2023-02-21 10:31:22.095 | INFO     | __main__:<module>:131 - pare down vp by stop segments 0:08:32.396195
+2023-02-21 10:31:22.112 | INFO     | __main__:<module>:134 - execution time: 0:15:53.744768
+2023-02-21 11:36:41.647 | INFO     | __main__:<module>:107 - Analysis date: 2023-01-18
+2023-02-21 11:41:35.303 | INFO     | __main__:<module>:121 - pare down vp by route segments 0:04:53.618341
+2023-02-21 11:47:01.400 | INFO     | __main__:<module>:129 - pare down vp by stop segments 0:05:26.096652
+2023-02-21 11:47:01.401 | INFO     | __main__:<module>:132 - execution time: 0:10:19.715831
+2023-03-03 09:26:30.749 | INFO     | __main__:<module>:95 - Analysis date: 2023-02-15
+2023-03-03 09:30:30.350 | INFO     | __main__:<module>:109 - pare down vp by route segments 0:03:59.594572
+2023-03-03 09:35:24.105 | INFO     | __main__:<module>:117 - pare down vp by stop segments 0:04:53.754809
+2023-03-03 09:35:24.106 | INFO     | __main__:<module>:120 - execution time: 0:08:53.356474
+2023-03-07 14:12:59.857 | INFO     | __main__:<module>:166 - Analysis date: 2023-02-15
+2023-03-07 14:12:59.864 | INFO     | __main__:pare_down_vp_to_valid_trips:138 - filter out to only valid trips
+2023-03-07 14:13:59.705 | INFO     | __main__:<module>:180 - pare down vp by route segments 0:00:59.841522
+2023-03-07 14:13:59.707 | INFO     | __main__:pare_down_vp_to_valid_trips:138 - filter out to only valid trips
+2023-03-07 14:15:20.496 | INFO     | __main__:<module>:188 - pare down vp by stop segments 0:01:20.791105
+2023-03-07 14:15:20.496 | INFO     | __main__:<module>:191 - execution time: 0:02:20.638298
