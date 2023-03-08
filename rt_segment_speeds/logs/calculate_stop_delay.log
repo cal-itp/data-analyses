@@ -1,0 +1,26 @@
+2023-02-20 12:54:33.437 | INFO     | __main__:<module>:169 - Analysis date: 2023-01-18
+2023-02-20 12:54:36.062 | INFO     | __main__:<module>:178 - merge scheduled and RT stop times and calculate delay: 0:00:02.623800
+2023-02-20 12:54:38.250 | INFO     | __main__:<module>:184 - merge in stop segments: 0:00:02.188364
+2023-02-20 12:57:05.119 | INFO     | __main__:<module>:195 - execution time: 0:02:31.681155
+2023-02-23 18:10:36.027 | INFO     | __main__:<module>:93 - Analysis date: 2023-01-18
+2023-02-24 09:41:27.818 | INFO     | __main__:<module>:123 - Analysis date: 2023-01-18
+2023-02-24 09:43:18.292 | INFO     | __main__:<module>:124 - Analysis date: 2023-01-18
+2023-02-24 09:44:48.190 | INFO     | __main__:<module>:124 - Analysis date: 2023-01-18
+2023-02-24 09:46:11.520 | INFO     | __main__:<module>:124 - Analysis date: 2023-01-18
+2023-02-24 09:46:14.951 | INFO     | __main__:<module>:136 - merge scheduled and RT stop times and calculate delay: 0:00:03.430329
+2023-02-24 09:48:51.808 | INFO     | __main__:<module>:148 - execution time: 0:02:40.287146
+2023-02-24 10:34:09.200 | INFO     | __main__:<module>:124 - Analysis date: 2023-01-18
+2023-02-24 10:34:12.824 | INFO     | __main__:<module>:136 - merge scheduled and RT stop times and calculate delay: 0:00:03.613472
+2023-02-24 10:39:11.955 | INFO     | __main__:<module>:135 - Analysis date: 2023-01-18
+2023-02-24 10:39:14.537 | INFO     | __main__:<module>:147 - merge scheduled and RT stop times and calculate delay: 0:00:02.581154
+2023-02-24 10:41:39.531 | INFO     | __main__:<module>:157 - execution time: 0:02:27.574897
+2023-03-06 09:24:15.550 | INFO     | __main__:<module>:139 - Analysis date: 2023-01-18
+2023-03-06 09:24:18.741 | INFO     | __main__:<module>:151 - merge scheduled and RT stop times and calculate delay: 0:00:03.119615
+2023-03-06 09:27:32.206 | INFO     | __main__:<module>:161 - execution time: 0:03:16.584754
+2023-03-07 16:25:36.977 | INFO     | __main__:<module>:111 - Analysis date: 2023-02-15
+2023-03-07 16:25:39.930 | INFO     | __main__:<module>:123 - merge scheduled and RT stop times and calculate delay: 0:00:02.931881
+2023-03-07 16:26:38.425 | INFO     | __main__:<module>:133 - execution time: 0:01:01.426652
+2023-03-07 16:41:20.828 | INFO     | __main__:<module>:108 - Analysis date: 2023-02-15
+2023-03-07 16:46:06.724 | INFO     | __main__:<module>:108 - Analysis date: 2023-02-15
+2023-03-07 16:46:09.356 | INFO     | __main__:<module>:120 - merge scheduled and RT stop times and calculate delay: 0:00:02.631370
+2023-03-07 16:46:39.205 | INFO     | __main__:<module>:130 - execution time: 0:00:32.480597

@@ -15,6 +15,7 @@ from calitp_data_analysis.tables import tbls
 from loguru import logger
 from siuba import *
 
+from segment_speed_utils import helpers
 from shared_utils import utils, gtfs_utils_v2
 from update_vars import SEGMENT_GCS, analysis_date
 
@@ -77,48 +78,35 @@ def download_vehicle_positions(
     return df
 
 
-def concat_batches(analysis_date: str) -> gpd.GeoDataFrame:
-    # Append individual operator vehicle position parquets together
-    # and cache a single vehicle positions parquet
-    fs_list = fs.ls(f"{SEGMENT_GCS}")
+def loop_through_batches_and_download_vp(
+    batches: dict, 
+    analysis_date: str
+):
+    """
+    Loop through batches dictionary and download vehicle positions.
+    Download for that batch of operators, for that date.
+    """
+    for i, subset_operators in batches.items():
+        time0 = datetime.datetime.now()
 
-    vp_files = [i for i in fs_list if "vp_raw" in i 
-                and f"{analysis_date}_batch" in i]
-    
-    df = pd.DataFrame()
-    
-    for f in vp_files:
-        batch_df = pd.read_parquet(f"gs://{f}")
-        df = pd.concat([df, batch_df], axis=0)
+        logger.info(f"batch {i}: {subset_operators}")
+        df = download_vehicle_positions(
+            analysis_date, subset_operators)
+
+        df.to_parquet(
+            f"{SEGMENT_GCS}vp_raw_{analysis_date}_batch{i}.parquet")
         
-    # Drop Nones or else shapely will error
-    df = df[df.location.notna()].reset_index(drop=True)
-    
-    geom = [shapely.wkt.loads(x) for x in df.location]
-
-    gdf = gpd.GeoDataFrame(
-        df, geometry=geom, 
-        crs="EPSG:4326").drop(columns="location")
-    
-    return gdf
-
-
-def remove_batched_parquets(analysis_date):
-    fs_list = fs.ls(f"{SEGMENT_GCS}")
-
-    vp_files = [i for i in fs_list if "vp_raw" in i 
-                and f"{analysis_date}_batch" in i]
-    
-    for f in vp_files:
-        fs.rm(f)
-
-
+        time1 = datetime.datetime.now()
+        logger.info(f"exported batch {i} to GCS: {time1 - time0}")
+        
+        
 if __name__ == "__main__":
     from dask.distributed import Client
     
     client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("../logs/download_vp_v2.log", retention="3 months")
+    LOG_FILE = "../logs/download_vp_v2.log"
+    logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -143,37 +131,15 @@ if __name__ == "__main__":
     ].reset_index(drop=True)
     
     rt_dataset_names = rt_datasets.name.unique().tolist()
-
     batches = determine_batches(rt_dataset_names)
     
-    for i, subset_operators in batches.items():
-        time0 = datetime.datetime.now()
-
-        logger.info(f"batch {i}: {subset_operators}")
-        df = download_vehicle_positions(
-            analysis_date, subset_operators)
-
-        df.to_parquet(
-            f"{SEGMENT_GCS}vp_raw_{analysis_date}_batch{i}.parquet")
-
-        time1 = datetime.datetime.now()
-        logger.info(f"exported batch {i} to GCS: {time1 - time0}")
+    one_day_after = helpers.find_day_after(analysis_date)
     
-    
-    all_vp = concat_batches(analysis_date)
-    logger.info(f"concatenated all batched data")
-    
-    utils.geoparquet_gcs_export(
-        all_vp, 
-        SEGMENT_GCS,
-        f"vp_{analysis_date}"
-    )
-    
-    logger.info(f"export concatenated vp")
-    
-    remove_batched_parquets(analysis_date)
-    logger.info(f"remove batched parquets")
-    
+    # Loop through batches and download the date we're interested in 
+    # and the day after
+    loop_through_batches_and_download_vp(batches, analysis_date)
+    loop_through_batches_and_download_vp(batches, one_day_after)
+        
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")
         
