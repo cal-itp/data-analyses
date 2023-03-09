@@ -29,38 +29,30 @@ def linear_referencing_and_speed_by_segment(
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]    
     EXPORT_FILE = dict_inputs["stage4"]
-    '''
-    operators = helpers.import_vehicle_positions(
-        SEGMENT_GCS,
-        f"{VP_FILE}_{analysis_date}/",
-        file_type = "df",
-        columns = ["gtfs_dataset_key"],
-        partitioned = True
-    ).drop_duplicates().compute()
-    
-    RT_OPERATORS = operators.gtfs_dataset_key.tolist()
-    
-    linear_ref_results = []
-    
-    # Loop over operator to do linear referencing
-    # Then compile all and do speed calculation over one ddf
-    for rt_dataset_key in sorted(RT_OPERATORS):
-    '''
+
     # https://docs.dask.org/en/stable/delayed-collections.html
-    # Adapt this import to take folder of partitioned parquets
+    
+    # Keep subset of columns - don't need it all. we can get the 
+    # columns dropped through segments file
+    vp_keep_cols = [
+        'gtfs_dataset_key', '_gtfs_dataset_name', 
+        'trip_id', 'feed_key',
+        TIMESTAMP_COL,
+        'lon', 'lat'
+    ] + SEGMENT_IDENTIFIER_COLS
+    
     vp = delayed(
         helpers.import_vehicle_positions)(
         SEGMENT_GCS,
         f"{VP_FILE}_{analysis_date}/",
         file_type = "df",
-        #filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]],
+        columns = vp_keep_cols,
         partitioned = True
     )
 
     segments = delayed(helpers.import_segments)(
         SEGMENT_GCS,
         f"{SEGMENT_FILE}_{analysis_date}", 
-        #filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]],
         columns = ["gtfs_dataset_key",  
                    "geometry"] + SEGMENT_IDENTIFIER_COLS,
     )
@@ -104,24 +96,22 @@ if __name__ == "__main__":
     ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
-    # Do stop segments first, since sometimes kernel can 
-    # die if we start with route segments
-    linear_referencing_and_speed_by_segment(
-        analysis_date, 
-        dict_inputs = STOP_SEG_DICT
-    )
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"speeds for stop segments: {time1 - start}")
-    
     linear_referencing_and_speed_by_segment(
         analysis_date, 
         dict_inputs = ROUTE_SEG_DICT
     )
     
-    time2 = datetime.datetime.now()
-    logger.info(f"speeds for route segments: {time2 - time1}")
+    time1 = datetime.datetime.now()
+    logger.info(f"speeds for route segments: {time1 - start}")
     
+    linear_referencing_and_speed_by_segment(
+        analysis_date, 
+        dict_inputs = STOP_SEG_DICT
+    )
+    
+    time2 = datetime.datetime.now()
+    logger.info(f"speeds for stop segments: {time2 - time1}")
+
     end = datetime.datetime.now()
     logger.info(f"execution time: {time2-start}")
     
