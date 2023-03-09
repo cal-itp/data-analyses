@@ -138,7 +138,7 @@ if __name__ == "__main__":
     # Loop through batches and download the date we're interested in 
     # and the day after
     loop_through_batches_and_download_vp(batches, analysis_date)
-    loop_through_batches_and_download_vp(batches, one_day_after)
+    #loop_through_batches_and_download_vp(batches, one_day_after)
         
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")

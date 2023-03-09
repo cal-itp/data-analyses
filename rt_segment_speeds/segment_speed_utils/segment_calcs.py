@@ -147,12 +147,20 @@ def localize_vp_timestamp(
         timestamp_col = [timestamp_col]
     
     for c in timestamp_col:
-        localized_timestamp_col = (dd.to_datetime(
+        if isinstance(df, (dd.DataFrame, dg.GeoDataFrame)):
+            localized_timestamp_col = (dd.to_datetime(
+                    df[c], utc=True)
+                    .dt.tz_convert(PACIFIC_TIMEZONE)
+                    .apply(lambda t: t.replace(tzinfo=None), 
+                           meta=(None, "datetime64[ns]"))
+                    )
+        elif isinstance(df, (pd.DataFrame, gpd.GeoDataFrame)):
+            localized_timestamp_col = (pd.to_datetime(
                 df[c], utc=True)
                 .dt.tz_convert(PACIFIC_TIMEZONE)
-                .apply(lambda t: t.replace(tzinfo=None), 
-                       meta=(None, "datetime64[ns]"))
+                .apply(lambda t: t.replace(tzinfo=None)
                 )
+            )
 
         df[f"{c}_local"] = localized_timestamp_col
     

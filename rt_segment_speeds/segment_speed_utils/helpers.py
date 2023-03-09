@@ -9,6 +9,7 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
 import gcsfs
+import geopandas as gpd
 import pandas as pd
 import yaml
 
@@ -112,14 +113,22 @@ def import_segments(
     
     if partitioned:
         file_name_sanitized = f"{utils.sanitize_file_path(file_name)}"
+        
+        df = dg.read_parquet(
+            f"{gcs_folder}{file_name_sanitized}", 
+            filters = filters,
+            columns = columns
+        )
     else:
         file_name_sanitized = f"{utils.sanitize_file_path(file_name)}.parquet"
         
-    df = dg.read_parquet(
-        f"{gcs_folder}{file_name_sanitized}", 
-        filters = filters,
-        columns = columns
-    ).drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)
+        df = gpd.read_parquet(
+            f"{gcs_folder}{file_name_sanitized}", 
+            filters = filters,
+            columns = columns
+        )
+    
+    df = df.drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)
     
     return df
 

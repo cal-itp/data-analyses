@@ -20,7 +20,7 @@ from shared_utils import dask_utils
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
-from A4_valid_vehicle_positions import trip_time_elapsed
+from A2_valid_vehicle_positions import trip_time_elapsed
 
 def trip_time_elapsed_segments_touched(
     ddf: dd.DataFrame,
@@ -65,9 +65,10 @@ def get_trip_stats(analysis_date: str,
     VP_FILE = dict_inputs["stage2"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]
     EXPORT_FILE = dict_inputs["rt_trip_diagnostics"]
+    GROUPING_COL = dict_inputs["grouping_col"]
     
     trip_cols = ["gtfs_dataset_key", "_gtfs_dataset_name", 
-                 "trip_id", "route_dir_identifier"]  
+                 "trip_id", GROUPING_COL]  
     
     ddf = helpers.import_vehicle_positions(
         gcs_folder = f"{SEGMENT_GCS}vp_sjoin/",
