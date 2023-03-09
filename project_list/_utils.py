@@ -24,7 +24,7 @@ def open_pdf(file_name:str, pages: str):
     
     return final 
 
-def clean_pdf(df, row_to_keep:int, 
+def clean_LOST_pdf(df, row_to_keep:int, 
               file_name:str,
               notes: str):
     """
