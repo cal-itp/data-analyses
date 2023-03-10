@@ -106,23 +106,6 @@ def prep_route_segments(analysis_date: str):
     longest_shapes = longest_shape_and_add_route_dir_identifier(trips_with_geom)
     
     return longest_shapes
-    
-
-def cut_route_segments(
-    gdf: gpd.GeoDataFrame,
-    group_cols: list,
-    segment_distance: int = 1_000
-) -> gpd.GeoDataFrame:
-    """
-    Cut route segments by splitting the shape into equally sized segments.
-    """
-    segments = geography_utils.cut_segments(
-        gdf,
-        group_cols = group_cols,
-        segment_distance = segment_distance
-    )
-    
-    return segments
  
     
 def prep_and_cut_route_segments(analysis_date: str): 
@@ -134,9 +117,10 @@ def prep_and_cut_route_segments(analysis_date: str):
         "route_dir_identifier"
     ]
     
-    segments = cut_route_segments(
-        longest_shapes, 
-        group_cols = group_cols, 
+    # Cut route segments
+    segments = geography_utils.cut_segments(
+        longest_shapes,
+        group_cols = group_cols,
         segment_distance = 1_000
     )
     
@@ -158,8 +142,6 @@ def finalize_route_segments(route_segments: gpd.GeoDataFrame) -> gpd.GeoDataFram
         route_segments_with_rt_key)
     
     return arrowized_segments
-
-
 
     
 if __name__ == "__main__":
