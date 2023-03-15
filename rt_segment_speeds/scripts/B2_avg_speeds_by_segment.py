@@ -112,7 +112,7 @@ if __name__ == "__main__":
         SEGMENT_GCS,
         f"{ROUTE_SEG_DICT['stage5']}_{analysis_date}"
     )
-    
+    '''
     stop_segment_speeds = avg_speeds_with_segment_geom(
         analysis_date, 
         max_speed_cutoff = MAX_SPEED,
@@ -124,3 +124,4 @@ if __name__ == "__main__":
         SEGMENT_GCS,
         f"{STOP_SEG_DICT['stage5']}_{analysis_date}"
     )
+    '''
