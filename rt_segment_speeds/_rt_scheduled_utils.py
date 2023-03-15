@@ -19,6 +19,9 @@ fs = gcsfs.GCSFileSystem()
 import intake
 catalog = intake.open_catalog("./catalog.yml")
 
+"""
+RT v. Scheduled Utils
+"""
 def count_rt_min(df):
     """
     Find total RT minute coverage
@@ -29,6 +32,7 @@ def count_rt_min(df):
     df['minute'] = df.location_timestamp.dt.minute
     
     subset_cols = ['gtfs_dataset_key', 'trip_id','hour', 'minute']
+    
     # Drop duplicates
     df = df.drop_duplicates(subset = subset_cols).reset_index(drop = True)
     
@@ -187,9 +191,9 @@ def merge_schedule_vp(vp_df, date: str):
 def trip_duration_categories(row):
     if row.actual_trip_duration_minutes < 31:
         return "0 - 30 minutes"
-    elif 31 < row.actual_trip_duration_minutes < 61:
+    elif 30 < row.actual_trip_duration_minutes < 61:
         return "31-60 minutes"
-    elif 61 < row.actual_trip_duration_minutes < 91:
+    elif 60 < row.actual_trip_duration_minutes < 91:
         return "61-90 minutes"
     else:
         return "90+ minutes"
@@ -197,14 +201,24 @@ def trip_duration_categories(row):
 def rt_data_proportion(row):
     if  row.rt_data_proportion_percentage < 21:
         return "0-20%"
-    elif 21 < row.rt_data_proportion_percentage < 40:
+    elif 20 < row.rt_data_proportion_percentage < 41:
         return "21-40%"
-    elif 41 < row.rt_data_proportion_percentage < 60:
+    elif 40 < row.rt_data_proportion_percentage < 61:
         return "41-60%"
-    elif 61 < row.rt_data_proportion_percentage < 80:
+    elif 60 < row.rt_data_proportion_percentage < 80:
         return "61-80%"
     else:
         return "81-100%"    
+    
+def pings_categories(row):
+    if 2.7 < row['pings_per_minute']:
+        return "3 pings per minute"
+    elif 0.99 < row['pings_per_minute'] < 1.8:
+        return "1 ping per minute"
+    elif 1.7 < row['pings_per_minute'] < 2.8:
+        return "2 pings per minute"
+    else:
+        return "No pings"
     
 def final_df(vp_df, date: str):
     """
@@ -247,4 +261,173 @@ def final_df(vp_df, date: str):
     # Categorize RT vs. scheduled coverage
     df["rt_category"] = df.apply(rt_data_proportion, axis=1)
     
+    # Categorize pings
+    df["ping_category"] = df.apply(pings_categories, axis=1)
+    
+    # Clean
+    df = threshold_utils.pre_clean(df)
     return df
+
+"""
+Summary Functions
+"""
+def rt_v_scheduled(df):
+    """
+    For every operator, find the # of trips 
+    that fall into the RT vs. Scheduled % 
+    bin and percentage of trips. 
+    """
+    df = (
+    df.groupby(['Gtfs Dataset Name','Rounded Rt Data Proportion Percentage'])
+    .agg({'Rt Trip Counts By Operator': "max", 'Trip Id': "nunique"})
+    .reset_index()
+    .rename(columns={'Trip Id': "Total Trips"}))
+    
+    df["Percentage of Trips"] = (
+    df['Total Trips'] / df['Rt Trip Counts By Operator'] * 100)
+    
+    df = df.round(1)
+    
+    return df
+
+def rt_trip_duration(df):
+    """
+    For every operator, find
+    the number of trips within each
+    by RT vs. Scheduled % data captured 
+    and trip duration bin.
+    """
+    df = (df.groupby(['Gtfs Dataset Name',  'Trip Category', 'Rt Category'])
+    .agg({"Rt Trip Counts By Operator": "max", "Trip Id": "nunique"})
+    .reset_index()
+    .rename(columns={"Trip Id": "Total Trips"}))
+    
+    df["Total Trips"] = (df["Total Trips"]).astype(int)
+    
+    df["Percentage of Trips"] = (df["Total Trips"]).divide(
+    df["Rt Trip Counts By Operator"]) * 100
+    
+    df = df.round(1)
+    
+    return df
+
+def statewide_metrics(df):
+    """
+    Aggregate operator metrics up to 
+    statewide.
+    """
+    # Get total trips for the day
+    all_trips = df['Trip Id'].count()
+    
+    # % of trips by RT vs. Scheduled Proportion 
+    rt_scheduled = rt_v_scheduled(df)
+    
+    # Trip Lengths and % of RT vs. Scheduled Time
+    rt_trip = rt_trip_duration(df)
+    
+    # Group by for statewide metrics
+    rt_scheduled_sw = (
+    rt_scheduled.groupby(['Rounded Rt Data Proportion Percentage'])
+    .agg({"Total Trips": "sum"})
+    .reset_index())
+    rt_scheduled_sw["Percentage of Trips"] = rt_scheduled_sw['Total Trips'].div(all_trips) * 100
+    
+    rt_trip_sw = (rt_trip.groupby(["Rt Category", "Trip Category"])
+    .agg({"Total Trips": "sum"})
+    .reset_index())
+    rt_trip_sw["Percentage of Trips"] = rt_trip_sw['Total Trips'].div(all_trips) * 100
+    
+    return rt_scheduled_sw, rt_trip_sw
+
+"""
+Visuals
+"""
+def bar_chart(df, x_col:str, y_col:str, chart_title:str):
+    chart = (alt.Chart(df)
+    .mark_bar(size=40)
+    .encode(
+        x=alt.X(f"{x_col}:N",
+            scale=alt.Scale(domain=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]),
+        ),
+        y=alt.Y(y_col, scale=alt.Scale(domain=[0, 100])),
+        color=alt.Color(
+            x_col,
+            scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
+            legend=None,
+        ),
+        tooltip=df.columns.tolist(),
+    )
+    .properties(title=chart_title)
+    .interactive())
+    
+    return chart
+
+def stacked_bar_chart(df, x_col:str, y_col:str, color_col: str, chart_title:str):
+    chart = (
+    (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=alt.X(x_col, axis=alt.Axis(labelAngle=-45)),
+            y=alt.Y(y_col, scale=alt.Scale(domain=[0, 100])),
+            color=alt.Color(
+                color_col, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+            ),
+            tooltip=df.columns.tolist(),
+        )
+        .properties(title=chart_title)
+    )
+    .interactive()
+    )
+        
+    return chart
+
+def operator_level_visuals(df):
+    """
+    Return 2 charts with visuals
+    for operator level metrics.
+    """
+    # Get summarized df
+    rt_scheduled = rt_v_scheduled(df)
+    rt_trip = rt_trip_duration(df)
+    
+    # Create dropdown menu
+    # Exclude "none" operators which are only scheduled data
+    operator_wo_none = df.loc[df['Gtfs Dataset Name'] != "None"][['Gtfs Dataset Name']]
+    dropdown_list = operator_wo_none['Gtfs Dataset Name'].unique().tolist()
+    
+    # Show only first operator by default
+    initialize_first_op = sorted(dropdown_list)[0]
+    input_dropdown = alt.binding_select(options=sorted(dropdown_list), name="Operator")
+    
+    selection = alt.selection_single(name="Operator",
+    fields=['Gtfs Dataset Name'],
+    bind=input_dropdown,
+    init={'Gtfs Dataset Name': initialize_first_op})
+    
+    # Create charts 
+    chart_scheduled = bar_chart(rt_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "% of RT vs. Scheduled Minutes by Operator")
+    chart_trip = stacked_bar_chart(rt_trip, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Lengths and % of RT vs. Scheduled Time by Operator")
+    
+    # Finalize charts
+    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 500, 400).add_selection(selection).transform_filter(selection)
+    chart_trip = threshold_utils.chart_size(chart_trip, 500, 400).add_selection(selection).transform_filter(selection)
+    
+    return chart_scheduled | chart_trip
+
+def create_statewide_visuals(df):
+    """
+    Return 2 charts with visuals
+    for statewide level metrics.
+    """
+    sw_scheduled, sw_trips = statewide_metrics(df)
+    
+    # Create charts
+    chart_scheduled = bar_chart(sw_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "% of RT vs. Scheduled Minutes for All Operators")
+    chart_trip = stacked_bar_chart(sw_trips, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Lengths and % of RT vs. Scheduled Time for All Operators")
+    
+    # Finalize charts
+    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 500, 400)
+    chart_trip = threshold_utils.chart_size(chart_trip, 500, 400)
+    
+    return chart_scheduled | chart_trip
