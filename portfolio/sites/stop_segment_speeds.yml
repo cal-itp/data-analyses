@@ -83,15 +83,9 @@ parts:
   - caption: 'Bear '
     params:
       name: Bear Vehicle Positions
-  - caption: 'Beaumont Pass '
-    params:
-      name: Beaumont Pass Vehicle Positions
   - caption: 'Big Blue Bus '
     params:
       name: Big Blue Bus VehiclePositions
-  - caption: 'BruinBus '
-    params:
-      name: BruinBus Vehicle Positions
   - caption: 'Burbank '
     params:
       name: Burbank VehiclePositions
@@ -122,21 +116,12 @@ parts:
   - caption: 'LA DOT '
     params:
       name: LA DOT VehiclePositions
-  - caption: 'LA Metro Bus '
-    params:
-      name: LA Metro Bus Vehicle Positions
-  - caption: 'LA Metro Rail '
-    params:
-      name: LA Metro Rail Vehicle Positions
   - caption: 'Lake '
     params:
       name: Lake Vehicle Positions
   - caption: 'Long Beach '
     params:
       name: Long Beach VehiclePositions
-  - caption: 'Madera County Connection '
-    params:
-      name: Madera County Connection Vehicle Positions
   - caption: 'Monterey Salinas '
     params:
       name: Monterey Salinas VehiclePositions
@@ -179,9 +164,6 @@ parts:
   - caption: 'Santa Maria '
     params:
       name: Santa Maria Vehicle Positions
-  - caption: 'Santa Ynez '
-    params:
-      name: Santa Ynez Vehicle Positions
   - caption: 'StanRTA '
     params:
       name: StanRTA Vehicle Positions
@@ -209,8 +191,5 @@ parts:
   - caption: 'Visalia '
     params:
       name: Visalia VehiclePositions
-  - caption: 'WeHo '
-    params:
-      name: WeHo Vehicle Positions
 readme: ./rt_segment_speeds/README.md
 title: Stop Metrics
