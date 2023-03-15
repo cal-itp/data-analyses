@@ -29,9 +29,7 @@ parts:
     -   file: name_bay-area-511-westcat-vehiclepositions/0__07_plot_stop_metrics__name_bay-area-511-westcat-vehiclepositions.ipynb
     -   file: name_beach-cities-vehiclepositions/0__07_plot_stop_metrics__name_beach-cities-vehiclepositions.ipynb
     -   file: name_bear-vehicle-positions/0__07_plot_stop_metrics__name_bear-vehicle-positions.ipynb
-    -   file: name_beaumont-pass-vehicle-positions/0__07_plot_stop_metrics__name_beaumont-pass-vehicle-positions.ipynb
     -   file: name_big-blue-bus-vehiclepositions/0__07_plot_stop_metrics__name_big-blue-bus-vehiclepositions.ipynb
-    -   file: name_bruinbus-vehicle-positions/0__07_plot_stop_metrics__name_bruinbus-vehicle-positions.ipynb
     -   file: name_burbank-vehiclepositions/0__07_plot_stop_metrics__name_burbank-vehiclepositions.ipynb
     -   file: name_commerce-vehiclepositions/0__07_plot_stop_metrics__name_commerce-vehiclepositions.ipynb
     -   file: name_eastern-sierra-vehicle-positions/0__07_plot_stop_metrics__name_eastern-sierra-vehicle-positions.ipynb
@@ -42,11 +40,8 @@ parts:
     -   file: name_humboldt-vehicle-positions/0__07_plot_stop_metrics__name_humboldt-vehicle-positions.ipynb
     -   file: name_kings-vehicle-positions/0__07_plot_stop_metrics__name_kings-vehicle-positions.ipynb
     -   file: name_la-dot-vehiclepositions/0__07_plot_stop_metrics__name_la-dot-vehiclepositions.ipynb
-    -   file: name_la-metro-bus-vehicle-positions/0__07_plot_stop_metrics__name_la-metro-bus-vehicle-positions.ipynb
-    -   file: name_la-metro-rail-vehicle-positions/0__07_plot_stop_metrics__name_la-metro-rail-vehicle-positions.ipynb
     -   file: name_lake-vehicle-positions/0__07_plot_stop_metrics__name_lake-vehicle-positions.ipynb
     -   file: name_long-beach-vehiclepositions/0__07_plot_stop_metrics__name_long-beach-vehiclepositions.ipynb
-    -   file: name_madera-county-connection-vehicle-positions/0__07_plot_stop_metrics__name_madera-county-connection-vehicle-positions.ipynb
     -   file: name_monterey-salinas-vehiclepositions/0__07_plot_stop_metrics__name_monterey-salinas-vehiclepositions.ipynb
     -   file: name_nevada-county-vehicle-positions/0__07_plot_stop_metrics__name_nevada-county-vehicle-positions.ipynb
     -   file: name_north-county-vehicle-positions/0__07_plot_stop_metrics__name_north-county-vehicle-positions.ipynb
@@ -61,7 +56,6 @@ parts:
     -   file: name_san-joaquin-vehicle-positions/0__07_plot_stop_metrics__name_san-joaquin-vehicle-positions.ipynb
     -   file: name_santa-clarita-vehiclepositions/0__07_plot_stop_metrics__name_santa-clarita-vehiclepositions.ipynb
     -   file: name_santa-maria-vehicle-positions/0__07_plot_stop_metrics__name_santa-maria-vehicle-positions.ipynb
-    -   file: name_santa-ynez-vehicle-positions/0__07_plot_stop_metrics__name_santa-ynez-vehicle-positions.ipynb
     -   file: name_stanrta-vehicle-positions/0__07_plot_stop_metrics__name_stanrta-vehicle-positions.ipynb
     -   file: name_tahoe-transportation-vehicle-positions/0__07_plot_stop_metrics__name_tahoe-transportation-vehicle-positions.ipynb
     -   file: name_torrance-swiftly-vehicle-positions/0__07_plot_stop_metrics__name_torrance-swiftly-vehicle-positions.ipynb
@@ -71,5 +65,4 @@ parts:
     -   file: name_vctc-vehicle-positions/0__07_plot_stop_metrics__name_vctc-vehicle-positions.ipynb
     -   file: name_victor-valley-vehicle-position/0__07_plot_stop_metrics__name_victor-valley-vehicle-position.ipynb
     -   file: name_visalia-vehiclepositions/0__07_plot_stop_metrics__name_visalia-vehiclepositions.ipynb
-    -   file: name_weho-vehicle-positions/0__07_plot_stop_metrics__name_weho-vehicle-positions.ipynb
 root: README
