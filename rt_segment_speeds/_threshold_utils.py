@@ -400,9 +400,17 @@ def create_operator_visuals(height:int, width:int,time_cutoff:list, segment_cuto
     route_length, time_segments, valid_stats = load_dataframes(time_cutoff,segment_cutoffs)
     
     # Create dropdown menu. 
-    dropdown_list = route_length["Name"].sort_values().unique().tolist()
-    dropdown = alt.binding_select(options=[None] + dropdown_list, labels = ['All'] + dropdown_list, name = "Operator")    
-    selection = alt.selection_single(fields=["Name"], bind=dropdown)
+    dropdown_list = route_length.Name.unique().tolist()
+    
+    # Grab first operator
+    initialize_first_operator = sorted(dropdown_list)[0]
+    
+    input_dropdown = alt.binding_select(options=sorted(dropdown_list), name='Operator')
+    
+    select_op = alt.selection_single(
+    name="Operator", fields=['Name'],
+    bind=input_dropdown, init={"Name": initialize_first_operator})
+ 
     
     # Create charts
     route_length_chart = create_dot_plot(route_length, 
@@ -420,10 +428,10 @@ def create_operator_visuals(height:int, width:int,time_cutoff:list, segment_cuto
     leniency_text_chart = create_text_table(valid_stats_leniency(valid_stats), 'Percentage of Trips Kept')
     
     # Resize charts and add the filter
-    route_length_chart= chart_size(route_length_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
-    route_text_chart= chart_size(route_text_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
-    valid_stats_chart= chart_size(valid_stats_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
-    leniency_text_chart= chart_size(leniency_text_chart, height, width).add_selection(selection).transform_filter(selection).interactive()
+    route_length_chart= chart_size(route_length_chart, height, width).add_selection(select_op).transform_filter(select_op).interactive()
+    route_text_chart= chart_size(route_text_chart, height, width).add_selection(select_op).transform_filter(select_op).interactive()
+    valid_stats_chart= chart_size(valid_stats_chart, height, width).add_selection(select_op).transform_filter(select_op).interactive()
+    leniency_text_chart= chart_size(leniency_text_chart, height, width).add_selection(select_op).transform_filter(select_op).interactive()
     
     return route_length_chart & route_text_chart &  valid_stats_chart & leniency_text_chart
 
