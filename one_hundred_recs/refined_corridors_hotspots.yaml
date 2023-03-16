@@ -69,6 +69,29 @@ districts:
            - part:
              shape_id: '40759'
              stop_bounds: [7, 12]
+             
+  - district: 04 - Oakland
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override:
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: False
+   # blank/None or list [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay
+   corr_extra_fm:
+   hs_extra_fm:
+    # below useful for situation where we want a specific corridor/hs not returned by utility for same operator-- clears filter
+   unfiltered_fm: [4]
+   corridors:
+     - corridor:
+         itp_id: 4
+         route_filter: ['72','72R','72M']
+         parts:
+         # can define each corridor with multiple parts if desired (i.e. one-way couplets)
+           - part:
+             shape_id: 'shp-72R-57'
+             stop_bounds: [7, 19]
 
  - district: 05 - San Luis Obispo
    # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
@@ -274,6 +297,39 @@ districts:
              shape_id: '9255'
              stop_bounds: [44, 45]
              
+ - district: 08 - San Bernardino
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override:
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: False
+   # blank/None or list [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay
+   corr_extra_fm:
+   hs_extra_fm:
+   corridors:
+     - corridor:
+         itp_id: 269
+         route_filter:
+         parts:
+         # can define each corridor with multiple parts if desired (i.e. one-way couplets)
+           - part:
+             shape_id: 'shp-61-56'
+             stop_bounds: [6, 7]
+   hotspots:
+   # can define each hotspot with multiple parts if desired (i.e. one-way couplets)
+     - hotspot:
+         itp_id: 269
+         route_filter: 
+         parts:
+           - part:
+             shape_id: 'shp-24-55'
+             stop_bounds: [15, 16]
+           - part:
+             shape_id: 'shp-24-55'
+             stop_bounds: [23, 24]
+             
  - district: 09 - Bishop
    # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
    # useful for d3 where we have no recent, usable RT data for SacRT
@@ -296,6 +352,35 @@ districts:
            - part:
              shape_id: 'p_9208'
              stop_bounds: [19, 21]
+             
+ - district: 10 - Bishop
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override:
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: False
+   # blank/None or list [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay
+   corr_extra_fm:
+   hs_extra_fm:
+   corridors:
+   hotspots:
+   # can define each hotspot with multiple parts if desired (i.e. one-way couplets)
+     - hotspot:
+         itp_id: 284
+         route_filter:
+         parts:
+           - part:
+             shape_id: '32100'
+             stop_bounds: [14, 15]
+     - hotspot:
+         itp_id: 284
+         route_filter:
+         parts:
+           - part:
+             shape_id: '32134'
+             stop_bounds: [3, 5]    
              
  - district: 11 - San Diego
    # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
@@ -382,3 +467,27 @@ districts:
            - part:
              shape_id: '3_0_90'
              stop_bounds: [27, 32]
+             
+ - district: 12 - Irvine
+   # blank/None or iso_date: get filter mappers with a different date than standard '2022-05-04'
+   # useful for d3 where we have no recent, usable RT data for SacRT
+   date_override: 
+   # bool: use "get_sorted" from bbutils, even if standard corridor/hotspot tool returns data
+   get_sorted_corr: False
+   get_sorted_hs: False
+   # blank/None or list of lists [[itp_id, iso_date], ...]: add additional filter mapper objects to notebook if not included at all in bbutils
+   # useful for d4 SF/Peninsula/South Bay 
+   corr_extra_fm: 
+   hs_extra_fm:
+   # below useful for situation where we want a specific corridor/hs not returned by utility for same operator-- clears filter
+   unfiltered_fm: [235]
+   corridors:
+     - corridor:
+         itp_id: 235
+         route_filter:
+         parts:
+         # can define each corridor with multiple parts if desired (i.e. one-way couplets)
+           - part:
+             shape_id: '0111'
+             stop_bounds: [20, 31]
+    hotspots:
