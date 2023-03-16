@@ -40,8 +40,10 @@ def filter_operator(operator_feeds: list, include_name: bool = False) -> siuba.d
         return filter(_["feed_key"].isin(operator_feeds))
 
 
-def filter_date(selected_date: Union[str, datetime.date]) -> siuba.dply.verbs.Pipeable:
-    return filter(_.service_date == selected_date)
+def filter_date(
+    selected_date: Union[str, datetime.date], date_col: Literal["service_date", "activity_date"]
+) -> siuba.dply.verbs.Pipeable:
+    return filter(_[date_col] == selected_date)
 
 
 def subset_cols(cols: list) -> siuba.dply.verbs.Pipeable:
@@ -319,7 +321,7 @@ def get_trips(
 
     trips = (
         tbls.mart_gtfs.fct_daily_scheduled_trips()
-        >> filter_date(selected_date)
+        >> filter_date(selected_date, date_col="service_date")
         >> filter_operator(operator_feeds, include_name=True)
         >> filter_custom_col(custom_filtering)
     )
@@ -369,7 +371,7 @@ def get_shapes(
 
     shapes = (
         tbls.mart_gtfs.fct_daily_scheduled_shapes()
-        >> filter_date(selected_date)
+        >> filter_date(selected_date, date_col="activity_date")
         >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
     )
@@ -410,7 +412,7 @@ def get_stops(
 
     stops = (
         tbls.mart_gtfs.fct_daily_scheduled_stops()
-        >> filter_date(selected_date)
+        >> filter_date(selected_date, date_col="activity_date")
         >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
         >> subset_cols(stop_cols_with_geom)
