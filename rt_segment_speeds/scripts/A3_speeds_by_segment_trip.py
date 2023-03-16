@@ -2,6 +2,7 @@
 Do linear referencing by segment-trip 
 and derive speed.
 """
+import dask.dataframe as dd
 import datetime
 import pandas as pd
 import sys
@@ -29,14 +30,23 @@ def linear_referencing_and_speed_by_segment(
     TIMESTAMP_COL = dict_inputs["timestamp_col"]    
     EXPORT_FILE = dict_inputs["stage4"]
 
-    
     # https://docs.dask.org/en/stable/delayed-collections.html
-    # Adapt this import to take folder of partitioned parquets
+    
+    # Keep subset of columns - don't need it all. we can get the 
+    # columns dropped through segments file
+    vp_keep_cols = [
+        'gtfs_dataset_key', '_gtfs_dataset_name', 
+        'trip_id', 'feed_key',
+        TIMESTAMP_COL,
+        'lon', 'lat'
+    ] + SEGMENT_IDENTIFIER_COLS
+    
     vp = delayed(
         helpers.import_vehicle_positions)(
         SEGMENT_GCS,
         f"{VP_FILE}_{analysis_date}/",
         file_type = "df",
+        columns = vp_keep_cols,
         partitioned = True
     )
 
@@ -46,21 +56,21 @@ def linear_referencing_and_speed_by_segment(
         columns = ["gtfs_dataset_key",  
                    "geometry"] + SEGMENT_IDENTIFIER_COLS,
     )
-    
+
     vp_linear_ref = delayed(wrangle_shapes.linear_reference_vp_against_segment)( 
         vp, 
         segments, 
         segment_identifier_cols = SEGMENT_IDENTIFIER_COLS
     )
-        
+  
+    
     speeds = delayed(segment_calcs.calculate_speed_by_segment_trip)(
         vp_linear_ref, 
         segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
         timestamp_col = TIMESTAMP_COL
     )    
-    
-    # Put results into a list to use dask_utils
-    results = [speeds]
+        
+    results = [speeds]       
     dask_utils.compute_and_export(
         results, 
         gcs_folder = SEGMENT_GCS, 
@@ -85,7 +95,7 @@ if __name__ == "__main__":
 
     ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-
+    
     linear_referencing_and_speed_by_segment(
         analysis_date, 
         dict_inputs = ROUTE_SEG_DICT
@@ -101,7 +111,7 @@ if __name__ == "__main__":
     
     time2 = datetime.datetime.now()
     logger.info(f"speeds for stop segments: {time2 - time1}")
-    
+
     end = datetime.datetime.now()
     logger.info(f"execution time: {time2-start}")
     
