@@ -6,6 +6,7 @@ Since RT is stored in UTC time, we download 2 days for
 vehicle positions, but need to grab grab 1 full day from that.
 """
 import dask.dataframe as dd
+import dask_geopandas as dg
 import datetime
 import gcsfs
 import geopandas as gpd
@@ -13,9 +14,10 @@ import pandas as pd
 import shapely
 import sys
 
+from dask import delayed
 from loguru import logger
 
-from shared_utils import utils
+from shared_utils import dask_utils, utils
 from segment_speed_utils import helpers, segment_calcs
 from update_vars import SEGMENT_GCS, analysis_date
 
@@ -46,40 +48,37 @@ def vp_into_gdf(df: pd.DataFrame) -> gpd.GeoDataFrame:
     Change vehicle positions, which comes as df, into gdf.
     """
     # Drop Nones or else shapely will error
-    df = df[df.location.notna()].reset_index(drop=True)
+    df2 = df[df.location.notna()].reset_index(drop=True)
     
-    geom = [shapely.wkt.loads(x) for x in df.location]
+    geom = [shapely.wkt.loads(x) for x in df2.location]
 
     gdf = gpd.GeoDataFrame(
-        df, geometry=geom, 
+        df2, geometry=geom, 
         crs="EPSG:4326").drop(columns="location")
-    
+        
     return gdf
 
 
 def filter_to_analysis_date(
-    df: dd.DataFrame,
+    df: pd.DataFrame,
     analysis_date: str
-) -> dd.DataFrame:
+) -> pd.DataFrame:
     """
     Parse the location_timestamp to grab date
     and only keep rows that are for analysis_date
-    """
-    if isinstance(df, pd.DataFrame):
-        df = dd.from_pandas(df, npartitions=3)
-    
+    """    
     df = segment_calcs.localize_vp_timestamp(
         df, "location_timestamp")
-    
+        
     df = df.assign(
-        date = dd.to_datetime(df.location_timestamp_local).dt.date,
+        activity_date = pd.to_datetime(df.location_timestamp_local).dt.date,
+        hour = pd.to_datetime(df.location_timestamp_local).dt.hour,
     )
     
-    df2 = (df[df.date == pd.to_datetime(analysis_date)]
+    df2 = (df[df.activity_date == pd.to_datetime(analysis_date)]
            .reset_index(drop=True)
-           .drop(columns = "date")
           )
-    
+        
     return df2
 
 
@@ -98,43 +97,45 @@ def remove_batched_parquets(analysis_date: str):
         (f"{one_day_after}_batch" in i))
     ]
     
+    concat_file = [i for i in fs_list if 
+                   f"{analysis_date}_concat" in i 
+    ]
+    
     for f in vp_files:
         fs.rm(f)
     
+    for f in concat_file:
+        fs.rm(f, recursive=True)
 
-def concat_and_filter_vp(analysis_date: str) -> pd.DataFrame: 
-    """
-    Since RT is UTC and that spans partly the day we want
-    and we need to grab the day after,
-    we will actually have 3 days worth of data from 2 days downloaded
-    
-    Concatenate the batched data we downloaded, save it.
-    Then, filter to just the analysis_date we're interested in
-    """
-    one_day_after = helpers.find_day_after(analysis_date)
-    
-    # Concatenate all the batched data for the 2 downloaded dates
-    part1 = concat_batches(analysis_date)
-    part1.to_parquet(f"{SEGMENT_GCS}vp_raw_{analysis_date}.parquet")
-    
-    part2 = concat_batches(one_day_after)
-    part2.to_parquet(f"{SEGMENT_GCS}vp_raw_{one_day_after}.parquet")
-    
-    logger.info(f"concatenated all batched data")
-
+        
+def concat_and_filter_for_operator(
+    analysis_date: str, 
+    rt_dataset_key: str
+) -> gpd.GeoDataFrame:
     # Filter down to analysis_date 
+    part1 = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_raw_{analysis_date}.parquet", 
+        filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
+    )
+    part2 = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_raw_{one_day_after}.parquet",
+        filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
+    )
+
     part1_filtered = filter_to_analysis_date(part1, analysis_date)
     part2_filtered = filter_to_analysis_date(part2, analysis_date)
 
-    
     # Concatenate the 2 dates downloaded that are filtered
     # appropriately to the analysis_date of interest
-    all_vp = dd.multi.concat(
+    all_vp = pd.concat(
         [part1_filtered, part2_filtered], 
-        axis=0).compute()
+        axis=0
+    ).reset_index(drop=True)
     
-    return all_vp
+    gdf = vp_into_gdf(all_vp)
     
+    return gdf
+
     
 if __name__ == "__main__":
 
@@ -148,24 +149,60 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
 
-    all_vp = concat_and_filter_vp(analysis_date)
+    one_day_after = helpers.find_day_after(analysis_date)
     
+    # Concatenate all the batched data for the 2 downloaded dates
+    part1 = concat_batches(analysis_date)
+    part1.to_parquet(f"{SEGMENT_GCS}vp_raw_{analysis_date}.parquet")
+    
+    part2 = concat_batches(one_day_after)
+    part2.to_parquet(f"{SEGMENT_GCS}vp_raw_{one_day_after}.parquet")
+    
+    logger.info(f"concatenated all batched data")
+    
+    operators = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_raw_{analysis_date}.parquet",
+        columns = ["gtfs_dataset_key"]
+    ).drop_duplicates()
+    
+    RT_OPERATORS = operators.gtfs_dataset_key.tolist()
+    
+    results = []
+    
+    for rt_dataset_key in RT_OPERATORS:
+        operator_df = delayed(concat_and_filter_for_operator)(
+            analysis_date, rt_dataset_key) 
+        
+        results.append(operator_df)
+        
+        print(f"finished: {rt_dataset_key}")
+       
+        
     time1 = datetime.datetime.now()
     logger.info(f"concat and filter for 2 dates downloaded: {time1 - start}")
         
-    gdf = vp_into_gdf(all_vp)
+    dask_utils.compute_and_export(
+        results,
+        SEGMENT_GCS,
+        f"vp_{analysis_date}_concat",
+        export_single_parquet = False
+    )
     
     time2 = datetime.datetime.now()
-    logger.info(f"turn df into gdf: {time2 - time1}")
-
+    logger.info(f"export concatenated vp: {time2 - time1}")
+    
+    vp = dg.read_parquet(
+        f"{SEGMENT_GCS}vp_{analysis_date}_concat/"
+    ).compute()
+    
+    
     utils.geoparquet_gcs_export(
-        gdf, 
+        vp,
         SEGMENT_GCS,
         f"vp_{analysis_date}"
     )
     
-    logger.info(f"export concatenated vp")
-    
     remove_batched_parquets(analysis_date)
     logger.info(f"remove batched parquets")
+    
     
