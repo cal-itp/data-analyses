@@ -9,7 +9,6 @@ download_vehicle_positions_one_day:
 	python download_vehicle_positions.py
 	python concatenate_vehicle_positions.py
     
-
 create_gtfs_schedule_geospatial_open_data:
 	python create_routes_data.py
 	python create_stops_data.py
