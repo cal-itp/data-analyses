@@ -40,6 +40,10 @@ HQTA data is updated at a monthly frequency for the open data portal. Check the 
 
 ### Download Data
 
+Prior to running the HQTA workflow, make sure this month's tables are already downloaded. Check `rt_dates` and the GCS bucket to see if `trips`, `stops`, `shapes`, and `stop_times` are already downloaded. 
+
+If not, within the `open_data` directory, run `make download_schedule_data_one_day` in the terminal.
+
 In terminal: `make download_hqta_data`
 
 1. [Create JSONs](./operators_for_hqta.py) storing a dictionary with all the operators that have cached files for all 4 datasets. These are the [valid operators](./valid_hqta_operators.json). 
