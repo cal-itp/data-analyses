@@ -66,7 +66,7 @@ def pct_route_in_equity_community(
     This captures how much of each route runs through equity communities.
     """
     gdf = gdf.assign(
-        pct_in_equity = gdf.intersect_length.divide(gdf.route_length)
+        percent_in_equity = gdf.intersect_length.divide(gdf.route_length)
     )
     
     in_equity_community = (gdf[gdf.overall_ptile_group==3]
