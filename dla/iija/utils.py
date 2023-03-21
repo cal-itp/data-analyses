@@ -69,7 +69,7 @@ def add_name_from_locode(df, df_locode_extract_col):
     
     #if we use other locode list then drop these columns
     df_all.drop(columns =['active_e76s______7_12_2021_', 'mpo_locode_fads', 'agency_locode'], axis=1, inplace=True)
-    
+        
     return df_all
 
 #add project information for all projects
@@ -115,6 +115,10 @@ def identify_agency(df, identifier_col):
     
     full_df.loc[full_df.county_name == "Statewide County", 'county_name'] = "Statewide"
     
+    full_df['implementing_agency'] = full_df['implementing_agency'].fillna(value='Unknown')
+    full_df['county_name'] = full_df['county_name'].fillna(value='Unknown')
+
+    
     return full_df
 
 
@@ -130,6 +134,9 @@ def condense_df(df):
      'program_code_description', 'recipient_project_number']] = df[['county_code', 'improvement_type',
                                                                      'implementing_agency_locode', 'district',
                                                                      'program_code_description', 'recipient_project_number']].astype(str)
+    # copy county column over to use for project title name easier
+    df['county_name_title'] = df['county_name'] 
+    
     # aggreate df using .agg function and join in the unique values into one row
     df_agg = (df
            .assign(count=1)
@@ -145,6 +152,7 @@ def condense_df(df):
                  'district':lambda x:' | '.join(x.unique()), # get unique values to concatenate
                  'county_code':lambda x:' | '.join(x.unique()), # get unique values to concatenate
                  'county_name':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'county_name_title':lambda x:' & '.join(x.unique()), # get unique values to concatenate
                  'implementing_agency_locode':lambda x:' | '.join(x.unique()), # get unique values to concatenate
                  'rtpa_name':'first', #should be the same
                  'mpo_name':'first',  #should be the same
@@ -302,7 +310,8 @@ def add_description_4_no_match(df, desc_col):
                         np.where(df[desc_col].str.contains("Preliminary Engineering"), "Preliminary Engineering Projects",
                         np.where(df[desc_col].str.contains("Construction Engineering"), "Construction Engineering Projects",
                         np.where(df[desc_col].str.contains("Right of Way"), "Right of Way Project",
-                                    "Project"))))))))))))))))))
+                        np.where(df[desc_col].str.contains("Administrative Expenses"), "Administrative Expenses",
+                                    "Project")))))))))))))))))))
     
     return df
 
@@ -310,24 +319,39 @@ def add_description_4_no_match(df, desc_col):
 
 #function for getting title column
 
-def add_new_title(df, first_col_method, second_col_type, third_col_name, alt_col_name):
+def add_new_title(df, first_col_method, second_col_type, third_col_name, alt_col_name, alt_in_proj_desc):
     """
     Function to add new title. 
     Expected output example: "New Bike Lane in Eureka"
-    """
+    """    
+
+    
     def return_name(df):
         
         if (df[third_col_name] == "California") & (df[alt_col_name] == "Statewide"):
             return (df[first_col_method] + " " + df[second_col_type] +" " + df[alt_col_name])
         
+        elif (df[third_col_name]== "Unknown"):
+            return (df[first_col_method] + " " + df[second_col_type] + " in " + df[alt_in_proj_desc])
+        
         elif (df[third_col_name] == "California"):
             return (df[first_col_method] + " " + df[second_col_type] + " in " + df[alt_col_name])
+        
+        elif (df[third_col_name] == "Metropolitan Transportation Commission"):
+            return (df[first_col_method] + " " + df[second_col_type] + " in the " + df[third_col_name] + " Region")
+        
+        elif (df[third_col_name] == "Los Angeles County Metropolitan Transportation Authority"):
+            return (df[first_col_method] + " " + df[second_col_type] + " in the " + df[third_col_name] + " Region")
+        
+        elif (df[third_col_name] == "Caltrans") & (df[alt_in_proj_desc] != ""):
+            return (df[first_col_method] + " " + df[second_col_type] + " in " + df[alt_in_proj_desc])
+        
+        elif (df[third_col_name] == "Caltrans") & (df[alt_in_proj_desc] == ""):
+            return (df[third_col_name] + " " + df[first_col_method] + " " + df[second_col_type])
         
         elif (df[third_col_name] != "California"):
             return (df[first_col_method] + " " + df[second_col_type] + " in " + df[third_col_name])
         
-        # elif (df[third_col_name] == "Metropolitan Transportation Commission"):
-        #     return (df[first_col_method] + " " + df[second_col_type] + " in The " + df[third_col_name])
 
         return df
 
@@ -359,8 +383,21 @@ def get_new_desc_title(df):
     #fill nan values in 'Project_type' with values from 'project_type2' from add_description_4_no_match function
     proj_unique_cat_title['project_type'] = proj_unique_cat_title['project_type'].fillna(proj_unique_cat_title['project_type2'])
     
+    
+    # first get new columns to get name to replace the Unknowns
+    #replace values for implementing agency name that are "unknown" with names in the project description
+    #get list of agency names from locode document
+    locodes = to_snakecase(pd.read_excel(f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
+    locodes['agency_name'] = locodes['agency_name'].str.upper()
+    locode_names = sorted(list(locodes['agency_name'].unique()), reverse=True)    
+    locode_names.remove('ROSS')
+    locode_names.append("STATE PARKS")
+    ### https://stackoverflow.com/questions/68869434/create-an-pandas-column-if-a-string-from-a-list-matches-from-another-column
+    proj_unique_cat["alt_geo_name_projdesc"] = proj_unique_cat_title["project_title"].map(lambda s: next((name for name in locode_names if name in s), ""))
+    proj_unique_cat["alt_geo_name_projdesc"] = proj_unique_cat_title["alt_geo_name_projdesc"].str.title()
+    
     #add title - second round to account for statewide projects
-    proj_unique_cat_title = add_new_title(proj_unique_cat, "project_method", "project_type", "implementing_agency", "county_name")
+    proj_unique_cat_title = add_new_title(proj_unique_cat, "project_method", "project_type", "implementing_agency", "county_name_title", "alt_geo_name_projdesc")
     
     # rename new title one
     proj_unique_cat_title = proj_unique_cat_title.rename(columns={'project_name_new':'project_title_new'})
@@ -375,7 +412,7 @@ def get_new_desc_title(df):
 
 
 
-def get_clean_data(full_or_agg = ''):
+def get_clean_data(df, full_or_agg = ''):
     
     '''
     Function putting together all the functions. 
@@ -393,10 +430,10 @@ def get_clean_data(full_or_agg = ''):
     if full_or_agg == 'agg':
         
         ## function reads in data from GCS
-        df = read_data_all()
+        # df = read_data_all()
     
         ## function that adds known agency name to df 
-        df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
+        # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
     
         aggdf = condense_df(df)
     
@@ -407,10 +444,10 @@ def get_clean_data(full_or_agg = ''):
     
     elif full_or_agg == 'full':
         ## function reads in data from GCS
-        df = read_data_all()
+        # df = read_data_all()
     
         ## function that adds known agency name to df 
-        df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
+        # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
         
         aggdf = condense_df(df)
         
@@ -424,18 +461,7 @@ def get_clean_data(full_or_agg = ''):
     
         return df
     
-#     else: 
-#         df = read_data_all()
-    
-#         ## function that adds known agency name to df 
-#         df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
-    
-#         aggdf = condense_df(df)
-    
-#         ## get new title (str parser) 
-#         aggdf = get_new_desc_title(aggdf)
-    
-#         return full_df
+
     
 '''
 another approach (not as effective for creating new titles)

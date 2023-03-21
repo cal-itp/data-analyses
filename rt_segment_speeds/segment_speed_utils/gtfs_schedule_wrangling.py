@@ -40,8 +40,8 @@ def merge_shapes_to_trips(
 
 
 def merge_shapes_to_stop_times(
+    trips_with_shape_geom: dg.GeoDataFrame,
     stop_times: dd.DataFrame,
-    trips_with_shape_geom: dg.GeoDataFrame
 ) -> dg.GeoDataFrame:
     """
     Merge stop_times with trips (with shape_geom) attached.
@@ -53,9 +53,10 @@ def merge_shapes_to_stop_times(
         how = "inner",
     )
     
-    # Sometimes, geometry is lost...need to set it so it remains dg.GeoDataFrame
-    if "geometry" in st_with_shape.columns:
-        st_with_shape = st_with_shape.set_geometry("geometry")
+    if isinstance(trips_with_shape_geom, (gpd.GeoDataFrame, dg.GeoDataFrame)):
+        geometry_col = trips_with_shape_geom.geometry.name
+        # Sometimes, geometry is lost...need to set it so it remains dg.GeoDataFrame
+        st_with_shape = st_with_shape.set_geometry(geometry_col)
     
     return st_with_shape
     

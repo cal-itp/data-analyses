@@ -7,11 +7,14 @@ and can be modularized in the future.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
+import datetime
 import gcsfs
+import geopandas as gpd
+import pandas as pd
 import yaml
 
 from typing import Literal, Union
-from update_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, PROJECT_CRS
+from segment_speed_utils.project_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, PROJECT_CRS
 from shared_utils import utils
 
 fs = gcsfs.GCSFileSystem()
@@ -56,6 +59,19 @@ def operators_with_data(
     return rt_operators
 
 
+def find_day_after(analysis_date: str) -> str:
+    """
+    RT is UTC, so let's also download the day after.
+    That way, when we localize to Pacific time, we don't lose
+    info after 4pm Pacific (which is midnight UTC).
+    """
+    one_day_later = (pd.to_datetime(analysis_date).date() + 
+                     datetime.timedelta(days=1)
+                    )
+    
+    return one_day_later.isoformat()
+        
+
 def import_vehicle_positions(
     gcs_folder: str = SEGMENT_GCS, 
     file_name: str = "",
@@ -97,14 +113,22 @@ def import_segments(
     
     if partitioned:
         file_name_sanitized = f"{utils.sanitize_file_path(file_name)}"
+        
+        df = dg.read_parquet(
+            f"{gcs_folder}{file_name_sanitized}", 
+            filters = filters,
+            columns = columns
+        )
     else:
         file_name_sanitized = f"{utils.sanitize_file_path(file_name)}.parquet"
         
-    df = dg.read_parquet(
-        f"{gcs_folder}{file_name_sanitized}", 
-        filters = filters,
-        columns = columns
-    ).drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)
+        df = gpd.read_parquet(
+            f"{gcs_folder}{file_name_sanitized}", 
+            filters = filters,
+            columns = columns
+        )
+    
+    df = df.drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)
     
     return df
 
@@ -230,11 +254,21 @@ def sjoin_vehicle_positions_to_segments(
     return ddf
 
 
-def exclude_unusable_trips(vp_df: dd.DataFrame, 
-                           valid_trip_ids: list) -> dd.DataFrame:
+def exclude_unusable_trips(
+    vp_df: dd.DataFrame, 
+    valid_trips: pd.DataFrame
+) -> dd.DataFrame:
     """
-    PLACEHOLDER FUNCTION
-    Figure out trip-level diagnostics first.
-    Supply a list of valid trips or trips to exclude?
+    Supply a df of valid trips.
+    Do an inner merge and pare down the vehicle positions df.
+    `trip_id` may not be unique across operators, so 
+    use `gtfs_dataset_key` and `trip_id`.
     """
-    return vp_df[vp_df.trip_id.isin(trips_list)].reset_index(drop=True)
+    valid_vp_df = dd.merge(
+        vp_df,
+        valid_trips,
+        on = ["gtfs_dataset_key", "trip_id"],
+        how = "inner"
+    ).reset_index(drop=True)
+    
+    return valid_vp_df
