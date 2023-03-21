@@ -141,19 +141,19 @@ def condense_df(df):
     df_agg = (df
            .assign(count=1)
            .groupby(['fmis_transaction_date','project_number', 'implementing_agency', 'summary_recipient_defined_text_field_1_value'])
-           .agg({'program_code':lambda x:' | '.join(x.unique()), # get unique values to concatenate
-                 'program_code_description':lambda x:' | '.join(x.unique()), # get unique values to concatenate
-                 'recipient_project_number':lambda x:' | '.join(x.unique()), #'first',
-                 'improvement_type':lambda x:' | '.join(x.unique()), # get unique values to concatenate
-                 'improvement_type_description':lambda x:' | '.join(x.unique()),  # get unique values to concatenate
+           .agg({'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate
+                 'program_code_description':lambda x:'|'.join(x.unique()), # get unique values to concatenate
+                 'recipient_project_number':lambda x:'|'.join(x.unique()), #'first',
+                 'improvement_type':lambda x:'|'.join(x.unique()), # get unique values to concatenate
+                 'improvement_type_description':lambda x:'|'.join(x.unique()),  # get unique values to concatenate
                  'project_title':'first', #should be the same                 
                  'obligations_amount':'sum', #sum of the obligations amount
-                 'congressional_district':lambda x:' | '.join(x.unique()), # get unique values to concatenate
-                 'district':lambda x:' | '.join(x.unique()), # get unique values to concatenate
-                 'county_code':lambda x:' | '.join(x.unique()), # get unique values to concatenate
-                 'county_name':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'congressional_district':lambda x:'|'.join(x.unique()), # get unique values to concatenate
+                 'district':lambda x:'|'.join(x.unique()), # get unique values to concatenate
+                 'county_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate
+                 'county_name':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'county_name_title':lambda x:' & '.join(x.unique()), # get unique values to concatenate
-                 'implementing_agency_locode':lambda x:' | '.join(x.unique()), # get unique values to concatenate
+                 'implementing_agency_locode':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'rtpa_name':'first', #should be the same
                  'mpo_name':'first',  #should be the same
                 }).reset_index())
@@ -231,7 +231,7 @@ def add_description(df, col):
                         np.where(df[col].str.contains("TURN LANE"), "Turn Lane",
                         np.where(df[col].str.contains("GUARDRAI"), "Guardrails", ##removing the "L"from Guardrail in case the word is cut off
                         np.where(df[col].str.contains("VIDEO DETECTION EQUIPMENT"), "Video Detection Equipment",
-                        np.where(df[col].str.contains("PEDESTRIAN") & df[col].str.contains("BIKE") , "Pedestrian  & Bike Safety Improvements",
+                        np.where(df[col].str.contains("PEDESTRIAN") & df[col].str.contains("BIKE") , "Pedestrian & Bike Safety Improvements",
                         np.where(df[col].str.contains("CONSTRUCT HOV"), "HOV Lane",
                         np.where(df[col].str.contains("CONVERT EXISTING HOV LANES TO EXPRESS LANES"), "Convert HOV Lanes to Express Lanes",    
                         np.where(df[col].str.contains("EXPRESS LANES"), "Express Lanes",         
