@@ -31,9 +31,7 @@ def fill_missing_route_short_name(df: pd.DataFrame) -> pd.DataFrame:
 def import_trips() -> pd.DataFrame:
     trips = pd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}_v2.parquet",
-        filters = [[("name", "==", "LA Metro Bus Schedule")], 
-                   #[("name", "==", "LA Metro Rail Schedule")]
-                  ],
+        filters = [[("name", "==", "LA Metro Bus Schedule")]],
         columns = ["feed_key", "name", "trip_id", "shape_id", 
                    "shape_array_key", "route_id", 
                    "route_short_name", "route_long_name"]
@@ -101,7 +99,7 @@ def split_route_into_separate_rows(df: pd.DataFrame) -> pd.DataFrame:
     duplicated = duplicated.assign(
         route_short_name_new = duplicated.apply(
             lambda x: x.route_short_name.split('/')[0] if x.obs ==1 
-            else x.route_short_name.split('/')[1], axis=1),     
+            else x.route_short_name.split('/')[1], axis=1),  
     ).drop(columns = ["obs", "route_short_name"]).rename(
         columns = {"route_short_name_new": "route_short_name"})
     
@@ -156,7 +154,7 @@ def recode_route_for_shape(df: pd.DataFrame) -> pd.DataFrame:
     duplicated = duplicated.assign(
         route_short_name = duplicated.apply(
             lambda x: DUP_ME_AND_RECODE[x.route_short_name] if x.obs ==2
-            else x.route_short_name, axis=1),     
+            else x.route_short_name, axis=1),    
     ).drop(columns = ["obs"])
     
     cleaned_df = pd.concat(
@@ -171,11 +169,11 @@ def assemble_route_level_data():
     
     trips = import_trips()
     
+    route_cols = ["route_id", "route_short_name", "route_long_name"]
     route = trips[[
-        "name", "route_id", 
-        "route_short_name", "route_long_name"]
+        "name"] + route_cols
     ].drop_duplicates().reset_index(drop=True)
-    
+
     route2 = split_route_into_separate_rows(route)
     route3 = recode_route_for_shape(route2)
     
@@ -191,4 +189,20 @@ def assemble_route_level_data():
         indicator=True
     )
     
-    return routes_with_geom
+    # Merge in number of trips, but don't assign values to the rows we 
+    # duplicated. We don't want n_trips to be overinflated 
+    trips_by_route = geography_utils.aggregate_by_geography(
+        trips,
+        group_cols = ["name"] + route_cols,
+        nunique_cols = ["trip_id"],
+        rename_cols = True
+    )
+    
+    routes_with_geom2 = pd.merge(
+        routes_with_geom,
+        trips_by_route,
+        on = ["name"] + route_cols,
+        how = "left",
+    )
+    
+    return routes_with_geom2
