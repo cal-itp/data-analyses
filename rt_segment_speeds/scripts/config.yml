@@ -3,19 +3,23 @@ route_segments:
     stage2: "vp_route_segment"
     stage3: "vp_pared"
     stage4: "speeds_route_segments"
+    stage5: "avg_speeds_route_segments"
     rt_trip_diagnostics: "trip_diagnostics"
     segments_file: "longest_shape_segments"
     trip_grouping_cols: ["route_id", "direction_id"]
     grouping_col: "route_dir_identifier"
     segment_identifier_cols: ["route_dir_identifier", "segment_sequence"]
-    timestamp_col: "location_timestamp"
+    timestamp_col: "location_timestamp_local"
+    time_min_cutoff: 5
 stop_segments:
     stage1: "vp"
     stage2: "vp_stop_segment"
     stage3: "vp_pared_stops"
     stage4: "speeds_stop_segments"
+    stop_delay_diagnostics: "stop_segments_with_speed_delay"
     segments_file: "stop_segments"
     trip_grouping_cols: ["shape_array_key"]
     grouping_col: "shape_array_key"
     segment_identifier_cols: ["shape_array_key", "stop_sequence"]
-    timestamp_col: "location_timestamp"
+    timestamp_col: "location_timestamp_local"
+    time_min_cutoff: 5
