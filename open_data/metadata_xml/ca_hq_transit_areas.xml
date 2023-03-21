@@ -48,7 +48,7 @@
 		</ns0:CI_ResponsibleParty>
 	</ns0:contact>
 	<ns0:dateStamp>
-		<ns1:Date>2023-02-17</ns1:Date>
+		<ns1:Date>2023-03-21</ns1:Date>
 	</ns0:dateStamp>
 	<ns0:metadataStandardName>
 		<ns1:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</ns1:CharacterString>
@@ -101,7 +101,7 @@
 					<ns0:date>
 						<ns0:CI_Date>
 							<ns0:date>
-								<ns1:Date>2023-02-15</ns1:Date>
+								<ns1:Date>2023-03-15</ns1:Date>
 							</ns0:date>
 							<ns0:dateType>
 								<ns0:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">
@@ -111,7 +111,7 @@
 						</ns0:CI_Date>
 					</ns0:date>
 					<ns0:edition>
-						<ns1:CharacterString>10</ns1:CharacterString>
+						<ns1:CharacterString>11</ns1:CharacterString>
 					</ns0:edition>
 					<ns0:citedResponsibleParty>
 						<ns0:CI_ResponsibleParty>
@@ -172,7 +172,7 @@
 						</ns0:MD_MaintenanceFrequencyCode>
 					</ns0:maintenanceAndUpdateFrequency>
 					<ns0:dateOfNextUpdate>
-						<ns1:Date>2023-03-15</ns1:Date>
+						<ns1:Date>2023-04-15</ns1:Date>
 					</ns0:dateOfNextUpdate>
 				</ns0:MD_MaintenanceInformation>
 			</ns0:resourceMaintenance>
@@ -254,8 +254,8 @@
 						<ns0:EX_TemporalExtent>
 							<ns0:extent>
 								<ns2:TimePeriod ns2:id="IDDWYVT5UGET0XIDOZ10J1NEM1TJ4BG4DJ4XQHJCJYNE1G53PQBC5H">
-									<ns2:beginPosition>2023-02-15T00:00:00</ns2:beginPosition>
-									<ns2:endPosition>2023-03-15T00:00:00</ns2:endPosition>
+									<ns2:beginPosition>2023-03-15T00:00:00</ns2:beginPosition>
+									<ns2:endPosition>2023-04-15T00:00:00</ns2:endPosition>
 								</ns2:TimePeriod>
 							</ns0:extent>
 						</ns0:EX_TemporalExtent>
@@ -315,7 +315,7 @@
 					<ns0:processStep>
 						<ns0:LI_ProcessStep>
 							<ns0:description>
-								<ns1:CharacterString>This data was estimated using a spatial process derived from General Transit Feed Specification (GTFS) schedule data. To find high-quality bus corridors, we split each corridor into 1,250 meter segments and counted frequencies at the stop within that segment with the highest number of transit trips. If that stop saw at least 4 trips per hour for at least one hour in the morning, and again for at least one hour in the afternoon, we consider that segment a high-quality bus corridor. Segments without a stop are not considered high-quality corridors. Major transit stops were identified as either the intersection of two high-quality corridors from the previous step, a rail or bus rapid transit station, or a ferry terminal with bus service. Note that the definition of `bus rapid transit` in Public Resources Code 21060.2 includes features not captured by available data sources, these features were captured manually using information from transit agency sources and imagery. We believe this data to be broadly accurate, and fit for purposes including overall dashboards, locating facilities in relation to high quality transit areas, and assessing community transit coverage. However, the spatial determination of high-quality transit areas from GTFS data necessarily involves some assumptions as described above. Any critical determinations of whether a specific parcel is located within a high-quality transit area should be made in conjunction with local sources, such as transit agency timetables.  Notes: Null values may be present. The `hqta_details` columns defines which part of the Public Resources Code definition the HQTA classification was based on. If `hqta_details` references a single operator, then `itp_id_secondary` and `agency_secondary` are null. If `hqta_details` references the same operator, then `itp_id_secondary` and `agency_secondary` are the same as `itp_id_primary` and `agency_primary`.</ns1:CharacterString>
+								<ns1:CharacterString>This data was estimated using a spatial process derived from General Transit Feed Specification (GTFS) schedule data. To find high-quality bus corridors, we split each corridor into 1,250 meter segments and counted frequencies at the stop within that segment with the highest number of transit trips. If that stop saw at least 4 trips per hour for at least one hour in the morning, and again for at least one hour in the afternoon, we consider that segment a high-quality bus corridor. Segments without a stop are not considered high-quality corridors. Major transit stops were identified as either the intersection of two high-quality corridors from the previous step, a rail or bus rapid transit station, or a ferry terminal with bus service. Note that the definition of `bus rapid transit` in Public Resources Code 21060.2 includes features not captured by available data sources, these features were captured manually using information from transit agency sources and imagery. We believe this data to be broadly accurate, and fit for purposes including overall dashboards, locating facilities in relation to high quality transit areas, and assessing community transit coverage. However, the spatial determination of high-quality transit areas from GTFS data necessarily involves some assumptions as described above. Any critical determinations of whether a specific parcel is located within a high-quality transit area should be made in conjunction with local sources, such as transit agency timetables.  Notes: Null values may be present. The `hqta_details` columns defines which part of the Public Resources Code definition the HQTA classification was based on. If `hqta_details` references a single operator, then `agency_secondary` and `base64_url_secondary` are null. If `hqta_details` references the same operator, then `agency_secondary` and `base64_url_secondary` are the same as `agency_primary` and `base64_url_primary`.</ns1:CharacterString>
 							</ns0:description>
 						</ns0:LI_ProcessStep>
 					</ns0:processStep>
