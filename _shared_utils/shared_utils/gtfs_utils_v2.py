@@ -49,7 +49,7 @@ def subset_cols(cols: list) -> siuba.dply.verbs.Pipeable:
     Select subset of columns, if column list is present.
     Otherwise, skip.
     """
-    if cols is not None:
+    if cols:
         return select(*cols)
     else:
         # Can't use select(), because we'll select no columns
@@ -241,7 +241,7 @@ def get_transit_organizations_gtfs_dataset_keys(
 
 def schedule_daily_feed_to_organization(
     selected_date: Union[str, datetime.date],
-    keep_cols: list[str] = None,
+    keep_cols: list[str] = [],
     get_df: bool = True,
     feed_option: Literal[
         "customer_facing",
@@ -305,7 +305,7 @@ def schedule_daily_feed_to_organization(
 def get_trips(
     selected_date: Union[str, datetime.date],
     operator_feeds: list[str] = [],
-    trip_cols: list[str] = None,
+    trip_cols: list[str] = [],
     get_df: bool = True,
     custom_filtering: dict = None,
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
@@ -354,7 +354,7 @@ def get_trips(
 def get_shapes(
     selected_date: Union[str, datetime.date],
     operator_feeds: list[str] = [],
-    shape_cols: list[str] = None,
+    shape_cols: list[str] = [],
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     custom_filtering: dict = None,
@@ -369,14 +369,17 @@ def get_shapes(
 
     shapes = (
         tbls.mart_gtfs.fct_daily_scheduled_shapes()
-        >> filter_date(selected_date)
+        >> filter(_.activity_date == selected_date) # service_date no longer present in tbl;should we change others?
         >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
     )
 
     if get_df:
         shapes = shapes >> collect()
-
+        if not shape_cols:
+             # maintain usual behaviour of returning all in absence of subset param
+             # must first drop pt_array since it's replaced by make_routes_gdf
+            shape_cols = list((shapes >> select(-_.pt_array)).columns)
         shapes_gdf = geography_utils.make_routes_gdf(shapes, crs=crs)[shape_cols + ["geometry"]]
 
         return shapes_gdf
@@ -388,7 +391,7 @@ def get_shapes(
 def get_stops(
     selected_date: Union[str, datetime.date],
     operator_feeds: list[str] = [],
-    stop_cols: list[str] = None,
+    stop_cols: list[str] = [],
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     custom_filtering: dict = None,
@@ -403,14 +406,14 @@ def get_stops(
 
     # If pt_geom is not kept in the final, we still need it
     # to turn this into a gdf
-    if (stop_cols is not None) and ("pt_geom" not in stop_cols):
+    if (stop_cols) and ("pt_geom" not in stop_cols):
         stop_cols_with_geom = stop_cols + ["pt_geom"]
     else:
         stop_cols_with_geom = stop_cols[:]
 
     stops = (
         tbls.mart_gtfs.fct_daily_scheduled_stops()
-        >> filter_date(selected_date)
+        >> filter(_.activity_date == selected_date) # service_date no longer present in tbl;should we change others?
         >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
         >> subset_cols(stop_cols_with_geom)
@@ -459,7 +462,7 @@ def filter_start_end_ts(time_filters: dict, time_col: Literal["arrival", "depart
 def get_stop_times(
     selected_date: Union[str, datetime.date],
     operator_feeds: list[str] = [],
-    stop_time_cols: list[str] = None,
+    stop_time_cols: list[str] = [],
     get_df: bool = False,
     time_filters: dict = {
         "arrival": (0, 26),
