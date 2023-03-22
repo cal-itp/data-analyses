@@ -212,21 +212,26 @@ class OperatorDayAnalysis:
         assert type(analysis_date) == dt.date, 'analysis date must be a datetime.date object'
         self.analysis_date = analysis_date
         self.display_date = self.analysis_date.strftime('%b %d (%a)')
-        self.vehicle_positions = shared_utils.rt_utils.get_vehicle_positions(self.calitp_itp_id, self.analysis_date)
-        self.trips = shared_utils.rt_utils.get_trips(self.calitp_itp_id, self.analysis_date)
-        self.stop_times = shared_utils.rt_utils.get_stop_times(self.calitp_itp_id, self.analysis_date)
-        self.stops = shared_utils.rt_utils.get_stops(self.calitp_itp_id, self.analysis_date)
-        trips = self.trips >> select(-_.calitp_url_number, -_.calitp_extracted_at, -_.calitp_deleted_at)
-        positions = self.vehicle_positions >> select(-_.calitp_url_number)
-        self.trips_positions_joined = (trips >> inner_join(_, positions, on= ['trip_id', 'calitp_itp_id']))
-        assert not self.trips_positions_joined.empty, 'vehicle positions empty, or vp trip ids not in schedule'
-        self.trips_positions_joined = gpd.GeoDataFrame(self.trips_positions_joined,
-                                    geometry=gpd.points_from_xy(self.trips_positions_joined.vehicle_longitude,
-                                                                self.trips_positions_joined.vehicle_latitude),
-                                    crs=WGS84).to_crs(CA_NAD83Albers)
+        ## Move to v2!
+        # call this org_feed_index_df instead?
+        self.index_query = v2_queries.get_ix_query(itp_id, analysis_date)
+        self.vehicle_positions = v2_queries.get_vehicle_positions(self.index_query)
+        self.index_df = self.index_query >> collect()
+        self.feed_key_list = list(self.index_df.feed_key.unique())
+        self.trips = shared_utils.gtfs_utils_v2.get_trips(analysis_date, self.feed_key_list, v2_queries.trip_cols)
+        st_pre_select = shared_utils.gtfs_utils_v2.get_stop_times(analysis_date, self.feed_key_list, trip_df = self.trips,
+                                                     stop_time_cols = v2_queries.st_cols, get_df = True)
+        self.stop_times = st_pre_select >> select(-_.arrival_sec, -_.departure_sec)
+        stops_wgs84 = shared_utils.gtfs_utils_v2.get_stops(analysis_date, self.feed_key_list, v2_queries.stop_cols)
+        self.stops = stops_wgs84.to_crs(CA_NAD83Albers)
+        
         self.routelines = shared_utils.rt_utils.get_routelines(self.calitp_itp_id, self.analysis_date)
         self.routelines = self.routelines.dropna(subset=['geometry']) ## invalid geos are nones in new df...
         assert type(self.routelines) == type(gpd.GeoDataFrame()) and not self.routelines.empty, 'routelines must not be empty'
+        
+        ## End Phase 2
+        self.trips_positions_joined = (trips >> inner_join(_, positions, on = ['trip_id']))
+        assert not self.trips_positions_joined.empty, 'vehicle positions empty, or vp trip ids not in schedule'
         self.trs = self.trips >> select(_.shape_id, _.trip_id)
         self.trs = self.trs >> inner_join(_, self.stop_times >> select(_.trip_id, _.stop_id), on = 'trip_id')
         self.trs = self.trs >> distinct(_.stop_id, _.shape_id)
