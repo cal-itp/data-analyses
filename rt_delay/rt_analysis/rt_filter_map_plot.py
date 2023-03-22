@@ -1,6 +1,7 @@
 import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.rt_utils import *
+from rt_analysis import v2_queries
 import branca
 import mapclassify
 
@@ -34,9 +35,9 @@ class RtFilterMapper:
         # below line fixes interpolated segment mapping for 10/12 data, fixed upstream for future dates
         self.stop_delay_view = self.stop_delay_view >> group_by(_.shape_id) >> mutate(direction_id = _.direction_id.ffill()) >> ungroup()
         self.routelines = routelines
-        self.calitp_agency_name = rt_trips.calitp_agency_name.iloc[0]
-        self.analysis_date = rt_trips.service_date.iloc[0]
-        self.display_date = self.analysis_date.strftime('%b %d (%a)')
+        self.organization_name = rt_trips.organization_name.iloc[0]
+        self.analysis_date = rt_trips.activity_date.iloc[0]
+        self.display_date = self.analysis_date.strftime('%b %d, %Y (%a)')
         
         self.endpoint_delay_view = (self.stop_delay_view
                       >> group_by(_.trip_id)
@@ -365,7 +366,7 @@ class RtFilterMapper:
         # Further reduce map size
         gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
                             -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
-                           -_.delay_chg_sec, -_.service_date, -_.last_loc, -_.shape_meters,
+                           -_.delay_chg_sec, -_.activity_date, -_.last_loc, -_.shape_meters,
                            -_.meters_from_last, -_.n_trips_shp)
         orig_rows = gdf.shape[0]
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'miles_from_last': 1,
@@ -396,7 +397,7 @@ class RtFilterMapper:
         gdf = gdf.to_crs(WGS84)
         self.detailed_map_view = gdf.copy()
         centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
-        name = self.calitp_agency_name
+        name = self.organization_name
 
         display_cols = [how_speed_col[how], 'time_formatted', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
@@ -460,7 +461,7 @@ class RtFilterMapper:
         if no_title:
             title = ''
         else:
-            title = f"{self.calitp_agency_name} Mean Delays by Arrival Hour{self.filter_formatted}"
+            title = f"{self.organization_name} Mean Delays by Arrival Hour{self.filter_formatted}"
             
         sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Minutes of Delay at Endpoint'], ci=None, 
                        palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
@@ -488,7 +489,7 @@ class RtFilterMapper:
         if no_title:
             title = ''
         else:
-            title = f"{self.calitp_agency_name} Median Trip Speeds by Arrival Hour{self.filter_formatted}"
+            title = f"{self.organization_name} Median Trip Speeds by Arrival Hour{self.filter_formatted}"
             
         sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Median Trip Speed (mph)'], ci=None, 
                        palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
@@ -524,7 +525,7 @@ class RtFilterMapper:
                                       'stop_sequence': 'Stop Segment ID',
                                       'stop_name': 'Segment Cross Street'})
         plt.xticks(rotation=65)
-        title = f"{self.calitp_agency_name} Speed Variability by Stop Segment{self.filter_formatted}"
+        title = f"{self.organization_name} Speed Variability by Stop Segment{self.filter_formatted}"
         if no_title:
             title = None
         variability_plt = sns.swarmplot(x = to_chart['Segment Cross Street'], y=to_chart['Segement Speed (mph)'],
@@ -630,7 +631,7 @@ class RtFilterMapper:
         speed_metric = int(round(speed_metric))
         self.corridor['schedule_metric_minutes'] = schedule_metric
         self.corridor['speed_metric_minutes'] = speed_metric
-        self.corridor['agency'] = self.calitp_agency_name
+        self.corridor['agency'] = self.organization_name
         self.corridor['routes_included'] = self.filter_formatted
         return {'schedule_metric_minutes': schedule_metric,
                'speed_metric_minutes': speed_metric}
@@ -645,6 +646,14 @@ def from_gcs(itp_id, analysis_date, pbar = None):
                  .reset_index(drop=True))
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
-    routelines = get_routelines(itp_id, analysis_date)
+
+    index_query = v2_queries.get_ix_query(itp_id, analysis_date)
+    index_df = index_query >> collect()
+    feed_key_list = list(index_df.feed_key.unique())
+    routelines = shared_utils.gtfs_utils_v2.get_shapes(analysis_date, feed_key_list, crs = CA_NAD83Albers, 
+                                                          shape_cols = v2_queries.shape_cols)
+    routelines = routelines.dropna(subset=['geometry']) ## invalid geos are nones in new df...
+    assert type(routelines) == type(gpd.GeoDataFrame()) and not routelines.empty, 'routelines must not be empty'
+    
     rt_day = RtFilterMapper(trips, stop_delay, routelines, pbar)
     return rt_day
