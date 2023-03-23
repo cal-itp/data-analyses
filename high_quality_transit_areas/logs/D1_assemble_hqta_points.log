@@ -209,3 +209,21 @@
 2023-02-17 11:52:03.189 | INFO     | __main__:<module>:229 - export as geojson
 2023-02-17 11:52:12.147 | INFO     | __main__:<module>:238 - export as geojsonl
 2023-02-17 11:52:12.148 | INFO     | __main__:<module>:241 - execution time: 0:00:38.272712
+2023-03-16 09:47:11.298 | INFO     | __main__:<module>:169 - Analysis date: 2023-03-15
+2023-03-16 09:47:13.601 | INFO     | __main__:<module>:187 - combined points: 0:00:02.291898
+2023-03-16 09:47:20.765 | INFO     | __main__:<module>:193 - add route info: 0:00:07.164008
+2023-03-16 09:47:26.891 | INFO     | __main__:<module>:200 - add agency names: 0:00:06.125435
+2023-03-16 09:47:27.673 | INFO     | __main__:<module>:210 - export as geoparquet in date folder
+2023-03-16 09:47:28.145 | INFO     | __main__:<module>:219 - export as geoparquet
+2023-03-16 09:47:38.005 | INFO     | __main__:<module>:229 - export as geojson
+2023-03-16 09:47:45.857 | INFO     | __main__:<module>:238 - export as geojsonl
+2023-03-16 09:47:45.859 | INFO     | __main__:<module>:241 - execution time: 0:00:34.549298
+2023-03-16 09:51:20.971 | INFO     | __main__:<module>:169 - Analysis date: 2023-03-15
+2023-03-16 09:51:23.285 | INFO     | __main__:<module>:187 - combined points: 0:00:02.312454
+2023-03-16 09:51:30.537 | INFO     | __main__:<module>:193 - add route info: 0:00:07.252028
+2023-03-16 09:51:37.070 | INFO     | __main__:<module>:200 - add agency names: 0:00:06.533528
+2023-03-16 09:51:37.698 | INFO     | __main__:<module>:210 - export as geoparquet in date folder
+2023-03-16 09:51:38.165 | INFO     | __main__:<module>:219 - export as geoparquet
+2023-03-16 09:51:46.231 | INFO     | __main__:<module>:229 - export as geojson
+2023-03-16 09:51:54.425 | INFO     | __main__:<module>:238 - export as geojsonl
+2023-03-16 09:51:54.425 | INFO     | __main__:<module>:241 - execution time: 0:00:33.453193

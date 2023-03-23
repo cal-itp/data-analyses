@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
   
     keep_shape_cols = [
-       "feed_key",
+       "feed_key", "activity_date", 
        "shape_id", "shape_array_key",
        "n_trips", 
        # n_trips is new column...can help if we want 
