@@ -369,7 +369,7 @@ def get_shapes(
 
     shapes = (
         tbls.mart_gtfs.fct_daily_scheduled_shapes()
-        >> filter(_.activity_date == selected_date) # service_date no longer present in tbl;should we change others?
+        >> filter(_.activity_date == selected_date) # service_date no longer present in tbl; should we change others?
         >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
     )
