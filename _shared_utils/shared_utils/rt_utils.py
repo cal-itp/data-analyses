@@ -799,12 +799,13 @@ route_type_names = {
 }
 
 
-def get_operators(analysis_date, operator_list):
+def get_operators(analysis_date, operator_list, verbose = False):
     """
     Function for checking the existence of rt_trips and stop_delay_views in GCS for operators on a given day.
 
     analysis_date: datetime.date
     operator_list: list of itp_id's
+    verbose: print status in additon to returning dict
     """
 
     if isinstance(analysis_date, str):
@@ -821,11 +822,11 @@ def get_operators(analysis_date, operator_list):
     op_list_runstatus = {}
     for itp_id in operator_list:
         if itp_id in ran_operators:
-            print(f"already ran: {itp_id}")
+            if verbose: print(f"already ran: {itp_id}")
             op_list_runstatus[itp_id] = "already_ran"
             continue
         else:
-            print(f"not yet run: {itp_id}")
+            if verbose: print(f"not yet run: {itp_id}")
             op_list_runstatus[itp_id] = "not_yet_run"
     return op_list_runstatus
 

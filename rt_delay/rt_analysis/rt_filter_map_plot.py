@@ -36,7 +36,10 @@ class RtFilterMapper:
         self.stop_delay_view = self.stop_delay_view >> group_by(_.shape_id) >> mutate(direction_id = _.direction_id.ffill()) >> ungroup()
         self.routelines = routelines
         self.organization_name = rt_trips.organization_name.iloc[0]
-        self.analysis_date = rt_trips.activity_date.iloc[0]
+        if 'activity_date' in rt_trips.columns:
+            self.analysis_date = rt_trips.activity_date.iloc[0]
+        else:
+            self.analysis_date = rt_trips.service_date.iloc[0] #v1 compatibility
         self.display_date = self.analysis_date.strftime('%b %d, %Y (%a)')
         
         self.endpoint_delay_view = (self.stop_delay_view
@@ -366,7 +369,8 @@ class RtFilterMapper:
         # Further reduce map size
         gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
                             -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
-                           -_.delay_chg_sec, -_.activity_date, -_.last_loc, -_.shape_meters,
+                           -_.delay_chg_sec, -_.activity_date, -_.service_date,
+                            -_.last_loc, -_.shape_meters,
                            -_.meters_from_last, -_.n_trips_shp)
         orig_rows = gdf.shape[0]
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'miles_from_last': 1,
