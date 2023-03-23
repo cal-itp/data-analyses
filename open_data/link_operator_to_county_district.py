@@ -52,7 +52,6 @@ def import_caltrans_districts() -> gpd.GeoDataFrame:
     return caltrans_districts
 
 
-
 def sjoin_to_geography_aggregate_to_operator(
     stops: gpd.GeoDataFrame, 
     geography_polygon: gpd.GeoDataFrame, 
@@ -69,11 +68,29 @@ def sjoin_to_geography_aggregate_to_operator(
         predicate = "intersects"
     ).drop(columns = "index_right")
     
-    
     count_stops_by_geog = geography_utils.aggregate_by_geography(
         stops_in_poly,
         group_cols = ["feed_key", geography_col],
         count_cols = ["stop_id"],
+    ).sort_values(["feed_key", "stop_id"]).reset_index(drop=True)
+    
+    if geography_col == "district":
+        geography_col_new = "district_str"
+        count_stops_by_geog = count_stops_by_geog.assign(
+            district_str = count_stops_by_geog[geography_col].astype(str)
+        )
+        
+    else:
+        geography_col_new = geography_col
+    
+    # Add a column that lists out the geographies, such as Los Angeles, Orange
+    count_stops_by_geog = count_stops_by_geog.assign(
+        geog_list = (count_stops_by_geog.sort_values(["feed_key", "stop_id"], 
+                                                  ascending=[True, False])
+                     .groupby("feed_key")
+                     [geography_col_new]
+                     .transform(lambda x: ', '.join(x))
+                    )
     )
     
     return count_stops_by_geog
@@ -101,11 +118,13 @@ def get_predominant_geography(
         .reset_index(drop=True)
     )
 
-    num_geog_units = (gdf.groupby("feed_key")
+    num_geog_units = (gdf.groupby(["feed_key", "geog_list"])
                       .agg({geography_col: "nunique"})
                       .reset_index()
                       .rename(columns = {
-                          geography_col: f"num_{geography_col}"})
+                          geography_col: f"num_{geography_col}", 
+                          "geog_list": f"{geography_col}_list"
+                      })
                     )
     
     operator_name = pd.read_parquet(
@@ -166,8 +185,6 @@ def get_operators_by_county(analysis_date: str):
     ).rename(columns = {"num_county_name": "num_county"})
     
     return operator_by_county
-    
-    
     
     
 if __name__ == "__main__":
