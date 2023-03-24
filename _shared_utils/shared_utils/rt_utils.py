@@ -50,6 +50,8 @@ HOUR_MIN_FMT = "%H:%M"  # 08:00 for 8 am, 13:00 for 1pm
 HOUR_MIN_SEC_FMT = "%H:%M:%S"  # 08:15:05 for 8:15 am + 5 sec, 13:15:05 for 1:15pm + 5 sec
 FULL_DATE_FMT = "%Y-%m-%d"  # 2022-06-01 for 6/1/22
 
+# decide to use v1 cached data from gcs or v2 warehouse cached data/fresh queries
+warehouse_cutoff_date = dt.date(2022, 12, 31)
 
 def format_date(analysis_date: Union[dt.date, str]) -> str:
     """

@@ -35,11 +35,12 @@ class RtFilterMapper:
         # below line fixes interpolated segment mapping for 10/12 data, fixed upstream for future dates
         self.stop_delay_view = self.stop_delay_view >> group_by(_.shape_id) >> mutate(direction_id = _.direction_id.ffill()) >> ungroup()
         self.routelines = routelines
-        self.organization_name = rt_trips.organization_name.iloc[0]
         if 'activity_date' in rt_trips.columns:
             self.analysis_date = rt_trips.activity_date.iloc[0]
+            self.organization_name = rt_trips.organization_name.iloc[0]
         else:
             self.analysis_date = rt_trips.service_date.iloc[0] #v1 compatibility
+            self.organization_name = rt_trips.calitp_agency_name.iloc[0]
         self.display_date = self.analysis_date.strftime('%b %d, %Y (%a)')
         
         self.endpoint_delay_view = (self.stop_delay_view
@@ -650,14 +651,17 @@ def from_gcs(itp_id, analysis_date, pbar = None):
                  .reset_index(drop=True))
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
-
-    index_query = v2_queries.get_ix_query(itp_id, analysis_date)
-    index_df = index_query >> collect()
-    feed_key_list = list(index_df.feed_key.unique())
-    routelines = shared_utils.gtfs_utils_v2.get_shapes(analysis_date, feed_key_list, crs = CA_NAD83Albers, 
-                                                          shape_cols = v2_queries.shape_cols)
-    routelines = routelines.dropna(subset=['geometry']) ## invalid geos are nones in new df...
-    assert type(routelines) == type(gpd.GeoDataFrame()) and not routelines.empty, 'routelines must not be empty'
+    
+    if analysis_date <= warehouse_cutoff_date:
+        routelines = get_routelines(itp_id, analysis_date)
+    else:
+        index_query = v2_queries.get_ix_query(itp_id, analysis_date)
+        index_df = index_query >> collect()
+        feed_key_list = list(index_df.feed_key.unique())
+        routelines = shared_utils.gtfs_utils_v2.get_shapes(analysis_date, feed_key_list, crs = CA_NAD83Albers, 
+                                                              shape_cols = v2_queries.shape_cols)
+        routelines = routelines.dropna(subset=['geometry']) ## invalid geos are nones in new df...
+        assert type(routelines) == type(gpd.GeoDataFrame()) and not routelines.empty, 'routelines must not be empty'
     
     rt_day = RtFilterMapper(trips, stop_delay, routelines, pbar)
     return rt_day

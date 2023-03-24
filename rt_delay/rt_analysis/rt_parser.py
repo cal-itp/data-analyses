@@ -221,6 +221,7 @@ class OperatorDayAnalysis:
         self.vehicle_positions = v2_queries.get_vehicle_positions(self.index_query)
         self.index_df = self.index_query >> collect()
         self.feed_key_list = list(self.index_df.feed_key.unique())
+        
         self.trips = shared_utils.gtfs_utils_v2.get_trips(analysis_date, self.feed_key_list, v2_queries.trip_cols)
         st_pre_select = shared_utils.gtfs_utils_v2.get_stop_times(analysis_date, self.feed_key_list, trip_df = self.trips,
                                                      stop_time_cols = v2_queries.st_cols, get_df = True)
