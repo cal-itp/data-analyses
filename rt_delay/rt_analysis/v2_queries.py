@@ -21,6 +21,8 @@ import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from calitp_data_analysis.tables import tbls
 
+import shared_utils.rt_utils as rt_utils
+
 # set system time
 os.environ["TZ"] = "America/Los_Angeles"
 time.tzset()
@@ -74,9 +76,21 @@ def get_vehicle_positions(ix_query):
     '''
     
     ix_df = ix_query >> collect()
-    assert ix_df.activity_date.iloc[0].date() == dt.date(2023, 3, 15), 'hardcoded to 3/15 for now :)'
-    vp_all = gpd.read_parquet(f'{VP_FILE_PATH}vp_2023-03-15.parquet')
-    org_vp = vp_all >> filter(_.gtfs_dataset_key.isin(ix_df.vehicle_positions_gtfs_dataset_key))
-    org_vp = org_vp >> select(-_.location_timestamp)
-    org_vp = org_vp.to_crs(CA_NAD83Albers)
+    activity_date = ix_df.activity_date.iloc[0]
+    date_str = activity_date.strftime(rt_utils.FULL_DATE_FMT)
+    assert activity_date.date() == dt.date(2023, 3, 15), 'hardcoded to 3/15 for now :)'
+    filename = f"vp_{ix_df.organization_itp_id.iloc[0]}_{date_str}.parquet"
+    subfolder = 'v2_cached_views/'
+    path = rt_utils.check_cached(filename = filename, subfolder = subfolder)
+    
+    if path:
+        print("found vp parquet")
+        org_vp = gpd.read_parquet(path)
+    else:
+        vp_all = gpd.read_parquet(f'{VP_FILE_PATH}vp_2023-03-15.parquet')
+        org_vp = vp_all >> filter(_.gtfs_dataset_key.isin(ix_df.vehicle_positions_gtfs_dataset_key))
+        org_vp = org_vp >> select(-_.location_timestamp)
+        org_vp = org_vp.to_crs(CA_NAD83Albers)
+        shared_utils.utils.geoparquet_gcs_export(org_vp, rt_utils.GCS_FILE_PATH+subfolder, filename)
+
     return org_vp
