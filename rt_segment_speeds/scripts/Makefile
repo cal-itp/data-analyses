@@ -10,3 +10,8 @@ get_speeds_by_segment:
 	python A3_speeds_by_segment_trip.py
 	python B1_rt_trip_diagnostics.py
 	python C1_calculate_stop_delay.py
+    
+download_roads:
+	#pip install esridump
+	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson
+	python download_all_roads.py
