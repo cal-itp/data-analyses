@@ -1,5 +1,1 @@
 -e .
-cpi==1.0.5
-xmltodict==0.13.0
-loguru==0.6.0
-mapclassify==2.4.3
