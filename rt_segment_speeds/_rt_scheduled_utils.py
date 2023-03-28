@@ -4,7 +4,6 @@ import pandas as pd
 import dask.dataframe as dd
 import datetime 
 
-from calitp_data_analysis.sql import to_snakecase
 import _threshold_utils as threshold_utils
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS, analysis_date
@@ -249,8 +248,7 @@ def final_df(vp_df, date: str):
     
     df[cols_to_keep].to_parquet(f"{RT_SCHED_GCS}rt_vs_scheduled_metrics.parquet")
     
-    # Add columns for making graphs
-    # Round certain columns to eyeball
+    # Add additional columns for making graphs
     for i in ['rt_data_proportion_percentage','actual_trip_duration_minutes']:
         df[f"rounded_{i}"] = (((df[i]/100)*10).astype(int)*10)
         # .astype(str) + '%'
@@ -406,14 +404,14 @@ def operator_level_visuals(df):
     init={'Gtfs Dataset Name': initialize_first_op})
     
     # Create charts 
-    chart_scheduled = bar_chart(rt_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "% of RT vs. Scheduled Minutes by Operator")
-    chart_trip = stacked_bar_chart(rt_trip, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Lengths and % of RT vs. Scheduled Time by Operator")
+    chart_scheduled = bar_chart(rt_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "Operator - % of RT vs. Scheduled Minutes")
+    chart_trip = stacked_bar_chart(rt_trip, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Length and % of RT Data")
     
     # Finalize charts
-    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 500, 400).add_selection(selection).transform_filter(selection)
-    chart_trip = threshold_utils.chart_size(chart_trip, 500, 400).add_selection(selection).transform_filter(selection)
+    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 400, 300).add_selection(selection).transform_filter(selection)
+    chart_trip = threshold_utils.chart_size(chart_trip, 400, 300).add_selection(selection).transform_filter(selection)
     
-    return chart_scheduled | chart_trip
+    return chart_scheduled & chart_trip
 
 def create_statewide_visuals(df):
     """
@@ -423,11 +421,11 @@ def create_statewide_visuals(df):
     sw_scheduled, sw_trips = statewide_metrics(df)
     
     # Create charts
-    chart_scheduled = bar_chart(sw_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "% of RT vs. Scheduled Minutes for All Operators")
-    chart_trip = stacked_bar_chart(sw_trips, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Lengths and % of RT vs. Scheduled Time for All Operators")
+    chart_scheduled = bar_chart(sw_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "Statewide - % of RT vs. Scheduled Minutes")
+    chart_trip = stacked_bar_chart(sw_trips, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Length and % of RT Data")
     
     # Finalize charts
-    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 500, 400)
-    chart_trip = threshold_utils.chart_size(chart_trip, 500, 400)
+    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 400, 300)
+    chart_trip = threshold_utils.chart_size(chart_trip, 400, 300)
     
-    return chart_scheduled | chart_trip
+    return chart_scheduled & chart_trip
