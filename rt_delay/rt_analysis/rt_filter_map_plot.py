@@ -1,7 +1,6 @@
 import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.rt_utils import *
-from rt_analysis import v2_queries
 import branca
 import mapclassify
 
@@ -26,7 +25,7 @@ class RtFilterMapper:
     Collects filtering and mapping functions, init with stop segment speed view and rt_trips
     '''
     def __init__(self, rt_trips, stop_delay_view,
-                 routelines, pbar = None):
+                 shapes, pbar = None):
         self.debug_dict = {}
         self.pbar = pbar
         self.rt_trips = rt_trips
@@ -34,9 +33,10 @@ class RtFilterMapper:
         self.stop_delay_view = stop_delay_view
         # below line fixes interpolated segment mapping for 10/12 data, fixed upstream for future dates
         self.stop_delay_view = self.stop_delay_view >> group_by(_.shape_id) >> mutate(direction_id = _.direction_id.ffill()) >> ungroup()
-        self.routelines = routelines
-        if 'activity_date' in rt_trips.columns:
-            self.analysis_date = rt_trips.activity_date.iloc[0]
+        self.shapes = shapes
+        self.using_v2 = 'activity_date' in rt_trips.columns
+        if self.using_v2:
+            self.analysis_date = rt_trips.activity_date.iloc[0] #v2 warehouse
             self.organization_name = rt_trips.organization_name.iloc[0]
         else:
             self.analysis_date = rt_trips.service_date.iloc[0] #v1 compatibility
@@ -281,9 +281,9 @@ class RtFilterMapper:
         assert how in ['average', 'low_speeds']
         
         gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.isoformat()}_{self.filter_period}'
-        subfolder = 'segment_speed_views/'
+        subfolder = 'v2_segment_speed_views/' if self.using_v2 else 'segment_speed_views/'
         cached_periods = ['PM_Peak', 'AM_Peak', 'Midday', 'All_Day']
-        if (check_cached (f'{gcs_filename}.parquet', subfolder) and self.filter_period in cached_periods
+        if (check_cached(filename = f'{gcs_filename}.parquet', subfolder = subfolder) and self.filter_period in cached_periods
             and self._time_only_filter and not corridor):
             self.stop_segment_speed_view = gpd.read_parquet(f'{GCS_FILE_PATH}{subfolder}{gcs_filename}.parquet')
         else:
@@ -315,7 +315,7 @@ class RtFilterMapper:
                     # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
                     stop_speeds.geometry = stop_speeds.apply(
                         lambda x: shapely.ops.substring(
-                                    (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
+                                    (self.shapes >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
                                     x.last_loc,
                                     x.shape_meters),
                                                     axis = 1)
@@ -354,8 +354,8 @@ class RtFilterMapper:
                 )
             all_stop_speeds = all_stop_speeds >> inner_join(_, direction_counts, on = ['route_id', 'direction_id'])
             self.stop_segment_speed_view = all_stop_speeds
-            export_path = f'{GCS_FILE_PATH}segment_speed_views/'
-            if self._time_only_filter and self.filter_period in ['AM_Peak', 'PM_Peak', 'Midday', 'All_Day']:
+            export_path = f'{GCS_FILE_PATH}{subfolder}'
+            if self._time_only_filter and self.filter_period in cached_periods:
                 shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
         self.speed_map_params = (how, colorscale, size, no_title, corridor)
         return self._show_speed_map()
@@ -645,23 +645,23 @@ def from_gcs(itp_id, analysis_date, pbar = None):
     ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_parser.OperatorDayAnalysis.export_views_gcs()
     '''
     date_iso = analysis_date.isoformat()
-    trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
+    
+    if analysis_date <= warehouse_cutoff_date:
+        shapes = get_routelines(itp_id, analysis_date)
+        trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
             .reset_index(drop=True))
-    stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
+        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
                  .reset_index(drop=True))
+    else:
+        index_df = get_ix_df(itp_id, analysis_date)
+        trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
+            .reset_index(drop=True))
+        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
+                 .reset_index(drop=True))
+        shapes = get_shapes(index_df)
+    
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
     
-    if analysis_date <= warehouse_cutoff_date:
-        routelines = get_routelines(itp_id, analysis_date)
-    else:
-        index_query = v2_queries.get_ix_query(itp_id, analysis_date)
-        index_df = index_query >> collect()
-        feed_key_list = list(index_df.feed_key.unique())
-        routelines = shared_utils.gtfs_utils_v2.get_shapes(analysis_date, feed_key_list, crs = CA_NAD83Albers, 
-                                                              shape_cols = v2_queries.shape_cols)
-        routelines = routelines.dropna(subset=['geometry']) ## invalid geos are nones in new df...
-        assert type(routelines) == type(gpd.GeoDataFrame()) and not routelines.empty, 'routelines must not be empty'
-    
-    rt_day = RtFilterMapper(trips, stop_delay, routelines, pbar)
+    rt_day = RtFilterMapper(trips, stop_delay, shapes, pbar)
     return rt_day
