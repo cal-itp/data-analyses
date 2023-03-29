@@ -1,0 +1,17 @@
+2023-03-29 12:19:55.519 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 12000, # of chunks: 238
+2023-03-29 12:19:55.561 | INFO     | __main__:<module>:194 - create list of delayed results: 0:00:06.370401
+2023-03-29 12:20:27.071 | INFO     | __main__:<module>:198 - compute list of delayed: 0:00:31.510174
+2023-03-29 12:51:26.861 | INFO     | __main__:<module>:208 - compute, concat, export batch CentralCal: 0:31:37.670373
+2023-03-29 12:51:31.226 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 300000, # of chunks: 3
+2023-03-29 12:51:31.263 | INFO     | __main__:<module>:194 - create list of delayed results: 0:00:04.400710
+2023-03-29 12:51:31.812 | INFO     | __main__:<module>:198 - compute list of delayed: 0:00:00.549058
+2023-03-29 12:52:42.092 | INFO     | __main__:<module>:208 - compute, concat, export batch Mojave: 0:01:15.229832
+2023-03-29 12:52:47.439 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 25000, # of chunks: 82
+2023-03-29 12:52:47.465 | INFO     | __main__:<module>:194 - create list of delayed results: 0:00:05.372813
+2023-03-29 12:52:58.784 | INFO     | __main__:<module>:198 - compute list of delayed: 0:00:11.318815
+2023-03-29 12:57:39.323 | INFO     | __main__:<module>:208 - compute, concat, export batch NorCal: 0:04:57.230215
+2023-03-29 12:57:46.175 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 6000, # of chunks: 441
+2023-03-29 12:57:46.253 | INFO     | __main__:<module>:194 - create list of delayed results: 0:00:06.928023
+2023-03-29 12:58:45.135 | INFO     | __main__:<module>:198 - compute list of delayed: 0:00:58.882470
+2023-03-29 13:37:10.608 | INFO     | __main__:<module>:208 - compute, concat, export batch SoCal: 0:39:31.283632
+2023-03-29 13:37:10.610 | INFO     | __main__:<module>:211 - execution time: 1:17:25.206197
