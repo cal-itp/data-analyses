@@ -368,8 +368,8 @@ def stacked_bar_chart(df, x_col:str, y_col:str, color_col: str, chart_title:str)
         .encode(
             x=alt.X(x_col, axis=alt.Axis(labelAngle=-45)),
             y=alt.Y(y_col, scale=alt.Scale(domain=[0, 100])),
-            color=alt.Color(
-                color_col, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+            color=alt.Color(color_col, scale=alt.Scale(range = cp.CALITP_CATEGORY_BRIGHT_COLORS,
+            domain=df[color_col].unique().tolist())
             ),
             tooltip=df.columns.tolist(),
         )
