@@ -331,7 +331,9 @@ class RtFilterMapper:
                                     var_mph = _.speed_mph.var()
                                   )
                          >> ungroup()
-                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
+                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay,
+                                  -_.delay_seconds, -_.seconds_from_last, -_.speed_from_last,
+                                  -_.delay_chg_sec, -_.speed_mph) # drop unaggregated columns
                         )
                     self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
                     assert not stop_speeds.empty, 'stop speeds gdf is empty!'
