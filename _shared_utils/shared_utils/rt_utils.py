@@ -285,14 +285,16 @@ def get_ix_df(itp_id: int, analysis_date: dt.date):
     An index table for tracking down a given org's schedule/rt feeds
     returns LazyTbl
     '''
+    analysis_dt = dt.datetime.combine(analysis_date, dt.time(0))
+    
     daily_service = (tbls.mart_gtfs.fct_daily_feed_scheduled_service_summary()
     >> select(_.schedule_gtfs_dataset_key == _.gtfs_dataset_key,
              _.feed_key, _.activity_date)
                 )
 
     org_feeds_datasets = (tbls.mart_transit_database.dim_provider_gtfs_data()
-    >> filter(_._is_current, _.reports_site_assessed,
-            _.organization_itp_id == itp_id,
+    >> filter(_._valid_from <= analysis_dt, _._valid_to >= analysis_dt)
+    >> filter(_.reports_site_assessed, _.organization_itp_id == itp_id,
              _.vehicle_positions_gtfs_dataset_key != None)
             ## think more about how to start/persist org level identifiers...
             ## could be an attribute, or in any case leave first index table as sql...
@@ -330,8 +332,8 @@ def get_vehicle_positions(ix_df):
         vp_all = gpd.read_parquet(f'{VP_FILE_PATH}vp_2023-03-15.parquet')
         org_vp = vp_all >> filter(_.gtfs_dataset_key.isin(ix_df.vehicle_positions_gtfs_dataset_key))
         org_vp = org_vp >> select(-_.location_timestamp)
-        org_vp = org_vp.to_crs(CA_NAD83Albers)
-        shared_utils.utils.geoparquet_gcs_export(org_vp, GCS_FILE_PATH+V2_SUBFOLDER, filename)
+        org_vp = org_vp.to_crs(geography_utils.CA_NAD83Albers)
+        utils.geoparquet_gcs_export(org_vp, GCS_FILE_PATH+V2_SUBFOLDER, filename)
 
     return org_vp
 
@@ -344,7 +346,7 @@ def get_trips(ix_df):
         org_trips = pd.read_parquet(path)
     else:
         feed_key_list = list(ix_df.feed_key.unique())  
-        org_trips = shared_utils.gtfs_utils_v2.get_trips(activity_date, feed_key_list, trip_cols)
+        org_trips = gtfs_utils_v2.get_trips(activity_date, feed_key_list, trip_cols)
         org_trips.to_parquet(GCS_FILE_PATH+V2_SUBFOLDER+filename)
         
     return org_trips
@@ -358,7 +360,7 @@ def get_st(ix_df, trip_df):
         org_st = pd.read_parquet(path)
     else:
         feed_key_list = list(ix_df.feed_key.unique())  
-        org_st = shared_utils.gtfs_utils_v2.get_stop_times(activity_date, feed_key_list, trip_df = trip_df,
+        org_st = gtfs_utils_v2.get_stop_times(activity_date, feed_key_list, trip_df = trip_df,
                                                      stop_time_cols = st_cols, get_df = True)
         org_st = org_st >> select(-_.arrival_sec, -_.departure_sec)
         org_st.to_parquet(GCS_FILE_PATH+V2_SUBFOLDER+filename)
@@ -374,9 +376,9 @@ def get_stops(ix_df):
         org_stops = gpd.read_parquet(path)
     else:
         feed_key_list = list(ix_df.feed_key.unique())  
-        org_stops = shared_utils.gtfs_utils_v2.get_stops(activity_date, feed_key_list, stop_cols,
-                                                     crs = CA_NAD83Albers)
-        shared_utils.utils.geoparquet_gcs_export(org_stops, GCS_FILE_PATH+V2_SUBFOLDER, filename)
+        org_stops = gtfs_utils_v2.get_stops(activity_date, feed_key_list, stop_cols,
+                                                     crs = geography_utils.CA_NAD83Albers)
+        utils.geoparquet_gcs_export(org_stops, GCS_FILE_PATH+V2_SUBFOLDER, filename)
         
     return org_stops
 
@@ -389,11 +391,11 @@ def get_shapes(ix_df):
         org_shapes = gpd.read_parquet(path)
     else:
         feed_key_list = list(ix_df.feed_key.unique())  
-        org_shapes = shared_utils.gtfs_utils_v2.get_shapes(activity_date, feed_key_list, crs = CA_NAD83Albers, 
+        org_shapes = gtfs_utils_v2.get_shapes(activity_date, feed_key_list, crs = geography_utils.CA_NAD83Albers, 
                                                           shape_cols = shape_cols)
         org_shapes = org_shapes.dropna(subset=['geometry']) ## invalid geos are nones in new df...
-        assert type(org_shapes) == type(gpd.GeoDataFrame()) and not org_shapes.empty, 'routelines must not be empty'
-        shared_utils.utils.geoparquet_gcs_export(org_shapes, GCS_FILE_PATH+V2_SUBFOLDER, filename)
+        assert type(org_shapes) == type(gpd.GeoDataFrame()) and not org_shapes.empty, 'shapes must not be empty'
+        utils.geoparquet_gcs_export(org_shapes, GCS_FILE_PATH+V2_SUBFOLDER, filename)
         
     return org_shapes
 
@@ -677,14 +679,17 @@ def get_operators(analysis_date, operator_list, verbose = False):
 
     if isinstance(analysis_date, str):
         analysis_date = pd.to_datetime(analysis_date).date()
-
-    fs_list = fs.ls(f"{GCS_FILE_PATH}rt_trips/")
+    if analysis_date <= dt.date(2022, 12, 31): # look for v1 or v2 intermediate data
+        subfolder = 'rt_trips/'
+    else:
+        subfolder = 'v2_rt_trips/'
+    fs_list = fs.ls(f"{GCS_FILE_PATH}{subfolder}")
     # day = str(analysis_date.day).zfill(2)
     # month = str(analysis_date.month).zfill(2)
     date_iso = analysis_date.isoformat()
     # now finds ran operators on specific analysis date
     ran_operators = [
-        int(path.split("rt_trips/")[1].split("_")[0]) for path in fs_list if date_iso in path.split("rt_trips/")[1]
+        int(path.split(f"{subfolder}")[1].split("_")[0]) for path in fs_list if date_iso in path.split(f'{subfolder}')[1]
     ]
     op_list_runstatus = {}
     for itp_id in operator_list:
