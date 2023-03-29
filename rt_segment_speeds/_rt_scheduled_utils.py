@@ -11,6 +11,7 @@ from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS, analysis
 # Graphs
 import altair as alt
 from shared_utils import calitp_color_palette as cp
+alt.data_transformers.enable('default', max_rows=None)
 
 import gcsfs
 fs = gcsfs.GCSFileSystem()
@@ -164,7 +165,7 @@ def find_metrics(date:str):
     m1['actual_trip_duration_minutes'] = (m1['end_minutes']-m1['start_minutes'])
     return m1
 
-def merge_schedule_vp(vp_df, date: str):
+def merge_schedule_vp(date: str):
     """
     Merge scheduled data with RT data. 
     Keeping this as a separate function  b/c
@@ -175,6 +176,9 @@ def merge_schedule_vp(vp_df, date: str):
     vp_df: the dataframe produced by `find_metrics`
     date (str): the analysis date from `segment_speed_utils.project_vars`
     """
+    # Load in dataframe with metrics
+    vp_df = find_metrics(date)
+    
     # Load scheduled trips
     scheduled_trips = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(analysis_date =date, 
     keep_trip_cols = ["feed_key", "trip_id", "service_hours"])
@@ -219,13 +223,13 @@ def pings_categories(row):
     else:
         return "No pings"
     
-def final_df(vp_df, date: str):
+def final_df(date: str):
     """
     Returns a final dataframe with all the requested metrics.
     A summarized version of the df is saved into 
     the RT_SCHED_GCS folder and a full one is returned for graphing.
     """
-    df = merge_schedule_vp(vp_df, date).drop(columns = ['_merge'])
+    df = merge_schedule_vp(date).drop(columns = ['_merge'])
     
     # Find RT trip time versus scheduled trip time.
     # Find pings per minute.
@@ -429,3 +433,54 @@ def create_statewide_visuals(df):
     chart_trip = threshold_utils.chart_size(chart_trip, 400, 300)
     
     return chart_scheduled & chart_trip
+
+def create_heatmap(df):
+    """
+    Create heatmap showing Total Trips 
+    by RT and Trip Category. 
+    """
+    # Aggregate
+    aggregate = (df
+        .groupby(['Trip Category','Rt Category'])
+        .agg({'Trip Id':'count'})
+        .reset_index()
+        .rename(columns = {'Trip Id':'Total Trips'})
+       )
+    
+    # Create chart
+    chart = (alt.Chart(aggregate).mark_rect().encode(
+    x=alt.X('Trip Category:O', axis=alt.Axis(labelAngle = -45)),
+    y='Rt Category:O',
+    color=alt.Color('Total Trips:Q', scale=alt.Scale(range =cp.CALITP_SEQUENTIAL_COLORS)),
+    tooltip = aggregate.columns.tolist())
+    .properties(title = "Total Trips by Trip and RT Categories"))
+    
+    chart = threshold_utils.chart_size(chart, 400,300)
+    
+    return chart 
+
+def realtime_data_by_trip_length(df):
+    """
+    Create a chart that shows the mean of 
+    % RT data available by trip duration categories.
+    """
+    # Subset
+    subset_cols = ['Trip Category', 'Rt Data Proportion Percentage']
+    df = df[subset_cols]
+    
+    # Create a ruler to show the mean of % RT data
+    # Across all trip length buckets
+    rule = alt.Chart(df).mark_rule(color='red', strokeDash=[10, 7]).encode(
+    y='mean(Rt Data Proportion Percentage):Q')
+    
+    # Create the histogram
+    chart = (alt.Chart(df).mark_bar().encode(
+     x=alt.X('Trip Category:O', axis=alt.Axis(labelAngle = -45)),
+     y='mean(Rt Data Proportion Percentage):Q',
+     color=alt.Color('Trip Category:O', 
+    scale=alt.Scale(range =cp.CALITP_CATEGORY_BRIGHT_COLORS)),)
+    .properties(title = "Mean % of Realtime Data by Trip Duration"))
+    
+    chart = threshold_utils.chart_size((chart+rule), 400,300)
+    
+    return chart
