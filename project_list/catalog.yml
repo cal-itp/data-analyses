@@ -1,0 +1,8 @@
+metadata:
+  version: 1
+sources:
+    state_rail_plan:
+        driver: Excel
+        description: Draft projects found in State Rail Plan Appendix.
+        args:
+          urlpath: https://storage.cloud.google.com/calitp-analytics-data/data-analyses/project_list/State%20Rail%20Plan/230307_CapitalProjectReview.xlsx
