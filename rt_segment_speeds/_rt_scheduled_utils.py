@@ -244,6 +244,9 @@ def final_df(date: str):
     df = df.fillna(
     df.dtypes.replace({"float64": 0.0, "object": "None"}))
     
+    # Drop trips that are more than 4 hours long
+    df = df.loc[df.actual_trip_duration_minutes < 240].reset_index(drop = True)
+    
     # Save to parquet
     # Drop some columns before saving to a parquet
     cols_to_keep = ['_gtfs_dataset_name', 'gtfs_dataset_key', 
