@@ -434,7 +434,7 @@ def create_statewide_visuals(df):
     
     return chart_scheduled & chart_trip
 
-def create_heatmap(df):
+def total_trips_heatmap(df):
     """
     Create heatmap showing Total Trips 
     by RT and Trip Category. 
@@ -484,3 +484,55 @@ def realtime_data_by_trip_length(df):
     chart = threshold_utils.chart_size((chart+rule), 400,300)
     
     return chart
+
+def dotplot_trip_time_rt_coverage(df):
+    """
+    Create a dotplot showing trips
+    by its duration and % of RT coverage.
+    """
+    df = df[['Actual Trip Duration Minutes','Rt Category']] 
+    
+    dot_chart = (
+        alt.Chart(df, width=0.5)
+        .mark_circle(size=50)
+        .encode(
+            x=alt.X(
+                "jitter:Q",
+                title=None,
+                axis=alt.Axis(values=[0], ticks=False, grid=False, labels=False),
+                scale=alt.Scale(),
+            ),
+            y=alt.Y("Actual Trip Duration Minutes:Q", axis=alt.Axis(labelAngle=90)),
+            color=alt.Color(
+                "Rt Category:N",
+                scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
+                legend=None,
+            ),
+            tooltip=["Rt Category", "Actual Trip Duration Minutes"],
+            column=alt.Column(
+                "Rt Category:N",
+                header=alt.Header(
+                    labelAngle=90,
+                    titleOrient="top",
+                    labelOrient="bottom",
+                    labelAlign="right",
+                    labelPadding=2,
+                ),
+            ),
+        )
+        .transform_calculate(
+            # Generate Gaussian jitter with a Box-Muller transform
+            jitter="sqrt(-2*log(random()))*cos(2*PI*random())"
+        )
+        .configure_facet(spacing=0)
+        .configure_view(stroke=None)
+        .properties(title="Trip Duration by RT Category")
+    )
+    
+    dot_chart = threshold_utils.chart_size(dot_chart, 75, 300).interactive()
+    
+    return dot_chart
+
+if __name__ == '__main__': 
+    DATE = analysis_date
+    final_df(DATE)
