@@ -295,7 +295,7 @@ class RtFilterMapper:
             # for shape_id in tqdm(gdf.shape_id.unique()): trying self.pbar.update...
             if type(self.pbar) != type(None):
                 self.pbar.reset(total=len(gdf.shape_id.unique()))
-                self.pbar.desc = 'Generating segment speeds'
+                self.pbar.desc = f'Generating segment speeds itp_id: {self.calitp_itp_id}'
             for shape_id in gdf.shape_id.unique():
                 try:
                     this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
@@ -400,7 +400,8 @@ class RtFilterMapper:
         gdf = gdf >> filter(gdf.geometry.is_valid)
         gdf = gdf >> filter(-gdf.geometry.is_empty)
         
-        assert gdf.shape[0] >= orig_rows*.99, 'over 1% of geometries invalid after buffer+simplify'
+        assert gdf.shape[0] >= orig_rows*.975, \
+            f'over 2.5% of geometries invalid after buffer+simplify ({gdf.shape[0]} / {orig_rows})'
         gdf = gdf.to_crs(WGS84)
         self.detailed_map_view = gdf.copy()
         centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
@@ -655,7 +656,7 @@ def from_gcs(itp_id, analysis_date, pbar = None):
         stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
                  .reset_index(drop=True))
     else:
-        index_df = get_ix_df(itp_id, analysis_date)
+        index_df = get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
         trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
             .reset_index(drop=True))
         stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')

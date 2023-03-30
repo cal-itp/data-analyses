@@ -217,7 +217,7 @@ class OperatorDayAnalysis:
         self.display_date = self.analysis_date.strftime('%b %d (%a)')
         ## Move to v2!
         # call this org_feed_index instead?
-        self.index_df = rt_utils.get_ix_df(itp_id, analysis_date)
+        self.index_df = rt_utils.get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
         self.vehicle_positions = rt_utils.get_vehicle_positions(self.index_df)
         self.trips = rt_utils.get_trips(self.index_df)
         self.stop_times = rt_utils.get_st(self.index_df, self.trips)

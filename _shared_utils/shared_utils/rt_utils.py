@@ -280,10 +280,14 @@ def trips_cached(itp_id: int, date_str: str) -> pd.DataFrame:
     else:
         return None
 
-def get_ix_df(itp_id: int, analysis_date: dt.date):
+def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None
+) -> pd.DataFrame:
     '''
-    An index table for tracking down a given org's schedule/rt feeds
-    returns LazyTbl
+    Collect relevant keys for finding all schedule and rt data for a reports-assessed organization.
+    Note that organizations may have multiple sets of feeds, or share feeds with other orgs.
+    
+    Used with specific itp_id in rt_analysis.rt_parser.OperatorDayAnalysis, or without specifying itp_id
+    to get an overall table of which datasets were processed and how to deduplicate if needed
     '''
     analysis_dt = dt.datetime.combine(analysis_date, dt.time(0))
     
@@ -296,18 +300,22 @@ def get_ix_df(itp_id: int, analysis_date: dt.date):
     >> filter(_._valid_from <= analysis_dt, _._valid_to >= analysis_dt)
     >> filter(_.reports_site_assessed, _.organization_itp_id == itp_id,
              _.vehicle_positions_gtfs_dataset_key != None)
-            ## think more about how to start/persist org level identifiers...
-            ## could be an attribute, or in any case leave first index table as sql...
     >> inner_join(_, daily_service, by = 'schedule_gtfs_dataset_key')
     >> filter(_.activity_date == analysis_date)
     >> select(_.feed_key, _.schedule_gtfs_dataset_key, _.vehicle_positions_gtfs_dataset_key,
              _.organization_itp_id, _.organization_name, _.activity_date)
     )
     
+    if itp_id:
+        org_feeds_datasets = org_feeds_datasets >> filter(_.organization_itp_id == itp_id)
+    
     return org_feeds_datasets >> collect()
 
-def compose_filename_check(ix_df, table):
-    
+def compose_filename_check(ix_df: pd.DataFrame, table: str):
+    '''
+    Compose target filename for cached warehouse queries (as used in rt_analysis.rt_parser.OperatorDayAnalysis),
+    then check if cached data already exists on GCS
+    '''
     activity_date = ix_df.activity_date.iloc[0].date()
     date_str = activity_date.strftime(FULL_DATE_FMT)
     assert activity_date == dt.date(2023, 3, 15), 'hardcoded to 3/15 for now :)'
@@ -316,11 +324,11 @@ def compose_filename_check(ix_df, table):
     
     return filename, path, activity_date
 
-def get_vehicle_positions(ix_df):
+def get_vehicle_positions(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     '''
-    # https://github.com/cal-itp/data-analyses/blob/main/open_data/download_vehicle_positions.py
-    # design these tools to read this, filter to organization, write out...
-    # starts with warehouse vehicle locations table
+    Using ix_df as a guide, download all-operator data from GCS as queried via:
+        https://github.com/cal-itp/data-analyses/blob/main/open_data/download_vehicle_positions.py
+    Filter to relevant vehicle positions datasets; cache filtered version
     '''
     
     filename, path, activity_date = compose_filename_check(ix_df, 'vp')
@@ -337,8 +345,11 @@ def get_vehicle_positions(ix_df):
 
     return org_vp
 
-def get_trips(ix_df):
-
+def get_trips(ix_df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Using ix_df as a guide, query warehouse for trips via shared_utils.gtfs_utils_v2
+    Only request columns used in speedmap workflow; cache
+    '''
     filename, path, activity_date = compose_filename_check(ix_df, 'trips')
     
     if path:
@@ -351,8 +362,11 @@ def get_trips(ix_df):
         
     return org_trips
 
-def get_st(ix_df, trip_df):
-    
+def get_st(ix_df: pd.DataFrame, trip_df: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Using ix_df as a guide, query warehouse for stop_times via shared_utils.gtfs_utils_v2
+    Only request columns used in speedmap workflow; cache
+    '''
     filename, path, activity_date = compose_filename_check(ix_df, 'st')
     
     if path:
@@ -367,8 +381,11 @@ def get_st(ix_df, trip_df):
         
     return org_st
 
-def get_stops(ix_df):
-    
+def get_stops(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
+    '''
+    Using ix_df as a guide, query warehouse for stops via shared_utils.gtfs_utils_v2
+    Only request columns used in speedmap workflow; cache
+    '''    
     filename, path, activity_date = compose_filename_check(ix_df, 'stops')
     
     if path:
@@ -382,8 +399,11 @@ def get_stops(ix_df):
         
     return org_stops
 
-def get_shapes(ix_df):
-    
+def get_shapes(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
+    '''
+    Using ix_df as a guide, query warehouse for shapes via shared_utils.gtfs_utils_v2
+    Only request columns used in speedmap workflow; cache
+    '''    
     filename, path, activity_date = compose_filename_check(ix_df, 'shapes')
     
     if path:
