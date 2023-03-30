@@ -19,7 +19,7 @@ fs = get_fs()
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/safety_projects/"
 
-# load projects - these were exported from ArcGIS Pro to get around the 2000 record limit on the open data portal. These are already projected. 
+# load bridges - these were exported from ArcGIS Pro to get around the 2000 record limit on the open data portal. These are already projected. 
 with get_fs().open(f'{GCS_FILE_PATH}State_Highway_Bridges_Projec.geojson') as f:
     bridges = gpd.read_file(f)
 
@@ -37,6 +37,9 @@ bridges_intersect_dissolve = bridges_intersect_dissolve.reset_index().dissolve("
 
 # buffer another 100m for analysis of crashes/encampments
 bridges_intersect_dissolve.geometry = bridges_intersect_dissolve.buffer(100)
+
+# tweak CRS
+bridge_areas = bridge_areas.to_crs(3310).drop(["index_right"], axis=1)
 
 # save out as geoparquet 
 shared_utils.utils.geoparquet_gcs_export(bridges_intersect_dissolve, GCS_FILE_PATH, "bridgeareas_clean")
