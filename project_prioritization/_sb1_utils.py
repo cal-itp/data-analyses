@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
 
+import fuzzywuzzy
+from fuzzywuzzy import process
+
 """
 Basic Cleaning
 """
@@ -88,6 +91,19 @@ SB1
 url_pt1 = "https://odpsvcs.dot.ca.gov/arcgis/rest/services/RCA/RCA_Projects_032022/FeatureServer/"
 url_pt2 = "/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*+&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&historicMoment=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&returnTrueCurves=false&sqlFormat=none&f=geojson"
 
+def row_limit(df, max_row_limit: int = 10000):
+    """
+    Print whether the dataframe is less
+    or greater than the limit.
+    """
+    # Grab length
+    df_length = len(df)
+    
+    if df_length >= max_row_limit:
+        return f"{df_length} rows -> over max limit"
+    else:
+        return f"{df_length} rows -> under max limit"
+    
 def load_sb1_rest_server() -> gpd.GeoDataFrame:
     """
     Load all the projects on the SB1
@@ -115,7 +131,7 @@ def load_sb1_rest_server() -> gpd.GeoDataFrame:
     
     return full_gdf, missing_geo
 
-def load_sb1_all_projects():
+def load_sb1_all_projects() -> pd.DataFrame:
     """
     Load in all projects layer of SB1 because it
     contains a value for every row in the 
@@ -162,6 +178,105 @@ def sb1_final() -> gpd.GeoDataFrame:
     
     # Fill missing titles with none
     merge1.projecttitle_x = merge1.projecttitle_x.fillna('None')
+    
+    return merge1
+
+"""
+Merges
+"""
+def m_nonshopp_sb1_project_titles(nonshopp_df, sb1_df):
+    """
+    Merge nonshopp and SB1 on project titles.
+    """
+    sb1_subset = ['projecttitle_x','projectdescription','countynames','geometry']
+    
+    # Delete any rows without a project title
+    sb1_df =  sb1_df.loc[sb1_df.projecttitle_x != "None"][sb1_subset]
+    
+    # Do an innter merge
+    m1 = pd.merge(sb1_df,
+    nonshopp_df,
+    how="inner",
+    left_on=[ "projecttitle_x"],
+    right_on=["project_name",],
+    indicator=True,)
+    
+    return m1
+
+def replace_matches_in_column(df, column, new_col_name, string_to_match, min_ratio):
+    """
+    Replace all rows in agency column with a min ratio with  "string_to_match value"
+    """
+    # Get a list of unique strings
+    strings = df[column].unique()
+
+    # Get the top 10 closest matches to our input string
+    matches = fuzzywuzzy.process.extract(
+        string_to_match, strings, limit=10, scorer=fuzzywuzzy.fuzz.token_sort_ratio
+    )
+
+    # Only get matches with a  min ratio
+    close_matches = [matches[0] for matches in matches if matches[1] > min_ratio]
+
+    # Get the rows of all the close matches in our dataframe
+    rows_with_matches = df[column].isin(close_matches)
+
+    # replace all rows with close matches with the input matches
+    df.loc[rows_with_matches, new_col_name] = string_to_match
+    
+def m_nonshopp_sb1_fuzzy(merge1, nonshopp_df, sb1_df):
+    """
+    Merge project titles using fuzzy matching
+    """
+    # List of projects that were already found
+    found_projects = merge1.projecttitle_x.unique().tolist()
+    
+    # Filter out projects that were already found during the first merge
+    # There's no point in merging everything again.
+    sb1_df = sb1_df[~sb1_df["projecttitle_x"].isin(found_projects)].reset_index(drop = True)
+    
+    # Filter out projects that were already found during the first merge
+    nonshopp_df = nonshopp_df[~nonshopp_df["project_name"].isin(found_projects)].reset_index(drop = True)
+    
+    # Place nonshopp projects into a list
+    nonshopp_projects = nonshopp_df.project_name.unique().tolist()
+    
+    # Remove any short project titles that have less than 4 words
+    sb1_df["projecttitle_x_count"] = sb1_df["projecttitle_x"].str.count('\w+')
+    
+    # Delete project titles that are short
+    sb1_df = (sb1_df.loc[sb1_df.projecttitle_x_count > 3]).reset_index(drop = True)
+    
+    # Replace 
+    for i in nonshopp_projects:
+        replace_matches_in_column(
+            sb1_df
+            , "projecttitle_x", "project_title_fuzzy_match", i,90 
+        )
+    
+    # Return only projects that match
+    fuzzy_match_subset = ['projecttitle_x','project_title_fuzzy_match','projectdescription','countynames','geometry']
+    fuzzy_match_results = (sb1_df.loc[sb1_df.project_title_fuzzy_match.notnull()]
+                       .drop_duplicates(subset = ["projecttitle_x", "project_title_fuzzy_match", "projectdescription"])
+                       .reset_index(drop = True)
+                       .sort_values('projecttitle_x')
+                      )
+    
+    # Last project isn't a match - delete it
+    fuzzy_match_results = (fuzzy_match_results
+                           .drop(columns = ["_merge"])
+                           .head(4)) 
+    
+    # Subset columns
+    fuzzy_match_results = fuzzy_match_results[fuzzy_match_subset]
+    
+    # Merge 
+    merge1 = pd.merge(
+    fuzzy_match_results,
+    nonshopp_df,
+    how="inner",
+    left_on=["project_title_fuzzy_match", "countynames"],
+    right_on=["project_name", "full_county_name"],)
     
     return merge1
     
