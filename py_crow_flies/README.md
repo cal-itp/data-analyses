@@ -2,7 +2,7 @@
 
 [GH Epic](https://github.com/cal-itp/data-analyses/issues/698)
 
-Henry McKay's measuring bike accessibility script here takes 2-3 weeks to run. Let's speed it up.
+Henry McKay's measuring bike accessibility [script here](https://github.com/hhmckay/Ideal-Access-Metric/blob/main/CrowsFlyWeighted.R) takes 2-3 weeks to run. Let's speed it up.
 
 ## Summary of current script
 * take an origin point of interest (POI) and draw a 20 mile buffer
