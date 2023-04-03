@@ -1,0 +1,5 @@
+2023-03-29 13:51:36.788 | INFO     | __main__:<module>:144 - get list of delayed: 0:00:00.000766
+2023-03-29 13:51:51.879 | INFO     | __main__:<module>:149 - compute list of results: 0:00:15.090868
+2023-03-29 13:52:13.405 | INFO     | __main__:<module>:157 - concatenate and export partitioned results: 0:00:21.525980
+2023-03-29 13:53:07.442 | INFO     | __main__:<module>:162 - export final results as parquet: 0:00:54.037063
+2023-03-29 13:53:07.443 | INFO     | __main__:<module>:163 - execution time: 0:01:30.654677
