@@ -27,7 +27,7 @@ def count_rt_min(df):
     Find total RT minute coverage
     for each trip-operator
     """
-    # Extract hour and minute
+    # Extract hour and minutes
     df['hour'] = df.location_timestamp.dt.hour
     df['minute'] = df.location_timestamp.dt.minute
     
@@ -48,7 +48,7 @@ def count_rt_min(df):
 def find_start_end_times(df, groupby_cols:list):
     """
     Find the max and min location stamp 
-    to determine start and end date. 
+    to determine start and end time. 
     """
     start_end = (df.groupby(groupby_cols)
         .agg({"location_timestamp": [ "min", "max"]})
@@ -109,7 +109,7 @@ def convert_timestamp_to_hrs_mins(
 def find_metrics(date:str):
     """
     Find metrics such as number of pings,
-    start and end time, and RT coverage for a trip.
+    start and end time, and RT coverage for each trip.
    
     date (str): the analysis date from `segment_speed_utils.project_vars`
     """
@@ -214,20 +214,18 @@ def rt_data_proportion(row):
         return "81-100%"    
     
 def pings_categories(row):
-    if 2.7 < row['pings_per_minute']:
+    if 2.4 < row['pings_per_minute']:
         return "3 pings per minute"
-    elif 0.99 < row['pings_per_minute'] < 1.8:
+    elif 0.74 < row['pings_per_minute'] < 1.5:
         return "1 ping per minute"
-    elif 1.7 < row['pings_per_minute'] < 2.8:
+    elif 1.4 < row['pings_per_minute'] < 2.5:
         return "2 pings per minute"
     else:
-        return "No pings"
+        return "0 pings"
     
 def final_df(date: str):
     """
     Returns a final dataframe with all the requested metrics.
-    A summarized version of the df is saved into 
-    the RT_SCHED_GCS folder and a full one is returned for graphing.
     """
     df = merge_schedule_vp(date).drop(columns = ['_merge'])
     
@@ -245,20 +243,11 @@ def final_df(date: str):
     df.dtypes.replace({"float64": 0.0, "object": "None"}))
     
     # Drop trips that are more than 4 hours long
-    df = df.loc[df.actual_trip_duration_minutes < 240].reset_index(drop = True)
-    
-    # Save to parquet
-    # Drop some columns before saving to a parquet
-    cols_to_keep = ['_gtfs_dataset_name', 'gtfs_dataset_key', 
-                    'feed_key','trip_id', 'rt_data_proportion_percentage',
-                    'rt_trip_counts_by_operator', 'trip_ping_count', 'pings_per_minute',]
-    
-    df[cols_to_keep].to_parquet(f"{RT_SCHED_GCS}rt_vs_scheduled_metrics.parquet")
+    df = df.loc[df.actual_trip_duration_minutes <= 240].reset_index(drop = True)
     
     # Add additional columns for making graphs
     for i in ['rt_data_proportion_percentage','actual_trip_duration_minutes']:
         df[f"rounded_{i}"] = (((df[i]/100)*10).astype(int)*10)
-        # .astype(str) + '%'
         
     # Categorize actual trip duration
     df["trip_category"] = df.apply(trip_duration_categories, axis=1)
@@ -297,10 +286,8 @@ def rt_v_scheduled(df):
 
 def rt_trip_duration(df):
     """
-    For every operator, find
-    the number of trips within each
-    by RT vs. Scheduled % data captured 
-    and trip duration bin.
+    For every operator, find the number of trips within each
+    by RT vs. Scheduled % data captured  and trip duration bin.
     """
     df = (df.groupby(['Gtfs Dataset Name',  'Trip Category', 'Rt Category'])
     .agg({"Rt Trip Counts By Operator": "max", "Trip Id": "nunique"})
@@ -323,6 +310,10 @@ def statewide_metrics(df):
     """
     # Get total trips for the day
     all_trips = df['Trip Id'].count()
+    
+    # Take away operators who don't have any
+    # RT data
+    df = df.loc[df['Gtfs Dataset Name'] != "None"]
     
     # % of trips by RT vs. Scheduled Proportion 
     rt_scheduled = rt_v_scheduled(df)
@@ -437,7 +428,7 @@ def create_statewide_visuals(df):
     
     return chart_scheduled & chart_trip
 
-def total_trips_heatmap(df):
+def rt_time_trips_heatmap(df):
     """
     Create heatmap showing Total Trips 
     by RT and Trip Category. 
@@ -456,11 +447,30 @@ def total_trips_heatmap(df):
     y='Rt Category:O',
     color=alt.Color('Total Trips:Q', scale=alt.Scale(range =cp.CALITP_SEQUENTIAL_COLORS)),
     tooltip = aggregate.columns.tolist())
-    .properties(title = "Total Trips by Trip and RT Categories"))
+    .properties(title = "Total Trips by Trip and % of RT Data"))
     
     chart = threshold_utils.chart_size(chart, 400,300)
     
     return chart 
+
+def pings_rt_heatmap(df):
+    aggregate = (df
+        .groupby(['Ping Category','Rt Category'])
+        .agg({'Trip Id':'count'})
+        .reset_index()
+        .rename(columns = {'Trip Id':'Total Trips'})
+       )
+    
+    chart = (alt.Chart(aggregate).mark_rect().encode(
+    x=alt.X('Ping Category:O', axis=alt.Axis(labelAngle = -45)),
+    y='Rt Category:O',
+    color=alt.Color('Total Trips:Q', scale=alt.Scale(range =cp.CALITP_SEQUENTIAL_COLORS )),
+    tooltip = aggregate.columns.tolist())
+    .properties(title = "Total Trips by Ping and % of RT Data"))
+   
+    chart = threshold_utils.chart_size(chart, 400,300)
+    
+    return chart
 
 def realtime_data_by_trip_length(df):
     """
@@ -538,4 +548,11 @@ def dotplot_trip_time_rt_coverage(df):
 
 if __name__ == '__main__': 
     DATE = analysis_date
-    final_df(DATE)
+    df = final_df(DATE)
+    # Drop some columns before saving to a parquet
+    cols_to_keep = ['_gtfs_dataset_name', 'gtfs_dataset_key', 
+                    'feed_key','trip_id', 'rt_data_proportion_percentage',
+                    'rt_trip_counts_by_operator', 'trip_ping_count', 'pings_per_minute',]
+    
+    df[cols_to_keep].to_parquet(f"{RT_SCHED_GCS}rt_vs_scheduled_metrics.parquet")
+    print("Saved parquet to GCS")
