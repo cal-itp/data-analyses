@@ -179,10 +179,10 @@ def sjoin_vp_to_segments(
         SEGMENT_GCS, 
         f"{SEGMENT_FILE}_{analysis_date}",
         columns = ["gtfs_dataset_key", 'geometry']
-    ).drop(columns = "geometry")
+    ).drop(columns = "geometry").drop_duplicates()
     
     in_vp = vp_df.gtfs_dataset_key.compute().tolist()
-    in_segments = segment_df.gtfs_dataset_key.compute().tolist()
+    in_segments = segment_df.gtfs_dataset_key.tolist()
     RT_OPERATORS = list(set(in_vp) & set(in_segments))
         
     for rt_dataset_key in sorted(RT_OPERATORS):
