@@ -9,10 +9,9 @@ import numpy as np
 import pandas as pd
 import sys
 
-from dask import delayed
 from loguru import logger
 
-from shared_utils import dask_utils
+import loop_utils
 from segment_speed_utils import helpers, segment_calcs
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
@@ -36,72 +35,40 @@ https://docs.dask.org/en/latest/delayed-best-practices.html
 
 Map partitions has trouble computing result.
 Just use partitioned df and don't use `ddf.map_partitions`.
-"""                       
+"""                          
+    
+def usable_no_loop_inlining_trips(
+    vp: dd.DataFrame
+) -> dd.DataFrame:   
+    """
+    From trips with enough RT vehicle positions,
+    exclude the trips that have looping/inlining.
+    """
+    vp_trips = vp[
+        ["gtfs_dataset_key", "feed_key", 
+         "trip_id"]].drop_duplicates()
+    
+    loop_trips = loop_utils.grab_loop_trips(analysis_date)
+    
+    trips_no_loops = dd.merge(
+        vp_trips,
+        loop_trips,
+        on = ["feed_key", "trip_id"],
+        how = "left",
+        indicator=True
+    ).query('_merge=="left_only"').drop(columns = ["_merge", "feed_key"])
+    
+    vp_simple_trips = dd.merge(
+        vp,
+        trips_no_loops,
+        on = ["gtfs_dataset_key", "trip_id"],
+        how = "inner"
+    )
+    
+    return vp_simple_trips
 
-def trip_time_elapsed(
-    ddf: dd.DataFrame, 
-    group_cols: list,
-    timestamp_col: str
-):
-    """
-    Group by trip and calculate the time elapsed (max_time-min_time)
-    for RT vp observed.
-    """
-    min_time = (ddf.groupby(group_cols)
-                [timestamp_col]
-                .min()
-                .reset_index()
-                .rename(columns = {timestamp_col: "min_time"})
-               )
-                 
-    
-    max_time = (ddf.groupby(group_cols)
-                [timestamp_col]
-                .max()
-                .reset_index()
-                .rename(columns = {timestamp_col: "max_time"})
-               )
-    
-    df = dd.merge(
-        min_time,
-        max_time,
-        on = group_cols,
-        how = "outer"
-    )
-    
-    df = df.assign(
-        trip_time_sec = (df.max_time - df.min_time) / np.timedelta64(1, "s")
-    )
 
-    return df
-    
-    
-def get_valid_trips_by_time_cutoff(
-    ddf: dd.DataFrame, 
-    trip_time_min_cutoff: int
-)-> pd.DataFrame:
-    """
-    Filter down trips by trip time elapsed.
-    Set the number of minutes to do cut-off for at least x min of RT.
-    """
-    trip_cols = ["gtfs_dataset_key", "trip_id"]
-    trip_stats = trip_time_elapsed(
-        ddf,
-        trip_cols,
-        "location_timestamp_local"
-    )
-    
-    usable_trips = (trip_stats[
-        trip_stats.trip_time_sec >= trip_time_min_cutoff * 60]
-                    [trip_cols]
-                    .drop_duplicates()
-                    .reset_index(drop=True)
-                   )
-    
-    return usable_trips
-   
-    
-def pare_down_vp_to_valid_trips(
+def pare_down_vp_by_segment(
     analysis_date: str, 
     dict_inputs: dict = {}
 ):
@@ -113,46 +80,29 @@ def pare_down_vp_to_valid_trips(
     INPUT_FILE_PREFIX = dict_inputs["stage2"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]
-    TIME_CUTOFF = dict_inputs["time_min_cutoff"]
     EXPORT_FILE = dict_inputs["stage3"]
 
     # https://docs.dask.org/en/stable/delayed-collections.html
-    vp_joined_to_segments = delayed(
-        helpers.import_vehicle_positions)(
+    vp_joined_to_segments = helpers.import_vehicle_positions(
         f"{SEGMENT_GCS}vp_sjoin/",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
         file_type = "df",
         partitioned=True
     )
     
-    usable_trips = delayed(get_valid_trips_by_time_cutoff)(
-        vp_joined_to_segments,
-        TIME_CUTOFF
+    valid_vp_joined_to_segments = usable_no_loop_inlining_trips(
+        vp_joined_to_segments
     )
+    
+    logger.info("filter out to only valid trips")
         
-    valid_vp_joined_to_segments = delayed(helpers.exclude_unusable_trips)(
-        vp_joined_to_segments,
-        usable_trips
-    )
-    
-    logger.info(f"filter out to only valid trips")
-    
-    vp_pared = delayed(segment_calcs.keep_min_max_timestamps_by_segment)(
+    vp_pared = segment_calcs.keep_min_max_timestamps_by_segment(
         valid_vp_joined_to_segments, 
         segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
         timestamp_col = TIMESTAMP_COL
-    )
-        
-    # Unpack delayed results
-    # store in a list to be unpacked
-    results = [vp_pared]
+    ).repartition(partition_size="85MB")
     
-    dask_utils.compute_and_export(
-        results, 
-        gcs_folder = SEGMENT_GCS,
-        file_name = f"{EXPORT_FILE}_{analysis_date}",
-        export_single_parquet=False
-    )
+    vp_pared.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}")
     
     
 if __name__ == "__main__":
@@ -171,7 +121,7 @@ if __name__ == "__main__":
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
    
     time1 = datetime.datetime.now()
-    pare_down_vp_to_valid_trips(
+    pare_down_vp_by_segment(
         analysis_date,
         dict_inputs = ROUTE_SEG_DICT
     )
@@ -179,7 +129,7 @@ if __name__ == "__main__":
     time2 = datetime.datetime.now()
     logger.info(f"pare down vp by route segments {time2 - time1}")
     
-    pare_down_vp_to_valid_trips(
+    pare_down_vp_by_segment(
         analysis_date,
         dict_inputs = STOP_SEG_DICT
     )
