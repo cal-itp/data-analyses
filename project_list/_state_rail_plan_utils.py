@@ -37,9 +37,6 @@ def clean_state_rail_plan(file_name):
     
     # Concat
     state_rail_plan_df = pd.concat([capital_df, fleet_df,grade_sep_df])
-    
-    # Replace nulls by data types
-    # state_rail_plan_df = state_rail_plan_df.fillna(state_rail_plan_df.dtypes.replace({'float64': 0.0, 'object': 'None'}))
-    
+
     return state_rail_plan_df
     
