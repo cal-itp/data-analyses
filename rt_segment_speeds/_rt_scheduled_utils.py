@@ -1,10 +1,8 @@
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 import datetime 
 
-from calitp_data_analysis.sql import to_snakecase
 import _threshold_utils as threshold_utils
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS, analysis_date
@@ -12,6 +10,7 @@ from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS, analysis
 # Graphs
 import altair as alt
 from shared_utils import calitp_color_palette as cp
+alt.data_transformers.enable('default', max_rows=None)
 
 import gcsfs
 fs = gcsfs.GCSFileSystem()
@@ -19,6 +18,9 @@ fs = gcsfs.GCSFileSystem()
 import intake
 catalog = intake.open_catalog("./catalog.yml")
 
+import os
+os.environ['USE_PYGEOS'] = '0'
+import geopandas
 """
 RT v. Scheduled Utils
 """
@@ -27,7 +29,7 @@ def count_rt_min(df):
     Find total RT minute coverage
     for each trip-operator
     """
-    # Extract hour and minute
+    # Extract hour and minutes
     df['hour'] = df.location_timestamp.dt.hour
     df['minute'] = df.location_timestamp.dt.minute
     
@@ -48,7 +50,7 @@ def count_rt_min(df):
 def find_start_end_times(df, groupby_cols:list):
     """
     Find the max and min location stamp 
-    to determine start and end date. 
+    to determine start and end time. 
     """
     start_end = (df.groupby(groupby_cols)
         .agg({"location_timestamp": [ "min", "max"]})
@@ -109,7 +111,7 @@ def convert_timestamp_to_hrs_mins(
 def find_metrics(date:str):
     """
     Find metrics such as number of pings,
-    start and end time, and RT coverage for a trip.
+    start and end time, and RT coverage for each trip.
    
     date (str): the analysis date from `segment_speed_utils.project_vars`
     """
@@ -165,7 +167,7 @@ def find_metrics(date:str):
     m1['actual_trip_duration_minutes'] = (m1['end_minutes']-m1['start_minutes'])
     return m1
 
-def merge_schedule_vp(vp_df, date: str):
+def merge_schedule_vp(date: str):
     """
     Merge scheduled data with RT data. 
     Keeping this as a separate function  b/c
@@ -176,6 +178,9 @@ def merge_schedule_vp(vp_df, date: str):
     vp_df: the dataframe produced by `find_metrics`
     date (str): the analysis date from `segment_speed_utils.project_vars`
     """
+    # Load in dataframe with metrics
+    vp_df = find_metrics(date)
+    
     # Load scheduled trips
     scheduled_trips = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(analysis_date =date, 
     keep_trip_cols = ["feed_key", "trip_id", "service_hours"])
@@ -211,22 +216,20 @@ def rt_data_proportion(row):
         return "81-100%"    
     
 def pings_categories(row):
-    if 2.7 < row['pings_per_minute']:
+    if 2.4 < row['pings_per_minute']:
         return "3 pings per minute"
-    elif 0.99 < row['pings_per_minute'] < 1.8:
+    elif 0.74 < row['pings_per_minute'] < 1.5:
         return "1 ping per minute"
-    elif 1.7 < row['pings_per_minute'] < 2.8:
+    elif 1.4 < row['pings_per_minute'] < 2.5:
         return "2 pings per minute"
     else:
-        return "No pings"
+        return "0 pings"
     
-def final_df(vp_df, date: str):
+def final_df(date: str):
     """
     Returns a final dataframe with all the requested metrics.
-    A summarized version of the df is saved into 
-    the RT_SCHED_GCS folder and a full one is returned for graphing.
     """
-    df = merge_schedule_vp(vp_df, date).drop(columns = ['_merge'])
+    df = merge_schedule_vp(date).drop(columns = ['_merge'])
     
     # Find RT trip time versus scheduled trip time.
     # Find pings per minute.
@@ -241,19 +244,12 @@ def final_df(vp_df, date: str):
     df = df.fillna(
     df.dtypes.replace({"float64": 0.0, "object": "None"}))
     
-    # Save to parquet
-    # Drop some columns before saving to a parquet
-    cols_to_keep = ['_gtfs_dataset_name', 'gtfs_dataset_key', 
-                    'feed_key','trip_id', 'rt_data_proportion_percentage',
-                    'rt_trip_counts_by_operator', 'trip_ping_count', 'pings_per_minute',]
+    # Drop trips that are more than 4 hours long
+    df = df.loc[df.actual_trip_duration_minutes <= 240].reset_index(drop = True)
     
-    df[cols_to_keep].to_parquet(f"{RT_SCHED_GCS}rt_vs_scheduled_metrics.parquet")
-    
-    # Add columns for making graphs
-    # Round certain columns to eyeball
+    # Add additional columns for making graphs
     for i in ['rt_data_proportion_percentage','actual_trip_duration_minutes']:
         df[f"rounded_{i}"] = (((df[i]/100)*10).astype(int)*10)
-        # .astype(str) + '%'
         
     # Categorize actual trip duration
     df["trip_category"] = df.apply(trip_duration_categories, axis=1)
@@ -292,10 +288,8 @@ def rt_v_scheduled(df):
 
 def rt_trip_duration(df):
     """
-    For every operator, find
-    the number of trips within each
-    by RT vs. Scheduled % data captured 
-    and trip duration bin.
+    For every operator, find the number of trips within each
+    by RT vs. Scheduled % data captured  and trip duration bin.
     """
     df = (df.groupby(['Gtfs Dataset Name',  'Trip Category', 'Rt Category'])
     .agg({"Rt Trip Counts By Operator": "max", "Trip Id": "nunique"})
@@ -318,6 +312,10 @@ def statewide_metrics(df):
     """
     # Get total trips for the day
     all_trips = df['Trip Id'].count()
+    
+    # Take away operators who don't have any
+    # RT data
+    df = df.loc[df['Gtfs Dataset Name'] != "None"]
     
     # % of trips by RT vs. Scheduled Proportion 
     rt_scheduled = rt_v_scheduled(df)
@@ -370,8 +368,8 @@ def stacked_bar_chart(df, x_col:str, y_col:str, color_col: str, chart_title:str)
         .encode(
             x=alt.X(x_col, axis=alt.Axis(labelAngle=-45)),
             y=alt.Y(y_col, scale=alt.Scale(domain=[0, 100])),
-            color=alt.Color(
-                color_col, scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+            color=alt.Color(color_col, scale=alt.Scale(range = cp.CALITP_CATEGORY_BRIGHT_COLORS,
+            domain=df[color_col].unique().tolist())
             ),
             tooltip=df.columns.tolist(),
         )
@@ -406,14 +404,14 @@ def operator_level_visuals(df):
     init={'Gtfs Dataset Name': initialize_first_op})
     
     # Create charts 
-    chart_scheduled = bar_chart(rt_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "% of RT vs. Scheduled Minutes by Operator")
-    chart_trip = stacked_bar_chart(rt_trip, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Lengths and % of RT vs. Scheduled Time by Operator")
+    chart_scheduled = bar_chart(rt_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "Operator - % of RT vs. Scheduled Minutes")
+    chart_trip = stacked_bar_chart(rt_trip, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Length and % of RT Data")
     
     # Finalize charts
-    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 500, 400).add_selection(selection).transform_filter(selection)
-    chart_trip = threshold_utils.chart_size(chart_trip, 500, 400).add_selection(selection).transform_filter(selection)
+    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 400, 300).add_selection(selection).transform_filter(selection)
+    chart_trip = threshold_utils.chart_size(chart_trip, 400, 300).add_selection(selection).transform_filter(selection)
     
-    return chart_scheduled | chart_trip
+    return chart_scheduled & chart_trip
 
 def create_statewide_visuals(df):
     """
@@ -423,11 +421,140 @@ def create_statewide_visuals(df):
     sw_scheduled, sw_trips = statewide_metrics(df)
     
     # Create charts
-    chart_scheduled = bar_chart(sw_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "% of RT vs. Scheduled Minutes for All Operators")
-    chart_trip = stacked_bar_chart(sw_trips, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Lengths and % of RT vs. Scheduled Time for All Operators")
+    chart_scheduled = bar_chart(sw_scheduled, 'Rounded Rt Data Proportion Percentage', 'Percentage of Trips', "Statewide - % of RT vs. Scheduled Minutes")
+    chart_trip = stacked_bar_chart(sw_trips, 'Trip Category','Percentage of Trips', 'Rt Category', "Trip Length and % of RT Data")
     
     # Finalize charts
-    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 500, 400)
-    chart_trip = threshold_utils.chart_size(chart_trip, 500, 400)
+    chart_scheduled = threshold_utils.chart_size(chart_scheduled, 400, 300)
+    chart_trip = threshold_utils.chart_size(chart_trip, 400, 300)
     
-    return chart_scheduled | chart_trip
+    return chart_scheduled & chart_trip
+
+def rt_time_trips_heatmap(df):
+    """
+    Create heatmap showing Total Trips 
+    by RT and Trip Category. 
+    """
+    # Aggregate
+    aggregate = (df
+        .groupby(['Trip Category','Rt Category'])
+        .agg({'Trip Id':'count'})
+        .reset_index()
+        .rename(columns = {'Trip Id':'Total Trips'})
+       )
+    
+    # Create chart
+    chart = (alt.Chart(aggregate).mark_rect().encode(
+    x=alt.X('Trip Category:O', axis=alt.Axis(labelAngle = -45)),
+    y='Rt Category:O',
+    color=alt.Color('Total Trips:Q', scale=alt.Scale(range =cp.CALITP_SEQUENTIAL_COLORS)),
+    tooltip = aggregate.columns.tolist())
+    .properties(title = "Total Trips by Trip and % of RT Data"))
+    
+    chart = threshold_utils.chart_size(chart, 400,300)
+    
+    return chart 
+
+def pings_rt_heatmap(df):
+    aggregate = (df
+        .groupby(['Ping Category','Rt Category'])
+        .agg({'Trip Id':'count'})
+        .reset_index()
+        .rename(columns = {'Trip Id':'Total Trips'})
+       )
+    
+    chart = (alt.Chart(aggregate).mark_rect().encode(
+    x=alt.X('Ping Category:O', axis=alt.Axis(labelAngle = -45)),
+    y='Rt Category:O',
+    color=alt.Color('Total Trips:Q', scale=alt.Scale(range =cp.CALITP_SEQUENTIAL_COLORS )),
+    tooltip = aggregate.columns.tolist())
+    .properties(title = "Total Trips by Ping Frequency and % of RT Data"))
+   
+    chart = threshold_utils.chart_size(chart, 400,300)
+    
+    return chart
+
+def realtime_data_by_trip_length(df):
+    """
+    Create a chart that shows the mean of 
+    % RT data available by trip duration categories.
+    """
+    # Subset
+    subset_cols = ['Trip Category', 'Rt Data Proportion Percentage']
+    df = df[subset_cols]
+    
+    # Create a ruler to show the mean of % RT data
+    # Across all trip length buckets
+    rule = alt.Chart(df).mark_rule(color='red', strokeDash=[10, 7]).encode(
+    y='mean(Rt Data Proportion Percentage):Q')
+    
+    # Create the histogram
+    chart = (alt.Chart(df).mark_bar().encode(
+     x=alt.X('Trip Category:O', axis=alt.Axis(labelAngle = -45)),
+     y='mean(Rt Data Proportion Percentage):Q',
+     color=alt.Color('Trip Category:O', 
+    scale=alt.Scale(range =cp.CALITP_CATEGORY_BRIGHT_COLORS)),)
+    .properties(title = "Mean % of RT Data by Trip Duration"))
+    
+    chart = threshold_utils.chart_size((chart+rule), 400,300)
+    
+    return chart
+
+def dotplot_trip_time_rt_coverage(df):
+    """
+    Create a dotplot showing trips
+    by its duration and % of RT coverage.
+    """
+    df = df[['Actual Trip Duration Minutes','Rt Category']] 
+    
+    dot_chart = (
+        alt.Chart(df, width=0.5)
+        .mark_circle(size=50)
+        .encode(
+            x=alt.X(
+                "jitter:Q",
+                title=None,
+                axis=alt.Axis(values=[0], ticks=False, grid=False, labels=False),
+                scale=alt.Scale(),
+            ),
+            y=alt.Y("Actual Trip Duration Minutes:Q", axis=alt.Axis(labelAngle=90)),
+            color=alt.Color(
+                "Rt Category:N",
+                scale=alt.Scale(range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
+                legend=None,
+            ),
+            tooltip=["Rt Category", "Actual Trip Duration Minutes"],
+            column=alt.Column(
+                "Rt Category:N",
+                header=alt.Header(
+                    labelAngle=90,
+                    titleOrient="top",
+                    labelOrient="bottom",
+                    labelAlign="right",
+                    labelPadding=2,
+                ),
+            ),
+        )
+        .transform_calculate(
+            # Generate Gaussian jitter with a Box-Muller transform
+            jitter="sqrt(-2*log(random()))*cos(2*PI*random())"
+        )
+        .configure_facet(spacing=0)
+        .configure_view(stroke=None)
+        .properties(title="Trip Duration by RT Category")
+    )
+    
+    dot_chart = threshold_utils.chart_size(dot_chart, 75, 300).interactive()
+    
+    return dot_chart
+
+if __name__ == '__main__': 
+    DATE = analysis_date
+    df = final_df(DATE)
+    # Drop some columns before saving to a parquet
+    cols_to_keep = ['Gtfs Dataset Name', 'Gtfs Dataset Key', 
+                    'Feed Key','Trip Id', 'Rt Data Proportion Percentage',
+                    'Rt Trip Counts By Operator', 'Trip Ping Count', 'Pings Per Minute',]
+    
+    df[cols_to_keep].to_parquet(f"{RT_SCHED_GCS}rt_vs_scheduled_metrics.parquet")
+    print("Saved parquet to GCS")
