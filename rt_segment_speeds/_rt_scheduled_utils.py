@@ -1,4 +1,3 @@
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 import dask.dataframe as dd
@@ -19,6 +18,9 @@ fs = gcsfs.GCSFileSystem()
 import intake
 catalog = intake.open_catalog("./catalog.yml")
 
+import os
+os.environ['USE_PYGEOS'] = '0'
+import geopandas
 """
 RT v. Scheduled Utils
 """
@@ -466,7 +468,7 @@ def pings_rt_heatmap(df):
     y='Rt Category:O',
     color=alt.Color('Total Trips:Q', scale=alt.Scale(range =cp.CALITP_SEQUENTIAL_COLORS )),
     tooltip = aggregate.columns.tolist())
-    .properties(title = "Total Trips by Ping and % of RT Data"))
+    .properties(title = "Total Trips by Ping Frequency and % of RT Data"))
    
     chart = threshold_utils.chart_size(chart, 400,300)
     
@@ -492,7 +494,7 @@ def realtime_data_by_trip_length(df):
      y='mean(Rt Data Proportion Percentage):Q',
      color=alt.Color('Trip Category:O', 
     scale=alt.Scale(range =cp.CALITP_CATEGORY_BRIGHT_COLORS)),)
-    .properties(title = "Mean % of Realtime Data by Trip Duration"))
+    .properties(title = "Mean % of RT Data by Trip Duration"))
     
     chart = threshold_utils.chart_size((chart+rule), 400,300)
     
@@ -550,9 +552,9 @@ if __name__ == '__main__':
     DATE = analysis_date
     df = final_df(DATE)
     # Drop some columns before saving to a parquet
-    cols_to_keep = ['_gtfs_dataset_name', 'gtfs_dataset_key', 
-                    'feed_key','trip_id', 'rt_data_proportion_percentage',
-                    'rt_trip_counts_by_operator', 'trip_ping_count', 'pings_per_minute',]
+    cols_to_keep = ['Gtfs Dataset Name', 'Gtfs Dataset Key', 
+                    'Feed Key','Trip Id', 'Rt Data Proportion Percentage',
+                    'Rt Trip Counts By Operator', 'Trip Ping Count', 'Pings Per Minute',]
     
     df[cols_to_keep].to_parquet(f"{RT_SCHED_GCS}rt_vs_scheduled_metrics.parquet")
     print("Saved parquet to GCS")
