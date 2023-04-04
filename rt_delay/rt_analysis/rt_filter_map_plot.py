@@ -299,7 +299,7 @@ class RtFilterMapper:
             for shape_id in gdf.shape_id.unique():
                 try:
                     this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
-                    self.debug_dict[f'{shape_id}_segments'] = this_shape
+                    # self.debug_dict[f'{shape_id}_segments'] = this_shape
                     # Siuba errors unless you do this twice? TODO make upstream issue...
                     this_shape = this_shape >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
                     stop_speeds = (this_shape
@@ -313,14 +313,14 @@ class RtFilterMapper:
                                  >> ungroup()
                                 )
                     # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
+                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
                     stop_speeds.geometry = stop_speeds.apply(
                         lambda x: shapely.ops.substring(
                                     (self.shapes >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
                                     x.last_loc,
                                     x.shape_meters),
                                                     axis = 1)
-                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
-                    self.debug_dict[f'{shape_id}_st_spd1'] = stop_speeds
+                    # self.debug_dict[f'{shape_id}_st_spd1'] = stop_speeds
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> filter(_.speed_mph < 80, _.speed_mph > 0) ## drop impossible speeds, TODO logging?
@@ -331,11 +331,9 @@ class RtFilterMapper:
                                     var_mph = _.speed_mph.var()
                                   )
                          >> ungroup()
-                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay,
-                                  -_.delay_seconds, -_.seconds_from_last, -_.speed_from_last,
-                                  -_.delay_chg_sec, -_.speed_mph) # drop unaggregated columns
+                         >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
                         )
-                    self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
+                    # self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
                     assert not stop_speeds.empty, 'stop speeds gdf is empty!'
                 except Exception as e:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
