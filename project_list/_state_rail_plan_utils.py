@@ -31,9 +31,9 @@ def clean_state_rail_plan(file_name):
     grade_sep_df = _utils.clean_columns(grade_sep_df, column_strings_to_del)
     
     # Add project categories
-    capital_df = _utils.add_project_category(capital_df, "Capital")
-    fleet_df = _utils.add_project_category(fleet_df,"Fleet")
-    grade_sep_df = _utils.add_project_category(grade_sep_df, "Grade Separation")
+    capital_df['project_category'] = "Capital"
+    fleet_df['project_category'] = "Fleet"
+    grade_sep_df['project_category'] = "Grade Separation"
     
     # Concat
     state_rail_plan_df = pd.concat([capital_df, fleet_df,grade_sep_df])
