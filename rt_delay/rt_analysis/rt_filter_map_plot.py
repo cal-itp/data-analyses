@@ -433,20 +433,41 @@ class RtFilterMapper:
         g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
         return g   
     
-    def map_variance(self):
+    def map_variance(self, no_title = False):
         '''
         A quick map of relative speed variance across stop segments. Currently symbolized
         with five quantiles.
         '''
         assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
         gdf = self.detailed_map_view.dropna(subset=['var_mph']) >> arrange(-_.var_mph)
+        gdf = gdf.round({'var_mph': 0})
+        display_cols = ['var_mph', 'miles_from_last',
+                       'route_short_name', 'trips_per_hour', 'shape_id',
+                       'stop_sequence']
+        display_aliases = ['Speed Variance (miles per hour squared)', 'Segment distance (miles)',
+                          'Route', 'Frequency (trips per hour)', 'Shape ID',
+                          'Stop Sequence']
+        tooltip_dict = {'aliases': display_aliases}
         bins = list(mapclassify.Quantiles(gdf.var_mph).bins)
-        cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins, vmin = gdf.var_mph.min(),
-                                    vmax = gdf.var_mph.max())
+        cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins,      
+                                vmin = gdf.var_mph.min(),
+                                vmax = gdf.var_mph.max())
+        if no_title:
+            title = ''
+        else:
+            title = f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}"
         cmap.caption = 'Segment Variance (miles per hour squared)'
         style_dict = {'opacity': 0.8, 'fillOpacity': 0.8}
-        return gdf.explore(column='var_mph', cmap = cmap, tiles = 'CartoDB positron',
+        g = gdf.explore(column='var_mph', cmap = cmap,
+                        tooltip = display_cols, popup = display_cols,
+                        tooltip_kwds = tooltip_dict, popup_kwds = tooltip_dict,
+                        tiles = 'CartoDB positron',
                    style_kwds = style_dict)
+        title_html = f"""
+         <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
+         """
+        g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
+        return g   
         
     def chart_delays(self, no_title = False):
         '''
