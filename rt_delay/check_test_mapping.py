@@ -1,0 +1,50 @@
+import os
+os.environ["CALITP_BQ_MAX_BYTES"] = str(1_000_000_000_000) ## 1TB?
+
+from siuba import *
+import pandas as pd
+import datetime as dt
+
+# from calitp_data_analysis.tables import tbls
+import shared_utils
+from rt_analysis import rt_filter_map_plot
+import tqdm
+import warnings
+
+def check_map_gen(row, pbar):
+    '''
+    Call using pd.apply for convienient iteration.
+    Save progress to parquet after attempting each agency's map in case script is interrupted
+    That progress parquet (when complete) is used in next script, actual output is ignored
+    '''
+    
+    global speedmaps_index_joined
+    analysis_date = row.analysis_date
+    progress_path = f'./_rt_progress_{analysis_date}.parquet'
+        
+    if row.status not in ('parser_failed', 'map_confirmed'):
+        try:
+            rt_day = rt_filter_map_plot.from_gcs(row.organization_itp_id,
+                                                       analysis_date, pbar)
+            _m = rt_day.segment_speed_map()
+            row.status = 'map_confirmed'
+        except Exception as e:
+            print(f'{row.organization_itp_id} map test failed: {e}')
+            row.status = 'map_failed'
+        speedmaps_index_joined.loc[row.name] = row
+        speedmaps_index_joined.to_parquet(progress_path)
+    
+    return
+
+if __name__ == "__main__":
+    
+    speedmaps_index_joined = shared_utils.rt_utils.check_intermediate_data()
+    # check if this stage needed
+    if speedmaps_index_joined.status.isin(['map_confirmed', 'map_failed', 'parser_failed']).all():
+        print('already attempted to test all maps:')
+        print(f'{speedmaps_index_joined >> count(_.status)}')
+    else:
+        pbar = tqdm.tqdm()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            _ = speedmaps_index_joined.apply(check_map_gen, axis = 1, args=[pbar])

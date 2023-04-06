@@ -452,6 +452,33 @@ def get_routelines(
         utils.geoparquet_gcs_export(routelines, export_path, filename)
 
         return routelines
+    
+def check_intermediate_data(speedmaps_index_df: pd.DataFrame = pd.DataFrame()
+) -> pd.DataFrame:
+    '''
+    speedmaps_index_df: pd.DataFrame of all agencies to try generating a speedmap
+        from rt_delay/build_speedmaps_index.py
+    For speedmap generation scripts in rt_delay.
+    Check if intermediate file exists (process partially complete) and 
+    return that to script, otherwise check intermediate data from GCS
+    '''
+    analysis_date = speedmaps_index_df.analysis_date.iloc[0]
+    progress_path = f'./_rt_progress_{analysis_date}.parquet'
+    already_tried = os.path.exists(progress_path)
+    assert already_tried or not speedmaps_index_df.empty, 'must provide df if no existing progress parquet'
+    if already_tried:
+        print(f'found {progress_path}, resuming')
+        speedmaps_index_joined = pd.read_parquet(progress_path)
+    else:
+        operators_ran = get_operators(analysis_date,
+                            speedmaps_index_df.organization_itp_id.to_list())
+        operators_ran_df = pd.DataFrame.from_dict(
+                    operators_ran, orient='index', columns = ['status'])
+        operators_ran_df.index.name = 'itp_id'
+        speedmaps_index_joined = speedmaps_index_df >> inner_join(_,
+                                                         operators_ran_df, on={'organization_itp_id': 'itp_id'})
+        
+    return speedmaps_index_joined
 
 def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
     if isinstance(value, int):
