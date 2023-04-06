@@ -496,35 +496,36 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
         if segment.length < 50:  # return short segments unmodified, for now
             return segment.buffer(buffer_distance)
         arrow_distance = max(arrow_distance, line_geometry.length / 20)
-        shift_distance = buffer_distance + 1
+        shift_distance = buffer_distance + 1 
 
-        begin_segment = shapely.ops.substring(segment, segment.length - 50, segment.length)
+        begin_segment = shapely.ops.substring(segment, 0, 50)
         r_shift = begin_segment.parallel_offset(shift_distance, "right")
         r_pt = shapely.ops.substring(r_shift, 0, 0)
         l_shift = begin_segment.parallel_offset(shift_distance, "left")
-        l_pt = shapely.ops.substring(l_shift, l_shift.length, l_shift.length)
+        l_pt = shapely.ops.substring(l_shift, 0, 0)
         end = shapely.ops.substring(
             begin_segment,
-            begin_segment.length - arrow_distance,
-            begin_segment.length - arrow_distance,
+            begin_segment.length + arrow_distance,
+            begin_segment.length + arrow_distance,
         )
         poly = shapely.geometry.Polygon((r_pt, end, l_pt))  # triangle to cut bottom of arrow
         # ends to the left
-        end_segment = shapely.ops.substring(segment, 0, 50)
-        end = shapely.ops.substring(end_segment, 0, 0)  # correct
+        end_segment = shapely.ops.substring(segment, segment.length - 50, segment.length)
+        end = shapely.ops.substring(end_segment, end_segment.length, end_segment.length)  # correct
         r_shift = end_segment.parallel_offset(shift_distance, "right")
-        r_pt = shapely.ops.substring(r_shift, r_shift.length, r_shift.length)
+        r_pt = shapely.ops.substring(r_shift, 0, 0)
         r_pt2 = shapely.ops.substring(r_shift, r_shift.length - arrow_distance, r_shift.length - arrow_distance)
         l_shift = end_segment.parallel_offset(shift_distance, "left")
         l_pt = shapely.ops.substring(l_shift, 0, 0)
         l_pt2 = shapely.ops.substring(l_shift, arrow_distance, arrow_distance)
         t1 = shapely.geometry.Polygon((l_pt2, end, l_pt))  # triangles to cut top of arrow
         t2 = shapely.geometry.Polygon((r_pt2, end, r_pt))
+
         segment_clip_mask = shapely.geometry.MultiPolygon((poly, t1, t2))
 
         # buffer, then clip segment with arrow shape
         differences = segment.buffer(buffer_distance).difference(segment_clip_mask)
-        # of resulting geometries, pick largest (actual segment, not any scraps...)
+        # # of resulting geometries, pick largest (actual segment, not any scraps...)
         areas = [x.area for x in differences.geoms]
         for geom in differences.geoms:
             if geom.area == max(areas):
