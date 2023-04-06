@@ -391,10 +391,8 @@ class RtFilterMapper:
         
         ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(try_parallel)
-        ## create clips, integrate buffer+simplify?
-        # gdf.geometry = gdf.geometry.apply(arrowize_segment)
         gdf = gdf.apply(arrowize_by_frequency, axis=1)
-        gdf.geometry = gdf.geometry.simplify(tolerance=5) # 5 is max for good-looking arrows!
+        gdf.geometry = gdf.geometry.simplify(tolerance=5) # 5 is max for good-looking arrows?
         gdf = gdf >> filter(gdf.geometry.is_valid)
         gdf = gdf >> filter(-gdf.geometry.is_empty)
         
