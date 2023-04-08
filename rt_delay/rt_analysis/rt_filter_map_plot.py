@@ -25,7 +25,7 @@ class RtFilterMapper:
     Collects filtering and mapping functions, init with stop segment speed view and rt_trips
     '''
     def __init__(self, rt_trips, stop_delay_view,
-                 routelines, pbar = None):
+                 shapes, pbar = None):
         self.debug_dict = {}
         self.pbar = pbar
         self.rt_trips = rt_trips
@@ -33,10 +33,15 @@ class RtFilterMapper:
         self.stop_delay_view = stop_delay_view
         # below line fixes interpolated segment mapping for 10/12 data, fixed upstream for future dates
         self.stop_delay_view = self.stop_delay_view >> group_by(_.shape_id) >> mutate(direction_id = _.direction_id.ffill()) >> ungroup()
-        self.routelines = routelines
-        self.calitp_agency_name = rt_trips.calitp_agency_name.iloc[0]
-        self.analysis_date = rt_trips.service_date.iloc[0]
-        self.display_date = self.analysis_date.strftime('%b %d (%a)')
+        self.shapes = shapes
+        self.using_v2 = 'activity_date' in rt_trips.columns
+        if self.using_v2:
+            self.analysis_date = rt_trips.activity_date.iloc[0] #v2 warehouse
+            self.organization_name = rt_trips.organization_name.iloc[0]
+        else:
+            self.analysis_date = rt_trips.service_date.iloc[0] #v1 compatibility
+            self.organization_name = rt_trips.calitp_agency_name.iloc[0]
+        self.display_date = self.analysis_date.strftime('%b %d, %Y (%a)')
         
         self.endpoint_delay_view = (self.stop_delay_view
                       >> group_by(_.trip_id)
@@ -276,9 +281,9 @@ class RtFilterMapper:
         assert how in ['average', 'low_speeds']
         
         gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.isoformat()}_{self.filter_period}'
-        subfolder = 'segment_speed_views/'
+        subfolder = 'v2_segment_speed_views/' if self.using_v2 else 'segment_speed_views/'
         cached_periods = ['PM_Peak', 'AM_Peak', 'Midday', 'All_Day']
-        if (check_cached (f'{gcs_filename}.parquet', subfolder) and self.filter_period in cached_periods
+        if (check_cached(filename = f'{gcs_filename}.parquet', subfolder = subfolder) and self.filter_period in cached_periods
             and self._time_only_filter and not corridor):
             self.stop_segment_speed_view = gpd.read_parquet(f'{GCS_FILE_PATH}{subfolder}{gcs_filename}.parquet')
         else:
@@ -290,11 +295,11 @@ class RtFilterMapper:
             # for shape_id in tqdm(gdf.shape_id.unique()): trying self.pbar.update...
             if type(self.pbar) != type(None):
                 self.pbar.reset(total=len(gdf.shape_id.unique()))
-                self.pbar.desc = 'Generating segment speeds'
+                self.pbar.desc = f'Generating segment speeds itp_id: {self.calitp_itp_id}'
             for shape_id in gdf.shape_id.unique():
                 try:
                     this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
-                    self.debug_dict[f'{shape_id}_segments'] = this_shape
+                    # self.debug_dict[f'{shape_id}_segments'] = this_shape
                     # Siuba errors unless you do this twice? TODO make upstream issue...
                     this_shape = this_shape >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
                     stop_speeds = (this_shape
@@ -308,14 +313,14 @@ class RtFilterMapper:
                                  >> ungroup()
                                 )
                     # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
+                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
                     stop_speeds.geometry = stop_speeds.apply(
                         lambda x: shapely.ops.substring(
-                                    (self.routelines >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
+                                    (self.shapes >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
                                     x.last_loc,
                                     x.shape_meters),
                                                     axis = 1)
-                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
-                    self.debug_dict[f'{shape_id}_st_spd1'] = stop_speeds
+                    # self.debug_dict[f'{shape_id}_st_spd1'] = stop_speeds
                     stop_speeds = (stop_speeds
                          >> mutate(speed_mph = _.speed_from_last * MPH_PER_MPS)
                          >> filter(_.speed_mph < 80, _.speed_mph > 0) ## drop impossible speeds, TODO logging?
@@ -328,7 +333,7 @@ class RtFilterMapper:
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
                         )
-                    self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
+                    # self.debug_dict[f'{shape_id}_st_spd2'] = stop_speeds
                     assert not stop_speeds.empty, 'stop speeds gdf is empty!'
                 except Exception as e:
                     print(f'stop_speeds shape: {stop_speeds.shape}, shape_id: {shape_id}')
@@ -349,8 +354,8 @@ class RtFilterMapper:
                 )
             all_stop_speeds = all_stop_speeds >> inner_join(_, direction_counts, on = ['route_id', 'direction_id'])
             self.stop_segment_speed_view = all_stop_speeds
-            export_path = f'{GCS_FILE_PATH}segment_speed_views/'
-            if self._time_only_filter and self.filter_period in ['AM_Peak', 'PM_Peak', 'Midday', 'All_Day']:
+            export_path = f'{GCS_FILE_PATH}{subfolder}'
+            if self._time_only_filter and self.filter_period in cached_periods:
                 shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
         self.speed_map_params = (how, colorscale, size, no_title, corridor)
         return self._show_speed_map()
@@ -365,7 +370,8 @@ class RtFilterMapper:
         # Further reduce map size
         gdf = gdf >> select(-_.speed_mph, -_.speed_from_last, -_.trip_id,
                             -_.trip_key, -_.delay_seconds, -_.seconds_from_last,
-                           -_.delay_chg_sec, -_.service_date, -_.last_loc, -_.shape_meters,
+                           -_.delay_chg_sec, -_.activity_date, -_.service_date,
+                            -_.last_loc, -_.shape_meters,
                            -_.meters_from_last, -_.n_trips_shp)
         orig_rows = gdf.shape[0]
         gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'miles_from_last': 1,
@@ -385,18 +391,17 @@ class RtFilterMapper:
         
         ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(try_parallel)
-        ## create clips, integrate buffer+simplify?
-        # gdf.geometry = gdf.geometry.apply(arrowize_segment)
         gdf = gdf.apply(arrowize_by_frequency, axis=1)
-        gdf.geometry = gdf.geometry.simplify(tolerance=5)
+        gdf.geometry = gdf.geometry.simplify(tolerance=5) # 5 is max for good-looking arrows?
         gdf = gdf >> filter(gdf.geometry.is_valid)
         gdf = gdf >> filter(-gdf.geometry.is_empty)
         
-        assert gdf.shape[0] >= orig_rows*.99, 'over 1% of geometries invalid after buffer+simplify'
+        assert gdf.shape[0] >= orig_rows*.975, \
+            f'over 2.5% of geometries invalid after buffer+simplify ({gdf.shape[0]} / {orig_rows})'
         gdf = gdf.to_crs(WGS84)
         self.detailed_map_view = gdf.copy()
         centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
-        name = self.calitp_agency_name
+        name = self.organization_name
 
         display_cols = [how_speed_col[how], 'time_formatted', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
@@ -428,20 +433,41 @@ class RtFilterMapper:
         g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
         return g   
     
-    def map_variance(self):
+    def map_variance(self, no_title = False):
         '''
         A quick map of relative speed variance across stop segments. Currently symbolized
         with five quantiles.
         '''
         assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
         gdf = self.detailed_map_view.dropna(subset=['var_mph']) >> arrange(-_.var_mph)
+        gdf = gdf.round({'var_mph': 0})
+        display_cols = ['var_mph', 'miles_from_last',
+                       'route_short_name', 'trips_per_hour', 'shape_id',
+                       'stop_sequence']
+        display_aliases = ['Speed Variance (miles per hour squared)', 'Segment distance (miles)',
+                          'Route', 'Frequency (trips per hour)', 'Shape ID',
+                          'Stop Sequence']
+        tooltip_dict = {'aliases': display_aliases}
         bins = list(mapclassify.Quantiles(gdf.var_mph).bins)
-        cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins, vmin = gdf.var_mph.min(),
-                                    vmax = gdf.var_mph.max())
+        cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins,      
+                                vmin = gdf.var_mph.min(),
+                                vmax = gdf.var_mph.max())
+        if no_title:
+            title = ''
+        else:
+            title = f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}"
         cmap.caption = 'Segment Variance (miles per hour squared)'
         style_dict = {'opacity': 0.8, 'fillOpacity': 0.8}
-        return gdf.explore(column='var_mph', cmap = cmap, tiles = 'CartoDB positron',
+        g = gdf.explore(column='var_mph', cmap = cmap,
+                        tooltip = display_cols, popup = display_cols,
+                        tooltip_kwds = tooltip_dict, popup_kwds = tooltip_dict,
+                        tiles = 'CartoDB positron',
                    style_kwds = style_dict)
+        title_html = f"""
+         <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
+         """
+        g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
+        return g   
         
     def chart_delays(self, no_title = False):
         '''
@@ -460,7 +486,7 @@ class RtFilterMapper:
         if no_title:
             title = ''
         else:
-            title = f"{self.calitp_agency_name} Mean Delays by Arrival Hour{self.filter_formatted}"
+            title = f"{self.organization_name} Mean Delays by Arrival Hour{self.filter_formatted}"
             
         sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Minutes of Delay at Endpoint'], ci=None, 
                        palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
@@ -488,7 +514,7 @@ class RtFilterMapper:
         if no_title:
             title = ''
         else:
-            title = f"{self.calitp_agency_name} Median Trip Speeds by Arrival Hour{self.filter_formatted}"
+            title = f"{self.organization_name} Median Trip Speeds by Arrival Hour{self.filter_formatted}"
             
         sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Median Trip Speed (mph)'], ci=None, 
                        palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
@@ -524,7 +550,7 @@ class RtFilterMapper:
                                       'stop_sequence': 'Stop Segment ID',
                                       'stop_name': 'Segment Cross Street'})
         plt.xticks(rotation=65)
-        title = f"{self.calitp_agency_name} Speed Variability by Stop Segment{self.filter_formatted}"
+        title = f"{self.organization_name} Speed Variability by Stop Segment{self.filter_formatted}"
         if no_title:
             title = None
         variability_plt = sns.swarmplot(x = to_chart['Segment Cross Street'], y=to_chart['Segement Speed (mph)'],
@@ -630,7 +656,7 @@ class RtFilterMapper:
         speed_metric = int(round(speed_metric))
         self.corridor['schedule_metric_minutes'] = schedule_metric
         self.corridor['speed_metric_minutes'] = speed_metric
-        self.corridor['agency'] = self.calitp_agency_name
+        self.corridor['agency'] = self.organization_name
         self.corridor['routes_included'] = self.filter_formatted
         return {'schedule_metric_minutes': schedule_metric,
                'speed_metric_minutes': speed_metric}
@@ -639,12 +665,23 @@ def from_gcs(itp_id, analysis_date, pbar = None):
     ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_parser.OperatorDayAnalysis.export_views_gcs()
     '''
     date_iso = analysis_date.isoformat()
-    trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
+    
+    if analysis_date <= warehouse_cutoff_date:
+        shapes = get_routelines(itp_id, analysis_date)
+        trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
             .reset_index(drop=True))
-    stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
+        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
                  .reset_index(drop=True))
+    else:
+        index_df = get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
+        trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
+            .reset_index(drop=True))
+        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
+                 .reset_index(drop=True))
+        shapes = get_shapes(index_df)
+    
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
-    routelines = get_routelines(itp_id, analysis_date)
-    rt_day = RtFilterMapper(trips, stop_delay, routelines, pbar)
+    
+    rt_day = RtFilterMapper(trips, stop_delay, shapes, pbar)
     return rt_day

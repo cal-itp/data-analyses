@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name="rt_analysis",
     packages=find_packages(),
-    version="0.1.0",
+    version="0.2.1",
     description="Module for GTFS-RT transit speed analysis",
     author="Cal-ITP",
     license="Apache",
