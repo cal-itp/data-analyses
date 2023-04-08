@@ -13,8 +13,9 @@ PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 
 def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
     '''
-    An index table for tracking down a given org's schedule/rt feeds
-    returns LazyTbl
+    An index table for tracking down a given org's schedule/rt feeds.
+    Note that in limited cases, multiple orgs may share the same datasets
+    (VCTC combined feeds, SD Airport and SDMTS...)
     '''
     analysis_dt = dt.datetime.combine(analysis_date, dt.time(0, 0))
     
@@ -36,13 +37,11 @@ def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
     orgs_with_vp = orgs_with_vp >> distinct(_.organization_name,
                     _.organization_itp_id, _.organization_source_record_id,
                     _.caltrans_district, _._is_current, _.analysis_date
-                    # ,_.vehicle_positions_gtfs_dataset_key
                                            )
     return orgs_with_vp
 
 if __name__ == "__main__":
     
-    # do_stuff()
     speedmaps_index = build_speedmaps_index(ANALYSIS_DATE)
     speedmaps_index_joined = shared_utils.rt_utils.check_intermediate_data(speedmaps_index)
     speedmaps_index_joined.to_parquet(PROGRESS_PATH)

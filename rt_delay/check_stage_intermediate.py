@@ -1,4 +1,3 @@
-print()
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(1_000_000_000_000) ## 1TB?
 
@@ -6,7 +5,6 @@ from siuba import *
 import pandas as pd
 import datetime as dt
 
-# from calitp_data_analysis.tables import tbls
 import shared_utils
 from rt_analysis import rt_parser
 import tqdm
