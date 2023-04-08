@@ -33,7 +33,8 @@ from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
 
 def stop_times_aggregated_to_shape_array_key(
-    analysis_date: str
+    analysis_date: str,
+    trips_with_geom: dg.GeoDataFrame
 ) -> dg.GeoDataFrame:
     """
     For stop-to-stop segments, we need to aggregate stop_times,
@@ -41,21 +42,6 @@ def stop_times_aggregated_to_shape_array_key(
     From trips, attach shape_array_key, then merge to stop_times.
     Then attach stop's point geom.
     """
-    
-    shapes = helpers.import_scheduled_shapes(analysis_date)
-
-    trips = helpers.import_scheduled_trips(
-        analysis_date,
-        columns = ["feed_key", "name", "trip_id", "shape_array_key"]
-    )
-    
-    trips = gtfs_schedule_wrangling.exclude_scheduled_operators(
-        trips, 
-        exclude_me = ["Amtrak Schedule"]
-    )
-
-    trips_with_geom = gtfs_schedule_wrangling.merge_shapes_to_trips(shapes, trips)
-
     stop_times = helpers.import_scheduled_stop_times(
         analysis_date,
         columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"]
@@ -97,7 +83,10 @@ def stop_times_aggregated_to_shape_array_key(
 
 
 def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
-    stop_times_with_geom = stop_times_aggregated_to_shape_array_key(analysis_date)
+    trips_with_geom = gtfs_schedule_wrangling.get_trips_with_geom(
+        analysis_date)
+    stop_times_with_geom = stop_times_aggregated_to_shape_array_key(
+        analysis_date, trips_with_geom)
     
     # Turn the stop_geometry and shape_geometry columns into geoseries
     shape_geoseries = gpd.GeoSeries(stop_times_with_geom.geometry.compute())
@@ -212,17 +201,16 @@ if __name__=="__main__":
     
     start = datetime.datetime.now()
     
-    #stops_by_shape = prep_stop_segments(analysis_date).compute()
+    stops_by_shape = prep_stop_segments(analysis_date).compute()
     
     time1 = datetime.datetime.now()
     logger.info(f"Prep stop segment df: {time1-start}")
-    '''
+    
     utils.geoparquet_gcs_export(
         stops_by_shape,
         SEGMENT_GCS,
         f"stops_projected_{analysis_date}"
     )
-    '''
     
     stops_by_shape = gpd.read_parquet(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet")

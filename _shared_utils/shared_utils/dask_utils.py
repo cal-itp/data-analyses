@@ -74,7 +74,7 @@ def compute_and_export(
     # save a single parquet
     # concat_and_export looks for a directory of partitioned parquets
     file_name_sanitized = file_name.replace(".parquet", "")
-    ddf2.to_parquet(f"{gcs_folder}{file_name_sanitized}")
+    ddf2.to_parquet(f"{gcs_folder}{file_name_sanitized}", overwrite=True)
 
     # If we want to export a single parquet, which we usually want
     # for our final results
