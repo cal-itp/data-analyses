@@ -6149,3 +6149,26 @@
 2023-02-16 09:22:14.015 | INFO     | __main__:<module>:31 - # operators to run: 195
 2023-02-16 09:22:14.017 | INFO     | __main__:<module>:35 - *********** Download routelines data ***********
 2023-02-16 09:26:44.219 | INFO     | __main__:<module>:62 - execution time: 0:04:31.866559
+2023-03-16 08:36:03.303 | INFO     | __main__:<module>:49 - Analysis date: 2023-03-15
+2023-03-16 08:36:04.932 | INFO     | __main__:<module>:56 - # operators to run: 201
+2023-03-16 08:36:04.933 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
+2023-03-16 08:36:20.377 | INFO     | __main__:<module>:82 - execution time: 0:00:17.073200
+2023-03-16 08:36:32.539 | INFO     | __main__:<module>:24 - Analysis date: 2023-03-15
+2023-03-16 08:36:34.245 | INFO     | __main__:<module>:31 - # operators to run: 201
+2023-03-16 08:36:34.246 | INFO     | __main__:<module>:34 - *********** Download stops data ***********
+2023-03-16 08:46:03.423 | INFO     | __main__:<module>:49 - Analysis date: 2023-03-15
+2023-03-16 08:46:04.957 | INFO     | __main__:<module>:56 - # operators to run: 201
+2023-03-16 08:46:04.958 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
+2023-03-16 08:46:16.679 | INFO     | __main__:<module>:84 - execution time: 0:00:13.236198
+2023-03-16 08:46:29.246 | INFO     | __main__:<module>:24 - Analysis date: 2023-03-15
+2023-03-16 08:46:30.795 | INFO     | __main__:<module>:31 - # operators to run: 201
+2023-03-16 08:46:30.796 | INFO     | __main__:<module>:34 - *********** Download stops data ***********
+2023-03-16 08:46:40.681 | INFO     | __main__:<module>:62 - execution time: 0:00:11.434627
+2023-03-16 08:46:52.762 | INFO     | __main__:<module>:24 - Analysis date: 2023-03-15
+2023-03-16 08:46:54.335 | INFO     | __main__:<module>:31 - # operators to run: 201
+2023-03-16 08:46:54.336 | INFO     | __main__:<module>:35 - *********** Download routelines data ***********
+2023-03-16 08:50:07.724 | INFO     | __main__:<module>:62 - execution time: 0:03:14.960963
+2023-03-16 08:50:20.373 | INFO     | __main__:<module>:25 - Analysis date: 2023-03-15
+2023-03-16 08:50:21.505 | INFO     | __main__:<module>:33 - # operators to run: 159
+2023-03-16 08:50:21.507 | INFO     | __main__:<module>:37 - *********** Download st data ***********
+2023-03-16 08:51:31.375 | INFO     | __main__:<module>:58 - execution time: 0:01:11.001468

@@ -4,7 +4,7 @@ metadata:
     analysis_date:
       type: str
       description: Analysis date for v2 diagnostics
-      default: "2023-01-18"
+      default: "2023-02-15"
 sources:  
     # GTFS RT VEHICLE POSITIONS 
     raw_vp_single_day:
@@ -14,26 +14,26 @@ sources:
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_{{analysis_date}}/
     vp_route_segment:
-    # Source: A3_sjoin_vp_segments.py
-        driver: geoparquet
+    # Source: A1_sjoin_vp_segments.py
+        driver: parquet
         description: Vehicle positions joined to route segments
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_sjoin/vp_route_segment_{{analysis_date}}/ 
     vp_valid_route_segment:
-    # Source: A4_valid_vehicle_positions.py
+    # Source: A2_valid_vehicle_positions.py
         driver: parquet
-        description: Vehicle positions pared down, only the enter and exit points are kept within for each segment-trip. Future iteration - unsuable trips discarded.
+        description: Vehicle positions pared down to trips with at least 5 min of data, only the enter and exit points are kept within for each segment-trip. 
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_pared_{{analysis_date}}/
     # SEGMENT SPEEDS 
     speeds_by_route_segment:
-    # Source: A5_speeds_by_segment_trip.py
+    # Source: A3_speeds_by_segment_trip.py
         driver: parquet
         description: Speeds by segment-trip for a single day.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/speeds_route_segments_{{analysis_date}}/                   
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/speeds_route_segments_{{analysis_date}}/               
     speeds_delay_by_stop_segment:
-    # Source: C6_calculate_stop_delay.py
+    # Source: C1_calculate_stop_delay.py
         driver: parquet
         description: Speeds and stop delay by segment-trip for a single day.
         args:

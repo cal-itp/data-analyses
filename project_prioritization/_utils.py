@@ -1,5 +1,6 @@
 import pandas as pd
-import _portfolio_utils 
+import _portfolio_utils
+
 # Geography
 from shared_utils import geography_utils
 import geopandas as gpd
@@ -10,8 +11,8 @@ from babel.numbers import format_currency
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/"
 
 # Save Geojson
-from calitp import *
-from calitp.storage import get_fs
+from calitp_data_analysis import *
+from calitp_data.storage import get_fs
 fs = get_fs()
 import os
 

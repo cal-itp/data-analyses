@@ -66,7 +66,9 @@ if __name__=="__main__":
         "direction_id", 
         "shape_array_key", "shape_id",
         "trip_first_departure_sec", "trip_last_arrival_sec",
-        "service_hours"       
+        "service_hours",
+        "activity_date", 
+        "activity_first_departure", "activity_last_arrival"
     ]
     
     trips = gtfs_utils_v2.get_trips(

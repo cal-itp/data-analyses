@@ -35,8 +35,6 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
     * Unzip before reading it in ESRI as layers
 2. Shapefile written as feature class in file gdb
 * Start with [arcgis_script](./arcgis_pro_script.py)
-* [Edit metadata for many ArcGIS items](https://desktop.arcgis.com/en/arcmap/latest/manage-data/metadata/editing-metadata-for-many-arcgis-items.htm)
-* [Metadata template -- is this needed?](https://desktop.arcgis.com/en/arcmap/latest/manage-data/metadata/creating-a-metadata-template.htm)
 * [Convert shp to gdb](https://gis.stackexchange.com/questions/269701/copying-multiple-shp-files-to-a-file-geodatabase)
 * [Export features to gdb](https://gis.stackexchange.com/questions/366054/export-features-to-geodatabase-created-in-same-python-script)
 3. Export metadata associated with feature class as XML
@@ -52,7 +50,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
 1. Add your dataset to `catalog.yml` and run `gcs_to_esri`.
     * In terminal: cd `open_data` followed by `python gcs_to_esri.py` 
     * The log will show basics like column names and EPSG. Make sure the metadata reflects the same info!
-    * Only use EPSG:4326 (WGS84). Use `gdf.to_crs()` if necessary. All open data portal datasets will be in WGS84.
+    * Only use EPSG:4326 (WGS84). All open data portal datasets will be in WGS84.
     * Download the zipped shapefiles from the Hub to your local filesystem.
 1. Run [arcgis_pro_script](./arcgis_pro_script.py) for Steps 2-3.
     * Open a notebook in Hub and find the `ARCGIS_PATH`
@@ -65,7 +63,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
     * The overwritten XML is stored in `open_data/metadata_xml/run_in_esri/`.
     * Download the overwritten XML files locally to run in ArcGIS.
 1. Run [arcgis_pro_script](./arcgis_pro_script.py) for Step 8.
-1. Zip the file gdb manually - can't get zipping file gdb code to work
+1. In terminal: `python cleanup.py` to clean up old XML files and remove zipped shapefiles.
 
 ### Metadata
 1. [High Quality Transit Areas (HQTA)](./metadata_hqta.py)

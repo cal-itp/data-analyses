@@ -6,6 +6,7 @@ import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
+from segment_speed_utils import helpers
 
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
@@ -38,10 +39,31 @@ def merge_shapes_to_trips(
     return trips_with_geom
 
 
+def get_trips_with_geom(analysis_date) -> dg.GeoDataFrame:
+    """
+    Merge trips with shapes.
+    """
+    shapes = helpers.import_scheduled_shapes(analysis_date)
+
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["feed_key", "name", "trip_id", "shape_array_key"]
+    )
+    
+    trips = exclude_scheduled_operators(
+        trips, 
+        exclude_me = ["Amtrak Schedule"]
+    )
+
+    trips_with_geom = merge_shapes_to_trips(
+        shapes, trips)
+    
+    return trips_with_geom
+
 
 def merge_shapes_to_stop_times(
+    trips_with_shape_geom: dg.GeoDataFrame,
     stop_times: dd.DataFrame,
-    trips_with_shape_geom: dg.GeoDataFrame
 ) -> dg.GeoDataFrame:
     """
     Merge stop_times with trips (with shape_geom) attached.
@@ -53,9 +75,10 @@ def merge_shapes_to_stop_times(
         how = "inner",
     )
     
-    # Sometimes, geometry is lost...need to set it so it remains dg.GeoDataFrame
-    if "geometry" in st_with_shape.columns:
-        st_with_shape = st_with_shape.set_geometry("geometry")
+    if isinstance(trips_with_shape_geom, (gpd.GeoDataFrame, dg.GeoDataFrame)):
+        geometry_col = trips_with_shape_geom.geometry.name
+        # Sometimes, geometry is lost...need to set it so it remains dg.GeoDataFrame
+        st_with_shape = st_with_shape.set_geometry(geometry_col)
     
     return st_with_shape
     

@@ -18,3 +18,15 @@
 2023-02-23 16:52:46.966 | INFO     | __main__:<module>:218 - Prep stop segment df: 0:00:00.000003
 2023-02-23 16:59:07.958 | INFO     | __main__:<module>:233 - Make stop segment wide: 0:06:20.991664
 2023-02-23 16:59:10.998 | INFO     | __main__:<module>:242 - execution time: 0:06:24.032097
+2023-03-02 08:54:10.345 | INFO     | __main__:<module>:211 - Analysis date: 2023-02-15
+2023-03-02 08:54:10.345 | INFO     | __main__:<module>:218 - Prep stop segment df: 0:00:00.000003
+2023-03-02 09:02:46.503 | INFO     | __main__:<module>:211 - Analysis date: 2023-02-15
+2023-03-02 09:02:46.535 | INFO     | __main__:<module>:218 - Prep stop segment df: 0:00:00.000005
+2023-03-02 09:03:36.213 | INFO     | __main__:<module>:211 - Analysis date: 2023-02-15
+2023-03-02 09:04:13.505 | INFO     | __main__:<module>:218 - Prep stop segment df: 0:00:37.290996
+2023-03-02 09:09:15.801 | INFO     | __main__:<module>:232 - Make stop segment wide: 0:05:02.295395
+2023-03-02 09:09:18.507 | INFO     | __main__:<module>:241 - execution time: 0:05:42.292687
+2023-04-03 09:35:01.862 | INFO     | __main__:<module>:200 - Analysis date: 2023-03-15
+2023-04-03 09:35:40.326 | INFO     | __main__:<module>:207 - Prep stop segment df: 0:00:38.424796
+2023-04-03 09:40:55.218 | INFO     | __main__:<module>:221 - Make stop segment wide: 0:05:14.892670
+2023-04-03 09:40:58.173 | INFO     | __main__:<module>:230 - execution time: 0:05:56.272368

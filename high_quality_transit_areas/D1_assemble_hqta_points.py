@@ -15,15 +15,12 @@ import os
 import pandas as pd
 import sys
 
-#from calitp.storage import get_fs, is_cloud # pass GCS credential to dask cluster?
 from loguru import logger
 
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
 from shared_utils import utils, geography_utils, gtfs_utils_v2, portfolio_utils
 from update_vars import analysis_date, TEMP_GCS, COMPILED_CACHED_VIEWS
-
-#fs = get_fs()
 
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 
