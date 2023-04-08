@@ -1,3 +1,4 @@
+print()
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(1_000_000_000_000) ## 1TB?
 
@@ -10,6 +11,8 @@ import shared_utils
 from rt_analysis import rt_filter_map_plot
 import tqdm
 import warnings
+from build_speedmaps_index import ANALYSIS_DATE
+
 
 def check_map_gen(row, pbar):
     '''
@@ -38,7 +41,8 @@ def check_map_gen(row, pbar):
 
 if __name__ == "__main__":
     
-    speedmaps_index_joined = shared_utils.rt_utils.check_intermediate_data()
+    speedmaps_index_joined = shared_utils.rt_utils.check_intermediate_data(
+        analysis_date = ANALYSIS_DATE)
     # check if this stage needed
     if speedmaps_index_joined.status.isin(['map_confirmed', 'map_failed', 'parser_failed']).all():
         print('already attempted to test all maps:')
@@ -48,3 +52,6 @@ if __name__ == "__main__":
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             _ = speedmaps_index_joined.apply(check_map_gen, axis = 1, args=[pbar])
+            print()
+            print('map testing complete:')
+            print(speedmaps_index_joined.status.value_counts())

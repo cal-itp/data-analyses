@@ -453,7 +453,8 @@ def get_routelines(
 
         return routelines
     
-def check_intermediate_data(speedmaps_index_df: pd.DataFrame = pd.DataFrame()
+def check_intermediate_data(speedmaps_index_df: pd.DataFrame = pd.DataFrame(),
+                            analysis_date: dt.date = None,
 ) -> pd.DataFrame:
     '''
     speedmaps_index_df: pd.DataFrame of all agencies to try generating a speedmap
@@ -462,7 +463,8 @@ def check_intermediate_data(speedmaps_index_df: pd.DataFrame = pd.DataFrame()
     Check if intermediate file exists (process partially complete) and 
     return that to script, otherwise check intermediate data from GCS
     '''
-    analysis_date = speedmaps_index_df.analysis_date.iloc[0]
+    assert analysis_date or not speedmaps_index_df.empty, 'must provide analysis date if not providing index df'
+    analysis_date = speedmaps_index_df.analysis_date.iloc[0] if not analysis_date else analysis_date
     progress_path = f'./_rt_progress_{analysis_date}.parquet'
     already_tried = os.path.exists(progress_path)
     assert already_tried or not speedmaps_index_df.empty, 'must provide df if no existing progress parquet'
@@ -517,7 +519,7 @@ def try_parallel(geometry):
 def arrowize_segment(line_geometry, buffer_distance: int = 20):
     """Given a linestring segment from a gtfs shape,
     buffer and clip to show direction of progression"""
-    arrow_distance = buffer_distance * 0.75
+    arrow_distance = buffer_distance # was buffer_distance * 0.75
     try:
         segment = line_geometry.simplify(tolerance=5)
         if segment.length < 50:  # return short segments unmodified, for now
@@ -525,7 +527,7 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
         arrow_distance = max(arrow_distance, line_geometry.length / 20)
         shift_distance = buffer_distance + 1 
 
-        begin_segment = shapely.ops.substring(segment, 0, 50)
+        begin_segment = shapely.ops.substring(segment, 0, arrow_distance)
         r_shift = begin_segment.parallel_offset(shift_distance, "right")
         r_pt = shapely.ops.substring(r_shift, 0, 0)
         l_shift = begin_segment.parallel_offset(shift_distance, "left")
@@ -537,7 +539,7 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
         )
         poly = shapely.geometry.Polygon((r_pt, end, l_pt))  # triangle to cut bottom of arrow
         # ends to the left
-        end_segment = shapely.ops.substring(segment, segment.length - 50, segment.length)
+        end_segment = shapely.ops.substring(segment, segment.length - arrow_distance, segment.length)
         end = shapely.ops.substring(end_segment, end_segment.length, end_segment.length)  # correct
         r_shift = end_segment.parallel_offset(shift_distance, "right")
         r_pt = shapely.ops.substring(r_shift, 0, 0)
