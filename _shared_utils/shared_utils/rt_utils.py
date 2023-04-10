@@ -256,10 +256,12 @@ def interpolate_arrival_times(df):
     yp = yp.astype("datetime64[s]").astype("float64")
     xp = interp_df.shape_meters.to_numpy()
 
-    interpolator = lambda x: np.interp(x, xp, yp)
+    def interpolator(x, shape_meters_array, arrival_time_np):
+        return np.interp(x, shape_meters_array, arrival_time_np)
+
     df = df.assign(
         arrival_time=df.apply(
-            lambda x: interpolator(x.shape_meters) if pd.isnull(x.arrival_time) else x.arrival_time,
+            lambda x: interpolator(x.shape_meters, xp, yp) if pd.isnull(x.arrival_time) else x.arrival_time,
             axis=1,
         )
     )
