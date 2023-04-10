@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 import shapely
 import siuba  # need for type hints
-from calitp_data_analysis.sql import query_sql
 from calitp_data_analysis.tables import tbls
 from numba import jit
 from shared_utils import geography_utils, gtfs_utils, gtfs_utils_v2, map_utils, utils
@@ -36,7 +35,7 @@ GCS_FILE_PATH = f"gs://{BUCKET_NAME}/{BUCKET_DIR}/"
 EXPORT_PATH = f"{GCS_FILE_PATH}cached_views/"
 SHN_PATH = "gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet"
 VP_FILE_PATH = f"gs://{BUCKET_NAME}/data-analyses/rt_segment_speeds/"
-V2_SUBFOLDER = 'v2_cached_views/'
+V2_SUBFOLDER = "v2_cached_views/"
 
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 
@@ -55,18 +54,38 @@ FULL_DATE_FMT = "%Y-%m-%d"  # 2022-06-01 for 6/1/22
 # decide to use v1 cached data from gcs or v2 warehouse cached data/fresh queries
 warehouse_cutoff_date = dt.date(2022, 12, 31)
 
-trip_cols = ['feed_key', 'trip_key', 'gtfs_dataset_key',
-             'activity_date', 'trip_id', 'route_id',
-             'route_short_name', 'shape_id', 'direction_id',
-             'route_type', 'route_long_name', 'route_desc']
+trip_cols = [
+    "feed_key",
+    "trip_key",
+    "gtfs_dataset_key",
+    "activity_date",
+    "trip_id",
+    "route_id",
+    "route_short_name",
+    "shape_id",
+    "direction_id",
+    "route_type",
+    "route_long_name",
+    "route_desc",
+]
 
-st_cols = ['feed_key', 'trip_id', 'stop_id', 'arrival_time',
-       'departure_time', 'timepoint', 'stop_sequence', 'continuous_drop_off',
-       'continuous_pickup', 'arrival_sec', 'departure_sec']
+st_cols = [
+    "feed_key",
+    "trip_id",
+    "stop_id",
+    "arrival_time",
+    "departure_time",
+    "timepoint",
+    "stop_sequence",
+    "continuous_drop_off",
+    "continuous_pickup",
+    "arrival_sec",
+    "departure_sec",
+]
 # must include _sec for util to work...
-stop_cols = ['feed_key', 'stop_id', 'stop_name', 'pt_geom']
+stop_cols = ["feed_key", "stop_id", "stop_name", "pt_geom"]
 # must include pt_geom to return gdf
-shape_cols = ['feed_key', 'shape_id']
+shape_cols = ["feed_key", "shape_id"]
 
 
 # used in gtfs_utils
@@ -78,6 +97,7 @@ def format_date(analysis_date: Union[dt.date, str]) -> str:
         return analysis_date.strftime(FULL_DATE_FMT)
     elif isinstance(analysis_date, str):
         return dt.datetime.strptime(analysis_date, FULL_DATE_FMT).date()
+
 
 def reversed_colormap(existing: branca.colormap.ColorMap) -> branca.colormap.ColorMap:
     return branca.colormap.LinearColormap(
@@ -212,6 +232,7 @@ def fix_arrival_time(gtfs_timestring: str) -> tuple[str, int]:
     else:
         return gtfs_timestring.strip(), extra_day
 
+
 # TODO use?
 def gtfs_time_to_dt(df: pd.DataFrame) -> pd.DataFrame:
     date = df.service_date
@@ -235,10 +256,12 @@ def interpolate_arrival_times(df):
     yp = yp.astype("datetime64[s]").astype("float64")
     xp = interp_df.shape_meters.to_numpy()
 
-    interpolator = lambda x: np.interp(x, xp, yp)
+    def interpolator(x, shape_meters_array, arrival_time_np):
+        return np.interp(x, shape_meters_array, arrival_time_np)
+
     df = df.assign(
         arrival_time=df.apply(
-            lambda x: interpolator(x.shape_meters) if pd.isnull(x.arrival_time) else x.arrival_time,
+            lambda x: interpolator(x.shape_meters, xp, yp) if pd.isnull(x.arrival_time) else x.arrival_time,
             axis=1,
         )
     )
@@ -280,146 +303,162 @@ def trips_cached(itp_id: int, date_str: str) -> pd.DataFrame:
     else:
         return None
 
-def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None
-) -> pd.DataFrame:
-    '''
+
+def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None) -> pd.DataFrame:
+    """
     Collect relevant keys for finding all schedule and rt data for a reports-assessed organization.
     Note that organizations may have multiple sets of feeds, or share feeds with other orgs.
-    
+
     Used with specific itp_id in rt_analysis.rt_parser.OperatorDayAnalysis, or without specifying itp_id
     to get an overall table of which datasets were processed and how to deduplicate if needed
-    '''
+    """
     analysis_dt = dt.datetime.combine(analysis_date, dt.time(0))
-    
-    daily_service = (tbls.mart_gtfs.fct_daily_feed_scheduled_service_summary()
-    >> select(_.schedule_gtfs_dataset_key == _.gtfs_dataset_key,
-             _.feed_key, _.activity_date)
-                )
 
-    org_feeds_datasets = (tbls.mart_transit_database.dim_provider_gtfs_data()
-    >> filter(_._valid_from <= analysis_dt, _._valid_to >= analysis_dt)
-    >> filter(_.reports_site_assessed, _.organization_itp_id == itp_id,
-             _.vehicle_positions_gtfs_dataset_key != None)
-    >> inner_join(_, daily_service, by = 'schedule_gtfs_dataset_key')
-    >> filter(_.activity_date == analysis_date)
-    >> select(_.feed_key, _.schedule_gtfs_dataset_key, _.vehicle_positions_gtfs_dataset_key,
-             _.organization_itp_id, _.organization_name, _.activity_date)
+    daily_service = tbls.mart_gtfs.fct_daily_feed_scheduled_service_summary() >> select(
+        _.schedule_gtfs_dataset_key == _.gtfs_dataset_key, _.feed_key, _.activity_date
     )
-    
+
+    org_feeds_datasets = (
+        tbls.mart_transit_database.dim_provider_gtfs_data()
+        >> filter(_._valid_from <= analysis_dt, _._valid_to >= analysis_dt)
+        >> filter(
+            _.reports_site_assessed, _.organization_itp_id == itp_id, _.vehicle_positions_gtfs_dataset_key != None
+        )
+        >> inner_join(_, daily_service, by="schedule_gtfs_dataset_key")
+        >> filter(_.activity_date == analysis_date)
+        >> select(
+            _.feed_key,
+            _.schedule_gtfs_dataset_key,
+            _.vehicle_positions_gtfs_dataset_key,
+            _.organization_itp_id,
+            _.organization_name,
+            _.activity_date,
+        )
+    )
+
     if itp_id:
         org_feeds_datasets = org_feeds_datasets >> filter(_.organization_itp_id == itp_id)
-    
+
     return org_feeds_datasets >> collect()
 
+
 def compose_filename_check(ix_df: pd.DataFrame, table: str):
-    '''
+    """
     Compose target filename for cached warehouse queries (as used in rt_analysis.rt_parser.OperatorDayAnalysis),
     then check if cached data already exists on GCS
-    '''
+    """
     activity_date = ix_df.activity_date.iloc[0].date()
     date_str = activity_date.strftime(FULL_DATE_FMT)
-    assert activity_date == dt.date(2023, 3, 15), 'hardcoded to 3/15 for now :)'
+    assert activity_date == dt.date(2023, 3, 15), "hardcoded to 3/15 for now :)"
     filename = f"{table}_{ix_df.organization_itp_id.iloc[0]}_{date_str}.parquet"
-    path = check_cached(filename = filename, subfolder = V2_SUBFOLDER)
-    
+    path = check_cached(filename=filename, subfolder=V2_SUBFOLDER)
+
     return filename, path, activity_date
 
+
 def get_vehicle_positions(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
-    '''
+    """
     Using ix_df as a guide, download all-operator data from GCS as queried via:
         https://github.com/cal-itp/data-analyses/blob/main/open_data/download_vehicle_positions.py
     Filter to relevant vehicle positions datasets; cache filtered version
-    '''
-    
-    filename, path, activity_date = compose_filename_check(ix_df, 'vp')
-    
+    """
+
+    filename, path, activity_date = compose_filename_check(ix_df, "vp")
+
     if path:
         print(f"found vp parquet at {path}")
         org_vp = gpd.read_parquet(path)
     else:
-        vp_all = gpd.read_parquet(f'{VP_FILE_PATH}vp_2023-03-15.parquet')
+        vp_all = gpd.read_parquet(f"{VP_FILE_PATH}vp_2023-03-15.parquet")
         org_vp = vp_all >> filter(_.gtfs_dataset_key.isin(ix_df.vehicle_positions_gtfs_dataset_key))
         org_vp = org_vp >> select(-_.location_timestamp)
         org_vp = org_vp.to_crs(geography_utils.CA_NAD83Albers)
-        utils.geoparquet_gcs_export(org_vp, GCS_FILE_PATH+V2_SUBFOLDER, filename)
+        utils.geoparquet_gcs_export(org_vp, GCS_FILE_PATH + V2_SUBFOLDER, filename)
 
     return org_vp
 
+
 def get_trips(ix_df: pd.DataFrame) -> pd.DataFrame:
-    '''
+    """
     Using ix_df as a guide, query warehouse for trips via shared_utils.gtfs_utils_v2
     Only request columns used in speedmap workflow; cache
-    '''
-    filename, path, activity_date = compose_filename_check(ix_df, 'trips')
-    
+    """
+    filename, path, activity_date = compose_filename_check(ix_df, "trips")
+
     if path:
         print(f"found trips parquet at {path}")
         org_trips = pd.read_parquet(path)
     else:
-        feed_key_list = list(ix_df.feed_key.unique())  
+        feed_key_list = list(ix_df.feed_key.unique())
         org_trips = gtfs_utils_v2.get_trips(activity_date, feed_key_list, trip_cols)
-        org_trips.to_parquet(GCS_FILE_PATH+V2_SUBFOLDER+filename)
-        
+        org_trips.to_parquet(GCS_FILE_PATH + V2_SUBFOLDER + filename)
+
     return org_trips
 
+
 def get_st(ix_df: pd.DataFrame, trip_df: pd.DataFrame) -> pd.DataFrame:
-    '''
+    """
     Using ix_df as a guide, query warehouse for stop_times via shared_utils.gtfs_utils_v2
     Only request columns used in speedmap workflow; cache
-    '''
-    filename, path, activity_date = compose_filename_check(ix_df, 'st')
-    
+    """
+    filename, path, activity_date = compose_filename_check(ix_df, "st")
+
     if path:
         print(f"found stop times parquet at {path}")
         org_st = pd.read_parquet(path)
     else:
-        feed_key_list = list(ix_df.feed_key.unique())  
-        org_st = gtfs_utils_v2.get_stop_times(activity_date, feed_key_list, trip_df = trip_df,
-                                                     stop_time_cols = st_cols, get_df = True)
+        feed_key_list = list(ix_df.feed_key.unique())
+        org_st = gtfs_utils_v2.get_stop_times(
+            activity_date, feed_key_list, trip_df=trip_df, stop_time_cols=st_cols, get_df=True
+        )
         org_st = org_st >> select(-_.arrival_sec, -_.departure_sec)
-        org_st.to_parquet(GCS_FILE_PATH+V2_SUBFOLDER+filename)
-        
+        org_st.to_parquet(GCS_FILE_PATH + V2_SUBFOLDER + filename)
+
     return org_st
 
+
 def get_stops(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
-    '''
+    """
     Using ix_df as a guide, query warehouse for stops via shared_utils.gtfs_utils_v2
     Only request columns used in speedmap workflow; cache
-    '''    
-    filename, path, activity_date = compose_filename_check(ix_df, 'stops')
-    
+    """
+    filename, path, activity_date = compose_filename_check(ix_df, "stops")
+
     if path:
         print(f"found stops parquet at {path}")
         org_stops = gpd.read_parquet(path)
     else:
-        feed_key_list = list(ix_df.feed_key.unique())  
-        org_stops = gtfs_utils_v2.get_stops(activity_date, feed_key_list, stop_cols,
-                                                     crs = geography_utils.CA_NAD83Albers)
-        utils.geoparquet_gcs_export(org_stops, GCS_FILE_PATH+V2_SUBFOLDER, filename)
-        
+        feed_key_list = list(ix_df.feed_key.unique())
+        org_stops = gtfs_utils_v2.get_stops(activity_date, feed_key_list, stop_cols, crs=geography_utils.CA_NAD83Albers)
+        utils.geoparquet_gcs_export(org_stops, GCS_FILE_PATH + V2_SUBFOLDER, filename)
+
     return org_stops
 
+
 def get_shapes(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
-    '''
+    """
     Using ix_df as a guide, query warehouse for shapes via shared_utils.gtfs_utils_v2
     Only request columns used in speedmap workflow; cache
-    '''    
-    filename, path, activity_date = compose_filename_check(ix_df, 'shapes')
-    
+    """
+    filename, path, activity_date = compose_filename_check(ix_df, "shapes")
+
     if path:
         print(f"found shapes parquet at {path}")
         org_shapes = gpd.read_parquet(path)
     else:
-        feed_key_list = list(ix_df.feed_key.unique())  
-        org_shapes = gtfs_utils_v2.get_shapes(activity_date, feed_key_list, crs = geography_utils.CA_NAD83Albers, 
-                                                          shape_cols = shape_cols)
-        org_shapes = org_shapes.dropna(subset=['geometry']) ## invalid geos are nones in new df...
-        assert type(org_shapes) == type(gpd.GeoDataFrame()) and not org_shapes.empty, 'shapes must not be empty'
-        utils.geoparquet_gcs_export(org_shapes, GCS_FILE_PATH+V2_SUBFOLDER, filename)
-        
+        feed_key_list = list(ix_df.feed_key.unique())
+        org_shapes = gtfs_utils_v2.get_shapes(
+            activity_date, feed_key_list, crs=geography_utils.CA_NAD83Albers, shape_cols=shape_cols
+        )
+        # invalid geos are nones in new df...
+        org_shapes = org_shapes.dropna(subset=["geometry"])
+        assert isinstance(org_shapes, gpd.GeoDataFrame) and not org_shapes.empty, "shapes must not be empty"
+        utils.geoparquet_gcs_export(org_shapes, GCS_FILE_PATH + V2_SUBFOLDER, filename)
+
     return org_shapes
 
-#needed for v1 RtFilterMapper compatibility
+
+# needed for v1 RtFilterMapper compatibility
 def get_routelines(
     itp_id: int,
     analysis_date: dt.date,
@@ -452,35 +491,37 @@ def get_routelines(
         utils.geoparquet_gcs_export(routelines, export_path, filename)
 
         return routelines
-    
-def check_intermediate_data(speedmaps_index_df: pd.DataFrame = pd.DataFrame(),
-                            analysis_date: dt.date = None,
+
+
+def check_intermediate_data(
+    speedmaps_index_df: pd.DataFrame = pd.DataFrame(),
+    analysis_date: dt.date = None,
 ) -> pd.DataFrame:
-    '''
+    """
     speedmaps_index_df: pd.DataFrame of all agencies to try generating a speedmap
         from rt_delay/build_speedmaps_index.py
     For speedmap generation scripts in rt_delay.
-    Check if intermediate file exists (process partially complete) and 
+    Check if intermediate file exists (process partially complete) and
     return that to script, otherwise check intermediate data from GCS
-    '''
-    assert analysis_date or not speedmaps_index_df.empty, 'must provide analysis date if not providing index df'
+    """
+    assert analysis_date or not speedmaps_index_df.empty, "must provide analysis date if not providing index df"
     analysis_date = speedmaps_index_df.analysis_date.iloc[0] if not analysis_date else analysis_date
-    progress_path = f'./_rt_progress_{analysis_date}.parquet'
+    progress_path = f"./_rt_progress_{analysis_date}.parquet"
     already_tried = os.path.exists(progress_path)
-    assert already_tried or not speedmaps_index_df.empty, 'must provide df if no existing progress parquet'
+    assert already_tried or not speedmaps_index_df.empty, "must provide df if no existing progress parquet"
     if already_tried:
-        print(f'found {progress_path}, resuming')
+        print(f"found {progress_path}, resuming")
         speedmaps_index_joined = pd.read_parquet(progress_path)
     else:
-        operators_ran = get_operators(analysis_date,
-                            speedmaps_index_df.organization_itp_id.to_list())
-        operators_ran_df = pd.DataFrame.from_dict(
-                    operators_ran, orient='index', columns = ['status'])
-        operators_ran_df.index.name = 'itp_id'
-        speedmaps_index_joined = speedmaps_index_df >> inner_join(_,
-                                                         operators_ran_df, on={'organization_itp_id': 'itp_id'})
-        
+        operators_ran = get_operators(analysis_date, speedmaps_index_df.organization_itp_id.to_list())
+        operators_ran_df = pd.DataFrame.from_dict(operators_ran, orient="index", columns=["status"])
+        operators_ran_df.index.name = "itp_id"
+        speedmaps_index_joined = speedmaps_index_df >> inner_join(
+            _, operators_ran_df, on={"organization_itp_id": "itp_id"}
+        )
+
     return speedmaps_index_joined
+
 
 def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
     if isinstance(value, int):
@@ -519,13 +560,13 @@ def try_parallel(geometry):
 def arrowize_segment(line_geometry, buffer_distance: int = 20):
     """Given a linestring segment from a gtfs shape,
     buffer and clip to show direction of progression"""
-    arrow_distance = buffer_distance # was buffer_distance * 0.75
+    arrow_distance = buffer_distance  # was buffer_distance * 0.75
     try:
         segment = line_geometry.simplify(tolerance=5)
         if segment.length < 50:  # return short segments unmodified, for now
             return segment.buffer(buffer_distance)
         arrow_distance = max(arrow_distance, line_geometry.length / 20)
-        shift_distance = buffer_distance + 1 
+        shift_distance = buffer_distance + 1
 
         begin_segment = shapely.ops.substring(segment, 0, arrow_distance)
         r_shift = begin_segment.parallel_offset(shift_distance, "right")
@@ -718,7 +759,7 @@ route_type_names = {
 }
 
 
-def get_operators(analysis_date, operator_list, verbose = False):
+def get_operators(analysis_date, operator_list, verbose=False):
     """
     Function for checking the existence of rt_trips and stop_delay_views in GCS for operators on a given day.
 
@@ -729,26 +770,30 @@ def get_operators(analysis_date, operator_list, verbose = False):
 
     if isinstance(analysis_date, str):
         analysis_date = pd.to_datetime(analysis_date).date()
-    if analysis_date <= dt.date(2022, 12, 31): # look for v1 or v2 intermediate data
-        subfolder = 'rt_trips/'
+    if analysis_date <= dt.date(2022, 12, 31):  # look for v1 or v2 intermediate data
+        subfolder = "rt_trips/"
     else:
-        subfolder = 'v2_rt_trips/'
+        subfolder = "v2_rt_trips/"
     fs_list = fs.ls(f"{GCS_FILE_PATH}{subfolder}")
     # day = str(analysis_date.day).zfill(2)
     # month = str(analysis_date.month).zfill(2)
     date_iso = analysis_date.isoformat()
     # now finds ran operators on specific analysis date
     ran_operators = [
-        int(path.split(f"{subfolder}")[1].split("_")[0]) for path in fs_list if date_iso in path.split(f'{subfolder}')[1]
+        int(path.split(f"{subfolder}")[1].split("_")[0])
+        for path in fs_list
+        if date_iso in path.split(f"{subfolder}")[1]
     ]
     op_list_runstatus = {}
     for itp_id in operator_list:
         if itp_id in ran_operators:
-            if verbose: print(f"already ran: {itp_id}")
+            if verbose:
+                print(f"already ran: {itp_id}")
             op_list_runstatus[itp_id] = "already_ran"
             continue
         else:
-            if verbose: print(f"not yet run: {itp_id}")
+            if verbose:
+                print(f"not yet run: {itp_id}")
             op_list_runstatus[itp_id] = "not_yet_run"
     return op_list_runstatus
 
