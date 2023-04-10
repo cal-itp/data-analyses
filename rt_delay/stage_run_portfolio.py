@@ -1,0 +1,79 @@
+import sys
+# https://docs.python.org/3/library/warnings.html
+if not sys.warnoptions:
+    import warnings
+    warnings.simplefilter("ignore")
+
+from tqdm import tqdm
+import time
+
+import pandas as pd
+from siuba import *
+
+import datetime as dt
+import shared_utils
+from rt_analysis import rt_parser
+
+import os
+
+import pyaml
+import yaml
+from build_speedmaps_index import ANALYSIS_DATE
+
+def make_rt_site_yml(speedmaps_index_joined,
+                       input_path = '../portfolio/sites/rt.yml',
+                       output_path = '../portfolio/sites/test_rt.yml'):
+        
+    # make sure intermediate data is ran or at least attempted
+    assert speedmaps_index_joined.status.isin(['map_confirmed',
+                        'parser_failed', 'map_failed']).all(), 'must run prior scripts first, see Makefile'
+    
+    with open(input_path) as rt_site:
+        rt_site_data = yaml.load(rt_site, yaml.Loader)
+    
+    chapters_list = []
+    speedmaps_index_joined = speedmaps_index_joined >> arrange(_.caltrans_district)
+    for district in speedmaps_index_joined.caltrans_district.unique():
+        if type(district) == type(None):
+            continue
+        chapter_dict = {}
+        filtered = (speedmaps_index_joined
+                    >> filter(_.caltrans_district == district,
+                             -_.status.isin(['parser_failed', 'map_failed']))
+                    >> arrange(_.organization_name)
+                   )
+        chapter_dict['caption'] = f'District {district}'
+        chapter_dict['params'] = {'district': district}
+        chapter_dict['sections'] = \
+            [{'itp_id': itp_id} for itp_id in filtered.organization_itp_id.to_list()]
+        chapters_list += [chapter_dict]   
+        
+    parts_list = [{'chapters': chapters_list}]
+    rt_site_data['parts'] = parts_list
+    
+    output = pyaml.dump(rt_site_data)
+    with open(output_path, 'w') as rt_site:
+        rt_site.write(output)
+    
+    print(f'portfolio yml staged to {output_path}')
+    return
+
+def stage_portfolio():
+    
+    os.chdir('/home/jovyan/data-analyses')
+    os.system('cp portfolio/sites/test_rt.yml portfolio/sites/rt.yml')
+    os.system('python3 portfolio/portfolio.py clean rt')
+    os.system('python3 portfolio/portfolio.py build rt --no-stderr')
+
+def deploy_portfolio():
+    
+    os.chdir('/home/jovyan/data-analyses')
+    os.system('python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy')
+
+if __name__ == "__main__":
+
+    speedmaps_index_joined = shared_utils.rt_utils.check_intermediate_data(
+        analysis_date = ANALYSIS_DATE)
+    make_rt_site_yml(speedmaps_index_joined)
+    stage_portfolio()
+    deploy_portfolio()
