@@ -12,7 +12,9 @@ repos:
     rev: 6.0.0
     hooks:
       - id: flake8
-        args: ["--ignore=E501,W503,F403,F405,E731,E712"] # line too long and line before binary operator (black is ok with these), assign lambda expression OK, comparison to True with is (siuba uses ==)
+        args: ["--ignore=E501,W503,F403,F405,E731,E712"] 
+        # E711: comparison to None should be 'if cond is not None:' (siuba filtering requires we use != None and not is not)
+        # E712: line too long and line before binary operator (black is ok with these), assign lambda expression OK, comparison to True with is (siuba uses ==)
         types:
           - python
         files: _shared_utils
