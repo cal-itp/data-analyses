@@ -11,7 +11,8 @@ import sys
 from loguru import logger
 from shared_utils import utils
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/py_crow_flies/"
+GCS_FILE_PATH = "gs://calitp-publish-data-analysis/py_crow_flies/"
+
 files = ["CentralCal_POIs", "Mojave_POIs", 
          "NorCal_POIs", "SoCal_POIs"]
 
