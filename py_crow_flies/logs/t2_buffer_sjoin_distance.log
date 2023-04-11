@@ -15,3 +15,20 @@
 2023-03-29 12:58:45.135 | INFO     | __main__:<module>:198 - compute list of delayed: 0:00:58.882470
 2023-03-29 13:37:10.608 | INFO     | __main__:<module>:208 - compute, concat, export batch SoCal: 0:39:31.283632
 2023-03-29 13:37:10.610 | INFO     | __main__:<module>:211 - execution time: 1:17:25.206197
+2023-04-10 16:49:42.663 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 12000, # of chunks: 238
+2023-04-10 16:49:42.685 | INFO     | __main__:<module>:195 - create list of delayed results: 0:00:05.484905
+2023-04-10 16:50:07.337 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:24.652248
+2023-04-10 17:11:01.835 | INFO     | __main__:<module>:209 - compute, concat, export batch CentralCal: 0:21:24.635532
+2023-04-10 17:11:05.384 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 300000, # of chunks: 3
+2023-04-10 17:11:05.388 | INFO     | __main__:<module>:195 - create list of delayed results: 0:00:03.503867
+2023-04-10 17:11:05.820 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:00.432399
+2023-04-10 17:11:57.729 | INFO     | __main__:<module>:209 - compute, concat, export batch Mojave: 0:00:55.845404
+2023-04-10 17:12:02.031 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 25000, # of chunks: 82
+2023-04-10 17:12:02.039 | INFO     | __main__:<module>:195 - create list of delayed results: 0:00:04.308774
+2023-04-10 17:12:10.700 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:08.661443
+2023-04-10 17:15:31.676 | INFO     | __main__:<module>:209 - compute, concat, export batch NorCal: 0:03:33.946342
+2023-04-10 17:15:37.073 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 6000, # of chunks: 441
+2023-04-10 17:15:37.117 | INFO     | __main__:<module>:195 - create list of delayed results: 0:00:05.440514
+2023-04-10 17:16:25.033 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:47.915451
+2023-04-10 17:43:50.555 | INFO     | __main__:<module>:209 - compute, concat, export batch SoCal: 0:28:18.878004
+2023-04-10 17:43:50.594 | INFO     | __main__:<module>:212 - execution time: 0:54:16.776361
