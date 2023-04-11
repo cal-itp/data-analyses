@@ -203,7 +203,7 @@ if __name__ == "__main__":
         ).reset_index(drop=True)
    
         sjoin_pairs_ddf.to_parquet(
-            f"{GCS_FILE_PATH}sjoin_pairs_{region}/", overwrite=True)
+            f"{GCS_FILE_PATH}sjoin_pairs_{region}", overwrite=True)
     
         region_end = datetime.datetime.now()
         logger.info(f"compute, concat, export batch {region}: {region_end - region_start}")
