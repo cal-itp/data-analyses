@@ -6,7 +6,9 @@ Merge results back onto original full POI file.
 import dask.dataframe as dd
 import datetime 
 import geopandas as gpd
+import gcsfs
 import numpy as np
+import os
 import pandas as pd
 import shutil
 import sys
@@ -15,6 +17,8 @@ from dask import delayed, compute
 from loguru import logger
 from shared_utils import utils
 from prep import GCS_FILE_PATH
+
+fs = gcsfs.GCSFileSystem()
 
 def aggregate_by_origin(
     df: pd.DataFrame
@@ -81,7 +85,7 @@ def weighted_opps_by_region(region: str) -> dd.DataFrame:
     number of opportunities. Sum it up by origin.
     """
     ddf = dd.read_parquet(
-        f"./sjoin_pairs_{region}/"
+        f"{GCS_FILE_PATH}sjoin_pairs_{region}/"
     ).repartition(partition_size="50MB")
     
     region_oppor = decay_weighted_opportunities(
@@ -150,7 +154,7 @@ if __name__ == "__main__":
     
     ddf = dd.multi.concat(results2, axis=0).reset_index(drop=True)
     
-    RESULTS_EXPORT_FILE = "all_results_tiffany"
+    RESULTS_EXPORT_FILE = "oppor_results"
     ddf.to_parquet(f"./{RESULTS_EXPORT_FILE}/", overwrite=True)
     
     time3 = datetime.datetime.now()
@@ -160,6 +164,22 @@ if __name__ == "__main__":
     
     end = datetime.datetime.now()
     logger.info(f"export final results as parquet: {end-time3}")
+    
+    final = gpd.read_parquet(f"{GCS_FILE_PATH}oppor_results.parquet")
+    
+    # make zipped shapefile
+    utils.make_zipped_shapefile(
+        final,
+        f"{RESULTS_EXPORT_FILE}.zip"
+    )
+    
+    # Upload to GCS
+    fs.put(
+        f"{RESULTS_EXPORT_FILE}.zip"
+        f"{GCS_FILE_PATH}{RESULTS_EXPORT_FILE}.zip"
+    )
+    
+    # Remove local version
+    os.remove(f"{RESULTS_EXPORT_FILE}.zip")
+    
     logger.info(f"execution time: {end-start}")
-
-   
