@@ -1,5 +1,5 @@
-directory: ./rt_delay/
-notebook: ./rt_delay/speedmaps.ipynb
+directory: ./ca_transit_speed_maps/
+notebook: ./ca_transit_speed_maps/speedmaps.ipynb
 parts:
   - chapters:
       - caption: District 01 - Eureka
