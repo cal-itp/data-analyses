@@ -34,7 +34,7 @@ def aggregate_crashes():
     
     # dissolve, grouping by bridge caracteristics, aggregating counts of encampment work orders 
     bridges_crashes_agg = bridges_crashes.dissolve(
-        by = ["BRIDGE_left","NAME_left","FAC_left"],
+        by = ["BRIDGE_left","NAME_left","FAC_left", "DIST_left", "CO_left"],
         aggfunc = {'number_killed' : 'sum',
                    'number_injured' : 'sum',
                    'pedestrian_accident' : 'count'
