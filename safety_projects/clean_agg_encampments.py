@@ -55,7 +55,7 @@ def aggregate_encampments(encampments):
     
     # dissolve, grouping by bridge caracteristics, aggregating counts of encampment work orders 
     bridges_encampments_agg = bridges_encampments.dissolve(
-        by = ["BRIDGE_left","NAME_left","FAC_left"],
+        by = ["BRIDGE_left","NAME_left","FAC_left", "DIST_left", "CO_left"],
         aggfunc = {'WONO' : 'nunique'}
     )
     
