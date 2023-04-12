@@ -1,31 +1,15 @@
-# Introduction
+# rt_delay (rt_analysis) tooling
 
-Supporting transit is integral to Caltrans' vision of delivering a connected, equitable, and more sustainable state transportation network as well as the Department’s work to combat the climate crisis.
+## Documentation
 
-To help realize that vision, the California Integrated Travel Program (Cal-ITP) is developing analyses alongside our partners such as the Caltrans Division of Research, Innovation and System Information (DRISI) in order to provide Caltrans staff and external stakeholders with actionable data to prioritize transit projects.
+See docs site: https://docs.calitp.org/data-infra/analytics_tools/rt_analysis.html#example-workflow-sccp
 
-Transit in California is overwhelmingly provided by buses. However, speeds have been declining for years, and now average below 10mph across much of California – and often much lower during peak times in urban areas. These slow speeds translate to countless hours wasted for transit riders and jeopardize the ability of California’s transit agencies to provide frequent, reliable service.
+## What's here?
 
-Our maps already include routes and operators accounting for about 80% of bus riders in the state, including operators in every Caltrans district. Cal-ITP continues to work daily to onboard and support new agencies in providing quality data that improves the transit rider experience and powers useful and timely analysis.
+* The `rt_analysis` package, which supports the California Transit Speed Maps and other analyses. Install with `make setup_rt_analysis`, and see the docs and the tutorial notebook for an intro.
 
-# About This Speedmap Site
+* Various other notebooks from past analyses (ongoing workflows will be parameterized/documented/migrated as appropriate)
 
-These maps, tables, and charts provide an overview of typical weekday transit vehicle speeds in California. They are based on actual, archived positions data from each vehicle. They are generally accurate for their intended purpose of identifying slower parts of bus routes that would be candidates for projects to speed up buses, but some erroneous data may be present. Feel free to contact Cal-ITP with any data questions.
+## Where are speedmaps and SCCP/LPP?
 
-Maps are organized by Caltrans district, with a separate page for each transit operator within the district. It's easiest to navigate the site using the menu on the left side of the page. Click the dropdown icon for each district to show links to each operator within the district. Alternatively, you can navigate through all pages in order using the "Next" and "Previous" links at the bottom of each page.
-
-## Data Sources
-
-* General Transit Feed Specification (GTFS)
-    * GTFS Schedule (static for each operator, includes timetable and route geometry information)
-    * Archived GTFS-Realtime (GTFS-RT) vehicle positions data (vehicle locations updated about every 20 seconds)
-
-## Methodology
-
-Segment speed is estimated using the time and distance between vehicle positions reports, with distance being measured linearly along the corresponding transit route. These maps show speeds along segments, which are calculated by interpolating the two nearest position reports for each trip in order to estimate speed along each segment, then taking the 20th percentile of speeds for that segment in each period (morning peak, afternoon peak, and midday). Generally, segments are constructed from one stop to the next, however, if the distance between stops is large we add interpolated segments every kilometer to provide additional resolution for rural and express services.
-
-## Ongoing Work
-
-The Cal-ITP team is working to share our derived datasets, including this vehicle speed and delay data, using the California Open Data Portal. In the interim, data is available upon request.
-
-### Questions or Feedback? Please email hello@calitp.org
+The `data_analyses/ca_transit_speed_maps` and `data_analyses/sccp` folders, respectively. See the technical notes in `ca_transit_speed_maps` for more info about the new scripted generation process.
