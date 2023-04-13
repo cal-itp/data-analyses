@@ -78,7 +78,7 @@ def geojson_gcs_export(
 
 # Make zipped shapefile
 # https://github.com/CityOfLosAngeles/planning-entitlements/blob/master/notebooks/utils.py
-def make_shapefile(gdf: gpd.GeoDataFrame, path: Union[str, Path]) -> tuple[Path, str]:
+def make_shapefile(gdf: gpd.GeoDataFrame, path: Union[Path, str]) -> tuple[Path, str]:
     """
     Make a zipped shapefile and save locally
     Parameters
@@ -93,8 +93,13 @@ def make_shapefile(gdf: gpd.GeoDataFrame, path: Union[str, Path]) -> tuple[Path,
     Returns a folder name (dirname) where the shapefile is stored and
     a filename. Both are strings.
     """
+    if isinstance(path, str):
+        path = Path(path)
+
+    # Use pathlib instead of os
+    # https://towardsdatascience.com/goodbye-os-path-15-pathlib-tricks-to-quickly-master-the-file-system-in-python-881213ca7c21
     # Grab first element of path (can input filename.zip or filename)
-    dirname = os.path.splitext(path)[0]
+    dirname = path.parent.joinpath(path.stem)
     print(f"Path name: {path}")
     print(f"Dirname (1st element of path): {dirname}")
 
@@ -102,35 +107,48 @@ def make_shapefile(gdf: gpd.GeoDataFrame, path: Union[str, Path]) -> tuple[Path,
     shutil.rmtree(dirname, ignore_errors=True)
 
     # Make folder
-    os.mkdir(dirname)
-    shapefile_name = f"{os.path.basename(dirname)}.shp"
+    Path.mkdir(dirname, parents=True)
+    shapefile_name = Path(path.stem).with_suffix(".shp")
     print(f"Shapefile name: {shapefile_name}")
 
     # Export shapefile into its own folder with the same name
-    gdf.to_file(driver="ESRI Shapefile", filename=f"{dirname}/{shapefile_name}")
+    gdf.to_file(driver="ESRI Shapefile", filename=dirname.joinpath(shapefile_name))
     print(f"Shapefile component parts folder: {dirname}/{shapefile_name}")
 
     return dirname, shapefile_name
 
 
-def make_zipped_shapefile(gdf: gpd.GeoDataFrame, path: Union[str, Path]):
+def make_zipped_shapefile(gdf: gpd.GeoDataFrame, local_path: Union[str, Path], gcs_folder: str = None):
     """
     Make a zipped shapefile and save locally
     Parameters
     ==========
     gdf: gpd.GeoDataFrame to be saved as zipped shapefile
-    path: str, local path to where the zipped shapefile is saved.
+    local_path: str, local path to where the zipped shapefile is saved.
             Ex: "folder_name/census_tracts"
                 "folder_name/census_tracts.zip"
+    gcs_folder: str, the gcs folder to save the local_path file name into.
+                Ex: if local_path is "folder_name/census_tracts.zip" abd
+                gcs_folder is "gs://my_bucket/new_folder",
+                the object in GCS would be "gs//my_bucket/new_folder/census_tracts.zip"
 
     Remember: ESRI only takes 10 character column names!!
     """
-    dirname, shapefile_name = make_shapefile(gdf, path)
+    dirname, shapefile_name = make_shapefile(gdf, local_path)
 
     # Zip it up
-    shutil.make_archive(dirname, "zip", dirname)
+    shutil.make_archive(dirname.parent, "zip", dirname)
     # Remove the unzipped folder
-    shutil.rmtree(dirname, ignore_errors=True)
+    shutil.rmtree(dirname.parent, ignore_errors=True)
+
+    if gcs_folder:
+        if gcs_folder[-1] != "/":
+            gcs_folder = f"{gcs_folder}/"
+
+        fs.put(
+            f"./{dirname.parent}.zip",
+            f"{gcs_folder}{dirname.parent}.zip",
+        )
 
 
 # Function to overwrite file in GitHub
