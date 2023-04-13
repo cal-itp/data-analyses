@@ -41,6 +41,7 @@ if __name__ == "__main__":
     keep_stop_cols = [
         "feed_key",
         "stop_id", "stop_key", "stop_name", 
+        "stop_event_count"
     ] + route_type_cols + ["missing_route_type"]
 
     
