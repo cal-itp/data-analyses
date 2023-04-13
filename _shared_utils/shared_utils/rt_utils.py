@@ -476,19 +476,8 @@ def get_routelines(
         if not cached.empty:
             return cached
         else:
-            print("cached parquet empty, will try a fresh query")
-    else:
-        trip_df_setting = trips_cached(itp_id, date_str)
-
-        routelines = gtfs_utils.get_route_shapes(
-            selected_date=analysis_date,
-            itp_id_list=[itp_id],
-            get_df=True,
-            crs=geography_utils.CA_NAD83Albers,
-            trip_df=trip_df_setting,
-        )
-
-        utils.geoparquet_gcs_export(routelines, export_path, filename)
+            print("v1 cached parquet empty -- unable to generate")
+            return
 
         return routelines
 
