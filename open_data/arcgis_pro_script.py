@@ -27,7 +27,7 @@ def feature_class_in_gdb_path(my_gdb, file_name):
 
 # Clean up last run (if applicable)
 for f in in_features:
-    os.remove(f"{f}.xml")
+    os.remove(f"{working_dir}\{f}.xml")
 
 ## (1) Convert shapefile layer to gdb feature class
 for f in in_features:
