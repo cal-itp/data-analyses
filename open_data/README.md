@@ -13,7 +13,9 @@ Several regularly updated datasets share the same cached GTFS tables, including 
 A selected day's worth of tables can be downloaded with these scripts:
 
 1. **Schedule data**: download data for [trips](./download_trips.py), [stops](./download_stops.py), [shapes](./download_shapes.py), and [stop times](./download_stop_times.py) and cache parquets in GCS
+   * In terminal: `make download_schedule_data_one_day`
 1. **Vehicle positions data**: download [RT vehicle positions](./download_vehicle_positions.py)
+   * In terminal: `make download_vehicle_positions_one_day`
 
 
 ## GTFS Schedule Routes & Stops Geospatial Data

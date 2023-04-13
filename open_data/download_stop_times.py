@@ -37,7 +37,8 @@ if __name__=="__main__":
     logger.info(f"*********** Download {dataset} data ***********")
 
     keep_stop_time_cols = [
-        "feed_key",   
+        "feed_key", 
+        "base64_url",
         "trip_id", 
         "stop_id", "stop_sequence", "timepoint",
         "arrival_sec", "departure_sec",

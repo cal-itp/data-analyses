@@ -16,7 +16,7 @@ import shapely
 import siuba  # need for type hints
 from calitp_data_analysis.tables import tbls
 from numba import jit
-from shared_utils import geography_utils, gtfs_utils, gtfs_utils_v2, map_utils, utils
+from shared_utils import geography_utils, gtfs_utils_v2, utils
 from siuba import *
 
 # from zoneinfo import ZoneInfo
@@ -661,7 +661,8 @@ def layer_points(rt_interpolator):
             # 'marker':  marker
         }
     # return layers_dict
-    return map_utils.make_folium_multiple_layers_map(layers_dict, 900, 500)
+    # TODO: fix multiple layer plotting using gdf.explore()
+    # return map_utils.make_folium_multiple_layers_map(layers_dict, 900, 500)
 
 
 def map_line(gdf):

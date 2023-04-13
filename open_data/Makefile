@@ -19,5 +19,5 @@ compile_open_data_portal:
 	python gcs_to_esri.py
 	#python arcgis_script_pro.py #(in ESRI!)
 	#update metadata_hqta.py or metadata_traffic_ops.py  # need to change XML field names...arcpy didn't
-	python open_data.py
-	python cleanup.py    
+	python open_data.py # go back into ESRI and update xml
+	python cleanup.py  # run after ESRI work done 
