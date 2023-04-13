@@ -16,7 +16,7 @@ import shapely
 import siuba  # need for type hints
 from calitp_data_analysis.tables import tbls
 from numba import jit
-from shared_utils import geography_utils, gtfs_utils, gtfs_utils_v2, utils
+from shared_utils import geography_utils, gtfs_utils_v2, utils
 from siuba import *
 
 # from zoneinfo import ZoneInfo
