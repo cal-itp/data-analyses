@@ -59,15 +59,16 @@ if __name__=="__main__":
     logger.info(f"*********** Download {dataset} data ***********")
 
     keep_trip_cols = [
-        "feed_key", "name", "regional_feed_type", 
-        "service_date", "trip_key", "trip_id",
+        "feed_key", "gtfs_dataset_key", 
+        "name", "regional_feed_type", 
+        "service_date", "activity_date",
+        "trip_key", "trip_id",
         "route_key", "route_id", "route_type", 
         "route_short_name", "route_long_name", "route_desc",
         "direction_id", 
         "shape_array_key", "shape_id",
         "trip_first_departure_sec", "trip_last_arrival_sec",
         "service_hours",
-        "activity_date", 
         "activity_first_departure", "activity_last_arrival"
     ]
     

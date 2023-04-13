@@ -19,7 +19,7 @@ def sanitize_file_path(file_name: str) -> str:
     """
     Remove the .parquet or .geojson in a filepath.
     """
-    return file_name.split(".")[0]
+    return str(Path(file_name).stem)
 
 
 def geoparquet_gcs_export(gdf: gpd.GeoDataFrame, gcs_file_path: str, file_name: str):
@@ -40,27 +40,6 @@ def geoparquet_gcs_export(gdf: gpd.GeoDataFrame, gcs_file_path: str, file_name: 
         f"{gcs_file_path}{file_name_sanitized}.parquet",
     )
     os.remove(f"./{file_name_sanitized}.parquet")
-
-
-def download_geoparquet(gcs_file_path: str, file_name: str, save_locally: bool = False) -> gpd.GeoDataFrame:
-    """
-    Parameters:
-    gcs_file_path: str
-                    Ex: gs://calitp-analytics-data/data-analyses/my-folder/
-    file_name: str
-                name of file (with or without the .parquet).
-    save_locally: bool
-                    defaults to False. if True, will save geoparquet locally.
-    """
-    file_name_sanitized = sanitize_file_path(file_name)
-
-    object_path = fs.open(f"{gcs_file_path}{file_name_sanitized}.parquet")
-    gdf = gpd.read_parquet(object_path)
-
-    if save_locally is True:
-        gdf.to_parquet(f"./{file_name}.parquet")
-
-    return gdf
 
 
 def geojson_gcs_export(
