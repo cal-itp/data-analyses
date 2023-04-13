@@ -32,3 +32,57 @@
 2023-04-10 17:16:25.033 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:47.915451
 2023-04-10 17:43:50.555 | INFO     | __main__:<module>:209 - compute, concat, export batch SoCal: 0:28:18.878004
 2023-04-10 17:43:50.594 | INFO     | __main__:<module>:212 - execution time: 0:54:16.776361
+2023-04-11 18:43:43.623 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 300000, # of chunks: 3
+2023-04-11 18:43:43.638 | INFO     | __main__:<module>:195 - create list of delayed results: 0:00:03.264514
+2023-04-11 18:43:43.949 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:00.311187
+2023-04-11 19:23:32.341 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 300000, # of chunks: 3
+2023-04-11 19:23:32.399 | INFO     | __main__:<module>:195 - create list of delayed results: 0:00:04.758191
+2023-04-11 19:23:32.926 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:00.526806
+2023-04-11 19:24:38.176 | INFO     | __main__:<module>:209 - compute, concat, export batch Mojave: 0:01:10.534780
+2023-04-11 19:24:44.502 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 25000, # of chunks: 82
+2023-04-11 19:24:44.515 | INFO     | __main__:<module>:195 - create list of delayed results: 0:00:06.338180
+2023-04-11 19:24:51.691 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:07.176493
+2023-04-11 19:29:29.724 | INFO     | __main__:<module>:209 - compute, concat, export batch NorCal: 0:04:51.547400
+2023-04-11 19:29:29.725 | INFO     | __main__:<module>:212 - execution time: 0:06:07.809730
+2023-04-11 19:51:26.330 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 12000, # of chunks: 238
+2023-04-11 19:51:26.382 | INFO     | __main__:<module>:195 - create list of delayed results: 0:00:06.024122
+2023-04-11 19:51:46.524 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:20.142557
+2023-04-11 20:21:29.523 | INFO     | __main__:<module>:209 - compute, concat, export batch CentralCal: 0:30:09.165401
+2023-04-11 20:21:35.525 | INFO     | __main__:wrangle_region_in_chunks:143 - chunk n: 6000, # of chunks: 441
+2023-04-11 20:21:35.556 | INFO     | __main__:<module>:195 - create list of delayed results: 0:00:06.032294
+2023-04-11 20:22:12.788 | INFO     | __main__:<module>:199 - compute list of delayed: 0:00:37.231782
+2023-04-12 10:31:32.685 | INFO     | __main__:wrangle_region_in_chunks:157 - chunk n: 300000, # of chunks: 3
+2023-04-12 10:31:32.711 | INFO     | __main__:<module>:209 - create list of delayed results: 0:00:01.754669
+2023-04-12 10:32:07.492 | INFO     | __main__:wrangle_region_in_chunks:157 - chunk n: 300000, # of chunks: 3
+2023-04-12 10:32:07.494 | INFO     | __main__:<module>:209 - create list of delayed results: 0:00:01.809245
+2023-04-12 10:32:07.984 | INFO     | __main__:<module>:213 - compute list of delayed: 0:00:00.489715
+2023-04-12 10:33:03.786 | INFO     | __main__:<module>:223 - compute, concat, export batch Mojave: 0:00:58.100707
+2023-04-12 10:33:03.786 | INFO     | __main__:<module>:226 - execution time: 0:01:00.984429
+2023-04-12 10:43:23.619 | INFO     | __main__:wrangle_region_in_chunks:157 - chunk n: 12000, # of chunks: 238
+2023-04-12 10:43:23.640 | INFO     | __main__:<module>:209 - create list of delayed results: 0:00:01.850383
+2023-04-12 10:43:58.309 | INFO     | __main__:<module>:213 - compute list of delayed: 0:00:34.668632
+2023-04-12 11:08:08.728 | INFO     | __main__:<module>:223 - compute, concat, export batch CentralCal: 0:24:46.938282
+2023-04-12 11:08:10.567 | INFO     | __main__:wrangle_region_in_chunks:157 - chunk n: 25000, # of chunks: 82
+2023-04-12 11:08:10.576 | INFO     | __main__:<module>:209 - create list of delayed results: 0:00:01.846716
+2023-04-12 11:08:23.353 | INFO     | __main__:<module>:213 - compute list of delayed: 0:00:12.777769
+2023-04-12 11:11:54.309 | INFO     | __main__:<module>:223 - compute, concat, export batch NorCal: 0:03:45.579768
+2023-04-12 11:11:54.310 | INFO     | __main__:<module>:226 - execution time: 0:28:35.995067
+2023-04-12 13:00:45.608 | INFO     | __main__:wrangle_region_in_chunks:157 - chunk n: 12000, # of chunks: 238
+2023-04-12 13:00:45.668 | INFO     | __main__:<module>:209 - create list of delayed results: 0:00:01.997059
+2023-04-12 13:03:14.501 | INFO     | __main__:wrangle_region_in_chunks:157 - chunk n: 12000, # of chunks: 238
+2023-04-12 13:03:14.572 | INFO     | __main__:<module>:210 - create list of delayed results: 0:00:01.785360
+2023-04-12 13:03:53.550 | INFO     | __main__:<module>:214 - compute list of delayed: 0:00:38.977716
+2023-04-12 13:24:19.467 | INFO     | __main__:<module>:224 - compute, concat, export batch CentralCal: 0:21:06.679719
+2023-04-12 13:24:21.331 | INFO     | __main__:wrangle_region_in_chunks:157 - chunk n: 300000, # of chunks: 3
+2023-04-12 13:24:21.335 | INFO     | __main__:<module>:210 - create list of delayed results: 0:00:01.867367
+2023-04-12 13:24:21.805 | INFO     | __main__:<module>:214 - compute list of delayed: 0:00:00.470060
+2023-04-12 13:25:01.794 | INFO     | __main__:<module>:224 - compute, concat, export batch Mojave: 0:00:42.326421
+2023-04-12 13:25:03.594 | INFO     | __main__:wrangle_region_in_chunks:157 - chunk n: 25000, # of chunks: 82
+2023-04-12 13:25:03.617 | INFO     | __main__:<module>:210 - create list of delayed results: 0:00:01.820374
+2023-04-12 13:25:16.587 | INFO     | __main__:<module>:214 - compute list of delayed: 0:00:12.969869
+2023-04-12 13:27:48.479 | INFO     | __main__:<module>:224 - compute, concat, export batch NorCal: 0:02:46.682234
+2023-04-12 13:27:50.117 | INFO     | __main__:wrangle_region_in_chunks:157 - chunk n: 6000, # of chunks: 441
+2023-04-12 13:27:50.218 | INFO     | __main__:<module>:210 - create list of delayed results: 0:00:01.737686
+2023-04-12 13:29:05.463 | INFO     | __main__:<module>:214 - compute list of delayed: 0:01:15.245643
+2023-04-12 13:55:20.776 | INFO     | __main__:<module>:224 - compute, concat, export batch SoCal: 0:27:32.295788
+2023-04-12 13:55:20.777 | INFO     | __main__:<module>:227 - execution time: 0:52:11.214321

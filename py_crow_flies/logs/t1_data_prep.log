@@ -1,3 +1,9 @@
 2023-03-28 10:30:33.545 | INFO     | __main__:<module>:70 - prep and concatenate regions: 0:00:25.763009
 2023-03-28 10:30:55.478 | INFO     | __main__:<module>:79 - export full gdf to GCS: 0:00:21.932690
 2023-03-28 10:30:55.478 | INFO     | __main__:<module>:80 - execution time: 0:00:47.695699
+2023-04-11 18:40:38.057 | INFO     | __main__:<module>:71 - prep and concatenate regions: 0:00:18.861803
+2023-04-11 18:40:51.609 | INFO     | __main__:<module>:80 - export full gdf to GCS: 0:00:13.552068
+2023-04-11 18:40:51.609 | INFO     | __main__:<module>:81 - execution time: 0:00:32.413871
+2023-04-12 09:29:23.748 | INFO     | __main__:<module>:79 - prep and concatenate regions: 0:00:35.135844
+2023-04-12 09:29:44.265 | INFO     | __main__:<module>:88 - export full gdf to GCS: 0:00:20.516520
+2023-04-12 09:29:44.265 | INFO     | __main__:<module>:89 - execution time: 0:00:55.652364
