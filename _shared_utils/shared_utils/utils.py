@@ -137,9 +137,9 @@ def make_zipped_shapefile(gdf: gpd.GeoDataFrame, local_path: Union[str, Path], g
     dirname, shapefile_name = make_shapefile(gdf, local_path)
 
     # Zip it up
-    shutil.make_archive(dirname.parent, "zip", dirname)
+    shutil.make_archive(dirname.name, "zip", dirname)
     # Remove the unzipped folder
-    # shutil.rmtree(dirname.parent, ignore_errors=True)
+    shutil.rmtree(dirname.name, ignore_errors=True)
 
     if gcs_folder:
         if gcs_folder[-1] != "/":
