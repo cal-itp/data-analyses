@@ -16,11 +16,11 @@ import dla_utils
 
 from calitp_data_analysis.sql import to_snakecase
 
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize, sent_tokenize
+# import nltk
+# from nltk.corpus import stopwords
+# from nltk.tokenize import word_tokenize, sent_tokenize
 
-import re
+# import re
 
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
 
@@ -435,30 +435,30 @@ def get_clean_data(df, full_or_agg = ''):
     
 
     
-'''
-another approach (not as effective for creating new titles)
-'''
-## code help: https://stackoverflow.com/questions/70995812/extract-keyword-from-sentences-in-a-pandas-text-column-using-nltk-and-or-regex
-def key_word_intersection(df, text_col):
-    summaries = []
-    for x in tokenize(df[text_col].to_numpy()):
-        keywords = np.concatenate([
-                                np.intersect1d(x, ['BRIDGE REPLACEMENT', 'BRIDGE', 'INSTALL', 'CONSTRUCT', 'REPLACE',
-                                                   'SIGNAL', 'SIGNALS', 'TRAFFIC', 'IMPROVEMENT', 'PEDESTRIAN', 
-                                                   'LANES', 'NEW', 'REHABILITATION','UPGRADE', 'CLASS',
-                                                   'BIKE', 'WIDEN', 'LANDSCAPING', 'SAFETY', 'RAISED', 
-                                                   'SEISMIC', 'SIGNAGE', 'RETROFIT', 'ADD', 'PLANNING', 'PAVE',
-                                                   'PREVENTIVE','MAINTENANCE', 'REHAB', 'RESURFACE', 'REPAIR', 'ROUNDABOUT'
-                                                  'COMPLETE STREET', 'VIDEO DETECTION EQUIPMENT', 'SYNCHRONIZE CORRIDOR', 'ROADWAY REALIGNMENTS']),
-                                np.intersect1d(x, [
-                                    # 'BRIDGE', 'ROAD', 'RD', 'AVENUE', 'AVE', 'STREET' , 'ST',
-                                                   # 'FRACTURED', 'LANE', 'DRIVE', 'BOULEVARD', 'BLVD',
-                                                   'INTERSECTION', 'INTERSECTIONS', 'SIDEWALK', 
-                                    # 'WAY', 'DR', 'CURB', 'ROADWAY',
-                                                   # 'TRAIL', 'PATH', 'CREEK', 'RIVER', 
-                                    # 'CORRIDOR', 'CROSSING','PARKWAY','RAMPS', 'GUARDRAIL'
-                                ]), 
-                                np.intersect1d(x, ['CITY', 'COUNTY', 'STATE', 'UNINCORPORATED'])])
+# '''
+# another approach (not as effective for creating new titles)
+# '''
+# ## code help: https://stackoverflow.com/questions/70995812/extract-keyword-from-sentences-in-a-pandas-text-column-using-nltk-and-or-regex
+# def key_word_intersection(df, text_col):
+#     summaries = []
+#     for x in tokenize(df[text_col].to_numpy()):
+#         keywords = np.concatenate([
+#                                 np.intersect1d(x, ['BRIDGE REPLACEMENT', 'BRIDGE', 'INSTALL', 'CONSTRUCT', 'REPLACE',
+#                                                    'SIGNAL', 'SIGNALS', 'TRAFFIC', 'IMPROVEMENT', 'PEDESTRIAN', 
+#                                                    'LANES', 'NEW', 'REHABILITATION','UPGRADE', 'CLASS',
+#                                                    'BIKE', 'WIDEN', 'LANDSCAPING', 'SAFETY', 'RAISED', 
+#                                                    'SEISMIC', 'SIGNAGE', 'RETROFIT', 'ADD', 'PLANNING', 'PAVE',
+#                                                    'PREVENTIVE','MAINTENANCE', 'REHAB', 'RESURFACE', 'REPAIR', 'ROUNDABOUT'
+#                                                   'COMPLETE STREET', 'VIDEO DETECTION EQUIPMENT', 'SYNCHRONIZE CORRIDOR', 'ROADWAY REALIGNMENTS']),
+#                                 np.intersect1d(x, [
+#                                     # 'BRIDGE', 'ROAD', 'RD', 'AVENUE', 'AVE', 'STREET' , 'ST',
+#                                                    # 'FRACTURED', 'LANE', 'DRIVE', 'BOULEVARD', 'BLVD',
+#                                                    'INTERSECTION', 'INTERSECTIONS', 'SIDEWALK', 
+#                                     # 'WAY', 'DR', 'CURB', 'ROADWAY',
+#                                                    # 'TRAIL', 'PATH', 'CREEK', 'RIVER', 
+#                                     # 'CORRIDOR', 'CROSSING','PARKWAY','RAMPS', 'GUARDRAIL'
+#                                 ]), 
+#                                 np.intersect1d(x, ['CITY', 'COUNTY', 'STATE', 'UNINCORPORATED'])])
     
-        summaries.append(np.array(x)[[i for i, keyword in enumerate(x) if keyword in keywords]])
-    return summaries 
+#         summaries.append(np.array(x)[[i for i, keyword in enumerate(x) if keyword in keywords]])
+#     return summaries 
