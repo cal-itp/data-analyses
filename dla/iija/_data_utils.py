@@ -3,6 +3,8 @@ This python file includes functions that can be used to read in the
 original IIJA data as well as other IIJA data. There are also functions
 that analyze string columns to get word counts and word analyses. 
 
+If using the get_list_of_words function, remove the comment out hashtag from the import nltk and re in this script 
+AND run a `! pip install nltk` in the first cell of your notebook
 '''
 
 import numpy as np
@@ -14,11 +16,11 @@ import dla_utils
 
 from calitp_data_analysis.sql import to_snakecase
 
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize, sent_tokenize
+# import nltk
+# from nltk.corpus import stopwords
+# from nltk.tokenize import word_tokenize, sent_tokenize
 
-import re
+# import re
 
 
 
@@ -38,29 +40,29 @@ def read_data_all():
     
     return proj
 
-def tokenize(texts):
-    return [nltk.tokenize.word_tokenize(t) for t in texts]
+# def tokenize(texts):
+#     return [nltk.tokenize.word_tokenize(t) for t in texts]
 
 
-def get_list_of_words(df, col):
-    nltk.download('stopwords')
-    nltk.download('punkt')
+# def get_list_of_words(df, col):
+#     nltk.download('stopwords')
+#     nltk.download('punkt')
     
-    #get just the one col
-    column = df[[col]]
-    #remove single-dimensional entries from the shape of an array
-    col_text = column.squeeze()
-    # get list of words
-    text_list = col_text.tolist()
-    #join list of words 
-    text_list = ' '.join(text_list).lower()
+#     #get just the one col
+#     column = df[[col]]
+#     #remove single-dimensional entries from the shape of an array
+#     col_text = column.squeeze()
+#     # get list of words
+#     text_list = col_text.tolist()
+#     #join list of words 
+#     text_list = ' '.join(text_list).lower()
     
-    # remove punctuation 
-    text_list = re.sub(r'[^\w\s]','',text_list)
-    swords = [re.sub(r"[^A-z\s]", "", sword) for sword in stopwords.words('english')]
-    # remove stopwords
-    clean_text_list = [word for word in word_tokenize(text_list.lower()) if word not in swords] 
-    # turn into a dataframe
-    clean_text_list = pd.DataFrame(np.array(clean_text_list))
+#     # remove punctuation 
+#     text_list = re.sub(r'[^\w\s]','',text_list)
+#     swords = [re.sub(r"[^A-z\s]", "", sword) for sword in stopwords.words('english')]
+#     # remove stopwords
+#     clean_text_list = [word for word in word_tokenize(text_list.lower()) if word not in swords] 
+#     # turn into a dataframe
+#     clean_text_list = pd.DataFrame(np.array(clean_text_list))
 
-    return clean_text_list
+#     return clean_text_list
