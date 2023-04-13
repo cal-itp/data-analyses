@@ -33,7 +33,7 @@ def title_column_names(df):
     return df
 
 
-#function to add locodes
+
 
 def read_data_all():
     proj = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/CopyofFMIS_Projects_Universe_IIJA_Reporting_4.xls", 
@@ -159,34 +159,6 @@ def condense_df(df):
                 }).reset_index())
     
     return df_agg
-
-def tokenize(texts):
-    return [nltk.tokenize.word_tokenize(t) for t in texts]
-
-
-def get_list_of_words(df, col):
-    nltk.download('stopwords')
-    nltk.download('punkt')
-    
-    #get just the one col
-    column = df[[col]]
-    #remove single-dimensional entries from the shape of an array
-    col_text = column.squeeze()
-    # get list of words
-    text_list = col_text.tolist()
-    #join list of words 
-    text_list = ' '.join(text_list).lower()
-    
-    # remove punctuation 
-    text_list = re.sub(r'[^\w\s]','',text_list)
-    swords = [re.sub(r"[^A-z\s]", "", sword) for sword in stopwords.words('english')]
-    # remove stopwords
-    clean_text_list = [word for word in word_tokenize(text_list.lower()) if word not in swords] 
-    # turn into a dataframe
-    clean_text_list = pd.DataFrame(np.array(clean_text_list))
-
-    return clean_text_list
-
 
 def add_description(df, col):
     ##using np.where. code help: https://stackoverflow.com/questions/43905930/conditional-if-statement-if-value-in-row-contains-string-set-another-column
@@ -490,78 +462,3 @@ def key_word_intersection(df, text_col):
     
         summaries.append(np.array(x)[[i for i, keyword in enumerate(x) if keyword in keywords]])
     return summaries 
-
-
-
-
-
-"""
-old functions
-"""
-# def update_no_matched(df, flag_col, desc_col, program_code_desc_col): 
-#     """
-#     function to itreate over projects that did not match the first time
-#     using an existing project's short description of project type. 
-#     """
-    
-#     def return_project_type(df):
-        
-#         if (df[flag_col] == "Project") & (df[desc_col] == "Bridge Rehabilitation") | (df[desc_col] =="Bridge Rehabilitation - No Added Capacity") | (df[desc_col] =="Bridge Rehabilitation - Added Capacity"):
-#             return ("Bridge Rehabilitation")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "Facilities for Pedestrians and Bicycles"):
-#             return (df[desc_col])
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "Safety"):
-#             return (df[desc_col] + " Improvements")
-            
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "Planning "):
-#             return "Project Planning" 
-            
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "Preliminary Engineering"):
-#             return (df[desc_col] + " Projects ")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "Construction Engineering"):
-#             return (df[desc_col] + " Projects")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Restoration & Rehabilitation"):
-#             return ("Road Restoration & Rehabilitation")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Maintenance  Resurfacing"):
-#             return ("Maintenance Resurfacing")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "Bridge Replacement - Added Capacity") | (df[desc_col] == "Bridge Replacement - No Added Capacity") | (df[desc_col] == "Bridge New Construction") | (df[desc_col] == "Special Bridge"):
-#             return ("Bridge Replacement")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "Mitigation of Water Pollution due to Highway Runoff"):
-#             return (df[desc_col])
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - Added Capacity"):
-#             return ("Added Roadway Capacity")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "4R - No Added Capacity"):
-#             return ("Road Construction")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "New  Construction Roadway"):
-#             return ("New Construction Roadway")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "Traffic Management/Engineering - HOV"):
-#             return ("Traffic Management Project")
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] == "Right of Way"):
-#             return (df[desc_col] + " Project")
-        
-#         elif (df[flag_col] == "Project") & (df[program_code_desc_col]== "National Highway Performance Program (NHPP)"): 
-#             return ("National Highway Performance Program Support") 
-        
-#         elif (df[flag_col] == "Project") & (df[desc_col] != "Other"):
-#             return (df[desc_col])
-    
-#         else:
-#             return df[flag_col] 
-
-#         return df
-
-#     df['project_type'] = df.apply(return_project_type, axis = 1)
-
-#     return df
