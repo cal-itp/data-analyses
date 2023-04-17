@@ -1,6 +1,6 @@
 from shared_utils import rt_dates
 
-analysis_date = rt_dates.DATES["mar2023"]
+analysis_date = rt_dates.DATES["apr2023"]
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
