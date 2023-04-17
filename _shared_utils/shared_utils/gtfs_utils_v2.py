@@ -384,9 +384,9 @@ def get_shapes(
         if not shape_cols:
             shape_cols = list((shapes >> select(-_.pt_array)).columns)
 
-            shapes_gdf = geography_utils.make_routes_gdf(shapes, crs=crs)[shape_cols + ["geometry"]]
+        shapes_gdf = geography_utils.make_routes_gdf(shapes, crs=crs)[shape_cols + ["geometry"]]
 
-            return shapes_gdf
+        return shapes_gdf
 
     else:
         return shapes >> subset_cols(shape_cols)
