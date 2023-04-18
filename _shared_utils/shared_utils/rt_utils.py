@@ -16,14 +16,7 @@ import shapely
 import siuba  # need for type hints
 from calitp_data_analysis.tables import tbls
 from numba import jit
-from shared_utils import (
-    geography_utils,
-    gtfs_utils,
-    gtfs_utils_v2,
-    map_utils,
-    rt_dates,
-    utils,
-)
+from shared_utils import geography_utils, gtfs_utils_v2, utils, rt_dates
 from siuba import *
 
 # from zoneinfo import ZoneInfo
@@ -487,19 +480,8 @@ def get_routelines(
         if not cached.empty:
             return cached
         else:
-            print("cached parquet empty, will try a fresh query")
-    else:
-        trip_df_setting = trips_cached(itp_id, date_str)
-
-        routelines = gtfs_utils.get_route_shapes(
-            selected_date=analysis_date,
-            itp_id_list=[itp_id],
-            get_df=True,
-            crs=geography_utils.CA_NAD83Albers,
-            trip_df=trip_df_setting,
-        )
-
-        utils.geoparquet_gcs_export(routelines, export_path, filename)
+            print("v1 cached parquet empty -- unable to generate")
+            return
 
         return routelines
 
@@ -683,7 +665,8 @@ def layer_points(rt_interpolator):
             # 'marker':  marker
         }
     # return layers_dict
-    return map_utils.make_folium_multiple_layers_map(layers_dict, 900, 500)
+    # TODO: fix multiple layer plotting using gdf.explore()
+    # return map_utils.make_folium_multiple_layers_map(layers_dict, 900, 500)
 
 
 def map_line(gdf):

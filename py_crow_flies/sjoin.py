@@ -15,7 +15,7 @@ import sys
 
 from dask import delayed, compute
 from loguru import logger
-from prep import GCS_FILE_PATH
+from prep import GCS_FILE_PATH, CRS
 
 
 def chunk_origin_points(df: gpd.GeoDataFrame, n: int) -> list:
@@ -32,7 +32,7 @@ def chunk_origin_points(df: gpd.GeoDataFrame, n: int) -> list:
 
 
 def buffer_origin_sjoin_calculate_distance(
-    origin_gdf: dg.GeoDataFrame,
+    origin_df: dd.DataFrame,
     destination_gdf: gpd.GeoDataFrame,
     buffer_miles: int = 20
 ) -> dd.DataFrame:
@@ -42,11 +42,23 @@ def buffer_origin_sjoin_calculate_distance(
     """
     METERS_IN_MILES = 1609.34
     
-    origin_gdf = dg.from_geopandas(origin_gdf, npartitions=1)
-    origin_gdf = origin_gdf.repartition(partition_size="50MB")
+    origin_ddf = dd.from_pandas(origin_df, npartitions=1)
+    origin_ddf = origin_ddf.repartition(partition_size="50MB")
     
-    origin_buffered = origin_gdf.assign(
-        geometry = origin_gdf.geometry.buffer(
+    # Create geometry column from x, y
+    origin_ddf["geometry"] = dg.points_from_xy(
+        origin_ddf,
+        x = "x", y = "y",
+        crs = CRS
+    )
+    
+    # Now change it to gddf, must set crs or else it's lost
+    origin_gddf = dg.from_dask_dataframe(
+        origin_ddf, geometry="geometry"
+    ).drop(columns = ["x", "y"]).set_crs(CRS)
+    
+    origin_buffered = origin_gddf.assign(
+        geometry = origin_gddf.geometry.buffer(
             buffer_miles * METERS_IN_MILES)
     )
             
@@ -68,7 +80,7 @@ def buffer_origin_sjoin_calculate_distance(
     
     # Merge point geometry back in
     with_origin_point_geom = dd.merge(
-        origin_gdf,
+        origin_gddf,
         sjoin_results,
         left_on = "poi_index",
         right_on = "origin_poi_index",
@@ -77,7 +89,7 @@ def buffer_origin_sjoin_calculate_distance(
     
     with_destin_point_geom = dd.merge(
         with_origin_point_geom,
-        origin_gdf,
+        origin_gddf,
         left_on = "destination_poi_index",
         right_on = "poi_index",
         how = "inner"
@@ -102,8 +114,10 @@ def calculate_distance(
     and destination point geometry column.
     This distance is as the crow flies.
     """                                
-    origin_geom = gdf.set_geometry(origin_col)[origin_col]
-    destin_geom = gdf.set_geometry(destination_col)[destination_col]
+    origin_geom = (gdf.set_geometry(origin_col)
+                   .set_crs(CRS)[origin_col])
+    destin_geom = (gdf.set_geometry(destination_col)
+                   .set_crs(CRS)[destination_col])
     
     distance = origin_geom.distance(destin_geom)
     
@@ -131,9 +145,9 @@ def wrangle_region_in_chunks(
     Try doing it all at once...but the final ddf is too large to save out, 
     will crash the kernel.
     """
-    keep_cols = ["poi_index", "geometry"]
+    keep_cols = ["poi_index", "x", "y"]
     
-    df = gpd.read_parquet(
+    df = pd.read_parquet(
         f"{GCS_FILE_PATH}all_pois.parquet", 
         columns = keep_cols, 
         filters = [[("region" , "==", region)]]
@@ -147,7 +161,8 @@ def wrangle_region_in_chunks(
     for chunk_df in list_df:
         chunk_sjoin = delayed(buffer_origin_sjoin_calculate_distance)(
             chunk_df, 
-            valid_destinations, 
+            valid_destinations[valid_destinations.region==region
+                              ].drop(columns = "region"), 
             buffer_miles = 20
         )
 
@@ -166,7 +181,7 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    keep_cols = ["poi_index", "geometry"]
+    keep_cols = ["poi_index", "region", "geometry"]
 
     # Use persist because we use it in subsequent functions, and it saves time
     valid_destinations = delayed(gpd.read_parquet)(

@@ -3,6 +3,9 @@ Import, concatenate individual parquets.
 Add a couple of columns (identifier, region) and 
 also downgrade dtypes for columns to save memory.
 """
+import os
+os.environ['USE_PYGEOS'] = '0'
+
 import datetime
 import geopandas as gpd
 import pandas as pd
@@ -12,6 +15,7 @@ from loguru import logger
 from shared_utils import utils
 
 GCS_FILE_PATH = "gs://calitp-publish-data-analysis/py_crow_flies/"
+CRS = "EPSG:3857"
 
 files = ["CentralCal_POIs", "Mojave_POIs", 
          "NorCal_POIs", "SoCal_POIs"]
@@ -21,9 +25,14 @@ def import_file(filename: str) -> gpd.GeoDataFrame:
     Import region's POI parquet.
     Add new column that shows what region it's from.
     """
-    gdf = gpd.read_parquet(f"{GCS_FILE_PATH}{filename}.parquet")
+    gdf = gpd.read_parquet(
+        f"{GCS_FILE_PATH}{filename}.parquet"
+    )
+    
     gdf = gdf.assign(
-        region = f"{filename.split('_')[0]}"
+        region = f"{filename.split('_')[0]}",
+        x = gdf.geometry.x, 
+        y = gdf.geometry.y
     )
 
     return gdf

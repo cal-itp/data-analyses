@@ -27,13 +27,13 @@ sources:
     driver: geoparquet
     description: CA transit routes with line geometry at the operator-level (open data)
     args:
-      # source: traffic_ops/create_routes_data.py
+      # source: open_data/create_routes_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet
   ca_transit_stops:
     driver: geoparquet
     description: CA transit stops with point geometry (open data)
     args:
-      # source: traffic_ops/create_stops_data.py
+      # source: open_data/create_stops_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_stops.parquet
   hqta_stops:
     driver: geoparquet
