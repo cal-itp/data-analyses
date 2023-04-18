@@ -1,5 +1,5 @@
-directory: ./rt_delay/
-notebook: ./rt_delay/speedmaps.ipynb
+directory: ./ca_transit_speed_maps/
+notebook: ./ca_transit_speed_maps/speedmaps.ipynb
 parts:
   - chapters:
       - caption: District 01 - Eureka
@@ -11,6 +11,7 @@ parts:
           - itp_id: 108
           - itp_id: 135
           - itp_id: 159
+          - itp_id: 198
           - itp_id: 261
       - caption: District 02 - Redding
         params:
@@ -22,7 +23,9 @@ parts:
           district: 03 - Marysville
         sections:
           - itp_id: 105
+          - itp_id: 489
           - itp_id: 221
+          - itp_id: 273
           - itp_id: 331
       - caption: District 04 - Oakland
         params:
@@ -32,11 +35,11 @@ parts:
           - itp_id: 61
           - itp_id: 282
           - itp_id: 110
-          - itp_id: 247
           - itp_id: 301
           - itp_id: 350
           - itp_id: 70
           - itp_id: 336
+          - itp_id: 106
           - itp_id: 127
           - itp_id: 167
           - itp_id: 194
@@ -50,6 +53,7 @@ parts:
           - itp_id: 381
           - itp_id: 314
           - itp_id: 315
+          - itp_id: 33
           - itp_id: 368
       - caption: District 05 - San Luis Obispo
         params:
@@ -89,7 +93,6 @@ parts:
           - itp_id: 308
           - itp_id: 337
           - itp_id: 339
-          - itp_id: 367
           - itp_id: 112
           - itp_id: 123
           - itp_id: 170
@@ -128,5 +131,5 @@ parts:
           district: 12 - Irvine
         sections:
           - itp_id: 235
-readme: ./rt_delay/README.md
+readme: ./ca_transit_speed_maps/README.md
 title: California Transit Speed Maps

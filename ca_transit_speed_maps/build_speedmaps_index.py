@@ -8,7 +8,7 @@ import datetime as dt
 from calitp_data_analysis.tables import tbls
 import shared_utils
 
-ANALYSIS_DATE = dt.date(2023, 3, 15)
+ANALYSIS_DATE = dt.date(2023, 4, 12)
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 
 def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:

@@ -240,8 +240,7 @@ class OperatorDayAnalysis:
                 (self.shapes >> filter(_.shape_id == x.shape_id)).geometry.iloc[0].project(x.geometry),
          axis = 1))
         self.shapes = self.shapes.apply(self._ix_from_routeline, axis=1)
-        # self.vp_obs_by_trip = self.vehicle_positions >> count(_.trip_id) >> arrange(-_.n) # siuba errors here
-        # obsolete given broader warehouse rt/scheduled work
+        
         # return ## debug return
         self._generate_position_interpolators()
         self.rt_trips = self.trips.copy() >> filter(_.trip_id.isin(self.position_interpolators.keys()))
