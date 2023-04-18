@@ -79,7 +79,9 @@ class RtFilterMapper:
             assert pd.Series(route_types).isin(self.rt_trips.route_type).all(), 'at least 1 route type not found in self.rt_trips'
         if route_names:
             assert pd.Series(route_names).isin(self.rt_trips.route_short_name).all(), 'at least 1 route not found in self.rt_trips'
-        assert not direction_id or type(direction_id) == str and len(direction_id) == 1
+        assert not direction_id or direction_id in ['0', '1', 0, 1, 0.0, 1.0]
+        if direction_id:
+            direction_id = float(direction_id)
         self.filter = {}
         if start_time:
             self.filter['start_time'] = dt.datetime.strptime(start_time, '%H:%M').time()
