@@ -27,6 +27,7 @@ def check_map_gen(row, pbar):
         try:
             rt_day = rt_filter_map_plot.from_gcs(row.organization_itp_id,
                                                        analysis_date, pbar)
+            rt_day.set_filter(start_time='06:00', end_time='09:00')
             _m = rt_day.segment_speed_map()
             row.status = 'map_confirmed'
         except Exception as e:
