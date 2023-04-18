@@ -115,9 +115,9 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 if __name__ == "__main__":
     # Connect to dask distributed client, put here so it only runs for this script
-    from dask.distributed import Client
+    #from dask.distributed import Client
     
-    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     logger.add("./logs/C3_create_bus_hqta_types.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
@@ -159,4 +159,4 @@ if __name__ == "__main__":
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
     
-    client.close()
+    #client.close()

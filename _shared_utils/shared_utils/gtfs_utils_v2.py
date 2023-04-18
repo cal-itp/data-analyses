@@ -13,8 +13,7 @@ import pandas as pd
 import shapely
 import siuba  # need this to do type hint in functions
 from calitp_data_analysis.tables import tbls
-from dask import compute, delayed
-from shared_utils import geography_utils, rt_utils
+from shared_utils import geography_utils
 from siuba import *
 
 GCS_PROJECT = "cal-itp-data-infra"
@@ -53,7 +52,7 @@ def subset_cols(cols: list) -> siuba.dply.verbs.Pipeable:
     """
     if cols:
         return select(*cols)
-    else:
+    elif not cols or len(cols) == 0:
         # Can't use select(), because we'll select no columns
         # But, without knowing full list of columns, let's just
         # filter out nothing
@@ -369,6 +368,13 @@ def get_shapes(
     """
     check_operator_feeds(operator_feeds)
 
+    # If pt_array is not kept in the final, we still need it
+    # to turn this into a gdf
+    if "pt_array" not in shape_cols:
+        shape_cols_with_geom = shape_cols + ["pt_array"]
+    elif shape_cols:
+        shape_cols_with_geom = shape_cols[:]
+
     shapes = (
         tbls.mart_gtfs.fct_daily_scheduled_shapes()
         >> filter_date(selected_date, date_col="activity_date")
@@ -381,15 +387,12 @@ def get_shapes(
 
         # maintain usual behaviour of returning all in absence of subset param
         # must first drop pt_array since it's replaced by make_routes_gdf
-        if not shape_cols:
-            shape_cols = list((shapes >> select(-_.pt_array)).columns)
-
         shapes_gdf = geography_utils.make_routes_gdf(shapes, crs=crs)[shape_cols + ["geometry"]]
 
         return shapes_gdf
 
     else:
-        return shapes >> subset_cols(shape_cols)
+        return shapes >> subset_cols(shape_cols_with_geom)
 
 
 def get_stops(
@@ -540,46 +543,3 @@ def get_stop_times(
         )
 
     return stop_times
-
-
-# ----------------------------------------------------------------#
-# Concatenate all stashed files in GCS
-# ----------------------------------------------------------------#
-# Moving forward, should use cached files whenever possible
-# especially for external-facing analysis
-# get the most use out of caching and create the same
-# "universe" of operators whenever we can
-
-
-def compiled_cached(
-    dataset: Literal["routelines", "stops", "trips", "st"],
-    analysis_date: Union[datetime.date, str],
-    operator_feeds: list = [],
-    import_path: str = "gs://calitp-analytics-data/data-analyses/rt_delay/cached_views/",
-    export_path: str = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/",
-):
-    """
-    Use cached files whenever possible, instead of running fresh query.
-    Routelines and stops are geospatial, import and export with geopandas.
-    """
-    date_str = rt_utils.format_date(analysis_date)
-
-    filename = f"{dataset}_{feed_key}_{date_str}.parquet"
-
-    if dataset in ["trips", "st"]:
-        dfs = [delayed(pd.read_parquet)(filename) for feed_key in operator_feeds]
-
-    elif dataset in ["routelines", "stops"]:
-        dfs = [delayed(gpd.read_parquet)(filename) for feed_key in operator_feeds]
-
-    # after reading in a list of delayed dfs/gdfs, compute them, and concat
-    results = [compute(i)[0] for i in dfs]
-    df = pd.concat(results, axis=0).drop_duplicates().reset_index(drop=True)
-
-    if isinstance(df, pd.DataFrame):
-        df.to_parquet(f"{export_path}{filename}")
-        print(f"exported df: {filename}")
-
-    elif isinstance(df, gpd.GeoDataFrame):
-        utils.geoparquet_gcs_export(df, export_path, filename)
-        print(f"exported gdf: {filename}")

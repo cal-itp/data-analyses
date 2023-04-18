@@ -59,9 +59,9 @@ def decay_weighted_opportunities(
     distance_arr = decay_ddf[distance_col].to_dask_array()
     
     decay_opps_series = (
-        oppor_arr * np.exp(np.log(0.5)) / 
+        oppor_arr * np.exp(np.log(0.5) / 
         (time_cutoff_min * 60) * 
-        (((60 * distance_arr * 0.000621371) / speed_mph) * 60)
+        (((60 * distance_arr * 0.000621371) / speed_mph) * 60))
     )
     
     decay_ddf["decay_weighted_opps"] = decay_opps_series
@@ -162,8 +162,8 @@ if __name__ == "__main__":
     
     finalize_and_export_results(RESULTS_EXPORT_FILE)
     
-    end = datetime.datetime.now()
-    logger.info(f"export final results as parquet: {end-time3}")
+    time4 = datetime.datetime.now()
+    logger.info(f"export final results as parquet: {time4-time3}")
     
     final = gpd.read_parquet(f"{GCS_FILE_PATH}oppor_results.parquet")
     
@@ -182,4 +182,6 @@ if __name__ == "__main__":
     # Remove local version
     os.remove(f"{RESULTS_EXPORT_FILE}.zip")
     
+    end = datetime.datetime.now()
+    logger.info(f"zip and upload zipped shapefile: {end-time4}")
     logger.info(f"execution time: {end-start}")

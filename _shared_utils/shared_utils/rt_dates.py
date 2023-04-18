@@ -36,6 +36,7 @@ METADATA_EDITION = {
     "jan2023": 9,
     "feb2023": 10,
     "mar2023": 11,
+    "apr2023": 12,
 }
 
 # Planning and Modal Advisory Committee (PMAC) - quarterly

@@ -50,9 +50,9 @@ BRT_STOPS_FILTER = {
 
 if __name__ == "__main__":
     # Connect to dask distributed client, put here so it only runs for this script
-    from dask.distributed import Client
+    #from dask.distributed import Client
     
-    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/A2_combine_stops.log", retention="3 months")
     logger.add(sys.stderr, 
@@ -112,4 +112,4 @@ if __name__ == "__main__":
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
     
-    client.close()
+    #client.close()
