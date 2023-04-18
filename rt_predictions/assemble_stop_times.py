@@ -156,21 +156,19 @@ def derive_trip_end(stop_times_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_trip_start_end_by_sched_relationship(df: pd.DataFrame):
-    scheduled = df[df.schedule_relationship=="SCHEDULED"]
-    not_scheduled = df[df.schedule_relationship!="SCHEDULED"]
+    scheduled = df[(df.schedule_relationship=="SCHEDULED") & 
+                   (df.scheduled_trip_start.notna())
+                  ]
+    not_scheduled = df[(df.schedule_relationship!="SCHEDULED") | 
+                       (df.scheduled_trip_start.isna())
+                      ]
     
     # For scheduled trips, the trip_start should be the first
     # arrival timestamp from scheduled stop_times, whether or not
     # trip_start is filled in
     scheduled2 = scheduled.assign(
-        trip_start_time = pd.to_datetime(
-            pd.to_datetime(scheduled.service_date
-                          ).dt.date.astype(str) + 
-            " " +
-            pd.to_datetime(scheduled.scheduled_trip_start
-                          ).dt.time.astype(str)
-        )
-    ).drop(columns = "scheduled_trip_start")
+        trip_start_time = scheduled.scheduled_trip_start
+    )
     
     # For not scheduled trips, we'll derive the trip start
     # using the first arrival prediction
@@ -181,7 +179,7 @@ def add_trip_start_end_by_sched_relationship(df: pd.DataFrame):
     
     # For scheduled and not scheduled, we want to use 
     # last prediction as trip end
-    df3 = derive_trip_end(df2)
+    df3 = derive_trip_end(df2).drop(columns = "scheduled_trip_start")
     
     return df3
 
@@ -232,19 +230,15 @@ def exclude_predictions_after_trip_end(
 
 
 def get_usable_predictions(
+    stop_time_updates: pd.DataFrame,
+    final_updates: pd.DataFrame,
     analysis_date: str,
-    **kwargs
 ) -> pd.DataFrame: 
     """
     Top-level function for doing all the general pre-processing needed 
     for stop_time_updates.
     From this, calculate each metric.
     """
-    df = import_stop_time_updates(
-        analysis_date,
-        **kwargs
-    )
-
     scheduled_stop_times = (
         wrangle_sched.scheduled_stop_times_with_rt_dataset_key(
         analysis_date, 
@@ -252,7 +246,7 @@ def get_usable_predictions(
     
     # Fill in schedule_relationship if it's missing
     df = wrangle_sched.derive_schedule_relationship(
-        df, scheduled_stop_times)
+        stop_time_updates, scheduled_stop_times).compute()
     
     # For scheduled trips, get scheduled trip start; 
     # For unscheduled trips, derive trip start.
@@ -275,11 +269,6 @@ def get_usable_predictions(
     
     # Stats
     print(f"# rows: {len(df)}, # rows after dropping prior trip start: {len(df3)}, # rows after dropping after trip end: {len(df4)}")
-    
-    final_updates = import_final_trip_updates(
-        analysis_date, 
-        **kwargs
-    )
     
     final = df4.merge(
         final_updates,
