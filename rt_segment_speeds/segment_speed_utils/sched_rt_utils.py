@@ -10,6 +10,8 @@ import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
 
+from typing import List, Literal
+
 from shared_utils import rt_utils
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS, PROJECT_CRS
@@ -18,6 +20,9 @@ from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS, PROJECT_CRS
 def crosswalk_scheduled_trip_grouping_with_rt_key(
     analysis_date: str, 
     keep_trip_cols: list = ["feed_key", "trip_id"],
+    feed_types: List[Literal["vehicle_positions", 
+                             "trip_updates", 
+                             "service_alerts"]] = ["vehicle_positions"]
 ) -> pd.DataFrame:
     """
     Filter scheduled trips to a certain grouping 
@@ -37,7 +42,7 @@ def crosswalk_scheduled_trip_grouping_with_rt_key(
             analysis_date, 
             keep_cols = ["gtfs_dataset_key", "schedule_feed_key", "feed_type"], 
             get_df = True,
-            custom_filtering = {"feed_type": ["vehicle_positions"]}
+            custom_filtering = {"feed_type": feed_types}
         ).rename(columns = {"schedule_feed_key": "feed_key"})
         .drop(columns = "feed_type")
     )
