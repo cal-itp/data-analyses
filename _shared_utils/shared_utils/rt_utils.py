@@ -16,7 +16,7 @@ import shapely
 import siuba  # need for type hints
 from calitp_data_analysis.tables import tbls
 from numba import jit
-from shared_utils import geography_utils, gtfs_utils, gtfs_utils_v2, map_utils, utils
+from shared_utils import geography_utils, gtfs_utils, gtfs_utils_v2, map_utils, utils, rt_dates
 from siuba import *
 
 # from zoneinfo import ZoneInfo
@@ -349,8 +349,7 @@ def compose_filename_check(ix_df: pd.DataFrame, table: str):
     """
     activity_date = ix_df.activity_date.iloc[0].date()
     date_str = activity_date.strftime(FULL_DATE_FMT)
-    ## TODO replace with in rt_dates?
-    # assert activity_date == dt.date(2023, 3, 15), "hardcoded to 3/15 for now :)"
+    assert date_str in rt_dates.DATES.values(), "selected date not in rt_dates"
     filename = f"{table}_{ix_df.organization_itp_id.iloc[0]}_{date_str}.parquet"
     path = check_cached(filename=filename, subfolder=V2_SUBFOLDER)
 
@@ -373,7 +372,9 @@ def get_vehicle_positions(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     else:
         vp_all = gpd.read_parquet(f"{VP_FILE_PATH}vp_{date_str}.parquet")
         org_vp = vp_all >> filter(_.gtfs_dataset_key.isin(ix_df.vehicle_positions_gtfs_dataset_key))
-        org_vp['location_timestamp_local'] = pd.to_datetime(org_vp.location_timestamp_local) # this is a string as of 4/12?
+        org_vp["location_timestamp_local"] = pd.to_datetime(
+            org_vp.location_timestamp_local
+        )  # this is a string as of 4/12?
         org_vp = org_vp >> select(-_.location_timestamp, -_.activity_date)
         org_vp = org_vp.to_crs(geography_utils.CA_NAD83Albers)
         utils.geoparquet_gcs_export(org_vp, GCS_FILE_PATH + V2_SUBFOLDER, filename)
