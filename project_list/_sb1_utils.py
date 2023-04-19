@@ -19,11 +19,6 @@ def sb1_basic_cleaning(
     Perform basic cleaning before joining
     SB1 & Non SHOPP data together.
     """
-    # Remove all punctation, lowercase, and strip whitespaces from
-    # project titles & descriptions.
-    for i in [project_name_col, project_desc_col]:
-        df[i] = df[i].str.lower().str.replace("[^\w\s]", "").str.strip()
-
     # Some project names contain the year. Remove anything after 20..
     df[project_name_col] = df[project_name_col].str.split("20").str[0]
 
@@ -138,8 +133,8 @@ def sb1_final() -> gpd.GeoDataFrame:
     merge1 = merge1.drop(columns = ['projecttitle_y'])
     
     # Add a new column detailing where this information comes from 
-    merge1 = merge1.assign(
-        notes = merge1.programcodes + '/' + 'SB1')
+    # merge1 = merge1.assign(
+    #    notes = merge1.programcodes + '/' + 'SB1')
     
     merge1 = merge1.fillna(merge1.dtypes.replace({'float64': 0.0, 'object': 'None'}))
     return merge1
