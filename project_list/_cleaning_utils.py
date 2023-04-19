@@ -1,4 +1,3 @@
-import _utils
 import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
 

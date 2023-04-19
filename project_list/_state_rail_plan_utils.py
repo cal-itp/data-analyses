@@ -1,4 +1,4 @@
-import _utils
+import _cleaning_utils
 import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
 
@@ -10,7 +10,7 @@ def open_state_rail_plan(file_name):
     sheet_names = ["SRP-Appx3.1-Capital", "SRP-Appx3.2-Fleet", "SRP-Appx3.3-GradeSep"]
     
     # Open the workbook in a dictionary
-    dict_df = pd.read_excel(f"{_utils.GCS_FILE_PATH}{file_name}", sheet_name=sheet_names)
+    dict_df = pd.read_excel(f"{_cleaning_utils.GCS_FILE_PATH}{file_name}", sheet_name=sheet_names)
     
     # Grab each sheet
     capital_df = to_snakecase(dict_df.get("SRP-Appx3.1-Capital"))
@@ -26,9 +26,9 @@ def clean_state_rail_plan(file_name):
     column_strings_to_del = ['capital_','fleet_','grade_separation_']
         
     # Clean up columns
-    capital_df = _utils.clean_columns(capital_df, column_strings_to_del)
-    fleet_df = _utils.clean_columns(fleet_df, column_strings_to_del)
-    grade_sep_df = _utils.clean_columns(grade_sep_df, column_strings_to_del)
+    capital_df = _cleaning_utils.clean_columns(capital_df, column_strings_to_del)
+    fleet_df = _cleaning_utils.clean_columns(fleet_df, column_strings_to_del)
+    grade_sep_df = _cleaning_utils.clean_columns(grade_sep_df, column_strings_to_del)
     
     # Add project categories
     capital_df['project_category'] = "Capital"
