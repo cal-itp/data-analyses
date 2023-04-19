@@ -1,0 +1,32 @@
+metadata:
+  version: 1
+  parameters:
+    analysis_date:
+      type: str
+      description: analysis date used
+      default: "2023-03-15"
+sources:
+  rt_stop_time_updates:
+    driver: parquet
+    description: RT stop time updates
+    args:
+      # source: more_cleaning.py
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_predictions/stop_time_updates_{{analysis_date}}.parquet
+  rt_final_trip_updates:
+    driver: parquet
+    description: Final trip updates for each stop acting as our actual stop arrival.
+    args:
+      # source: more_cleaning.py
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_predictions/final_updates_{{analysis_date}}.parquet
+  rt_sched_stop_times:
+    driver: parquet
+    description: Combined RT (stop_time_updates) and schedule (stop_times) for calculating real-time information metrics. Timestamps are localized to Pacific. Predictions occurring too early before a trip or after a trip are excluded. 
+    args:
+      # source: more_cleaning.py
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_predictions/rt_sched_stop_times_{{analysis_date}}.parquet
+  scheduled_stop_times_with_geom:
+    driver: geoparquet
+    description: Combined schedule stop_times, shapes, trips, and stops to get shape_geometry and stop_geometry. Use this for making maps, and use dask_geopandas to filter this partitioned parquet.
+    args:
+      # source: schedule_stop_times_with_geom.py
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_predictions/scheduled_stop_times_with_geom_{{analysis_date}}/      
