@@ -21,14 +21,13 @@ import yaml
 from build_speedmaps_index import ANALYSIS_DATE
 
 def make_rt_site_yml(speedmaps_index_joined,
-                       input_path = '../portfolio/sites/rt.yml',
-                       output_path = '../portfolio/sites/test_rt.yml'):
+                       rt_site_path = '../portfolio/sites/rt.yml'):
         
     # make sure intermediate data is ran or at least attempted
     assert speedmaps_index_joined.status.isin(['map_confirmed',
                         'parser_failed', 'map_failed']).all(), 'must run prior scripts first, see Makefile'
     
-    with open(input_path) as rt_site:
+    with open(rt_site_path) as rt_site:
         rt_site_data = yaml.load(rt_site, yaml.Loader)
     
     chapters_list = []
@@ -52,16 +51,15 @@ def make_rt_site_yml(speedmaps_index_joined,
     rt_site_data['parts'] = parts_list
     
     output = pyaml.dump(rt_site_data)
-    with open(output_path, 'w') as rt_site:
+    with open(rt_site_path, 'w') as rt_site:
         rt_site.write(output)
     
-    print(f'portfolio yml staged to {output_path}')
+    print(f'portfolio yml staged to {rt_site_path}')
     return
 
 def stage_portfolio():
     
     os.chdir('/home/jovyan/data-analyses')
-    os.system('cp portfolio/sites/test_rt.yml portfolio/sites/rt.yml')
     os.system('python3 portfolio/portfolio.py clean rt')
     os.system('python3 portfolio/portfolio.py build rt --no-stderr')
 
