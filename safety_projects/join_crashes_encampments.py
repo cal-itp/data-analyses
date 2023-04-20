@@ -39,6 +39,6 @@ if __name__ == "__main__":
     # save out as geoparquet 
     crashes_encampments_agg = join_crash_encamp()
     #print some info in the terminal to verify
-    bridges_crashes_agg.info()
+    crashes_encampments_agg.info()
     # export geojson for ArcGIS Pro
-    shared_utils.utils.geojson_gcs_export(crashes_encampments_gdf.drop("geometry_y", axis=1), GCS_FILE_PATH, "analytical_file_joined")  
+    shared_utils.utils.geojson_gcs_export(crashes_encampments_agg.drop("geometry_y", axis=1), GCS_FILE_PATH, "analytical_file_joined")  
