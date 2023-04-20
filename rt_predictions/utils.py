@@ -24,6 +24,13 @@ def parse_hour_min(
     return df
 
 
+def minute_cols(timestamp_col: str) -> list:
+    """
+    Return list of the _hour, _min columns for grouping
+    """
+    return [f"{timestamp_col}_hour", f"{timestamp_col}_min"]
+
+
 def exclude_predictions_after_actual_stop_arrival(
     df: pd.DataFrame,
     timestamp_col: str
