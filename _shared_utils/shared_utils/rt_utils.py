@@ -372,9 +372,9 @@ def get_vehicle_positions(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     else:
         vp_all = gpd.read_parquet(f"{VP_FILE_PATH}vp_{date_str}.parquet")
         org_vp = vp_all >> filter(_.gtfs_dataset_key.isin(ix_df.vehicle_positions_gtfs_dataset_key))
-        org_vp["location_timestamp_local"] = pd.to_datetime(
-            org_vp.location_timestamp_local
-        )  # this is a string as of 4/12?
+        # org_vp["location_timestamp_local"] = pd.to_datetime(
+        #     org_vp.location_timestamp_local
+        # )  # this is a string as of 4/12? # fixed upstream?
         org_vp = org_vp >> select(-_.location_timestamp, -_.activity_date)
         org_vp = org_vp.to_crs(geography_utils.CA_NAD83Albers)
         utils.geoparquet_gcs_export(org_vp, GCS_FILE_PATH + V2_SUBFOLDER, filename)
