@@ -60,3 +60,17 @@ def exclude_predictions_at_actual_stop_arrival(
     )].drop(columns = hour_cols + minute_cols).reset_index(drop=True)
     
     return df2
+
+
+def exclude_predictions_before_trip_start_time(
+    df: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    We might want to exclude predictions before the trip_start_time,
+    basically, get rid of predictions happening coming in the 1 hr
+    before.
+    """
+    df2 = df[df._extract_ts_local >= df.trip_start_time
+            ].reset_index(drop=True)
+    
+    return df2
