@@ -202,7 +202,7 @@ def exclude_predictions_before_trip_start(
     """    
     df = df.assign(
         seconds_difference = (df.trip_start_time - 
-                              df[timestamp_col]).dt.seconds 
+                              df[timestamp_col]).dt.total_seconds() 
     )
     
     df2 = (df[df.seconds_difference <= cutoff_minutes_prior*60]
@@ -221,7 +221,7 @@ def exclude_predictions_after_trip_end(
     Drop the rows where predictions are occuring after the trip has 
     already ended. 
     """
-    df2 =  (df[df[timestamp_col] < df.trip_end_time]
+    df2 =  (df[df[timestamp_col] <= df.trip_end_time]
             .drop(columns = "trip_end_time")
             .reset_index(drop=True)
            )
