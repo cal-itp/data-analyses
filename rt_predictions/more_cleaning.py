@@ -46,38 +46,6 @@ def resolve_missing_arrival_vs_departure(df: pd.DataFrame):
     return df
 
 
-def grab_prior_stop_actual_arrival(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Get the df to each individual stop, and grab the previous 
-    stop arrival.
-    We need this to subset down to prediction duration, which is
-    the period between stops, for some of the metrics.
-    """
-    group_cols = assemble_stop_times.trip_cols
-    
-    stop_df = (df[group_cols + ["stop_sequence", "stop_id", 
-                     "actual_stop_arrival_pacific"]]
-               .drop_duplicates()
-               .sort_values(group_cols + [
-                   "stop_sequence", 
-                   "actual_stop_arrival_pacific"])
-               .reset_index(drop=True)
-              )
-
-    # Grab the previous stop's actual arrival time
-    stop_df = stop_df.assign(
-        prior_stop_arrival_pacific = (
-            stop_df.sort_values(group_cols + ["stop_sequence"])
-            .groupby(group_cols, group_keys=False
-                    )["actual_stop_arrival_pacific"]
-            .apply(lambda x: x.shift(1))
-        )
-    ).drop(columns = "actual_stop_arrival_pacific") 
-    # we will merge this back onto the full df, so actual_stop_arrival_pacific will be there
-    
-    return stop_df
-
-
 def concatenate_files(operator_list: list):
     """
     Since we downloaded individual operators for stop_time_updates
@@ -139,15 +107,6 @@ if __name__ == "__main__":
     )
     
     df2 = resolve_missing_arrival_vs_departure(df)
-
-    stop_df = grab_prior_stop_actual_arrival(df2)
     
-    df3 = pd.merge(
-        df2, 
-        stop_df, 
-        on = assemble_stop_times.stop_cols + ["stop_sequence"],
-        how = "inner",
-    )
-    
-    df3.to_parquet(
+    df2.to_parquet(
         f"{PREDICTIONS_GCS}rt_sched_stop_times_{analysis_date}.parquet")
