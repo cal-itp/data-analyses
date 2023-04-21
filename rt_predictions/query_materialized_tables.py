@@ -1,13 +1,23 @@
+"""
+Query tables.
+
+Try dask_bigquery, pandas_gbq as well as tbls.
+"""
+import datetime
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(12_000_000_000_000)
 os.environ['USE_PYGEOS'] = '0'
 
+import pandas as pd
 #import dask_bigquery
+#import pandas_gbq
 
 from calitp_data_analysis.tables import tbls
 from siuba import *
+
+#from shared_utils import gtfs_utils_v2
 from segment_speed_utils.project_vars import PREDICTIONS_GCS, analysis_date
-from download_stop_time_updates import snake_case_string
+
 
 # Metabase: which orgs passed guidelines checks...add these good orgs later
 # https://dashboards.calitp.org/question/1296-organizations-passing-trip-updates-guidelines-checks-on-3-15-23
@@ -24,6 +34,57 @@ URLS = {
     santa_cruz_url: "Santa Cruz",
     berkeley_url: "Bear"
 }
+
+
+def snake_case_string(string: str):
+    return (string.replace('TripUpdates', '')
+            .replace('Trip Updates', '')
+            .strip()
+            .lower()
+            .replace(' ', '_')
+           )
+
+def download_stop_time_updates(
+    analysis_date: str, 
+    operator_name: str
+):
+    cols = [
+        "gtfs_dataset_key", "_gtfs_dataset_name",
+        "trip_id",
+        "stop_id", "stop_sequence",
+        "arrival_time", "departure_time", 
+    ]
+
+    df = (tbls.mart_gtfs.fct_stop_time_updates()
+          >> filter(_.dt == analysis_date)
+          >> filter(_._gtfs_dataset_name == operator_name)
+          >> select(*cols)
+          >> collect()
+    )
+    
+    return df
+
+
+def download_stop_time_updates_pandas(
+    analysis_date: str, 
+    operator_name: str
+):  
+    
+    df  = pd.read_gbq(
+        f"""
+        select 
+            *
+        from `cal-itp-data-infra`.`mart_gtfs`.`fct_stop_time_updates`
+        where dt = '{analysis_date}' AND _gtfs_dataset_name = '{operator_name}'
+        """, 
+        project_id = 'cal-itp-data-infra'
+    )
+    
+    operator_snakecase = snake_case_string(operator_name)
+    
+    df.to_parquet(
+        f"{PREDICTIONS_GCS}stop_time_update_"
+        f"{analysis_date}_{operator_snakecase}.parquet")
 
 
 def stop_time_updates(analysis_date: str, url: str, name: str):

@@ -10,7 +10,7 @@ import pandas as pd
 from dask import delayed, compute
 
 import assemble_stop_times
-from download_stop_time_updates import snake_case_string
+from query_materialized_tables import snake_case_string
 from segment_speed_utils.project_vars import (PREDICTIONS_GCS, 
                                               analysis_date)
 
