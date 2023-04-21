@@ -75,7 +75,7 @@ def filter_to_analysis_date(
         hour = pd.to_datetime(df.location_timestamp_local).dt.hour,
     )
     
-    df2 = (df[df.activity_date == pd.to_datetime(analysis_date)]
+    df2 = (df[df.activity_date == pd.to_datetime(analysis_date).date()]
            .reset_index(drop=True)
           )
         
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     logger.info(f"Analysis date: {analysis_date}")
     
     start = datetime.datetime.now()
-
+    
     one_day_after = helpers.find_day_after(analysis_date)
     
     # Concatenate all the batched data for the 2 downloaded dates

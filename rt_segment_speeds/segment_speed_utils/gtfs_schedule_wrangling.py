@@ -39,7 +39,11 @@ def merge_shapes_to_trips(
     return trips_with_geom
 
 
-def get_trips_with_geom(analysis_date) -> dg.GeoDataFrame:
+def get_trips_with_geom(
+    analysis_date,
+    trip_cols: list = ["feed_key", "name", 
+                        "trip_id", "shape_array_key"]
+) -> dg.GeoDataFrame:
     """
     Merge trips with shapes.
     """
@@ -47,7 +51,7 @@ def get_trips_with_geom(analysis_date) -> dg.GeoDataFrame:
 
     trips = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["feed_key", "name", "trip_id", "shape_array_key"]
+        columns = trip_cols
     )
     
     trips = exclude_scheduled_operators(
