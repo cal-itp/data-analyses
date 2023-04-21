@@ -18,6 +18,8 @@ OPERATORS = [
     "Anaheim Resort",
     "Bay Area 511 Dumbarton Express",
     "Bay Area 511 Fairfield and Suisun Transit",
+    "Santa Cruz",
+    "Bear"
 ]
 
 
