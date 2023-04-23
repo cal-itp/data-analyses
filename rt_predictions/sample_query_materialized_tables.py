@@ -8,6 +8,7 @@ Query and save intermediate on chunks based on total service hours.
 
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(12_000_000_000_000)
+os.environ['USE_PYGEOS'] = '0'
 
 import pandas as pd
 from siuba import *
@@ -19,6 +20,7 @@ import datetime as dt
 
 from segment_speed_utils.project_vars import (PREDICTIONS_GCS, 
                                               analysis_date)
+analysis_date = dt.datetime.fromisoformat(analysis_date)
 import numpy as np
 
 sampling_periods = {}
@@ -68,7 +70,7 @@ def chunk_by_svc_hours(df):
     
     chunks = {}
     # https://stackoverflow.com/questions/42763362/dividing-a-pandas-dataframe-into-smaller-chunks-based-of-the-sum-of-one-column
-    chunk_target = 15 * 10**3 # slightly smaller than Metro Bus, which worked
+    chunk_target = 10 * 10**3 # ~.75x Metro Bus, which worked
     df['running_total'] = df['ttl_service_hours'].cumsum()
     # better to actually round than truncate as in stackoverflow example...
     df['batch'] = np.round((df['running_total'] / chunk_target), 0).astype(int)
@@ -97,11 +99,26 @@ def get_sample_df(sampling_period, chunk_df):
 )
     return df
 
+def sample_by_chunk_period(sampling_periods, chunks):
+        
+    for period in sampling_periods.keys():
+        'st_updates_2023-03-15_am_sample'
+        for chunk in chunks.keys():
+            print(f'period: {period}, chunk: {chunk}')
+            print(chunks[chunk].organization_name)
+            sample_df = get_sample_df(sampling_periods[period],
+                                     chunks[chunk])
+            sample_df.to_parquet(
+                f"{PREDICTIONS_GCS}st_updates_2023-03-15_{period}_sample/"
+                f"chunk_{chunk}.parquet")
+            del(sample_df) # memory issues?
+    return
+
 if __name__ == "__main__":
     
     service_levels = get_service_levels()
     tu_datasets = get_tu_datasets()
     all_data_service = filter_join_datasets_service(tu_datasets, service_levels)
     chunks = chunk_by_svc_hours(all_data_service)
-    
+    sample_by_chunk_period(sampling_periods, chunks)
     
