@@ -119,10 +119,11 @@ def sample_by_chunk_period(sampling_periods, chunks):
     return
 
 if __name__ == "__main__":
+    print('already in GCS, uncomment in script to rerun...')
     
-    service_levels = get_service_levels()
-    tu_datasets = get_tu_datasets()
-    all_data_service = filter_join_datasets_service(tu_datasets, service_levels)
-    chunks = chunk_by_svc_hours(all_data_service)
-    sample_by_chunk_period(sampling_periods, chunks)
+    # service_levels = get_service_levels()
+    # tu_datasets = get_tu_datasets()
+    # all_data_service = filter_join_datasets_service(tu_datasets, service_levels)
+    # chunks = chunk_by_svc_hours(all_data_service)
+    # sample_by_chunk_period(sampling_periods, chunks)
     
