@@ -71,9 +71,14 @@ def chunk_by_svc_hours(df):
     chunks = {}
     # https://stackoverflow.com/questions/42763362/dividing-a-pandas-dataframe-into-smaller-chunks-based-of-the-sum-of-one-column
     chunk_target = 10 * 10**3 # ~.75x Metro Bus, which worked
+    df = df >> arrange(-_.ttl_service_hours)
+    assert (df.ttl_service_hours > chunk_target).value_counts()[True] <= 1, 'only 1st row may exceed chunk target'
     df['running_total'] = df['ttl_service_hours'].cumsum()
     # better to actually round than truncate as in stackoverflow example...
     df['batch'] = np.round((df['running_total'] / chunk_target), 0).astype(int)
+    # reset LA Metro Bus chunk to 1 (algo breaks if row exceeds target)
+    if df.ttl_service_hours.iloc[0] >= chunk_target:
+        df.iloc[0, -1] = 1 # hacky, fix if function ever generalized...
     grouped = df.groupby('batch')
     for group in grouped.groups.keys():
         data = grouped.get_group(group)
@@ -102,7 +107,6 @@ def get_sample_df(sampling_period, chunk_df):
 def sample_by_chunk_period(sampling_periods, chunks):
         
     for period in sampling_periods.keys():
-        'st_updates_2023-03-15_am_sample'
         for chunk in chunks.keys():
             print(f'period: {period}, chunk: {chunk}')
             print(chunks[chunk].organization_name)
