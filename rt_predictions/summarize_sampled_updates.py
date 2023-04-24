@@ -132,7 +132,8 @@ def group_summarize(advance_calculated_df):
        >> mutate(max_advance = _.time_in_advance.max())
        >> mutate(max_advance_min = _.max_advance.apply(lambda x: x.seconds / 60))
        >> mutate(updates_per_min = _.shape[0] / _.max_advance_min)
-       >> summarize(max_advance_min = np.round(_.max_advance_min.max(), 0),
+       # round minutes to 1 decimal to avoid div/0 later
+       >> summarize(max_advance_min = np.round(_.max_advance_min.max(), 1),
                    updates_per_min = np.round(_.updates_per_min.max(), 1))
       )
     return df2
