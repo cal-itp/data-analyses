@@ -6,12 +6,24 @@
 1. [CA Transit Routes](https://gis.data.ca.gov/datasets/dd7cb74665a14859a59b8c31d3bc5a3e_0)
 1. [CA Transit Stops](https://gis.data.ca.gov/datasets/900992cc94ab49dbbb906d8f147c2a72_0)
 
+## Understanding the Open Data
+
+Per statute, High Quality Transit Areas are defined as the _areas surrounding_ high quality transit corridors and major transit stops. Therefore, if you're looking for our most authoratative data on where HQTAs are within California, please start with the HQTA Areas (polygon) dataset.
+
+Major transit stop is a more restrictive definition that high quality transit corridor. A high quality corridor only requires that there be service in that corridor meeting the frequency standard. It need not be one route alone meeting the frequency standard – therefore we cut corridors into segments and make the high quality corridor determination based on the stop with the most trips in that segment (even if those trips are on different routes). It is possible and valid for a high quality corridor to contain no major transit stops at all.
+
+On the other hand, major transit stops exist at the intersection of two high-quality transit corridors as described above, and also at any rail station, most ferry terminals, and select BRT stations.
+
+Using the HQTA Areas dataset, it's possible to determine if an area qualifies because it is a high quality corridor, major transit stop, or both. This is useful for certain kinds of analyses, since some statutes and programs only reference major transit stops and don't include high quality corridors.
+
+We provide the HQTA Stops dataset as a convienience for certain kinds of analysis where it would be helpful to know actual stop locations. Note that the `hq_corridor_stop` type includes all stops in a high quality corridor. Since we make the high quality corridor determination at the corridor segment level and only then find the stops within that corridor, not every `hq_corridor_stop` is guaranteed to have frequent service (though they could all have frequent service, and at least one stop every 1,250 meters will have frequent service).
+
 ## High Quality Transit Areas Relevant Statutes
 
 [PRC 21155](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21155.&lawCode=PRC)
 * Major transit stop definition: _A major transit stop is as defined in Section 21064.3, except that, for purposes of this section, it also includes major transit stops that are included in the applicable regional transportation plan_
 * High-quality transit corridor definition: _For purposes of this section, a high-quality transit corridor means a corridor with fixed route bus service with service intervals no longer than 15 minutes during peak commute hours._
-    * Unable to locate definition of "peak commute hours"
+    * Statute does not define "peak commute hours", given that peaks may vary locally we look for any hour in the morning plus any hour in the afternoon/evening.
 
 [PRC 21064.3](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21064.3.&lawCode=PRC)
 * _Major transit stop means a site containing any of the following:
