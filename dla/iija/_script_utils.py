@@ -382,7 +382,16 @@ def get_new_desc_title(df):
 
     return df
 
-
+## function to add new description column that has the federal program amount and the dollar amount. 
+## to run after aggregating the data
+def add_new_description_col(df):
+    df["obligations_amount_string"] = df["obligations_amount"].astype(str)
+    
+    df["new_description_col"] = df["program_code_description"] + " for $" + df["obligations_amount_string"]
+    
+    df.drop(columns =['obligations_amount_string'], axis=1, inplace=True)
+    
+    return df
 
 def get_clean_data(df, full_or_agg = ''):
     
@@ -411,6 +420,8 @@ def get_clean_data(df, full_or_agg = ''):
     
         ## get new title (str parser) 
         aggdf = get_new_desc_title(aggdf)
+        
+        aggdf = add_new_description_col(aggdf)
     
         return aggdf
     
