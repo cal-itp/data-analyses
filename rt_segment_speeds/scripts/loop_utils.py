@@ -63,9 +63,11 @@ def assign_visits_to_stop(df: pd.DataFrame):
     )
 
     df = df.assign(
-        visit_order = (df.sort_values(["stop_id", "stop_sequence"])
-                      .groupby("stop_id")
-                      .cumcount() + 1)
+        prior_stop_seq = (df.sort_values(["shape_array_key", "stop_sequence"])
+                          .groupby("shape_array_key", group_keys=False)
+                          .stop_sequence
+                          .apply(lambda x: x.shift(1))
+                         )
     )
     
     return df
