@@ -315,7 +315,7 @@ def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None)
     analysis_dt = dt.datetime.combine(analysis_date, dt.time(0))
 
     daily_service = tbls.mart_gtfs.fct_daily_feed_scheduled_service_summary() >> select(
-        _.schedule_gtfs_dataset_key == _.gtfs_dataset_key, _.feed_key, _.activity_date
+        _.schedule_gtfs_dataset_key == _.gtfs_dataset_key, _.feed_key, _.service_date
     )
 
     org_feeds_datasets = (
@@ -325,14 +325,14 @@ def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None)
             _.reports_site_assessed, _.organization_itp_id == itp_id, _.vehicle_positions_gtfs_dataset_key != None
         )
         >> inner_join(_, daily_service, by="schedule_gtfs_dataset_key")
-        >> filter(_.activity_date == analysis_date)
+        >> filter(_.service_date == analysis_date)
         >> select(
             _.feed_key,
             _.schedule_gtfs_dataset_key,
             _.vehicle_positions_gtfs_dataset_key,
             _.organization_itp_id,
             _.organization_name,
-            _.activity_date,
+            _.activity_date == _.service_date, ## TODO fix the rest of it
         )
     )
 
