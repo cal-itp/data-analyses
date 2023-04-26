@@ -1,5 +1,6 @@
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(1_000_000_000_000) ## 1TB?
+os.environ['USE_PYGEOS'] = '0'
 
 from siuba import *
 import pandas as pd

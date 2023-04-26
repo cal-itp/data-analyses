@@ -58,7 +58,7 @@ trip_cols = [
     "feed_key",
     "trip_key",
     "gtfs_dataset_key",
-    "activity_date",
+    "service_date",
     "trip_id",
     "route_id",
     "route_short_name",
@@ -332,7 +332,7 @@ def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None)
             _.vehicle_positions_gtfs_dataset_key,
             _.organization_itp_id,
             _.organization_name,
-            _.activity_date == _.service_date, ## TODO fix the rest of it
+            _.service_date,
         )
     )
 
@@ -347,13 +347,13 @@ def compose_filename_check(ix_df: pd.DataFrame, table: str):
     Compose target filename for cached warehouse queries (as used in rt_analysis.rt_parser.OperatorDayAnalysis),
     then check if cached data already exists on GCS
     """
-    activity_date = ix_df.activity_date.iloc[0].date()
-    date_str = activity_date.strftime(FULL_DATE_FMT)
+    service_date = ix_df.service_date.iloc[0].date()
+    date_str = service_date.strftime(FULL_DATE_FMT)
     assert date_str in rt_dates.DATES.values(), "selected date not in rt_dates"
     filename = f"{table}_{ix_df.organization_itp_id.iloc[0]}_{date_str}.parquet"
     path = check_cached(filename=filename, subfolder=V2_SUBFOLDER)
 
-    return filename, path, activity_date
+    return filename, path, service_date
 
 
 def get_vehicle_positions(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
@@ -363,8 +363,8 @@ def get_vehicle_positions(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     Filter to relevant vehicle positions datasets; cache filtered version
     """
 
-    filename, path, activity_date = compose_filename_check(ix_df, "vp")
-    date_str = activity_date.isoformat()
+    filename, path, service_date = compose_filename_check(ix_df, "vp")
+    date_str = service_date.isoformat()
 
     if path:
         print(f"found vp parquet at {path}")
@@ -372,10 +372,7 @@ def get_vehicle_positions(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     else:
         vp_all = gpd.read_parquet(f"{VP_FILE_PATH}vp_{date_str}.parquet")
         org_vp = vp_all >> filter(_.gtfs_dataset_key.isin(ix_df.vehicle_positions_gtfs_dataset_key))
-        # org_vp["location_timestamp_local"] = pd.to_datetime(
-        #     org_vp.location_timestamp_local
-        # )  # this is a string as of 4/12? # fixed upstream?
-        org_vp = org_vp >> select(-_.location_timestamp, -_.activity_date)
+        org_vp = org_vp >> select(-_.location_timestamp, -_.service_date, -_.activity_date)
         org_vp = org_vp.to_crs(geography_utils.CA_NAD83Albers)
         utils.geoparquet_gcs_export(org_vp, GCS_FILE_PATH + V2_SUBFOLDER, filename)
 
@@ -387,14 +384,14 @@ def get_trips(ix_df: pd.DataFrame) -> pd.DataFrame:
     Using ix_df as a guide, query warehouse for trips via shared_utils.gtfs_utils_v2
     Only request columns used in speedmap workflow; cache
     """
-    filename, path, activity_date = compose_filename_check(ix_df, "trips")
+    filename, path, service_date = compose_filename_check(ix_df, "trips")
 
     if path:
         print(f"found trips parquet at {path}")
         org_trips = pd.read_parquet(path)
     else:
         feed_key_list = list(ix_df.feed_key.unique())
-        org_trips = gtfs_utils_v2.get_trips(activity_date, feed_key_list, trip_cols)
+        org_trips = gtfs_utils_v2.get_trips(service_date, feed_key_list, trip_cols)
         org_trips.to_parquet(GCS_FILE_PATH + V2_SUBFOLDER + filename)
 
     return org_trips
@@ -405,7 +402,7 @@ def get_st(ix_df: pd.DataFrame, trip_df: pd.DataFrame) -> pd.DataFrame:
     Using ix_df as a guide, query warehouse for stop_times via shared_utils.gtfs_utils_v2
     Only request columns used in speedmap workflow; cache
     """
-    filename, path, activity_date = compose_filename_check(ix_df, "st")
+    filename, path, service_date = compose_filename_check(ix_df, "st")
 
     if path:
         print(f"found stop times parquet at {path}")
@@ -413,7 +410,7 @@ def get_st(ix_df: pd.DataFrame, trip_df: pd.DataFrame) -> pd.DataFrame:
     else:
         feed_key_list = list(ix_df.feed_key.unique())
         org_st = gtfs_utils_v2.get_stop_times(
-            activity_date, feed_key_list, trip_df=trip_df, stop_time_cols=st_cols, get_df=True
+            service_date, feed_key_list, trip_df=trip_df, stop_time_cols=st_cols, get_df=True
         )
         org_st = org_st >> select(-_.arrival_sec, -_.departure_sec)
         org_st.to_parquet(GCS_FILE_PATH + V2_SUBFOLDER + filename)
@@ -426,14 +423,14 @@ def get_stops(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     Using ix_df as a guide, query warehouse for stops via shared_utils.gtfs_utils_v2
     Only request columns used in speedmap workflow; cache
     """
-    filename, path, activity_date = compose_filename_check(ix_df, "stops")
+    filename, path, service_date = compose_filename_check(ix_df, "stops")
 
     if path:
         print(f"found stops parquet at {path}")
         org_stops = gpd.read_parquet(path)
     else:
         feed_key_list = list(ix_df.feed_key.unique())
-        org_stops = gtfs_utils_v2.get_stops(activity_date, feed_key_list, stop_cols, crs=geography_utils.CA_NAD83Albers)
+        org_stops = gtfs_utils_v2.get_stops(service_date, feed_key_list, stop_cols, crs=geography_utils.CA_NAD83Albers)
         utils.geoparquet_gcs_export(org_stops, GCS_FILE_PATH + V2_SUBFOLDER, filename)
 
     return org_stops
@@ -444,7 +441,7 @@ def get_shapes(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     Using ix_df as a guide, query warehouse for shapes via shared_utils.gtfs_utils_v2
     Only request columns used in speedmap workflow; cache
     """
-    filename, path, activity_date = compose_filename_check(ix_df, "shapes")
+    filename, path, service_date = compose_filename_check(ix_df, "shapes")
 
     if path:
         print(f"found shapes parquet at {path}")
@@ -452,7 +449,7 @@ def get_shapes(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     else:
         feed_key_list = list(ix_df.feed_key.unique())
         org_shapes = gtfs_utils_v2.get_shapes(
-            activity_date, feed_key_list, crs=geography_utils.CA_NAD83Albers, shape_cols=shape_cols
+            service_date, feed_key_list, crs=geography_utils.CA_NAD83Albers, shape_cols=shape_cols
         )
         # invalid geos are nones in new df...
         org_shapes = org_shapes.dropna(subset=["geometry"])
