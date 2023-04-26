@@ -30,14 +30,19 @@ def include_prior(
     subsequent stop sequence and return an array.
     """
     idx = get_index(array, value)
+    upper_bound = idx + 1 
     
-    subset_array = array[idx-1: idx+1]
+    if len(array) > upper_bound:
+        subset_array = array[idx-1: idx+1]
     
-    # For the first stop sequence, there is no prior, 
-    # but the result of that is grabbing nothing
-    if len(subset_array) == 0:
-        subset_array  = array[idx: idx+1]
-            
+        # For the first stop sequence, there is no prior, 
+        # but the result of that is grabbing nothing
+        if len(subset_array) == 0:
+            subset_array  = array[idx: upper_bound]
+        
+    else:
+        subset_array = array[idx-1:]
+    
     return subset_array
 
 
