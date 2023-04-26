@@ -9,11 +9,37 @@ import dask_geopandas as dg
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import shapely
+
+from typing import Literal
 
 from shared_utils import rt_utils
 from segment_speed_utils.project_vars import PROJECT_CRS
 
 
+def interpolate_projected_points(
+    shape_geometry: shapely.geometry.LineString,
+    projected_list: list
+):
+    return [shape_geometry.interpolate(i) for i in projected_list]
+
+
+def project_list_of_coords(
+    shape_geometry: shapely.geometry.LineString,
+    point_geom_list: list,
+    use_shapely_coords: bool = False
+) -> np.ndarray:
+    if use_shapely_coords:
+        # https://stackoverflow.com/questions/49330030/remove-a-duplicate-point-from-polygon-in-shapely
+        # use simplify(0) to remove any points that might be duplicates
+        return np.array(
+            [shape_geometry.project(shapely.geometry.Point(p))
+            for p in shape_geometry.simplify(0).coords])
+    else:
+        return np.array(
+            [shape_geometry.project(i) for i in point_geom_list])
+
+    
 def add_arrowized_geometry(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Add a column where the segment is arrowized.
@@ -101,7 +127,7 @@ def linear_reference_vp_against_segment(
     shape_geoseries = gpd.GeoSeries(linear_ref_vp_to_shape.geometry_y.compute())
     
     # Project, save results, then convert to dask array, 
-    # otherwise can't add a column to the dask df
+    # otherwise can't add a column to the dask df    
     shape_meters_geoseries = project_point_geom_onto_linestring(
         shape_geoseries,
         vp_geoseries,
@@ -119,3 +145,27 @@ def linear_reference_vp_against_segment(
     )
     
     return linear_ref_df
+
+
+def array_to_geoseries(
+    array: np.ndarray,
+    geom_type: Literal["point", "line", "polygon"],
+    crs: str = "EPSG:3310"
+)-> gpd.GeoSeries: 
+    """
+    Turn array back into geoseries.
+    """
+    if geom_type == "point":
+        gdf = gpd.GeoSeries(array, crs=crs)
+        
+    elif geom_type == "line":
+        gdf = gpd.GeoSeries(
+            shapely.geometry.LineString(array), 
+            crs=crs)
+        
+    elif geom_type == "polygon":
+        gdf = gpd.GeoSeries(
+            shapely.geometry.Polygon(array),
+            crs = crs)
+    
+    return gdf
