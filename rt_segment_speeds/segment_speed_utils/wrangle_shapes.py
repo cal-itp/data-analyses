@@ -48,10 +48,13 @@ def add_arrowized_geometry(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     segment_geom = gpd.GeoSeries(gdf.geometry)
     CRS = gdf.crs.to_epsg()
     
+    #TODO: parallel_offset is going to be deprecated? offset_curve is the new one
     geom_parallel = gpd.GeoSeries(
-        [i.offset_curve(30) for i in segment_geom], 
-        crs=CRS
-    )
+        [rt_utils.try_parallel(i) for i in segment_geom])
+    #geom_parallel = gpd.GeoSeries(
+    #    [i.offset_curve(30) for i in segment_geom], 
+    #    crs=CRS
+    #)
     
     geom_arrowized = rt_utils.arrowize_segment(
         geom_parallel, 
