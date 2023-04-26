@@ -377,7 +377,7 @@ def get_shapes(
 
     shapes = (
         tbls.mart_gtfs.fct_daily_scheduled_shapes()
-        >> filter_date(selected_date, date_col="activity_date")
+        >> filter_date(selected_date, date_col="service_date")
         >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
     )
@@ -420,7 +420,7 @@ def get_stops(
 
     stops = (
         tbls.mart_gtfs.fct_daily_scheduled_stops()
-        >> filter_date(selected_date, date_col="activity_date")
+        >> filter_date(selected_date, date_col="service_date")
         >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
         >> subset_cols(stop_cols_with_geom)
