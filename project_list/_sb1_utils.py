@@ -132,9 +132,9 @@ def sb1_final() -> gpd.GeoDataFrame:
     # Drop columns
     merge1 = merge1.drop(columns = ['projecttitle_y'])
     
-    # Add a new column detailing where this information comes from 
-    # merge1 = merge1.assign(
-    #    notes = merge1.programcodes + '/' + 'SB1')
+    # Filter out completed projects
+    merge1 = merge1[merge1.projectstatuscodes == 'Completed'].reset_index(drop = True)
     
     merge1 = merge1.fillna(merge1.dtypes.replace({'float64': 0.0, 'object': 'None'}))
+    
     return merge1
