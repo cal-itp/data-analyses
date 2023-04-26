@@ -61,25 +61,5 @@ def assign_visits_to_stop(df: pd.DataFrame):
         num_visits = df.groupby(["shape_array_key", "stop_id"])
                     .stop_sequence.transform("nunique")
     )
-
-    df = df.assign(
-        visit_order = (df.sort_values(["stop_id", "stop_sequence"])
-                      .groupby("stop_id")
-                      .cumcount() + 1)
-    )
     
     return df
-
-
-if __name__ == "__main__":
-    loop_shapes = grab_loop_shapes(analysis_date)
-
-    stop_times_with_geom = prep_stop_segments.stop_times_aggregated_to_shape_array_key(
-            analysis_date, loop_shapes)
-
-    st_loops = stop_times_with_geom.compute()
-
-    gdf = (assign_visits_to_stop(st_loops)
-           .sort_values(["shape_array_key", "stop_sequence"])
-           .reset_index(drop=True)
-          )
