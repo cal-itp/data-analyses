@@ -158,30 +158,27 @@ def adjust_stop_start_end_for_special_cases(
     if start_stop < end_stop:
         origin_stop = start_stop
         destin_stop = start_stop + distance_between_stops
-        
-        # change this to point
-        origin_destination_geom = wrangle_shapes.interpolate_projected_points(
-            shape_geometry, [origin_stop, destin_stop])
-    
+            
     # Case where inlining occurs, and now the bus is doubling back    
     elif start_stop > end_stop:
         origin_stop = start_stop
         destin_stop = start_stop - distance_between_stops
         
-        # Flip this so when we order the subset of points, we 
-        # correctly append the origin to the shape_coords_list 
-        # (which is destination, since it has a lower value)
-        origin_destination_geom = wrangle_shapes.interpolate_projected_points(
-            shape_geometry, [destin_stop, origin_stop])
+    # Flip this so when we order the subset of points, we 
+    # correctly append the origin to the shape_coords_list 
+    # (which is destination, since it has a lower value)
+    # TODO: the flip of this doesn't happen here, it happens when we
+    # get subset of shape_coords_list
     
     # Case at origin, where there is no prior stop to look for
     elif start_stop == end_stop:
         origin_stop = 0
         destin_stop = start_stop
-        
-        origin_destination_geom = wrangle_shapes.interpolate_projected_points(
-            shape_geometry, [origin_stop, destin_stop]
-        )
+    
+    # change this to point
+    origin_destination_geom = wrangle_shapes.interpolate_projected_points(
+        shape_geometry, [origin_stop, destin_stop]
+    )
     
     return origin_stop, destin_stop, origin_destination_geom
 
@@ -236,26 +233,44 @@ def super_project(
         cumulative_distances,
         (origin_stop, destin_stop)
     )
-            
-    if len(cumulative_distances) < idx_shape_dist[-1]:
+    
+    # Normal case, let's grab that last point. 
+    # To do so, we need to set the index range to be 1 above that.
+    if len(cumulative_distances) > idx_shape_dist[-1]:
+        subset_shape_geom = subset_array_by_indices(
+            shape_coords_list, 
+            (idx_shape_dist[0], idx_shape_dist[-1])
+        )
+        
+    # Last stop case, where we need to grab all the shape coords up to that 
+    # stop, but just in case we run out of indices
+    # let's truncate by 1         
+    elif len(cumulative_distances) == idx_shape_dist[-1] + 1:
         subset_shape_geom = subset_array_by_indices(
             shape_coords_list, 
             (idx_shape_dist[0], idx_shape_dist[-2])
         )
-
-    else:
-         subset_shape_geom = subset_array_by_indices(
-            shape_coords_list, 
-            (idx_shape_dist[0], idx_shape_dist[-1])
-        )
     
     # Attach the origin and destination, otherwise the segment
     # will not reach the actual stops, but will just grab the trunk portion
-    subset_shape_geom_with_od = np.array(
-        [origin_destination_geom[0]] + 
-        subset_shape_geom + 
-        [origin_destination_geom[-1]]
-    )
+    
+    # Normal case
+    if origin_stop <= destin_stop:
+        subset_shape_geom_with_od = np.array(
+            [origin_destination_geom[0]] + 
+            subset_shape_geom + 
+            [origin_destination_geom[-1]]
+        )
+    
+    
+    # Special case, where bus is doubling back, we need to flip the 
+    # origin and destination points, but the inside should be in increasing order
+    elif origin_stop > destin_stop:        
+        subset_shape_geom_with_od = np.flip(np.array(
+            [origin_destination_geom[-1]] + 
+            subset_shape_geom + 
+            [origin_destination_geom[0]]
+        ))
     
     return subset_shape_geom_with_od, origin_destination_geom
 
