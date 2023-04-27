@@ -42,7 +42,7 @@ class VehiclePositionsInterpolator:
         self.debug_dict = {}
         self.position_type = 'rt'
         self.time_col = 'location_timestamp_local'
-        trip_info_cols = ['activity_date', 'trip_id', 'route_id', 'route_short_name',
+        trip_info_cols = ['service_date', 'trip_id', 'route_id', 'route_short_name',
                           'shape_id', 'direction_id', 'route_type', 'feed_key']
         # TODO add dataset keys for vp and sched?
         self.logassert(set(trip_info_cols).issubset(vp_trip_gdf.columns), f"vp_trip_gdf must contain columns: {trip_info_cols}")
