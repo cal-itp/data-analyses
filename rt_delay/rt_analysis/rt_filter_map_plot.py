@@ -34,12 +34,16 @@ class RtFilterMapper:
         # below line fixes interpolated segment mapping for 10/12 data, fixed upstream for future dates
         self.stop_delay_view = self.stop_delay_view >> group_by(_.shape_id) >> mutate(direction_id = _.direction_id.ffill()) >> ungroup()
         self.shapes = shapes
-        self.using_v2 = 'activity_date' in rt_trips.columns
+        self.using_v2 = 'organization_name' in rt_trips.columns
         if self.using_v2:
-            self.analysis_date = rt_trips.activity_date.iloc[0] #v2 warehouse
+            if 'activity_date' in rt_trips.columns:
+                # temporarily accomodate 3/15/22, 4/12/22 intermediates generated with activity_date
+                self.analysis_date = rt_trips.activity_date.iloc[0] #v2 warehouse
+            else:
+                self.analysis_date = rt_trips.service_date.iloc[0]
             self.organization_name = rt_trips.organization_name.iloc[0]
-        else:
-            self.analysis_date = rt_trips.service_date.iloc[0] #v1 compatibility
+        else: # v1 compatibility
+            self.analysis_date = rt_trips.service_date.iloc[0]
             self.organization_name = rt_trips.calitp_agency_name.iloc[0]
         self.display_date = self.analysis_date.strftime('%b %d, %Y (%a)')
         
