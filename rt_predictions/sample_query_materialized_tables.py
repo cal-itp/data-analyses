@@ -35,8 +35,8 @@ analysis_ts = dt.datetime.combine(analysis_date, dt.time(0))
 
 def get_service_levels():
     service_levels = (tbls.mart_gtfs.fct_daily_feed_scheduled_service_summary()
-                      >> filter(_.activity_date == analysis_date)
-                      >> select(_.activity_date, _.gtfs_dataset_key, _.ttl_service_hours)
+                      >> filter(_.service_date == analysis_date)
+                      >> select(_.service_date, _.gtfs_dataset_key, _.ttl_service_hours)
     )
     return service_levels
 
