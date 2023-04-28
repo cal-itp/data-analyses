@@ -26,6 +26,7 @@ import shapely
 import sys
 
 from loguru import logger
+from typing import Union
 
 from shared_utils import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling, wrangle_shapes
@@ -45,7 +46,7 @@ def stop_times_aggregated_to_shape_array_key(
     stop_times = helpers.import_scheduled_stop_times(
         analysis_date,
         columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"]
-    )
+    ).astype({"stop_sequence": "int16"})
 
     # Attach shapes 
     stop_times_with_shape = gtfs_schedule_wrangling.merge_shapes_to_stop_times(
@@ -82,6 +83,84 @@ def stop_times_aggregated_to_shape_array_key(
     return st_with_shape_stop_geom
 
 
+def tag_shapes_with_stops_visited_twice(
+    stop_times: Union[dd.DataFrame, dg.GeoDataFrame]
+) -> np.ndarray:
+    """
+    Aggregate stop times by shape_array_key.
+    For each stop_id, count how many stop_sequence values there are. 
+    More than 1 means that the same stop_id is revisited on the same trip.
+    
+    Ex: a stop in a plaza that acts as origin and destination.
+    """
+    stop_visits = (stop_times.groupby(
+                    ["shape_array_key", "stop_id"])
+                  .agg({"stop_sequence": "count"}) 
+                   #nunique doesn't work in dask
+                  .reset_index()
+                 )
+    
+    
+    # If any of the trips within that shape revisits a stop, keep that shape
+    loopy_shapes = (stop_visits[stop_visits.stop_sequence > 1]
+                    .shape_array_key
+                    .unique()
+                    .compute()
+                    .to_numpy()
+                 )
+    
+    return loopy_shapes
+
+
+def tag_shapes_with_inlining(
+    stop_times: Union[dd.DataFrame, dg.GeoDataFrame]
+) -> np.ndarray:
+    """
+    Rough estimate of inlining present in shapes. 
+    Based on stops projected onto the shape_geometry, tag any 
+    shapes where the stops are not monotonically increasing.
+    When stops are converted from coordinates to distances (shapely.project), 
+    it doesn't project neatly monotonically in the section of inlining, 
+    because a stop can be projected onto several coord options on the shape.
+    Any weirdness of values jumping around means we want to cut it with 
+    super_project.
+    """
+    # Keep relevant columns, which is only the projected stop geometry
+    # saved as shape_meters
+    stop_times2 = stop_times[["shape_array_key", 
+                              "stop_sequence", "shape_meters"]].compute()
+    
+    # Once we order it by stop sequence, save out shape_meters into a list
+    # and make the gdf wide
+    stop_times_wide = (stop_times2
+                       .sort_values(["shape_array_key", "stop_sequence"])
+                       .groupby("shape_array_key")
+                       .agg({"shape_meters": lambda x: list(x)})
+                       .reset_index()
+                      )
+    
+    # Once it's wide, we can check whether the array in each row is 
+    # monotonically increasing. If it's not, it's because the stop's projection 
+    # as shape_meters is jumping wildly, which could indicate there's inlining present
+    # first take the difference from prior value in the array
+    # if it's monotonically increasing, the difference is always positive. any negative 
+    # values indicates the value is fluctating.
+    is_monotonic = [
+        np.all(np.diff(shape_meters_arr) > 0) 
+        for shape_meters_arr in stop_times_wide.shape_meters
+    ]
+    
+    # About 1/6 of the 6,000 shapes gets tagged as being False
+    stop_times_wide = stop_times_wide.assign(
+        is_monotonic = is_monotonic
+    )
+    
+    inlining_shapes = stop_times_wide[stop_times_wide.is_monotonic == False
+                                     ].shape_array_key.unique()
+
+    return inlining_shapes
+
+
 def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
     trips_with_geom = gtfs_schedule_wrangling.get_trips_with_geom(
         analysis_date)
@@ -102,86 +181,23 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
     # Attach dask array as a column
     stop_times_with_geom["shape_meters"] = shape_meters_geoseries
     
-    # Drop stop geometry, now that we have shape_meters
-    # We can easily merge stop geom back in...but keeping it
-    # will make this gdf too large with 2 geometry columns
-    stop_times_with_geom = stop_times_with_geom.drop(columns = ["stop_geometry"])
+    stop_times_with_geom = stop_times_with_geom.repartition(npartitions=4)
+    
+    # Get the arrays of shape_array_keys to flag
+    loopy_shapes = tag_shapes_with_stops_visited_twice(stop_times_with_geom)
+    inlining_shapes = tag_shapes_with_inlining(stop_times_with_geom)
+    
+    # Create column where it's 1 if it needs super_project, 
+    # 0 for normal shapely.project   
+    stop_times_with_geom = stop_times_with_geom.assign(
+        loop_or_inlining = stop_times_with_geom.apply(
+            lambda x: 
+            1 if x.shape_array_key in np.union1d(loopy_shapes, inlining_shapes)
+            else 0, axis=1, 
+            meta = ('loop_or_inlining', 'int8'))
+    )
     
     return stop_times_with_geom
-
-
-def transform_wide_by_shape_array_key(
-    gdf: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
-    """
-    Make the gdf wide so that we can save certain columns as arrays or lists.
-    """
-    shape_cols = ["shape_array_key"]
-    
-    unique_shapes = (gdf
-                     [shape_cols + ["geometry"]]
-                     .drop_duplicates()
-                    )
-    
-    gdf_wide = (gdf.groupby(shape_cols)
-                .agg({
-                    "shape_meters": lambda x: list(x), 
-                    "stop_sequence": lambda x: list(x)
-                }).reset_index()
-               )
-    
-    gdf_wide2 = pd.merge(
-        unique_shapes,
-        gdf_wide,
-        on = shape_cols,
-        how = "inner"
-    )
-    
-    gdf_wide3 = add_columns_with_projected_coords_for_shape_geom(gdf_wide2)
-    
-    return gdf_wide3
-
-
-def add_columns_with_projected_coords_for_shape_geom(
-    gdf_wide: gpd.GeoDataFrame) -> gpd.GeoDataFrame: 
-    """
-    Add 2 columns, one with the stop's "break" / where we want to cut
-    points with the shape's start/end distances and 
-    all the distances along a shape's coordinate sequence
-    Expand the shape's line geom to get the projected distances
-    """
-    stop_break_distances = []
-    shape_path_distances = []
-    
-    for row in gdf_wide.itertuples():
-        stop_breaks = getattr(row, "shape_meters")
-        shape_geom = getattr(row, "geometry")
-        
-        stop_breaks_with_endpoints = np.unique(
-            np.array(
-                [0] + list(stop_breaks) + [shape_geom.length]
-            )
-        )
-        
-        stop_break_distances.append(stop_breaks_with_endpoints)
-        
-        # Get all the distances for all the 
-        # coordinate points included in shape line geom
-        shape_path_dist = np.unique(
-            np.array(
-                [shape_geom.project(shapely.geometry.Point(p)) 
-                for p in shape_geom.coords]
-            )
-        )
-    
-        shape_path_distances.append(shape_path_dist)
-    
-    gdf_wide2 = gdf_wide.assign(
-        stop_break_distances = stop_break_distances,
-        shape_distances = shape_path_distances
-    )
-    
-    return gdf_wide2
 
 
 if __name__=="__main__":
@@ -201,31 +217,16 @@ if __name__=="__main__":
     
     start = datetime.datetime.now()
     
-    stops_by_shape = prep_stop_segments(analysis_date).compute()
+    stops_by_shape = prep_stop_segments(analysis_date)
     
     time1 = datetime.datetime.now()
     logger.info(f"Prep stop segment df: {time1-start}")
     
-    utils.geoparquet_gcs_export(
-        stops_by_shape,
-        SEGMENT_GCS,
-        f"stops_projected_{analysis_date}"
+    # Export this as partitioned parquet
+    stops_by_shape.to_parquet(
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}", overwrite=True
     )
-    
-    stops_by_shape = gpd.read_parquet(
-        f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet")
-    # Turn df from long to wide (just 1 row per shape_array_key)
-    stops_by_shape_wide = transform_wide_by_shape_array_key(stops_by_shape)
-    
-    time2 = datetime.datetime.now()
-    logger.info(f"Make stop segment wide: {time2-time1}")
-    
-    utils.geoparquet_gcs_export(
-        stops_by_shape_wide,
-        SEGMENT_GCS,
-        f"stops_projected_wide_{analysis_date}"
-    )
-       
+   
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
     

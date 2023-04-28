@@ -26,7 +26,7 @@ def interpolate_projected_points(
 
 def project_list_of_coords(
     shape_geometry: shapely.geometry.LineString,
-    point_geom_list: list,
+    point_geom_list: list = [],
     use_shapely_coords: bool = False
 ) -> np.ndarray:
     if use_shapely_coords:
