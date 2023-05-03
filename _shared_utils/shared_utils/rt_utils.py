@@ -322,7 +322,8 @@ def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None)
         tbls.mart_transit_database.dim_provider_gtfs_data()
         >> filter(_._valid_from <= analysis_dt, _._valid_to >= analysis_dt)
         >> filter(
-            _.reports_site_assessed, _.organization_itp_id == itp_id, _.vehicle_positions_gtfs_dataset_key != None
+            _.public_customer_facing_or_regional_subfeed_fixed_route,
+            _.organization_itp_id == itp_id, _.vehicle_positions_gtfs_dataset_key != None
         )
         >> inner_join(_, daily_service, by="schedule_gtfs_dataset_key")
         >> filter(_.service_date == analysis_date)
