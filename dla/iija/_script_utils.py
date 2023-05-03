@@ -16,6 +16,8 @@ import dla_utils
 
 from calitp_data_analysis.sql import to_snakecase
 
+import _data_utils
+
 # import nltk
 # from nltk.corpus import stopwords
 # from nltk.tokenize import word_tokenize, sent_tokenize
@@ -35,50 +37,13 @@ def title_column_names(df):
 
 
 
-def read_data_all():
-    proj = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/CopyofFMIS_Projects_Universe_IIJA_Reporting_4.xls", 
-                           # sheet_name='FMIS 5 Projects  ', header=[3]
-                           sheet_name='IIJA',
-                           # sheet_name='FMIS 5 Projects  ',
-                           ))
-    proj.drop(columns =['unnamed:_0', 'unnamed:_13', 'unnamed:_14'], axis=1, inplace=True)
-    proj = proj.dropna(how='all') 
-    proj['summary_recipient_defined_text_field_1_value'] = proj['summary_recipient_defined_text_field_1_value'].fillna(value='None')
-    
-    new_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/FY21-22ProgramCodesAsOf5-25-2022.v2.xlsx"))
-    code_map = dict(new_codes[['iija_program_code', 'new_description']].values)
-    proj['program_code_description'] = proj.program_code.map(code_map)
-    
-    return proj
-
-#for use in the following function identify_agency
-def add_name_from_locode(df, df_locode_extract_col):
-    #read in locode sheet
-    locodes = to_snakecase(pd.read_excel(f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
-    
-    #extract locode, make sure it i has the same spots
-    df['locode'] = df[df_locode_extract_col].apply(lambda x: x[1:5])
-    #make sure locode column is numeric
-    df['locode'] = pd.to_numeric(df['locode'], errors='coerce')
-    
-    #merge
-    df_all = (pd.merge(df, locodes, left_on='locode', right_on='agency_locode', how='left'))
-    
-    df_all = df_all.rename(columns={'agency_name':'implementing_agency',
-                                   'locode':'implementing_agency_locode'})
-    
-    #if we use other locode list then drop these columns
-    df_all.drop(columns =['active_e76s______7_12_2021_', 'mpo_locode_fads', 'agency_locode'], axis=1, inplace=True)
-        
-    return df_all
-
 #add project information for all projects
 def identify_agency(df, identifier_col):
     #projects wtih locodes
     locode_proj = ((df[~df[identifier_col].str.contains(" ")]))
     locode_proj = locode_proj>>filter(_[identifier_col]!='None')
     
-    locode_proj = (add_name_from_locode(locode_proj, 'summary_recipient_defined_text_field_1_value'))
+    locode_proj = (_data_utils.add_name_from_locode(locode_proj, 'summary_recipient_defined_text_field_1_value'))
     
 
     #projects with no locodes
@@ -140,9 +105,11 @@ def condense_df(df):
     # aggreate df using .agg function and join in the unique values into one row
     df_agg = (df
            .assign(count=1)
-           .groupby(['fmis_transaction_date','project_number', 'implementing_agency', 'summary_recipient_defined_text_field_1_value'])
-           .agg({'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate
-                 'program_code_description':lambda x:'|'.join(x.unique()), # get unique values to concatenate
+           .groupby(['fmis_transaction_date','project_number', 'implementing_agency', 'summary_recipient_defined_text_field_1_value'
+                    , 'program_code', 'program_code_description'])
+           .agg({
+                 # 'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate                ##hasing this out to group by instead
+                 # 'program_code_description':lambda x:'|'.join(x.unique()), # get unique values to concatenate    ##hasing this out to group by instead
                  'recipient_project_number':lambda x:'|'.join(x.unique()), #'first',
                  'improvement_type':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'improvement_type_description':lambda x:'|'.join(x.unique()),  # get unique values to concatenate
@@ -387,7 +354,7 @@ def get_new_desc_title(df):
 def add_new_description_col(df):
     df["obligations_amount_string"] = df["obligations_amount"].astype(str)
     
-    df["new_description_col"] = df["program_code_description"] + " for $" + df["obligations_amount_string"]
+    df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $ " + df["obligations_amount_string"] + ". This project will " + df["project_title_new"]
     
     df.drop(columns =['obligations_amount_string'], axis=1, inplace=True)
     
@@ -409,9 +376,7 @@ def get_clean_data(df, full_or_agg = ''):
     '''
     
     if full_or_agg == 'agg':
-        
-        ## function reads in data from GCS
-        # df = read_data_all()
+
     
         ## function that adds known agency name to df 
         # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
@@ -426,8 +391,6 @@ def get_clean_data(df, full_or_agg = ''):
         return aggdf
     
     elif full_or_agg == 'full':
-        ## function reads in data from GCS
-        # df = read_data_all()
     
         ## function that adds known agency name to df 
         # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
