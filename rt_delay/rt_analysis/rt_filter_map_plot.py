@@ -37,11 +37,13 @@ class RtFilterMapper:
         self.using_v2 = 'organization_name' in rt_trips.columns
         if self.using_v2:
             if 'activity_date' in rt_trips.columns:
-                # temporarily accomodate 3/15/22, 4/12/22 intermediates generated with activity_date
-                self.analysis_date = rt_trips.activity_date.iloc[0] #v2 warehouse
-            else:
+                raise Exception('rerun intermediate data')
+            #     # temporarily accomodate 3/15/22, 4/12/22 intermediates generated with activity_date
+            #     self.analysis_date = rt_trips.activity_date.iloc[0] #v2 warehouse
+            else:s
                 self.analysis_date = rt_trips.service_date.iloc[0]
             self.organization_name = rt_trips.organization_name.iloc[0]
+            self.caltrans_district = self.rt_trips.caltrans_district.iloc[0]
         else: # v1 compatibility
             self.analysis_date = rt_trips.service_date.iloc[0]
             self.organization_name = rt_trips.calitp_agency_name.iloc[0]
