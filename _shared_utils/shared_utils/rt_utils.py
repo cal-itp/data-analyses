@@ -318,20 +318,27 @@ def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None)
         _.schedule_gtfs_dataset_key == _.gtfs_dataset_key, _.feed_key, _.service_date
     )
 
+    dim_orgs = (
+        tbls.mart_transit_database.dim_organizations()
+        >> filter(_._valid_from <= analysis_dt, _._valid_to > analysis_dt)
+        >> select(_.source_record_id, _.caltrans_district)
+    )
+
     org_feeds_datasets = (
         tbls.mart_transit_database.dim_provider_gtfs_data()
         >> filter(_._valid_from <= analysis_dt, _._valid_to >= analysis_dt)
         >> filter(
-            _.public_customer_facing_or_regional_subfeed_fixed_route,
-            _.organization_itp_id == itp_id, _.vehicle_positions_gtfs_dataset_key != None
+            _.public_customer_facing_or_regional_subfeed_fixed_route, _.vehicle_positions_gtfs_dataset_key != None
         )
         >> inner_join(_, daily_service, by="schedule_gtfs_dataset_key")
+        >> inner_join(_, dim_orgs, on={"organization_source_record_id": "source_record_id"})
         >> filter(_.service_date == analysis_date)
         >> select(
             _.feed_key,
             _.schedule_gtfs_dataset_key,
             _.vehicle_positions_gtfs_dataset_key,
             _.organization_itp_id,
+            _.caltrans_district,
             _.organization_name,
             _.service_date,
         )
