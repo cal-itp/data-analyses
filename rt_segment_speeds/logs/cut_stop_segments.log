@@ -11,3 +11,7 @@
 2023-04-03 09:45:08.714 | INFO     | __main__:<module>:251 - Cut stop segments: 0:03:27.996436
 2023-04-03 09:45:56.279 | INFO     | __main__:<module>:264 - Add arrowized geometry and rt_dataset_key: 0:00:47.565150
 2023-04-03 09:46:04.479 | INFO     | __main__:<module>:273 - execution time: 0:04:23.761136
+2023-05-03 14:03:42.760 | INFO     | __main__:<module>:222 - Analysis date: 2023-03-15
+2023-05-03 14:04:01.383 | INFO     | __main__:<module>:256 - Cut stop segments: 0:00:18.623015
+2023-05-03 14:13:43.641 | INFO     | __main__:<module>:271 - Export results: 0:09:42.258069
+2023-05-03 14:13:43.642 | INFO     | __main__:<module>:289 - execution time: 0:10:00.881736

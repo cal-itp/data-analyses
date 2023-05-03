@@ -1,4 +1,5 @@
 from . import (
+    array_utils,
     gtfs_schedule_wrangling,
     helpers,
     sched_rt_utils,
@@ -8,6 +9,7 @@ from . import (
 )
 
 __all__ = [
+    "array_utils",
     "gtfs_schedule_wrangling",
     "helpers",
     "sched_rt_utils",
