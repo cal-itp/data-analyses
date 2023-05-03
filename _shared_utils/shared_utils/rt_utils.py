@@ -328,7 +328,7 @@ def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None)
         >> filter(_._valid_from <= analysis_dt, _._valid_to >= analysis_dt)
         >> filter(
             _.public_customer_facing_or_regional_subfeed_fixed_route,
-            _.organization_itp_id == itp_id, _.vehicle_positions_gtfs_dataset_key != None
+            _.vehicle_positions_gtfs_dataset_key != None
         )
         >> inner_join(_, daily_service, by="schedule_gtfs_dataset_key")
         >> inner_join(_, dim_orgs, on = {'organization_source_record_id': 'source_record_id'})
