@@ -37,11 +37,19 @@ class RtFilterMapper:
         self.using_v2 = 'organization_name' in rt_trips.columns
         if self.using_v2:
             if 'activity_date' in rt_trips.columns:
+                # raise Exception('rerun intermediate data')
                 # temporarily accomodate 3/15/22, 4/12/22 intermediates generated with activity_date
                 self.analysis_date = rt_trips.activity_date.iloc[0] #v2 warehouse
             else:
                 self.analysis_date = rt_trips.service_date.iloc[0]
             self.organization_name = rt_trips.organization_name.iloc[0]
+            self.caltrans_district = self.rt_trips.caltrans_district.iloc[0]
+            self.ct_dist_numeric = int(self.caltrans_district.split(' ')[0])
+            self.shn = (gpd.read_parquet(SHN_PATH)
+                        >> select(_.Route, _.County, _.District,
+                                  _.RouteType, _.geometry)
+                        >> filter(_.District == self.ct_dist_numeric)
+                       )
         else: # v1 compatibility
             self.analysis_date = rt_trips.service_date.iloc[0]
             self.organization_name = rt_trips.calitp_agency_name.iloc[0]
@@ -273,7 +281,7 @@ class RtFilterMapper:
     
     def segment_speed_map(self, segments = 'stops', how = 'low_speeds',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
-                         no_title = False, corridor = False):
+                         no_title = False, corridor = False, shn = False):
         ''' Generate a map of segment speeds aggregated across all trips for each shape, either as averages
         or 20th percentile speeds.
         
@@ -363,12 +371,12 @@ class RtFilterMapper:
             export_path = f'{GCS_FILE_PATH}{subfolder}'
             if self._time_only_filter and self.filter_period in cached_periods:
                 shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
-        self.speed_map_params = (how, colorscale, size, no_title, corridor)
+        self.speed_map_params = (how, colorscale, size, no_title, corridor, shn)
         return self._show_speed_map()
     
     def _show_speed_map(self):
         
-        how, colorscale, size, no_title, corridor = self.speed_map_params
+        how, colorscale, size, no_title, corridor, shn = self.speed_map_params
         gdf = self.stop_segment_speed_view.copy()
         # essential here for reasonable map size!
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
@@ -422,7 +430,12 @@ class RtFilterMapper:
             title = f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}"
         colorscale.caption = "Speed (miles per hour)"
         style_dict = {'opacity': 0, 'fillOpacity': 0.8}
-
+        if shn:
+            m = self.shn.explore(tiles = 'CartoDB positron', color = 'gray',
+                                 width = size[0], height = size[1], zoom_start = 13,
+                                 location = centroid)
+        else:
+            m = None
         g = gdf.explore(column=how_speed_col[how],
                         cmap = colorscale,
                         tiles = 'CartoDB positron',
@@ -431,7 +444,7 @@ class RtFilterMapper:
                         tooltip_kwds = tooltip_dict, popup_kwds = tooltip_dict,
                         highlight_kwds = {'fillColor': '#DD1C77',"fillOpacity": 0.6},
                         width = size[0], height = size[1], zoom_start = 13,
-                        location = centroid)
+                        location = centroid, m = m)
         
         title_html = f"""
          <h3 align="center" style="font-size:20px"><b>{title}</b></h3>

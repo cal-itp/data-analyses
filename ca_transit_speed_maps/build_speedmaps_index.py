@@ -27,7 +27,8 @@ def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
     
     orgs_with_vp = (tbls.mart_transit_database.dim_provider_gtfs_data()
     >> filter(_._valid_from <= analysis_dt, _._valid_to > analysis_dt,
-              _.reports_site_assessed, _.vehicle_positions_gtfs_dataset_key != None)
+              _.public_customer_facing_or_regional_subfeed_fixed_route,
+              _.vehicle_positions_gtfs_dataset_key != None)
     >> inner_join(_, dim_orgs, on = {'organization_source_record_id': 'source_record_id'})
     >> select(_.organization_itp_id, _.organization_name, _.organization_source_record_id,
              _.caltrans_district, _._is_current, _.vehicle_positions_gtfs_dataset_key)

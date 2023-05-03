@@ -254,6 +254,7 @@ class OperatorDayAnalysis:
 
         self._generate_stop_delay_view()
         self.rt_trips['organization_name'] = self.index_df.organization_name.iloc[0]
+        self.rt_trips['caltrans_district'] = self.index_df.caltrans_district.iloc[0]
         
     def _ix_from_routeline(self, routeline):
         try:
