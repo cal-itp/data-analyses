@@ -27,5 +27,3 @@
 2023-05-03 19:03:25.878 | INFO     | __main__:<module>:262 - Analysis date: 2023-03-15
 2023-05-03 19:03:42.303 | INFO     | __main__:<module>:294 - Cut special stop segments: 0:00:16.424538
 2023-05-03 19:48:44.626 | INFO     | __main__:<module>:309 - Export results: 0:45:02.322140
-2023-05-04 09:03:29.739 | INFO     | __main__:<module>:270 - Analysis date: 2023-03-15
-2023-05-04 09:03:43.683 | INFO     | __main__:<module>:302 - Cut special stop segments: 0:00:13.870173

@@ -13,7 +13,7 @@ from loguru import logger
 
 import cut_normal_stop_segments
 from shared_utils import utils
-from segment_speed_utils import array_utils, wrangle_shapes
+from segment_speed_utils import array_utils, sched_rt_utils, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
 
@@ -236,7 +236,7 @@ def super_project_and_cut_segments_for_one_shape(
                   for i in segment_results]
     
     keep_cols = [
-        "shape_array_key", "stop_segment_geometry", 
+        "feed_key", "shape_array_key", "stop_segment_geometry", 
         "stop_id", "stop_sequence"
     ]
     
@@ -309,6 +309,8 @@ if __name__ == "__main__":
                    .sort_values(["shape_array_key", "stop_sequence"])
                    .reset_index(drop=True)
                   )
+    
+    results_gdf = cut_normal_stop_segments.finalize_stop_segments(results_gdf)
     
     utils.geoparquet_gcs_export(
         results_gdf,

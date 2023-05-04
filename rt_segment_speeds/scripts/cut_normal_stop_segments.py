@@ -15,7 +15,7 @@ import sys
 from loguru import logger
 
 from shared_utils import utils
-from segment_speed_utils import helpers, sched_rt_utils, wrangle_shapes
+from segment_speed_utils import sched_rt_utils, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               PROJECT_CRS, CONFIG_PATH)
 
@@ -161,7 +161,7 @@ def project_and_cut_segments_for_one_shape(
     # Leave as list, then set CRS here
     
     keep_cols = [
-        "shape_array_key", "stop_segment_geometry", 
+        "feed_key", "shape_array_key", "stop_segment_geometry", 
         "stop_id", "stop_sequence"
     ]
     
@@ -176,40 +176,23 @@ def project_and_cut_segments_for_one_shape(
     
     
 def finalize_stop_segments(
-    stops_long: gpd.GeoDataFrame,
     stop_segments: gpd.GeoDataFrame, 
 ):
-    """
-    Finalize stop segments by merging the "long" stops file with 
-    the associated segments.
-    For a given stop, the segment associated is the portion from the prior
-    stop to the current stop.
-    
+    """    
     Arrowize geometry and also add gtfs_dataset_key.
-    """
-    stops_with_segments = pd.merge(
-        stops_long.drop(columns = "geometry"),
-        stop_segments,
-        on = ["shape_array_key", "shape_meters"],
-        # we want to keep left only, because in generating 
-        # stop segments, we intentionally skipped first stop, 
-        # so there's definitely going to be left_only observations
-        how = "left",
-        validate = "m:1",
-    ).set_geometry("geometry")
-    
+    """    
     # Add gtfs_dataset_key to this segment data (from schedule)
     stop_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
-        stops_with_segments, 
+        stop_segments, 
         analysis_date, 
         ["feed_key", "shape_array_key"]
     )
     
     # arrowize
-    arrowized_segments = wrangle_shapes.add_arrowized_geometry(
-        stop_segments_with_rt_key)
+    #arrowized_segments = wrangle_shapes.add_arrowized_geometry(
+    #    stop_segments_with_rt_key)
 
-    return arrowized_segments
+    return stop_segments_with_rt_key
     
     
 if __name__ == "__main__":
@@ -267,8 +250,10 @@ if __name__ == "__main__":
                    .reset_index(drop=True)
                   )
     
+    results_gdf = finalize_stop_segments(results_gdf)
+    
     utils.geoparquet_gcs_export(
-        results_gdf,
+        results_gdf_with_rt_key,
         SEGMENT_GCS,
         f"stop_segments_normal_{analysis_date}"
     )
@@ -276,20 +261,5 @@ if __name__ == "__main__":
     time2 = datetime.datetime.now()
     logger.info(f"Export results: {time2-time1}")
     
-    '''
-    arrowized_segments = finalize_stop_segments(
-        stops_projected, 
-        stop_segments
-    )
-    
-    time2 = datetime.datetime.now()
-    logger.info(f"Add arrowized geometry and rt_dataset_key: {time2-time1}")
-    
-    utils.geoparquet_gcs_export(
-        arrowized_segments,
-        SEGMENT_GCS,
-        f"{EXPORT_FILE}_{analysis_date}"
-    )
-    '''
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
