@@ -6,7 +6,6 @@ import shared_utils
 
 import pandas as pd
 import geopandas as gpd
-from siuba import *
 
 pd.set_option('display.max_columns', None) 
 
@@ -19,7 +18,7 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/safety_projects/"
 
 def join_crash_encamp():
     # load aggregated crashes
-    crashes = gpd.read_parquet(f'{GCS_FILE_PATH}pedcrashes_agg.parquet')
+    crashes = gpd.read_parquet(f'{GCS_FILE_PATH}pedbikecrashes_agg.parquet')
 
     # load aggregated encampments
     encampments = gpd.read_parquet(f'{GCS_FILE_PATH}encampments_agg.parquet')
@@ -41,4 +40,6 @@ if __name__ == "__main__":
     #print some info in the terminal to verify
     crashes_encampments_agg.info()
     # export geojson for ArcGIS Pro
-    shared_utils.utils.geojson_gcs_export(crashes_encampments_agg.drop("geometry_y", axis=1), GCS_FILE_PATH, "analytical_file_joined")  
+    shared_utils.utils.geojson_gcs_export(crashes_encampments_agg.drop("geometry_y", axis=1), GCS_FILE_PATH, "analytical_file_joined")
+    # export parquet for overall stats
+    shared_utils.utils.geoparquet_gcs_export(crashes_encampments_agg, GCS_FILE_PATH, "analytical_file_joined")
