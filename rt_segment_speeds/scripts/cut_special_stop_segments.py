@@ -237,7 +237,7 @@ def super_project_and_cut_segments_for_one_shape(
     
     keep_cols = [
         "feed_key", "shape_array_key", "stop_segment_geometry", 
-        "stop_id", "stop_sequence"
+        "stop_id", "stop_sequence", "loop_or_inlining"
     ]
     
     gdf2 = (gdf2.assign(
@@ -273,9 +273,6 @@ if __name__ == "__main__":
     logger.info(f"Analysis date: {analysis_date}")
     
     start = datetime.datetime.now()
-
-    #STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    #EXPORT_FILE = STOP_SEG_DICT["segments_file"]
     
     # Get list of shapes that go through normal stop segment cutting
     shapes_to_cut = pd.read_parquet(
