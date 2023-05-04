@@ -162,7 +162,7 @@ def project_and_cut_segments_for_one_shape(
     
     keep_cols = [
         "feed_key", "shape_array_key", "stop_segment_geometry", 
-        "stop_id", "stop_sequence"
+        "stop_id", "stop_sequence", "loop_or_inlining"
     ]
     
     gdf2 = (gdf.assign(
@@ -179,7 +179,7 @@ def finalize_stop_segments(
     stop_segments: gpd.GeoDataFrame, 
 ):
     """    
-    Arrowize geometry and also add gtfs_dataset_key.
+    Add gtfs_dataset_key.
     """    
     # Add gtfs_dataset_key to this segment data (from schedule)
     stop_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
@@ -187,10 +187,6 @@ def finalize_stop_segments(
         analysis_date, 
         ["feed_key", "shape_array_key"]
     )
-    
-    # arrowize
-    #arrowized_segments = wrangle_shapes.add_arrowized_geometry(
-    #    stop_segments_with_rt_key)
 
     return stop_segments_with_rt_key
     

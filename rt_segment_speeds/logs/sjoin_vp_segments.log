@@ -43,3 +43,6 @@
 2023-04-03 11:39:19.999 | INFO     | __main__:<module>:305 - attach vp to route segments: 1:08:26.639548
 2023-04-03 13:03:12.904 | INFO     | __main__:<module>:319 - attach vp to stop-to-stop segments: 1:23:52.905197
 2023-04-03 13:03:12.906 | INFO     | __main__:<module>:322 - execution time: 2:32:19.546712
+2023-05-04 11:40:56.643 | INFO     | __main__:<module>:285 - Analysis date: 2023-03-15
+2023-05-04 13:51:45.697 | INFO     | __main__:<module>:320 - attach vp to stop-to-stop segments: 2:10:49.049663
+2023-05-04 13:51:45.698 | INFO     | __main__:<module>:323 - execution time: 2:10:49.054779
