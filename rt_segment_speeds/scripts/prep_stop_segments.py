@@ -29,7 +29,8 @@ from loguru import logger
 from typing import Union
 
 from shared_utils import utils
-from segment_speed_utils import helpers, gtfs_schedule_wrangling, wrangle_shapes
+from segment_speed_utils import (helpers, gtfs_schedule_wrangling,
+                                 wrangle_shapes)
 from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
 

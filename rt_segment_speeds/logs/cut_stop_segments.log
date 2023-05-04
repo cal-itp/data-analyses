@@ -12,6 +12,20 @@
 2023-04-03 09:45:56.279 | INFO     | __main__:<module>:264 - Add arrowized geometry and rt_dataset_key: 0:00:47.565150
 2023-04-03 09:46:04.479 | INFO     | __main__:<module>:273 - execution time: 0:04:23.761136
 2023-05-03 14:03:42.760 | INFO     | __main__:<module>:222 - Analysis date: 2023-03-15
-2023-05-03 14:04:01.383 | INFO     | __main__:<module>:256 - Cut stop segments: 0:00:18.623015
+2023-05-03 14:04:01.383 | INFO     | __main__:<module>:256 - Cut normal stop segments: 0:00:18.623015
 2023-05-03 14:13:43.641 | INFO     | __main__:<module>:271 - Export results: 0:09:42.258069
 2023-05-03 14:13:43.642 | INFO     | __main__:<module>:289 - execution time: 0:10:00.881736
+2023-05-03 15:44:29.207 | INFO     | __main__:<module>:262 - Analysis date: 2023-03-15
+2023-05-03 15:44:42.556 | INFO     | __main__:<module>:294 - Cut special stop segments: 0:00:13.349184
+2023-05-03 15:49:04.507 | INFO     | __main__:<module>:266 - Analysis date: 2023-03-15
+2023-05-03 15:49:18.307 | INFO     | __main__:<module>:298 - Cut special stop segments: 0:00:13.799021
+2023-05-03 15:51:49.786 | INFO     | __main__:<module>:266 - Analysis date: 2023-03-15
+2023-05-03 15:52:04.591 | INFO     | __main__:<module>:298 - Cut special stop segments: 0:00:14.804545
+2023-05-03 15:53:49.549 | INFO     | __main__:<module>:266 - Analysis date: 2023-03-15
+2023-05-03 15:54:02.866 | INFO     | __main__:<module>:298 - Cut special stop segments: 0:00:13.316102
+2023-05-03 16:37:56.701 | INFO     | __main__:<module>:313 - Export results: 0:43:53.835077
+2023-05-03 19:03:25.878 | INFO     | __main__:<module>:262 - Analysis date: 2023-03-15
+2023-05-03 19:03:42.303 | INFO     | __main__:<module>:294 - Cut special stop segments: 0:00:16.424538
+2023-05-03 19:48:44.626 | INFO     | __main__:<module>:309 - Export results: 0:45:02.322140
+2023-05-04 09:03:29.739 | INFO     | __main__:<module>:270 - Analysis date: 2023-03-15
+2023-05-04 09:03:43.683 | INFO     | __main__:<module>:302 - Cut special stop segments: 0:00:13.870173

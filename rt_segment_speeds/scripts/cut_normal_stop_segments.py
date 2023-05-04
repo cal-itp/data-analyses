@@ -159,9 +159,15 @@ def project_and_cut_segments_for_one_shape(
     # Note: if we change step 5 to a geoseries (with CRS), 
     # we lose the shapely objects, and it's a geoseries of None geometries. 
     # Leave as list, then set CRS here
+    
+    keep_cols = [
+        "shape_array_key", "stop_segment_geometry", 
+        "stop_id", "stop_sequence"
+    ]
+    
     gdf2 = (gdf.assign(
         stop_segment_geometry = subset_shape_geom_ls
-        ).drop(columns = "geometry")
+        )[keep_cols]
         .set_geometry("stop_segment_geometry")
         .set_crs(gdf.crs)
     )
@@ -253,7 +259,7 @@ if __name__ == "__main__":
         results.append(segments)
     
     time1 = datetime.datetime.now()
-    logger.info(f"Cut stop segments: {time1-start}")
+    logger.info(f"Cut normal stop segments: {time1-start}")
     
     results2 = [compute(i)[0] for i in results]
     results_gdf = (pd.concat(results2, axis=0)
