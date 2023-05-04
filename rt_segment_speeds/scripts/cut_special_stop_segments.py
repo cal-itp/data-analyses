@@ -1,14 +1,22 @@
-import folium
+"""
+Use super_project() to cut loopy or inlining routes.
+"""
+import datetime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
+import sys
 
-from segment_speed_utils import wrangle_shapes
+from dask import delayed, compute
+from loguru import logger
 
-#-------------------------------------------------------#
-#
-#-------------------------------------------------------#
+import cut_normal_stop_segments
+from shared_utils import utils
+from segment_speed_utils import array_utils, wrangle_shapes
+from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
+
+
 def get_shape_components(
     shape_geometry: shapely.geometry.LineString,
 ) -> tuple:
@@ -86,11 +94,6 @@ def adjust_stop_start_end_for_special_cases(
         origin_stop = start_stop
         destin_stop = start_stop - distance_between_stops
         
-    # Flip this so when we order the subset of points, we 
-    # correctly append the origin to the shape_coords_list 
-    # (which is destination, since it has a lower value)
-    # TODO: the flip of this doesn't happen here, it happens when we
-    # get subset of shape_coords_list
     
     # Case at origin, where there is no prior stop to look for
     elif start_stop == end_stop:
@@ -111,7 +114,9 @@ def super_project(
     stop_geometry_array: np.ndarray,
     stop_sequence_array: np.ndarray,
 ):
+    """
     
+    """
     shape_coords_list, cumulative_distances = get_shape_components(
         shape_geometry)
 
@@ -119,7 +124,7 @@ def super_project(
     # just flanking it (prior and subsequent).
     # this is important especially because stop_sequence does not have 
     # to be increasing in increments of 1, but it has to be monotonically increasing
-    subset_seq = include_prior(
+    subset_seq = array_utils.include_prior(
         stop_sequence_array, current_stop_seq)
     
     #https://stackoverflow.com/questions/31789187/find-indices-of-large-array-if-it-contains-values-in-smaller-array
@@ -128,7 +133,7 @@ def super_project(
     
     # (2) Grab relevant subset based on stop sequence values to get stop geometry subset
     # https://stackoverflow.com/questions/5508352/indexing-numpy-array-with-another-numpy-array    
-    subset_stop_geom = subset_array_by_indices(
+    subset_stop_geom = array_utils.subset_array_by_indices(
         stop_geometry_array,
         (idx_stop_seq[0], idx_stop_seq[-1])
     )
@@ -151,27 +156,33 @@ def super_project(
         
     # (5) Find the subset from cumulative distances
     # that is in between our origin stop and destination stop
-    idx_shape_dist = cut_shape_by_origin_destination(
+    idx_shape_dist = array_utils.cut_shape_by_origin_destination(
         cumulative_distances,
         (origin_stop, destin_stop)
     )
     
-    # Normal case, let's grab that last point. 
-    # To do so, we need to set the index range to be 1 above that.
-    if len(cumulative_distances) > idx_shape_dist[-1]:
-        subset_shape_geom = subset_array_by_indices(
-            shape_coords_list, 
-            (idx_shape_dist[0], idx_shape_dist[-1])
-        )
-        
+    # TODO: how often does this occur?
+    if len(idx_shape_dist) == 0:
+        subset_shape_geom = []
+    
     # Last stop case, where we need to grab all the shape coords up to that 
     # stop, but just in case we run out of indices
     # let's truncate by 1         
     elif len(cumulative_distances) == idx_shape_dist[-1] + 1:
-        subset_shape_geom = subset_array_by_indices(
+        subset_shape_geom = array_utils.subset_array_by_indices(
             shape_coords_list, 
             (idx_shape_dist[0], idx_shape_dist[-2])
         )
+    
+    # Normal case, let's grab that last point. 
+    # To do so, we need to set the index range to be 1 above that.
+    else:
+        #len(cumulative_distances) > idx_shape_dist[-1]:
+        subset_shape_geom = array_utils.subset_array_by_indices(
+            shape_coords_list, 
+            (idx_shape_dist[0], idx_shape_dist[-1])
+        )
+        
     
     # Attach the origin and destination, otherwise the segment
     # will not reach the actual stops, but will just grab the trunk portion
@@ -187,48 +198,124 @@ def super_project(
     
     # Special case, where bus is doubling back, we need to flip the 
     # origin and destination points, but the inside should be in increasing order
-    elif origin_stop > destin_stop:        
-        subset_shape_geom_with_od = np.flip(np.array(
-            [origin_destination_geom[-1]] + 
-            subset_shape_geom + 
-            [origin_destination_geom[0]]
-        ))
+    else: 
+        # elif origin_stop > destin_stop:        
+        subset_shape_geom_with_od = np.flip(
+            np.array(
+                [origin_destination_geom[-1]] + 
+                subset_shape_geom + 
+                [origin_destination_geom[0]]
+            )
+        )
     
     return subset_shape_geom_with_od, origin_destination_geom
 
 
-def stop_segment_components_to_geoseries(
-    subset_shape_geom_array: np.ndarray,
-    subset_stop_geom_array: np.ndarray = [],
-    crs: str = "EPSG:3310"
-) -> tuple:#[gpd.GeoDataFrame]:
-    """
-    Turn segments and stops into geoseries so we can plot it easily.
-    """
-    stop_segment = wrangle_shapes.array_to_geoseries(
-        subset_shape_geom_array, 
-        geom_type="line",
-        crs=crs
-    )#.to_frame(name="stop_segment")
+def super_project_and_cut_segments_for_one_shape(
+    gdf: gpd.GeoDataFrame, 
+    one_shape: str
+) -> gpd.GeoDataFrame:
     
-    if len(subset_stop_geom_array) > 0:
-        related_stops = wrangle_shapes.array_to_geoseries(
-            subset_stop_geom_array,
-            geom_type="point",
-            crs=crs
-        )#.to_frame(name="surrounding_stops_geom")
+    gdf2 = gdf[gdf.shape_array_key==one_shape].reset_index(drop=True)
 
-        return stop_segment, related_stops
-    else:
-        return stop_segment
+    shape_geometry = gdf2.geometry.iloc[0]
+    stop_geometry_array = np.array(gdf2.stop_geometry)
+    stop_sequence_array = np.array(gdf2.stop_sequence)
+        
+    segment_results = [
+        # since super_project returns a tuple, just grab 1st item in tuple
+        super_project(
+            stop_seq, 
+            shape_geometry, 
+            stop_geometry_array, 
+            stop_sequence_array
+        )[0] for stop_seq in stop_sequence_array
+    ]
     
+    segment_ls = [cut_normal_stop_segments.linestring_from_points(i) 
+                  for i in segment_results]
     
-def plot_segments_and_stops(
-    segment: gpd.GeoSeries, 
-    stops: gpd.GeoSeries
-):
-    m = segment.explore(tiles="CartoDB Positron", name="segment")
-    m = stops.explore(m=m, name="stops")
+    keep_cols = [
+        "shape_array_key", "stop_segment_geometry", 
+        "stop_id", "stop_sequence"
+    ]
+    
+    gdf2 = (gdf2.assign(
+        stop_segment_geometry = segment_ls
+        )[keep_cols]
+        .set_geometry("stop_segment_geometry")
+        .set_crs(gdf.crs)
+    )
+    
+    return gdf2 
 
-    folium.LayerControl().add_to(m)
-    return m
+
+if __name__ == "__main__":
+    import warnings
+    
+    from dask.distributed import Client
+    #https://docs.dask.org/en/latest/futures.html#distributed.Client.upload_file
+    # Run this in rt_segment_speeds/: python setup.py bdist_egg
+    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    #client.upload_file('../dist/segment_speed_utils-0.1.0-py3.9.egg')  
+    #client.upload_file('../../dist/shared_utils-1.2.0-py3.9.egg')
+    
+    warnings.filterwarnings(
+        "ignore",
+        category=shapely.errors.ShapelyDeprecationWarning) 
+
+    LOG_FILE = "../logs/cut_stop_segments.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    logger.info(f"Analysis date: {analysis_date}")
+    
+    start = datetime.datetime.now()
+
+    #STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    #EXPORT_FILE = STOP_SEG_DICT["segments_file"]
+    
+    # Get list of shapes that go through normal stop segment cutting
+    shapes_to_cut = pd.read_parquet(
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
+        filters = [[("loop_or_inlining", "==", 1)]],
+        columns = ["shape_array_key"]
+    ).drop_duplicates().shape_array_key
+    
+    gdf = gpd.read_parquet(
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
+        filters = [[("loop_or_inlining", "==", 1)]],
+        columns = ["shape_array_key",
+            "stop_id", "stop_sequence", 
+            "stop_geometry", # don't need shape_meters, we need stop_geometry
+            "geometry", 
+            ]
+    )
+        
+    results = []
+    
+    for shape in shapes_to_cut:
+        segments = delayed(super_project_and_cut_segments_for_one_shape)(
+            gdf, shape)
+        results.append(segments)
+    
+    time1 = datetime.datetime.now()
+    logger.info(f"Cut special stop segments: {time1-start}")
+    
+    results2 = [compute(i)[0] for i in results]
+    results_gdf = (pd.concat(results2, axis=0)
+                   .sort_values(["shape_array_key", "stop_sequence"])
+                   .reset_index(drop=True)
+                  )
+    
+    utils.geoparquet_gcs_export(
+        results_gdf,
+        SEGMENT_GCS,
+        f"stop_segments_special_{analysis_date}"
+    )
+    
+    time2 = datetime.datetime.now()
+    logger.info(f"Export results: {time2-time1}")
+    #client.close()
