@@ -13,7 +13,10 @@ from shared_utils import geography_utils, utils
 from update_vars import (BUS_SERVICE_GCS, get_filename, 
                          ANALYSIS_DATE, VERSION)
 
-def import_data(analysis_date: str, warehouse_version: str) -> tuple[gpd.GeoDataFrame]:
+def import_data(
+    analysis_date: str, 
+    warehouse_version: str
+) -> tuple[gpd.GeoDataFrame]:
     """
     Import the data needed, and account for different naming when 
     warehouse is in transition.

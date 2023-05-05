@@ -1,12 +1,14 @@
 """
 Utility functions for wrangling Dask data processing steps.
 """
-from typing import List, Literal
+from typing import List, Literal, Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
 import gcsfs
-from dask import compute
+import geopandas as gpd
+import pandas as pd
+from dask import compute, delayed
 from dask.delayed import Delayed  # type hint
 from shared_utils import utils
 
@@ -84,3 +86,29 @@ def compute_and_export(
 
         elif isinstance(ddf2, dg.GeoDataFrame):
             concat_and_export(gcs_folder, file_name_sanitized, filetype="gdf")
+
+
+def concatenate_list_of_files(
+    list_of_filepaths: list, file_type: Literal["df", "gdf"]
+) -> Union[pd.DataFrame, gpd.GeoDataFrame]:
+    """
+    Concatenate an imported list of filenames read in
+    with pandas or geopandas. Use dask.delayed to loop through and
+    assemble a concatenated pandas or geopandas dataframe.
+    """
+    dfs = []
+
+    if file_type == "df":
+        for f in list_of_filepaths:
+            indiv_df = delayed(pd.read_parquet)(f)
+            dfs.append(indiv_df)
+
+    elif file_type == "gdf":
+        for f in list_of_filepaths:
+            indiv_df = delayed(gpd.read_parquet)(f)
+            dfs.append(indiv_df)
+
+    results = [compute(i)[0] for i in dfs]
+    full_df = pd.concat(results, axis=0).reset_index(drop=True)
+
+    return full_df
