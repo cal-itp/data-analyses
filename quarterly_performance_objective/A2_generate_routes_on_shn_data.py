@@ -9,8 +9,9 @@ import sys
 from loguru import logger
 
 from bus_service_utils import create_parallel_corridors
-from shared_utils import geography_utils, rt_dates
-from update_vars import BUS_SERVICE_GCS, get_filename
+from shared_utils import geography_utils
+from update_vars import (BUS_SERVICE_GCS, get_filename,
+                         ANALYSIS_DATE, VERSION)
 
     
 if __name__ == "__main__":    
@@ -19,9 +20,6 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    ANALYSIS_DATE = rt_dates.PMAC["Q1_2023"]
-    VERSION = "v2"
-
     logger.info(f"Analysis date: {ANALYSIS_DATE}   warehouse {VERSION}")
     start = datetime.datetime.now()
     
