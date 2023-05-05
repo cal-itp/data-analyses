@@ -57,15 +57,7 @@ build_segment_speeds:
 	python portfolio/portfolio.py clean segment_speeds
 	python portfolio/portfolio.py build segment_speeds --deploy 
 	git add portfolio/segment_speeds/*.ipynb portfolio/segment_speeds/*.yml portfolio/segment_speeds/*.md 
-	git add portfolio/sites/ 
-    
-build_stop_segment_speeds:
-	#git rm portfolio/stop_segment_speeds/ -rf
-	cd rt_segment_speeds && python deploy_portfolio_yaml.py && cd ../ 
-	python portfolio/portfolio.py clean stop_segment_speeds
-	python portfolio/portfolio.py build stop_segment_speeds --deploy 
-	git add portfolio/stop_segment_speeds/*.ipynb portfolio/stop_segment_speeds/*.yml portfolio/stop_segment_speeds/*.md 
-	git add portfolio/sites/     
+	git add portfolio/sites/    
     
 
 add_precommit:
