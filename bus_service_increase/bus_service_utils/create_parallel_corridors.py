@@ -74,7 +74,7 @@ def prep_highway_directions_for_dissolve(
     the direction info up to the group_col level.
     '''
     df = (gpd.read_parquet("gs://calitp-analytics-data/data-analyses/"
-                           "state_highway_network.parquet")
+                           "shared_data/state_highway_network.parquet")
           .to_crs(geography_utils.CA_StatePlane))
     
     # Get dummies for direction

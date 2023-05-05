@@ -9,10 +9,14 @@ import sys
 
 from loguru import logger
 
-from shared_utils import geography_utils, utils, rt_dates
-from update_vars import BUS_SERVICE_GCS, get_filename
+from shared_utils import geography_utils, utils
+from update_vars import (BUS_SERVICE_GCS, get_filename, 
+                         ANALYSIS_DATE, VERSION)
 
-def import_data(analysis_date: str, warehouse_version: str) -> tuple[gpd.GeoDataFrame]:
+def import_data(
+    analysis_date: str, 
+    warehouse_version: str
+) -> tuple[gpd.GeoDataFrame]:
     """
     Import the data needed, and account for different naming when 
     warehouse is in transition.
@@ -116,9 +120,6 @@ def flag_shn_intersecting_routes(
 
 
 if __name__=="__main__":
-    
-    ANALYSIS_DATE = rt_dates.PMAC["Q1_2023"]
-    VERSION = "v2"
 
     logger.add("./logs/A3_categorize_routes.log", retention = "6 months")
     logger.add(sys.stderr, 
