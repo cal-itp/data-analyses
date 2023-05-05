@@ -21,15 +21,6 @@ build_100_recs:
 	git add portfolio/sites/ 
 
 
-build_test_100_recs:
-	#git rm portfolio/test_one_hundred_recs/ -rf
-	python one_hundred_recs/deploy_portfolio_yaml.py   
-	python portfolio/portfolio.py clean test_one_hundred_recs
-	python portfolio/portfolio.py build test_one_hundred_recs --deploy 
-	git add portfolio/test_one_hundred_recs/*.ipynb portfolio/test_one_hundred_recs/*.yml portfolio/test_one_hundred_recs/*.md 
-	git add portfolio/sites/ 
-
-
 build_dla_reports:
 	#cd dla/ && pip install -r requirements.txt && cd ..
 	#git rm portfolio/dla/ -rf
@@ -57,15 +48,7 @@ build_segment_speeds:
 	python portfolio/portfolio.py clean segment_speeds
 	python portfolio/portfolio.py build segment_speeds --deploy 
 	git add portfolio/segment_speeds/*.ipynb portfolio/segment_speeds/*.yml portfolio/segment_speeds/*.md 
-	git add portfolio/sites/ 
-    
-build_stop_segment_speeds:
-	#git rm portfolio/stop_segment_speeds/ -rf
-	cd rt_segment_speeds && python deploy_portfolio_yaml.py && cd ../ 
-	python portfolio/portfolio.py clean stop_segment_speeds
-	python portfolio/portfolio.py build stop_segment_speeds --deploy 
-	git add portfolio/stop_segment_speeds/*.ipynb portfolio/stop_segment_speeds/*.yml portfolio/stop_segment_speeds/*.md 
-	git add portfolio/sites/     
+	git add portfolio/sites/    
     
 
 add_precommit:

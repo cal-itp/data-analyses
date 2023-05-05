@@ -13,10 +13,10 @@ import sys
 from loguru import logger
 from typing import Literal
 
-from shared_utils import geography_utils, utils, rt_dates
+from shared_utils import geography_utils, utils
 from bus_service_utils import create_parallel_corridors
 from update_vars import (BUS_SERVICE_GCS, COMPILED_CACHED_GCS,
-                         get_filename #,ANALYSIS_DATE
+                         get_filename, ANALYSIS_DATE, VERSION
                         )
 
 catalog = intake.open_catalog(
@@ -141,9 +141,6 @@ def import_data(analysis_date: str,
 
 
 if __name__ == "__main__":
-    
-    ANALYSIS_DATE = rt_dates.PMAC["Q1_2023"]
-    VERSION = "v2"
     
     logger.add("./logs/A1_scheduled_route_level_df.log", retention="6 months")
     logger.add(sys.stderr, 

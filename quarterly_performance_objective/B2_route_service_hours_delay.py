@@ -9,20 +9,24 @@ import sys
 
 from loguru import logger
 
-from update_vars import BUS_SERVICE_GCS, COMPILED_CACHED_GCS
-from shared_utils import geography_utils, utils, rt_dates
+from update_vars import (BUS_SERVICE_GCS, COMPILED_CACHED_GCS, 
+                         get_filename, ANALYSIS_DATE, VERSION
+                        )
+from shared_utils import geography_utils, utils
 
 def calculate_route_level_delays(selected_date: str, 
                                  route_cols: list) -> pd.DataFrame:
     """
     Aggregate endpoint_delays to route-level, from trip-level.
+    TODO: we should use feed_key for a single day, and at last step bring in
+    the more understandable names, but don't drop them beforehand
     """
-    delay_df = gpd.read_parquet(
+    delay_df = pd.read_parquet(
         f"{COMPILED_CACHED_GCS}endpoint_delays_{selected_date}.parquet")
     
     # Drop duplicates
     delay_df2 = delay_df.drop_duplicates(
-        subset=route_cols + ["trip_id", "stop_id"])
+        subset=route_cols + ["trip_id"])
     
     route_delay = geography_utils.aggregate_by_geography(
         delay_df2, 
@@ -60,10 +64,7 @@ def merge_delay_with_route_categories(
 
 
 if __name__ == "__main__":
-    
-    ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"]
-    VERSION = "v2"
-    
+        
     logger.add("./logs/B2_route_service_hours_delay.log")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
@@ -77,10 +78,12 @@ if __name__ == "__main__":
         
     elif VERSION == "v2":
         route_cols = ["feed_key", "route_id"]
-        
-    routes_categorized = gpd.read_parquet(
-        f"{BUS_SERVICE_GCS}routes_categorized_{ANALYSIS_DATE}_{VERSION}.parquet")
     
+    routes_categorized = gpd.read_parquet(
+        get_filename(f"{BUS_SERVICE_GCS}routes_categorized_", 
+                     ANALYSIS_DATE, VERSION)
+    )
+        
     # Get endpoint delay up to route-level
     route_delay = calculate_route_level_delays(ANALYSIS_DATE, route_cols)
     
@@ -96,7 +99,7 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(
         df, 
         BUS_SERVICE_GCS,
-        f"routes_categorized_with_delay_{ANALYSIS_DATE}_{VERSION}"
+        f"routes_categorized_with_delay_{ANALYSIS_DATE}"
     )
     
     logger.info(f"exported to GCS")

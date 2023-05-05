@@ -4,7 +4,8 @@ Utility functions
 import json
 import pandas as pd
 
-from calitp.storage import get_fs
+from calitp_data.storage import get_fs 
+
 fs = get_fs()
 
 GCS_PROJECT = "cal-itp-data-infra"
