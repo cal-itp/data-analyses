@@ -4,8 +4,8 @@ segmentize:
 	python prep_stop_segments.py
 	python cut_normal_stop_segments.py
 	python cut_special_stop_segments.py
-    
-    
+	python concatenate_stop_segments.py
+      
 get_speeds_by_segment:
 	python A0_preprocessing.py
 	python A1_sjoin_vp_segments.py
