@@ -67,48 +67,32 @@ def pare_down_vp_by_segment(
     EXPORT_FILE = dict_inputs["stage3"]
 
     # Handle stop segments and the normal/special cases separately
-    if "shape_array_key" in GROUPING_COL:
-        normal_shapes = identify_stop_segment_cases(
-            analysis_date, GROUPING_COL, 0)
-        special_shapes = identify_stop_segment_cases(
-            analysis_date, GROUPING_COL, 1)
+    normal_shapes = identify_stop_segment_cases(
+        analysis_date, GROUPING_COL, 0)
+    special_shapes = identify_stop_segment_cases(
+        analysis_date, GROUPING_COL, 1)
 
-        # https://docs.dask.org/en/stable/delayed-collections.html
-        vp_joined_to_segments_normal = helpers.import_vehicle_positions(
-            f"{SEGMENT_GCS}vp_sjoin/",
-            f"{INPUT_FILE_PREFIX}_{analysis_date}",
-            file_type = "df",
-            filters = [[(GROUPING_COL, "in", normal_shapes)]],
-            partitioned=True
-        )
+    # https://docs.dask.org/en/stable/delayed-collections.html
+    vp_joined_to_segments_normal = helpers.import_vehicle_positions(
+        f"{SEGMENT_GCS}vp_sjoin/",
+        f"{INPUT_FILE_PREFIX}_{analysis_date}",
+        file_type = "df",
+        filters = [[(GROUPING_COL, "in", normal_shapes)]],
+        partitioned=True
+    )
 
-        vp_pared_normal = segment_calcs.keep_min_max_timestamps_by_segment(
-            vp_joined_to_segments_normal, 
-            segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
-            timestamp_col = TIMESTAMP_COL
-        ).repartition(partition_size="85MB")
+    vp_pared_normal = segment_calcs.keep_min_max_timestamps_by_segment(
+        vp_joined_to_segments_normal, 
+        segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
+        timestamp_col = TIMESTAMP_COL
+    ).repartition(partition_size="85MB")
         
-        vp_pared_normal.to_parquet(
-            f"{SEGMENT_GCS}{EXPORT_FILE}_normal_{analysis_date}")
+    vp_pared_normal.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_normal_{analysis_date}")
 
-        # placeholder for dealing with complex segments
+    # placeholder for dealing with complex segments
     
-    else:
-        vp_joined_to_segments = helpers.import_vehicle_positions(
-            f"{SEGMENT_GCS}vp_sjoin/",
-            f"{INPUT_FILE_PREFIX}_{analysis_date}",
-            file_type = "df",
-            partitioned=True
-        )
-        
-        vp_pared = segment_calcs.keep_min_max_timestamps_by_segment(
-            vp_joined_to_segments, 
-            segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
-            timestamp_col = TIMESTAMP_COL
-        ).repartition(partition_size="85MB")
-        
-    
-        vp_pared.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}")
+   
     
     
 if __name__ == "__main__":
@@ -123,26 +107,17 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    #ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
    
     time1 = datetime.datetime.now()
-    '''
-    pare_down_vp_by_segment(
-        analysis_date,
-        dict_inputs = ROUTE_SEG_DICT
-    )
-    '''
-    time2 = datetime.datetime.now()
-    logger.info(f"pare down vp by route segments {time2 - time1}")
     
     pare_down_vp_by_segment(
         analysis_date,
         dict_inputs = STOP_SEG_DICT
     )
     
-    time3 = datetime.datetime.now()
-    logger.info(f"pare down vp by stop segments {time3 - time2}")
+    time2 = datetime.datetime.now()
+    logger.info(f"pare down vp by stop segments {time2 - time1}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
