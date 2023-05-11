@@ -166,12 +166,15 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
     trips_with_geom = gtfs_schedule_wrangling.get_trips_with_geom(
         analysis_date)
     stop_times_with_geom = stop_times_aggregated_to_shape_array_key(
-        analysis_date, trips_with_geom).sort_values(
-        ["feed_key", "shape_array_key", "stop_sequence"]).reset_index(drop=True)
+        analysis_date, trips_with_geom
+    ).sort_values(
+        ["feed_key", "shape_array_key", "stop_sequence"]
+    ).reset_index(drop=True)
     
     # Turn the stop_geometry and shape_geometry columns into geoseries
     shape_geoseries = gpd.GeoSeries(stop_times_with_geom.geometry.compute())
-    stop_geoseries = gpd.GeoSeries(stop_times_with_geom.stop_geometry.compute())
+    stop_geoseries = gpd.GeoSeries(
+        stop_times_with_geom.stop_geometry.compute())
     
     # Get projected shape_meters as dask array
     shape_meters_geoseries = wrangle_shapes.project_point_geom_onto_linestring(

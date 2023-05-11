@@ -109,11 +109,7 @@ def project_and_cut_segments_for_one_shape(
     
     # (1) Get list of coords from shapely linestring and convert it to a list
     # of projected distances. 
-    # Simplify to get rid of duplicate coords (if there are any)
     # Ex: we can take a subset of distances between stop 2 and 3 [100m, 500m]
-    shape_coords_list = [shapely.Point(i) for 
-                         i in shape_geometry.simplify(0).coords]
-    
     shape_projected_dist = wrangle_shapes.project_list_of_coords(
         shape_geometry, use_shapely_coords = True)
     
