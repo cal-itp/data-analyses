@@ -53,31 +53,11 @@ def funding_vs_expenses(df):
     """
     Determine if a project is fully funded or not
     """
-    if df["total_project_cost"] == 0.00:
+    if df["total_project_cost_(millions)"] == 0.00:
         return "No project cost info"
-    elif df["total_available_funds"] == 0.00:
+    elif df["total_available_funds_(millions)"] == 0.00:
         return "No available funding info"
-    elif (df["total_available_funds"] == df["total_project_cost"])|(df["total_available_funds"] > df["total_project_cost"]):
+    elif (df["total_available_funds_(millions)"] == df["total_project_cost_(millions)"])|(df["total_available_funds_(millions)"] > df["total_project_cost_(millions)"]):
         return "Fully funded"
     else:
         return "Partially funded"
-
-columns_to_keep = [
-        "project_title",
-        "lead_agency",
-        "project_year",
-        "project_category",
-        "grant_program",
-        "project_description",
-        "total_project_cost",
-        "fully_funded",
-        "total_available_funds",
-        "location",
-         "city",
-        "county",
-        "data_source",
-        "notes",
-        "funding_notes",
-        "project_id",
-    ]
-
