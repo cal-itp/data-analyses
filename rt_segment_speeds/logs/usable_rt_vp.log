@@ -4,3 +4,10 @@
 2023-04-03 10:28:38.880 | INFO     | __main__:<module>:133 - Analysis date: 2023-03-15
 2023-04-03 10:30:40.291 | INFO     | __main__:<module>:145 - pare down vp
 2023-04-03 10:30:40.293 | INFO     | __main__:<module>:148 - execution time: 0:02:01.403003
+2023-05-12 09:19:24.770 | INFO     | __main__:<module>:149 - Analysis date: 2023-03-15
+2023-05-12 09:23:59.810 | INFO     | __main__:<module>:146 - Analysis date: 2023-03-15
+2023-05-12 09:27:00.897 | INFO     | __main__:<module>:161 - pare down vp
+2023-05-12 09:27:00.898 | INFO     | __main__:<module>:164 - execution time: 0:03:01.087548
+2023-05-12 09:34:40.763 | INFO     | __main__:<module>:139 - Analysis date: 2023-03-15
+2023-05-12 09:38:02.031 | INFO     | __main__:<module>:154 - pare down vp
+2023-05-12 09:38:02.032 | INFO     | __main__:<module>:157 - execution time: 0:03:21.265920
