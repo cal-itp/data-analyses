@@ -23,7 +23,7 @@ def sanitize_file_path(file_name: str) -> str:
     return str(Path(file_name).stem)
 
 
-def geoparquet_gcs_export(gdf: Union[gpd.GeoDataFrame, dg.GeoDataFrame], gcs_file_path: str, file_name: str):
+def geoparquet_gcs_export(gdf: Union[gpd.GeoDataFrame, dg.GeoDataFrame], gcs_file_path: str, file_name: str, **kwargs):
     """
     Save geodataframe as parquet locally,
     then move to GCS bucket and delete local file.
@@ -37,15 +37,15 @@ def geoparquet_gcs_export(gdf: Union[gpd.GeoDataFrame, dg.GeoDataFrame], gcs_fil
     file_name_sanitized = sanitize_file_path(file_name)
 
     if isinstance(gdf, dg.GeoDataFrame):
-        gdf.to_parquet(f"{gcs_file_path}{file_name_sanitized}", overwrite=True)
+        gdf.to_parquet(f"{gcs_file_path}{file_name_sanitized}", overwrite=True, **kwargs)
 
     else:
-        gdf.to_parquet(f"./{file_name_sanitized}.parquet")
+        gdf.to_parquet(f"./{file_name_sanitized}.parquet", **kwargs)
         fs.put(
             f"./{file_name_sanitized}.parquet",
             f"{gcs_file_path}{file_name_sanitized}.parquet",
         )
-        os.remove(f"./{file_name_sanitized}.parquet")
+        os.remove(f"./{file_name_sanitized}.parquet", **kwargs)
 
 
 def geojson_gcs_export(

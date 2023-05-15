@@ -88,11 +88,7 @@ def pare_down_vp_by_segment(
     ).repartition(partition_size="85MB")
         
     vp_pared_normal.to_parquet(
-        f"{SEGMENT_GCS}{EXPORT_FILE}_normal_{analysis_date}")
-
-    # placeholder for dealing with complex segments
-    
-   
+        f"{SEGMENT_GCS}{EXPORT_FILE}_normal_{analysis_date}")    
     
     
 if __name__ == "__main__":

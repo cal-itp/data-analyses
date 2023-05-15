@@ -1,9 +1,6 @@
 """
 Pre-processing vehicle positions.
-Drop all RT trips with less than ___ min of data.
-
-Create 2 dfs of trips that are straightforward - no loops, no inlining, 
-and ones that are more complex?
+Drop all RT trips with less than 5 min of data.
 """
 import dask.dataframe as dd
 import datetime
@@ -14,7 +11,7 @@ import sys
 
 from loguru import logger
 
-from shared_utils import utils
+#from shared_utils import utils
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
@@ -112,14 +109,23 @@ def pare_down_vp_to_valid_trips(
         usable_trips,
         on = ["gtfs_dataset_key", "trip_id"],
         how = "inner"
-    )
+    ).sort_values(
+        ["gtfs_dataset_key", "trip_id", 
+         "location_timestamp_local"]
+    ).drop_duplicates().reset_index(drop=True)
     
-    utils.geoparquet_gcs_export(
-        usable_vp,
-        SEGMENT_GCS,
-        f"{EXPORT_FILE}_{analysis_date}"
+    # Let's convert to tabular now, make use of partitioning
+    # We want to break up sjoins, so we can wrangle it to points on-the-fly
+    usable_vp = usable_vp.assign(
+        x = usable_vp.geometry.x,
+        y = usable_vp.geometry.y,
+        vp_idx = usable_vp.index.astype("int32")
+    ).drop(columns = "geometry")
+    
+    usable_vp.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
+        partition_cols = ["gtfs_dataset_key"]
     )
-
 
     
 if __name__ == "__main__":
@@ -134,6 +140,9 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
+    # Doesn't matter which dictionary to use
+    # We're operating on same vp, and it's only in the next stage
+    # that which segments used matters
     ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
    
     time1 = datetime.datetime.now()
