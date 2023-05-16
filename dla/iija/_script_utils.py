@@ -108,8 +108,8 @@ def condense_df(df):
            .groupby(['fmis_transaction_date','project_number', 'implementing_agency', 'summary_recipient_defined_text_field_1_value'
                     , 'program_code', 'program_code_description'])
            .agg({
-                 # 'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate                ##hasing this out to group by instead
-                 # 'program_code_description':lambda x:'|'.join(x.unique()), # get unique values to concatenate    ##hasing this out to group by instead
+                 # 'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate                ##hashing this out to group by instead
+                 # 'program_code_description':lambda x:'|'.join(x.unique()), # get unique values to concatenate    ##hashing this out to group by instead
                  'recipient_project_number':lambda x:'|'.join(x.unique()), #'first',
                  'improvement_type':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'improvement_type_description':lambda x:'|'.join(x.unique()),  # get unique values to concatenate
@@ -340,7 +340,7 @@ def get_new_desc_title(df):
     
     # rename new title one
     proj_unique_cat_title = proj_unique_cat_title.rename(columns={'project_name_new':'project_title_new'})
-    proj_unique_cat_title.drop(columns =['project_method', 'project_type', 'project_type2'], axis=1, inplace=True)
+    # proj_unique_cat_title.drop(columns =['project_method', 'project_type', 'project_type2'], axis=1, inplace=True)
     
     #map the title back to df
     proj_title_mapping = (dict(proj_unique_cat_title[['project_number', 'project_title_new']].values))
@@ -354,7 +354,7 @@ def get_new_desc_title(df):
 def add_new_description_col(df):
     df["obligations_amount_string"] = df["obligations_amount"].astype(str)
     
-    df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $ " + df["obligations_amount_string"] + ". This project will " + df["project_title_new"]
+    df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["project_title_new"]
     
     df.drop(columns =['obligations_amount_string'], axis=1, inplace=True)
     
