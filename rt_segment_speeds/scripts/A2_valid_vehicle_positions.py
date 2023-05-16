@@ -60,6 +60,7 @@ def pare_down_vp_by_segment(
     to keep the enter / exit timestamps.
     Also, exclude any bad batches of trips.
     """
+    USABLE_VP = dict_inputs["stage1"]
     INPUT_FILE_PREFIX = dict_inputs["stage2"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     GROUPING_COL = dict_inputs["grouping_col"]
@@ -69,10 +70,7 @@ def pare_down_vp_by_segment(
     # Handle stop segments and the normal/special cases separately
     normal_shapes = identify_stop_segment_cases(
         analysis_date, GROUPING_COL, 0)
-    special_shapes = identify_stop_segment_cases(
-        analysis_date, GROUPING_COL, 1)
-
-    # https://docs.dask.org/en/stable/delayed-collections.html
+    
     vp_joined_to_segments_normal = helpers.import_vehicle_positions(
         f"{SEGMENT_GCS}vp_sjoin/",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
@@ -80,7 +78,7 @@ def pare_down_vp_by_segment(
         filters = [[(GROUPING_COL, "in", normal_shapes)]],
         partitioned=True
     )
-
+    
     vp_pared_normal = segment_calcs.keep_min_max_timestamps_by_segment(
         vp_joined_to_segments_normal, 
         segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,

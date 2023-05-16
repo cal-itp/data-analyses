@@ -150,9 +150,6 @@ def loop_over_groups_by_operator(
     groups = operator_vp[grouping_col].unique()
     groups = compute(groups)[0]
     
-    seg_seq_col = [c for c in segment_identifier_cols 
-                       if c != grouping_col][0]
-    
     operator_results = []
     
     for g in groups:
@@ -167,7 +164,7 @@ def loop_over_groups_by_operator(
             segments_group,
             how = "inner",
             predicate = "within"
-        )[["vp_idx", seg_seq_col]]
+        )[["vp_idx"] + segment_identifier_cols]
         
         operator_results.append(sjoin_point_in_seg)
 
@@ -237,11 +234,13 @@ def compile_partitioned_parquets_for_operators(
     gcs_folder: str,
     file_name: str,
     analysis_date: str, 
+    vp_trips: pd.DataFrame,
 ):
     """
     Once we've saved out indiv operator partitioned parquets,
     read those in and save as one partitioned parquet
     """
+    
     all_files = fs.ls(f"{gcs_folder}")
     
     # The files to compile need format
@@ -262,11 +261,11 @@ def compile_partitioned_parquets_for_operators(
         file_name = f"{file_name}_{analysis_date}",
         export_single_parquet = False
     )
-    
+
     # Remove these partitioned parquets (folders, set recursive = True)
     for f in files_to_compile:
         fs.rm(f"gs://{f}", recursive=True)
-        
+    
         
 if __name__ == "__main__":
     
