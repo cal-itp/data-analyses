@@ -48,8 +48,13 @@ def read_data_all():
 
 ## Function to add the updated program codes to the data
 def add_new_codes(df):
-    new_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/FY21-22ProgramCodesAsOf5-25-2022.v2.xlsx"))
-    code_map = dict(new_codes[['iija_program_code', 'new_description']].values)
+    #new_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/FY21-22ProgramCodesAsOf5-25-2022.v2.xlsx"))
+    #code_map = dict(new_codes[['iija_program_code', 'new_description']].values)
+
+    ## adding updated program codes 05/11/23
+    new_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/Copy of lst_IIJA_Code_20230510.xlsx"))
+    code_map = dict(new_codes[['iija_program_code', 'program_name']].values)
+
     
     df['program_code_description'] = df.program_code.map(code_map)
     df['summary_recipient_defined_text_field_1_value'] = df['summary_recipient_defined_text_field_1_value'].astype(str)
