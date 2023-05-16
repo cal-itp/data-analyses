@@ -296,19 +296,26 @@ if __name__ == "__main__":
     '''
     time1 = datetime.datetime.now()
     #logger.info(f"attach vp to route segments: {time1 - start}")
-    
+    '''
     vp_stop_seg = sjoin_vp_to_segments(
         analysis_date = analysis_date,
         dict_inputs = STOP_SEG_DICT
     )
+    '''
     
+    vp_trips = add_grouping_col_to_vp(
+        f"{STOP_SEG_DICT['stage1']}_{analysis_date}",
+        analysis_date,
+        STOP_SEG_DICT["trip_grouping_cols"]
+    )
     compile_partitioned_parquets_for_operators(
         f"{SEGMENT_GCS}vp_sjoin/", 
         STOP_SEG_DICT["stage2"], 
-        analysis_date
+        analysis_date, 
+        vp_trips
     ) 
     time2 = datetime.datetime.now()
-    logger.info(f"attach vp to stop-to-stop segments: {time2 - time1}")
+    #logger.info(f"attach vp to stop-to-stop segments: {time2 - time1}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
