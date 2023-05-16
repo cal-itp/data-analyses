@@ -70,7 +70,7 @@ def pare_down_vp_by_segment(
     # Handle stop segments and the normal/special cases separately
     normal_shapes = identify_stop_segment_cases(
         analysis_date, GROUPING_COL, 0)
-    
+        
     vp_joined_to_segments_normal = helpers.import_vehicle_positions(
         f"{SEGMENT_GCS}vp_sjoin/",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
