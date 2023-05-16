@@ -25,6 +25,34 @@ from update_vars import analysis_date, TEMP_GCS, COMPILED_CACHED_VIEWS
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 
 catalog = intake.open_catalog("*.yml")
+ 
+def merge_in_max_arrivals_by_stop(
+    hqta_points: gpd.GeoDataFrame,
+    max_arrivals: pd.DataFrame
+) -> gpd.GeoDataFrame:
+    """
+    Merge combined hqta points across all categories with
+    the maximum arrivals for each stop (keep if it shows up in hqta_points) 
+    with left merge.
+    """    
+    with_stops = pd.merge(
+        hqta_points,
+        max_arrivals.rename(columns = {"feed_key": "feed_key_primary"}),
+        on = ["feed_key_primary", "stop_id"],
+        how = "left"
+    )
+    
+    # Combine AM max and PM max into 1 column
+    trip_count_cols = ["am_max_trips", "pm_max_trips"]
+    
+    with_stops2 = with_stops.assign(
+        peak_max_trips = (with_stops[trip_count_cols]
+                          .max(axis=1)
+                          .fillna(0).astype(int))
+    ).drop(columns = trip_count_cols)
+    
+    return with_stops2
+
     
 def add_route_info(hqta_points: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
@@ -141,7 +169,9 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "agency_name_primary", 
         "hqta_type", "stop_id", "route_id",
         "hqta_details", "agency_name_secondary",
-        "base64_url_primary", "base64_url_secondary", # include these as stable IDs?
+        # include these as stable IDs?
+        "base64_url_primary", "base64_url_secondary", 
+        "peak_max_trips",
         "geometry"
     ]
     
@@ -169,6 +199,10 @@ if __name__=="__main__":
     rail_ferry_brt = rail_ferry_brt_extract.get_rail_ferry_brt_extract()
     major_stop_bus = catalog.major_stop_bus.read()
     stops_in_corridor = catalog.stops_in_hq_corr.read()
+    max_arrivals_by_stop = pd.read_parquet(
+        f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet", 
+        columns = ["feed_key", "stop_id", "am_max_trips", "pm_max_trips"]
+    ).rename(columns = {"feed_key": "feed_key_primary"})
     
     # Combine all the points data
     hqta_points_combined = pd.concat([
@@ -179,18 +213,22 @@ if __name__=="__main__":
         rail_ferry_brt.drop(columns = "name_primary"),
     ], axis=0)
     
+    hqta_points_combined2 = merge_in_max_arrivals_by_stop(
+        hqta_points_combined, max_arrivals_by_stop)
+    
     
     time1 = dt.datetime.now()
     logger.info(f"combined points: {time1 - start}")
     
     # Add in route_id 
-    hqta_points_with_route_info = add_route_info(hqta_points_combined)
+    hqta_points_with_route_info = add_route_info(hqta_points_combined2)
     
     time2 = dt.datetime.now()
     logger.info(f"add route info: {time2 - time1}")
 
     # Add agency names, hqta_details, project back to WGS84
-    gdf = add_agency_names_hqta_details(hqta_points_with_route_info, analysis_date)
+    gdf = add_agency_names_hqta_details(
+        hqta_points_with_route_info, analysis_date)
     gdf = final_processing(gdf)
     
     time3 = dt.datetime.now()
@@ -214,25 +252,6 @@ if __name__=="__main__":
    )
     
     logger.info("export as geoparquet")
-        
-    # Add geojson / geojsonl exports
-    utils.geojson_gcs_export(
-        gdf, 
-        EXPORT_PATH,
-        'ca_hq_transit_stops', 
-        geojson_type = "geojson"
-    )
-    
-    logger.info("export as geojson")
-    
-    utils.geojson_gcs_export(
-        gdf, 
-        EXPORT_PATH,
-        'ca_hq_transit_stops', 
-        geojson_type = "geojsonl"
-    )
-    
-    logger.info("export as geojsonl")
 
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
