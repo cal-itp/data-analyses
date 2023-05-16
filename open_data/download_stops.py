@@ -39,7 +39,10 @@ if __name__ == "__main__":
     route_type_cols = [f"route_type_{i}" for i in route_type_vals] 
     
     keep_stop_cols = [
-        "feed_key",
+        "feed_key", "service_date",
+        "feed_timezone",
+        "first_stop_arrival_datetime_pacific", 
+        "last_stop_departure_datetime_pacific",
         "stop_id", "stop_key", "stop_name", 
         "stop_event_count"
     ] + route_type_cols + ["missing_route_type"]
