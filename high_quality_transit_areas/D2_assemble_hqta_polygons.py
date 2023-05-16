@@ -120,6 +120,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "agency_name_primary", "agency_name_secondary",
         "hqta_type", "hqta_details", "route_id", 
         "base64_url_primary", "base64_url_secondary",
+        "peak_max_trips",
         "geometry"
     ]
     
@@ -176,25 +177,6 @@ if __name__=="__main__":
     )    
     
     logger.info("export as geoparquet")
-    
-    # Add geojson / geojsonl exports
-    utils.geojson_gcs_export(
-        gdf, 
-        EXPORT_PATH,
-        'ca_hq_transit_areas', 
-        geojson_type = "geojson"
-    )
-    
-    logger.info("export as geojson")
-
-    utils.geojson_gcs_export(
-        gdf, 
-        EXPORT_PATH,
-        'ca_hq_transit_areas', 
-        geojson_type = "geojsonl"
-    )
-    
-    logger.info("export as geojsonl")
         
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
