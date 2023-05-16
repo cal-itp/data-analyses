@@ -1,9 +1,12 @@
 import dask.dataframe as dd
+import folium
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 
 import prep_stop_segments
-from segment_speed_utils import gtfs_schedule_wrangling, helpers
+from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
+                                 wrangle_shapes)
 from segment_speed_utils.project_vars import analysis_date
 
 def grab_loop_trips(analysis_date: str) -> pd.DataFrame:
@@ -63,3 +66,40 @@ def assign_visits_to_stop(df: pd.DataFrame):
     )
     
     return df
+
+
+def plot_segments_and_stops(
+    segment: gpd.GeoSeries, 
+    stops: gpd.GeoSeries
+):
+    m = segment.explore(tiles="CartoDB Positron", name="segment")
+    m = stops.explore(m=m, name="stops")
+
+    folium.LayerControl().add_to(m)
+    return m
+
+
+def stop_segment_components_to_geoseries(
+    subset_shape_geom_array: np.ndarray,
+    subset_stop_geom_array: np.ndarray = [],
+    crs: str = "EPSG:3310"
+) -> tuple:#[gpd.GeoDataFrame]:
+    """
+    Turn segments and stops into geoseries so we can plot it easily.
+    """
+    stop_segment = wrangle_shapes.array_to_geoseries(
+        subset_shape_geom_array, 
+        geom_type="line",
+        crs=crs
+    )#.to_frame(name="stop_segment")
+    
+    if len(subset_stop_geom_array) > 0:
+        related_stops = wrangle_shapes.array_to_geoseries(
+            subset_stop_geom_array,
+            geom_type="point",
+            crs=crs
+        )#.to_frame(name="surrounding_stops_geom")
+
+        return stop_segment, related_stops
+    else:
+        return stop_segment

@@ -10,8 +10,8 @@ import pandas as pd
 import sys
 
 from loguru import logger
+from typing import Literal
 
-import loop_utils
 from segment_speed_utils import helpers, segment_calcs
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
@@ -35,37 +35,20 @@ https://docs.dask.org/en/latest/delayed-best-practices.html
 
 Map partitions has trouble computing result.
 Just use partitioned df and don't use `ddf.map_partitions`.
-"""                          
+"""     
+def identify_stop_segment_cases(
+    analysis_date: str, 
+    grouping_col: str,
+    loop_or_inlining: Literal[0, 1]
+) -> np.ndarray:
     
-def usable_no_loop_inlining_trips(
-    vp: dd.DataFrame
-) -> dd.DataFrame:   
-    """
-    From trips with enough RT vehicle positions,
-    exclude the trips that have looping/inlining.
-    """
-    vp_trips = vp[
-        ["gtfs_dataset_key", "feed_key", 
-         "trip_id"]].drop_duplicates()
-    
-    loop_trips = loop_utils.grab_loop_trips(analysis_date)
-    
-    trips_no_loops = dd.merge(
-        vp_trips,
-        loop_trips,
-        on = ["feed_key", "trip_id"],
-        how = "left",
-        indicator=True
-    ).query('_merge=="left_only"').drop(columns = ["_merge", "feed_key"])
-    
-    vp_simple_trips = dd.merge(
-        vp,
-        trips_no_loops,
-        on = ["gtfs_dataset_key", "trip_id"],
-        how = "inner"
-    )
-    
-    return vp_simple_trips
+    shape_cases = pd.read_parquet(
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
+        filters = [[("loop_or_inlining", "==", loop_or_inlining)]],
+        columns = [grouping_col]
+    )[grouping_col].unique().tolist()
+
+    return shape_cases
 
 
 def pare_down_vp_by_segment(
@@ -77,32 +60,33 @@ def pare_down_vp_by_segment(
     to keep the enter / exit timestamps.
     Also, exclude any bad batches of trips.
     """
+    USABLE_VP = dict_inputs["stage1"]
     INPUT_FILE_PREFIX = dict_inputs["stage2"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
+    GROUPING_COL = dict_inputs["grouping_col"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]
     EXPORT_FILE = dict_inputs["stage3"]
 
-    # https://docs.dask.org/en/stable/delayed-collections.html
-    vp_joined_to_segments = helpers.import_vehicle_positions(
+    # Handle stop segments and the normal/special cases separately
+    normal_shapes = identify_stop_segment_cases(
+        analysis_date, GROUPING_COL, 0)
+        
+    vp_joined_to_segments_normal = helpers.import_vehicle_positions(
         f"{SEGMENT_GCS}vp_sjoin/",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
         file_type = "df",
+        filters = [[(GROUPING_COL, "in", normal_shapes)]],
         partitioned=True
     )
     
-    valid_vp_joined_to_segments = usable_no_loop_inlining_trips(
-        vp_joined_to_segments
-    )
-    
-    logger.info("filter out to only valid trips")
-        
-    vp_pared = segment_calcs.keep_min_max_timestamps_by_segment(
-        valid_vp_joined_to_segments, 
+    vp_pared_normal = segment_calcs.keep_min_max_timestamps_by_segment(
+        vp_joined_to_segments_normal, 
         segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
         timestamp_col = TIMESTAMP_COL
     ).repartition(partition_size="85MB")
-    
-    vp_pared.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}")
+        
+    vp_pared_normal.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_normal_{analysis_date}")    
     
     
 if __name__ == "__main__":
@@ -117,25 +101,17 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
    
     time1 = datetime.datetime.now()
-    pare_down_vp_by_segment(
-        analysis_date,
-        dict_inputs = ROUTE_SEG_DICT
-    )
-    
-    time2 = datetime.datetime.now()
-    logger.info(f"pare down vp by route segments {time2 - time1}")
     
     pare_down_vp_by_segment(
         analysis_date,
         dict_inputs = STOP_SEG_DICT
     )
     
-    time3 = datetime.datetime.now()
-    logger.info(f"pare down vp by stop segments {time3 - time2}")
+    time2 = datetime.datetime.now()
+    logger.info(f"pare down vp by stop segments {time2 - time1}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
