@@ -206,54 +206,6 @@ def import_scheduled_stops(
     return stops
 
 
-def sjoin_vehicle_positions_to_segments(
-    vehicle_positions: dg.GeoDataFrame, 
-    segments: dg.GeoDataFrame,
-    route_tuple: tuple,
-    segment_identifier_cols: list
-) -> dd.DataFrame:
-    """
-    Spatial join vehicle positions for an operator
-    to buffered route segments.
-    
-    Returns a dd.DataFrame. geometry seems to make the 
-    compute extremely large. 
-    """    
-    route_col, route_value = route_tuple[0], route_tuple[1]
-    
-    vehicle_positions_subset = (vehicle_positions[
-        vehicle_positions[route_col]==route_value]
-        .reset_index(drop=True))
-        
-    segments_subset = (segments[
-        segments[route_col]==route_value]
-       .reset_index(drop=True)
-      )
-    
-    # Once we filter for the route_dir_identifier, don't need to include
-    # it into segment_cols, otherwise, it'll show up as _x and _y
-    vp_to_seg = dg.sjoin(
-        vehicle_positions_subset,
-        segments_subset[
-            segment_identifier_cols + ["geometry"]],
-        how = "inner",
-        predicate = "within"
-    ).drop(columns = "index_right").drop_duplicates().reset_index(drop=True)
-    
-    
-    # Drop geometry and return a df...eventually,
-    # can attach point geom back on, after enter/exit points are kept
-    # geometry seems to be a big issue in the compute
-    vp_to_seg2 = vp_to_seg.assign(
-        lon = vp_to_seg.geometry.x,
-        lat = vp_to_seg.geometry.y,
-    )
-    
-    ddf = vp_to_seg2.drop(columns = ["geometry"])
-    
-    return ddf
-
-
 def exclude_unusable_trips(
     vp_df: dd.DataFrame, 
     valid_trips: pd.DataFrame

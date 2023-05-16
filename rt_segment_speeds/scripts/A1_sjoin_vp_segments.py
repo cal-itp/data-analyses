@@ -14,23 +14,25 @@ import geopandas as gpd
 import pandas as pd
 import sys
 
-from dask import delayed
+from dask import delayed, compute
+from dask.delayed import Delayed # type hint
 from loguru import logger
 
 from shared_utils import dask_utils
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (analysis_date, SEGMENT_GCS, 
-                                              CONFIG_PATH)
+                                              CONFIG_PATH, PROJECT_CRS)
 
 fs = gcsfs.GCSFileSystem()
 
-def import_vp_and_merge_crosswalk( 
-    rt_dataset_key: str,
+
+def add_grouping_col_to_vp(
+    vp_file_name: str,
     analysis_date: str,
-    trip_grouping_cols:  list 
-):
+    trip_grouping_cols: list
+) -> pd.DataFrame:
     """
-    Import vehicle positions, subset to operator.
+    Import unique trips present in vehicle positions.
     
     Determine trip_grouping_cols, a list of columns to aggregate trip tables
     up to how segments are cut. 
@@ -39,91 +41,96 @@ def import_vp_and_merge_crosswalk(
     Merge on crosswalk, which gives us feed_key. 
     Be able to link RT to schedule data (gtfs_dataset_key and feed_key present).
     """
-    vp = helpers.import_vehicle_positions(
+    vp_trips = helpers.import_vehicle_positions(
         SEGMENT_GCS,
-        f"vp_{analysis_date}",
-        file_type = "gdf",
-        filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
+        vp_file_name,
+        columns = ["gtfs_dataset_key", "trip_id"],
+        file_type = "df",
+        partitioned=False
+    ).drop_duplicates()
+
+    crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
+        analysis_date, 
+        ["feed_key", "trip_id"] + trip_grouping_cols
     )
     
-    crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
-        analysis_date, ["feed_key", "trip_id"] + trip_grouping_cols)
-    
     vp_with_crosswalk = dd.merge(
-        vp,
+        vp_trips,
         crosswalk,
+        on = ["gtfs_dataset_key", "trip_id"],
+        how = "inner"
+    ).compute().sort_values(
+        ["gtfs_dataset_key"] + trip_grouping_cols
+    ).reset_index(drop=True)
+    
+    return vp_with_crosswalk
+   
+
+def import_segments_and_buffer(
+    segment_file_name: str,
+    buffer_size: int,
+    segment_identifier_cols: list
+) -> gpd.GeoDataFrame:
+    """
+    Import segments , subset certain columns, 
+    and buffer by some specified amount.
+    """
+    segments = helpers.import_segments(
+        SEGMENT_GCS, 
+        segment_file_name,
+        columns = segment_identifier_cols + ["gtfs_dataset_key", "geometry"]
+    ).to_crs(PROJECT_CRS)
+    
+    # Buffer the segment for vehicle positions (points) to fall in polygons
+    segments = segments.assign(
+        geometry = segments.geometry.buffer(buffer_size)
+    )
+    
+    return segments
+
+
+def vehicle_positions_to_gdf(
+    vp_file_name: str,
+    rt_dataset_key: str,
+    crosswalk_vp_segments: pd.DataFrame
+) -> dg.GeoDataFrame:
+    """
+    Import vp_usable (tabular) for an operator and create geometry column.
+    Also merge in the crosswalk so we know which grouping it is, 
+    whether shape_array_key or route_dir_identifier.
+    """
+    vp = helpers.import_vehicle_positions(
+        SEGMENT_GCS,
+        vp_file_name,
+        filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]],
+        columns = ["gtfs_dataset_key", "trip_id", 
+                   "vp_idx", "x", "y"],
+        partitioned = True
+    ).merge(
+        crosswalk_vp_segments,
         on = ["gtfs_dataset_key", "trip_id"],
         how = "inner"
     )
     
-    return vp_with_crosswalk
+    vp["geometry"] = dg.points_from_xy(vp, "x", "y")
     
-
-def import_segments_and_buffer(
-    segment_file_name: str,
-    rt_dataset_key: str,
-    analysis_date: str,
-    buffer_size: int = 50,
-):
-    """
-    Import segments and subset to operator. 
-    Buffer by some specified amount.
-    """
-    segments = helpers.import_segments(
-        SEGMENT_GCS, 
-        f"{segment_file_name}_{analysis_date}",
-        filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
-    )
+    # Set CRS after gddf created
+    # https://github.com/geopandas/dask-geopandas/issues/189
+    vp_gdf = dg.from_dask_dataframe(
+        vp, geometry = "geometry", 
+    ).drop(columns = ["x", "y"]).set_crs("EPSG:4326").to_crs(PROJECT_CRS)
     
-    # Buffer the segment for vehicle positions (points) to fall in polygons
-    segments_buff = segments.assign(
-        geometry = segments.geometry.buffer(buffer_size)
-    )
+    return vp_gdf
     
-    return segments_buff
-
-
-def add_grouping_col_to_vp(
-    vp: dg.GeoDataFrame,
+    
+def loop_over_groups_by_operator(
+    vp_file_name: str,
+    vp_trips: pd.DataFrame,
     segments: dg.GeoDataFrame,
-    trip_grouping_cols: list,
-    grouping_col: str,
-):
-    '''
-    If we used a list of columns to aggregate trips up, 
-    we need to identify the single grouping column.
-    For route segments, since we used 2 columns, create a 3rd column that
-    combines those 2. 
-    This single grouping column is how we'll subset vp and segments later.
-    
-    ["route_id", "direction_id"] -> "route_dir_identifier"
-    ["shape_array_key"] -> "shape_array_key"
-    '''
-    group_cols =  ["gtfs_dataset_key"] + trip_grouping_cols
-    
-    unique_grouping_cols = list(set(group_cols + [grouping_col]))
-    segments_new_grouping = segments[
-        unique_grouping_cols].drop_duplicates()
-    
-    # vp_crosswalk contains the trip_ids that are present for this operator
-    # Do merge to get the route_dir_identifiers that remain
-    vp_with_grouping_col = dd.merge(
-        vp,
-        segments_new_grouping,
-        on = group_cols,
-        how = "inner"
-    ).reset_index(drop=True).repartition(npartitions=1)
-    
-    return vp_with_grouping_col
-      
-    
-def loop_over_route_groupings_within_operator(
-    operator_vp: dd.DataFrame,
-    operator_segments: dg.GeoDataFrame,
-    route_groupings: list,
+    rt_dataset_key: str,
     grouping_col: list,
     segment_identifier_cols: list
-): # returns dask delayed object
+) -> list[Delayed]:
     """
     Do the loop within an operator. Loop by route_dir_identifier
     or shape_array_key.
@@ -131,26 +138,41 @@ def loop_over_route_groupings_within_operator(
     Only the vehicle positions for that grouping can sjoin
     to those segments.
     """
+    operator_vp = delayed(vehicle_positions_to_gdf)(
+        vp_file_name,
+        rt_dataset_key,
+        vp_trips,
+    ).persist()
+    
+    operator_segments = segments[
+        segments.gtfs_dataset_key == rt_dataset_key]
+    
+    groups = operator_vp[grouping_col].unique()
+    groups = compute(groups)[0]
+    
     operator_results = []
     
-    for i, one_value in enumerate(route_groupings):
+    for g in groups:
+        vp_group = operator_vp[
+            operator_vp[grouping_col] == g][["vp_idx", "geometry"]]
+        
+        segments_group = operator_segments[
+            operator_segments[grouping_col] == g]
+        
+        sjoin_point_in_seg = delayed(dg.sjoin)(
+            vp_group,
+            segments_group,
+            how = "inner",
+            predicate = "within"
+        )[["vp_idx"] + segment_identifier_cols]
+        
+        operator_results.append(sjoin_point_in_seg)
 
-        vp_to_segment = delayed(helpers.sjoin_vehicle_positions_to_segments)(
-            operator_vp,
-            operator_segments, 
-            route_tuple = (grouping_col, one_value), 
-            segment_identifier_cols = segment_identifier_cols
-        )
-
-        # Store each route's results in the operator's results list.
-        operator_results.append(vp_to_segment)
-    
     return operator_results
     
     
 def sjoin_vp_to_segments(
     analysis_date: str,
-    buffer_size: int = 50,
     dict_inputs: dict = {}
 ):
     """
@@ -168,65 +190,35 @@ def sjoin_vp_to_segments(
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     EXPORT_FILE = dict_inputs["stage2"]
     
-    vp_df = helpers.import_vehicle_positions(
-        SEGMENT_GCS,
+    BUFFER_METERS = 35
+    
+    vp_trips = add_grouping_col_to_vp(
         f"{INPUT_FILE}_{analysis_date}",
-        file_type = "df",
-        columns = ["gtfs_dataset_key"],
+        analysis_date,
+        TRIP_GROUPING_COLS
     )
-    
-    segment_df = helpers.import_segments(
-        SEGMENT_GCS, 
+          
+    segments = delayed(import_segments_and_buffer)(
         f"{SEGMENT_FILE}_{analysis_date}",
-        columns = ["gtfs_dataset_key", 'geometry']
-    ).drop(columns = "geometry").drop_duplicates()
+        BUFFER_METERS,
+        SEGMENT_IDENTIFIER_COLS
+    ).persist()
     
-    in_vp = vp_df.gtfs_dataset_key.compute().tolist()
-    in_segments = segment_df.gtfs_dataset_key.tolist()
-    RT_OPERATORS = list(set(in_vp) & set(in_segments))
-        
-    for rt_dataset_key in sorted(RT_OPERATORS):
-        
+    RT_OPERATORS = vp_trips.gtfs_dataset_key.unique()
+    
+    for rt_dataset_key in RT_OPERATORS:
         start_id = datetime.datetime.now()
-        
-        vp = delayed(import_vp_and_merge_crosswalk)(
-            rt_dataset_key,
-            analysis_date,
-            TRIP_GROUPING_COLS
-        )
-        
-        segments = delayed(import_segments_and_buffer)(
-            SEGMENT_FILE,
-            rt_dataset_key,
-            analysis_date,
-            buffer_size=50
-        ).persist()
-        
-        vp2 = delayed(add_grouping_col_to_vp)(
-            vp,
+
+        operator_results = loop_over_groups_by_operator(
+            f"{INPUT_FILE}_{analysis_date}/",
+            vp_trips[vp_trips.gtfs_dataset_key == rt_dataset_key],
             segments,
-            TRIP_GROUPING_COLS,
-            GROUPING_COL
-        ).persist()
-        
-        # persist the vehicle positions and segments so we can 
-        # easily loop by route_dir_identifier or shape_array_key        
-        SINGLE_SEGMENT_COL = [c for c in SEGMENT_IDENTIFIER_COLS 
-                      if c!= GROUPING_COL]
-        
-        all_groups = vp2[GROUPING_COL].unique().compute()
-        
-        operator_results = loop_over_route_groupings_within_operator(
-            vp2,
-            segments,
-            all_groups, 
+            rt_dataset_key,
             GROUPING_COL,
-            SINGLE_SEGMENT_COL
-        )
-        
+            SEGMENT_IDENTIFIER_COLS
+        )        
+    
         if len(operator_results) > 0:
-        
-            # Compute the list of delayed objects
             dask_utils.compute_and_export(
                 operator_results,
                 gcs_folder = f"{SEGMENT_GCS}vp_sjoin/",
@@ -238,16 +230,17 @@ def sjoin_vp_to_segments(
             print(f"exported: {rt_dataset_key} {end_id - start_id}")
      
     
-    
 def compile_partitioned_parquets_for_operators(
     gcs_folder: str,
     file_name: str,
     analysis_date: str, 
+    vp_trips: pd.DataFrame,
 ):
     """
     Once we've saved out indiv operator partitioned parquets,
     read those in and save as one partitioned parquet
     """
+    
     all_files = fs.ls(f"{gcs_folder}")
     
     # The files to compile need format
@@ -268,11 +261,11 @@ def compile_partitioned_parquets_for_operators(
         file_name = f"{file_name}_{analysis_date}",
         export_single_parquet = False
     )
-    
+
     # Remove these partitioned parquets (folders, set recursive = True)
     for f in files_to_compile:
         fs.rm(f"gs://{f}", recursive=True)
-        
+    
         
 if __name__ == "__main__":
     
@@ -286,9 +279,9 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
+    #ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
+    '''
     vp_route_seg = sjoin_vp_to_segments(
         analysis_date = analysis_date,
         buffer_size = 50,
@@ -300,23 +293,29 @@ if __name__ == "__main__":
         ROUTE_SEG_DICT["stage2"], 
         analysis_date
     ) 
-    
+    '''
     time1 = datetime.datetime.now()
-    logger.info(f"attach vp to route segments: {time1 - start}")
-    
+    #logger.info(f"attach vp to route segments: {time1 - start}")
+    '''
     vp_stop_seg = sjoin_vp_to_segments(
         analysis_date = analysis_date,
-        buffer_size = 50,
         dict_inputs = STOP_SEG_DICT
     )
+    '''
     
+    vp_trips = add_grouping_col_to_vp(
+        f"{STOP_SEG_DICT['stage1']}_{analysis_date}",
+        analysis_date,
+        STOP_SEG_DICT["trip_grouping_cols"]
+    )
     compile_partitioned_parquets_for_operators(
         f"{SEGMENT_GCS}vp_sjoin/", 
         STOP_SEG_DICT["stage2"], 
-        analysis_date
+        analysis_date, 
+        vp_trips
     ) 
     time2 = datetime.datetime.now()
-    logger.info(f"attach vp to stop-to-stop segments: {time2 - time1}")
+    #logger.info(f"attach vp to stop-to-stop segments: {time2 - time1}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
