@@ -15,41 +15,42 @@ PACIFIC_TIMEZONE = "US/Pacific"
 def keep_min_max_timestamps_by_segment(
     vp_to_seg: dd.DataFrame, 
     segment_identifier_cols: list,
-    timestamp_col: str = "location_timestamp"
+    timestamp_col: str = "location_timestamp_local"
 ) -> dd.DataFrame:
     """
     For each segment-trip combination, throw away excess points, just 
     keep the enter/exit points for the segment.
     """
-    segment_trip_cols = ["gtfs_dataset_key", 
-                         "trip_id"] + segment_identifier_cols
+    segment_trip_cols = ["trip_id"] + segment_identifier_cols
+    dtypes_map = vp_to_seg[segment_trip_cols + [timestamp_col]].dtypes.to_dict()
     
     # https://stackoverflow.com/questions/52552066/dask-compute-gives-attributeerror-series-object-has-no-attribute-encode    
-    # comment out .compute() and just .reset_index()
     enter = (vp_to_seg.groupby(segment_trip_cols)
              [timestamp_col].min()
-             #.compute()
              .reset_index()
+             # we lose the dtypes for int16 in dask, set it again
+             .astype(dtypes_map)
             )
 
     exit = (vp_to_seg.groupby(segment_trip_cols)
             [timestamp_col].max()
-            #.compute()
             .reset_index()
+            .astype(dtypes_map)
            )
     
     enter_exit = dd.multi.concat([enter, exit], axis=0)
     
     # Merge back in with original to only keep the min/max timestamps
     # dask can't sort by multiple columns to drop
-    enter_exit_full_info = dd.merge(
+    vp_full_info = dd.merge(
         vp_to_seg,
         enter_exit,
         on = segment_trip_cols + [timestamp_col],
         how = "inner"
     ).reset_index(drop=True)
-        
-    return enter_exit_full_info
+            
+    return vp_full_info
+    
 
 
 def derive_speed(

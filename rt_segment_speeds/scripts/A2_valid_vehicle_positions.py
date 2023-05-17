@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import sys
 
+from dask import delayed, compute
 from loguru import logger
 from typing import Literal
 
@@ -41,7 +42,12 @@ def identify_stop_segment_cases(
     grouping_col: str,
     loop_or_inlining: Literal[0, 1]
 ) -> np.ndarray:
-    
+    """
+    Filter based on the column loop_or_inlining in the
+    stops_projected file. 
+    1 is special case, can have loops or inlining.
+    0 is normal case
+    """
     shape_cases = pd.read_parquet(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
         filters = [[("loop_or_inlining", "==", loop_or_inlining)]],
@@ -60,34 +66,70 @@ def pare_down_vp_by_segment(
     to keep the enter / exit timestamps.
     Also, exclude any bad batches of trips.
     """
+    time0 = datetime.datetime.now()
+    
     USABLE_VP = dict_inputs["stage1"]
     INPUT_FILE_PREFIX = dict_inputs["stage2"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     GROUPING_COL = dict_inputs["grouping_col"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]
     EXPORT_FILE = dict_inputs["stage3"]
-
+    
     # Handle stop segments and the normal/special cases separately
     normal_shapes = identify_stop_segment_cases(
         analysis_date, GROUPING_COL, 0)
-        
-    vp_joined_to_segments_normal = helpers.import_vehicle_positions(
-        f"{SEGMENT_GCS}vp_sjoin/",
-        f"{INPUT_FILE_PREFIX}_{analysis_date}",
+    
+    # First, grab all the usable vp (with lat/lon columns)
+    usable_vp = helpers.import_vehicle_positions(
+        SEGMENT_GCS,
+        f"{USABLE_VP}_{analysis_date}",
         file_type = "df",
+        partitioned = True
+    ).set_index("vp_idx")
+        
+    # Grab our results of vp_idx joined to segments
+    seg_seq_col = [c for c in SEGMENT_IDENTIFIER_COLS 
+                   if c != GROUPING_COL][0]
+    
+    vp_joined_to_segments_normal = dd.read_parquet(
+        f"{SEGMENT_GCS}vp_sjoin/{INPUT_FILE_PREFIX}_{analysis_date}/",
         filters = [[(GROUPING_COL, "in", normal_shapes)]],
-        partitioned=True
+    ).set_index("vp_idx")
+    
+    # Merge these so that we have segment identifiers and lat/lon
+    usable_normal_vp = dd.merge(
+        usable_vp,
+        vp_joined_to_segments_normal,
+        left_index = True,
+        right_index = True,
+        how = "inner"
     )
     
-    vp_pared_normal = segment_calcs.keep_min_max_timestamps_by_segment(
-        vp_joined_to_segments_normal, 
+    #usable_normal_vp.reset_index().to_parquet(
+    #    f"{SEGMENT_GCS}{EXPORT_FILE}_temp",
+    #    partition_on="gtfs_dataset_key"
+    #)
+    
+    time1 = datetime.datetime.now()    
+    logger.info(f"merge usable vp with sjoin results: {time1 - time0}")
+
+
+    normal_vp_to_keep = segment_calcs.keep_min_max_timestamps_by_segment(
+        usable_normal_vp,       
         segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
         timestamp_col = TIMESTAMP_COL
-    ).repartition(partition_size="85MB")
+    )
         
-    vp_pared_normal.to_parquet(
-        f"{SEGMENT_GCS}{EXPORT_FILE}_normal_{analysis_date}")    
+    time2 = datetime.datetime.now()
+    logger.info(f"keep enter/exit points: {time2 - time1}")
+
+    normal_vp_to_keep.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_normal_{analysis_date}"
+    )
     
+    logger.info(f"exported: {datetime.datetime.now() - time2}")
+    
+
     
 if __name__ == "__main__":
     
