@@ -120,7 +120,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "agency_name_primary", "agency_name_secondary",
         "hqta_type", "hqta_details", "route_id", 
         "base64_url_primary", "base64_url_secondary",
-        "peak_max_trips",
+        "peak_trips",
         "geometry"
     ]
     
