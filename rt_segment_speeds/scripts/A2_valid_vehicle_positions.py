@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 import sys
 
-from dask import delayed, compute
 from loguru import logger
 from typing import Literal
 
@@ -57,6 +56,48 @@ def identify_stop_segment_cases(
     return shape_cases
 
 
+def merge_usable_vp_with_sjoin_vpidx(
+    shape_cases: np.ndarray,
+    usable_vp_file: str,
+    sjoin_results_file: str,
+    segment_identifier_cols: list,
+    grouping_col: str
+) -> dd.DataFrame:
+    """
+    Grab all the usable vp (with lat/lon columns), filter it down to
+    normal or special cases, and merge it
+    against the sjoin results (which only has vp_idx + segment_identifier_cols).
+    """
+    # First, grab all the usable vp (with lat/lon columns)
+    usable_vp = helpers.import_vehicle_positions(
+        SEGMENT_GCS,
+        usable_vp_file,
+        file_type = "df",
+        partitioned = True
+    ).set_index("vp_idx")
+        
+    # Grab our results of vp_idx joined to segments
+    seg_seq_col = [c for c in segment_identifier_cols 
+                   if c != grouping_col][0]
+    
+    vp_to_seg = dd.read_parquet(
+        f"{SEGMENT_GCS}vp_sjoin/{sjoin_results_file}",
+        filters = [[(grouping_col, "in", shape_cases)]],
+    ).set_index("vp_idx")
+    
+    # Merge these so that we have segment identifiers and lat/lon
+    # use index to merge so it's faster. left and right dfs are ddfs.
+    usable_vp_full_info = dd.merge(
+        usable_vp,
+        vp_to_seg,
+        left_index = True,
+        right_index = True,
+        how = "inner"
+    )
+    
+    return usable_vp_full_info
+
+
 def pare_down_vp_by_segment(
     analysis_date: str, 
     dict_inputs: dict = {}
@@ -78,46 +119,23 @@ def pare_down_vp_by_segment(
     # Handle stop segments and the normal/special cases separately
     normal_shapes = identify_stop_segment_cases(
         analysis_date, GROUPING_COL, 0)
-    
+
     # First, grab all the usable vp (with lat/lon columns)
-    usable_vp = helpers.import_vehicle_positions(
-        SEGMENT_GCS,
+    usable_normal_vp = merge_usable_vp_with_sjoin_vpidx(
+        normal_shapes,
         f"{USABLE_VP}_{analysis_date}",
-        file_type = "df",
-        partitioned = True
-    ).set_index("vp_idx")
-        
-    # Grab our results of vp_idx joined to segments
-    seg_seq_col = [c for c in SEGMENT_IDENTIFIER_COLS 
-                   if c != GROUPING_COL][0]
-    
-    vp_joined_to_segments_normal = dd.read_parquet(
-        f"{SEGMENT_GCS}vp_sjoin/{INPUT_FILE_PREFIX}_{analysis_date}/",
-        filters = [[(GROUPING_COL, "in", normal_shapes)]],
-    ).set_index("vp_idx")
-    
-    # Merge these so that we have segment identifiers and lat/lon
-    usable_normal_vp = dd.merge(
-        usable_vp,
-        vp_joined_to_segments_normal,
-        left_index = True,
-        right_index = True,
-        how = "inner"
+        f"{INPUT_FILE_PREFIX}_{analysis_date}",
+        SEGMENT_IDENTIFIER_COLS,
+        GROUPING_COL
     )
-    
-    #usable_normal_vp.reset_index().to_parquet(
-    #    f"{SEGMENT_GCS}{EXPORT_FILE}_temp",
-    #    partition_on="gtfs_dataset_key"
-    #)
     
     time1 = datetime.datetime.now()    
     logger.info(f"merge usable vp with sjoin results: {time1 - time0}")
 
-
     normal_vp_to_keep = segment_calcs.keep_min_max_timestamps_by_segment(
         usable_normal_vp,       
-        segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
-        timestamp_col = TIMESTAMP_COL
+        SEGMENT_IDENTIFIER_COLS,
+        TIMESTAMP_COL
     )
         
     time2 = datetime.datetime.now()
@@ -153,7 +171,7 @@ if __name__ == "__main__":
     )
     
     time2 = datetime.datetime.now()
-    logger.info(f"pare down vp by stop segments {time2 - time1}")
+    logger.info(f"pare down vp by stop segments normal cases {time2 - time1}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
