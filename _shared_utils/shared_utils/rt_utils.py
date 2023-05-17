@@ -559,6 +559,7 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
     """Given a linestring segment from a gtfs shape,
     buffer and clip to show direction of progression"""
     arrow_distance = buffer_distance  # was buffer_distance * 0.75
+    st_end_distance = arrow_distance + 3  # avoid floating point errors...
     try:
         segment = line_geometry.simplify(tolerance=5)
         if segment.length < 50:  # return short segments unmodified, for now
@@ -566,7 +567,7 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
         arrow_distance = max(arrow_distance, line_geometry.length / 20)
         shift_distance = buffer_distance + 1
 
-        begin_segment = shapely.ops.substring(segment, 0, arrow_distance)
+        begin_segment = shapely.ops.substring(segment, 0, st_end_distance)
         r_shift = begin_segment.parallel_offset(shift_distance, "right")
         r_pt = shapely.ops.substring(r_shift, 0, 0)
         l_shift = begin_segment.parallel_offset(shift_distance, "left")
@@ -578,7 +579,7 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
         )
         poly = shapely.geometry.Polygon((r_pt, end, l_pt))  # triangle to cut bottom of arrow
         # ends to the left
-        end_segment = shapely.ops.substring(segment, segment.length - arrow_distance, segment.length)
+        end_segment = shapely.ops.substring(segment, segment.length - st_end_distance, segment.length)
         end = shapely.ops.substring(end_segment, end_segment.length, end_segment.length)  # correct
         r_shift = end_segment.parallel_offset(shift_distance, "right")
         r_pt = shapely.ops.substring(r_shift, 0, 0)
