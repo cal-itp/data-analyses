@@ -46,8 +46,8 @@ def merge_in_max_arrivals_by_stop(
     trip_count_cols = ["am_max_trips", "pm_max_trips"]
     
     with_stops2 = with_stops.assign(
-        peak_max_trips = (with_stops[trip_count_cols]
-                          .max(axis=1)
+        peak_trips = (with_stops[trip_count_cols]
+                          .min(axis=1)
                           .fillna(0).astype(int))
     ).drop(columns = trip_count_cols)
     
@@ -171,7 +171,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "hqta_details", "agency_name_secondary",
         # include these as stable IDs?
         "base64_url_primary", "base64_url_secondary", 
-        "peak_max_trips",
+        "peak_trips",
         "geometry"
     ]
     
