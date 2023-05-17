@@ -10,7 +10,8 @@ get_speeds_by_segment:
 	python A0_preprocessing.py
 	python A1_sjoin_vp_segments.py
 	python A2_valid_vehicle_positions.py
-	#python A3_loop_inlining.py
+	python A3_loop_inlining.py
+	python A4_concatenate_vp_pared.py
 	#python B1_speeds_by_segment_trip.py
 	#python B2_avg_speeds_by_segment.py
 	#python C1_rt_trip_diagnostics.py

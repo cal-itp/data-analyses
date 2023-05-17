@@ -284,7 +284,7 @@ def pare_down_vp_for_special_cases(
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
         SEGMENT_IDENTIFIER_COLS,
         GROUPING_COL
-    ).reset_index()
+    )
 
     segments = helpers.import_segments(
         file_name = f"{SEGMENT_FILE}_{analysis_date}",
