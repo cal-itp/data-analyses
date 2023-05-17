@@ -93,7 +93,7 @@ def merge_usable_vp_with_sjoin_vpidx(
         left_index = True,
         right_index = True,
         how = "inner"
-    )
+    ).reset_index()
     
     return usable_vp_full_info
 
