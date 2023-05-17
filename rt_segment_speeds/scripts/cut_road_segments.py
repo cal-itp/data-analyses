@@ -17,6 +17,8 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 
 
+"""
+Tiffany's Stuff
 def compare_roads_to_shapes(analysis_date: str) -> dd.DataFrame:
     roads = dg.read_parquet(
          f"{SHARED_GCS}all_roads_2020_state06.parquet", 
@@ -41,9 +43,9 @@ def compare_roads_to_shapes(analysis_date: str) -> dd.DataFrame:
 
 
 def chunk_df(df: gpd.GeoDataFrame, n: int) -> list:
-    """
-    Cut df into chunks
-    """
+ 
+    # Cut df into chunks
+
     # https://stackoverflow.com/questions/33367142/split-dataframe-into-relatively-even-chunks-according-to-length
     list_df = [delayed(df[i:i+n]) for i in range(0, df.shape[0], n)]
 
@@ -99,3 +101,4 @@ if __name__ == "__main__":
     end = datetime.datetime.now()
     print(f"cut segments: {end-time2}")
     print(f"execution time: {end-start}")
+"""
