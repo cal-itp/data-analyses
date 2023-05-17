@@ -220,7 +220,7 @@ def cut_segments(
 
     segmented = (
         segmented.assign(
-            segment_sequence=(segmented.groupby(group_cols)["temp_index"].transform("rank") - 1).astype(int)
+            segment_sequence=(segmented.groupby(group_cols)["temp_index"].transform("rank") - 1).astype("int16")
         )
         .sort_values(group_cols)
         .reset_index(drop=True)

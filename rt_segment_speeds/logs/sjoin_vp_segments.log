@@ -49,7 +49,3 @@
 2023-05-15 14:11:43.758 | INFO     | __main__:<module>:280 - Analysis date: 2023-03-15
 2023-05-15 16:09:03.504 | INFO     | __main__:<module>:313 - attach vp to stop-to-stop segments: 1:57:19.737088
 2023-05-15 16:09:03.505 | INFO     | __main__:<module>:316 - execution time: 1:57:19.745243
-2023-05-15 17:23:08.678 | INFO     | __main__:<module>:278 - Analysis date: 2023-03-15
-2023-05-15 19:38:18.968 | INFO     | __main__:<module>:278 - Analysis date: 2023-03-15
-2023-05-15 19:39:06.179 | INFO     | __main__:<module>:278 - Analysis date: 2023-03-15
-2023-05-15 19:40:51.600 | INFO     | __main__:<module>:321 - execution time: 0:01:45.419542
