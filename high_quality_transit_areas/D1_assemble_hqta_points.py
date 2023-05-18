@@ -158,6 +158,17 @@ def add_agency_names_hqta_details(
         hqta_details = gdf.apply(utilities.hqta_details, axis=1),
     )
     
+    # Additional clarification of hq_corridor_bus, 
+    # do not put in utilities because hqta_polygons does not share this
+    gdf["hqta_details"] = gdf.apply(
+        lambda x: "corridor_frequent_stop" if (
+            (x.hqta_type == "hq_corridor_bus") and 
+            (x.peak_trips >= 4)
+        ) else "corridor_other_stop" if (
+            (x.hqta_type == "hq_corridor_bus") and 
+            (x.peak_trips < 4) 
+        ) else x.hqta_details, axis = 1)
+    
     # Add base64_urls
     gdf = attach_base64_url_to_feed_key(gdf, analysis_date)
     
@@ -200,7 +211,7 @@ if __name__=="__main__":
     major_stop_bus = catalog.major_stop_bus.read()
     stops_in_corridor = catalog.stops_in_hq_corr.read()
     max_arrivals_by_stop = pd.read_parquet(
-        f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet", 
+        f"{utilities.GCS_FILE_PATH}max_arrivals_by_stop.parquet", 
         columns = ["feed_key", "stop_id", "am_max_trips", "pm_max_trips"]
     ).rename(columns = {"feed_key": "feed_key_primary"})
     

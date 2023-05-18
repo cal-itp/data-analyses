@@ -35,10 +35,7 @@ def hqta_details(row):
         else:
             return "intersection_2_bus_routes_same_operator"
     elif row.hqta_type == "hq_corridor_bus":
-        if row.peak_max_trips >= 4:
-            return "corridor_frequent_stop"
-        else:
-            return "corridor_other_stop"
+        return "stop_along_hq_bus_corridor_single_operator"
     elif row.hqta_type in ["major_stop_ferry", 
                            "major_stop_brt", "major_stop_rail"]:
         # (not sure if ferry, brt, rail, primary/secondary ids are filled in.)
