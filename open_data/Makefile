@@ -12,7 +12,7 @@ download_vehicle_positions_one_day:
 create_gtfs_schedule_geospatial_open_data:
 	python create_routes_data.py
 	python create_stops_data.py
-	python link_operator_to_county_district.py
+	#python link_operator_to_county_district.py
     
 
 compile_open_data_portal:

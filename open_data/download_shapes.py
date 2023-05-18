@@ -36,12 +36,15 @@ if __name__ == "__main__":
 
   
     keep_shape_cols = [
-       "feed_key", "activity_date", 
-       "shape_id", "shape_array_key",
-       "n_trips", 
-       # n_trips is new column...can help if we want 
-       # to choose between shape_ids
-       # geometry already returned when get_df is True
+        "feed_key", "feed_timezone",
+        "service_date", 
+        "shape_first_departure_datetime_pacific", 
+        "shape_last_arrival_datetime_pacific",
+        "shape_id", "shape_array_key",
+        "n_trips", 
+        # n_trips is new column...can help if we want 
+        # to choose between shape_ids
+        # geometry already returned when get_df is True
     ]
     
     routelines = gtfs_utils_v2.get_shapes(

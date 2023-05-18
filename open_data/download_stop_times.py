@@ -38,6 +38,7 @@ if __name__=="__main__":
 
     keep_stop_time_cols = [
         "feed_key", 
+        "feed_timezone", 
         "base64_url",
         "trip_id", 
         "stop_id", "stop_sequence", "timepoint",
