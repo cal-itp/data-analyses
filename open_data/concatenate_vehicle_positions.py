@@ -23,10 +23,10 @@ from update_vars import SEGMENT_GCS, analysis_date
 
 fs = gcsfs.GCSFileSystem()
 
-def concat_batches(analysis_date: str) -> pd.DataFrame:
+def concat_batches(analysis_date: str) -> dd.DataFrame:
     """
     Append individual operator vehicle position parquets together
-    and cache a single vehicle positions parquet
+    and cache a partitioned parquet
     """
 
     fs_list = fs.ls(f"{SEGMENT_GCS}")
@@ -34,13 +34,12 @@ def concat_batches(analysis_date: str) -> pd.DataFrame:
     vp_files = [i for i in fs_list if "vp_raw" in i 
                 and f"{analysis_date}_batch" in i]
     
-    df = pd.DataFrame()
+    delayed_dfs = [delayed(pd.read_parquet)(f"gs://{f}") 
+                   for f in vp_files]
     
-    for f in vp_files:
-        batch_df = pd.read_parquet(f"gs://{f}")
-        df = pd.concat([df, batch_df], axis=0)
+    ddf = dd.from_delayed(delayed_dfs)
     
-    return df
+    return ddf
 
 
 def vp_into_gdf(df: pd.DataFrame) -> gpd.GeoDataFrame:
@@ -106,40 +105,78 @@ def remove_batched_parquets(analysis_date: str):
     
     for f in concat_file:
         fs.rm(f, recursive=True)
+    
 
-        
-def concat_and_filter_for_operator(
+def concat_batches_for_two_dates(
     analysis_date: str, 
-    rt_dataset_key: str
-) -> gpd.GeoDataFrame:
-    # Filter down to analysis_date 
-    part1 = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_raw_{analysis_date}.parquet", 
-        filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
-    )
-    part2 = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_raw_{one_day_after}.parquet",
-        filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
-    )
-
-    part1_filtered = filter_to_analysis_date(part1, analysis_date)
-    part2_filtered = filter_to_analysis_date(part2, analysis_date)
-
-    # Concatenate the 2 dates downloaded that are filtered
-    # appropriately to the analysis_date of interest
-    all_vp = pd.concat(
-        [part1_filtered, part2_filtered], 
-        axis=0
-    ).reset_index(drop=True)
+    one_day_after: str
+):
+    """
+    Concatenate across the batches for the 2 dates and export 
+    as partitioned parquet.
+    Partition on gtfs_dataset_key because dask.delay will import
+    each operator later.
+    """
+    # Concatenate all the batched data for the 2 downloaded dates
+    part1 = concat_batches(analysis_date)
+    part1.to_parquet(f"{SEGMENT_GCS}vp_raw_{analysis_date}", 
+                     partition_on = "gtfs_dataset_key")
     
-    gdf = vp_into_gdf(all_vp)
+    part2 = concat_batches(one_day_after)
+    part2.to_parquet(f"{SEGMENT_GCS}vp_raw_{one_day_after}", 
+                     partition_on = "gtfs_dataset_key")
     
-    return gdf
+    logger.info(f"concatenated all batched data")
 
+    
+def filter_by_operator_to_activity_date(
+    analysis_date: str, 
+    one_day_after: str
+):  
+    """
+    Use dask delayed to go through all operators.
+    For each operator, filter down to the activity date within 
+    each downloaded date (service_date).
+    Concatenate the 2 dates into one and save it as our actual analysis_date.
+    """
+    RT_OPERATORS = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_raw_{analysis_date}.parquet",
+        columns = ["gtfs_dataset_key"]
+    ).drop_duplicates().gtfs_dataset_key.unique().tolist()
+        
+    results = []
+    
+    for rt_dataset_key in RT_OPERATORS:
+        part1 = delayed(pd.read_parquet)(
+            f"{SEGMENT_GCS}vp_raw_{analysis_date}", 
+            filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
+        )
+        part2 = delayed(pd.read_parquet)(
+            f"{SEGMENT_GCS}vp_raw_{one_day_after}",
+            filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]]
+        )
+
+        part1_filtered = delayed(filter_to_analysis_date)(part1, analysis_date)
+        part2_filtered = delayed(filter_to_analysis_date)(part2, analysis_date)
+        
+        results.append(part1_filtered)
+        results.append(part2_filtered)
+    
+        print(f"finished: {rt_dataset_key}")
+
+    results_df = dd.from_delayed(results)     
+    
+    results_df = results_df.astype({"activity_date": "datetime64[ns]"})
+    
+    results_df.to_parquet(
+        f"{SEGMENT_GCS}vp_{analysis_date}_concat", 
+        overwrite = True
+    )    
+       
     
 if __name__ == "__main__":
 
-    LOG_FILE = "../logs/download_vp_v2.log"
+    LOG_FILE = "./logs/download_vp_v2.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -151,58 +188,36 @@ if __name__ == "__main__":
     
     one_day_after = helpers.find_day_after(analysis_date)
     
-    # Concatenate all the batched data for the 2 downloaded dates
-    part1 = concat_batches(analysis_date)
-    part1.to_parquet(f"{SEGMENT_GCS}vp_raw_{analysis_date}.parquet")
+    # Concatenate all the batches for the two dates
+    concat_batches_for_two_dates(analysis_date, one_day_after)
     
-    part2 = concat_batches(one_day_after)
-    part2.to_parquet(f"{SEGMENT_GCS}vp_raw_{one_day_after}.parquet")
-    
-    logger.info(f"concatenated all batched data")
-    
-    operators = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_raw_{analysis_date}.parquet",
-        columns = ["gtfs_dataset_key"]
-    ).drop_duplicates()
-    
-    RT_OPERATORS = operators.gtfs_dataset_key.tolist()
-    
-    results = []
-    
-    for rt_dataset_key in RT_OPERATORS:
-        operator_df = delayed(concat_and_filter_for_operator)(
-            analysis_date, rt_dataset_key) 
-        
-        results.append(operator_df)
-        
-        print(f"finished: {rt_dataset_key}")
-       
-        
     time1 = datetime.datetime.now()
     logger.info(f"concat and filter for 2 dates downloaded: {time1 - start}")
-        
-    dask_utils.compute_and_export(
-        results,
-        SEGMENT_GCS,
-        f"vp_{analysis_date}_concat",
-        export_single_parquet = False
-    )
+    
+    # For each operator, filter it to the activity date we want
+    # and concatenate and export
+    filter_by_operator_to_activity_date(analysis_date, one_day_after)
     
     time2 = datetime.datetime.now()
     logger.info(f"export concatenated vp: {time2 - time1}")
     
-    vp = dg.read_parquet(
+    # Import concatenated tabular vp and make it a gdf
+    vp = pd.read_parquet(
         f"{SEGMENT_GCS}vp_{analysis_date}_concat/"
-    ).compute()
+    ).reset_index(drop=True)
     
-    
+    vp_gdf = vp_into_gdf(vp)
+
     utils.geoparquet_gcs_export(
-        vp,
+        vp_gdf,
         SEGMENT_GCS,
         f"vp_{analysis_date}"
     )
     
     remove_batched_parquets(analysis_date)
     logger.info(f"remove batched parquets")
+    
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end - start}")
     
     

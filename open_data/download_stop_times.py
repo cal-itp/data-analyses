@@ -43,7 +43,6 @@ if __name__=="__main__":
         "trip_id", 
         "stop_id", "stop_sequence", "timepoint",
         "arrival_sec", "departure_sec",
-        "arrival_time_interval", "departure_time_interval"
     ]
     
     stop_times = gtfs_utils_v2.get_stop_times(
