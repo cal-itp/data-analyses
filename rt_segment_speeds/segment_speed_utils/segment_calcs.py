@@ -21,6 +21,9 @@ def keep_min_max_timestamps_by_segment(
     For each segment-trip combination, throw away excess points, just 
     keep the enter/exit points for the segment.
     """
+    # a groupby including gtfs_dataset_key explodes the groupers, and 
+    # a lot of NaNs result...why?
+    # shape_array_key will uniquely identify feed_key + shape_id, so should be ok
     segment_trip_cols = ["trip_id"] + segment_identifier_cols
     dtypes_map = vp_to_seg[segment_trip_cols + [timestamp_col]].dtypes.to_dict()
     
@@ -79,50 +82,51 @@ def derive_speed(
 
 
 def calculate_speed_by_segment_trip(
-    gdf: dg.GeoDataFrame, 
+    df: dd.DataFrame, 
     segment_identifier_cols: list,
-    timestamp_col: str = "location_timestamp"
+    timestamp_col: str
 ) -> dd.DataFrame:
     """
     For each segment-trip pair, calculate find the min/max timestamp
     and min/max shape_meters. Use that to derive speed column.
     """ 
-    segment_trip_cols = [
-        "gtfs_dataset_key", "_gtfs_dataset_name", 
-        "trip_id"] + segment_identifier_cols
+    segment_trip_cols = segment_identifier_cols + ["trip_id"]
     
-    min_time = (gdf.groupby(segment_trip_cols)
-                [timestamp_col].min()
-                .compute()
-                .reset_index(name="min_time")
+    min_time_dist = (df.groupby(segment_trip_cols)
+                     .agg({timestamp_col: "min", 
+                           "shape_meters": "min"})
+                     .reset_index()
+                     .compute()
+                     .rename(columns = {
+                         timestamp_col: "min_time",
+                         "shape_meters": "min_dist"})
     )
     
-    max_time = (gdf.groupby(segment_trip_cols)
-                [timestamp_col].max()
-                .compute()
-                .reset_index(name="max_time")
+    max_time_dist = (df.groupby(segment_trip_cols)
+                     .agg({timestamp_col: "max", 
+                           "shape_meters": "max"})
+                     .reset_index()
+                     .compute()
+                     .rename(columns = {
+                         timestamp_col: "max_time",
+                         "shape_meters": "max_dist"})
+    )
+
+    # groupby with gtfs_dataset_key/name explode the number of rows, 
+    # so we won't use it in getting min/max time and distance
+    # but we will merge it in with base_agg
+    base_agg = (df[["gtfs_dataset_key", "_gtfs_dataset_name"] + 
+                    segment_trip_cols]
+                .drop_duplicates()
+                .reset_index(drop=True)
                )
     
-    min_dist = (gdf.groupby(segment_trip_cols)
-                .shape_meters.min()
-                .compute()
-                .reset_index(name="min_dist")
-    )
-    
-    max_dist = (gdf.groupby(segment_trip_cols)
-                .shape_meters.max()
-                .compute()
-                .reset_index(name="max_dist")
-               )  
-    
-    base_agg = gdf[segment_trip_cols].drop_duplicates().reset_index(drop=True)
-    
-    segment_trip_agg = (
-        base_agg
-        .merge(min_time, on = segment_trip_cols, how = "left")
-        .merge(max_time, on = segment_trip_cols, how = "left")
-        .merge(min_dist, on = segment_trip_cols, how = "left")
-        .merge(max_dist, on = segment_trip_cols, how = "left")
+    segment_trip_agg = (dd.merge(
+        base_agg,
+        min_time_dist,
+        on = segment_trip_cols, 
+        how = "left"
+    ).merge(max_time_dist, on = segment_trip_cols, how = "left")
     )
     
     segment_speeds = derive_speed(
