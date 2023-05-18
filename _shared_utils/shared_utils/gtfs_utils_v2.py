@@ -471,11 +471,6 @@ def get_stop_times(
     operator_feeds: list[str] = [],
     stop_time_cols: list[str] = [],
     get_df: bool = False,
-    time_filters: dict = {
-        "arrival": (0, 26),
-        "departure": (0, 26),
-    },  # since some trips wrap past midnight,
-    # let's capture all the way through the 25th hour
     trip_df: Union[pd.DataFrame, siuba.sql.verbs.LazyTbl] = None,
     custom_filtering: dict = None,
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
@@ -489,10 +484,6 @@ def get_stop_times(
             If True, return pd.DataFrame
     """
     check_operator_feeds(operator_feeds)
-
-    # Fill in time_filters dict so arrival and departure are both there
-    time_filters.setdefault("arrival", (0, 26))
-    time_filters.setdefault("departure", (0, 26))
 
     trip_id_cols = ["feed_key", "trip_id"]
 
@@ -513,8 +504,6 @@ def get_stop_times(
             tbls.mart_gtfs.dim_stop_times()
             >> filter_operator(operator_feeds, include_name=True)
             >> inner_join(_, trips_on_day, on=trip_id_cols)
-            >> filter_start_end_ts(time_filters, "arrival")
-            >> filter_start_end_ts(time_filters, "departure")
             >> filter_custom_col(custom_filtering)
             >> subset_cols(stop_time_cols)
         )
@@ -526,8 +515,6 @@ def get_stop_times(
             tbls.mart_gtfs.dim_stop_times()
             >> filter_operator(operator_feeds, include_name=False)
             >> filter(_.trip_id.isin(trips_on_day.trip_id))
-            >> filter_start_end_ts(time_filters, "arrival")
-            >> filter_start_end_ts(time_filters, "departure")
             >> filter_custom_col(custom_filtering)
             >> subset_cols(stop_time_cols)
         )
