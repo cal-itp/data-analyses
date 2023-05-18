@@ -61,15 +61,17 @@ if __name__=="__main__":
     keep_trip_cols = [
         "feed_key", "gtfs_dataset_key", 
         "name", "regional_feed_type", 
-        "service_date", "activity_date",
+        "service_date", "trip_start_date_pacific",
         "trip_key", "trip_id",
         "route_key", "route_id", "route_type", 
         "route_short_name", "route_long_name", "route_desc",
         "direction_id", 
         "shape_array_key", "shape_id",
-        "trip_first_departure_sec", "trip_last_arrival_sec",
+        "trip_first_departure_datetime_pacific", 
+        "trip_last_arrival_datetime_pacific",
         "service_hours",
-        "activity_first_departure", "activity_last_arrival"
+        "trip_start_date_local_tz", "trip_first_departure_datetime_local_tz",
+        "trip_last_arrival_datetime_local_tz"
     ]
     
     trips = gtfs_utils_v2.get_trips(

@@ -16,7 +16,18 @@ On the other hand, major transit stops exist at the intersection of two high-qua
 
 Using the HQTA Areas dataset, it's possible to determine if an area qualifies because it is a high quality corridor, major transit stop, or both. This is useful for certain kinds of analyses, since some statutes and programs only reference major transit stops and don't include high quality corridors.
 
-We provide the HQTA Stops dataset as a convienience for certain kinds of analysis where it would be helpful to know actual stop locations. Note that the `hq_corridor_stop` type includes all stops in a high quality corridor. Since we make the high quality corridor determination at the corridor segment level and only then find the stops within that corridor, not every `hq_corridor_stop` is guaranteed to have frequent service (though they could all have frequent service, and at least one stop every 1,250 meters will have frequent service).
+We provide the HQTA Stops dataset as a convienience for certain kinds of analysis where it would be helpful to know actual stop locations. Note that the `hq_corridor_bus` type includes all stops in a high quality corridor. Since we make the high quality corridor determination at the corridor segment level and only then find the stops within that corridor, not every `hq_corridor_stop` is guaranteed to have frequent service (though they could all have frequent service, and at least one stop every 1,250 meters will have frequent service).
+
+### Additional Details
+*  `peak_trips`: the number of trips per hour are calculated separately for the AM peak and PM peak. This column should be interpreted as: *at least x trips per hour in the peak period*. 
+    * If these values differ, the *lesser* value is reported. 
+    * Ex: 5 AM peak trips, 4 PM peak trips would show a value of `peak_trips = 4`.
+* `hqta_type = hq_corridor_bus`
+    * `hqta_details` is `corridor_frequent_stop` if the stop has at least 4 peak trips, `corridor_other_stop` otherwise.
+* `hqta_type = major_stop_bus`
+    * Major stop bus is designation of stops appearing at the intersection of 2 frequent corridors. In our analysis, corridors have an operator and route associated to track it.
+    * If the intersection was between 2 different operators (different agency names), `hqta_details = intersection_2_bus_routes_different_operators`.
+    * If the intersection was between routes of the same operator, `hqta_details = intersection_2_bus_routes_same_operator` 
 
 ## High Quality Transit Areas Relevant Statutes
 

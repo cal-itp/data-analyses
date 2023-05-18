@@ -199,8 +199,8 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
 
     segment_hq_corr = segment_to_stop_unique.assign(
         hq_transit_corr = segment_to_stop_unique.apply(
-            lambda x: True if (x.am_max_trips > hq_transit_threshold and 
-                               (x.pm_max_trips > hq_transit_threshold))
+            lambda x: True if (x.am_max_trips >= hq_transit_threshold and 
+                               (x.pm_max_trips >= hq_transit_threshold))
             else False, axis=1)
     ).drop(columns = drop_cols)
     
