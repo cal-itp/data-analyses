@@ -1,6 +1,6 @@
 # Cut segments
 segmentize:
-	python cut_route_segments.py
+	#python cut_route_segments.py
 	python prep_stop_segments.py
 	python cut_normal_stop_segments.py
 	python cut_special_stop_segments.py
