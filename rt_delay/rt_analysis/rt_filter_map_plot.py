@@ -461,12 +461,13 @@ class RtFilterMapper:
         assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
         gdf = self.detailed_map_view.dropna(subset=['fast_slow_ratio']) >> arrange(-_.fast_slow_ratio)
         gdf = gdf.round({'fast_slow_ratio': 1})
-        display_cols = ['fast_slow_ratio', 'miles_from_last',
+        display_cols = ['fast_slow_ratio', '_20p_mph', '_80p_mph', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
-                       'stop_sequence', '_20p_mph', '_80p_mph']
-        display_aliases = ['80th %ile to 20th %ile speed ratio (variation in speeds)', 'Segment distance (miles)',
+                       'stop_sequence']
+        display_aliases = ['80th %ile to 20th %ile speed ratio (variation in speeds)',
+                           '20th %ile Speed (miles per hour)', ' 80th %ile Speed (miles per hour)', 'Segment distance (miles)',
                           'Route', 'Frequency (trips per hour)', 'Shape ID',
-                          'Stop Sequence', '20th %ile Speed (miles per hour)', ' 80th %ile Speed (miles per hour)']
+                          'Stop Sequence']
         tooltip_dict = {'aliases': display_aliases}
         bins = list(mapclassify.Quantiles(gdf.fast_slow_ratio).bins)
         cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins,      
