@@ -342,7 +342,9 @@ class RtFilterMapper:
                          >> mutate(n_trips_shp = _.stop_sequence.size, # filtered to shape
                                     avg_mph = _.speed_mph.mean(),
                                     _20p_mph = _.speed_mph.quantile(.2),
-                                    var_mph = _.speed_mph.var()
+                                    _80p_mph = _.speed_mph.quantile(.8),
+                                    fast_slow_ratio = _._80p_mph / _._20p_mph # new intuitive variation measure
+                                    # var_mph = _.speed_mph.var() # old statistical variance
                                   )
                          >> ungroup()
                          >> select(-_.arrival_time, -_.actual_time, -_.delay, -_.last_delay)
@@ -388,8 +390,9 @@ class RtFilterMapper:
                             -_.last_loc, -_.shape_meters,
                            -_.meters_from_last, -_.n_trips_shp)
         orig_rows = gdf.shape[0]
-        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, 'miles_from_last': 1,
-                        'trips_per_hour': 1, 'avg_sec': 0, '_20p_sec': 0,}) ##round for display
+        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, '_80p_mph': 1,
+                         'miles_from_last': 1, 'trips_per_hour': 1, 'avg_sec': 0,
+                         '_20p_sec': 0, 'fast_slow_ratio': 1}) ##round for display
         
         how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
         how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
@@ -415,19 +418,17 @@ class RtFilterMapper:
         gdf = gdf.to_crs(WGS84)
         self.detailed_map_view = gdf.copy()
         centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
-        name = self.organization_name
-
         display_cols = [how_speed_col[how], 'time_formatted', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
-                       'stop_sequence']
+                       'stop_sequence', 'fast_slow_ratio']
         display_aliases = ['Speed (miles per hour)', 'Travel time', 'Segment distance (miles)',
                           'Route', 'Frequency (trips per hour)', 'Shape ID',
-                          'Stop Sequence']
+                          'Stop Sequence', '80th %ile to 20th %ile speed ratio (variation in speeds)']
         tooltip_dict = {'aliases': display_aliases}
         if no_title:
             title = ''
         else:
-            title = f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}"
+            title = f"{self.organization_name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}"
         colorscale.caption = "Speed (miles per hour)"
         style_dict = {'opacity': 0, 'fillOpacity': 0.8}
         if shn:
@@ -458,26 +459,26 @@ class RtFilterMapper:
         with five quantiles.
         '''
         assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
-        gdf = self.detailed_map_view.dropna(subset=['var_mph']) >> arrange(-_.var_mph)
-        gdf = gdf.round({'var_mph': 0})
-        display_cols = ['var_mph', 'miles_from_last',
+        gdf = self.detailed_map_view.dropna(subset=['fast_slow_ratio']) >> arrange(-_.fast_slow_ratio)
+        gdf = gdf.round({'fast_slow_ratio': 1})
+        display_cols = ['fast_slow_ratio', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
-                       'stop_sequence']
-        display_aliases = ['Speed Variance (miles per hour squared)', 'Segment distance (miles)',
+                       'stop_sequence', '_20p_mph', '_80p_mph']
+        display_aliases = ['80th %ile to 20th %ile speed ratio (variation in speeds)', 'Segment distance (miles)',
                           'Route', 'Frequency (trips per hour)', 'Shape ID',
-                          'Stop Sequence']
+                          'Stop Sequence', '20th %ile Speed (miles per hour)', ' 80th %ile Speed (miles per hour)']
         tooltip_dict = {'aliases': display_aliases}
-        bins = list(mapclassify.Quantiles(gdf.var_mph).bins)
+        bins = list(mapclassify.Quantiles(gdf.fast_slow_ratio).bins)
         cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins,      
-                                vmin = gdf.var_mph.min(),
-                                vmax = gdf.var_mph.max())
+                                vmin = gdf.fast_slow_ratio.min(),
+                                vmax = gdf.fast_slow_ratio.max())
         if no_title:
             title = ''
         else:
-            title = f"{name} {how_formatted[how]} Vehicle Speeds Between Stops{self.filter_formatted}"
-        cmap.caption = 'Segment Variance (miles per hour squared)'
+            title = f"{self.organization_name} Variation in Vehicle Speeds Between Stops{self.filter_formatted}"
+        cmap.caption = '80th percentile to 20th percentile speed ratio (variation in speeds)'
         style_dict = {'opacity': 0.8, 'fillOpacity': 0.8}
-        g = gdf.explore(column='var_mph', cmap = cmap,
+        g = gdf.explore(column='fast_slow_ratio', cmap = cmap,
                         tooltip = display_cols, popup = display_cols,
                         tooltip_kwds = tooltip_dict, popup_kwds = tooltip_dict,
                         tiles = 'CartoDB positron',
