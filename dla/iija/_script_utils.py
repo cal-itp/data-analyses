@@ -254,10 +254,39 @@ def add_description_4_no_match(df, desc_col):
     
     return df
 
+## function for reading in the locodes
+def read_in_locodes():
+    locodes = to_snakecase(pd.read_excel(f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
+    locodes['agency_name'] = locodes['agency_name'].str.upper()
+    locode_names = sorted(list(locodes['agency_name'].unique()), reverse=True)    
+    
+    ## append list so that "Crosswalk" does not select "Ross"
+    locode_names.remove('ROSS')
+    locode_names.append("STATE PARKS")
+    locode_names.append("SACOG - Sacramento Area Council of Governments")
+    locode_names.append("SACOG")
+    locode_names.append("MTC")
+    locode_names.append("MTC - Metropolitan Transportation Commission")
+    locode_names.append("Statewide")
+    
+    return locode_names
+
+## function to find any agency name/locations wihin the description column or title column using locodes
+def find_alternative_name(df, desc_col, new_col_name):
+    
+    #read in locode names to get list to find in description column
+    locode_names = read_in_locodes()
+    
+    ### https://stackoverflow.com/questions/68869434/create-an-pandas-column-if-a-string-from-a-list-matches-from-another-column
+    df[new_col_name] = df[desc_col].map(lambda s: next((name for name in locode_names if name in s), ""))
+    df[new_col_name] = df[new_col_name].str.title()
+    
+    return df
 
 
 #function for getting title column
 
+## changing the title function to include the new description col
 def add_new_title(df, first_col_method, second_col_type, third_col_name, alt_col_name, alt_in_proj_desc):
     """
     Function to add new title. 
@@ -267,9 +296,12 @@ def add_new_title(df, first_col_method, second_col_type, third_col_name, alt_col
     
     def return_name(df):
         
-        if (df[third_col_name] == "California") & (df[alt_col_name] == "Statewide"):
-            return (df[first_col_method] + " " + df[second_col_type] +" " + df[alt_col_name])
+        if (df[third_col_name] == "California") & (df[alt_col_name] == "Statewide") & (df[alt_in_proj_desc] != ""):
+            return (df[first_col_method] + " " + df[second_col_type] +" in " + df[alt_in_proj_desc])
         
+        elif (df[third_col_name] == "California") & (df[alt_col_name] == "Statewide") & (df[alt_in_proj_desc] == ""):
+            return (df[first_col_method] + " " + df[second_col_type] +" " + df[alt_col_name])
+                    
         elif (df[third_col_name]== "Unknown"):
             return (df[first_col_method] + " " + df[second_col_type] + " in " + df[alt_in_proj_desc])
         
@@ -326,14 +358,8 @@ def get_new_desc_title(df):
     # first get new columns to get name to replace the Unknowns
     #replace values for implementing agency name that are "unknown" with names in the project description
     #get list of agency names from locode document
-    locodes = to_snakecase(pd.read_excel(f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
-    locodes['agency_name'] = locodes['agency_name'].str.upper()
-    locode_names = sorted(list(locodes['agency_name'].unique()), reverse=True)    
-    locode_names.remove('ROSS')
-    locode_names.append("STATE PARKS")
     ### https://stackoverflow.com/questions/68869434/create-an-pandas-column-if-a-string-from-a-list-matches-from-another-column
-    proj_unique_cat["alt_geo_name_projdesc"] = proj_unique_cat_title["project_title"].map(lambda s: next((name for name in locode_names if name in s), ""))
-    proj_unique_cat["alt_geo_name_projdesc"] = proj_unique_cat_title["alt_geo_name_projdesc"].str.title()
+    proj_unique_cat = find_alternative_name(proj_unique_cat, "project_title", "alt_geo_name_projdesc")
     
     #add title - second round to account for statewide projects
     proj_unique_cat_title = add_new_title(proj_unique_cat, "project_method", "project_type", "implementing_agency", "county_name_title", "alt_geo_name_projdesc")
@@ -354,7 +380,7 @@ def get_new_desc_title(df):
 def add_new_description_col(df):
     df["obligations_amount_string"] = df["obligations_amount"].astype(str)
     
-    df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["project_title_new"]
+    df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["project_title_new"] + "."
     
     df.drop(columns =['obligations_amount_string'], axis=1, inplace=True)
     
@@ -381,12 +407,16 @@ def get_clean_data(df, full_or_agg = ''):
         ## function that adds known agency name to df 
         # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
     
+        df = _data_utils.change_col_to_integer(df, "congressional_district")
+        
         aggdf = condense_df(df)
     
         ## get new title (str parser) 
         aggdf = get_new_desc_title(aggdf)
         
         aggdf = add_new_description_col(aggdf)
+        
+        _data_utils.change_col_to_integer(df, "congressional_district")
     
         return aggdf
     
@@ -394,6 +424,8 @@ def get_clean_data(df, full_or_agg = ''):
     
         ## function that adds known agency name to df 
         # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
+        
+        df = _data_utils.change_col_to_integer(df, "congressional_district")
         
         aggdf = condense_df(df)
         
