@@ -421,5 +421,5 @@ def tcag_lrtp():
             return "< 2035"
 
     df["completion_year"] = df.apply(lambda x: completion_2035(x), axis=1)
-
+    df['cost_in_millions'] = df['cost_x_1,000']*1_000
     return df
