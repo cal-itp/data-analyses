@@ -8,13 +8,15 @@ import pandas as pd
 import shapely
 import sys
 
-from dask import delayed, compute
+from dask import delayed#, compute
 from loguru import logger
 
 import cut_normal_stop_segments
 from shared_utils import utils
-from segment_speed_utils import array_utils, sched_rt_utils, wrangle_shapes
-from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
+from segment_speed_utils import (array_utils, helpers, 
+                                wrangle_shapes)
+from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
+                                              CONFIG_PATH)
 
 
 def get_shape_components(
@@ -246,24 +248,14 @@ def super_project_and_cut_segments_for_one_shape(
         .set_geometry("stop_segment_geometry")
         .set_crs(gdf.crs)
     )
-    
+            
     return gdf2 
 
 
 if __name__ == "__main__":
     import warnings
+    warnings.filterwarnings("once")
     
-    from dask.distributed import Client
-    #https://docs.dask.org/en/latest/futures.html#distributed.Client.upload_file
-    # Run this in rt_segment_speeds/: python setup.py bdist_egg
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
-    #client.upload_file('../dist/segment_speed_utils-0.1.0-py3.9.egg')  
-    #client.upload_file('../../dist/shared_utils-1.2.0-py3.9.egg')
-    
-    warnings.filterwarnings(
-        "ignore",
-        category=shapely.errors.ShapelyDeprecationWarning) 
-
     LOG_FILE = "../logs/cut_stop_segments.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
@@ -271,6 +263,9 @@ if __name__ == "__main__":
                level="INFO")
     
     logger.info(f"Analysis date: {analysis_date}")
+    
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    EXPORT_FILE = STOP_SEG_DICT["segments_file"]
     
     start = datetime.datetime.now()
     
@@ -281,12 +276,14 @@ if __name__ == "__main__":
         columns = ["shape_array_key"]
     ).drop_duplicates().shape_array_key
     
-    gdf = gpd.read_parquet(
+    gdf = delayed(gpd.read_parquet)(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
         filters = [[("loop_or_inlining", "==", 1)]],
-        columns = ["shape_array_key",
-            "stop_id", "stop_sequence", 
+        columns = [
+            "feed_key",
+            "shape_array_key", "stop_id", "stop_sequence", 
             "stop_geometry", # don't need shape_meters, we need stop_geometry
+            "loop_or_inlining",
             "geometry", 
             ]
     )
@@ -294,27 +291,23 @@ if __name__ == "__main__":
     results = []
     
     for shape in shapes_to_cut:
+        gdf2 = gdf[gdf.shape_array_key==shape]
         segments = delayed(super_project_and_cut_segments_for_one_shape)(
-            gdf, shape)
+            gdf2, shape)
         results.append(segments)
     
     time1 = datetime.datetime.now()
     logger.info(f"Cut special stop segments: {time1-start}")
     
-    results2 = [compute(i)[0] for i in results]
-    results_gdf = (pd.concat(results2, axis=0)
-                   .sort_values(["shape_array_key", "stop_sequence"])
-                   .reset_index(drop=True)
-                  )
-    
-    results_gdf = cut_normal_stop_segments.finalize_stop_segments(results_gdf)
+    results2 = dd.from_delayed(results)
+    results_gdf = results2.compute()    
     
     utils.geoparquet_gcs_export(
         results_gdf,
         SEGMENT_GCS,
-        f"stop_segments_special_{analysis_date}"
+        f"{EXPORT_FILE}_special_{analysis_date}"
     )
     
     time2 = datetime.datetime.now()
     logger.info(f"Export results: {time2-time1}")
-    #client.close()
+    

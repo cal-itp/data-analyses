@@ -217,7 +217,7 @@ def merge_speeds_to_segment_geom(
     speed_with_segment_geom = dd.merge(
         segments_gdf,
         speeds_df,
-        on = ["gtfs_dataset_key"] + segment_identifier_cols,
+        on = segment_identifier_cols,
         how = "inner",
     )
     

@@ -80,3 +80,12 @@
 2023-05-17 15:02:19.159 | INFO     | __main__:pare_down_vp_by_segment:148 - exported: 0:03:12.755317
 2023-05-17 15:02:19.160 | INFO     | __main__:<module>:174 - pare down vp by stop segments normal cases 0:05:23.842972
 2023-05-17 15:02:19.161 | INFO     | __main__:<module>:177 - execution time: 0:05:23.846486
+2023-05-19 20:20:15.888 | INFO     | __main__:<module>:160 - Analysis date: 2023-04-12
+2023-05-19 20:22:58.463 | INFO     | __main__:pare_down_vp_by_segment:133 - merge usable vp with sjoin results: 0:02:42.548862
+2023-05-19 20:22:58.591 | INFO     | __main__:pare_down_vp_by_segment:142 - keep enter/exit points: 0:00:00.127990
+2023-05-19 20:27:00.743 | INFO     | __main__:pare_down_vp_by_segment:148 - exported: 0:04:02.152412
+2023-05-19 20:27:00.745 | INFO     | __main__:<module>:174 - pare down vp by stop segments normal cases 0:06:44.831202
+2023-05-19 20:27:00.746 | INFO     | __main__:<module>:177 - execution time: 0:06:44.836680
+2023-05-19 20:27:18.503 | INFO     | __main__:<module>:321 - Analysis date: 2023-04-12
+2023-05-19 20:55:08.289 | INFO     | __main__:<module>:335 - pare down vp by stop segments special cases 0:27:49.780782
+2023-05-19 20:55:08.290 | INFO     | __main__:<module>:338 - execution time: 0:27:49.786033
