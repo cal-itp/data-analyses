@@ -1,7 +1,6 @@
 """
 Quick aggregation for avg speeds by segment
 """
-import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
 
@@ -23,38 +22,58 @@ def avg_speeds_with_segment_geom(
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     SPEEDS_FILE = dict_inputs["stage4"]
     
-    df = dd.read_parquet(
-        f"{SEGMENT_GCS}{SPEEDS_FILE}_{analysis_date}/")
+    df = pd.read_parquet(
+        f"{SEGMENT_GCS}{SPEEDS_FILE}_{analysis_date}", 
+        filters = [[("speed_mph", "<=", max_speed_cutoff)]]
+    )
     
     # Take the average after dropping unusually high speeds
-    segment_cols = [
-        "gtfs_dataset_key"
-    ]+ SEGMENT_IDENTIFIER_COLS
-    
-    avg_speeds = (df[(df.speed_mph <= max_speed_cutoff)].compute()
-        .groupby(segment_cols)
-        .agg({
+    avg = (df.groupby(SEGMENT_IDENTIFIER_COLS)
+          .agg({
             "speed_mph": "mean",
-            "trip_id": "nunique"
-        }).reset_index()
+            "trip_id": "nunique"})
+          .reset_index()
+    )
+    
+    p20 = (df.groupby(SEGMENT_IDENTIFIER_COLS)
+           .agg({"speed_mph": lambda x: x.quantile(0.2)})
+           .reset_index()  
+          )
+    
+    p80 = (df.groupby(SEGMENT_IDENTIFIER_COLS)
+           .agg({"speed_mph": lambda x: x.quantile(0.8)})
+           .reset_index()  
+          )
+    
+    stats = pd.merge(
+        avg.rename(columns = {"speed_mph": "avg_speed_mph", 
+                              "trip_id": "n_trips"}),
+        p20.rename(columns = {"speed_mph": "p20_speed_mph"}),
+        on = SEGMENT_IDENTIFIER_COLS,
+        how = "left"
+    ).merge(
+        p80.rename(columns = {"speed_mph": "p80_speed_mph"}),
+        on = SEGMENT_IDENTIFIER_COLS,
+        how = "left"
     )
     
     # Clean up for map
-    avg_speeds = avg_speeds.assign(
-        speed_mph = avg_speeds.speed_mph.round(2),
-    ).rename(columns = {"trip_id": "n_trips"})
+    speed_cols = [c for c in stats.columns if "_speed_mph" in c]
+    stats[speed_cols] = stats[speed_cols].round(2)
     
     # Merge in segment geometry
     segments = helpers.import_segments(
         SEGMENT_GCS,
         f"{SEGMENT_FILE}_{analysis_date}",
-        columns = segment_cols + ["geometry", "geometry_arrowized"]
-    ).set_geometry("geometry_arrowized").drop(columns = "geometry").compute()
+        columns = SEGMENT_IDENTIFIER_COLS + [
+            "gtfs_dataset_key", "loop_or_inlining",
+            "geometry", "geometry_arrowized"]
+    )#.set_geometry("geometry_arrowized").drop(columns = "geometry")
     
     gdf = pd.merge(
-        segments[~segments.geometry_arrowized.is_empty], 
-        avg_speeds,
-        on = segment_cols,
+        segments,#[~segments.geometry_arrowized.is_empty], 
+        stats,
+        on = SEGMENT_IDENTIFIER_COLS,
         how = "inner"
     )
     
@@ -94,25 +113,12 @@ def spatial_join_to_caltrans_districts(
 
 if __name__ == "__main__":
     
-    ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
     MAX_SPEED = 70
     
     # Average the speeds for segment for entire day
     # Drop speeds above our max cutoff
-    route_segment_speeds = avg_speeds_with_segment_geom(
-        analysis_date, 
-        max_speed_cutoff = MAX_SPEED,
-        dict_inputs = ROUTE_SEG_DICT
-    )
-        
-    utils.geoparquet_gcs_export(
-        route_segment_speeds,
-        SEGMENT_GCS,
-        f"{ROUTE_SEG_DICT['stage5']}_{analysis_date}"
-    )
-    
     stop_segment_speeds = avg_speeds_with_segment_geom(
         analysis_date, 
         max_speed_cutoff = MAX_SPEED,

@@ -11,3 +11,6 @@
     * `dd.compute(*results)` [https://docs.dask.org/en/stable/delayed-collections.html](docs) - this doesn't work when the pandas df that results needs `df.compute()`.
     * How to better manipulate `delayed` objects through the workflow to actually do the compute once?
     
+
+## Client
+* [GH: Dask workers don't reload modified modules](https://github.com/dask/distributed/issues/4245)

@@ -21,3 +21,22 @@
 2023-03-09 11:00:50.402 | INFO     | __main__:<module>:105 - speeds for route segments: 0:03:40.652910
 2023-03-09 11:10:38.477 | INFO     | __main__:<module>:113 - speeds for stop segments: 0:09:48.075323
 2023-03-09 11:10:38.479 | INFO     | __main__:<module>:116 - execution time: 0:13:28.728233
+2023-05-17 16:19:52.504 | INFO     | __main__:<module>:88 - Analysis date: 2023-03-15
+2023-05-17 17:03:10.979 | INFO     | __main__:<module>:99 - speeds for stop segments: 0:43:18.473648
+2023-05-17 17:03:10.980 | INFO     | __main__:<module>:100 - execution time: 0:43:18.474989
+2023-05-17 17:22:11.804 | INFO     | __main__:<module>:91 - Analysis date: 2023-03-15
+2023-05-17 19:13:43.292 | INFO     | __main__:<module>:108 - speeds for stop segments: 0:47:28.923199
+2023-05-17 19:13:43.293 | INFO     | __main__:<module>:109 - execution time: 0:47:28.924170
+2023-05-17 20:07:40.284 | INFO     | __main__:<module>:110 - Analysis date: 2023-03-15
+2023-05-17 20:59:48.812 | INFO     | __main__:<module>:121 - speeds for stop segments: 0:52:08.527645
+2023-05-17 20:59:48.813 | INFO     | __main__:<module>:122 - execution time: 0:52:08.529250
+2023-05-17 21:09:28.858 | INFO     | __main__:<module>:104 - Analysis date: 2023-03-15
+2023-05-17 21:09:28.863 | INFO     | __main__:linear_referencing_and_speed_by_segment:69 - linear referencing: 0:00:00.000836
+2023-05-17 21:09:28.863 | INFO     | __main__:linear_referencing_and_speed_by_segment:78 - calculate speeds: 0:00:00.000558
+2023-05-17 21:45:55.937 | INFO     | __main__:<module>:115 - speeds for stop segments: 0:36:27.078088
+2023-05-17 21:45:55.937 | INFO     | __main__:<module>:116 - execution time: 0:36:27.078920
+2023-05-20 10:56:10.861 | INFO     | __main__:<module>:104 - Analysis date: 2023-04-12
+2023-05-20 10:56:10.880 | INFO     | __main__:linear_referencing_and_speed_by_segment:69 - linear referencing: 0:00:00.000940
+2023-05-20 10:56:10.880 | INFO     | __main__:linear_referencing_and_speed_by_segment:78 - calculate speeds: 0:00:00.000678
+2023-05-20 11:50:39.921 | INFO     | __main__:<module>:115 - speeds for stop segments: 0:54:29.046501
+2023-05-20 11:50:39.924 | INFO     | __main__:<module>:116 - execution time: 0:54:29.049154
