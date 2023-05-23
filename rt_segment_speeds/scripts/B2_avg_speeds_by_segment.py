@@ -65,7 +65,9 @@ def avg_speeds_with_segment_geom(
     segments = helpers.import_segments(
         SEGMENT_GCS,
         f"{SEGMENT_FILE}_{analysis_date}",
-        columns = SEGMENT_IDENTIFIER_COLS + ["geometry", "geometry_arrowized"]
+        columns = SEGMENT_IDENTIFIER_COLS + [
+            "gtfs_dataset_key", "loop_or_inlining",
+            "geometry", "geometry_arrowized"]
     )#.set_geometry("geometry_arrowized").drop(columns = "geometry")
     
     gdf = pd.merge(
