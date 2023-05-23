@@ -92,7 +92,7 @@ def project_point_geom_onto_linestring(
 def linear_reference_vp_against_segment(
     vp: dd.DataFrame, 
     segments: gpd.GeoDataFrame, 
-    segment_identifier_cols: list
+    segment_identifier_cols: list,
 ) -> dd.DataFrame:
     """
     Do linear referencing and calculate `shape_meters` for the 
@@ -110,17 +110,18 @@ def linear_reference_vp_against_segment(
     if isinstance(segments, dg.GeoDataFrame):
         segments = segments.compute()
     
+    if isinstance(vp, pd.DataFrame):
+        vp = dd.from_pandas(vp, npartitions=1)
+    
     # https://stackoverflow.com/questions/71685387/faster-methods-to-create-geodataframe-from-a-dask-or-pandas-dataframe
     # https://github.com/geopandas/dask-geopandas/issues/197
-    vp = vp.assign(
-        geometry = dg.points_from_xy(vp, "lon", "lat", crs = PROJECT_CRS), 
-    )
+    vp["geometry"] = dg.points_from_xy(vp, "x", "y")
     
     # Refer to the geometry column by name
     vp_gddf = dg.from_dask_dataframe(
         vp, 
         geometry="geometry"
-    )
+    ).set_crs("EPSG:4326").to_crs(PROJECT_CRS)
     
     linear_ref_vp_to_shape = dd.merge(
         vp_gddf, 
@@ -147,9 +148,9 @@ def linear_reference_vp_against_segment(
     
     linear_ref_df = (linear_ref_vp_to_shape.drop(
         columns = ["geometry_x", "geometry_y",
-                   "lon", "lat"])
-                     .drop_duplicates()
-                     .reset_index(drop=True)
+                   "x", "y"])
+                .drop_duplicates()
+                .reset_index(drop=True)
     )
     
     return linear_ref_df
@@ -218,6 +219,7 @@ def get_vector_norm(vector: tuple) -> float:
 def get_normalized_vector(vector: tuple) -> tuple:
     """
     Apply Pythagorean Theorem and normalize the vector of distances.
+    https://stackoverflow.com/questions/21030391/how-to-normalize-a-numpy-array-to-a-unit-vector
     """
     x_norm = vector[0] / get_vector_norm(vector)
     y_norm = vector[1] / get_vector_norm(vector)
@@ -231,32 +233,3 @@ def dot_product(vec1: tuple, vec2: tuple) -> float:
     sum it up.
     """
     return vec1[0]*vec2[0] + vec1[1]*vec2[1]
-
-
-def find_if_two_arrays_same_direction(
-    subset_stop_geom_array: np.ndarray, 
-    subset_shape_geom_array: np.ndarray
-) -> float:
-    """
-    https://stackoverflow.com/questions/21030391/how-to-normalize-a-numpy-array-to-a-unit-vector
-    """
-    # Get vectors for stop and shape
-    stop_vec = distill_array_into_direction_vector(
-        subset_stop_geom_array)
-    shape_vec = distill_array_into_direction_vector(
-        subset_shape_geom_array)
-    
-    print(f"stop vector: {stop_vec}")
-    print(f"shape vector: {shape_vec}")
-    
-    # Normalize the vectors (divide by length) to get unit vector
-    stop_norm = get_normalized_vector(stop_vec)
-    shape_norm = get_normalized_vector(shape_vec)
-    
-    print(f"stop_norm: {stop_norm}, shape_norm: {shape_norm}")
-    
-    dot_result = dot_product(stop_norm, shape_norm)
-    
-    print(f"dot product: {dot_result}")
-    
-    return dot_result

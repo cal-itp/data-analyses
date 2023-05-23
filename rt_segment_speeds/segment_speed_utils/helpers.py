@@ -32,9 +32,9 @@ def get_parameters(
     Returns a dictionary of parameters.
     """
     #https://aaltoscicomp.github.io/python-for-scicomp/scripts/
-    f = open(config_file)
-    my_dict = yaml.safe_load(f)
-    params_dict = my_dict[segment_type]
+    with open(config_file) as f: 
+        my_dict = yaml.safe_load(f)
+        params_dict = my_dict[segment_type]
     
     return params_dict
     

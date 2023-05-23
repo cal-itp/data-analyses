@@ -24,52 +24,61 @@ def linear_referencing_and_speed_by_segment(
     With just enter / exit points on segments, 
     do the linear referencing to get shape_meters, and then derive speed.
     """
+    time0 = datetime.datetime.now()
+    
     VP_FILE = dict_inputs["stage3"]
     SEGMENT_FILE = dict_inputs["segments_file"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]    
     EXPORT_FILE = dict_inputs["stage4"]
-
-    # https://docs.dask.org/en/stable/delayed-collections.html
     
     # Keep subset of columns - don't need it all. we can get the 
     # columns dropped through segments file
     vp_keep_cols = [
         'gtfs_dataset_key', '_gtfs_dataset_name', 
-        'trip_id', 'feed_key',
+        'trip_id',
         TIMESTAMP_COL,
-        'lon', 'lat'
+        'x', 'y'
     ] + SEGMENT_IDENTIFIER_COLS
     
-    vp = delayed(
-        helpers.import_vehicle_positions)(
+    vp = delayed(helpers.import_vehicle_positions)(
         SEGMENT_GCS,
         f"{VP_FILE}_{analysis_date}/",
         file_type = "df",
         columns = vp_keep_cols,
         partitioned = True
-    )
-
+    )   
+        
     segments = delayed(helpers.import_segments)(
         SEGMENT_GCS,
         f"{SEGMENT_FILE}_{analysis_date}", 
-        columns = ["gtfs_dataset_key",  
-                   "geometry"] + SEGMENT_IDENTIFIER_COLS,
+        columns = SEGMENT_IDENTIFIER_COLS + ["geometry"]
     )
 
-    vp_linear_ref = delayed(wrangle_shapes.linear_reference_vp_against_segment)( 
+    vp_linear_ref = delayed(
+        wrangle_shapes.linear_reference_vp_against_segment)( 
         vp, 
         segments, 
-        segment_identifier_cols = SEGMENT_IDENTIFIER_COLS
+        SEGMENT_IDENTIFIER_COLS
     )
-  
-    
+      
+    time1 = datetime.datetime.now()
+    logger.info(f"linear referencing: {time1 - time0}")
+
     speeds = delayed(segment_calcs.calculate_speed_by_segment_trip)(
         vp_linear_ref, 
-        segment_identifier_cols = SEGMENT_IDENTIFIER_COLS,
-        timestamp_col = TIMESTAMP_COL
-    )    
-        
+        SEGMENT_IDENTIFIER_COLS,
+        TIMESTAMP_COL
+    )
+    
+    time2 = datetime.datetime.now()
+    logger.info(f"calculate speeds: {time2 - time1}")
+    
+    #speeds.to_parquet(
+    #    f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}", 
+    #    overwrite = True
+    #)
+    
     results = [speeds]       
     dask_utils.compute_and_export(
         results, 
@@ -93,27 +102,15 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
 
-    ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
-    linear_referencing_and_speed_by_segment(
-        analysis_date, 
-        dict_inputs = ROUTE_SEG_DICT
-    )
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"speeds for route segments: {time1 - start}")
-    
+        
     linear_referencing_and_speed_by_segment(
         analysis_date, 
         dict_inputs = STOP_SEG_DICT
     )
     
-    time2 = datetime.datetime.now()
-    logger.info(f"speeds for stop segments: {time2 - time1}")
-
-    end = datetime.datetime.now()
-    logger.info(f"execution time: {time2-start}")
+    logger.info(f"speeds for stop segments: {datetime.datetime.now() - start}")
+    logger.info(f"execution time: {datetime.datetime.now() - start}")
     
     #client.close()
         

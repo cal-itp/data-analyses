@@ -15,7 +15,7 @@ import sys
 from loguru import logger
 
 from shared_utils import utils
-from segment_speed_utils import sched_rt_utils, wrangle_shapes
+from segment_speed_utils import helpers, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               PROJECT_CRS, CONFIG_PATH)
 
@@ -171,22 +171,6 @@ def project_and_cut_segments_for_one_shape(
     return gdf2
     
     
-def finalize_stop_segments(
-    stop_segments: gpd.GeoDataFrame, 
-):
-    """    
-    Add gtfs_dataset_key.
-    """    
-    # Add gtfs_dataset_key to this segment data (from schedule)
-    stop_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
-        stop_segments, 
-        analysis_date, 
-        ["feed_key", "shape_array_key"]
-    )
-
-    return stop_segments_with_rt_key
-    
-    
 if __name__ == "__main__":
     import warnings
     
@@ -204,8 +188,8 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
 
-    #STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    #EXPORT_FILE = STOP_SEG_DICT["segments_file"]
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    EXPORT_FILE = STOP_SEG_DICT["segments_file"]
     
     # Get list of shapes that go through normal stop segment cutting
     shapes_to_cut = pd.read_parquet(
@@ -214,40 +198,37 @@ if __name__ == "__main__":
         columns = ["shape_array_key"]
     ).drop_duplicates().shape_array_key
     
-    gdf = gpd.read_parquet(
+    gdf = delayed(gpd.read_parquet)(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
         filters = [[("loop_or_inlining", "==", 0)]],
-        columns = ["shape_array_key",
-            "stop_id", "stop_sequence", 
+        columns = [
+            "feed_key",
+            "shape_array_key", "stop_id", "stop_sequence", 
             "shape_meters", 
+            "loop_or_inlining",
             "geometry", 
             ]
     )
     
-    gdf = get_prior_shape_meters(gdf)
+    gdf2 = delayed(get_prior_shape_meters)(gdf).persist()
     
     results = []
     
     for shape in shapes_to_cut:
         segments = delayed(project_and_cut_segments_for_one_shape)(
-            gdf, shape)
+            gdf2, shape)
         results.append(segments)
     
     time1 = datetime.datetime.now()
     logger.info(f"Cut normal stop segments: {time1-start}")
     
     results2 = [compute(i)[0] for i in results]
-    results_gdf = (pd.concat(results2, axis=0)
-                   .sort_values(["shape_array_key", "stop_sequence"])
-                   .reset_index(drop=True)
-                  )
-    
-    results_gdf = finalize_stop_segments(results_gdf)
-    
+    results_gdf = pd.concat(results2, axis=0)
+        
     utils.geoparquet_gcs_export(
-        results_gdf_with_rt_key,
+        results_gdf,
         SEGMENT_GCS,
-        f"stop_segments_normal_{analysis_date}"
+        f"{EXPORT_FILE}_normal_{analysis_date}"
     )
     
     time2 = datetime.datetime.now()

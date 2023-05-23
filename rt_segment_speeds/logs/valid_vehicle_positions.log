@@ -55,8 +55,37 @@
 2023-04-03 13:12:49.457 | INFO     | __main__:<module>:138 - pare down vp by stop segments 0:05:17.293446
 2023-04-03 13:12:49.459 | INFO     | __main__:<module>:141 - execution time: 0:09:23.304992
 2023-05-04 14:19:14.757 | INFO     | __main__:<module>:121 - Analysis date: 2023-03-15
-2023-05-04 14:19:14.776 | INFO     | __main__:<module>:136 - pare down vp by route segments 0:00:00.000003
 2023-05-04 14:24:45.262 | INFO     | __main__:<module>:144 - pare down vp by stop segments 0:05:30.485955
 2023-05-04 14:24:45.262 | INFO     | __main__:<module>:147 - execution time: 0:05:30.489946
-2023-05-15 17:18:36.810 | INFO     | __main__:<module>:100 - Analysis date: 2023-03-15
-2023-05-15 19:47:08.243 | INFO     | __main__:<module>:100 - Analysis date: 2023-03-15
+2023-05-17 10:28:34.722 | INFO     | __main__:<module>:142 - Analysis date: 2023-03-15
+2023-05-17 10:31:13.320 | INFO     | __main__:pare_down_vp_by_segment:114 - merge usable vp with sjoin results: 0:02:38.591180
+2023-05-17 10:31:13.448 | INFO     | __main__:pare_down_vp_by_segment:124 - keep enter/exit points: 0:00:00.128579
+2023-05-17 10:34:15.436 | INFO     | __main__:pare_down_vp_by_segment:130 - exported: 0:03:01.987445
+2023-05-17 10:34:15.437 | INFO     | __main__:<module>:156 - pare down vp by stop segments 0:05:40.708672
+2023-05-17 10:34:15.438 | INFO     | __main__:<module>:159 - execution time: 0:05:40.713170
+2023-05-17 11:12:56.293 | INFO     | __main__:<module>:157 - Analysis date: 2023-03-15
+2023-05-17 11:16:27.309 | INFO     | __main__:<module>:157 - Analysis date: 2023-03-15
+2023-05-17 11:19:06.524 | INFO     | __main__:<module>:162 - Analysis date: 2023-03-15
+2023-05-17 11:21:02.754 | INFO     | __main__:pare_down_vp_by_segment:134 - merge usable vp with sjoin results: 0:01:56.223968
+2023-05-17 11:21:02.853 | INFO     | __main__:pare_down_vp_by_segment:144 - keep enter/exit points: 0:00:00.098756
+2023-05-17 11:23:50.850 | INFO     | __main__:pare_down_vp_by_segment:150 - exported: 0:02:47.997736
+2023-05-17 11:23:50.852 | INFO     | __main__:<module>:176 - pare down vp by stop segments 0:04:44.322025
+2023-05-17 11:23:50.852 | INFO     | __main__:<module>:179 - execution time: 0:04:44.327230
+2023-05-17 14:07:58.913 | INFO     | __main__:<module>:318 - Analysis date: 2023-03-15
+2023-05-17 14:31:49.200 | INFO     | __main__:<module>:332 - pare down vp by stop segments special cases 0:23:50.264830
+2023-05-17 14:31:49.231 | INFO     | __main__:<module>:335 - execution time: 0:23:50.316700
+2023-05-17 14:56:55.314 | INFO     | __main__:<module>:160 - Analysis date: 2023-03-15
+2023-05-17 14:59:06.276 | INFO     | __main__:pare_down_vp_by_segment:133 - merge usable vp with sjoin results: 0:02:10.959049
+2023-05-17 14:59:06.403 | INFO     | __main__:pare_down_vp_by_segment:142 - keep enter/exit points: 0:00:00.126989
+2023-05-17 15:02:19.159 | INFO     | __main__:pare_down_vp_by_segment:148 - exported: 0:03:12.755317
+2023-05-17 15:02:19.160 | INFO     | __main__:<module>:174 - pare down vp by stop segments normal cases 0:05:23.842972
+2023-05-17 15:02:19.161 | INFO     | __main__:<module>:177 - execution time: 0:05:23.846486
+2023-05-19 20:20:15.888 | INFO     | __main__:<module>:160 - Analysis date: 2023-04-12
+2023-05-19 20:22:58.463 | INFO     | __main__:pare_down_vp_by_segment:133 - merge usable vp with sjoin results: 0:02:42.548862
+2023-05-19 20:22:58.591 | INFO     | __main__:pare_down_vp_by_segment:142 - keep enter/exit points: 0:00:00.127990
+2023-05-19 20:27:00.743 | INFO     | __main__:pare_down_vp_by_segment:148 - exported: 0:04:02.152412
+2023-05-19 20:27:00.745 | INFO     | __main__:<module>:174 - pare down vp by stop segments normal cases 0:06:44.831202
+2023-05-19 20:27:00.746 | INFO     | __main__:<module>:177 - execution time: 0:06:44.836680
+2023-05-19 20:27:18.503 | INFO     | __main__:<module>:321 - Analysis date: 2023-04-12
+2023-05-19 20:55:08.289 | INFO     | __main__:<module>:335 - pare down vp by stop segments special cases 0:27:49.780782
+2023-05-19 20:55:08.290 | INFO     | __main__:<module>:338 - execution time: 0:27:49.786033

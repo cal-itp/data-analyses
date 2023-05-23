@@ -46,7 +46,7 @@ def add_grouping_col_to_vp(
         vp_file_name,
         columns = ["gtfs_dataset_key", "trip_id"],
         file_type = "df",
-        partitioned=False
+        partitioned=True
     ).drop_duplicates()
 
     crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
@@ -279,43 +279,29 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    #ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    '''
-    vp_route_seg = sjoin_vp_to_segments(
-        analysis_date = analysis_date,
-        buffer_size = 50,
-        dict_inputs = ROUTE_SEG_DICT,
-    )
     
-    compile_partitioned_parquets_for_operators(
-        f"{SEGMENT_GCS}vp_sjoin/", 
-        ROUTE_SEG_DICT["stage2"], 
-        analysis_date
-    ) 
-    '''
-    time1 = datetime.datetime.now()
-    #logger.info(f"attach vp to route segments: {time1 - start}")
-    '''
     vp_stop_seg = sjoin_vp_to_segments(
         analysis_date = analysis_date,
         dict_inputs = STOP_SEG_DICT
     )
-    '''
     
     vp_trips = add_grouping_col_to_vp(
-        f"{STOP_SEG_DICT['stage1']}_{analysis_date}",
+        f"{STOP_SEG_DICT['stage1']}_{analysis_date}/",
         analysis_date,
         STOP_SEG_DICT["trip_grouping_cols"]
     )
+    
+    time1 = datetime.datetime.now()
+    logger.info(f"attach vp to stop-to-stop segments: {time1 - start}")
+
     compile_partitioned_parquets_for_operators(
         f"{SEGMENT_GCS}vp_sjoin/", 
         STOP_SEG_DICT["stage2"], 
         analysis_date, 
         vp_trips
     ) 
-    time2 = datetime.datetime.now()
-    #logger.info(f"attach vp to stop-to-stop segments: {time2 - time1}")
     
     end = datetime.datetime.now()
+    logger.info(f"compiled partitioned parquets: {end - time1}")
     logger.info(f"execution time: {end-start}")

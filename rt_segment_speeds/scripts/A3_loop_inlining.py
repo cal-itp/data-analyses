@@ -18,14 +18,15 @@ from loguru import logger
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH, PROJECT_CRS)
-
+from A2_valid_vehicle_positions import (identify_stop_segment_cases, 
+                                        merge_usable_vp_with_sjoin_vpidx)
 
 def calculate_mean_time(
     df: dd.DataFrame, 
     group_cols: list,
+    timestamp_col: str = "location_timestamp_local"
 ) -> dd.DataFrame:
     
-    timestamp_col = "location_timestamp_local"
     seconds_col = f"{timestamp_col}_sec"
     
     df = segment_calcs.convert_timestamp_to_seconds(
@@ -55,8 +56,8 @@ def calculate_mean_time(
     
 def get_first_last_position_in_group(
     df: dd.DataFrame, 
-    group_cols: list
-) -> dd.DataFrame:
+    group_cols: list,
+) -> pd.DataFrame:
     """
     """
     time_col = "location_timestamp_local_sec"
@@ -72,7 +73,7 @@ def get_first_last_position_in_group(
              .reset_index()
             )
     
-    keep_cols = trip_group_cols + [time_col, "lat", "lon"]
+    keep_cols = trip_group_cols + [time_col, "x", "y"]
     
     pared_down = (dd.multi.concat([first, last], axis=0)
                   [trip_group_cols + [time_col]]
@@ -97,20 +98,26 @@ def get_first_last_position_in_group(
         on = trip_group_cols
     )
     
-    df2 = dd.merge(
-        df[keep_cols],
+    # Do subset first, because dask doesn't like subsetting on-the-fly
+    df2 = df[keep_cols]
+    df3 = dd.merge(
+        df2,
         pared_down2,
         on = trip_group_cols + [time_col]
-    )
+    ).compute() # compute so we can sort by multiple columns
     
-    df2 = df2.assign(
-        obs = (df2.sort_values(trip_group_cols + [time_col])
-               .groupby(trip_group_cols)[time_col]
+    # Sorting right before the groupby causes errors
+    df3 = df3.sort_values(
+        trip_group_cols + [time_col]
+    ).reset_index(drop=True)
+    
+    df3 = df3.assign(
+        obs = (df3.groupby(trip_group_cols)[time_col]
                .cumcount() + 1
               ).astype("int8")
     )
     
-    return df2
+    return df3
 
 
 def get_stop_segments_direction_vector(
@@ -152,38 +159,36 @@ def get_stop_segments_direction_vector(
 
 
 def find_vp_direction_vector(
-    df: dd.DataFrame, 
+    df: pd.DataFrame, 
     group_cols: list,
     crs: str = PROJECT_CRS
-):
-
+) -> pd.DataFrame:
+    """
+    """
     trip_group_cols = group_cols + ["group", "segments_vector"]
-    keep_cols = trip_group_cols + ["lat", "lon"]
+    keep_cols = trip_group_cols + ["x", "y"]
     
     first_position = df[df.obs == 1][keep_cols]
     last_position = df[df.obs==2][keep_cols]
     
     # Set this up to be wide so we can compare positions and 
     # get a vector
-    df_wide = dd.merge(
+    df_wide = pd.merge(
         first_position,
         last_position,
         on = trip_group_cols,
         suffixes = ('_start', '_end')
     ).sort_values(trip_group_cols).reset_index(drop=True)
     
-    first_vp = dg.points_from_xy(
-        df_wide, "lon_start", "lat_start", 
-        crs=crs
-    ) 
+    first_series = gpd.points_from_xy(
+        df_wide.x_start, df_wide.y_start,
+        crs="EPSG:4326"
+    ).to_crs(crs)
            
-    last_vp = dg.points_from_xy(
-        df_wide, "lon_end", "lat_end", 
-        crs=crs
-    )
-    
-    first_series = first_vp.compute()
-    last_series = last_vp.compute()
+    last_series = gpd.points_from_xy(
+        df_wide.x_end, df_wide.y_end, 
+        crs="EPSG:4326"
+    ).to_crs(crs)
     
     direction_vector = [
         wrangle_shapes.get_direction_vector(start, end) 
@@ -193,7 +198,7 @@ def find_vp_direction_vector(
     vector_normalized = [wrangle_shapes.get_normalized_vector(i) 
                      for i in direction_vector]
     
-    results = df_wide[trip_group_cols].compute()
+    results = df_wide[trip_group_cols]
     results = results.assign(
         vp_vector = vector_normalized
     )
@@ -211,20 +216,24 @@ def find_vp_direction_vector(
 def find_errors_in_segment_groups(
     vp_sjoin: dd.DataFrame, 
     segments: gpd.GeoDataFrame,
-    group_cols: list
+    segment_identifier_cols: list,
 ) -> dd.DataFrame:
+    """
+    """
+    group_cols = segment_identifier_cols + ["trip_id"]
+    
     segments = get_stop_segments_direction_vector(
-        segments).drop(columns = "geometry")
+        segments)
     
     vp_grouped = calculate_mean_time(vp_sjoin, group_cols)
     
     vp_pared_by_group = get_first_last_position_in_group(
         vp_grouped, group_cols)
 
-    vp_with_segment_vec = dd.merge(
+    vp_with_segment_vec = pd.merge(
         segments,
         vp_pared_by_group,
-        on = SEGMENT_IDENTIFIER_COLS,
+        on = segment_identifier_cols,
     )
 
     vp_dot_prod = find_vp_direction_vector(
@@ -232,6 +241,9 @@ def find_errors_in_segment_groups(
     
     # Only keep if vehicle positions are running in the same
     # direction as the segment
+    # TODO: should we keep NaNs? NaNs weren't able to have a vector calculated,
+    # which could mean it's kind of an outlier in the segment, 
+    # maybe should have been attached elsewhere
     vp_same_direction = (vp_dot_prod[vp_dot_prod.dot_product > 0]
                              [group_cols + ["group"]]
                              .drop_duplicates()
@@ -248,14 +260,13 @@ def find_errors_in_segment_groups(
     return vp_to_keep
         
 
-
-
 def pare_down_vp_for_special_cases(
     analysis_date: str, 
     dict_inputs: dict = {}
 ):
     """
     """
+    USABLE_VP = dict_inputs["stage1"]
     INPUT_FILE_PREFIX = dict_inputs["stage2"]
     SEGMENT_FILE = dict_inputs["segments_file"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
@@ -264,35 +275,39 @@ def pare_down_vp_for_special_cases(
     EXPORT_FILE = dict_inputs["stage3"]
 
     
-    # Handle stop segments and the normal/special cases separately
-    if GROUPING_COL == "shape_array_key":
-        special_shapes = identify_stop_segment_cases(
-            analysis_date, GROUPING_COL, 1)
-        
-            
-        # https://docs.dask.org/en/stable/delayed-collections.html
-        vp_joined_to_segments = helpers.import_vehicle_positions(
-            f"{SEGMENT_GCS}vp_sjoin/",
-            f"{INPUT_FILE_PREFIX}_{analysis_date}",
-            file_type = "df",
-            filters = [[(GROUPING_COL, "in", special_cases)]],
-            partitioned=True
-        )
+    special_shapes = identify_stop_segment_cases(
+        analysis_date, GROUPING_COL, 1)
 
-        segments = helpers.import_segments(
-            file_name = f"{SEGMENTS_FILE}_{analysis_date}",
-            filters = [[(GROUPING_COL, "in", special_cases)]],
-            columns = SEGMENT_IDENTIFIER_COLS + ["geometry"],
-            partitioned = False
-        )
-        
-        vp_pared_special = find_errors_in_segment_groups(
-            vp_joined_to_segments, segments, 
-            SEGMENT_IDENTIFIER_COLS + ["trip_id"])
-        
-        vp_pared_special.to_parquet(
-            f"{SEGMENT_GCS}{EXPORT_FILE}_special_{analysis_date}")
+    vp_joined_to_segments = merge_usable_vp_with_sjoin_vpidx(
+        special_shapes,
+        f"{USABLE_VP}_{analysis_date}",
+        f"{INPUT_FILE_PREFIX}_{analysis_date}",
+        SEGMENT_IDENTIFIER_COLS,
+        GROUPING_COL
+    )
+
+    segments = helpers.import_segments(
+        file_name = f"{SEGMENT_FILE}_{analysis_date}",
+        filters = [[(GROUPING_COL, "in", special_shapes)]],
+        columns = SEGMENT_IDENTIFIER_COLS + ["geometry"],
+        partitioned = False
+    )
+
+    vp_pared_special = find_errors_in_segment_groups(
+        vp_joined_to_segments, 
+        segments, 
+        SEGMENT_IDENTIFIER_COLS
+    )
+
+    special_vp_to_keep = segment_calcs.keep_min_max_timestamps_by_segment(
+        vp_pared_special,       
+        SEGMENT_IDENTIFIER_COLS,
+        TIMESTAMP_COL
+    )
     
+    special_vp_to_keep.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_special_{analysis_date}")
+
     
     
 if __name__ == "__main__":
@@ -307,26 +322,17 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    #ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
    
     time1 = datetime.datetime.now()
-    '''
-    pare_down_vp_by_segment(
-        analysis_date,
-        dict_inputs = ROUTE_SEG_DICT
-    )
-    '''
-    time2 = datetime.datetime.now()
-    logger.info(f"pare down vp by route segments {time2 - time1}")
     
     pare_down_vp_for_special_cases(
         analysis_date,
         dict_inputs = STOP_SEG_DICT
     )
     
-    time3 = datetime.datetime.now()
-    logger.info(f"pare down vp by stop segments {time3 - time2}")
+    time2 = datetime.datetime.now()
+    logger.info(f"pare down vp by stop segments special cases {time2 - time1}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")
