@@ -365,13 +365,15 @@ def get_new_desc_title(df):
     proj_unique_cat_title = add_new_title(proj_unique_cat, "project_method", "project_type", "implementing_agency", "county_name_title", "alt_geo_name_projdesc")
     
     # rename new title one
-    proj_unique_cat_title = proj_unique_cat_title.rename(columns={'project_name_new':'project_title_new'})
+    proj_unique_cat_title = proj_unique_cat_title.rename(columns={'project_name_new':'new_project_title'})
     # proj_unique_cat_title.drop(columns =['project_method', 'project_type', 'project_type2'], axis=1, inplace=True)
     
     #map the title back to df
-    proj_title_mapping = (dict(proj_unique_cat_title[['project_number', 'project_title_new']].values))
+    proj_title_mapping = (dict(proj_unique_cat_title[['project_number', 'new_project_title']].values))
     
-    df['project_title_new'] = df.project_number.map(proj_title_mapping)
+    df['new_project_title'] = df.project_number.map(proj_title_mapping)
+    
+    df.rename(columns={'project_title': 'old_project_title_desc'}, inplace=True)
 
     return df
 
@@ -380,7 +382,7 @@ def get_new_desc_title(df):
 def add_new_description_col(df):
     df["obligations_amount_string"] = df["obligations_amount"].astype(str)
     
-    df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["project_title_new"] + "."
+    df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["new_project_title"] + "."
     
     df.drop(columns =['obligations_amount_string'], axis=1, inplace=True)
     
@@ -432,9 +434,9 @@ def get_clean_data(df, full_or_agg = ''):
         aggdf = get_new_desc_title(aggdf)
         
         #map title back to full df
-        proj_title_mapping = (dict(aggdf[['project_number', 'project_title_new']].values))
+        proj_title_mapping = (dict(aggdf[['project_number', 'new_project_title']].values))
     
-        df['project_title_new'] = df.project_number.map(proj_title_mapping)
+        df['new_project_title'] = df.project_number.map(proj_title_mapping)
 
     
         return df
