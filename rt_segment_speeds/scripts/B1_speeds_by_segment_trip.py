@@ -31,8 +31,6 @@ def linear_referencing_and_speed_by_segment(
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]    
     EXPORT_FILE = dict_inputs["stage4"]
-
-    # https://docs.dask.org/en/stable/delayed-collections.html
     
     # Keep subset of columns - don't need it all. we can get the 
     # columns dropped through segments file
@@ -54,8 +52,7 @@ def linear_referencing_and_speed_by_segment(
     segments = delayed(helpers.import_segments)(
         SEGMENT_GCS,
         f"{SEGMENT_FILE}_{analysis_date}", 
-        columns = ["gtfs_dataset_key",  
-                   "geometry"] + SEGMENT_IDENTIFIER_COLS,
+        columns = SEGMENT_IDENTIFIER_COLS + ["geometry"]
     )
 
     vp_linear_ref = delayed(

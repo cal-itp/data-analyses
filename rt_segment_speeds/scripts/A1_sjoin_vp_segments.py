@@ -46,7 +46,7 @@ def add_grouping_col_to_vp(
         vp_file_name,
         columns = ["gtfs_dataset_key", "trip_id"],
         file_type = "df",
-        partitioned=False
+        partitioned=True
     ).drop_duplicates()
 
     crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
@@ -287,7 +287,7 @@ if __name__ == "__main__":
     )
     
     vp_trips = add_grouping_col_to_vp(
-        f"{STOP_SEG_DICT['stage1']}_{analysis_date}",
+        f"{STOP_SEG_DICT['stage1']}_{analysis_date}/",
         analysis_date,
         STOP_SEG_DICT["trip_grouping_cols"]
     )

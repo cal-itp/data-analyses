@@ -11,3 +11,6 @@
 2023-05-12 09:34:40.763 | INFO     | __main__:<module>:139 - Analysis date: 2023-03-15
 2023-05-12 09:38:02.031 | INFO     | __main__:<module>:154 - pare down vp
 2023-05-12 09:38:02.032 | INFO     | __main__:<module>:157 - execution time: 0:03:21.265920
+2023-05-19 18:36:48.070 | INFO     | __main__:<module>:139 - Analysis date: 2023-04-12
+2023-05-19 18:40:05.313 | INFO     | __main__:<module>:154 - pare down vp
+2023-05-19 18:40:05.316 | INFO     | __main__:<module>:157 - execution time: 0:03:17.213492
