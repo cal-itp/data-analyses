@@ -104,33 +104,26 @@ def filter_feed_options(
         "use_subfeeds",
         "current_feeds",
         "include_precursor",
-        "include_precursor_and_future",
     ]
 ) -> siuba.dply.verbs.Pipeable:
-    exclude_future = filter(_["is_future"] == False)
     exclude_precursor = filter(_.regional_feed_type != "Regional Precursor Feed")
 
     if feed_option == "customer_facing":
-        return filter(_.regional_feed_type != "Regional Subfeed") >> exclude_future >> exclude_precursor
+        return filter(_.regional_feed_type != "Regional Subfeed") >> exclude_precursor
 
     elif feed_option == "use_subfeeds":
         return (
             filter(
                 _["name"] != "Bay Area 511 Regional Schedule"
             )  # keep VCTC combined because the combined feed is the only feed
-            >> exclude_future
             >> exclude_precursor
         )
 
     elif feed_option == "current_feeds":
-        return exclude_future >> exclude_precursor
+        return exclude_precursor
 
     elif feed_option == "include_precursor":
-        return exclude_future
-
-    elif feed_option == "include_precursor_and_future":
         return filter()
-
     else:
         return filter()
 
