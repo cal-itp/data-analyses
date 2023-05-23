@@ -585,8 +585,18 @@ def cut_all_or_month(date:str,
                      last_month_segmented_local_roads: str, 
                      run_monthly:bool = True):
     """
-    Cut either all the roads again (primary, secondary, local)
-    OR cut only new roads that are found for particular month.
+    Cut only new roads and delete
+    out old roads that are found for a particular month 
+    OR cut either all the roads again (primary, secondary, local).
+    
+    Args:
+        date (str): analysis date
+        
+        last_month_segmented_local_roads (str): file path in GCS to the parquet
+        containing last month's segmented local roads
+        
+        run_monthly (bool): determine whether to cut only most
+        recent month or everything.
     """
     if run_monthly:
         gdf1 = monthly_linearids(date, last_month_segmented_local_roads)
