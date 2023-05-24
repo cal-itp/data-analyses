@@ -18,7 +18,12 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from IPython.display import display, Markdown
+from IPython.display import display, Markdown, IFrame
+
+import gzip
+import base64
+import json
+from calitp_data.storage import get_fs
 
 class RtFilterMapper:
     '''
@@ -281,7 +286,8 @@ class RtFilterMapper:
     
     def segment_speed_map(self, segments = 'stops', how = 'low_speeds',
                           colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
-                         no_title = False, corridor = False, shn = False):
+                         no_title = False, corridor = False, shn = False,
+                         no_render = False):
         ''' Generate a map of segment speeds aggregated across all trips for each shape, either as averages
         or 20th percentile speeds.
         
@@ -289,7 +295,7 @@ class RtFilterMapper:
         how: 'average', 'low_speeds' (20%ile)
         colorscale: branca.colormap
         size: [x, y]
-        
+        no_render: don't remder map using folium, only store as self.detailed_map_view
         '''
         assert segments in ['stops', 'detailed']
         assert how in ['average', 'low_speeds']
@@ -373,12 +379,12 @@ class RtFilterMapper:
             export_path = f'{GCS_FILE_PATH}{subfolder}'
             if self._time_only_filter and self.filter_period in cached_periods:
                 shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
-        self.speed_map_params = (how, colorscale, size, no_title, corridor, shn)
+        self.speed_map_params = (how, colorscale, size, no_title, corridor, shn, no_render)
         return self._show_speed_map()
     
     def _show_speed_map(self):
         
-        how, colorscale, size, no_title, corridor, shn = self.speed_map_params
+        how, colorscale, size, no_title, corridor, shn, no_render = self.speed_map_params
         gdf = self.stop_segment_speed_view.copy()
         # essential here for reasonable map size!
         gdf = gdf >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
@@ -416,8 +422,10 @@ class RtFilterMapper:
         assert gdf.shape[0] >= orig_rows*.975, \
             f'over 2.5% of geometries invalid after buffer+simplify ({gdf.shape[0]} / {orig_rows})'
         gdf = gdf.to_crs(WGS84)
+        self.current_centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
         self.detailed_map_view = gdf.copy()
-        centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
+        if no_render:
+            return  # ready but don't show map here, export later           
         display_cols = [how_speed_col[how], 'time_formatted', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
                        'stop_sequence', 'fast_slow_ratio']
@@ -434,7 +442,7 @@ class RtFilterMapper:
         if shn:
             m = self.shn.explore(tiles = 'CartoDB positron', color = 'gray',
                                  width = size[0], height = size[1], zoom_start = 13,
-                                 location = centroid)
+                                 location = self.current_centroid)
         else:
             m = None
         g = gdf.explore(column=how_speed_col[how],
@@ -445,7 +453,7 @@ class RtFilterMapper:
                         tooltip_kwds = tooltip_dict, popup_kwds = tooltip_dict,
                         highlight_kwds = {'fillColor': '#DD1C77',"fillOpacity": 0.6},
                         width = size[0], height = size[1], zoom_start = 13,
-                        location = centroid, m = m)
+                        location = self.current_centroid, m = m)
         
         title_html = f"""
          <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
@@ -487,35 +495,73 @@ class RtFilterMapper:
         title_html = f"""
          <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
          """
-        g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
-        return g   
+        g.get_root().html.add_6child(folium.Element(title_html)) # might still want a util for this...
+        return g
+    
+    def test_gz_export(self, map_type = '_20p_speeds'):
+        '''
+        Test exporting speed data to gcs bucket for iframe render
         
-    def chart_delays(self, no_title = False):
+        Always put SHN in state['layers'][0] 
         '''
-        A bar chart showing delays grouped by arrival hour for current filtered selection.
-        Currently hardcoded to 0600-2200.
-        '''
-        filtered_endpoint = (self._filter(self.endpoint_delay_view)
-                             >> filter(_.arrival_hour > 5)
-                             >> filter(_.arrival_hour < 23)
-                            )
-        grouped = (filtered_endpoint >> group_by(_.arrival_hour)
-                   >> summarize(mean_end_delay = _.delay_seconds.mean())
-                  )
-        grouped['Minutes of Delay at Endpoint'] = grouped.mean_end_delay.apply(lambda x: x / 60)
-        grouped['Hour'] = grouped.arrival_hour
-        if no_title:
-            title = ''
-        else:
-            title = f"{self.organization_name} Mean Delays by Arrival Hour{self.filter_formatted}"
+        self.spa_map_state = {"name": "null", "layers": [], "lat_lon": (),
+                             "zoom": 13}
+        fs = get_fs()
+        def _export(gdf, path):
+        ## TODO generalize and --> rt_utils
+            geojson_str = gdf.to_json()
+            geojson_bytes = geojson_str.encode('utf-8')
+            if fs.exists(path):  # check before calling this, retain for future util
+                print(f'{path} exists, skipping write')
+            else:
+                print(f'writing to {path}')
+                with fs.open(path, 'wb') as writer:  # write out to public-facing GCS?
+                    with gzip.GzipFile(fileobj=writer, mode="w") as gz:
+                        gz.write(geojson_bytes)
             
-        sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Minutes of Delay at Endpoint'], ci=None, 
-                       palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
-            .set_title(title)
-           )
-        chart = sns_plot.get_figure()
-        chart.tight_layout()
-        return chart
+            # base64state = base64.urlsafe_b64encode(json.dumps(state).encode()).decode()
+            return
+        
+        if map_type == '_20p_speeds':
+            assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
+            if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
+                self.test_gz_export(map_type = 'shn')
+            
+            path = f'calitp-map-tiles/{self.calitp_itp_id}_{self.filter_period}_TEST.geojson.gz'
+            if fs.exists(path):
+                print(f'20p speeds {path} already formatted/exported')
+            gdf = self.detailed_map_view.copy()
+            cmap = self.speed_map_params[1]
+            gdf['color'] = gdf._20p_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
+            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Vehicle Speeds Between Stops{self.filter_formatted}",
+             "url": f"https://storage.googleapis.com/{path}", "analysis": None}]
+            self.spa_map_state["lat_lon"] = self.current_centroid
+            self.spa_map_state["zoom"] = 13
+            return _export(gdf, path)
+        
+        elif map_type == 'shn':
+            dist = self.caltrans_district[:2]
+            path = f'calitp-map-tiles/{dist}_SHN_TEST.geojson.gz'
+            if fs.exists(path):
+                print(f'shn {path} already formatted/exported')
+            shn_gdf = self.shn.copy().to_crs(WGS84)
+            # color_series = pd.Series([(169,169,169) for _ in range(len(shn_gdf))])
+            color_list = [(127,255,212) for _ in range(len(shn_gdf))] # aquamarine for kicks
+            print('ok weird')
+            shn_gdf['color'] = color_list  # gray for SHN
+            # shn only for initial layer
+            self.spa_map_state["layers"] = [{"name": f"D{dist} State Highway Network",
+             "url": f"https://storage.googleapis.com/{path}", "analysis": None}]
+            return _export(shn_gdf, path)
+    
+    def display_spa_map(self, width=1200, height=600):
+        
+        assert hasattr(self, 'spa_map_state'), 'must export map and set state first using self.test_gz_export'
+        base64state = base64.urlsafe_b64encode(json.dumps(self.spa_map_state).encode()).decode()
+        i = IFrame(f'https://leaflet-speedmaps--cal-itp-data-analyses.netlify.app/?state={base64state}', width=width, height=height)
+        display(i)
+        return
+
     
     def chart_speeds(self, no_title = False):
         '''
@@ -578,28 +624,6 @@ class RtFilterMapper:
               palette=shared_utils.calitp_color_palette.CALITP_CATEGORY_BRIGHT_COLORS,
              ).set_title(title)
         return variability_plt
-    
-    ## works fine, not especially handy to agencies
-    # def describe_delayed_routes(self):
-    #     try:
-    #         most_delayed = (self._filter(self.endpoint_delay_view)
-    #                     >> group_by(_.shape_id)
-    #                     >> summarize(mean_delay_seconds = _.delay_seconds.mean())
-    #                     >> arrange(-_.mean_delay_seconds)
-    #                     >> head(5)
-    #                    )
-    #         most_delayed = most_delayed >> inner_join(_,
-    #                                self.rt_trips >> distinct(_.shape_id, _keep_all=True),
-    #                                on = 'shape_id')
-    #         most_delayed = most_delayed.apply(describe_most_delayed, axis=1)
-    #         display_list = most_delayed.full_description.to_list()
-    #         with_newlines = '\n * ' + '\n * '.join(display_list)
-    #         period_formatted = self.filter_period.replace('_', ' ')
-    #         display(Markdown(f'{period_formatted} most delayed routes: {with_newlines}'))
-    #     except:
-    #         # print('describe delayed routes failed!')
-    #         pass
-    #     return
     
     def describe_slow_routes(self):
         try:
