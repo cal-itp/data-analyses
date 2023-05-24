@@ -5,7 +5,7 @@ import base64
 import os
 import shutil
 from pathlib import Path
-from typing import Union
+from typing import Literal, Union
 
 import dask_geopandas as dg
 import fsspec
@@ -80,6 +80,39 @@ def geojson_gcs_export(
         f"{gcs_file_path}{file_name_sanitized}.{geojson_type}",
     )
     os.remove(f"./{file_name_sanitized}.{geojson_type}")
+
+
+def read_geojson(
+    gcs_file_path: str,
+    file_name: str,
+    geojson_type: Literal["geojson", "geojsonl"] = "geojson",
+    save_locally: bool = False,
+) -> gpd.GeoDataFrame:
+    """
+    Parameters:
+    gcs_file_path: str
+                    Ex: gs://calitp-analytics-data/data-analyses/my-folder/
+    file_name: str
+                name of file (with or without the .geojson).
+    geojson_type: str.
+                    valid values are geojson or geojsonl.
+    save_locally: bool
+                    defaults to False. if True, will save geojson locally.
+    """
+    file_name_sanitized = sanitize_file_path(file_name)
+
+    object_path = fs.open(f"{gcs_file_path}{file_name_sanitized}.{geojson_type}")
+    gdf = gpd.read_file(object_path)
+
+    if geojson_type == "geojson":
+        DRIVER = "GeoJSON"
+    elif geojson_type == "geojsonl":
+        DRIVER = "GeoJSONSeq"
+
+    if save_locally:
+        gdf.to_file(f"./{file_name}.{geojson_type}", driver=DRIVER)
+
+    return gdf
 
 
 # Make zipped shapefile
