@@ -461,14 +461,13 @@ class RtFilterMapper:
         g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
         return g   
     
-    def map_variance(self, no_title = False):
+    def map_variance(self, no_title = False, no_render = False):
         '''
         A quick map of relative speed variance across stop segments. Currently symbolized
         with five quantiles.
         '''
         assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
-        gdf = self.detailed_map_view.dropna(subset=['fast_slow_ratio']) >> arrange(-_.fast_slow_ratio)
-        gdf = gdf.round({'fast_slow_ratio': 1})
+        gdf = self.detailed_map_view.copy().dropna(subset=['fast_slow_ratio']) >> arrange(-_.fast_slow_ratio)
         display_cols = ['fast_slow_ratio', '_20p_mph', '_80p_mph', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
                        'stop_sequence']
@@ -481,13 +480,18 @@ class RtFilterMapper:
         cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins,      
                                 vmin = gdf.fast_slow_ratio.min(),
                                 vmax = gdf.fast_slow_ratio.max())
+        cmap.caption = '80th percentile to 20th percentile speed ratio (variation in speeds)'
+        self.variance_cmap = cmap
+        if no_render:
+            self._variance_map_view = gdf
+            return
         if no_title:
             title = ''
         else:
             title = f"{self.organization_name} Variation in Vehicle Speeds Between Stops{self.filter_formatted}"
-        cmap.caption = '80th percentile to 20th percentile speed ratio (variation in speeds)'
+
         style_dict = {'opacity': 0.8, 'fillOpacity': 0.8}
-        g = gdf.explore(column='fast_slow_ratio', cmap = cmap,
+        g = gdf.explore(column='fast_slow_ratio', cmap = self.variance_cmap,
                         tooltip = display_cols, popup = display_cols,
                         tooltip_kwds = tooltip_dict, popup_kwds = tooltip_dict,
                         tiles = 'CartoDB positron',
@@ -495,7 +499,7 @@ class RtFilterMapper:
         title_html = f"""
          <h3 align="center" style="font-size:20px"><b>{title}</b></h3>
          """
-        g.get_root().html.add_6child(folium.Element(title_html)) # might still want a util for this...
+        g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
         return g
     
     def test_gz_export(self, map_type = '_20p_speeds'):
@@ -507,6 +511,7 @@ class RtFilterMapper:
         self.spa_map_state = {"name": "null", "layers": [], "lat_lon": (),
                              "zoom": 13}
         fs = get_fs()
+        
         def _export(gdf, path):
         ## TODO generalize and --> rt_utils
             geojson_str = gdf.to_json()
@@ -535,18 +540,33 @@ class RtFilterMapper:
             self.spa_map_state["zoom"] = 13
             return _export(gdf, path)
         
+        elif map_type == 'variance':
+            assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
+            if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
+                self.test_gz_export(map_type = 'shn')
+            
+            path = f'calitp-map-tiles/{self.calitp_itp_id}_{self.filter_period}_variance_TEST.geojson.gz'
+            cmap = self.variance_cmap
+            gdf = self._variance_map_view
+            gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
+            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} 80th %ile to 20th %ile Speed Ratio Between Stops{self.filter_formatted}",
+             "url": f"https://storage.googleapis.com/{path}", "analysis": None}]
+            self.spa_map_state["lat_lon"] = self.current_centroid
+            self.spa_map_state["zoom"] = 13
+            return _export(gdf, path)
+        
         elif map_type == 'shn':
             dist = self.caltrans_district[:2]
             path = f'calitp-map-tiles/{dist}_SHN_TEST.geojson.gz'
             shn_gdf = self.shn.copy().to_crs(WGS84)
-            # color_series = pd.Series([(169,169,169) for _ in range(len(shn_gdf))])
-            color_list = [(127,255,212) for _ in range(len(shn_gdf))] # aquamarine for kicks
-            print('ok weird')
+            color_list = [(169,169,169) for _ in range(len(shn_gdf))]
+            # color_list = [(127,255,212) for _ in range(len(shn_gdf))] # aquamarine for kicks
+            # print('ok weird')
             shn_gdf['color'] = color_list  # gray for SHN
             # shn only for initial layer
             self.spa_map_state["layers"] = [{"name": f"D{dist} State Highway Network",
              "url": f"https://storage.googleapis.com/{path}", "analysis": None}]
-            display(shn_gdf)
+            # display(shn_gdf)
             return _export(shn_gdf, path)
     
     def display_spa_map(self, width=1200, height=600):
