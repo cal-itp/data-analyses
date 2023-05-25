@@ -511,13 +511,11 @@ class RtFilterMapper:
         ## TODO generalize and --> rt_utils
             geojson_str = gdf.to_json()
             geojson_bytes = geojson_str.encode('utf-8')
-            if fs.exists(path):  # check before calling this, retain for future util
-                print(f'{path} exists, skipping write')
-            else:
-                print(f'writing to {path}')
-                with fs.open(path, 'wb') as writer:  # write out to public-facing GCS?
-                    with gzip.GzipFile(fileobj=writer, mode="w") as gz:
-                        gz.write(geojson_bytes)
+            print(f'writing to {path}')
+            self.debug_shn = geojson_str
+            with fs.open(path, 'wb') as writer:  # write out to public-facing GCS?
+                with gzip.GzipFile(fileobj=writer, mode="w") as gz:
+                    gz.write(geojson_bytes)
             
             # base64state = base64.urlsafe_b64encode(json.dumps(state).encode()).decode()
             return
@@ -528,8 +526,6 @@ class RtFilterMapper:
                 self.test_gz_export(map_type = 'shn')
             
             path = f'calitp-map-tiles/{self.calitp_itp_id}_{self.filter_period}_TEST.geojson.gz'
-            if fs.exists(path):
-                print(f'20p speeds {path} already formatted/exported')
             gdf = self.detailed_map_view.copy()
             cmap = self.speed_map_params[1]
             gdf['color'] = gdf._20p_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
@@ -542,8 +538,6 @@ class RtFilterMapper:
         elif map_type == 'shn':
             dist = self.caltrans_district[:2]
             path = f'calitp-map-tiles/{dist}_SHN_TEST.geojson.gz'
-            if fs.exists(path):
-                print(f'shn {path} already formatted/exported')
             shn_gdf = self.shn.copy().to_crs(WGS84)
             # color_series = pd.Series([(169,169,169) for _ in range(len(shn_gdf))])
             color_list = [(127,255,212) for _ in range(len(shn_gdf))] # aquamarine for kicks
@@ -552,6 +546,7 @@ class RtFilterMapper:
             # shn only for initial layer
             self.spa_map_state["layers"] = [{"name": f"D{dist} State Highway Network",
              "url": f"https://storage.googleapis.com/{path}", "analysis": None}]
+            display(shn_gdf)
             return _export(shn_gdf, path)
     
     def display_spa_map(self, width=1200, height=600):
