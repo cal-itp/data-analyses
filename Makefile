@@ -65,3 +65,7 @@ install_env:
 	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	#cd rt_delay/ && make setup_rt_analysis && cd ..    
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ..
+
+# Create .egg to upload to dask cloud cluster
+egg_modules:
+	cd ~/data-analyses/rt_segment_speeds && python setup.py bdist_egg && cd ..

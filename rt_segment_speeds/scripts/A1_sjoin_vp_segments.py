@@ -1,16 +1,16 @@
 """
 Spatial join vehicle positions to segments.
 
-Route segments and stop-to-stop segments.
+Stop-to-stop segments.
 Use dask.delayed + loop so that vp can only join to the 
 relevant segments.
 Otherwise, vp will be joined to other segments that share the same road.
 """
 import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime
 import gcsfs
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import sys
 
@@ -18,7 +18,6 @@ from dask import delayed, compute
 from dask.delayed import Delayed # type hint
 from loguru import logger
 
-from shared_utils import dask_utils
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (analysis_date, SEGMENT_GCS, 
                                               CONFIG_PATH, PROJECT_CRS)
@@ -66,6 +65,11 @@ def add_grouping_col_to_vp(
     return vp_with_crosswalk
    
 
+def subset_vp_for_shape(vp_df: dd.DataFrame, shape: str) -> pd.DataFrame:
+    subset_df = vp_df[vp_df.shape_array_key==shape]
+    return subset_df
+    
+    
 def import_segments_and_buffer(
     segment_file_name: str,
     buffer_size: int,
@@ -75,12 +79,11 @@ def import_segments_and_buffer(
     Import segments , subset certain columns, 
     and buffer by some specified amount.
     """
-    segments = helpers.import_segments(
-        SEGMENT_GCS, 
-        segment_file_name,
-        columns = segment_identifier_cols + ["gtfs_dataset_key", "geometry"]
+    segments = delayed(gpd.read_parquet)(
+        f"{SEGMENT_GCS}{segment_file_name}.parquet",
+        columns = segment_identifier_cols + ["seg_idx", "geometry"],
     ).to_crs(PROJECT_CRS)
-    
+
     # Buffer the segment for vehicle positions (points) to fall in polygons
     segments = segments.assign(
         geometry = segments.geometry.buffer(buffer_size)
@@ -89,86 +92,30 @@ def import_segments_and_buffer(
     return segments
 
 
-def vehicle_positions_to_gdf(
-    vp_file_name: str,
-    rt_dataset_key: str,
-    crosswalk_vp_segments: pd.DataFrame
-) -> dg.GeoDataFrame:
-    """
-    Import vp_usable (tabular) for an operator and create geometry column.
-    Also merge in the crosswalk so we know which grouping it is, 
-    whether shape_array_key or route_dir_identifier.
-    """
-    vp = helpers.import_vehicle_positions(
-        SEGMENT_GCS,
-        vp_file_name,
-        filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]],
-        columns = ["gtfs_dataset_key", "trip_id", 
-                   "vp_idx", "x", "y"],
-        partitioned = True
-    ).merge(
-        crosswalk_vp_segments,
-        on = ["gtfs_dataset_key", "trip_id"],
-        how = "inner"
-    )
+def sjoin_vp_to_segment(
+    vp: pd.DataFrame,
+    segment: gpd.GeoDataFrame,
+) -> np.ndarray: 
     
-    vp["geometry"] = dg.points_from_xy(vp, "x", "y")
+    vp_gdf = gpd.GeoDataFrame(
+        vp, 
+        geometry = gpd.points_from_xy(vp.x, vp.y, crs = "EPSG:4326")
+    ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
     
-    # Set CRS after gddf created
-    # https://github.com/geopandas/dask-geopandas/issues/189
-    vp_gdf = dg.from_dask_dataframe(
-        vp, geometry = "geometry", 
-    ).drop(columns = ["x", "y"]).set_crs("EPSG:4326").to_crs(PROJECT_CRS)
+    vp_in_seg = gpd.sjoin(
+        vp_gdf,
+        segment,
+        how = "inner",
+        predicate = "within"
+    )[["vp_idx", "seg_idx"]]
     
-    return vp_gdf
-    
-    
-def loop_over_groups_by_operator(
-    vp_file_name: str,
-    vp_trips: pd.DataFrame,
-    segments: dg.GeoDataFrame,
-    rt_dataset_key: str,
-    grouping_col: list,
-    segment_identifier_cols: list
-) -> list[Delayed]:
-    """
-    Do the loop within an operator. Loop by route_dir_identifier
-    or shape_array_key.
-    
-    Only the vehicle positions for that grouping can sjoin
-    to those segments.
-    """
-    operator_vp = delayed(vehicle_positions_to_gdf)(
-        vp_file_name,
-        rt_dataset_key,
-        vp_trips,
-    ).persist()
-    
-    operator_segments = segments[
-        segments.gtfs_dataset_key == rt_dataset_key]
-    
-    groups = operator_vp[grouping_col].unique()
-    groups = compute(groups)[0]
-    
-    operator_results = []
-    
-    for g in groups:
-        vp_group = operator_vp[
-            operator_vp[grouping_col] == g][["vp_idx", "geometry"]]
+    # Instead of saving it out as df, which seems to get stuck,
+    # in dask delayed for the compute, convert to numpy matrix of n_rows x 2 cols.
+    # Just need idx to merge all the other columns later.
+    pairs = vp_in_seg.to_numpy()
         
-        segments_group = operator_segments[
-            operator_segments[grouping_col] == g]
-        
-        sjoin_point_in_seg = delayed(dg.sjoin)(
-            vp_group,
-            segments_group,
-            how = "inner",
-            predicate = "within"
-        )[["vp_idx"] + segment_identifier_cols]
-        
-        operator_results.append(sjoin_point_in_seg)
-
-    return operator_results
+    return pairs
+    
     
     
 def sjoin_vp_to_segments(
@@ -208,64 +155,115 @@ def sjoin_vp_to_segments(
     
     for rt_dataset_key in RT_OPERATORS:
         start_id = datetime.datetime.now()
-
-        operator_results = loop_over_groups_by_operator(
+        
+        vp = helpers.import_vehicle_positions(
+            SEGMENT_GCS,
             f"{INPUT_FILE}_{analysis_date}/",
-            vp_trips[vp_trips.gtfs_dataset_key == rt_dataset_key],
-            segments,
-            rt_dataset_key,
-            GROUPING_COL,
-            SEGMENT_IDENTIFIER_COLS
-        )        
-    
-        if len(operator_results) > 0:
-            dask_utils.compute_and_export(
-                operator_results,
-                gcs_folder = f"{SEGMENT_GCS}vp_sjoin/",
-                file_name = f"{EXPORT_FILE}_{rt_dataset_key}_{analysis_date}",
-                export_single_parquet = False
-            )
-            
-            end_id = datetime.datetime.now()
-            print(f"exported: {rt_dataset_key} {end_id - start_id}")
+            filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]],
+            columns = ["gtfs_dataset_key", "trip_id", 
+                       "vp_idx", "x", "y"],
+            partitioned = True
+        ).merge(
+            vp_trips,
+            on = ["gtfs_dataset_key", "trip_id"],
+            how = "inner"
+        )
+        
+        vp = delayed(vp).persist()    
+        
+        all_shapes = vp_trips[vp_trips.gtfs_dataset_key==rt_dataset_key
+                             ].shape_array_key.unique().tolist()
+
+        vp_dfs = [
+            delayed(subset_vp_for_shape)(vp, shape)
+            for shape in all_shapes
+        ]
+
+        segment_dfs = [
+            segments[segments.shape_array_key==shape] 
+            for shape in all_shapes
+        ]
+
+        results = [
+            delayed(sjoin_vp_to_segment)(shape_vp, shape_segments)
+            for shape_vp, shape_segments in zip(vp_dfs, segment_dfs)
+        ]
+
+        time1 = datetime.datetime.now()
+        print(f"delayed results: {time1 - start_id}")
+
+        # Compute results, which are numpy arrays, and stack rows
+        results2 = [compute(i)[0] for i in results]
+        stacked_results = np.row_stack(results2)
+
+        time2 = datetime.datetime.now()
+        print(f"stack arrays: {time2 - time1}")
+
+        # Change matrix to df
+        result_pairs = pd.DataFrame(
+            stacked_results, 
+            columns = ["vp_idx", "seg_idx"]
+        )
+        
+        result_pairs.to_parquet(
+            f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_"
+            f"{rt_dataset_key}_{analysis_date}.parquet")
+        
+        end_id = datetime.datetime.now()
+        print(f"finished {rt_dataset_key}: {end_id - start_id}")
      
     
-def compile_partitioned_parquets_for_operators(
+def compile_parquets_for_operators(
     gcs_folder: str,
     file_name: str,
     analysis_date: str, 
-    vp_trips: pd.DataFrame,
+    dict_inputs: dict = {}
 ):
     """
-    Once we've saved out indiv operator partitioned parquets,
-    read those in and save as one partitioned parquet
+    Once we've saved out indiv operator parquets,
+    read those in and save as one parquet. 
+    Merge in segment identifier cols so we're not left with seg_idx only, 
+    and export our sjoin results as 1 parquet for the date.
     """
+    SEGMENT_FILE = dict_inputs["segments_file"]
+    SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     
     all_files = fs.ls(f"{gcs_folder}")
     
     # The files to compile need format
     # {file_name}_{rt_dataset_key}_{analysis_date}.
     # do not include {file_name}_{analysis_date} (bc that is concat version)
-    files_to_compile = [f for f in all_files 
-                        if file_name in f and 
-                        analysis_date in f and 
-                        f"{file_name}_{analysis_date}" not in f
-                       ]
+    files_to_compile = [
+        f"gs://{f}" for f in all_files 
+        if (file_name in f) and (analysis_date in f) and 
+        (f"{file_name}_{analysis_date}" not in f)
+    ]
     
-    results = [delayed(pd.read_parquet)(f"gs://{f}") 
-                 for f in files_to_compile]
+    delayed_dfs = [delayed(pd.read_parquet)(f) for f in files_to_compile]
     
-    dask_utils.compute_and_export(
-        results,
-        gcs_folder = gcs_folder,
-        file_name = f"{file_name}_{analysis_date}",
-        export_single_parquet = False
+    ddf = dd.from_delayed(delayed_dfs)
+    
+    segments = pd.read_parquet(
+        f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet", 
+        columns = ["seg_idx"] + SEGMENT_IDENTIFIER_COLS
     )
-
-    # Remove these partitioned parquets (folders, set recursive = True)
-    for f in files_to_compile:
-        fs.rm(f"gs://{f}", recursive=True)
     
+    # Merge in segment_identifier_cols so that vp has the 
+    # segment grouping columns attached for use in the next age
+    ddf2 = dd.merge(
+        ddf,
+        segments,
+        on = "seg_idx",
+        how = "inner"
+    ).drop(columns = "seg_idx")
+        
+    ddf2.to_parquet(f"{gcs_folder}{file_name}_{analysis_date}", 
+                    overwrite=True)
+
+    # Remove these partitioned parquets (if it's folder, set recursive = True)
+    for f in files_to_compile:
+        fs.rm(f)
+            
         
 if __name__ == "__main__":
     
@@ -286,22 +284,16 @@ if __name__ == "__main__":
         dict_inputs = STOP_SEG_DICT
     )
     
-    vp_trips = add_grouping_col_to_vp(
-        f"{STOP_SEG_DICT['stage1']}_{analysis_date}/",
-        analysis_date,
-        STOP_SEG_DICT["trip_grouping_cols"]
-    )
-    
     time1 = datetime.datetime.now()
     logger.info(f"attach vp to stop-to-stop segments: {time1 - start}")
 
-    compile_partitioned_parquets_for_operators(
+    compile_parquets_for_operators(
         f"{SEGMENT_GCS}vp_sjoin/", 
         STOP_SEG_DICT["stage2"], 
         analysis_date, 
-        vp_trips
+        STOP_SEG_DICT,
     ) 
     
     end = datetime.datetime.now()
-    logger.info(f"compiled partitioned parquets: {end - time1}")
+    logger.info(f"compiled parquets: {end - time1}")
     logger.info(f"execution time: {end-start}")

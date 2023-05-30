@@ -96,17 +96,11 @@ def concatenate_list_of_files(
     with pandas or geopandas. Use dask.delayed to loop through and
     assemble a concatenated pandas or geopandas dataframe.
     """
-    dfs = []
-
     if file_type == "df":
-        for f in list_of_filepaths:
-            indiv_df = delayed(pd.read_parquet)(f)
-            dfs.append(indiv_df)
+        dfs = [delayed(pd.read_parquet)(f) for f in list_of_filepaths]
 
     elif file_type == "gdf":
-        for f in list_of_filepaths:
-            indiv_df = delayed(gpd.read_parquet)(f)
-            dfs.append(indiv_df)
+        dfs = [delayed(gpd.read_parquet)(f) for f in list_of_filepaths]
 
     results = [compute(i)[0] for i in dfs]
     full_df = pd.concat(results, axis=0).reset_index(drop=True)
