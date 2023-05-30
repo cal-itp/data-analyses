@@ -267,6 +267,8 @@ class RtFilterMapper:
         example:
         shape_id = '27_3_87'
         stop_range = [16, 31]
+        
+        NOTE: last generated speedmap must include shape_id of interest for this to work
         '''
         corridor = (self.stop_segment_speed_view
          >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
