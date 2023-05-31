@@ -514,6 +514,12 @@ def monthly_linearids(date:str, last_month_segmented_local_roads: str) -> gpd.Ge
     cut_linearid_2 = this_month_gdf.loc[this_month_gdf.linearid.isin(linearids_to_cut)].reset_index(drop = True)
     cut_linearid_2 = cut_local_roads(cut_linearid_2, date)
     
+    # Compare lengths of last versus this month's local roads
+    this_month_local_roads = pd.concat([cut_linearid_1, cut_linearid_2], axis = 0)
+    this_month_len = this_month_local_roads.geometry.length.sum()
+    last_month_len = last_month_gdf.geometry.length.sum()
+    print(f"This month's local roads length: {this_month_len} meters. Last month: {last_month_len} meters. Diff: {last_month_len-this_month_len} meters")
+    
     # Read in primary & secondary roads that have already been cut
     primary_secondary = gpd.read_parquet(f"{SHARED_GCS}segmented_primary_secondary_roads.parquet")
     
