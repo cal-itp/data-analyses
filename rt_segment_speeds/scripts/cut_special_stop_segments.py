@@ -2,14 +2,12 @@
 Use super_project() to cut loopy or inlining routes.
 """
 import datetime
-import dask.dataframe as dd
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
 import sys
 
-from dask import delayed
 from loguru import logger
 
 import cut_normal_stop_segments
@@ -64,6 +62,13 @@ def adjust_stop_start_end_for_special_cases(
     subset_stop_projected: np.ndarray
 ) -> tuple:
     """
+    Given two stops, look at what how distance is increasing or 
+    decreasing.
+    Calculate the distance between them.
+    Pin ourselves to the prior stop, use distance between, to get 
+    at where we are going for current stop.
+    With our new calculated start/end projected points, interpolate it
+    and get back our point geometries.
     """
     # (1a) Normal case: given a current stop and a prior stop
     # use this to get sense of direction, whether 
@@ -118,7 +123,7 @@ def super_project(
     stop_sequence_array: np.ndarray,
 ) -> tuple:
     """
-    Implement super project over 1 shape. 
+    Implement super project for one stop. 
     """
     shape_coords_list, cumulative_distances = get_shape_components(
         shape_geometry)
@@ -211,46 +216,50 @@ def super_project(
             )
         )
     
-    return subset_shape_geom_with_od, origin_destination_geom
+    subset_ls = cut_normal_stop_segments.linestring_from_points(
+        subset_shape_geom_with_od)
+    
+    #return subset_shape_geom_with_od, origin_destination_geom
+    return subset_ls 
 
 
-def super_project_and_cut_segments_for_one_shape(
-    gdf: gpd.GeoDataFrame, 
-    one_shape: str
+def find_special_cases_and_setup_df(
+    analysis_date: str
 ) -> gpd.GeoDataFrame:
-    
-    gdf2 = gdf[gdf.shape_array_key==one_shape].reset_index(drop=True)
-
-    shape_geometry = gdf2.geometry.iloc[0]
-    stop_geometry_array = np.asarray(gdf2.stop_geometry)
-    stop_sequence_array = np.asarray(gdf2.stop_sequence)
-    
-    segment_results = [
-        # since super_project returns a tuple, just grab 1st item in tuple
-        super_project(
-            stop_seq, 
-            shape_geometry, 
-            stop_geometry_array, 
-            stop_sequence_array
-        )[0] for stop_seq in stop_sequence_array
-    ]
-        
-    segment_ls = [cut_normal_stop_segments.linestring_from_points(i) 
-                  for i in segment_results]
-    
-    keep_cols = [
-        "feed_key", "shape_array_key", "stop_segment_geometry", 
-        "stop_id", "stop_sequence", "loop_or_inlining"
-    ]
-    
-    gdf2 = (gdf2.assign(
-        stop_segment_geometry = segment_ls
-        )[keep_cols]
-        .set_geometry("stop_segment_geometry")
-        .set_crs(gdf.crs)
+    """
+    Import just special cases and prep so we can apply super_project row-wise.
+    For every stop, we need to attach the array of 
+    stop sequences / stop geometry for that shape.
+    """
+    gdf = gpd.read_parquet(
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
+        filters = [[("loop_or_inlining", "==", 1)]],
+        columns = [
+            "feed_key",
+            "shape_array_key", "stop_id", "stop_sequence", 
+            "stop_geometry", # don't need shape_meters, we need stop_geometry
+            "loop_or_inlining",
+            "geometry"]
     )
-            
-    return gdf2 
+    
+    wide = (gdf.groupby("shape_array_key")
+            .agg({
+                "stop_sequence": lambda x: list(x), 
+                "stop_geometry": lambda x: list(x)}
+            ).reset_index()
+            .rename(columns = {
+                "stop_sequence": "stop_sequence_array", 
+                "stop_geometry": "stop_geometry_array"})
+           )
+    
+    gdf2 = pd.merge(
+        gdf,
+        wide,
+        on = "shape_array_key",
+        how = "inner"
+    )
+
+    return gdf2
 
 
 if __name__ == "__main__":
@@ -268,39 +277,31 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    # Get list of shapes that go through normal stop segment cutting
-    shapes_to_cut = pd.read_parquet(
-        f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
-        filters = [[("loop_or_inlining", "==", 1)]],
-        columns = ["shape_array_key"]
-    ).drop_duplicates().shape_array_key.tolist()
+    gdf = find_special_cases_and_setup_df(analysis_date)
     
-    gdf = delayed(gpd.read_parquet)(
-        f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
-        filters = [[("loop_or_inlining", "==", 1)]],
-        columns = [
-            "feed_key",
-            "shape_array_key", "stop_id", "stop_sequence", 
-            "stop_geometry", # don't need shape_meters, we need stop_geometry
-            "loop_or_inlining",
-            "geometry", 
-            ]
+    # apply super project row-wise
+    gdf = gdf.assign(
+        stop_segment_geometry = gdf.apply(
+            lambda x: super_project(
+                x.stop_sequence,
+                x.geometry,
+                x.stop_geometry_array,
+                x.stop_sequence_array), axis=1)
     )
-        
-    results = []
-    
-    for shape in shapes_to_cut:
-        gdf2 = gdf[gdf.shape_array_key==shape]
-        segments = delayed(super_project_and_cut_segments_for_one_shape)(
-            gdf2, shape)
-        results.append(segments)
     
     time1 = datetime.datetime.now()
     logger.info(f"Cut special stop segments: {time1-start}")
     
-    results2 = dd.from_delayed(results)
-    results_gdf = results2.compute()   
+    keep_cols = [
+        "feed_key", "shape_array_key", "stop_segment_geometry", 
+        "stop_id", "stop_sequence", "loop_or_inlining"
+    ]
     
+    results_gdf = (gdf[keep_cols]
+        .set_geometry("stop_segment_geometry")
+        .set_crs(gdf.crs)
+    )    
+
     utils.geoparquet_gcs_export(
         results_gdf,
         SEGMENT_GCS,
