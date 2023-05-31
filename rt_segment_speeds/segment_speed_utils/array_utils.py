@@ -1,8 +1,8 @@
 import numpy as np
 
-from numba import jit
+#from numba import jit
 
-@jit(parallel=True)
+#@jit(parallel=True)
 def get_index(array: np.ndarray, item) -> int:
     """
     Find the index for a certain value in an array.
@@ -13,7 +13,7 @@ def get_index(array: np.ndarray, item) -> int:
             return idx[0]
 
         
-@jit(parallel=True)
+#@jit(parallel=True)
 def subset_array_by_indices(
     array: np.ndarray, 
     start_end_tuple: tuple

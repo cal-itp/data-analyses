@@ -32,11 +32,11 @@ def project_list_of_coords(
     if use_shapely_coords:
         # https://stackoverflow.com/questions/49330030/remove-a-duplicate-point-from-polygon-in-shapely
         # use simplify(0) to remove any points that might be duplicates
-        return np.array(
+        return np.asarray(
             [shape_geometry.project(shapely.geometry.Point(p))
             for p in shape_geometry.simplify(0).coords])
     else:
-        return np.array(
+        return np.asarray(
             [shape_geometry.project(i) for i in point_geom_list])
 
     

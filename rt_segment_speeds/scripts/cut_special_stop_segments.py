@@ -2,13 +2,14 @@
 Use super_project() to cut loopy or inlining routes.
 """
 import datetime
+import dask.dataframe as dd
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
 import sys
 
-from dask import delayed#, compute
+from dask import delayed
 from loguru import logger
 
 import cut_normal_stop_segments
@@ -42,7 +43,7 @@ def get_shape_components(
         geom_type="point"
     )
     
-    distance_from_prior = np.array(
+    distance_from_prior = np.asarray(
         point_series_no_idx0.distance(points_series)
     )
     
@@ -50,7 +51,7 @@ def get_shape_components(
     # cumulative distance array, and append 0 to 
     # the beginning. We want length of this array to match the 
     # length of stop_sequence array
-    cumulative_distances = np.array(
+    cumulative_distances = np.asarray(
         [0] + list(np.cumsum(distance_from_prior))
     )
     
@@ -115,9 +116,9 @@ def super_project(
     shape_geometry: shapely.geometry.LineString,
     stop_geometry_array: np.ndarray,
     stop_sequence_array: np.ndarray,
-):
+) -> tuple:
     """
-    
+    Implement super project over 1 shape. 
     """
     shape_coords_list, cumulative_distances = get_shape_components(
         shape_geometry)
@@ -140,7 +141,7 @@ def super_project(
         (idx_stop_seq[0], idx_stop_seq[-1])
     )
     
-    # (3a) Project this vector of start/end stops
+    # (3) Project this vector of start/end stops
     subset_stop_proj = wrangle_shapes.project_list_of_coords(
         shape_geometry, subset_stop_geom)
     
@@ -203,7 +204,7 @@ def super_project(
     else: 
         # elif origin_stop > destin_stop:        
         subset_shape_geom_with_od = np.flip(
-            np.array(
+            np.asarray(
                 [origin_destination_geom[-1]] + 
                 subset_shape_geom + 
                 [origin_destination_geom[0]]
@@ -221,9 +222,9 @@ def super_project_and_cut_segments_for_one_shape(
     gdf2 = gdf[gdf.shape_array_key==one_shape].reset_index(drop=True)
 
     shape_geometry = gdf2.geometry.iloc[0]
-    stop_geometry_array = np.array(gdf2.stop_geometry)
-    stop_sequence_array = np.array(gdf2.stop_sequence)
-        
+    stop_geometry_array = np.asarray(gdf2.stop_geometry)
+    stop_sequence_array = np.asarray(gdf2.stop_sequence)
+    
     segment_results = [
         # since super_project returns a tuple, just grab 1st item in tuple
         super_project(
@@ -233,7 +234,7 @@ def super_project_and_cut_segments_for_one_shape(
             stop_sequence_array
         )[0] for stop_seq in stop_sequence_array
     ]
-    
+        
     segment_ls = [cut_normal_stop_segments.linestring_from_points(i) 
                   for i in segment_results]
     
@@ -253,8 +254,6 @@ def super_project_and_cut_segments_for_one_shape(
 
 
 if __name__ == "__main__":
-    import warnings
-    warnings.filterwarnings("once")
     
     LOG_FILE = "../logs/cut_stop_segments.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -274,7 +273,7 @@ if __name__ == "__main__":
         f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
         filters = [[("loop_or_inlining", "==", 1)]],
         columns = ["shape_array_key"]
-    ).drop_duplicates().shape_array_key
+    ).drop_duplicates().shape_array_key.tolist()
     
     gdf = delayed(gpd.read_parquet)(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
@@ -300,7 +299,7 @@ if __name__ == "__main__":
     logger.info(f"Cut special stop segments: {time1-start}")
     
     results2 = dd.from_delayed(results)
-    results_gdf = results2.compute()    
+    results_gdf = results2.compute()   
     
     utils.geoparquet_gcs_export(
         results_gdf,
@@ -308,6 +307,7 @@ if __name__ == "__main__":
         f"{EXPORT_FILE}_special_{analysis_date}"
     )
     
-    time2 = datetime.datetime.now()
-    logger.info(f"Export results: {time2-time1}")
+    end = datetime.datetime.now()
+    logger.info(f"export results: {end - time1}")
+    logger.info(f"execution time: {end - start}")
     
