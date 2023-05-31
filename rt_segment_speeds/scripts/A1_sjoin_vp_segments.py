@@ -96,6 +96,14 @@ def sjoin_vp_to_segment(
     vp: pd.DataFrame,
     segment: gpd.GeoDataFrame,
 ) -> np.ndarray: 
+    """
+    Convert vehicle positions from tabular to spatial.
+    Sjoin vehicle positions to segments.
+    Only keep vp_idx and seg_idx, the sjoin pairing, in our results 
+    and save as numpy array.
+    """
+    #if isinstance(segment, Delayed):
+    #    segment = compute(segment)[0]
     
     vp_gdf = gpd.GeoDataFrame(
         vp, 
@@ -145,11 +153,13 @@ def sjoin_vp_to_segments(
         TRIP_GROUPING_COLS
     )
           
-    segments = delayed(import_segments_and_buffer)(
+    segments = import_segments_and_buffer(
         f"{SEGMENT_FILE}_{analysis_date}",
         BUFFER_METERS,
         SEGMENT_IDENTIFIER_COLS
-    ).persist()
+    )
+    
+    segments = delayed(segments).persist()
     
     RT_OPERATORS = vp_trips.gtfs_dataset_key.unique()
     
@@ -169,7 +179,7 @@ def sjoin_vp_to_segments(
             how = "inner"
         )
         
-        vp = delayed(vp).persist()    
+        vp = delayed(vp).persist() 
         
         all_shapes = vp_trips[vp_trips.gtfs_dataset_key==rt_dataset_key
                              ].shape_array_key.unique().tolist()
