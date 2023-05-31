@@ -452,21 +452,7 @@ def cut_local_roads(gdf, date:str) -> gpd.GeoDataFrame:
     ddf_list = chunk_dask_df(gdf)
     
     cut_df = cut_geometry_compute(ddf_list)
-    
-    """
-    # Cut geometry
-    cut_results = []
-    for ddf in ddf_list:
-        cut_geometry = delayed(geography_utils.cut_segments)(ddf, ["linearid", "fullname"], 1_000)
-        cut_results.append(cut_geometry)
-    print("Cut geometry")
-    
-    print(f"Begin computing")
-    # Compute 
-    cut_results = [compute(i)[0] for i in cut_results]
-    cut_df = pd.concat(cut_results, axis=0).reset_index(drop=True)
-    
-    """
+
     file_date = date.replace('-','_')
     cut_df.to_parquet(f"{SHARED_GCS}segmented_local_rds_{file_date}.parquet")
     
