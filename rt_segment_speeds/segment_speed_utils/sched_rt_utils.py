@@ -81,3 +81,28 @@ def add_rt_keys_to_segments(
     )
     
     return segments_with_crosswalk 
+
+
+def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
+    """
+    Assign trips to time-of-day.
+    """
+    keep_trip_cols = [
+        "feed_key", "trip_id", 
+        "service_hours", 
+        "trip_first_departure_datetime_pacific"
+    ]
+    
+    trips = crosswalk_scheduled_trip_grouping_with_rt_key(
+        analysis_date, 
+        keep_trip_cols
+    )                 
+                      
+    trips = trips.assign(
+        time_of_day = trips.apply(
+            lambda x: rt_utils.categorize_time_of_day(
+                x.trip_first_departure_datetime_pacific), axis=1), 
+        service_minutes = trips.service_hours * 60
+    )
+    
+    return trips

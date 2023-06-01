@@ -24,8 +24,12 @@ def finalize_stop_segments(
         stop_segments, 
         analysis_date, 
         ["feed_key", "shape_array_key"]
-    )
+    ).reset_index(drop=True)
 
+    stop_segments_with_rt_key = stop_segments_with_rt_key.assign(
+        seg_idx = stop_segments_with_rt_key.index
+    )
+    
     return stop_segments_with_rt_key
 
 
