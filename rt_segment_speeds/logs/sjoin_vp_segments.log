@@ -49,9 +49,17 @@
 2023-05-15 14:11:43.758 | INFO     | __main__:<module>:280 - Analysis date: 2023-03-15
 2023-05-15 16:09:03.504 | INFO     | __main__:<module>:313 - attach vp to stop-to-stop segments: 1:57:19.737088
 2023-05-15 16:09:03.505 | INFO     | __main__:<module>:316 - execution time: 1:57:19.745243
-2023-05-19 18:40:22.816 | INFO     | __main__:<module>:278 - Analysis date: 2023-04-12
-2023-05-19 18:44:49.439 | INFO     | __main__:<module>:278 - Analysis date: 2023-04-12
 2023-05-19 18:46:21.102 | INFO     | __main__:<module>:278 - Analysis date: 2023-04-12
 2023-05-19 20:18:23.376 | INFO     | __main__:<module>:296 - attach vp to stop-to-stop segments: 1:32:02.273276
 2023-05-19 20:19:56.588 | INFO     | __main__:<module>:306 - compiled partitioned parquets: 0:01:33.211730
 2023-05-19 20:19:56.589 | INFO     | __main__:<module>:307 - execution time: 1:33:35.485006
+2023-05-26 17:58:19.393 | INFO     | __main__:<module>:111 - Analysis date: 2023-04-12
+2023-05-26 18:01:16.079 | INFO     | __main__:<module>:176 - delayed results: 0:02:56.684602
+2023-05-26 19:46:57.454 | INFO     | __main__:<module>:182 - stack arrays: 1:45:41.374605
+2023-05-26 19:47:05.557 | INFO     | __main__:<module>:191 - execution time: 1:48:46.162546
+2023-05-26 21:24:22.480 | INFO     | __main__:<module>:111 - Analysis date: 2023-04-12
+2023-05-26 23:14:16.971 | INFO     | __main__:<module>:202 - execution time: 1:49:54.490501
+2023-05-30 11:09:47.568 | INFO     | __main__:<module>:286 - Analysis date: 2023-04-12
+2023-05-30 11:58:29.934 | INFO     | __main__:<module>:298 - attach vp to stop-to-stop segments: 0:48:42.364791
+2023-05-30 12:00:23.165 | INFO     | __main__:<module>:308 - compiled parquets: 0:01:53.231698
+2023-05-30 12:00:23.166 | INFO     | __main__:<module>:309 - execution time: 0:50:35.596489

@@ -4,12 +4,59 @@ Quick aggregation for avg speeds by segment
 import geopandas as gpd
 import pandas as pd
 
-from segment_speed_utils import helpers
+from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
 from shared_utils import utils, portfolio_utils
 
-def avg_speeds_with_segment_geom(
+
+def calculate_avg_speeds(
+    df: pd.DataFrame,
+    group_cols: list
+) -> pd.DataFrame:
+    """
+    Calculate the mean, 20th, and 80th percentile speeds 
+    by groups.
+    """
+    # Take the average after dropping unusually high speeds
+    avg = (df.groupby(group_cols)
+          .agg({
+            "speed_mph": "mean",
+            "trip_id": "nunique"})
+          .reset_index()
+    )
+    
+    p20 = (df.groupby(group_cols)
+           .agg({"speed_mph": lambda x: x.quantile(0.2)})
+           .reset_index()  
+          )
+    
+    p80 = (df.groupby(group_cols)
+           .agg({"speed_mph": lambda x: x.quantile(0.8)})
+           .reset_index()  
+          )
+    
+    stats = pd.merge(
+        avg.rename(columns = {"speed_mph": "avg_speed_mph", 
+                              "trip_id": "n_trips"}),
+        p20.rename(columns = {"speed_mph": "p20_speed_mph"}),
+        on = group_cols,
+        how = "left"
+    ).merge(
+        p80.rename(columns = {"speed_mph": "p80_speed_mph"}),
+        on = group_cols,
+        how = "left"
+    )
+    
+    # Clean up for map
+    speed_cols = [c for c in stats.columns if "_speed_mph" in c]
+    stats[speed_cols] = stats[speed_cols].round(2)
+    
+    return stats
+    
+    
+
+def speeds_with_segment_geom(
     analysis_date: str, 
     max_speed_cutoff: int = 70,
     dict_inputs: dict = {}
@@ -27,46 +74,39 @@ def avg_speeds_with_segment_geom(
         filters = [[("speed_mph", "<=", max_speed_cutoff)]]
     )
     
-    # Take the average after dropping unusually high speeds
-    avg = (df.groupby(SEGMENT_IDENTIFIER_COLS)
-          .agg({
-            "speed_mph": "mean",
-            "trip_id": "nunique"})
-          .reset_index()
+    time_of_day_df = sched_rt_utils.get_trip_time_buckets(analysis_date)
+    
+    df2 = pd.merge(
+        df, 
+        time_of_day_df, 
+        on = ["gtfs_dataset_key", "trip_id"], 
+        how = "inner"
     )
     
-    p20 = (df.groupby(SEGMENT_IDENTIFIER_COLS)
-           .agg({"speed_mph": lambda x: x.quantile(0.2)})
-           .reset_index()  
-          )
-    
-    p80 = (df.groupby(SEGMENT_IDENTIFIER_COLS)
-           .agg({"speed_mph": lambda x: x.quantile(0.8)})
-           .reset_index()  
-          )
-    
-    stats = pd.merge(
-        avg.rename(columns = {"speed_mph": "avg_speed_mph", 
-                              "trip_id": "n_trips"}),
-        p20.rename(columns = {"speed_mph": "p20_speed_mph"}),
-        on = SEGMENT_IDENTIFIER_COLS,
-        how = "left"
-    ).merge(
-        p80.rename(columns = {"speed_mph": "p80_speed_mph"}),
-        on = SEGMENT_IDENTIFIER_COLS,
-        how = "left"
+    all_day = calculate_avg_speeds(
+        df2, 
+        SEGMENT_IDENTIFIER_COLS
     )
     
-    # Clean up for map
-    speed_cols = [c for c in stats.columns if "_speed_mph" in c]
-    stats[speed_cols] = stats[speed_cols].round(2)
+    peak = calculate_avg_speeds(
+        df2[df2.time_of_day.isin(["AM Peak", "PM Peak"])], 
+        SEGMENT_IDENTIFIER_COLS
+    )
+    
+    stats = pd.concat([
+        all_day.assign(time_of_day = "all_day"),
+        peak.assign(time_of_day = "peak")
+    ], axis=0)
+    
     
     # Merge in segment geometry
     segments = helpers.import_segments(
         SEGMENT_GCS,
         f"{SEGMENT_FILE}_{analysis_date}",
         columns = SEGMENT_IDENTIFIER_COLS + [
-            "gtfs_dataset_key", "loop_or_inlining",
+            "gtfs_dataset_key", 
+            "stop_id",
+            "loop_or_inlining",
             "geometry", "geometry_arrowized"]
     )#.set_geometry("geometry_arrowized").drop(columns = "geometry")
     
@@ -119,7 +159,7 @@ if __name__ == "__main__":
     
     # Average the speeds for segment for entire day
     # Drop speeds above our max cutoff
-    stop_segment_speeds = avg_speeds_with_segment_geom(
+    stop_segment_speeds = speeds_with_segment_geom(
         analysis_date, 
         max_speed_cutoff = MAX_SPEED,
         dict_inputs = STOP_SEG_DICT
