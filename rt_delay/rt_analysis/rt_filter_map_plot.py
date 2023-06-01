@@ -202,11 +202,13 @@ class RtFilterMapper:
             trips = trips >> filter(_.direction == self.filter['direction'])
         return df.copy() >> inner_join(_, trips >> select(_.trip_id), on = 'trip_id')
     
-    def add_corridor(self, corridor_gdf):
+    def add_corridor(self, corridor_gdf, manual_exclude = {}):
         '''
         Add ability to filter stop_delay_view and subsequently generated stop_segment_speed_views
         to trips running within a corridor, as specified by a polygon bounding box (corridor gdf).
         Enables calculation of metrics for SCCP, LPP.
+        
+        manual_exclude: dict in {'shape': {'min': int, 'max': int}, ...} format (values are stop sequence)
         '''
         corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
         self.corridor = corridor_gdf >> select(_.geometry)
@@ -235,6 +237,11 @@ class RtFilterMapper:
             filter_max = (this_shape >> filter(_.stop_sequence > clipped_max)).stop_sequence.min()
             self._shape_sequence_filter[shape_id]['min'] = max(0, filter_min)
             self._shape_sequence_filter[shape_id]['max'] = filter_max if not np.isnan(filter_max) else clipped_max
+            if manual_exclude and shape_id in manual_exclude.keys():
+                if 'min' in manual_exclude[shape_id].keys():
+                    self._shape_sequence_filter[shape_id]['min'] = manual_exclude[shape_id]['min']
+                if 'max' in manual_exclude[shape_id].keys():
+                    self._shape_sequence_filter[shape_id]['max'] = manual_exclude[shape_id]['max']
             
         fn = (lambda x: x.shape_id in (self._shape_sequence_filter.keys())
               and x.stop_sequence >= self._shape_sequence_filter[x.shape_id]['min']
@@ -253,7 +260,7 @@ class RtFilterMapper:
         with_entry_delay = with_entry_delay >> mutate(corridor_delay_seconds = _.delay_seconds - _.entry_delay_seconds)
         self.corridor_stop_delays = with_entry_delay
     
-    def autocorridor(self, shape_id: str, stop_seq_range: list):
+    def autocorridor(self, shape_id: str, stop_seq_range: list, manual_exclude = {}):
         '''
         Defines a corridor for delay analysis using existing GTFS Shapes data,
         without the need for externally defining the corridor bounding box.
@@ -263,10 +270,15 @@ class RtFilterMapper:
         
         shape_id: string, GTFS shape_id
         stop_seq_range: list, containing 2 ints/floats, any order
+        exclude_stops: stop_id to exclude manually (optional)
         
         example:
         shape_id = '27_3_87'
         stop_range = [16, 31]
+        
+        NOTE: last generated speedmap must include shape_id of interest for this to work
+        
+        manual_exclude: dict in {'shape': {'min': int, 'max': int}, ...} format (values are stop sequence)
         '''
         corridor = (self.stop_segment_speed_view
          >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
@@ -276,7 +288,7 @@ class RtFilterMapper:
         )
         corridor.geometry = corridor.buffer(100)
         corridor = corridor.dissolve()
-        self.add_corridor(corridor)
+        self.add_corridor(corridor, manual_exclude)
         return
     
     def segment_speed_map(self, segments = 'stops', how = 'low_speeds',
@@ -631,7 +643,7 @@ class RtFilterMapper:
         mappable_stops = (filtered_stops.dropna(subset=['stop_id'])
                   >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
                   >> filter(_.corridor)
-                  >> select(_.stop_id, _.geometry, _.stop_sequence)
+                  >> select(_.stop_id, _.geometry, _.stop_sequence, _.shape_id)
                  )
         m = pd.concat([mappable_stops, self.corridor]).explore(tiles = "CartoDB positron")
         return m
