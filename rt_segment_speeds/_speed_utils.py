@@ -55,22 +55,6 @@ def merge_all_speeds(date:str) -> pd.DataFrame:
     
     m1 = m1.drop_duplicates().reset_index(drop = True)
     
-    # Renumber stop sequences since some of them are out of order. 
-    # Ex: instead of stop 1,2,3 it could be stop 151,169, 300
-    # Sort df first.
-    sort_cols = ['shape_array_key', 'gtfs_dataset_key', 'trip_id', 'stop_sequence']
-    m1 = m1.sort_values(sort_cols).reset_index(drop = True)
-    
-    # Count stops by operator (gtfs key), route (shape array), and trip
-    group_cols = ['gtfs_dataset_key','shape_array_key', 'trip_id']
-    m1['sorted_stop_seq'] = m1.groupby(group_cols).cumcount().astype(int)+1
-    
-    # Check that stops were renumbered correctly. Should only be 0.
-    # Total original stops should equal newly renumbered ones. 
-    check1 = m1.groupby(['shape_array_key']).agg({'sorted_stop_seq':'count', 'stop_sequence':'count'}).reset_index(drop = True)
-    check1["stops_renumbered_correctly"] = check1.sorted_stop_seq-check1.stop_sequence
-    print(check1.stops_renumbered_correctly.value_counts())
-    
     return m1
 
 def find_shapes_with_many_stops(date:str) -> pd.DataFrame:
