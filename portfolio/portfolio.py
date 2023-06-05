@@ -214,6 +214,7 @@ class Site(BaseModel):
     notebook: Optional[Path] = None
     parts: List[Part]
     prepare_only: bool = False
+    enabled: bool = True
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -306,7 +307,9 @@ def index(
         with open(f"./portfolio/sites/{site}") as f:
             name = site.replace(".yml", "")
             site_output_dir = PORTFOLIO_DIR / Path(name)
-            sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
+            s = Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f))
+            if s.enabled:
+                sites.append(s)
 
     for template in ["index.html", "_redirects"]:
         fname = f"./portfolio/index/{template}"
