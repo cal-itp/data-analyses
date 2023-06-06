@@ -11,16 +11,6 @@ build_competitive_corridors:
 	git add portfolio/sites/ 
     #--config=./portfolio/test-analyses.yml
 
-
-build_100_recs:
-	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	#git rm portfolio/one_hundred_recs/ -rf
-	#python portfolio/portfolio.py clean one_hundred_recs
-	python portfolio/portfolio.py build one_hundred_recs --deploy 
-	git add portfolio/one_hundred_recs/*.ipynb portfolio/one_hundred_recs/*.yml portfolio/one_hundred_recs/*.md 
-	git add portfolio/sites/ 
-
-
 build_dla_reports:
 	#cd dla/ && pip install -r requirements.txt && cd ..
 	#git rm portfolio/dla/ -rf
@@ -41,15 +31,7 @@ build_hqta:
 	python portfolio/portfolio.py clean hqta
 	python portfolio/portfolio.py build hqta --deploy 
 	git add portfolio/hqta/*.ipynb portfolio/hqta/*.yml portfolio/hqta/*.md 
-	git add portfolio/sites/ 
-    
-build_segment_speeds:
-	#git rm portfolio/segment_speeds/ -rf
-	python portfolio/portfolio.py clean segment_speeds
-	python portfolio/portfolio.py build segment_speeds --deploy 
-	git add portfolio/segment_speeds/*.ipynb portfolio/segment_speeds/*.yml portfolio/segment_speeds/*.md 
-	git add portfolio/sites/    
-    
+	git add portfolio/sites/     
 
 add_precommit:
 	pip install pre-commit

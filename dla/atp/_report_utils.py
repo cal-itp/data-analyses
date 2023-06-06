@@ -9,10 +9,10 @@ import intake
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from calitp import to_snakecase
+from calitp_data_analysis.sql import to_snakecase
 from dla_utils import _dla_utils
 from shared_utils import geography_utils
-from shared_utils import altair_utils
+from shared_utils import calitp_color_palette as cp
 
 from IPython.display import HTML, Markdown
 from siuba import *
@@ -509,7 +509,7 @@ def add_dropdown_map(districts_df):
     
     #add base map
     base1 = (alt.Chart(districts_df).mark_geoshape().encode(
-    color=alt.Color("Total",scale=alt.Scale(range=altair_utils.CALITP_SEQUENTIAL_COLORS)),
+    color=alt.Color("Total",scale=alt.Scale(range=cp.CALITP_SEQUENTIAL_COLORS)),
     tooltip=['District Type', 'District', 'Total']))
     
     #add in selections
@@ -557,7 +557,7 @@ def map_couty_proj(df):
         .encode(
             x=('Total Funds'),
             y=('Implementing Agency Name:N'),
-            color=alt.Color('Project Name', scale=alt.Scale(range=altair_utils.CALITP_DIVERGING_COLORS), legend = None),
+            color=alt.Color('Project Name', scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS), legend = None),
             tooltip=['Project Name','Total Funds'])
         .properties(title="Total ATP Funds by Project")
         .add_selection(county_select)
@@ -632,7 +632,7 @@ def map_dist_proj(df_funded, df_all, gdf, district):
         .encode(
             x=('Total ATP Funds'),
             y=('Implementing Agency Name:N'),
-            color=alt.Color('Project Name', scale=alt.Scale(range=altair_utils.CALITP_DIVERGING_COLORS), legend = None),
+            color=alt.Color('Project Name', scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS), legend = None),
             tooltip=['Project Name','Total ATP Funds'])
         .properties(title="Total ATP Funds by Project"))
 
