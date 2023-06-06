@@ -467,7 +467,7 @@ class RtFilterMapper:
         with five quantiles.
         '''
         assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
-        gdf = self.detailed_map_view.copy().dropna(subset=['fast_slow_ratio']) >> arrange(-_.fast_slow_ratio)
+        gdf = self.detailed_map_view.copy().dropna(subset=['fast_slow_ratio']) >> arrange(_.trips_per_hour)
         display_cols = ['fast_slow_ratio', '_20p_mph', '_80p_mph', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
                        'stop_sequence']
@@ -476,13 +476,16 @@ class RtFilterMapper:
                           'Route', 'Frequency (trips per hour)', 'Shape ID',
                           'Stop Sequence']
         tooltip_dict = {'aliases': display_aliases}
-        bins = list(mapclassify.Quantiles(gdf.fast_slow_ratio).bins)
-        cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins,      
-                                vmin = gdf.fast_slow_ratio.min(),
-                                vmax = gdf.fast_slow_ratio.max())
-        cmap.caption = '80th percentile to 20th percentile speed ratio (variation in speeds)'
+        # bins = list(mapclassify.Quantiles(gdf.fast_slow_ratio).bins)
+        # cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins,      
+        #                         vmin = gdf.fast_slow_ratio.min(),
+        #                         vmax = gdf.fast_slow_ratio.max())
+        # cmap.caption = '80th percentile to 20th percentile speed ratio (variation in speeds)'
+        cmap = VARIANCE_FIXED_COLORSCALE
         self.variance_cmap = cmap
         if no_render:
+            gdf = gdf[display_cols + ['geometry']]
+            assert isinstance(gdf, gpd.GeoDataFrame)
             self._variance_map_view = gdf
             return
         if no_title:
@@ -517,7 +520,6 @@ class RtFilterMapper:
             geojson_str = gdf.to_json()
             geojson_bytes = geojson_str.encode('utf-8')
             print(f'writing to {path}')
-            self.debug_shn = geojson_str
             with fs.open(path, 'wb') as writer:  # write out to public-facing GCS?
                 with gzip.GzipFile(fileobj=writer, mode="w") as gz:
                     gz.write(geojson_bytes)
@@ -532,12 +534,17 @@ class RtFilterMapper:
             
             path = f'calitp-map-tiles/{self.calitp_itp_id}_{self.filter_period}_TEST.geojson.gz'
             gdf = self.detailed_map_view.copy()
+            gdf['organization_name'] = self.organization_name
             cmap = self.speed_map_params[1]
             gdf['color'] = gdf._20p_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Vehicle Speeds Between Stops{self.filter_formatted}",
-             "url": f"https://storage.googleapis.com/{path}", "analysis": None}]
+            self.spa_map_state["layers"] += [{
+                "name": f"{self.organization_name} Vehicle Speeds{self.filter_formatted}",
+                "url": f"https://storage.googleapis.com/{path}", "type": "speedmap",
+                'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': '_20p_mph'}
+                }]
             self.spa_map_state["lat_lon"] = self.current_centroid
             self.spa_map_state["zoom"] = 13
+            self.spa_map_state['legend_url'] = 'https://storage.googleapis.com/calitp-map-tiles/speeds_legend.svg'
             return _export(gdf, path)
         
         elif map_type == 'variance':
@@ -549,27 +556,24 @@ class RtFilterMapper:
             cmap = self.variance_cmap
             gdf = self._variance_map_view
             gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} 80th %ile to 20th %ile Speed Ratio Between Stops{self.filter_formatted}",
-             "url": f"https://storage.googleapis.com/{path}", "analysis": None}]
+            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Variation in Speeds{self.filter_formatted}",
+             "url": f"https://storage.googleapis.com/{path}",
+             'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
+                                             }]
             self.spa_map_state["lat_lon"] = self.current_centroid
             self.spa_map_state["zoom"] = 13
+            self.spa_map_state['legend_url'] = 'https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg'
             return _export(gdf, path)
         
         elif map_type == 'shn':
             dist = self.caltrans_district[:2]
             path = f'calitp-map-tiles/{dist}_SHN_TEST.geojson.gz'
             shn_gdf = self.shn.copy().to_crs(WGS84)
-            color_list = [(169,169,169) for _ in range(len(shn_gdf))]
-            # color_list = [(127,255,212) for _ in range(len(shn_gdf))] # aquamarine for kicks
-            # print('ok weird')
-            shn_gdf['color'] = color_list  # gray for SHN
-            # shn only for initial layer
             self.spa_map_state["layers"] = [{"name": f"D{dist} State Highway Network",
-             "url": f"https://storage.googleapis.com/{path}", "analysis": None}]
-            # display(shn_gdf)
+             "url": f"https://storage.googleapis.com/{path}", "type": "state_highway_network"}]
             return _export(shn_gdf, path)
     
-    def display_spa_map(self, width=1200, height=600):
+    def display_spa_map(self, width=1000, height=600):
         
         assert hasattr(self, 'spa_map_state'), 'must export map and set state first using self.test_gz_export'
         base64state = base64.urlsafe_b64encode(json.dumps(self.spa_map_state).encode()).decode()
