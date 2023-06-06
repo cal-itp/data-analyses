@@ -538,7 +538,7 @@ class RtFilterMapper:
             cmap = self.speed_map_params[1]
             gdf['color'] = gdf._20p_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
             self.spa_map_state["layers"] += [{
-                "name": f"{self.organization_name} Vehicle Speeds{self.filter_formatted}",
+                "name": f"{self.organization_name} Vehicle Speeds{self.display_date}",
                 "url": f"https://storage.googleapis.com/{path}", "type": "speedmap",
                 'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': '_20p_mph'}
                 }]
@@ -556,7 +556,7 @@ class RtFilterMapper:
             cmap = self.variance_cmap
             gdf = self._variance_map_view
             gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Variation in Speeds{self.filter_formatted}",
+            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Variation in Speeds{self.display_date}",
              "url": f"https://storage.googleapis.com/{path}",
              'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
                                              }]
