@@ -1,0 +1,11 @@
+metadata:
+  version: 1
+sources:
+  # projecct shapefiles 
+  shp_demoproj_bikeped:
+    driver: shapefile
+    description: Watsonville-SC Bike-Ped Overcrossing
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/project_prioritization/SantaCruz_Watsonville_Project_SHP_files/sc_bikeped_overcrossing.zip
+      use_fsspec: true
+  
