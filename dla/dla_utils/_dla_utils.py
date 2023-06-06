@@ -4,24 +4,19 @@ Analysis Functions
 
 import numpy as np
 import pandas as pd
-from calitp import to_snakecase
+from calitp_data_analysis.sql import to_snakecase
 from siuba import *
 import intake
 import geopandas as gpd
 from plotnine import *
 
 import altair as alt
-import altair_saver
 
 from IPython.display import Markdown, HTML, display_html, display
 from IPython.core.display import display
 
-from shared_utils import geography_utils
+from shared_utils import geography_utils, styleguide
 from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
-
-from calitp import to_snakecase
-import intake
 
 import ipywidgets as widgets
 from ipywidgets import *
@@ -310,7 +305,7 @@ def pretify_tables(df):
     r_cols = {'Count','Sum Allocated','Sum Allocated By Year'}
     
     df = df.rename(columns=labeling)
-    df_styler = (df.style.hide_index()
+    df_styler = (df.style.hide(axis="index")
               .set_properties(**{'text-align': 'center'})
               .set_table_styles([dict(selector='th', props=[('text-align', 'center')])])
              )
