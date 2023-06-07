@@ -185,7 +185,7 @@ def add_description(df, col):
                         np.where(df[col].str.contains("SIGN") & ~df[col].str.contains('DESIGN'), "Signage",
                         np.where(df[col].str.contains("BRIDGE REPLACEMENT") | df[col].str.contains("REPLACE EXISTING BRIDGE") | df[col].str.contains("REPLACE BRIDGE"), "Bridge",
                         np.where(df[col].str.contains("LIGHT"), "Lighting",         
-                        np.where(df[col].str.contains("SAFETY ") & df[col].str.contains("IMPROVE") , "Safety Improvemnts",
+                        np.where(df[col].str.contains("SAFETY ") & df[col].str.contains("IMPROVE") , "Safety Improvements",
                         np.where(df[col].str.contains("ROAD REHAB") | df[col].str.contains("ROADWAY REHAB"), "Road Rehabiliation",
                         np.where(df[col].str.contains("RAISED") & df[col].str.contains("MEDIAN"), "Raised Median",
                         np.where(df[col].str.contains("MEDIAN"), "Median",
@@ -384,7 +384,8 @@ def add_new_description_col(df):
     
     df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["new_project_title"] + "."
     
-    df.drop(columns =['obligations_amount_string'], axis=1, inplace=True)
+    df.drop(columns =['obligations_amount_string', 'county_name_title'], axis=1, inplace=True)
+    df['implementing_agency_locode'] = df['implementing_agency_locode'].str.replace('.0', '')
     
     return df
 
