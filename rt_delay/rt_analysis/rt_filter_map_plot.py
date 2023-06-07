@@ -505,7 +505,7 @@ class RtFilterMapper:
         g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
         return g
     
-    def test_gz_export(self, map_type = '_20p_speeds'):
+    def map_gz_export(self, map_type = '_20p_speeds'):
         '''
         Test exporting speed data to gcs bucket for iframe render
         
@@ -514,6 +514,8 @@ class RtFilterMapper:
         self.spa_map_state = {"name": "null", "layers": [], "lat_lon": (),
                              "zoom": 13}
         fs = get_fs()
+        prefix = f'calitp-map-tiles/speeds_{self.analysis_date.isoformat()}'
+        
         
         def _export(gdf, path):
         ## TODO generalize and --> rt_utils
@@ -530,9 +532,9 @@ class RtFilterMapper:
         if map_type == '_20p_speeds':
             assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
             if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
-                self.test_gz_export(map_type = 'shn')
+                self.map_gz_export(map_type = 'shn')
             
-            path = f'calitp-map-tiles/{self.calitp_itp_id}_{self.filter_period}_TEST.geojson.gz'
+            path = f'{prefix}/{self.calitp_itp_id}_{self.filter_period}_speeds.geojson.gz'
             gdf = self.detailed_map_view.copy()
             gdf['organization_name'] = self.organization_name
             cmap = self.speed_map_params[1]
@@ -550,9 +552,9 @@ class RtFilterMapper:
         elif map_type == 'variance':
             assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
             if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
-                self.test_gz_export(map_type = 'shn')
+                self.map_gz_export(map_type = 'shn')
             
-            path = f'calitp-map-tiles/{self.calitp_itp_id}_{self.filter_period}_variance_TEST.geojson.gz'
+            path = f'{prefix}/{self.calitp_itp_id}_{self.filter_period}_variance.geojson.gz'
             cmap = self.variance_cmap
             gdf = self._variance_map_view
             gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
@@ -567,7 +569,7 @@ class RtFilterMapper:
         
         elif map_type == 'shn':
             dist = self.caltrans_district[:2]
-            path = f'calitp-map-tiles/{dist}_SHN_TEST.geojson.gz'
+            path = f'{prefix}/{dist}_SHN.geojson.gz'
             shn_gdf = self.shn.copy().to_crs(WGS84)
             self.spa_map_state["layers"] = [{"name": f"D{dist} State Highway Network",
              "url": f"https://storage.googleapis.com/{path}", "type": "state_highway_network"}]
@@ -575,7 +577,7 @@ class RtFilterMapper:
     
     def display_spa_map(self, width=1100, height=650):
         
-        assert hasattr(self, 'spa_map_state'), 'must export map and set state first using self.test_gz_export'
+        assert hasattr(self, 'spa_map_state'), 'must export map and set state first using self.map_gz_export'
         base64state = base64.urlsafe_b64encode(json.dumps(self.spa_map_state).encode()).decode()
         i = IFrame(f'https://leaflet-speedmaps--cal-itp-data-analyses.netlify.app/?state={base64state}', width=width, height=height)
         display(i)
