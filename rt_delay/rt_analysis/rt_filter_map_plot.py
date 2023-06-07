@@ -538,7 +538,7 @@ class RtFilterMapper:
             cmap = self.speed_map_params[1]
             gdf['color'] = gdf._20p_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
             self.spa_map_state["layers"] += [{
-                "name": f"{self.organization_name} Vehicle Speeds{self.display_date}",
+                "name": f"{self.organization_name} Vehicle Speeds {self.display_date}",
                 "url": f"https://storage.googleapis.com/{path}", "type": "speedmap",
                 'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': '_20p_mph'}
                 }]
@@ -556,7 +556,7 @@ class RtFilterMapper:
             cmap = self.variance_cmap
             gdf = self._variance_map_view
             gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Variation in Speeds{self.display_date}",
+            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Variation in Speeds {self.display_date}",
              "url": f"https://storage.googleapis.com/{path}",
              'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
                                              }]
@@ -573,7 +573,7 @@ class RtFilterMapper:
              "url": f"https://storage.googleapis.com/{path}", "type": "state_highway_network"}]
             return _export(shn_gdf, path)
     
-    def display_spa_map(self, width=1000, height=600):
+    def display_spa_map(self, width=1100, height=650):
         
         assert hasattr(self, 'spa_map_state'), 'must export map and set state first using self.test_gz_export'
         base64state = base64.urlsafe_b64encode(json.dumps(self.spa_map_state).encode()).decode()

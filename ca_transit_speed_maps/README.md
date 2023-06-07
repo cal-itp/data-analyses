@@ -14,6 +14,16 @@ These maps, tables, and charts provide an overview of typical weekday transit ve
 
 Maps are organized by Caltrans district, with a separate page for each transit operator within the district. It's easiest to navigate the site using the menu on the left side of the page. Click the dropdown icon for each district to show links to each operator within the district. Alternatively, you can navigate through all pages in order using the "Next" and "Previous" links at the bottom of each page.
 
+## New: Speed Variation Maps and Download Links!
+
+![speedmap header with download link in top right circled in red](img/download.png)
+
+We've updated our map rendering technology for better performance and flexibility.
+
+Speed variation maps are now displayed for each time of day, just like speed maps. Segments with high variation in speeds make it difficult for transit operators to set accurate schedules, and can cause inconsistent service for riders. Identifying where speeds are inconsistent provides another useful data point to target transit priority measures in addition to actual speeds.
+
+Each map now comes with a link to download its geospatial data in a gzip-compressed GeoJSON format (.geojson.gz). Most file compression software, including 7zip on Windows, will decompress these files. Once decompressed, most GIS software including ESRI ArcGIS Pro and QGIS can import the geojson.
+
 ## Data Sources
 
 * General Transit Feed Specification (GTFS)
@@ -26,6 +36,6 @@ Segment speed is estimated using the time and distance between vehicle positions
 
 ## Ongoing Work
 
-The Cal-ITP team is working to share our derived datasets, including this vehicle speed and delay data, using the California Open Data Portal. In the interim, data is available upon request.
+The Cal-ITP team is working to share broader speed and delay data using the California Open Data Portal.
 
 ### Questions or Feedback? Please email hello@calitp.org
