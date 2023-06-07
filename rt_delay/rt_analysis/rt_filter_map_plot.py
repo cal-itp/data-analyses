@@ -36,8 +36,8 @@ class RtFilterMapper:
         self.rt_trips = rt_trips
         self.calitp_itp_id = self.rt_trips.calitp_itp_id.iloc[0]
         self.stop_delay_view = stop_delay_view
-        # below line fixes interpolated segment mapping for 10/12 data, fixed upstream for future dates
-        self.stop_delay_view = self.stop_delay_view >> group_by(_.shape_id) >> mutate(direction_id = _.direction_id.ffill()) >> ungroup()
+        # # below line fixes interpolated segment mapping for 10/12 data, fixed upstream for future dates
+        # self.stop_delay_view = self.stop_delay_view >> group_by(_.shape_id) >> mutate(direction_id = _.direction_id.ffill()) >> ungroup()
         self.shapes = shapes
         self.using_v2 = 'organization_name' in rt_trips.columns
         if self.using_v2:
@@ -284,8 +284,8 @@ class RtFilterMapper:
         self.add_corridor(corridor)
         return
     
-    def segment_speed_map(self, segments = 'stops', how = 'low_speeds',
-                          colorscale = ZERO_THIRTY_COLORSCALE, size = [900, 550],
+    def segment_speed_map(self, segments: str='stops', how: str='low_speeds',
+                          colorscale = ZERO_THIRTY_COLORSCALE, size: list=[900, 550],
                          no_title = False, corridor = False, shn = False,
                          no_render = False):
         ''' Generate a map of segment speeds aggregated across all trips for each shape, either as averages
@@ -295,6 +295,9 @@ class RtFilterMapper:
         how: 'average', 'low_speeds' (20%ile)
         colorscale: branca.colormap
         size: [x, y]
+        no_title: don't show title in folium map
+        corridor: if corridor set, only map segments relevant to that corridor
+        shn: show state highway network
         no_render: don't remder map using folium, only store as self.detailed_map_view
         '''
         assert segments in ['stops', 'detailed']
@@ -383,7 +386,12 @@ class RtFilterMapper:
         return self._show_speed_map()
     
     def _show_speed_map(self):
+        '''
+        Final formatting for speed map, saves to self.detailed_map_view and
+        renders via folium unless self.segment_speed_map called with no_render = True
         
+        Don't call directly; use self.segment_speed_map
+        '''
         how, colorscale, size, no_title, corridor, shn, no_render = self.speed_map_params
         gdf = self.stop_segment_speed_view.copy()
         # essential here for reasonable map size!
@@ -463,8 +471,8 @@ class RtFilterMapper:
     
     def map_variance(self, no_title = False, no_render = False):
         '''
-        A quick map of relative speed variance across stop segments. Currently symbolized
-        with five quantiles.
+        A quick map of relative speed variance across stop segments, measured as
+        the ratio between the 80th percentile and 20th percentile speeds
         '''
         assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
         gdf = self.detailed_map_view.copy().dropna(subset=['fast_slow_ratio']) >> arrange(_.trips_per_hour)
@@ -476,11 +484,6 @@ class RtFilterMapper:
                           'Route', 'Frequency (trips per hour)', 'Shape ID',
                           'Stop Sequence']
         tooltip_dict = {'aliases': display_aliases}
-        # bins = list(mapclassify.Quantiles(gdf.fast_slow_ratio).bins)
-        # cmap = branca.colormap.StepColormap(colors=VARIANCE_COLORS, index=bins,      
-        #                         vmin = gdf.fast_slow_ratio.min(),
-        #                         vmax = gdf.fast_slow_ratio.max())
-        # cmap.caption = '80th percentile to 20th percentile speed ratio (variation in speeds)'
         cmap = VARIANCE_FIXED_COLORSCALE
         self.variance_cmap = cmap
         if no_render:
@@ -505,17 +508,16 @@ class RtFilterMapper:
         g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
         return g
     
-    def map_gz_export(self, map_type = '_20p_speeds'):
+    def map_gz_export(self, map_type: str='_20p_speeds'):
         '''
         Test exporting speed data to gcs bucket for iframe render
-        
-        Always put SHN in state['layers'][0] 
+        Will always put state highway network in state['layers'][0] 
+        map_type: '_20p_speeds', 'variance', or 'shn'
         '''
         self.spa_map_state = {"name": "null", "layers": [], "lat_lon": (),
                              "zoom": 13}
         fs = get_fs()
         prefix = f'calitp-map-tiles/speeds_{self.analysis_date.isoformat()}'
-        
         
         def _export(gdf, path):
         ## TODO generalize and --> rt_utils
@@ -524,9 +526,7 @@ class RtFilterMapper:
             print(f'writing to {path}')
             with fs.open(path, 'wb') as writer:  # write out to public-facing GCS?
                 with gzip.GzipFile(fileobj=writer, mode="w") as gz:
-                    gz.write(geojson_bytes)
-            
-            # base64state = base64.urlsafe_b64encode(json.dumps(state).encode()).decode()
+                    gz.write(geojson_bytes)            
             return
         
         if map_type == '_20p_speeds':
@@ -575,8 +575,13 @@ class RtFilterMapper:
              "url": f"https://storage.googleapis.com/{path}", "type": "state_highway_network"}]
             return _export(shn_gdf, path)
     
-    def display_spa_map(self, width=1100, height=650):
-        
+    def display_spa_map(self, width: int=1100, height: int=650):
+        '''
+        Display map from external simple web app in the notebook/JupyterBook context via an IFrame.
+        Will show most recent map set using self.map_gz_export
+        Width/height defaults are current best option for JupyterBook, don't change for portfolio use
+        width, height: int (pixels)
+        '''
         assert hasattr(self, 'spa_map_state'), 'must export map and set state first using self.map_gz_export'
         base64state = base64.urlsafe_b64encode(json.dumps(self.spa_map_state).encode()).decode()
         i = IFrame(f'https://leaflet-speedmaps--cal-itp-data-analyses.netlify.app/?state={base64state}', width=width, height=height)
