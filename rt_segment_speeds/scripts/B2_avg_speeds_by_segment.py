@@ -7,7 +7,7 @@ import pandas as pd
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
-from shared_utils import utils, portfolio_utils
+from shared_utils import utils
 
 
 def calculate_avg_speeds(
@@ -55,7 +55,6 @@ def calculate_avg_speeds(
     return stats
     
     
-
 def speeds_with_segment_geom(
     analysis_date: str, 
     max_speed_cutoff: int = 70,
@@ -117,39 +116,8 @@ def speeds_with_segment_geom(
         how = "inner"
     )
     
-    gdf_with_district = spatial_join_to_caltrans_districts(gdf)
-    
-    return gdf_with_district
+    return gdf
 
-
-def spatial_join_to_caltrans_districts(
-    gdf: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame: 
-    """
-    Spatial join any gdf to Caltrans districts (open data portal)
-    """
-    URL = ("https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHboundary/"
-           "District_Tiger_Lines/FeatureServer/0/query?"
-           "outFields=*&where=1%3D1&f=geojson"
-          )
-    
-    caltrans_districts = gpd.read_file(URL)[["DISTRICT", "geometry"]]
-    
-    caltrans_districts = caltrans_districts.assign(
-        district_name = caltrans_districts.DISTRICT.map(
-            portfolio_utils.district_name_dict)
-    ).rename(columns = {"DISTRICT": "district"})
-    
-    # Spatial join to Caltrans district
-    gdf2 = gpd.sjoin(
-        gdf, 
-        caltrans_districts.to_crs(gdf.crs),
-        how = "inner",
-        predicate = "intersects"
-    ).drop(columns = "index_right")
-    
-    return gdf2
-    
 
 if __name__ == "__main__":
     
