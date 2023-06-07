@@ -103,7 +103,7 @@ def add_agency_identifiers(df: pd.DataFrame, date: str) -> pd.DataFrame:
     return df2
 
 
-def add_organization_name(
+def get_organization_name(
     df: pd.DataFrame,
     date: str,
     merge_cols: list = [],
@@ -139,14 +139,23 @@ def add_organization_name(
         dim_provider_gtfs_data = (
             tbls.mart_transit_database.dim_provider_gtfs_data()
             >> filter(_._valid_from <= pd.to_datetime(date), _._valid_to >= pd.to_datetime(date))
-            >> filter(_._is_current == True)
-            >> select(_.organization_source_record_id, _.organization_name, _.regional_feed_type, *merge_cols)
             >> distinct()
             >> collect()
         )
 
-        df2 = pd.merge(df, dim_provider_gtfs_data, on=merge_cols, how="inner")
-        return df2
+        sorting = [True for c in merge_cols]
+        keep_cols = ["organization_source_record_id", "organization_name", "regional_feed_type"]
+
+        dim_provider_gtfs_data2 = (
+            dim_provider_gtfs_data.sort_values(
+                merge_cols + ["_valid_to", "_valid_from"], ascending=sorting + [False, False]
+            )
+            .drop_duplicates(merge_cols)
+            .reset_index(drop=True)[merge_cols + keep_cols]
+        )
+
+        # df2 = pd.merge(df, dim_provider_gtfs_data, on=merge_cols, how="inner")
+        return dim_provider_gtfs_data2
 
 
 def add_caltrans_district(df: pd.DataFrame, date: str):
