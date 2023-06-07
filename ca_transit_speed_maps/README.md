@@ -16,13 +16,13 @@ Maps are organized by Caltrans district, with a separate page for each transit o
 
 ## New: Speed Variation Maps and Download Links!
 
-![speedmap header with download link in top right circled in red](img/download.png)
+![speedmap header with download link in top right circled in red](https://github.com/cal-itp/data-analyses/blob/065adb2838482619c039791f6f3090b7efaa9e82/ca_transit_speed_maps/img/download.png?raw=true)
 
 We've updated our map rendering technology for better performance and flexibility.
 
 Speed variation maps are now displayed for each time of day, just like speed maps. Segments with high variation in speeds make it difficult for transit operators to set accurate schedules, and can cause inconsistent service for riders. Identifying where speeds are inconsistent provides another useful data point to target transit priority measures in addition to actual speeds.
 
-Each map now comes with a link to download its geospatial data in a gzip-compressed GeoJSON format (.geojson.gz). Most file compression software, including 7zip on Windows, will decompress these files. Once decompressed, most GIS software including ESRI ArcGIS Pro and QGIS can import the geojson.
+Each map now comes with a link to download its geospatial data in a gzip-compressed GeoJSON format (.geojson.gz). Most file compression software, including 7zip on Windows, will decompress these files. Once decompressed, most GIS software including ESRI ArcGIS Pro and QGIS can import the GeoJSON.
 
 ## Data Sources
 
