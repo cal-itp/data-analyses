@@ -145,7 +145,9 @@ def get_organization_name(
 
         sorting = [True for c in merge_cols]
         keep_cols = ["organization_source_record_id", "organization_name", "regional_feed_type"]
-
+        # Eventually, we need to move to 1 organization name, so there's
+        # no fanout when we merge it on
+        # Until then, handle it by dropping duplicates and pick 1 name
         dim_provider_gtfs_data2 = (
             dim_provider_gtfs_data.sort_values(
                 merge_cols + ["_valid_to", "_valid_from"], ascending=sorting + [False, False]
@@ -154,8 +156,9 @@ def get_organization_name(
             .reset_index(drop=True)[merge_cols + keep_cols]
         )
 
-        # df2 = pd.merge(df, dim_provider_gtfs_data, on=merge_cols, how="inner")
-        return dim_provider_gtfs_data2
+        df2 = pd.merge(df, dim_provider_gtfs_data2, on=merge_cols, how="inner")
+        # return dim_provider_gtfs_data2
+        return df2
 
 
 def add_caltrans_district(df: pd.DataFrame, date: str):
