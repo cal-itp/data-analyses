@@ -35,7 +35,20 @@ def title_column_names(df):
     return df
 
 
-
+def change_district_format(df, district_col):
+    """
+    Function to reformat the district columns
+    """
+    district_map = ({'1.0':'01', '2.0':'02', '3.0':'03',
+                 '4.0': '04', '5.0': '05', '6.0':'06', '7.0':'07',
+                 '8.0':'08', '9.0':'09', '10.0':'10',
+                 '11.0':'11', '12.0':'12'})
+        
+    # df[district_col] = df[district_col].astype(str)
+        
+    df[district_col] = df[district_col].map(district_map)
+                
+    return df
 
 #add project information for all projects
 def identify_agency(df, identifier_col):
@@ -124,6 +137,11 @@ def condense_df(df):
                  'rtpa_name':'first', #should be the same
                  'mpo_name':'first',  #should be the same
                 }).reset_index())
+    
+    df_agg['obligations_amount'] = df_agg['obligations_amount'].astype(np.int64)
+    
+    df_agg['district'] = '|' + df_agg['district'] + '|'
+    df_agg['congressional_district'] = '|' + df_agg['congressional_district'] + '|'
     
     return df_agg
 
@@ -382,7 +400,9 @@ def get_new_desc_title(df):
 def add_new_description_col(df):
     df["obligations_amount_string"] = df["obligations_amount"].astype(str)
     
-    df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["new_project_title"] + "."
+    # df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["new_project_title"] + "."
+    
+    df["new_description_col"] = df["new_project_title"] + ", part of the " + df["program_code_description"] + ". (Federal Project ID: " + df["project_number"] + ")."
     
     df.drop(columns =['obligations_amount_string', 'county_name_title'], axis=1, inplace=True)
     df['implementing_agency_locode'] = df['implementing_agency_locode'].str.replace('.0', '')
@@ -412,6 +432,8 @@ def get_clean_data(df, full_or_agg = ''):
     
         df = _data_utils.change_col_to_integer(df, "congressional_district")
         
+        df = change_district_format(df, "district")
+        
         aggdf = condense_df(df)
     
         ## get new title (str parser) 
@@ -429,6 +451,8 @@ def get_clean_data(df, full_or_agg = ''):
         # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
         
         df = _data_utils.change_col_to_integer(df, "congressional_district")
+        
+        df = change_district_format(df, "district")
         
         aggdf = condense_df(df)
         
