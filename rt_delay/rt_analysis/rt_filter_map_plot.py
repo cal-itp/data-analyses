@@ -474,7 +474,7 @@ class RtFilterMapper:
         A quick map of relative speed variance across stop segments, measured as
         the ratio between the 80th percentile and 20th percentile speeds
         '''
-        assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
+        assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first with self.segment_speed_map'
         gdf = self.detailed_map_view.copy().dropna(subset=['fast_slow_ratio']) >> arrange(_.trips_per_hour)
         display_cols = ['fast_slow_ratio', '_20p_mph', '_80p_mph', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
@@ -486,10 +486,10 @@ class RtFilterMapper:
         tooltip_dict = {'aliases': display_aliases}
         cmap = VARIANCE_FIXED_COLORSCALE
         self.variance_cmap = cmap
+        gdf = gdf[display_cols + ['geometry']]
+        assert isinstance(gdf, gpd.GeoDataFrame)
+        self._variance_map_view = gdf
         if no_render:
-            gdf = gdf[display_cols + ['geometry']]
-            assert isinstance(gdf, gpd.GeoDataFrame)
-            self._variance_map_view = gdf
             return
         if no_title:
             title = ''
@@ -530,7 +530,7 @@ class RtFilterMapper:
             return
         
         if map_type == '_20p_speeds':
-            assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
+            assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first with self.segment_speed_map'
             if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
                 self.map_gz_export(map_type = 'shn')
             
@@ -550,7 +550,7 @@ class RtFilterMapper:
             return _export(gdf, path)
         
         elif map_type == 'variance':
-            assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first'
+            assert hasattr(self, 'detailed_map_view'), 'must generate a variance map first with self.map_variance'
             if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
                 self.map_gz_export(map_type = 'shn')
             
