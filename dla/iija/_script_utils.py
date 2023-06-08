@@ -18,6 +18,8 @@ from calitp_data_analysis.sql import to_snakecase
 
 import _data_utils
 
+import intake
+
 # import nltk
 # from nltk.corpus import stopwords
 # from nltk.tokenize import word_tokenize, sent_tokenize
@@ -35,7 +37,43 @@ def title_column_names(df):
     return df
 
 
+def change_district_format(df, district_col):
+    """
+    Function to reformat the district columns
+    """
+    district_map = ({'1.0':'01', '2.0':'02', '3.0':'03',
+                 '4.0': '04', '5.0': '05', '6.0':'06', '7.0':'07',
+                 '8.0':'08', '9.0':'09', '10.0':'10',
+                 '11.0':'11', '12.0':'12'})
+        
+    df[district_col] = df[district_col].astype(str)
+        
+    df[district_col] = df[district_col].map(district_map)
+                
+    return df
 
+def add_county_abbrev(df, county_name_col):
+    '''
+    Function to add county abbreviation to a county name EX: 'Kings County' to 'KIN'
+    Note: if your county name column has 'County' already in the string, then hash out line 3 of the function
+    that adds it in for counties with no 'County' in the name
+    '''
+    ### read county data in from the shared_data catalog
+    catalog = intake.open_catalog("../../_shared_utils/shared_utils/shared_data_catalog.yml")
+    counties = to_snakecase((catalog.ca_counties.read())>>select(_.COUNTY_NAME,_.COUNTY_ABBREV,_.COUNTY_CODE))
+    
+    ### add county 
+    counties['county_name_full'] = counties['county_name'] + ' County'
+    
+    ### create dict to map
+    county_mapping = dict(counties[['county_name_full', 'county_abbrev']].values)
+    
+    ### map values to the df
+    df[f"{county_name_col}_abbrev"] = df[county_name_col].map(county_mapping)
+    
+    df[f"{county_name_col}_abbrev"] = df[f"{county_name_col}_abbrev"].fillna('NA')
+    
+    return df
 
 #add project information for all projects
 def identify_agency(df, identifier_col):
@@ -119,11 +157,18 @@ def condense_df(df):
                  'district':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'county_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'county_name':lambda x:'|'.join(x.unique()), # get unique values to concatenate
+                 'county_name_abbrev':lambda x:'|'.join(x.unique()), # get unique values to concatenate 
                  'county_name_title':lambda x:' & '.join(x.unique()), # get unique values to concatenate
                  'implementing_agency_locode':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'rtpa_name':'first', #should be the same
                  'mpo_name':'first',  #should be the same
                 }).reset_index())
+    
+    df_agg['obligations_amount'] = df_agg['obligations_amount'].astype(np.int64)
+    
+    df_agg['district'] = '|' + df_agg['district'] + '|'
+    df_agg['congressional_district'] = '|' + df_agg['congressional_district'] + '|'
+    df_agg['county_name_abbrev'] = '|' + df_agg['county_name_abbrev'] + '|'
     
     return df_agg
 
@@ -185,7 +230,7 @@ def add_description(df, col):
                         np.where(df[col].str.contains("SIGN") & ~df[col].str.contains('DESIGN'), "Signage",
                         np.where(df[col].str.contains("BRIDGE REPLACEMENT") | df[col].str.contains("REPLACE EXISTING BRIDGE") | df[col].str.contains("REPLACE BRIDGE"), "Bridge",
                         np.where(df[col].str.contains("LIGHT"), "Lighting",         
-                        np.where(df[col].str.contains("SAFETY ") & df[col].str.contains("IMPROVE") , "Safety Improvemnts",
+                        np.where(df[col].str.contains("SAFETY ") & df[col].str.contains("IMPROVE") , "Safety Improvements",
                         np.where(df[col].str.contains("ROAD REHAB") | df[col].str.contains("ROADWAY REHAB"), "Road Rehabiliation",
                         np.where(df[col].str.contains("RAISED") & df[col].str.contains("MEDIAN"), "Raised Median",
                         np.where(df[col].str.contains("MEDIAN"), "Median",
@@ -382,9 +427,12 @@ def get_new_desc_title(df):
 def add_new_description_col(df):
     df["obligations_amount_string"] = df["obligations_amount"].astype(str)
     
-    df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["new_project_title"] + "."
+    # df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["new_project_title"] + "."
     
-    df.drop(columns =['obligations_amount_string'], axis=1, inplace=True)
+    df["new_description_col"] = df["new_project_title"] + ", part of the " + df["program_code_description"] + ". (Federal Project ID: " + df["project_number"] + ")."
+    
+    df.drop(columns =['obligations_amount_string', 'county_name_title'], axis=1, inplace=True)
+    df['implementing_agency_locode'] = df['implementing_agency_locode'].str.replace('.0', '')
     
     return df
 
@@ -411,6 +459,9 @@ def get_clean_data(df, full_or_agg = ''):
     
         df = _data_utils.change_col_to_integer(df, "congressional_district")
         
+        df = change_district_format(df, "district")
+        df= add_county_abbrev(df, 'county_name')
+        
         aggdf = condense_df(df)
     
         ## get new title (str parser) 
@@ -428,6 +479,10 @@ def get_clean_data(df, full_or_agg = ''):
         # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
         
         df = _data_utils.change_col_to_integer(df, "congressional_district")
+        
+        df = change_district_format(df, "district")
+        
+        df= add_county_abbrev(df, 'county_name')
         
         aggdf = condense_df(df)
         
