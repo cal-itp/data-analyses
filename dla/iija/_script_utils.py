@@ -18,6 +18,8 @@ from calitp_data_analysis.sql import to_snakecase
 
 import _data_utils
 
+import intake
+
 # import nltk
 # from nltk.corpus import stopwords
 # from nltk.tokenize import word_tokenize, sent_tokenize
@@ -44,10 +46,33 @@ def change_district_format(df, district_col):
                  '8.0':'08', '9.0':'09', '10.0':'10',
                  '11.0':'11', '12.0':'12'})
         
-    # df[district_col] = df[district_col].astype(str)
+    df[district_col] = df[district_col].astype(str)
         
     df[district_col] = df[district_col].map(district_map)
                 
+    return df
+
+def add_county_abbrev(df, county_name_col):
+    '''
+    Function to add county abbreviation to a county name EX: 'Kings County' to 'KIN'
+    Note: if your county name column has 'County' already in the string, then hash out line 3 of the function
+    that adds it in for counties with no 'County' in the name
+    '''
+    ### read county data in from the shared_data catalog
+    catalog = intake.open_catalog("../../_shared_utils/shared_utils/shared_data_catalog.yml")
+    counties = to_snakecase((catalog.ca_counties.read())>>select(_.COUNTY_NAME,_.COUNTY_ABBREV,_.COUNTY_CODE))
+    
+    ### add county 
+    counties['county_name_full'] = counties['county_name'] + ' County'
+    
+    ### create dict to map
+    county_mapping = dict(counties[['county_name_full', 'county_abbrev']].values)
+    
+    ### map values to the df
+    df[f"{county_name_col}_abbrev"] = df[county_name_col].map(county_mapping)
+    
+    df[f"{county_name_col}_abbrev"] = df[f"{county_name_col}_abbrev"].fillna('NA')
+    
     return df
 
 #add project information for all projects
@@ -132,6 +157,7 @@ def condense_df(df):
                  'district':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'county_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'county_name':lambda x:'|'.join(x.unique()), # get unique values to concatenate
+                 'county_name_abbrev':lambda x:'|'.join(x.unique()), # get unique values to concatenate 
                  'county_name_title':lambda x:' & '.join(x.unique()), # get unique values to concatenate
                  'implementing_agency_locode':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'rtpa_name':'first', #should be the same
@@ -142,6 +168,7 @@ def condense_df(df):
     
     df_agg['district'] = '|' + df_agg['district'] + '|'
     df_agg['congressional_district'] = '|' + df_agg['congressional_district'] + '|'
+    df_agg['county_name_abbrev'] = '|' + df_agg['county_name_abbrev'] + '|'
     
     return df_agg
 
@@ -433,6 +460,7 @@ def get_clean_data(df, full_or_agg = ''):
         df = _data_utils.change_col_to_integer(df, "congressional_district")
         
         df = change_district_format(df, "district")
+        df= add_county_abbrev(df, 'county_name')
         
         aggdf = condense_df(df)
     
@@ -453,6 +481,8 @@ def get_clean_data(df, full_or_agg = ''):
         df = _data_utils.change_col_to_integer(df, "congressional_district")
         
         df = change_district_format(df, "district")
+        
+        df= add_county_abbrev(df, 'county_name')
         
         aggdf = condense_df(df)
         
