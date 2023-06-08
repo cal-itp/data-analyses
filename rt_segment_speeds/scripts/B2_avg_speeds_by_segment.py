@@ -1,6 +1,7 @@
 """
 Quick aggregation for avg speeds by segment
 """
+import datetime
 import geopandas as gpd
 import pandas as pd
 
@@ -15,13 +16,13 @@ def calculate_avg_speeds(
     group_cols: list
 ) -> pd.DataFrame:
     """
-    Calculate the mean, 20th, and 80th percentile speeds 
+    Calculate the median, 20th, and 80th percentile speeds 
     by groups.
     """
     # Take the average after dropping unusually high speeds
     avg = (df.groupby(group_cols)
           .agg({
-            "speed_mph": "mean",
+            "speed_mph": "median",
             "trip_id": "nunique"})
           .reset_index()
     )
@@ -37,7 +38,7 @@ def calculate_avg_speeds(
           )
     
     stats = pd.merge(
-        avg.rename(columns = {"speed_mph": "avg_speed_mph", 
+        avg.rename(columns = {"speed_mph": "median_speed_mph", 
                               "trip_id": "n_trips"}),
         p20.rename(columns = {"speed_mph": "p20_speed_mph"}),
         on = group_cols,
@@ -106,7 +107,9 @@ def speeds_with_segment_geom(
             "gtfs_dataset_key", 
             "stop_id",
             "loop_or_inlining",
-            "geometry", "geometry_arrowized"]
+            "geometry", "geometry_arrowized", 
+            "district", "district_name"
+        ]
     )#.set_geometry("geometry_arrowized").drop(columns = "geometry")
     
     gdf = pd.merge(
@@ -121,7 +124,9 @@ def speeds_with_segment_geom(
 
 if __name__ == "__main__":
     
+    start = datetime.datetime.now()
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    EXPORT_FILE = f'{STOP_SEG_DICT["stage5"]}_{analysis_date}'
     
     MAX_SPEED = 70
     
@@ -136,5 +141,7 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(
         stop_segment_speeds,
         SEGMENT_GCS,
-        f"{STOP_SEG_DICT['stage5']}_{analysis_date}"
+        EXPORT_FILE
     )
+    
+    print(f"Exported: {datetime.datetime.now() - start}")
