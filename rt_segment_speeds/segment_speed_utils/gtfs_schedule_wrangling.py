@@ -105,29 +105,3 @@ def attach_stop_geometry(
     )
     
     return df2
-    
-    
-    
-def merge_speeds_to_segment_geom(
-    speeds_df: dd.DataFrame,
-    segments_df: gpd.GeoDataFrame,
-) -> dg.GeoDataFrame:
-    """
-    Merge in stop segment geometry
-    """
-    stop_segments = gpd.read_parquet(
-        f"{SEGMENT_GCS}stop_segments_{analysis_date}.parquet",
-        columns = ["gtfs_dataset_key", 
-                   "shape_array_key", "stop_sequence", 
-                   "stop_name",
-                   "geometry"]
-    )
-
-    stop_segments_with_speed = dd.merge(
-        stop_segments,
-        speeds_df,
-        on = ["gtfs_dataset_key", "shape_array_key", "stop_sequence"],
-        how = "inner",
-    )
-    
-    return stop_segments_with_speed
