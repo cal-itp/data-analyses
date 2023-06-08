@@ -59,6 +59,9 @@ def add_new_codes(df):
     df['program_code_description'] = df.program_code.map(code_map)
     df['summary_recipient_defined_text_field_1_value'] = df['summary_recipient_defined_text_field_1_value'].astype(str)
     
+    df.loc[df.program_code =='ER01', 'program_code_description'] = 'Emergency Relieve Funding'
+    df.loc[df.program_code =='ER03', 'program_code_description'] = 'Emergency Relieve Funding'
+    
     return df
 
 # Function that changes "Congressional District 2" to "2"
