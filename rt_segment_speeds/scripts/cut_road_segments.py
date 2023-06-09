@@ -452,21 +452,7 @@ def cut_local_roads(gdf, date:str) -> gpd.GeoDataFrame:
     ddf_list = chunk_dask_df(gdf)
     
     cut_df = cut_geometry_compute(ddf_list)
-    
-    """
-    # Cut geometry
-    cut_results = []
-    for ddf in ddf_list:
-        cut_geometry = delayed(geography_utils.cut_segments)(ddf, ["linearid", "fullname"], 1_000)
-        cut_results.append(cut_geometry)
-    print("Cut geometry")
-    
-    print(f"Begin computing")
-    # Compute 
-    cut_results = [compute(i)[0] for i in cut_results]
-    cut_df = pd.concat(cut_results, axis=0).reset_index(drop=True)
-    
-    """
+
     file_date = date.replace('-','_')
     cut_df.to_parquet(f"{SHARED_GCS}segmented_local_rds_{file_date}.parquet")
     
@@ -513,6 +499,12 @@ def monthly_linearids(date:str, last_month_segmented_local_roads: str) -> gpd.Ge
     # Cut the linearids that are only found in this month
     cut_linearid_2 = this_month_gdf.loc[this_month_gdf.linearid.isin(linearids_to_cut)].reset_index(drop = True)
     cut_linearid_2 = cut_local_roads(cut_linearid_2, date)
+    
+    # Compare lengths of last versus this month's local roads
+    this_month_local_roads = pd.concat([cut_linearid_1, cut_linearid_2], axis = 0)
+    this_month_len = this_month_local_roads.geometry.length.sum()
+    last_month_len = last_month_gdf.geometry.length.sum()
+    print(f"This month's local roads length: {this_month_len} meters. Last month: {last_month_len} meters. Diff: {last_month_len-this_month_len} meters")
     
     # Read in primary & secondary roads that have already been cut
     primary_secondary = gpd.read_parquet(f"{SHARED_GCS}segmented_primary_secondary_roads.parquet")
@@ -585,8 +577,18 @@ def cut_all_or_month(date:str,
                      last_month_segmented_local_roads: str, 
                      run_monthly:bool = True):
     """
-    Cut either all the roads again (primary, secondary, local)
-    OR cut only new roads that are found for particular month.
+    Cut only new roads and delete
+    out old roads that are found for a particular month 
+    OR cut either all the roads again (primary, secondary, local).
+    
+    Args:
+        date (str): analysis date
+        
+        last_month_segmented_local_roads (str): file path in GCS to the parquet
+        containing last month's segmented local roads
+        
+        run_monthly (bool): determine whether to cut only most
+        recent month or everything.
     """
     if run_monthly:
         gdf1 = monthly_linearids(date, last_month_segmented_local_roads)
