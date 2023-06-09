@@ -43,6 +43,11 @@ MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
 ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 VARIANCE_COLORS = branca.colormap.step.Blues_06.colors[1:]  # actual breaks will vary
+VARIANCE_RANGE = np.arange(1, 2.8, 0.3)
+VARIANCE_FIXED_COLORSCALE = branca.colormap.StepColormap(
+    colors=VARIANCE_COLORS, index=VARIANCE_RANGE, vmin=min(VARIANCE_RANGE), vmax=max(VARIANCE_RANGE)
+)
+VARIANCE_FIXED_COLORSCALE.caption = "80th percentile to 20th percentile speed ratio (variation in speeds)"
 
 # Datetime formats
 DATE_WEEKDAY_FMT = "%b %d (%a)"  # Jun 01 (Wed) for 6/1/22
