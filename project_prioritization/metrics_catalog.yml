@@ -1,11 +1,28 @@
 metadata:
   version: 1
 sources:
-  # projecct shapefiles 
+  # project shapefiles 
   shp_demoproj_bikeped:
     driver: shapefile
     description: Watsonville-SC Bike-Ped Overcrossing
     args:
       urlpath: gs://calitp-analytics-data/data-analyses/project_prioritization/SantaCruz_Watsonville_Project_SHP_files/sc_bikeped_overcrossing.zip
       use_fsspec: true
-  
+  shp_demoproj_auxlane:
+    driver: shapefile
+    description: Watsonville-SC Auxiliary Lane
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/project_prioritization/SantaCruz_Watsonville_Project_SHP_files/sc_auxiliary_lane.zip
+      use_fsspec: true
+  shp_demoproj_busshoulder:
+    driver: shapefile
+    description: Watsonville-SC Bus on SHoulder
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/project_prioritization/SantaCruz_Watsonville_Project_SHP_files/sc_bus_on_shoulder.zip
+      use_fsspec: true
+  shp_demoproj_multimodal:
+    driver: shapefile
+    description: Watsonville-SC Multimodal Street
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/project_prioritization/SantaCruz_Watsonville_Project_SHP_files/sc_multimodal_street.zip
+      use_fsspec: true
