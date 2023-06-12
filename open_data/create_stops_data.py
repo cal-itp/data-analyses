@@ -75,9 +75,20 @@ def create_stops_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     time0 = datetime.now()
 
     # Read in parquets
-    stops = prep_traffic_ops.import_stops(analysis_date)
-    trips = prep_traffic_ops.import_trips(analysis_date)
-    stop_times = prep_traffic_ops.import_stop_times(analysis_date)
+    stops = helpers.import_scheduled_stops(
+        analysis_date,
+        columns = prep_traffic_ops.keep_stop_cols
+    ).to_crs(geography_utils.WGS84)
+    
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = prep_traffic_ops.keep_trip_cols
+    )
+    
+    stop_times = helpers.import_scheduled_stop_times(
+        analysis_date,
+        columns = prep_traffic_ops.keep_stop_time_cols
+    )
         
     stops_assembled = attach_route_info_to_stops(stops, trips, stop_times)
     

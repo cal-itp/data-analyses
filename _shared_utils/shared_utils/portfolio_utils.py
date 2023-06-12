@@ -83,18 +83,16 @@ def add_agency_identifiers(df: pd.DataFrame, date: str) -> pd.DataFrame:
         dim_gtfs_datasets[
             (dim_gtfs_datasets.data_quality_pipeline == True)
             & (dim_gtfs_datasets._is_current == True)
-            & (dim_gtfs_datasets._valid_from <= pd.to_datetime(analysis_date))
-            & (dim_gtfs_datasets._valid_to >= pd.to_datetime(analysis_date))
+            & (dim_gtfs_datasets._valid_from <= pd.to_datetime(date))
+            & (dim_gtfs_datasets._valid_to >= pd.to_datetime(date))
         ]
         .sort_values(["name", "gtfs_dataset_key"])
         .drop_duplicates("name")
     )
 
-    current_feeds2 = current_feeds.assign(feed_url=current_feeds.apply(lambda x: decode_base64_url(x), axis=1))
-
     df2 = pd.merge(
         df,
-        current_feeds2[["gtfs_dataset_key", "name", "base64_url", "feed_url", "uri"]],
+        current_feeds[["gtfs_dataset_key", "name", "base64_url", "uri"]],
         on="name",
         how="inner",
         validate="m:1",

@@ -12,72 +12,47 @@ from shared_utils import (utils, rt_dates, rt_utils,
 from update_vars import (TRAFFIC_OPS_GCS, 
                          COMPILED_CACHED_VIEWS, analysis_date)
 
+keep_trip_cols = [
+    "feed_key", "name", 
+    "trip_id", 
+    "route_id", "route_type", 
+    "shape_id",
+    "route_long_name", "route_short_name", "route_desc"
+]
 
-def import_trips(analysis_date: str) -> pd.DataFrame:
-    keep_cols = ["feed_key", "name", 
-                 "trip_id", 
-                 "route_id", "route_type", "shape_id", 
-                 "route_long_name", "route_short_name", "route_desc"
-                ]
-    
-    trips = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
-        columns = keep_cols
-    )
-    
-    return trips
-    
-    
-def import_shapes(analysis_date: str) -> gpd.GeoDataFrame:
-    keep_cols = ["feed_key", "shape_id", "n_trips", "geometry"]
-    
-    shapes = gpd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet", 
-        columns = keep_cols
-    ).to_crs(geography_utils.WGS84)
-    
-    return shapes
-    
+keep_shape_cols = [
+    "feed_key", "shape_id",
+    "n_trips", "geometry"
+]
+  
+keep_stop_cols = [
+    "feed_key",
+    "stop_id", "stop_name", 
+    "geometry"
+] 
 
-def import_stops(analysis_date: str) -> gpd.GeoDataFrame:
-    # Instead of keeping route_type_0, route_type_1, etc
-    # keep stops table long, instead of wide
-    # attach route_id, route_type as before
-    keep_cols = [
-        "feed_key",
-        "stop_id", "stop_name", 
-        "geometry"
-    ] 
+keep_stop_time_cols = [
+    "feed_key", "trip_id", "stop_id"
+]    
     
-    stops = gpd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet",
-        columns = keep_cols
-    ).to_crs(geography_utils.WGS84)
-    
-    return stops
-    
-    
-def import_stop_times(analysis_date: str) -> pd.DataFrame:
-    keep_cols = ["feed_key", "trip_id", "stop_id"]
-    
-    stop_times = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet",
-        columns = keep_cols
-    ).drop_duplicates().reset_index(drop=True)
-    
-    return stop_times
 
     
 def standardize_operator_info_for_exports(df: pd.DataFrame) -> pd.DataFrame:
     
     # Add a decoded version for base64_url
-    df2 = portfolio_utils.add_agency_identifiers(df)
+    df2 = (portfolio_utils.add_agency_identifiers(df, analysis_date)
+           .rename(columns = {
+               "gtfs_dataset_key": "schedule_gtfs_dataset_key",
+               "name": "schedule_gtfs_dataset_name"})
+    )
+    
     
     # Clean organization name
-    df3 = portfolio_utils.clean_organization_name(df2) 
-    df3 = (portfolio_utils.standardize_gtfs_dataset_names(df3)
-           .rename(columns = RENAME_COLS)
-          )
+    df3 = portfolio_utils.get_organization_name(
+        df2, 
+        analysis_date, 
+        merge_cols = ["schedule_gtfs_dataset_key", "schedule_gtfs_dataset_name"]
+    ).rename(columns = RENAME_COLS)
     
     return df3
     
