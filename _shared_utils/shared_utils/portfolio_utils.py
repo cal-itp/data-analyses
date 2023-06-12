@@ -16,7 +16,6 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import pandas as pd
 import pandas.io.formats.style  # for type hint: https://github.com/pandas-dev/pandas/issues/24884
-from calitp_data_analysis.tables import tbls
 from IPython.display import HTML
 from shared_utils import gtfs_utils_v2, rt_utils
 from siuba import *
@@ -35,26 +34,6 @@ district_name_dict = {
     11: "District 11 - San Diego",
     12: "District 12 - Irvine",
 }
-
-
-def clean_organization_name(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Clean up organization name used in portfolio.
-    """
-    df = df.assign(
-        name=(
-            df.name.str.replace("Schedule", "")
-            .str.replace("Vehicle Positions", "")
-            .str.replace("VehiclePositions", "")
-            .str.replace("Trip Updates", "")
-            .str.replace("TripUpdates", "")
-            .str.replace("Service Alerts", "")
-            .str.replace("Bay Area 511", "")
-            .str.strip()
-        )
-    )
-
-    return df
 
 
 def decode_base64_url(row):
@@ -99,72 +78,6 @@ def add_agency_identifiers(df: pd.DataFrame, date: str) -> pd.DataFrame:
     )
 
     return df2
-
-
-def get_organization_name(
-    df: pd.DataFrame,
-    date: str,
-    merge_cols: list = [],
-) -> pd.DataFrame:
-    """
-    Instead of using the GTFS dataset name (of the quartet), usually
-    LA Metro Schedule, LA Metro Trip Updates, etc, always
-    publish with the organization name, LA Metro.
-
-    Input a date to filter down what feeds were valid.
-    Merge columns must be defined and hold prefixes indicating the quartet.
-    Ex: schedule_gtfs_dataset_key, vehicle_positions_gtfs_dataset_name
-    """
-    quartet = ["schedule", "vehicle_positions", "service_alerts", "trip_updates"]
-
-    datasets = ["gtfs_dataset_key", "gtfs_dataset_name", "source_record_id"]
-
-    # https://stackoverflow.com/questions/2541401/pairwise-crossproduct-in-python
-    quartet_cols = [f"{q}_{d}" for q in quartet for d in datasets]
-
-    # All the merge cols must be found in quartet_cols
-    # This is flexible enough so we can take just gtfs_dataset_key or name to merge too
-    if not all(c in quartet_cols for c in merge_cols):
-        raise KeyError(
-            "Unable to detect which GTFS quartet "
-            f"these columns {df.columns}. "
-            "Rename to [quartet]_gtfs_dataset_key, "
-            "[quartet]_gtfs_dataset_name. "
-            "Valid quartet values: schedule, vehicle_positions, "
-            "trip_updates, or service_alerts."
-        )
-    else:
-        dim_provider_gtfs_data = (
-            tbls.mart_transit_database.dim_provider_gtfs_data()
-            >> filter(_._valid_from <= pd.to_datetime(date), _._valid_to >= pd.to_datetime(date))
-            >> distinct()
-            >> collect()
-        )
-
-        sorting = [True for c in merge_cols]
-        keep_cols = ["organization_source_record_id", "organization_name", "regional_feed_type"]
-        # Eventually, we need to move to 1 organization name, so there's
-        # no fanout when we merge it on
-        # Until then, handle it by dropping duplicates and pick 1 name
-        dim_provider_gtfs_data2 = (
-            dim_provider_gtfs_data.sort_values(
-                merge_cols + ["_valid_to", "_valid_from"], ascending=sorting + [False, False]
-            )
-            .drop_duplicates(merge_cols)
-            .reset_index(drop=True)[merge_cols + keep_cols]
-        )
-
-        df2 = pd.merge(df, dim_provider_gtfs_data2, on=merge_cols, how="inner")
-        # return dim_provider_gtfs_data2
-        return df2
-
-
-def add_caltrans_district(df: pd.DataFrame, date: str):
-    """
-    Caltrans districts are defined at the organization-level.
-    """
-
-    return
 
 
 # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/utils.py
