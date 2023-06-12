@@ -300,11 +300,11 @@ class RtFilterMapper:
                           colorscale = ZERO_THIRTY_COLORSCALE, size: list=[900, 550],
                          no_title = False, corridor = False, shn = False,
                          no_render = False):
-        ''' Generate a map of segment speeds aggregated across all trips for each shape, either as averages
+        ''' Generate a map of segment speeds aggregated across all trips for each shape, either as medians
         or 20th percentile speeds.
         
         segments: 'stops' or 'detailed' (detailed not yet implemented)
-        how: 'average', 'low_speeds' (20%ile)
+        how: 'median', 'low_speeds' (20%ile)
         colorscale: branca.colormap
         size: [x, y]
         no_title: don't show title in folium map
@@ -313,7 +313,7 @@ class RtFilterMapper:
         no_render: don't remder map using folium, only store as self.detailed_map_view
         '''
         assert segments in ['stops', 'detailed']
-        assert how in ['average', 'low_speeds']
+        assert how in ['median', 'low_speeds']
         
         gcs_filename = f'{self.calitp_itp_id}_{self.analysis_date.isoformat()}_{self.filter_period}'
         subfolder = 'v2_segment_speed_views/' if self.using_v2 else 'segment_speed_views/'
@@ -361,10 +361,10 @@ class RtFilterMapper:
                          >> filter(_.speed_mph < 80, _.speed_mph > 0) ## drop impossible speeds, TODO logging?
                          >> group_by(_.stop_sequence)
                          >> mutate(n_trips_shp = _.stop_sequence.size, # filtered to shape
-                                    avg_mph = _.speed_mph.mean(),
-                                    _20p_mph = _.speed_mph.quantile(.2),
-                                    _80p_mph = _.speed_mph.quantile(.8),
-                                    fast_slow_ratio = _._80p_mph / _._20p_mph # new intuitive variation measure
+                                    p50_mph = _.speed_mph.median(),
+                                    p20_mph = _.speed_mph.quantile(.2),
+                                    p80_mph = _.speed_mph.quantile(.8),
+                                    fast_slow_ratio = _.p80_mph / _.p20_mph # new intuitive variation measure
                                     # var_mph = _.speed_mph.var() # old statistical variance
                                   )
                          >> ungroup()
@@ -416,15 +416,15 @@ class RtFilterMapper:
                             -_.last_loc, -_.shape_meters,
                            -_.meters_from_last, -_.n_trips_shp)
         orig_rows = gdf.shape[0]
-        gdf = gdf.round({'avg_mph': 1, '_20p_mph': 1, '_80p_mph': 1,
+        gdf = gdf.round({'p50_mph': 1, 'p20_mph': 1, 'p80_mph': 1,
                          'miles_from_last': 1, 'trips_per_hour': 1, 'avg_sec': 0,
                          '_20p_sec': 0, 'fast_slow_ratio': 1}) ##round for display
         
-        how_speed_col = {'average': 'avg_mph', 'low_speeds': '_20p_mph'}
-        how_formatted = {'average': 'Average', 'low_speeds': '20th Percentile'}
+        how_speed_col = {'median': 'p50_mph', 'low_speeds': 'p20_mph'}
+        how_formatted = {'median': 'Median', 'low_speeds': '20th Percentile'}
         
         # filter out 0's in distance, speed-- issue arises from rounding error
-        gdf = (gdf >> filter(_.miles_from_last > 0, _._20p_mph > 0, _.avg_mph > 0))
+        gdf = (gdf >> filter(_.miles_from_last > 0, _.p20_mph > 0, _.p50_mph > 0))
         
         gdf['time_formatted'] = (gdf.miles_from_last / gdf[how_speed_col[how]]) * 60**2 #seconds
         gdf['time_formatted'] = gdf['time_formatted'].apply(lambda x: f'{int(x)//60}' + f':{int(x)%60:02}')
@@ -488,7 +488,7 @@ class RtFilterMapper:
         '''
         assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first with self.segment_speed_map'
         gdf = self.detailed_map_view.copy().dropna(subset=['fast_slow_ratio']) >> arrange(_.trips_per_hour)
-        display_cols = ['fast_slow_ratio', '_20p_mph', '_80p_mph', 'miles_from_last',
+        display_cols = ['fast_slow_ratio', 'p20_mph', 'p80_mph', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
                        'stop_sequence']
         display_aliases = ['80th %ile to 20th %ile speed ratio (variation in speeds)',
@@ -550,11 +550,11 @@ class RtFilterMapper:
             gdf = self.detailed_map_view.copy()
             gdf['organization_name'] = self.organization_name
             cmap = self.speed_map_params[1]
-            gdf['color'] = gdf._20p_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
+            gdf['color'] = gdf.p20_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
             self.spa_map_state["layers"] += [{
                 "name": f"{self.organization_name} Vehicle Speeds {self.display_date}",
                 "url": f"https://storage.googleapis.com/{path}", "type": "speedmap",
-                'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': '_20p_mph'}
+                'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': 'p20_mph'}
                 }]
             self.spa_map_state["lat_lon"] = self.current_centroid
             self.spa_map_state["zoom"] = 13
