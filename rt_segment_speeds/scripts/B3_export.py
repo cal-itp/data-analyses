@@ -34,8 +34,9 @@ def get_operator_natural_identifiers(
     # Get shape_id back
     shape_identifiers = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["shape_array_key", "shape_id"]
-    ).drop_duplicates().compute()
+        columns = ["shape_array_key", "shape_id"],
+        get_pandas = True
+    ).drop_duplicates()
     
     df_with_shape = pd.merge(
         operator_shape_df,
