@@ -140,17 +140,18 @@ def import_scheduled_trips(
         "feed_key", "name", "trip_id", 
         "shape_id", "shape_array_key", 
         "route_id", "route_key", "direction_id"
-    ]
+    ],
+    get_pandas: bool = False
 ) -> dd.DataFrame:
     """
     Get scheduled trips info (all operators) for single day, 
     and keep subset of columns.
     """
-    trips = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
-        filters = filters,
-        columns = columns
-    )
+    FILE = f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet"
+    trips = dd.read_parquet(FILE, filters = filters, columns = columns)
+    
+    if get_pandas:
+        trips = pd.read_parquet(FILE, filters = filters, columns = columns)
     
     return trips
 
@@ -158,17 +159,20 @@ def import_scheduled_trips(
 def import_scheduled_shapes(
     analysis_date: str, 
     filters: tuple = None,
-    columns: list = ["shape_array_key", "geometry"]
+    columns: list = ["shape_array_key", "geometry"],
+    get_pandas: bool = False
 ) -> dg.GeoDataFrame: 
     """
     Import routelines and add route_length.
     """
-    shapes = dg.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet",
-        filters = filters,
-        columns = columns
-    ).to_crs(PROJECT_CRS)
+    FILE = f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet"
     
+    shapes = dg.read_parquet(FILE, filters = filters,
+                             columns = columns).to_crs(PROJECT_CRS)
+    
+    if get_pandas: 
+        shapes = gpd.read_parquet(FILE, filters = filters, 
+                                  columns = columns).to_crs(PROJECT_CRS)
     return shapes
 
 
@@ -192,16 +196,20 @@ def import_scheduled_stop_times(
 def import_scheduled_stops(
     analysis_date: str,
     filters: tuple = None,
-    columns: list = None
+    columns: list = None,
+    get_pandas: bool = False
 ) -> dg.GeoDataFrame:
     """
     Get scheduled stops
     """
-    stops = dg.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet",
-        filters = filters,
-        columns = columns
-    ).to_crs(PROJECT_CRS)
+    FILE = f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet"
+    
+    stops = dg.read_parquet(FILE, filters = filters,
+                            columns = columns).to_crs(PROJECT_CRS)
+    
+    if get_pandas:
+        stops = gpd.read_parquet(FILE, filters = filters, 
+                                 columns = columns).to_crs(PROJECT_CRS)
     
     return stops
 

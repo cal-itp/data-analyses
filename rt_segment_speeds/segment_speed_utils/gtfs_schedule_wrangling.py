@@ -22,19 +22,30 @@ def exclude_scheduled_operators(
 
 def merge_shapes_to_trips(
     shapes: dg.GeoDataFrame, 
-    trips: dd.DataFrame
+    trips: dd.DataFrame,
+    merge_cols: list = ["shape_array_key"]
 ) -> dg.GeoDataFrame:   
     """
     Merge shapes and trips tables.
     We usually start with trip_id (from RT vehicle positions or stop_times),
     and we need to get the `shape_array_key`.
     """
-    trips_with_geom = dd.merge(
-        shapes,
-        trips,
-        on = "shape_array_key",
-        how = "inner",
-    )
+    if isinstance(shapes, dg.GeoDataFrame):
+        trips_with_geom = dd.merge(
+            shapes,
+            trips,
+            on = merge_cols,
+            how = "inner",
+        )
+    else:
+        if isinstance(trips, dd.DataFrame):
+            trips = trips.compute()
+        trips_with_geom = pd.merge(
+            shapes,
+            trips,
+            on = merge_cols,
+            how = "inner"
+        )
         
     return trips_with_geom
 
