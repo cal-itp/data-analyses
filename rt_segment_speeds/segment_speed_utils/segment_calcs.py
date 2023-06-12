@@ -8,8 +8,6 @@ from typing import Union
 
 from shared_utils import rt_utils
 
-PACIFIC_TIMEZONE = "US/Pacific"
-
 # https://stackoverflow.com/questions/58145700/using-groupby-to-store-value-counts-in-new-column-in-dask-dataframe
 # https://github.com/dask/dask/pull/5327
 def keep_min_max_timestamps_by_segment(
@@ -136,40 +134,6 @@ def calculate_speed_by_segment_trip(
     )
         
     return segment_speeds
-
-    
-def localize_vp_timestamp(
-    df: dd.DataFrame, 
-    timestamp_col: Union[str, list]
-) -> dd.DataFrame:
-    """
-    RT vehicle timestamps are given in UTC. 
-    Localize these to Pacific Time.
-    """
-    #https://stackoverflow.com/questions/62992863/trying-to-convert-aware-local-datetime-to-naive-local-datetime-in-panda-datafram
-    
-    if isinstance(timestamp_col, str):
-        timestamp_col = [timestamp_col]
-    
-    for c in timestamp_col:
-        if isinstance(df, (dd.DataFrame, dg.GeoDataFrame)):
-            localized_timestamp_col = (dd.to_datetime(
-                    df[c], utc=True)
-                    .dt.tz_convert(PACIFIC_TIMEZONE)
-                    .apply(lambda t: t.replace(tzinfo=None), 
-                           meta=(None, "datetime64[ns]"))
-                    )
-        elif isinstance(df, (pd.DataFrame, gpd.GeoDataFrame)):
-            localized_timestamp_col = (pd.to_datetime(
-                df[c], utc=True)
-                .dt.tz_convert(PACIFIC_TIMEZONE)
-                .apply(lambda t: t.replace(tzinfo=None)
-                )
-            )
-
-        df[f"{c}_local"] = localized_timestamp_col
-    
-    return df
 
                                    
 def convert_timestamp_to_seconds(
