@@ -88,7 +88,8 @@ def prep_route_segments(analysis_date: str):
     trips = helpers.import_scheduled_trips(
         analysis_date, 
         columns = route_dir_cols + shape_id_cols + [
-            "trip_id", "shape_id", "name"]
+            "trip_id", "shape_id", "name"],
+        get_pandas = True
     )       
     
     trips = gtfs_schedule_wrangling.exclude_scheduled_operators(
