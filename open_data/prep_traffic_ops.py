@@ -2,15 +2,11 @@
 Import trips, shapes, stops, stop_times files
 and get it ready for GTFS schedule routes / stops datasets.
 """
-import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import (utils, rt_dates, rt_utils, 
-                          geography_utils, portfolio_utils)
-
-from update_vars import (TRAFFIC_OPS_GCS, 
-                         COMPILED_CACHED_VIEWS, analysis_date)
+from shared_utils import utils, schedule_rt_utils
+from update_vars import TRAFFIC_OPS_GCS, analysis_date
 
 keep_trip_cols = [
     "feed_key", "name", 
@@ -36,25 +32,31 @@ keep_stop_time_cols = [
 ]    
     
 
+def standardize_operator_info_for_exports(
+    df: pd.DataFrame, 
+    analysis_date: str
+) -> pd.DataFrame:
     
-def standardize_operator_info_for_exports(df: pd.DataFrame) -> pd.DataFrame:
-    
-    # Add a decoded version for base64_url
-    df2 = (portfolio_utils.add_agency_identifiers(df, analysis_date)
-           .rename(columns = {
-               "gtfs_dataset_key": "schedule_gtfs_dataset_key",
-               "name": "schedule_gtfs_dataset_name"})
+    crosswalk = schedule_rt_utils.sample_schedule_feed_key_to_organization_crosswalk(
+        df, 
+        analysis_date,
+        quartet_data = "schedule", 
+        dim_gtfs_dataset_cols = [
+            "key", "regional_feed_type",
+            "base64_url", "uri"],
+        dim_organization_cols = [
+            "source_record_id", "name", "caltrans_district"]
     )
     
-    
-    # Clean organization name
-    df3 = portfolio_utils.get_organization_name(
-        df2, 
-        analysis_date, 
-        merge_cols = ["schedule_gtfs_dataset_key", "schedule_gtfs_dataset_name"]
-    ).rename(columns = RENAME_COLS)
-    
-    return df3
+    df2 = pd.merge(
+        df,
+        crosswalk,
+        on = "feed_key",
+        how = "inner",
+        validate = "m:1"
+    )
+        
+    return df2
     
     
 def export_to_subfolder(file_name: str, analysis_date: str):
@@ -78,6 +80,7 @@ def export_to_subfolder(file_name: str, analysis_date: str):
         
 # Define column names, must fit ESRI 10 character limits
 RENAME_COLS = {
-    "name": "agency",
+    "organization_name": "agency",
+    "organization_source_record_id": "org_id",
     "route_name_used": "route_name",
 }
