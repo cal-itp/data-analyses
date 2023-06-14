@@ -709,7 +709,7 @@ class RtFilterMapper:
         Measure observed runtimes for routes within filter. Based on full data extent of each trip,
         currently bidirectional.
         '''
-        df = (self._filter(rt_day.stop_delay_view).copy()
+        df = (self._filter(self.stop_delay_view)
              >> group_by(_.shape_id, _.route_id, _.route_short_name, _.trip_id)
              >> summarize(runtime = _.actual_time.max() - _.actual_time.min())
              >> group_by(_.route_id, _.route_short_name)
@@ -773,7 +773,7 @@ class RtFilterMapper:
                           )
         runtimes = self.runtime_metrics() >> select(_.route_id, _.p50_runtime_minutes)
         both_metrics_df = (both_metrics_df >> inner_join(_, runtimes, on = 'route_id')
-                              >> mutate(trips_added = _.speed_metric_minutes / _.p50_runtime_minutes)
+                              >> mutate(trips_added = _.speed_delay_minutes / _.p50_runtime_minutes)
                           )
         gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
         # ffill kinda broken in geopandas?
