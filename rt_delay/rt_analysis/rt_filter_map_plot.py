@@ -697,7 +697,8 @@ class RtFilterMapper:
                   >> filter(_.corridor)
                   >> select(_.stop_id, _.geometry, _.stop_sequence, _.shape_id)
                  )
-        m = pd.concat([mappable_stops, self.corridor]).explore(tiles = "CartoDB positron")
+        gdf = (self.corridor >> select(_.geometry, _.total_speed_delay, _.total_schedule_delay)).iloc[0,:]
+        m = pd.concat([mappable_stops, ]).explore(tiles = "CartoDB positron")
         return m
     
     def corridor_metrics(self):
@@ -746,25 +747,15 @@ class RtFilterMapper:
               >> summarize(median_corr_mph = _.corridor_speed_mph.quantile(.5),
                            speed_delay_minutes = _.target_delay_seconds.sum() / 60)
              )
-        both_metrics_df = speed_metric_df >> inner_join(_, schedule_metric_df, on = ['route_id', 'route_short_name'])
-        
-        # df = (self.corridor_trip_speeds
-        #       >> mutate(corridor_speed_mph = _.speed_from_entry * MPH_PER_MPS)
-        #       >> mutate(target_seconds = _.meters_from_entry / target_speed_mps)
-        #       >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
-        #      )
-        # speed_metric = df.target_delay_seconds.sum() / 60
+        both_metrics_df = (speed_metric_df >> inner_join(_, schedule_metric_df, on = ['route_id', 'route_short_name'])
+                              >> mutate(total_speed_delay = _.speed_delay_minutes.sum(),
+                                       total_schedule_delay = _.schedule_delay_minutes.sum())
+                          )
         
         gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
         # ffill kinda broken in geopandas?
         gdf.geometry = gdf.geometry.fillna(value=gdf.geometry.iloc[0])
         self.corridor = gdf
-        # speed_metric = int(round(speed_metric))
-        # self.corridor['total_schedule_delay_minutes'] = schedule_metric
-        # self.corridor['total_speed_delay_minutes'] = speed_metric
-        # self.corridor = >> full_join(_, output, on = {'agency': 'organization'})
-        # self.corridor['organization'] = self.organization_name
-        # self.corridor['routes_included'] = self.filter_formatted
         print('metrics attached to self.corridor: ')
         return self.corridor
     
