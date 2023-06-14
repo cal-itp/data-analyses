@@ -35,7 +35,7 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     )
     
     drop_cols = ["route_short_name", "route_long_name", 
-                 "route_desc", "feed_key", "trip_id"
+                 "route_desc", "trip_id"
                 ]
     
     routes_assembled = (portfolio_utils.add_route_name(df)
@@ -44,25 +44,31 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
                        .drop_duplicates(subset=[
                            "name", "route_id", "shape_id"])
                        .reset_index(drop=True)
-                      )#.to_crs(geography_utils.WGS84)
-    
-    
-    # Change column order
-    route_cols = ['agency', 'route_id', 'route_type']
-    agency_ids = ['base64_url', 'uri']
+                      )    
+    routes_assembled2 = prep_traffic_ops.standardize_operator_info_for_exports(
+            routes_assembled, analysis_date).to_crs(geography_utils.WGS84)
+        
+    return routes_assembled2
 
-    col_order = route_cols + ['route_name', 
-        'shape_id', 'n_trips'
-    ] + agency_ids + ['geometry']
+
+def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Suppress certain columns used in our internal modeling for export.
+    """
+    # Change column order
+    route_cols = [
+        'organization_source_record_id', 'organization_name',
+        'route_id', 'route_type', 'route_name_used']
+    shape_cols = ['shape_id', 'n_trips']
+    agency_ids = ['base64_url', 'uri']
     
-    routes_assembled2 = (
-        prep_traffic_ops.standardize_operator_info_for_exports(
-            routes_assembled)
-        [col_order]
-        .reindex(columns = col_order)   
+    col_order = route_cols + shape_cols + agency_ids + ['geometry']
+    df2 = (df[col_order]
+           .reindex(columns = col_order)
+           .rename(columns = prep_traffic_ops.RENAME_COLS)
     )
     
-    return routes_assembled2
+    return df2
 
 
 if __name__ == "__main__":
@@ -71,6 +77,8 @@ if __name__ == "__main__":
     # Make an operator-feed level file (this is published)    
     # This is feed-level already, but we already keep only 1 feed per operator
     routes = create_routes_file_for_export(analysis_date)  
+    
+    routes = finalize_export_df(routes)
     
     utils.geoparquet_gcs_export(
         routes, 
