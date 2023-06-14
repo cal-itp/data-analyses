@@ -700,15 +700,32 @@ class RtFilterMapper:
                   >> filter(_.corridor)
                   >> select(_.stop_id, _.geometry, _.stop_sequence, _.shape_id)
                  )
-        gdf = (self.corridor >> select(_.geometry, _.total_speed_delay, _.total_schedule_delay)).iloc[0,:]
+        gdf = (self.corridor >> select(_.geometry, _.total_speed_delay, _.total_schedule_delay)).iloc[:1,:]
         m = pd.concat([mappable_stops, gdf]).explore(tiles = "CartoDB positron")
         return m
     
+    def runtime_metrics(self):
+        '''
+        Measure observed runtimes for routes within filter. Based on full data extent of each trip,
+        currently bidirectional.
+        '''
+        df = (self._filter(rt_day.stop_delay_view).copy()
+             >> group_by(_.shape_id, _.route_id, _.route_short_name, _.trip_id)
+             >> summarize(runtime = _.actual_time.max() - _.actual_time.min())
+             >> group_by(_.route_id, _.route_short_name)
+             >> summarize(p50_runtime_minutes =_.runtime.quantile(.5).seconds / 60,
+                          p20_runtime_minutes =_.runtime.quantile(.2).seconds / 60,
+                          p80_runtime_minutes =_.runtime.quantile(.8).seconds / 60)
+        ).round(0)
+        return df
     def corridor_metrics(self):
         '''
         Generate schedule based and speed based metrics for SCCP/LPP programs.
         
-        Default assumption is that 
+        Default assumption is that
+        
+        Note that trips_added assumes that service hour savings based on corridor speed improvements
+        are reinvested into additonal runs of the *entire* route, at the existing median runtime.
         '''
         assert hasattr(self, 'corridor'), 'must add corridor before generating corridor metrics'
         assert not self._filter(self.corridor_stop_delays).empty, 'filter does not include any corridor trips'
@@ -754,11 +771,14 @@ class RtFilterMapper:
                               >> mutate(total_speed_delay = _.speed_delay_minutes.sum(),
                                        total_schedule_delay = _.schedule_delay_minutes.sum())
                           )
-        
+        runtimes = self.runtime_metrics() >> select(_.route_id, _.p50_runtime_minutes)
+        both_metrics_df = (both_metrics_df >> inner_join(_, runtimes, on = 'route_id')
+                              >> mutate(trips_added = _.speed_metric_minutes / _.p50_runtime_minutes)
+                          )
         gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
         # ffill kinda broken in geopandas?
         gdf.geometry = gdf.geometry.fillna(value=gdf.geometry.iloc[0])
-        self.corridor = gdf
+        self.corridor = gdf.round(1)
         print('metrics attached to self.corridor: ')
         return self.corridor
     
