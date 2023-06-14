@@ -1,13 +1,13 @@
 """
 Functions to bridge GTFS schedule and RT.
 """
-import datetime as dt
-from typing import Union
+from typing import Literal, Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
+import siuba  # for type hints
 from calitp_data_analysis.tables import tbls
 from shared_utils import gtfs_utils_v2  # rt_utils
 from siuba import *
@@ -65,12 +65,12 @@ def get_rt_schedule_feeds_crosswalk(
 def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
     """
     Use fct_daily_feed_scheduled_service to find
-    the schedule gtfs_dataset_key that corresponds to the feed_key.
+    the gtfs_dataset_key that corresponds to the feed_key.
     """
     schedule_feed_to_rt_key = (
         tbls.mart_gtfs.fct_daily_feed_scheduled_service_summary()
         >> filter(_.service_date == date)
-        >> select(_.schedule_gtfs_dataset_key == _.gtfs_dataset_key, _.feed_key)
+        >> select(_.gtfs_dataset_key, _.feed_key)
     )
 
     if get_df:
@@ -79,19 +79,28 @@ def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True) -> Union[pd.Da
     return schedule_feed_to_rt_key
 
 
-def filter_dim_gtfs_dataset(
+def filter_dim_gtfs_datasets(
     date: str,
-    keep_cols: list[str] = [],
+    keep_cols: list[str] = ["key", "name", "type", "regional_feed_type", "uri", "base64_url"],
     custom_filtering: dict = None,
     get_df: bool = True,
-):
+) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+    """ """
+    if "key" not in keep_cols:
+        raise KeyError("Include key in keep_cols list")
+
     dim_gtfs_datasets = (
         tbls.mart_transit_database.dim_gtfs_datasets()
         >> filter(_.data_quality_pipeline == True)  # if True, we can use
-        >> gtfs_utils_v2.subset_cols(keep_cols)
         >> gtfs_utils_v2.filter_custom_col(custom_filtering)
-        >> rename(gtfs_dataset_key="key")
+        >> gtfs_utils_v2.subset_cols(keep_cols)
     )
+
+    # rename columns to match our convention
+    if "key" in keep_cols:
+        dim_gtfs_datasets = dim_gtfs_datasets >> rename(gtfs_dataset_key="key")
+    if "name" in keep_cols:
+        dim_gtfs_datasets = dim_gtfs_datasets >> rename(_gtfs_dataset_name="name")
 
     if get_df:
         dim_gtfs_datasets = dim_gtfs_datasets >> collect()
@@ -132,22 +141,22 @@ def get_organization_name(
             "trip_updates, or service_alerts."
         )
     else:
-        analysis_dt = dt.datetime.combine(date, dt.time(0))
+        dim_provider_gtfs_data = tbls.mart_transit_database.dim_provider_gtfs_data() >> distinct() >> collect()
 
-        dim_provider_gtfs_data = (
-            tbls.mart_transit_database.dim_provider_gtfs_data()
-            >> filter(_._valid_from <= pd.to_datetime(analysis_dt), _._valid_to >= pd.to_datetime(analysis_dt))
-            >> distinct()
-            >> collect()
+        dim_provider_gtfs_data = localize_timestamp_col(dim_provider_gtfs_data, ["_valid_from", "_valid_to"])
+
+        dim_provider_gtfs_data2 = dim_provider_gtfs_data >> filter(
+            _._valid_from_local <= pd.to_datetime(date), _._valid_to_local >= pd.to_datetime(date)
         )
 
         sorting = [True for c in merge_cols]
-        keep_cols = ["organization_source_record_id", "organization_name", "regional_feed_type"]
+        keep_cols = ["organization_source_record_id", "organization_name"]
+
         # Eventually, we need to move to 1 organization name, so there's
         # no fanout when we merge it on
         # Until then, handle it by dropping duplicates and pick 1 name
         dim_provider_gtfs_data2 = (
-            dim_provider_gtfs_data.sort_values(
+            dim_provider_gtfs_data2.sort_values(
                 merge_cols + ["_valid_to", "_valid_from"], ascending=sorting + [False, False]
             )
             .drop_duplicates(merge_cols)
@@ -157,3 +166,116 @@ def get_organization_name(
         df2 = pd.merge(df, dim_provider_gtfs_data2, on=merge_cols, how="inner")
         # return dim_provider_gtfs_data2
         return df2
+
+
+def filter_dim_organizations(
+    date: str,
+    keep_cols: list[str] = ["source_record_id", "caltrans_district"],
+    custom_filtering: dict = None,
+    get_df: bool = True,
+) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+    """
+    Filter dim_organizations down to current record for organization.
+    Caltrans district is associated with organization_source_record_id.
+    """
+    dim_orgs = (
+        tbls.mart_transit_database.dim_organizations()
+        >> gtfs_utils_v2.filter_custom_col(custom_filtering)
+        >> filter(_._is_current == True)
+        >> gtfs_utils_v2.subset_cols(keep_cols)
+        >> rename(organization_source_record_id="source_record_id")
+    )
+
+    if get_df:
+        dim_orgs = dim_orgs >> collect()
+
+    return dim_orgs
+
+
+def sample_gtfs_dataset_key_to_organization_crosswalk(
+    df: pd.DataFrame,
+    date: str,
+    quartet_data: Literal["schedule", "vehicle_positions", "service_alerts", "trip_updates"],
+    dim_gtfs_dataset_cols: list[str] = [
+        "key",
+        "name",
+        "type",
+        "source_record_id",
+        "regional_feed_type",
+        "base64_url",
+        "uri",
+    ],
+    dim_organization_cols: list[str] = ["source_record_id", "caltrans_district"],
+) -> pd.DataFrame:
+    """
+    Get crosswalk from gtfs_dataset_key to certain quartet data identifiers
+    like base64_url, uri, and organization identifiers
+    like organization_source_record_id and caltrans_district.
+    """
+    feeds = df[["gtfs_dataset_key"]].drop_duplicates().reset_index(drop=True)
+
+    # (1) Filter dim_gtfs_datasets by quartet and merge with the
+    # gtfs_dataset_keys in df.
+    dim_gtfs_datasets = filter_dim_gtfs_datasets(
+        date, keep_cols=dim_gtfs_dataset_cols, custom_filtering={"type": [quartet_data]}, get_df=True
+    )
+
+    feeds_with_quartet_info = pd.merge(
+        feeds,
+        dim_gtfs_datasets,
+        on="gtfs_dataset_key",
+        how="inner",
+    )
+
+    # (2) Rename key/name to reflect the quartet
+    GTFS_DATASET_RENAME_DICT = {
+        "gtfs_dataset_key": f"{quartet_data}_gtfs_dataset_key",
+        "_gtfs_dataset_name": f"{quartet_data}_gtfs_dataset_name",
+        "source_record_id": f"{quartet_data}_source_record_id",
+    }
+
+    feeds_with_quartet_info = feeds_with_quartet_info.rename(columns=GTFS_DATASET_RENAME_DICT)
+
+    # (3) From quartet, get to organization name
+    merge_cols = [i for i in feeds_with_quartet_info.columns if quartet_data in i]
+
+    feeds_with_org_id = get_organization_name(feeds_with_quartet_info, date, merge_cols=merge_cols)
+
+    # (4) Merge in dim_orgs to get caltrans_district
+    orgs = filter_dim_organizations(date, keep_cols=dim_organization_cols, get_df=True)
+
+    feeds_with_district = pd.merge(feeds_with_org_id, orgs, on="organization_source_record_id")
+
+    return feeds_with_district
+
+
+def sample_schedule_feed_key_to_organization_crosswalk(
+    df: pd.DataFrame,
+    date: str,
+    quartet_data: Literal["schedule", "vehicle_positions", "service_alerts", "trip_updates"] = "schedule",
+    **kwargs,
+) -> pd.DataFrame:
+    """
+    From scedule data, using feed_key as primary key,
+    grab the gtfs_dataset_key associated.
+    Pass this through function to attach quartet data identifier columns
+    and organization info.
+    """
+    # Start with schedule feed_key, and grab gtfs_dataset_key associated
+    # with that feed_key
+    feeds = df[["feed_key"]].drop_duplicates().reset_index(drop=True)
+
+    crosswalk_feed_to_gtfs_dataset_key = get_schedule_gtfs_dataset_key(date, get_df=True)
+
+    feeds_with_gtfs_dataset_key = pd.merge(
+        feeds,
+        crosswalk_feed_to_gtfs_dataset_key,
+        on="feed_key",
+        how="inner",
+    )
+
+    feeds_with_district = sample_gtfs_dataset_key_to_organization_crosswalk(
+        feeds_with_gtfs_dataset_key, date, quartet_data=quartet_data, **kwargs
+    )
+
+    return feeds_with_district
