@@ -701,7 +701,7 @@ class RtFilterMapper:
                   >> select(_.stop_id, _.geometry, _.stop_sequence, _.shape_id)
                  )
         gdf = (self.corridor >> select(_.geometry, _.total_speed_delay, _.total_schedule_delay)).iloc[0,:]
-        m = pd.concat([mappable_stops, ]).explore(tiles = "CartoDB positron")
+        m = pd.concat([mappable_stops, gdf]).explore(tiles = "CartoDB positron")
         return m
     
     def corridor_metrics(self):
