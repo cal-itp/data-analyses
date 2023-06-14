@@ -108,7 +108,7 @@ def filter_dim_gtfs_datasets(
     return dim_gtfs_datasets
 
 
-def get_organization_name(
+def get_organization_id(
     df: pd.DataFrame,
     date: str,
     merge_cols: list = [],
@@ -150,7 +150,7 @@ def get_organization_name(
         )
 
         sorting = [True for c in merge_cols]
-        keep_cols = ["organization_source_record_id", "organization_name"]
+        keep_cols = ["organization_source_record_id"]
 
         # Eventually, we need to move to 1 organization name, so there's
         # no fanout when we merge it on
@@ -205,14 +205,20 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
         "base64_url",
         "uri",
     ],
-    dim_organization_cols: list[str] = ["source_record_id", "caltrans_district"],
+    dim_organization_cols: list[str] = ["source_record_id", "name", "caltrans_district"],
 ) -> pd.DataFrame:
     """
     Get crosswalk from gtfs_dataset_key to certain quartet data identifiers
     like base64_url, uri, and organization identifiers
     like organization_source_record_id and caltrans_district.
     """
-    feeds = df[["gtfs_dataset_key"]].drop_duplicates().reset_index(drop=True)
+    id_cols = ["gtfs_dataset_key"]
+
+    # If schedule feed_key is present, include it our crosswalk output
+    if "feed_key" in df.columns:
+        id_cols = ["feed_key"] + id_cols
+
+    feeds = df[id_cols].drop_duplicates().reset_index(drop=True)
 
     # (1) Filter dim_gtfs_datasets by quartet and merge with the
     # gtfs_dataset_keys in df.
@@ -239,10 +245,11 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
     # (3) From quartet, get to organization name
     merge_cols = [i for i in feeds_with_quartet_info.columns if quartet_data in i]
 
-    feeds_with_org_id = get_organization_name(feeds_with_quartet_info, date, merge_cols=merge_cols)
+    feeds_with_org_id = get_organization_id(feeds_with_quartet_info, date, merge_cols=merge_cols)
 
     # (4) Merge in dim_orgs to get caltrans_district
-    orgs = filter_dim_organizations(date, keep_cols=dim_organization_cols, get_df=True)
+    ORG_RENAME_DICT = {"source_record_id": "organization_source_record_id", "name": "organization_name"}
+    orgs = filter_dim_organizations(date, keep_cols=dim_organization_cols, get_df=True).rename(columns=ORG_RENAME_DICT)
 
     feeds_with_district = pd.merge(feeds_with_org_id, orgs, on="organization_source_record_id")
 
