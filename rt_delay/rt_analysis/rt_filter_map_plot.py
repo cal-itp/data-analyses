@@ -59,7 +59,7 @@ class RtFilterMapper:
             self.analysis_date = rt_trips.service_date.iloc[0]
             self.organization_name = rt_trips.calitp_agency_name.iloc[0]
         self.display_date = self.analysis_date.strftime('%b %d, %Y (%a)')
-        
+        self.transit_priority_target_mph = 16
         self.endpoint_delay_view = (self.stop_delay_view
                       >> group_by(_.trip_id)
                       >> filter(_.stop_sequence == _.stop_sequence.max())
@@ -732,7 +732,7 @@ class RtFilterMapper:
              >> ungroup()
              >> distinct(_.trip_id, _keep_all=True)
             )
-        target_speed_mps = 16 / MPH_PER_MPS
+        target_speed_mps = self.transit_priority_target_mph / MPH_PER_MPS
         df = (self.corridor_trip_speeds
               >> mutate(corridor_speed_mph = _.speed_from_entry * MPH_PER_MPS)
               >> mutate(target_seconds = _.meters_from_entry / target_speed_mps)
