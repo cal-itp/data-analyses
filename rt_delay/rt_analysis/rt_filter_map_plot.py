@@ -703,17 +703,21 @@ class RtFilterMapper:
     def corridor_metrics(self):
         '''
         Generate schedule based and speed based metrics for SCCP/LPP programs.
+        
+        Default assumption is that 
         '''
         assert hasattr(self, 'corridor'), 'must add corridor before generating corridor metrics'
         assert not self._filter(self.corridor_stop_delays).empty, 'filter does not include any corridor trips'
         if self.filter:
             print('warning: filter set -- for SCCP/LPP reset filter first')
-        schedule_metric = (self._filter(self.corridor_stop_delays)
-             >> group_by(_.trip_id)
+            
+        # median delay within segment for each trip, then aggregate to route
+        schedule_metric_df = (self._filter(self.corridor_stop_delays)
+             >> group_by(_.trip_id, _.route_id, _.route_short_name)
              >> summarize(median_corridor_delay_seconds = _.corridor_delay_seconds.median())
-             >> summarize(sum_of_medians_minutes = _.median_corridor_delay_seconds.sum() / 60)
-            ).sum_of_medians_minutes.iloc[0]
-        schedule_metric = int(round(schedule_metric))
+             >> group_by(_.route_id, _.route_short_name)
+             >> summarize(schedule_delay_minutes = _.median_corridor_delay_seconds.sum() / 60)
+            )
         
         self.stop_delay_view = self.stop_delay_view >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
         self.corridor_trip_speeds = (self._filter(self.stop_delay_view)
@@ -730,19 +734,39 @@ class RtFilterMapper:
              >> distinct(_.trip_id, _keep_all=True)
             )
         target_speed_mps = self.transit_priority_target_mph / MPH_PER_MPS
-        df = (self.corridor_trip_speeds
+        
+        speed_int_df = (self.corridor_trip_speeds
               >> mutate(corridor_speed_mph = _.speed_from_entry * MPH_PER_MPS)
               >> mutate(target_seconds = _.meters_from_entry / target_speed_mps)
               >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
              )
-        speed_metric = df.target_delay_seconds.sum() / 60
-        speed_metric = int(round(speed_metric))
-        self.corridor['schedule_metric_minutes'] = schedule_metric
-        self.corridor['speed_metric_minutes'] = speed_metric
-        self.corridor['agency'] = self.organization_name
-        self.corridor['routes_included'] = self.filter_formatted
-        return {'schedule_metric_minutes': schedule_metric,
-               'speed_metric_minutes': speed_metric}
+        speed_metric_df = (df
+              >> mutate(organization = self.organization_name)
+              >> group_by(_.route_id, _.route_short_name, _.organization)
+              >> summarize(median_corr_mph = _.corridor_speed_mph.quantile(.5),
+                           speed_delay_minutes = _.target_delay_seconds.sum() / 60)
+             )
+        both_metrics_df = speed_metric_df >> inner_join(_, schedule_metric, on = ['route_id', 'route_short_name'])
+        
+        # df = (self.corridor_trip_speeds
+        #       >> mutate(corridor_speed_mph = _.speed_from_entry * MPH_PER_MPS)
+        #       >> mutate(target_seconds = _.meters_from_entry / target_speed_mps)
+        #       >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
+        #      )
+        # speed_metric = df.target_delay_seconds.sum() / 60
+        
+        gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
+        # ffill kinda broken in geopandas?
+        gdf.geometry = gdf.geometry.fillna(value=gdf.geometry.iloc[0])
+        self.corridor = gdf
+        # speed_metric = int(round(speed_metric))
+        # self.corridor['total_schedule_delay_minutes'] = schedule_metric
+        # self.corridor['total_speed_delay_minutes'] = speed_metric
+        # self.corridor = >> full_join(_, output, on = {'agency': 'organization'})
+        # self.corridor['organization'] = self.organization_name
+        # self.corridor['routes_included'] = self.filter_formatted
+        print('metrics attached to self.corridor: ')
+        return self.corridor
     
 def from_gcs(itp_id, analysis_date, pbar = None):
     ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_parser.OperatorDayAnalysis.export_views_gcs()
