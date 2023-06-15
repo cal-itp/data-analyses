@@ -120,3 +120,9 @@
 2023-05-18 11:54:59.370 | INFO     | __main__:<module>:86 - grabbed ferry: 0:00:10.460957
 2023-05-18 11:55:51.720 | INFO     | __main__:<module>:102 - concatenated datasets
 2023-05-18 11:55:52.007 | INFO     | __main__:<module>:113 - execution time: 0:01:28.668508
+2023-06-15 11:51:39.762 | INFO     | __main__:<module>:62 - Analysis date: 2023-06-14
+2023-06-15 11:51:52.187 | INFO     | __main__:<module>:70 - grabbed rail: 0:00:12.421736
+2023-06-15 11:52:01.910 | INFO     | __main__:<module>:79 - grabbed brt: 0:00:09.723123
+2023-06-15 11:52:11.381 | INFO     | __main__:<module>:86 - grabbed ferry: 0:00:09.470578
+2023-06-15 11:52:47.652 | INFO     | __main__:<module>:102 - concatenated datasets
+2023-06-15 11:52:47.970 | INFO     | __main__:<module>:113 - execution time: 0:01:08.204844
