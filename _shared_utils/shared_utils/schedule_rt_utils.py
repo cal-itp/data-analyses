@@ -9,7 +9,7 @@ import geopandas as gpd
 import pandas as pd
 import siuba  # for type hints
 from calitp_data_analysis.tables import tbls
-from shared_utils import gtfs_utils_v2  # rt_utils
+from shared_utils import gtfs_utils_v2
 from siuba import *
 
 PACIFIC_TIMEZONE = "US/Pacific"
