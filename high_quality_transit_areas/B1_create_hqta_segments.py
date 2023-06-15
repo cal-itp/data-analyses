@@ -16,6 +16,8 @@ Takes 8 min to run
 TODO: speed up geography_utils.cut_segments to be faster.
 7.5 min is spent on this step.
 """
+import os
+os.environ['USE_PYGEOS'] = '0'
 import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime as dt
@@ -25,39 +27,29 @@ import sys
 import zlib
 
 from loguru import logger
+from dask import delayed, compute
 
 import operators_for_hqta
 from shared_utils import utils, geography_utils, rt_utils
+from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
                         
 HQTA_SEGMENT_LENGTH = 1_250 # meters
 
 
-def merge_routes_to_trips(routelines: gpd.GeoDataFrame, 
-                          trips: dd.DataFrame) -> dg.GeoDataFrame:   
+def pare_down_trips_by_route_direction(
+    trips_with_geom: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:   
     """
-    Merge routes and trips tables.
-    Keep the longest shape by route_length in each direction.
+    Given a trips table that has shape geometry attached, 
+    keep the longest shape by route_length in each direction.
     
     For LA Metro, out of ~700 unique shape_ids,
     this pares it down to ~115 route_ids.
     Use this pared down shape_ids to get hqta_segments.
     """
-    shape_id_cols = ["shape_array_key"]
     route_dir_cols = ["feed_key", "route_key", "route_id", "direction_id"]
-        
-    # Merge routes to trips with using trip_id
-    # Keep route_id and shape_id, but drop trip_id by the end
-    trips_with_geom = dd.merge(
-        routelines,
-        # Don't merge using calitp_url_number because ITP ID 282 (SFMTA)
-        # can use calitp_url_number = 1
-        # Just keep calitp_url_number = 0 from routelines
-        trips,
-        on = shape_id_cols,
-        how = "inner",
-    ).compute()
     
     trips_with_geom = (
         trips_with_geom
@@ -68,30 +60,29 @@ def merge_routes_to_trips(routelines: gpd.GeoDataFrame,
         .drop_duplicates(subset = route_dir_cols)
         .reset_index(drop=True)
     )
-    
-    m1 = dg.from_geopandas(trips_with_geom, npartitions=2)
-    
+        
     # If direction_id is missing, then later code will break, because
     # we need to find the longest route_length
     # Don't really care what direction is, since we will replace it with north-south
     # Just need a value to stand-in, treat it as the same direction
-    m1 = m1.assign(
-        direction_id = m1.direction_id.fillna(0)
-    )
     
-    m1 = m1.assign(    
-        # dask can only sort by 1 column
-        # so, let's combine route-dir into 1 column and drop_duplicates
-        route_dir_identifier = m1.apply(
+    trips_with_geom2 = trips_with_geom.assign(
+        direction_id = (trips_with_geom.direction_id.fillna(0)
+                        .astype(int).astype(str))
+    )
+
+    trips_with_geom2 = trips_with_geom2.assign(    
+        route_dir_identifier = trips_with_geom2.apply(
             lambda x: zlib.crc32(
-                (x.route_key + str(x.direction_id)
+                (x.route_key + x.direction_id
                 ).encode("utf-8")), 
-            axis=1, meta=("route_dir_identifier", "int"))
+            axis=1, 
+        )
     )
     
     # Keep the longest shape_id for each direction
     # with missing direction_id filled in
-    longest_shapes = (m1.sort_values("shape_array_key")
+    longest_shapes = (trips_with_geom2.sort_values("shape_array_key")
                       .drop_duplicates("route_dir_identifier")
                       .drop(columns = "route_dir_identifier")
                       .reset_index(drop=True)
@@ -125,12 +116,12 @@ def difference_overlay_by_route(
                  .reset_index(drop=True)
             )
     
-    first = one_route[one_route.index==0]
-    second = one_route[one_route.index==1]
+    first = one_route[one_route.index==0].reset_index(drop=True)
+    second = one_route[one_route.index==1].reset_index(drop=True)
     
     # Find the difference
     # We'll combine it with the first segment anyway
-    overlay = first.overlay(second, how = "difference")
+    overlay = first.geometry.difference(second.geometry).to_frame(name="geometry")
     
     # Notice that overlay keeps a lot of short segments that are in the
     # middle of the route. Drop these. We mostly want
@@ -160,7 +151,7 @@ def difference_overlay_by_route(
                          )
     
     longest_shape_portions = (pd.concat(
-        [first, segments_to_attach], axis=0)
+        [first, segments_to_attach], axis=0).reset_index(drop=True)
         [["route_key", "geometry"]]
     )
     
@@ -168,7 +159,7 @@ def difference_overlay_by_route(
 
 
 def select_shapes_and_segment(
-    longest_shapes_gddf: dg.GeoDataFrame, 
+    gdf: gpd.GeoDataFrame,
     segment_length: int) -> gpd.GeoDataFrame: 
     """
     For routes where only 1 shape_id was chosen for longest route_length,
@@ -183,33 +174,30 @@ def select_shapes_and_segment(
     gpd.overlay(how = 'symmetric_difference') is causing error, 
     either need to downgrade pandas or switch to 'difference'
     https://gis.stackexchange.com/questions/414317/gpd-overlay-throws-intcastingnanerror
-    """
-    # Since the difference needs to be geopandas,
-    # convert it now, and leave it as geopandas
-    # ensure it is computed as gdf...sometimes it's computed as df
-    gdf = gpd.GeoDataFrame(longest_shapes_gddf.compute())
-        
+    """            
     routes_both_dir = (gdf.route_key
                        .value_counts()
                        .loc[lambda x: x > 1]
                        .index).tolist()  
 
     one_direction = gdf[~gdf.route_key.isin(routes_both_dir)]
-    
-    two_directions = gdf[gdf.route_key.isin(routes_both_dir)]    
+    two_directions = gdf[gdf.route_key.isin(routes_both_dir)]   
     
     two_directions_overlay = gpd.GeoDataFrame()
-
-    for r in routes_both_dir:
-        exploded = difference_overlay_by_route(
+    
+    two_directions_overlay_results = [
+        delayed(difference_overlay_by_route)(
             two_directions, r, segment_length)
+        for r in routes_both_dir
+    ]
+  
+    two_directions_overlay_results = [
+        compute(i)[0] for i in two_directions_overlay_results]
     
-        two_directions_overlay = pd.concat(
-            [two_directions_overlay, exploded], axis=0)    
-    
+    two_direction_results = pd.concat(two_directions_overlay_results, axis=0)
     
     ready_for_segmenting = pd.concat(
-        [one_direction, two_directions_overlay], 
+        [one_direction, two_direction_results], 
         axis=0)[["route_key", "geometry"]]
     
     # Cut segments 
@@ -333,19 +321,15 @@ if __name__=="__main__":
         
     # (1) Merge routelines with trips, find the longest shape in 
     # each direction, and after overlay difference, cut HQTA segments
-    routelines = dg.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet", 
-        columns = ["shape_array_key", "geometry"]
-    ).drop_duplicates()
-    
-    trips = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
-        columns = ["feed_key", "route_key", 
-                   "route_id", "direction_id", "shape_array_key"]
-    ).drop_duplicates()
-    
+    trips_with_geom = gtfs_schedule_wrangling.get_trips_with_geom(
+        analysis_date,
+        trip_cols = ["feed_key", "name",
+                     "route_key", "route_id", 
+                     "direction_id", "shape_array_key"]
+    ).dropna(subset="shape_array_key").reset_index(drop=True).compute()
+
     # Keep longest shape in each direction
-    longest_shapes = merge_routes_to_trips(routelines, trips)
+    longest_shapes = pare_down_trips_by_route_direction(trips_with_geom)
     
     time1 = dt.datetime.now()
     logger.info(f"merge routes to trips: {time1 - start}")
@@ -360,10 +344,11 @@ if __name__=="__main__":
     hqta_segments_with_dir = find_primary_direction_across_hqta_segments(
         hqta_segments)
     
-    utils.geoparquet_gcs_export(hqta_segments_with_dir, 
-                                GCS_FILE_PATH,
-                                "hqta_segments"
-                               )
+    utils.geoparquet_gcs_export(
+        hqta_segments_with_dir, 
+        GCS_FILE_PATH,
+        "hqta_segments"
+    )
     
     time2 = dt.datetime.now()
     logger.info(f"cut segments: {time2 - time1}")

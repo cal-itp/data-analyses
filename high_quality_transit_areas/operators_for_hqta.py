@@ -40,7 +40,7 @@ def scheduled_operators_for_hqta(analysis_date: str):
             f"{TEMP_GCS}operators_for_hqta_{analysis_date}.parquet")
     else:
     
-        all_operators = gtfs_utils_v2.schedule_daily_feed_to_organization(
+        all_operators = gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(
             selected_date = analysis_date,
             keep_cols = None,
             get_df = True,
