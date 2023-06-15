@@ -9,7 +9,8 @@ import pandas as pd
 from datetime import datetime
 
 import prep_traffic_ops
-from shared_utils import utils
+from shared_utils import utils, geography_utils, schedule_rt_utils
+from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from update_vars import analysis_date, TRAFFIC_OPS_GCS
 
     
@@ -38,46 +39,65 @@ def attach_route_info_to_stops(
                                   "route_id", "route_type"])
         .drop(columns = "trip_id")
         .reset_index(drop=True)
-    )
-    
-    stops_with_geom = dd.merge(
-        stops,
-        stops_with_route_info,
-        on = ["feed_key", "stop_id"],
-        how = "inner",
     ).compute()
     
-    # Drop feed_key and just sort on name
-    stops_assembled = (stops_with_geom.drop(columns = "feed_key")
+    stops_with_geom = gtfs_schedule_wrangling.attach_stop_geometry(
+        stops_with_route_info,
+        stops
+    )
+  
+    stops_assembled = (stops_with_geom
                        .sort_values(["name", "route_id", "stop_id"])
                        .reset_index(drop=True)
                       )
     
-    # Change column order
-    route_cols = ['agency', 'route_id', 'route_type']
-    agency_ids = ['base64_url', 'uri', 'feed_url']
-    
-    col_order = route_cols + [
-        'stop_id', 'stop_name',
-    ] + agency_ids + ['geometry']
-    
-    stops_assembled2 = (
-        prep_traffic_ops.standardize_operator_info_for_exports(
-        stops_assembled)
-        [col_order]
-        .reindex(columns = col_order)    
-    )
+    stops_assembled2 = prep_traffic_ops.standardize_operator_info_for_exports(
+            stops_assembled, analysis_date).to_crs(geography_utils.WGS84)
     
     return stops_assembled2
+
+
+def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame: 
+    """
+    Suppress certain columns used in our internal modeling for export.
+    """
+    # Change column order
+    route_cols = [
+        'organization_source_record_id', 'organization_name',
+        'route_id', 'route_type']
+    stop_cols = ['stop_id', 'stop_name']
+    agency_ids = ['base64_url', 'uri']
+    
+    col_order = route_cols + stop_cols + agency_ids + ['geometry']
+    
+    df2 = (df[col_order]
+           .reindex(columns = col_order)
+           .rename(columns = prep_traffic_ops.RENAME_COLS)
+    )
+    
+    return df2
 
 
 def create_stops_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     time0 = datetime.now()
 
     # Read in parquets
-    stops = prep_traffic_ops.import_stops(analysis_date)
-    trips = prep_traffic_ops.import_trips(analysis_date)
-    stop_times = prep_traffic_ops.import_stop_times(analysis_date)
+    stops = helpers.import_scheduled_stops(
+        analysis_date,
+        columns = prep_traffic_ops.keep_stop_cols,
+        get_pandas = True
+    )
+    
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = prep_traffic_ops.keep_trip_cols,
+        get_pandas = True
+    )
+    
+    stop_times = helpers.import_scheduled_stop_times(
+        analysis_date,
+        columns = prep_traffic_ops.keep_stop_time_cols
+    )
         
     stops_assembled = attach_route_info_to_stops(stops, trips, stop_times)
     

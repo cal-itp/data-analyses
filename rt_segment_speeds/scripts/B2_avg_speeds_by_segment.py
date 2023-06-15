@@ -1,13 +1,14 @@
 """
 Quick aggregation for avg speeds by segment
 """
+import datetime
 import geopandas as gpd
 import pandas as pd
 
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
-from shared_utils import utils, portfolio_utils
+from shared_utils import utils
 
 
 def calculate_avg_speeds(
@@ -15,13 +16,13 @@ def calculate_avg_speeds(
     group_cols: list
 ) -> pd.DataFrame:
     """
-    Calculate the mean, 20th, and 80th percentile speeds 
+    Calculate the median, 20th, and 80th percentile speeds 
     by groups.
     """
     # Take the average after dropping unusually high speeds
     avg = (df.groupby(group_cols)
           .agg({
-            "speed_mph": "mean",
+            "speed_mph": "median",
             "trip_id": "nunique"})
           .reset_index()
     )
@@ -37,7 +38,7 @@ def calculate_avg_speeds(
           )
     
     stats = pd.merge(
-        avg.rename(columns = {"speed_mph": "avg_speed_mph", 
+        avg.rename(columns = {"speed_mph": "median_speed_mph", 
                               "trip_id": "n_trips"}),
         p20.rename(columns = {"speed_mph": "p20_speed_mph"}),
         on = group_cols,
@@ -55,7 +56,6 @@ def calculate_avg_speeds(
     return stats
     
     
-
 def speeds_with_segment_geom(
     analysis_date: str, 
     max_speed_cutoff: int = 70,
@@ -107,7 +107,9 @@ def speeds_with_segment_geom(
             "gtfs_dataset_key", 
             "stop_id",
             "loop_or_inlining",
-            "geometry", "geometry_arrowized"]
+            "geometry", "geometry_arrowized", 
+            "district", "district_name"
+        ]
     )#.set_geometry("geometry_arrowized").drop(columns = "geometry")
     
     gdf = pd.merge(
@@ -117,43 +119,14 @@ def speeds_with_segment_geom(
         how = "inner"
     )
     
-    gdf_with_district = spatial_join_to_caltrans_districts(gdf)
-    
-    return gdf_with_district
+    return gdf
 
-
-def spatial_join_to_caltrans_districts(
-    gdf: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame: 
-    """
-    Spatial join any gdf to Caltrans districts (open data portal)
-    """
-    URL = ("https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHboundary/"
-           "District_Tiger_Lines/FeatureServer/0/query?"
-           "outFields=*&where=1%3D1&f=geojson"
-          )
-    
-    caltrans_districts = gpd.read_file(URL)[["DISTRICT", "geometry"]]
-    
-    caltrans_districts = caltrans_districts.assign(
-        district_name = caltrans_districts.DISTRICT.map(
-            portfolio_utils.district_name_dict)
-    ).rename(columns = {"DISTRICT": "district"})
-    
-    # Spatial join to Caltrans district
-    gdf2 = gpd.sjoin(
-        gdf, 
-        caltrans_districts.to_crs(gdf.crs),
-        how = "inner",
-        predicate = "intersects"
-    ).drop(columns = "index_right")
-    
-    return gdf2
-    
 
 if __name__ == "__main__":
     
+    start = datetime.datetime.now()
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    EXPORT_FILE = f'{STOP_SEG_DICT["stage5"]}_{analysis_date}'
     
     MAX_SPEED = 70
     
@@ -168,5 +141,7 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(
         stop_segment_speeds,
         SEGMENT_GCS,
-        f"{STOP_SEG_DICT['stage5']}_{analysis_date}"
+        EXPORT_FILE
     )
+    
+    print(f"Exported: {datetime.datetime.now() - start}")
