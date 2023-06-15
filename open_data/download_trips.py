@@ -18,7 +18,7 @@ def get_operators(analysis_date: str):
     """
     Operators to download: favor subfeeds over combined regional feed.
     """
-    all_operators = gtfs_utils_v2.schedule_daily_feed_to_organization(
+    all_operators = gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(
                 selected_date = analysis_date,
                 keep_cols = None,
                 get_df = True,
