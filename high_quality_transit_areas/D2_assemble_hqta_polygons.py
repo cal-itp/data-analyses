@@ -18,9 +18,7 @@ import C1_prep_pairwise_intersections as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
 from shared_utils import utils, geography_utils
-from D1_assemble_hqta_points import (EXPORT_PATH, 
-                                     add_route_info, 
-                                     attach_base64_url_to_feed_key)
+from D1_assemble_hqta_points import (EXPORT_PATH, add_route_info)
 from update_vars import analysis_date
 
 fs = get_fs()
@@ -58,18 +56,19 @@ def get_dissolved_hq_corridor_bus(
         hqta_type = "hq_corridor_bus",
     )[corridor_cols]
     
-    names_dict = assemble_hqta_points.get_agency_names()
+    feeds_df = corridors[["feed_key"]].drop_duplicates()
+    crosswalk = assemble_hqta_points.get_agency_info(feeds_df, analysis_date)
+        
+    NAMES_DICT = dict(zip(crosswalk.feed_key, crosswalk.organization_name))
+    B64_DICT = dict(zip(crosswalk.feed_key, crosswalk.base64_url))
+    ORG_DICT = dict(zip(crosswalk.feed_key, crosswalk.organization_source_record_id))  
     
     corridors = corridors.assign(
-        agency_name_primary = corridors.feed_key.map(names_dict),
-        hqta_details = corridors.apply(utilities.hqta_details, axis=1)
+        agency_name_primary = corridors.feed_key.map(NAMES_DICT),
+        hqta_details = corridors.apply(utilities.hqta_details, axis=1),
+        org_id_primary = corridors.feed_key.map(ORG_DICT),
+        base64_url_primary = corridors.feed_key.map(B64_DICT),
     ).rename(columns = {"feed_key": "feed_key_primary"})
-    
-    corridors = attach_base64_url_to_feed_key(
-        corridors, 
-        analysis_date,
-        feed_key_cols = ["feed_key_primary"]
-    )
 
     return corridors
 
@@ -120,6 +119,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "agency_name_primary", "agency_name_secondary",
         "hqta_type", "hqta_details", "route_id", 
         "base64_url_primary", "base64_url_secondary",
+        "org_id_primary", "org_id_secondary",
         "geometry"
     ]
     
