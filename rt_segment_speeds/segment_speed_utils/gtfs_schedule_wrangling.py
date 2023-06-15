@@ -22,19 +22,30 @@ def exclude_scheduled_operators(
 
 def merge_shapes_to_trips(
     shapes: dg.GeoDataFrame, 
-    trips: dd.DataFrame
+    trips: dd.DataFrame,
+    merge_cols: list = ["shape_array_key"]
 ) -> dg.GeoDataFrame:   
     """
     Merge shapes and trips tables.
     We usually start with trip_id (from RT vehicle positions or stop_times),
     and we need to get the `shape_array_key`.
     """
-    trips_with_geom = dd.merge(
-        shapes,
-        trips,
-        on = "shape_array_key",
-        how = "inner",
-    )
+    if isinstance(shapes, dg.GeoDataFrame):
+        trips_with_geom = dd.merge(
+            shapes,
+            trips,
+            on = merge_cols,
+            how = "inner",
+        )
+    else:
+        if isinstance(trips, dd.DataFrame):
+            trips = trips.compute()
+        trips_with_geom = pd.merge(
+            shapes,
+            trips,
+            on = merge_cols,
+            how = "inner"
+        )
         
     return trips_with_geom
 
@@ -51,7 +62,8 @@ def get_trips_with_geom(
 
     trips = helpers.import_scheduled_trips(
         analysis_date,
-        columns = trip_cols
+        columns = trip_cols,
+        get_pandas = True
     )
     
     trips = exclude_scheduled_operators(
@@ -91,43 +103,25 @@ def attach_stop_geometry(
     df: pd.DataFrame, 
     stops: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
-    
+    """
+    Merge df with stop's point geometry, using feed_key and stop_id.
+    """
     if isinstance(df, pd.DataFrame):
-        df = dd.from_pandas(df, npartitions=1)
-    elif isinstance(df, gpd.GeoDataFrame):
-        df = dg.from_geopandas(df, npartitions=1)
-        
-    df2 = dd.merge(
-        df,
-        stops,
-        on = ["feed_key", "stop_id"],
-        how = "inner"
-    )
+        df2 = pd.merge(
+            stops,
+            df,
+            on = ["feed_key", "stop_id"],
+            how = "inner"
+        )
+    elif isinstance(df, [dd.DataFrame, dg.GeoDataFrame]):
+        # We will lose geometry by putting stops on the right
+        # but, in the case where we have another dg.GeoDataFrame on left,
+        # we should explicitly set geometry column after
+        df2 = dd.merge(
+            df,
+            stops,
+            on = ["feed_key", "stop_id"],
+            how = "inner"
+        )
     
     return df2
-    
-    
-    
-def merge_speeds_to_segment_geom(
-    speeds_df: dd.DataFrame,
-    segments_df: gpd.GeoDataFrame,
-) -> dg.GeoDataFrame:
-    """
-    Merge in stop segment geometry
-    """
-    stop_segments = gpd.read_parquet(
-        f"{SEGMENT_GCS}stop_segments_{analysis_date}.parquet",
-        columns = ["gtfs_dataset_key", 
-                   "shape_array_key", "stop_sequence", 
-                   "stop_name",
-                   "geometry"]
-    )
-
-    stop_segments_with_speed = dd.merge(
-        stop_segments,
-        speeds_df,
-        on = ["gtfs_dataset_key", "shape_array_key", "stop_sequence"],
-        how = "inner",
-    )
-    
-    return stop_segments_with_speed
