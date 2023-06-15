@@ -16,7 +16,7 @@ from loguru import logger
 from siuba import *
 
 from segment_speed_utils import helpers
-from shared_utils import utils, gtfs_utils_v2
+from shared_utils import utils, schedule_rt_utils
 from update_vars import SEGMENT_GCS, analysis_date
 
 fs = gcsfs.GCSFileSystem()
@@ -116,12 +116,11 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     # Get rt_datasets that are available for that day
-    rt_datasets = gtfs_utils_v2.get_transit_organizations_gtfs_dataset_keys(
+    rt_datasets = schedule_rt_utils.filter_dim_gtfs_datasets(
         keep_cols=["key", "name", "type", "regional_feed_type"],
         custom_filtering={"type": ["vehicle_positions"]},
         get_df = True
-    ) >> collect()
-    
+    ) >> rename(name="_gtfs_dataset_name")
     
     # Exclude regional feed and precursors
     exclude = ["Bay Area 511 Regional VehiclePositions"]
