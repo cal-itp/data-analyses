@@ -213,3 +213,15 @@
 2023-05-18 13:38:27.704 | INFO     | __main__:<module>:215 - Analysis date: 2023-05-17
 2023-05-18 13:38:28.915 | INFO     | __main__:<module>:245 - remove batched parquets
 2023-05-18 13:38:28.915 | INFO     | __main__:<module>:247 - execution time: 0:00:01.211319
+2023-06-15 10:51:08.906 | INFO     | __main__:<module>:185 - Analysis date: 2023-06-14
+2023-06-15 10:53:25.950 | INFO     | __main__:concat_batches_for_two_dates:129 - concatenated all batched data
+2023-06-15 10:53:25.952 | INFO     | __main__:<module>:195 - concat and filter for 2 dates downloaded: 0:02:16.941947
+2023-06-15 10:56:25.190 | INFO     | __main__:<module>:185 - Analysis date: 2023-06-14
+2023-06-15 10:58:37.465 | INFO     | __main__:concat_batches_for_two_dates:129 - concatenated all batched data
+2023-06-15 10:58:37.466 | INFO     | __main__:<module>:195 - concat and filter for 2 dates downloaded: 0:02:12.274981
+2023-06-15 10:59:41.709 | INFO     | __main__:<module>:185 - Analysis date: 2023-06-14
+2023-06-15 11:01:50.054 | INFO     | __main__:concat_batches_for_two_dates:129 - concatenated all batched data
+2023-06-15 11:01:50.055 | INFO     | __main__:<module>:195 - concat and filter for 2 dates downloaded: 0:02:08.345357
+2023-06-15 11:06:33.710 | INFO     | __main__:<module>:202 - export concatenated vp: 0:04:43.654906
+2023-06-15 11:13:28.332 | INFO     | __main__:<module>:218 - remove batched parquets
+2023-06-15 11:13:28.332 | INFO     | __main__:<module>:221 - execution time: 0:13:46.622590
