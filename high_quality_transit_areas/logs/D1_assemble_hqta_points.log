@@ -243,3 +243,10 @@
 2023-05-18 12:48:34.365 | INFO     | __main__:<module>:256 - export as geoparquet in date folder
 2023-05-18 12:48:35.015 | INFO     | __main__:<module>:265 - export as geoparquet
 2023-05-18 12:48:35.016 | INFO     | __main__:<module>:268 - execution time: 0:01:40.313278
+2023-06-15 15:11:02.140 | INFO     | __main__:<module>:189 - Analysis date: 2023-06-14
+2023-06-15 15:11:07.484 | INFO     | __main__:<module>:213 - combined points: 0:00:05.295363
+2023-06-15 15:12:36.502 | INFO     | __main__:<module>:219 - add route info: 0:01:29.018130
+2023-06-15 15:13:04.019 | INFO     | __main__:<module>:227 - add agency names: 0:00:27.516847
+2023-06-15 15:13:05.036 | INFO     | __main__:<module>:237 - export as geoparquet in date folder
+2023-06-15 15:13:05.706 | INFO     | __main__:<module>:246 - export as geoparquet
+2023-06-15 15:13:05.708 | INFO     | __main__:<module>:249 - execution time: 0:02:03.519691
