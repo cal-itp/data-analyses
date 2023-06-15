@@ -11,6 +11,7 @@ need to import different pandas to add type hint for styler object
 
 """
 import base64
+from typing import Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
