@@ -19,7 +19,7 @@ from loguru import logger
 
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
-from shared_utils import utils, geography_utils, gtfs_utils_v2, portfolio_utils
+from shared_utils import utils, geography_utils, schedule_rt_utils
 from update_vars import analysis_date, TEMP_GCS, COMPILED_CACHED_VIEWS
 
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
@@ -60,9 +60,13 @@ def add_route_info(hqta_points: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     using the trips and stop_times table.
     """    
     stop_times = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet", 
+        columns = ["feed_key", "stop_id", "trip_id"]
+    )
     trips = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
+        columns = ["feed_key", "trip_id", "route_id"]
+    )
     
     stop_cols = ["feed_key", "stop_id"]
     trip_cols = ["feed_key", "trip_id"]
@@ -94,52 +98,21 @@ def add_route_info(hqta_points: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return ca_hqta_points
 
     
-def get_agency_names() -> dict:
-    feed_to_name = (pd.read_parquet(
-            f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
-            columns = ["feed_key", "name"]
-        ).drop_duplicates()
-        .reset_index(drop=True)
+def get_agency_info(df: pd.DataFrame, date: str) -> pd.DataFrame:
+    crosswalk = schedule_rt_utils.sample_schedule_feed_key_to_organization_crosswalk(
+        df, 
+        date,
+        quartet_data = "schedule",
+        dim_gtfs_dataset_cols = ["key", "base64_url"],
+        dim_organization_cols = ["source_record_id", "name"]
     )
-    
-    cleaned_names = portfolio_utils.clean_organization_name(feed_to_name)
-    cleaned_names = portfolio_utils.standardize_gtfs_dataset_names(cleaned_names)
-    
-    names_dict = dict(zip(cleaned_names.feed_key, cleaned_names.name))
         
-    return names_dict
-
-
-def attach_base64_url_to_feed_key(
-    df: pd.DataFrame, analysis_date: str,
-    feed_key_cols: list = ["feed_key_primary", "feed_key_secondary"]
-) -> pd.DataFrame:
-    """
-    We will not use feed_key in the published data, but rather, 
-    include base64_url, which should be more stable and acts like itp_id.
-    Agency name is already gtfs_dataset_name, but gtfs_dataset_key is not 
-    going to be as stable as base64_url.
-    """
-    feed_to_orgs = gtfs_utils_v2.schedule_daily_feed_to_organization(
-        selected_date = analysis_date,
-        keep_cols = ["base64_url", "feed_key"],
-        get_df = True,
-        feed_option = "use_subfeeds"
-    )
-    
-    base64_url_dict = dict(zip(feed_to_orgs.feed_key, 
-                               feed_to_orgs.base64_url))
-
-    for c in feed_key_cols:
-        # new column will be called base64_url_primary if the column was feed_key_primary
-        new_col = f"{c.replace('feed_key', 'base64_url')}"
-        df[new_col] = df[c].map(base64_url_dict)
-    
-    return df
+    return crosswalk
     
 
 def add_agency_names_hqta_details(
-    gdf: gpd.GeoDataFrame, analysis_date: str
+    gdf: gpd.GeoDataFrame, 
+    analysis_date: str
 ) -> gpd.GeoDataFrame:
     """
     Add agency names by merging it in with our crosswalk
@@ -150,12 +123,22 @@ def add_agency_names_hqta_details(
     hqta_details makes it clearer for open data portal users why
     some ID / agency name columns show the same info or are missing.
     """
-    names_dict = get_agency_names()
-        
+    feeds_df = gdf.rename(
+        columns = {"feed_key_primary": "feed_key"})[["feed_key"]].drop_duplicates()
+    
+    crosswalk = get_agency_info(feeds_df, analysis_date)
+    
+    NAMES_DICT = dict(zip(crosswalk.feed_key, crosswalk.organization_name))
+    B64_DICT = dict(zip(crosswalk.feed_key, crosswalk.base64_url))
+    ORG_DICT = dict(zip(crosswalk.feed_key, crosswalk.organization_source_record_id))    
     gdf = gdf.assign(
-        agency_name_primary = gdf.feed_key_primary.map(names_dict),
-        agency_name_secondary = gdf.feed_key_secondary.map(names_dict),
+        agency_name_primary = gdf.feed_key_primary.map(NAMES_DICT),
+        agency_name_secondary = gdf.feed_key_secondary.map(NAMES_DICT),
         hqta_details = gdf.apply(utilities.hqta_details, axis=1),
+        org_id_primary = gdf.feed_key_primary.map(ORG_DICT),
+        org_id_secondary = gdf.feed_key_secondary.map(ORG_DICT),
+        base64_url_primary = gdf.feed_key_primary.map(B64_DICT),
+        base64_url_secondary = gdf.feed_key_secondary.map(B64_DICT),
     )
     
     # Additional clarification of hq_corridor_bus, 
@@ -168,10 +151,7 @@ def add_agency_names_hqta_details(
             (x.hqta_type == "hq_corridor_bus") and 
             (x.peak_trips < 4) 
         ) else x.hqta_details, axis = 1)
-    
-    # Add base64_urls
-    gdf = attach_base64_url_to_feed_key(gdf, analysis_date)
-    
+        
     return gdf  
 
 
@@ -182,6 +162,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "hqta_details", "agency_name_secondary",
         # include these as stable IDs?
         "base64_url_primary", "base64_url_secondary", 
+        "org_id_primary", "org_id_secondary",
         "peak_trips",
         "geometry"
     ]
@@ -226,7 +207,6 @@ if __name__=="__main__":
     
     hqta_points_combined2 = merge_in_max_arrivals_by_stop(
         hqta_points_combined, max_arrivals_by_stop)
-    
     
     time1 = dt.datetime.now()
     logger.info(f"combined points: {time1 - start}")
