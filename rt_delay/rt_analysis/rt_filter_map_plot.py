@@ -708,15 +708,25 @@ class RtFilterMapper:
         '''
         Measure observed runtimes for routes within filter. Based on full data extent of each trip,
         currently bidirectional.
+        
+        TODO document rest!
         '''
         df = (self._filter(self.stop_delay_view)
+             >> filter(_.actual_time > dt.datetime.combine(rt_day.analysis_date, dt.time(6)),
+                       _.actual_time < dt.datetime.combine(rt_day.analysis_date, dt.time(21))
+                      )
              >> group_by(_.shape_id, _.route_id, _.route_short_name, _.trip_id)
-             >> summarize(runtime = _.actual_time.max() - _.actual_time.min())
+             >> summarize(runtime = _.actual_time.max() - _.actual_time.min(),
+                         start = _.actual_time.min())
              >> group_by(_.route_id, _.route_short_name)
              >> summarize(p50_runtime_minutes =_.runtime.quantile(.5).seconds / 60,
                           p20_runtime_minutes =_.runtime.quantile(.2).seconds / 60,
-                          p80_runtime_minutes =_.runtime.quantile(.8).seconds / 60)
-        ).round(0)
+                          p80_runtime_minutes =_.runtime.quantile(.8).seconds / 60,
+                         first_start = _.start.min(), last_start = _.start.max(),
+                         n_trips = _.shape[0])
+             >> mutate(span = _.last_start - _.first_start, span_minutes = _.span.map(lambda x: x.seconds) / 60,
+                      daily_avg_headway = (_.span_minutes / _.n_trips) * 2) # create avg per direction by multiplying 2x
+        ).round(1)
         return df
     def corridor_metrics(self):
         '''
@@ -764,7 +774,7 @@ class RtFilterMapper:
         speed_metric_df = (speed_int_df
               >> mutate(organization = self.organization_name)
               >> group_by(_.route_id, _.route_short_name, _.organization)
-              >> summarize(median_corr_mph = _.corridor_speed_mph.quantile(.5),
+              >> summarize(p20_corr_mph = _.corridor_speed_mph.quantile(.2),
                            speed_delay_minutes = _.target_delay_seconds.sum() / 60)
              )
         both_metrics_df = (speed_metric_df >> inner_join(_, schedule_metric_df, on = ['route_id', 'route_short_name'])
