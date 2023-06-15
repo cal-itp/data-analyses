@@ -64,7 +64,7 @@ def get_trips_with_geom(
         analysis_date,
         columns = trip_cols,
         get_pandas = True
-    )
+    ).drop_duplicates()
     
     trips = exclude_scheduled_operators(
         trips, 
