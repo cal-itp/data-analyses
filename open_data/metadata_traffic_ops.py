@@ -1,4 +1,5 @@
 from gcs_to_esri import open_data_dates
+from metadata_hqta import ESRI_BASE_URL
 
 # Traffic Ops routes and stops data dictionary
 KEYWORDS = [
@@ -12,7 +13,10 @@ KEYWORDS = [
 
 PURPOSE = "Provide all CA transit stops and routes (geospatial) from all transit operators."
 
-METHODOLOGY = "This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. For the routes that aren't found in `shapes.txt`, we compile the stop sequences with stop longitude/latitude to roughly capture the route alignment. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt."
+METHODOLOGY = "This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt."
+
+DATA_DICT_ROUTES_URL = f"{ESRI_BASE_URL}CA_Transit_Routes/FeatureServer"
+DATA_DICT_STOPS_URL = f"{ESRI_BASE_URL}CA_Transit_Stops/FeatureServer"
 
 ROUTES_DICT = {
     "dataset_name": "ca_transit_routes", 
@@ -33,11 +37,11 @@ ROUTES_DICT = {
     "methodology": METHODOLOGY, 
     
     "data_dict_type": "CSV",
-    "data_dict_url": "some_url", 
+    "data_dict_url": DATA_DICT_ROUTES_URL, 
 
     "contact_organization": "Caltrans", 
-    "contact_person": "Tiffany Chu", 
-    "contact_email": "tiffany.chu@dot.ca.gov",
+    "contact_person": "Tiffany Ku", 
+    "contact_email": "tiffany.ku@dot.ca.gov",
     
     "horiz_accuracy": "4 meters",
 }
@@ -45,3 +49,4 @@ ROUTES_DICT = {
 # Use same data dictionary with tiny modifications
 STOPS_DICT = ROUTES_DICT.copy()
 STOPS_DICT["dataset_name"] = "ca_transit_stops"
+STOPS_DICT["data_dict_url"] = DATA_DICT_STOPS_URL
