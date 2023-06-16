@@ -795,10 +795,11 @@ class RtFilterMapper:
                               >> mutate(new_avg_trips_hr = ((_.n_trips + _.trips_added) / _.span_hours) / 2)
                               # create avg per direction by div 2
                           )
+        both_metrics_df['length_miles'] = (self.corridor.distance_meters / METERS_PER_MILE).iloc[0]
+        # both_metrics_df.length_miles = both_metrics_df.length_miles.fillna(value=gdf.length_miles.iloc[0])
         gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
         # ffill kinda broken in geopandas?
         gdf.geometry = gdf.geometry.fillna(value=gdf.geometry.iloc[0])
-        gdf['length_miles'] = self.corridor.distance_meters / METERS_PER_MILE
         self.corridor = gdf.round(1)
         print('metrics attached to self.corridor: ')
         return self.corridor
