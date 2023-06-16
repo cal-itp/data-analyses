@@ -12,7 +12,10 @@ get_speeds_by_segment:
 	python A3_loop_inlining.py
 	python A4_concatenate_vp_pared.py
 	python B1_speeds_by_segment_trip.py
+    
+export_data:
 	python B2_avg_speeds_by_segment.py
+	python B3_export.py    
 	#python C1_rt_trip_diagnostics.py
 	#TODO: where should calculate_stop_delay and stop_level_metrics be?
 
