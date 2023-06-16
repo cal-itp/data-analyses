@@ -9,7 +9,7 @@ import geopandas as gpd
 import pandas as pd
 import siuba  # for type hints
 from calitp_data_analysis.tables import tbls
-from shared_utils import gtfs_utils_v2  # rt_utils
+from shared_utils import gtfs_utils_v2
 from siuba import *
 
 PACIFIC_TIMEZONE = "US/Pacific"
@@ -80,7 +80,6 @@ def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True) -> Union[pd.Da
 
 
 def filter_dim_gtfs_datasets(
-    date: str,
     keep_cols: list[str] = ["key", "name", "type", "regional_feed_type", "uri", "base64_url"],
     custom_filtering: dict = None,
     get_df: bool = True,
@@ -223,7 +222,7 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
     # (1) Filter dim_gtfs_datasets by quartet and merge with the
     # gtfs_dataset_keys in df.
     dim_gtfs_datasets = filter_dim_gtfs_datasets(
-        date, keep_cols=dim_gtfs_dataset_cols, custom_filtering={"type": [quartet_data]}, get_df=True
+        keep_cols=dim_gtfs_dataset_cols, custom_filtering={"type": [quartet_data]}, get_df=True
     )
 
     feeds_with_quartet_info = pd.merge(

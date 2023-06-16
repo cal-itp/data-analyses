@@ -61,11 +61,13 @@ for f in need_renaming:
     # Grab this renaming dict
     #hqta.RENAME_CA_HQTA (UPDATE THESE, FEWER NOW)
     RENAME_CA_HQTA = {
-        "itp_id_pri": "itp_id_primary",
         "agency_pri": "agency_primary",
-        "itp_id_sec": "itp_id_secondary",
         "agency_sec": "agency_secondary",
         "hqta_detai": "hqta_details",
+        "base64_url": "base64_url_primary",
+        "base64_u_1": "base64_url_secondary",  
+        "org_id_pri": "org_id_primary",
+        "org_id_sec": "org_id_secondary",
     }
 
     # To change field names, must use AlterField_management, 

@@ -112,6 +112,8 @@ if __name__ == "__main__":
 
     stops = create_stops_file_for_export(analysis_date)  
     
+    stops = finalize_export_df(stops)
+    
     utils.geoparquet_gcs_export(
         stops, 
         TRAFFIC_OPS_GCS, 
