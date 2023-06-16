@@ -28,7 +28,7 @@ DATA_DICT_STOPS_URL = f"{ESRI_BASE_URL}CA_HQ_Transit_Stops/FeatureServer"
 
 HQTA_TRANSIT_AREAS_DICT = {
     "dataset_name": "ca_hq_transit_areas", 
-    "publish_entity": "California Integrated Travel Project", 
+    "publish_entity": "Data & Digital Services / California Integrated Travel Project", 
 
     "abstract": "Public. EPSG: 4326",
     "purpose": PURPOSE_AREAS, 
