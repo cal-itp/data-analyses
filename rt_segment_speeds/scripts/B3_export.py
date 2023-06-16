@@ -76,23 +76,62 @@ def finalize_df_for_export(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     keep_cols = [
         'organization_source_record_id', 'organization_name',
         'shape_id', 'stop_sequence', 'stop_id', 
-        #'loop_or_inlining', 
         'geometry',
         'p50_mph', 'p20_mph', 
         'p80_mph', 'n_trips', 
         'time_of_day', 
-        'uri', 'base64_url',
+        'base64_url',
         'district', 'district_name'
     ]
+    
+    RENAME_DICT = {
+        "organization_source_record_id": "org_id",
+        "organization_name": "agency_name",
+    }
     
     gdf2 = (gdf.reindex(columns = keep_cols)
            .sort_values(["organization_name", 
                          "shape_id", "stop_sequence"])
            .reset_index(drop=True)
+           .rename(columns = RENAME_DICT) 
           )
     
     return gdf2
 
+
+def grab_extreme_tails(
+    df: pd.DataFrame, 
+    col_list: list, 
+    q: float = 0.05
+) -> list:
+    """
+    Get quantile cutoffs across list of columns.
+    """
+    return [df[c].quantile(q=q) for c in col_list]
+
+
+def suppress_bad_data(
+    gdf: gpd.GeoDataFrame, 
+    quantile_cutoff: float = 0.05
+) -> gpd.GeoDataFrame:
+    """
+    Suppress the tails of bad data that we need to investigate.
+    Suppress the bottom 5% of extreme calculations.
+    """
+    cutoffs = grab_extreme_tails(
+        gdf, 
+        ["p20_mph", "p50_mph", "p80_mph"], 
+        quantile_cutoff
+    )
+    
+    gdf2 = gdf[
+        (gdf.p20_mph >= cutoffs[0]) & 
+        (gdf.p50_mph >= cutoffs[1]) & 
+        (gdf.p80_mph >= cutoffs[2])
+    ].reset_index(drop=True)
+
+    return gdf2
+    
 
 if __name__ == "__main__":
     
@@ -117,7 +156,9 @@ if __name__ == "__main__":
         how = "inner"
     )
             
-    final_gdf = finalize_df_for_export(gdf2)
+    gdf3 = finalize_df_for_export(gdf2)
+    
+    final_gdf = suppress_bad_data(gdf3)
     
     time2 = datetime.datetime.now()
     print(f"finalize: {time2 - time1}")
