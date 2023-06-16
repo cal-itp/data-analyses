@@ -17,8 +17,8 @@ import sys
 from dask import delayed
 from loguru import logger
 
-from shared_utils import dask_utils, utils
-from segment_speed_utils import helpers, segment_calcs
+from shared_utils import dask_utils, schedule_rt_utils, utils
+from segment_speed_utils import helpers
 from update_vars import SEGMENT_GCS, analysis_date
 
 fs = gcsfs.GCSFileSystem()
@@ -66,7 +66,7 @@ def filter_to_analysis_date(
     Parse the location_timestamp to grab date
     and only keep rows that are for analysis_date
     """    
-    df = segment_calcs.localize_vp_timestamp(
+    df = schedule_rt_utils.localize_timestamp_col(
         df, "location_timestamp")
         
     df = df.assign(
@@ -140,7 +140,7 @@ def filter_by_operator_to_activity_date(
     Concatenate the 2 dates into one and save it as our actual analysis_date.
     """
     RT_OPERATORS = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_raw_{analysis_date}.parquet",
+        f"{SEGMENT_GCS}vp_raw_{analysis_date}",
         columns = ["gtfs_dataset_key"]
     ).drop_duplicates().gtfs_dataset_key.unique().tolist()
         

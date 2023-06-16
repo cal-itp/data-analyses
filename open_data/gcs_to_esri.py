@@ -13,7 +13,7 @@ import sys
 
 from loguru import logger
 
-from shared_utils import utils, geography_utils, rt_dates
+from shared_utils import utils, geography_utils
 from update_vars import analysis_date
 
 catalog = intake.open_catalog("./*.yml")

@@ -11,13 +11,14 @@ need to import different pandas to add type hint for styler object
 
 """
 import base64
+from typing import Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
 import pandas as pd
 import pandas.io.formats.style  # for type hint: https://github.com/pandas-dev/pandas/issues/24884
 from IPython.display import HTML
-from shared_utils import gtfs_utils_v2, rt_utils
+from shared_utils import rt_utils
 from siuba import *
 
 district_name_dict = {
@@ -50,38 +51,8 @@ def decode_base64_url(row):
     return decoded
 
 
-def add_agency_identifiers(df: pd.DataFrame, date: str) -> pd.DataFrame:
-    """
-    Find the current base64_url for the organization name and
-    decode it as ASCII (Chad Baker request for CKAN data).
-    The encoded version might not be as usable for users.
-    """
-    dim_gtfs_datasets = gtfs_utils_v2.get_transit_organizations_gtfs_dataset_keys(keep_cols=None, get_df=True)
-
-    current_feeds = (
-        dim_gtfs_datasets[
-            (dim_gtfs_datasets.data_quality_pipeline == True)
-            & (dim_gtfs_datasets._is_current == True)
-            & (dim_gtfs_datasets._valid_from <= pd.to_datetime(date))
-            & (dim_gtfs_datasets._valid_to >= pd.to_datetime(date))
-        ]
-        .sort_values(["name", "gtfs_dataset_key"])
-        .drop_duplicates("name")
-    )
-
-    df2 = pd.merge(
-        df,
-        current_feeds[["gtfs_dataset_key", "name", "base64_url", "uri"]],
-        on="name",
-        how="inner",
-        validate="m:1",
-    )
-
-    return df2
-
-
 # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/utils.py
-def add_route_name(df: pd.DataFrame) -> pd.DataFrame:
+def add_route_name(df: Union[pd.DataFrame, dd.DataFrame]) -> Union[pd.DataFrame, dd.DataFrame]:
     """
     Input a df that has route_id and route_short_name, route_long_name, route_desc, and this will pick
     """
@@ -90,16 +61,12 @@ def add_route_name(df: pd.DataFrame) -> pd.DataFrame:
     if not (set(route_cols).issubset(set(list(df.columns)))):
         raise ValueError(f"Input a df that contains {route_cols}")
 
-    if isinstance(df, pd.DataFrame):
-        ddf = dd.from_pandas(df, npartitions=2)
-    elif isinstance(df, gpd.GeoDataFrame):
-        ddf = dg.from_geopandas(df, npartitions=2)
-
-    ddf = ddf.assign(
-        route_name_used=ddf.apply(lambda x: rt_utils.which_desc(x), axis=1, meta=("route_name_used", "str"))
-    )
-
-    df = ddf.compute()
+    if isinstance(df, [dd.DataFrame, dg.GeoDataFrame]):
+        df = df.assign(
+            route_name_used=df.apply(lambda x: rt_utils.which_desc(x), axis=1, meta=("route_name_used", "str"))
+        )
+    else:
+        df = df.assign(route_name_used=df.apply(lambda x: rt_utils.which_desc(x), axis=1))
 
     # If route names show up with leading comma
     df = df.assign(route_name_used=df.route_name_used.str.lstrip(",").str.strip())

@@ -13,7 +13,7 @@ import pandas as pd
 import shapely
 import siuba  # need this to do type hint in functions
 from calitp_data_analysis.tables import tbls
-from shared_utils import geography_utils
+from shared_utils import geography_utils, schedule_rt_utils
 from siuba import *
 
 GCS_PROJECT = "cal-itp-data-infra"
@@ -163,14 +163,15 @@ def get_metrolink_feed_key(selected_date: Union[str, datetime.date], get_df: boo
     """
     Get Metrolink's feed_key value.
     """
-    metrolink_in_airtable = get_transit_organizations_gtfs_dataset_keys(
-        keep_cols=["key", "name"], custom_filtering={"name": ["Metrolink Schedule"]}
+    metrolink_in_airtable = schedule_rt_utils.filter_dim_gtfs_datasets(
+        keep_cols=["key", "name"], custom_filtering={"name": ["Metrolink Schedule"]}, get_df=False
     )
 
     metrolink_feed = (
         tbls.mart_gtfs.fct_daily_schedule_feeds()
         >> filter(_.date == selected_date)
         >> inner_join(_, metrolink_in_airtable, on="gtfs_dataset_key")
+        >> rename(name=_._gtfs_dataset_name)
         >> subset_cols(["feed_key", "name"])
         >> collect()
     )
@@ -210,30 +211,7 @@ def fill_in_metrolink_trips_df_with_shape_id(trips: pd.DataFrame, metrolink_feed
     return df
 
 
-def get_transit_organizations_gtfs_dataset_keys(
-    keep_cols: list[str], custom_filtering: dict = None, get_df: bool = False
-) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
-    """
-    From Airtable GTFS datasets, get the datasets (and gtfs_dataset_key)
-    for usable feeds.
-
-    With no filters, all available dataset quartets are returned.
-    """
-    dim_gtfs_datasets = (
-        tbls.mart_transit_database.dim_gtfs_datasets()
-        >> filter(_.data_quality_pipeline == True)  # if True, we can use
-        >> subset_cols(keep_cols)
-        >> filter_custom_col(custom_filtering)
-        >> rename(gtfs_dataset_key="key")
-    )
-
-    if get_df:
-        dim_gtfs_datasets = dim_gtfs_datasets >> collect()
-
-    return dim_gtfs_datasets
-
-
-def schedule_daily_feed_to_organization(
+def schedule_daily_feed_to_gtfs_dataset_name(
     selected_date: Union[str, datetime.date],
     keep_cols: list[str] = [],
     get_df: bool = True,
@@ -271,11 +249,9 @@ def schedule_daily_feed_to_organization(
                 Caution: would result in duplicate organization names
     """
     # Get GTFS schedule datasets from Airtable
-    dim_gtfs_datasets = get_transit_organizations_gtfs_dataset_keys(
-        keep_cols=["key", "name", "type", "regional_feed_type"],
-        custom_filtering={"type": ["schedule"]},
-        get_df=False,
-    )
+    dim_gtfs_datasets = schedule_rt_utils.filter_dim_gtfs_datasets(
+        keep_cols=["key", "name", "type", "regional_feed_type"], custom_filtering={"type": ["schedule"]}, get_df=False
+    ) >> rename(name="_gtfs_dataset_name")
 
     # Merge on gtfs_dataset_key to get organization name
     fact_feeds = (
@@ -304,15 +280,15 @@ def get_trips(
     custom_filtering: dict = None,
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
     """
-    Query fct_daily_scheduled_trips
+    Query fct_scheduled_trips
 
     Must supply a list of feed_keys returned from
-    schedule_daily_feed_to_organization() or subset of those results.
+    schedule_daily_feed_to_gtfs_dataset_name() or subset of those results.
     """
     check_operator_feeds(operator_feeds)
 
     trips = (
-        tbls.mart_gtfs.fct_daily_scheduled_trips()
+        tbls.mart_gtfs.fct_scheduled_trips()
         >> filter_date(selected_date, date_col="service_date")
         >> filter_operator(operator_feeds, include_name=True)
         >> filter_custom_col(custom_filtering)
@@ -357,7 +333,7 @@ def get_shapes(
     Query fct_daily_scheduled_shapes.
 
     Must supply a list of feed_keys returned from
-    schedule_daily_feed_to_organization() or subset of those results.
+    schedule_daily_feed_to_gtfs_dataset_name() or subset of those results.
     """
     check_operator_feeds(operator_feeds)
 
@@ -400,7 +376,7 @@ def get_stops(
     Query fct_daily_scheduled_stops.
 
     Must supply a list of feed_keys or organization names returned from
-    schedule_daily_feed_to_organization() or subset of those results.
+    schedule_daily_feed_to_gtfs_dataset_name() or subset of those results.
     """
     check_operator_feeds(operator_feeds)
 
