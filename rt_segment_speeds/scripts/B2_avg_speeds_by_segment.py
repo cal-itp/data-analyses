@@ -38,19 +38,19 @@ def calculate_avg_speeds(
           )
     
     stats = pd.merge(
-        avg.rename(columns = {"speed_mph": "median_speed_mph", 
+        avg.rename(columns = {"speed_mph": "p50_mph", 
                               "trip_id": "n_trips"}),
-        p20.rename(columns = {"speed_mph": "p20_speed_mph"}),
+        p20.rename(columns = {"speed_mph": "p20_mph"}),
         on = group_cols,
         how = "left"
     ).merge(
-        p80.rename(columns = {"speed_mph": "p80_speed_mph"}),
+        p80.rename(columns = {"speed_mph": "p80_mph"}),
         on = group_cols,
         how = "left"
     )
     
     # Clean up for map
-    speed_cols = [c for c in stats.columns if "_speed_mph" in c]
+    speed_cols = [c for c in stats.columns if "_mph" in c]
     stats[speed_cols] = stats[speed_cols].round(2)
     
     return stats
