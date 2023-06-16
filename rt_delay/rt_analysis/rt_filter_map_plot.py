@@ -712,9 +712,9 @@ class RtFilterMapper:
     def runtime_metrics(self):
         '''
         Measure observed runtimes for routes within filter. Based on full data extent of each trip,
-        currently bidirectional.
-        
-        TODO document rest!
+        currently bidirectional. Returns 20th, 50th, 80th %ile.
+        Assess all-day frequency as frequency within the narrower of 0600-2100 or actual span.
+        Note that frequency is average frequency in each direction.        
         '''
         df = (self._filter(self.stop_delay_view)
              >> filter(_.actual_time > dt.datetime.combine(self.analysis_date, dt.time(6)),
@@ -735,9 +735,10 @@ class RtFilterMapper:
         return df
     def corridor_metrics(self, sccp = False):
         '''
-        Generate schedule based and speed based metrics for SCCP/LPP programs.
+        Set sccp = True to generate schedule and speed based metrics for SCCP/LPP programs.
         
-        Default assumption is that
+        Default assumption is that speeds will improve to 16mph for the speed based metric.
+        Set a different speed via the self.transit_priority_target_mph attribute.
         
         Note that trips_added assumes that service hour savings based on corridor speed improvements
         are reinvested into additonal runs of the *entire* route, at the existing median runtime.
@@ -746,6 +747,7 @@ class RtFilterMapper:
         assert not self._filter(self.corridor_stop_delays).empty, 'filter does not include any corridor trips'
         if sccp:
             assert not self.filter, 'warning: filter set -- for SCCP/LPP reset filter first'
+            assert self.transit_priority_target_mph == 16, 'for SCCP/LPP use 16mph standard'
             
         # median delay within segment for each trip, then aggregate to route
         schedule_metric_df = (self._filter(self.corridor_stop_delays)
