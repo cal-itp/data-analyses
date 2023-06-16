@@ -12,7 +12,7 @@ import pandas as pd
 
 from typing import List, Literal
 
-from shared_utils import rt_utils
+from shared_utils import schedule_rt_utils, rt_utils
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS, PROJECT_CRS
 
@@ -35,10 +35,10 @@ def crosswalk_scheduled_trip_grouping_with_rt_key(
     trips = helpers.import_scheduled_trips(
         analysis_date, 
         columns = keep_trip_cols
-    ).drop_duplicates()
+    )
     
     # Get the schedule feed_key and RT gtfs_dataset_key and add it to crosswalk
-    fct_rt_feeds = (rt_utils.get_rt_schedule_feeds_crosswalk(
+    fct_rt_feeds = (schedule_rt_utils.get_rt_schedule_feeds_crosswalk(
             analysis_date, 
             keep_cols = ["gtfs_dataset_key", "schedule_feed_key", "feed_type"], 
             get_df = True,

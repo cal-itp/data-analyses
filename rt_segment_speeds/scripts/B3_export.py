@@ -11,9 +11,9 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import gtfs_utils_v2, portfolio_utils, utils
+from shared_utils import schedule_rt_utils, utils
 from shared_utils.geography_utils import WGS84
-from segment_speed_utils import helpers, segment_calcs
+from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
 
@@ -36,7 +36,7 @@ def get_operator_natural_identifiers(
         analysis_date,
         columns = ["shape_array_key", "shape_id"],
         get_pandas = True
-    ).drop_duplicates()
+    )
     
     df_with_shape = pd.merge(
         operator_shape_df,
@@ -45,43 +45,25 @@ def get_operator_natural_identifiers(
         how = "inner"
     )
     
-    # Get base64_url and uri
-    dim_gtfs_datasets = gtfs_utils_v2.get_transit_organizations_gtfs_dataset_keys(
-        keep_cols=None, get_df=True)
-
-    dim_gtfs_datasets = segment_calcs.localize_vp_timestamp(
-        dim_gtfs_datasets, 
-        ["_valid_from", "_valid_to"]
-    )
-    
-    current_feeds = (
-        dim_gtfs_datasets[
-            (dim_gtfs_datasets.data_quality_pipeline == True)
-            #& (dim_gtfs_datasets._is_current == True)
-            & (dim_gtfs_datasets._valid_from_local <= pd.to_datetime(analysis_date))
-            & (dim_gtfs_datasets._valid_to_local >= pd.to_datetime(analysis_date))
-        ].drop_duplicates("gtfs_dataset_key")
-        [["gtfs_dataset_key", "uri", "base64_url"]]
-    )
-    
-    df_with_url = pd.merge(
+    # Get base64_url, uri, organization_source_record_id and organization_name
+    crosswalk = schedule_rt_utils.sample_gtfs_dataset_key_to_organization_crosswalk(
         df_with_shape,
-        current_feeds,
+        analysis_date,
+        quartet_data = "vehicle_positions",
+        dim_gtfs_dataset_cols = [
+            "key",
+            "base64_url",
+            "uri",
+        ],
+        dim_organization_cols = ["source_record_id", "name"]
+    )
+
+    df_with_org = pd.merge(
+        df_with_shape,
+        crosswalk.rename(
+            columns = {"vehicle_positions_gtfs_dataset_key": "gtfs_dataset_key"}),
         on = "gtfs_dataset_key",
         how = "inner"
-    )
-    
-    # Get organization_name and organization_source_record_id
-    df_with_url = df_with_url.rename(columns = {
-        "gtfs_dataset_key": "vehicle_positions_gtfs_dataset_key",
-    })
-    
-    merge_cols = ["vehicle_positions_gtfs_dataset_key"]
-    
-    df_with_org = portfolio_utils.get_organization_name(
-        df_with_url,
-        analysis_date,
-        merge_cols
     )
     
     return df_with_org
@@ -96,11 +78,10 @@ def finalize_df_for_export(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         'shape_id', 'stop_sequence', 'stop_id', 
         #'loop_or_inlining', 
         'geometry',
-        'median_speed_mph', 'p20_speed_mph', 
-        'p80_speed_mph', 'n_trips', 
+        'p50_mph', 'p20_mph', 
+        'p80_mph', 'n_trips', 
         'time_of_day', 
         'uri', 'base64_url',
-        'regional_feed_type', 
         'district', 'district_name'
     ]
     
@@ -129,13 +110,10 @@ if __name__ == "__main__":
     time1 = datetime.datetime.now()
     print(f"get natural identifiers: {time1 - start}")
     
-    gdf = gdf.rename(
-        columns = {"gtfs_dataset_key": "vehicle_positions_gtfs_dataset_key"})
-
     gdf2 = pd.merge(
         gdf,
         operator_identifiers,
-        on = ["vehicle_positions_gtfs_dataset_key", "shape_array_key"],
+        on = ["gtfs_dataset_key", "shape_array_key"],
         how = "inner"
     )
             

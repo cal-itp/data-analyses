@@ -153,7 +153,7 @@ def import_scheduled_trips(
     if get_pandas:
         trips = pd.read_parquet(FILE, filters = filters, columns = columns)
     
-    return trips
+    return trips.drop_duplicates()
 
 
 def import_scheduled_shapes(
@@ -173,7 +173,7 @@ def import_scheduled_shapes(
     if get_pandas: 
         shapes = gpd.read_parquet(FILE, filters = filters, 
                                   columns = columns).to_crs(PROJECT_CRS)
-    return shapes
+    return shapes.drop_duplicates()
 
 
 def import_scheduled_stop_times(
@@ -190,7 +190,7 @@ def import_scheduled_stop_times(
         columns = columns
     )
     
-    return stop_times
+    return stop_times.drop_duplicates()
 
 
 def import_scheduled_stops(
@@ -211,7 +211,7 @@ def import_scheduled_stops(
         stops = gpd.read_parquet(FILE, filters = filters, 
                                  columns = columns).to_crs(PROJECT_CRS)
     
-    return stops
+    return stops.drop_duplicates()
 
 
 def exclude_unusable_trips(
