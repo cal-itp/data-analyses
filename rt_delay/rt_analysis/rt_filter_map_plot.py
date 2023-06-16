@@ -216,7 +216,10 @@ class RtFilterMapper:
         manual_exclude: dict in {'shape': {'min': int, 'max': int}, ...} format (values are stop sequence)
         '''
         corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
-        self.corridor = corridor_gdf >> select(_.geometry)
+        if 'distance_meters' in corridor_gdf.columns:
+            self.corridor = corridor_gdf >> select(_.geometry, _.distance_meters)
+        else:
+            self.corridor = corridor_gdf >> select(_.geometry)
         to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence']).dropna(subset=['stop_id'])
         clipped = to_clip.clip(corridor_gdf)
         shape_sequences = (self.stop_delay_view.dropna(subset=['stop_id'])
@@ -285,11 +288,12 @@ class RtFilterMapper:
         
         manual_exclude: dict in {'shape': {'min': int, 'max': int}, ...} format (values are stop sequence)
         '''
-        corridor = (self.stop_segment_speed_view
+        corridor = (self.stop_segment_speed_view.copy() # will returning a copy here help?
          >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
          >> filter(_.shape_id == shape_id,
                    _.stop_sequence >= min(stop_seq_range),
                    _.stop_sequence <= max(stop_seq_range))
+         >> mutate(distance_meters = _.shape_meters.max() - _.shape_meters.min())
         )
         corridor.geometry = corridor.buffer(100)
         corridor = corridor.dissolve()
@@ -697,7 +701,7 @@ class RtFilterMapper:
                   >> filter(_.corridor)
                   >> select(_.stop_id, _.geometry, _.stop_sequence, _.shape_id)
                  )
-        if total_schedule_delay in self.corridor.columns:
+        if 'total_schedule_delay' in self.corridor.columns:
             selector = select(_.geometry, _.total_speed_delay, _.total_schedule_delay)
         else:
             selector = select(_.geometry, _.total_speed_delay)
@@ -794,6 +798,7 @@ class RtFilterMapper:
         gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
         # ffill kinda broken in geopandas?
         gdf.geometry = gdf.geometry.fillna(value=gdf.geometry.iloc[0])
+        gdf['length_miles'] = self.corridor.distance_meters / METERS_PER_MILE
         self.corridor = gdf.round(1)
         print('metrics attached to self.corridor: ')
         return self.corridor
