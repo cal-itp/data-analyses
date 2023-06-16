@@ -37,7 +37,7 @@ VP_FILE_PATH = f"gs://{BUCKET_NAME}/data-analyses/rt_segment_speeds/"
 V2_SUBFOLDER = "v2_cached_views/"
 
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
-
+METERS_PER_MILE = 1609.34
 # Colorscale
 ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
 ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
