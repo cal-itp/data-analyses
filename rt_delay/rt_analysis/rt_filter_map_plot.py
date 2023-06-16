@@ -700,7 +700,11 @@ class RtFilterMapper:
                   >> filter(_.corridor)
                   >> select(_.stop_id, _.geometry, _.stop_sequence, _.shape_id)
                  )
-        gdf = (self.corridor >> select(_.geometry, _.total_speed_delay, _.total_schedule_delay)).iloc[:1,:]
+        if total_schedule_delay in self.corridor.columns:
+            selector = select(_.geometry, _.total_speed_delay, _.total_schedule_delay)
+        else:
+            selector = select(_.geometry, _.total_speed_delay)
+        gdf = (self.corridor >> selector).iloc[:1,:]
         m = pd.concat([mappable_stops, gdf]).explore(tiles = "CartoDB positron")
         return m
     
@@ -712,8 +716,8 @@ class RtFilterMapper:
         TODO document rest!
         '''
         df = (self._filter(self.stop_delay_view)
-             >> filter(_.actual_time > dt.datetime.combine(rt_day.analysis_date, dt.time(6)),
-                       _.actual_time < dt.datetime.combine(rt_day.analysis_date, dt.time(21))
+             >> filter(_.actual_time > dt.datetime.combine(self.analysis_date, dt.time(6)),
+                       _.actual_time < dt.datetime.combine(self.analysis_date, dt.time(21))
                       )
              >> group_by(_.shape_id, _.route_id, _.route_short_name, _.trip_id)
              >> summarize(runtime = _.actual_time.max() - _.actual_time.min(),
@@ -724,11 +728,11 @@ class RtFilterMapper:
                           p80_runtime_minutes =_.runtime.quantile(.8).seconds / 60,
                          first_start = _.start.min(), last_start = _.start.max(),
                          n_trips = _.shape[0])
-             >> mutate(span = _.last_start - _.first_start, span_minutes = _.span.map(lambda x: x.seconds) / 60,
-                      daily_avg_headway = (_.span_minutes / _.n_trips) * 2) # create avg per direction by multiplying 2x
+             >> mutate(span = _.last_start - _.first_start, span_hours = _.span.map(lambda x: x.seconds) / 60**2,
+                      daily_avg_trips_hr = (_.n_trips / _.span_hours) / 2) # create avg per direction by div 2
         ).round(1)
         return df
-    def corridor_metrics(self):
+    def corridor_metrics(self, sccp = False):
         '''
         Generate schedule based and speed based metrics for SCCP/LPP programs.
         
@@ -739,8 +743,8 @@ class RtFilterMapper:
         '''
         assert hasattr(self, 'corridor'), 'must add corridor before generating corridor metrics'
         assert not self._filter(self.corridor_stop_delays).empty, 'filter does not include any corridor trips'
-        if self.filter:
-            print('warning: filter set -- for SCCP/LPP reset filter first')
+        if sccp:
+            assert not self.filter, 'warning: filter set -- for SCCP/LPP reset filter first'
             
         # median delay within segment for each trip, then aggregate to route
         schedule_metric_df = (self._filter(self.corridor_stop_delays)
@@ -781,9 +785,14 @@ class RtFilterMapper:
                               >> mutate(total_speed_delay = _.speed_delay_minutes.sum(),
                                        total_schedule_delay = _.schedule_delay_minutes.sum())
                           )
-        runtimes = self.runtime_metrics() >> select(_.route_id, _.p50_runtime_minutes)
+        if not sccp:
+            both_metrics_df = both_metrics_df >> select(-_.total_schedule_delay, -_.schedule_delay_minutes)
+        runtimes = self.runtime_metrics() >> select(_.route_id, _.p50_runtime_minutes, _.n_trips,
+                                                   _.span_hours, _.daily_avg_trips_hr)
         both_metrics_df = (both_metrics_df >> inner_join(_, runtimes, on = 'route_id')
                               >> mutate(trips_added = _.speed_delay_minutes / _.p50_runtime_minutes)
+                              >> mutate(new_avg_trips_hr = ((_.n_trips + _.trips_added) / _.span_hours) / 2)
+                              # create avg per direction by div 2
                           )
         gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
         # ffill kinda broken in geopandas?
