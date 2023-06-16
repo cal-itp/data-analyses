@@ -26,7 +26,7 @@ def tims_etl():
                                      _.NUMBER_KILLED,_.NUMBER_INJURED,_.PEDESTRIAN_ACCIDENT,_.BICYCLE_ACCIDENT,
                                      _.LATITUDE,_.LONGITUDE,_.POINT_X,_.POINT_Y
                                 )
-                  >> filter(_.COLLISION_SEVERITY<=2) # fatality or severe injury
+                  #>> filter(_.COLLISION_SEVERITY<=2) # fatality or severe injury
                    )
 
     # make geodataframe w/ relevant columns 
@@ -45,9 +45,18 @@ def tims_etl():
 
 if __name__ == "__main__":
     tims = tims_etl()
+   
     #print some info in the terminal to verify
     tims.info()
+    
+    #filter to FSI
+    tims_fsi = (tims >> filter(_.COLLISION_SEVERITY<=2)) # fatality or severe injury
+    
     # save geoparquet
-    shared_utils.utils.geoparquet_gcs_export(tims, GCS_FILE_PATH, "tims_fsi")
+    shared_utils.utils.geoparquet_gcs_export(tims_fsi, GCS_FILE_PATH, "tims_fsi")
+   
     # also save a geojson for use in ArcGIS Pro
-    shared_utils.utils.geojson_gcs_export(tims, GCS_FILE_PATH, "tims_fsi")  
+    shared_utils.utils.geojson_gcs_export(tims_fsi, GCS_FILE_PATH, "tims_fsi") 
+    
+    # save geoparquet with all severities
+    shared_utils.utils.geoparquet_gcs_export(tims, GCS_FILE_PATH, "tims_all_severity")
