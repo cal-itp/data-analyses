@@ -59,7 +59,7 @@ class RtFilterMapper:
             self.analysis_date = rt_trips.service_date.iloc[0]
             self.organization_name = rt_trips.calitp_agency_name.iloc[0]
         self.display_date = self.analysis_date.strftime('%b %d, %Y (%a)')
-        
+        self.transit_priority_target_mph = 16
         self.endpoint_delay_view = (self.stop_delay_view
                       >> group_by(_.trip_id)
                       >> filter(_.stop_sequence == _.stop_sequence.max())
@@ -216,7 +216,10 @@ class RtFilterMapper:
         manual_exclude: dict in {'shape': {'min': int, 'max': int}, ...} format (values are stop sequence)
         '''
         corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
-        self.corridor = corridor_gdf >> select(_.geometry)
+        if 'distance_meters' in corridor_gdf.columns:
+            self.corridor = corridor_gdf >> select(_.geometry, _.distance_meters)
+        else:
+            self.corridor = corridor_gdf >> select(_.geometry)
         to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence']).dropna(subset=['stop_id'])
         clipped = to_clip.clip(corridor_gdf)
         shape_sequences = (self.stop_delay_view.dropna(subset=['stop_id'])
@@ -285,11 +288,12 @@ class RtFilterMapper:
         
         manual_exclude: dict in {'shape': {'min': int, 'max': int}, ...} format (values are stop sequence)
         '''
-        corridor = (self.stop_segment_speed_view
+        corridor = (self.stop_segment_speed_view.copy() # will returning a copy here help?
          >> distinct(_.shape_id, _.stop_sequence, _keep_all=True)
          >> filter(_.shape_id == shape_id,
                    _.stop_sequence >= min(stop_seq_range),
                    _.stop_sequence <= max(stop_seq_range))
+         >> mutate(distance_meters = _.shape_meters.max() - _.shape_meters.min())
         )
         corridor.geometry = corridor.buffer(100)
         corridor = corridor.dissolve()
@@ -697,23 +701,61 @@ class RtFilterMapper:
                   >> filter(_.corridor)
                   >> select(_.stop_id, _.geometry, _.stop_sequence, _.shape_id)
                  )
-        m = pd.concat([mappable_stops, self.corridor]).explore(tiles = "CartoDB positron")
+        if 'total_schedule_delay' in self.corridor.columns:
+            selector = select(_.geometry, _.total_speed_delay, _.total_schedule_delay)
+        else:
+            selector = select(_.geometry, _.total_speed_delay)
+        gdf = (self.corridor >> selector).iloc[:1,:]
+        m = pd.concat([mappable_stops, gdf]).explore(tiles = "CartoDB positron")
         return m
     
-    def corridor_metrics(self):
+    def runtime_metrics(self):
         '''
-        Generate schedule based and speed based metrics for SCCP/LPP programs.
+        Measure observed runtimes for routes within filter. Based on full data extent of each trip,
+        currently bidirectional. Returns 20th, 50th, 80th %ile.
+        Assess all-day frequency as frequency within the narrower of 0600-2100 or actual span.
+        Note that frequency is average frequency in each direction.        
+        '''
+        df = (self._filter(self.stop_delay_view)
+             >> filter(_.actual_time > dt.datetime.combine(self.analysis_date, dt.time(6)),
+                       _.actual_time < dt.datetime.combine(self.analysis_date, dt.time(21))
+                      )
+             >> group_by(_.shape_id, _.route_id, _.route_short_name, _.trip_id)
+             >> summarize(runtime = _.actual_time.max() - _.actual_time.min(),
+                         start = _.actual_time.min())
+             >> group_by(_.route_id, _.route_short_name)
+             >> summarize(p50_runtime_minutes =_.runtime.quantile(.5).seconds / 60,
+                          p20_runtime_minutes =_.runtime.quantile(.2).seconds / 60,
+                          p80_runtime_minutes =_.runtime.quantile(.8).seconds / 60,
+                         first_start = _.start.min(), last_start = _.start.max(),
+                         n_trips = _.shape[0])
+             >> mutate(span = _.last_start - _.first_start, span_hours = _.span.map(lambda x: x.seconds) / 60**2,
+                      daily_avg_trips_hr = (_.n_trips / _.span_hours) / 2) # create avg per direction by div 2
+        ).round(1)
+        return df
+    def corridor_metrics(self, sccp = False):
+        '''
+        Set sccp = True to generate schedule and speed based metrics for SCCP/LPP programs.
+        
+        Default assumption is that speeds will improve to 16mph for the speed based metric.
+        Set a different speed via the self.transit_priority_target_mph attribute.
+        
+        Note that trips_added assumes that service hour savings based on corridor speed improvements
+        are reinvested into additonal runs of the *entire* route, at the existing median runtime.
         '''
         assert hasattr(self, 'corridor'), 'must add corridor before generating corridor metrics'
         assert not self._filter(self.corridor_stop_delays).empty, 'filter does not include any corridor trips'
-        if self.filter:
-            print('warning: filter set -- for SCCP/LPP reset filter first')
-        schedule_metric = (self._filter(self.corridor_stop_delays)
-             >> group_by(_.trip_id)
+        if sccp:
+            assert not self.filter, 'warning: filter set -- for SCCP/LPP reset filter first'
+            assert self.transit_priority_target_mph == 16, 'for SCCP/LPP use 16mph standard'
+            
+        # median delay within segment for each trip, then aggregate to route
+        schedule_metric_df = (self._filter(self.corridor_stop_delays)
+             >> group_by(_.trip_id, _.route_id, _.route_short_name)
              >> summarize(median_corridor_delay_seconds = _.corridor_delay_seconds.median())
-             >> summarize(sum_of_medians_minutes = _.median_corridor_delay_seconds.sum() / 60)
-            ).sum_of_medians_minutes.iloc[0]
-        schedule_metric = int(round(schedule_metric))
+             >> group_by(_.route_id, _.route_short_name)
+             >> summarize(schedule_delay_minutes = _.median_corridor_delay_seconds.sum() / 60)
+            )
         
         self.stop_delay_view = self.stop_delay_view >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> ungroup()
         self.corridor_trip_speeds = (self._filter(self.stop_delay_view)
@@ -729,20 +771,41 @@ class RtFilterMapper:
              >> ungroup()
              >> distinct(_.trip_id, _keep_all=True)
             )
-        target_speed_mps = 16 / MPH_PER_MPS
-        df = (self.corridor_trip_speeds
+        target_speed_mps = self.transit_priority_target_mph / MPH_PER_MPS
+        
+        speed_int_df = (self.corridor_trip_speeds
               >> mutate(corridor_speed_mph = _.speed_from_entry * MPH_PER_MPS)
               >> mutate(target_seconds = _.meters_from_entry / target_speed_mps)
               >> mutate(target_delay_seconds = _.seconds_from_entry - _.target_seconds)
              )
-        speed_metric = df.target_delay_seconds.sum() / 60
-        speed_metric = int(round(speed_metric))
-        self.corridor['schedule_metric_minutes'] = schedule_metric
-        self.corridor['speed_metric_minutes'] = speed_metric
-        self.corridor['agency'] = self.organization_name
-        self.corridor['routes_included'] = self.filter_formatted
-        return {'schedule_metric_minutes': schedule_metric,
-               'speed_metric_minutes': speed_metric}
+        speed_metric_df = (speed_int_df
+              >> mutate(organization = self.organization_name)
+              >> group_by(_.route_id, _.route_short_name, _.organization)
+              >> summarize(p20_corr_mph = _.corridor_speed_mph.quantile(.2),
+                           speed_delay_minutes = _.target_delay_seconds.sum() / 60)
+             )
+        both_metrics_df = (speed_metric_df >> inner_join(_, schedule_metric_df, on = ['route_id', 'route_short_name'])
+                              >> mutate(total_speed_delay = _.speed_delay_minutes.sum(),
+                                       total_schedule_delay = _.schedule_delay_minutes.sum())
+                          )
+        if not sccp:
+            both_metrics_df = both_metrics_df >> select(-_.total_schedule_delay, -_.schedule_delay_minutes)
+        runtimes = self.runtime_metrics() >> select(_.route_id, _.p50_runtime_minutes, _.n_trips,
+                                                   _.span_hours, _.daily_avg_trips_hr)
+        both_metrics_df = (both_metrics_df >> inner_join(_, runtimes, on = 'route_id')
+                              >> mutate(trips_added = _.speed_delay_minutes / _.p50_runtime_minutes)
+                              >> mutate(new_avg_trips_hr = ((_.n_trips + _.trips_added) / _.span_hours) / 2)
+                              # create avg per direction by div 2
+                          )
+        both_metrics_df['length_miles'] = (self.corridor.distance_meters / METERS_PER_MILE).iloc[0]
+        both_metrics_df['target_mph'] = self.transit_priority_target_mph
+        # both_metrics_df.length_miles = both_metrics_df.length_miles.fillna(value=gdf.length_miles.iloc[0])
+        gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
+        # ffill kinda broken in geopandas?
+        gdf.geometry = gdf.geometry.fillna(value=gdf.geometry.iloc[0])
+        self.corridor = gdf.round(1)
+        print('metrics attached to self.corridor: ')
+        return self.corridor
     
 def from_gcs(itp_id, analysis_date, pbar = None):
     ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_parser.OperatorDayAnalysis.export_views_gcs()
