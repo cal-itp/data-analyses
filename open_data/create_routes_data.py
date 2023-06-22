@@ -2,6 +2,9 @@
 Create routes file with identifiers including
 route_id, route_name, operator name.
 """
+import os
+os.environ['USE_PYGEOS'] = '0'
+
 import geopandas as gpd
 import pandas as pd
 
@@ -25,7 +28,8 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
         columns = prep_traffic_ops.keep_shape_cols,
-        get_pandas = True
+        get_pandas = True,
+        crs = geography_utils.WGS84
     )
     
     df = gtfs_schedule_wrangling.merge_shapes_to_trips(
@@ -40,14 +44,14 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     
     routes_assembled = (portfolio_utils.add_route_name(df)
                         .drop(columns = drop_cols)
-                        .sort_values(["name", "route_id"])
-                       .drop_duplicates(subset=[
+                        .sort_values(["name", "route_id", "shape_id"])
+                        .drop_duplicates(subset=[
                            "name", "route_id", "shape_id"])
-                       .reset_index(drop=True)
+                        .reset_index(drop=True)
                       )    
     routes_assembled2 = prep_traffic_ops.standardize_operator_info_for_exports(
-            routes_assembled, analysis_date).to_crs(geography_utils.WGS84)
-        
+            routes_assembled, analysis_date)
+            
     return routes_assembled2
 
 
@@ -78,10 +82,10 @@ if __name__ == "__main__":
     # This is feed-level already, but we already keep only 1 feed per operator
     routes = create_routes_file_for_export(analysis_date)  
     
-    routes = finalize_export_df(routes)
+    routes2 = finalize_export_df(routes)
     
     utils.geoparquet_gcs_export(
-        routes, 
+        routes2, 
         TRAFFIC_OPS_GCS, 
         "ca_transit_routes"
     )
