@@ -2,6 +2,9 @@
 Create stops file with identifiers including
 route_id, route_name, agency_id, agency_name.
 """
+import os
+os.environ['USE_PYGEOS'] = '0'
+
 import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
@@ -52,7 +55,7 @@ def attach_route_info_to_stops(
                       )
     
     stops_assembled2 = prep_traffic_ops.standardize_operator_info_for_exports(
-            stops_assembled, analysis_date).to_crs(geography_utils.WGS84)
+            stops_assembled, analysis_date)
     
     return stops_assembled2
 
@@ -85,7 +88,8 @@ def create_stops_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
     stops = helpers.import_scheduled_stops(
         analysis_date,
         columns = prep_traffic_ops.keep_stop_cols,
-        get_pandas = True
+        get_pandas = True,
+        crs = geography_utils.WGS84
     )
     
     trips = helpers.import_scheduled_trips(
