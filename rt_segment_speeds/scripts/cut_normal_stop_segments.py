@@ -12,24 +12,13 @@ import pandas as pd
 import shapely
 import sys
 
+from dask import delayed, compute
 from loguru import logger
 
 from shared_utils import utils
-from segment_speed_utils import helpers, wrangle_shapes
+from segment_speed_utils import array_utils, helpers, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               PROJECT_CRS, CONFIG_PATH)
-
-
-import geopandas as gpd
-import numpy as np
-import pandas as pd
-import shapely
-
-from dask import delayed, compute
-
-from shared_utils import utils
-from segment_speed_utils import array_utils, wrangle_shapes
-from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
 
 
 def get_prior_shape_meters(
@@ -208,7 +197,7 @@ if __name__ == "__main__":
             "loop_or_inlining",
             "geometry", 
             ]
-    )
+    ).dropna(subset="geometry").reset_index(drop=True)
     
     gdf2 = delayed(get_prior_shape_meters)(gdf).persist()
     
