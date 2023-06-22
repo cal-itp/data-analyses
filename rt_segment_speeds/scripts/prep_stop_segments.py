@@ -68,7 +68,8 @@ def stop_times_aggregated_to_shape_array_key(
     # Attach stop geom
     stops = helpers.import_scheduled_stops(
         analysis_date,
-        columns = ["feed_key", "stop_id", "stop_name", "geometry"]
+        columns = ["feed_key", "stop_id", "stop_name", "geometry"],
+        get_pandas = True
     )
     
     # Renaming geometry column before causes error, so rename after the merge
@@ -156,8 +157,8 @@ def tag_shapes_with_inlining(
         is_monotonic = is_monotonic
     )
     
-    inlining_shapes = stop_times_wide[stop_times_wide.is_monotonic == False
-                                     ].shape_array_key.unique()
+    inlining_shapes = stop_times_wide[
+        stop_times_wide.is_monotonic == False].shape_array_key.unique()
 
     return inlining_shapes
 
@@ -169,7 +170,7 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
         analysis_date, trips_with_geom
     ).sort_values(
         ["feed_key", "shape_array_key", "stop_sequence"]
-    ).reset_index(drop=True)
+    ).dropna(subset="geometry").reset_index(drop=True)
     
     # Turn the stop_geometry and shape_geometry columns into geoseries
     shape_geoseries = gpd.GeoSeries(stop_times_with_geom.geometry.compute())
