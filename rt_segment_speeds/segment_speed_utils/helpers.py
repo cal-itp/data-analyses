@@ -160,7 +160,8 @@ def import_scheduled_shapes(
     analysis_date: str, 
     filters: tuple = None,
     columns: list = ["shape_array_key", "geometry"],
-    get_pandas: bool = False
+    get_pandas: bool = False, 
+    crs: str = PROJECT_CRS
 ) -> dg.GeoDataFrame: 
     """
     Import routelines and add route_length.
@@ -168,11 +169,12 @@ def import_scheduled_shapes(
     FILE = f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet"
     
     shapes = dg.read_parquet(FILE, filters = filters,
-                             columns = columns).to_crs(PROJECT_CRS)
+                             columns = columns).to_crs(crs)
     
     if get_pandas: 
         shapes = gpd.read_parquet(FILE, filters = filters, 
-                                  columns = columns).to_crs(PROJECT_CRS)
+                                  columns = columns).to_crs(crs)
+        
     return shapes.drop_duplicates()
 
 
@@ -197,7 +199,8 @@ def import_scheduled_stops(
     analysis_date: str,
     filters: tuple = None,
     columns: list = None,
-    get_pandas: bool = False
+    get_pandas: bool = False,
+    crs: str = PROJECT_CRS
 ) -> dg.GeoDataFrame:
     """
     Get scheduled stops
@@ -205,11 +208,11 @@ def import_scheduled_stops(
     FILE = f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet"
     
     stops = dg.read_parquet(FILE, filters = filters,
-                            columns = columns).to_crs(PROJECT_CRS)
+                            columns = columns).to_crs(crs)
     
     if get_pandas:
         stops = gpd.read_parquet(FILE, filters = filters, 
-                                 columns = columns).to_crs(PROJECT_CRS)
+                                 columns = columns).to_crs(crs)
     
     return stops.drop_duplicates()
 
