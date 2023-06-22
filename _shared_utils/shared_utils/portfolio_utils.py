@@ -61,7 +61,7 @@ def add_route_name(df: Union[pd.DataFrame, dd.DataFrame]) -> Union[pd.DataFrame,
     if not (set(route_cols).issubset(set(list(df.columns)))):
         raise ValueError(f"Input a df that contains {route_cols}")
 
-    if isinstance(df, [dd.DataFrame, dg.GeoDataFrame]):
+    if isinstance(df, (dd.DataFrame, dg.GeoDataFrame)):
         df = df.assign(
             route_name_used=df.apply(lambda x: rt_utils.which_desc(x), axis=1, meta=("route_name_used", "str"))
         )
