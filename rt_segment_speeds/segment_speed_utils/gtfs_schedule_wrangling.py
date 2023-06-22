@@ -10,13 +10,20 @@ from segment_speed_utils import helpers
 
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
-    exclude_me: list = ["Amtrak Schedule"]
+    exclude_me: list = ["Amtrak Schedule", "*Flex"]
 ):
     """
     Exclude certain operators by name.
     Here, we always want to exclude Amtrak Schedule because
     it runs outside of CA.
     """
+    substrings_to_exclude = [i for i in exclude_me if "*" in i]
+    
+    if len(substrings_to_exclude) > 1:
+        substrings = [i.replace("*", "") for i in substrings_to_exclude]
+        for i in substrings:
+            trips = trips[~trips.name.str.contains(i)].reset_index(drop=True)
+    
     return trips[~trips.name.isin(exclude_me)].reset_index(drop=True)
 
 
@@ -68,7 +75,7 @@ def get_trips_with_geom(
     
     trips = exclude_scheduled_operators(
         trips, 
-        exclude_me = ["Amtrak Schedule"]
+        exclude_me = ["Amtrak Schedule", "*Flex"]
     )
 
     trips_with_geom = merge_shapes_to_trips(
@@ -113,7 +120,7 @@ def attach_stop_geometry(
             on = ["feed_key", "stop_id"],
             how = "inner"
         )
-    elif isinstance(df, [dd.DataFrame, dg.GeoDataFrame]):
+    elif isinstance(df, (dd.DataFrame, dg.GeoDataFrame)):
         # We will lose geometry by putting stops on the right
         # but, in the case where we have another dg.GeoDataFrame on left,
         # we should explicitly set geometry column after
