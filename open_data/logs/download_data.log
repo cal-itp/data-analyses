@@ -204,3 +204,11 @@
 2023-06-15 09:29:37.228 | INFO     | __main__:<module>:60 - execution time: 0:01:32.510767
 2023-06-15 10:22:38.014 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
 2023-06-15 10:23:03.570 | INFO     | __main__:<module>:87 - execution time: 0:00:27.442476
+2023-06-23 12:13:06.484 | INFO     | __main__:<module>:24 - Analysis date: 2023-06-14
+2023-06-23 12:13:08.443 | INFO     | __main__:<module>:31 - # operators to run: 203
+2023-06-23 12:13:08.443 | INFO     | __main__:<module>:35 - *********** Download routelines data ***********
+2023-06-23 12:25:07.216 | INFO     | __main__:<module>:65 - execution time: 0:12:00.690905
+2023-06-23 13:02:04.303 | INFO     | __main__:<module>:24 - Analysis date: 2023-06-14
+2023-06-23 13:02:06.530 | INFO     | __main__:<module>:31 - # operators to run: 203
+2023-06-23 13:02:06.532 | INFO     | __main__:<module>:35 - *********** Download routelines data ***********
+2023-06-23 13:06:07.144 | INFO     | __main__:<module>:65 - execution time: 0:04:02.810387

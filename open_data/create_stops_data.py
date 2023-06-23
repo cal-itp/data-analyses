@@ -54,10 +54,12 @@ def attach_route_info_to_stops(
                        .reset_index(drop=True)
                       )
     
-    stops_assembled2 = prep_traffic_ops.standardize_operator_info_for_exports(
-            stops_assembled, analysis_date)
+    stops_assembled2 = prep_traffic_ops.clip_to_usa(stops_assembled)
     
-    return stops_assembled2
+    stops_assembled3 = prep_traffic_ops.standardize_operator_info_for_exports(
+            stops_assembled2, analysis_date)
+    
+    return stops_assembled3
 
 
 def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame: 
@@ -81,25 +83,25 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df2
 
 
-def create_stops_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
+def create_stops_file_for_export(date: str) -> gpd.GeoDataFrame:
     time0 = datetime.now()
 
     # Read in parquets
     stops = helpers.import_scheduled_stops(
-        analysis_date,
+        date,
         columns = prep_traffic_ops.keep_stop_cols,
         get_pandas = True,
         crs = geography_utils.WGS84
     )
     
     trips = helpers.import_scheduled_trips(
-        analysis_date,
+        date,
         columns = prep_traffic_ops.keep_trip_cols,
         get_pandas = True
     )
     
     stop_times = helpers.import_scheduled_stop_times(
-        analysis_date,
+        date,
         columns = prep_traffic_ops.keep_stop_time_cols
     )
         
@@ -116,10 +118,10 @@ if __name__ == "__main__":
 
     stops = create_stops_file_for_export(analysis_date)  
     
-    stops = finalize_export_df(stops)
+    stops2 = finalize_export_df(stops)
     
     utils.geoparquet_gcs_export(
-        stops, 
+        stops2, 
         TRAFFIC_OPS_GCS, 
         "ca_transit_stops"
     )
