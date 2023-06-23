@@ -2,7 +2,7 @@
 Utility functions for geospatial data.
 Some functions for dealing with census tract or other geographic unit dfs.
 """
-from typing import Union
+from typing import Literal, Union
 
 import dask.dataframe as dd
 import geopandas as gpd
@@ -230,3 +230,31 @@ def cut_segments(
     segmented2 = gpd.GeoDataFrame(segmented, crs=f"EPSG:{EPSG_CODE}")
 
     return segmented2
+
+
+def find_geometry_type(geometry) -> Literal["point", "line", "polygon", "missing", "linearring", "geometry_collection"]:
+    """
+    Find the broad geometry type of a geometry value.
+
+    shapely.get_type_id returns integers and differentiates between
+    point/multipoint, linestring/multilinestring, etc.
+    Sometimes, we just want a broader category.
+
+    https://shapely.readthedocs.io/en/stable/reference/shapely.get_type_id.html
+    """
+    point_type_ids = [0, 4]
+    line_type_ids = [1, 5]
+    polygon_type_ids = [3, 6]
+
+    if shapely.get_type_id(geometry) in point_type_ids:
+        return "point"
+    elif shapely.get_type_id(geometry) in line_type_ids:
+        return "line"
+    elif shapely.get_type_id(geometry) in polygon_type_ids:
+        return "polygon"
+    elif shapely.get_type_id(geometry) == -1:
+        return "missing"
+    elif shapely.get_type_id(geometry) == 2:
+        return "linearring"
+    elif shapely.get_type_id(geometry) == 7:
+        return "geometry_collection"
