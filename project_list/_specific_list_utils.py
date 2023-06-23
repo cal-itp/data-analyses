@@ -9,7 +9,7 @@ import _harmonization_utils as harmonization_utils
 
 def lower_case(df, columns_to_search: list):
     """
-    Lowercase certain columns
+    Lowercase and clean certain columns:
     """
     new_columns = []
     for i in columns_to_search:
@@ -59,8 +59,8 @@ def filter_cordon(
         df2[i] = df2[i].str.title()
         
     # Drop invalid geometries
-    gdf = df2[~df2.geometry.is_empty].reset_index(drop=True)
-    gdf = gdf[gdf.geometry.is_valid].reset_index(drop=True)
+    # gdf = df2[~df2.geometry.is_empty].reset_index(drop=True)
+    gdf = df[df.geometry.is_valid].reset_index(drop=True)
 
     gdf = gdf.set_geometry("geometry")
     gdf = gdf.fillna(gdf.dtypes.replace({"float64": 0.0, "object": "None"}))
