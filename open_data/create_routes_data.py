@@ -16,33 +16,33 @@ from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from update_vars import analysis_date, TRAFFIC_OPS_GCS
 
 
-def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
+def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
     
     # Read in local parquets
     trips = helpers.import_scheduled_trips(
-        analysis_date,
+        date,
         columns = prep_traffic_ops.keep_trip_cols,
         get_pandas = True
-    )
+    ).dropna(subset="shape_array_key")
     
     shapes = helpers.import_scheduled_shapes(
-        analysis_date,
+        date,
         columns = prep_traffic_ops.keep_shape_cols,
         get_pandas = True,
         crs = geography_utils.WGS84
-    )
+    ).dropna(subset="shape_array_key")
     
     df = gtfs_schedule_wrangling.merge_shapes_to_trips(
         shapes,
         trips,
-        merge_cols = ["feed_key", "shape_id"]
-    )
+        merge_cols = ["shape_array_key"]
+    ).drop(columns = "trip_id").drop_duplicates(subset="shape_array_key")
+        
+    df2 = remove_erroneous_shapes(df)    
+        
+    drop_cols = ["route_short_name", "route_long_name", "route_desc"]
     
-    drop_cols = ["route_short_name", "route_long_name", 
-                 "route_desc", "trip_id"
-                ]
-    
-    routes_assembled = (portfolio_utils.add_route_name(df)
+    routes_assembled = (portfolio_utils.add_route_name(df2)
                         .drop(columns = drop_cols)
                         .sort_values(["name", "route_id", "shape_id"])
                         .drop_duplicates(subset=[
@@ -50,10 +50,38 @@ def create_routes_file_for_export(analysis_date: str) -> gpd.GeoDataFrame:
                         .reset_index(drop=True)
                       )    
     routes_assembled2 = prep_traffic_ops.standardize_operator_info_for_exports(
-            routes_assembled, analysis_date)
+            routes_assembled, date)
             
     return routes_assembled2
 
+
+def remove_erroneous_shapes(
+    shapes_with_route_info: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    """
+    Check if line is simple for Amtrak. If it is, keep. 
+    If it's not simple (line crosses itself), drop.
+    
+    In Jun 2023, some Amtrak shapes appeared to be funky, 
+    but in prior months, it's been ok.
+    Checking for length is fairly time-consuming.
+    """
+    amtrak = "Amtrak Schedule"
+    
+    possible_error = shapes_with_route_info[shapes_with_route_info.name==amtrak]
+    ok = shapes_with_route_info[shapes_with_route_info.name != amtrak]
+    
+    # Check if the line crosses itself
+    ok_amtrak = possible_error.assign(
+        simple = possible_error.geometry.is_simple
+    ).query("simple == True").drop(columns = "simple")
+    
+    ok_shapes = pd.concat(
+        [ok, ok_amtrak], 
+        axis=0
+    ).reset_index(drop=True)
+
+    return ok_shapes
 
 def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
