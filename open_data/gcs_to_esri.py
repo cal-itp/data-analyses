@@ -56,7 +56,7 @@ if __name__=="__main__":
                level="INFO")
     
     datasets = list(dict(catalog).keys())
-    
+
     for d in datasets:
         gdf = catalog[d].read().to_crs(geography_utils.WGS84)
         gdf = standardize_column_names(gdf)
