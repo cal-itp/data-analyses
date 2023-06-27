@@ -12,6 +12,7 @@ in_features = [
     'ca_hq_transit_stops',
     'ca_transit_routes',
     'ca_transit_stops',
+    'speeds_by_stop_segments'
 ]
 
 staging_location = 'staging.gdb'
@@ -54,6 +55,7 @@ for f in in_features:
 need_renaming = [
     'ca_hq_transit_areas',
     'ca_hq_transit_stops',
+    'speeds_by_stop_segments'
 ]
 
 
@@ -68,6 +70,9 @@ for f in need_renaming:
         "base64_u_1": "base64_url_secondary",  
         "org_id_pri": "org_id_primary",
         "org_id_sec": "org_id_secondary",
+        "stop_seque": "stop_sequence",
+        "time_of_da": "time_of_day",
+        "district_n": "district_name"
     }
 
     # To change field names, must use AlterField_management, 

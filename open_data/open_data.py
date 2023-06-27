@@ -8,7 +8,7 @@ import metadata_update_pro
 # Import various dictionaries
 import metadata_hqta
 import metadata_traffic_ops
-# import metadata_speeds
+import metadata_speeds
 
 OPEN_DATA = {
     "hqta_areas": {
@@ -27,10 +27,10 @@ OPEN_DATA = {
         "path": "./metadata_xml/ca_transit_routes.xml",
         "metadata_dict": metadata_traffic_ops.ROUTES_DICT,
     },
-    #"speeds_stop_segments": {
-    #    "path": "./metadata_xml/ca_speeds_stop_segments.xml",
-    #    "metadata_dict": metadata_speeds.SPEEDS_STOP_SEG_DICT,
-    #},
+    "speeds_stop_segments": {
+        "path": "./metadata_xml/speeds_by_stop_segments.xml",
+        "metadata_dict": metadata_speeds.SPEEDS_STOP_SEG_DICT,
+    },
 }
 
 if __name__=="__main__":
@@ -39,7 +39,7 @@ if __name__=="__main__":
     RUN_ME = [
         "hqta_areas", "hqta_stops",
         "transit_stops", "transit_routes",
-        #"speeds_stop_segments",
+        "speeds_stop_segments",
     ]
     
     for name, dataset in OPEN_DATA.items():
