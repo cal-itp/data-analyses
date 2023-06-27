@@ -142,7 +142,7 @@ if __name__ == "__main__":
     
     gdf = gpd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}.parquet"
-    ).drop(columns = "geometry_arrowized")
+    )
     
     operator_identifiers = get_operator_natural_identifiers(gdf, analysis_date)
      
@@ -167,6 +167,12 @@ if __name__ == "__main__":
         final_gdf,
         f"{SEGMENT_GCS}export/",
         INPUT_FILE
+    )
+    
+    utils.geoparquet_gcs_export(
+        final_gdf,
+        f"{SEGMENT_GCS}export/",
+        "speeds_by_stop_segments"
     )
     
     end = datetime.datetime.now()
