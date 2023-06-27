@@ -594,7 +594,7 @@ class RtFilterMapper:
              "url": f"https://storage.googleapis.com/{path}", "type": "state_highway_network"}]
             return _export(shn_gdf, path)
     
-    def display_spa_map(self, width: int=1100, height: int=650):
+    def display_spa_map(self, width: int=1000, height: int=650):
         '''
         Display map from external simple web app in the notebook/JupyterBook context via an IFrame.
         Will show most recent map set using self.map_gz_export
