@@ -8,7 +8,7 @@ import pandas as pd
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
-from shared_utils import utils
+from shared_utils import utils, geography_utils
 
 
 def calculate_avg_speeds(
@@ -107,13 +107,13 @@ def speeds_with_segment_geom(
             "gtfs_dataset_key", 
             "stop_id",
             "loop_or_inlining",
-            "geometry", "geometry_arrowized", 
+            "geometry", 
             "district", "district_name"
         ]
-    )#.set_geometry("geometry_arrowized").drop(columns = "geometry")
+    ).to_crs(geography_utils.WGS84)
     
     gdf = pd.merge(
-        segments,#[~segments.geometry_arrowized.is_empty], 
+        segments,
         stats,
         on = SEGMENT_IDENTIFIER_COLS,
         how = "inner"
