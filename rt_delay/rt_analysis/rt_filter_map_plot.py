@@ -559,8 +559,7 @@ class RtFilterMapper:
             self.spa_map_state["layers"] += [{
                 "name": f"{self.organization_name} Vehicle Speeds {self.display_date}",
                 "url": f"https://storage.googleapis.com/{path}", "type": "speedmap",
-                'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': 'p20_mph',
-                              'opacity': 0.7}
+                'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': 'p20_mph'}
                 }]
             self.spa_map_state["lat_lon"] = self.current_centroid
             self.spa_map_state["zoom"] = 13
@@ -579,7 +578,7 @@ class RtFilterMapper:
             gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
             self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Variation in Speeds {self.display_date}",
              "url": f"https://storage.googleapis.com/{path}",
-             'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'opacity': 0.8}
+             'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
                                              }]
             self.spa_map_state["lat_lon"] = self.current_centroid
             self.spa_map_state["zoom"] = 13
