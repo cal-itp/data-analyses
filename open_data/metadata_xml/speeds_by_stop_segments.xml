@@ -21,20 +21,20 @@
 	<ns0:contact>
 		<ns0:CI_ResponsibleParty>
 			<ns0:individualName>
-				<ns1:CharacterString>Tiffany Ku</ns1:CharacterString>
+				<ns1:CharacterString>Tiffany Ku; Eric Dasmalchi</ns1:CharacterString>
 			</ns0:individualName>
 			<ns0:organisationName>
 				<ns1:CharacterString>Caltrans</ns1:CharacterString>
 			</ns0:organisationName>
 			<ns0:positionName>
-				<ns1:CharacterString>California Integrated Travel Project</ns1:CharacterString>
+				<ns1:CharacterString>Data &amp; Digital Services / California Integrated Travel Project</ns1:CharacterString>
 			</ns0:positionName>
 			<ns0:contactInfo>
 				<ns0:CI_Contact>
 					<ns0:address>
 						<ns0:CI_Address>
 							<ns0:electronicMailAddress>
-								<ns1:CharacterString>tiffany.ku@dot.ca.gov</ns1:CharacterString>
+								<ns1:CharacterString>tiffany.ku@dot.ca.gov; eric.dasmalchi@dot.ca.gov</ns1:CharacterString>
 							</ns0:electronicMailAddress>
 						</ns0:CI_Address>
 					</ns0:address>
@@ -66,8 +66,8 @@
 			<ns0:geometricObjects>
 				<ns0:MD_GeometricObjects>
 					<ns0:geometricObjectType>
-						<ns0:MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="point" codeSpace="ISOTC211/19115">
-							<text>point</text>
+						<ns0:MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="composite" codeSpace="ISOTC211/19115">
+							<text>composite</text>
 						</ns0:MD_GeometricObjectTypeCode>
 					</ns0:geometricObjectType>
 				</ns0:MD_GeometricObjects>
@@ -96,7 +96,7 @@
 			<ns0:citation>
 				<ns0:CI_Citation>
 					<ns0:title>
-						<ns1:CharacterString>ca_transit_stops</ns1:CharacterString>
+						<ns1:CharacterString>ca_speeds_stop_segments</ns1:CharacterString>
 					</ns0:title>
 					<ns0:date>
 						<ns0:CI_Date>
@@ -116,20 +116,20 @@
 					<ns0:citedResponsibleParty>
 						<ns0:CI_ResponsibleParty>
 							<ns0:individualName>
-								<ns1:CharacterString>Tiffany Ku</ns1:CharacterString>
+								<ns1:CharacterString>Tiffany Ku; Eric Dasmalchi</ns1:CharacterString>
 							</ns0:individualName>
 							<ns0:organisationName>
 								<ns1:CharacterString>Caltrans</ns1:CharacterString>
 							</ns0:organisationName>
 							<ns0:positionName>
-								<ns1:CharacterString>California Integrated Travel Project</ns1:CharacterString>
+								<ns1:CharacterString>Data &amp; Digital Services / California Integrated Travel Project</ns1:CharacterString>
 							</ns0:positionName>
 							<ns0:contactInfo>
 								<ns0:CI_Contact>
 									<ns0:address>
 										<ns0:CI_Address>
 											<ns0:electronicMailAddress>
-												<ns1:CharacterString>tiffany.ku@dot.ca.gov</ns1:CharacterString>
+												<ns1:CharacterString>tiffany.ku@dot.ca.gov; eric.dasmalchi@dot.ca.gov</ns1:CharacterString>
 											</ns0:electronicMailAddress>
 										</ns0:CI_Address>
 									</ns0:address>
@@ -153,7 +153,7 @@
 				<ns1:CharacterString>Public. EPSG: 4326</ns1:CharacterString>
 			</ns0:abstract>
 			<ns0:purpose>
-				<ns1:CharacterString>Provide all CA transit stops and routes (geospatial) from all transit operators.</ns1:CharacterString>
+				<ns1:CharacterString>All day and peak transit speeds on stop segments estimated on a single day.</ns1:CharacterString>
 			</ns0:purpose>
 			<ns0:status>
 				<ns0:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">
@@ -199,16 +199,22 @@
 						<ns1:CharacterString>Transportation</ns1:CharacterString>
 					</ns0:keyword>
 					<ns0:keyword>
+						<ns1:CharacterString>Transit</ns1:CharacterString>
+					</ns0:keyword>
+					<ns0:keyword>
 						<ns1:CharacterString>GTFS</ns1:CharacterString>
 					</ns0:keyword>
 					<ns0:keyword>
-						<ns1:CharacterString>Transit routes</ns1:CharacterString>
+						<ns1:CharacterString>GTFS RT</ns1:CharacterString>
 					</ns0:keyword>
 					<ns0:keyword>
-						<ns1:CharacterString>Transit stops</ns1:CharacterString>
+						<ns1:CharacterString>real time</ns1:CharacterString>
 					</ns0:keyword>
 					<ns0:keyword>
-						<ns1:CharacterString>Transit</ns1:CharacterString>
+						<ns1:CharacterString>speeds</ns1:CharacterString>
+					</ns0:keyword>
+					<ns0:keyword>
+						<ns1:CharacterString>vehicle positions</ns1:CharacterString>
 					</ns0:keyword>
 					<ns0:thesaurusName uuidref="723f6998-058e-11dc-8314-0800200c9a66"></ns0:thesaurusName>
 				</ns0:MD_Keywords>
@@ -313,7 +319,9 @@
 					<ns0:processStep>
 						<ns0:LI_ProcessStep>
 							<ns0:description>
-								<ns1:CharacterString>This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt.</ns1:CharacterString>
+								<ns1:CharacterString>
+    This data was estimated by combining GTFS real-time vehicle positions to GTFS scheduled trips, shapes, stops, and stop times tables. GTFS shapes provides the route alignment path, and multiple trips share the same shape. Shapes are cut into segments at stop positions. A `stop segment` refers to the portion of shapes between the prior stop and the current stop. Vehicle positions are spatially joined to segments, and speeds are calculated within each segment for each trip. Multiple trip speeds within each segment provide a distribution, from which 20th percentile, 50th percentile (median), and 80th percentile speeds can be calculated. For all day speed metrics, all trips are used. For peak speed metrics, only trips with start times between 7 - 9:59 AM and 4 - 7:59 PM are used.  
+    </ns1:CharacterString>
 							</ns0:description>
 						</ns0:LI_ProcessStep>
 					</ns0:processStep>

@@ -47,3 +47,9 @@ sources:
     args:
       # source: high_quality_transit_areas/D2_assemble_hqta_polygons.py
       urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_areas.parquet
+  us_states:
+    driver: geojson
+    description: US state polygons
+    args:
+      # ArcGIS Hub resource; https://hub.arcgis.com/datasets/1612d351695b467eba75fdf82c10884f_0/
+      urlpath: https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
