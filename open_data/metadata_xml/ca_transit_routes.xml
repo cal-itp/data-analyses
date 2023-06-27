@@ -21,7 +21,7 @@
 	<ns0:contact>
 		<ns0:CI_ResponsibleParty>
 			<ns0:individualName>
-				<ns1:CharacterString>Tiffany Chu</ns1:CharacterString>
+				<ns1:CharacterString>Tiffany Ku</ns1:CharacterString>
 			</ns0:individualName>
 			<ns0:organisationName>
 				<ns1:CharacterString>Caltrans</ns1:CharacterString>
@@ -34,7 +34,7 @@
 					<ns0:address>
 						<ns0:CI_Address>
 							<ns0:electronicMailAddress>
-								<ns1:CharacterString>tiffany.chu@dot.ca.gov</ns1:CharacterString>
+								<ns1:CharacterString>tiffany.ku@dot.ca.gov</ns1:CharacterString>
 							</ns0:electronicMailAddress>
 						</ns0:CI_Address>
 					</ns0:address>
@@ -48,7 +48,7 @@
 		</ns0:CI_ResponsibleParty>
 	</ns0:contact>
 	<ns0:dateStamp>
-		<ns1:Date>2023-06-15</ns1:Date>
+		<ns1:Date>2023-06-26</ns1:Date>
 	</ns0:dateStamp>
 	<ns0:metadataStandardName>
 		<ns1:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</ns1:CharacterString>
@@ -116,7 +116,7 @@
 					<ns0:citedResponsibleParty>
 						<ns0:CI_ResponsibleParty>
 							<ns0:individualName>
-								<ns1:CharacterString>Tiffany Chu</ns1:CharacterString>
+								<ns1:CharacterString>Tiffany Ku</ns1:CharacterString>
 							</ns0:individualName>
 							<ns0:organisationName>
 								<ns1:CharacterString>Caltrans</ns1:CharacterString>
@@ -129,7 +129,7 @@
 									<ns0:address>
 										<ns0:CI_Address>
 											<ns0:electronicMailAddress>
-												<ns1:CharacterString>tiffany.chu@dot.ca.gov</ns1:CharacterString>
+												<ns1:CharacterString>tiffany.ku@dot.ca.gov</ns1:CharacterString>
 											</ns0:electronicMailAddress>
 										</ns0:CI_Address>
 									</ns0:address>
@@ -313,7 +313,7 @@
 					<ns0:processStep>
 						<ns0:LI_ProcessStep>
 							<ns0:description>
-								<ns1:CharacterString>This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. For the routes that aren't found in `shapes.txt`, we compile the stop sequences with stop longitude/latitude to roughly capture the route alignment. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt.</ns1:CharacterString>
+								<ns1:CharacterString>This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt.</ns1:CharacterString>
 							</ns0:description>
 						</ns0:LI_ProcessStep>
 					</ns0:processStep>
