@@ -25,3 +25,9 @@ sources:
     args:
       # source: open_data/create_stops_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_stops.parquet
+  speeds_by_stop_segments:
+    driver: geoparquet
+    description: All day and peak speeds by stop segments (lines).
+    args:
+      # source: rt_segment_speeds/scripts/B3_export.py
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/export/speeds_by_stop_segments.parquet

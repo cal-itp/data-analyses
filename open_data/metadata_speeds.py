@@ -17,11 +17,11 @@ PURPOSE = "All day and peak transit speeds on stop segments estimated on a singl
 
 METHODOLOGY = (
     '''
-    This data was estimated by combining GTFS real-time vehicle positions to GTFS scheduled trips, shapes, stops, and stop times tables. GTFS shapes provides the route alignment path, and multiple trips share the same shape. Shapes are cut into segments at stop positions. A `stop segment` refers to the portion of shapes between the prior stop and the current stop. Vehicle positions are spatially joined to segments, and speeds are calculated within each segment for each trip. Multiple trip speeds within each segment provide a distribution, from which a 20th percentile, 50th percentile (median), and 80th percentile speed can be calculated. For all day speed metrics, all trips are used. For peak speed metrics, only trips with start times between 7 - 9:59 AM and 4 - 7:59 PM are used.  
+    This data was estimated by combining GTFS real-time vehicle positions to GTFS scheduled trips, shapes, stops, and stop times tables. GTFS shapes provides the route alignment path, and multiple trips share the same shape. Shapes are cut into segments at stop positions. A `stop segment` refers to the portion of shapes between the prior stop and the current stop. Vehicle positions are spatially joined to segments, and speeds are calculated within each segment for each trip. Multiple trip speeds within each segment provide a distribution, from which 20th percentile, 50th percentile (median), and 80th percentile speeds can be calculated. For all day speed metrics, all trips are used. For peak speed metrics, only trips with start times between 7 - 9:59 AM and 4 - 7:59 PM are used.  
     '''
 )
 
-#DATA_DICT_SPEEDS_URL = f"{ESRI_BASE_URL}CA_Transit_Routes/FeatureServer"
+DATA_DICT_SPEEDS_URL = f"{ESRI_BASE_URL}CA_Transit_Routes/FeatureServer"
 
 SPEEDS_STOP_SEG_DICT = {
     "dataset_name": "ca_speeds_stop_segments", 

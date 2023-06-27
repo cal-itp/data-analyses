@@ -52,7 +52,7 @@ if __name__ == "__main__":
         operator_feeds = FEEDS_TO_RUN,
         shape_cols = keep_shape_cols,
         get_df = True,
-        crs = geography_utils.CA_NAD83Albers,
+        crs = geography_utils.WGS84,
     )
     
     utils.geoparquet_gcs_export(
