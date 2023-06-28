@@ -1,20 +1,22 @@
 """
 Pre-processing vehicle positions.
-Drop all RT trips with less than 5 min of data.
+Drop all RT trips with less than 10 min of data.
 """
 import dask.dataframe as dd
 import datetime
 import geopandas as gpd
+import gcsfs
 import numpy as np
 import pandas as pd
 import sys
 
 from loguru import logger
 
-#from shared_utils import utils
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
+
+fs = gcsfs.GCSFileSystem()
 
 def trip_time_elapsed(
     ddf: dd.DataFrame, 
@@ -25,17 +27,19 @@ def trip_time_elapsed(
     Group by trip and calculate the time elapsed (max_time-min_time)
     for RT vp observed.
     """
-    min_time = (ddf.groupby(group_cols)
+    min_time = (ddf.groupby(group_cols, observed=True)
                 [timestamp_col]
                 .min()
+                .dropna()
                 .reset_index()
                 .rename(columns = {timestamp_col: "min_time"})
                )
                  
     
-    max_time = (ddf.groupby(group_cols)
+    max_time = (ddf.groupby(group_cols, observed=True)
                 [timestamp_col]
                 .max()
+                .dropna()
                 .reset_index()
                 .rename(columns = {timestamp_col: "max_time"})
                )
@@ -112,7 +116,9 @@ def pare_down_vp_to_valid_trips(
     ).sort_values(
         ["gtfs_dataset_key", "trip_id", 
          "location_timestamp_local"]
-    ).drop_duplicates().reset_index(drop=True)
+    ).drop_duplicates(
+        subset=["gtfs_dataset_key", "trip_id", "location_timestamp_local"]
+    ).reset_index(drop=True)
     
     # Let's convert to tabular now, make use of partitioning
     # We want to break up sjoins, so we can wrangle it to points on-the-fly
@@ -122,9 +128,15 @@ def pare_down_vp_to_valid_trips(
         vp_idx = usable_vp.index.astype("int32")
     ).drop(columns = "geometry")
     
+    
+    # Either use dask (which kills kernel here) or remove the existing folder of output
+    # https://stackoverflow.com/questions/69092126/is-it-possible-to-change-the-output-filenames-when-saving-as-partitioned-parquet
+    if fs.exists(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}/"):
+        fs.rm(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}/", recursive=True)
+    
     usable_vp.to_parquet(
         f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
-        partition_cols = ["gtfs_dataset_key"]
+        partition_cols = ["gtfs_dataset_key"],
     )
 
     
@@ -140,15 +152,13 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    # Doesn't matter which dictionary to use
-    # We're operating on same vp, and it's only in the next stage
-    # that which segments used matters
-    ROUTE_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "route_segments")
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
    
     time1 = datetime.datetime.now()
+    
     pare_down_vp_to_valid_trips(
         analysis_date,
-        dict_inputs = ROUTE_SEG_DICT
+        dict_inputs = STOP_SEG_DICT
     )
     
     logger.info(f"pare down vp")
