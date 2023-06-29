@@ -579,7 +579,7 @@ class RtFilterMapper:
             gdf = gdf.round({'stop_sequence': 2}) # round for map display, interpolated segs are long floats
             gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
             self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Variation in Speeds {self.display_date}",
-             "url": f"https://storage.googleapis.com/{path}",
+             "url": f"https://storage.googleapis.com/{path}", "type": "speed_variation",
              'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
                                              }]
             self.spa_map_state["lat_lon"] = self.current_centroid
