@@ -22,7 +22,8 @@ def crosswalk_scheduled_trip_grouping_with_rt_key(
     keep_trip_cols: list = ["feed_key", "trip_id"],
     feed_types: List[Literal["vehicle_positions", 
                              "trip_updates", 
-                             "service_alerts"]] = ["vehicle_positions"]
+                             "service_alerts"]] = ["vehicle_positions"],
+    **kwargs
 ) -> pd.DataFrame:
     """
     Filter scheduled trips to a certain grouping 
@@ -34,7 +35,8 @@ def crosswalk_scheduled_trip_grouping_with_rt_key(
     """
     trips = helpers.import_scheduled_trips(
         analysis_date, 
-        columns = keep_trip_cols
+        columns = keep_trip_cols,
+        **kwargs
     )
     
     # Get the schedule feed_key and RT gtfs_dataset_key and add it to crosswalk
@@ -53,7 +55,7 @@ def crosswalk_scheduled_trip_grouping_with_rt_key(
         fct_rt_feeds,
         on = "feed_key",
         how = "inner"
-    ).compute()
+    )
     
     return trips_with_rt_key
 
@@ -95,7 +97,8 @@ def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     
     trips = crosswalk_scheduled_trip_grouping_with_rt_key(
         analysis_date, 
-        keep_trip_cols
+        keep_trip_cols,
+        get_pandas = True
     )                 
                       
     trips = trips.assign(
