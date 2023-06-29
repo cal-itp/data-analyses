@@ -297,7 +297,6 @@ def pare_down_vp_for_special_cases(
         special_shapes,
         f"{USABLE_VP}_{analysis_date}",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
-        SEGMENT_IDENTIFIER_COLS,
         GROUPING_COL
     )
 
