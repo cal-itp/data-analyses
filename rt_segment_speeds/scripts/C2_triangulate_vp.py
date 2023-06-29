@@ -11,7 +11,7 @@ from typing import Literal
 
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (SEGMENT_GCS, #analysis_date,
-                                              CONFIG_PATH, PROJECT_CRS
+                                              CONFIG_PATH
                                              )
 from A2_valid_vehicle_positions import merge_usable_vp_with_sjoin_vpidx
 
@@ -40,7 +40,7 @@ def trip_stat(
     elif stat == "max":
         stat_df = grouped_df[col].max()
     
-    elif stat=="mean":
+    elif stat == "p50":
         stat_df = grouped_df[col].mean().round(0)
     
     elif stat == "p25":
@@ -49,11 +49,17 @@ def trip_stat(
         # and it's expensive because of the shuffling. 
         # do a rough version to approximate midpoint, 
         # since vp_idx should increase by 1
-        stat_df = (grouped_df[col].mean() - grouped_df[col].min()).round(0)
+        stat_df = (
+            (grouped_df[col].mean() - grouped_df[col].min()).divide(2).round(0) + 
+            grouped_df[col].min()
+        )
     
     elif stat == "p75":
-        stat_df = (grouped_df[col].max() - grouped_df.mean()).round(0)
-    
+        stat_df = (
+            (grouped_df[col].max() - grouped_df[col].mean()).divide(2) + 
+            grouped_df[col].mean()
+        ).round(0)  
+        
     return stat_df.pipe(integrify)
     
 
@@ -73,7 +79,7 @@ def triangulate_vp(
     # group_keys = False so that group_cols is not used as index.
     
     results = [delayed(trip_stat)(ddf, group_cols, s)
-               for s in ["min", "p25", "p50", "p75", "max",]] 
+               for s in ["min", "p25", "p50", "p75", "max"]] 
     
     t1 = datetime.datetime.now()
     print(f"delayed stats: {t1 - t0}")
@@ -132,28 +138,20 @@ def merge_rt_scheduled_trips(
     """
     keep_cols = [
         "feed_key",
-        "shape_id", "shape_array_key", 
-        "direction_id", 
-        "route_id", "route_short_name", "route_long_name",
+        "shape_array_key", 
     ] + group_cols
         
     crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
         analysis_date, 
         keep_trip_cols = keep_cols, 
         get_pandas = True
-    ).astype({"direction_id": "Int64"})
-    
-    time_of_day = sched_rt_utils.get_trip_time_buckets(analysis_date)
-    
+    )
+        
     df = dd.merge(
         rt_trips,
         crosswalk,
         on = ["gtfs_dataset_key"] + group_cols,
         how = "left",
-    ).merge(
-        time_of_day,
-        on = ["gtfs_dataset_key", "feed_key", "trip_id"],
-        how = "left"
     )
     
     return df
@@ -187,13 +185,14 @@ if __name__ == "__main__":
         filters = [[("vp_idx", "in", vp_idx_list)]]
     ).compute()
     
-    vp_with_sched = merge_rt_scheduled_trips(
-        vp_results,
-        analysis_date, 
-        group_cols = ["trip_id"]
+    vp_with_sched = (
+        merge_rt_scheduled_trips(
+            vp_results, 
+            analysis_date, 
+            group_cols = ["trip_id"]
+        ).sort_values("vp_idx")
+        .reset_index(drop=True)
     )
-    
-    vp_with_sched = vp_with_sched.sort_values("vp_idx").reset_index(drop=True)
     
     vp_with_sched.to_parquet(
         f"{SEGMENT_GCS}trip_summary/vp_subset_{analysis_date}.parquet",
