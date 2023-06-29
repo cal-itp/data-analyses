@@ -559,7 +559,7 @@ class RtFilterMapper:
             gdf['color'] = gdf.p20_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
             gdf = gdf.round({'stop_sequence': 2}) # round for map display, interpolated segs are long floats
             self.spa_map_state["layers"] += [{
-                "name": f"{self.organization_name} Vehicle Speeds {self.display_date}",
+                "name": f"{self.organization_name} Vehicle Speeds {self.display_date} {self.filter_period.replace('_', ' ')}",
                 "url": f"https://storage.googleapis.com/{path}", "type": "speedmap",
                 'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': 'p20_mph'}
                 }]
@@ -578,7 +578,8 @@ class RtFilterMapper:
             gdf = self._variance_map_view
             gdf = gdf.round({'stop_sequence': 2}) # round for map display, interpolated segs are long floats
             gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Variation in Speeds {self.display_date}",
+            self.spa_map_state["layers"] += [{
+             "name": f"{self.organization_name} Variation in Speeds {self.display_date} {self.filter_period.replace('_', ' ')}",
              "url": f"https://storage.googleapis.com/{path}", "type": "speed_variation",
              'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
                                              }]
