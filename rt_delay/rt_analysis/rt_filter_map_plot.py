@@ -594,6 +594,11 @@ class RtFilterMapper:
             self.spa_map_state["layers"] = [{"name": f"D{dist} State Highway Network",
              "url": f"https://storage.googleapis.com/{path}", "type": "state_highway_network"}]
             return _export(shn_gdf, path)
+        
+    def render_spa_link(self):
+        
+        display(Markdown(f'<a href="{self.spa_map_url}" target="_blank">Open Full Map in New Tab</a>'))
+        return
     
     def display_spa_map(self, width: int=1000, height: int=650):
         '''
