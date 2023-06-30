@@ -109,3 +109,38 @@ def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     )
     
     return trips
+
+def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
+    """
+    Find shape_id with most trips for that route-direction.
+    """
+    route_dir_cols = [
+        "feed_key", "route_id", "direction_id"]
+    
+    keep_trip_cols = route_dir_cols + [
+        "trip_id", "shape_id"
+    ]
+    
+    trips = crosswalk_scheduled_trip_grouping_with_rt_key(
+        analysis_date, 
+        keep_trip_cols,
+        get_pandas = True
+    )                 
+    
+    sorting_order = [True for i in route_dir_cols]
+    
+    most_common_shape = (
+        trips.groupby(route_dir_cols + ["shape_id"], 
+                      observed=True, group_keys = False)
+        .agg({"trip_id": "count"})
+        .reset_index()
+        .sort_values(route_dir_cols + ["trip_id"], 
+                     ascending = sorting_order + [False])
+        .drop_duplicates(subset=route_dir_cols)
+        .reset_index(drop=True)
+        .rename(columns = {"shape_id": "common_shape_id"})
+        [route_dir_cols + ["common_shape_id"]]
+    )
+    
+    return most_common_shape
+    

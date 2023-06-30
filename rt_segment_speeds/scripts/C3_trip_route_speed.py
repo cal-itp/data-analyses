@@ -84,7 +84,7 @@ def add_scheduled_trip_columns(
     route-direction-time_of_day averages.
     """
     keep_cols = [
-        "feed_key",
+        "feed_key", 
         "direction_id", 
         "route_id", "route_short_name", "route_long_name", "route_desc",
     ] + group_cols
@@ -93,13 +93,23 @@ def add_scheduled_trip_columns(
         analysis_date, 
         keep_trip_cols = keep_cols, 
         get_pandas = True
+    )
+    
+    common_shape = sched_rt_utils.most_common_shape_by_route_direction(analysis_date)
+    
+    crosswalk2 = pd.merge(
+        crosswalk,
+        common_shape,
+        on = ["feed_key", "route_id", "direction_id"],
+        how = "inner"
     ).astype({"direction_id": "Int64"})
+    
     
     time_of_day = sched_rt_utils.get_trip_time_buckets(analysis_date)
     
     # Clean up route name
     crosswalk2 = portfolio_utils.add_route_name(
-        crosswalk
+        crosswalk2
     ).drop(columns = ["route_short_name", "route_long_name", "route_desc"])
 
     df = dd.merge(
@@ -164,12 +174,63 @@ def avg_route_speeds_by_time_of_day(
           )
     
     df3 = df3.assign(
-        avg_rt_trip_min = df3.change_sec.divide(60),
-    ).rename(columns = {"service_min": "avg_sched_trip_min"})
+        avg_rt_trip_min = df3.change_sec.divide(60).round(1),
+        service_minutes = df3.service_minutes.round(1),
+        speed_mph = df3.speed_mph.round(1),
+    ).rename(columns = {
+        "service_minutes": "avg_sched_trip_min",
+        "trip_id": "n_trips",
+        "route_name_used": "route_name"
+    }).drop(columns = "change_sec")
     
     return df3
 
 
+def make_wide_for_export(
+    df: pd.DataFrame, 
+) -> pd.DataFrame:
+    """
+    If we have to make it wide and attach common shape_id, we will.
+    If enterprise gdb can't bundle layers, then we'll have to.
+    """
+    col_order = [
+        'organization_source_record_id', 'organization_name',
+        'route_id', 'route_name', 
+        'direction_id', 'common_shape_id',
+        'time_of_day',
+        'speed_mph', 'n_trips',
+        'base64_url', 'caltrans_district'
+    ]
+    
+    RENAME_DICT = {
+        "organization_source_record_id": "org_id",
+        "organization_name": "agency",
+    }
+    
+    df2 = df.reindex(columns = col_order).rename(columns = RENAME_DICT)
+    
+    # make wide 
+    # https://stackoverflow.com/questions/22798934/pandas-long-to-wide-reshape-by-two-variables
+    group_cols = [
+        "org_id", "agency", 
+        "route_id", "direction_id", "route_name",
+        "common_shape_id",
+        "base64_url", "caltrans_district"
+    ]
+    
+    df3 = df2.pivot(
+        index = group_cols,
+        columns = "time_of_day", 
+        values=["speed_mph", "trip_id"]
+    ).sort_index(axis=1, level=1)
+    
+    df3.columns = [f'{x}_{y}' for x,y in df3.columns]
+    
+    df4 = df3.reset_index()
+    return df4
+    
+
+    
 if __name__ == "__main__":
     
     start = datetime.datetime.now()
@@ -228,7 +289,7 @@ if __name__ == "__main__":
         group_cols = [
             "gtfs_dataset_key", "time_of_day",
             "route_id", "direction_id",
-            "route_name_used"
+            "route_name_used", "common_shape_id"
         ]
     )
     
@@ -240,8 +301,7 @@ if __name__ == "__main__":
             quartet_data = "vehicle_positions",
             dim_gtfs_dataset_cols = ["key", "base64_url"],
             dim_organization_cols = ["source_record_id", 
-                                     "name", "caltrans_district"]
-        )
+                                     "name", "caltrans_district"])
     )
     
     avg_speeds_with_org = pd.merge(
@@ -251,9 +311,20 @@ if __name__ == "__main__":
         on = "gtfs_dataset_key",
         how = "inner"
     )
+    
+    agency_cols = ['organization_source_record_id', 'organization_name']
+    route_cols = ['route_id', 'route_name', 
+                  'direction_id', 'common_shape_id']
 
-    avg_speeds_with_org.to_parquet(
-        f"{SEGMENT_GCS}trip_summary/route_speeds_{analysis_date}.parquet")
+    col_order = agency_cols + route_cols + [
+        'time_of_day',
+        'speed_mph', 'n_trips', 
+        'avg_sched_trip_min', 'avg_rt_trip_min', 
+        'base64_url', 'caltrans_district'
+    ]
+    
+    avg_speeds_with_org.reindex(columns = col_order).to_parquet(
+        f"{SEGMENT_GCS}trip_summary/route_speeds_{analysis_date}.parquet")    
     
     time3 = datetime.datetime.now()
     print(f"route-direction average speeds: {time3 - time2}")
