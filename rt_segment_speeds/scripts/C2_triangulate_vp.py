@@ -20,12 +20,10 @@ from dask import delayed, compute
 from typing import Literal
 
 from segment_speed_utils import helpers, sched_rt_utils
-from segment_speed_utils.project_vars import (SEGMENT_GCS, #analysis_date,
-                                              CONFIG_PATH
-                                             )
+from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
+                                              CONFIG_PATH)
 from A2_valid_vehicle_positions import merge_usable_vp_with_sjoin_vpidx
 
-analysis_date = "2023-05-17"
 
 def trip_stat(
     ddf: dd.DataFrame, 

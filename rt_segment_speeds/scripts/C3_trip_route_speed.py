@@ -16,10 +16,8 @@ from shared_utils.rt_utils import MPH_PER_MPS
 from shared_utils.geography_utils import WGS84
 from shared_utils import utils, portfolio_utils, schedule_rt_utils
 from segment_speed_utils import helpers, sched_rt_utils, wrangle_shapes
-from segment_speed_utils.project_vars import (SEGMENT_GCS,
-                                              # analysis_date,
+from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
                                               PROJECT_CRS)
-analysis_date = "2023-05-17"
 
 def distance_and_seconds_elapsed(
     df: pd.DataFrame, 
