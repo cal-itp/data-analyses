@@ -15,11 +15,12 @@ get_speeds_by_segment:
     
 export_data:
 	python B2_avg_speeds_by_segment.py
-	python B3_export.py    
-	#python C1_rt_trip_diagnostics.py
-	#TODO: where should calculate_stop_delay and stop_level_metrics be?
-
-    
+	python B3_export.py
+	python C2_triangulate_vp.py      
+	python C3_trip_route_speed.py      
+    #python C1_rt_trip_diagnostics.py
+	#TODO: where should calculate_stop_delay and stop_level_metrics be?     
+   
 download_roads:
 	#pip install esridump
 	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson
