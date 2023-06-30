@@ -128,9 +128,16 @@ def add_agency_names_hqta_details(
     
     crosswalk = get_agency_info(feeds_df, analysis_date)
     
-    NAMES_DICT = dict(zip(crosswalk.feed_key, crosswalk.organization_name))
-    B64_DICT = dict(zip(crosswalk.feed_key, crosswalk.base64_url))
-    ORG_DICT = dict(zip(crosswalk.feed_key, crosswalk.organization_source_record_id))    
+    NAMES_DICT = dict(zip(
+        crosswalk.feed_key, crosswalk.organization_name
+    ))
+    B64_DICT = dict(zip(
+        crosswalk.feed_key, crosswalk.base64_url
+    ))
+    ORG_DICT = dict(zip(
+        crosswalk.feed_key, crosswalk.organization_source_record_id
+    ))
+    
     gdf = gdf.assign(
         agency_name_primary = gdf.feed_key_primary.map(NAMES_DICT),
         agency_name_secondary = gdf.feed_key_secondary.map(NAMES_DICT),

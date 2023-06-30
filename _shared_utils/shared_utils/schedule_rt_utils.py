@@ -262,7 +262,7 @@ def sample_schedule_feed_key_to_organization_crosswalk(
     **kwargs,
 ) -> pd.DataFrame:
     """
-    From scedule data, using feed_key as primary key,
+    From schedule data, using feed_key as primary key,
     grab the gtfs_dataset_key associated.
     Pass this through function to attach quartet data identifier columns
     and organization info.
