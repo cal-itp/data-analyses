@@ -1,3 +1,13 @@
+"""
+Starting from the vp that were spatially joined
+to segments, pick a subset of these.
+Triangulate these by picking 5 points to better 
+calculate speeds for the entire trip.
+
+If we pick only 2 points, for a looping route, origin/destination
+are basically the same. If we pick 3 points, this is better 
+for triangulating the distance traveled.
+"""
 import os
 os.environ['USE_PYGEOS'] = '0'
 
@@ -22,7 +32,20 @@ def trip_stat(
     group_cols: list, 
     stat: Literal["min", "max", "p25", "p50", "p75"]
 ) -> dd.DataFrame:
+    """
+    For a group, grab the min, max, and maybe some other
+    quartiles.
+    The shuffling done on all the vp is expensive, so
+    we'll use vp_idx and roughly grab what's the 25th, 50th, 75th 
+    percentile by taking the midpoints.
     
+    If we're off by 1, it's not a big deal, since we're 
+    sampling 5 vp per trip.
+    """
+    # observed = True means don't create rows when that 
+    # group_cols combination is not present
+    # we need this because gtfs_dataset_key is categorical dtype
+    # group_keys = False so that group_cols is not used as index.
     grouped_df = ddf.groupby(group_cols, observed=True, group_keys=False)
     col = "vp_idx"
     
@@ -30,7 +53,7 @@ def trip_stat(
         """
         Make sure vp_idx returns as an integer and get rid of any NaNs. 
         """
-        df2 = df.dropna().astype("int64").reset_index()#.compute()
+        df2 = df.dropna().astype("int64").reset_index()
         
         return df2
     
@@ -69,14 +92,17 @@ def triangulate_vp(
         "gtfs_dataset_key", "trip_id"]
 ) -> np.ndarray:
     """
-    Grab 3 vehicle positions for each trip to triangulate distance.
+    Grab a sample of vehicle positions for each trip to triangulate distance.
     These vp already sjoined onto the shape.
-    Pick the min, rounded mean, and max vp_idx for simplicity.
+    Roughly pick vp at equally spaced intervals.
+    
+    Dask aggregation can't group and use lambda to create list of possible 
+    vp_idx.
+    Rather than caring about specifically which vp_idx, we just want
+    roughly spaced apart ones that approximate 0, 25, 50, 75, 100 percentiles.
     """
     t0 = datetime.datetime.now()
-    # observed = True means don't create rows when that group_cols combination is not present
-    # we need this because gtfs_dataset_key is categorical dtype
-    # group_keys = False so that group_cols is not used as index.
+
     
     results = [delayed(trip_stat)(ddf, group_cols, s)
                for s in ["min", "p25", "p50", "p75", "max"]] 
@@ -98,7 +124,7 @@ def triangulate_vp(
 
 def subset_usable_vp(dict_inputs: dict) -> np.ndarray:
     """
-    Subset all the usable vp and keep the first, middle, and last 
+    Subset all the usable vp and keep a sample of triangulated
     vp per trip.
     """
     SEGMENT_FILE = f'{dict_inputs["segments_file"]}_{analysis_date}'
@@ -111,6 +137,8 @@ def subset_usable_vp(dict_inputs: dict) -> np.ndarray:
         columns = ["shape_array_key"]
     ).shape_array_key.unique().tolist()
     
+    # Use this function to attach the crosswalk of sjoin results
+    # back to usable_vp
     ddf = merge_usable_vp_with_sjoin_vpidx(
         all_shapes,
         USABLE_FILE,
@@ -133,8 +161,10 @@ def merge_rt_scheduled_trips(
     analysis_date: str,
     group_cols: list = ["trip_id"]) -> dd.DataFrame:
     """
-    Merge RT trips (vehicle positions) to scheduled trips.
-    Scheduled trips provides trip_start_time, which is used to find time_of_day.
+    Merge RT trips (vehicle positions) to scheduled trips 
+    to get the shape_array_key.
+    Don't pull other scheduled trip columns now, wait until
+    after aggregation is done.
     """
     keep_cols = [
         "feed_key",
