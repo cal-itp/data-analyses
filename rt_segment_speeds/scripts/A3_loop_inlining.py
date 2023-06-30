@@ -180,6 +180,7 @@ def find_vp_direction_vector(
         suffixes = ('_start', '_end')
     ).sort_values(trip_group_cols).reset_index(drop=True)
     
+    # Use 2 geoseries, the first point and the last point
     first_series = gpd.points_from_xy(
         df_wide.x_start, df_wide.y_start,
         crs="EPSG:4326"
@@ -190,11 +191,13 @@ def find_vp_direction_vector(
         crs="EPSG:4326"
     ).to_crs(crs)
     
+    # Input 2 series to get a directon for each element-pair 
     direction_vector = [
         wrangle_shapes.get_direction_vector(start, end) 
         for start, end in zip(first_series, last_series)
     ]
     
+    # Normalize vector by Pythagorean Theorem to get values between -1 and 1
     vector_normalized = [wrangle_shapes.get_normalized_vector(i) 
                      for i in direction_vector]
     
@@ -203,6 +206,8 @@ def find_vp_direction_vector(
         vp_vector = vector_normalized
     )
     
+    # Take the dot product. 
+    # positive = same direction; 0 = orthogonal; negative = opposite direction
     dot_result = [wrangle_shapes.dot_product(vec1, vec2) for vec1, vec2 in 
                   zip(results.segments_vector, results.vp_vector)]
     
@@ -219,6 +224,13 @@ def find_errors_in_segment_groups(
     segment_identifier_cols: list,
 ) -> dd.DataFrame:
     """
+    For each sjoin result for each segment-trip:
+    (1) find the direction the segment is running
+    (2) use the mean timestamp to divide sjoin results into 2 groups
+    (3) for each group, find the first/last vp
+    (4) find the direction of each group of vp for segment-trip
+    (5) as long as vp are running in same direction as segment (dot product > 0),
+    keep those observations.
     """
     group_cols = segment_identifier_cols + ["trip_id"]
     
@@ -265,6 +277,9 @@ def pare_down_vp_for_special_cases(
     dict_inputs: dict = {}
 ):
     """
+    For special shapes, include a direction check where each
+    batch of vp have direction generated, and compare that against
+    the direction the segment is running.
     """
     USABLE_VP = dict_inputs["stage1"]
     INPUT_FILE_PREFIX = dict_inputs["stage2"]
@@ -282,7 +297,6 @@ def pare_down_vp_for_special_cases(
         special_shapes,
         f"{USABLE_VP}_{analysis_date}",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
-        SEGMENT_IDENTIFIER_COLS,
         GROUPING_COL
     )
 

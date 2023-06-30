@@ -57,11 +57,11 @@ def identify_stop_segment_cases(
 
 
 def merge_usable_vp_with_sjoin_vpidx(
-    shape_cases: np.ndarray,
+    shape_cases: list,
     usable_vp_file: str,
     sjoin_results_file: str,
-    segment_identifier_cols: list,
-    grouping_col: str
+    grouping_col: str,
+    **kwargs
 ) -> dd.DataFrame:
     """
     Grab all the usable vp (with lat/lon columns), filter it down to
@@ -73,13 +73,11 @@ def merge_usable_vp_with_sjoin_vpidx(
         SEGMENT_GCS,
         usable_vp_file,
         file_type = "df",
-        partitioned = True
+        partitioned = True,
+        **kwargs
     ).set_index("vp_idx")
         
     # Grab our results of vp_idx joined to segments
-    seg_seq_col = [c for c in segment_identifier_cols 
-                   if c != grouping_col][0]
-    
     vp_to_seg = dd.read_parquet(
         f"{SEGMENT_GCS}vp_sjoin/{sjoin_results_file}",
         filters = [[(grouping_col, "in", shape_cases)]],
@@ -125,7 +123,6 @@ def pare_down_vp_by_segment(
         normal_shapes,
         f"{USABLE_VP}_{analysis_date}",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
-        SEGMENT_IDENTIFIER_COLS,
         GROUPING_COL
     )
     
