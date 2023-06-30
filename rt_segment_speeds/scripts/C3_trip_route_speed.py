@@ -8,11 +8,13 @@ Aggregate trip speeds into route-direction averages by time-of-day.
 """
 import dask.dataframe as dd
 import datetime
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 
 from shared_utils.rt_utils import MPH_PER_MPS
-from shared_utils import portfolio_utils, schedule_rt_utils
+from shared_utils.geography_utils import WGS84
+from shared_utils import utils, portfolio_utils, schedule_rt_utils
 from segment_speed_utils import helpers, sched_rt_utils, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               # analysis_date,
@@ -186,29 +188,69 @@ def avg_route_speeds_by_time_of_day(
     return df3
 
 
-def make_wide_for_export(
+def final_cleaning_for_export(
     df: pd.DataFrame, 
-) -> pd.DataFrame:
+    analysis_date: str
+) -> gpd.GeoDataFrame: 
     """
-    If we have to make it wide and attach common shape_id, we will.
-    If enterprise gdb can't bundle layers, then we'll have to.
+    Attach shape geometry to most common shape_id.
     """
-    col_order = [
-        'organization_source_record_id', 'organization_name',
-        'route_id', 'route_name', 
-        'direction_id', 'common_shape_id',
+    # Attach org name and source_record_id
+    org_crosswalk = (
+        schedule_rt_utils.sample_gtfs_dataset_key_to_organization_crosswalk(
+            df,
+            analysis_date,
+            quartet_data = "vehicle_positions",
+            dim_gtfs_dataset_cols = ["key", "base64_url"],
+            dim_organization_cols = ["source_record_id", 
+                                     "name", "caltrans_district"])
+    )
+    
+    df_with_org = pd.merge(
+        df,
+        org_crosswalk.rename(columns = {
+            "vehicle_positions_gtfs_dataset_key": "gtfs_dataset_key"}),
+        on = "gtfs_dataset_key",
+        how = "inner"
+    )
+    
+    # Attach shape geometry and make sure it's in WGS84
+    shapes = helpers.import_scheduled_shapes(
+        analysis_date,
+        columns = ["shape_array_key", "geometry"],
+        get_pandas = True,
+        crs = WGS84
+    )
+    
+    df_with_shape = pd.merge(
+        shapes,
+        df_with_org,
+        on = "shape_array_key", # once merged, can drop shape_array_key
+        how = "inner"
+    )
+    
+    agency_cols = ['organization_source_record_id', 'organization_name']
+    route_cols = ['route_id', 'route_name', 
+                  'direction_id', 'common_shape_id']
+
+    col_order = agency_cols + route_cols + [
         'time_of_day',
-        'speed_mph', 'n_trips',
-        'base64_url', 'caltrans_district'
+        'speed_mph', 'n_trips', 
+        'avg_sched_trip_min', 'avg_rt_trip_min', 
+        'base64_url', 'caltrans_district',
+        'geometry'
     ]
     
-    RENAME_DICT = {
-        "organization_source_record_id": "org_id",
-        "organization_name": "agency",
-    }
+    final_df = df_with_shape.reindex(columns = col_order).rename(
+        columns = {"organization_source_record_id": "org_id",
+                   "organization_name": "agency"})
+
+    return final_df
     
-    df2 = df.reindex(columns = col_order).rename(columns = RENAME_DICT)
     
+def make_wide_for_export(
+    df: pd.DataFrame, 
+) -> pd.DataFrame:    
     # make wide 
     # https://stackoverflow.com/questions/22798934/pandas-long-to-wide-reshape-by-two-variables
     group_cols = [
@@ -278,54 +320,33 @@ if __name__ == "__main__":
     
     time2 = datetime.datetime.now()
     print(f"calculate speed: {time2 - time1}")
-    
+        
     speed2.to_parquet(
         f"{SEGMENT_GCS}trip_summary/trip_speeds_{analysis_date}.parquet"
     )
     
+    speed2 = pd.read_parquet(
+        f"{SEGMENT_GCS}trip_summary/trip_speeds_{analysis_date}.parquet")
+
     # Take the average across route-direction-time_of_day
     avg_speeds = avg_route_speeds_by_time_of_day(
         speed2, 
         group_cols = [
             "gtfs_dataset_key", "time_of_day",
             "route_id", "direction_id",
-            "route_name_used", "common_shape_id"
+            "route_name_used",
+            "common_shape_id", "shape_array_key"
         ]
     )
     
-    # Attach org name and source_record_id
-    org_crosswalk = (
-        schedule_rt_utils.sample_gtfs_dataset_key_to_organization_crosswalk(
-            avg_speeds,
-            analysis_date,
-            quartet_data = "vehicle_positions",
-            dim_gtfs_dataset_cols = ["key", "base64_url"],
-            dim_organization_cols = ["source_record_id", 
-                                     "name", "caltrans_district"])
-    )
-    
-    avg_speeds_with_org = pd.merge(
-        avg_speeds,
-        org_crosswalk.rename(columns = {
-            "vehicle_positions_gtfs_dataset_key": "gtfs_dataset_key"}),
-        on = "gtfs_dataset_key",
-        how = "inner"
-    )
-    
-    agency_cols = ['organization_source_record_id', 'organization_name']
-    route_cols = ['route_id', 'route_name', 
-                  'direction_id', 'common_shape_id']
+    avg_speeds2 = final_cleaning_for_export(avg_speeds, analysis_date)
 
-    col_order = agency_cols + route_cols + [
-        'time_of_day',
-        'speed_mph', 'n_trips', 
-        'avg_sched_trip_min', 'avg_rt_trip_min', 
-        'base64_url', 'caltrans_district'
-    ]
-    
-    avg_speeds_with_org.reindex(columns = col_order).to_parquet(
-        f"{SEGMENT_GCS}trip_summary/route_speeds_{analysis_date}.parquet")    
-    
+    utils.geoparquet_gcs_export(
+        avg_speeds2,
+        f"{SEGMENT_GCS}trip_summary/",
+        f"route_speeds_{analysis_date}"
+    )
+        
     time3 = datetime.datetime.now()
     print(f"route-direction average speeds: {time3 - time2}")
     
