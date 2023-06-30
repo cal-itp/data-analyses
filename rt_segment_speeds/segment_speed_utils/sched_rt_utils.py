@@ -118,7 +118,7 @@ def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
         "feed_key", "route_id", "direction_id"]
     
     keep_trip_cols = route_dir_cols + [
-        "trip_id", "shape_id"
+        "trip_id", "shape_id", "shape_array_key"
     ]
     
     trips = crosswalk_scheduled_trip_grouping_with_rt_key(
@@ -130,7 +130,7 @@ def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
     sorting_order = [True for i in route_dir_cols]
     
     most_common_shape = (
-        trips.groupby(route_dir_cols + ["shape_id"], 
+        trips.groupby(route_dir_cols + ["shape_id", "shape_array_key"], 
                       observed=True, group_keys = False)
         .agg({"trip_id": "count"})
         .reset_index()
@@ -139,7 +139,7 @@ def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
         .drop_duplicates(subset=route_dir_cols)
         .reset_index(drop=True)
         .rename(columns = {"shape_id": "common_shape_id"})
-        [route_dir_cols + ["common_shape_id"]]
+        [route_dir_cols + ["common_shape_id", "shape_array_key"]]
     )
     
     return most_common_shape
