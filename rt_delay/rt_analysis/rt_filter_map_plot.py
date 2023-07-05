@@ -494,11 +494,11 @@ class RtFilterMapper:
         gdf = self.detailed_map_view.copy().dropna(subset=['fast_slow_ratio']) >> arrange(_.trips_per_hour)
         display_cols = ['fast_slow_ratio', 'p20_mph', 'p80_mph', 'miles_from_last',
                        'route_short_name', 'trips_per_hour', 'shape_id',
-                       'stop_sequence']
+                       'stop_sequence', 'stop_id', 'route_id', 'stop_name']
         display_aliases = ['80th %ile to 20th %ile speed ratio (variation in speeds)',
                            '20th %ile Speed (miles per hour)', ' 80th %ile Speed (miles per hour)', 'Segment distance (miles)',
                           'Route', 'Frequency (trips per hour)', 'Shape ID',
-                          'Stop Sequence']
+                          'Stop Sequence', 'Stop ID', 'Route ID', 'Stop Name']
         tooltip_dict = {'aliases': display_aliases}
         cmap = VARIANCE_FIXED_COLORSCALE
         self.variance_cmap = cmap
@@ -542,7 +542,9 @@ class RtFilterMapper:
             print(f'writing to {path}')
             with fs.open(path, 'wb') as writer:  # write out to public-facing GCS?
                 with gzip.GzipFile(fileobj=writer, mode="w") as gz:
-                    gz.write(geojson_bytes)            
+                    gz.write(geojson_bytes)
+            base64state = base64.urlsafe_b64encode(json.dumps(self.spa_map_state).encode()).decode()
+            self.spa_map_url = f'https://leaflet-speedmaps--cal-itp-data-analyses.netlify.app/?state={base64state}'
             return
         
         if map_type == '_20p_speeds':
@@ -555,8 +557,9 @@ class RtFilterMapper:
             gdf['organization_name'] = self.organization_name
             cmap = self.speed_map_params[1]
             gdf['color'] = gdf.p20_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
+            gdf = gdf.round({'stop_sequence': 2}) # round for map display, interpolated segs are long floats
             self.spa_map_state["layers"] += [{
-                "name": f"{self.organization_name} Vehicle Speeds {self.display_date}",
+                "name": f"{self.organization_name} Vehicle Speeds {self.display_date} {self.filter_period.replace('_', ' ')}",
                 "url": f"https://storage.googleapis.com/{path}", "type": "speedmap",
                 'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': 'p20_mph'}
                 }]
@@ -573,9 +576,11 @@ class RtFilterMapper:
             path = f'{prefix}/{self.calitp_itp_id}_{self.filter_period}_variance.geojson.gz'
             cmap = self.variance_cmap
             gdf = self._variance_map_view
+            gdf = gdf.round({'stop_sequence': 2}) # round for map display, interpolated segs are long floats
             gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            self.spa_map_state["layers"] += [{"name": f"{self.organization_name} Variation in Speeds {self.display_date}",
-             "url": f"https://storage.googleapis.com/{path}",
+            self.spa_map_state["layers"] += [{
+             "name": f"{self.organization_name} Variation in Speeds {self.display_date} {self.filter_period.replace('_', ' ')}",
+             "url": f"https://storage.googleapis.com/{path}", "type": "speed_variation",
              'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
                                              }]
             self.spa_map_state["lat_lon"] = self.current_centroid
@@ -590,17 +595,21 @@ class RtFilterMapper:
             self.spa_map_state["layers"] = [{"name": f"D{dist} State Highway Network",
              "url": f"https://storage.googleapis.com/{path}", "type": "state_highway_network"}]
             return _export(shn_gdf, path)
+        
+    def render_spa_link(self):
+        
+        display(Markdown(f'<a href="{self.spa_map_url}" target="_blank">Open Full Map in New Tab</a>'))
+        return
     
-    def display_spa_map(self, width: int=1100, height: int=650):
+    def display_spa_map(self, width: int=1000, height: int=650):
         '''
         Display map from external simple web app in the notebook/JupyterBook context via an IFrame.
         Will show most recent map set using self.map_gz_export
         Width/height defaults are current best option for JupyterBook, don't change for portfolio use
         width, height: int (pixels)
         '''
-        assert hasattr(self, 'spa_map_state'), 'must export map and set state first using self.map_gz_export'
-        base64state = base64.urlsafe_b64encode(json.dumps(self.spa_map_state).encode()).decode()
-        i = IFrame(f'https://leaflet-speedmaps--cal-itp-data-analyses.netlify.app/?state={base64state}', width=width, height=height)
+        assert hasattr(self, 'spa_map_url'), 'must export map and set state first using self.map_gz_export'
+        i = IFrame(self.spa_map_url, width=width, height=height)
         display(i)
         return
 
