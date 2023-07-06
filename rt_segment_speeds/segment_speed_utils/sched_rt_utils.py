@@ -50,13 +50,22 @@ def crosswalk_scheduled_trip_grouping_with_rt_key(
     )
     
     # Merge trips with fct_rt_feeds to get gtfs_dataset_key
-    trips_with_rt_key = dd.merge(
-        trips,
-        fct_rt_feeds,
-        on = "feed_key",
-        how = "inner"
-    )
+    if isinstance(trips, dd.DataFrame):
+        trips_with_rt_key = dd.merge(
+            trips,
+            fct_rt_feeds,
+            on = "feed_key",
+            how = "inner"
+        )
     
+    else:
+        trips_with_rt_key = pd.merge(
+            trips,
+            fct_rt_feeds,
+            on = "feed_key",
+            how = "inner"
+        )    
+        
     return trips_with_rt_key
 
 
@@ -109,6 +118,7 @@ def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     )
     
     return trips
+
 
 def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
     """
