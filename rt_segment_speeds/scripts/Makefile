@@ -5,6 +5,7 @@ segmentize:
 	python cut_special_stop_segments.py
 	python concatenate_stop_segments.py
       
+      
 get_speeds_by_segment:
 	python A0_preprocessing.py
 	python A1_sjoin_vp_segments.py
@@ -19,7 +20,6 @@ export_data:
 	python C2_triangulate_vp.py      
 	python C3_trip_route_speed.py      
     #python C1_rt_trip_diagnostics.py
-	#TODO: where should calculate_stop_delay and stop_level_metrics be?     
    
 download_roads:
 	#pip install esridump
