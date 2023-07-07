@@ -31,3 +31,9 @@ sources:
     args:
       # source: rt_segment_speeds/scripts/B3_export.py
       urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/export/speeds_by_stop_segments.parquet
+  speeds_by_route_time_of_day:
+    driver: geoparquet
+    description: Average speeds by route-direction-time-of-day.
+    args:
+      # source: rt_segment_speeds/scripts/C3_trip_route_speed.py
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/export/speeds_by_route_time_of_day.parquet

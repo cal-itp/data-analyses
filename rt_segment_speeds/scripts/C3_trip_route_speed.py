@@ -180,7 +180,7 @@ def avg_route_speeds_by_time_of_day(
     ).rename(columns = {
         "service_minutes": "avg_sched_trip_min",
         "trip_id": "n_trips",
-        "route_name_used": "route_name"
+        "route_name_used": "route_name",
     }).drop(columns = "change_sec")
     
     return df3
@@ -241,7 +241,9 @@ def final_cleaning_for_export(
     
     final_df = df_with_shape.reindex(columns = col_order).rename(
         columns = {"organization_source_record_id": "org_id",
-                   "organization_name": "agency"})
+                   "organization_name": "agency", 
+                   "caltrans_district": "district_name"
+                  })
 
     return final_df
     
@@ -343,6 +345,12 @@ if __name__ == "__main__":
         avg_speeds2,
         f"{SEGMENT_GCS}trip_summary/",
         f"route_speeds_{analysis_date}"
+    )
+    
+    utils.geoparquet_gcs_export(
+        avg_speeds2,
+        f"{SEGMENT_GCS}export/",
+        "speeds_by_route_time_of_day"
     )
         
     time3 = datetime.datetime.now()
