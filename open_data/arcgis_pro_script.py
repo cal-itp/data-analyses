@@ -12,7 +12,8 @@ in_features = [
     'ca_hq_transit_stops',
     'ca_transit_routes',
     'ca_transit_stops',
-    'speeds_by_stop_segments'
+    'speeds_by_stop_segments',
+    'speeds_by_route_time_of_day',
 ]
 
 staging_location = 'staging.gdb'
@@ -28,7 +29,9 @@ def feature_class_in_gdb_path(my_gdb, file_name):
 
 # Clean up last run (if applicable)
 for f in in_features:
-    os.remove(f"{working_dir}\{f}.xml")
+    feature_path = f"{working_dir}\{f}.xml"
+    if os.path.exists(feature_path):
+        os.remove(feature_path)
 
 ## (1) Convert shapefile layer to gdb feature class
 for f in in_features:
@@ -52,47 +55,65 @@ for f in in_features:
 ## (2) Rename fields where needed
 # Do this once it's a feature class, so we can preserve the new column names
 # before metadata is created
-need_renaming = [
+hqta_renaming = [
     'ca_hq_transit_areas',
     'ca_hq_transit_stops',
-    'speeds_by_stop_segments'
+]
+speed_renaming = [
+    'speeds_by_stop_segments',
+    'speeds_by_route_time_of_day'
 ]
 
+# hqta datasets
+RENAME_HQTA = {
+    "agency_pri": "agency_primary",
+    "agency_sec": "agency_secondary",
+    "hqta_detai": "hqta_details",
+    "base64_url": "base64_url_primary",
+    "base64_u_1": "base64_url_secondary",  
+    "org_id_pri": "org_id_primary",
+    "org_id_sec": "org_id_secondary",
+}
 
-for f in need_renaming:
-    # Grab this renaming dict
-    #hqta.RENAME_CA_HQTA (UPDATE THESE, FEWER NOW)
-    RENAME_CA_HQTA = {
-        "agency_pri": "agency_primary",
-        "agency_sec": "agency_secondary",
-        "hqta_detai": "hqta_details",
-        "base64_url": "base64_url_primary",
-        "base64_u_1": "base64_url_secondary",  
-        "org_id_pri": "org_id_primary",
-        "org_id_sec": "org_id_secondary",
-        "stop_seque": "stop_sequence",
-        "time_of_da": "time_of_day",
-        "district_n": "district_name"
-    }
+# speeds datasets
+RENAME_SPEED = {
+    "stop_seque": "stop_sequence",
+    "time_of_da": "time_of_day",
+    "district_n": "district_name",
+    "direction_": "direction_id",
+    "common_sha": "common_shape_id",
+    "avg_sched_": "avg_sched_service_min", 
+    "avg_rt_tri": "avg_rt_service_min",
+}
 
-    # To change field names, must use AlterField_management, 
-    # because changing it in XML won't carry through when you sync
-    this_feature_class = feature_class_in_gdb_path(staging_location, f)
+# Separate out renaming for groups of datasets to prevent 
+# columns from being renamed when we don't want it to (don't need suffixes for non-hqta)
+def rename_columns_with_dict(feature_class_list, rename_dict):
+    for f in feature_class_list:
+        # To change field names, must use AlterField_management, 
+        # because changing it in XML won't carry through when you sync
+        this_feature_class = feature_class_in_gdb_path(staging_location, f)
 
-    field_list = arcpy.ListFields(this_feature_class)  #get a list of fields for each feature class
+        field_list = arcpy.ListFields(this_feature_class)  #get a list of fields for each feature class    
 
-    for field in field_list: #loop through each field
-        if field.name in RENAME_CA_HQTA:  #look for the name elev
-            arcpy.AlterField_management(
-                this_feature_class, 
-                field.name, RENAME_CA_HQTA[field.name], # new_field_name
-                RENAME_CA_HQTA[field.name]) # new_field_alias
+        for field in field_list: #loop through each field
+            if field.name in rename_dict:  #look for the name elev
+                arcpy.AlterField_management(
+                    this_feature_class, 
+                    field.name, rename_dict[field.name], # new_field_name
+                    rename_dict[field.name]) # new_field_alias
+    return
+            
+
+            
+rename_columns_with_dict(hqta_renaming, RENAME_HQTA)
+rename_columns_with_dict(speed_renaming, RENAME_SPEED)
             
             
 # Double check it's done
 # TODO: this does look like it renames it...but when XML is exported in next step
 # the new field names are not retained
-for f in need_renaming:
+for f in hqta_renaming + speed_renaming:
     this_feature_class = os.path.join(staging_location, f)
 
     # Print field names, just in case it needs renaming

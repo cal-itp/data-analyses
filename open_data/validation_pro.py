@@ -2,9 +2,9 @@ import pandas as pd
 
 from shared_utils import rt_dates
 
-def fill_in_keyword_list(keyword_list: list = []) -> list[dict]:
+def fill_in_keyword_list(keyword_list: list = []) -> dict:
     if len(keyword_list) >= 5:
-        filled_out_list =  [{"ns1:CharacterString": i} for i in keyword_list]
+        filled_out_list =  {"ns1:CharacterString": ', '.join(keyword_list)}
         return filled_out_list
     else:
         return "Input minimum 5 keywords"
@@ -33,11 +33,3 @@ def check_dates(string: str)-> str:
     date5 = '20200830'
     """
     return pd.to_datetime(string).date().isoformat()            
-
-
-def add_edition():
-    # Replace to largest 
-    possible_editions = list(rt_dates.METADATA_EDITION.values())        
-    new_edition = str(max(possible_editions))
-    
-    return new_edition
