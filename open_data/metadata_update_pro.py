@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 import xmltodict
 
 from pydantic import BaseModel
-from typing import List, Dict, Literal
+from typing import Literal
 
 import validation_pro
 
@@ -60,7 +60,7 @@ def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
 
 
 def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
-    DEFAULT_XML = f"./{METADATA_FOLDER}default_pro.xml"
+    DEFAULT_XML = f"./{METADATA_FOLDER}default_pro_new.xml"
     default_template = xml_to_json(DEFAULT_XML)
     
     # Grab the necessary elements from my dataset
@@ -82,11 +82,12 @@ def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
 # If the key isn't there, then it'll be filled in with default
 class metadata_input(BaseModel):
     dataset_name: str
-    publish_entity: str = "California Integrated Travel Project"
+    publish_entity: str = "Data & Digital Services / California Integrated Travel Project"
     abstract: str
     purpose: str
     creation_date: str
     beginning_date: str
+    end_date: str
     place: str = "California"
     status: Literal["completed", "historicalArchive", "obsolete", 
                     "onGoing", "planned", "required", 
@@ -97,7 +98,7 @@ class metadata_input(BaseModel):
                        "asNeeded", "irregular", "notPlanned", 
                        "unknown"] = "monthly"
     theme_topic: str = "transportation"
-    theme_keywords: list    
+    theme_keywords: dict    
     methodology: str
     #data_dict_type: str
     #data_dict_url: str
@@ -105,7 +106,7 @@ class metadata_input(BaseModel):
     contact_person: str
     contact_email: str = "hello@calitp.org"
     horiz_accuracy: str = "4 meters"
-    edition: str
+    #edition: str
     boilerplate_license: str = (
         '''Public. License - Creative Commons 4.0 Attribution. 
         The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an "as is" and an "as available" basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.''')
@@ -119,6 +120,7 @@ def fix_values_in_validated_dict(d: dict) -> dict:
     #d["data_dict_type"] = validation.check_data_dict_format(d["data_dict_type"])
     
     d["beginning_date"] = validation_pro.check_dates(d["beginning_date"])
+    d["end_date"] = validation_pro.check_dates(d["end_date"])
     d["creation_date"] = validation_pro.check_dates(d["creation_date"])
     
     # Can we get away with 4 meters in EPSG:4326?
@@ -133,33 +135,31 @@ def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
     # This is how most values are keyed in for last dict
     key = "ns1:CharacterString"
     key_dt = "ns1:Date"
+    enum = "@codeListValue"
+    t = "text"
     
     ## Identification Info
     id_info = metadata[f"{x}identificationInfo"][f"{x}MD_DataIdentification"]
     
     id_info[f"{x}abstract"][key] = d["abstract"]
     id_info[f"{x}purpose"][key] = d["purpose"]
-    (id_info[f"{x}descriptiveKeywords"][1]
+    (id_info[f"{x}descriptiveKeywords"][0]
      [f"{x}MD_Keywords"][f"{x}keyword"]) = d["theme_keywords"]
     id_info[f"{x}topicCategory"][f"{x}MD_TopicCategoryCode"] = d["theme_topic"]
-    id_info[f"{x}extent"][0][f"{x}EX_Extent"][f"{x}description"][key] = d["place"]
+    id_info[f"{x}extent"][f"{x}EX_Extent"][f"{x}description"][key] = d["place"]
     
     citation_info = id_info[f"{x}citation"][f"{x}CI_Citation"]
     citation_info[f"{x}title"][key] = d["dataset_name"]    
     
     beginning_cite = citation_info[f"{x}date"][0][f"{x}CI_Date"] 
     beginning_cite[f"{x}date"][key_dt] = d["creation_date"]
-    (beginning_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"]
-     ["codeListValue"]) = "creation"
-    (beginning_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"]
-     ["text"]) = "creation"    
+    beginning_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"][enum] = "creation"
+    beginning_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"][t] = "creation"    
     
     end_cite = citation_info[f"{x}date"][1][f"{x}CI_Date"] 
     end_cite[f"{x}date"][key_dt] = d["beginning_date"]
-    (end_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"]
-     ["codeListValue"]) = "revision"
-    (end_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"]
-     ["text"]) = "revision"      
+    end_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"][enum] = "revision"
+    end_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"][t] = "revision"      
     
     #citation_info[f"{x}edition"][key] = d["edition"]
     
@@ -171,26 +171,26 @@ def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
      [f"{x}CI_Address"][f"{x}electronicMailAddress"][key]) = d["contact_email"]
     
     status_info = id_info[f"{x}status"][f"{x}MD_ProgressCode"]
-    status_info["codeListValue"] = d["status"]
-    status_info["text"] = d["status"]
+    status_info[enum] = d["status"]
+    status_info[t] = d["status"]
     
     maint_info = id_info[f"{x}resourceMaintenance"][f"{x}MD_MaintenanceInformation"]
     (maint_info[f"{x}maintenanceAndUpdateFrequency"]
-     [f"{x}MD_MaintenanceFrequencyCode"]["codeListValue"]) = d["frequency"]
+     [f"{x}MD_MaintenanceFrequencyCode"][enum]) = d["frequency"]
     (maint_info[f"{x}maintenanceAndUpdateFrequency"]
-     [f"{x}MD_MaintenanceFrequencyCode"]["text"]) = d["frequency"]
+     [f"{x}MD_MaintenanceFrequencyCode"][t]) = d["frequency"]
     maint_info[f"{x}dateOfNextUpdate"][key_dt] = d["end_date"]
-    
-    extent_info = (id_info[f"{x}extent"][0][f"{x}EX_Extent"]
-                   [f"{x}temporalElement"][f"{x}EX_TemporalExtent"]
-                   [f"{x}extent"]["ns2:TimePeriod"])
- 
-    extent_info["ns2:beginPosition"] = d["beginning_date"] + "T00:00:00"
-    extent_info["ns2:endPosition"] = d["end_date"] + "T00:00:00"
-    
-    (id_info[f"{x}resourceConstraints"][f"{x}MD_Constraints"]
+    maint_info = overwrite_contact_info(maint_info, d)
+        
+    (id_info[f"{x}resourceConstraints"][0][f"{x}MD_Constraints"]
      [f"{x}useLimitation"][key]) = d["boilerplate_license"]
-    
+    (id_info[f"{x}resourceConstraints"][1][f"{x}MD_LegalConstraints"]
+     [f"{x}useLimitation"][key]) = d["boilerplate_license"]
+    (id_info[f"{x}resourceConstraints"][1][f"{x}MD_LegalConstraints"]
+     [f"{x}useConstraints"][f"{x}MD_RestrictionCode"][enum]) = "license"
+    (id_info[f"{x}resourceConstraints"][1][f"{x}MD_LegalConstraints"]
+     [f"{x}useConstraints"][f"{x}MD_RestrictionCode"][t]) = "license"     
+
     return metadata
     
     
@@ -234,7 +234,10 @@ def overwrite_metadata_json(metadata_json: dict,
     new_metadata = metadata_json.copy()
     
     new_metadata[main] = overwrite_id_info(new_metadata[main], d)
-    new_metadata[main] = overwrite_contact_info(new_metadata[main], d)
+    
+    # Maintenance contact moved to be within ID info
+    #new_metadata[main] = overwrite_contact_info(new_metadata[main], d)
+    
     new_metadata[main] = overwrite_data_quality_info(new_metadata[main], d)
                 
     #m["eainfo"]["detailed"]["enttyp"]["enttypd"] = d["data_dict_type"]    

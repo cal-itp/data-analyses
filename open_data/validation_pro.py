@@ -2,9 +2,9 @@ import pandas as pd
 
 from shared_utils import rt_dates
 
-def fill_in_keyword_list(keyword_list: list = []) -> list[dict]:
+def fill_in_keyword_list(keyword_list: list = []) -> dict:
     if len(keyword_list) >= 5:
-        filled_out_list =  [{"gco:CharacterString": i} for i in keyword_list]
+        filled_out_list =  {"ns1:CharacterString": ', '.join(keyword_list)}
         return filled_out_list
     else:
         return "Input minimum 5 keywords"
