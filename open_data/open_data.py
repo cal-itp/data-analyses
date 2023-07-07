@@ -31,6 +31,10 @@ OPEN_DATA = {
         "path": "./metadata_xml/speeds_by_stop_segments.xml",
         "metadata_dict": metadata_speeds.SPEEDS_STOP_SEG_DICT,
     },
+    "speeds_route_time_of_day": {
+        "path": "./metadata_xml/speeds_by_route_time_of_day.xml",
+        "metadata_dict": metadata_speeds.ROUTE_SPEEDS_DICT
+    },
 }
 
 if __name__=="__main__":
@@ -39,7 +43,7 @@ if __name__=="__main__":
     RUN_ME = [
         "hqta_areas", "hqta_stops",
         "transit_stops", "transit_routes",
-        "speeds_stop_segments",
+        "speeds_stop_segments", "speeds_route_time_of_day",
     ]
     
     for name, dataset in OPEN_DATA.items():
@@ -49,5 +53,5 @@ if __name__=="__main__":
             metadata_update_pro.update_metadata_xml(
                 dataset["path"], 
                 dataset["metadata_dict"], 
-                first_run=True)
+            )
     
