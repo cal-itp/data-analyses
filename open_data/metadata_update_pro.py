@@ -106,6 +106,9 @@ class metadata_input(BaseModel):
     contact_email: str = "hello@calitp.org"
     horiz_accuracy: str = "4 meters"
     edition: str
+    boilerplate_license: str = (
+        '''Public. License - Creative Commons 4.0 Attribution. 
+        The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an "as is" and an "as available" basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.''')
     
 
 def fix_values_in_validated_dict(d: dict) -> dict:
@@ -141,7 +144,6 @@ def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
      [f"{x}MD_Keywords"][f"{x}keyword"]) = d["theme_keywords"]
     id_info[f"{x}topicCategory"][f"{x}MD_TopicCategoryCode"] = d["theme_topic"]
     id_info[f"{x}extent"][0][f"{x}EX_Extent"][f"{x}description"][key] = d["place"]
-
     
     citation_info = id_info[f"{x}citation"][f"{x}CI_Citation"]
     citation_info[f"{x}title"][key] = d["dataset_name"]
@@ -172,6 +174,9 @@ def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
  
     extent_info["ns2:beginPosition"] = d["beginning_date"] + "T00:00:00"
     extent_info["ns2:endPosition"] = d["end_date"] + "T00:00:00"
+    
+    (id_info[f"{x}resourceConstraints"][f"{x}MD_Constraints"]
+     [f"{x}useLimitation"][key]) = d["boilerplate_license"]
     
     return metadata
     
@@ -225,9 +230,11 @@ def overwrite_metadata_json(metadata_json: dict,
     return new_metadata 
 
 
-def update_metadata_xml(xml_file: str, dataset_info: dict, 
-                        first_run: bool = False, 
-                        metadata_folder: str = METADATA_FOLDER):
+def update_metadata_xml(
+    xml_file: str, 
+    dataset_info: dict, 
+    metadata_folder: str = METADATA_FOLDER
+):
     """
     xml_file: string.
         Path to the XML metadata file.
@@ -236,24 +243,16 @@ def update_metadata_xml(xml_file: str, dataset_info: dict,
     dataset_info: dict.
         Dictionary with values to overwrite in metadata. 
         Analyst needs to replace the values where needed.
-    
-    first_run: boolean.
-        Defaults to False.
-        For the first time, set to True, so you apply `default.xml` as template.
     """
     
     # Read in original XML as JSON
     esri_metadata = xml_to_json(xml_file)
     print("Read in XML as JSON")
     
-    if first_run:
-        # Apply template
-        metadata_templated = overwrite_default_with_dataset_elements(esri_metadata)
-        print("Default template applied.")
-    else:
-        metadata_templated = esri_metadata.copy()
-        print("Skip default template.")
-    
+    # Apply template
+    metadata_templated = overwrite_default_with_dataset_elements(esri_metadata)
+    print("Default template applied.")
+
     # These rely on functions, so they can't be used in pydantic easily
     dataset_info = fix_values_in_validated_dict(dataset_info) 
     
