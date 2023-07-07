@@ -99,6 +99,16 @@
 </dateType>
 </CI_Date>
 </date>
+<date>
+<CI_Date>
+<date>
+<gco:Date>2023-01-01</gco:Date>
+</date>
+<dateType>
+<CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="ISOTC211/19115">revision</CI_DateTypeCode>
+</dateType>
+</CI_Date>
+</date>
 <edition>
 <gco:CharacterString>6</gco:CharacterString>
 </edition>

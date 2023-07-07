@@ -61,7 +61,25 @@
 <title>
 <gco:CharacterString>speeds_by_stop_segments</gco:CharacterString>
 </title>
-<date gco:nilReason="missing">
+<date>
+<CI_Date>
+<date>
+<gco:Date>2023-07-01</gco:Date>
+</date>
+<dateType>
+<CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">creation</CI_DateTypeCode>
+</dateType>
+</CI_Date>
+</date>
+<date>
+<CI_Date>
+<date>
+<gco:Date>2023-07-05</gco:Date>
+</date>
+<dateType>
+<CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="ISOTC211/19115">revision</CI_DateTypeCode>
+</dateType>
+</CI_Date>
 </date>
 <presentationForm>
 <CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="ISOTC211/19115">mapDigital</CI_PresentationFormCode>

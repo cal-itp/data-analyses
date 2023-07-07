@@ -85,8 +85,8 @@ class metadata_input(BaseModel):
     publish_entity: str = "California Integrated Travel Project"
     abstract: str
     purpose: str
+    creation_date: str
     beginning_date: str
-    end_date: str
     place: str = "California"
     status: Literal["completed", "historicalArchive", "obsolete", 
                     "onGoing", "planned", "required", 
@@ -117,10 +117,9 @@ def fix_values_in_validated_dict(d: dict) -> dict:
     d["frequency"] = validation_pro.check_update_frequency(d["frequency"])
     
     #d["data_dict_type"] = validation.check_data_dict_format(d["data_dict_type"])
-    d["edition"] = validation_pro.add_edition()
     
     d["beginning_date"] = validation_pro.check_dates(d["beginning_date"])
-    d["end_date"] = validation_pro.check_dates(d["end_date"])
+    d["creation_date"] = validation_pro.check_dates(d["creation_date"])
     
     # Can we get away with 4 meters in EPSG:4326?
     #d["horiz_accuracy"] = validation.check_horiz_accuracy(d["horiz_accuracy"])
@@ -146,9 +145,23 @@ def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
     id_info[f"{x}extent"][0][f"{x}EX_Extent"][f"{x}description"][key] = d["place"]
     
     citation_info = id_info[f"{x}citation"][f"{x}CI_Citation"]
-    citation_info[f"{x}title"][key] = d["dataset_name"]
-    citation_info[f"{x}date"][f"{x}CI_Date"][f"{x}date"][key_dt] = d["beginning_date"]
-    citation_info[f"{x}edition"][key] = d["edition"]
+    citation_info[f"{x}title"][key] = d["dataset_name"]    
+    
+    beginning_cite = citation_info[f"{x}date"][0][f"{x}CI_Date"] 
+    beginning_cite[f"{x}date"][key_dt] = d["creation_date"]
+    (beginning_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"]
+     ["codeListValue"]) = "creation"
+    (beginning_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"]
+     ["text"]) = "creation"    
+    
+    end_cite = citation_info[f"{x}date"][1][f"{x}CI_Date"] 
+    end_cite[f"{x}date"][key_dt] = d["beginning_date"]
+    (end_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"]
+     ["codeListValue"]) = "revision"
+    (end_cite[f"{x}dateType"][f"{x}CI_DateTypeCode"]
+     ["text"]) = "revision"      
+    
+    #citation_info[f"{x}edition"][key] = d["edition"]
     
     citation_contact = citation_info[f"{x}citedResponsibleParty"][f"{x}CI_ResponsibleParty"]
     citation_contact[f"{x}individualName"][key] = d["contact_person"]
