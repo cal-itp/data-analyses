@@ -35,6 +35,7 @@ HQTA_TRANSIT_AREAS_DICT = {
 
     "creation_date": "2022-02-08",
     "beginning_date": open_data_dates()[0],
+    "end_date": open_data_dates()[1],
     "place": "California",
 
     "status": "completed", 
