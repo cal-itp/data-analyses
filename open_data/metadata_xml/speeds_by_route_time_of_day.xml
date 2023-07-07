@@ -38,8 +38,8 @@
 			<ns0:geometricObjects>
 				<ns0:MD_GeometricObjects>
 					<ns0:geometricObjectType>
-						<ns0:MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="point" codeSpace="ISOTC211/19115">
-							<text>point</text>
+						<ns0:MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="composite" codeSpace="ISOTC211/19115">
+							<text>composite</text>
 						</ns0:MD_GeometricObjectTypeCode>
 					</ns0:geometricObjectType>
 				</ns0:MD_GeometricObjects>
@@ -68,12 +68,12 @@
 			<ns0:citation>
 				<ns0:CI_Citation>
 					<ns0:title>
-						<ns1:CharacterString>ca_transit_stops</ns1:CharacterString>
+						<ns1:CharacterString>speeds_by_route_time_of_day</ns1:CharacterString>
 					</ns0:title>
 					<ns0:date>
 						<ns0:CI_Date>
 							<ns0:date>
-								<ns1:Date>2022-02-08</ns1:Date>
+								<ns1:Date>2023-06-14</ns1:Date>
 							</ns0:date>
 							<ns0:dateType>
 								<ns0:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">
@@ -97,20 +97,20 @@
 					<ns0:citedResponsibleParty>
 						<ns0:CI_ResponsibleParty>
 							<ns0:individualName>
-								<ns1:CharacterString>Tiffany Ku</ns1:CharacterString>
+								<ns1:CharacterString>Tiffany Ku; Eric Dasmalchi</ns1:CharacterString>
 							</ns0:individualName>
 							<ns0:organisationName>
 								<ns1:CharacterString>Caltrans</ns1:CharacterString>
 							</ns0:organisationName>
 							<ns0:positionName>
-								<ns1:CharacterString>California Integrated Travel Project</ns1:CharacterString>
+								<ns1:CharacterString>Data &amp; Digital Services / California Integrated Travel Project</ns1:CharacterString>
 							</ns0:positionName>
 							<ns0:contactInfo>
 								<ns0:CI_Contact>
 									<ns0:address>
 										<ns0:CI_Address>
 											<ns0:electronicMailAddress>
-												<ns1:CharacterString>tiffany.ku@dot.ca.gov</ns1:CharacterString>
+												<ns1:CharacterString>tiffany.ku@dot.ca.gov; eric.dasmalchi@dot.ca.gov</ns1:CharacterString>
 											</ns0:electronicMailAddress>
 										</ns0:CI_Address>
 									</ns0:address>
@@ -134,7 +134,7 @@
 				<ns1:CharacterString>Public. EPSG: 4326</ns1:CharacterString>
 			</ns0:abstract>
 			<ns0:purpose>
-				<ns1:CharacterString>Provide all CA transit stops and routes (geospatial) from all transit operators.</ns1:CharacterString>
+				<ns1:CharacterString>Average transit speeds by route-direction by time-of-day estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</ns1:CharacterString>
 			</ns0:purpose>
 			<ns0:status>
 				<ns0:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">
@@ -154,20 +154,20 @@
 					<ns0:contact>
 						<ns0:CI_ResponsibleParty>
 							<ns0:individualName>
-								<ns1:CharacterString>Tiffany Ku</ns1:CharacterString>
+								<ns1:CharacterString>Tiffany Ku; Eric Dasmalchi</ns1:CharacterString>
 							</ns0:individualName>
 							<ns0:organisationName>
 								<ns1:CharacterString>Caltrans</ns1:CharacterString>
 							</ns0:organisationName>
 							<ns0:positionName>
-								<ns1:CharacterString>California Integrated Travel Project</ns1:CharacterString>
+								<ns1:CharacterString>Data &amp; Digital Services / California Integrated Travel Project</ns1:CharacterString>
 							</ns0:positionName>
 							<ns0:contactInfo>
 								<ns0:CI_Contact>
 									<ns0:address>
 										<ns0:CI_Address>
 											<ns0:electronicMailAddress>
-												<ns1:CharacterString>tiffany.ku@dot.ca.gov</ns1:CharacterString>
+												<ns1:CharacterString>tiffany.ku@dot.ca.gov; eric.dasmalchi@dot.ca.gov</ns1:CharacterString>
 											</ns0:electronicMailAddress>
 										</ns0:CI_Address>
 									</ns0:address>
@@ -185,7 +185,7 @@
 			<ns0:descriptiveKeywords>
 				<ns0:MD_Keywords>
 					<ns0:keyword>
-						<ns1:CharacterString>Transportation, GTFS, Transit routes, Transit stops, Transit</ns1:CharacterString>
+						<ns1:CharacterString>Transportation, Transit, GTFS, GTFS RT, real time, speeds, vehicle positions</ns1:CharacterString>
 					</ns0:keyword>
 					<ns0:type>
 						<ns0:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">
@@ -289,7 +289,11 @@
 					<ns0:processStep>
 						<ns0:LI_ProcessStep>
 							<ns0:description>
-								<ns1:CharacterString>This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt.</ns1:CharacterString>
+								<ns1:CharacterString>
+    This data was estimated by combining GTFS real-time vehicle positions with GTFS scheduled trips and shapes. 
+    GTFS real-time (RT) vehicle positions are spatially joined to GTFS scheduled shapes, so only vehicle positions traveling along the route alignment path are kept. A sample of five vehicle positions are selected (min, 25th percentile, 50th percentile, 75th percentile, max). The trip speed is calculated using these five vehicle positions. Each trip is categorized into a time-of-day. The average speed for a route-direction-time_of_day is calculated. Additional metrics are stored, such as the number of trips observed, the average scheduled service minutes, and the average RT observed service minutes. For convenience, we also provide a singular shape (common_shape_id) to associate with a route-direction. This is the shape that had the most number of trips for a given route-direction. 
+    Time-of-day is determined by the GTFS scheduled trip start time. The trip start hour (military time) is categorized based on the following: Owl (0-3), Early AM (4-6), AM Peak (7-9), Midday (10-14), PM Peak (15-19), and Evening (20-23). The start and end hours are inclusive (e.g., 4-6 refers to 4am, 5am, and 6am).
+    </ns1:CharacterString>
 							</ns0:description>
 						</ns0:LI_ProcessStep>
 					</ns0:processStep>
