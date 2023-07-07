@@ -60,7 +60,7 @@ def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
 
 
 def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
-    DEFAULT_XML = f"./{METADATA_FOLDER}default_pro_new.xml"
+    DEFAULT_XML = f"./{METADATA_FOLDER}default_pro.xml"
     default_template = xml_to_json(DEFAULT_XML)
     
     # Grab the necessary elements from my dataset
