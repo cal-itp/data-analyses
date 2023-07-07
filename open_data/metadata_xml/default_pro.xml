@@ -12,35 +12,10 @@
 <hierarchyLevelName>
 <gco:CharacterString>dataset</gco:CharacterString>
 </hierarchyLevelName>
-<contact>
-<CI_ResponsibleParty>
-<individualName>
-<gco:CharacterString>Eric Dasmalchi</gco:CharacterString>
-</individualName>
-<organisationName>
-<gco:CharacterString>Caltrans</gco:CharacterString>
-</organisationName>
-<positionName>
-<gco:CharacterString>California Integrated Travel Project</gco:CharacterString>
-</positionName>
-<contactInfo>
-<CI_Contact>
-<address>
-<CI_Address>
-<electronicMailAddress>
-<gco:CharacterString>eric.dasmalchi@dot.ca.gov</gco:CharacterString>
-</electronicMailAddress>
-</CI_Address>
-</address>
-</CI_Contact>
-</contactInfo>
-<role>
-<CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher" codeSpace="ISOTC211/19115">publisher</CI_RoleCode>
-</role>
-</CI_ResponsibleParty>
+<contact gco:nilReason="missing">
 </contact>
 <dateStamp>
-<gco:Date>2022-10-25</gco:Date>
+<gco:Date>2023-07-07</gco:Date>
 </dateStamp>
 <metadataStandardName>
 <gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
@@ -58,9 +33,6 @@
 <geometricObjectType>
 <MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="composite" codeSpace="ISOTC211/19115">composite</MD_GeometricObjectTypeCode>
 </geometricObjectType>
-<geometricObjectCount>
-<gco:Integer>28466</gco:Integer>
-</geometricObjectCount>
 </MD_GeometricObjects>
 </geometricObjects>
 </MD_VectorSpatialRepresentation>
@@ -87,12 +59,12 @@
 <citation>
 <CI_Citation>
 <title>
-<gco:CharacterString>ca_hq_transit_areas</gco:CharacterString>
+<gco:CharacterString>speeds_by_stop_segments</gco:CharacterString>
 </title>
 <date>
 <CI_Date>
 <date>
-<gco:Date>2022-10-12</gco:Date>
+<gco:Date>2023-01-01</gco:Date>
 </date>
 <dateType>
 <CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">creation</CI_DateTypeCode>
@@ -102,16 +74,13 @@
 <date>
 <CI_Date>
 <date>
-<gco:Date>2023-01-01</gco:Date>
+<gco:Date>2023-07-01</gco:Date>
 </date>
 <dateType>
 <CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="ISOTC211/19115">revision</CI_DateTypeCode>
 </dateType>
 </CI_Date>
 </date>
-<edition>
-<gco:CharacterString>6</gco:CharacterString>
-</edition>
 <citedResponsibleParty>
 <CI_ResponsibleParty>
 <individualName>
@@ -121,14 +90,14 @@
 <gco:CharacterString>Caltrans</gco:CharacterString>
 </organisationName>
 <positionName>
-<gco:CharacterString>California Integrated Travel Project</gco:CharacterString>
+<gco:CharacterString>Data &amp; Digital Services / California Integrated Travel Project</gco:CharacterString>
 </positionName>
 <contactInfo>
 <CI_Contact>
 <address>
 <CI_Address>
 <electronicMailAddress>
-<gco:CharacterString>eric.dasmalchi@dot.ca.gov</gco:CharacterString>
+<gco:CharacterString>hello@calitp.org</gco:CharacterString>
 </electronicMailAddress>
 </CI_Address>
 </address>
@@ -145,12 +114,10 @@
 </CI_Citation>
 </citation>
 <abstract>
-<gco:CharacterString>Public. EPSG: 4326</gco:CharacterString>
+<gco:CharacterString>Description here.</gco:CharacterString>
 </abstract>
 <purpose>
-<gco:CharacterString>
-    Estimated High Quality Transit Areas as described in Public Resources Code 21155, 21064.3, 21060.2.
-    </gco:CharacterString>
+<gco:CharacterString>Summary and purpose statement.</gco:CharacterString>
 </purpose>
 <status>
 <MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">completed</MD_ProgressCode>
@@ -161,27 +128,45 @@
 <MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="monthly" codeSpace="ISOTC211/19115">monthly</MD_MaintenanceFrequencyCode>
 </maintenanceAndUpdateFrequency>
 <dateOfNextUpdate>
-<gco:Date>2022-11-12</gco:Date>
+<gco:Date>2023-08-01</gco:Date>
 </dateOfNextUpdate>
+<contact>
+<CI_ResponsibleParty>
+<individualName>
+<gco:CharacterString>Eric Dasmalchi</gco:CharacterString>
+</individualName>
+<organisationName>
+<gco:CharacterString>Caltrans</gco:CharacterString>
+</organisationName>
+<positionName>
+<gco:CharacterString>Data &amp; Digital Services / California Integrated Travel Project</gco:CharacterString>
+</positionName>
+<contactInfo>
+<CI_Contact>
+<address>
+<CI_Address>
+<electronicMailAddress>
+<gco:CharacterString>hello@calitp.org</gco:CharacterString>
+</electronicMailAddress>
+</CI_Address>
+</address>
+</CI_Contact>
+</contactInfo>
+<role>
+<CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher" codeSpace="ISOTC211/19115">publisher</CI_RoleCode>
+</role>
+</CI_ResponsibleParty>
+</contact>
 </MD_MaintenanceInformation>
 </resourceMaintenance>
 <descriptiveKeywords>
 <MD_Keywords>
 <keyword>
-<gco:CharacterString>Transportation</gco:CharacterString>
+<gco:CharacterString>keyword1, keyword2, keyword3, keyword4, keyword5</gco:CharacterString>
 </keyword>
-<keyword>
-<gco:CharacterString>Land Use</gco:CharacterString>
-</keyword>
-<keyword>
-<gco:CharacterString>Transit-Oriented Development</gco:CharacterString>
-</keyword>
-<keyword>
-<gco:CharacterString>TOD</gco:CharacterString>
-</keyword>
-<keyword>
-<gco:CharacterString>High Quality Transit</gco:CharacterString>
-</keyword>
+<type>
+<MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</MD_KeywordTypeCode>
+</type>
 </MD_Keywords>
 </descriptiveKeywords>
 <descriptiveKeywords>
@@ -196,9 +181,20 @@
 <resourceConstraints>
 <MD_Constraints>
 <useLimitation>
-<gco:CharacterString>Public. License - Creative Commons 4.0 Attribution.The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an "as is" and an "as available" basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.</gco:CharacterString>
+<gco:CharacterString>Public. License - Creative Commons 4.0 Attribution.  Boilerplate.</gco:CharacterString>
 </useLimitation>
 </MD_Constraints>
+</resourceConstraints>
+<resourceConstraints>
+<MD_LegalConstraints>
+<useLimitation>
+<gco:CharacterString>The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an "as is" and an "as available" basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.
+License - Creative Commons 4.0 Attribution</gco:CharacterString>
+</useLimitation>
+<useConstraints>
+<MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="license" codeSpace="ISOTC211/19115">license</MD_RestrictionCode>
+</useConstraints>
+</MD_LegalConstraints>
 </resourceConstraints>
 <spatialRepresentationType>
 <MD_SpatialRepresentationTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" codeSpace="ISOTC211/19115">vector</MD_SpatialRepresentationTypeCode>
@@ -213,46 +209,13 @@
 <MD_TopicCategoryCode>transportation</MD_TopicCategoryCode>
 </topicCategory>
 <environmentDescription>
-<gco:CharacterString>Microsoft Windows 10 Version 10.0 (Build 19042) ; Esri ArcGIS 12.9.2.32739</gco:CharacterString>
+<gco:CharacterString>Microsoft Windows 10 Version 10.0 (Build 19045) ; Esri ArcGIS 12.9.2.32739</gco:CharacterString>
 </environmentDescription>
 <extent>
 <EX_Extent>
 <description>
 <gco:CharacterString>California</gco:CharacterString>
 </description>
-<temporalElement>
-<EX_TemporalExtent>
-<extent>
-<gml:TimePeriod gml:id="IDDWYVT5UGET0XIDOZ10J1NEM1TJ4BG4DJ4XQHJCJYNE1G53PQBC5H">
-<gml:beginPosition>2022-10-12T00:00:00</gml:beginPosition>
-<gml:endPosition>2022-11-12T00:00:00</gml:endPosition>
-</gml:TimePeriod>
-</extent>
-</EX_TemporalExtent>
-</temporalElement>
-</EX_Extent>
-</extent>
-<extent>
-<EX_Extent>
-<geographicElement>
-<EX_GeographicBoundingBox>
-<extentTypeCode>
-<gco:Boolean>true</gco:Boolean>
-</extentTypeCode>
-<westBoundLongitude>
-<gco:Decimal>-124.210151</gco:Decimal>
-</westBoundLongitude>
-<eastBoundLongitude>
-<gco:Decimal>-114.590865</gco:Decimal>
-</eastBoundLongitude>
-<southBoundLatitude>
-<gco:Decimal>32.537144</gco:Decimal>
-</southBoundLatitude>
-<northBoundLatitude>
-<gco:Decimal>41.763711</gco:Decimal>
-</northBoundLatitude>
-</EX_GeographicBoundingBox>
-</geographicElement>
 </EX_Extent>
 </extent>
 </MD_DataIdentification>
@@ -272,7 +235,12 @@
 </distributionInfo>
 <dataQualityInfo>
 <DQ_DataQuality>
-<scope gco:nilReason="missing">
+<scope>
+<DQ_Scope>
+<level>
+<MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset" codeSpace="ISOTC211/19115">dataset</MD_ScopeCode>
+</level>
+</DQ_Scope>
 </scope>
 <report>
 <DQ_RelativeInternalPositionalAccuracy>
@@ -288,7 +256,7 @@
 <processStep>
 <LI_ProcessStep>
 <description>
-<gco:CharacterString>This data was estimated using a spatial process derived from General Transit Feed Specification (GTFS) schedule data. To find high-quality bus corridors, we split each corridor into 1,250 meter segments and counted frequencies at the stop within that segment with the highest number of transit trips. If that stop saw at least 4 trips per hour for at least one hour in the morning, and again for at least one hour in the afternoon, we consider that segment a high-quality bus corridor. Segments without a stop are not considered high-quality corridors. Major transit stops were identified as either the intersection of two high-quality corridors from the previous step, a rail or bus rapid transit station, or a ferry terminal with bus service. Note that the definition of `bus rapid transit` in Public Resources Code 21060.2 includes features not captured by available data sources, these features were captured manually using information from transit agency sources and imagery. We believe this data to be broadly accurate, and fit for purposes including overall dashboards, locating facilities in relation to high quality transit areas, and assessing community transit coverage. However, the spatial determination of high-quality transit areas from GTFS data necessarily involves some assumptions as described above. Any critical determinations of whether a specific parcel is located within a high-quality transit area should be made in conjunction with local sources, such as transit agency timetables.  Notes: Null values may be present. The `hqta_details` columns defines which part of the Public Resources Code definition the HQTA classification was based on. If `hqta_details` references a single operator, then `itp_id_secondary` and `agency_secondary` are null. If `hqta_details` references the same operator, then `itp_id_secondary` and `agency_secondary` are the same as `itp_id_primary` and `agency_primary`.</gco:CharacterString>
+<gco:CharacterString>Detailed methodology here.</gco:CharacterString>
 </description>
 </LI_ProcessStep>
 </processStep>
