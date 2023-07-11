@@ -16,6 +16,8 @@ import dla_utils
 
 from calitp_data_analysis.sql import to_snakecase
 
+import _script_utils
+
 
 
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
@@ -70,6 +72,7 @@ def change_col_to_integer(df, col):
     df[col] = df[col].str.split(' ').str[-1]
     
     return df
+ 
 
 
 #for use in the following function identify_agency
