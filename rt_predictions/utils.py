@@ -4,6 +4,7 @@ POC for real-time metrics.
 """
 import pandas as pd
 
+analysis_date = "2023-03-15"
 
 def parse_hour_min(
     df: pd.DataFrame, 
