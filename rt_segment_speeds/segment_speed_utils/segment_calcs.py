@@ -138,17 +138,18 @@ def calculate_speed_by_segment_trip(
                                    
 def convert_timestamp_to_seconds(
     df: pd.DataFrame, 
-    timestamp_col: str,
+    timestamp_cols: list,
 ) -> dd.DataFrame: 
     """
     Convert timestamp into seconds.
     """
-    df = df.assign(
-        time_sec = ((df[timestamp_col].dt.hour * 3_600) + 
-                        (df[timestamp_col].dt.minute * 60) + 
-                        (df[timestamp_col].dt.second)
-                   ),
-    ).rename(columns = {"time_sec": f"{timestamp_col}_sec"})
+    for c in timestamp_cols:
+        df = df.assign(
+            time_sec = ((df[c].dt.hour * 3_600) + 
+                            (df[c].dt.minute * 60) + 
+                            (df[c].dt.second)
+                       ),
+        ).rename(columns = {"time_sec": f"{c}_sec"})
     
     return df
 
