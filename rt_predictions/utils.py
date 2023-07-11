@@ -4,6 +4,7 @@ POC for real-time metrics.
 """
 import pandas as pd
 
+analysis_date = "2023-03-15"
 
 def parse_hour_min(
     df: pd.DataFrame, 
@@ -79,5 +80,25 @@ def exclude_predictions_before_trip_start_time(
     """
     df2 = df[df._extract_ts_local >= df.trip_start_time
             ].reset_index(drop=True)
+    
+    return df2
+
+
+def set_prediction_window(
+    df: pd.DataFrame, 
+    min_before: int
+) -> pd.DataFrame:
+    """
+    We can set a prediction window, such as 30 min prior to 
+    actual stop arrival.
+    """
+    df = df.assign(
+        prediction_window = (df.actual_stop_arrival_pacific - 
+                             pd.Timedelta(minutes = min_before))
+    )
+        
+    df2 = df[
+        df._extract_ts_local >= df.prediction_window
+    ].drop(columns = "prediction_window").reset_index(drop=True)
     
     return df2
