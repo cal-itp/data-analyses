@@ -52,6 +52,19 @@ def change_district_format(df, district_col):
                 
     return df
 
+def format_congressional_district(df, con_dist_col):
+    """
+    reformat the congressional district column
+    """
+    
+    df = _data_utils.change_col_to_integer(df, "congressional_district")
+    
+    df = df.replace({'0': '01', '1': '01', '2':'02', '3':'03', '4':'04',
+               '5':'05', '6':'06', '7':'07', '8':'08', '9':'09'})
+    
+    return df
+    
+
 def add_county_abbrev(df, county_name_col):
     '''
     Function to add county abbreviation to a county name EX: 'Kings County' to 'KIN'
@@ -453,13 +466,13 @@ def get_clean_data(df, full_or_agg = ''):
     
     if full_or_agg == 'agg':
 
-    
         ## function that adds known agency name to df 
         # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
-    
-        df = _data_utils.change_col_to_integer(df, "congressional_district")
+        
+        df = format_congressional_district(df, "congressional_district")
         
         df = change_district_format(df, "district")
+                
         df= add_county_abbrev(df, 'county_name')
         
         aggdf = condense_df(df)
@@ -469,7 +482,7 @@ def get_clean_data(df, full_or_agg = ''):
         
         aggdf = add_new_description_col(aggdf)
         
-        _data_utils.change_col_to_integer(df, "congressional_district")
+        # _data_utils.change_col_to_integer(df, "congressional_district")
     
         return aggdf
     
@@ -478,7 +491,7 @@ def get_clean_data(df, full_or_agg = ''):
         ## function that adds known agency name to df 
         # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
         
-        df = _data_utils.change_col_to_integer(df, "congressional_district")
+        df = format_congressional_district(df, "congressional_district")
         
         df = change_district_format(df, "district")
         
