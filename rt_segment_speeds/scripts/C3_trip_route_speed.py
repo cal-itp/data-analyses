@@ -246,31 +246,6 @@ def final_cleaning_for_export(
                   })
 
     return final_df
-    
-    
-def make_wide_for_export(
-    df: pd.DataFrame, 
-) -> pd.DataFrame:    
-    # make wide 
-    # https://stackoverflow.com/questions/22798934/pandas-long-to-wide-reshape-by-two-variables
-    group_cols = [
-        "org_id", "agency", 
-        "route_id", "direction_id", "route_name",
-        "common_shape_id",
-        "base64_url", "caltrans_district"
-    ]
-    
-    df3 = df2.pivot(
-        index = group_cols,
-        columns = "time_of_day", 
-        values=["speed_mph", "trip_id"]
-    ).sort_index(axis=1, level=1)
-    
-    df3.columns = [f'{x}_{y}' for x,y in df3.columns]
-    
-    df4 = df3.reset_index()
-    return df4
-    
 
     
 if __name__ == "__main__":
