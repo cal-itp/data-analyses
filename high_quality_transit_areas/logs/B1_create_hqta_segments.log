@@ -1,102 +1,3 @@
-2022-11-07 15:15:21.111 | INFO     | __main__:<module>:300 - Analysis date: 2022-10-12
-2022-11-07 15:15:22.655 | INFO     | __main__:<module>:317 - merge routes to trips: 0:00:01.543517
-2022-11-07 15:23:11.645 | INFO     | __main__:<module>:332 - cut segments: 0:07:48.989922
-2022-11-07 15:23:29.793 | INFO     | __main__:<module>:344 - dissolve: 0:00:18.148088
-2022-11-07 15:23:29.794 | INFO     | __main__:<module>:345 - total execution time: 0:08:08.681527
-2022-11-08 08:36:13.706 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 08:36:15.373 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.647044
-2022-11-08 08:49:45.314 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 08:49:46.988 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.669397
-2022-11-08 08:59:05.062 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 08:59:06.613 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.537838
-2022-11-08 09:08:38.444 | INFO     | __main__:<module>:338 - cut segments: 0:09:31.831387
-2022-11-08 09:08:54.511 | INFO     | __main__:<module>:350 - dissolve: 0:00:16.066622
-2022-11-08 09:08:54.512 | INFO     | __main__:<module>:351 - total execution time: 0:09:49.435847
-2022-11-08 09:54:31.669 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 09:54:33.302 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.599715
-2022-11-08 10:03:10.044 | INFO     | __main__:<module>:338 - cut segments: 0:08:36.742200
-2022-11-08 10:03:27.598 | INFO     | __main__:<module>:350 - dissolve: 0:00:17.554004
-2022-11-08 10:03:27.599 | INFO     | __main__:<module>:351 - total execution time: 0:08:55.895919
-2022-11-08 10:27:12.713 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 10:27:14.396 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.681762
-2022-11-08 10:36:06.566 | INFO     | __main__:<module>:338 - cut segments: 0:08:52.170587
-2022-11-08 10:36:24.127 | INFO     | __main__:<module>:350 - dissolve: 0:00:17.560745
-2022-11-08 10:36:24.128 | INFO     | __main__:<module>:351 - total execution time: 0:09:11.413094
-2022-11-08 10:59:25.141 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 10:59:26.740 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.598326
-2022-11-08 11:09:02.189 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 11:09:03.784 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.593644
-2022-11-08 11:19:25.385 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 11:19:26.959 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.573550
-2022-11-08 11:30:15.522 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 11:30:17.093 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.571043
-2022-11-08 11:39:31.017 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 11:39:32.572 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.552780
-2022-11-08 11:46:13.729 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 11:46:15.264 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.532829
-2022-11-08 11:52:20.486 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 11:52:22.056 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.568636
-2022-11-08 11:57:17.562 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 11:57:19.162 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.598600
-2022-11-08 11:57:43.596 | INFO     | __main__:<module>:341 - cut segments: 0:00:24.434000
-2022-11-08 11:57:44.028 | INFO     | __main__:<module>:353 - dissolve: 0:00:00.432475
-2022-11-08 11:57:44.030 | INFO     | __main__:<module>:354 - total execution time: 0:00:26.465075
-2022-11-08 11:58:26.252 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 11:58:27.847 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.591414
-2022-11-08 12:07:17.304 | INFO     | __main__:<module>:338 - cut segments: 0:08:49.456791
-2022-11-08 12:07:35.073 | INFO     | __main__:<module>:350 - dissolve: 0:00:17.769501
-2022-11-08 12:07:35.074 | INFO     | __main__:<module>:351 - total execution time: 0:09:08.817706
-2022-11-08 12:25:21.520 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 12:25:23.058 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.537044
-2022-11-08 12:34:20.111 | INFO     | __main__:<module>:338 - cut segments: 0:08:57.052997
-2022-11-08 12:34:37.559 | INFO     | __main__:<module>:350 - dissolve: 0:00:17.448486
-2022-11-08 12:34:37.560 | INFO     | __main__:<module>:351 - total execution time: 0:09:16.038527
-2022-11-08 12:36:20.555 | INFO     | __main__:<module>:307 - Analysis date: 2022-10-12
-2022-11-08 12:36:22.708 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:02.150629
-2022-11-08 12:45:03.648 | INFO     | __main__:<module>:338 - cut segments: 0:08:40.939999
-2022-11-08 12:45:22.223 | INFO     | __main__:<module>:350 - dissolve: 0:00:18.575419
-2022-11-08 12:45:22.225 | INFO     | __main__:<module>:351 - total execution time: 0:09:01.666047
-2022-11-17 10:46:25.836 | INFO     | __main__:<module>:307 - Analysis date: 2022-11-16
-2022-11-17 10:46:27.471 | INFO     | __main__:<module>:323 - merge routes to trips: 0:00:01.624897
-2022-11-17 10:54:37.618 | INFO     | __main__:<module>:338 - cut segments: 0:08:10.146025
-2022-11-17 10:54:55.491 | INFO     | __main__:<module>:350 - dissolve: 0:00:17.873265
-2022-11-17 10:54:55.492 | INFO     | __main__:<module>:351 - total execution time: 0:08:29.644187
-2022-12-05 13:54:11.480 | INFO     | __main__:<module>:309 - Analysis date: 2022-11-16
-2022-12-05 13:54:13.021 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.540453
-2022-12-05 13:55:24.798 | INFO     | __main__:<module>:311 - Analysis date: 2022-11-16
-2022-12-05 13:55:26.318 | INFO     | __main__:<module>:328 - merge routes to trips: 0:00:01.518592
-2022-12-05 14:00:13.086 | INFO     | __main__:<module>:309 - Analysis date: 2022-11-16
-2022-12-05 14:00:14.614 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.527584
-2022-12-05 14:04:03.358 | INFO     | __main__:<module>:343 - cut segments: 0:03:48.743244
-2022-12-05 14:04:12.577 | INFO     | __main__:<module>:355 - dissolve: 0:00:09.219766
-2022-12-05 14:04:12.578 | INFO     | __main__:<module>:356 - total execution time: 0:03:59.490594
-2022-12-05 14:15:42.287 | INFO     | __main__:<module>:309 - Analysis date: 2022-11-16
-2022-12-05 14:15:43.863 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.575932
-2022-12-05 14:16:19.965 | INFO     | __main__:<module>:309 - Analysis date: 2022-11-16
-2022-12-05 14:16:21.550 | INFO     | __main__:<module>:326 - merge routes to trips: 0:00:01.583829
-2022-12-05 14:20:12.988 | INFO     | __main__:<module>:343 - cut segments: 0:03:51.438531
-2022-12-05 14:20:22.071 | INFO     | __main__:<module>:355 - dissolve: 0:00:09.082768
-2022-12-05 14:20:22.072 | INFO     | __main__:<module>:356 - total execution time: 0:04:02.105128
-2022-12-05 14:25:15.022 | INFO     | __main__:<module>:311 - Analysis date: 2022-11-16
-2022-12-05 14:25:16.556 | INFO     | __main__:<module>:328 - merge routes to trips: 0:00:01.533457
-2022-12-05 14:29:01.638 | INFO     | __main__:<module>:345 - cut segments: 0:03:45.081873
-2022-12-05 14:29:08.852 | INFO     | __main__:<module>:357 - dissolve: 0:00:07.214117
-2022-12-05 14:29:08.852 | INFO     | __main__:<module>:358 - total execution time: 0:03:53.829447
-2022-12-12 10:51:03.298 | INFO     | __main__:<module>:315 - Analysis date: 2022-11-16
-2022-12-12 10:51:05.023 | INFO     | __main__:<module>:332 - merge routes to trips: 0:00:01.723693
-2022-12-12 10:56:41.061 | INFO     | __main__:<module>:349 - cut segments: 0:05:36.038082
-2022-12-12 10:56:52.982 | INFO     | __main__:<module>:362 - dissolve: 0:00:11.920927
-2022-12-12 10:56:52.983 | INFO     | __main__:<module>:363 - total execution time: 0:05:49.682702
-2022-12-12 11:44:10.963 | INFO     | __main__:<module>:326 - Analysis date: 2022-11-16
-2022-12-12 11:44:12.580 | INFO     | __main__:<module>:343 - merge routes to trips: 0:00:01.616279
-2022-12-12 11:49:47.975 | INFO     | __main__:<module>:360 - cut segments: 0:05:35.394745
-2022-12-12 11:49:58.707 | INFO     | __main__:<module>:373 - dissolve: 0:00:10.732026
-2022-12-12 11:49:58.708 | INFO     | __main__:<module>:374 - total execution time: 0:05:47.743050
-2022-12-15 10:15:00.670 | INFO     | __main__:<module>:326 - Analysis date: 2022-12-14
-2022-12-15 10:15:02.281 | INFO     | __main__:<module>:343 - merge routes to trips: 0:00:01.608873
-2022-12-15 10:21:58.098 | INFO     | __main__:<module>:360 - cut segments: 0:06:55.817672
-2022-12-15 10:22:09.002 | INFO     | __main__:<module>:373 - dissolve: 0:00:10.903203
-2022-12-15 10:22:09.002 | INFO     | __main__:<module>:374 - total execution time: 0:07:08.329748
 2023-01-19 15:38:25.352 | INFO     | __main__:<module>:323 - Analysis date: 2023-01-18
 2023-01-19 15:38:27.010 | INFO     | __main__:<module>:340 - merge routes to trips: 0:00:01.657026
 2023-01-19 15:44:08.041 | INFO     | __main__:<module>:357 - cut segments: 0:05:41.030537
@@ -133,8 +34,8 @@
 2023-06-15 14:23:47.951 | INFO     | __main__:<module>:360 - cut segments: 0:09:47.120686
 2023-06-15 14:23:57.726 | INFO     | __main__:<module>:373 - dissolve: 0:00:09.774952
 2023-06-15 14:23:57.728 | INFO     | __main__:<module>:374 - total execution time: 0:10:03.811403
-2023-07-13 12:20:28.356 | INFO     | __main__:<module>:316 - Analysis date: 2023-07-12
-2023-07-13 12:27:48.999 | INFO     | __main__:<module>:335 - merge routes to trips: 0:07:20.619848
-2023-07-13 12:41:36.642 | INFO     | __main__:<module>:354 - cut segments: 0:13:47.642247
-2023-07-13 12:41:50.047 | INFO     | __main__:<module>:367 - dissolve: 0:00:13.405436
-2023-07-13 12:41:50.048 | INFO     | __main__:<module>:368 - total execution time: 0:21:21.667531
+2023-07-13 14:02:02.777 | INFO     | __main__:<module>:316 - Analysis date: 2023-07-12
+2023-07-13 14:09:13.599 | INFO     | __main__:<module>:335 - merge routes to trips: 0:07:10.821016
+2023-07-13 14:23:03.739 | INFO     | __main__:<module>:354 - cut segments: 0:13:50.140651
+2023-07-13 14:23:16.699 | INFO     | __main__:<module>:367 - dissolve: 0:00:12.959801
+2023-07-13 14:23:16.700 | INFO     | __main__:<module>:368 - total execution time: 0:21:13.921468
