@@ -133,3 +133,8 @@
 2023-06-15 14:23:47.951 | INFO     | __main__:<module>:360 - cut segments: 0:09:47.120686
 2023-06-15 14:23:57.726 | INFO     | __main__:<module>:373 - dissolve: 0:00:09.774952
 2023-06-15 14:23:57.728 | INFO     | __main__:<module>:374 - total execution time: 0:10:03.811403
+2023-07-13 12:20:28.356 | INFO     | __main__:<module>:316 - Analysis date: 2023-07-12
+2023-07-13 12:27:48.999 | INFO     | __main__:<module>:335 - merge routes to trips: 0:07:20.619848
+2023-07-13 12:41:36.642 | INFO     | __main__:<module>:354 - cut segments: 0:13:47.642247
+2023-07-13 12:41:50.047 | INFO     | __main__:<module>:367 - dissolve: 0:00:13.405436
+2023-07-13 12:41:50.048 | INFO     | __main__:<module>:368 - total execution time: 0:21:21.667531
