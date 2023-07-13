@@ -63,10 +63,10 @@ def download_vehicle_positions(
 ) -> pd.DataFrame:    
     
     df = (tbls.mart_gtfs.fct_vehicle_locations()
-          >> filter(_.dt == date)
+          >> filter(_.service_date == date)
           >> filter(_._gtfs_dataset_name.isin(operator_names))
           >> select(_.gtfs_dataset_key, _._gtfs_dataset_name,
-                    _.trip_id,
+                    _.trip_id, _.trip_instance_key,
                     _.location_timestamp,
                     _.location)
               >> collect()
@@ -134,10 +134,7 @@ if __name__ == "__main__":
     
     one_day_after = helpers.find_day_after(analysis_date)
     
-    # Loop through batches and download the date we're interested in 
-    # and the day after
     loop_through_batches_and_download_vp(batches, analysis_date)
-    loop_through_batches_and_download_vp(batches, one_day_after)
         
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")
