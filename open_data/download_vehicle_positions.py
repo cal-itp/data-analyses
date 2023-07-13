@@ -15,7 +15,6 @@ from calitp_data_analysis.tables import tbls
 from loguru import logger
 from siuba import *
 
-from segment_speed_utils import helpers
 from shared_utils import utils, schedule_rt_utils
 from update_vars import SEGMENT_GCS, analysis_date
 
@@ -66,6 +65,7 @@ def download_vehicle_positions(
           >> filter(_.service_date == date)
           >> filter(_._gtfs_dataset_name.isin(operator_names))
           >> select(_.gtfs_dataset_key, _._gtfs_dataset_name,
+                    _.schedule_gtfs_dataset_key,
                     _.trip_id, _.trip_instance_key,
                     _.location_timestamp,
                     _.location)
@@ -131,9 +131,7 @@ if __name__ == "__main__":
     
     rt_dataset_names = rt_datasets.name.unique().tolist()
     batches = determine_batches(rt_dataset_names)
-    
-    one_day_after = helpers.find_day_after(analysis_date)
-    
+        
     loop_through_batches_and_download_vp(batches, analysis_date)
         
     end = datetime.datetime.now()
