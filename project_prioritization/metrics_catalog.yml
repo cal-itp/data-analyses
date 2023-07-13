@@ -26,3 +26,9 @@ sources:
     args:
       urlpath: gs://calitp-analytics-data/data-analyses/project_prioritization/SantaCruz_Watsonville_Project_SHP_files/sc_multimodal_street.zip
       use_fsspec: true
+  shp_demoproj_transitroute:
+    driver: shapefile
+    description: Santa Cruz Metro Route 69
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/project_prioritization/SantaCruz_Watsonville_Project_SHP_files/transit_route.zip
+      use_fsspec: true
