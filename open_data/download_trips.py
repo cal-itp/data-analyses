@@ -62,7 +62,8 @@ if __name__=="__main__":
         "feed_key", "gtfs_dataset_key", 
         "name", "regional_feed_type", 
         "service_date", "trip_start_date_pacific",
-        "trip_key", "trip_id",
+        "trip_key", "trip_id", 
+        "trip_key_instance", # https://github.com/cal-itp/data-infra/pull/2489
         "route_key", "route_id", "route_type", 
         "route_short_name", "route_long_name", "route_desc",
         "direction_id", 
