@@ -99,7 +99,7 @@ def filter_dim_gtfs_datasets(
     if "key" in keep_cols:
         dim_gtfs_datasets = dim_gtfs_datasets >> rename(gtfs_dataset_key="key")
     if "name" in keep_cols:
-        dim_gtfs_datasets = dim_gtfs_datasets >> rename(_gtfs_dataset_name="name")
+        dim_gtfs_datasets = dim_gtfs_datasets >> rename(gtfs_dataset_name="name")
 
     if get_df:
         dim_gtfs_datasets = dim_gtfs_datasets >> collect()

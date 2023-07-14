@@ -225,3 +225,8 @@
 2023-06-15 11:06:33.710 | INFO     | __main__:<module>:202 - export concatenated vp: 0:04:43.654906
 2023-06-15 11:13:28.332 | INFO     | __main__:<module>:218 - remove batched parquets
 2023-06-15 11:13:28.332 | INFO     | __main__:<module>:221 - execution time: 0:13:46.622590
+2023-07-13 20:53:10.199 | INFO     | __main__:<module>:98 - Analysis date: 2023-07-12
+2023-07-13 20:53:20.750 | INFO     | __main__:<module>:106 - concat and filter batched data: 0:00:10.550618
+2023-07-13 20:57:17.235 | INFO     | __main__:<module>:113 - export concatenated vp: 0:03:56.484502
+2023-07-13 21:07:51.939 | INFO     | __main__:<module>:129 - remove batched parquets
+2023-07-13 21:07:51.981 | INFO     | __main__:<module>:132 - execution time: 0:14:41.781622
