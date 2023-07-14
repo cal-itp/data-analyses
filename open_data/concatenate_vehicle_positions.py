@@ -38,6 +38,13 @@ def concat_batches(analysis_date: str) -> dd.DataFrame:
     
     ddf = dd.from_delayed(delayed_dfs)
     
+    ddf = schedule_rt_utils.localize_timestamp_col(
+        ddf, ["location_timestamp"])
+        
+    ddf = ddf.assign(
+        hour = dd.to_datetime(ddf.location_timestamp_local).dt.hour,
+    ).rename(columns = {"gtfs_dataset_name": "_gtfs_dataset_name"})
+    
     return ddf
 
 
@@ -55,29 +62,6 @@ def vp_into_gdf(df: pd.DataFrame) -> gpd.GeoDataFrame:
         crs="EPSG:4326").drop(columns="location")
         
     return gdf
-
-
-def filter_to_analysis_date(
-    df: pd.DataFrame,
-    analysis_date: str
-) -> pd.DataFrame:
-    """
-    Parse the location_timestamp to grab date
-    and only keep rows that are for analysis_date
-    """    
-    df = schedule_rt_utils.localize_timestamp_col(
-        df, "location_timestamp")
-        
-    df = df.assign(
-        activity_date = pd.to_datetime(df.location_timestamp_local).dt.date,
-        hour = pd.to_datetime(df.location_timestamp_local).dt.hour,
-    )
-    
-    df2 = (df[df.activity_date == pd.to_datetime(analysis_date).date()]
-           .reset_index(drop=True)
-          )
-        
-    return df2
 
 
 def remove_batched_parquets(analysis_date: str):
@@ -117,12 +101,11 @@ if __name__ == "__main__":
         
     # Concatenate all the batches
     concatenated_vp_df = concat_batches(analysis_date)
-    concatenated_vp_filtered = filter_to_analysis_date(concatenated_vp_df)
     
     time1 = datetime.datetime.now()
     logger.info(f"concat and filter batched data: {time1 - start}")
     
-    concatenated_vp_filtered.to_parquet(
+    concatenated_vp_df.to_parquet(
         f"{SEGMENT_GCS}vp_{analysis_date}_concat", 
         partition_on = "gtfs_dataset_key")
     

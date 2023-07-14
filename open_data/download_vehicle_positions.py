@@ -22,9 +22,12 @@ fs = gcsfs.GCSFileSystem()
 
 def determine_batches(rt_names: list) -> dict:
     #https://stackoverflow.com/questions/4843158/how-to-check-if-a-string-is-a-substring-of-items-in-a-list-of-strings
-    large_operator_names = [
+    la_metro_names = [
         "LA Metro Bus",
         "LA Metro Rail",
+    ]
+    
+    bay_area_large_names = [
         "AC Transit", 
         "Muni"
     ]
@@ -36,22 +39,27 @@ def determine_batches(rt_names: list) -> dict:
     # If any of the large operator name substring is 
     # found in our list of names, grab those
     # be flexible bc "Vehicle Positions" and "VehiclePositions" present
-    matching = [i for i in rt_names 
-                if any(name in i for name in large_operator_names)]
+    matching1 = [i for i in rt_names 
+                if any(name in i for name in la_metro_names)]
+    
+    matching2 = [i for i in rt_names 
+                if any(name in i for name in bay_area_large_names)]  
     
     remaining_bay_area = [i for i in rt_names 
                           if any(name in i for name in bay_area_names) and 
-                          i not in matching
+                          (i not in matching1) and (i not in matching2)
                          ]
     remaining = [i for i in rt_names if 
-                 i not in matching and i not in remaining_bay_area]
+                 (i not in matching1) and (i not in matching2) and 
+                 (i not in remaining_bay_area)]
     
     # Batch large operators together and run remaining in 2nd query
     batch_dict = {}
     
-    batch_dict[0] = matching
+    batch_dict[0] = matching1
     batch_dict[1] = remaining_bay_area
     batch_dict[2] = remaining
+    batch_dict[3] = matching2
     
     return batch_dict
 
@@ -63,8 +71,8 @@ def download_vehicle_positions(
     
     df = (tbls.mart_gtfs.fct_vehicle_locations()
           >> filter(_.service_date == date)
-          >> filter(_._gtfs_dataset_name.isin(operator_names))
-          >> select(_.gtfs_dataset_key, _._gtfs_dataset_name,
+          >> filter(_.gtfs_dataset_name.isin(operator_names))
+          >> select(_.gtfs_dataset_key, _.gtfs_dataset_name,
                     _.schedule_gtfs_dataset_key,
                     _.trip_id, _.trip_instance_key,
                     _.location_timestamp,
@@ -120,7 +128,7 @@ if __name__ == "__main__":
         keep_cols=["key", "name", "type", "regional_feed_type"],
         custom_filtering={"type": ["vehicle_positions"]},
         get_df = True
-    ) >> rename(name="_gtfs_dataset_name")
+    ) >> rename(name="gtfs_dataset_name")
     
     # Exclude regional feed and precursors
     exclude = ["Bay Area 511 Regional VehiclePositions"]
