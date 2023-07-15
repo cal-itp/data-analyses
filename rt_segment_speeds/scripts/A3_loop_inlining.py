@@ -30,9 +30,9 @@ def calculate_mean_time(
     seconds_col = f"{timestamp_col}_sec"
     
     df = segment_calcs.convert_timestamp_to_seconds(
-        df, timestamp_col)
+        df, [timestamp_col])
     
-    mean_time = (df.groupby(group_cols)
+    mean_time = (df.groupby(group_cols, observed=True, group_keys=False)
                  .agg({seconds_col: "mean"})
                  .reset_index()
                  .rename(columns = {
@@ -63,12 +63,13 @@ def get_first_last_position_in_group(
     time_col = "location_timestamp_local_sec"
     trip_group_cols = group_cols + ["group"]
     
-    first = (df.groupby(trip_group_cols)
+    grouped_df = df.groupby(trip_group_cols, observed=True, group_keys=False)
+    first = (grouped_df
              .agg({time_col: "min"})
              .reset_index()
             )
     
-    last = (df.groupby(trip_group_cols)
+    last = (grouped_df
              .agg({time_col: "max"})
              .reset_index()
             )
@@ -85,7 +86,7 @@ def get_first_last_position_in_group(
     # if it has only 1 point (cannot calculate direction vector), 
     # which means it'll get excluded down the line
     more_than_2 = (pared_down
-                   .groupby(trip_group_cols)
+                   .groupby(trip_group_cols, observed=True, group_keys=False)
                    [time_col].size()
                    .loc[lambda x: x > 1]
                    .reset_index()
@@ -112,7 +113,8 @@ def get_first_last_position_in_group(
     ).reset_index(drop=True)
     
     df3 = df3.assign(
-        obs = (df3.groupby(trip_group_cols)[time_col]
+        obs = (df3.groupby(trip_group_cols, observed=True, 
+                           group_keys=False)[time_col]
                .cumcount() + 1
               ).astype("int8")
     )

@@ -242,7 +242,7 @@ def find_special_cases_and_setup_df(
             "geometry"]
     )
     
-    wide = (gdf.groupby("shape_array_key")
+    wide = (gdf.groupby("shape_array_key", observed=True, group_keys=False)
             .agg({
                 "stop_sequence": lambda x: list(x), 
                 "stop_geometry": lambda x: list(x)}
