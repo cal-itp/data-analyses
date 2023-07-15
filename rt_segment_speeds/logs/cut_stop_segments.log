@@ -60,3 +60,11 @@
 2023-06-22 09:18:12.947 | INFO     | __main__:<module>:293 - Cut special stop segments: 0:56:25.125689
 2023-06-22 09:18:15.093 | INFO     | __main__:<module>:312 - export results: 0:00:02.145901
 2023-06-22 09:18:15.094 | INFO     | __main__:<module>:313 - execution time: 0:56:27.271590
+2023-07-14 12:30:43.727 | INFO     | __main__:<module>:176 - Analysis date: 2023-07-12
+2023-07-14 12:31:11.716 | INFO     | __main__:<module>:212 - Cut normal stop segments: 0:00:27.988246
+2023-07-14 12:38:53.887 | INFO     | __main__:<module>:224 - Export results: 0:07:42.170548
+2023-07-14 12:38:53.887 | INFO     | __main__:<module>:227 - execution time: 0:08:10.159521
+2023-07-14 12:39:11.764 | INFO     | __main__:<module>:273 - Analysis date: 2023-07-12
+2023-07-14 13:24:34.066 | INFO     | __main__:<module>:293 - Cut special stop segments: 0:45:22.297052
+2023-07-14 13:24:37.613 | INFO     | __main__:<module>:312 - export results: 0:00:03.547337
+2023-07-14 13:24:37.615 | INFO     | __main__:<module>:313 - execution time: 0:45:25.844389

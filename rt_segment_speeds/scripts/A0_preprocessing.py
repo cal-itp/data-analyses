@@ -27,7 +27,7 @@ def trip_time_elapsed(
     Group by trip and calculate the time elapsed (max_time-min_time)
     for RT vp observed.
     """
-    min_time = (ddf.groupby(group_cols, observed=True)
+    min_time = (ddf.groupby(group_cols, observed=True, group_keys=False)
                 [timestamp_col]
                 .min()
                 .dropna()
@@ -36,7 +36,7 @@ def trip_time_elapsed(
                )
                  
     
-    max_time = (ddf.groupby(group_cols, observed=True)
+    max_time = (ddf.groupby(group_cols, observed=True, group_keys=False)
                 [timestamp_col]
                 .max()
                 .dropna()

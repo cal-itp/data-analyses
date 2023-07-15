@@ -37,7 +37,7 @@ def get_prior_shape_meters(
 
     gdf = gdf.assign(
         prior_shape_meters = (gdf.sort_values(shape_cols + ["stop_sequence"])
-                              .groupby(shape_cols, group_keys = False)
+                              .groupby(shape_cols, observed=True, group_keys = False)
                               .shape_meters
                               .apply(lambda x: x.shift(1))
                              )

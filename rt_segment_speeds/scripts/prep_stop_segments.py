@@ -213,7 +213,7 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
     # Attach dask array as a column
     stop_times_with_geom["shape_meters"] = shape_meters_geoseries
     
-    stop_times_with_geom = stop_times_with_geom.repartition(npartitions=4)
+    stop_times_with_geom = stop_times_with_geom.repartition(npartitions=10)
     
     # Get the arrays of shape_array_keys to flag
     loopy_shapes = tag_shapes_with_stops_visited_twice(stop_times_with_geom)
