@@ -171,6 +171,10 @@ for f in in_features:
 
 ## (7) Move from file gdb to enterprise gdb
 # License Select must be set to Advanced for this to work
+# Exit and restart ArcPro to clear locks on layers in overwriting
+# If we don't exit, the layer will be locked because it shows we're already using it 
+# staging to open_data), and it will prevent writing from open_data to the enterprise gdb.
+
 ENTERPRISE_DATABASE = "Database Connections/HQrail(edit)@sv03tmcsqlprd1.sde"
 
 for f in in_features:
