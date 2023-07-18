@@ -13,8 +13,9 @@ from pydantic import BaseModel
 from typing import Literal
 
 import validation_pro
+from update_vars import DEFAULT_XML_TEMPLATE
 
-METADATA_FOLDER = "metadata_xml/"
+METADATA_FOLDER = "./xml/"
 
 # This prefix keeps coming up, but xmltodict has trouble processing or replacing it
 x = "ns0:"
@@ -60,8 +61,7 @@ def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
 
 
 def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
-    DEFAULT_XML = f"./{METADATA_FOLDER}default_pro.xml"
-    default_template = xml_to_json(DEFAULT_XML)
+    default_template = xml_to_json(f"{METADATA_FOLDER}{DEFAULT_XML_TEMPLATE}")
     
     # Grab the necessary elements from my dataset
     necessary_elements = lift_necessary_dataset_elements(metadata_json[main])
@@ -83,8 +83,9 @@ def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
 class metadata_input(BaseModel):
     dataset_name: str
     publish_entity: str = "Data & Digital Services / California Integrated Travel Project"
-    abstract: str
     purpose: str
+    abstract: str
+    public_access: Literal["Public", "Restricted"] = "Public"
     creation_date: str
     beginning_date: str
     end_date: str
@@ -107,9 +108,8 @@ class metadata_input(BaseModel):
     contact_email: str = "hello@calitp.org"
     horiz_accuracy: str = "4 meters"
     #edition: str
-    boilerplate_license: str = (
-        '''Public. License - Creative Commons 4.0 Attribution. 
-        The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an "as is" and an "as available" basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.''')
+    boilerplate_desc: str = "The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an 'as is' and an 'as available' basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein."
+    boilerplate_license: str = "License - Creative Commons 4.0 Attribution."
     
 
 def fix_values_in_validated_dict(d: dict) -> dict:
@@ -183,13 +183,15 @@ def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
     maint_info = overwrite_contact_info(maint_info, d)
         
     (id_info[f"{x}resourceConstraints"][0][f"{x}MD_Constraints"]
-     [f"{x}useLimitation"][key]) = d["boilerplate_license"]
+     [f"{x}useLimitation"][key]) = d["public_access"]   
     (id_info[f"{x}resourceConstraints"][1][f"{x}MD_LegalConstraints"]
-     [f"{x}useLimitation"][key]) = d["boilerplate_license"]
-    (id_info[f"{x}resourceConstraints"][1][f"{x}MD_LegalConstraints"]
+     [f"{x}useLimitation"][key]) = d["boilerplate_desc"]
+    (id_info[f"{x}resourceConstraints"][2][f"{x}MD_LegalConstraints"]
+     [f"{x}useLimitation"][key]) = d["boilerplate_license"]   
+    (id_info[f"{x}resourceConstraints"][2][f"{x}MD_LegalConstraints"]
      [f"{x}useConstraints"][f"{x}MD_RestrictionCode"][enum]) = "license"
-    (id_info[f"{x}resourceConstraints"][1][f"{x}MD_LegalConstraints"]
-     [f"{x}useConstraints"][f"{x}MD_RestrictionCode"][t]) = "license"     
+    (id_info[f"{x}resourceConstraints"][2][f"{x}MD_LegalConstraints"]
+     [f"{x}useConstraints"][f"{x}MD_RestrictionCode"][t]) = "license"    
 
     return metadata
     
