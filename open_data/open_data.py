@@ -10,29 +10,31 @@ import metadata_hqta
 import metadata_traffic_ops
 import metadata_speeds
 
+FOLDER = metadata_update_pro.METADATA_FOLDER
+
 OPEN_DATA = {
     "hqta_areas": {
-        "path": "./metadata_xml/ca_hq_transit_areas.xml", 
+        "path": f"{FOLDER}/ca_hq_transit_areas.xml", 
         "metadata_dict": metadata_hqta.HQTA_TRANSIT_AREAS_DICT,
     },
     "hqta_stops": {
-        "path": "./metadata_xml/ca_hq_transit_stops.xml",
+        "path": f"{FOLDER}ca_hq_transit_stops.xml",
         "metadata_dict": metadata_hqta.HQTA_TRANSIT_STOPS_DICT,
     },
     "transit_stops": {
-        "path": "./metadata_xml/ca_transit_stops.xml",
+        "path": f"{FOLDER}ca_transit_stops.xml",
         "metadata_dict": metadata_traffic_ops.STOPS_DICT,
     },
     "transit_routes": {
-        "path": "./metadata_xml/ca_transit_routes.xml",
+        "path": f"{FOLDER}ca_transit_routes.xml",
         "metadata_dict": metadata_traffic_ops.ROUTES_DICT,
     },
     "speeds_stop_segments": {
-        "path": "./metadata_xml/speeds_by_stop_segments.xml",
+        "path": f"{FOLDER}speeds_by_stop_segments.xml",
         "metadata_dict": metadata_speeds.SPEEDS_STOP_SEG_DICT,
     },
     "speeds_route_time_of_day": {
-        "path": "./metadata_xml/speeds_by_route_time_of_day.xml",
+        "path": f"{FOLDER}speeds_by_route_time_of_day.xml",
         "metadata_dict": metadata_speeds.ROUTE_SPEEDS_DICT
     },
 }
