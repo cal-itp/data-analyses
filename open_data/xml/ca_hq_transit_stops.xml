@@ -38,8 +38,8 @@
 			<ns0:geometricObjects>
 				<ns0:MD_GeometricObjects>
 					<ns0:geometricObjectType>
-						<ns0:MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="composite" codeSpace="ISOTC211/19115">
-							<text>composite</text>
+						<ns0:MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="point" codeSpace="ISOTC211/19115">
+							<text>point</text>
 						</ns0:MD_GeometricObjectTypeCode>
 					</ns0:geometricObjectType>
 				</ns0:MD_GeometricObjects>
@@ -68,12 +68,12 @@
 			<ns0:citation>
 				<ns0:CI_Citation>
 					<ns0:title>
-						<ns1:CharacterString>speeds_by_route_time_of_day</ns1:CharacterString>
+						<ns1:CharacterString>ca_hq_transit_stops</ns1:CharacterString>
 					</ns0:title>
 					<ns0:date>
 						<ns0:CI_Date>
 							<ns0:date>
-								<ns1:Date>2023-06-14</ns1:Date>
+								<ns1:Date>2022-02-08</ns1:Date>
 							</ns0:date>
 							<ns0:dateType>
 								<ns0:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">
@@ -97,7 +97,7 @@
 					<ns0:citedResponsibleParty>
 						<ns0:CI_ResponsibleParty>
 							<ns0:individualName>
-								<ns1:CharacterString>Tiffany Ku; Eric Dasmalchi</ns1:CharacterString>
+								<ns1:CharacterString>Eric Dasmalchi</ns1:CharacterString>
 							</ns0:individualName>
 							<ns0:organisationName>
 								<ns1:CharacterString>Caltrans</ns1:CharacterString>
@@ -110,7 +110,7 @@
 									<ns0:address>
 										<ns0:CI_Address>
 											<ns0:electronicMailAddress>
-												<ns1:CharacterString>tiffany.ku@dot.ca.gov; eric.dasmalchi@dot.ca.gov</ns1:CharacterString>
+												<ns1:CharacterString>eric.dasmalchi@dot.ca.gov</ns1:CharacterString>
 											</ns0:electronicMailAddress>
 										</ns0:CI_Address>
 									</ns0:address>
@@ -131,10 +131,10 @@
 				</ns0:CI_Citation>
 			</ns0:citation>
 			<ns0:abstract>
-				<ns1:CharacterString>Public. EPSG: 4326</ns1:CharacterString>
+				<ns1:CharacterString>Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled frequencies of 15 minutes or less.</ns1:CharacterString>
 			</ns0:abstract>
 			<ns0:purpose>
-				<ns1:CharacterString>Average transit speeds by route-direction by time-of-day estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</ns1:CharacterString>
+				<ns1:CharacterString>Estimated High Quality Transit Areas as described in Public Resources Code 21155, 21064.3, 21060.2.</ns1:CharacterString>
 			</ns0:purpose>
 			<ns0:status>
 				<ns0:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">
@@ -154,7 +154,7 @@
 					<ns0:contact>
 						<ns0:CI_ResponsibleParty>
 							<ns0:individualName>
-								<ns1:CharacterString>Tiffany Ku; Eric Dasmalchi</ns1:CharacterString>
+								<ns1:CharacterString>Eric Dasmalchi</ns1:CharacterString>
 							</ns0:individualName>
 							<ns0:organisationName>
 								<ns1:CharacterString>Caltrans</ns1:CharacterString>
@@ -167,7 +167,7 @@
 									<ns0:address>
 										<ns0:CI_Address>
 											<ns0:electronicMailAddress>
-												<ns1:CharacterString>tiffany.ku@dot.ca.gov; eric.dasmalchi@dot.ca.gov</ns1:CharacterString>
+												<ns1:CharacterString>eric.dasmalchi@dot.ca.gov</ns1:CharacterString>
 											</ns0:electronicMailAddress>
 										</ns0:CI_Address>
 									</ns0:address>
@@ -185,7 +185,7 @@
 			<ns0:descriptiveKeywords>
 				<ns0:MD_Keywords>
 					<ns0:keyword>
-						<ns1:CharacterString>Transportation, Transit, GTFS, GTFS RT, real time, speeds, vehicle positions</ns1:CharacterString>
+						<ns1:CharacterString>Transportation, Land Use, Transit-Oriented Development, TOD, High Quality Transit</ns1:CharacterString>
 					</ns0:keyword>
 					<ns0:type>
 						<ns0:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">
@@ -205,16 +205,21 @@
 			<ns0:resourceConstraints>
 				<ns0:MD_Constraints>
 					<ns0:useLimitation>
-						<ns1:CharacterString>Public. License - Creative Commons 4.0 Attribution. 
-        The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an "as is" and an "as available" basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.</ns1:CharacterString>
+						<ns1:CharacterString>Public</ns1:CharacterString>
 					</ns0:useLimitation>
 				</ns0:MD_Constraints>
 			</ns0:resourceConstraints>
 			<ns0:resourceConstraints>
 				<ns0:MD_LegalConstraints>
 					<ns0:useLimitation>
-						<ns1:CharacterString>Public. License - Creative Commons 4.0 Attribution. 
-        The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an "as is" and an "as available" basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.</ns1:CharacterString>
+						<ns1:CharacterString>The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an 'as is' and an 'as available' basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.</ns1:CharacterString>
+					</ns0:useLimitation>
+				</ns0:MD_LegalConstraints>
+			</ns0:resourceConstraints>
+			<ns0:resourceConstraints>
+				<ns0:MD_LegalConstraints>
+					<ns0:useLimitation>
+						<ns1:CharacterString>License - Creative Commons 4.0 Attribution.</ns1:CharacterString>
 					</ns0:useLimitation>
 					<ns0:useConstraints>
 						<ns0:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="license" codeSpace="ISOTC211/19115">
@@ -289,11 +294,7 @@
 					<ns0:processStep>
 						<ns0:LI_ProcessStep>
 							<ns0:description>
-								<ns1:CharacterString>
-    This data was estimated by combining GTFS real-time vehicle positions with GTFS scheduled trips and shapes. 
-    GTFS real-time (RT) vehicle positions are spatially joined to GTFS scheduled shapes, so only vehicle positions traveling along the route alignment path are kept. A sample of five vehicle positions are selected (min, 25th percentile, 50th percentile, 75th percentile, max). The trip speed is calculated using these five vehicle positions. Each trip is categorized into a time-of-day. The average speed for a route-direction-time_of_day is calculated. Additional metrics are stored, such as the number of trips observed, the average scheduled service minutes, and the average RT observed service minutes. For convenience, we also provide a singular shape (common_shape_id) to associate with a route-direction. This is the shape that had the most number of trips for a given route-direction. 
-    Time-of-day is determined by the GTFS scheduled trip start time. The trip start hour (military time) is categorized based on the following: Owl (0-3), Early AM (4-6), AM Peak (7-9), Midday (10-14), PM Peak (15-19), and Evening (20-23). The start and end hours are inclusive (e.g., 4-6 refers to 4am, 5am, and 6am).
-    </ns1:CharacterString>
+								<ns1:CharacterString>This data was estimated using a spatial process derived from General Transit Feed Specification (GTFS) schedule data. To find high-quality bus corridors, we split each corridor into 1,500 meter segments and counted frequencies at the stop within that segment with the highest number of transit trips. If that stop saw at least 4 trips per hour for at least one hour in the morning, and again for at least one hour in the afternoon, we consider that segment a high-quality bus corridor. Segments without a stop are not considered high-quality corridors. Major transit stops were identified as either the intersection of two high-quality corridors from the previous step, a rail or bus rapid transit station, or a ferry terminal with bus service. Note that the definition of `bus rapid transit` in Public Resources Code 21060.2 includes features not captured by available data sources, these features were captured manually using information from transit agency sources and imagery. We believe this data to be broadly accurate, and fit for purposes including overall dashboards, locating facilities in relation to high quality transit areas, and assessing community transit coverage. However, the spatial determination of high-quality transit areas from GTFS data necessarily involves some assumptions as described above. Any critical determinations of whether a specific parcel is located within a high-quality transit area should be made in conjunction with local sources, such as transit agency timetables.  Notes: Null values may be present. The `hqta_details` columns defines which part of the Public Resources Code definition the HQTA classification was based on. If `hqta_details` references a single operator, then `agency_secondary` and `base64_url_secondary` are null. If `hqta_details` references the same operator, then `agency_secondary` and `base64_url_secondary` are the same as `agency_primary` and `base64_url_primary`. Refer to https://github.com/cal-itp/data-analyses/blob/main/high_quality_transit_areas/README.md for more details.</ns1:CharacterString>
 							</ns0:description>
 						</ns0:LI_ProcessStep>
 					</ns0:processStep>

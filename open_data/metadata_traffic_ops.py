@@ -1,5 +1,9 @@
+"""
+Traffic Ops request for geospatial routes and stops 
+metadata elements
+"""
 from gcs_to_esri import open_data_dates
-from metadata_hqta import ESRI_BASE_URL
+from update_vars import ESRI_BASE_URL
 
 # Traffic Ops routes and stops data dictionary
 KEYWORDS = [
@@ -13,6 +17,8 @@ KEYWORDS = [
 
 PURPOSE = "Provide all CA transit stops and routes (geospatial) from all transit operators."
 
+ABSTRACT = "Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates route information to stops."
+
 METHODOLOGY = "This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt."
 
 DATA_DICT_ROUTES_URL = f"{ESRI_BASE_URL}CA_Transit_Routes/FeatureServer"
@@ -22,9 +28,9 @@ ROUTES_DICT = {
     "dataset_name": "ca_transit_routes", 
     "publish_entity": "California Integrated Travel Project", 
 
-    "abstract": "Public. EPSG: 4326",
     "purpose": PURPOSE, 
-
+    "abstract": ABSTRACT,
+    
     "creation_date": "2022-02-08",
     "beginning_date": open_data_dates()[0],
     "end_date": open_data_dates()[1],
