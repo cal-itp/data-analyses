@@ -1,59 +1,3 @@
-2022-11-07 15:26:39.521 | INFO     | __main__:<module>:137 - Analysis date: 2022-10-12
-2022-11-07 15:27:11.200 | INFO     | __main__:<module>:146 - across operator intersections: 0:00:31.677812
-2022-11-07 15:27:49.028 | INFO     | __main__:<module>:170 - compute for pairwise/subset_corridors: 0:00:37.828539
-2022-11-07 15:27:51.713 | INFO     | __main__:<module>:181 - execution time: 0:01:12.190524
-2022-11-07 15:37:30.468 | INFO     | __main__:<module>:123 - Analysis date: 2022-10-12
-2022-11-07 15:37:32.456 | INFO     | __main__:<module>:132 - grab all stops
-2022-11-07 15:38:42.855 | INFO     | __main__:<module>:136 - create major stop bus
-2022-11-07 15:38:43.914 | INFO     | __main__:<module>:140 - create hq corridor bus
-2022-11-07 15:39:34.195 | INFO     | __main__:<module>:157 - execution time: 0:02:03.701663
-2022-11-07 15:46:00.825 | INFO     | __main__:<module>:126 - Analysis date: 2022-10-12
-2022-11-07 15:46:41.781 | INFO     | __main__:<module>:135 - grab all stops
-2022-11-07 15:46:47.495 | INFO     | __main__:<module>:139 - create major stop bus
-2022-11-07 15:46:58.694 | INFO     | __main__:<module>:143 - create hq corridor bus
-2022-11-07 15:46:59.863 | INFO     | __main__:<module>:160 - execution time: 0:00:59.037045
-2022-11-07 16:03:32.099 | INFO     | __main__:<module>:136 - Analysis date: 2022-10-12
-2022-11-07 16:04:04.321 | INFO     | __main__:<module>:147 - filter and buffer: 0:00:32.204345
-2022-11-07 16:04:07.025 | INFO     | __main__:<module>:158 - export as geoparquet in date folder
-2022-11-07 16:04:09.016 | INFO     | __main__:<module>:166 - export as geoparquet
-2022-11-07 16:04:57.307 | INFO     | __main__:<module>:175 - export as geojson
-2022-11-07 16:05:39.716 | INFO     | __main__:<module>:183 - export as geojsonl
-2022-11-07 16:05:39.717 | INFO     | __main__:<module>:186 - execution time: 0:02:07.600502
-2022-11-17 10:57:41.901 | INFO     | __main__:<module>:137 - Analysis date: 2022-11-16
-2022-11-17 10:58:04.052 | INFO     | __main__:<module>:146 - across operator intersections: 0:00:22.132270
-2022-11-17 10:58:36.757 | INFO     | __main__:<module>:170 - compute for pairwise/subset_corridors: 0:00:32.704898
-2022-11-17 10:58:39.320 | INFO     | __main__:<module>:181 - execution time: 0:00:57.399459
-2022-11-17 11:00:10.451 | INFO     | __main__:<module>:127 - Analysis date: 2022-11-16
-2022-11-17 11:00:50.580 | INFO     | __main__:<module>:136 - grab all stops
-2022-11-17 11:00:56.068 | INFO     | __main__:<module>:140 - create major stop bus
-2022-11-17 11:01:06.824 | INFO     | __main__:<module>:144 - create hq corridor bus
-2022-11-17 11:01:07.947 | INFO     | __main__:<module>:158 - execution time: 0:00:57.493055
-2022-11-17 11:09:46.245 | INFO     | __main__:<module>:136 - Analysis date: 2022-11-16
-2022-11-17 11:10:16.441 | INFO     | __main__:<module>:147 - filter and buffer: 0:00:30.177874
-2022-11-17 11:10:18.737 | INFO     | __main__:<module>:158 - export as geoparquet in date folder
-2022-11-17 11:10:21.787 | INFO     | __main__:<module>:166 - export as geoparquet
-2022-11-17 11:11:13.334 | INFO     | __main__:<module>:175 - export as geojson
-2022-11-17 11:11:55.826 | INFO     | __main__:<module>:183 - export as geojsonl
-2022-11-17 11:11:55.829 | INFO     | __main__:<module>:186 - execution time: 0:02:09.565677
-2022-11-21 13:10:55.883 | INFO     | __main__:<module>:135 - Analysis date: 2022-11-16
-2022-11-21 13:11:25.437 | INFO     | __main__:<module>:144 - across operator intersections: 0:00:29.551388
-2022-11-21 13:11:57.426 | INFO     | __main__:<module>:168 - compute for pairwise/subset_corridors: 0:00:31.989003
-2022-11-21 13:12:00.473 | INFO     | __main__:<module>:179 - execution time: 0:01:04.587994
-2022-11-21 16:40:32.366 | INFO     | __main__:<module>:126 - Analysis date: 2022-11-16
-2022-11-21 16:40:33.475 | INFO     | __main__:<module>:135 - across operator intersections: 0:00:01.107124
-2022-11-21 16:40:51.929 | INFO     | __main__:<module>:159 - compute for pairwise/subset_corridors: 0:00:18.454631
-2022-11-21 16:41:17.765 | INFO     | __main__:<module>:126 - Analysis date: 2022-11-16
-2022-11-21 16:41:18.766 | INFO     | __main__:<module>:135 - get pairwise table: 0:00:00.999581
-2022-11-21 16:41:36.801 | INFO     | __main__:<module>:159 - compute for pairwise/subset_corridors: 0:00:18.035015
-2022-11-21 16:41:39.484 | INFO     | __main__:<module>:170 - execution time: 0:00:21.717351
-2022-12-05 10:20:59.059 | INFO     | __main__:<module>:127 - Analysis date: 2022-11-16
-2022-12-05 10:21:00.027 | INFO     | __main__:<module>:136 - get pairwise table: 0:00:00.947987
-2022-12-05 10:21:14.888 | INFO     | __main__:<module>:160 - compute for pairwise/subset_corridors: 0:00:14.861273
-2022-12-05 10:21:17.264 | INFO     | __main__:<module>:171 - execution time: 0:00:18.185112
-2022-12-15 10:26:08.755 | INFO     | __main__:<module>:127 - Analysis date: 2022-12-14
-2022-12-15 10:26:09.758 | INFO     | __main__:<module>:136 - get pairwise table: 0:00:00.983326
-2022-12-15 10:26:23.284 | INFO     | __main__:<module>:160 - compute for pairwise/subset_corridors: 0:00:13.526280
-2022-12-15 10:26:25.320 | INFO     | __main__:<module>:171 - execution time: 0:00:16.544982
 2023-01-19 16:24:36.570 | INFO     | __main__:<module>:127 - Analysis date: 2023-01-18
 2023-01-19 16:24:37.592 | INFO     | __main__:<module>:136 - get pairwise table: 0:00:00.994099
 2023-01-19 16:25:37.687 | INFO     | __main__:<module>:127 - Analysis date: 2023-01-18
@@ -80,3 +24,7 @@
 2023-06-15 14:42:39.079 | INFO     | __main__:<module>:136 - get pairwise table: 0:00:01.240791
 2023-06-15 14:42:50.284 | INFO     | __main__:<module>:160 - compute for pairwise/subset_corridors: 0:00:11.204628
 2023-06-15 14:42:52.737 | INFO     | __main__:<module>:171 - execution time: 0:00:14.898256
+2023-07-13 14:24:50.602 | INFO     | __main__:<module>:127 - Analysis date: 2023-07-12
+2023-07-13 14:24:51.800 | INFO     | __main__:<module>:136 - get pairwise table: 0:00:01.197493
+2023-07-13 14:25:01.613 | INFO     | __main__:<module>:160 - compute for pairwise/subset_corridors: 0:00:09.812926
+2023-07-13 14:25:03.938 | INFO     | __main__:<module>:171 - execution time: 0:00:13.336201

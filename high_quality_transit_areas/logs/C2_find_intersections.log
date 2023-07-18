@@ -1,42 +1,3 @@
-2022-11-07 15:32:48.791 | INFO     | __main__:<module>:114 - Analysis date: 2022-10-12
-2022-11-07 15:32:52.453 | INFO     | __main__:<module>:124 - attach geometry to pairwise table: 0:00:03.661194
-2022-11-07 15:35:07.178 | INFO     | __main__:<module>:129 - find intersections: 0:02:14.724854
-2022-11-07 15:35:15.180 | INFO     | __main__:<module>:138 - execution time: 0:02:26.387816
-2022-11-14 11:45:17.091 | INFO     | __main__:<module>:102 - Analysis date: 2022-10-12
-2022-11-14 11:45:20.700 | INFO     | __main__:<module>:112 - attach geometry to pairwise table: 0:00:03.607210
-2022-11-14 11:46:24.345 | INFO     | __main__:<module>:117 - find intersections: 0:01:03.645169
-2022-11-14 11:46:24.345 | INFO     | __main__:<module>:126 - execution time: 0:01:07.253018
-2022-11-14 11:49:23.672 | INFO     | __main__:<module>:102 - Analysis date: 2022-10-12
-2022-11-14 11:49:27.529 | INFO     | __main__:<module>:112 - attach geometry to pairwise table: 0:00:03.856943
-2022-11-14 11:50:31.100 | INFO     | __main__:<module>:117 - find intersections: 0:01:03.571039
-2022-11-14 11:58:02.122 | INFO     | __main__:<module>:103 - Analysis date: 2022-10-12
-2022-11-14 11:58:06.087 | INFO     | __main__:<module>:113 - attach geometry to pairwise table: 0:00:03.965178
-2022-11-14 11:59:09.623 | INFO     | __main__:<module>:118 - find intersections: 0:01:03.536008
-2022-11-14 11:59:18.573 | INFO     | __main__:<module>:127 - execution time: 0:01:16.450801
-2022-11-17 10:58:50.227 | INFO     | __main__:<module>:103 - Analysis date: 2022-11-16
-2022-11-17 10:58:53.399 | INFO     | __main__:<module>:113 - attach geometry to pairwise table: 0:00:03.154442
-2022-11-17 10:59:49.835 | INFO     | __main__:<module>:118 - find intersections: 0:00:56.435602
-2022-11-17 10:59:56.744 | INFO     | __main__:<module>:127 - execution time: 0:01:06.499401
-2022-11-21 13:12:14.292 | INFO     | __main__:<module>:105 - Analysis date: 2022-11-16
-2022-11-21 13:12:17.804 | INFO     | __main__:<module>:115 - attach geometry to pairwise table: 0:00:03.487644
-2022-11-21 13:13:26.963 | INFO     | __main__:<module>:120 - find intersections: 0:01:09.158960
-2022-11-21 13:13:36.266 | INFO     | __main__:<module>:129 - execution time: 0:01:21.949515
-2022-11-21 16:41:52.292 | INFO     | __main__:<module>:105 - Analysis date: 2022-11-16
-2022-11-21 16:41:55.782 | INFO     | __main__:<module>:115 - attach geometry to pairwise table: 0:00:03.489351
-2022-11-21 16:43:03.011 | INFO     | __main__:<module>:120 - find intersections: 0:01:07.229421
-2022-11-21 16:43:11.370 | INFO     | __main__:<module>:129 - execution time: 0:01:19.077618
-2022-12-05 10:14:53.255 | INFO     | __main__:<module>:108 - Analysis date: 2022-11-16
-2022-12-05 10:14:56.550 | INFO     | __main__:<module>:118 - attach geometry to pairwise table: 0:00:03.283977
-2022-12-05 10:15:18.543 | INFO     | __main__:<module>:123 - find intersections: 0:00:21.992202
-2022-12-05 10:15:23.097 | INFO     | __main__:<module>:132 - execution time: 0:00:29.830773
-2022-12-05 10:16:14.084 | INFO     | __main__:<module>:109 - Analysis date: 2022-11-16
-2022-12-05 10:16:17.543 | INFO     | __main__:<module>:119 - attach geometry to pairwise table: 0:00:03.457199
-2022-12-05 10:16:39.449 | INFO     | __main__:<module>:124 - find intersections: 0:00:21.906959
-2022-12-05 10:16:44.278 | INFO     | __main__:<module>:133 - execution time: 0:00:30.192569
-2022-12-15 10:26:37.702 | INFO     | __main__:<module>:109 - Analysis date: 2022-12-14
-2022-12-15 10:26:41.089 | INFO     | __main__:<module>:119 - attach geometry to pairwise table: 0:00:03.371445
-2022-12-15 10:27:04.086 | INFO     | __main__:<module>:124 - find intersections: 0:00:22.996609
-2022-12-15 10:27:08.646 | INFO     | __main__:<module>:133 - execution time: 0:00:30.928311
 2023-01-19 16:26:22.439 | INFO     | __main__:<module>:109 - Analysis date: 2023-01-18
 2023-01-19 16:26:25.781 | INFO     | __main__:<module>:119 - attach geometry to pairwise table: 0:00:03.311074
 2023-01-19 16:26:44.586 | INFO     | __main__:<module>:124 - find intersections: 0:00:18.804916
@@ -61,3 +22,7 @@
 2023-06-15 14:43:15.826 | INFO     | __main__:<module>:119 - attach geometry to pairwise table: 0:00:04.588303
 2023-06-15 14:43:39.769 | INFO     | __main__:<module>:124 - find intersections: 0:00:23.942611
 2023-06-15 14:43:44.681 | INFO     | __main__:<module>:133 - execution time: 0:00:33.442944
+2023-07-13 14:25:19.724 | INFO     | __main__:<module>:109 - Analysis date: 2023-07-12
+2023-07-13 14:25:23.376 | INFO     | __main__:<module>:119 - attach geometry to pairwise table: 0:00:03.651465
+2023-07-13 14:25:42.585 | INFO     | __main__:<module>:124 - find intersections: 0:00:19.209192
+2023-07-13 14:25:46.651 | INFO     | __main__:<module>:133 - execution time: 0:00:26.925865

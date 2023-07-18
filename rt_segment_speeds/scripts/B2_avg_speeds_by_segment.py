@@ -1,5 +1,5 @@
 """
-Quick aggregation for avg speeds by segment
+Quick aggregation for speed metrics by segment
 """
 import datetime
 import geopandas as gpd
@@ -20,19 +20,20 @@ def calculate_avg_speeds(
     by groups.
     """
     # Take the average after dropping unusually high speeds
-    avg = (df.groupby(group_cols)
+    grouped_df = df.groupby(group_cols, observed=True, group_keys=False)
+    avg = (grouped_df
           .agg({
             "speed_mph": "median",
             "trip_id": "nunique"})
           .reset_index()
     )
     
-    p20 = (df.groupby(group_cols)
+    p20 = (grouped_df
            .agg({"speed_mph": lambda x: x.quantile(0.2)})
            .reset_index()  
           )
     
-    p80 = (df.groupby(group_cols)
+    p80 = (grouped_df
            .agg({"speed_mph": lambda x: x.quantile(0.8)})
            .reset_index()  
           )
