@@ -48,7 +48,9 @@ def filter_to_brt_trips(trips: pd.DataFrame) -> pd.DataFrame:
         "Bay Area 511 AC Transit Schedule": {"route_id": 
                                              ["1T"]},
         "LA Metro Bus Schedule": {"route_desc": 
-                                  ["METRO SILVER LINE", "METRO ORANGE LINE"]},
+                                  ["METRO SILVER LINE", "METRO ORANGE LINE", 
+                                   "METRO J LINE", "METRO G LINE"
+                                  ]},
         "Bay Area 511 Muni Schedule": {"route_short_name": 
                                        ['49']},
         # Omni BRT -- too infrequent!

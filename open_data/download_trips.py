@@ -62,7 +62,8 @@ if __name__=="__main__":
         "feed_key", "gtfs_dataset_key", 
         "name", "regional_feed_type", 
         "service_date", "trip_start_date_pacific",
-        "trip_key", "trip_id",
+        "trip_id", 
+        "trip_instance_key", # https://github.com/cal-itp/data-infra/pull/2489
         "route_key", "route_id", "route_type", 
         "route_short_name", "route_long_name", "route_desc",
         "direction_id", 
@@ -81,7 +82,8 @@ if __name__=="__main__":
         get_df = True,
     ) 
     
-    trips.to_parquet(f"{COMPILED_CACHED_VIEWS}{dataset}_{analysis_date}.parquet") 
+    trips.to_parquet(
+        f"{COMPILED_CACHED_VIEWS}{dataset}_{analysis_date}.parquet") 
 
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")

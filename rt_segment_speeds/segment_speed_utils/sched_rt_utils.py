@@ -81,9 +81,10 @@ def add_rt_keys_to_segments(
     """
     crosswalk = crosswalk_scheduled_trip_grouping_with_rt_key(
         analysis_date, 
-        merge_cols
+        merge_cols,
+        get_pandas = True
     )
-    
+
     segments_with_crosswalk = pd.merge(
         segments,
         crosswalk,
