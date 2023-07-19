@@ -19,7 +19,7 @@ CONFIG_PATH = './scripts/config.yml'
 STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
 
 # Delete this date later. 
-analysis_date = '2023-05-17'
+analysis_date = '2023-07-12'
 
 """
 General Functions
@@ -383,7 +383,7 @@ def flag_stage3(flagged_df:pd.DataFrame, date:str) -> pd.DataFrame:
           .merge(multi_locs, how="left", on=loc_merge_cols)
          )
     
-    drop_cols = ['vp_idx','x','y','hour','activity_date']
+    drop_cols = ['vp_idx','x','y','hour']
     
     # Drop columns
     m1 = m1.drop(columns = drop_cols)
@@ -469,6 +469,51 @@ def import_vehicle_positions(unique_trips:pd.DataFrame,
         )
     return vp
 
+def import_segments1(flagged_df: pd.DataFrame, 
+                    route:str, 
+                    gtfs_key:str, 
+                    trip_id:str) -> gpd.GeoDataFrame:
+    """
+    Import cut segments and colorcode  them based on 
+    whether or not it has 1+ rows that is divided by 0.
+    Cavaet: even if a segment records only 1 row that is divided by 0,
+    it will be color coded as so.
+    
+    Args:
+        flagged_df: result from df from categorize_meters_speeds_pandas()
+    """
+    # Load in ALL segments, flag them.
+    FILE = STOP_SEG_DICT['segments_file']
+    gdf = gpd.read_parquet(f"{SEGMENT_GCS}{FILE}_{analysis_date}.parquet",
+                           filters = [[("shape_array_key", "==", route),
+                                      ("gtfs_dataset_key", "==", gtfs_key),
+                                     ]]).to_crs(PROJECT_CRS)
+    
+    gdf["geometry_buffered"] = gdf.geometry.buffer(35)
+    gdf = gdf.set_geometry('geometry_buffered')
+    
+    """
+    # Distinguish between "correct" and "incorrect" seq
+    # A sequence can be incorrect even if just one row is "divided by 0"
+    incorrect_segments = flagged_df[
+        (flagged_df.shape_array_key == route)
+        & (flagged_df.gtfs_dataset_key == gtfs_key)
+        & (flagged_df.trip_id == trip_id)
+    ]
+    incorrect_segments_list = incorrect_segments.stop_sequence.unique().tolist()
+    incorrect_segments_filtered = gdf[gdf.stop_sequence.isin(incorrect_segments_list)].reset_index(drop = True)
+    incorrect_segments_filtered['flag'] = 'contains 0m/0sec'
+    
+    # Filter for correct segments using 
+    correct_segments = flagged_df[~flagged_df.stop_sequence.isin(incorrect_segments_list)]
+    correct_segments_list = correct_segments.stop_sequence.unique().tolist()
+    correct_segments_filtered = gdf[gdf.stop_sequence.isin(correct_segments_list)].reset_index(drop = True)
+    correct_segments_filtered['flag'] = 'does not contain 0m/0sec'
+    
+    final = pd.concat([correct_segments_filtered, incorrect_segments_filtered])
+    """
+    return gdf
+
 def import_segments(flagged_df: pd.DataFrame, 
                     route:str, 
                     gtfs_key:str, 
@@ -492,26 +537,7 @@ def import_segments(flagged_df: pd.DataFrame,
     gdf["geometry_buffered"] = gdf.geometry.buffer(35)
     gdf = gdf.set_geometry('geometry_buffered')
     
-    # Distinguish between "correct" and "incorrect" seq
-    # A sequence can be incorrect even if just one row is "divided by 0"
-    incorrect_segments = flagged_df[
-        (flagged_df.shape_array_key == route)
-        & (flagged_df.gtfs_dataset_key == gtfs_key)
-        & (flagged_df.trip_id == trip_id)
-    ]
-    incorrect_segments_list = incorrect_segments.stop_sequence.unique().tolist()
-    incorrect_segments_filtered = gdf[gdf.stop_sequence.isin(incorrect_segments_list)].reset_index(drop = True)
-    incorrect_segments_filtered['flag'] = 'contains 0m/0sec'
-    
-    # Filter for correct segments using 
-    correct_segments = flagged_df[~flagged_df.stop_sequence.isin(incorrect_segments_list)]
-    correct_segments_list = correct_segments.stop_sequence.unique().tolist()
-    correct_segments_filtered = gdf[gdf.stop_sequence.isin(correct_segments_list)].reset_index(drop = True)
-    correct_segments_filtered['flag'] = 'does not contain 0m/0sec'
-    
-    final = pd.concat([correct_segments_filtered, incorrect_segments_filtered])
-    
-    return final
+    return gdf
 
 def find_first_last_points(route:str, trip:str, gtfs_key:str)-> gpd.GeoDataFrame:
     """
@@ -563,8 +589,11 @@ def display_maps(all_points: gpd.GeoDataFrame,
         segments: gdf from import_segments()
         sjoin_results: gdf from sjoin_vp_segments()
     """
-    segments = segments[~segments.geometry_buffered.is_empty]
-    base1 = segments.explore('flag', cmap= 'tab10', height = 400, width = 600, name = 'segments')
+    # segments = segments[~segments.geometry_buffered.is_empty]
+    # segments = segments[~(segments.is_empty | segments.isna())]
+    
+    #  Deleted flag
+    base1 = segments.explore(cmap= 'tab10', height = 400, width = 600, name = 'segments')
     all_points_map = all_points.explore(m = base1, color = 'red',style_kwds = {'weight':6}, name= 'points')
     
     print('ALL POINTS')
@@ -574,13 +603,13 @@ def display_maps(all_points: gpd.GeoDataFrame,
     sjoin_points = sjoin_results.set_geometry('geometry_left')
     sjoin_segments = sjoin_results.set_geometry('geometry_right')
     sjoin_segments.geometry_right = sjoin_segments.geometry_right.buffer(35)
-    base3 = sjoin_segments.explore('flag', cmap= 'tab10', height = 400, width = 600, name = 'segments')
+    base3 = sjoin_segments.explore(cmap= 'tab10', height = 400, width = 600, name = 'segments')
     sjoin_map = sjoin_points.explore(m = base3, color = 'orange',style_kwds = {'weight':6},  name= 'points')
     
     print('SJOIN')
     display(sjoin_map)
     
-    base2 = segments.explore('flag', cmap= 'tab10', height = 400, width = 600, name = 'segments')
+    base2 = segments.explore(cmap= 'tab10', height = 400, width = 600, name = 'segments')
     first_last_map = first_last_points.explore(m = base2, color = 'pink',style_kwds = {'weight':6},height = 400, width = 600,)
     
     print('FIRST AND LAST')
