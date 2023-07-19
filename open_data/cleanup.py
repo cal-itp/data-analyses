@@ -21,8 +21,8 @@ def delete_old_xml_check_in_new_xml(open_data_dict: dict):
     for key, value in open_data_dict.items():
         file_path = value["path"]
         file_name = os.path.basename(file_path)
-        os.replace(f"./metadata_xml/run_in_esri/{file_name}",
-            f"./metadata_xml/{file_name}")
+        os.replace(f"./xml/run_in_esri/{file_name}",
+            f"./xml/{file_name}")
         
 
 
