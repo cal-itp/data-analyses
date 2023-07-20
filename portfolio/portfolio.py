@@ -23,6 +23,7 @@ from slugify import slugify
 
 assert os.getcwd().endswith("data-analyses"), "this script must be run from the root of the data-analyses repo!"
 
+GOOGLE_ANALYTICS_TAG_ID = "G-JCX3Z8JZJC"
 PORTFOLIO_DIR = Path("./portfolio/")
 SITES_DIR = PORTFOLIO_DIR / Path("sites")
 
@@ -312,7 +313,7 @@ def index(
         fname = f"./portfolio/index/{template}"
         with open(fname, "w") as f:
             typer.echo(f"writing out to {fname}")
-            f.write(env.get_template(template).render(sites=sites))
+            f.write(env.get_template(template).render(sites=sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
 
     args = [
         "netlify",
@@ -376,7 +377,7 @@ def build(
     fname = site_output_dir / Path("_config.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing config to {fname}", fg=typer.colors.GREEN)
-        f.write(env.get_template("_config.yml").render(site=site))
+        f.write(env.get_template("_config.yml").render(site=site, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
     fname = site_output_dir / Path("_toc.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing toc to {fname}", fg=typer.colors.GREEN)
