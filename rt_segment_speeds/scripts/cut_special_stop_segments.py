@@ -25,29 +25,19 @@ def get_shape_components(
     For a shape, we want to get the list of shapely.Points and
     a calculated cumulative distance array.
     """
-    #shape_coords_list = [shapely.Point(i) for 
-    #                     i in shape_geometry.simplify(0).coords]
-    
-    projected_coords = wrangle_shapes.project_list_of_coords(
-        shape_geometry,
-        use_shapely_coords = True
-    )
-    
-    shape_coords_sorted = np.maximum.accumulate(projected_coords)
-    
-    shape_geometry_sorted = wrangle_shapes.interpolate_projected_points(
-        shape_geometry, shape_coords_sorted)
+    shape_coords_list = [shapely.Point(i) for 
+                         i in shape_geometry.simplify(0).coords]
     
     # calculate the distance between current point and prior
     # need to remove the first point so that we can 
     # compare to the prior
     point_series_no_idx0 = wrangle_shapes.array_to_geoseries(
-        shape_geometry_sorted[1:],
+        shape_coords_list[1:],
         geom_type="point"
     )
 
     points_series = wrangle_shapes.array_to_geoseries(
-        shape_geometry_sorted, 
+        shape_coords_list, 
         geom_type="point"
     )
     
@@ -63,7 +53,7 @@ def get_shape_components(
         [0] + list(np.cumsum(distance_from_prior))
     )
     
-    return shape_geometry_sorted, cumulative_distances
+    return shape_coords_list, cumulative_distances
 
 
 def adjust_stop_start_end_for_special_cases(
@@ -264,10 +254,14 @@ def find_special_cases_and_setup_df(
             "shape_array_key", "stop_id", "stop_sequence", 
             "stop_geometry", # don't need shape_meters, we need stop_geometry
             "loop_or_inlining",
-            "geometry"]
-    ).sort_values(["shape_array_key", "stop_sequence"]
-                 ).reset_index(drop=True)
+            "shape_geometry_altered"
+        ]).rename(columns = {
+            "shape_geometry_altered": "geometry"}
+        ).sort_values(["shape_array_key", "stop_sequence"]
+    ).reset_index(drop=True)
     
+    gdf = gdf.set_geometry("geometry")
+        
     wide = (gdf.groupby("shape_array_key", 
                         observed=True, group_keys=False)
             .agg({
