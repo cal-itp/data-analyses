@@ -25,19 +25,29 @@ def get_shape_components(
     For a shape, we want to get the list of shapely.Points and
     a calculated cumulative distance array.
     """
-    shape_coords_list = [shapely.Point(i) for 
-                         i in shape_geometry.simplify(0).coords]
+    #shape_coords_list = [shapely.Point(i) for 
+    #                     i in shape_geometry.simplify(0).coords]
+    
+    projected_coords = wrangle_shapes.project_list_of_coords(
+        shape_geometry,
+        use_shapely_coords = True
+    )
+    
+    shape_coords_sorted = np.maximum.accumulate(projected_coords)
+    
+    shape_geometry_sorted = wrangle_shapes.interpolate_projected_points(
+        shape_geometry, shape_coords_sorted)
     
     # calculate the distance between current point and prior
     # need to remove the first point so that we can 
     # compare to the prior
     point_series_no_idx0 = wrangle_shapes.array_to_geoseries(
-        shape_coords_list[1:],
+        shape_geometry_sorted[1:],
         geom_type="point"
     )
 
     points_series = wrangle_shapes.array_to_geoseries(
-        shape_coords_list, 
+        shape_geometry_sorted, 
         geom_type="point"
     )
     
@@ -53,7 +63,7 @@ def get_shape_components(
         [0] + list(np.cumsum(distance_from_prior))
     )
     
-    return shape_coords_list, cumulative_distances
+    return shape_geometry_sorted, cumulative_distances
 
 
 def adjust_stop_start_end_for_special_cases(
@@ -80,6 +90,16 @@ def adjust_stop_start_end_for_special_cases(
         # Calculate distance between stops
         distance_between_stops = subset_stop_geometry[0].distance(
             subset_stop_geometry[-1])
+        
+        # The above is straight line distance, so we can possibly underestimate
+        # Check if there's any leftover distance 
+        end_stop_interp = wrangle_shapes.interpolate_projected_points(
+            shape_geometry, [end_stop]
+        )[0]
+        
+        leftover_distance = end_stop_interp.distance(subset_stop_geometry[-1])
+        
+        distance_best_guess = distance_between_stops + leftover_distance
     
     # (1b) Origin stop case: current stop only, cannot find prior stop
     # but we can set the start point to be the start of the shape
@@ -87,6 +107,7 @@ def adjust_stop_start_end_for_special_cases(
         start_stop = 0
         end_stop = subset_stop_projected[0]
         distance_between_stops = subset_stop_projected[0]
+        distance_best_guess = distance_between_stops
         
     # (2) We know distance between stops, so let's back out the correct
     # "end_stop". If the end_stop is actually going 
@@ -95,13 +116,18 @@ def adjust_stop_start_end_for_special_cases(
     # Normal case
     if start_stop < end_stop:
         origin_stop = start_stop
-        destin_stop = start_stop + distance_between_stops
+        # if we use straight line distance, we can underestimate distance too
+        potential_destin_stop = start_stop + distance_between_stops
+        
+        destin_stop = max(start_stop + distance_between_stops, 
+                          start_stop + distance_best_guess)
             
     # Case where inlining occurs, and now the bus is doubling back    
     elif start_stop > end_stop:
         origin_stop = start_stop
-        destin_stop = start_stop - distance_between_stops
-        
+
+        destin_stop = min(start_stop - distance_between_stops, 
+                          start_stop - distance_best_guess)
     
     # Case at origin, where there is no prior stop to look for
     elif start_stop == end_stop:
@@ -125,8 +151,7 @@ def super_project(
     """
     Implement super project for one stop. 
     """
-    shape_coords_list, cumulative_distances = get_shape_components(
-        shape_geometry)
+    shape_coords_list, cumulative_distances = get_shape_components(shape_geometry)
 
     # (1) Given a stop sequence value, find the stop_sequence values 
     # just flanking it (prior and subsequent).
@@ -240,9 +265,11 @@ def find_special_cases_and_setup_df(
             "stop_geometry", # don't need shape_meters, we need stop_geometry
             "loop_or_inlining",
             "geometry"]
-    )
+    ).sort_values(["shape_array_key", "stop_sequence"]
+                 ).reset_index(drop=True)
     
-    wide = (gdf.groupby("shape_array_key", observed=True, group_keys=False)
+    wide = (gdf.groupby("shape_array_key", 
+                        observed=True, group_keys=False)
             .agg({
                 "stop_sequence": lambda x: list(x), 
                 "stop_geometry": lambda x: list(x)}
