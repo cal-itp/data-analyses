@@ -407,6 +407,7 @@ def flag_stage3(flagged_df:pd.DataFrame, date:str) -> pd.DataFrame:
     check_in_stage2 = m1[m1.stage3_flag == "check in stage 2"]
     print(f"Have to check {len(check_in_stage2)/len(m1) * 100} % of rows in stage 2")
     
+    check_in_stage2 = check_in_stage2.drop_duplicates().reset_index(drop = True)
     end = datetime.datetime.now()
     print(f"Took {end-start}")
     return m1
