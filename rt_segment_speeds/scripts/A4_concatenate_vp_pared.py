@@ -28,7 +28,7 @@ if __name__ == "__main__":
     ]
     
     df = dd.multi.concat(dfs, axis=0).reset_index(drop=True)
-    df = df.repartition(npartitions = 5)
+    df = df.repartition(npartitions = 3)
     df.to_parquet(f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}", 
                   overwrite=True)
     

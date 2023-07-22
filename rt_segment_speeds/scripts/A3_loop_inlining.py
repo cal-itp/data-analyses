@@ -26,7 +26,11 @@ def calculate_mean_time(
     group_cols: list,
     timestamp_col: str = "location_timestamp_local"
 ) -> dd.DataFrame:
-    
+    """
+    Find the mean timestamp (in seconds) for a segment-trip.
+    Use this to separate whether there are inbound vs 
+    outbound vp attached to the same segment.
+    """
     seconds_col = f"{timestamp_col}_sec"
     
     df = segment_calcs.convert_timestamp_to_seconds(
@@ -59,6 +63,9 @@ def get_first_last_position_in_group(
     group_cols: list,
 ) -> pd.DataFrame:
     """
+    For each grouping of vp (separated by the mean timestamp)
+    for a segment-trip, get the first and last vp.
+    Find the direction each pair of points.
     """
     time_col = "location_timestamp_local_sec"
     trip_group_cols = group_cols + ["group"]

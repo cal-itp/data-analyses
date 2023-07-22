@@ -19,7 +19,6 @@ stop_segments:
     stage3: "vp_pared_stops"
     stage4: "speeds_stop_segments"
     stage5: "avg_speeds_stop_segments"
-    #stop_delay_diagnostics: "stop_segments_with_speed_delay"
     segments_file: "stop_segments"
     trip_grouping_cols: ["shape_array_key"]
     grouping_col: "shape_array_key"

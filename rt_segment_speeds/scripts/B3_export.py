@@ -73,24 +73,13 @@ def finalize_df_for_export(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Sorting, suppressing columns not needed in export.
     """
-    keep_cols = [
-        'organization_source_record_id', 'organization_name',
-        'shape_id', 'stop_sequence', 'stop_id', 
-        'geometry',
-        'p50_mph', 'p20_mph', 
-        'p80_mph', 'n_trips', 
-        'time_of_day', 
-        'base64_url',
-        'district', 'district_name'
-    ]
-    
+
     RENAME_DICT = {
         "organization_source_record_id": "org_id",
-        "organization_name": "agency_name",
+        "organization_name": "agency",
     }
     
-    gdf2 = (gdf.reindex(columns = keep_cols)
-           .sort_values(["organization_name", 
+    gdf2 = (gdf.sort_values(["organization_name", 
                          "shape_id", "stop_sequence"])
            .reset_index(drop=True)
            .rename(columns = RENAME_DICT) 
@@ -163,14 +152,32 @@ if __name__ == "__main__":
     time2 = datetime.datetime.now()
     print(f"finalize: {time2 - time1}")
     
+    keep_cols = [
+        'org_id', 'agency',
+        'shape_id', 'stop_sequence', 'stop_id', 
+        'geometry',
+        'p50_mph', 'p20_mph', 
+        'p80_mph', 'n_trips', 
+        'time_of_day', 
+        'base64_url',
+        'district', 'district_name'
+    ]
+    
     utils.geoparquet_gcs_export(
-        final_gdf,
+        final_gdf[keep_cols],
         f"{SEGMENT_GCS}export/",
         INPUT_FILE
     )
     
+    # Keep a tabular version (geom is big to save) for us to compare what's published
+    # and contains columns we use for internal modeling 
+    # (shape_array_key, gtfs_dataset_key, etc)
+    final_gdf.drop(columns = "geometry").to_parquet(
+        f"{SEGMENT_GCS}export/{INPUT_FILE}_tabular.parquet"
+    )
+        
     utils.geoparquet_gcs_export(
-        final_gdf,
+        final_gdf[keep_cols],
         f"{SEGMENT_GCS}export/",
         "speeds_by_stop_segments"
     )
