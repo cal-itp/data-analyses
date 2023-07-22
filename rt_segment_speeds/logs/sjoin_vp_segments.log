@@ -81,3 +81,11 @@
 2023-07-14 14:18:05.782 | INFO     | __main__:<module>:298 - attach vp to stop-to-stop segments: 0:35:15.590086
 2023-07-14 14:19:05.428 | INFO     | __main__:<module>:308 - compiled parquets: 0:00:59.645954
 2023-07-14 14:19:05.430 | INFO     | __main__:<module>:309 - execution time: 0:36:15.236040
+2023-07-21 13:01:27.755 | INFO     | __main__:<module>:286 - Analysis date: 2023-06-14
+2023-07-21 13:31:40.765 | INFO     | __main__:<module>:298 - attach vp to stop-to-stop segments: 0:30:13.008990
+2023-07-21 13:32:31.605 | INFO     | __main__:<module>:308 - compiled parquets: 0:00:50.840225
+2023-07-21 13:32:31.606 | INFO     | __main__:<module>:309 - execution time: 0:31:03.849215
+2023-07-21 15:14:18.352 | INFO     | __main__:<module>:286 - Analysis date: 2023-07-12
+2023-07-21 16:00:08.511 | INFO     | __main__:<module>:298 - attach vp to stop-to-stop segments: 0:45:50.129886
+2023-07-21 16:01:13.055 | INFO     | __main__:<module>:308 - compiled parquets: 0:01:04.543964
+2023-07-21 16:01:13.056 | INFO     | __main__:<module>:309 - execution time: 0:46:54.673850

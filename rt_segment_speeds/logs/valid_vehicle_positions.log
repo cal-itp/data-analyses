@@ -134,3 +134,21 @@
 2023-07-14 14:26:40.117 | INFO     | __main__:<module>:337 - Analysis date: 2023-07-12
 2023-07-14 14:44:30.975 | INFO     | __main__:<module>:351 - pare down vp by stop segments special cases 0:17:50.852683
 2023-07-14 14:44:31.009 | INFO     | __main__:<module>:354 - execution time: 0:17:50.890608
+2023-07-21 13:32:45.248 | INFO     | __main__:<module>:157 - Analysis date: 2023-06-14
+2023-07-21 13:34:56.228 | INFO     | __main__:pare_down_vp_by_segment:130 - merge usable vp with sjoin results: 0:02:10.976278
+2023-07-21 13:34:56.328 | INFO     | __main__:pare_down_vp_by_segment:139 - keep enter/exit points: 0:00:00.100660
+2023-07-21 13:37:43.051 | INFO     | __main__:pare_down_vp_by_segment:145 - exported: 0:02:46.722858
+2023-07-21 13:37:43.053 | INFO     | __main__:<module>:171 - pare down vp by stop segments normal cases 0:04:57.801421
+2023-07-21 13:37:43.053 | INFO     | __main__:<module>:174 - execution time: 0:04:57.805060
+2023-07-21 13:37:57.868 | INFO     | __main__:<module>:337 - Analysis date: 2023-06-14
+2023-07-21 13:46:17.830 | INFO     | __main__:<module>:351 - pare down vp by stop segments special cases 0:08:19.958606
+2023-07-21 13:46:17.831 | INFO     | __main__:<module>:354 - execution time: 0:08:19.962664
+2023-07-21 16:12:51.548 | INFO     | __main__:<module>:157 - Analysis date: 2023-07-12
+2023-07-21 16:15:13.638 | INFO     | __main__:pare_down_vp_by_segment:130 - merge usable vp with sjoin results: 0:02:22.062849
+2023-07-21 16:15:13.858 | INFO     | __main__:pare_down_vp_by_segment:139 - keep enter/exit points: 0:00:00.220214
+2023-07-21 16:18:26.366 | INFO     | __main__:pare_down_vp_by_segment:145 - exported: 0:03:12.507864
+2023-07-21 16:18:26.368 | INFO     | __main__:<module>:171 - pare down vp by stop segments normal cases 0:05:34.792780
+2023-07-21 16:18:26.368 | INFO     | __main__:<module>:174 - execution time: 0:05:34.806309
+2023-07-21 16:18:40.333 | INFO     | __main__:<module>:344 - Analysis date: 2023-07-12
+2023-07-21 16:28:23.891 | INFO     | __main__:<module>:358 - pare down vp by stop segments special cases 0:09:43.554348
+2023-07-21 16:28:23.892 | INFO     | __main__:<module>:361 - execution time: 0:09:43.558713
