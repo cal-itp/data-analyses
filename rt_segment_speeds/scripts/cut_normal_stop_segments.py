@@ -210,6 +210,7 @@ if __name__ == "__main__":
     ).shape_array_key.unique()
     
     gdf = delayed(import_stops_projected)(
+        analysis_date,
         filters = [[("loop_or_inlining", "==", 0)]],
         columns = [
             "feed_key",
