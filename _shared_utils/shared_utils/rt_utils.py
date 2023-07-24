@@ -8,7 +8,6 @@ from typing import Union
 import branca
 import dask_geopandas as dg
 import folium
-import gcsfs
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -18,10 +17,12 @@ from numba import jit
 from shared_utils import geography_utils, gtfs_utils_v2, rt_dates, utils
 from siuba import *
 
-# from zoneinfo import ZoneInfo
-# import warnings
+import gzip
+import base64
+import json
+from calitp_data.storage import get_fs
 
-fs = gcsfs.GCSFileSystem()
+fs = get_fs()
 
 # set system time
 os.environ["TZ"] = "America/Los_Angeles"
@@ -35,6 +36,10 @@ EXPORT_PATH = f"{GCS_FILE_PATH}cached_views/"
 SHN_PATH = "gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet"
 VP_FILE_PATH = f"gs://{BUCKET_NAME}/data-analyses/rt_segment_speeds/"
 V2_SUBFOLDER = "v2_cached_views/"
+
+SPA_MAP_SITE = 'https://embeddable-maps.calitp.org/'
+SPA_MAP_BUCKET = 'calitp-map-tiles/'
+SPEEDMAP_LEGEND_URL = 'https://storage.googleapis.com/calitp-map-tiles/speeds_legend.svg'
 
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 METERS_PER_MILE = 1609.34
@@ -800,3 +805,45 @@ def get_operators(analysis_date, operator_list, verbose=False):
                 print(f"not yet run: {itp_id}")
             op_list_runstatus[itp_id] = "not_yet_run"
     return op_list_runstatus
+
+def spa_map_export_link(gdf: gpd.GeoDataFrame, path: str, state: dict, site: str=SPA_MAP_SITE):
+    ## TODO generalize and --> shared_utils
+
+    geojson_str = gdf.to_json()
+    geojson_bytes = geojson_str.encode('utf-8')
+    print(f'writing to {path}')
+    with fs.open(path, 'wb') as writer:  # write out to public-facing GCS?
+        with gzip.GzipFile(fileobj=writer, mode="w") as gz:
+            gz.write(geojson_bytes)
+    base64state = base64.urlsafe_b64encode(json.dumps(state).encode()).decode()
+    spa_map_url = f'{site}?state={base64state}'
+    return spa_map_url
+
+def set_state_export(gdf, bucket: str=SPA_MAP_BUCKET, subfolder: str='testing/',
+                     filename: str='test2', map_type: str=None, map_title: str='Map',
+                    cmap: branca.colormap.ColorMap=None, color_col: str=None,
+                    legend_url: str=None, existing_state: dict={}):
+    '''
+    
+    '''
+    spa_map_state = existing_state or {"name": "null", "layers": [], "lat_lon": (),
+                             "zoom": 13}
+    path = f'{bucket}{subfolder}{filename}.geojson.gz'
+    gdf = gdf.to_crs(geography_utils.WGS84)
+    if cmap and color_col:
+        gdf['color'] = gdf[color_col].apply(lambda x: cmap.rgb_bytes_tuple(x))
+    gdf = gdf.round(2) # round for map display
+    this_layer = [{
+        "name": f"{map_title}",
+        "url": f"https://storage.googleapis.com/{path}",
+        'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
+        }]
+    if map_type: this_layer[0]['type'] = map_type 
+    if map_type == 'speedmap':
+        this_layer[0]['properties']['tooltip_speed_key'] = 'p20_mph'
+    spa_map_state["layers"] += this_layer
+    centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
+    spa_map_state["lat_lon"] = centroid
+    if legend_url:
+        spa_map_state['legend_url'] = legend_url
+    return {'state_dict': spa_map_state, 'spa_link': spa_map_export_link(gdf = gdf, path = path, state = spa_map_state)}
