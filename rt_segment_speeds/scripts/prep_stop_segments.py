@@ -34,7 +34,8 @@ from typing import Union
 from shared_utils import utils
 from segment_speed_utils import (helpers, gtfs_schedule_wrangling,
                                  wrangle_shapes)
-from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date, PROJECT_CRS
+from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
+                                              PROJECT_CRS)
 
 
 def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
@@ -197,6 +198,15 @@ def stop_times_aggregated_to_shape_array_key(
         on = "shape_array_key",
         how = "inner"
     )
+    
+    # Note: there can be duplicate shape_array_key because of multiple feeds
+    # Drop them now so we keep 1 set of shape-stop info
+    st_with_shape = (st_with_shape.sort_values(["feed_key", "shape_array_key",
+                                                "st_trip_id", "stop_sequence"])
+                     .drop_duplicates(subset=["shape_array_key", "st_trip_id", 
+                                              "stop_sequence"])
+                     .reset_index(drop=True)
+                    )
     
     # Attach stop geom
     st_with_shape_stop_geom = pd.merge(
