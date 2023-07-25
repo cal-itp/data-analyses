@@ -137,7 +137,6 @@ def adjust_stop_start_end_for_special_cases(
 def super_project(
     current_stop_seq: int,
     shape_geometry: shapely.geometry.LineString,
-    shape_geometry_altered: shapely.geometry.LineString,
     stop_geometry_array: np.ndarray,
     stop_sequence_array: np.ndarray,
 ) -> shapely.geometry.LineString:
@@ -166,7 +165,7 @@ def super_project(
     
     # (3) Project this vector of start/end stops
     subset_stop_proj = wrangle_shapes.project_list_of_coords(
-        shape_geometry_altered, subset_stop_geom)
+        shape_geometry, subset_stop_geom)
     
     
     # (4) Handle various cases for first stop or last stop
@@ -256,9 +255,9 @@ def find_special_cases_and_setup_df(
             "shape_array_key", "stop_id", "stop_sequence", 
             "stop_geometry", # don't need shape_meters, we need stop_geometry
             "loop_or_inlining",
-            "geometry", "shape_geometry_altered"
-        ]).set_geometry("shape_geometry_altered").sort_values(
-        ["shape_array_key", "stop_sequence"]
+            "geometry", 
+        ]).sort_values(
+            ["shape_array_key", "stop_sequence"]
         ).reset_index(drop=True)
     )
             
@@ -283,56 +282,6 @@ def find_special_cases_and_setup_df(
     return gdf2
 
 
-def segment_representative_point_off_shape(
-    gdf: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
-    """
-    Grab the stop segment's representative point, 
-    and see if it touches the shape.
-    If it doesn't, it needs to be flagged and we need to cut it again.
-    This time, super_project should consider both 
-    shape_geometry and shape_geometry_altered. 
-    
-    Use shape_geometry for the basis of segmenting, but stop positions are done 
-    off of shape_geometry_altered.
-    """
-    gdf = gdf.assign(
-        segment_point = gdf.stop_segment_geometry.set_crs(
-            PROJECT_CRS).representative_point(),
-    )
-
-    gdf = gdf.assign(
-        overlap_shape = gdf.segment_point.intersects(gdf.geometry),
-    )
-    
-    on_shape = gdf[gdf.overlap_shape == True]
-    
-    off_shape = gdf[gdf.overlap_shape == False].drop(columns = [
-        "segment_point", "overlap_shape", 
-        "stop_segment_geometry"])
-    
-    # for second round, use altered shape for 
-    # grabbing stop projections, but geometry for cumulative distance
-    off_shape = off_shape.assign(
-        stop_segment_geometry = off_shape.apply(
-            lambda x: super_project(
-                x.stop_sequence,
-                x.geometry,
-                x.shape_geometry_altered, 
-                x.stop_geometry_array,
-                x.stop_sequence_array), axis=1)
-    )
-   
-    gdf2 = (pd.concat(
-            [on_shape.set_crs(PROJECT_CRS), 
-             off_shape.set_crs(PROJECT_CRS)], axis=0)
-            .set_geometry("stop_segment_geometry").set_crs(PROJECT_CRS)
-            .sort_values(["shape_array_key", "stop_sequence"])
-            .reset_index(drop=True)
-           )
-    
-    return gdf2
-
 if __name__ == "__main__":
     
     LOG_FILE = "../logs/cut_stop_segments.log"
@@ -349,29 +298,29 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     gdf = find_special_cases_and_setup_df(analysis_date)
-    
+        
     # apply super project row-wise
     gdf = gdf.assign(
         stop_segment_geometry = gdf.apply(
             lambda x: super_project(
                 x.stop_sequence,
-                x.shape_geometry_altered,
-                x.shape_geometry_altered, # for first round, only use altered_shape
+                x.geometry,
                 x.stop_geometry_array,
                 x.stop_sequence_array), axis=1)
     )
     
     time1 = datetime.datetime.now()
     logger.info(f"Cut special stop segments: {time1-start}")
-
-    gdf2 = segment_representative_point_off_shape(gdf)
     
     keep_cols = [
         "feed_key", "shape_array_key", "stop_segment_geometry", 
         "stop_id", "stop_sequence", "loop_or_inlining"
     ]
     
-    results_gdf = gdf2[keep_cols]    
+    results_gdf = (gdf[keep_cols]
+                   .set_geometry("stop_segment_geometry") 
+                   .set_crs(gdf.crs)
+                  )
 
     utils.geoparquet_gcs_export(
         results_gdf,
