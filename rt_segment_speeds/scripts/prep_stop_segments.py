@@ -92,65 +92,6 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
     return df2
 
     
-def alter_one_shape_geometry(
-    shape_geometry: shapely.LineString
-) -> shapely.LineString:
-    """
-    Produce an altered shape_geometry where coords are cast to 
-    be monotonically increasing.
-    Use this column for backing out cumulative distances.
-    """
-    projected_coords = wrangle_shapes.project_list_of_coords(
-        shape_geometry,
-        use_shapely_coords = True
-    )
-    
-    shape_coords_sorted = np.maximum.accumulate(projected_coords)
-    
-    shape_geometry_sorted = wrangle_shapes.interpolate_projected_points(
-        shape_geometry, shape_coords_sorted)
-    
-    shape_geometry_altered = wrangle_shapes.array_to_geoseries(
-        shape_geometry_sorted, geom_type="line", crs = PROJECT_CRS)
-        
-    return shape_geometry_altered
-
-
-def add_altered_shape_geom_to_shapes(
-    analysis_date: str,
-    **kwargs
-) -> gpd.GeoDataFrame:
-    """
-    Import scheduled shapes and add an altered shape_geometry column.
-    Use this for dealing with loop_or_inlining shapes for cutting segments
-    and getting the cumulative distances out.
-    Do not use the altered shape geometry otherwise, but store it so we
-    can check it separately.
-    """
-    shapes = helpers.import_scheduled_shapes(
-        analysis_date, 
-        columns = ["shape_array_key", "geometry"],
-        get_pandas = True,
-        **kwargs
-    ).dropna(subset=["shape_array_key", "geometry"])
-    
-    # Use geopandas because dask has trouble keeping crs when 
-    # there are multiple geometry columns
-    # after we're done, we can convert back to dask_geopandas to export with fewer partitions
-    shapes = shapes.assign(
-        shape_geometry_altered = shapes.apply(
-            lambda x: alter_one_shape_geometry(x.geometry), axis=1,
-        )
-    ).set_geometry("geometry")
-    
-    shapes = shapes.assign(
-        shape_geometry_altered = shapes.shape_geometry_altered.set_crs(
-            shapes.geometry.crs.to_epsg())
-    )
-    
-    return shapes
-
-    
 def stop_times_aggregated_to_shape_array_key(
     analysis_date: str,
 ) -> gpd.GeoDataFrame:
@@ -176,10 +117,12 @@ def stop_times_aggregated_to_shape_array_key(
         columns = {"trip_id": "st_trip_id"}
     ).compute()
     
-    shapes = add_altered_shape_geom_to_shapes(
+    shapes = helpers.import_scheduled_shapes(
         analysis_date, 
-        filters = [[("shape_array_key", "in", keep_shapes)]]
-    )
+        columns = ["shape_array_key", "geometry"],
+        filters = [[("shape_array_key", "in", keep_shapes)]],
+        get_pandas = True,
+    ).dropna(subset=["shape_array_key", "geometry"])
     
     stops = helpers.import_scheduled_stops(
         analysis_date,
@@ -230,7 +173,8 @@ def tag_shapes_with_stops_visited_twice(
     Ex: a stop in a plaza that acts as origin and destination.
     """
     stop_visits = (stop_times.groupby(
-                    ["shape_array_key", "stop_id"], observed=True, group_keys=False)
+                    ["shape_array_key", "stop_id"], 
+                        observed=True, group_keys=False)
                   .agg({"stop_sequence": "count"}) 
                    #nunique doesn't work in dask
                   .reset_index()
@@ -265,7 +209,7 @@ def tag_shapes_with_inlining(
     # Keep relevant columns, which is only the projected stop geometry
     # saved as shape_meters
     stop_times2 = stop_times[["shape_array_key", 
-                              "stop_sequence", "shape_meters"]]
+                              "stop_sequence", "shape_meters"]].drop_duplicates()
         
     # Once we order it by stop sequence, save out shape_meters into a list
     # and make the gdf wide

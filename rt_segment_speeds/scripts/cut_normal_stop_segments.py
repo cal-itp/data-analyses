@@ -24,7 +24,7 @@ from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
 def import_stops_projected(analysis_date: str, **kwargs):
     """
     Import stops_projected df, which includes the stop_id, stop_sequence,
-    shape_geometry, shape_geometry_altered.
+    shape_geometry.
     """
     columns = kwargs["columns"]
     
