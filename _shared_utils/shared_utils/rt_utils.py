@@ -805,6 +805,7 @@ def get_operators(analysis_date, operator_list, verbose=False):
             op_list_runstatus[itp_id] = "not_yet_run"
     return op_list_runstatus
 
+
 def spa_map_export_link(gdf: gpd.GeoDataFrame, path: str, state: dict, site: str = SPA_MAP_SITE):
     """
     Called via set_state_export. Handles stream writing of gzipped geojson to GCS bucket,
