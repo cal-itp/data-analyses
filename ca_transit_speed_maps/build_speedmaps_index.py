@@ -9,7 +9,7 @@ import datetime as dt
 from calitp_data_analysis.tables import tbls
 import shared_utils
 
-ANALYSIS_DATE = dt.date.fromisoformat(shared_utils.rt_dates.DATES['may2023'])
+ANALYSIS_DATE = dt.date.fromisoformat(shared_utils.rt_dates.DATES['jul2023'])
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 
 def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
