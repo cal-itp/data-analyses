@@ -319,13 +319,13 @@ def segment_representative_point_off_shape(
                 x.stop_sequence,
                 x.geometry,
                 x.shape_geometry_altered, 
-
                 x.stop_geometry_array,
                 x.stop_sequence_array), axis=1)
     )
    
     gdf2 = (pd.concat(
-            [on_shape, off_shape], axis=0)
+            [on_shape.set_crs(PROJECT_CRS), 
+             off_shape.set_crs(PROJECT_CRS)], axis=0)
             .set_geometry("stop_segment_geometry").set_crs(PROJECT_CRS)
             .sort_values(["shape_array_key", "stop_sequence"])
             .reset_index(drop=True)
