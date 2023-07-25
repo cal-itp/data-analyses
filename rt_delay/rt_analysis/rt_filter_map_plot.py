@@ -530,71 +530,60 @@ class RtFilterMapper:
         Will always put state highway network in state['layers'][0] 
         map_type: '_20p_speeds', 'variance', or 'shn'
         '''
-        self.spa_map_state = {"name": "null", "layers": [], "lat_lon": (),
+        if not hasattr(self, 'spa_map_state'):
+            self.spa_map_state = {"name": "null", "layers": [], "lat_lon": (),
                              "zoom": 13}
-        fs = get_fs()
-        prefix = f'calitp-map-tiles/speeds_{self.analysis_date.isoformat()}'
-        
-        def _export(gdf, path):
-        ## TODO generalize and --> rt_utils
-            geojson_str = gdf.to_json()
-            geojson_bytes = geojson_str.encode('utf-8')
-            print(f'writing to {path}')
-            with fs.open(path, 'wb') as writer:  # write out to public-facing GCS?
-                with gzip.GzipFile(fileobj=writer, mode="w") as gz:
-                    gz.write(geojson_bytes)
-            base64state = base64.urlsafe_b64encode(json.dumps(self.spa_map_state).encode()).decode()
-            self.spa_map_url = f'https://leaflet-speedmaps--cal-itp-data-analyses.netlify.app/?state={base64state}'
-            return
+        subfolder = f'speeds_{self.analysis_date.isoformat()}/'
         
         if map_type == '_20p_speeds':
             assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first with self.segment_speed_map'
             if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
                 self.map_gz_export(map_type = 'shn')
-            
-            path = f'{prefix}/{self.calitp_itp_id}_{self.filter_period}_speeds.geojson.gz'
+                
             gdf = self.detailed_map_view.copy()
             gdf['organization_name'] = self.organization_name
             cmap = self.speed_map_params[1]
-            gdf['color'] = gdf.p20_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            gdf = gdf.round({'stop_sequence': 2}) # round for map display, interpolated segs are long floats
-            self.spa_map_state["layers"] += [{
-                "name": f"{self.organization_name} Vehicle Speeds {self.display_date} {self.filter_period.replace('_', ' ')}",
-                "url": f"https://storage.googleapis.com/{path}", "type": "speedmap",
-                'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': 'p20_mph'}
-                }]
-            self.spa_map_state["lat_lon"] = self.current_centroid
-            self.spa_map_state["zoom"] = 13
-            self.spa_map_state['legend_url'] = 'https://storage.googleapis.com/calitp-map-tiles/speeds_legend.svg'
-            return _export(gdf, path)
+            
+            filename = f'{self.calitp_itp_id}_{self.filter_period}_speeds'
+            title = f"{self.organization_name} Vehicle Speeds {self.display_date} {self.filter_period.replace('_', ' ')}"
+            
+            export_result = set_state_export(gdf, subfolder = subfolder, filename = filename,
+                                map_type = 'speed_variation', map_title = title, cmap = cmap,
+                                color_col = 'p20_mph', legend_url = SPEEDMAP_LEGEND_URL,
+                                existing_state = self.spa_map_state
+                                            )
+            self.spa_map_state = export_result['state_dict']
+            self.spa_map_url = export_result['spa_link']
+            return
         
         elif map_type == 'variance':
             assert hasattr(self, 'detailed_map_view'), 'must generate a variance map first with self.map_variance'
             if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
                 self.map_gz_export(map_type = 'shn')
             
-            path = f'{prefix}/{self.calitp_itp_id}_{self.filter_period}_variance.geojson.gz'
-            cmap = self.variance_cmap
-            gdf = self._variance_map_view
-            gdf = gdf.round({'stop_sequence': 2}) # round for map display, interpolated segs are long floats
-            gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            self.spa_map_state["layers"] += [{
-             "name": f"{self.organization_name} Variation in Speeds {self.display_date} {self.filter_period.replace('_', ' ')}",
-             "url": f"https://storage.googleapis.com/{path}", "type": "speed_variation",
-             'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
-                                             }]
-            self.spa_map_state["lat_lon"] = self.current_centroid
-            self.spa_map_state["zoom"] = 13
-            self.spa_map_state['legend_url'] = 'https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg'
-            return _export(gdf, path)
+            filename = f'{self.calitp_itp_id}_{self.filter_period}_variance'
+            title = f"{self.organization_name} Variation in Speeds {self.display_date} {self.filter_period.replace('_', ' ')}"
+            
+            export_result = set_state_export(self._variance_map_view, subfolder = subfolder, filename = filename,
+                                map_type = 'speed_variation', map_title = title, cmap = self.variance_cmap,
+                                color_col = 'fast_slow_ratio', 
+                                legend_url = 'https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg',
+                                existing_state = self.spa_map_state
+                                            )
+            self.spa_map_state = export_result['state_dict']
+            self.spa_map_url = export_result['spa_link']
+            return
         
         elif map_type == 'shn':
             dist = self.caltrans_district[:2]
-            path = f'{prefix}/{dist}_SHN.geojson.gz'
-            shn_gdf = self.shn.copy().to_crs(WGS84)
-            self.spa_map_state["layers"] = [{"name": f"D{dist} State Highway Network",
-             "url": f"https://storage.googleapis.com/{path}", "type": "state_highway_network"}]
-            return _export(shn_gdf, path)
+            filename = f'{dist}_SHN'
+            title = f"D{dist} State Highway Network"
+            
+            export_result = set_state_export(self.shn, subfolder = subfolder, filename = filename,
+                                map_type = 'state_highway_network', map_title = title)
+            self.spa_map_state = export_result['state_dict']
+            self.spa_map_url = export_result['spa_link']
+            return
         
     def render_spa_link(self):
         
