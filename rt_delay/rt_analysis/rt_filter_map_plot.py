@@ -72,7 +72,6 @@ class RtFilterMapper:
                       >> summarize(n_trips = _.route_id.size, mean_end_delay_seconds = _.delay_seconds.mean())
                      )
         self.reset_filter()
-        self.spa_map_state = None
 
     def set_filter(self, start_time = None, end_time = None, route_names = None,
                    shape_ids = None, direction_id = None, direction = None, trip_ids = None,
@@ -531,7 +530,8 @@ class RtFilterMapper:
         Will always put state highway network in state['layers'][0] 
         map_type: '_20p_speeds', 'variance', or 'shn'
         '''
-        spa_map_state = self.spa_map_state or {"name": "null", "layers": [], "lat_lon": (),
+        if not hasattr(self, 'spa_map_state'):
+            self.spa_map_state = {"name": "null", "layers": [], "lat_lon": (),
                              "zoom": 13}
         fs = get_fs()
         subfolder = f'speeds_{self.analysis_date.isoformat()}/'
