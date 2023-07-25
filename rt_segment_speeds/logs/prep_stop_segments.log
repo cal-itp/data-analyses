@@ -12,12 +12,9 @@
 2023-05-19 10:45:28.062 | INFO     | __main__:<module>:221 - Analysis date: 2023-04-12
 2023-05-19 10:46:45.036 | INFO     | __main__:<module>:228 - Prep stop segment df: 0:01:16.953477
 2023-05-19 10:54:48.480 | INFO     | __main__:<module>:236 - execution time: 0:09:20.397968
-2023-06-21 18:07:30.507 | INFO     | __main__:<module>:221 - Analysis date: 2023-05-17
-2023-06-21 18:09:06.679 | INFO     | __main__:<module>:228 - Prep stop segment df: 0:01:36.170838
-2023-06-21 18:16:49.250 | INFO     | __main__:<module>:236 - execution time: 0:09:18.742277
-2023-07-24 19:18:17.488 | INFO     | __main__:<module>:346 - Analysis date: 2023-06-14
-2023-07-24 19:38:26.437 | INFO     | __main__:<module>:353 - Prep stop segment df: 0:20:08.947160
-2023-07-24 19:40:02.479 | INFO     | __main__:<module>:363 - execution time: 0:21:44.989665
-2023-07-25 08:20:53.821 | INFO     | __main__:<module>:346 - Analysis date: 2023-07-12
-2023-07-25 08:42:48.261 | INFO     | __main__:<module>:353 - Prep stop segment df: 0:21:54.392630
-2023-07-25 08:44:24.887 | INFO     | __main__:<module>:363 - execution time: 0:23:31.018610
+2023-07-25 13:30:34.630 | INFO     | __main__:<module>:290 - Analysis date: 2023-05-17
+2023-07-25 13:40:12.848 | INFO     | __main__:<module>:297 - Prep stop segment df: 0:09:38.217245
+2023-07-25 13:41:01.595 | INFO     | __main__:<module>:307 - execution time: 0:10:26.964487
+2023-07-25 14:39:19.717 | INFO     | __main__:<module>:290 - Analysis date: 2023-06-14
+2023-07-25 14:49:25.861 | INFO     | __main__:<module>:297 - Prep stop segment df: 0:10:06.141854
+2023-07-25 14:50:12.947 | INFO     | __main__:<module>:307 - execution time: 0:10:53.228185
