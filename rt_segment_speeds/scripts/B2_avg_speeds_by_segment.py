@@ -21,6 +21,8 @@ def calculate_avg_speeds(
     """
     # Take the average after dropping unusually high speeds
     grouped_df = df.groupby(group_cols, observed=True, group_keys=False)
+    
+    
     avg = (grouped_df
           .agg({
             "speed_mph": "median",
@@ -72,8 +74,13 @@ def speeds_with_segment_geom(
     
     df = pd.read_parquet(
         f"{SEGMENT_GCS}{SPEEDS_FILE}_{analysis_date}", 
-        filters = [[("speed_mph", "<=", max_speed_cutoff)]]
+        filters = [[("speed_mph", "<=", max_speed_cutoff), 
+                    ("sec_elapsed", ">", 0), 
+                    ("meters_elapsed", ">", 0)
+                   ]]
     )
+    
+    df = df[df.speed_mph.notna() ].reset_index(drop=True)
     
     time_of_day_df = sched_rt_utils.get_trip_time_buckets(analysis_date)
     
