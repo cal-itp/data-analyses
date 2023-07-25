@@ -121,7 +121,7 @@ def stop_times_aggregated_to_shape_array_key(
         analysis_date, 
         columns = ["shape_array_key", "geometry"],
         filters = [[("shape_array_key", "in", keep_shapes)]],
-        get_pandas = True,
+        get_pandas = False,
     ).dropna(subset=["shape_array_key", "geometry"])
     
     stops = helpers.import_scheduled_stops(
@@ -135,12 +135,12 @@ def stop_times_aggregated_to_shape_array_key(
     
     
     # Attach shape geom
-    st_with_shape = pd.merge(
+    st_with_shape = dd.merge(
         shapes,
         stop_times,
         on = "shape_array_key",
         how = "inner"
-    )
+    ).compute()
     
     # Note: there can be duplicate shape_array_key because of multiple feeds
     # Drop them now so we keep 1 set of shape-stop info
