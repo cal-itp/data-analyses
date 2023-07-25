@@ -219,9 +219,14 @@ if __name__ == "__main__":
             "loop_or_inlining",
             "geometry", 
             ]
-    ).dropna(subset="geometry").reset_index(drop=True)
-
+    )
     
+    gdf = (gdf.sort_values(["feed_key", "shape_array_key", "stop_sequence"])
+           .drop_duplicates(subset=["shape_array_key", "stop_sequence"])
+           .dropna(subset="geometry")
+           .reset_index(drop=True)
+          )
+
     gdf2 = delayed(get_prior_shape_meters)(gdf).persist()
     
     results = []
