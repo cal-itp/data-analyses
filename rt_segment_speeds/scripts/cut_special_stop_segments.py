@@ -15,7 +15,7 @@ from shared_utils import utils
 from segment_speed_utils import (array_utils, helpers, 
                                 wrangle_shapes)
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
-                                              CONFIG_PATH)
+                                              CONFIG_PATH, PROJECT_CRS)
 
 
 def get_shape_components(
@@ -80,6 +80,16 @@ def adjust_stop_start_end_for_special_cases(
         # Calculate distance between stops
         distance_between_stops = subset_stop_geometry[0].distance(
             subset_stop_geometry[-1])
+        
+        # The above is straight line distance, so we can possibly underestimate
+        # Check if there's any leftover distance 
+        end_stop_interp = wrangle_shapes.interpolate_projected_points(
+            shape_geometry, [end_stop]
+        )[0]
+        
+        leftover_distance = end_stop_interp.distance(subset_stop_geometry[-1])
+        
+        distance_best_guess = distance_between_stops + leftover_distance
     
     # (1b) Origin stop case: current stop only, cannot find prior stop
     # but we can set the start point to be the start of the shape
@@ -87,6 +97,7 @@ def adjust_stop_start_end_for_special_cases(
         start_stop = 0
         end_stop = subset_stop_projected[0]
         distance_between_stops = subset_stop_projected[0]
+        distance_best_guess = distance_between_stops
         
     # (2) We know distance between stops, so let's back out the correct
     # "end_stop". If the end_stop is actually going 
@@ -95,17 +106,24 @@ def adjust_stop_start_end_for_special_cases(
     # Normal case
     if start_stop < end_stop:
         origin_stop = start_stop
-        destin_stop = start_stop + distance_between_stops
+     
+        destin_stop = max(start_stop + distance_between_stops, 
+                          start_stop + distance_best_guess)
+        
             
     # Case where inlining occurs, and now the bus is doubling back    
     elif start_stop > end_stop:
         origin_stop = start_stop
-        destin_stop = start_stop - distance_between_stops
         
-    
+        destin_stop = min(start_stop - distance_between_stops, 
+                          start_stop - distance_best_guess)
+            
     # Case at origin, where there is no prior stop to look for
     elif start_stop == end_stop:
-        origin_stop = 0
+        origin_stop = wrangle_shapes.project_list_of_coords(
+            shape_geometry, 
+            use_shapely_coords = True
+        )[0]
         destin_stop = start_stop
     
     # change this to point
@@ -121,12 +139,11 @@ def super_project(
     shape_geometry: shapely.geometry.LineString,
     stop_geometry_array: np.ndarray,
     stop_sequence_array: np.ndarray,
-) -> tuple:
+) -> shapely.geometry.LineString:
     """
     Implement super project for one stop. 
     """
-    shape_coords_list, cumulative_distances = get_shape_components(
-        shape_geometry)
+    shape_coords_list, cumulative_distances = get_shape_components(shape_geometry)
 
     # (1) Given a stop sequence value, find the stop_sequence values 
     # just flanking it (prior and subsequent).
@@ -219,7 +236,6 @@ def super_project(
     subset_ls = cut_normal_stop_segments.linestring_from_points(
         subset_shape_geom_with_od)
     
-    #return subset_shape_geom_with_od, origin_destination_geom
     return subset_ls 
 
 
@@ -231,18 +247,22 @@ def find_special_cases_and_setup_df(
     For every stop, we need to attach the array of 
     stop sequences / stop geometry for that shape.
     """
-    gdf = gpd.read_parquet(
-        f"{SEGMENT_GCS}stops_projected_{analysis_date}/",
+    gdf = (cut_normal_stop_segments.import_stops_projected(
+        analysis_date,
         filters = [[("loop_or_inlining", "==", 1)]],
         columns = [
             "feed_key",
             "shape_array_key", "stop_id", "stop_sequence", 
             "stop_geometry", # don't need shape_meters, we need stop_geometry
             "loop_or_inlining",
-            "geometry"]
+            "geometry", 
+        ]).sort_values(
+            ["shape_array_key", "stop_sequence"]
+        ).reset_index(drop=True)
     )
-    
-    wide = (gdf.groupby("shape_array_key", observed=True, group_keys=False)
+            
+    wide = (gdf.groupby("shape_array_key", 
+                        observed=True, group_keys=False)
             .agg({
                 "stop_sequence": lambda x: list(x), 
                 "stop_geometry": lambda x: list(x)}
@@ -278,7 +298,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     gdf = find_special_cases_and_setup_df(analysis_date)
-    
+        
     # apply super project row-wise
     gdf = gdf.assign(
         stop_segment_geometry = gdf.apply(
@@ -298,9 +318,9 @@ if __name__ == "__main__":
     ]
     
     results_gdf = (gdf[keep_cols]
-        .set_geometry("stop_segment_geometry")
-        .set_crs(gdf.crs)
-    )    
+                   .set_geometry("stop_segment_geometry") 
+                   .set_crs(gdf.crs)
+                  )
 
     utils.geoparquet_gcs_export(
         results_gdf,
