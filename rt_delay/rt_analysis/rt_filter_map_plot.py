@@ -545,10 +545,10 @@ class RtFilterMapper:
             cmap = self.speed_map_params[1]
             
             filename = f'{self.calitp_itp_id}_{self.filter_period}_speeds'
-            title = f"{self.organization_name} Vehicle Speeds {self.display_date} {self.filter_period.replace('_', ' ')}"
+            title = f"{self.organization_name} {self.display_date} {self.filter_period.replace('_', ' ')}"
             
             export_result = set_state_export(gdf, subfolder = subfolder, filename = filename,
-                                map_type = 'speed_variation', map_title = title, cmap = cmap,
+                                map_type = 'speedmap', map_title = title, cmap = cmap,
                                 color_col = 'p20_mph', legend_url = SPEEDMAP_LEGEND_URL,
                                 existing_state = self.spa_map_state
                                             )
@@ -562,7 +562,7 @@ class RtFilterMapper:
                 self.map_gz_export(map_type = 'shn')
             
             filename = f'{self.calitp_itp_id}_{self.filter_period}_variance'
-            title = f"{self.organization_name} Variation in Speeds {self.display_date} {self.filter_period.replace('_', ' ')}"
+            title = f"{self.organization_name} {self.display_date} {self.filter_period.replace('_', ' ')}"
             
             export_result = set_state_export(self._variance_map_view, subfolder = subfolder, filename = filename,
                                 map_type = 'speed_variation', map_title = title, cmap = self.variance_cmap,
