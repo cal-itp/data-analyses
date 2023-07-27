@@ -31,21 +31,6 @@
 2023-05-20 10:56:10.880 | INFO     | __main__:linear_referencing_and_speed_by_segment:78 - calculate speeds: 0:00:00.000678
 2023-05-20 11:50:39.921 | INFO     | __main__:<module>:115 - speeds for stop segments: 0:54:29.046501
 2023-05-20 11:50:39.924 | INFO     | __main__:<module>:116 - execution time: 0:54:29.049154
-2023-07-24 16:22:19.702 | INFO     | __main__:<module>:116 - Analysis date: 2023-05-17
-2023-07-24 16:52:00.420 | INFO     | __main__:linear_referencing_and_speed_by_segment:84 - linear referencing: 0:29:40.696934
-2023-07-24 16:52:00.426 | INFO     | __main__:linear_referencing_and_speed_by_segment:96 - calculate speeds: 0:00:00.006454
-2023-07-24 17:19:08.400 | INFO     | __main__:<module>:127 - speeds for stop segments: 0:56:48.681858
-2023-07-24 17:19:08.401 | INFO     | __main__:<module>:128 - execution time: 0:56:48.682781
-2023-07-24 21:48:17.827 | INFO     | __main__:<module>:116 - Analysis date: 2023-06-14
-2023-07-24 22:17:10.701 | INFO     | __main__:linear_referencing_and_speed_by_segment:84 - linear referencing: 0:28:52.868856
-2023-07-24 22:17:10.707 | INFO     | __main__:linear_referencing_and_speed_by_segment:96 - calculate speeds: 0:00:00.005970
-2023-07-24 22:43:17.406 | INFO     | __main__:<module>:127 - speeds for stop segments: 0:54:59.578336
-2023-07-24 22:43:17.407 | INFO     | __main__:<module>:128 - execution time: 0:54:59.579301
-2023-07-25 11:12:28.456 | INFO     | __main__:<module>:116 - Analysis date: 2023-07-12
-2023-07-25 11:49:17.338 | INFO     | __main__:linear_referencing_and_speed_by_segment:84 - linear referencing: 0:36:48.876648
-2023-07-25 11:49:17.344 | INFO     | __main__:linear_referencing_and_speed_by_segment:96 - calculate speeds: 0:00:00.006385
-2023-07-25 12:16:28.698 | INFO     | __main__:<module>:127 - speeds for stop segments: 1:04:00.240843
-2023-07-25 12:16:28.699 | INFO     | __main__:<module>:128 - execution time: 1:04:00.241659
 2023-07-25 17:55:40.998 | INFO     | __main__:<module>:116 - Analysis date: 2023-05-17
 2023-07-25 18:25:17.498 | INFO     | __main__:linear_referencing_and_speed_by_segment:84 - linear referencing: 0:29:36.467955
 2023-07-25 18:25:17.508 | INFO     | __main__:linear_referencing_and_speed_by_segment:96 - calculate speeds: 0:00:00.009634
@@ -61,3 +46,13 @@
 2023-07-25 23:31:55.493 | INFO     | __main__:linear_referencing_and_speed_by_segment:96 - calculate speeds: 0:00:00.028630
 2023-07-26 00:00:04.530 | INFO     | __main__:<module>:127 - speeds for stop segments: 1:11:18.196214
 2023-07-26 00:00:04.531 | INFO     | __main__:<module>:128 - execution time: 1:11:18.197170
+2023-07-26 20:02:52.083 | INFO     | __main__:<module>:116 - Analysis date: 2023-03-15
+2023-07-26 20:34:36.201 | INFO     | __main__:linear_referencing_and_speed_by_segment:84 - linear referencing: 0:31:44.113095
+2023-07-26 20:34:36.209 | INFO     | __main__:linear_referencing_and_speed_by_segment:96 - calculate speeds: 0:00:00.007907
+2023-07-26 21:12:55.949 | INFO     | __main__:<module>:127 - speeds for stop segments: 1:10:03.865319
+2023-07-26 21:12:55.950 | INFO     | __main__:<module>:128 - execution time: 1:10:03.866321
+2023-07-26 22:48:56.041 | INFO     | __main__:<module>:116 - Analysis date: 2023-04-12
+2023-07-26 23:21:16.317 | INFO     | __main__:linear_referencing_and_speed_by_segment:84 - linear referencing: 0:32:20.261839
+2023-07-26 23:21:16.327 | INFO     | __main__:linear_referencing_and_speed_by_segment:96 - calculate speeds: 0:00:00.009498
+2023-07-26 23:50:59.023 | INFO     | __main__:<module>:127 - speeds for stop segments: 1:02:02.972239
+2023-07-26 23:50:59.024 | INFO     | __main__:<module>:128 - execution time: 1:02:02.973670
