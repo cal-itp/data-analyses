@@ -169,10 +169,10 @@ def get_metrolink_feed_key(selected_date: Union[str, datetime.date], get_df: boo
 
     metrolink_feed = (
         tbls.mart_gtfs.fct_daily_schedule_feeds()
-        >> filter(_.date == analysis_date)
+        >> filter(_.date == selected_date)
         >> inner_join(_, metrolink_in_airtable, on=["gtfs_dataset_key", "gtfs_dataset_name"])
         >> rename(name = _.gtfs_dataset_name)
-        >> shared_utils.gtfs_utils_v2.subset_cols(["feed_key", "name"])
+        >> subset_cols(["feed_key", "name"])
         >> collect()
     )
 

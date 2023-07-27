@@ -26,6 +26,9 @@ parts:
     -   file: district_08-san-bernardino.md
         sections:
         -   glob: district_08-san-bernardino/*
+    -   file: district_09-bishop.md
+        sections:
+        -   glob: district_09-bishop/*
     -   file: district_10-stockton.md
         sections:
         -   glob: district_10-stockton/*
