@@ -170,8 +170,9 @@ def get_metrolink_feed_key(selected_date: Union[str, datetime.date], get_df: boo
     metrolink_feed = (
         tbls.mart_gtfs.fct_daily_schedule_feeds()
         >> filter(_.date == selected_date)
+        >> select(_.feed_key, _.gtfs_dataset_key)
         >> inner_join(_, metrolink_in_airtable, on="gtfs_dataset_key")
-        >> rename(name=_._gtfs_dataset_name)
+        >> rename(name=_.gtfs_dataset_name)
         >> subset_cols(["feed_key", "name"])
         >> collect()
     )
@@ -251,7 +252,7 @@ def schedule_daily_feed_to_gtfs_dataset_name(
     # Get GTFS schedule datasets from Airtable
     dim_gtfs_datasets = schedule_rt_utils.filter_dim_gtfs_datasets(
         keep_cols=["key", "name", "type", "regional_feed_type"], custom_filtering={"type": ["schedule"]}, get_df=False
-    ) >> rename(name="_gtfs_dataset_name")
+    ) >> rename(name="gtfs_dataset_name")
 
     # Merge on gtfs_dataset_key to get organization name
     fact_feeds = (

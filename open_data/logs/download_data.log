@@ -223,3 +223,26 @@
 2023-07-13 12:10:35.732 | INFO     | __main__:<module>:33 - # operators to run: 176
 2023-07-13 12:10:35.733 | INFO     | __main__:<module>:37 - *********** Download st data ***********
 2023-07-13 12:12:24.693 | INFO     | __main__:<module>:60 - execution time: 0:01:50.746267
+2023-07-28 09:09:28.228 | INFO     | __main__:<module>:49 - Analysis date: 2023-06-14
+2023-07-28 09:09:29.961 | INFO     | __main__:<module>:56 - # operators to run: 203
+2023-07-28 09:09:29.962 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
+2023-07-28 09:10:43.405 | INFO     | __main__:<module>:49 - Analysis date: 2023-06-14
+2023-07-28 09:10:45.012 | INFO     | __main__:<module>:56 - # operators to run: 203
+2023-07-28 09:10:45.013 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
+2023-07-28 09:11:29.890 | INFO     | __main__:<module>:89 - execution time: 0:00:46.482554
+2023-07-28 09:12:24.615 | INFO     | __main__:<module>:49 - Analysis date: 2023-05-17
+2023-07-28 09:12:26.454 | INFO     | __main__:<module>:56 - # operators to run: 199
+2023-07-28 09:12:26.455 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
+2023-07-28 09:13:01.586 | INFO     | __main__:<module>:89 - execution time: 0:00:36.952720
+2023-07-28 09:13:31.503 | INFO     | __main__:<module>:49 - Analysis date: 2023-04-12
+2023-07-28 09:13:33.174 | INFO     | __main__:<module>:56 - # operators to run: 201
+2023-07-28 09:13:33.174 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
+2023-07-28 09:14:05.438 | INFO     | __main__:<module>:89 - execution time: 0:00:33.934016
+2023-07-28 09:14:33.726 | INFO     | __main__:<module>:49 - Analysis date: 2023-03-15
+2023-07-28 09:14:35.454 | INFO     | __main__:<module>:56 - # operators to run: 202
+2023-07-28 09:14:35.455 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
+2023-07-28 09:15:08.849 | INFO     | __main__:<module>:89 - execution time: 0:00:35.122604
+2023-07-28 09:15:47.961 | INFO     | __main__:<module>:49 - Analysis date: 2023-02-15
+2023-07-28 09:15:49.671 | INFO     | __main__:<module>:56 - # operators to run: 196
+2023-07-28 09:15:49.673 | INFO     | __main__:<module>:59 - *********** Download trips data ***********
+2023-07-28 09:16:24.524 | INFO     | __main__:<module>:89 - execution time: 0:00:36.561946
