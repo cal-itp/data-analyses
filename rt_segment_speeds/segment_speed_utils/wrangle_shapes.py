@@ -79,6 +79,13 @@ def project_point_geom_onto_linestring(
     https://shapely.readthedocs.io/en/stable/manual.html?highlight=project#object.project
     https://gis.stackexchange.com/questions/306838/snap-points-shapefile-to-line-shapefile-using-shapely
     """
+    if shape_geoseries.crs != point_geoseries.crs:
+        error_msg = (
+            f"CRS do not match: shape CRS is {shape_geoseries.crs.to_epsg()}" 
+            f"and point CRS is {point_geoseries.crs.to_epsg()}"
+        )
+        raise AttributeError(error_msg)
+    
     shape_meters_geoseries = shape_geoseries.project(point_geoseries)
     
     if get_dask_array:

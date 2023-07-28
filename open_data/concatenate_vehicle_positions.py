@@ -43,7 +43,7 @@ def concat_batches(analysis_date: str) -> dd.DataFrame:
         
     ddf = ddf.assign(
         hour = dd.to_datetime(ddf.location_timestamp_local).dt.hour,
-    ).rename(columns = {"gtfs_dataset_name": "_gtfs_dataset_name"})
+    )
     
     return ddf
 
