@@ -69,32 +69,6 @@ def crosswalk_scheduled_trip_grouping_with_rt_key(
     return trips_with_rt_key
 
 
-def add_rt_keys_to_segments(
-    segments: gpd.GeoDataFrame, 
-    analysis_date: str,
-    merge_cols: list,
-) -> gpd.GeoDataFrame:
-    """
-    Once segments are cut, add the RT gtfs_dataset_key 
-    using crosswalk_scheduled_trip_grouping_with_rt_key
-    function.
-    """
-    crosswalk = crosswalk_scheduled_trip_grouping_with_rt_key(
-        analysis_date, 
-        merge_cols,
-        get_pandas = True
-    )
-
-    segments_with_crosswalk = pd.merge(
-        segments,
-        crosswalk,
-        on = merge_cols,
-        how = "inner",
-    )
-    
-    return segments_with_crosswalk 
-
-
 def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     """
     Assign trips to time-of-day.
