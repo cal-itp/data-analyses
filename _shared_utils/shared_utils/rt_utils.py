@@ -803,22 +803,21 @@ def get_operators(analysis_date, operator_list, verbose=False):
             op_list_runstatus[itp_id] = "not_yet_run"
     return op_list_runstatus
 
-def spa_map_export_link(gdf: gpd.GeoDataFrame, path: str, state: dict, site: str = SPA_MAP_SITE, short_cache = False):
+def spa_map_export_link(gdf: gpd.GeoDataFrame, path: str, state: dict, site: str = SPA_MAP_SITE,
+                        cache_seconds: int = 3600):
     """
     Called via set_state_export. Handles stream writing of gzipped geojson to GCS bucket,
     encoding spa state as base64 and URL generation.
     """
-
+    assert cache_seconds in range(3601), 'cache must be 0-3600 seconds'
     geojson_str = gdf.to_json()
     geojson_bytes = geojson_str.encode("utf-8")
-    if short_cache:
-        fs = get_fs(cache_timeout = 120) # two minutes
-    else:
-        fs = get_fs()
     print(f"writing to {path}")
     with fs.open(path, "wb") as writer:  # write out to public-facing GCS?
         with gzip.GzipFile(fileobj=writer, mode="w") as gz:
             gz.write(geojson_bytes)
+    if cache_seconds != 3600:
+        fs.setxattrs(path, fixed_key_metadata={'cache_control': f'public, max-age={cache_seconds}'})
     base64state = base64.urlsafe_b64encode(json.dumps(state).encode()).decode()
     spa_map_url = f"{site}?state={base64state}"
     return spa_map_url
@@ -836,7 +835,7 @@ def set_state_export(
     color_col: str = None,
     legend_url: str = None,
     existing_state: dict = {},
-    short_cache: bool = False
+    cache_seconds: int = 3600
 ):
     """
     Applies light formatting to gdf for successful spa display. Will pass map_type
@@ -844,8 +843,8 @@ def set_state_export(
     available one.
     Supply cmap and color_col for coloring based on a Branca ColorMap and a column
     to apply the color to.
-    Set short_cache == True to ensure browser renders an overwritten map in about 2 minutes
-    (useful for "near realtime" applications or development)
+    Cache is 1 hour by default, can set shorter time in seconds for
+    "near realtime" applications (suggest 120) or development (suggest 0)
 
     Returns dict with state dictionary and map URL. Can call multiple times and supply
     previous state as existing_state to create multilayered maps.
@@ -873,5 +872,5 @@ def set_state_export(
     if legend_url:
         spa_map_state["legend_url"] = legend_url
     return {"state_dict": spa_map_state, "spa_link": spa_map_export_link(
-        gdf=gdf, path=path, state=spa_map_state, short_cache = short_cache)
+        gdf=gdf, path=path, state=spa_map_state, cache_seconds = cache_seconds)
            }
