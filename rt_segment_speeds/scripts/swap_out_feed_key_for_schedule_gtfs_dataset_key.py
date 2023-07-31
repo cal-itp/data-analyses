@@ -37,7 +37,7 @@ def update_stops_projected(analysis_date):
     
     print("updated stops projected")
     
-    
+# for cut_normal_stop_segments, cut_special_stop_segments, concatenate_stop_segments    
 # for stop_segments_normal, stop_segments_special, stop_segments
 def switch_feed_key_out(
     file_name: str, analysis_date: str
@@ -67,6 +67,36 @@ def switch_feed_key_out(
         f"{file_name}_{analysis_date}"
     )
     
+
+# for B1_speeds_by_segment_trip
+def update_speeds_by_trip(analysis_date: str):
+
+    vp_trip_ids = dd.read_parquet(
+        f"{SEGMENT_GCS}vp_usable_{analysis_date}", 
+        columns = ["gtfs_dataset_key", "trip_id", 
+                   "trip_instance_key",
+                   "schedule_gtfs_dataset_key"]
+    ).drop_duplicates().reset_index(drop=True).compute()
+    
+    speeds = dd.read_parquet(
+        f"{SEGMENT_GCS}speeds_stop_segments_{analysis_date}"
+    )
+    
+    speeds2 = dd.merge(
+        speeds,
+        vp_trip_ids,
+        on = ["gtfs_dataset_key", "trip_id"],
+        how = "left"
+    ).rename(columns = {"_gtfs_dataset_name": "gtfs_dataset_name"})
+    
+    print(speeds2.dtypes)
+    
+    speeds2 = speeds2.persist()
+    
+    speeds2.to_parquet(
+        f"{SEGMENT_GCS}speeds_stop_segments_{analysis_date}", 
+        overwrite=True)
+    
 if __name__ == "__main__":
     
     dates_list = ["mar2023", "apr2023", "may2023", "jun2023", "jul2023"]
@@ -74,7 +104,7 @@ if __name__ == "__main__":
     
     for analysis_date in dates:
         update_stops_projected(analysis_date)
-
+        
         for file in [
             "stop_segments_normal", 
             "stop_segments_special",
@@ -82,4 +112,5 @@ if __name__ == "__main__":
         ]:
             print(file)
             switch_feed_key_out(file, analysis_date)
-    
+        
+    update_speeds_by_trip(analysis_date)

@@ -47,6 +47,9 @@ def merge_vp_with_patch(date: str):
     )
     
     print(df.dtypes)
+    
+    df = df.astype({"hour": "int8"})
+    
     utils.geoparquet_gcs_export(
         df,
         SEGMENT_GCS,

@@ -74,17 +74,17 @@ def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     Assign trips to time-of-day.
     """
     keep_trip_cols = [
-        "feed_key", "trip_id", 
+        "trip_instance_key", 
         "service_hours", 
         "trip_first_departure_datetime_pacific"
     ]
     
-    trips = crosswalk_scheduled_trip_grouping_with_rt_key(
-        analysis_date, 
-        keep_trip_cols,
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = keep_trip_cols,
         get_pandas = True
-    )                 
-                      
+    )
+                              
     trips = trips.assign(
         time_of_day = trips.apply(
             lambda x: rt_utils.categorize_time_of_day(
@@ -99,33 +99,34 @@ def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
     """
     Find shape_id with most trips for that route-direction.
     """
-    route_dir_cols = [
-        "feed_key", "route_id", "direction_id"]
+    route_dir_cols = ["gtfs_dataset_key", "route_id", "direction_id"]
     
     keep_trip_cols = route_dir_cols + [
-        "trip_id", "shape_id", "shape_array_key"
+        "trip_instance_key", "shape_id", "shape_array_key"
     ]
     
-    trips = crosswalk_scheduled_trip_grouping_with_rt_key(
+    trips = helpers.import_scheduled_trips(
         analysis_date, 
-        keep_trip_cols,
+        columns = keep_trip_cols,
         get_pandas = True
-    )                 
+    ).rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})                 
     
     sorting_order = [True for i in route_dir_cols]
     
     most_common_shape = (
         trips.groupby(route_dir_cols + ["shape_id", "shape_array_key"], 
                       observed=True, group_keys = False)
-        .agg({"trip_id": "count"})
+        .agg({"trip_instance_key": "count"})
         .reset_index()
-        .sort_values(route_dir_cols + ["trip_id"], 
+        .sort_values(route_dir_cols + ["trip_instance_key"], 
                      ascending = sorting_order + [False])
         .drop_duplicates(subset=route_dir_cols)
         .reset_index(drop=True)
-        .rename(columns = {"shape_id": "common_shape_id"})
-        [route_dir_cols + ["common_shape_id", "shape_array_key"]]
-    )
+        [route_dir_cols + ["shape_id", "shape_array_key"]]
+    ).rename(columns = {
+        "gtfs_dataset_key": "schedule_gtfs_dataset_key", 
+        "shape_id": "common_shape_id"
+    })  
     
     return most_common_shape
     

@@ -82,7 +82,7 @@ if __name__ == "__main__":
     gdf = gpd.GeoDataFrame()
     
     for file in INPUT_FILES:
-        part_gdf = gpd.read_parquet(f"{SEGMENT_GCS}{file}.parquet")
+        part_gdf = gpd.read_parquet(f"{SEGMENT_GCS}segments_staging/{file}.parquet")
         gdf = pd.concat([gdf, part_gdf], axis=0)
     
     gdf = (gdf.rename(columns = {"stop_segment_geometry": "geometry"})
