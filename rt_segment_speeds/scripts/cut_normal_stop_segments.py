@@ -245,7 +245,7 @@ if __name__ == "__main__":
         
     utils.geoparquet_gcs_export(
         results_gdf,
-        SEGMENT_GCS,
+        f"{SEGMENT_GCS}segments_staging/",
         f"{EXPORT_FILE}_normal_{analysis_date}"
     )
     

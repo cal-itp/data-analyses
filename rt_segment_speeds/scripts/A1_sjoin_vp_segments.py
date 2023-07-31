@@ -43,24 +43,23 @@ def add_grouping_col_to_vp(
     vp_trips = helpers.import_vehicle_positions(
         SEGMENT_GCS,
         vp_file_name,
-        columns = ["gtfs_dataset_key", "trip_id"],
+        columns = ["trip_instance_key"],
         file_type = "df",
         partitioned=True
     ).drop_duplicates()
 
-    crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
-        analysis_date, 
-        ["feed_key", "trip_id"] + trip_grouping_cols
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["trip_instance_key", "shape_array_key"],
+        get_pandas = True
     )
     
     vp_with_crosswalk = dd.merge(
         vp_trips,
-        crosswalk,
-        on = ["gtfs_dataset_key", "trip_id"],
+        trips,
+        on = "trip_instance_key",
         how = "inner"
-    ).compute().sort_values(
-        ["gtfs_dataset_key"] + trip_grouping_cols
-    ).reset_index(drop=True)
+    )
     
     return vp_with_crosswalk
    
@@ -102,8 +101,6 @@ def sjoin_vp_to_segment(
     Only keep vp_idx and seg_idx, the sjoin pairing, in our results 
     and save as numpy array.
     """
-    #if isinstance(segment, Delayed):
-    #    segment = compute(segment)[0]
     
     vp_gdf = gpd.GeoDataFrame(
         vp, 
@@ -170,12 +167,12 @@ def sjoin_vp_to_segments(
             SEGMENT_GCS,
             f"{INPUT_FILE}_{analysis_date}/",
             filters = [[("gtfs_dataset_key", "==", rt_dataset_key)]],
-            columns = ["gtfs_dataset_key", "trip_id", 
+            columns = ["trip_instance_key", 
                        "vp_idx", "x", "y"],
             partitioned = True
         ).merge(
             vp_trips,
-            on = ["gtfs_dataset_key", "trip_id"],
+            on = "trip_instance_key",
             how = "inner"
         )
         
@@ -266,6 +263,8 @@ def compile_parquets_for_operators(
         on = "seg_idx",
         how = "inner"
     ).drop(columns = "seg_idx")
+    
+    ddf2 = ddf2.repartition(npartitions=10)
         
     ddf2.to_parquet(f"{gcs_folder}{file_name}_{analysis_date}", 
                     overwrite=True)
