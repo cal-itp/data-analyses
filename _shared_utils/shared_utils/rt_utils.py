@@ -849,6 +849,7 @@ def set_state_export(
     Returns dict with state dictionary and map URL. Can call multiple times and supply
     previous state as existing_state to create multilayered maps.
     """
+    assert not gdf.empty, "geodataframe is empty!"
     spa_map_state = existing_state or {"name": "null", "layers": [], "lat_lon": (), "zoom": 13}
     path = f"{bucket}{subfolder}{filename}.geojson.gz"
     gdf = gdf.to_crs(geography_utils.WGS84)
