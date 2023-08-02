@@ -142,13 +142,13 @@ def subset_usable_vp(dict_inputs: dict) -> np.ndarray:
         USABLE_FILE,
         SJOIN_FILE,
         GROUPING_COL,
-        columns = ["gtfs_dataset_key", "trip_id", "vp_idx"]
+        columns = ["trip_instance_key", "vp_idx"]
     )
     
     # Results are just vp_idx as np array
     results = triangulate_vp(
         ddf, 
-        ["gtfs_dataset_key", "trip_id"]
+        ["trip_instance_key"]
     )
     
     return results
@@ -157,28 +157,23 @@ def subset_usable_vp(dict_inputs: dict) -> np.ndarray:
 def merge_rt_scheduled_trips(
     rt_trips: dd.DataFrame,
     analysis_date: str,
-    group_cols: list = ["trip_id"]) -> dd.DataFrame:
+    group_cols: list = ["trip_instance_key"]) -> dd.DataFrame:
     """
     Merge RT trips (vehicle positions) to scheduled trips 
     to get the shape_array_key.
     Don't pull other scheduled trip columns now, wait until
     after aggregation is done.
     """
-    keep_cols = [
-        "feed_key",
-        "shape_array_key", 
-    ] + group_cols
-        
-    crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
-        analysis_date, 
-        keep_trip_cols = keep_cols, 
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = group_cols + ["shape_array_key"],
         get_pandas = True
     )
         
     df = dd.merge(
         rt_trips,
-        crosswalk,
-        on = ["gtfs_dataset_key"] + group_cols,
+        trips,
+        on = group_cols,
         how = "left",
     )
     
@@ -206,10 +201,10 @@ if __name__ == "__main__":
         USABLE_FILE,
         file_type = "df",
         partitioned = True,
-        columns = ["gtfs_dataset_key", "_gtfs_dataset_name", "trip_id",
+        columns = ["gtfs_dataset_key",
+                   "trip_instance_key",
                    "location_timestamp_local",
-                   "x", "y", "vp_idx"
-                  ],
+                   "x", "y", "vp_idx"],
         filters = [[("vp_idx", "in", vp_idx_list)]]
     ).compute()
     
@@ -217,7 +212,7 @@ if __name__ == "__main__":
         merge_rt_scheduled_trips(
             vp_results, 
             analysis_date, 
-            group_cols = ["trip_id"]
+            group_cols = ["trip_instance_key"]
         ).sort_values("vp_idx")
         .reset_index(drop=True)
     )

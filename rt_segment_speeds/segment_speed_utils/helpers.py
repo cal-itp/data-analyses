@@ -137,7 +137,7 @@ def import_scheduled_trips(
     analysis_date: str, 
     filters: tuple = None,
     columns: list = [
-        "feed_key", "name", "trip_id", 
+        "gtfs_dataset_key", "name", "trip_id", 
         "shape_id", "shape_array_key", 
         "route_id", "route_key", "direction_id"
     ],
@@ -148,13 +148,17 @@ def import_scheduled_trips(
     and keep subset of columns.
     """
     FILE = f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet"
+    RENAME_DICT = {
+        "gtfs_dataset_key": "schedule_gtfs_dataset_key"
+    }
     
     if get_pandas:
         trips = pd.read_parquet(FILE, filters = filters, columns = columns)
     else:
         trips = dd.read_parquet(FILE, filters = filters, columns = columns)
     
-    return trips.drop_duplicates().reset_index(drop=True)
+    return (trips.drop_duplicates().reset_index(drop=True)
+            .rename(columns = RENAME_DICT))
 
 
 def import_scheduled_shapes(

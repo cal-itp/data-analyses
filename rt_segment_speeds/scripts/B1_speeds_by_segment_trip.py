@@ -37,8 +37,8 @@ def linear_referencing_and_speed_by_segment(
     # Keep subset of columns - don't need it all. we can get the 
     # columns dropped through segments file
     vp_keep_cols = [
-        'gtfs_dataset_key', '_gtfs_dataset_name', 
-        'trip_id',
+        'gtfs_dataset_key', 'gtfs_dataset_name', 
+        'trip_id', 'trip_instance_key',
         TIMESTAMP_COL,
         'x', 'y'
     ] + SEGMENT_IDENTIFIER_COLS

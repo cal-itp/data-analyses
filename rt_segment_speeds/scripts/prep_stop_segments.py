@@ -44,8 +44,9 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
     """
     trips = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["feed_key", "name", 
-                    "trip_id", "shape_array_key"],
+        columns = ["gtfs_dataset_key", "feed_key", "name", 
+                   "trip_id", "trip_instance_key", 
+                   "shape_array_key"],
         get_pandas = True
     )
 
@@ -144,7 +145,8 @@ def stop_times_aggregated_to_shape_array_key(
     
     # Note: there can be duplicate shape_array_key because of multiple feeds
     # Drop them now so we keep 1 set of shape-stop info
-    st_with_shape = (st_with_shape.sort_values(["feed_key", "shape_array_key",
+    st_with_shape = (st_with_shape.sort_values(["schedule_gtfs_dataset_key",
+                                                "shape_array_key",
                                                 "st_trip_id", "stop_sequence"])
                      .drop_duplicates(subset=["shape_array_key", "st_trip_id", 
                                               "stop_sequence"])
@@ -157,7 +159,9 @@ def stop_times_aggregated_to_shape_array_key(
         stops,
         on = ["feed_key", "stop_id"],
         how = "inner"
-    ).reset_index(drop=True).set_geometry("geometry")
+    ).reset_index(drop=True).drop(
+        columns = "feed_key"
+    ).set_geometry("geometry")
     
     return st_with_shape_stop_geom
 
@@ -193,8 +197,7 @@ def tag_shapes_with_stops_visited_twice(
 
 
 def tag_shapes_with_inlining(
-    stop_times: Union[pd.DataFrame, gpd.GeoDataFrame, 
-                      ]
+    stop_times: Union[pd.DataFrame, gpd.GeoDataFrame]
 ) -> np.ndarray:
     """
     Rough estimate of inlining present in shapes. 
