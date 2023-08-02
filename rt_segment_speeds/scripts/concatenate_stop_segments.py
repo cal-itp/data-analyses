@@ -19,23 +19,13 @@ def finalize_stop_segments(
     stop_segments: gpd.GeoDataFrame, 
 ):
     """    
-    Add gtfs_dataset_key.
+    Add segment_idx.
     """    
-    if "gtfs_dataset_key" in stop_segments.columns:
-        stop_segments = stop_segments.drop(columns = "gtfs_dataset_key")
-        
-    # Add gtfs_dataset_key to this segment data (from schedule)
-    stop_segments_with_rt_key = sched_rt_utils.add_rt_keys_to_segments(
-        stop_segments, 
-        analysis_date, 
-        ["feed_key", "shape_array_key"]
-    ).reset_index(drop=True)
-
-    stop_segments_with_rt_key = stop_segments_with_rt_key.assign(
-        seg_idx = stop_segments_with_rt_key.index
+    stop_segments = stop_segments.assign(
+        seg_idx = stop_segments.index
     )
     
-    return stop_segments_with_rt_key
+    return stop_segments
 
 
 def spatial_join_to_caltrans_districts(
@@ -92,7 +82,7 @@ if __name__ == "__main__":
     gdf = gpd.GeoDataFrame()
     
     for file in INPUT_FILES:
-        part_gdf = gpd.read_parquet(f"{SEGMENT_GCS}{file}.parquet")
+        part_gdf = gpd.read_parquet(f"{SEGMENT_GCS}segments_staging/{file}.parquet")
         gdf = pd.concat([gdf, part_gdf], axis=0)
     
     gdf = (gdf.rename(columns = {"stop_segment_geometry": "geometry"})

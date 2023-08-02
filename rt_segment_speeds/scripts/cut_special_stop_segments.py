@@ -251,7 +251,7 @@ def find_special_cases_and_setup_df(
         analysis_date,
         filters = [[("loop_or_inlining", "==", 1)]],
         columns = [
-            "feed_key",
+            "schedule_gtfs_dataset_key",
             "shape_array_key", "stop_id", "stop_sequence", 
             "stop_geometry", # don't need shape_meters, we need stop_geometry
             "loop_or_inlining",
@@ -313,7 +313,8 @@ if __name__ == "__main__":
     logger.info(f"Cut special stop segments: {time1-start}")
     
     keep_cols = [
-        "feed_key", "shape_array_key", "stop_segment_geometry", 
+        "schedule_gtfs_dataset_key", 
+        "shape_array_key", "stop_segment_geometry", 
         "stop_id", "stop_sequence", "loop_or_inlining"
     ]
     
@@ -324,7 +325,7 @@ if __name__ == "__main__":
 
     utils.geoparquet_gcs_export(
         results_gdf,
-        SEGMENT_GCS,
+        f"{SEGMENT_GCS}segments_staging/",
         f"{EXPORT_FILE}_special_{analysis_date}"
     )
     

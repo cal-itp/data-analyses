@@ -23,7 +23,7 @@ def keep_min_max_timestamps_by_segment(
     # a lot of NaNs result...why?
     # gtfs_dataset_key or name sometimes is category dtype...so we must use groupby(observed=True)
     # shape_array_key will uniquely identify feed_key + shape_id, so should be ok
-    segment_trip_cols = ["trip_id"] + segment_identifier_cols
+    segment_trip_cols = ["trip_instance_key"] + segment_identifier_cols
     dtypes_map = vp_to_seg[segment_trip_cols + [timestamp_col]].dtypes.to_dict()
     
     # https://stackoverflow.com/questions/52552066/dask-compute-gives-attributeerror-series-object-has-no-attribute-encode    

@@ -168,7 +168,7 @@ def project_and_cut_segments_for_one_shape(
     # Leave as list, then set CRS here
     
     keep_cols = [
-        "feed_key", "shape_array_key", "stop_segment_geometry", 
+        "schedule_gtfs_dataset_key", "shape_array_key", "stop_segment_geometry", 
         "stop_id", "stop_sequence", "loop_or_inlining"
     ]
     
@@ -213,7 +213,7 @@ if __name__ == "__main__":
         analysis_date,
         filters = [[("loop_or_inlining", "==", 0)]],
         columns = [
-            "feed_key",
+            "schedule_gtfs_dataset_key",
             "shape_array_key", "stop_id", "stop_sequence", 
             "shape_meters", 
             "loop_or_inlining",
@@ -221,7 +221,8 @@ if __name__ == "__main__":
             ]
     )
     
-    gdf = (gdf.sort_values(["feed_key", "shape_array_key", "stop_sequence"])
+    gdf = (gdf.sort_values(["schedule_gtfs_dataset_key", 
+                            "shape_array_key", "stop_sequence"])
            .drop_duplicates(subset=["shape_array_key", "stop_sequence"])
            .dropna(subset="geometry")
            .reset_index(drop=True)
@@ -244,7 +245,7 @@ if __name__ == "__main__":
         
     utils.geoparquet_gcs_export(
         results_gdf,
-        SEGMENT_GCS,
+        f"{SEGMENT_GCS}segments_staging/",
         f"{EXPORT_FILE}_normal_{analysis_date}"
     )
     
