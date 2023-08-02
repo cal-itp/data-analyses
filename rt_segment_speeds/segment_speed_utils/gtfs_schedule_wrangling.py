@@ -70,7 +70,7 @@ def get_trips_with_geom(
     shapes = helpers.import_scheduled_shapes(
         analysis_date, 
         columns = ["shape_array_key", "geometry"],
-        get_pandas = False,
+        get_pandas = True,
     )
 
     trips = helpers.import_scheduled_trips(
