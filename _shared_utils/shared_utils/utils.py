@@ -9,11 +9,11 @@ from typing import Literal, Union
 
 import dask_geopandas as dg
 import fsspec
+import gcsfs
 import geopandas as gpd
 import requests
-from calitp_data.storage import get_fs
 
-fs = get_fs()
+fs = gcsfs.GCSFileSystem()
 
 
 def sanitize_file_path(file_name: str) -> str:
