@@ -23,7 +23,7 @@ from IPython.display import display, Markdown, IFrame
 import gzip
 import base64
 import json
-from calitp_data.storage import get_fs
+from calitp_data_analysis import get_fs
 
 class RtFilterMapper:
     '''
