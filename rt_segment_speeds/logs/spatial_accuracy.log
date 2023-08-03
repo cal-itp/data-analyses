@@ -1,0 +1,5 @@
+2023-08-03 09:00:53.761 | INFO     | __main__:<module>:172 - Analysis date: 2023-06-14
+2023-08-03 09:01:13.253 | INFO     | __main__:<module>:198 - get delayed by operator: 0:00:19.490708
+2023-08-03 09:41:41.514 | INFO     | __main__:<module>:203 - compute results: 0:40:28.260681
+2023-08-03 09:41:42.365 | INFO     | __main__:<module>:214 - export: 0:00:00.850823
+2023-08-03 09:41:42.365 | INFO     | __main__:<module>:215 - execution time: 0:40:48.602212
