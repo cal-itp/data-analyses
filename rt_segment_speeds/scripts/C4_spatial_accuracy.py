@@ -29,16 +29,27 @@ def grab_shape_keys_in_vp(analysis_date: str) -> pd.DataFrame:
         f"{SEGMENT_GCS}vp_{analysis_date}.parquet",
         columns=["gtfs_dataset_key", "trip_instance_key"])
         .drop_duplicates()
-    )
+        .dropna(subset="trip_instance_key")
+    ).astype({"gtfs_dataset_key": "str"})
+    
+    # Make sure we have a shape geometry too
+    shapes = pd.read_parquet(
+        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet",
+        columns = ["shape_array_key"],
+    ).dropna().drop_duplicates()
     
     trips_with_shape = pd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet",
         columns=["trip_instance_key", "shape_array_key"],
     ).merge(
+        shapes,
+        on = "shape_array_key",
+        how = "inner"
+    ).merge(
         vp_trip_df,
         on = "trip_instance_key",
         how = "inner"
-    ).drop_duplicates().reset_index(drop=True)
+    ).drop_duplicates().dropna().reset_index(drop=True)
 
     return trips_with_shape
 
@@ -108,9 +119,10 @@ def merge_vp_with_shape_and_count(
         columns=["trip_instance_key", "location_timestamp_local", 
                  "geometry"],
         filters = [[("gtfs_dataset_key", "in", subset_rt_keys),
-                    ("trip_instance_key", "in", subset_trips)]]
+                    ("trip_instance_key", "in", subset_trips)]],
+        #pc.field('trip_instance_key').is_valid() 
     ).to_crs(PROJECT_CRS)
-    
+        
     vp2 = pd.merge(
         vp,
         trips_with_shape_geom,
@@ -130,6 +142,10 @@ def merge_vp_with_shape_and_count(
                     .reset_index()
                     .rename(columns = {"location_timestamp_local": "vp_in_shape"})
                    )
+    
+    vps_in_shape = vps_in_shape.assign(
+        vp_in_shape = vps_in_shape.vp_in_shape.fillna(0).astype(int)
+    )
         
     count_df = pd.merge(
         total_vp,
@@ -154,14 +170,19 @@ def total_vp_counts_by_trip(vp: gpd.GeoDataFrame) -> pd.DataFrame:
         .rename(columns={"location_timestamp_local": "total_vp"})
     )
     
+    count_vp = count_vp.assign(
+        total_vp = count_vp.total_vp.fillna(0).astype(int)
+    )
+    
     return count_vp
 
     
 if __name__=="__main__":    
     
-    #from dask.distributed import Client
+    #from dask.distributed import LocalCluster, Client
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    #cluster = LocalCluster(n_workers = 2)
     
     LOG_FILE = "../logs/spatial_accuracy.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -175,7 +196,6 @@ if __name__=="__main__":
 
     trips_with_shape = grab_shape_keys_in_vp(analysis_date)
 
-    shapes_in_vp = trips_with_shape.shape_array_key.unique().tolist()
     rt_operators = trips_with_shape.gtfs_dataset_key.unique().tolist()
     
     # Set up delayed lists of inputs by operator
@@ -186,7 +206,7 @@ if __name__=="__main__":
             buffer_meters = 35,
         ) for rt_key in rt_operators 
     ]
-        
+    
     operator_results = [
         delayed(merge_vp_with_shape_and_count)(
             analysis_date, 
@@ -215,3 +235,4 @@ if __name__=="__main__":
     logger.info(f"execution time: {end - start}")
     
     #client.close()
+    #cluster.close()
