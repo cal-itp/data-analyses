@@ -17,6 +17,7 @@ from dask import delayed, compute
 from loguru import logger
 
 from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, SEGMENT_GCS,
+                                              RT_SCHED_GCS,
                                               analysis_date, PROJECT_CRS
                                              )
 
@@ -227,8 +228,7 @@ if __name__=="__main__":
     ).reset_index(drop=True)
         
     results_df.to_parquet(
-        f"{SEGMENT_GCS}trip_summary/"
-        f"vp_spatial_accuracy_{analysis_date}.parquet")
+        f"{RT_SCHED_GCS}vp_spatial_accuracy_{analysis_date}.parquet")
     
     end = datetime.datetime.now()
     logger.info(f"export: {end - time2}")
