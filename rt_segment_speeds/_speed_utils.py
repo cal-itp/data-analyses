@@ -3,9 +3,8 @@ import dask.dataframe as dd
 import numpy as np
 import geopandas as gpd
 import pandas as pd
-from segment_speed_utils import gtfs_schedule_wrangling, helpers, segment_calcs
+from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (
-    COMPILED_CACHED_VIEWS,
     PROJECT_CRS,
     SEGMENT_GCS,
     #analysis_date,
