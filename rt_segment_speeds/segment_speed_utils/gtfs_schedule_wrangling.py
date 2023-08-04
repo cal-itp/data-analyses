@@ -32,8 +32,10 @@ def exclude_scheduled_operators(
 def get_trips_with_geom(
     analysis_date: str,
     trip_cols: list = ["feed_key", "name", 
-                       "trip_id", "shape_array_key"]
-) -> dg.GeoDataFrame:
+                       "trip_id", "shape_array_key"],
+    exclude_me: list = ["Amtrak Schedule", "*Flex"],
+    crs: str = "EPSG:3310"
+) -> gpd.GeoDataFrame:
     """
     Merge trips with shapes. 
     Also exclude Amtrak and Flex trips.
@@ -42,6 +44,7 @@ def get_trips_with_geom(
         analysis_date, 
         columns = ["shape_array_key", "geometry"],
         get_pandas = True,
+        crs = crs
     )
 
     trips = helpers.import_scheduled_trips(
@@ -52,7 +55,7 @@ def get_trips_with_geom(
     
     trips = exclude_scheduled_operators(
         trips, 
-        exclude_me = ["Amtrak Schedule", "*Flex"]
+        exclude_me
     )
 
     trips_with_geom = pd.merge(
