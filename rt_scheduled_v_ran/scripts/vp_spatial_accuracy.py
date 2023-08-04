@@ -9,16 +9,18 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
 import geopandas as gpd
-import numpy as np
 import pandas as pd
+import pyarrow.compute as pc
 import sys
 
-from dask import delayed, compute
+#from dask import delayed, compute
 from loguru import logger
 
-from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, SEGMENT_GCS,
+from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, 
+                                              SEGMENT_GCS,
                                               RT_SCHED_GCS,
-                                              analysis_date, PROJECT_CRS
+                                              analysis_date, 
+                                              PROJECT_CRS
                                              )
 
 def grab_shape_keys_in_vp(analysis_date: str) -> pd.DataFrame:
@@ -28,10 +30,10 @@ def grab_shape_keys_in_vp(analysis_date: str) -> pd.DataFrame:
     """
     vp_trip_df = (pd.read_parquet(
         f"{SEGMENT_GCS}vp_{analysis_date}.parquet",
-        columns=["gtfs_dataset_key", "trip_instance_key"])
+        columns=["trip_instance_key"])
         .drop_duplicates()
         .dropna(subset="trip_instance_key")
-    ).astype({"gtfs_dataset_key": "str"})
+    )#.astype({"gtfs_dataset_key": "str"})
     
     # Make sure we have a shape geometry too
     shapes = pd.read_parquet(
@@ -57,17 +59,22 @@ def grab_shape_keys_in_vp(analysis_date: str) -> pd.DataFrame:
 
 def buffer_shapes(
     analysis_date: str,
+    trips_with_shape_subset: pd.DataFrame,
     buffer_meters: int = 35,
     **kwargs
 ) -> gpd.GeoDataFrame:
     """
     Filter scheduled shapes down to the shapes that appear in vp.
     Buffer these.
+    
+    Attach the shape geometry for a subset of shapes or trips.
     """
+    shapes_subset = trips_with_shape_subset.shape_array_key.unique().tolist()
+
     shapes = gpd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet",
         columns = ["shape_array_key", "geometry"],
-        **kwargs
+        filters = [[("shape_array_key", "in", shapes_subset)]]
     ).to_crs(PROJECT_CRS)
     
     # to_crs takes awhile, so do a filtering on only shapes we need
@@ -75,25 +82,6 @@ def buffer_shapes(
         geometry = shapes.geometry.buffer(buffer_meters)
     )
     
-    return shapes
-
-
-def attach_shape_geometry(
-    analysis_date: str,
-    trips_with_shape_subset: pd.DataFrame,
-    buffer_meters: int = 35,
-) -> gpd.GeoDataFrame:
-    """
-    Attach the shape geometry for a subset of shapes or trips.
-    """
-    shapes_subset = trips_with_shape_subset.shape_array_key.unique().tolist()
-    
-    shapes = buffer_shapes(
-        analysis_date, 
-        buffer_meters = 35, 
-        filters = [[("shape_array_key", "in", shapes_subset)]]
-    )
-
     trips_with_shape_geom = pd.merge(
         shapes,
         trips_with_shape_subset,
@@ -105,26 +93,14 @@ def attach_shape_geometry(
 
 
 def merge_vp_with_shape_and_count(
-    analysis_date: str,
+    vp: dg.GeoDataFrame,
     trips_with_shape_geom: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
     """
     Merge vp with crosswalk and buffered shapes.
     Get vp count totals and vp within shape.
-    """ 
-    subset_rt_keys = trips_with_shape_geom.gtfs_dataset_key.unique().tolist()
-    subset_trips = trips_with_shape_geom.trip_instance_key.unique().tolist()
-    
-    vp = gpd.read_parquet(
-        f"{SEGMENT_GCS}vp_{analysis_date}.parquet",
-        columns=["trip_instance_key", "location_timestamp_local", 
-                 "geometry"],
-        filters = [[("gtfs_dataset_key", "in", subset_rt_keys),
-                    ("trip_instance_key", "in", subset_trips)]],
-        #pc.field('trip_instance_key').is_valid() 
-    ).to_crs(PROJECT_CRS)
-        
-    vp2 = pd.merge(
+    """         
+    vp2 = dd.merge(
         vp,
         trips_with_shape_geom,
         on = "trip_instance_key",
@@ -143,16 +119,17 @@ def merge_vp_with_shape_and_count(
                     .reset_index()
                     .rename(columns = {"location_timestamp_local": "vp_in_shape"})
                    )
-    
-    vps_in_shape = vps_in_shape.assign(
-        vp_in_shape = vps_in_shape.vp_in_shape.fillna(0).astype(int)
-    )
         
     count_df = pd.merge(
         total_vp,
         vps_in_shape,
         on = "trip_instance_key",
         how = "left"
+    )
+    
+    count_df = count_df.assign(
+        vp_in_shape = count_df.vp_in_shape.fillna(0).astype("int32"),
+        total_vp = count_df.total_vp.fillna(0).astype("int32")
     )
     
     return count_df
@@ -169,10 +146,6 @@ def total_vp_counts_by_trip(vp: gpd.GeoDataFrame) -> pd.DataFrame:
         .agg({"location_timestamp_local": "count"})
         .reset_index()
         .rename(columns={"location_timestamp_local": "total_vp"})
-    )
-    
-    count_vp = count_vp.assign(
-        total_vp = count_vp.total_vp.fillna(0).astype(int)
     )
     
     return count_vp
@@ -195,39 +168,41 @@ if __name__=="__main__":
         
     start = datetime.datetime.now()
 
+    # Create crosswalk of trip_instance_keys to shape_array_key
     trips_with_shape = grab_shape_keys_in_vp(analysis_date)
-
-    rt_operators = trips_with_shape.gtfs_dataset_key.unique().tolist()
     
-    # Set up delayed lists of inputs by operator
-    operator_trips_with_shapes = [
-        delayed(attach_shape_geometry)(
-            analysis_date,
-            trips_with_shape[trips_with_shape.gtfs_dataset_key == rt_key],
-            buffer_meters = 35,
-        ) for rt_key in rt_operators 
-    ]
+    trips_with_shape_geom = buffer_shapes(
+        analysis_date,
+        trips_with_shape,
+        buffer_meters = 35)
     
-    operator_results = [
-        delayed(merge_vp_with_shape_and_count)(
-            analysis_date, 
-            operator_df
-        ) for operator_df in operator_trips_with_shapes
-    ]
+    # Import vp and partition it
+    vp = dg.read_parquet(
+        f"{SEGMENT_GCS}vp_{analysis_date}.parquet",
+    ).to_crs(PROJECT_CRS)
+ 
+    vp = vp.repartition(npartitions = 100)
+        
+    results = vp.map_partitions(
+        merge_vp_with_shape_and_count,
+        trips_with_shape_geom,
+        meta = {
+            "trip_instance_key": "str",
+            "total_vp": "int32",
+            "vp_in_shape": "int32"
+        }, 
+        align_dataframes = False
+    )
 
     time1 = datetime.datetime.now()
-    logger.info(f"get delayed by operator: {time1 - start}")
+    logger.info(f"use map partitions to find within shape vp: {time1 - start}")
     
-    results = [compute(i)[0] for i in operator_results]
+    results = results.compute()
     
     time2 = datetime.datetime.now()
     logger.info(f"compute results: {time2 - time1}")
-    
-    results_df = pd.concat(
-        results, axis=0
-    ).reset_index(drop=True)
         
-    results_df.to_parquet(
+    results.to_parquet(
         f"{RT_SCHED_GCS}vp_spatial_accuracy_{analysis_date}.parquet")
     
     end = datetime.datetime.now()
