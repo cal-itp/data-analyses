@@ -235,7 +235,7 @@ def generate_calenviroscreen_lehd_data(
     # Merge together
     final = merge_calenviroscreen_lehd(gdf, lehd)
     
-    if GCS is True:
+    if GCS:
         shared_utils.utils.geoparquet_gcs_export(
             final,
             utils.GCS_FILE_PATH,
