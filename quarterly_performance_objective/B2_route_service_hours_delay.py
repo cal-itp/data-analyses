@@ -10,7 +10,7 @@ import sys
 from loguru import logger
 
 from update_vars import (BUS_SERVICE_GCS, COMPILED_CACHED_GCS, 
-                         get_filename, ANALYSIS_DATE, VERSION
+                        ANALYSIS_DATE, VERSION
                         )
 from shared_utils import geography_utils, utils
 
@@ -80,8 +80,7 @@ if __name__ == "__main__":
         route_cols = ["feed_key", "route_id"]
     
     routes_categorized = gpd.read_parquet(
-        get_filename(f"{BUS_SERVICE_GCS}routes_categorized_", 
-                     ANALYSIS_DATE, VERSION)
+        f"{BUS_SERVICE_GCS}routes_categorized_{ANALYSIS_DATE}.parquet"
     )
         
     # Get endpoint delay up to route-level

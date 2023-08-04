@@ -10,34 +10,23 @@ import sys
 from loguru import logger
 
 from shared_utils import geography_utils, utils
-from update_vars import (BUS_SERVICE_GCS, get_filename, 
+from update_vars import (BUS_SERVICE_GCS, 
                          ANALYSIS_DATE, VERSION)
 
 def import_data(
     analysis_date: str, 
-    warehouse_version: str
 ) -> tuple[gpd.GeoDataFrame]:
     """
-    Import the data needed, and account for different naming when 
-    warehouse is in transition.
+    Import the data needed.
     """
-    transit_routes_file = get_filename(
-        f"{BUS_SERVICE_GCS}routes_", 
-        analysis_date, warehouse_version
-    )
+    transit_routes = gpd.read_parquet(
+        f"{BUS_SERVICE_GCS}routes_{analysis_date}.parquet") 
+
+    on_shn_routes = gpd.read_parquet(
+        f"{BUS_SERVICE_GCS}routes_on_shn_{analysis_date}.parquet")
     
-    on_shn_file = get_filename(
-        f"{BUS_SERVICE_GCS}routes_on_shn_", 
-        analysis_date, warehouse_version
-    )
-    
-    intersecting_file = get_filename(
-        f"{BUS_SERVICE_GCS}parallel_or_intersecting_",
-        analysis_date, warehouse_version)
-    
-    transit_routes = gpd.read_parquet(transit_routes_file)
-    on_shn_routes = gpd.read_parquet(on_shn_file)
-    intersecting_routes = gpd.read_parquet(intersecting_file)
+    intersecting_routes = gpd.read_parquet(
+        f"{BUS_SERVICE_GCS}parallel_or_intersecting_{analysis_date}.parquet")
     
     return transit_routes, on_shn_routes, intersecting_routes
     
@@ -128,16 +117,12 @@ if __name__=="__main__":
     
     logger.info(f"Analysis date: {ANALYSIS_DATE}  warehouse {VERSION}")
     start = datetime.datetime.now()
-    
-    if VERSION == "v1":
-        route_cols = ["calitp_itp_id", "route_id"]
-    
-    elif VERSION == "v2":
-        route_cols = ["feed_key", "name", "route_id"]
+
+    route_cols = ["feed_key", "name", "route_id"]
     
     # (1) Get unique transit routes 
     transit_routes, on_shn_routes, intersecting_routes = import_data(
-        ANALYSIS_DATE, VERSION)
+        ANALYSIS_DATE)
     
     on_shn = get_unique_routes(
         on_shn_routes[on_shn_routes.parallel==1],
@@ -171,14 +156,11 @@ if __name__=="__main__":
         .to_crs(geography_utils.WGS84)
     )
     
-    # Export to GCS (use date suffix because we will want historical comparisons)
-    routes_categorized_file = get_filename(
-        "routes_categorized_", ANALYSIS_DATE, VERSION)
-    
+    # Export to GCS (use date suffix because we will want historical comparisons)    
     utils.geoparquet_gcs_export(
         gdf, 
         BUS_SERVICE_GCS,
-        routes_categorized_file
+        f"routes_categorized_{ANALYSIS_DATE}"
     )
     
     logger.info("exported dataset to GCS")
