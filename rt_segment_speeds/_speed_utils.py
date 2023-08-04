@@ -168,7 +168,8 @@ def keep_only_zeroes(flagged:pd.DataFrame)-> pd.DataFrame:
     return df2
 
 def problematic_trips_percentage(original:pd.DataFrame, 
-                                 flagged:pd.DataFrame)->pd.DataFrame:
+                                 flagged:pd.DataFrame,
+                                 most_least_populated: bool = True)->pd.DataFrame:
     """
     See the % of trips for a route that has 
     at least one row that is divided by 0.
@@ -236,6 +237,9 @@ def route_most_populated(flagged:pd.DataFrame)-> pd.DataFrame:
     
     # Find total % of rows that are ok
     agg2['percent_of_ok_rows'] = (agg2.ok/agg2.total_rows * 100)
+    
+    # Filter out for rows that are equal to 1
+    agg2 = agg2[agg2.total_rows != 1].reset_index(drop = True)
     
     # Only keep the route/trip with the highest % of ok rows
     agg2 = (agg2
