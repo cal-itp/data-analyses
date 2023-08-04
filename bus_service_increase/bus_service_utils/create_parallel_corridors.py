@@ -144,7 +144,7 @@ def overlay_transit_to_highways(
         transit_routes, 
         highways, 
         how = "intersection", 
-        keep_geom_type = False
+        keep_geom_type = True
     )  
     
     # Using new geometry column, calculate what % that intersection 
