@@ -4,6 +4,6 @@ readme: ./quarterly_performance_objective/README.md
 parts:
 - caption: Introduction
 - chapters:
-  #- notebook: ./quarterly_performance_objective/current_quarter_report.ipynb
+  - notebook: ./quarterly_performance_objective/current_quarter_report.ipynb
   - notebook: ./quarterly_performance_objective/historical_service_hours_v2.ipynb
   #- notebook: ./quarterly_performance_objective/historical_report.ipynb
