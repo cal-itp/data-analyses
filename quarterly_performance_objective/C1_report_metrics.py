@@ -134,18 +134,18 @@ def by_district_on_shn_breakdown(df: pd.DataFrame,
 def prep_data_for_report(analysis_date: str) -> gpd.GeoDataFrame:
     # https://stackoverflow.com/questions/69781678/intake-catalogue-level-parameters
     
-    df = catalog.routes_categorized_with_delay(
+    df = catalog.routes_categorized(
         analysis_date = analysis_date).read()
 
     # TODO: Some interest in excluding modes like rail from District 4
     # Don't have route_type...but maybe we want to exclude rail
-    
+    '''
     df = df.assign(
         delay_hours = round(df.delay_seconds / 60 ** 2, 2)
     ).drop(columns = "delay_seconds")
     
     df = df[df.merge_delay != "right_only"].reset_index(drop=True)
-    
+    '''
     return df
 
 
