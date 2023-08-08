@@ -12,8 +12,8 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization
 
 # Save Geojson
 from calitp_data_analysis import *
-from calitp_data.storage import get_fs
-fs = get_fs()
+# from calitp_data.storage import get_fs
+# fs = get_fs()
 import os
 
 # Function to clean agency/organization names
