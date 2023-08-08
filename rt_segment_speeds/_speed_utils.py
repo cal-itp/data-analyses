@@ -7,7 +7,7 @@ from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (
     PROJECT_CRS,
     SEGMENT_GCS,
-    #analysis_date,
+    analysis_date,
 )
 from scripts import A1_sjoin_vp_segments
 
@@ -16,9 +16,6 @@ Paths
 """
 CONFIG_PATH = './scripts/config.yml'
 STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-
-# Delete this date later. 
-analysis_date = '2023-07-12'
 
 """
 General Functions
