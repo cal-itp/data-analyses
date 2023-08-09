@@ -11,7 +11,7 @@ Role:
 Reports to:
 
 # [Onboarding Curriculum Schedule](https://docs.calitp.org/data-infra/analytics_onboarding/overview.html)
-## Week 1 – Introduction to Caltrans, Cal-ITP, and Division of Data & Digital Services
+## Week 1 Introduction to Caltrans, Cal-ITP, and Division of Data & Digital Services
 - [ ] Non-technical 1:1 chats scheduled with each analyst
 - [ ] Peer-guided intro to [transit data](https://docs.calitp.org/data-infra/warehouse/what_is_gtfs.html)
 - [ ] Peer-guided intro to transportation grants 
@@ -27,7 +27,7 @@ Reports to:
 - [ ] What is in / how to access Metabase 
 - [ ] Work through Metabase tutorial module
 
-## Weeks 4-5 – Python Bootcamp in `starter_kit/`
+## Weeks 4-5 Python Bootcamp in `starter_kit/`
 - [ ] Read through basic [training curriculum](https://docs.calitp.org/data-infra/analytics_new_analysts/overview.html)
 - [ ] exercise 1
 - [ ] exercise 2
