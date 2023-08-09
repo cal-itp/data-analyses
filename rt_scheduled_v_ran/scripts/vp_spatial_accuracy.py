@@ -10,14 +10,12 @@ import dask_geopandas as dg
 import datetime
 import geopandas as gpd
 import pandas as pd
-import pyarrow.compute as pc
 import sys
 
-#from dask import delayed, compute
 from loguru import logger
 
-from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, 
-                                              SEGMENT_GCS,
+from segment_speed_utils import helpers
+from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               RT_SCHED_GCS,
                                               analysis_date, 
                                               PROJECT_CRS
@@ -33,17 +31,19 @@ def grab_shape_keys_in_vp(analysis_date: str) -> pd.DataFrame:
         columns=["trip_instance_key"])
         .drop_duplicates()
         .dropna(subset="trip_instance_key")
-    )#.astype({"gtfs_dataset_key": "str"})
+    )
     
     # Make sure we have a shape geometry too
+    # otherwise map_partitions will throw error
     shapes = pd.read_parquet(
         f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet",
         columns = ["shape_array_key"],
     ).dropna().drop_duplicates()
     
-    trips_with_shape = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet",
-        columns=["trip_instance_key", "shape_array_key"],
+    trips_with_shape = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["trip_instance_key", "shape_array_key"],
+        get_pandas = True
     ).merge(
         shapes,
         on = "shape_array_key",
@@ -70,12 +70,14 @@ def buffer_shapes(
     Attach the shape geometry for a subset of shapes or trips.
     """
     shapes_subset = trips_with_shape_subset.shape_array_key.unique().tolist()
-
-    shapes = gpd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet",
+    
+    shapes = helpers.import_scheduled_shapes(
+        analysis_date,
         columns = ["shape_array_key", "geometry"],
-        filters = [[("shape_array_key", "in", shapes_subset)]]
-    ).to_crs(PROJECT_CRS)
+        filters = [[("shape_array_key", "in", shapes_subset)]],
+        crs = PROJECT_CRS,
+        get_pandas = True
+    )
     
     # to_crs takes awhile, so do a filtering on only shapes we need
     shapes = shapes.assign(
