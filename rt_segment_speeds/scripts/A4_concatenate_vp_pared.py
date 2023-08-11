@@ -30,10 +30,11 @@ if __name__ == "__main__":
     ]
     
     pared_down_vp = dd.multi.concat(dfs, axis=0).reset_index(
-        drop=True).set_index("vp_idx")
+        drop=True).set_index("vp_idx", sorted=False)
     
     vp_full_info = dd.read_parquet(
-        f"{SEGMENT_GCS}{VP_FULL_INFO}_{analysis_date}").set_index("vp_idx")
+        f"{SEGMENT_GCS}{VP_FULL_INFO}_{analysis_date}"
+    ).set_index("vp_idx", sorted=False)
     
     df = dd.merge(
         vp_full_info,
