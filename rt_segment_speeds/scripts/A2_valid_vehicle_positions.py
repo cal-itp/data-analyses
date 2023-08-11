@@ -75,16 +75,16 @@ def merge_usable_vp_with_sjoin_vpidx(
         file_type = "df",
         partitioned = True,
         **kwargs
-    ).set_index("vp_idx")
+    ).repartition(npartitions=100)
+    
+    usable_vp = usable_vp.set_index("vp_idx", sorted=False)
         
     # Grab our results of vp_idx joined to segments
     vp_to_seg = dd.read_parquet(
         f"{SEGMENT_GCS}vp_sjoin/{sjoin_results_file}",
         filters = [[(grouping_col, "in", shape_cases)]],
-    ).set_index("vp_idx")
+    ).set_index("vp_idx", sorted=False)
     
-    # Merge these so that we have segment identifiers and lat/lon
-    # use index to merge so it's faster. left and right dfs are ddfs.
     usable_vp_full_info = dd.merge(
         usable_vp,
         vp_to_seg,
