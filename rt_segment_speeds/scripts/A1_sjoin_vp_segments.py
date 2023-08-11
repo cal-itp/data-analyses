@@ -1,10 +1,10 @@
 """
 Spatial join vehicle positions to segments.
 
-Stop-to-stop segments.
-Use dask.delayed + loop so that vp can only join to the 
-relevant segments.
-Otherwise, vp will be joined to other segments that share the same road.
+Ensure that RT trips can only join to the scheduled shape
+for that scheduled trip. 
+Otherwise, vp on the same road get joined to multiple segments
+across shapes.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
