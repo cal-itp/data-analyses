@@ -14,7 +14,7 @@ GCS_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/"
 
 """
 For this function you will need to specify the name of the geojson file you want to read in before. example:
-file = "proejct_location_bike.geojson"
+file = "project_location_bike.geojson"
 """
 
 def read_and_create_shpfiles(geojson_file, zip_name):
