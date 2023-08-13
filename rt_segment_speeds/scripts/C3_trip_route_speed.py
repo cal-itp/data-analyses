@@ -254,12 +254,17 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     # Merge in the subset of vp to the shape geometry
-    df = pd.read_parquet(
+    vp = pd.read_parquet(
         f"{SEGMENT_GCS}trip_summary/vp_subset_{analysis_date}.parquet",
     )
     
+    vp = gpd.GeoDataFrame(
+        vp,
+        geometry = gpd.points_from_xy(vp.x, vp.y, crs=WGS84)
+    ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
+    
     # in case there are fewer shapes to grab
-    shapes_list = df.shape_array_key.unique().tolist()
+    shapes_list = vp.shape_array_key.unique().tolist()
 
     # to_crs() takes a long time when os.environ["USE_PYGEOS"] = '0',
     # so keep pygeos on
@@ -271,19 +276,30 @@ if __name__ == "__main__":
         crs = PROJECT_CRS
     )
     
-    # project the vp geometry onto the shape geometry and get shape_meters
-    linear_ref = wrangle_shapes.linear_reference_vp_against_segment(
-        df,
+    df = pd.merge(
+        vp,
         shapes,
-        segment_identifier_cols = ["shape_array_key"]
-    ).compute()
+        on = "shape_array_key",
+        how = "inner"
+    ).rename(columns = {"geometry_x": "vp_geometry", 
+                        "geometry_y": "shape_geometry"}
+            ).set_geometry("vp_geometry")
+    
+    # project the vp geometry onto the shape geometry and get shape_meters
+    shape_meters_geoseries = wrangle_shapes.project_point_geom_onto_linestring(
+        df,
+        "shape_geometry",
+        "vp_geometry",
+    )
+
+    df["shape_meters"] = shape_meters_geoseries
     
     time1 = datetime.datetime.now()
     print(f"linear ref: {time1 - start}")
     
     # Get trip-level speed
     speed = distance_and_seconds_elapsed(
-        linear_ref,
+        df,
         group_cols = ["gtfs_dataset_key", "trip_instance_key"]
     )
     

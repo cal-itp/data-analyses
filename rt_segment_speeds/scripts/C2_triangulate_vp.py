@@ -59,12 +59,15 @@ def triangulate_vp(
 
     vp_range = vp_range.persist()
     
-    vp_range["range_difference"] = vp_range.max_vp_idx - vp_range.min_vp_idx
+    vp_range["range_diff"] = vp_range.max_vp_idx - vp_range.min_vp_idx
     
     vp_range = vp_range.assign(
-        p25_vp_idx = (vp_range.range_difference * 0.25).round(0).astype("int64"),
-        p50_vp_idx = (vp_range.range_difference * 0.5).round(0).astype("int64"),
-        p75_vp_idx = (vp_range.range_difference * 0.75).round(0).astype("int64"),
+        p25_vp_idx = (vp_range.range_diff * 0.25 + vp_range.min_vp_idx
+                     ).round(0).astype("int64"),
+        p50_vp_idx = (vp_range.range_diff * 0.5 + vp_range.min_vp_idx
+                     ).round(0).astype("int64"),
+        p75_vp_idx = (vp_range.range_diff * 0.75 + vp_range.min_vp_idx
+                     ).round(0).astype("int64"),
     )
     
     vp_idx_cols = [

@@ -1,26 +1,25 @@
-2023-07-25 19:29:22.771 | INFO     | __main__:<module>:286 - Analysis date: 2023-06-14
-2023-07-25 20:10:03.035 | INFO     | __main__:<module>:298 - attach vp to stop-to-stop segments: 0:40:40.263436
-2023-07-25 20:11:00.673 | INFO     | __main__:<module>:308 - compiled parquets: 0:00:57.637347
-2023-07-25 20:11:00.675 | INFO     | __main__:<module>:309 - execution time: 0:41:37.900783
-2023-07-25 21:27:52.866 | INFO     | __main__:<module>:286 - Analysis date: 2023-07-12
-2023-07-25 22:11:55.296 | INFO     | __main__:<module>:298 - attach vp to stop-to-stop segments: 0:44:02.429077
-2023-07-25 22:13:11.709 | INFO     | __main__:<module>:308 - compiled parquets: 0:01:16.412710
-2023-07-25 22:13:11.713 | INFO     | __main__:<module>:309 - execution time: 0:45:18.841787
-2023-07-26 18:23:50.016 | INFO     | __main__:<module>:286 - Analysis date: 2023-03-15
-2023-07-26 19:31:45.629 | INFO     | __main__:<module>:298 - attach vp to stop-to-stop segments: 1:07:55.611782
-2023-07-26 19:32:43.933 | INFO     | __main__:<module>:308 - compiled parquets: 0:00:58.304490
-2023-07-26 19:32:43.944 | INFO     | __main__:<module>:309 - execution time: 1:08:53.916272
-2023-07-26 21:21:05.389 | INFO     | __main__:<module>:286 - Analysis date: 2023-04-12
-2023-07-26 22:22:19.205 | INFO     | __main__:<module>:298 - attach vp to stop-to-stop segments: 1:01:13.776816
-2023-07-26 22:23:14.796 | INFO     | __main__:<module>:308 - compiled parquets: 0:00:55.591754
-2023-07-26 22:23:14.798 | INFO     | __main__:<module>:309 - execution time: 1:02:09.368570
-2023-08-09 15:54:14.979 | INFO     | __main__:<module>:210 - Analysis date: 2023-07-12
-2023-08-09 15:56:18.298 | INFO     | __main__:sjoin_vp_to_segments:175 - prep vp and persist: 0:02:03.315568
-2023-08-09 15:56:18.318 | INFO     | __main__:sjoin_vp_to_segments:190 - sjoin with map_partitions: 0:00:00.020238
-2023-08-09 16:02:51.019 | INFO     | __main__:sjoin_vp_to_segments:199 - export partitioned results: 0:06:32.701054
-2023-08-09 16:02:55.007 | INFO     | __main__:<module>:222 - execution time: 0:08:40.027954
-2023-08-10 15:56:36.606 | INFO     | __main__:<module>:210 - Analysis date: 2023-06-14
-2023-08-10 15:58:57.908 | INFO     | __main__:sjoin_vp_to_segments:175 - prep vp and persist: 0:02:21.294873
-2023-08-10 15:58:58.007 | INFO     | __main__:sjoin_vp_to_segments:190 - sjoin with map_partitions: 0:00:00.099206
-2023-08-10 16:05:24.846 | INFO     | __main__:sjoin_vp_to_segments:199 - export partitioned results: 0:06:26.839284
-2023-08-10 16:05:29.683 | INFO     | __main__:<module>:222 - execution time: 0:08:53.075372
+2023-08-12 10:46:31.162 | INFO     | __main__:<module>:210 - Analysis date: 2023-07-12
+2023-08-12 10:49:20.419 | INFO     | __main__:sjoin_vp_to_segments:175 - prep vp and persist: 0:02:49.238622
+2023-08-12 10:49:20.449 | INFO     | __main__:sjoin_vp_to_segments:190 - sjoin with map_partitions: 0:00:00.030092
+2023-08-12 10:59:46.723 | INFO     | __main__:sjoin_vp_to_segments:199 - export partitioned results: 0:10:26.273596
+2023-08-12 10:59:50.732 | INFO     | __main__:<module>:222 - execution time: 0:13:19.555494
+2023-08-12 14:26:41.388 | INFO     | __main__:<module>:210 - Analysis date: 2023-06-14
+2023-08-12 14:29:15.722 | INFO     | __main__:sjoin_vp_to_segments:175 - prep vp and persist: 0:02:34.329190
+2023-08-12 14:29:15.751 | INFO     | __main__:sjoin_vp_to_segments:190 - sjoin with map_partitions: 0:00:00.028481
+2023-08-12 14:38:06.467 | INFO     | __main__:sjoin_vp_to_segments:199 - export partitioned results: 0:08:50.716716
+2023-08-12 14:38:10.076 | INFO     | __main__:<module>:222 - execution time: 0:11:28.687265
+2023-08-12 16:02:02.402 | INFO     | __main__:<module>:210 - Analysis date: 2023-05-17
+2023-08-12 16:04:31.303 | INFO     | __main__:sjoin_vp_to_segments:175 - prep vp and persist: 0:02:28.894732
+2023-08-12 16:04:31.333 | INFO     | __main__:sjoin_vp_to_segments:190 - sjoin with map_partitions: 0:00:00.029664
+2023-08-12 16:13:33.414 | INFO     | __main__:sjoin_vp_to_segments:199 - export partitioned results: 0:09:02.080652
+2023-08-12 16:13:37.605 | INFO     | __main__:<module>:222 - execution time: 0:11:35.202448
+2023-08-12 17:03:42.271 | INFO     | __main__:<module>:211 - Analysis date: 2023-04-12
+2023-08-12 17:06:19.728 | INFO     | __main__:sjoin_vp_to_segments:176 - prep vp and persist: 0:02:37.450383
+2023-08-12 17:06:19.773 | INFO     | __main__:sjoin_vp_to_segments:191 - sjoin with map_partitions: 0:00:00.044938
+2023-08-12 17:15:57.984 | INFO     | __main__:sjoin_vp_to_segments:200 - export partitioned results: 0:09:38.211127
+2023-08-12 17:16:01.961 | INFO     | __main__:<module>:223 - execution time: 0:12:19.688568
+2023-08-12 18:43:32.754 | INFO     | __main__:<module>:211 - Analysis date: 2023-03-15
+2023-08-12 18:46:10.409 | INFO     | __main__:sjoin_vp_to_segments:176 - prep vp and persist: 0:02:37.646769
+2023-08-12 18:46:10.437 | INFO     | __main__:sjoin_vp_to_segments:191 - sjoin with map_partitions: 0:00:00.027895
+2023-08-12 18:55:34.021 | INFO     | __main__:sjoin_vp_to_segments:200 - export partitioned results: 0:09:23.583445
+2023-08-12 18:55:37.967 | INFO     | __main__:<module>:223 - execution time: 0:12:05.211983

@@ -100,24 +100,16 @@ def adjust_stop_start_end_for_special_cases(
         distance_best_guess = distance_between_stops
         
     # (2) We know distance between stops, so let's back out the correct
-    # "end_stop". If the end_stop is actually going 
-    # back closer to the start of the shape, we'll use subtraction.
+    # "end_stop". We use a cumulative distance array...just need distance between 
+    # 2 points
     
-    # Normal case
-    if start_stop < end_stop:
+    # Normal case or inlining
+    if start_stop != end_stop:
         origin_stop = start_stop
      
         destin_stop = max(start_stop + distance_between_stops, 
                           start_stop + distance_best_guess)
         
-            
-    # Case where inlining occurs, and now the bus is doubling back    
-    elif start_stop > end_stop:
-        origin_stop = start_stop
-        
-        destin_stop = min(start_stop - distance_between_stops, 
-                          start_stop - distance_best_guess)
-            
     # Case at origin, where there is no prior stop to look for
     elif start_stop == end_stop:
         origin_stop = wrangle_shapes.project_list_of_coords(
@@ -169,9 +161,8 @@ def super_project(
     
     
     # (4) Handle various cases for first stop or last stop
-    # and also direction of origin to destination stop
-    # if destination stop actually is closer to the start of the shape,
-    # that's ok, we'll use distance and make sure the direction is correct
+    # and grab the distance between origin/destination stop to use 
+    # with cumulative distance array
     (origin_stop, destin_stop, 
      origin_destination_geom) = adjust_stop_start_end_for_special_cases(
         shape_geometry,
@@ -211,27 +202,11 @@ def super_project(
     
     # Attach the origin and destination, otherwise the segment
     # will not reach the actual stops, but will just grab the trunk portion
-    
-    # Normal case
-    if origin_stop <= destin_stop:
-        subset_shape_geom_with_od = np.array(
-            [origin_destination_geom[0]] + 
-            subset_shape_geom + 
-            [origin_destination_geom[-1]]
-        )
-    
-    
-    # Special case, where bus is doubling back, we need to flip the 
-    # origin and destination points, but the inside should be in increasing order
-    else: 
-        # elif origin_stop > destin_stop:        
-        subset_shape_geom_with_od = np.flip(
-            np.asarray(
-                [origin_destination_geom[-1]] + 
-                subset_shape_geom + 
-                [origin_destination_geom[0]]
-            )
-        )
+    subset_shape_geom_with_od = np.array(
+        [origin_destination_geom[0]] + 
+        subset_shape_geom + 
+        [origin_destination_geom[-1]]
+    )
     
     subset_ls = cut_normal_stop_segments.linestring_from_points(
         subset_shape_geom_with_od)
