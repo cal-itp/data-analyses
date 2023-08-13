@@ -5,7 +5,7 @@ This file contains functions for converting geodata into the form needed for CSI
 import pandas as pd
 import geopandas as gpd
 import json
-import geojson
+# import geojson
 
 from shared_utils import utils
 
