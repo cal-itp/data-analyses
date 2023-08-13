@@ -4,6 +4,9 @@ Quick aggregation for speed metrics by segment
 import datetime
 import geopandas as gpd
 import pandas as pd
+import sys
+
+from loguru import logger
 
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
@@ -132,6 +135,14 @@ def speeds_with_segment_geom(
 
 if __name__ == "__main__":
     
+    LOG_FILE = "../logs/avg_speeds.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    logger.info(f"Analysis date: {analysis_date}")
+    
     start = datetime.datetime.now()
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     EXPORT_FILE = f'{STOP_SEG_DICT["stage5"]}_{analysis_date}'
@@ -152,4 +163,4 @@ if __name__ == "__main__":
         EXPORT_FILE
     )
     
-    print(f"Exported: {datetime.datetime.now() - start}")
+    logger.info(f"execution time: {datetime.datetime.now() - start}")

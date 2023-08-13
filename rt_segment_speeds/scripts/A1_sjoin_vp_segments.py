@@ -15,6 +15,7 @@ import sys
 
 from loguru import logger
 
+from shared_utils.geography_utils import WGS84
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (analysis_date, SEGMENT_GCS, 
                                               CONFIG_PATH, PROJECT_CRS)
@@ -165,8 +166,8 @@ def sjoin_vp_to_segments(
     
     vp_gddf = dg.from_dask_dataframe(
         vp,
-        geometry = dg.points_from_xy(vp, x="x", y="y", crs="EPSG:4326")
-    ).set_crs("EPSG:4326").to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
+        geometry = dg.points_from_xy(vp, x="x", y="y", crs=WGS84)
+    ).set_crs(WGS84).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
     
     
     vp_gddf = vp_gddf.repartition(npartitions=100).persist()
