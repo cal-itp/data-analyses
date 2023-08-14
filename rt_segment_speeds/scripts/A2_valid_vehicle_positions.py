@@ -140,7 +140,7 @@ def pare_down_vp_by_segment(
     time2 = datetime.datetime.now()
     logger.info(f"keep enter/exit points: {time2 - time1}")
 
-    normal_vp_to_keep = normal_vp_to_keep.repartition(npartitions=10)
+    normal_vp_to_keep = normal_vp_to_keep.repartition(npartitions=3)
     normal_vp_to_keep.to_parquet(
         f"{SEGMENT_GCS}vp_pare_down/{EXPORT_FILE}_normal_{analysis_date}",
         overwrite=True

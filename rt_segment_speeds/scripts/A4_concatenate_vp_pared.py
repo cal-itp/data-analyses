@@ -44,7 +44,7 @@ if __name__ == "__main__":
         how = "inner"
     ).reset_index()
     
-    df = df.repartition(npartitions = 3)
+    df = df.repartition(npartitions = 2)
     df.to_parquet(f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}", 
                   overwrite=True)
     
