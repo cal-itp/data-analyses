@@ -133,14 +133,14 @@ def pare_down_vp_by_segment(
 
     normal_vp_to_keep = segment_calcs.keep_min_max_timestamps_by_segment(
         usable_normal_vp,       
-        SEGMENT_IDENTIFIER_COLS,
+        SEGMENT_IDENTIFIER_COLS + ["trip_instance_key"],
         TIMESTAMP_COL
     )
         
     time2 = datetime.datetime.now()
     logger.info(f"keep enter/exit points: {time2 - time1}")
 
-    normal_vp_to_keep = normal_vp_to_keep.repartition(npartitions=2)
+    normal_vp_to_keep = normal_vp_to_keep.repartition(npartitions=10)
     normal_vp_to_keep.to_parquet(
         f"{SEGMENT_GCS}vp_pare_down/{EXPORT_FILE}_normal_{analysis_date}",
         overwrite=True
