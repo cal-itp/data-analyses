@@ -75,16 +75,16 @@ def merge_usable_vp_with_sjoin_vpidx(
         file_type = "df",
         partitioned = True,
         **kwargs
-    ).set_index("vp_idx")
+    ).repartition(npartitions=100)
+    
+    usable_vp = usable_vp.set_index("vp_idx", sorted=False)
         
     # Grab our results of vp_idx joined to segments
     vp_to_seg = dd.read_parquet(
         f"{SEGMENT_GCS}vp_sjoin/{sjoin_results_file}",
         filters = [[(grouping_col, "in", shape_cases)]],
-    ).set_index("vp_idx")
+    ).set_index("vp_idx", sorted=False)
     
-    # Merge these so that we have segment identifiers and lat/lon
-    # use index to merge so it's faster. left and right dfs are ddfs.
     usable_vp_full_info = dd.merge(
         usable_vp,
         vp_to_seg,
@@ -133,14 +133,14 @@ def pare_down_vp_by_segment(
 
     normal_vp_to_keep = segment_calcs.keep_min_max_timestamps_by_segment(
         usable_normal_vp,       
-        SEGMENT_IDENTIFIER_COLS,
+        SEGMENT_IDENTIFIER_COLS + ["trip_instance_key"],
         TIMESTAMP_COL
     )
         
     time2 = datetime.datetime.now()
     logger.info(f"keep enter/exit points: {time2 - time1}")
 
-    normal_vp_to_keep = normal_vp_to_keep.repartition(npartitions=2)
+    normal_vp_to_keep = normal_vp_to_keep.repartition(npartitions=10)
     normal_vp_to_keep.to_parquet(
         f"{SEGMENT_GCS}vp_pare_down/{EXPORT_FILE}_normal_{analysis_date}",
         overwrite=True

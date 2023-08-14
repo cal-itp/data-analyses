@@ -16,78 +16,18 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from dask import delayed, compute
 from typing import Literal
 
-from segment_speed_utils import helpers, sched_rt_utils
+from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
                                               CONFIG_PATH)
+
 from A2_valid_vehicle_positions import merge_usable_vp_with_sjoin_vpidx
 
 
-def trip_stat(
-    ddf: dd.DataFrame, 
-    group_cols: list, 
-    stat: Literal["min", "max", "p25", "p50", "p75"]
-) -> dd.DataFrame:
-    """
-    For a group, grab the min, max, and maybe some other
-    quartiles.
-    The shuffling done on all the vp is expensive, so
-    we'll use vp_idx and roughly grab what's the 25th, 50th, 75th 
-    percentile by taking the midpoints.
-    
-    If we're off by 1, it's not a big deal, since we're 
-    sampling 5 vp per trip.
-    """
-    # observed = True means don't create rows when that 
-    # group_cols combination is not present
-    # we need this because gtfs_dataset_key is categorical dtype
-    # group_keys = False so that group_cols is not used as index.
-    grouped_df = ddf.groupby(group_cols, observed=True, group_keys=False)
-    col = "vp_idx"
-    
-    def integrify(df: dd.DataFrame) -> dd.DataFrame:
-        """
-        Make sure vp_idx returns as an integer and get rid of any NaNs. 
-        """
-        df2 = df.dropna().astype("int64").reset_index()
-        
-        return df2
-    
-    if stat == "min":
-        stat_df = grouped_df[col].min()
-    
-    elif stat == "max":
-        stat_df = grouped_df[col].max()
-    
-    elif stat == "p50":
-        stat_df = grouped_df[col].mean().round(0)
-    
-    elif stat == "p25":
-        # medians, percentiles aren't included in dask aggregation, 
-        # would have to do custom aggregation
-        # and it's expensive because of the shuffling. 
-        # do a rough version to approximate midpoint, 
-        # since vp_idx should increase by 1
-        stat_df = (
-            (grouped_df[col].mean() - grouped_df[col].min()).divide(2).round(0) + 
-            grouped_df[col].min()
-        )
-    
-    elif stat == "p75":
-        stat_df = (
-            (grouped_df[col].max() - grouped_df[col].mean()).divide(2) + 
-            grouped_df[col].mean()
-        ).round(0)  
-        
-    return stat_df.pipe(integrify)
-    
-
 def triangulate_vp(
     ddf: dd.DataFrame, 
-    group_cols: list = [
-        "gtfs_dataset_key", "trip_id"]
+    group_cols: list = ["trip_instance_key"]
 ) -> np.ndarray:
     """
     Grab a sample of vehicle positions for each trip to triangulate distance.
@@ -96,28 +36,51 @@ def triangulate_vp(
     
     Dask aggregation can't group and use lambda to create list of possible 
     vp_idx.
-    Rather than caring about specifically which vp_idx, we just want
-    roughly spaced apart ones that approximate 0, 25, 50, 75, 100 percentiles.
-    """
-    t0 = datetime.datetime.now()
+    """        
+    grouped_ddf = ddf.groupby(group_cols, observed=True, group_keys=False)
 
+    min_df = (grouped_ddf
+              .agg({"vp_idx": "min"})
+              .rename(columns = {"vp_idx": "min_vp_idx"})
+             )
+
+    max_df = (grouped_ddf
+              .agg({"vp_idx": "max"})
+              .rename(columns = {"vp_idx": "max_vp_idx"})
+             )
     
-    results = [delayed(trip_stat)(ddf, group_cols, s)
-               for s in ["min", "p25", "p50", "p75", "max"]] 
+    vp_range = dd.merge(
+        min_df,
+        max_df,
+        left_index = True,
+        right_index = True,
+        how = "inner"
+    )
+
+    vp_range = vp_range.persist()
     
-    t1 = datetime.datetime.now()
-    print(f"delayed stats: {t1 - t0}")
+    vp_range["range_diff"] = vp_range.max_vp_idx - vp_range.min_vp_idx
     
-    results2 = [compute(i)[0].vp_idx.to_numpy() for i in results]
-            
-    t2 = datetime.datetime.now()
-    print(f"compute, get np arrays: {t2 - t1}")
+    vp_range = vp_range.assign(
+        p25_vp_idx = (vp_range.range_diff * 0.25 + vp_range.min_vp_idx
+                     ).round(0).astype("int64"),
+        p50_vp_idx = (vp_range.range_diff * 0.5 + vp_range.min_vp_idx
+                     ).round(0).astype("int64"),
+        p75_vp_idx = (vp_range.range_diff * 0.75 + vp_range.min_vp_idx
+                     ).round(0).astype("int64"),
+    )
     
-    # Here, row_stacking it results in 3 arrays, so flatten it to be 1d
-    # or, equivalently, use np.concatenate
-    stacked_results = np.concatenate(results2)
+    vp_idx_cols = [
+        "min_vp_idx", 
+        "p25_vp_idx",
+        "p50_vp_idx", 
+        "p75_vp_idx",
+        "max_vp_idx"
+    ]
+
+    results = vp_range[vp_idx_cols].compute().to_numpy().flatten()    
     
-    return stacked_results
+    return results
 
 
 def subset_usable_vp(dict_inputs: dict) -> np.ndarray:

@@ -100,24 +100,15 @@ def adjust_stop_start_end_for_special_cases(
         distance_best_guess = distance_between_stops
         
     # (2) We know distance between stops, so let's back out the correct
-    # "end_stop". If the end_stop is actually going 
-    # back closer to the start of the shape, we'll use subtraction.
+    # "end_stop". We use a cumulative distance array...just need distance between 
+    # 2 points
     
-    # Normal case
-    if start_stop < end_stop:
+    # Normal case or inlining
+    if start_stop != end_stop:
         origin_stop = start_stop
      
-        destin_stop = max(start_stop + distance_between_stops, 
-                          start_stop + distance_best_guess)
+        destin_stop = start_stop + distance_best_guess
         
-            
-    # Case where inlining occurs, and now the bus is doubling back    
-    elif start_stop > end_stop:
-        origin_stop = start_stop
-        
-        destin_stop = min(start_stop - distance_between_stops, 
-                          start_stop - distance_best_guess)
-            
     # Case at origin, where there is no prior stop to look for
     elif start_stop == end_stop:
         origin_stop = wrangle_shapes.project_list_of_coords(
@@ -131,7 +122,30 @@ def adjust_stop_start_end_for_special_cases(
         shape_geometry, [origin_stop, destin_stop]
     )
     
-    return origin_stop, destin_stop, origin_destination_geom
+    # Check what direction the stops run
+    stop_vec = wrangle_shapes.get_direction_vector(
+        subset_stop_geometry[0],
+        subset_stop_geometry[-1]
+    )
+    
+    norm_stop_vec = wrangle_shapes.get_normalized_vector(stop_vec) 
+    
+    # Check what direction the segment runs
+    segment_vec = wrangle_shapes.get_direction_vector(
+        origin_destination_geom[0], 
+        origin_destination_geom[-1]
+    )
+    
+    norm_segment_vec = wrangle_shapes.get_normalized_vector(segment_vec)
+    
+    dot_product = wrangle_shapes.dot_product(norm_stop_vec, norm_segment_vec) 
+    
+    if dot_product < 0:
+        flip = True
+    else: 
+        flip = False
+    
+    return origin_stop, destin_stop, origin_destination_geom, flip
 
 
 def super_project(
@@ -169,11 +183,10 @@ def super_project(
     
     
     # (4) Handle various cases for first stop or last stop
-    # and also direction of origin to destination stop
-    # if destination stop actually is closer to the start of the shape,
-    # that's ok, we'll use distance and make sure the direction is correct
+    # and grab the distance between origin/destination stop to use 
+    # with cumulative distance array
     (origin_stop, destin_stop, 
-     origin_destination_geom) = adjust_stop_start_end_for_special_cases(
+     origin_destination_geom, flip) = adjust_stop_start_end_for_special_cases(
         shape_geometry,
         subset_stop_geom, 
         subset_stop_proj
@@ -211,27 +224,15 @@ def super_project(
     
     # Attach the origin and destination, otherwise the segment
     # will not reach the actual stops, but will just grab the trunk portion
+    subset_shape_geom_with_od = np.array(
+        [origin_destination_geom[0]] + 
+        subset_shape_geom + 
+        [origin_destination_geom[-1]]
+    )
     
-    # Normal case
-    if origin_stop <= destin_stop:
-        subset_shape_geom_with_od = np.array(
-            [origin_destination_geom[0]] + 
-            subset_shape_geom + 
-            [origin_destination_geom[-1]]
-        )
-    
-    
-    # Special case, where bus is doubling back, we need to flip the 
-    # origin and destination points, but the inside should be in increasing order
-    else: 
-        # elif origin_stop > destin_stop:        
-        subset_shape_geom_with_od = np.flip(
-            np.asarray(
-                [origin_destination_geom[-1]] + 
-                subset_shape_geom + 
-                [origin_destination_geom[0]]
-            )
-        )
+    # flip happens here for inlining.
+    if flip:
+        subset_shape_geom_with_od = np.flip(subset_shape_geom_with_od)
     
     subset_ls = cut_normal_stop_segments.linestring_from_points(
         subset_shape_geom_with_od)
@@ -299,14 +300,20 @@ if __name__ == "__main__":
     
     gdf = find_special_cases_and_setup_df(analysis_date)
         
-    # apply super project row-wise
+    stop_segment_geoseries = []
+    
+    for row in gdf.itertuples():
+        stop_seg_geom = super_project(
+            getattr(row, "stop_sequence"),
+            getattr(row, "geometry"),
+            getattr(row, "stop_geometry_array"),
+            getattr(row, "stop_sequence_array")
+        )
+        stop_segment_geoseries.append(stop_seg_geom)
+    
+    
     gdf = gdf.assign(
-        stop_segment_geometry = gdf.apply(
-            lambda x: super_project(
-                x.stop_sequence,
-                x.geometry,
-                x.stop_geometry_array,
-                x.stop_sequence_array), axis=1)
+        stop_segment_geometry = stop_segment_geoseries
     )
     
     time1 = datetime.datetime.now()
