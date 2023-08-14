@@ -13,6 +13,7 @@ import sys
 
 from loguru import logger
 
+from shared_utils.geography_utils import WGS84
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               PROJECT_CRS, CONFIG_PATH)    
@@ -62,7 +63,7 @@ def linear_referencing_and_speed_by_segment(
     vp_gddf = dg.from_dask_dataframe(
         vp, 
         geometry=dg.points_from_xy(vp, "x", "y")
-    ).set_crs("EPSG:4326").to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
+    ).set_crs(WGS84).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
     
     vp_with_seg_geom = dd.merge(
         vp_gddf, 
@@ -87,6 +88,8 @@ def linear_referencing_and_speed_by_segment(
     )
     
     vp_with_seg_geom["shape_meters"] = shape_meters_series
+    vp_with_seg_geom = segment_calcs.convert_timestamp_to_seconds(
+        vp_with_seg_geom, [TIMESTAMP_COL])
     
     time2 = datetime.datetime.now()
     logger.info(f"linear referencing: {time2 - time1}")
@@ -102,12 +105,12 @@ def linear_referencing_and_speed_by_segment(
     speeds = vp_with_seg_geom.map_partitions(
         segment_calcs.calculate_speed_by_segment_trip,
         SEGMENT_IDENTIFIER_COLS,
-        TIMESTAMP_COL,
+        f"{TIMESTAMP_COL}_sec",
         meta = {
             **dtypes_dict,
-            "min_time": "datetime64[ns]",
+            "min_time": "float",
             "min_dist": "float",
-            "max_time": "datetime64[ns]",
+            "max_time": "float",
             "max_dist": "float",
             "meters_elapsed": "float", 
             "sec_elapsed": "float",

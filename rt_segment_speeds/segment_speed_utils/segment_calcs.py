@@ -69,10 +69,20 @@ def derive_speed(
     min_time, max_time = time_cols[0], time_cols[1]    
     
     df = df.assign(
-        meters_elapsed = df[max_dist] - df[min_dist],
-        sec_elapsed = (df[max_time] - df[min_time]).divide(
-                       np.timedelta64(1, 's')),
+        meters_elapsed = df[max_dist] - df[min_dist]
     )
+    
+    if df[min_time].dtype in ["float", "int"]:
+        # If 2 time cols are already converted to seconds, just take difference
+        df = df.assign(
+            sec_elapsed = (df[max_time] - df[min_time])
+        )
+    else:
+        # If 2 time cols are datetime, convert timedelta to seconds
+        df = df.assign(
+            sec_elapsed = (df[max_time] - df[min_time]).divide(
+                           np.timedelta64(1, 's')),
+        )
     
     df = df.assign(
         speed_mph = (df.meters_elapsed.divide(df.sec_elapsed) * 

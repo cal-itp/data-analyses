@@ -15,6 +15,7 @@ import sys
 
 from loguru import logger
 
+from shared_utils.geography_utils import WGS84
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH, PROJECT_CRS)
@@ -173,6 +174,7 @@ def find_vp_direction_vector(
     crs: str = PROJECT_CRS
 ) -> pd.DataFrame:
     """
+    Get direction vector for first and last vp within segment.
     """
     trip_group_cols = group_cols + ["group", "segments_vector"]
     keep_cols = trip_group_cols + ["x", "y"]
@@ -192,12 +194,12 @@ def find_vp_direction_vector(
     # Use 2 geoseries, the first point and the last point
     first_series = gpd.points_from_xy(
         df_wide.x_start, df_wide.y_start,
-        crs="EPSG:4326"
+        crs=WGS84
     ).to_crs(crs)
            
     last_series = gpd.points_from_xy(
         df_wide.x_end, df_wide.y_end, 
-        crs="EPSG:4326"
+        crs=WGS84
     ).to_crs(crs)
     
     # Input 2 series to get a directon for each element-pair 
@@ -265,7 +267,7 @@ def find_errors_in_segment_groups(
     # TODO: should we keep NaNs? NaNs weren't able to have a vector calculated,
     # which could mean it's kind of an outlier in the segment, 
     # maybe should have been attached elsewhere
-    vp_same_direction = (vp_dot_prod[vp_dot_prod.dot_product > 0]
+    vp_same_direction = (vp_dot_prod[~(vp_dot_prod.dot_product < 0)]
                              [group_cols + ["group"]]
                              .drop_duplicates()
                              .reset_index(drop=True)
@@ -326,7 +328,7 @@ def pare_down_vp_for_special_cases(
 
     special_vp_to_keep = segment_calcs.keep_min_max_timestamps_by_segment(
         vp_pared_special,       
-        SEGMENT_IDENTIFIER_COLS,
+        SEGMENT_IDENTIFIER_COLS + ["trip_instance_key"],
         TIMESTAMP_COL
     )
     
