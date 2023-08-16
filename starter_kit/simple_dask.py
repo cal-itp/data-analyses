@@ -4,7 +4,7 @@ import gcsfs
 import os
 import pandas as pd
 
-from calitp.storage import get_fs, is_cloud
+from calitp_data_analysis import get_fs
 fs = get_fs()
 
 RT_GCS = 'gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/'
