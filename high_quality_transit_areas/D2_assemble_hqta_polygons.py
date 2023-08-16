@@ -10,8 +10,7 @@ import intake
 import pandas as pd
 import sys
 
-from calitp_data.storage import get_fs
-from calitp_data.config import is_cloud
+from calitp_data_analysis import get_fs
 from loguru import logger
 
 import C1_prep_pairwise_intersections as prep_clip
