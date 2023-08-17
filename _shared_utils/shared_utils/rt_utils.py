@@ -15,10 +15,14 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
+from calitp_data_analysis import get_fs
 from calitp_data_analysis.tables import tbls
 from numba import jit
 from shared_utils import geography_utils, gtfs_utils_v2, rt_dates, utils
 from siuba import *
+from typing import Literal
+
+fs = get_fs()
 
 # set system time
 os.environ["TZ"] = "America/Los_Angeles"
@@ -802,19 +806,21 @@ def get_operators(analysis_date, operator_list, verbose=False):
             op_list_runstatus[itp_id] = "not_yet_run"
     return op_list_runstatus
 
-
-def spa_map_export_link(gdf: gpd.GeoDataFrame, path: str, state: dict, site: str = SPA_MAP_SITE):
+def spa_map_export_link(gdf: gpd.GeoDataFrame, path: str, state: dict, site: str = SPA_MAP_SITE,
+                        cache_seconds: int = 3600):
     """
     Called via set_state_export. Handles stream writing of gzipped geojson to GCS bucket,
     encoding spa state as base64 and URL generation.
     """
-
+    assert cache_seconds in range(3601), 'cache must be 0-3600 seconds'
     geojson_str = gdf.to_json()
     geojson_bytes = geojson_str.encode("utf-8")
     print(f"writing to {path}")
     with fs.open(path, "wb") as writer:  # write out to public-facing GCS?
         with gzip.GzipFile(fileobj=writer, mode="w") as gz:
             gz.write(geojson_bytes)
+    if cache_seconds != 3600:
+        fs.setxattrs(path, fixed_key_metadata={'cache_control': f'public, max-age={cache_seconds}'})
     base64state = base64.urlsafe_b64encode(json.dumps(state).encode()).decode()
     spa_map_url = f"{site}?state={base64state}"
     return spa_map_url
@@ -825,12 +831,14 @@ def set_state_export(
     bucket: str = SPA_MAP_BUCKET,
     subfolder: str = "testing/",
     filename: str = "test2",
-    map_type: str = None,
+    map_type: Literal["speedmap", "speed_variation", "hqta_areas",
+                      "hqta_stops", "state_highway_network"] = None,
     map_title: str = "Map",
     cmap: branca.colormap.ColorMap = None,
     color_col: str = None,
     legend_url: str = None,
     existing_state: dict = {},
+    cache_seconds: int = 3600
 ):
     """
     Applies light formatting to gdf for successful spa display. Will pass map_type
@@ -838,10 +846,13 @@ def set_state_export(
     available one.
     Supply cmap and color_col for coloring based on a Branca ColorMap and a column
     to apply the color to.
+    Cache is 1 hour by default, can set shorter time in seconds for
+    "near realtime" applications (suggest 120) or development (suggest 0)
 
     Returns dict with state dictionary and map URL. Can call multiple times and supply
     previous state as existing_state to create multilayered maps.
     """
+    assert not gdf.empty, "geodataframe is empty!"
     spa_map_state = existing_state or {"name": "null", "layers": [], "lat_lon": (), "zoom": 13}
     path = f"{bucket}{subfolder}{filename}.geojson.gz"
     gdf = gdf.to_crs(geography_utils.WGS84)
@@ -864,4 +875,6 @@ def set_state_export(
     spa_map_state["lat_lon"] = centroid
     if legend_url:
         spa_map_state["legend_url"] = legend_url
-    return {"state_dict": spa_map_state, "spa_link": spa_map_export_link(gdf=gdf, path=path, state=spa_map_state)}
+    return {"state_dict": spa_map_state, "spa_link": spa_map_export_link(
+        gdf=gdf, path=path, state=spa_map_state, cache_seconds = cache_seconds)
+           }
