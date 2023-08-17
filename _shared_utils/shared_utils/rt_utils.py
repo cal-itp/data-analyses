@@ -23,6 +23,8 @@ from siuba import *
 
 fs = get_fs()
 
+fs = get_fs()
+
 # set system time
 os.environ["TZ"] = "America/Los_Angeles"
 time.tzset()
