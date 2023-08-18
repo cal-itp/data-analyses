@@ -8,8 +8,3 @@
 2023-07-13 14:26:23.643 | INFO     | __main__:<module>:140 - create major stop bus
 2023-07-13 14:26:29.371 | INFO     | __main__:<module>:144 - create hq corridor bus
 2023-07-13 14:26:30.528 | INFO     | __main__:<module>:160 - execution time: 0:00:27.548297
-2023-08-17 08:48:01.315 | INFO     | __main__:<module>:126 - Analysis date: 2023-08-16
-2023-08-17 08:48:05.815 | INFO     | __main__:<module>:136 - grab all stops
-2023-08-17 08:48:06.138 | INFO     | __main__:<module>:140 - create major stop bus
-2023-08-17 08:48:08.343 | INFO     | __main__:<module>:144 - create hq corridor bus
-2023-08-17 08:48:09.073 | INFO     | __main__:<module>:160 - execution time: 0:00:07.757601
