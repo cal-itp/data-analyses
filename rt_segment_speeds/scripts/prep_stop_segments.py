@@ -250,16 +250,12 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
     stop_times_with_geom = stop_times_aggregated_to_shape_array_key(
         analysis_date
     )
-    
-    # Turn the stop_geometry and shape_geometry columns into geoseries
-    shape_geoseries = stop_times_with_geom.geometry
-    stop_geoseries = stop_times_with_geom.stop_geometry
-    
-    # Get projected shape_meters as dask array
+        
+    # Get projected shape_meters as an array
     shape_meters_geoseries = wrangle_shapes.project_point_geom_onto_linestring(
-        shape_geoseries,
-        stop_geoseries,
-        get_dask_array=False
+        stop_times_with_geom,
+        "geometry",
+        "stop_geometry",
     )
     
     # Attach dask array as a column

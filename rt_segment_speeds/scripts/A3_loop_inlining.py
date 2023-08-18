@@ -332,7 +332,7 @@ def pare_down_vp_for_special_cases(
         TIMESTAMP_COL
     )
     
-    special_vp_to_keep = special_vp_to_keep.repartition(npartitions=2)
+    special_vp_to_keep = special_vp_to_keep.repartition(npartitions=1)
 
     special_vp_to_keep.to_parquet(
         f"{SEGMENT_GCS}vp_pare_down/{EXPORT_FILE}_special_{analysis_date}", 
