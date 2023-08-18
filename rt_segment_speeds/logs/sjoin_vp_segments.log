@@ -23,3 +23,8 @@
 2023-08-14 07:56:59.002 | INFO     | __main__:sjoin_vp_to_segments:191 - sjoin with map_partitions: 0:00:00.026733
 2023-08-14 08:07:24.889 | INFO     | __main__:sjoin_vp_to_segments:200 - export partitioned results: 0:10:25.887360
 2023-08-14 08:07:29.336 | INFO     | __main__:<module>:223 - execution time: 0:13:01.059573
+2023-08-18 14:12:59.926 | INFO     | __main__:<module>:211 - Analysis date: 2023-08-16
+2023-08-18 14:15:43.911 | INFO     | __main__:sjoin_vp_to_segments:176 - prep vp and persist: 0:02:43.951955
+2023-08-18 14:15:43.969 | INFO     | __main__:sjoin_vp_to_segments:191 - sjoin with map_partitions: 0:00:00.057488
+2023-08-18 14:22:15.411 | INFO     | __main__:sjoin_vp_to_segments:200 - export partitioned results: 0:06:31.441789
+2023-08-18 14:22:19.302 | INFO     | __main__:<module>:223 - execution time: 0:09:19.346578

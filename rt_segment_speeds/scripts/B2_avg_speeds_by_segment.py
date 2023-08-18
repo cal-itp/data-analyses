@@ -84,13 +84,12 @@ def speeds_with_segment_geom(
     )
     
     df = df[df.speed_mph.notna() ].reset_index(drop=True)
-    
     time_of_day_df = sched_rt_utils.get_trip_time_buckets(analysis_date)
-    
+
     df2 = pd.merge(
         df, 
         time_of_day_df, 
-        on = ["gtfs_dataset_key", "trip_id"], 
+        on = "trip_instance_key", 
         how = "inner"
     )
     
@@ -115,7 +114,7 @@ def speeds_with_segment_geom(
         SEGMENT_GCS,
         f"{SEGMENT_FILE}_{analysis_date}",
         columns = SEGMENT_IDENTIFIER_COLS + [
-            "gtfs_dataset_key", 
+            "schedule_gtfs_dataset_key", 
             "stop_id",
             "loop_or_inlining",
             "geometry", 

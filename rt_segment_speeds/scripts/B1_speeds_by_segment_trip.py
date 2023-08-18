@@ -117,7 +117,7 @@ def linear_referencing_and_speed_by_segment(
             "speed_mph": "float",
         }) 
     
-    speeds = speeds.repartition(npartitions=10)
+    speeds = speeds.repartition(npartitions=2)
     
     time3 = datetime.datetime.now()
     logger.info(f"calculate speeds: {time3 - time2}")

@@ -115,7 +115,7 @@ def check_for_completeness(
     
 if __name__=="__main__":
     
-    logger.add("./logs/operators_for_hqta.log", retention="6 months")
+    logger.add("./logs/operators_for_hqta.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
