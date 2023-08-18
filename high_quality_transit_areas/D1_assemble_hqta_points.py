@@ -92,8 +92,16 @@ def add_route_info(hqta_points: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         validate = "m:1"
     ).drop(columns = "trip_id")
     
-    # Clip to CA
-    ca_hqta_points = utilities.clip_to_ca(hqta_points_with_route)
+    # Clip to CA -- remove ferry or else we're losing it in the clip
+    not_ferry = hqta_points_with_route[
+        hqta_points_with_route.hqta_type != "major_stop_ferry"]
+    is_ferry = hqta_points_with_route[
+        hqta_points_with_route.hqta_type == "major_stop_ferry"]
+    
+    not_ferry_ca = utilities.clip_to_ca(not_ferry)
+    ca_hqta_points = pd.concat(
+        [not_ferry_ca, is_ferry], axis=0
+    ).reset_index(drop=True)
     
     return ca_hqta_points
 
