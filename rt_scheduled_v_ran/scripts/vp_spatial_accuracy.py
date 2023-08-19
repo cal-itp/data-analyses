@@ -14,10 +14,11 @@ import sys
 
 from loguru import logger
 
+from update_vars import analysis_date
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS,
+                                              COMPILED_CACHED_VIEWS,
                                               RT_SCHED_GCS,
-                                              analysis_date, 
                                               PROJECT_CRS
                                              )
 
