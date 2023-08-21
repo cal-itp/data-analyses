@@ -1,3 +1,6 @@
-{% for site in sites -%}
-
-{% endfor %}
+/dla/* https://dla--cal-itp-data-analyses.netlify.app//:splat  301
+/ahsc/* https://ahsc--cal-itp-data-analyses.netlify.app//:splat  301
+/atp/* https://atp--cal-itp-data-analyses.netlify.app//:splat  301
+/competitive-corridors/* https://competitive-corridors--cal-itp-data-analyses.netlify.app//:splat  301
+/hqta/* https://hqta--cal-itp-data-analyses.netlify.app//:splat  301
+/quarterly-performance-metrics/* https://quarterly-performance-metrics--cal-itp-data-analyses.netlify.app//:splat  301
