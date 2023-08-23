@@ -66,8 +66,11 @@ def stage_portfolio():
 def deploy_portfolio():
     
     os.chdir('/home/jovyan/data-analyses')
-    ## TODO replace with new cp + deploy prod...
-    # os.system('python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy')
+    os.system('cp -r portfolio/rt/_build/html/* portfolio/index/rt/')
+    os.system('python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy')
+    print('check draft URL for RT site, then run python portfolio/portfolio.py index --deploy')
+    print('after that, check draft URL for index, rerun last with --prod')
+    # os.system('netlify deploy --site=cal-itp-data-analyses --dir=portfolio/rt/_build/html/ --alias=rt')
 
 if __name__ == "__main__":
 

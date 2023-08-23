@@ -46,7 +46,6 @@ if __name__ == "__main__":
     # check if this stage needed
     if speedmaps_index_joined.status.isin(['map_confirmed', 'map_failed', 'parser_failed']).all():
         print('already attempted to test all maps:')
-        print(f'{speedmaps_index_joined >> count(_.status)}')
     else:
         pbar = tqdm.tqdm()
         with warnings.catch_warnings():
