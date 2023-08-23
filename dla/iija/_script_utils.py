@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from siuba import *
 
-from shared_utils import geography_utils
 import dla_utils
 
 from calitp_data_analysis.sql import to_snakecase
@@ -73,13 +72,15 @@ def add_county_abbrev(df, county_name_col):
     '''
     ### read county data in from the shared_data catalog
     catalog = intake.open_catalog("../../_shared_utils/shared_utils/shared_data_catalog.yml")
-    counties = to_snakecase((catalog.ca_counties.read())>>select(_.COUNTY_NAME,_.COUNTY_ABBREV,_.COUNTY_CODE))
+    counties = to_snakecase((catalog.ca_counties.read())>>select(_.COUNTY_NAME,_.COUNTY_ABBREV,))
+    
+    county_codes = to_snakecase((pd.read_excel(f"{GCS_FILE_PATH}/CountyNameToCodeLookUp.xlsx")))
     
     ### add county 
     counties['county_name_full'] = counties['county_name'] + ' County'
     
     ### create dict to map
-    county_mapping = dict(counties[['county_name_full', 'county_abbrev']].values)
+    county_mapping = dict(county_codes[['county_name', 'rca_county_code']].values)
     
     ### map values to the df
     df[f"{county_name_col}_abbrev"] = df[county_name_col].map(county_mapping)
