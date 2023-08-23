@@ -520,7 +520,7 @@ def check_intermediate_data(
     if already_tried:
         print(f"found {progress_path}, resuming")
         speedmaps_index_joined = pd.read_parquet(progress_path)
-        print(speedmaps_index_joined >> count(_.status)) # show status when running script
+        print(speedmaps_index_joined >> count(_.status))  # show status when running script
     else:
         operators_ran = get_operators(analysis_date, speedmaps_index_df.organization_itp_id.to_list())
         operators_ran_df = pd.DataFrame.from_dict(operators_ran, orient="index", columns=["status"])
