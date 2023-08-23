@@ -66,7 +66,8 @@ def stage_portfolio():
 def deploy_portfolio():
     
     os.chdir('/home/jovyan/data-analyses')
-    os.system('python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy')
+    ## TODO replace with new cp + deploy prod...
+    # os.system('python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy')
 
 if __name__ == "__main__":
 
