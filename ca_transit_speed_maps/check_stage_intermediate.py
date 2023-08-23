@@ -43,7 +43,6 @@ if __name__ == "__main__":
     if speedmaps_index_joined.status.isin(['already_ran', 'parser_failed',
                                            'map_confirmed', 'map_failed']).all():
         print('already attempted to stage all intermediate data:')
-        print(speedmaps_index_joined.status.value_counts())
     else:
         pbar = tqdm.tqdm()
         with warnings.catch_warnings():
@@ -51,4 +50,3 @@ if __name__ == "__main__":
             _ = speedmaps_index_joined.apply(stage_intermediate_data, axis = 1, args=[pbar])
         print()
         print('intermediate data stage attempt complete:')
-        print(speedmaps_index_joined.status.value_counts())
