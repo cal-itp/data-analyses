@@ -45,7 +45,7 @@ if __name__=="__main__":
     RUN_ME = [
         "hqta_areas", "hqta_stops",
         "transit_stops", "transit_routes",
-        "speeds_stop_segments", "speeds_route_time_of_day",
+        #"speeds_stop_segments", "speeds_route_time_of_day",
     ]
     
     for name, dataset in OPEN_DATA.items():

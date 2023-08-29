@@ -8,7 +8,6 @@ import geopandas as gpd
 import glob
 import intake
 import os
-import pendulum
 import sys
 
 from loguru import logger
@@ -18,13 +17,6 @@ from update_vars import analysis_date
 
 catalog = intake.open_catalog("./*.yml")
 
-def open_data_dates(analysis_date: str = analysis_date) -> tuple[str]:
-    # From analysis date, return beginning date and end date (in 1 month)
-    beginning_date = analysis_date    
-    end_date = pendulum.parse(beginning_date).add(months=1).to_date_string()
-    
-    return beginning_date, end_date
-    
 
 def standardize_column_names(df):
     df.columns = df.columns.str.replace('agency_name', 'agency')
@@ -56,6 +48,7 @@ if __name__=="__main__":
                level="INFO")
     
     datasets = list(dict(catalog).keys())
+    datasets = [i for i in datasets if "speed" not in i]
     
     for d in datasets:
         gdf = catalog[d].read().to_crs(geography_utils.WGS84)
