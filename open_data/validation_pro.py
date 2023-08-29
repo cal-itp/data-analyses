@@ -85,4 +85,4 @@ def check_dates(string: str)-> str:
     date4 = '04-15-22'
     date5 = '20200830'
     """
-    return pd.to_datetime(string).date().isoformat()            
+    return pd.to_datetime(string).date().isoformat()
