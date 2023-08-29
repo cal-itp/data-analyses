@@ -10,3 +10,4 @@ SEGMENT_GCS = f"{GCS_FILE_PATH}rt_segment_speeds/"
 
 ESRI_BASE_URL = "https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/"
 DEFAULT_XML_TEMPLATE = "default_pro.xml"
+XML_FOLDER = "xml/"
