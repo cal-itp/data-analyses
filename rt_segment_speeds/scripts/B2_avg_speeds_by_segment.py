@@ -122,11 +122,11 @@ def speeds_with_segment_geom(
         how = "inner"
     )
     
-    all_day = B2_avg_speeds_by_segment.calculate_avg_speeds(
+    all_day = calculate_avg_speeds(
         df4, 
         SEGMENT_IDENTIFIER_COLS
     )
-    peak = B2_avg_speeds_by_segment.calculate_avg_speeds(
+    peak = calculate_avg_speeds(
         df4[df4.time_of_day.isin(["AM Peak", "PM Peak"])], 
         SEGMENT_IDENTIFIER_COLS
     )
