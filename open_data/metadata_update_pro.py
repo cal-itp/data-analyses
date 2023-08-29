@@ -12,6 +12,8 @@ import xmltodict
 import validation_pro
 from update_vars import DEFAULT_XML_TEMPLATE, XML_FOLDER
 
+TEMPLATE_XML = f"./{XML_FOLDER}{DEFAULT_XML_TEMPLATE}"
+
 # This prefix keeps coming up, but xmltodict has trouble processing or replacing it
 x = "ns0:"
 main = f"{x}MD_Metadata"
@@ -63,7 +65,7 @@ def lift_necessary_dataset_elements(metadata_json: dict) -> dict:
 
 
 def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
-    default_template = xml_to_json(f"./{XML_FOLDER}{DEFAULT_XML_TEMPLATE}")
+    default_template = xml_to_json(TEMPLATE_XML)
     
     # Grab the necessary elements from my dataset
     necessary_elements = lift_necessary_dataset_elements(metadata_json[main])
@@ -77,6 +79,59 @@ def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
             
     # Return the default template, but now with our dataset's info populated
     return default_template
+
+
+def update_arcpy_metadata_class(dataset_info: dict) -> :
+    """
+    This step needs to take place in ArcPro before we export XML.
+    """
+        
+    for_arcpy = [
+        "dataset_name", # title
+        "theme_keywords", # tags
+        "purpose", # summary
+        "description", # abstract
+        "public_access", # accessConstraints
+    ]
+    
+    subset_dict = {i: dataset_info[i] for i in for_arcpy}
+    
+    #test_metadata.exportMetadata("test.xml")
+    
+    return subset_dict
+
+
+def overwrite_overview(metadata: dict, dataset_info: dict) -> dict:
+    """
+    Overwrite the metadata for ArcPro Overview section 
+    with dictionary of dataset info supplied.
+    """
+    d = dataset_info
+    
+    # This is how most values are keyed in for last dict
+    key = "ns1:CharacterString"
+    key_dt = "ns1:Date"
+    enum = "@codeListValue"
+    t = "text"
+    
+    id_info = metadata[f"{x}identificationInfo"][f"{x}MD_DataIdentification"]
+    
+    
+    citation_info[f"{x}title"][key] = d["dataset_name"]  
+    
+    
+    id_info[f"{x}abstract"][key] = d["abstract"]
+    id_info[f"{x}purpose"][key] = d["purpose"]
+    (id_info[f"{x}descriptiveKeywords"][0]
+     [f"{x}MD_Keywords"][f"{x}keyword"]) = d["theme_keywords"]
+    id_info[f"{x}topicCategory"][f"{x}MD_TopicCategoryCode"] = d["theme_topic"]
+    id_info[f"{x}extent"][0][f"{x}EX_Extent"][f"{x}description"][key] = d["place"]
+    
+    citation_info = id_info[f"{x}citation"][f"{x}CI_Citation"]
+  
+    
+    return metadata
+
 
 
 def overwrite_id_info(metadata: dict, dataset_info: dict) -> dict:
@@ -219,7 +274,7 @@ def update_metadata_xml(
     print("Default template applied.")
 
     # These rely on functions, so they can't be used in pydantic easily
-    dataset_info = fix_values_in_validated_dict(dataset_info) 
+    dataset_info = validation_pro.fix_values_in_validated_dict(dataset_info) 
     
     # Validate the dict input with pydantic
     DATASET_INFO_VALIDATED = metadata_input(**dataset_info).dict()

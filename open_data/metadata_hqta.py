@@ -44,7 +44,7 @@ HQTA_TRANSIT_AREAS_DICT = {
 
     "methodology": METHODOLOGY, 
     
-    "data_dict_type": "CSV",
+    "data_dict_type": "XML",
     "data_dict_url": DATA_DICT_AREAS_URL, 
 
     "contact_organization": "Caltrans", 

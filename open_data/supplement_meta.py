@@ -1,3 +1,7 @@
+"""
+Add to metadata.yml with longer descriptions and/or
+sections that rely on functions.
+"""
 from update_vars import analysis_date, ESRI_BASE_URL
 
 # Use 1 revision date for all products at once
