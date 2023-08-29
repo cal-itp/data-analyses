@@ -87,18 +87,6 @@ def finalize_df_for_export(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     return gdf2
 
-
-def grab_extreme_tails(
-    df: pd.DataFrame, 
-    col_list: list, 
-    q: float = 0.05
-) -> list:
-    """
-    Get quantile cutoffs across list of columns.
-    """
-    return [df[c].quantile(q=q) for c in col_list]
-
-
 if __name__ == "__main__":
     
     start = datetime.datetime.now()
