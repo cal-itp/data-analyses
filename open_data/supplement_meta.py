@@ -64,7 +64,6 @@ supplement_me = {
         "data_dict_url": get_esri_url("CA_HQ_Transit_Stops"), 
         "revision_date": analysis_date,
         "rename_cols": RENAME_HQTA,
-
     },
     "ca_transit_routes": {
         "methodology": TRAFFIC_OPS_METHODOLOGY,

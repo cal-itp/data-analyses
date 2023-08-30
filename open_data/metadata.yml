@@ -19,7 +19,7 @@ common-fields:
       https://github.com/cal-itp/data-analyses/blob/main/high_quality_transit_areas/README.md
   - &hqta_keywords |-
       Transportation, Land Use, Transit-Oriented Development, TOD, High Quality Transit
-  - &hqta_abstract |-
+  - &hqta_description |-
       Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled frequencies of 15 minutes or less.
   - &traffic_ops_readme |-
       https://github.com/cal-itp/data-analyses/blob/main/open_data/README.md
@@ -27,7 +27,7 @@ common-fields:
         Transportation, GTFS, Transit routes, Transit stops, Transit
   - &traffic_ops_purpose |-
       Provide all CA transit stops and routes (geospatial) from all transit operators.
-  - &traffic_ops_abstract |-
+  - &traffic_ops_description |-
       Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates route information to stops.
   - &speeds_readme |-
       https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/README.md
@@ -37,8 +37,8 @@ common-fields:
 tables:
   - dataset_name: ca_hq_transit_areas
     publish_entity: *publish_entity
-    purpose: "Estimated High Quality Transit Areas as described in Public Resources Code 21155, 21064.3, 21060.2."
-    abstract: *hqta_abstract
+    summary_purpose: "Estimated High Quality Transit Areas as described in Public Resources Code 21155, 21064.3, 21060.2."
+    description: *hqta_description
     public_access: *public_access
     creation_date: "2022-02-08"
     place: *place
@@ -58,8 +58,8 @@ tables:
   
   - dataset_name: ca_hq_transit_stops
     publish_entity: *publish_entity
-    purpose: "Estimated stops along High Quality Transit Corridors, plus major transit stops for bus rapid transit, ferry, rail modes as described in Public Resources Code 21155, 21064.3, 21060.2."
-    abstract: *hqta_abstract
+    summary_purpose: "Estimated stops along High Quality Transit Corridors, plus major transit stops for bus rapid transit, ferry, rail modes as described in Public Resources Code 21155, 21064.3, 21060.2."
+    description: *hqta_description
     public_access: *public_access
     creation_date: "2022-02-08"
     place: *place
@@ -79,8 +79,8 @@ tables:
 
   - dataset_name: ca_transit_routes
     publish_entity: *publish_entity
-    purpose: *traffic_ops_purpose
-    abstract: *traffic_ops_abstract
+    summary_purpose: *traffic_ops_purpose
+    description: *traffic_ops_description
     public_access: *public_access
     creation_date: "2022-02-08"
     place: *place
@@ -100,8 +100,8 @@ tables:
     
   - dataset_name: ca_transit_stops
     publish_entity: *publish_entity
-    purpose: *traffic_ops_purpose
-    abstract: *traffic_ops_abstract
+    summary_purpose: *traffic_ops_purpose
+    description: *traffic_ops_description
     public_access: *public_access
     creation_date: "2022-02-08"
     place: *place
@@ -121,8 +121,8 @@ tables:
 
   - dataset_name: speeds_by_stop_segments
     publish_entity: *publish_entity
-    purpose: "All day and peak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data."
-    abstract: |-
+    summary_purpose: "All day and peak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data."
+    description: |-
         All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.
     public_access: *public_access
     creation_date: "2022-02-08"
@@ -143,9 +143,9 @@ tables:
 
   - dataset_name: speeds_by_route_time_of_day
     publish_entity: *publish_entity
-    purpose: |-
+    summary_purpose: |-
         Average transit speeds by route-direction and time-of-day estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.
-    abstract: |-
+    description: |-
         Provide average transit speeds, number of trips, and metrics related to scheduled annd real-time service minutes by route-direction and time-of-day.
     public_access: *public_access
     creation_date: "2023-06-14"

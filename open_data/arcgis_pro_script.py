@@ -1,5 +1,6 @@
 import os
 import arcpy
+import json
 
 from arcpy import metadata as md
 
@@ -52,79 +53,65 @@ for f in in_features:
     for field in field_list: #loop through each field
         print(field.name)
 
-## (2) Rename fields where needed
-# Do this once it's a feature class, so we can preserve the new column names
-# before metadata is created
-hqta_renaming = [
-    'ca_hq_transit_areas',
-    'ca_hq_transit_stops',
-]
-speed_renaming = [
-    'speeds_by_stop_segments',
-    'speeds_by_route_time_of_day'
-]
+## (2) Read in json with all the changes we need for each layer
+with open(f"{working_dir}\metadata.json") as f:
+    meta_dict = json.load(f)
 
-# hqta datasets
-RENAME_HQTA = {
-    "agency_pri": "agency_primary",
-    "agency_sec": "agency_secondary",
-    "hqta_detai": "hqta_details",
-    "base64_url": "base64_url_primary",
-    "base64_u_1": "base64_url_secondary",  
-    "org_id_pri": "org_id_primary",
-    "org_id_sec": "org_id_secondary",
-}
+    
+def rename_columns_with_dict(this_feature_class, rename_dict: dict):
+    """
+    Get a list of fields for each feature class and use a dict to rename.
+    """
+    field_list = arcpy.ListFields(this_feature_class)  
 
-# speeds datasets
-RENAME_SPEED = {
-    "stop_seque": "stop_sequence",
-    "time_of_da": "time_of_day",
-    "district_n": "district_name",
-    "direction_": "direction_id",
-    "common_sha": "common_shape_id",
-    "avg_sched_": "avg_sched_service_min", 
-    "avg_rt_tri": "avg_rt_service_min",
-}
+    for field in field_list: 
+        if field.name in rename_dict: 
+            arcpy.AlterField_management(
+                this_feature_class, 
+                field.name, rename_dict[field.name], # new_field_name
+                rename_dict[field.name]) # new_field_alias
+    return
 
-# Separate out renaming for groups of datasets to prevent 
-# columns from being renamed when we don't want it to (don't need suffixes for non-hqta)
-def rename_columns_with_dict(feature_class_list, rename_dict):
+
+def update_layer_with_json(feature_class_list: list, meta_dict_supplied: dict):
+    """
+    Update each feature layer.
+    Rename columns, update the metadata class attributes
+    that can be accessed through the arcpy.metadata class.
+    """
     for f in feature_class_list:
         # To change field names, must use AlterField_management, 
         # because changing it in XML won't carry through when you sync
         this_feature_class = feature_class_in_gdb_path(staging_location, f)
-
-        field_list = arcpy.ListFields(this_feature_class)  #get a list of fields for each feature class    
-
-        for field in field_list: #loop through each field
-            if field.name in rename_dict:  #look for the name elev
-                arcpy.AlterField_management(
-                    this_feature_class, 
-                    field.name, rename_dict[field.name], # new_field_name
-                    rename_dict[field.name]) # new_field_alias
+        
+        subset_meta_dict = meta_dict_supplied[f]
+        
+        if "rename_cols" in subset_meta_dict.keys():  
+            rename_dict = subset_meta_dict["rename_cols"]
+            rename_columns_with_dict(this_feature_class, rename_dict)
+        
+        
+        # Check that renaming is done
+        print(this_feature_class)
+        check_fields = arcpy.ListFields(this_feature_class)
+        for field in check_fields: #loop through each field
+            print(field.name)
+        
+        # Now update metadata class elements that are available
+        source_metadata = md.Metadata(this_feature_class)
+        source_metadata.tags = subset_meta_dict["theme_keywords"]
+        source_metadata.summary = subset_meta_dict["summary_purpose"]
+        source_metadata.description = subset_meta_dict["description"]
+        source_metadata.accessConstraints = subset_meta_dict["public_access"]
+        source_metadata.save()
+        
     return
-            
 
-            
-rename_columns_with_dict(hqta_renaming, RENAME_HQTA)
-rename_columns_with_dict(speed_renaming, RENAME_SPEED)
-            
-            
-# Double check it's done
-# TODO: this does look like it renames it...but when XML is exported in next step
-# the new field names are not retained
-for f in hqta_renaming + speed_renaming:
-    this_feature_class = os.path.join(staging_location, f)
 
-    # Print field names, just in case it needs renaming
-    field_list = arcpy.ListFields(this_feature_class)  #get a list of fields for each feature class
+update_layer_with_json(in_features, meta_dict)    
     
-    print(this_feature_class)
-    for field in field_list: #loop through each field
-        print(field.name)
-
-
-## (3) Export metadata associated with file gdb feature class in FGDC format    
+    
+## (3) Export metadata associated with file gdb feature class in ISO19139 format    
 for f in in_features:
     this_feature_class = feature_class_in_gdb_path(staging_location, f)
 
