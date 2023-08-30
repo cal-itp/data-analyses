@@ -76,16 +76,18 @@ def speeds_with_segment_geom(
     SPEEDS_FILE = dict_inputs["stage4"]
     
     # Load in segment geometry
-    segments = helpers.import_segments(
-        SEGMENT_GCS,
-        f"{SEGMENT_FILE}_{analysis_date}",
-        columns = SEGMENT_IDENTIFIER_COLS + [
+    segment_cols_to_keep = SEGMENT_IDENTIFIER_COLS + [
             "schedule_gtfs_dataset_key", 
             "stop_id",
             "loop_or_inlining",
             "geometry", 
             "district", "district_name"
         ]
+    
+    segments = helpers.import_segments(
+        SEGMENT_GCS,
+        f"{SEGMENT_FILE}_{analysis_date}",
+        columns = segment_cols_to_keep
     )
     
     # CRS is 3310, calculate the length
@@ -93,15 +95,18 @@ def speeds_with_segment_geom(
     
     # Read in speeds
     df = pd.read_parquet(
-        f"{SEGMENT_GCS}{SPEEDS_FILE}_{analysis_date}"
-    )
-    
-    # Find only unique segments with rt data  before filtering
-    unique_segments = df[SEGMENT_IDENTIFIER_COLS].drop_duplicates()
+        f"{SEGMENT_GCS}{SPEEDS_FILE}_{analysis_date}", 
+        filters = [[("speed_mph", "<=", max_speed_cutoff)]])
     
     # Do a merge with segments
     merge_cols = ['shape_array_key','stop_sequence','schedule_gtfs_dataset_key']
     df2 = pd.merge(segments, df, on = merge_cols, how = "inner")
+    
+    # Keep only segments that have RT data. 
+    unique_segments = (df2[segment_cols_to_keep]
+                       .drop_duplicates()
+                       .reset_index(drop = True)
+                      )
     
     # Find percentage of meters elapsed vs. total segment length
     df2 = df2.assign(
@@ -136,32 +141,17 @@ def speeds_with_segment_geom(
         peak.assign(time_of_day = "peak")
     ], axis=0)
     
-    # start with segments with geom (scheduled, we have way too many)
-    # merge against unique_segments (these are present in RT...inner join)...we have geom 
-    missing = (pd.merge(unique_segs_with_geo, 
-                        stats, 
-                        on = ['shape_array_key', 'stop_sequence'], 
-                        how = "left", 
-                        indicator = True))
-    
-    # Grab left only results, which did not show up in the stats df
-    missing = missing.loc[missing._merge == "left_only"].reset_index(drop = True)
-    missing = missing.drop(columns = ['_merge'])
-    
-    # Concat & clean.
-    stats2 = pd.concat([missing, stats])
-    stats2 = stats2.fillna(stats2.dtypes.replace({'float64': 0.0, 'object': 'None'}))
-    stats2 = stats2.drop(columns = ['segment_length'])
-    
+  
     # Merge in segment geometry with a changed CRS
-    segments = segments.to_crs(geography_utils.WGS84)
+    unique_segments = unique_segments.to_crs(geography_utils.WGS84)
     
     gdf = pd.merge(
-        segments,
-        stats2,
+        unique_segments,
+        stats,
         on = SEGMENT_IDENTIFIER_COLS,
-        how = "inner"
+        how = "left"
     )
+    
     
     return gdf
 
