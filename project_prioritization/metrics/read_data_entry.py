@@ -24,5 +24,12 @@ dac_traffic.to_parquet(f'{GCS_FILE_PATH}data_entry_raw_dac_traffic.parquet')
 
 # Land use
 land_use = to_snakecase(pd.read_excel(f'{GCS_FILE_PATH}Metrics_Scoring_All_Projects.xlsx', sheet_name="Land Use"))
+land_use.columns = land_use.columns.str.replace('?', '')
 land_use.to_parquet(f'{GCS_FILE_PATH}data_entry_raw_land_use.parquet')
+
+# VMT
+vmt = to_snakecase(pd.read_excel(f'{GCS_FILE_PATH}Metrics_Scoring_All_Projects.xlsx', sheet_name="VMT"))
+vmt.columns = vmt.columns.str.replace('?', '')
+vmt['estimated_change_in_vmt__total_for_project_'] = vmt['estimated_change_in_vmt__total_for_project_'].str.replace('\n', '')
+vmt.to_parquet(f'{GCS_FILE_PATH}data_entry_raw_vmt.parquet')
 
