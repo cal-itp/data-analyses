@@ -23,8 +23,9 @@ DATES = {
     "may2023": "2023-05-17",
     "jun2023": "2023-06-14",
     "jul2023": "2023-07-12",
-    "aug2023": "2023-08-16",
-    "aug2023a": "2023-08-23", # muni was missing on 8/16
+    # "aug2023": "2023-08-16", # this date is missing Muni
+    "aug2023": "2023-08-15",
+    "aug2023a": "2023-08-23", # date used for speedmaps
 }
 
 
