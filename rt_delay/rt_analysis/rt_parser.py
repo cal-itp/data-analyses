@@ -253,8 +253,11 @@ class OperatorDayAnalysis:
         self.pct_trips_valid_rt = self.rt_trips.trip_id.nunique() / self.trips.trip_id.nunique()
 
         self._generate_stop_delay_view()
-        self.rt_trips['organization_name'] = self.index_df.organization_name.iloc[0]
+        self.organization_name = self.index_df.organization_name.iloc[0]
+        self.rt_trips['organization_name'] = self.organization_name
         self.rt_trips['caltrans_district'] = self.index_df.caltrans_district.iloc[0]
+        
+        self.pbar_desc = f'itp_id: {self.calitp_itp_id}\n org: {self.organization_name}'
         
     def _ix_from_routeline(self, routeline):
         try:
@@ -280,7 +283,7 @@ class OperatorDayAnalysis:
         self.position_interpolators = {}
         if type(self.pbar) != type(None):
             self.pbar.reset(total=self.vehicle_positions.trip_id.nunique())
-            self.pbar.desc = f'Generating position interpolators itp_id: {self.calitp_itp_id}'
+            self.pbar.desc = f'generating position interpolators {self.pbar_desc}'
         for trip_id in self.vehicle_positions.trip_id.unique():
             trip_positions_joined = self.trips_positions_joined >> filter(_.trip_id == trip_id)
             # self.debug_dict[f'{trip_id}_vp'] = trip_positions_joined
@@ -334,7 +337,7 @@ class OperatorDayAnalysis:
         
         if type(self.pbar) != type(None):
             self.pbar.reset(total=len(delays.trip_id.unique()))
-            self.pbar.desc = f'Generating stop delay view itp_id: {self.calitp_itp_id}'
+            self.pbar.desc = f'generating stop delay view {self.pbar_desc}'
         for trip_id in delays.trip_id.unique():
             try:
                 _delay = delays.copy() >> filter(_.trip_id == trip_id) >> distinct(_.stop_id, _keep_all = True)
