@@ -218,6 +218,8 @@ class OperatorDayAnalysis:
         ## Move to v2!
         # call this org_feed_index instead?
         self.index_df = rt_utils.get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
+        self.organization_name = self.index_df.organization_name.iloc[0]
+        self.pbar_desc = f'itp_id: {self.calitp_itp_id} org: {self.organization_name[:15]}'
         self.vehicle_positions = rt_utils.get_vehicle_positions(self.index_df)
         self.trips = rt_utils.get_trips(self.index_df)
         self.stop_times = rt_utils.get_st(self.index_df, self.trips)
@@ -253,12 +255,9 @@ class OperatorDayAnalysis:
         self.pct_trips_valid_rt = self.rt_trips.trip_id.nunique() / self.trips.trip_id.nunique()
 
         self._generate_stop_delay_view()
-        self.organization_name = self.index_df.organization_name.iloc[0]
         self.rt_trips['organization_name'] = self.organization_name
         self.rt_trips['caltrans_district'] = self.index_df.caltrans_district.iloc[0]
-        
-        self.pbar_desc = f'itp_id: {self.calitp_itp_id}\n org: {self.organization_name}'
-        
+                
     def _ix_from_routeline(self, routeline):
         try:
             km_index = np.arange(1000, routeline.geometry.length, 1000)
