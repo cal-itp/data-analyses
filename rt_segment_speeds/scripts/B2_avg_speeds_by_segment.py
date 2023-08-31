@@ -65,11 +65,12 @@ def speeds_with_segment_geom(
     analysis_date: str, 
     max_speed_cutoff: int = 70,
     dict_inputs: dict = {},
-    percent_segment_covered:float = 0.55,
+    percent_segment_covered:float = 0.40,
 ) -> gpd.GeoDataFrame: 
     """
     Import the segment-trip table. 
     Average the speed_mph across all trips present in the segment.
+    By default, filter out the bottom 20% of the rows
     """
     SEGMENT_FILE = dict_inputs["segments_file"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
@@ -171,7 +172,7 @@ if __name__ == "__main__":
     EXPORT_FILE = f'{STOP_SEG_DICT["stage5"]}_{analysis_date}'
     
     MAX_SPEED = 70
-    MIN_SEGMENT_PERCENT = 0.55
+    MIN_SEGMENT_PERCENT = 0.40
     
     # Average the speeds for segment for entire day
     # Drop speeds above our max cutoff
