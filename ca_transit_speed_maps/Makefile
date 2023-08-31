@@ -5,7 +5,6 @@ generate_speedmaps_slowly:
 	python stage_run_portfolio.py
 
 generate_d4_data:
-    generate_speedmaps_slowly:
 	python build_speedmaps_index.py
 	python index_filter_d4.py
 	python check_stage_intermediate.py
