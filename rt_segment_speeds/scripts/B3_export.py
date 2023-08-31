@@ -87,41 +87,6 @@ def finalize_df_for_export(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     return gdf2
 
-
-def grab_extreme_tails(
-    df: pd.DataFrame, 
-    col_list: list, 
-    q: float = 0.05
-) -> list:
-    """
-    Get quantile cutoffs across list of columns.
-    """
-    return [df[c].quantile(q=q) for c in col_list]
-
-
-def suppress_bad_data(
-    gdf: gpd.GeoDataFrame, 
-    quantile_cutoff: float = 0.05
-) -> gpd.GeoDataFrame:
-    """
-    Suppress the tails of bad data that we need to investigate.
-    Suppress the bottom 5% of extreme calculations.
-    """
-    cutoffs = grab_extreme_tails(
-        gdf, 
-        ["p20_mph", "p50_mph", "p80_mph"], 
-        quantile_cutoff
-    )
-    
-    gdf2 = gdf[
-        (gdf.p20_mph >= cutoffs[0]) & 
-        (gdf.p50_mph >= cutoffs[1]) & 
-        (gdf.p80_mph >= cutoffs[2])
-    ].reset_index(drop=True)
-
-    return gdf2
-    
-
 if __name__ == "__main__":
     
     start = datetime.datetime.now()
