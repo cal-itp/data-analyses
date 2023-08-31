@@ -7,7 +7,7 @@ from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (
     PROJECT_CRS,
     SEGMENT_GCS,
-    #analysis_date,
+    analysis_date,
 )
 from scripts import A1_sjoin_vp_segments
 
@@ -16,9 +16,6 @@ Paths
 """
 CONFIG_PATH = './scripts/config.yml'
 STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-
-# Delete this date later. 
-analysis_date = '2023-07-12'
 
 """
 General Functions
@@ -31,7 +28,7 @@ def count_trips_routes(df:pd.DataFrame):
     Args:
         df can be any df (from flag_stage3 or merge_all_speeds)
     """
-    cols_to_keep = ['shape_array_key','_gtfs_dataset_name','gtfs_dataset_key', 'trip_id', 'n_trips']
+    cols_to_keep = ['shape_array_key','gtfs_dataset_name','gtfs_dataset_key', 'trip_id', 'n_trips']
     m1 = (df
      .sort_values(['n_trips'], ascending = False)
      .drop_duplicates(['shape_array_key'])
@@ -162,7 +159,7 @@ def keep_only_zeroes(flagged:pd.DataFrame)-> pd.DataFrame:
     print(f"{flagged.trip_id.nunique()-df2.trip_id.nunique()} unique trips flagged.")
     print(f"{df2.shape_array_key.nunique()} routes flagged out of {flagged.shape_array_key.nunique()}.")
     print(f"{df2.shape_array_key.nunique()/flagged.shape_array_key.nunique() * 100} routes have 1+ row that has zeroes for meters/sec elapsed")
-    print(f"{flagged._gtfs_dataset_name.nunique()-df2._gtfs_dataset_name.nunique()} operators are not flagged.")
+    print(f"{flagged.gtfs_dataset_name.nunique()-df2.gtfs_dataset_name.nunique()} operators are not flagged.")
     
     return df2
 
@@ -305,7 +302,7 @@ def load_vp_stage3(flagged_df:pd.DataFrame, date:str) -> pd.DataFrame:
                    ('gtfs_dataset_key', 'in', gtfs_dataset_key)]],)
     
     # Merge to capture original df information and filter down further
-    vp2 = pd.merge(flagged_df, vp, how = "inner", on = ['gtfs_dataset_key', 'trip_id','stop_sequence','shape_array_key','_gtfs_dataset_name'])
+    vp2 = pd.merge(flagged_df, vp, how = "inner", on = ['gtfs_dataset_key', 'trip_id','stop_sequence','shape_array_key','gtfs_dataset_name'])
     
     return vp2
 
