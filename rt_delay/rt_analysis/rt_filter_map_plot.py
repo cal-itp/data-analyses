@@ -24,6 +24,7 @@ import gzip
 import base64
 import json
 from calitp_data_analysis import get_fs
+import warnings
 
 class RtFilterMapper:
     '''
@@ -447,7 +448,9 @@ class RtFilterMapper:
         assert gdf.shape[0] >= orig_rows*.975, \
             f'over 2.5% of geometries invalid after buffer+simplify ({gdf.shape[0]} / {orig_rows})'
         gdf = gdf.to_crs(WGS84)
-        self.current_centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.current_centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
         self.detailed_map_view = gdf.copy()
         if no_render:
             return  # ready but don't show map here, export later           
