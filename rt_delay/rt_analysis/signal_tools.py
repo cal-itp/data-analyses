@@ -24,15 +24,17 @@ def read_signal_excel(path):
     
     return gdf
 
-def all_day_speedmap_segments(progress_df: pd.DataFrame = None,
+def concatenate_speedmap_segments(progress_df: pd.DataFrame = None,
                              itp_id_list: list = None,
                              analysis_date: dt.datetime = None,
-                            pbar: tqdm = None):
+                             pbar: tqdm = None,
+                             filter_args: dict = None):
     '''
     get polygon segments from legacy speedmap workflow, with relevant ids attached
     relatively fast if already ran for date, slow otherwise
     
     progress_df: see data_analyses/ca_transit_speed_maps
+    filter_dict: dict of args to RtFilterMapper.set_filter
     '''
     
     df_present = isinstance(progress_df, pd.DataFrame)
@@ -45,16 +47,18 @@ def all_day_speedmap_segments(progress_df: pd.DataFrame = None,
     for itp_id in itp_id_list:
         print(itp_id)
         try:
-            # all-day speeds (no filter)
             rt_day = rt_filter_map_plot.from_gcs(itp_id, analysis_date, pbar)
+            if filter_args:
+                rt_day.set_filter(**filter_args)
             _m = rt_day.segment_speed_map(how='low_speeds', no_title=True, shn=True,
                                  no_render=True
                                 )
 
             dmv_proj = rt_day.detailed_map_view.to_crs(CA_NAD83Albers)
             # re-add some identifiers since we won't have the instance handy
-            dmv_proj['feed_key'] = rt_day.rt_trips.feed_key.iloc[0]
+            # dmv_proj['feed_key'] = rt_day.rt_trips.feed_key.iloc[0]
             dmv_proj['gtfs_dataset_key'] = rt_day.rt_trips.gtfs_dataset_key.iloc[0]
+            dmv_proj['organization_name'] = rt_day.organization_name
             dmv_proj['system_p50_median'] = dmv_proj.p50_mph.quantile(.5)
 
             all_segment_gdfs += [dmv_proj]
