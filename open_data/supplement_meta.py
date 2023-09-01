@@ -34,8 +34,8 @@ RENAME_HQTA = {
     "hqta_detai": "hqta_details",
     "base64_url": "base64_url_primary",
     "base64_u_1": "base64_url_secondary",  
-    "org_pri": "org_id_primary",
-    "org_sec": "org_id_secondary",
+    "org_id_pri": "org_id_primary",
+    "org_id_sec": "org_id_secondary",
 }
 
 RENAME_SPEED = {

@@ -15,7 +15,7 @@ from loguru import logger
 from shared_utils import utils, geography_utils
 from update_vars import analysis_date
 
-catalog = intake.open_catalog("./*.yml")
+catalog = intake.open_catalog("./catalog.yml")
 
 
 def standardize_column_names(df):
@@ -48,7 +48,6 @@ if __name__=="__main__":
                level="INFO")
     
     datasets = list(dict(catalog).keys())
-    datasets = [i for i in datasets if "speed" not in i]
     
     for d in datasets:
         gdf = catalog[d].read().to_crs(geography_utils.WGS84)
