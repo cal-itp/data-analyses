@@ -125,7 +125,7 @@ if __name__ == "__main__":
         'p80_mph', 'n_trips', 
         'time_of_day', 
         'base64_url',
-        'district', 'district_name'
+        'district_name'
     ]
     
     utils.geoparquet_gcs_export(

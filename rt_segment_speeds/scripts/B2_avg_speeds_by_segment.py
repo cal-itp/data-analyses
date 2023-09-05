@@ -70,7 +70,7 @@ def speeds_with_segment_geom(
     """
     Import the segment-trip table. 
     Average the speed_mph across all trips present in the segment.
-    By default, filter out the bottom 20% of the rows
+    By default, filter out rows where meters_elapsed covers less than 40% of segment length
     """
     SEGMENT_FILE = dict_inputs["segments_file"]
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
@@ -78,12 +78,12 @@ def speeds_with_segment_geom(
     
     # Load in segment geometry
     segment_cols_to_keep = SEGMENT_IDENTIFIER_COLS + [
-            "schedule_gtfs_dataset_key", 
-            "stop_id",
-            "loop_or_inlining",
-            "geometry", 
-            "district", "district_name"
-        ]
+        "schedule_gtfs_dataset_key", 
+        "stop_id",
+        "loop_or_inlining",
+        "geometry", 
+        "district_name"
+    ]
     
     segments = helpers.import_segments(
         SEGMENT_GCS,
@@ -116,8 +116,11 @@ def speeds_with_segment_geom(
     
     # Filter out abnormally high and low speeds
     # Threshold defaults to throwing away the bottom 20% of rows with low speeds
-    df3 = df2[(df2.pct_seg >= percent_segment_covered) & (df2.speed_mph.notna()) & 
-              (df2.sec_elapsed > 0) & (df2.meters_elapsed > 0)]
+    df3 = df2[(df2.pct_seg >= percent_segment_covered) & 
+              (df2.speed_mph.notna()) & 
+              (df2.sec_elapsed > 0) & 
+              (df2.meters_elapsed > 0)
+             ]
     
     time_of_day_df = sched_rt_utils.get_trip_time_buckets(analysis_date)
 
@@ -142,9 +145,21 @@ def speeds_with_segment_geom(
         peak.assign(time_of_day = "peak")
     ], axis=0)
     
-  
     # Merge in segment geometry with a changed CRS
     unique_segments = unique_segments.to_crs(geography_utils.WGS84)
+    
+    # Merge in segment geometry
+    segments = helpers.import_segments(
+        SEGMENT_GCS,
+        f"{SEGMENT_FILE}_{analysis_date}",
+        columns = SEGMENT_IDENTIFIER_COLS + [
+            "schedule_gtfs_dataset_key", 
+            "stop_id",
+            "loop_or_inlining",
+            "geometry", 
+            "district_name"
+        ]
+    ).to_crs(geography_utils.WGS84)
     
     gdf = pd.merge(
         unique_segments,

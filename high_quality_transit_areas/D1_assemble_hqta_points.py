@@ -147,8 +147,8 @@ def add_agency_names_hqta_details(
     ))
     
     gdf = gdf.assign(
-        agency_name_primary = gdf.feed_key_primary.map(NAMES_DICT),
-        agency_name_secondary = gdf.feed_key_secondary.map(NAMES_DICT),
+        agency_primary = gdf.feed_key_primary.map(NAMES_DICT),
+        agency_secondary = gdf.feed_key_secondary.map(NAMES_DICT),
         hqta_details = gdf.apply(utilities.hqta_details, axis=1),
         org_id_primary = gdf.feed_key_primary.map(ORG_DICT),
         org_id_secondary = gdf.feed_key_secondary.map(ORG_DICT),
@@ -172,9 +172,9 @@ def add_agency_names_hqta_details(
 
 def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     keep_cols = [
-        "agency_name_primary", 
+        "agency_primary", 
         "hqta_type", "stop_id", "route_id",
-        "hqta_details", "agency_name_secondary",
+        "hqta_details", "agency_secondary",
         # include these as stable IDs?
         "base64_url_primary", "base64_url_secondary", 
         "org_id_primary", "org_id_secondary",
@@ -184,8 +184,8 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     gdf2 = (gdf.reindex(columns = keep_cols)
             .drop_duplicates(
-                subset=["agency_name_primary", "hqta_type", "stop_id", "route_id"])
-            .sort_values(["agency_name_primary", "hqta_type", "stop_id"])
+                subset=["agency_primary", "hqta_type", "stop_id", "route_id"])
+            .sort_values(["agency_primary", "hqta_type", "stop_id"])
             .reset_index(drop=True)
             .to_crs(geography_utils.WGS84)
     )
