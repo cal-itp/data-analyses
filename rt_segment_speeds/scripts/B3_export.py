@@ -26,9 +26,10 @@ def get_operator_natural_identifiers(
     re-attach the natural identifiers and organizational identifiers.
     Return a df that should be merged against speeds_df.
     """
-    operator_shape_df = (df[["gtfs_dataset_key", "shape_array_key"]]
+    operator_shape_df = (df[["schedule_gtfs_dataset_key", "shape_array_key"]]
                          .drop_duplicates()
                          .reset_index(drop=True)
+                         .rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})
                         )
     
     # Get shape_id back
@@ -49,20 +50,18 @@ def get_operator_natural_identifiers(
     crosswalk = schedule_rt_utils.sample_gtfs_dataset_key_to_organization_crosswalk(
         df_with_shape,
         analysis_date,
-        quartet_data = "vehicle_positions",
+        quartet_data = "schedule",
         dim_gtfs_dataset_cols = [
             "key",
             "base64_url",
-            "uri",
         ],
         dim_organization_cols = ["source_record_id", "name"]
     )
 
     df_with_org = pd.merge(
-        df_with_shape,
-        crosswalk.rename(
-            columns = {"vehicle_positions_gtfs_dataset_key": "gtfs_dataset_key"}),
-        on = "gtfs_dataset_key",
+        df_with_shape.rename(columns = {"gtfs_dataset_key": "schedule_gtfs_dataset_key"}),
+        crosswalk,
+        on = "schedule_gtfs_dataset_key",
         how = "inner"
     )
     
@@ -106,14 +105,12 @@ if __name__ == "__main__":
     gdf2 = pd.merge(
         gdf,
         operator_identifiers,
-        on = ["gtfs_dataset_key", "shape_array_key"],
+        on = ["schedule_gtfs_dataset_key", "shape_array_key"],
         how = "inner"
     )
             
-    gdf3 = finalize_df_for_export(gdf2)
-    
-    final_gdf = suppress_bad_data(gdf3)
-    
+    final_gdf = finalize_df_for_export(gdf2)
+        
     time2 = datetime.datetime.now()
     print(f"finalize: {time2 - time1}")
     
