@@ -11,6 +11,17 @@ from update_vars import analysis_date
 
 catalog = intake.open_catalog("catalog.yml")
 
+
+def unpack_list_of_tables_as_dict(list_of_dict: list) -> dict:
+    """
+    In the yml, the datasets come as a list of dictionary items.
+    Re-structure this as a dict so we can key into
+    specific datasets.
+    """
+    dict_of_tables = {d["dataset_name"]: d for d in list_of_dict}
+    
+    return dict_of_tables
+
 def new_columns_for_data_dict(
     open_data_catalog: Union[str, Path] = Path("catalog.yml"),
     data_dict_file: Union[str, Path] = Path("data_dictionary.yml")
@@ -27,7 +38,7 @@ def new_columns_for_data_dict(
     n_catalog_tables = len(catalog)
     
     # Unpack the table section of the data dictionary, which is a list, as a dict
-    dict_of_tables = {d["dataset_name"]: d for d in data_dict["tables"]}
+    dict_of_tables = unpack_list_of_tables_as_dict(data_dict["tables"])
     
     n_dict_tables = len(dict_of_tables.keys())
     
