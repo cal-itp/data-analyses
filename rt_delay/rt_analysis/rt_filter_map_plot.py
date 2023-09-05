@@ -24,6 +24,7 @@ import gzip
 import base64
 import json
 from calitp_data_analysis import get_fs
+import warnings
 
 class RtFilterMapper:
     '''
@@ -72,6 +73,7 @@ class RtFilterMapper:
                       >> summarize(n_trips = _.route_id.size, mean_end_delay_seconds = _.delay_seconds.mean())
                      )
         self.reset_filter()
+        self.pbar_desc = f'itp_id: {self.calitp_itp_id} org: {self.organization_name[:15]}'
 
     def set_filter(self, start_time = None, end_time = None, route_names = None,
                    shape_ids = None, direction_id = None, direction = None, trip_ids = None,
@@ -334,7 +336,7 @@ class RtFilterMapper:
             # for shape_id in tqdm(gdf.shape_id.unique()): trying self.pbar.update...
             if type(self.pbar) != type(None):
                 self.pbar.reset(total=len(gdf.shape_id.unique()))
-                self.pbar.desc = f'Generating segment speeds itp_id: {self.calitp_itp_id}'
+                self.pbar.desc = f'Generating segment speeds {self.pbar_desc}'
             for shape_id in gdf.shape_id.unique():
                 try:
                     this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
@@ -446,7 +448,9 @@ class RtFilterMapper:
         assert gdf.shape[0] >= orig_rows*.975, \
             f'over 2.5% of geometries invalid after buffer+simplify ({gdf.shape[0]} / {orig_rows})'
         gdf = gdf.to_crs(WGS84)
-        self.current_centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.current_centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
         self.detailed_map_view = gdf.copy()
         if no_render:
             return  # ready but don't show map here, export later           
