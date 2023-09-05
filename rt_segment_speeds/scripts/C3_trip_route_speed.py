@@ -338,13 +338,13 @@ if __name__ == "__main__":
         f"{SEGMENT_GCS}trip_summary/",
         f"route_speeds_{analysis_date}"
     )
-    '''
+    
     utils.geoparquet_gcs_export(
         avg_speeds2,
         f"{SEGMENT_GCS}export/",
         "speeds_by_route_time_of_day"
     )
-    '''
+    
     time3 = datetime.datetime.now()
     print(f"route-direction average speeds: {time3 - time2}")
     
