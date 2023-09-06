@@ -19,7 +19,7 @@ fs = gcsfs.GCSFileSystem()
 
 from shared_utils import utils
 
-# local_path = "/home/jovyan/data-analyses/project_prioritization/accessibility/"
+local_folder = "zipped_locations/"
 GCS_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/zipped_shpfiles/"
 
 """
@@ -27,9 +27,10 @@ For this function you will need to specify the name of the geojson file you want
 file = "project_location_bike.geojson"
 """
 
-def read_and_create_shpfiles(geojson_file, zip_name):
+def read_and_create_shpfiles(geojson_file, zip_name, localfolder):
+    localfolder_str = str(localfolder)
     location = gpd.read_file(geojson_file)
-    location_zipped = utils.make_zipped_shapefile(location, zip_name, gcs_folder = GCS_PATH)
+    location_zipped = utils.make_zipped_shapefile(location, local_path = f"{localfolder_str}{zip_name}", gcs_folder = GCS_PATH)
     
 
 ## Function takes a json, creates a string and then modifies it so that it is in a geojson format that works for us. 
@@ -60,10 +61,16 @@ def manipulate_json(json_file, geojson_file_name):
 
         
 ## function puts together the two previous functions, to get from json file to shp file.
-def json_to_shpfile(json_file, geojson_file_name, zip_name):
+def json_to_shpfile(json_file, geojson_file_name, zip_name, local_folder):
+    '''
+    use this function to convert jsons to a zipped shp file
+    1. upload json file to folder in jupyter notebook
+    2. open notebook project_location_to_shapefiles.ipynb
+    3. add information for the uploaded json file, name for geojson and then the name of the zip file output 
+    '''
     ## run through json manipulation
     manipulate_json(json_file, geojson_file_name)
     
     ## run through function to get shpfiles
-    read_and_create_shpfiles(f"{geojson_file_name}.geojson", zip_name)    
+    read_and_create_shpfiles(f"{geojson_file_name}.geojson", zip_name, local_folder)    
     
