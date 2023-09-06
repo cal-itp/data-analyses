@@ -7,13 +7,20 @@ import geopandas as gpd
 import json
 # import geojson
 
+import gcsfs
+import os
+
 import re
 import ast
 
+from calitp_data_analysis import get_fs
+
+fs = gcsfs.GCSFileSystem()
+
 from shared_utils import utils
 
-local_path = "/home/jovyan/data-analyses/project_prioritization/accessibility/"
-GCS_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/"
+# local_path = "/home/jovyan/data-analyses/project_prioritization/accessibility/"
+GCS_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/zipped_shpfiles"
 
 """
 For this function you will need to specify the name of the geojson file you want to read in before. example:
@@ -24,6 +31,7 @@ def read_and_create_shpfiles(geojson_file, zip_name):
     location = gpd.read_file(geojson_file)
     location_zipped = utils.make_zipped_shapefile(location,
                              zip_name
+                                                  # , gcs_folder = f"{GCS_PATH}" ## need to check on this
                            )
     
 
@@ -55,11 +63,16 @@ def manipulate_json(json_file, geojson_file_name):
 
         
 ## function puts together the two previous functions, to get from json file to shp file.
-def json_to_shpfile(json_file, geojson_file_name, zip_name):
+def json_to_shpfile(json_file, geojson_file_name, zip_name, gcs_folder = GCS_PATH):
     ## run through json manipulation
     manipulate_json(json_file, geojson_file_name)
     
     ## run through function to get shpfiles
-    read_and_create_shpfiles(f"{geojson_file_name}.geojson", zip_name)        
+    read_and_create_shpfiles(f"{geojson_file_name}.geojson", zip_name)     
+    
+    fs.put(
+        f"{zip_name}.zip"
+        f"{GCS_PATH}{zip_name}.zip"
+    )
 
  
