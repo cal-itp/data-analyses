@@ -35,7 +35,8 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
     * The log will show basics like column names and EPSG. Make sure the metadata reflects the same info!
     * Only use EPSG:4326 (WGS84). All open data portal datasets will be in WGS84.
     * Download the zipped shapefiles from the Hub to your local filesystem.
-1. If there are changes to make in `metadata.yml`, make them. Otherwise, in terminal, you can run: `python supplement_meta.py`
+1. If there are new datasets to add or changes to make, make them in `metadata.yml` and/or `data_dictionary.yml`. 
+   * If there are changes to make in `metadata.yml`, make them. Afterwards, in terminal, run: `python supplement_meta.py`
 1. Run [arcgis_pro_script](./arcgis_pro_script.py) to create XML files.
     * Open a notebook in Hub and find the `ARCGIS_PATH`
     * Hardcode that path for `arcpy.env.workspace = ARCGIS_PATH`
@@ -47,10 +48,13 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
     * The overwritten XML is stored in `open_data/metadata_xml/run_in_esri/`.
     * Download the overwritten XML files locally to run in ArcGIS.
 1. Run [arcgis_pro_script](./arcgis_pro_script.py) after import the updated XML metadata for each feature class.
+   * There are steps to create FGDC templates for each datasets to store field information.
+   * This only needs to be done once when a new dataset is created. 
 1. In terminal: `python cleanup.py` to clean up old XML files and remove zipped shapefiles.
 
 ### Metadata
-[YAML](./metadata.yml)
+* [Metadata](./metadata.yml)
+* [Data dictionary](./data_dictionary.yml)
 
 ## Open Data Intake Process 
 * Open a [ticket](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNUo1NjRNRFpIOVRBMVFFTFJDM1JKNkY0SC4u) on the Intranet to update or add new services and provide [justification](./intake_justification.md)
