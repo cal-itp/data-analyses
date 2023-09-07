@@ -19,7 +19,7 @@ fs = gcsfs.GCSFileSystem()
 
 from shared_utils import utils
 
-local_folder = "zipped_locations/"
+#local_folder = "zipped_locations/"
 GCS_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/zipped_shpfiles/"
 
 """
@@ -27,10 +27,13 @@ For this function you will need to specify the name of the geojson file you want
 file = "project_location_bike.geojson"
 """
 
-def read_and_create_shpfiles(geojson_file, zip_name, localfolder):
-    localfolder_str = str(localfolder)
+def read_and_create_shpfiles(geojson_file, zip_name):
+   
     location = gpd.read_file(geojson_file)
-    location_zipped = utils.make_zipped_shapefile(location, local_path = f"{localfolder_str}{zip_name}", gcs_folder = GCS_PATH)
+    location_zipped = utils.make_zipped_shapefile(location, local_path = zip_name, gcs_folder = GCS_PATH)
+    
+    ##remove local version
+    os.remove(f"{zip_name}.zip")
     
 
 ## Function takes a json, creates a string and then modifies it so that it is in a geojson format that works for us. 
@@ -61,7 +64,7 @@ def manipulate_json(json_file, geojson_file_name):
 
         
 ## function puts together the two previous functions, to get from json file to shp file.
-def json_to_shpfile(json_file, geojson_file_name, zip_name, local_folder):
+def json_to_shpfile(json_file, new_file_name):
     '''
     use this function to convert jsons to a zipped shp file
     1. upload json file to folder in jupyter notebook
@@ -69,8 +72,11 @@ def json_to_shpfile(json_file, geojson_file_name, zip_name, local_folder):
     3. add information for the uploaded json file, name for geojson and then the name of the zip file output 
     '''
     ## run through json manipulation
-    manipulate_json(json_file, geojson_file_name)
+    manipulate_json(json_file, new_file_name)
     
     ## run through function to get shpfiles
-    read_and_create_shpfiles(f"{geojson_file_name}.geojson", zip_name, local_folder)    
+    read_and_create_shpfiles(f"{new_file_name}.geojson", new_file_name)   
+    
+    ##remove local geojson
+    os.remove(f"{new_file_name}.geojson")
     
