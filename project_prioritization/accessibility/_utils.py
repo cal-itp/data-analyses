@@ -13,11 +13,11 @@ import os
 import re
 import ast
 
-from calitp_data_analysis import get_fs
+from calitp_data_analysis import get_fs, utils
 
 fs = gcsfs.GCSFileSystem()
 
-from shared_utils import utils
+# from shared_utils import utils
 
 #local_folder = "zipped_locations/"
 GCS_PATH = "gs://calitp-analytics-data/data-analyses/project_prioritization/zipped_shpfiles/"
