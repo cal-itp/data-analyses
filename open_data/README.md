@@ -27,49 +27,34 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
    * [prep_traffic_ops](./prep_traffic_ops.py): helper functions for creating `routes` and `stops` datasets
    * [create_routes_data](./create_routes_data.py): functions to assemble routes that appear in `shapes`
    * [create_stops_data](./create_stops_data.py): functions to assemble stop data
-   * [metadata](./traffic_ops.py) associated with `ca_transit_routes` and `ca_transit_stops`
 
 
 ## Metadata Automation Steps and References
-
-1. Dataset created in Hub. Run [gcs_to_esri](./gcs_to_esri.py) script to convert geoparquets to zipped shapefiles.
-    * Zipped shapefiles need to be downloaded from Hub.
-    * Unzip before reading it in ESRI as layers
-2. Shapefile written as feature class in file gdb
-* Start with [arcgis_script](./arcgis_pro_script.py)
-* [Convert shp to gdb](https://gis.stackexchange.com/questions/269701/copying-multiple-shp-files-to-a-file-geodatabase)
-* [Export features to gdb](https://gis.stackexchange.com/questions/366054/export-features-to-geodatabase-created-in-same-python-script)
-3. Export metadata associated with feature class as XML
-4. [Convert XML to JSON using xmltodict](https://stackoverflow.com/questions/48821725/xml-parsers-expat-expaterror-not-well-formed-invalid-token)
-5. Supply a dictionary with the relevant info 
-* Create a Python script to store dictionary (ex: `metadata_hqta.py`)
-6. Overwrite values with dictionary in the JSON 
-7. [Convert JSON back to XML](https://gis.stackexchange.com/questions/202978/converting-xml-dict-xml-using-python) and overwrite XML
-8. Overwrite the XML and import this, overwrite/sync this metadata with feature class
-9. Zip the file gdb
-
-### Analyst Steps
 1. Add your dataset to `catalog.yml` and run `gcs_to_esri`.
-    * In terminal: cd `open_data` followed by `python gcs_to_esri.py` 
+    * In terminal: `cd open_data` followed by `python gcs_to_esri.py` 
     * The log will show basics like column names and EPSG. Make sure the metadata reflects the same info!
     * Only use EPSG:4326 (WGS84). All open data portal datasets will be in WGS84.
     * Download the zipped shapefiles from the Hub to your local filesystem.
-1. Run [arcgis_pro_script](./arcgis_pro_script.py) for Steps 2-3.
+1. If there are new datasets to add or changes to make, make them in `metadata.yml` and/or `data_dictionary.yml`. 
+   * If there are changes to make in `metadata.yml`, make them. Afterwards, in terminal, run: `python supplement_meta.py`
+1. Run [arcgis_pro_script](./arcgis_pro_script.py) to create XML files.
     * Open a notebook in Hub and find the `ARCGIS_PATH`
     * Hardcode that path for `arcpy.env.workspace = ARCGIS_PATH`
     * The exported XML metadata will be in file gdb directory.
-    * Upload the XML metadata into Hub in `open_data/metadata_xml/`.
-1. Open `open_data.py` and modify the script to overwrite XML for the desired datasets.
-1. In terminal: `python open_data.py` for Steps 4-7.
+    * Upload the XML metadata into Hub in `open_data/xml/`.
+1. If there are new datasets added, open `open_data.py` and modify the script.
+1. In terminal: `python open_data.py`.
     * Change into the `open_data` directory: `cd open_data/`.
     * The overwritten XML is stored in `open_data/metadata_xml/run_in_esri/`.
     * Download the overwritten XML files locally to run in ArcGIS.
-1. Run [arcgis_pro_script](./arcgis_pro_script.py) for Step 8.
+1. Run [arcgis_pro_script](./arcgis_pro_script.py) after import the updated XML metadata for each feature class.
+   * There are steps to create FGDC templates for each datasets to store field information.
+   * This only needs to be done once when a new dataset is created. 
 1. In terminal: `python cleanup.py` to clean up old XML files and remove zipped shapefiles.
 
 ### Metadata
-1. [High Quality Transit Areas (HQTA)](./metadata_hqta.py)
-1. [Transit Stops and Routes (Traffic Ops request)](./metadata_traffic_ops.py)
+* [Metadata](./metadata.yml)
+* [Data dictionary](./data_dictionary.yml)
 
 ## Open Data Intake Process 
 * Open a [ticket](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNUo1NjRNRFpIOVRBMVFFTFJDM1JKNkY0SC4u) on the Intranet to update or add new services and provide [justification](./intake_justification.md)

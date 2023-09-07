@@ -1,0 +1,172 @@
+metadata:
+  version: 1
+common-fields:
+  - &org_id
+    definition: Organization identifier for the agency
+  - &agency
+    definition: Full name of the transit agency
+  - &route_id
+    definition: Identifies a route
+    definition_source: "https://gtfs.org/schedule/reference/#routestxt"
+  - &route_type
+    definition: |-
+      Indicates the type of transportation used on a route. Valid options are
+        0 - Tram, Streetcar, Light rail. Any light rail or street level system within a metropolitan area.
+        1 - Subway, Metro. Any underground rail system within a metropolitan area.
+        2 - Rail. Used for intercity or long-distance travel.
+        3 - Bus. Used for short- and long-distance bus routes.
+        4 - Ferry. Used for short- and long-distance boat service.
+        5 - Cable tram. Used for street-level rail cars where the cable runs beneath the vehicle (e.g., cable car in San Francisco).
+        6 - Aerial lift, suspended cable car (e.g., gondola lift, aerial tramway). Cable transport where cabins, cars, gondolas or open chairs are suspended by means of one or more cables.
+        7 - Funicular. Any rail system designed for steep inclines.
+        11 - Trolleybus. Electric buses that draw power from overhead wires using poles.
+        12 - Monorail. Railway in which the track consists of a single rail or a beam.
+    definition_source: "https://gtfs.org/schedule/reference/#routestxt"
+  - &route_name
+    definition: "A standardized route_name for the route_id (can be route_short_name, route_long_name, or route_desc)"
+    definition_source: "https://gtfs.org/schedule/reference/#routestxt"
+  - &stop_id
+    definition: "Identifies a stop, station, or station entrance"
+    definition_source: "https://gtfs.org/schedule/reference/#stopstxt"
+  - &stop_name
+    definition: "Name of the stop location"
+    definition_source: "https://gtfs.org/schedule/reference/#stopstxt"
+  - &stop_sequence
+    definition: |- 
+      Order of stops for a particular trip. The values must increase along the trip but do not need to be consecutive.
+    definition_source: "https://gtfs.org/schedule/reference/#stop_timestxt"
+  - &shape_id
+    definition: Identifies a shape
+    definition_source: "https://gtfs.org/schedule/reference/#shapestxt"
+  - &direction_id
+    definition: |-
+      Indicates the direction of travel for a trip. This field should not be used in routing; it provides a way to separate trips by direction when publishing time tables. Valid options are
+        0 - Travel in one direction (e.g. outbound travel).
+        1 - Travel in the opposite direction (e.g. inbound travel).
+    definition_source: "https://gtfs.org/schedule/reference/#tripstxt"  
+  - &base64_url
+    definition: The base64 encoded url for the feed associated with the agency
+  - &uri
+    definition: The URI for the feed associated with the agency
+  - &district
+    definition: Caltrans district number
+  - &district_name
+    definition: Caltrans district name
+  - &hqta_type
+    definition: |-
+      Indicates the type of High Quality Transit Area as defined in the Public Resources Code that a stop is and/or falls within. Valid options are: hq_corridor_bus (PRC 21155), major_stop_bus (PRC 21064.3), major_stop_rail (PRC 21064.3), major_stop_ferry (PRC 21064.3), major_stop_brt (PRC 21064.3, 21060.2)
+    definition_source: |-
+      https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PRC&sectionNum=21155, https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=PRC&division=13.&title=&part=&chapter=2.5.&article
+  - &hqta_details
+    definition: |-
+      Indicates the details associated with High Quality Transit Area type as defined in the Public Resources Code. Valid options are: major_stop_rail_single_operator, major_stop_brt_single_operator, major_stop_ferry_single_operator,   intersection_2_bus_routes_same_operator, intersection_2_bus_routes_different_operators, stop_along_hq_bus_corridor_single_operator
+    definition_source: |- 
+      https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PRC&sectionNum=21155, https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=PRC&division=13.&title=&part=&chapter=2.5.&article
+
+tables:
+  - dataset_name: ca_hq_transit_areas
+    agency_primary: *agency
+    agency_secondary: 
+      definition: |- 
+        Full name of the secondary transit agency (for major bus stops only)
+    hqta_type: *hqta_type
+    hqta_details: *hqta_details
+    route_id: *route_id
+    base64_url_primary: *base64_url
+    base64_url_secondary: 
+      definition: |- 
+        The base64 encoded url for the feed associated with the secondary agency
+    org_id_primary: *org_id
+    org_id_secondary: 
+      definition: Organization identifier for the secondary agency
+  
+  - dataset_name: ca_hq_transit_stops
+    agency_primary: *agency
+    agency_secondary: 
+      definition: |- 
+        Full name of the secondary transit agency (for major bus stops only)
+    hqta_type: *hqta_type
+    hqta_details: *hqta_details
+    route_id: *route_id
+    stop_id: *stop_id
+    base64_url_primary: *base64_url
+    base64_url_secondary: 
+      definition: |- 
+        The base64 encoded url for the feed associated with the secondary agency
+    org_id_primary: *org_id
+    org_id_secondary: 
+      definition: Organization identifier for the secondary agency
+    peak_trips:
+      definition: |- 
+        The number of AM and PM hourly trips. Where AM and PM peak trips differ, the lesser value is used.
+        
+  - dataset_name: ca_transit_routes
+    agency: *agency
+    org_id: *org_id    
+    route_id: *route_id
+    route_type: *route_type
+    route_name: *route_name
+    shape_id: *shape_id
+    n_trips: 
+      definition: Daily trips associated with this shape_id and route_id.      
+    base64_url: *base64_url
+    uri: *uri    
+
+  - dataset_name: ca_transit_stops
+    agency: *agency
+    org_id: *org_id    
+    route_id: *route_id
+    route_type: *route_type
+    stop_id: *stop_id
+    stop_name: *stop_name
+    base64_url: *base64_url
+    uri: *uri    
+    
+  - dataset_name: speeds_by_stop_segments
+    agency: *agency
+    org_id: *org_id    
+    shape_id: *shape_id
+    stop_sequence: *stop_sequence
+    stop_id: *stop_id
+    p20_mph: 
+      definition: |- 
+        The 20th percentile speed (mph) for all trips associated with the shape_id and time_of_day.
+    p50_mph:
+      definition: |- 
+        The 50th percentile speed (mph) for all trips associated with the shape_id and time_of_day.
+    p80_mph: 
+      definition: |- 
+        The 80th percentile speed (mph) for all trips associated with the shape_id and time_of_day.
+    n_trips: 
+      definition: |- 
+        The number of trips used to find the 20th, 50th, and 80th percentile speeds within the segment.
+    time_of_day: 
+      definition: |- 
+        The time of day period that provides the 20th, 50th, and 80th percentile speeds. Valid values are all_day and peak.
+    base64_url: *base64_url
+    district_name: *district_name
+    
+  - dataset_name: speeds_by_route_time_of_day
+    agency: *agency
+    org_id: *org_id    
+    route_id: *route_id
+    route_name: *route_name
+    direction_id: *direction_id
+    common_shape_id: *shape_id
+    time_of_day: 
+      definition: |- 
+        The time of day period that provides average speeds. Valid values are Early AM, AM Peak, Midday, PM Peak, Evening, Owl.
+    speed_mph: 
+      definition: |- 
+        The average speed_mph for all trips with vehicle positions for that time-of-day.
+    n_trips: 
+      definition: |- 
+        The number of trips used to calculate the average speed_mph for that time-of-day.
+    avg_sched_trip_min:
+      definition: |- 
+        The average scheduled trip (minutes) for trips occurring in that time-of-day period. Derived from the `service_hours` in GTFS scheduled trips.
+    avg_rt_trip_min: 
+      definition: |- 
+        The average real-time trip (minutes) elapsed for trips with vehicle positions occurring in that time-of-day period. Strictly speaking, it is not the number of minutes to complete the trips, but the number of minutes with real-time vehicle positions observed for that shape_id.
+    base64_url: *base64_url
+    district_name: *district_name
