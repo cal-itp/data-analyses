@@ -10,6 +10,7 @@ HQTA_GCS = f"{GCS_FILE_PATH}high_quality_transit_areas/"
 SEGMENT_GCS = f"{GCS_FILE_PATH}rt_segment_speeds/"
 
 ESRI_BASE_URL = "https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/"
-DEFAULT_XML_TEMPLATE = Path("default_pro.xml")
 XML_FOLDER = Path("xml")
+DEFAULT_XML_TEMPLATE = XML_FOLDER.joinpath(Path("default_pro.xml"))
 META_JSON = Path("metadata.json")
+DATA_DICT_YML = Path("data_dictionary.yml")

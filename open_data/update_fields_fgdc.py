@@ -9,13 +9,14 @@ import yaml
 from pathlib import Path
 from typing import Union
 
-from data_dictionary_updates import unpack_list_of_tables_as_dict
-from metadata_update_pro import
 from open_data import RUN_ME
+from metadata_update_pro import xml_to_json
+from update_data_dict import unpack_list_of_tables_as_dict
+from update_vars import XML_FOLDER, DATA_DICT_YML
 
 def grab_data_dictionary_for_dataset(
     dataset_name: str,
-    data_dict_file: Union[str, Path] = Path("data_dictionary.yml")
+    data_dict_file: Union[str, Path] = DATA_DICT_YML
 ) -> dict:
     """
     Open the data dictionary yaml and 
@@ -69,7 +70,7 @@ def populate_other_dataset_columns(
         new_field_dict = {}
         
         if field_name != "dataset_name":
-            new_field_dict["attrlabl"] = field_name
+            new_field_dict["attrlabl"] = field_name    
             new_field_dict["attrdef"] = field_attributes_dict["definition"]
         
             # If we can find definition_source key (not None), then
@@ -83,20 +84,41 @@ def populate_other_dataset_columns(
     
 
 
+def populate_fgdc_template_for_dataset(dataset_name: str):
+    """
+    Each dataset has its own FGDC template, which contains 
+    spatial data info and field info.
+    We will modify field section with what's stored in our
+    data dictionary yml.
+    """
+    print(dataset_name)
+    
+    # Each dataset must have its own FGDC template...
+    # we only want to adjust fields
+    FGDC_META = XML_FOLDER.joinpath(f"{dataset_name}_fgdc.xml")
+    
+    metadata = xml_to_json(FGDC_META)
+    
+    # Key into the field section
+    field_section = metadata["metadata"]["eainfo"]["detailed"]
 
-FGDC_META = Path("xml/ca_hq_transit_areas_fgdc.xml")
-metadata = metadata_update_pro.xml_to_json(FGDC_META)
+    # Create a copy of the metadata dict so we can manipulate it.
+    new_field_metadata = field_section.copy()
+    new_field_metadata = populate_default_esri_columns(new_field_metadata)
+    new_field_metadata = populate_other_dataset_columns(new_field_metadata)
 
-field_section = metadata["metadata"]["eainfo"]["detailed"]
+    # Overwrite this section with our new info
+    metadata["metadata"]["eainfo"]["detailed"] = new_field_metadata
 
-new_field_metadata = field_section.copy()
-
-new_field_metadata = populate_default_esri_columns(new_field_metadata)
-new_field_metadata = populate_other_dataset_columns(new_field_metadata)
-
-metadata["metadata"]["eainfo"]["detailed"] = new_field_metadata
-
-new_xml = xmltodict.unparse(metadata, encoding='utf-8', pretty=True)
-
-with open(f"xml/ca_hq_transit_areas_fgdc2.xml", 'w') as f:
+    new_xml = xmltodict.unparse(metadata, encoding='utf-8', pretty=True)
+    
+    with open(FGDC_META, 'w') as f:
         f.write(new_xml)
+    
+    print(f"Save over existing XML for {dataset_name}")
+
+
+if __name__ == "__main__":
+    
+    for d in RUN_ME:
+        populate_fgdc_template_for_dataset(d)

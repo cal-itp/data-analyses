@@ -70,9 +70,7 @@ def overwrite_default_with_dataset_elements(metadata_json: dict) -> dict:
     Replace entire sections that are dataset specific with 
     this dataset's attributes.
     """
-    TEMPLATE_XML = XML_FOLDER.joinpath(DEFAULT_XML_TEMPLATE)
-
-    default_template = xml_to_json(TEMPLATE_XML)
+    default_template = xml_to_json(DEFAULT_XML_TEMPLATE)
     
     # Grab the necessary elements from my dataset
     necessary_elements = lift_necessary_dataset_elements(metadata_json[main])
