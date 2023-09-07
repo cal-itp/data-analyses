@@ -59,7 +59,7 @@
 <citation>
 <CI_Citation>
 <title>
-<gco:CharacterString>ca_hq_transit_areas</gco:CharacterString>
+<gco:CharacterString>dataset_name</gco:CharacterString>
 </title>
 <date>
 <CI_Date>
@@ -94,7 +94,7 @@
 <citedResponsibleParty>
 <CI_ResponsibleParty>
 <individualName>
-<gco:CharacterString>Eric Dasmalchi</gco:CharacterString>
+<gco:CharacterString>Your Name</gco:CharacterString>
 </individualName>
 <organisationName>
 <gco:CharacterString>Caltrans</gco:CharacterString>
@@ -107,7 +107,7 @@
 <address>
 <CI_Address>
 <electronicMailAddress>
-<gco:CharacterString>eric.dasmalchi@dot.ca.gov</gco:CharacterString>
+<gco:CharacterString>hello@calitp.org</gco:CharacterString>
 </electronicMailAddress>
 </CI_Address>
 </address>
@@ -124,10 +124,10 @@
 </CI_Citation>
 </citation>
 <abstract>
-<gco:CharacterString>Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled frequencies of 15 minutes or less.</gco:CharacterString>
+<gco:CharacterString>This is the abstract statement.</gco:CharacterString>
 </abstract>
 <purpose>
-<gco:CharacterString>Estimated High Quality Transit Areas as described in Public Resources Code 21155, 21064.3, 21060.2.</gco:CharacterString>
+<gco:CharacterString>Some purpose statement.</gco:CharacterString>
 </purpose>
 <status>
 <MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">completed</MD_ProgressCode>
