@@ -186,11 +186,12 @@ def make_zipped_shapefile(gdf: gpd.GeoDataFrame, local_path: Union[str, Path], g
 
         if gcs_folder[-1] != "/":
             gcs_folder = f"{gcs_folder}/"
-        
+
         fs.put(
             str(Path(f"{dirname}.zip")),
             f"{gcs_folder}{dirname}.zip",
         )
+
 
 # Function to overwrite file in GitHub
 # Based on https://github.com/CityOfLosAngeles/aqueduct/tree/master/civis-aqueduct-utils/civis_aqueduct_utils
