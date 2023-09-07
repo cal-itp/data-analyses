@@ -235,7 +235,7 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
     # (2) Rename key/name to reflect the quartet
     GTFS_DATASET_RENAME_DICT = {
         "gtfs_dataset_key": f"{quartet_data}_gtfs_dataset_key",
-        "_gtfs_dataset_name": f"{quartet_data}_gtfs_dataset_name",
+        "gtfs_dataset_name": f"{quartet_data}_gtfs_dataset_name",
         "source_record_id": f"{quartet_data}_source_record_id",
     }
 

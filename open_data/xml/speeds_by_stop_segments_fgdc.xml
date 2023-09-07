@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+	<idinfo>
+		<citation>
+			<citeinfo>
+				<title>speeds_by_stop_segments</title>
+				<geoform>vector digital data</geoform>
+			</citeinfo>
+		</citation>
+		<descript>
+			<abstract>All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</abstract>
+			<purpose>All day and peak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data.</purpose>
+		</descript>
+		<spdom>
+			<bounding>
+				<westbc>-124.226362</westbc>
+				<eastbc>-115.974529</eastbc>
+				<northbc>41.957893</northbc>
+				<southbc>32.542091</southbc>
+			</bounding>
+		</spdom>
+		<keywords>
+			<theme>
+				<themekt>None</themekt>
+				<themekey>Transportation</themekey>
+				<themekey>Transit</themekey>
+				<themekey>GTFS</themekey>
+				<themekey>GTFS RT</themekey>
+				<themekey>real time</themekey>
+				<themekey>speeds</themekey>
+				<themekey>vehicle positions</themekey>
+			</theme>
+		</keywords>
+		<accconst>None</accconst>
+		<useconst>Public.</useconst>
+		<native>Esri ArcGIS 12.9.2.32739</native>
+	</idinfo>
+	<spdoinfo>
+		<direct>Vector</direct>
+		<ptvctinf>
+			<sdtsterm>
+				<sdtstype>String</sdtstype>
+				<ptvctcnt>217821</ptvctcnt>
+			</sdtsterm>
+		</ptvctinf>
+	</spdoinfo>
+	<eainfo>
+		<detailed>
+			<enttyp>
+				<enttypl>speeds_by_stop_segments</enttypl>
+			</enttyp>
+			<attr>
+				<attrlabl>OBJECTID</attrlabl>
+				<attrdef>Internal feature number.</attrdef>
+				<attrdefs>Esri</attrdefs>
+				<attrdomv>
+					<udom>Sequential unique whole numbers that are automatically generated.</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>Shape</attrlabl>
+				<attrdef>Feature geometry.</attrdef>
+				<attrdefs>Esri</attrdefs>
+				<attrdomv>
+					<udom>Coordinates defining the features.</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>Shape_Length</attrlabl>
+				<attrdef>Length of feature in internal units.</attrdef>
+				<attrdefs>Esri</attrdefs>
+				<attrdomv>
+					<udom>Positive real numbers that are automatically generated.</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>agency</attrlabl>
+				<attrdef>Full name of the transit agency</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>org_id</attrlabl>
+				<attrdef>Organization identifier for the agency</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>shape_id</attrlabl>
+				<attrdef>Identifies a shape</attrdef>
+				<attrdefs>https://gtfs.org/schedule/reference/#shapestxt</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>stop_sequence</attrlabl>
+				<attrdef>Order of stops for a particular trip. The values must increase along the trip but do not need to be consecutive.</attrdef>
+				<attrdefs>https://gtfs.org/schedule/reference/#stop_timestxt</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>stop_id</attrlabl>
+				<attrdef>Identifies a stop, station, or station entrance</attrdef>
+				<attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>p20_mph</attrlabl>
+				<attrdef>The 20th percentile speed (mph) for all trips associated with the shape_id and time_of_day.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>p50_mph</attrlabl>
+				<attrdef>The 50th percentile speed (mph) for all trips associated with the shape_id and time_of_day.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>p80_mph</attrlabl>
+				<attrdef>The 80th percentile speed (mph) for all trips associated with the shape_id and time_of_day.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>n_trips</attrlabl>
+				<attrdef>The number of trips used to find the 20th, 50th, and 80th percentile speeds within the segment.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>time_of_day</attrlabl>
+				<attrdef>The time of day period that provides the 20th, 50th, and 80th percentile speeds. Valid values are all_day and peak.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>base64_url</attrlabl>
+				<attrdef>The base64 encoded url for the feed associated with the agency</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>district_name</attrlabl>
+				<attrdef>Caltrans district name</attrdef>
+			</attr>
+		</detailed>
+	</eainfo>
+	<metainfo>
+		<metd>20230831</metd>
+		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+		<metstdv>FGDC-STD-001-1998</metstdv>
+		<mettc>local time</mettc>
+	</metainfo>
+</metadata>
