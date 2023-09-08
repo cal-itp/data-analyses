@@ -224,7 +224,7 @@ class RtFilterMapper:
             self.corridor = corridor_gdf >> select(_.geometry)
         to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence'])
         clipped = to_clip.clip(corridor_gdf)
-        shape_sequences = (self.stop_delay_view)
+        shape_sequences = (self.stop_delay_view
                           >> distinct(_.shape_id, _.stop_sequence)
                           >> arrange(_.shape_id, _.stop_sequence)
                          )
