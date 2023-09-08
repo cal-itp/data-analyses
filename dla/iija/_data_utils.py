@@ -11,12 +11,9 @@ import numpy as np
 import pandas as pd
 from siuba import *
 
-import dla_utils
-
 from calitp_data_analysis.sql import to_snakecase
 
 import _script_utils
-
 
 
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
@@ -25,9 +22,7 @@ GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
 # import nltk
 # from nltk.corpus import stopwords
 # from nltk.tokenize import word_tokenize, sent_tokenize
-
 # import re
-
 
 
 def read_data_all():
@@ -53,10 +48,9 @@ def add_new_codes(df):
     #code_map = dict(new_codes[['iija_program_code', 'new_description']].values)
 
     ## adding updated program codes 05/11/23
-    new_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/Copy of lst_IIJA_Code_20230510.xlsx"))
+    new_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/Copy of lst_IIJA_Code_20230908.xlsx"))
     code_map = dict(new_codes[['iija_program_code', 'program_name']].values)
 
-    
     df['program_code_description'] = df.program_code.map(code_map)
     df['summary_recipient_defined_text_field_1_value'] = df['summary_recipient_defined_text_field_1_value'].astype(str)
     
@@ -65,6 +59,7 @@ def add_new_codes(df):
     
     return df
 
+
 # Function that changes "Congressional District 2" to "2"
 def change_col_to_integer(df, col):
     
@@ -72,7 +67,6 @@ def change_col_to_integer(df, col):
     
     return df
  
-
 
 #for use in the following function identify_agency
 def add_name_from_locode(df, df_locode_extract_col):
@@ -94,8 +88,6 @@ def add_name_from_locode(df, df_locode_extract_col):
     df_all.drop(columns =['active_e76s______7_12_2021_', 'mpo_locode_fads', 'agency_locode'], axis=1, inplace=True)
         
     return df_all
-
-
 
 
 # def tokenize(texts):

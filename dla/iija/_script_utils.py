@@ -158,7 +158,7 @@ def condense_df(df):
     df_agg = (df
            .assign(count=1)
            .groupby(['fmis_transaction_date','project_number', 'implementing_agency', 'summary_recipient_defined_text_field_1_value'
-                    # , 'program_code', 'program_code_description'
+                    , 'program_code', 'program_code_description'
                     ])
            .agg({
                  # 'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate                ##hashing this out to group by instead
@@ -166,8 +166,8 @@ def condense_df(df):
                  'recipient_project_number':lambda x:'|'.join(x.unique()), #'first',
                  'improvement_type':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'improvement_type_description':lambda x:'|'.join(x.unique()),  # get unique values to concatenate
-                 'program_code':lambda x:'|'.join(x.unique()),  # get unique values to concatenate
-                 'program_code_description':lambda x:'|'.join(x.unique()),  # get unique values to concatenate
+                 # 'program_code':lambda x:'|'.join(x.unique()),  # get unique values to concatenate
+                 # 'program_code_description':lambda x:'|'.join(x.unique()),  # get unique values to concatenate
                  'project_title':'first', #should be the same                 
                  'obligations_amount':'sum', #sum of the obligations amount
                  'congressional_district':lambda x:'|'.join(x.unique()), # get unique values to concatenate
