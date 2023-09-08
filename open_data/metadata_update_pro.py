@@ -100,6 +100,9 @@ def overwrite_topic_section(metadata: dict, dataset_info: dict) -> dict:
     status_info = id_info[f"{x}status"][f"{x}MD_ProgressCode"]
     
     ## Topic & Keywords
+    id_info[f"{x}abstract"][char_key] = d["description"]
+    id_info[f"{x}purpose"][char_key] = d["summary_purpose"]
+    
     id_info[f"{x}topicCategory"][f"{x}MD_TopicCategoryCode"] = d["theme_topic"]
     
     # this might be GIS theme keywords?
@@ -129,7 +132,9 @@ def overwrite_citation_section(metadata: dict, dataset_info: dict) -> dict:
     ## Identification Info > Citation
     id_info = metadata[f"{x}identificationInfo"][f"{x}MD_DataIdentification"]
     citation_info = id_info[f"{x}citation"][f"{x}CI_Citation"]
-                    
+    
+    citation_info[f"{x}title"][char_key] = d["dataset_name"]
+    
     ## Citation Dates
     (citation_info[f"{x}date"][0][f"{x}CI_Date"]
      [f"{x}date"][dt_key]) = d["creation_date"]
