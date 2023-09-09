@@ -308,7 +308,7 @@ def pare_down_vp_for_special_cases(
         special_shapes,
         f"{USABLE_VP}_{analysis_date}",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
-        GROUPING_COL,
+        sjoin_filtering = [[(GROUPING_COL, "in", special_shapes)]],
         columns = ["vp_idx", "trip_instance_key", TIMESTAMP_COL,
                    "x", "y"]
     )

@@ -57,10 +57,9 @@ def identify_stop_segment_cases(
 
 
 def merge_usable_vp_with_sjoin_vpidx(
-    shape_cases: list,
     usable_vp_file: str,
     sjoin_results_file: str,
-    grouping_col: str,
+    sjoin_filtering: tuple = [[(grouping_col, "in", shape_cases)]],
     **kwargs
 ) -> dd.DataFrame:
     """
@@ -76,22 +75,19 @@ def merge_usable_vp_with_sjoin_vpidx(
         partitioned = True,
         **kwargs
     ).repartition(npartitions=100)
-    
-    usable_vp = usable_vp.set_index("vp_idx", sorted=False)
-        
+            
     # Grab our results of vp_idx joined to segments
     vp_to_seg = dd.read_parquet(
         f"{SEGMENT_GCS}vp_sjoin/{sjoin_results_file}",
-        filters = [[(grouping_col, "in", shape_cases)]],
-    ).set_index("vp_idx", sorted=False)
+        filters = sjoin_filtering,
+    )
     
     usable_vp_full_info = dd.merge(
         usable_vp,
         vp_to_seg,
-        left_index = True,
-        right_index = True,
+        on = "vp_idx",
         how = "inner"
-    ).reset_index()
+    )
     
     return usable_vp_full_info
 
@@ -123,7 +119,7 @@ def pare_down_vp_by_segment(
         normal_shapes,
         f"{USABLE_VP}_{analysis_date}",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
-        GROUPING_COL, 
+        sjoin_filtering = [[(GROUPING_COL, "in", normal_shapes)]],
         columns = ["vp_idx", "trip_instance_key", TIMESTAMP_COL,
                    "x", "y"]
     )
