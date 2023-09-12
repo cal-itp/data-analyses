@@ -137,6 +137,9 @@ def pare_down_vp_to_valid_trips(
     usable_vp.to_parquet(
         f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
         partition_cols = "gtfs_dataset_key",
+        # if we don't delete the entire folder of partitioned parquets, this
+        # can delete it if the partitions have the same name
+        #existing_data_behavior = "delete_matching" 
     )
 
     

@@ -33,3 +33,5 @@
 2023-08-24 14:25:38.767 | INFO     | __main__:sjoin_vp_to_segments:191 - sjoin with map_partitions: 0:00:00.050300
 2023-08-24 14:32:56.013 | INFO     | __main__:sjoin_vp_to_segments:200 - export partitioned results: 0:07:17.246282
 2023-08-24 14:33:01.424 | INFO     | __main__:<module>:223 - execution time: 0:09:33.082155
+2023-09-09 13:26:39.979 | INFO     | __main__:<module>:457 - Analysis date: 2023-07-12
+2023-09-09 13:34:38.631 | INFO     | __main__:<module>:465 - remove erroneous sjoin results: 0:07:58.650611
