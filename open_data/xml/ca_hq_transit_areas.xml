@@ -68,7 +68,7 @@
 			<ns0:citation>
 				<ns0:CI_Citation>
 					<ns0:title>
-						<ns1:CharacterString>dataset_name</ns1:CharacterString>
+						<ns1:CharacterString>ca_hq_transit_areas</ns1:CharacterString>
 					</ns0:title>
 					<ns0:date>
 						<ns0:CI_Date>
@@ -143,10 +143,10 @@
 				</ns0:CI_Citation>
 			</ns0:citation>
 			<ns0:abstract>
-				<ns1:CharacterString>This is the abstract statement.</ns1:CharacterString>
+				<ns1:CharacterString>Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled frequencies of 15 minutes or less.</ns1:CharacterString>
 			</ns0:abstract>
 			<ns0:purpose>
-				<ns1:CharacterString>Some purpose statement.</ns1:CharacterString>
+				<ns1:CharacterString>Estimated High Quality Transit Areas as described in Public Resources Code 21155, 21064.3, 21060.2.</ns1:CharacterString>
 			</ns0:purpose>
 			<ns0:status>
 				<ns0:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">
