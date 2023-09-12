@@ -299,8 +299,10 @@ class OperatorDayAnalysis:
         ''' Experimental to break up long segments
             To filter these out, self.stop_delay_view.dropna(subset=['stop_id'])
         '''
-        
-        new_ix = (self.shapes >> filter(_.shape_id == _delay.shape_id.iloc[0])).km_index.iloc[0]
+        relevant_shape = self.shapes >> filter(_.shape_id == _delay.shape_id.iloc[0])
+        shape_geom = relevant_shape.geometry.iloc[0]
+        # display(shape_geom) # debug
+        new_ix = relevant_shape.km_index.iloc[0]
         if np.any(new_ix):
             _delay = _delay.set_index('shape_meters')
             first_shape_meters = (_delay >> filter(_.stop_sequence == _.stop_sequence.min())).index.to_numpy()[0]
@@ -316,6 +318,10 @@ class OperatorDayAnalysis:
             appended = appended.reset_index()
             appended['actual_time'] = appended.apply(lambda x: 
                         self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
+                        axis = 1)
+            # include point geometries for interpolated stops
+            appended['geometry'] = appended.apply(lambda x:
+                        shape_geom.interpolate(x.shape_meters) if pd.isna(x.geometry) else x.geometry,
                         axis = 1)
             return appended
         else:
@@ -361,8 +367,9 @@ class OperatorDayAnalysis:
                 self.debug_dict[f'{trip_id}_stopsegs'] = _delay
                 try:
                     _delay = self._add_km_segments(_delay)
-                except:
+                except Exception as e:
                     print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
+                    print(e)
                     continue
 
                 _delays = pd.concat((_delays, _delay))
