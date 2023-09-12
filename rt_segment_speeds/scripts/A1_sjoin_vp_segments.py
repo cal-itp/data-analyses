@@ -190,7 +190,7 @@ def sjoin_vp_to_segments(
     time2 = datetime.datetime.now()
     logger.info(f"sjoin with map_partitions: {time2 - time1}")
     
-    results = results.repartition(npartitions=10)
+    results = results.repartition(npartitions=5)
     results.to_parquet(
         f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_{analysis_date}",
         overwrite=True
