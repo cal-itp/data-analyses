@@ -13,6 +13,7 @@ DATES = {
     "jul2022": "2022-07-13",
     "aug2022": "2022-08-17",
     "sep2022": "2022-09-14",
+    "sep2022a": "2022-09-21",  # start of most v2 fct_vehicle_locations data? extent of backfill?
     "oct2022": "2022-10-12",
     "nov2022": "2022-11-16",
     "dec2022": "2022-12-14",

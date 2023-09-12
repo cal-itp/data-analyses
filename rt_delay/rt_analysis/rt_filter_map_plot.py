@@ -814,19 +814,21 @@ def from_gcs(itp_id, analysis_date, pbar = None):
     '''
     date_iso = analysis_date.isoformat()
     
-    if analysis_date <= warehouse_cutoff_date:
-        shapes = get_routelines(itp_id, analysis_date)
-        trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
-            .reset_index(drop=True))
-        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
-                 .reset_index(drop=True))
-    else:
-        index_df = get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
-        trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
-            .reset_index(drop=True))
-        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
-                 .reset_index(drop=True))
-        shapes = get_shapes(index_df)
+    # if analysis_date <= warehouse_cutoff_date:
+    #     shapes = get_routelines(itp_id, analysis_date)
+    #     trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
+    #         .reset_index(drop=True))
+    #     stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
+    #              .reset_index(drop=True))
+    # else:
+    
+    # always use v2 warehouse, v1 warehouse deprecated/gone
+    index_df = get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
+    trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
+        .reset_index(drop=True))
+    stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
+             .reset_index(drop=True))
+    shapes = get_shapes(index_df)
     
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
