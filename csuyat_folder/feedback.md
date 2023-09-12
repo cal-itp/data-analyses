@@ -1,0 +1,26 @@
+# Feedback for Christian
+
+## Exercise 1
+* Use `git mv` to change the path of where your current exercises in progress and future exercises live. Use `csuyat_folder` and not `csuyat_folder/python`.    
+   * `YOURNAME_exercise1` can be interpreted as `christian_exercise1`...not literally as `CHRISTIAN_exercise1`
+* Functions within scripts are imported if they are in the same directory. It is brittle to have too many nested folders for simpler projects.
+   * Most folders within `data-analyses` follow this, except for larger projects like `rt_segment_speeds` and `dla`
+   * For more complex projects, nested directories are used, but only in conjunction with installable packages.
+* When submitting a finished exercise, use `Kernel > Restart Kernel and Run ALl Cells` to show a fresh run of code with outputs.
+
+## Exercise 2
+* Left join keeps all rows that show up in the left df, whether or not the right df has it.
+   * If the right df has it, those columns will be populated. 
+   * If the right df does not have those rows, those columns will be filled with NaNs / missing values. NaNs = not a number.
+   * In this exercise, if there were 100 agencies in the left df, and 90 agencies in the right df:
+      * A left merge would leave you with 100 agencies in your merged df. Those 10 agencies not present in the right df would have their `vehicles` columns populated with NaNs.
+      * An inner merge would leave you with 90 agencies in your merged df. These are the 90 agencies are found in the left and the right dfs.
+   * There are use cases for having a left merge or an inner merge. Sometimes you want agencies with complete information. Other times you want all the agencies to show up in your results and you want to present how many agencies have missing info.
+* Modify this cell to another column that isn't categorical. 
+    ```
+    merge2.groupby('State').TOS.agg(['count', 'nunique', 'min']).head()    
+    ```
+   * Use `df.dtypes` to check what data types are. 
+   * `TOS` = type of service, and it has 2 unique values, DO and PT (directly operated). `min(TOS) = DO` isn't that interpretable, since the min of a string is just the first one that appears in the alphabet.
+* Add a line of code to rename columns where the new line character is cleaned up. Ex: `Population\n` becomes `Population` without the new line character.
+* Do the challenge portion and provide not only aggregate stats for `service_vehicles`, but also `per capita service vehicles`. Plot these 2 charts side-by-side.
