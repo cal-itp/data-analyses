@@ -299,8 +299,8 @@ class OperatorDayAnalysis:
         ''' Experimental to break up long segments
             To filter these out, self.stop_delay_view.dropna(subset=['stop_id'])
         '''
-        
-        new_ix = (self.shapes >> filter(_.shape_id == _delay.shape_id.iloc[0])).km_index.iloc[0]
+        relevant_shape = self.shapes >> filter(_.shape_id == _delay.shape_id.iloc[0])
+        new_ix = relevant_shape.km_index.iloc[0]
         if np.any(new_ix):
             _delay = _delay.set_index('shape_meters')
             first_shape_meters = (_delay >> filter(_.stop_sequence == _.stop_sequence.min())).index.to_numpy()[0]
@@ -316,6 +316,10 @@ class OperatorDayAnalysis:
             appended = appended.reset_index()
             appended['actual_time'] = appended.apply(lambda x: 
                         self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
+                        axis = 1)
+            # include point geometries for interpolated stops
+            appended['geometry'] = appended.apply(lambda x:
+                        relevant_shape.interpolate(x.shape_meters) if np.isna(x.geometry) else x.geometry,
                         axis = 1)
             return appended
         else:
