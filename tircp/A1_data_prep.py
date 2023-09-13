@@ -1,5 +1,5 @@
 import pandas as pd
-from calitp import *
+from calitp_data_analysis.sql import to_snakecase
 
 #GCS File Path:
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/tircp/"
@@ -40,7 +40,7 @@ def organization_cleaning(df, column_wanted: str):
 
 # Format a column to currency format
 def currency_format(df, col_name: str):
-    df[col_name] = "$" + (df[col_name].astype(float)).round(0).astype(str)
+    df[col_name] = "$" + (df[col_name].apply(pd.to_numeric, errors = 'coerce').fillna(0)).round(0).astype(str)
     return df
 
 

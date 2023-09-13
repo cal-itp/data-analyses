@@ -1,7 +1,7 @@
 import A1_data_prep
 import numpy as np
 import pandas as pd
-from calitp.sql import to_snakecase
+from calitp_data_analysis.sql import to_snakecase
 
 # Clean up project IDS by deleting extra zeroes and making it 8 characters long
 def clean_project_ids(df, project_id_col: str):
