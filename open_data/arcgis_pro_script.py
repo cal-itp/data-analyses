@@ -236,7 +236,15 @@ for f in in_features:
 
 
 ### (4) UPDATE XML METADATA SEPARATELY IN PYTHON OUTSIDE OF ARCGIS IN JUPYTERHUB
+
+## Import FGDC metadata for each dataset manually
+# The button to Metadata > Import > type of metadata set to FGDC does something different than the `metadata.importMetadata` feature, which doesn't do it. Manually doing the import for the fgdb metadata works for each dataset only.
+
+# Do this FGDC metadata first to get the field descriptions populated. If we do this second, certain items in the metadata will get overwritten and set to blank.
+
 # Once updated XML is back in ArcPro, synchronize it with existing layer
+# This synchronize doesn't really work exactly the same as import Metadata button.
+# It only synchronizes certain elements, but not all
 def apply_updated_xml(feature_class):
     """
     Synchronize new XML with existing feature class.
@@ -256,8 +264,6 @@ def apply_updated_xml(feature_class):
 for f in in_features:
     apply_updated_xml(f)
 
-## Import FGDC metadata for each dataset manually
-# The button to Metadata > Import > type of metadata set to FGDC does something different than the `metadata.importMetadata` feature, which doesn't do it. Manually doing the import for the fgdb metadata works for each dataset only.
 
 ## Write layers to open_data gdb
     
