@@ -271,3 +271,20 @@
 2023-09-12 13:05:35.111 | INFO     | __main__:<module>:105 - export concatenated vp: 0:01:45.093159
 2023-09-12 13:10:50.983 | INFO     | __main__:<module>:121 - remove batched parquets
 2023-09-12 13:10:50.985 | INFO     | __main__:<module>:124 - execution time: 0:07:05.336866
+2023-09-12 13:39:50.239 | INFO     | __main__:<module>:90 - Analysis date: 2022-10-12
+2023-09-12 13:39:59.432 | INFO     | __main__:<module>:98 - concat and filter batched data: 0:00:09.189793
+2023-09-12 13:43:09.472 | INFO     | __main__:<module>:105 - export concatenated vp: 0:03:10.040565
+2023-09-12 13:54:16.230 | INFO     | __main__:<module>:121 - remove batched parquets
+2023-09-12 13:54:16.231 | INFO     | __main__:<module>:124 - execution time: 0:14:25.989089
+2023-09-12 14:04:25.971 | INFO     | __main__:<module>:90 - Analysis date: 2022-11-16
+2023-09-12 14:04:32.144 | INFO     | __main__:<module>:98 - concat and filter batched data: 0:00:06.171920
+2023-09-12 14:06:32.761 | INFO     | __main__:<module>:105 - export concatenated vp: 0:02:00.616483
+2023-09-12 14:12:42.068 | INFO     | __main__:<module>:121 - remove batched parquets
+2023-09-12 14:12:42.069 | INFO     | __main__:<module>:124 - execution time: 0:08:16.096005
+2023-09-12 14:36:02.288 | INFO     | __main__:<module>:90 - Analysis date: 2022-12-14
+2023-09-12 14:36:09.588 | INFO     | __main__:<module>:98 - concat and filter batched data: 0:00:07.287529
+2023-09-12 14:39:11.752 | INFO     | __main__:<module>:105 - export concatenated vp: 0:03:02.163900
+2023-09-12 14:45:46.459 | INFO     | __main__:<module>:121 - remove batched parquets
+2023-09-12 14:45:46.461 | INFO     | __main__:<module>:124 - execution time: 0:09:44.160336
+2023-09-13 13:36:49.274 | INFO     | __main__:<module>:90 - Analysis date: 2023-01-18
+2023-09-13 13:36:56.809 | INFO     | __main__:<module>:98 - concat and filter batched data: 0:00:07.512212
