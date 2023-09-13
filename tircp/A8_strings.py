@@ -1,13 +1,9 @@
 import pandas as pd
-from calitp import *
+from calitp_data_analysis.sql import to_snakecase
 import A1_data_prep
 
-import altair as alt
-from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
-
 import re
-# import nltk
+import nltk
 from nltk import ngrams
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
@@ -317,8 +313,8 @@ def get_list_of_words(df, col: str):
     
     # Correct spelling 
     # https://stackoverflow.com/questions/49364664/how-to-use-autocorrect-in-pandas-column-of-sentences
-    spell = Speller(lang='en')
-    df[col] = df[col].apply(lambda x: " ".join([spell(i) for i in x.split()]))
+    #spell = Speller(lang='en')
+    #df[col] = df[col].apply(lambda x: " ".join([spell(i) for i in x.split()]))
     
     # remove single-dimensional entries from the shape of an array
     col_text = column.squeeze()

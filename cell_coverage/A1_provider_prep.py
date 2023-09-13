@@ -4,6 +4,7 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import pandas as pd
 import shapely.wkt
+from calitp_data_analysis.sql import to_snakecase
 
 # Open zip files 
 import fsspec
