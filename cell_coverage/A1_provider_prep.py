@@ -1,5 +1,3 @@
-import shared_utils
-from shared_utils import geography_utils
 from shared_utils import utils
 import geopandas as gpd
 import dask.dataframe as dd
@@ -9,8 +7,7 @@ import shapely.wkt
 
 # Open zip files 
 import fsspec
-from calitp import *
-from calitp.storage import get_fs
+from calitp_data_analysis import get_fs 
 fs = get_fs()
 import os
 

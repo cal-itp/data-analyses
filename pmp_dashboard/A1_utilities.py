@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from calitp import *
+from calitp_data_analysis.sql import to_snakecase
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/pmp_dashboard/"
 
