@@ -44,8 +44,8 @@ RENAME_SPEED = {
     "district_n": "district_name",
     "direction_": "direction_id",
     "common_sha": "common_shape_id",
-    "avg_sched_": "avg_sched_service_min", 
-    "avg_rt_tri": "avg_rt_service_min",
+    "avg_sched_": "avg_sched_trip_min", 
+    "avg_rt_tri": "avg_rt_trip_min",
     "caltrans_d": "district_name"
 }
 
