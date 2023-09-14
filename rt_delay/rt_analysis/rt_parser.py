@@ -1,6 +1,6 @@
-import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils import rt_utils
+from shared_utils.utils import geoparquet_gcs_export
 
 import branca
 
@@ -398,7 +398,7 @@ class OperatorDayAnalysis:
         stop_delay_to_parquet['arrival_time'] = stop_delay_to_parquet.arrival_time.map(lambda x: x.isoformat())
         stop_delay_to_parquet['actual_time'] = stop_delay_to_parquet.actual_time.map(lambda x: x.isoformat())
         stop_delay_to_parquet = stop_delay_to_parquet >> select(-_.delay)
-        shared_utils.utils.geoparquet_gcs_export(stop_delay_to_parquet,
+        geoparquet_gcs_export(stop_delay_to_parquet,
                                          f'{rt_utils.GCS_FILE_PATH}v2_stop_delay_views/',
                                         f'{self.calitp_itp_id}_{date_iso}'
                                         )
