@@ -6,7 +6,7 @@ from siuba import *
 import pandas as pd
 import datetime as dt
 
-import shared_utils
+from shared_utils import rt_utils
 from rt_analysis import rt_filter_map_plot
 import tqdm
 import warnings
@@ -41,7 +41,7 @@ def check_map_gen(row, pbar):
 
 if __name__ == "__main__":
     
-    speedmaps_index_joined = shared_utils.rt_utils.check_intermediate_data(
+    speedmaps_index_joined = rt_utils.check_intermediate_data(
         analysis_date = ANALYSIS_DATE)
     # check if this stage needed
     if speedmaps_index_joined.status.isin(['map_confirmed', 'map_failed', 'parser_failed']).all():
