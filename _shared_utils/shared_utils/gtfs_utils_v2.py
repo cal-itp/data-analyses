@@ -304,10 +304,9 @@ def get_trips(
             metrolink_feed_key = metrolink_feed_key_name_df.feed_key.iloc[0]
             metrolink_name = metrolink_feed_key_name_df.name.iloc[0]
         else:
-            print(f'could not get metrolink feed on {selected_date}!')
+            print(f"could not get metrolink feed on {selected_date}!")
         # Handle Metrolink when we need to
         if not metrolink_empty and ((metrolink_feed_key in operator_feeds) or (metrolink_name in operator_feeds)):
-
             metrolink_trips = trips >> filter(_.feed_key == metrolink_feed_key) >> collect()
             not_metrolink_trips = trips >> filter(_.feed_key != metrolink_feed_key) >> collect()
 
