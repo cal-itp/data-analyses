@@ -22,7 +22,7 @@ from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
                                               CONFIG_PATH)
 
-from A2_valid_vehicle_positions import merge_usable_vp_with_sjoin_vpidx
+from A3_valid_vehicle_positions import merge_usable_vp_with_sjoin_vpidx
 
 
 def triangulate_vp(
@@ -101,10 +101,9 @@ def subset_usable_vp(dict_inputs: dict) -> np.ndarray:
     # Use this function to attach the crosswalk of sjoin results
     # back to usable_vp
     ddf = merge_usable_vp_with_sjoin_vpidx(
-        all_shapes,
         USABLE_FILE,
         SJOIN_FILE,
-        GROUPING_COL,
+        sjoin_filtering = [(GROUPING_COL, "in", all_shapes)],
         columns = ["trip_instance_key", "vp_idx"]
     )
     
