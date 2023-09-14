@@ -784,6 +784,8 @@ class RtFilterMapper:
               >> mutate(organization = self.organization_name)
               >> group_by(_.route_id, _.route_short_name, _.organization)
               >> summarize(p20_corr_mph = _.corridor_speed_mph.quantile(.2),
+                           p50_corr_mph = _.corridor_speed_mph.quantile(.5),
+                           avg_corr_mph = _.corridor_speed_mph.mean(),
                            speed_delay_minutes = _.target_delay_seconds.sum() / 60)
              )
         both_metrics_df = (speed_metric_df >> inner_join(_, schedule_metric_df, on = ['route_id', 'route_short_name'])
