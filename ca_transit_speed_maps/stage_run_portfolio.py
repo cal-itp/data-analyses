@@ -11,8 +11,8 @@ import pandas as pd
 from siuba import *
 
 import datetime as dt
-import shared_utils
 from rt_analysis import rt_parser
+from shared_utils import rt_utils
 
 import os
 
@@ -74,7 +74,7 @@ def deploy_portfolio():
 
 if __name__ == "__main__":
 
-    speedmaps_index_joined = shared_utils.rt_utils.check_intermediate_data(
+    speedmaps_index_joined = rt_utils.check_intermediate_data(
         analysis_date = ANALYSIS_DATE)
     make_rt_site_yml(speedmaps_index_joined)
     stage_portfolio()
