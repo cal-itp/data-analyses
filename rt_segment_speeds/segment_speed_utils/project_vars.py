@@ -6,6 +6,6 @@ SEGMENT_GCS = f"{GCS_FILE_PATH}rt_segment_speeds/"
 RT_SCHED_GCS = f"{GCS_FILE_PATH}rt_vs_schedule/"
 SCHED_GCS = f"{GCS_FILE_PATH}gtfs_schedule/"
 PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/"
-analysis_date = rt_dates.DATES["aug2023"]
+analysis_date = rt_dates.DATES["sep2023"]
 PROJECT_CRS = "EPSG:3310"
 CONFIG_PATH = "./config.yml"
