@@ -299,11 +299,14 @@ def get_trips(
     # get subsetted out
     if get_df:
         metrolink_feed_key_name_df = get_metrolink_feed_key(selected_date=selected_date, get_df=True)
-        metrolink_feed_key = metrolink_feed_key_name_df.feed_key.iloc[0]
-        metrolink_name = metrolink_feed_key_name_df.name.iloc[0]
-
+        metrolink_empty = metrolink_feed_key_name_df.empty
+        if not metrolink_empty:
+            metrolink_feed_key = metrolink_feed_key_name_df.feed_key.iloc[0]
+            metrolink_name = metrolink_feed_key_name_df.name.iloc[0]
+        else:
+            print(f"could not get metrolink feed on {selected_date}!")
         # Handle Metrolink when we need to
-        if (metrolink_feed_key in operator_feeds) or (metrolink_name in operator_feeds):
+        if not metrolink_empty and ((metrolink_feed_key in operator_feeds) or (metrolink_name in operator_feeds)):
             metrolink_trips = trips >> filter(_.feed_key == metrolink_feed_key) >> collect()
             not_metrolink_trips = trips >> filter(_.feed_key != metrolink_feed_key) >> collect()
 
@@ -315,7 +318,7 @@ def get_trips(
                 trip_cols
             ].reset_index(drop=True)
 
-        elif metrolink_feed_key not in operator_feeds:
+        elif metrolink_empty or (metrolink_feed_key not in operator_feeds):
             trips = trips >> subset_cols(trip_cols) >> collect()
 
     return trips >> subset_cols(trip_cols)
