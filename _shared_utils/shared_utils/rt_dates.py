@@ -30,6 +30,7 @@ DATES = {
     # "aug2023": "2023-08-16", # this date is missing Muni
     "aug2023": "2023-08-15",
     "aug2023a": "2023-08-23",  # date used for speedmaps
+    "sep2023": "2023-09-13",
 }
 
 
