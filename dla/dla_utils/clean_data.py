@@ -12,17 +12,14 @@ https://dot.ca.gov/programs/local-assistance/reports/e-76-waiting
 
 import numpy as np
 import pandas as pd
-from calitp import to_snakecase
+from calitp_data_analysis.sql import to_snakecase
 from siuba import *
 import cpi
 
-from calitp.storage import get_fs
-fs = get_fs()
 
 GCS_FILE_PATH = 'gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/'
 
 pd.set_option('display.max_columns', None)
-
 
 
 #reading data
@@ -46,6 +43,7 @@ def read_data():
     
     return df
 
+
 #get integers without coercing other values
 def get_num(x):
     try:
@@ -65,15 +63,14 @@ def clean_data(df):
     #drop unnecessary columns
     df.drop(['waiting_days', 'unnamed:_28','today','warning'], axis=1, inplace=True)
        
-    #dropping the rows with strings in 'total_requested'
-    delete_row = df[df["total_requested"]== '2748.3NA999'].index
-    df = df.drop(delete_row)
-    
-    delete_row = df[df["total_requested"]== '30169.98NA99'].index
-    df = df.drop(delete_row)
-    
-    #change column type to float
-    df['total_requested'] = df['total_requested'].astype(float)
+    ##dropping the rows with strings in 'total_requested'    
+    #change column type to float then int
+    funding_cols = ["total_requested", "ac_requested", "fed_requested"]
+    for col in funding_cols:
+        df[col] = df[col].astype(str)
+        df = df[~df[col].str.contains("NA")]
+        df[col] = df[col].astype(float)
+        df[col] = df[col].fillna(0).astype(np.int64, errors='ignore')
     
     cols = ['prepared_date','to_fmis_date','submit_to_fhwa_date','submit__to_hq_date','hq_review_date','date_request_initiated','date_completed_request']
     df[cols] = df[cols].applymap(lambda x : pd.to_datetime(x, format = '%Y-%m-%d'))
@@ -196,6 +193,7 @@ def clean_agency_names(df):
     
     return df
 
+
 def adjust_prices(df):
     
     cols =  ["total_requested",
@@ -219,20 +217,6 @@ def adjust_prices(df):
         )
     
         return inflation_df
-#         cpi.update()
-#         series_df = cpi.series.get(area="U.S. city average").to_dataframe()
-#         inflation_df = (series_df[series_df.year >= 2008]
-#                .pivot_table(index='year', values='value', aggfunc='mean')
-#                .reset_index()
-#               )
-#         denominator = inflation_df.value.loc[inflation_df.year==base_year].iloc[0]
-
-#         inflation_df = inflation_df.assign(
-#             inflation = inflation_df.value.divide(denominator)
-#         )
-    
-#         return inflation_df
-    
     
     ##get cpi table 
     cpi = inflation_table(2021)
@@ -248,11 +232,7 @@ def adjust_prices(df):
         df[f"adjusted_{col}"] = ((df[col] * 270.97) / multiplier)
     return df
 
-#     ##get cpi table 
-#     cpi_table = inflation_table(2021)
-# #     cpi = (cpi>>select(_.year, _.value))
-# #     cpi_dict = dict(zip(cpi['year'], cpi['value']))
-    
+
 #     df = pd.merge(df, 
 #          cpi_table[["year", "multiplier"]],
 #          left_on = "prepared_y",
@@ -276,7 +256,8 @@ def adjust_prices(df):
 #     return df
 
 
-#add project categories
+###add project categories
+
 
 def add_agency_cat(df):
     group = df >> count(_.primary_agency_name) >> arrange(_.n)
@@ -339,6 +320,7 @@ def add_categories(df):
     NOT_INC = ['charging', 'fueling', 'cng', 'bridge', 'trail',
            'k-rail', 'guardrails', 'bridge rail', 'guard', 'guarrail']
 
+    
     def categorize_project_descriptions(row):
         """
         This function takes a individual type of work description (row of a dataframe)
@@ -395,8 +377,6 @@ def add_categories(df):
     df2 = df2.assign(work_categories = df2[work_cols].sum(axis=1))
     
     return(df2)
-
-
 
 
 def make_clean_data():

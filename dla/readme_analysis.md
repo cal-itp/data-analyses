@@ -13,7 +13,7 @@
 ### Crosswalks
 
 1. [agency_ntd_crosswalk.ipynb](./crosswalks/agency_ntd_crosswalk.ipynb): notebook creating crosswalk between NTD organizations and Airtable organizations
-1. [dla_ntd_itp_crosswalk.ipynb](.//crosswalks/dla_ntd_itp_crosswalk.ipynb): notebook connecting crosswalk 1 (NTD and Airtable) with DLA Locodes
+1. [dla_ntd_itp_crosswalk.ipynb](./crosswalks/dla_ntd_itp_crosswalk.ipynb): notebook connecting crosswalk 1 (NTD and Airtable) with DLA Locodes
 
 
 ### Data Assembly
