@@ -32,7 +32,7 @@ common-fields:
   - &speeds_readme |-
       https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/README.md
   - &speeds_keywords |-
-      Transportation, Transit, GTFS, GTFS RT, real time, speeds, vehicle positions   
+      Transportation, Transit, GTFS, GTFS RT, real time, speeds, vehicle positions         
 
 tables:
   - dataset_name: ca_hq_transit_areas
@@ -52,7 +52,7 @@ tables:
     contact_organization: *contact_organization
     contact_person: "Eric Dasmalchi"
     contact_email: "eric.dasmalchi@dot.ca.gov"
-    horiz_accuracy: "4 meters"
+    horiz_accuracy: *gtfs_horiz_accuracy
     boilerplate_desc: *boilerplate_desc
     boilerplate_license: *boilerplate_license
   
@@ -125,7 +125,7 @@ tables:
     description: |-
         All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.
     public_access: *public_access
-    creation_date: "2022-02-08"
+    creation_date: "2023-06-14"
     place: *place
     status: *status
     frequency: *frequency
@@ -135,8 +135,8 @@ tables:
     readme: *speeds_readme
     readme_desc: *readme_desc
     contact_organization: *contact_organization
-    contact_person: "Data & Digital Services"
-    contact_email: "hello@calitp.org"
+    contact_person: "Tiffany Ku / Eric Dasmalchi"
+    contact_email: "tiffany.ku@dot.ca.gov / eric.dasmalchi@dot.ca.gov"
     horiz_accuracy: *gtfs_horiz_accuracy
     boilerplate_desc: *boilerplate_desc
     boilerplate_license: *boilerplate_license
@@ -158,8 +158,8 @@ tables:
     readme: *speeds_readme
     readme_desc: *readme_desc
     contact_organization: *contact_organization
-    contact_person: "Data & Digital Services"
-    contact_email: "hello@calitp.org"
+    contact_person: "Tiffany Ku"
+    contact_email: "tiffany.ku@dot.ca.gov"
     horiz_accuracy: *gtfs_horiz_accuracy
     boilerplate_desc: *boilerplate_desc
     boilerplate_license: *boilerplate_license

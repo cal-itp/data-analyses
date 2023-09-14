@@ -10,7 +10,7 @@ import intake
 import os
 import pandas as pd
 
-from calitp.tables import tbl
+from calitp_data_analysis.tables import tbls
 from siuba import *
 
 import shared_utils
