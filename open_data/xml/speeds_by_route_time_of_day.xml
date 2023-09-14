@@ -20,7 +20,7 @@
 	</ns0:hierarchyLevelName>
 	<ns0:contact ns1:nilReason="missing"></ns0:contact>
 	<ns0:dateStamp>
-		<ns1:Date>2023-09-07</ns1:Date>
+		<ns1:Date>2023-08-31</ns1:Date>
 	</ns0:dateStamp>
 	<ns0:metadataStandardName>
 		<ns1:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</ns1:CharacterString>
@@ -42,6 +42,9 @@
 							<text>composite</text>
 						</ns0:MD_GeometricObjectTypeCode>
 					</ns0:geometricObjectType>
+					<ns0:geometricObjectCount>
+						<ns1:Integer>10350</ns1:Integer>
+					</ns0:geometricObjectCount>
 				</ns0:MD_GeometricObjects>
 			</ns0:geometricObjects>
 		</ns0:MD_VectorSpatialRepresentation>
@@ -68,7 +71,7 @@
 			<ns0:citation>
 				<ns0:CI_Citation>
 					<ns0:title>
-						<ns1:CharacterString>dataset_name</ns1:CharacterString>
+						<ns1:CharacterString>speeds_by_route_time_of_day</ns1:CharacterString>
 					</ns0:title>
 					<ns0:date>
 						<ns0:CI_Date>
@@ -109,7 +112,7 @@
 					<ns0:citedResponsibleParty>
 						<ns0:CI_ResponsibleParty>
 							<ns0:individualName>
-								<ns1:CharacterString>Data &amp; Digital Services</ns1:CharacterString>
+								<ns1:CharacterString>Tiffany Ku</ns1:CharacterString>
 							</ns0:individualName>
 							<ns0:organisationName>
 								<ns1:CharacterString>Caltrans</ns1:CharacterString>
@@ -122,7 +125,7 @@
 									<ns0:address>
 										<ns0:CI_Address>
 											<ns0:electronicMailAddress>
-												<ns1:CharacterString>hello@calitp.org</ns1:CharacterString>
+												<ns1:CharacterString>tiffany.ku@dot.ca.gov</ns1:CharacterString>
 											</ns0:electronicMailAddress>
 										</ns0:CI_Address>
 									</ns0:address>
@@ -143,10 +146,10 @@
 				</ns0:CI_Citation>
 			</ns0:citation>
 			<ns0:abstract>
-				<ns1:CharacterString>This is the abstract statement.</ns1:CharacterString>
+				<ns1:CharacterString>Provide average transit speeds, number of trips, and metrics related to scheduled annd real-time service minutes by route-direction and time-of-day.</ns1:CharacterString>
 			</ns0:abstract>
 			<ns0:purpose>
-				<ns1:CharacterString>Some purpose statement.</ns1:CharacterString>
+				<ns1:CharacterString>Average transit speeds by route-direction and time-of-day estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</ns1:CharacterString>
 			</ns0:purpose>
 			<ns0:status>
 				<ns0:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">

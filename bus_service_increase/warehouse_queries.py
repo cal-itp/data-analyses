@@ -5,7 +5,7 @@ import pandas as pd
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
 
-from calitp.tables import tbl
+from calitp_data_analysis.tables import tbls
 from siuba import *
 
 from bus_service_utils import utils

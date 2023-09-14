@@ -15,27 +15,7 @@ from typing import Literal
 from segment_speed_utils import helpers, segment_calcs
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
-
-"""
-References
-
-Why call compute twice on dask delayed?
-https://stackoverflow.com/questions/56944723/why-sometimes-do-i-have-to-call-compute-twice-on-dask-delayed-functions
-
-Parallelize dask aggregation
-https://stackoverflow.com/questions/62352617/parallelizing-a-dask-aggregation
-
-Dask delayed stuff
-https://docs.dask.org/en/latest/delayed.htmls
-https://tutorial.dask.org/03_dask.delayed.html
-https://stackoverflow.com/questions/71736681/possible-overhead-on-dask-computation-over-list-of-delayed-objects
-https://docs.dask.org/en/stable/delayed-collections.html
-https://distributed.dask.org/en/latest/manage-computation.html
-https://docs.dask.org/en/latest/delayed-best-practices.html
-
-Map partitions has trouble computing result.
-Just use partitioned df and don't use `ddf.map_partitions`.
-"""     
+    
 def identify_stop_segment_cases(
     analysis_date: str, 
     grouping_col: str,
@@ -57,10 +37,9 @@ def identify_stop_segment_cases(
 
 
 def merge_usable_vp_with_sjoin_vpidx(
-    shape_cases: list,
     usable_vp_file: str,
     sjoin_results_file: str,
-    grouping_col: str,
+    sjoin_filtering: tuple = None,
     **kwargs
 ) -> dd.DataFrame:
     """
@@ -76,22 +55,19 @@ def merge_usable_vp_with_sjoin_vpidx(
         partitioned = True,
         **kwargs
     ).repartition(npartitions=100)
-    
-    usable_vp = usable_vp.set_index("vp_idx", sorted=False)
-        
+            
     # Grab our results of vp_idx joined to segments
     vp_to_seg = dd.read_parquet(
         f"{SEGMENT_GCS}vp_sjoin/{sjoin_results_file}",
-        filters = [[(grouping_col, "in", shape_cases)]],
-    ).set_index("vp_idx", sorted=False)
+        filters = sjoin_filtering,
+    )
     
     usable_vp_full_info = dd.merge(
         usable_vp,
         vp_to_seg,
-        left_index = True,
-        right_index = True,
+        on = "vp_idx",
         how = "inner"
-    ).reset_index()
+    )
     
     return usable_vp_full_info
 
@@ -113,17 +89,12 @@ def pare_down_vp_by_segment(
     GROUPING_COL = dict_inputs["grouping_col"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]
     EXPORT_FILE = dict_inputs["stage3"]
-    
-    # Handle stop segments and the normal/special cases separately
-    normal_shapes = identify_stop_segment_cases(
-        analysis_date, GROUPING_COL, 0)
 
     # First, grab all the usable vp (with lat/lon columns)
-    usable_normal_vp = merge_usable_vp_with_sjoin_vpidx(
-        normal_shapes,
+    usable_vp = merge_usable_vp_with_sjoin_vpidx(
         f"{USABLE_VP}_{analysis_date}",
         f"{INPUT_FILE_PREFIX}_{analysis_date}",
-        GROUPING_COL, 
+        sjoin_filtering = None,
         columns = ["vp_idx", "trip_instance_key", TIMESTAMP_COL,
                    "x", "y"]
     )
@@ -131,8 +102,8 @@ def pare_down_vp_by_segment(
     time1 = datetime.datetime.now()    
     logger.info(f"merge usable vp with sjoin results: {time1 - time0}")
 
-    normal_vp_to_keep = segment_calcs.keep_min_max_timestamps_by_segment(
-        usable_normal_vp,       
+    vp_to_keep = segment_calcs.keep_min_max_timestamps_by_segment(
+        usable_vp,       
         SEGMENT_IDENTIFIER_COLS + ["trip_instance_key"],
         TIMESTAMP_COL
     )
@@ -140,9 +111,12 @@ def pare_down_vp_by_segment(
     time2 = datetime.datetime.now()
     logger.info(f"keep enter/exit points: {time2 - time1}")
 
-    normal_vp_to_keep = normal_vp_to_keep.repartition(npartitions=3)
-    normal_vp_to_keep.to_parquet(
-        f"{SEGMENT_GCS}vp_pare_down/{EXPORT_FILE}_normal_{analysis_date}",
+    vp_to_keep = (vp_to_keep.drop_duplicates()
+                  .reset_index(drop=True)
+                  .repartition(npartitions=3)
+                 )
+    vp_to_keep.to_parquet(
+        f"{SEGMENT_GCS}vp_pare_down/{EXPORT_FILE}_all_{analysis_date}",
         overwrite=True
     )
     
@@ -171,7 +145,7 @@ if __name__ == "__main__":
     )
     
     time2 = datetime.datetime.now()
-    logger.info(f"pare down vp by stop segments normal cases {time2 - time1}")
+    logger.info(f"pare down vp by stop segments for all cases {time2 - time1}")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end-start}")

@@ -8,7 +8,7 @@ from bus_service_utils import utils
 import shared_utils
 import warehouse_queries
 
-from calitp.tables import tbl
+from calitp_data_analysis.tables import tbls
 from siuba import *
 
 # Use sub-folder for Jan 2022
