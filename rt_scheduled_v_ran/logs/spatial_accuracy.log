@@ -33,3 +33,8 @@
 2023-08-24 15:56:51.631 | INFO     | __main__:<module>:206 - compute results: 0:16:44.334493
 2023-08-24 15:56:53.954 | INFO     | __main__:<module>:212 - export: 0:00:02.323612
 2023-08-24 15:56:53.955 | INFO     | __main__:<module>:213 - execution time: 0:17:21.860803
+2023-09-14 15:06:52.843 | INFO     | __main__:<module>:170 - Analysis date: 2023-09-13
+2023-09-14 15:07:23.164 | INFO     | __main__:<module>:201 - use map partitions to find within shape vp: 0:00:30.296347
+2023-09-14 15:28:53.077 | INFO     | __main__:<module>:206 - compute results: 0:21:29.912870
+2023-09-14 15:28:54.955 | INFO     | __main__:<module>:212 - export: 0:00:01.878703
+2023-09-14 15:28:54.956 | INFO     | __main__:<module>:213 - execution time: 0:22:02.087920

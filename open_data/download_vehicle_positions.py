@@ -113,7 +113,7 @@ if __name__ == "__main__":
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    LOG_FILE = "../logs/download_vp_v2.log"
+    LOG_FILE = "./logs/download_vp_v2.log"
     
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 

@@ -18,3 +18,8 @@
 2023-08-24 13:12:39.930 | INFO     | __main__:<module>:168 - export as geoparquet in date folder
 2023-08-24 13:12:41.708 | INFO     | __main__:<module>:177 - export as geoparquet
 2023-08-24 13:12:41.710 | INFO     | __main__:<module>:180 - execution time: 0:00:33.958956
+2023-09-14 10:56:52.811 | INFO     | __main__:<module>:144 - Analysis date: 2023-09-13
+2023-09-14 10:57:27.702 | INFO     | __main__:<module>:155 - filter and buffer: 0:00:34.872580
+2023-09-14 10:57:30.557 | INFO     | __main__:<module>:168 - export as geoparquet in date folder
+2023-09-14 10:57:32.309 | INFO     | __main__:<module>:177 - export as geoparquet
+2023-09-14 10:57:32.310 | INFO     | __main__:<module>:180 - execution time: 0:00:39.480266
