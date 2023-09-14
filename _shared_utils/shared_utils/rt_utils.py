@@ -781,10 +781,10 @@ def get_operators(analysis_date, operator_list, verbose=False):
 
     if isinstance(analysis_date, str):
         analysis_date = pd.to_datetime(analysis_date).date()
-    if analysis_date <= dt.date(2022, 12, 31):  # look for v1 or v2 intermediate data
-        subfolder = "rt_trips/"
-    else:
-        subfolder = "v2_rt_trips/"
+    # if analysis_date <= dt.date(2022, 12, 31):  # look for v1 or v2 intermediate data
+    #     subfolder = "rt_trips/"
+    # else:
+    subfolder = "v2_rt_trips/"
     fs_list = fs.ls(f"{GCS_FILE_PATH}{subfolder}")
     # day = str(analysis_date.day).zfill(2)
     # month = str(analysis_date.month).zfill(2)
