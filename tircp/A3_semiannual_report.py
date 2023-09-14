@@ -3,7 +3,7 @@ Semiannual Report
 """
 import pandas as pd
 import numpy as np
-from calitp import *
+from calitp_data_analysis.sql import to_snakecase
 import A1_data_prep
 import A5_crosswalks as crosswalks
 

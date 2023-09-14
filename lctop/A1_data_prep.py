@@ -1,13 +1,13 @@
 #General packages
-import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shared_utils import geography_utils, utils
-from calitp import *
+from calitp_data_analysis.sql import to_snakecase
 
 #For saving geojson to GCS
-from calitp.storage import get_fs
+from calitp_data_analysis import get_fs
 fs = get_fs()
+
 import os
 
 '''
