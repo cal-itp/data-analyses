@@ -5,7 +5,7 @@ import pandas as pd
 
 from bus_service_utils import utils
 from setup_tract_charts import *
-from shared_utils import geography_utils, map_utils
+from shared_utils import geography_utils
 from shared_utils import calitp_color_palette as cp
 
 catalog = intake.open_catalog("./catalog.yml")
@@ -266,14 +266,15 @@ def create_maps(df, CHART_IMG_PATH):
         "arrivals_group_pj": "Arrivals Group (3 is highest)",
     }
         
-    for i, group_name in EQUITY_GROUPS.items():        
-        fig = map_utils.make_folium_choropleth_map(
-            df[df.equity_group==1], plot_col = plot_col, 
-            popup_dict = popup_dict, tooltip_dict = popup_dict, 
-            colorscale = colorscale2, fig_width = FIG_WIDTH, fig_height = FIG_HEIGHT, 
-            zoom = map_utils.REGION_CENTROIDS["CA"]["zoom"], 
-            centroid = map_utils.REGION_CENTROIDS["CA"]["centroid"],
-            title=f"Bus Service per 1k for {group_name}-Need CalEnviroScreen Tracts")
+    for i, group_name in EQUITY_GROUPS.items():
+        fig = df[df.equity_group==i].explore(
+            plot_col,
+            cmap=colorscale2,
+            tooltip = list(popup_dict.keys()),
+            popup = list(popup_dict.keys()),
+            tiles = "CartoDB Positron",
+            title=f"Bus Service per 1k for {group_name}-Need CalEnviroScreen Tracts"
+        )
                                    
         fig.save(f"{CHART_IMG_PATH}arrivals_pc_{group_name.lower()}.html")
     
@@ -292,14 +293,15 @@ def create_maps(df, CHART_IMG_PATH):
 
     plot_col = "popjobdensity_group"
 
-    fig = map_utils.make_folium_choropleth_map(
-        df[(df.equity_group==3) & (df.stop_id==0)], plot_col = plot_col, 
-        popup_dict = popup_dict, tooltip_dict = popup_dict, 
-        colorscale = colorscale, fig_width = FIG_WIDTH, fig_height = FIG_HEIGHT, 
-        zoom = map_utils.REGION_CENTROIDS["CA"]["zoom"], 
-        centroid = map_utils.REGION_CENTROIDS["CA"]["centroid"],
+    fig = df[(df.equity_group==3) & (df.stop_id==0)].explore(
+        plot_col,
+        cmap=colorscale,
+        tooltip = list(popup_dict.keys()),
+        popup = list(popup_dict.keys()),
+        tiles = "CartoDB Positron",
         title=f"Zero Bus Service for High-Need CalEnviroScreen Tracts"
     )
+    
     fig.save(f"{CHART_IMG_PATH}zero_service_high.html")
     
     
@@ -328,13 +330,13 @@ def create_maps(df, CHART_IMG_PATH):
     plot_col = "equity_group"
     arrivals_col = "arrivals_group_pj"
 
-    fig = map_utils.make_folium_choropleth_map(
-        df[df.flag_me==1], plot_col = plot_col, 
-        popup_dict = popup_dict, tooltip_dict = popup_dict, 
-        colorscale = colorscale, 
-        fig_width = FIG_WIDTH, fig_height = FIG_HEIGHT, 
-        zoom = map_utils.REGION_CENTROIDS["CA"]["zoom"], 
-        centroid = map_utils.REGION_CENTROIDS["CA"]["centroid"],
-        title="Opportunity Tracts by CalEnviroScreen Need")
+    fig = df[(df.flag_me==1)].explore(
+        plot_col,
+        cmap=colorscale,
+        tooltip = list(popup_dict.keys()),
+        popup = list(popup_dict.keys()),
+        tiles = "CartoDB Positron",
+        title=f"Opportunity Tracts by CalEnviroScreen Need"
+    )
     
     fig.save(f"{CHART_IMG_PATH}opportunity_tracts.html")
