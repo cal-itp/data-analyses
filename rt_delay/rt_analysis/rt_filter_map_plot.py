@@ -1,6 +1,7 @@
-import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.rt_utils import *
+from shared_utils.utils import geoparquet_gcs_export
+from shared_utils.calitp_color_palette import CALITP_CATEGORY_BOLD_COLORS, CALITP_CATEGORY_BRIGHT_COLORS
 import branca
 import mapclassify
 
@@ -354,7 +355,7 @@ class RtFilterMapper:
                                  >> ungroup()
                                 )
                     # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
-                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
+                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(CA_NAD83Albers)
                     stop_speeds.geometry = stop_speeds.apply(
                         lambda x: shapely.ops.substring(
                                     (self.shapes >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
@@ -399,7 +400,7 @@ class RtFilterMapper:
             self.stop_segment_speed_view = all_stop_speeds
             export_path = f'{GCS_FILE_PATH}{subfolder}'
             if self._time_only_filter and self.filter_period in cached_periods:
-                shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
+                geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
         self.speed_map_params = (how, colorscale, size, no_title, corridor, shn, no_render)
         return self._show_speed_map()
     
@@ -628,7 +629,7 @@ class RtFilterMapper:
             title = f"{self.organization_name} Median Trip Speeds by Arrival Hour{self.filter_formatted}"
             
         sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Median Trip Speed (mph)'], ci=None, 
-                       palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
+                       palette=[CALITP_CATEGORY_BOLD_COLORS[1]])
             .set_title(title)
            )
         chart = sns_plot.get_figure()
@@ -665,7 +666,7 @@ class RtFilterMapper:
         if no_title:
             title = None
         variability_plt = sns.swarmplot(x = to_chart['Segment Cross Street'], y=to_chart['Segement Speed (mph)'],
-              palette=shared_utils.calitp_color_palette.CALITP_CATEGORY_BRIGHT_COLORS,
+              palette=CALITP_CATEGORY_BRIGHT_COLORS,
              ).set_title(title)
         return variability_plt
     
