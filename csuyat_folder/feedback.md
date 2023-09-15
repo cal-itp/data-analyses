@@ -24,3 +24,31 @@
    * `TOS` = type of service, and it has 2 unique values, DO and PT (directly operated). `min(TOS) = DO` isn't that interpretable, since the min of a string is just the first one that appears in the alphabet.
 * Add a line of code to rename columns where the new line character is cleaned up. Ex: `Population\n` becomes `Population` without the new line character.
 * Do the challenge portion and provide not only aggregate stats for `service_vehicles`, but also `per capita service vehicles`. Plot these 2 charts side-by-side.
+
+## Exercise 3
+* The rows do differ outside of the `subset_cols` you've defined. For `mode = MB (bus)`, the 2 rows left for LA Metro are probably for `TOS = DO or PT` (directly operated or contracted out purchased transportation). 
+* [NTD Glossary](https://www.transit.dot.gov/ntd/national-transit-database-ntd-glossary)
+* When deciding whether to aggregate or deal with duplicates by dropping, it depends on the research question.
+   * If you wanted to focus on directly operated bus service, it's possible to filter down to the point where you no longer have duplicates.
+   * If you wanted to compare agencies, aggregation is usually the way to go. 
+* Fix the dictionary for mapping `Mode` values. 
+   * Check whether the `and` worked by comparing `df.mode_cat.value_counts()` with `df.mode_cat.value_counts(dropna=False)`
+   * If there are unmapped modes, write out the dictionary in long form:
+      ```
+      mode_fill = {
+          "HR": "Rail",
+          "SR": "Rail",
+          "AR": "Rail",
+          "LR": "Light Rail"
+      }
+      ```
+* Looping: `for c in some_list:` is how loops start. `c` is the variable that is injected into the later lines.
+   * By convention, it's usually something related to what that variable means. `c` here is column. You can also use `for col in df.columns:` for something readable.
+   * Within each loop, `c` is replaced by the variable.
+   * When the loop goes through the first time, `c = Agency_VOMS`. The second time, `c = Mode_VOMS`
+      * `df.Agency_VOMS = df.Agency_VOMS.str.replace(',', '').fillna('0').astype({"Agency_VOMS": int})`
+      * `df.Mode_VOMS = df.Mode_VOMS.str.replace(',', '').fillna('0').astype({"Mode_VOMS": int})`
+* Alternatively, for weighted averages, you can simply take the `sum(operating_expenses)` and `sum(vehicle_miles)` by state.
+   * Then, your df with 5 rows (5 states), you can add a new column calculating state-level operating expenses per mile by dividing the 2 summation columns.
+   * `df["operating_cost_per_mi"] = df.total_operating_expenses.divide(df.vehicle_miles)` or `df.total_operating_expenses / df.total_vehicle_miles`
+* To show `altair` chart, first use the function to make the chart: `chart = make_bar_chart()`, followed by `chart` to print it, not `chart.show()`
