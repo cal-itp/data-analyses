@@ -17,6 +17,8 @@ import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
+from typing import Literal
+
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH, PROJECT_CRS)
@@ -95,7 +97,55 @@ def get_usable_vp_bounds_by_trip(df: dd.DataFrame) -> pd.DataFrame:
     ).reset_index(drop=True).compute()
     
     return df2
+
+
+def merge_in_segments(
+    gdf: gpd.GeoDataFrame,
+    segment_identifier_cols: list,
+    grouping_col: str
+) -> gpd.GeoDataFrame:
     
+    shapes_needed = gdf[grouping_col].unique().tolist()
+    
+    # If segment has 1 point, then we have to use the shape,
+    # since the prior point can come from multiple segments away
+    if (gdf.n_vp_seg==1).all():
+        
+        shapes = helpers.import_scheduled_shapes(
+            analysis_date,
+            filters = [[(grouping_col, "in", shapes_needed)]],
+            columns = [grouping_col, "geometry"],
+            get_pandas = True,
+            crs = PROJECT_CRS
+        )
+        
+        m1 = pd.merge(
+            gdf,
+            shapes,
+            on = grouping_col,
+            how = "inner"
+        ).rename(columns = {
+            "geometry_x": "vp_geometry", 
+            "geometry_y": "geometry"})
+        
+    # If segment has 2 points, then we can use segment geometry
+    elif (gdf.n_vp_seg==2).all():
+        
+        segments = gpd.read_parquet(
+            f"{SEGMENT_GCS}stop_segments_{analysis_date}.parquet",
+            columns = segment_identifier_cols + ["geometry"]
+        )
+
+        m1 = pd.merge(
+            gdf,
+            segments,
+            on = segment_identifier_cols,
+            how = "inner"
+        ).rename(columns = {
+            "geometry_x": "vp_geometry", 
+            "geometry_y": "geometry"})
+    
+    return m1
     
 def put_all_together(
     analysis_date: str, 
@@ -188,7 +238,44 @@ def put_all_together(
         ).to_crs(PROJECT_CRS)
     ).drop(columns = ["prior_x", "prior_y"]).set_geometry("geometry")
     
-    return gdf2
+    part1 = gdf2[gdf.n_vp_seg==1].reset_index(drop=True)
+    part2 = gdf2[gdf.n_vp_seg==2].reset_index(drop=True)
+    
+    part2_keep = (part2.groupby(["trip_instance_key"] + SEGMENT_IDENTIFIER_COLS)
+              .vp_idx
+              .max()
+              .reset_index()
+             )
+
+    part2_pared = pd.merge(
+        part2,
+        part2_keep,
+        on = ["trip_instance_key", "vp_idx"] + SEGMENT_IDENTIFIER_COLS, 
+        how = "inner"
+    )
+    
+    
+    part1_gdf = merge_in_segments(
+        part1,
+        SEGMENT_IDENTIFIER_COLS,
+        GROUPING_COL
+    )
+
+    part2_gdf = merge_in_segments(
+        part2_pared,
+        SEGMENT_IDENTIFIER_COLS,
+        GROUPING_COL
+    )
+    
+    gdf3 = pd.concat(
+        [part1_gdf, part2_gdf], 
+        axis=0
+    ).sort_values(
+        SEGMENT_IDENTIFIER_COLS + ["trip_instance_key"]
+    ).reset_index(drop=True)
+    
+    
+    return gdf3
     
 
     
@@ -197,74 +284,5 @@ if __name__ == "__main__":
     
 
 
-    gdf = gdf.assign(
-        prior_time = gdf.prior_time.fillna(
-            gdf.groupby("trip_instance_key", 
-                        observed=True, group_keys=False)
-            [time_col]
-            .shift(1)
-        ),
-        prior_coord = gdf.geometry.fillna(
-            gdf.groupby("trip_instance_key",
-                        observed=True, group_keys=False)
-            .geometry
-            .shift(1)
-        ),
-    ).rename(columns = {"geometry": "vp_geometry"})
 
-    
-    segments = gpd.read_parquet(
-        f"{SEGMENT_GCS}stop_segments_{analysis_date}.parquet",
-        columns = SEGMENT_IDENTIFIER_COLS + ["geometry"]
-    ).rename(columns = {"geometry": "segment_geometry"})
-    
-    two_obs_in_seg_gdf = pd.merge(
-        two_obs_in_seg,
-        segments,
-        on = SEGMENT_IDENTIFIER_COLS,
-        how = "inner"
-    )
-    
-    two_obs_in_seg_gdf = dg.from_geopandas(two_obs_in_seg_gdf, npartitions=10
-                                          ).set_geometry("vp_geometry")
-    
-    shapes_to_keep = one_obs_in_seg_one_outside.shape_array_key.unique().tolist()
-    
-    shapes = helpers.import_scheduled_shapes(
-        analysis_date,
-        columns = ["shape_array_key", "geometry"],
-        filters = [[("shape_array_key", "in", shapes_to_keep)]],
-        get_pandas = True,
-        crs = "EPSG:3310"
-    ).rename(columns = {"geometry": "shape_geometry"})
-             
-    one_obs_in_seg_one_outside_gdf = pd.merge(
-        one_obs_in_seg_one_outside,
-        shapes,
-        on = "shape_array_key",
-        how = "inner"
-    )
-    
-    shape_meters_series = two_obs_in_seg_gdf.map_partitions(
-        wrangle_shapes.project_point_geom_onto_linestring(
-        "segment_geometry",
-        "vp_geometry",
-        meta = ("shape_meters", "float")
-    ))
-        
-    two_obs_in_seg_gdf["shape_meters"] = shape_meters_series
-    
-    two_obs_in_seg_gdf = two_obs_in_seg_gdf.repartition(npartitions=5)
-    two_obs_in_seg_gdf.to_parquet("two_seg_test")
-    
-    shape_meters_series2 =wrangle_shapes.project_point_geom_onto_linestring(
-            one_obs_in_seg_one_outside_gdf,
-            "shape_geometry",
-            "vp_geometry",
-        #meta = ("shape_meters", "float")
-    )
-    
-    one_obs_in_seg_one_outside_gdf["shape_meters"] = shape_meters_series2
-    one_obs_in_seg_one_outside_gdf.to_parquet("one_seg_test.parquet")
-        
-    
+    gddf = dg.from_geopandas(gdf3, npartitions=50)
