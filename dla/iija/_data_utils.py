@@ -7,7 +7,6 @@ If using the get_list_of_words function, remove the comment out hashtag from the
 AND run a `! pip install nltk` in the first cell of your notebook
 '''
 
-import numpy as np
 import pandas as pd
 from siuba import *
 
