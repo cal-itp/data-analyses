@@ -7,8 +7,10 @@ from siuba import *
 
 import altair as alt
 from IPython.display import Markdown, HTML
-from shared_utils import altair_utils, styleguide
-from calitp import to_snakecase
+from shared_utils import styleguide
+from shared_utils import calitp_color_palette as cp
+
+from calitp_data_analysis.sql import to_snakecase
 import _dla_utils
 import ipywidgets as widgets
 
@@ -96,7 +98,7 @@ def make_charts(subset):
         y=alt.Y('Count:Q', title='Number of Unique Agencies'),
         color = alt.Color("District:N", 
                               scale=alt.Scale(
-                                  range=altair_utils.CALITP_SEQUENTIAL_COLORS),  
+                                  range=cp.CALITP_SEQUENTIAL_COLORS),  
                                legend=alt.Legend(title="Prepared Year")
                               )))
                               
@@ -130,7 +132,7 @@ def make_charts(subset):
         y=alt.Y('Count:Q', title='Number of Unique Agencies'),
         color = alt.Color("District:N", 
                               scale=alt.Scale(
-                                  range=altair_utils.CALITP_SEQUENTIAL_COLORS),  
+                                  range=cp.CALITP_SEQUENTIAL_COLORS),  
                                legend=alt.Legend(title="District")
                               )
                               ))
