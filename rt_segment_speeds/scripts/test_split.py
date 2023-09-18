@@ -18,7 +18,6 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 
-from dask import delayed, compute
 from typing import Literal
 
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
@@ -55,6 +54,7 @@ def get_prior_position_on_segment(
     ).sort_values(
         segment_trip_cols + ["vp_idx"]
     ).reset_index(drop=True)
+    
     
     df2 = df2.assign(
         prior_vp_idx = (df2.groupby(segment_trip_cols,
@@ -104,48 +104,42 @@ def get_usable_vp_bounds_by_trip(df: dd.DataFrame) -> pd.DataFrame:
 def merge_in_segments(
     gdf: gpd.GeoDataFrame,
     segment_identifier_cols: list,
-    grouping_col: str
+    grouping_col: str,
+    n_vp_seg_value: Literal[1,2]
 ) -> gpd.GeoDataFrame:
-    
-    shapes_needed = gdf[grouping_col].unique().tolist()
-    
+        
     # If segment has 1 point, then we have to use the shape,
     # since the prior point can come from multiple segments away
-    if (gdf.n_vp_seg==1).all():
+    if n_vp_seg_value==1:
         
         shapes = helpers.import_scheduled_shapes(
             analysis_date,
-            filters = [[(grouping_col, "in", shapes_needed)]],
             columns = [grouping_col, "geometry"],
             get_pandas = True,
             crs = PROJECT_CRS
         )
         
-        m1 = pd.merge(
+        m1 = dd.merge(
             gdf,
             shapes,
             on = grouping_col,
             how = "inner"
-        ).rename(columns = {
-            "geometry_x": "vp_geometry", 
-            "geometry_y": "geometry"})
+        )
         
     # If segment has 2 points, then we can use segment geometry
-    elif (gdf.n_vp_seg==2).all():
+    elif n_vp_seg_value==2:
         
         segments = gpd.read_parquet(
             f"{SEGMENT_GCS}stop_segments_{analysis_date}.parquet",
             columns = segment_identifier_cols + ["geometry"]
         )
 
-        m1 = pd.merge(
+        m1 = dd.merge(
             gdf,
             segments,
             on = segment_identifier_cols,
             how = "inner"
-        ).rename(columns = {
-            "geometry_x": "vp_geometry", 
-            "geometry_y": "geometry"})
+        )
     
     return m1
     
@@ -154,47 +148,40 @@ def attach_vp_timestamp_location(
     df: pd.DataFrame,
     usable_vp: dd.DataFrame,
     timestamp_col: str
-) ->gpd.GeoDataFrame:
+) -> gpd.GeoDataFrame:
     """
     """
     # Merge in the timestamp and x, y coords 
-    df_with_xy = dd.merge(
+    usable_gdf = dg.from_dask_dataframe(
         usable_vp,
+        geometry = dg.points_from_xy(usable_vp, x = "x", y = "y")
+    ).drop(columns = ["x", "y"]).set_crs(WGS84)
+    
+    usable_gdf = usable_gdf.to_crs(PROJECT_CRS)
+    
+    df_with_xy = dd.merge(
+        usable_gdf,
         df,
         on = "vp_idx",
         how = "inner"
     )
     
     # Merge again to get timestamp and x, y coords of previous point
-    usable_vp2 = usable_vp.rename(
+    usable_gdf2 = usable_gdf.rename(
         columns = {
             "vp_idx": "prior_vp_idx",
             timestamp_col: f"prior_{timestamp_col}",
-            "x": "prior_x",
-            "y": "prior_y",
         }
     ).drop(columns = "trip_instance_key")
     
     df_with_prior_xy = dd.merge(
         df_with_xy,
-        usable_vp2,
+        usable_gdf2,
         on = "prior_vp_idx",
         how = "inner"
-    ).compute()
+    )
     
-    gdf = gpd.GeoDataFrame(
-        df_with_prior_xy,
-        geometry = gpd.points_from_xy(df_with_prior_xy.x, df_with_prior_xy.y),
-        crs = WGS84
-    ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
-    
-    gdf2 = gdf.assign(
-        prior_vp_geometry = gpd.points_from_xy(
-            gdf.prior_x, gdf.prior_y, crs = WGS84
-        ).to_crs(PROJECT_CRS)
-    ).drop(columns = ["prior_x", "prior_y"]).set_geometry("geometry")
-    
-    return gdf2
+    return df_with_prior_xy
         
     
 def linear_referencing_for_segment(
@@ -203,25 +190,21 @@ def linear_referencing_for_segment(
     scaling_factor: float = 1.75
 ) -> dg.GeoDataFrame:
     
-    #gddf = dg.from_geopandas(gdf, npartitions=50)
-    gddf = gdf.copy()
+    gddf = gdf.repartition(npartitions=50)
     
-    
-    shape_meters_series = (#gddf.map_partitions(
-        wrangle_shapes.project_point_geom_onto_linestring(
-        gddf,
+    shape_meters_series = gddf.map_partitions(
+        wrangle_shapes.project_point_geom_onto_linestring,
         "geometry",
         "vp_geometry",
-        #meta = ("shape_meters", "float")
-    ))
+        meta = ("shape_meters", "float")
+    )
     
-    prior_shape_meters_series = (#gddf.map_partitions(
-        wrangle_shapes.project_point_geom_onto_linestring(
-            gddf,
+    prior_shape_meters_series = gddf.map_partitions(
+        wrangle_shapes.project_point_geom_onto_linestring,
         "geometry",
         "prior_vp_geometry",
-        #meta = ("prior_shape_meters", "float")
-    ))
+        meta = ("prior_shape_meters", "float")
+    )
     
     #gddf["current_shape_meters"] = shape_meters_series
     #gddf["prior_shape_meters"] = prior_shape_meters_series
@@ -241,7 +224,7 @@ def linear_referencing_for_segment(
                 x.difference_shape_meters >= x.straight_distance*scaling_factor
             ) else x.difference_shape_meters, 
             axis=1, 
-            #meta = ("meters_elapsed", "float")
+            meta = ("meters_elapsed", "float")
         ),
     )
     
@@ -267,6 +250,8 @@ def put_all_together(
     GROUPING_COL = dict_inputs["grouping_col"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]
 
+    time0 = datetime.datetime.now()
+    
     # Import usable vp, which we'll use later for the x, y and timestamp
     usable_vp = dd.read_parquet(
         f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
@@ -275,21 +260,24 @@ def put_all_together(
     vp_idx_bounds = get_usable_vp_bounds_by_trip(usable_vp)
     
     # Start from pared down vp
-    df = delayed(pd.read_parquet)(
+    df = pd.read_parquet(
         f"{SEGMENT_GCS}vp_pare_down/{INPUT_FILE}_all_{analysis_date}",
         columns = SEGMENT_IDENTIFIER_COLS + ["trip_instance_key", "vp_idx"]
     )
     
     # Make sure all segments have 2 points
     # If it doesn't, fill it in with the previous vp_idx
-    df2 = delayed(get_prior_position_on_segment)(
+    df2 = get_prior_position_on_segment(
         df, 
         SEGMENT_IDENTIFIER_COLS,
         TIMESTAMP_COL
     )
     
+    time1 = datetime.datetime.now()
+    print(f"get prior position: {time1 - time0}")
+    
     # Check that the previous vp_idx actually occurs on the same trip
-    df3 = delayed(pd.merge)(
+    df3 = dd.merge(
         df2,
         vp_idx_bounds,
         on = "trip_instance_key",
@@ -310,53 +298,66 @@ def put_all_together(
             axis=1)
     ).drop(columns = ["trip_instance_key", "min_vp_idx", "max_vp_idx"])
     
-    gdf = delayed(attach_vp_timestamp_location)(
+    gdf = attach_vp_timestamp_location(
         df3,
         usable_vp,
         TIMESTAMP_COL
     )
     
-    part1 = gdf[gdf.n_vp_seg==1].reset_index(drop=True)
-    part2 = gdf[gdf.n_vp_seg==2].reset_index(drop=True)
+    time2 = datetime.datetime.now()
+    print(f"attach vp timestamp: {time2 - time1}")
     
-    part2_keep = (part2.groupby(["trip_instance_key"] + SEGMENT_IDENTIFIER_COLS)
-              .vp_idx
-              .max()
-              .reset_index()
-             )
+    #part1 = gdf[gdf.n_vp_seg==1]
+    part2 = gdf[gdf.n_vp_seg==2]
+    
+    part2_keep = (part2.groupby(["trip_instance_key"] + SEGMENT_IDENTIFIER_COLS,
+                                observed=True, group_keys=False)
+                  .vp_idx
+                  .max()
+                  .reset_index()
+                 )
 
-    part2_pared = delayed(pd.merge)(
+    part2_pared = dd.merge(
         part2,
         part2_keep,
         on = ["trip_instance_key", "vp_idx"] + SEGMENT_IDENTIFIER_COLS, 
         how = "inner"
     )
     
-    
-    part1_gdf = delayed(merge_in_segments)(
-        part1,
-        SEGMENT_IDENTIFIER_COLS,
-        GROUPING_COL
-    )
+    #part1_gdf = merge_in_segments(
+    #    part1,
+    #    SEGMENT_IDENTIFIER_COLS,
+    #    GROUPING_COL,
+    #    n_vp_seg_value=1
+    #)
 
-    part2_gdf = delayed(merge_in_segments)(
+    part2_gdf = merge_in_segments(
         part2_pared,
         SEGMENT_IDENTIFIER_COLS,
-        GROUPING_COL
+        GROUPING_COL,
+        n_vp_seg_value=2
     )
     
-    gdf3 = delayed(pd.concat)(
-        [part1_gdf, part2_gdf], 
+    gdf3 = dd.multi.concat(
+        [
+        #part1_gdf, 
+            part2_gdf], 
         axis=0
-    ).sort_values(
-        SEGMENT_IDENTIFIER_COLS + ["trip_instance_key"]
-    ).reset_index(drop=True)
+    ).reset_index(drop=True)#.sort_values(
+     #   SEGMENT_IDENTIFIER_COLS + ["trip_instance_key"]
+    #)
     
-    gdf4 = delayed(linear_referencing_for_segment)(
+    time3 = datetime.datetime.now()
+    print(f"merge in segments: {time3 - time2}")
+    
+    gdf4 = linear_referencing_for_segment(
         gdf3,
         TIMESTAMP_COL, 
         scaling_factor = 1.75
     )
+    
+    time4 = datetime.datetime.now()
+    print(f"linear ref: {time4 - time2}")
         
     return gdf4
     
@@ -365,10 +366,10 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     gddf = put_all_together(analysis_date, STOP_SEG_DICT)
+        
+    gddf = gddf.repartition(npartitions=2)
     
-    gdf = compute(gddf)[0]
-    
-    gdf.to_parquet(f"linear_ref.parquet")
+    gddf.to_parquet("linear_ref")
     
     print(f"execution time: {datetime.datetime.now() - start}")
 
