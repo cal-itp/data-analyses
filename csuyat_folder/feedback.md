@@ -52,3 +52,19 @@
    * Then, your df with 5 rows (5 states), you can add a new column calculating state-level operating expenses per mile by dividing the 2 summation columns.
    * `df["operating_cost_per_mi"] = df.total_operating_expenses.divide(df.vehicle_miles)` or `df.total_operating_expenses / df.total_vehicle_miles`
 * To show `altair` chart, first use the function to make the chart: `chart = make_bar_chart()`, followed by `chart` to print it, not `chart.show()`
+
+## Exercise 4
+* Challenge question: why does `stops_2229 = stops_ptg.assign(geometry=stops_ptg.geometry.to_crs('EPSG:2229'))` show results of area = 0 for all the rows?
+   * Do points have area?
+   * Do lines have area? 
+   * Area can only be calculated for polygons. Lines and points do not have area, so if you try to calculate it, it will always return 0.
+   * Lines have lengths, and so do polygons (circumference)! Points do not have length, so if you try to calculate length on a point, you'll also return 0.
+* Diving into the swapping which df to put on the left, county or stops.
+   * What is the active geometry column name and what does it reflect? Is it the left or right gdf's geometry?
+   * It matters which column you're interested in attaching attributes to / wanting to aggregate. If you want to count how many stops are in a county, you first want to attach the county for each stop.
+   * When you keep stops on the left, it's because you want to keep stop (point) geometry for plotting, and each dot on a map should be colored according to the county name. Most of the time you want points on the left.
+   * If you want to keep county on the left and plot county boundaries, you can keep county (polygon) geometry on the left.
+   * Most of the time, for point-in-polygon questions, like, which polygon does this point fall into, you want the point gdf on the left.
+* Do the sq ft calculation on the county gdf, not the stops. Keep only 1 row for each county, and add the column for `county_sq_ft`, then another column converting `county_sq_ft` to `county_sq_mi`. 
+   * When you have your results for the county, merge it onto your groupby results here: `stop_count = geojoin_stp_cnty.groupby('COUNTY_NAME')['stop_id'].count().reset_index()
+)`. `stop_count` will then contain the number of stops as well as county polygon geometry, sq_ft, sq_mi, and a new column with stops_per_sq_mi.
