@@ -6,10 +6,10 @@ pip install -r portfolio/requirements.txt
 cd 5310_orgs
 python publish_report.py
 '''
-import dotenv
-import os
+# import dotenv
+# import os
 import subprocess
-import sys
+# import sys
 
 import pandas as pd
 import papermill as pm 
