@@ -1,16 +1,10 @@
 import numpy as np
 import pandas as pd
 from siuba import *
-from calitp import *
-from plotnine import *
+from calitp_data_analysis.sql import *
 import intake
 import cpi
-import altair as alt
-import altair_saver
 from shared_utils import geography_utils
-from shared_utils import altair_utils
-from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
 import _agency_crosswalk as agency_crosswalk
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"

@@ -1,18 +1,11 @@
 """
 5311 Utils for Analysis and Charting 
 """
-import numpy as np
 import pandas as pd
 from siuba import *
-from calitp import *
-from plotnine import *
-import intake
-from shared_utils import geography_utils
+from calitp_data_analysis.sql import *
 
 import altair as alt
-import altair_saver
-from shared_utils import geography_utils
-from shared_utils import altair_utils
 from shared_utils import calitp_color_palette as cp
 from shared_utils import styleguide
 
@@ -48,7 +41,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol):
                  y=alt.Y(y_col, title=labeling(y_col)),
                  color = alt.Color(colorcol,
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+                                      range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
                                       legend=alt.Legend(title=(labeling(colorcol)))
                                   ))
              .properties( 
@@ -71,7 +64,7 @@ def basic_scatter_chart(df, x_col, y_col, colorcol):
                  y=alt.Y(y_col, title=labeling(y_col)),
                  color = alt.Color(colorcol,
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+                                      range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
                                       legend=alt.Legend(title=(labeling(colorcol)))
                                   ))
              .properties( 
@@ -94,7 +87,7 @@ def basic_line_chart(df, x_col, y_col, colorcol):
                  y=alt.Y(y_col, title=labeling(y_col)),
                  color = alt.Color(colorcol,
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+                                      range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
                                       legend=alt.Legend(title=(labeling(colorcol)))
                                   ))
               ).properties( 
