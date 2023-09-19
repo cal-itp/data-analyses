@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from calitp import *
+from calitp_data_analysis.sql import *
 from siuba import *
 from shared_utils import geography_utils
 
