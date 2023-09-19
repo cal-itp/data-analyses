@@ -5,30 +5,28 @@ Utils for Scheduled vs RT Trips
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000) ## 800GB?
 
-from calitp.tables import tbl
+from calitp_data_analysis.tables import tbls
 from calitp_data_analysis.sql import query_sql
-import calitp.magics
+import calitp_data_analysis.magics
 import branca
-
-import shared_utils
 
 from siuba import *
 import pandas as pd
 
 import datetime as dt
-import time
-from zoneinfo import ZoneInfo
+# import time
+# from zoneinfo import ZoneInfo
 
-import importlib
+# import importlib
 
 import gcsfs
 fs = gcsfs.GCSFileSystem()
 
-from tqdm import tqdm_notebook
-from tqdm.notebook import trange, tqdm
+# from tqdm import tqdm_notebook
+# from tqdm.notebook import trange, tqdm
 
 import altair as alt
-from shared_utils import altair_utils, portfolio_utils, geography_utils, styleguide
+from shared_utils import portfolio_utils, geography_utils, styleguide
 from shared_utils import calitp_color_palette as cp
 from dla_utils import _dla_utils as dla_utils
 
@@ -50,7 +48,7 @@ def read_data():
     #filtering for now to avoid the expired calitp_urls
     df = df[((df["calitp_itp_id"]==290) & (df["calitp_url_number"]==1)) | ((df["calitp_itp_id"]==300))]
     
-    itpid_district = portfolio_utils.add_caltrans_district()
+    # itpid_district = portfolio_utils.add_caltrans_district()
     df = pd.merge(df, itpid_district, on='calitp_itp_id', how='left')
     
     assert len(df>>filter(_.agency_name.isnull())) == 0, "PASS"
