@@ -16,7 +16,35 @@ from shared_utils.rt_utils import MPH_PER_MPS
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               PROJECT_CRS, CONFIG_PATH)   
-import test_split
+
+def get_usable_vp_bounds_by_trip(df: dd.DataFrame) -> pd.DataFrame:
+    """
+    Of all the usable vp, for each trip, find the min(vp_idx)
+    and max(vp_idx).
+    For the first stop, there will never be a previous vp to find,
+    because the previous vp_idx will belong to a different operator/trip.
+    But for segments in the middle of the shape, the previous vp can be anywhere,
+    maybe several segments away.
+    """
+    
+    grouped_df = df.groupby("trip_instance_key", 
+                            observed=True, group_keys=False)
+
+    start_vp = (grouped_df.vp_idx.min().reset_index()
+                .rename(columns = {"vp_idx": "min_vp_idx"})
+               )
+    end_vp = (grouped_df.vp_idx.max().reset_index()
+              .rename(columns = {"vp_idx": "max_vp_idx"})
+             )
+    
+    df2 = dd.merge(
+        start_vp,
+        end_vp,
+        on = "trip_instance_key",
+        how = "left"
+    ).reset_index(drop=True).compute()
+    
+    return df2
 
 def linear_referencing_vp_against_line(
     vp: dd.DataFrame, 
@@ -182,7 +210,7 @@ def low_speed_segments_select_different_prior_vp(
         columns = ["trip_instance_key", "vp_idx", timestamp_col, "x", "y"]
     )
 
-    vp_idx_bounds = test_split.get_usable_vp_bounds_by_trip(usable_vp)
+    vp_idx_bounds = get_usable_vp_bounds_by_trip(usable_vp)
     
     df2 = pd.merge(
         df1, 
