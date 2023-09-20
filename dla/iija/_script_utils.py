@@ -523,6 +523,33 @@ def get_clean_data(df, full_or_agg = ''):
         return df
 
     
+def run_script(file_name, recipient_column, df_agg_level):
+    
+    ### Read in data
+    proj_list = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
+    
+    ### run function to get new program codes
+    proj_cleaned = _data_utils.add_new_codes(proj_list)
+    
+    ## function that adds known agency name to df 
+    df = identify_agency(proj_cleaned, recipient_column)
+    
+    ### run the data through the rest of the script
+    ### return a dataset that is aggregated at the project and program code
+    agg = get_clean_data(df, full_or_agg = df_agg_level)
+    
+    return agg
+    
+    
+def export_to_gcs(df, export_date):
+    
+    ### pretty print the column names
+    df = title_column_names(df)
+    
+    ## export to csv in GCS
+    df.to_csv(f"{GCS_FILE_PATH}/FMIS_Projects_Universe_IIJA_Reporting_{export_date}.csv")
+    
+    
 # '''
 # another approach (not as effective for creating new titles)
 # '''
