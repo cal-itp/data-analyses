@@ -25,7 +25,6 @@ https://github.com/CityOfLosAngeles/los-angeles-citywide-data-style
 
 """
 import altair as alt
-from plotnine import *
 from shared_utils import calitp_color_palette as cp
 
 # --------------------------------------------------------------#
@@ -59,10 +58,6 @@ PALETTE = {
 @import url('https://fonts.googleapis.com/css?family=Lato');
 </style>
 """
-
-# --------------------------------------------------------------#
-# Altair
-# --------------------------------------------------------------#
 
 
 def calitp_theme(
@@ -251,37 +246,6 @@ def preset_chart_config(chart: alt.Chart) -> alt.Chart:
     chart = apply_chart_config(chart).properties(
         width=chart_width,
         height=chart_height,
-    )
-
-    return chart
-
-
-# --------------------------------------------------------------#
-# Plotnine
-# --------------------------------------------------------------#
-def preset_plotnine_config(chart):
-    chart = (
-        chart
-        + theme_538()
-        + theme(
-            plot_background=element_rect(fill=backgroundColor, color=backgroundColor),
-            panel_background=element_rect(fill=backgroundColor, color=backgroundColor),
-            panel_grid_major_y=element_line(color=axisColor, linetype="solid", size=1),
-            panel_grid_major_x=element_blank(),
-            figure_size=(7.0, 4.4),
-            title=element_text(weight="bold", size=font_size, family=font, color=blackTitle),
-            axis_title=element_text(family=labelFont, size=12, color=guideTitleColor),
-            axis_text=element_text(family=labelFont, size=10, color=guideLabelColor, margin={"r": 4}),
-            axis_title_x=element_text(margin={"t": 10}),
-            axis_title_y=element_text(margin={"r": 10}),
-            legend_title=element_text(font=labelFont, size=14, color=blackTitle, margin={"b": 10}),
-            legend_text=element_text(
-                font=labelFont,
-                size=11,
-                color=blackTitle,
-                margin={"t": 5, "b": 5, "r": 5, "l": 5},
-            ),
-        )
     )
 
     return chart

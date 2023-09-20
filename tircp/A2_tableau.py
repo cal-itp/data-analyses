@@ -1,9 +1,8 @@
 """
 Tableau 
 """
-import numpy as np
 import pandas as pd
-from calitp import *
+from calitp_data_analysis.sql import to_snakecase
 import A5_crosswalks as crosswalks
 import A1_data_prep
 

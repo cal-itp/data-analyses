@@ -308,7 +308,7 @@ def dissolved_to_longest_shape(hqta_segments: gpd.GeoDataFrame):
     
 if __name__=="__main__":   
 
-    logger.add("./logs/B1_create_hqta_segments.log", retention="6 months")
+    logger.add("./logs/B1_create_hqta_segments.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
@@ -326,7 +326,7 @@ if __name__=="__main__":
         trip_cols = ["feed_key", "name",
                      "route_key", "route_id", 
                      "direction_id", "shape_array_key"]
-    ).dropna(subset="shape_array_key").reset_index(drop=True).compute()
+    ).dropna(subset="shape_array_key").reset_index(drop=True)
 
     # Keep longest shape in each direction
     longest_shapes = pare_down_trips_by_route_direction(trips_with_geom)

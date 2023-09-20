@@ -23,7 +23,7 @@ def get_operators(analysis_date: str):
                 keep_cols = None,
                 get_df = True,
                 feed_option = "use_subfeeds"
-            )
+            ).rename(columns = {"gtfs_dataset_name": "name"})
 
     keep_cols = ["feed_key", "name"]
 

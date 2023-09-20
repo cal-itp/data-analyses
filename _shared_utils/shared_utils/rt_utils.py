@@ -1,27 +1,29 @@
+import base64
 import datetime as dt
+import gzip
+import json
 import os
 import re
 import time
 from pathlib import Path
-from typing import Union
+from typing import Literal, Union
 
 import branca
 import dask_geopandas as dg
 import folium
-import gcsfs
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
+from calitp_data_analysis import get_fs
 from calitp_data_analysis.tables import tbls
 from numba import jit
 from shared_utils import geography_utils, gtfs_utils_v2, rt_dates, utils
 from siuba import *
 
-# from zoneinfo import ZoneInfo
-# import warnings
+fs = get_fs()
 
-fs = gcsfs.GCSFileSystem()
+fs = get_fs()
 
 # set system time
 os.environ["TZ"] = "America/Los_Angeles"
@@ -35,6 +37,10 @@ EXPORT_PATH = f"{GCS_FILE_PATH}cached_views/"
 SHN_PATH = "gs://calitp-analytics-data/data-analyses/bus_service_increase/highways.parquet"
 VP_FILE_PATH = f"gs://{BUCKET_NAME}/data-analyses/rt_segment_speeds/"
 V2_SUBFOLDER = "v2_cached_views/"
+
+SPA_MAP_SITE = "https://embeddable-maps.calitp.org/"
+SPA_MAP_BUCKET = "calitp-map-tiles/"
+SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/speeds_legend.svg"
 
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 METERS_PER_MILE = 1609.34
@@ -514,6 +520,7 @@ def check_intermediate_data(
     if already_tried:
         print(f"found {progress_path}, resuming")
         speedmaps_index_joined = pd.read_parquet(progress_path)
+        print(speedmaps_index_joined >> count(_.status))  # show status when running script
     else:
         operators_ran = get_operators(analysis_date, speedmaps_index_df.organization_itp_id.to_list())
         operators_ran_df = pd.DataFrame.from_dict(operators_ran, orient="index", columns=["status"])
@@ -774,10 +781,10 @@ def get_operators(analysis_date, operator_list, verbose=False):
 
     if isinstance(analysis_date, str):
         analysis_date = pd.to_datetime(analysis_date).date()
-    if analysis_date <= dt.date(2022, 12, 31):  # look for v1 or v2 intermediate data
-        subfolder = "rt_trips/"
-    else:
-        subfolder = "v2_rt_trips/"
+    # if analysis_date <= dt.date(2022, 12, 31):  # look for v1 or v2 intermediate data
+    #     subfolder = "rt_trips/"
+    # else:
+    subfolder = "v2_rt_trips/"
     fs_list = fs.ls(f"{GCS_FILE_PATH}{subfolder}")
     # day = str(analysis_date.day).zfill(2)
     # month = str(analysis_date.month).zfill(2)
@@ -800,3 +807,78 @@ def get_operators(analysis_date, operator_list, verbose=False):
                 print(f"not yet run: {itp_id}")
             op_list_runstatus[itp_id] = "not_yet_run"
     return op_list_runstatus
+
+
+def spa_map_export_link(
+    gdf: gpd.GeoDataFrame, path: str, state: dict, site: str = SPA_MAP_SITE, cache_seconds: int = 3600
+):
+    """
+    Called via set_state_export. Handles stream writing of gzipped geojson to GCS bucket,
+    encoding spa state as base64 and URL generation.
+    """
+    assert cache_seconds in range(3601), "cache must be 0-3600 seconds"
+    geojson_str = gdf.to_json()
+    geojson_bytes = geojson_str.encode("utf-8")
+    print(f"writing to {path}")
+    with fs.open(path, "wb") as writer:  # write out to public-facing GCS?
+        with gzip.GzipFile(fileobj=writer, mode="w") as gz:
+            gz.write(geojson_bytes)
+    if cache_seconds != 3600:
+        fs.setxattrs(path, fixed_key_metadata={"cache_control": f"public, max-age={cache_seconds}"})
+    base64state = base64.urlsafe_b64encode(json.dumps(state).encode()).decode()
+    spa_map_url = f"{site}?state={base64state}"
+    return spa_map_url
+
+
+def set_state_export(
+    gdf,
+    bucket: str = SPA_MAP_BUCKET,
+    subfolder: str = "testing/",
+    filename: str = "test2",
+    map_type: Literal["speedmap", "speed_variation", "hqta_areas", "hqta_stops", "state_highway_network"] = None,
+    map_title: str = "Map",
+    cmap: branca.colormap.ColorMap = None,
+    color_col: str = None,
+    legend_url: str = None,
+    existing_state: dict = {},
+    cache_seconds: int = 3600,
+):
+    """
+    Applies light formatting to gdf for successful spa display. Will pass map_type
+    if supported by the spa and provided. GCS bucket is preset to the publically
+    available one.
+    Supply cmap and color_col for coloring based on a Branca ColorMap and a column
+    to apply the color to.
+    Cache is 1 hour by default, can set shorter time in seconds for
+    "near realtime" applications (suggest 120) or development (suggest 0)
+
+    Returns dict with state dictionary and map URL. Can call multiple times and supply
+    previous state as existing_state to create multilayered maps.
+    """
+    assert not gdf.empty, "geodataframe is empty!"
+    spa_map_state = existing_state or {"name": "null", "layers": [], "lat_lon": (), "zoom": 13}
+    path = f"{bucket}{subfolder}{filename}.geojson.gz"
+    gdf = gdf.to_crs(geography_utils.WGS84)
+    if cmap and color_col:
+        gdf["color"] = gdf[color_col].apply(lambda x: cmap.rgb_bytes_tuple(x))
+    gdf = gdf.round(2)  # round for map display
+    this_layer = [
+        {
+            "name": f"{map_title}",
+            "url": f"https://storage.googleapis.com/{path}",
+            "properties": {"stroked": False, "highlight_saturation_multiplier": 0.5},
+        }
+    ]
+    if map_type:
+        this_layer[0]["type"] = map_type
+    if map_type == "speedmap":
+        this_layer[0]["properties"]["tooltip_speed_key"] = "p20_mph"
+    spa_map_state["layers"] += this_layer
+    centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
+    spa_map_state["lat_lon"] = centroid
+    if legend_url:
+        spa_map_state["legend_url"] = legend_url
+    return {
+        "state_dict": spa_map_state,
+        "spa_link": spa_map_export_link(gdf=gdf, path=path, state=spa_map_state, cache_seconds=cache_seconds),
+    }

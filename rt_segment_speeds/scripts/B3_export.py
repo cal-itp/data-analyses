@@ -26,9 +26,10 @@ def get_operator_natural_identifiers(
     re-attach the natural identifiers and organizational identifiers.
     Return a df that should be merged against speeds_df.
     """
-    operator_shape_df = (df[["gtfs_dataset_key", "shape_array_key"]]
+    operator_shape_df = (df[["schedule_gtfs_dataset_key", "shape_array_key"]]
                          .drop_duplicates()
                          .reset_index(drop=True)
+                         .rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})
                         )
     
     # Get shape_id back
@@ -49,20 +50,18 @@ def get_operator_natural_identifiers(
     crosswalk = schedule_rt_utils.sample_gtfs_dataset_key_to_organization_crosswalk(
         df_with_shape,
         analysis_date,
-        quartet_data = "vehicle_positions",
+        quartet_data = "schedule",
         dim_gtfs_dataset_cols = [
             "key",
             "base64_url",
-            "uri",
         ],
         dim_organization_cols = ["source_record_id", "name"]
     )
 
     df_with_org = pd.merge(
-        df_with_shape,
-        crosswalk.rename(
-            columns = {"vehicle_positions_gtfs_dataset_key": "gtfs_dataset_key"}),
-        on = "gtfs_dataset_key",
+        df_with_shape.rename(columns = {"gtfs_dataset_key": "schedule_gtfs_dataset_key"}),
+        crosswalk,
+        on = "schedule_gtfs_dataset_key",
         how = "inner"
     )
     
@@ -73,65 +72,19 @@ def finalize_df_for_export(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Sorting, suppressing columns not needed in export.
     """
-    keep_cols = [
-        'organization_source_record_id', 'organization_name',
-        'shape_id', 'stop_sequence', 'stop_id', 
-        'geometry',
-        'p50_mph', 'p20_mph', 
-        'p80_mph', 'n_trips', 
-        'time_of_day', 
-        'base64_url',
-        'district', 'district_name'
-    ]
-    
+
     RENAME_DICT = {
         "organization_source_record_id": "org_id",
-        "organization_name": "agency_name",
+        "organization_name": "agency",
     }
     
-    gdf2 = (gdf.reindex(columns = keep_cols)
-           .sort_values(["organization_name", 
+    gdf2 = (gdf.sort_values(["organization_name", 
                          "shape_id", "stop_sequence"])
            .reset_index(drop=True)
            .rename(columns = RENAME_DICT) 
           )
     
     return gdf2
-
-
-def grab_extreme_tails(
-    df: pd.DataFrame, 
-    col_list: list, 
-    q: float = 0.05
-) -> list:
-    """
-    Get quantile cutoffs across list of columns.
-    """
-    return [df[c].quantile(q=q) for c in col_list]
-
-
-def suppress_bad_data(
-    gdf: gpd.GeoDataFrame, 
-    quantile_cutoff: float = 0.05
-) -> gpd.GeoDataFrame:
-    """
-    Suppress the tails of bad data that we need to investigate.
-    Suppress the bottom 5% of extreme calculations.
-    """
-    cutoffs = grab_extreme_tails(
-        gdf, 
-        ["p20_mph", "p50_mph", "p80_mph"], 
-        quantile_cutoff
-    )
-    
-    gdf2 = gdf[
-        (gdf.p20_mph >= cutoffs[0]) & 
-        (gdf.p50_mph >= cutoffs[1]) & 
-        (gdf.p80_mph >= cutoffs[2])
-    ].reset_index(drop=True)
-
-    return gdf2
-    
 
 if __name__ == "__main__":
     
@@ -152,25 +105,41 @@ if __name__ == "__main__":
     gdf2 = pd.merge(
         gdf,
         operator_identifiers,
-        on = ["gtfs_dataset_key", "shape_array_key"],
+        on = ["schedule_gtfs_dataset_key", "shape_array_key"],
         how = "inner"
     )
             
-    gdf3 = finalize_df_for_export(gdf2)
-    
-    final_gdf = suppress_bad_data(gdf3)
-    
+    final_gdf = finalize_df_for_export(gdf2)
+        
     time2 = datetime.datetime.now()
     print(f"finalize: {time2 - time1}")
     
+    keep_cols = [
+        'org_id', 'agency',
+        'shape_id', 'stop_sequence', 'stop_id', 
+        'geometry',
+        'p50_mph', 'p20_mph', 
+        'p80_mph', 'n_trips', 
+        'time_of_day', 
+        'base64_url',
+        'district_name'
+    ]
+    
     utils.geoparquet_gcs_export(
-        final_gdf,
+        final_gdf[keep_cols],
         f"{SEGMENT_GCS}export/",
         INPUT_FILE
     )
     
+    # Keep a tabular version (geom is big to save) for us to compare what's published
+    # and contains columns we use for internal modeling 
+    # (shape_array_key, gtfs_dataset_key, etc)
+    final_gdf.drop(columns = "geometry").to_parquet(
+        f"{SEGMENT_GCS}export/{INPUT_FILE}_tabular.parquet"
+    )
+        
     utils.geoparquet_gcs_export(
-        final_gdf,
+        final_gdf[keep_cols],
         f"{SEGMENT_GCS}export/",
         "speeds_by_stop_segments"
     )

@@ -109,11 +109,12 @@ def loop_through_batches_and_download_vp(
         
         
 if __name__ == "__main__":
-    from dask.distributed import Client
+    #from dask.distributed import Client
     
-    client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    LOG_FILE = "../logs/download_vp_v2.log"
+    LOG_FILE = "./logs/download_vp_v2.log"
+    
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -145,4 +146,4 @@ if __name__ == "__main__":
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")
         
-    client.close()
+    #client.close()

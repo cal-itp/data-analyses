@@ -34,36 +34,97 @@ from typing import Union
 from shared_utils import utils
 from segment_speed_utils import (helpers, gtfs_schedule_wrangling,
                                  wrangle_shapes)
-from segment_speed_utils.project_vars import SEGMENT_GCS, analysis_date
+from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
+                                              PROJECT_CRS)
 
 
-def stop_times_aggregated_to_shape_array_key(
-    analysis_date: str,
-) -> dg.GeoDataFrame:
+def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
     """
-    For stop-to-stop segments, we need to aggregate stop_times,
-    which comes at trip-level, to shape level. 
-    From trips, attach shape_array_key, then merge to stop_times.
-    Then attach stop's point geom.
+    Count the number of stop_id-stop_sequence rows for each trip.
     """
     trips = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["feed_key", "name", 
-                    "trip_id", "shape_array_key"],
+        columns = ["gtfs_dataset_key", "feed_key", "name", 
+                   "trip_id", "trip_instance_key", 
+                   "shape_array_key"],
         get_pandas = True
     )
 
     trips = gtfs_schedule_wrangling.exclude_scheduled_operators(
         trips, 
         exclude_me = ["Amtrak Schedule", "*Flex"]
+    ).drop(columns = "name")
+    
+    stop_times = helpers.import_scheduled_stop_times(
+        analysis_date,
+        columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"]
     )
+    
+    stops_per_trip = (stop_times.groupby(["feed_key", "trip_id"], 
+                                         observed=True, group_keys=False)
+                      .agg({"stop_id": "count"})
+                      .reset_index()
+                      .rename(columns = {"stop_id": "n_stops"})
+                     ).compute()
+    
+    df = pd.merge(
+        trips,
+        stops_per_trip,
+        on = ["feed_key", "trip_id"],
+        how = "inner"
+    )
+    
+    df = df.assign(
+          max_stops = (df.groupby("shape_array_key")
+                       .n_stops
+                       .transform("max").fillna(0).astype(int)
+                      )
+    ).query('max_stops == n_stops')
+    
+    # We can still have multiple trips within shape with same amt of stops
+    # this is majority of cases
+    df2 = (df.sort_values(["shape_array_key", "trip_id"], 
+                          ascending=[True, True])
+           .drop_duplicates(subset="shape_array_key")
+           .reset_index(drop=True)
+           .drop(columns = ["max_stops", "n_stops"])
+          )
+    
+    return df2
+
+    
+def stop_times_aggregated_to_shape_array_key(
+    analysis_date: str,
+) -> gpd.GeoDataFrame:
+    """
+    For stop-to-stop segments, we need to aggregate stop_times,
+    which comes at trip-level, to shape level. 
+    From trips, attach shape_array_key, then merge to stop_times.
+    Then attach stop's point geom.
+    """
+    
+    trips_with_shape = trip_with_most_stops(analysis_date)
+    keep_shapes = trips_with_shape.shape_array_key.unique().tolist()
+    
+    stop_times = helpers.import_scheduled_stop_times(
+        analysis_date,
+        columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"],
+    ).merge(
+        trips_with_shape, 
+        on = ["feed_key", "trip_id"], 
+        how = "inner"
+    ).astype({"stop_sequence": "int16"}
+            ).rename(
+        columns = {"trip_id": "st_trip_id"}
+    ).compute()
     
     shapes = helpers.import_scheduled_shapes(
         analysis_date, 
         columns = ["shape_array_key", "geometry"],
+        filters = [[("shape_array_key", "in", keep_shapes)]],
         get_pandas = False,
-    ).dropna(subset="shape_array_key").repartition(npartitions=5)
-
+    ).dropna(subset=["shape_array_key", "geometry"])
+    
     stops = helpers.import_scheduled_stops(
         analysis_date,
         columns = ["feed_key", "stop_id", "stop_name", "geometry"],
@@ -71,51 +132,42 @@ def stop_times_aggregated_to_shape_array_key(
     ).drop_duplicates(
         subset=["feed_key", "stop_id"]
     ).rename(columns = {"geometry": "stop_geometry"}
-            ).set_geometry("stop_geometry")
-
-    stop_times = helpers.import_scheduled_stop_times(
-        analysis_date,
-        columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"]
-    ).astype({"stop_sequence": "int16"}).repartition(npartitions=20)
+    ).set_geometry("stop_geometry")
     
-
-    # For each shape_array_key, keep the unique stop_id-stop_sequence combo
-    # to cut into stop-to-stop segments
-    stop_times_with_shape = dd.merge(
-        stop_times,
-        trips,
-        on = ["feed_key", "trip_id"],
-        how = "inner"
-    ).drop(columns = "trip_id").drop_duplicates(
-        subset=["shape_array_key", "stop_id", "stop_sequence"]
-    ).compute().sort_values(
-        ["shape_array_key", "stop_sequence"]
-    ).reset_index(drop=True)
     
     # Attach shape geom
     st_with_shape = dd.merge(
         shapes,
-        stop_times_with_shape,
+        stop_times,
         on = "shape_array_key",
         how = "inner"
-    )
+    ).compute()
+    
+    # Note: there can be duplicate shape_array_key because of multiple feeds
+    # Drop them now so we keep 1 set of shape-stop info
+    st_with_shape = (st_with_shape.sort_values(["schedule_gtfs_dataset_key",
+                                                "shape_array_key",
+                                                "st_trip_id", "stop_sequence"])
+                     .drop_duplicates(subset=["shape_array_key", "st_trip_id", 
+                                              "stop_sequence"])
+                     .reset_index(drop=True)
+                    )
     
     # Attach stop geom
-    st_with_shape_stop_geom = dd.merge(
+    st_with_shape_stop_geom = pd.merge(
         st_with_shape,
         stops,
         on = ["feed_key", "stop_id"],
         how = "inner"
+    ).reset_index(drop=True).drop(
+        columns = "feed_key"
     ).set_geometry("geometry")
-    
-    st_with_shape_stop_geom = st_with_shape_stop_geom.dropna(
-        subset="geometry").reset_index(drop=True).persist()
     
     return st_with_shape_stop_geom
 
 
 def tag_shapes_with_stops_visited_twice(
-    stop_times: Union[dd.DataFrame, dg.GeoDataFrame]
+    stop_times: Union[pd.DataFrame, gpd.GeoDataFrame]
 ) -> np.ndarray:
     """
     Aggregate stop times by shape_array_key.
@@ -125,7 +177,8 @@ def tag_shapes_with_stops_visited_twice(
     Ex: a stop in a plaza that acts as origin and destination.
     """
     stop_visits = (stop_times.groupby(
-                    ["shape_array_key", "stop_id"], observed=True, group_keys=False)
+                    ["shape_array_key", "stop_id"], 
+                        observed=True, group_keys=False)
                   .agg({"stop_sequence": "count"}) 
                    #nunique doesn't work in dask
                   .reset_index()
@@ -136,15 +189,15 @@ def tag_shapes_with_stops_visited_twice(
     loopy_shapes = (stop_visits[stop_visits.stop_sequence > 1]
                     .shape_array_key
                     .unique()
-                    .compute()
-                    .to_numpy()
+                    #.compute()
+                    #.to_numpy()
                  )
     
     return loopy_shapes
 
 
 def tag_shapes_with_inlining(
-    stop_times: Union[dd.DataFrame, dg.GeoDataFrame]
+    stop_times: Union[pd.DataFrame, gpd.GeoDataFrame]
 ) -> np.ndarray:
     """
     Rough estimate of inlining present in shapes. 
@@ -159,8 +212,8 @@ def tag_shapes_with_inlining(
     # Keep relevant columns, which is only the projected stop geometry
     # saved as shape_meters
     stop_times2 = stop_times[["shape_array_key", 
-                              "stop_sequence", "shape_meters"]].compute()
-    
+                              "stop_sequence", "shape_meters"]].drop_duplicates()
+        
     # Once we order it by stop sequence, save out shape_meters into a list
     # and make the gdf wide
     stop_times_wide = (stop_times2
@@ -196,24 +249,17 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
 
     stop_times_with_geom = stop_times_aggregated_to_shape_array_key(
         analysis_date
-    ).repartition(npartitions=1)
-    
-    # Turn the stop_geometry and shape_geometry columns into geoseries
-    shape_geoseries = gpd.GeoSeries(stop_times_with_geom.geometry.compute())
-    stop_geoseries = gpd.GeoSeries(
-        stop_times_with_geom.stop_geometry.compute())
-    
-    # Get projected shape_meters as dask array
+    )
+        
+    # Get projected shape_meters as an array
     shape_meters_geoseries = wrangle_shapes.project_point_geom_onto_linestring(
-        shape_geoseries,
-        stop_geoseries,
-        get_dask_array=True
+        stop_times_with_geom,
+        "geometry",
+        "stop_geometry",
     )
     
     # Attach dask array as a column
     stop_times_with_geom["shape_meters"] = shape_meters_geoseries
-    
-    stop_times_with_geom = stop_times_with_geom.repartition(npartitions=10)
     
     # Get the arrays of shape_array_keys to flag
     loopy_shapes = tag_shapes_with_stops_visited_twice(stop_times_with_geom)
@@ -226,7 +272,7 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
             lambda x: 
             1 if x.shape_array_key in np.union1d(loopy_shapes, inlining_shapes)
             else 0, axis=1, 
-            meta = ('loop_or_inlining', 'int8'))
+        ).astype("int8")
     )
     
     return stop_times_with_geom
@@ -248,6 +294,8 @@ if __name__=="__main__":
     
     time1 = datetime.datetime.now()
     logger.info(f"Prep stop segment df: {time1-start}")
+    
+    stops_by_shape = dg.from_geopandas(stops_by_shape, npartitions=10)
     
     # Export this as partitioned parquet
     stops_by_shape.to_parquet(

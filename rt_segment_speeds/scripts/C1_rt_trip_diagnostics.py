@@ -67,7 +67,7 @@ def get_trip_stats(analysis_date: str,
     EXPORT_FILE = dict_inputs["rt_trip_diagnostics"]
     GROUPING_COL = dict_inputs["grouping_col"]
     
-    trip_cols = ["gtfs_dataset_key", "_gtfs_dataset_name", 
+    trip_cols = ["gtfs_dataset_key", "gtfs_dataset_name", 
                  "trip_id", GROUPING_COL]  
     
     ddf = helpers.import_vehicle_positions(
@@ -85,7 +85,7 @@ def get_trip_stats(analysis_date: str,
         TIMESTAMP_COL,
         meta= {
             "gtfs_dataset_key": "object",
-            "_gtfs_dataset_name": "object",
+            "gtfs_dataset_name": "object",
             "trip_id": "object",
             "route_dir_identifier": "int64",
             "trip_start": "datetime64[ns]",

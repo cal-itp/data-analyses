@@ -1,6 +1,6 @@
 import pandas as pd
 
-from calitp_data.storage import get_fs
+from calitp_data_analysis import get_fs
 from calitp_data_analysis.sql import to_snakecase
 
 from shared_utils import rt_dates

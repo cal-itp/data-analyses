@@ -10,8 +10,7 @@ import intake
 import pandas as pd
 import sys
 
-from calitp_data.storage import get_fs
-from calitp_data.config import is_cloud
+from calitp_data_analysis import get_fs
 from loguru import logger
 
 import C1_prep_pairwise_intersections as prep_clip
@@ -64,7 +63,7 @@ def get_dissolved_hq_corridor_bus(
     ORG_DICT = dict(zip(crosswalk.feed_key, crosswalk.organization_source_record_id))  
     
     corridors = corridors.assign(
-        agency_name_primary = corridors.feed_key.map(NAMES_DICT),
+        agency_primary = corridors.feed_key.map(NAMES_DICT),
         hqta_details = corridors.apply(utilities.hqta_details, axis=1),
         org_id_primary = corridors.feed_key.map(ORG_DICT),
         base64_url_primary = corridors.feed_key.map(B64_DICT),
@@ -116,7 +115,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     
     keep_cols = [
-        "agency_name_primary", "agency_name_secondary",
+        "agency_primary", "agency_secondary",
         "hqta_type", "hqta_details", "route_id", 
         "base64_url_primary", "base64_url_secondary",
         "org_id_primary", "org_id_secondary",
@@ -126,8 +125,8 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Drop bad stops, subset columns
     gdf2 = (gdf[keep_cols]
             .drop_duplicates()
-            .sort_values(["hqta_type", "agency_name_primary", 
-                          "agency_name_secondary",
+            .sort_values(["hqta_type", "agency_primary", 
+                          "agency_secondary",
                           "hqta_details", "route_id"])
             .reset_index(drop=True)
            )

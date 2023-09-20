@@ -12,7 +12,7 @@ from datetime import datetime
 
 import prep_traffic_ops
 from shared_utils import utils, geography_utils, portfolio_utils
-from segment_speed_utils import helpers, gtfs_schedule_wrangling
+from segment_speed_utils import helpers
 from update_vars import analysis_date, TRAFFIC_OPS_GCS
 
 
@@ -32,12 +32,13 @@ def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
         crs = geography_utils.WGS84
     ).dropna(subset="shape_array_key")
     
-    df = gtfs_schedule_wrangling.merge_shapes_to_trips(
+    df = pd.merge(
         shapes,
         trips,
-        merge_cols = ["shape_array_key"]
+        on = "shape_array_key",
+        how = "inner"
     ).drop(columns = "trip_id").drop_duplicates(subset="shape_array_key")
-        
+ 
     df2 = remove_erroneous_shapes(df)    
         
     drop_cols = ["route_short_name", "route_long_name", "route_desc"]
@@ -82,6 +83,7 @@ def remove_erroneous_shapes(
     ).reset_index(drop=True)
 
     return ok_shapes
+
 
 def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """

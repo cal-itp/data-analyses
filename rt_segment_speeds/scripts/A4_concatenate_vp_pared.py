@@ -16,6 +16,7 @@ if __name__ == "__main__":
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
 
+    VP_FULL_INFO = STOP_SEG_DICT["stage1"]
     INPUT_FILE = STOP_SEG_DICT["stage3"]
     SEGMENT_IDENTIFIER_COLS = STOP_SEG_DICT["segment_identifier_cols"]
     TIMESTAMP_COL = STOP_SEG_DICT["timestamp_col"]
@@ -23,12 +24,27 @@ if __name__ == "__main__":
     
     dfs = [
         dd.read_parquet(
-            f"{SEGMENT_GCS}{INPUT_FILE}_{c}_{analysis_date}"
+            f"{SEGMENT_GCS}vp_pare_down/{INPUT_FILE}_{c}_{analysis_date}",
+            columns = ["vp_idx"] + SEGMENT_IDENTIFIER_COLS
         ) for c in cases
     ]
     
-    df = dd.multi.concat(dfs, axis=0).reset_index(drop=True)
-    df = df.repartition(npartitions = 5)
+    pared_down_vp = dd.multi.concat(dfs, axis=0).reset_index(
+        drop=True).set_index("vp_idx", sorted=False)
+    
+    vp_full_info = dd.read_parquet(
+        f"{SEGMENT_GCS}{VP_FULL_INFO}_{analysis_date}"
+    ).set_index("vp_idx", sorted=False)
+    
+    df = dd.merge(
+        vp_full_info,
+        pared_down_vp,
+        left_index = True,
+        right_index = True,
+        how = "inner"
+    ).reset_index()
+    
+    df = df.repartition(npartitions = 2)
     df.to_parquet(f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}", 
                   overwrite=True)
     

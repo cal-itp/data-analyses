@@ -29,48 +29,22 @@ def exclude_scheduled_operators(
     return trips[~trips.name.isin(exclude_me)].reset_index(drop=True)
 
 
-def merge_shapes_to_trips(
-    shapes: Union[dg.GeoDataFrame, gpd.GeoDataFrame], 
-    trips: Union[dd.DataFrame, pd.DataFrame],
-    merge_cols: list = ["shape_array_key"]
-) -> Union[dg.GeoDataFrame, gpd.GeoDataFrame]:   
-    """
-    Merge shapes and trips tables.
-    We usually start with trip_id (from RT vehicle positions or stop_times),
-    and we need to get the `shape_array_key`.
-    """    
-    if isinstance(shapes, dg.GeoDataFrame):
-        trips_with_geom = dd.merge(
-            shapes,
-            trips,
-            on = merge_cols,
-            how = "inner",
-        )
-    else:
-        if isinstance(trips, dd.DataFrame):
-            trips = trips.compute()
-        trips_with_geom = pd.merge(
-            shapes,
-            trips,
-            on = merge_cols,
-            how = "inner"
-        )
-        
-    return trips_with_geom
-
-
 def get_trips_with_geom(
     analysis_date: str,
     trip_cols: list = ["feed_key", "name", 
-                        "trip_id", "shape_array_key"]
-) -> dg.GeoDataFrame:
+                       "trip_id", "shape_array_key"],
+    exclude_me: list = ["Amtrak Schedule", "*Flex"],
+    crs: str = "EPSG:3310"
+) -> gpd.GeoDataFrame:
     """
-    Merge trips with shapes.
+    Merge trips with shapes. 
+    Also exclude Amtrak and Flex trips.
     """
     shapes = helpers.import_scheduled_shapes(
         analysis_date, 
         columns = ["shape_array_key", "geometry"],
-        get_pandas = False,
+        get_pandas = True,
+        crs = crs
     )
 
     trips = helpers.import_scheduled_trips(
@@ -81,11 +55,15 @@ def get_trips_with_geom(
     
     trips = exclude_scheduled_operators(
         trips, 
-        exclude_me = ["Amtrak Schedule", "*Flex"]
+        exclude_me
     )
 
-    trips_with_geom = merge_shapes_to_trips(
-        shapes, trips).drop_duplicates()
+    trips_with_geom = pd.merge(
+        shapes,
+        trips,
+        on = "shape_array_key",
+        how = "inner"
+    ).drop_duplicates().reset_index(drop=True)
     
     return trips_with_geom
 
@@ -111,31 +89,3 @@ def merge_shapes_to_stop_times(
         st_with_shape = st_with_shape.set_crs(trips_with_shape_geom.crs)
     
     return st_with_shape
-    
-
-def attach_stop_geometry(
-    df: Union[pd.DataFrame, gpd.GeoDataFrame, dd.DataFrame, dg.GeoDataFrame], 
-    stops: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
-    """
-    Merge df with stop's point geometry, using feed_key and stop_id.
-    """
-    if isinstance(df, (pd.DataFrame, gpd.GeoDataFrame)):
-        df2 = pd.merge(
-            stops,
-            df,
-            on = ["feed_key", "stop_id"],
-            how = "inner"
-        )
-    elif isinstance(df, (dd.DataFrame, dg.GeoDataFrame)):
-        # We will lose geometry by putting stops on the right
-        # but, in the case where we have another dg.GeoDataFrame on left,
-        # we should explicitly set geometry column after
-        df2 = dd.merge(
-            stops,
-            df,
-            on = ["feed_key", "stop_id"],
-            how = "inner"
-        )
-    
-    return df2

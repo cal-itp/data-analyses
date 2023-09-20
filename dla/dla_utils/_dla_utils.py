@@ -8,7 +8,6 @@ from calitp_data_analysis.sql import to_snakecase
 from siuba import *
 import intake
 import geopandas as gpd
-from plotnine import *
 
 import altair as alt
 

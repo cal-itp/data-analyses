@@ -67,7 +67,7 @@ def get_valid_trips_by_time_cutoff(
     Filter down trips by trip time elapsed.
     Set the number of minutes to do cut-off for at least x min of RT.
     """
-    trip_cols = ["gtfs_dataset_key", "trip_id"]
+    trip_cols = ["trip_instance_key"]
     trip_stats = trip_time_elapsed(
         ddf,
         trip_cols,
@@ -111,13 +111,13 @@ def pare_down_vp_to_valid_trips(
     usable_vp = pd.merge(
         vp,
         usable_trips,
-        on = ["gtfs_dataset_key", "trip_id"],
+        on = "trip_instance_key",
         how = "inner"
     ).sort_values(
         ["gtfs_dataset_key", "trip_id", 
          "location_timestamp_local"]
     ).drop_duplicates(
-        subset=["gtfs_dataset_key", "trip_id", "location_timestamp_local"]
+        subset=["trip_instance_key", "location_timestamp_local"]
     ).reset_index(drop=True)
     
     # Let's convert to tabular now, make use of partitioning
@@ -136,7 +136,10 @@ def pare_down_vp_to_valid_trips(
     
     usable_vp.to_parquet(
         f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
-        partition_cols = ["gtfs_dataset_key"],
+        partition_cols = "gtfs_dataset_key",
+        # if we don't delete the entire folder of partitioned parquets, this
+        # can delete it if the partitions have the same name
+        #existing_data_behavior = "delete_matching" 
     )
 
     

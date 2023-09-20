@@ -5,4 +5,4 @@ jupyter-book==0.12.2
 python-slugify==6.1.1
 pyaml==21.10.1
 humanize==4.2.3
-pydantic>=1.9.1
+pydantic==1.10.5

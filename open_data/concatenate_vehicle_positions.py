@@ -1,9 +1,5 @@
 """
-Concatenate batched vehicle positions 
-and filter to one day.
-
-Since RT is stored in UTC time, we download 2 days for 
-vehicle positions, but need to grab grab 1 full day from that.
+Concatenate batched vehicle positions. 
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
@@ -40,10 +36,6 @@ def concat_batches(analysis_date: str) -> dd.DataFrame:
     
     ddf = schedule_rt_utils.localize_timestamp_col(
         ddf, ["location_timestamp"])
-        
-    ddf = ddf.assign(
-        hour = dd.to_datetime(ddf.location_timestamp_local).dt.hour,
-    ).rename(columns = {"gtfs_dataset_name": "_gtfs_dataset_name"})
     
     return ddf
 

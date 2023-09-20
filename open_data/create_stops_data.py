@@ -13,7 +13,7 @@ from datetime import datetime
 
 import prep_traffic_ops
 from shared_utils import utils, geography_utils, schedule_rt_utils
-from segment_speed_utils import helpers, gtfs_schedule_wrangling
+from segment_speed_utils import helpers
 from update_vars import analysis_date, TRAFFIC_OPS_GCS
 
     
@@ -44,9 +44,11 @@ def attach_route_info_to_stops(
         .reset_index(drop=True)
     ).compute()
     
-    stops_with_geom = gtfs_schedule_wrangling.attach_stop_geometry(
+    stops_with_geom = dd.merge(
+        stops,
         stops_with_route_info,
-        stops
+        on = ["feed_key", "stop_id"],
+        how = "inner"
     )
   
     stops_assembled = (stops_with_geom
