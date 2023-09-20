@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from siuba import *
 
-from shared_utils import geography_utils
 import dla_utils
 
 from calitp_data_analysis.sql import to_snakecase
@@ -27,6 +26,18 @@ import intake
 # import re
 
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
+
+
+def _prep_data(file_name): 
+    proj = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
+
+    # df = utils.read_data_all()
+    proj = _data_utils.add_new_codes(proj)
+    
+    ## function that adds known agency name to df 
+    df = identify_agency(proj, 'summary_recipient_defined_text_field_1_value')
+    
+    return df
 
 
 #get column names in Title Format (for exporting)
@@ -52,6 +63,7 @@ def change_district_format(df, district_col):
                 
     return df
 
+
 def format_congressional_district(df, con_dist_col):
     """
     reformat the congressional district column
@@ -73,13 +85,15 @@ def add_county_abbrev(df, county_name_col):
     '''
     ### read county data in from the shared_data catalog
     catalog = intake.open_catalog("../../_shared_utils/shared_utils/shared_data_catalog.yml")
-    counties = to_snakecase((catalog.ca_counties.read())>>select(_.COUNTY_NAME,_.COUNTY_ABBREV,_.COUNTY_CODE))
+    counties = to_snakecase((catalog.ca_counties.read())>>select(_.COUNTY_NAME,_.COUNTY_ABBREV,))
+    
+    county_codes = to_snakecase((pd.read_excel(f"{GCS_FILE_PATH}/CountyNameToCodeLookUp.xlsx")))
     
     ### add county 
     counties['county_name_full'] = counties['county_name'] + ' County'
     
     ### create dict to map
-    county_mapping = dict(counties[['county_name_full', 'county_abbrev']].values)
+    county_mapping = dict(county_codes[['county_name', 'rca_county_code']].values)
     
     ### map values to the df
     df[f"{county_name_col}_abbrev"] = df[county_name_col].map(county_mapping)
@@ -87,6 +101,7 @@ def add_county_abbrev(df, county_name_col):
     df[f"{county_name_col}_abbrev"] = df[f"{county_name_col}_abbrev"].fillna('NA')
     
     return df
+
 
 #add project information for all projects
 def identify_agency(df, identifier_col):
@@ -138,8 +153,6 @@ def identify_agency(df, identifier_col):
     return full_df
 
 
-
-
 def condense_df(df):
     """
     Function to return one row for each project and keep valuable unique information for the project
@@ -152,18 +165,22 @@ def condense_df(df):
                                                                      'program_code_description', 'recipient_project_number']].astype(str)
     # copy county column over to use for project title name easier
     df['county_name_title'] = df['county_name'] 
+    # copy program code column over to use for project description column easier
+    df['program_code_description_for_description'] = df['program_code_description'] 
     
     # aggreate df using .agg function and join in the unique values into one row
     df_agg = (df
            .assign(count=1)
            .groupby(['fmis_transaction_date','project_number', 'implementing_agency', 'summary_recipient_defined_text_field_1_value'
-                    , 'program_code', 'program_code_description'])
+                    # , 'program_code', 'program_code_description'
+                    ])
            .agg({
-                 # 'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate                ##hashing this out to group by instead
-                 # 'program_code_description':lambda x:'|'.join(x.unique()), # get unique values to concatenate    ##hashing this out to group by instead
+                 'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate                ##hashing this out to group by instead
+                 'program_code_description':lambda x:'|'.join(x.unique()), # get unique values to concatenate    ##hashing this out to group by instead
                  'recipient_project_number':lambda x:'|'.join(x.unique()), #'first',
                  'improvement_type':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'improvement_type_description':lambda x:'|'.join(x.unique()),  # get unique values to concatenate
+                 'program_code_description_for_description':lambda x:', and the '.join(x.unique()),
                  'project_title':'first', #should be the same                 
                  'obligations_amount':'sum', #sum of the obligations amount
                  'congressional_district':lambda x:'|'.join(x.unique()), # get unique values to concatenate
@@ -184,6 +201,7 @@ def condense_df(df):
     df_agg['county_name_abbrev'] = '|' + df_agg['county_name_abbrev'] + '|'
     
     return df_agg
+
 
 def add_description(df, col):
     ##using np.where. code help: https://stackoverflow.com/questions/43905930/conditional-if-statement-if-value-in-row-contains-string-set-another-column
@@ -280,8 +298,6 @@ def add_description(df, col):
 
                                  'Project')
                                    ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))#)
-    
-    
     return df
 
 
@@ -312,6 +328,7 @@ def add_description_4_no_match(df, desc_col):
     
     return df
 
+
 ## function for reading in the locodes
 def read_in_locodes():
     locodes = to_snakecase(pd.read_excel(f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
@@ -328,6 +345,7 @@ def read_in_locodes():
     locode_names.append("Statewide")
     
     return locode_names
+
 
 ## function to find any agency name/locations wihin the description column or title column using locodes
 def find_alternative_name(df, desc_col, new_col_name):
@@ -350,7 +368,6 @@ def add_new_title(df, first_col_method, second_col_type, third_col_name, alt_col
     Function to add new title. 
     Expected output example: "New Bike Lane in Eureka"
     """    
-
     
     def return_name(df):
         
@@ -381,7 +398,6 @@ def add_new_title(df, first_col_method, second_col_type, third_col_name, alt_col
         elif (df[third_col_name] != "California"):
             return (df[first_col_method] + " " + df[second_col_type] + " in " + df[third_col_name])
         
-
         return df
 
     df['project_name_new'] = df.apply(return_name, axis = 1)
@@ -435,6 +451,7 @@ def get_new_desc_title(df):
 
     return df
 
+
 ## function to add new description column that has the federal program amount and the dollar amount. 
 ## to run after aggregating the data
 def add_new_description_col(df):
@@ -442,12 +459,13 @@ def add_new_description_col(df):
     
     # df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["new_project_title"] + "."
     
-    df["new_description_col"] = df["new_project_title"] + ", part of the " + df["program_code_description"] + ". (Federal Project ID: " + df["project_number"] + ")."
+    df["new_description_col"] = df["new_project_title"] + ", part of the program(s) " + df["program_code_description_for_description"] + ". (Federal Project ID: " + df["project_number"] + ")."
     
-    df.drop(columns =['obligations_amount_string', 'county_name_title'], axis=1, inplace=True)
+    df.drop(columns =['obligations_amount_string', 'county_name_title', 'program_code_description_for_description'], axis=1, inplace=True)
     df['implementing_agency_locode'] = df['implementing_agency_locode'].str.replace('.0', '')
     
     return df
+
 
 def get_clean_data(df, full_or_agg = ''):
     
@@ -465,9 +483,6 @@ def get_clean_data(df, full_or_agg = ''):
     '''
     
     if full_or_agg == 'agg':
-
-        ## function that adds known agency name to df 
-        # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
         
         df = format_congressional_district(df, "congressional_district")
         
@@ -481,15 +496,13 @@ def get_clean_data(df, full_or_agg = ''):
         aggdf = get_new_desc_title(aggdf)
         
         aggdf = add_new_description_col(aggdf)
-        
-        # _data_utils.change_col_to_integer(df, "congressional_district")
+                
+        ##asserting that the there is one row for each project id in the new 
+        assert len(aggdf) == df.project_number.nunique()
     
         return aggdf
     
     elif full_or_agg == 'full':
-    
-        ## function that adds known agency name to df 
-        # df = identify_agency(df, 'summary_recipient_defined_text_field_1_value')
         
         df = format_congressional_district(df, "congressional_district")
         
@@ -505,11 +518,37 @@ def get_clean_data(df, full_or_agg = ''):
         proj_title_mapping = (dict(aggdf[['project_number', 'new_project_title']].values))
     
         df['new_project_title'] = df.project_number.map(proj_title_mapping)
-
     
+
         return df
-    
 
+    
+def run_script(file_name, recipient_column, df_agg_level):
+    
+    ### Read in data
+    proj_list = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
+    
+    ### run function to get new program codes
+    proj_cleaned = _data_utils.add_new_codes(proj_list)
+    
+    ## function that adds known agency name to df 
+    df = identify_agency(proj_cleaned, recipient_column)
+    
+    ### run the data through the rest of the script
+    ### return a dataset that is aggregated at the project and program code
+    agg = get_clean_data(df, full_or_agg = df_agg_level)
+    
+    return agg
+    
+    
+def export_to_gcs(df, export_date):
+    
+    ### pretty print the column names
+    df = title_column_names(df)
+    
+    ## export to csv in GCS
+    df.to_csv(f"{GCS_FILE_PATH}/FMIS_Projects_Universe_IIJA_Reporting_{export_date}.csv")
+    
     
 # '''
 # another approach (not as effective for creating new titles)
