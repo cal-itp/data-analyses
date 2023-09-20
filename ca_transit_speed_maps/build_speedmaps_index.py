@@ -7,9 +7,9 @@ import pandas as pd
 import datetime as dt
 
 from calitp_data_analysis.tables import tbls
-import shared_utils
+from shared_utils import rt_dates, rt_utils
 
-ANALYSIS_DATE = dt.date.fromisoformat(shared_utils.rt_dates.DATES['may2023'])
+ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['apr2023b'])
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 
 def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
@@ -44,6 +44,7 @@ def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
 
 if __name__ == "__main__":
     
+    print(f'analysis date from shared_utils/rt_dates: {ANALYSIS_DATE}')
     speedmaps_index = build_speedmaps_index(ANALYSIS_DATE)
-    speedmaps_index_joined = shared_utils.rt_utils.check_intermediate_data(speedmaps_index)
+    speedmaps_index_joined = rt_utils.check_intermediate_data(speedmaps_index)
     speedmaps_index_joined.to_parquet(PROGRESS_PATH)

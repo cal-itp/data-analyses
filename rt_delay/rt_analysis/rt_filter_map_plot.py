@@ -1,6 +1,7 @@
-import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.rt_utils import *
+from shared_utils.utils import geoparquet_gcs_export
+from shared_utils.calitp_color_palette import CALITP_CATEGORY_BOLD_COLORS, CALITP_CATEGORY_BRIGHT_COLORS
 import branca
 import mapclassify
 
@@ -23,7 +24,8 @@ from IPython.display import display, Markdown, IFrame
 import gzip
 import base64
 import json
-from calitp_data.storage import get_fs
+from calitp_data_analysis import get_fs
+import warnings
 
 class RtFilterMapper:
     '''
@@ -72,6 +74,7 @@ class RtFilterMapper:
                       >> summarize(n_trips = _.route_id.size, mean_end_delay_seconds = _.delay_seconds.mean())
                      )
         self.reset_filter()
+        self.pbar_desc = f'itp_id: {self.calitp_itp_id} org: {self.organization_name[:15]}'
 
     def set_filter(self, start_time = None, end_time = None, route_names = None,
                    shape_ids = None, direction_id = None, direction = None, trip_ids = None,
@@ -220,9 +223,9 @@ class RtFilterMapper:
             self.corridor = corridor_gdf >> select(_.geometry, _.distance_meters)
         else:
             self.corridor = corridor_gdf >> select(_.geometry)
-        to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence']).dropna(subset=['stop_id'])
+        to_clip = self.stop_delay_view.drop_duplicates(subset=['shape_id', 'stop_sequence'])
         clipped = to_clip.clip(corridor_gdf)
-        shape_sequences = (self.stop_delay_view.dropna(subset=['stop_id'])
+        shape_sequences = (self.stop_delay_view
                           >> distinct(_.shape_id, _.stop_sequence)
                           >> arrange(_.shape_id, _.stop_sequence)
                          )
@@ -334,7 +337,7 @@ class RtFilterMapper:
             # for shape_id in tqdm(gdf.shape_id.unique()): trying self.pbar.update...
             if type(self.pbar) != type(None):
                 self.pbar.reset(total=len(gdf.shape_id.unique()))
-                self.pbar.desc = f'Generating segment speeds itp_id: {self.calitp_itp_id}'
+                self.pbar.desc = f'Generating segment speeds {self.pbar_desc}'
             for shape_id in gdf.shape_id.unique():
                 try:
                     this_shape = (gdf >> filter((_.shape_id == shape_id))).copy()
@@ -352,7 +355,7 @@ class RtFilterMapper:
                                  >> ungroup()
                                 )
                     # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
-                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(shared_utils.geography_utils.CA_NAD83Albers)
+                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(CA_NAD83Albers)
                     stop_speeds.geometry = stop_speeds.apply(
                         lambda x: shapely.ops.substring(
                                     (self.shapes >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
@@ -397,7 +400,7 @@ class RtFilterMapper:
             self.stop_segment_speed_view = all_stop_speeds
             export_path = f'{GCS_FILE_PATH}{subfolder}'
             if self._time_only_filter and self.filter_period in cached_periods:
-                shared_utils.utils.geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
+                geoparquet_gcs_export(all_stop_speeds, export_path, gcs_filename)
         self.speed_map_params = (how, colorscale, size, no_title, corridor, shn, no_render)
         return self._show_speed_map()
     
@@ -446,7 +449,9 @@ class RtFilterMapper:
         assert gdf.shape[0] >= orig_rows*.975, \
             f'over 2.5% of geometries invalid after buffer+simplify ({gdf.shape[0]} / {orig_rows})'
         gdf = gdf.to_crs(WGS84)
-        self.current_centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.current_centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
         self.detailed_map_view = gdf.copy()
         if no_render:
             return  # ready but don't show map here, export later           
@@ -530,71 +535,60 @@ class RtFilterMapper:
         Will always put state highway network in state['layers'][0] 
         map_type: '_20p_speeds', 'variance', or 'shn'
         '''
-        self.spa_map_state = {"name": "null", "layers": [], "lat_lon": (),
+        if not hasattr(self, 'spa_map_state'):
+            self.spa_map_state = {"name": "null", "layers": [], "lat_lon": (),
                              "zoom": 13}
-        fs = get_fs()
-        prefix = f'calitp-map-tiles/speeds_{self.analysis_date.isoformat()}'
-        
-        def _export(gdf, path):
-        ## TODO generalize and --> rt_utils
-            geojson_str = gdf.to_json()
-            geojson_bytes = geojson_str.encode('utf-8')
-            print(f'writing to {path}')
-            with fs.open(path, 'wb') as writer:  # write out to public-facing GCS?
-                with gzip.GzipFile(fileobj=writer, mode="w") as gz:
-                    gz.write(geojson_bytes)
-            base64state = base64.urlsafe_b64encode(json.dumps(self.spa_map_state).encode()).decode()
-            self.spa_map_url = f'https://leaflet-speedmaps--cal-itp-data-analyses.netlify.app/?state={base64state}'
-            return
+        subfolder = f'speeds_{self.analysis_date.isoformat()}/'
         
         if map_type == '_20p_speeds':
             assert hasattr(self, 'detailed_map_view'), 'must generate a speedmap first with self.segment_speed_map'
             if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
                 self.map_gz_export(map_type = 'shn')
-            
-            path = f'{prefix}/{self.calitp_itp_id}_{self.filter_period}_speeds.geojson.gz'
+                
             gdf = self.detailed_map_view.copy()
             gdf['organization_name'] = self.organization_name
             cmap = self.speed_map_params[1]
-            gdf['color'] = gdf.p20_mph.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            gdf = gdf.round({'stop_sequence': 2}) # round for map display, interpolated segs are long floats
-            self.spa_map_state["layers"] += [{
-                "name": f"{self.organization_name} Vehicle Speeds {self.display_date} {self.filter_period.replace('_', ' ')}",
-                "url": f"https://storage.googleapis.com/{path}", "type": "speedmap",
-                'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5, 'tooltip_speed_key': 'p20_mph'}
-                }]
-            self.spa_map_state["lat_lon"] = self.current_centroid
-            self.spa_map_state["zoom"] = 13
-            self.spa_map_state['legend_url'] = 'https://storage.googleapis.com/calitp-map-tiles/speeds_legend.svg'
-            return _export(gdf, path)
+            
+            filename = f'{self.calitp_itp_id}_{self.filter_period}_speeds'
+            title = f"{self.organization_name} {self.display_date} {self.filter_period.replace('_', ' ')}"
+            
+            export_result = set_state_export(gdf, subfolder = subfolder, filename = filename,
+                                map_type = 'speedmap', map_title = title, cmap = cmap,
+                                color_col = 'p20_mph', legend_url = SPEEDMAP_LEGEND_URL,
+                                existing_state = self.spa_map_state
+                                            )
+            self.spa_map_state = export_result['state_dict']
+            self.spa_map_url = export_result['spa_link']
+            return
         
         elif map_type == 'variance':
             assert hasattr(self, 'detailed_map_view'), 'must generate a variance map first with self.map_variance'
             if len(self.spa_map_state["layers"]) != 1:  # re-initialize to SHN only
                 self.map_gz_export(map_type = 'shn')
             
-            path = f'{prefix}/{self.calitp_itp_id}_{self.filter_period}_variance.geojson.gz'
-            cmap = self.variance_cmap
-            gdf = self._variance_map_view
-            gdf = gdf.round({'stop_sequence': 2}) # round for map display, interpolated segs are long floats
-            gdf['color'] = gdf.fast_slow_ratio.apply(lambda x: cmap.rgb_bytes_tuple(x))
-            self.spa_map_state["layers"] += [{
-             "name": f"{self.organization_name} Variation in Speeds {self.display_date} {self.filter_period.replace('_', ' ')}",
-             "url": f"https://storage.googleapis.com/{path}", "type": "speed_variation",
-             'properties': {'stroked': False, 'highlight_saturation_multiplier': 0.5}
-                                             }]
-            self.spa_map_state["lat_lon"] = self.current_centroid
-            self.spa_map_state["zoom"] = 13
-            self.spa_map_state['legend_url'] = 'https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg'
-            return _export(gdf, path)
+            filename = f'{self.calitp_itp_id}_{self.filter_period}_variance'
+            title = f"{self.organization_name} {self.display_date} {self.filter_period.replace('_', ' ')}"
+            
+            export_result = set_state_export(self._variance_map_view, subfolder = subfolder, filename = filename,
+                                map_type = 'speed_variation', map_title = title, cmap = self.variance_cmap,
+                                color_col = 'fast_slow_ratio', 
+                                legend_url = 'https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg',
+                                existing_state = self.spa_map_state
+                                            )
+            self.spa_map_state = export_result['state_dict']
+            self.spa_map_url = export_result['spa_link']
+            return
         
         elif map_type == 'shn':
             dist = self.caltrans_district[:2]
-            path = f'{prefix}/{dist}_SHN.geojson.gz'
-            shn_gdf = self.shn.copy().to_crs(WGS84)
-            self.spa_map_state["layers"] = [{"name": f"D{dist} State Highway Network",
-             "url": f"https://storage.googleapis.com/{path}", "type": "state_highway_network"}]
-            return _export(shn_gdf, path)
+            filename = f'{dist}_SHN'
+            title = f"D{dist} State Highway Network"
+            
+            export_result = set_state_export(self.shn, subfolder = subfolder, filename = filename,
+                                map_type = 'state_highway_network', map_title = title)
+            self.spa_map_state = export_result['state_dict']
+            self.spa_map_url = export_result['spa_link']
+            return
         
     def render_spa_link(self):
         
@@ -635,7 +629,7 @@ class RtFilterMapper:
             title = f"{self.organization_name} Median Trip Speeds by Arrival Hour{self.filter_formatted}"
             
         sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Median Trip Speed (mph)'], ci=None, 
-                       palette=[shared_utils.calitp_color_palette.CALITP_CATEGORY_BOLD_COLORS[1]])
+                       palette=[CALITP_CATEGORY_BOLD_COLORS[1]])
             .set_title(title)
            )
         chart = sns_plot.get_figure()
@@ -672,7 +666,7 @@ class RtFilterMapper:
         if no_title:
             title = None
         variability_plt = sns.swarmplot(x = to_chart['Segment Cross Street'], y=to_chart['Segement Speed (mph)'],
-              palette=shared_utils.calitp_color_palette.CALITP_CATEGORY_BRIGHT_COLORS,
+              palette=CALITP_CATEGORY_BRIGHT_COLORS,
              ).set_title(title)
         return variability_plt
     
@@ -791,6 +785,8 @@ class RtFilterMapper:
               >> mutate(organization = self.organization_name)
               >> group_by(_.route_id, _.route_short_name, _.organization)
               >> summarize(p20_corr_mph = _.corridor_speed_mph.quantile(.2),
+                           p50_corr_mph = _.corridor_speed_mph.quantile(.5),
+                           avg_corr_mph = _.corridor_speed_mph.mean(),
                            speed_delay_minutes = _.target_delay_seconds.sum() / 60)
              )
         both_metrics_df = (speed_metric_df >> inner_join(_, schedule_metric_df, on = ['route_id', 'route_short_name'])
@@ -821,19 +817,21 @@ def from_gcs(itp_id, analysis_date, pbar = None):
     '''
     date_iso = analysis_date.isoformat()
     
-    if analysis_date <= warehouse_cutoff_date:
-        shapes = get_routelines(itp_id, analysis_date)
-        trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
-            .reset_index(drop=True))
-        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
-                 .reset_index(drop=True))
-    else:
-        index_df = get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
-        trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
-            .reset_index(drop=True))
-        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
-                 .reset_index(drop=True))
-        shapes = get_shapes(index_df)
+    # if analysis_date <= warehouse_cutoff_date:
+    #     shapes = get_routelines(itp_id, analysis_date)
+    #     trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
+    #         .reset_index(drop=True))
+    #     stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
+    #              .reset_index(drop=True))
+    # else:
+    
+    # always use v2 warehouse, v1 warehouse deprecated/gone
+    index_df = get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
+    trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
+        .reset_index(drop=True))
+    stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
+             .reset_index(drop=True))
+    shapes = get_shapes(index_df)
     
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))

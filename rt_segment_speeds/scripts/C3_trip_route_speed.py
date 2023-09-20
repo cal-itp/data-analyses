@@ -77,21 +77,21 @@ def distance_and_seconds_elapsed(
 def add_scheduled_trip_columns(
     rt_trips: pd.DataFrame,
     analysis_date: str,
-    group_cols: list = ["trip_id"]) -> pd.DataFrame:
+    group_cols: list = ["trip_instance_key"]) -> pd.DataFrame:
     """
     Merge RT trips (vehicle positions) to scheduled trips.
     Add in the needed scheduled trip columns to take 
     route-direction-time_of_day averages.
     """
     keep_cols = [
-        "feed_key", 
+        "gtfs_dataset_key",
         "direction_id", 
         "route_id", "route_short_name", "route_long_name", "route_desc",
     ] + group_cols
         
-    crosswalk = sched_rt_utils.crosswalk_scheduled_trip_grouping_with_rt_key(
+    crosswalk = helpers.import_scheduled_trips(
         analysis_date, 
-        keep_trip_cols = keep_cols, 
+        columns = keep_cols, 
         get_pandas = True
     )
     
@@ -100,7 +100,7 @@ def add_scheduled_trip_columns(
     crosswalk2 = pd.merge(
         crosswalk,
         common_shape,
-        on = ["feed_key", "route_id", "direction_id"],
+        on = ["schedule_gtfs_dataset_key", "route_id", "direction_id"],
         how = "inner"
     ).astype({"direction_id": "Int64"})
     
@@ -115,11 +115,11 @@ def add_scheduled_trip_columns(
     df = dd.merge(
         rt_trips,
         crosswalk2,
-        on = ["gtfs_dataset_key"] + group_cols,
+        on = group_cols,
         how = "left",
     ).merge(
         time_of_day,
-        on = ["gtfs_dataset_key", "feed_key", "trip_id"],
+        on = group_cols,
         how = "left"
     )
     
@@ -160,16 +160,17 @@ def avg_route_speeds_by_time_of_day(
     
     Take the average by route-direction-time_of_day.
     Also include averages for scheduled trip service_minutes vs 
-    rt trip pproximated-service-minutes
+    rt trip approximated-service-minutes
     """
     df2 = drop_extremely_low_and_high_speeds(df, speed_range = (3, 70))
     
-    df3 = (df2.groupby(group_cols)
+    df3 = (df2.groupby(group_cols, 
+                       observed = True, group_keys = False)
            .agg({
                "speed_mph": "mean",
                "service_minutes": "mean",
                "change_sec": "mean",
-               "trip_id": "count"
+               "trip_instance_key": "count"
            }).reset_index()
           )
     
@@ -179,7 +180,7 @@ def avg_route_speeds_by_time_of_day(
         speed_mph = df3.speed_mph.round(1),
     ).rename(columns = {
         "service_minutes": "avg_sched_trip_min",
-        "trip_id": "n_trips",
+        "trip_instance_key": "n_trips",
         "route_name_used": "route_name",
     }).drop(columns = "change_sec")
     
@@ -246,31 +247,6 @@ def final_cleaning_for_export(
                   })
 
     return final_df
-    
-    
-def make_wide_for_export(
-    df: pd.DataFrame, 
-) -> pd.DataFrame:    
-    # make wide 
-    # https://stackoverflow.com/questions/22798934/pandas-long-to-wide-reshape-by-two-variables
-    group_cols = [
-        "org_id", "agency", 
-        "route_id", "direction_id", "route_name",
-        "common_shape_id",
-        "base64_url", "caltrans_district"
-    ]
-    
-    df3 = df2.pivot(
-        index = group_cols,
-        columns = "time_of_day", 
-        values=["speed_mph", "trip_id"]
-    ).sort_index(axis=1, level=1)
-    
-    df3.columns = [f'{x}_{y}' for x,y in df3.columns]
-    
-    df4 = df3.reset_index()
-    return df4
-    
 
     
 if __name__ == "__main__":
@@ -278,12 +254,17 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     # Merge in the subset of vp to the shape geometry
-    df = pd.read_parquet(
+    vp = pd.read_parquet(
         f"{SEGMENT_GCS}trip_summary/vp_subset_{analysis_date}.parquet",
     )
     
+    vp = gpd.GeoDataFrame(
+        vp,
+        geometry = gpd.points_from_xy(vp.x, vp.y, crs=WGS84)
+    ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
+    
     # in case there are fewer shapes to grab
-    shapes_list = df.shape_array_key.unique().tolist()
+    shapes_list = vp.shape_array_key.unique().tolist()
 
     # to_crs() takes a long time when os.environ["USE_PYGEOS"] = '0',
     # so keep pygeos on
@@ -295,27 +276,38 @@ if __name__ == "__main__":
         crs = PROJECT_CRS
     )
     
-    # project the vp geometry onto the shape geometry and get shape_meters
-    linear_ref = wrangle_shapes.linear_reference_vp_against_segment(
-        df,
+    df = pd.merge(
+        vp,
         shapes,
-        segment_identifier_cols = ["shape_array_key"]
-    ).compute()
+        on = "shape_array_key",
+        how = "inner"
+    ).rename(columns = {"geometry_x": "vp_geometry", 
+                        "geometry_y": "shape_geometry"}
+            ).set_geometry("vp_geometry")
+    
+    # project the vp geometry onto the shape geometry and get shape_meters
+    shape_meters_geoseries = wrangle_shapes.project_point_geom_onto_linestring(
+        df,
+        "shape_geometry",
+        "vp_geometry",
+    )
+
+    df["shape_meters"] = shape_meters_geoseries
     
     time1 = datetime.datetime.now()
     print(f"linear ref: {time1 - start}")
     
     # Get trip-level speed
     speed = distance_and_seconds_elapsed(
-        linear_ref,
-        group_cols = ["gtfs_dataset_key", "trip_id"]
+        df,
+        group_cols = ["gtfs_dataset_key", "trip_instance_key"]
     )
     
     # Attach scheduled trip columns, like route, direction, time_of_day
     speed2 = add_scheduled_trip_columns(
         speed,
         analysis_date,
-        group_cols = ["trip_id"]
+        group_cols = ["trip_instance_key"]
     )
     
     time2 = datetime.datetime.now()
@@ -352,7 +344,7 @@ if __name__ == "__main__":
         f"{SEGMENT_GCS}export/",
         "speeds_by_route_time_of_day"
     )
-        
+    
     time3 = datetime.datetime.now()
     print(f"route-direction average speeds: {time3 - time2}")
     

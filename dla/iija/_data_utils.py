@@ -8,7 +8,6 @@ AND run a `! pip install nltk` in the first cell of your notebook
 '''
 
 
-import numpy as np
 import pandas as pd
 from siuba import *
 

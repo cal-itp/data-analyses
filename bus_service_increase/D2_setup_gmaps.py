@@ -10,7 +10,7 @@ import pandas as pd
 import zlib
 
 from datetime import timedelta
-from calitp_data.storage import get_fs
+from calitp_data_analysis import get_fs
 
 from bus_service_utils import utils
 from D1_setup_parallel_trips_with_stops import ANALYSIS_DATE, COMPILED_CACHED

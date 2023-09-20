@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MD_Metadata xmlns="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<language>
+<LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng" codeSpace="ISO639-2">eng</LanguageCode>
+</language>
+<characterSet>
+<MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
+</characterSet>
+<hierarchyLevel>
+<MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset" codeSpace="ISOTC211/19115">dataset</MD_ScopeCode>
+</hierarchyLevel>
+<hierarchyLevelName>
+<gco:CharacterString>dataset</gco:CharacterString>
+</hierarchyLevelName>
+<contact gco:nilReason="missing">
+</contact>
+<dateStamp>
+<gco:Date>2023-08-30</gco:Date>
+</dateStamp>
+<metadataStandardName>
+<gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
+</metadataStandardName>
+<metadataStandardVersion>
+<gco:CharacterString>2007</gco:CharacterString>
+</metadataStandardVersion>
+<spatialRepresentationInfo>
+<MD_VectorSpatialRepresentation>
+<topologyLevel>
+<MD_TopologyLevelCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_TopologyLevelCode" codeListValue="geometryOnly" codeSpace="ISOTC211/19115">geometryOnly</MD_TopologyLevelCode>
+</topologyLevel>
+<geometricObjects>
+<MD_GeometricObjects>
+<geometricObjectType>
+<MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="composite" codeSpace="ISOTC211/19115">composite</MD_GeometricObjectTypeCode>
+</geometricObjectType>
+</MD_GeometricObjects>
+</geometricObjects>
+</MD_VectorSpatialRepresentation>
+</spatialRepresentationInfo>
+<referenceSystemInfo>
+<MD_ReferenceSystem>
+<referenceSystemIdentifier>
+<RS_Identifier>
+<code>
+<gco:CharacterString>4326</gco:CharacterString>
+</code>
+<codeSpace>
+<gco:CharacterString>EPSG</gco:CharacterString>
+</codeSpace>
+<version>
+<gco:CharacterString>6.2(3.0.1)</gco:CharacterString>
+</version>
+</RS_Identifier>
+</referenceSystemIdentifier>
+</MD_ReferenceSystem>
+</referenceSystemInfo>
+<identificationInfo>
+<MD_DataIdentification>
+<citation>
+<CI_Citation>
+<title>
+<gco:CharacterString>dataset_name</gco:CharacterString>
+</title>
+<date>
+<CI_Date>
+<date>
+<gco:Date>2022-02-08</gco:Date>
+</date>
+<dateType>
+<CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">creation</CI_DateTypeCode>
+</dateType>
+</CI_Date>
+</date>
+<date>
+<CI_Date>
+<date>
+<gco:Date>2023-08-15</gco:Date>
+</date>
+<dateType>
+<CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="ISOTC211/19115">revision</CI_DateTypeCode>
+</dateType>
+</CI_Date>
+</date>
+<citedResponsibleParty>
+<CI_ResponsibleParty>
+<organisationName>
+<gco:CharacterString>Caltrans</gco:CharacterString>
+</organisationName>
+<role>
+<CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher" codeSpace="ISOTC211/19115">publisher</CI_RoleCode>
+</role>
+</CI_ResponsibleParty>
+</citedResponsibleParty>
+<citedResponsibleParty>
+<CI_ResponsibleParty>
+<individualName>
+<gco:CharacterString>Your Name</gco:CharacterString>
+</individualName>
+<organisationName>
+<gco:CharacterString>Caltrans</gco:CharacterString>
+</organisationName>
+<positionName>
+<gco:CharacterString>Data &amp; Digital Services / California Integrated Travel Project</gco:CharacterString>
+</positionName>
+<contactInfo>
+<CI_Contact>
+<address>
+<CI_Address>
+<electronicMailAddress>
+<gco:CharacterString>hello@calitp.org</gco:CharacterString>
+</electronicMailAddress>
+</CI_Address>
+</address>
+</CI_Contact>
+</contactInfo>
+<role>
+<CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact" codeSpace="ISOTC211/19115">pointOfContact</CI_RoleCode>
+</role>
+</CI_ResponsibleParty>
+</citedResponsibleParty>
+<presentationForm>
+<CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="ISOTC211/19115">mapDigital</CI_PresentationFormCode>
+</presentationForm>
+</CI_Citation>
+</citation>
+<abstract>
+<gco:CharacterString>This is the abstract statement.</gco:CharacterString>
+</abstract>
+<purpose>
+<gco:CharacterString>Some purpose statement.</gco:CharacterString>
+</purpose>
+<status>
+<MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">completed</MD_ProgressCode>
+</status>
+<resourceMaintenance>
+<MD_MaintenanceInformation>
+<maintenanceAndUpdateFrequency>
+<MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="monthly" codeSpace="ISOTC211/19115">monthly</MD_MaintenanceFrequencyCode>
+</maintenanceAndUpdateFrequency>
+</MD_MaintenanceInformation>
+</resourceMaintenance>
+<descriptiveKeywords>
+<MD_Keywords>
+<keyword>
+<gco:CharacterString>Transportation</gco:CharacterString>
+</keyword>
+<type>
+<MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</MD_KeywordTypeCode>
+</type>
+</MD_Keywords>
+</descriptiveKeywords>
+<descriptiveKeywords>
+<MD_Keywords>
+<keyword>
+<gco:CharacterString>Downloadable Data</gco:CharacterString>
+</keyword>
+<thesaurusName uuidref="723f6998-058e-11dc-8314-0800200c9a66">
+</thesaurusName>
+</MD_Keywords>
+</descriptiveKeywords>
+<resourceConstraints>
+<MD_Constraints>
+<useLimitation>
+<gco:CharacterString>Public.</gco:CharacterString>
+</useLimitation>
+</MD_Constraints>
+</resourceConstraints>
+<resourceConstraints>
+<MD_LegalConstraints>
+<useLimitation>
+<gco:CharacterString>The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an 'as is' and an 'as available' basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.</gco:CharacterString>
+</useLimitation>
+</MD_LegalConstraints>
+</resourceConstraints>
+<resourceConstraints>
+<MD_LegalConstraints>
+<useLimitation>
+<gco:CharacterString>Creative Commons 4.0 Attribution</gco:CharacterString>
+</useLimitation>
+<useConstraints>
+<MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="license" codeSpace="ISOTC211/19115">license</MD_RestrictionCode>
+</useConstraints>
+</MD_LegalConstraints>
+</resourceConstraints>
+<spatialRepresentationType>
+<MD_SpatialRepresentationTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" codeSpace="ISOTC211/19115">vector</MD_SpatialRepresentationTypeCode>
+</spatialRepresentationType>
+<language>
+<LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng" codeSpace="ISO639-2">eng</LanguageCode>
+</language>
+<characterSet>
+<MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
+</characterSet>
+<topicCategory>
+<MD_TopicCategoryCode>transportation</MD_TopicCategoryCode>
+</topicCategory>
+<environmentDescription>
+<gco:CharacterString>Microsoft Windows 10 Version 10.0 (Build 19045) ; Esri ArcGIS 12.9.2.32739</gco:CharacterString>
+</environmentDescription>
+<extent>
+<EX_Extent>
+<description>
+<gco:CharacterString>California</gco:CharacterString>
+</description>
+</EX_Extent>
+</extent>
+</MD_DataIdentification>
+</identificationInfo>
+<distributionInfo>
+<MD_Distribution>
+<distributionFormat>
+<MD_Format>
+<name>
+<gco:CharacterString>File Geodatabase Feature Class</gco:CharacterString>
+</name>
+<version gco:nilReason="missing">
+</version>
+</MD_Format>
+</distributionFormat>
+<transferOptions>
+<MD_DigitalTransferOptions>
+<onLine>
+<CI_OnlineResource>
+<linkage>
+<URL>https://github.com/cal-itp/data-analyses/blob/main/README.md</URL>
+</linkage>
+<name>
+<gco:CharacterString>Readme</gco:CharacterString>
+</name>
+<description>
+<gco:CharacterString>This site allows you to access the code used to create this dataset and provides additional explanatory resources.</gco:CharacterString>
+</description>
+<function>
+<CI_OnLineFunctionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information" codeSpace="ISOTC211/19115">information</CI_OnLineFunctionCode>
+</function>
+</CI_OnlineResource>
+</onLine>
+</MD_DigitalTransferOptions>
+</transferOptions>
+</MD_Distribution>
+</distributionInfo>
+<dataQualityInfo>
+<DQ_DataQuality>
+<scope>
+<DQ_Scope>
+<level>
+<MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="feature" codeSpace="ISOTC211/19115">feature</MD_ScopeCode>
+</level>
+</DQ_Scope>
+</scope>
+<report>
+<DQ_RelativeInternalPositionalAccuracy>
+<measureDescription>
+<gco:CharacterString>4 meters</gco:CharacterString>
+</measureDescription>
+<result gco:nilReason="missing">
+</result>
+</DQ_RelativeInternalPositionalAccuracy>
+</report>
+<lineage>
+<LI_Lineage>
+<processStep>
+<LI_ProcessStep>
+<description>
+<gco:CharacterString>This is my methodology.</gco:CharacterString>
+</description>
+</LI_ProcessStep>
+</processStep>
+</LI_Lineage>
+</lineage>
+</DQ_DataQuality>
+</dataQualityInfo>
+</MD_Metadata>

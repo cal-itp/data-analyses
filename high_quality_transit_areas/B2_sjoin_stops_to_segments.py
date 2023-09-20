@@ -213,7 +213,7 @@ if __name__ == "__main__":
     #from dask.distributed import Client
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("./logs/B2_sjoin_stops_to_segments.log", retention="6 months")
+    logger.add("./logs/B2_sjoin_stops_to_segments.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")

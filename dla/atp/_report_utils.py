@@ -5,8 +5,6 @@ Functions combine the funded and application data to get one row for each projec
 From there was can use the functions for the report
 '''
 
-import intake
-import numpy as np
 import pandas as pd
 import geopandas as gpd
 from calitp_data_analysis.sql import to_snakecase
@@ -14,7 +12,7 @@ from dla_utils import _dla_utils
 from shared_utils import geography_utils
 from shared_utils import calitp_color_palette as cp
 
-from IPython.display import HTML, Markdown
+from IPython.display import HTML
 from siuba import *
 
 import altair as alt

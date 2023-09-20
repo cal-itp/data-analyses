@@ -11,7 +11,7 @@ import dask_geopandas as dg
 import fsspec
 import geopandas as gpd
 import requests
-from calitp_data.storage import get_fs
+from calitp_data_analysis import get_fs
 
 fs = get_fs()
 
@@ -181,12 +181,15 @@ def make_zipped_shapefile(gdf: gpd.GeoDataFrame, local_path: Union[str, Path], g
     shutil.rmtree(dirname.name, ignore_errors=True)
 
     if gcs_folder:
+        # GCS can't work with pathlib PosixPath
+        gcs_folder = str(gcs_folder)
+
         if gcs_folder[-1] != "/":
             gcs_folder = f"{gcs_folder}/"
 
         fs.put(
-            f"./{dirname.parent}.zip",
-            f"{gcs_folder}{dirname.parent}.zip",
+            str(Path(f"{dirname}.zip")),
+            f"{gcs_folder}{dirname}.zip",
         )
 
 

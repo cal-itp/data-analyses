@@ -10,7 +10,7 @@ from loguru import logger
 
 from bus_service_utils import create_parallel_corridors
 from shared_utils import geography_utils
-from update_vars import (BUS_SERVICE_GCS, get_filename,
+from update_vars import (BUS_SERVICE_GCS,
                          ANALYSIS_DATE, VERSION)
 
     
@@ -22,11 +22,9 @@ if __name__ == "__main__":
     
     logger.info(f"Analysis date: {ANALYSIS_DATE}   warehouse {VERSION}")
     start = datetime.datetime.now()
-    
-    transit_routes_file = get_filename(
-        f"{BUS_SERVICE_GCS}routes_", ANALYSIS_DATE, VERSION
-    )   
-    transit_routes = gpd.read_parquet(transit_routes_file)
+            
+    transit_routes = gpd.read_parquet(
+        f"{BUS_SERVICE_GCS}routes_{ANALYSIS_DATE}.parquet")
 
     
     # 50 ft buffers, get routes that are on SHN
@@ -36,7 +34,7 @@ if __name__ == "__main__":
         pct_route_threshold = 0.2, 
         pct_highway_threshold = 0,
         data_path = BUS_SERVICE_GCS, 
-        file_name = get_filename(f"routes_on_shn_", ANALYSIS_DATE, VERSION),
+        file_name = f"routes_on_shn_{ANALYSIS_DATE}",
         warehouse_version = VERSION
     )  
     
@@ -50,7 +48,7 @@ if __name__ == "__main__":
         pct_route_threshold = 0.2,
         pct_highway_threshold = 0,
         data_path = BUS_SERVICE_GCS, 
-        file_name = get_filename(f"parallel_or_intersecting_", ANALYSIS_DATE, VERSION),
+        file_name = f"parallel_or_intersecting_{ANALYSIS_DATE}",
         warehouse_version = VERSION
     )
     

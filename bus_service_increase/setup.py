@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name="bus_service_utils",
     packages=find_packages(),
-    version="1.0",
+    version="2.0",
     description="Shared utility functions for bus service data analyses",
     author="Cal-ITP",
     license="Apache",

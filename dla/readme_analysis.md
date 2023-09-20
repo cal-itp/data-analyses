@@ -6,14 +6,13 @@
 
 1. [Cleaning Script](./dla_utils/dla_utils/clean_data.py): Pull E_-76 data from Caltrans page, clean and produce parquet file 
 1. [cleaning_notebooks](./e76_obligated_funds/cleaning_notebooks): folder with cleaning notebooks work 
-1. [project_categories](./e76_obligated_funds/project_categories) folder with identifying project categories (included in cleaning script)
 1. [update_parquet.ipynb](./e76_obligated_funds/data_exploration_analyses/update_parquet.ipynb): notebook to pull and read E-76 Data
 
 
 ### Crosswalks
 
 1. [agency_ntd_crosswalk.ipynb](./crosswalks/agency_ntd_crosswalk.ipynb): notebook creating crosswalk between NTD organizations and Airtable organizations
-1. [dla_ntd_itp_crosswalk.ipynb](.//crosswalks/dla_ntd_itp_crosswalk.ipynb): notebook connecting crosswalk 1 (NTD and Airtable) with DLA Locodes
+1. [dla_ntd_itp_crosswalk.ipynb](./crosswalks/dla_ntd_itp_crosswalk.ipynb): notebook connecting crosswalk 1 (NTD and Airtable) with DLA Locodes
 
 
 ### Data Assembly

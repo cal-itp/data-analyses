@@ -1,6 +1,6 @@
-import shared_utils
 from shared_utils.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils import rt_utils
+from shared_utils.utils import geoparquet_gcs_export
 
 import branca
 
@@ -218,6 +218,8 @@ class OperatorDayAnalysis:
         ## Move to v2!
         # call this org_feed_index instead?
         self.index_df = rt_utils.get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
+        self.organization_name = self.index_df.organization_name.iloc[0]
+        self.pbar_desc = f'itp_id: {self.calitp_itp_id} org: {self.organization_name[:15]}'
         self.vehicle_positions = rt_utils.get_vehicle_positions(self.index_df)
         self.trips = rt_utils.get_trips(self.index_df)
         self.stop_times = rt_utils.get_st(self.index_df, self.trips)
@@ -253,9 +255,9 @@ class OperatorDayAnalysis:
         self.pct_trips_valid_rt = self.rt_trips.trip_id.nunique() / self.trips.trip_id.nunique()
 
         self._generate_stop_delay_view()
-        self.rt_trips['organization_name'] = self.index_df.organization_name.iloc[0]
+        self.rt_trips['organization_name'] = self.organization_name
         self.rt_trips['caltrans_district'] = self.index_df.caltrans_district.iloc[0]
-        
+                
     def _ix_from_routeline(self, routeline):
         try:
             km_index = np.arange(1000, routeline.geometry.length, 1000)
@@ -280,7 +282,7 @@ class OperatorDayAnalysis:
         self.position_interpolators = {}
         if type(self.pbar) != type(None):
             self.pbar.reset(total=self.vehicle_positions.trip_id.nunique())
-            self.pbar.desc = f'Generating position interpolators itp_id: {self.calitp_itp_id}'
+            self.pbar.desc = f'generating position interpolators {self.pbar_desc}'
         for trip_id in self.vehicle_positions.trip_id.unique():
             trip_positions_joined = self.trips_positions_joined >> filter(_.trip_id == trip_id)
             # self.debug_dict[f'{trip_id}_vp'] = trip_positions_joined
@@ -297,8 +299,10 @@ class OperatorDayAnalysis:
         ''' Experimental to break up long segments
             To filter these out, self.stop_delay_view.dropna(subset=['stop_id'])
         '''
-        
-        new_ix = (self.shapes >> filter(_.shape_id == _delay.shape_id.iloc[0])).km_index.iloc[0]
+        relevant_shape = self.shapes >> filter(_.shape_id == _delay.shape_id.iloc[0])
+        shape_geom = relevant_shape.geometry.iloc[0]
+        # display(shape_geom) # debug
+        new_ix = relevant_shape.km_index.iloc[0]
         if np.any(new_ix):
             _delay = _delay.set_index('shape_meters')
             first_shape_meters = (_delay >> filter(_.stop_sequence == _.stop_sequence.min())).index.to_numpy()[0]
@@ -314,6 +318,10 @@ class OperatorDayAnalysis:
             appended = appended.reset_index()
             appended['actual_time'] = appended.apply(lambda x: 
                         self.position_interpolators[x.trip_id]['rt'].time_at_position(x.shape_meters),
+                        axis = 1)
+            # include point geometries for interpolated stops
+            appended['geometry'] = appended.apply(lambda x:
+                        shape_geom.interpolate(x.shape_meters) if pd.isna(x.geometry) else x.geometry,
                         axis = 1)
             return appended
         else:
@@ -334,7 +342,7 @@ class OperatorDayAnalysis:
         
         if type(self.pbar) != type(None):
             self.pbar.reset(total=len(delays.trip_id.unique()))
-            self.pbar.desc = f'Generating stop delay view itp_id: {self.calitp_itp_id}'
+            self.pbar.desc = f'generating stop delay view {self.pbar_desc}'
         for trip_id in delays.trip_id.unique():
             try:
                 _delay = delays.copy() >> filter(_.trip_id == trip_id) >> distinct(_.stop_id, _keep_all = True)
@@ -359,8 +367,9 @@ class OperatorDayAnalysis:
                 self.debug_dict[f'{trip_id}_stopsegs'] = _delay
                 try:
                     _delay = self._add_km_segments(_delay)
-                except:
+                except Exception as e:
                     print(f'could not add km segments trip: {_delay.trip_id.iloc[0]}')
+                    print(e)
                     continue
 
                 _delays = pd.concat((_delays, _delay))
@@ -389,7 +398,7 @@ class OperatorDayAnalysis:
         stop_delay_to_parquet['arrival_time'] = stop_delay_to_parquet.arrival_time.map(lambda x: x.isoformat())
         stop_delay_to_parquet['actual_time'] = stop_delay_to_parquet.actual_time.map(lambda x: x.isoformat())
         stop_delay_to_parquet = stop_delay_to_parquet >> select(-_.delay)
-        shared_utils.utils.geoparquet_gcs_export(stop_delay_to_parquet,
+        geoparquet_gcs_export(stop_delay_to_parquet,
                                          f'{rt_utils.GCS_FILE_PATH}v2_stop_delay_views/',
                                         f'{self.calitp_itp_id}_{date_iso}'
                                         )

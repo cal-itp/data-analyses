@@ -23,11 +23,12 @@ def keep_min_max_timestamps_by_segment(
     # a lot of NaNs result...why?
     # gtfs_dataset_key or name sometimes is category dtype...so we must use groupby(observed=True)
     # shape_array_key will uniquely identify feed_key + shape_id, so should be ok
-    segment_trip_cols = ["trip_id"] + segment_identifier_cols
-    dtypes_map = vp_to_seg[segment_trip_cols + [timestamp_col]].dtypes.to_dict()
+    dtypes_map = vp_to_seg[segment_identifier_cols + [timestamp_col]].dtypes.to_dict()
     
     # https://stackoverflow.com/questions/52552066/dask-compute-gives-attributeerror-series-object-has-no-attribute-encode    
-    grouped_df = vp_to_seg.groupby(segment_trip_cols, observed=True, group_keys=False)
+    grouped_df = vp_to_seg.groupby(segment_identifier_cols, 
+                                   observed=True, group_keys=False)
+    
     enter = (grouped_df
              [timestamp_col].min()
              .reset_index()
@@ -48,7 +49,7 @@ def keep_min_max_timestamps_by_segment(
     vp_full_info = dd.merge(
         vp_to_seg,
         enter_exit,
-        on = segment_trip_cols + [timestamp_col],
+        on = segment_identifier_cols + [timestamp_col],
         how = "inner"
     ).reset_index(drop=True)
             
@@ -68,10 +69,20 @@ def derive_speed(
     min_time, max_time = time_cols[0], time_cols[1]    
     
     df = df.assign(
-        meters_elapsed = df[max_dist] - df[min_dist],
-        sec_elapsed = (df[max_time] - df[min_time]).divide(
-                       np.timedelta64(1, 's')),
+        meters_elapsed = df[max_dist] - df[min_dist]
     )
+    
+    if df[min_time].dtype in ["float", "int"]:
+        # If 2 time cols are already converted to seconds, just take difference
+        df = df.assign(
+            sec_elapsed = (df[max_time] - df[min_time])
+        )
+    else:
+        # If 2 time cols are datetime, convert timedelta to seconds
+        df = df.assign(
+            sec_elapsed = (df[max_time] - df[min_time]).divide(
+                           np.timedelta64(1, 's')),
+        )
     
     df = df.assign(
         speed_mph = (df.meters_elapsed.divide(df.sec_elapsed) * 
@@ -90,8 +101,10 @@ def calculate_speed_by_segment_trip(
     For each segment-trip pair, calculate find the min/max timestamp
     and min/max shape_meters. Use that to derive speed column.
     """ 
-    segment_trip_cols = segment_identifier_cols + ["gtfs_dataset_key",
-                                                   "_gtfs_dataset_name", "trip_id"]
+    segment_trip_cols = [
+        "gtfs_dataset_key", "gtfs_dataset_name", 
+        "trip_id", "trip_instance_key", "schedule_gtfs_dataset_key"
+    ] + segment_identifier_cols
     
     grouped_df = df.groupby(segment_trip_cols, observed=True, group_keys=False)
     
@@ -99,7 +112,6 @@ def calculate_speed_by_segment_trip(
                      .agg({timestamp_col: "min", 
                            "shape_meters": "min"})
                      .reset_index()
-                     .compute()
                      .rename(columns = {
                          timestamp_col: "min_time",
                          "shape_meters": "min_dist"})
@@ -109,20 +121,19 @@ def calculate_speed_by_segment_trip(
                      .agg({timestamp_col: "max", 
                            "shape_meters": "max"})
                      .reset_index()
-                     .compute()
                      .rename(columns = {
                          timestamp_col: "max_time",
                          "shape_meters": "max_dist"})
     )
     
-    segment_trip_agg = dd.merge(
+    segment_trip_agg = pd.merge(
         min_time_dist,
         max_time_dist,
         on = segment_trip_cols, 
         how = "left"
     )
     
-    segment_trip_agg = dd.from_pandas(segment_trip_agg, npartitions=3)
+    #segment_trip_agg = dd.from_pandas(segment_trip_agg, npartitions=3)
     
     segment_speeds = derive_speed(
         segment_trip_agg,
