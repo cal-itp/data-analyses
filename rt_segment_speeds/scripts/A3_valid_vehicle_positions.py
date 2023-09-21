@@ -116,7 +116,7 @@ def pare_down_vp_by_segment(
                   .repartition(npartitions=3)
                  )
     vp_to_keep.to_parquet(
-        f"{SEGMENT_GCS}vp_pare_down/{EXPORT_FILE}_all_{analysis_date}",
+        f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
         overwrite=True
     )
     
