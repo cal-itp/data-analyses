@@ -13,4 +13,4 @@ sources:
    description: california counties
    args:
      urlpath: https://services1.arcgis.com/jUJYIo9tSA7EHvfZ/arcgis/rest/services/California_County_Boundaries/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
-     use_fspec: true
+     use_fsspec: true
