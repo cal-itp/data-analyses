@@ -172,3 +172,69 @@ def style_table(
             display(HTML(df_style.to_html()))
 
     return df_style
+
+def aggregate_by_geography(
+    df: Union[pd.DataFrame, gpd.GeoDataFrame],
+    group_cols: list,
+    sum_cols: list = [],
+    mean_cols: list = [],
+    count_cols: list = [],
+    nunique_cols: list = [],
+    rename_cols: bool = False,
+) -> pd.DataFrame:
+    """
+    df: pandas.DataFrame or geopandas.GeoDataFrame.,
+        The df on which the aggregating is done.
+        If it's a geodataframe, it must exclude the tract's geometry column
+
+    group_cols: list.
+        List of columns to do the groupby, but exclude geometry.
+    sum_cols: list.
+        List of columns to calculate a sum with the groupby.
+    mean_cols: list.
+        List of columns to calculate an average with the groupby
+        (beware: may want weighted averages and not simple average!!).
+    count_cols: list.
+        List of columns to calculate a count with the groupby.
+    nunique_cols: list.
+        List of columns to calculate the number of unique values with the groupby.
+    rename_cols: boolean.
+        Defaults to False. If True, will rename columns in sum_cols to have suffix `_sum`,
+        rename columns in mean_cols to have suffix `_mean`, etc.
+
+    Returns a pandas.DataFrame or geopandas.GeoDataFrame (same as input).
+    """
+    final_df = df[group_cols].drop_duplicates().reset_index()
+
+    def aggregate_and_merge(
+        df: Union[pd.DataFrame, gpd.GeoDataFrame],
+        final_df: pd.DataFrame,
+        group_cols: list,
+        agg_cols: list,
+        aggregate_function: str,
+    ):
+        agg_df = df.pivot_table(index=group_cols, values=agg_cols, aggfunc=aggregate_function).reset_index()
+
+        # https://stackoverflow.com/questions/34049618/how-to-add-a-suffix-or-prefix-to-each-column-name
+        # Why won't .add_prefix or .add_suffix work?
+        if rename_cols:
+            for c in agg_cols:
+                agg_df = agg_df.rename(columns={c: f"{c}_{aggregate_function}"})
+
+        final_df = pd.merge(final_df, agg_df, on=group_cols, how="left", validate="1:1")
+
+        return final_df
+
+    if len(sum_cols) > 0:
+        final_df = aggregate_and_merge(df, final_df, group_cols, sum_cols, "sum")
+
+    if len(mean_cols) > 0:
+        final_df = aggregate_and_merge(df, final_df, group_cols, mean_cols, "mean")
+
+    if len(count_cols) > 0:
+        final_df = aggregate_and_merge(df, final_df, group_cols, count_cols, "count")
+
+    if len(nunique_cols) > 0:
+        final_df = aggregate_and_merge(df, final_df, group_cols, nunique_cols, "nunique")
+
+    return final_df.drop(columns="index")
