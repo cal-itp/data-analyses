@@ -1,0 +1,16 @@
+metadata:
+  version: 1
+sources:
+    
+ stops:
+   driver: csv
+   description: stops in merced and caltrain
+   args:
+     urlpath: gs://calitp-analytics-data/data-analyses/csuyat_folder/stops_caltrain_merced.csv
+
+ ca_county:
+   driver: geojson
+   description: california counties
+   args:
+     urlpath: https://services1.arcgis.com/jUJYIo9tSA7EHvfZ/arcgis/rest/services/California_County_Boundaries/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+     use_fspec: true
