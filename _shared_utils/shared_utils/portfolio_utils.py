@@ -173,6 +173,7 @@ def style_table(
 
     return df_style
 
+
 def aggregate_by_geography(
     df: Union[pd.DataFrame, gpd.GeoDataFrame],
     group_cols: list,
