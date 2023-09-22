@@ -170,7 +170,8 @@ def recalculate_low_speeds_with_straight_distance(
     
     usable_vp = dd.read_parquet(
         f"{SEGMENT_GCS}vp_usable_{analysis_date}",
-        columns = ["trip_instance_key", "vp_idx", timestamp_col, "x", "y"]
+        columns = ["trip_instance_key",
+                   "vp_idx", timestamp_col, "x", "y"]
     )
 
     vp_idx_bounds = segment_calcs.get_usable_vp_bounds_by_trip(usable_vp)
@@ -269,6 +270,7 @@ def linear_referencing_and_speed_by_segment(
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]    
     EXPORT_FILE = dict_inputs["stage4"]
+    PCT_SEGMENT_MIN = dict_inputs["pct_segment_minimum"]
     
     # Keep subset of columns - don't need it all. we can get the 
     # columns dropped through segments file
@@ -312,7 +314,7 @@ def linear_referencing_and_speed_by_segment(
     
     ok_speeds, low_speeds = filter_for_unstable_speeds(
         initial_speeds,
-        pct_segment_threshold = 0.3
+        pct_segment_threshold = PCT_SEGMENT_MIN
     )
     
     low_speeds_recalculated = recalculate_low_speeds_with_straight_distance(

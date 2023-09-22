@@ -137,7 +137,7 @@ if __name__ == "__main__":
     final_gdf.drop(columns = "geometry").to_parquet(
         f"{SEGMENT_GCS}export/{INPUT_FILE}_tabular.parquet"
     )
-        
+       
     utils.geoparquet_gcs_export(
         final_gdf[keep_cols],
         f"{SEGMENT_GCS}export/",

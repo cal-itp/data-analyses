@@ -12,11 +12,11 @@ speeds_pipeline:
 	python A2_sjoin_postprocessing.py
 	python A3_valid_vehicle_positions.py
 	python B1_speeds_by_segment_trip.py
-	#python B2_avg_speeds_by_segment.py
-	#python B3_export.py
+	python B2_avg_speeds_by_segment.py
+	python B3_export.py
 	#python C2_triangulate_vp.py      
 	#python C3_trip_route_speed.py  
-   
+
    
 download_roads:
 	#pip install esridump
