@@ -29,7 +29,7 @@ def calculate_avg_speeds(
     avg = (grouped_df
           .agg({
             "speed_mph": "median",
-            "trip_id": "nunique"})
+            "trip_instance_key": "nunique"})
           .reset_index()
     )
     
@@ -45,7 +45,7 @@ def calculate_avg_speeds(
     
     stats = pd.merge(
         avg.rename(columns = {"speed_mph": "p50_mph", 
-                              "trip_id": "n_trips"}),
+                              "trip_instance_key": "n_trips"}),
         p20.rename(columns = {"speed_mph": "p20_mph"}),
         on = group_cols,
         how = "left"
@@ -65,7 +65,6 @@ def speeds_with_segment_geom(
     analysis_date: str, 
     max_speed_cutoff: int = 70,
     dict_inputs: dict = {},
-    percent_segment_covered:float = 0.40,
 ) -> gpd.GeoDataFrame: 
     """
     Import the segment-trip table. 
@@ -90,53 +89,45 @@ def speeds_with_segment_geom(
         f"{SEGMENT_FILE}_{analysis_date}",
         columns = segment_cols_to_keep
     )
-    
-    # CRS is 3310, calculate the length
-    segments["segment_length"] = segments.geometry.length
-    
+        
     # Read in speeds
     df = pd.read_parquet(
-        f"{SEGMENT_GCS}{SPEEDS_FILE}_{analysis_date}", 
-        filters = [[("speed_mph", "<=", max_speed_cutoff)]])
+        f"{SEGMENT_GCS}{SPEEDS_FILE}_{analysis_date}.parquet", 
+        filters = [[
+            ("speed_mph", "<=", max_speed_cutoff),
+            ("meters_elapsed", ">", 0),
+            ("sec_elapsed", ">", 0)
+    ]])
     
     # Do a merge with segments
-    merge_cols = ['shape_array_key','stop_sequence','schedule_gtfs_dataset_key']
-    df2 = pd.merge(segments, df, on = merge_cols, how = "inner")
+    df2 = pd.merge(
+        segments, 
+        df, 
+        on = SEGMENT_IDENTIFIER_COLS, 
+        how = "inner"
+    )
     
     # Keep only segments that have RT data. 
     unique_segments = (df2[segment_cols_to_keep]
                        .drop_duplicates()
                        .reset_index(drop = True)
-                      )
-    
-    # Find percentage of meters elapsed vs. total segment length
-    df2 = df2.assign(
-        pct_seg = df2.meters_elapsed.divide(df2.segment_length)
-    )
-    
-    # Filter out abnormally high and low speeds
-    # Threshold defaults to throwing away the bottom 20% of rows with low speeds
-    df3 = df2[(df2.pct_seg >= percent_segment_covered) & 
-              (df2.speed_mph.notna()) & 
-              (df2.sec_elapsed > 0) & 
-              (df2.meters_elapsed > 0)
-             ]
+                      ).to_crs(geography_utils.WGS84)
     
     time_of_day_df = sched_rt_utils.get_trip_time_buckets(analysis_date)
 
-    df4 = pd.merge(
-        df3, 
+    df3 = pd.merge(
+        df2, 
         time_of_day_df, 
         on = "trip_instance_key", 
         how = "inner"
     )
     
     all_day = calculate_avg_speeds(
-        df4, 
+        df3, 
         SEGMENT_IDENTIFIER_COLS
     )
     peak = calculate_avg_speeds(
-        df4[df4.time_of_day.isin(["AM Peak", "PM Peak"])], 
+        df3[df3.time_of_day.isin(["AM Peak", "PM Peak"])], 
         SEGMENT_IDENTIFIER_COLS
     )
     
@@ -145,29 +136,14 @@ def speeds_with_segment_geom(
         peak.assign(time_of_day = "peak")
     ], axis=0)
     
-    # Merge in segment geometry with a changed CRS
-    unique_segments = unique_segments.to_crs(geography_utils.WGS84)
     
-    # Merge in segment geometry
-    segments = helpers.import_segments(
-        SEGMENT_GCS,
-        f"{SEGMENT_FILE}_{analysis_date}",
-        columns = SEGMENT_IDENTIFIER_COLS + [
-            "schedule_gtfs_dataset_key", 
-            "stop_id",
-            "loop_or_inlining",
-            "geometry", 
-            "district_name"
-        ]
-    ).to_crs(geography_utils.WGS84)
-    
+    # Merge in segment geometry    
     gdf = pd.merge(
         unique_segments,
         stats,
         on = SEGMENT_IDENTIFIER_COLS,
         how = "left"
-    )
-    
+    ).sort_values(SEGMENT_IDENTIFIER_COLS + ["time_of_day"]).reset_index(drop=True)
     
     return gdf
 
@@ -187,7 +163,6 @@ if __name__ == "__main__":
     EXPORT_FILE = f'{STOP_SEG_DICT["stage5"]}_{analysis_date}'
     
     MAX_SPEED = 70
-    MIN_SEGMENT_PERCENT = 0.40
     
     # Average the speeds for segment for entire day
     # Drop speeds above our max cutoff
@@ -195,7 +170,6 @@ if __name__ == "__main__":
         analysis_date, 
         max_speed_cutoff = MAX_SPEED,
         dict_inputs = STOP_SEG_DICT,
-        percent_segment_covered = MIN_SEGMENT_PERCENT
     )
         
     utils.geoparquet_gcs_export(
