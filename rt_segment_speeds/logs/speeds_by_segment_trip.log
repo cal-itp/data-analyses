@@ -40,3 +40,59 @@
 2023-08-24 14:51:47.828 | INFO     | __main__:linear_referencing_and_speed_by_segment:123 - calculate speeds: 0:00:00.006706
 2023-08-24 14:56:14.082 | INFO     | __main__:<module>:150 - speeds for stop segments: 0:04:32.610802
 2023-08-24 14:56:14.083 | INFO     | __main__:<module>:151 - execution time: 0:04:32.611824
+2023-09-21 11:53:11.705 | INFO     | __main__:<module>:367 - Analysis date: 2023-09-13
+2023-09-21 11:53:18.285 | INFO     | __main__:linear_referencing_vp_against_line:58 - set up merged vp with segments: 0:00:00.152710
+2023-09-21 11:53:18.322 | INFO     | __main__:linear_referencing_vp_against_line:76 - linear referencing: 0:00:00.037063
+2023-09-21 11:57:20.821 | INFO     | __main__:linear_referencing_and_speed_by_segment:300 - linear referencing: 0:04:09.111393
+2023-09-21 12:03:20.231 | INFO     | __main__:linear_referencing_and_speed_by_segment:311 - make wide and get initial speeds: 0:05:59.409953
+2023-09-21 12:05:33.476 | INFO     | __main__:linear_referencing_and_speed_by_segment:352 - recalculate speeds and get final: 0:02:13.244950
+2023-09-21 12:05:46.785 | INFO     | __main__:<module>:375 - speeds for stop segments: 0:12:35.079026
+2023-09-21 12:05:46.788 | INFO     | __main__:<module>:376 - execution time: 0:12:35.081785
+2023-09-21 12:28:12.385 | INFO     | __main__:<module>:367 - Analysis date: 2023-08-15
+2023-09-21 12:28:19.027 | INFO     | __main__:linear_referencing_vp_against_line:58 - set up merged vp with segments: 0:00:00.162699
+2023-09-21 12:28:19.063 | INFO     | __main__:linear_referencing_vp_against_line:76 - linear referencing: 0:00:00.036557
+2023-09-21 12:32:49.165 | INFO     | __main__:linear_referencing_and_speed_by_segment:300 - linear referencing: 0:04:36.761005
+2023-09-21 12:39:56.447 | INFO     | __main__:linear_referencing_and_speed_by_segment:311 - make wide and get initial speeds: 0:07:07.282236
+2023-09-21 12:42:14.396 | INFO     | __main__:linear_referencing_and_speed_by_segment:352 - recalculate speeds and get final: 0:02:17.948959
+2023-09-21 12:42:27.893 | INFO     | __main__:<module>:375 - speeds for stop segments: 0:14:15.493395
+2023-09-21 12:42:27.894 | INFO     | __main__:<module>:376 - execution time: 0:14:15.494456
+2023-09-21 13:16:38.177 | INFO     | __main__:<module>:367 - Analysis date: 2023-07-12
+2023-09-21 13:16:44.655 | INFO     | __main__:linear_referencing_vp_against_line:58 - set up merged vp with segments: 0:00:00.156084
+2023-09-21 13:16:44.692 | INFO     | __main__:linear_referencing_vp_against_line:76 - linear referencing: 0:00:00.037555
+2023-09-21 13:20:41.231 | INFO     | __main__:linear_referencing_and_speed_by_segment:300 - linear referencing: 0:04:03.035504
+2023-09-21 13:26:57.794 | INFO     | __main__:linear_referencing_and_speed_by_segment:311 - make wide and get initial speeds: 0:06:16.562615
+2023-09-21 13:29:08.771 | INFO     | __main__:linear_referencing_and_speed_by_segment:352 - recalculate speeds and get final: 0:02:10.977540
+2023-09-21 13:29:21.791 | INFO     | __main__:<module>:375 - speeds for stop segments: 0:12:43.599595
+2023-09-21 13:29:21.792 | INFO     | __main__:<module>:376 - execution time: 0:12:43.600710
+2023-09-21 15:36:54.009 | INFO     | __main__:<module>:369 - Analysis date: 2023-06-14
+2023-09-21 15:36:59.961 | INFO     | __main__:linear_referencing_vp_against_line:58 - set up merged vp with segments: 0:00:00.156330
+2023-09-21 15:37:00.016 | INFO     | __main__:linear_referencing_vp_against_line:76 - linear referencing: 0:00:00.055084
+2023-09-21 15:40:58.894 | INFO     | __main__:linear_referencing_and_speed_by_segment:302 - linear referencing: 0:04:04.880927
+2023-09-21 15:46:35.541 | INFO     | __main__:linear_referencing_and_speed_by_segment:313 - make wide and get initial speeds: 0:05:36.646767
+2023-09-21 15:48:52.854 | INFO     | __main__:linear_referencing_and_speed_by_segment:354 - recalculate speeds and get final: 0:02:17.313285
+2023-09-21 15:49:04.953 | INFO     | __main__:<module>:377 - speeds for stop segments: 0:12:10.943637
+2023-09-21 15:49:04.954 | INFO     | __main__:<module>:378 - execution time: 0:12:10.944518
+2023-09-21 17:41:01.371 | INFO     | __main__:<module>:369 - Analysis date: 2023-05-17
+2023-09-21 17:41:07.436 | INFO     | __main__:linear_referencing_vp_against_line:58 - set up merged vp with segments: 0:00:00.155348
+2023-09-21 17:41:07.465 | INFO     | __main__:linear_referencing_vp_against_line:76 - linear referencing: 0:00:00.028611
+2023-09-21 17:45:03.306 | INFO     | __main__:linear_referencing_and_speed_by_segment:302 - linear referencing: 0:04:01.914759
+2023-09-21 17:51:13.000 | INFO     | __main__:linear_referencing_and_speed_by_segment:313 - make wide and get initial speeds: 0:06:09.693714
+2023-09-21 17:53:38.147 | INFO     | __main__:linear_referencing_and_speed_by_segment:354 - recalculate speeds and get final: 0:02:25.147277
+2023-09-21 17:53:49.471 | INFO     | __main__:<module>:377 - speeds for stop segments: 0:12:48.084151
+2023-09-21 17:53:49.474 | INFO     | __main__:<module>:378 - execution time: 0:12:48.087006
+2023-09-21 18:19:33.226 | INFO     | __main__:<module>:369 - Analysis date: 2023-04-12
+2023-09-21 18:19:39.961 | INFO     | __main__:linear_referencing_vp_against_line:58 - set up merged vp with segments: 0:00:00.173198
+2023-09-21 18:19:39.999 | INFO     | __main__:linear_referencing_vp_against_line:76 - linear referencing: 0:00:00.037629
+2023-09-21 18:23:57.932 | INFO     | __main__:linear_referencing_and_speed_by_segment:302 - linear referencing: 0:04:24.702955
+2023-09-21 18:30:30.758 | INFO     | __main__:linear_referencing_and_speed_by_segment:313 - make wide and get initial speeds: 0:06:32.825103
+2023-09-21 18:32:55.850 | INFO     | __main__:linear_referencing_and_speed_by_segment:354 - recalculate speeds and get final: 0:02:25.091989
+2023-09-21 18:33:07.969 | INFO     | __main__:<module>:377 - speeds for stop segments: 0:13:34.743167
+2023-09-21 18:33:07.972 | INFO     | __main__:<module>:378 - execution time: 0:13:34.745381
+2023-09-21 19:14:16.648 | INFO     | __main__:<module>:369 - Analysis date: 2023-03-15
+2023-09-21 19:14:22.748 | INFO     | __main__:linear_referencing_vp_against_line:58 - set up merged vp with segments: 0:00:00.170221
+2023-09-21 19:14:22.792 | INFO     | __main__:linear_referencing_vp_against_line:76 - linear referencing: 0:00:00.044492
+2023-09-21 19:18:37.589 | INFO     | __main__:linear_referencing_and_speed_by_segment:302 - linear referencing: 0:04:20.919458
+2023-09-21 19:24:39.102 | INFO     | __main__:linear_referencing_and_speed_by_segment:313 - make wide and get initial speeds: 0:06:01.513090
+2023-09-21 19:28:06.672 | INFO     | __main__:linear_referencing_and_speed_by_segment:354 - recalculate speeds and get final: 0:03:27.569825
+2023-09-21 19:28:23.294 | INFO     | __main__:<module>:377 - speeds for stop segments: 0:14:06.628501
+2023-09-21 19:28:23.296 | INFO     | __main__:<module>:378 - execution time: 0:14:06.630732
