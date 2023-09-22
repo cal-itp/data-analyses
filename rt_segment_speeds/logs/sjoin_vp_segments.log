@@ -42,3 +42,17 @@
 2023-09-14 13:06:15.758 | INFO     | __main__:<module>:223 - execution time: 0:12:03.599629
 2023-09-14 13:06:31.913 | INFO     | __main__:<module>:457 - Analysis date: 2023-09-13
 2023-09-14 13:14:08.656 | INFO     | __main__:<module>:465 - remove erroneous sjoin results: 0:07:36.742381
+2023-09-21 10:58:58.711 | INFO     | __main__:<module>:457 - Analysis date: 2023-09-13
+2023-09-21 11:05:58.377 | INFO     | __main__:<module>:465 - remove erroneous sjoin results: 0:06:59.626650
+2023-09-21 12:11:55.875 | INFO     | __main__:<module>:456 - Analysis date: 2023-08-15
+2023-09-21 12:19:13.216 | INFO     | __main__:<module>:464 - remove erroneous sjoin results: 0:07:17.337816
+2023-09-21 12:58:44.489 | INFO     | __main__:<module>:456 - Analysis date: 2023-07-12
+2023-09-21 13:07:33.610 | INFO     | __main__:<module>:464 - remove erroneous sjoin results: 0:08:49.120980
+2023-09-21 15:22:02.693 | INFO     | __main__:<module>:456 - Analysis date: 2023-06-14
+2023-09-21 15:29:14.363 | INFO     | __main__:<module>:464 - remove erroneous sjoin results: 0:07:11.668827
+2023-09-21 17:26:50.733 | INFO     | __main__:<module>:456 - Analysis date: 2023-05-17
+2023-09-21 17:33:37.420 | INFO     | __main__:<module>:464 - remove erroneous sjoin results: 0:06:46.686094
+2023-09-21 18:03:52.838 | INFO     | __main__:<module>:456 - Analysis date: 2023-04-12
+2023-09-21 18:11:04.091 | INFO     | __main__:<module>:464 - remove erroneous sjoin results: 0:07:11.251722
+2023-09-21 18:55:33.230 | INFO     | __main__:<module>:456 - Analysis date: 2023-03-15
+2023-09-21 19:05:26.800 | INFO     | __main__:<module>:464 - remove erroneous sjoin results: 0:09:53.569193

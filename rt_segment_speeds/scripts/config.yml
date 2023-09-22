@@ -25,3 +25,4 @@ stop_segments:
     segment_identifier_cols: ["shape_array_key", "stop_sequence"]
     timestamp_col: "location_timestamp_local"
     time_min_cutoff: 10
+    pct_segment_minimum: 0.3

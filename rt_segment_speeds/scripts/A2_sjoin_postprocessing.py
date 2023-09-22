@@ -380,7 +380,6 @@ def remove_erroneous_sjoin_results(
     """
     USABLE_VP = dict_inputs["stage1"]
     INPUT_FILE_PREFIX = dict_inputs["stage2"]
-
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     SEGMENT_TRIP_COLS = ["trip_instance_key"] + SEGMENT_IDENTIFIER_COLS
     GROUPING_COL = dict_inputs["grouping_col"]
