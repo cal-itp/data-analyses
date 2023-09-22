@@ -58,3 +58,62 @@
                 how = 'inner', validate = 'm:1')
     ```
 * Clean up formatting of Markdown cells, make use of various levels of heading. Use the [Markdown reference](https://www.datacamp.com/tutorial/markdown-in-jupyter-notebook) from exercise 3 to improve the formatting.
+
+## Exercise 5
+* Instead of writing it as 2 lines, combine it into one:
+    ```
+    #For each county, calculate the number of operators, stops, and stop events.
+    agg_gct1=join.groupby(['COUNTY_NAME']).agg({'feed_key':'count'}).reset_index()
+    agg_gsum1=join.groupby(['COUNTY_NAME']).agg({'route_type_3':'sum'}).reset_index()
+    
+    # Do this instead
+    agg_county = join.groupby(["COUNTY_NAME"]).agg({
+            "feed_key": "count",
+            "route_type_3_": "sum"
+           }).reset_index()
+    ```
+* Good job on the use of a function for making a map!
+* You can apply the function concept to your aggregation.
+    ```
+    def aggregation_by_group(df, group_cols):
+        
+        aggregated = df.groupby(group_cols).agg(
+                {"feed_key": "count",
+                 "route_type_3": "sum"}
+                 ).reset_index().rename(columns = {
+                     "feed_key": "num_operators",
+                     "route_type_3": "stop_events"
+                 })
+        
+        return aggregated
+        
+    # Use this function
+    agg_by_county = aggregation_by_group(join, ["COUNTY_NAME"])
+    agg_by_operator = aggregation_by_group(join, ["name"])
+    agg_by_region = aggregation_by_group(join, ["Region"])
+    ```
+
+## Exercise 6
+* Doing a spatial join between `stops` and `counties` makes sense. After that, getting `count_stop` is good. But why do you merge `merge` and `count_stop` together?
+    ```
+    # You go from having a df that's 4 rows to 200 something rows again
+    agg_df = pd.merge(merge, count_stop, on = 'COUNTY_NAME',
+        how = 'inner', validate = 'm:1')
+        
+    # Instead, do this to get the county geometry
+    # Put the county gdf on the left so it's a gdf in your result
+    count_stop_gdf = pd.merge(
+        counties,
+        count_stop,
+        on = "COUNTY_NAME",
+        how = "inner"
+    )
+    
+    # this keeps your df of 4 rows, but makes it a gdf of 4 rows
+    ```
+
+## Exercise 7
+* Know this distinction: For districts, where Caltrans districts are polygons, `districts.geometry.length` gives you the circumference of the polygon (length of the boundary around the polygon). If you had lines, then `gdf.geometry.length` gives you the length of the line.
+* For future work: we made available `CA Transit Stops` and `CA Transit Routes` available on the open data portal. You can use it to find Amtrak!
+   * Transit stops: https://gis.data.ca.gov/maps/900992cc94ab49dbbb906d8f147c2a72_0
+   * Transit routes: https://gis.data.ca.gov/maps/dd7cb74665a14859a59b8c31d3bc5a3e_0
