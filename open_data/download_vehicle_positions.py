@@ -3,6 +3,7 @@ Download vehicle positions for a day.
 """
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
+os.environ['USE_PYGEOS'] = '0'
 
 import datetime
 import gcsfs
