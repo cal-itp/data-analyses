@@ -10,6 +10,10 @@ route name, Caltrans district the same way.
 need to import different pandas to add type hint for styler object
 
 """
+import os
+os.environ['USE_PYGEOS'] = '0'
+import geopandas as gpd
+
 import base64
 from typing import Union
 
