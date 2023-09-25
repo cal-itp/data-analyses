@@ -23,3 +23,6 @@
     ```
 
 ## Exercise 2
+* Add a Markdown cell. When you open a new cell, navigate to the top bar, and where it says `Code`, change the dropdown to say `Markdown`. That changes the cell to be Markdown, which takes text, rather than Python code.
+* Reference [this](https://www.datacamp.com/tutorial/markdown-in-jupyter-notebook), linked in exercise 2, to see how to add headers and various formatting to a Markdown cell.
+
