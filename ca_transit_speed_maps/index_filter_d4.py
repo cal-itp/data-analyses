@@ -10,8 +10,8 @@ import os
 
 if __name__ == "__main__":
     
-    dates = [f'2023-04-{day}' for day in range(10, 14)]
-    dates = dates[:2] + [dates[-1]] # apr 12 exists for all operators
+    dates = [f'2022-10-0{day}' for day in range(3, 7)]
+    # dates = dates[:2] + [dates[-1]] # apr 12 exists for all operators
     for date in dates:
         path = f'./_rt_progress_{date}.parquet'
         if os.path.exists(path):

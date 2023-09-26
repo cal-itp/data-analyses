@@ -9,7 +9,7 @@ import datetime as dt
 from calitp_data_analysis.tables import tbls
 from shared_utils import rt_dates, rt_utils
 
-ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['jul2023'])
+ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['oct2022d'])
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 
 def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
@@ -34,6 +34,8 @@ def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
              _.caltrans_district, _._is_current, _.vehicle_positions_gtfs_dataset_key)
     >> collect()
     )
+    print(orgs_with_vp >> filter(_.caltrans_district.isna()))
+    orgs_with_vp = orgs_with_vp >> filter(-_.caltrans_district.isna())
     assert not orgs_with_vp.isnull().values.any()
     orgs_with_vp['analysis_date'] = analysis_date
     orgs_with_vp = orgs_with_vp >> distinct(_.organization_name,
