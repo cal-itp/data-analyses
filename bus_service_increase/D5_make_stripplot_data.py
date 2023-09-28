@@ -13,10 +13,11 @@ import pandas as pd
 from calitp_data_analysis.tables import tbls
 from siuba import *
 
-import shared_utils
 import D2_setup_gmaps as setup_gmaps
 import E2_aggregated_route_stats as aggregated_route_stats 
-from bus_service_utils import utils
+from bus_service_utils import utils as bus_utils
+from calitp_data_analysis import utils
+from shared_utils import portfolio_utils, rt_utils
 from D1_setup_parallel_trips_with_stops import (ANALYSIS_DATE, COMPILED_CACHED,
                                                 merge_trips_with_service_hours)
 
@@ -62,7 +63,7 @@ def add_trip_time_of_day(trips: pd.DataFrame) -> pd.DataFrame:
     # Add time-of-day
     df = df.assign(
         time_of_day = df.apply(
-            lambda x: shared_utils.rt_utils.categorize_time_of_day(
+            lambda x: rt_utils.categorize_time_of_day(
                 x.trip_first_departure), 
             axis=1)
     )
@@ -193,7 +194,7 @@ def add_route_group(df: gpd.GeoDataFrame,
 
 # Use agency_name from our views.gtfs_schedule.agency instead of Airtable?
 def merge_in_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    agency_names = shared_utils.portfolio_utils.add_agency_name(
+    agency_names = portfolio_utils.add_agency_name(
         selected_date = ANALYSIS_DATE)
     
     df2 = pd.merge(
@@ -209,7 +210,7 @@ def merge_in_agency_name(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
 def merge_in_airtable(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Don't use name from Airtable. But, use district.
-    caltrans_districts = shared_utils.portfolio_utils.add_caltrans_district()
+    caltrans_districts = portfolio_utils.add_caltrans_district()
                             
     # Airtable gives us fewer duplicates than doing tbl.gtfs_schedule.agency()
     # But naming should be done with tbl.gtfs_schedule.agency because that's what's used
@@ -231,7 +232,7 @@ def add_route_categories(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     under quarterly performance objective work.
     """
     route_categories = (gpd.read_parquet(
-        f"{utils.GCS_FILE_PATH}routes_categorized_{ANALYSIS_DATE}.parquet")
+        f"{bus_utils.GCS_FILE_PATH}routes_categorized_{ANALYSIS_DATE}.parquet")
         .rename(columns = {"itp_id": "calitp_itp_id"})
     )
     
@@ -244,7 +245,7 @@ def add_route_categories(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     )
     
     # Clean up route_name
-    route_names = shared_utils.portfolio_utils.add_route_name(ANALYSIS_DATE)
+    route_names = portfolio_utils.add_route_name(ANALYSIS_DATE)
     
     gdf3 = pd.merge(
         gdf2,
@@ -330,7 +331,7 @@ if __name__ == "__main__":
     gdf = assemble_data(ANALYSIS_DATE, threshold = 1.5, 
                         service_time_cutoffs = SERVICE_TIME_CUTOFFS)
     
-    shared_utils.utils.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         gdf, 
-        utils.GCS_FILE_PATH, 
+        bus_utils.GCS_FILE_PATH, 
         f"competitive_route_variability_{ANALYSIS_DATE}")

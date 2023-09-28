@@ -8,8 +8,8 @@ import D5_make_stripplot_data as D5
 
 from E0_bus_oppor_vars import ANALYSIS_DATE, GCS_FILE_PATH
 from parallel_corridors_utils import PCT_COMPETITIVE_THRESHOLD
-
-from shared_utils import geography_utils, utils
+from calitp_data_analysis import geography_utils, utils
+from shared_utils import portfolio_utils
 
 catalog = intake.open_catalog("./*.yml")
 
@@ -143,7 +143,7 @@ def get_pct_uncompetitive_by_highway_segment_id(
     Get only the highway segments where all of the transit that
     does intersect with that segment are uncompetitive.
     """
-    a1 = geography_utils.aggregate_by_geography(
+    a1 = portfolio_utils.aggregate_by_geography(
         gdf,
         group_cols = ["hwy_segment_id"],
         count_cols = ["uncompetitive"],

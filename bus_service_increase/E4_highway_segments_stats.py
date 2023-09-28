@@ -7,7 +7,8 @@ import geopandas as gpd
 import pandas as pd
 
 import E2_aggregated_route_stats as aggregated_route_stats
-from shared_utils import geography_utils, utils
+from calitp_data_analysis import geography_utils, utils
+from shared_utils import portfolio_utils
 from E0_bus_oppor_vars import GCS_FILE_PATH, ANALYSIS_DATE, COMPILED_CACHED_GCS
 
 catalog = intake.open_catalog("*.yml")
@@ -64,7 +65,7 @@ def average_speed_by_stop():
     # Drop observations with way too fast speeds
     speed_by_stops2 = speed_by_stops[speed_by_stops.speed_mph <= 65]
     
-    mean_speed = geography_utils.aggregate_by_geography(
+    mean_speed = portfolio_utils.aggregate_by_geography(
         speed_by_stops2,
         group_cols = ["calitp_itp_id", "stop_id"],
         mean_cols = ["speed_mph"],
@@ -143,7 +144,7 @@ def calculate_trip_weighted_speed(gdf: gpd.GeoDataFrame,
         weighted_speed = gdf.mean_speed_mph * gdf.num_trips
     )
     
-    segment_speed_agg = geography_utils.aggregate_by_geography(
+    segment_speed_agg = portfolio_utils.aggregate_by_geography(
         segment_speed,
         group_cols = group_cols,
         sum_cols = ["weighted_speed", "num_trips"]
@@ -172,7 +173,7 @@ def aggregate_to_hwy_segment(df: pd.DataFrame,
     ]
     
     # These are stats we can easily sum up, to highway segment level
-    segment = geography_utils.aggregate_by_geography(
+    segment = portfolio_utils.aggregate_by_geography(
         df,
         group_cols = group_cols,
         sum_cols = sum_cols,
@@ -181,12 +182,12 @@ def aggregate_to_hwy_segment(df: pd.DataFrame,
     # Attach the highway segment line geom back in
     other_hwy_cols = list(set(highway_cols).difference(set(["hwy_segment_id"])))
     
-    segment_with_geom = geography_utils.attach_geometry(
-        segment,
+    segment_with_geom = pd.merge(
         highway_segment_gdf[group_cols + other_hwy_cols + 
                             ["geometry"]].drop_duplicates(),
-        merge_col = group_cols,
-        join = "inner"
+        segment,
+        on = group_cols,
+        how = "inner"
     )
     
     # Clean up dtypes, re-order columns
