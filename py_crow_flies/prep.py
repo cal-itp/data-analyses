@@ -12,7 +12,7 @@ import pandas as pd
 import sys
 
 from loguru import logger
-from shared_utils import utils
+from calitp_data_analysis import utils
 
 GCS_FILE_PATH = "gs://calitp-publish-data-analysis/py_crow_flies/"
 CRS = "EPSG:3857"
