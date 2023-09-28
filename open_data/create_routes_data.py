@@ -11,7 +11,8 @@ import pandas as pd
 from datetime import datetime
 
 import prep_traffic_ops
-from shared_utils import utils, geography_utils, portfolio_utils
+from calitp_data_analysis import utils, geography_utils
+from shared_utils import portfolio_utils
 from segment_speed_utils import helpers
 from update_vars import analysis_date, TRAFFIC_OPS_GCS
 

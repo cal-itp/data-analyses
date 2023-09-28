@@ -12,10 +12,11 @@ import shapely
 import sys
 
 from calitp_data_analysis.tables import tbls
+from calitp_data_analysis import utils
 from loguru import logger
 from siuba import *
 
-from shared_utils import utils, schedule_rt_utils
+from shared_utils import schedule_rt_utils
 from update_vars import SEGMENT_GCS, analysis_date
 
 fs = gcsfs.GCSFileSystem()
