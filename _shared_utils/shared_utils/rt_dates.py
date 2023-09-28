@@ -14,11 +14,11 @@ DATES = {
     "aug2022": "2022-08-17",
     "sep2022": "2022-09-14",
     "sep2022a": "2022-09-21",  # start of most v2 fct_vehicle_locations data? extent of backfill?
-    "oct2022a": "2022-10-03",  # postfixed dates for d4/MTC analysis
-    "oct2022b": "2022-10-04",
-    "oct2022c": "2022-10-05",
-    "oct2022d": "2022-10-06",
     "oct2022": "2022-10-12",
+    "nov2022a": "2022-11-07",  # postfixed dates for d4/MTC analysis
+    "nov2022b": "2022-11-08",
+    "nov2022c": "2022-11-09",
+    "nov2022d": "2022-11-10",
     "nov2022": "2022-11-16",
     "dec2022": "2022-12-14",
     "jan2023": "2023-01-18",  # start of v2
