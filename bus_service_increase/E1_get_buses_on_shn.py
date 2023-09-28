@@ -13,7 +13,7 @@ import zlib
 
 from E0_bus_oppor_vars import GCS_FILE_PATH, ANALYSIS_DATE, COMPILED_CACHED_GCS
 from bus_service_utils import create_parallel_corridors, utils
-from shared_utils import geography_utils, utils
+from calitp_data_analysis import geography_utils, utils
 
 catalog = intake.open_catalog("./*.yml")
 
