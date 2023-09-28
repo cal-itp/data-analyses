@@ -7,7 +7,7 @@ import os
 import shapely
 
 from typing import Union
-from shared_utils import calitp_color_palette
+from calitp_data_analysis import calitp_color_palette
 
 fs = gcsfs.GCSFileSystem()
 

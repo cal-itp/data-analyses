@@ -19,7 +19,8 @@ from loguru import logger
 
 import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
-from shared_utils import utils, geography_utils, schedule_rt_utils
+from calitp_data_analysis import geography_utils, utils
+from shared_utils import schedule_rt_utils
 from update_vars import analysis_date, TEMP_GCS, COMPILED_CACHED_VIEWS
 
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"

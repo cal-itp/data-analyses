@@ -30,7 +30,8 @@ from loguru import logger
 from dask import delayed, compute
 
 import operators_for_hqta
-from shared_utils import utils, geography_utils, rt_utils
+from calitp_data_analysis import geography_utils, utils
+from shared_utils import rt_utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
