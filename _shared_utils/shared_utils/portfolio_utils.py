@@ -15,6 +15,7 @@ from typing import Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
+import geopandas as gpd
 import pandas as pd
 import pandas.io.formats.style  # for type hint: https://github.com/pandas-dev/pandas/issues/24884
 from IPython.display import HTML
