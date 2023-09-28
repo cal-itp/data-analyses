@@ -3,7 +3,8 @@
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import geography_utils, rt_dates
+from calitp_data_analysis import geography_utils
+from shared_utils import portfolio_utils, rt_dates
 from bus_service_utils import calenviroscreen_lehd_utils
 from segment_speed_utils.project_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS
 
@@ -48,7 +49,7 @@ def aggregate_overlay_intersect_by_equity(
                   "route_length"]
     equity_cols = ["overall_ptile_group"]
     
-    by_route_equity = geography_utils.aggregate_by_geography(
+    by_route_equity = portfolio_utils.aggregate_by_geography(
         gdf,
         group_cols = route_cols + equity_cols,
         sum_cols = ["intersect_length"],
