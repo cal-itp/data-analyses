@@ -144,3 +144,50 @@
     ```
 
 ## Exercise 7
+* Looking at your [commit history](https://github.com/cal-itp/data-analyses/compare/main...csuyat_work2), reusing a lot of the same commit messages ultimately won't be too useful. Try to describe what the commit is doing. 
+   * Ex: "exercise 7, add sjoin section", "ex8 get dissolve for shn"
+   * This is the `main` branch's [commit history](https://github.com/cal-itp/data-analyses/commits/main)...and finding a relevant commit where something happens relies on a concise, yet descriptive message.
+* Print and display statements can be mixed. Also, you can use as many as you'd like. Think about what makes sense to save as an object like `results`. 
+   * [last cell in this notebook](https://github.com/cal-itp/data-analyses/blob/main/bus_service_increase/competitive-routes.ipynb)...a link was saved out as an object, then used in a caption.
+   * An example of writing out a [longer caption with some formatting](https://github.com/CityOfLosAngeles/covid19-indicators/blob/master/processing_utils/us_county_utils.py#L206-L216)
+    
+    ```
+    # An example of mixing print statements with commas with 
+    # single print statements with display statements
+    
+    def gdf_ptg_info(a):
+        print(a.geometry.x.iloc[0], a.geometry.y.iloc[0])
+        print(a.geometry.name)
+        print(f"second row: {a.geometry.iloc[2]}")
+        display(a.head(2))
+    ```
+    
+* It is possible to chain functions, and this is how you'd get it to work. You would project the geometry on-the-fly and draw the buffer, and get that new column to stick. 
+   
+   ```
+   stops_test = stops.assign(
+       geometry_buffered = stops.geometry.to_crs("EPSG:3310").buffer(50),
+       geometry = stops.geometry.to_crs("ESPG:3310") #if you didn't already get the projection to stick in geometry, you can do it within the assign
+   )
+   ```
+* These docs...we should add this to our own docs reference: https://pygis.io/docs/e_vector_overlay.html
+* Watch [video](https://www.youtube.com/watch?v=QBVv7h2Jhvo) that gives diagrams of clipping vs overlay
+* In addition to looking at what's in `s2` from your left sjoin, you can look at it with a map. For stops that do fall in CA boundaries, what values are populated in the column `state`? For stops that do not fall in CA boundaries, what values are populated in `state`? Compare that with `s2.explore("state")` and see how the colors change based on whether they are in CA or outside.
+    ```
+    s2 = gpd.sjoin(
+        amtrak_stops.to_crs("EPSG:2229"),
+        ca2.to_crs("EPSG:2229"),
+        how = "left",
+        predicate = "intersects"
+    )
+    ```
+* Note that the right sjoin uses geometry from the right df. Compare what the df looks like with what's being plotted. What shows up in the geometry column, and is that value consistent through all 116 rows of the df? 
+    ```
+    s3 = gpd.sjoin(
+        amtrak_stops.to_crs("EPSG:2229"),
+        ca2.to_crs("EPSG:2229"),
+        how = "right",
+        predicate = "intersects"
+    )
+    ```
+
