@@ -18,7 +18,7 @@ import sys
 
 from loguru import logger
 
-from shared_utils import utils
+from calitp_data_analysis import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
 from update_vars import analysis_date
 
