@@ -6,7 +6,8 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
-from shared_utils import utils, geography_utils, schedule_rt_utils
+from calitp_data_analysis import utils, geography_utils
+from shared_utils import schedule_rt_utils
 from update_vars import TRAFFIC_OPS_GCS, analysis_date
 
 catalog = intake.open_catalog(
