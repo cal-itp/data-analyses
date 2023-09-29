@@ -3,8 +3,7 @@ from calitp_data_analysis.sql import to_snakecase
 import A1_data_prep
 
 import altair as alt
-from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
+from calitp_data_analysis import calitp_color_palette as cp, styleguide
 
 #import re
 #from nltk import ngrams

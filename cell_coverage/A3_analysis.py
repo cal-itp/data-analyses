@@ -1,20 +1,18 @@
 import A1_provider_prep
 import A2_other
 
-from shared_utils import geography_utils
+from calitp_data_analaysis import geography_utils, utils, calitp_color_palette as cp
 import geopandas as gpd
 import shapely.wkt
 
 import dask.dataframe as dd
 import pandas as pd
-from shared_utils import utils
 
 # Times
 import datetime
 from loguru import logger
 
 # Charts
-from shared_utils import calitp_color_palette as cp
 import altair as alt
 
 """

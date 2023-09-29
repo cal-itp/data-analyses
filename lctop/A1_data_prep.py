@@ -1,7 +1,7 @@
 #General packages
 import pandas as pd
 import geopandas as gpd
-from shared_utils import geography_utils, utils
+from calitp_data_analysis import geography_utils, utils
 from calitp_data_analysis.sql import to_snakecase
 
 #For saving geojson to GCS
