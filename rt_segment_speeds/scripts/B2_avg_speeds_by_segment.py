@@ -11,7 +11,7 @@ from loguru import logger
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
-from shared_utils import utils, geography_utils
+from calitp_data_analysis import utils, geography_utils
 
 
 def calculate_avg_speeds(

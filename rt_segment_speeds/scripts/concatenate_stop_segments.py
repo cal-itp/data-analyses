@@ -8,8 +8,9 @@ os.environ['USE_PYGEOS'] = '0'
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import utils, portfolio_utils
-from shared_utils.geography_utils import WGS84
+from calitp_data_analysis import utils
+from calitp_data_analysis.geography_utils import WGS84
+from shared_utils import portfolio_utils
 from segment_speed_utils import helpers, sched_rt_utils, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)
