@@ -12,7 +12,8 @@ from loguru import logger
 from update_vars import (BUS_SERVICE_GCS, COMPILED_CACHED_GCS, 
                         ANALYSIS_DATE, VERSION
                         )
-from shared_utils import geography_utils, utils
+from shared_utils import portfolio_utils
+from calitp_data_analysis import utils
 
 def calculate_route_level_delays(selected_date: str, 
                                  route_cols: list) -> pd.DataFrame:
@@ -28,7 +29,7 @@ def calculate_route_level_delays(selected_date: str,
     delay_df2 = delay_df.drop_duplicates(
         subset=route_cols + ["trip_id"])
     
-    route_delay = geography_utils.aggregate_by_geography(
+    route_delay = portfolio_utils.aggregate_by_geography(
         delay_df2, 
         group_cols = route_cols,
         sum_cols = ["delay_seconds"]

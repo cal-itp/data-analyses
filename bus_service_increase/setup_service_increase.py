@@ -5,8 +5,7 @@ import pandas as pd
 from calitp_data_analysis.tables import tbls
 from siuba import *
 
-from bus_service_utils import utils
-import shared_utils
+from bus_service_utils import utils as bus_utils
 import warehouse_queries
 
 # Use sub-folder for Jan 2022
@@ -136,7 +135,7 @@ def calculate_additional_trips_service_hours(df):
 
 
 def prep_ntd_metrics():
-    df = (pd.read_csv(f"{utils.GCS_FILE_PATH}ntd_metrics_2019.csv") 
+    df = (pd.read_csv(f"{bus_utils.GCS_FILE_PATH}ntd_metrics_2019.csv") 
                         >> filter(_.State == 'CA')
                        )
         
@@ -164,7 +163,7 @@ def prep_ntd_metrics():
 
 
 def prep_ntd_vehicles():
-    df = (pd.read_csv(f"{utils.GCS_FILE_PATH}ntd_vehicles_2019.csv") 
+    df = (pd.read_csv(f"{bus_utils.GCS_FILE_PATH}ntd_vehicles_2019.csv") 
           >> filter(_.State == 'CA')   
          )
 

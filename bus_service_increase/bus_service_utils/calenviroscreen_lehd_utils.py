@@ -15,8 +15,8 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-import shared_utils
-from bus_service_utils import utils
+from calitp_data_analysis import geography_utils, utils
+from bus_service_utils import utils as bus_utils
 
 #--------------------------------------------------------#
 ### CalEnviroScreen functions
@@ -58,7 +58,7 @@ def prep_calenviroscreen(df: gpd.GeoDataFrame,
     # Fix tract ID and calculate pop density
     df = (df.assign(
             Tract = df.Tract.apply(lambda x: '0' + str(x)[:-2]).astype(str),
-            sq_mi = df.geometry.area * shared_utils.geography_utils.SQ_MI_PER_SQ_M,
+            sq_mi = df.geometry.area * geography_utils.SQ_MI_PER_SQ_M,
         ).rename(columns = {
             "TotPop19": "Population",
             "ApproxLoc": "City",
@@ -122,7 +122,7 @@ def download_lehd_data(download_date: str,
         utils.import_csv_export_parquet(
             dataset_name = f"{URBAN_URL}{download_date}{dataset}",
             output_file_name = dataset, 
-            GCS_FILE_PATH = utils.GCS_FILE_PATH,
+            GCS_FILE_PATH = bus_utils.GCS_FILE_PATH,
             GCS=True
         )
 
@@ -213,7 +213,7 @@ def generate_calenviroscreen_lehd_data(
 ) -> gpd.GeoDataFrame:
     
     # CalEnviroScreen data (gdf)
-    CALENVIROSCREEN_PATH = f"{utils.GCS_FILE_PATH}calenviroscreen40shpf2021shp.zip"
+    CALENVIROSCREEN_PATH = f"{bus_utils.GCS_FILE_PATH}calenviroscreen40shpf2021shp.zip"
     
     with fsspec.open(CALENVIROSCREEN_PATH) as file:
         gdf = gpd.read_file(file)
@@ -223,7 +223,7 @@ def generate_calenviroscreen_lehd_data(
     # LEHD Data
     lehd_dfs = {}
     for d in lehd_datasets:
-        lehd_dfs[d] = pd.read_parquet(f"{utils.GCS_FILE_PATH}{d}.parquet")
+        lehd_dfs[d] = pd.read_parquet(f"{bus_utils.GCS_FILE_PATH}{d}.parquet")
     
     cleaned_dfs = []
     for key, value in lehd_dfs.items():
@@ -236,9 +236,9 @@ def generate_calenviroscreen_lehd_data(
     final = merge_calenviroscreen_lehd(gdf, lehd)
     
     if GCS:
-        shared_utils.utils.geoparquet_gcs_export(
+        utils.geoparquet_gcs_export(
             final,
-            utils.GCS_FILE_PATH,
+            bus_utils.GCS_FILE_PATH,
             "calenviroscreen_lehd_by_tract"
         )
     

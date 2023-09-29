@@ -8,8 +8,8 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
 from calitp_data_analysis.tables import tbls
 from siuba import *
 
-from bus_service_utils import utils
-import shared_utils
+from bus_service_utils import utils as bus_utils
+from shared_utils import gtfs_utils
 
 '''
 Stash datasets in GCS to read in create_service_estimator.py
@@ -22,10 +22,10 @@ The original analysis was done on Oct 2021 service dates for
 service estimation and tract bus arrivals.
 Keep those in `utils.GCS_FILE_PATH`.
 
-New sub-folders take form: f"{utils.GCS_FILE_PATH}SUBFOLDER_NAME/"
+New sub-folders take form: f"{bus_utils.GCS_FILE_PATH}SUBFOLDER_NAME/"
 '''
 
-DATA_PATH = f"{utils.GCS_FILE_PATH}2022_Jan/"
+DATA_PATH = f"{bus_utils.GCS_FILE_PATH}2022_Jan/"
 
 #---------------------------------------------------------------#
 # Set dates for analysis
@@ -55,7 +55,7 @@ def grab_selected_trips_for_date(selected_date):
         "trip_key", "trip_id", "is_in_service"
     ]
     
-    trips = shared_utils.gtfs_utils.get_trips(
+    trips = gtfs_utils.get_trips(
         selected_date = selected_date,
         itp_id_list = None,
         trip_cols = keep_trip_cols,
@@ -68,7 +68,7 @@ def grab_selected_trips_for_date(selected_date):
         "stop_sequence", "stop_id"
     ]
     
-    stop_times = shared_utils.gtfs_utils.get_stop_times(
+    stop_times = gtfs_utils.get_stop_times(
         selected_date = selected_date,
         itp_id_list = None,
         stop_time_cols = keep_stop_time_cols,
@@ -121,7 +121,7 @@ def calculate_arrivals_at_stop(day_of_week: str = "thurs",
     trips_on_day = pd.read_parquet(f"{DATA_PATH}trips_joined_{day_of_week}.parquet")
      
     # this handles multiple url_feeds already, finds distinct in dim_stop_times
-    stop_times = shared_utils.gtfs_utils.get_stop_times(
+    stop_times = gtfs_utils.get_stop_times(
         selected_date = selected_date,
         itp_id_list = None,
         get_df = False, # return dask df
@@ -140,11 +140,12 @@ def calculate_arrivals_at_stop(day_of_week: str = "thurs",
     ).compute()
 
 
-    daily_stop_times.to_parquet(f"{utils.GCS_FILE_PATH}daily_stop_times.parquet")
+    daily_stop_times.to_parquet(f"{bus_utils.GCS_FILE_PATH}daily_stop_times.parquet")
 
 
 def process_daily_stop_times(selected_date):
-    daily_stop_times = pd.read_parquet(f"{utils.GCS_FILE_PATH}daily_stop_times.parquet")
+    daily_stop_times = pd.read_parquet(
+        f"{bus_utils.GCS_FILE_PATH}daily_stop_times.parquet")
     
     # Handle some exclusions
     daily_stop_times = daily_stop_times[daily_stop_times.calitp_itp_id != 200]
@@ -155,7 +156,7 @@ def process_daily_stop_times(selected_date):
         "stop_lon", "stop_lat",
      ]
     
-    stop_geom = shared_utils.gtfs_utils.get_stops(
+    stop_geom = gtfs_utils.get_stops(
         selected_date = selected_date,
         itp_id_list = None,
         stop_cols = keep_stop_cols,
@@ -169,7 +170,7 @@ def process_daily_stop_times(selected_date):
     )
 
     aggregated_stops_with_geom.to_parquet(
-        f"{utils.GCS_FILE_PATH}aggregated_stops_with_geom.parquet")
+        f"{bus_utils.GCS_FILE_PATH}aggregated_stops_with_geom.parquet")
     
     
 if __name__ == "__main__":

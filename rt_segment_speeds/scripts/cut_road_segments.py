@@ -6,14 +6,14 @@ import gcsfs
 fs = gcsfs.GCSFileSystem()
 import dask.dataframe as dd
 import dask_geopandas as dg
-import geopandas
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
 from dask import compute, delayed
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import analysis_date
-from shared_utils import dask_utils, geography_utils, utils
+from calitp_data_analysis import geography_utils, utils
+from shared_utils import dask_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"

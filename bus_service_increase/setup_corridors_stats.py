@@ -10,7 +10,8 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
-from shared_utils import geography_utils
+from calitp_data_analysis import geography_utils
+from shared_utils import portfolio_utils
 
 catalog = intake.open_catalog("./*.yml")
 
@@ -112,7 +113,7 @@ def aggregate_operators(df: gpd.GeoDataFrame) -> pd.DataFrame:
             .reset_index()
     )
     
-    df3 = geography_utils.aggregate_by_geography(
+    df3 = portfolio_utils.aggregate_by_geography(
         df2,
         group_cols = group_cols,
         sum_cols = ["parallel", "competitive"],

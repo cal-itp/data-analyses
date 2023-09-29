@@ -3,8 +3,8 @@ import pandas as pd
 
 from typing import List, Literal
 
-from shared_utils import styleguide
-from shared_utils import calitp_color_palette as cp
+from calitp_data_analysis import styleguide
+from calitp_data_analysis import calitp_color_palette as cp
 
 def base_bar(df: pd.DataFrame, x_col: str) -> alt.Chart:
     chart = (alt.Chart(df)

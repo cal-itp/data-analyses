@@ -1,6 +1,6 @@
 import altair as alt
-from shared_utils import calitp_color_palette as cp
 import pandas as pd
+from calitp_data_analysis import calitp_color_palette as cp
 
 def altair_dropdown(df, column_for_dropdown:str, title_of_dropdown:str):
     """

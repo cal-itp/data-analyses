@@ -13,8 +13,8 @@ import pandas as pd
 from IPython.display import Markdown, HTML, display_html
 from typing import Union
 
-from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
+from calitp_data_analysis import calitp_color_palette as cp
+from calitp_data_analysis import styleguide
 from D1_setup_parallel_trips_with_stops import ANALYSIS_DATE
 
 alt.themes.register("calitp_theme", styleguide.calitp_theme)
@@ -282,19 +282,12 @@ def make_map(gdf: gpd.GeoDataFrame):
         colors = cp.CALITP_CATEGORY_BOLD_COLORS,
     )
     
-    m = map_utils.make_folium_choropleth_map(
-        gdf,
-        plot_col = PLOT_COL,
-        popup_dict = POPUP_DICT, tooltip_dict = POPUP_DICT,
-        colorscale = COLORSCALE,
-        fig_width = FIG_WIDTH,
-        fig_height = FIG_HEIGHT,
-        zoom = 10,
-        centroid = [gdf.geometry.centroid.y, 
-                    gdf.geometry.centroid.x,
-                   ],
-        title = f"{gdf.hwy_route_name.iloc[0]}",
-        legend_name = None,
+    print(f"{gdf.hwy_route_name.iloc[0]}")
+    m = gdf.explore(
+        PLOT_COL,
+        tooltip = list(POPUP_DICT.keys()),
+        cmap = COLORSCALE,
+        legend = False
     )
     
     return m

@@ -11,7 +11,7 @@ import pandas as pd
 
 from typing import Literal
 
-from shared_utils import geography_utils
+from shared_utils import portfolio_utils
 
 catalog = intake.open_catalog("*.yml")
 
@@ -22,7 +22,7 @@ def aggregate_calculate_percent_and_average(
     """
     Create columns with pct values. 
     """
-    agg_df = geography_utils.aggregate_by_geography(
+    agg_df = portfolio_utils.aggregate_by_geography(
         df, 
         group_cols = group_cols,
         sum_cols = sum_cols,

@@ -9,7 +9,7 @@ import sys
 
 from loguru import logger
 
-from shared_utils import geography_utils, utils
+from calitp_data_analysis import geography_utils, utils
 from update_vars import (BUS_SERVICE_GCS, 
                          ANALYSIS_DATE, VERSION)
 

@@ -12,7 +12,7 @@ import sys
 
 from loguru import logger
 
-from shared_utils import utils, geography_utils
+from calitp_data_analysis import utils, geography_utils
 from update_vars import analysis_date
 
 catalog = intake.open_catalog("./catalog.yml")

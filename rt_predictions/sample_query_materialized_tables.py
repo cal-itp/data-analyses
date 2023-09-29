@@ -10,18 +10,17 @@ import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(12_000_000_000_000)
 os.environ['USE_PYGEOS'] = '0'
 
+import numpy as np
 import pandas as pd
 from siuba import *
 
 from calitp_data_analysis.sql import query_sql
 from calitp_data_analysis.tables import tbls
-import shared_utils
 import datetime as dt
 
 from segment_speed_utils.project_vars import (PREDICTIONS_GCS, 
                                               analysis_date)
 analysis_date = dt.datetime.fromisoformat(analysis_date)
-import numpy as np
 
 sampling_periods = {}
 sampling_periods['am'] = [dt.datetime.combine(analysis_date, dt.time(8, 0)),

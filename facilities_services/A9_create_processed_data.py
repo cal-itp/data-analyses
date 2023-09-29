@@ -9,10 +9,9 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
-from calitp import to_snakecase
-
-import utils
-import shared_utils
+import utils as _utils
+from calitp_data_analysis import geography_utils, utils
+from calitp_data_analysis.sql import to_snakecase
 
 catalog = intake.open_catalog("./*.yml")
 
@@ -52,8 +51,8 @@ def sjoin_to_geography(df: gpd.GeoDataFrame,
     Join facilities (points) to some polygon geometry (county or district)
     '''
     s1 = gpd.sjoin(
-        df.to_crs(shared_utils.geography_utils.WGS84), 
-        geog_df.to_crs(shared_utils.geography_utils.WGS84),
+        df.to_crs(geography_utils.WGS84), 
+        geog_df.to_crs(geography_utils.WGS84),
         how = "left",
         predicate = "intersects"
     ).drop(columns = "index_right")
@@ -95,7 +94,8 @@ if __name__ == "__main__":
     ).drop(columns = "district_orig")
     
     # Export to GCS
-    shared_utils.utils.geoparquet_gcs_export(gdf4, 
-                                             utils.GCS_FILE_PATH, 
-                                             "tier1_facilities_processed"
-                                            )
+    utils.geoparquet_gcs_export(
+        gdf4, 
+        _utils.GCS_FILE_PATH, 
+        "tier1_facilities_processed"
+    )
