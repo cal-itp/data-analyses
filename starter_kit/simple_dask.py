@@ -1,10 +1,9 @@
 # Simple script to test dask clutser
 import dask.dataframe as dd
-import gcsfs
 import os
 import pandas as pd
 
-from calitp_data_analysis import get_fs
+from calitp_data_infra.storage import get_fs
 fs = get_fs()
 
 RT_GCS = 'gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/'
