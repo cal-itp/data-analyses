@@ -2,8 +2,8 @@
 
 #pip install esridump
 import geopandas as gpd
-from calitp_data_analysis import get_fs
-from shared_utils import utils
+from calitp_data_infra.storage import get_fs 
+from calitp_data_analysis import utils
 
 fs = get_fs()
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"

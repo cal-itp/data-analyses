@@ -15,7 +15,7 @@ import sys
 from dask import delayed, compute
 from loguru import logger
 
-from shared_utils import utils
+from calitp_data_analysis import utils
 from segment_speed_utils import array_utils, helpers, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               PROJECT_CRS, CONFIG_PATH)

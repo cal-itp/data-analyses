@@ -15,7 +15,7 @@ import sys
 
 from loguru import logger
 
-from shared_utils import geography_utils 
+from calitp_data_analysis import geography_utils 
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               PROJECT_CRS, CONFIG_PATH)    
