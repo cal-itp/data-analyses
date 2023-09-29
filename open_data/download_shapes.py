@@ -11,7 +11,8 @@ import sys
 from loguru import logger
 
 from download_trips import get_operators
-from shared_utils import gtfs_utils_v2, geography_utils, utils
+from shared_utils import gtfs_utils_v2
+from calitp_data_analysis import geography_utils, utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 if __name__ == "__main__":

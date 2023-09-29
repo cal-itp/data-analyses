@@ -7,7 +7,7 @@ import intake
 import pandas as pd
 
 import utils
-from shared_utils import geography_utils
+from calitp_data_analysis import geography_utils
 
 catalog = intake.open_catalog("./*.yml")
 

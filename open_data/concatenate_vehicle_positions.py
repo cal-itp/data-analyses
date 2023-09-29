@@ -13,7 +13,8 @@ import sys
 from dask import delayed
 from loguru import logger
 
-from shared_utils import dask_utils, schedule_rt_utils, utils
+from shared_utils import dask_utils, schedule_rt_utils
+from calitp_data_analysis import utils
 from update_vars import SEGMENT_GCS, analysis_date
 
 fs = gcsfs.GCSFileSystem()

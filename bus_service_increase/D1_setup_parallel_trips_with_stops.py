@@ -15,16 +15,17 @@ import pandas as pd
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
 
-import shared_utils
-from bus_service_utils import utils
+from shared_utils import gtfs_utils, rt_dates, rt_utils
+from bus_service_utils import utils as bus_utils
+from calitp_data_analysis import geography_utils, utils
 
-ANALYSIS_DATE = shared_utils.rt_dates.PMAC["Q2_2022"]
-COMPILED_CACHED = f"{shared_utils.rt_utils.GCS_FILE_PATH}compiled_cached_views/"
+ANALYSIS_DATE = rt_dates.PMAC["Q2_2022"]
+COMPILED_CACHED = f"{rt_utils.GCS_FILE_PATH}compiled_cached_views/"
 
 
 def grab_service_hours(selected_date: str, 
                        valid_trip_keys: list) -> pd.DataFrame:
-    daily_service_hours = shared_utils.gtfs_utils.get_trips(
+    daily_service_hours = gtfs_utils.get_trips(
         selected_date = selected_date,
         itp_id_list = None,
         # Keep more columns, route_id, shape_id, direction_id so the metrolink fix 
@@ -36,7 +37,7 @@ def grab_service_hours(selected_date: str,
     )
     
     daily_service_hours.to_parquet(
-        f"{utils.GCS_FILE_PATH}service_hours_{selected_date}.parquet")
+        f"{bus_utils.GCS_FILE_PATH}service_hours_{selected_date}.parquet")
 
     
 def merge_trips_with_service_hours(selected_date: str)-> pd.DataFrame:
@@ -45,7 +46,7 @@ def merge_trips_with_service_hours(selected_date: str)-> pd.DataFrame:
         f"{COMPILED_CACHED}trips_{selected_date}.parquet")
     
     daily_service_hours = pd.read_parquet(
-        f"{utils.GCS_FILE_PATH}service_hours_{selected_date}.parquet")
+        f"{bus_utils.GCS_FILE_PATH}service_hours_{selected_date}.parquet")
 
     df = dd.merge(
         trips, 
@@ -120,7 +121,7 @@ def grab_stops_for_trip_selected(trip_df: dd.DataFrame,
         stop_times_for_trip,
         on = ["calitp_itp_id", "stop_id"],
         how = "inner"
-    ).to_crs(shared_utils.geography_utils.WGS84)
+    ).to_crs(geography_utils.WGS84)
     
     
     stop_times_with_geom2 = (stop_times_with_geom.drop(
@@ -146,8 +147,8 @@ if __name__ == "__main__":
 
     trips_with_stops = grab_stops_for_trip_selected(one_trip, ANALYSIS_DATE)
     
-    shared_utils.utils.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         trips_with_stops,
-        utils.GCS_FILE_PATH,
+        bus_utils.GCS_FILE_PATH,
         f"trips_with_stops_{ANALYSIS_DATE}"
     )

@@ -8,12 +8,12 @@ Use open data: https://gisdata-caltrans.opendata.arcgis.com/datasets/c22341fec9c
 import geopandas as gpd
 import pandas as pd
 
-import utils
-import shared_utils
+import utils as _utils
+from calitp_data_analysis import geography_utils, utils
 
 # Basic cleaning of SHN postmiles dataset
 def clean_postmiles() -> gpd.GeoDataFrame:
-    df = gpd.read_parquet(f"{utils.DATA_PATH}shn_postmiles.parquet")
+    df = gpd.read_parquet(f"{_utils.DATA_PATH}shn_postmiles.parquet")
     
     # Round to 2 decimal places
     # otherwise, floats are giving trouble
@@ -147,7 +147,7 @@ def add_manual_results(df:pd.DataFrame)->gpd.GeoDataFrame:
     lat_lon = df.apply(add_lat_lon, axis=1)
     df2 = pd.concat([df, lat_lon], axis=1)
     
-    gdf = shared_utils.geography_utils.create_point_geometry(
+    gdf = geography_utils.create_point_geometry(
         df2,
         longitude_col="longitude",
         latitude_col = "latitude"
@@ -158,7 +158,7 @@ def add_manual_results(df:pd.DataFrame)->gpd.GeoDataFrame:
 
 
 if __name__ == "__main__":
-    df = pd.read_parquet(f"{utils.GCS_FILE_PATH}manual_geocoding.parquet")
+    df = pd.read_parquet(f"{_utils.GCS_FILE_PATH}manual_geocoding.parquet")
     df2 = subset_manual_geocoding(df)
     df3 = parse_postmiles(df2)
     
@@ -182,8 +182,8 @@ if __name__ == "__main__":
     gdf = pd.concat([df5, manual_ones2], axis=0, ignore_index=True)
     
     # Export to GCS
-    shared_utils.utils.geoparquet_gcs_export(gdf, 
-                                             utils.GCS_FILE_PATH, 
-                                             "manually_geocoded_results"
-                                            )
+    utils.geoparquet_gcs_export(gdf, 
+                                bus_utils.GCS_FILE_PATH, 
+                                "manually_geocoded_results"
+                                )
     

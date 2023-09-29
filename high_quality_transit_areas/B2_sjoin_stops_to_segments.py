@@ -16,7 +16,7 @@ import sys
 from loguru import logger
 from typing import Union
 
-from shared_utils import utils, gtfs_utils
+from calitp_data_analysis import utils
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 

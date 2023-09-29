@@ -20,7 +20,7 @@ import dask_geopandas as dg
 import fsspec
 import geopandas as gpd
 
-from shared_utils import utils
+from calitp_data_analysis import utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 

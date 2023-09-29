@@ -14,8 +14,10 @@ import pandas as pd
 import yaml
 
 from typing import Literal, Union
-from segment_speed_utils.project_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS, PROJECT_CRS
-from shared_utils import utils
+from segment_speed_utils.project_vars import (SEGMENT_GCS, 
+                                              COMPILED_CACHED_VIEWS,
+                                              PROJECT_CRS)
+from calitp_data_analysis import utils
 
 fs = gcsfs.GCSFileSystem()
 

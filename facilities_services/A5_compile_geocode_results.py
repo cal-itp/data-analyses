@@ -5,8 +5,8 @@ into geodataframe.
 import pandas as pd
 
 import A4_geocode
-import utils
-import shared_utils
+import utils as _utils
+from calitp_data_analysis import geography_utils, utils
 
 # Parse the results dict and compile as pd.Series
 def compile_results(results: dict) -> pd.Series:
@@ -33,10 +33,10 @@ if __name__ == "__main__":
         
     for i in unique_uuid:
         # Grab cached result
-        result = utils.open_request_json(
+        result = _utils.open_request_json(
             i,
-            DATA_PATH = utils.DATA_PATH,
-            GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}arcgis_geocode/"
+            DATA_PATH = _utils.DATA_PATH,
+            GCS_FILE_PATH = f"{_utils.GCS_FILE_PATH}arcgis_geocode/"
         )
 
         # Compile JSON into pd.Series
@@ -54,14 +54,15 @@ if __name__ == "__main__":
     # Export results to GCS
     print(f"# geocoded results: {len(full_results)}")
     
-    gdf = shared_utils.geography_utils.create_point_geometry(
+    gdf = geography_utils.create_point_geometry(
         full_results,
         longitude_col = "longitude",
         latitude_col = "latitude",
     ).drop(columns = ["longitude", "latitude"])
     
 
-    shared_utils.utils.geoparquet_gcs_export(gdf, 
-                                             utils.GCS_FILE_PATH, 
-                                             "geocoder_results"
-                                            )
+    utils.geoparquet_gcs_export(
+        gdf, 
+        _utils.GCS_FILE_PATH, 
+        "geocoder_results"
+    )

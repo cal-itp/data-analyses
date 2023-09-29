@@ -1,7 +1,5 @@
-import numpy as np
 import pandas as pd
 import dask.dataframe as dd
-import datetime 
 
 import _threshold_utils as threshold_utils
 from segment_speed_utils import helpers, sched_rt_utils
@@ -9,7 +7,7 @@ from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS, analysis
 
 # Graphs
 import altair as alt
-from shared_utils import calitp_color_palette as cp
+from calitp_data_analysis import calitp_color_palette as cp
 alt.data_transformers.enable('default', max_rows=None)
 
 import gcsfs

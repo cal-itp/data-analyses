@@ -16,7 +16,7 @@ from loguru import logger
 import C1_prep_pairwise_intersections as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
-from shared_utils import utils, geography_utils
+from calitp_data_analysis import utils, geography_utils
 from D1_assemble_hqta_points import (EXPORT_PATH, add_route_info)
 from update_vars import analysis_date
 

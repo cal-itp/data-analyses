@@ -4,8 +4,7 @@ import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
 
 import altair as alt
-from shared_utils import calitp_color_palette as cp
-from shared_utils import geography_utils, rt_utils, styleguide, utils
+from calitp_data_analysis import calitp_color_palette as cp
 
 import intake
 catalog = intake.open_catalog("./catalog_threshold.yml")

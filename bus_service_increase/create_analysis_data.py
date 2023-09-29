@@ -4,8 +4,8 @@ import intake
 import numpy as np
 import pandas as pd
 
-from bus_service_utils import utils
-import shared_utils
+from bus_service_utils import utils as bus_utils
+from calitp_data_analysis import geography_utils, utils
 import warehouse_queries
 
 from calitp_data_analysis.tables import tbls
@@ -23,7 +23,7 @@ def get_time_calculations(df: pd.DataFrame) -> pd.DataFrame:
     ## time calculations
     df = df.assign(
         date = pd.to_datetime(df.date),
-        departure_time = df.departure_time.dropna().apply(utils.fix_gtfs_time),
+        departure_time = df.departure_time.dropna().apply(bus_utils.fix_gtfs_time),
     )
 
     # Something weird comes up trying to generate departure_dt
@@ -267,7 +267,7 @@ def create_service_estimator_data():
 # Categorize tracts and add back further process the operator-route-level df
 def generate_shape_categories(shapes_df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     shapes_df = (shapes_df.reset_index(drop=True)
-                 .to_crs(shared_utils.geography_utils.CA_NAD83Albers)
+                 .to_crs(geography_utils.CA_NAD83Albers)
                 )
     
     shapes_df = shapes_df.assign(
@@ -276,7 +276,7 @@ def generate_shape_categories(shapes_df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     ## quick fix for invalid geometries?
     ces_df = (catalog.calenviroscreen_lehd_by_tract.read()
-              .to_crs(shared_utils.geography_utils.CA_NAD83Albers)
+              .to_crs(geography_utils.CA_NAD83Albers)
              )
 
     ces_df = ces_df.assign(
@@ -328,14 +328,14 @@ def create_shapes_tract_categorized():
     print(f"Grab ITP IDs")
     print(itp_ids)
     
-    all_shapes = shared_utils.geography_utils.make_routes_shapefile(
+    all_shapes = geography_utils.make_routes_shapefile(
         ITP_ID_LIST = itp_ids)
     
     time1 = dt.datetime.now()
     print(f"Execution time to make routes shapefile: {time1-time0}")
     
     # Upload to GCS
-    shared_utils.utils.geoparquet_gcs_export(all_shapes, DATA_PATH, 'shapes_initial')
+    utils.geoparquet_gcs_export(all_shapes, DATA_PATH, 'shapes_initial')
     
     all_shapes = gpd.read_parquet(f"{DATA_PATH}shapes_initial.parquet")
     
@@ -344,7 +344,7 @@ def create_shapes_tract_categorized():
     processed_shapes = processed_shapes.apply(categorize_shape, axis=1)
         
     print(f"Execution time to categorize routes: {time2-time1}")
-    shared_utils.utils.geoparquet_gcs_export(processed_shapes, DATA_PATH, 
+    utils.geoparquet_gcs_export(processed_shapes, DATA_PATH, 
                                              'shapes_processed')
     
     print(f"Total execution time: {time2-time0}")

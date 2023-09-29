@@ -6,8 +6,8 @@ import seaborn as sns
 
 import shared_utils
 from bus_service_utils import utils, chart_utils
-from shared_utils import styleguide, geography_utils
-from shared_utils import calitp_color_palette as cp
+from calitp_data_analysis import styleguide
+from calitp_data_analysis import calitp_color_palette as cp
 
 # Set charting style guide
 alt.data_transformers.enable('default', max_rows=10_000)

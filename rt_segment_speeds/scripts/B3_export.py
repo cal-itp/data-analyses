@@ -12,7 +12,7 @@ import geopandas as gpd
 import pandas as pd
 
 from shared_utils import schedule_rt_utils, utils
-from shared_utils.geography_utils import WGS84
+from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
                                               CONFIG_PATH)

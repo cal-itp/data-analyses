@@ -23,7 +23,7 @@ import zlib
 
 from loguru import logger
 
-from shared_utils import geography_utils, utils
+from calitp_data_analysis import geography_utils, utils
 from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
                                  sched_rt_utils, wrangle_shapes)
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 

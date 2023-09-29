@@ -5,8 +5,8 @@ import pandas as pd
 
 from bus_service_utils import utils
 from setup_tract_charts import *
-from shared_utils import geography_utils
-from shared_utils import calitp_color_palette as cp
+from calitp_data_analysis import calitp_color_palette as cp
+from shared_utils import portfolio_utils
 
 catalog = intake.open_catalog("./catalog.yml")
 
@@ -77,7 +77,7 @@ def import_processed_data()-> pd.DataFrame:
 
 def aggregate_generate_stats(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
     # After subset
-    t1 = geography_utils.aggregate_by_geography(
+    t1 = portfolio_utils.aggregate_by_geography(
         df, 
         group_cols = group_cols, 
         sum_cols = ["stop_id", "itp_id", "Population", 

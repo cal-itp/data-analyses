@@ -12,8 +12,8 @@ import sys
 from datetime import datetime
 from loguru import logger
 
-import shared_utils
-from bus_service_utils import utils
+from calitp_data_analysis import geography_utils, utils
+from bus_service_utils import utils as bus_utils
 from D1_setup_parallel_trips_with_stops import ANALYSIS_DATE, COMPILED_CACHED
 
 logger.add("./logs/make_gmaps_results.log")
@@ -22,7 +22,7 @@ logger.add(sys.stderr,
            level="INFO")
 
 DATA_PATH = "./gmaps_cache/"
-GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}gmaps_cache_{ANALYSIS_DATE}/"
+GCS_FILE_PATH = f"{bus_utils.GCS_FILE_PATH}gmaps_cache_{ANALYSIS_DATE}/"
 
 def grab_cached_results(df: pd.DataFrame) -> (list, list):
     result_ids = list(df.identifier_num)
@@ -32,7 +32,7 @@ def grab_cached_results(df: pd.DataFrame) -> (list, list):
 
     for i in result_ids:
         try:
-            json_dict = utils.open_request_json(i, 
+            json_dict = bus_utils.open_request_json(i, 
                                                 data_path = DATA_PATH, 
                                                 gcs_file_path = GCS_FILE_PATH
                                    )
@@ -71,7 +71,7 @@ def compare_travel_time_by_mode(df: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":    
     time0 = datetime.now()
     
-    df = pd.read_parquet(f"{utils.GCS_FILE_PATH}gmaps_df_{ANALYSIS_DATE}.parquet")
+    df = pd.read_parquet(f"{bus_utils.GCS_FILE_PATH}gmaps_df_{ANALYSIS_DATE}.parquet")
     
     successful_ids, durations = grab_cached_results(df)
     logger.info("Grabbed cached results")
@@ -106,11 +106,11 @@ if __name__ == "__main__":
         how = "inner",
         # many on right because trip_ids can share same shape_id
         validate = "1:m"
-    ).to_crs(shared_utils.geography_utils.WGS84)
+    ).to_crs(geography_utils.WGS84)
     
-    shared_utils.utils.geoparquet_gcs_export(gdf, 
-                                             utils.GCS_FILE_PATH, 
-                                             f"gmaps_results_{ANALYSIS_DATE}")
+    utils.geoparquet_gcs_export(gdf, 
+                                bus_utils.GCS_FILE_PATH, 
+                                f"gmaps_results_{ANALYSIS_DATE}")
     
     end = datetime.now()
     logger.info(f"Total execution: {end - time0}")

@@ -3,10 +3,8 @@ import numpy as np
 import geopandas as gpd
 import datetime as dt
 
-import shared_utils
-
-import calitp
-from calitp.tables import tbl
+from calitp_data_analysis.tables import tbls
+from calitp_data_analysis import geography_utils
 from siuba import *
 
 import requests
@@ -30,20 +28,20 @@ def get_ca_block_group_geo():
     stanford_shorelines = catalog.stanford_shorelines.read()
     ca_shoreline = stanford_shorelines >> filter(_.STFIPS == '06')
     ca_block_geo = ca_block_geo.clip(ca_shoreline)
-    ca_block_geo = ca_block_geo.to_crs(shared_utils.geography_utils.CA_NAD83Albers)
+    ca_block_geo = ca_block_geo.to_crs(geography_utils.CA_NAD83Albers)
     
     return ca_block_geo
 
 # Use this one, move to TIGER file
 def get_ca_block_geo():
     # Bring in block geometry
-    ca_blocks = gpd.read_parquet(f'{utils.GCS_FILE_PATH}2020_tiger_block_geo.parquet')
+    ca_blocks = gpd.read_parquet(f'{GCS_FILE_PATH}2020_tiger_block_geo.parquet')
     ca_blocks = (ca_blocks >> filter(_.ALAND20 > 10) ## remove water
                  >> select(_.county == _.COUNTYFP20, 
                            _.tract == _.TRACTCE20, 
                            _.block == _.BLOCKCE20,
                            _.geo_id == _.GEOID20, _.geometry))
-    ca_blocks = ca_blocks.to_crs(shared_utils.geography_utils.CA_NAD83Albers)
+    ca_blocks = ca_blocks.to_crs(geography_utils.CA_NAD83Albers)
     
     # Bring in block population
     ca_block_pop = catalog.ca_block_population.read()
@@ -105,7 +103,7 @@ def get_stops_and_trips(filter_accessible):
                         geometry=gpd.points_from_xy(stops_trips.stop_lon,
                                                    stops_trips.stop_lat),
                         crs = 'EPSG:4326')
-                   .to_crs(shared_utils.geography_utils.CA_NAD83Albers)
+                   .to_crs(geography_utils.CA_NAD83Albers)
                   )
     
     return stops_trips

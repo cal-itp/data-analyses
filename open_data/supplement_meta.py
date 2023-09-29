@@ -7,7 +7,7 @@ import yaml
 
 from pathlib import Path
 
-from shared_utils import utils
+from calitp_data_analysis import utils
 from update_vars import analysis_date, ESRI_BASE_URL
 
 
