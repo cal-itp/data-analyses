@@ -13,7 +13,8 @@ import sys
 from loguru import logger
 from typing import Literal
 
-from shared_utils import geography_utils, utils
+from calitp_data_analysis import geography_utils, utils
+from shared_utils import portfolio_utils
 from bus_service_utils import create_parallel_corridors
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from update_vars import (BUS_SERVICE_GCS, COMPILED_CACHED_GCS,
@@ -72,7 +73,7 @@ def aggregate_trip_service_to_route_level(
         get_pandas = True
     )
     
-    route_service_hours = geography_utils.aggregate_by_geography(
+    route_service_hours = portfolio_utils.aggregate_by_geography(
         trips,
         group_cols = route_cols,
         sum_cols = ["service_hours"]
