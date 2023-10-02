@@ -191,3 +191,43 @@
     )
     ```
 
+## Exercise 8
+* Markdown cell formatting: if the preview doesn't show the newline the way you want, simply add `<br>` for break right at the beginning of that line. 
+* When we use gdfs that come from ESRI, there's always these columns: `Shape_Area` and/or `Shape_Length` and/or `OBJECTID`. Usually, we don't need these. Your dissolve doesn't need to include `Shape_Area`, because you won't be really sure what units those are in, and it's better to calculate your own `geometry.area` in the projected CRS of your choice.
+* Before you get started on categorizing rail routes, make sure to check for duplicates against this subset of columns: `org_id, agency, route_id`. In the display you have, the first 2 rows look similar, and they simply differ on `shape_id`.
+   * shape is a variation of the route path. A route can have 2 shapes, one in each direction, or short vs long routes. 
+   * Get rid of duplicates by keeping the longest shape_id for each route. Use `gdf.geometry.length` to compare lengths, and do a groupby/transform/max for the route to find which one row has the longest. The longest route has the most chance of getting close to the SHN. 
+   * If there are still duplicates, handle it by sorting on `shape_id` and keeping the one first alphabetically. Use chaining to accomplish the sorting/drop duplicates. `df.sort_values(['org_id', 'route_id', 'shape_id'], ascending=[True, True, True].drop_duplicates(subset=some_col_list)`
+   * This ensures that 2 people who are handling the df can reproduce the same result, even if the row order was scrambled. You want to use a heuristic that can be replicated (alphabetical, length, etc) 
+* Buffer by 0.25 mile around SHN, not rail routes. 
+   * This gives you a cleaner overlay result.
+   * Each rail route would be split by the portion within 0.25 mile and outside the 0.25 mile.
+* To categorize each rail route into one of the 3 categories, you want to create two tables that can be combined: 
+
+**Table 1: Route Characteristics before overlay**
+| name    | route | route_length|     
+|---------|---------|-----------|
+| Amtrak  | Route1  | 25 miles  |      
+| Amtrak  | Route2  | 10 miles  |    
+ 
+**Table 2: Overlay/Intersection Results**
+| name    | route   | overlay_length|     
+|---------|---------|-------------|
+| Amtrak  | Route1  | 12.5 miles  |      
+| Amtrak  | Route2  | 4 miles     | 
+
+**Put Together** 
+| name    | route | pct_near_SHN  |     
+|---------|---------|-------------|
+| Amtrak  | Route1  | 0.50        |      
+| Amtrak  | Route2  | 0.4         |  
+ 
+ 
+* Once you handle duplicates, do an overlay with `intersection`. Do post processing on table 2 to get it to route level, if it's not. Each route should be 1 row. 
+* Rail routes that are never within 0.25 mi of SHN:
+   * Instead of using use overlay `symmetric difference`, which isn't exactly what you want, you can use an overlay `intersects`. If a route does go near the SHN, the overlay results will produce 1 row for the portion inside the buffered area and 1 row for the portion outside the buffered area.
+* Your methodology looks ok and the final results look roughly correct to me! But, I would just adjust 2 of the steps to be a tighter methodology:
+   * Handle duplicates in rail routes, no multiple shape_ids present, each row should represent one route `org_id, route_id` combination.
+   * Switch the buffering to occur on SHN
+   * Continue using the same methodology related to `overlay_dissolve.geom_len / overlay_dissolve.rail_len)*100)` and using a function to categorize each route.
+* All in all, valiant effort!
