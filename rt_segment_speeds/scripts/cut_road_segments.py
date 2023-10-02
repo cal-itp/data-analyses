@@ -1,21 +1,22 @@
 """
 Cut road segments.
 """
-import datetime
-import gcsfs
-fs = gcsfs.GCSFileSystem()
 import dask.dataframe as dd
 import dask_geopandas as dg
+import datetime
 import geopandas as gpd
+import gcsfs
 import pandas as pd
-from calitp_data_analysis.sql import to_snakecase
-from dask import compute, delayed
-from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import analysis_date
-from calitp_data_analysis import geography_utils, utils
-from shared_utils import dask_utils
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
+from calitp_data_analysis.sql import to_snakecase
+from segment_speed_utils import helpers
+from segment_speed_utils.project_vars import (analysis_date, 
+                                              SEGMENT_GCS, 
+                                              GCS_FILE_PATH, 
+                                              PROJECT_CRS
+                                             )
+from calitp_data_analysis import geography_utils, utils
+
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 
 """
@@ -27,18 +28,20 @@ def load_roads(road_type_wanted: list) -> gpd.GeoDataFrame:
 
     Args:
         road_type_wanted (list): the type of roads you want.
-
+            S1100: primary roads
+            S1200: secondary roads
+            S1400: local roads                    
+                            
         https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2019/TGRSHP2019_TechDoc.pdf
-        buffer_or_not (bool): add a buffer of 200.
 
     Returns:
-        GDF. As of 4/18/23, returns 953914 nunique linearid
+        gdf. As of 4/18/23, returns 953914 nunique linearid
     """
     df = gpd.read_parquet(
         f"{SHARED_GCS}all_roads_2020_state06.parquet",
         filters=[("MTFCC", "in", road_type_wanted)],
         columns=["LINEARID", "geometry", "FULLNAME"],
-    ).to_crs(geography_utils.CA_NAD83Albers)
+    ).to_crs(PROJECT_CRS)
 
     # If a road has mutliple rows but the same
     # linear ID, dissolve it so it becomes one row.
@@ -57,7 +60,7 @@ def load_roads(road_type_wanted: list) -> gpd.GeoDataFrame:
 """
 GTFS
 """
-def gtfs_stops_operators(date:str) -> gpd.GeoDataFrame:
+def gtfs_stops_operators(date: str) -> gpd.GeoDataFrame:
     """
     Load stops with operator and feed key information.
 
@@ -66,13 +69,13 @@ def gtfs_stops_operators(date:str) -> gpd.GeoDataFrame:
     """
     stops = (
         helpers.import_scheduled_stops(
-            date, (), ["feed_key", "stop_id", "stop_key", "geometry"]
+            date, 
+            columns = ["feed_key", "stop_id", "stop_key", "geometry"],
+            get_pandas = True,
+            crs = PROJECT_CRS
         )
-        .compute()
         .drop_duplicates()
     )
-
-    stops = stops.set_crs(geography_utils.CA_NAD83Albers)
 
     # Buffer each stop by 50 feet
     stops = stops.assign(buffered_geometry=stops.geometry.buffer(50))
