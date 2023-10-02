@@ -23,6 +23,8 @@ SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 
 def import_roads(road_type_wanted: list) -> gpd.GeoDataFrame: 
     """
+    Import roads dataset and filter by MTFCC type (primary/secondary/local).
+    Do some basic cleaning/dissolving.
     """
     roads = gpd.read_parquet(
         f"{SHARED_GCS}all_roads_2020_state06.parquet",
@@ -47,9 +49,12 @@ def import_roads(road_type_wanted: list) -> gpd.GeoDataFrame:
 def explode_segments(
     gdf: gpd.GeoDataFrame,
     group_cols: list,
-    segment_col: str
-):
+    segment_col: str = "segment_geometry"
+) -> gpd.GeoDataFrame:
     """
+    Explode the column that is used to store segments, which is a list.
+    Take the list and create a row for each element in the list.
+    We'll do a rough rank so we can order the segments.
     """
     gdf_exploded = gdf.explode(segment_col).reset_index(drop=True)
     
@@ -60,9 +65,11 @@ def explode_segments(
                         .groupby(group_cols, observed=True, group_keys=False)
                         .temp_index
                         .transform("rank") - 1
-                       ).fillna(0).astype("int16")
+                        # there are NaNs, but since they're a single segment, just use 0
+                       ).fillna(0).astype("int16") 
     )
     
+    # Drop the original line geometry, use the segment geometry only
     gdf_exploded2 = (
         gdf_exploded
         .drop(columns = ["geometry", "temp_index"])
@@ -80,10 +87,15 @@ def sjoin_shapes_to_local_roads(
     roads: gpd.GeoDataFrame,
     shapes: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
+    """
+    Using shapes instead of stops roughly doubles the linearids we pick up.
+    All the ones in stops is found in shapes (as expected).
+    """
     shapes = shapes.assign(
         geometry = shapes.geometry.buffer(100)
     )
     
+    # Keep unique linearids from the sjoin
     local_roads_sjoin_shapes = dg.sjoin(
         shapes,
         roads,
@@ -93,6 +105,7 @@ def sjoin_shapes_to_local_roads(
     
     local_ids = local_roads_sjoin_shapes.compute().tolist()
     
+    # Filter down our local roads to ones that showed up in the sjoin
     local_roads_cut = roads[
         roads.linearid.isin(local_ids)
     ].reset_index(drop=True)
@@ -100,11 +113,17 @@ def sjoin_shapes_to_local_roads(
     return local_roads_cut
     
     
-def local_roads_base(segment_length_meters: int = 1_000):
+def local_roads_base(
+    roads: gpd.GeoDataFrame, 
+    segment_length_meters: int
+) -> gpd.GeoDataFrame:
     """
+    Use Sep 2023 shapes to figure out the "base" of local roads we are cutting.
+    In the future, grab only the local road linearids that are not here,
+    and cut any additional ones.
     """
-    roads = import_roads(["S1400"])
-    
+    # If roads are less than our segment length, keep these because we get these for free
+    # without putting it through segmentizing.
     short_roads = roads[roads.road_length <= segment_length_meters].reset_index(drop=True)
     long_roads = roads[roads.road_length > segment_length_meters].reset_index(drop=True)
     
@@ -117,6 +136,8 @@ def local_roads_base(segment_length_meters: int = 1_000):
     
     local_roads_to_cut = sjoin_shapes_to_local_roads(long_roads, shapes)
     
+    # Use dask geopandas to create a new column that is a list
+    # and contains all the shapely cut segments
     gddf = dg.from_geopandas(local_roads_to_cut, npartitions=20)
     
     gddf["segment_geometry"] = gddf.apply(
@@ -124,6 +145,7 @@ def local_roads_base(segment_length_meters: int = 1_000):
         axis=1, meta = ("segment_geometry", "object")
     )
     
+    # Exploding only works as gdf
     gdf = gddf.compute()
     
     gdf2 = explode_segments(
@@ -132,25 +154,24 @@ def local_roads_base(segment_length_meters: int = 1_000):
         segment_col = "segment_geometry"
     )
     
+    # Concatenate the short roads and the segmented roads
     gdf3 = pd.concat([
         gdf2, 
         short_roads.assign(segment_sequence = 0).astype({"segment_sequence": "int16"})
     ], axis=0).reset_index(drop=True)
     
-    utils.geoparquet_gcs_export(
-        gdf3,
-        SHARED_GCS,
-        "segmented_roads_2020_state06_local_base"
-    )
-    
-    return
+    return gdf3
 
     
 def cut_roads(
     road_type_name: Literal["primarysecondary", "local"],
-    segment_length_meters: int = 1_000,  
+    segment_length_meters: int,  
 ):
     """
+    By default, we always want to cut primary/secondary roads, and
+    have a set of local roads we have precut.
+    
+    For every subsequent month, we can check for additional roads we need to keep.
     """
     if road_type_name == "primarysecondary":
         road_type_values = ["S1100", "S1200"]
@@ -163,29 +184,31 @@ def cut_roads(
         ).sort_values(
             ["linearid", "segment_sequence"]
         ).reset_index(drop=True)
-    
+        
+        utils.geoparquet_gcs_export(
+            roads_segmented,
+            SHARED_GCS,
+            f"segmented_roads_2020_state06_{road_type_name}"
+        )
+        
     elif road_type_name == "local":
         road_type_values = ["S1400"]
         roads = import_roads(road_type_values)
 
+        roads_segmented = local_roads_base(roads, segment_length_meters)
         
+        utils.geoparquet_gcs_export(
+            roads_segmented,
+            SHARED_GCS,
+            f"segmented_roads_2020_state06_{road_type_name}_base"
+        )
         
-    utils.geoparquet_gcs_export(
-        roads_segmented,
-        SHARED_GCS,
-        f"segmented_roads_2020_state06_{road_type_name}"
-    )
+    return
 
 
 if __name__ == "__main__":
     
     start = datetime.datetime.now()
-
-    # MTFCC values
-    ROAD_TYPE_DICT = {
-        "primarysecondary": ["S1100", "S1200"],
-        "local": ["S1400"]
-    }
 
     ROAD_SEGMENT_METERS = 1_000
     
@@ -197,7 +220,8 @@ if __name__ == "__main__":
     print(f"cut primary/secondary roads: {time1 - start}")
     
     # Grab Sep 2023's shapes as base to grab majority of local roads we def need to cut
-    local_roads_base()
+    road_type = "local"
+    cut_roads(road_type, ROAD_SEGMENT_METERS)
     
     time2 = datetime.datetime.now()
     print(f"cut local roads base: {time2 - time1}")
