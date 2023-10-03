@@ -6,14 +6,14 @@ import dask_geopandas as dg
 import datetime
 import geopandas as gpd
 import pandas as pd
+import sys
 
+from loguru import logger
 from typing import Literal
 
 from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import (analysis_date, 
-                                              SEGMENT_GCS, 
-                                              SHARED_GCS, 
+from segment_speed_utils.project_vars import (SHARED_GCS, 
                                               PROJECT_CRS, 
                                               ROAD_SEGMENT_METERS
                                              )
@@ -23,7 +23,7 @@ from shared_utils import rt_utils
 """
 TIGER
 """
-def load_roads(road_type_wanted: list) -> gpd.GeoDataFrame:
+def load_roads(filtering: tuple) -> gpd.GeoDataFrame:
     """
     Load roads based on what you filter for MTFCC values (road types).
     Do some basic cleaning/dissolving.
@@ -39,9 +39,10 @@ def load_roads(road_type_wanted: list) -> gpd.GeoDataFrame:
     Returns:
         gdf. As of 4/18/23, returns 953914 nunique linearid
     """
+    # https://stackoverflow.com/questions/56522977/using-predicates-to-filter-rows-from-pyarrow-parquet-parquetdataset
     df = gpd.read_parquet(
         f"{SHARED_GCS}all_roads_2020_state06.parquet",
-        filters=[("MTFCC", "in", road_type_wanted)],
+        filters = filtering,
         columns=["LINEARID", "MTFCC", "FULLNAME", "geometry"],
     ).to_crs(PROJECT_CRS).pipe(to_snakecase)
     
@@ -291,69 +292,52 @@ def append_reverse_segments(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     ).reset_index(drop=True)
     
     return both_sets_of_segments
+ 
 
-
-"""
-Segment primary/secondary roads & local roads (base)
-"""
-def cut_roads(
-    road_type_name: Literal["primarysecondary", "local"],
-    segment_length_meters: int,  
-):
-    """
-    By default, we always want to cut primary/secondary roads, and
-    have a set of local roads we have precut.
-    
-    For every subsequent month, we can check for additional roads we need to keep.
-    """
-    if road_type_name == "primarysecondary":
-        road_type_values = ["S1100", "S1200"]
-        roads = load_roads(road_type_values)
-        
-        roads_segmented = cut_primary_secondary_roads(roads, segment_length_meters)
-        roads_segmented_both_sets = append_reverse_segments(roads_segmented)
-        
-        utils.geoparquet_gcs_export(
-            roads_segmented_both_sets,
-            SHARED_GCS,
-            f"segmented_roads_2020_state06_{road_type_name}"
-        )
-        
-    elif road_type_name == "local":
-        road_type_values = ["S1400"]
-        roads = load_roads(road_type_values)
-
-        roads_segmented = local_roads_base(roads, segment_length_meters)
-        roads_segmented_both_sets = append_reverse_segments(roads_segmented)
-
-        utils.geoparquet_gcs_export(
-            roads_segmented_both_sets,
-            SHARED_GCS,
-            f"segmented_roads_2020_state06_{road_type_name}_base"
-        )
-        
-    return
-   
-
-# CD to rt_segment_speeds -> pip install -r requirements.txt
 if __name__ == '__main__': 
+    
+    LOG_FILE = "../logs/cut_road_segments.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
     
     start = datetime.datetime.now()
     
     # Always cut all the primary and secondary roads
     road_type = "primarysecondary"
-    cut_roads(road_type, ROAD_SEGMENT_METERS)
+    road_type_values = ["S1100", "S1200"]
+
+    roads = load_roads(filtering = [("MTFCC", "in", road_type_values)])
+    roads_segmented = cut_primary_secondary_roads(roads, ROAD_SEGMENT_METERS)
+    primary_secondary_roads = append_reverse_segments(roads_segmented).drop(
+        columns = "road_length")
+    
+    utils.geoparquet_gcs_export(
+        primary_secondary_roads,
+        SHARED_GCS,
+        f"segmented_roads_2020_{road_type}"
+    )
     
     time1 = datetime.datetime.now()
-    print(f"cut primary/secondary roads: {time1 - start}")
+    logger.info(f"cut primary/secondary roads: {time1 - start}")
     
     # Grab Sep 2023's shapes as base to grab majority of local roads we def need to cut
-    road_type = "local"
-    cut_roads(road_type, ROAD_SEGMENT_METERS)
+    road_type = "local"    
+    roads = load_roads(filtering = [("MTFCC", "==", "S1400")])
+    roads_segmented = local_roads_base(roads, ROAD_SEGMENT_METERS)
+    local_roads = append_reverse_segments(roads_segmented).drop(
+        columns = "road_length")
+    
+    utils.geoparquet_gcs_export(
+        local_roads,
+        SHARED_GCS,
+        f"segmented_roads_2020_{road_type}"
+    )
     
     time2 = datetime.datetime.now()
-    print(f"cut local roads base: {time2 - time1}")
+    logger.info(f"cut local roads base: {time2 - time1}")
         
     end = datetime.datetime.now()
-    print(f"execution time: {end - start}")
+    logger.info(f"execution time: {end - start}")
     
