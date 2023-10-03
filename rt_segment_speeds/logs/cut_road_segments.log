@@ -1,0 +1,12 @@
+2023-10-03 11:53:05.029 | INFO     | __main__:<module>:348 - cut primary/secondary roads: 0:05:10.249108
+2023-10-03 12:01:24.762 | INFO     | __main__:<module>:361 - cut local roads base: 0:08:19.731943
+2023-10-03 12:01:24.762 | INFO     | __main__:<module>:364 - execution time: 
+2023-10-03 14:31:57.295 | INFO     | __main__:<module>:89 - Analysis date: 2023-09-13
+2023-10-03 14:35:36.383 | INFO     | __main__:<module>:96 - add local linearids for this month: 0:03:39.086054
+2023-10-03 14:36:13.921 | INFO     | __main__:<module>:140 - concatenate road segments: 0:00:37.538270
+2023-10-03 14:36:13.922 | INFO     | __main__:<module>:141 - execution time: 0:04:16.624324
+2023-10-03 14:37:06.758 | INFO     | __main__:<module>:89 - Analysis date: 2023-08-15
+2023-10-03 14:41:05.798 | INFO     | __main__:<module>:96 - add local linearids for this month: 0:03:59.038850
+2023-10-03 14:41:54.860 | INFO     | __main__:<module>:140 - concatenate road segments: 0:00:49.062053
+2023-10-03 14:41:54.861 | INFO     | __main__:<module>:141 - execution time: 0:04:48.100903
+2023-10-03 15:41:44.051 | INFO     | __main__:<module>:89 - Analysis date: 2023-07-12

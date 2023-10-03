@@ -4,6 +4,8 @@ segmentize:
 	python cut_normal_stop_segments.py
 	python cut_special_stop_segments.py
 	python concatenate_stop_segments.py
+	#python cut_road_segments.py #cut once creates files needed to run in concat_road_segments
+	python concatenate_road_segments.py
     
    
 speeds_pipeline:
