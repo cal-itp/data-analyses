@@ -5,7 +5,6 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
 import geopandas as gpd
-import gcsfs
 import pandas as pd
 
 from typing import Literal
@@ -14,12 +13,12 @@ from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (analysis_date, 
                                               SEGMENT_GCS, 
-                                              GCS_FILE_PATH, 
-                                              PROJECT_CRS
+                                              SHARED_GCS, 
+                                              PROJECT_CRS, 
+                                              ROAD_SEGMENT_METERS
                                              )
 from calitp_data_analysis import geography_utils, utils
-
-SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
+from shared_utils import rt_utils
 
 """
 TIGER
@@ -45,21 +44,72 @@ def load_roads(road_type_wanted: list) -> gpd.GeoDataFrame:
         filters=[("MTFCC", "in", road_type_wanted)],
         columns=["LINEARID", "MTFCC", "FULLNAME", "geometry"],
     ).to_crs(PROJECT_CRS).pipe(to_snakecase)
-
+    
     # If a road has mutliple rows but the same
     # linear ID, dissolve it so it becomes one row.    
     df = (df.sort_values(["linearid", "mtfcc", "fullname"])
-          .drop_duplicates(subset=["linearid", "fullname"])
-          .dissolve(by="linearid")
+          .drop_duplicates(subset=["linearid", "mtfcc", "fullname"])
+          .dissolve(by=["linearid", "mtfcc"])
           .reset_index()
          )
     
     df = df.assign(
         road_length = df.geometry.length
     )
+    
+    # There are some multilinestrings that appear for local roads
+    # This will throw error when we try to add primary cardinal direction
+    # For this handful of roads, keep the longest length,
+    # a cursory check for the base local roads shows that 75th percentile < 2 meters
+    multi_df = df[
+        df.geometry.geom_type=="MultiLineString"
+    ].explode().reset_index(drop=True)
+    
+    multi_df = multi_df.assign(
+        road_length = multi_df.geometry.length
+    )
+    
+    multi_df2 = multi_df.assign(
+        max_part = (multi_df.groupby(["linearid", "mtfcc"], 
+                                     observed= True, group_keys=False)
+                    .road_length
+                    .transform("max")
+                   )
+    ).query('road_length == max_part').drop(
+        columns = "max_part"
+    )
+    
+    df2 = pd.concat([
+        df[df.geometry.geom_type!="MultiLineString"], 
+        multi_df2
+    ], axis=0).reset_index(drop=True)
+    
+    return df2 
 
-    return df
+"""
+Primary/Secondary Roads 
+"""
+def cut_primary_secondary_roads(
+    roads: gpd.GeoDataFrame,
+    segment_length_meters: int
+) -> gpd.GeoDataFrame:
+    """
+    Cut all primary and secondary roads.
+    Add a primary cardinal direction for the segment.
+    """
+    roads_segmented = geography_utils.cut_segments(
+        roads,
+        group_cols = ["linearid", "mtfcc", "fullname"],
+        segment_distance = segment_length_meters,
+    ).sort_values(
+        ["linearid", "segment_sequence"]
+    ).reset_index(drop=True)
+    
+    roads_segmented2 = add_segment_direction(roads_segmented)
 
+    return roads_segmented2
+    
+    
 """
 Local Roads (base)
 """
@@ -197,49 +247,50 @@ def local_roads_base(
         short_roads.assign(segment_sequence = 0).astype({"segment_sequence": "int16"})
     ], axis=0).reset_index(drop=True)
     
-    return gdf
+    gdf2 = add_segment_direction(gdf)
+    
+    return gdf2
 
 
-def monthly_local_linearids(
-    analysis_date: str, 
-    segment_length_meters: int
-) -> gpd.GeoDataFrame:
+def add_segment_direction(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Instead of re-cutting all local roads found from the last run,
-    only cut the new local roads that are found. 
-    
-    Args:
-        analysis_date: analysis_date
-
+    Add primary cardinal direction for road segment.
+    Since we're going to reverse the road segment to create the
+    one running on other side, we need to distinguish between
+    these 2 rows with same linearid-mtfcc-fullname.
     """
-    already_cut = pd.read_parquet(
-        f"{SHARED_GCS}segmented_roads_2020_state06_local_base.parquet",
-        columns = ["linearid"]
-    ).linearid.unique().tolist()
+    df = rt_utils.add_origin_destination(df)
     
-    local_roads = load_roads(["S1400"]).query("linearid not in @already_cut")
+    df = df.assign(
+        route_primary_direction = df.apply(
+            lambda x: 
+            rt_utils.primary_cardinal_direction(x.origin, x.destination),
+            axis=1,
+        )
+    ).drop(columns = ["origin", "destination"])
+
+    return df
     
-    shapes = helpers.import_scheduled_shapes(
-        analysis_date,
-        columns = ["shape_array_key", "geometry"],
-        crs = PROJECT_CRS,
-        get_pandas = False
+    
+def append_reverse_segments(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Flip the geometry for road segment and append it to df.
+    If we have eastbound segments, create set of westbound segments
+    so we can capture both sides of street.
+    """
+    df_flipped = df.assign(
+        geometry = df.geometry.reverse(),
     )
     
-    local_roads_to_cut = sjoin_shapes_to_local_roads(local_roads, shapes)
+    df_flipped2 = add_segment_direction(df_flipped)
     
-    segmented_roads = cut_segments_dask(
-        local_roads_to_cut,
-        ["linearid", "mtfcc", "fullname"],
-        segment_length_meters
-    )
+    both_sets_of_segments = pd.concat(
+        [df, df_flipped2], axis=0
+    ).sort_values(
+        ["linearid", "segment_sequence", "route_primary_direction"]
+    ).reset_index(drop=True)
     
-    # Save
-    utils.geoparquet_gcs_export(
-        segmented_roads,
-        f"{SHARED_GCS}road_segments_monthly_append/",
-        f"segmented_local_{analysis_date}"
-    )
+    return both_sets_of_segments
 
 
 """
@@ -257,18 +308,13 @@ def cut_roads(
     """
     if road_type_name == "primarysecondary":
         road_type_values = ["S1100", "S1200"]
-        roads = local_roads(road_type_values)
-
-        roads_segmented = geography_utils.cut_segments(
-            roads,
-            group_cols = ["linearid", "mtfcc", "fullname"],
-            segment_distance = segment_length_meters,
-        ).sort_values(
-            ["linearid", "segment_sequence"]
-        ).reset_index(drop=True)
+        roads = load_roads(road_type_values)
+        
+        roads_segmented = cut_primary_secondary_roads(roads, segment_length_meters)
+        roads_segmented_both_sets = append_reverse_segments(roads_segmented)
         
         utils.geoparquet_gcs_export(
-            roads_segmented,
+            roads_segmented_both_sets,
             SHARED_GCS,
             f"segmented_roads_2020_state06_{road_type_name}"
         )
@@ -278,9 +324,10 @@ def cut_roads(
         roads = load_roads(road_type_values)
 
         roads_segmented = local_roads_base(roads, segment_length_meters)
-        
+        roads_segmented_both_sets = append_reverse_segments(roads_segmented)
+
         utils.geoparquet_gcs_export(
-            roads_segmented,
+            roads_segmented_both_sets,
             SHARED_GCS,
             f"segmented_roads_2020_state06_{road_type_name}_base"
         )
@@ -292,9 +339,7 @@ def cut_roads(
 if __name__ == '__main__': 
     
     start = datetime.datetime.now()
-
-    ROAD_SEGMENT_METERS = 1_000
-    '''
+    
     # Always cut all the primary and secondary roads
     road_type = "primarysecondary"
     cut_roads(road_type, ROAD_SEGMENT_METERS)
@@ -308,12 +353,6 @@ if __name__ == '__main__':
     
     time2 = datetime.datetime.now()
     print(f"cut local roads base: {time2 - time1}")
-    '''
-    time2 = datetime.datetime.now()
-
-    monthly_local_linearids(analysis_date, ROAD_SEGMENT_METERS)
-    time3 = datetime.datetime.now()
-    print(f"add local linearids for this month: {time3 - time2}")
         
     end = datetime.datetime.now()
     print(f"execution time: {end - start}")
