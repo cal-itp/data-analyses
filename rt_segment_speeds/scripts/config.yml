@@ -1,17 +1,3 @@
-route_segments:
-    stage0: "vp" 
-    stage1: "vp_usable"
-    stage2: "vp_route_segment"
-    stage3: "vp_pared"
-    stage4: "speeds_route_segments"
-    stage5: "avg_speeds_route_segments"
-    rt_trip_diagnostics: "trip_diagnostics"
-    segments_file: "longest_shape_segments"
-    trip_grouping_cols: ["route_id", "direction_id"]
-    grouping_col: "route_dir_identifier"
-    segment_identifier_cols: ["route_dir_identifier", "segment_sequence"]
-    timestamp_col: "location_timestamp_local"
-    time_min_cutoff: 5
 stop_segments:
     stage0: "vp"
     stage1: "vp_usable"
@@ -26,3 +12,16 @@ stop_segments:
     timestamp_col: "location_timestamp_local"
     time_min_cutoff: 10
     pct_segment_minimum: 0.3
+road_segments:
+    stage0: "vp"
+    stage1: "vp_usable"
+    stage2: "vp_road_segment"
+    stage3: "vp_pared_roads"
+    stage4: "speeds_road_segments"
+    stage5: "avg_speeds_road_segments"
+    segments_file: "road_segments"
+    trip_grouping_cols: ["trip_instance_key"]
+    grouping_col: "trip_instance_key"
+    segment_identifier_cols: ["linearid", "mtfcc", "fullname", "route_primary_direction", "segment_sequence"]
+    timestamp_col: "location_timestamp_local"
+    time_min_cutoff: 10
