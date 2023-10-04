@@ -45,15 +45,25 @@ def monthly_local_linearids(
             ("LINEARID", "not in", already_cut)]
     )
     
+    trips = helpers.import_scheduled_trips(
+        analysis_date, 
+        columns = ["name", "shape_array_key"],
+        get_pandas = True
+    )
+    
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
         columns = ["shape_array_key", "geometry"],
         crs = PROJECT_CRS,
         get_pandas = False
-    )
+    ).merge(
+        trips,
+        on = "shape_array_key",
+        how = "inner"
+    ).query('name != "Amtrak Schedule"')
     
     local_roads_to_cut = cut_road_segments.sjoin_shapes_to_local_roads(
-        local_roads, shapes)
+        shapes, local_roads)
     
     if len(local_roads_to_cut) > 0:
     
@@ -125,7 +135,7 @@ if __name__ == "__main__":
     else: 
         road_segments = dd.from_delayed([primary_secondary, local])
     
-    road_segments = road_segments.reset_index(drop=True).repartition(npartitions=3)
+    road_segments = road_segments.reset_index(drop=True).repartition(npartitions=2)
         
     road_segments.to_parquet(
         f"{SHARED_GCS}road_segments/road_segments_{analysis_date}", 
