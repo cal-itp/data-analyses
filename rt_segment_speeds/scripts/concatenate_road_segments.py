@@ -48,7 +48,8 @@ def monthly_local_linearids(
     
     trips = helpers.import_scheduled_trips(
         analysis_date, 
-        columns = ["name", "shape_array_key"],
+        columns = ["shape_array_key"],
+        filters = [[("name", "!=", "Amtrak Schedule")]],
         get_pandas = True
     )
     
@@ -61,7 +62,7 @@ def monthly_local_linearids(
         trips,
         on = "shape_array_key",
         how = "inner"
-    ).query('name != "Amtrak Schedule"')
+    )
     
     local_roads_to_cut = cut_road_segments.sjoin_shapes_to_local_roads(
         shapes, local_roads)

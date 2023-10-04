@@ -325,8 +325,7 @@ if __name__ == '__main__':
 
     roads = load_roads(filtering = [("MTFCC", "in", road_type_values)])
     roads_segmented = cut_primary_secondary_roads(roads, ROAD_SEGMENT_METERS)
-    primary_secondary_roads = append_reverse_segments(roads_segmented).drop(
-        columns = "road_length")
+    primary_secondary_roads = append_reverse_segments(roads_segmented)
     
     utils.geoparquet_gcs_export(
         primary_secondary_roads,
