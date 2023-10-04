@@ -278,7 +278,7 @@ def add_segment_direction(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df = rt_utils.add_origin_destination(df)
     
     df = df.assign(
-        route_primary_direction = df.apply(
+        primary_direction = df.apply(
             lambda x: 
             rt_utils.primary_cardinal_direction(x.origin, x.destination),
             axis=1,
@@ -303,7 +303,7 @@ def append_reverse_segments(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     both_sets_of_segments = pd.concat(
         [df, df_flipped2], axis=0
     ).sort_values(
-        ["linearid", "segment_sequence", "route_primary_direction"]
+        ["linearid", "segment_sequence", "primary_direction"]
     ).reset_index(drop=True)
     
     return both_sets_of_segments
