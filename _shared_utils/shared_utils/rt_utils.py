@@ -130,13 +130,17 @@ def primary_cardinal_direction(origin, destination) -> str:
     if abs(distance_east) > abs(distance_north):
         if distance_east > 0:
             return "Eastbound"
-        else:
+        elif distance_east < 0:
             return "Westbound"
+        else:
+            return "Unknown"
     else:
         if distance_north > 0:
             return "Northbound"
-        else:
+        elif distance_north < 0:
             return "Southbound"
+        else:
+            return "Unknown"
 
 
 def add_origin_destination(
