@@ -152,8 +152,8 @@ def explode_segments(
 
 
 def sjoin_shapes_to_local_roads(
+    shapes: dg.GeoDataFrame,
     roads: gpd.GeoDataFrame,
-    shapes: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
     """
     Using shapes instead of stops roughly doubles the linearids we pick up.
@@ -162,12 +162,12 @@ def sjoin_shapes_to_local_roads(
     shapes = shapes.assign(
         geometry = shapes.geometry.buffer(100)
     )
-    
+
     # Keep unique linearids from the sjoin
     local_roads_sjoin_shapes = dg.sjoin(
         shapes,
         roads,
-        on = "inner",
+        how = "inner",
         predicate = "intersects"
     ).linearid.unique()
     
@@ -227,14 +227,29 @@ def local_roads_base(
         roads.road_length > segment_length_meters
     ].reset_index(drop=True)
     
+    # Remove Amtrak, because some shapes are erroneous and 
+    # kills the kernel while buffering by 100m 
+    # Since Amtrak is not traveling on roads, we'll be removing those vp anyway
+    base_date = "2023-09-13"
+    
+    trips = helpers.import_scheduled_trips(
+        base_date,
+        columns = ["name", "shape_array_key"],
+        get_pandas = True
+    )
+    
     shapes = helpers.import_scheduled_shapes(
-        "2023-09-13",
+        base_date,
         columns = ["shape_array_key", "geometry"],
         crs = PROJECT_CRS,
         get_pandas = False
-    )
+    ).merge(
+        trips,
+        on = "shape_array_key",
+        how = "inner"
+    ).query('name != "Amtrak Schedule"')
     
-    local_roads_to_cut = sjoin_shapes_to_local_roads(long_roads, shapes)
+    local_roads_to_cut = sjoin_shapes_to_local_roads(shapes, long_roads)
     
     segmented_long_roads = cut_segments_dask(
         local_roads_to_cut,
