@@ -106,7 +106,7 @@ if __name__ == "__main__":
     
     keep_cols = [
         "linearid", "mtfcc", "fullname",
-        "segment_sequence", "route_primary_direction",
+        "segment_sequence", "primary_direction",
         "geometry"
     ]
                 
