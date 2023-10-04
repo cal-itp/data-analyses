@@ -183,11 +183,6 @@ def project_and_cut_segments_for_one_shape(
     
     
 if __name__ == "__main__":
-    import warnings
-    
-    warnings.filterwarnings(
-        "ignore",
-        category=shapely.errors.ShapelyDeprecationWarning) 
 
     LOG_FILE = "../logs/cut_stop_segments.log"
     logger.add(LOG_FILE, retention="3 months")

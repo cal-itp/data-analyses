@@ -158,18 +158,15 @@ if __name__ == "__main__":
     
     USABLE_FILE = f'{STOP_SEG_DICT["stage1"]}_{analysis_date}'
 
-    vp_results = helpers.import_vehicle_positions(
-        SEGMENT_GCS,
-        USABLE_FILE,
-        file_type = "df",
-        partitioned = True,
-        columns = ["gtfs_dataset_key",
-                   "trip_instance_key",
-                   "location_timestamp_local",
-                   "x", "y", "vp_idx"],
+    vp_results = dd.read_parquet(
+        f"{SEGMENT_GCS}{USABLE_FILE}/", 
+        columns = [
+            "gtfs_dataset_key", "trip_instance_key",
+            "location_timestamp_local",
+            "x", "y", "vp_idx"],
         filters = [[("vp_idx", "in", vp_idx_list)]]
     ).compute()
-    
+
     vp_with_sched = (
         merge_rt_scheduled_trips(
             vp_results, 
