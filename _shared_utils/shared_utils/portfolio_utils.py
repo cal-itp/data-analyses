@@ -10,7 +10,10 @@ route name, Caltrans district the same way.
 need to import different pandas to add type hint for styler object
 
 """
+# os.environ["USE_PYGEOS"] = "0"  # avoids import warning but flake doesn't statements before imports...
 import base64
+
+# import os
 from typing import Union
 
 import dask.dataframe as dd
