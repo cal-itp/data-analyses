@@ -8,7 +8,7 @@ import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import utils
+from calitp_data_analysis import utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS, TEMP_GCS
 
 

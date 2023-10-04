@@ -24,7 +24,7 @@ from calitp_data_analysis.tables import tbls
 from siuba import *
 from typing import Literal, Union
 
-from shared_utils import geography_utils
+from calitp_data_analysis import geography_utils
 from bus_service_utils import calenviroscreen_lehd_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/bus_service_increase/"

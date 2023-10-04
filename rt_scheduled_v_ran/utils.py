@@ -5,31 +5,23 @@ Utils for Scheduled vs RT Trips
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000) ## 800GB?
 
+import altair as alt
+import branca
+
+import gcsfs
+import pandas as pd
+
+from siuba import *
 from calitp_data_analysis.tables import tbls
 from calitp_data_analysis.sql import query_sql
 import calitp_data_analysis.magics
-import branca
 
-from siuba import *
-import pandas as pd
-
-import datetime as dt
-# import time
-# from zoneinfo import ZoneInfo
-
-# import importlib
-
-import gcsfs
-fs = gcsfs.GCSFileSystem()
-
-# from tqdm import tqdm_notebook
-# from tqdm.notebook import trange, tqdm
-
-import altair as alt
-from shared_utils import portfolio_utils, geography_utils, styleguide
-from shared_utils import calitp_color_palette as cp
+from shared_utils import portfolio_utils
+from calitp_data_analysis import geography_utils, styleguide
+from calitp_data_analysis import calitp_color_palette as cp
 from dla_utils import _dla_utils as dla_utils
 
+fs = gcsfs.GCSFileSystem()
 
 # Read in complete data table
 def read_data():
@@ -189,7 +181,7 @@ def get_agg_pct(df,
                 sum_vp: list,
                ):
     
-    agg_df = (geography_utils.aggregate_by_geography(df,
+    agg_df = (portfolio_utils.aggregate_by_geography(df,
                                        group_cols = groupings,
                                        sum_cols = [sum_sched, sum_vp]
                                        ))>>mutate(avg = _[sum_vp]/_[sum_sched])

@@ -15,7 +15,8 @@ from siuba import *
 from loguru import logger
 
 from shared_utils import (gtfs_utils_v2, gtfs_utils, 
-                          rt_dates, utils, geography_utils)
+                          rt_dates)
+from calitp_data_analysis import utils, geography_utils
 from update_vars import COMPILED_CACHED_GCS
 
 def scheduled_operators(analysis_date: str):

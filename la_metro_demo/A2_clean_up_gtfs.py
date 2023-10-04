@@ -3,7 +3,8 @@
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import geography_utils, rt_dates
+from shared_utils import portfolio_utils, rt_dates
+from calitp_data_analysis import geography_utils
 from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
 
 # LA Metro data is for Oct 2022, so let's use the date we already downloaded
@@ -191,7 +192,7 @@ def assemble_route_level_data():
     
     # Merge in number of trips, but don't assign values to the rows we 
     # duplicated. We don't want n_trips to be overinflated 
-    trips_by_route = geography_utils.aggregate_by_geography(
+    trips_by_route = portfolio_utils.aggregate_by_geography(
         trips,
         group_cols = ["name"] + route_cols,
         nunique_cols = ["trip_id"],

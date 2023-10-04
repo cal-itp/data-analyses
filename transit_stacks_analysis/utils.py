@@ -4,14 +4,8 @@ from siuba import *
 from calitp import *
 from plotnine import *
 import intake
-from shared_utils import geography_utils
-
-import altair as alt
-import altair_saver
-from shared_utils import geography_utils
-from shared_utils import altair_utils
-from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
+from calitp_data_analysis import geography_utils, calitp_color_palette as cp, styleguide
+from calitp_data_analysis.sql import to_snakecase
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/transit_stacks/"
 
@@ -84,7 +78,7 @@ def basic_bar_chart(df, x_col, y_col, colorcol, chart_title=''):
                  y=alt.Y(y_col, title=labeling(y_col),sort=('-x')),
                  color = alt.Color(colorcol, 
                                   scale=alt.Scale(
-                                      range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS),
+                                      range=cp.CALITP_CATEGORY_BRIGHT_COLORS),
                                       legend=alt.Legend(title=(labeling(colorcol)))
                                   ))
              .properties( 
@@ -116,7 +110,7 @@ def fancy_bar_chart(df, x_col, y_col, label_col, chart_title=''):
          y=alt.Y(y_col, title=labeling(y_col), sort=('-x')),
          color=alt.Color(y_col, 
                         scale=alt.Scale(
-                            range=altair_utils.CALITP_CATEGORY_BRIGHT_COLORS
+                            range=cp.CALITP_CATEGORY_BRIGHT_COLORS
                         )
                 )
              )

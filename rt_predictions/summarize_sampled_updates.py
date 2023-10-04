@@ -2,12 +2,13 @@ import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(12_000_000_000_000)
 os.environ['USE_PYGEOS'] = '0'
 
+import numpy as np
 import pandas as pd
+import pytz
 from siuba import *
 
 from calitp_data_analysis.sql import query_sql
 from calitp_data_analysis.tables import tbls
-import shared_utils
 import datetime as dt
 import sample_query_materialized_tables as smpl
 
@@ -15,8 +16,6 @@ from segment_speed_utils.project_vars import (PREDICTIONS_GCS,
                                               analysis_date)
 analysis_date = dt.datetime.fromisoformat(analysis_date)
 
-import pytz
-import numpy as np
 
 service_levels = smpl.get_service_levels()
 tu_datasets = smpl.get_tu_datasets()

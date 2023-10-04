@@ -10,15 +10,15 @@ route name, Caltrans district the same way.
 need to import different pandas to add type hint for styler object
 
 """
-import os
-os.environ['USE_PYGEOS'] = '0'
-import geopandas as gpd
-
+# os.environ["USE_PYGEOS"] = "0"  # avoids import warning but flake doesn't statements before imports...
 import base64
+
+# import os
 from typing import Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
+import geopandas as gpd
 import pandas as pd
 import pandas.io.formats.style  # for type hint: https://github.com/pandas-dev/pandas/issues/24884
 from IPython.display import HTML

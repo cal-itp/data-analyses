@@ -11,7 +11,7 @@ import sys
 from loguru import logger
 
 import cut_normal_stop_segments
-from shared_utils import utils
+from calitp_data_analysis import utils
 from segment_speed_utils import (array_utils, helpers, 
                                 wrangle_shapes)
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
