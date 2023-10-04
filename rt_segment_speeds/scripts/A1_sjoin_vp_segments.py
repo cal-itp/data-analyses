@@ -66,8 +66,14 @@ def import_segments_and_buffer(
     Import segments , subset certain columns, 
     and buffer by some specified amount.
     """
+    if "stop_segments" in segment_file_name:
+        filename = f"{SEGMENT_GCS}{segment_file_name}.parquet"
+    
+    elif "road_segments" in segment_file_name:
+        filename = f"{SEGMENT_GCS}{segment_file_name}"
+    
     segments = gpd.read_parquet(
-        f"{SEGMENT_GCS}{segment_file_name}.parquet",
+        filename,
         columns = segment_identifier_cols + ["seg_idx", "geometry"],
         **kwargs
     ).to_crs(PROJECT_CRS)
@@ -152,12 +158,9 @@ def sjoin_vp_to_segments(
     )
     
     # Import vp, keep trips that are usable
-    vp = helpers.import_vehicle_positions(
-        SEGMENT_GCS,
-        f"{INPUT_FILE}_{analysis_date}/",
-        columns = ["trip_instance_key", 
-                   "vp_idx", "x", "y"],
-        partitioned = True
+    vp = dd.read_parquet(
+        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}/",
+        columns = ["trip_instance_key", "vp_idx", "x", "y"],
     ).merge(
         vp_trips,
         on = "trip_instance_key",
@@ -214,7 +217,7 @@ if __name__ == "__main__":
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
-    vp_stop_seg = sjoin_vp_to_segments(
+    sjoin_vp_to_segments(
         analysis_date = analysis_date,
         dict_inputs = STOP_SEG_DICT
     )

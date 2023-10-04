@@ -1,66 +1,56 @@
 metadata:
-  version: 2
+  version: 3
   parameters:
     analysis_date:
       type: str
-      description: Analysis date for v2 diagnostics
+      description: Single date for processing raw vehicle positions into speeds
       default: "2023-02-15"
 sources:  
     # GTFS RT VEHICLE POSITIONS 
-    raw_vp_single_day:
+    raw_vp:
     # Source: open_data/download_vehicle_positions.py
         driver: geoparquet
-        description: Raw vehicle positions with point geometry for all operators on a single day.
+        description: |- 
+            Raw vehicle positions with point geometry for all operators on a single day.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_{{analysis_date}}/
-    vp_route_segment:
-    # Source: A1_sjoin_vp_segments.py
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_{{analysis_date}}.parquet
+    vp_usable:
+    # Source: A0_preprocessing.py
         driver: parquet
-        description: Vehicle positions joined to route segments
+        description: Filter RT trips down to at least 10 minutes of vp data available.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_sjoin/vp_route_segment_{{analysis_date}}/ 
-    vp_valid_route_segment:
-    # Source: A2_valid_vehicle_positions.py
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_usable_{{analysis_date}}/ 
+    vp_usable:
+    # Source: A0_preprocessing.py
         driver: parquet
-        description: Vehicle positions pared down to trips with at least 5 min of data, only the enter and exit points are kept within for each segment-trip. 
+        description: Filter RT trips down to at least 10 minutes of vp data available.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_pared_{{analysis_date}}/
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_usable_{{analysis_date}}/ 
     # SEGMENT SPEEDS 
-    speeds_by_route_segment:
-    # Source: A3_speeds_by_segment_trip.py
+    speeds_by_stop_segment_trip:
+    # Source: B1_speeds_by_segment_trip.py
         driver: parquet
-        description: Speeds by segment-trip for a single day.
+        description: Speeds by stop segments and trip for a single day.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/speeds_route_segments_{{analysis_date}}/               
-    speeds_delay_by_stop_segment:
-    # Source: C1_calculate_stop_delay.py
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/speeds_stop_segments_{{analysis_date}}.parquet 
+    avg_speeds_by_stop_segment:
+    # Source: B2_avg_speeds_by_segment.py
         driver: parquet
-        description: Speeds and stop delay by segment-trip for a single day.
+        description: |- 
+            Average speeds by stop segments (aggregated across trips) for a single day.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/stop_segments_with_speed_delay_{{analysis_date}}.parquet 
+          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/avg_speeds_stop_segments_{{analysis_date}}.parquet 
     # SEGMENTS
-    route_segments:
-    # Source: cut_route_segments.py
-        driver: geoparquet
-        description: Longest shape_id for each feed_key-route_id-direction_id, segmented into 1,000 m segments. Create `route_dir_identifier` and `segment_sequence` to uniquely identify route segments.
-        args:
-          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/longest_shape_segments_{{analysis_date}}.parquet
     stop_segments:
     # Source: prep_stop_segments.py, cut_stop_segments.py
         driver: geoparquet
-        description: Stop-to-stop segments by `shape_array_key`
+        description: Stop-to-stop segments by `shape_array_key` and `stop_sequence`
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/stop_segments_{{analysis_date}}.parquet
-    # EXPLORATORY OR DIAGNOSTIC RESULTS
-    rt_trip_diagnostics:
-    # Source: B1_rt_trip_diagnostics.py
-        driver: parquet
-        description: Get aggregations at the trip-level, trip start time, trip end time, and number of segments the vehicle positions touch to decide whether that batch of trips should be kept. 
-        args:
-          urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/trip_diagnostics_{{analysis_date}}.parquet
     # ROAD SEGMENTS
     ca_roads:
         driver: geoparquet
-        description: All CA roads (concatenated)
+        description: |- 
+            Primary, secondary, and local roads segmented and reversed for an analysis date.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/shared_data/all_roads_2020_state06.parquet
+          urlpath: gs://calitp-analytics-data/data-analyses/shared_data/road_segments/road_segments_{{analysis_date}}.parquet

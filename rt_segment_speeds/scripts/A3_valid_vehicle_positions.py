@@ -48,11 +48,8 @@ def merge_usable_vp_with_sjoin_vpidx(
     against the sjoin results (which only has vp_idx + segment_identifier_cols).
     """
     # First, grab all the usable vp (with lat/lon columns)
-    usable_vp = helpers.import_vehicle_positions(
-        SEGMENT_GCS,
-        usable_vp_file,
-        file_type = "df",
-        partitioned = True,
+    usable_vp = dd.read_parquet(
+        f"{SEGMENT_GCS}{usable_vp_file}", 
         **kwargs
     ).repartition(npartitions=100)
             

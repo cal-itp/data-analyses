@@ -72,37 +72,6 @@ def find_day_after(analysis_date: str) -> str:
                     )
     
     return one_day_later.isoformat()
-        
-
-def import_vehicle_positions(
-    gcs_folder: str = SEGMENT_GCS, 
-    file_name: str = "",
-    file_type: Literal["df", "gdf"] = "df", 
-    filters: tuple = None,
-    columns: list = None,
-    partitioned: bool = False,
-) -> Union[dd.DataFrame, dg.GeoDataFrame]:
-    
-    if partitioned:
-        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}"
-    else:
-        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}.parquet"
-    
-    if file_type == "df":
-        df = dd.read_parquet(
-            f"{gcs_folder}{file_name_sanitized}", 
-            filters = filters,
-            columns = columns
-        ).drop_duplicates().reset_index(drop=True)
-    
-    elif file_type == "gdf":
-        df = dg.read_parquet(
-            f"{gcs_folder}{file_name_sanitized}", 
-            filters = filters,
-            columns = columns
-        ).drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)
-    
-    return df
 
     
 def import_segments(
