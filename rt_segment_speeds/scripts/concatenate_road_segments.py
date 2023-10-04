@@ -14,7 +14,8 @@ from loguru import logger
 
 import cut_road_segments
 from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import (analysis_date, 
+from segment_speed_utils.project_vars import (analysis_date,
+                                              SEGMENT_GCS,
                                               SHARED_GCS,
                                               PROJECT_CRS, 
                                               ROAD_SEGMENT_METERS
@@ -136,9 +137,10 @@ if __name__ == "__main__":
         road_segments = dd.from_delayed([primary_secondary, local])
     
     road_segments = road_segments.reset_index(drop=True).repartition(npartitions=2)
-        
+    road_segments["seg_idx"] = road_segments.index
+    
     road_segments.to_parquet(
-        f"{SHARED_GCS}road_segments/road_segments_{analysis_date}", 
+        f"{SEGMENT_GCS}road_segments_{analysis_date}", 
         overwrite = True
     )
 
