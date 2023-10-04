@@ -803,6 +803,7 @@ class RtFilterMapper:
                               # create avg per direction by div 2
                           )
         both_metrics_df['length_miles'] = (self.corridor.distance_meters / METERS_PER_MILE).iloc[0]
+        both_metrics_df['distance_meters'] = self.corridor.distance_meters
         both_metrics_df['target_mph'] = self.transit_priority_target_mph
         # both_metrics_df.length_miles = both_metrics_df.length_miles.fillna(value=gdf.length_miles.iloc[0])
         gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
