@@ -18,9 +18,8 @@ import intake
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import (geography_utils, gtfs_utils, 
-                          rt_utils, portfolio_utils, utils
-                         )
+from shared_utils import gtfs_utils, portfolio_utils, rt_utils
+from calitp_data_analysis import utils
 from E0_bus_oppor_vars import GCS_FILE_PATH, ANALYSIS_DATE, COMPILED_CACHED_GCS
 from bus_service_utils import gtfs_build
 
@@ -254,7 +253,7 @@ def calculate_mean_speed_by_route(analysis_date: str,
         
     # Each trip is 1 observation, just take the average (not weighted)
     # to get route-level mean_speed_mph
-    mean_speed = geography_utils.aggregate_by_geography(
+    mean_speed = portfolio_utils.aggregate_by_geography(
         df,
         group_cols = group_cols,
         mean_cols = ["mean_speed_mph"]
@@ -281,7 +280,7 @@ def get_competitive_routes() -> pd.DataFrame:
         "num_competitive", "pct_trips_competitive",
     ]
 
-    route_df = geography_utils.aggregate_by_geography(
+    route_df = portfolio_utils.aggregate_by_geography(
         trip_df,
         group_cols = route_level_cols,
         mean_cols = ["bus_multiplier", "bus_difference"],

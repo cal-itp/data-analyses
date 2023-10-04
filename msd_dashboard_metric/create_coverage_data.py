@@ -6,12 +6,12 @@ import requests
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(100_000_000_000)
 
-from calitp.tables import tbl
+from calitp_data_analysis.tables import tbls
 from calitp_data_analysis.sql import query_sql
 from siuba import *
 
-import utils
-import shared_utils
+import utils as _utils
+from calitp_data_analysis import geography_utils, utils
 
 
 catalog = intake.open_catalog("./catalog.yml")
@@ -41,7 +41,7 @@ def get_employment_tract_data():
                        )
     
     tract_pop_employ = tract_pop_employ.to_crs(
-                        shared_utils.geography_utils.CA_NAD83Albers)
+                        geography_utils.CA_NAD83Albers)
     tract_pop_employ['area'] = tract_pop_employ.geometry.area
     
     
@@ -70,18 +70,18 @@ def get_employment_tract_data():
 
 
 def save_initial_data():
-    ca_block_joined = utils.get_ca_block_geo()
-    shared_utils.utils.geoparquet_gcs_export(ca_block_joined, utils.GCS_FILE_PATH, 
+    ca_block_joined = _utils.get_ca_block_geo()
+    utils.geoparquet_gcs_export(ca_block_joined, _utils.GCS_FILE_PATH, 
                                              'block_population_joined')
     
-    all_stops = utils.get_stops_and_trips(filter_accessible = False)
+    all_stops = _utils.get_stops_and_trips(filter_accessible = False)
     all_stops = all_stops.apply(buffer_by_route_type, axis=1)
-    shared_utils.utils.geoparquet_gcs_export(all_stops, utils.GCS_FILE_PATH, 
+    utils.geoparquet_gcs_export(all_stops, _utils.GCS_FILE_PATH, 
                                              'all_stops')
     
-    accessible_stops_trips = utils.get_stops_and_trips(filter_accessible = True)
+    accessible_stops_trips = _utils.get_stops_and_trips(filter_accessible = True)
     accessible_stops_trips = accessible_stops_trips.apply(buffer_by_route_type, axis=1)
-    shared_utils.utils.geoparquet_gcs_export(accessible_stops_trips, utils.GCS_FILE_PATH, 
+    utils.geoparquet_gcs_export(accessible_stops_trips, _utils.GCS_FILE_PATH, 
                                              'accessible_stops_trips')
     
     
@@ -107,7 +107,7 @@ def save_initial_data():
                          _.calitp_url_number == _.url_number)
               )
 
-    rt_complete.to_parquet(f'{utils.GCS_FILE_PATH}rt_complete.parquet')
+    rt_complete.to_parquet(f'{_utils.GCS_FILE_PATH}rt_complete.parquet')
     
     
 
@@ -223,12 +223,12 @@ def spatial_joins_to_blocks_and_tracts():
     Return 2 dictionaries of results.
     '''
     # Read in parquets from above
-    ca_block_joined = shared_utils.utils.download_geoparquet(
-        utils.GCS_FILE_PATH, 'block_population_joined')
-    all_stops = shared_utils.utils.download_geoparquet(utils.GCS_FILE_PATH, 'all_stops')
-    accessible_stops_trips = shared_utils.utils.download_geoparquet(
-        utils.GCS_FILE_PATH, 'accessible_stops_trips')
-    rt_complete = pd.read_parquet(f"{utils.GCS_FILE_PATH}rt_complete.parquet") 
+    ca_block_joined = gpd.read_parquet(
+        f"{_utils.GCS_FILE_PATH}block_population_joined.parquet")
+    all_stops = gpd.read_parquet(f"{_utils.GCS_FILE_PATH}all_stops.parquet")
+    accessible_stops_trips = gpd.read_parquet(
+        f"{_utils.GCS_FILE_PATH}accessible_stops_trips.parquet")
+    rt_complete = pd.read_parquet(f"{_utils.GCS_FILE_PATH}rt_complete.parquet") 
     
     # Read in employment data by tract
     tract_pop_employ_filtered = get_employment_tract_data()
@@ -265,8 +265,8 @@ def spatial_joins_to_blocks_and_tracts():
     for key, value in sjoin_blocks.items():
         print(key)
         new_name = rename_block_files[key]
-        shared_utils.utils.geoparquet_gcs_export(value, GCS_FILE_PATH, f"{new_name}")
+        utils.geoparquet_gcs_export(value, GCS_FILE_PATH, f"{new_name}")
     
     for key, value in sjoin_tracts.items():
         print(key)
-        shared_utils.utils.geoparquet_gcs_export(value, GCS_FILE_PATH, f"{key}")
+        utils.geoparquet_gcs_export(value, GCS_FILE_PATH, f"{key}")

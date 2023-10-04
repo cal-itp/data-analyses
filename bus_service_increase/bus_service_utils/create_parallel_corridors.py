@@ -14,7 +14,7 @@ import pandas as pd
 
 from typing import Literal
 
-from shared_utils import geography_utils, utils
+from calitp_data_analysis import geography_utils, utils
 
 DATA_PATH = "./data/"
 

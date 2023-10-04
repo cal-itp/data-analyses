@@ -15,7 +15,7 @@ import sys
 
 from dask import delayed, compute
 from loguru import logger
-from shared_utils import utils
+from calitp_data_analysis import utils
 from prep import GCS_FILE_PATH
 
 fs = gcsfs.GCSFileSystem()

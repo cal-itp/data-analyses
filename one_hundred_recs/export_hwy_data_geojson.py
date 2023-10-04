@@ -11,7 +11,7 @@ import geopandas as gpd
 import pandas as pd
 
 from bus_service_utils import better_bus_utils
-from shared_utils import utils
+from calitp_data_analysis import utils
 
 BUS_SERVICE_GCS = "gs://calitp-analytics-data/data-analyses/bus_service_increase/"
 RECS_GCS = "gs://calitp-analytics-data/data-analyses/one_hundred_recs/"

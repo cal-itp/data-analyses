@@ -3,8 +3,7 @@ import intake
 import pandas as pd
 
 from calitp_data_analysis.sql import to_snakecase
-
-from shared_utils import geography_utils
+from calitp_data_analysis import geography_utils
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
 catalog = intake.open_catalog("../_shared_utils/shared_utils/*.yml")

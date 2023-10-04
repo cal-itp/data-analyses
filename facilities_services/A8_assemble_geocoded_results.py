@@ -5,9 +5,9 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
-import utils
-import shared_utils
+import utils as _utils
 import A3_prep_for_geocode
+from calitp_data_analysis import utils
 
 catalog = intake.open_catalog("./*.yml")
 
@@ -17,13 +17,13 @@ if __name__ == "__main__":
     df = catalog.tier1_facilities_addresses.read()
     df = A3_prep_for_geocode.prep_for_geocoding(df)
 
-    geocoder_df = shared_utils.utils.download_geoparquet(
-        GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}",
+    geocoder_df = utils.download_geoparquet(
+        GCS_FILE_PATH = f"{_utils.GCS_FILE_PATH}",
         FILE_NAME = "geocoder_results"
     )
     
-    manual_df = shared_utils.utils.download_geoparquet( 
-        GCS_FILE_PATH = f"{utils.GCS_FILE_PATH}", 
+    manual_df = utils.download_geoparquet( 
+        GCS_FILE_PATH = f"{_utils.GCS_FILE_PATH}", 
         FILE_NAME = "manually_geocoded_results"
     )
     
@@ -75,7 +75,8 @@ if __name__ == "__main__":
     print(f"# obs in final df: {len(final)}")
     
     # Export to GCS
-    shared_utils.utils.geoparquet_gcs_export(final, 
-                                             utils.GCS_FILE_PATH, 
-                                             "tier1_facilities_geocoded"
-                                            )
+    utils.geoparquet_gcs_export(
+        final, 
+        _utils.GCS_FILE_PATH, 
+        "tier1_facilities_geocoded"
+    )

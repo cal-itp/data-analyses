@@ -1,4 +1,4 @@
-from shared_utils import utils
+from calitp_data_analaysis import utils
 import geopandas as gpd
 import dask.dataframe as dd
 import dask_geopandas as dg

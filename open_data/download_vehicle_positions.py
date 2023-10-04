@@ -3,6 +3,7 @@ Download vehicle positions for a day.
 """
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
+os.environ['USE_PYGEOS'] = '0'
 
 import datetime
 import gcsfs
@@ -12,10 +13,11 @@ import shapely
 import sys
 
 from calitp_data_analysis.tables import tbls
+from calitp_data_analysis import utils
 from loguru import logger
 from siuba import *
 
-from shared_utils import utils, schedule_rt_utils
+from shared_utils import schedule_rt_utils
 from update_vars import SEGMENT_GCS, analysis_date
 
 fs = gcsfs.GCSFileSystem()

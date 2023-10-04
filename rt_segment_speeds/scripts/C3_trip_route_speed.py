@@ -13,8 +13,9 @@ import numpy as np
 import pandas as pd
 
 from shared_utils.rt_utils import MPH_PER_MPS
-from shared_utils.geography_utils import WGS84
-from shared_utils import utils, portfolio_utils, schedule_rt_utils
+from calitp_data_analysis.geography_utils import WGS84
+from calitp_data_analysis import utils
+from shared_utils import portfolio_utils, schedule_rt_utils
 from segment_speed_utils import helpers, sched_rt_utils, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
                                               PROJECT_CRS)

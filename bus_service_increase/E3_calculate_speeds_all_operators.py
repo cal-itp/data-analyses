@@ -14,8 +14,8 @@ import glob
 import os
 import pandas as pd
 
-from shared_utils import (rt_utils, geography_utils, 
-                          gtfs_utils, utils)
+from shared_utils import rt_utils, gtfs_utils
+from calitp_data_analysis import geography_utils, utils
 from E0_bus_oppor_vars import ANALYSIS_DATE, COMPILED_CACHED_GCS
 from E2_aggregated_route_stats import ANALYSIS_MONTH_DAY
 

@@ -1,8 +1,8 @@
 import altair as alt
 import pandas as pd
 
-from shared_utils import styleguide
-from shared_utils import calitp_color_palette as cp
+from calitp_data_analysis import styleguide
+from calitp_data_analysis import calitp_color_palette as cp
 
 AXIS_DATE_FORMAT ="%-m/%-d/%y"
 
