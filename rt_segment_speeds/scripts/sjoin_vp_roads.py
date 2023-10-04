@@ -66,12 +66,9 @@ def sjoin_vp_to_segments(
     )
     
     # Import vp, keep trips that are usable
-    vp = helpers.import_vehicle_positions(
-        SEGMENT_GCS,
-        f"{INPUT_FILE}_{analysis_date}/",
-        columns = ["trip_instance_key", 
-                   "vp_idx", "x", "y"],
-        partitioned = True
+    vp = dd.read_parquet(
+        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}/",
+        columns = ["trip_instance_key", "vp_idx", "x", "y"],
     )
     
     vp_gddf = dg.from_dask_dataframe(
