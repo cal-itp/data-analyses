@@ -29,8 +29,8 @@ Who is asking the question, and who is the audience?
 
 * **Remaining data source questions**:
 
-## Deliverables:
+## Deliverables
 Notebook, dashboard, narrative, presentation details.
 
-## Timeline of deliverables:
+## Timeline of deliverables
 Estimated completion date
