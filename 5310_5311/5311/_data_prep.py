@@ -4,7 +4,7 @@ from siuba import *
 from calitp_data_analysis.sql import *
 import intake
 import cpi
-from shared_utils import geography_utils
+from calitp_data_analysis import geography_utils
 import _agency_crosswalk as agency_crosswalk
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/5311 /"

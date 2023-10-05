@@ -12,10 +12,9 @@ from plotnine import *
 
 from IPython.display import Markdown, HTML
 
-from shared_utils import altair_utils
-from shared_utils import geography_utils
-from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
+from calitp_data_analysis import geography_utils
+from calitp_data_analysis import calitp_color_palette as cp
+from calitp_data_analysis import styleguide
 
 from calitp import to_snakecase
 import intake
@@ -117,7 +116,7 @@ def make_charts(subset):
         y=alt.Y('Count:Q', title='Number of Unique Agencies'),
         color = alt.Color("District:N", 
                               scale=alt.Scale(
-                                  range=altair_utils.CALITP_SEQUENTIAL_COLORS),  
+                                  range=cp.CALITP_SEQUENTIAL_COLORS),  
                                legend=alt.Legend(title="Prepared Year")
                               )))
                               
@@ -153,7 +152,7 @@ def make_charts(subset):
         y=alt.Y('Count:Q', title='Number of Unique Agencies'),
         color = alt.Color("District:N", 
                               scale=alt.Scale(
-                                  range=altair_utils.CALITP_SEQUENTIAL_COLORS),  
+                                  range=cp.CALITP_SEQUENTIAL_COLORS),  
                                legend=alt.Legend(title="District")
                               )
                               ))
