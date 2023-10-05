@@ -15,7 +15,7 @@ import pandas as pd
 import papermill as pm 
 import requests
 
-from shared_utils import utils
+from calitp_data_analysis import utils
 
 
 OUTPUT_FILENAME = "5310_report_output"
