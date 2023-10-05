@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from calitp_data_analysis.sql import *
 from siuba import *
-from shared_utils import geography_utils
+from calitp_data_analysis import geography_utils
 
 
 # Clean organization names 

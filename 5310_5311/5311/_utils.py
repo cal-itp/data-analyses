@@ -6,8 +6,7 @@ from siuba import *
 from calitp_data_analysis.sql import *
 
 import altair as alt
-from shared_utils import calitp_color_palette as cp
-from shared_utils import styleguide
+from calitp_data_analysis import calitp_color_palette as cp, styleguide
 
 '''
 Charting Functions 

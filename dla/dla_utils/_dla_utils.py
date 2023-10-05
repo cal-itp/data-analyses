@@ -14,8 +14,8 @@ import altair as alt
 from IPython.display import Markdown, HTML, display_html, display
 from IPython.core.display import display
 
-from shared_utils import geography_utils, styleguide
-from shared_utils import calitp_color_palette as cp
+from calitp_data_analysis import geography_utils, styleguide
+from calitp_data_analysis import calitp_color_palette as cp
 
 import ipywidgets as widgets
 from ipywidgets import *
