@@ -9,8 +9,8 @@ import pandas as pd
 import geopandas as gpd
 from calitp_data_analysis.sql import to_snakecase
 from dla_utils import _dla_utils
-from shared_utils import geography_utils
-from shared_utils import calitp_color_palette as cp
+from calitp_data_analysis import geography_utils
+from calitp_data_analysis import calitp_color_palette as cp
 
 from IPython.display import HTML
 from siuba import *

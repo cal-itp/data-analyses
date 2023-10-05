@@ -7,8 +7,8 @@ from siuba import *
 
 import altair as alt
 from IPython.display import Markdown, HTML
-from shared_utils import styleguide
-from shared_utils import calitp_color_palette as cp
+from calitp_data_analysis import styleguide
+from calitp_data_analysis import calitp_color_palette as cp
 
 from calitp_data_analysis.sql import to_snakecase
 import _dla_utils
