@@ -1,0 +1,6 @@
+2023-10-06 16:50:10.614 | INFO     | __main__:<module>:164 - Analysis date: 2023-09-13
+2023-10-06 16:52:15.731 | INFO     | __main__:attach_prior_vp_add_direction:94 - persist vp gddf: 0:02:05.111343
+2023-10-06 16:52:15.737 | INFO     | __main__:attach_prior_vp_add_direction:106 - map partitions for direction: 0:00:00.005964
+2023-10-06 17:16:53.247 | INFO     | __main__:attach_prior_vp_add_direction:113 - export vp direction: 0:24:37.509815
+2023-10-06 17:18:09.802 | INFO     | __main__:merge_onto_usable_vp:151 - export usable vp with direction: 0:01:14.744478
+2023-10-06 17:18:10.414 | INFO     | __main__:<module>:174 - execution time: 0:27:59.798678
