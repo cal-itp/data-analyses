@@ -6,9 +6,56 @@ import pandas as pd
 
 import A1_sjoin_vp_segments as A1
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import helpers
+from segment_speed_utils import helpers, segment_calcs
 from segment_speed_utils.project_vars import (analysis_date, SEGMENT_GCS, 
                                               CONFIG_PATH, PROJECT_CRS)
+from shared_utils import rt_utils
+
+
+def get_vp_direction(vp: dg.GeoDataFrame) -> dg.GeoDataFrame:
+    usable_bounds = segment_calcs.get_usable_vp_bounds_by_trip(vp)
+
+    vp_gddf = vp.assign(
+        prior_vp_idx = vp.vp_idx - 1
+    ).merge(
+        usable_bounds, 
+        on = "trip_instance_key",
+        how = "inner"
+    )
+    
+    unknown_direction = vp_gddf[vp_gddf.vp_idx == vp_gddf.min_vp_idx]     
+    can_get_direction = vp_gddf[vp_gddf.vp_idx != vp_gddf.min_vp_idx]
+    
+    # Dask gdf does not like to to renaming on-the-fly
+    vp_gddf_renamed = (vp_gddf[["vp_idx", "geometry"]]
+                   .add_prefix("prior_")
+                   .set_geometry("prior_geometry")
+                  )
+    
+    vp_with_prior = dd.merge(
+        can_get_direction,
+        vp_gddf_renamed,
+        on = "prior_vp_idx",
+        how = "inner"
+    )
+    
+    vp_with_prior["vp_primary_direction"] = vp_with_prior.apply(
+        lambda x: 
+        rt_utils.primary_cardinal_direction(x.prior_geometry, x.geometry),
+        axis=1, meta = ("vp_primary_direction", "object")
+    )
+    
+    
+    can_get_direction_results = vp_with_prior[["vp_idx", "vp_primary_direction"]]
+    unknown_direction_results = unknown_direction.assign(vp_primary_direction="Unknown")
+    
+    vp_direction = dd.multi.concat(
+        [can_get_direction_results, 
+         unknown_direction_results], axis=0
+    ).sort_values("vp_idx").reset_index(drop=True)
+    
+    return vp_direction
+     
 
 def get_sjoin_results(
     vp_gddf: dg.GeoDataFrame, 
@@ -76,7 +123,7 @@ def sjoin_vp_to_segments(
         geometry = dg.points_from_xy(vp, x="x", y="y", crs=WGS84)
     ).set_crs(WGS84).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
     
-    vp_gddf = vp_gddf.repartition(npartitions=100).persist()
+    vp_gddf = vp_gddf.repartition(npartitions=100)
     
     time1 = datetime.datetime.now()
     print(f"prep vp and persist: {time1 - time0}")
@@ -84,12 +131,41 @@ def sjoin_vp_to_segments(
     # save dtypes as a dict to input in map_partitions
     seg_id_dtypes = segments[SEGMENT_IDENTIFIER_COLS].dtypes.to_dict()
     
-    results = get_sjoin_results(
+    vp_direction = get_vp_direction(vp_gddf)
+    
+    vp_gddf2 = dd.merge(
         vp_gddf,
-        segments,
+        vp_direction,
+        on = "vp_idx",
+        how = "inner"
+    ).persist()
+    
+    def subset_by_direction(
+        vp: dg.GeoDataFrame,
+        segments: dg.GeoDataFrame,
+        direction: str
+    ) -> tuple[dg.GeoDataFrame]:
+        direction_list = [direction, "Unknown"]
+        subset_vp = vp[vp.vp_primary_direction.isin(direction_list)]
+        subset_segments = segments[segments.primary_direction.isin(direction_list)]
+        
+        return subset_vp, subset_segments
+        
+        
+    vp_north, segments_north = subset_by_direction(vp_gddf2, segments, "Northbound")
+    vp_south, segments_south = subset_by_direction(vp_gddf2, segments, "Southbound")
+    
+    results_north = get_sjoin_results(
+        vp_north,
+        segments_north,
         SEGMENT_IDENTIFIER_COLS,
-        #meta = {"vp_idx": "int64", **seg_id_dtypes},
-        #align_dataframes = False
+    )
+    
+        
+    results_south = get_sjoin_results(
+        vp_south,
+        segments_south,
+        SEGMENT_IDENTIFIER_COLS,
     )
     
     time2 = datetime.datetime.now()
@@ -97,7 +173,10 @@ def sjoin_vp_to_segments(
     
     # An sjoin like this will give 13_524_111 results...13M combinations is too much
     # Bring in direction earlier
-    results = results.repartition(npartitions=5)
+    results = dd.multi.concat(
+        [results_north, results_south], axis=0
+    ).reset_index(drop=True).repartition(npartitions=5)
+    
     results.to_parquet(
         f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_{analysis_date}",
         overwrite=True

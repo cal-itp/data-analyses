@@ -1,11 +1,15 @@
 """
 Add direction to vp.
+
+Doing this with geopandas gdfs will crash kernel (2 geom cols too much).
+Doing this with dask_geopandas gddfs takes ~25 min.
+Doing this with dask ddfs (x, y) coords takes ~7 min.
+Doing this with dask ddfs  + np arrays takes ~4 min.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
 import geopandas as gpd
-import gcsfs
 import numpy as np
 import pandas as pd
 import sys
@@ -18,41 +22,6 @@ from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
                                               PROJECT_CRS, CONFIG_PATH)
 from shared_utils import rt_utils
 
-
-def get_vp_direction(vp_gddf: dg.GeoDataFrame) -> dd.DataFrame:
-    """
-    Attach the prior vp's geometry, and find the cardinal direction
-    the vp is traveling.
-    """   
-    vp_gddf = vp_gddf.assign(
-        prior_vp_idx = vp_gddf.vp_idx - 1
-    )
-    
-    # Dask gdf does not like to to renaming on-the-fly
-    vp_gddf_renamed = (vp_gddf[["vp_idx", "geometry"]]
-                       .add_prefix("prior_")
-                       .set_geometry("prior_geometry")
-                      )
-    
-    # Filter to the rows where prior_vp_idx is within same trip_instance_key
-    vp_gddf_with_prior = dd.merge(
-        vp_gddf,
-        vp_gddf_renamed,
-        on = "prior_vp_idx",
-        how = "inner"
-    ).query('prior_vp_idx >= min_vp_idx')
-        
-    vp_gddf_with_prior["vp_primary_direction"] = vp_gddf_with_prior.apply(
-        lambda x: 
-        rt_utils.primary_cardinal_direction(x.prior_geometry, x.geometry), 
-        axis=1, 
-    )
-    
-    results = vp_gddf_with_prior[["vp_idx", "vp_primary_direction"]]
-        
-    return results
-
-
 def attach_prior_vp_add_direction(
     analysis_date: str, 
     dict_inputs: dict = {}
@@ -61,7 +30,7 @@ def attach_prior_vp_add_direction(
     For each vp, attach the prior_vp, and use
     the 2 geometry columns to find the direction 
     the vp is traveling.
-    Make use of map partitions. Since export takes awhile,
+    Since export takes awhile,
     save out a parquet and read it in to merge later.
     """
     time0 = datetime.datetime.now()
@@ -86,74 +55,100 @@ def attach_prior_vp_add_direction(
     vp_gddf = dg.from_dask_dataframe(
         vp2,
         geometry = dg.points_from_xy(vp2, x="x", y="y", crs=WGS84)
-    ).set_crs(WGS84).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
+    ).set_crs(WGS84).to_crs(PROJECT_CRS)
     
-    vp_gddf = vp_gddf.persist()
+    vp_ddf = vp_gddf.assign(
+        x = vp_gddf.geometry.x,
+        y = vp_gddf.geometry.y,
+        prior_vp_idx = vp_gddf.vp_idx - 1
+    ).drop(columns = "geometry")
+    
+    # Dask gdf doesn't like to be renamed on-the-fly
+    # Make 1 partition for faster merging
+    vp_ddf_renamed = vp_ddf[
+        ["vp_idx", "x", "y"]
+    ].add_prefix("prior_").repartition(npartitions=1)
+    
+    # Merge on prior_vp_idx's geometry, and filter to those rows
+    # whose prior_vp_idx is from the same trip_instance_key
+    full_df = dd.merge(
+        vp_ddf,
+        vp_ddf_renamed,
+        on = "prior_vp_idx",
+        how = "inner"
+    ).query('prior_vp_idx >= min_vp_idx')[
+        ["vp_idx", "prior_x", "prior_y", "x", "y"]
+    ].reset_index(drop=True)
+    
+    full_df = full_df.persist()
     
     time1 = datetime.datetime.now()
     logger.info(f"persist vp gddf: {time1 - time0}")
-            
-    vp_direction = vp_gddf.map_partitions(
-        get_vp_direction, 
-        meta = {"vp_idx": "int64",
-                "vp_primary_direction": "object"},
-        align_dataframes = False
-    )
     
-    vp_direction = vp_direction.repartition(npartitions=2)
-    
-    time2 = datetime.datetime.now()
-    logger.info(f"map partitions for direction: {time2 - time1}")
+    def column_into_array(df: dd.DataFrame, col: str) -> np.ndarray:
+        return df[col].compute().to_numpy()
         
-    vp_direction.to_parquet(
-        f"{SEGMENT_GCS}vp_direction_{analysis_date}",
-        overwrite=True)
+    vp_indices = column_into_array(full_df, "vp_idx")
+    prior_geom_x = column_into_array(full_df, "prior_x")
+    prior_geom_y = column_into_array(full_df, "prior_y") 
+    current_geom_x = column_into_array(full_df, "x")
+    current_geom_y = column_into_array(full_df, "y")
     
-    time3 = datetime.datetime.now()
-    logger.info(f"export vp direction: {time3 - time2}")
+    distance_east = current_geom_x - prior_geom_x
+    distance_north = current_geom_y - prior_geom_y
 
+    direction_result = np.vectorize(
+        rt_utils.cardinal_definition_rules)(distance_east, distance_north)
     
-def merge_onto_usable_vp(analysis_date: str, dict_inputs: dict):
-    """
-    Import the usable vp that was staged and merge with the direction parquet
-    """
-    time0 = datetime.datetime.now()
+    # Stack our results and convert to df
+    results_array = np.column_stack((vp_indices, direction_result))
     
+    vp_direction = pd.DataFrame(
+        results_array, 
+        columns = ["vp_idx", "vp_primary_direction"]
+    ).astype({"vp_idx": "int64"})
+
+    time2 = datetime.datetime.now()
+    logger.info(f"np vectorize arrays for direction: {time2 - time1}")
+    
+    vp_direction.to_parquet(
+        f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet")    
+
+
+def add_direction_to_usable_vp(analysis_date: str, dict_inputs: dict):
+    """
+    Merge staged vp_usable (partitioned by gtfs_dataset_key)
+    to the vp direction results.
+    """
     INPUT_FILE = dict_inputs["stage1"]
     
-    df = pd.read_parquet(
-        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage",
+    usable_vp = pd.read_parquet(
+        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage"
     )
     
-    vp_direction_df = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_direction_{analysis_date}"
+    vp_direction = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet"
     )
     
-    print(vp_direction_df.dtypes)
-    
-    df_with_dir = pd.merge(
-        df,
-        vp_direction_df,
+    # Do a left merge so that rows (esp first vp for each trip) can be filled in
+    # with Unknowns later
+    vp_with_dir = pd.merge(
+        usable_vp,
+        vp_direction,
         on = "vp_idx",
         how = "left"
     )
-
-    df_with_dir = df_with_dir.assign(
-        vp_primary_direction = df_with_dir.vp_primary_direction.fillna("Unknown"),
+    
+    vp_with_dir = vp_with_dir.assign(
+        vp_primary_direction = vp_with_dir.vp_primary_direction.fillna("Unknown"),
     )    
     
-    df_with_dir.to_parquet(
+    vp_with_dir.to_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}",
         partition_cols = "gtfs_dataset_key",
-        overwrite = True
     )
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"export usable vp with direction: {time1 - time0}")
-    
-    
-    
-    
+
+
 if __name__ == "__main__":
     
     LOG_FILE = "../logs/find_vp_direction.log"
@@ -169,7 +164,12 @@ if __name__ == "__main__":
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
     attach_prior_vp_add_direction(analysis_date, STOP_SEG_DICT)
-    merge_onto_usable_vp(analysis_date, STOP_SEG_DICT)
     
+    time1 = datetime.datetime.now()
+    logger.info(f"export vp direction: {time1 - start}")
+    
+    add_direction_to_usable_vp(analysis_date, STOP_SEG_DICT)
+        
     end = datetime.datetime.now()
+    logger.info(f"export usable vp with direction: {end - time1}")
     logger.info(f"execution time: {end - start}")

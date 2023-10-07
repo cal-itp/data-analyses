@@ -125,17 +125,19 @@ def pare_down_vp_to_valid_trips(
     usable_vp = usable_vp.assign(
         x = usable_vp.geometry.x,
         y = usable_vp.geometry.y,
-        vp_idx = usable_vp.index.astype("int32")
+        vp_idx = usable_vp.index.astype
     ).drop(columns = "geometry")
     
     
     # Either use dask (which kills kernel here) or remove the existing folder of output
     # https://stackoverflow.com/questions/69092126/is-it-possible-to-change-the-output-filenames-when-saving-as-partitioned-parquet
-    if fs.exists(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}/"):
-        fs.rm(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}/", recursive=True)
+    export_path = f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}_stage"
+    
+    if fs.exists(export_path):
+        fs.rm(export_path, recursive=True)
     
     usable_vp.to_parquet(
-        f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
+        export_path,
         partition_cols = "gtfs_dataset_key",
         # if we don't delete the entire folder of partitioned parquets, this
         # can delete it if the partitions have the same name
