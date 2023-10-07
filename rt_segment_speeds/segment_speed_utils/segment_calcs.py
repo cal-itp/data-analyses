@@ -188,7 +188,9 @@ def get_usable_vp_bounds_by_trip(df: dd.DataFrame) -> pd.DataFrame:
     But for segments in the middle of the shape, the previous vp can be anywhere,
     maybe several segments away.
     """
-    
+    if isinstance(df, pd.DataFrame):
+        df = dd.from_pandas(df, npartitions=3)
+        
     grouped_df = df.groupby("trip_instance_key", 
                             observed=True, group_keys=False)
 
