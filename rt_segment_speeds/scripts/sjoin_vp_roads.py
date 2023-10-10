@@ -101,13 +101,10 @@ def sjoin_vp_to_segments(
         columns = ["vp_idx", "x", "y", "vp_primary_direction"],
     ).repartition(npartitions=100)
     
-    # Maybe work on primary/secondary segments first
-    # then any vp_idx that has no sjoin result can be passed to local
-    primary_secondary_segments = A1.import_segments_and_buffer(
+    segments = A1.import_segments_and_buffer(
         f"{SEGMENT_FILE}_{analysis_date}",
         BUFFER_METERS,
         SEGMENT_IDENTIFIER_COLS,
-        filters = [[("mtfcc", "in", ["S1100", "S1200"])]]
     )
     
     time1 = datetime.datetime.now()
@@ -118,73 +115,29 @@ def sjoin_vp_to_segments(
     results = [
         stage_direction_results(
             vp,
-            primary_secondary_segments,
+            segments,
             SEGMENT_IDENTIFIER_COLS, 
             one_direction
         ) for one_direction in all_directions
     ]
     
     time2 = datetime.datetime.now()
-    logger.info(f"primary/secondary sjoin with map_partitions: {time2 - time1}")
+    logger.info(f"sjoin with map_partitions: {time2 - time1}")
     
     full_results = dd.multi.concat(results, axis=0).reset_index(drop=True)
-    full_results = full_results.repartition(npartitions=2)
+    full_results = full_results.repartition(npartitions=4)
     
     full_results.to_parquet(
-        f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_prisec_{analysis_date}",
+        f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_{analysis_date}",
         overwrite = True
     )
-    
-    present_vp = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_prisec_{analysis_date}",
-        columns = ["vp_idx"]
-    ).vp_idx.unique().tolist()
-    print(f"# vp not yet joined: {len(present_vp)}")
     
     time3 = datetime.datetime.now()
-    #logger.info(f"export partitioned results: {time3 - time2}")
-    
-    
-    vp_round2 = dd.read_parquet(
-        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}/",
-        columns = ["vp_idx", "x", "y", "vp_primary_direction"],
-        filters = [[("vp_idx", "not in", present_vp)]]
-    ).repartition(npartitions=50)
-    
-    local_segments = A1.import_segments_and_buffer(
-        f"{SEGMENT_FILE}_{analysis_date}",
-        BUFFER_METERS,
-        SEGMENT_IDENTIFIER_COLS,
-        filters = [[("mtfcc", "==", "S1400")]]
-    )
-    
-    results2 = [
-        stage_direction_results(
-            vp_round2,
-            local_segments,
-            SEGMENT_IDENTIFIER_COLS, 
-            one_direction
-        ) for one_direction in all_directions
-    ]
-    
-    time4 = datetime.datetime.now()
-    logger.info(f"local sjoin with map_partitions: {time4 - time3}")
-    
-    full_results2 = dd.multi.concat(results2, axis=0).reset_index(drop=True)
-    full_results2 = full_results2.repartition(npartitions=2)
-    
-    full_results2.to_parquet(
-        f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_local_{analysis_date}",
-        overwrite = True
-    )
-    
-    time5 = datetime.datetime.now()
-    logger.info(f"export partitioned results: {time5 - time4}")
-    
+    logger.info(f"export partitioned results: {time3 - time2}")
     
     
 if __name__ == "__main__":
-    LOG_FILE = "../logs/test_sjoin_roads.log"
+    LOG_FILE = "../logs/sjoin_vp_segments.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
