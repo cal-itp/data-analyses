@@ -309,9 +309,6 @@ def index(
             site_output_dir = PORTFOLIO_DIR / Path(name)
             sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
 
-    rendered_index_dir = "./portfolio/index"
-    shutil.rmtree(rendered_index_dir, ignore_errors=True)
-    os.makedirs(f"{rendered_index_dir}/rt/")
     for template in ["index.html", "_redirects"]:
         fname = f"./portfolio/index/{template}"
         with open(fname, "w") as f:
@@ -332,10 +329,8 @@ def index(
         args.append("--prod")
 
     if deploy:
-        typer.secho(f"deploying with args {' '.join(args)}", fg=typer.colors.GREEN)
+        typer.secho(f"deploying with args {args}", fg=typer.colors.GREEN)
         subprocess.run(args).check_returncode()
-    else:
-        typer.secho(f"skipping deploy (may run manually): {' '.join(args)}", fg=typer.colors.YELLOW)
 
 
 @app.command()

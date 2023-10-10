@@ -36,10 +36,8 @@ parts:
         sections:
           - itp_id: 4
           - itp_id: 61
-          - itp_id: 282
           - itp_id: 110
           - itp_id: 247
-          - itp_id: 301
           - itp_id: 350
           - itp_id: 70
           - itp_id: 336
@@ -48,7 +46,7 @@ parts:
           - itp_id: 167
           - itp_id: 194
           - itp_id: 218
-          - itp_id: 246
+          - itp_id: 257
           - itp_id: 280
           - itp_id: 290
           - itp_id: 294
@@ -57,6 +55,7 @@ parts:
           - itp_id: 314
           - itp_id: 315
           - itp_id: 33
+          - itp_id: 368
       - caption: District 05 - San Luis Obispo
         params:
           district: 05 - San Luis Obispo
@@ -86,6 +85,7 @@ parts:
           - itp_id: 75
           - itp_id: 87
           - itp_id: 97
+          - itp_id: 164
           - itp_id: 183
           - itp_id: 210
           - itp_id: 228
@@ -99,6 +99,7 @@ parts:
           - itp_id: 339
           - itp_id: 112
           - itp_id: 123
+          - itp_id: 170
           - itp_id: 182
           - itp_id: 380
       - caption: District 08 - San Bernardino
