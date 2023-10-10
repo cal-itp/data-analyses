@@ -324,8 +324,8 @@ if __name__ == '__main__':
     road_type_values = ["S1100", "S1200"]
 
     roads = load_roads(filtering = [("MTFCC", "in", road_type_values)])
-    roads_segmented = cut_primary_secondary_roads(roads, ROAD_SEGMENT_METERS)
-    primary_secondary_roads = append_reverse_segments(roads_segmented)
+    primary_secondary_roads = cut_primary_secondary_roads(roads, ROAD_SEGMENT_METERS)
+    #primary_secondary_roads = append_reverse_segments(roads_segmented)
     
     utils.geoparquet_gcs_export(
         primary_secondary_roads,
@@ -339,9 +339,9 @@ if __name__ == '__main__':
     # Grab Sep 2023's shapes as base to grab majority of local roads we def need to cut
     road_type = "local"    
     roads = load_roads(filtering = [("MTFCC", "==", "S1400")])
-    roads_segmented = local_roads_base(roads, ROAD_SEGMENT_METERS)
-    local_roads = append_reverse_segments(roads_segmented).drop(
-        columns = "road_length")
+    local_roads = local_roads_base(roads, ROAD_SEGMENT_METERS)
+    #local_roads = append_reverse_segments(roads_segmented).drop(
+    #    columns = "road_length")
     
     utils.geoparquet_gcs_export(
         local_roads,
