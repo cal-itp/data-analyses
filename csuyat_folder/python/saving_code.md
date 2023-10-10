@@ -6,4 +6,6 @@ is it because i did not make a pull request?
 
 ...
 
-Amanda helped me figure it out. Im just stupid
+Amanda helped me figure it out. Im just stupid.
+
+asdfhasdfhaksjldhfljkasdhlfkjashdkflasd.

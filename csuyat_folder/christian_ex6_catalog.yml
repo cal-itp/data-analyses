@@ -1,0 +1,14 @@
+metadata:
+  version: 1
+sources:
+  stops:
+   driver: csv
+   description: stops in merced and caltrain
+   args:
+     urlpath: gs://calitp-analytics-data/data-analyses/csuyat_folder/stops_caltrain_merced.csv
+
+  ca_counties:
+    driver: geojson
+    description: CA county polygons
+    args:
+      urlpath: https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson
