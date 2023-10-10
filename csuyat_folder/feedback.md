@@ -231,3 +231,32 @@
    * Switch the buffering to occur on SHN
    * Continue using the same methodology related to `overlay_dissolve.geom_len / overlay_dissolve.rail_len)*100)` and using a function to categorize each route.
 * All in all, valiant effort!
+
+## Exercise 9
+* `stops` should be read in with `gpd.read_parquet`, not `pd.read_parquet`. The hint is that there is a `geometry` column that looks like gibberish. If you read it in with `geopandas`, it'll look normal.
+* Be careful whether you use `set_crs` or `to_crs`. Here: `stops2 = gpd.GeoDataFrame(stops2).set_geometry('pt_geom').set_crs('EPSG:2229')`, instead of setting the CRS right away, you should check whether it is set already. If `stops2.crs is None`, then the CRS should be set to `EPSG:4326` first, based on the format (-118, 34).  * Following setting the correct CRS, you should use `to_crs` here: 
+    ```
+    def makegdf(df, geom):
+        gdf = gpd.GeoDataFrame(df).set_geometry(geom).set_crs('EPSG:2229')
+
+        return gdf 
+    ```
+* If you read in `stops` with `geopandas`, the CRS would already be set, and you can skip over creating your own geometry column, and simply project it to `EPSG:2229`. (This is what you did with the `highways` dataset). 
+* When you set the CRS (incorrectly) to `EPSG:2229` when it is **actually** `EPSG:4326`, you'll get funky results like distance being in decimal degrees (0.0000, 0.00001, etc). That's a hint to go to an earlier step to fix it. You are expecting distances in feet, so it'd be reasonable for first and last stops to be more than 0 ft apart, unless every single route ran in a circulator/loop.
+* When creating your trip-level df with the straight line distance between first and last stop, `trip_distance`, I would instead go back to these 2 gdfs, merge first, then find the distance: 
+    ```
+    # before this, make sure any trip-level aggregation is done with feed_key and trip_id
+    testpv = gdfmin.merge(
+        gdfmax,
+        on=['feed_key', 'trip_id'],
+        how='inner'
+    )
+    
+    testpv = testpv.assign(
+        distance = testpv.first_stop_geom.distance(testpv.last_stop_geom)
+    )
+    ```
+    * I noticed a warning that the indices of the geoseries are different. That tells me either `gdfmin` or `gdfmax` is longer (perhaps due to the `how='left'`)? If they're of different lengths, the first row of one series is having its distance calculated against the first row of the other series, but you have no guarantee that these 2 rows actually refer to the same trip. Merging first, then calculating the distance after ensures you're lining up the columns correctly, so distance is being calculated between the first/last stop of the same trip.
+* Good job on the distance from every stop to the interstate.
+   * Following this, I'm looking for a `groupby/agg` at the trip-level to find the minimum distance, across all stops present, for a given trip. Take that value and merge it back onto your trip results with distance between first/last stop.
+* Your final output contains duplicate rows (because the merges were done for the trip-stop), but outputs should be per trip (feed_key, trip_id), not (feed_key, trip_id, stop_id, stop_key).
