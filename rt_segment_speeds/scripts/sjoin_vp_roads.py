@@ -114,7 +114,7 @@ def sjoin_vp_to_segments(
     logger.info(f"import vp and segments: {time1 - time0}")
     
     all_directions = ["Northbound", "Southbound", "Eastbound", "Westbound"]
-
+    
     results = [
         stage_direction_results(
             vp,
@@ -125,7 +125,7 @@ def sjoin_vp_to_segments(
     ]
     
     time2 = datetime.datetime.now()
-    logger.info(f"sjoin with map_partitions: {time2 - time1}")
+    logger.info(f"primary/secondary sjoin with map_partitions: {time2 - time1}")
     
     full_results = dd.multi.concat(results, axis=0).reset_index(drop=True)
     full_results = full_results.repartition(npartitions=2)
@@ -135,8 +135,52 @@ def sjoin_vp_to_segments(
         overwrite = True
     )
     
+    present_vp = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_prisec_{analysis_date}",
+        columns = ["vp_idx"]
+    ).vp_idx.unique().tolist()
+    print(f"# vp not yet joined: {len(present_vp)}")
+    
     time3 = datetime.datetime.now()
-    logger.info(f"export partitioned results: {time3 - time2}")
+    #logger.info(f"export partitioned results: {time3 - time2}")
+    
+    
+    vp_round2 = dd.read_parquet(
+        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}/",
+        columns = ["vp_idx", "x", "y", "vp_primary_direction"],
+        filters = [[("vp_idx", "not in", present_vp)]]
+    ).repartition(npartitions=50)
+    
+    local_segments = A1.import_segments_and_buffer(
+        f"{SEGMENT_FILE}_{analysis_date}",
+        BUFFER_METERS,
+        SEGMENT_IDENTIFIER_COLS,
+        filters = [[("mtfcc", "==", "S1400")]]
+    )
+    
+    results2 = [
+        stage_direction_results(
+            vp_round2,
+            local_segments,
+            SEGMENT_IDENTIFIER_COLS, 
+            one_direction
+        ) for one_direction in all_directions
+    ]
+    
+    time4 = datetime.datetime.now()
+    logger.info(f"local sjoin with map_partitions: {time4 - time3}")
+    
+    full_results2 = dd.multi.concat(results2, axis=0).reset_index(drop=True)
+    full_results2 = full_results2.repartition(npartitions=2)
+    
+    full_results2.to_parquet(
+        f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_local_{analysis_date}",
+        overwrite = True
+    )
+    
+    time5 = datetime.datetime.now()
+    logger.info(f"export partitioned results: {time5 - time4}")
+    
     
     
 if __name__ == "__main__":
