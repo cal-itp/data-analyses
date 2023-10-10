@@ -125,7 +125,7 @@ def pare_down_vp_to_valid_trips(
     usable_vp = usable_vp.assign(
         x = usable_vp.geometry.x,
         y = usable_vp.geometry.y,
-        vp_idx = usable_vp.index.astype
+        vp_idx = usable_vp.index
     ).drop(columns = "geometry")
     
     
