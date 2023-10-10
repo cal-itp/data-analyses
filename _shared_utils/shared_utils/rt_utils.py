@@ -22,7 +22,6 @@ from shared_utils import geography_utils, gtfs_utils_v2, rt_dates, utils
 from siuba import *
 
 fs = get_fs()
-fs = get_fs()
 
 # set system time
 os.environ["TZ"] = "America/Los_Angeles"
