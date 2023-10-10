@@ -1,4 +1,4 @@
-# Feedback for Christian
+# Feedback for Christian 
 
 ## Exercise 1
 * Use `git mv` to change the path of where your current exercises in progress and future exercises live. Use `csuyat_folder` and not `csuyat_folder/python`.    
