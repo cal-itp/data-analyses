@@ -22,7 +22,6 @@ from shared_utils import geography_utils, gtfs_utils_v2, rt_dates, utils
 from siuba import *
 
 fs = get_fs()
-
 fs = get_fs()
 
 # set system time
@@ -115,18 +114,7 @@ def reversed_colormap(existing: branca.colormap.ColorMap) -> branca.colormap.Col
     )
 
 
-def primary_cardinal_direction(origin, destination) -> str:
-    """
-    origin: shapely.geometry.Point
-    destination: shapely.geometry.Point
-
-    Takes point geometry and returns the primary cardinal direction
-    (north, south, east, west). To use, first grab the origin
-    and destination of a line geometry.
-    """
-    distance_east = destination.x - origin.x
-    distance_north = destination.y - origin.y
-
+def cardinal_definition_rules(distance_east: float, distance_north: float) -> str:
     if abs(distance_east) > abs(distance_north):
         if distance_east > 0:
             return "Eastbound"
@@ -141,6 +129,24 @@ def primary_cardinal_direction(origin, destination) -> str:
             return "Southbound"
         else:
             return "Unknown"
+
+
+def primary_cardinal_direction(
+    origin: shapely.geometry.Point,
+    destination: shapely.geometry.Point,
+) -> str:
+    """
+    origin: shapely.geometry.Point
+    destination: shapely.geometry.Point
+
+    Takes point geometry and returns the primary cardinal direction
+    (north, south, east, west). To use, first grab the origin
+    and destination of a line geometry.
+    """
+    distance_east = destination.x - origin.x
+    distance_north = destination.y - origin.y
+
+    return cardinal_definition_rules(distance_east, distance_north)
 
 
 def add_origin_destination(
