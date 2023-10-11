@@ -56,3 +56,7 @@
 2023-09-21 18:11:04.091 | INFO     | __main__:<module>:464 - remove erroneous sjoin results: 0:07:11.251722
 2023-09-21 18:55:33.230 | INFO     | __main__:<module>:456 - Analysis date: 2023-03-15
 2023-09-21 19:05:26.800 | INFO     | __main__:<module>:464 - remove erroneous sjoin results: 0:09:53.569193
+2023-10-10 16:26:03.401 | INFO     | __main__:<module>:189 - Analysis date: 2023-09-13
+2023-10-10 16:26:54.759 | INFO     | __main__:sjoin_vp_to_segments:111 - import vp and segments: 0:00:51.353998
+2023-10-10 16:26:55.499 | INFO     | __main__:sjoin_vp_to_segments:125 - sjoin with map_partitions: 0:00:00.739841
+2023-10-10 16:29:18.592 | INFO     | __main__:sjoin_vp_to_segments:136 - export partitioned results: 0:02:23.093345

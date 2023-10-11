@@ -77,11 +77,8 @@ def monthly_local_linearids(
 
         roads_segmented2 = cut_road_segments.add_segment_direction(roads_segmented)
 
-        roads_segmented_both_sets = cut_road_segments.append_reverse_segments(
-            roads_segmented2)
-
         utils.geoparquet_gcs_export(
-            roads_segmented_both_sets,
+            roads_segmented2,
             f"{SHARED_GCS}road_segments_monthly_append/",
             f"segmented_roads_{analysis_date}"
         )

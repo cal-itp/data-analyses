@@ -286,27 +286,6 @@ def add_segment_direction(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     ).drop(columns = ["origin", "destination"])
 
     return df
-    
-    
-def append_reverse_segments(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    """
-    Flip the geometry for road segment and append it to df.
-    If we have eastbound segments, create set of westbound segments
-    so we can capture both sides of street.
-    """
-    df_flipped = df.assign(
-        geometry = df.geometry.reverse(),
-    )
-    
-    df_flipped2 = add_segment_direction(df_flipped)
-    
-    both_sets_of_segments = pd.concat(
-        [df, df_flipped2], axis=0
-    ).sort_values(
-        ["linearid", "segment_sequence", "primary_direction"]
-    ).reset_index(drop=True)
-    
-    return both_sets_of_segments
  
 
 if __name__ == '__main__': 
@@ -324,8 +303,8 @@ if __name__ == '__main__':
     road_type_values = ["S1100", "S1200"]
 
     roads = load_roads(filtering = [("MTFCC", "in", road_type_values)])
-    roads_segmented = cut_primary_secondary_roads(roads, ROAD_SEGMENT_METERS)
-    primary_secondary_roads = append_reverse_segments(roads_segmented)
+    primary_secondary_roads = cut_primary_secondary_roads(
+        roads, ROAD_SEGMENT_METERS).drop(columns = "road_length")
     
     utils.geoparquet_gcs_export(
         primary_secondary_roads,
@@ -339,8 +318,7 @@ if __name__ == '__main__':
     # Grab Sep 2023's shapes as base to grab majority of local roads we def need to cut
     road_type = "local"    
     roads = load_roads(filtering = [("MTFCC", "==", "S1400")])
-    roads_segmented = local_roads_base(roads, ROAD_SEGMENT_METERS)
-    local_roads = append_reverse_segments(roads_segmented).drop(
+    local_roads = local_roads_base(roads, ROAD_SEGMENT_METERS).drop(
         columns = "road_length")
     
     utils.geoparquet_gcs_export(
