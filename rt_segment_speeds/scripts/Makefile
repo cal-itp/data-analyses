@@ -19,7 +19,10 @@ speeds_pipeline:
 	#python C2_triangulate_vp.py      
 	#python C3_trip_route_speed.py  
 
-   
+sjoin_prep:
+	python A0_preprocessing.py
+	python find_vp_direction.py
+    
 download_roads:
 	#pip install esridump
 	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson

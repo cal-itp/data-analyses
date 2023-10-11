@@ -1,0 +1,5 @@
+2023-10-07 13:54:49.607 | INFO     | __main__:<module>:169 - Analysis date: 2023-09-13
+2023-10-07 13:57:49.198 | INFO     | __main__:attach_prior_vp_add_direction:85 - persist vp gddf: 0:02:59.585829
+2023-10-07 13:58:04.790 | INFO     | __main__:attach_prior_vp_add_direction:111 - np vectorize arrays for direction: 0:00:15.592161
+2023-10-07 13:59:04.082 | INFO     | __main__:add_direction_to_usable_vp:156 - export usable vp with direction: 0:00:53.426991
+2023-10-07 13:59:04.344 | INFO     | __main__:<module>:179 - execution time: 0:04:14.735599
