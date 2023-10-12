@@ -18,3 +18,7 @@
 2023-09-14 10:54:01.352 | INFO     | __main__:<module>:136 - get pairwise table: 0:00:01.276375
 2023-09-14 10:54:11.543 | INFO     | __main__:<module>:160 - compute for pairwise/subset_corridors: 0:00:10.190855
 2023-09-14 10:54:13.862 | INFO     | __main__:<module>:171 - execution time: 0:00:13.785805
+2023-10-12 10:22:42.315 | INFO     | __main__:<module>:127 - Analysis date: 2023-10-11
+2023-10-12 10:22:43.454 | INFO     | __main__:<module>:136 - get pairwise table: 0:00:01.115271
+2023-10-12 10:22:55.490 | INFO     | __main__:<module>:160 - compute for pairwise/subset_corridors: 0:00:12.036398
+2023-10-12 10:22:57.950 | INFO     | __main__:<module>:171 - execution time: 0:00:15.611292
