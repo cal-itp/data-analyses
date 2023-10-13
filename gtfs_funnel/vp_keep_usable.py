@@ -147,7 +147,7 @@ if __name__ == "__main__":
     
     from update_vars import analysis_date_list, CONFIG_DICT
     
-    LOG_FILE = "../logs/usable_rt_vp.log"
+    LOG_FILE = "./logs/usable_rt_vp.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
