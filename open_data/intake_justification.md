@@ -8,7 +8,7 @@ Document links, justification, for why datasets need to be made public. Submit t
     * Division / Program: `Rail and Mass Transportation`
     * Update or New: `Update existing service`
     * Enterprise Geodatabase Name: `HQ`
-    * Feature Class Name: `HQ.ca_hq_transit_stops, HQ.ca_hq_transit_areas, HQ.ca_transit_stops, HQ.ca_transit_routes`, `HQ.speeds_by_stop_segments`
+    * Feature Class Name: `HQ.ca_hq_transit_stops, HQ.ca_hq_transit_areas, HQ.ca_transit_stops, HQ.ca_transit_routes`, `HQ.speeds_by_stop_segments`, `HQ.speeds_by_route_time_of_day`
     
 1. [Open support ticket for GIS](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNkI2T0hGWElZMUcwTDRUOUNCU0VWMTUxWi4u)
 
