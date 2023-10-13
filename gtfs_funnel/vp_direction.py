@@ -19,8 +19,7 @@ from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import helpers, segment_calcs
-from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
-                                              PROJECT_CRS, CONFIG_PATH)
+from segment_speed_utils.project_vars import SEGMENT_GCS, PROJECT_CRS
 from shared_utils import rt_utils
 
 fs = gcsfs.GCSFileSystem()
@@ -37,7 +36,7 @@ def attach_prior_vp_add_direction(
     save out a parquet and read it in to merge later.
     """
     time0 = datetime.datetime.now()
-    INPUT_FILE = dict_inputs["stage1"]
+    INPUT_FILE = dict_inputs["usable_vp_file"]
 
     vp = dd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage",
@@ -118,12 +117,15 @@ def attach_prior_vp_add_direction(
         f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet")    
 
 
-def add_direction_to_usable_vp(analysis_date: str, dict_inputs: dict):
+def add_direction_to_usable_vp(
+    analysis_date: str, 
+    dict_inputs: dict = {}
+):
     """
     Merge staged vp_usable (partitioned by gtfs_dataset_key)
     to the vp direction results.
     """
-    INPUT_FILE = dict_inputs["stage1"]
+    INPUT_FILE = dict_inputs["usable_vp_file"]
     
     usable_vp = pd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage"
@@ -158,30 +160,33 @@ def add_direction_to_usable_vp(analysis_date: str, dict_inputs: dict):
 
 if __name__ == "__main__":
     
+    from update_vars import analysis_date_list, CONFIG_DICT
+    
     LOG_FILE = "../logs/find_vp_direction.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
     
-    start = datetime.datetime.now()
+    for analysis_date in analysis_date_list:
     
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
-    attach_prior_vp_add_direction(analysis_date, STOP_SEG_DICT)
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"export vp direction: {time1 - start}")
-    
-    add_direction_to_usable_vp(analysis_date, STOP_SEG_DICT)
-    
-    # Clean up staged files
-    INPUT_FILE = STOP_SEG_DICT["stage1"]
-    fs.rm(f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage/", recursive=True)
-    fs.rm(f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet")
-    
-    end = datetime.datetime.now()
-    logger.info(f"export usable vp with direction: {end - time1}")
-    logger.info(f"execution time: {end - start}")
+        logger.info(f"Analysis date: {analysis_date}")
+
+        start = datetime.datetime.now()
+
+        attach_prior_vp_add_direction(analysis_date, CONFIG_DICT)
+
+        time1 = datetime.datetime.now()
+        logger.info(f"export vp direction: {time1 - start}")
+
+        add_direction_to_usable_vp(analysis_date, CONFIG_DICT)
+
+        # Clean up staged files
+        INPUT_FILE = CONFIG_DICT["usable_vp_file"]
+        fs.rm(f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage/", recursive=True)
+        fs.rm(f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet")
+
+        end = datetime.datetime.now()
+        logger.info(f"export usable vp with direction: {end - time1}")
+        logger.info(f"execution time: {end - start}")
