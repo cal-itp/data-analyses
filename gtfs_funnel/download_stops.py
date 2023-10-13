@@ -13,15 +13,13 @@ from loguru import logger
 from download_trips import get_operators
 from calitp_data_analysis import geography_utils, utils
 from shared_utils import gtfs_utils_v2
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
 
-if __name__ == "__main__":    
-    
-    logger.add("./logs/download_data.log", retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
-    
+
+def download_one_day(analysis_date: str):
+    """
+    Download single day for stops.
+    """
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
@@ -48,13 +46,12 @@ if __name__ == "__main__":
         "stop_event_count"
     ] + route_type_cols + ["missing_route_type"]
 
-    
     stops = gtfs_utils_v2.get_stops(
         selected_date = analysis_date,
         operator_feeds = FEEDS_TO_RUN,
         stop_cols = keep_stop_cols,
         get_df = True,
-        crs = geography_utils.CA_NAD83Albers,
+        crs = geography_utils.WGS84,
     )
     
     utils.geoparquet_gcs_export(
@@ -65,3 +62,18 @@ if __name__ == "__main__":
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+    
+    return
+
+
+if __name__ == "__main__":    
+    
+    from update_vars import analysis_date_list
+
+    logger.add("./logs/download_data.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    for analysis_date in analysis_date_list:
+        download_one_day(analysis_date)
