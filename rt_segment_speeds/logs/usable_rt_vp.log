@@ -21,4 +21,6 @@
 2023-08-24 14:23:13.391 | INFO     | __main__:<module>:167 - execution time: 0:01:40.133174
 2023-09-14 12:51:45.121 | INFO     | __main__:<module>:154 - Analysis date: 2023-09-13
 2023-09-14 12:53:56.411 | INFO     | __main__:<module>:167 - pare down vp
-2023-09-14 12:53:56.412 | INFO     | __main__:<module>:170 - execution time: 0:02:11.273944
+2023-09-14 12:53:56.412 | INFO     | __main__:<module>:170 - execution time: 0:02:11.2739442023-10-12 11:13:11.171 | INFO     | __main__:<module>:156 - Analysis date: 2023-10-11
+2023-10-12 11:16:02.518 | INFO     | __main__:<module>:169 - pare down vp
+2023-10-12 11:16:02.518 | INFO     | __main__:<module>:172 - execution time: 0:02:51.325929
