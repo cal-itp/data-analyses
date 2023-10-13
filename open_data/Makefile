@@ -1,15 +1,5 @@
-download_schedule_data_one_day:
-# make sure to update update_vars.py
-	python download_trips.py
-	python download_stops.py
-	python download_shapes.py
-	python download_stop_times.py
-
-download_vehicle_positions_one_day:
-	python download_vehicle_positions.py
-	python concatenate_vehicle_positions.py
-    
 create_gtfs_schedule_geospatial_open_data:
+# make sure to update update_vars.py
 	python create_routes_data.py
 	python create_stops_data.py
 	#python link_operator_to_county_district.py
