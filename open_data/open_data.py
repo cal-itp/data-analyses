@@ -11,8 +11,8 @@ RUN_ME = [
     "ca_hq_transit_stops",
     "ca_transit_routes", 
     "ca_transit_stops",
-    #"speeds_by_stop_segments", 
-    #"speeds_by_route_time_of_day",
+    "speeds_by_stop_segments", 
+    "speeds_by_route_time_of_day",
 ]
 
 if __name__=="__main__":
