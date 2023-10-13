@@ -9,13 +9,12 @@ import gcsfs
 import numpy as np
 import pandas as pd
 import sys
+import yaml
 
 from loguru import logger
 
-from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
-                                              CONFIG_PATH)
-
+from segment_speed_utils.project_vars import SEGMENT_GCS 
+                                              
 fs = gcsfs.GCSFileSystem()
 
 def trip_time_elapsed(
@@ -93,13 +92,13 @@ def pare_down_vp_to_valid_trips(
     to keep the enter / exit timestamps.
     Also, exclude any bad batches of trips.
     """
-    INPUT_FILE_PREFIX = dict_inputs["stage0"]
+    INPUT_FILE = dict_inputs["raw_vp_file"]
     TIMESTAMP_COL = dict_inputs["timestamp_col"]
     TIME_CUTOFF = dict_inputs["time_min_cutoff"]
-    EXPORT_FILE = dict_inputs["stage1"]
+    EXPORT_FILE = dict_inputs["usable_vp_file"]
 
     vp = gpd.read_parquet(
-        f"{SEGMENT_GCS}{INPUT_FILE_PREFIX}_{analysis_date}.parquet"
+        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet"
     )
     
     usable_trips = get_valid_trips_by_time_cutoff(
@@ -147,26 +146,30 @@ def pare_down_vp_to_valid_trips(
     
 if __name__ == "__main__":
     
+    from update_vars import analysis_date_list, CONFIG_PATH
+    
     LOG_FILE = "../logs/usable_rt_vp.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
     
     start = datetime.datetime.now()
     
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-   
-    time1 = datetime.datetime.now()
+    with open(CONFIG_PATH) as f: 
+        CONFIG_DICT = yaml.safe_load(f)   
     
-    pare_down_vp_to_valid_trips(
-        analysis_date,
-        dict_inputs = STOP_SEG_DICT
-    )
+    for analysis_date in analysis_date_list:
     
-    logger.info(f"pare down vp")
-   
-    end = datetime.datetime.now()
-    logger.info(f"execution time: {end-start}")
+        logger.info(f"Analysis date: {analysis_date}")
+
+        time1 = datetime.datetime.now()
+
+        pare_down_vp_to_valid_trips(
+            analysis_date,
+            CONFIG_DICT
+        )
+        
+        end = datetime.datetime.now()
+        logger.info(f"pare down vp: {end-start}")
