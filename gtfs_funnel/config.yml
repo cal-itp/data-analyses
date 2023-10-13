@@ -1,0 +1,4 @@
+raw_vp_file: "vp"
+usable_vp_file: "vp_usable"
+timestamp_col: "location_timestamp_local"
+time_min_cutoff: 10
