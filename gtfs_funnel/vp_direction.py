@@ -162,7 +162,7 @@ if __name__ == "__main__":
     
     from update_vars import analysis_date_list, CONFIG_DICT
     
-    LOG_FILE = "../logs/find_vp_direction.log"
+    LOG_FILE = "./logs/find_vp_direction.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -181,11 +181,6 @@ if __name__ == "__main__":
         logger.info(f"export vp direction: {time1 - start}")
 
         add_direction_to_usable_vp(analysis_date, CONFIG_DICT)
-
-        # Clean up staged files
-        INPUT_FILE = CONFIG_DICT["usable_vp_file"]
-        fs.rm(f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage/", recursive=True)
-        fs.rm(f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet")
 
         end = datetime.datetime.now()
         logger.info(f"export usable vp with direction: {end - time1}")
