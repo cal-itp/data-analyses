@@ -11,7 +11,7 @@ import sys
 from loguru import logger
 
 from shared_utils import gtfs_utils_v2
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
 
 
 def get_operators(analysis_date: str):
@@ -39,22 +39,19 @@ def get_operators(analysis_date: str):
     return operators_to_include
 
 
-if __name__=="__main__":
-    
-    logger.add("./logs/download_data.log", retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
-    
+def download_one_day(analysis_date: str):
+    """
+    Download single day for trips.
+    """
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
-    
+
     operators_df = get_operators(analysis_date)
-    
+
     FEEDS_TO_RUN = sorted(operators_df.feed_key.unique().tolist())    
-    
+
     logger.info(f"# operators to run: {len(FEEDS_TO_RUN)}")
-    
+
     dataset = "trips"
     logger.info(f"*********** Download {dataset} data ***********")
 
@@ -74,16 +71,31 @@ if __name__=="__main__":
         "trip_start_date_local_tz", "trip_first_departure_datetime_local_tz",
         "trip_last_arrival_datetime_local_tz"
     ]
-    
+
     trips = gtfs_utils_v2.get_trips(
         selected_date = analysis_date,
         operator_feeds = FEEDS_TO_RUN,
         trip_cols = keep_trip_cols,
         get_df = True,
     ) 
-    
+
     trips.to_parquet(
         f"{COMPILED_CACHED_VIEWS}{dataset}_{analysis_date}.parquet") 
-
+    
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+    
+    return
+
+    
+if __name__=="__main__":
+    
+    from update_vars import analysis_date_list
+    
+    logger.add("./logs/download_data.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    for analysis_date in analysis_date_list:
+        download_one_day(analysis_date)
