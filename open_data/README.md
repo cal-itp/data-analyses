@@ -7,17 +7,6 @@
 1. [CA Transit Stops](https://gis.data.ca.gov/datasets/900992cc94ab49dbbb906d8f147c2a72_0): metadata [feature server](https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_Transit_Stops/FeatureServer) or [map server](https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_Transit_Stops/MapServer)
 1. All GTFS datasets [metadata/data dictionary](https://data.ca.gov/dataset/cal-itp-gtfs-ingest-pipeline-dataset/resource/e26bf6ee-419d-4a95-8e4c-e2b13d5de793)
 
-## Download Single Day of GTFS Schedule & Real-Time Data
-Several regularly updated datasets share the same cached GTFS tables, including HQTA and GTFS Routes & Stops (geospatial) that are published to the open data portal, as well as the quarterly performance metrics.
-
-A selected day's worth of tables can be downloaded with these scripts:
-
-1. **Schedule data**: download data for [trips](./download_trips.py), [stops](./download_stops.py), [shapes](./download_shapes.py), and [stop times](./download_stop_times.py) and cache parquets in GCS
-   * In terminal: `make download_schedule_data_one_day`
-1. **Vehicle positions data**: download [RT vehicle positions](./download_vehicle_positions.py)
-   * In terminal: `make download_vehicle_positions_one_day`
-
-
 ## GTFS Schedule Routes & Stops Geospatial Data
 
 Traffic Ops had a request for all transit routes and transit stops to be published in the open data portal. 
