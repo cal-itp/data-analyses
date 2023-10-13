@@ -9,8 +9,6 @@ segmentize:
     
    
 speeds_pipeline:
-	python A0_preprocessing.py
-	python find_vp_direction.py
 	python A1_sjoin_vp_segments.py
 	python A2_sjoin_postprocessing.py
 	python A3_valid_vehicle_positions.py
@@ -20,9 +18,6 @@ speeds_pipeline:
 	python C2_triangulate_vp.py      
 	python C3_trip_route_speed.py  
 
-sjoin_prep:
-	python A0_preprocessing.py
-	python find_vp_direction.py
     
 download_roads:
 	#pip install esridump

@@ -22,10 +22,6 @@
 2023-10-12 10:32:55.776 | INFO     | __main__:<module>:289 - Analysis date: 2023-10-11
 2023-10-12 10:38:32.223 | INFO     | __main__:<module>:296 - Prep stop segment df: 0:05:36.430784
 2023-10-12 10:39:25.490 | INFO     | __main__:<module>:306 - execution time: 0:06:29.697506
-2023-10-12 17:23:23.186 | INFO     | __main__:<module>:315 - Analysis date: 2023-10-11
-2023-10-12 17:24:16.820 | INFO     | __main__:<module>:322 - Prep stop segment df: 0:00:53.633616
-2023-10-12 17:29:27.701 | INFO     | __main__:<module>:332 - execution time: 0:06:04.514431
-2023-10-12 17:58:10.220 | INFO     | __main__:<module>:312 - Analysis date: 2023-10-11
-2023-10-12 18:10:14.872 | INFO     | __main__:<module>:311 - Analysis date: 2023-10-11
-2023-10-12 18:15:48.074 | INFO     | __main__:<module>:318 - Prep stop segment df: 0:05:33.201061
-2023-10-12 18:15:53.605 | INFO     | __main__:<module>:326 - execution time: 0:05:38.732357
+2023-10-13 12:12:10.227 | INFO     | __main__:<module>:275 - Analysis date: 2023-10-11
+2023-10-13 12:12:55.686 | INFO     | __main__:<module>:282 - Prep stop segment df: 0:00:45.458045
+2023-10-13 12:13:00.995 | INFO     | __main__:<module>:290 - execution time: 0:00:50.767060

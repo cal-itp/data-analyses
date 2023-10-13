@@ -13,15 +13,12 @@ from loguru import logger
 from download_trips import get_operators
 from shared_utils import gtfs_utils_v2
 from calitp_data_analysis import geography_utils, utils
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
 
-if __name__ == "__main__":
-
-    logger.add("./logs/download_data.log", retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
-    
+def download_one_day(analysis_date: str):
+    """
+    Download single day for shapes.
+    """
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
@@ -64,4 +61,18 @@ if __name__ == "__main__":
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
+
+    return
+
+
+if __name__ == "__main__":
     
+    from update_vars import analysis_date_list
+
+    logger.add("./logs/download_data.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    for analysis_date in analysis_date_list:
+        download_one_day(analysis_date)
