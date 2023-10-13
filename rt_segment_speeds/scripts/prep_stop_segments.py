@@ -103,46 +103,24 @@ def stop_times_aggregated_to_shape_array_key(
     Then attach stop's point geom.
     """
     
-    trips_with_shape = trip_with_most_stops(analysis_date)
-    keep_shapes = trips_with_shape.shape_array_key.unique().tolist()
+    trips_with_shape = trip_with_most_stops(analysis_date)[
+        ["trip_instance_key", "shape_array_key"]]
     
-    stop_times = helpers.import_scheduled_stop_times(
-        analysis_date,
-        columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"],
-    ).merge(
-        trips_with_shape, 
-        on = ["feed_key", "trip_id"], 
-        how = "inner"
-    ).astype({"stop_sequence": "int16"}
-            ).rename(
-        columns = {"trip_id": "st_trip_id",
-                   "trip_instance_key": "st_trip_instance_key"}
-    )
+    keep_trips = trips_with_shape.trip_instance_key.unique().tolist()
     
-    stops = helpers.import_scheduled_stops(
-        analysis_date,
-        columns = ["feed_key", "stop_id", "stop_name", "geometry"],
-        get_pandas = False
-    ).drop_duplicates(
-        subset=["feed_key", "stop_id"]
-    ).rename(
-        columns = {"geometry": "stop_geometry"}
-    ).set_geometry("stop_geometry")
-    
-    
-    # Attach stop geom
-    st_with_stop_geom = dd.merge(
-        stops,
-        stop_times,
-        on = ["feed_key", "stop_id"],
-        how = "inner"
-    ).drop(columns = "feed_key")
+    stop_times = gpd.read_parquet(
+        f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet",
+        filters = [[("trip_instance_key", "in", keep_trips)]]
+    ).rename(columns = {
+        "trip_instance_key": "st_trip_instance_key", 
+        "geometry": "stop_geometry"
+    })
     
     # Note: there can be duplicate shape_array_key because of multiple feeds
     # Drop them now so we keep 1 set of shape-stop info
-    st_with_stop_geom = (st_with_stop_geom.sort_values("schedule_gtfs_dataset_key")
+    st_with_stop_geom = (stop_times.sort_values("schedule_gtfs_dataset_key")
                          .drop_duplicates(subset=[
-                             "shape_array_key", "st_trip_id", 
+                             "shape_array_key", "st_trip_instance_key", 
                              "stop_sequence"])
                          .reset_index(drop=True)
                         )
@@ -265,6 +243,7 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
         analysis_date, 
         columns = ["shape_array_key", "geometry"],
         get_pandas = False,
+        crs = PROJECT_CRS
     ).dropna(subset=["shape_array_key", "geometry"])
   
     

@@ -87,7 +87,7 @@ def import_segments_and_buffer(
 
 
 def get_sjoin_results(
-    vp_gddf: dg.GeoDataFrame, 
+    vp: dd.DataFrame, 
     segments: gpd.GeoDataFrame, 
     grouping_col: str,
     segment_identifier_cols: list,
@@ -98,7 +98,12 @@ def get_sjoin_results(
     Export just vp_idx and seg_idx as our "crosswalk" of sjoin results.
     If we use dask map_partitions, this is still faster than dask.delayed.
     """
-    vp_to_seg = dd.merge(
+    vp_gddf = gpd.GeoDataFrame(
+        vp,
+        geometry = gpd.points_from_xy(vp, x="x", y="y", crs=WGS84)
+    ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
+    
+    vp_to_seg = pd.merge(
         vp_gddf,
         segments,
         on = grouping_col,
@@ -109,6 +114,7 @@ def get_sjoin_results(
         is_within = vp_to_seg.geometry_x.within(vp_to_seg.geometry_y)
     ).query('is_within==True')
     
+
     results = (vp_in_seg[["vp_idx"] + segment_identifier_cols]
                .drop_duplicates()
                .reset_index(drop=True)
@@ -116,6 +122,34 @@ def get_sjoin_results(
     
     return results
 
+
+def stage_direction_results(
+    vp: dd.DataFrame, 
+    segments: gpd.GeoDataFrame, 
+    grouping_col: str,
+    segment_identifier_cols: list,
+    direction: str
+):
+    keep_vp = [direction, "Unknown"]
+    
+    vp_subset = vp[vp.vp_primary_direction.isin(keep_vp)].repartition(npartitions=20)
+    segments_subset = segments[
+        segments.primary_direction==direction].reset_index(drop=True)
+    
+    seg_id_dtypes = segments[segment_identifier_cols].dtypes.to_dict()
+    
+    results_subset = vp_subset.map_partitions(
+        get_sjoin_results,
+        segments_subset,
+        grouping_col,
+        segment_identifier_cols,
+        direction,
+        meta = {"vp_idx": "int64", 
+               **seg_id_dtypes},
+        align_dataframes = False
+    )
+    
+    return results_subset
     
 def sjoin_vp_to_segments(
     analysis_date: str,
@@ -160,41 +194,39 @@ def sjoin_vp_to_segments(
     # Import vp, keep trips that are usable
     vp = dd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}/",
-        columns = ["trip_instance_key", "vp_idx", "x", "y"],
+        columns = ["trip_instance_key", "vp_idx", "x", "y", 
+                   "vp_primary_direction"],
     ).merge(
         vp_trips,
         on = "trip_instance_key",
         how = "inner"
     )
     
-    vp_gddf = dg.from_dask_dataframe(
-        vp,
-        geometry = dg.points_from_xy(vp, x="x", y="y", crs=WGS84)
-    ).set_crs(WGS84).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
-    
-    
-    vp_gddf = vp_gddf.repartition(npartitions=100).persist()
+    vp = vp.repartition(npartitions=100).persist()
     
     time1 = datetime.datetime.now()
     logger.info(f"prep vp and persist: {time1 - time0}")
     
-    # save dtypes as a dict to input in map_partitions
-    seg_id_dtypes = segments[SEGMENT_IDENTIFIER_COLS].dtypes.to_dict()
+    all_directions = ["Northbound", "Southbound", "Eastbound", "Westbound"]
     
-    results = vp_gddf.map_partitions(
-        get_sjoin_results,
-        segments,
-        GROUPING_COL,
-        SEGMENT_IDENTIFIER_COLS,
-        meta = {"vp_idx": "int64", **seg_id_dtypes},
-        align_dataframes = False
-    )
+    results = [
+        stage_direction_results(
+            vp,
+            segments,
+            GROUPING_COL,
+            SEGMENT_IDENTIFIER_COLS, 
+            one_direction
+        ) for one_direction in all_directions
+    ]
+    
     
     time2 = datetime.datetime.now()
     logger.info(f"sjoin with map_partitions: {time2 - time1}")
     
-    results = results.repartition(npartitions=5)
-    results.to_parquet(
+    full_results = dd.multi.concat(results, axis=0).reset_index(drop=True)
+    full_results = full_results.repartition(npartitions=4)
+
+    full_results.to_parquet(
         f"{SEGMENT_GCS}vp_sjoin/{EXPORT_FILE}_{analysis_date}",
         overwrite=True
     )
