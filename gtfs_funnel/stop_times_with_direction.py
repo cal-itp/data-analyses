@@ -6,6 +6,7 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 
 from calitp_data_analysis import utils
@@ -128,22 +129,26 @@ def assemble_stop_times_with_direction(analysis_date: str):
     
     first_stop = first_stop.assign(
         stop_primary_direction = "Unknown"
+    ).drop(columns = "prior_geometry").compute()
+    
+    other_stops_no_geom = other_stops.drop(columns = ["prior_geometry"]).compute()
+    
+    prior_geom = other_stops.prior_geometry.compute()
+    current_geom = other_stops.geometry.compute()
+        
+    stop_direction = np.vectorize(
+        rt_utils.primary_cardinal_direction)(prior_geom, current_geom)
+    
+    other_stops_no_geom = other_stops_no_geom.assign(
+        stop_primary_direction = stop_direction 
     )
     
-    other_stops = other_stops.assign(
-        stop_primary_direction = other_stops.apply(
-            lambda x: 
-            rt_utils.primary_cardinal_direction(x.prior_geometry, x.geometry),
-            axis=1, meta = ("stop_primary_direction", "object")
-        )
-    )
-    
-    scheduled_stop_times_with_direction = dd.multi.concat(
-        [first_stop, other_stops], 
+    scheduled_stop_times_with_direction = pd.concat(
+        [first_stop, other_stops_no_geom], 
         axis=0
-    ).drop(columns = ["prior_stop_sequence"])
+    )
     
-    df = scheduled_stop_times_with_direction.compute().sort_index()
+    df = scheduled_stop_times_with_direction.sort_index()
 
     time1 = datetime.datetime.now()
     print(f"get scheduled stop times with direction: {time1 - start}")
