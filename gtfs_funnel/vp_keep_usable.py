@@ -9,7 +9,6 @@ import gcsfs
 import numpy as np
 import pandas as pd
 import sys
-import yaml
 
 from loguru import logger
 
@@ -146,7 +145,7 @@ def pare_down_vp_to_valid_trips(
     
 if __name__ == "__main__":
     
-    from update_vars import analysis_date_list, CONFIG_PATH
+    from update_vars import analysis_date_list, CONFIG_DICT
     
     LOG_FILE = "../logs/usable_rt_vp.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -156,9 +155,6 @@ if __name__ == "__main__":
     
     
     start = datetime.datetime.now()
-    
-    with open(CONFIG_PATH) as f: 
-        CONFIG_DICT = yaml.safe_load(f)   
     
     for analysis_date in analysis_date_list:
     
@@ -172,4 +168,4 @@ if __name__ == "__main__":
         )
         
         end = datetime.datetime.now()
-        logger.info(f"pare down vp: {end-start}")
+        logger.info(f"pare down vp: {end - start}")
