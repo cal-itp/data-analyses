@@ -77,7 +77,7 @@ def find_prior_stop(
             .groupby("trip_instance_key")
             .stop_sequence
             .shift(1)
-        )
+        ).astype("Int64")
     )
     
     prior_stop_geom = stop_times[
