@@ -81,6 +81,8 @@ def remove_batched_parquets(analysis_date: str):
        
     
 if __name__ == "__main__":
+    
+    from update_vars import analysis_date_list
 
     LOG_FILE = "./logs/download_vp_v2.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -88,40 +90,42 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
+    for analysis_date in analysis_date_list:
     
-    start = datetime.datetime.now()
-        
-    # Concatenate all the batches
-    concatenated_vp_df = concat_batches(analysis_date)
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"concat and filter batched data: {time1 - start}")
-    
-    concatenated_vp_df.to_parquet(
-        f"{SEGMENT_GCS}vp_{analysis_date}_concat", 
-        partition_on = "gtfs_dataset_key")
-    
-    time2 = datetime.datetime.now()
-    logger.info(f"export concatenated vp: {time2 - time1}")
-    
-    # Import concatenated tabular vp and make it a gdf
-    vp = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_{analysis_date}_concat/"
-    ).reset_index(drop=True)
-    
-    vp_gdf = vp_into_gdf(vp)
+        logger.info(f"Analysis date: {analysis_date}")
 
-    utils.geoparquet_gcs_export(
-        vp_gdf,
-        SEGMENT_GCS,
-        f"vp_{analysis_date}"
-    )
-    
-    remove_batched_parquets(analysis_date)
-    logger.info(f"remove batched parquets")
-    
-    end = datetime.datetime.now()
-    logger.info(f"execution time: {end - start}")
+        start = datetime.datetime.now()
+
+        # Concatenate all the batches
+        concatenated_vp_df = concat_batches(analysis_date)
+
+        time1 = datetime.datetime.now()
+        logger.info(f"concat and filter batched data: {time1 - start}")
+
+        concatenated_vp_df.to_parquet(
+            f"{SEGMENT_GCS}vp_{analysis_date}_concat", 
+            partition_on = "gtfs_dataset_key")
+
+        time2 = datetime.datetime.now()
+        logger.info(f"export concatenated vp: {time2 - time1}")
+
+        # Import concatenated tabular vp and make it a gdf
+        vp = pd.read_parquet(
+            f"{SEGMENT_GCS}vp_{analysis_date}_concat/"
+        ).reset_index(drop=True)
+
+        vp_gdf = vp_into_gdf(vp)
+
+        utils.geoparquet_gcs_export(
+            vp_gdf,
+            SEGMENT_GCS,
+            f"vp_{analysis_date}"
+        )
+
+        remove_batched_parquets(analysis_date)
+        logger.info(f"remove batched parquets")
+
+        end = datetime.datetime.now()
+        logger.info(f"execution time: {end - start}")
     
     
