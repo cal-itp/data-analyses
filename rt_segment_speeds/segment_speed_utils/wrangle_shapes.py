@@ -2,6 +2,13 @@
 Functions for applying shapely project and interpolation.
 Move our shapes (linestrings) and stops (points) from coordinates
 to numpy arrays with numeric values (shape_meters) and vice versa.
+
+References:
+* Tried method 4: https://gis.stackexchange.com/questions/203048/split-lines-at-points-using-shapely -- debug because we lost curves
+* https://stackoverflow.com/questions/31072945/shapely-cut-a-piece-from-a-linestring-at-two-cutting-points
+* https://gis.stackexchange.com/questions/210220/break-a-shapely-linestring-at-multiple-points
+* https://gis.stackexchange.com/questions/416284/splitting-multiline-or-linestring-into-equal-segments-of-particular-length-using
+* https://stackoverflow.com/questions/62053253/how-to-split-a-linestring-to-segments
 """
 import dask.array as da
 import dask.dataframe as dd

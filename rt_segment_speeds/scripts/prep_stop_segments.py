@@ -1,31 +1,17 @@
 """
 Prep dfs to cut stop-to-stop segments by shape_id.
 
-Use np.arrays and store shape_geometry as meters from origin.
-An individual stop-to-stop segment has starting point of previous stop's projected coord and end point at current stop's projected coord.
-Also add in the shape's coords present (which adds more detail, including curves).
-
-gtfs_schedule.01_stop_route_table.ipynb
-shows that stop_sequence would probably be unique at shape_id level, but
-not anything more aggregated than that (not route-direction).
-
-References:
-* Tried method 4: https://gis.stackexchange.com/questions/203048/split-lines-at-points-using-shapely -- debug because we lost curves
-* https://stackoverflow.com/questions/31072945/shapely-cut-a-piece-from-a-linestring-at-two-cutting-points
-* https://gis.stackexchange.com/questions/210220/break-a-shapely-linestring-at-multiple-points
-* https://gis.stackexchange.com/questions/416284/splitting-multiline-or-linestring-into-equal-segments-of-particular-length-using
-* https://stackoverflow.com/questions/62053253/how-to-split-a-linestring-to-segments
+Pick a single trip with the most stops for each shape_array_key
+and use that to cut segments.
+We want to cut the most granular segments for each shape.
 """
 import os
 os.environ['USE_PYGEOS'] = '0'
 
-import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import shapely
 import sys
 
 from loguru import logger
@@ -34,7 +20,9 @@ from typing import Union
 from calitp_data_analysis import utils
 from segment_speed_utils import (helpers, gtfs_schedule_wrangling,
                                  wrangle_shapes)
-from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
+from segment_speed_utils.project_vars import (SEGMENT_GCS, 
+                                              RT_SCHED_GCS,
+                                              analysis_date, 
                                               PROJECT_CRS)
 
 
@@ -44,8 +32,7 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
     """
     trips = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["gtfs_dataset_key", "feed_key", "name", 
-                   "trip_id", "trip_instance_key", 
+        columns = ["name", "trip_instance_key", 
                    "shape_array_key"],
         get_pandas = True
     )
@@ -55,27 +42,24 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
         exclude_me = ["Amtrak Schedule", "*Flex"]
     ).drop(columns = "name")
     
-    stop_times = helpers.import_scheduled_stop_times(
-        analysis_date,
-        columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"]
-    )
-    
-    stops_per_trip = (stop_times.groupby(["feed_key", "trip_id"], 
-                                         observed=True, group_keys=False)
-                      .agg({"stop_id": "count"})
-                      .reset_index()
-                      .rename(columns = {"stop_id": "n_stops"})
-                     ).compute()
-    
-    df = pd.merge(
+    stop_times = pd.read_parquet(
+        f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet",
+        columns = ["trip_instance_key", "stop_sequence"]
+    ).merge(
         trips,
-        stops_per_trip,
-        on = ["feed_key", "trip_id"],
+        on = "trip_instance_key",
         how = "inner"
     )
     
-    df = df.assign(
-          max_stops = (df.groupby("shape_array_key")
+    stops_per_trip = (stop_times.groupby(["shape_array_key", "trip_instance_key"], 
+                                         observed=True, group_keys=False)
+                      .agg({"stop_sequence": "count"})
+                      .reset_index()
+                      .rename(columns = {"stop_sequence": "n_stops"})
+                     )
+    
+    df = stops_per_trip.assign(
+          max_stops = (stops_per_trip.groupby("shape_array_key")
                        .n_stops
                        .transform("max").fillna(0).astype(int)
                       )
@@ -83,7 +67,7 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
     
     # We can still have multiple trips within shape with same amt of stops
     # this is majority of cases
-    df2 = (df.sort_values(["shape_array_key", "trip_id"], 
+    df2 = (df.sort_values(["shape_array_key", "trip_instance_key"], 
                           ascending=[True, True])
            .drop_duplicates(subset="shape_array_key")
            .reset_index(drop=True)
@@ -103,14 +87,14 @@ def stop_times_aggregated_to_shape_array_key(
     Then attach stop's point geom.
     """
     
-    trips_with_shape = trip_with_most_stops(analysis_date)[
-        ["trip_instance_key", "shape_array_key"]]
-    
-    keep_trips = trips_with_shape.trip_instance_key.unique().tolist()
+    trips_with_shape = trip_with_most_stops(analysis_date)
     
     stop_times = gpd.read_parquet(
         f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet",
-        filters = [[("trip_instance_key", "in", keep_trips)]]
+    ).merge(
+        trips_with_shape,
+        on = "trip_instance_key",
+        how = "inner"
     ).rename(columns = {
         "trip_instance_key": "st_trip_instance_key", 
         "geometry": "stop_geometry"
@@ -205,59 +189,31 @@ def tag_shapes_with_inlining(
     return inlining_shapes
 
 
-def project_stop_to_shape(
-    stop_times: dg.GeoDataFrame,
-    shapes: dg.GeoDataFrame
-):
-    """
-    Project the stop geometry against the shape geometry.
-    Use map partitions, which treats each partition
-    as pd.DataFrame or gpd.GeoDataFrame
-    """
-    gdf = pd.merge(
-        stop_times,
-        shapes,
-        on = "shape_array_key",
-        how = "inner"
-    )
-        
-    # Get projected shape_meters 
-    gdf["shape_meters"] = gdf.apply(
-        lambda x: x.geometry.project(x.stop_geometry), 
-        axis=1, 
-    )
-    
-    df = gdf.drop(columns = "geometry")
-
-    return df
-
-
-
-def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
+def prep_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
 
     stop_times_with_geom = stop_times_aggregated_to_shape_array_key(
         analysis_date
     )
-    
+        
     shapes = helpers.import_scheduled_shapes(
         analysis_date, 
         columns = ["shape_array_key", "geometry"],
-        get_pandas = False,
+        get_pandas = True,
         crs = PROJECT_CRS
     ).dropna(subset=["shape_array_key", "geometry"])
   
-    
-    # Use map partitions to get shape_meters
-    existing_dtypes = stop_times_with_geom.dtypes.to_dict()
-
-    stop_times_with_geom2 = stop_times_with_geom.map_partitions(
-        project_stop_to_shape,
+    stop_times_with_geom2 = pd.merge(
+        stop_times_with_geom,
         shapes,
-        meta = {**existing_dtypes,
-                "shape_meters": "float64"},
-        align_dataframes = False,
-    ).compute()
+        on = "shape_array_key",
+        how = "inner"
+    )
     
+    stop_times_with_geom2 = stop_times_with_geom2.assign(
+        shape_meters = stop_times_with_geom2.apply(
+            lambda x: x.geometry.project(x.stop_geometry), 
+            axis=1)
+    ).drop(columns = "geometry")
     
     # Get the arrays of shape_array_keys to flag
     # Always return np arrays, need to compute
@@ -266,12 +222,14 @@ def prep_stop_segments(analysis_date: str) -> dg.GeoDataFrame:
     
     inlining_shapes = tag_shapes_with_inlining(stop_times_with_geom2)
     
+    loopy_inlining = np.union1d(loopy_shapes, inlining_shapes).tolist()
+    
     # Create column where it's 1 if it needs super_project, 
     # 0 for normal shapely.project   
     stop_times_with_geom2 = stop_times_with_geom2.assign(
         loop_or_inlining = stop_times_with_geom2.apply(
             lambda x: 
-            1 if x.shape_array_key in np.union1d(loopy_shapes, inlining_shapes)
+            1 if x.shape_array_key in loopy_inlining
             else 0, axis=1, 
         ).astype("int8")
     )
@@ -296,7 +254,7 @@ if __name__=="__main__":
     time1 = datetime.datetime.now()
     logger.info(f"Prep stop segment df: {time1-start}")
         
-    # Export this as partitioned parquet
+    # Export parquet
     stops_by_shape.to_parquet(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}_test.parquet", 
     )
