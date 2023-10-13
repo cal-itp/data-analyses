@@ -9,15 +9,16 @@ segmentize:
     
    
 speeds_pipeline:
-	#python A0_preprocessing.py
-	#python A1_sjoin_vp_segments.py
+	python A0_preprocessing.py
+	python find_vp_direction.py
+	python A1_sjoin_vp_segments.py
 	python A2_sjoin_postprocessing.py
 	python A3_valid_vehicle_positions.py
 	python B1_speeds_by_segment_trip.py
 	python B2_avg_speeds_by_segment.py
 	python B3_export.py
-	#python C2_triangulate_vp.py      
-	#python C3_trip_route_speed.py  
+	python C2_triangulate_vp.py      
+	python C3_trip_route_speed.py  
 
 sjoin_prep:
 	python A0_preprocessing.py
