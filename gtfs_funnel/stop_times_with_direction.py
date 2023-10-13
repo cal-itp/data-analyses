@@ -14,8 +14,12 @@ from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import RT_SCHED_GCS, PROJECT_CRS
 
 
-def prep_scheduled_stop_times(analysis_date: str):
-    
+def prep_scheduled_stop_times(analysis_date: str) -> dg.GeoDataFrame:
+    """
+    Attach stop geometry to stop_times data, and also 
+    add in trip_instance_key (from trips table), so 
+    this can be joined to any RT dataset.
+    """
     stops = helpers.import_scheduled_stops(
         analysis_date,
         columns = ["feed_key", "stop_id", "geometry"],
@@ -56,9 +60,13 @@ def prep_scheduled_stop_times(analysis_date: str):
 
 
 def find_prior_stop(
-    stop_times: dd.DataFrame,
+    stop_times: dg.GeoDataFrame,
     trip_stop_cols: list
-):
+) -> dg.GeoDataFrame:
+    """
+    For trip-stop, find the previous stop (using stop sequence).
+    Attach the previous stop's geometry.
+    """
     prior_stop = stop_times[trip_stop_cols].compute()
     
     prior_stop = prior_stop.assign(
@@ -96,6 +104,13 @@ def find_prior_stop(
 
 
 def assemble_stop_times_with_direction(analysis_date: str):
+    """
+    Assemble a stop_times table ready to be joined with 
+    RT data (has trip_instance_key).
+    For each stop, find the direction it's traveling (prior stop to current stop)
+    and attach that as a column.
+    The first stop in each trip has direction Unknown.
+    """
     start = datetime.datetime.now()
 
     scheduled_stop_times = prep_scheduled_stop_times(analysis_date).persist()
@@ -141,6 +156,8 @@ def assemble_stop_times_with_direction(analysis_date: str):
     
     end = datetime.datetime.now()
     print(f"execution time: {end - start}")
+    
+    return
 
 
 if __name__ == "__main__":  
