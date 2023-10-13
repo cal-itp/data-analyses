@@ -166,5 +166,3 @@ if __name__ == "__main__":
     
     for date in analysis_date_list:
         assemble_stop_times_with_direction(date)
-    
-    

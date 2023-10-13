@@ -18,7 +18,7 @@ from loguru import logger
 from siuba import *
 
 from shared_utils import schedule_rt_utils
-from update_vars import SEGMENT_GCS, analysis_date
+from update_vars import SEGMENT_GCS
 
 fs = gcsfs.GCSFileSystem()
 
@@ -99,7 +99,6 @@ def loop_through_batches_and_download_vp(
     for i, subset_operators in batches.items():
         time0 = datetime.datetime.now()
 
-        logger.info(f"batch {i}: {subset_operators}")
         df = download_vehicle_positions(
             analysis_date, subset_operators)
 
@@ -108,9 +107,11 @@ def loop_through_batches_and_download_vp(
         
         time1 = datetime.datetime.now()
         logger.info(f"exported batch {i} to GCS: {time1 - time0}")
-        
+ 
         
 if __name__ == "__main__":
+    
+    from update_vars import analysis_date_list
     #from dask.distributed import Client
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
@@ -122,10 +123,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
-    
-    start = datetime.datetime.now()
-    
+        
     # Get rt_datasets that are available for that day
     rt_datasets = schedule_rt_utils.filter_dim_gtfs_datasets(
         keep_cols=["key", "name", "type", "regional_feed_type"],
@@ -142,10 +140,16 @@ if __name__ == "__main__":
     
     rt_dataset_names = rt_datasets.name.unique().tolist()
     batches = determine_batches(rt_dataset_names)
+    
+    
+    for analysis_date in analysis_date_list:
+        logger.info(f"Analysis date: {analysis_date}")
+
+        start = datetime.datetime.now()
         
-    loop_through_batches_and_download_vp(batches, analysis_date)
+        loop_through_batches_and_download_vp(batches, analysis_date)
         
-    end = datetime.datetime.now()
-    logger.info(f"execution time: {end - start}")
+        end = datetime.datetime.now()
+        logger.info(f"execution time: {end - start}")
         
     #client.close()
