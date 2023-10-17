@@ -32,11 +32,11 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
     """
     trips = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["name", "trip_instance_key", 
-                   "shape_array_key"],
+        columns = ["name", "trip_instance_key"],
         get_pandas = True
     )
 
+    # Identify trips belonging to Amtrak, Flex and exclude
     trips = gtfs_schedule_wrangling.exclude_scheduled_operators(
         trips, 
         exclude_me = ["Amtrak Schedule", "*Flex"]
@@ -44,7 +44,7 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
     
     stop_times = pd.read_parquet(
         f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet",
-        columns = ["trip_instance_key", "stop_sequence"]
+        columns = ["trip_instance_key", "shape_array_key", "stop_sequence"]
     ).merge(
         trips,
         on = "trip_instance_key",
@@ -73,7 +73,7 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
            .reset_index(drop=True)
            .drop(columns = ["max_stops", "n_stops"])
           )
-    
+        
     return df2
 
     
@@ -93,7 +93,7 @@ def stop_times_aggregated_to_shape_array_key(
         f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet",
     ).merge(
         trips_with_shape,
-        on = "trip_instance_key",
+        on = ["trip_instance_key", "shape_array_key"],
         how = "inner"
     ).rename(columns = {
         "trip_instance_key": "st_trip_instance_key", 
