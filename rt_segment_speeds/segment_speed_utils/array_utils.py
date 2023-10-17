@@ -19,6 +19,9 @@ def subset_array_by_indices(
 ):
     """
     Subset an array using index positions.
+    
+    https://stackoverflow.com/questions/31789187/find-indices-of-large-array-if-it-contains-values-in-smaller-array
+    https://stackoverflow.com/questions/5508352/indexing-numpy-array-with-another-numpy-array  
     """
     lower_idx = start_end_tuple[0]
     upper_idx = start_end_tuple[-1] + 1

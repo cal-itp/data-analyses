@@ -54,3 +54,7 @@
 2023-10-17 10:55:09.151 | INFO     | __main__:<module>:222 - Cut normal stop segments: 0:00:11.479882
 2023-10-17 11:00:38.315 | INFO     | __main__:<module>:234 - Export results: 0:05:29.164232
 2023-10-17 11:00:38.316 | INFO     | __main__:<module>:237 - execution time: 0:05:40.644729
+2023-10-17 12:10:58.267 | INFO     | __main__:<module>:327 - Analysis date: 2023-10-11
+2023-10-17 12:18:58.422 | INFO     | __main__:<module>:353 - Cut special stop segments: 0:08:00.151683
+2023-10-17 12:18:59.549 | INFO     | __main__:<module>:374 - export results: 0:00:01.127227
+2023-10-17 12:18:59.549 | INFO     | __main__:<module>:375 - execution time: 0:08:01.278910
