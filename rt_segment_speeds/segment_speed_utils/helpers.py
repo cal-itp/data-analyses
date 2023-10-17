@@ -10,14 +10,20 @@ import dask_geopandas as dg
 import datetime
 import gcsfs
 import geopandas as gpd
+import intake
 import pandas as pd
 import yaml
 
+from pathlib import Path
 from typing import Literal, Union
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               COMPILED_CACHED_VIEWS,
                                               PROJECT_CRS)
 from calitp_data_analysis import utils
+
+CATALOG_PATH = Path("data-analyses/_shared_utils/shared_utils/shared_data_catalog.yml")
+
+catalog = intake.open_catalog(f"{Path.home().joinpath(CATALOG_PATH)}")
 
 fs = gcsfs.GCSFileSystem()
 
@@ -219,3 +225,44 @@ def exclude_unusable_trips(
     ).reset_index(drop=True)
     
     return valid_vp_df
+
+
+def remove_shapes_outside_ca(
+    shapes: Union[gpd.GeoDataFrame, dg.GeoDataFrame]
+) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
+    """
+    Remove shapes that are too far outside CA.
+    We'll include border states with a gpd.sjoin(predicate='within')
+    to make sure we get shapes that travel a tiny bit outside CA, but
+    aren't ones like Amtrak.
+    
+    FlixBus is another like Amtrak, with far flung routes.
+    """
+    us_states = catalog.us_states.read()
+    
+    border_states = ["CA", "NV", "AZ", "OR"]
+    
+    # Filter to California
+    ca = us_states.query(
+        'STATE_ABBR in @border_states'
+    ).dissolve()[["geometry"]]
+    
+    # Be aggressive and keep if shape
+    # is within (does not cross CA + border state boundaries)
+    if isinstance(shapes, dg.GeoDataFrame):
+        shapes_within_ca = dg.sjoin(
+            shapes,
+            ca.to_crs(shapes.crs),
+            how = "inner",
+            predicate = "within"
+        )
+    
+    else:
+        shapes_within_ca = gpd.sjoin(
+            shapes,
+            ca.to_crs(shapes.crs),
+            how = "inner",
+            predicate = "within",
+        )
+    
+    return shapes_within_ca

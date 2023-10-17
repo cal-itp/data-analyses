@@ -21,27 +21,6 @@ from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
                                               PROJECT_CRS, CONFIG_PATH)
 
 
-def import_stops_projected(analysis_date: str, **kwargs):
-    """
-    Import stops_projected df, which includes the stop_id, stop_sequence,
-    shape_geometry.
-    """
-    columns = kwargs["columns"]
-    
-    # If we want to return some kind of geometry, use geopandas, 
-    # otherwise use pandas. Grab just the column kwarg for condition check
-    STOPS_FILE = f"{SEGMENT_GCS}stops_projected_{analysis_date}/"
-    
-    if ((columns is None) or 
-        (any("geometry" in c for c in columns))):
-        df = gpd.read_parquet(STOPS_FILE, **kwargs).drop_duplicates()
-        
-    else:
-        df = pd.read_parquet(STOPS_FILE, **kwargs)
-
-    return df.drop_duplicates().reset_index(drop=True)
-
-
 def get_prior_shape_meters(
     gdf: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
@@ -168,8 +147,11 @@ def project_and_cut_segments_for_one_shape(
     # Leave as list, then set CRS here
     
     keep_cols = [
-        "schedule_gtfs_dataset_key", "shape_array_key", "stop_segment_geometry", 
-        "stop_id", "stop_sequence", "loop_or_inlining"
+        "schedule_gtfs_dataset_key", 
+        "shape_array_key", "stop_sequence",
+        "stop_segment_geometry", 
+        "stop_id", "loop_or_inlining", 
+        "stop_primary_direction"
     ]
     
     gdf2 = (gdf.assign(
@@ -197,39 +179,43 @@ if __name__ == "__main__":
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     EXPORT_FILE = STOP_SEG_DICT["segments_file"]
     
-    # Get list of shapes that go through normal stop segment cutting
-    shapes_to_cut = import_stops_projected(
-        analysis_date, 
-        filters = [[("loop_or_inlining", "==", 0)]],
-        columns = ["shape_array_key"]
-    ).shape_array_key.unique()
-    
-    gdf = delayed(import_stops_projected)(
-        analysis_date,
+    stops_projected = delayed(pd.read_parquet)(
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet", 
         filters = [[("loop_or_inlining", "==", 0)]],
         columns = [
             "schedule_gtfs_dataset_key",
             "shape_array_key", "stop_id", "stop_sequence", 
             "shape_meters", 
             "loop_or_inlining",
-            "geometry", 
-            ]
+            "st_trip_instance_key",
+            "prior_stop_sequence",
+            "stop_primary_direction"
+        ]
     )
     
-    gdf = (gdf.sort_values(["schedule_gtfs_dataset_key", 
-                            "shape_array_key", "stop_sequence"])
-           .drop_duplicates(subset=["shape_array_key", "stop_sequence"])
-           .dropna(subset="geometry")
-           .reset_index(drop=True)
-          )
-
-    gdf2 = delayed(get_prior_shape_meters)(gdf).persist()
+    stops_projected2 = delayed(get_prior_shape_meters)(stops_projected)
+    
+    shapes = helpers.import_scheduled_shapes(
+        analysis_date,
+        columns = ["shape_array_key", "geometry"],
+        crs = PROJECT_CRS,
+        get_pandas = True
+    ).pipe(helpers.remove_shapes_outside_ca)
+    
+    gdf = delayed(pd.merge)(
+        shapes,
+        stops_projected2,
+        on = "shape_array_key",
+        how = "inner"
+    ).persist()
+    
+    shapes_to_cut = gdf.shape_array_key.unique().compute()
     
     results = []
     
-    for shape in shapes_to_cut:
+    for one_shape in shapes_to_cut:
         segments = delayed(project_and_cut_segments_for_one_shape)(
-            gdf2, shape)
+            gdf, one_shape)
         results.append(segments)
     
     time1 = datetime.datetime.now()
