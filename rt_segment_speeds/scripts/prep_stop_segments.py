@@ -256,7 +256,7 @@ if __name__=="__main__":
         
     # Export parquet
     stops_by_shape.to_parquet(
-        f"{SEGMENT_GCS}stops_projected_{analysis_date}_test.parquet", 
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet", 
     )
    
     end = datetime.datetime.now()
