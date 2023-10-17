@@ -36,7 +36,9 @@ def prep_scheduled_stop_times(analysis_date: str) -> dg.GeoDataFrame:
     trips = helpers.import_scheduled_trips(
         analysis_date,
         columns = ["gtfs_dataset_key", "feed_key", 
-                   "trip_id", "trip_instance_key"],
+                   "trip_id", "trip_instance_key", 
+                   "shape_array_key"
+                  ],
         get_pandas = True
     )
     
@@ -77,7 +79,7 @@ def find_prior_stop(
             .groupby("trip_instance_key")
             .stop_sequence
             .shift(1)
-        ).astype("Int64")
+        )
     )
     
     prior_stop_geom = stop_times[
@@ -99,7 +101,7 @@ def find_prior_stop(
         prior_stop_geom,
         on = ["trip_instance_key", "prior_stop_sequence"],
         how = "left"
-    )
+    ).astype({"prior_stop_sequence": "Int64"})
     
     return stop_times_with_prior_geom
 
@@ -116,7 +118,9 @@ def assemble_stop_times_with_direction(analysis_date: str):
 
     scheduled_stop_times = prep_scheduled_stop_times(analysis_date).persist()
     
-    trip_stop_cols = ["trip_instance_key", "stop_id", "stop_sequence"]
+    trip_stop_cols = ["trip_instance_key", "shape_array_key",
+                      "stop_id", "stop_sequence"]
+    
     scheduled_stop_times2 = find_prior_stop(scheduled_stop_times, trip_stop_cols)
     
     other_stops = scheduled_stop_times2[
@@ -148,7 +152,9 @@ def assemble_stop_times_with_direction(analysis_date: str):
         axis=0
     )
     
-    df = scheduled_stop_times_with_direction.sort_index()
+    df = scheduled_stop_times_with_direction.sort_values([
+        "trip_instance_key", "stop_sequence"]
+    ).reset_index(drop=True)
 
     time1 = datetime.datetime.now()
     print(f"get scheduled stop times with direction: {time1 - start}")
@@ -158,6 +164,8 @@ def assemble_stop_times_with_direction(analysis_date: str):
         RT_SCHED_GCS,
         f"stop_times_direction_{analysis_date}"
     )
+    
+    
     
     end = datetime.datetime.now()
     print(f"execution time: {end - start}")
