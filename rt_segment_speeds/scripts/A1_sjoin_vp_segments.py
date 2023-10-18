@@ -20,6 +20,14 @@ from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (analysis_date, SEGMENT_GCS, 
                                               CONFIG_PATH, PROJECT_CRS)
 
+ALL_DIRECTIONS = ["Northbound", "Southbound", "Eastbound", "Westbound"]
+OPPOSITE_DIRECTIONS = {
+    "Northbound": "Southbound",
+    "Southbound": "Northbound",
+    "Eastbound": "Westbound",
+    "Westbound": "Eastbound",
+}
+
 
 def add_grouping_col_to_vp(
     vp_file_name: str,
@@ -74,7 +82,8 @@ def import_segments_and_buffer(
     
     segments = gpd.read_parquet(
         filename,
-        columns = segment_identifier_cols + ["seg_idx", "geometry"],
+        columns = segment_identifier_cols + [
+            "seg_idx", "stop_primary_direction", "geometry"],
         **kwargs
     ).to_crs(PROJECT_CRS)
 
@@ -100,22 +109,21 @@ def get_sjoin_results(
     """
     vp_gddf = gpd.GeoDataFrame(
         vp,
-        geometry = gpd.points_from_xy(vp, x="x", y="y", crs=WGS84)
+        geometry = gpd.points_from_xy(vp.x, vp.y, crs=WGS84)
     ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
     
-    vp_to_seg = pd.merge(
+    vp_to_seg = gpd.sjoin(
         vp_gddf,
         segments,
-        on = grouping_col,
-        how = "inner"
-    ).set_geometry("geometry_x")
-    
-    vp_in_seg = vp_to_seg.assign(
-        is_within = vp_to_seg.geometry_x.within(vp_to_seg.geometry_y)
-    ).query('is_within==True')
-    
+        how = "inner",
+        predicate = "within"
+    ).query(
+        f'{grouping_col}_left == {grouping_col}_right'
+    ).drop(
+        columns = f"{grouping_col}_right"
+    ).rename(columns = {f"{grouping_col}_left": grouping_col})
 
-    results = (vp_in_seg[["vp_idx"] + segment_identifier_cols]
+    results = (vp_to_seg[["vp_idx"] + segment_identifier_cols]
                .drop_duplicates()
                .reset_index(drop=True)
               )
@@ -130,11 +138,17 @@ def stage_direction_results(
     segment_identifier_cols: list,
     direction: str
 ):
-    keep_vp = [direction, "Unknown"]
+    opposite = OPPOSITE_DIRECTIONS[direction]
+    keep_vp = [d for d in ALL_DIRECTIONS if d != opposite] + ["Unknown"]
     
+    # Keep all directions of vp except the ones running in opposite direction
+    # Esp since buses make turns, a northbound segment can be 
+    # partially westbound and then northbound
     vp_subset = vp[vp.vp_primary_direction.isin(keep_vp)].repartition(npartitions=20)
+    
     segments_subset = segments[
-        segments.primary_direction==direction].reset_index(drop=True)
+        segments.stop_primary_direction==direction
+    ].reset_index(drop=True)
     
     seg_id_dtypes = segments[segment_identifier_cols].dtypes.to_dict()
     
@@ -143,7 +157,6 @@ def stage_direction_results(
         segments_subset,
         grouping_col,
         segment_identifier_cols,
-        direction,
         meta = {"vp_idx": "int64", 
                **seg_id_dtypes},
         align_dataframes = False
@@ -194,8 +207,9 @@ def sjoin_vp_to_segments(
     # Import vp, keep trips that are usable
     vp = dd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}/",
-        columns = ["trip_instance_key", "vp_idx", "x", "y", 
-                   "vp_primary_direction"],
+        columns = [
+            "trip_instance_key", "vp_idx", "x", "y", 
+            "vp_primary_direction"]
     ).merge(
         vp_trips,
         on = "trip_instance_key",
@@ -207,7 +221,6 @@ def sjoin_vp_to_segments(
     time1 = datetime.datetime.now()
     logger.info(f"prep vp and persist: {time1 - time0}")
     
-    all_directions = ["Northbound", "Southbound", "Eastbound", "Westbound"]
     
     results = [
         stage_direction_results(
@@ -216,7 +229,7 @@ def sjoin_vp_to_segments(
             GROUPING_COL,
             SEGMENT_IDENTIFIER_COLS, 
             one_direction
-        ) for one_direction in all_directions
+        ).persist() for one_direction in ALL_DIRECTIONS
     ]
     
     
