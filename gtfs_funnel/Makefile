@@ -1,4 +1,4 @@
-download_gtfs_data_one_day:
+download_gtfs_data:
 # make sure to update update_vars.py for dates to download
 	python download_trips.py
 	python download_stops.py
@@ -11,3 +11,5 @@ preprocess:
 	python stop_times_with_direction.py
 	python vp_keep_usable.py
 	python vp_direction.py
+	python cleanup.py
+    
