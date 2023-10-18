@@ -23,6 +23,14 @@ from typing import Literal
 from shared_utils import rt_utils
 from segment_speed_utils.project_vars import PROJECT_CRS
 
+ALL_DIRECTIONS = ["Northbound", "Southbound", "Eastbound", "Westbound"]
+
+OPPOSITE_DIRECTIONS = {
+    "Northbound": "Southbound",
+    "Southbound": "Northbound",
+    "Eastbound": "Westbound",
+    "Westbound": "Eastbound",
+}
 
 def interpolate_projected_points(
     shape_geometry: shapely.geometry.LineString,
