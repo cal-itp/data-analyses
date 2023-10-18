@@ -227,8 +227,7 @@ def find_special_cases_and_setup_df(
 ) -> gpd.GeoDataFrame:
     """
     Import just special cases and prep so we can apply super_project row-wise.
-    For every stop, we need to attach the array of 
-    stop sequences / stop geometry for that shape.
+    For every stop, we need to attach the array of stop geometry for that shape.
     """
     gdf = gpd.read_parquet(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet", 
@@ -245,25 +244,8 @@ def find_special_cases_and_setup_df(
     )
     
     # Merge in prior stop sequence's stop geom
-    prior_stop = gdf[
-        ["shape_array_key", "stop_sequence", "stop_geometry"]
-    ].rename(columns = {
-        "stop_sequence": "prior_stop_sequence",
-        "stop_geometry": "prior_stop_geometry"
-    }).astype({"prior_stop_sequence": "Int64"})
-    
-    gdf_with_prior = pd.merge(
-        gdf,
-        prior_stop,
-        on = ["shape_array_key", "prior_stop_sequence"],
-        how = "left"
-    )
-    
-    # If we don't have a prior point, use same point and cut
-    # empty segment
-    gdf_with_prior = gdf_with_prior.assign(
-        prior_stop_geometry = gdf_with_prior.prior_stop_geometry.fillna(
-            gdf_with_prior.stop_geometry)
+    gdf_with_prior = cut_normal_stop_segments.get_prior_stop_info(
+        gdf, "stop_geometry"
     )
 
     subset_shapes = gdf_with_prior.shape_array_key.unique().tolist()
