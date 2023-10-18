@@ -65,3 +65,5 @@
 2023-10-17 13:39:08.674 | INFO     | __main__:sjoin_vp_to_segments:237 - sjoin with map_partitions: 0:04:06.236607
 2023-10-17 13:39:16.788 | INFO     | __main__:sjoin_vp_to_segments:248 - export partitioned results: 0:00:08.113816
 2023-10-17 13:39:16.993 | INFO     | __main__:<module>:271 - execution time: 0:05:48.489259
+2023-10-17 18:14:35.528 | INFO     | __main__:<module>:456 - Analysis date: 2023-10-11
+2023-10-17 18:19:27.790 | INFO     | __main__:<module>:464 - remove erroneous sjoin results: 0:04:52.262114
