@@ -28,3 +28,9 @@
 2023-10-12 10:20:40.784 | INFO     | __main__:<module>:355 - cut segments: 0:16:46.996748
 2023-10-12 10:20:56.013 | INFO     | __main__:<module>:368 - dissolve: 0:00:15.229048
 2023-10-12 10:20:56.015 | INFO     | __main__:<module>:369 - total execution time: 0:17:13.929747
+2023-10-18 13:34:46.941 | INFO     | __main__:<module>:285 - Analysis date: 2023-10-11
+2023-10-18 13:34:54.061 | INFO     | __main__:<module>:302 - merge routes to trips: 0:00:07.120037
+2023-10-18 13:40:54.360 | INFO     | __main__:<module>:285 - Analysis date: 2023-10-11
+2023-10-18 13:41:01.280 | INFO     | __main__:<module>:302 - merge routes to trips: 0:00:06.918956
+2023-10-18 13:44:48.351 | INFO     | __main__:<module>:321 - cut segments: 0:03:47.071447
+2023-10-18 13:44:48.352 | INFO     | __main__:<module>:324 - total execution time: 0:03:53.991597

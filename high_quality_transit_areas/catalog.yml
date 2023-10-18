@@ -25,13 +25,7 @@ sources:
         driver: geoparquet
         description: Cut HQTA segments across all operators. Created in B1_create_hqta_segments.py.
         args:
-          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_segments.parquet
-    # Source: B1_create_hqta_segments.py
-    longest_shape:
-        driver: geoparquet
-        description: Dissolve hqta segments into 1 line geom per route. Created in B1_create_hqta_segments.py.
-        args:
-          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/longest_shape_with_dir.parquet     
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_segments.parquet   
     # Source: B2_sjoin_stops_to_segments.py
     all_bus:
         driver: geoparquet
