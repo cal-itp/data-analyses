@@ -38,3 +38,13 @@
 2023-09-14 15:28:53.077 | INFO     | __main__:<module>:206 - compute results: 0:21:29.912870
 2023-09-14 15:28:54.955 | INFO     | __main__:<module>:212 - export: 0:00:01.878703
 2023-09-14 15:28:54.956 | INFO     | __main__:<module>:213 - execution time: 0:22:02.087920
+2023-10-17 19:30:35.929 | INFO     | __main__:<module>:171 - Analysis date: 2023-10-11
+2023-10-17 19:31:00.690 | INFO     | __main__:<module>:202 - use map partitions to find within shape vp: 0:00:24.747995
+2023-10-17 19:46:39.904 | INFO     | __main__:<module>:207 - compute results: 0:15:39.213513
+2023-10-17 19:46:41.950 | INFO     | __main__:<module>:213 - export: 0:00:02.046481
+2023-10-17 19:46:41.951 | INFO     | __main__:<module>:214 - execution time: 0:16:06.007989
+2023-10-17 20:13:04.502 | INFO     | __main__:<module>:177 - Analysis date: 2023-03-15
+2023-10-17 20:14:31.775 | INFO     | __main__:<module>:214 - use map partitions to find within shape vp: 0:01:27.261365
+2023-10-17 20:28:32.235 | INFO     | __main__:<module>:219 - compute results: 0:14:00.459889
+2023-10-17 20:28:41.136 | INFO     | __main__:<module>:225 - export: 0:00:08.900656
+2023-10-17 20:28:41.136 | INFO     | __main__:<module>:226 - execution time: 0:15:36.621910
