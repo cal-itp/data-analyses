@@ -14,7 +14,6 @@ import sys
 
 from loguru import logger
 
-from update_vars import analysis_date
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               COMPILED_CACHED_VIEWS,
@@ -96,15 +95,21 @@ def buffer_shapes(
 
 
 def merge_vp_with_shape_and_count(
-    vp: dg.GeoDataFrame,
+    vp: dd.DataFrame,
     trips_with_shape_geom: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
     """
     Merge vp with crosswalk and buffered shapes.
     Get vp count totals and vp within shape.
-    """         
-    vp2 = dd.merge(
+    """
+    vp_gdf = gpd.GeoDataFrame(
         vp,
+        geometry = gpd.points_from_xy(vp.x, vp.y),
+        crs = PROJECT_CRS
+    )
+    
+    vp2 = pd.merge(
+        vp_gdf,
         trips_with_shape_geom,
         on = "trip_instance_key",
         how = "inner"
@@ -155,7 +160,7 @@ def total_vp_counts_by_trip(vp: gpd.GeoDataFrame) -> pd.DataFrame:
 
     
 if __name__=="__main__":    
-    
+    from update_vars import analysis_date_list
     #from dask.distributed import LocalCluster, Client
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
@@ -167,50 +172,58 @@ if __name__=="__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
-        
-    start = datetime.datetime.now()
+    for analysis_date in analysis_date_list:
+    
+        logger.info(f"Analysis date: {analysis_date}")
 
-    # Create crosswalk of trip_instance_keys to shape_array_key
-    trips_with_shape = grab_shape_keys_in_vp(analysis_date)
-    
-    trips_with_shape_geom = buffer_shapes(
-        analysis_date,
-        trips_with_shape,
-        buffer_meters = 35)
-    
-    # Import vp and partition it
-    vp = dg.read_parquet(
-        f"{SEGMENT_GCS}vp_{analysis_date}.parquet",
-    ).to_crs(PROJECT_CRS)
- 
-    vp = vp.repartition(npartitions = 100)
-        
-    results = vp.map_partitions(
-        merge_vp_with_shape_and_count,
-        trips_with_shape_geom,
-        meta = {
-            "trip_instance_key": "str",
-            "total_vp": "int32",
-            "vp_in_shape": "int32"
-        }, 
-        align_dataframes = False
-    )
+        start = datetime.datetime.now()
 
-    time1 = datetime.datetime.now()
-    logger.info(f"use map partitions to find within shape vp: {time1 - start}")
-    
-    results = results.compute()
-    
-    time2 = datetime.datetime.now()
-    logger.info(f"compute results: {time2 - time1}")
+        # Create crosswalk of trip_instance_keys to shape_array_key
+        trips_with_shape = grab_shape_keys_in_vp(analysis_date)
+
+        trips_with_shape_geom = buffer_shapes(
+            analysis_date,
+            trips_with_shape,
+            buffer_meters = 35
+        )
+
+        # Import vp and partition it
+        vp = dg.read_parquet(
+            f"{SEGMENT_GCS}vp_{analysis_date}.parquet",
+        ).to_crs(PROJECT_CRS)
         
-    results.to_parquet(
-        f"{RT_SCHED_GCS}vp_spatial_accuracy_{analysis_date}.parquet")
-    
-    end = datetime.datetime.now()
-    logger.info(f"export: {end - time2}")
-    logger.info(f"execution time: {end - start}")
+        vp = vp.assign(
+            x = vp.geometry.x,
+            y = vp.geometry.y
+        ).drop(columns = "geometry")
+
+        vp = vp.repartition(npartitions = 100).persist()
+
+        results = vp.map_partitions(
+            merge_vp_with_shape_and_count,
+            trips_with_shape_geom,
+            meta = {
+                "trip_instance_key": "str",
+                "total_vp": "int32",
+                "vp_in_shape": "int32"
+            }, 
+            align_dataframes = False
+        )
+
+        time1 = datetime.datetime.now()
+        logger.info(f"use map partitions to find within shape vp: {time1 - start}")
+
+        results = results.compute()
+
+        time2 = datetime.datetime.now()
+        logger.info(f"compute results: {time2 - time1}")
+
+        results.to_parquet(
+            f"{RT_SCHED_GCS}vp_spatial_accuracy_{analysis_date}.parquet")
+
+        end = datetime.datetime.now()
+        logger.info(f"export: {end - time2}")
+        logger.info(f"execution time: {end - start}")
     
     #client.close()
     #cluster.close()
