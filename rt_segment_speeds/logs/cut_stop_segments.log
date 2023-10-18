@@ -50,3 +50,11 @@
 2023-10-12 11:06:14.469 | INFO     | __main__:<module>:320 - Cut special stop segments: 0:13:21.760520
 2023-10-12 11:06:16.038 | INFO     | __main__:<module>:340 - export results: 0:00:01.569837
 2023-10-12 11:06:16.039 | INFO     | __main__:<module>:341 - execution time: 0:13:23.330357
+2023-10-17 12:10:58.267 | INFO     | __main__:<module>:327 - Analysis date: 2023-10-11
+2023-10-17 12:18:58.422 | INFO     | __main__:<module>:353 - Cut special stop segments: 0:08:00.151683
+2023-10-17 12:18:59.549 | INFO     | __main__:<module>:374 - export results: 0:00:01.127227
+2023-10-17 12:18:59.549 | INFO     | __main__:<module>:375 - execution time: 0:08:01.278910
+2023-10-17 15:02:34.361 | INFO     | __main__:<module>:202 - Analysis date: 2023-10-11
+2023-10-17 15:07:39.065 | INFO     | __main__:<module>:228 - Cut normal stop segments: 0:05:04.703943
+2023-10-17 15:07:41.179 | INFO     | __main__:<module>:249 - export results: 0:00:02.113235
+2023-10-17 15:07:41.179 | INFO     | __main__:<module>:250 - execution time: 0:05:06.817178

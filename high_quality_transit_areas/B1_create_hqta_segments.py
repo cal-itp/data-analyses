@@ -31,7 +31,7 @@ from dask import delayed, compute
 
 import operators_for_hqta
 from calitp_data_analysis import geography_utils, utils
-from shared_utils import rt_utils
+from shared_utils import rt_utils, geog_utils_to_add
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
@@ -52,42 +52,27 @@ def pare_down_trips_by_route_direction(
     """
     route_dir_cols = ["feed_key", "route_key", "route_id", "direction_id"]
     
-    trips_with_geom = (
-        trips_with_geom
-        .assign(
-            route_length = trips_with_geom.geometry.length
-       ).sort_values(route_dir_cols + ["route_length"], 
-                     ascending = [True for i in route_dir_cols] + [False])
-        .drop_duplicates(subset = route_dir_cols)
-        .reset_index(drop=True)
-    )
-        
     # If direction_id is missing, then later code will break, because
     # we need to find the longest route_length
     # Don't really care what direction is, since we will replace it with north-south
     # Just need a value to stand-in, treat it as the same direction
+    trips_with_geom = trips_with_geom.assign(
+        route_length = trips_with_geom.geometry.length,
+        direction_id = trips_with_geom.direction_id.fillna(0).astype(int).astype(str)
+    ).sort_values(route_dir_cols + ["route_length"], 
+                  ascending = [True for i in route_dir_cols] + [False]
+                 )
     
-    trips_with_geom2 = trips_with_geom.assign(
-        direction_id = (trips_with_geom.direction_id.fillna(0)
-                        .astype(int).astype(str))
-    )
-
-    trips_with_geom2 = trips_with_geom2.assign(    
-        route_dir_identifier = trips_with_geom2.apply(
-            lambda x: zlib.crc32(
-                (x.route_key + x.direction_id
-                ).encode("utf-8")), 
-            axis=1, 
-        )
-    )
-    
-    # Keep the longest shape_id for each direction
-    # with missing direction_id filled in
-    longest_shapes = (trips_with_geom2.sort_values("shape_array_key")
-                      .drop_duplicates("route_dir_identifier")
-                      .drop(columns = "route_dir_identifier")
-                      .reset_index(drop=True)
-                     )
+    longest_shapes = trips_with_geom.assign(
+        max_route_length = (trips_with_geom
+                            .groupby(route_dir_cols,observed=True, group_keys=False)
+                            .route_length
+                            .transform("max")
+                           )
+    ).query(
+        'max_route_length == route_length'
+    ).drop_duplicates(subset = route_dir_cols) 
+    # if there are duplicates remaining, drop and keep first obs based on prior sorting
 
     # A route is uniquely identified by route_key (feed_key + route_id)
     # Once we keep just 1 shape for each route direction, go back to route_key
@@ -202,15 +187,16 @@ def select_shapes_and_segment(
         axis=0)[["route_key", "geometry"]]
     
     # Cut segments 
-    segmented = geography_utils.cut_segments(
-        ready_for_segmenting,
-        group_cols = ["route_key"],
-        segment_distance = segment_length
+    ready_for_segmenting["segment_geometry"] = ready_for_segmenting.apply(
+        lambda x: 
+        geography_utils.create_segments(x.geometry, int(segment_length)), 
+        axis=1, 
     )
     
-    segmented = segmented.assign(
-        segment_sequence = (segmented.groupby("route_key")
-                            ["segment_sequence"].cumcount())
+    segmented = geog_utils_to_add.explode_segments(
+        ready_for_segmenting, 
+        group_cols = ["route_key"],
+        segment_col = "segment_geometry"
     )
     
     route_cols = ["feed_key", "route_id", "route_key"]
@@ -287,24 +273,6 @@ def find_primary_direction_across_hqta_segments(
     ).drop(columns = drop_cols)
     
     return routes_with_primary_direction
-
-
-def dissolved_to_longest_shape(hqta_segments: gpd.GeoDataFrame):
-    """
-    Since HQTA segments were cut right after the overlay difference
-    was taken, do a dissolve so that each route is just 1 line geom.
-    
-    Keep this version to plot the route.
-    """
-    route_cols = ["feed_key", "route_id", 
-                  "route_key", "route_direction"]
-    
-    dissolved = (hqta_segments[route_cols + ["geometry"]]
-                 .dissolve(by=route_cols)
-                 .reset_index()
-                )
-    
-    return dissolved
     
     
 if __name__=="__main__":   
@@ -317,8 +285,6 @@ if __name__=="__main__":
     logger.info(f"Analysis date: {analysis_date}")
 
     start = dt.datetime.now()
-    
-    #https://stackoverflow.com/questions/69884348/use-dask-to-chunkwise-work-with-smaller-pandas-df-breaks-memory-limits
         
     # (1) Merge routelines with trips, find the longest shape in 
     # each direction, and after overlay difference, cut HQTA segments
@@ -348,22 +314,11 @@ if __name__=="__main__":
     utils.geoparquet_gcs_export(
         hqta_segments_with_dir, 
         GCS_FILE_PATH,
-        "hqta_segments"
+        "hqta_segments_test"
     )
     
     time2 = dt.datetime.now()
     logger.info(f"cut segments: {time2 - time1}")
     
-    # In addition to segments, let's keep a version where line geom is 
-    # at route-level
-    # Dissolve across directions so that each route is 1 row, 1 line
-    longest_shape = dissolved_to_longest_shape(hqta_segments_with_dir)
-    
-    utils.geoparquet_gcs_export(longest_shape,
-                                GCS_FILE_PATH,
-                                "longest_shape_with_dir"
-                               ) 
-    
     end = dt.datetime.now()
-    logger.info(f"dissolve: {end - time2}")
     logger.info(f"total execution time: {end - start}")

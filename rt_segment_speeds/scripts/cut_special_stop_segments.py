@@ -149,40 +149,22 @@ def adjust_stop_start_end_for_special_cases(
 
 
 def super_project(
-    current_stop_seq: int,
     shape_geometry: shapely.geometry.LineString,
     stop_geometry_array: np.ndarray,
-    stop_sequence_array: np.ndarray,
 ) -> shapely.geometry.LineString:
     """
     Implement super project for one stop. 
     """
     shape_coords_list, cumulative_distances = get_shape_components(shape_geometry)
-
-    # (1) Given a stop sequence value, find the stop_sequence values 
-    # just flanking it (prior and subsequent).
-    # this is important especially because stop_sequence does not have 
-    # to be increasing in increments of 1, but it has to be monotonically increasing
-    subset_seq = array_utils.include_prior(
-        stop_sequence_array, current_stop_seq)
     
-    #https://stackoverflow.com/questions/31789187/find-indices-of-large-array-if-it-contains-values-in-smaller-array
-    idx_stop_seq = np.where(np.in1d(
-        stop_sequence_array, subset_seq))[0]
+    subset_stop_geom = stop_geometry_array
     
-    # (2) Grab relevant subset based on stop sequence values to get stop geometry subset
-    # https://stackoverflow.com/questions/5508352/indexing-numpy-array-with-another-numpy-array    
-    subset_stop_geom = array_utils.subset_array_by_indices(
-        stop_geometry_array,
-        (idx_stop_seq[0], idx_stop_seq[-1])
-    )
-    
-    # (3) Project this vector of start/end stops
+    # (1) Project this vector of start/end stops
     subset_stop_proj = wrangle_shapes.project_list_of_coords(
         shape_geometry, subset_stop_geom)
     
     
-    # (4) Handle various cases for first stop or last stop
+    # (2) Handle various cases for first stop or last stop
     # and grab the distance between origin/destination stop to use 
     # with cumulative distance array
     (origin_stop, destin_stop, 
@@ -192,7 +174,7 @@ def super_project(
         subset_stop_proj
     )
         
-    # (5) Find the subset from cumulative distances
+    # (3) Find the subset from cumulative distances
     # that is in between our origin stop and destination stop
     idx_shape_dist = array_utils.cut_shape_by_origin_destination(
         cumulative_distances,
@@ -245,42 +227,54 @@ def find_special_cases_and_setup_df(
 ) -> gpd.GeoDataFrame:
     """
     Import just special cases and prep so we can apply super_project row-wise.
-    For every stop, we need to attach the array of 
-    stop sequences / stop geometry for that shape.
+    For every stop, we need to attach the array of stop geometry for that shape.
     """
-    gdf = (cut_normal_stop_segments.import_stops_projected(
-        analysis_date,
+    gdf = gpd.read_parquet(
+        f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet", 
         filters = [[("loop_or_inlining", "==", 1)]],
         columns = [
             "schedule_gtfs_dataset_key",
             "shape_array_key", "stop_id", "stop_sequence", 
-            "stop_geometry", # don't need shape_meters, we need stop_geometry
+            "stop_geometry", # don't need shape_meters, we need stop_geometry 
             "loop_or_inlining",
-            "geometry", 
-        ]).sort_values(
-            ["shape_array_key", "stop_sequence"]
-        ).reset_index(drop=True)
+            "st_trip_instance_key",
+            "prior_stop_sequence",
+            "stop_primary_direction"
+        ]
     )
-            
-    wide = (gdf.groupby("shape_array_key", 
-                        observed=True, group_keys=False)
-            .agg({
-                "stop_sequence": lambda x: list(x), 
-                "stop_geometry": lambda x: list(x)}
-            ).reset_index()
-            .rename(columns = {
-                "stop_sequence": "stop_sequence_array", 
-                "stop_geometry": "stop_geometry_array"})
-           )
     
-    gdf2 = pd.merge(
-        gdf,
-        wide,
+    # Merge in prior stop sequence's stop geom
+    gdf_with_prior = cut_normal_stop_segments.get_prior_stop_info(
+        gdf, "stop_geometry"
+    )
+
+    subset_shapes = gdf_with_prior.shape_array_key.unique().tolist()
+    
+    # Merge in shape geometry, but first remove shapes that might make 
+    # kernel crash...shapes that are really long and run nationwide
+    shapes = helpers.import_scheduled_shapes(
+        analysis_date,
+        columns = ["shape_array_key", "geometry"],
+        filters = [[("shape_array_key", "in", subset_shapes)]],
+        crs = PROJECT_CRS,
+        get_pandas = True
+    ).pipe(helpers.remove_shapes_outside_ca)
+    
+    gdf_with_shape = pd.merge(
+        gdf_with_prior,
+        shapes,
         on = "shape_array_key",
         how = "inner"
     )
-
-    return gdf2
+    
+    gdf_with_shape = gdf_with_shape.assign(
+        stop_geometry_array = gdf_with_shape.apply(
+            lambda x: 
+            x[["prior_stop_geometry", "stop_geometry"]].tolist(), axis=1
+        )
+    )
+    
+    return gdf_with_shape
 
 
 if __name__ == "__main__":
@@ -304,10 +298,8 @@ if __name__ == "__main__":
     
     for row in gdf.itertuples():
         stop_seg_geom = super_project(
-            getattr(row, "stop_sequence"),
             getattr(row, "geometry"),
             getattr(row, "stop_geometry_array"),
-            getattr(row, "stop_sequence_array")
         )
         stop_segment_geoseries.append(stop_seg_geom)
     
@@ -322,7 +314,8 @@ if __name__ == "__main__":
     keep_cols = [
         "schedule_gtfs_dataset_key", 
         "shape_array_key", "stop_segment_geometry", 
-        "stop_id", "stop_sequence", "loop_or_inlining"
+        "stop_id", "stop_sequence", "loop_or_inlining",
+        "stop_primary_direction"
     ]
     
     results_gdf = (gdf[keep_cols]

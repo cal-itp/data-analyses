@@ -22,7 +22,6 @@ from segment_speed_utils import (helpers, gtfs_schedule_wrangling,
                                  wrangle_shapes)
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               RT_SCHED_GCS,
-                                              analysis_date, 
                                               PROJECT_CRS)
 
 
@@ -32,11 +31,11 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
     """
     trips = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["name", "trip_instance_key", 
-                   "shape_array_key"],
+        columns = ["name", "trip_instance_key"],
         get_pandas = True
     )
 
+    # Identify trips belonging to Amtrak, Flex and exclude
     trips = gtfs_schedule_wrangling.exclude_scheduled_operators(
         trips, 
         exclude_me = ["Amtrak Schedule", "*Flex"]
@@ -44,7 +43,7 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
     
     stop_times = pd.read_parquet(
         f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet",
-        columns = ["trip_instance_key", "stop_sequence"]
+        columns = ["trip_instance_key", "shape_array_key", "stop_sequence"]
     ).merge(
         trips,
         on = "trip_instance_key",
@@ -73,7 +72,7 @@ def trip_with_most_stops(analysis_date: str) -> pd.DataFrame:
            .reset_index(drop=True)
            .drop(columns = ["max_stops", "n_stops"])
           )
-    
+        
     return df2
 
     
@@ -93,7 +92,7 @@ def stop_times_aggregated_to_shape_array_key(
         f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet",
     ).merge(
         trips_with_shape,
-        on = "trip_instance_key",
+        on = ["trip_instance_key", "shape_array_key"],
         how = "inner"
     ).rename(columns = {
         "trip_instance_key": "st_trip_instance_key", 
@@ -238,27 +237,31 @@ def prep_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
 
 
 if __name__=="__main__":
-
+    
+    from segment_speed_utils.project_vars import analysis_date_list
+    
     LOG_FILE = "../logs/prep_stop_segments.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
     
-    start = datetime.datetime.now()
+    for analysis_date in analysis_date_list:
     
-    stops_by_shape = prep_stop_segments(analysis_date)
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"Prep stop segment df: {time1-start}")
-        
-    # Export parquet
-    stops_by_shape.to_parquet(
-        f"{SEGMENT_GCS}stops_projected_{analysis_date}_test.parquet", 
-    )
-   
-    end = datetime.datetime.now()
-    logger.info(f"execution time: {end-start}")
-    
+        logger.info(f"Analysis date: {analysis_date}")
+
+        start = datetime.datetime.now()
+
+        stops_by_shape = prep_stop_segments(analysis_date)
+
+        time1 = datetime.datetime.now()
+        logger.info(f"Prep stop segment df: {time1-start}")
+
+        # Export parquet
+        stops_by_shape.to_parquet(
+            f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet", 
+        )
+
+        end = datetime.datetime.now()
+        logger.info(f"execution time: {end-start}")
