@@ -214,12 +214,7 @@ class OperatorDayAnalysis:
         '''
         self.calitp_itp_id = int(itp_id)
         assert type(analysis_date) == dt.date, 'analysis date must be a datetime.date object'
-        if debug_trip_list:
-            print('debug mode! \n only including trips:')
-            if len(debug_trip_list) < 10:
-                print(debug_trip_list)
-            else:
-                print(f'{debug_trip_list[:11]}...')
+
         self.analysis_date = analysis_date
         self.display_date = self.analysis_date.strftime('%b %d (%a)')
         ## Move to v2!
@@ -232,6 +227,14 @@ class OperatorDayAnalysis:
         self.stop_times = rt_utils.get_st(self.index_df, self.trips)
         self.stops = rt_utils.get_stops(self.index_df)
         self.shapes = rt_utils.get_shapes(self.index_df)
+        
+        if debug_trip_list:
+            print('debug mode! \n only including trips:')
+            if len(debug_trip_list) < 10:
+                print(debug_trip_list)
+            else:
+                print(f'{debug_trip_list[:11]}...')
+            self.trips = self.trips >> filter(_.trip_id.isin(debug_trip_list))
         
         self.trips_positions_joined = (self.vehicle_positions >> inner_join(_, self.trips, on = ['trip_id']))
         assert not self.trips_positions_joined.empty, 'vehicle positions empty, or vp trip ids not in schedule'
