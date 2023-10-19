@@ -18,11 +18,11 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import helpers, segment_calcs
+from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS, PROJECT_CRS
 from shared_utils import rt_utils
 
-fs = gcsfs.GCSFileSystem()
+fs = gcsfs.GCSFileSystem()    
 
 def attach_prior_vp_add_direction(
     analysis_date: str, 
@@ -56,7 +56,7 @@ def attach_prior_vp_add_direction(
     # calculated in projected CRS
     vp_gddf = dg.from_dask_dataframe(
         vp2,
-        geometry = dg.points_from_xy(vp2, x="x", y="y", crs=WGS84)
+        geometry = dg.points_from_xy(vp2, x="x", y="y")
     ).set_crs(WGS84).to_crs(PROJECT_CRS)
     
     vp_ddf = vp_gddf.assign(
@@ -81,34 +81,46 @@ def attach_prior_vp_add_direction(
     ).query('prior_vp_idx >= min_vp_idx')[
         ["vp_idx", "prior_x", "prior_y", "x", "y"]
     ].reset_index(drop=True)
-    
-    full_df = full_df.persist()
+        
+    keep_cols = ["vp_idx", "prior_x", "prior_y", "x", "y"]
+    full_df = full_df[keep_cols].compute()
     
     time1 = datetime.datetime.now()
     logger.info(f"persist vp gddf: {time1 - time0}")
     
-    def column_into_array(df: dd.DataFrame, col: str) -> np.ndarray:
-        return df[col].compute().to_numpy()
-        
-    vp_indices = column_into_array(full_df, "vp_idx")
-    prior_geom_x = column_into_array(full_df, "prior_x")
-    prior_geom_y = column_into_array(full_df, "prior_y") 
-    current_geom_x = column_into_array(full_df, "x")
-    current_geom_y = column_into_array(full_df, "y")
+    vp_indices = full_df.vp_idx.to_numpy()
+    distance_east = full_df.x - full_df.prior_x
+    distance_north = full_df.y - full_df.prior_y
     
-    distance_east = current_geom_x - prior_geom_x
-    distance_north = current_geom_y - prior_geom_y
+    # Get the normalized direction vector split into x and y columns
+    normalized_vector = wrangle_shapes.get_normalized_vector(
+        (distance_east, distance_north)
+    )
 
-    direction_result = np.vectorize(
-        rt_utils.cardinal_definition_rules)(distance_east, distance_north)
-    
     # Stack our results and convert to df
-    results_array = np.column_stack((vp_indices, direction_result))
+    results_array = np.column_stack((
+        vp_indices, 
+        normalized_vector[0], 
+        normalized_vector[1]
+    ))
     
     vp_direction = pd.DataFrame(
         results_array, 
-        columns = ["vp_idx", "vp_primary_direction"]
-    ).astype({"vp_idx": "int64"})
+        columns = ["vp_idx", "vp_dir_xnorm", "vp_dir_ynorm"]
+    ).astype({
+        "vp_idx": "int64", 
+        "vp_dir_xnorm": "float",
+        "vp_dir_ynorm": "float"
+    })
+    
+    # Get a readable direction (westbound, eastbound)
+    vp_direction = vp_direction.assign(
+        vp_primary_direction = vp_direction.apply(
+            lambda x:
+            rt_utils.cardinal_definition_rules(x.vp_dir_xnorm, x.vp_dir_ynorm), 
+            axis=1
+        )
+    )
 
     time2 = datetime.datetime.now()
     logger.info(f"np vectorize arrays for direction: {time2 - time1}")
@@ -167,7 +179,6 @@ if __name__ == "__main__":
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
-    
     
     for analysis_date in analysis_date_list:
     
