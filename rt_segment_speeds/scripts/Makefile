@@ -18,6 +18,12 @@ speeds_pipeline:
 	python C2_triangulate_vp.py      
 	python C3_trip_route_speed.py  
 
+new_pipeline:
+	python prep_stop_segments.py
+	python shapely_project_vp.py
+	python shapely_interpolate.py
+	#python A3_valid_vehicle_positions.py 
+
     
 download_roads:
 	#pip install esridump
