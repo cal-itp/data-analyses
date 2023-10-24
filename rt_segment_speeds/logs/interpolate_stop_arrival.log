@@ -1,0 +1,3 @@
+2023-10-24 13:53:30.034 | INFO     | __main__:<module>:122 - set up df with nearest / subseq vp info: 0:01:06.871897
+2023-10-24 13:54:09.757 | INFO     | __main__:<module>:127 - interpolate stop arrival: 0:00:39.722841
+2023-10-24 13:54:17.449 | INFO     | __main__:<module>:133 - execution time: 0:01:54.286578
