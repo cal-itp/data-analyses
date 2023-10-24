@@ -10,20 +10,14 @@ import dask_geopandas as dg
 import datetime
 import gcsfs
 import geopandas as gpd
-import intake
 import pandas as pd
 import yaml
 
-from pathlib import Path
 from typing import Literal, Union
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               COMPILED_CACHED_VIEWS,
                                               PROJECT_CRS)
 from calitp_data_analysis import utils
-
-CATALOG_PATH = Path("data-analyses/_shared_utils/shared_utils/shared_data_catalog.yml")
-
-catalog = intake.open_catalog(f"{Path.home().joinpath(CATALOG_PATH)}")
 
 fs = gcsfs.GCSFileSystem()
 
@@ -238,7 +232,15 @@ def remove_shapes_outside_ca(
     
     FlixBus is another like Amtrak, with far flung routes.
     """
-    us_states = catalog.us_states.read()
+    # Can't get relative path working within importable segment_speed_utils
+    #us_states = catalog.us_states.read()
+    # https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/shared_data_catalog.yml
+    us_states = gpd.read_file(
+        "https://services.arcgis.com/ue9rwulIoeLEI9bj/"
+        "arcgis/rest/services/US_StateBoundaries/FeatureServer/0/"
+        "query?outFields=*&where=1%3D1&f=geojson"
+    )
+    
     
     border_states = ["CA", "NV", "AZ", "OR"]
     

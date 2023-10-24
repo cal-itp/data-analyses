@@ -16,18 +16,9 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import helpers
+from segment_speed_utils import helpers, wrangle_shapes
 from segment_speed_utils.project_vars import (analysis_date, SEGMENT_GCS, 
                                               CONFIG_PATH, PROJECT_CRS)
-
-ALL_DIRECTIONS = ["Northbound", "Southbound", "Eastbound", "Westbound"]
-OPPOSITE_DIRECTIONS = {
-    "Northbound": "Southbound",
-    "Southbound": "Northbound",
-    "Eastbound": "Westbound",
-    "Westbound": "Eastbound",
-}
-
 
 def add_grouping_col_to_vp(
     vp_file_name: str,
@@ -138,8 +129,8 @@ def stage_direction_results(
     segment_identifier_cols: list,
     direction: str
 ):
-    opposite = OPPOSITE_DIRECTIONS[direction]
-    keep_vp = [d for d in ALL_DIRECTIONS if d != opposite] + ["Unknown"]
+    opposite = wrangle_shapes.OPPOSITE_DIRECTIONS[direction]
+    keep_vp = [d for d in wrangle_shapes.ALL_DIRECTIONS if d != opposite] + ["Unknown"]
     
     # Keep all directions of vp except the ones running in opposite direction
     # Esp since buses make turns, a northbound segment can be 
@@ -229,7 +220,7 @@ def sjoin_vp_to_segments(
             GROUPING_COL,
             SEGMENT_IDENTIFIER_COLS, 
             one_direction
-        ).persist() for one_direction in ALL_DIRECTIONS
+        ).persist() for one_direction in wrangle_shapes.ALL_DIRECTIONS
     ]
     
     

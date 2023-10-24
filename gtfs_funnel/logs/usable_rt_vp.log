@@ -18,3 +18,19 @@
 2023-10-13 10:38:23.748 | INFO     | __main__:attach_prior_vp_add_direction:88 - persist vp gddf: 0:04:24.538800
 2023-10-13 10:39:00.233 | INFO     | __main__:attach_prior_vp_add_direction:114 - np vectorize arrays for direction: 0:00:36.484908
 2023-10-13 10:39:07.270 | INFO     | __main__:<module>:181 - export vp direction: 0:05:08.060546
+2023-10-19 10:21:27.377 | INFO     | __main__:<module>:161 - Analysis date: 2023-09-13
+2023-10-19 10:22:59.586 | INFO     | __main__:<module>:171 - pare down vp: 0:01:32.208062
+2023-10-19 10:22:59.586 | INFO     | __main__:<module>:161 - Analysis date: 2023-10-11
+2023-10-19 10:24:21.940 | INFO     | __main__:<module>:171 - pare down vp: 0:02:54.562217
+2023-10-19 11:34:28.126 | INFO     | __main__:<module>:161 - Analysis date: 2023-03-15
+2023-10-19 11:36:28.520 | INFO     | __main__:<module>:171 - pare down vp: 0:02:00.393163
+2023-10-19 11:36:28.521 | INFO     | __main__:<module>:161 - Analysis date: 2023-04-12
+2023-10-19 11:37:58.174 | INFO     | __main__:<module>:171 - pare down vp: 0:03:30.047838
+2023-10-19 11:37:58.177 | INFO     | __main__:<module>:161 - Analysis date: 2023-05-17
+2023-10-19 11:39:35.480 | INFO     | __main__:<module>:171 - pare down vp: 0:05:07.353337
+2023-10-19 11:39:35.481 | INFO     | __main__:<module>:161 - Analysis date: 2023-06-14
+2023-10-19 11:41:06.197 | INFO     | __main__:<module>:171 - pare down vp: 0:06:38.070240
+2023-10-19 11:41:06.197 | INFO     | __main__:<module>:161 - Analysis date: 2023-07-12
+2023-10-19 11:42:34.062 | INFO     | __main__:<module>:171 - pare down vp: 0:08:05.936015
+2023-10-19 11:42:34.063 | INFO     | __main__:<module>:161 - Analysis date: 2023-08-15
+2023-10-19 11:43:55.229 | INFO     | __main__:<module>:171 - pare down vp: 0:09:27.102851
