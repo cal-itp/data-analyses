@@ -1,4 +1,0 @@
-2023-10-24 10:41:22.489 | INFO     | __main__:<module>:172 - Analysis date: 2023-09-13
-2023-10-24 10:45:20.963 | INFO     | __main__:<module>:200 - map partitions to transform vp: 0:03:58.472517
-2023-10-24 10:45:21.638 | INFO     | __main__:<module>:231 - map partitions to find nearest vp to stop: 0:00:00.675195
-2023-10-24 10:46:43.464 | INFO     | __main__:<module>:239 - execution time: 0:05:20.974165

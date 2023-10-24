@@ -1,7 +1,8 @@
 """
 Handle normal vs loopy shapes separately.
 
-For normal shapes, get to interpolation already.
+For normal shapes, find the nearest vp_idx before a stop,
+and the vp_idx after.
 """
 import dask.dataframe as dd
 import datetime
@@ -15,7 +16,6 @@ from segment_speed_utils import helpers, segment_calcs
 from segment_speed_utils.project_vars import SEGMENT_GCS, PROJECT_CRS
 from shared_utils import rt_dates
 
-analysis_date = rt_dates.DATES["sep2023"]
 
 def rt_trips_to_shape(analysis_date: str) -> pd.DataFrame:
     """
@@ -137,6 +137,9 @@ def find_vp_nearest_stop_position(
             # side = "left" would be stop_meters <= vp_shape_meters
         )
 
+        # For the next value, if there's nothing to index into, 
+        # just set it to the same position
+        # if we set subseq_value = getattr(row, )[idx], we might not get a consecutive vp
         nearest_value = getattr(row, "vp_idx_arr")[idx-1]
         subseq_value = nearest_value + 1
 
@@ -144,7 +147,7 @@ def find_vp_nearest_stop_position(
         subseq_vp_idx.append(subseq_value)
     
    
-    result = df[trip_shape_cols + ["stop_sequence"]]
+    result = df[trip_shape_cols + ["stop_sequence", "stop_id", "stop_meters"]]
     
     # Now assign the nearest vp for each trip that's nearest to
     # a given stop
@@ -157,13 +160,46 @@ def find_vp_nearest_stop_position(
     return result
 
 
+def fix_out_of_bound_results(
+    df: pd.DataFrame, 
+    analysis_date: str
+) -> pd.DataFrame:
+
+    # Merge in usable bounds
+    usable_bounds = dd.read_parquet(
+        f"{SEGMENT_GCS}vp_usable_{analysis_date}"
+    ).pipe(segment_calcs.get_usable_vp_bounds_by_trip)
+    
+    results_with_bounds = pd.merge(
+        df,
+        usable_bounds,
+        on = "trip_instance_key",
+        how = "inner"
+    )
+    
+    correct_results = results_with_bounds.query('subseq_vp_idx <= max_vp_idx')
+    incorrect_results = results_with_bounds.query('subseq_vp_idx > max_vp_idx')
+    incorrect_results = incorrect_results.assign(
+        subseq_vp_idx = incorrect_results.nearest_vp_idx
+    )
+    
+    fixed_results = pd.concat(
+        [correct_results, incorrect_results], 
+        axis=0
+    ).drop(columns = ["min_vp_idx", "max_vp_idx"]).sort_index()
+    
+    return fixed_results
+
+
 if __name__ == "__main__":
     
-    LOG_FILE = "../logs/interpolate.log"
+    LOG_FILE = "../logs/nearest_vp.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
+    
+    analysis_date = rt_dates.DATES["sep2023"]
     
     logger.info(f"Analysis date: {analysis_date}")
     
@@ -198,11 +234,11 @@ if __name__ == "__main__":
     stops_projected = pd.read_parquet(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet",
         filters = [[("shape_array_key", "in", normal_shapes)]],
-        columns = ["shape_array_key", "stop_sequence", "shape_meters"]
+        columns = ["shape_array_key", "stop_sequence", "stop_id", "shape_meters"]
     ).rename(columns = {"shape_meters": "stop_meters"})
     
     existing_stop_cols = stops_projected[
-        ["shape_array_key", "stop_sequence"]].dtypes.to_dict()
+        ["shape_array_key", "stop_sequence", "stop_id", "stop_meters"]].dtypes.to_dict()
     existing_vp_cols = vp_wide[["trip_instance_key"]].dtypes.to_dict()
     
     vp_to_stop = dd.merge(
@@ -228,7 +264,9 @@ if __name__ == "__main__":
     
     result = result.compute()
     
-    result.to_parquet(
+    fixed_results = fix_out_of_bound_results(result, analysis_date)
+    
+    fixed_results.to_parquet(
         f"{SEGMENT_GCS}projection/nearest_vp_normal_{analysis_date}.parquet")
     
     end = datetime.datetime.now()
