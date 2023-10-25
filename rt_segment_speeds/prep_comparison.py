@@ -12,6 +12,7 @@ Get at why speeds are coming out differently.
 """
 import geopandas as gpd
 import pandas as pd
+from siuba import *
 
 from shared_utils import rt_dates, rt_utils
 from segment_speed_utils import helpers
@@ -20,6 +21,21 @@ from calitp_data_analysis import utils
 
 RT_DELAY_GCS = f"{GCS_FILE_PATH}rt_delay/v2_segment_speed_views/"
 analysis_date = rt_dates.DATES["sep2023"]
+
+def remove_interpolated_segments(df_eric):
+    '''
+    speedmap pipeline adds virtual, interpolated segments where stop spacing is >1km
+    segment speeds does not do this, so we should strip these out first to compare
+    these are marked by non-integer stop_sequence, so remove segments where current or previous
+    ending stop sequence is non-integer
+    '''
+    df_eric = df_eric >> group_by(_.trip_id) >> arrange(_.stop_sequence) >> mutate(last_seq = _.stop_sequence.shift(1)) >> ungroup()
+    df_eric.last_seq = df_eric.last_seq.bfill()
+    df_eric = (df_eric >> filter(_.stop_sequence.astype(int) == _.stop_sequence)
+         >> filter(_.last_seq.astype(int) == _.last_seq)
+         >> select(-_.last_seq)
+    )
+    return df_eric
 
 def prep_eric_data(analysis_date: str) -> gpd.GeoDataFrame:
     itp_ids = [
@@ -41,8 +57,7 @@ def prep_eric_data(analysis_date: str) -> gpd.GeoDataFrame:
 
     df_eric = pd.concat(eric_dfs, axis=0).reset_index(drop=True)
     
-    return df_eric
-
+    return remove_interpolated_segments(df_eric)
 
 def prep_tiff_data(
     analysis_date: str, 
