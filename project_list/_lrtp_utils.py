@@ -1235,6 +1235,9 @@ def all_mpo(save_to_gcs: bool = True):
     stancog = harmonize_stancog()
     tahoe = harmonize_tahoe()
     tcag = harmonize_tcag()
+    
+    # LOST
+    lost = harmonize_lost()
 
     df_list = [
         ambag,
@@ -1255,6 +1258,7 @@ def all_mpo(save_to_gcs: bool = True):
         stancog,
         tahoe,
         tcag,
+        lost
     ]
     df = pd.concat(df_list)
 
