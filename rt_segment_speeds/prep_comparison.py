@@ -111,6 +111,46 @@ def prep_tiff_data(
     return df_tiff
 
 
+def prep_tiff_interpolated_data(
+    analysis_date: str, 
+    subset_df: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    
+    shape_trips = subset_df[["shape_id", "trip_id"]].drop_duplicates()
+
+    scheduled_trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = [
+            "gtfs_dataset_key", "name", 
+            "trip_id", "trip_instance_key",
+            "shape_id", "shape_array_key",
+            "route_id", "direction_id"],
+        get_pandas = True
+    ).rename(columns = {"gtfs_dataset_key": "schedule_gtfs_dataset_key"})
+
+    # Grab the trip_instance_keys we need and use it
+    # to filter the speeds parquet down
+    subset_trips = scheduled_trips.merge(
+        shape_trips,
+        on = ["shape_id", "trip_id"],
+        how = "inner"
+    )
+
+    trip_instances = subset_trips.trip_instance_key.unique().tolist()
+    subset_shapes = subset_trips.shape_array_key.unique().tolist()
+
+    filtered_trip_speeds = pd.read_parquet(
+        f"{SEGMENT_GCS}stop_arrivals_speed_{analysis_date}.parquet",
+        filters = [[("trip_instance_key", "in", trip_instances)]]
+    ).merge(
+        subset_trips,
+        on = ["trip_instance_key", "shape_array_key"],
+        how = "inner"
+    )
+    
+    return filtered_trip_speeds
+
+
 def map_one_trip(gdf: gpd.GeoDataFrame, one_trip: str):
     gdf2 = gdf[gdf.trip_id==one_trip]
 
@@ -123,8 +163,10 @@ def map_one_trip(gdf: gpd.GeoDataFrame, one_trip: str):
     return m1
 
 if __name__ == "__main__":
+    
     df_eric = prep_eric_data(analysis_date)
     df_tiff = prep_tiff_data(analysis_date, df_eric)
+    df_tiff_interp = prep_tiff_interpolated_data(analysis_date, df_eric)
     
     utils.geoparquet_gcs_export(
         df_eric,
@@ -138,6 +180,9 @@ if __name__ == "__main__":
         f"speeds_tiff_{analysis_date}"
     )
     
+    df_tiff_interp.to_parquet(
+        f"{SEGMENT_GCS}speeds_tiff_interp_{analysis_date}.parquet")
+    
     # stop_sequence doesn't exactly merge, but that's fine, 
     # since Eric cuts shorter segments, so stop_sequence can have 
     # values like 1.25, 1.50, etc.
@@ -146,7 +191,6 @@ if __name__ == "__main__":
         "trip_id", "shape_id", "stop_id", "stop_sequence",
         "route_id", "direction_id",
     ]
-
     
     speed_df = pd.merge(
         df_eric[identifier_cols + ["speed_mph"]].rename(
@@ -156,6 +200,12 @@ if __name__ == "__main__":
         on = identifier_cols,
         how = "left",
         indicator = True
+    ).merge(
+        df_tiff_interp[identifier_cols + ["speed_mph"]].rename(
+            columns = {"speed_mph": "tiff_interp_speed_mph"}),
+        on = identifier_cols,
+        how = "left",
     )
 
-    speed_df.to_parquet(f"{SEGMENT_GCS}speeds_comparison_{analysis_date}.parquet")
+    speed_df.to_parquet(
+        f"{SEGMENT_GCS}speeds_comparison_{analysis_date}.parquet")
