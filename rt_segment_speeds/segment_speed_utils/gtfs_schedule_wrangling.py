@@ -89,3 +89,23 @@ def merge_shapes_to_stop_times(
         st_with_shape = st_with_shape.set_crs(trips_with_shape_geom.crs)
     
     return st_with_shape
+
+
+def stop_arrivals_per_stop(
+    stop_times: pd.DataFrame,
+    group_cols: list,
+    count_col: str = "trip_id"
+) -> pd.DataFrame:
+    """
+    Aggregate stop_times by list of grouping columns 
+    and count number of stop arrivals.
+    """
+    arrivals_by_stop = (stop_times
+                        .groupby(group_cols, 
+                                 observed=True, group_keys=False)
+                        .agg({count_col: 'count'})
+                        .reset_index()
+                        .rename(columns = {count_col: "n_arrivals"})          
+                     )    
+    return arrivals_by_stop
+    
