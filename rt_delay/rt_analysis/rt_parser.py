@@ -204,15 +204,17 @@ class VehiclePositionsInterpolator:
 class OperatorDayAnalysis:
     '''New top-level class for rt delay/speed analysis of a single operator on a single day
     '''
-    def __init__(self, itp_id, analysis_date, pbar = None):
+    def __init__(self, itp_id, analysis_date, pbar = None, debug_trip_list = []):
         self.pbar = pbar
         self.debug_dict = {}
         '''
         itp_id: an itp_id (string or integer)
         analysis date: datetime.date
+        debug_trip_list: List of trip_ids
         '''
         self.calitp_itp_id = int(itp_id)
         assert type(analysis_date) == dt.date, 'analysis date must be a datetime.date object'
+
         self.analysis_date = analysis_date
         self.display_date = self.analysis_date.strftime('%b %d (%a)')
         ## Move to v2!
@@ -225,6 +227,14 @@ class OperatorDayAnalysis:
         self.stop_times = rt_utils.get_st(self.index_df, self.trips)
         self.stops = rt_utils.get_stops(self.index_df)
         self.shapes = rt_utils.get_shapes(self.index_df)
+        
+        if debug_trip_list:
+            print('debug mode! \n only including trips:')
+            if len(debug_trip_list) < 10:
+                print(debug_trip_list)
+            else:
+                print(f'{debug_trip_list[:11]}...')
+            self.trips = self.trips >> filter(_.trip_id.isin(debug_trip_list))
         
         self.trips_positions_joined = (self.vehicle_positions >> inner_join(_, self.trips, on = ['trip_id']))
         assert not self.trips_positions_joined.empty, 'vehicle positions empty, or vp trip ids not in schedule'
