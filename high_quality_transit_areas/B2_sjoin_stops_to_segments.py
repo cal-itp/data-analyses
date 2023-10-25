@@ -17,6 +17,7 @@ from loguru import logger
 from typing import Union
 
 from calitp_data_analysis import utils
+from segment_speed_utils import gtfs_schedule_wrangling
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS
 
@@ -51,11 +52,11 @@ def stop_times_aggregation_max_by_stop(stop_times: dd.DataFrame) -> dd.DataFrame
     )
             
     # Aggregate how many trips are made at that stop by departure hour
-    trips_per_hour = (stop_times.groupby(stop_cols + ["departure_hour"])
-                      .agg({'trip_id': 'count'})
-                      .reset_index()
-                      .rename(columns = {"trip_id": "n_trips"})
-                     )    
+    trips_per_hour = gtfs_schedule_wrangling.stop_arrivals_per_stop(
+        stop_times,
+        group_cols = stop_cols + ["departure_hour"],
+        count_col = "trip_id"
+    ).rename(columns = {"n_arrivals": "n_trips"})
     
     # Subset to departure hour before or after 12pm
     am_trips = max_trips_by_group(
