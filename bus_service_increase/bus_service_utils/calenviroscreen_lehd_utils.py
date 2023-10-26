@@ -22,12 +22,12 @@ from bus_service_utils import utils as bus_utils
 ### CalEnviroScreen functions
 #--------------------------------------------------------#
 def define_equity_groups(df: pd.DataFrame, 
-                         percentile_col: list = ["CIscoreP"], 
-                         num_groups: int=5) -> pd.DataFrame:
+                         percentile_col: list, 
+                         num_groups: int) -> pd.DataFrame:
     """
     df: pandas.DataFrame
     percentile_col: list.
-                    List of columns with values that are percentils, to be
+                    List of columns with values that are percentiles, to be
                     grouped into bins.
     num_groups: integer.
                 Number of bins, groups. Ex: for quartiles, num_groups=4.
@@ -35,19 +35,10 @@ def define_equity_groups(df: pd.DataFrame,
     `pd.cut` vs `pd.qcut`: 
     https://stackoverflow.com/questions/30211923/what-is-the-difference-between-pandas-qcut-and-pandas-cut            
     """
-    
     for col in percentile_col:
-        # -999 should be replaced as NaN, so it doesn't throw off the binning of groups
-        df = (df.assign(
-                col = df[col].replace(-999, np.nan),
-                new_col = (pd.cut(df[col], bins=num_groups, 
-                                  labels=False, duplicates="drop") + 1).astype("Int64")
-            ).drop(columns = col) 
-              # drop original column and use the one with replaced values
-            .rename(columns = {
-                "col": col, 
-                "new_col": f"{col}_group"})
-             )
+        df[f"{col}_group"] = (pd.qcut(
+            df[col], num_groups, labels=False) + 1).astype("Int64")
+            
 
     return df
 
@@ -66,32 +57,29 @@ def prep_calenviroscreen(df: gpd.GeoDataFrame,
     )
     df['pop_sq_mi'] = df.Population / df.sq_mi
     
-    df2 = define_equity_groups(
-        df,
-        percentile_col =  ["CIscoreP", "PolBurdP", "PopCharP"], 
-        num_groups = quartile_groups)
     
     # Rename columns
     keep_cols = [
         'Tract', 'ZIP', 'Population',
         'sq_mi', 'pop_sq_mi',
         'CIscoreP', 'PolBurdP', 'PopCharP',
-        'CIscoreP_group', 'PolBurdP_group', 'PopCharP_group',
         'County', 'City', 'geometry',  
     ]
     
-    df3 = (df2[keep_cols]
-           .rename(columns = 
-                     {"CIscoreP_group": "equity_group",
-                     "PolBurdP_group": "pollution_group",
-                     "PopCharP_group": "popchar_group",
+    df2 = (df[keep_cols]
+           .rename(columns = {
                      "CIscoreP": "overall_ptile",
                      "PolBurdP": "pollution_ptile",
-                     "PopCharP": "popchar_ptile"}
-                    )
+                     "PopCharP": "popchar_ptile"})
            .sort_values(by="Tract")
            .reset_index(drop=True)
           )
+    
+    df3 = define_equity_groups(
+        df2,
+        percentile_col =  ["overall_ptile"], 
+        num_groups = quartile_groups
+    ).rename(columns = {"overall_ptile_group": "equity_group"})
     
     return df3
 
@@ -117,14 +105,10 @@ def download_lehd_data(download_date: str,
     # Doing all_se01-se03 is the same as primary jobs
     # summing up to tract level gives same df.describe() results
 
-
     for dataset in lehd_datasets:
-        utils.import_csv_export_parquet(
-            dataset_name = f"{URBAN_URL}{download_date}{dataset}",
-            output_file_name = dataset, 
-            GCS_FILE_PATH = bus_utils.GCS_FILE_PATH,
-            GCS=True
-        )
+        dataset_name = f"{URBAN_URL}{download_date}{dataset}.csv"
+        df = pd.read_csv(datdaset_name)
+        df.to_parquet(f"{bus_utils.GCS_FILE_PATH}{dataset}.parquet")
 
 
 def process_lehd(df: pd.DataFrame) -> pd.DataFrame:
@@ -158,21 +142,17 @@ def merge_and_process(data_to_merge: list = []) -> pd.DataFrame:
     # For subsequent dfs, merge and rename column
     # We want num_jobs to be stored as num_jobs0, num_jobs1, etc to keep track
     final = pd.DataFrame()
-    i = 0
     
-    for d in data_to_merge:
-        new_col = f"num_jobs{i}"
+    for i, d in enumerate(data_to_merge):
         if i == 0:
             final = d.copy()
-            final = final.rename(columns = {"num_jobs": new_col})
+            final = final.rename(columns = {"num_jobs": f"num_jobs{i}"})
             
         else:
             final = final.merge(d,
                 on = "Tract", how = "left", validate = "1:1"
-            ).rename(columns = {"num_jobs": new_col})
-            
-        i += 1
-    
+            ).rename(columns = {"num_jobs": f"num_jobs{i}"})
+                
     # Sum across to get total number of jobs for tract
     jobs_cols = [col for col in final.columns if "num_jobs" in col]
     
@@ -183,12 +163,18 @@ def merge_and_process(data_to_merge: list = []) -> pd.DataFrame:
     return final   
     
     
-def merge_calenviroscreen_lehd(calenviroscreen: pd.DataFrame, 
-                               lehd: pd.DataFrame) -> pd.DataFrame:    
+def merge_calenviroscreen_lehd(
+    calenviroscreen: pd.DataFrame, 
+    lehd: pd.DataFrame
+) -> pd.DataFrame:    
     # Merge LEHD with CalEnviroScreen
-    df = pd.merge(calenviroscreen, lehd, 
-                  on = "Tract", how = "left", validate = "1:1"
-                 )
+    df = pd.merge(
+        calenviroscreen, 
+        lehd, 
+        on = "Tract", 
+        how = "left", 
+        validate = "1:1"
+    )
     
     # Calculate jobs per sq mi
     df = df.assign(
@@ -207,9 +193,9 @@ def merge_calenviroscreen_lehd(calenviroscreen: pd.DataFrame,
 
 ## Put all functions above together to generate cleaned CalEnviroScreen + LEHD data
 def generate_calenviroscreen_lehd_data(
-    calenviroscreen_quartile_groups: int = 3,
-    lehd_datasets: list = LEHD_DATASETS,
-    GCS: bool = True
+    calenviroscreen_quartile_groups: int,
+    lehd_datasets: list,
+    GCS: bool
 ) -> gpd.GeoDataFrame:
     
     # CalEnviroScreen data (gdf)
@@ -221,16 +207,13 @@ def generate_calenviroscreen_lehd_data(
     gdf = prep_calenviroscreen(gdf, calenviroscreen_quartile_groups)
     
     # LEHD Data
-    lehd_dfs = {}
-    for d in lehd_datasets:
-        lehd_dfs[d] = pd.read_parquet(f"{bus_utils.GCS_FILE_PATH}{d}.parquet")
-    
-    cleaned_dfs = []
-    for key, value in lehd_dfs.items():
-        processed_df = process_lehd(value)
-        cleaned_dfs.append(processed_df)
+    cleaned_dfs = [
+        pd.read_parquet(
+            f"{bus_utils.GCS_FILE_PATH}{d}.parquet"
+        ).pipe(process_lehd) for d in lehd_datasets
+    ]
 
-    lehd = merge_and_process(data_to_merge = cleaned_dfs)
+    lehd = merge_and_process(cleaned_dfs)
     
     # Merge together
     final = merge_calenviroscreen_lehd(gdf, lehd)

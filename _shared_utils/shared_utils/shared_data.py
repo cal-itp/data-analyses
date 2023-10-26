@@ -3,6 +3,7 @@ One-off functions, run once, save datasets for shared use.
 """
 import geopandas as gpd
 import pandas as pd
+from calitp_data_analysis import geography_utils, utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 
@@ -79,11 +80,6 @@ def make_clean_state_highway_network():
 
 # Run functions to create these datasets...store in GCS
 if __name__ == "__main__":
-    # Don't use from shared_utils import geography_utils
-    # Those have other dependencies...like map_utils imports from geography_utils
-    import geography_utils
-    import utils
-
     make_county_centroids()
 
     make_clean_state_highway_network()
