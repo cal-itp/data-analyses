@@ -1274,7 +1274,9 @@ def all_mpo(save_to_gcs: bool = True):
     ]
     for i in str_cols:
         df[i] = df[i].str.replace("_", " ").str.strip().str.title()
-
+        
+    df = df.drop(columns=["geometry"])
+    
     # Create gdf
     gdf = df[df.geometry != None].reset_index(drop=True)
     gdf = gdf.set_geometry("geometry")
@@ -1282,7 +1284,7 @@ def all_mpo(save_to_gcs: bool = True):
     gdf = gdf[gdf.geometry.geometry.is_valid].reset_index(drop=True)
 
     if save_to_gcs:
-        df.drop(columns=["geometry"]).to_excel(
+        df.to_excel(
             f"{harmonization_utils.GCS_FILE_PATH}LRTP/all_LRTP_LOST.xlsx", index=False
         )
         gdf.to_file("./all_LRTP_LOST.geojson", driver="GeoJSON")
