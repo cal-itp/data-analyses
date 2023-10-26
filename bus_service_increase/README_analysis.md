@@ -28,16 +28,6 @@ Scripts associated with data creation and visualization / output generation. The
 1. [setup_corridors_stats](./setup_corridors_stats.py): aggregate summary stats by operator or highway route
 
 
-### Data Assembly
-
-1. [setup_parallel_trips_with_stops](./D1_setup_parallel_trips_with_stops.py): set up parallel routes, select 1 representative trip per route (25th percentile trip), to compare against car 
-1. [setup_gmaps](./D2_setup_gmaps.py): set up df to be used in Google Directions API with origin, destination, waypoint, and departure times
-1. [make_gmaps_requests](./D3_make_gmaps_requests.py): make Google Directions API requests and cache results in GCS
-1. [make_gmaps_results](./D4_make_gmaps_results.py): grab cached JSON results and assemble into df
-1. [make_stripplot_data](./D5_make_stripplot_data.py): merge competitive routes info from Google Directions API back to trip-level data and wrangle data for making stripplots showing trip variability.
-1. [definitions-competitive-viable](./D6_definitions-competitive-viable.ipynb): descriptives to justify cut-offs in competitive-parallel-routes report
-
-
 ### Reports
 1. [parallel_corridors_utils](./parallel_corridors_utils.py): utility functions used in reports.  
 1. [deploy_portfolio_yaml](./deploy_portfolio_yaml.py): programmatically set up jupyterbook yml file in [portfolio/sites/](../portfolio/sites/parallel_corridors.yml)
