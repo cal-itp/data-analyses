@@ -11,20 +11,7 @@ from calitp_data_analysis.tables import tbls
 from siuba import *
 
 from calitp_data_analysis import utils, geography_utils
-from bus_service_utils import utils as bus_utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling, sched_rt_utils
-from shared_utils import rt_dates
-
-DATA_PATH = f"{bus_utils.GCS_FILE_PATH}2023_Oct/"
-
-#---------------------------------------------------------------#
-# Set dates for analysis
-#---------------------------------------------------------------#
-dates = {
-    "wed": rt_dates.DATES["oct2023"], 
-    "sat": rt_dates.DATES["oct2023a"],
-    "sun": rt_dates.DATES["oct2023b"],
-}
 
 
 def calculate_trip_run_time(selected_date: str) -> pd.DataFrame:
@@ -75,11 +62,13 @@ def aggregate_stop_times_add_stop_geometry(selected_date: str) -> pd.DataFrame:
     Aggregate it to the number of arrivals per stop
     and attach stop point geometry.
     """
-    stop_cols = ["feed_key", "stop_id"]
+    stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
     
-    stop_times = helpers.import_scheduled_stop_times(
+    stop_times = helpers.import_assembled_stop_times_with_direction(
         selected_date,
-        columns = stop_cols + ["arrival_sec"]
+        columns = stop_cols + ["stop_sequence", "geometry"],
+        get_pandas = True,
+        crs = geography_utils.WGS84
     )
     
     # Aggregate to count daily stop times
@@ -87,18 +76,11 @@ def aggregate_stop_times_add_stop_geometry(selected_date: str) -> pd.DataFrame:
     stop_arrivals = gtfs_schedule_wrangling.stop_arrivals_per_stop(
         stop_times,
         group_cols = stop_cols,
-        count_col = "arrival_sec"
-    ).compute()
-    
-    stops = helpers.import_scheduled_stops(
-        selected_date,
-        columns = stop_cols + ["stop_name", "geometry"],
-        get_pandas = True,
-        crs = geography_utils.WGS84
+        count_col = "stop_sequence"
     )
     
     aggregated_stops_with_geom = pd.merge(
-        stops,
+        stop_times[stop_cols + ["geometry"]],
         stop_arrivals,
         on = stop_cols,
         how = "inner"
@@ -139,9 +121,8 @@ def funding_table(is_current_status: bool):
 
     
 if __name__ == "__main__":
-    # Run this to get the static parquet files
-    # Analysis is for a particular day, so don't need to hit warehouse constantly
-    
+    from service_increase_vars import dates, DATA_PATH
+        
     # (1) Get existing service 
     for analysis_date in dates.values():
         calculate_trip_run_time(analysis_date)

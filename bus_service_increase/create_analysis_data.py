@@ -1,21 +1,22 @@
 """
+Create analysis data for service increase estimator
+and tract-level stats.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
-import datetime
 import geopandas as gpd
+import gcsfs
 import intake
 import pandas as pd
 
 from dask import delayed
 
-from bus_service_utils import utils as bus_utils
 from calitp_data_analysis import geography_utils, utils
 from segment_speed_utils import helpers
 from shared_utils import portfolio_utils
-from warehouse_queries import DATA_PATH, dates
 
 catalog = intake.open_catalog("*.yml")
+fs = gcsfs.GCSFileSystem()
 
 #------------------------------------------------------------------#
 ## Functions to create operator-route-level dataset
@@ -202,8 +203,8 @@ def create_bus_arrivals_by_tract_data(selected_date: str):
     """
     Aggregate bus arrivals to tract.
     """
-    aggregated_stops_with_geom = pd.read_parquet(
-        f"{utils.DATA_PATH}aggregated_stops_with_geom_{selected_date}.parquet")
+    aggregated_stops_with_geom = gpd.read_parquet(
+        f"{DATA_PATH}aggregated_stops_with_geom_{selected_date}.parquet")
 
     census_tracts = catalog.calenviroscreen_lehd_by_tract.read()
     
@@ -214,16 +215,16 @@ def create_bus_arrivals_by_tract_data(selected_date: str):
         how = "inner",
         predicate = "intersects"
     ).drop(columns = "index_right")
-    
+        
     # Aggregate by tract level and count bus arrivals, number of stops, etc
     gdf2 = portfolio_utils.aggregate_by_geography(
         gdf, 
         group_cols = ["Tract"], 
-        sum_cols = ["num_arrivals"],
+        sum_cols = ["n_arrivals"],
         count_cols = ["stop_id"],
         nunique_cols = ["schedule_gtfs_dataset_key"],
     ).rename(columns = {
-        "num_arrivals": "total_arrivals",
+        "n_arrivals": "total_arrivals",
         "stop_id": "n_stops",
         "schedule_gtfs_dataset_key": "n_operators"
     })
@@ -239,16 +240,18 @@ def create_bus_arrivals_by_tract_data(selected_date: str):
     # Export to GCS
     utils.geoparquet_gcs_export(
         final, 
-        utils.GCS_FILE_PATH, 
-        "bus_stop_times_by_tract"
+        DATA_PATH, 
+        f"bus_stop_times_by_tract_{selected_date}"
     )
 
-
+    
 if __name__ == "__main__":
+    
+    from service_increase_vars import dates, DATA_PATH
     
     # Run this to get the static parquet files    
     all_dates = list(dates.values())
-
+    
     # Get analysis dataset for service increase estimator?
     operators = pd.read_parquet(
         f"{DATA_PATH}trip_run_times_{dates['wed']}.parquet",
@@ -274,7 +277,15 @@ if __name__ == "__main__":
         partition_on = "schedule_gtfs_dataset_key"
     )
     
-    generate_shape_categories(analysis_date)
+    results = pd.read_parquet(
+        f"{DATA_PATH}shapes_processed"
+    )
+    
+    # Partitioned parquet as a release valve since we're running close to memory
+    results.to_parquet(f"{DATA_PATH}shapes_processed.parquet")
+    fs.rm(f"{DATA_PATH}shapes_processed/", recursive=True)
+    
+    generate_shape_categories(dates['wed'])
     
     # Get analysis dataset for bus arrivals by tract
-    create_bus_arrivals_by_tract_data(analysis_date)
+    create_bus_arrivals_by_tract_data(dates['wed'])
