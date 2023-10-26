@@ -1,46 +1,23 @@
+"""
+"""
+import dask.dataframe as dd
+import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import intake
-import numpy as np
 import pandas as pd
 
 from bus_service_utils import utils as bus_utils
 from calitp_data_analysis import geography_utils, utils
-import warehouse_queries
-
-from calitp_data_analysis.tables import tbls
-from siuba import *
-
-# Use sub-folder for Jan 2022
-DATA_PATH = warehouse_queries.DATA_PATH
+from segment_speed_utils import helpers
+from shared_utils import portfolio_utils
+from warehouse_queries import DATA_PATH
 
 catalog = intake.open_catalog("*.yml")
 
 #------------------------------------------------------------------#
 ## Functions to create operator-route-level dataset
 #------------------------------------------------------------------#
-def get_time_calculations(df: pd.DataFrame) -> pd.DataFrame:
-    ## time calculations
-    df = df.assign(
-        date = pd.to_datetime(df.date),
-        departure_time = df.departure_time.dropna().apply(bus_utils.fix_gtfs_time),
-    )
-
-    # Something weird comes up trying to generate departure_dt
-    # pd.to_datetime() gives today's date
-    # datetime.strptime gives year 1900
-    # Either way, we have the service date, and later subsetting between 5am-9pm will address this
-    df = df.assign(
-        departure_time = pd.to_datetime(df.departure_time, errors="coerce"),
-        departure_hour = pd.to_datetime(df.departure_time, errors="coerce").dt.hour,
-    )
-    
-    # Any observation with NaTs for departure time get dropped
-    # Will create issue later when grouping is done with departure hour
-    df = df[df.departure_time.notna()].reset_index(drop=True)
-    
-    return df
-
 
 def add_zeros(one_operator_df):
     '''
@@ -68,10 +45,7 @@ def add_zeros(one_operator_df):
         shape_frequency = shape_frequency.reindex(multi_ix).reset_index()
     except ValueError: ## aggregate rare shape_ids with multiple routes (these may be errors)
         duplicate_indicies = shape_frequency.index[shape_frequency.index.duplicated()]
-    #     print(f'''
-    #     caution, operator has {len(duplicate_indicies)} duplicate shape/day/departure_hour \
-    # out of an ix of {len(shape_frequency.index)}
-    #     ''')
+
         assert len(duplicate_indicies) < len(shape_frequency.index) / 100, 'too many duplicate shape/day/departure_hour'
         shape_frequency = (shape_frequency
                            .groupby(['shape_id', 'day_name', 'departure_hour'])
@@ -106,80 +80,29 @@ def add_all_zeros(shape_frequency_df):
     return df_with_zeros
 
 
-def calculate_runtime_hourlytrips(df):
+def frequency_by_shape(df: pd.DataFrame) -> pd.DataFrame:
         
-    # Calculate run time for a trip
-    # Find the median stop (keep that observation)
-    def find_runtime(df):
-        mindt = df[df.stop_sequence == df.stop_sequence.min()].departure_time.iloc[0]
-        maxdt = df[df.stop_sequence == df.stop_sequence.max()].departure_time.iloc[0]
-        td = (maxdt - mindt)
-        df['runtime_seconds'] = td.seconds
-        return df
+    trips_per_hour = (df
+                      .groupby(["schedule_gtfs_dataset_key", 
+                                "day_name", "departure_hour", 
+                                "time_of_day",
+                                "route_id", "shape_id"], 
+                              observed=True, group_keys=False)
+                      .agg({
+                          "trip_instance_key": "count",
+                          "service_minutes": "mean"
+                      })
+                      .reset_index()
+                      .rename(columns = {
+                          "trip_instance_key": "n_trips",
+                          "service_minutes": "avg_service_minutes"
+                      })
+                     )
 
-    group_cols = ['trip_key', 'day_name']
-    df = df.groupby(group_cols).apply(find_runtime)
-
-    df = df.assign(
-        middle_stop = df.groupby(group_cols)["stop_sequence"].transform("median"),
-    ).astype({"middle_stop": "int64"})
-    
-    
-    # Drop any trips with runtime of NaN calculated
-    df = df[df.runtime_seconds.notna()].reset_index(drop=True)
-
-    # Still want to use this to merge on the mean runtime info
-    middle_stops = df >> filter(_.stop_sequence == _.middle_stop)
-    
-    middle_stops = middle_stops.assign(
-        mean_runtime_min = (middle_stops.groupby(["calitp_itp_id", 
-                                                  "route_id", "shape_id", 
-                                                  "departure_hour", "day_name"])
-                            ["runtime_seconds"].transform("mean")
-                           )
-    )
-    
-    
-    middle_stops = middle_stops.assign(
-        mean_runtime_min = (middle_stops.mean_runtime_min.dropna()     
-                            .apply(lambda x: int(round(x) / 60))
-                           )
-    )   
-    
-    # Add trips per hour column
-    shape_frequency = (
-        middle_stops
-        >> count(_.calitp_itp_id, _.route_id,
-                 _.shape_id, _.departure_hour, _.day_name, sort = True)
-        >> rename(trips_per_hour = "n")
-        >> inner_join(_, middle_stops, 
-                      on = ["calitp_itp_id", "day_name", 
-                            "shape_id", "departure_hour", "route_id"])
-    )
-    
-    # Now, data is at the trip-level (trip_key) still present
-    # Drop duplicates, but no aggregation because trips_per_hour and mean_runtime 
-    # are already correctly generated at the route-level, across trips in that departure hour
-    shape_frequency = shape_frequency.drop_duplicates(subset=[
-        "calitp_itp_id", "shape_id", "departure_hour",
-        "day_name", "route_id"])
-    
-    # There's an aggregation to deal with multiple route_ids that share same shape_id
-    # If there are still multiple route_ids, then aggregate and sum / mean
-    # Modify this to include itp_id into the groupby
-    shape_frequency2 = (shape_frequency
-                        .groupby(["calitp_itp_id", "shape_id", 
-                                  "departure_hour", "day_name"])
-                        .agg({"route_id": "max", 
-                              "trips_per_hour": "sum", 
-                              "mean_runtime_min": "mean"
-                             }).reset_index()
-                       )
-    
-    # Now, drop ITP_ID==200 to use individual operator feeds
-    shape_frequency3 = shape_frequency2 >> filter(_.calitp_itp_id != 200)
+    # Should we deal with multiple route_ids that share the same shape_id?
+    # Used to...but does that still happen in v2?
      
-    return shape_frequency3
+    return trips_per_hour
 
 
 def attach_funding(all_operators_df):
@@ -206,29 +129,15 @@ def attach_funding(all_operators_df):
 
 
 # Loop through and grab weekday/Sat/Sun subsets of joined data, calculate runtimes
-def create_service_estimator_data():
-    
-    time0 = dt.datetime.now()
-    
-    dates = warehouse_queries.dates
-    
-    processed_dfs = {}
-    for key in dates.keys():
-        start_time_loop = dt.datetime.now()
+def create_service_estimator_data(list_of_dates: list):    
 
-        print(f"Grab selected trips for {key}, created in warehouse_queries")
-        days_st = pd.read_parquet(f"{DATA_PATH}trips_joined_{key}.parquet")
-
-        print(f"Do time calculations for {key}")
-        st_trips_joined = get_time_calculations(days_st)
-        st_trips_joined.to_parquet(f"{DATA_PATH}timecalc_{key}.parquet")
-        
-        st_trips_joined = pd.read_parquet(f"{DATA_PATH}timecalc_{key}.parquet")
-        print(f"Calculate runtimes for {key}")    
-        processed_dfs[key] = calculate_runtime_hourlytrips(st_trips_joined)
-
-        finish_time_loop = dt.datetime.now()
-        print(f"Execution time for {key}: {finish_time_loop - start_time_loop}")
+    
+    combined_trip_times = pd.concat(
+        [pd.read_parquet(f"{DATA_PATH}trip_run_times_{d}.parquet") 
+         for d in list_of_dates], axis=0
+    )
+    
+    combind_shape_frequency = combined_trip_times.pipe(frequency_by_shape)
     
     
     start_time_append = dt.datetime.now()
@@ -263,154 +172,138 @@ def create_service_estimator_data():
     #os.remove(f"{DATA_PATH}trips_*.parquet")
     
 
-## Start functions related to A2
-# Categorize tracts and add back further process the operator-route-level df
-def generate_shape_categories(shapes_df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    shapes_df = (shapes_df.reset_index(drop=True)
-                 .to_crs(geography_utils.CA_NAD83Albers)
-                )
+def clip_shapes(
+    shapes: dg.GeoDataFrame, 
+    tracts_by_category: gpd.GeoDataFrame, 
+    category: str
+) -> dd.DataFrame:
+
+    clipped = dg.clip(shapes, tracts_by_category.loc[[category]])
+    clipped = clipped.assign(
+        tract_type = category,
+        pct_category = clipped.geometry.length / clipped.total_length
+    ).drop(columns = ["geometry", "total_length"])
+
+    return clipped
     
-    shapes_df = shapes_df.assign(
-        geometry = shapes_df.geometry.simplify(tolerance=1),
+        
+def generate_shape_categories(selected_date: str) -> gpd.GeoDataFrame:
+    
+    shape_cols = ["feed_key", "shape_id"]
+    
+    shapes = helpers.import_scheduled_shapes(
+        selected_date,
+        columns = shape_cols + ["geometry"],
+        get_pandas = False,
+        crs = geography_utils.CA_NAD83Albers
     )
     
-    ## quick fix for invalid geometries?
-    ces_df = (catalog.calenviroscreen_lehd_by_tract.read()
-              .to_crs(geography_utils.CA_NAD83Albers)
+    shapes = shapes.assign(
+        total_length = shapes.geometry.length
+    )
+    
+    census_tracts = (catalog.calenviroscreen_lehd_by_tract.read()
+                     .to_crs(geography_utils.CA_NAD83Albers)
+                     [["Tract", "pop_sq_mi", "geometry"]]
              )
 
-    ces_df = ces_df.assign(
-        tract_type = ces_df['pop_sq_mi'].apply(lambda x: 'urban' if x > 2400 
-                                               else 'suburban' if x > 800 
-                                               else 'rural'),
+    census_tracts = census_tracts.assign(
+        tract_type = census_tracts.pop_sq_mi.apply(
+            lambda x: 'urban' if x > 2_400 
+            else 'suburban' if x > 800 
+            else 'rural'),
         ## quick fix for invalid geometries (comes up in dissolve later)
-        geometry = ces_df.geometry.buffer(0),
+        geometry = census_tracts.geometry.buffer(0),
     )
     
-    category_dissolved = ces_df[["tract_type", "geometry"]].dissolve(by='tract_type')
-    # Since CRS is in meters, tolerance is anything < 1m off gets straightened
-    category_dissolved["geometry"] = category_dissolved.geometry.simplify(tolerance=1)
-    
+    tracts_by_category = census_tracts[
+        ["tract_type", "geometry"]
+    ].dissolve(by='tract_type')
 
-    urban = shapes_df.clip(category_dissolved.loc[['urban']])
-    suburban = shapes_df.clip(category_dissolved.loc[['suburban']])
-    rural = shapes_df.clip(category_dissolved.loc[['rural']])
+    tract_categories = ["urban", "suburban", "rural"]
 
-    shapes_df['pct_urban'] = urban.geometry.length / shapes_df.geometry.length
-    shapes_df['pct_suburban'] = suburban.geometry.length / shapes_df.geometry.length
-    shapes_df['pct_rural'] = rural.geometry.length / shapes_df.geometry.length
+    results = dd.multi.concat(
+        [clip_shapes(shapes, tracts_by_category, c)
+         for c in tract_categories],
+        axis=0
+    ).repartition(npartitions=1)
     
-    shapes_df['pct_max'] = shapes_df[
-        ['pct_urban', 'pct_suburban', 'pct_rural']].max(axis=1)
+    shapes2 = dd.merge(
+        shapes,
+        results,
+        on = shape_cols,
+        how = "inner"
+    ).compute()
     
-    return shapes_df
-
-
-def categorize_shape(row: float) -> str:
-    if row.pct_urban == row.pct_max:
-        row['tract_type'] = 'urban'
-    elif row.pct_suburban == row.pct_max:
-        row['tract_type'] = 'suburban'
-    elif row.pct_rural == row.pct_max:
-        row['tract_type'] = 'rural'
-    else:
-        row['tract_type'] = np.nan
-    return row
-
-
-def create_shapes_tract_categorized():    
-    time0 = dt.datetime.now()
+    shapes3 = shapes2.assign(
+        pct_max = (shapes2.groupby(shape_cols)
+                   .pct_category
+                   .transform("max"))
+    ).query(
+        'pct_max == pct_category'
+    ).drop(columns = ["pct_category", "pct_max"])
     
-    # Move creating linestring to this    
-    itp_ids = pd.read_parquet(f"{DATA_PATH}shape_frequency.parquet")
+    utils.geoparquet_gcs_export(
+        shapes3, 
+        DATA_PATH, 
+        f'shapes_categorized_{selected_date}'
+    ) 
     
-    itp_ids = list(itp_ids.calitp_itp_id.unique())    
-    print(f"Grab ITP IDs")
-    print(itp_ids)
-    
-    all_shapes = geography_utils.make_routes_shapefile(
-        ITP_ID_LIST = itp_ids)
-    
-    time1 = dt.datetime.now()
-    print(f"Execution time to make routes shapefile: {time1-time0}")
-    
-    # Upload to GCS
-    utils.geoparquet_gcs_export(all_shapes, DATA_PATH, 'shapes_initial')
-    
-    all_shapes = gpd.read_parquet(f"{DATA_PATH}shapes_initial.parquet")
-    
-    time2 = dt.datetime.now()
-    processed_shapes = generate_shape_categories(all_shapes)
-    processed_shapes = processed_shapes.apply(categorize_shape, axis=1)
-        
-    print(f"Execution time to categorize routes: {time2-time1}")
-    utils.geoparquet_gcs_export(processed_shapes, DATA_PATH, 
-                                             'shapes_processed')
-    
-    print(f"Total execution time: {time2-time0}")
-    
-   
     
 #------------------------------------------------------------------#
 ## Functions to create tract-level dataset
 #------------------------------------------------------------------#
-def create_bus_arrivals_by_tract_data():
+def create_bus_arrivals_by_tract_data(selected_date: str):
     aggregated_stops_with_geom = pd.read_parquet(
-        f"{utils.DATA_PATH}aggregated_stops_with_geom.parquet")
+        f"{utils.DATA_PATH}aggregated_stops_with_geom_{selected_date}.parquet")
 
     census_tracts = catalog.calenviroscreen_lehd_by_tract.read()
     
-    # If there are the same stops with multiple lat/lon values
-    # Drop duplicates
-    aggregated_stops = (aggregated_stops_with_geom
-                        .sort_values(["itp_id", "stop_id", "stop_lon", "stop_lat"])
-           .drop_duplicates(subset = ["itp_id", "stop_id"])
-           .reset_index(drop=True)
-    )
-    
-    print(f"# obs in bus stop arrivals: {len(aggregated_stops_with_geom)}")
-    print(f"# obs in bus stop arrivals, no dups lat/lon: {len(aggregated_stops)}")
-    
-    # Add stop geometry column (default parameter is WGS84)
-    bus_stops = (shared_utils.geography_utils.create_point_geometry(aggregated_stops)
-                 .drop(columns = ["stop_lon", "stop_lat"])
-                )
-    
     gdf = gpd.sjoin(
-        bus_stops, 
-        census_tracts.to_crs(shared_utils.geography_utils.WGS84),
+        aggregated_stops_with_geom, 
+        census_tracts.to_crs(geography_utils.WGS84),
         # Use inner, or else left join will result in some NaN tracts
         how = "inner",
         predicate = "intersects"
     ).drop(columns = "index_right")
     
     # Aggregate by tract level and count bus arrivals, number of stops, etc
-    gdf2 = shared_utils.geography_utils.aggregate_by_geography(
+    gdf2 = portfolio_utils.aggregate_by_geography(
         gdf, 
         group_cols = ["Tract"], 
         sum_cols = ["num_arrivals"],
         count_cols = ["stop_id"],
-        nunique_cols = ["itp_id"]
+        nunique_cols = ["schedule_gtfs_dataset_key"]
     )
     
     # Attach tract geometry back, since our previous spatial join kept bus stop's point geometry
-    final = shared_utils.geography_utils.attach_geometry(
-        gdf2, census_tracts, 
-        merge_col = ["Tract"], join="left"
+    final = pd.merge(
+        census_tracts,
+        gdf2,
+        on = "Tract",
+        how = "left"
     )
     
     # Export to GCS
-    shared_utils.utils.geoparquet_gcs_export(final, 
-                                             utils.GCS_FILE_PATH, 
-                                             "bus_stop_times_by_tract")
+    utils.geoparquet_gcs_export(
+        final, 
+        utils.GCS_FILE_PATH, 
+        "bus_stop_times_by_tract"
+    )
 
 
 if __name__ == "__main__":
     # Run this to get the static parquet files
     
     # Get analysis dataset for service increase estimator?
+    df = pd.concat(
+        [pd.read_parquet(
+            f"{DATA_PATH}trip_run_times_{d}.parquet")
+        for d in analysis_date_list], axis=0
+    ).pipe(frequency_by_shape)
+    
     create_service_estimator_data()
-    create_shapes_tract_categorized()
+    generate_shape_categories(analysis_date)
     
     # Get analysis dataset for bus arrivals by tract
-    create_bus_arrivals_by_tract_data()
+    create_bus_arrivals_by_tract_data(analysis_date)
