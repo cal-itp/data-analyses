@@ -53,3 +53,9 @@ sources:
     args:
       # ArcGIS Hub resource; https://hub.arcgis.com/datasets/1612d351695b467eba75fdf82c10884f_0/
       urlpath: https://services.arcgis.com/ue9rwulIoeLEI9bj/arcgis/rest/services/US_StateBoundaries/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+  calenviroscreen_lehd_by_tract:
+    driver: geoparquet
+    description: CalEnviroScreen 4.0 + LEHD 2021 data by tract
+    args:
+      # source: bus_service_increase/bus_service_utils/generate_calenviroscreen_lehd_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen_lehd_by_tract.parquet
