@@ -748,7 +748,7 @@ def describe_most_delayed(row):
     description = which_desc(row)
     full_description = (
         f"{row.route_short_name}{description}, {row.direction}: "
-        f"{round(row.mean_delay_seconds/60, 0)} minutes late on average"
+        f"{round(row.mean_delay_seconds / 60, 0)} minutes late on average"
     )
     row["full_description"] = full_description
     return row
