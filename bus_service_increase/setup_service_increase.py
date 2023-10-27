@@ -1,137 +1,102 @@
+"""
+"""
 import geopandas as gpd
-import os
 import pandas as pd
 
-from calitp_data_analysis.tables import tbls
 from siuba import *
 
 from bus_service_utils import utils as bus_utils
-import warehouse_queries
-
-# Use sub-folder for Jan 2022
-DATA_PATH = warehouse_queries.DATA_PATH
-
-# Merge routes with tract type (notebook A3)
-def merge_routes_with_tract_type():
-    
-    service = pd.read_parquet(f"{DATA_PATH}shape_frequency_funding.parquet")
-    processed_shapes = gpd.read_parquet(f'{DATA_PATH}shapes_processed.parquet')
-    
-    service_tract_type = pd.merge(
-        (service 
-         >> select(_.calitp_itp_id, _.shape_id, 
-                   _.day_name, _.departure_hour, 
-                   _.trips_per_hour, _.mean_runtime_min)
-        ),
-        (processed_shapes
-         >> select(_.calitp_itp_id, _.shape_id, _.tract_type)
-        ),
-        on = ['calitp_itp_id', 'shape_id'],
-        how = "inner",
-        validate = "m:1",
-    )
-    
-    # Filter and keep 5am-9pm hours
-    service_tract_type = (service_tract_type 
-                          >> filter(_.departure_hour > 4, _.departure_hour < 21) 
-                          ## filter for performance
-                         )
-    
-    service_tract_type = service_tract_type.assign(
-        min_runtime_min = (service_tract_type.groupby(["calitp_itp_id", "shape_id"])
-                       ["mean_runtime_min"].transform("min")
-                      )
-    )
-    
-    service_tract_type = (service_tract_type
-                      .dropna(subset=["tract_type", "min_runtime_min"])
-                      .reset_index(drop=True)
-                     )
-    
-    
-    ## runtime for analysis is the mean runtime for a shape/day/hour for existing service,
-    # or the min runtime for new service
-    service_tract_type = service_tract_type.assign(
-        runtime = service_tract_type[
-            ["mean_runtime_min", "min_runtime_min"]].max(axis=1).astype(int)
-    )
-    
-    return service_tract_type
-
-
 
 ## {tract type: target trips per hour}
-target_frequencies = {
+TARGET_FREQ = {
     'urban': 4, 
     'suburban': 2, 
     'rural': 1
 } 
 
 
-def calculate_additonal_trips(row, target_frequencies):
-    if row.trips_per_hour < target_frequencies[row.tract_type]:
-        additional_trips = (target_frequencies[row.tract_type]
-                            - row.trips_per_hour)
-    else:
-        additional_trips = 0
-    row['additional_trips'] = additional_trips
-    return row
-
-
-def annual_service_hours(df, MULTIPLIER):
-    df = df.assign(
-        service_hours_annual = df.service_hrs * MULTIPLIER,
-        addl_service_hrs_annual = df.addl_service_hrs * MULTIPLIER,
+# Merge routes with tract type (notebook A3)
+def merge_shapes_with_tract_type(selected_date: str) -> pd.DataFrame:
+    """
+    """
+    # Filter and keep 5am-9pm hours
+    service_by_shape = dd.read_parquet(
+        f"{DATA_PATH}shapes_processed.parquet", 
+        filters = [[("departure_hour", ">", 4),
+                    ("departure_hour", "<", 21)]]
+    ).repartition(npartitions=20)
+    
+    shapes_categorized = pd.read_parquet(
+        f"{DATA_PATH}shapes_categorized_{selected_date}.parquet",
+        columns = ["schedule_gtfs_dataset_key", "shape_id", "tract_type"]
     )
-    return df  
+    
+    shapes_categorized = shapes_categorized.assign(
+        target_trips = shapes_categorized.tract_type.map(TARGET_FREQ)
+    )
+    
+    service_by_tract_type = dd.merge(
+        service_by_shape,
+        shapes_categorized,
+        on = ["schedule_gtfs_dataset_key", "shape_id"],
+        how = "inner"
+    )
+    
+    avg_service = (service_by_tract_type
+                   .groupby(["schedule_gtfs_dataset_key", 
+                             "shape_id"],
+                            observed=True, group_keys=False)
+                   .agg({"avg_service_minutes": "mean"})
+                   .reset_index()
+                  ).query(
+        'avg_service_minutes.notna()'
+    ).rename(
+        columns = {"avg_service_minutes": "avg_runtime"}
+    ).repartition(npartitions=1)
 
+    
+    # fill in missing avg_service_minutes with the mean of 
+    # avg_service_minutes across hours / days / routes (but same shape)
+    # if it can't be filled in, then drop
+    df = dd.merge(
+        service_by_tract_type,
+        avg_service,
+        on = ["schedule_gtfs_dataset_key", "shape_id"],
+        how = "left"
+    )
+    
+    df = df.assign(
+        avg_service_minutes = df.avg_service_minutes.fillna(
+            df.avg_runtime)
+    ).query(
+        'avg_runtime.notna()'
+    ).drop(columns = ["avg_runtime"])
+    
+    df = df.assign(
+        additional_trips = df.target_trips - df.n_trips
+    )
+    
+    return df.compute()
 
 # Calculate route-level additional service hours / trips / annual extrapolation
-def calculate_additional_trips_service_hours(df):
-    WEEKEND = ["Saturday", "Sunday"]
-
-    service_dfs = {
-        "weekday": df[~df.day_name.isin(WEEKEND)].reset_index(drop=True),
-        "weekend": df[df.day_name.isin(WEEKEND)].reset_index(drop=True),
-    }
+def add_additional_trips_and_annualize(df):
+    df = df.assign(
+        additional_trips = df.target_trips - df.n_trips,
+    )
     
-    new_service_df = pd.DataFrame()
+    # Annualize
+    # Since we just have 1 weekday (wed), this will need to be scaled up by 5 still
+    # we have both weekend days, so scaling it up here is enough
+    df = df.assign(
+        annual_service_hrs = (
+            (df.avg_service_minutes * df.n_trips).divide(60)
+        ) * 52,
+        annual_addl_service_hrs = (
+            (df.avg_service_minutes * df.additional_trips).divide(60)
+        ) * 52
+    )
     
-    for key, data in service_dfs.items():
-        days_in_sample = data.day_name.nunique()
-        
-        # For weekday (if just 1 day present, 52 * (5/1) = 52*5 = 260)
-        # For weekend (if both days present, 52 * (2/2) = 52*1 = 52)
-        # For weekend (if 1 day present, 52 * (2/1) = 52*2 = 104)
-        if key == "weekday":
-            MULTIPLIER = (52 * (5 / days_in_sample))
-        elif key == "weekend":
-            MULTIPLIER = (52 * (2 / days_in_sample))
-        
-        # calculate additional trips
-        df = data.apply(calculate_additonal_trips, axis=1, 
-                        args=(target_frequencies,))
-        
-        ## divide minutes to hours
-        df = df.assign(
-            service_hrs = (df.runtime * df.trips_per_hour) / 60,
-            addl_service_hrs = (df.runtime * df.additional_trips) / 60
-        )
-        
-        
-        # Grab the annual service hours calculation
-        # Correctly scale up, depending on how many days are represented
-        df2 = annual_service_hours(df, MULTIPLIER)
-        
-        new_service_df = pd.concat(
-            [new_service_df, df2], 
-            axis=0, ignore_index=True)
-    
-    
-    new_service_df = new_service_df >> arrange(_.calitp_itp_id, _.shape_id, 
-                                               _.day_name, _.departure_hour)
-    return new_service_df
-
+    return df
 
 
 def prep_ntd_metrics():
@@ -228,21 +193,31 @@ def calculate_operator_capex(service_increase_df, ntd_joined):
     return by_operator
 
     
-# Put all the functions together
 if __name__ == "__main__":
     
     # Merge in tract type
-    service_tract_type = merge_routes_with_tract_type()
+    df = merge_shapes_with_tract_type(selected_date)
+    df = df.persist()
+    
     # Calculate service hrs, trips by route and extrapolate to annual numbers
-    service_combined = calculate_additional_trips_service_hours(service_tract_type)
-    service_combined.to_parquet(f"{DATA_PATH}service_increase.parquet")
+    df2 = df.map_partitions(
+        add_additional_trips_and_annualize,
+        meta = {**df.dtypes.to_dict(),
+            "additional_trips": "int",
+            "annual_service_hrs": "float",
+            "annual_addl_service_hrs": "float",
+           },
+        align_dataframes = True
+    ).compute()
+    
+    df2.to_parquet(f"{DATA_PATH}service_increase.parquet")
     
     
     # Prep NTD data for VRH and # buses
-    ntd_joined = add_ntd_operator_vrh_buses()
-    ntd_joined.to_parquet(f'{DATA_PATH}vehicles_ntd_joined.parquet')
+    #ntd_joined = add_ntd_operator_vrh_buses()
+    #ntd_joined.to_parquet(f'{DATA_PATH}vehicles_ntd_joined.parquet')
     
     # Calculate operator capital expenditures
-    hours_by_operator = calculate_operator_capex(service_combined, ntd_joined)
-    hours_by_operator.to_parquet(f'{DATA_PATH}increase_by_operator.parquet')
+    #hours_by_operator = calculate_operator_capex(service_combined, ntd_joined)
+    #hours_by_operator.to_parquet(f'{DATA_PATH}increase_by_operator.parquet')
     
