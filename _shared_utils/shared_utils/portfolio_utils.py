@@ -163,13 +163,12 @@ def style_table(
         df_style = add_custom_format(df_style, format_str, cols_to_format)
 
     # https://stackoverflow.com/questions/63686157/flexible-chaining-in-python-pandas
-    scroll_setting = f"{scrollbar_height}; overflow: auto; width: {scrollbar_width}"
-
     if display_table:
         if display_scrollbar:
             display(
                 HTML(
-                    f"<div style={scroll_setting}>"
+                    f"<div style=>{scrollbar_height}; "
+                    + f"overflow: auto; width: {scrollbar_width}"
                     + (df_style.set_properties(**{"font-size": scrollbar_font}).render())
                     + "</div>"
                 )
