@@ -1,24 +1,27 @@
+"""
+Functions for making charts for 
+by census tract.
+"""
 import altair as alt
-import altair_saver
-import matplotlib.pyplot as plt
+import intake
 import pandas as pd
 import seaborn as sns
 
-import shared_utils
 from bus_service_utils import utils, chart_utils
 from calitp_data_analysis import styleguide
 from calitp_data_analysis import calitp_color_palette as cp
 
+catalog = intake.open_catalog("*.yml")
+
 # Set charting style guide
 alt.data_transformers.enable('default', max_rows=10_000)
-alt.renderers.enable('altair_saver', fmts=['png'])
-
-plt.style.use('../_shared_utils/shared_utils/calitp.mplstyle')
 
 
-def grab_legend_thresholds(df: pd.DataFrame, 
-                           plot_col: str,
-                           arrivals_group: str) -> tuple[float]:
+def grab_legend_thresholds(
+    df: pd.DataFrame, 
+    plot_col: str,
+    arrivals_group: str
+) -> tuple[float]:
     cut1 = df[(df[arrivals_group]==1) & (df[plot_col] > 0)][plot_col].min()
     cut2 = df[df[arrivals_group]==2][plot_col].min()
     cut3 = df[df[arrivals_group]==3][plot_col].min()
@@ -47,10 +50,6 @@ CHART_LABELING = {
     "popjobdensity_group": "Pop / Job Density",
 }
 
-def labeling(word: str) -> str:
-    return chart_utils.labeling(word, CHART_LABELING)
-
-
 
 def chartnaming(word: str) -> str:
     word = word.replace('_pj', '').replace('_group', '')
@@ -66,7 +65,9 @@ def base_bar_chart(df: pd.DataFrame, x_col: str,
                        axis=alt.Axis(title=""), 
                        scale=alt.Scale(domain=LEGEND_ORDER)),
                y=alt.Y(f"{y_col}:Q", 
-                       axis=alt.Axis(title=labeling(y_col)),
+                       axis=alt.Axis(
+                           title=chart_utils.labeling(y_col, CHART_LABELING)
+                       ),
                        scale=alt.Scale(domain=[0, Y_MAX])
                       ),
            )
@@ -75,62 +76,44 @@ def base_bar_chart(df: pd.DataFrame, x_col: str,
     return bar
     
 
-def bar_chart(df: pd.DataFrame, x_col: str, y_col: str, 
-              color_col: str, Y_MAX: int, 
-              chart_title: str, IMG_PATH = f"{utils.IMG_PATH}"):
+def grouped_bar_chart(
+    df: pd.DataFrame, 
+    x_col: str, y_col: str, 
+    color_col: str, grouped_col: str, 
+    y_max: int, 
+    chart_title: str, 
+) -> alt.Chart:   
     
-    # Need to add a way to find the max across different datasets...
-    # So charts are comparable in presentation
-    
-    bar = base_bar_chart(df, x_col, y_col, Y_MAX)
-    
+    bar = base_bar_chart(df, x_col, y_col, y_max)
     bar = (bar.encode(
-               color=alt.Color(f"{color_col}:N", 
-                               title=labeling(color_col),
-                               scale=alt.Scale(domain=LEGEND_ORDER,
-                                               range=cp.CALITP_CATEGORY_BRIGHT_COLORS
-                                              )
-                              )
-           )
-    )
-    
-    bar = (styleguide.preset_chart_config(bar)
-           .properties(title=chart_title, width = styleguide.chart_width*0.25)
-          )
-    
-    bar.save(f"{IMG_PATH}{chartnaming(y_col)}_{chartnaming(x_col)}.png")
-
-
-def grouped_bar_chart(df: pd.DataFrame, 
-                      x_col: str, y_col: str, 
-                      color_col: str, grouped_col: str, 
-                      Y_MAX: int, chart_title: str, 
-                      IMG_PATH = f"{utils.IMG_PATH}"):    
-    bar = base_bar_chart(df, x_col, y_col, Y_MAX)
-    bar = (bar.encode(
-            column = alt.Column(f"{grouped_col}:N", 
-                                title=labeling(grouped_col)
-                               ),
-            color=alt.Color(f"{color_col}:N", 
-                            title=labeling(color_col),
-                            scale=alt.Scale(domain=LEGEND_ORDER,
-                                           range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
-                           )
+            column = alt.Column(
+                f"{grouped_col}:N", 
+                title=chart_utils.labeling(grouped_col, CHART_LABELING)
+            ),
+            color=alt.Color(
+                f"{color_col}:N", 
+                title=chart_utils.labeling(color_col, CHART_LABELING),
+                scale=alt.Scale(domain=LEGEND_ORDER,
+                range=cp.CALITP_CATEGORY_BRIGHT_COLORS)
+            )
         )
     )
     bar = (styleguide.preset_chart_config(bar)
-           .properties(title=chart_title, width = styleguide.chart_width*0.25)
+           .properties(title=chart_title, 
+                       width = styleguide.chart_width*0.25)
+           .interactive()
           )
     
-    bar.save(f"{IMG_PATH}{chartnaming(y_col)}_{chartnaming(x_col)}_bar.png")
-
+    return bar
     
 #----------------------------------------------------------------#
 ## Heatmaps
 #----------------------------------------------------------------#
 def make_heatmap(df: pd.DataFrame, chart_title: str, xtitle: str, ytitle: str):
     chart = (sns.heatmap(df, cmap="Blues")
-             .set(title=chart_title, xlabel=xtitle, ylabel=ytitle,
+             .set(title=chart_title, 
+                  xlabel=xtitle, 
+                  ylabel=ytitle,
                  )
     )
     
