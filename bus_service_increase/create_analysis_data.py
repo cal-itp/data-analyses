@@ -5,7 +5,6 @@ and tract-level stats.
 import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
-import gcsfs
 import intake
 import pandas as pd
 
@@ -16,7 +15,6 @@ from segment_speed_utils import helpers
 from shared_utils import portfolio_utils
 
 catalog = intake.open_catalog("*.yml")
-fs = gcsfs.GCSFileSystem()
 
 #------------------------------------------------------------------#
 ## Functions to create operator-route-level dataset
@@ -28,7 +26,6 @@ def frequency_by_shape(df: pd.DataFrame) -> pd.DataFrame:
     """
     group_cols = ["schedule_gtfs_dataset_key", 
                   "day_name", "departure_hour", 
-                  "time_of_day",
                   "shape_id"]
     
     trips_per_hour = (df
@@ -137,11 +134,22 @@ def generate_shape_categories(selected_date: str) -> gpd.GeoDataFrame:
     """
     shape_cols = ["feed_key", "shape_id"]
     
+    # Add schedule gtfs_dataset_key to use instead of feed_key
+    feed_dataset_key_crosswalk = helpers.import_scheduled_trips(
+        selected_date,
+        columns = ["gtfs_dataset_key", "feed_key"],
+        get_pandas = True
+    ).drop_duplicates()
+    
     shapes = helpers.import_scheduled_shapes(
         selected_date,
         columns = shape_cols + ["geometry"],
         get_pandas = False,
         crs = geography_utils.CA_NAD83Albers
+    ).merge(
+        feed_dataset_key_crosswalk,
+        on = "feed_key",
+        how = "inner"
     )
     
     shapes = shapes.assign(
@@ -177,17 +185,20 @@ def generate_shape_categories(selected_date: str) -> gpd.GeoDataFrame:
     shapes2 = dd.merge(
         shapes,
         results,
-        on = shape_cols,
+        on = ["schedule_gtfs_dataset_key"] + shape_cols,
         how = "inner"
     ).compute()
     
     shapes3 = shapes2.assign(
-        pct_max = (shapes2.groupby(shape_cols)
+        pct_max = (shapes2.groupby(["schedule_gtfs_dataset_key"] + 
+                                   shape_cols, 
+                                   observed=True, group_keys=False)
                    .pct_category
                    .transform("max"))
     ).query(
         'pct_max == pct_category'
-    ).drop(columns = ["pct_category", "pct_max"])
+    ).drop(columns = ["pct_category", "pct_max", "total_length"])
+    
     
     utils.geoparquet_gcs_export(
         shapes3, 
@@ -278,12 +289,16 @@ if __name__ == "__main__":
     )
     
     results = pd.read_parquet(
-        f"{DATA_PATH}shapes_processed"
+        f"{DATA_PATH}shapes_processed/"
     )
     
-    # Partitioned parquet as a release valve since we're running close to memory
+    # Partitioned parquet as a release valve since we're 
+    # running close to memory
     results.to_parquet(f"{DATA_PATH}shapes_processed.parquet")
-    fs.rm(f"{DATA_PATH}shapes_processed/", recursive=True)
+    print("save parquet")
+    
+    helpers.if_exists_then_delete(f"{DATA_PATH}shapes_processed/")
+    print("delete partitioned")
     
     generate_shape_categories(dates['wed'])
     
