@@ -15,7 +15,6 @@ Scripts associated with data creation and visualization / output generation. The
 ### Visualization / Outputs
 1. [setup_service_increase](./setup_service_increase_data.py): calculate additional trips, service hours, annual service hours, and capital expenditures needed by operator
 1. [setup_tract_charts](./setup_tract_charts.py): functions for altair charts, seaborn heatmaps
-1. [make_tract_viz](./make_tract_viz.py): combine charts and maps and produce all visualizations needed
 1. [service_increase_estimator](./A3_service_increase_estimator.ipynb): estimate service hours increase, capital expenditures to bring transit up to desired 15, 30, 60 min frequencies by urban/suburban/rural.
 1. [bus_arrivals_by_tract](./B2_chart_bus_arrivals_by_tract.ipynb): charts and maps produced for tract-level population / service density against equity scores.
 

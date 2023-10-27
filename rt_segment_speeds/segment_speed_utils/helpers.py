@@ -16,6 +16,7 @@ import yaml
 from typing import Literal, Union
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               COMPILED_CACHED_VIEWS,
+                                              RT_SCHED_GCS,
                                               PROJECT_CRS)
 from calitp_data_analysis import utils
 
@@ -201,6 +202,34 @@ def import_scheduled_stops(
     return stops.drop_duplicates().reset_index(drop=True)
 
 
+def import_assembled_stop_times_with_direction(
+    analysis_date: str, 
+    filters: tuple = None,
+    columns: list = None,
+    get_pandas: bool = False,
+    crs: str = PROJECT_CRS
+) -> dg.GeoDataFrame:
+    """
+    Get assembled stop times with direction 
+    (which doesn't have all the stop_times
+    columns, but does have trip_instance_key).
+    """
+    FILE = f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet"
+    
+    if get_pandas:
+        stop_times = gpd.read_parquet(FILE, filters = filters, 
+                                      columns = columns)
+    else:
+        stop_times = dg.read_parquet(FILE,
+            filters = filters, columns = columns
+        )
+    
+    if crs != stop_times.crs:
+        stop_times = stop_times.to_crs(crs)
+    
+    return stop_times.drop_duplicates().reset_index(drop=True)
+
+
 def exclude_unusable_trips(
     vp_df: dd.DataFrame, 
     valid_trips: pd.DataFrame
@@ -268,3 +297,18 @@ def remove_shapes_outside_ca(
         )
     
     return shapes_within_ca
+
+
+def if_exists_then_delete(filepath: str):
+    """
+    Check if file exists in GCS and delete.
+    For partitioned parquets, which are saved as folders, we need
+    to use recursive=True.
+    """
+    if fs.exists(filepath):
+        if fs.isdir(filepath):
+            fs.rm(filepath, recursive=True)
+        else:
+            fs.rm(filepath)
+    
+    return
