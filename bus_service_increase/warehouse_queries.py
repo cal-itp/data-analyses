@@ -1,190 +1,133 @@
-import datetime as dt
-import geopandas as gpd
-import os
-import pandas as pd
+"""
+GTFS schedule data is downloaded in gtfs_funnel/.
 
-os.environ["CALITP_BQ_MAX_BYTES"] = str(130_000_000_000)
+Pull those parquets and combine / aggregate.
+"""
+import dask.dataframe as dd
+import geopandas as gpd
+import pandas as pd
 
 from calitp_data_analysis.tables import tbls
 from siuba import *
 
-from bus_service_utils import utils as bus_utils
-from shared_utils import gtfs_utils
-
-'''
-Stash datasets in GCS to read in create_service_estimator.py
-warehouse_queries and create_analysis_data functions related 
-to service increase estimation need to be created in a "bundle"
-otherewise, `shape_id` may not match
-Use sub-folders to store intermediate parquets
-
-The original analysis was done on Oct 2021 service dates for 
-service estimation and tract bus arrivals.
-Keep those in `utils.GCS_FILE_PATH`.
-
-New sub-folders take form: f"{bus_utils.GCS_FILE_PATH}SUBFOLDER_NAME/"
-'''
-
-DATA_PATH = f"{bus_utils.GCS_FILE_PATH}2022_Jan/"
-
-#---------------------------------------------------------------#
-# Set dates for analysis
-#---------------------------------------------------------------#
-# Replace get_recent_dates()
-# Explicitly set dates
-dates = {
-    #'thurs': dt.date(2021, 10, 7),
-    #'sat': dt.date(2021, 10, 9),
-    #'sun': dt.date(2021, 10, 10),
-    "thurs": "2022-1-6", 
-    "sat": "2022-1-8",
-    "sun": "2022-1-9",
-}
-
-min_date = min(dates.values())
-max_date = max(dates.values())
+from calitp_data_analysis import utils, geography_utils
+from segment_speed_utils import helpers, gtfs_schedule_wrangling, sched_rt_utils
 
 
-#---------------------------------------------------------------#
-# Warehouse Queries for A1_generate_existing_service.ipynb
-#---------------------------------------------------------------#
-def grab_selected_trips_for_date(selected_date):
-    ## get trips for operator on dates of interest, join with day of week table
-    keep_trip_cols = [
-        "calitp_itp_id", "service_date", 
-        "trip_key", "trip_id", "is_in_service"
-    ]
-    
-    trips = gtfs_utils.get_trips(
-        selected_date = selected_date,
-        itp_id_list = None,
-        trip_cols = keep_trip_cols,
-        get_df = True
+def calculate_trip_run_time(selected_date: str) -> pd.DataFrame:
+    """
+    For a given date, read in cached trips table.
+    Attach time-of-day, departure_hour, and get service_minutes.
+    Filter out rows that do not have complete info.
+    """
+    trips = helpers.import_scheduled_trips(
+        selected_date,
+        columns = ["gtfs_dataset_key", "feed_key", 
+                   "trip_instance_key", "trip_id", 
+                   "shape_id",
+                   "route_id",
+                   "service_date",
+                  ],
+        get_pandas = True
     )
     
-    ## get stop times for operator
-    keep_stop_time_cols = [
-        "calitp_itp_id", "trip_id", "departure_time", 
-        "stop_sequence", "stop_id"
-    ]
+    time_of_day = sched_rt_utils.get_trip_time_buckets(selected_date)
     
-    stop_times = gtfs_utils.get_stop_times(
-        selected_date = selected_date,
-        itp_id_list = None,
-        stop_time_cols = keep_stop_time_cols,
-        get_df = True,
-        trip_df = trips
-    )
-    
-    # Join trips to stop times, which gives stop sequence and departure time
-    trips_to_stops = pd.merge(
+    trips2 = pd.merge(
         trips,
-        stop_times,
-        on = ["calitp_itp_id", "trip_id"],
+        time_of_day,
+        on = "trip_instance_key",
         how = "inner"
     )
     
-    # Add in day of week
-    date_tbl = (tbl.views.dim_date() 
-                >> filter(_.full_date == selected_date)
-                >> select(_.date == _.full_date, _.day_name)  
-                >> collect()
-           )
+    trips3 = trips2[
+        (trips2.trip_first_departure_datetime_pacific.notna()) & 
+        (trips2.service_minutes.notna())
+    ].reset_index(drop=True)
     
-    trips_joined = pd.merge(
-        trips_to_stops.rename(columns = {"service_date": "date"}),
-        date_tbl,
-        on = "date",
-        how = "inner"
+    
+    trips3 = trips3.assign(
+        departure_hour = pd.to_datetime(
+            trips3.trip_first_departure_datetime_pacific).dt.hour,
+        day_name = pd.to_datetime(
+            trips3.trip_first_departure_datetime_pacific).dt.day_name(),
     )
     
-    day_name = trips_joined.day_name.iloc[0].lower()
+    trips3.to_parquet(f"{DATA_PATH}trip_run_times_{selected_date}.parquet")
     
-    three_letters = ["monday", "wednesday", "friday", "saturday", "sunday"]
-    if day_name == "thursday":
-        day = "thurs"
-    elif day_name == "tuesday":
-        day = "tues"
-    elif day_name in three_letters:
-        day = day_name[:3]
 
-    trips_joined.to_parquet(f"{DATA_PATH}trips_joined_{day}.parquet")
-
-
-#---------------------------------------------------------------#
-# Warehouse Queries for B1_service_opportunities_tract.ipynb
-#---------------------------------------------------------------#
-def calculate_arrivals_at_stop(day_of_week: str = "thurs", 
-                               selected_date: str = dates["thurs"]):
-    # Since this is run for a selected date, don't need to rerun
+def aggregate_stop_times_add_stop_geometry(selected_date: str) -> pd.DataFrame:
+    """
+    For a given date, read in cached stop_times table.
+    Aggregate it to the number of arrivals per stop
+    and attach stop point geometry.
+    """
+    stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
     
-    trips_on_day = pd.read_parquet(f"{DATA_PATH}trips_joined_{day_of_week}.parquet")
-     
-    # this handles multiple url_feeds already, finds distinct in dim_stop_times
-    stop_times = gtfs_utils.get_stop_times(
-        selected_date = selected_date,
-        itp_id_list = None,
-        get_df = False, # return dask df
-        trip_df = trips_on_day,
-        departure_hours = (5, 22)
+    stop_times = helpers.import_assembled_stop_times_with_direction(
+        selected_date,
+        columns = stop_cols + ["stop_sequence", "geometry"],
+        get_pandas = True,
+        crs = geography_utils.WGS84
     )
     
     # Aggregate to count daily stop times
-    # Count the number of times a bus arrives at that stop daily
-    daily_stop_times = (
-        stop_times.groupby(["calitp_itp_id", "stop_id"])
-        .agg({"arrival_time": "count"})
-        .reset_index()
-        .rename(columns = {"calitp_itp_id": "itp_id", 
-                           "arrival_time": "num_arrivals"})
-    ).compute()
-
-
-    daily_stop_times.to_parquet(f"{bus_utils.GCS_FILE_PATH}daily_stop_times.parquet")
-
-
-def process_daily_stop_times(selected_date):
-    daily_stop_times = pd.read_parquet(
-        f"{bus_utils.GCS_FILE_PATH}daily_stop_times.parquet")
-    
-    # Handle some exclusions
-    daily_stop_times = daily_stop_times[daily_stop_times.calitp_itp_id != 200]
-
-    # Add lat/lon info in
-    keep_stop_cols = [
-        "calitp_itp_id", "stop_id", "stop_name",
-        "stop_lon", "stop_lat",
-     ]
-    
-    stop_geom = gtfs_utils.get_stops(
-        selected_date = selected_date,
-        itp_id_list = None,
-        stop_cols = keep_stop_cols,
-        get_df = True,
+    # Count the number of times a bus arrives at that stop daily    
+    stop_arrivals = gtfs_schedule_wrangling.stop_arrivals_per_stop(
+        stop_times,
+        group_cols = stop_cols,
+        count_col = "stop_sequence"
     )
     
     aggregated_stops_with_geom = pd.merge(
-        stop_geom.rename(columns = {"calitp_itp_id": "itp_id"}),
-        daily_stop_times,
-        on = ["itp_id", "stop_id"]
+        stop_times[stop_cols + ["geometry"]],
+        stop_arrivals,
+        on = stop_cols,
+        how = "inner"
+    )
+    
+    utils.geoparquet_gcs_export(
+        aggregated_stops_with_geom,
+        DATA_PATH,
+        f"aggregated_stops_with_geom_{selected_date}"
     )
 
-    aggregated_stops_with_geom.to_parquet(
-        f"{bus_utils.GCS_FILE_PATH}aggregated_stops_with_geom.parquet")
     
+def funding_table(is_current_status: bool):
+    # no dollar amounts though, and there doesn't appear to
+    # be any table in warehouse with dollar amounts or even NTD operating expenses
+    funding = (
+        tbls.mart.transit_database.bridge_organizations_x_funding_programs 
+        >> filter(_.is_current == is_current_stats)
+        >> select(_.organization_name, _.funding_program_name,)
+        >> collect()
+    )
+    
+    organizations = (
+        tbls.mart.transit_database.dim_organizations
+        >> select(_.source_record_id, _.ntd_id, _.name)
+        >> rename(organization_name = _.name)
+        >> collect()
+    )
+    
+    df = pd.merge(
+        funding, 
+        organizations,
+        on = "organization_name",
+        how = "inner"
+    )
+    
+    return df
+
     
 if __name__ == "__main__":
-    # Run this to get the static parquet files
-    # Analysis is for a particular day, so don't need to hit warehouse constantly
-    
+    from service_increase_vars import dates, DATA_PATH
+        
     # (1) Get existing service 
-    for key in dates.keys():
-        print(f"Grab selected trips for {key}")
-        selected_date = dates[key]
-        grab_selected_trips_for_date(selected_date)
+    for analysis_date in dates.values():
+        calculate_trip_run_time(analysis_date)
     
     # (2) Get daily bus stop arrivals with geometry
-    # Only do it for a weekday (Thurs)
-    day_of_week = "thurs"
-    calculate_arrivals_at_stop(day_of_week, dates[day_of_week])
-    process_daily_stop_times(dates[day_of_week])
+    # Only do it for a weekday
+    aggregate_stop_times_add_stop_geometry(dates["wed"])
+    

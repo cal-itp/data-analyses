@@ -167,7 +167,8 @@ def style_table(
         if display_scrollbar:
             display(
                 HTML(
-                    f"<div style='height: {scrollbar_height}; overflow: auto; width: {scrollbar_width}'>"
+                    f"<div style=>{scrollbar_height}; "
+                    + f"overflow: auto; width: {scrollbar_width}"
                     + (df_style.set_properties(**{"font-size": scrollbar_font}).render())
                     + "</div>"
                 )

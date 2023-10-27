@@ -12,9 +12,11 @@ repos:
     rev: 6.0.0
     hooks:
       - id: flake8
-        args: ["--ignore=E501,W503,F403,F405,E711,E712"] 
+        args: ["--ignore=E501,W503,F403,F405,E711,E712,E231,E702"] 
         # E711: comparison to None should be 'if cond is not None:' (siuba filtering requires we use != None and not is not)
         # E712: line too long and line before binary operator (black is ok with these), assign lambda expression OK, comparison to True with is (siuba uses ==)
+        # E231: missing whitespace after colon (we don't want white space when setting gs://)
+        # E702: multiple statements on one line (semicolon)
         types:
           - python
         files: _shared_utils
