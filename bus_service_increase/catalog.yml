@@ -4,7 +4,7 @@ metadata:
     analysis_date:
       type: str
       description: Analysis date, used for certain analyses such as 100 bus recs.
-      default: "2022-05-04"
+      default: "2023-10-11"
 sources:
   # CalEnviroScreen
   calenviroscreen_raw:
@@ -31,7 +31,7 @@ sources:
     description: Number of daily bus arrivals by tract
     args:
       # source: bus_service_increase/create_analysis_data.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/bus_stop_times_by_tract.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/2023_Oct/bus_stop_times_by_tract_{{analysis_date}}.parquet
   service_increase_by_route:
     driver: parquet
     description: Number of additional trips to reach desired frequencies by route.
