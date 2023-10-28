@@ -2,3 +2,7 @@
 2023-10-24 12:18:28.007 | INFO     | __main__:<module>:231 - map partitions to transform vp: 0:03:53.547561
 2023-10-24 12:18:28.823 | INFO     | __main__:<module>:262 - map partitions to find nearest vp to stop: 0:00:00.816213
 2023-10-24 12:20:42.144 | INFO     | __main__:<module>:293 - execution time: 0:06:07.685094
+2023-10-27 17:31:35.725 | INFO     | __main__:<module>:233 - Analysis date: 2023-09-13
+2023-10-27 17:39:52.170 | INFO     | __main__:<module>:263 - map partitions to transform vp: 0:08:16.443723
+2023-10-27 17:39:53.440 | INFO     | __main__:<module>:295 - map partitions to find nearest vp to stop: 0:00:01.270103
+2023-10-27 17:48:43.000 | INFO     | __main__:<module>:305 - execution time: 0:17:07.274386
