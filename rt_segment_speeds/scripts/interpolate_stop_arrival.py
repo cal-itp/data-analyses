@@ -93,7 +93,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     vp_pared = pd.read_parquet(
-        f"{SEGMENT_GCS}projection/nearest_vp_normal_{analysis_date}.parquet",
+        f"{SEGMENT_GCS}projection/nearest_vp_all_{analysis_date}.parquet",
     )    
     
     subset_vp = np.union1d(
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     logger.info(f"interpolate stop arrival: {time2 - time1}")    
     
     stop_arrivals_df.to_parquet(
-        f"{SEGMENT_GCS}stop_arrivals_{analysis_date}.parquet")
+        f"{SEGMENT_GCS}stop_arrivals_{analysis_date}_2.parquet")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")    
