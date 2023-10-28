@@ -18,7 +18,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     df = pd.read_parquet(
-        f"{SEGMENT_GCS}stop_arrivals_{analysis_date}.parquet"
+        f"{SEGMENT_GCS}stop_arrivals_{analysis_date}_2.parquet"
     )
     
     trip_stop_cols = ["trip_instance_key", "stop_sequence"]
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     )
     
     speed.to_parquet(
-        f"{SEGMENT_GCS}stop_arrivals_speed_{analysis_date}.parquet")
+        f"{SEGMENT_GCS}stop_arrivals_speed_{analysis_date}_2.parquet")
     
     end = datetime.datetime.now()
     print(f"execution time: {end - start}")
