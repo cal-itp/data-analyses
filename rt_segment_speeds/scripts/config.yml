@@ -1,11 +1,13 @@
 stop_segments:
-    stage0: "vp"
     stage1: "vp_usable"
-    stage2: "vp_stop_segment"
-    stage3: "vp_pared_stops"
-    stage4: "speeds_stop_segments"
-    stage5: "avg_speeds_stop_segments"
-    segments_file: "stop_segments"
+    stage2: "nearest_vp_all"
+    stage3: "stop_arrivals"
+    stage4: "stop_arrivals_speed"
+    #stage2: "vp_stop_segment"
+    #stage3: "vp_pared_stops"
+    #stage4: "speeds_stop_segments"
+    #stage5: "avg_speeds_stop_segments"
+    #segments_file: "stop_segments"
     trip_grouping_cols: ["shape_array_key"]
     grouping_col: "shape_array_key"
     segment_identifier_cols: ["shape_array_key", "stop_sequence"]
@@ -13,7 +15,6 @@ stop_segments:
     time_min_cutoff: 10
     pct_segment_minimum: 0.3
 road_segments:
-    stage0: "vp"
     stage1: "vp_usable"
     stage2: "vp_road_segment"
     stage3: "vp_pared_roads"
