@@ -65,4 +65,5 @@ if __name__ == "__main__":
         f"{SEGMENT_GCS}projection/{NEAREST_VP}.parquet"
     ).pipe(tag_common_errors)
     
-    
+    df.to_parquet(
+        f"{SEGMENT_GCS}projection/nearest_vp_error_{analysis_date}.parquet")
