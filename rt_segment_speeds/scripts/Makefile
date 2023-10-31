@@ -23,7 +23,9 @@ new_pipeline:
 	python shapely_project_vp.py
 	python nearest_vp_to_stop.py
 	python interpolate_stop_arrival.py
-	#python A3_valid_vehicle_positions.py 
+	python stop_arrivals_to_speed.py
+	#python handle_common_errors.py
+    
 
     
 download_roads:

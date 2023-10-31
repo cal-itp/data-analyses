@@ -72,7 +72,12 @@ def get_stop_arrivals(df: pd.DataFrame) -> pd.DataFrame:
         
     df = df.assign(
         arrival_time = stop_arrival_series,
-    ).astype({"arrival_time": "datetime64[s]"})
+    ).astype(
+        {"arrival_time": "datetime64[s]"}
+    ).sort_values(
+        ["trip_instance_key", 
+        "shape_array_key", "stop_sequence"]
+    ).reset_index(drop=True)
     
     return df
 
