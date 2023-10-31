@@ -1,24 +1,37 @@
 """
-Quick script to back out the stop arrivals, even if partial,
-to speeds.
+Convert stop-to-stop arrivals into speeds.
 """
 import datetime
 import pandas as pd
+import sys
+
+from loguru import logger
 
 from shared_utils import rt_dates
-from segment_speed_utils import segment_calcs
-from segment_speed_utils.project_vars import SEGMENT_GCS
+from segment_speed_utils import helpers, segment_calcs
+from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
 
 if __name__ == "__main__":
     
+    LOG_FILE = "../logs/speeds_by_segment_trip.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
     analysis_date = rt_dates.DATES["sep2023"]
+    logger.info(f"Analysis date: {analysis_date}")
     
-    print(f"Analysis date: {analysis_date}")    
     
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    
+    STOP_ARRIVALS_FILE = f"{STOP_SEG_DICT['stage3']}_{analysis_date}"
+    SPEED_FILE = f"{STOP_SEG_DICT['stage4']}_{analysis_date}"
+        
     start = datetime.datetime.now()
     
     df = pd.read_parquet(
-        f"{SEGMENT_GCS}stop_arrivals_{analysis_date}_2.parquet"
+        f"{SEGMENT_GCS}stop_arrivals_{analysis_date}.parquet"
     )
     
     trip_stop_cols = ["trip_instance_key", "stop_sequence"]
@@ -28,11 +41,13 @@ if __name__ == "__main__":
     ).sort_values(trip_stop_cols).reset_index(drop=True)
     
     df = df.assign(
-        prior_arrival_time_sec = (df.groupby("trip_instance_key")
+        prior_arrival_time_sec = (df.groupby("trip_instance_key", 
+                                             observed=True, group_keys=False)
                                   .arrival_time_sec
                                   .shift(1)
                                  ),
-        prior_stop_meters = (df.groupby("trip_instance_key")
+        prior_stop_meters = (df.groupby("trip_instance_key", 
+                                        observed=True, group_keys=False)
                              .stop_meters
                              .shift(1)
                             )
@@ -48,7 +63,7 @@ if __name__ == "__main__":
     )
     
     speed.to_parquet(
-        f"{SEGMENT_GCS}stop_arrivals_speed_{analysis_date}_2.parquet")
+        f"{SEGMENT_GCS}{SPEED_FILE}.parquet")
     
     end = datetime.datetime.now()
-    print(f"execution time: {end - start}")
+    logger.info(f"execution time: {end - start}")
