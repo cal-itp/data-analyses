@@ -9,11 +9,10 @@ import sys
 
 from loguru import logger
 
-from segment_speed_utils import helpers, segment_calcs
-from segment_speed_utils.project_vars import SEGMENT_GCS, PROJECT_CRS
+from segment_speed_utils import helpers
+from segment_speed_utils.project_vars import (SEGMENT_GCS, 
+                                              PROJECT_CRS, CONFIG_PATH)
 from shared_utils import rt_dates
-
-analysis_date = rt_dates.DATES["sep2023"]
 
 
 def attach_vp_shape_meters_with_timestamp(
@@ -73,7 +72,12 @@ def get_stop_arrivals(df: pd.DataFrame) -> pd.DataFrame:
         
     df = df.assign(
         arrival_time = stop_arrival_series,
-    ).astype({"arrival_time": "datetime64[s]"})
+    ).astype(
+        {"arrival_time": "datetime64[s]"}
+    ).sort_values(
+        ["trip_instance_key", 
+        "shape_array_key", "stop_sequence"]
+    ).reset_index(drop=True)
     
     return df
 
@@ -87,15 +91,21 @@ if __name__ == "__main__":
                level="INFO")
     
     analysis_date = rt_dates.DATES["sep2023"]
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    
+    NEAREST_VP = f"{STOP_SEG_DICT['stage2']}_{analysis_date}"
+    STOP_ARRIVALS_FILE = f"{STOP_SEG_DICT['stage3']}_{analysis_date}"
     
     logger.info(f"Analysis date: {analysis_date}")
 
     start = datetime.datetime.now()
     
     vp_pared = pd.read_parquet(
-        f"{SEGMENT_GCS}projection/nearest_vp_normal_{analysis_date}.parquet",
+        f"{SEGMENT_GCS}projection/{NEAREST_VP}.parquet",
     )    
-    
+
+    # If we filter down pd.read_parquet, we can use np arrays
+    # If we filter down dd.read_parquet, we have to use lists
     subset_vp = np.union1d(
         vp_pared.nearest_vp_idx.unique(), 
         vp_pared.subseq_vp_idx.unique()
@@ -129,7 +139,7 @@ if __name__ == "__main__":
     logger.info(f"interpolate stop arrival: {time2 - time1}")    
     
     stop_arrivals_df.to_parquet(
-        f"{SEGMENT_GCS}stop_arrivals_{analysis_date}.parquet")
+        f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}.parquet")
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")    
