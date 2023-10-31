@@ -30,6 +30,7 @@ OPPOSITE_DIRECTIONS = {
     "Southbound": "Northbound",
     "Eastbound": "Westbound",
     "Westbound": "Eastbound",
+    "Unknown": "",
 }
 
 def interpolate_projected_points(

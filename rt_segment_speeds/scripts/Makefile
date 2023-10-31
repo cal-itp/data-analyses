@@ -21,8 +21,11 @@ speeds_pipeline:
 new_pipeline:
 	python prep_stop_segments.py
 	python shapely_project_vp.py
-	python shapely_interpolate.py
-	#python A3_valid_vehicle_positions.py 
+	python nearest_vp_to_stop.py
+	python interpolate_stop_arrival.py
+	python stop_arrivals_to_speed.py
+	#python handle_common_errors.py
+    
 
     
 download_roads:
