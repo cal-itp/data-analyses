@@ -10,23 +10,25 @@ import sys
 
 from loguru import logger
 
+from calitp_data_analysis.geography_utils import WGS84
 from shared_utils import rt_dates
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS,
-                                              PROJECT_CRS)
-
-analysis_date = rt_dates.DATES["sep2023"]
+                                              PROJECT_CRS, CONFIG_PATH)
 
 def project_vp_to_shape(
     vp: dd.DataFrame, 
     shapes: gpd.GeoDataFrame
 ):
+    """
+    shapely.project vp point geom onto shape_geometry.
+    """
     shapes = shapes.rename(columns = {"geometry": "shape_geometry"})
     
     vp_gdf = gpd.GeoDataFrame(
         vp,
         geometry = gpd.points_from_xy(vp.x, vp.y),
-        crs = "EPSG:4326"
+        crs = WGS84
     ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
     
     gdf = pd.merge(
@@ -47,7 +49,12 @@ def project_vp_to_shape(
 
 if __name__ == "__main__":
     
+    analysis_date = rt_dates.DATES["sep2023"]
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    
     start = datetime.datetime.now()
+    
+    USABLE_VP = f'{STOP_SEG_DICT["stage1"]}_{analysis_date}'
     
     trips = helpers.import_scheduled_trips(
         analysis_date,
@@ -56,7 +63,7 @@ if __name__ == "__main__":
     )
 
     vp = dd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+        f"{SEGMENT_GCS}{USABLE_VP}",
         columns = ["trip_instance_key", "vp_idx", "x", "y"]
     ).merge(
         trips,
@@ -65,7 +72,7 @@ if __name__ == "__main__":
     )
 
     subset_shapes = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+        f"{SEGMENT_GCS}{USABLE_VP}",
         columns = ["trip_instance_key"]
     ).drop_duplicates().merge(
         trips,
@@ -98,4 +105,3 @@ if __name__ == "__main__":
 
     end = datetime.datetime.now()
     logger.info(f"compute and export: {end - time1}")
-
