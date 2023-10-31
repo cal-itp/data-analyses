@@ -1,8 +1,9 @@
 """
-Handle normal vs loopy shapes separately.
+Find the nearest vp to a stop cutpoint.
 
-For normal shapes, find the nearest vp_idx before a stop,
-and the vp_idx after.
+Factor in direction. Only search within the valid vp idx
+values (ones that are not running in the opposite direction
+as the stop is going). Of these, find the nearest vp to each stop.
 """
 import dask.dataframe as dd
 import datetime
@@ -13,7 +14,8 @@ import sys
 from loguru import logger
 
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
-from segment_speed_utils.project_vars import SEGMENT_GCS, PROJECT_CRS
+from segment_speed_utils.project_vars import (SEGMENT_GCS, 
+                                              PROJECT_CRS, CONFIG_PATH)
 from shared_utils import rt_dates
 
 
@@ -154,7 +156,6 @@ def find_vp_nearest_stop_position(
         # Make sure these are arrays so we can search within the valid values
         valid_shape_meters_array = np.asarray(shape_meters_array)[valid_indices]
         valid_vp_idx_array = np.asarray(vp_idx_array)[valid_indices]
-        
 
         this_stop_meters = getattr(row, "stop_meters")
         
@@ -168,7 +169,8 @@ def find_vp_nearest_stop_position(
 
         # For the next value, if there's nothing to index into, 
         # just set it to the same position
-        # if we set subseq_value = getattr(row, )[idx], we might not get a consecutive vp
+        # if we set subseq_value = getattr(row, )[idx], 
+        # we might not get a consecutive vp
         nearest_value = valid_vp_idx_array[idx-1]
         subseq_value = nearest_value + 1
 
@@ -215,33 +217,29 @@ def fix_out_of_bound_results(
     fixed_results = pd.concat(
         [correct_results, incorrect_results], 
         axis=0
-    ).drop(columns = ["min_vp_idx", "max_vp_idx"]).sort_index()
+    ).drop(
+        columns = ["min_vp_idx", "max_vp_idx"]
+    ).sort_values(["trip_instance_key", "shape_array_key", "stop_sequence"]
+    ).reset_index(drop=True)
     
     return fixed_results
 
 
-if __name__ == "__main__":
-    
-    LOG_FILE = "../logs/nearest_vp.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
-    
-    analysis_date = rt_dates.DATES["sep2023"]
-    
-    logger.info(f"Analysis date: {analysis_date}")
-    
+def find_nearest_vp_to_stop(
+    analysis_date: str, 
+    dict_inputs: dict = {}
+):
     start = datetime.datetime.now()
     
-    VP_FILE = "vp_usable"
-    VP_FILE_NAME = f"vp_usable_{analysis_date}"
+    USABLE_VP = f'{dict_inputs["stage1"]}_{analysis_date}'
+    SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
+    EXPORT_FILE = f'{dict_inputs["stage2"]}_{analysis_date}'
     
     shape_trip_crosswalk = rt_trips_to_shape(analysis_date)
     shape_keys = shape_trip_crosswalk.shape_array_key.unique().tolist()
     
     vp = vp_with_shape_meters(
-        VP_FILE_NAME, 
+        USABLE_VP, 
     ).merge(
         shape_trip_crosswalk,
         on = "trip_instance_key",
@@ -265,12 +263,12 @@ if __name__ == "__main__":
     stops_projected = pd.read_parquet(
         f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet",
         filters = [[("shape_array_key", "in", shape_keys)]],
-        columns = ["shape_array_key", "stop_sequence", "stop_id", 
+        columns = SEGMENT_IDENTIFIER_COLS + ["stop_id", 
                    "shape_meters", "stop_primary_direction"]
     ).rename(columns = {"shape_meters": "stop_meters"})
     
     existing_stop_cols = stops_projected[
-        ["shape_array_key", "stop_sequence", "stop_id", "stop_meters"]].dtypes.to_dict()
+        SEGMENT_IDENTIFIER_COLS + ["stop_id", "stop_meters"]].dtypes.to_dict()
     existing_vp_cols = vp_wide[["trip_instance_key"]].dtypes.to_dict()
     
     vp_to_stop = dd.merge(
@@ -296,13 +294,30 @@ if __name__ == "__main__":
     
     result = result.compute()
     
-    fixed_results = fix_out_of_bound_results(result, VP_FILE_NAME)
+    fixed_results = fix_out_of_bound_results(result, USABLE_VP)
     
     fixed_results.to_parquet(
-        f"{SEGMENT_GCS}projection/nearest_vp_all_{analysis_date}.parquet")
+        f"{SEGMENT_GCS}projection/{EXPORT_FILE}.parquet")
     
+
+
+
+if __name__ == "__main__":
+    
+    LOG_FILE = "../logs/nearest_vp.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    analysis_date = rt_dates.DATES["sep2023"]
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    
+    logger.info(f"Analysis date: {analysis_date}")
+    
+    start = datetime.datetime.now()
+    
+    find_nearest_vp_to_stop(analysis_date, STOP_SEG_DICT)
+   
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")
-    
-    # https://stackoverflow.com/questions/10226551/whats-the-most-pythonic-way-to-calculate-percentage-changes-on-a-list-of-numbers
-
