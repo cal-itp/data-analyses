@@ -2,7 +2,7 @@ stop_segments:
     stage1: "vp_usable"
     stage2: "nearest_vp"
     stage3: "stop_arrivals"
-    stage4: "stop_arrivals_speed"
+    stage4: "speed_stop_segments"
     segment_identifier_cols: ["shape_array_key", "stop_sequence"]
     timestamp_col: "location_timestamp_local"
     time_min_cutoff: 10
