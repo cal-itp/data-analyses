@@ -231,7 +231,7 @@ def prep_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
             1 if x.shape_array_key in loopy_inlining
             else 0, axis=1, 
         ).astype("int8")
-    )
+    ).sort_values(["shape_array_key", "stop_sequence"]).reset_index(drop=True)
     
     return stop_times_with_geom2
 
