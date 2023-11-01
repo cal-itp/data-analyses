@@ -87,6 +87,17 @@ def vp_with_shape_meters(
     return vp_with_projection
 
 
+def duplicate_coords_keep_last_timestamp(df: pd.DataFrame):
+    df2 = df.sort_values(
+        ["trip_instance_key", "vp_idx", 
+         "shape_meters"]
+    ).drop_duplicates(
+        subset=["trip_instance_key", "shape_meters"],
+        keep = "last"
+    ).reset_index(drop=True)
+    
+    return df2
+
 def transform_vp(vp: dd.DataFrame) -> dd.DataFrame:
     """
     For each trip, transform vp from long to wide,
@@ -157,22 +168,27 @@ def find_vp_nearest_stop_position(
         valid_shape_meters_array = np.asarray(shape_meters_array)[valid_indices]
         valid_vp_idx_array = np.asarray(vp_idx_array)[valid_indices]
 
-        this_stop_meters = getattr(row, "stop_meters")
-        
-        idx = np.searchsorted(
-            valid_shape_meters_array,
-            getattr(row, "stop_meters"),
-            side="right" 
-            # want our stop_meters value to be < vp_shape_meters,
-            # side = "left" would be stop_meters <= vp_shape_meters
-        )
+        if len(valid_shape_meters_array) > 0:
+            this_stop_meters = getattr(row, "stop_meters")
 
-        # For the next value, if there's nothing to index into, 
-        # just set it to the same position
-        # if we set subseq_value = getattr(row, )[idx], 
-        # we might not get a consecutive vp
-        nearest_value = valid_vp_idx_array[idx-1]
-        subseq_value = nearest_value + 1
+            idx = np.searchsorted(
+                valid_shape_meters_array,
+                getattr(row, "stop_meters"),
+                side="right" 
+                # want our stop_meters value to be < vp_shape_meters,
+                # side = "left" would be stop_meters <= vp_shape_meters
+            )
+
+            # For the next value, if there's nothing to index into, 
+            # just set it to the same position
+            # if we set subseq_value = getattr(row, )[idx], 
+            # we might not get a consecutive vp
+            nearest_value = valid_vp_idx_array[idx-1]
+            subseq_value = nearest_value + 1
+        
+        else:
+            nearest_value = np.nan
+            subseq_value = np.nan
 
         nearest_vp_idx.append(nearest_value)
         subseq_vp_idx.append(subseq_value)
@@ -246,7 +262,12 @@ def find_nearest_vp_to_stop(
         how = "inner"
     )
     
-    vp_wide = vp.map_partitions(
+    vp_deduped = vp.map_partitions(
+        duplicate_coords_keep_last_timestamp,
+        meta = vp.dtypes.to_dict()
+    )
+    
+    vp_wide = vp_deduped.map_partitions(
         transform_vp,
         meta = {"trip_instance_key": "object",
                 "shape_array_key": "object",
