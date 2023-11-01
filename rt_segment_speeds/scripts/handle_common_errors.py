@@ -17,43 +17,46 @@ for stop 2.
 This happens because vp_primary_direction might be Unknown
 
 """
-import dask.dataframe as dd
+import datetime
 import numpy as np
 import pandas as pd
 
-from segment_speed_utils import helpers, wrangle_shapes
+from numba import jit
+
+from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS, PROJECT_CRS, CONFIG_PATH
 from shared_utils import rt_dates
 
-def tag_common_errors(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    """
+def rolling_window_make_array(
+    df: pd.DataFrame, 
+    window: int, 
+    rolling_col: str
+) -> pd.DataFrame:
+    # https://stackoverflow.com/questions/47482009/pandas-rolling-window-to-return-an-array
+    df[f"rolling_{rolling_col}"] = [
+        np.asarray(window)for window in 
+        df.groupby("trip_instance_key")[rolling_col].rolling(
+            window = window, center=True)
+    ]
     
-    df = df.assign(
-        # Find where we select same points and try to interpolate in between
-        error_same_endpoints = df.apply(
-            lambda x: 1 if x.nearest_vp_idx == x.subseq_vp_idx
-            else 0, axis=1
-        ),
-        # Find the difference in nearest_vp_idx by comparing
-        # against the previous row and subsequent row
-        # If there's a big drop-off after a stop, we want to flag this current one
-        diff_subseq = (df.groupby("trip_instance_key", 
-                                 observed=True, group_keys=False)
-                   .nearest_vp_idx
-                   .apply(lambda x: x.shift(-1) - x)
-                  ),
-    )
-    
-    df = df.assign(
-        error_arrival_order = df.apply(
-            lambda x: 1 if x.diff_subseq < 0
-            else 0, axis=1
-        )
-    )
+    is_monotonic_series = np.vectorize(monotonic_check)(df[f"rolling_{rolling_col}"])
+    df[f"{rolling_col}_monotonic"] = is_monotonic_series
     
     return df
-
+    
+@jit(nopython=True)
+def monotonic_check(arr: np.ndarray) -> bool:
+    """
+    For an array, check if it's monotonically increasing. 
+    https://stackoverflow.com/questions/4983258/check-list-monotonicity
+    """
+    diff_arr = np.diff(arr)
+    
+    if np.all(diff_arr >= 0):
+        return True
+    else:
+        return False
+    
 
 if __name__ == "__main__":
     
@@ -61,10 +64,19 @@ if __name__ == "__main__":
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
 
     NEAREST_VP = f"{STOP_SEG_DICT['stage2']}_{analysis_date}"
+
+    start = datetime.datetime.now()
     
     df = pd.read_parquet(
         f"{SEGMENT_GCS}projection/{NEAREST_VP}.parquet"
-    ).pipe(tag_common_errors)
+    )    
+    
+    window = 3
+    df = rolling_window_make_array(df, window = window, rolling_col = "nearest_vp_idx")
+    df = rolling_window_make_array(df, window = window, rolling_col = "stop_meters")
     
     df.to_parquet(
         f"{SEGMENT_GCS}projection/nearest_vp_error_{analysis_date}.parquet")
+
+    end = datetime.datetime.now()
+    print(f"execution time: {end - start}")
