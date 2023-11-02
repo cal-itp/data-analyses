@@ -10,3 +10,7 @@
 2023-08-04 11:45:56.122 | INFO     | __main__:<module>:146 - flag shn or intersecting: 0:00:10.415007
 2023-08-04 11:45:59.080 | INFO     | __main__:<module>:166 - exported dataset to GCS
 2023-08-04 11:45:59.088 | INFO     | __main__:<module>:169 - execution time: 0:00:13.380339
+2023-11-02 10:21:45.360 | INFO     | __main__:<module>:118 - Analysis date: 2023-10-11  warehouse v2
+2023-11-02 10:21:58.862 | INFO     | __main__:<module>:146 - flag shn or intersecting: 0:00:13.501375
+2023-11-02 10:22:00.910 | INFO     | __main__:<module>:166 - exported dataset to GCS
+2023-11-02 10:22:00.911 | INFO     | __main__:<module>:169 - execution time: 0:00:15.550393
