@@ -106,7 +106,6 @@ def find_prior_stop(
         return renamed_stop_geom
     
     prior_stop_geom = renamed_geom_stop_times(stop_times, suffix="prior")
-    subseq_stop_geom = renamed_geom_stop_times(stop_times, suffix="subseq")
     
     stop_times_with_prior = dd.merge(
         stop_times,
@@ -120,19 +119,12 @@ def find_prior_stop(
         prior_stop_geom,
         on = ["trip_instance_key", "prior_stop_sequence"],
         how = "left"
-    )
-    
-    stop_times_with_subseq_geom = dd.merge(
-        stop_times_with_prior_geom,
-        subseq_stop_geom,
-        on = ["trip_instance_key", "subseq_stop_sequence"],
-        how = "left"
     ).astype({
         "prior_stop_sequence": "Int64",
         "subseq_stop_sequence": "Int64"
     })
     
-    return stop_times_with_subseq_geom
+    return stop_times_with_prior_geom
 
 
 def assemble_stop_times_with_direction(analysis_date: str):
