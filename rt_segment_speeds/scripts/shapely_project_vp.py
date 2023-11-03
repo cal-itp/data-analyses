@@ -11,7 +11,6 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from shared_utils import rt_dates
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               PROJECT_CRS, CONFIG_PATH)
@@ -47,14 +46,13 @@ def project_vp_to_shape(
     return vp_projected_result
 
 
-if __name__ == "__main__":
-    
-    analysis_date = rt_dates.DATES["sep2023"]
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
+def project_usable_vp_one_day(
+    analysis_date: str, 
+    dict_inputs: dict = {}
+):
     start = datetime.datetime.now()
     
-    USABLE_VP = f'{STOP_SEG_DICT["stage1"]}_{analysis_date}'
+    USABLE_VP = f'{dict_inputs["stage1"]}_{analysis_date}'
     
     trips = helpers.import_scheduled_trips(
         analysis_date,
@@ -105,3 +103,26 @@ if __name__ == "__main__":
 
     end = datetime.datetime.now()
     logger.info(f"compute and export: {end - time1}")
+    logger.info(f"execution time: {end - start}")
+    
+    return
+
+
+if __name__ == "__main__":
+    
+    from segment_speed_utils.project_vars import analysis_date_list
+    
+    LOG_FILE = "../logs/shapely_project_vp.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+        
+        
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    
+    for analysis_date in analysis_date_list:
+        logger.info(f"Analysis date: {analysis_date}")
+        
+        project_usable_vp_one_day(analysis_date, STOP_SEG_DICT)
+     
