@@ -7,24 +7,19 @@ segmentize:
 	#python cut_road_segments.py #cut once creates files needed to run in concat_road_segments
 	python concatenate_road_segments.py
     
-   
-speeds_pipeline:
-	python A1_sjoin_vp_segments.py
-	python A2_sjoin_postprocessing.py
-	python A3_valid_vehicle_positions.py
-	python B1_speeds_by_segment_trip.py
-	python B2_avg_speeds_by_segment.py
-	python B3_export.py
-	python C2_triangulate_vp.py      
-	python C3_trip_route_speed.py  
+old_pipeline:
+	#python C2_triangulate_vp.py      
+	#python C3_trip_route_speed.py  
 
-new_pipeline:
-	python prep_stop_segments.py
+
+speeds_pipeline:
 	python shapely_project_vp.py
 	python nearest_vp_to_stop.py
 	python interpolate_stop_arrival.py
 	python stop_arrivals_to_speed.py
 	#python handle_common_errors.py
+	#python B2_avg_speeds_by_segment.py  
+	#python B3_export.py
     
 
     

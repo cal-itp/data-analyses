@@ -96,11 +96,8 @@ if __name__ == "__main__":
     
     gdf2 = spatial_join_to_caltrans_districts(gdf)
     
-    arrowized_segments = wrangle_shapes.add_arrowized_geometry(
-        gdf2)
-    
     utils.geoparquet_gcs_export(
-        arrowized_segments, 
+        gdf2, 
         SEGMENT_GCS,
         f"{EXPORT_FILE}_{analysis_date}"
     )
