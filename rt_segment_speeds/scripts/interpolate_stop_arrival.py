@@ -12,7 +12,6 @@ from loguru import logger
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               PROJECT_CRS, CONFIG_PATH)
-from shared_utils import rt_dates
 
 
 def attach_vp_shape_meters_with_timestamp(
@@ -82,22 +81,13 @@ def get_stop_arrivals(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-if __name__ == "__main__":
+def main(
+    analysis_date: str, 
+    dict_inputs: dict
+):
+    NEAREST_VP = f"{dict_inputs['stage2']}_{analysis_date}"
+    STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
     
-    LOG_FILE = "../logs/interpolate_stop_arrival.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
-    
-    analysis_date = rt_dates.DATES["sep2023"]
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
-    NEAREST_VP = f"{STOP_SEG_DICT['stage2']}_{analysis_date}"
-    STOP_ARRIVALS_FILE = f"{STOP_SEG_DICT['stage3']}_{analysis_date}"
-    
-    logger.info(f"Analysis date: {analysis_date}")
-
     start = datetime.datetime.now()
     
     vp_pared = pd.read_parquet(
@@ -143,3 +133,22 @@ if __name__ == "__main__":
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")    
+
+    return
+
+
+if __name__ == "__main__":
+    
+    from segment_speed_utils.project_vars import analysis_date_list
+    
+    LOG_FILE = "../logs/interpolate_stop_arrival.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    
+    for analysis_date in analysis_date_list:
+        logger.info(f"Analysis date: {analysis_date}")
+        main(analysis_date, STOP_SEG_DICT)
