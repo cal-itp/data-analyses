@@ -68,29 +68,6 @@ def get_trips_with_geom(
     return trips_with_geom
 
 
-def merge_shapes_to_stop_times(
-    trips_with_shape_geom: Union[dg.GeoDataFrame, gpd.GeoDataFrame],
-    stop_times: dd.DataFrame,
-) -> dg.GeoDataFrame:
-    """
-    Merge stop_times with trips (with shape_geom) attached.
-    """    
-    st_with_shape = dd.merge(
-        trips_with_shape_geom,
-        stop_times, 
-        on = ["feed_key", "trip_id"],
-        how = "inner",
-    ).drop_duplicates()
-    
-    if isinstance(trips_with_shape_geom, (gpd.GeoDataFrame, dg.GeoDataFrame)):
-        geometry_col = trips_with_shape_geom.geometry.name
-        # Sometimes, geometry is lost...need to set it so it remains dg.GeoDataFrame
-        st_with_shape = st_with_shape.set_geometry(geometry_col)
-        st_with_shape = st_with_shape.set_crs(trips_with_shape_geom.crs)
-    
-    return st_with_shape
-
-
 def stop_arrivals_per_stop(
     stop_times: pd.DataFrame,
     group_cols: list,
