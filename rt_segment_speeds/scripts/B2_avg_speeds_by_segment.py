@@ -1,9 +1,9 @@
 """
 Quick aggregation for speed metrics by segment
 """
-import dask.dataframe as dd
 import datetime
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import sys
 
@@ -22,37 +22,23 @@ def calculate_avg_speeds(
     Calculate the median, 20th, and 80th percentile speeds 
     by groups.
     """
-    # Take the average after dropping unusually high speeds
-    grouped_df = df.groupby(group_cols, observed=True, group_keys=False)
-    
-    avg = (grouped_df
-          .agg({
-            "speed_mph": "median",
-            "trip_instance_key": "nunique"})
-          .reset_index()
+    # pd.groupby and pd.quantile is so slow
+    # create our own list of speeds and use np
+    df2 = (df.groupby(group_cols, 
+                      observed=True, group_keys=False)
+           .agg({"speed_mph": lambda x: sorted(list(x))})
+           .reset_index()
+           .rename(columns = {"speed_mph": "speed_mph_list"})
+    )
+                        
+    df2 = df2.assign(
+        p50_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, 0.5), axis=1),
+        n_trips = df2.apply(lambda x: len(x.speed_mph_list), axis=1).astype("int"),
+        p20_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, 0.2), axis=1),
+        p80_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, 0.8), axis=1),
     )
     
-    p20 = (grouped_df
-           .agg({"speed_mph": lambda x: x.quantile(0.2)})
-           .reset_index()  
-          )
-    
-    p80 = (grouped_df
-           .agg({"speed_mph": lambda x: x.quantile(0.8)})
-           .reset_index()  
-          )
-    
-    stats = pd.merge(
-        avg.rename(columns = {"speed_mph": "p50_mph", 
-                              "trip_instance_key": "n_trips"}),
-        p20.rename(columns = {"speed_mph": "p20_mph"}),
-        on = group_cols,
-        how = "left"
-    ).merge(
-        p80.rename(columns = {"speed_mph": "p80_mph"}),
-        on = group_cols,
-        how = "left"
-    )
+    stats = df2.drop(columns = "speed_mph_list")
     
     # Clean up for map
     speed_cols = [c for c in stats.columns if "_mph" in c]
@@ -78,25 +64,25 @@ def speeds_with_segment_geom(
     EXPORT_FILE = f'{dict_inputs["stage5"]}_{analysis_date}'
     
     # Read in speeds and attach time-of-day
-    df = dd.read_parquet(
+    df = pd.read_parquet(
         f"{SEGMENT_GCS}{SPEEDS_FILE}.parquet", 
         filters = [[("speed_mph", "<=", max_speed_cutoff)]]
     )
     
     time_of_day_df = sched_rt_utils.get_trip_time_buckets(analysis_date)
 
-    ddf = dd.merge(
+    df2 = pd.merge(
         df,
         time_of_day_df,
         on = "trip_instance_key",
         how = "inner"
-    ).repartition(npartitions=5)
+    )
     
-    subset_shape_keys = df2.shape_array_key.unique().compute().tolist()
+    subset_shape_keys = df2.shape_array_key.unique().tolist()
     
     # Load in segment geometry, keep shapes present in speeds  
     segments = gpd.read_parquet(
-        f"{SEGMENT_GCS}{SEGMENT_FILE}",
+        f"{SEGMENT_GCS}{SEGMENT_FILE}.parquet",
         columns = SEGMENT_IDENTIFIER_COLS + [
             "schedule_gtfs_dataset_key", 
             "stop_id",
@@ -106,39 +92,16 @@ def speeds_with_segment_geom(
         ],
         filters = [[("shape_array_key", "in", subset_shape_keys)]]
     ).to_crs(geography_utils.WGS84)
-
     
-    existing_cols_dtypes = ddf[SEGMENT_IDENTIFIER_COLS].dtypes.to_dict()
-    
-    speed_cols_dtypes = {
-        "p50_mph": "float64",
-        "n_trips": "int64",
-        "p20_mph": "float64",
-        "p80_mph": "float64"    
-    }
-    
-    all_day = ddf.map_partitions(
-        calculate_avg_speeds,
+    all_day = calculate_avg_speeds(
+        df2,
         SEGMENT_IDENTIFIER_COLS,
-        meta = {
-            **existing_cols_dtypes,
-            **speed_cols_dtypes
-            },
-        align_dataframes = False
-    ).compute()
+    )
                               
-    peak_ddf = ddf[ddf.time_of_day.isin(["AM Peak", "PM Peak"])]
-    
-    peak = peak_ddf.map_partitions(
-        calculate_avg_speeds,
+    peak = calculate_avg_speeds(
+        df2[df2.time_of_day.isin(["AM Peak", "PM Peak"])],
         SEGMENT_IDENTIFIER_COLS,
-        meta = {
-            **existing_cols_dtypes,
-            **speed_cols_dtypes
-            },
-        align_dataframes = False,
-    ).compute()
-    
+    )
 
     stats = pd.concat([
         all_day.assign(time_of_day = "all_day"),
@@ -152,7 +115,9 @@ def speeds_with_segment_geom(
         stats,
         on = SEGMENT_IDENTIFIER_COLS,
         how = "left"
-    ).sort_values(SEGMENT_IDENTIFIER_COLS + ["time_of_day"]).reset_index(drop=True)
+    ).sort_values(
+        SEGMENT_IDENTIFIER_COLS + ["time_of_day"]
+    ).reset_index(drop=True)
     
     utils.geoparquet_gcs_export(
         gdf,

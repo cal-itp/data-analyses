@@ -8,6 +8,8 @@ segmentize:
 	python concatenate_road_segments.py
     
 old_pipeline:
+# move these to separate rt_v_schedule pipeline
+# adjust trip route_speed to pull from separate source and aggregate
 	#python C2_triangulate_vp.py      
 	#python C3_trip_route_speed.py  
 
@@ -17,11 +19,10 @@ speeds_pipeline:
 	python nearest_vp_to_stop.py
 	python interpolate_stop_arrival.py
 	python stop_arrivals_to_speed.py
-	#python handle_common_errors.py
-	#python B2_avg_speeds_by_segment.py  
-	#python B3_export.py
+	python handle_common_errors.py
+	python avg_speeds_by_segment.py  
+	python export.py
     
-
     
 download_roads:
 	#pip install esridump
