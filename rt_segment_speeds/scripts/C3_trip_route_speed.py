@@ -16,9 +16,10 @@ from shared_utils.rt_utils import MPH_PER_MPS
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from shared_utils import portfolio_utils, schedule_rt_utils
-from segment_speed_utils import helpers, sched_rt_utils, wrangle_shapes
-from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
-                                              PROJECT_CRS)
+from segment_speed_utils import helpers, sched_rt_utils
+from segment_speed_utils.project_vars import SEGMENT_GCS, PROJECT_CRS
+import shapely_project_vp
+
 
 def distance_and_seconds_elapsed(
     df: pd.DataFrame, 
@@ -139,7 +140,7 @@ def drop_extremely_low_and_high_speeds(
     some negative values, so let's exclude those...maybe
     the vp is not traveling across the entirety of the shape.
     
-    Exclude unusually high speeds, over 70 mph.
+    Exclude unusually high speeds, over 80 mph.
     """
     low, high = speed_range
     
@@ -153,7 +154,7 @@ def drop_extremely_low_and_high_speeds(
 def avg_route_speeds_by_time_of_day(
     df: pd.DataFrame,
     group_cols: list,
-    speed_range: tuple = (3, 70)
+    speed_range: tuple = (3, 80)
 ) -> pd.DataFrame:
     """
     Keep trips with average speeds at least LOWER_BOUND_SPEED
@@ -163,7 +164,7 @@ def avg_route_speeds_by_time_of_day(
     Also include averages for scheduled trip service_minutes vs 
     rt trip approximated-service-minutes
     """
-    df2 = drop_extremely_low_and_high_speeds(df, speed_range = (3, 70))
+    df2 = drop_extremely_low_and_high_speeds(df, speed_range = (3, 80))
     
     df3 = (df2.groupby(group_cols, 
                        observed = True, group_keys = False)
@@ -259,16 +260,9 @@ if __name__ == "__main__":
         f"{SEGMENT_GCS}trip_summary/vp_subset_{analysis_date}.parquet",
     )
     
-    vp = gpd.GeoDataFrame(
-        vp,
-        geometry = gpd.points_from_xy(vp.x, vp.y, crs=WGS84)
-    ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
-    
     # in case there are fewer shapes to grab
     shapes_list = vp.shape_array_key.unique().tolist()
 
-    # to_crs() takes a long time when os.environ["USE_PYGEOS"] = '0',
-    # so keep pygeos on
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
         columns = ["shape_array_key","geometry"],
@@ -277,26 +271,16 @@ if __name__ == "__main__":
         crs = PROJECT_CRS
     )
     
-    df = pd.merge(
-        vp,
+    results = vp.map_partitions(
+        shapely_project_vp.project_vp_to_shape,
         shapes,
-        on = "shape_array_key",
-        how = "inner"
-    ).rename(columns = {"geometry_x": "vp_geometry", 
-                        "geometry_y": "shape_geometry"}
-            ).set_geometry("vp_geometry")
-    
-    # project the vp geometry onto the shape geometry and get shape_meters
-    shape_meters_geoseries = wrangle_shapes.project_point_geom_onto_linestring(
-        df,
-        "shape_geometry",
-        "vp_geometry",
+        meta = {"vp_idx": "int64",
+               "shape_meters": "float64"},
+        align_dataframes = False
     )
-
-    df["shape_meters"] = shape_meters_geoseries
     
     time1 = datetime.datetime.now()
-    print(f"linear ref: {time1 - start}")
+    print(f"map partitions: {time1 - start}")
     
     # Get trip-level speed
     speed = distance_and_seconds_elapsed(
