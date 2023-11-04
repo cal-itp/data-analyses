@@ -84,31 +84,6 @@ def add_arrowized_geometry(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf
 
 
-def project_point_geom_onto_linestring(
-    vp_with_seg_geom: dg.GeoDataFrame,
-    shape_geoseries: str = "segment_geometry",
-    point_geoseries: str = "vp_geometry"
-):
-    """
-    Use shapely.project to turn point coordinates into numeric.
-    The point coordinates will be converted to the distance along the linestring.
-    https://shapely.readthedocs.io/en/stable/manual.html?highlight=project#object.project
-    https://gis.stackexchange.com/questions/306838/snap-points-shapefile-to-line-shapefile-using-shapely
-    
-    From Eric: projecting the stop's point geom onto the shape_id's line geom
-    https://github.com/cal-itp/data-analyses/blob/f4c9c3607069da6ea96e70c485d0ffe1af6d7a47/rt_delay/rt_analysis/rt_parser.py#L102-L103
-    """
-    shape_meters_series = vp_with_seg_geom.apply(
-        lambda x: x[shape_geoseries].project(x[point_geoseries]), 
-        axis=1, 
-    )
-    
-    # To add this as a column to a dask df
-    # https://www.appsloveworld.com/coding/dataframe/6/add-a-dask-array-column-to-a-dask-dataframe
-    
-    return shape_meters_series
-
-
 def array_to_geoseries(
     array: np.ndarray,
     geom_type: Literal["point", "line", "polygon"],
@@ -132,6 +107,7 @@ def array_to_geoseries(
     
     return gdf
 
+
 def get_direction_vector(
     start: shapely.geometry.Point, 
     end: shapely.geometry.Point
@@ -145,6 +121,7 @@ def get_direction_vector(
 
     """
     return ((end.x - start.x), (end.y - start.y))
+
 
 def distill_array_into_direction_vector(array: np.ndarray) -> tuple:
     """
