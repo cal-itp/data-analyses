@@ -1,0 +1,15 @@
+# Updating GTFS/Network Bundles in Conveyal Analysis
+
+## General Notes
+
+* Conveyal is set up to ingest individual GTFS feeds (zipped feeds consisting of textfiles), while our warehouse extracts and transforms these. Potential approaches are:
+    * synthesize something that looks like a GTFS feed from our warehouse data (not attempted here)
+    * use our warehouse as a guide, but download and supply the raw individual feeds from when we archived them in GCS (this approach)
+    
+## Scripts
+
+* Set target date in `conveyal_vars.py`. Region boundaries are also set here, but these should remain static unless the decision is made to use entirely different regions in Conveyal. Target date should be a mid-week day.
+* TODO `evaluate_feeds.py` includes functions to check to see which feeds have service defined on the target date, and show feeds without any apparent service, including if that service is apparently captured in another feed. This helps check for potential coverage gaps, likely due to GTFS feed expirations and/or the [publishing future service issue](https://github.com/MobilityData/GTFS_Schedule_Best-Practices/issues/48(https://github.com/MobilityData/GTFS_Schedule_Best-Practices/issues/48). You may have to shift the target date around to find the best overall coverage, and/or manually edit important but missing feeds to define service if reasonable.
+* TODO `match_feeds_regions.py`
+* TODO `download_data.py`
+* TODO `run_and_handoff.py` runs the above scripts, and additionally generates handoff outputs that can be used to download, crop, and filter OSM data for each region using...
