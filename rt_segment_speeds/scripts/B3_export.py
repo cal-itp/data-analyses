@@ -2,11 +2,6 @@
 Attach columns needed for publishing to open data portal.
 Suppress certain rows and columns too.
 """
-import os
-os.environ['USE_PYGEOS'] = '0'
-
-import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime
 import geopandas as gpd
 import pandas as pd
@@ -14,8 +9,7 @@ import pandas as pd
 from shared_utils import schedule_rt_utils, utils
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date, 
-                                              CONFIG_PATH)
+from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
 
 def get_operator_natural_identifiers(
     df: pd.DataFrame, 
@@ -29,7 +23,8 @@ def get_operator_natural_identifiers(
     operator_shape_df = (df[["schedule_gtfs_dataset_key", "shape_array_key"]]
                          .drop_duplicates()
                          .reset_index(drop=True)
-                         .rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})
+                         .rename(columns = {
+                             "schedule_gtfs_dataset_key": "gtfs_dataset_key"})
                         )
     
     # Get shape_id back
@@ -59,7 +54,8 @@ def get_operator_natural_identifiers(
     )
 
     df_with_org = pd.merge(
-        df_with_shape.rename(columns = {"gtfs_dataset_key": "schedule_gtfs_dataset_key"}),
+        df_with_shape.rename(
+            columns = {"gtfs_dataset_key": "schedule_gtfs_dataset_key"}),
         crosswalk,
         on = "schedule_gtfs_dataset_key",
         how = "inner"
@@ -86,12 +82,13 @@ def finalize_df_for_export(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     return gdf2
 
-if __name__ == "__main__":
-    
+
+def export_average_speeds(
+    analysis_date: str, 
+    dict_inputs: dict
+):
     start = datetime.datetime.now()
-    
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    INPUT_FILE = f'{STOP_SEG_DICT["stage5"]}_{analysis_date}'
+    INPUT_FILE = f'{dict_inputs["stage5"]}_{analysis_date}'
     
     gdf = gpd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}.parquet"
@@ -137,7 +134,7 @@ if __name__ == "__main__":
     final_gdf.drop(columns = "geometry").to_parquet(
         f"{SEGMENT_GCS}export/{INPUT_FILE}_tabular.parquet"
     )
-       
+    
     utils.geoparquet_gcs_export(
         final_gdf[keep_cols],
         f"{SEGMENT_GCS}export/",
@@ -145,5 +142,16 @@ if __name__ == "__main__":
     )
     
     end = datetime.datetime.now()
-    print(f"export: {end - time2}")
     print(f"execution time: {end - start}")
+    
+    return
+
+
+if __name__ == "__main__":
+    
+    from segment_speed_utils.project_vars import analysis_date_list
+    
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    
+    for analysis_date in analysis_date_list:
+        export_average_speeds(analysis_date, STOP_SEG_DICT)
