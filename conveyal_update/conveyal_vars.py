@@ -1,5 +1,6 @@
 import datetime as dt
 
+gcs_path = 'gs://calitp-analytics-data/data-analyses/conveyal_update/'
 target_date = dt.date(2023, 10, 18)
 
 conveyal_regions = {}
