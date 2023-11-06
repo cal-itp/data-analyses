@@ -15,6 +15,10 @@ def load_state_rail_plan():
 
 def load_lost():
     df = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}LOST/LOST_all_projects.xlsx", sheet_name = "Main"))
+    
+    df.cost__in_millions_ = df.cost__in_millions_ * 1_000_000
+    df.estimated_lost_funds = df.estimated_lost_funds* 1_000_000
+    
     return df
 
 def load_sb1():
