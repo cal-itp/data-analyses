@@ -1,7 +1,10 @@
 import datetime as dt
 
 gcs_path = 'gs://calitp-analytics-data/data-analyses/conveyal_update/'
-target_date = dt.date(2023, 11, 1)
+target_date = dt.date(2023, 10, 18)
+osm_file = 'us-west-latest.osm.pbf'
+#  http://download.geofabrik.de/north-america/us-west-latest.osm.pbf
+#  first download with wget...
 
 conveyal_regions = {}
 #  boundaries correspond to Conveyal Analysis regions
