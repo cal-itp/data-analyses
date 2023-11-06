@@ -76,10 +76,12 @@ def harmonizing_lrtp(
 
     # Divide cost columns by millions
     # If bool is set to True
+    """
     if cost_in_millions:
         for i in cost_columns:
             df[i] = df[i].divide(1_000_000)
-
+    """
+    
     # Create columns even if they don't exist, just to harmonize
     # before concatting.
     create_columns = [
@@ -87,7 +89,7 @@ def harmonizing_lrtp(
         "city",
         "notes",
         "project_year",
-        "project_description",
+        "project_description"
     ]
 
     for column in create_columns:
@@ -327,17 +329,23 @@ def bcag_lrtp():
     df = to_snakecase(df)
 
     # Correct cost
-    # df.cost_estimate = df.cost_estimate * 1_000
+    df.cost_estimate = df.cost_estimate * 1_000
+    
+    # Can't seem to correct fund_estimate bc
+    # of so many variances
+    """
     df.fund_estimate = (
         df.fund_estimate.str.replace("$", "")
         .str.replace(".", "")
         .str.replace("million", "")
         .apply(pd.to_numeric, errors="coerce")
-        * 1_000_000
+        * 1_000
     )
-
+    """
+    
     # create geometry
     df["geometry"] = gpd.GeoSeries.from_xy(df.x_coord, df.y_coord, crs="EPSG:4326")
+    
     # Same project is split across multiple rows. Divide out project cost
     df = correct_project_cost(df, "title", "cost_estimate")
     df = df.set_geometry("geometry")
@@ -408,8 +416,9 @@ def kcag_lrtp():
     df = to_snakecase(pd.read_excel(f"{LRTP_GCS}KCAG.xlsx"))
 
     # No title column
-    df["title"] = (df.category + "-" + df.location).fillna("No Title")
-
+    # df["title"] = (df.category + "-" + df.location).fillna("No Title")
+    df["title"] = "None"
+    
     # Some duplicates
     df = df.drop_duplicates(["location", "category", "description"]).reset_index(
         drop=True
@@ -615,9 +624,12 @@ def mtc_lrtp():
 
     # Set geometry again
     final = final.set_geometry("geometry").set_crs("EPSG:4326")
+    
+    # Convert to full number instead of truncated
+    final['funding_numerated'] = final.funding_millions_yoe * 1_000_000
 
     # Same project is split across multiple rows. Divide out project cost
-    final = correct_project_cost(final, "proj_title", "funding_millions_yoe")
+    final = correct_project_cost(final, "proj_title", "funding_numerated")
 
     # Divide project cost over 30 years
     final.total_project_cost = final.total_project_cost / 30
@@ -709,10 +721,12 @@ def sandag_lrtp():
         .str.replace("N/A", "")
         .apply(pd.to_numeric, errors="coerce")
     )
+    sandag.cost2020m = sandag.cost2020m * 1_000_000
     sandag = correct_project_cost(sandag, "project_name", "cost2020m")
-
+    
     sandag = sandag.drop_duplicates().reset_index(drop=True)
     return sandag
+
 def harmonize_sandag():
     df = sandag_lrtp()
     df = harmonizing_lrtp(
@@ -1058,12 +1072,14 @@ def stancog_lrtp():
 
     df = df.dropna(subset=["description"]).reset_index(drop=True)
 
-    df["title"] = (df.location + "-" + df.description).fillna("No Title")
-
+    # df["title"] = (df.location + "-" + df.description).fillna("No Title")
+    
+    df["title"] = "None"
+    
     df = delete_embedded_headers(df, "location", "Location")
 
     df = df.drop_duplicates(
-        subset=["title", "location", "jurisdiction", "total_cost", "open_to_traffic"]
+        subset=["location", "jurisdiction", "total_cost", "open_to_traffic"]
     ).reset_index(drop=True)
     return df
 
@@ -1238,6 +1254,8 @@ def all_mpo(save_to_gcs: bool = True):
     
     # LOST
     lost = harmonize_lost()
+    lost = lost.drop(columns = ["data_source"])
+    lost["data_source"] = "LOST"
 
     df_list = [
         ambag,
@@ -1274,8 +1292,7 @@ def all_mpo(save_to_gcs: bool = True):
     ]
     for i in str_cols:
         df[i] = df[i].str.replace("_", " ").str.strip().str.title()
-        
-    df = df.drop(columns=["geometry"])
+
     
     # Create gdf
     gdf = df[df.geometry != None].reset_index(drop=True)
@@ -1284,7 +1301,7 @@ def all_mpo(save_to_gcs: bool = True):
     gdf = gdf[gdf.geometry.geometry.is_valid].reset_index(drop=True)
 
     if save_to_gcs:
-        df.to_excel(
+        df.drop(columns=["geometry"]).to_excel(
             f"{harmonization_utils.GCS_FILE_PATH}LRTP/all_LRTP_LOST.xlsx", index=False
         )
         gdf.to_file("./all_LRTP_LOST.geojson", driver="GeoJSON")
