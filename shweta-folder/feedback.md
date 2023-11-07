@@ -48,3 +48,48 @@
    display(df2.head())
    ```
 * Nullable integers: `pandas` allows for a column to be integers with NaNs. df = `df.astype({"this_col": "Int64"})`. Normally, if the column can be made an integer type, and there are no NaNs, you can use `df.astype({"this_col": "int64"})`. Capitalized `Int64` vs lowercase `int64`. You can view your df's data types with `df.dtypes`.
+
+## Exercise 3
+* Writing out the steps longhand is great for seeing patterns in your code. Once you start noticing something that's being repated, that's a good candidate for using a function.
+* For example, this last cell making the chart, most of the code is repeated except for the y-column.
+```
+fares_per_passengerchart = alt.Chart(df3).encode(alt.X('Agency'),
+                                                alt.Y('fares_per_passenger'), alt.Color('Mode')
+                                               ).mark_bar()
+fares_revenuechart = alt.Chart(df3).encode(alt.X('Agency'),
+                                                alt.Y('Fare_Revenues_Earned'),alt.Color('Mode')
+                                               ).mark_bar()
+```
+
+The next step is to convert this code into a function.
+
+
+```
+# Altair allows you to specify if a column is categorical or numeric or datetime
+# It is specified like this: alt.X("Agency:O") or alt.X("Agency:N")
+# N = nominal = unordered categorical
+# O = ordinal = ordered categorical
+# Q = quantitative = numeric
+# T = datetime (can parse for year/month/hour/quarter, etc)
+def base_chart(df):
+   chart = (alt.Chart(df)
+             .mark_bar()
+             .encode(
+                 x = alt.X("Agency:N"),
+                 color = alt.Color("Mode:N") 
+             )
+      )
+      
+    return chart
+    
+# this base chart can be used, with some additional customization for the y-column.
+
+fares_per_passengerchart = base_chart(df3).encode(
+    y = alt.Y('fares_per_passenger:Q', title = "Fare Revenues per Passenger")
+)
+
+fare_revenues_chart = base_chart(df3).encode(
+    y = alt.Y('Fare_Revenues_Earned:Q', title = "Fare Revenues")
+)
+
+```
