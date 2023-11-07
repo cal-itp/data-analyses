@@ -16,7 +16,6 @@ from loguru import logger
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               PROJECT_CRS, CONFIG_PATH)
-from shared_utils import rt_dates
 
 
 def rt_trips_to_shape(analysis_date: str) -> pd.DataFrame:
@@ -320,10 +319,13 @@ def find_nearest_vp_to_stop(
     fixed_results.to_parquet(
         f"{SEGMENT_GCS}projection/{EXPORT_FILE}.parquet")
     
-
+    end = datetime.datetime.now()
+    logger.info(f"execution time: {end - start}")
 
 
 if __name__ == "__main__":
+    
+    from segment_speed_utils.project_vars import analysis_date_list
     
     LOG_FILE = "../logs/nearest_vp.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -331,14 +333,9 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    analysis_date = rt_dates.DATES["sep2023"]
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
-    logger.info(f"Analysis date: {analysis_date}")
+    for analysis_date in analysis_date_list:
+        logger.info(f"Analysis date: {analysis_date}")
     
-    start = datetime.datetime.now()
-    
-    find_nearest_vp_to_stop(analysis_date, STOP_SEG_DICT)
-   
-    end = datetime.datetime.now()
-    logger.info(f"execution time: {end - start}")
+        find_nearest_vp_to_stop(analysis_date, STOP_SEG_DICT)

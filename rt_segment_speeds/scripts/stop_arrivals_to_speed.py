@@ -7,26 +7,16 @@ import sys
 
 from loguru import logger
 
-from shared_utils import rt_dates
 from segment_speed_utils import helpers, segment_calcs
 from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
 
-if __name__ == "__main__":
+def calculate_speed_from_stop_arrivals(
+    analysis_date: str, 
+    dict_inputs: dict
+):
     
-    LOG_FILE = "../logs/speeds_by_segment_trip.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
-    
-    analysis_date = rt_dates.DATES["sep2023"]
-    logger.info(f"Analysis date: {analysis_date}")
-    
-    
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
-    STOP_ARRIVALS_FILE = f"{STOP_SEG_DICT['stage3']}_{analysis_date}"
-    SPEED_FILE = f"{STOP_SEG_DICT['stage4']}_{analysis_date}"
+    STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
+    SPEED_FILE = f"{dict_inputs['stage4']}_{analysis_date}"
         
     start = datetime.datetime.now()
     
@@ -67,3 +57,23 @@ if __name__ == "__main__":
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")
+
+    return
+
+
+if __name__ == "__main__":
+    
+    from segment_speed_utils.project_vars import analysis_date_list
+    
+    LOG_FILE = "../logs/speeds_by_segment_trip.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+        
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    
+    for analysis_date in analysis_date_list:
+        logger.info(f"Analysis date: {analysis_date}")
+        
+        calculate_speed_from_stop_arrivals(analysis_date, STOP_SEG_DICT)

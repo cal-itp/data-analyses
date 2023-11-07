@@ -87,6 +87,7 @@ def load_roads(filtering: tuple) -> gpd.GeoDataFrame:
     
     return df2 
 
+
 """
 Primary/Secondary Roads 
 """
@@ -246,7 +247,7 @@ def add_segment_direction(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
             rt_utils.primary_cardinal_direction(x.origin, x.destination),
             axis=1,
         )
-    ).drop(columns = ["origin", "destination"])
+    )
 
     return df
  
@@ -267,7 +268,7 @@ if __name__ == '__main__':
 
     roads = load_roads(filtering = [("MTFCC", "in", road_type_values)])
     primary_secondary_roads = cut_primary_secondary_roads(
-        roads, ROAD_SEGMENT_METERS).drop(columns = "road_length")
+        roads, ROAD_SEGMENT_METERS)
     
     utils.geoparquet_gcs_export(
         primary_secondary_roads,
