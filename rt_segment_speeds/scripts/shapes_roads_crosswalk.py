@@ -36,9 +36,11 @@ def sjoin_shapes_to_roads(
     return shapes_to_roads
 
     
-def main(analysis_date: str, dict_inputs: dict):
+def create_shapes_to_roads_crosswalk(analysis_date: str, dict_inputs: dict):
     
     start = datetime.datetime.now()
+    
+    keep_road_cols = dict_inputs["segment_identifier_cols"]
     
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
@@ -48,9 +50,7 @@ def main(analysis_date: str, dict_inputs: dict):
     ).pipe(
         helpers.remove_shapes_outside_ca
     ).drop(columns = "index_right")
-    
-    keep_road_cols = ["linearid", "mtfcc", "segment_sequence"]
-    
+        
     road_segments = dg.read_parquet(
         f"{SEGMENT_GCS}road_segments_{analysis_date}",
         columns = keep_road_cols + ["geometry"]
@@ -96,6 +96,9 @@ if __name__ == "__main__":
 
     for analysis_date in analysis_date_list:
         logger.info(f"Analysis date: {analysis_date}")
-        main(analysis_date, ROAD_SEG_DICT)
+        create_shapes_to_roads_crosswalk(
+            analysis_date, 
+            ROAD_SEG_DICT
+        )
     
 
