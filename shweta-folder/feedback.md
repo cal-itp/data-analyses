@@ -93,3 +93,22 @@ fare_revenues_chart = base_chart(df3).encode(
 )
 
 ```
+
+## Exercise 4
+* Your output is now ready for a map. Try this:
+```
+# Merge back county geometry
+gdf = pd.merge(
+    CA_county[["COUNTY_NAME", "geometry"]],
+    county_area,
+    on = "COUNTY_NAME",
+    how = "inner"
+)
+
+
+# Create a chloropleth map, one plotting absolute count of stops
+# and one plotting counts per sq mi
+gdf.explore("stop_id", tiles = "CartoDB Positron", cmap = "viridis")
+
+gdf.explore("stop_sqmi", tiles = "CartoDB Positron", cmap = "viridis")
+```
