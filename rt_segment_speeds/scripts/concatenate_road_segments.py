@@ -14,8 +14,7 @@ from loguru import logger
 
 import cut_road_segments
 from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import (analysis_date,
-                                              SEGMENT_GCS,
+from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               SHARED_GCS,
                                               PROJECT_CRS, 
                                               ROAD_SEGMENT_METERS
@@ -35,6 +34,8 @@ def monthly_local_linearids(
         analysis_date: analysis_date
         segment_length_meters: how many meters to make the segment 
     """
+    time0 = datetime.datetime.now()
+    
     already_cut = dd.read_parquet(
         f"{SHARED_GCS}segmented_roads_2020_local.parquet",
         columns = ["linearid"]
@@ -85,27 +86,23 @@ def monthly_local_linearids(
     else:
         pass 
     
-    
-if __name__ == "__main__":
-    
-    LOG_FILE = "../logs/cut_road_segments.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
-    logger.info(f"Analysis date: {analysis_date}")
-
-    start = datetime.datetime.now()
-    
-    monthly_local_linearids(analysis_date, ROAD_SEGMENT_METERS)
-    
     time1 = datetime.datetime.now()
-    logger.info(f"add local linearids for this month: {time1 - start}")
+    logger.info(f"add local linearids for this month: {time1 - time0}")
+    
+    return
+    
+    
+def concatenate_road_types(analysis_date: str):
+    """
+    Concatenate road segments for primary/secondary/local
+    and the local segments we need to append for this month.
+    """
+    start = datetime.datetime.now()
     
     keep_cols = [
         "linearid", "mtfcc", "fullname",
         "segment_sequence", "primary_direction",
-        "geometry"
+        "geometry", "origin", "destination"
     ]
                 
     primary_secondary = delayed(gpd.read_parquet)(
@@ -142,6 +139,31 @@ if __name__ == "__main__":
         overwrite = True
     )
 
-    end = datetime.datetime.now()    
-    logger.info(f"concatenate road segments: {end - time1}")
-    logger.info(f"execution time: {end - start}")
+    end = datetime.datetime.now() 
+    logger.info(f"concatenate road segments: {end - start}")
+
+    
+if __name__ == "__main__":
+    
+    from segment_speed_utils.project_vars import analysis_date_list
+    
+    LOG_FILE = "../logs/cut_road_segments.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    for analysis_date in analysis_date_list:
+        
+        logger.info(f"Analysis date: {analysis_date}")
+
+        start = datetime.datetime.now()
+    
+        monthly_local_linearids(analysis_date, ROAD_SEGMENT_METERS)
+        concatenate_road_types(analysis_date)
+        
+        end = datetime.datetime.now()
+        logger.info(f"execution time: {end - start}")
+    
+    
+  

@@ -14,11 +14,9 @@ stop_segments:
     max_speed: 80
 road_segments:
     stage1: "vp_usable"
-    stage2: "vp_road_segment"
-    stage3: "vp_pared_roads"
     stage4: "speeds_road_segments"
     stage5: "avg_speeds_road_segments"
     segments_file: "road_segments"
-    segment_identifier_cols: ["linearid", "mtfcc", "primary_direction", "segment_sequence"]
+    segment_identifier_cols: ["linearid", "mtfcc", "segment_sequence"]
     timestamp_col: "location_timestamp_local"
     time_min_cutoff: 10
