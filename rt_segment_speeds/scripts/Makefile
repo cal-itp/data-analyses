@@ -5,13 +5,7 @@ segmentize:
 	python cut_special_stop_segments.py
 	python concatenate_stop_segments.py
 	#python cut_road_segments.py #cut once creates files needed to run in concat_road_segments
-	python concatenate_road_segments.py
-    
-old_pipeline:
-# move these to separate rt_v_schedule pipeline
-# adjust trip route_speed to pull from separate source and aggregate
-	#python C2_triangulate_vp.py      
-	#python C3_trip_route_speed.py  
+	python concatenate_road_segments.py 
 
 
 speeds_pipeline:
