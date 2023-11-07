@@ -2,13 +2,16 @@ stop_segments:
     stage1: "vp_usable"
     stage2: "nearest_vp"
     stage3: "stop_arrivals"
-    stage4: "speed_stop_segments"
-    stage5: "avg_speed_stop_segments"
+    stage4: "speeds_stop_segments"
+    stage5: "avg_speeds_stop_segments"
+    stage6: "trip_speeds"
+    stage7: "route_speeds"
     segments_file: "stop_segments"    
     segment_identifier_cols: ["shape_array_key", "stop_sequence"]
     timestamp_col: "location_timestamp_local"
     time_min_cutoff: 10
     pct_segment_minimum: 0.3
+    max_speed: 80
 road_segments:
     stage1: "vp_usable"
     stage2: "vp_road_segment"

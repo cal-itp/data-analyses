@@ -1,16 +1,43 @@
-2023-11-03 17:14:11.477 | INFO     | __main__:<module>:147 - Analysis date: 2023-09-13
-2023-11-03 17:16:36.306 | INFO     | __main__:speeds_with_segment_geom:127 - execution time: 0:02:24.828352
-2023-11-03 17:18:11.493 | INFO     | __main__:<module>:149 - Analysis date: 2023-08-15
-2023-11-03 17:20:35.623 | INFO     | __main__:speeds_with_segment_geom:129 - execution time: 0:02:24.128760
-2023-11-03 17:20:35.877 | INFO     | __main__:<module>:149 - Analysis date: 2023-07-12
-2023-11-03 17:22:39.776 | INFO     | __main__:speeds_with_segment_geom:129 - execution time: 0:02:03.898130
-2023-11-03 17:22:39.926 | INFO     | __main__:<module>:149 - Analysis date: 2023-06-14
-2023-11-03 17:24:41.843 | INFO     | __main__:speeds_with_segment_geom:129 - execution time: 0:02:01.915926
-2023-11-03 17:24:41.959 | INFO     | __main__:<module>:149 - Analysis date: 2023-05-17
-2023-11-03 17:27:06.614 | INFO     | __main__:speeds_with_segment_geom:129 - execution time: 0:02:24.653718
-2023-11-03 17:27:06.804 | INFO     | __main__:<module>:149 - Analysis date: 2023-04-12
-2023-11-03 17:29:23.521 | INFO     | __main__:speeds_with_segment_geom:129 - execution time: 0:02:16.715044
-2023-11-03 17:29:23.640 | INFO     | __main__:<module>:149 - Analysis date: 2023-03-15
-2023-11-03 17:31:39.734 | INFO     | __main__:speeds_with_segment_geom:129 - execution time: 0:02:16.092945
-2023-11-03 17:31:39.851 | INFO     | __main__:<module>:149 - Analysis date: 2023-10-11
-2023-11-03 17:33:59.652 | INFO     | __main__:speeds_with_segment_geom:129 - execution time: 0:02:19.800642
+2023-11-06 15:57:16.305 | INFO     | __main__:<module>:249 - Analysis date: 2023-10-11
+2023-11-06 15:59:18.120 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:01.813076
+2023-11-06 15:59:26.899 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.655715
+2023-11-06 15:59:26.911 | INFO     | __main__:<module>:249 - Analysis date: 2023-09-13
+2023-11-06 16:01:24.513 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:57.601884
+2023-11-06 16:01:32.899 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.277026
+2023-11-06 16:01:32.910 | INFO     | __main__:<module>:249 - Analysis date: 2023-08-15
+2023-11-06 16:03:34.836 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:01.925195
+2023-11-06 16:03:43.726 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.779732
+2023-11-06 16:03:43.739 | INFO     | __main__:<module>:249 - Analysis date: 2023-07-12
+2023-11-06 16:05:28.192 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:44.451632
+2023-11-06 16:05:37.199 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.899107
+2023-11-06 16:05:37.210 | INFO     | __main__:<module>:249 - Analysis date: 2023-06-14
+2023-11-06 16:07:20.946 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:43.736212
+2023-11-06 16:07:30.071 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.023577
+2023-11-06 16:07:30.083 | INFO     | __main__:<module>:249 - Analysis date: 2023-05-17
+2023-11-06 16:09:26.014 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:55.930926
+2023-11-06 16:09:35.119 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.005461
+2023-11-06 16:09:35.131 | INFO     | __main__:<module>:249 - Analysis date: 2023-04-12
+2023-11-06 16:14:19.095 | INFO     | __main__:<module>:249 - Analysis date: 2023-10-11
+2023-11-06 16:16:23.123 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:04.027868
+2023-11-06 16:16:32.544 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.299333
+2023-11-06 16:16:32.557 | INFO     | __main__:<module>:249 - Analysis date: 2023-09-13
+2023-11-06 16:18:31.595 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:59.037028
+2023-11-06 16:18:39.862 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.143427
+2023-11-06 16:18:39.874 | INFO     | __main__:<module>:249 - Analysis date: 2023-08-15
+2023-11-06 16:20:44.117 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:04.241983
+2023-11-06 16:20:52.968 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.742420
+2023-11-06 16:20:52.980 | INFO     | __main__:<module>:249 - Analysis date: 2023-07-12
+2023-11-06 16:22:41.130 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:48.149524
+2023-11-06 16:22:50.098 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.871341
+2023-11-06 16:22:50.111 | INFO     | __main__:<module>:249 - Analysis date: 2023-06-14
+2023-11-06 16:24:38.042 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:47.930386
+2023-11-06 16:24:47.008 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.854655
+2023-11-06 16:24:47.021 | INFO     | __main__:<module>:249 - Analysis date: 2023-05-17
+2023-11-06 16:26:48.437 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:01.414883
+2023-11-06 16:26:57.608 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.058372
+2023-11-06 16:26:57.622 | INFO     | __main__:<module>:249 - Analysis date: 2023-04-12
+2023-11-06 16:29:01.767 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:04.143738
+2023-11-06 16:29:10.778 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.902052
+2023-11-06 16:29:10.791 | INFO     | __main__:<module>:249 - Analysis date: 2023-03-15
+2023-11-06 16:31:05.067 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:54.274974
+2023-11-06 16:31:14.376 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.212622

@@ -12,6 +12,7 @@ from loguru import logger
 from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
 from calitp_data_analysis import utils, geography_utils
+from shared_utils import portfolio_utils, rt_utils
 
 
 def calculate_avg_speeds(
@@ -49,7 +50,6 @@ def calculate_avg_speeds(
     
 def speeds_with_segment_geom(
     analysis_date: str, 
-    max_speed_cutoff: int = 80,
     dict_inputs: dict = {},
 ): 
     """
@@ -62,11 +62,12 @@ def speeds_with_segment_geom(
     SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
     SPEEDS_FILE = f'{dict_inputs["stage4"]}_{analysis_date}'
     EXPORT_FILE = f'{dict_inputs["stage5"]}_{analysis_date}'
+    MAX_SPEED = dict_inputs["max_speed"]
     
     # Read in speeds and attach time-of-day
     df = pd.read_parquet(
         f"{SEGMENT_GCS}{SPEEDS_FILE}.parquet", 
-        filters = [[("speed_mph", "<=", max_speed_cutoff)]]
+        filters = [[("speed_mph", "<=", MAX_SPEED)]]
     )
     
     time_of_day_df = sched_rt_utils.get_trip_time_buckets(analysis_date)
@@ -126,9 +127,110 @@ def speeds_with_segment_geom(
     )
     
     end = datetime.datetime.now()
-    logger.info(f"execution time: {end - start}")
+    logger.info(f"segment averages execution time: {end - start}")
 
     return
+
+
+def add_scheduled_trip_columns(
+    rt_trips: pd.DataFrame,
+    analysis_date: str,
+    group_cols: list = ["trip_instance_key"]) -> pd.DataFrame:
+    """
+    Merge RT trips (vehicle positions) to scheduled trips.
+    Add in the needed scheduled trip columns to take 
+    route-direction-time_of_day averages.
+    """
+    keep_cols = [
+        "gtfs_dataset_key",
+        "direction_id", 
+        "route_id", "route_short_name", "route_long_name", "route_desc",
+    ] + group_cols
+        
+    crosswalk = helpers.import_scheduled_trips(
+        analysis_date, 
+        columns = keep_cols, 
+        get_pandas = True
+    )
+    
+    common_shape = sched_rt_utils.most_common_shape_by_route_direction(analysis_date)
+    
+    crosswalk2 = pd.merge(
+        crosswalk,
+        common_shape,
+        on = ["schedule_gtfs_dataset_key", "route_id", "direction_id"],
+        how = "inner"
+    ).astype({"direction_id": "Int64"})
+    
+    time_of_day = sched_rt_utils.get_trip_time_buckets(analysis_date)
+    
+    # Clean up route name
+    crosswalk2 = portfolio_utils.add_route_name(
+        crosswalk2
+    ).drop(columns = ["route_short_name", "route_long_name", "route_desc"])
+
+    df = pd.merge(
+        rt_trips,
+        crosswalk2,
+        on = group_cols,
+        how = "left",
+    ).merge(
+        time_of_day,
+        on = group_cols,
+        how = "left"
+    )
+    
+    return df
+
+
+def avg_trip_speeds_with_time_of_day(
+    analysis_date: str,
+    dict_inputs: dict,
+) -> pd.DataFrame:
+    """    
+    Get trip-level speeds, scheduled trip service_minutes
+    and rt trip approximated-service_minutes.
+    """
+    start = datetime.datetime.now()
+    
+    SPEEDS_FILE = f'{dict_inputs["stage4"]}_{analysis_date}'
+    EXPORT_FILE = f'{dict_inputs["stage6"]}_{analysis_date}'
+    MAX_SPEED = dict_inputs["max_speed"]
+    
+    by_segment = pd.read_parquet(
+        f"{SEGMENT_GCS}{SPEEDS_FILE}.parquet",
+        columns = ["trip_instance_key", "meters_elapsed", "sec_elapsed"]
+    )
+    
+    by_trip = (by_segment.groupby("trip_instance_key")
+           .agg({
+               "meters_elapsed": "sum",
+                "sec_elapsed": "sum"
+                })
+           .reset_index()
+          )
+    
+    by_trip = by_trip.assign(
+        speed_mph = (by_trip.meters_elapsed.divide(by_trip.sec_elapsed)
+                    ) * rt_utils.MPH_PER_MPS,
+        rt_trip_min = by_trip.sec_elapsed.divide(60)
+    ).query('speed_mph <= @MAX_SPEED')
+    
+    
+    df = add_scheduled_trip_columns(
+        by_trip,
+        analysis_date,
+        group_cols = ["trip_instance_key"]        
+    )
+    
+    df.to_parquet(
+        f"{SEGMENT_GCS}trip_summary/{EXPORT_FILE}.parquet"
+    )
+    
+    end = datetime.datetime.now()
+    logger.info(f"trip summary execution time: {end - start}")
+
+    return 
 
 
 if __name__ == "__main__":
@@ -142,15 +244,17 @@ if __name__ == "__main__":
                level="INFO")
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
-    MAX_SPEED = 80
-    
+        
     for analysis_date in analysis_date_list:
         logger.info(f"Analysis date: {analysis_date}")
         
         speeds_with_segment_geom(
             analysis_date, 
-            MAX_SPEED,
+            STOP_SEG_DICT
+        )
+        
+        avg_trip_speeds_with_time_of_day(
+            analysis_date, 
             STOP_SEG_DICT
         )
     
