@@ -9,9 +9,9 @@ PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/"
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 
 analysis_date = rt_dates.DATES["oct2023"]
+
 analysis_date_list = [
-    rt_dates.DATES["sep2023"],
-    rt_dates.DATES["oct2023"]
+    rt_dates.DATES["oct2023"] 
 ]
 
 PROJECT_CRS = "EPSG:3310"

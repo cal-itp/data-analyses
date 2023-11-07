@@ -2,3 +2,31 @@
 2023-10-31 18:11:18.958 | INFO     | __main__:<module>:134 - set up df with nearest / subseq vp info: 0:01:18.690602
 2023-10-31 18:12:06.833 | INFO     | __main__:<module>:139 - interpolate stop arrival: 0:00:47.874819
 2023-10-31 18:12:14.756 | INFO     | __main__:<module>:145 - execution time: 0:02:14.488207
+2023-11-03 13:50:00.660 | INFO     | __main__:<module>:153 - Analysis date: 2023-10-11
+2023-11-03 13:51:28.630 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:27.969585
+2023-11-03 13:52:31.928 | INFO     | __main__:main:129 - interpolate stop arrival: 0:01:03.298093
+2023-11-03 13:52:41.114 | INFO     | __main__:main:135 - execution time: 0:02:40.453737
+2023-11-03 15:59:50.277 | INFO     | __main__:<module>:153 - Analysis date: 2023-08-15
+2023-11-03 16:01:18.175 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:27.896964
+2023-11-03 16:02:21.641 | INFO     | __main__:main:129 - interpolate stop arrival: 0:01:03.466104
+2023-11-03 16:02:31.047 | INFO     | __main__:main:135 - execution time: 0:02:40.768508
+2023-11-03 16:02:31.231 | INFO     | __main__:<module>:153 - Analysis date: 2023-07-12
+2023-11-03 16:03:55.074 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:23.841921
+2023-11-03 16:04:51.717 | INFO     | __main__:main:129 - interpolate stop arrival: 0:00:56.643267
+2023-11-03 16:05:00.003 | INFO     | __main__:main:135 - execution time: 0:02:28.771041
+2023-11-03 16:05:00.125 | INFO     | __main__:<module>:153 - Analysis date: 2023-06-14
+2023-11-03 16:06:28.304 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:28.178540
+2023-11-03 16:07:24.310 | INFO     | __main__:main:129 - interpolate stop arrival: 0:00:56.005986
+2023-11-03 16:07:33.890 | INFO     | __main__:main:135 - execution time: 0:02:33.764494
+2023-11-03 16:07:34.155 | INFO     | __main__:<module>:153 - Analysis date: 2023-05-17
+2023-11-03 16:08:58.194 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:24.038301
+2023-11-03 16:09:56.769 | INFO     | __main__:main:129 - interpolate stop arrival: 0:00:58.574171
+2023-11-03 16:10:05.405 | INFO     | __main__:main:135 - execution time: 0:02:31.248634
+2023-11-03 16:10:05.597 | INFO     | __main__:<module>:153 - Analysis date: 2023-04-12
+2023-11-03 16:11:35.069 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:29.471108
+2023-11-03 16:12:36.102 | INFO     | __main__:main:129 - interpolate stop arrival: 0:01:01.033072
+2023-11-03 16:12:44.655 | INFO     | __main__:main:135 - execution time: 0:02:39.056691
+2023-11-03 16:12:44.788 | INFO     | __main__:<module>:153 - Analysis date: 2023-03-15
+2023-11-03 16:14:10.249 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:25.460793
+2023-11-03 16:15:11.212 | INFO     | __main__:main:129 - interpolate stop arrival: 0:01:00.962506
+2023-11-03 16:15:19.953 | INFO     | __main__:main:135 - execution time: 0:02:35.163939

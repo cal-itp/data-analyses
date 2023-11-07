@@ -9,6 +9,8 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+from typing import Literal
+
 from calitp_data_analysis import utils
 from shared_utils import rt_utils
 from segment_speed_utils import helpers, wrangle_shapes
@@ -79,15 +81,31 @@ def find_prior_stop(
             .groupby("trip_instance_key")
             .stop_sequence
             .shift(1)
+        ),
+        subseq_stop_sequence = (
+            prior_stop
+            .sort_values(["trip_instance_key", "stop_sequence"])
+            .groupby("trip_instance_key")
+            .stop_sequence
+            .shift(-1)        
         )
     )
     
-    prior_stop_geom = stop_times[
-        ["trip_instance_key", "stop_sequence", "geometry"]
-    ].rename(columns = {
-        "stop_sequence": "prior_stop_sequence",
-        "geometry": "prior_geometry"
-    }).set_geometry("prior_geometry").repartition(npartitions=1)
+    def renamed_geom_stop_times(
+        stop_times: dd.DataFrame, 
+        suffix: Literal["prior", "subseq"]
+    ) -> dd.DataFrame:
+    
+        renamed_stop_geom = stop_times[
+            ["trip_instance_key", "stop_sequence", "geometry"]
+        ].rename(columns = {
+            "stop_sequence": f"{suffix}_stop_sequence",
+            "geometry": f"{suffix}_geometry"
+        }).set_geometry(f"{suffix}_geometry").repartition(npartitions=1)
+        
+        return renamed_stop_geom
+    
+    prior_stop_geom = renamed_geom_stop_times(stop_times, suffix="prior")
     
     stop_times_with_prior = dd.merge(
         stop_times,
@@ -101,7 +119,10 @@ def find_prior_stop(
         prior_stop_geom,
         on = ["trip_instance_key", "prior_stop_sequence"],
         how = "left"
-    ).astype({"prior_stop_sequence": "Int64"})
+    ).astype({
+        "prior_stop_sequence": "Int64",
+        "subseq_stop_sequence": "Int64"
+    })
     
     return stop_times_with_prior_geom
 
