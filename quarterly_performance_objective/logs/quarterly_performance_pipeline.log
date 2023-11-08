@@ -1,0 +1,4 @@
+2023-11-08 12:10:16.976 | INFO     | __main__:<module>:179 - route level service: 2023-10-11 0:00:21.452201
+2023-11-08 12:11:10.785 | INFO     | __main__:<module>:52 - create intermediate dfs: 2023-10-11  0:00:37.861739
+2023-11-08 12:11:37.530 | INFO     | __main__:<module>:159 - categorize routes: 2023-10-11  0:00:09.897875
+2023-11-08 14:15:09.229 | INFO     | __main__:<module>:133 - attach speed: 2023-10-11  0:00:10.655576
