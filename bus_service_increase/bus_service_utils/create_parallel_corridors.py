@@ -12,8 +12,6 @@ Usually, this can be achieved by merging `trips` and `shapes`.
 import geopandas as gpd
 import pandas as pd
 
-from typing import Literal
-
 from calitp_data_analysis import geography_utils, utils
 
 DATA_PATH = "./data/"
@@ -23,20 +21,13 @@ DATA_PATH = "./data/"
 #--------------------------------------------------------#
 def process_transit_routes(
     df: gpd.GeoDataFrame, 
-    warehouse_version: Literal["v1", "v2"]
+    operator_cols: list = ["feed_key"]
 ) -> gpd.GeoDataFrame:
     """
     At operator level, pick the route with the longest length 
     to overlay with SHN.
     At operator level, sum up how many unique routes there are.
     """
-    
-    if warehouse_version == "v1":
-        operator_cols = ["calitp_itp_id"]
-        
-    elif warehouse_version == "v2":
-        operator_cols = ["feed_key"]
-    
     ## Clean transit routes
     df = df.assign(
         route_length = df.to_crs(
@@ -45,18 +36,15 @@ def process_transit_routes(
     
     # Get it down to route_id and pick longest shape
     df2 = (df.sort_values(operator_cols + ["route_id", "route_length"], 
-                          ascending = [True, True, False])
+                          ascending = [True for i in operator_cols] + [True, False])
            .drop_duplicates(subset=operator_cols + ["route_id"])
            .reset_index(drop=True)
     )
     
     # Then count how many unique route_ids appear for operator (that's denominator)
     route_cols = ["route_id", "total_routes", "route_length", "geometry"]
-    
-    if warehouse_version == "v2":
-        keep_cols = operator_cols + ["name"] + route_cols
-    else:
-        keep_cols = operator_cols + route_cols
+    keep_cols = operator_cols + route_cols
+
     
     df3 = df2.assign(
         total_routes = df2.groupby(operator_cols)["route_id"].transform(
@@ -123,7 +111,7 @@ def process_highways(
 def overlay_transit_to_highways(
     hwy_buffer_feet: int = geography_utils.FEET_PER_MI,
     transit_routes_df: gpd.GeoDataFrame = None, 
-    warehouse_version: Literal["v1", "v2"] = "v2"
+    operator_cols: list = ["feed_key", "name"]
 ) -> gpd.GeoDataFrame:
     """
     Function to find areas of intersection between
@@ -135,7 +123,7 @@ def overlay_transit_to_highways(
     
     # Can pass a different buffer zone to determine parallel corridors
     highways = process_highways(buffer_feet = hwy_buffer_feet)
-    transit_routes = process_transit_routes(transit_routes_df, warehouse_version)
+    transit_routes = process_transit_routes(transit_routes_df, operator_cols)
     
     # Overlay
     # Note: an overlay based on intersection changes the geometry column
@@ -170,13 +158,7 @@ def overlay_transit_to_highways(
     )
     
     # Fix geometry - don't want the overlay geometry, which is intersection
-    # Want to use a transit route's line geometry
-    if warehouse_version == "v1":
-        operator_cols = ["calitp_itp_id"]
-        
-    elif warehouse_version == "v2":
-        operator_cols = ["feed_key", "name"]
-    
+    # Want to use a transit route's line geometry    
     gdf2 = pd.merge(
         transit_routes[operator_cols + ["route_id", "geometry"]
                       ].drop_duplicates(),
@@ -213,13 +195,13 @@ def parallel_or_intersecting(
 # Use this in notebook
 # Can pass different parameters if buffer or thresholds need adjusting
 def make_analysis_data(
-    hwy_buffer_feet:int = geography_utils.FEET_PER_MI,
+    hwy_buffer_feet: int = geography_utils.FEET_PER_MI,
     transit_routes_df: gpd.GeoDataFrame = None,
     pct_route_threshold: float = 0.5,
     pct_highway_threshold: float = 0.1,
     data_path: str = "", 
     file_name: str = "parallel_or_intersecting",
-    warehouse_version: Literal["v1", "v2"] = "v2"
+    operator_cols: list = ["feed_key", "name"]
 ):
     '''
     hwy_buffer_feet: int, number of feet to draw hwy buffers, defaults to 1 mile
@@ -233,7 +215,7 @@ def make_analysis_data(
     # Get overlay between highway and transit routes
     # Draw buffer around highways
     gdf = overlay_transit_to_highways(
-        hwy_buffer_feet, transit_routes_df, warehouse_version)
+        hwy_buffer_feet, transit_routes_df, operator_cols)
 
     # Remove transit routes that do not overlap with highways
     gdf = (gdf[gdf._merge!="left_only"]

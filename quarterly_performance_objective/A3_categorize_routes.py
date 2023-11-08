@@ -10,8 +10,7 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis import geography_utils, utils
-from update_vars import (BUS_SERVICE_GCS, 
-                         ANALYSIS_DATE, VERSION)
+from update_vars import BUS_SERVICE_GCS, ANALYSIS_DATE
 
 def import_data(
     analysis_date: str, 
@@ -110,15 +109,14 @@ def flag_shn_intersecting_routes(
 
 if __name__=="__main__":
 
-    logger.add("./logs/A3_categorize_routes.log", retention = "6 months")
+    logger.add("./logs/quarterly_performance_pipeline.log", retention = "6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {ANALYSIS_DATE}  warehouse {VERSION}")
     start = datetime.datetime.now()
 
-    route_cols = ["feed_key", "name", "route_id"]
+    route_cols = ["feed_key", "name", "gtfs_dataset_key", "route_id"]
     
     # (1) Get unique transit routes 
     transit_routes, on_shn_routes, intersecting_routes = import_data(
@@ -141,13 +139,7 @@ if __name__=="__main__":
         intersecting,
         route_cols
     )
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"flag shn or intersecting: {time1 - start}")
-    
-    
-    time2 = datetime.datetime.now()
-    
+     
     # (3) Some cleanup for visualization
     gdf = (df.assign(
         service_hours = df.service_hours.round(2),
@@ -162,8 +154,6 @@ if __name__=="__main__":
         BUS_SERVICE_GCS,
         f"routes_categorized_{ANALYSIS_DATE}"
     )
-    
-    logger.info("exported dataset to GCS")
-    
+        
     end = datetime.datetime.now()
-    logger.info(f"execution time: {end - start}")
+    logger.info(f"categorize routes: {ANALYSIS_DATE}  {end - start}")
