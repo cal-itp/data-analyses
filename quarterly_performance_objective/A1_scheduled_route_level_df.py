@@ -18,7 +18,7 @@ from shared_utils import portfolio_utils
 from bus_service_utils import create_parallel_corridors
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from update_vars import (BUS_SERVICE_GCS, COMPILED_CACHED_GCS,
-                         ANALYSIS_DATE, VERSION
+                         ANALYSIS_DATE, 
                         )
 
 catalog = intake.open_catalog(
@@ -36,7 +36,7 @@ def shape_geom_to_route_geom(
     
     df = gtfs_schedule_wrangling.get_trips_with_geom(
         analysis_date,
-        trip_cols = ["feed_key", "name", 
+        trip_cols = operator_cols + [ 
                      "trip_id",
                      "shape_id","shape_array_key", 
                      "route_id", "route_type"
@@ -54,10 +54,24 @@ def shape_geom_to_route_geom(
     
     # Now, get it from shape_id level to route_id level
     routes = create_parallel_corridors.process_transit_routes(
-        df, "v2" 
-    )   
+        df, operator_cols = operator_cols 
+    ) 
     
-    return routes
+    # Add gtfs_dataset_name back
+    feed_gtfs_data_crosswalk = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["feed_key", "gtfs_dataset_key"],
+        get_pandas = True
+    ).rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})
+    
+    routes2 = pd.merge(
+        routes,
+        feed_gtfs_data_crosswalk,
+        on = "feed_key",
+        how = "inner"
+    )
+    
+    return routes2
 
     
 def aggregate_trip_service_to_route_level(
@@ -71,7 +85,7 @@ def aggregate_trip_service_to_route_level(
         analysis_date,
         columns = route_cols + ["trip_id", "service_hours"],
         get_pandas = True
-    )
+    ).rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})
     
     route_service_hours = portfolio_utils.aggregate_by_geography(
         trips,
@@ -127,15 +141,14 @@ def add_district(route_df: gpd.GeoDataFrame,
 
 if __name__ == "__main__":
     
-    logger.add("./logs/A1_scheduled_route_level_df.log", retention="6 months")
+    logger.add("./logs/quarterly_performance_pipeline.log", retention="6 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {ANALYSIS_DATE}   warehouse {VERSION}")
     start = datetime.datetime.now()
     
-    route_cols = ["feed_key", "name", "route_id"]
+    route_cols = ["gtfs_dataset_key", "feed_key", "name", "route_id"]
     
     # Merge to get shape_level geometry, then pare down to route-level geometry
     route_geom = shape_geom_to_route_geom(
@@ -143,11 +156,9 @@ if __name__ == "__main__":
 
     # Add district
     route_geom_with_district = add_district(route_geom, route_cols)
-    logger.info("get route-level geometry and district")
 
     # Get route-level service
     route_service = aggregate_trip_service_to_route_level(ANALYSIS_DATE, route_cols)
-    logger.info("get route-level service")
     
     # Merge service hours with route-level geometry and district
     gdf = pd.merge(
@@ -165,4 +176,4 @@ if __name__ == "__main__":
     )
     
     end = datetime.datetime.now()
-    logger.info(f"execution time: {end - start}")
+    logger.info(f"route level service: {ANALYSIS_DATE} {end - start}")
