@@ -5,4 +5,3 @@ BUS_SERVICE_GCS = f"{utils.GCS_FILE_PATH}"
 COMPILED_CACHED_GCS = f"{rt_utils.GCS_FILE_PATH}compiled_cached_views/"
 CURRENT_QUARTER = "Q4_2023"
 ANALYSIS_DATE = rt_dates.PMAC[CURRENT_QUARTER] 
-VERSION = "v2" # warehouse version (post migration, we are on v2)
