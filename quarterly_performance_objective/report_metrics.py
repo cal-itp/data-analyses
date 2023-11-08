@@ -84,12 +84,12 @@ def get_service_hours_summary_table(df: pd.DataFrame)-> pd.DataFrame:
 
 def get_delay_summary_table(df: pd.DataFrame) -> pd.DataFrame:
     # Note: merge_delay both narrows down the dataset quite a bit
-    delay_df = df[df.merge_delay=="both"]
-
+    delay_df = df[df.rt_sched_category=="rt_and_sched"]
+    
     delay_summary = aggregate_calculate_percent_and_average(
         delay_df,
         group_cols = ["category"],
-        sum_cols = ["delay_hours", "unique_route"],
+        sum_cols = ["delay_hours", "unique_route"]
     ).astype({"unique_route": int})
     
     delay_summary = (sort_by_column(delay_summary)
@@ -130,32 +130,14 @@ def by_district_on_shn_breakdown(df: pd.DataFrame,
     return by_district
 
 
-    
-def prep_data_for_report(analysis_date: str) -> gpd.GeoDataFrame:
-    # https://stackoverflow.com/questions/69781678/intake-catalogue-level-parameters
-    
-    df = catalog.routes_categorized(
-        analysis_date = analysis_date).read()
-
-    # TODO: Some interest in excluding modes like rail from District 4
-    # Don't have route_type...but maybe we want to exclude rail
-    '''
-    df = df.assign(
-        delay_hours = round(df.delay_seconds / 60 ** 2, 2)
-    ).drop(columns = "delay_seconds")
-    
-    df = df[df.merge_delay != "right_only"].reset_index(drop=True)
-    '''
-    return df
-
-
-
 def quarterly_summary_long(analysis_date: str) -> pd.DataFrame: 
     """
     For historical report, get a long df of service hours and delay hours 
     summary tables.
     """
-    df = prep_data_for_report(analysis_date)
+    # https://stackoverflow.com/questions/69781678/intake-catalogue-level-parameters
+    df = catalog.routes_categorized_with_speed(
+        analysis_date = analysis_date).read()
     
     service_summary = get_service_hours_summary_table(df)                      
     delay_summary = (get_delay_summary_table(df)
@@ -192,7 +174,8 @@ def district_breakdown_long(analysis_date: str) -> pd.DataFrame:
     For historical report, get a long df of service hours and delay hours 
     summary tables.
     """
-    df = prep_data_for_report(analysis_date)
+    df = catalog.routes_categorized_with_speed(
+        analysis_date = analysis_date).read()
     
     by_district_summary = by_district_on_shn_breakdown(
         df, sum_cols = ["service_hours", "unique_route"])

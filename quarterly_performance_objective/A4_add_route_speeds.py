@@ -82,6 +82,27 @@ def aggregate_route_direction_speeds(
     
     return speeds_by_route
     
+    
+def speed_to_delay_estimate(
+    df: gpd.GeoDataFrame, 
+    target_speeds_dict: dict
+) -> gpd.GeoDataFrame:
+
+    df = df.assign(
+        target_speed = df.category.map(target_speeds_dict)
+    )
+    
+    df = df.assign(
+        actual_service_hours = df.route_length_mi.divide(df.speed_mph),
+        target_service_hours = df.route_length_mi.divide(df.target_speed),
+    )
+    
+    df = df.assign(
+        delay_hours = df.actual_service_hours - df.target_service_hours
+    )
+    
+    return df      
+
         
 if __name__=="__main__":
     
@@ -122,6 +143,14 @@ if __name__=="__main__":
     final = final.assign(
         rt_sched_category = final._merge.map(MERGE_CATEGORIES)
     ).drop(columns = "_merge")
+    
+    TARGET_SPEEDS_DICT = {
+        "on_shn": 16,
+        "intersects_shn": 16,
+        "other": 25
+    }
+
+    final = speed_to_delay_estimate(final, TARGET_SPEEDS_DICT)  
     
     utils.geoparquet_gcs_export(
         final, 
