@@ -60,6 +60,12 @@ def clean_up_category_values(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def prep_data_for_report(analysis_date: str) -> gpd.GeoDataFrame:
+    # https://stackoverflow.com/questions/69781678/intake-catalogue-level-parameters
+
+    return catalog.routes_categorized_with_speed(
+        analysis_date = analysis_date).read()
+
 def get_service_hours_summary_table(df: pd.DataFrame)-> pd.DataFrame: 
     """
     Aggregate by parallel/on_shn/other category.
@@ -135,9 +141,7 @@ def quarterly_summary_long(analysis_date: str) -> pd.DataFrame:
     For historical report, get a long df of service hours and delay hours 
     summary tables.
     """
-    # https://stackoverflow.com/questions/69781678/intake-catalogue-level-parameters
-    df = catalog.routes_categorized_with_speed(
-        analysis_date = analysis_date).read()
+    df = prep_data_for_report(analysis_date)
     
     service_summary = get_service_hours_summary_table(df)                      
     delay_summary = (get_delay_summary_table(df)
@@ -174,8 +178,7 @@ def district_breakdown_long(analysis_date: str) -> pd.DataFrame:
     For historical report, get a long df of service hours and delay hours 
     summary tables.
     """
-    df = catalog.routes_categorized_with_speed(
-        analysis_date = analysis_date).read()
+    df = prep_data_for_report(analysis_date)
     
     by_district_summary = by_district_on_shn_breakdown(
         df, sum_cols = ["service_hours", "unique_route"])
@@ -209,9 +212,10 @@ def district_breakdown_long(analysis_date: str) -> pd.DataFrame:
     return summary
 
 
-def concatenate_summary_across_dates(rt_dates_dict: dict, 
-                                     summary_dataset: Literal["summary", "district"],
-                                    ) -> pd.DataFrame:
+def concatenate_summary_across_dates(
+    rt_dates_dict: dict, 
+    summary_dataset: Literal["summary", "district"],
+) -> pd.DataFrame:
     """
     Loop across dates available for quarterly performance metrics,
     and concatenate into 1 long df.

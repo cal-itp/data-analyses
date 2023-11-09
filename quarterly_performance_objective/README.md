@@ -17,12 +17,11 @@ Initially presented for the Planning and Modal Advisory Committee (PMAC).
 1. [Aggregate from shape level to route level](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/A1_scheduled_route_level_df)
 1. [Generate processed data for categories and service hours](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/A2_generate_routes_on_shn_data.py) with GTFS schedule data
 1. [Categorize routes into 3 groups](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/A3_categorize_routes.py)
-1. [Generate endpoint data processed data](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/B1_generate_endpoint_delay.py) with GTFS real-time data
-1. [Merge service hours and endpoint delay](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/B2_route_service_hours_delay.py)
+1. [Merge service hours and speeds and estimate delay](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/A4_add_route_speeds.py)
 
 ### Helper Scripts for Reports
-1. [data prep functions](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/C1_report_metrics.py)
-1. [chart functions](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/C2_report_charts.py)
+1. [data prep functions](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/report_metrics.py)
+1. [chart functions](https://github.com/cal-itp/data-analyses/blob/main/quarterly_performance_objective/report_charts.py)
 
 ### Reports
 
