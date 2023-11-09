@@ -4,7 +4,7 @@ metadata:
     analysis_date:
       type: str
       description: Analysis date, specified in update_vars.py
-      default: "2022-05-04" 
+      default: "2023-10-11" 
 sources:
   route_df:
     driver: geoparquet

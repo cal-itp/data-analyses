@@ -98,7 +98,8 @@ def speed_to_delay_estimate(
     )
     
     df = df.assign(
-        delay_hours = df.actual_service_hours - df.target_service_hours
+        delay_hours = (df.actual_service_hours - 
+                       df.target_service_hours) * df.n_trips
     )
     
     return df      
