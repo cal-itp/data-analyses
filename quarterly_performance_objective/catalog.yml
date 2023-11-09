@@ -4,7 +4,7 @@ metadata:
     analysis_date:
       type: str
       description: Analysis date, specified in update_vars.py
-      default: "2022-05-04" 
+      default: "2023-10-11" 
 sources:
   route_df:
     driver: geoparquet
@@ -30,16 +30,9 @@ sources:
     args:
       # source: A3_categorize_routes.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/routes_categorized_{{analysis_date}}.parquet 
-  endpoint_delays:
+  routes_categorized_with_speed:
     driver: geoparquet
-    description: Operator-stop-level endpoint delays generated using rt_map_filter_plot
+    description: Route-level service hours, speeds, category, and line geometry, ready for report.
     args:
-      # source: B1_generate_endpoint_delay.py
-      urlpath: gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/endpoint_delays_{{analysis_date}}.parquet 
-  routes_categorized_with_delay:
-    driver: geoparquet
-    description: Route-level service hours, delay, category, and line geometry, ready for report.
-    args:
-      # source: B2_route_service_hours_delay.py
-      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/routes_categorized_with_delay_{{analysis_date}}.parquet       
-      
+      # source: A4_add_route_speeds.py
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/routes_categorized_with_speed_{{analysis_date}}.parquet
