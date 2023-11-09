@@ -98,7 +98,6 @@ def load_api_511(excel_file: str) -> pd.DataFrame:
         .str.replace("/", "")
     )
 
-    # display(df)
     print("These are Bay Area feeds that keep track of RT")
     display(df[(df.new == "true").shift(1).fillna(False)])
     
@@ -110,8 +109,7 @@ def incomplete(tu_excel_file: str, vp_excel_file: str, airtable: pd.DataFrame) -
     incomplete = incomplete.sort_values(["name"]).reset_index(drop=True)
 
     incomplete = incomplete.fillna("OK")
-
-    # incomplete.name = incomplete.name.str.replace('Schedule','')
+    
     incomplete2 = (
         pd.merge(
             incomplete, airtable, left_on="name", right_on="gtfs_datasets", how="left"
