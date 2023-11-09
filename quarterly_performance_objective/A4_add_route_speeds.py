@@ -14,71 +14,49 @@ from shared_utils import rt_utils, schedule_rt_utils
 from update_vars import BUS_SERVICE_GCS, ANALYSIS_DATE
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
-def attach_organization_identifiers(
-    df: gpd.GeoDataFrame, 
-    analysis_date: str
-) -> gpd.GeoDataFrame:
-    """
-    Take routes categorized with its gtfs_dataset_key and attach
-    organization_source_record_id.
-    speeds by route comes at source_record_id as identifiers.
-    """
-    unique_operators = df[["gtfs_dataset_key"]].drop_duplicates()
-    
-    # Get base64_url, uri, organization_source_record_id and organization_name
-    crosswalk = schedule_rt_utils.sample_gtfs_dataset_key_to_organization_crosswalk(
-        unique_operators,
-        analysis_date,
-        quartet_data = "schedule",
-        dim_gtfs_dataset_cols = [
-            "key",
-            "base64_url",
-        ],
-        dim_organization_cols = ["source_record_id", "name"]
-    ).rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})
-    
-    df_with_org = pd.merge(
-        df,
-        crosswalk,
-        on = "gtfs_dataset_key",
-        how = "inner"
-    )
-    
-    return df_with_org
 
-
-def aggregate_route_direction_speeds(
+def aggregate_trip_speeds_to_route(
     analysis_date: str,
     route_cols: list
-)-> pd.DataFrame:
+):
     """
-    Aggregate route-direction-time-of-day speeds up to route-level.
-    """
-    speeds = pd.read_parquet(
-        f"{SEGMENT_GCS}trip_summary/route_speeds_{analysis_date}.parquet",
-        columns = ["org_id", "agency", "route_id", 
-                   "speed_mph", "time_of_day", "n_trips"]
-    ).rename(columns = {
-        "org_id": "organization_source_record_id",
-        "agency": "organization_name",
-    })
+    Start with trip speeds and aggregate to route-level.
+    Instead of using route_speeds (which aggregates to 
+    route-direction-time_of_day and uses source_record_id),
+    let's just use trip-level speeds.
     
-    speeds = speeds.assign(
-        weighted_speeds = speeds.speed_mph * speeds.n_trips
+    Also, back out the operator's median speed, and use
+    that as the target speed for a given route.
+    """
+    
+    speeds = pd.read_parquet(
+        f"{SEGMENT_GCS}trip_summary/trip_speeds_{analysis_date}.parquet",
+        columns = route_cols + ["trip_instance_key", "speed_mph"]
     )
     
     speeds_by_route = (speeds.groupby(route_cols, 
                                       observed=True, group_keys=False)
-                       .agg({"weighted_speeds": "sum", 
-                             "n_trips": "sum"})
-                       .reset_index()
-                       .astype({"n_trips": "int"})
+                       .agg({
+                           "speed_mph": "mean",
+                           "trip_instance_key": "count"
+                       }).reset_index()
+                       .rename(columns = {"trip_instance_key": "n_trips"})
                       )
+    '''
+    system_median = (speeds.groupby("schedule_gtfs_dataset_key", 
+                                    observed=True, group_keys=False)
+                     .agg({"speed_mph": "median"})
+                     .reset_index()
+                     .rename(columns = {"speed_mph": "system_speed_median"})
+                    )
     
-    speeds_by_route = speeds_by_route.assign(
-        speed_mph = speeds_by_route.weighted_speeds.divide(
-            speeds_by_route.n_trips).round(2)
-    ).drop(columns = "weighted_speeds")
+    speeds_by_route2 = pd.merge(
+        speeds_by_route,
+        system_median,
+        on = "schedule_gtfs_dataset_key",
+        how = "inner"
+    )
+    '''
     
     return speeds_by_route
     
@@ -87,7 +65,18 @@ def speed_to_delay_estimate(
     df: gpd.GeoDataFrame, 
     target_speeds_dict: dict
 ) -> gpd.GeoDataFrame:
+    """
+    Assign target speeds using dict. Estimate delay hours based on 
+    this equation:
+    
+    speed = distance / time
+    time = distance / speed
+    
+    hours = miles / miles_per_hour
 
+    Take difference between target speed and actual speed and 
+    back out delay hours.
+    """
     df = df.assign(
         target_speed = df.category.map(target_speeds_dict)
     )
@@ -116,14 +105,16 @@ if __name__=="__main__":
     
     routes_categorized = gpd.read_parquet(
         f"{BUS_SERVICE_GCS}routes_categorized_{ANALYSIS_DATE}.parquet"
-    ).pipe(attach_organization_identifiers, ANALYSIS_DATE)
+    ).rename(
+        columns = {"gtfs_dataset_key": "schedule_gtfs_dataset_key"}
+    )
     
     route_cols = [
-        "organization_source_record_id", "organization_name",
+        "schedule_gtfs_dataset_key",
         "route_id"
     ]
     
-    speeds_by_route = aggregate_route_direction_speeds(
+    speeds_by_route = aggregate_trip_speeds_to_route(
         ANALYSIS_DATE, route_cols)
     
     final = pd.merge(
@@ -145,13 +136,13 @@ if __name__=="__main__":
         rt_sched_category = final._merge.map(MERGE_CATEGORIES)
     ).drop(columns = "_merge")
     
-    TARGET_SPEEDS_DICT = {
+    TARGET_SPEEDS = {
         "on_shn": 16,
         "intersects_shn": 16,
-        "other": 25
+        "other": 16,
     }
-
-    final = speed_to_delay_estimate(final, TARGET_SPEEDS_DICT)  
+    
+    final = speed_to_delay_estimate(final, TARGET_SPEEDS)  
     
     utils.geoparquet_gcs_export(
         final, 
