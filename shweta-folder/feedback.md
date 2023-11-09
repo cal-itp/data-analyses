@@ -112,3 +112,38 @@ gdf.explore("stop_id", tiles = "CartoDB Positron", cmap = "viridis")
 
 gdf.explore("stop_sqmi", tiles = "CartoDB Positron", cmap = "viridis")
 ```
+
+## Exercise 5
+* Go one step further in the functions, and see if you can use dictionaries, f-strings to populate more of the chart programmatically. The example below shows how you might prep the df a bit more, and then use an extra function to clean up words for displaying in a chart. 
+
+```
+df = df.rename(
+   columns = {"stop_event_count": "total_stop_events",
+              "COUNTY_NAME": "county"})
+
+
+
+def make_chart(df, x_col, y_col, colorscale): 
+    
+    # defining a function inside of another means you can't access it 
+    # outside of this function. 
+    # if you define title_case outside of make_chart, you can use it in
+    # other functions too.
+    
+    def title_case(word: str):
+       return word.replace('_', '').title()
+    
+    chart = (alt.Chart(df)
+             .mark_bar()
+             .encode(
+                 x=alt.X(x_col, title=title_case(x_col)),
+                 y=alt.Y(y_col, title=title_case(y_col)),
+                 color = alt.Color(y_col,
+                                   scale = alt.Scale(range=colorscale),
+                                  ),
+             ).properties(title=f"{title_case(y_col)} by County")
+            )
+    chart = styleguide.preset_chart_config(chart)
+    display(chart)
+```
+* Take a look [in this notebook](https://github.com/cal-itp/data-analyses/blob/main/bus_service_increase/competitive-routes.ipynb) to see how you could also weave in HTML and Markdown with `display(HTML())` and `display(Markdown())` to programmatically generate captions. This is the Jupyter notebook equivalent of creating RMarkdown docs the way [Urban Institute creates their fact sheets](https://urban-institute.medium.com/iterated-fact-sheets-with-r-markdown-d685eb4eafce).
