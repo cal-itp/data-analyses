@@ -1,0 +1,21 @@
+metadata:
+  version: 1
+sources:
+  caltrans_districts:
+    driver: geojson
+    description: Caltrans district polygons
+    args:
+      urlpath: https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHboundary/District_Tiger_Lines/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+  county_centroids:
+    driver: parquet
+    description: Operators
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/shared_data/ca_county_centroids.parquet
+  operators_csv:
+    driver: csv
+    description: Operators
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/shared_data/operator_by_district_county.csv    
+      
+      
+      
