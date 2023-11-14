@@ -10,40 +10,9 @@ import sys
 
 from loguru import logger
 
-from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import helpers
+from segment_speed_utils import helpers, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               PROJECT_CRS, CONFIG_PATH)
-
-def project_vp_to_shape(
-    vp: dd.DataFrame, 
-    shapes: gpd.GeoDataFrame
-):
-    """
-    shapely.project vp point geom onto shape_geometry.
-    """
-    shapes = shapes.rename(columns = {"geometry": "shape_geometry"})
-    
-    vp_gdf = gpd.GeoDataFrame(
-        vp,
-        geometry = gpd.points_from_xy(vp.x, vp.y),
-        crs = WGS84
-    ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
-    
-    gdf = pd.merge(
-        vp_gdf,
-        shapes,
-        on = "shape_array_key",
-        how = "inner"
-    )
-    
-    gdf = gdf.assign(
-        shape_meters = gdf.shape_geometry.project(gdf.geometry)
-    )
-    
-    vp_projected_result = gdf[["vp_idx", "shape_meters"]]
-    
-    return vp_projected_result
 
 
 def project_usable_vp_one_day(
@@ -85,10 +54,14 @@ def project_usable_vp_one_day(
         get_pandas = True,
         crs = PROJECT_CRS
     )
-        
+    
+    group_cols = ["shape_array_key"]
+    shape_cols_dtypes = shapes[group_cols].dtypes.to_dict()
+    
     results = vp.map_partitions(
-        project_vp_to_shape,
+        wrangle_shapes.project_vp_onto_segment_geometry,
         shapes,
+        grouping_cols = ["shape_array_key"],
         meta = {"vp_idx": "int64",
                "shape_meters": "float64"},
         align_dataframes = False
