@@ -17,7 +17,7 @@ segment_identifier_cols = road_id_cols + ["segment_sequence"]
 
 def merge_vp_to_crosswalk(
     analysis_date: str, 
-    filters: tuple
+    filters: tuple = None
 ):
     # vp to road segment crosswalk
     df = pd.read_parquet(
@@ -98,21 +98,12 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    test_trips = [
-        '00062c6db9dbef9c80f5ada74b31e257',
-        '0009c78b48866a26d664ab00f67d1606',
-        '00139041e36b607c7e10cb7ec023e837', 
-        'ff780650b98209acf69a71a7dab2502c',
-        'ff86898d6a8ff5df82912699133bf4b6',
-        'ffb44943b394f891d2b2286bb3902305'
-    ]
-    
     vp = merge_vp_to_crosswalk(
         analysis_date,
-        filters = [[("trip_instance_key", "in", test_trips)]]
+        #filters = [[("trip_instance_key", "in", test_trips)]]
     )
     
-    vp = vp.repartition(npartitions=3)
+    vp = vp.repartition(npartitions=25)
     
     subset_roads = vp.linearid.unique().compute().tolist()
     
