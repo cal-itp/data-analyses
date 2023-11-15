@@ -11,7 +11,7 @@ from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               CONFIG_PATH, PROJECT_CRS)
 
 
-road_id_cols = ["linearid", "mtfcc"]
+road_id_cols = ["linearid", "mtfcc", "primary_direction"]
 segment_identifier_cols = road_id_cols + ["segment_sequence"]
 
 
@@ -60,38 +60,38 @@ def merge_vp_to_crosswalk(
 
 def expand_relevant_road_segments(
     analysis_date: str,
-    segment_identifier_cols: list = ["linearid", "mtfcc",
-                                     "segment_sequence"],
-    filtering = None
+    segment_identifier_cols: list,
+    filters = None
 ):
+    
     sjoin_results = pd.read_parquet(
         f"{SEGMENT_GCS}vp_sjoin/vp_road_segments_{analysis_date}",
-        columns = segment_identifier_cols
+        columns = [i for i in segment_identifier_cols 
+                   if i != "segment_sequence"]
     ).drop_duplicates()
-    
     
     full_road_info = gpd.read_parquet(
         f"{SEGMENT_GCS}segments_staging/"
         f"roads_with_cutpoints_long_{analysis_date}.parquet",
-        filters = filtering
+        filters = filters
     )
     
     road_segments = gpd.read_parquet(
         f"{SEGMENT_GCS}road_segments_{analysis_date}",
         filters = [[("mtfcc", "in", ["S1100", "S1200"])]],
-        columns = segment_identifier_cols + [
-            "primary_direction", "destination"],
-    ).merge(
-        sjoin_results,
-        on = segment_identifier_cols,
-        how = "inner"
+        columns = segment_identifier_cols + ["destination"],
     ).merge(
         full_road_info,
         on = segment_identifier_cols,
         how = "inner"
+    ).set_geometry("geometry").merge(
+        sjoin_results,
+        on = road_id_cols,
+        how = "inner"
     )
     
     return road_segments
+
 
 if __name__ == "__main__":
     from segment_speed_utils.project_vars import analysis_date
@@ -100,7 +100,6 @@ if __name__ == "__main__":
     
     vp = merge_vp_to_crosswalk(
         analysis_date,
-        #filters = [[("trip_instance_key", "in", test_trips)]]
     )
     
     vp = vp.repartition(npartitions=25)
@@ -110,7 +109,7 @@ if __name__ == "__main__":
     road_segments = expand_relevant_road_segments(
         analysis_date,
         segment_identifier_cols = segment_identifier_cols,
-        filtering = [[("linearid", "in", subset_roads)]],
+        filters = [[("linearid", "in", subset_roads)]],
     )
     
     road_dtypes = vp[road_id_cols].dtypes.to_dict()
@@ -188,7 +187,7 @@ if __name__ == "__main__":
         subseq_vp_idx.append(subseq_value)
         
     result = gdf[segment_identifier_cols + [
-        "primary_direction", "fullname", "road_meters", 
+        "primary_direction", "road_meters", 
         "trip_instance_key"]]
 
     # Now assign the nearest vp for each trip that's nearest to

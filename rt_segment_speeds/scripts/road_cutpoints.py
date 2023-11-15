@@ -18,18 +18,24 @@ if __name__ == "__main__":
     road_segments = gpd.read_parquet(
         f"{SEGMENT_GCS}road_segments_{analysis_date}",
         filters = [[("mtfcc", "in", ["S1100", "S1200"])]],
-        columns = segment_identifier_cols + ["destination"],
-    )
+        columns = segment_identifier_cols + [
+            "primary_direction", "destination", "geometry"],
+    ).set_geometry("destination")
     
-    full_roads = cut_road_segments.load_roads(
-        filtering = [("MTFCC", "in", ["S1100", "S1200"])]
-    ).drop(columns = "road_length")
+    full_roads = road_segments[
+        road_id_cols + ["primary_direction", "geometry"]
+    ].set_geometry("geometry").dissolve(
+        by = road_id_cols + ["primary_direction"]
+    ).reset_index()
+    #full_roads = cut_road_segments.load_roads(
+    #    filtering = [("MTFCC", "in", ["S1100", "S1200"])]
+    #).drop(columns = "road_length")
 
     # Merge cut road segments with full road geometry
     gdf = pd.merge(
         full_roads,
-        road_segments,
-        on = road_id_cols,
+        road_segments.drop(columns = "geometry"),
+        on = road_id_cols + ["primary_direction"],
         how = "inner"
     )
     
@@ -47,7 +53,7 @@ if __name__ == "__main__":
     
     # For each linearid, create an array tracking the cutpoints where
     # segments are created, which can act as "stops"
-    road_info = (gdf.groupby(road_id_cols,
+    road_info = (gdf.groupby(road_id_cols + ["primary_direction"],
                  observed=True, group_keys=False)
         .agg({
             "segment_sequence": lambda x: list(x),
@@ -60,9 +66,9 @@ if __name__ == "__main__":
     )
     
     road_info_with_geom = pd.merge(
-        full_roads[road_id_cols + ["geometry"]],
+        full_roads,
         road_info,
-        on = road_id_cols,
+        on = road_id_cols + ["primary_direction"],
         how = "inner"
     )
 
