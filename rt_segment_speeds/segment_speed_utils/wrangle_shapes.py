@@ -20,6 +20,7 @@ import shapely
 
 from typing import Literal
 
+from calitp_data_analysis.geography_utils import WGS84
 from shared_utils import rt_utils
 from segment_speed_utils.project_vars import PROJECT_CRS
 
@@ -163,3 +164,47 @@ def dot_product(vec1: tuple, vec2: tuple) -> float:
     sum it up.
     """
     return vec1[0]*vec2[0] + vec1[1]*vec2[1]
+
+
+def vp_as_gdf(vp: pd.DataFrame) -> gpd.GeoDataFrame:
+    """
+    Turn vp as a gdf and project to EPSG:3310.
+    """
+    vp_gdf = gpd.GeoDataFrame(
+        vp,
+        geometry = gpd.points_from_xy(vp.x, vp.y),
+        crs = WGS84
+    ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
+        
+    return vp_gdf
+
+
+def project_vp_onto_segment_geometry(
+    vp: pd.DataFrame,
+    segment_gdf: gpd.GeoDataFrame,
+    grouping_cols: list 
+) -> pd.DataFrame:
+    """
+    Project vp onto either shape_geometry or 
+    road_geometry.
+    """
+    segment_gdf = segment_gdf.rename(columns = {"geometry": "line_geometry"})
+        
+    vp_gdf = vp_as_gdf(vp)
+    
+    gdf = pd.merge(
+        vp_gdf,
+        segment_gdf,
+        on = grouping_cols,
+        how = "inner"
+    )
+    
+    gdf = gdf.assign(
+        shape_meters = gdf.line_geometry.project(gdf.geometry)
+    )
+    
+    vp_projected_result = gdf[
+        ["vp_idx"] + grouping_cols + ["shape_meters"]
+    ].drop_duplicates()
+    
+    return vp_projected_result
