@@ -56,7 +56,6 @@ def project_usable_vp_one_day(
     )
     
     group_cols = ["shape_array_key"]
-    shape_cols_dtypes = shapes[group_cols].dtypes.to_dict()
     
     results = vp.map_partitions(
         wrangle_shapes.project_vp_onto_segment_geometry,
@@ -66,7 +65,8 @@ def project_usable_vp_one_day(
                 **shape_cols_dtypes,
                "shape_meters": "float64"},
         align_dataframes = False
-    ).drop(columns = group_cols)
+    ).drop(columns = group_cols).persist()
+
     
     time1 = datetime.datetime.now()
     logger.info(f"map partitions: {time1 - start}")
