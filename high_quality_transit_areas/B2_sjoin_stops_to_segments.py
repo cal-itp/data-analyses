@@ -17,9 +17,9 @@ from loguru import logger
 from typing import Union
 
 from calitp_data_analysis import utils
-from segment_speed_utils import gtfs_schedule_wrangling
+from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from utilities import GCS_FILE_PATH
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+from update_vars import analysis_date, COMPILED_CACHED_VIEWS, PROJECT_CRS
 
 def max_trips_by_group(df: dd.DataFrame, 
                        group_cols: list,
@@ -235,8 +235,11 @@ if __name__ == "__main__":
     ## (2) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
     hqta_segments = dg.read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
-    stops = dg.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
+    stops = helpers.import_scheduled_stops(
+        analysis_date,
+        get_pandas = False,
+        crs = PROJECT_CRS
+    )
     max_arrivals_by_stop = pd.read_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet") 
     

@@ -25,3 +25,7 @@
 2023-11-03 14:41:13.621 | INFO     | __main__:project_usable_vp_one_day:98 - map partitions: 0:00:52.667374
 2023-11-03 14:46:15.016 | INFO     | __main__:project_usable_vp_one_day:105 - compute and export: 0:05:01.394757
 2023-11-03 14:46:15.017 | INFO     | __main__:project_usable_vp_one_day:106 - execution time: 0:05:54.062131
+2023-11-16 09:53:29.443 | INFO     | __main__:<module>:99 - Analysis date: 2023-11-15
+2023-11-16 09:54:16.588 | INFO     | __main__:project_usable_vp_one_day:72 - map partitions: 0:00:47.144502
+2023-11-16 09:59:50.370 | INFO     | __main__:project_usable_vp_one_day:79 - compute and export: 0:05:33.782335
+2023-11-16 09:59:50.371 | INFO     | __main__:project_usable_vp_one_day:80 - execution time: 0:06:20.926837
