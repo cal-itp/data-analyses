@@ -18,7 +18,7 @@ from loguru import logger
 from siuba import *
 
 from shared_utils import schedule_rt_utils
-from update_vars import SEGMENT_GCS
+from segment_speed_utils.project_vars import SEGMENT_GCS
 
 fs = gcsfs.GCSFileSystem()
 
