@@ -33,7 +33,7 @@ def sjoin_vp_to_roads(
         vp_gdf,
         roads2,
         how = "inner",
-        predicate = "within"
+        predicate = "intersects"
     )[["vp_idx", "trip_instance_key"] + keep_road_cols
      ].drop_duplicates().sort_values("vp_idx")  
         
@@ -85,8 +85,6 @@ if __name__ == "__main__":
             align_dataframes = False
         ) for direction in all_directions
     ]
-    
-    #https://github.com/cal-itp/data-analyses/blob/f7ecb9252895374aaa3927a93d9bcd2253888973/rt_segment_speeds/scripts/sjoin_vp_roads.py
     
     full_results = dd.multi.concat(results, axis=0).reset_index(drop=True)
     full_results = full_results.repartition(npartitions=10).persist()
