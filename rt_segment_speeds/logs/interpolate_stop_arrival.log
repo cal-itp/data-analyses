@@ -30,3 +30,7 @@
 2023-11-03 16:14:10.249 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:25.460793
 2023-11-03 16:15:11.212 | INFO     | __main__:main:129 - interpolate stop arrival: 0:01:00.962506
 2023-11-03 16:15:19.953 | INFO     | __main__:main:135 - execution time: 0:02:35.163939
+2023-11-16 10:25:53.100 | INFO     | __main__:<module>:153 - Analysis date: 2023-11-15
+2023-11-16 10:27:32.352 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:39.235915
+2023-11-16 10:28:37.624 | INFO     | __main__:main:129 - interpolate stop arrival: 0:01:05.272069
+2023-11-16 10:28:47.210 | INFO     | __main__:main:135 - execution time: 0:02:54.093853

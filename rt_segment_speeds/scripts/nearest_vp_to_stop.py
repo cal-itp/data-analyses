@@ -168,10 +168,10 @@ def find_vp_nearest_stop_position(
         valid_vp_idx_array = np.asarray(vp_idx_array)[valid_indices]
 
         if len(valid_shape_meters_array) > 0:
-
+            
             idx = np.searchsorted(
                 valid_shape_meters_array,
-                this_stop_meters,
+                getattr(row, "stop_meters"),
                 side="right" 
                 # want our stop_meters value to be < vp_shape_meters,
                 # side = "left" would be stop_meters <= vp_shape_meters
