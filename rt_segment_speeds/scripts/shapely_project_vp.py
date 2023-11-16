@@ -61,11 +61,12 @@ def project_usable_vp_one_day(
     results = vp.map_partitions(
         wrangle_shapes.project_vp_onto_segment_geometry,
         shapes,
-        grouping_cols = ["shape_array_key"],
+        grouping_cols = group_cols,
         meta = {"vp_idx": "int64",
+                **shape_cols_dtypes,
                "shape_meters": "float64"},
         align_dataframes = False
-    )
+    ).drop(columns = group_cols)
     
     time1 = datetime.datetime.now()
     logger.info(f"map partitions: {time1 - start}")
