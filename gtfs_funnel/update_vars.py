@@ -2,15 +2,9 @@ import yaml
 from pathlib import Path
 from shared_utils import rt_dates
 
-months = [
-    "mar", "apr", "may",
-    "jun", "jul", "aug",
-    "sep",
-    "oct"
-]         
+months = ["nov"]         
 
 analysis_date_list = [
-    #rt_dates.DATES["sep2023"],
     rt_dates.DATES[f"{m}2023"] for m in months
 ]
 
