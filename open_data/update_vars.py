@@ -1,7 +1,7 @@
 from pathlib import Path
 from shared_utils import rt_dates
 
-analysis_date = rt_dates.DATES["oct2023"]
+analysis_date = rt_dates.DATES["nov2023"]
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
