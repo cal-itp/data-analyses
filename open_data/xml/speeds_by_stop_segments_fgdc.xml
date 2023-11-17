@@ -5,16 +5,24 @@
 			<citeinfo>
 				<title>speeds_by_stop_segments</title>
 				<geoform>vector digital data</geoform>
+				<pubinfo>
+					<publish>Caltrans</publish>
+				</pubinfo>
+				<onlink>https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/README.md</onlink>
 			</citeinfo>
 		</citation>
 		<descript>
 			<abstract>All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</abstract>
 			<purpose>All day and peak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data.</purpose>
 		</descript>
+		<status>
+			<progress>Complete</progress>
+			<update>Monthly</update>
+		</status>
 		<spdom>
 			<bounding>
 				<westbc>-124.226362</westbc>
-				<eastbc>-115.974529</eastbc>
+				<eastbc>-114.562623</eastbc>
 				<northbc>41.957893</northbc>
 				<southbc>32.542091</southbc>
 			</bounding>
@@ -22,25 +30,40 @@
 		<keywords>
 			<theme>
 				<themekt>None</themekt>
-				<themekey>Transportation</themekey>
-				<themekey>Transit</themekey>
-				<themekey>GTFS</themekey>
-				<themekey>GTFS RT</themekey>
-				<themekey>real time</themekey>
-				<themekey>speeds</themekey>
-				<themekey>vehicle positions</themekey>
+				<themekey>transportation</themekey>
+			</theme>
+			<theme>
+				<themekt>ISO 19115 Topic Categories</themekt>
+				<themekey>transportation</themekey>
 			</theme>
 		</keywords>
 		<accconst>None</accconst>
 		<useconst>Public.</useconst>
+		<ptcontac>
+			<cntinfo>
+				<cntorgp>
+					<cntorg>Caltrans</cntorg>
+					<cntper>Tiffany Ku / Eric Dasmalchi</cntper>
+				</cntorgp>
+				<cntpos>Data &amp; Digital Services / California Integrated Travel Project</cntpos>
+				<cntemail>tiffany.ku@dot.ca.gov / eric.dasmalchi@dot.ca.gov</cntemail>
+			</cntinfo>
+		</ptcontac>
 		<native>Esri ArcGIS 12.9.2.32739</native>
 	</idinfo>
+	<dataqual>
+		<lineage>
+			<procstep>
+				<procdesc>This data was estimated by combining GTFS real-time vehicle positions to GTFS scheduled trips, shapes, stops, and stop times tables. GTFS shapes provides the route alignment path. Multiple trips may share the same shape, with a route typically associated with multiple shapes. Shapes are cut into segments at stop positions (stop_id-stop_sequence combination). A `stop segment` refers to the portion of shapes between the prior stop and the current stop. Vehicle positions are spatially joined to 35 meter buffered segments. Within each segment-trip, the first and last vehicle position observed are used to calculate the speed. Since multiple trips may occur over a segment each day, the multiple trip speeds provide a distribution. From this distribution, the 20th percentile, 50th percentile (median), and 80th percentile speeds are calculated. For all day speed metrics, all trips are used. For peak speed metrics, only trips with start times between 7 - 9:59 AM and 4 - 7:59 PM are used to find the 20th, 50th, and 80th percentile metrics. Data processing notes: (a) GTFS RT trips whose vehicle position timestamps span 10 minutes or less are dropped. Incomplete data would lead to unreliable estimates of speed at the granularity we need. (b) Segment-trip speeds of over 70 mph are excluded. These are erroneously calculated as transit does not typically reach those speeds. (c) Other missing or erroneous calculations, either arising from only one vehicle position found in a segment (change in time or change in distance cannot be calculated).</procdesc>
+			</procstep>
+		</lineage>
+	</dataqual>
 	<spdoinfo>
 		<direct>Vector</direct>
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>String</sdtstype>
-				<ptvctcnt>217821</ptvctcnt>
+				<ptvctcnt>275372</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -127,7 +150,7 @@
 		</detailed>
 	</eainfo>
 	<metainfo>
-		<metd>20230831</metd>
+		<metd>20231013</metd>
 		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
 		<metstdv>FGDC-STD-001-1998</metstdv>
 		<mettc>local time</mettc>
