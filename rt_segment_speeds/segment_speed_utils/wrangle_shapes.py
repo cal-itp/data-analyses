@@ -20,7 +20,7 @@ import shapely
 
 from typing import Literal
 
-from calitp_data_analysis.geography_utils import WGS84
+from calitp_data_analysis import geography_utils
 from shared_utils import rt_utils
 from segment_speed_utils.project_vars import PROJECT_CRS
 
@@ -170,10 +170,10 @@ def vp_as_gdf(vp: pd.DataFrame) -> gpd.GeoDataFrame:
     """
     Turn vp as a gdf and project to EPSG:3310.
     """
-    vp_gdf = gpd.GeoDataFrame(
+    vp_gdf = geography_utils.create_point_geometry(
         vp,
-        geometry = gpd.points_from_xy(vp.x, vp.y),
-        crs = WGS84
+        longitude_col = "x", latitude_col = "y",
+        crs = geography_utils.WGS84
     ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
         
     return vp_gdf
