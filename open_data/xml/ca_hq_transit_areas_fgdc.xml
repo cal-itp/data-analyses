@@ -21,10 +21,10 @@
 		</status>
 		<spdom>
 			<bounding>
-				<westbc>-124.224990</westbc>
-				<eastbc>-73.976597</eastbc>
-				<northbc>41.886590</northbc>
-				<southbc>25.782065</southbc>
+				<westbc>-124.226978</westbc>
+				<eastbc>-71.041087</eastbc>
+				<northbc>42.367367</northbc>
+				<southbc>26.189064</southbc>
 			</bounding>
 		</spdom>
 		<keywords>
@@ -63,7 +63,7 @@
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>GT-polygon composed of chains</sdtstype>
-				<ptvctcnt>23040</ptvctcnt>
+				<ptvctcnt>23406</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -146,7 +146,7 @@
 		</detailed>
 	</eainfo>
 	<metainfo>
-		<metd>20230905</metd>
+		<metd>20231013</metd>
 		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
 		<metstdv>FGDC-STD-001-1998</metstdv>
 		<mettc>local time</mettc>
