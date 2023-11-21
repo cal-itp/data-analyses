@@ -11,7 +11,7 @@ from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               CONFIG_PATH, PROJECT_CRS)
 
 
-road_id_cols = ["linearid", "mtfcc", "primary_direction"]
+road_id_cols = ["linearid", "mtfcc"]
 segment_identifier_cols = road_id_cols + ["segment_sequence"]
 
 
@@ -63,11 +63,12 @@ def expand_relevant_road_segments(
     segment_identifier_cols: list,
     filters = None
 ):
+    road_id_cols = [i for i in segment_identifier_cols 
+                    if i != "segment_sequence"]
     
     sjoin_results = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_sjoin/vp_road_segments_{analysis_date}",
-        columns = [i for i in segment_identifier_cols 
-                   if i != "segment_sequence"]
+        f"{SEGMENT_GCS}vp_sjoin/vp_road_segments_{analysis_date}_seg",
+        columns = road_id_cols
     ).drop_duplicates()
     
     full_road_info = gpd.read_parquet(
@@ -102,7 +103,7 @@ if __name__ == "__main__":
         analysis_date,
     )
     
-    vp = vp.repartition(npartitions=25)
+    vp = vp.repartition(npartitions=150)
     
     subset_roads = vp.linearid.unique().compute().tolist()
     
@@ -168,21 +169,30 @@ if __name__ == "__main__":
         valid_shape_meters_array = getattr(row, "shape_meters_arr")
         valid_vp_idx_array = np.asarray(getattr(row, "vp_idx_arr"))
 
-        idx = np.searchsorted(
-            valid_shape_meters_array,
-            this_stop_meters,
-            side="right" 
-            # want our stop_meters value to be < vp_shape_meters,
-            # side = "left" would be stop_meters <= vp_shape_meters
-        )
+        if (
+            (this_stop_meters >= min(valid_shape_meters_array)) and 
+            (this_stop_meters <= max(valid_shape_meters_array))
+       ):
+        
+            idx = np.searchsorted(
+                valid_shape_meters_array,
+                this_stop_meters,
+                side="right" 
+                # want our stop_meters value to be < vp_shape_meters,
+                # side = "left" would be stop_meters <= vp_shape_meters
+            )
 
-        # For the next value, if there's nothing to index into, 
-        # just set it to the same position
-        # if we set subseq_value = getattr(row, )[idx], 
-        # we might not get a consecutive vp
-        nearest_value = valid_vp_idx_array[idx-1]
-        subseq_value = nearest_value + 1
+            # For the next value, if there's nothing to index into, 
+            # just set it to the same position
+            # if we set subseq_value = getattr(row, )[idx], 
+            # we might not get a consecutive vp
+            nearest_value = valid_vp_idx_array[idx-1]
+            subseq_value = nearest_value + 1
 
+        else:
+            nearest_value = np.nan
+            subseq_value = np.nan
+            
         nearest_vp_idx.append(nearest_value)
         subseq_vp_idx.append(subseq_value)
         
