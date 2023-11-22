@@ -14,32 +14,24 @@ if __name__ == "__main__":
     
     road_id_cols = ["linearid", "mtfcc"]
     segment_identifier_cols = road_id_cols + ["segment_sequence"]
+    road_types = ["S1100", "S1200", "S1400"]
     
     road_segments = gpd.read_parquet(
         f"{SEGMENT_GCS}road_segments_{analysis_date}",
-        filters = [[("mtfcc", "in", ["S1100", "S1200"])]],
+        filters = [[("mtfcc", "in", road_types)]],
         columns = segment_identifier_cols + [
-            #"primary_direction",
             "destination", "geometry"],
     ).set_geometry("destination")
-    '''
-    full_roads = road_segments[
-        road_id_cols + [
-            #"primary_direction", 
-            "geometry"]
-    ].set_geometry("geometry").dissolve(
-        by = road_id_cols# + ["primary_direction"]
-    ).reset_index()
-    '''
+
     full_roads = cut_road_segments.load_roads(
-        filtering = [("MTFCC", "in", ["S1100", "S1200"])]
+        filtering = [("MTFCC", "in", road_types)]
     ).drop(columns = "road_length")
 
     # Merge cut road segments with full road geometry
     gdf = pd.merge(
         full_roads,
         road_segments.drop(columns = "geometry"),
-        on = road_id_cols, #+ ["primary_direction"],
+        on = road_id_cols, 
         how = "inner"
     )
     
@@ -72,7 +64,7 @@ if __name__ == "__main__":
     road_info_with_geom = pd.merge(
         full_roads,
         road_info,
-        on = road_id_cols,# + ["primary_direction"],
+        on = road_id_cols,
         how = "inner"
     )
 
