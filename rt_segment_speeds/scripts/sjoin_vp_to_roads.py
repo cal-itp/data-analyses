@@ -15,19 +15,20 @@ def sjoin_vp_to_roads(
     road_grouping_cols: list,
 ) -> dd.DataFrame:
     
-    vp_gdf = wrangle_shapes.vp_as_gdf(vp)
+    # Need to do similar thing as sjoin with shapes
+    # because vp can only join to certain road segments
+    # not all road segments that shape doesn't travel on
+    # https://github.com/cal-itp/data-analyses/blob/64afd3b9ed1e239a0ca4da486e2fe1e857b17dde/rt_segment_speeds/scripts/A1_sjoin_vp_segments.py
     
-    roads2 = roads.dissolve(road_grouping_cols).reset_index()
-    
-    roads2 = roads2.assign(
-        geometry = roads2.geometry.buffer(25)
-    )
-        
+    vp_gdf = wrangle_shapes.vp_as_gdf(vp)        
+                
     results = gpd.sjoin(
         vp_gdf,
-        roads2,
+        roads,
         how = "inner",
         predicate = "within"
+    ).query(
+        "shape_array_key_left == shape_array_key_right"
     )[["vp_idx", "trip_instance_key"] + 
       road_grouping_cols].drop_duplicates().sort_values("vp_idx")  
         
@@ -74,36 +75,38 @@ def import_vp(analysis_date: str):
         trip_to_shape,
         on = "trip_instance_key",
         how = "inner"
-    )
+    ).repartition(npartitions=25)
     
     return vp2
 
 
 def import_roads(
     analysis_date: str, 
-    vp: dd.DataFrame,
     road_grouping_cols: list,
-) -> gpd.GeoDataFrame:
-    
-    keep_shapes = vp.shape_array_key.unique().compute().tolist()
-    
-    # Import shapes to roads crosswalk
-    keep_roads = pd.read_parquet(
-        f"{SEGMENT_GCS}shape_road_crosswalk_{analysis_date}.parquet",
-        filters = [[("shape_array_key", "in", keep_shapes)]]
-    ).linearid.unique().tolist()
+) -> dg.GeoDataFrame:
         
     road_segments = dg.read_parquet(
         f"{SEGMENT_GCS}road_segments_{analysis_date}",
-        filters = [[
-            ("linearid", "in", keep_roads),
-            #("mtfcc", "in", ["S1100", "S1200"]), 
-        ]],
-        columns =  road_grouping_cols + ["primary_direction", 
-                                         "geometry"]
+        columns = road_grouping_cols + ["primary_direction", "geometry"]
     )
+    
+    road_segments = road_segments.assign(
+        geometry = road_segments.geometry.buffer(25)
+    )
+    
+    shape_road_crosswalk = pd.read_parquet(
+        f"{SEGMENT_GCS}shape_road_crosswalk_{analysis_date}.parquet",
+    )
+    
+    road_segments2 = dd.merge(
+        road_segments,
+        shape_road_crosswalk,
+        on = road_grouping_cols,
+        how = "inner"
+    ).repartition(npartitions=25)
               
-    return road_segments
+    return road_segments2
+
 
 
 if __name__ == "__main__":
@@ -111,32 +114,33 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     road_cols = ["linearid", "mtfcc"]
+    segment_identifier_cols = road_cols + ["segment_sequence"]
 
     all_directions = wrangle_shapes.ALL_DIRECTIONS + ["Unknown"]
 
     vp = import_vp(analysis_date).persist()
-    roads = import_roads(analysis_date, vp, road_cols).persist()
+    roads = import_roads(analysis_date, segment_identifier_cols).persist()
                 
     vp_dfs = [
-        vp[vp.vp_primary_direction == d].repartition(npartitions=20)
+        vp[vp.vp_primary_direction == d]
         for d in all_directions
     ]
     
     road_dfs = [
         roads[roads.primary_direction != 
               wrangle_shapes.OPPOSITE_DIRECTIONS[d]
-             ].repartition(npartitions=40) 
-        for d in all_directions
+             ] for d in all_directions
     ]
     
+    
     vp_cols_dtypes = vp[["vp_idx", "trip_instance_key"]].dtypes.to_dict()
-    road_cols_dtypes = roads[road_cols].dtypes.to_dict()
+    road_cols_dtypes = roads[segment_identifier_cols].dtypes.to_dict()
     
     results = [
         vp_subset.map_partitions(
             sjoin_vp_to_roads,
             road_subset,
-            road_cols,
+            segment_identifier_cols,
             meta = {
                 **vp_cols_dtypes,
                 **road_cols_dtypes
@@ -160,13 +164,15 @@ if __name__ == "__main__":
     full_results = dd.read_parquet(
         f"{SEGMENT_GCS}vp_sjoin/vp_road_segments_{analysis_date}"
     )
-        
+    
+    road_cols_dtypes2 = roads[road_cols].dtypes.to_dict()
+    
     results_wide = full_results.map_partitions(
         make_wide,
         road_cols,
         meta = {
             "trip_instance_key": "object",
-            **road_cols_dtypes,
+            **road_cols_dtypes2,
             "vp_idx_arr": "object",
         },
         align_dataframes = False
