@@ -41,7 +41,11 @@ def make_wide(
 ) -> pd.DataFrame:
     results_wide = (full_results.groupby(["trip_instance_key"] + road_cols, 
                       observed=True, group_keys=False)
-                    .agg({"vp_idx": lambda x: list(x)})
+                    .agg({
+                        "vp_idx": lambda x: list(x),
+                        "segment_sequence": "nunique"
+                        
+                    })
                     .reset_index()
                     .rename(columns = {"vp_idx": "vp_idx_arr"}) 
                    )
@@ -49,7 +53,11 @@ def make_wide(
     # No point in keeping results where there are fewer than 2 vp for entire road
     results_wide = results_wide.assign(
         n_vp = results_wide.apply(lambda x: len(x.vp_idx_arr), axis=1)
-    ).query('n_vp > 1').drop(columns = "n_vp").reset_index(drop=True)
+    ).query(
+        'n_vp > 1 & segment_sequence > 1'
+    ).drop(
+        columns = ["n_vp", "segment_sequence"]
+    ).reset_index(drop=True)
     
     return results_wide
 
@@ -117,7 +125,7 @@ if __name__ == "__main__":
     segment_identifier_cols = road_cols + ["segment_sequence"]
 
     all_directions = wrangle_shapes.ALL_DIRECTIONS + ["Unknown"]
-
+    
     vp = import_vp(analysis_date).persist()
     roads = import_roads(analysis_date, segment_identifier_cols).persist()
                 
