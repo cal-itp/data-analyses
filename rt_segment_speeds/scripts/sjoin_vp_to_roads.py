@@ -4,6 +4,7 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 
+from dask import delayed
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
                                               PROJECT_CRS)
 from segment_speed_utils import helpers, wrangle_shapes
@@ -29,8 +30,10 @@ def sjoin_vp_to_roads(
         predicate = "within"
     ).query(
         "shape_array_key_left == shape_array_key_right"
-    )[["vp_idx", "trip_instance_key"] + 
-      road_grouping_cols].drop_duplicates().sort_values("vp_idx")  
+    )[
+        ["vp_idx", "trip_instance_key"] + 
+      road_grouping_cols
+    ].drop_duplicates().sort_values("vp_idx").reset_index(drop=True)
         
     return results
     
@@ -42,9 +45,8 @@ def make_wide(
     results_wide = (full_results.groupby(["trip_instance_key"] + road_cols, 
                       observed=True, group_keys=False)
                     .agg({
-                        "vp_idx": lambda x: list(x),
-                        "segment_sequence": "nunique"
-                        
+                        "vp_idx": lambda x: list(set(x)),
+                        "segment_sequence": "nunique",
                     })
                     .reset_index()
                     .rename(columns = {"vp_idx": "vp_idx_arr"}) 
@@ -169,24 +171,13 @@ if __name__ == "__main__":
         overwrite=True
     )
     
-    full_results = dd.read_parquet(
+    full_results = delayed(pd.read_parquet)(
         f"{SEGMENT_GCS}vp_sjoin/vp_road_segments_{analysis_date}"
     )
-    
-    road_cols_dtypes2 = roads[road_cols].dtypes.to_dict()
-    
-    results_wide = full_results.map_partitions(
-        make_wide,
-        road_cols,
-        meta = {
-            "trip_instance_key": "object",
-            **road_cols_dtypes2,
-            "vp_idx_arr": "object",
-        },
-        align_dataframes = False
-    ).compute()
         
-    results_wide.to_parquet(
+    results_wide = delayed(make_wide)(full_results, road_cols)
+        
+    results_wide.compute().to_parquet(
         f"{SEGMENT_GCS}vp_sjoin/vp_road_segments_wide_{analysis_date}.parquet",
     )
     
