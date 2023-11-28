@@ -120,7 +120,7 @@ def normal_project(
     # can get as close as possible to the stop
     subset_shape_dist_with_endpoints = np.concatenate([
         [origin_stop],
-        idx_shape_dist,
+        shape_projected_dist[idx_shape_dist],
         [destination_stop]
     ])
 
@@ -153,7 +153,11 @@ def find_normal_cases_and_setup_df(
             "prior_stop_sequence",
             "stop_primary_direction"
         ]
-    )
+    ).sort_values(
+        "st_trip_instance_key"
+    ).drop_duplicates(
+        subset=["shape_array_key", "stop_sequence"]
+    ).reset_index(drop=True)
     
     gdf_with_prior = get_prior_stop_info(gdf, "shape_meters")
     
@@ -226,8 +230,8 @@ if __name__ == "__main__":
     time1 = datetime.datetime.now()
     logger.info(f"Cut normal stop segments: {time1-start}")
     
-    keep_cols = [
-        "schedule_gtfs_dataset_key", 
+    keep_cols = [ 
+        "schedule_gtfs_dataset_key",
         "shape_array_key", "stop_segment_geometry", 
         "stop_id", "stop_sequence", "loop_or_inlining",
         "stop_primary_direction"
