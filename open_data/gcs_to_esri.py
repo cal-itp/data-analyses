@@ -12,6 +12,7 @@ import sys
 
 from loguru import logger
 
+import open_data
 from calitp_data_analysis import utils, geography_utils
 from update_vars import analysis_date
 
@@ -47,9 +48,10 @@ if __name__=="__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    datasets = list(dict(catalog).keys())
+    #datasets = list(dict(catalog).keys())
+    datasets = open_data.RUN_ME 
     
-    for d in datasets:
+    for d in datasets :
         gdf = catalog[d].read().to_crs(geography_utils.WGS84)
         gdf = standardize_column_names(gdf)
 
