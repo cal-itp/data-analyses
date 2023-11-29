@@ -20,7 +20,7 @@
 	</ns0:hierarchyLevelName>
 	<ns0:contact ns1:nilReason="missing"></ns0:contact>
 	<ns0:dateStamp>
-		<ns1:Date>2023-10-13</ns1:Date>
+		<ns1:Date>2023-11-28</ns1:Date>
 	</ns0:dateStamp>
 	<ns0:metadataStandardName>
 		<ns1:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</ns1:CharacterString>
@@ -85,7 +85,7 @@
 					<ns0:date>
 						<ns0:CI_Date>
 							<ns0:date>
-								<ns1:Date>2023-10-11</ns1:Date>
+								<ns1:Date>2023-11-15</ns1:Date>
 							</ns0:date>
 							<ns0:dateType>
 								<ns0:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="ISOTC211/19115">

@@ -5,42 +5,65 @@
 			<citeinfo>
 				<title>speeds_by_route_time_of_day</title>
 				<geoform>vector digital data</geoform>
+				<pubinfo>
+					<publish>Caltrans</publish>
+				</pubinfo>
+				<onlink>https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/README.md</onlink>
 			</citeinfo>
 		</citation>
 		<descript>
 			<abstract>Provide average transit speeds, number of trips, and metrics related to scheduled annd real-time service minutes by route-direction and time-of-day.</abstract>
 			<purpose>Average transit speeds by route-direction and time-of-day estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</purpose>
 		</descript>
+		<status>
+			<progress>Complete</progress>
+			<update>Monthly</update>
+		</status>
 		<spdom>
 			<bounding>
 				<westbc>-124.226362</westbc>
-				<eastbc>-116.471893</eastbc>
+				<eastbc>-114.562623</eastbc>
 				<northbc>41.957418</northbc>
-				<southbc>32.542093</southbc>
+				<southbc>32.542091</southbc>
 			</bounding>
 		</spdom>
 		<keywords>
 			<theme>
 				<themekt>None</themekt>
-				<themekey>Transportation</themekey>
-				<themekey>Transit</themekey>
-				<themekey>GTFS</themekey>
-				<themekey>GTFS RT</themekey>
-				<themekey>real time</themekey>
-				<themekey>speeds</themekey>
-				<themekey>vehicle positions</themekey>
+				<themekey>transportation</themekey>
+			</theme>
+			<theme>
+				<themekt>ISO 19115 Topic Categories</themekt>
+				<themekey>transportation</themekey>
 			</theme>
 		</keywords>
 		<accconst>None</accconst>
 		<useconst>Public.</useconst>
+		<ptcontac>
+			<cntinfo>
+				<cntorgp>
+					<cntorg>Caltrans</cntorg>
+					<cntper>Tiffany Ku</cntper>
+				</cntorgp>
+				<cntpos>Data &amp; Digital Services / California Integrated Travel Project</cntpos>
+				<cntemail>tiffany.ku@dot.ca.gov</cntemail>
+			</cntinfo>
+		</ptcontac>
 		<native>Esri ArcGIS 12.9.2.32739</native>
 	</idinfo>
+	<dataqual>
+		<lineage>
+			<procstep>
+				<procdesc>This data was estimated by combining GTFS real-time vehicle positions with GTFS scheduled trips and shapes. GTFS real-time (RT) vehicle positions are spatially joined to GTFS scheduled shapes, so only vehicle positions traveling along the route alignment path are kept. A sample of five vehicle positions are selected (min, 25th percentile, 50th percentile, 75th percentile, max). The trip speed is calculated using these five vehicle positions. Each trip is categorized into a time-of-day. The average speed for a route-direction-time_of_day is calculated. Additional metrics are stored, such as the number of trips observed, the average scheduled service minutes, and the average RT observed service minutes. For convenience, we also provide a singular shape (common_shape_id) to associate with a route-direction. This is the shape that had the most number of trips for a given route-direction. Time-of-day is determined by the GTFS scheduled trip start time. The trip start hour (military time) is categorized based on the following: Owl (0-3), Early AM (4-6), AM Peak (7-9), Midday (10-14), PM Peak (15-19), and Evening (20-23). The start and end hours are inclusive (e.g., 4-6 refers to 4am, 5am, and 6am).</procdesc>
+			</procstep>
+		</lineage>
+	</dataqual>
 	<spdoinfo>
 		<direct>Vector</direct>
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>String</sdtstype>
-				<ptvctcnt>10350</ptvctcnt>
+				<ptvctcnt>10595</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -134,7 +157,7 @@
 		</detailed>
 	</eainfo>
 	<metainfo>
-		<metd>20230831</metd>
+		<metd>20231013</metd>
 		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
 		<metstdv>FGDC-STD-001-1998</metstdv>
 		<mettc>local time</mettc>

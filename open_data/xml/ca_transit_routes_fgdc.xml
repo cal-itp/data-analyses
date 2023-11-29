@@ -24,7 +24,7 @@
 				<westbc>-124.498056</westbc>
 				<eastbc>-68.805360</eastbc>
 				<northbc>49.273757</northbc>
-				<southbc>24.551930</southbc>
+				<southbc>24.551980</southbc>
 			</bounding>
 		</spdom>
 		<keywords>
@@ -63,7 +63,7 @@
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>String</sdtstype>
-				<ptvctcnt>7245</ptvctcnt>
+				<ptvctcnt>7406</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -149,7 +149,7 @@
 		</detailed>
 	</eainfo>
 	<metainfo>
-		<metd>20230831</metd>
+		<metd>20231013</metd>
 		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
 		<metstdv>FGDC-STD-001-1998</metstdv>
 		<mettc>local time</mettc>

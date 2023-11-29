@@ -20,3 +20,7 @@
 2023-11-07 15:11:26.416 | INFO     | __main__:monthly_local_linearids:90 - add local linearids for this month: 0:01:16.536574
 2023-11-07 15:12:05.511 | INFO     | __main__:concatenate_road_types:143 - concatenate road segments: 0:00:38.986941
 2023-11-07 15:12:05.569 | INFO     | __main__:<module>:166 - execution time: 0:01:55.689007
+2023-11-22 10:26:55.107 | INFO     | __main__:<module>:170 - Analysis date: 2023-10-11
+2023-11-22 10:28:51.151 | INFO     | __main__:monthly_local_linearids:90 - add local linearids for this month: 0:01:56.043036
+2023-11-22 10:29:30.006 | INFO     | __main__:concatenate_road_types:155 - concatenate road segments: 0:00:38.540339
+2023-11-22 10:29:30.375 | INFO     | __main__:<module>:178 - execution time: 0:02:35.266334
