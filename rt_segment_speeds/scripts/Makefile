@@ -22,7 +22,7 @@ speeds_pipeline:
 	python handle_common_errors.py
 	python avg_speeds_by_segment.py  
 	python export.py
-    
+
     
 download_roads:
 	#pip install esridump

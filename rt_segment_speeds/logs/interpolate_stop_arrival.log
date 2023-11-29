@@ -34,3 +34,10 @@
 2023-11-16 10:27:32.352 | INFO     | __main__:main:124 - set up df with nearest / subseq vp info: 0:01:39.235915
 2023-11-16 10:28:37.624 | INFO     | __main__:main:129 - interpolate stop arrival: 0:01:05.272069
 2023-11-16 10:28:47.210 | INFO     | __main__:main:135 - execution time: 0:02:54.093853
+2023-11-29 09:02:06.675 | INFO     | __main__:main:174 - road_segments: set up df with nearest / subseq vp info: 0:01:16.935557
+2023-11-29 09:02:18.901 | INFO     | __main__:main:180 - interpolate stop arrival: 0:00:12.225484
+2023-11-29 09:02:20.010 | INFO     | __main__:main:186 - execution time for road_segments: 0:01:30.269674
+2023-11-29 09:05:02.395 | INFO     | __main__:<module>:215 - Analysis date: 2023-10-11
+2023-11-29 09:06:55.591 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:53.194948
+2023-11-29 09:07:52.341 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:56.750164
+2023-11-29 09:08:03.943 | INFO     | __main__:main:196 - execution time for stop_segments: 0:03:01.547292
