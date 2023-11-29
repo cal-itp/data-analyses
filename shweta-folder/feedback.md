@@ -282,3 +282,41 @@ def make_chart(df, x_col, y_col, colorscale):
    ```
 
 ## Exercise 9
+* Whenever you notice the weird hash in `geometry` after using `pd.read_parquet()`, that means there's geospatial data, and you should use `gpd.read_parquet()` to read in the file. The geometry column will be present and you won't have to use `shapely` to form it yourself!
+* Use `index = [feed_key, trip_id]` here...because `trip_id` is not unique: `pivot_max = merge.pivot_table(index= [], values='stop_sequence', aggfunc='max').reset_index()`
+* These left merges mean you are keeping all the stop sequences, when I think you just want to add the point geometry associated with the max or min stop sequence.
+    ```
+    # also use feed_key within merge columns 
+    max_geom = pivot_max.merge(
+        merge[['feed_key', 'trip_id', 'geometry', 'stop_sequence']],
+        on=['feed_key', 'trip_id', 'stop_sequence'],
+        how='left'
+    )
+    
+    # same for min_geom
+    ```
+* Cleaner way to do the distance calcuation would be to rename your `stop_sequence` column to `min_stop_sequence` or `max_stop_sequence` after `min_geom` and `max_geom` are created.
+    * Merge them before calculating distance with an inner merge. There's no guarantee that the order is the same within the 2 dfs unless you merge. Also, you can only calculate distance if the pair of points are both present (if one is missing, you won't want it anyway!)
+    * Right now, given that `min_geom` and `max_geom` are left merges, is it keeping too many rows? Also, checking the length of `min_geom`, `max_geom`, they don't match, so the distance calculation is not guaranteed.
+    ```
+    # Only pairs of points can have distance calculated
+    gdf = pd.merge(
+        min_geom,
+        max_geom,
+        on = ['feed_key', 'trip_id'],
+        how = "inner"
+    )
+    
+    # this series would match pairs row-wise exactly
+    distance_col = gdf.geometry_x.distance(gdf.geometry)
+    
+    # You can assign this series to the gdf safely. Or, just use assign and create it here to begin with.
+    gdf = gdf.assign(
+        distance = distance_col
+    )
+    
+    # By the end of this, the distance is already for each trip 
+    # since the merge produces a trip-level df
+    ```
+* For the shortest distance, I don't see a step that takes the `min()` over any grouping. Distance would be created for each stop to the highway. A bus trip makes many stops. All of those distances could be different (10 ft, 100 ft, 1,000 ft, etc), and dropping duplicates would drop the duplicates but not necessarily find the minimum. 
+* For each trip, find the minimum stop distance to the highway. Merge in the result for the trip-level df created with `shortest_distance_hwy` column with your previous df that's also trip-level with `distance_first_last_stop` and put these 2 columns side-by-side.
