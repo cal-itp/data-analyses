@@ -8,7 +8,7 @@ SCHED_GCS = f"{GCS_FILE_PATH}gtfs_schedule/"
 PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/"
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 
-analysis_date = rt_dates.DATES["oct2023"]
+analysis_date = rt_dates.DATES["nov2023"]
 
 analysis_date_list = [
     rt_dates.DATES["oct2023"] 

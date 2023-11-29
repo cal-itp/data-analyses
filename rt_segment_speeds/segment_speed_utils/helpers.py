@@ -270,20 +270,22 @@ def remove_shapes_outside_ca(
         "query?outFields=*&where=1%3D1&f=geojson"
     )
     
-    
     border_states = ["CA", "NV", "AZ", "OR"]
     
+    SHAPE_CRS = shapes.crs.to_epsg()
+
     # Filter to California
     ca = us_states.query(
         'STATE_ABBR in @border_states'
-    ).dissolve()[["geometry"]]
+    ).dissolve()[["geometry"]].to_crs(SHAPE_CRS)
+    
     
     # Be aggressive and keep if shape
     # is within (does not cross CA + border state boundaries)
     if isinstance(shapes, dg.GeoDataFrame):
         shapes_within_ca = dg.sjoin(
             shapes,
-            ca.to_crs(shapes.crs),
+            ca,
             how = "inner",
             predicate = "within"
         )
@@ -291,7 +293,7 @@ def remove_shapes_outside_ca(
     else:
         shapes_within_ca = gpd.sjoin(
             shapes,
-            ca.to_crs(shapes.crs),
+            ca,
             how = "inner",
             predicate = "within",
         )
