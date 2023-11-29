@@ -17,7 +17,7 @@ from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               SHARED_GCS,
                                               PROJECT_CRS, 
-                                              ROAD_SEGMENT_METERS
+                                              ROAD_SEGMENT_METERS, 
                                              )
 from calitp_data_analysis import utils
 from shared_utils import rt_utils
@@ -92,7 +92,9 @@ def monthly_local_linearids(
     return
     
     
-def concatenate_road_types(analysis_date: str):
+def concatenate_road_types(
+    analysis_date: str,
+):
     """
     Concatenate road segments for primary/secondary/local
     and the local segments we need to append for this month.
@@ -131,7 +133,17 @@ def concatenate_road_types(analysis_date: str):
     else: 
         road_segments = dd.from_delayed([primary_secondary, local])
     
-    road_segments = road_segments.reset_index(drop=True).repartition(npartitions=2)
+    road_segments["road_length"] = road_segments.geometry.length
+    
+    road_segments = road_segments.assign(
+        road_meters = (road_segments.groupby(["linearid", "mtfcc"],
+                                observed=True, group_keys=False)
+                       .road_length.cumsum().round(2)
+                      )
+    ).drop(
+        columns = "road_length"
+    ).reset_index(drop=True).repartition(npartitions=2)
+    
     road_segments["seg_idx"] = road_segments.index
     
     road_segments.to_parquet(
@@ -152,7 +164,7 @@ if __name__ == "__main__":
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
-    
+        
     for analysis_date in analysis_date_list:
         
         logger.info(f"Analysis date: {analysis_date}")

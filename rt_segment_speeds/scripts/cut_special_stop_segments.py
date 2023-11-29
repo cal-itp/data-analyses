@@ -241,7 +241,11 @@ def find_special_cases_and_setup_df(
             "prior_stop_sequence",
             "stop_primary_direction"
         ]
-    )
+    ).sort_values(
+        "st_trip_instance_key"
+    ).drop_duplicates(
+        subset=["shape_array_key", "stop_sequence"]
+    ).reset_index(drop=True)
     
     # Merge in prior stop sequence's stop geom
     gdf_with_prior = cut_normal_stop_segments.get_prior_stop_info(
@@ -311,8 +315,8 @@ if __name__ == "__main__":
     time1 = datetime.datetime.now()
     logger.info(f"Cut special stop segments: {time1-start}")
     
-    keep_cols = [
-        "schedule_gtfs_dataset_key", 
+    keep_cols = [ 
+        "schedule_gtfs_dataset_key",
         "shape_array_key", "stop_segment_geometry", 
         "stop_id", "stop_sequence", "loop_or_inlining",
         "stop_primary_direction"

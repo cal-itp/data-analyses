@@ -18,44 +18,11 @@ This happens because vp_primary_direction might be Unknown
 
 """
 import datetime
-import numpy as np
 import pandas as pd
 
-from numba import jit
-
-from segment_speed_utils import helpers
+from segment_speed_utils import array_utils, helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS, PROJECT_CRS, CONFIG_PATH
 from shared_utils import rt_dates
-
-def rolling_window_make_array(
-    df: pd.DataFrame, 
-    window: int, 
-    rolling_col: str
-) -> pd.DataFrame:
-    # https://stackoverflow.com/questions/47482009/pandas-rolling-window-to-return-an-array
-    df[f"rolling_{rolling_col}"] = [
-        np.asarray(window)for window in 
-        df.groupby("trip_instance_key")[rolling_col].rolling(
-            window = window, center=True)
-    ]
-    
-    is_monotonic_series = np.vectorize(monotonic_check)(df[f"rolling_{rolling_col}"])
-    df[f"{rolling_col}_monotonic"] = is_monotonic_series
-    
-    return df
-    
-@jit(nopython=True)
-def monotonic_check(arr: np.ndarray) -> bool:
-    """
-    For an array, check if it's monotonically increasing. 
-    https://stackoverflow.com/questions/4983258/check-list-monotonicity
-    """
-    diff_arr = np.diff(arr)
-    
-    if np.all(diff_arr >= 0):
-        return True
-    else:
-        return False
     
 
 if __name__ == "__main__":
@@ -71,9 +38,15 @@ if __name__ == "__main__":
         f"{SEGMENT_GCS}projection/{NEAREST_VP}.parquet"
     )    
     
-    window = 3
-    df = rolling_window_make_array(df, window = window, rolling_col = "nearest_vp_idx")
-    df = rolling_window_make_array(df, window = window, rolling_col = "stop_meters")
+    WINDOW = 3
+    df = array_utils.rolling_window_make_array(
+        df, 
+        window = WINDOW, rolling_col = "nearest_vp_idx"
+    )
+    df = array_utils.rolling_window_make_array(
+        df, 
+        window = WINDOW, rolling_col = "stop_meters"
+    )
     
     df.to_parquet(
         f"{SEGMENT_GCS}projection/nearest_vp_error_{analysis_date}.parquet")

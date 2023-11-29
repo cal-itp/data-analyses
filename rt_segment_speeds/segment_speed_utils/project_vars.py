@@ -11,9 +11,9 @@ SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 analysis_date = rt_dates.DATES["nov2023"]
 
 analysis_date_list = [
-    rt_dates.DATES["nov2023"] 
+    rt_dates.DATES["oct2023"] 
 ]
 
 PROJECT_CRS = "EPSG:3310"
 CONFIG_PATH = "./config.yml"
-ROAD_SEGMENT_METERS = 500
+ROAD_SEGMENT_METERS = 250

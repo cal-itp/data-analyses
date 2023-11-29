@@ -31,6 +31,25 @@ def feature_class_in_gdb_path(my_gdb, file_name):
 
 
 ## Set FGDC field defs for each dataset and export XML (do once when new dataset added)
+with open(f"{working_dir}\metadata.json") as f:
+    meta_dict = json.load(f)
+    
+def update_metadata_class(this_feature_class, meta_dict_for_dataset: dict):
+    """
+    Update the elements in the arcpy.metadata class.
+    """
+    # Now update metadata class elements that are available
+    source_metadata = md.Metadata(this_feature_class)
+
+    source_metadata.title = meta_dict_for_dataset["dataset_name"]
+    source_metadata.tags = meta_dict_for_dataset["theme_keywords"]
+    source_metadata.summary = meta_dict_for_dataset["summary_purpose"]
+    source_metadata.description = meta_dict_for_dataset["description"]
+    source_metadata.accessConstraints = meta_dict_for_dataset["public_access"]
+    source_metadata.save()
+    
+    return
+
 # Only the FGDC standard keeps fields. 
 # See if we can use this and combine it with our ISO 19139 standard later.
 
@@ -44,6 +63,10 @@ def export_fgdc_metadata(one_feature_class):
         staging_location, 
         one_feature_class
     )
+    
+    subset_meta_dict = meta_dict[one_feature_class]
+    
+    update_metadata_class(this_feature_class, subset_meta_dict)
     
     source_metadata = md.Metadata(this_feature_class)
     
@@ -111,11 +134,7 @@ for f in in_features:
     shp_to_feature_class(f)
 
 
-## (2) Read in json with all the changes we need for each layer
-with open(f"{working_dir}\metadata.json") as f:
-    meta_dict = json.load(f)
-
-    
+## (2) Read in json with all the changes we need for each layer    
 def rename_columns_with_dict(this_feature_class, rename_dict: dict):
     """
     Get a list of fields for each feature class and use a dict to rename.
@@ -151,23 +170,6 @@ def import_fgdc_metadata_and_sync(one_feature_class):
     
     # Synchronize it with the field info populated from the FGDC template 
     source_metadata.importMetadata(f"{one_feature_class}_fgdc.xml")
-    source_metadata.save()
-    
-    return
-
-
-def update_metadata_class(this_feature_class, meta_dict_for_dataset: dict):
-    """
-    Update the elements in the arcpy.metadata class.
-    """
-    # Now update metadata class elements that are available
-    source_metadata = md.Metadata(this_feature_class)
-
-    source_metadata.title = meta_dict_for_dataset["dataset_name"]
-    source_metadata.tags = meta_dict_for_dataset["theme_keywords"]
-    source_metadata.summary = meta_dict_for_dataset["summary_purpose"]
-    source_metadata.description = meta_dict_for_dataset["description"]
-    source_metadata.accessConstraints = meta_dict_for_dataset["public_access"]
     source_metadata.save()
     
     return
@@ -241,29 +243,6 @@ for f in in_features:
 # The button to Metadata > Import > type of metadata set to FGDC does something different than the `metadata.importMetadata` feature, which doesn't do it. Manually doing the import for the fgdb metadata works for each dataset only.
 
 # Do this FGDC metadata first to get the field descriptions populated. If we do this second, certain items in the metadata will get overwritten and set to blank.
-
-# Once updated XML is back in ArcPro, synchronize it with existing layer
-# This synchronize doesn't really work exactly the same as import Metadata button.
-# It only synchronizes certain elements, but not all
-def apply_updated_xml(feature_class):
-    """
-    Synchronize new XML with existing feature class.
-    """
-    this_feature_class = feature_class_in_gdb_path(
-        staging_location, 
-        feature_class
-    )
-    
-    source_metadata = md.Metadata(this_feature_class)
-    source_metadata.synchronize(metadata_sync_option="ALWAYS")
-    source_metadata.save()
-    
-    return
-
-
-for f in in_features:
-    apply_updated_xml(f)
-
 
 ## Write layers to open_data gdb
     
