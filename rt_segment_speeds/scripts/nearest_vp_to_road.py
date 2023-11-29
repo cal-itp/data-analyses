@@ -241,7 +241,7 @@ if __name__ == "__main__":
     )
     
     result.to_parquet(
-        f"{SEGMENT_GCS}nearest_vp_roads_{analysis_date}.parquet"
+        f"{SEGMENT_GCS}projection/nearest_vp_roads_{analysis_date}.parquet"
     )
     
     end = datetime.datetime.now()
