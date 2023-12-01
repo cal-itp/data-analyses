@@ -86,3 +86,64 @@ def stop_arrivals_per_stop(
                      )    
     return arrivals_by_stop
     
+    
+def aggregate_time_of_day_to_peak_offpeak(
+    df: pd.DataFrame,
+    group_cols: list
+) -> pd.DataFrame:
+    """
+    Aggregate time-of-day bins into peak/offpeak periods.
+    Return n_trips and frequency for grouping of columns (route-direction, etc).
+    """
+    peak_periods = ["AM Peak", "PM Peak"]
+    
+    HOURS_BY_TIME_OF_DAY = {
+        "Owl": 4, #[0, 3]
+        "Early AM": 3,  #[4, 6]
+        "AM Peak": 3,  #[7, 9]
+        "Midday": 5,  #[10, 14]
+        "PM Peak": 5, #[15, 19]
+        "Evening": 4 #[20, 23]
+    }
+    
+    peak_hours = sum(v for k, v in HOURS_BY_TIME_OF_DAY.items() 
+                 if k in peak_periods) 
+    
+    offpeak_hours = sum(v for k, v in HOURS_BY_TIME_OF_DAY.items() 
+                 if k not in peak_periods) 
+    
+    df = df.assign(
+        peak_offpeak = df.apply(
+            lambda x: "peak" if x.time_of_day in peak_periods
+            else "offpeak", 
+            axis=1)
+    )
+    
+    df2 = (df.groupby(group_cols + ["peak_offpeak"])
+           .agg({"trip_instance_key": "count"})
+           .reset_index()
+           .rename(columns = {"trip_instance_key": "n_trips"})
+          )
+    
+    # Add service frequency (trips per hour)
+    # there are different number of hours in peak and offpeak periods
+    df2 = df2.assign(
+        frequency = df2.apply(
+            lambda x:
+            round(x.n_trips / peak_hours, 2) if x.peak_offpeak=="peak"
+            else round(x.n_trips / offpeak_hours, 2), axis=1
+        )
+    )
+    
+    # Reshape from wide to long
+    # get rid of multiindex column names
+    df3 = df2.pivot(index=group_cols, 
+          columns="peak_offpeak",
+          values=["n_trips", "frequency"]
+         )
+    
+    df3.columns = [f'{b}_{a}' for a, b in df3.columns]
+    df3 = df3.reset_index()
+    
+    return df3
+    
