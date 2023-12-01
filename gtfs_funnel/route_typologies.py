@@ -3,12 +3,16 @@ Add some GTFS schedule derived metrics
 by trip (service frequency and stop spacing).
 """
 import geopandas as gpd
+import intake
 import pandas as pd
 
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling, sched_rt_utils
-from segment_speed_utils.project_vars import RT_SCHED_GCS
+from segment_speed_utils.project_vars import RT_SCHED_GCS, PROJECT_CRS
+
+catalog = intake.open_catalog(
+    "../_shared_utils/shared_utils/shared_data_catalog.yml")
 
 def assemble_scheduled_trip_metrics(analysis_date: str):
     
@@ -108,7 +112,7 @@ def add_common_shape(analysis_date: str):
         columns = ["shape_array_key", "geometry"],
         crs = WGS84,
         get_pandas = True
-    )
+    ).pipe(helpers.remove_shapes_outside_ca)
     
     shapes_with_geom = pd.merge(
         shapes,
@@ -119,7 +123,65 @@ def add_common_shape(analysis_date: str):
     
     return shapes_with_geom
     
+    
+def pop_density_by_shape(shape_df: gpd.GeoDataFrame):
+    
+    shape_df = shape_df.to_crs(PROJECT_CRS)
+    shape_df = shape_df.assign(
+        geometry = shape_df.geometry.buffer(5)
+    )
+    
+    calenviroscreen_lehd = (catalog.calenviroscreen_lehd_by_tract.read()
+                            [["Tract", "pop_sq_mi", "geometry"]]
+                            .to_crs(PROJECT_CRS)
+                           )
+    
+    calenviroscreen_lehd = calenviroscreen_lehd.assign(
+        dense = calenviroscreen_lehd.apply(
+            lambda x: 1 if x.pop_sq_mi >= 10_000
+            else 0, axis=1
+        )
+    )
+    
+    group_cols = ["shape_array_key"]
 
+    shape_overlay = gpd.overlay(
+        shape_df[group_cols + ["geometry"]].drop_duplicates(), 
+        calenviroscreen_lehd, 
+        how = "intersection"
+    )
+    
+    shape_overlay = shape_overlay.assign(
+        length = shape_overlay.geometry.length,
+    )
+    
+    shape_grouped = (shape_overlay.groupby(group_cols + ["dense"], 
+                                          observed=True, group_keys=False)
+                 .agg({"length": "sum"})
+                 .reset_index()
+                 .rename(columns = {"length": "overlay_length"})
+                )
+    
+    shape_grouped = shape_grouped.assign(
+        length = (shape_grouped.groupby(group_cols, 
+                                        observed=True, group_keys=False)
+                  .overlay_length
+                  .transform("sum")
+                 )
+    )
+    
+    shape_grouped = shape_grouped.assign(
+        pct_dense = (shape_grouped.overlay_length
+                     .divide(shape_grouped.length)
+                     .round(3)
+                    )
+    ).query('dense == 1')[
+        ["shape_array_key", "pct_dense"]
+    ].reset_index(drop=True)
+    
+    return shape_grouped
+    
+    
 if __name__ == "__main__":
     
     from update_vars import analysis_date_list, CONFIG_DICT
@@ -138,11 +200,21 @@ if __name__ == "__main__":
             "route_id", 
             "direction_id"
         ]
+        
         route_dir_metrics = schedule_metrics_by_route_direction(
             trip_metrics, date, route_cols)
-                
-        utils.geoparquet_gcs_export(
+        
+        pop_density_df = pop_density_by_shape(route_dir_metrics)
+        
+        route_dir_metrics2 = pd.merge(
             route_dir_metrics,
+            pop_density_df,
+            on = "shape_array_key",
+            how = "left"
+        )
+            
+        utils.geoparquet_gcs_export(
+            route_dir_metrics2,
             RT_SCHED_GCS,
             f"{ROUTE_DIR_EXPORT}_{date}"
         )
