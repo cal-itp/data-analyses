@@ -64,6 +64,26 @@ def prep_scheduled_stop_times(analysis_date: str) -> dg.GeoDataFrame:
     return st_with_stop
 
 
+def get_projected_stop_meters(
+    stop_times: dd.DataFrame, 
+    shapes: gpd.GeoDataFrame
+) -> dd.DataFrame:
+    """
+    """
+    gdf = pd.merge(
+        stop_times,
+        shapes.rename(columns = {"geometry": "shape_geometry"}),
+        on = "shape_array_key",
+        how = "inner"
+    )
+    
+    gdf = gdf.assign(
+        stop_meters = gdf.shape_geometry.project(gdf.geometry)
+    ).drop(columns = "shape_geometry").drop_duplicates()
+    
+    return gdf
+    
+
 def find_prior_stop(
     stop_times: dg.GeoDataFrame,
     trip_stop_cols: list
@@ -72,40 +92,25 @@ def find_prior_stop(
     For trip-stop, find the previous stop (using stop sequence).
     Attach the previous stop's geometry.
     """
-    prior_stop = stop_times[trip_stop_cols].compute()
-    
-    prior_stop = prior_stop.assign(
-        prior_stop_sequence = (
-            prior_stop
-            .sort_values(["trip_instance_key", "stop_sequence"])
-            .groupby("trip_instance_key")
-            .stop_sequence
-            .shift(1)
-        ),
-        subseq_stop_sequence = (
-            prior_stop
-            .sort_values(["trip_instance_key", "stop_sequence"])
-            .groupby("trip_instance_key")
-            .stop_sequence
-            .shift(-1)        
-        )
-    )
-    
-    def renamed_geom_stop_times(
-        stop_times: dd.DataFrame, 
-        suffix: Literal["prior", "subseq"]
-    ) -> dd.DataFrame:
-    
-        renamed_stop_geom = stop_times[
-            ["trip_instance_key", "stop_sequence", "geometry"]
-        ].rename(columns = {
-            "stop_sequence": f"{suffix}_stop_sequence",
-            "geometry": f"{suffix}_geometry"
-        }).set_geometry(f"{suffix}_geometry").repartition(npartitions=1)
+    prior_stop = stop_times[trip_stop_cols].compute().sort_values(
+        trip_stop_cols).reset_index(drop=True)
         
-        return renamed_stop_geom
+    prior_stop = prior_stop.assign(
+        prior_stop_sequence = (prior_stop.groupby("trip_instance_key")
+                               .stop_sequence.shift(1)),
+        subseq_stop_sequence = (prior_stop.groupby("trip_instance_key")
+                                .stop_sequence.shift(-1)),
+    )
+                     
     
-    prior_stop_geom = renamed_geom_stop_times(stop_times, suffix="prior")
+    prior_stop_geom = (stop_times[trip_stop_cols + ["geometry"]]
+                       .rename(columns = {
+                           "stop_sequence": "prior_stop_sequence",
+                           "geometry": "prior_geometry"
+                           })
+                       .set_geometry("prior_geometry")
+                       .repartition(npartitions=1)
+                      )
     
     stop_times_with_prior = dd.merge(
         stop_times,
@@ -127,7 +132,7 @@ def find_prior_stop(
     return stop_times_with_prior_geom
 
 
-def assemble_stop_times_with_direction(analysis_date: str):
+def assemble_stop_times_with_direction(analysis_date: str, dict_inputs: dict):
     """
     Assemble a stop_times table ready to be joined with 
     RT data (has trip_instance_key).
@@ -137,12 +142,16 @@ def assemble_stop_times_with_direction(analysis_date: str):
     """
     start = datetime.datetime.now()
 
-    scheduled_stop_times = prep_scheduled_stop_times(analysis_date).persist()
+    EXPORT_FILE = dict_inputs["stop_times_direction_file"]
     
-    trip_stop_cols = ["trip_instance_key", "shape_array_key",
-                      "stop_id", "stop_sequence"]
-    
-    scheduled_stop_times2 = find_prior_stop(scheduled_stop_times, trip_stop_cols)
+    scheduled_stop_times = prep_scheduled_stop_times(analysis_date).repartition(
+        npartitions=1).persist()
+
+    trip_stop_cols = ["trip_instance_key", "stop_sequence"]
+        
+    scheduled_stop_times2 = find_prior_stop(
+        scheduled_stop_times, trip_stop_cols
+    )
     
     other_stops = scheduled_stop_times2[
         ~(scheduled_stop_times2.prior_geometry.isna())
@@ -164,6 +173,7 @@ def assemble_stop_times_with_direction(analysis_date: str):
     # Create a column with readable direction like westbound, eastbound, etc
     stop_direction = np.vectorize(
         rt_utils.primary_cardinal_direction)(prior_geom, current_geom)
+    stop_distance = prior_geom.distance(current_geom)
     
     # Create a column with normalized direction vector
     # Add this because some bus can travel in southeasterly direction, 
@@ -175,6 +185,7 @@ def assemble_stop_times_with_direction(analysis_date: str):
     
     other_stops_no_geom = other_stops_no_geom.assign(
         stop_primary_direction = stop_direction,
+        stop_meters = stop_distance,
         # since we can't save tuples, let's assign x, y normalized direction vector
         # as 2 columns
         stop_dir_xnorm = normalized_vector[0],
@@ -186,9 +197,8 @@ def assemble_stop_times_with_direction(analysis_date: str):
         axis=0
     )
     
-    df = scheduled_stop_times_with_direction.sort_values([
-        "trip_instance_key", "stop_sequence"]
-    ).reset_index(drop=True)
+    df = scheduled_stop_times_with_direction.sort_values(
+        trip_stop_cols).reset_index(drop=True)
 
     time1 = datetime.datetime.now()
     print(f"get scheduled stop times with direction: {time1 - start}")
@@ -196,7 +206,7 @@ def assemble_stop_times_with_direction(analysis_date: str):
     utils.geoparquet_gcs_export(
         df,
         RT_SCHED_GCS,
-        f"stop_times_direction_{analysis_date}"
+        f"{EXPORT_FILE}_{analysis_date}"
     )
     
     end = datetime.datetime.now()
@@ -207,7 +217,7 @@ def assemble_stop_times_with_direction(analysis_date: str):
 
 if __name__ == "__main__":  
     
-    from update_vars import analysis_date_list
-    
+    from update_vars import analysis_date_list, CONFIG_DICT
+
     for date in analysis_date_list:
-        assemble_stop_times_with_direction(date)
+        assemble_stop_times_with_direction(date, CONFIG_DICT)
