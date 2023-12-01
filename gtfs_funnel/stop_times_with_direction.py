@@ -132,7 +132,7 @@ def find_prior_stop(
     return stop_times_with_prior_geom
 
 
-def assemble_stop_times_with_direction(analysis_date: str):
+def assemble_stop_times_with_direction(analysis_date: str, dict_inputs: dict):
     """
     Assemble a stop_times table ready to be joined with 
     RT data (has trip_instance_key).
@@ -142,6 +142,8 @@ def assemble_stop_times_with_direction(analysis_date: str):
     """
     start = datetime.datetime.now()
 
+    EXPORT_FILE = dict_inputs["stop_times_direction_file"]
+    
     scheduled_stop_times = prep_scheduled_stop_times(analysis_date).repartition(
         npartitions=1).persist()
 
@@ -204,7 +206,7 @@ def assemble_stop_times_with_direction(analysis_date: str):
     utils.geoparquet_gcs_export(
         df,
         RT_SCHED_GCS,
-        f"stop_times_direction_{analysis_date}"
+        f"{EXPORT_FILE}_{analysis_date}"
     )
     
     end = datetime.datetime.now()
@@ -215,7 +217,7 @@ def assemble_stop_times_with_direction(analysis_date: str):
 
 if __name__ == "__main__":  
     
-    from update_vars import analysis_date_list
-    
+    from update_vars import analysis_date_list, CONFIG_DICT
+
     for date in analysis_date_list:
-        assemble_stop_times_with_direction(date)
+        assemble_stop_times_with_direction(date, CONFIG_DICT)
