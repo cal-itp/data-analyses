@@ -12,6 +12,8 @@ preprocess:
 	python vp_keep_usable.py
 	python vp_direction.py
 	python cleanup.py
+	python route_typologies.py
+    
     
 funnel_gtfs_data: 
 	make download_gtfs_data && make preprocess
