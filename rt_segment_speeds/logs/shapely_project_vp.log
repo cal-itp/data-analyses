@@ -29,3 +29,15 @@
 2023-11-16 09:54:16.588 | INFO     | __main__:project_usable_vp_one_day:72 - map partitions: 0:00:47.144502
 2023-11-16 09:59:50.370 | INFO     | __main__:project_usable_vp_one_day:79 - compute and export: 0:05:33.782335
 2023-11-16 09:59:50.371 | INFO     | __main__:project_usable_vp_one_day:80 - execution time: 0:06:20.926837
+2023-12-06 10:26:56.147 | INFO     | __main__:<module>:100 - Analysis date: 2023-04-10
+2023-12-06 10:33:04.021 | INFO     | __main__:project_usable_vp_one_day:73 - map partitions: 0:06:07.873197
+2023-12-06 10:33:16.635 | INFO     | __main__:project_usable_vp_one_day:80 - compute and export: 0:00:12.613601
+2023-12-06 10:33:16.636 | INFO     | __main__:project_usable_vp_one_day:81 - execution time: 0:06:20.486798
+2023-12-06 10:33:16.657 | INFO     | __main__:<module>:100 - Analysis date: 2023-04-11
+2023-12-06 10:39:19.920 | INFO     | __main__:project_usable_vp_one_day:73 - map partitions: 0:06:03.262827
+2023-12-06 10:39:32.163 | INFO     | __main__:project_usable_vp_one_day:80 - compute and export: 0:00:12.242801
+2023-12-06 10:39:32.164 | INFO     | __main__:project_usable_vp_one_day:81 - execution time: 0:06:15.505628
+2023-12-06 12:35:23.911 | INFO     | __main__:<module>:100 - Analysis date: 2023-04-13
+2023-12-06 12:42:28.355 | INFO     | __main__:project_usable_vp_one_day:73 - map partitions: 0:07:04.442619
+2023-12-06 12:42:41.634 | INFO     | __main__:project_usable_vp_one_day:80 - compute and export: 0:00:13.279396
+2023-12-06 12:42:41.635 | INFO     | __main__:project_usable_vp_one_day:81 - execution time: 0:07:17.722015
