@@ -21,7 +21,7 @@ def calculate_speed_from_stop_arrivals(
     start = datetime.datetime.now()
     
     df = pd.read_parquet(
-        f"{SEGMENT_GCS}stop_arrivals_{analysis_date}.parquet"
+        f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}.parquet"
     )
     
     trip_stop_cols = ["trip_instance_key", "stop_sequence"]
