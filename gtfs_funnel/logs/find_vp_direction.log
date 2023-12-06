@@ -80,3 +80,9 @@
 2023-12-06 10:07:38.851 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:03:20.352632
 2023-12-06 10:10:12.415 | INFO     | __main__:attach_prior_vp_add_direction:126 - np vectorize arrays for direction: 0:02:33.563897
 2023-12-06 10:10:28.922 | INFO     | __main__:<module>:192 - export vp direction: 0:06:10.424122
+2023-12-06 11:44:08.120 | INFO     | __main__:<module>:185 - Analysis date: 2023-04-13
+2023-12-06 11:47:24.203 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:03:16.081457
+2023-12-06 11:51:10.081 | INFO     | __main__:attach_prior_vp_add_direction:126 - np vectorize arrays for direction: 0:03:45.878184
+2023-12-06 11:51:26.497 | INFO     | __main__:<module>:192 - export vp direction: 0:07:18.375848
+2023-12-06 11:52:43.318 | INFO     | __main__:<module>:197 - export usable vp with direction: 0:01:16.820683
+2023-12-06 11:52:43.349 | INFO     | __main__:<module>:198 - execution time: 0:08:35.196531
