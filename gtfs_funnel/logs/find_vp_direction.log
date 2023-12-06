@@ -64,3 +64,19 @@
 2023-11-16 09:09:05.386 | INFO     | __main__:<module>:192 - export vp direction: 0:06:08.012524
 2023-11-16 09:10:08.795 | INFO     | __main__:<module>:197 - export usable vp with direction: 0:01:03.409462
 2023-11-16 09:10:08.796 | INFO     | __main__:<module>:198 - execution time: 0:07:11.421986
+2023-12-06 09:49:58.441 | INFO     | __main__:<module>:185 - Analysis date: 2023-04-10
+2023-12-06 09:53:09.265 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:03:10.793841
+2023-12-06 09:55:39.273 | INFO     | __main__:attach_prior_vp_add_direction:126 - np vectorize arrays for direction: 0:02:30.008123
+2023-12-06 09:55:55.554 | INFO     | __main__:<module>:192 - export vp direction: 0:05:57.082788
+2023-12-06 09:57:17.486 | INFO     | __main__:<module>:197 - export usable vp with direction: 0:01:21.932000
+2023-12-06 09:57:17.526 | INFO     | __main__:<module>:198 - execution time: 0:07:19.014788
+2023-12-06 09:57:17.526 | INFO     | __main__:<module>:185 - Analysis date: 2023-04-11
+2023-12-06 10:00:21.247 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:03:03.719964
+2023-12-06 10:02:58.202 | INFO     | __main__:attach_prior_vp_add_direction:126 - np vectorize arrays for direction: 0:02:36.954889
+2023-12-06 10:03:14.432 | INFO     | __main__:<module>:192 - export vp direction: 0:05:56.905124
+2023-12-06 10:04:18.496 | INFO     | __main__:<module>:197 - export usable vp with direction: 0:01:04.064086
+2023-12-06 10:04:18.497 | INFO     | __main__:<module>:198 - execution time: 0:07:00.969210
+2023-12-06 10:04:18.498 | INFO     | __main__:<module>:185 - Analysis date: 2023-04-13
+2023-12-06 10:07:38.851 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:03:20.352632
+2023-12-06 10:10:12.415 | INFO     | __main__:attach_prior_vp_add_direction:126 - np vectorize arrays for direction: 0:02:33.563897
+2023-12-06 10:10:28.922 | INFO     | __main__:<module>:192 - export vp direction: 0:06:10.424122
