@@ -86,3 +86,21 @@
 2023-12-06 11:51:26.497 | INFO     | __main__:<module>:192 - export vp direction: 0:07:18.375848
 2023-12-06 11:52:43.318 | INFO     | __main__:<module>:197 - export usable vp with direction: 0:01:16.820683
 2023-12-06 11:52:43.349 | INFO     | __main__:<module>:198 - execution time: 0:08:35.196531
+2023-12-06 16:32:18.037 | INFO     | __main__:<module>:185 - Analysis date: 2023-04-14
+2023-12-06 16:35:32.050 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:03:13.980889
+2023-12-06 16:38:01.997 | INFO     | __main__:attach_prior_vp_add_direction:126 - np vectorize arrays for direction: 0:02:29.947364
+2023-12-06 16:38:18.023 | INFO     | __main__:<module>:192 - export vp direction: 0:05:59.954077
+2023-12-06 16:39:27.546 | INFO     | __main__:<module>:197 - export usable vp with direction: 0:01:09.523507
+2023-12-06 16:39:27.547 | INFO     | __main__:<module>:198 - execution time: 0:07:09.477584
+2023-12-06 16:39:27.548 | INFO     | __main__:<module>:185 - Analysis date: 2023-04-15
+2023-12-06 16:41:50.091 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:02:22.542545
+2023-12-06 16:43:26.673 | INFO     | __main__:attach_prior_vp_add_direction:126 - np vectorize arrays for direction: 0:01:36.582328
+2023-12-06 16:43:37.609 | INFO     | __main__:<module>:192 - export vp direction: 0:04:10.061071
+2023-12-06 16:44:21.890 | INFO     | __main__:<module>:197 - export usable vp with direction: 0:00:44.280662
+2023-12-06 16:44:21.891 | INFO     | __main__:<module>:198 - execution time: 0:04:54.341733
+2023-12-06 16:44:21.891 | INFO     | __main__:<module>:185 - Analysis date: 2023-04-16
+2023-12-06 16:46:14.514 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:01:52.622852
+2023-12-06 16:47:47.319 | INFO     | __main__:attach_prior_vp_add_direction:126 - np vectorize arrays for direction: 0:01:32.804627
+2023-12-06 16:47:57.378 | INFO     | __main__:<module>:192 - export vp direction: 0:03:35.486164
+2023-12-06 16:48:37.562 | INFO     | __main__:<module>:197 - export usable vp with direction: 0:00:40.183893
+2023-12-06 16:48:37.565 | INFO     | __main__:<module>:198 - execution time: 0:04:15.670057
