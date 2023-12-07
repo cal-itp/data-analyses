@@ -6,6 +6,7 @@ stop_segments:
     stage5: "avg_speeds_stop_segments"
     stage6: "trip_speeds"
     stage7: "route_speeds"
+    stage8: "speeds_by_peak_daytype"
     segments_file: "stop_segments"    
     segment_identifier_cols: ["shape_array_key", "stop_sequence"]
     timestamp_col: "location_timestamp_local"
