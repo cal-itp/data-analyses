@@ -80,6 +80,8 @@ def project_usable_vp_one_day(
     logger.info(f"compute and export: {end - time1}")
     logger.info(f"execution time: {end - start}")
     
+    del df, trips, shapes
+    
     return
 
 

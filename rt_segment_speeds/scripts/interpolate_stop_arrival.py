@@ -194,7 +194,7 @@ def main(
     
     end = datetime.datetime.now()
     logger.info(f"execution time for {segment_type}: {end - start}")    
-
+    
     return
 
 
