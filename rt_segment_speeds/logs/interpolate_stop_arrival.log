@@ -41,3 +41,59 @@
 2023-11-29 09:06:55.591 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:53.194948
 2023-11-29 09:07:52.341 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:56.750164
 2023-11-29 09:08:03.943 | INFO     | __main__:main:196 - execution time for stop_segments: 0:03:01.547292
+2023-12-06 13:38:10.975 | INFO     | __main__:<module>:215 - Analysis date: 2023-04-10
+2023-12-06 13:40:29.318 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:02:18.324245
+2023-12-06 13:42:02.234 | INFO     | __main__:main:190 - interpolate stop arrival: 0:01:32.916465
+2023-12-06 13:42:14.390 | INFO     | __main__:main:196 - execution time for stop_segments: 0:04:03.396747
+2023-12-06 14:25:15.888 | INFO     | __main__:<module>:215 - Analysis date: 2023-04-10
+2023-12-06 14:27:02.078 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:46.189151
+2023-12-06 14:27:59.243 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:57.165206
+2023-12-06 14:28:08.661 | INFO     | __main__:main:196 - execution time for stop_segments: 0:02:52.771817
+2023-12-06 14:28:08.806 | INFO     | __main__:<module>:215 - Analysis date: 2023-04-11
+2023-12-06 14:29:53.523 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:44.715299
+2023-12-06 14:30:56.050 | INFO     | __main__:main:190 - interpolate stop arrival: 0:01:02.527888
+2023-12-06 14:31:05.504 | INFO     | __main__:main:196 - execution time for stop_segments: 0:02:56.696400
+2023-12-06 14:31:05.590 | INFO     | __main__:<module>:215 - Analysis date: 2023-04-13
+2023-12-06 14:32:46.106 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:40.515843
+2023-12-06 14:33:45.047 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:58.940644
+2023-12-06 14:33:54.375 | INFO     | __main__:main:196 - execution time for stop_segments: 0:02:48.784874
+2023-12-06 17:36:39.814 | INFO     | __main__:<module>:215 - Analysis date: 2023-04-14
+2023-12-06 17:38:24.761 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:44.935252
+2023-12-06 17:39:22.316 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:57.554944
+2023-12-06 17:39:31.932 | INFO     | __main__:main:196 - execution time for stop_segments: 0:02:52.106073
+2023-12-06 18:00:41.014 | INFO     | __main__:<module>:215 - Analysis date: 2023-04-14
+2023-12-06 18:02:22.388 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:41.372930
+2023-12-06 18:03:20.119 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:57.731453
+2023-12-06 18:03:29.536 | INFO     | __main__:main:196 - execution time for stop_segments: 0:02:48.521773
+2023-12-06 18:03:29.637 | INFO     | __main__:<module>:215 - Analysis date: 2023-04-15
+2023-12-06 18:04:32.475 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:02.837175
+2023-12-06 18:05:07.425 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:34.950058
+2023-12-06 18:05:13.760 | INFO     | __main__:main:196 - execution time for stop_segments: 0:01:44.123017
+2023-12-06 18:05:13.878 | INFO     | __main__:<module>:215 - Analysis date: 2023-04-16
+2023-12-06 18:06:15.997 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:02.117478
+2023-12-06 18:06:53.980 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:37.983125
+2023-12-06 18:07:00.061 | INFO     | __main__:main:196 - execution time for stop_segments: 0:01:46.180889
+2023-12-07 16:47:49.231 | INFO     | __main__:<module>:215 - Analysis date: 2023-10-09
+2023-12-07 16:49:37.560 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:48.309180
+2023-12-07 16:50:33.219 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:55.659113
+2023-12-07 16:50:42.535 | INFO     | __main__:main:196 - execution time for stop_segments: 0:02:53.284704
+2023-12-07 16:50:42.624 | INFO     | __main__:<module>:215 - Analysis date: 2023-10-10
+2023-12-07 16:52:51.040 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:02:08.414804
+2023-12-07 16:53:49.777 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:58.737207
+2023-12-07 16:53:59.451 | INFO     | __main__:main:196 - execution time for stop_segments: 0:03:16.826512
+2023-12-07 16:53:59.592 | INFO     | __main__:<module>:215 - Analysis date: 2023-10-12
+2023-12-07 16:55:46.587 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:46.994491
+2023-12-07 16:56:38.902 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:52.314455
+2023-12-07 16:56:48.034 | INFO     | __main__:main:196 - execution time for stop_segments: 0:02:48.441496
+2023-12-07 16:56:48.150 | INFO     | __main__:<module>:215 - Analysis date: 2023-10-13
+2023-12-07 16:58:37.300 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:49.149436
+2023-12-07 16:59:28.094 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:50.793340
+2023-12-07 16:59:36.894 | INFO     | __main__:main:196 - execution time for stop_segments: 0:02:48.743112
+2023-12-07 16:59:36.986 | INFO     | __main__:<module>:215 - Analysis date: 2023-10-14
+2023-12-07 17:00:51.710 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:14.723966
+2023-12-07 17:01:38.566 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:46.855794
+2023-12-07 17:01:45.645 | INFO     | __main__:main:196 - execution time for stop_segments: 0:02:08.658748
+2023-12-07 17:01:45.714 | INFO     | __main__:<module>:215 - Analysis date: 2023-10-15
+2023-12-07 17:02:47.027 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:01.312088
+2023-12-07 17:03:23.124 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:36.097307
+2023-12-07 17:03:28.969 | INFO     | __main__:main:196 - execution time for stop_segments: 0:01:43.254294

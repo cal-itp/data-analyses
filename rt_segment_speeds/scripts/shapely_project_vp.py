@@ -56,6 +56,7 @@ def project_usable_vp_one_day(
     )
     
     group_cols = ["shape_array_key"]
+    shape_cols_dtypes = shapes[group_cols].dtypes.to_dict()
     
     results = vp.map_partitions(
         wrangle_shapes.project_vp_onto_segment_geometry,
@@ -78,6 +79,8 @@ def project_usable_vp_one_day(
     end = datetime.datetime.now()
     logger.info(f"compute and export: {end - time1}")
     logger.info(f"execution time: {end - start}")
+    
+    del df, trips, shapes
     
     return
 

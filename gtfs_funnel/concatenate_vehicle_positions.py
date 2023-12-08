@@ -10,10 +10,10 @@ import pandas as pd
 import shapely
 import sys
 
-from dask import delayed
+from dask import delayed, compute
 from loguru import logger
 
-from shared_utils import dask_utils, schedule_rt_utils
+from shared_utils import schedule_rt_utils
 from calitp_data_analysis import utils
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
@@ -109,12 +109,18 @@ if __name__ == "__main__":
         time2 = datetime.datetime.now()
         logger.info(f"export concatenated vp: {time2 - time1}")
 
+        # Delete objects once it's saved out
+        # Loop to save out multiple dates of vp may cause kernel to crash
+        del concatenated_vp_df
+        
         # Import concatenated tabular vp and make it a gdf
-        vp = pd.read_parquet(
+        vp = delayed(pd.read_parquet)(
             f"{SEGMENT_GCS}vp_{analysis_date}_concat/"
         ).reset_index(drop=True)
 
-        vp_gdf = vp_into_gdf(vp)
+        vp_gdf = delayed(vp_into_gdf)(vp)
+        
+        vp_gdf = compute(vp_gdf)[0]
 
         utils.geoparquet_gcs_export(
             vp_gdf,
@@ -127,5 +133,5 @@ if __name__ == "__main__":
 
         end = datetime.datetime.now()
         logger.info(f"execution time: {end - start}")
-    
-    
+        
+        del vp_gdf

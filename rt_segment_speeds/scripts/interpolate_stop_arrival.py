@@ -194,7 +194,7 @@ def main(
     
     end = datetime.datetime.now()
     logger.info(f"execution time for {segment_type}: {end - start}")    
-
+    
     return
 
 
@@ -209,12 +209,12 @@ if __name__ == "__main__":
                level="INFO")
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    ROAD_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "road_segments")
+    #ROAD_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "road_segments")
     
     for analysis_date in analysis_date_list:
         logger.info(f"Analysis date: {analysis_date}")
         
         main(analysis_date, STOP_SEG_DICT, "stop_segments")
-        main(analysis_date, ROAD_SEG_DICT, "road_segments")
+        #main(analysis_date, ROAD_SEG_DICT, "road_segments")
 
         

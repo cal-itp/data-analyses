@@ -10,6 +10,17 @@ from typing import Union
 
 from segment_speed_utils import helpers
 
+peak_periods = ["AM Peak", "PM Peak"]
+
+HOURS_BY_TIME_OF_DAY = {
+    "Owl": 4, #[0, 3]
+    "Early AM": 3,  #[4, 6]
+    "AM Peak": 3,  #[7, 9]
+    "Midday": 5,  #[10, 14]
+    "PM Peak": 5, #[15, 19]
+    "Evening": 4 #[20, 23]
+}
+
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
     exclude_me: list = ["Amtrak Schedule", "*Flex"]
@@ -87,37 +98,34 @@ def stop_arrivals_per_stop(
     return arrivals_by_stop
     
     
-def aggregate_time_of_day_to_peak_offpeak(
-    df: pd.DataFrame,
-    group_cols: list
-) -> pd.DataFrame:
+def add_peak_offpeak_column(df: pd.DataFrame):
     """
-    Aggregate time-of-day bins into peak/offpeak periods.
-    Return n_trips and frequency for grouping of columns (route-direction, etc).
+    Add a single peak_offpeak column based on the time-of-day column.
     """
-    peak_periods = ["AM Peak", "PM Peak"]
-    
-    HOURS_BY_TIME_OF_DAY = {
-        "Owl": 4, #[0, 3]
-        "Early AM": 3,  #[4, 6]
-        "AM Peak": 3,  #[7, 9]
-        "Midday": 5,  #[10, 14]
-        "PM Peak": 5, #[15, 19]
-        "Evening": 4 #[20, 23]
-    }
-    
-    peak_hours = sum(v for k, v in HOURS_BY_TIME_OF_DAY.items() 
-                 if k in peak_periods) 
-    
-    offpeak_hours = sum(v for k, v in HOURS_BY_TIME_OF_DAY.items() 
-                 if k not in peak_periods) 
-    
     df = df.assign(
         peak_offpeak = df.apply(
             lambda x: "peak" if x.time_of_day in peak_periods
             else "offpeak", 
             axis=1)
     )
+    
+    return df
+    
+def aggregate_time_of_day_to_peak_offpeak(
+    df: pd.DataFrame,
+    group_cols: list,
+) -> pd.DataFrame:
+    """
+    Aggregate time-of-day bins into peak/offpeak periods.
+    Return n_trips and frequency for grouping of columns (route-direction, etc).
+    """    
+    peak_hours = sum(v for k, v in HOURS_BY_TIME_OF_DAY.items() 
+                 if k in peak_periods) 
+    
+    offpeak_hours = sum(v for k, v in HOURS_BY_TIME_OF_DAY.items() 
+                 if k not in peak_periods) 
+    
+    df = add_peak_offpeak_column(df)
     
     df2 = (df.groupby(group_cols + ["peak_offpeak"])
            .agg({"trip_instance_key": "count"})
@@ -141,9 +149,8 @@ def aggregate_time_of_day_to_peak_offpeak(
           columns="peak_offpeak",
           values=["n_trips", "frequency"]
          )
-    
+
     df3.columns = [f'{b}_{a}' for a, b in df3.columns]
     df3 = df3.reset_index()
-    
+
     return df3
-    

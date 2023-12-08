@@ -7,11 +7,13 @@ RT_SCHED_GCS = f"{GCS_FILE_PATH}rt_vs_schedule/"
 SCHED_GCS = f"{GCS_FILE_PATH}gtfs_schedule/"
 PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/"
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
+PUBLIC_GCS = "gs://calitp-publish-data-analysis/"
 
 analysis_date = rt_dates.DATES["nov2023"]
 
 analysis_date_list = [
-    rt_dates.DATES["oct2023"] 
+    rt_dates.DATES[f"oct2023{s}"] for s in 
+    ["a", "b", "", "c", "d", "e", "f"] 
 ]
 
 PROJECT_CRS = "EPSG:3310"

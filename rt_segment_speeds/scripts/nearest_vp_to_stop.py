@@ -320,6 +320,10 @@ def find_nearest_vp_to_stop(
     
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")
+    
+    del stops_projected, result, fixed_results
+    
+    return
 
 
 if __name__ == "__main__":

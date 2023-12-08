@@ -53,7 +53,7 @@ def attach_prior_vp_add_direction(
     )
     
     # Convert the x, y into gdf, project it, since direction has to be
-    # calculated in projected CRS
+    # calculated in projected CRS, so save out the projected CRS's x and y
     vp_gddf = dg.from_dask_dataframe(
         vp2,
         geometry = dg.points_from_xy(vp2, x="x", y="y")
@@ -126,7 +126,11 @@ def attach_prior_vp_add_direction(
     logger.info(f"np vectorize arrays for direction: {time2 - time1}")
     
     vp_direction.to_parquet(
-        f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet")    
+        f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet")  
+    
+    del vp_direction, full_df, usable_bounds, vp, vp2
+
+    return
 
 
 def add_direction_to_usable_vp(
@@ -168,6 +172,10 @@ def add_direction_to_usable_vp(
         export_path,
         partition_cols = "gtfs_dataset_key",
     )
+    
+    del usable_vp, vp_direction, vp_with_dir
+
+    return
 
 
 if __name__ == "__main__":

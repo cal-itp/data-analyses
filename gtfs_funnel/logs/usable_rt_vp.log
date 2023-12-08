@@ -36,3 +36,29 @@
 2023-10-19 11:43:55.229 | INFO     | __main__:<module>:171 - pare down vp: 0:09:27.102851
 2023-11-16 09:00:34.801 | INFO     | __main__:<module>:161 - Analysis date: 2023-11-15
 2023-11-16 09:02:38.948 | INFO     | __main__:<module>:171 - pare down vp: 0:02:04.146588
+2023-12-06 09:44:25.172 | INFO     | __main__:<module>:161 - Analysis date: 2023-04-10
+2023-12-06 09:46:17.458 | INFO     | __main__:<module>:171 - pare down vp: 0:01:52.285563
+2023-12-06 09:46:17.459 | INFO     | __main__:<module>:161 - Analysis date: 2023-04-11
+2023-12-06 09:47:56.977 | INFO     | __main__:<module>:171 - pare down vp: 0:03:31.804535
+2023-12-06 09:47:56.977 | INFO     | __main__:<module>:161 - Analysis date: 2023-04-13
+2023-12-06 09:49:41.727 | INFO     | __main__:<module>:171 - pare down vp: 0:05:16.554824
+2023-12-06 11:41:29.767 | INFO     | __main__:<module>:161 - Analysis date: 2023-04-13
+2023-12-06 11:43:50.294 | INFO     | __main__:<module>:171 - pare down vp: 0:02:20.526206
+2023-12-06 16:28:15.227 | INFO     | __main__:<module>:161 - Analysis date: 2023-04-14
+2023-12-06 16:29:53.099 | INFO     | __main__:<module>:171 - pare down vp: 0:01:37.872709
+2023-12-06 16:29:53.100 | INFO     | __main__:<module>:161 - Analysis date: 2023-04-15
+2023-12-06 16:30:59.943 | INFO     | __main__:<module>:171 - pare down vp: 0:02:44.716558
+2023-12-06 16:30:59.945 | INFO     | __main__:<module>:161 - Analysis date: 2023-04-16
+2023-12-06 16:31:58.722 | INFO     | __main__:<module>:171 - pare down vp: 0:03:43.495726
+2023-12-07 13:22:11.864 | INFO     | __main__:<module>:161 - Analysis date: 2023-10-09
+2023-12-07 13:23:53.277 | INFO     | __main__:<module>:171 - pare down vp: 0:01:41.413376
+2023-12-07 13:23:53.278 | INFO     | __main__:<module>:161 - Analysis date: 2023-10-10
+2023-12-07 13:25:36.640 | INFO     | __main__:<module>:171 - pare down vp: 0:03:24.776882
+2023-12-07 13:32:58.264 | INFO     | __main__:<module>:165 - Analysis date: 2023-10-12
+2023-12-07 13:34:38.070 | INFO     | __main__:<module>:175 - pare down vp: 0:01:39.805674
+2023-12-07 13:34:38.071 | INFO     | __main__:<module>:165 - Analysis date: 2023-10-13
+2023-12-07 13:36:12.479 | INFO     | __main__:<module>:175 - pare down vp: 0:03:14.214774
+2023-12-07 13:36:12.482 | INFO     | __main__:<module>:165 - Analysis date: 2023-10-14
+2023-12-07 13:37:14.399 | INFO     | __main__:<module>:175 - pare down vp: 0:04:16.134572
+2023-12-07 13:37:14.401 | INFO     | __main__:<module>:165 - Analysis date: 2023-10-15
+2023-12-07 13:38:10.534 | INFO     | __main__:<module>:175 - pare down vp: 0:05:12.269306
