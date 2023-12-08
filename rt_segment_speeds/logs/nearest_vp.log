@@ -34,3 +34,51 @@
 2023-11-16 10:18:33.328 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:06:36.732371
 2023-11-16 10:18:34.574 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:01.245608
 2023-11-16 10:24:51.629 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:12:55.033384
+2023-12-06 12:43:40.288 | INFO     | __main__:<module>:338 - Analysis date: 2023-04-10
+2023-12-06 12:55:41.611 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:12:01.311889
+2023-12-06 12:55:44.924 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:03.313263
+2023-12-06 13:01:10.460 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:17:30.161126
+2023-12-06 13:01:11.159 | INFO     | __main__:<module>:338 - Analysis date: 2023-04-11
+2023-12-06 13:14:41.736 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:13:30.575531
+2023-12-06 13:14:43.902 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:02.166148
+2023-12-06 13:19:53.178 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:18:42.017549
+2023-12-06 13:19:54.010 | INFO     | __main__:<module>:338 - Analysis date: 2023-04-13
+2023-12-06 13:32:17.110 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:12:23.099291
+2023-12-06 13:32:19.214 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:02.104497
+2023-12-06 13:37:48.460 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:17:54.449273
+2023-12-06 17:08:41.914 | INFO     | __main__:<module>:338 - Analysis date: 2023-04-14
+2023-12-06 17:15:39.543 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:06:57.614274
+2023-12-06 17:15:41.265 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:01.722158
+2023-12-06 17:21:14.615 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:12:32.685918
+2023-12-06 17:21:15.187 | INFO     | __main__:<module>:338 - Analysis date: 2023-04-15
+2023-12-06 17:25:27.072 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:04:11.883261
+2023-12-06 17:25:28.248 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:01.175821
+2023-12-06 17:29:02.083 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:07:46.893665
+2023-12-06 17:29:02.429 | INFO     | __main__:<module>:338 - Analysis date: 2023-04-16
+2023-12-06 17:32:44.689 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:03:42.259247
+2023-12-06 17:32:45.852 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:01.162384
+2023-12-06 17:36:20.656 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:07:18.225946
+2023-12-07 15:42:10.674 | INFO     | __main__:<module>:342 - Analysis date: 2023-10-09
+2023-12-07 15:48:32.990 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:06:22.286719
+2023-12-07 15:48:35.030 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:02.039135
+2023-12-07 15:54:24.614 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:12:13.910169
+2023-12-07 15:54:25.027 | INFO     | __main__:<module>:342 - Analysis date: 2023-10-10
+2023-12-07 16:01:55.970 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:07:30.942496
+2023-12-07 16:01:57.958 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:01.987623
+2023-12-07 16:07:58.853 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:13:33.825360
+2023-12-07 16:07:59.441 | INFO     | __main__:<module>:342 - Analysis date: 2023-10-12
+2023-12-07 16:14:33.601 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:06:34.158815
+2023-12-07 16:14:35.543 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:01.941874
+2023-12-07 16:20:17.841 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:12:18.398991
+2023-12-07 16:20:18.392 | INFO     | __main__:<module>:342 - Analysis date: 2023-10-13
+2023-12-07 16:26:53.891 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:06:35.496469
+2023-12-07 16:26:55.979 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:02.088681
+2023-12-07 16:32:35.967 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:12:17.573106
+2023-12-07 16:32:36.478 | INFO     | __main__:<module>:342 - Analysis date: 2023-10-14
+2023-12-07 16:36:34.910 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:03:58.431339
+2023-12-07 16:36:36.324 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:01.413598
+2023-12-07 16:40:40.105 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:08:03.625761
+2023-12-07 16:40:40.434 | INFO     | __main__:<module>:342 - Analysis date: 2023-10-15
+2023-12-07 16:43:50.815 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:03:10.380242
+2023-12-07 16:43:52.035 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:01.220004
+2023-12-07 16:47:31.271 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:06:50.836257

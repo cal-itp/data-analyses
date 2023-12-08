@@ -13,7 +13,7 @@ from segment_speed_utils import helpers, sched_rt_utils
 from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
 from calitp_data_analysis import utils, geography_utils
 from shared_utils import portfolio_utils, rt_utils
-
+    
 
 def calculate_avg_speeds(
     df: pd.DataFrame,
@@ -244,7 +244,7 @@ if __name__ == "__main__":
                level="INFO")
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-        
+    
     for analysis_date in analysis_date_list:
         logger.info(f"Analysis date: {analysis_date}")
         
