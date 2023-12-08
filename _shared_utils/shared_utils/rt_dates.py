@@ -38,9 +38,13 @@ DATES = {
     "aug2023": "2023-08-15",
     "aug2023a": "2023-08-23",  # date used for speedmaps
     "sep2023": "2023-09-13",
+    "oct2023a": "2023-10-09",
+    "oct2023b": "2023-10-10",
     "oct2023": "2023-10-11",
-    "oct2023a": "2023-10-13",  # add weekend dates for SB 125 service increase
-    "oct2023b": "2023-10-14",
+    "oct2023c": "2023-10-12",
+    "oct2023d": "2023-10-13",
+    "oct2023e": "2023-10-14",  # add weekend dates for SB 125 service increase
+    "oct2023f": "2023-10-15",
     "nov2023": "2023-11-15",
 }
 
