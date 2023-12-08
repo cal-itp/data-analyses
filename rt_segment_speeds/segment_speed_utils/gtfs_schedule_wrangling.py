@@ -99,6 +99,9 @@ def stop_arrivals_per_stop(
     
     
 def add_peak_offpeak_column(df: pd.DataFrame):
+    """
+    Add a single peak_offpeak column based on the time-of-day column.
+    """
     df = df.assign(
         peak_offpeak = df.apply(
             lambda x: "peak" if x.time_of_day in peak_periods
