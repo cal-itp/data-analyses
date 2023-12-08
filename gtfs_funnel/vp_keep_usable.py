@@ -141,6 +141,10 @@ def pare_down_vp_to_valid_trips(
         # can delete it if the partitions have the same name
         #existing_data_behavior = "delete_matching" 
     )
+    
+    del vp, usable_trips, usable_vp
+    
+    return
 
     
 if __name__ == "__main__":
@@ -169,3 +173,5 @@ if __name__ == "__main__":
         
         end = datetime.datetime.now()
         logger.info(f"pare down vp: {end - start}")
+        
+        
