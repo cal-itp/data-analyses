@@ -3,9 +3,8 @@ import datetime
 import dask
 import dask.dataframe as dd
 import geopandas as gpd
-import numpy as np
 import pandas as pd
-from calitp_data_analysis import utils
+# from calitp_data_analysis import utils
 from calitp_data_analysis.geography_utils import WGS84
 import vp_spatial_accuracy
 from segment_speed_utils import helpers
@@ -265,7 +264,6 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     )
     
     m1.to_parquet('./vp_usable_metrics.parquet')
-    return m1
 
 if __name__ == "__main__":
     start = datetime.datetime.now()
