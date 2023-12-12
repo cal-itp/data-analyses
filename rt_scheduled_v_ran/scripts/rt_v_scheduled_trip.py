@@ -17,7 +17,9 @@ import datetime
 import sys
 from loguru import logger
 
+# first install rt_segment_speeds, then _shared_utils
 # cd rt_segment_speeds && pip install -r requirements.txt && cd
+# cd data-analyses/rt_scheduled_v_ran/scripts 
 
 # LOAD FILES
 def load_trip_speeds(analysis_date):
@@ -49,7 +51,7 @@ def load_vp_usable(analysis_date):
     )
 
     # Create a copy of location timestamp for the total_trip_time function
-    # to avoid type setting
+    # to avoid type setting warning
     df["max_time"] = df.location_timestamp_local
     return df
 
@@ -109,16 +111,17 @@ def two_pings_per_min(vp_usable_df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Need a copy of numer of pings per minute to count for total minutes w gtfs
-    df["total_minute_w_gtfs"] = df.number_of_pings_per_minute
+    df["total_min_w_gtfs"] = df.number_of_pings_per_minute
 
-    # Find the total min with at least 2 pings per min
+    # Find the total min with at least 2 pings per min, median of pings
+    # per minute, and total minutes with gtfs
     df = (
         df.groupby(["trip_instance_key"])
         .agg(
             {
                 "min_w_atleast2_trip_updates": "sum",
                 "number_of_pings_per_minute": "median",
-                "total_minute_w_gtfs": "count",
+                "total_min_w_gtfs": "count",
             }
         )
         .reset_index()
@@ -135,7 +138,8 @@ def two_pings_per_min(vp_usable_df: pd.DataFrame) -> pd.DataFrame:
 def grab_shape_keys_in_vp(vp_usable: dd.DataFrame, analysis_date: str) -> pd.DataFrame:
     """
     Subset raw vp and find unique trip_instance_keys.
-    Create crosswalk to link trip_instance_key to shape_array_key.
+    Create crosswalk to link trip_instance_key to shape_array_key
+    to find trips for the analysis date that have shapes.
     """
     vp_usable = (
         vp_usable[["trip_instance_key"]]
@@ -278,7 +282,7 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
         "trip_instance_key": "object",
         "min_w_atleast2_trip_updates": "int64",
         "median_pings_per_min": "float64",
-        "total_minute_w_gtfs": "int64",
+        "total_min_w_gtfs": "int64",
     },
     align_dataframes=False
     ).persist()
@@ -316,7 +320,7 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
             "vp_in_shape": "int32"},
     align_dataframes=False).persist()
     time5 = datetime.datetime.now()
-    logger.info(f"Spatial accuracy metric: {time5-time4}")
+    logger.info(f"Spatial accuracy grouping metric: {time5-time4}")
     
     # Load trip speeds
     trip_speeds_df = load_trip_speeds(analysis_date)
@@ -332,7 +336,7 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     
     m1.to_parquet('./rt_v_schedule_trip_metrics.parquet')
     time6 = datetime.datetime.now()
-    logger.info(f"Total run time for {analysis_date}: {time6-start}")
+    logger.info(f"Total run time for metrics on {analysis_date}: {time6-start}")
 
 if __name__ == "__main__":
     LOG_FILE = "../logs/rt_v_scheduled_trip_metrics.log"
