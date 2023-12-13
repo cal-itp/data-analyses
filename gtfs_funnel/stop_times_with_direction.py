@@ -2,8 +2,6 @@
 Create a schedule stop_times table with direction of travel
 between stops.
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime
 import geopandas as gpd
 import numpy as np
@@ -66,10 +64,12 @@ def prep_scheduled_stop_times(analysis_date: str) -> gpd.GeoDataFrame:
 
 
 def get_projected_stop_meters(
-    stop_times: dd.DataFrame, 
+    stop_times: pd.DataFrame, 
     shapes: gpd.GeoDataFrame
-) -> dd.DataFrame:
+) -> pd.DataFrame:
     """
+    Project the stop's position to the shape and
+    get stop_meters (meters from start of the shape).
     """
     gdf = pd.merge(
         stop_times,
