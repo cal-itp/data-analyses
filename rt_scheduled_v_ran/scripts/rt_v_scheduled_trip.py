@@ -4,6 +4,7 @@ import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.geography_utils import WGS84
 import vp_spatial_accuracy
+import update_vars2
 from segment_speed_utils.project_vars import (
     GCS_FILE_PATH,
     PROJECT_CRS,
@@ -19,7 +20,7 @@ from loguru import logger
 
 # first install rt_segment_speeds, then _shared_utils
 # cd rt_segment_speeds && pip install -r requirements.txt && cd
-# cd data-analyses/rt_scheduled_v_ran/scripts 
+# cd ../data-analyses/rt_scheduled_v_ran/scripts 
 
 # LOAD FILES
 def load_trip_speeds(analysis_date):
@@ -256,19 +257,18 @@ def total_counts(result: dd.DataFrame):
 # Complete
 def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     start = datetime.datetime.now()
-    print(f"Started running script at {start}")
+    print(f"For {analysis_date}, started running script at {start}")
     
     """
     Keep for testing temporarily
     operator = "Bay Area 511 Muni VehiclePositions"
-    
+    """
     gtfs_key = "7cc0cb1871dfd558f11a2885c145d144"
+    vp_usable = load_vp_usable(analysis_date)
+    
     vp_usable = (vp_usable.loc
     [vp_usable.schedule_gtfs_dataset_key ==gtfs_key]
     .reset_index(drop=True))
-    """
-    vp_usable = load_vp_usable(analysis_date)
-  
     
     ## Find total rt service minutes ##
     rt_service_df = total_trip_time(vp_usable)
@@ -341,16 +341,17 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
          .merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer")
          .merge(trip_speeds_df, on ="trip_instance_key", how = "outer"))
     
-    m1.to_parquet('./rt_v_schedule_trip_metrics.parquet')
+    m1.to_parquet(f"{GCS_FILE_PATH}rt_vs_schedule/trip_{analysis_date}_metrics.parquet")
     time7 = datetime.datetime.now()
     logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
 
 if __name__ == "__main__":
-    LOG_FILE = "../logs/rt_v_scheduled_trip_metrics.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
-   
-    vp_usable_metrics(analysis_date)
-    print('Done')
+    for date in update_vars2.analysis_date_list:
+        LOG_FILE = "../logs/rt_v_scheduled_trip_metrics.log"
+        logger.add(LOG_FILE, retention="3 months")
+        logger.add(sys.stderr, 
+                   format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+                   level="INFO")
+
+        vp_usable_metrics(date)
+        print('Done')
