@@ -8,6 +8,7 @@ import geopandas as gpd
 import pandas as pd
 import sys
 
+from dask import delayed
 from loguru import logger
 from typing import Literal
 
@@ -85,6 +86,11 @@ def load_roads(filtering: tuple) -> gpd.GeoDataFrame:
         multi_df2
     ], axis=0).reset_index(drop=True)
     
+    df2 = df2.reindex(
+        columns = ["linearid", "mtfcc", "fullname", 
+                   "geometry", "road_length"]
+    )
+    
     return df2 
 
 
@@ -115,119 +121,91 @@ def cut_primary_secondary_roads(
 """
 Local Roads (base)
 """
-def sjoin_shapes_to_local_roads(
-    shapes: dg.GeoDataFrame,
-    roads: gpd.GeoDataFrame,
-) -> gpd.GeoDataFrame:
-    """
-    Using shapes instead of stops roughly doubles the linearids we pick up.
-    All the ones in stops is found in shapes (as expected).
-    """
-    shapes = shapes.assign(
-        geometry = shapes.geometry.buffer(100)
-    )
-
-    # Keep unique linearids from the sjoin
-    local_roads_sjoin_shapes = dg.sjoin(
-        shapes,
-        roads,
-        how = "inner",
-        predicate = "intersects"
-    ).linearid.unique()
-    
-    local_ids = local_roads_sjoin_shapes.compute().tolist()
-    
-    # Filter down our local roads to ones that showed up in the sjoin
-    local_roads_cut = roads[
-        roads.linearid.isin(local_ids)
-    ].reset_index(drop=True)
-    
-    return local_roads_cut
-
-
-def cut_segments_dask(
-    roads_to_cut: gpd.GeoDataFrame,
+def cut_segments(
+    gdf: gpd.GeoDataFrame,
     group_cols: list,
     segment_length_meters: int
 ) -> gpd.GeoDataFrame:
-    # Use dask geopandas to create a new column that is a list
-    # and contains all the shapely cut segments
-    gddf = dg.from_geopandas(roads_to_cut, npartitions=20)
-    
-    gddf["segment_geometry"] = gddf.apply(
+    gdf["segment_geometry"] = gdf.apply(
         lambda x: 
         geography_utils.create_segments(x.geometry, int(segment_length_meters)), 
-        axis=1, meta = ("segment_geometry", "object")
+        axis=1,
     )
-    
-    # Exploding only works as gdf
-    gdf = gddf.compute()
     
     gdf2 = geog_utils_to_add.explode_segments(
-        gdf, 
-        group_cols = group_cols,
-        segment_col = "segment_geometry"
-    )
+        gdf,
+        group_cols,
+        segment_col = "segment_geometry",
+    )[group_cols + ["segment_sequence", "geometry"]
+     ].set_geometry("geometry").set_crs(PROJECT_CRS)
     
-    return gdf2
+    return gdf2 
 
 
-def local_roads_base(
+def cut_local_roads(
     roads: gpd.GeoDataFrame, 
+    group_cols: list,
     segment_length_meters: int
 ) -> gpd.GeoDataFrame:
-    """
-    Use Sep 2023 shapes to figure out the "base" of local roads we are cutting.
-    In the future, grab only the local road linearids that are not here,
-    and cut any additional ones.
-    """
+    
     # If roads are less than our segment length
     # keep these intact...they are freebies, already segmented for us (1 segment)
     short_roads = roads[
         roads.road_length <= segment_length_meters
-    ].reset_index(drop=True)
-    
+    ].drop(columns = "road_length").reset_index(drop=True)
+
+    short_roads = short_roads.assign(
+        segment_sequence = 0
+    ).astype({"segment_sequence": "int16"})
+
     long_roads = roads[
         roads.road_length > segment_length_meters
-    ].reset_index(drop=True)
+    ].drop(columns = "road_length").reset_index(drop=True)
+
     
-    # Remove Amtrak, because some shapes are erroneous and 
-    # kills the kernel while buffering by 100m 
-    # Since Amtrak is not traveling on roads, we'll be removing those vp anyway
-    base_date = "2023-09-13"
+    long_roads = long_roads.repartition(npartitions=50)
     
-    trips = helpers.import_scheduled_trips(
-        base_date,
-        columns = ["name", "shape_array_key"],
-        get_pandas = True
-    )
-    
-    shapes = helpers.import_scheduled_shapes(
-        base_date,
-        columns = ["shape_array_key", "geometry"],
-        crs = PROJECT_CRS,
-        get_pandas = False
-    ).merge(
-        trips,
-        on = "shape_array_key",
-        how = "inner"
-    ).query('name != "Amtrak Schedule"')
-    
-    local_roads_to_cut = sjoin_shapes_to_local_roads(shapes, long_roads)
-    
-    segmented_long_roads = cut_segments_dask(
-        local_roads_to_cut,
-        ["linearid", "mtfcc", "fullname"],
-        segment_length_meters
-    )
-    
+    time1 = datetime.datetime.now()
+
     # Concatenate the short roads and the segmented roads
-    gdf = pd.concat([
-        segmented_long_roads, 
-        short_roads.assign(segment_sequence = 0).astype({"segment_sequence": "int16"})
-    ], axis=0).reset_index(drop=True)
+    road_dtypes = long_roads[group_cols].dtypes.to_dict()
     
-    gdf2 = add_segment_direction(gdf)
+    segmented_long_roads = long_roads.map_partitions(
+        cut_segments,
+        group_cols,
+        segment_length_meters,
+        meta = {
+            **road_dtypes,
+            "segment_sequence": "int16",
+            "geometry": "geometry"
+        },
+        align_dataframes = False
+    ).persist()
+    
+    print("first persist")
+    print(segmented_long_roads.dtypes)
+        
+    gdf = dd.multi.concat(
+        [short_roads, segmented_long_roads],
+        axis=0
+    ).reset_index(drop=True)
+    
+    gdf = gdf.repartition(npartitions=20)
+    
+    gdf_dtypes = gdf.dtypes.to_dict()
+    
+    gdf2 = gdf.map_partitions(
+        add_segment_direction,
+        meta = {
+            **gdf_dtypes, 
+            "origin": "geometry",
+            "destination": "geometry",
+            "primary_direction": "object"
+            }
+    ).persist()
+    
+    time2 = datetime.datetime.now()
+    print(f"map partitions to cut segments and add direction: {time2 - time1}")
     
     return gdf2
 
@@ -262,6 +240,8 @@ if __name__ == '__main__':
     
     start = datetime.datetime.now()
     
+    road_cols = ["linearid", "mtfcc", "fullname"]
+
     # Always cut all the primary and secondary roads
     road_type = "primarysecondary"
     road_type_values = ["S1100", "S1200"]
@@ -276,14 +256,19 @@ if __name__ == '__main__':
         f"segmented_roads_2020_{road_type}"
     )
     
+    del roads, primary_secondary_roads
     time1 = datetime.datetime.now()
     logger.info(f"cut primary/secondary roads: {time1 - start}")
+        
+    road_type = "local"  
+    road_type_values = ["S1400"]
+    roads = delayed(load_roads)(filtering = [("MTFCC", "in", road_type_values)])
     
-    # Grab Sep 2023's shapes as base to grab majority of local roads we def need to cut
-    road_type = "local"    
-    roads = load_roads(filtering = [("MTFCC", "==", "S1400")])
-    local_roads = local_roads_base(roads, ROAD_SEGMENT_METERS).drop(
-        columns = "road_length")
+    local_gddf = dd.from_delayed(roads).repartition(npartitions=50)
+    
+    local_roads = cut_local_roads(
+        local_gddf, road_cols, ROAD_SEGMENT_METERS
+    ).compute()
     
     utils.geoparquet_gcs_export(
         local_roads,
@@ -292,8 +277,7 @@ if __name__ == '__main__':
     )
     
     time2 = datetime.datetime.now()
-    logger.info(f"cut local roads base: {time2 - time1}")
+    logger.info(f"cut local roads: {time2 - time1}")
         
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")
-    
