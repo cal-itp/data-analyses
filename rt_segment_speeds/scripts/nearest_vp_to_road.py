@@ -154,20 +154,19 @@ if __name__ == "__main__":
         align_dataframes = False
     ).persist()
     
+    vp2 = vp[["vp_idx", "trip_instance_key"] + segment_identifier_cols]
     
-    vp2 = vp[["vp_idx", "trip_instance_key"]]
-
     vp_with_projected = dd.merge(
         vp2,
         vp_projected,
-        on = "vp_idx",
+        on = ["vp_idx"] + road_id_cols,
         how = "inner"
     ).compute()
     
     vp_with_projected.to_parquet(
         f"{SEGMENT_GCS}projection/vp_projected_roads_{analysis_date}.parquet"
     )
-    
+    '''
     vp_projected_wide2 = make_wide(vp_with_projected)
     
     road_cutpoints = expand_road_segments(
@@ -243,6 +242,6 @@ if __name__ == "__main__":
     result.to_parquet(
         f"{SEGMENT_GCS}projection/nearest_vp_roads_{analysis_date}.parquet"
     )
-    
+    '''
     end = datetime.datetime.now()
     print(f"execution time: {end - start}")
