@@ -189,7 +189,7 @@ if __name__ == "__main__":
     TRIP_EXPORT = CONFIG_DICT["trip_metrics_file"]
     ROUTE_DIR_EXPORT = CONFIG_DICT["route_direction_metrics_file"]
     
-    for date in analysis_date_list[:1]:
+    for date in analysis_date_list:
         trip_metrics = assemble_scheduled_trip_metrics(date)
         
         trip_metrics.to_parquet(

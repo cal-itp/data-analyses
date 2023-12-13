@@ -9,13 +9,19 @@ PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/"
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 PUBLIC_GCS = "gs://calitp-publish-data-analysis/"
 
-analysis_date = rt_dates.DATES["nov2023"]
+analysis_date = rt_dates.DATES["oct2023"]
+
+days = ["a", "b", "", "c", "d", "e", "f"] 
+months = [
+    "nov", "oct", "sep",
+    "aug", "jul", "jun",
+    "may", "apr", "mar"
+]
 
 analysis_date_list = [
-    rt_dates.DATES[f"oct2023{s}"] for s in 
-    ["a", "b", "", "c", "d", "e", "f"] 
+    rt_dates.DATES[f"{m}2023"] for m in months
 ]
 
 PROJECT_CRS = "EPSG:3310"
 CONFIG_PATH = "./config.yml"
-ROAD_SEGMENT_METERS = 250
+ROAD_SEGMENT_METERS = 1_000

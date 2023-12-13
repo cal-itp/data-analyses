@@ -6,6 +6,7 @@ import pandas as pd
 
 from dask import delayed
 from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
+                                              SHARED_GCS,
                                               PROJECT_CRS)
 from segment_speed_utils import helpers, wrangle_shapes
 
@@ -94,29 +95,27 @@ def import_roads(
     analysis_date: str, 
     road_grouping_cols: list,
 ) -> dg.GeoDataFrame:
-        
-    road_segments = dg.read_parquet(
-        f"{SEGMENT_GCS}road_segments_{analysis_date}",
-        columns = road_grouping_cols + ["primary_direction", "geometry"]
-    )
-    
-    road_segments = road_segments.assign(
-        geometry = road_segments.geometry.buffer(25)
-    )
-    
+      
     shape_road_crosswalk = pd.read_parquet(
         f"{SEGMENT_GCS}shape_road_crosswalk_{analysis_date}.parquet",
-    )
-    
-    road_segments2 = dd.merge(
-        road_segments,
+    ) 
+        
+    road_segments = dg.read_parquet(
+        f"{SHARED_GCS}road_segments/",
+        columns = road_grouping_cols + ["primary_direction", "geometry"]
+    ).merge(
         shape_road_crosswalk,
         on = road_grouping_cols,
         how = "inner"
-    ).repartition(npartitions=25)
+    )
+    
+    road_segments = road_segments.assign(
+        geometry = road_segments.geometry.buffer(15)
+    )
+    
+    road_segments = road_segments.repartition(npartitions=25)
               
-    return road_segments2
-
+    return road_segments
 
 
 if __name__ == "__main__":
@@ -125,21 +124,20 @@ if __name__ == "__main__":
     
     road_cols = ["linearid", "mtfcc"]
     segment_identifier_cols = road_cols + ["segment_sequence"]
-
-    all_directions = wrangle_shapes.ALL_DIRECTIONS + ["Unknown"]
     
     vp = import_vp(analysis_date).persist()
     roads = import_roads(analysis_date, segment_identifier_cols).persist()
                 
     vp_dfs = [
         vp[vp.vp_primary_direction == d]
-        for d in all_directions
+        for d in wrangle_shapes.ALL_DIRECTIONS
     ]
     
+    # Remove all the Unknowns (vps that aren't moving)
     road_dfs = [
         roads[roads.primary_direction != 
               wrangle_shapes.OPPOSITE_DIRECTIONS[d]
-             ] for d in all_directions
+             ] for d in wrangle_shapes.ALL_DIRECTIONS
     ]
     
     
