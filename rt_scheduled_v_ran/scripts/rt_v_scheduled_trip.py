@@ -81,11 +81,10 @@ def total_trip_time(vp_usable_df: pd.DataFrame):
 
     return df
 
-def two_pings_per_min(vp_usable_df: pd.DataFrame) -> pd.DataFrame:
+def trips_by_one_min(vp_usable_df: pd.DataFrame):
     """
-    For each trip: find the median GTFS pings per minute,
-    the total minutes with at least 1 GTFS ping per minute,
-    and total minutes with at least 2 GTFS pings per minute.
+    For each trip: count how many rows are associated with each minute
+    then tag whether or not a minute has 2+ pings. 
     """
     subset = ["location_timestamp_local", "trip_instance_key", "vp_idx"]
     vp_usable_df = vp_usable_df[subset]
@@ -109,25 +108,35 @@ def two_pings_per_min(vp_usable_df: pd.DataFrame) -> pd.DataFrame:
             lambda x: 1 if x.number_of_pings_per_minute >= 2 else 0, axis=1
         )
     )
+    
+    df = df.drop(columns = ['location_timestamp_local'])
+    return df
 
+def update_completeness(df: pd.DataFrame):
+    """
+    For each trip: find the median GTFS pings per minute,
+    the total minutes with at least 1 GTFS ping per minute,
+    and total minutes with at least 2 GTFS pings per minute.
+    
+    Use result  from trips_by_one_min as the argument.
+    """
     # Need a copy of numer of pings per minute to count for total minutes w gtfs
     df["total_min_w_gtfs"] = df.number_of_pings_per_minute
-
-    # Find the total min with at least 2 pings per min, median of pings
-    # per minute, and total minutes with gtfs
+    
+    # Find the total min with at least 2 pings per min
     df = (
         df.groupby(["trip_instance_key"])
         .agg(
             {
                 "min_w_atleast2_trip_updates": "sum",
-                "number_of_pings_per_minute": "median",
+                "number_of_pings_per_minute": "mean",
                 "total_min_w_gtfs": "count",
             }
         )
         .reset_index()
         .rename(
             columns={
-                "number_of_pings_per_minute": "median_pings_per_min",
+                "number_of_pings_per_minute": "avg_pings_per_min",
             }
         )
     )
@@ -250,7 +259,7 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     print(f"Started running script at {start}")
     
     """
-    Keep for testing
+    Keep for testing temporarily
     operator = "Bay Area 511 Muni VehiclePositions"
     
     gtfs_key = "7cc0cb1871dfd558f11a2885c145d144"
@@ -259,35 +268,33 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     .reset_index(drop=True))
     """
     vp_usable = load_vp_usable(analysis_date)
+  
     
-    ## Update Completeness ##
-    # Find total rt service minutes
-    rt_service_df = vp_usable.map_partitions(
-    total_trip_time,
-    meta={
-        "trip_instance_key": "object",
-        "rt_service_min": "float64",
-    },
-    align_dataframes=False,
-    ).persist()
+    ## Find total rt service minutes ##
+    rt_service_df = total_trip_time(vp_usable)
 
     time1 = datetime.datetime.now()
     logger.info(f"Rt service min: {time1-start}")
     
+    ## Update Completeness ##
     # Find median pings per min, total min with
     # GTFS and total min with at least 2 pings per min.
-    pings_trip_time_df = vp_usable.map_partitions(
-    two_pings_per_min,
+    trips_by_one_min_df = vp_usable.map_partitions(
+    trips_by_one_min,
     meta={
         "trip_instance_key": "object",
+        "number_of_pings_per_minute": "int64",
         "min_w_atleast2_trip_updates": "int64",
-        "median_pings_per_min": "float64",
-        "total_min_w_gtfs": "int64",
     },
     align_dataframes=False
     ).persist()
     time2 = datetime.datetime.now()
-    logger.info(f"Pings metric: {time2-time1}")
+    logger.info(f"Grouping by each minute: {time2-time1}")
+    
+    # Final function
+    pings_trip_time_df = update_completeness(trips_by_one_min_df)
+    time3 = datetime.datetime.now()
+    logger.info(f"Spatial accuracy metric: {time3-time2}")
     
     ## Spatial accuracy  ##
     # Determine which trips have shapes associated with them
@@ -295,8 +302,8 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
 
     # Buffer the shapes 
     buffered_shapes_df = buffer_shapes(trips_with_shapes_df, analysis_date, 35)
-    time3 = datetime.datetime.now()
-    logger.info(f"Buffering: {time3-time2}")
+    time4 = datetime.datetime.now()
+    logger.info(f"Buffering: {time4-time3}")
     
     # Find the vps that fall into buffered shapes
     in_shape_df = vp_usable.map_partitions(
@@ -307,8 +314,8 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
         "location_timestamp_local": "datetime64[ns]",
         "is_within":"bool",
     },align_dataframes=False).persist()
-    time4 = datetime.datetime.now()
-    logger.info(f"Find vps that fall into shapes: {time4-time3}")
+    time5 = datetime.datetime.now()
+    logger.info(f"Find vps that fall into shapes: {time5-time4}")
     
     # Compare total vps for a trip versus total vps that 
     # fell in the recorded shape
@@ -319,8 +326,8 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
             "total_vp": "int32", 
             "vp_in_shape": "int32"},
     align_dataframes=False).persist()
-    time5 = datetime.datetime.now()
-    logger.info(f"Spatial accuracy grouping metric: {time5-time4}")
+    time6 = datetime.datetime.now()
+    logger.info(f"Spatial accuracy grouping metric: {time6-time5}")
     
     # Load trip speeds
     trip_speeds_df = load_trip_speeds(analysis_date)
@@ -335,8 +342,8 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
          .merge(trip_speeds_df, on ="trip_instance_key", how = "outer"))
     
     m1.to_parquet('./rt_v_schedule_trip_metrics.parquet')
-    time6 = datetime.datetime.now()
-    logger.info(f"Total run time for metrics on {analysis_date}: {time6-start}")
+    time7 = datetime.datetime.now()
+    logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
 
 if __name__ == "__main__":
     LOG_FILE = "../logs/rt_v_scheduled_trip_metrics.log"
