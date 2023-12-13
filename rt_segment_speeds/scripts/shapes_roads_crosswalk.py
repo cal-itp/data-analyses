@@ -1,4 +1,9 @@
 """
+Create crosswalk to show which shapes can sjoin
+to which road segments.
+
+We want to filter out vp when it's not traveling on 
+a scheduled shape.
 """
 import dask.dataframe as dd
 import dask_geopandas as dg
@@ -73,7 +78,7 @@ def create_shapes_to_roads_crosswalk(analysis_date: str, dict_inputs: dict):
     
     results = sjoin_results.compute()
     results.to_parquet(
-        f"{SEGMENT_GCS}shape_road_crosswalk_{analysis_date}.parquet"
+        f"{SEGMENT_GCS}roads_staging/shape_road_crosswalk_{analysis_date}.parquet"
     )
     
     end = datetime.datetime.now()
