@@ -10,12 +10,12 @@ import sys
 from loguru import logger
 
 from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import (SEGMENT_GCS, 
+from segment_speed_utils.project_vars import (SEGMENT_GCS, SHARED_GCS,
                                               CONFIG_PATH, PROJECT_CRS)
 
 
 def sjoin_shapes_to_roads(
-    road_segments: gpd.GeoDataFrame,
+    roads: gpd.GeoDataFrame,
     shapes: gpd.GeoDataFrame
 ) -> pd.DataFrame:
     
@@ -28,7 +28,7 @@ def sjoin_shapes_to_roads(
     
     shapes_to_roads = gpd.sjoin(
         shapes,
-        road_segments,
+        roads,
         how = "inner",
         predicate = "intersects"
     )[keep_cols].drop_duplicates()
@@ -50,12 +50,12 @@ def create_shapes_to_roads_crosswalk(analysis_date: str, dict_inputs: dict):
     ).pipe(
         helpers.remove_shapes_outside_ca
     ).drop(columns = "index_right")
-        
+                
     road_segments = dg.read_parquet(
-        f"{SEGMENT_GCS}road_segments_{analysis_date}",
+        f"{SHARED_GCS}road_segments/",
         columns = keep_road_cols + ["geometry"]
-    ).repartition(npartitions=5)
-    
+    ).repartition(npartitions=10)
+        
     keep_shape_cols = ["shape_array_key"]
     
     shape_cols_dtypes = shapes[keep_shape_cols].dtypes.to_dict()
@@ -83,7 +83,7 @@ def create_shapes_to_roads_crosswalk(analysis_date: str, dict_inputs: dict):
     
 if __name__ == "__main__":
     
-    from segment_speed_utils.project_vars import analysis_date_list
+    from segment_speed_utils.project_vars import analysis_date
     
     LOG_FILE = "../logs/sjoin_shapes_roads.log"
     
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     
     ROAD_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "road_segments")
 
-    for analysis_date in analysis_date_list:
+    for analysis_date in [analysis_date]:
         logger.info(f"Analysis date: {analysis_date}")
         create_shapes_to_roads_crosswalk(
             analysis_date, 
