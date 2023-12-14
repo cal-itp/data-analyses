@@ -2,11 +2,10 @@
 Attach stop times table to HQTA segments, 
 and flag which segments are HQ transit corridors.
 
-Takes 2.5 min to run.
+Takes <1 min to run.
 - down from 1 hr in v2 (was part of B1)
 """
 import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import numpy as np
@@ -14,17 +13,16 @@ import pandas as pd
 import sys
 
 from loguru import logger
-from typing import Union
 
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS, PROJECT_CRS
 
-def max_trips_by_group(df: dd.DataFrame, 
+def max_trips_by_group(df: pd.DataFrame, 
                        group_cols: list,
                        max_col: str = "n_trips"
-                      ) -> dd.DataFrame:
+                      ) -> pd.DataFrame:
     """
     Find the max trips, by stop_id or by hqta_segment_id.
     Put in a list of group_cols to find the max.
@@ -38,7 +36,7 @@ def max_trips_by_group(df: dd.DataFrame,
     return df2 
 
 
-def stop_times_aggregation_max_by_stop(stop_times: dd.DataFrame) -> dd.DataFrame:
+def stop_times_aggregation_max_by_stop(stop_times: pd.DataFrame) -> pd.DataFrame:
     """
     Take the stop_times table 
     and group by stop_id-departure hour
@@ -47,7 +45,7 @@ def stop_times_aggregation_max_by_stop(stop_times: dd.DataFrame) -> dd.DataFrame
     stop_cols = ["feed_key", "stop_id"]
 
     stop_times = stop_times.assign(
-        departure_hour = dd.to_datetime(
+        departure_hour = pd.to_datetime(
             stop_times.departure_sec, unit="s").dt.hour
     )
             
@@ -71,7 +69,7 @@ def stop_times_aggregation_max_by_stop(stop_times: dd.DataFrame) -> dd.DataFrame
         max_col = "n_trips"
     ).rename(columns = {"n_trips": "pm_max_trips"})
     
-    max_trips_by_stop = dd.merge(
+    max_trips_by_stop = pd.merge(
         am_trips, 
         pm_trips,
         on = stop_cols,
@@ -88,16 +86,16 @@ def stop_times_aggregation_max_by_stop(stop_times: dd.DataFrame) -> dd.DataFrame
     return max_trips_by_stop
 
 
-def hqta_segment_to_stop(hqta_segments: dg.GeoDataFrame, 
-                         stops: dg.GeoDataFrame
-                        ) -> dg.GeoDataFrame:    
+def hqta_segment_to_stop(hqta_segments: gpd.GeoDataFrame, 
+                         stops: gpd.GeoDataFrame
+                        ) -> gpd.GeoDataFrame:    
     """
     Spatially join hqta segments to stops. 
     Which stops fall into which segments?
     """
     segment_cols = ["hqta_segment_id", "segment_sequence"]
 
-    segment_to_stop = (dg.sjoin(
+    segment_to_stop = (gpd.sjoin(
             stops[["stop_id", "geometry"]],
             hqta_segments,
             how = "inner",
@@ -108,7 +106,7 @@ def hqta_segment_to_stop(hqta_segments: dg.GeoDataFrame,
     
     # After sjoin, we don't want to keep stop's point geom
     # Merge on hqta_segment_id's polygon geom
-    segment_to_stop2 = dd.merge(
+    segment_to_stop2 = pd.merge(
         hqta_segments,
         segment_to_stop,
         on = segment_cols
@@ -118,8 +116,9 @@ def hqta_segment_to_stop(hqta_segments: dg.GeoDataFrame,
 
 
 def hqta_segment_keep_one_stop(
-    hqta_segments: dg.GeoDataFrame, 
-    stop_times: pd.DataFrame) -> gpd.GeoDataFrame:
+    hqta_segments: gpd.GeoDataFrame, 
+    stop_times: pd.DataFrame
+) -> gpd.GeoDataFrame:
     """
     Since multiple stops can fall into the same segment, 
     keep the stop wiht the highest trips (sum across AM and PM).
@@ -127,13 +126,12 @@ def hqta_segment_keep_one_stop(
     Returns gdf where each segment only appears once.
     """
     stop_cols = ["feed_key", "stop_id"]
-    # dd.merge between dask dataframes can be expensive
-    # put pd.DataFrame on right if possible
-    segment_to_stop_times = dd.merge(
-            hqta_segments, 
-            stop_times,
-            on = stop_cols
-        )
+    
+    segment_to_stop_times = pd.merge(
+        hqta_segments, 
+        stop_times,
+        on = stop_cols
+    )
                       
     # Can't sort by multiple columns in dask,
     # so, find the max, then inner merge
@@ -141,14 +139,14 @@ def hqta_segment_keep_one_stop(
         segment_to_stop_times,
         group_cols = ["hqta_segment_id"],
         max_col = "n_trips"
-    ).compute()
+    )
     
     # Merge in and keep max trips observation
     # Since there might be duplicates still, where multiple stops all 
     # share 2 trips for that segment, do a drop duplicates at the end 
     max_trip_cols = ["hqta_segment_id", "am_max_trips", "pm_max_trips"]
     
-    segment_to_stop_unique = dd.merge(
+    segment_to_stop_unique = pd.merge(
         segment_to_stop_times,
         max_trips_by_segment,
         on = ["hqta_segment_id", "n_trips"],
@@ -157,8 +155,7 @@ def hqta_segment_keep_one_stop(
     
     # In the case of same number of trips overall, do a sort
     # with descending order for AM, then PM trips
-    segment_to_stop_gdf = segment_to_stop_unique.compute()
-    segment_to_stop_gdf = (segment_to_stop_gdf
+    segment_to_stop_gdf = (segment_to_stop_unique
                            .sort_values(max_trip_cols, 
                                         ascending=[True, False, False])
                             .drop_duplicates(subset="hqta_segment_id")
@@ -169,12 +166,12 @@ def hqta_segment_keep_one_stop(
 
 
 def sjoin_stops_and_stop_times_to_hqta_segments(
-    hqta_segments: Union[gpd.GeoDataFrame, dg.GeoDataFrame], 
-    stops: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
-    stop_times: Union[pd.DataFrame, dd.DataFrame],
+    hqta_segments: gpd.GeoDataFrame, 
+    stops: gpd.GeoDataFrame,
+    stop_times: pd.DataFrame,
     buffer_size: int = 50,
     hq_transit_threshold: int = 4,
-) -> dg.GeoDataFrame:
+) -> gpd.GeoDataFrame:
     """
     Take HQTA segments, draw a buffer around the linestrings.
     Spatial join the stops (points) to segments (now polygons).
@@ -225,19 +222,19 @@ if __name__ == "__main__":
     
     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
     # takes 1 min
-    stop_times = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
-    max_arrivals_by_stop = stop_times_aggregation_max_by_stop(stop_times)
+    max_arrivals_by_stop = helpers.import_scheduled_stop_times(
+        analysis_date
+    ).compute().pipe(stop_times_aggregation_max_by_stop)
     
-    max_arrivals_by_stop.compute().to_parquet(
+    max_arrivals_by_stop.to_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
     
     ## (2) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
-    hqta_segments = dg.read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
+    hqta_segments = gpd.read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
     stops = helpers.import_scheduled_stops(
         analysis_date,
-        get_pandas = False,
+        get_pandas = True,
         crs = PROJECT_CRS
     )
     max_arrivals_by_stop = pd.read_parquet(

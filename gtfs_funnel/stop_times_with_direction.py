@@ -2,13 +2,11 @@
 Create a schedule stop_times table with direction of travel
 between stops.
 """
+import dask.dataframe as dd
 import datetime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-
-from dask import delayed, compute
-from typing import Literal
 
 from calitp_data_analysis import utils
 from shared_utils import rt_utils
@@ -86,9 +84,9 @@ def get_projected_stop_meters(
     
 
 def find_prior_stop(
-    stop_times: dg.GeoDataFrame,
+    stop_times: gpd.GeoDataFrame,
     trip_stop_cols: list
-) -> dg.GeoDataFrame:
+) -> gpd.GeoDataFrame:
     """
     For trip-stop, find the previous stop (using stop sequence).
     Attach the previous stop's geometry.
