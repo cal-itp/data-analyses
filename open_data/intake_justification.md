@@ -17,6 +17,6 @@ Document links, justification, for why datasets need to be made public. Submit t
 
 High Quality Transit Areas, as described in Public Resources Code 21155, 21064.3, 21060.2, relies on the intersection of frequent transit service and is based on the General Transit Feed Specification (GTFS) data. This HQTA dataset provides four categories of high quality transit: rail, ferry, BRT, and the intersection of frequent bus corridors. 
 
-### Transit Routes / Stops
+### Transit Routes / Stops / Speeds
 
-The General Transit Feed Specification (GTFS) provides transit schedules, including transit route and stop information, in text files. The California Integrated Travel Project within Caltrans ingests GTFS data daily for all operators in the state, standardizes, and processes this data for storage in its data warehouse. This dataset compiles all the route and stop information for all CA transit operators and provides it in a geospatial format.
+The General Transit Feed Specification (GTFS) provides transit schedules, including transit route and stop information, in text files. The California Integrated Travel Project within Caltrans ingests GTFS data daily for all operators in the state, standardizes, and processes this data for storage in its data warehouse. This dataset compiles all the route and stop information for all CA transit operators and provides it in a geospatial format. It also compiles all the GTFS real-time vehicle positions data, processes it into a usable format as speeds.
