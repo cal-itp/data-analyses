@@ -19,7 +19,7 @@ import sys
 from loguru import logger
 
 # first install rt_segment_speeds, then _shared_utils
-# cd rt_segment_speeds && pip install -r requirements.txt && cd
+# cd rt_segment_speeds && pip install -r requirements.txt && cd data-analyses/_shared_utils && make setup_env
 # cd ../data-analyses/rt_scheduled_v_ran/scripts 
 
 # LOAD FILES
