@@ -4,7 +4,6 @@ Make a polygon version of HQ transit corridors for open data portal.
 From combine_and_visualize.ipynb
 """
 import datetime as dt
-import dask_geopandas as dg
 import geopandas as gpd
 import intake
 import pandas as pd
@@ -18,7 +17,7 @@ import D1_assemble_hqta_points as assemble_hqta_points
 import utilities
 from calitp_data_analysis import utils, geography_utils
 from D1_assemble_hqta_points import (EXPORT_PATH, add_route_info)
-from update_vars import analysis_date
+from update_vars import analysis_date, PROJECT_CRS
 
 fs = get_fs()
 
@@ -73,7 +72,7 @@ def get_dissolved_hq_corridor_bus(
 
 
 def filter_and_buffer(hqta_points: gpd.GeoDataFrame, 
-                      hqta_segments: dg.GeoDataFrame, 
+                      hqta_segments: gpd.GeoDataFrame, 
                       analysis_date: str
                      ) -> gpd.GeoDataFrame:
     """
@@ -82,14 +81,9 @@ def filter_and_buffer(hqta_points: gpd.GeoDataFrame,
     Buffers are already drawn for corridors and stops, so 
     draw new buffers, and address each hqta_type separately.
     """
-    stops = (hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
-             .to_crs(geography_utils.CA_NAD83Albers)
-            )
+    stops = hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
     
-    corridor_segments = hqta_segments.to_crs(
-        geography_utils.CA_NAD83Albers).compute()
-    
-    corridors = get_dissolved_hq_corridor_bus(corridor_segments, analysis_date)
+    corridors = get_dissolved_hq_corridor_bus(hqta_segments, analysis_date)
     
     # General buffer distance: 1/2mi ~= 805 meters
     # Bus corridors are already buffered 100 meters, so will buffer 705 meters
@@ -97,13 +91,10 @@ def filter_and_buffer(hqta_points: gpd.GeoDataFrame,
         geometry = stops.geometry.buffer(705)
     )
     
-    hqta_polygons = (
-        pd.concat([
-            corridors, 
-            stops
-        ], axis=0)
-        .to_crs(geography_utils.WGS84)
-    )
+    hqta_polygons = pd.concat([
+        corridors, 
+        stops
+    ], axis=0).to_crs(geography_utils.WGS84)
     
     return hqta_polygons
 
@@ -144,8 +135,8 @@ if __name__=="__main__":
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
-    hqta_points = catalog.hqta_points.read()
-    bus_hq_corr = prep_clip.prep_bus_corridors()
+    hqta_points = catalog.hqta_points.read().to_crs(PROJECT_CRS)
+    bus_hq_corr = prep_clip.prep_bus_corridors().to_crs(PROJECT_CRS)
     
     # Filter and buffer for stops (805 m) and corridors (755 m)
     # and add agency_names

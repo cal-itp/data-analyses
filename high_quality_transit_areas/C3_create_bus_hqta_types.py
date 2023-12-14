@@ -19,7 +19,8 @@ from loguru import logger
 import C1_prep_pairwise_intersections as prep_clip
 from calitp_data_analysis import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+from update_vars import analysis_date, COMPILED_CACHED_VIEWS, PROJECT_CRS
+from segment_speed_utils import helpers
 
 
 # Input files
@@ -131,8 +132,12 @@ if __name__ == "__main__":
     bus_intersections = buffer_around_intersections(buffer_size=100)
 
     # Grab point geom with all stops
-    all_stops = gpd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
+    all_stops = helpers.import_scheduled_stops(
+        analysis_date,
+        get_pandas = True,
+        crs = PROJECT_CRS
+    )
+    
     logger.info("grab all stops")
     
     # Create hqta_type == major_stop_bus
