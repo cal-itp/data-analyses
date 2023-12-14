@@ -21,7 +21,8 @@ import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
 from calitp_data_analysis import geography_utils, utils
 from shared_utils import schedule_rt_utils
-from update_vars import analysis_date, TEMP_GCS, COMPILED_CACHED_VIEWS
+from update_vars import analysis_date, TEMP_GCS, COMPILED_CACHED_VIEWS, PROJECT_CRS
+from segment_speed_utils import helpers
 
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
 
@@ -60,13 +61,16 @@ def add_route_info(hqta_points: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Use feed_key-stop_id to add route_id back in, 
     using the trips and stop_times table.
     """    
-    stop_times = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet", 
+    stop_times = helpers.import_scheduled_stop_times(
+        analysis_date,
         columns = ["feed_key", "stop_id", "trip_id"]
-    )
-    trips = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet", 
-        columns = ["feed_key", "trip_id", "route_id"]
+    ).compute()
+
+    
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["feed_key", "trip_id", "route_id"],
+        get_pandas = True
     )
     
     stop_cols = ["feed_key", "stop_id"]
@@ -204,9 +208,10 @@ if __name__=="__main__":
     logger.info(f"Analysis date: {analysis_date}")    
     start = dt.datetime.now()
     
-    rail_ferry_brt = rail_ferry_brt_extract.get_rail_ferry_brt_extract()
-    major_stop_bus = catalog.major_stop_bus.read()
-    stops_in_corridor = catalog.stops_in_hq_corr.read()
+    rail_ferry_brt = rail_ferry_brt_extract.get_rail_ferry_brt_extract().to_crs(
+        PROJECT_CRS)
+    major_stop_bus = catalog.major_stop_bus.read().to_crs(PROJECT_CRS)
+    stops_in_corridor = catalog.stops_in_hq_corr.read().to_crs(PROJECT_CRS)
     max_arrivals_by_stop = pd.read_parquet(
         f"{utilities.GCS_FILE_PATH}max_arrivals_by_stop.parquet", 
         columns = ["feed_key", "stop_id", "am_max_trips", "pm_max_trips"]

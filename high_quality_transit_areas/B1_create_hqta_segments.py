@@ -9,17 +9,14 @@ Cannot use symmetric difference unless we downgrade pandas to 1.1.3
 https://gis.stackexchange.com/questions/414317/gpd-overlay-throws-intcastingnanerror.
 Too complicated to change between pandas versions.
 
-Takes 8 min to run 
+Takes ~5 min to run 
 - down from 1 hr in v2 
 - down from several hours v1
 
-TODO: speed up geography_utils.cut_segments to be faster.
-7.5 min is spent on this step.
 """
 import os
 os.environ['USE_PYGEOS'] = '0'
 import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import pandas as pd
@@ -146,7 +143,8 @@ def difference_overlay_by_route(
 
 def select_shapes_and_segment(
     gdf: gpd.GeoDataFrame,
-    segment_length: int) -> gpd.GeoDataFrame: 
+    segment_length: int
+) -> gpd.GeoDataFrame: 
     """
     For routes where only 1 shape_id was chosen for longest route_length,
     it's ready to cut into segments.
@@ -177,11 +175,8 @@ def select_shapes_and_segment(
         for r in routes_both_dir
     ]
   
-    two_directions_overlay_results = [
-        compute(i)[0] for i in two_directions_overlay_results]
-    
-    two_direction_results = pd.concat(two_directions_overlay_results, axis=0)
-    
+    two_direction_results = dd.from_delayed(two_directions_overlay_results).compute()
+        
     ready_for_segmenting = pd.concat(
         [one_direction, two_direction_results], 
         axis=0)[["route_key", "geometry"]]
@@ -230,7 +225,8 @@ def select_shapes_and_segment(
 
 
 def find_primary_direction_across_hqta_segments(
-    hqta_segments_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    hqta_segments_gdf: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
     """
     For each hqta_segment_id, grab the origin / destination of 
     each segment. For a route, find the route_direction that appears
@@ -302,19 +298,21 @@ if __name__=="__main__":
     logger.info(f"merge routes to trips: {time1 - start}")
     
     # Cut into HQTA segments
-    hqta_segments = select_shapes_and_segment(
+    hqta_segments = delayed(select_shapes_and_segment)(
         longest_shapes, HQTA_SEGMENT_LENGTH)
     
     # Since route_direction at the route-level could yield both 
     # north-south and east-west 
     # for a given route, use the segments to determine the primary direction
-    hqta_segments_with_dir = find_primary_direction_across_hqta_segments(
+    hqta_segments_with_dir = delayed(find_primary_direction_across_hqta_segments)(
         hqta_segments)
+    
+    hqta_segments_with_dir = compute(hqta_segments_with_dir)[0]
     
     utils.geoparquet_gcs_export(
         hqta_segments_with_dir, 
         GCS_FILE_PATH,
-        "hqta_segments_test"
+        "hqta_segments"
     )
     
     time2 = dt.datetime.now()
