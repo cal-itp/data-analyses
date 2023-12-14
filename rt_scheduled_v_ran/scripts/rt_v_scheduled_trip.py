@@ -18,8 +18,7 @@ import datetime
 import sys
 from loguru import logger
 
-# first install rt_segment_speeds, then _shared_utils
-# cd rt_segment_speeds && pip install -r requirements.txt && cd data-analyses/_shared_utils && make setup_env
+# cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
 # cd ../data-analyses/rt_scheduled_v_ran/scripts 
 
 # LOAD FILES
@@ -118,8 +117,6 @@ def update_completeness(df: pd.DataFrame):
     For each trip: find the median GTFS pings per minute,
     the total minutes with at least 1 GTFS ping per minute,
     and total minutes with at least 2 GTFS pings per minute.
-    
-    Use result  from trips_by_one_min as the argument.
     """
     # Need a copy of numer of pings per minute to count for total minutes w gtfs
     df["total_min_w_gtfs"] = df.number_of_pings_per_minute
@@ -130,14 +127,14 @@ def update_completeness(df: pd.DataFrame):
         .agg(
             {
                 "min_w_atleast2_trip_updates": "sum",
-                "number_of_pings_per_minute": "mean",
+                "number_of_pings_per_minute": "sum",
                 "total_min_w_gtfs": "count",
             }
         )
         .reset_index()
         .rename(
             columns={
-                "number_of_pings_per_minute": "avg_pings_per_min",
+                "number_of_pings_per_minute": "total_pings_for_trip",
             }
         )
     )
@@ -257,18 +254,20 @@ def total_counts(result: dd.DataFrame):
 # Complete
 def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     start = datetime.datetime.now()
-    print(f"For {analysis_date}, started running script at {start}")
+    print(f"Started running script at {start} for {analysis_date} metrics")
     
     """
     Keep for testing temporarily
     operator = "Bay Area 511 Muni VehiclePositions"
-    """
+    
     gtfs_key = "7cc0cb1871dfd558f11a2885c145d144"
-    vp_usable = load_vp_usable(analysis_date)
     
     vp_usable = (vp_usable.loc
     [vp_usable.schedule_gtfs_dataset_key ==gtfs_key]
     .reset_index(drop=True))
+    
+    """
+    vp_usable = load_vp_usable(analysis_date)
     
     ## Find total rt service minutes ##
     rt_service_df = total_trip_time(vp_usable)
@@ -329,10 +328,9 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     time6 = datetime.datetime.now()
     logger.info(f"Spatial accuracy grouping metric: {time6-time5}")
     
+    ## Merges ##
     # Load trip speeds
     trip_speeds_df = load_trip_speeds(analysis_date)
-    
-    # Merges
     rt_service_df = rt_service_df.compute()
     pings_trip_time_df = pings_trip_time_df.compute()
     spatial_accuracy_df = spatial_accuracy_df.compute()
@@ -341,7 +339,15 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
          .merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer")
          .merge(trip_speeds_df, on ="trip_instance_key", how = "outer"))
     
-    m1.to_parquet(f"{GCS_FILE_PATH}rt_vs_schedule/trip_{analysis_date}_metrics.parquet")
+    # Some metrics
+    m1['pings_per_min'] = (m1.total_pings_for_trip / m1.rt_service_min)
+    m1['spatial_accuracy_pct'] = (m1.vp_in_shape/m1.total_vp) * 100
+    m1['rt_w_gtfs_pct'] = (m1.total_min_w_gtfs / m1.rt_service_min) * 100
+    m1['rt_v_scheduled_trip_time_pct'] = (m1.rt_service_min / m1.service_minutes - 1) * 100
+    
+    # Save
+    m1.to_parquet(f"{GCS_FILE_PATH}rt_vs_schedule/trip_level_metrics/{analysis_date}_metrics.parquet")
+    
     time7 = datetime.datetime.now()
     logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
 
