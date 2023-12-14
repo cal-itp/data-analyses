@@ -97,3 +97,7 @@
 2023-12-07 17:02:47.027 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:01:01.312088
 2023-12-07 17:03:23.124 | INFO     | __main__:main:190 - interpolate stop arrival: 0:00:36.097307
 2023-12-07 17:03:28.969 | INFO     | __main__:main:196 - execution time for stop_segments: 0:01:43.254294
+2023-12-14 11:37:11.735 | INFO     | __main__:<module>:215 - Analysis date: 2023-12-13
+2023-12-14 11:39:47.181 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:02:35.392831
+2023-12-14 11:40:48.345 | INFO     | __main__:main:190 - interpolate stop arrival: 0:01:01.164427
+2023-12-14 11:40:59.919 | INFO     | __main__:main:196 - execution time for stop_segments: 0:03:48.131217
