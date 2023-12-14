@@ -12,7 +12,7 @@ preprocess:
 	python vp_keep_usable.py
 	python vp_direction.py
 	python cleanup.py
-	#python route_typologies.py
+	python route_typologies.py
     
     
 funnel_gtfs_data: 
