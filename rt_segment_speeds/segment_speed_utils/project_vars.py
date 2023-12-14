@@ -9,7 +9,7 @@ PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/"
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 PUBLIC_GCS = "gs://calitp-publish-data-analysis/"
 
-analysis_date = rt_dates.DATES["oct2023"]
+analysis_date = rt_dates.DATES["dec2023"]
 
 days = ["a", "b", "", "c", "d", "e", "f"] 
 months = [
@@ -19,7 +19,7 @@ months = [
 ]
 
 analysis_date_list = [
-    rt_dates.DATES[f"{m}2023"] for m in months
+    rt_dates.DATES["dec2023"]
 ]
 
 PROJECT_CRS = "EPSG:3310"
