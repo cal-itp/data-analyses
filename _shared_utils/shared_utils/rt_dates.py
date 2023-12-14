@@ -46,6 +46,7 @@ DATES = {
     "oct2023e": "2023-10-14",  # add weekend dates for SB 125 service increase
     "oct2023f": "2023-10-15",
     "nov2023": "2023-11-15",
+    "dec2023": "2023-12-13",
 }
 
 
