@@ -7,13 +7,12 @@ Takes 1 min to run.
 - down from 30 min in v2
 - down from several hours in v1 in combine_and_visualize.ipynb
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime as dt
 import geopandas as gpd
 import pandas as pd
 import sys
 
+from dask import delayed, compute
 from loguru import logger
 
 from calitp_data_analysis import utils
@@ -23,26 +22,28 @@ from update_vars import analysis_date
 # Input files
 ALL_BUS = catalog_filepath("all_bus")
 
-def prep_bus_corridors() -> dg.GeoDataFrame:
+def prep_bus_corridors() -> gpd.GeoDataFrame:
     """
     Import all hqta segments with hq_transit_corr tagged.
     
     Only keep if hq_transit_corr == True
     """
-    bus_hqtc = dg.read_parquet(ALL_BUS)
+    bus_hqtc = gpd.read_parquet(ALL_BUS).query(
+        'hq_transit_corr==True'
+    ).reset_index(drop=True)
     
-    bus_hqtc2 = bus_hqtc[bus_hqtc.hq_transit_corr==True].reset_index(drop=True)
-    bus_hqtc2 = bus_hqtc2.assign(
+    bus_hqtc = bus_hqtc.assign(
         hqta_type = "hqta_transit_corr",
         route_type = "3"
     )
     
-    return bus_hqtc2
+    return bus_hqtc
 
 
 def sjoin_against_other_operators(
-    in_group_df: dg.GeoDataFrame, 
-    out_group_df: dg.GeoDataFrame) -> dd.DataFrame: 
+    in_group_df: gpd.GeoDataFrame, 
+    out_group_df: gpd.GeoDataFrame
+) -> pd.DataFrame: 
     """
     Spatial join of the in group vs the out group. 
     This could be the operator vs other operators, 
@@ -55,7 +56,7 @@ def sjoin_against_other_operators(
     """
     route_cols = ["hqta_segment_id", "route_direction"]
     
-    s1 = dg.sjoin(
+    s1 = gpd.sjoin(
         in_group_df[route_cols + ["geometry"]], 
         out_group_df[route_cols  + ["geometry"]],
         how = "inner",
@@ -73,45 +74,7 @@ def sjoin_against_other_operators(
           .reset_index(drop=True)
     )    
     
-    return route_pairs
-
-
-def compile_operator_intersections(
-    gdf: dg.GeoDataFrame) -> dd.DataFrame:
-    """
-    Grab one operator's routes, and do sjoin against all other operators' routes.
-    Look BETWEEN operators and WITHIN operators at the same time.
-    
-    Since only orthogonal routes are allowed to intersect,
-    put an east-west df on the left, and a north-south df on the right.
-    For a given operator's east-west routes, it can be compared to both
-    north-south routes from other operators and itself.
-    
-    Concatenate all the small dask dfs into 1 dask df by the end.
-    
-    https://stackoverflow.com/questions/56072129/scale-and-concatenate-pandas-dataframe-into-a-dask-dataframe
-    """
-    results = []
-
-    # Part 1: take east-west routes for an operator, and compare against
-    # all north-south routes for itself and other operators
-    all_east_west = gdf[gdf.route_direction=="east-west"]
-    all_north_south = gdf[gdf.route_direction=="north-south"]
-
-    results.append(sjoin_against_other_operators(
-        all_east_west, all_north_south))
-        
-    # Part 2: take north-south routes for an operator, and compare against
-    # all east-west routes for itself and other operators
-    # Even though this necessarily would repeat results from earlier, just swapped, 
-    # like RouteA-RouteB becomes RouteB-RouteA, use this to key in easier later.
-    results.append(sjoin_against_other_operators(
-        all_north_south, all_east_west)) 
-    
-    # Concatenate all the dask dfs in the list and get it into one dask df
-    ddf = dd.multi.concat(results, axis=0).drop_duplicates().reset_index(drop=True)
-    
-    return ddf    
+    return route_pairs   
 
 
 if __name__=="__main__":
@@ -130,12 +93,25 @@ if __name__=="__main__":
     corridors = prep_bus_corridors()   
         
     # Route intersections across operators
-    intersection_pairs = compile_operator_intersections(corridors)
+    east_west_corr = corridors[corridors.route_direction == "east-west"]
+    north_south_corr = corridors[corridors.route_direction == "north-south"]
+    
+    # Part 1: take east-west routes for an operator, and compare against
+    # all north-south routes for itself and other operators
+    # Part 2: take north-south routes for an operator, and compare against
+    # all east-west routes for itself and other operators
+    # Even though this necessarily would repeat results from earlier, just swapped, 
+    # like RouteA-RouteB becomes RouteB-RouteA, use this to key in easier later.
+    results = [
+        sjoin_against_other_operators(north_south_corr, east_west_corr),
+        sjoin_against_other_operators(east_west_corr, north_south_corr)
+    ]
+    
+    pairwise_intersections = pd.concat(results, axis=0, ignore_index=True)
 
     time1 = dt.datetime.now()
     logger.info(f"get pairwise table: {time1 - start}")
 
-    pairwise_intersections = intersection_pairs.compute()
     
     routes_p1 = pairwise_intersections.hqta_segment_id.unique().tolist()
     routes_p2 = pairwise_intersections.intersect_hqta_segment_id.unique().tolist()
@@ -148,7 +124,7 @@ if __name__=="__main__":
             (corridors.hqta_segment_id.isin(routes_p2))]
         .drop_duplicates()
         .reset_index(drop=True)
-    ).compute()
+    )
     
     subset_corridors = (subset_corridors.sort_values(
                     ["feed_key", "route_id", "hqta_segment_id"], 
@@ -162,10 +138,11 @@ if __name__=="__main__":
     pairwise_intersections.to_parquet(
         f"{GCS_FILE_PATH}pairwise.parquet")
     
-    utils.geoparquet_gcs_export(subset_corridors,
-                                GCS_FILE_PATH,
-                                'subset_corridors'
-                       )
+    utils.geoparquet_gcs_export(
+        subset_corridors,
+        GCS_FILE_PATH,
+        'subset_corridors'
+    )
     
     end = dt.datetime.now()
     logger.info(f"execution time: {end-start}")
