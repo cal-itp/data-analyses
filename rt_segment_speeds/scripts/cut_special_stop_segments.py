@@ -14,7 +14,7 @@ import cut_normal_stop_segments
 from calitp_data_analysis import utils
 from segment_speed_utils import (array_utils, helpers, 
                                 wrangle_shapes)
-from segment_speed_utils.project_vars import (SEGMENT_GCS, analysis_date,
+from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               CONFIG_PATH, PROJECT_CRS)
 
 
@@ -283,6 +283,8 @@ def find_special_cases_and_setup_df(
 
 if __name__ == "__main__":
     
+    from segment_speed_utils.project_vars import analysis_date
+
     LOG_FILE = "../logs/cut_stop_segments.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
