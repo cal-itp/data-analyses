@@ -17,7 +17,7 @@ from loguru import logger
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from utilities import GCS_FILE_PATH
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS, PROJECT_CRS
+from update_vars import analysis_date, PROJECT_CRS
 
 def max_trips_by_group(df: pd.DataFrame, 
                        group_cols: list,
