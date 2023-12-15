@@ -21,7 +21,7 @@ import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
 import utilities
 from calitp_data_analysis import geography_utils, utils
 from shared_utils import schedule_rt_utils
-from update_vars import analysis_date, TEMP_GCS, COMPILED_CACHED_VIEWS, PROJECT_CRS
+from update_vars import analysis_date, TEMP_GCS, PROJECT_CRS
 from segment_speed_utils import helpers
 
 EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
