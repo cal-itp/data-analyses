@@ -31,7 +31,7 @@ from calitp_data_analysis import geography_utils, utils
 from shared_utils import rt_utils, geog_utils_to_add
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from utilities import GCS_FILE_PATH
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS
+from update_vars import analysis_date
                         
 HQTA_SEGMENT_LENGTH = 1_250 # meters
 
