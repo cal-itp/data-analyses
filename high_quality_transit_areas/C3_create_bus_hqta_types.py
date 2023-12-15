@@ -19,7 +19,7 @@ from loguru import logger
 import C1_prep_pairwise_intersections as prep_clip
 from calitp_data_analysis import utils
 from utilities import catalog_filepath, GCS_FILE_PATH
-from update_vars import analysis_date, COMPILED_CACHED_VIEWS, PROJECT_CRS
+from update_vars import analysis_date, PROJECT_CRS
 from segment_speed_utils import helpers
 
 
