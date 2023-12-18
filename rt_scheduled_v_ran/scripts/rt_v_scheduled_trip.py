@@ -342,7 +342,7 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     # Some metrics
     m1['pings_per_min'] = (m1.total_pings_for_trip / m1.rt_service_min)
     m1['spatial_accuracy_pct'] = (m1.vp_in_shape/m1.total_vp) * 100
-    m1['rt_w_gtfs_pct'] = (m1.total_min_w_gtfs / m1.rt_service_min) * 100
+    m1['rt_triptime_w_gtfs_pct'] = (m1.total_min_w_gtfs / m1.rt_service_min) * 100
     m1['rt_v_scheduled_trip_time_pct'] = (m1.rt_service_min / m1.service_minutes - 1) * 100
     
     # Save
@@ -352,12 +352,11 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
 
 if __name__ == "__main__":
+    LOG_FILE = "../logs/rt_v_scheduled_trip_metrics.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
     for date in update_vars2.analysis_date_list:
-        LOG_FILE = "../logs/rt_v_scheduled_trip_metrics.log"
-        logger.add(LOG_FILE, retention="3 months")
-        logger.add(sys.stderr, 
-                   format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-                   level="INFO")
-
         vp_usable_metrics(date)
         print('Done')
