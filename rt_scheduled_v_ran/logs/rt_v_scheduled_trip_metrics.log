@@ -112,3 +112,24 @@
 2023-12-14 13:21:20.201 | INFO     | __main__:vp_usable_metrics:353 - Total run time for metrics on 2023-03-15: 0:18:18.429882
 2023-12-14 13:21:20.201 | INFO     | __main__:vp_usable_metrics:353 - Total run time for metrics on 2023-03-15: 0:18:18.429882
 2023-12-14 13:21:20.201 | INFO     | __main__:vp_usable_metrics:353 - Total run time for metrics on 2023-03-15: 0:18:18.429882
+2023-12-18 10:36:40.657 | INFO     | __main__:vp_usable_metrics:276 - Rt service min: 0:00:01.283826
+2023-12-18 10:38:40.557 | INFO     | __main__:vp_usable_metrics:291 - Grouping by each minute: 0:01:59.900216
+2023-12-18 10:38:40.575 | INFO     | __main__:vp_usable_metrics:296 - Spatial accuracy metric: 0:00:00.017627
+2023-12-18 10:41:18.330 | INFO     | __main__:vp_usable_metrics:305 - Buffering: 0:02:37.755476
+2023-12-18 10:56:11.358 | INFO     | __main__:vp_usable_metrics:317 - Find vps that fall into shapes: 0:14:53.027421
+2023-12-18 10:56:14.353 | INFO     | __main__:vp_usable_metrics:329 - Spatial accuracy grouping metric: 0:00:02.995883
+2023-12-18 10:57:21.216 | INFO     | __main__:vp_usable_metrics:352 - Total run time for metrics on 2023-08-15: 0:20:41.843267
+2023-12-18 10:57:21.718 | INFO     | __main__:vp_usable_metrics:276 - Rt service min: 0:00:00.420929
+2023-12-18 10:59:21.077 | INFO     | __main__:vp_usable_metrics:291 - Grouping by each minute: 0:01:59.358702
+2023-12-18 10:59:21.097 | INFO     | __main__:vp_usable_metrics:296 - Spatial accuracy metric: 0:00:00.019517
+2023-12-18 11:01:59.021 | INFO     | __main__:vp_usable_metrics:305 - Buffering: 0:02:37.923989
+2023-12-18 11:15:55.755 | INFO     | __main__:vp_usable_metrics:317 - Find vps that fall into shapes: 0:13:56.734330
+2023-12-18 11:15:58.445 | INFO     | __main__:vp_usable_metrics:329 - Spatial accuracy grouping metric: 0:00:02.690374
+2023-12-18 11:17:24.207 | INFO     | __main__:vp_usable_metrics:352 - Total run time for metrics on 2023-07-12: 0:20:02.909633
+2023-12-18 11:17:24.824 | INFO     | __main__:vp_usable_metrics:276 - Rt service min: 0:00:00.554015
+2023-12-18 11:19:27.549 | INFO     | __main__:vp_usable_metrics:291 - Grouping by each minute: 0:02:02.724711
+2023-12-18 11:19:27.566 | INFO     | __main__:vp_usable_metrics:296 - Spatial accuracy metric: 0:00:00.017343
+2023-12-18 11:22:00.708 | INFO     | __main__:vp_usable_metrics:305 - Buffering: 0:02:33.141334
+2023-12-18 11:35:07.478 | INFO     | __main__:vp_usable_metrics:317 - Find vps that fall into shapes: 0:13:06.769992
+2023-12-18 11:35:10.327 | INFO     | __main__:vp_usable_metrics:329 - Spatial accuracy grouping metric: 0:00:02.849241
+2023-12-18 11:36:22.118 | INFO     | __main__:vp_usable_metrics:352 - Total run time for metrics on 2023-06-14: 0:18:57.847299
