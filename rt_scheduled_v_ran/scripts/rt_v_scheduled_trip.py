@@ -19,7 +19,7 @@ import sys
 from loguru import logger
 
 # cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
-# cd ../data-analyses/rt_scheduled_v_ran/scripts 
+# cd ../rt_scheduled_v_ran/scripts 
 
 # LOAD FILES
 def load_trip_speeds(analysis_date):
