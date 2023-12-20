@@ -357,6 +357,6 @@ if __name__ == "__main__":
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
-    for date in update_vars2.analysis_date_list:
+    for date in update_vars.analysis_date_list:
         vp_usable_metrics(date)
         print('Done')
