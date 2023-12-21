@@ -137,6 +137,26 @@ def concatenate_speeds(date_list: list) -> pd.DataFrame:
     return df_concat
     
 
+def rough_stop_sequence_ordering(
+    df: pd.DataFrame, 
+    group_cols: list
+) -> pd.DataFrame:
+    """
+    Whenever we aggregate trips to anything such as shape_id
+    or route_id, we lose the stop_sequence.
+    Let's get a rough idea of what the stop sequence ordering is,
+    even if it's hard to calculate depending on complexity of shapes and stops.
+    """
+    mean_stop_seq = (df
+                 .groupby(group_cols, observed=True, group_keys=False)
+                 .agg({"stop_sequence": "mean"})
+                 .reset_index()
+                 .rename(columns = {"stop_sequence": "mean_stop_sequence"})
+                )
+    
+    return mean_stop_seq
+    
+    
 def time_span_labeling(date_list: list) -> tuple[str]: 
     """
     If we grab a week's worth of trips, we'll
@@ -212,12 +232,12 @@ if __name__ == "__main__":
     time_cols = ["peak_offpeak", "weekday_weekend"]
     
     time1 = datetime.datetime.now()
-
+    
     daytype_peak_stop_seg_speeds = delayed(calculate_avg_speeds)(
         df[df.speed_mph <= MAX_SPEED], 
         operator_cols + shape_stop_cols + time_cols
     )
-    
+        
     daytype_peak_stop_seg_speeds = compute(daytype_peak_stop_seg_speeds)[0]
     
     daytype_peak_stop_seg_speeds = add_time_span_columns(
@@ -240,11 +260,21 @@ if __name__ == "__main__":
         operator_cols + route_dir_cols + time_cols
     )
     
+    mean_stop_seq = delayed(rough_stop_sequence_ordering)(
+        df[df.speed_mph <= MAX_SPEED],
+        operator_cols + route_dir_cols + time_cols        
+    )
+    
     daytype_peak_route_dir_speeds = compute(daytype_peak_route_dir_speeds)[0]
+    mean_stop_seq = compute(mean_stop_seq)[0]
     
     daytype_peak_route_dir_speeds = add_time_span_columns(
         daytype_peak_route_dir_speeds, 
         time_span_num
+    ).merge(
+        mean_stop_seq,
+        on = operator_cols + route_dir_cols + time_cols,
+        how = "inner"
     )    
     
     daytype_peak_route_dir_speeds.to_parquet(
