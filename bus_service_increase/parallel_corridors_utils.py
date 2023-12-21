@@ -15,11 +15,11 @@ from typing import Union
 
 from calitp_data_analysis import calitp_color_palette as cp
 from calitp_data_analysis import styleguide
-from D1_setup_parallel_trips_with_stops import ANALYSIS_DATE
 
 alt.themes.register("calitp_theme", styleguide.calitp_theme)
 
-catalog = intake.open_catalog("./*.yml")
+ANALYSIS_DATE = "2022-05-04"
+catalog = intake.open_catalog("./catalog.yml")
 
 PCT_COMPETITIVE_THRESHOLD = 0.5
 
@@ -33,7 +33,8 @@ def operator_parallel_competitive_stats(itp_id: int,
     """
     c = competitive_cutoff
     
-    df = catalog.competitive_route_variability.read()
+    df = catalog.competitive_route_variability(
+        analysis_date = ANALYSIS_DATE).read()
 
     df = df[(df.calitp_itp_id == itp_id)]
     

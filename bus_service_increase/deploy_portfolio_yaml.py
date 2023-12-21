@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Union
 from bus_service_utils import utils
 
+ANALYSIS_DATE = "2022-05-04"
 catalog = intake.open_catalog("./bus_service_increase/*.yml")
 
 # these come from parallel_corridors_utils
@@ -58,7 +59,11 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    df = catalog.competitive_route_variability.read()  
+    # See example here how to inject and overwrite a paramter
+    # https://github.com/intake/intake/pull/562
+    df = catalog.competitive_route_variability(
+        analysis_date = ANALYSIS_DATE
+    ).read()  
     
     operators_to_include = valid_operators(df)
     

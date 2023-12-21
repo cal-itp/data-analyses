@@ -8,30 +8,26 @@ build_competitive_corridors:
 	python bus_service_increase/deploy_portfolio_yaml.py   
 	python portfolio/portfolio.py build competitive_corridors --deploy 
 	git add portfolio/competitive_corridors/district_*/ portfolio/competitive_corridors/*.yml portfolio/competitive_corridors/*.md 
-	git add portfolio/sites/ 
+	git add portfolio/sites/competitive_corridors.yml 
+	netlify deploy --site=cal-itp-data-analyses --dir=portfolio/competitive_corridors/_build/html/ --alias=competitive_corridors    
     #--config=./portfolio/test-analyses.yml
 
 build_dla_reports:
-	#cd dla/ && pip install -r requirements.txt && cd ..
-	#git rm portfolio/dla/ -rf
+	cd dla/ && pip install -r requirements.txt && cd ..
+	git rm portfolio/dla/ -rf
 	python portfolio/portfolio.py build dla --deploy 
 	git add portfolio/dla/district_*/ portfolio/dla/*.yml portfolio/dla/*.md 
 	git add portfolio/sites/dla.yml
+	netlify deploy --site=cal-itp-data-analyses --dir=portfolio/dla/_build/html/ --alias=dla
     
 build_quarterly_performance_metrics:
-	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	git rm portfolio/quarterly_performance_metrics/ -rf
-	python portfolio/portfolio.py clean quarterly_performance_metrics
+	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
+	#git rm portfolio/quarterly_performance_metrics/ -rf
+	#python portfolio/portfolio.py clean quarterly_performance_metrics
 	python portfolio/portfolio.py build quarterly_performance_metrics --deploy 
 	git add portfolio/quarterly_performance_metrics/*.ipynb portfolio/quarterly_performance_metrics/*.yml portfolio/quarterly_performance_metrics/*.md 
-	git add portfolio/sites/ 
-    
-build_hqta:
-	#git rm portfolio/hqta/ -rf
-	python portfolio/portfolio.py clean hqta
-	python portfolio/portfolio.py build hqta --deploy 
-	git add portfolio/hqta/*.ipynb portfolio/hqta/*.yml portfolio/hqta/*.md 
-	git add portfolio/sites/     
+	netlify deploy --site=cal-itp-data-analyses --dir=portfolio/quarterly_performance_metrics/_build/html/ --alias=quarterly_performance_metrics    
+	git add portfolio/sites/quarterly_performance_metrics.yml 
 
 add_precommit:
 	pip install pre-commit
