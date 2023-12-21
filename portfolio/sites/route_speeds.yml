@@ -1,0 +1,252 @@
+directory: ./rt_segment_speeds/
+notebook: ./rt_segment_speeds/26_weekly_avg_speeds.ipynb
+parts:
+- chapters:
+  - caption: Alameda-Contra Costa Transit District
+    params:
+      name: Alameda-Contra Costa Transit District
+  - caption: Anaheim Transportation Network
+    params:
+      name: Anaheim Transportation Network
+  - caption: Antelope Valley Transit Authority
+    params:
+      name: Antelope Valley Transit Authority
+  - caption: Banning Pass Transit
+    params:
+      name: Banning Pass Transit
+  - caption: Butte County Association of Governments
+    params:
+      name: Butte County Association of Governments
+  - caption: Central Contra Costa Transit Authority
+    params:
+      name: Central Contra Costa Transit Authority
+  - caption: City and County of San Francisco
+    params:
+      name: City and County of San Francisco
+  - caption: City of Avalon
+    params:
+      name: City of Avalon
+  - caption: City of Beaumont
+    params:
+      name: City of Beaumont
+  - caption: City of Burbank
+    params:
+      name: City of Burbank
+  - caption: City of Commerce
+    params:
+      name: City of Commerce
+  - caption: City of Culver City
+    params:
+      name: City of Culver City
+  - caption: City of Elk Grove
+    params:
+      name: City of Elk Grove
+  - caption: City of Escalon
+    params:
+      name: City of Escalon
+  - caption: City of Fairfield
+    params:
+      name: City of Fairfield
+  - caption: City of Fresno
+    params:
+      name: City of Fresno
+  - caption: City of Lawndale
+    params:
+      name: City of Lawndale
+  - caption: City of Los Angeles
+    params:
+      name: City of Los Angeles
+  - caption: City of Montebello
+    params:
+      name: City of Montebello
+  - caption: City of Norwalk
+    params:
+      name: City of Norwalk
+  - caption: City of Pasadena
+    params:
+      name: City of Pasadena
+  - caption: City of Petaluma
+    params:
+      name: City of Petaluma
+  - caption: City of Redondo Beach
+    params:
+      name: City of Redondo Beach
+  - caption: City of Santa Maria
+    params:
+      name: City of Santa Maria
+  - caption: City of Santa Monica
+    params:
+      name: City of Santa Monica
+  - caption: City of Santa Rosa
+    params:
+      name: City of Santa Rosa
+  - caption: City of Solvang
+    params:
+      name: City of Solvang
+  - caption: City of Torrance
+    params:
+      name: City of Torrance
+  - caption: City of Turlock
+    params:
+      name: City of Turlock
+  - caption: City of Union City
+    params:
+      name: City of Union City
+  - caption: City of Visalia
+    params:
+      name: City of Visalia
+  - caption: City of West Hollywood
+    params:
+      name: City of West Hollywood
+  - caption: Cloverdale Transit
+    params:
+      name: Cloverdale Transit
+  - caption: Dumbarton Bridge Regional Operations Consortium
+    params:
+      name: Dumbarton Bridge Regional Operations Consortium
+  - caption: Eastern Contra Costa Transit Authority
+    params:
+      name: Eastern Contra Costa Transit Authority
+  - caption: Eastern Sierra Transit Authority
+    params:
+      name: Eastern Sierra Transit Authority
+  - caption: Emeryville Transportation Management Agency
+    params:
+      name: Emeryville Transportation Management Agency
+  - caption: Flagship Cruises and Events Inc.
+    params:
+      name: Flagship Cruises and Events Inc.
+  - caption: Foothill Transit
+    params:
+      name: Foothill Transit
+  - caption: Gold Coast Transit District
+    params:
+      name: Gold Coast Transit District
+  - caption: Golden Empire Transit District
+    params:
+      name: Golden Empire Transit District
+  - caption: Golden Gate Bridge, Highway and Transportation District
+    params:
+      name: Golden Gate Bridge, Highway and Transportation District
+  - caption: Kings County Area Public Transit Agency
+    params:
+      name: Kings County Area Public Transit Agency
+  - caption: Lake Transit Authority
+    params:
+      name: Lake Transit Authority
+  - caption: Long Beach Transit
+    params:
+      name: Long Beach Transit
+  - caption: Los Angeles County Metropolitan Transportation Authority
+    params:
+      name: Los Angeles County Metropolitan Transportation Authority
+  - caption: Madera County
+    params:
+      name: Madera County
+  - caption: Marin County Transit District
+    params:
+      name: Marin County Transit District
+  - caption: Mendocino Transit Authority
+    params:
+      name: Mendocino Transit Authority
+  - caption: Monterey-Salinas Transit
+    params:
+      name: Monterey-Salinas Transit
+  - caption: Mountain View Transportation Management Association
+    params:
+      name: Mountain View Transportation Management Association
+  - caption: Napa Valley Transportation Authority
+    params:
+      name: Napa Valley Transportation Authority
+  - caption: Nevada County
+    params:
+      name: Nevada County
+  - caption: North County Transit District
+    params:
+      name: North County Transit District
+  - caption: OmniTrans
+    params:
+      name: OmniTrans
+  - caption: Orange County Transportation Authority
+    params:
+      name: Orange County Transportation Authority
+  - caption: Palo Verde Valley Transit Agency
+    params:
+      name: Palo Verde Valley Transit Agency
+  - caption: Peninsula Corridor Joint Powers Board
+    params:
+      name: Peninsula Corridor Joint Powers Board
+  - caption: Presidio Trust
+    params:
+      name: Presidio Trust
+  - caption: Redding Area Bus Authority
+    params:
+      name: Redding Area Bus Authority
+  - caption: Redwood Coast Transit Authority
+    params:
+      name: Redwood Coast Transit Authority
+  - caption: Riverside Transit Agency
+    params:
+      name: Riverside Transit Agency
+  - caption: Sacramento Regional Transit District
+    params:
+      name: Sacramento Regional Transit District
+  - caption: San Francisco Bay Area Water Emergency Transit Authority
+    params:
+      name: San Francisco Bay Area Water Emergency Transit Authority
+  - caption: San Joaquin Regional Transit District
+    params:
+      name: San Joaquin Regional Transit District
+  - caption: San Luis Obispo Regional Transit Authority
+    params:
+      name: San Luis Obispo Regional Transit Authority
+  - caption: San Mateo County Transit District
+    params:
+      name: San Mateo County Transit District
+  - caption: Santa Barbara Metropolitan Transit District
+    params:
+      name: Santa Barbara Metropolitan Transit District
+  - caption: Santa Clara Valley Transportation Authority
+    params:
+      name: Santa Clara Valley Transportation Authority
+  - caption: Santa Cruz Metropolitan Transit District
+    params:
+      name: Santa Cruz Metropolitan Transit District
+  - caption: Solano Transportation Authority
+    params:
+      name: Solano Transportation Authority
+  - caption: Sonoma-Marin Area Rail Transit District
+    params:
+      name: Sonoma-Marin Area Rail Transit District
+  - caption: Stanislaus Regional Transit Authority
+    params:
+      name: Stanislaus Regional Transit Authority
+  - caption: SunLine Transit Agency
+    params:
+      name: SunLine Transit Agency
+  - caption: Tahoe Transportation District
+    params:
+      name: Tahoe Transportation District
+  - caption: Tulare County Regional Transit Agency
+    params:
+      name: Tulare County Regional Transit Agency
+  - caption: University of California, Berkeley
+    params:
+      name: University of California, Berkeley
+  - caption: University of California, Davis
+    params:
+      name: University of California, Davis
+  - caption: University of California, Los Angeles
+    params:
+      name: University of California, Los Angeles
+  - caption: Victor Valley Transit Authority
+    params:
+      name: Victor Valley Transit Authority
+  - caption: Western Contra Costa Transit Authority
+    params:
+      name: Western Contra Costa Transit Authority
+  - caption: Yolo County Transportation District
+    params:
+      name: Yolo County Transportation District
+readme: ./rt_segment_speeds/README.md
+title: Average Speeds by Transit Operator Exploratory Charts
