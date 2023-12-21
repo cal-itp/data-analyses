@@ -4,9 +4,9 @@ import yaml
 from pathlib import Path
 from typing import Union
 
-from segment_speed_utils.project_vars import analysis_date
+from segment_speed_utils.project_vars import SEGMENT_GCS
 
-PORTFOLIO_SITE_YAML = Path("../portfolio/sites/stop_segment_speeds.yml")
+PORTFOLIO_SITE_YAML = Path("../portfolio/sites/route_speeds.yml")
     
 def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     """
@@ -17,16 +17,15 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    operators_df = (pd.read_parquet(
-            f"./scripts/data/stop_metrics_by_hour_{analysis_date}.parquet",
-            columns = ["_gtfs_dataset_name"])
-                 .sort_values("_gtfs_dataset_name")
-                 .drop_duplicates()
-                )
-    operators_df = operators_df[~
-                             operators_df._gtfs_dataset_name.str.contains(
-                                 "LA Metro")]
-    operators = operators_df._gtfs_dataset_name.tolist()      
+    SPEEDS_SHAPE = "speeds_by_shape_peak_daytype"
+    MONTH = "oct2023"
+    DATASET = f"rollup/{SPEEDS_SHAPE}_{MONTH}.parquet"
+    
+    operators_df = pd.read_parquet(f"{SEGMENT_GCS}{DATASET}",
+        columns = ["organization_name"]
+    ).sort_values("organization_name").drop_duplicates()
+
+    operators = operators_df.organization_name.tolist()      
     # Eric's example
     # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
 
@@ -38,13 +37,9 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     chapters_list = []
     for transit_operator in operators:
         
-        cleaned_name = (transit_operator.replace("VehiclePositions", "")
-                        .replace("Vehicle Positions", "")
-                       )
-        
         chapter_dict = {}
 
-        chapter_dict['caption'] = f'{cleaned_name}'
+        chapter_dict['caption'] = f'{transit_operator}'
         chapter_dict['params'] = {'name': transit_operator}
         chapters_list += [chapter_dict]
 
