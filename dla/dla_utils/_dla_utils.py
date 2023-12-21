@@ -14,8 +14,9 @@ import altair as alt
 from IPython.display import Markdown, HTML, display_html, display
 from IPython.core.display import display
 
-from calitp_data_analysis import geography_utils, styleguide
+from calitp_data_analysis import styleguide
 from calitp_data_analysis import calitp_color_palette as cp
+from shared_utils import portfolio_utils
 
 import ipywidgets as widgets
 from ipywidgets import *
@@ -63,7 +64,7 @@ def calculate_data_head(df, col, aggregate_by=["dist"], aggfunc="sum"):
 
 def count_all_years(df, groupedby=["prepared_y", "dist"]):
     count_years = (
-        geography_utils.aggregate_by_geography(
+        portfolio_utils.aggregate_by_geography(
             df,
             group_cols=groupedby,
             sum_cols=[
