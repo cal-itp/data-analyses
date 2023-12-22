@@ -1,0 +1,45 @@
+title: NTD Monthly Ridership by RTPA
+directory: ./ntd/
+readme: ./ntd/README.md
+notebook: ./ntd/monthly_ridership_report.ipynb
+parts:
+- caption: Introduction
+- chapters:
+  - params:
+      rtpa: Alpine County Local Transportation Commission
+  - params:
+      rtpa: Butte County Association of Governments
+  - params:
+      rtpa: Fresno Council of Governments
+  - params:
+      rtpa: Kern Council of Governments
+  - params:
+      rtpa: Kings County Association of Governments
+  - params:
+      rtpa: Merced County Association of Governments
+  - params:
+      rtpa: Metropolitan Transportation Commission
+  - params:
+      rtpa: Sacramento Area Council of Governments
+  - params:
+      rtpa: San Diego Association of Governments
+  - params:
+      rtpa: San Joaquin Council of Governments
+  - params:
+      rtpa: San Luis Obispo Council of Governments
+  - params:
+      rtpa: Santa Barbara County Association of Governments
+  - params:
+      rtpa: Santa Cruz County Regional Transportation Commission
+  - params:
+      rtpa: Shasta Regional Transportation Agency
+  - params:
+      rtpa: Southern California Association of Governments
+  - params:
+      rtpa: Stanislaus Council of Governments
+  - params:
+      rtpa: Tahoe Regional Planning Agency
+  - params:
+      rtpa: Transportation Agency for Monterey County
+  - params:
+      rtpa: Tulare County Association of Governments
