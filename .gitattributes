@@ -1,4 +1,6 @@
 portfolio/**/*.ipynb filter=lfs diff=lfs merge=lfs -text
+portfolio/route_speeds/**/*.ipynb
+portfolio/ntd_monthly_ridership/**/*.ipynb
 portfolio/dla/district_10__district_title_district-10-stockton/0__dla_district_report__district_10__district_title_district-10-stockton.ipynb filter=lfs diff=lfs merge=lfs -text
 portfolio/dla/district_11__district_title_district-11-san-diego/0__dla_district_report__district_11__district_title_district-11-san-diego.ipynb filter=lfs diff=lfs merge=lfs -text
 portfolio/dla/district_12__district_title_district-12-irvine/0__dla_district_report__district_12__district_title_district-12-irvine.ipynb filter=lfs diff=lfs merge=lfs -text
