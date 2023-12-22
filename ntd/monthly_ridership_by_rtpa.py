@@ -20,6 +20,11 @@ RTPA_URL = ("https://services3.arcgis.com/bWPjFyq029ChCGur/arcgis/rest/services/
 
 #gpd.read_file(RTPA_URL).RTPA.drop_duplicates().to_csv("rtpa.csv")
 def save_rtpa_outputs(df: pd.DataFrame, year: int, month: str):
+    """
+    Export a csv for each RTPA into a folder.
+    Zip that folder. 
+    Upload zipped file to GCS.
+    """
     for i in df.RTPA.unique():
         # Filename should be snakecase
         rtpa_snakecase = i.replace(' ', '_').lower()
@@ -31,9 +36,9 @@ def save_rtpa_outputs(df: pd.DataFrame, year: int, month: str):
             f"{GCS_FILE_PATH}{year}_{month}/{rtpa_snakecase}.csv",
             index = False)
         )
-    '''    
+       
     # Zip this folder, and save zipped output to GCS
-    shutil.make_archive(f"./{year}_{month}/", "zip", "./")
+    shutil.make_archive(f"./{year}_{month}", "zip", f"{year}_{month}")
     print("Zipped folder")
     
     fs.upload(
@@ -42,7 +47,7 @@ def save_rtpa_outputs(df: pd.DataFrame, year: int, month: str):
     )
     
     print("Uploaded to GCS")
-    '''
+    
     return
 
 
@@ -93,7 +98,7 @@ def produce_ntd_monthly_ridership_by_rtpa(
         raise ValueError("There are unmerged rows to crosswalk")
     
     # For each RTPA, we'll produce a single csv and save it to a local folder
-    #os.makedirs(f"./{year}_{month}/")
+    os.makedirs(f"./{year}_{month}/")
     
     save_rtpa_outputs(df, year, month)
     
@@ -119,4 +124,4 @@ if __name__ == "__main__":
     )
     
     produce_ntd_monthly_ridership_by_rtpa(FULL_URL, YEAR, MONTH)
-    #remove_local_outputs(YEAR, MONTH)
+    remove_local_outputs(YEAR, MONTH)
