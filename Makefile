@@ -44,6 +44,9 @@ install_env:
 	#cd rt_delay/ && make setup_rt_analysis && cd ..    
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ..
 
+production_portfolio:
+	python portfolio/portfolio.py index --deploy --prod
+
 # Create .egg to upload to dask cloud cluster
 egg_modules:
 	cd ~/data-analyses/rt_segment_speeds && python setup.py bdist_egg && cd ..
