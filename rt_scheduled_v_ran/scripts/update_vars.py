@@ -1,6 +1,6 @@
 from shared_utils import rt_dates
 
-months = ["nov", "oct", "sep", "aug",
+months = ["dec","nov", "oct", "sep", "aug",
         "jul", "jun", "may", "apr", "mar"]         
 
 analysis_date_list = [
