@@ -3,6 +3,7 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 YEAR = "2023"
 MONTH = "October"
 MONTH_CREATED = "2023-12"
+PUBLIC_FILENAME = f"{YEAR}_{MONTH}.zip"
 
 NTD_MODES = {
     "CB": "Commuter Bus",
