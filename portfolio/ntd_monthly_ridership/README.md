@@ -7,4 +7,4 @@ This report shows general ridership trends by transit agency, mode, and type of 
 ## Datasets
 1. NTD monthly data: https://www.transit.dot.gov/ntd/data-product/monthly-module-adjusted-data-release. 
 2. [RTPA list](https://gis.data.ca.gov/datasets/CAEnergy::regional-transportation-planning-agencies/explore?appid=cf412a17daaa47bca93c6d6b7e77aff0&edit=true)
-3. Download our processed full data [here](https://storage.googleapis.com/calitp-publish-data-analysis/ntd_monthly_ridership/).
+3. Download our processed full data [here](https://console.cloud.google.com/storage/browser/calitp-publish-data-analysis).

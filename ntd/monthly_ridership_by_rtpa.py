@@ -181,5 +181,5 @@ if __name__ == "__main__":
     df = pd.read_parquet(
         f"{GCS_FILE_PATH}ca_monthly_ridership_{YEAR}_{MONTH}.parquet"
     )
-    save_rtpa_outputs(df, YEAR, MONTH, upload_to_public = False)
+    save_rtpa_outputs(df, YEAR, MONTH, upload_to_public = True)
     remove_local_outputs(YEAR, MONTH)
