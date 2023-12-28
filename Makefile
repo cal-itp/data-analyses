@@ -1,5 +1,6 @@
 # Run this in data-analyses
 # To specify different Makefile: make build_parallel_corridors -f Makefile
+
 build_competitive_corridors:
 	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	git rm portfolio/competitive_corridors/ -rf
@@ -9,7 +10,6 @@ build_competitive_corridors:
 	python portfolio/portfolio.py build competitive_corridors --deploy 
 	git add portfolio/competitive_corridors/district_*/ portfolio/competitive_corridors/*.yml portfolio/competitive_corridors/*.md 
 	git add portfolio/sites/competitive_corridors.yml 
-	netlify deploy --site=cal-itp-data-analyses --dir=portfolio/competitive_corridors/_build/html/ --alias=competitive_corridors    
     #--config=./portfolio/test-analyses.yml
 
 build_dla_reports:
@@ -18,16 +18,22 @@ build_dla_reports:
 	python portfolio/portfolio.py build dla --deploy 
 	git add portfolio/dla/district_*/ portfolio/dla/*.yml portfolio/dla/*.md 
 	git add portfolio/sites/dla.yml
-	netlify deploy --site=cal-itp-data-analyses --dir=portfolio/dla/_build/html/ --alias=dla
     
 build_quarterly_performance_metrics:
-	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	#git rm portfolio/quarterly_performance_metrics/ -rf
-	#python portfolio/portfolio.py clean quarterly_performance_metrics
+	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
+	git rm portfolio/quarterly_performance_metrics/ -rf
+	python portfolio/portfolio.py clean quarterly_performance_metrics
 	python portfolio/portfolio.py build quarterly_performance_metrics --deploy 
-	git add portfolio/quarterly_performance_metrics/*.ipynb portfolio/quarterly_performance_metrics/*.yml portfolio/quarterly_performance_metrics/*.md 
-	netlify deploy --site=cal-itp-data-analyses --dir=portfolio/quarterly_performance_metrics/_build/html/ --alias=quarterly_performance_metrics    
+	git add portfolio/quarterly_performance_metrics/*.ipynb portfolio/quarterly_performance_metrics/*.yml portfolio/quarterly_performance_metrics/*.md   
 	git add portfolio/sites/quarterly_performance_metrics.yml 
+    
+build_ntd_report:
+	git rm portfolio/ntd_monthly_ridership/ -rf
+	python portfolio/portfolio.py clean ntd_monthly_ridership
+	cd ntd/ && python deploy_portfolio_yaml.py && cd ..   
+	python portfolio/portfolio.py build ntd_monthly_ridership --deploy 
+	git add portfolio/ntd_monthly_ridership/*.ipynb portfolio/ntd_monthly_ridership/*.yml portfolio/ntd_monthly_ridership/*.md 
+	git add portfolio/sites/ntd_monthly_ridership.yml 
 
 add_precommit:
 	pip install pre-commit
