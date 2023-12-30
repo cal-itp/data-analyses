@@ -154,3 +154,69 @@ def aggregate_time_of_day_to_peak_offpeak(
     df3 = df3.reset_index()
 
     return df3
+
+
+def most_recent_route_info(
+    df: pd.DataFrame,
+    group_cols: list,
+    route_col: str
+) -> pd.DataFrame:
+    """
+    Find the most recent value across a grouping.
+    Ex: if we group by route_id, we can find the most recent 
+    value for route_long_name.
+    
+    Needs a date column to work.
+    """
+    sort_order = [True for c in group_cols]
+    
+    most_recent = (df.sort_values(group_cols + ["service_date"], 
+                                  ascending = sort_order + [False])
+                   .drop_duplicates(subset = group_cols)  
+                   .rename(columns = {route_col: f"recent_{route_col}"})
+                  )
+    
+    df2 = pd.merge(
+        df,
+        most_recent[group_cols + [f"recent_{route_col}"]],
+        on = group_cols,
+        how = "left"
+    )
+    
+    return df2
+
+
+OPERATORS_USE_HYPHENS = [
+    "Monterey Salinas", "LA Metro",
+    "BART", # Beige - N, Beige - S
+    "MVGO", # B - AM, B - PM
+]
+
+OPERATORS_USE_UNDERSCORES = [
+    "Roseville", # 5_AM, 5_PM
+]
+
+def standardize_route_id(
+    row, 
+    gtfs_name_col: str, 
+    route_col: str
+) -> str:
+    """
+    Standardize route_id across time. 
+    For certain operators, we can parse away the suffix after an
+    hyphen or underscore.
+    Must include a column that corresponds to `gtfs_dataset_name`.
+    """
+    word = row[route_col]
+    
+    if any(word in row[gtfs_name_col] for word in OPERATORS_USE_HYPHENS): 
+        word = word.split("-")[0]
+    
+    if any(word in row[gtfs_name_col] for word in OPERATORS_USE_UNDERSCORES):
+        word = word.split("_")[0]
+    
+    
+    word = word.strip()
+    
+    return word
+    

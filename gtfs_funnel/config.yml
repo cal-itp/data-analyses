@@ -5,3 +5,4 @@ time_min_cutoff: 10
 stop_times_direction_file: "stop_times_direction"
 trip_metrics_file: "schedule_trip_metrics"
 route_direction_metrics_file: "schedule_route_direction_metrics"
+route_identification_file: "standardized_route_ids"
