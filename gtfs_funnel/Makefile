@@ -14,6 +14,11 @@ preprocess:
 	python cleanup.py
 	python route_typologies.py
     
+# Start compiling scripts needed when we start concatenating several days
+# Clean route names for displaying across time
+timeseries_preprocessing: 
+	python clean_route_naming.py
+    
     
 funnel_gtfs_data: 
 	make download_gtfs_data && make preprocess
