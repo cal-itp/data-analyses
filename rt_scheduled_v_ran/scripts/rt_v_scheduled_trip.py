@@ -4,7 +4,7 @@ import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.geography_utils import WGS84
 import vp_spatial_accuracy
-import update_vars2
+import update_vars
 from segment_speed_utils.project_vars import (
     GCS_FILE_PATH,
     PROJECT_CRS,
@@ -28,6 +28,7 @@ def load_trip_speeds(analysis_date):
     columns=[
         "trip_instance_key",
         "speed_mph",
+        "service_minutes",
     ])
     
     return df
