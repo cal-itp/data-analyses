@@ -69,7 +69,7 @@ def schedule_metrics_by_route_direction(
     
     service_freq_df = gtfs_schedule_wrangling.aggregate_time_of_day_to_peak_offpeak(
         df, group_cols)
-    
+        
     metrics_df = (df.groupby(group_cols, observed=True, group_keys=False)
                   .agg({
                       "median_stop_meters": "mean", 
@@ -83,9 +83,9 @@ def schedule_metrics_by_route_direction(
                       "sched_service_min": "avg_sched_service_min"
                   })
                  )
-    
+
     common_shape_for_route_dir = add_common_shape(analysis_date)
-    
+
     df = pd.merge(
         common_shape_for_route_dir,
         metrics_df,
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     
     for date in analysis_date_list:
         trip_metrics = assemble_scheduled_trip_metrics(date)
-        
+                
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
         
@@ -203,7 +203,7 @@ if __name__ == "__main__":
         
         route_dir_metrics = schedule_metrics_by_route_direction(
             trip_metrics, date, route_cols)
-        
+
         pop_density_df = pop_density_by_shape(route_dir_metrics)
         
         route_dir_metrics2 = pd.merge(
