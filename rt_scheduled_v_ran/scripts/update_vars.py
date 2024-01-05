@@ -1,6 +1,8 @@
 from shared_utils import rt_dates
 
-months = ["dec"]
+months = ["nov", "oct", "sep", "aug",
+      "jul", "jun", "may", "apr", "mar"]         
+
 
 #months = ["dec","nov", "oct", "sep", "aug",
 #        "jul", "jun", "may", "apr", "mar"]         
