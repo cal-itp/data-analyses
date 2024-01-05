@@ -4,7 +4,7 @@ import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.geography_utils import WGS84
 import vp_spatial_accuracy
-import update_vars2
+import update_vars
 from segment_speed_utils.project_vars import (
     GCS_FILE_PATH,
     PROJECT_CRS,
@@ -28,8 +28,6 @@ def load_trip_speeds(analysis_date):
     columns=[
         "trip_instance_key",
         "speed_mph",
-        "route_id",
-        "time_of_day",
         "service_minutes",
     ])
     
@@ -345,6 +343,9 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     m1['rt_triptime_w_gtfs_pct'] = (m1.total_min_w_gtfs / m1.rt_service_min) * 100
     m1['rt_v_scheduled_trip_time_pct'] = (m1.rt_service_min / m1.service_minutes - 1) * 100
     
+    # Mask rt_triptime_w_gtfs_pct for any values above 100%
+    m1.rt_triptime_w_gtfs_pct = m1.rt_triptime_w_gtfs_pct.mask(m1.rt_triptime_w_gtfs_pct > 100).fillna(100)
+    
     # Save
     m1.to_parquet(f"{GCS_FILE_PATH}rt_vs_schedule/trip_level_metrics/{analysis_date}_metrics.parquet")
     
@@ -357,6 +358,6 @@ if __name__ == "__main__":
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
-    for date in update_vars2.analysis_date_list:
+    for date in update_vars.analysis_date_list:
         vp_usable_metrics(date)
         print('Done')
