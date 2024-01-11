@@ -288,7 +288,7 @@ def remove_shapes_outside_ca(
             ca,
             how = "inner",
             predicate = "within"
-        )
+        ).drop(columns = "index_right")
     
     else:
         shapes_within_ca = gpd.sjoin(
@@ -296,7 +296,7 @@ def remove_shapes_outside_ca(
             ca,
             how = "inner",
             predicate = "within",
-        )
+        ).drop(columns = "index_right")
     
     return shapes_within_ca
 
