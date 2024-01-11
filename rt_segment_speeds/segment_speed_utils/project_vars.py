@@ -13,13 +13,14 @@ analysis_date = rt_dates.DATES["dec2023"]
 
 days = ["a", "b", "", "c", "d", "e", "f"] 
 months = [
-    "nov", "oct", "sep",
-    "aug", "jul", "jun",
-    "may", "apr", "mar"
+    "dec", 
+    #"nov", "oct", "sep",
+    #"aug", "jul", "jun",
+    #"may", "apr", "mar"
 ]
 
 analysis_date_list = [
-    rt_dates.DATES["dec2023"]
+    rt_dates.DATES[f"{m}2023"] for m in months
 ]
 
 PROJECT_CRS = "EPSG:3310"
