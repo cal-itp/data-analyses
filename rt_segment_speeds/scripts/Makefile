@@ -26,6 +26,7 @@ export:
 	python handle_common_errors.py
 	python avg_speeds_by_segment.py  
 	python export.py
+	python singleday_avg.py
 	python multiday_avg.py
 
     
