@@ -40,69 +40,6 @@ def get_parameters(
         params_dict = my_dict[segment_type]
     
     return params_dict
-    
-
-def operators_with_data(
-    gcs_folder: str, 
-    file_name_prefix: str, 
-    analysis_date: str
-) -> list:
-    """
-    Return a list of operators with RT files on that day by looking for a
-    certain file_name_prefix
-    """
-    all_files_in_folder = fs.ls(gcs_folder)
-    
-    files = [i for i in all_files_in_folder if f"{file_name_prefix}" in i]
-    
-    rt_operators = [i.split(f'{file_name_prefix}')[1]
-                    .split(f'_{analysis_date}')[0] 
-                    for i in files if analysis_date in i]
-    
-    return rt_operators
-
-
-def find_day_after(analysis_date: str) -> str:
-    """
-    RT is UTC, so let's also download the day after.
-    That way, when we localize to Pacific time, we don't lose
-    info after 4pm Pacific (which is midnight UTC).
-    """
-    one_day_later = (pd.to_datetime(analysis_date).date() + 
-                     datetime.timedelta(days=1)
-                    )
-    
-    return one_day_later.isoformat()
-
-    
-def import_segments(
-    gcs_folder: str = SEGMENT_GCS, 
-    file_name: str = "",
-    filters: tuple = None,
-    columns: list = None,
-    partitioned: bool = False
-) -> dg.GeoDataFrame:
-    
-    if partitioned:
-        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}"
-        
-        df = dg.read_parquet(
-            f"{gcs_folder}{file_name_sanitized}", 
-            filters = filters,
-            columns = columns
-        )
-    else:
-        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}.parquet"
-        
-        df = gpd.read_parquet(
-            f"{gcs_folder}{file_name_sanitized}", 
-            filters = filters,
-            columns = columns
-        )
-    
-    df = df.drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)
-    
-    return df
 
 
 def import_scheduled_trips(
