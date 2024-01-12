@@ -163,6 +163,26 @@ def import_scheduled_stops(
     return stops.drop_duplicates().reset_index(drop=True)
 
 
+def import_schedule_gtfs_key_organization_crosswalk(
+    analysis_date: str,
+    filters: tuple = None,
+    columns: list = None,
+) -> pd.DataFrame:
+    """
+    Get scheduled stops
+    """
+    FILE = (
+        f"{SCHED_GCS}crosswalk/"
+        f"gtfs_key_organization_{analysis_date}.parquet"
+    )
+    
+    crosswalk = pd.read_parquet(
+        FILE, filters = filters, columns = columns
+    )
+    
+    return crosswalk.drop_duplicates().reset_index(drop=True)
+
+
 def exclude_unusable_trips(
     vp_df: dd.DataFrame, 
     valid_trips: pd.DataFrame
