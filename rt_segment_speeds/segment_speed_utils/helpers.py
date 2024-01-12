@@ -50,7 +50,7 @@ def import_scheduled_trips(
         "shape_id", "shape_array_key", 
         "route_id", "route_key", "direction_id"
     ],
-    get_pandas: bool = False
+    get_pandas: bool = True
 ) -> dd.DataFrame:
     """
     Get scheduled trips info (all operators) for single day, 
@@ -74,7 +74,7 @@ def import_scheduled_shapes(
     analysis_date: str, 
     filters: tuple = None,
     columns: list = ["shape_array_key", "geometry"],
-    get_pandas: bool = False, 
+    get_pandas: bool = True, 
     crs: str = PROJECT_CRS
 ) -> dg.GeoDataFrame: 
     """
@@ -83,11 +83,11 @@ def import_scheduled_shapes(
     FILE = f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet"
     
     if get_pandas: 
-        shapes = gpd.read_parquet(FILE, filters = filters, 
-                                  columns = columns)
+        shapes = gpd.read_parquet(
+            FILE, filters = filters, columns = columns)
     else:
-        shapes = dg.read_parquet(FILE, filters = filters,
-                                 columns = columns)
+        shapes = dg.read_parquet(
+            FILE, filters = filters, columns = columns)
     
     # Don't do this expensive operation unless we have to
     if crs != shapes.crs:
@@ -99,16 +99,38 @@ def import_scheduled_shapes(
 def import_scheduled_stop_times(
     analysis_date: str, 
     filters: tuple = None,
-    columns: list = None
+    columns: list = None,
+    get_pandas: bool = False,
+    with_direction: bool = False,
+    crs: str = PROJECT_CRS,
 ) -> dd.DataFrame:
     """
     Get scheduled stop times.
     """
-    stop_times = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet", 
-        filters = filters,
-        columns = columns
-    )
+    if with_direction:
+        FILE = f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet"
+        
+        if get_pandas:
+            stop_times = gpd.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
+        else:
+            stop_times = dg.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
+        if crs != stop_times.crs:
+            stop_times = stop_times.to_crs(crs)
+            
+    else:
+        FILE = f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet"
+        if get_pandas:
+            stop_times = pd.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
+        else:
+            stop_times = dd.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
     
     return stop_times.drop_duplicates().reset_index(drop=True)
 
@@ -117,7 +139,7 @@ def import_scheduled_stops(
     analysis_date: str,
     filters: tuple = None,
     columns: list = None,
-    get_pandas: bool = False,
+    get_pandas: bool = True,
     crs: str = PROJECT_CRS
 ) -> dg.GeoDataFrame:
     """
@@ -126,45 +148,19 @@ def import_scheduled_stops(
     FILE = f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet"
     
     if get_pandas:
-        stops = gpd.read_parquet(FILE, filters = filters, 
-                                 columns = columns)
+        stops = gpd.read_parquet(
+            FILE, filters = filters, columns = columns
+        )
     
     else:
-        stops = dg.read_parquet(FILE, filters = filters,
-                                columns = columns)
+        stops = dg.read_parquet(
+            FILE, filters = filters, columns = columns
+        )
     
     if crs != stops.crs:
         stops = stops.to_crs(crs)
     
     return stops.drop_duplicates().reset_index(drop=True)
-
-
-def import_assembled_stop_times_with_direction(
-    analysis_date: str, 
-    filters: tuple = None,
-    columns: list = None,
-    get_pandas: bool = False,
-    crs: str = PROJECT_CRS
-) -> dg.GeoDataFrame:
-    """
-    Get assembled stop times with direction 
-    (which doesn't have all the stop_times
-    columns, but does have trip_instance_key).
-    """
-    FILE = f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet"
-    
-    if get_pandas:
-        stop_times = gpd.read_parquet(FILE, filters = filters, 
-                                      columns = columns)
-    else:
-        stop_times = dg.read_parquet(FILE,
-            filters = filters, columns = columns
-        )
-    
-    if crs != stop_times.crs:
-        stop_times = stop_times.to_crs(crs)
-    
-    return stop_times.drop_duplicates().reset_index(drop=True)
 
 
 def exclude_unusable_trips(
