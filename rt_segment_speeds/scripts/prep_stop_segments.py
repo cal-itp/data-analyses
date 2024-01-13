@@ -95,7 +95,8 @@ def stop_times_aggregated_to_shape_array_key(
         on = ["trip_instance_key", "shape_array_key"],
         how = "inner"
     ).rename(columns = {
-        "trip_instance_key": "st_trip_instance_key", 
+        "trip_instance_key": "st_trip_instance_key",
+        "stop_pair": "shape_stop_pair",
         "geometry": "stop_geometry"
     })
     
@@ -189,7 +190,8 @@ def tag_shapes_with_inlining(
 
 
 def prep_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
-
+    """
+    """
     stop_times_with_geom = stop_times_aggregated_to_shape_array_key(
         analysis_date
     )

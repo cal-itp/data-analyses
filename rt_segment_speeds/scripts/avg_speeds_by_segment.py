@@ -1,236 +1,297 @@
 """
-Quick aggregation for speed metrics by segment
+Quick aggregation for speed metrics.
 """
 import datetime
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 import sys
 
+from dask import delayed, compute
 from loguru import logger
 
-from segment_speed_utils import helpers, sched_rt_utils
+from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
+                                 segment_calcs, time_helpers)
 from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
-from calitp_data_analysis import utils, geography_utils
-from shared_utils import portfolio_utils, rt_utils
-    
 
-def calculate_avg_speeds(
-    df: pd.DataFrame,
-    group_cols: list
+
+OPERATOR_COLS = [
+    "schedule_gtfs_dataset_key", 
+    #"name", # from schedule
+    #"organization_source_record_id", "organization_name", # from dim_organizations
+    #"base64_url", "caltrans_district", 
+]
+
+SHAPE_STOP_COLS = [
+    "shape_array_key", "shape_id", "stop_sequence",
+]
+
+STOP_PAIR_COLS = ["shape_stop_pair"] # should we include stop_id?
+
+ROUTE_DIR_COLS = [
+    "route_id", "direction_id"
+]
+
+def merge_operator_identifiers(
+    df: pd.DataFrame, 
+    analysis_date_list: list
 ) -> pd.DataFrame:
     """
-    Calculate the median, 20th, and 80th percentile speeds 
-    by groups.
+    Carrying a lot of these operator identifiers is not 
+    inconsequential, esp when we need to run a week's segment speeds
+    in one go.
+    Instead, we'll just merge it back on before we export.
     """
-    # pd.groupby and pd.quantile is so slow
-    # create our own list of speeds and use np
-    df2 = (df.groupby(group_cols, 
-                      observed=True, group_keys=False)
-           .agg({"speed_mph": lambda x: sorted(list(x))})
-           .reset_index()
-           .rename(columns = {"speed_mph": "speed_mph_list"})
-    )
-                        
-    df2 = df2.assign(
-        p50_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, 0.5), axis=1),
-        n_trips = df2.apply(lambda x: len(x.speed_mph_list), axis=1).astype("int"),
-        p20_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, 0.2), axis=1),
-        p80_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, 0.8), axis=1),
-    )
+    crosswalk = pd.concat([
+        helpers.import_schedule_gtfs_key_organization_crosswalk(
+            analysis_date,
+        ).drop(columns = "itp_id") 
+        for analysis_date in analysis_date_list],
+        axis=0, ignore_index=True
+    ).drop_duplicates()
     
-    stats = df2.drop(columns = "speed_mph_list")
-    
-    # Clean up for map
-    speed_cols = [c for c in stats.columns if "_mph" in c]
-    stats[speed_cols] = stats[speed_cols].round(2)
-    
-    return stats
-    
-    
-def speeds_with_segment_geom(
-    analysis_date: str, 
-    dict_inputs: dict = {},
-): 
-    """
-    Import the segment-trip table. 
-    Average the speed_mph across all trips present in the segment.
-    """
-    start = datetime.datetime.now()
-    
-    SEGMENT_FILE = f'{dict_inputs["segments_file"]}_{analysis_date}'
-    SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
-    SPEEDS_FILE = f'{dict_inputs["stage4"]}_{analysis_date}'
-    EXPORT_FILE = f'{dict_inputs["stage5"]}_{analysis_date}'
-    MAX_SPEED = dict_inputs["max_speed"]
-    
-    # Read in speeds and attach time-of-day
-    df = pd.read_parquet(
-        f"{SEGMENT_GCS}{SPEEDS_FILE}.parquet", 
-        filters = [[("speed_mph", "<=", MAX_SPEED)]]
-    )
-    
-    time_of_day_df = sched_rt_utils.get_trip_time_buckets(analysis_date)
-
-    df2 = pd.merge(
-        df,
-        time_of_day_df,
-        on = "trip_instance_key",
-        how = "inner"
-    )
-    
-    subset_shape_keys = df2.shape_array_key.unique().tolist()
-    
-    # Load in segment geometry, keep shapes present in speeds  
-    segments = gpd.read_parquet(
-        f"{SEGMENT_GCS}{SEGMENT_FILE}.parquet",
-        columns = SEGMENT_IDENTIFIER_COLS + [
-            "schedule_gtfs_dataset_key", 
-            "stop_id",
-            "loop_or_inlining",
-            "geometry", 
-            "district_name"        
-        ],
-        filters = [[("shape_array_key", "in", subset_shape_keys)]]
-    ).to_crs(geography_utils.WGS84)
-    
-    all_day = calculate_avg_speeds(
-        df2,
-        SEGMENT_IDENTIFIER_COLS,
-    )
-                              
-    peak = calculate_avg_speeds(
-        df2[df2.time_of_day.isin(["AM Peak", "PM Peak"])],
-        SEGMENT_IDENTIFIER_COLS,
-    )
-
-    stats = pd.concat([
-        all_day.assign(time_of_day = "all_day"),
-        peak.assign(time_of_day = "peak")
-    ], axis=0)
-    
-    
-    # Merge in segment geometry    
-    gdf = pd.merge(
-        segments,
-        stats,
-        on = SEGMENT_IDENTIFIER_COLS,
-        how = "left"
-    ).sort_values(
-        SEGMENT_IDENTIFIER_COLS + ["time_of_day"]
-    ).reset_index(drop=True)
-    
-    utils.geoparquet_gcs_export(
-        gdf,
-        SEGMENT_GCS,
-        EXPORT_FILE
-    )
-    
-    end = datetime.datetime.now()
-    logger.info(f"segment averages execution time: {end - start}")
-
-    return
-
-
-def add_scheduled_trip_columns(
-    rt_trips: pd.DataFrame,
-    analysis_date: str,
-    group_cols: list = ["trip_instance_key"]) -> pd.DataFrame:
-    """
-    Merge RT trips (vehicle positions) to scheduled trips.
-    Add in the needed scheduled trip columns to take 
-    route-direction-time_of_day averages.
-    """
-    keep_cols = [
-        "gtfs_dataset_key",
-        "direction_id", 
-        "route_id", "route_short_name", "route_long_name", "route_desc",
-    ] + group_cols
-        
-    crosswalk = helpers.import_scheduled_trips(
-        analysis_date, 
-        columns = keep_cols, 
-        get_pandas = True
-    )
-    
-    common_shape = sched_rt_utils.most_common_shape_by_route_direction(analysis_date)
-    
-    crosswalk2 = pd.merge(
-        crosswalk,
-        common_shape,
-        on = ["schedule_gtfs_dataset_key", "route_id", "direction_id"],
-        how = "inner"
-    ).astype({"direction_id": "Int64"})
-    
-    time_of_day = sched_rt_utils.get_trip_time_buckets(analysis_date)
-    
-    # Clean up route name
-    crosswalk2 = portfolio_utils.add_route_name(
-        crosswalk2
-    ).drop(columns = ["route_short_name", "route_long_name", "route_desc"])
-
     df = pd.merge(
-        rt_trips,
-        crosswalk2,
-        on = group_cols,
-        how = "left",
-    ).merge(
-        time_of_day,
-        on = group_cols,
-        how = "left"
+        df,
+        crosswalk,
+        on = "schedule_gtfs_dataset_key",
+        how = "inner"
     )
     
     return df
+    
+    
 
-
-def avg_trip_speeds_with_time_of_day(
-    analysis_date: str,
-    dict_inputs: dict,
-) -> pd.DataFrame:
-    """    
-    Get trip-level speeds, scheduled trip service_minutes
-    and rt trip approximated-service_minutes.
+def weighted_average_speeds_across_segments(
+    df: pd.DataFrame,
+    group_cols: list
+) -> pd.DataFrame: 
     """
-    start = datetime.datetime.now()
-    
-    SPEEDS_FILE = f'{dict_inputs["stage4"]}_{analysis_date}'
-    EXPORT_FILE = f'{dict_inputs["stage6"]}_{analysis_date}'
-    MAX_SPEED = dict_inputs["max_speed"]
-    
-    by_segment = pd.read_parquet(
-        f"{SEGMENT_GCS}{SPEEDS_FILE}.parquet",
-        columns = ["trip_instance_key", "meters_elapsed", "sec_elapsed"]
-    )
-    
-    by_trip = (by_segment.groupby("trip_instance_key")
+    We can use our segments and the deltas within a trip
+    to calculate the trip-level average speed, or
+    the route-direction-level average speed.
+    But, we want a weighted average, using the raw deltas
+    instead of mean(speed_mph), since segments can be varying lengths.
+    """
+    avg_speeds_peak = (df.groupby(group_cols + ["peak_offpeak"], 
+                      observed=True, group_keys=False)
            .agg({
                "meters_elapsed": "sum",
-                "sec_elapsed": "sum"
-                })
-           .reset_index()
+               "sec_elapsed": "sum",
+           }).reset_index()
           )
     
-    by_trip = by_trip.assign(
-        speed_mph = (by_trip.meters_elapsed.divide(by_trip.sec_elapsed)
-                    ) * rt_utils.MPH_PER_MPS,
-        rt_trip_min = by_trip.sec_elapsed.divide(60)
-    ).query('speed_mph <= @MAX_SPEED')
+    avg_speeds_peak = segment_calcs.speed_from_meters_elapsed_sec_elapsed(
+        avg_speeds_peak)
     
+    avg_speeds_allday = (df.groupby(group_cols, 
+                                    observed=True, group_keys=False)
+                         .agg({
+                             "meters_elapsed": "sum",
+                             "sec_elapsed": "sum",
+                         }).reset_index()
+                        )
     
-    df = add_scheduled_trip_columns(
-        by_trip,
-        analysis_date,
-        group_cols = ["trip_instance_key"]        
+    avg_speeds_allday = segment_calcs.speed_from_meters_elapsed_sec_elapsed(
+        avg_speeds_allday).assign(
+        peak_offpeak = "all_day"
     )
     
-    df.to_parquet(
-        f"{SEGMENT_GCS}trip_summary/{EXPORT_FILE}.parquet"
+    avg_speeds = pd.concat(
+        [avg_speeds_peak, avg_speeds_allday],
+        axis=0, ignore_index = True
+    ).rename(
+        columns = {"peak_offpeak": "time_period"}
     )
     
-    end = datetime.datetime.now()
-    logger.info(f"trip summary execution time: {end - start}")
+    return avg_speeds
+    
 
-    return 
+def concatenate_peak_offpeak_allday_averages(
+    df: pd.DataFrame, 
+    group_cols: list
+):
+    """
+    """
+    avg_speeds_peak = segment_calcs.calculate_avg_speeds(
+        df,
+        group_cols + ["peak_offpeak"]
+    )
+    
+    avg_speeds_allday = segment_calcs.calculate_avg_speeds(
+        df,
+        group_cols
+    ).assign(peak_offpeak = "all_day")
+    
+    # Concatenate so that every segment has 3 time periods: peak, offpeak, and all_day
+    avg_speeds = pd.concat(
+        [avg_speeds_peak, avg_speeds_allday], 
+        axis=0, ignore_index = True
+    ).rename(
+        columns = {"peak_offpeak": "time_period"}
+    )
+        
+    return avg_speeds
+
+
+def concatenate_trip_segment_speeds(
+    analysis_date_list: list,
+    dict_inputs: dict
+) -> pd.DataFrame:
+    SPEED_FILE = dict_inputs["stage4"]
+    MAX_SPEED = dict_inputs["max_speed"]
+    
+    df = pd.concat([
+        pd.read_parquet(
+            f"{SEGMENT_GCS}{SPEED_FILE}_{analysis_date}.parquet", 
+            columns = (OPERATOR_COLS + SHAPE_STOP_COLS + 
+                       STOP_PAIR_COLS + ROUTE_DIR_COLS + [
+                           "trip_instance_key", "speed_mph", 
+                           "meters_elapsed", "sec_elapsed", 
+                           "time_of_day"]),
+            filters = [[("speed_mph", "<=", MAX_SPEED)]]
+        ).assign(
+            service_date = pd.to_datetime(analysis_date)
+        ) for analysis_date in analysis_date_list], 
+        axis=0, ignore_index = True
+    ).pipe(
+        gtfs_schedule_wrangling.add_peak_offpeak_column
+    ).pipe(
+        gtfs_schedule_wrangling.add_weekday_weekend_column
+    )
+    
+    return df
+    
+    
+def single_day_averages(analysis_date: str, dict_inputs: dict):
+    
+    SHAPE_SEG_FILE = dict_inputs["shape_stop_single_segment"]
+    ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
+    TRIP_FILE = dict_inputs["trip_speeds_single_summary"]
+    ROUTE_DIR_FILE = dict_inputs["route_dir_single_summary"]
+    
+    start = datetime.datetime.now()
+    
+    df = concatenate_trip_segment_speeds([analysis_date], dict_inputs)
+    print("concatenated files")   
+    
+    t0 = datetime.datetime.now()
+    shape_stop_segments = concatenate_peak_offpeak_allday_averages(
+        df, 
+        OPERATOR_COLS + SHAPE_STOP_COLS + STOP_PAIR_COLS
+    ).pipe(
+        merge_operator_identifiers, [analysis_date]
+    )
+    
+    shape_stop_segments.to_parquet(
+        f"{SEGMENT_GCS}{SHAPE_SEG_FILE}_{analysis_date}.parquet"
+    )
+    del shape_stop_segments
+    
+    t1 = datetime.datetime.now()
+    logger.info(f"shape seg avg {t1 - t0}")
+    
+    route_dir_segments = concatenate_peak_offpeak_allday_averages(
+        df, 
+        OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS
+    ).pipe(
+        merge_operator_identifiers, [analysis_date]
+    )
+    
+    route_dir_segments.to_parquet(
+        f"{SEGMENT_GCS}{ROUTE_SEG_FILE}_{analysis_date}.parquet"
+    )
+    del route_dir_segments
+    
+    t2 = datetime.datetime.now()
+    logger.info(f"route dir seg avg {t2 - t1}")
+    
+    trip_avg = weighted_average_speeds_across_segments(
+        df,
+        OPERATOR_COLS + ROUTE_DIR_COLS + [
+            "trip_instance_key", 
+            "shape_array_key", "shape_id", "time_of_day"]
+    ).pipe(
+        merge_operator_identifiers, [analysis_date]
+    )
+    
+    trip_avg.to_parquet(
+        f"{SEGMENT_GCS}{TRIP_FILE}_{analysis_date}.parquet"
+    )
+    del trip_avg
+    
+    t3 = datetime.datetime.now()
+    logger.info(f"trip avg {t3 - t2}")
+    
+    route_dir_avg = weighted_average_speeds_across_segments(
+        df,
+        OPERATOR_COLS + ROUTE_DIR_COLS
+    ).pipe(
+        merge_operator_identifiers, [analysis_date]
+    )
+    
+    route_dir_avg.to_parquet(
+        f"{SEGMENT_GCS}{ROUTE_DIR_FILE}_{analysis_date}.parquet"
+    )
+    del route_dir_avg
+    
+    t4 = datetime.datetime.now()
+    logger.info(f"route dir avg: {t4 - t3}")
+    
+    return
+
+
+def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
+    ROUTE_SEG_FILE = dict_inputs["route_dir_multi_summary"]
+    ROUTE_DIR_FILE = dict_inputs["route_dir_multi_segment"]
+        
+    df = delayed(concatenate_trip_segment_speeds)(analysis_date_list, dict_inputs)
+    print("concatenated files")   
+    
+    time_span_str, time_span_num = time_helpers.time_span_labeling(analysis_date_list)
+    
+    t0 = datetime.datetime.now()
+        
+    route_dir_segments = delayed(concatenate_peak_offpeak_allday_averages)(
+        df, 
+        OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"]
+    )
+    
+    route_dir_segments = compute(route_dir_segments)[0]
+    
+    route_dir_segments = time_helpers.add_time_span_columns(
+        route_dir_segments, time_span_num
+    ).pipe(
+        merge_operator_identifiers, analysis_date_list
+    )
+    
+    route_dir_segments.to_parquet(
+        f"{SEGMENT_GCS}{ROUTE_SEG_FILE}_{time_span_str}.parquet"
+    )
+    del route_dir_segments   
+    
+    t1 = datetime.datetime.now()
+    logger.info(f"route seg avg {t1 - t0}")
+    
+    route_dir_avg = delayed(weighted_average_speeds_across_segments)(
+        df,
+        OPERATOR_COLS + ROUTE_DIR_COLS + ["weekday_weekend"]
+    )
+    
+    route_dir_avg = compute(route_dir_avg)[0]
+    route_dir_avg = time_helpers.add_time_span_columns(
+        route_dir_avg, time_span_num
+    ).pipe(
+        merge_operator_identifiers, analysis_date_list
+    )
+
+    route_dir_avg.to_parquet(
+        f"{SEGMENT_GCS}{ROUTE_DIR_FILE}_{time_span_str}.parquet"
+    )
+    del route_dir_avg
+
+    t2 = datetime.datetime.now()
+    logger.info(f"route dir avg {t2 - t1}")
+        
+    return
 
 
 if __name__ == "__main__":
@@ -245,16 +306,19 @@ if __name__ == "__main__":
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
+    '''
     for analysis_date in analysis_date_list:
-        logger.info(f"Analysis date: {analysis_date}")
         
-        speeds_with_segment_geom(
-            analysis_date, 
-            STOP_SEG_DICT
-        )
+        start = datetime.datetime.now()
+        single_day_averages(analysis_date, STOP_SEG_DICT)
+        end = datetime.datetime.now()
         
-        avg_trip_speeds_with_time_of_day(
-            analysis_date, 
-            STOP_SEG_DICT
-        )
+        logger.info(f"average rollups for {analysis_date}: {end - start}")
+    '''
+    start = datetime.datetime.now()
+    multi_day_averages(analysis_date_list, STOP_SEG_DICT)
+    end = datetime.datetime.now()
+    
+    logger.info(f"average rollups for {analysis_date_list}: {end - start}")
+
     
