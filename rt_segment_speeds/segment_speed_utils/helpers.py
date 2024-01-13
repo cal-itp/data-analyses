@@ -16,7 +16,8 @@ import yaml
 from typing import Literal, Union
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               COMPILED_CACHED_VIEWS,
-                                              RT_SCHED_GCS,
+                                              RT_SCHED_GCS, 
+                                              SCHED_GCS,
                                               PROJECT_CRS)
 from calitp_data_analysis import utils
 

@@ -1,25 +1,13 @@
 """
 All kinds of GTFS schedule table wrangling.
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
 from typing import Union
 
-from segment_speed_utils import helpers
-
-peak_periods = ["AM Peak", "PM Peak"]
-
-HOURS_BY_TIME_OF_DAY = {
-    "Owl": 4, #[0, 3]
-    "Early AM": 3,  #[4, 6]
-    "AM Peak": 3,  #[7, 9]
-    "Midday": 5,  #[10, 14]
-    "PM Peak": 5, #[15, 19]
-    "Evening": 4 #[20, 23]
-}
+from segment_speed_utils import helpers, time_helpers
+from shared_utils import rt_utils
 
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
@@ -98,18 +86,23 @@ def stop_arrivals_per_stop(
     return arrivals_by_stop
     
     
-def add_peak_offpeak_column(df: pd.DataFrame):
+def add_peak_offpeak_column(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add a single peak_offpeak column based on the time-of-day column.
     """
     df = df.assign(
-        peak_offpeak = df.apply(
-            lambda x: "peak" if x.time_of_day in peak_periods
-            else "offpeak", 
-            axis=1)
+        peak_offpeak = df.time_of_day.map(time_helpers.TIME_OF_DAY_DICT)
     )
     
     return df
+
+def add_weekday_weekend_column(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.assign(
+        weekday_weekend = df.service_date.dt.day_name().map(time_helpers.WEEKDAY_DICT)
+    )
+    
+    return df
+    
     
 def aggregate_time_of_day_to_peak_offpeak(
     df: pd.DataFrame,
@@ -119,11 +112,11 @@ def aggregate_time_of_day_to_peak_offpeak(
     Aggregate time-of-day bins into peak/offpeak periods.
     Return n_trips and frequency for grouping of columns (route-direction, etc).
     """    
-    peak_hours = sum(v for k, v in HOURS_BY_TIME_OF_DAY.items() 
-                 if k in peak_periods) 
+    peak_hours = sum(v for k, v in time_helpers.HOURS_BY_TIME_OF_DAY.items() 
+                 if k in time_helpers.PEAK_PERIODS) 
     
-    offpeak_hours = sum(v for k, v in HOURS_BY_TIME_OF_DAY.items() 
-                 if k not in peak_periods) 
+    offpeak_hours = sum(v for k, v in time_helpers.HOURS_BY_TIME_OF_DAY.items() 
+                 if k not in time_helpers.PEAK_PERIODS) 
     
     df = add_peak_offpeak_column(df)
     
@@ -154,6 +147,32 @@ def aggregate_time_of_day_to_peak_offpeak(
     df3 = df3.reset_index()
 
     return df3
+
+
+def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
+    """
+    Assign trips to time-of-day.
+    """
+    keep_trip_cols = [
+        "trip_instance_key", 
+        "service_hours", 
+        "trip_first_departure_datetime_pacific"
+    ]
+    
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = keep_trip_cols,
+        get_pandas = True
+    )
+                              
+    trips = trips.assign(
+        time_of_day = trips.apply(
+            lambda x: rt_utils.categorize_time_of_day(
+                x.trip_first_departure_datetime_pacific), axis=1), 
+        service_minutes = trips.service_hours * 60
+    )
+    
+    return trips
 
 
 def most_recent_route_info(
@@ -219,4 +238,40 @@ def standardize_route_id(
     word = word.strip()
     
     return word
+
+
+def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
+    """
+    Find shape_id with most trips for that route-direction.
+    """
+    route_dir_cols = ["gtfs_dataset_key", "route_id", "direction_id"]
+    
+    keep_trip_cols = route_dir_cols + [
+        "trip_instance_key", "shape_id", "shape_array_key"
+    ]
+    
+    trips = helpers.import_scheduled_trips(
+        analysis_date, 
+        columns = keep_trip_cols,
+        get_pandas = True
+    ).rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})                 
+    
+    sorting_order = [True for i in route_dir_cols]
+    
+    most_common_shape = (
+        trips.groupby(route_dir_cols + ["shape_id", "shape_array_key"], 
+                      observed=True, group_keys = False)
+        .agg({"trip_instance_key": "count"})
+        .reset_index()
+        .sort_values(route_dir_cols + ["trip_instance_key"], 
+                     ascending = sorting_order + [False])
+        .drop_duplicates(subset=route_dir_cols)
+        .reset_index(drop=True)
+        [route_dir_cols + ["shape_id", "shape_array_key"]]
+    ).rename(columns = {
+        "gtfs_dataset_key": "schedule_gtfs_dataset_key", 
+        "shape_id": "common_shape_id"
+    })  
+    
+    return most_common_shape
     
