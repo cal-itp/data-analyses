@@ -3,17 +3,16 @@ stop_segments:
     stage2: "nearest_vp"
     stage3: "stop_arrivals"
     stage4: "speeds_stop_segments"
-    stage5: "avg_speeds_stop_segments"
-    stage6: "trip_speeds"
-    stage7: "route_speeds"
-    stage8: "avg_route_speeds_stop_segments"
-    shape_rollup: "speeds_by_shape_peak_daytype"
-    route_direction_rollup: "speeds_by_route_direction_peak_daytype"
+    shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments"
+    route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"    
+    trip_speeds_single_summary: "rollup_singleday/speeds_trip"
+    route_dir_single_summary: "rollup_singleday/speeds_route_dir"
+    route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
+    route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
     segments_file: "stop_segments"    
     segment_identifier_cols: ["shape_array_key", "stop_sequence"]
     timestamp_col: "location_timestamp_local"
     time_min_cutoff: 10
-    pct_segment_minimum: 0.3
     max_speed: 80
 road_segments:
     stage1: "vp_usable"

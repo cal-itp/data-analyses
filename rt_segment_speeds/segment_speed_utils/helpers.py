@@ -16,7 +16,8 @@ import yaml
 from typing import Literal, Union
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               COMPILED_CACHED_VIEWS,
-                                              RT_SCHED_GCS,
+                                              RT_SCHED_GCS, 
+                                              SCHED_GCS,
                                               PROJECT_CRS)
 from calitp_data_analysis import utils
 
@@ -40,69 +41,6 @@ def get_parameters(
         params_dict = my_dict[segment_type]
     
     return params_dict
-    
-
-def operators_with_data(
-    gcs_folder: str, 
-    file_name_prefix: str, 
-    analysis_date: str
-) -> list:
-    """
-    Return a list of operators with RT files on that day by looking for a
-    certain file_name_prefix
-    """
-    all_files_in_folder = fs.ls(gcs_folder)
-    
-    files = [i for i in all_files_in_folder if f"{file_name_prefix}" in i]
-    
-    rt_operators = [i.split(f'{file_name_prefix}')[1]
-                    .split(f'_{analysis_date}')[0] 
-                    for i in files if analysis_date in i]
-    
-    return rt_operators
-
-
-def find_day_after(analysis_date: str) -> str:
-    """
-    RT is UTC, so let's also download the day after.
-    That way, when we localize to Pacific time, we don't lose
-    info after 4pm Pacific (which is midnight UTC).
-    """
-    one_day_later = (pd.to_datetime(analysis_date).date() + 
-                     datetime.timedelta(days=1)
-                    )
-    
-    return one_day_later.isoformat()
-
-    
-def import_segments(
-    gcs_folder: str = SEGMENT_GCS, 
-    file_name: str = "",
-    filters: tuple = None,
-    columns: list = None,
-    partitioned: bool = False
-) -> dg.GeoDataFrame:
-    
-    if partitioned:
-        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}"
-        
-        df = dg.read_parquet(
-            f"{gcs_folder}{file_name_sanitized}", 
-            filters = filters,
-            columns = columns
-        )
-    else:
-        file_name_sanitized = f"{utils.sanitize_file_path(file_name)}.parquet"
-        
-        df = gpd.read_parquet(
-            f"{gcs_folder}{file_name_sanitized}", 
-            filters = filters,
-            columns = columns
-        )
-    
-    df = df.drop_duplicates().reset_index(drop=True).to_crs(PROJECT_CRS)
-    
-    return df
 
 
 def import_scheduled_trips(
@@ -113,8 +51,8 @@ def import_scheduled_trips(
         "shape_id", "shape_array_key", 
         "route_id", "route_key", "direction_id"
     ],
-    get_pandas: bool = False
-) -> dd.DataFrame:
+    get_pandas: bool = True
+) -> Union[pd.DataFrame, dd.DataFrame]:
     """
     Get scheduled trips info (all operators) for single day, 
     and keep subset of columns.
@@ -137,24 +75,24 @@ def import_scheduled_shapes(
     analysis_date: str, 
     filters: tuple = None,
     columns: list = ["shape_array_key", "geometry"],
-    get_pandas: bool = False, 
+    get_pandas: bool = True, 
     crs: str = PROJECT_CRS
-) -> dg.GeoDataFrame: 
+) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]: 
     """
     Import shapes.
     """
     FILE = f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet"
     
     if get_pandas: 
-        shapes = gpd.read_parquet(FILE, filters = filters, 
-                                  columns = columns)
+        shapes = gpd.read_parquet(
+            FILE, filters = filters, columns = columns
+        )
     else:
-        shapes = dg.read_parquet(FILE, filters = filters,
-                                 columns = columns)
+        shapes = dg.read_parquet(
+            FILE, filters = filters, columns = columns
+        )
     
-    # Don't do this expensive operation unless we have to
-    if crs != shapes.crs:
-        shapes = shapes.to_crs(crs)
+    shapes = shapes.to_crs(crs)
         
     return shapes.drop_duplicates().reset_index(drop=True)
 
@@ -162,16 +100,37 @@ def import_scheduled_shapes(
 def import_scheduled_stop_times(
     analysis_date: str, 
     filters: tuple = None,
-    columns: list = None
-) -> dd.DataFrame:
+    columns: list = None,
+    get_pandas: bool = False,
+    with_direction: bool = False,
+    crs: str = PROJECT_CRS,
+) -> Union[dd.DataFrame, pd.DataFrame, dg.GeoDataFrame, gpd.GeoDataFrame]:
     """
     Get scheduled stop times.
     """
-    stop_times = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet", 
-        filters = filters,
-        columns = columns
-    )
+    if with_direction:
+        FILE = f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet"
+        
+        if get_pandas:
+            stop_times = gpd.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
+        else:
+            stop_times = dg.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
+        stop_times = stop_times.to_crs(crs)
+            
+    else:
+        FILE = f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet"
+        if get_pandas:
+            stop_times = pd.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
+        else:
+            stop_times = dd.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
     
     return stop_times.drop_duplicates().reset_index(drop=True)
 
@@ -180,54 +139,47 @@ def import_scheduled_stops(
     analysis_date: str,
     filters: tuple = None,
     columns: list = None,
-    get_pandas: bool = False,
+    get_pandas: bool = True,
     crs: str = PROJECT_CRS
-) -> dg.GeoDataFrame:
+) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
     """
     Get scheduled stops
     """
     FILE = f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet"
     
     if get_pandas:
-        stops = gpd.read_parquet(FILE, filters = filters, 
-                                 columns = columns)
+        stops = gpd.read_parquet(
+            FILE, filters = filters, columns = columns
+        )
     
     else:
-        stops = dg.read_parquet(FILE, filters = filters,
-                                columns = columns)
+        stops = dg.read_parquet(
+            FILE, filters = filters, columns = columns
+        )
     
-    if crs != stops.crs:
-        stops = stops.to_crs(crs)
+    stops = stops.to_crs(crs)
     
     return stops.drop_duplicates().reset_index(drop=True)
 
 
-def import_assembled_stop_times_with_direction(
-    analysis_date: str, 
+def import_schedule_gtfs_key_organization_crosswalk(
+    analysis_date: str,
     filters: tuple = None,
     columns: list = None,
-    get_pandas: bool = False,
-    crs: str = PROJECT_CRS
-) -> dg.GeoDataFrame:
+) -> pd.DataFrame:
     """
-    Get assembled stop times with direction 
-    (which doesn't have all the stop_times
-    columns, but does have trip_instance_key).
+    Get scheduled stops
     """
-    FILE = f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet"
+    FILE = (
+        f"{SCHED_GCS}crosswalk/"
+        f"gtfs_key_organization_{analysis_date}.parquet"
+    )
     
-    if get_pandas:
-        stop_times = gpd.read_parquet(FILE, filters = filters, 
-                                      columns = columns)
-    else:
-        stop_times = dg.read_parquet(FILE,
-            filters = filters, columns = columns
-        )
+    crosswalk = pd.read_parquet(
+        FILE, filters = filters, columns = columns
+    )
     
-    if crs != stop_times.crs:
-        stop_times = stop_times.to_crs(crs)
-    
-    return stop_times.drop_duplicates().reset_index(drop=True)
+    return crosswalk.drop_duplicates().reset_index(drop=True)
 
 
 def exclude_unusable_trips(
