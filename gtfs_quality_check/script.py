@@ -118,3 +118,11 @@ def incomplete(tu_excel_file: str, vp_excel_file: str, airtable: pd.DataFrame) -
         .fillna("NA")
     )
     display(incomplete2)
+    
+def load_complete_tu_vp(tu_file:str, vp_file:str) -> pd.DataFrame:
+    tu = to_snakecase(pd.read_excel(tu_file))
+    vp = to_snakecase(pd.read_excel(vp_file))
+    m1 = pd.merge(tu, vp, on = "name", how = "outer", indicator = True)
+    m1 = m1.sort_values(by = "name").reset_index(drop = True)
+    m1._merge = m1._merge.str.replace('right_only','found_in_vp_only').str.replace('left_only','found_in_tu_only')
+    return m1
