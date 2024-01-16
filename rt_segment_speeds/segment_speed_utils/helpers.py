@@ -52,7 +52,7 @@ def import_scheduled_trips(
         "route_id", "route_key", "direction_id"
     ],
     get_pandas: bool = True
-) -> dd.DataFrame:
+) -> Union[pd.DataFrame, dd.DataFrame]:
     """
     Get scheduled trips info (all operators) for single day, 
     and keep subset of columns.
@@ -77,7 +77,7 @@ def import_scheduled_shapes(
     columns: list = ["shape_array_key", "geometry"],
     get_pandas: bool = True, 
     crs: str = PROJECT_CRS
-) -> dg.GeoDataFrame: 
+) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]: 
     """
     Import shapes.
     """
@@ -85,14 +85,14 @@ def import_scheduled_shapes(
     
     if get_pandas: 
         shapes = gpd.read_parquet(
-            FILE, filters = filters, columns = columns)
+            FILE, filters = filters, columns = columns
+        )
     else:
         shapes = dg.read_parquet(
-            FILE, filters = filters, columns = columns)
+            FILE, filters = filters, columns = columns
+        )
     
-    # Don't do this expensive operation unless we have to
-    if crs != shapes.crs:
-        shapes = shapes.to_crs(crs)
+    shapes = shapes.to_crs(crs)
         
     return shapes.drop_duplicates().reset_index(drop=True)
 
@@ -104,7 +104,7 @@ def import_scheduled_stop_times(
     get_pandas: bool = False,
     with_direction: bool = False,
     crs: str = PROJECT_CRS,
-) -> dd.DataFrame:
+) -> Union[dd.DataFrame, pd.DataFrame, dg.GeoDataFrame, gpd.GeoDataFrame]:
     """
     Get scheduled stop times.
     """
@@ -119,8 +119,7 @@ def import_scheduled_stop_times(
             stop_times = dg.read_parquet(
                 FILE, filters = filters, columns = columns
             )
-        if crs != stop_times.crs:
-            stop_times = stop_times.to_crs(crs)
+        stop_times = stop_times.to_crs(crs)
             
     else:
         FILE = f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet"
@@ -142,7 +141,7 @@ def import_scheduled_stops(
     columns: list = None,
     get_pandas: bool = True,
     crs: str = PROJECT_CRS
-) -> dg.GeoDataFrame:
+) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
     """
     Get scheduled stops
     """
@@ -158,8 +157,7 @@ def import_scheduled_stops(
             FILE, filters = filters, columns = columns
         )
     
-    if crs != stops.crs:
-        stops = stops.to_crs(crs)
+    stops = stops.to_crs(crs)
     
     return stops.drop_duplicates().reset_index(drop=True)
 
