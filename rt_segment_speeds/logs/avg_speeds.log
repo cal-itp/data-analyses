@@ -1,58 +1,51 @@
-2023-11-06 15:57:16.305 | INFO     | __main__:<module>:249 - Analysis date: 2023-10-11
-2023-11-06 15:59:18.120 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:01.813076
-2023-11-06 15:59:26.899 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.655715
-2023-11-06 15:59:26.911 | INFO     | __main__:<module>:249 - Analysis date: 2023-09-13
-2023-11-06 16:01:24.513 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:57.601884
-2023-11-06 16:01:32.899 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.277026
-2023-11-06 16:01:32.910 | INFO     | __main__:<module>:249 - Analysis date: 2023-08-15
-2023-11-06 16:03:34.836 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:01.925195
-2023-11-06 16:03:43.726 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.779732
-2023-11-06 16:03:43.739 | INFO     | __main__:<module>:249 - Analysis date: 2023-07-12
-2023-11-06 16:05:28.192 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:44.451632
-2023-11-06 16:05:37.199 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.899107
-2023-11-06 16:05:37.210 | INFO     | __main__:<module>:249 - Analysis date: 2023-06-14
-2023-11-06 16:07:20.946 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:43.736212
-2023-11-06 16:07:30.071 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.023577
-2023-11-06 16:07:30.083 | INFO     | __main__:<module>:249 - Analysis date: 2023-05-17
-2023-11-06 16:09:26.014 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:55.930926
-2023-11-06 16:09:35.119 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.005461
-2023-11-06 16:09:35.131 | INFO     | __main__:<module>:249 - Analysis date: 2023-04-12
-2023-11-06 16:14:19.095 | INFO     | __main__:<module>:249 - Analysis date: 2023-10-11
-2023-11-06 16:16:23.123 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:04.027868
-2023-11-06 16:16:32.544 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.299333
-2023-11-06 16:16:32.557 | INFO     | __main__:<module>:249 - Analysis date: 2023-09-13
-2023-11-06 16:18:31.595 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:59.037028
-2023-11-06 16:18:39.862 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.143427
-2023-11-06 16:18:39.874 | INFO     | __main__:<module>:249 - Analysis date: 2023-08-15
-2023-11-06 16:20:44.117 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:04.241983
-2023-11-06 16:20:52.968 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.742420
-2023-11-06 16:20:52.980 | INFO     | __main__:<module>:249 - Analysis date: 2023-07-12
-2023-11-06 16:22:41.130 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:48.149524
-2023-11-06 16:22:50.098 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.871341
-2023-11-06 16:22:50.111 | INFO     | __main__:<module>:249 - Analysis date: 2023-06-14
-2023-11-06 16:24:38.042 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:47.930386
-2023-11-06 16:24:47.008 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.854655
-2023-11-06 16:24:47.021 | INFO     | __main__:<module>:249 - Analysis date: 2023-05-17
-2023-11-06 16:26:48.437 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:01.414883
-2023-11-06 16:26:57.608 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.058372
-2023-11-06 16:26:57.622 | INFO     | __main__:<module>:249 - Analysis date: 2023-04-12
-2023-11-06 16:29:01.767 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:04.143738
-2023-11-06 16:29:10.778 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:08.902052
-2023-11-06 16:29:10.791 | INFO     | __main__:<module>:249 - Analysis date: 2023-03-15
-2023-11-06 16:31:05.067 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:01:54.274974
-2023-11-06 16:31:14.376 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.212622
-2023-11-16 10:32:18.445 | INFO     | __main__:<module>:249 - Analysis date: 2023-11-15
-2023-11-16 10:34:24.761 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:06.278055
-2023-11-16 10:34:35.014 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:10.128945
-2023-11-28 09:11:27.747 | INFO     | __main__:<module>:249 - Analysis date: 2023-10-11
-2023-11-28 09:13:34.200 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:06.452114
-2023-11-28 09:13:43.845 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.522839
-2023-11-28 09:13:43.860 | INFO     | __main__:<module>:249 - Analysis date: 2023-11-15
-2023-11-28 09:15:49.936 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:06.074704
-2023-11-28 09:15:59.701 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:09.603107
-2023-12-13 11:04:09.669 | INFO     | __main__:<module>:256 - roll up speeds for: ['2023-10-09', '2023-10-10', '2023-10-11', '2023-10-12', '2023-10-13', '2023-10-14', '2023-10-15']: 0:10:47.044050
-2023-12-13 11:39:18.611 | INFO     | __main__:<module>:256 - roll up speeds for: ['2023-04-10', '2023-04-11', '2023-04-12', '2023-04-13', '2023-04-14', '2023-04-15', '2023-04-16']: 0:08:40.796207
-2023-12-13 11:48:21.346 | INFO     | __main__:<module>:256 - roll up speeds for: ['2023-10-09', '2023-10-10', '2023-10-11', '2023-10-12', '2023-10-13', '2023-10-14', '2023-10-15']: 0:08:33.916126
-2023-12-14 11:44:30.559 | INFO     | __main__:<module>:249 - Analysis date: 2023-12-13
-2023-12-14 11:46:45.777 | INFO     | __main__:speeds_with_segment_geom:130 - segment averages execution time: 0:02:15.201397
-2023-12-14 11:46:57.617 | INFO     | __main__:avg_trip_speeds_with_time_of_day:231 - trip summary execution time: 0:00:11.668171
+2024-01-12 18:06:39.922 | INFO     | __main__:single_day_averages:161 - shape seg avg 0:03:02.810870
+2024-01-12 18:08:46.477 | INFO     | __main__:single_day_averages:174 - route dir seg avg 0:02:06.554774
+2024-01-12 18:08:52.454 | INFO     | __main__:single_day_averages:188 - trip avg 0:00:05.976923
+2024-01-12 18:08:55.443 | INFO     | __main__:single_day_averages:200 - route dir avg: 0:00:02.988727
+2024-01-12 18:08:55.535 | INFO     | __main__:<module>:226 - average rollups for 2023-11-15: 0:05:30.589840
+2024-01-12 18:12:19.679 | INFO     | __main__:single_day_averages:161 - shape seg avg 0:03:12.836248
+2024-01-12 18:14:24.263 | INFO     | __main__:single_day_averages:174 - route dir seg avg 0:02:04.583881
+2024-01-12 18:14:30.117 | INFO     | __main__:single_day_averages:188 - trip avg 0:00:05.854436
+2024-01-12 18:14:33.483 | INFO     | __main__:single_day_averages:200 - route dir avg: 0:00:03.366009
+2024-01-12 18:14:33.561 | INFO     | __main__:<module>:226 - average rollups for 2023-10-11: 0:05:38.025964
+2024-01-12 18:17:38.177 | INFO     | __main__:single_day_averages:161 - shape seg avg 0:02:53.331595
+2024-01-12 18:19:37.364 | INFO     | __main__:single_day_averages:174 - route dir seg avg 0:01:59.186956
+2024-01-12 18:19:42.466 | INFO     | __main__:single_day_averages:188 - trip avg 0:00:05.102817
+2024-01-12 18:19:45.241 | INFO     | __main__:single_day_averages:200 - route dir avg: 0:00:02.774644
+2024-01-12 18:19:45.320 | INFO     | __main__:<module>:226 - average rollups for 2023-09-13: 0:05:11.758315
+2024-01-12 18:23:03.853 | INFO     | __main__:single_day_averages:161 - shape seg avg 0:03:07.330519
+2024-01-12 18:25:05.827 | INFO     | __main__:single_day_averages:174 - route dir seg avg 0:02:01.974740
+2024-01-12 18:25:11.688 | INFO     | __main__:single_day_averages:188 - trip avg 0:00:05.860574
+2024-01-12 18:25:14.962 | INFO     | __main__:single_day_averages:200 - route dir avg: 0:00:03.274055
+2024-01-12 18:25:15.059 | INFO     | __main__:<module>:226 - average rollups for 2023-08-15: 0:05:29.737775
+2024-01-12 18:28:02.563 | INFO     | __main__:single_day_averages:161 - shape seg avg 0:02:35.697961
+2024-01-12 18:29:46.221 | INFO     | __main__:single_day_averages:174 - route dir seg avg 0:01:43.657744
+2024-01-12 18:29:51.370 | INFO     | __main__:single_day_averages:188 - trip avg 0:00:05.149411
+2024-01-12 18:29:54.318 | INFO     | __main__:single_day_averages:200 - route dir avg: 0:00:02.947539
+2024-01-12 18:29:54.406 | INFO     | __main__:<module>:226 - average rollups for 2023-07-12: 0:04:39.346597
+2024-01-12 18:32:47.926 | INFO     | __main__:single_day_averages:161 - shape seg avg 0:02:41.740822
+2024-01-12 18:34:30.637 | INFO     | __main__:single_day_averages:174 - route dir seg avg 0:01:42.711175
+2024-01-12 18:34:35.408 | INFO     | __main__:single_day_averages:188 - trip avg 0:00:04.771437
+2024-01-12 18:34:37.957 | INFO     | __main__:single_day_averages:200 - route dir avg: 0:00:02.549076
+2024-01-12 18:34:38.052 | INFO     | __main__:<module>:226 - average rollups for 2023-06-14: 0:04:43.645367
+2024-01-12 18:37:36.391 | INFO     | __main__:single_day_averages:161 - shape seg avg 0:02:47.454496
+2024-01-12 18:39:30.098 | INFO     | __main__:single_day_averages:174 - route dir seg avg 0:01:53.707229
+2024-01-12 18:39:35.127 | INFO     | __main__:single_day_averages:188 - trip avg 0:00:05.029718
+2024-01-12 18:39:37.900 | INFO     | __main__:single_day_averages:200 - route dir avg: 0:00:02.772840
+2024-01-12 18:39:37.970 | INFO     | __main__:<module>:226 - average rollups for 2023-05-17: 0:04:59.916877
+2024-01-12 18:42:48.234 | INFO     | __main__:single_day_averages:161 - shape seg avg 0:03:00.306669
+2024-01-12 18:44:44.898 | INFO     | __main__:single_day_averages:174 - route dir seg avg 0:01:56.664023
+2024-01-12 18:44:50.122 | INFO     | __main__:single_day_averages:188 - trip avg 0:00:05.223725
+2024-01-12 18:44:53.286 | INFO     | __main__:single_day_averages:200 - route dir avg: 0:00:03.163784
+2024-01-12 18:44:53.356 | INFO     | __main__:<module>:226 - average rollups for 2023-04-12: 0:05:15.385673
+2024-01-12 18:47:46.971 | INFO     | __main__:single_day_averages:161 - shape seg avg 0:02:42.806424
+2024-01-12 18:49:40.554 | INFO     | __main__:single_day_averages:174 - route dir seg avg 0:01:53.582921
+2024-01-12 18:49:45.551 | INFO     | __main__:single_day_averages:188 - trip avg 0:00:04.997039
+2024-01-12 18:49:48.333 | INFO     | __main__:single_day_averages:200 - route dir avg: 0:00:02.782500
+2024-01-12 18:49:48.405 | INFO     | __main__:<module>:226 - average rollups for 2023-03-15: 0:04:55.047935
+2024-01-12 21:40:57.958 | INFO     | __main__:multi_day_averages:272 - route seg avg 0:04:51.371722
+2024-01-12 21:42:02.380 | INFO     | __main__:multi_day_averages:292 - route dir avg 0:01:04.422529
+2024-01-12 21:42:02.381 | INFO     | __main__:<module>:322 - average rollups for ['2023-10-09', '2023-10-10', '2023-10-11', '2023-10-12', '2023-10-13', '2023-10-14', '2023-10-15']: 0:05:55.797342
+2024-01-12 21:58:24.392 | INFO     | __main__:multi_day_averages:272 - route seg avg 0:05:11.243450
+2024-01-12 21:59:19.820 | INFO     | __main__:multi_day_averages:292 - route dir avg 0:00:55.428205
+2024-01-12 21:59:19.821 | INFO     | __main__:<module>:322 - average rollups for ['2023-04-10', '2023-04-11', '2023-04-12', '2023-04-13', '2023-04-14', '2023-04-15', '2023-04-16']: 0:06:06.674622
