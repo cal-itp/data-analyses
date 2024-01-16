@@ -13,6 +13,7 @@ preprocess:
 	python vp_direction.py
 	python cleanup.py
 	python route_typologies.py
+	python crosswalk_gtfs_dataset_key_to_organization.py
     
 # Start compiling scripts needed when we start concatenating several days
 # Clean route names for displaying across time
