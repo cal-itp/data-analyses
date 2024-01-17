@@ -1,55 +1,3 @@
-2023-08-13 15:07:10.416 | INFO     | __main__:<module>:294 - Analysis date: 2023-07-12
-2023-08-13 15:27:44.115 | INFO     | __main__:<module>:314 - Cut special stop segments: 0:20:33.695022
-2023-08-13 15:27:45.344 | INFO     | __main__:<module>:334 - export results: 0:00:01.228991
-2023-08-13 15:27:45.345 | INFO     | __main__:<module>:335 - execution time: 0:20:34.924013
-2023-08-13 18:27:02.589 | INFO     | __main__:<module>:294 - Analysis date: 2023-06-14
-2023-08-13 18:50:15.053 | INFO     | __main__:<module>:320 - Cut special stop segments: 0:23:12.459102
-2023-08-13 18:50:17.027 | INFO     | __main__:<module>:340 - export results: 0:00:01.974071
-2023-08-13 18:50:17.027 | INFO     | __main__:<module>:341 - execution time: 0:23:14.433173
-2023-08-13 19:00:41.749 | INFO     | __main__:<module>:294 - Analysis date: 2023-05-17
-2023-08-13 19:22:26.794 | INFO     | __main__:<module>:320 - Cut special stop segments: 0:21:45.041264
-2023-08-13 19:22:28.676 | INFO     | __main__:<module>:340 - export results: 0:00:01.882236
-2023-08-13 19:22:28.677 | INFO     | __main__:<module>:341 - execution time: 0:21:46.923500
-2023-08-13 19:42:40.600 | INFO     | __main__:<module>:294 - Analysis date: 2023-04-12
-2023-08-13 20:01:56.578 | INFO     | __main__:<module>:320 - Cut special stop segments: 0:19:15.948045
-2023-08-13 20:01:58.357 | INFO     | __main__:<module>:340 - export results: 0:00:01.779154
-2023-08-13 20:01:58.358 | INFO     | __main__:<module>:341 - execution time: 0:19:17.727199
-2023-08-13 20:20:06.975 | INFO     | __main__:<module>:294 - Analysis date: 2023-03-15
-2023-08-13 20:40:27.141 | INFO     | __main__:<module>:320 - Cut special stop segments: 0:20:20.162191
-2023-08-13 20:40:28.893 | INFO     | __main__:<module>:340 - export results: 0:00:01.752011
-2023-08-13 20:40:28.893 | INFO     | __main__:<module>:341 - execution time: 0:20:21.914202
-2023-08-18 13:35:35.608 | INFO     | __main__:<module>:198 - Analysis date: 2023-08-16
-2023-08-18 13:36:14.742 | INFO     | __main__:<module>:241 - Cut normal stop segments: 0:00:39.118741
-2023-08-18 13:44:52.926 | INFO     | __main__:<module>:253 - Export results: 0:08:38.183837
-2023-08-18 13:44:52.927 | INFO     | __main__:<module>:256 - execution time: 0:09:17.303518
-2023-08-18 13:45:10.055 | INFO     | __main__:<module>:294 - Analysis date: 2023-08-16
-2023-08-18 14:08:31.069 | INFO     | __main__:<module>:320 - Cut special stop segments: 0:23:21.009693
-2023-08-18 14:08:33.714 | INFO     | __main__:<module>:340 - export results: 0:00:02.645860
-2023-08-18 14:08:33.716 | INFO     | __main__:<module>:341 - execution time: 0:23:23.655553
-2023-08-24 13:40:46.153 | INFO     | __main__:<module>:198 - Analysis date: 2023-08-15
-2023-08-24 13:41:21.628 | INFO     | __main__:<module>:241 - Cut normal stop segments: 0:00:35.462594
-2023-08-24 13:54:33.224 | INFO     | __main__:<module>:253 - Export results: 0:13:11.596216
-2023-08-24 13:54:33.263 | INFO     | __main__:<module>:256 - execution time: 0:13:47.097510
-2023-08-24 13:55:08.349 | INFO     | __main__:<module>:294 - Analysis date: 2023-08-15
-2023-08-24 14:19:19.999 | INFO     | __main__:<module>:320 - Cut special stop segments: 0:24:11.635486
-2023-08-24 14:19:22.137 | INFO     | __main__:<module>:340 - export results: 0:00:02.137997
-2023-08-24 14:19:22.139 | INFO     | __main__:<module>:341 - execution time: 0:24:13.773483
-2023-09-14 12:04:30.188 | INFO     | __main__:<module>:198 - Analysis date: 2023-09-13
-2023-09-14 12:05:18.808 | INFO     | __main__:<module>:241 - Cut normal stop segments: 0:00:48.592841
-2023-09-14 12:17:38.959 | INFO     | __main__:<module>:253 - Export results: 0:12:20.150798
-2023-09-14 12:17:38.959 | INFO     | __main__:<module>:256 - execution time: 0:13:08.744283
-2023-09-14 12:17:55.414 | INFO     | __main__:<module>:294 - Analysis date: 2023-09-13
-2023-09-14 12:49:01.519 | INFO     | __main__:<module>:320 - Cut special stop segments: 0:31:06.099902
-2023-09-14 12:49:03.997 | INFO     | __main__:<module>:340 - export results: 0:00:02.477876
-2023-09-14 12:49:03.997 | INFO     | __main__:<module>:341 - execution time: 0:31:08.577778
-2023-10-12 10:39:42.151 | INFO     | __main__:<module>:193 - Analysis date: 2023-10-11
-2023-10-12 10:40:36.734 | INFO     | __main__:<module>:236 - Cut normal stop segments: 0:00:54.569485
-2023-10-12 10:52:34.472 | INFO     | __main__:<module>:248 - Export results: 0:11:57.737589
-2023-10-12 10:52:34.473 | INFO     | __main__:<module>:251 - execution time: 0:12:52.307907
-2023-10-12 10:52:52.703 | INFO     | __main__:<module>:294 - Analysis date: 2023-10-11
-2023-10-12 11:06:14.469 | INFO     | __main__:<module>:320 - Cut special stop segments: 0:13:21.760520
-2023-10-12 11:06:16.038 | INFO     | __main__:<module>:340 - export results: 0:00:01.569837
-2023-10-12 11:06:16.039 | INFO     | __main__:<module>:341 - execution time: 0:13:23.330357
 2023-10-17 12:10:58.267 | INFO     | __main__:<module>:327 - Analysis date: 2023-10-11
 2023-10-17 12:18:58.422 | INFO     | __main__:<module>:353 - Cut special stop segments: 0:08:00.151683
 2023-10-17 12:18:59.549 | INFO     | __main__:<module>:374 - export results: 0:00:01.127227
@@ -78,3 +26,5 @@
 2023-12-14 11:15:58.909 | INFO     | __main__:<module>:318 - Cut special stop segments: 0:10:06.139637
 2023-12-14 11:16:00.020 | INFO     | __main__:<module>:339 - export results: 0:00:01.110908
 2023-12-14 11:16:00.021 | INFO     | __main__:<module>:340 - execution time: 0:10:07.250545
+2024-01-17 08:51:37.506 | INFO     | __main__:<module>:71 - Analysis date: 2023-12-13
+2024-01-17 09:13:47.443 | INFO     | __main__:<module>:118 - cut segments for all trips: 0:22:09.920160
