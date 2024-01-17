@@ -104,23 +104,6 @@ def convert_timestamp_to_seconds(
     return df
 
 
-def derive_stop_delay(
-    df: dd.DataFrame, 
-    rt_sched_time_cols: tuple = ("max_time_sec", "arrival_sec")
-) -> dd.DataFrame:
-    """
-    Calculate the difference in actual arrival time 
-    and scheduled arrival time.
-    """
-    actual, scheduled = rt_sched_time_cols[0], rt_sched_time_cols[1]
-    
-    df = df.assign(
-        actual_minus_scheduled_sec = df[actual] - df[scheduled]
-    )
-    
-    return df
-
-
 def get_usable_vp_bounds_by_trip(df: dd.DataFrame) -> pd.DataFrame:
     """
     Of all the usable vp, for each trip, find the min(vp_idx)
