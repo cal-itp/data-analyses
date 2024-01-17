@@ -182,6 +182,18 @@ def import_schedule_gtfs_key_organization_crosswalk(
     return crosswalk.drop_duplicates().reset_index(drop=True)
 
 
+def import_unique_vp_trips(analysis_date: str) -> list:
+    """
+    Get the unique trip_instance_keys that are present
+    on a given day in vp_usable.
+    """
+    rt_trips = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+        columns = ["trip_instance_key"]
+    ).trip_instance_key.unique().tolist()
+    
+    return rt_trips
+
 def exclude_unusable_trips(
     vp_df: dd.DataFrame, 
     valid_trips: pd.DataFrame

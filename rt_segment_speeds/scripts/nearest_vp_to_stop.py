@@ -25,20 +25,14 @@ def rt_trips_to_shape(analysis_date: str) -> pd.DataFrame:
     Provide shape_array_key associated with trip_instance_key.
     """
     # Get RT trips
-    rt_trips = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
-        columns = ["trip_instance_key"]
-    ).drop_duplicates()
+    rt_trips = helpers.import_unique_vp_trips(analysis_date)
 
     # Find the shape_array_key for RT trips
     trip_to_shape = helpers.import_scheduled_trips(
         analysis_date,
         columns = ["trip_instance_key", "shape_array_key"],
+        filters = [[("trip_instance_key", "in", rt_trips)]],
         get_pandas = True
-    ).merge(
-        rt_trips,
-        on = "trip_instance_key",
-        how = "inner"
     )
 
     # Find whether it's loop or inlining
