@@ -7,6 +7,7 @@ shapes better at the edges.
 import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
+import geopandas as gpd
 import gtfs_segments
 import pandas as pd
 import sys
@@ -65,26 +66,11 @@ def stop_times_with_shape(
     return df
 
 
-if __name__ == "__main__":
-    
-    from segment_speed_utils.project_vars import analysis_date
-    
-    LOG_FILE = "../logs/cut_stop_segments.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
-    
-    logger.info(f"Analysis date: {analysis_date}")
-    
-    start = datetime.datetime.now()
-
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    EXPORT_FILE = STOP_SEG_DICT["segments_file"]
-    
+def cut_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
     ddf = stop_times_with_shape(analysis_date)
     
-    # This is a lot of 
+    # This is stop_times for all rt_trips, could be a lot
+    # so let's partition it with a lot of npartitions
     ddf = ddf.repartition(npartitions=150).persist()
         
     renamed_ddf = ddf.rename(columns = {"stop_id": "stop_id1"})
@@ -116,11 +102,34 @@ if __name__ == "__main__":
      .compute()
      )
     
-    utils.geoparquet_gcs_export(
-        segments,
-        SEGMENT_GCS,
-        f"{EXPORT_FILE}_{analysis_date}"
-    )
+    return segments
     
-    end = datetime.datetime.now()
-    logger.info(f"cut segments for all trips: {end - start}")
+
+if __name__ == "__main__":
+    
+    from segment_speed_utils.project_vars import analysis_date_list
+    
+    LOG_FILE = "../logs/cut_stop_segments.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")    
+    
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    EXPORT_FILE = STOP_SEG_DICT["segments_file"]
+    
+    for analysis_date in analysis_date_list:
+        start = datetime.datetime.now()
+
+        segments = cut_stop_segments(analysis_date)
+        
+        utils.geoparquet_gcs_export(
+            segments,
+            SEGMENT_GCS,
+            f"{EXPORT_FILE}_{analysis_date}"
+        )
+        
+        del segments
+    
+        end = datetime.datetime.now()
+        logger.info(f"cut segments {analysis_date}: {end - start}")
