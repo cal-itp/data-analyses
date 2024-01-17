@@ -1,10 +1,8 @@
 # Cut segments
 segmentize:
 	#pip install -r requirements.txt
-	python prep_stop_segments.py
-	python cut_normal_stop_segments.py
-	python cut_special_stop_segments.py
-	python concatenate_stop_segments.py
+	#python prep_stop_segments.py
+	python cut_stop_segments.py
 
 prep_roads:
 # run cut_road_segments and concatenate_road_segments once

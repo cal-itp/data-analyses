@@ -183,17 +183,10 @@ def assemble_stop_times_with_direction(analysis_date: str, dict_inputs: dict):
     # Add this because some bus can travel in southeasterly direction, 
     # but it's categorized as southbound or eastbound depending 
     # on whether south or east value is larger.
-    # Keeping the normalized x/y direction allows us to distinguish a bit better later
-    direction_vector = wrangle_shapes.get_direction_vector(prior_geom, current_geom)
-    normalized_vector = wrangle_shapes.get_normalized_vector(direction_vector)
-    
+
     other_stops_no_geom = other_stops_no_geom.assign(
         stop_primary_direction = stop_direction,
         stop_meters = stop_distance,
-        # since we can't save tuples, let's assign x, y normalized direction vector
-        # as 2 columns
-        stop_dir_xnorm = normalized_vector[0],
-        stop_dir_ynorm = normalized_vector[1]
     )
     
     scheduled_stop_times_with_direction = pd.concat(
@@ -227,4 +220,5 @@ if __name__ == "__main__":
     from update_vars import analysis_date_list, CONFIG_DICT
 
     for date in analysis_date_list:
+        print(date)
         assemble_stop_times_with_direction(date, CONFIG_DICT)
