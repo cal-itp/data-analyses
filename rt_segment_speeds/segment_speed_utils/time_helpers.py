@@ -1,3 +1,8 @@
+"""
+Helpers for defining peak vs offpeak periods and
+weekend and weekends so we can aggregate our
+existing time-of-day bins.
+"""
 import datetime 
 import pandas as pd
 

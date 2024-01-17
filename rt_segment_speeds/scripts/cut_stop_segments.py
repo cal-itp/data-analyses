@@ -28,10 +28,7 @@ def stop_times_with_shape(
     and attach stop_times and shapes.
     Set up this df the way we need to use gtfs_segments.create_segments.
     """
-    rt_trips = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
-        columns = ["trip_instance_key"]
-    ).trip_instance_key.unique().tolist()
+    rt_trips = helpers.import_unique_vp_trips(analysis_date)
     
     stop_times = helpers.import_scheduled_stop_times(
         analysis_date,
