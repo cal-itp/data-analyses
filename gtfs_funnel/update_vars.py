@@ -2,12 +2,14 @@ import yaml
 from pathlib import Path
 from shared_utils import rt_dates
 
-months = ["nov", "oct", "sep", "aug",
+months = ["dec", "nov", "oct", "sep", "aug",
          "jul", "jun", "may", "apr", "mar"]         
 
+days = ["a", "b", "c", "d", "e", "f"]
+
 analysis_date_list = [
-    rt_dates.DATES["dec2023"] 
-]
+    rt_dates.DATES["dec2023"]
+] 
 
 CONFIG_PATH = Path("config.yml")
 
