@@ -4,6 +4,8 @@ Functions for working with numpy arrays.
 import numpy as np
 import pandas as pd
 
+from numba import jit
+
 def rolling_window_make_array(
     df: pd.DataFrame, 
     window: int, 
