@@ -90,7 +90,7 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
     are stops that physically reside in the corridor.
     """
     bus_corridors = (prep_clip.prep_bus_corridors()
-                     [["hqta_segment_id", "geometry"]].compute()
+                     [["hqta_segment_id", "geometry"]]
                     )
     
     stop_cols = ["feed_key", "stop_id"]
