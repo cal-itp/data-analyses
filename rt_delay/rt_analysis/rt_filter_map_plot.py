@@ -136,10 +136,10 @@ class RtFilterMapper:
         if start_time and end_time:
             self.hr_duration_in_filter = (dt.datetime.combine(self.analysis_date, self.filter['end_time'])
                                  - dt.datetime.combine(self.analysis_date, self.filter['start_time'])
-                                ).seconds / 60**2
+                                ).total_seconds() / 60**2
         else:
             self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
-                                         self.stop_delay_view.actual_time.min()).seconds / 60**2
+                                         self.stop_delay_view.actual_time.min()).total_seconds() / 60**2
         
         if self.filter['route_names'] and len(self.filter['route_names']) <= 5:
             rts = 'Route(s) ' + ', '.join(self.filter['route_names'])
