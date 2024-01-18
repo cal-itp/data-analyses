@@ -166,7 +166,10 @@ def dot_product(vec1: tuple, vec2: tuple) -> float:
     return vec1[0]*vec2[0] + vec1[1]*vec2[1]
 
 
-def vp_as_gdf(vp: pd.DataFrame) -> gpd.GeoDataFrame:
+def vp_as_gdf(
+    vp: pd.DataFrame,
+    crs: str = PROJECT_CRS
+) -> gpd.GeoDataFrame:
     """
     Turn vp as a gdf and project to EPSG:3310.
     """
@@ -174,7 +177,7 @@ def vp_as_gdf(vp: pd.DataFrame) -> gpd.GeoDataFrame:
         vp,
         longitude_col = "x", latitude_col = "y",
         crs = geography_utils.WGS84
-    ).to_crs(PROJECT_CRS).drop(columns = ["x", "y"])
+    ).to_crs(crs).drop(columns = ["x", "y"])
         
     return vp_gdf
 
