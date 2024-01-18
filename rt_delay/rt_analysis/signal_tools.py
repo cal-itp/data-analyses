@@ -210,11 +210,12 @@ def calculate_scores(joined_seg_lines_gdf):
     to_calculate = calculate_speed_score(to_calculate)
     to_calculate = calculate_variability_score(to_calculate)
     to_calculate = calculate_frequency_score(to_calculate)
-    to_calculate['transit_score'] = to_calculate.speed_score + to_calculate.variability_score + to_calculate.frequency_score
     
-    median_by_signal = to_calculate >> group_by(_.imms_id, _.location) >> summarize(speed_score = _.speed_score.median(),
+    median_by_signal = (to_calculate >> group_by(_.imms_id, _.location)
+                        >> summarize(speed_score = _.speed_score.median(),
                                             variability_score = _.variability_score.median(),
                                             frequency_score = _.frequency_score.median(),
-                                            overall_transit_score = _.transit_score.median(),
                                            )
+                        >> mutate(overall_transit_score = _.speed_score + _.variability_score + _.frequency_score)
+                       )
     return median_by_signal >> arrange(-_.overall_transit_score)
