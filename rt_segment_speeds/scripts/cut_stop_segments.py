@@ -15,7 +15,7 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis import utils
-from segment_speed_utils import helpers
+from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               PROJECT_CRS, 
                                               CONFIG_PATH
@@ -57,9 +57,10 @@ def stop_times_with_shape(
     ).rename(columns = {
         "geometry_x": "start",
         "geometry_y": "geometry",
-        "trip_instance_key": "trip_id", 
-        "shape_array_key": "shape_id",
-    }).dropna(
+    }).pipe(
+        gtfs_schedule_wrangling.gtfs_segments_rename_cols,
+        natural_identifier = True
+    ).dropna(
         subset="geometry"
     ).reset_index(drop=True).set_geometry("geometry")
     
@@ -93,10 +94,10 @@ def cut_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
     segments = (segments.drop(
         columns = ["start", "end", 
                    "snap_start_id", "snap_end_id"]
-    ).rename(columns = {
-        "shape_id": "shape_array_key",
-        "trip_id": "trip_instance_key",
-    }).set_geometry("geometry")
+    ).pipe(
+        gtfs_schedule_wrangling.gtfs_segments_rename_cols,
+        natural_identifier = False
+    ).set_geometry("geometry")
       .set_crs("EPSG:4326")
      .to_crs(PROJECT_CRS)
      .compute()
