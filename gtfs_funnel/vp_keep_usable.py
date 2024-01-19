@@ -12,6 +12,7 @@ import sys
 
 from loguru import logger
 
+from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS 
                                               
 fs = gcsfs.GCSFileSystem()
@@ -131,8 +132,7 @@ def pare_down_vp_to_valid_trips(
     # https://stackoverflow.com/questions/69092126/is-it-possible-to-change-the-output-filenames-when-saving-as-partitioned-parquet
     export_path = f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}_stage"
     
-    if fs.exists(export_path):
-        fs.rm(export_path, recursive=True)
+    helpers.if_exists_then_delete(export_path)
     
     usable_vp.to_parquet(
         export_path,
@@ -151,27 +151,21 @@ if __name__ == "__main__":
     
     from update_vars import analysis_date_list, CONFIG_DICT
     
-    LOG_FILE = "./logs/usable_rt_vp.log"
+    LOG_FILE = "./logs/vp_preprocessing.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    
-    start = datetime.datetime.now()
-    
     for analysis_date in analysis_date_list:
-    
-        logger.info(f"Analysis date: {analysis_date}")
-
-        time1 = datetime.datetime.now()
-
+        start = datetime.datetime.now()
+  
         pare_down_vp_to_valid_trips(
             analysis_date,
             CONFIG_DICT
         )
         
         end = datetime.datetime.now()
-        logger.info(f"pare down vp: {end - start}")
+        logger.info(f"{analysis_date}: pare down vp: {end - start}")
         
         
