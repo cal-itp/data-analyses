@@ -1,5 +1,6 @@
 raw_vp_file: "vp"
 usable_vp_file: "vp_usable"
+vp_condensed_line_file: "vp_condensed"
 timestamp_col: "location_timestamp_local"
 time_min_cutoff: 10
 stop_times_direction_file: "stop_times_direction"

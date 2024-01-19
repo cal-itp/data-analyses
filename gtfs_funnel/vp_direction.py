@@ -91,36 +91,31 @@ def attach_prior_vp_add_direction(
     vp_indices = full_df.vp_idx.to_numpy()
     distance_east = full_df.x - full_df.prior_x
     distance_north = full_df.y - full_df.prior_y
-    
-    # Get the normalized direction vector split into x and y columns
-    normalized_vector = wrangle_shapes.get_normalized_vector(
-        (distance_east, distance_north)
-    )
 
     # Stack our results and convert to df
     results_array = np.column_stack((
         vp_indices, 
-        normalized_vector[0], 
-        normalized_vector[1]
+        distance_east, 
+        distance_north
     ))
     
     vp_direction = pd.DataFrame(
         results_array, 
-        columns = ["vp_idx", "vp_dir_xnorm", "vp_dir_ynorm"]
+        columns = ["vp_idx", "distance_east", "distance_north"]
     ).astype({
         "vp_idx": "int64", 
-        "vp_dir_xnorm": "float",
-        "vp_dir_ynorm": "float"
+        "distance_east": "float",
+        "distance_north": "float"
     })
     
     # Get a readable direction (westbound, eastbound)
     vp_direction = vp_direction.assign(
         vp_primary_direction = vp_direction.apply(
             lambda x:
-            rt_utils.cardinal_definition_rules(x.vp_dir_xnorm, x.vp_dir_ynorm), 
+            rt_utils.cardinal_definition_rules(x.distance_east, x.distance_north), 
             axis=1
         )
-    )
+    ).drop(columns = ["distance_east", "distance_north"])
 
     time2 = datetime.datetime.now()
     logger.info(f"np vectorize arrays for direction: {time2 - time1}")
@@ -182,7 +177,7 @@ if __name__ == "__main__":
     
     from update_vars import analysis_date_list, CONFIG_DICT
     
-    LOG_FILE = "./logs/find_vp_direction.log"
+    LOG_FILE = "./logs/vp_preprocessing.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -190,17 +185,20 @@ if __name__ == "__main__":
     
     for analysis_date in analysis_date_list:
     
-        logger.info(f"Analysis date: {analysis_date}")
-
         start = datetime.datetime.now()
 
         attach_prior_vp_add_direction(analysis_date, CONFIG_DICT)
 
         time1 = datetime.datetime.now()
-        logger.info(f"export vp direction: {time1 - start}")
+        logger.info(f"{analysis_date}: export vp direction: {time1 - start}")
 
         add_direction_to_usable_vp(analysis_date, CONFIG_DICT)
 
         end = datetime.datetime.now()
-        logger.info(f"export usable vp with direction: {end - time1}")
-        logger.info(f"execution time: {end - start}")
+        
+        logger.info(
+            f"{analysis_date}: export usable vp with direction: "
+            f"{end - time1}")
+        logger.info(
+            f"{analysis_date}: vp_direction script execution time: "
+            f"{end - start}")
