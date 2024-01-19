@@ -6,7 +6,7 @@ import pandas as pd
 import geopandas as gpd
 from calitp_data_analysis.sql import to_snakecase
 import _harmonization_utils as harmonization_utils
-
+import re
 
 def lower_case(df, columns_to_search: list):
     """
@@ -28,15 +28,15 @@ def lower_case(df, columns_to_search: list):
 
 def find_keywords(df, columns_to_search: list, keywords_search: list):
     """
-    Find keywords in certain columns
+    Find exact keywords in certain columns
     """
     df2, lower_case_cols_list = lower_case(df, columns_to_search)
 
-    keywords_search = f"({'|'.join(keywords_search)})"
+    keywords_search = fr'\b({"|".join(map(re.escape, keywords_search))})\b'
 
     for i in lower_case_cols_list:
         df2[f"{i}_keyword_search"] = (
-            df2[i].str.extract(keywords_search).fillna("keyword not found")
+            df2[i].apply(lambda x: re.search(keywords_search, x, flags=re.IGNORECASE).group(0) if re.search(keywords_search, x, flags=re.IGNORECASE) else "keyword not found")
         )
 
     return df2
