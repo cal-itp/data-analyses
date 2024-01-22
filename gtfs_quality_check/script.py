@@ -72,28 +72,6 @@ def summarize_cat(
     )
 
     display(m1)
-
-    
-def load_api_511(excel_file: str) -> pd.DataFrame:
-    # Read in 511
-    df = to_snakecase(pd.read_excel(excel_file))
-    df = df.rename(columns={df.columns[0]: "new"})
-
-    # Only keep rows that have the string name or monitored
-    df = df[df["new"].str.contains(("Name|Monitored"))].reset_index(drop=True)
-
-    # Get rid of random characters
-    df.new = (
-        df.new.str.replace(">", "")
-        .str.replace("ShortName", "")
-        .str.replace("Name", "")
-        .str.replace("Monitored", "")
-        .str.replace("<", "")
-        .str.replace("/", "")
-    )
-
-    print("These are Bay Area feeds that keep track of RT")
-    display(df[(df.new == "true").shift(1).fillna(False)])
     
 def load_tu_or_vp(excel_file: str, column_to_filter: str, percent_to_filter: int) -> pd.DataFrame:
     df = to_snakecase(pd.read_excel(excel_file))
