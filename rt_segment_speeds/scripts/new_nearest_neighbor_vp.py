@@ -1,26 +1,14 @@
-import dask.dataframe as dd
 import datetime
 import geopandas as gpd
-import gtfs_segments
 import numpy as np
 import pandas as pd
 import sys
 
-from dask import delayed
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import gtfs_schedule_wrangling, helpers, neighbor
+from segment_speed_utils import helpers, neighbor
 from segment_speed_utils.project_vars import SEGMENT_GCS
-
-def rt_stop_times_nearest_neighbor(
-    gdf: gpd.GeoDataFrame
-) -> pd.DataFrame:
-    
-    results = neighbor.add_nearest_vp_idx(
-        gdf).drop(columns = ["start", "geometry", "vp_idx"])
-    
-    return results
 
 
 if __name__ == "__main__":
@@ -49,37 +37,25 @@ if __name__ == "__main__":
                    "stop_sequence", "stop_primary_direction",
                    "geometry"],
         with_direction = True,
-        get_pandas = False,
+        get_pandas = True,
         crs = WGS84
-    ).repartition(npartitions=5)
+    )
+        
+    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(stop_times, vp)
     
-    stop_times = stop_times.rename(
-        columns = {"geometry": "start"}
-    ).set_geometry("start")
+    del vp, stop_times
     
-    gdf = dd.merge(
-        stop_times,
-        vp.rename(columns = {"vp_primary_direction": "stop_primary_direction"}),
-        on = ["trip_instance_key", "stop_primary_direction"],
-        how = "inner"
-    ).repartition(npartitions=50)
+    nearest_vp_idx = np.vectorize(neighbor.add_nearest_vp_idx)(
+        gdf.geometry, gdf.stop_geometry, gdf.vp_idx)
+        
+    results = gdf[["trip_instance_key", "stop_sequence"]]
+    results = results.assign(
+        nearest_vp_idx = nearest_vp_idx
+    )
     
-    st_dtypes = stop_times.drop(columns = ["start"]).dtypes.to_dict()
-    
-    del vp
-    
-    results = gdf.map_partitions(
-        rt_stop_times_nearest_neighbor,
-        meta = {
-            **st_dtypes,
-            "nearest_vp_idx": "int"
-        },
-        align_dataframes = False
-    ).repartition(npartitions=5)
-
     results.to_parquet(
         f"{SEGMENT_GCS}nearest/"
-        f"nearest_rt_stop_times_{analysis_date}",
+        f"nearest_rt_stop_times_{analysis_date}.parquet",
     )
     
     end = datetime.datetime.now()
