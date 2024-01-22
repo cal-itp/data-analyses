@@ -113,7 +113,7 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
 
-        #condense_vp_to_linestring(analysis_date, CONFIG_DICT)
+        condense_vp_to_linestring(analysis_date, CONFIG_DICT)
         
         time1 = datetime.datetime.now()
         logger.info(

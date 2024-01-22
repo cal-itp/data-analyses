@@ -5,7 +5,8 @@ import shapely
 
 from scipy.spatial import cKDTree
 
-from segment_speed_utils import gtfs_schedule_wrangling     
+from calitp_data_analysis.geography_utils import WGS84
+from segment_speed_utils import gtfs_schedule_wrangling, wrangle_shapes     
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
 def nearest_snap(line: shapely.LineString, point: shapely.Point) -> int:

@@ -1,328 +1,110 @@
 """
-Find the nearest vp to a stop cutpoint.
-
-Factor in direction. Only search within the valid vp idx
-values (ones that are not running in the opposite direction
-as the stop is going). Of these, find the nearest vp to each stop.
+Find nearest_vp_idx to the stop position 
+using scipy KDTree.
 """
-import dask.dataframe as dd
 import datetime
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import sys
 
 from loguru import logger
 
-from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
-from segment_speed_utils.project_vars import (SEGMENT_GCS, 
-                                              PROJECT_CRS, CONFIG_PATH)
+from calitp_data_analysis.geography_utils import WGS84
+from segment_speed_utils import helpers, neighbor
+from segment_speed_utils.project_vars import SEGMENT_GCS
 
 
-def rt_trips_to_shape(analysis_date: str) -> pd.DataFrame:
-    """
-    Filter down trip_instance_keys from schedule to 
-    trips present in vp.
-    Provide shape_array_key associated with trip_instance_key.
-    """
-    # Get RT trips
-    rt_trips = helpers.import_unique_vp_trips(analysis_date)
-
-    # Find the shape_array_key for RT trips
-    trip_to_shape = helpers.import_scheduled_trips(
-        analysis_date,
-        columns = ["trip_instance_key", "shape_array_key"],
-        filters = [[("trip_instance_key", "in", rt_trips)]],
-        get_pandas = True
-    )
-
-    # Find whether it's loop or inlining
-    shapes_loop_inlining = pd.read_parquet(
-        f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet",
-        columns = [
-            "shape_array_key", "loop_or_inlining", 
-        ]
-    ).drop_duplicates().merge(
-        trip_to_shape,
-        on = "shape_array_key",
-        how = "inner"
-    )
-    
-    return shapes_loop_inlining
-
-
-def vp_with_shape_meters(
-    vp_file_name: str, 
-    **kwargs
-) -> dd.DataFrame:
-    """
-    Subset vp_usable down based on list of trip_instance_keys.
-    For these trips, attach the projected shape meters.
-    """
-    vp = dd.read_parquet(
-        f"{SEGMENT_GCS}{vp_file_name}",
-        **kwargs,
-        columns = ["trip_instance_key", "vp_idx", 
-                   "vp_primary_direction", 
-                  ]
-    )
-    
-    projected_shape_meters = pd.read_parquet(
-        f"{SEGMENT_GCS}projection/vp_projected_{analysis_date}.parquet",
-    )
-
-    vp_with_projection = dd.merge(
-        vp,
-        projected_shape_meters,
-        on = "vp_idx",
-        how = "inner"
-    )
-    
-    return vp_with_projection
-
-
-def duplicate_coords_keep_last_timestamp(df: pd.DataFrame):
-    df2 = df.sort_values(
-        ["trip_instance_key", "vp_idx", 
-         "shape_meters"]
-    ).drop_duplicates(
-        subset=["trip_instance_key", "shape_meters"],
-        keep = "last"
-    ).reset_index(drop=True)
-    
-    return df2
-
-def transform_vp(vp: dd.DataFrame) -> dd.DataFrame:
-    """
-    For each trip, transform vp from long to wide,
-    so each row is one trip.
-    Store vp_idx and shape_meters as lists.
-    """
-    trip_shape_cols = ["trip_instance_key", "shape_array_key"]
-    
-    trip_info = (
-        vp
-        .groupby(trip_shape_cols, 
-                  observed=True, group_keys=False)
-        .agg({
-            "vp_idx": lambda x: list(x),
-            "shape_meters": lambda x: list(x),
-            "vp_primary_direction": lambda x: list(x),
-        })
-        .reset_index()
-        .rename(columns = {
-            "vp_idx": "vp_idx_arr",
-            "shape_meters": "shape_meters_arr",
-            "vp_primary_direction": "vp_dir_arr"
-        })
-    )
-    
-    return trip_info
-
-
-def find_vp_nearest_stop_position(
-    df: dd.DataFrame, 
-) -> dd.DataFrame:
-    """
-    Once we've attached where each shape has stop cutpoints (stop_meters),
-    for each trip_instance_key, we want to find where the nearest
-    vp_idx is to that particular stop.
-    
-    We have array of vp_idx and vp_shape_meters.
-    Go through each row and find the nearest vp_shape_meters is
-    to stop_meters, and save that vp_idx value.
-    """
-    trip_shape_cols = ["trip_instance_key", "shape_array_key"]
-           
-    nearest_vp_idx = []
-    subseq_vp_idx = []
-    
-    # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/rt_analysis/rt_parser.py#L270-L271
-    # Don't forget to subtract 1 for proper index  
-    # Use this as a mask to hide the values that are not valid
-    # https://stackoverflow.com/questions/16094563/numpy-get-index-where-value-is-true
-
-    for row in df.itertuples():
+def add_nearest_neighbor_result(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
+    nearest_vp_idx = np.vectorize(neighbor.add_nearest_vp_idx)(
+        gdf.geometry, gdf.stop_geometry, gdf.vp_idx)
         
-        this_stop_direction = getattr(row, "stop_primary_direction")
-        opposite_to_stop_direction = wrangle_shapes.OPPOSITE_DIRECTIONS[
-            this_stop_direction]
-        
-        # Start with the array of all the vp primary direction
-        vp_dir_array = np.asarray(getattr(row, "vp_dir_arr"))
-        
-        # Hide the array indices where it's the opposite direction
-        # Keep the ones running in all other directions
-        valid_indices = (vp_dir_array != opposite_to_stop_direction).nonzero()
-
-        shape_meters_array = getattr(row, "shape_meters_arr")
-        vp_idx_array = getattr(row, "vp_idx_arr")
-
-        # Make sure these are arrays so we can search within the valid values
-        valid_shape_meters_array = np.asarray(shape_meters_array)[valid_indices]
-        valid_vp_idx_array = np.asarray(vp_idx_array)[valid_indices]
-
-        if len(valid_shape_meters_array) > 0:
-            
-            idx = np.searchsorted(
-                valid_shape_meters_array,
-                getattr(row, "stop_meters"),
-                side="right" 
-                # want our stop_meters value to be < vp_shape_meters,
-                # side = "left" would be stop_meters <= vp_shape_meters
-            )
-
-            # For the next value, if there's nothing to index into, 
-            # just set it to the same position
-            # if we set subseq_value = getattr(row, )[idx], 
-            # we might not get a consecutive vp
-            nearest_value = valid_vp_idx_array[idx-1]
-            subseq_value = nearest_value + 1
-        
-        else:
-            nearest_value = np.nan
-            subseq_value = np.nan
-
-        nearest_vp_idx.append(nearest_value)
-        subseq_vp_idx.append(subseq_value)
-    
-   
-    result = df[trip_shape_cols + ["stop_sequence", "stop_id", "stop_meters"]]
-    
-    # Now assign the nearest vp for each trip that's nearest to
-    # a given stop
-    # Need to find the one after the stop later
-    result = result.assign(
-        nearest_vp_idx = nearest_vp_idx,
-        subseq_vp_idx = subseq_vp_idx,
-    )
-
-    return result
-
-
-def fix_out_of_bound_results(
-    df: pd.DataFrame, 
-    vp_file_name: str
-) -> pd.DataFrame:
-    
-    # Merge in usable bounds
-    usable_bounds = dd.read_parquet(
-        f"{SEGMENT_GCS}{vp_file_name}"
-    ).pipe(segment_calcs.get_usable_vp_bounds_by_trip)
-    
-    results_with_bounds = pd.merge(
-        df,
-        usable_bounds,
-        on = "trip_instance_key",
-        how = "inner"
+    results = gdf[["trip_instance_key", "stop_sequence"]]
+    results = results.assign(
+        nearest_vp_idx = nearest_vp_idx
     )
     
-    correct_results = results_with_bounds.query('subseq_vp_idx <= max_vp_idx')
-    incorrect_results = results_with_bounds.query('subseq_vp_idx > max_vp_idx')
-    incorrect_results = incorrect_results.assign(
-        subseq_vp_idx = incorrect_results.nearest_vp_idx
-    )
+    return results
     
-    fixed_results = pd.concat(
-        [correct_results, incorrect_results], 
-        axis=0
-    ).drop(
-        columns = ["min_vp_idx", "max_vp_idx"]
-    ).sort_values(["trip_instance_key", "shape_array_key", "stop_sequence"]
-    ).reset_index(drop=True)
-    
-    return fixed_results
 
-
-def find_nearest_vp_to_stop(
-    analysis_date: str, 
-    dict_inputs: dict = {}
+def nearest_neighbor_rt_stop_times(
+    analysis_date: str,
+    dict_inputs: dict
 ):
     start = datetime.datetime.now()
+    dataset_type = "rt_stop_times"
+    EXPORT_FILE = dict_inputs[f"nearest_vp_{dataset_type}"]
     
-    USABLE_VP = f'{dict_inputs["stage1"]}_{analysis_date}'
-    SEGMENT_IDENTIFIER_COLS = dict_inputs["segment_identifier_cols"]
-    EXPORT_FILE = f'{dict_inputs["stage2"]}_{analysis_date}'
-    
-    shape_trip_crosswalk = rt_trips_to_shape(analysis_date)
-    shape_keys = shape_trip_crosswalk.shape_array_key.unique().tolist()
-    
-    vp = vp_with_shape_meters(
-        USABLE_VP, 
-    ).merge(
-        shape_trip_crosswalk,
-        on = "trip_instance_key",
-        how = "inner"
+    # Unknown directions can be done separately for origin stop
+    # we will use other methods to pare down the vp_idx 
+    # maybe based on min(vp_idx) to use as the max bound
+    vp = gpd.read_parquet(
+        f"{SEGMENT_GCS}condensed/vp_nearest_neighbor_{analysis_date}.parquet",
+        filters = [[("vp_primary_direction", "!=", "Unknown")]]
     )
     
-    vp_deduped = vp.map_partitions(
-        duplicate_coords_keep_last_timestamp,
-        meta = vp.dtypes.to_dict()
-    )
-    
-    vp_wide = vp_deduped.map_partitions(
-        transform_vp,
-        meta = {"trip_instance_key": "object",
-                "shape_array_key": "object",
-                "vp_idx_arr": "object",
-                "shape_meters_arr": "object",
-                "vp_dir_arr": "object"
-               },
-        align_dataframes = False
-    ).persist()
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"map partitions to transform vp: {time1 - start}")
-    
-    stops_projected = pd.read_parquet(
-        f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet",
-        filters = [[("shape_array_key", "in", shape_keys)]],
-        columns = SEGMENT_IDENTIFIER_COLS + ["stop_id", 
-                   "shape_meters", "stop_primary_direction"]
-    ).rename(columns = {"shape_meters": "stop_meters"})
-    
-    existing_stop_cols = stops_projected[
-        SEGMENT_IDENTIFIER_COLS + ["stop_id", "stop_meters"]].dtypes.to_dict()
-    existing_vp_cols = vp_wide[["trip_instance_key"]].dtypes.to_dict()
-    
-    vp_to_stop = dd.merge(
-        vp_wide,
-        stops_projected,
-        on = "shape_array_key",
-        how = "inner"
+    stop_times = helpers.import_scheduled_stop_times(
+        analysis_date,
+        columns = ["trip_instance_key", 
+                   "stop_sequence", "stop_primary_direction",
+                   "geometry"],
+        with_direction = True,
+        get_pandas = True,
+        crs = WGS84
     )
         
-    result = vp_to_stop.map_partitions(
-        find_vp_nearest_stop_position,
-        meta = {
-            **existing_vp_cols,
-            **existing_stop_cols,
-            "nearest_vp_idx": "int64",
-            "subseq_vp_idx": "int64",
-        },
-        align_dataframes = False,
+    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(stop_times, vp)
+    del vp, stop_times
+    
+    results = add_nearest_neighbor_result(gdf)
+    
+    results.to_parquet(
+        f"{SEGMENT_GCS}nearest/"
+        f"{EXPORT_FILE}_{analysis_date}.parquet",
     )
-    
-    time2 = datetime.datetime.now()
-    logger.info(f"map partitions to find nearest vp to stop: {time2 - time1}")
-    
-    result = result.compute()
-    
-    fixed_results = fix_out_of_bound_results(result, USABLE_VP)
-    
-    fixed_results.to_parquet(
-        f"{SEGMENT_GCS}projection/{EXPORT_FILE}.parquet")
-    
     end = datetime.datetime.now()
-    logger.info(f"execution time: {end - start}")
-    
-    del stops_projected, result, fixed_results
+    logger.info(f"nearest points for RT stop times: {end - start}")
     
     return
 
 
+def nearest_neighbor_shape_segments(
+    analysis_date: str,
+    dict_inputs: dict
+):
+    start = datetime.datetime.now()
+
+    dataset_type = "stop_segments"
+    EXPORT_FILE = dict_inputs[f"nearest_vp_{dataset_type}"]
+    
+    # Unknown directions can be done separately for origin stop
+    # we will use other methods to pare down the vp_idx 
+    # maybe based on min(vp_idx) to use as the max bound
+    vp = gpd.read_parquet(
+        f"{SEGMENT_GCS}condensed/vp_nearest_neighbor_{analysis_date}.parquet",
+        filters = [[("vp_primary_direction", "!=", "Unknown")]]
+    )
+    
+    stop_times = gpd.read_parquet(f"")
+        
+    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(stop_times, vp)
+    del vp, stop_times
+    
+    results = add_nearest_neighbor_result(gdf)
+
+    results.to_parquet(
+        f"{SEGMENT_GCS}nearest/"
+        f"{EXPORT_FILE}_{analysis_date}.parquet",
+    )
+    
+    end = datetime.datetime.now()
+    logger.info(f"nearest points for RT stop times: {end - start}")
+    
+    return 
+    
 if __name__ == "__main__":
     
-    from segment_speed_utils.project_vars import analysis_date_list
+    from segment_speed_utils.project_vars import analysis_date
     
     LOG_FILE = "../logs/nearest_vp.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -330,9 +112,5 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
-    for analysis_date in analysis_date_list:
-        logger.info(f"Analysis date: {analysis_date}")
-    
-        find_nearest_vp_to_stop(analysis_date, STOP_SEG_DICT)
+
+                               
