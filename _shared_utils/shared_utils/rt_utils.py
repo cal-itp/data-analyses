@@ -851,7 +851,7 @@ def set_state_export(
     legend_url: str = None,
     existing_state: dict = {},
     cache_seconds: int = 3600,
-    manual_centroid: list = None
+    manual_centroid: list = None,
 ):
     """
     Applies light formatting to gdf for successful spa display. Will pass map_type
