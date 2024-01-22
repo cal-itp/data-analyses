@@ -72,14 +72,8 @@ def summarize_cat(
     )
 
     display(m1)
-    
-def load_tu_or_vp(excel_file: str, column_to_filter: str) -> pd.DataFrame:
-    df = to_snakecase(pd.read_excel(excel_file))
-    df = (df[df[column_to_filter] < 41].sort_values([column_to_filter])).reset_index(
-        drop=True
-    )
-    return df
 
+    
 def load_api_511(excel_file: str) -> pd.DataFrame:
     # Read in 511
     df = to_snakecase(pd.read_excel(excel_file))
@@ -101,9 +95,16 @@ def load_api_511(excel_file: str) -> pd.DataFrame:
     print("These are Bay Area feeds that keep track of RT")
     display(df[(df.new == "true").shift(1).fillna(False)])
     
-def incomplete(tu_excel_file: str, vp_excel_file: str, airtable: pd.DataFrame) -> pd.DataFrame:
-    tu_df = load_tu_or_vp(tu_excel_file, "%_of_trips_with_tu_messages")
-    vp_df = load_tu_or_vp(vp_excel_file, "%_of_trips_with_vp_messages")
+def load_tu_or_vp(excel_file: str, column_to_filter: str, percent_to_filter: int) -> pd.DataFrame:
+    df = to_snakecase(pd.read_excel(excel_file))
+    df = (df[df[column_to_filter] < percent_to_filter].sort_values([column_to_filter])).reset_index(
+        drop=True
+    )
+    return df
+    
+def incomplete(tu_excel_file: str, vp_excel_file: str, airtable: pd.DataFrame, percent_to_filter:str) -> pd.DataFrame:
+    tu_df = load_tu_or_vp(tu_excel_file, "%_of_trips_with_tu_messages", percent_to_filter)
+    vp_df = load_tu_or_vp(vp_excel_file, "%_of_trips_with_vp_messages", percent_to_filter)
 
     incomplete = pd.merge(tu_df, vp_df, on="name", how="outer")
     incomplete = incomplete.sort_values(["name"]).reset_index(drop=True)
@@ -112,17 +113,11 @@ def incomplete(tu_excel_file: str, vp_excel_file: str, airtable: pd.DataFrame) -
     
     incomplete2 = (
         pd.merge(
-            incomplete, airtable, left_on="name", right_on="gtfs_datasets", how="left"
+            incomplete, airtable, left_on="name", right_on="gtfs_datasets", how="left", indicator = True
         )
         .sort_values("name")
         .fillna("NA")
     )
-    display(incomplete2)
     
-def load_complete_tu_vp(tu_file:str, vp_file:str) -> pd.DataFrame:
-    tu = to_snakecase(pd.read_excel(tu_file))
-    vp = to_snakecase(pd.read_excel(vp_file))
-    m1 = pd.merge(tu, vp, on = "name", how = "outer", indicator = True)
-    m1 = m1.sort_values(by = "name").reset_index(drop = True)
-    m1._merge = m1._merge.str.replace('right_only','found_in_vp_only').str.replace('left_only','found_in_tu_only')
-    return m1
+    incomplete2._merge = incomplete2._merge.str.replace('right_only','problems_w_vp_only').str.replace('left_only','problems_w_tu_only')
+    return incomplete2
