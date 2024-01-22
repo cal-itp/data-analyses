@@ -15,7 +15,7 @@ if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date
     
-    LOG_FILE = "../logs/nearest_neighbors.log"
+    LOG_FILE = "../logs/nearest_vp.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -42,7 +42,6 @@ if __name__ == "__main__":
     )
         
     gdf = neighbor.merge_stop_vp_for_nearest_neighbor(stop_times, vp)
-    
     del vp, stop_times
     
     nearest_vp_idx = np.vectorize(neighbor.add_nearest_vp_idx)(
