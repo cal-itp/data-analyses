@@ -70,13 +70,16 @@ def concatenate_speedmap_segments(progress_df: pd.DataFrame = None,
 
 def copy_segment_speeds(progress_df: pd.DataFrame = None,
                         itp_id_list: list = None,
-                        analysis_date: dt.datetime = None):
+                        analysis_date: dt.datetime = None,
+                        date_exceptions: dict = None
+                       ):
     '''
     get line segments from legacy speedmap workflow
     must generate segments via all_day_speedmap_segments first, or else there will
     be no cached files in gcs to grab+concat
     
     progress_df: see data_analyses/ca_transit_speed_maps
+    date_exceptions: itp_id:dt.datetime
     '''
     
     
@@ -89,7 +92,9 @@ def copy_segment_speeds(progress_df: pd.DataFrame = None,
     fs = get_fs()
     base = 'gs://calitp-analytics-data/data-analyses/rt_delay/v2_segment_speed_views/'
     pattern = f'_{analysis_date}_All_Day.parquet'
-    patterns = [str(itp_id) + pattern for itp_id in itp_id_list]
+    patterns = [str(itp_id) + pattern for itp_id in itp_id_list if itp_id not in date_exceptions.keys()]
+    exception_patterns = [str(itp_id) + f'_{date_exceptions[itp_id]}_All_Day.parquet' for itp_id in date_exceptions.keys()]
+    patterns += exception_patterns
     remote_paths = [base + pattern for pattern in patterns]
     local_path = f'./segment_lines_all_{analysis_date}'
     os.system(f'rm -rf {local_path}')
@@ -205,11 +210,12 @@ def calculate_scores(joined_seg_lines_gdf):
     to_calculate = calculate_speed_score(to_calculate)
     to_calculate = calculate_variability_score(to_calculate)
     to_calculate = calculate_frequency_score(to_calculate)
-    to_calculate['transit_score'] = to_calculate.speed_score + to_calculate.variability_score + to_calculate.frequency_score
     
-    median_by_signal = to_calculate >> group_by(_.imms_id, _.location) >> summarize(speed_score = _.speed_score.median(),
+    median_by_signal = (to_calculate >> group_by(_.imms_id, _.location)
+                        >> summarize(speed_score = _.speed_score.median(),
                                             variability_score = _.variability_score.median(),
                                             frequency_score = _.frequency_score.median(),
-                                            overall_transit_score = _.transit_score.median(),
                                            )
+                        >> mutate(overall_transit_score = _.speed_score + _.variability_score + _.frequency_score)
+                       )
     return median_by_signal >> arrange(-_.overall_transit_score)

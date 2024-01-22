@@ -851,6 +851,7 @@ def set_state_export(
     legend_url: str = None,
     existing_state: dict = {},
     cache_seconds: int = 3600,
+    manual_centroid: list = None,
 ):
     """
     Applies light formatting to gdf for successful spa display. Will pass map_type
@@ -883,7 +884,10 @@ def set_state_export(
     if map_type == "speedmap":
         this_layer[0]["properties"]["tooltip_speed_key"] = "p20_mph"
     spa_map_state["layers"] += this_layer
-    centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
+    if manual_centroid:
+        centroid = manual_centroid
+    else:
+        centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
     spa_map_state["lat_lon"] = centroid
     if legend_url:
         spa_map_state["legend_url"] = legend_url

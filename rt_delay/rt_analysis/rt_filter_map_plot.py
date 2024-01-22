@@ -75,6 +75,13 @@ class RtFilterMapper:
                      )
         self.reset_filter()
         self.pbar_desc = f'itp_id: {self.calitp_itp_id} org: {self.organization_name[:15]}'
+    
+    def get_time_span(self):
+        '''
+        returns total time span convered by RT data, in seconds
+        '''
+        return (self.stop_delay_view.actual_time.max() - 
+                        self.stop_delay_view.actual_time.min()).total_seconds() / 60**2
 
     def set_filter(self, start_time = None, end_time = None, route_names = None,
                    shape_ids = None, direction_id = None, direction = None, trip_ids = None,
@@ -136,10 +143,9 @@ class RtFilterMapper:
         if start_time and end_time:
             self.hr_duration_in_filter = (dt.datetime.combine(self.analysis_date, self.filter['end_time'])
                                  - dt.datetime.combine(self.analysis_date, self.filter['start_time'])
-                                ).seconds / 60**2
+                                ).total_seconds() / 60**2
         else:
-            self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
-                                         self.stop_delay_view.actual_time.min()).seconds / 60**2
+            self.hr_duration_in_filter = self.get_time_span()
         
         if self.filter['route_names'] and len(self.filter['route_names']) <= 5:
             rts = 'Route(s) ' + ', '.join(self.filter['route_names'])
@@ -177,8 +183,8 @@ class RtFilterMapper:
         '''
         self.filter = None
         self._time_only_filter = True
-        self.hr_duration_in_filter = (self.stop_delay_view.actual_time.max() - 
-                                         self.stop_delay_view.actual_time.min()).seconds / 60**2
+        self.hr_duration_in_filter = self.get_time_span()
+
         self.filter_period = 'All_Day'
         rts = 'All Routes'
         elements_ordered = [rts, self.filter_period, self.display_date]
