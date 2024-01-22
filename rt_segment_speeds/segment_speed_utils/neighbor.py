@@ -27,42 +27,26 @@ def nearest_snap(line: shapely.LineString, point: shapely.Point) -> int:
 
 
 def add_nearest_vp_idx(
-    gdf: gpd.GeoDataFrame,
-    vp_linestring_col: str = "geometry",
-    stop_point_col: str = "start",
-    vp_idx_array_col: str = "vp_idx",
-) -> gpd.GeoDataFrame:
-    """
-    """
-    results = []
+    vp_linestring: shapely.LineString, 
+    stop: shapely.Point, 
+    vp_idx_arr: np.ndarray
+) -> int:
     
-    for row in gdf.itertuples():
-        
-        vp_linestring = getattr(row, vp_linestring_col)
-        stop = getattr(row, stop_point_col)
-        vp_idx_array = getattr(row, vp_idx_array_col)
-        
-        idx = nearest_snap(vp_linestring, stop)
-        
-        results.append(vp_idx_array[idx])
-        
-    gdf = gdf.assign(
-        nearest_vp_idx = results
-    )
+    idx = nearest_snap(vp_linestring, stop)
     
-    return gdf
+    return vp_idx_arr[idx]
 
 
-def merge_stops_with_vp(
-    stop_times: gpd.GeoDataFrame, 
+def merge_stop_vp_for_nearest_neighbor(
+    stop_times: gpd.GeoDataFrame,
     vp_condensed: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
-    """
-    """
+    
     gdf = pd.merge(
-        stop_times.rename(columns = {"geometry": "start"}).set_geometry("start"),
-        vp_condensed.rename(columns = {
-            "vp_primary_direction": "stop_primary_direction"}),
+        stop_times.rename(
+            columns = {"geometry": "stop_geometry"}).set_geometry("stop_geometry"),
+        vp_condensed.rename(
+            columns = {"vp_primary_direction": "stop_primary_direction"}),
         on = ["trip_instance_key", "stop_primary_direction"],
         how = "inner"
     )
