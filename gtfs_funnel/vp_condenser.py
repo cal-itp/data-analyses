@@ -32,7 +32,9 @@ def condense_vp_to_linestring(
     vp = dd.read_parquet(
         f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
         columns = ["trip_instance_key", "x", "y", 
-                    "vp_idx", "vp_primary_direction"],
+                   "vp_idx", "vp_primary_direction", 
+                   "location_timestamp_local"
+                  ],
     )
     
     vp_dtypes = vp.drop(columns = ["x", "y"]).dtypes.to_dict()
@@ -51,12 +53,13 @@ def condense_vp_to_linestring(
         vp_transform.condense_point_geom_to_line,
         group_cols = ["trip_instance_key", "vp_primary_direction"],
         geom_col = "geometry",
-        other_cols = ["vp_idx"],
+        other_cols = ["vp_idx", "location_timestamp_local"],
         meta = {
             "trip_instance_key": "object",
             "vp_primary_direction": "object",
             "geometry": "geometry",
-            "vp_idx": "object"
+            "vp_idx": "object",
+            "location_timestamp_local": "object"
         },
         align_dataframes = False
     ).compute().set_geometry("geometry").set_crs(WGS84)
@@ -113,7 +116,7 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
 
-        condense_vp_to_linestring(analysis_date, CONFIG_DICT)
+        #condense_vp_to_linestring(analysis_date, CONFIG_DICT)
         
         time1 = datetime.datetime.now()
         logger.info(

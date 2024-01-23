@@ -47,17 +47,23 @@ def condense_point_geom_to_line(
     return df3
 
 
-def stack_vpidx_by_trip(df: pd.DataFrame) -> pd.DataFrame:
+def stack_column_by_trip(df: pd.DataFrame, col: str = "vp_idx") -> pd.DataFrame:
     """
+    By trip_instance_key, concatenate all the values in a 
+    certain column (across multiple rows).
+    New column value holds an array with all the values.
     """
     return (df.groupby("trip_instance_key")
-            .vp_idx.apply(np.array)
+            [col].apply(np.array)
             .apply(np.concatenate)
             .reset_index()
            )
 
 def stack_linecoords_by_trip(df: pd.DataFrame) -> pd.DataFrame:
     """
+    By trip_instance_key, concatenate all the coordinates
+    in a shapely LineString and save it as an array.
+    We'll create a new (longer) linestring with it later.
     """
     df = df.assign(
         geometry_array = df.apply(
@@ -74,15 +80,17 @@ def stack_linecoords_by_trip(df: pd.DataFrame) -> pd.DataFrame:
 
 def sort_by_vp_idx_order(
     vp_idx_array: np.ndarray, 
-    geometry_array: np.ndarray
+    geometry_array: np.ndarray,
+    timestamp_array: np.ndarray,
 ) -> tuple[np.ndarray]:    
     
     sort_order = np.argsort(vp_idx_array, axis=0)
     
     vp_sorted = np.take_along_axis(vp_idx_array, sort_order, axis=0)
     geom_sorted = np.take_along_axis(geometry_array, sort_order, axis=0)
+    timestamp_sorted = np.take_along_axis(timestamp_array, sort_order, axis=0)
     
-    return vp_sorted, geom_sorted
+    return vp_sorted, geom_sorted, timestamp_sorted
 
 
 def combine_valid_vp_for_direction(
@@ -99,7 +107,9 @@ def combine_valid_vp_for_direction(
     vp_valid = vp_condensed[vp_condensed.vp_primary_direction != 
                   wrangle_shapes.OPPOSITE_DIRECTIONS[direction]]
     
-    stacked_vp_idx = stack_vpidx_by_trip(vp_valid)
+    stacked_vp_idx = stack_column_by_trip(vp_valid, col = "vp_idx")
+    stacked_timestamps = stack_column_by_trip(
+        vp_valid, col = "location_timestamp_local")
     stacked_coords = stack_linecoords_by_trip(vp_valid)
     
     vp_valid2 = pd.merge(
@@ -107,28 +117,38 @@ def combine_valid_vp_for_direction(
         stacked_coords,
         on = "trip_instance_key",
         how = "inner"
+    ).merge(
+        stacked_timestamps,
+        on = "trip_instance_key",
+        how = "inner"
     )
     
     sorted_vp = []
     sorted_geom = []
+    sorted_timestamps = []
     
     for row in vp_valid2.itertuples():
         
         vp_idx_array = getattr(row, "vp_idx")
         geometry_array = getattr(row, "geometry_array")
+        timestamp_array = getattr(row, "location_timestamp_local")
         
-        vp_sorted, geom_sorted = sort_by_vp_idx_order(
-            vp_idx_array, geometry_array
+        vp_sorted, geom_sorted, time_sorted = sort_by_vp_idx_order(
+            vp_idx_array, geometry_array, timestamp_array
         )
         sorted_vp.append(vp_sorted)
         sorted_geom.append(geom_sorted)
+        sorted_timestamps.append(time_sorted)
 
     # Overwrite the vp_idx and geometry_array 
     # with the sorted versions of the array
     vp_valid2 = vp_valid2.assign(
         geometry_array = sorted_geom,
-        vp_idx = sorted_vp
+        vp_idx = sorted_vp,
+        location_timestamp_local = sorted_timestamps
     )
+    
+    del sorted_geom, sorted_vp, sorted_timestamps
     
     vp_valid2 = vp_valid2.assign(
         geometry = gpd.GeoSeries(
