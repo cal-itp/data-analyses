@@ -1,5 +1,6 @@
 stop_segments:
     stage1: "vp_usable"
+    nearest_shape_segments: "nearest_vp_shape_segments"
     stage2: "nearest_vp"
     stage3: "stop_arrivals"
     stage4: "speeds_stop_segments"
@@ -14,6 +15,9 @@ stop_segments:
     timestamp_col: "location_timestamp_local"
     time_min_cutoff: 10
     max_speed: 80
+rt_stop_times:
+    stage1: "vp_usable"
+    nearest_rt_stop_times: "nearest_vp_rt_stop_times"    
 road_segments:
     stage1: "vp_usable"
     stage2: "nearest_vp_roads"
