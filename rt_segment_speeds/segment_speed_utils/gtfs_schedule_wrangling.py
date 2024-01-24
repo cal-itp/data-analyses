@@ -275,3 +275,26 @@ def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
     
     return most_common_shape
     
+    
+def gtfs_segments_rename_cols(
+    df: pd.DataFrame, 
+    natural_identifier: bool = True
+) -> pd.DataFrame:
+    """
+    To use gtfs_segments package, we need to always have
+    natural identifiers for GTFS.
+    But, since that package relies on each feed being
+    processed individually, we need to use our internal 
+    keys to make sure we're not mixing up operators.
+    """
+    if natural_identifier:
+        df = df.rename(columns = {
+            "trip_instance_key": "trip_id",
+            "shape_array_key": "shape_id"
+        })
+    else:
+        df = df.rename(columns = {
+            "trip_id": "trip_instance_key",
+            "shape_id": "shape_array_key"
+        })
+    return df
