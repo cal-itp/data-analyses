@@ -6,6 +6,7 @@ import datetime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import shapely
 import sys
 
 from loguru import logger
@@ -21,11 +22,15 @@ def add_nearest_neighbor_result(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
     Add the nearest vp_idx and save out trip_instance_key-stop_sequence 
     and nearest_vp_idx.
     """
-    vp_condensed = pd.read_parquet(
+    vp_condensed = gpd.read_parquet(
         f"{SEGMENT_GCS}condensed/vp_condensed_{analysis_date}.parquet",
         filters = [[("vp_primary_direction", "==", "Unknown")]],
-        columns = ["trip_instance_key", "vp_idx", "location_timestamp_local"]
-    ).rename(columns = {"vp_idx": "trip_vp_idx"})
+        columns = ["trip_instance_key", "vp_idx", "location_timestamp_local", 
+                  "geometry"]
+    ).rename(columns = {
+        "vp_idx": "trip_vp_idx",
+        "geometry": "trip_geometry"
+    })
     
     gdf2 = pd.merge(
         gdf,
@@ -44,6 +49,7 @@ def add_nearest_neighbor_result(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
         
     vp_trio_series = []
     time_trio_series = []
+    coords_trio_series = []
     
     # don't think np.vectorize works well for returning arrays...
     # need to find another method, so use itertuples here
@@ -51,17 +57,22 @@ def add_nearest_neighbor_result(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
         nearest_value = getattr(row, "nearest_vp_idx")
         vp_idx_arr = np.array(getattr(row, "trip_vp_idx"))
         timestamp_arr = np.array(getattr(row, "location_timestamp_local"))
+        coords_arr = np.array(getattr(row, "trip_geometry").coords)
+                
+        vp_trio, time_trio, coords_trio = neighbor.add_trio(
+            nearest_value, vp_idx_arr, timestamp_arr, coords_arr)
         
-        vp_trio, time_trio = neighbor.add_trio(
-            nearest_value, vp_idx_arr, timestamp_arr)
+        trio_line = shapely.LineString(coords_trio)
         
         vp_trio_series.append(vp_trio)
         time_trio_series.append(time_trio)
-    
+        coords_trio_series.append(trio_line)
+        
     results = gdf2.assign(
         vp_idx_trio = vp_trio_series,
-        location_timestamp_local_trio = time_trio_series 
-    ).drop(columns = ["trip_vp_idx", "location_timestamp_local"])
+        location_timestamp_local_trio = time_trio_series,
+        vp_coords_trio = gpd.GeoSeries(coords_trio_series, crs = WGS84)
+    ).drop(columns = ["trip_vp_idx", "location_timestamp_local", "trip_geometry"])
 
     
     return results
