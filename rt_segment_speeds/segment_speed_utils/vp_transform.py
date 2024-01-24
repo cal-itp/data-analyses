@@ -107,6 +107,8 @@ def combine_valid_vp_for_direction(
     vp_valid = vp_condensed[vp_condensed.vp_primary_direction != 
                   wrangle_shapes.OPPOSITE_DIRECTIONS[direction]]
     
+    del vp_condensed
+    
     stacked_vp_idx = stack_column_by_trip(vp_valid, col = "vp_idx")
     stacked_timestamps = stack_column_by_trip(
         vp_valid, col = "location_timestamp_local")
@@ -122,6 +124,8 @@ def combine_valid_vp_for_direction(
         on = "trip_instance_key",
         how = "inner"
     )
+    
+    del vp_valid
     
     sorted_vp = []
     sorted_geom = []
