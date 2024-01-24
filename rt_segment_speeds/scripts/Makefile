@@ -14,7 +14,6 @@ prep_roads:
     
 speeds_pipeline:
 	make segmentize
-	#python shapely_project_vp.py
 	python nearest_vp_to_stop.py
 	python interpolate_stop_arrival.py
 	python stop_arrivals_to_speed.py
