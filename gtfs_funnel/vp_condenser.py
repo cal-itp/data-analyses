@@ -70,6 +70,8 @@ def condense_vp_to_linestring(
         f"{EXPORT_FILE}_{analysis_date}"
     )
     
+    del vp_condensed
+    
     return 
 
 
@@ -98,6 +100,8 @@ def prepare_vp_for_all_directions(analysis_date: str) -> gpd.GeoDataFrame:
         f"{SEGMENT_GCS}condensed/",
         f"vp_nearest_neighbor_{analysis_date}"
     )
+    
+    del results, gdf
    
     return 
 
