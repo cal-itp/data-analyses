@@ -37,24 +37,10 @@ def attach_operator_natural_identifiers(
     # Add time-of-day, which is associated with trip_instance_key
     time_of_day = gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)
     
-    # Add shape_stop_pair
-    # Since all trips for a shape must adhere to a single trip's cutpoints,
-    # the stop_pair is not associated with the trip, but the shape
-    # to allow for easier aggregation
-    shape_stop_pairs = pd.read_parquet(
-        f"{SEGMENT_GCS}stops_projected_{analysis_date}.parquet",
-        columns = ["shape_array_key", "stop_sequence", 
-                   "stop_id", "shape_stop_pair"]
-    )
-    
     df_with_natural_ids = pd.merge(
         df,
         shape_identifiers,
         on = "shape_array_key",
-        how = "inner"
-    ).merge(
-        shape_stop_pairs,
-        on = ["shape_array_key", "stop_sequence", "stop_id"],
         how = "inner"
     ).merge(
         time_of_day,
@@ -90,25 +76,25 @@ def calculate_speed_from_stop_arrivals(
     ).sort_values(trip_stop_cols).reset_index(drop=True)
     
     df = df.assign(
-        prior_arrival_time_sec = (df.groupby("trip_instance_key", 
+        subseq_arrival_time_sec = (df.groupby("trip_instance_key", 
                                              observed=True, group_keys=False)
                                   .arrival_time_sec
-                                  .shift(1)
+                                  .shift(-1)
                                  ),
-        prior_stop_meters = (df.groupby("trip_instance_key", 
+        subseq_stop_meters = (df.groupby("trip_instance_key", 
                                         observed=True, group_keys=False)
                              .stop_meters
-                             .shift(1)
+                             .shift(-1)
                             )
     )
 
     speed = df.assign(
-        meters_elapsed = df.stop_meters - df.prior_stop_meters, 
-        sec_elapsed = df.arrival_time_sec - df.prior_arrival_time_sec,
+        meters_elapsed = df.subseq_stop_meters - df.stop_meters, 
+        sec_elapsed = df.subseq_arrival_time_sec - df.arrival_time_sec,
     ).pipe(
         segment_calcs.derive_speed, 
-        ("prior_stop_meters", "stop_meters"), 
-        ("prior_arrival_time_sec", "arrival_time_sec")
+        ("stop_meters", "subseq_stop_meters"), 
+        ("arrival_time_sec", "subseq_arrival_time_sec")
     ).pipe(
         attach_operator_natural_identifiers, 
         analysis_date
