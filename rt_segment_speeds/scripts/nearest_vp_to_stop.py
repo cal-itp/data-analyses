@@ -122,7 +122,7 @@ def nearest_neighbor_rt_stop_times(
     utils.geoparquet_gcs_export(
         results,
         f"{SEGMENT_GCS}nearest/",
-        f"{EXPORT_FILE}.parquet",
+        EXPORT_FILE,
     )
     
     end = datetime.datetime.now()
@@ -193,7 +193,7 @@ def nearest_neighbor_shape_segments(
     utils.geoparquet_gcs_export(
         results,
         f"{SEGMENT_GCS}nearest/",
-        f"{EXPORT_FILE}.parquet",
+        EXPORT_FILE,
     )
     
     end = datetime.datetime.now()
