@@ -1,8 +1,8 @@
 # Cut segments
 segmentize:
 	#pip install -r requirements.txt
-	#python prep_stop_segments.py
 	python cut_stop_segments.py
+	python select_stop_segments.py
 
 prep_roads:
 # run cut_road_segments and concatenate_road_segments once
@@ -14,7 +14,6 @@ prep_roads:
     
 speeds_pipeline:
 	make segmentize
-	python shapely_project_vp.py
 	python nearest_vp_to_stop.py
 	python interpolate_stop_arrival.py
 	python stop_arrivals_to_speed.py

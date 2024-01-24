@@ -11,6 +11,7 @@ preprocess:
 	python stop_times_with_direction.py
 	python vp_keep_usable.py
 	python vp_direction.py
+	python vp_condenser.py
 	python cleanup.py
 	python route_typologies.py
 	python crosswalk_gtfs_dataset_key_to_organization.py
