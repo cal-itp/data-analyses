@@ -20,7 +20,7 @@ def project_points_onto_shape(
     vp_coords_trio: shapely.LineString,
     shape_geometry: shapely.Geometry,
     timestamp_arr: np.ndarray,
-) -> float:
+) -> tuple[float]:
     """
     Project the points in the vp trio against the shape geometry
     and the stop position onto the shape geometry.
@@ -35,7 +35,7 @@ def project_points_onto_shape(
 
     interpolated_arrival = np.interp(stop_position, xp, yp)
     
-    return interpolated_arrival
+    return stop_position, interpolated_arrival
 
 
 def interpolate_stop_arrivals(
@@ -76,24 +76,27 @@ def interpolate_stop_arrivals(
 
     del df, shapes
 
+    stop_meters_series = []
     stop_arrival_series = []
-
+    
     for row in gdf.itertuples():
         
-        interpolated_arrival = project_points_onto_shape(
+        stop_meters, interpolated_arrival = project_points_onto_shape(
             getattr(row, "stop_geometry"),
             getattr(row, "vp_coords_trio"),
             getattr(row, "shape_geometry"),
             getattr(row, "location_timestamp_local_trio")
         )
-
+        
+        stop_meters_series.append(stop_meters)
         stop_arrival_series.append(interpolated_arrival)
 
     results = gdf.assign(
+        stop_meters = stop_meters_series,
         arrival_time = stop_arrival_series,
     ).astype({"arrival_time": "datetime64[s]"})[
         ["trip_instance_key", "shape_array_key",
-         "stop_sequence", "stop_id",
+         "stop_sequence", "stop_id", "stop_meters",
          "arrival_time"
     ]]
 
