@@ -54,7 +54,7 @@ def select_one_trip_per_shape(analysis_date: str):
 if __name__ == "__main__":
     from segment_speed_utils.project_vars import analysis_date_list
     
-    for analysis_date in analysis_date_list[:1]:
+    for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
         stop_segments = select_one_trip_per_shape(analysis_date)

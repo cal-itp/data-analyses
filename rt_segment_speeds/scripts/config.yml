@@ -1,7 +1,6 @@
 stop_segments:
     stage1: "vp_usable"
-    nearest_shape_segments: "nearest_vp_shape_segments"
-    stage2: "nearest_vp"
+    stage2: "nearest_vp_shape_segments"
     stage3: "stop_arrivals"
     stage4: "speeds_stop_segments"
     shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments"
@@ -11,13 +10,12 @@ stop_segments:
     route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
     route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
     segments_file: "stop_segments"    
-    segment_identifier_cols: ["shape_array_key", "stop_sequence"]
     timestamp_col: "location_timestamp_local"
     time_min_cutoff: 10
     max_speed: 80
 rt_stop_times:
     stage1: "vp_usable"
-    nearest_rt_stop_times: "nearest_vp_rt_stop_times"    
+    stage2: "nearest_vp_rt_stop_times"    
 road_segments:
     stage1: "vp_usable"
     stage2: "nearest_vp_roads"

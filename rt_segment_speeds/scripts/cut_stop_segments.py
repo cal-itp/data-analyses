@@ -14,6 +14,7 @@ import sys
 
 from loguru import logger
 
+from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
@@ -39,13 +40,13 @@ def stop_times_with_shape(
         filters = [[("trip_instance_key", "in", rt_trips)]],
         with_direction = True,
         get_pandas = False,
-        crs = "EPSG:4326"
+        crs = WGS84
     )
     
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
         columns = ["shape_array_key", "geometry"],
-        crs = "EPSG:4326",
+        crs = WGS84,
         get_pandas = True
     ).dropna(subset="geometry")
     
@@ -98,7 +99,7 @@ def cut_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
         gtfs_schedule_wrangling.gtfs_segments_rename_cols,
         natural_identifier = False
     ).set_geometry("geometry")
-      .set_crs("EPSG:4326")
+      .set_crs(WGS84)
      .to_crs(PROJECT_CRS)
      .compute()
      )
@@ -117,17 +118,18 @@ if __name__ == "__main__":
                level="INFO")    
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    EXPORT_FILE = STOP_SEG_DICT["segments_file"]
     
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
-
+        
+        EXPORT_FILE = f'{STOP_SEG_DICT["segments_file"]}_{analysis_date}'
+        
         segments = cut_stop_segments(analysis_date)
         
         utils.geoparquet_gcs_export(
             segments,
             SEGMENT_GCS,
-            f"{EXPORT_FILE}_{analysis_date}"
+            f"{EXPORT_FILE}"
         )
         
         del segments
