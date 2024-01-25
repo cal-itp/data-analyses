@@ -112,14 +112,18 @@ def import_scheduled_stop_times(
         FILE = f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet"
         
         if get_pandas:
-            stop_times = gpd.read_parquet(
-                FILE, filters = filters, columns = columns
-            )
+            if columns is None or "geometry" in columns:
+                stop_times = gpd.read_parquet(
+                    FILE, filters = filters, columns = columns
+                ).to_crs(crs)
+            else:
+                stop_times = pd.read_parquet(
+                    FILE, filters = filters, columns = columns
+                )
         else:
             stop_times = dg.read_parquet(
                 FILE, filters = filters, columns = columns
-            )
-        stop_times = stop_times.to_crs(crs)
+            ).to_crs(crs)
             
     else:
         FILE = f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet"

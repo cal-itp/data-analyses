@@ -96,14 +96,23 @@ def find_prior_stop(
         
     prior_stop = prior_stop.assign(
         prior_stop_sequence = (prior_stop.groupby("trip_instance_key")
-                               .stop_sequence.shift(1)),
+                               .stop_sequence
+                               .shift(1)),
+        # add subseq stop info here
+        subseq_stop_sequence = (prior_stop.groupby("trip_instance_key")
+                                .stop_sequence
+                                .shift(-1)),
+        subseq_stop_id = (prior_stop.groupby("trip_instance_key")
+                          .stop_id
+                          .shift(-1)),
     )
-                     
     
-    prior_stop_geom = (stop_times[trip_stop_cols + ["geometry"]]
+    # Merge in prior stop geom as a separate column so we can
+    # calculate distance / direction
+    prior_stop_geom = (stop_times[["trip_instance_key", 
+                                   "stop_sequence", "geometry"]]
                        .rename(columns = {
                            "stop_sequence": "prior_stop_sequence",
-                           "stop_id": "prior_stop_id",
                            "geometry": "prior_geometry"
                            })
                        .set_geometry("prior_geometry")
@@ -123,25 +132,32 @@ def find_prior_stop(
         how = "left"
     ).astype({
         "prior_stop_sequence": "Int64",
-    }).fillna({"prior_stop_id": ""})
+        "subseq_stop_sequence": "Int64"
+    }).fillna({"subseq_stop_id": ""})
     
     
+    # Create stop pair with underscores, since stop_id 
+    # can contain hyphens
     stop_times_with_prior_geom = stop_times_with_prior_geom.assign(
         stop_pair = stop_times_with_prior_geom.apply(
             lambda x: 
-            str(x.prior_stop_id) + "-" + str(x.stop_id), 
+            str(x.stop_id) + "__" + str(x.subseq_stop_id), 
             axis=1, 
         )
-    ).drop(columns = "prior_stop_id")
+    ).drop(columns = ["subseq_stop_id"])
     
     return stop_times_with_prior_geom
 
 
-def assemble_stop_times_with_direction(analysis_date: str, dict_inputs: dict):
+def assemble_stop_times_with_direction(
+    analysis_date: str, 
+    dict_inputs: dict
+):
     """
     Assemble a stop_times table ready to be joined with 
     RT data (has trip_instance_key).
-    For each stop, find the direction it's traveling (prior stop to current stop)
+    For each stop, find the direction it's traveling 
+    (prior stop to current stop)
     and attach that as a column.
     The first stop in each trip has direction Unknown.
     """
