@@ -1,3 +1,5 @@
+# Code Review 
+[Google Drive notes](https://docs.google.com/document/d/12SLubjQoE8NLLOm8Nb5DYKzwdNS1WYOkvrK_HnR1-FY/) 
 
 ### README for methodology is good
 * The methodology reads like a narrative, code can be the same!
