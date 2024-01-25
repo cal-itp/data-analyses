@@ -25,7 +25,7 @@ SHAPE_STOP_COLS = [
     "shape_array_key", "shape_id", "stop_sequence",
 ]
 
-STOP_PAIR_COLS = ["shape_stop_pair"] # should we include stop_id?
+STOP_PAIR_COLS = ["stop_pair"] 
 
 ROUTE_DIR_COLS = [
     "route_id", "direction_id"
@@ -59,7 +59,6 @@ def merge_operator_identifiers(
     return df
     
     
-
 def weighted_average_speeds_across_segments(
     df: pd.DataFrame,
     group_cols: list
@@ -91,7 +90,8 @@ def weighted_average_speeds_across_segments(
                         )
     
     avg_speeds_allday = segment_calcs.speed_from_meters_elapsed_sec_elapsed(
-        avg_speeds_allday).assign(
+        avg_speeds_allday
+    ).assign(
         peak_offpeak = "all_day"
     )
     
@@ -108,8 +108,12 @@ def weighted_average_speeds_across_segments(
 def concatenate_peak_offpeak_allday_averages(
     df: pd.DataFrame, 
     group_cols: list
-):
+) -> pd.DataFrame:
     """
+    Calculate average speeds for all day and
+    peak_offpeak.
+    Concatenate these, so that speeds are always calculated
+    for the same 3 time periods.
     """
     avg_speeds_peak = segment_calcs.calculate_avg_speeds(
         df,
@@ -136,6 +140,12 @@ def concatenate_trip_segment_speeds(
     analysis_date_list: list,
     dict_inputs: dict
 ) -> pd.DataFrame:
+    """
+    Concatenate the speed-trip parquets together, 
+    whether it's for single day or multi-day averages.
+    Add columns for peak_offpeak, weekday_weekend based 
+    on day of week and time-of-day.
+    """
     SPEED_FILE = dict_inputs["stage4"]
     MAX_SPEED = dict_inputs["max_speed"]
     
@@ -162,7 +172,11 @@ def concatenate_trip_segment_speeds(
     
     
 def single_day_averages(analysis_date: str, dict_inputs: dict):
-    
+    """
+    Main function for calculating average speeds.
+    Start from single day segment-trip speeds and 
+    aggregate by peak_offpeak, weekday_weekend.
+    """
     SHAPE_SEG_FILE = dict_inputs["shape_stop_single_segment"]
     ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
     TRIP_FILE = dict_inputs["trip_speeds_single_summary"]
@@ -240,6 +254,14 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
 
 
 def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
+    """
+    Main function for calculating average speeds.
+    Start from single day segment-trip speeds and 
+    aggregate by peak_offpeak, weekday_weekend.
+    The main difference from a single day average is that
+    the seven days is concatenated first before averaging,
+    so that we get weighted averages.
+    """
     ROUTE_SEG_FILE = dict_inputs["route_dir_multi_summary"]
     ROUTE_DIR_FILE = dict_inputs["route_dir_multi_segment"]
         
@@ -306,7 +328,7 @@ if __name__ == "__main__":
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
-    '''
+    
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
@@ -314,11 +336,12 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
+    
     '''
     start = datetime.datetime.now()
     multi_day_averages(analysis_date_list, STOP_SEG_DICT)
     end = datetime.datetime.now()
     
     logger.info(f"average rollups for {analysis_date_list}: {end - start}")
-
+    '''
     

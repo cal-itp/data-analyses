@@ -172,11 +172,10 @@ def nearest_neighbor_shape_segments(
     
     all_trips = helpers.import_scheduled_stop_times(
         analysis_date,
-        columns = ["trip_instance_key", "shape_array_key",
-                    "geometry"],
+        columns = ["trip_instance_key", "shape_array_key"],
         get_pandas = True,
         with_direction = True
-    ).drop(columns = "geometry").drop_duplicates().reset_index(drop=True)
+    ).drop_duplicates().reset_index(drop=True)
     
     stop_times = pd.merge(
         stops_to_use,
