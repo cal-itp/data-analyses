@@ -9,6 +9,7 @@ import geopandas as gpd
 import pandas as pd
 
 from calitp_data_analysis import utils
+from segment_speed_utils import helpers
 from update_vars import analysis_date, COMPILED_CACHED_VIEWS, TEMP_GCS
 
 
@@ -19,8 +20,11 @@ def filter_trips_to_route_type(analysis_date: str,
     from trips, might as well just get it from trips.
     """
     
-    trips = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["feed_key", "name", "trip_id", 
+                 "route_id", "route_type"],
+    )
     
     if isinstance(route_types, list):
         trips_subset = trips[trips.route_type.isin(route_types)]
@@ -28,10 +32,7 @@ def filter_trips_to_route_type(analysis_date: str,
     elif route_types == "brt": 
         trips_subset = filter_to_brt_trips(trips)
         
-    keep_cols = ["feed_key", "name", "trip_id", 
-                 "route_id", "route_type"]
-    
-    trips_subset = (trips_subset[keep_cols]
+    trips_subset = (trips_subset
                     .drop_duplicates()
                     .reset_index(drop=True)
                    )
@@ -70,7 +71,8 @@ def filter_to_brt_trips(trips: pd.DataFrame) -> pd.DataFrame:
     return all_brt_trips
     
 
-def filter_unique_stops_for_trips(analysis_date: str, 
+def filter_unique_stops_for_trips(
+    analysis_date: str, 
     trip_df: pd.DataFrame
 ) -> gpd.GeoDataFrame:
     """
@@ -79,8 +81,11 @@ def filter_unique_stops_for_trips(analysis_date: str,
     
     Then attach the stop's point geometry.
     """
-    stop_times = dd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet")
+    stop_times = helpers.import_scheduled_stop_times(
+        analysis_date,
+        with_direction = False,
+        get_pandas = True
+    )
     
     keep_stop_cols = [
         "feed_key", "name", 
@@ -89,22 +94,21 @@ def filter_unique_stops_for_trips(analysis_date: str,
         # let's keep route_id, since we double check in a notebook
     ]
     
-    stops_for_trips = dd.merge(
+    stops_for_trips = pd.merge(
         stop_times,
         trip_df,
         on = ["feed_key", "trip_id"],
         how = "inner"
     )[keep_stop_cols].drop_duplicates().reset_index(drop=True)
-    
-    stops_present = stops_for_trips.compute()
-    
+        
     # Attach stop geometry
-    stops = gpd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet")
+    stops = helpers.import_scheduled_stops(
+        analysis_date,
+    )
     
     stops_with_geom = pd.merge(
         stops, 
-        stops_present,
+        stops_for_trips,
         on = ["feed_key", "stop_id"],
         how = "inner"
     )[keep_stop_cols + ["stop_name", "geometry"]]
