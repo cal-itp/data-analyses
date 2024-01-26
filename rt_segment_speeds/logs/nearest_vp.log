@@ -5,3 +5,5 @@
 2024-01-23 13:20:29.631 | INFO     | __main__:nearest_neighbor_shape_segments:185 - nearest points for shape segments: 0:08:08.647055
 2024-01-23 13:28:37.977 | INFO     | __main__:nearest_neighbor_rt_stop_times:120 - nearest points for RT stop times: 0:08:03.546822
 2024-01-24 09:43:44.540 | INFO     | __main__:nearest_neighbor_shape_segments:200 - shape segments 2024-01-17: 0:08:33.397316
+2024-01-25 21:54:29.690 | INFO     | __main__:nearest_neighbor_shape_segments:203 - shape segments 2023-12-13: 0:07:26.752626
+2024-01-25 22:01:21.938 | INFO     | __main__:nearest_neighbor_shape_segments:203 - shape segments 2023-11-15: 0:06:50.375528
