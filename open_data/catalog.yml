@@ -27,13 +27,13 @@ sources:
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_stops.parquet
   speeds_by_stop_segments:
     driver: geoparquet
-    description: All day and peak speeds by stop segments (lines).
+    description: Segment speeds by route-direction-stop_pair-time_period. The geometry is a segment that runs between 2 stops.
     args:
-      # source: rt_segment_speeds/scripts/B3_export.py
-      urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/export/speeds_by_stop_segments.parquet
+      # source: rt_segment_speeds/scripts/average_speeds.py
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/export/speeds_route_dir_segments.parquet
   speeds_by_route_time_of_day:
     driver: geoparquet
-    description: Average speeds by route-direction-time-of-day.
+    description: Average speeds by route-direction-time_period. The geometry is a common shape_id for that route-direction.
     args:
-      # source: rt_segment_speeds/scripts/C3_trip_route_speed.py
-      urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/export/speeds_by_route_time_of_day.parquet
+      # source: rt_segment_speeds/scripts/average_speeds.py
+      urlpath: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/export/speeds_route_dir.parquet

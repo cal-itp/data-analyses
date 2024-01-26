@@ -23,4 +23,4 @@ timeseries_preprocessing:
     
     
 funnel_gtfs_data: 
-	make download_gtfs_data && make preprocess
+	make download_gtfs_data && make preprocess && make timeseries_preprocessing

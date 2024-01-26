@@ -9,7 +9,7 @@ PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/"
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 PUBLIC_GCS = "gs://calitp-publish-data-analysis/"
 
-analysis_date = rt_dates.DATES["dec2023"]
+analysis_date = rt_dates.DATES["jan2024"]
 
 days = ["a", "b", "", "c", "d", "e", "f"] 
 months = [

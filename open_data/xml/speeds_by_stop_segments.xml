@@ -20,7 +20,7 @@
 	</ns0:hierarchyLevelName>
 	<ns0:contact ns1:nilReason="missing"></ns0:contact>
 	<ns0:dateStamp>
-		<ns1:Date>2023-12-14</ns1:Date>
+		<ns1:Date>2024-01-26</ns1:Date>
 	</ns0:dateStamp>
 	<ns0:metadataStandardName>
 		<ns1:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</ns1:CharacterString>
@@ -85,7 +85,7 @@
 					<ns0:date>
 						<ns0:CI_Date>
 							<ns0:date>
-								<ns1:Date>2023-12-13</ns1:Date>
+								<ns1:Date>2024-01-17</ns1:Date>
 							</ns0:date>
 							<ns0:dateType>
 								<ns0:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="ISOTC211/19115">
@@ -146,7 +146,7 @@
 				<ns1:CharacterString>All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</ns1:CharacterString>
 			</ns0:abstract>
 			<ns0:purpose>
-				<ns1:CharacterString>All day and peak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data.</ns1:CharacterString>
+				<ns1:CharacterString>Average all-day, peak, and offpeak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data.</ns1:CharacterString>
 			</ns0:purpose>
 			<ns0:status>
 				<ns0:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">

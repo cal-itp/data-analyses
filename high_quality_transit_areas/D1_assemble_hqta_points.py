@@ -63,10 +63,11 @@ def add_route_info(hqta_points: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """    
     stop_times = helpers.import_scheduled_stop_times(
         analysis_date,
-        columns = ["feed_key", "stop_id", "trip_id"]
-    ).compute()
+        columns = ["feed_key", "stop_id", "trip_id"],
+        get_pandas = True,
+        with_direction = False
+    )
 
-    
     trips = helpers.import_scheduled_trips(
         analysis_date,
         columns = ["feed_key", "trip_id", "route_id"],

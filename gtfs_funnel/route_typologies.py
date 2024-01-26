@@ -8,7 +8,7 @@ import pandas as pd
 
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
-from segment_speed_utils import helpers, gtfs_schedule_wrangling, sched_rt_utils
+from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from segment_speed_utils.project_vars import RT_SCHED_GCS, PROJECT_CRS
 
 catalog = intake.open_catalog(
@@ -26,7 +26,7 @@ def assemble_scheduled_trip_metrics(analysis_date: str):
         get_pandas = True
     )
     
-    time_of_day = (sched_rt_utils.get_trip_time_buckets(analysis_date)   
+    time_of_day = (gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)   
                    [["trip_instance_key", "time_of_day", 
                      "service_minutes"]]
                    .rename(columns = {"service_minutes": "sched_service_min"})
@@ -105,23 +105,12 @@ def add_common_shape(analysis_date: str):
     For route-direction df, add common_shape_id (most frequent shape)
     and attach that shape geometry
     """
-    common_shape = sched_rt_utils.most_common_shape_by_route_direction(analysis_date)
-    
-    shapes = helpers.import_scheduled_shapes(
-        analysis_date, 
-        columns = ["shape_array_key", "geometry"],
-        crs = WGS84,
-        get_pandas = True
-    ).pipe(helpers.remove_shapes_outside_ca)
-    
-    shapes_with_geom = pd.merge(
-        shapes,
-        common_shape,
-        on = "shape_array_key",
-        how = "inner"
+    common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
+        analysis_date).pipe(
+        helpers.remove_shapes_outside_ca
     )
     
-    return shapes_with_geom
+    return common_shape
     
     
 def pop_density_by_shape(shape_df: gpd.GeoDataFrame):

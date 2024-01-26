@@ -5,65 +5,32 @@
 			<citeinfo>
 				<title>ca_transit_stops</title>
 				<geoform>vector digital data</geoform>
-				<pubinfo>
-					<publish>Caltrans</publish>
-				</pubinfo>
-				<onlink>https://github.com/cal-itp/data-analyses/blob/main/open_data/README.md</onlink>
 			</citeinfo>
 		</citation>
 		<descript>
 			<abstract>Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates route information to stops.</abstract>
 			<purpose>Provide all CA transit stops and routes (geospatial) from all transit operators.</purpose>
 		</descript>
-		<status>
-			<progress>Complete</progress>
-			<update>Monthly</update>
-		</status>
-		<spdom>
-			<bounding>
-				<westbc>-124.498079</westbc>
-				<eastbc>-68.811782</eastbc>
-				<northbc>49.273757</northbc>
-				<southbc>24.552569</southbc>
-			</bounding>
-		</spdom>
 		<keywords>
 			<theme>
 				<themekt>None</themekt>
-				<themekey>transportation</themekey>
-			</theme>
-			<theme>
-				<themekt>ISO 19115 Topic Categories</themekt>
-				<themekey>transportation</themekey>
+				<themekey>Transportation</themekey>
+				<themekey>GTFS</themekey>
+				<themekey>Transit routes</themekey>
+				<themekey>Transit stops</themekey>
+				<themekey>Transit</themekey>
 			</theme>
 		</keywords>
 		<accconst>None</accconst>
 		<useconst>Public.</useconst>
-		<ptcontac>
-			<cntinfo>
-				<cntorgp>
-					<cntorg>Caltrans</cntorg>
-					<cntper>Tiffany Ku</cntper>
-				</cntorgp>
-				<cntpos>Data &amp; Digital Services / California Integrated Travel Project</cntpos>
-				<cntemail>tiffany.ku@dot.ca.gov</cntemail>
-			</cntinfo>
-		</ptcontac>
 		<native>Esri ArcGIS 12.9.2.32739</native>
 	</idinfo>
-	<dataqual>
-		<lineage>
-			<procstep>
-				<procdesc>This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt.</procdesc>
-			</procstep>
-		</lineage>
-	</dataqual>
 	<spdoinfo>
 		<direct>Vector</direct>
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>Entity point</sdtstype>
-				<ptvctcnt>124774</ptvctcnt>
+				<ptvctcnt>0</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -130,14 +97,10 @@
 				<attrlabl>base64_url</attrlabl>
 				<attrdef>The base64 encoded url for the feed associated with the agency</attrdef>
 			</attr>
-			<attr>
-				<attrlabl>uri</attrlabl>
-				<attrdef>The URI for the feed associated with the agency</attrdef>
-			</attr>
 		</detailed>
 	</eainfo>
 	<metainfo>
-		<metd>20231013</metd>
+		<metd>20240126</metd>
 		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
 		<metstdv>FGDC-STD-001-1998</metstdv>
 		<mettc>local time</mettc>

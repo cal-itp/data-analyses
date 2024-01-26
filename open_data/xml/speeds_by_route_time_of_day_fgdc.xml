@@ -5,65 +5,34 @@
 			<citeinfo>
 				<title>speeds_by_route_time_of_day</title>
 				<geoform>vector digital data</geoform>
-				<pubinfo>
-					<publish>Caltrans</publish>
-				</pubinfo>
-				<onlink>https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/README.md</onlink>
 			</citeinfo>
 		</citation>
 		<descript>
-			<abstract>Provide average transit speeds, number of trips, and metrics related to scheduled annd real-time service minutes by route-direction and time-of-day.</abstract>
-			<purpose>Average transit speeds by route-direction and time-of-day estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</purpose>
+			<abstract>Provide average transit speeds, number of trips by route-direction.</abstract>
+			<purpose>Average transit speeds by route-direction estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</purpose>
 		</descript>
-		<status>
-			<progress>Complete</progress>
-			<update>Monthly</update>
-		</status>
-		<spdom>
-			<bounding>
-				<westbc>-124.226362</westbc>
-				<eastbc>-114.562623</eastbc>
-				<northbc>41.957418</northbc>
-				<southbc>32.542091</southbc>
-			</bounding>
-		</spdom>
 		<keywords>
 			<theme>
 				<themekt>None</themekt>
-				<themekey>transportation</themekey>
-			</theme>
-			<theme>
-				<themekt>ISO 19115 Topic Categories</themekt>
-				<themekey>transportation</themekey>
+				<themekey>Transportation</themekey>
+				<themekey>Transit</themekey>
+				<themekey>GTFS</themekey>
+				<themekey>GTFS RT</themekey>
+				<themekey>real time</themekey>
+				<themekey>speeds</themekey>
+				<themekey>vehicle positions</themekey>
 			</theme>
 		</keywords>
 		<accconst>None</accconst>
 		<useconst>Public.</useconst>
-		<ptcontac>
-			<cntinfo>
-				<cntorgp>
-					<cntorg>Caltrans</cntorg>
-					<cntper>Tiffany Ku</cntper>
-				</cntorgp>
-				<cntpos>Data &amp; Digital Services / California Integrated Travel Project</cntpos>
-				<cntemail>tiffany.ku@dot.ca.gov</cntemail>
-			</cntinfo>
-		</ptcontac>
 		<native>Esri ArcGIS 12.9.2.32739</native>
 	</idinfo>
-	<dataqual>
-		<lineage>
-			<procstep>
-				<procdesc>This data was estimated by combining GTFS real-time vehicle positions with GTFS scheduled trips and shapes. GTFS real-time (RT) vehicle positions are spatially joined to GTFS scheduled shapes, so only vehicle positions traveling along the route alignment path are kept. A sample of five vehicle positions are selected (min, 25th percentile, 50th percentile, 75th percentile, max). The trip speed is calculated using these five vehicle positions. Each trip is categorized into a time-of-day. The average speed for a route-direction-time_of_day is calculated. Additional metrics are stored, such as the number of trips observed, the average scheduled service minutes, and the average RT observed service minutes. For convenience, we also provide a singular shape (common_shape_id) to associate with a route-direction. This is the shape that had the most number of trips for a given route-direction. Time-of-day is determined by the GTFS scheduled trip start time. The trip start hour (military time) is categorized based on the following: Owl (0-3), Early AM (4-6), AM Peak (7-9), Midday (10-14), PM Peak (15-19), and Evening (20-23). The start and end hours are inclusive (e.g., 4-6 refers to 4am, 5am, and 6am).</procdesc>
-			</procstep>
-		</lineage>
-	</dataqual>
 	<spdoinfo>
 		<direct>Vector</direct>
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>String</sdtstype>
-				<ptvctcnt>10595</ptvctcnt>
+				<ptvctcnt>0</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -122,29 +91,20 @@
 				<attrdefs>https://gtfs.org/schedule/reference/#tripstxt</attrdefs>
 			</attr>
 			<attr>
-				<attrlabl>common_shape_id</attrlabl>
-				<attrdef>Identifies a shape</attrdef>
-				<attrdefs>https://gtfs.org/schedule/reference/#shapestxt</attrdefs>
-			</attr>
-			<attr>
-				<attrlabl>time_of_day</attrlabl>
-				<attrdef>The time of day period that provides average speeds. Valid values are Early AM, AM Peak, Midday, PM Peak, Evening, Owl.</attrdef>
+				<attrlabl>time_period</attrlabl>
+				<attrdef>The time period over which the metric is calculated. Valid options are
+  offpeak - offpeak hours are 12am-6:59am inclusive, 10am-2:59pm inclusive, and 8pm-11:59pm inclusive.
+  peak - peak hours are 7am-9:59am inclusive and 3pm-7:59pm inclusive.
+  all_day </attrdef>
+				<attrdefs>https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/segment_speed_utils/time_helpers.py</attrdefs>
 			</attr>
 			<attr>
 				<attrlabl>speed_mph</attrlabl>
-				<attrdef>The average speed_mph for all trips with vehicle positions for that time-of-day.</attrdef>
+				<attrdef>The average speed_mph for all trips with vehicle positions for that time_period.</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>n_trips</attrlabl>
-				<attrdef>The number of trips used to calculate the average speed_mph for that time-of-day.</attrdef>
-			</attr>
-			<attr>
-				<attrlabl>avg_sched_trip_min</attrlabl>
-				<attrdef>The average scheduled trip (minutes) for trips occurring in that time-of-day period. Derived from the `service_hours` in GTFS scheduled trips.</attrdef>
-			</attr>
-			<attr>
-				<attrlabl>avg_rt_trip_min</attrlabl>
-				<attrdef>The average real-time trip (minutes) elapsed for trips with vehicle positions occurring in that time-of-day period. Strictly speaking, it is not the number of minutes to complete the trips, but the number of minutes with real-time vehicle positions observed for that shape_id.</attrdef>
+				<attrdef>The number of trips used to calculate the average speed_mph for that route_id, direction_id, and time_period.</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>base64_url</attrlabl>
@@ -157,7 +117,7 @@
 		</detailed>
 	</eainfo>
 	<metainfo>
-		<metd>20231013</metd>
+		<metd>20240126</metd>
 		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
 		<metstdv>FGDC-STD-001-1998</metstdv>
 		<mettc>local time</mettc>
