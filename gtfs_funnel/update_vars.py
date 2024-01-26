@@ -8,7 +8,7 @@ months = ["dec", "nov", "oct", "sep", "aug",
 days = ["a", "b", "c", "d", "e", "f"]
 
 analysis_date_list = [
-    rt_dates.DATES["dec2023"]
+    rt_dates.DATES["jan2024"]
 ] 
 
 CONFIG_PATH = Path("config.yml")

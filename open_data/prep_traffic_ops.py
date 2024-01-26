@@ -48,7 +48,7 @@ def standardize_operator_info_for_exports(
         quartet_data = "schedule", 
         dim_gtfs_dataset_cols = [
             "key", "regional_feed_type",
-            "base64_url", "uri"],
+            "base64_url"],
         dim_organization_cols = [
             "source_record_id", "name", "caltrans_district"]
     )

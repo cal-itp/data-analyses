@@ -35,6 +35,8 @@ common-fields:
     definition: |- 
       Order of stops for a particular trip. The values must increase along the trip but do not need to be consecutive.
     definition_source: "https://gtfs.org/schedule/reference/#stop_timestxt"
+  - &stop_pair
+    definition: A pair of stops. Identifies the current stop_id and the subsequent stop_id. The stop pair value is created internally by concatenating two stop ids with double underscores. 
   - &shape_id
     definition: Identifies a shape
     definition_source: "https://gtfs.org/schedule/reference/#shapestxt"
@@ -46,12 +48,17 @@ common-fields:
     definition_source: "https://gtfs.org/schedule/reference/#tripstxt"  
   - &base64_url
     definition: The base64 encoded url for the feed associated with the agency
-  - &uri
-    definition: The URI for the feed associated with the agency
   - &district
     definition: Caltrans district number
   - &district_name
     definition: Caltrans district name
+  - &time_period
+    definition: |-
+      The time period over which the metric is calculated. Valid options are
+        offpeak - offpeak hours are 12am-6:59am inclusive, 10am-2:59pm inclusive, and 8pm-11:59pm inclusive.
+        peak - peak hours are 7am-9:59am inclusive and 3pm-7:59pm inclusive.
+        all_day 
+    definition_source: "https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/segment_speed_utils/time_helpers.py"  
   - &hqta_type
     definition: |-
       Indicates the type of High Quality Transit Area as defined in the Public Resources Code that a stop is and/or falls within. Valid options are: hq_corridor_bus (PRC 21155), major_stop_bus (PRC 21064.3), major_stop_rail (PRC 21064.3), major_stop_ferry (PRC 21064.3), major_stop_brt (PRC 21064.3, 21060.2)
@@ -110,7 +117,6 @@ tables:
     n_trips: 
       definition: Daily trips associated with this shape_id and route_id.      
     base64_url: *base64_url
-    uri: *uri    
 
   - dataset_name: ca_transit_stops
     agency: *agency
@@ -120,29 +126,26 @@ tables:
     stop_id: *stop_id
     stop_name: *stop_name
     base64_url: *base64_url
-    uri: *uri    
     
   - dataset_name: speeds_by_stop_segments
     agency: *agency
     org_id: *org_id    
-    shape_id: *shape_id
-    stop_sequence: *stop_sequence
-    stop_id: *stop_id
+    route_id: *route_id
+    direction_id: *direction_id
+    stop_pair: *stop_pair
     p20_mph: 
       definition: |- 
-        The 20th percentile speed (mph) for all trips associated with the shape_id and time_of_day.
+        The 20th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
     p50_mph:
       definition: |- 
-        The 50th percentile speed (mph) for all trips associated with the shape_id and time_of_day.
+        The 50th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
     p80_mph: 
       definition: |- 
-        The 80th percentile speed (mph) for all trips associated with the shape_id and time_of_day.
+        The 80th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
     n_trips: 
       definition: |- 
         The number of trips used to find the 20th, 50th, and 80th percentile speeds within the segment.
-    time_of_day: 
-      definition: |- 
-        The time of day period that provides the 20th, 50th, and 80th percentile speeds. Valid values are all_day and peak.
+    time_period: *time_period
     base64_url: *base64_url
     district_name: *district_name
     
@@ -152,21 +155,12 @@ tables:
     route_id: *route_id
     route_name: *route_name
     direction_id: *direction_id
-    common_shape_id: *shape_id
-    time_of_day: 
-      definition: |- 
-        The time of day period that provides average speeds. Valid values are Early AM, AM Peak, Midday, PM Peak, Evening, Owl.
+    time_period: *time_period
     speed_mph: 
       definition: |- 
-        The average speed_mph for all trips with vehicle positions for that time-of-day.
+        The average speed_mph for all trips with vehicle positions for that time_period.
     n_trips: 
       definition: |- 
-        The number of trips used to calculate the average speed_mph for that time-of-day.
-    avg_sched_trip_min:
-      definition: |- 
-        The average scheduled trip (minutes) for trips occurring in that time-of-day period. Derived from the `service_hours` in GTFS scheduled trips.
-    avg_rt_trip_min: 
-      definition: |- 
-        The average real-time trip (minutes) elapsed for trips with vehicle positions occurring in that time-of-day period. Strictly speaking, it is not the number of minutes to complete the trips, but the number of minutes with real-time vehicle positions observed for that shape_id.
+        The number of trips used to calculate the average speed_mph for that route_id, direction_id, and time_period.
     base64_url: *base64_url
     district_name: *district_name
