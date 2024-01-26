@@ -13,6 +13,8 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 
+from pathlib import Path
+
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS
@@ -20,9 +22,13 @@ from segment_speed_utils.project_vars import SEGMENT_GCS
 
 def select_one_trip_per_shape(analysis_date: str):
     """
+    From stop segments across all trips, select 1 trip per shape.
+    Select the trip that's the longest length.
+    Column called st_trip_instance_key will help us find
+    which trip we chose for that shape_array_key.
     """
     stop_segments = gpd.read_parquet(
-        f"{SEGMENT_GCS}stop_segments_{analysis_date}.parquet"
+        f"{SEGMENT_GCS}segment_options/stop_segments_{analysis_date}.parquet"
     )
     
     stop_segments = stop_segments.assign(
@@ -52,18 +58,24 @@ def select_one_trip_per_shape(analysis_date: str):
 
 
 if __name__ == "__main__":
-    from segment_speed_utils.project_vars import analysis_date_list
+    from segment_speed_utils.project_vars import analysis_date_list, CONFIG_PATH
+    
+    # This is a different stop segments file (a subset)
+    # of the RT stop times one that cuts segments for all trips
+    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
-        stop_segments = select_one_trip_per_shape(analysis_date)
-
+        SEGMENT_FILE = Path(STOP_SEG_DICT["segments_file"])        
+        
+        segments = select_one_trip_per_shape(analysis_date)
+        
         utils.geoparquet_gcs_export(
-            stop_segments,
-            f"{SEGMENT_GCS}segment_options/",
-            f"shape_stop_segments_{analysis_date}"
-        )
+            segments,
+            f"{SEGMENT_GCS}{str(SEGMENT_FILE.parent)}/",
+            f"{SEGMENT_FILE.stem}_{analysis_date}"
+        )    
         
         end = datetime.datetime.now()
         print(f"execution time: {end - start}")
