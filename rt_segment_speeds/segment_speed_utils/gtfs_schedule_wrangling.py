@@ -7,7 +7,7 @@ import pandas as pd
 from typing import Union
 
 from segment_speed_utils import helpers, time_helpers
-from shared_utils import rt_utils
+from shared_utils import portfolio_utils, rt_utils
 
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
@@ -285,7 +285,23 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
         how = "inner"
     ).drop(columns = "shape_array_key")
     
-    return common_shape_geom
+    route_info = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["gtfs_dataset_key", "route_id", 
+                   "route_long_name", "route_short_name", "route_desc"]
+    ).drop_duplicates().pipe(
+        portfolio_utils.add_route_name
+    ).drop(columns = ["route_long_name", "route_short_name", "route_desc"])
+    
+    del shape_geom, most_common_shape
+    
+    common_shape_geom2 = pd.merge(
+        common_shape_geom,
+        route_info.rename(columns = {"route_name_used": "route_name"}),
+        on = ["schedule_gtfs_dataset_key", "route_id"]
+    )
+    
+    return common_shape_geom2
     
     
 def gtfs_segments_rename_cols(
