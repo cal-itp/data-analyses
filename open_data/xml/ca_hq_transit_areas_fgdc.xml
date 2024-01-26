@@ -5,65 +5,32 @@
 			<citeinfo>
 				<title>ca_hq_transit_areas</title>
 				<geoform>vector digital data</geoform>
-				<pubinfo>
-					<publish>Caltrans</publish>
-				</pubinfo>
-				<onlink>https://github.com/cal-itp/data-analyses/blob/main/high_quality_transit_areas/README.md</onlink>
 			</citeinfo>
 		</citation>
 		<descript>
 			<abstract>Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled frequencies of 15 minutes or less.</abstract>
 			<purpose>Estimated High Quality Transit Areas as described in Public Resources Code 21155, 21064.3, 21060.2.</purpose>
 		</descript>
-		<status>
-			<progress>Complete</progress>
-			<update>Monthly</update>
-		</status>
-		<spdom>
-			<bounding>
-				<westbc>-124.226978</westbc>
-				<eastbc>-71.041087</eastbc>
-				<northbc>42.367367</northbc>
-				<southbc>26.189064</southbc>
-			</bounding>
-		</spdom>
 		<keywords>
 			<theme>
 				<themekt>None</themekt>
-				<themekey>transportation</themekey>
-			</theme>
-			<theme>
-				<themekt>ISO 19115 Topic Categories</themekt>
-				<themekey>transportation</themekey>
+				<themekey>Transportation</themekey>
+				<themekey>Land Use</themekey>
+				<themekey>Transit-Oriented Development</themekey>
+				<themekey>TOD</themekey>
+				<themekey>High Quality Transit</themekey>
 			</theme>
 		</keywords>
 		<accconst>None</accconst>
 		<useconst>Public.</useconst>
-		<ptcontac>
-			<cntinfo>
-				<cntorgp>
-					<cntorg>Caltrans</cntorg>
-					<cntper>Eric Dasmalchi</cntper>
-				</cntorgp>
-				<cntpos>Data &amp; Digital Services / California Integrated Travel Project</cntpos>
-				<cntemail>eric.dasmalchi@dot.ca.gov</cntemail>
-			</cntinfo>
-		</ptcontac>
 		<native>Esri ArcGIS 12.9.2.32739</native>
 	</idinfo>
-	<dataqual>
-		<lineage>
-			<procstep>
-				<procdesc>This data was estimated using a spatial process derived from General Transit Feed Specification (GTFS) schedule data. To find high-quality bus corridors, we split each corridor into 1,500 meter segments and counted frequencies at the stop within that segment with the highest number of transit trips. If that stop saw at least 4 trips per hour for at least one hour in the morning, and again for at least one hour in the afternoon, we consider that segment a high-quality bus corridor. Segments without a stop are not considered high-quality corridors. Major transit stops were identified as either the intersection of two high-quality corridors from the previous step, a rail or bus rapid transit station, or a ferry terminal with bus service. Note that the definition of `bus rapid transit` in Public Resources Code 21060.2 includes features not captured by available data sources, these features were captured manually using information from transit agency sources and imagery. We believe this data to be broadly accurate, and fit for purposes including overall dashboards, locating facilities in relation to high quality transit areas, and assessing community transit coverage. However, the spatial determination of high-quality transit areas from GTFS data necessarily involves some assumptions as described above. Any critical determinations of whether a specific parcel is located within a high-quality transit area should be made in conjunction with local sources, such as transit agency timetables.  Notes: Null values may be present. The `hqta_details` columns defines which part of the Public Resources Code definition the HQTA classification was based on. If `hqta_details` references a single operator, then `agency_secondary` and `base64_url_secondary` are null. If `hqta_details` references the same operator, then `agency_secondary` and `base64_url_secondary` are the same as `agency_primary` and `base64_url_primary`.</procdesc>
-			</procstep>
-		</lineage>
-	</dataqual>
 	<spdoinfo>
 		<direct>Vector</direct>
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>GT-polygon composed of chains</sdtstype>
-				<ptvctcnt>23406</ptvctcnt>
+				<ptvctcnt>0</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -146,7 +113,7 @@
 		</detailed>
 	</eainfo>
 	<metainfo>
-		<metd>20231013</metd>
+		<metd>20240126</metd>
 		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
 		<metstdv>FGDC-STD-001-1998</metstdv>
 		<mettc>local time</mettc>
