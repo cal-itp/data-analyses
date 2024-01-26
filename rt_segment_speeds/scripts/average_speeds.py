@@ -337,6 +337,33 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     return
 
 
+def stage_open_data_exports(analysis_date: str, dict_inputs: dict):
+    """
+    For the datasets we publish to Geoportal, 
+    export them to a stable GCS URL so we can always 
+    read it in open_data/catalog.yml.
+    """
+    
+    datasets = [
+        dict_inputs["route_dir_single_segment"],
+        dict_inputs["route_dir_single_summary"]
+    ]
+
+    for d in datasets:
+        gdf = gpd.read_parquet(
+            f"{SEGMENT_GCS}{d}_{analysis_date}.parquet"
+        )
+        
+        utils.geoparquet_gcs_export(
+            gdf,
+            f"{SEGMENT_GCS}export/",
+            f"{Path(d).stem}"
+        )
+        del gdf
+    
+    return
+        
+
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date#analysis_date_list
@@ -353,7 +380,10 @@ if __name__ == "__main__":
     for analysis_date in [analysis_date]:
         
         start = datetime.datetime.now()
+        
         single_day_averages(analysis_date, STOP_SEG_DICT)
+        stage_open_data_exports(analysis_date, STOP_SEG_DICT)
+        
         end = datetime.datetime.now()
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
