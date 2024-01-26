@@ -5,7 +5,6 @@ and flag which segments are HQ transit corridors.
 Takes <1 min to run.
 - down from 1 hr in v2 (was part of B1)
 """
-import dask.dataframe as dd
 import datetime as dt
 import geopandas as gpd
 import numpy as np
@@ -223,8 +222,9 @@ if __name__ == "__main__":
     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
     # takes 1 min
     max_arrivals_by_stop = helpers.import_scheduled_stop_times(
-        analysis_date
-    ).compute().pipe(stop_times_aggregation_max_by_stop)
+        analysis_date,
+        get_pandas = True
+    ).pipe(stop_times_aggregation_max_by_stop)
     
     max_arrivals_by_stop.to_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
