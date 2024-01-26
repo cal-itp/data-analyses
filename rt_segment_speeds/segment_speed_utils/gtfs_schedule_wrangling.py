@@ -240,9 +240,10 @@ def standardize_route_id(
     return word
 
 
-def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
+def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame:
     """
     Find shape_id with most trips for that route-direction.
+    Merge in shape geometry.
     """
     route_dir_cols = ["gtfs_dataset_key", "route_id", "direction_id"]
     
@@ -255,7 +256,6 @@ def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
         columns = keep_trip_cols,
         get_pandas = True
     ).rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})                 
-    
     sorting_order = [True for i in route_dir_cols]
     
     most_common_shape = (
@@ -273,7 +273,19 @@ def most_common_shape_by_route_direction(analysis_date: str) -> pd.DataFrame:
         "shape_id": "common_shape_id"
     })  
     
-    return most_common_shape
+    shape_geom = helpers.import_scheduled_shapes(
+        analysis_date,
+        columns = ["shape_array_key", "geometry"],
+    )
+    
+    common_shape_geom = pd.merge(
+        shape_geom,
+        most_common_shape,
+        on = "shape_array_key",
+        how = "inner"
+    ).drop(columns = "shape_array_key")
+    
+    return common_shape_geom
     
     
 def gtfs_segments_rename_cols(

@@ -8,7 +8,11 @@ import sys
 
 from dask import delayed, compute
 from loguru import logger
+from pathlib import Path
+from typing import Literal
 
+from calitp_data_analysis.geography_utils import WGS84
+from calitp_data_analysis import utils
 from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
                                  segment_calcs, time_helpers)
 from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
@@ -25,7 +29,7 @@ SHAPE_STOP_COLS = [
     "shape_array_key", "shape_id", "stop_sequence",
 ]
 
-STOP_PAIR_COLS = ["shape_stop_pair"] # should we include stop_id?
+STOP_PAIR_COLS = ["stop_pair"] 
 
 ROUTE_DIR_COLS = [
     "route_id", "direction_id"
@@ -57,85 +61,60 @@ def merge_operator_identifiers(
     )
     
     return df
-    
-    
 
-def weighted_average_speeds_across_segments(
-    df: pd.DataFrame,
-    group_cols: list
-) -> pd.DataFrame: 
-    """
-    We can use our segments and the deltas within a trip
-    to calculate the trip-level average speed, or
-    the route-direction-level average speed.
-    But, we want a weighted average, using the raw deltas
-    instead of mean(speed_mph), since segments can be varying lengths.
-    """
-    avg_speeds_peak = (df.groupby(group_cols + ["peak_offpeak"], 
-                      observed=True, group_keys=False)
-           .agg({
-               "meters_elapsed": "sum",
-               "sec_elapsed": "sum",
-           }).reset_index()
-          )
-    
-    avg_speeds_peak = segment_calcs.speed_from_meters_elapsed_sec_elapsed(
-        avg_speeds_peak)
-    
-    avg_speeds_allday = (df.groupby(group_cols, 
-                                    observed=True, group_keys=False)
-                         .agg({
-                             "meters_elapsed": "sum",
-                             "sec_elapsed": "sum",
-                         }).reset_index()
-                        )
-    
-    avg_speeds_allday = segment_calcs.speed_from_meters_elapsed_sec_elapsed(
-        avg_speeds_allday).assign(
-        peak_offpeak = "all_day"
-    )
-    
-    avg_speeds = pd.concat(
-        [avg_speeds_peak, avg_speeds_allday],
-        axis=0, ignore_index = True
-    ).rename(
-        columns = {"peak_offpeak": "time_period"}
-    )
-    
-    return avg_speeds
-    
 
-def concatenate_peak_offpeak_allday_averages(
-    df: pd.DataFrame, 
-    group_cols: list
-):
+def import_segments(
+    analysis_date: str,
+    segment_type: Literal["stop_segments", "rt_stop_times"]
+) -> gpd.GeoDataFrame:
     """
+    Import the segments to merge.
+    For stop_segments, import only 1 trip per shape for segments, and merge
+    on shape_array_key and stop_pair.
+    For rt_stop_times, import all trips with their segments, and merge on 
+    trip_instance_key and stop_pair.
     """
-    avg_speeds_peak = segment_calcs.calculate_avg_speeds(
-        df,
-        group_cols + ["peak_offpeak"]
-    )
+    SEGMENT_FILE = f"segment_options/stop_segments_{analysis_date}.parquet"
     
-    avg_speeds_allday = segment_calcs.calculate_avg_speeds(
-        df,
-        group_cols
-    ).assign(peak_offpeak = "all_day")
+    keep_cols = [
+        "shape_array_key", "stop_pair", 
+        "schedule_gtfs_dataset_key", "route_id", "direction_id",
+        "geometry"
+    ]
     
-    # Concatenate so that every segment has 3 time periods: peak, offpeak, and all_day
-    avg_speeds = pd.concat(
-        [avg_speeds_peak, avg_speeds_allday], 
-        axis=0, ignore_index = True
-    ).rename(
-        columns = {"peak_offpeak": "time_period"}
-    )
+    if segment_type == "stop_segments":
+        subset_trips = pd.read_parquet(
+            f"{SEGMENT_GCS}segment_options/"
+            f"shape_stop_segments_{analysis_date}.parquet",
+            columns = ["st_trip_instance_key"]
+        ).st_trip_instance_key.unique()
         
-    return avg_speeds
+        gdf = gpd.read_parquet(
+            f"{SEGMENT_GCS}{SEGMENT_FILE}",
+            columns = keep_cols,
+            filters = [[("trip_instance_key", "in", subset_trips)]],
+        ).to_crs(WGS84) 
+        
+        
+    elif segment_type == "rt_stop_times":
+        gdf = gpd.read_parquet(
+            f"{SEGMENT_GCS}{SEGMENT_FILE}",
+            columns = keep_cols,
+        ).to_crs(WGS84)
+
+    return gdf
 
 
 def concatenate_trip_segment_speeds(
     analysis_date_list: list,
     dict_inputs: dict
 ) -> pd.DataFrame:
+    """
+    Concatenate the speed-trip parquets together, 
+    whether it's for single day or multi-day averages.
+    Add columns for peak_offpeak, weekday_weekend based 
+    on day of week and time-of-day.
+    """
     SPEED_FILE = dict_inputs["stage4"]
     MAX_SPEED = dict_inputs["max_speed"]
     
@@ -162,11 +141,15 @@ def concatenate_trip_segment_speeds(
     
     
 def single_day_averages(analysis_date: str, dict_inputs: dict):
-    
-    SHAPE_SEG_FILE = dict_inputs["shape_stop_single_segment"]
-    ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
-    TRIP_FILE = dict_inputs["trip_speeds_single_summary"]
-    ROUTE_DIR_FILE = dict_inputs["route_dir_single_summary"]
+    """
+    Main function for calculating average speeds.
+    Start from single day segment-trip speeds and 
+    aggregate by peak_offpeak, weekday_weekend.
+    """
+    SHAPE_SEG_FILE = Path(dict_inputs["shape_stop_single_segment"])
+    ROUTE_SEG_FILE = Path(dict_inputs["route_dir_single_segment"])
+    TRIP_FILE = Path(dict_inputs["trip_speeds_single_summary"])
+    ROUTE_DIR_FILE = Path(dict_inputs["route_dir_single_summary"])
     
     start = datetime.datetime.now()
     
@@ -174,44 +157,77 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     print("concatenated files")   
     
     t0 = datetime.datetime.now()
-    shape_stop_segments = concatenate_peak_offpeak_allday_averages(
+    shape_stop_segments = segment_calcs.concatenate_peak_offpeak_allday_averages(
         df, 
         OPERATOR_COLS + SHAPE_STOP_COLS + STOP_PAIR_COLS
     ).pipe(
         merge_operator_identifiers, [analysis_date]
     )
     
-    shape_stop_segments.to_parquet(
-        f"{SEGMENT_GCS}{SHAPE_SEG_FILE}_{analysis_date}.parquet"
+    col_order = [c for c in shape_stop_segments.columns]
+    
+    segment_geom = import_segments(analysis_date, "stop_segments")
+    
+    shape_stop_segments = pd.merge(
+        segment_geom,
+        shape_stop_segments,
+        on = OPERATOR_COLS + ["shape_array_key"] + STOP_PAIR_COLS, 
+    ).reset_index(drop=True).reindex(
+        columns = col_order + ["geometry"]
     )
-    del shape_stop_segments
+    
+    utils.geoparquet_gcs_export(
+        shape_stop_segments,
+        f"{SEGMENT_GCS}{str(SHAPE_SEG_FILE.parent)}/",
+        f"{SHAPE_SEG_FILE.stem}_{analysis_date}"
+    )
+    
+    del shape_stop_segments, segment_geom
     
     t1 = datetime.datetime.now()
     logger.info(f"shape seg avg {t1 - t0}")
     
-    route_dir_segments = concatenate_peak_offpeak_allday_averages(
+    route_dir_segments = segment_calcs.concatenate_peak_offpeak_allday_averages(
         df, 
         OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS
     ).pipe(
         merge_operator_identifiers, [analysis_date]
     )
     
-    route_dir_segments.to_parquet(
-        f"{SEGMENT_GCS}{ROUTE_SEG_FILE}_{analysis_date}.parquet"
+    col_order = [c for c in route_dir_segments.columns]
+    
+    segment_geom = (import_segments(analysis_date, "stop_segments")
+                    .drop(columns = "shape_array_key")
+                    .drop_duplicates()
+                   )
+
+    route_dir_segments = pd.merge(
+        segment_geom,
+        route_dir_segments,
+        on = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS, 
+    ).reset_index(drop=True).reindex(
+        columns = col_order + ["geometry"]
     )
-    del route_dir_segments
+    
+    utils.geoparquet_gcs_export(
+        route_dir_segments,
+        f"{SEGMENT_GCS}{str(ROUTE_SEG_FILE.parent)}/",
+        f"{ROUTE_SEG_FILE.stem}_{analysis_date}"
+    )
+    
+    del route_dir_segments, segment_geom
     
     t2 = datetime.datetime.now()
     logger.info(f"route dir seg avg {t2 - t1}")
     
-    trip_avg = weighted_average_speeds_across_segments(
+    trip_avg = segment_calcs.weighted_average_speeds_across_segments(
         df,
         OPERATOR_COLS + ROUTE_DIR_COLS + [
             "trip_instance_key", 
             "shape_array_key", "shape_id", "time_of_day"]
     ).pipe(
         merge_operator_identifiers, [analysis_date]
-    )
+    ).reset_index(drop=True)
     
     trip_avg.to_parquet(
         f"{SEGMENT_GCS}{TRIP_FILE}_{analysis_date}.parquet"
@@ -221,17 +237,34 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     t3 = datetime.datetime.now()
     logger.info(f"trip avg {t3 - t2}")
     
-    route_dir_avg = weighted_average_speeds_across_segments(
+    route_dir_avg = segment_calcs.weighted_average_speeds_across_segments(
         df,
         OPERATOR_COLS + ROUTE_DIR_COLS
     ).pipe(
         merge_operator_identifiers, [analysis_date]
     )
     
-    route_dir_avg.to_parquet(
-        f"{SEGMENT_GCS}{ROUTE_DIR_FILE}_{analysis_date}.parquet"
+    col_order = [c for c in route_dir_avg.columns]
+    
+    common_shape_geom = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
+        analysis_date).to_crs(WGS84)
+    
+    route_dir_avg = pd.merge(
+        common_shape_geom,
+        route_dir_avg,
+        on = OPERATOR_COLS + ROUTE_DIR_COLS,
+        how = "inner"
+    ).reset_index(drop=True).reindex(
+        columns = col_order + ["geometry"]
     )
-    del route_dir_avg
+    
+    utils.geoparquet_gcs_export(
+        route_dir_avg,
+        f"{SEGMENT_GCS}{str(ROUTE_DIR_FILE.parent)}/",
+        f"{ROUTE_DIR_FILE.stem}_{analysis_date}"
+    )
+    
+    del route_dir_avg, common_shape_geom
     
     t4 = datetime.datetime.now()
     logger.info(f"route dir avg: {t4 - t3}")
@@ -240,6 +273,14 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
 
 
 def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
+    """
+    Main function for calculating average speeds.
+    Start from single day segment-trip speeds and 
+    aggregate by peak_offpeak, weekday_weekend.
+    The main difference from a single day average is that
+    the seven days is concatenated first before averaging,
+    so that we get weighted averages.
+    """
     ROUTE_SEG_FILE = dict_inputs["route_dir_multi_summary"]
     ROUTE_DIR_FILE = dict_inputs["route_dir_multi_segment"]
         
@@ -250,7 +291,8 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     
     t0 = datetime.datetime.now()
         
-    route_dir_segments = delayed(concatenate_peak_offpeak_allday_averages)(
+    route_dir_segments = delayed(
+        segment_calcs.concatenate_peak_offpeak_allday_averages)(
         df, 
         OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"]
     )
@@ -271,7 +313,8 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     t1 = datetime.datetime.now()
     logger.info(f"route seg avg {t1 - t0}")
     
-    route_dir_avg = delayed(weighted_average_speeds_across_segments)(
+    route_dir_avg = delayed(
+        segment_calcs.weighted_average_speeds_across_segments)(
         df,
         OPERATOR_COLS + ROUTE_DIR_COLS + ["weekday_weekend"]
     )
@@ -296,7 +339,7 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
 
 if __name__ == "__main__":
     
-    from segment_speed_utils.project_vars import analysis_date_list
+    from segment_speed_utils.project_vars import analysis_date#analysis_date_list
     
     LOG_FILE = "../logs/avg_speeds.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -306,19 +349,20 @@ if __name__ == "__main__":
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
-    '''
-    for analysis_date in analysis_date_list:
+    
+    for analysis_date in [analysis_date]:
         
         start = datetime.datetime.now()
         single_day_averages(analysis_date, STOP_SEG_DICT)
         end = datetime.datetime.now()
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
+    
     '''
     start = datetime.datetime.now()
     multi_day_averages(analysis_date_list, STOP_SEG_DICT)
     end = datetime.datetime.now()
     
     logger.info(f"average rollups for {analysis_date_list}: {end - start}")
-
+    '''
     

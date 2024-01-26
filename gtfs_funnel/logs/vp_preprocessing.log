@@ -1,0 +1,8 @@
+2024-01-25 12:58:02.895 | INFO     | __main__:<module>:186 - 2023-12-13: condense vp for trip-direction 0:06:17.127762
+2024-01-25 13:09:11.256 | INFO     | __main__:<module>:194 - 2023-12-13: prepare vp to use in nearest neighbor: 0:11:08.360926
+2024-01-25 13:15:43.377 | INFO     | __main__:<module>:186 - 2023-11-15: condense vp for trip-direction 0:06:32.119567
+2024-01-25 13:27:16.897 | INFO     | __main__:<module>:194 - 2023-11-15: prepare vp to use in nearest neighbor: 0:11:33.520352
+2024-01-25 13:33:47.613 | INFO     | __main__:<module>:186 - 2023-10-11: condense vp for trip-direction 0:06:30.714860
+2024-01-25 13:45:08.728 | INFO     | __main__:<module>:194 - 2023-10-11: prepare vp to use in nearest neighbor: 0:11:21.115081
+2024-01-25 13:51:28.299 | INFO     | __main__:<module>:186 - 2023-09-13: condense vp for trip-direction 0:06:19.569858
+2024-01-25 14:20:34.069 | INFO     | __main__:<module>:143 - 2023-09-13: prepare vp to use in nearest neighbor: 0:10:58.447822
