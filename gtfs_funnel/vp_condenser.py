@@ -23,7 +23,7 @@ def condense_vp_to_linestring(
     """
     Turn vp (df with point geometry) into a condensed 
     linestring version.
-    We will group by trip and direction and save out 
+    We will group by trip and save out 
     the vp point geom into a shapely.LineString.
     """
     USABLE_VP = dict_inputs["usable_vp_file"]
@@ -51,15 +51,15 @@ def condense_vp_to_linestring(
 
     vp_condensed = vp_gdf.map_partitions(
         vp_transform.condense_point_geom_to_line,
-        group_cols = ["trip_instance_key", "vp_primary_direction"],
+        group_cols = ["trip_instance_key"],
         geom_col = "geometry",
-        other_cols = ["vp_idx", "location_timestamp_local"],
+        other_cols = ["vp_idx", "location_timestamp_local", "vp_primary_direction"],
         meta = {
             "trip_instance_key": "object",
-            "vp_primary_direction": "object",
             "geometry": "geometry",
             "vp_idx": "object",
-            "location_timestamp_local": "object"
+            "location_timestamp_local": "object",
+            "vp_primary_direction": "object",
         },
         align_dataframes = False
     ).compute().set_geometry("geometry").set_crs(WGS84)
@@ -70,11 +70,20 @@ def condense_vp_to_linestring(
         f"{EXPORT_FILE}_{analysis_date}"
     )
     
+    del vp_condensed
+    
     return 
 
 
 def prepare_vp_for_all_directions(analysis_date: str) -> gpd.GeoDataFrame:
     """
+    For each direction, exclude one the opposite direction and
+    save out the arrays of valid indices.
+    Every trip will have 4 rows, 1 row corresponding to each direction.
+    
+    Ex: for a given trip's northbound points, exclude southbound vp.
+    Subset vp_idx, location_timestamp_local and coordinate arrays 
+    to exclude southbound.
     """
     vp = delayed(gpd.read_parquet)(
         f"{SEGMENT_GCS}condensed/vp_condensed_{analysis_date}.parquet",
@@ -83,7 +92,7 @@ def prepare_vp_for_all_directions(analysis_date: str) -> gpd.GeoDataFrame:
     dfs = [
         delayed(vp_transform.combine_valid_vp_for_direction)(
             vp, direction) 
-        for direction in wrangle_shapes.ALL_DIRECTIONS + ["Unknown"]
+        for direction in wrangle_shapes.ALL_DIRECTIONS
     ]
     
     results = [compute(i)[0] for i in dfs]
@@ -93,11 +102,15 @@ def prepare_vp_for_all_directions(analysis_date: str) -> gpd.GeoDataFrame:
         ["trip_instance_key", "vp_primary_direction"]
     ).reset_index(drop=True)
     
+    del results
+    
     utils.geoparquet_gcs_export(
         gdf,
         f"{SEGMENT_GCS}condensed/",
         f"vp_nearest_neighbor_{analysis_date}"
     )
+    
+    del gdf
    
     return 
 
@@ -116,7 +129,7 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
 
-        #condense_vp_to_linestring(analysis_date, CONFIG_DICT)
+        condense_vp_to_linestring(analysis_date, CONFIG_DICT)
         
         time1 = datetime.datetime.now()
         logger.info(
@@ -130,8 +143,4 @@ if __name__ == "__main__":
         logger.info(
             f"{analysis_date}: prepare vp to use in nearest neighbor: "
             f"{end - time1}"
-        ) 
-        logger.info(
-            f"{analysis_date}: vp condenser script execution time: "
-            f"{end - start}"
-        )        
+        )       

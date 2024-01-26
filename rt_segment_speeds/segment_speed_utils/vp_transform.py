@@ -97,78 +97,54 @@ def combine_valid_vp_for_direction(
     vp_condensed: gpd.GeoDataFrame, 
     direction: str
 ) -> gpd.GeoDataFrame:
-    # This is the df we will merge the valid vp from 
-    # 3 other directions against
-    vp_one_direction = vp_condensed[
-        vp_condensed.vp_primary_direction == direction][
-        ["trip_instance_key", "vp_primary_direction"]
-    ].drop_duplicates()
     
-    vp_valid = vp_condensed[vp_condensed.vp_primary_direction != 
-                  wrangle_shapes.OPPOSITE_DIRECTIONS[direction]]
+    opposite_direction = wrangle_shapes.OPPOSITE_DIRECTIONS[direction]
     
-    stacked_vp_idx = stack_column_by_trip(vp_valid, col = "vp_idx")
-    stacked_timestamps = stack_column_by_trip(
-        vp_valid, col = "location_timestamp_local")
-    stacked_coords = stack_linecoords_by_trip(vp_valid)
+    coords_series = []
+    vp_idx_series = []
+    timestamp_series = []
     
-    vp_valid2 = pd.merge(
-        stacked_vp_idx,
-        stacked_coords,
-        on = "trip_instance_key",
-        how = "inner"
-    ).merge(
-        stacked_timestamps,
-        on = "trip_instance_key",
-        how = "inner"
-    )
-    
-    sorted_vp = []
-    sorted_geom = []
-    sorted_timestamps = []
-    
-    for row in vp_valid2.itertuples():
-        
-        vp_idx_array = getattr(row, "vp_idx")
-        geometry_array = getattr(row, "geometry_array")
-        timestamp_array = getattr(row, "location_timestamp_local")
-        
-        vp_sorted, geom_sorted, time_sorted = sort_by_vp_idx_order(
-            vp_idx_array, geometry_array, timestamp_array
-        )
-        sorted_vp.append(vp_sorted)
-        sorted_geom.append(geom_sorted)
-        sorted_timestamps.append(time_sorted)
+    for row in vp_condensed.itertuples():
+        vp_dir_arr = np.asarray(getattr(row, "vp_primary_direction"))
 
-    # Overwrite the vp_idx and geometry_array 
-    # with the sorted versions of the array
-    vp_valid2 = vp_valid2.assign(
-        geometry_array = sorted_geom,
-        vp_idx = sorted_vp,
-        location_timestamp_local = sorted_timestamps
-    )
+        # These are the valid index values where opposite direction 
+        # is excluded
+        valid_indices = (vp_dir_arr != opposite_direction).nonzero()
+        
+        # Subset all the other arrays to these indices
+        valid_vp_idx = np.asarray(getattr(row, "vp_idx"))[valid_indices]
+        vp_linestring = np.array(getattr(row, "geometry").coords)[valid_indices]
+
+        valid_timestamps = np.asarray(
+            getattr(row, "location_timestamp_local"))[valid_indices]
+                
+        if len(vp_linestring) > 1:
+            valid_vp_line = shapely.LineString([shapely.Point(p) 
+                                                for p in vp_linestring])
+        elif len(vp_linestring) == 1:
+            valid_vp_line = shapely.Point([p for p in vp_linestring])
+        else:
+            valid_vp_line = shapely.LineString()
+        
+        coords_series.append(valid_vp_line)
+        vp_idx_series.append(valid_vp_idx)
+        timestamp_series.append(valid_timestamps)
     
-    del sorted_geom, sorted_vp, sorted_timestamps
     
-    vp_valid2 = vp_valid2.assign(
-        geometry = gpd.GeoSeries(
-            vp_valid2.apply(lambda x: shapely.LineString(
-                [p for p in x.geometry_array]), axis=1), 
-            crs = WGS84)
-    ).drop(columns = "geometry_array")
+    vp_one_direction = vp_condensed.assign(
+        vp_primary_direction = direction,
+        geometry = gpd.GeoSeries(valid_vp_line, crs = WGS84),
+        vp_idx = vp_idx_series,
+        location_timestamp_local = timestamp_series,
+    )[["trip_instance_key", "vp_primary_direction", 
+       "geometry", "vp_idx", "location_timestamp_local"]]
     
-    # Merge results back onto original trip info for that direction
-    df = pd.merge(
-        vp_one_direction,
-        vp_valid2,
-        on = "trip_instance_key",
-        how = "inner"
-    ).reset_index(drop=True)
+    del vp_condensed
     
     gdf = gpd.GeoDataFrame(
-        df, geometry = "geometry", crs = WGS84
+        vp_one_direction, 
+        geometry = "geometry", 
+        crs = WGS84
     )
     
     return gdf
-    
-    

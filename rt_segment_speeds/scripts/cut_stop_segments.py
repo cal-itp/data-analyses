@@ -13,8 +13,10 @@ import pandas as pd
 import sys
 
 from loguru import logger
+from pathlib import Path
 
 from calitp_data_analysis import utils
+from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               PROJECT_CRS, 
@@ -39,13 +41,13 @@ def stop_times_with_shape(
         filters = [[("trip_instance_key", "in", rt_trips)]],
         with_direction = True,
         get_pandas = False,
-        crs = "EPSG:4326"
+        crs = WGS84
     )
     
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
         columns = ["shape_array_key", "geometry"],
-        crs = "EPSG:4326",
+        crs = WGS84,
         get_pandas = True
     ).dropna(subset="geometry")
     
@@ -98,10 +100,15 @@ def cut_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
         gtfs_schedule_wrangling.gtfs_segments_rename_cols,
         natural_identifier = False
     ).set_geometry("geometry")
-      .set_crs("EPSG:4326")
+     .set_crs(WGS84)
      .to_crs(PROJECT_CRS)
      .compute()
      )
+    
+    # Add stop_pair now
+    segments = segments.assign(
+        stop_pair = segments.stop_id1 + "__" + segments.stop_id2
+    )
     
     return segments
     
@@ -116,21 +123,35 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")    
     
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    EXPORT_FILE = STOP_SEG_DICT["segments_file"]
+    RT_DICT = helpers.get_parameters(CONFIG_PATH, "rt_stop_times")
     
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
-
+        
+        SEGMENT_FILE = Path(RT_DICT["segments_file"])        
+        
         segments = cut_stop_segments(analysis_date)
         
-        utils.geoparquet_gcs_export(
-            segments,
-            SEGMENT_GCS,
-            f"{EXPORT_FILE}_{analysis_date}"
+        shape_to_route = helpers.import_scheduled_trips(
+            analysis_date,
+            columns = ["gtfs_dataset_key", "shape_array_key", 
+                       "route_id", "direction_id"]
         )
         
-        del segments
+        segments = pd.merge(
+            segments,
+            shape_to_route,
+            on = "shape_array_key",
+            how = "inner"
+        )
+                
+        utils.geoparquet_gcs_export(
+            segments,
+            f"{SEGMENT_GCS}{str(SEGMENT_FILE.parent)}/",
+            f"{SEGMENT_FILE.stem}_{analysis_date}"
+        )    
+        
+        del segments, shape_to_route
     
         end = datetime.datetime.now()
         logger.info(f"cut segments {analysis_date}: {end - start}")
