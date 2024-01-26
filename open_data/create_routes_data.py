@@ -95,7 +95,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         'organization_source_record_id', 'organization_name',
         'route_id', 'route_type', 'route_name_used']
     shape_cols = ['shape_id', 'n_trips']
-    agency_ids = ['base64_url', 'uri']
+    agency_ids = ['base64_url']
     
     col_order = route_cols + shape_cols + agency_ids + ['geometry']
     df2 = (df[col_order]

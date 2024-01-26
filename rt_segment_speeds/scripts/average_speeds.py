@@ -343,7 +343,6 @@ def stage_open_data_exports(analysis_date: str, dict_inputs: dict):
     export them to a stable GCS URL so we can always 
     read it in open_data/catalog.yml.
     """
-    
     datasets = [
         dict_inputs["route_dir_single_segment"],
         dict_inputs["route_dir_single_summary"]
@@ -360,6 +359,8 @@ def stage_open_data_exports(analysis_date: str, dict_inputs: dict):
             f"{Path(d).stem}"
         )
         del gdf
+    
+    print(f"overwrite {datasets}")
     
     return
         

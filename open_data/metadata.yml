@@ -121,7 +121,7 @@ tables:
 
   - dataset_name: speeds_by_stop_segments
     publish_entity: *publish_entity
-    summary_purpose: "All day and peak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data."
+    summary_purpose: "Average all-day, peak, and offpeak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data."
     description: |-
         All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.
     public_access: *public_access
@@ -144,9 +144,9 @@ tables:
   - dataset_name: speeds_by_route_time_of_day
     publish_entity: *publish_entity
     summary_purpose: |-
-        Average transit speeds by route-direction and time-of-day estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.
+        Average transit speeds by route-direction estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.
     description: |-
-        Provide average transit speeds, number of trips, and metrics related to scheduled annd real-time service minutes by route-direction and time-of-day.
+        Provide average transit speeds, number of trips, and metrics related to scheduled annd real-time service minutes by route-direction.
     public_access: *public_access
     creation_date: "2023-06-14"
     place: *place
