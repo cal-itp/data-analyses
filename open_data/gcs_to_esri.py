@@ -14,6 +14,7 @@ from loguru import logger
 
 import open_data
 from calitp_data_analysis import utils, geography_utils
+from shared_utils import portfolio_utils
 from update_vars import analysis_date
 
 catalog = intake.open_catalog("./catalog.yml")
@@ -22,9 +23,18 @@ def standardize_column_names(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Standardize how agency is referred to.
     """
+    RENAME_DICT = {
+        "caltrans_district": "district_name"
+    }
+    # these rename hqta datasets
+    # agency_name_primary, agency_name_secondary, etc
     df.columns = df.columns.str.replace('agency_name', 'agency')
     
+    df = df.rename(columns = RENAME_DICT)
+    df
+    
     return df
+
 
 def remove_internal_keys(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
@@ -32,8 +42,11 @@ def remove_internal_keys(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Leave only natural identifiers (route_id, shape_id).
     Remove shape_array_key, gtfs_dataset_key, etc.
     """
+    exclude_list = ["sec_elapsed", "meters_elapsed"]
     cols = [c for c in df.columns]
-    internal_cols = [c for c in cols if "_key" in c]
+    
+    internal_cols = [c for c in cols if "_key" in c or c in exclude_list] 
+    
     print(f"drop: {internal_cols}")
     
     return df.drop(columns = internal_cols)
