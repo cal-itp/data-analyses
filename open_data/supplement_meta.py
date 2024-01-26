@@ -41,6 +41,7 @@ RENAME_HQTA = {
 RENAME_SPEED = {
     "stop_seque": "stop_sequence",
     "time_of_da": "time_of_day",
+    "time_perio": "time_period",
     "district_n": "district_name",
     "direction_": "direction_id",
     "common_sha": "common_shape_id",
