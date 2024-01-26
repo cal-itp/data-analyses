@@ -106,23 +106,11 @@ def add_common_shape(analysis_date: str):
     and attach that shape geometry
     """
     common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
-        analysis_date)
-    
-    shapes = helpers.import_scheduled_shapes(
-        analysis_date, 
-        columns = ["shape_array_key", "geometry"],
-        crs = WGS84,
-        get_pandas = True
-    ).pipe(helpers.remove_shapes_outside_ca)
-    
-    shapes_with_geom = pd.merge(
-        shapes,
-        common_shape,
-        on = "shape_array_key",
-        how = "inner"
+        analysis_date).pipe(
+        helpers.remove_shapes_outside_ca
     )
     
-    return shapes_with_geom
+    return common_shape
     
     
 def pop_density_by_shape(shape_df: gpd.GeoDataFrame):
