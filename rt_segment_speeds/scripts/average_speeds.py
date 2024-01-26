@@ -57,7 +57,7 @@ def merge_operator_identifiers(
     )
     
     return df
-    
+
     
 def weighted_average_speeds_across_segments(
     df: pd.DataFrame,
