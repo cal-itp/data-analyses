@@ -24,7 +24,9 @@ def standardize_column_names(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Standardize how agency is referred to.
     """
     RENAME_DICT = {
-        "caltrans_district": "district_name"
+        "caltrans_district": "district_name",
+        "organization_source_record_id": "org_id",
+        "organization_name": "org_name"
     }
     # these rename hqta datasets
     # agency_name_primary, agency_name_secondary, etc
@@ -42,7 +44,10 @@ def remove_internal_keys(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Leave only natural identifiers (route_id, shape_id).
     Remove shape_array_key, gtfs_dataset_key, etc.
     """
-    exclude_list = ["sec_elapsed", "meters_elapsed"]
+    exclude_list = [
+        "sec_elapsed", "meters_elapsed", 
+        "name" #schedule_gtfs_dataset_name
+    ]
     cols = [c for c in df.columns]
     
     internal_cols = [c for c in cols if "_key" in c or c in exclude_list] 

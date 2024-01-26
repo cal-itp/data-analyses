@@ -82,11 +82,6 @@ def export_fgdc_metadata(one_feature_class):
     )
     print(f"Exported FGDC XML for {one_feature_class}")
     
-    
-'''
-for f in in_features:
-    export_fgdc_metadata(f)
-'''
 
 ## Do field data dictionary updates in Jupyter Hub
 
@@ -202,17 +197,24 @@ def update_feature_class_with_json(one_feature_class, meta_json_dict: dict):
     
     # Sync with FGDC metadata 
     # (this is on the one_feature_class, which sits outside of staging/)
-    import_fgdc_metadata_and_sync(one_feature_class)
+    #import_fgdc_metadata_and_sync(one_feature_class)
     
     # Now update the rest of the metadata elements
     update_metadata_class(this_feature_class, subset_meta_dict)
 
     return
 
-    
+ 
 for f in in_features:
     update_feature_class_with_json(f, meta_dict)
 
+
+'''
+# if there are updates to data_dictionary.yml, this needs to be run
+# so fields reflect new definitions.
+for f in in_features:
+    export_fgdc_metadata(f)
+'''
     
 ## (3) Export metadata associated with file gdb feature class in ISO19139 format    
 for f in in_features:
