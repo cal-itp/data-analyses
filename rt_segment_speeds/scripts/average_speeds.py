@@ -255,7 +255,7 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
         on = OPERATOR_COLS + ROUTE_DIR_COLS,
         how = "inner"
     ).reset_index(drop=True).reindex(
-        columns = col_order + ["geometry"]
+        columns = col_order + ["route_name", "geometry"]
     )
     
     utils.geoparquet_gcs_export(

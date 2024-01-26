@@ -5,65 +5,34 @@
 			<citeinfo>
 				<title>speeds_by_stop_segments</title>
 				<geoform>vector digital data</geoform>
-				<pubinfo>
-					<publish>Caltrans</publish>
-				</pubinfo>
-				<onlink>https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/README.md</onlink>
 			</citeinfo>
 		</citation>
 		<descript>
 			<abstract>All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</abstract>
-			<purpose>All day and peak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data.</purpose>
+			<purpose>Average all-day, peak, and offpeak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data.</purpose>
 		</descript>
-		<status>
-			<progress>Complete</progress>
-			<update>Monthly</update>
-		</status>
-		<spdom>
-			<bounding>
-				<westbc>-124.226362</westbc>
-				<eastbc>-114.562623</eastbc>
-				<northbc>41.957893</northbc>
-				<southbc>32.542091</southbc>
-			</bounding>
-		</spdom>
 		<keywords>
 			<theme>
 				<themekt>None</themekt>
-				<themekey>transportation</themekey>
-			</theme>
-			<theme>
-				<themekt>ISO 19115 Topic Categories</themekt>
-				<themekey>transportation</themekey>
+				<themekey>Transportation</themekey>
+				<themekey>Transit</themekey>
+				<themekey>GTFS</themekey>
+				<themekey>GTFS RT</themekey>
+				<themekey>real time</themekey>
+				<themekey>speeds</themekey>
+				<themekey>vehicle positions</themekey>
 			</theme>
 		</keywords>
 		<accconst>None</accconst>
 		<useconst>Public.</useconst>
-		<ptcontac>
-			<cntinfo>
-				<cntorgp>
-					<cntorg>Caltrans</cntorg>
-					<cntper>Tiffany Ku / Eric Dasmalchi</cntper>
-				</cntorgp>
-				<cntpos>Data &amp; Digital Services / California Integrated Travel Project</cntpos>
-				<cntemail>tiffany.ku@dot.ca.gov / eric.dasmalchi@dot.ca.gov</cntemail>
-			</cntinfo>
-		</ptcontac>
 		<native>Esri ArcGIS 12.9.2.32739</native>
 	</idinfo>
-	<dataqual>
-		<lineage>
-			<procstep>
-				<procdesc>This data was estimated by combining GTFS real-time vehicle positions to GTFS scheduled trips, shapes, stops, and stop times tables. GTFS shapes provides the route alignment path. Multiple trips may share the same shape, with a route typically associated with multiple shapes. Shapes are cut into segments at stop positions (stop_id-stop_sequence combination). A `stop segment` refers to the portion of shapes between the prior stop and the current stop. Vehicle positions are spatially joined to 35 meter buffered segments. Within each segment-trip, the first and last vehicle position observed are used to calculate the speed. Since multiple trips may occur over a segment each day, the multiple trip speeds provide a distribution. From this distribution, the 20th percentile, 50th percentile (median), and 80th percentile speeds are calculated. For all day speed metrics, all trips are used. For peak speed metrics, only trips with start times between 7 - 9:59 AM and 4 - 7:59 PM are used to find the 20th, 50th, and 80th percentile metrics. Data processing notes: (a) GTFS RT trips whose vehicle position timestamps span 10 minutes or less are dropped. Incomplete data would lead to unreliable estimates of speed at the granularity we need. (b) Segment-trip speeds of over 70 mph are excluded. These are erroneously calculated as transit does not typically reach those speeds. (c) Other missing or erroneous calculations, either arising from only one vehicle position found in a segment (change in time or change in distance cannot be calculated).</procdesc>
-			</procstep>
-		</lineage>
-	</dataqual>
 	<spdoinfo>
 		<direct>Vector</direct>
 		<ptvctinf>
 			<sdtsterm>
 				<sdtstype>String</sdtstype>
-				<ptvctcnt>275372</ptvctcnt>
+				<ptvctcnt>0</ptvctcnt>
 			</sdtsterm>
 		</ptvctinf>
 	</spdoinfo>
@@ -105,39 +74,44 @@
 				<attrdef>Organization identifier for the agency</attrdef>
 			</attr>
 			<attr>
-				<attrlabl>shape_id</attrlabl>
-				<attrdef>Identifies a shape</attrdef>
-				<attrdefs>https://gtfs.org/schedule/reference/#shapestxt</attrdefs>
+				<attrlabl>route_id</attrlabl>
+				<attrdef>Identifies a route</attrdef>
+				<attrdefs>https://gtfs.org/schedule/reference/#routestxt</attrdefs>
 			</attr>
 			<attr>
-				<attrlabl>stop_sequence</attrlabl>
-				<attrdef>Order of stops for a particular trip. The values must increase along the trip but do not need to be consecutive.</attrdef>
-				<attrdefs>https://gtfs.org/schedule/reference/#stop_timestxt</attrdefs>
+				<attrlabl>direction_id</attrlabl>
+				<attrdef>Indicates the direction of travel for a trip. This field should not be used in routing; it provides a way to separate trips by direction when publishing time tables. Valid options are
+  0 - Travel in one direction (e.g. outbound travel).
+  1 - Travel in the opposite direction (e.g. inbound travel).</attrdef>
+				<attrdefs>https://gtfs.org/schedule/reference/#tripstxt</attrdefs>
 			</attr>
 			<attr>
-				<attrlabl>stop_id</attrlabl>
-				<attrdef>Identifies a stop, station, or station entrance</attrdef>
-				<attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+				<attrlabl>stop_pair</attrlabl>
+				<attrdef>A pair of stops. Identifies the current stop_id and the subsequent stop_id. The stop pair value is created internally by concatenating two stop ids with double underscores.</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>p20_mph</attrlabl>
-				<attrdef>The 20th percentile speed (mph) for all trips associated with the shape_id and time_of_day.</attrdef>
+				<attrdef>The 20th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>p50_mph</attrlabl>
-				<attrdef>The 50th percentile speed (mph) for all trips associated with the shape_id and time_of_day.</attrdef>
+				<attrdef>The 50th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>p80_mph</attrlabl>
-				<attrdef>The 80th percentile speed (mph) for all trips associated with the shape_id and time_of_day.</attrdef>
+				<attrdef>The 80th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>n_trips</attrlabl>
 				<attrdef>The number of trips used to find the 20th, 50th, and 80th percentile speeds within the segment.</attrdef>
 			</attr>
 			<attr>
-				<attrlabl>time_of_day</attrlabl>
-				<attrdef>The time of day period that provides the 20th, 50th, and 80th percentile speeds. Valid values are all_day and peak.</attrdef>
+				<attrlabl>time_period</attrlabl>
+				<attrdef>The time period over which the metric is calculated. Valid options are
+  offpeak - offpeak hours are 12am-6:59am inclusive, 10am-2:59pm inclusive, and 8pm-11:59pm inclusive.
+  peak - peak hours are 7am-9:59am inclusive and 3pm-7:59pm inclusive.
+  all_day </attrdef>
+				<attrdefs>https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/segment_speed_utils/time_helpers.py</attrdefs>
 			</attr>
 			<attr>
 				<attrlabl>base64_url</attrlabl>
@@ -150,7 +124,7 @@
 		</detailed>
 	</eainfo>
 	<metainfo>
-		<metd>20231013</metd>
+		<metd>20240126</metd>
 		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
 		<metstdv>FGDC-STD-001-1998</metstdv>
 		<mettc>local time</mettc>

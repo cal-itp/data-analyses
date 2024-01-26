@@ -146,7 +146,7 @@ tables:
     summary_purpose: |-
         Average transit speeds by route-direction estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.
     description: |-
-        Provide average transit speeds, number of trips, and metrics related to scheduled annd real-time service minutes by route-direction.
+        Provide average transit speeds, number of trips by route-direction.
     public_access: *public_access
     creation_date: "2023-06-14"
     place: *place
