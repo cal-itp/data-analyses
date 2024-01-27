@@ -3,8 +3,8 @@
 ## Datasets
 * FTA Bus and Low- and No-Emission Grant Awards
 * TIRCP Project List
-* DGS Usage Reports (via Rebel)
-* Washington and Georgia Contract list (via Rebel)
+* (upcoming) DGS Usage Reports (via Rebel)
+* (upcoming )Washington and/or Georgia Contract list (via Rebel)
 
 ## GH issue
 Research Request - Bus Procurement Costs & Awards #897
@@ -19,5 +19,15 @@ Identify federal awards to fund bus purchases and how much agencies pay for them
     * count of buses
     * propulsion type of buses (zero/non-zero emission, BEB, FCEB, CNG etc)
     * bus type (standard, cutaway, articulated etc)
-- Combine datasets together, aggregate up by transit agency, calculate a "cost_per_bus" column.
-- Anylyze cost per bus for the different bus categories
+<br> </br>
+- Combine datasets together, aggregate up by transit agency, calculate a "cost_per_bus" (cpb) column.
+- Aggregate cpb by:
+    * transit agency
+    * propulsion type
+    * bus size type
+ <br></br> 
+ - Visualize aggregations on charts
+ - Calculate summary stats on cpb
+     * calculate mean, standard deviation
+     * calculate z-score. remove outliers
+     * plot distribution
