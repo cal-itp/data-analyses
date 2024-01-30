@@ -1,9 +1,9 @@
 2023-12-14 11:24:08.032 | INFO     | __main__:<module>:342 - Analysis date: 2023-12-13
 2023-12-14 11:30:59.475 | INFO     | __main__:find_nearest_vp_to_stop:280 - map partitions to transform vp: 0:06:51.416122
 2023-12-14 11:31:01.378 | INFO     | __main__:find_nearest_vp_to_stop:312 - map partitions to find nearest vp to stop: 0:00:01.903498
-2023-12-14 11:36:53.416 | INFO     | __main__:find_nearest_vp_to_stop:322 - execution time: 0:12:45.357638
-2024-01-23 13:20:29.631 | INFO     | __main__:nearest_neighbor_shape_segments:185 - nearest points for shape segments: 0:08:08.647055
-2024-01-23 13:28:37.977 | INFO     | __main__:nearest_neighbor_rt_stop_times:120 - nearest points for RT stop times: 0:08:03.546822
-2024-01-24 09:43:44.540 | INFO     | __main__:nearest_neighbor_shape_segments:200 - shape segments 2024-01-17: 0:08:33.397316
-2024-01-25 21:54:29.690 | INFO     | __main__:nearest_neighbor_shape_segments:203 - shape segments 2023-12-13: 0:07:26.752626
-2024-01-25 22:01:21.938 | INFO     | __main__:nearest_neighbor_shape_segments:203 - shape segments 2023-11-15: 0:06:50.375528
+2024-01-27 13:45:18.221 | INFO     | __main__:nearest_neighbor_shape_segments:203 - shape segments 2023-12-13: 0:11:38.045844
+2024-01-27 14:19:15.940 | INFO     | __main__:nearest_neighbor_shape_segments:206 - shape segments 2023-12-13: 0:11:37.741682
+2024-01-27 17:07:34.843 | INFO     | __main__:nearest_neighbor_shape_segments:204 - shape segments 2023-11-15: 0:12:02.309702
+2024-01-27 17:19:42.602 | INFO     | __main__:nearest_neighbor_rt_stop_times:136 - RT stop times 2023-11-15: 0:12:04.187679
+2024-01-27 17:46:11.054 | INFO     | __main__:nearest_neighbor_shape_segments:204 - shape segments 2023-10-11: 0:11:47.793159
+2024-01-27 17:58:02.005 | INFO     | __main__:nearest_neighbor_rt_stop_times:136 - RT stop times 2023-10-11: 0:11:47.705595
