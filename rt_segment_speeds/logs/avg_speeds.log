@@ -8,15 +8,9 @@
 2024-01-27 21:44:12.903 | INFO     | __main__:single_day_averages:238 - trip avg 0:00:01.982998
 2024-01-27 21:44:21.280 | INFO     | __main__:single_day_averages:270 - route dir avg: 0:00:08.377181
 2024-01-27 21:44:28.045 | INFO     | __main__:<module>:390 - average rollups for 2023-12-13: 0:01:40.228117
-2024-01-27 21:45:12.932 | INFO     | __main__:single_day_averages:188 - shape seg avg 0:00:41.758331
-2024-01-27 21:45:48.137 | INFO     | __main__:single_day_averages:221 - route dir seg avg 0:00:35.204837
-2024-01-27 21:45:50.070 | INFO     | __main__:single_day_averages:238 - trip avg 0:00:01.933541
-2024-01-27 21:46:00.256 | INFO     | __main__:single_day_averages:270 - route dir avg: 0:00:10.185598
-2024-01-27 21:46:05.578 | INFO     | __main__:<module>:390 - average rollups for 2023-11-15: 0:01:37.531698
-2024-01-27 21:46:46.405 | INFO     | __main__:single_day_averages:188 - shape seg avg 0:00:38.314198
-2024-01-27 21:47:21.999 | INFO     | __main__:single_day_averages:221 - route dir seg avg 0:00:35.594443
-2024-01-27 21:47:23.608 | INFO     | __main__:single_day_averages:238 - trip avg 0:00:01.609088
-2024-01-27 21:47:31.995 | INFO     | __main__:single_day_averages:270 - route dir avg: 0:00:08.386497
-2024-01-27 21:47:37.278 | INFO     | __main__:<module>:390 - average rollups for 2023-10-11: 0:01:31.698668
-2024-01-29 11:00:31.672 | INFO     | __main__:<module>:398 - average rollups for ['2023-10-09', '2023-10-10', '2023-10-12', '2023-10-11', '2023-10-13', '2023-10-14', '2023-10-15']: 0:01:46.542411
-2024-01-29 19:14:13.440 | INFO     | __main__:<module>:403 - average rollups for ['2023-04-10', '2023-04-11', '2023-04-12', '2023-04-13', '2023-04-14', '2023-04-15', '2023-04-16']: 0:01:43.827995
+2024-01-30 10:19:05.280 | INFO     | __main__:multi_day_averages:338 - route seg avg 0:02:47.182451
+2024-01-30 10:19:42.290 | INFO     | __main__:multi_day_averages:377 - route dir avg 0:00:37.010142
+2024-01-30 10:19:42.449 | INFO     | __main__:<module>:443 - average rollups for ['2023-04-10', '2023-04-11', '2023-04-12', '2023-04-13', '2023-04-14', '2023-04-15', '2023-04-16']: 0:03:24.353678
+2024-01-30 10:22:12.414 | INFO     | __main__:multi_day_averages:338 - route seg avg 0:02:29.962531
+2024-01-30 10:22:54.131 | INFO     | __main__:multi_day_averages:377 - route dir avg 0:00:41.717110
+2024-01-30 10:22:54.176 | INFO     | __main__:<module>:443 - average rollups for ['2023-10-09', '2023-10-10', '2023-10-11', '2023-10-12', '2023-10-13', '2023-10-14', '2023-10-15']: 0:03:11.725898
