@@ -16,6 +16,7 @@ import pandas as pd
 from pathlib import Path
 
 from calitp_data_analysis import utils
+from shared_utils import rt_dates
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
@@ -27,6 +28,16 @@ def select_one_trip_per_shape(analysis_date: str):
     Column called st_trip_instance_key will help us find
     which trip we chose for that shape_array_key.
     """
+    '''
+    analysis_date_dt = pd.to_datetime(analysis_date)
+    
+    if analysis_date_dt.day_name() != "Wednesday":
+        month = analysis_date_dt.month_name()[:3].lower()
+        year = analysis_date_dt.year
+        wednesday_date = rt_dates.DATES[f"{month}{year}"]
+    else:
+        wednesday_date = analysis_date
+    '''    
     stop_segments = gpd.read_parquet(
         f"{SEGMENT_GCS}segment_options/stop_segments_{analysis_date}.parquet"
     )
