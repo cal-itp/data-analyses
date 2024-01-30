@@ -1,1 +1,6 @@
 2024-01-24 17:15:10.165 | INFO     | __main__:calculate_speed_from_stop_arrivals:132 - speeds by segment: 2024-01-17: 0:00:25.610204
+2024-01-27 20:12:24.879 | INFO     | __main__:calculate_speed_from_stop_arrivals:132 - speeds by segment: 2023-12-13: 0:00:26.567386
+2024-01-27 20:12:50.577 | INFO     | __main__:calculate_speed_from_stop_arrivals:132 - speeds by segment: 2023-11-15: 0:00:25.530726
+2024-01-27 20:13:15.096 | INFO     | __main__:calculate_speed_from_stop_arrivals:132 - speeds by segment: 2023-10-11: 0:00:24.355903
+2024-01-28 15:12:19.958 | INFO     | __main__:calculate_speed_from_stop_arrivals:132 - speeds by segment: 2023-09-13: 0:00:21.749183
+2024-01-28 15:12:40.323 | INFO     | __main__:calculate_speed_from_stop_arrivals:132 - 
