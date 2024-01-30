@@ -28,6 +28,7 @@ build_quarterly_performance_metrics:
 	git add portfolio/sites/quarterly_performance_metrics.yml 
     
 build_ntd_report:
+	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	git rm portfolio/ntd_monthly_ridership/ -rf
 	python portfolio/portfolio.py clean ntd_monthly_ridership
 	cd ntd/ && python deploy_portfolio_yaml.py && cd ..   
