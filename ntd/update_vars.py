@@ -1,9 +1,13 @@
+import pandas as pd
+
+import ntd_dates
+
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
-YEAR = "2023"
-MONTH = "October"
-MONTH_CREATED = "2023-12"
-PUBLIC_FILENAME = f"{YEAR}_{MONTH}.zip"
+current_month = "nov2023"
+YEAR, MONTH = ntd_dates.parse_monthyear_string(current_month)
+PUBLIC_FILENAME = ntd_dates.get_public_filename(current_month)
+MONTH_CREATED = ntd_dates.DATES[current_month]
 
 NTD_MODES = {
     "CB": "Commuter Bus",
