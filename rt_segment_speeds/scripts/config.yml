@@ -15,7 +15,7 @@ stop_segments:
     max_speed: 80
 rt_stop_times:
     stage1: "vp_usable"
-    stage2: "nearest_vp_rt_stop_times"    
+    stage2: "nearest/nearest_vp_rt_stop_times"    
     segments_file: "segment_options/stop_segments"
 road_segments:
     stage1: "vp_usable"

@@ -281,8 +281,8 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     the seven days is concatenated first before averaging,
     so that we get weighted averages.
     """
-    ROUTE_SEG_FILE = dict_inputs["route_dir_multi_summary"]
-    ROUTE_DIR_FILE = dict_inputs["route_dir_multi_segment"]
+    ROUTE_SEG_FILE = Path(dict_inputs["route_dir_multi_summary"])
+    ROUTE_DIR_FILE = Path(dict_inputs["route_dir_multi_segment"])
         
     df = delayed(concatenate_trip_segment_speeds)(analysis_date_list, dict_inputs)
     print("concatenated files")   
@@ -367,7 +367,8 @@ def stage_open_data_exports(analysis_date: str, dict_inputs: dict):
 
 if __name__ == "__main__":
     
-    from segment_speed_utils.project_vars import analysis_date#analysis_date_list
+    from segment_speed_utils.project_vars import analysis_date_list
+    from shared_utils import rt_dates
     
     LOG_FILE = "../logs/avg_speeds.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -377,8 +378,7 @@ if __name__ == "__main__":
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
-    
-    for analysis_date in [analysis_date]:
+    for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
         
@@ -389,11 +389,16 @@ if __name__ == "__main__":
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
     
-    '''
-    start = datetime.datetime.now()
-    multi_day_averages(analysis_date_list, STOP_SEG_DICT)
-    end = datetime.datetime.now()
     
-    logger.info(f"average rollups for {analysis_date_list}: {end - start}")
-    '''
+    for month in ["apr2023", "oct2023"]:
+        start = datetime.datetime.now()
+        
+        one_week = [i for i in rt_dates.DATES.keys() if month in i]
+    
+        multi_day_averages(one_week, STOP_SEG_DICT)
+        end = datetime.datetime.now()
+    
+        logger.info(f"average rollups for {one_week}: {end - start}")
+    
+    
     

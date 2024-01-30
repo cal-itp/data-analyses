@@ -54,7 +54,7 @@ def interpolate_stop_arrivals(
     # Import nearest vp file, set to EPSG:3310 
     # to merge against scheduled shapes
     df = gpd.read_parquet(
-        f"{SEGMENT_GCS}nearest/{NEAREST_VP}.parquet",
+        f"{SEGMENT_GCS}{NEAREST_VP}.parquet",
     )
 
     df = df.assign(
