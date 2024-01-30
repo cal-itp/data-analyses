@@ -64,7 +64,7 @@ def merge_operator_identifiers(
 
 
 def import_segments(
-    analysis_date: str,
+    analysis_date_list: list,
     segment_type: Literal["stop_segments", "rt_stop_times"]
 ) -> gpd.GeoDataFrame:
     """
@@ -74,7 +74,7 @@ def import_segments(
     For rt_stop_times, import all trips with their segments, and merge on 
     trip_instance_key and stop_pair.
     """
-    SEGMENT_FILE = f"segment_options/stop_segments_{analysis_date}.parquet"
+    SEGMENT_FILE = "segment_options/stop_segments"
     
     keep_cols = [
         "shape_array_key", "stop_pair", 
@@ -83,24 +83,30 @@ def import_segments(
     ]
     
     if segment_type == "stop_segments":
-        subset_trips = pd.read_parquet(
-            f"{SEGMENT_GCS}segment_options/"
-            f"shape_stop_segments_{analysis_date}.parquet",
-            columns = ["st_trip_instance_key"]
-        ).st_trip_instance_key.unique()
         
-        gdf = gpd.read_parquet(
-            f"{SEGMENT_GCS}{SEGMENT_FILE}",
-            columns = keep_cols,
-            filters = [[("trip_instance_key", "in", subset_trips)]],
-        ).to_crs(WGS84) 
+        subset_trips = pd.concat([
+            pd.read_parquet(
+                f"{SEGMENT_GCS}segment_options/"
+                f"shape_stop_segments_{analysis_date}.parquet",
+                columns = ["st_trip_instance_key"]
+            ) for analysis_date in analysis_date_list
+        ], axis=0, ignore_index=True).st_trip_instance_key.unique()
         
+        gdf = pd.concat([
+            gpd.read_parquet(
+                f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
+                columns = keep_cols,
+                filters = [[("trip_instance_key", "in", subset_trips)]],
+            ).to_crs(WGS84) for analysis_date in analysis_date_list 
+        ], axis=0, ignore_index=True).drop_duplicates(subset=keep_cols)
         
     elif segment_type == "rt_stop_times":
-        gdf = gpd.read_parquet(
-            f"{SEGMENT_GCS}{SEGMENT_FILE}",
-            columns = keep_cols,
-        ).to_crs(WGS84)
+        gdf = pd.concat([
+            gpd.read_parquet(
+                f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
+                columns = keep_cols,
+            ).to_crs(WGS84) for analysis_date in analysis_date_list
+        ], axis=0, ignore_index=True).drop_duplicates(subset=keep_cols)
 
     return gdf
 
@@ -166,7 +172,7 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     
     col_order = [c for c in shape_stop_segments.columns]
     
-    segment_geom = import_segments(analysis_date, "stop_segments")
+    segment_geom = import_segments([analysis_date], "stop_segments")
     
     shape_stop_segments = pd.merge(
         segment_geom,
@@ -196,7 +202,7 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     
     col_order = [c for c in route_dir_segments.columns]
     
-    segment_geom = (import_segments(analysis_date, "stop_segments")
+    segment_geom = (import_segments([analysis_date], "stop_segments")
                     .drop(columns = "shape_array_key")
                     .drop_duplicates()
                    )
@@ -281,8 +287,8 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     the seven days is concatenated first before averaging,
     so that we get weighted averages.
     """
-    ROUTE_SEG_FILE = Path(dict_inputs["route_dir_multi_summary"])
-    ROUTE_DIR_FILE = Path(dict_inputs["route_dir_multi_segment"])
+    ROUTE_SEG_FILE = Path(dict_inputs["route_dir_multi_segment"])
+    ROUTE_DIR_FILE = Path(dict_inputs["route_dir_multi_summary"])
         
     df = delayed(concatenate_trip_segment_speeds)(analysis_date_list, dict_inputs)
     print("concatenated files")   
@@ -305,9 +311,27 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
         merge_operator_identifiers, analysis_date_list
     )
     
-    route_dir_segments.to_parquet(
-        f"{SEGMENT_GCS}{ROUTE_SEG_FILE}_{time_span_str}.parquet"
+    segment_geom = (import_segments(analysis_date_list, "stop_segments")
+                .drop(columns = "shape_array_key")
+                .drop_duplicates()
+               )
+    
+    col_order = [c for c in route_dir_segments.columns]
+    
+    route_dir_segments = pd.merge(
+        segment_geom,
+        route_dir_segments,
+        on = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS, 
+    ).reset_index(drop=True).reindex(
+        columns = col_order + ["geometry"]
     )
+    
+    utils.geoparquet_gcs_export(
+        route_dir_segments,
+        f"{SEGMENT_GCS}{str(ROUTE_SEG_FILE.parent)}/",
+        f"{ROUTE_SEG_FILE.stem}_{time_span_str}"
+    )
+    
     del route_dir_segments   
     
     t1 = datetime.datetime.now()
@@ -325,10 +349,28 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     ).pipe(
         merge_operator_identifiers, analysis_date_list
     )
-
-    route_dir_avg.to_parquet(
-        f"{SEGMENT_GCS}{ROUTE_DIR_FILE}_{time_span_str}.parquet"
+    
+    col_order = [c for c in route_dir_avg.columns]
+    
+    # Use Wednesday to select a shape
+    common_shape_geom = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
+        analysis_date_list[2]).to_crs(WGS84)
+    
+    route_dir_avg = pd.merge(
+        common_shape_geom,
+        route_dir_avg,
+        on = OPERATOR_COLS + ROUTE_DIR_COLS,
+        how = "inner"
+    ).reset_index(drop=True).reindex(
+        columns = col_order + ["route_name", "geometry"]
     )
+    
+    utils.geoparquet_gcs_export(
+        route_dir_avg,
+        f"{SEGMENT_GCS}{str(ROUTE_DIR_FILE.parent)}/",
+        f"{ROUTE_DIR_FILE.stem}_{time_span_str}"
+    )
+    
     del route_dir_avg
 
     t2 = datetime.datetime.now()
@@ -377,7 +419,7 @@ if __name__ == "__main__":
                level="INFO")
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
+    '''
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
@@ -388,12 +430,12 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
-    
+    '''
     
     for month in ["apr2023", "oct2023"]:
         start = datetime.datetime.now()
         
-        one_week = [i for i in rt_dates.DATES.keys() if month in i]
+        one_week = [v for k, v in rt_dates.DATES.items() if month in k]
     
         multi_day_averages(one_week, STOP_SEG_DICT)
         end = datetime.datetime.now()
