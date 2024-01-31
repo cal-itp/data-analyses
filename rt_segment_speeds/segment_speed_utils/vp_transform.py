@@ -47,37 +47,6 @@ def condense_point_geom_to_line(
     return df3
 
 
-def stack_column_by_trip(df: pd.DataFrame, col: str = "vp_idx") -> pd.DataFrame:
-    """
-    By trip_instance_key, concatenate all the values in a 
-    certain column (across multiple rows).
-    New column value holds an array with all the values.
-    """
-    return (df.groupby("trip_instance_key")
-            [col].apply(np.array)
-            .apply(np.concatenate)
-            .reset_index()
-           )
-
-def stack_linecoords_by_trip(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    By trip_instance_key, concatenate all the coordinates
-    in a shapely LineString and save it as an array.
-    We'll create a new (longer) linestring with it later.
-    """
-    df = df.assign(
-        geometry_array = df.apply(
-            lambda x: 
-            np.array([shapely.Point(p) for p in x.geometry.coords]), 
-            axis=1)
-    )
-    return (df.groupby("trip_instance_key")
-            .geometry_array.apply(np.array)
-            .apply(np.concatenate)
-            .reset_index()
-           )
-
-
 def sort_by_vp_idx_order(
     vp_idx_array: np.ndarray, 
     geometry_array: np.ndarray,
@@ -112,12 +81,14 @@ def combine_valid_vp_for_direction(
         valid_indices = (vp_dir_arr != opposite_direction).nonzero()
         
         # Subset all the other arrays to these indices
-        valid_vp_idx = np.asarray(getattr(row, "vp_idx"))[valid_indices]
-        vp_linestring = np.array(getattr(row, "geometry").coords)[valid_indices]
+        vp_idx_arr = np.asarray(getattr(row, "vp_idx"))
+        coords_arr = np.array(getattr(row, "geometry").coords)
 
-        valid_timestamps = np.asarray(
-            getattr(row, "location_timestamp_local"))[valid_indices]
-                
+        timestamp_arr = np.asarray(
+            getattr(row, "location_timestamp_local"))
+        
+        vp_linestring = coords_arr[valid_indices]
+
         if len(vp_linestring) > 1:
             valid_vp_line = shapely.LineString([shapely.Point(p) 
                                                 for p in vp_linestring])
@@ -127,24 +98,25 @@ def combine_valid_vp_for_direction(
             valid_vp_line = shapely.LineString()
         
         coords_series.append(valid_vp_line)
-        vp_idx_series.append(valid_vp_idx)
-        timestamp_series.append(valid_timestamps)
+        vp_idx_series.append(vp_idx_arr[valid_indices])
+        timestamp_series.append(timestamp_arr[valid_indices])
     
     
-    vp_one_direction = vp_condensed.assign(
+    vp_condensed = vp_condensed.assign(
         vp_primary_direction = direction,
-        geometry = gpd.GeoSeries(valid_vp_line, crs = WGS84),
+        geometry = coords_series,
         vp_idx = vp_idx_series,
         location_timestamp_local = timestamp_series,
     )[["trip_instance_key", "vp_primary_direction", 
-       "geometry", "vp_idx", "location_timestamp_local"]]
-    
-    del vp_condensed
+       "geometry", "vp_idx", "location_timestamp_local"]].reset_index(drop=True)
     
     gdf = gpd.GeoDataFrame(
-        vp_one_direction, 
+        vp_condensed, 
         geometry = "geometry", 
         crs = WGS84
     )
+    
+    del coords_series, vp_idx_series, timestamp_series
+    del vp_condensed
     
     return gdf

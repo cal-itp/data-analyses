@@ -18,18 +18,21 @@ from segment_speed_utils import helpers, neighbor
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
 
-def add_nearest_neighbor_result(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
+def add_nearest_neighbor_result(
+    gdf: gpd.GeoDataFrame, 
+    analysis_date: str
+) -> pd.DataFrame:
     """
     Add the nearest vp_idx. Also add and trio of be the boundary
     of nearest_vp_idx. Trio provides the vp_idx, timestamp,
     and vp coords we need to do stop arrival interpolation.
     """
-    # Use direction=Unknown because no directions are excluded.
-    vp_condensed = gpd.read_parquet(
+    # Grab vp_condensed, which contains all the coords for entire trip
+    vp_full = gpd.read_parquet(
         f"{SEGMENT_GCS}condensed/vp_condensed_{analysis_date}.parquet",
         columns = ["trip_instance_key", "vp_idx", 
                    "location_timestamp_local", 
-                  "geometry"]
+                   "geometry"]
     ).rename(columns = {
         "vp_idx": "trip_vp_idx",
         "geometry": "trip_geometry"
@@ -37,55 +40,63 @@ def add_nearest_neighbor_result(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
     
     gdf2 = pd.merge(
         gdf,
-        vp_condensed,
+        vp_full,
         on = "trip_instance_key",
         how = "inner"
     )
     
-    del vp_condensed
+    del vp_full, gdf
     
-    # np.vectorize seems to work here for a loop
-    nearest_vp_idx = np.vectorize(neighbor.add_nearest_vp_idx)( 
-        gdf2.geometry, gdf2.stop_geometry, gdf2.vp_idx
-    )
-        
-    gdf2 = gdf2.assign(
-        nearest_vp_idx = nearest_vp_idx,
-    ).drop(columns = ["vp_idx", "geometry"])
-        
+    nearest_vp_idx_series = []    
     vp_trio_series = []
     time_trio_series = []
     coords_trio_series = []
     
-    # don't think np.vectorize works well for returning arrays...
-    # need to find another method, so use itertuples here
+    # Iterate through and find the nearest_vp_idx, then surrounding trio
     for row in gdf2.itertuples():
-        nearest_value = getattr(row, "nearest_vp_idx")
+        nearest_vp = neighbor.add_nearest_vp_idx(
+            getattr(row, "geometry"),
+            getattr(row, "stop_geometry"),
+            getattr(row, "vp_idx")
+        )
+                
         vp_idx_arr = np.asarray(getattr(row, "trip_vp_idx"))
         timestamp_arr = np.asarray(getattr(row, "location_timestamp_local"))
         coords_arr = np.asarray(getattr(row, "trip_geometry").coords)
                 
         vp_trio, time_trio, coords_trio = neighbor.add_trio(
-            nearest_value, vp_idx_arr, timestamp_arr, coords_arr)
+            nearest_vp, 
+            np.asarray(getattr(row, "trip_vp_idx")),
+            np.asarray(getattr(row, "location_timestamp_local")),
+            np.array(getattr(row, "trip_geometry").coords),
+        )
         
+        nearest_vp_idx_series.append(nearest_vp)
         trio_line = shapely.LineString(coords_trio)
-        
         vp_trio_series.append(vp_trio)
         time_trio_series.append(time_trio)
         coords_trio_series.append(trio_line)
         
-    results = gdf2.assign(
+        
+    gdf2 = gdf2.assign(
+        nearest_vp_idx = nearest_vp_idx_series,
         vp_idx_trio = vp_trio_series,
         location_timestamp_local_trio = time_trio_series,
         vp_coords_trio = gpd.GeoSeries(coords_trio_series, crs = WGS84)
-    ).drop(columns = [
-        "trip_vp_idx", 
-        "location_timestamp_local", "trip_geometry"]
     )
     
-    del gdf, gdf2
+    drop_cols = [
+        "vp_idx", "geometry",
+        "location_timestamp_local",
+        "trip_vp_idx", "trip_geometry"
+    ]
     
-    return results
+    gdf2 = gdf2.drop(columns = drop_cols)
+    
+    del nearest_vp_idx_series, vp_trio_series
+    del time_trio_series, coords_trio_series
+    
+    return gdf2
     
 
 def nearest_neighbor_rt_stop_times(
@@ -98,14 +109,7 @@ def nearest_neighbor_rt_stop_times(
     """
     start = datetime.datetime.now()
     EXPORT_FILE = Path(f'{dict_inputs["stage2"]}')
-    
-    # Unknown directions can be done separately for origin stop
-    # we will use other methods to pare down the vp_idx 
-    # maybe based on min(vp_idx) to use as the max bound
-    vp = gpd.read_parquet(
-        f"{SEGMENT_GCS}condensed/vp_nearest_neighbor_{analysis_date}.parquet",
-    ).drop(columns = "location_timestamp_local")
-    
+        
     stop_times = helpers.import_scheduled_stop_times(
         analysis_date,
         columns = ["trip_instance_key", 
@@ -117,10 +121,10 @@ def nearest_neighbor_rt_stop_times(
         crs = WGS84
     )
         
-    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(stop_times, vp)
-    del vp, stop_times
-    
-    results = add_nearest_neighbor_result(gdf)
+    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(
+        stop_times, analysis_date)
+        
+    results = add_nearest_neighbor_result(gdf, analysis_date)
     
     utils.geoparquet_gcs_export(
         results,
@@ -151,13 +155,6 @@ def nearest_neighbor_shape_segments(
     EXPORT_FILE = Path(f'{dict_inputs["stage2"]}')
     SEGMENT_FILE = dict_inputs["segments_file"]
     
-    # Unknown directions can be done separately for origin stop
-    # we will use other methods to pare down the vp_idx 
-    # maybe based on min(vp_idx) to use as the max bound
-    vp = gpd.read_parquet(
-        f"{SEGMENT_GCS}condensed/vp_nearest_neighbor_{analysis_date}.parquet",
-    ).drop(columns = "location_timestamp_local")
-    
     subset_trips = pd.read_parquet(
         f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
         columns = ["st_trip_instance_key"]
@@ -187,12 +184,16 @@ def nearest_neighbor_shape_segments(
         on = "shape_array_key",
         how = "inner"
     )
-        
-    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(stop_times, vp)
-    del vp, stop_times
     
-    results = add_nearest_neighbor_result(gdf)
-
+    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(
+        stop_times, analysis_date)
+        
+    del stop_times, all_trips, stops_to_use
+     
+    results = add_nearest_neighbor_result(gdf, analysis_date)
+    
+    del gdf
+    
     utils.geoparquet_gcs_export(
         results,
         f"{SEGMENT_GCS}{str(EXPORT_FILE.parent)}/",
@@ -223,5 +224,5 @@ if __name__ == "__main__":
     
     for analysis_date in analysis_date_list:
         nearest_neighbor_shape_segments(analysis_date, STOP_SEG_DICT)
-        #nearest_neighbor_rt_stop_times(analysis_date, RT_STOP_TIMES_DICT)
+        nearest_neighbor_rt_stop_times(analysis_date, RT_STOP_TIMES_DICT)
                                

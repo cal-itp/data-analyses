@@ -16,6 +16,7 @@ import pandas as pd
 from pathlib import Path
 
 from calitp_data_analysis import utils
+from shared_utils import rt_dates
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
@@ -27,6 +28,7 @@ def select_one_trip_per_shape(analysis_date: str):
     Column called st_trip_instance_key will help us find
     which trip we chose for that shape_array_key.
     """
+   
     stop_segments = gpd.read_parquet(
         f"{SEGMENT_GCS}segment_options/stop_segments_{analysis_date}.parquet"
     )
@@ -44,7 +46,8 @@ def select_one_trip_per_shape(analysis_date: str):
                          "segment_meters", "trip_instance_key"])
                      .drop_duplicates(subset="shape_array_key")
                      .drop(columns = "segment_meters")
-                     .rename(columns = {"trip_instance_key": "st_trip_instance_key"})
+                     .rename(columns = {
+                         "trip_instance_key": "st_trip_instance_key"})
                     )
     
     stop_segments_subset = pd.merge(
