@@ -290,7 +290,8 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     ROUTE_SEG_FILE = Path(dict_inputs["route_dir_multi_segment"])
     ROUTE_DIR_FILE = Path(dict_inputs["route_dir_multi_summary"])
         
-    df = delayed(concatenate_trip_segment_speeds)(analysis_date_list, dict_inputs)
+    df = delayed(concatenate_trip_segment_speeds)(
+        analysis_date_list, dict_inputs)
     print("concatenated files")   
     
     time_span_str, time_span_num = time_helpers.time_span_labeling(analysis_date_list)
@@ -419,7 +420,7 @@ if __name__ == "__main__":
                level="INFO")
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    '''
+    
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
@@ -430,7 +431,7 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
-    '''
+    
     
     for month in ["apr2023", "oct2023"]:
         start = datetime.datetime.now()
