@@ -57,9 +57,14 @@ def add_trio(
     We don't have a guarantee that the nearest_vp_idx is before
     the stop, so let's just keep more boundary points.
     """
-    start_idx = np.where(vp_idx_arr == nearest_value)[0][0]
-    
     array_length = len(vp_idx_arr)
+    try:
+        start_idx = np.where(vp_idx_arr == nearest_value)[0][0]
+    
+    # Just in case we don't have any vp_idx_arr, set to zero and
+    # use condition later to return empty array
+    except:
+        start_idx = 0
 
     # if we only have 2 values, we want to return all the possibilities
     if array_length <= 2:
@@ -75,12 +80,15 @@ def add_trio(
                 coords_arr[start_pos: end_pos])
     
     # if it's the last value in the array, still grab 3 vp_idx
-    elif start_idx == array_length - 1:
-        start_pos = start_idx-2
+    elif (start_idx == array_length - 1) and (array_length > 0):
+        start_pos = start_idx - 2
         return (vp_idx_arr[start_pos: ], 
                 timestamp_arr[start_pos: ],
                 coords_arr[start_pos: ]
                )
+    
+    elif array_length == 0:
+        return vp_idx_arr
     
     # (start_idx > 0) and (array_length > 2):
     else: 
@@ -94,12 +102,19 @@ def add_trio(
 
 def merge_stop_vp_for_nearest_neighbor(
     stop_times: gpd.GeoDataFrame,
-    vp_condensed: gpd.GeoDataFrame
+    analysis_date: str
 ) -> gpd.GeoDataFrame:
+    
+    vp_condensed = gpd.read_parquet(
+        f"{SEGMENT_GCS}condensed/"
+        f"vp_nearest_neighbor_{analysis_date}.parquet",
+    ).drop(columns = "location_timestamp_local")
     
     gdf = pd.merge(
         stop_times.rename(
-            columns = {"geometry": "stop_geometry"}).set_geometry("stop_geometry"),
+            columns = {
+                "geometry": "stop_geometry"}
+        ).set_geometry("stop_geometry"),
         vp_condensed.rename(
             columns = {"vp_primary_direction": "stop_primary_direction"}),
         on = ["trip_instance_key", "stop_primary_direction"],

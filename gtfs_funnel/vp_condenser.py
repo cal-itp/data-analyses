@@ -53,7 +53,8 @@ def condense_vp_to_linestring(
         vp_transform.condense_point_geom_to_line,
         group_cols = ["trip_instance_key"],
         geom_col = "geometry",
-        other_cols = ["vp_idx", "location_timestamp_local", "vp_primary_direction"],
+        other_cols = ["vp_idx", "location_timestamp_local", 
+                      "vp_primary_direction"],
         meta = {
             "trip_instance_key": "object",
             "geometry": "geometry",
