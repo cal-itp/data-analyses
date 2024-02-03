@@ -444,4 +444,3 @@ if __name__ == "__main__":
         logger.info(f"average rollups for {one_week}: {end - start}")
     
     
-    

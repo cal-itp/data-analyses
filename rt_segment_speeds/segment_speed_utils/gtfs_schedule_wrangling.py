@@ -4,7 +4,7 @@ All kinds of GTFS schedule table wrangling.
 import geopandas as gpd
 import pandas as pd
 
-from typing import Union
+from typing import Literal, Union
 
 from segment_speed_utils import helpers, time_helpers
 from shared_utils import portfolio_utils, rt_utils
@@ -107,10 +107,12 @@ def add_weekday_weekend_column(df: pd.DataFrame) -> pd.DataFrame:
 def aggregate_time_of_day_to_peak_offpeak(
     df: pd.DataFrame,
     group_cols: list,
+    long_or_wide: Literal["long", "wide"] = "wide"
 ) -> pd.DataFrame:
     """
     Aggregate time-of-day bins into peak/offpeak periods.
     Return n_trips and frequency for grouping of columns (route-direction, etc).
+    Allow wide or long df to be returned.
     """    
     peak_hours = sum(v for k, v in time_helpers.HOURS_BY_TIME_OF_DAY.items() 
                  if k in time_helpers.PEAK_PERIODS) 
@@ -120,33 +122,50 @@ def aggregate_time_of_day_to_peak_offpeak(
     
     df = add_peak_offpeak_column(df)
     
-    df2 = (df.groupby(group_cols + ["peak_offpeak"])
-           .agg({"trip_instance_key": "count"})
-           .reset_index()
-           .rename(columns = {"trip_instance_key": "n_trips"})
-          )
+    all_day = (df.groupby(group_cols)
+               .agg({"trip_instance_key": "count"})
+               .reset_index()
+               .assign(time_period = "all_day")
+              )
+    
+    peak_offpeak = (df.groupby(group_cols + ["peak_offpeak"])
+                    .agg({"trip_instance_key": "count"})
+                    .reset_index()
+                    .rename(columns = {"peak_offpeak": "time_period"})
+                   )
+    
+    df2 = pd.concat(
+        [all_day, peak_offpeak], 
+        axis=0, ignore_index = True
+    ).rename(columns = {"trip_instance_key": "n_trips"})
+
     
     # Add service frequency (trips per hour)
     # there are different number of hours in peak and offpeak periods
     df2 = df2.assign(
         frequency = df2.apply(
             lambda x:
-            round(x.n_trips / peak_hours, 2) if x.peak_offpeak=="peak"
-            else round(x.n_trips / offpeak_hours, 2), axis=1
+            round(x.n_trips / peak_hours, 2) if x.time_period=="peak"
+            else round(x.n_trips / offpeak_hours, 2) if x.time_period=="offpeak"
+            else round(x.n_trips / (peak_hours + offpeak_hours), 2), axis=1
         )
     )
     
-    # Reshape from wide to long
-    # get rid of multiindex column names
-    df3 = df2.pivot(index=group_cols, 
-          columns="peak_offpeak",
-          values=["n_trips", "frequency"]
-         )
+    if long_or_wide == "long":
+        return df2
+    
+    elif long_or_wide == "wide":
+        # Reshape from wide to long
+        # get rid of multiindex column names
+        df3 = df2.pivot(index=group_cols, 
+              columns="time_period",
+              values=["n_trips", "frequency"]
+             )
 
-    df3.columns = [f'{b}_{a}' for a, b in df3.columns]
-    df3 = df3.reset_index()
+        df3.columns = [f'{b}_{a}' for a, b in df3.columns]
+        df3 = df3.reset_index()
 
-    return df3
+        return df3
 
 
 def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
