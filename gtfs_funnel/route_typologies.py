@@ -7,20 +7,27 @@ import intake
 import pandas as pd
 
 from calitp_data_analysis.geography_utils import WGS84
-from calitp_data_analysis import utils
+#from calitp_data_analysis import utils
+from shared_utils import utils_to_add
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from segment_speed_utils.project_vars import RT_SCHED_GCS, PROJECT_CRS
 
 catalog = intake.open_catalog(
     "../_shared_utils/shared_utils/shared_data_catalog.yml")
 
-def assemble_scheduled_trip_metrics(analysis_date: str) -> pd.DataFrame:
+
+def assemble_scheduled_trip_metrics(
+    analysis_date: str, 
+    dict_inputs: dict
+) -> pd.DataFrame:
     """
     Get GTFS schedule trip metrics including time-of-day buckets,
     scheduled service minutes, and median stop spacing.
     """
+    STOP_TIMES_FILE = dict_inputs["stop_times_direction_file"]
+    
     df = gpd.read_parquet(
-        f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet"
+        f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet"
     )
 
     trips_to_route = helpers.import_scheduled_trips(
@@ -173,7 +180,7 @@ if __name__ == "__main__":
     ROUTE_DIR_EXPORT = CONFIG_DICT["route_direction_metrics_file"]
     
     for date in analysis_date_list:
-        trip_metrics = assemble_scheduled_trip_metrics(date)
+        trip_metrics = assemble_scheduled_trip_metrics(date, CONFIG_DICT)
                 
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
@@ -196,7 +203,7 @@ if __name__ == "__main__":
             how = "left"
         )
             
-        utils.geoparquet_gcs_export(
+        utils_to_add.geoparquet_gcs_export(
             route_dir_metrics2,
             RT_SCHED_GCS,
             f"{ROUTE_DIR_EXPORT}_{date}"
