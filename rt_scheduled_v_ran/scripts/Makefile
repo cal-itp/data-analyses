@@ -1,2 +1,2 @@
-spatial_accuracy:
-	python vp_spatial_accuracy.py
+rt_sched_pipeline:
+	python rt_v_scheduled_trip.py
