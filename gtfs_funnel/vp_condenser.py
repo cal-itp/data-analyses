@@ -11,7 +11,8 @@ from dask import delayed, compute
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from calitp_data_analysis import utils
+#from calitp_data_analysis import utils
+from shared_utils import utils_to_add
 from segment_speed_utils import vp_transform, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
@@ -65,9 +66,9 @@ def condense_vp_to_linestring(
         align_dataframes = False
     ).compute().set_geometry("geometry").set_crs(WGS84)
     
-    utils.geoparquet_gcs_export(
+    utils_to_add.geoparquet_gcs_export(
         vp_condensed,
-        f"{SEGMENT_GCS}condensed/",
+        SEGMENT_GCS,
         f"{EXPORT_FILE}_{analysis_date}"
     )
     
@@ -76,7 +77,10 @@ def condense_vp_to_linestring(
     return 
 
 
-def prepare_vp_for_all_directions(analysis_date: str) -> gpd.GeoDataFrame:
+def prepare_vp_for_all_directions(
+    analysis_date: str, 
+    dict_inputs: dict
+) -> gpd.GeoDataFrame:
     """
     For each direction, exclude one the opposite direction and
     save out the arrays of valid indices.
@@ -86,8 +90,11 @@ def prepare_vp_for_all_directions(analysis_date: str) -> gpd.GeoDataFrame:
     Subset vp_idx, location_timestamp_local and coordinate arrays 
     to exclude southbound.
     """
+    INPUT_FILE = dict_inputs["vp_condensed_line_file"]
+    EXPORT_FILE = dict_inputs["vp_nearest_neighbor_file"]
+    
     vp = delayed(gpd.read_parquet)(
-        f"{SEGMENT_GCS}condensed/vp_condensed_{analysis_date}.parquet",
+        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
     )
   
     dfs = [
@@ -105,10 +112,10 @@ def prepare_vp_for_all_directions(analysis_date: str) -> gpd.GeoDataFrame:
     
     del results
     
-    utils.geoparquet_gcs_export(
+    utils_to_add.geoparquet_gcs_export(
         gdf,
-        f"{SEGMENT_GCS}condensed/",
-        f"vp_nearest_neighbor_{analysis_date}"
+        SEGMENT_GCS,
+        f"{EXPORT_FILE}_{analysis_date}"
     )
     
     del gdf
@@ -138,7 +145,7 @@ if __name__ == "__main__":
             f"{time1 - start}"
         )
         
-        prepare_vp_for_all_directions(analysis_date)
+        prepare_vp_for_all_directions(analysis_date, CONFIG_DICT)
         
         end = datetime.datetime.now()
         logger.info(
