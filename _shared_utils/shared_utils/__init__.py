@@ -7,10 +7,10 @@ from . import (  # calitp_color_palette,; geography_utils,; styleguide,; utils,
     rt_dates,
     rt_utils,
     schedule_rt_utils,
+    utils_to_add,
 )
 
 __all__ = [
-    # "calitp_color_palette",
     "dask_utils",
     "geog_utils_to_add",
     "gtfs_utils",
@@ -19,6 +19,5 @@ __all__ = [
     "schedule_rt_utils",
     "rt_dates",
     "rt_utils",
-    # "styleguide",
-    # "utils",
+    "utils_to_add",
 ]
