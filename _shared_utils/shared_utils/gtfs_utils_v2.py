@@ -12,8 +12,9 @@ import geopandas as gpd
 import pandas as pd
 import shapely
 import siuba  # need this to do type hint in functions
+from calitp_data_analysis import geography_utils
 from calitp_data_analysis.tables import tbls
-from shared_utils import geography_utils, schedule_rt_utils
+from shared_utils import schedule_rt_utils
 from siuba import *
 
 GCS_PROJECT = "cal-itp-data-infra"
