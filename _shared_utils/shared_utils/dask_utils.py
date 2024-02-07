@@ -8,9 +8,9 @@ import dask_geopandas as dg
 import gcsfs
 import geopandas as gpd
 import pandas as pd
+from calitp_data_analysis import utils
 from dask import compute, delayed
 from dask.delayed import Delayed  # type hint
-from shared_utils import utils
 
 fs = gcsfs.GCSFileSystem()
 
