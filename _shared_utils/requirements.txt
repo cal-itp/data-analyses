@@ -1,1 +1,3 @@
 -e .
+gtfs-segments==0.1.0
+pyairtable==2.2.2
