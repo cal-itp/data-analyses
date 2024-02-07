@@ -50,6 +50,12 @@ DATES = {
     "jan2024": "2024-01-17",
 }
 
+y2023_dates = [DATES[f"{m}2023"] for m in ["dec", "nov", "oct", "sep", "aug", "jul", "jun", "may", "apr", "mar"]]
+y2024_dates = [v for k, v in DATES.items() if "2024" in k]
+
+apr_week = [v for k, v in DATES.items() if "apr2023" in k]
+oct_week = [v for k, v in DATES.items() if "oct2023" in k]
+
 
 # Planning and Modal Advisory Committee (PMAC) - quarterly
 PMAC = {
