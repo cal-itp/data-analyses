@@ -1,7 +1,7 @@
 papermill==2.3.4
 nbformat==5.1.3
 typer==0.4.1
-jupyter-book==0.12.2
+jupyter-book==1.0.0
 python-slugify==6.1.1
 pyaml==21.10.1
 humanize==4.2.3
