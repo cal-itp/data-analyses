@@ -3,8 +3,6 @@ Download rail, ferry, BRT stops.
 
 From rail_ferry_brt.ipynb into script.
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
 
@@ -41,20 +39,28 @@ def filter_trips_to_route_type(analysis_date: str,
     return trips_subset
     
 
+ac_transit_route_id = ["1T"]
+metro_route_desc = ["METRO SILVER LINE", "METRO ORANGE LINE", 
+                    "METRO J LINE", "METRO G LINE"]
+muni_route_id = [
+    '49', 
+    # add more based on Muni's request
+    #'1', '1X', '2',
+    #'8', '8AX', '8BX', '9', '9R',
+    #'12', '14', '14R', '15', '19', '22', '27', '28', 
+    #'30', '33', '36', '38', '38R', '45', '49', '55',
+    #'90', '91', '714','TBUS',              
+]  
+    
 def filter_to_brt_trips(trips: pd.DataFrame) -> pd.DataFrame:
     """
     Start with trips table and filter to specific routes that
     are BRT
     """    
     BRT_ROUTE_FILTERING = {
-        "Bay Area 511 AC Transit Schedule": {"route_id": 
-                                             ["1T"]},
-        "LA Metro Bus Schedule": {"route_desc": 
-                                  ["METRO SILVER LINE", "METRO ORANGE LINE", 
-                                   "METRO J LINE", "METRO G LINE"
-                                  ]},
-        "Bay Area 511 Muni Schedule": {"route_id": 
-                                       ['49']},
+        "Bay Area 511 AC Transit Schedule": {"route_id": ac_transit_route_id},
+        "LA Metro Bus Schedule": {"route_desc": metro_route_desc},
+        "Bay Area 511 Muni Schedule": {"route_id": muni_route_id},
         # Omni BRT -- too infrequent!
         #"OmniTrans Schedule": {"route_short_name": ["sbX"]}
     }             
