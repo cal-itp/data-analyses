@@ -3,7 +3,6 @@ import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.geography_utils import WGS84
-import vp_spatial_accuracy
 import update_vars
 from segment_speed_utils.project_vars import (
     GCS_FILE_PATH,
@@ -60,12 +59,12 @@ def total_trip_time(vp_usable_df: pd.DataFrame):
     recorded in real time data so we can compare it with
     scheduled service minutes.
     """
-    subset = ["location_timestamp_local", "trip_instance_key", "max_time"]
+    subset = ["location_timestamp_local", "trip_instance_key", "max_time", "schedule_gtfs_dataset_key"]
     vp_usable_df = vp_usable_df[subset]
 
     # Find the max and the min time based on location timestamp
     df = (
-        vp_usable_df.groupby(["trip_instance_key"])
+        vp_usable_df.groupby(["schedule_gtfs_dataset_key","trip_instance_key"])
         .agg({"location_timestamp_local": "min", "max_time": "max"})
         .reset_index()
         .rename(columns={"location_timestamp_local": "min_time"})
@@ -90,8 +89,7 @@ def trips_by_one_min(vp_usable_df: pd.DataFrame):
     # Find number of pings each minute
     df = (
         vp_usable_df.groupby(
-            [
-                "trip_instance_key",
+            [ "trip_instance_key",
                 pd.Grouper(key="location_timestamp_local", freq="1Min"),
             ]
         )
@@ -336,21 +334,12 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     m1 = (rt_service_df.merge(pings_trip_time_df, on = "trip_instance_key", how = "outer")
          .merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer"))
     
-    # Some metrics
-    #m1['pings_per_min'] = (m1.total_pings_for_trip / m1.rt_service_min)
-    #m1['spatial_accuracy_pct'] = (m1.vp_in_shape/m1.total_vp) * 100
-    #m1['rt_triptime_w_gtfs_pct'] = (m1.total_min_w_gtfs / m1.rt_service_min) * 100
-    #m1['rt_v_scheduled_trip_time_pct'] = (m1.rt_service_min / m1.service_minutes - 1) * 100
-    
-    # Mask rt_triptime_w_gtfs_pct for any values above 100%
-    #m1.rt_triptime_w_gtfs_pct = m1.rt_triptime_w_gtfs_pct.mask(m1.rt_triptime_w_gtfs_pct > 100).fillna(100)
-    
     # Save
     # from update_vars import CONFIG_DICT
     # TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
     # m1.to_parquet(f"{GCS_FILE_PATH}{TRIP_EXPORT}/metrics_{analysis_date}.parquet")
-    
-    # time7 = datetime.datetime.now()
+    m1.to_parquet(f"./ah_testing_{analysis_date}.parquet")
+    time7 = datetime.datetime.now()
     logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
 
 if __name__ == "__main__":
