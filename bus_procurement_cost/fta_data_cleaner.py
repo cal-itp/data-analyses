@@ -61,6 +61,8 @@ value_replacer(fta,'bus_count','12batteryelectric','bus_count', 12)
 value_replacer(fta,'prop_type','PM-awardwillnotfund68buses)', 'prop_type', 'estimated-cutaway vans (PM- award will not fund 68 buses)')
 value_replacer(fta,'project_sponsor','City of Charlotte - Charlotte Area Transit System','bus_count',31)
 
+#checl data type for bus _count
+fta['bus_count'] = fta['bus_count'].astype('int64')
 
 # using str.lower() on project type
 fta["project_type"] = fta["project_type"].str.lower().str.replace(" ", "")
@@ -259,8 +261,8 @@ def find_bus_size_type(description):
 fta["bus_size_type"] = fta["description"].apply(find_bus_size_type)
 
 
-# saving to GCS as csv
+# saving to GCS as parquet
 
-clean_file = 'fta_bus_cost_clean.csv'
+clean_file = 'fta_bus_cost_clean.parquet'
 
-fta.to_csv(gcs_path+clean_file)
+fta.to_parquet(gcs_path+clean_file)
