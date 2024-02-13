@@ -3,12 +3,13 @@ All kinds of GTFS schedule table wrangling.
 """
 import geopandas as gpd
 import pandas as pd
+import dask.dataframe as dd
 
 from typing import Literal, Union
 
 from segment_speed_utils import helpers, time_helpers
 from shared_utils import portfolio_utils, rt_utils
-
+from segment_speed_utils.project_vars import SEGMENT_GCS
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
     exclude_me: list = ["Amtrak Schedule", "*Flex"]
@@ -167,6 +168,39 @@ def aggregate_time_of_day_to_peak_offpeak(
 
         return df3
 
+def get_vp_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
+    """
+    Assign trips to time-of-day.
+    """
+    ddf = dd.read_parquet(
+        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+        columns=[
+            "schedule_gtfs_dataset_key",
+            "trip_instance_key",
+            "location_timestamp_local",
+        ],
+    )
+
+    ddf2 = (
+        ddf.groupby(["schedule_gtfs_dataset_key", "trip_instance_key"])
+        .agg({"location_timestamp_local": "min"})
+        .reset_index()
+        .rename(columns={"location_timestamp_local": "min_time"})
+    )
+
+    ddf2 = ddf2.compute()
+
+    ddf2 = ddf2.assign(
+        time_of_day=ddf2.apply(
+            lambda x: rt_utils.categorize_time_of_day(x.min_time), axis=1
+        )
+    )
+
+    ddf3 = add_peak_offpeak_column(ddf2)
+
+    ddf3 = ddf3[["schedule_gtfs_dataset_key", "trip_instance_key", "peak_offpeak"]]
+
+    return ddf3
 
 def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     """
