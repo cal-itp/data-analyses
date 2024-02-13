@@ -325,8 +325,6 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     logger.info(f"Spatial accuracy grouping metric: {time6-time5}")
     
     ## Merges ##
-    # Load trip speeds
-    # trip_speeds_df = load_trip_speeds(analysis_date)
     rt_service_df = rt_service_df.compute()
     pings_trip_time_df = pings_trip_time_df.compute()
     spatial_accuracy_df = spatial_accuracy_df.compute()
