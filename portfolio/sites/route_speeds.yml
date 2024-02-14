@@ -1,252 +1,237 @@
 directory: ./rt_segment_speeds/
-notebook: ./rt_segment_speeds/26_weekly_avg_speeds.ipynb
+notebook: ./rt_segment_speeds/28_route_averages.ipynb
 parts:
 - chapters:
-  - caption: Alameda-Contra Costa Transit District
+  - caption: Antelope Valley Transit Authority Schedule
     params:
-      name: Alameda-Contra Costa Transit District
-  - caption: Anaheim Transportation Network
+      name: Antelope Valley Transit Authority Schedule
+  - caption: Avalon Schedule
     params:
-      name: Anaheim Transportation Network
-  - caption: Antelope Valley Transit Authority
+      name: Avalon Schedule
+  - caption: Banning Pass Schedule
     params:
-      name: Antelope Valley Transit Authority
-  - caption: Banning Pass Transit
+      name: Banning Pass Schedule
+  - caption: Bay Area 511 AC Transit Schedule
     params:
-      name: Banning Pass Transit
-  - caption: Butte County Association of Governments
+      name: Bay Area 511 AC Transit Schedule
+  - caption: Bay Area 511 Caltrain Schedule
     params:
-      name: Butte County Association of Governments
-  - caption: Central Contra Costa Transit Authority
+      name: Bay Area 511 Caltrain Schedule
+  - caption: Bay Area 511 County Connection Schedule
     params:
-      name: Central Contra Costa Transit Authority
-  - caption: City and County of San Francisco
+      name: Bay Area 511 County Connection Schedule
+  - caption: Bay Area 511 Dumbarton Express Schedule
     params:
-      name: City and County of San Francisco
-  - caption: City of Avalon
+      name: Bay Area 511 Dumbarton Express Schedule
+  - caption: Bay Area 511 Fairfield and Suisun Transit Schedule
     params:
-      name: City of Avalon
-  - caption: City of Beaumont
+      name: Bay Area 511 Fairfield and Suisun Transit Schedule
+  - caption: Bay Area 511 Golden Gate Transit Schedule
     params:
-      name: City of Beaumont
-  - caption: City of Burbank
+      name: Bay Area 511 Golden Gate Transit Schedule
+  - caption: Bay Area 511 MVGO Schedule
     params:
-      name: City of Burbank
-  - caption: City of Commerce
+      name: Bay Area 511 MVGO Schedule
+  - caption: Bay Area 511 Marin Schedule
     params:
-      name: City of Commerce
-  - caption: City of Culver City
+      name: Bay Area 511 Marin Schedule
+  - caption: Bay Area 511 Muni Schedule
     params:
-      name: City of Culver City
-  - caption: City of Elk Grove
+      name: Bay Area 511 Muni Schedule
+  - caption: Bay Area 511 Petaluma Schedule
     params:
-      name: City of Elk Grove
-  - caption: City of Escalon
+      name: Bay Area 511 Petaluma Schedule
+  - caption: Bay Area 511 SamTrans Schedule
     params:
-      name: City of Escalon
-  - caption: City of Fairfield
+      name: Bay Area 511 SamTrans Schedule
+  - caption: Bay Area 511 San Francisco Bay Ferry Schedule
     params:
-      name: City of Fairfield
-  - caption: City of Fresno
+      name: Bay Area 511 San Francisco Bay Ferry Schedule
+  - caption: Bay Area 511 Santa Clara Transit Schedule
     params:
-      name: City of Fresno
-  - caption: City of Lawndale
+      name: Bay Area 511 Santa Clara Transit Schedule
+  - caption: Bay Area 511 Santa Rosa CityBus Schedule
     params:
-      name: City of Lawndale
-  - caption: City of Los Angeles
+      name: Bay Area 511 Santa Rosa CityBus Schedule
+  - caption: Bay Area 511 SolTrans Schedule
     params:
-      name: City of Los Angeles
-  - caption: City of Montebello
+      name: Bay Area 511 SolTrans Schedule
+  - caption: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
     params:
-      name: City of Montebello
-  - caption: City of Norwalk
+      name: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
+  - caption: Bay Area 511 Tri Delta Schedule
     params:
-      name: City of Norwalk
-  - caption: City of Pasadena
+      name: Bay Area 511 Tri Delta Schedule
+  - caption: Bay Area 511 Tri-Valley Wheels Schedule
     params:
-      name: City of Pasadena
-  - caption: City of Petaluma
+      name: Bay Area 511 Tri-Valley Wheels Schedule
+  - caption: Bay Area 511 Union City Transit Schedule
     params:
-      name: City of Petaluma
-  - caption: City of Redondo Beach
+      name: Bay Area 511 Union City Transit Schedule
+  - caption: Bay Area 511 Vine Transit Schedule
     params:
-      name: City of Redondo Beach
-  - caption: City of Santa Maria
+      name: Bay Area 511 Vine Transit Schedule
+  - caption: Bay Area 511 WestCAT Schedule
     params:
-      name: City of Santa Maria
-  - caption: City of Santa Monica
+      name: Bay Area 511 WestCAT Schedule
+  - caption: Beach Cities GMV Schedule
     params:
-      name: City of Santa Monica
-  - caption: City of Santa Rosa
+      name: Beach Cities GMV Schedule
+  - caption: Bear Schedule
     params:
-      name: City of Santa Rosa
-  - caption: City of Solvang
+      name: Bear Schedule
+  - caption: Beaumont Pass Schedule
     params:
-      name: City of Solvang
-  - caption: City of Torrance
+      name: Beaumont Pass Schedule
+  - caption: Big Blue Bus Schedule
     params:
-      name: City of Torrance
-  - caption: City of Turlock
+      name: Big Blue Bus Schedule
+  - caption: BruinBus Schedule
     params:
-      name: City of Turlock
-  - caption: City of Union City
+      name: BruinBus Schedule
+  - caption: Burbank Schedule
     params:
-      name: City of Union City
-  - caption: City of Visalia
+      name: Burbank Schedule
+  - caption: Commerce Schedule
     params:
-      name: City of Visalia
-  - caption: City of West Hollywood
+      name: Commerce Schedule
+  - caption: Culver City Schedule
     params:
-      name: City of West Hollywood
-  - caption: Cloverdale Transit
+      name: Culver City Schedule
+  - caption: Desert Roadrunner GMV Schedule
     params:
-      name: Cloverdale Transit
-  - caption: Dumbarton Bridge Regional Operations Consortium
+      name: Desert Roadrunner GMV Schedule
+  - caption: Eastern Sierra Schedule
     params:
-      name: Dumbarton Bridge Regional Operations Consortium
-  - caption: Eastern Contra Costa Transit Authority
+      name: Eastern Sierra Schedule
+  - caption: Elk Grove Schedule
     params:
-      name: Eastern Contra Costa Transit Authority
-  - caption: Eastern Sierra Transit Authority
+      name: Elk Grove Schedule
+  - caption: Fresno Schedule
     params:
-      name: Eastern Sierra Transit Authority
-  - caption: Emeryville Transportation Management Agency
+      name: Fresno Schedule
+  - caption: GET Schedule
     params:
-      name: Emeryville Transportation Management Agency
-  - caption: Flagship Cruises and Events Inc.
+      name: GET Schedule
+  - caption: Humboldt Schedule
     params:
-      name: Flagship Cruises and Events Inc.
-  - caption: Foothill Transit
+      name: Humboldt Schedule
+  - caption: Kings Schedule
     params:
-      name: Foothill Transit
-  - caption: Gold Coast Transit District
+      name: Kings Schedule
+  - caption: LA DOT Schedule
     params:
-      name: Gold Coast Transit District
-  - caption: Golden Empire Transit District
+      name: LA DOT Schedule
+  - caption: LA Metro Bus Schedule
     params:
-      name: Golden Empire Transit District
-  - caption: Golden Gate Bridge, Highway and Transportation District
+      name: LA Metro Bus Schedule
+  - caption: LA Metro Rail Schedule
     params:
-      name: Golden Gate Bridge, Highway and Transportation District
-  - caption: Kings County Area Public Transit Agency
+      name: LA Metro Rail Schedule
+  - caption: Lake Schedule
     params:
-      name: Kings County Area Public Transit Agency
-  - caption: Lake Transit Authority
+      name: Lake Schedule
+  - caption: Lawndale Beat GMV Schedule
     params:
-      name: Lake Transit Authority
-  - caption: Long Beach Transit
+      name: Lawndale Beat GMV Schedule
+  - caption: Long Beach Schedule
     params:
-      name: Long Beach Transit
-  - caption: Los Angeles County Metropolitan Transportation Authority
+      name: Long Beach Schedule
+  - caption: Madera County Connection Schedule
     params:
-      name: Los Angeles County Metropolitan Transportation Authority
-  - caption: Madera County
+      name: Madera County Connection Schedule
+  - caption: Mendocino Schedule
     params:
-      name: Madera County
-  - caption: Marin County Transit District
+      name: Mendocino Schedule
+  - caption: Monterey Salinas Schedule
     params:
-      name: Marin County Transit District
-  - caption: Mendocino Transit Authority
+      name: Monterey Salinas Schedule
+  - caption: Nevada County Schedule
     params:
-      name: Mendocino Transit Authority
-  - caption: Monterey-Salinas Transit
+      name: Nevada County Schedule
+  - caption: North County Schedule
     params:
-      name: Monterey-Salinas Transit
-  - caption: Mountain View Transportation Management Association
+      name: North County Schedule
+  - caption: Norwalk Avail Schedule
     params:
-      name: Mountain View Transportation Management Association
-  - caption: Napa Valley Transportation Authority
+      name: Norwalk Avail Schedule
+  - caption: OCTA Schedule
     params:
-      name: Napa Valley Transportation Authority
-  - caption: Nevada County
+      name: OCTA Schedule
+  - caption: OmniTrans Schedule
     params:
-      name: Nevada County
-  - caption: North County Transit District
+      name: OmniTrans Schedule
+  - caption: Pasadena Schedule
     params:
-      name: North County Transit District
-  - caption: OmniTrans
+      name: Pasadena Schedule
+  - caption: PresidiGo Schedule
     params:
-      name: OmniTrans
-  - caption: Orange County Transportation Authority
+      name: PresidiGo Schedule
+  - caption: Redding Schedule
     params:
-      name: Orange County Transportation Authority
-  - caption: Palo Verde Valley Transit Agency
+      name: Redding Schedule
+  - caption: Redwood Coast Schedule
     params:
-      name: Palo Verde Valley Transit Agency
-  - caption: Peninsula Corridor Joint Powers Board
+      name: Redwood Coast Schedule
+  - caption: Riverside Schedule
     params:
-      name: Peninsula Corridor Joint Powers Board
-  - caption: Presidio Trust
+      name: Riverside Schedule
+  - caption: SBMTD Schedule
     params:
-      name: Presidio Trust
-  - caption: Redding Area Bus Authority
+      name: SBMTD Schedule
+  - caption: SLORTA Schedule
     params:
-      name: Redding Area Bus Authority
-  - caption: Redwood Coast Transit Authority
+      name: SLORTA Schedule
+  - caption: Sacramento Schedule
     params:
-      name: Redwood Coast Transit Authority
-  - caption: Riverside Transit Agency
+      name: Sacramento Schedule
+  - caption: San Diego Schedule
     params:
-      name: Riverside Transit Agency
-  - caption: Sacramento Regional Transit District
+      name: San Diego Schedule
+  - caption: San Joaquin Schedule
     params:
-      name: Sacramento Regional Transit District
-  - caption: San Francisco Bay Area Water Emergency Transit Authority
+      name: San Joaquin Schedule
+  - caption: Santa Clarita Schedule
     params:
-      name: San Francisco Bay Area Water Emergency Transit Authority
-  - caption: San Joaquin Regional Transit District
+      name: Santa Clarita Schedule
+  - caption: Santa Cruz Schedule
     params:
-      name: San Joaquin Regional Transit District
-  - caption: San Luis Obispo Regional Transit Authority
+      name: Santa Cruz Schedule
+  - caption: Santa Maria Schedule
     params:
-      name: San Luis Obispo Regional Transit Authority
-  - caption: San Mateo County Transit District
+      name: Santa Maria Schedule
+  - caption: Santa Ynez Mecatran Schedule
     params:
-      name: San Mateo County Transit District
-  - caption: Santa Barbara Metropolitan Transit District
+      name: Santa Ynez Mecatran Schedule
+  - caption: StanRTA Schedule
     params:
-      name: Santa Barbara Metropolitan Transit District
-  - caption: Santa Clara Valley Transportation Authority
+      name: StanRTA Schedule
+  - caption: Tahoe Transportation District GMV Schedule
     params:
-      name: Santa Clara Valley Transportation Authority
-  - caption: Santa Cruz Metropolitan Transit District
+      name: Tahoe Transportation District GMV Schedule
+  - caption: Torrance Schedule
     params:
-      name: Santa Cruz Metropolitan Transit District
-  - caption: Solano Transportation Authority
+      name: Torrance Schedule
+  - caption: Turlock Schedule
     params:
-      name: Solano Transportation Authority
-  - caption: Sonoma-Marin Area Rail Transit District
+      name: Turlock Schedule
+  - caption: Unitrans Schedule
     params:
-      name: Sonoma-Marin Area Rail Transit District
-  - caption: Stanislaus Regional Transit Authority
+      name: Unitrans Schedule
+  - caption: VCTC GMV Schedule
     params:
-      name: Stanislaus Regional Transit Authority
-  - caption: SunLine Transit Agency
+      name: VCTC GMV Schedule
+  - caption: Victor Valley GMV Schedule
     params:
-      name: SunLine Transit Agency
-  - caption: Tahoe Transportation District
+      name: Victor Valley GMV Schedule
+  - caption: Visalia Schedule
     params:
-      name: Tahoe Transportation District
-  - caption: Tulare County Regional Transit Agency
+      name: Visalia Schedule
+  - caption: Yolobus Schedule
     params:
-      name: Tulare County Regional Transit Agency
-  - caption: University of California, Berkeley
+      name: Yolobus Schedule
+  - caption: eTrans Schedule
     params:
-      name: University of California, Berkeley
-  - caption: University of California, Davis
-    params:
-      name: University of California, Davis
-  - caption: University of California, Los Angeles
-    params:
-      name: University of California, Los Angeles
-  - caption: Victor Valley Transit Authority
-    params:
-      name: Victor Valley Transit Authority
-  - caption: Western Contra Costa Transit Authority
-    params:
-      name: Western Contra Costa Transit Authority
-  - caption: Yolo County Transportation District
-    params:
-      name: Yolo County Transportation District
+      name: eTrans Schedule
 readme: ./rt_segment_speeds/README.md
 title: Average Speeds by Transit Operator Exploratory Charts
