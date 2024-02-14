@@ -11,8 +11,7 @@ from dask import delayed, compute
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-#from calitp_data_analysis import utils
-from shared_utils import utils_to_add
+from calitp_data_analysis import utils
 from segment_speed_utils import vp_transform, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
@@ -66,7 +65,7 @@ def condense_vp_to_linestring(
         align_dataframes = False
     ).compute().set_geometry("geometry").set_crs(WGS84)
     
-    utils_to_add.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         vp_condensed,
         SEGMENT_GCS,
         f"{EXPORT_FILE}_{analysis_date}"
@@ -112,7 +111,7 @@ def prepare_vp_for_all_directions(
     
     del results
     
-    utils_to_add.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         gdf,
         SEGMENT_GCS,
         f"{EXPORT_FILE}_{analysis_date}"
