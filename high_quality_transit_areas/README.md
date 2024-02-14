@@ -1,8 +1,11 @@
 # High Quality Transit Areas Analysis
 
 ## Open Data Portal 
-1. [HQTA Areas](https://gis.data.ca.gov/datasets/863e61eacbf3463ab239beb3cee4a2c3_0)
-1. [HQTA Stops](https://gis.data.ca.gov/datasets/f6c30480f0e84be699383192c099a6a4_0)
+
+These datasets are updated **monthly**. We usually use a Wednesday in the middle of the month. The datasets reflect the a snapshot in time based on published GTFS schedule data.
+
+1. [HQTA Areas](https://gis.data.ca.gov/datasets/863e61eacbf3463ab239beb3cee4a2c3_0) -- start here for any policy or planning analysis related to high quality transit.
+1. [HQTA Stops](https://gis.data.ca.gov/datasets/f6c30480f0e84be699383192c099a6a4_0) -- use this to understand the transit stops that go into defining high quality transit areas.
 1. [CA Transit Routes](https://gis.data.ca.gov/datasets/dd7cb74665a14859a59b8c31d3bc5a3e_0)
 1. [CA Transit Stops](https://gis.data.ca.gov/datasets/900992cc94ab49dbbb906d8f147c2a72_0)
 
@@ -19,6 +22,11 @@ Using the HQTA Areas dataset, it's possible to determine if an area qualifies be
 We provide the HQTA Stops dataset as a convienience for certain kinds of analysis where it would be helpful to know actual stop locations. Note that the `hq_corridor_bus` type includes all stops in a high quality corridor. Since we make the high quality corridor determination at the corridor segment level and only then find the stops within that corridor, not every `hq_corridor_stop` is guaranteed to have frequent service (though they could all have frequent service, and at least one stop every 1,250 meters will have frequent service).
 
 ### Additional Details
+* The AM peak period is defined as 12:00 AM - 11:59 AM. The PM peak period is defined as 12:00 PM - 11:59 PM.
+    * Frequencies are calculated for each stop per hour. The highest frequency in the period before noon is counted for AM peak frequency; the highest frequency in the period after noon is counted for PM peak frequency.
+* Corridors are cut for each operator-route-direction every 1,250 meters.
+   * Stops have a 50 meter buffer drawn around them and are spatially joined to corridors.
+   * For each 1,250 meter corridor, the highest frequency is counted (if there are multiple stops).
 *  `peak_trips`: the number of trips per hour are calculated separately for the AM peak and PM peak. This column should be interpreted as: *at least x trips per hour in the peak period*. 
     * If these values differ, the *lesser* value is reported. 
     * Ex: 5 AM peak trips, 4 PM peak trips would show a value of `peak_trips = 4`.
@@ -27,7 +35,8 @@ We provide the HQTA Stops dataset as a convienience for certain kinds of analysi
 * `hqta_type = major_stop_bus`
     * Major stop bus is designation of stops appearing at the intersection of 2 frequent corridors. In our analysis, corridors have an operator and route associated to track it.
     * If the intersection was between 2 different operators (different agency names), `hqta_details = intersection_2_bus_routes_different_operators`.
-    * If the intersection was between routes of the same operator, `hqta_details = intersection_2_bus_routes_same_operator` 
+    * If the intersection was between routes of the same operator, `hqta_details = intersection_2_bus_routes_same_operator`
+* A half-mile buffered dataset is provided for high quality transit areas. We recommend using the polygon dataset. To get the stops (points) that create these half mile polygons, we do also provide high quality transit stops.
 
 ## High Quality Transit Areas Relevant Statutes
 
@@ -65,13 +74,11 @@ HQTA data is updated at a monthly frequency for the open data portal. Check the 
 
 Prior to running the HQTA workflow, make sure this month's tables are already downloaded. Check `rt_dates` and the GCS bucket to see if `trips`, `stops`, `shapes`, and `stop_times` are already downloaded. 
 
-If not, within the `open_data` directory, run `make download_schedule_data_one_day` in the terminal.
+If not, within the `gtfs_funnel` directory, run `make download_gtfs_data` in the terminal.
 
 In terminal: `make download_hqta_data`
 
 1. [Create JSONs](./operators_for_hqta.py) storing a dictionary with all the operators that have cached files for all 4 datasets. These are the [valid operators](./valid_hqta_operators.json). 
-    * It's possible in downloading the `routes`, `trips`, `stops`, and `stop_times`, one of the files is not able to be successfully downloaded, but the other 3 are. 
-    * Also, it's possible that files with no rows are downloaded.
     * A check for complete information (all 4 files are present and are non-empty)
     * These valid operators are the ones that continue on in the HQTA workflow.
 1. [Download rail, ferry, brt data](./A2_combine_stops.py)
@@ -79,7 +86,7 @@ In terminal: `make download_hqta_data`
 
 ### Bus Corridor Intersections
 
-In terminal: `make grab_corridors_and_find_intersections`
+In terminal: `make create_hqta_types`
 
 1. [Draw bus corridors, from routes to HQTA segments](./B1_create_hqta_segments.py)
     * Across all operators, find the longest shapes in each direction. Use a symmetric difference to grab the components that make up the route network.
@@ -92,8 +99,7 @@ In terminal: `make grab_corridors_and_find_intersections`
     * Find which routes actually do intersect, and store that in a pairwise table.
 1. [Find where corridors intersect](./C2_get_intersections.py)
 1. [Create datasets for each of the hqta types](./C3_create_bus_hqta_types.py)
-    * `major_stop_bus`: the bus stop within the above intersection does not necessarily have
-the highest trip count
+    * `major_stop_bus`: the bus stop within the above intersection does not necessarily have the highest trip count
     * `hq_corridor_bus`: stops along the HQ transit corr (may not be highest trip count)
     * Sanity check: [check 2: hq corridors](./check2_hq_corridors.ipynb)
 

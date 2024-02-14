@@ -15,10 +15,10 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
-from calitp_data_analysis import get_fs
+from calitp_data_analysis import geography_utils, get_fs, utils
 from calitp_data_analysis.tables import tbls
 from numba import jit
-from shared_utils import geography_utils, gtfs_utils_v2, rt_dates, utils
+from shared_utils import gtfs_utils_v2, rt_dates
 from siuba import *
 
 fs = get_fs()

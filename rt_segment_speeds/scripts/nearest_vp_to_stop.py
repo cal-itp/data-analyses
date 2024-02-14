@@ -10,10 +10,10 @@ import shapely
 import sys
 
 from loguru import logger
-from pathlib import Path
 
 from calitp_data_analysis.geography_utils import WGS84
-from calitp_data_analysis import utils
+#from calitp_data_analysis import utils
+from shared_utils import utils_to_add
 from segment_speed_utils import helpers, neighbor
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
@@ -126,10 +126,10 @@ def nearest_neighbor_rt_stop_times(
         
     results = add_nearest_neighbor_result(gdf, analysis_date)
     
-    utils.geoparquet_gcs_export(
+    utils_to_add.geoparquet_gcs_export(
         results,
-        f"{SEGMENT_GCS}{str(EXPORT_FILE.parent)}/",
-        f"{EXPORT_FILE.stem}_{analysis_date}",
+        SEGMENT_GCS,
+        f"{EXPORT_FILE}_{analysis_date}",
     )
     
     end = datetime.datetime.now()
@@ -152,7 +152,7 @@ def nearest_neighbor_shape_segments(
     """
     start = datetime.datetime.now()
 
-    EXPORT_FILE = Path(f'{dict_inputs["stage2"]}')
+    EXPORT_FILE = dict_inputs["stage2"]
     SEGMENT_FILE = dict_inputs["segments_file"]
     
     subset_trips = pd.read_parquet(
@@ -194,10 +194,10 @@ def nearest_neighbor_shape_segments(
     
     del gdf
     
-    utils.geoparquet_gcs_export(
+    utils_to_add.geoparquet_gcs_export(
         results,
-        f"{SEGMENT_GCS}{str(EXPORT_FILE.parent)}/",
-        f"{EXPORT_FILE.stem}_{analysis_date}",
+        SEGMENT_GCS,
+        f"{EXPORT_FILE}_{analysis_date}",
     )
     
     end = datetime.datetime.now()

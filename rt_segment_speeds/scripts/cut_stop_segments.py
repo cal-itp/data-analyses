@@ -13,9 +13,9 @@ import pandas as pd
 import sys
 
 from loguru import logger
-from pathlib import Path
 
-from calitp_data_analysis import utils
+#from calitp_data_analysis import utils
+from shared_utils import utils_to_add
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
-        SEGMENT_FILE = Path(RT_DICT["segments_file"])        
+        SEGMENT_FILE = RT_DICT["segments_file"]      
         
         segments = cut_stop_segments(analysis_date)
         
@@ -145,10 +145,10 @@ if __name__ == "__main__":
             how = "inner"
         )
                 
-        utils.geoparquet_gcs_export(
+        utils_to_add.geoparquet_gcs_export(
             segments,
-            f"{SEGMENT_GCS}{str(SEGMENT_FILE.parent)}/",
-            f"{SEGMENT_FILE.stem}_{analysis_date}"
+            SEGMENT_GCS,
+            f"{SEGMENT_FILE}_{analysis_date}"
         )    
         
         del segments, shape_to_route

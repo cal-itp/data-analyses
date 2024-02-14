@@ -14,10 +14,19 @@ from segment_speed_utils.project_vars import RT_SCHED_GCS, PROJECT_CRS
 catalog = intake.open_catalog(
     "../_shared_utils/shared_utils/shared_data_catalog.yml")
 
-def assemble_scheduled_trip_metrics(analysis_date: str):
+
+def assemble_scheduled_trip_metrics(
+    analysis_date: str, 
+    dict_inputs: dict
+) -> pd.DataFrame:
+    """
+    Get GTFS schedule trip metrics including time-of-day buckets,
+    scheduled service minutes, and median stop spacing.
+    """
+    STOP_TIMES_FILE = dict_inputs["stop_times_direction_file"]
     
     df = gpd.read_parquet(
-        f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet"
+        f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet"
     )
 
     trips_to_route = helpers.import_scheduled_trips(
@@ -50,10 +59,6 @@ def assemble_scheduled_trip_metrics(analysis_date: str):
         how = "inner"
     )
     
-    df2 = df2.assign(
-        median_stop_meters = df2.median_stop_meters.round(2)
-    )
-    
     return df2
     
     
@@ -68,7 +73,7 @@ def schedule_metrics_by_route_direction(
     """
     
     service_freq_df = gtfs_schedule_wrangling.aggregate_time_of_day_to_peak_offpeak(
-        df, group_cols)
+        df, group_cols, long_or_wide = "long")
         
     metrics_df = (df.groupby(group_cols, observed=True, group_keys=False)
                   .agg({
@@ -83,11 +88,16 @@ def schedule_metrics_by_route_direction(
                       "sched_service_min": "avg_sched_service_min"
                   })
                  )
+    
+    round_me = ["avg_stop_meters", "avg_sched_service_min"]
+    metrics_df[round_me] = metrics_df[round_me].round(2)
 
-    common_shape_for_route_dir = add_common_shape(analysis_date)
+    common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
+        analysis_date
+    ).pipe(helpers.remove_shapes_outside_ca)
 
     df = pd.merge(
-        common_shape_for_route_dir,
+        common_shape,
         metrics_df,
         on = group_cols,
         how = "inner"
@@ -98,19 +108,6 @@ def schedule_metrics_by_route_direction(
     )
     
     return df
-
-
-def add_common_shape(analysis_date: str):
-    """
-    For route-direction df, add common_shape_id (most frequent shape)
-    and attach that shape geometry
-    """
-    common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
-        analysis_date).pipe(
-        helpers.remove_shapes_outside_ca
-    )
-    
-    return common_shape
     
     
 def pop_density_by_shape(shape_df: gpd.GeoDataFrame):
@@ -132,7 +129,10 @@ def pop_density_by_shape(shape_df: gpd.GeoDataFrame):
         )
     )
     
-    group_cols = ["shape_array_key"]
+    group_cols = ["schedule_gtfs_dataset_key", 
+                  "route_id", "direction_id", 
+                  "common_shape_id"
+                 ]
 
     shape_overlay = gpd.overlay(
         shape_df[group_cols + ["geometry"]].drop_duplicates(), 
@@ -165,7 +165,7 @@ def pop_density_by_shape(shape_df: gpd.GeoDataFrame):
                      .round(3)
                     )
     ).query('dense == 1')[
-        ["shape_array_key", "pct_dense"]
+        group_cols + ["pct_dense"]
     ].reset_index(drop=True)
     
     return shape_grouped
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     ROUTE_DIR_EXPORT = CONFIG_DICT["route_direction_metrics_file"]
     
     for date in analysis_date_list:
-        trip_metrics = assemble_scheduled_trip_metrics(date)
+        trip_metrics = assemble_scheduled_trip_metrics(date, CONFIG_DICT)
                 
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
@@ -198,7 +198,7 @@ if __name__ == "__main__":
         route_dir_metrics2 = pd.merge(
             route_dir_metrics,
             pop_density_df,
-            on = "shape_array_key",
+            on = route_cols + ["common_shape_id"],
             how = "left"
         )
             

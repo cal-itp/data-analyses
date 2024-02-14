@@ -13,9 +13,8 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 
-from pathlib import Path
-
-from calitp_data_analysis import utils
+#from calitp_data_analysis import utils
+from shared_utils import utils_to_add
 from shared_utils import rt_dates
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS
@@ -70,14 +69,14 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
-        SEGMENT_FILE = Path(STOP_SEG_DICT["segments_file"])        
+        SEGMENT_FILE = STOP_SEG_DICT["segments_file"]        
         
         segments = select_one_trip_per_shape(analysis_date)
         
-        utils.geoparquet_gcs_export(
+        utils_to_add.geoparquet_gcs_export(
             segments,
-            f"{SEGMENT_GCS}{str(SEGMENT_FILE.parent)}/",
-            f"{SEGMENT_FILE.stem}_{analysis_date}"
+            SEGMENT_GCS,
+            f"{SEGMENT_FILE}_{analysis_date}"
         )    
         
         end = datetime.datetime.now()

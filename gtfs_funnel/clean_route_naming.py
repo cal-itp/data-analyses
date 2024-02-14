@@ -39,17 +39,7 @@ if __name__ == "__main__":
     from update_vars import CONFIG_DICT
     CLEANED_ROUTE_NAMING = CONFIG_DICT["route_identification_file"]
 
-    months = [
-        "mar", "apr", "may",
-        "jun", "jul", "aug",
-        "sep", "oct", "nov",
-        "dec"
-    ]
-
-    date_list = [
-        rt_dates.DATES[f"{m}2023"] 
-        for m in months
-    ]
+    date_list = rt_dates.y2024_dates + rt_dates.y2023_dates
 
     df =  concatenate_routes_across_dates(date_list)
     
