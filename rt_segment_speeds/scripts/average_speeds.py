@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Literal
 
 from calitp_data_analysis.geography_utils import WGS84
+from shared_utils import utils_to_add
 from calitp_data_analysis import utils
 from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
                                  segment_calcs, time_helpers)
@@ -152,10 +153,10 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     Start from single day segment-trip speeds and 
     aggregate by peak_offpeak, weekday_weekend.
     """
-    SHAPE_SEG_FILE = Path(dict_inputs["shape_stop_single_segment"])
-    ROUTE_SEG_FILE = Path(dict_inputs["route_dir_single_segment"])
-    TRIP_FILE = Path(dict_inputs["trip_speeds_single_summary"])
-    ROUTE_DIR_FILE = Path(dict_inputs["route_dir_single_summary"])
+    SHAPE_SEG_FILE = dict_inputs["shape_stop_single_segment"]
+    ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
+    TRIP_FILE = dict_inputs["trip_speeds_single_summary"]
+    ROUTE_DIR_FILE = dict_inputs["route_dir_single_summary"]
     
     start = datetime.datetime.now()
     
@@ -182,10 +183,10 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
         columns = col_order + ["geometry"]
     )
     
-    utils.geoparquet_gcs_export(
+    utils_to_add.geoparquet_gcs_export(
         shape_stop_segments,
-        f"{SEGMENT_GCS}{str(SHAPE_SEG_FILE.parent)}/",
-        f"{SHAPE_SEG_FILE.stem}_{analysis_date}"
+        SEGMENT_GCS,
+        f"{SHAPE_SEG_FILE}_{analysis_date}"
     )
     
     del shape_stop_segments, segment_geom
@@ -215,10 +216,10 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
         columns = col_order + ["geometry"]
     )
     
-    utils.geoparquet_gcs_export(
+    utils_to_add.geoparquet_gcs_export(
         route_dir_segments,
-        f"{SEGMENT_GCS}{str(ROUTE_SEG_FILE.parent)}/",
-        f"{ROUTE_SEG_FILE.stem}_{analysis_date}"
+        SEGMENT_GCS,
+        f"{ROUTE_SEG_FILE}_{analysis_date}"
     )
     
     del route_dir_segments, segment_geom
@@ -264,10 +265,10 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
         columns = col_order + ["route_name", "geometry"]
     )
     
-    utils.geoparquet_gcs_export(
+    utils_to_add.geoparquet_gcs_export(
         route_dir_avg,
-        f"{SEGMENT_GCS}{str(ROUTE_DIR_FILE.parent)}/",
-        f"{ROUTE_DIR_FILE.stem}_{analysis_date}"
+        SEGMENT_GCS,
+        f"{ROUTE_DIR_FILE}_{analysis_date}"
     )
     
     del route_dir_avg, common_shape_geom
@@ -287,8 +288,8 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     the seven days is concatenated first before averaging,
     so that we get weighted averages.
     """
-    ROUTE_SEG_FILE = Path(dict_inputs["route_dir_multi_segment"])
-    ROUTE_DIR_FILE = Path(dict_inputs["route_dir_multi_summary"])
+    ROUTE_SEG_FILE = dict_inputs["route_dir_multi_segment"]
+    ROUTE_DIR_FILE = dict_inputs["route_dir_multi_summary"]
         
     df = delayed(concatenate_trip_segment_speeds)(
         analysis_date_list, dict_inputs)
@@ -327,10 +328,10 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
         columns = col_order + ["geometry"]
     )
     
-    utils.geoparquet_gcs_export(
+    utils_to_add.geoparquet_gcs_export(
         route_dir_segments,
-        f"{SEGMENT_GCS}{str(ROUTE_SEG_FILE.parent)}/",
-        f"{ROUTE_SEG_FILE.stem}_{time_span_str}"
+        SEGMENT_GCS,
+        f"{ROUTE_SEG_FILE}_{time_span_str}"
     )
     
     del route_dir_segments   
@@ -366,10 +367,10 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
         columns = col_order + ["route_name", "geometry"]
     )
     
-    utils.geoparquet_gcs_export(
+    utils_to_add.geoparquet_gcs_export(
         route_dir_avg,
-        f"{SEGMENT_GCS}{str(ROUTE_DIR_FILE.parent)}/",
-        f"{ROUTE_DIR_FILE.stem}_{time_span_str}"
+        SEGMENT_GCS,
+        f"{ROUTE_DIR_FILE}_{time_span_str}"
     )
     
     del route_dir_avg
@@ -442,6 +443,5 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
     
         logger.info(f"average rollups for {one_week}: {end - start}")
-    
     
     
