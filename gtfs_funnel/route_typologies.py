@@ -7,8 +7,7 @@ import intake
 import pandas as pd
 
 from calitp_data_analysis.geography_utils import WGS84
-#from calitp_data_analysis import utils
-from shared_utils import utils_to_add
+from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from segment_speed_utils.project_vars import RT_SCHED_GCS, PROJECT_CRS
 
@@ -203,7 +202,7 @@ if __name__ == "__main__":
             how = "left"
         )
             
-        utils_to_add.geoparquet_gcs_export(
+        utils.geoparquet_gcs_export(
             route_dir_metrics2,
             RT_SCHED_GCS,
             f"{ROUTE_DIR_EXPORT}_{date}"

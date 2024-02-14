@@ -1,7 +1,7 @@
 import geopandas as gpd
 import pandas as pd
 
-from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS
+from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
 
 route_time_cols = ["schedule_gtfs_dataset_key", 
                    "route_id", "direction_id", "time_period"]
@@ -71,6 +71,47 @@ def concatenate_speeds_by_route_direction(
     return df
 
 
+def merge_in_standardized_route_names(df: pd.DataFrame) -> pd.DataFrame:
+    standardized_route_names = pd.read_parquet(
+        f"{SCHED_GCS}standardized_route_ids.parquet",
+        columns = ["schedule_gtfs_dataset_key", "name", 
+                   "route_id", "service_date",
+                   "recent_route_id2", "recent_combined_name"
+                  ]
+    )
+    
+    df = pd.merge(
+        df,
+        standardized_route_names,
+        on = ["schedule_gtfs_dataset_key", "route_id", "service_date"],
+        how = "left",
+    )
+    
+    df = df.assign(
+        route_short_name = (df.recent_combined_name
+                            .str.split("__", expand=True)[0]),
+        route_long_name = (df.recent_combined_name
+                           .str.split("__", expand=True)[1]),
+    ).drop(
+        columns = ["route_id", "recent_combined_name"]
+    ).rename(
+        columns = {"recent_route_id2": "route_id"}
+    )
+    
+    return df
+
+
+def clean_up_for_charts(df: pd.DataFrame) -> pd.DataFrame:
+    # Clean up, round columns, get it as close to ready for charts
+    df = df.assign(
+        direction_id = df.direction_id.astype("int"),
+        avg_sched_service_min = df.avg_sched_service_min.round(1),
+        avg_stop_meters = df.avg_stop_meters.round(1),
+    )
+
+    return df
+
+
 if __name__ == "__main__":
     
     from shared_utils.rt_dates import y2023_dates, y2024_dates
@@ -96,7 +137,8 @@ if __name__ == "__main__":
     
     df_sched_speeds= df_sched_speeds.assign(
         sched_rt_category = df_sched_speeds.sched_rt_category.map(category_dict)
-    )
+    ).pipe(merge_in_standardized_route_names)
+
     
     df_sched_speeds.to_parquet(
         f"{RT_SCHED_GCS}digest/schedule_vp_metrics.parquet"
