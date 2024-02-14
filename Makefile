@@ -1,40 +1,47 @@
 # Run this in data-analyses
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 
+site = my_site_name
+
+build_portfolio_site: 
+	git rm portfolio/$(site)/ -rf
+	python portfolio/portfolio.py clean $(site)
+	python portfolio/portfolio.py build $(site) --deploy 
+	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
+	git add portfolio/$(site)/*.ipynb 
+	git add portfolio/sites/$(site).yml 
+
+
 build_competitive_corridors:
-	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	git rm portfolio/competitive_corridors/ -rf
+	$(eval override site = competitive_corridors)
+	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	#need git rm because otherwise, just local removal, but git change is untracked
-	python portfolio/portfolio.py clean competitive_corridors
 	python bus_service_increase/deploy_portfolio_yaml.py   
-	python portfolio/portfolio.py build competitive_corridors --deploy 
-	git add portfolio/competitive_corridors/district_*/ portfolio/competitive_corridors/*.yml portfolio/competitive_corridors/*.md 
-	git add portfolio/sites/competitive_corridors.yml 
+	make build_portfolio_site
     #--config=./portfolio/test-analyses.yml
 
 build_dla_reports:
+	$(eval override site = dla)
 	cd dla/ && pip install -r requirements.txt && cd ..
-	git rm portfolio/dla/ -rf
-	python portfolio/portfolio.py build dla --deploy 
-	git add portfolio/dla/district_*/ portfolio/dla/*.yml portfolio/dla/*.md 
-	git add portfolio/sites/dla.yml
+	make build_portfolio_site
+	git add portfolio/dla/district_*/ 
     
 build_quarterly_performance_metrics:
+	$(eval override site = quarterly_performance_metrics)
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	git rm portfolio/quarterly_performance_metrics/ -rf
-	python portfolio/portfolio.py clean quarterly_performance_metrics
-	python portfolio/portfolio.py build quarterly_performance_metrics --deploy 
-	git add portfolio/quarterly_performance_metrics/*.ipynb portfolio/quarterly_performance_metrics/*.yml portfolio/quarterly_performance_metrics/*.md   
-	git add portfolio/sites/quarterly_performance_metrics.yml 
+	make build_portfolio_site
     
 build_ntd_report:
-	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	git rm portfolio/ntd_monthly_ridership/ -rf
-	python portfolio/portfolio.py clean ntd_monthly_ridership
+	$(eval override site = ntd_monthly_ridership)
+	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	cd ntd/ && python deploy_portfolio_yaml.py && cd ..   
-	python portfolio/portfolio.py build ntd_monthly_ridership --deploy 
-	git add portfolio/ntd_monthly_ridership/*.ipynb portfolio/ntd_monthly_ridership/*.yml portfolio/ntd_monthly_ridership/*.md 
-	git add portfolio/sites/ntd_monthly_ridership.yml 
+	make build_portfolio_site
+
+build_route_speeds:
+	$(eval override site = route_speeds)
+	cd rt_segment_speeds / && make pip install -r requirements.txt && cd ..
+	cd rt_segment_speeds/ && python deploy_portfolio_yaml.py && cd ..   
+	make build_portfolio_site
 
 add_precommit:
 	pip install pre-commit

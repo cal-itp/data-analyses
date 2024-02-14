@@ -17,15 +17,15 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    SPEEDS_SHAPE = "speeds_by_shape_peak_daytype"
-    MONTH = "oct2023"
-    DATASET = f"rollup/{SPEEDS_SHAPE}_{MONTH}.parquet"
+    SPEEDS = "speeds_route_dir"
+    LATEST = "2024-01-17"
+    DATASET = f"rollup_singleday/{SPEEDS}_{LATEST}.parquet"
     
     operators_df = pd.read_parquet(f"{SEGMENT_GCS}{DATASET}",
-        columns = ["organization_name"]
-    ).sort_values("organization_name").drop_duplicates()
+        columns = ["name"]
+    ).sort_values("name").drop_duplicates()
 
-    operators = operators_df.organization_name.tolist()      
+    operators = operators_df.name.tolist()      
     # Eric's example
     # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
 
