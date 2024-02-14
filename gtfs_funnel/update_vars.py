@@ -2,10 +2,8 @@ import yaml
 from pathlib import Path
 from shared_utils import rt_dates
 
-months = ["dec", "nov", "oct", "sep", "aug",
-         "jul", "jun", "may", "apr", "mar"]         
-
-days = ["a", "b", "c", "d", "e", "f"]
+all_dates = (rt_dates.y2024_dates + rt_dates.y2023_dates + 
+             rt_dates.oct_week + rt_dates.apr_week)
 
 analysis_date_list = [
     rt_dates.DATES["jan2024"]
