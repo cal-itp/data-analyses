@@ -1,38 +1,39 @@
 # Run this in data-analyses
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 
-site = my_site_name
 
-build_portfolio_site: 
+build_portfolio_site:
+	cd portfolio/ && pip install -r requirements.txt && cd ../
+	#need git rm because otherwise, just local removal, but git change is untracked
 	git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site) --deploy 
 	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
 	git add portfolio/$(site)/*.ipynb 
 	git add portfolio/sites/$(site).yml 
+	#make production_portfolio
 
 
 build_competitive_corridors:
-	$(eval override site = competitive_corridors)
+	$(eval export site = competitive_corridors)
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	#need git rm because otherwise, just local removal, but git change is untracked
 	python bus_service_increase/deploy_portfolio_yaml.py   
 	make build_portfolio_site
     #--config=./portfolio/test-analyses.yml
 
 build_dla_reports:
-	$(eval override site = dla)
+	$(eval export site = dla)
 	cd dla/ && pip install -r requirements.txt && cd ..
 	make build_portfolio_site
 	git add portfolio/dla/district_*/ 
     
 build_quarterly_performance_metrics:
-	$(eval override site = quarterly_performance_metrics)
+	$(eval export site = quarterly_performance_metrics)
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	make build_portfolio_site
     
 build_ntd_report:
-	$(eval override site = ntd_monthly_ridership)
+	$(eval export site = ntd_monthly_ridership)
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	cd ntd/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
