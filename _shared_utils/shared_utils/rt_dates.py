@@ -48,10 +48,14 @@ DATES = {
     "nov2023": "2023-11-15",
     "dec2023": "2023-12-13",
     "jan2024": "2024-01-17",
+    "feb2024": "2024-02-14",
 }
 
-y2023_dates = [DATES[f"{m}2023"] for m in ["dec", "nov", "oct", "sep", "aug", "jul", "jun", "may", "apr", "mar"]]
-y2024_dates = [v for k, v in DATES.items() if "2024" in k]
+y2023_dates = [
+    v for k, v in DATES.items() if k.endswith("2023") and not any(substring in k for substring in ["jan", "feb"])
+]
+
+y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
 
 apr_week = [v for k, v in DATES.items() if "apr2023" in k]
 oct_week = [v for k, v in DATES.items() if "oct2023" in k]

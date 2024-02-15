@@ -119,12 +119,12 @@ if __name__ == "__main__":
     #from dask.distributed import Client
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
-    logger.add("./logs/C3_create_bus_hqta_types.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
+    logger.info(f"C3_create_bus_hqta_types Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     # Start with the gdf of all the hqta_segments
@@ -162,6 +162,6 @@ if __name__ == "__main__":
     )
     
     end = dt.datetime.now()
-    logger.info(f"execution time: {end-start}")
+    logger.info(f"C3_create_bus_hqta_types execution time: {end-start}")
     
     #client.close()

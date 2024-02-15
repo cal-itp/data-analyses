@@ -127,12 +127,12 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 if __name__=="__main__":    
     
-    logger.add("./logs/D2_assemble_hqta_polygons.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
+    logger.info(f"D2_assemble_hqta_polygons Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     hqta_points = catalog.hqta_points.read().to_crs(PROJECT_CRS)
@@ -168,4 +168,4 @@ if __name__=="__main__":
     logger.info("export as geoparquet")
         
     end = dt.datetime.now()
-    logger.info(f"execution time: {end-start}")
+    logger.info(f"D2_assemble_hqta_polygons execution time: {end-start}")

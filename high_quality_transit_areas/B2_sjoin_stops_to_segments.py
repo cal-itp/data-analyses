@@ -210,12 +210,12 @@ if __name__ == "__main__":
     #from dask.distributed import Client
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("./logs/B2_sjoin_stops_to_segments.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
+    logger.info(f"B2_sjoin_stops_to_segments Analysis date: {analysis_date}")
 
     start = dt.datetime.now()
     
@@ -255,6 +255,6 @@ if __name__ == "__main__":
     )
     
     end = dt.datetime.now()
-    logger.info(f"Execution time: {end-start}")
+    logger.info(f"B2_sjoin_stops_to_segments execution time: {end-start}")
     
     #client.close()
