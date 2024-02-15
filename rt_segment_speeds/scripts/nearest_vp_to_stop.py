@@ -12,8 +12,7 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-#from calitp_data_analysis import utils
-from shared_utils import utils_to_add
+from calitp_data_analysis import utils
 from segment_speed_utils import helpers, neighbor
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
@@ -108,7 +107,7 @@ def nearest_neighbor_rt_stop_times(
     includes all trips. Use stop sequences for each trip.
     """
     start = datetime.datetime.now()
-    EXPORT_FILE = Path(f'{dict_inputs["stage2"]}')
+    EXPORT_FILE = f'{dict_inputs["stage2"]}'
         
     stop_times = helpers.import_scheduled_stop_times(
         analysis_date,
@@ -126,7 +125,7 @@ def nearest_neighbor_rt_stop_times(
         
     results = add_nearest_neighbor_result(gdf, analysis_date)
     
-    utils_to_add.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         results,
         SEGMENT_GCS,
         f"{EXPORT_FILE}_{analysis_date}",
@@ -194,7 +193,7 @@ def nearest_neighbor_shape_segments(
     
     del gdf
     
-    utils_to_add.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         results,
         SEGMENT_GCS,
         f"{EXPORT_FILE}_{analysis_date}",

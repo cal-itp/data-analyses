@@ -14,8 +14,7 @@ import sys
 
 from loguru import logger
 
-#from calitp_data_analysis import utils
-from shared_utils import utils_to_add
+from calitp_data_analysis import utils
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
@@ -145,7 +144,7 @@ if __name__ == "__main__":
             how = "inner"
         )
                 
-        utils_to_add.geoparquet_gcs_export(
+        utils.geoparquet_gcs_export(
             segments,
             SEGMENT_GCS,
             f"{SEGMENT_FILE}_{analysis_date}"
