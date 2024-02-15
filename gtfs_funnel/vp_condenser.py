@@ -14,7 +14,7 @@ from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import vp_transform, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS
-
+from shared_utils import dask_utils
 
 def condense_vp_to_linestring(
     analysis_date: str, 
@@ -102,7 +102,13 @@ def prepare_vp_for_all_directions(
         for direction in wrangle_shapes.ALL_DIRECTIONS
     ]
     
-    results = [compute(i)[0] for i in dfs]
+    dask_utils.compute_and_export(
+        dfs,
+        SEGMENT_GCS,
+        file_name =f"{EXPORT_FILE}_{analysis_date}",
+        export_single_parquet = True,
+    )
+    '''
     gdf = pd.concat(
         results, axis=0, ignore_index=True
     ).sort_values(
@@ -118,7 +124,7 @@ def prepare_vp_for_all_directions(
     )
     
     del gdf
-   
+    '''
     return 
 
 
@@ -136,13 +142,13 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
 
-        condense_vp_to_linestring(analysis_date, CONFIG_DICT)
+        #condense_vp_to_linestring(analysis_date, CONFIG_DICT)
         
         time1 = datetime.datetime.now()
-        logger.info(
-            f"{analysis_date}: condense vp for trip-direction "
-            f"{time1 - start}"
-        )
+        #logger.info(
+        #    f"{analysis_date}: condense vp for trip-direction "
+        #    f"{time1 - start}"
+        #)
         
         prepare_vp_for_all_directions(analysis_date, CONFIG_DICT)
         
