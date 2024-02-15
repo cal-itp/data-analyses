@@ -31,7 +31,7 @@ def monotonic_check(arr: np.ndarray) -> bool:
     """
     diff_arr = np.diff(arr)
     
-    if np.all(diff_arr >= 0):
+    if np.all(diff_arr > 0):
         return True
     else:
         return False

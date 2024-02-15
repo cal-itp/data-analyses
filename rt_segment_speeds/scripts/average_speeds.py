@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Literal
 
 from calitp_data_analysis.geography_utils import WGS84
-from shared_utils import utils_to_add
 from calitp_data_analysis import utils
 from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
                                  segment_calcs, time_helpers)
@@ -183,7 +182,7 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
         columns = col_order + ["geometry"]
     )
     
-    utils_to_add.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         shape_stop_segments,
         SEGMENT_GCS,
         f"{SHAPE_SEG_FILE}_{analysis_date}"
@@ -216,7 +215,7 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
         columns = col_order + ["geometry"]
     )
     
-    utils_to_add.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         route_dir_segments,
         SEGMENT_GCS,
         f"{ROUTE_SEG_FILE}_{analysis_date}"
@@ -265,7 +264,7 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
         columns = col_order + ["route_name", "geometry"]
     )
     
-    utils_to_add.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         route_dir_avg,
         SEGMENT_GCS,
         f"{ROUTE_DIR_FILE}_{analysis_date}"
@@ -328,7 +327,7 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
         columns = col_order + ["geometry"]
     )
     
-    utils_to_add.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         route_dir_segments,
         SEGMENT_GCS,
         f"{ROUTE_SEG_FILE}_{time_span_str}"
@@ -433,7 +432,7 @@ if __name__ == "__main__":
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
     
-    
+    '''
     for month in ["apr2023", "oct2023"]:
         start = datetime.datetime.now()
         
@@ -443,5 +442,5 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
     
         logger.info(f"average rollups for {one_week}: {end - start}")
-    
+    '''
     
