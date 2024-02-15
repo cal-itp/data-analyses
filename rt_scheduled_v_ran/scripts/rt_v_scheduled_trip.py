@@ -4,6 +4,7 @@ import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.geography_utils import WGS84
 import update_vars
+from update_vars import analysis_date_list, CONFIG_DICT
 from segment_speed_utils.project_vars import (
     GCS_FILE_PATH,
     PROJECT_CRS,
@@ -18,7 +19,7 @@ import sys
 from loguru import logger
 
 # cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
-# cd ../rt_scheduled_v_ran/scripts 
+# cd ../rt_scheduled_v_ran/scripts && python rt_v_scheduled_trip.py
 
 # LOAD FILES
 def load_trip_speeds(analysis_date):
@@ -333,10 +334,11 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
          .merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer"))
     
     # Save
-    # from update_vars import CONFIG_DICT
-    # TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
-    # m1.to_parquet(f"{GCS_FILE_PATH}{TRIP_EXPORT}/metrics_{analysis_date}.parquet")
     m1.to_parquet(f"./ah_testing_{analysis_date}.parquet")
+        
+    TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
+    m1.to_parquet(f"{GCS_FILE_PATH}{TRIP_EXPORT}/metrics_{analysis_date}.parquet")
+
     time7 = datetime.datetime.now()
     logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
 
