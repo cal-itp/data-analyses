@@ -162,19 +162,7 @@ def remove_local_outputs(year: int, month: str):
 if __name__ == "__main__":
     
     # Define variables we'll probably change later
-    from update_vars import YEAR, MONTH, MONTH_CREATED
-    
-    # Check this url each month
-    # https://www.transit.dot.gov/ntd/data-product/monthly-module-adjusted-data-release
-    # Depending on if they fixed the Excel, there may be an additional suffix
-    
-    suffix = "_0"
-    FULL_URL = (
-        "https://www.transit.dot.gov/sites/fta.dot.gov/files/"
-        f"{MONTH_CREATED}/{MONTH}%20{YEAR}%20"
-        "Complete%20Monthly%20Ridership%20%28with%20"
-        f"adjustments%20and%20estimates%29{suffix}.xlsx"
-    )    
+    from update_vars import YEAR, MONTH, MONTH_CREATED, FULL_URL
     
     df = produce_ntd_monthly_ridership_by_rtpa(FULL_URL, YEAR, MONTH)
     print(df.columns)
