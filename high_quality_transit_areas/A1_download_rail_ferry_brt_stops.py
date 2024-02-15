@@ -23,7 +23,7 @@ def filter_trips_to_route_type(analysis_date: str,
     trips = helpers.import_scheduled_trips(
         analysis_date,
         columns = ["feed_key", "name", "trip_id", 
-                 "route_id", "route_type"],
+                 "route_id", "route_type", "route_desc"],
     )
     
     if isinstance(route_types, list):
@@ -33,6 +33,7 @@ def filter_trips_to_route_type(analysis_date: str,
         trips_subset = filter_to_brt_trips(trips)
         
     trips_subset = (trips_subset
+                    .drop(columns = "route_desc")
                     .drop_duplicates()
                     .reset_index(drop=True)
                    )
@@ -52,7 +53,7 @@ def filter_to_brt_trips(trips: pd.DataFrame) -> pd.DataFrame:
                                   ["METRO SILVER LINE", "METRO ORANGE LINE", 
                                    "METRO J LINE", "METRO G LINE"
                                   ]},
-        "Bay Area 511 Muni Schedule": {"route_short_name": 
+        "Bay Area 511 Muni Schedule": {"route_id": 
                                        ['49']},
         # Omni BRT -- too infrequent!
         #"OmniTrans Schedule": {"route_short_name": ["sbX"]}
