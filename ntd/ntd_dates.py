@@ -28,4 +28,5 @@ DATES = {
     # value is the month_updated in the url we're downloading from
     "oct2023": "2023-12",
     "nov2023": "2024-01",
+    "dec2023": "2024-02",
 }
