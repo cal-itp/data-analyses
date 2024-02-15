@@ -1,7 +1,8 @@
 import os
 os.environ['USE_PYGEOS'] = '0'
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
-from shared_utils import gtfs_utils_v2, geography_utils
+from shared_utils import gtfs_utils_v2
+from calitp_data_analysis import geography_utils
 
 import pandas as pd
 from siuba import *
