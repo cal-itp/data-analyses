@@ -175,14 +175,13 @@ def get_vp_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     ddf = dd.read_parquet(
         f"{SEGMENT_GCS}vp_usable_{analysis_date}",
         columns=[
-            "schedule_gtfs_dataset_key",
             "trip_instance_key",
             "location_timestamp_local",
         ],
     )
 
     ddf2 = (
-        ddf.groupby(["schedule_gtfs_dataset_key", "trip_instance_key"])
+        ddf.groupby(["trip_instance_key"])
         .agg({"location_timestamp_local": "min"})
         .reset_index()
         .rename(columns={"location_timestamp_local": "min_time"})
@@ -195,12 +194,11 @@ def get_vp_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
             lambda x: rt_utils.categorize_time_of_day(x.min_time), axis=1
         )
     )
+    
 
-    ddf3 = add_peak_offpeak_column(ddf2)
+    ddf2 = ddf2[["time_of_day","trip_instance_key"]]
 
-    ddf3 = ddf3[["schedule_gtfs_dataset_key", "trip_instance_key", "peak_offpeak"]]
-
-    return ddf3
+    return ddf2
 
 def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     """
