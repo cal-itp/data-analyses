@@ -6,12 +6,12 @@ from calitp_data_analysis.geography_utils import WGS84
 import update_vars
 from update_vars import analysis_date_list, CONFIG_DICT
 from segment_speed_utils.project_vars import (
-    GCS_FILE_PATH,
     PROJECT_CRS,
     SEGMENT_GCS,
+    RT_SCHED_GCS,
     analysis_date,
 )
-from segment_speed_utils import helpers, wrangle_shapes
+from segment_speed_utils import gtfs_schedule_wrangling, helpers, wrangle_shapes
 
 # Times
 import datetime
@@ -115,7 +115,7 @@ def update_completeness(df: pd.DataFrame):
     the total minutes with at least 1 GTFS ping per minute,
     and total minutes with at least 2 GTFS pings per minute.
     """
-    # Need a copy of numer of pings per minute to count for total minutes w gtfs
+    # Need a copy of number of pings per minute to count for total minutes w gtfs
     df["total_min_w_gtfs"] = df.number_of_pings_per_minute
     
     # Find the total min with at least 2 pings per min
@@ -131,7 +131,7 @@ def update_completeness(df: pd.DataFrame):
         .reset_index()
         .rename(
             columns={
-                "number_of_pings_per_minute": "total_pings_for_trip",
+                "number_of_pings_per_minute": "total_pings",
             }
         )
     )
@@ -248,6 +248,79 @@ def total_counts(result: dd.DataFrame):
 
     return count_df
 
+def add_route_time(df:pd.DataFrame, analysis_date: str)->pd.DataFrame:
+    """
+    Add route id, direction id,
+    off_peak, and time_of_day columns. Do some
+    light cleaning.
+    """
+    routes_df = helpers.import_scheduled_trips(
+        analysis_date,
+        columns=[
+            "gtfs_dataset_key",
+            "route_id",
+            "direction_id",
+            "trip_instance_key",
+        ],
+        get_pandas=True,
+    )
+
+    df2 = pd.merge(
+        df,
+        routes_df,
+        on=["schedule_gtfs_dataset_key", "trip_instance_key"],
+        how="left",
+        indicator="sched_rt_category",
+    )
+
+    df2 = df2.assign(
+        route_id=df2.route_id.fillna("Unknown"),
+        direction_id=df2.direction_id.astype("Int64"),
+        total_vp=df2.total_vp.fillna(0).astype("Int64"),
+        vp_in_shape=df2.vp_in_shape.fillna(0).astype("Int64"),
+        rt_service_min=df2.rt_service_min.round(0).astype("Int64"),
+        sched_rt_category=df2.apply(
+            lambda x: "vp_only" if x.sched_rt_category == "left_only" else "vp_sched",
+            axis=1,
+        ),
+    )
+
+    sched_time_of_day = gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)[
+        ["trip_instance_key", "time_of_day", "service_minutes"]
+    ].rename(columns={"time_of_day": "sched_time_of_day"})
+    
+    rt_time_of_day = gtfs_schedule_wrangling.get_vp_trip_time_buckets(
+        analysis_date
+    ).rename(columns={"time_of_day": "rt_time_of_day"})
+
+    df3 = pd.merge(
+        df2,
+        sched_time_of_day,
+        on=["trip_instance_key"],
+        how="left",
+    ).merge(
+        rt_time_of_day,
+        on=["trip_instance_key"],
+        how="inner",
+    )
+    
+    df3['time_of_day'] = df3.sched_time_of_day.fillna(df3.rt_time_of_day)
+    df3 =  gtfs_schedule_wrangling.add_peak_offpeak_column(df3)
+    df3 = df3.drop(columns = ['sched_time_of_day', 'rt_time_of_day'])
+    return df3
+
+def add_metrics(df: pd.DataFrame) -> pd.DataFrame:
+
+    df["pings_per_min"] = df.total_pings / df.rt_service_min
+    df["spatial_accuracy_pct"] = df.vp_in_shape / df.total_vp
+    df["rt_w_gtfs_pct"] = df.total_min_w_gtfs / df.rt_service_min
+    df["rt_v_scheduled_time_pct"] = df.rt_service_min / df.service_minutes - 1
+
+    # Mask rt_triptime_w_gtfs_pct for any values above 100%
+    df.rt_w_gtfs_pct = df.rt_w_gtfs_pct.mask(df.rt_w_gtfs_pct > 1, 1)
+
+    return df
+
 # Complete
 def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     start = datetime.datetime.now()
@@ -333,11 +406,15 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     m1 = (rt_service_df.merge(pings_trip_time_df, on = "trip_instance_key", how = "outer")
          .merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer"))
     
+    ### Add more columns & a bit of  cleaning ###
+    m1 = add_route_time(m1, analysis_date)
+    
+    ### Add in metrics on the trip level ###
+    m1 = add_metrics(m1)
+    
     # Save
-    m1.to_parquet(f"./ah_testing_{analysis_date}.parquet")
-        
     TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
-    m1.to_parquet(f"{GCS_FILE_PATH}{TRIP_EXPORT}/metrics_{analysis_date}.parquet")
+    m1.to_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}/trip_{analysis_date}.parquet")
 
     time7 = datetime.datetime.now()
     logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
