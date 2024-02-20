@@ -3,15 +3,15 @@ import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.geography_utils import WGS84
-import vp_spatial_accuracy
 import update_vars
+from update_vars import trip_analysis_date_list, CONFIG_DICT
 from segment_speed_utils.project_vars import (
-    GCS_FILE_PATH,
     PROJECT_CRS,
     SEGMENT_GCS,
+    RT_SCHED_GCS,
     analysis_date,
 )
-from segment_speed_utils import helpers, wrangle_shapes
+from segment_speed_utils import gtfs_schedule_wrangling, helpers, wrangle_shapes
 
 # Times
 import datetime
@@ -19,7 +19,7 @@ import sys
 from loguru import logger
 
 # cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
-# cd ../rt_scheduled_v_ran/scripts 
+# cd ../rt_scheduled_v_ran/scripts && python rt_v_scheduled_trip.py
 
 # LOAD FILES
 def load_trip_speeds(analysis_date):
@@ -60,12 +60,12 @@ def total_trip_time(vp_usable_df: pd.DataFrame):
     recorded in real time data so we can compare it with
     scheduled service minutes.
     """
-    subset = ["location_timestamp_local", "trip_instance_key", "max_time"]
+    subset = ["location_timestamp_local", "trip_instance_key", "max_time", "schedule_gtfs_dataset_key"]
     vp_usable_df = vp_usable_df[subset]
 
     # Find the max and the min time based on location timestamp
     df = (
-        vp_usable_df.groupby(["trip_instance_key"])
+        vp_usable_df.groupby(["schedule_gtfs_dataset_key","trip_instance_key"])
         .agg({"location_timestamp_local": "min", "max_time": "max"})
         .reset_index()
         .rename(columns={"location_timestamp_local": "min_time"})
@@ -90,8 +90,7 @@ def trips_by_one_min(vp_usable_df: pd.DataFrame):
     # Find number of pings each minute
     df = (
         vp_usable_df.groupby(
-            [
-                "trip_instance_key",
+            [ "trip_instance_key",
                 pd.Grouper(key="location_timestamp_local", freq="1Min"),
             ]
         )
@@ -116,7 +115,7 @@ def update_completeness(df: pd.DataFrame):
     the total minutes with at least 1 GTFS ping per minute,
     and total minutes with at least 2 GTFS pings per minute.
     """
-    # Need a copy of numer of pings per minute to count for total minutes w gtfs
+    # Need a copy of number of pings per minute to count for total minutes w gtfs
     df["total_min_w_gtfs"] = df.number_of_pings_per_minute
     
     # Find the total min with at least 2 pings per min
@@ -132,7 +131,7 @@ def update_completeness(df: pd.DataFrame):
         .reset_index()
         .rename(
             columns={
-                "number_of_pings_per_minute": "total_pings_for_trip",
+                "number_of_pings_per_minute": "total_pings",
             }
         )
     )
@@ -249,6 +248,79 @@ def total_counts(result: dd.DataFrame):
 
     return count_df
 
+def add_route_time(df:pd.DataFrame, analysis_date: str)->pd.DataFrame:
+    """
+    Add route id, direction id,
+    off_peak, and time_of_day columns. Do some
+    light cleaning.
+    """
+    routes_df = helpers.import_scheduled_trips(
+        analysis_date,
+        columns=[
+            "gtfs_dataset_key",
+            "route_id",
+            "direction_id",
+            "trip_instance_key",
+        ],
+        get_pandas=True,
+    )
+
+    df2 = pd.merge(
+        df,
+        routes_df,
+        on=["schedule_gtfs_dataset_key", "trip_instance_key"],
+        how="left",
+        indicator="sched_rt_category",
+    )
+
+    df2 = df2.assign(
+        route_id=df2.route_id.fillna("Unknown"),
+        direction_id=df2.direction_id.astype("Int64"),
+        total_vp=df2.total_vp.fillna(0).astype("Int64"),
+        vp_in_shape=df2.vp_in_shape.fillna(0).astype("Int64"),
+        rt_service_min=df2.rt_service_min.round(0).astype("Int64"),
+        sched_rt_category=df2.apply(
+            lambda x: "vp_only" if x.sched_rt_category == "left_only" else "vp_sched",
+            axis=1,
+        ),
+    )
+
+    sched_time_of_day = gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)[
+        ["trip_instance_key", "time_of_day", "service_minutes"]
+    ].rename(columns={"time_of_day": "sched_time_of_day"})
+    
+    rt_time_of_day = gtfs_schedule_wrangling.get_vp_trip_time_buckets(
+        analysis_date
+    ).rename(columns={"time_of_day": "rt_time_of_day"})
+
+    df3 = pd.merge(
+        df2,
+        sched_time_of_day,
+        on=["trip_instance_key"],
+        how="left",
+    ).merge(
+        rt_time_of_day,
+        on=["trip_instance_key"],
+        how="inner",
+    )
+    
+    df3['time_of_day'] = df3.sched_time_of_day.fillna(df3.rt_time_of_day)
+    df3 =  gtfs_schedule_wrangling.add_peak_offpeak_column(df3)
+    df3 = df3.drop(columns = ['sched_time_of_day', 'rt_time_of_day'])
+    return df3
+
+def add_metrics(df: pd.DataFrame) -> pd.DataFrame:
+
+    df["pings_per_min"] = df.total_pings / df.rt_service_min
+    df["spatial_accuracy_pct"] = df.vp_in_shape / df.total_vp
+    df["rt_w_gtfs_pct"] = df.total_min_w_gtfs / df.rt_service_min
+    df["rt_v_scheduled_time_pct"] = df.rt_service_min / df.service_minutes - 1
+
+    # Mask rt_triptime_w_gtfs_pct for any values above 100%
+    df.rt_w_gtfs_pct = df.rt_w_gtfs_pct.mask(df.rt_w_gtfs_pct > 1, 1)
+
+    return df
+
 # Complete
 def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     start = datetime.datetime.now()
@@ -327,28 +399,23 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     logger.info(f"Spatial accuracy grouping metric: {time6-time5}")
     
     ## Merges ##
-    # Load trip speeds
-    trip_speeds_df = load_trip_speeds(analysis_date)
     rt_service_df = rt_service_df.compute()
     pings_trip_time_df = pings_trip_time_df.compute()
     spatial_accuracy_df = spatial_accuracy_df.compute()
     
     m1 = (rt_service_df.merge(pings_trip_time_df, on = "trip_instance_key", how = "outer")
-         .merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer")
-         .merge(trip_speeds_df, on ="trip_instance_key", how = "outer"))
+         .merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer"))
     
-    # Some metrics
-    m1['pings_per_min'] = (m1.total_pings_for_trip / m1.rt_service_min)
-    m1['spatial_accuracy_pct'] = (m1.vp_in_shape/m1.total_vp) * 100
-    m1['rt_triptime_w_gtfs_pct'] = (m1.total_min_w_gtfs / m1.rt_service_min) * 100
-    m1['rt_v_scheduled_trip_time_pct'] = (m1.rt_service_min / m1.service_minutes - 1) * 100
+    ### Add more columns & a bit of  cleaning ###
+    m1 = add_route_time(m1, analysis_date)
     
-    # Mask rt_triptime_w_gtfs_pct for any values above 100%
-    m1.rt_triptime_w_gtfs_pct = m1.rt_triptime_w_gtfs_pct.mask(m1.rt_triptime_w_gtfs_pct > 100).fillna(100)
+    ### Add in metrics on the trip level ###
+    m1 = add_metrics(m1)
     
     # Save
-    m1.to_parquet(f"{GCS_FILE_PATH}rt_vs_schedule/trip_level_metrics/{analysis_date}_metrics.parquet")
-    
+    TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
+    m1.to_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}/trip_{analysis_date}.parquet")
+
     time7 = datetime.datetime.now()
     logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
 
@@ -358,6 +425,7 @@ if __name__ == "__main__":
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
-    for date in update_vars.analysis_date_list:
+    
+    for date in update_vars.trip_analysis_date_list:
         vp_usable_metrics(date)
         print('Done')
