@@ -4,7 +4,7 @@ import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.geography_utils import WGS84
 import update_vars
-from update_vars import analysis_date_list, CONFIG_DICT
+from update_vars import trip_analysis_date_list, CONFIG_DICT
 from segment_speed_utils.project_vars import (
     PROJECT_CRS,
     SEGMENT_GCS,
@@ -426,6 +426,6 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    for date in update_vars.analysis_date_list:
+    for date in update_vars.trip_analysis_date_list:
         vp_usable_metrics(date)
         print('Done')
