@@ -2,10 +2,16 @@ from shared_utils import rt_dates
 import yaml
 from pathlib import Path
 
-months = ["sep", "oct"]         
+trip_months = ["sep", "oct"]         
 
-analysis_date_list = [
-    rt_dates.DATES[f"{m}2023"] for m in months
+trip_analysis_date_list = [
+    rt_dates.DATES[f"{m}2023"] for m in trip_months
+]
+
+route_months = ["sep", "oct"]         
+
+route_analysis_date_list = [
+    rt_dates.DATES[f"{m}2023"] for m in trip_months
 ]
 
 CONFIG_PATH = Path("config.yml")
