@@ -147,5 +147,4 @@ if __name__ == "__main__":
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
     for analysis_date in analysis_date_list:
-        
         calculate_speed_from_stop_arrivals(analysis_date, STOP_SEG_DICT)

@@ -3,6 +3,8 @@ Cached dates available in rt_delay/.
 
 GCS: gs://calitp-analytics-data/data-analyses/rt_delay/cached_views/
 """
+from typing import Literal
+
 # HQTAs and RT speedmaps
 DATES = {
     "feb2022": "2022-02-08",
@@ -57,8 +59,16 @@ y2023_dates = [
 
 y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
 
-apr_week = [v for k, v in DATES.items() if "apr2023" in k]
-oct_week = [v for k, v in DATES.items() if "oct2023" in k]
+
+def get_week(month: Literal["apr2023", "oct2023"], exclude_wed: bool) -> list:
+    if exclude_wed:
+        return [v for k, v in DATES.items() if month in k]
+    else:
+        return [v for k, v in DATES.items() if month in k and not k.endswith(month)]
+
+
+apr_week = get_week(month="apr2023", exclude_wed=False)
+oct_week = get_week(month="oct2023", exclude_wed=False)
 
 
 # Planning and Modal Advisory Committee (PMAC) - quarterly
