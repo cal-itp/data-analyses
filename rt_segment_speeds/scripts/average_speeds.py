@@ -366,7 +366,7 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
         columns = col_order + ["route_name", "geometry"]
     )
     
-    utils_to_add.geoparquet_gcs_export(
+    utils.geoparquet_gcs_export(
         route_dir_avg,
         SEGMENT_GCS,
         f"{ROUTE_DIR_FILE}_{time_span_str}"
@@ -432,15 +432,14 @@ if __name__ == "__main__":
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
     
-    '''
-    for month in ["apr2023", "oct2023"]:
-        start = datetime.datetime.now()
-        
-        one_week = [v for k, v in rt_dates.DATES.items() if month in k]
     
+    for one_week in [rt_dates.oct_week, rt_dates.apr_week]:
+        start = datetime.datetime.now()
+            
         multi_day_averages(one_week, STOP_SEG_DICT)
         end = datetime.datetime.now()
     
         logger.info(f"average rollups for {one_week}: {end - start}")
-    '''
+    
+    
     

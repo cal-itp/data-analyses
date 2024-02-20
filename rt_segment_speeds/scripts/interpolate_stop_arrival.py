@@ -18,7 +18,7 @@ from segment_speed_utils.project_vars import (SEGMENT_GCS, PROJECT_CRS,
 def project_points_onto_shape(
     stop_geometry: shapely.Point,
     vp_coords_trio: shapely.LineString,
-    shape_geometry: shapely.Geometry,
+    shape_geometry: shapely.LineString,
     timestamp_arr: np.ndarray,
 ) -> tuple[float]:
     """
@@ -26,16 +26,17 @@ def project_points_onto_shape(
     and the stop position onto the shape geometry.
     Use np.interp to find interpolated arrival time
     """
-    stop_position = shape_geometry.project(stop_geometry)
-
+    stop_position = vp_coords_trio.project(stop_geometry)
+    stop_meters = shape_geometry.project(stop_geometry)
+    
     points = [shapely.Point(p) for p in vp_coords_trio.coords]
-    xp = np.asarray([shape_geometry.project(p) for p in points])
+    xp = np.asarray([vp_coords_trio.project(p) for p in points])
 
     yp = timestamp_arr.astype("datetime64[s]").astype("float64")
 
     interpolated_arrival = np.interp(stop_position, xp, yp)
-    
-    return stop_position, interpolated_arrival
+        
+    return stop_meters, interpolated_arrival
 
 
 def interpolate_stop_arrivals(
@@ -58,6 +59,7 @@ def interpolate_stop_arrivals(
     )
 
     df = df.assign(
+        stop_geometry = df.stop_geometry.to_crs(PROJECT_CRS),
         vp_coords_trio = df.vp_coords_trio.to_crs(PROJECT_CRS)
     )
 
@@ -96,7 +98,8 @@ def interpolate_stop_arrivals(
         arrival_time = stop_arrival_series,
     ).astype({"arrival_time": "datetime64[s]"})[
         ["trip_instance_key", "shape_array_key",
-         "stop_sequence", "stop_id", "stop_meters",
+         "stop_sequence", "stop_id", 
+         "stop_meters",
          "arrival_time"
     ]]
 
@@ -121,8 +124,10 @@ if __name__ == "__main__":
                level="INFO")
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    
+    RT_STOP_TIMES_DICT = helpers.get_parameters(CONFIG_PATH, "rt_stop_times")
+
     for analysis_date in analysis_date_list:        
         interpolate_stop_arrivals(analysis_date, STOP_SEG_DICT)
+        #interpolate_stop_arrivals(analysis_date, RT_STOP_TIMES_DICT)
 
         
