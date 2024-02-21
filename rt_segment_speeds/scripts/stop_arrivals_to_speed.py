@@ -36,7 +36,7 @@ def attach_operator_natural_identifiers(
         columns = {"time_of_day": "schedule_time_of_day"})
     
     # If trip isn't in schedule, use vp to derive
-    vp_time_of_day = gtfs_schedule_wrangling.rt_time_of_day(
+    vp_time_of_day = gtfs_schedule_wrangling.get_vp_trip_time_buckets(
         analysis_date
     ).rename(
         columns = {"time_of_day": "vp_time_of_day"})
@@ -78,8 +78,8 @@ def attach_operator_natural_identifiers(
         time_of_day = df_with_natural_ids.schedule_time_of_day.fillna(
             df_with_natural_ids.vp_time_of_day)
     ).drop(columns = ["schedule_time_of_day", "vp_time_of_day"])
-    
-    del shape_identifiers, time_of_day
+        
+    del df, stop_pair, sched_time_of_day, vp_time_of_day
     
     return df_with_natural_ids
 
