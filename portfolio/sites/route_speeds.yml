@@ -44,9 +44,6 @@ parts:
   - caption: Bay Area 511 Muni Schedule
     params:
       name: Bay Area 511 Muni Schedule
-  - caption: Bay Area 511 Petaluma Schedule
-    params:
-      name: Bay Area 511 Petaluma Schedule
   - caption: Bay Area 511 SamTrans Schedule
     params:
       name: Bay Area 511 SamTrans Schedule
@@ -56,9 +53,6 @@ parts:
   - caption: Bay Area 511 Santa Clara Transit Schedule
     params:
       name: Bay Area 511 Santa Clara Transit Schedule
-  - caption: Bay Area 511 Santa Rosa CityBus Schedule
-    params:
-      name: Bay Area 511 Santa Rosa CityBus Schedule
   - caption: Bay Area 511 SolTrans Schedule
     params:
       name: Bay Area 511 SolTrans Schedule
@@ -71,9 +65,6 @@ parts:
   - caption: Bay Area 511 Tri-Valley Wheels Schedule
     params:
       name: Bay Area 511 Tri-Valley Wheels Schedule
-  - caption: Bay Area 511 Union City Transit Schedule
-    params:
-      name: Bay Area 511 Union City Transit Schedule
   - caption: Bay Area 511 Vine Transit Schedule
     params:
       name: Bay Area 511 Vine Transit Schedule
@@ -83,9 +74,6 @@ parts:
   - caption: Beach Cities GMV Schedule
     params:
       name: Beach Cities GMV Schedule
-  - caption: Bear Schedule
-    params:
-      name: Bear Schedule
   - caption: Beaumont Pass Schedule
     params:
       name: Beaumont Pass Schedule
@@ -167,9 +155,6 @@ parts:
   - caption: OmniTrans Schedule
     params:
       name: OmniTrans Schedule
-  - caption: Pasadena Schedule
-    params:
-      name: Pasadena Schedule
   - caption: PresidiGo Schedule
     params:
       name: PresidiGo Schedule
@@ -221,9 +206,6 @@ parts:
   - caption: Turlock Schedule
     params:
       name: Turlock Schedule
-  - caption: Unitrans Schedule
-    params:
-      name: Unitrans Schedule
   - caption: VCTC GMV Schedule
     params:
       name: VCTC GMV Schedule
@@ -236,8 +218,5 @@ parts:
   - caption: Yolobus Schedule
     params:
       name: Yolobus Schedule
-  - caption: eTrans Schedule
-    params:
-      name: eTrans Schedule
 readme: ./rt_segment_speeds/README.md
 title: Average Speeds by Transit Operator Exploratory Charts

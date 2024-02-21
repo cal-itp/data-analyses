@@ -16,20 +16,16 @@ parts:
     -   file: name_bay-area-511-mvgo-schedule/0__28_route_averages__name_bay-area-511-mvgo-schedule.ipynb
     -   file: name_bay-area-511-marin-schedule/0__28_route_averages__name_bay-area-511-marin-schedule.ipynb
     -   file: name_bay-area-511-muni-schedule/0__28_route_averages__name_bay-area-511-muni-schedule.ipynb
-    -   file: name_bay-area-511-petaluma-schedule/0__28_route_averages__name_bay-area-511-petaluma-schedule.ipynb
     -   file: name_bay-area-511-samtrans-schedule/0__28_route_averages__name_bay-area-511-samtrans-schedule.ipynb
     -   file: name_bay-area-511-san-francisco-bay-ferry-schedule/0__28_route_averages__name_bay-area-511-san-francisco-bay-ferry-schedule.ipynb
     -   file: name_bay-area-511-santa-clara-transit-schedule/0__28_route_averages__name_bay-area-511-santa-clara-transit-schedule.ipynb
-    -   file: name_bay-area-511-santa-rosa-citybus-schedule/0__28_route_averages__name_bay-area-511-santa-rosa-citybus-schedule.ipynb
     -   file: name_bay-area-511-soltrans-schedule/0__28_route_averages__name_bay-area-511-soltrans-schedule.ipynb
     -   file: name_bay-area-511-sonoma-marin-area-rail-transit-schedule/0__28_route_averages__name_bay-area-511-sonoma-marin-area-rail-transit-schedule.ipynb
     -   file: name_bay-area-511-tri-delta-schedule/0__28_route_averages__name_bay-area-511-tri-delta-schedule.ipynb
     -   file: name_bay-area-511-tri-valley-wheels-schedule/0__28_route_averages__name_bay-area-511-tri-valley-wheels-schedule.ipynb
-    -   file: name_bay-area-511-union-city-transit-schedule/0__28_route_averages__name_bay-area-511-union-city-transit-schedule.ipynb
     -   file: name_bay-area-511-vine-transit-schedule/0__28_route_averages__name_bay-area-511-vine-transit-schedule.ipynb
     -   file: name_bay-area-511-westcat-schedule/0__28_route_averages__name_bay-area-511-westcat-schedule.ipynb
     -   file: name_beach-cities-gmv-schedule/0__28_route_averages__name_beach-cities-gmv-schedule.ipynb
-    -   file: name_bear-schedule/0__28_route_averages__name_bear-schedule.ipynb
     -   file: name_beaumont-pass-schedule/0__28_route_averages__name_beaumont-pass-schedule.ipynb
     -   file: name_big-blue-bus-schedule/0__28_route_averages__name_big-blue-bus-schedule.ipynb
     -   file: name_bruinbus-schedule/0__28_route_averages__name_bruinbus-schedule.ipynb
@@ -57,7 +53,6 @@ parts:
     -   file: name_norwalk-avail-schedule/0__28_route_averages__name_norwalk-avail-schedule.ipynb
     -   file: name_octa-schedule/0__28_route_averages__name_octa-schedule.ipynb
     -   file: name_omnitrans-schedule/0__28_route_averages__name_omnitrans-schedule.ipynb
-    -   file: name_pasadena-schedule/0__28_route_averages__name_pasadena-schedule.ipynb
     -   file: name_presidigo-schedule/0__28_route_averages__name_presidigo-schedule.ipynb
     -   file: name_redding-schedule/0__28_route_averages__name_redding-schedule.ipynb
     -   file: name_redwood-coast-schedule/0__28_route_averages__name_redwood-coast-schedule.ipynb
@@ -75,10 +70,8 @@ parts:
     -   file: name_tahoe-transportation-district-gmv-schedule/0__28_route_averages__name_tahoe-transportation-district-gmv-schedule.ipynb
     -   file: name_torrance-schedule/0__28_route_averages__name_torrance-schedule.ipynb
     -   file: name_turlock-schedule/0__28_route_averages__name_turlock-schedule.ipynb
-    -   file: name_unitrans-schedule/0__28_route_averages__name_unitrans-schedule.ipynb
     -   file: name_vctc-gmv-schedule/0__28_route_averages__name_vctc-gmv-schedule.ipynb
     -   file: name_victor-valley-gmv-schedule/0__28_route_averages__name_victor-valley-gmv-schedule.ipynb
     -   file: name_visalia-schedule/0__28_route_averages__name_visalia-schedule.ipynb
     -   file: name_yolobus-schedule/0__28_route_averages__name_yolobus-schedule.ipynb
-    -   file: name_etrans-schedule/0__28_route_averages__name_etrans-schedule.ipynb
 root: README
