@@ -437,7 +437,7 @@ if __name__ == "__main__":
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
     
-    
+    '''
     for one_week in [rt_dates.oct_week, rt_dates.apr_week]:
         start = datetime.datetime.now()
             
@@ -445,6 +445,4 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
     
         logger.info(f"average rollups for {one_week}: {end - start}")
-    
-    
-    
+    '''
