@@ -11,6 +11,7 @@ Load in cleaned up data
 """
 def load_state_rail_plan():
     df = srp_utils.clean_state_rail_plan(srp_utils.state_rail_plan_file)
+    df['data_source'] = "State Rail Plan"
     return df
 def load_lost():
     df = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}LOST/LOST_all_projects.xlsx", sheet_name = "Main"))
