@@ -20,9 +20,6 @@ from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
 
 OPERATOR_COLS = [
     "schedule_gtfs_dataset_key", 
-    #"name", # from schedule
-    #"organization_source_record_id", "organization_name", # from dim_organizations
-    #"base64_url", "caltrans_district", 
 ]
 
 SHAPE_STOP_COLS = [
@@ -123,6 +120,9 @@ def concatenate_trip_segment_speeds(
     """
     SPEED_FILE = dict_inputs["stage4"]
     MAX_SPEED = dict_inputs["max_speed"]
+    METERS_CUTOFF = dict_inputs["min_meters_elapsed"]
+    MAX_TRIP_SECONDS = dict_inputs["max_trip_minutes"] * 60
+    MIN_TRIP_SECONDS = dict_inputs["min_trip_minutes"] * 60
     
     df = pd.concat([
         pd.read_parquet(
@@ -132,7 +132,12 @@ def concatenate_trip_segment_speeds(
                            "trip_instance_key", "speed_mph", 
                            "meters_elapsed", "sec_elapsed", 
                            "time_of_day"]),
-            filters = [[("speed_mph", "<=", MAX_SPEED)]]
+            filters = [[
+                ("speed_mph", "<=", MAX_SPEED), 
+                ("meters_elapsed", ">=", METERS_CUTOFF),
+                ("sec_elapsed", ">=", MIN_TRIP_SECONDS),
+                ("sec_elapsed", "<=", MAX_TRIP_SECONDS)
+            ]]
         ).assign(
             service_date = pd.to_datetime(analysis_date)
         ) for analysis_date in analysis_date_list], 
