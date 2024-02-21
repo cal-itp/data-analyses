@@ -4,12 +4,14 @@ Grab all files in the rollup
 import datetime
 import pandas as pd
 
-from segment_speed_utils import time_series_utils
+from segment_speed_utils import helpers, time_series_utils
 from segment_speed_utils.project_vars import SEGMENT_GCS, PUBLIC_GCS
 
 
 if __name__ == "__main__":
 
+    from segment_speed_utils.project_vars import CONFIG_PATH
+    
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
     DATASETS = [

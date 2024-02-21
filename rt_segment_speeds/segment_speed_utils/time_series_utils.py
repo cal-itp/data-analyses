@@ -28,22 +28,27 @@ def concatenate_datasets_across_months(
     """
     Concatenate parquets across all months of available data.
     """
-    list_of_files = fs.glob(f"{SEGMENT_GCS}rollup_singleday/{dataset_name}_*")
+    list_of_files = fs.glob(f"{SEGMENT_GCS}{dataset_name}_*")
     
-    dates = [Path(i).stem.split(f"{dataset_name}_")[1] for i in list_of_files]
+    # If the dataset name includes a folder, parse that away
+    dataset_stem = Path(dataset).stem
+
+    dates = [Path(i).stem.split(f"{dataset_stem}_")[1] for i in list_of_files]
     
-    
-    df = delayed(pd.concat)([
-        gpd.read_parquet(
-            f"{SEGMENT_GCS}rollup_singleday/{dataset_name}_{d}.parquet"
+    dfs = [
+        delayed(gpd.read_parquet)(
+            f"{SEGMENT_GCS}{dataset_name}_{d}.parquet"
         ).assign(
             service_date = pd.to_datetime(d)
         ) for d in dates
-    ], axis=0, ignore_index = True
+    ]
+    
+    df = delayed(pd.concat)(
+        dfs, axis=0, ignore_index=True
     ).sort_values(
         ["organization_name", "service_date"] + ROUTE_DIR_COLS
     ).reset_index(drop=True)    
     
-    df = compute(df)[0]
+    df = compute(df)[0]    
     
     return df
