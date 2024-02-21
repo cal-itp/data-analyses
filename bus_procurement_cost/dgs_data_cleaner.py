@@ -151,7 +151,7 @@ def agg_by_agency(df:pd.DataFrame) ->pd.DataFrame:
 if __name__ == "__main__":
 
     # initial df
-    dgs_17bc = clean_dgs()
+    dgs_17bc = clean_dgs_columns()
     
     # assigning new columns
     df2 = dgs_17bc.assign(
