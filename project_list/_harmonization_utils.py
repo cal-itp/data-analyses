@@ -12,7 +12,6 @@ Load in cleaned up data
 def load_state_rail_plan():
     df = srp_utils.clean_state_rail_plan(srp_utils.state_rail_plan_file)
     return df
-
 def load_lost():
     df = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}LOST/LOST_all_projects.xlsx", sheet_name = "Main"))
     
@@ -20,10 +19,6 @@ def load_lost():
     df.estimated_lost_funds = df.estimated_lost_funds* 1_000_000
     
     return df
-
-def load_sb1():
-    return sb1_utils.sb1_final()
-
 """
 Harmonizing
 Functions
