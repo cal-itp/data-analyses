@@ -36,12 +36,14 @@ merge_col = [
 ]
 
 # columns to change dtype
-to_int64 =['contract_unit_price',
-       'extended_contract_price_paid',
-       'total_with_options_per_unit',
-       'grand_total']
+to_int64 =[
+    'contract_unit_price',
+    'extended_contract_price_paid',
+    'total_with_options_per_unit',
+    'grand_total'
+]
 
-def get_data(path, file, sheet):
+def get_data(path:str, file:str, sheet:str)->pd.DataFrame:
     """
     read in DGS usage report excel data from bus_procurement_cost folder
     """
@@ -89,14 +91,15 @@ def prop_type_finder(description):
     function that matches prop_list keywords to item_description col. returns the prop type keywords it matched on. else returns not specified.
     To be used with .assign()
     '''
-    prop_list = ['Battery Electric Bus',
-            'battery electric bus',
-            'Fuel Cell Electric Bus',
-            'fuel cell electric bus',
-            'Hydrogen Electic Bus',
-            'hydrogen electric bus',
-            'battery electric',
-            ]
+    prop_list = [
+        'Battery Electric Bus',
+        'battery electric bus',
+        'Fuel Cell Electric Bus',
+        'fuel cell electric bus',
+        'Hydrogen Electic Bus',
+        'hydrogen electric bus',
+        'battery electric',
+    ]
     
     for keyword in prop_list:
         if keyword in description:
@@ -110,12 +113,14 @@ def bus_size_finder(description):
     To be used with .assign()
     '''
     
-    size_list =['35 Foot',
-           '40 Foot',
-           '60 foot',
-           '40 foot',
-           '35 foot',
-           ]
+    size_list = [
+        '35 Foot',
+        '40 Foot',
+        '60 foot',
+        '40 foot',
+        '35 foot',
+    ]
+    
     for keyword in size_list:
         if keyword in description:
             return keyword
@@ -136,7 +141,6 @@ def agg_by_agency(df:pd.DataFrame) ->pd.DataFrame:
                                             'total_cost',
                                             'prop_type',
                                             'bus_size_type']]
-
 
     agg_agency_bus_count3 = agg_agency_bus_count2.groupby('ordering_agency_name').agg({
         'quantity':'sum',
