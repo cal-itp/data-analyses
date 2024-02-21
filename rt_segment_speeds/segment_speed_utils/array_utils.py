@@ -13,7 +13,7 @@ def rolling_window_make_array(
 ) -> pd.DataFrame:
     # https://stackoverflow.com/questions/47482009/pandas-rolling-window-to-return-an-array
     df[f"rolling_{rolling_col}"] = [
-        np.asarray(window)for window in 
+        np.asarray(window) for window in 
         df.groupby("trip_instance_key")[rolling_col].rolling(
             window = window, center=True)
     ]

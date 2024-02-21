@@ -10,9 +10,6 @@ References:
 * https://gis.stackexchange.com/questions/416284/splitting-multiline-or-linestring-into-equal-segments-of-particular-length-using
 * https://stackoverflow.com/questions/62053253/how-to-split-a-linestring-to-segments
 """
-import dask.array as da
-import dask.dataframe as dd
-import dask_geopandas as dg
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -182,32 +179,17 @@ def vp_as_gdf(
     return vp_gdf
 
 
-def project_vp_onto_segment_geometry(
-    vp: pd.DataFrame,
-    segment_gdf: gpd.GeoDataFrame,
-    grouping_cols: list 
-) -> pd.DataFrame:
+def interpolate_stop_arrival_time(
+    stop_position: float, 
+    shape_meters_arr: np.ndarray,
+    timestamp_arr: np.ndarray
+) -> float:
     """
-    Project vp onto either shape_geometry or 
-    road_geometry.
+    Interpolate the arrival time given the stop meters position.
+    Cast datetimes into floats and cast back as datetime.
     """
-    segment_gdf = segment_gdf.rename(columns = {"geometry": "line_geometry"})
-        
-    vp_gdf = vp_as_gdf(vp)
-    
-    gdf = pd.merge(
-        vp_gdf,
-        segment_gdf,
-        on = grouping_cols,
-        how = "inner"
-    )
-    
-    gdf = gdf.assign(
-        shape_meters = gdf.line_geometry.project(gdf.geometry)
-    )
-    
-    vp_projected_result = gdf[
-        ["vp_idx"] + grouping_cols + ["shape_meters"]
-    ].drop_duplicates()
-    
-    return vp_projected_result
+    timestamp_arr = np.asarray(timestamp_arr).astype("datetime64[s]").astype("float64")
+
+    return np.interp(
+        stop_position, np.asarray(shape_meters_arr), timestamp_arr
+    ).astype("datetime64[s]")

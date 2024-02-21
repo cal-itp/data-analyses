@@ -11,8 +11,10 @@ stop_segments:
     route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
     segments_file: "segment_options/shape_stop_segments"
     timestamp_col: "location_timestamp_local"
-    time_min_cutoff: 10
+    min_trip_minutes: 10
+    max_trip_minutes: 180
     max_speed: 80
+    min_meters_elapsed: 1609
 rt_stop_times:
     stage1: "vp_usable"
     stage2: "nearest/nearest_vp_rt_stop_times"    
@@ -28,4 +30,3 @@ road_segments:
     segments_file: "road_segments"
     segment_identifier_cols: ["linearid", "mtfcc", "segment_sequence"]
     timestamp_col: "location_timestamp_local"
-    time_min_cutoff: 10

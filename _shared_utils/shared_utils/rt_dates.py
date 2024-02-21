@@ -62,9 +62,9 @@ y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
 
 def get_week(month: Literal["apr2023", "oct2023"], exclude_wed: bool) -> list:
     if exclude_wed:
-        return [v for k, v in DATES.items() if month in k]
-    else:
         return [v for k, v in DATES.items() if month in k and not k.endswith(month)]
+    else:
+        return [v for k, v in DATES.items() if month in k]
 
 
 apr_week = get_week(month="apr2023", exclude_wed=False)

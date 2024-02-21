@@ -10,7 +10,7 @@ import sys
 
 from loguru import logger
 
-from segment_speed_utils import helpers
+from segment_speed_utils import array_utils, helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import (SEGMENT_GCS, PROJECT_CRS, 
                                               CONFIG_PATH
                                              )
@@ -30,14 +30,104 @@ def project_points_onto_shape(
     stop_meters = shape_geometry.project(stop_geometry)
     
     points = [shapely.Point(p) for p in vp_coords_trio.coords]
-    xp = np.asarray([vp_coords_trio.project(p) for p in points])
+    projected_points = np.asarray([vp_coords_trio.project(p) for p in points])
 
-    yp = timestamp_arr.astype("datetime64[s]").astype("float64")
-
-    interpolated_arrival = np.interp(stop_position, xp, yp)
+    interpolated_arrival = wrangle_shapes.interpolate_stop_arrival_time(
+        stop_position, projected_points, timestamp_arr)
         
     return stop_meters, interpolated_arrival
 
+
+def stop_and_arrival_time_arrays_by_trip(
+    df: pd.DataFrame, 
+) -> pd.DataFrame:
+    """
+    For stops that violated the monotonically increasing condition,
+    set those arrival_times to NaT again.
+    Now, look across stops and interpolate again, using stop_meters.
+    """
+    # Add columns with the trip's stop_meters and arrival_times
+    # for only correctly interpolated values
+    df_arrays = (df[df.arrival_time.notna()]
+           .groupby("trip_instance_key")
+           .agg({
+               "stop_meters": lambda x: list(x),
+               "arrival_time": lambda x: list(x)
+           }).rename(columns = {
+               "stop_meters": "stop_meters_arr", 
+               "arrival_time": "arrival_time_arr"
+           }).reset_index()
+    )
+    
+    df2 = pd.merge(
+        df,
+        df_arrays,
+        on = "trip_instance_key",
+        how = "inner"
+    )
+
+    # Use correct values to fill in the missing arrival times
+    df2 = df2.assign(
+        arrival_time = df2.apply(
+            lambda x: wrangle_shapes.interpolate_stop_arrival_time(
+                x.stop_meters, x.stop_meters_arr, x.arrival_time_arr
+            ), axis=1
+        )
+    ).drop(columns = ["stop_meters_arr", "arrival_time_arr"])
+
+    return df2
+
+
+def enforce_monotonicity_and_interpolate_across_stops(
+    df: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Do a check to make sure stop arrivals are all monotonically increasing.
+    If it fails the check in a window of 3, and the center
+    position is not increasing, we will interpolate again using 
+    surrounding observations.
+    """
+    df = segment_calcs.convert_timestamp_to_seconds(
+        df, ["arrival_time"])
+
+    df = array_utils.rolling_window_make_array(
+        df, 
+        window = 3, rolling_col = "arrival_time_sec"
+    )
+    
+    # Subset to trips that have at least 1 obs that violates monotonicity
+    trips_with_one_false = (df.groupby("trip_instance_key")
+                        .agg({"arrival_time_sec_monotonic": "min"})
+                        .reset_index()
+                        .query('arrival_time_sec_monotonic==0')
+                        .trip_instance_key
+                        )
+    
+    # Set arrival times to NaT if it's not monotonically increasing
+    mask = df.arrival_time_sec_monotonic == False 
+    df.loc[mask, 'arrival_time'] = np.nan
+    
+    no_fix = df[~df.trip_instance_key.isin(trips_with_one_false)]
+    fix1 = df[df.trip_instance_key.isin(trips_with_one_false)]
+    fix1 = stop_and_arrival_time_arrays_by_trip(fix1)
+    
+    drop_me = [
+        "arrival_time_sec",
+        "rolling_arrival_time_sec", "arrival_time_sec_monotonic"
+    ]
+    
+    fixed_df = pd.concat(
+        [no_fix, fix1], axis=0
+    ).drop(
+        columns = drop_me
+    ).sort_values(
+        ["trip_instance_key", "stop_sequence"]
+    ).reset_index(drop=True)
+         
+    del no_fix, fix1, df
+        
+    return fixed_df
+ 
 
 def interpolate_stop_arrivals(
     analysis_date: str,
@@ -96,21 +186,28 @@ def interpolate_stop_arrivals(
     results = gdf.assign(
         stop_meters = stop_meters_series,
         arrival_time = stop_arrival_series,
-    ).astype({"arrival_time": "datetime64[s]"})[
-        ["trip_instance_key", "shape_array_key",
+    )[["trip_instance_key", "shape_array_key",
          "stop_sequence", "stop_id", 
-         "stop_meters",
-         "arrival_time"
-    ]]
-
-    del gdf
-
+         "stop_meters", "arrival_time"]
+     ].sort_values(
+        ["trip_instance_key", "stop_sequence"]
+    ).reset_index(drop=True)
+    
+    time1 = datetime.datetime.now()
+    logger.info(f"get stop arrivals {analysis_date}: {time1 - start}")
+    
+    results = enforce_monotonicity_and_interpolate_across_stops(results)
+        
     results.to_parquet(
         f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}.parquet"
     )
-
+    
+    del gdf, results
+    
     end = datetime.datetime.now()
-    logger.info(f"get stop arrivals {analysis_date}: {end - start}")
+    logger.info(f"interpolate arrivals execution time:  {analysis_date}: {end - start}")
+    
+    return
 
 
 if __name__ == "__main__":
