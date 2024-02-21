@@ -70,9 +70,7 @@ def import_segments(
     on shape_array_key and stop_pair.
     For rt_stop_times, import all trips with their segments, and merge on 
     trip_instance_key and stop_pair.
-    """
-    SEGMENT_FILE = "segment_options/stop_segments"
-    
+    """    
     keep_cols = [
         "shape_array_key", "stop_pair", 
         "schedule_gtfs_dataset_key", "route_id", "direction_id",
@@ -80,30 +78,18 @@ def import_segments(
     ]
     
     if segment_type == "stop_segments":
+        SEGMENT_FILE = "segment_options/shape_stop_segments"
         
-        subset_trips = pd.concat([
-            pd.read_parquet(
-                f"{SEGMENT_GCS}segment_options/"
-                f"shape_stop_segments_{analysis_date}.parquet",
-                columns = ["st_trip_instance_key"]
-            ) for analysis_date in analysis_date_list
-        ], axis=0, ignore_index=True).st_trip_instance_key.unique()
-        
-        gdf = pd.concat([
-            gpd.read_parquet(
-                f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
-                columns = keep_cols,
-                filters = [[("trip_instance_key", "in", subset_trips)]],
-            ).to_crs(WGS84) for analysis_date in analysis_date_list 
-        ], axis=0, ignore_index=True).drop_duplicates(subset=keep_cols)
         
     elif segment_type == "rt_stop_times":
-        gdf = pd.concat([
-            gpd.read_parquet(
-                f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
-                columns = keep_cols,
-            ).to_crs(WGS84) for analysis_date in analysis_date_list
-        ], axis=0, ignore_index=True).drop_duplicates(subset=keep_cols)
+        SEGMENT_FILE = "segment_options/stop_segments"
+
+    gdf = pd.concat([
+        gpd.read_parquet(
+            f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
+            columns = keep_cols,
+        ).to_crs(WGS84) for analysis_date in analysis_date_list
+    ], axis=0, ignore_index=True).drop_duplicates(subset=keep_cols)
 
     return gdf
 
@@ -120,9 +106,6 @@ def concatenate_trip_segment_speeds(
     """
     SPEED_FILE = dict_inputs["stage4"]
     MAX_SPEED = dict_inputs["max_speed"]
-    METERS_CUTOFF = dict_inputs["min_meters_elapsed"]
-    MAX_TRIP_SECONDS = dict_inputs["max_trip_minutes"] * 60
-    MIN_TRIP_SECONDS = dict_inputs["min_trip_minutes"] * 60
     
     df = pd.concat([
         pd.read_parquet(
@@ -132,12 +115,7 @@ def concatenate_trip_segment_speeds(
                            "trip_instance_key", "speed_mph", 
                            "meters_elapsed", "sec_elapsed", 
                            "time_of_day"]),
-            filters = [[
-                ("speed_mph", "<=", MAX_SPEED), 
-                ("meters_elapsed", ">=", METERS_CUTOFF),
-                ("sec_elapsed", ">=", MIN_TRIP_SECONDS),
-                ("sec_elapsed", "<=", MAX_TRIP_SECONDS)
-            ]]
+            filters = [[("speed_mph", "<=", MAX_SPEED)]]
         ).assign(
             service_date = pd.to_datetime(analysis_date)
         ) for analysis_date in analysis_date_list], 
@@ -161,6 +139,10 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
     TRIP_FILE = dict_inputs["trip_speeds_single_summary"]
     ROUTE_DIR_FILE = dict_inputs["route_dir_single_summary"]
+    
+    METERS_CUTOFF = dict_inputs["min_meters_elapsed"]
+    MAX_TRIP_SECONDS = dict_inputs["max_trip_minutes"] * 60
+    MIN_TRIP_SECONDS = dict_inputs["min_trip_minutes"] * 60
     
     start = datetime.datetime.now()
     
@@ -243,13 +225,18 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     trip_avg.to_parquet(
         f"{SEGMENT_GCS}{TRIP_FILE}_{analysis_date}.parquet"
     )
-    del trip_avg
     
     t3 = datetime.datetime.now()
     logger.info(f"trip avg {t3 - t2}")
     
+    trip_avg_filtered = trip_avg[
+        (trip_avg.meters_elapsed >= METERS_CUTOFF) & 
+        (trip_avg.sec_elapsed >= MIN_TRIP_SECONDS) & 
+        (trip_avg.sec_elapsed <= MAX_TRIP_SECONDS)
+    ].trip_instance_key.unique()
+
     route_dir_avg = segment_calcs.weighted_average_speeds_across_segments(
-        df,
+        df[df.trip_instance_key.isin(trip_avg_filtered)],
         OPERATOR_COLS + ROUTE_DIR_COLS
     ).pipe(
         merge_operator_identifiers, [analysis_date]
