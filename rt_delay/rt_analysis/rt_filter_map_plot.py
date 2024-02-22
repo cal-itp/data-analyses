@@ -1,7 +1,7 @@
 from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils.rt_utils import *
-from shared_utils.utils import geoparquet_gcs_export
-from shared_utils.calitp_color_palette import CALITP_CATEGORY_BOLD_COLORS, CALITP_CATEGORY_BRIGHT_COLORS
+from calitp_data_analysis.utils import geoparquet_gcs_export
+from calitp_data_analysis.calitp_color_palette import CALITP_CATEGORY_BOLD_COLORS, CALITP_CATEGORY_BRIGHT_COLORS
 import branca
 import mapclassify
 
