@@ -115,12 +115,12 @@ def check_for_completeness(
     
 if __name__=="__main__":
     
-    logger.add("./logs/operators_for_hqta.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
+    logger.info(f"operators_for_hqta Analysis date: {analysis_date}")
     start = dt.datetime.now()
     
     # These are all the IDs that have some cached files in GCS
@@ -148,7 +148,7 @@ if __name__=="__main__":
     logger.info(f"check files for completeness, save as json: {time2-time1}")
 
     end = dt.datetime.now()
-    logger.info(f"execution time: {end-start}")
+    logger.info(f"operators_for_hqta execution time: {end-start}")
 
         
     

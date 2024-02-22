@@ -20,7 +20,6 @@ speeds_pipeline:
 	make export
 
 export: 
-	python handle_common_errors.py
 	python average_speeds.py  
     
 download_roads:

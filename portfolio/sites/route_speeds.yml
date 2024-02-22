@@ -14,9 +14,15 @@ parts:
   - caption: Bay Area 511 AC Transit Schedule
     params:
       name: Bay Area 511 AC Transit Schedule
+  - caption: Bay Area 511 ACE Schedule
+    params:
+      name: Bay Area 511 ACE Schedule
   - caption: Bay Area 511 Caltrain Schedule
     params:
       name: Bay Area 511 Caltrain Schedule
+  - caption: Bay Area 511 Capitol Corridor Schedule
+    params:
+      name: Bay Area 511 Capitol Corridor Schedule
   - caption: Bay Area 511 County Connection Schedule
     params:
       name: Bay Area 511 County Connection Schedule

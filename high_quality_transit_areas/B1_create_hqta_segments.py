@@ -28,7 +28,7 @@ from dask import delayed, compute
 
 import operators_for_hqta
 from calitp_data_analysis import geography_utils, utils
-from shared_utils import rt_utils, geog_utils_to_add
+from shared_utils import rt_utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from utilities import GCS_FILE_PATH
 from update_vars import analysis_date
@@ -188,7 +188,7 @@ def select_shapes_and_segment(
         axis=1, 
     )
     
-    segmented = geog_utils_to_add.explode_segments(
+    segmented = geography_utils.explode_segments(
         ready_for_segmenting, 
         group_cols = ["route_key"],
         segment_col = "segment_geometry"
@@ -273,12 +273,12 @@ def find_primary_direction_across_hqta_segments(
     
 if __name__=="__main__":   
 
-    logger.add("./logs/B1_create_hqta_segments.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
+    logger.info(f"B1_create_hqta_segments Analysis date: {analysis_date}")
 
     start = dt.datetime.now()
         
@@ -319,4 +319,4 @@ if __name__=="__main__":
     logger.info(f"cut segments: {time2 - time1}")
     
     end = dt.datetime.now()
-    logger.info(f"total execution time: {end - start}")
+    logger.info(f"B1_create_hqta_segments execution time: {end - start}")

@@ -11,7 +11,7 @@ build_portfolio_site:
 	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
 	git add portfolio/$(site)/*.ipynb 
 	git add portfolio/sites/$(site).yml 
-	#make production_portfolio
+	make production_portfolio
 
 
 build_competitive_corridors:
@@ -39,8 +39,8 @@ build_ntd_report:
 	make build_portfolio_site
 
 build_route_speeds:
-	$(eval override site = route_speeds)
-	cd rt_segment_speeds / && make pip install -r requirements.txt && cd ..
+	$(eval export site = route_speeds)
+	cd rt_segment_speeds / && pip install -r requirements.txt && cd ..
 	cd rt_segment_speeds/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 

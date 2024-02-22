@@ -3,6 +3,8 @@ Cached dates available in rt_delay/.
 
 GCS: gs://calitp-analytics-data/data-analyses/rt_delay/cached_views/
 """
+from typing import Literal
+
 # HQTAs and RT speedmaps
 DATES = {
     "feb2022": "2022-02-08",
@@ -48,13 +50,25 @@ DATES = {
     "nov2023": "2023-11-15",
     "dec2023": "2023-12-13",
     "jan2024": "2024-01-17",
+    "feb2024": "2024-02-14",
 }
 
-y2023_dates = [DATES[f"{m}2023"] for m in ["dec", "nov", "oct", "sep", "aug", "jul", "jun", "may", "apr", "mar"]]
-y2024_dates = [v for k, v in DATES.items() if "2024" in k]
+y2023_dates = [
+    v for k, v in DATES.items() if k.endswith("2023") and not any(substring in k for substring in ["jan", "feb"])
+]
 
-apr_week = [v for k, v in DATES.items() if "apr2023" in k]
-oct_week = [v for k, v in DATES.items() if "oct2023" in k]
+y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
+
+
+def get_week(month: Literal["apr2023", "oct2023"], exclude_wed: bool) -> list:
+    if exclude_wed:
+        return [v for k, v in DATES.items() if month in k and not k.endswith(month)]
+    else:
+        return [v for k, v in DATES.items() if month in k]
+
+
+apr_week = get_week(month="apr2023", exclude_wed=False)
+oct_week = get_week(month="oct2023", exclude_wed=False)
 
 
 # Planning and Modal Advisory Committee (PMAC) - quarterly

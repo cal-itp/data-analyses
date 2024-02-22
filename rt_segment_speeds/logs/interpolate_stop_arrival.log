@@ -1,8 +1,1 @@
-2023-12-14 11:37:11.735 | INFO     | __main__:<module>:215 - Analysis date: 2023-12-13
-2023-12-14 11:39:47.181 | INFO     | __main__:main:184 - stop_segments: set up df with nearest / subseq vp info: 0:02:35.392831
-2023-12-14 11:40:48.345 | INFO     | __main__:main:190 - interpolate stop arrival: 0:01:01.164427
-2023-12-14 11:40:59.919 | INFO     | __main__:main:196 - execution time for stop_segments: 0:03:48.131217
-2024-01-24 09:54:22.652 | INFO     | __main__:interpolate_stop_arrivals:107 - get stop arrivals 2024-01-17: 0:10:11.131591
-2024-01-27 19:51:50.425 | INFO     | __main__:interpolate_stop_arrivals:110 - get stop arrivals 2023-12-13: 0:09:47.554048
-2024-01-27 20:02:03.868 | INFO     | __main__:interpolate_stop_arrivals:110 - get stop arrivals 2023-11-15: 0:10:13.251370
-2024-01-27 20:11:39.908 | INFO     | __main__:interpolate_stop_arrivals:110 - get stop arrivals 2023-10-11: 0:09:35.901028
+2024-02-15 14:18:47.082 | INFO     | __main__:interpolate_stop_arrivals:110 - get stop arrivals 2024-02-14: 0:09:37.655118

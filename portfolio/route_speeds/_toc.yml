@@ -6,7 +6,9 @@ parts:
     -   file: name_avalon-schedule/0__28_route_averages__name_avalon-schedule.ipynb
     -   file: name_banning-pass-schedule/0__28_route_averages__name_banning-pass-schedule.ipynb
     -   file: name_bay-area-511-ac-transit-schedule/0__28_route_averages__name_bay-area-511-ac-transit-schedule.ipynb
+    -   file: name_bay-area-511-ace-schedule/0__28_route_averages__name_bay-area-511-ace-schedule.ipynb
     -   file: name_bay-area-511-caltrain-schedule/0__28_route_averages__name_bay-area-511-caltrain-schedule.ipynb
+    -   file: name_bay-area-511-capitol-corridor-schedule/0__28_route_averages__name_bay-area-511-capitol-corridor-schedule.ipynb
     -   file: name_bay-area-511-county-connection-schedule/0__28_route_averages__name_bay-area-511-county-connection-schedule.ipynb
     -   file: name_bay-area-511-dumbarton-express-schedule/0__28_route_averages__name_bay-area-511-dumbarton-express-schedule.ipynb
     -   file: name_bay-area-511-fairfield-and-suisun-transit-schedule/0__28_route_averages__name_bay-area-511-fairfield-and-suisun-transit-schedule.ipynb

@@ -201,12 +201,12 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
 if __name__=="__main__":
         
-    logger.add("./logs/D1_assemble_hqta_points.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")    
+    logger.info(f"D1_assemble_hqta_points Analysis date: {analysis_date}")    
     start = dt.datetime.now()
     
     rail_ferry_brt = rail_ferry_brt_extract.get_rail_ferry_brt_extract().to_crs(
@@ -267,4 +267,4 @@ if __name__=="__main__":
     logger.info("export as geoparquet")
 
     end = dt.datetime.now()
-    logger.info(f"execution time: {end-start}")
+    logger.info(f"D1_assemble_hqta_points execution time: {end-start}")
