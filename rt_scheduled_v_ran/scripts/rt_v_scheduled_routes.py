@@ -78,14 +78,10 @@ def route_metrics(analysis_date_list: list) -> pd.DataFrame:
 
     count_cols = ["trip_instance_key"]
 
-    group_cols = [
-        "schedule_gtfs_dataset_key",
-        "route_id",
-        "direction_id",
-        "sched_rt_category",
-        "peak_offpeak",
-        "time_of_day",
-    ]
+    group_cols = ["schedule_gtfs_dataset_key",
+                  "route_id",
+                  "direction_id"]
+    
     df2 = (
         df.groupby(group_cols)
         .agg({**{e: "sum" for e in sum_cols}, **{e: "count" for e in count_cols}})
