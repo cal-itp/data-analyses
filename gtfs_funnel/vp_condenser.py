@@ -15,7 +15,6 @@ from calitp_data_analysis import utils
 from segment_speed_utils import vp_transform, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
-
 def condense_vp_to_linestring(
     analysis_date: str, 
     dict_inputs: dict
@@ -103,6 +102,7 @@ def prepare_vp_for_all_directions(
     ]
     
     results = [compute(i)[0] for i in dfs]
+
     gdf = pd.concat(
         results, axis=0, ignore_index=True
     ).sort_values(
@@ -118,7 +118,7 @@ def prepare_vp_for_all_directions(
     )
     
     del gdf
-   
+    
     return 
 
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
         
         time1 = datetime.datetime.now()
         logger.info(
-            f"{analysis_date}: condense vp for trip-direction "
+            f"{analysis_date}: condense vp for trip "
             f"{time1 - start}"
         )
         

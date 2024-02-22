@@ -6,6 +6,7 @@ from . import (
     project_vars,
     segment_calcs,
     time_helpers,
+    time_series_utils,
     vp_transform,
     wrangle_shapes,
 )
@@ -18,6 +19,7 @@ __all__ = [
     "project_vars",
     "segment_calcs",
     "time_helpers",
+    "time_series_utils",
     "vp_transform",
     "wrangle_shapes",
 ]

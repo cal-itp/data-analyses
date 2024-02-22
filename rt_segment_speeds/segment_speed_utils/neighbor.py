@@ -9,23 +9,29 @@ from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import gtfs_schedule_wrangling, wrangle_shapes     
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
+geo_const_meters = 6_371_000 * np.pi / 180
+geo_const_miles = 3_959_000 * np.pi / 180
+
 def nearest_snap(line: shapely.LineString, point: shapely.Point) -> int:
     """
     Based off of this function,
     but we want to return the index value, rather than the point.
     https://github.com/UTEL-UIUC/gtfs_segments/blob/main/gtfs_segments/geom_utils.py
     """
-    line = np.array(line.coords)
-    point = np.array(point.coords)
+    line = np.asarray(line.coords)
+    point = np.asarray(point.coords)
     tree = cKDTree(line)
     
     # np_dist is array of distances of result
     # np_inds is array of indices of result
-    np_dist, np_inds = tree.query(point, workers=-1, k=1)
-    
+    # to get approx distance in meters: geo_const * np_dist
+    _, np_inds = tree.query(
+        point, workers=-1, k=1, 
+        #distance_upper_bound = geo_const_miles * 5 # upper bound of 5 miles
+    )
     # We're looking for 1 nearest neighbor, so return 1st element in array
     return np_inds[0]
-
+    
 
 def add_nearest_vp_idx(
     vp_linestring: shapely.LineString, 
@@ -87,9 +93,6 @@ def add_trio(
                 coords_arr[start_pos: ]
                )
     
-    elif array_length == 0:
-        return vp_idx_arr
-    
     # (start_idx > 0) and (array_length > 2):
     else: 
         start_pos = start_idx - 1
@@ -108,17 +111,22 @@ def merge_stop_vp_for_nearest_neighbor(
     vp_condensed = gpd.read_parquet(
         f"{SEGMENT_GCS}condensed/"
         f"vp_nearest_neighbor_{analysis_date}.parquet",
-    ).drop(columns = "location_timestamp_local")
-    
+    ).drop(columns = "location_timestamp_local").to_crs(WGS84)
+        
     gdf = pd.merge(
         stop_times.rename(
             columns = {
                 "geometry": "stop_geometry"}
-        ).set_geometry("stop_geometry"),
+        ).set_geometry("stop_geometry").to_crs(WGS84),
         vp_condensed.rename(
-            columns = {"vp_primary_direction": "stop_primary_direction"}),
+            columns = {
+                "vp_primary_direction": "stop_primary_direction",
+                "geometry": "vp_geometry"
+            }),
         on = ["trip_instance_key", "stop_primary_direction"],
         how = "inner"
     )
+    
+    del vp_condensed
     
     return gdf

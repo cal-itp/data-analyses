@@ -54,12 +54,12 @@ if __name__ == "__main__":
     
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("./logs/A2_combine_stops.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
 
-    logger.info(f"Analysis date: {analysis_date}")
+    logger.info(f"A2_combine_stops Analysis Date: {analysis_date}")
     start = datetime.datetime.now()
     
     # Rail
@@ -99,9 +99,6 @@ if __name__ == "__main__":
         ferry_stops
     ], axis=0, ignore_index=True)
     
-    logger.info("concatenated datasets")
-
-    
     # Export to GCS
     utils.geoparquet_gcs_export(
         rail_brt_ferry, 
@@ -110,6 +107,6 @@ if __name__ == "__main__":
     )
     
     end = datetime.datetime.now()
-    logger.info(f"execution time: {end-start}")
+    logger.info(f"A2_combine_stops execution time: {end-start}")
     
     #client.close()

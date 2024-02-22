@@ -16,7 +16,7 @@ def attach_operator_natural_identifiers(
 ) -> pd.DataFrame:
     """
     For each gtfs_dataset_key-shape_array_key combination,
-    re-attach the natural identifiers and organizational identifiers.
+    re-attach the natural identifiers.
     Return a df with all the identifiers we need during downstream 
     aggregations, such as by route-direction.
     """
@@ -29,13 +29,18 @@ def attach_operator_natural_identifiers(
         get_pandas = True
     )
     
-    # Get crosswalk from schedule_gtfs_dataset_key to organization
-    crosswalk = helpers.import_schedule_gtfs_key_organization_crosswalk(
-        analysis_date,
-    ).drop(columns = "itp_id")
-    
     # Add time-of-day, which is associated with trip_instance_key
-    time_of_day = gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)
+    sched_time_of_day = gtfs_schedule_wrangling.get_trip_time_buckets(
+        analysis_date
+    ).rename(
+        columns = {"time_of_day": "schedule_time_of_day"})
+    
+    # If trip isn't in schedule, use vp to derive
+    vp_time_of_day = gtfs_schedule_wrangling.get_vp_trip_time_buckets(
+        analysis_date
+    ).rename(
+        columns = {"time_of_day": "vp_time_of_day"})
+    
     
     trip_used_for_shape = pd.read_parquet(
         f"{SEGMENT_GCS}segment_options/"
@@ -60,16 +65,21 @@ def attach_operator_natural_identifiers(
         stop_pair,
         on = ["shape_array_key", "stop_sequence"]
     ).merge(
-        time_of_day,
+        sched_time_of_day,
+        on = "trip_instance_key",
+        how = "left"
+    ).merge(
+        vp_time_of_day,
         on = "trip_instance_key",
         how = "inner"
-    ).merge(
-        crosswalk,
-        on = "schedule_gtfs_dataset_key",
-        how = "left"
     )
     
-    del crosswalk, shape_identifiers, time_of_day
+    df_with_natural_ids = df_with_natural_ids.assign(
+        time_of_day = df_with_natural_ids.schedule_time_of_day.fillna(
+            df_with_natural_ids.vp_time_of_day)
+    ).drop(columns = ["schedule_time_of_day", "vp_time_of_day"])
+        
+    del df, stop_pair, sched_time_of_day, vp_time_of_day
     
     return df_with_natural_ids
 
@@ -147,5 +157,4 @@ if __name__ == "__main__":
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
     
     for analysis_date in analysis_date_list:
-        
         calculate_speed_from_stop_arrivals(analysis_date, STOP_SEG_DICT)
