@@ -6,7 +6,6 @@ parts:
         params:
           district: 01 - Eureka
         sections:
-          - itp_id: 42
           - itp_id: 18
           - itp_id: 108
           - itp_id: 135
@@ -35,17 +34,20 @@ parts:
           district: 04 - Oakland
         sections:
           - itp_id: 4
+          - itp_id: 56
           - itp_id: 61
+          - itp_id: 282
           - itp_id: 110
           - itp_id: 247
+          - itp_id: 301
           - itp_id: 350
           - itp_id: 70
           - itp_id: 336
-          - itp_id: 106
           - itp_id: 127
           - itp_id: 167
           - itp_id: 194
           - itp_id: 218
+          - itp_id: 246
           - itp_id: 257
           - itp_id: 280
           - itp_id: 290
@@ -63,6 +65,7 @@ parts:
           - itp_id: 298
           - itp_id: 312
           - itp_id: 208
+          - itp_id: 289
           - itp_id: 293
           - itp_id: 296
       - caption: District 06 - Fresno
@@ -92,11 +95,11 @@ parts:
           - itp_id: 231
           - itp_id: 243
           - itp_id: 260
-          - itp_id: 295
           - itp_id: 300
           - itp_id: 308
           - itp_id: 337
           - itp_id: 339
+          - itp_id: 367
           - itp_id: 112
           - itp_id: 123
           - itp_id: 170
@@ -123,6 +126,7 @@ parts:
         sections:
           - itp_id: 107
           - itp_id: 349
+          - itp_id: 10
           - itp_id: 284
           - itp_id: 484
       - caption: District 11 - San Diego
