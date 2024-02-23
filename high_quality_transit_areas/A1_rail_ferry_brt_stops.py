@@ -34,33 +34,38 @@ muni_route_id = [
     '90', '91', '714','TBUS',              
 ]  
 
-# Adapted from metro_street_running
-# Let's not use this list, since it doesn't 
-# include the ones on the freeway
-metro_j_include = [
-    # Figueroa from 110 going towards DTLA
-    '13460', '4994', '5049', '5041', '5040', '65300042',
-    '4652', # find Pico / Fig stop_id in older dates
-    # Flower from 110 going towards DTLA
-    '15820', '1813', '2378', '2377', '4675', '3674',
-    # 6th St DTLA
-    '15713',
-    # Olive St DTLA
-    '5378', '70500012', 
-    # Spring St DTLA in front of city hall facing
-    '11917',
-    # Aliso both sides of freeway
-    '12415', '8704' 
-]
+'''
+Eric double checked for bus shelters
+'15820', '13460', #  Flower/Adams, Fig/Adams; no shelter
+'1813', #  Flower/23rd; no shelter
+'2378', #  Flower/Washington; no shelter
+'2377', #  Flower/Pico; no shelter
+'4675', #  Flower/Olympic; no shelter
+'3674', #  Flower/7th; no shelter
+'15713', #  6th/Flower; no shelter
+'5378', #  Olive/5th; no shelter
+'70500012', #  Olive/2nd; no shelter
+'8704', #  Arcadia/Los Angeles; no shelter
+'''
 
 # Certain stops from Metro must be excluded
 metro_j_exclude = [
-    # Grand DTLA - no bus lanes
-    '13560', '13561',
+    # Flower from 110 going towards DTLA -- no shelters, yes bus lanes
+    '15820', '13460', '1813', '2378', '2377', '4675', '3674',
+    # Grand DTLA - no bus lanes 
+    '13560', 
+    # Grand DTLA - no shelters, yes bus lanes
+    '13561',
+    # 6th St DTLA -- no shelters, yes bus lanes
+    '15713',    
+    # Olive St DTLA -- no shelters, yes bus lanes
+    '5378', '70500012', 
     # 1st St DTLA
     '5377', '15612',
     # Spring St DTLA on grand park side...no bus lanes?
-    '12416',    
+    '12416', 
+    # Aliso -- no shelters, yes bus lanes
+    '8704',
     # Figueroa St Gardena/Carson before it gets onto 110
     '65300038', '65300039',
     # Beacon St Harbor Gateway area
