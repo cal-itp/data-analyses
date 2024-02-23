@@ -351,7 +351,42 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
     )
     
     return common_shape_geom2
+ 
     
+def longest_shape_by_route_direction(
+    analysis_date: str
+) -> gpd.GeoDataFrame:
+    """
+    """
+    routes = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["feed_key", "gtfs_dataset_key", 
+                   "route_id", "direction_id", "route_key",
+                   "shape_array_key"],
+        get_pandas = True
+    )
+    
+    routes2 = helpers.import_scheduled_shapes(
+        analysis_date,
+        columns = ["shape_array_key", "geometry"],
+        get_pandas = True
+    ).merge(
+        routes,
+        on = "shape_array_key",
+        how = "inner"
+    )
+    
+    sort_cols = ["feed_key", "route_id", "direction_id"]
+    
+    routes2 = routes2.assign(
+        route_length = routes2.geometry.length
+    ).sort_values(
+        sort_cols + ["route_length"],
+        ascending = [True for i in sort_cols] + [False]
+    ).drop_duplicates(subset=sort_cols).reset_index(drop=True)
+    
+    return routes2
+
     
 def gtfs_segments_rename_cols(
     df: pd.DataFrame, 

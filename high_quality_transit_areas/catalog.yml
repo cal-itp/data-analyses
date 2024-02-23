@@ -14,7 +14,7 @@ sources:
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/ca_boundary.parquet
     ## INTERMEDIATE DATA
-    # Source: A2_combine_stops.py
+    # Source: A1_rail_ferry_brt_stops.py
     rail_brt_ferry_initial:
         driver: geoparquet
         description: Rail / BRT / Ferry points created in A2_combine_stops.py

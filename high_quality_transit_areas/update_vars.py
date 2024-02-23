@@ -1,8 +1,10 @@
-from shared_utils import rt_utils, rt_dates
+from shared_utils import rt_dates
 
 analysis_date = rt_dates.DATES["feb2024"]
 
-COMPILED_CACHED_VIEWS = f"{rt_utils.GCS_FILE_PATH}compiled_cached_views/"
-TEMP_GCS = f"{rt_utils.GCS_FILE_PATH}temp/"
-VALID_OPERATORS_FILE = "./valid_hqta_operators.json"
+GCS_FILE_PATH = ("gs://calitp-analytics-data/data-analyses/"
+                 "high_quality_transit_areas/")
+TEMP_GCS = f"{GCS_FILE_PATH}temp/"
 PROJECT_CRS = "EPSG:3310"
+HQTA_SEGMENT_LENGTH = 1_250 # meters
+BUFFER_METERS = 50
