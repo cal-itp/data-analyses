@@ -5,7 +5,7 @@ and flag which segments are HQ transit corridors.
 Takes <1 min to run.
 - down from 1 hr in v2 (was part of B1)
 """
-import datetime as dt
+import datetime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -15,8 +15,7 @@ from loguru import logger
 
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
-from utilities import GCS_FILE_PATH
-from update_vars import analysis_date, PROJECT_CRS
+from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS
 
 def max_trips_by_group(df: pd.DataFrame, 
                        group_cols: list,
@@ -85,9 +84,10 @@ def stop_times_aggregation_max_by_stop(stop_times: pd.DataFrame) -> pd.DataFrame
     return max_trips_by_stop
 
 
-def hqta_segment_to_stop(hqta_segments: gpd.GeoDataFrame, 
-                         stops: gpd.GeoDataFrame
-                        ) -> gpd.GeoDataFrame:    
+def hqta_segment_to_stop(
+    hqta_segments: gpd.GeoDataFrame, 
+    stops: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:    
     """
     Spatially join hqta segments to stops. 
     Which stops fall into which segments?
@@ -215,9 +215,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"B2_sjoin_stops_to_segments Analysis date: {analysis_date}")
-
-    start = dt.datetime.now()
+    start = datetime.datetime.now()
     
     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
     # takes 1 min
@@ -254,7 +252,8 @@ if __name__ == "__main__":
         "all_bus"
     )
     
-    end = dt.datetime.now()
-    logger.info(f"B2_sjoin_stops_to_segments execution time: {end-start}")
+    end = datetime.datetime.now()
+    logger.info(f"B2_sjoin_stops_to_segments {analysis_date} "
+                f"execution time: {end - start}")
     
     #client.close()

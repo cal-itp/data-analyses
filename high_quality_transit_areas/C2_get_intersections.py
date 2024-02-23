@@ -9,7 +9,7 @@ Takes 1.5 min to run.
 - down from ranging from 1 hr 45 min - 2 hr 50 min in v2 
 - down from several hours in v1 in combine_and_visualize.ipynb
 """
-import datetime as dt
+import datetime
 import geopandas as gpd
 import intake
 import os
@@ -19,14 +19,14 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis import utils
-from utilities import catalog_filepath, GCS_FILE_PATH
-from update_vars import analysis_date
+from update_vars import GCS_FILE_PATH, analysis_date
 
 catalog = intake.open_catalog("*.yml")
 
-def attach_geometry_to_pairs(corridors: gpd.GeoDataFrame, 
-                             intersecting_pairs: pd.DataFrame
-                            ) -> gpd.GeoDataFrame:
+def attach_geometry_to_pairs(
+    corridors: gpd.GeoDataFrame, 
+    intersecting_pairs: pd.DataFrame
+) -> gpd.GeoDataFrame:
     """
     Take pairwise table and attach geometry to hqta_segment_id and 
     intersect_hqta_segment_id.
@@ -106,30 +106,23 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"C2_find_intersections Analysis date: {analysis_date}")
-
-    start = dt.datetime.now()
+    start = datetime.datetime.now()
         
     intersecting_pairs = catalog.pairwise_intersections.read()
     corridors = catalog.subset_corridors.read()
     
     pairs_table = attach_geometry_to_pairs(corridors, intersecting_pairs)
-    
-    time1 = dt.datetime.now()
-    logger.info(f"attach geometry to pairwise table: {time1 - start}")
-    
-    results = find_intersections(pairs_table)
-    
-    time2 = dt.datetime.now()
-    logger.info(f"find intersections: {time2 - time1}")
         
+    results = find_intersections(pairs_table)
+            
     utils.geoparquet_gcs_export(
         results,
         GCS_FILE_PATH,
         "all_intersections"
     )
  
-    end = dt.datetime.now()
-    logger.info(f"C2_find_intersections execution time: {end-start}")
+    end = datetime.datetime.now()
+    logger.info(f"C2_find_intersections {analysis_date} "
+                f"execution time: {end - start}")
     
     #client.close()
