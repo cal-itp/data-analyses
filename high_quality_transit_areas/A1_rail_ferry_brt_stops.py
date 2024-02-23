@@ -262,11 +262,13 @@ def clip_to_ca(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf2
     
     
-def get_rail_ferry_brt_extract(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def get_rail_ferry_brt_extract() -> gpd.GeoDataFrame:
     """
     Prepare the rail / ferry / BRT stops to be assembled with
     the bus_hqta types and saved into the hqta_points file.
     """
+    df = catalog.rail_brt_ferry_initial.read()
+    
     keep_cols = ["feed_key", "name", "stop_id", 
                  "route_type", "geometry"]
     
@@ -281,9 +283,8 @@ def get_rail_ferry_brt_extract(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                 else "major_stop_ferry" if x in ferry_types 
                 else "missing" # add flag to make it easier to check results
             )
-        ).rename(columns = {"name": "name_primary", 
-                            "feed_key": "feed_key_primary"})
-       .drop(columns = "route_type")
+        ).rename(columns = {"feed_key": "feed_key_primary"})
+           .drop(columns = ["route_type", "name"])
     )
 
     return df2 
