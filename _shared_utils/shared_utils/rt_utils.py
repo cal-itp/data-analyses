@@ -177,6 +177,14 @@ def add_origin_destination(
     return gdf
 
 
+direction_grouping = {
+    "Northbound": "north-south",
+    "Southbound": "north-south",
+    "Eastbound": "east-west",
+    "Westbound": "east-west",
+}
+
+
 def add_route_cardinal_direction(
     df: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
     origin: str = "origin",
@@ -190,7 +198,6 @@ def add_route_cardinal_direction(
        route_primary_direction: Northbound, Southbound, Eastbound, Westbound
        route_direction: north-south, east-west
     """
-    NORTH_SOUTH = ["Northbound", "Southbound"]
 
     # Stick the origin/destination of a route_id and return the primary cardinal direction
     if isinstance(df, dg.GeoDataFrame):
@@ -202,26 +209,17 @@ def add_route_cardinal_direction(
             )
         )
 
-        # In cases where you don't care exactly if it's southbound or northbound,
-        # but care that it's north-south, such as
-        # testing for orthogonality of 2 bus routes intersecting
-        df = df.assign(
-            route_direction=df.route_primary_direction.apply(
-                lambda x: "north-south" if x in NORTH_SOUTH else "east-west",
-                meta=("route_direction", "str"),
-            ),
-        )
-
     elif isinstance(df, gpd.GeoDataFrame):
         df = df.assign(
             route_primary_direction=df.apply(lambda x: primary_cardinal_direction(x[origin], x[destination]), axis=1)
         )
 
-        df = df.assign(
-            route_direction=df.route_primary_direction.apply(
-                lambda x: "north-south" if x in NORTH_SOUTH else "east-west"
-            ),
-        )
+    # In cases where you don't care exactly if it's southbound or northbound,
+    # but care that it's north-south, such as
+    # testing for orthogonality of 2 bus routes intersecting
+    df = df.assign(
+        route_direction=df.route_primary_direction.map(direction_grouping),
+    )
 
     return df
 
