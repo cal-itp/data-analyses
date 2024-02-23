@@ -284,6 +284,12 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
                 # Consider importing this name from calitp.magics
                 if '%%capture_parameters' in cell.source:
                     params = {**params, **json.loads(cell.outputs[0]['text'])}
+                if '%%full_width' in cell.source:
+                    cell.metadata.tags.append('full-width')
+                    # new_params = **json.loads(cell.outputs[0]['text'])
+                    # if "jupyterbook_append_tags" in new_params.keys():
+                    #     for tag in new_params["jupyterbook_append_tags"]:
+                    #         cell.metadata.tags.append(tag)
 
                 if "%%capture" in cell.source:
                     cell.outputs = []
