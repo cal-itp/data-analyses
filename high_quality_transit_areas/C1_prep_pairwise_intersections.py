@@ -29,7 +29,6 @@ def prep_bus_corridors(is_hq_corr: bool) -> gpd.GeoDataFrame:
     ).reset_index(drop=True)
     
     bus_hqtc = bus_hqtc.assign(
-        hqta_type = "hqta_transit_corr",
         route_type = "3"
     )
     

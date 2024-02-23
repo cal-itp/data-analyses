@@ -9,7 +9,7 @@ the highest trip count
 - <1 min in v2, but left the query in
 - v1 in combine_and_visualize.ipynb
 """
-import datetime as dt
+import datetime
 import geopandas as gpd
 import pandas as pd
 import sys
@@ -17,21 +17,22 @@ import sys
 from loguru import logger
 
 import C1_prep_pairwise_intersections as prep_clip
+
 from calitp_data_analysis import utils
-from utilities import catalog_filepath, GCS_FILE_PATH
-from update_vars import analysis_date, PROJECT_CRS
 from segment_speed_utils import helpers
+from update_vars import (GCS_FILE_PATH, analysis_date, 
+                         PROJECT_CRS, BUFFER_METERS
+                        )
 
 
-# Input files
-ALL_INTERSECTIONS = catalog_filepath("all_intersections")
-
-def buffer_around_intersections(buffer_size: int = 50) -> gpd.GeoDataFrame: 
+def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame: 
     """
     Draw 50 m buffers around intersections to better catch stops
     that might fall within it.
     """
-    gdf = gpd.read_parquet(ALL_INTERSECTIONS)
+    gdf = gpd.read_parquet(
+        f"{GCS_FILE_PATH}all_intersections.parquet"
+    )
     
     gdf = gdf.assign(
         geometry = gdf.geometry.buffer(buffer_size)
@@ -40,8 +41,10 @@ def buffer_around_intersections(buffer_size: int = 50) -> gpd.GeoDataFrame:
     return gdf 
 
 
-def create_major_stop_bus(all_stops: gpd.GeoDataFrame, 
-                          bus_intersections: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def create_major_stop_bus(
+    all_stops: gpd.GeoDataFrame, 
+    bus_intersections: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
     """
     Designate those hqta_type == major_stop_bus
     
@@ -89,7 +92,7 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
     They may also be stops that don't meet the HQ corridor threshold, but
     are stops that physically reside in the corridor.
     """
-    bus_corridors = (prep_clip.prep_bus_corridors()
+    bus_corridors = (prep_clip.prep_bus_corridors(is_hq_corr = True)
                      [["hqta_segment_id", "geometry"]]
                     )
     
@@ -124,12 +127,11 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
     
-    logger.info(f"C3_create_bus_hqta_types Analysis date: {analysis_date}")
-    start = dt.datetime.now()
+    start = datetime.datetime.now()
     
     # Start with the gdf of all the hqta_segments
     # that have a sjoin with an orthogonal route
-    bus_intersections = buffer_around_intersections(buffer_size=100)
+    bus_intersections = buffer_around_intersections(BUFFER_METERS)
 
     # Grab point geom with all stops
     all_stops = helpers.import_scheduled_stops(
@@ -137,31 +139,28 @@ if __name__ == "__main__":
         get_pandas = True,
         crs = PROJECT_CRS
     )
-    
-    logger.info("grab all stops")
-    
+        
     # Create hqta_type == major_stop_bus
     major_stop_bus = create_major_stop_bus(all_stops, bus_intersections)
-    logger.info("create major stop bus")
 
     # Create hqta_type = hq_corridor_bus
     stops_in_hq_corr = create_stops_along_corridors(all_stops)
-    logger.info("create hq corridor bus")
     
     # Export to GCS    
     utils.geoparquet_gcs_export(
         major_stop_bus, 
         GCS_FILE_PATH,
-        'major_stop_bus'
+        "major_stop_bus"
     )
     
     utils.geoparquet_gcs_export(
         stops_in_hq_corr,
         GCS_FILE_PATH,
-        'stops_in_hq_corr'
+        "stops_in_hq_corr"
     )
     
-    end = dt.datetime.now()
-    logger.info(f"C3_create_bus_hqta_types execution time: {end-start}")
+    end = datetime.datetime.now()
+    logger.info(f"C3_create_bus_hqta_types {analysis_date} "
+                f"execution time: {end - start}")
     
     #client.close()
