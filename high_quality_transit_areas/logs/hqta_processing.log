@@ -49,3 +49,8 @@
 2024-02-15 11:21:22.772 | INFO     | __main__:<module>:159 - export as geoparquet in date folder
 2024-02-15 11:21:24.051 | INFO     | __main__:<module>:168 - export as geoparquet
 2024-02-15 11:21:24.052 | INFO     | __main__:<module>:171 - D2_assemble_hqta_polygons execution time: 0:00:30.373503
+2024-02-23 12:16:18.905 | INFO     | __main__:<module>:334 - A1_rail_ferry_brt_stops 2024-02-14 execution time: 0:00:55.356475
+2024-02-23 13:02:56.942 | INFO     | __main__:<module>:243 - B1_create_hqta_segments execution time: 0:02:45.137511
+2024-02-23 13:06:07.547 | INFO     | __main__:<module>:256 - B2_sjoin_stops_to_segments 2024-02-14 execution time: 0:00:43.474327
+2024-02-23 13:18:24.960 | INFO     | __main__:<module>:143 - C1_prep_pairwise_intersections 2024-02-14 execution time: 0:00:09.433171
+2024-02-23 13:20:52.094 | INFO     | __main__:<module>:125 - C2_find_intersections 2024-02-14 execution time: 0:00:26.055988
