@@ -1,13 +1,37 @@
-directory: ./rt_segment_speeds/
-notebook: ./rt_segment_speeds/28_route_averages.ipynb
+directory: ./gtfs_digest/
+notebook: ./gtfs_digest/report.ipynb
 parts:
 - chapters:
+  - caption: Alhambra Schedule
+    params:
+      name: Alhambra Schedule
+  - caption: Amador Schedule
+    params:
+      name: Amador Schedule
+  - caption: Amtrak Schedule
+    params:
+      name: Amtrak Schedule
   - caption: Antelope Valley Transit Authority Schedule
     params:
       name: Antelope Valley Transit Authority Schedule
+  - caption: Arcadia Schedule
+    params:
+      name: Arcadia Schedule
+  - caption: Arvin Schedule
+    params:
+      name: Arvin Schedule
+  - caption: Auburn Schedule
+    params:
+      name: Auburn Schedule
   - caption: Avalon Schedule
     params:
       name: Avalon Schedule
+  - caption: B-Line Schedule
+    params:
+      name: B-Line Schedule
+  - caption: Baldwin Park Schedule
+    params:
+      name: Baldwin Park Schedule
   - caption: Banning Pass Schedule
     params:
       name: Banning Pass Schedule
@@ -17,18 +41,27 @@ parts:
   - caption: Bay Area 511 ACE Schedule
     params:
       name: Bay Area 511 ACE Schedule
+  - caption: Bay Area 511 BART Schedule
+    params:
+      name: Bay Area 511 BART Schedule
   - caption: Bay Area 511 Caltrain Schedule
     params:
       name: Bay Area 511 Caltrain Schedule
   - caption: Bay Area 511 Capitol Corridor Schedule
     params:
       name: Bay Area 511 Capitol Corridor Schedule
+  - caption: Bay Area 511 Commute.org Schedule
+    params:
+      name: Bay Area 511 Commute.org Schedule
   - caption: Bay Area 511 County Connection Schedule
     params:
       name: Bay Area 511 County Connection Schedule
   - caption: Bay Area 511 Dumbarton Express Schedule
     params:
       name: Bay Area 511 Dumbarton Express Schedule
+  - caption: Bay Area 511 Emery Go-Round Schedule
+    params:
+      name: Bay Area 511 Emery Go-Round Schedule
   - caption: Bay Area 511 Fairfield and Suisun Transit Schedule
     params:
       name: Bay Area 511 Fairfield and Suisun Transit Schedule
@@ -41,12 +74,21 @@ parts:
   - caption: Bay Area 511 Marin Schedule
     params:
       name: Bay Area 511 Marin Schedule
+  - caption: Bay Area 511 Mission Bay Schedule
+    params:
+      name: Bay Area 511 Mission Bay Schedule
   - caption: Bay Area 511 Muni Schedule
     params:
       name: Bay Area 511 Muni Schedule
   - caption: Bay Area 511 Petaluma Schedule
     params:
       name: Bay Area 511 Petaluma Schedule
+  - caption: Bay Area 511 Rio Vista Delta Breeze Schedule
+    params:
+      name: Bay Area 511 Rio Vista Delta Breeze Schedule
+  - caption: Bay Area 511 SFO AirTrain Schedule
+    params:
+      name: Bay Area 511 SFO AirTrain Schedule
   - caption: Bay Area 511 SamTrans Schedule
     params:
       name: Bay Area 511 SamTrans Schedule
@@ -62,9 +104,15 @@ parts:
   - caption: Bay Area 511 SolTrans Schedule
     params:
       name: Bay Area 511 SolTrans Schedule
+  - caption: Bay Area 511 Sonoma County Transit Schedule
+    params:
+      name: Bay Area 511 Sonoma County Transit Schedule
   - caption: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
     params:
       name: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
+  - caption: Bay Area 511 South San Francisco Shuttle Schedule
+    params:
+      name: Bay Area 511 South San Francisco Shuttle Schedule
   - caption: Bay Area 511 Tri Delta Schedule
     params:
       name: Bay Area 511 Tri Delta Schedule
@@ -74,6 +122,9 @@ parts:
   - caption: Bay Area 511 Union City Transit Schedule
     params:
       name: Bay Area 511 Union City Transit Schedule
+  - caption: Bay Area 511 Vacaville City Coach Schedule
+    params:
+      name: Bay Area 511 Vacaville City Coach Schedule
   - caption: Bay Area 511 Vine Transit Schedule
     params:
       name: Bay Area 511 Vine Transit Schedule
@@ -89,39 +140,138 @@ parts:
   - caption: Beaumont Pass Schedule
     params:
       name: Beaumont Pass Schedule
+  - caption: Bell Gardens Schedule
+    params:
+      name: Bell Gardens Schedule
+  - caption: Bellflower Bus Schedule
+    params:
+      name: Bellflower Bus Schedule
   - caption: Big Blue Bus Schedule
     params:
       name: Big Blue Bus Schedule
+  - caption: Blossom Express Schedule
+    params:
+      name: Blossom Express Schedule
   - caption: BruinBus Schedule
     params:
       name: BruinBus Schedule
   - caption: Burbank Schedule
     params:
       name: Burbank Schedule
+  - caption: Calabasas Schedule
+    params:
+      name: Calabasas Schedule
+  - caption: Calaveras Schedule
+    params:
+      name: Calaveras Schedule
+  - caption: Clean Air Express Schedule
+    params:
+      name: Clean Air Express Schedule
+  - caption: Clovis Schedule
+    params:
+      name: Clovis Schedule
   - caption: Commerce Schedule
     params:
       name: Commerce Schedule
+  - caption: Corona Schedule
+    params:
+      name: Corona Schedule
+  - caption: County Express Schedule
+    params:
+      name: County Express Schedule
+  - caption: Cudahy Schedule
+    params:
+      name: Cudahy Schedule
   - caption: Culver City Schedule
     params:
       name: Culver City Schedule
+  - caption: Curry Public Transit Schedule
+    params:
+      name: Curry Public Transit Schedule
+  - caption: Delano Schedule
+    params:
+      name: Delano Schedule
   - caption: Desert Roadrunner GMV Schedule
     params:
       name: Desert Roadrunner GMV Schedule
+  - caption: Desert Roadrunner Schedule
+    params:
+      name: Desert Roadrunner Schedule
+  - caption: DowneyLINK GMV Schedule
+    params:
+      name: DowneyLINK GMV Schedule
+  - caption: DowneyLINK Schedule
+    params:
+      name: DowneyLINK Schedule
   - caption: Eastern Sierra Schedule
     params:
       name: Eastern Sierra Schedule
+  - caption: El Dorado Schedule
+    params:
+      name: El Dorado Schedule
+  - caption: El Monte Schedule
+    params:
+      name: El Monte Schedule
+  - caption: El Segundo Schedule
+    params:
+      name: El Segundo Schedule
   - caption: Elk Grove Schedule
     params:
       name: Elk Grove Schedule
+  - caption: Flixbus Schedule
+    params:
+      name: Flixbus Schedule
+  - caption: Foothill Schedule
+    params:
+      name: Foothill Schedule
+  - caption: Fresno County Schedule
+    params:
+      name: Fresno County Schedule
   - caption: Fresno Schedule
     params:
       name: Fresno Schedule
+  - caption: G Trans Schedule
+    params:
+      name: G Trans Schedule
   - caption: GET Schedule
     params:
       name: GET Schedule
+  - caption: Get Around Town Express Schedule
+    params:
+      name: Get Around Town Express Schedule
+  - caption: Glendale Schedule
+    params:
+      name: Glendale Schedule
+  - caption: Glendora Schedule
+    params:
+      name: Glendora Schedule
+  - caption: Glenn Schedule
+    params:
+      name: Glenn Schedule
+  - caption: Go West Schedule
+    params:
+      name: Go West Schedule
+  - caption: Grapeline Schedule
+    params:
+      name: Grapeline Schedule
+  - caption: Guadalupe Flyer Schedule
+    params:
+      name: Guadalupe Flyer Schedule
   - caption: Humboldt Schedule
     params:
       name: Humboldt Schedule
+  - caption: Huntington Schedule
+    params:
+      name: Huntington Schedule
+  - caption: Imperial Valley Transit Schedule
+    params:
+      name: Imperial Valley Transit Schedule
+  - caption: Inglewood Schedule
+    params:
+      name: Inglewood Schedule
+  - caption: Kern Schedule
+    params:
+      name: Kern Schedule
   - caption: Kings Schedule
     params:
       name: Kings Schedule
@@ -134,24 +284,75 @@ parts:
   - caption: LA Metro Rail Schedule
     params:
       name: LA Metro Rail Schedule
+  - caption: LADPW Schedule
+    params:
+      name: LADPW Schedule
+  - caption: LAX FlyAway Schedule
+    params:
+      name: LAX FlyAway Schedule
+  - caption: La Campana Schedule
+    params:
+      name: La Campana Schedule
+  - caption: La Puente Schedule
+    params:
+      name: La Puente Schedule
+  - caption: Laguna Beach Schedule
+    params:
+      name: Laguna Beach Schedule
   - caption: Lake Schedule
     params:
       name: Lake Schedule
+  - caption: Lassen Schedule
+    params:
+      name: Lassen Schedule
   - caption: Lawndale Beat GMV Schedule
     params:
       name: Lawndale Beat GMV Schedule
+  - caption: Lawndale Schedule
+    params:
+      name: Lawndale Schedule
   - caption: Long Beach Schedule
     params:
       name: Long Beach Schedule
+  - caption: Lynwood Schedule
+    params:
+      name: Lynwood Schedule
   - caption: Madera County Connection Schedule
     params:
       name: Madera County Connection Schedule
+  - caption: Madera Metro Schedule
+    params:
+      name: Madera Metro Schedule
+  - caption: Manteca Schedule
+    params:
+      name: Manteca Schedule
+  - caption: Maywood Schedule
+    params:
+      name: Maywood Schedule
   - caption: Mendocino Schedule
     params:
       name: Mendocino Schedule
+  - caption: Merced GMV Schedule
+    params:
+      name: Merced GMV Schedule
+  - caption: Merced Schedule
+    params:
+      name: Merced Schedule
+  - caption: Mission Bay Schedule
+    params:
+      name: Mission Bay Schedule
   - caption: Monterey Salinas Schedule
     params:
       name: Monterey Salinas Schedule
+  - caption: Morongo Basin Schedule
+    params:
+      name: Morongo Basin Schedule
+  - caption: Mountain Transit Schedule
+    params:
+      name: Mountain Transit Schedule
+  - caption: Needles Schedule
+    params:
+      name: Needles Schedule
   - caption: Nevada County Schedule
     params:
       name: Nevada County Schedule
@@ -167,9 +368,21 @@ parts:
   - caption: OmniTrans Schedule
     params:
       name: OmniTrans Schedule
+  - caption: Oregon POINT
+    params:
+      name: Oregon POINT
+  - caption: Palos Verdes PTA Schedule
+    params:
+      name: Palos Verdes PTA Schedule
   - caption: Pasadena Schedule
     params:
       name: Pasadena Schedule
+  - caption: Placer Schedule
+    params:
+      name: Placer Schedule
+  - caption: Plumas Schedule
+    params:
+      name: Plumas Schedule
   - caption: PresidiGo Schedule
     params:
       name: PresidiGo Schedule
@@ -182,15 +395,27 @@ parts:
   - caption: Riverside Schedule
     params:
       name: Riverside Schedule
+  - caption: Rosemead Schedule
+    params:
+      name: Rosemead Schedule
+  - caption: Roseville Schedule
+    params:
+      name: Roseville Schedule
   - caption: SBMTD Schedule
     params:
       name: SBMTD Schedule
+  - caption: SLO Schedule
+    params:
+      name: SLO Schedule
   - caption: SLORTA Schedule
     params:
       name: SLORTA Schedule
   - caption: Sacramento Schedule
     params:
       name: Sacramento Schedule
+  - caption: Sage Stage Schedule
+    params:
+      name: Sage Stage Schedule
   - caption: San Diego Schedule
     params:
       name: San Diego Schedule
@@ -209,15 +434,48 @@ parts:
   - caption: Santa Ynez Mecatran Schedule
     params:
       name: Santa Ynez Mecatran Schedule
+  - caption: Sierra Madre Schedule
+    params:
+      name: Sierra Madre Schedule
+  - caption: Siskiyou Schedule
+    params:
+      name: Siskiyou Schedule
+  - caption: South County Transit Link Schedule
+    params:
+      name: South County Transit Link Schedule
+  - caption: Spirit Bus Schedule
+    params:
+      name: Spirit Bus Schedule
   - caption: StanRTA Schedule
     params:
       name: StanRTA Schedule
+  - caption: Stanford Schedule
+    params:
+      name: Stanford Schedule
+  - caption: TART, North Lake Tahoe Schedule
+    params:
+      name: TART, North Lake Tahoe Schedule
+  - caption: TIME GMV Schedule
+    params:
+      name: TIME GMV Schedule
   - caption: Tahoe Transportation District GMV Schedule
     params:
       name: Tahoe Transportation District GMV Schedule
+  - caption: Tahoe Transportation District Schedule
+    params:
+      name: Tahoe Transportation District Schedule
+  - caption: Tehama Schedule
+    params:
+      name: Tehama Schedule
   - caption: Torrance Schedule
     params:
       name: Torrance Schedule
+  - caption: Tracy Schedule
+    params:
+      name: Tracy Schedule
+  - caption: Trinity Schedule
+    params:
+      name: Trinity Schedule
   - caption: Turlock Schedule
     params:
       name: Turlock Schedule
@@ -230,12 +488,30 @@ parts:
   - caption: Victor Valley GMV Schedule
     params:
       name: Victor Valley GMV Schedule
+  - caption: Victor Valley Schedule
+    params:
+      name: Victor Valley Schedule
   - caption: Visalia Schedule
     params:
       name: Visalia Schedule
+  - caption: WeHo Schedule
+    params:
+      name: WeHo Schedule
+  - caption: YARTS Schedule
+    params:
+      name: YARTS Schedule
   - caption: Yolobus Schedule
     params:
       name: Yolobus Schedule
+  - caption: Yosemite Valley Shuttle Schedule
+    params:
+      name: Yosemite Valley Shuttle Schedule
+  - caption: Yuba-Sutter Schedule
+    params:
+      name: Yuba-Sutter Schedule
+  - caption: Yuma Schedule
+    params:
+      name: Yuma Schedule
   - caption: eTrans Schedule
     params:
       name: eTrans Schedule
