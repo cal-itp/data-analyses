@@ -9,7 +9,7 @@ from pathlib import Path
 
 from calitp_data_analysis import utils
 from update_vars import analysis_date, ESRI_BASE_URL
-
+from publish_utils import RENAME_HQTA, RENAME_SPEED
 
 def get_esri_url(name: str)-> str:
     return f"{ESRI_BASE_URL}{name}/FeatureServer"
@@ -25,30 +25,6 @@ SEGMENT_METHODOLOGY = "This data was estimated by combining GTFS real-time vehic
 
 ROUTE_METHODOLOGY = "This data was estimated by combining GTFS real-time vehicle positions with GTFS scheduled trips and shapes. GTFS real-time (RT) vehicle positions are spatially joined to GTFS scheduled shapes, so only vehicle positions traveling along the route alignment path are kept. A sample of five vehicle positions are selected (min, 25th percentile, 50th percentile, 75th percentile, max). The trip speed is calculated using these five vehicle positions. Each trip is categorized into a time-of-day. The average speed for a route-direction-time_of_day is calculated. Additional metrics are stored, such as the number of trips observed, the average scheduled service minutes, and the average RT observed service minutes. For convenience, we also provide a singular shape (common_shape_id) to associate with a route-direction. This is the shape that had the most number of trips for a given route-direction. Time-of-day is determined by the GTFS scheduled trip start time. The trip start hour (military time) is categorized based on the following: Owl (0-3), Early AM (4-6), AM Peak (7-9), Midday (10-14), PM Peak (15-19), and Evening (20-23). The start and end hours are inclusive (e.g., 4-6 refers to 4am, 5am, and 6am)."
 
-#--------------------------------------------------------#
-# Rename columns
-#--------------------------------------------------------#
-RENAME_HQTA = {
-    "agency_pri": "agency_primary",
-    "agency_sec": "agency_secondary",
-    "hqta_detai": "hqta_details",
-    "base64_url": "base64_url_primary",
-    "base64_u_1": "base64_url_secondary",  
-    "org_id_pri": "org_id_primary",
-    "org_id_sec": "org_id_secondary",
-}
-
-RENAME_SPEED = {
-    "stop_seque": "stop_sequence",
-    "time_of_da": "time_of_day",
-    "time_perio": "time_period",
-    "district_n": "district_name",
-    "direction_": "direction_id",
-    "common_sha": "common_shape_id",
-    "avg_sched_": "avg_sched_trip_min", 
-    "avg_rt_tri": "avg_rt_trip_min",
-    "caltrans_d": "district_name"
-}
 
 #--------------------------------------------------------#
 # Put supplemental parts together into dict
@@ -95,7 +71,7 @@ if __name__ == "__main__":
     
     METADATA_FILE = "metadata.yml"
     
-    with open(f"./{METADATA_FILE}") as f:
+    with open(METADATA_FILE) as f:
         meta = yaml.load(f, yaml.Loader)
         
     # The dictionaries for each dataset are stored in a list
@@ -122,7 +98,7 @@ if __name__ == "__main__":
     # Output a json to use in ArcPro, and only of the subset of dict that's meta["tables"]
     JSON_FILE = utils.sanitize_file_path(METADATA_FILE)
     
-    with open(f"./{JSON_FILE}.json", 'w') as f:
+    with open(f"{JSON_FILE}.json", 'w') as f:
         json.dump(output, f)
     
     print(f"{JSON_FILE} produced")
