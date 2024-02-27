@@ -1,6 +1,7 @@
 import geopandas as gpd
 import pandas as pd
 
+from calitp_data_analysis import utils
 from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
 
 route_time_cols = ["schedule_gtfs_dataset_key", 
@@ -24,8 +25,7 @@ def concatenate_schedule_by_route_direction(
             ]
         ).assign(
             service_date = pd.to_datetime(d)
-        ).astype({"direction_id": "Int64"}) 
-        for d in date_list
+        ) for d in date_list
     ], axis=0, ignore_index=True)
     
     return df
@@ -42,11 +42,12 @@ def concatenate_segment_speeds_by_route_direction(
         gpd.read_parquet(
             f"{SEGMENT_GCS}rollup_singleday/"
             f"speeds_route_dir_segments_{d}.parquet",
-            columns = route_time_cols + ["p20_mph", "p50_mph", "p80_mph"]
+            columns = route_time_cols + [
+                "name", "stop_pair", "p20_mph", "p50_mph", 
+                "p80_mph", "geometry"]
         ).assign(
             service_date = pd.to_datetime(d)
-        ).astype({"direction_id": "Int64"})  
-         for d in date_list], 
+        ) for d in date_list], 
         axis=0, ignore_index=True
     )
     
@@ -63,41 +64,45 @@ def concatenate_speeds_by_route_direction(
             columns = route_time_cols + ["speed_mph"]
         ).assign(
             service_date = pd.to_datetime(d)
-        ).astype({"direction_id": "Int64"})  
-         for d in date_list], 
+        )  for d in date_list], 
         axis=0, ignore_index=True
     )
     
     return df
 
 
-def merge_in_standardized_route_names(df: pd.DataFrame) -> pd.DataFrame:
+def merge_in_standardized_route_names(
+    df: pd.DataFrame, 
+) -> pd.DataFrame:
     standardized_route_names = pd.read_parquet(
         f"{SCHED_GCS}standardized_route_ids.parquet",
         columns = ["schedule_gtfs_dataset_key", "name", 
                    "route_id", "service_date",
-                   "recent_route_id2", "recent_combined_name"
-                  ]
+                   "recent_route_id2", "recent_combined_name"],
     )
+    
+    if "name" in df.columns:
+        df = df.drop(columns = "name")
     
     df = pd.merge(
         df,
         standardized_route_names,
-        on = ["schedule_gtfs_dataset_key", "route_id", "service_date"],
+        on = ["schedule_gtfs_dataset_key", 
+              "route_id", "service_date"],
         how = "left",
     )
     
     df = df.assign(
-        route_short_name = (df.recent_combined_name
-                            .str.split("__", expand=True)[0]),
-        route_long_name = (df.recent_combined_name
-                           .str.split("__", expand=True)[1]),
+        recent_combined_name = df.recent_combined_name.str.replace("__", " ")
     ).drop(
-        columns = ["route_id", "recent_combined_name"]
+        columns = ["route_id"]
     ).rename(
-        columns = {"recent_route_id2": "route_id"}
+        columns = {
+            "recent_route_id2": "route_id",
+            "recent_combined_name": "route_combined_name"
+        }
     )
-    
+
     return df
 
 
@@ -137,9 +142,23 @@ if __name__ == "__main__":
     
     df_sched_speeds= df_sched_speeds.assign(
         sched_rt_category = df_sched_speeds.sched_rt_category.map(category_dict)
-    ).pipe(merge_in_standardized_route_names)
+    ).pipe(
+        merge_in_standardized_route_names
+    ).pipe(clean_up_for_charts)
 
     
     df_sched_speeds.to_parquet(
         f"{RT_SCHED_GCS}digest/schedule_vp_metrics.parquet"
+    )
+    
+    segment_speeds = concatenate_segment_speeds_by_route_direction(
+        analysis_date_list
+    ).pipe(
+        merge_in_standardized_route_names
+    ).astype({"direction_id": "int"})
+    
+    utils.geoparquet_gcs_export(
+        segment_speeds,
+        RT_SCHED_GCS,
+        f"digest/segment_speeds"
     )
