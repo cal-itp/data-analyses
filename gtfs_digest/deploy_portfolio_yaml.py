@@ -4,7 +4,7 @@ import yaml
 from pathlib import Path
 from typing import Union
 
-from segment_speed_utils.project_vars import SEGMENT_GCS
+from segment_speed_utils.project_vars import RT_SCHED_GCS
 
 PORTFOLIO_SITE_YAML = Path("../portfolio/sites/route_speeds.yml")
     
@@ -17,11 +17,9 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    SPEEDS = "speeds_route_dir"
-    LATEST = "2024-01-17"
-    DATASET = f"rollup_singleday/{SPEEDS}_{LATEST}.parquet"
+    DATASET = f"digest/schedule_vp_metrics.parquet"
     
-    operators_df = pd.read_parquet(f"{SEGMENT_GCS}{DATASET}",
+    operators_df = pd.read_parquet(f"{RT_SCHED_GCS}{DATASET}",
         columns = ["name"]
     ).sort_values("name").drop_duplicates()
 
