@@ -44,6 +44,9 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
 ### Metadata
 * [Metadata](./metadata.yml)
 * [Data dictionary](./data_dictionary.yml)
+* [update_vars](./update_vars.py) and [publish_utils](./publish_utils.py) contain a lot of the variables that would frequently get updated in the publishing process.
+   * Apply standardized column names across published datasets, even they differ from internal keys (`org_id` in favor of `gtfs_dataset_key`, `agency` in favor of `organization_name`). 
+   * Since we do not save multiple versions of published datasets, the columns are renamed prior to exporting the geoparquet as a zipped shapefile.
 
 ## Open Data Intake Process 
 * Open a [ticket](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNUo1NjRNRFpIOVRBMVFFTFJDM1JKNkY0SC4u) on the Intranet to update or add new services and provide [justification](./intake_justification.md)
