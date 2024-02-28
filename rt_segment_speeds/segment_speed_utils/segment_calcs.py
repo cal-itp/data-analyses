@@ -107,30 +107,36 @@ def weighted_average_speeds_across_segments(
     
     avg_speeds_peak = speed_from_meters_elapsed_sec_elapsed(
         avg_speeds_peak)
+            
+    # For all aggregations above the trip level, continue on
+    if "trip_instance_key" not in group_cols:
+        avg_speeds_allday = (df.groupby(group_cols, 
+                                        observed=True, group_keys=False)
+                             .agg({
+                                 "meters_elapsed": "sum",
+                                 "sec_elapsed": "sum",
+                             }).reset_index()
+                            )
+
+        avg_speeds_allday = speed_from_meters_elapsed_sec_elapsed(
+            avg_speeds_allday
+        ).assign(
+            peak_offpeak = "all_day"
+        )
     
-    avg_speeds_allday = (df.groupby(group_cols, 
-                                    observed=True, group_keys=False)
-                         .agg({
-                             "meters_elapsed": "sum",
-                             "sec_elapsed": "sum",
-                         }).reset_index()
-                        )
+        avg_speeds = pd.concat(
+            [avg_speeds_peak, avg_speeds_allday],
+            axis=0, ignore_index = True
+        ).rename(
+            columns = {"peak_offpeak": "time_period"}
+        )
+
+        return avg_speeds
     
-    avg_speeds_allday = speed_from_meters_elapsed_sec_elapsed(
-        avg_speeds_allday
-    ).assign(
-        peak_offpeak = "all_day"
-    )
-    
-    avg_speeds = pd.concat(
-        [avg_speeds_peak, avg_speeds_allday],
-        axis=0, ignore_index = True
-    ).rename(
-        columns = {"peak_offpeak": "time_period"}
-    )
-    
-    return avg_speeds
-    
+    # A trip level dataset cannot be aggregated to peak/offpeak/all_day
+    else:
+        return avg_speeds_peak
+
 
 def concatenate_peak_offpeak_allday_averages(
     df: pd.DataFrame, 
