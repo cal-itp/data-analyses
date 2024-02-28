@@ -515,5 +515,5 @@ parts:
   - caption: eTrans Schedule
     params:
       name: eTrans Schedule
-readme: ./rt_segment_speeds/README.md
+readme: ./gtfs_digest/README.md
 title: Average Speeds by Transit Operator Exploratory Charts
