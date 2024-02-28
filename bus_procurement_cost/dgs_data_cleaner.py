@@ -7,16 +7,19 @@ from fta_data_cleaner import gcs_path
 def calculate_total_cost(row):
     """
     Calculate new column for total cost by checking if total_with_options_per_unit is present or not.
+    if not, then calculate using contract_unit_price.
     to be used with .assign()
     """
     if row["total_with_options_per_unit"] > 0:
         return row["total_with_options_per_unit"] * row["quantity"]
     else:
         return row["contract_unit_price"] * row["quantity"]
-    
-def new_bus_size_finder(item_description):
+
+
+def new_bus_size_finder(description: str) -> str:
     """
     Similar to prop_type_find, matches keywords to item description col and return standardized bus size type.
+    now includes variable that make description input lowercase.
     To be used with .assign()
     """
 
@@ -50,36 +53,38 @@ def new_bus_size_finder(item_description):
         "over-the-road",
     ]
 
+    item_description = description.lower().replace("-", " ").strip()
+
     if any(word in item_description for word in articulated_list):
         return "articulated"
 
-    if any(word in item_description for word in standard_bus_list):
+    elif any(word in item_description for word in standard_bus_list):
         return "standard/conventional (30ft-45ft)"
 
-    if any(word in item_description for word in cutaway_list):
+    elif any(word in item_description for word in cutaway_list):
         return "cutaway"
 
-    if any(word in item_description for word in otr_bus_list):
+    elif any(word in item_description for word in otr_bus_list):
         return "over-the-road"
 
-    if any(word in item_description for word in other_bus_size_list):
+    elif any(word in item_description for word in other_bus_size_list):
         return "other"
 
-    return "not specified"
+    else:
+        return "not specified"
 
 
 # new prop_finder function
-def new_prop_finder(item_description):
+def new_prop_finder(description: str) -> str:
     """
     function that matches keywords from each propulsion type list against the item description col, returns a standardized prop type
+    now includes variable that make description input lowercase.
     to be used with .assign()
     """
 
     BEB_list = [
         "battery electric",
-        "battery-electric",
         "BEBs paratransit buses",
-        "Battery Electric Bus",
         "battery electric bus",
     ]
 
@@ -93,37 +98,32 @@ def new_prop_finder(item_description):
     electric_list = [
         "electric buses",
         "electric commuter",
-        "Electric",
         "electric",
     ]
 
     FCEB_list = [
         "fuel cell",
-        "fuel-cell",
         "fuel cell electric",
         "hydrogen fuel cell",
-        "Fuel Cell Electric Bus",
         "fuel cell electric bus",
-        "Hydrogen Electic Bus",
         "hydrogen electric bus",
     ]
 
     # low emission (hybrid)
     hybrid_list = [
         "diesel electric hybrids",
-        "diesel-electric",
         "diesel-electric hybrids",
-        "hybrid",
         "hybrid electric",
         "hybrid electric buses",
         "hybrid electrics",
+        "hybrid",
     ]
 
     # low emission (propane)
     propane_list = [
-        "propane",
         "propane buses",
         "propaned powered vehicles",
+        "propane",
     ]
 
     mix_beb_list = [
@@ -142,44 +142,47 @@ def new_prop_finder(item_description):
     ]
 
     zero_e_list = [
-        "zero‐emission",
-        "zero-emission buses",
-        "zero emission",
         "zero emission buses",
         "zero emission electric",
+        "zero emission",
     ]
 
-    if any(word in item_description for word in BEB_list):
+    item_description = description.lower().replace("-", " ").strip()
+
+    if any(word in item_description for word in BEB_list) and not any(
+        word in item_description for word in ["diesel", "hybrid", "fuel cell"]
+    ):
         return "BEB"
 
-    if any(word in item_description for word in cng_list):
+    elif any(word in item_description for word in cng_list):
         return "CNG"
 
-    if any(word in item_description for word in FCEB_list):
+    elif any(word in item_description for word in FCEB_list):
         return "FCEB"
 
-    if any(word in item_description for word in hybrid_list):
+    elif any(word in item_description for word in hybrid_list):
         return "low emission (hybrid)"
 
-    if any(word in item_description for word in propane_list):
+    elif any(word in item_description for word in propane_list):
         return "low emission (propane)"
 
-    if any(word in item_description for word in mix_beb_list):
+    elif any(word in item_description for word in mix_beb_list):
         return "mix (BEB and FCEB)"
 
-    if any(word in item_description for word in mix_lowe_list):
+    elif any(word in item_description for word in mix_lowe_list):
         return "mix (low emission)"
 
-    if any(word in item_description for word in mix_zero_low_list):
+    elif any(word in item_description for word in mix_zero_low_list):
         return "mix (zero and low emission)"
 
-    if any(word in item_description for word in zero_e_list):
+    elif any(word in item_description for word in zero_e_list):
         return "zero-emission bus (not specified)"
 
-    if any(word in item_description for word in electric_list):
+    elif any(word in item_description for word in electric_list):
         return "electric (not specified)"
 
-    return "not specified"
+    else:
+        return "not specified"
 
 
 # included assign columns
@@ -226,6 +229,7 @@ def clean_dgs_columns() -> pd.DataFrame:
         "total_with_options_per_unit",
         "grand_total",
     ]
+    
     # read in data
     dgs_17c = pd.read_excel(f"{gcs_path}{file_17c}", sheet_name=sheet_17c)
     dgs_17b = pd.read_excel(f"{gcs_path}{file_17b}", sheet_name=sheet_17b)
@@ -242,9 +246,9 @@ def clean_dgs_columns() -> pd.DataFrame:
 
     # takes list of columns and updates to int64
     dgs_17bc[to_int64] = dgs_17bc[to_int64].astype("int64")
-    
+
     # change purchase_order_number col to str
-    dgs_17bc['purchase_order_number'] = dgs_17bc['purchase_order_number'].astype('str')
+    dgs_17bc["purchase_order_number"] = dgs_17bc["purchase_order_number"].astype("str")
 
     # adds 3 new columns from functions
     dgs_17bc2 = dgs_17bc.assign(
@@ -252,9 +256,8 @@ def clean_dgs_columns() -> pd.DataFrame:
         new_prop_type=dgs_17bc["item_description"].apply(new_prop_finder),
         new_bus_size=dgs_17bc["item_description"].apply(new_bus_size_finder),
     )
-    
-    return dgs_17bc2
 
+    return dgs_17bc2
 
 def agg_by_agency(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -338,8 +341,8 @@ def agg_by_agency_w_options(df: pd.DataFrame) -> pd.DataFrame:
 
     return merge
 
-
 if __name__ == "__main__":
+    
     # initial df
     df1 = clean_dgs_columns()
     
