@@ -11,7 +11,7 @@ trip_analysis_date_list = [
 route_months = ["sep", "oct"]         
 
 route_analysis_date_list = [
-    rt_dates.DATES[f"{m}2023"] for m in trip_months
+    rt_dates.DATES[f"{m}2023"] for m in route_months
 ]
 
 CONFIG_PATH = Path("config.yml")
