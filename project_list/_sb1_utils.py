@@ -133,7 +133,7 @@ def load_sb1() -> gpd.GeoDataFrame:
     ]
     
     # Only keep cols of interest
-    full_gdf = full_gdf[keep]
+    # full_gdf = full_gdf[keep]
     
     # Fill in missing info for the same project
     full_gdf = fill_in_missing_info(full_gdf)
