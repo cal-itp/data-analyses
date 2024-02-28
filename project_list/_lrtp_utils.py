@@ -300,7 +300,7 @@ def harmonize_ambag():
         county_col="county",
         city_col="",
         project_year_col="",
-        data_source="AMBAG",
+        data_source="AMBAG 2050 Metropolitan Transportation Plan & the Sustainable Communities Strategy",
         lead_agency = "",
         note_cols= [],
         cost_in_millions=True,
@@ -363,7 +363,7 @@ def harmonize_bcag():
         county_col="",
         city_col="",
         project_year_col="target_fiscal_year",
-        data_source="BCAG",
+        data_source="BCAG RTP/SCS published in 2020",
         lead_agency = "agency",
         note_cols=[
             "project_type",
@@ -400,7 +400,7 @@ def harmonize_fresnocog():
         county_col="",
         city_col="",
         project_year_col="estimated_open_to_traffic",
-        data_source="Fresno COG",
+        data_source="Fresno RTP/SCS published in 2022",
         lead_agency="",
         note_cols=[
             "project_type",
@@ -440,7 +440,7 @@ def harmonize_kcag():
         county_col="",
         city_col="",
         project_year_col="",
-        data_source="KCAG",
+        data_source="KCAG RTP/SCS published in 2022",
         lead_agency="",
         note_cols=[
             "category",
@@ -495,7 +495,7 @@ def harmonize_kerncog():
         county_col="",
         city_col="",
         project_year_col="",
-        data_source="Kern Cog",
+        data_source="Kern 2022 RTP/SCS",
         lead_agency="",
         note_cols=[
             "yoe_w__new_revenue",
@@ -546,7 +546,7 @@ def harmonize_madera():
         county_col="",
         city_col="",
         project_year_col="opening_year",
-        data_source="Madera CTC",
+        data_source="Madera 2046 RTP/SCS",
         lead_agency="agency",
         note_cols=[
             "category",
@@ -578,7 +578,7 @@ def harmonize_mcagov():
         county_col="",
         city_col="",
         project_year_col="completion\nyear",
-        data_source="MCAGOV",
+        data_source="MCAG RTP/SCS published in 2022",
         lead_agency="agency",
         note_cols=[
             "type",
@@ -646,7 +646,7 @@ def harmonize_mtc():
         county_col="county",
         city_col="",
         project_year_col="open_year",
-        data_source="MTC",
+        data_source="MTC Plan Bay Area 2050",
         lead_agency="",
         note_cols=[
             "plan_strategy",
@@ -686,7 +686,7 @@ def harmonize_sacog():
         county_col="county",
         city_col="",
         project_year_col="completion_timing",
-        data_source="SACOG",
+        data_source="SACOG RTP/SCS published in 2019",
         lead_agency="lead_agency",
         note_cols=[
             "budget_category",
@@ -738,7 +738,7 @@ def harmonize_sandag():
         county_col="",
         city_col="",
         project_year_col="phase",
-        data_source="SANDAG",
+        data_source="SANDAG RTP/SCS published 2021",
         lead_agency="",
         note_cols=[
             "category",
@@ -802,7 +802,7 @@ def harmonize_sbcag():
         county_col="",
         city_col="",
         project_year_col="completion\nyear",
-        data_source="SBCAG",
+        data_source="SBCAG Connected 2050",
         lead_agency="",
         note_cols=[
             "phase",
@@ -845,7 +845,7 @@ def harmonize_scrtpa():
         county_col="",
         city_col="",
         project_year_col="project_band",
-        data_source="SCRTPA",
+        data_source="SCRTPA RTP/SCS published in 2018",
         lead_agency="",
         note_cols=[
             "project_type\n_project_intent_",
@@ -901,7 +901,7 @@ def harmonize_slocog():
         county_col="",
         city_col="",
         project_year_col="time_period",
-        data_source="SLOCOG",
+        data_source="SLOCOG 2023-2045 Regional Transportation Plan",
         lead_agency="",
         note_cols=["project_type", "sponsor", "community", "time_horizon"],
         cost_in_millions=True,
@@ -978,7 +978,7 @@ def harmonize_sjcog():
         county_col="",
         city_col="",
         project_year_col="completion_date",
-        data_source="SJCOG",
+        data_source="SJCOG RTP/SCS published 2022",
         lead_agency="",
         note_cols=[
             "jurisdiction",
@@ -1036,7 +1036,7 @@ def harmonize_scag():
         county_col="county",
         city_col="",
         project_year_col="completion_year",
-        data_source="SCAG",
+        data_source="SCAG RTP/SCS published in 2020",
         lead_agency="lead_agency",
         note_cols=["system", "route_#", "route_name", "from", "to"],
         cost_in_millions=True,
@@ -1094,7 +1094,7 @@ def harmonize_stancog():
         county_col="",
         city_col="",
         project_year_col="open_to_traffic",
-        data_source="STANCOG",
+        data_source="STANCOG RTP/SCS published in 2022",
         lead_agency="",
         note_cols=[
             "jurisdiction",
@@ -1139,7 +1139,7 @@ def harmonize_tahoe():
         county_col="",
         city_col="",
         project_year_col="project_year",
-        data_source="TMPO",
+        data_source="TMPO RTP/SCS published in 2020",
         lead_agency="implementer",
         note_cols=[
             "category",
@@ -1181,7 +1181,7 @@ def harmonize_tcag():
         county_col="",
         city_col="",
         project_year_col="completion_year",
-        data_source="TCAG",
+        data_source="TCAG RTP/SCS published in 2022",
         lead_agency="",
         note_cols=[
             "project_category",
