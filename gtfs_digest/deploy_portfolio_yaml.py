@@ -19,9 +19,11 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     """
     DATASET = f"digest/schedule_vp_metrics.parquet"
     
-    operators_df = pd.read_parquet(f"{RT_SCHED_GCS}{DATASET}",
+    operators_df = pd.read_parquet(
+        f"{RT_SCHED_GCS}{DATASET}",
+        filters = [[("sched_rt_category", "==", "schedule_and_vp")]],
         columns = ["name"]
-    ).sort_values("name").drop_duplicates()
+    ).sort_values("name").drop_duplicates().head(2)
 
     operators = operators_df.name.tolist()      
     # Eric's example
