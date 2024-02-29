@@ -1,5 +1,5 @@
-# Average Weekly Speeds by Transit Operator
+# GTFS Digest
 
-Take a deep dive into our preliminary speed aggregations by route-direction-stop_pair for each operator.
+Performance metrics from GTFS schedule and vehicle positions data for all transit operators by route.
 
-We'll plot the median speed for each route for peak / offpeak hours, weekday / weekend days for April and Oct 2023.
+Now that we're beginning to add monthly aggregations to schedule data, let's see how it all plays together. Use this to get out the kinks of combining all our current data products.
