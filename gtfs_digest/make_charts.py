@@ -102,9 +102,28 @@ def dual_chart(
         fields=[control_field], 
         bind=route_dropdown
     )
-                
-    chart = base_chart(
-        df, y_col
+    
+    sched_df = df[
+        (df.sched_rt_category != "vp_only") & 
+        (df.time_period != "all_day")]
+             
+    sched_service_chart = base_route_chart(
+        sched_df, "avg_sched_service_min"
     ).add_params(route_selector).transform_filter(route_selector)
    
+    sched_trips_chart = base_route_chart(
+        sched_df, "n_trips"
+    ).add_params(route_selector).transform_filter(route_selector)
+
+    sched_freq_chart = base_route_chart(
+        sched_df, "frequency"
+    ).add_params(route_selector).transform_filter(route_selector)
+
+    chart_list = [
+        sched_service_chart, sched_trips_chart,
+        sched_freq_chart,
+    ]
+    
+    chart = alt.vconcat(*chart_list)
+
     return chart
