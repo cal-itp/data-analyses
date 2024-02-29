@@ -1,13 +1,13 @@
-directory: ./rt_segment_speeds/
-notebook: ./rt_segment_speeds/28_route_averages.ipynb
+directory: ./gtfs_digest/
+notebook: ./gtfs_digest/report.ipynb
 parts:
 - chapters:
   - caption: Antelope Valley Transit Authority Schedule
     params:
       name: Antelope Valley Transit Authority Schedule
-  - caption: Avalon Schedule
+  - caption: B-Line Schedule
     params:
-      name: Avalon Schedule
+      name: B-Line Schedule
   - caption: Banning Pass Schedule
     params:
       name: Banning Pass Schedule
@@ -20,21 +20,15 @@ parts:
   - caption: Bay Area 511 Caltrain Schedule
     params:
       name: Bay Area 511 Caltrain Schedule
-  - caption: Bay Area 511 Capitol Corridor Schedule
-    params:
-      name: Bay Area 511 Capitol Corridor Schedule
   - caption: Bay Area 511 County Connection Schedule
     params:
       name: Bay Area 511 County Connection Schedule
-  - caption: Bay Area 511 Dumbarton Express Schedule
+  - caption: Bay Area 511 Emery Go-Round Schedule
     params:
-      name: Bay Area 511 Dumbarton Express Schedule
+      name: Bay Area 511 Emery Go-Round Schedule
   - caption: Bay Area 511 Fairfield and Suisun Transit Schedule
     params:
       name: Bay Area 511 Fairfield and Suisun Transit Schedule
-  - caption: Bay Area 511 Golden Gate Transit Schedule
-    params:
-      name: Bay Area 511 Golden Gate Transit Schedule
   - caption: Bay Area 511 MVGO Schedule
     params:
       name: Bay Area 511 MVGO Schedule
@@ -50,9 +44,6 @@ parts:
   - caption: Bay Area 511 SamTrans Schedule
     params:
       name: Bay Area 511 SamTrans Schedule
-  - caption: Bay Area 511 San Francisco Bay Ferry Schedule
-    params:
-      name: Bay Area 511 San Francisco Bay Ferry Schedule
   - caption: Bay Area 511 Santa Clara Transit Schedule
     params:
       name: Bay Area 511 Santa Clara Transit Schedule
@@ -62,6 +53,9 @@ parts:
   - caption: Bay Area 511 SolTrans Schedule
     params:
       name: Bay Area 511 SolTrans Schedule
+  - caption: Bay Area 511 Sonoma County Transit Schedule
+    params:
+      name: Bay Area 511 Sonoma County Transit Schedule
   - caption: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
     params:
       name: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
@@ -113,6 +107,9 @@ parts:
   - caption: Elk Grove Schedule
     params:
       name: Elk Grove Schedule
+  - caption: Foothill Schedule
+    params:
+      name: Foothill Schedule
   - caption: Fresno Schedule
     params:
       name: Fresno Schedule
@@ -182,62 +179,5 @@ parts:
   - caption: Riverside Schedule
     params:
       name: Riverside Schedule
-  - caption: SBMTD Schedule
-    params:
-      name: SBMTD Schedule
-  - caption: SLORTA Schedule
-    params:
-      name: SLORTA Schedule
-  - caption: Sacramento Schedule
-    params:
-      name: Sacramento Schedule
-  - caption: San Diego Schedule
-    params:
-      name: San Diego Schedule
-  - caption: San Joaquin Schedule
-    params:
-      name: San Joaquin Schedule
-  - caption: Santa Clarita Schedule
-    params:
-      name: Santa Clarita Schedule
-  - caption: Santa Cruz Schedule
-    params:
-      name: Santa Cruz Schedule
-  - caption: Santa Maria Schedule
-    params:
-      name: Santa Maria Schedule
-  - caption: Santa Ynez Mecatran Schedule
-    params:
-      name: Santa Ynez Mecatran Schedule
-  - caption: StanRTA Schedule
-    params:
-      name: StanRTA Schedule
-  - caption: Tahoe Transportation District GMV Schedule
-    params:
-      name: Tahoe Transportation District GMV Schedule
-  - caption: Torrance Schedule
-    params:
-      name: Torrance Schedule
-  - caption: Turlock Schedule
-    params:
-      name: Turlock Schedule
-  - caption: Unitrans Schedule
-    params:
-      name: Unitrans Schedule
-  - caption: VCTC GMV Schedule
-    params:
-      name: VCTC GMV Schedule
-  - caption: Victor Valley GMV Schedule
-    params:
-      name: Victor Valley GMV Schedule
-  - caption: Visalia Schedule
-    params:
-      name: Visalia Schedule
-  - caption: Yolobus Schedule
-    params:
-      name: Yolobus Schedule
-  - caption: eTrans Schedule
-    params:
-      name: eTrans Schedule
-readme: ./rt_segment_speeds/README.md
+readme: ./gtfs_digest/README.md
 title: Average Speeds by Transit Operator Exploratory Charts

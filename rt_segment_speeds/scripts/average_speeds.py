@@ -62,7 +62,8 @@ def merge_operator_identifiers(
 
 def import_segments(
     analysis_date_list: list,
-    segment_type: Literal["stop_segments", "rt_stop_times"]
+    segment_type: Literal["stop_segments", "rt_stop_times"],
+    get_pandas: bool
 ) -> gpd.GeoDataFrame:
     """
     Import the segments to merge.
@@ -95,14 +96,16 @@ def import_segments(
         dfs, axis=0, ignore_index=True
     ).drop_duplicates(subset=keep_cols).reset_index(drop=True)
     
-    gdf = compute(gdf)[0]
-
+    if get_pandas:
+        gdf = compute(gdf)[0]
+    
     return gdf
 
 
 def concatenate_trip_segment_speeds(
     analysis_date_list: list,
-    dict_inputs: dict
+    dict_inputs: dict,
+    get_pandas: bool
 ) -> pd.DataFrame:
     """
     Concatenate the speed-trip parquets together, 
@@ -135,7 +138,8 @@ def concatenate_trip_segment_speeds(
         gtfs_schedule_wrangling.add_weekday_weekend_column
     )
     
-    df = compute(df)[0]
+    if get_pandas:
+        df = compute(df)[0]
     
     return df
     
@@ -157,8 +161,10 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     
     start = datetime.datetime.now()
     
-    df = concatenate_trip_segment_speeds([analysis_date], dict_inputs)
-    print("concatenated files")   
+    df = concatenate_trip_segment_speeds(
+        [analysis_date], dict_inputs, get_pandas = True
+    )
+    print("concatenated files")  
     
     t0 = datetime.datetime.now()
     shape_stop_segments = segment_calcs.concatenate_peak_offpeak_allday_averages(
@@ -170,7 +176,8 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     
     col_order = [c for c in shape_stop_segments.columns]
     
-    segment_geom = import_segments([analysis_date], "stop_segments")
+    segment_geom = import_segments(
+        [analysis_date], "stop_segments", get_pandas=True)
     
     shape_stop_segments = pd.merge(
         segment_geom,
@@ -200,7 +207,8 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     
     col_order = [c for c in route_dir_segments.columns]
     
-    segment_geom = (import_segments([analysis_date], "stop_segments")
+    segment_geom = (import_segments(
+        [analysis_date], "stop_segments", get_pandas=True)
                     .drop(columns = "shape_array_key")
                     .drop_duplicates()
                    )
@@ -293,11 +301,13 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     ROUTE_SEG_FILE = dict_inputs["route_dir_multi_segment"]
     ROUTE_DIR_FILE = dict_inputs["route_dir_multi_summary"]
         
-    df = delayed(concatenate_trip_segment_speeds)(
-        analysis_date_list, dict_inputs)
+    df = concatenate_trip_segment_speeds(
+        analysis_date_list, dict_inputs, get_pandas = False)
+    
     print("concatenated files")   
     
-    time_span_str, time_span_num = time_helpers.time_span_labeling(analysis_date_list)
+    time_span_str, time_span_num = time_helpers.time_span_labeling(
+        analysis_date_list)
     
     t0 = datetime.datetime.now()
         
@@ -307,30 +317,25 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
         OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"]
     )
     
-    #route_dir_segments = compute(route_dir_segments)[0]
+    route_dir_segments = compute(route_dir_segments)[0]
     
-    route_dir_segments = delayed(time_helpers.add_time_span_columns)(
+    route_dir_segments = time_helpers.add_time_span_columns(
         route_dir_segments, time_span_num
     ).pipe(
         merge_operator_identifiers, analysis_date_list
     )
+        
+    segment_geom = import_segments(
+        [analysis_date_list[2]], "stop_segments", get_pandas=True
+    ).drop(columns = "shape_array_key").drop_duplicates()
     
-    segment_geom = delayed(import_segments(analysis_date_list, "stop_segments")
-                .drop(columns = "shape_array_key")
-                .drop_duplicates()
-               )
-    
-    
-    route_dir_segments = delayed(pd.merge)(
+    col_order = [c for c in route_dir_segments.columns]
+
+    route_dir_segments = pd.merge(
         segment_geom,
         route_dir_segments,
         on = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS, 
-    ).reset_index(drop=True)
-    
-    route_dir_segments = compute(route_dir_segments)[0]
-    col_order = [c for c in route_dir_segments.columns]
-
-    route_dir_segments = route_dir_segments.reindex(
+    ).reset_index(drop=True).reindex(
         columns = col_order + ["geometry"]
     )
     
@@ -352,6 +357,7 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     )
     
     route_dir_avg = compute(route_dir_avg)[0]
+    
     route_dir_avg = time_helpers.add_time_span_columns(
         route_dir_avg, time_span_num
     ).pipe(
@@ -427,7 +433,7 @@ if __name__ == "__main__":
                level="INFO")
     
     STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
-    '''
+    
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
@@ -438,8 +444,9 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
-    '''
     
+        
+    '''
     for one_week in [rt_dates.oct_week, rt_dates.apr_week]:
         start = datetime.datetime.now()
             
@@ -447,4 +454,4 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
     
         logger.info(f"average rollups for {one_week}: {end - start}")
-    
+    '''
