@@ -24,21 +24,16 @@ def new_bus_size_finder(description: str) -> str:
     """
 
     articulated_list = [
-        "60-foot",
         "60 foot",
         "articulated",
     ]
 
     standard_bus_list = [
-        "30-foot",
+        "30 foot",
         "35 foot",
-        "35 Foot",
         "40 foot",
-        "40-foot",
-        "40 Foot",
         "40ft",
         "45 foot",
-        "45-foot",
         "standard",
     ]
 
@@ -49,8 +44,8 @@ def new_bus_size_finder(description: str) -> str:
     other_bus_size_list = ["feeder bus"]
 
     otr_bus_list = [
-        "coach-style",
-        "over-the-road",
+        "coach style",
+        "over the road",
     ]
 
     item_description = description.lower().replace("-", " ").strip()
@@ -86,13 +81,15 @@ def new_prop_finder(description: str) -> str:
         "battery electric",
         "BEBs paratransit buses",
         "battery electric bus",
+        'battery electric buses',
+        'battery  electric buses',
     ]
 
     cng_list = [
-        "CNG buses",
-        "CNG fueled",
-        "estimated-CNG buses",
-        "low emission CNG",
+        "cng buses",
+        "cng fueled",
+        "estimated cng buses",
+        "low emission cng",
     ]
 
     electric_list = [
@@ -144,27 +141,22 @@ def new_prop_finder(description: str) -> str:
     zero_e_list = [
         "zero emission buses",
         "zero emission electric",
+        "zero emission vehicles",
         "zero emission",
     ]
 
-    item_description = description.lower().replace("-", " ").strip()
+    item_description = description.lower().replace("-" "", " ").replace("‐", " ").strip()
 
     if any(word in item_description for word in BEB_list) and not any(
         word in item_description for word in ["diesel", "hybrid", "fuel cell"]
     ):
         return "BEB"
 
-    elif any(word in item_description for word in cng_list):
-        return "CNG"
-
     elif any(word in item_description for word in FCEB_list):
         return "FCEB"
 
     elif any(word in item_description for word in hybrid_list):
         return "low emission (hybrid)"
-
-    elif any(word in item_description for word in propane_list):
-        return "low emission (propane)"
 
     elif any(word in item_description for word in mix_beb_list):
         return "mix (BEB and FCEB)"
@@ -178,8 +170,14 @@ def new_prop_finder(description: str) -> str:
     elif any(word in item_description for word in zero_e_list):
         return "zero-emission bus (not specified)"
 
+    elif any(word in item_description for word in propane_list):
+        return "low emission (propane)"
+
     elif any(word in item_description for word in electric_list):
         return "electric (not specified)"
+    
+    elif any(word in item_description for word in cng_list):
+        return "CNG"
 
     else:
         return "not specified"
