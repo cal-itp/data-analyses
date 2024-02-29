@@ -305,8 +305,8 @@ def add_route_time(df:pd.DataFrame, analysis_date: str)->pd.DataFrame:
     )
     
     df3['time_of_day'] = df3.sched_time_of_day.fillna(df3.rt_time_of_day)
-    df3 =  gtfs_schedule_wrangling.add_peak_offpeak_column(df3)
-    df3 = df3.drop(columns = ['sched_time_of_day', 'rt_time_of_day'])
+    # df3 =  gtfs_schedule_wrangling.add_peak_offpeak_column(df3)
+    # df3 = df3.drop(columns = ['sched_time_of_day', 'rt_time_of_day'])
     return df3
 
 def add_metrics(df: pd.DataFrame) -> pd.DataFrame:

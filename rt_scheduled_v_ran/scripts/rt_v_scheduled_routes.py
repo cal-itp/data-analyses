@@ -54,8 +54,9 @@ def concatenate_trip_segment_speeds(analysis_date_list: list) -> pd.DataFrame:
     return df
 
 def route_metrics(analysis_date_list: list) -> pd.DataFrame:
-
+  
     df = concatenate_trip_segment_speeds(analysis_date_list)
+    
     # Delete out trip generated metrics
     del_cols = [
         "pings_per_min",
@@ -78,30 +79,39 @@ def route_metrics(analysis_date_list: list) -> pd.DataFrame:
 
     count_cols = ["trip_instance_key"]
 
-    group_cols = [
-        "schedule_gtfs_dataset_key",
-        "route_id",
-        "direction_id",
-        "sched_rt_category",
-        "peak_offpeak",
-        "time_of_day",
-    ]
-    df2 = (
-        df.groupby(group_cols)
+    all_day_groups = ["schedule_gtfs_dataset_key",
+                  "route_id",
+                  "direction_id",
+                  ]
+    
+    all_day_df = (
+        df.groupby(all_day_groups)
         .agg({**{e: "sum" for e in sum_cols}, **{e: "count" for e in count_cols}})
         .reset_index()
     )
 
-    df2 = df2.rename(columns={"trip_instance_key": "n_trips"})
+    all_day_df = all_day_df.rename(columns={"trip_instance_key": "n_trips"})
+    all_day_df =  rt_v_scheduled_trip.add_metrics(all_day_df)
+    all_day_df['time_period'] = "all_day"
+    
+    peak_groups = ["peak_offpeak"] + all_day_groups
+    peak_df = (
+        df.groupby(peak_groups)
+        .agg({**{e: "sum" for e in sum_cols}, **{e: "count" for e in count_cols}})
+        .reset_index()
+    )
 
-    df2 = rt_v_scheduled_trip.add_metrics(df2)
+    peak_df = peak_df.rename(columns={"trip_instance_key": "n_trips",'peak_offpeak':'time_period'})
+    peak_df =  rt_v_scheduled_trip.add_metrics(peak_df)
+    
+    final_df = pd.concat([peak_df, all_day_df])
     
     # Save
     analysis_date_file = generate_date(analysis_date_list)
     ROUTE_EXPORT = CONFIG_DICT["route_direction_metrics"]
-    df2.to_parquet(f"{RT_SCHED_GCS}{ROUTE_EXPORT}/trip_{analysis_date_file}.parquet")
+    final_df.to_parquet(f"{RT_SCHED_GCS}{ROUTE_EXPORT}/trip_{analysis_date_file}.parquet")
     
-    return df2
+    return final_df
 
 if __name__ == "__main__":
     route_metrics(update_vars.route_analysis_date_list)
