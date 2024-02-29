@@ -23,7 +23,7 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
         f"{RT_SCHED_GCS}{DATASET}",
         filters = [[("sched_rt_category", "==", "schedule_and_vp")]],
         columns = ["name"]
-    ).sort_values("name").drop_duplicates().head(2)
+    ).sort_values("name").drop_duplicates()
 
     operators = operators_df.name.tolist()      
     # Eric's example
