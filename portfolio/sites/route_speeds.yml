@@ -8,5 +8,176 @@ parts:
   - caption: B-Line Schedule
     params:
       name: B-Line Schedule
+  - caption: Banning Pass Schedule
+    params:
+      name: Banning Pass Schedule
+  - caption: Bay Area 511 AC Transit Schedule
+    params:
+      name: Bay Area 511 AC Transit Schedule
+  - caption: Bay Area 511 ACE Schedule
+    params:
+      name: Bay Area 511 ACE Schedule
+  - caption: Bay Area 511 Caltrain Schedule
+    params:
+      name: Bay Area 511 Caltrain Schedule
+  - caption: Bay Area 511 County Connection Schedule
+    params:
+      name: Bay Area 511 County Connection Schedule
+  - caption: Bay Area 511 Emery Go-Round Schedule
+    params:
+      name: Bay Area 511 Emery Go-Round Schedule
+  - caption: Bay Area 511 Fairfield and Suisun Transit Schedule
+    params:
+      name: Bay Area 511 Fairfield and Suisun Transit Schedule
+  - caption: Bay Area 511 MVGO Schedule
+    params:
+      name: Bay Area 511 MVGO Schedule
+  - caption: Bay Area 511 Marin Schedule
+    params:
+      name: Bay Area 511 Marin Schedule
+  - caption: Bay Area 511 Muni Schedule
+    params:
+      name: Bay Area 511 Muni Schedule
+  - caption: Bay Area 511 Petaluma Schedule
+    params:
+      name: Bay Area 511 Petaluma Schedule
+  - caption: Bay Area 511 SamTrans Schedule
+    params:
+      name: Bay Area 511 SamTrans Schedule
+  - caption: Bay Area 511 Santa Clara Transit Schedule
+    params:
+      name: Bay Area 511 Santa Clara Transit Schedule
+  - caption: Bay Area 511 Santa Rosa CityBus Schedule
+    params:
+      name: Bay Area 511 Santa Rosa CityBus Schedule
+  - caption: Bay Area 511 SolTrans Schedule
+    params:
+      name: Bay Area 511 SolTrans Schedule
+  - caption: Bay Area 511 Sonoma County Transit Schedule
+    params:
+      name: Bay Area 511 Sonoma County Transit Schedule
+  - caption: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
+    params:
+      name: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
+  - caption: Bay Area 511 Tri Delta Schedule
+    params:
+      name: Bay Area 511 Tri Delta Schedule
+  - caption: Bay Area 511 Tri-Valley Wheels Schedule
+    params:
+      name: Bay Area 511 Tri-Valley Wheels Schedule
+  - caption: Bay Area 511 Union City Transit Schedule
+    params:
+      name: Bay Area 511 Union City Transit Schedule
+  - caption: Bay Area 511 Vine Transit Schedule
+    params:
+      name: Bay Area 511 Vine Transit Schedule
+  - caption: Bay Area 511 WestCAT Schedule
+    params:
+      name: Bay Area 511 WestCAT Schedule
+  - caption: Beach Cities GMV Schedule
+    params:
+      name: Beach Cities GMV Schedule
+  - caption: Bear Schedule
+    params:
+      name: Bear Schedule
+  - caption: Beaumont Pass Schedule
+    params:
+      name: Beaumont Pass Schedule
+  - caption: Big Blue Bus Schedule
+    params:
+      name: Big Blue Bus Schedule
+  - caption: BruinBus Schedule
+    params:
+      name: BruinBus Schedule
+  - caption: Burbank Schedule
+    params:
+      name: Burbank Schedule
+  - caption: Commerce Schedule
+    params:
+      name: Commerce Schedule
+  - caption: Culver City Schedule
+    params:
+      name: Culver City Schedule
+  - caption: Desert Roadrunner GMV Schedule
+    params:
+      name: Desert Roadrunner GMV Schedule
+  - caption: Eastern Sierra Schedule
+    params:
+      name: Eastern Sierra Schedule
+  - caption: Elk Grove Schedule
+    params:
+      name: Elk Grove Schedule
+  - caption: Foothill Schedule
+    params:
+      name: Foothill Schedule
+  - caption: Fresno Schedule
+    params:
+      name: Fresno Schedule
+  - caption: GET Schedule
+    params:
+      name: GET Schedule
+  - caption: Humboldt Schedule
+    params:
+      name: Humboldt Schedule
+  - caption: Kings Schedule
+    params:
+      name: Kings Schedule
+  - caption: LA DOT Schedule
+    params:
+      name: LA DOT Schedule
+  - caption: LA Metro Bus Schedule
+    params:
+      name: LA Metro Bus Schedule
+  - caption: LA Metro Rail Schedule
+    params:
+      name: LA Metro Rail Schedule
+  - caption: Lake Schedule
+    params:
+      name: Lake Schedule
+  - caption: Lawndale Beat GMV Schedule
+    params:
+      name: Lawndale Beat GMV Schedule
+  - caption: Long Beach Schedule
+    params:
+      name: Long Beach Schedule
+  - caption: Madera County Connection Schedule
+    params:
+      name: Madera County Connection Schedule
+  - caption: Mendocino Schedule
+    params:
+      name: Mendocino Schedule
+  - caption: Monterey Salinas Schedule
+    params:
+      name: Monterey Salinas Schedule
+  - caption: Nevada County Schedule
+    params:
+      name: Nevada County Schedule
+  - caption: North County Schedule
+    params:
+      name: North County Schedule
+  - caption: Norwalk Avail Schedule
+    params:
+      name: Norwalk Avail Schedule
+  - caption: OCTA Schedule
+    params:
+      name: OCTA Schedule
+  - caption: OmniTrans Schedule
+    params:
+      name: OmniTrans Schedule
+  - caption: Pasadena Schedule
+    params:
+      name: Pasadena Schedule
+  - caption: PresidiGo Schedule
+    params:
+      name: PresidiGo Schedule
+  - caption: Redding Schedule
+    params:
+      name: Redding Schedule
+  - caption: Redwood Coast Schedule
+    params:
+      name: Redwood Coast Schedule
+  - caption: Riverside Schedule
+    params:
+      name: Riverside Schedule
 readme: ./gtfs_digest/README.md
 title: Average Speeds by Transit Operator Exploratory Charts
