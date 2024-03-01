@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import shared_utils
 from calitp_data_analysis.sql import to_snakecase
-from fta_data_cleaner import gcs_path
+
 from dgs_data_cleaner import new_prop_finder
 from dgs_data_cleaner import new_bus_size_finder
 
@@ -18,6 +18,7 @@ def clean_tircp_columns() -> pd.DataFrame:
     """
     main function that reads in and cleans TIRCP data.
     """
+    from fta_data_cleaner import gcs_path
     file_name = "TIRCP Tracking Sheets 2_1-10-2024.xlsx"
     tircp_name = "Project Tracking"
 
@@ -119,6 +120,8 @@ def agg_buses_only(df: pd.DataFrame) -> pd.DataFrame:
     return df3
 
 if __name__ == "__main__":
+    
+    from fta_data_cleaner import gcs_path
     
     # initial df
     df1 = clean_tircp_columns()
