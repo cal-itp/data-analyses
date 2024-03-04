@@ -53,10 +53,8 @@ def concatenate_trip_segment_speeds(analysis_date_list: list) -> pd.DataFrame:
     )
     return df
 
-def route_metrics(analysis_date_list: list) -> pd.DataFrame:
-  
-    df = concatenate_trip_segment_speeds(analysis_date_list)
-    
+def route_metrics(df:pd.DataFrame) -> pd.DataFrame:
+
     # Delete out trip generated metrics
     del_cols = [
         "pings_per_min",
@@ -106,6 +104,26 @@ def route_metrics(analysis_date_list: list) -> pd.DataFrame:
     
     final_df = pd.concat([peak_df, all_day_df])
     
+    return final_df
+
+def route_singleday_metrics(analysis_date:str) -> pd.DataFrame:
+    df = pd.read_parquet(
+                f"{RT_SCHED_GCS}{TRIP_EXPORT}/trip_{analysis_date}.parquet"
+            )
+    
+    # Save
+    final_df = route_metrics(df)
+    ROUTE_EXPORT = CONFIG_DICT["route_direction_metrics"]
+    final_df.to_parquet(f"{RT_SCHED_GCS}{ROUTE_EXPORT}/trip_{analysis_date}.parquet")
+    
+    return final_df
+
+def route_metrics_multiple_days(analysis_date_list: list) -> pd.DataFrame:
+      
+    df = concatenate_trip_segment_speeds(analysis_date_list)
+    
+    final_df = route_metrics(df)
+    
     # Save
     analysis_date_file = generate_date(analysis_date_list)
     ROUTE_EXPORT = CONFIG_DICT["route_direction_metrics"]
@@ -114,5 +132,6 @@ def route_metrics(analysis_date_list: list) -> pd.DataFrame:
     return final_df
 
 if __name__ == "__main__":
-    route_metrics(update_vars.route_analysis_date_list)
-    print('Done')
+    for date in update_vars.trip_analysis_date_list:
+        route_singleday_metrics(date)
+        print('Done')
