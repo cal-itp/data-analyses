@@ -102,7 +102,7 @@ def add_trio(
                 coords_arr[start_pos: end_pos]
                )
 
-
+    
 def merge_stop_vp_for_nearest_neighbor(
     stop_times: gpd.GeoDataFrame,
     analysis_date: str
@@ -126,7 +126,74 @@ def merge_stop_vp_for_nearest_neighbor(
         on = ["trip_instance_key", "stop_primary_direction"],
         how = "inner"
     )
-    
-    del vp_condensed
-    
+        
     return gdf
+
+
+def add_nearest_neighbor_result(
+    gdf: gpd.GeoDataFrame, 
+    analysis_date: str
+) -> pd.DataFrame:
+    """
+    Add the nearest vp_idx. Also add and trio of be the boundary
+    of nearest_vp_idx. Trio provides the vp_idx, timestamp,
+    and vp coords we need to do stop arrival interpolation.
+    """
+    # Grab vp_condensed, which contains all the coords for entire trip
+    vp_full = gpd.read_parquet(
+        f"{SEGMENT_GCS}condensed/vp_condensed_{analysis_date}.parquet",
+        columns = ["trip_instance_key", "vp_idx", 
+                   "location_timestamp_local", 
+                   "geometry"],
+    ).rename(columns = {
+        "vp_idx": "trip_vp_idx",
+        "geometry": "trip_geometry"
+    }).set_geometry("trip_geometry").to_crs(WGS84)
+    
+    gdf2 = pd.merge(
+        gdf,
+        vp_full,
+        on = "trip_instance_key",
+        how = "inner"
+    )
+        
+    nearest_vp_idx_series = []    
+    vp_trio_series = []
+    time_trio_series = []
+    coords_trio_series = []
+    
+    # Iterate through and find the nearest_vp_idx, then surrounding trio
+    nearest_vp_idx = np.vectorize(add_nearest_vp_idx)( 
+        gdf2.vp_geometry, gdf2.stop_geometry, gdf2.vp_idx
+    )
+        
+    gdf2 = gdf2.assign(
+        nearest_vp_idx = nearest_vp_idx,
+    ).drop(
+        columns = ["vp_idx", "vp_geometry"]
+    )
+    
+    for row in gdf2.itertuples():
+        vp_trio, time_trio, coords_trio = add_trio(
+            getattr(row, "nearest_vp_idx"), 
+            np.asarray(getattr(row, "trip_vp_idx")),
+            np.asarray(getattr(row, "location_timestamp_local")),
+            np.asarray(getattr(row, "trip_geometry").coords),
+        )
+        
+        vp_trio_series.append(vp_trio)
+        time_trio_series.append(time_trio)
+        coords_trio_series.append(shapely.LineString(coords_trio))
+                
+    drop_cols = [
+        "location_timestamp_local",
+        "trip_vp_idx", "trip_geometry"
+    ]
+    
+    gdf2 = gdf2.assign(
+        vp_idx_trio = vp_trio_series,
+        location_timestamp_local_trio = time_trio_series,
+        vp_coords_trio = gpd.GeoSeries(coords_trio_series, crs = WGS84)
+    ).drop(columns = drop_cols)
+        
+    return gdf2
