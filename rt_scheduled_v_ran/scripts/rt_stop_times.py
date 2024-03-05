@@ -92,10 +92,8 @@ def assemble_scheduled_rt_stop_times(
 
 if __name__ == "__main__":
     
-    from shared_utils import rt_dates
     from update_vars import CONFIG_DICT
-    
-    analysis_date_list = rt_dates.get_week("apr2023", exclude_wed=True)
+    from update_vars import analysis_date_list
     
     EXPORT_FILE = CONFIG_DICT["schedule_rt_stop_times"]
     
