@@ -4,7 +4,7 @@ import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.geography_utils import WGS84
 import update_vars
-from update_vars import route_analysis_date_list, CONFIG_DICT
+from update_vars import trip_analysis_date_list, CONFIG_DICT
 from segment_speed_utils.project_vars import (
     PROJECT_CRS,
     SEGMENT_GCS,
@@ -107,6 +107,9 @@ def route_metrics(df:pd.DataFrame) -> pd.DataFrame:
     return final_df
 
 def route_singleday_metrics(analysis_date:str) -> pd.DataFrame:
+    TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
+    
+    ROUTE_EXPORT = CONFIG_DICT["route_direction_metrics"]
     df = pd.read_parquet(
                 f"{RT_SCHED_GCS}{TRIP_EXPORT}/trip_{analysis_date}.parquet"
             )
@@ -114,7 +117,7 @@ def route_singleday_metrics(analysis_date:str) -> pd.DataFrame:
     # Save
     final_df = route_metrics(df)
     ROUTE_EXPORT = CONFIG_DICT["route_direction_metrics"]
-    final_df.to_parquet(f"{RT_SCHED_GCS}{ROUTE_EXPORT}/trip_{analysis_date}.parquet")
+    final_df.to_parquet(f"{RT_SCHED_GCS}{ROUTE_EXPORT}/route_{analysis_date}.parquet")
     
     return final_df
 
@@ -124,9 +127,9 @@ def route_metrics_multiple_days(analysis_date_list: list) -> pd.DataFrame:
     
     final_df = route_metrics(df)
     
+    ROUTE_EXPORT = CONFIG_DICT["route_direction_metrics"]
     # Save
     analysis_date_file = generate_date(analysis_date_list)
-    ROUTE_EXPORT = CONFIG_DICT["route_direction_metrics"]
     final_df.to_parquet(f"{RT_SCHED_GCS}{ROUTE_EXPORT}/trip_{analysis_date_file}.parquet")
     
     return final_df

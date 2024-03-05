@@ -18,6 +18,8 @@ import datetime
 import sys
 from loguru import logger
 
+
+TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
 # cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
 # cd ../rt_scheduled_v_ran/scripts && python rt_v_scheduled_trip.py
 
@@ -305,8 +307,8 @@ def add_route_time(df:pd.DataFrame, analysis_date: str)->pd.DataFrame:
     )
     
     df3['time_of_day'] = df3.sched_time_of_day.fillna(df3.rt_time_of_day)
-    # df3 =  gtfs_schedule_wrangling.add_peak_offpeak_column(df3)
-    # df3 = df3.drop(columns = ['sched_time_of_day', 'rt_time_of_day'])
+    df3 =  gtfs_schedule_wrangling.add_peak_offpeak_column(df3)
+    df3 = df3.drop(columns = ['sched_time_of_day', 'rt_time_of_day'])
     return df3
 
 def add_metrics(df: pd.DataFrame) -> pd.DataFrame:
@@ -320,6 +322,46 @@ def add_metrics(df: pd.DataFrame) -> pd.DataFrame:
     df.rt_w_gtfs_pct = df.rt_w_gtfs_pct.mask(df.rt_w_gtfs_pct > 1, 1)
 
     return df
+
+def spatial_accuracy(analysis_date:str)->pd.DataFrame:
+    
+    start = datetime.datetime.now()
+    
+    # Load vp usable
+    vp_usable = load_vp_usable(analysis_date)
+    
+    # Determine which trips have shapes associated with them
+    trips_with_shapes_df = grab_shape_keys_in_vp(vp_usable, analysis_date)
+
+    # Buffer the shapes 
+    buffered_shapes_df = buffer_shapes(trips_with_shapes_df, analysis_date, 35)
+    
+    # Find the vps that fall into buffered shapes
+    in_shape_df = vp_usable.map_partitions(
+    vp_in_shape,
+    buffered_shapes_df,
+    meta={
+        "trip_instance_key": "object",
+        "location_timestamp_local": "datetime64[ns]",
+        "is_within":"bool",
+    },align_dataframes=False).persist()
+    
+    # Compare total vps for a trip versus total vps that 
+    # fell in the recorded shape
+    spatial_accuracy_df = in_shape_df.map_partitions(
+        total_counts,
+        meta={
+            "trip_instance_key": "object", 
+            "total_vp": "int32", 
+            "vp_in_shape": "int32"},
+    align_dataframes=False).persist()
+    
+    spatial_accuracy_df = spatial_accuracy_df.compute()
+    
+    spatial_accuracy_df.to_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}/spatial_accuracy_only_{analysis_date}.parquet")
+    
+    time1 = datetime.datetime.now()
+    logger.info(f"Total run time for spatial accuracy for {analysis_date}: {time1-start}")
 
 # Complete
 def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
@@ -363,48 +405,16 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     # Final function
     pings_trip_time_df = update_completeness(trips_by_one_min_df)
     time3 = datetime.datetime.now()
-    logger.info(f"Spatial accuracy metric: {time3-time2}")
+    logger.info(f"Update completeness metric: {time3-time2}")
     
-    ## Spatial accuracy  ##
-    # Determine which trips have shapes associated with them
-    trips_with_shapes_df = grab_shape_keys_in_vp(vp_usable, analysis_date)
-
-    # Buffer the shapes 
-    buffered_shapes_df = buffer_shapes(trips_with_shapes_df, analysis_date, 35)
-    time4 = datetime.datetime.now()
-    logger.info(f"Buffering: {time4-time3}")
-    
-    # Find the vps that fall into buffered shapes
-    in_shape_df = vp_usable.map_partitions(
-    vp_in_shape,
-    buffered_shapes_df,
-    meta={
-        "trip_instance_key": "object",
-        "location_timestamp_local": "datetime64[ns]",
-        "is_within":"bool",
-    },align_dataframes=False).persist()
-    time5 = datetime.datetime.now()
-    logger.info(f"Find vps that fall into shapes: {time5-time4}")
-    
-    # Compare total vps for a trip versus total vps that 
-    # fell in the recorded shape
-    spatial_accuracy_df = in_shape_df.map_partitions(
-        total_counts,
-        meta={
-            "trip_instance_key": "object", 
-            "total_vp": "int32", 
-            "vp_in_shape": "int32"},
-    align_dataframes=False).persist()
-    time6 = datetime.datetime.now()
-    logger.info(f"Spatial accuracy grouping metric: {time6-time5}")
+    # Read in spatial file
+    spatial_accuracy_df = pd.read_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}/spatial_accuracy_only_{analysis_date}.parquet")
     
     ## Merges ##
     rt_service_df = rt_service_df.compute()
     pings_trip_time_df = pings_trip_time_df.compute()
-    spatial_accuracy_df = spatial_accuracy_df.compute()
     
-    m1 = (rt_service_df.merge(pings_trip_time_df, on = "trip_instance_key", how = "outer")
-         .merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer"))
+    m1 = (rt_service_df.merge(pings_trip_time_df, on = "trip_instance_key", how = "outer").merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer"))
     
     ### Add more columns & a bit of  cleaning ###
     m1 = add_route_time(m1, analysis_date)
@@ -413,11 +423,10 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     m1 = add_metrics(m1)
     
     # Save
-    TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
     m1.to_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}/trip_{analysis_date}.parquet")
 
-    time7 = datetime.datetime.now()
-    logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
+    time4 = datetime.datetime.now()
+    logger.info(f"Total run time for metrics (minus spatial accuracy) on {analysis_date}: {time4-start}")
 
 if __name__ == "__main__":
     LOG_FILE = "../logs/rt_v_scheduled_trip_metrics.log"
@@ -427,5 +436,7 @@ if __name__ == "__main__":
                level="INFO")
     
     for date in update_vars.trip_analysis_date_list:
+        # Can comment spatial accuracy if need be
+        spatial_accuracy(date)
         vp_usable_metrics(date)
         print('Done')
