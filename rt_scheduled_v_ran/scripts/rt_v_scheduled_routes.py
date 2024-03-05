@@ -108,7 +108,7 @@ def route_metrics(df:pd.DataFrame) -> pd.DataFrame:
 
 def route_singleday_metrics(analysis_date:str) -> pd.DataFrame:
     TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
-    
+    print(f"Start aggregating for routes for {analysis_date}")
     ROUTE_EXPORT = CONFIG_DICT["route_direction_metrics"]
     df = pd.read_parquet(
                 f"{RT_SCHED_GCS}{TRIP_EXPORT}/trip_{analysis_date}.parquet"
@@ -118,7 +118,7 @@ def route_singleday_metrics(analysis_date:str) -> pd.DataFrame:
     final_df = route_metrics(df)
     ROUTE_EXPORT = CONFIG_DICT["route_direction_metrics"]
     final_df.to_parquet(f"{RT_SCHED_GCS}{ROUTE_EXPORT}/route_{analysis_date}.parquet")
-    
+    print(f"Done aggregating for routes for {analysis_date}")
     return final_df
 
 def route_metrics_multiple_days(analysis_date_list: list) -> pd.DataFrame:

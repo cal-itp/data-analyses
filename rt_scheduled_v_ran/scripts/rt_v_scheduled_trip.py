@@ -324,9 +324,9 @@ def add_metrics(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def spatial_accuracy(analysis_date:str)->pd.DataFrame:
-    
+   
     start = datetime.datetime.now()
-    
+    print(f"Starting spatial accuracy for {analysis_date} at {start}")
     # Load vp usable
     vp_usable = load_vp_usable(analysis_date)
     

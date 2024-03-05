@@ -8,7 +8,7 @@ from pathlib import Path
 #    rt_dates.DATES[f"{m}2023"] for m in trip_months
 #]
 
-trip_analysis_date_list = ['2024-02-14']
+trip_analysis_date_list = ['2023-12-13']
 
 
 CONFIG_PATH = Path("config.yml")
