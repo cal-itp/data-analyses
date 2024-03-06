@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import shared_utils
 from calitp_data_analysis.sql import to_snakecase
-from fta_data_cleaner import gcs_path
+
 
 def calculate_total_cost(row):
     """
@@ -189,6 +189,9 @@ def clean_dgs_columns() -> pd.DataFrame:
     reads in 2 dgs sheets, adds source column, merges both DFs, snakecase columns, update dtypes for monetary columns.
     merged first becaues the snakecase function messes with the dtypes for some reason
     """
+    
+    from fta_data_cleaner import gcs_path
+    
     # params
     file_17c = "17c compiled-Proterra Compiled Contract Usage Report .xlsx"
     file_17b = "17b compiled.xlsx"
@@ -341,6 +344,7 @@ def agg_by_agency_w_options(df: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     
+    from fta_data_cleaner import gcs_path
     # initial df
     df1 = clean_dgs_columns()
     
