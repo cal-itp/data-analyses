@@ -11,6 +11,12 @@ from segment_speed_utils import helpers, time_helpers
 from shared_utils import portfolio_utils, rt_utils
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
+sched_rt_category_dict = {
+    "left_only": "schedule_only",
+    "both": "schedule_and_vp",
+    "right_only": "vp_only"
+}
+
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
     exclude_me: list = ["Amtrak Schedule", "*Flex"]
@@ -174,7 +180,7 @@ def get_vp_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     """
     Assign trips to time-of-day.
     """
-    ddf = dd.read_parquet(
+    df = dd.read_parquet(
         f"{SEGMENT_GCS}vp_usable_{analysis_date}",
         columns=[
             "trip_instance_key",
@@ -182,20 +188,20 @@ def get_vp_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
         ],
     )
 
-    ddf2 = (
-        ddf.groupby(["trip_instance_key"])
+    df2 = (
+        df.groupby(["trip_instance_key"])
         .agg({"location_timestamp_local": "min"})
         .reset_index()
         .rename(columns={"location_timestamp_local": "min_time"})
     ).compute()
 
-    ddf2 = ddf2.assign(
-        time_of_day=ddf2.apply(
+    df2 = df2.assign(
+        time_of_day=df2.apply(
             lambda x: rt_utils.categorize_time_of_day(x.min_time), axis=1
         )
     )[["time_of_day","trip_instance_key"]]
     
-    return ddf2
+    return df2
 
 
 def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
@@ -218,11 +224,66 @@ def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
         time_of_day = trips.apply(
             lambda x: rt_utils.categorize_time_of_day(
                 x.trip_first_departure_datetime_pacific), axis=1), 
-        service_minutes = trips.service_hours * 60
+        scheduled_service_minutes = trips.service_hours * 60
     )
     
     return trips
 
+
+def attach_scheduled_route_info(
+    analysis_date: str
+) -> pd.DataFrame:
+    """
+    Add route id, direction id,
+    off_peak, and time_of_day columns. Do some
+    light cleaning.
+    """
+    route_info = helpers.import_scheduled_trips(
+        analysis_date,
+        columns=[
+            "gtfs_dataset_key", "trip_instance_key",
+            "route_id", "direction_id",
+        ],
+        get_pandas=True,
+    )
+    
+    sched_time_of_day = (
+        get_trip_time_buckets(analysis_date)          
+        [["trip_instance_key", "time_of_day", "scheduled_service_minutes"]]
+        .rename(columns={"time_of_day": "sched_time_of_day"})
+    )
+    
+    rt_time_of_day = (
+        get_vp_trip_time_buckets(analysis_date)
+        .rename(columns={"time_of_day": "rt_time_of_day"})
+    )
+
+    time_df = pd.merge(
+        route_info,
+        sched_time_of_day,
+        on = "trip_instance_key",
+        how = "inner"
+    )
+    
+    time_df = time_df.merge(
+        rt_time_of_day,
+        on = "trip_instance_key",
+        how = "outer",
+        indicator="sched_rt_category"
+    )
+    
+    time_df = time_df.assign(
+        route_id = time_df.route_id.fillna("Unknown"),
+        direction_id = time_df.direction_id.astype("Int64"),
+        time_of_day = time_df.sched_time_of_day.fillna(
+            time_df.rt_time_of_day),
+        sched_rt_category = time_df.sched_rt_category.map(
+            sched_rt_category_dict),
+    ).drop(
+        columns = ['sched_time_of_day', 'rt_time_of_day']
+    )
+    
+    return time_df
 
 def most_recent_route_info(
     df: pd.DataFrame,
