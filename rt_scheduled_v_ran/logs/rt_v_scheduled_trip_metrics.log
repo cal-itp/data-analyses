@@ -327,3 +327,16 @@
 2024-02-16 16:32:30.218 | INFO     | __main__:vp_usable_metrics:387 - Find vps that fall into shapes: 0:13:46.736720
 2024-02-16 16:32:32.274 | INFO     | __main__:vp_usable_metrics:399 - Spatial accuracy grouping metric: 0:00:02.056348
 2024-02-16 16:34:51.946 | INFO     | __main__:vp_usable_metrics:420 - Total run time for metrics on 2023-10-11: 0:20:58.267956
+2024-03-08 15:30:00.082 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:42.915795
+2024-03-08 15:32:28.294 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:28.210020
+2024-03-08 15:35:02.691 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:34.396896
+2024-03-08 15:38:02.449 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:59.757097
+2024-03-08 15:42:57.930 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:55.479549
+2024-03-08 15:47:30.993 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:33.061717
+2024-03-08 15:51:58.919 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:27.921616
+2024-03-08 15:56:43.827 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:44.903483
+2024-03-08 16:01:30.855 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:47.020406
+2024-03-08 16:04:07.260 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:36.404858
+2024-03-08 16:06:50.451 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:43.189295
+2024-03-08 16:09:23.129 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:32.676751
+2024-03-08 16:13:13.960 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:46.309166
