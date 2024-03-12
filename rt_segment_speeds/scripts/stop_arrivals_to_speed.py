@@ -30,31 +30,24 @@ def attach_operator_natural_identifiers(
     # Get shape_id back
     shape_identifiers = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["gtfs_dataset_key", 
-                   "shape_array_key", "shape_id", 
-                   "route_id", "direction_id"],
+        columns = ["shape_array_key", "shape_id"],
         get_pandas = True
     )
     
-    # Add time-of-day, which is associated with trip_instance_key
-    sched_time_of_day = gtfs_schedule_wrangling.get_trip_time_buckets(
+    route_info = gtfs_schedule_wrangling.attach_scheduled_route_info(
         analysis_date
-    ).rename(
-        columns = {"time_of_day": "schedule_time_of_day"})
-    
-    # If trip isn't in schedule, use vp to derive
-    vp_time_of_day = gtfs_schedule_wrangling.get_vp_trip_time_buckets(
-        analysis_date
-    ).rename(
-        columns = {"time_of_day": "vp_time_of_day"})
+    )    
     
     df_with_natural_ids = pd.merge(
         df,
+        route_info,
+        on = "trip_instance_key",
+        how = "inner"
+    ).merge(
         shape_identifiers,
         on = "shape_array_key",
-        how = "inner"
+        how = "inner",
     )
-    
     
     if segment_type == "stop_segments":
         trip_used_for_shape = pd.read_parquet(
@@ -88,24 +81,6 @@ def attach_operator_natural_identifiers(
             stop_pair,
             on = ["trip_instance_key", "stop_sequence"]
         )
-        
-
-    df_with_natural_ids = df_with_natural_ids.merge(
-        sched_time_of_day,
-        on = "trip_instance_key",
-        how = "left"
-    ).merge(
-        vp_time_of_day,
-        on = "trip_instance_key",
-        how = "inner"
-    )
-    
-    df_with_natural_ids = df_with_natural_ids.assign(
-        time_of_day = df_with_natural_ids.schedule_time_of_day.fillna(
-            df_with_natural_ids.vp_time_of_day)
-    ).drop(columns = ["schedule_time_of_day", "vp_time_of_day"])
-        
-    del df, stop_pair, sched_time_of_day, vp_time_of_day
     
     return df_with_natural_ids
 
