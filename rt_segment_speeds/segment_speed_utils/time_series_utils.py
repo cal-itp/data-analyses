@@ -11,6 +11,7 @@ from dask import delayed, compute
 from pathlib import Path
 from typing import Literal
 
+from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS
 
 fs = gcsfs.GCSFileSystem()
@@ -23,25 +24,39 @@ ROUTE_DIR_COLS = ["route_id", "direction_id"]
 
 
 def concatenate_datasets_across_months(
+    gcs_bucket: str,
     dataset_name: Literal["speeds_route_dir_segments", "speeds_route_dir"],
-    date_list: list
+    date_list: list,
+    data_type: Literal["df", "gdf"] = "gdf",
+    **kwargs
 ) -> pd.DataFrame:
     """
     Concatenate parquets across all months of available data.
-    """        
-    dfs = [
-        delayed(gpd.read_parquet)(
-            f"{SEGMENT_GCS}{dataset_name}_{d}.parquet"
-        ).assign(
-            service_date = pd.to_datetime(d)
-        ) for d in date_list
-    ]
+    """  
+    if data_type == "gdf":
+        dfs = [
+            delayed(gpd.read_parquet)(
+                f"{gcs_bucket}{dataset_name}_{d}.parquet",
+                **kwargs
+            ).assign(
+                service_date = pd.to_datetime(d)
+            ) for d in date_list
+        ]
+    else:
+        dfs = [
+            delayed(pd.read_parquet)(
+                f"{gcs_bucket}{dataset_name}_{d}.parquet",
+                **kwargs
+            ).assign(
+                service_date = pd.to_datetime(d)
+            ) for d in date_list
+        ]
     
     df = delayed(pd.concat)(
         dfs, axis=0, ignore_index=True
-    ).sort_values(
-        ["organization_name", "service_date"] + ROUTE_DIR_COLS
-    ).reset_index(drop=True)    
+    )#.sort_values(
+     #   ["organization_name", "service_date"] + ROUTE_DIR_COLS
+    #).reset_index(drop=True)    
     
     df = compute(df)[0]    
     
