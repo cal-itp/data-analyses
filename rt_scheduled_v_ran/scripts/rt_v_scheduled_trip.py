@@ -273,11 +273,11 @@ def rt_schedule_trip_metrics(
     [vp_usable.schedule_gtfs_dataset_key ==gtfs_key]
     .reset_index(drop=True))
     """
-
-    #basic_counts_by_vp_trip(analysis_date)
+    '''
+    basic_counts_by_vp_trip(analysis_date)
     
     time1 = datetime.datetime.now()
-    #logger.info(f"tabular trip metrics {analysis_date}: {time1 - start}")
+    logger.info(f"tabular trip metrics {analysis_date}: {time1 - start}")
     
     spatial_accuracy_count(analysis_date)
     
@@ -285,6 +285,8 @@ def rt_schedule_trip_metrics(
     logger.info(f"spatial trip metrics {analysis_date}: {time2 - time1}")
     
     '''
+    time2 = datetime.datetime.now()
+
     ## Merges ##
     rt_service_df = pd.read_parquet(
         f"{RT_SCHED_GCS}vp_trip/intermediate/"
@@ -320,8 +322,8 @@ def rt_schedule_trip_metrics(
     )
     
     order_first = ["schedule_gtfs_dataset_key", 
-        "trip_instance_key", "route_id", "direction_id",
-        "scheduled_service_minutes"]
+                   "trip_instance_key", "route_id", "direction_id",
+                   "scheduled_service_minutes"]
     other_cols = [c for c in df2.columns if c not in order_first]
     df2 = df2.reindex(columns = order_first + other_cols)
     
@@ -331,7 +333,7 @@ def rt_schedule_trip_metrics(
 
     time3 = datetime.datetime.now()
     logger.info(f"Total run time for metrics on {analysis_date}: {time3 - start}")
-    '''
+    
     
 if __name__ == "__main__":
     
@@ -342,9 +344,10 @@ if __name__ == "__main__":
                level="INFO")
     
     from shared_utils import rt_dates
+    
     oct_week = rt_dates.get_week("oct2023", exclude_wed=True)
     apr_week = rt_dates.get_week("apr2023", exclude_wed=True)
-    for date in oct_week[1:] + apr_week:
-    #for date in update_vars.trip_analysis_date_list:
+
+    for date in rt_dates.y2024_dates[1:] + rt_dates.y2023_dates + oct_week + apr_week:
         rt_schedule_trip_metrics(date, CONFIG_DICT)
         print('Done')
