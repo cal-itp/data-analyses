@@ -8,7 +8,7 @@ from dask import delayed, compute
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from update_vars import CONFIG_DICT
+from update_vars import CONFIG_DICT, analysis_date_list
 
 from segment_speed_utils.project_vars import (
     PROJECT_CRS,
@@ -273,7 +273,7 @@ def rt_schedule_trip_metrics(
     [vp_usable.schedule_gtfs_dataset_key ==gtfs_key]
     .reset_index(drop=True))
     """
-    '''
+    
     basic_counts_by_vp_trip(analysis_date)
     
     time1 = datetime.datetime.now()
@@ -284,9 +284,6 @@ def rt_schedule_trip_metrics(
     time2 = datetime.datetime.now()
     logger.info(f"spatial trip metrics {analysis_date}: {time2 - time1}")
     
-    '''
-    time2 = datetime.datetime.now()
-
     ## Merges ##
     rt_service_df = pd.read_parquet(
         f"{RT_SCHED_GCS}vp_trip/intermediate/"
@@ -305,11 +302,11 @@ def rt_schedule_trip_metrics(
         how = "outer"
     )
     
+    # Add route id, direction id, off_peak, and time_of_day columns. 
     route_info = gtfs_schedule_wrangling.attach_scheduled_route_info(
         analysis_date
     )
     
-    # Add route id, direction id, off_peak, and time_of_day columns. 
     df2 = pd.merge(
         df,
         route_info,
@@ -343,11 +340,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    from shared_utils import rt_dates
     
-    oct_week = rt_dates.get_week("oct2023", exclude_wed=True)
-    apr_week = rt_dates.get_week("apr2023", exclude_wed=True)
-
-    for date in rt_dates.y2024_dates[1:] + rt_dates.y2023_dates + oct_week + apr_week:
+    for date in analysis_date_list:
         rt_schedule_trip_metrics(date, CONFIG_DICT)
         print('Done')
