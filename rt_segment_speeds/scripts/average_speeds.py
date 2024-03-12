@@ -13,10 +13,13 @@ from typing import Literal
 
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
-from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
-                                 segment_calcs, time_helpers)
+from segment_speed_utils import (gtfs_schedule_wrangling, 
+                                 helpers, 
+                                 metrics,
+                                 time_helpers, 
+                                 )
 from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
-
+from segment_speed_utils.time_series_utils import STOP_PAIR_COLS, ROUTE_DIR_COLS
 
 OPERATOR_COLS = [
     "schedule_gtfs_dataset_key", 
@@ -25,39 +28,6 @@ OPERATOR_COLS = [
 SHAPE_STOP_COLS = [
     "shape_array_key", "shape_id", "stop_sequence",
 ]
-
-STOP_PAIR_COLS = ["stop_pair"] 
-
-ROUTE_DIR_COLS = [
-    "route_id", "direction_id"
-]
-
-def merge_operator_identifiers(
-    df: pd.DataFrame, 
-    analysis_date_list: list
-) -> pd.DataFrame:
-    """
-    Carrying a lot of these operator identifiers is not 
-    inconsequential, esp when we need to run a week's segment speeds
-    in one go.
-    Instead, we'll just merge it back on before we export.
-    """
-    crosswalk = pd.concat([
-        helpers.import_schedule_gtfs_key_organization_crosswalk(
-            analysis_date,
-        ).drop(columns = "itp_id") 
-        for analysis_date in analysis_date_list],
-        axis=0, ignore_index=True
-    ).drop_duplicates()
-    
-    df = pd.merge(
-        df,
-        crosswalk,
-        on = "schedule_gtfs_dataset_key",
-        how = "inner"
-    )
-    
-    return df
 
 
 def import_segments(
@@ -167,11 +137,11 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     print("concatenated files")  
     
     t0 = datetime.datetime.now()
-    shape_stop_segments = segment_calcs.concatenate_peak_offpeak_allday_averages(
+    shape_stop_segments = metrics.concatenate_peak_offpeak_allday_averages(
         df, 
         OPERATOR_COLS + SHAPE_STOP_COLS + STOP_PAIR_COLS
     ).pipe(
-        merge_operator_identifiers, [analysis_date]
+        time_series_utils.merge_operator_identifiers, [analysis_date]
     )
     
     col_order = [c for c in shape_stop_segments.columns]
@@ -198,11 +168,11 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     t1 = datetime.datetime.now()
     logger.info(f"shape seg avg {t1 - t0}")
     
-    route_dir_segments = segment_calcs.concatenate_peak_offpeak_allday_averages(
+    route_dir_segments = metrics.concatenate_peak_offpeak_allday_averages(
         df, 
         OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS
     ).pipe(
-        merge_operator_identifiers, [analysis_date]
+        gtfs_schedule_wrangling.merge_operator_identifiers, [analysis_date]
     )
     
     col_order = [c for c in route_dir_segments.columns]
@@ -232,13 +202,14 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     t2 = datetime.datetime.now()
     logger.info(f"route dir seg avg {t2 - t1}")
     
-    trip_avg = segment_calcs.weighted_average_speeds_across_segments(
+    trip_avg = metrics.weighted_average_speeds_across_segments(
         df,
         OPERATOR_COLS + ROUTE_DIR_COLS + [
             "trip_instance_key", 
             "shape_array_key", "shape_id", "time_of_day"]
     ).pipe(
-        merge_operator_identifiers, [analysis_date]
+        gtfs_schedule_wrangling.merge_operator_identifiers, 
+        [analysis_date]
     ).reset_index(drop=True)
     
     trip_avg.to_parquet(
@@ -254,11 +225,12 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
         (trip_avg.sec_elapsed <= MAX_TRIP_SECONDS)
     ].trip_instance_key.unique()
 
-    route_dir_avg = segment_calcs.weighted_average_speeds_across_segments(
+    route_dir_avg = metrics.weighted_average_speeds_across_segments(
         df[df.trip_instance_key.isin(trip_avg_filtered)],
         OPERATOR_COLS + ROUTE_DIR_COLS
     ).pipe(
-        merge_operator_identifiers, [analysis_date]
+        gtfs_schedule_wrangling.merge_operator_identifiers, 
+        [analysis_date]
     )
     
     col_order = [c for c in route_dir_avg.columns]
@@ -312,7 +284,7 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     t0 = datetime.datetime.now()
         
     route_dir_segments = delayed(
-        segment_calcs.concatenate_peak_offpeak_allday_averages)(
+        metrics.concatenate_peak_offpeak_allday_averages)(
         df, 
         OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"]
     )
@@ -351,7 +323,7 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     logger.info(f"route seg avg {t1 - t0}")
     
     route_dir_avg = delayed(
-        segment_calcs.weighted_average_speeds_across_segments)(
+        metrics.weighted_average_speeds_across_segments)(
         df,
         OPERATOR_COLS + ROUTE_DIR_COLS + ["weekday_weekend"]
     )

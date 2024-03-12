@@ -327,3 +327,49 @@
 2024-02-16 16:32:30.218 | INFO     | __main__:vp_usable_metrics:387 - Find vps that fall into shapes: 0:13:46.736720
 2024-02-16 16:32:32.274 | INFO     | __main__:vp_usable_metrics:399 - Spatial accuracy grouping metric: 0:00:02.056348
 2024-02-16 16:34:51.946 | INFO     | __main__:vp_usable_metrics:420 - Total run time for metrics on 2023-10-11: 0:20:58.267956
+2024-03-08 15:30:00.082 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:42.915795
+2024-03-08 15:32:28.294 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:28.210020
+2024-03-08 15:35:02.691 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:34.396896
+2024-03-08 15:38:02.449 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:59.757097
+2024-03-08 15:42:57.930 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:55.479549
+2024-03-08 15:47:30.993 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:33.061717
+2024-03-08 15:51:58.919 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:27.921616
+2024-03-08 15:56:43.827 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:44.903483
+2024-03-08 16:01:30.855 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:04:47.020406
+2024-03-08 16:04:07.260 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:36.404858
+2024-03-08 16:06:50.451 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:43.189295
+2024-03-08 16:09:23.129 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:32.676751
+2024-03-08 16:13:13.960 | INFO     | __main__:rt_schedule_trip_metrics:339 - tabular trip metrics: 0:02:46.309166
+2024-03-12 11:15:13.564 | INFO     | __main__:rt_schedule_trip_metrics:351 - spatial trip metrics 2023-10-10: 0:15:42.931313
+2024-03-12 11:30:45.805 | INFO     | __main__:rt_schedule_trip_metrics:351 - spatial trip metrics 2023-10-12: 0:15:32.240692
+2024-03-12 11:45:45.089 | INFO     | __main__:rt_schedule_trip_metrics:351 - spatial trip metrics 2023-10-13: 0:14:59.283492
+2024-03-12 11:55:47.464 | INFO     | __main__:rt_schedule_trip_metrics:351 - spatial trip metrics 2023-10-14: 0:10:02.372827
+2024-03-12 12:04:46.286 | INFO     | __main__:rt_schedule_trip_metrics:351 - spatial trip metrics 2023-10-15: 0:08:58.820945
+2024-03-12 12:19:14.696 | INFO     | __main__:rt_schedule_trip_metrics:351 - spatial trip metrics 2023-04-10: 0:14:28.410076
+2024-03-12 12:34:03.857 | INFO     | __main__:rt_schedule_trip_metrics:351 - spatial trip metrics 2023-04-11: 0:14:49.160209
+2024-03-12 12:48:40.915 | INFO     | __main__:rt_schedule_trip_metrics:351 - spatial trip metrics 2023-04-13: 0:14:37.057489
+2024-03-12 13:03:11.556 | INFO     | __main__:rt_schedule_trip_metrics:351 - spatial trip metrics 2023-04-14: 0:14:30.638812
+2024-03-12 13:26:07.927 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2024-01-17: 0:01:15.739377
+2024-03-12 13:28:17.070 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2024-02-14: 0:01:04.110188
+2024-03-12 13:29:15.359 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-03-15: 0:00:58.281108
+2024-03-12 13:30:20.232 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-04-12: 0:01:04.864600
+2024-03-12 13:31:25.366 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-05-17: 0:01:05.126642
+2024-03-12 13:32:36.126 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-06-14: 0:01:10.748726
+2024-03-12 13:33:40.392 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-07-12: 0:01:04.259613
+2024-03-12 13:34:46.878 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-08-15: 0:01:06.477858
+2024-03-12 13:36:00.627 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-09-13: 0:01:13.741800
+2024-03-12 13:37:05.345 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-10-11: 0:01:04.711601
+2024-03-12 13:38:22.007 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-11-15: 0:01:16.655019
+2024-03-12 13:39:29.382 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-12-13: 0:01:07.368445
+2024-03-12 13:40:35.719 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-10-09: 0:01:06.328725
+2024-03-12 13:41:44.467 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-10-10: 0:01:08.742605
+2024-03-12 13:42:58.992 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-10-12: 0:01:14.517324
+2024-03-12 13:44:11.937 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-10-13: 0:01:12.937135
+2024-03-12 13:44:53.177 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-10-14: 0:00:41.233201
+2024-03-12 13:45:37.494 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-10-15: 0:00:44.311866
+2024-03-12 13:46:39.433 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-04-10: 0:01:01.934142
+2024-03-12 13:47:48.314 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-04-11: 0:01:08.873211
+2024-03-12 13:49:02.132 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-04-13: 0:01:13.810243
+2024-03-12 13:50:07.918 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-04-14: 0:01:05.779022
+2024-03-12 13:50:51.699 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-04-15: 0:00:43.774220
+2024-03-12 13:51:33.881 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2023-04-16: 0:00:42.177338

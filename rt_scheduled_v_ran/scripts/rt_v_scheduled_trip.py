@@ -1,328 +1,265 @@
-import dask
 import dask.dataframe as dd
+import datetime
 import geopandas as gpd
 import pandas as pd
+import sys
+
+from dask import delayed, compute
+from loguru import logger
+
 from calitp_data_analysis.geography_utils import WGS84
-import update_vars
-from update_vars import trip_analysis_date_list, CONFIG_DICT
+from update_vars import CONFIG_DICT, analysis_date_list
+
 from segment_speed_utils.project_vars import (
     PROJECT_CRS,
     SEGMENT_GCS,
     RT_SCHED_GCS,
-    analysis_date,
 )
-from segment_speed_utils import gtfs_schedule_wrangling, helpers, wrangle_shapes
+from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
+                                 metrics,
+                                 segment_calcs)
 
-# Times
-import datetime
-import sys
-from loguru import logger
-
-# cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
-# cd ../rt_scheduled_v_ran/scripts && python rt_v_scheduled_trip.py
-
-# LOAD FILES
-def load_trip_speeds(analysis_date):
-    df = pd.read_parquet(
-    f"{SEGMENT_GCS}trip_summary/trip_speeds_{analysis_date}.parquet",
-    columns=[
-        "trip_instance_key",
-        "speed_mph",
-        "service_minutes",
-    ])
-    
-    return df
-
-def load_vp_usable(analysis_date):
-
-    # Delete schedule_gtfs_dataset_key later
-    df = dd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
-        columns=[
-            "schedule_gtfs_dataset_key",
-            "trip_instance_key",
-            "location_timestamp_local",
-            "x",
-            "y",
-            "vp_idx",
-        ],
-    )
-
-    # Create a copy of location timestamp for the total_trip_time function
-    # to avoid type setting warning
-    df["max_time"] = df.location_timestamp_local
-    return df
 
 # UPDATE COMPLETENESS
-def total_trip_time(vp_usable_df: pd.DataFrame):
+def vp_trip_time(vp: pd.DataFrame,) -> pd.DataFrame:
     """
     For each trip: find the total service minutes
     recorded in real time data so we can compare it with
     scheduled service minutes.
     """
-    subset = ["location_timestamp_local", "trip_instance_key", "max_time", "schedule_gtfs_dataset_key"]
-    vp_usable_df = vp_usable_df[subset]
-
+    vp = segment_calcs.convert_timestamp_to_seconds(
+        vp, ["location_timestamp_local"])
+    
     # Find the max and the min time based on location timestamp
-    df = (
-        vp_usable_df.groupby(["schedule_gtfs_dataset_key","trip_instance_key"])
-        .agg({"location_timestamp_local": "min", "max_time": "max"})
+    grouped_df = vp.groupby("trip_instance_key", 
+                            observed=True, group_keys=False)
+    start_time = (
+        grouped_df
+        .agg({
+            "location_timestamp_local": "count",
+            "location_timestamp_local_sec": "min"
+        })
         .reset_index()
-        .rename(columns={"location_timestamp_local": "min_time"})
+        .rename(columns={
+            "location_timestamp_local": "total_vp",
+            "location_timestamp_local_sec": "min_time"
+        })
     )
-
-    # Find total rt service mins and add an extra minute
-    df["rt_service_min"] = (df.max_time - df.min_time) / pd.Timedelta(minutes=1) + 1
-
-    # Return only one row per trip with 2 columns: trip instance key & total trip time
-    df = df.drop(columns=["max_time", "min_time"])
+    
+    end_time = (
+        grouped_df
+        .agg({"location_timestamp_local_sec": "max"})
+        .reset_index()
+        .rename(columns={"location_timestamp_local_sec": "max_time"})
+    )
+    
+    df = start_time.merge(
+        end_time,
+        on = "trip_instance_key",
+        how = "inner"
+    )
+    
+    # Find total rt service minutes (take difference in seconds)
+    df = df.assign(
+        rt_service_minutes = (df.max_time - df.min_time) / 60
+    ).drop(columns = ["max_time", "min_time"])
 
     return df
 
-def trips_by_one_min(vp_usable_df: pd.DataFrame):
+
+def vp_one_minute_interval_metrics(
+    vp: pd.DataFrame,
+) -> pd.DataFrame:
     """
     For each trip: count how many rows are associated with each minute
     then tag whether or not a minute has 2+ pings. 
     """
-    subset = ["location_timestamp_local", "trip_instance_key", "vp_idx"]
-    vp_usable_df = vp_usable_df[subset]
-
+    time_col = "location_timestamp_local"
+    grouped_df = vp.groupby(
+        ["trip_instance_key", 
+         pd.Grouper(key = time_col, freq="1Min")
+        ]
+    )
+    
     # Find number of pings each minute
     df = (
-        vp_usable_df.groupby(
-            [ "trip_instance_key",
-                pd.Grouper(key="location_timestamp_local", freq="1Min"),
-            ]
-        )
-        .vp_idx.count()
+        grouped_df
+        .vp_idx
+        .count()
         .reset_index()
-        .rename(columns={"vp_idx": "number_of_pings_per_minute"})
+        .rename(columns={"vp_idx": "n_pings_per_min"})
     )
 
     # Determine which rows have 2+ pings per minute
     df = df.assign(
-        min_w_atleast2_trip_updates=df.apply(
-            lambda x: 1 if x.number_of_pings_per_minute >= 2 else 0, axis=1
+        at_least2=df.apply(
+            lambda x: 1 if x.n_pings_per_min >= 2 else 0, axis=1
         )
     )
     
-    df = df.drop(columns = ['location_timestamp_local'])
-    return df
-
-def update_completeness(df: pd.DataFrame):
-    """
-    For each trip: find the median GTFS pings per minute,
-    the total minutes with at least 1 GTFS ping per minute,
-    and total minutes with at least 2 GTFS pings per minute.
-    """
-    # Need a copy of number of pings per minute to count for total minutes w gtfs
-    df["total_min_w_gtfs"] = df.number_of_pings_per_minute
+    df2 = (df.groupby("trip_instance_key", observed=True, group_keys=False)
+           .agg({
+               # this is time frequency grouper
+               time_col: "count",
+               "at_least2": "sum"
+           })
+           .rename(columns = {
+               time_col: "minutes_atleast1_vp", 
+               "at_least2": "minutes_atleast2_vp"
+           }).reset_index()
+          )
     
-    # Find the total min with at least 2 pings per min
-    df = (
-        df.groupby(["trip_instance_key"])
-        .agg(
-            {
-                "min_w_atleast2_trip_updates": "sum",
-                "number_of_pings_per_minute": "sum",
-                "total_min_w_gtfs": "count",
-            }
-        )
-        .reset_index()
-        .rename(
-            columns={
-                "number_of_pings_per_minute": "total_pings",
-            }
-        )
-    )
+    return df2
 
-    return df
 
-# SPATIAL ACCURACY
-def grab_shape_keys_in_vp(vp_usable: dd.DataFrame, analysis_date: str) -> pd.DataFrame:
+def basic_counts_by_vp_trip(analysis_date: str) -> pd.DataFrame:
     """
-    Subset raw vp and find unique trip_instance_keys.
-    Create crosswalk to link trip_instance_key to shape_array_key
-    to find trips for the analysis date that have shapes.
+    Calculate vp trip metrics that are strictly tabular
+    that can be easily generated.
+    Use dask delayed because pd.Grouper is pandas only.
     """
-    vp_usable = (
-        vp_usable[["trip_instance_key"]]
-        .drop_duplicates()
-        .reset_index(drop=True)
+    trip_cols = ["trip_instance_key"]
+    
+    vp = delayed(pd.read_parquet)(
+        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+        columns = trip_cols + ["location_timestamp_local", "vp_idx"],
     )
-
-    trips_with_shape = helpers.import_scheduled_trips(
-        analysis_date,
-        columns=["trip_instance_key", "shape_array_key"],
-        get_pandas=True,
+    
+    rt_service_df = vp_trip_time(vp)
+    rt_time_coverage = vp_one_minute_interval_metrics(vp)
+   
+    results = delayed(pd.merge)(
+        rt_service_df,
+        rt_time_coverage,
+        on = trip_cols,
+        how = "inner"
     )
-
-    # Only one row per trip/shape: trip_instance_key and shape_array_key are the only cols left
-    m1 = dd.merge(vp_usable, trips_with_shape, on="trip_instance_key", how="inner")
-
-    return m1
-
+    
+    results = compute(results)[0]
+    results.to_parquet(
+        f"{RT_SCHED_GCS}vp_trip/intermediate/"
+        f"trip_stats_{analysis_date}.parquet")
+    
+    return
+ 
+    
+# SPATIAL ACCURACY 
 def buffer_shapes(
-    trips_with_shape: pd.DataFrame,
     analysis_date: str,
     buffer_meters: int = 35,
-):
+    **kwargs
+) -> gpd.GeoDataFrame:
     """
-    Filter scheduled shapes down to the shapes that appear in vp.
-    Buffer these.
-
-    Attach the shape geometry for a subset of shapes or trips.
-    """
-    subset = trips_with_shape.shape_array_key.unique().compute().tolist()
-
+    Buffer shapes for shapes that are present in vp.
+    """ 
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
         columns=["shape_array_key", "geometry"],
-        filters=[[("shape_array_key", "in", subset)]],
         crs=PROJECT_CRS,
-        get_pandas=False,
-    ).pipe(helpers.remove_shapes_outside_ca)
-
-    # to_crs takes awhile, so do a filtering on only shapes we need
-    shapes = shapes.assign(geometry=shapes.geometry.buffer(buffer_meters))
-
-    trips_with_shape_geom = dd.merge(
-        shapes, trips_with_shape, on="shape_array_key", how="inner"
-    )
-
-    trips_with_shape_geom = trips_with_shape_geom.compute()
-    return trips_with_shape_geom
-
-def vp_in_shape(
-    vp_usable: dd.DataFrame, trips_with_buffered_shape: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
-
-    keep = ["trip_instance_key", "x", "y", "location_timestamp_local"]
-    vp_usable = vp_usable[keep]
-
-    vp_gdf = wrangle_shapes.vp_as_gdf(vp_usable)
-
-    gdf = pd.merge(
-        vp_gdf, trips_with_buffered_shape, on="trip_instance_key", how="inner"
-    )
-
-    gdf = gdf.assign(is_within=gdf.geometry_x.within(gdf.geometry_y))
-    
-    to_keep = ["trip_instance_key", "location_timestamp_local", "is_within"]
-    gdf = gdf[to_keep]
-
-    return gdf
-
-def total_vp_counts_by_trip(vp: gpd.GeoDataFrame, new_col_title: str):
-    """
-    Get a count of vp for each trip, whether or not those fall
-    within buffered shape or not
-    """
-    count_vp = (
-        vp.groupby("trip_instance_key", observed=True, group_keys=False)
-        .agg({"location_timestamp_local": "count"})
-        .reset_index()
-        .rename(columns={"location_timestamp_local": new_col_title})
-    )
-
-    return count_vp
-
-def total_counts(result: dd.DataFrame):
-
-    # Find the total number of vps for each route
-    total_vp_df = total_vp_counts_by_trip(result, "total_vp")
-
-    # Find the total number of vps that actually fall within the  route shape
-    subset = ["trip_instance_key", "location_timestamp_local"]
-    result2 = result.loc[result.is_within == True].reset_index(drop=True)[subset]
-
-    vps_in_shape = total_vp_counts_by_trip(result2, "vp_in_shape")
-
-    # Count total vps for the trip
-    count_df = pd.merge(total_vp_df, vps_in_shape, on="trip_instance_key", how="left")
-
-    count_df = count_df.assign(
-        vp_in_shape=count_df.vp_in_shape.fillna(0).astype("int32"),
-        total_vp=count_df.total_vp.fillna(0).astype("int32"),
-    )
-
-    return count_df
-
-def add_route_time(df:pd.DataFrame, analysis_date: str)->pd.DataFrame:
-    """
-    Add route id, direction id,
-    off_peak, and time_of_day columns. Do some
-    light cleaning.
-    """
-    routes_df = helpers.import_scheduled_trips(
-        analysis_date,
-        columns=[
-            "gtfs_dataset_key",
-            "route_id",
-            "direction_id",
-            "trip_instance_key",
-        ],
         get_pandas=True,
+        **kwargs
+    ).dropna(
+        subset="geometry"
     )
-
-    df2 = pd.merge(
-        df,
-        routes_df,
-        on=["schedule_gtfs_dataset_key", "trip_instance_key"],
-        how="left",
-        indicator="sched_rt_category",
-    )
-
-    df2 = df2.assign(
-        route_id=df2.route_id.fillna("Unknown"),
-        direction_id=df2.direction_id.astype("Int64"),
-        total_vp=df2.total_vp.fillna(0).astype("Int64"),
-        vp_in_shape=df2.vp_in_shape.fillna(0).astype("Int64"),
-        rt_service_min=df2.rt_service_min.round(0).astype("Int64"),
-        sched_rt_category=df2.apply(
-            lambda x: "vp_only" if x.sched_rt_category == "left_only" else "vp_sched",
-            axis=1,
-        ),
-    )
-
-    sched_time_of_day = gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)[
-        ["trip_instance_key", "time_of_day", "service_minutes"]
-    ].rename(columns={"time_of_day": "sched_time_of_day"})
     
-    rt_time_of_day = gtfs_schedule_wrangling.get_vp_trip_time_buckets(
-        analysis_date
-    ).rename(columns={"time_of_day": "rt_time_of_day"})
+    shapes = shapes.assign(
+        geometry = shapes.geometry.buffer(buffer_meters)
+    )
+    
+    return shapes
 
-    df3 = pd.merge(
-        df2,
-        sched_time_of_day,
-        on=["trip_instance_key"],
-        how="left",
+
+def count_vp_in_shape(
+    vp: gpd.GeoDataFrame,
+    shapes: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    """
+    For each trip, count the number of vp within a 35meter buffer of
+    scheduled shape.
+    """  
+    gdf = pd.merge(
+        shapes,
+        vp,
+        on = "shape_array_key",
+        how = "inner"
+    )
+    
+    # Ask if vp point is within buffered shape polygon and 
+    # only keep it if it is     
+    vp_point = gpd.points_from_xy(
+        gdf.x, gdf.y, crs = WGS84
+    ).to_crs(PROJECT_CRS)
+           
+    is_within = vp_point.within(gdf.geometry)
+    
+    gdf = gdf.assign(
+        vp_in_shape=is_within
+    )[["trip_instance_key", "vp_in_shape"]].query('vp_in_shape==True')
+    
+    gdf2 = (gdf
+            .groupby("trip_instance_key", 
+                     observed=True, group_keys=False)
+            .agg({"vp_in_shape": "sum"})
+            .reset_index()
+            .astype({"vp_in_shape": "int32"})
+           )
+    
+    return gdf2
+
+
+def spatial_accuracy_count(analysis_date: str):
+    """
+    Merge vp with shape_array_key and shape_geometry
+    and count how many vp per trip fall within shape.
+    """    
+    trip_to_shape = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["trip_instance_key", "shape_array_key"],
+        get_pandas = True
+    )
+
+    vp_usable = dd.read_parquet(
+        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+        columns=["trip_instance_key", "x", "y"],
     ).merge(
-        rt_time_of_day,
-        on=["trip_instance_key"],
-        how="inner",
+        trip_to_shape,
+        on = "trip_instance_key",
+        how = "inner"
+    ).repartition(npartitions=150).persist()
+        
+    shapes_in_vp = vp_usable.shape_array_key.unique().compute().tolist()
+    
+    shapes = buffer_shapes(
+        analysis_date, 
+        buffer_meters = 35,
+        filters = [[("shape_array_key", "in", shapes_in_vp)]], 
+    )        
+          
+    results = vp_usable.map_partitions(
+        count_vp_in_shape,
+        shapes,
+        meta = {
+            "trip_instance_key": "str",
+            "vp_in_shape": "int32"},
+        align_dataframes = False
+    )
+        
+    results = results.compute()
+            
+    results.to_parquet(
+        f"{RT_SCHED_GCS}vp_trip/intermediate/"
+        f"spatial_accuracy_{analysis_date}.parquet",
     )
     
-    df3['time_of_day'] = df3.sched_time_of_day.fillna(df3.rt_time_of_day)
-    # df3 =  gtfs_schedule_wrangling.add_peak_offpeak_column(df3)
-    # df3 = df3.drop(columns = ['sched_time_of_day', 'rt_time_of_day'])
-    return df3
+    return
 
-def add_metrics(df: pd.DataFrame) -> pd.DataFrame:
-
-    df["pings_per_min"] = df.total_pings / df.rt_service_min
-    df["spatial_accuracy_pct"] = df.vp_in_shape / df.total_vp
-    df["rt_w_gtfs_pct"] = df.total_min_w_gtfs / df.rt_service_min
-    df["rt_v_scheduled_time_pct"] = df.rt_service_min / df.service_minutes - 1
-
-    # Mask rt_triptime_w_gtfs_pct for any values above 100%
-    df.rt_w_gtfs_pct = df.rt_w_gtfs_pct.mask(df.rt_w_gtfs_pct > 1, 1)
-
-    return df
 
 # Complete
-def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
+def rt_schedule_trip_metrics(
+    analysis_date: str, 
+    dict_inputs: dict
+) -> pd.DataFrame:
+    
     start = datetime.datetime.now()
     print(f"Started running script at {start} for {analysis_date} metrics")
     
@@ -335,97 +272,75 @@ def vp_usable_metrics(analysis_date:str) -> pd.DataFrame:
     vp_usable = (vp_usable.loc
     [vp_usable.schedule_gtfs_dataset_key ==gtfs_key]
     .reset_index(drop=True))
-    
     """
-    vp_usable = load_vp_usable(analysis_date)
     
-    ## Find total rt service minutes ##
-    rt_service_df = total_trip_time(vp_usable)
-
+    basic_counts_by_vp_trip(analysis_date)
+    
     time1 = datetime.datetime.now()
-    logger.info(f"Rt service min: {time1-start}")
+    logger.info(f"tabular trip metrics {analysis_date}: {time1 - start}")
     
-    ## Update Completeness ##
-    # Find median pings per min, total min with
-    # GTFS and total min with at least 2 pings per min.
-    trips_by_one_min_df = vp_usable.map_partitions(
-    trips_by_one_min,
-    meta={
-        "trip_instance_key": "object",
-        "number_of_pings_per_minute": "int64",
-        "min_w_atleast2_trip_updates": "int64",
-    },
-    align_dataframes=False
-    ).persist()
+    spatial_accuracy_count(analysis_date)
+    
     time2 = datetime.datetime.now()
-    logger.info(f"Grouping by each minute: {time2-time1}")
-    
-    # Final function
-    pings_trip_time_df = update_completeness(trips_by_one_min_df)
-    time3 = datetime.datetime.now()
-    logger.info(f"Spatial accuracy metric: {time3-time2}")
-    
-    ## Spatial accuracy  ##
-    # Determine which trips have shapes associated with them
-    trips_with_shapes_df = grab_shape_keys_in_vp(vp_usable, analysis_date)
-
-    # Buffer the shapes 
-    buffered_shapes_df = buffer_shapes(trips_with_shapes_df, analysis_date, 35)
-    time4 = datetime.datetime.now()
-    logger.info(f"Buffering: {time4-time3}")
-    
-    # Find the vps that fall into buffered shapes
-    in_shape_df = vp_usable.map_partitions(
-    vp_in_shape,
-    buffered_shapes_df,
-    meta={
-        "trip_instance_key": "object",
-        "location_timestamp_local": "datetime64[ns]",
-        "is_within":"bool",
-    },align_dataframes=False).persist()
-    time5 = datetime.datetime.now()
-    logger.info(f"Find vps that fall into shapes: {time5-time4}")
-    
-    # Compare total vps for a trip versus total vps that 
-    # fell in the recorded shape
-    spatial_accuracy_df = in_shape_df.map_partitions(
-        total_counts,
-        meta={
-            "trip_instance_key": "object", 
-            "total_vp": "int32", 
-            "vp_in_shape": "int32"},
-    align_dataframes=False).persist()
-    time6 = datetime.datetime.now()
-    logger.info(f"Spatial accuracy grouping metric: {time6-time5}")
+    logger.info(f"spatial trip metrics {analysis_date}: {time2 - time1}")
     
     ## Merges ##
-    rt_service_df = rt_service_df.compute()
-    pings_trip_time_df = pings_trip_time_df.compute()
-    spatial_accuracy_df = spatial_accuracy_df.compute()
+    rt_service_df = pd.read_parquet(
+        f"{RT_SCHED_GCS}vp_trip/intermediate/"
+        f"trip_stats_{analysis_date}.parquet"
+    )
+    spatial_accuracy_df = pd.read_parquet(
+        f"{RT_SCHED_GCS}vp_trip/intermediate/"
+        f"spatial_accuracy_{analysis_date}.parquet"
+    )
     
-    m1 = (rt_service_df.merge(pings_trip_time_df, on = "trip_instance_key", how = "outer")
-         .merge(spatial_accuracy_df, on ="trip_instance_key", how = "outer"))
+    # Merge and add metrics and clean up columns
+    df = pd.merge(
+        rt_service_df,
+        spatial_accuracy_df, 
+        on = "trip_instance_key", 
+        how = "outer"
+    )
     
-    ### Add more columns & a bit of  cleaning ###
-    m1 = add_route_time(m1, analysis_date)
+    # Add route id, direction id, off_peak, and time_of_day columns. 
+    route_info = gtfs_schedule_wrangling.attach_scheduled_route_info(
+        analysis_date
+    )
     
-    ### Add in metrics on the trip level ###
-    m1 = add_metrics(m1)
+    df2 = pd.merge(
+        df,
+        route_info,
+        on = "trip_instance_key",
+        how = "inner"
+    ).pipe(
+        gtfs_schedule_wrangling.add_peak_offpeak_column
+    ).pipe(
+        metrics.derive_rt_vs_schedule_metrics
+    )
+    
+    order_first = ["schedule_gtfs_dataset_key", 
+                   "trip_instance_key", "route_id", "direction_id",
+                   "scheduled_service_minutes"]
+    other_cols = [c for c in df2.columns if c not in order_first]
+    df2 = df2.reindex(columns = order_first + other_cols)
     
     # Save
-    TRIP_EXPORT = CONFIG_DICT["trip_metrics"]
-    m1.to_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}/trip_{analysis_date}.parquet")
+    TRIP_EXPORT = dict_inputs["trip_metrics"]
+    df2.to_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet")
 
-    time7 = datetime.datetime.now()
-    logger.info(f"Total run time for metrics on {analysis_date}: {time7-start}")
-
+    time3 = datetime.datetime.now()
+    logger.info(f"Total run time for metrics on {analysis_date}: {time3 - start}")
+    
+    
 if __name__ == "__main__":
+    
     LOG_FILE = "../logs/rt_v_scheduled_trip_metrics.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    for date in update_vars.trip_analysis_date_list:
-        vp_usable_metrics(date)
+    
+    for date in analysis_date_list:
+        rt_schedule_trip_metrics(date, CONFIG_DICT)
         print('Done')
