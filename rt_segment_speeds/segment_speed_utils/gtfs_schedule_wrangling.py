@@ -471,3 +471,31 @@ def gtfs_segments_rename_cols(
             "shape_id": "shape_array_key"
         })
     return df
+
+
+def merge_operator_identifiers(
+    df: pd.DataFrame, 
+    analysis_date_list: list
+) -> pd.DataFrame:
+    """
+    Carrying a lot of these operator identifiers is not 
+    inconsequential, esp when we need to run a week's segment speeds
+    in one go.
+    Instead, we'll just merge it back on before we export.
+    """
+    crosswalk = pd.concat([
+        helpers.import_schedule_gtfs_key_organization_crosswalk(
+            analysis_date,
+        ).drop(columns = "itp_id") 
+        for analysis_date in analysis_date_list],
+        axis=0, ignore_index=True
+    ).drop_duplicates()
+    
+    df = pd.merge(
+        df,
+        crosswalk,
+        on = "schedule_gtfs_dataset_key",
+        how = "inner"
+    )
+    
+    return df
