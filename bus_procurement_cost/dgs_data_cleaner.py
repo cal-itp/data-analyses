@@ -79,17 +79,11 @@ def new_prop_finder(description: str) -> str:
 
     BEB_list = [
         "battery electric",
-        "BEBs paratransit buses",
-        "battery electric bus",
-        'battery electric buses',
-        'battery  electric buses',
+        "BEBs paratransit buses"
     ]
 
     cng_list = [
-        "cng buses",
-        "cng fueled",
-        "estimated cng buses",
-        "low emission cng",
+        "cng"
     ]
 
     electric_list = [
@@ -100,26 +94,28 @@ def new_prop_finder(description: str) -> str:
 
     FCEB_list = [
         "fuel cell",
-        "fuel cell electric",
-        "hydrogen fuel cell",
-        "fuel cell electric bus",
-        "hydrogen electric bus",
+        "hydrogen",
+        #"fuel cell electric",
+        #"hydrogen fuel cell",
+        #"fuel cell electric bus",
+        #"hydrogen electric bus",
     ]
 
     # low emission (hybrid)
     hybrid_list = [
-        "diesel electric hybrids",
-        "diesel-electric hybrids",
-        "hybrid electric",
-        "hybrid electric buses",
-        "hybrid electrics",
+        #"diesel electric hybrids",
+        #"diesel-electric hybrids",
+        #"hybrid electric",
+        #"hybrid electric buses",
+        #"hybrid electrics",
+        "hybrids",
         "hybrid",
     ]
 
     # low emission (propane)
     propane_list = [
-        "propane buses",
-        "propaned powered vehicles",
+        #"propane buses",
+        #"propaned powered vehicles",
         "propane",
     ]
 
@@ -139,13 +135,13 @@ def new_prop_finder(description: str) -> str:
     ]
 
     zero_e_list = [
-        "zero emission buses",
-        "zero emission electric",
-        "zero emission vehicles",
+        #"zero emission buses",
+        #"zero emission electric",
+        #"zero emission vehicles",
         "zero emission",
     ]
 
-    item_description = description.lower().replace("-" "", " ").replace("‐", " ").strip()
+    item_description = description.lower().replace("‐", " ").strip()
 
     if any(word in item_description for word in BEB_list) and not any(
         word in item_description for word in ["diesel", "hybrid", "fuel cell"]
