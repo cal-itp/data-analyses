@@ -54,9 +54,7 @@ def concatenate_datasets_across_months(
     
     df = delayed(pd.concat)(
         dfs, axis=0, ignore_index=True
-    )#.sort_values(
-     #   ["organization_name", "service_date"] + ROUTE_DIR_COLS
-    #).reset_index(drop=True)    
+    ) 
     
     df = compute(df)[0]    
     
