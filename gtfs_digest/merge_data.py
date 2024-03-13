@@ -136,13 +136,13 @@ if __name__ == "__main__":
     
     analysis_date_list = y2024_dates + y2023_dates 
     
-    df_sched = (concatenate_schedule_by_route_direction(analysis_date_list)
-                .astype({"direction_id": "Int64"})
-                )
-    df_avg_speeds = (concatenate_speeds_by_route_direction(analysis_date_list)
-                     .astype({"direction_id": "Int64"})
-                    )
-    df_rt_sched = concatenate_rt_vs_schedule_by_route_direction(analysis_date_list)
+    df_sched = concatenate_schedule_by_route_direction(analysis_date_list)
+    
+    df_avg_speeds = concatenate_speeds_by_route_direction(analysis_date_list)
+                    
+    df_rt_sched = (concatenate_rt_vs_schedule_by_route_direction(analysis_date_list)
+                   .astype({"direction_id": "float"})
+                  )
     
     df = pd.merge(
         df_sched,
