@@ -26,7 +26,6 @@ def concatenate_schedule_by_route_direction(
             "avg_sched_service_minutes", 
             "avg_stop_meters",
             "n_scheduled_trips", "frequency"],
-        get_pandas = True
     ).sort_values(sort_cols).reset_index(drop=True)
     
     return df
@@ -47,7 +46,6 @@ def concatenate_segment_speeds_by_route_direction(
         columns = route_time_cols + [
             "stop_pair", "p20_mph", "p50_mph", 
             "p80_mph", "geometry"],
-        get_pandas = True
     ).sort_values(sort_cols).reset_index(drop=True)
     
     return df
@@ -66,7 +64,6 @@ def concatenate_speeds_by_route_direction(
         date_list,
         data_type = "df",
         columns = route_time_cols + ["speed_mph"],
-        get_pandas = True
     ).sort_values(sort_cols).reset_index(drop=True)
     
     return df
@@ -81,7 +78,6 @@ def concatenate_rt_vs_schedule_by_route_direction(
         "vp_route_dir/route_direction_metrics",
         date_list,
         data_type = "df",
-        get_pandas = True
     ).sort_values(sort_cols).reset_index(drop=True)
     
     # We'll add this back in after merging
