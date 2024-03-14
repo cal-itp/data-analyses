@@ -22,3 +22,5 @@
 2024-03-12 15:13:40.663 | INFO     | __main__:route_metrics:47 - route aggregation 2023-04-14: 0:00:01.329009
 2024-03-12 15:13:42.091 | INFO     | __main__:route_metrics:47 - route aggregation 2023-04-15: 0:00:01.425752
 2024-03-12 15:13:43.361 | INFO     | __main__:route_metrics:47 - route aggregation 2023-04-16: 0:00:01.268246
+2024-03-14 13:38:59.152 | INFO     | __main__:route_metrics:47 - route aggregation 2024-03-13: 0:00:03.018222
+2024-03-14 15:03:28.709 | INFO     | __main__:route_metrics:46 - route aggregation 2024-03-13: 0:00:02.241537

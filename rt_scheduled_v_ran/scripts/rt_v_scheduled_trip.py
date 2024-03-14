@@ -152,6 +152,10 @@ def buffer_shapes(
     """
     Buffer shapes for shapes that are present in vp.
     """ 
+    # Remove certain Amtrak routes
+    amtrak_outside_ca = gtfs_schedule_wrangling.amtrak_trips(
+        analysis_date, inside_ca = False).shape_array_key.unique().tolist()
+    
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
         columns=["shape_array_key", "geometry"],
@@ -160,7 +164,7 @@ def buffer_shapes(
         **kwargs
     ).dropna(
         subset="geometry"
-    )
+    ).query("shape_array_key not in @amtrak_outside_ca")
     
     shapes = shapes.assign(
         geometry = shapes.geometry.buffer(buffer_meters)
@@ -228,6 +232,8 @@ def spatial_accuracy_count(analysis_date: str):
     ).repartition(npartitions=150).persist()
         
     shapes_in_vp = vp_usable.shape_array_key.unique().compute().tolist()
+    
+    
     
     shapes = buffer_shapes(
         analysis_date, 
