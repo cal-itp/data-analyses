@@ -7,8 +7,7 @@ import sys
 from loguru import logger
 
 from segment_speed_utils import (gtfs_schedule_wrangling, 
-                                 metrics,
-                                 time_series_utils
+                                 metrics
                                 )
 from segment_speed_utils.project_vars import RT_SCHED_GCS
 from segment_speed_utils.time_series_utils import ROUTE_DIR_COLS
@@ -56,7 +55,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    from update_vars import route_analysis_date_list, CONFIG_DICT
+    from update_vars import analysis_date_list, CONFIG_DICT
     
-    for analysis_date in route_analysis_date_list: 
+    for analysis_date in analysis_date_list: 
         route_metrics(analysis_date, CONFIG_DICT)

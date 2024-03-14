@@ -105,8 +105,14 @@ def select_shapes_and_segment(
     Concatenate these 2 portions and then cut HQTA segments.
     Returns the hqta_segments for all the routes across all operators.
     """ 
+    # Only include certain Amtrak routes
+    outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips(
+        analysis_date, inside_ca = False).shape_array_key.unique()
+    
     gdf = gtfs_schedule_wrangling.longest_shape_by_route_direction(
         analysis_date
+    ).query(
+        'shape_array_key not in @outside_ca_amtrak_shapes'
     ).drop(
         columns = ["schedule_gtfs_dataset_key", 
                    "shape_array_key", "route_length"]

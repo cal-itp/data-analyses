@@ -17,9 +17,39 @@ sched_rt_category_dict = {
     "right_only": "vp_only"
 }
 
+CA_AMTRAK = ["Pacific Surfliner", "San Joaquins", 
+             "Coast Starlight", "Capitol Corridor"]
+
+
+def amtrak_trips(
+    analysis_date: str,
+    inside_ca: bool = True
+) -> pd.DataFrame:
+    """
+    Return Amtrak table, either for routes primarily inside CA or outside CA.
+    """
+    
+    if inside_ca:
+        filters = [[("name", "==", "Amtrak Schedule"), 
+                    ("route_long_name", "in", CA_AMTRAK)]]
+    else:
+        filters = [[("name", "==", "Amtrak Schedule"), 
+                    ("route_long_name", "not in", CA_AMTRAK)]]
+    
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        get_pandas = True,
+        filters = filters,
+        columns = None
+    )
+       
+    return trips
+    
+
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
-    exclude_me: list = ["Amtrak Schedule", "*Flex"]
+    exclude_me: list = ["*Flex"],
+    include_amtrak_routes: list = CA_AMTRAK
 ):
     """
     Exclude certain operators by name.
@@ -33,7 +63,20 @@ def exclude_scheduled_operators(
         for i in substrings:
             trips = trips[~trips.name.str.contains(i)].reset_index(drop=True)
     
-    return trips[~trips.name.isin(exclude_me)].reset_index(drop=True)
+    trips = trips[~trips.name.isin(exclude_me)].reset_index(drop=True)
+    
+    outside_ca_amtrak = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["trip_instance_key"],
+        filters = [[("name", "==", "Amtrak Schedule"), 
+                   ("route_long_name", "not in", include_amtrak_routes)]],
+    ).trip_instance_key.unique()
+    
+    trips = trips[
+        ~trips.trip_instance_key.isin(outside_ca_amtrak)
+    ].reset_index(drop=True)
+    
+    return trips
 
 
 def get_trips_with_geom(
@@ -274,7 +317,6 @@ def attach_scheduled_route_info(
     
     time_df = time_df.assign(
         route_id = time_df.route_id.fillna("Unknown"),
-        direction_id = time_df.direction_id.astype("Int64"),
         time_of_day = time_df.sched_time_of_day.fillna(
             time_df.rt_time_of_day),
         sched_rt_category = time_df.sched_rt_category.map(

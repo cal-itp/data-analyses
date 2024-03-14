@@ -23,8 +23,8 @@ rt_stop_times:
     segments_file: "segment_options/stop_segments"
 road_segments:
     stage1: "vp_usable"
-    stage2: "nearest_vp_roads"
-    stage3: "stop_arrivals_roads"
+    stage2: "nearest/nearest_vp_roads"
+    stage3: "road_segments/stop_arrivals"
     stage4: "speeds_road_segments"
     stage5: "avg_speeds_road_segments"
     segments_file: "road_segments"

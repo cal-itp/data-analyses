@@ -23,11 +23,12 @@ STOP_PAIR_COLS = ["stop_pair"]
 ROUTE_DIR_COLS = ["route_id", "direction_id"]
 
 
-def concatenate_datasets_across_months(
+def concatenate_datasets_across_dates(
     gcs_bucket: str,
     dataset_name: Literal["speeds_route_dir_segments", "speeds_route_dir"],
     date_list: list,
     data_type: Literal["df", "gdf"] = "gdf",
+    get_pandas: bool = True,
     **kwargs
 ) -> pd.DataFrame:
     """
@@ -56,6 +57,7 @@ def concatenate_datasets_across_months(
         dfs, axis=0, ignore_index=True
     ) 
     
-    df = compute(df)[0]    
+    if get_pandas:
+        df = compute(df)[0]    
     
     return df

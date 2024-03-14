@@ -37,8 +37,7 @@ def assemble_scheduled_trip_metrics(
     
     time_of_day = (gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)   
                    [["trip_instance_key", "time_of_day", 
-                     "service_minutes"]]
-                   .rename(columns = {"service_minutes": "sched_service_min"})
+                     "scheduled_service_minutes"]]
               )
     
     trip_cols = ["schedule_gtfs_dataset_key", "trip_instance_key"]
@@ -81,15 +80,15 @@ def schedule_metrics_by_route_direction(
                       # take mean of the median stop spacing for trip
                       # does this make sense?
                       # median is the single boiled down metric at the trip-level
-                      "sched_service_min": "mean",
+                      "scheduled_service_minutes": "mean",
                   }).reset_index()
                   .rename(columns = {
                       "median_stop_meters": "avg_stop_meters",
-                      "sched_service_min": "avg_sched_service_min"
+                      "scheduled_service_minutes": "avg_scheduled_service_minutes"
                   })
                  )
     
-    round_me = ["avg_stop_meters", "avg_sched_service_min"]
+    round_me = ["avg_stop_meters", "avg_scheduled_service_minutes"]
     metrics_df[round_me] = metrics_df[round_me].round(2)
 
     common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
