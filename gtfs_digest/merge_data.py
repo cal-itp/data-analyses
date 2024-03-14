@@ -17,18 +17,17 @@ def concatenate_schedule_by_route_direction(
     Concatenate schedule data that's been 
     aggregated to route-direction-time_period.
     """
-    df = time_series_utils.concatenate_datasets_across_months(
+    df = time_series_utils.concatenate_datasets_across_dates(
         RT_SCHED_GCS,
         "schedule_route_dir/schedule_route_direction_metrics",
         date_list,
         data_type = "df",
         columns = route_time_cols + [
-            "avg_sched_service_min", 
+            "avg_sched_service_minutes", 
             "avg_stop_meters",
-            "n_trips", "frequency",]
-    ).sort_values(sort_cols).reset_index(drop=True).rename(
-        columns = {"n_trips": "n_scheduled_trips"}
-    )    
+            "n_scheduled_trips", "frequency"],
+        get_pandas = True
+    ).sort_values(sort_cols).reset_index(drop=True)
     
     return df
 
@@ -40,14 +39,15 @@ def concatenate_segment_speeds_by_route_direction(
     Concatenate segment speeds data that's been 
     aggregated to route-direction-time_period.
     """
-    df = time_series_utils.concatenate_datasets_across_months(
+    df = time_series_utils.concatenate_datasets_across_dates(
         SEGMENT_GCS,
         "rollup_singleday/speeds_route_dir_segments",
         date_list,
         data_type = "gdf",
         columns = route_time_cols + [
             "stop_pair", "p20_mph", "p50_mph", 
-            "p80_mph", "geometry"]
+            "p80_mph", "geometry"],
+        get_pandas = True
     ).sort_values(sort_cols).reset_index(drop=True)
     
     return df
@@ -60,12 +60,13 @@ def concatenate_speeds_by_route_direction(
     Concatenate rt vs schedule data that's been 
     aggregated to route-direction-time_period.
     """
-    df = time_series_utils.concatenate_datasets_across_months(
+    df = time_series_utils.concatenate_datasets_across_dates(
         SEGMENT_GCS,
         "rollup_singleday/speeds_route_dir",
         date_list,
         data_type = "df",
-        columns = route_time_cols + ["speed_mph"]
+        columns = route_time_cols + ["speed_mph"],
+        get_pandas = True
     ).sort_values(sort_cols).reset_index(drop=True)
     
     return df
@@ -75,14 +76,13 @@ def concatenate_rt_vs_schedule_by_route_direction(
     date_list: list
 ) -> pd.DataFrame:
     
-    df = time_series_utils.concatenate_datasets_across_months(
+    df = time_series_utils.concatenate_datasets_across_dates(
         RT_SCHED_GCS,
         "vp_route_dir/route_direction_metrics",
         date_list,
         data_type = "df",
-    ).sort_values(sort_cols).reset_index(drop=True).rename(
-        columns = {"n_trips": "vp_trips"}
-    )
+        get_pandas = True
+    ).sort_values(sort_cols).reset_index(drop=True)
     
     # We'll add this back in after merging
     # because these would be NaN if it's not in schedule

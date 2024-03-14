@@ -106,18 +106,8 @@ def select_shapes_and_segment(
     Returns the hqta_segments for all the routes across all operators.
     """ 
     # Only include certain Amtrak routes
-    ca_amtrak = ["Pacific Surfliner", "San Joaquins", 
-                 "Coast Starlight", "Capitol Corridor",
-                 #"Sunset Limited", "California Zephyr",
-                ]
-    
-    outside_ca_amtrak_shapes = helpers.import_scheduled_trips(
-        analysis_date,
-        filters = [[("name", "==", "Amtrak Schedule"), 
-                   ("route_long_name", "not in", ca_amtrak)]],
-        columns = ["shape_array_key"]
-    ).shape_array_key.unique()
-    
+    outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips(
+        analysis_date, inside_ca = False).shape_array_key.unique()
     
     gdf = gtfs_schedule_wrangling.longest_shape_by_route_direction(
         analysis_date
