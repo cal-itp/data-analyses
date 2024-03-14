@@ -70,7 +70,7 @@ def derive_rt_vs_schedule_metrics(df: pd.DataFrame) -> pd.DataFrame:
     df = df.assign(
         vp_per_minute = df.total_vp / df.rt_service_minutes,
         pct_in_shape = df.vp_in_shape / df.total_vp,
-        pct_rt_journey_vp = df.minutes_atleast1_vp / df.rt_service_minutes,
+        pct_rt_journey_atleast1_vp = df.minutes_atleast1_vp / df.rt_service_minutes,
         pct_rt_journey_atleast2_vp = df.minutes_atleast2_vp / df.rt_service_minutes,
         pct_sched_journey_atleast1_vp = (df.minutes_atleast1_vp / 
                                          df.scheduled_service_minutes),
@@ -126,7 +126,7 @@ def calculate_weighted_average_vp_schedule_metrics(
             **{e: "sum" for e in sum_cols}, 
             **{e: "count" for e in count_cols}}
         ).reset_index()
-        .rename(columns = {"trip_instance_key": "n_trips"})
+        .rename(columns = {"trip_instance_key": "n_vp_trips"})
     )
     
     return df2

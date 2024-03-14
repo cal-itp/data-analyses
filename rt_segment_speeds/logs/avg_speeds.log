@@ -26,3 +26,9 @@
 2024-02-28 15:02:52.016 | INFO     | __main__:multi_day_averages:351 - route seg avg 0:04:51.436845
 2024-02-28 15:03:48.470 | INFO     | __main__:multi_day_averages:391 - route dir avg 0:00:56.454294
 2024-02-28 15:03:48.541 | INFO     | __main__:<module>:456 - average rollups for ['2023-04-10', '2023-04-11', '2023-04-12', '2023-04-13', '2023-04-14', '2023-04-15', '2023-04-16']: 0:05:47.967308
+2024-03-14 14:16:48.427 | INFO     | __main__:single_day_averages:170 - shape seg avg 0:03:23.830232
+2024-03-14 14:58:31.402 | INFO     | __main__:single_day_averages:164 - shape seg avg 0:03:17.806332
+2024-03-14 15:00:54.509 | INFO     | __main__:single_day_averages:199 - route dir seg avg 0:02:23.106681
+2024-03-14 15:00:56.734 | INFO     | __main__:single_day_averages:216 - trip avg 0:00:02.224932
+2024-03-14 15:01:08.404 | INFO     | __main__:single_day_averages:255 - route dir avg: 0:00:11.670228
+2024-03-14 15:01:15.161 | INFO     | __main__:<module>:416 - average rollups for 2024-03-13: 0:06:10.168066
