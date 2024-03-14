@@ -19,3 +19,9 @@
 2024-03-14 09:33:52.186 | INFO     | __main__:<module>:199 - 2023-03-13: export usable vp with direction: 0:01:06.526779
 2024-03-14 09:33:52.187 | INFO     | __main__:<module>:202 - 2023-03-13: vp_direction script execution time: 0:06:50.186660
 2024-03-14 09:47:28.091 | INFO     | __main__:<module>:142 - 2023-03-13: condense vp for trip 0:13:14.682784
+2024-03-14 12:08:15.749 | INFO     | __main__:<module>:169 - 2024-03-13: pare down vp: 0:01:39.120888
+2024-03-14 12:11:52.801 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:03:19.615961
+2024-03-14 12:14:59.645 | INFO     | __main__:attach_prior_vp_add_direction:121 - np vectorize arrays for direction: 0:03:06.843928
+2024-03-14 12:15:05.566 | INFO     | __main__:<module>:193 - 2024-03-13: export vp direction: 0:06:32.381100
+2024-03-14 12:16:08.741 | INFO     | __main__:<module>:199 - 2024-03-13: export usable vp with direction: 0:01:03.175027
+2024-03-14 12:16:08.742 | INFO     | __main__:<module>:202 - 2024-03-13: vp_direction script execution time: 0:07:35.556127
