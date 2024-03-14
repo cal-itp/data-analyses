@@ -157,3 +157,12 @@ if __name__ == "__main__":
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
+    
+    from segment_speed_utils.project_vars import analysis_date_list, CONFIG_PATH
+    
+    for analysis_date in analysis_date_list:
+        calculate_speed_from_stop_arrivals(
+            analysis_date = analysis_date, 
+            segment_type = segment_type, 
+            config_path = CONFIG_PATH
+        )

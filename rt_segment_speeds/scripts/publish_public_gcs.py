@@ -29,11 +29,12 @@ if __name__ == "__main__":
         
         start = datetime.datetime.now()
 
-        df = time_series_utils.concatenate_datasets_across_months(
+        df = time_series_utils.concatenate_datasets_across_dates(
             SEGMENT_GCS,
             d, 
             analysis_date_list,
-            data_type = "gdf"
+            data_type = "gdf",
+            get_pandas = True
         )
         
         dataset_stem = Path(d).stem
