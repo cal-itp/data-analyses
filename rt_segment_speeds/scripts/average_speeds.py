@@ -17,6 +17,7 @@ from segment_speed_utils import (gtfs_schedule_wrangling,
                                  helpers, 
                                  metrics,
                                  time_helpers, 
+                                 time_series_utils
                                  )
 from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
 from segment_speed_utils.time_series_utils import STOP_PAIR_COLS, ROUTE_DIR_COLS
@@ -86,30 +87,23 @@ def concatenate_trip_segment_speeds(
     SPEED_FILE = dict_inputs["stage4"]
     MAX_SPEED = dict_inputs["max_speed"]
     
-    dfs = [
-        delayed(pd.read_parquet)(
-            f"{SEGMENT_GCS}{SPEED_FILE}_{analysis_date}.parquet", 
-            columns = (OPERATOR_COLS + SHAPE_STOP_COLS + 
+    df = time_series_utils.concatenate_datasets_across_dates(
+        SEGMENT_GCS,
+        SPEED_FILE,
+        analysis_date_list,
+        data_type  = "df",
+        get_pandas = get_pandas,
+        columns = (OPERATOR_COLS + SHAPE_STOP_COLS + 
                        STOP_PAIR_COLS + ROUTE_DIR_COLS + [
                            "trip_instance_key", "speed_mph", 
                            "meters_elapsed", "sec_elapsed", 
                            "time_of_day"]),
-            filters = [[("speed_mph", "<=", MAX_SPEED)]]
-        ).assign(
-            service_date = pd.to_datetime(analysis_date)
-        ) for analysis_date in analysis_date_list
-    ]
-    
-    df = delayed(pd.concat)(
-        dfs, axis=0, ignore_index = True
+        filters = [[("speed_mph", "<=", MAX_SPEED)]]
     ).pipe(
         gtfs_schedule_wrangling.add_peak_offpeak_column
     ).pipe(
         gtfs_schedule_wrangling.add_weekday_weekend_column
     )
-    
-    if get_pandas:
-        df = compute(df)[0]
     
     return df
     
@@ -139,9 +133,10 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     t0 = datetime.datetime.now()
     shape_stop_segments = metrics.concatenate_peak_offpeak_allday_averages(
         df, 
-        OPERATOR_COLS + SHAPE_STOP_COLS + STOP_PAIR_COLS
+        OPERATOR_COLS + SHAPE_STOP_COLS + STOP_PAIR_COLS,
+        metric_type = "segment_speeds"
     ).pipe(
-        time_series_utils.merge_operator_identifiers, [analysis_date]
+        gtfs_schedule_wrangling.merge_operator_identifiers, [analysis_date]
     )
     
     col_order = [c for c in shape_stop_segments.columns]
@@ -170,7 +165,8 @@ def single_day_averages(analysis_date: str, dict_inputs: dict):
     
     route_dir_segments = metrics.concatenate_peak_offpeak_allday_averages(
         df, 
-        OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS
+        OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
+        metric_type = "segment_speeds"
     ).pipe(
         gtfs_schedule_wrangling.merge_operator_identifiers, [analysis_date]
     )
@@ -286,7 +282,8 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     route_dir_segments = delayed(
         metrics.concatenate_peak_offpeak_allday_averages)(
         df, 
-        OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"]
+        OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"],
+        metric_type = "segment_speeds"
     )
     
     route_dir_segments = compute(route_dir_segments)[0]
@@ -294,7 +291,8 @@ def multi_day_averages(analysis_date_list: list, dict_inputs: dict):
     route_dir_segments = time_helpers.add_time_span_columns(
         route_dir_segments, time_span_num
     ).pipe(
-        merge_operator_identifiers, analysis_date_list
+        gtfs_schedule_wrangling.merge_operator_identifiers, 
+        analysis_date_list
     )
         
     segment_geom = import_segments(

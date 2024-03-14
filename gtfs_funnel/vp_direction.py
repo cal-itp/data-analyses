@@ -160,8 +160,8 @@ def add_direction_to_usable_vp(
     ).drop_duplicates(subset=["vp_idx", "vp_primary_direction"])   
     
     export_path = f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}"
-    if fs.exists(export_path):
-        fs.rm(export_path, recursive=True)
+    
+    helpers.if_exists_then_delete(export_path)
     
     vp_with_dir.to_parquet(
         export_path,

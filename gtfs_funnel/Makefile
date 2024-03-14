@@ -6,15 +6,16 @@ download_gtfs_data:
 	python download_stop_times.py
 	python download_vehicle_positions.py
 	python concatenate_vehicle_positions.py      
-   
+
+    
 preprocess:
 	python stop_times_with_direction.py
+	python route_typologies.py
+	python crosswalk_gtfs_dataset_key_to_organization.py    
 	python vp_keep_usable.py
 	python vp_direction.py
-	python vp_condenser.py
 	python cleanup.py
-	python route_typologies.py
-	python crosswalk_gtfs_dataset_key_to_organization.py
+	python vp_condenser.py
     
 # Start compiling scripts needed when we start concatenating several days
 # Clean route names for displaying across time
