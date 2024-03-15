@@ -1,307 +1,130 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ns0:MD_Metadata xmlns:ns0="http://www.isotc211.org/2005/gmd" xmlns:ns1="http://www.isotc211.org/2005/gco">
-	<ns0:language>
-		<ns0:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng" codeSpace="ISO639-2">
-			<text>eng</text>
-		</ns0:LanguageCode>
-	</ns0:language>
-	<ns0:characterSet>
-		<ns0:MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">
-			<text>utf8</text>
-		</ns0:MD_CharacterSetCode>
-	</ns0:characterSet>
-	<ns0:hierarchyLevel>
-		<ns0:MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset" codeSpace="ISOTC211/19115">
-			<text>dataset</text>
-		</ns0:MD_ScopeCode>
-	</ns0:hierarchyLevel>
-	<ns0:hierarchyLevelName>
-		<ns1:CharacterString>dataset</ns1:CharacterString>
-	</ns0:hierarchyLevelName>
-	<ns0:contact ns1:nilReason="missing"></ns0:contact>
-	<ns0:dateStamp>
-		<ns1:Date>2024-02-23</ns1:Date>
-	</ns0:dateStamp>
-	<ns0:metadataStandardName>
-		<ns1:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</ns1:CharacterString>
-	</ns0:metadataStandardName>
-	<ns0:metadataStandardVersion>
-		<ns1:CharacterString>2007</ns1:CharacterString>
-	</ns0:metadataStandardVersion>
-	<ns0:spatialRepresentationInfo>
-		<ns0:MD_VectorSpatialRepresentation>
-			<ns0:topologyLevel>
-				<ns0:MD_TopologyLevelCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_TopologyLevelCode" codeListValue="geometryOnly" codeSpace="ISOTC211/19115">
-					<text>geometryOnly</text>
-				</ns0:MD_TopologyLevelCode>
-			</ns0:topologyLevel>
-			<ns0:geometricObjects>
-				<ns0:MD_GeometricObjects>
-					<ns0:geometricObjectType>
-						<ns0:MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="point" codeSpace="ISOTC211/19115">
-							<text>point</text>
-						</ns0:MD_GeometricObjectTypeCode>
-					</ns0:geometricObjectType>
-				</ns0:MD_GeometricObjects>
-			</ns0:geometricObjects>
-		</ns0:MD_VectorSpatialRepresentation>
-	</ns0:spatialRepresentationInfo>
-	<ns0:referenceSystemInfo>
-		<ns0:MD_ReferenceSystem>
-			<ns0:referenceSystemIdentifier>
-				<ns0:RS_Identifier>
-					<ns0:code>
-						<ns1:CharacterString>4326</ns1:CharacterString>
-					</ns0:code>
-					<ns0:codeSpace>
-						<ns1:CharacterString>EPSG</ns1:CharacterString>
-					</ns0:codeSpace>
-					<ns0:version>
-						<ns1:CharacterString>6.2(3.0.1)</ns1:CharacterString>
-					</ns0:version>
-				</ns0:RS_Identifier>
-			</ns0:referenceSystemIdentifier>
-		</ns0:MD_ReferenceSystem>
-	</ns0:referenceSystemInfo>
-	<ns0:identificationInfo>
-		<ns0:MD_DataIdentification>
-			<ns0:citation>
-				<ns0:CI_Citation>
-					<ns0:title>
-						<ns1:CharacterString>ca_transit_stops</ns1:CharacterString>
-					</ns0:title>
-					<ns0:date>
-						<ns0:CI_Date>
-							<ns0:date>
-								<ns1:Date>2022-02-08</ns1:Date>
-							</ns0:date>
-							<ns0:dateType>
-								<ns0:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation" codeSpace="ISOTC211/19115">
-									<text>creation</text>
-								</ns0:CI_DateTypeCode>
-							</ns0:dateType>
-						</ns0:CI_Date>
-					</ns0:date>
-					<ns0:date>
-						<ns0:CI_Date>
-							<ns0:date>
-								<ns1:Date>2024-02-14</ns1:Date>
-							</ns0:date>
-							<ns0:dateType>
-								<ns0:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="ISOTC211/19115">
-									<text>revision</text>
-								</ns0:CI_DateTypeCode>
-							</ns0:dateType>
-						</ns0:CI_Date>
-					</ns0:date>
-					<ns0:citedResponsibleParty>
-						<ns0:CI_ResponsibleParty>
-							<ns0:organisationName>
-								<ns1:CharacterString>Caltrans</ns1:CharacterString>
-							</ns0:organisationName>
-							<ns0:role>
-								<ns0:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher" codeSpace="ISOTC211/19115">
-									<text>publisher</text>
-								</ns0:CI_RoleCode>
-							</ns0:role>
-						</ns0:CI_ResponsibleParty>
-					</ns0:citedResponsibleParty>
-					<ns0:citedResponsibleParty>
-						<ns0:CI_ResponsibleParty>
-							<ns0:individualName>
-								<ns1:CharacterString>Tiffany Ku</ns1:CharacterString>
-							</ns0:individualName>
-							<ns0:organisationName>
-								<ns1:CharacterString>Caltrans</ns1:CharacterString>
-							</ns0:organisationName>
-							<ns0:positionName>
-								<ns1:CharacterString>Data &amp; Digital Services / California Integrated Travel Project</ns1:CharacterString>
-							</ns0:positionName>
-							<ns0:contactInfo>
-								<ns0:CI_Contact>
-									<ns0:address>
-										<ns0:CI_Address>
-											<ns0:electronicMailAddress>
-												<ns1:CharacterString>tiffany.ku@dot.ca.gov</ns1:CharacterString>
-											</ns0:electronicMailAddress>
-										</ns0:CI_Address>
-									</ns0:address>
-								</ns0:CI_Contact>
-							</ns0:contactInfo>
-							<ns0:role>
-								<ns0:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact" codeSpace="ISOTC211/19115">
-									<text>pointOfContact</text>
-								</ns0:CI_RoleCode>
-							</ns0:role>
-						</ns0:CI_ResponsibleParty>
-					</ns0:citedResponsibleParty>
-					<ns0:presentationForm>
-						<ns0:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="ISOTC211/19115">
-							<text>mapDigital</text>
-						</ns0:CI_PresentationFormCode>
-					</ns0:presentationForm>
-				</ns0:CI_Citation>
-			</ns0:citation>
-			<ns0:abstract>
-				<ns1:CharacterString>Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates route information to stops.</ns1:CharacterString>
-			</ns0:abstract>
-			<ns0:purpose>
-				<ns1:CharacterString>Provide all CA transit stops and routes (geospatial) from all transit operators.</ns1:CharacterString>
-			</ns0:purpose>
-			<ns0:status>
-				<ns0:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">
-					<text>completed</text>
-				</ns0:MD_ProgressCode>
-			</ns0:status>
-			<ns0:resourceMaintenance>
-				<ns0:MD_MaintenanceInformation>
-					<ns0:maintenanceAndUpdateFrequency>
-						<ns0:MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="monthly" codeSpace="ISOTC211/19115">
-							<text>monthly</text>
-						</ns0:MD_MaintenanceFrequencyCode>
-					</ns0:maintenanceAndUpdateFrequency>
-				</ns0:MD_MaintenanceInformation>
-			</ns0:resourceMaintenance>
-			<ns0:descriptiveKeywords>
-				<ns0:MD_Keywords>
-					<ns0:keyword>
-						<ns1:CharacterString>transportation</ns1:CharacterString>
-					</ns0:keyword>
-					<ns0:type>
-						<ns0:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">
-							<text>theme</text>
-						</ns0:MD_KeywordTypeCode>
-					</ns0:type>
-				</ns0:MD_Keywords>
-			</ns0:descriptiveKeywords>
-			<ns0:descriptiveKeywords>
-				<ns0:MD_Keywords>
-					<ns0:keyword>
-						<ns1:CharacterString>Downloadable Data</ns1:CharacterString>
-					</ns0:keyword>
-					<ns0:thesaurusName uuidref="723f6998-058e-11dc-8314-0800200c9a66"></ns0:thesaurusName>
-				</ns0:MD_Keywords>
-			</ns0:descriptiveKeywords>
-			<ns0:resourceConstraints>
-				<ns0:MD_Constraints>
-					<ns0:useLimitation>
-						<ns1:CharacterString>Public.</ns1:CharacterString>
-					</ns0:useLimitation>
-				</ns0:MD_Constraints>
-			</ns0:resourceConstraints>
-			<ns0:resourceConstraints>
-				<ns0:MD_LegalConstraints>
-					<ns0:useLimitation>
-						<ns1:CharacterString>The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an 'as is' and an 'as available' basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.</ns1:CharacterString>
-					</ns0:useLimitation>
-				</ns0:MD_LegalConstraints>
-			</ns0:resourceConstraints>
-			<ns0:resourceConstraints>
-				<ns0:MD_LegalConstraints>
-					<ns0:useLimitation>
-						<ns1:CharacterString>Creative Commons 4.0 Attribution.</ns1:CharacterString>
-					</ns0:useLimitation>
-					<ns0:useConstraints>
-						<ns0:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="license" codeSpace="ISOTC211/19115">
-							<text>license</text>
-						</ns0:MD_RestrictionCode>
-					</ns0:useConstraints>
-				</ns0:MD_LegalConstraints>
-			</ns0:resourceConstraints>
-			<ns0:spatialRepresentationType>
-				<ns0:MD_SpatialRepresentationTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" codeSpace="ISOTC211/19115">
-					<text>vector</text>
-				</ns0:MD_SpatialRepresentationTypeCode>
-			</ns0:spatialRepresentationType>
-			<ns0:language>
-				<ns0:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng" codeSpace="ISO639-2">
-					<text>eng</text>
-				</ns0:LanguageCode>
-			</ns0:language>
-			<ns0:characterSet>
-				<ns0:MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">
-					<text>utf8</text>
-				</ns0:MD_CharacterSetCode>
-			</ns0:characterSet>
-			<ns0:topicCategory>
-				<ns0:MD_TopicCategoryCode>transportation</ns0:MD_TopicCategoryCode>
-			</ns0:topicCategory>
-			<ns0:environmentDescription>
-				<ns1:CharacterString>Microsoft Windows 10 Version 10.0 (Build 19045) ; Esri ArcGIS 12.9.2.32739</ns1:CharacterString>
-			</ns0:environmentDescription>
-			<ns0:extent>
-				<ns0:EX_Extent>
-					<ns0:description>
-						<ns1:CharacterString>California</ns1:CharacterString>
-					</ns0:description>
-				</ns0:EX_Extent>
-			</ns0:extent>
-		</ns0:MD_DataIdentification>
-	</ns0:identificationInfo>
-	<ns0:distributionInfo>
-		<ns0:MD_Distribution>
-			<ns0:distributionFormat>
-				<ns0:MD_Format>
-					<ns0:name>
-						<ns1:CharacterString>File Geodatabase Feature Class</ns1:CharacterString>
-					</ns0:name>
-					<ns0:version ns1:nilReason="missing"></ns0:version>
-				</ns0:MD_Format>
-			</ns0:distributionFormat>
-			<ns0:transferOptions>
-				<ns0:MD_DigitalTransferOptions>
-					<ns0:onLine>
-						<ns0:CI_OnlineResource>
-							<ns0:linkage>
-								<ns0:URL>https://github.com/cal-itp/data-analyses/blob/main/open_data/README.md</ns0:URL>
-							</ns0:linkage>
-							<ns0:name>
-								<ns1:CharacterString>Readme</ns1:CharacterString>
-							</ns0:name>
-							<ns0:description>
-								<ns1:CharacterString>This site allows you to access the code used to create this dataset and provides additional explanatory resources.</ns1:CharacterString>
-							</ns0:description>
-							<ns0:function>
-								<ns0:CI_OnLineFunctionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information" codeSpace="ISOTC211/19115">
-									<text>information</text>
-								</ns0:CI_OnLineFunctionCode>
-							</ns0:function>
-						</ns0:CI_OnlineResource>
-					</ns0:onLine>
-				</ns0:MD_DigitalTransferOptions>
-			</ns0:transferOptions>
-		</ns0:MD_Distribution>
-	</ns0:distributionInfo>
-	<ns0:dataQualityInfo>
-		<ns0:DQ_DataQuality>
-			<ns0:scope>
-				<ns0:DQ_Scope>
-					<ns0:level>
-						<ns0:MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="feature" codeSpace="ISOTC211/19115">
-							<text>feature</text>
-						</ns0:MD_ScopeCode>
-					</ns0:level>
-				</ns0:DQ_Scope>
-			</ns0:scope>
-			<ns0:report>
-				<ns0:DQ_RelativeInternalPositionalAccuracy>
-					<ns0:measureDescription>
-						<ns1:CharacterString>4 meters</ns1:CharacterString>
-					</ns0:measureDescription>
-					<ns0:result ns1:nilReason="missing"></ns0:result>
-				</ns0:DQ_RelativeInternalPositionalAccuracy>
-			</ns0:report>
-			<ns0:lineage>
-				<ns0:LI_Lineage>
-					<ns0:processStep>
-						<ns0:LI_ProcessStep>
-							<ns0:description>
-								<ns1:CharacterString>This data was assembled from the General Transit Feed Specification (GTFS) schedule data. GTFS tables are text files, but these have been compiled for all operators and transformed into geospatial data, with minimal data processing. The transit routes dataset is assembled from two tables: (1) `shapes.txt`, which defines the route alignment path, and (2) `trips.txt` and `stops.txt`, for routes not found in `shapes.txt`. `shapes.txt` is an optional GTFS table with richer information than just transit stop longitude and latitude. The transit stops dataset is assembled from `stops.txt`, which contains information about the route, stop sequence, and stop longitude and latitude. References: https://gtfs.org/. https://gtfs.org/schedule/reference/#shapestxt. https://gtfs.org/schedule/reference/#stopstxt. https://gtfs.org/schedule/reference/#tripstxt.</ns1:CharacterString>
-							</ns0:description>
-						</ns0:LI_ProcessStep>
-					</ns0:processStep>
-				</ns0:LI_Lineage>
-			</ns0:lineage>
-		</ns0:DQ_DataQuality>
-	</ns0:dataQualityInfo>
-</ns0:MD_Metadata>
+<?xml version="1.0" encoding="UTF-8"?>
+<MD_Metadata xmlns="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<language>
+<LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng" codeSpace="ISO639-2">eng</LanguageCode>
+</language>
+<characterSet>
+<MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
+</characterSet>
+<hierarchyLevel>
+<MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset" codeSpace="ISOTC211/19115">dataset</MD_ScopeCode>
+</hierarchyLevel>
+<hierarchyLevelName>
+<gco:CharacterString>dataset</gco:CharacterString>
+</hierarchyLevelName>
+<contact gco:nilReason="missing">
+</contact>
+<dateStamp>
+<gco:Date>2024-03-14</gco:Date>
+</dateStamp>
+<metadataStandardName>
+<gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
+</metadataStandardName>
+<metadataStandardVersion>
+<gco:CharacterString>2007</gco:CharacterString>
+</metadataStandardVersion>
+<spatialRepresentationInfo>
+<MD_VectorSpatialRepresentation>
+<topologyLevel>
+<MD_TopologyLevelCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_TopologyLevelCode" codeListValue="geometryOnly" codeSpace="ISOTC211/19115">geometryOnly</MD_TopologyLevelCode>
+</topologyLevel>
+<geometricObjects>
+<MD_GeometricObjects>
+<geometricObjectType>
+<MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="point" codeSpace="ISOTC211/19115">point</MD_GeometricObjectTypeCode>
+</geometricObjectType>
+</MD_GeometricObjects>
+</geometricObjects>
+</MD_VectorSpatialRepresentation>
+</spatialRepresentationInfo>
+<referenceSystemInfo>
+<MD_ReferenceSystem>
+<referenceSystemIdentifier>
+<RS_Identifier>
+<code>
+<gco:CharacterString>4326</gco:CharacterString>
+</code>
+<codeSpace>
+<gco:CharacterString>EPSG</gco:CharacterString>
+</codeSpace>
+<version>
+<gco:CharacterString>6.2(3.0.1)</gco:CharacterString>
+</version>
+</RS_Identifier>
+</referenceSystemIdentifier>
+</MD_ReferenceSystem>
+</referenceSystemInfo>
+<identificationInfo>
+<MD_DataIdentification>
+<citation>
+<CI_Citation>
+<title>
+<gco:CharacterString>ca_transit_stops</gco:CharacterString>
+</title>
+<date gco:nilReason="missing">
+</date>
+<presentationForm>
+<CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="ISOTC211/19115">mapDigital</CI_PresentationFormCode>
+</presentationForm>
+</CI_Citation>
+</citation>
+<abstract>
+<gco:CharacterString>Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates route information to stops.</gco:CharacterString>
+</abstract>
+<purpose>
+<gco:CharacterString>Provide all CA transit stops and routes (geospatial) from all transit operators.</gco:CharacterString>
+</purpose>
+<descriptiveKeywords>
+<MD_Keywords>
+<keyword>
+<gco:CharacterString>Transportation</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>GTFS</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>Transit routes</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>Transit stops</gco:CharacterString>
+</keyword>
+<keyword>
+<gco:CharacterString>Transit</gco:CharacterString>
+</keyword>
+</MD_Keywords>
+</descriptiveKeywords>
+<resourceConstraints>
+<MD_Constraints>
+<useLimitation>
+<gco:CharacterString>Public.</gco:CharacterString>
+</useLimitation>
+</MD_Constraints>
+</resourceConstraints>
+<spatialRepresentationType>
+<MD_SpatialRepresentationTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" codeSpace="ISOTC211/19115">vector</MD_SpatialRepresentationTypeCode>
+</spatialRepresentationType>
+<language>
+<LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng" codeSpace="ISO639-2">eng</LanguageCode>
+</language>
+<characterSet>
+<MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
+</characterSet>
+<environmentDescription>
+<gco:CharacterString>Microsoft Windows 10 Version 10.0 (Build 19045) ; Esri ArcGIS 12.9.2.32739</gco:CharacterString>
+</environmentDescription>
+</MD_DataIdentification>
+</identificationInfo>
+<distributionInfo>
+<MD_Distribution>
+<distributionFormat>
+<MD_Format>
+<name>
+<gco:CharacterString>File Geodatabase Feature Class</gco:CharacterString>
+</name>
+<version gco:nilReason="missing">
+</version>
+</MD_Format>
+</distributionFormat>
+</MD_Distribution>
+</distributionInfo>
+</MD_Metadata>
