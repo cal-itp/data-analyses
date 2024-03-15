@@ -4,7 +4,7 @@ import ntd_dates
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
-current_month = "dec2023"
+current_month = "jan2024"
 YEAR, MONTH = ntd_dates.parse_monthyear_string(current_month)
 PUBLIC_FILENAME = ntd_dates.get_public_filename(current_month)
 MONTH_CREATED = ntd_dates.DATES[current_month]
