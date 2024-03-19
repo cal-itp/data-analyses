@@ -35,10 +35,10 @@ def construct_data_path(
     elif filename in SPEED_DATA:
         
         if filename == "speeds_by_stop_segments":
-            path = f"{SEGMENT_GCS}export/avg_speeds_stop_segments_{date}"
+            path = f"{SEGMENT_GCS}rollup_singleday/speeds_route_dir_segments_{date}"
         
         elif filename == "speeds_by_route_timeofday":
-            path = f"{SEGMENT_GCS}trip_summary/route_speeds_{date}"
+            path = f"{SEGMENT_GCS}rollup_singleday/speeds_route_dir_{date}"
     
     return f"{path}.parquet"
 
@@ -88,12 +88,10 @@ if __name__ == "__main__":
     from shared_utils import rt_dates
     
     dates = [
-        rt_dates.DATES["aug2023"]
+        rt_dates.DATES["mar2024"]
     ]
     
     for d in dates:
         write_to_public_gcs("ca_hq_transit_stops", d)
     
     remove_zipped_shapefiles()
-
-        
