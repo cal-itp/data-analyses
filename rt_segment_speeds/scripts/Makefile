@@ -15,13 +15,11 @@ prep_roads:
 speeds_pipeline:
 	make segmentize
 	python pipeline_segment_speeds.py
-	make export
-
-export: 
-	python average_speeds.py  
+	python average_segment_speeds.py  
 
 rt_stop_times_pipeline:
 	python pipeline_rt_stop_times.py
+	python average_summary_speeds.py  
 
 download_roads:
 	#pip install esridump
