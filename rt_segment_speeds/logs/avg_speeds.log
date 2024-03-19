@@ -32,3 +32,20 @@
 2024-03-14 15:00:56.734 | INFO     | __main__:single_day_averages:216 - trip avg 0:00:02.224932
 2024-03-14 15:01:08.404 | INFO     | __main__:single_day_averages:255 - route dir avg: 0:00:11.670228
 2024-03-14 15:01:15.161 | INFO     | __main__:<module>:416 - average rollups for 2024-03-13: 0:06:10.168066
+2024-03-18 15:22:03.537 | INFO     | __main__:single_day_segment_averages:163 - shape seg avg 0:03:21.861539
+2024-03-18 15:24:33.153 | INFO     | __main__:single_day_segment_averages:179 - route dir seg avg 0:02:29.616019
+2024-03-18 15:24:33.153 | INFO     | __main__:single_day_segment_averages:180 - single day segment execution time: 0:05:51.477558
+2024-03-18 15:24:33.385 | INFO     | __main__:<module>:288 - average rollups for 2024-03-13: 0:05:51.709448
+2024-03-18 15:32:25.562 | INFO     | __main__:<module>:290 - average rollups for 2024-03-13: 0:00:00.000008
+2024-03-18 15:37:23.275 | INFO     | __main__:multi_day_segment_averages:236 - multi day segment execution time: 0:04:57.711864
+2024-03-18 15:37:23.380 | INFO     | __main__:<module>:300 - average rollups for ['2023-10-09', '2023-10-10', '2023-10-11', '2023-10-12', '2023-10-13', '2023-10-14', '2023-10-15']: 0:04:57.816776
+2024-03-18 15:42:03.699 | INFO     | __main__:multi_day_segment_averages:236 - multi day segment execution time: 0:04:40.317570
+2024-03-18 15:42:03.808 | INFO     | __main__:<module>:300 - average rollups for ['2023-04-10', '2023-04-11', '2023-04-12', '2023-04-13', '2023-04-14', '2023-04-15', '2023-04-16']: 0:04:40.426676
+2024-03-18 16:11:37.670 | INFO     | __main__:single_day_summary_averages:98 - trip avg 0:00:09.802753
+2024-03-18 16:11:45.809 | INFO     | __main__:single_day_summary_averages:134 - route dir avg: 0:00:08.138764
+2024-03-18 16:11:45.810 | INFO     | __main__:single_day_summary_averages:135 - single day summary speed execution time: 0:00:17.941517
+2024-03-18 16:11:45.861 | INFO     | __main__:<module>:251 - average rollups for 2024-03-13: 0:00:17.993233
+2024-03-18 17:59:29.242 | INFO     | __main__:multi_day_summary_averages:225 - multi day summary speed execution time: 0:00:56.772723
+2024-03-18 17:59:29.250 | INFO     | __main__:<module>:261 - average rollups for ['2023-10-09', '2023-10-10', '2023-10-11', '2023-10-12', '2023-10-13', '2023-10-14', '2023-10-15']: 0:00:56.780709
+2024-03-18 18:00:25.018 | INFO     | __main__:multi_day_summary_averages:225 - multi day summary speed execution time: 0:00:55.767158
+2024-03-18 18:00:25.025 | INFO     | __main__:<module>:261 - average rollups for ['2023-04-10', '2023-04-11', '2023-04-12', '2023-04-13', '2023-04-14', '2023-04-15', '2023-04-16']: 0:00:55.773949
