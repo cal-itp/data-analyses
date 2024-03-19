@@ -3,24 +3,25 @@ stop_segments:
     stage2: "nearest/nearest_vp_shape_segments"
     stage3: "stop_arrivals"
     stage4: "speeds_stop_segments"
-    trip_speeds_single_summary: "rollup_singleday/speeds_trip"
     shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments"
     route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"    
-    route_dir_single_summary: "rollup_singleday/speeds_route_dir"
     route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
-    route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
     segments_file: "segment_options/shape_stop_segments"
     timestamp_col: "location_timestamp_local"
-    min_trip_minutes: 10
-    max_trip_minutes: 180
     max_speed: 80
-    min_meters_elapsed: 1609
 rt_stop_times:
     stage1: "vp_usable"
     stage2: "nearest/nearest_vp_rt_stop_times"    
     stage3: "rt_stop_times/stop_arrivals" 
     stage4: "rt_stop_times/speeds"
     segments_file: "segment_options/stop_segments"
+    trip_speeds_single_summary: "rollup_singleday/speeds_trip"
+    route_dir_single_summary: "rollup_singleday/speeds_route_dir"
+    route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
+    min_trip_minutes: 10
+    max_trip_minutes: 180
+    max_speed: 80
+    min_meters_elapsed: 1609
 road_segments:
     stage1: "vp_usable"
     stage2: "nearest/nearest_vp_roads"
