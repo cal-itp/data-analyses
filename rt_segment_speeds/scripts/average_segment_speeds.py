@@ -286,15 +286,15 @@ if __name__ == "__main__":
         
         start = datetime.datetime.now()
         
-        #single_day_segment_averages(analysis_date, STOP_SEG_DICT)
-        #stage_open_data_exports(analysis_date, STOP_SEG_DICT)
+        single_day_segment_averages(analysis_date, STOP_SEG_DICT)
+        stage_open_data_exports(analysis_date, STOP_SEG_DICT)
         
         end = datetime.datetime.now()
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
     
         
-    
+    '''
     for one_week in [rt_dates.oct_week, rt_dates.apr_week]:
         start = datetime.datetime.now()
             
@@ -302,4 +302,4 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
     
         logger.info(f"average rollups for {one_week}: {end - start}")
-    
+    '''
