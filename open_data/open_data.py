@@ -4,7 +4,7 @@ Track the metadata updates for all open data portal datasets.
 from pathlib import Path
 
 import metadata_update_pro
-from update_vars import XML_FOLDER, META_JSON, RUN_ME
+from update_vars import META_JSON, RUN_ME
 
 
 if __name__=="__main__":
