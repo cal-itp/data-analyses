@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 **Where does your feature apply?**
-Select from the below, and be sure to affix the appropriate label to this issue (e.g. `dataset`, `jupyterhub`, `metabase`, `analytics.calitp.org`)
+Select from the below, and be sure to affix the appropriate label to this issue (e.g. `dataset`, `jupyterhub`, `metabase`, `analysis.calitp.org`)
 - [ ] Data (the warehouse)
 - [ ] JupyterHub
 - [ ] Metabase
