@@ -25,7 +25,22 @@ test_shapes = [
     'a1999da4d09bc81548fe3e2b0fb458b4',
     '1e7115aaac1fcb58c6509c7a90d9741c',
     '3d437ea82b56e9827d15527ce41c716a',
-    '40469843deb94fbf61ef5f38bb76a137'
+    '40469843deb94fbf61ef5f38bb76a137',
+    '04353cab33c0b31d8e9575ace6f9f6da',
+    'f165d1399f8880fc0011eb75b740ba24',
+    'ad15c10f6bc86dd6d3c02bfe6daf7ad9',
+    '71b06c07dabcecf71ddc5a8f3638ccf1',
+    '4e2b8555bc9936d711c8748694d67a3e',
+    '2e00363dba250fae30b7c14596f18907',
+    '2fd717cc5df1495434b8170e294137a6',
+    '60057141822cc9d9ac4795a83b2f25f1',
+    '5c0a268639c22fc58c8c842741cf68e3',
+    '67bc9cc93630ea8a22783cd59d11d46b',
+    '81e5d878737a777ffea18b0c08f58118',
+    'a91351f71fc4d2c0b457e1701a3ade64',
+    '67af448db16c21d09812f58cf065aac5',
+    'bd66e7d4ffae3bc36888cfddaf5e2e44',
+    'b9b803a342d42f72bbe25042f7328385'
 ]
 
 def get_shape_road_crosswalk(
@@ -215,20 +230,36 @@ if __name__ == "__main__":
     
     shape_road_crosswalk = get_shape_road_crosswalk(
         analysis_date, 
+        filters = [[("shape_array_key", "in", test_shapes)]]
     )
     
     road_segments_long = make_road_stops_long(shape_road_crosswalk)
     
-    gdf = delayed(neighbor.merge_stop_vp_for_nearest_neighbor)(
+    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(
         road_segments_long, 
         analysis_date
     )
     
-    results = delayed(neighbor.add_nearest_neighbor_result)(gdf, analysis_date)
+    results = neighbor.add_nearest_neighbor_result(gdf, analysis_date)
+    #results = compute(results)[0]
+    
+    #utils.geoparquet_gcs_export(
+    #    results,
+    #    SEGMENT_GCS,
+    #    f"roads_staging/nearest_{analysis_date}"
+    #)
     
     results2 = delayed(merge_nn_with_shape)(results)
+    #results2 = compute(results2)[0]
+    
+    #utils.geoparquet_gcs_export(
+    #    results2,
+    #    SEGMENT_GCS,
+    #    f"roads_staging/interp_{analysis_date}"
+    #)
     
     speeds = delayed(quick_calculate_speeds)(results2)
+    
     time1 = datetime.datetime.now()
     print(f"delayed dfs: {time1 - start}")
     
@@ -239,4 +270,4 @@ if __name__ == "__main__":
         f"test_speeds_{analysis_date}.parquet")
     
     end = datetime.datetime.now()
-    print(f"test all shapes: {end - start}")
+    print(f"test 25 shapes: {end - start}")
