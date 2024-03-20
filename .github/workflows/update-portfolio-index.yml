@@ -33,8 +33,9 @@ jobs:
     - name: Netlify docs preview
       if: ${{ github.ref != 'refs/heads/main' }}
       run: |
-        npm install -g netlify-cli
+        npm install -g netlify-cli@17.x.x
         python portfolio/portfolio.py index --deploy --alias=${GITHUB_REPOSITORY#*/}-${PR_NUMBER}
+
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         PR_NUMBER: ${{ github.event.number }}
@@ -42,7 +43,7 @@ jobs:
     - name: Netlify docs production
       if: ${{ github.ref == 'refs/heads/main' }}
       run: |
-        npm install -g netlify-cli
+        npm install -g netlify-cli@17.x.x
         python portfolio/portfolio.py index --deploy --prod
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
