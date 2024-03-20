@@ -6,7 +6,7 @@ labels: ["bug", "admin"]
 assignees: ''
 ---
 **Where did the bug occur?**
-Select from the below, and be sure to affix the appropriate label to this issue (e.g. `dataset`, `jupyterhub`, `metabase`, `analytics.calitp.org`)
+Select from the below, and be sure to affix the appropriate label to this issue (e.g. `dataset`, `jupyterhub`, `metabase`, `analysis.calitp.org`)
 - [ ] Data (the warehouse)
 - [ ] JupyterHub
 - [ ] Metabase
