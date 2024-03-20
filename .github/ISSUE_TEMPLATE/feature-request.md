@@ -11,7 +11,7 @@ Select from the below, and be sure to affix the appropriate label to this issue 
 - [ ] Data (the warehouse)
 - [ ] JupyterHub
 - [ ] Metabase
-- [ ] analytics.calitp.org  
+- [ ] analysis.calitp.org  
 - [ ] Other (add detail)
 
 **Is your feature request related to a problem? Please describe.**
