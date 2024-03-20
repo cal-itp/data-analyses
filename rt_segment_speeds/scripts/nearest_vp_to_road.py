@@ -5,7 +5,9 @@ import geopandas as gpd
 import pandas as pd
 import shapely
 
-from segment_speed_utils import helpers, neighbors, segment_calcs, wrangle_shapes
+from dask import delayed, compute
+
+from segment_speed_utils import helpers, neighbor, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS, SHARED_GCS, PROJECT_CRS
 import interpolate_stop_arrival
 
@@ -13,7 +15,18 @@ road_id_cols = ["linearid", "mtfcc", "primary_direction"]
 segment_identifier_cols = road_id_cols + ["segment_sequence"]
 segment_identifier_cols2 = ['linearid', 'mtfcc', 
                             'stop_primary_direction', 'segment_sequence']
-one_shape = "2419613ed3a3e49420a24f8d7efd3a4e"
+test_shapes = [
+    'e3435a4b882913d92a12563910f7193d',
+    'dfae5639b824ed6ad87ed753575f5381',
+    '626724031caabc3abcf3f183f4c9c718',
+    'b63ae7a27ecb677ac93c0373245ea21b',
+    '85a03eed08934ed37f204e9aae6cbd36',
+    '20af512ed1ada757a3b49beb36b623ad',
+    'a1999da4d09bc81548fe3e2b0fb458b4',
+    '1e7115aaac1fcb58c6509c7a90d9741c',
+    '3d437ea82b56e9827d15527ce41c716a',
+    '40469843deb94fbf61ef5f38bb76a137'
+]
 
 def get_shape_road_crosswalk(
     analysis_date: str, **kwargs
@@ -202,25 +215,28 @@ if __name__ == "__main__":
     
     shape_road_crosswalk = get_shape_road_crosswalk(
         analysis_date, 
-        filters = [[("shape_array_key", "==", one_shape)]]
     )
     
     road_segments_long = make_road_stops_long(shape_road_crosswalk)
     
-    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(
+    gdf = delayed(neighbor.merge_stop_vp_for_nearest_neighbor)(
         road_segments_long, 
         analysis_date
     )
     
-    results = neighbor.add_nearest_neighbor_result(gdf, analysis_date)
+    results = delayed(neighbor.add_nearest_neighbor_result)(gdf, analysis_date)
     
-    results2 = merge_nn_with_shape(results)
+    results2 = delayed(merge_nn_with_shape)(results)
     
-    speeds = quick_calculate_speeds(results2)
+    speeds = delayed(quick_calculate_speeds)(results2)
+    time1 = datetime.datetime.now()
+    print(f"delayed dfs: {time1 - start}")
+    
+    speeds = compute(speeds)[0]
     
     speeds.to_parquet(
         f"{SEGMENT_GCS}roads_staging/"
         f"test_speeds_{analysis_date}.parquet")
     
     end = datetime.datetime.now()
-    print(f"test 1 shape: {end - start}")
+    print(f"test all shapes: {end - start}")
