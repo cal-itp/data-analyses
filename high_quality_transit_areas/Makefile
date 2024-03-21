@@ -7,4 +7,9 @@ hqta_data:
 	python C3_create_bus_hqta_types.py
 	python D1_assemble_hqta_points.py
 	python D2_assemble_hqta_polygons.py 
-    
+
+# Only need this is operator input changes
+# For now, Muni sent over a date-versioned list of stops
+# they want included as BRT
+add_operator_input:
+	python operator_input.py
