@@ -112,7 +112,7 @@ def select_shapes_and_segment(
     gdf = gtfs_schedule_wrangling.longest_shape_by_route_direction(
         analysis_date
     ).query(
-        'shape_array_key not in @outside_ca_amtrak_shapes'
+        'shape_array_key not in @outside_amtrak_shapes'
     ).drop(
         columns = ["schedule_gtfs_dataset_key", 
                    "shape_array_key", "route_length"]
