@@ -26,13 +26,18 @@ catalog = intake.open_catalog("*.yml")
 ac_transit_route_id = ["1T"]
 metro_route_desc = ["METRO SILVER LINE", "METRO ORANGE LINE", 
                     "METRO J LINE", "METRO G LINE"]
+
 muni_route_id = [
     '1', '1X', '2',
     '8', '8AX', '8BX', '9', '9R',
     '12', '14', '14R', '15', '19', '22', '27', '28', 
     '30', '33', '36', '38', '38R', '45', '49', '55',
     '90', '91', '714','TBUS',              
-]  
+]
+
+muni_brt_include = pd.read_parquet(
+    f"{GCS_FILE_PATH}operator_input/muni_brt_stops.parquet"
+).stop_id.tolist()
 
 '''
 Eric double checked for bus shelters
@@ -215,14 +220,23 @@ def additional_brt_filtering_out_stops(
     df: geopandas.GeoDataFrame
         Input BRT stops data (combined across operators)
     """
+    metro_name = "LA Metro Bus Schedule"
+    muni_name = "Bay Area 511 Muni Schedule"
+    
+    muni = df[df.name == muni_name].query(
+        'stop_id in @muni_brt_include'
+    )
+    
     # For Metro, unable to filter out non-station stops using GTFS, manual list
-    metro = df[df.name == "LA Metro Bus Schedule"].query(
+    metro = df[df.name == metro_name].query(
         'stop_id not in @metro_j_exclude')
     
-    other_operators = df[df.name != "LA Metro Bus Schedule"]
+    muni_metro = pd.concat([muni, metro], axis=0)
+    
+    other_operators = df[~df.name.isin([metro_name, muni_name])]
 
     brt_df_stops = pd.concat(
-        [metro, other_operators], axis=0
+        [muni_metro, other_operators], axis=0
     ).sort_values(["feed_key", "name"]).reset_index(drop=True)
     
     return brt_df_stops
