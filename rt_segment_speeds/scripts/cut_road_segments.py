@@ -18,9 +18,6 @@ from segment_speed_utils.project_vars import (SHARED_GCS,
 from calitp_data_analysis import geography_utils, utils
 from shared_utils import rt_utils
 
-"""
-TIGER
-"""
 def load_roads(**kwargs) -> gpd.GeoDataFrame:
     """
     Load roads based on what you filter for MTFCC values (road types).
@@ -149,8 +146,24 @@ def add_segment_direction(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     )
 
     return df
- 
 
+
+def cut_road_segments(
+    group_cols: list,
+    segment_length_meters: int, 
+    **kwargs
+):
+    roads = delayed(load_roads)(**kwargs)
+    
+    road_segments = delayed(cut_segments)(
+        roads, 
+        group_cols, 
+        segment_length_meters
+    ).pipe(add_segment_direction)
+    
+    return road_segments
+    
+    
 if __name__ == '__main__': 
     
     LOG_FILE = "../logs/cut_road_segments.log"
@@ -161,23 +174,17 @@ if __name__ == '__main__':
     
     start = datetime.datetime.now()
     
+    road_segment_str = "twomile"
     ROAD_SEGMENT_METERS = 1_609*2
     road_cols = ["linearid", "mtfcc", "fullname"]
-
-    roads = delayed(load_roads)()
     
-    road_segments = delayed(cut_segments)(
-        roads, 
-        ["linearid", "mtfcc", "fullname"], 
-        ROAD_SEGMENT_METERS
-    ).pipe(add_segment_direction)
-    
+    road_segments = cut_road_segments(road_cols, ROAD_SEGMENT_METERS)
     road_segments = compute(road_segments)[0]
     
     utils.geoparquet_gcs_export(
         road_segments,
         SHARED_GCS,
-        f"segmented_roads_twomile_2020"
+        f"segmented_roads_{road_segment_str}_2020"
     )            
         
     end = datetime.datetime.now()
