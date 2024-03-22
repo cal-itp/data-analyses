@@ -19,7 +19,7 @@ from segment_speed_utils.project_vars import (SHARED_GCS,
                                               ROAD_SEGMENT_METERS
                                              )
 from calitp_data_analysis import geography_utils, utils
-from shared_utils import rt_utils, geog_utils_to_add
+from shared_utils import rt_utils
 
 """
 TIGER
@@ -92,35 +92,8 @@ def load_roads(filtering: tuple) -> gpd.GeoDataFrame:
     )
     
     return df2 
-
-
-"""
-Primary/Secondary Roads 
-"""
-def cut_primary_secondary_roads(
-    roads: gpd.GeoDataFrame,
-    segment_length_meters: int
-) -> gpd.GeoDataFrame:
-    """
-    Cut all primary and secondary roads.
-    Add a primary cardinal direction for the segment.
-    """
-    roads_segmented = geography_utils.cut_segments(
-        roads,
-        group_cols = ["linearid", "mtfcc", "fullname"],
-        segment_distance = segment_length_meters,
-    ).sort_values(
-        ["linearid", "segment_sequence"]
-    ).reset_index(drop=True)
-    
-    roads_segmented2 = add_segment_direction(roads_segmented)
-
-    return roads_segmented2
     
     
-"""
-Local Roads (base)
-"""
 def cut_segments(
     gdf: gpd.GeoDataFrame,
     group_cols: list,
@@ -132,7 +105,7 @@ def cut_segments(
         axis=1,
     )
     
-    gdf2 = geog_utils_to_add.explode_segments(
+    gdf2 = geography_utils.explode_segments(
         gdf,
         group_cols,
         segment_col = "segment_geometry",
@@ -240,6 +213,7 @@ if __name__ == '__main__':
     
     start = datetime.datetime.now()
     
+    ROAD_SEGMENT_METERS = 1_609*2
     road_cols = ["linearid", "mtfcc", "fullname"]
 
     # Always cut all the primary and secondary roads
@@ -247,13 +221,14 @@ if __name__ == '__main__':
     road_type_values = ["S1100", "S1200"]
 
     roads = load_roads(filtering = [("MTFCC", "in", road_type_values)])
-    primary_secondary_roads = cut_primary_secondary_roads(
-        roads, ROAD_SEGMENT_METERS)
+    primary_secondary_roads = cut_segments(
+        roads, road_cols, ROAD_SEGMENT_METERS)
+    primary_secondary_roads = add_segment_direction(primary_secondary_roads)
     
     utils.geoparquet_gcs_export(
         primary_secondary_roads,
         SHARED_GCS,
-        f"segmented_roads_2020_{road_type}"
+        f"segmented_roads_twomile_2020_{road_type}"
     )
     
     del roads, primary_secondary_roads
@@ -273,7 +248,7 @@ if __name__ == '__main__':
     utils.geoparquet_gcs_export(
         local_roads,
         SHARED_GCS,
-        f"segmented_roads_2020_{road_type}"
+        f"segmented_roads_twomile_2020_{road_type}"
     )
     
     time2 = datetime.datetime.now()
