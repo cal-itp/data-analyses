@@ -151,6 +151,7 @@ def add_segment_direction(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def cut_road_segments(
     group_cols: list,
     segment_length_meters: int, 
+    road_segment_str: str, 
     **kwargs
 ):
     roads = delayed(load_roads)(**kwargs)
@@ -161,7 +162,15 @@ def cut_road_segments(
         segment_length_meters
     ).pipe(add_segment_direction)
     
-    return road_segments
+    road_segments = compute(road_segments)[0]
+    
+    utils.geoparquet_gcs_export(
+        road_segments,
+        SHARED_GCS,
+        f"segmented_roads_{road_segment_str}_2020"
+    )   
+    
+    return 
     
     
 if __name__ == '__main__': 
@@ -174,18 +183,14 @@ if __name__ == '__main__':
     
     start = datetime.datetime.now()
     
-    road_segment_str = "twomile"
-    ROAD_SEGMENT_METERS = 1_609*2
     road_cols = ["linearid", "mtfcc", "fullname"]
-    
-    road_segments = cut_road_segments(road_cols, ROAD_SEGMENT_METERS)
-    road_segments = compute(road_segments)[0]
-    
-    utils.geoparquet_gcs_export(
-        road_segments,
-        SHARED_GCS,
-        f"segmented_roads_{road_segment_str}_2020"
-    )            
+
+    cut_road_segments(road_cols, ROAD_SEGMENT_METERS, "onekm")
+ 
+    '''
+    TWO_MILES_IN_METERS = 1_609*2
+    cut_road_segments(road_cols, TWO_MILES_IN_METERS, "twomile")
+    '''
         
     end = datetime.datetime.now()
     logger.info(f"execution time: {end - start}")
