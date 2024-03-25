@@ -4,7 +4,7 @@ import pandas as pd
 import geopandas as gpd
 import datetime as dt
 from siuba import *
-from shared_utils.geography_utils import WGS84, CA_NAD83Albers
+from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers
 import shapely
 
 import numpy as np
