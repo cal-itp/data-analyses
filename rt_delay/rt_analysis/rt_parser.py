@@ -1,6 +1,6 @@
-from shared_utils.geography_utils import WGS84, CA_NAD83Albers
+from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers
 from shared_utils import rt_utils
-from shared_utils.utils import geoparquet_gcs_export
+from calitp_data_analysis.utils import geoparquet_gcs_export
 
 import branca
 
