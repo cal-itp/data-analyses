@@ -6,9 +6,9 @@ From combine_and_visualize.ipynb
 Request: Thank you for this data. It would be useful for us to get the 
 HQTA stops as a point data file, not a polygon. Also, if you could 
 differentiate between train, bus, BRT, and ferry stop that would be 
-immensely helpful. Let me know if it is possible to get the data in this format.  
+immensely helpful. Let me know if it is possible to get the data in this format.
 """
-import datetime as dt
+import datetime
 import geopandas as gpd
 import intake
 import os
@@ -17,17 +17,32 @@ import sys
 
 from loguru import logger
 
-import A3_rail_ferry_brt_extract as rail_ferry_brt_extract
-import utilities
+from A1_rail_ferry_brt_stops import clip_to_ca, get_rail_ferry_brt_extract
 from calitp_data_analysis import geography_utils, utils
-from shared_utils import schedule_rt_utils
-from update_vars import analysis_date, TEMP_GCS, PROJECT_CRS
 from segment_speed_utils import helpers
-
-EXPORT_PATH = f"{utilities.GCS_FILE_PATH}export/{analysis_date}/"
+from update_vars import analysis_date, GCS_FILE_PATH, PROJECT_CRS
 
 catalog = intake.open_catalog("*.yml")
- 
+EXPORT_PATH = f"{GCS_FILE_PATH}export/{analysis_date}/"
+
+def hqta_details(row) -> str:
+    """
+    Add HQTA details of why nulls are present 
+    based on feedback from open data users.
+    """
+    if row.hqta_type == "major_stop_bus":
+        if row.feed_key_primary != row.feed_key_secondary:
+            return "intersection_2_bus_routes_different_operators"
+        else:
+            return "intersection_2_bus_routes_same_operator"
+    elif row.hqta_type == "hq_corridor_bus":
+        return "stop_along_hq_bus_corridor_single_operator"
+    elif row.hqta_type in ["major_stop_ferry", 
+                           "major_stop_brt", "major_stop_rail"]:
+        # (not sure if ferry, brt, rail, primary/secondary ids are filled in.)
+        return row.hqta_type + "_single_operator"
+    
+    
 def merge_in_max_arrivals_by_stop(
     hqta_points: gpd.GeoDataFrame,
     max_arrivals: pd.DataFrame
@@ -70,7 +85,7 @@ def add_route_info(hqta_points: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     trips = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["feed_key", "trip_id", "route_id"],
+        columns = ["feed_key", "gtfs_dataset_key", "trip_id", "route_id"],
         get_pandas = True
     )
     
@@ -84,7 +99,9 @@ def add_route_info(hqta_points: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     with_route_info = pd.merge(
         one_trip,
-        trips[trip_cols + ["route_id"]].drop_duplicates(),
+        trips[trip_cols + [
+            "schedule_gtfs_dataset_key", "route_id"
+        ]].drop_duplicates(),
         on = trip_cols,
         how = "inner",
         validate = "m:1" # one_trip has many stops for that trip
@@ -100,26 +117,34 @@ def add_route_info(hqta_points: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     # Clip to CA -- remove ferry or else we're losing it in the clip
     not_ferry = hqta_points_with_route[
-        hqta_points_with_route.hqta_type != "major_stop_ferry"]
+        hqta_points_with_route.hqta_type != "major_stop_ferry"
+    ].pipe(clip_to_ca)
+    
     is_ferry = hqta_points_with_route[
         hqta_points_with_route.hqta_type == "major_stop_ferry"]
     
-    not_ferry_ca = utilities.clip_to_ca(not_ferry)
     ca_hqta_points = pd.concat(
-        [not_ferry_ca, is_ferry], axis=0
+        [not_ferry, is_ferry], axis=0
     ).reset_index(drop=True)
     
     return ca_hqta_points
 
     
 def get_agency_info(df: pd.DataFrame, date: str) -> pd.DataFrame:
-    crosswalk = schedule_rt_utils.sample_schedule_feed_key_to_organization_crosswalk(
-        df, 
-        date,
-        quartet_data = "schedule",
-        dim_gtfs_dataset_cols = ["key", "base64_url"],
-        dim_organization_cols = ["source_record_id", "name"]
-    )
+    """
+    HQTA analysis uses feed_key to link across schedule tables.
+    But, from trips table, we have schedule_gtfs_dataset_key,
+    and we can use that to join to our saved crosswalk.
+    """
+    crosswalk = helpers.import_schedule_gtfs_key_organization_crosswalk(
+        date
+    ).drop(
+        columns = ["itp_id", "caltrans_district"]
+    ).rename(columns = {
+        "organization_name": "agency",
+        "organization_source_record_id": "org_id"
+    })[["schedule_gtfs_dataset_key", 
+     "agency", "org_id", "base64_url"]]
         
     return crosswalk
     
@@ -138,33 +163,40 @@ def add_agency_names_hqta_details(
     some ID / agency name columns show the same info or are missing.
     """
     feeds_df = gdf.rename(
-        columns = {"feed_key_primary": "feed_key"})[["feed_key"]].drop_duplicates()
+        columns = {"feed_key_primary": "feed_key"})[
+        ["feed_key", "schedule_gtfs_dataset_key"]
+    ].drop_duplicates()
     
     crosswalk = get_agency_info(feeds_df, analysis_date)
     
-    NAMES_DICT = dict(zip(
-        crosswalk.feed_key, crosswalk.organization_name
-    ))
-    B64_DICT = dict(zip(
-        crosswalk.feed_key, crosswalk.base64_url
-    ))
-    ORG_DICT = dict(zip(
-        crosswalk.feed_key, crosswalk.organization_source_record_id
-    ))
-    
-    gdf = gdf.assign(
-        agency_primary = gdf.feed_key_primary.map(NAMES_DICT),
-        agency_secondary = gdf.feed_key_secondary.map(NAMES_DICT),
-        hqta_details = gdf.apply(utilities.hqta_details, axis=1),
-        org_id_primary = gdf.feed_key_primary.map(ORG_DICT),
-        org_id_secondary = gdf.feed_key_secondary.map(ORG_DICT),
-        base64_url_primary = gdf.feed_key_primary.map(B64_DICT),
-        base64_url_secondary = gdf.feed_key_secondary.map(B64_DICT),
+    agency_info = pd.merge(
+        feeds_df,
+        crosswalk,
+        on = "schedule_gtfs_dataset_key",
+        how = "inner"
+    ).drop(columns = "schedule_gtfs_dataset_key")
+
+    # Merge in organization ids for feed_key_primary
+    # and feed_key_secondary
+    gdf2 = pd.merge(
+        gdf,
+        agency_info.add_suffix("_primary"),
+        on = "feed_key_primary",
+        how = "inner"
+    ).merge(
+        agency_info.add_suffix("_secondary"),
+        on = "feed_key_secondary",
+        how = "left" 
+        # left bc we don't want to drop rows that have secondary operator
+    )
+
+    gdf2 = gdf2.assign(
+        hqta_details = gdf2.apply(hqta_details, axis=1),
     )
     
     # Additional clarification of hq_corridor_bus, 
-    # do not put in utilities because hqta_polygons does not share this
-    gdf["hqta_details"] = gdf.apply(
+    # only for hqta_stops, not hqta_polygons
+    gdf2["hqta_details"] = gdf2.apply(
         lambda x: "corridor_frequent_stop" if (
             (x.hqta_type == "hq_corridor_bus") and 
             (x.peak_trips >= 4)
@@ -172,8 +204,8 @@ def add_agency_names_hqta_details(
             (x.hqta_type == "hq_corridor_bus") and 
             (x.peak_trips < 4) 
         ) else x.hqta_details, axis = 1)
-        
-    return gdf  
+    
+    return gdf2  
 
 
 def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -201,20 +233,19 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
 if __name__=="__main__":
         
-    logger.add("./logs/D1_assemble_hqta_points.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")    
-    start = dt.datetime.now()
+    start = datetime.datetime.now()
     
-    rail_ferry_brt = rail_ferry_brt_extract.get_rail_ferry_brt_extract().to_crs(
+    rail_ferry_brt = get_rail_ferry_brt_extract().to_crs(
         PROJECT_CRS)
     major_stop_bus = catalog.major_stop_bus.read().to_crs(PROJECT_CRS)
     stops_in_corridor = catalog.stops_in_hq_corr.read().to_crs(PROJECT_CRS)
     max_arrivals_by_stop = pd.read_parquet(
-        f"{utilities.GCS_FILE_PATH}max_arrivals_by_stop.parquet", 
+        f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet", 
         columns = ["feed_key", "stop_id", "am_max_trips", "pm_max_trips"]
     ).rename(columns = {"feed_key": "feed_key_primary"})
     
@@ -224,47 +255,42 @@ if __name__=="__main__":
         stops_in_corridor,
         # add name at once, rail/ferry/brt is only one with it...
         # but we used it to double check downloads were correct
-        rail_ferry_brt.drop(columns = "name_primary"),
+        rail_ferry_brt,
     ], axis=0)
     
     hqta_points_combined2 = merge_in_max_arrivals_by_stop(
         hqta_points_combined, max_arrivals_by_stop)
-    
-    time1 = dt.datetime.now()
-    logger.info(f"combined points: {time1 - start}")
-    
+        
     # Add in route_id 
     hqta_points_with_route_info = add_route_info(hqta_points_combined2)
     
-    time2 = dt.datetime.now()
-    logger.info(f"add route info: {time2 - time1}")
-
     # Add agency names, hqta_details, project back to WGS84
     gdf = add_agency_names_hqta_details(
-        hqta_points_with_route_info, analysis_date)
+        hqta_points_with_route_info, analysis_date
+    )
+    
+    cols = [i for i in gdf.columns if "_primary" in i or "_secondary" in i]
+    gdf[cols].drop_duplicates().reset_index(drop=True).to_parquet(
+        f"{GCS_FILE_PATH}feed_key_org_crosswalk.parquet"
+    )
+    
     gdf = final_processing(gdf)
     
-    time3 = dt.datetime.now()
-    logger.info(f"add agency names: {time3 - time2}")
-    
     # Export to GCS
-    # Stash this date's into its own folder, to convert to geojson, geojsonl later
+    # Stash this date's into its own folder
     utils.geoparquet_gcs_export(
         gdf,
         EXPORT_PATH,
-        'ca_hq_transit_stops'
+        "ca_hq_transit_stops"
     )  
-    
-    logger.info("export as geoparquet in date folder")
-   
+       
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(
         gdf, 
-        utilities.GCS_FILE_PATH,
-        'hqta_points'
+        GCS_FILE_PATH,
+        "hqta_points"
    )
     
-    logger.info("export as geoparquet")
-
-    end = dt.datetime.now()
-    logger.info(f"execution time: {end-start}")
+    end = datetime.datetime.now()
+    logger.info(f"D1_assemble_hqta_points {analysis_date} "
+                f"execution time: {end - start}")

@@ -280,24 +280,24 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             # hide input (i.e. code) for all cells
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
-                
+                                
                 # Consider importing this name from calitp.magics
                 if '%%capture_parameters' in cell.source:
                     params = {**params, **json.loads(cell.outputs[0]['text'])}
-                if '%%full_width' in cell.source:
-                    cell.metadata.tags.append('full-width')
-                    # new_params = **json.loads(cell.outputs[0]['text'])
-                    # if "jupyterbook_append_tags" in new_params.keys():
-                    #     for tag in new_params["jupyterbook_append_tags"]:
-                    #         cell.metadata.tags.append(tag)
-
+                        
                 if "%%capture" in cell.source:
                     cell.outputs = []
                     
                 if no_stderr:
                     cell.outputs = [output for output in cell.outputs if 'name' not in output.keys() or output['name'] != 'stderr']
-
-
+                
+                # right side widget to add "tags" (it reverts to "tags": ["tags"]), 
+                if cell.metadata.get("tags"): 
+                    #"%%full_width" in cell.source doesn't pick up
+                    # when Jupyterbook builds, it says 
+                    # UsageError: Line magic function `%%full_width` not found.
+                    cell.metadata.tags.append("full-width")
+                    
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
 papermill_engines.register_entry_points()
 
@@ -432,6 +432,6 @@ def build(
         typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
         sys.exit(1)
 
-
+       
 if __name__ == "__main__":
     app()

@@ -39,9 +39,9 @@ build_ntd_report:
 	make build_portfolio_site
 
 build_route_speeds:
-	$(eval override site = route_speeds)
-	cd rt_segment_speeds / && make pip install -r requirements.txt && cd ..
-	cd rt_segment_speeds/ && python deploy_portfolio_yaml.py && cd ..   
+	$(eval export site = route_speeds)
+	#cd rt_segment_speeds / && pip install -r requirements.txt && cd ..
+	cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 
 add_precommit:

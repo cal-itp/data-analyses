@@ -14,15 +14,13 @@ prep_roads:
     
 speeds_pipeline:
 	make segmentize
-	python nearest_vp_to_stop.py
-	python interpolate_stop_arrival.py
-	python stop_arrivals_to_speed.py
-	make export
+	python pipeline_segment_speeds.py
+	python average_segment_speeds.py  
 
-export: 
-	python handle_common_errors.py
-	python average_speeds.py  
-    
+rt_stop_times_pipeline:
+	python pipeline_rt_stop_times.py
+	python average_summary_speeds.py  
+
 download_roads:
 	#pip install esridump
 	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson

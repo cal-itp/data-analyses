@@ -7,10 +7,10 @@ from loguru import logger
 from pathlib import Path
 from typing import Union
 
+import publish_utils
 from update_vars import analysis_date
 
 catalog = intake.open_catalog("catalog.yml")
-
 
 def unpack_list_of_tables_as_dict(list_of_dict: list) -> dict:
     """
@@ -54,8 +54,18 @@ def new_columns_for_data_dict(
         
         # Columns in our dataset
         FILE = catalog[t].urlpath
-        col_list = gpd.read_parquet(FILE).columns.tolist()
-            
+        gdf = gpd.read_parquet(FILE).pipe(
+            publish_utils.standardize_column_names
+        ).pipe(
+            publish_utils.remove_internal_keys)
+        
+        if "hq_" in t:
+            gdf = gdf.rename(columns = publish_utils.RENAME_HQTA)
+        elif "speed" in t:
+            gdf = gdf.rename(columns = publish_utils.RENAME_SPEED)
+        
+        col_list = gdf.columns.tolist()
+                
         # Columns included in data dictionary
         cols_defined = [c for c in dict_of_tables[t].keys()]
                 

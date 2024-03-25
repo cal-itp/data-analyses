@@ -9,20 +9,13 @@ PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/"
 SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
 PUBLIC_GCS = "gs://calitp-publish-data-analysis/"
 
-analysis_date = rt_dates.DATES["jan2024"]
+analysis_date = rt_dates.DATES["mar2024"]
 
-days = ["a", "b", "", "c", "d", "e", "f"] 
-months = [
-    "dec", 
-    #"nov", "oct", "sep",
-    #"aug", "jul", "jun",
-    #"may", "apr", "mar"
-]
-
-analysis_date_list = [
-    rt_dates.DATES[f"{m}2023"] for m in months
-]
+oct_week = rt_dates.get_week("oct2023", exclude_wed=True)
+apr_week = rt_dates.get_week("apr2023", exclude_wed=True)
+analysis_date_list  = [analysis_date]
 
 PROJECT_CRS = "EPSG:3310"
 CONFIG_PATH = "./config.yml"
 ROAD_SEGMENT_METERS = 1_000
+SEGMENT_TYPES = ["stop_segments", "rt_stop_times"]

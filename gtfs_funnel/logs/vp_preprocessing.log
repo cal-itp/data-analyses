@@ -4,3 +4,19 @@
 2024-01-27 14:39:49.578 | INFO     | __main__:<module>:144 - 2023-11-15: prepare vp to use in nearest neighbor: 0:12:32.357147
 2024-01-27 14:46:57.364 | INFO     | __main__:<module>:136 - 2023-10-11: condense vp for trip-direction 0:07:07.785109
 2024-01-27 14:58:58.072 | INFO     | __main__:<module>:144 - 2023-10-11: prepare vp to use in nearest neighbor: 0:12:00.707961
+2024-02-15 12:35:27.737 | INFO     | __main__:<module>:169 - 2024-02-14: pare down vp: 0:01:27.967360
+2024-02-15 12:40:05.610 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:02:46.966446
+2024-02-15 12:42:39.989 | INFO     | __main__:attach_prior_vp_add_direction:121 - np vectorize arrays for direction: 0:02:34.378961
+2024-02-15 12:42:45.707 | INFO     | __main__:<module>:193 - 2024-02-14: export vp direction: 0:05:27.063384
+2024-02-15 12:43:43.624 | INFO     | __main__:<module>:199 - 2024-02-14: export usable vp with direction: 0:00:57.917219
+2024-02-15 12:43:43.624 | INFO     | __main__:<module>:202 - 2024-02-14: vp_direction script execution time: 0:06:24.980603
+2024-02-15 12:50:35.377 | INFO     | __main__:<module>:142 - 2024-02-14: condense vp for trip-direction 0:06:37.853370
+2024-02-15 13:02:43.454 | INFO     | __main__:<module>:150 - 2024-02-14: prepare vp to use in nearest neighbor: 0:12:08.077021
+2024-03-14 12:08:15.749 | INFO     | __main__:<module>:169 - 2024-03-13: pare down vp: 0:01:39.120888
+2024-03-14 12:11:52.801 | INFO     | __main__:attach_prior_vp_add_direction:89 - persist vp gddf: 0:03:19.615961
+2024-03-14 12:14:59.645 | INFO     | __main__:attach_prior_vp_add_direction:121 - np vectorize arrays for direction: 0:03:06.843928
+2024-03-14 12:15:05.566 | INFO     | __main__:<module>:193 - 2024-03-13: export vp direction: 0:06:32.381100
+2024-03-14 12:16:08.741 | INFO     | __main__:<module>:199 - 2024-03-13: export usable vp with direction: 0:01:03.175027
+2024-03-14 12:16:08.742 | INFO     | __main__:<module>:202 - 2024-03-13: vp_direction script execution time: 0:07:35.556127
+2024-03-14 12:43:58.062 | INFO     | __main__:<module>:153 - 2024-03-13: condense vp for trip 0:04:45.267623
+2024-03-14 12:56:43.421 | INFO     | __main__:<module>:161 - 2024-03-13: prepare vp to use in nearest neighbor: 0:12:45.358549

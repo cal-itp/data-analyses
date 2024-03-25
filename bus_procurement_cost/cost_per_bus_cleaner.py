@@ -1,87 +1,81 @@
-import numpy as np
 import pandas as pd
-import seaborn as sns
-import shared_utils
+from fta_data_cleaner import gcs_path
 
-gcs_path = "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/"
-fta_data = "fta_bus_cost_clean.parquet"
-tircp_data = "tircp_project_bus_only.parquet"
-dgs_data = "dgs_agg_clean.parquet"
-
-fta = pd.read_parquet(f"{gcs_path}{fta_data}")
-tircp = pd.read_parquet(f"{gcs_path}{tircp_data}")
-dgs = pd.read_parquet(f"{gcs_path}{dgs_data}")
-
-# renaming dgs column name from quantity to bus_count
-dgs.rename(columns={"quantity": "bus_count"}, inplace=True)
-
-# make new column for dgs data, project_title that concats agency name and total cost?
-dgs["project_title"] = dgs["ordering_agency_name"] + dgs["total_cost"].astype(str)
-
-# add new col to identify source
-fta["source"] = "fta_press_release"
-tircp["source"] = "tircp_project_tracking"
-
-
-# shorten FTA df
-fta_short = fta[
-    [
-        "project_sponsor",
-        "project_title",
-        "funding",
-        "bus_count",
-        "prop_type",
-        "bus_size_type",
-        'source'
-    ]
-]
-
-# shorten tircp df
-tircp_short = tircp[
-    [
-        "grant_recipient",
-        "project_title",
-        "tircp_award_amount_($)",
-        "bus_count",
-        "prop_type",
-        "bus_size_type",
-        'source'
-    ]
-]
-
-# dictionary to update column names in df
-col_dict = {
-    "project_sponsor": "agency_name",
-    "funding": "project_award_amount",
-    "grant_recipient": "agency_name",
-    "tircp_award_amount_($)": "project_award_amount",
-    "ordering_agency_name": "agency_name",
-    "total_cost": "project_award_amount",
-}
-
-df_list=[fta_short, tircp_short, dgs]
-
-# loop through df_list to rename columns per dictionary
-for df in df_list:
-    df.rename(columns=col_dict, inplace=True)
+def prepare_data() ->pd.DataFrame:
+    """
+    primary function to read-in, merge data across FTA, TIRCP and DGS data.
+    standardizes columns names, then exports as parquet.
+    """
+    # variables for file names
+    fta_bus_data = "fta_bus_cost_clean.parquet"
+    tircp_bus_data = "clean_tircp_project_bus_only.parquet"
+    dgs_bus_data = "dgs_agg_w_options_clean.parquet"
     
-# outer merge on all columns via chaining
-all_data = fta_short.merge(tircp_short, on=['agency_name',
- 'bus_count',
- 'project_award_amount',
- 'prop_type',
- 'bus_size_type',
- 'source',
- 'project_title'], how='outer'
-).merge(dgs, on=['agency_name',
- 'bus_count',
- 'project_award_amount',
- 'prop_type',
- 'bus_size_type',
- 'source',
- 'project_title'], how='outer')  
+    # dictionary to update columns names 
+    col_dict = {
+        "funding": "total_cost",
+        "grant_recipient": "transit_agency",
+        "new_bus_size": "bus_size_type",
+        "new_bus_size_type": "bus_size_type",
+        "new_prop_type": "prop_type",
+        "new_prop_type_finder": "prop_type",
+        "ordering_agency_name": "transit_agency",
+        "purchase_order_number": "ppno",
+        "quantity": "bus_count",
+        "total_project_cost": "total_cost",
+        "project_sponsor": "transit_agency",
+    }
 
-# export to parquet
-all_data.to_parquet(
-    "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/cpb_analysis_data_merge.parquet"
-)
+    # reading in data
+    fta = pd.read_parquet(f"{gcs_path}{fta_bus_data}")
+    tircp = pd.read_parquet(f"{gcs_path}{tircp_bus_data}")
+    dgs = pd.read_parquet(f"{gcs_path}{dgs_bus_data}")
+    
+    # adding new column to identify source
+    fta["source"] = "fta"
+    tircp["source"] = "tircp"
+    dgs["source"] = "dgs"
+
+    # using .replace() with dictionary to update column names
+    fta2 = fta.rename(columns=col_dict)
+    tircp2 = tircp.rename(columns=col_dict)
+    dgs2 = dgs.rename(columns=col_dict)
+    
+    # merging fta2 and tircp 2
+    merge1 = pd.merge(fta2,
+        tircp2,
+        on=[
+            "transit_agency",
+            "prop_type",
+            "bus_size_type",
+            "total_cost",
+            "bus_count",
+            "source",
+        ],
+        how="outer",
+    )
+    
+    # mergeing merge1 and dgs2
+    merge2 = pd.merge(merge1,
+        dgs2,
+        on=[
+            "transit_agency",
+            "prop_type",
+            "bus_size_type",
+            "total_cost",
+            "bus_count",
+            "source",
+            "ppno",
+        ],
+        how="outer",
+    )
+    
+    return merge2
+
+if __name__ == "__main__":
+    
+    # initial df
+    df1 = prepare_data()
+    
+    # export to gcs
+    df1.to_parquet(f'{gcs_path}cpb_analysis_data_merge.parquet')

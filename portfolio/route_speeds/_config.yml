@@ -3,7 +3,7 @@
 
 title: Average Speeds by Transit Operator Exploratory Charts
 author: Cal-ITP
-copyright: "2022"
+copyright: "2024"
 #logo: calitp_logo_MAIN.png
 
 # Force re-execution of notebooks on each build.
@@ -26,7 +26,7 @@ launch_buttons:
 repository:
   url: https://github.com/cal-itp/data-analyses/  # Online location of your book
 #  path_to_book: docs  # Optional path to your book, relative to the repository root
-  path_to_book: rt_segment_speeds
+  path_to_book: gtfs_digest
   branch: main  # Which branch of the repository should be used when creating links (optional)
 
 # Add GitHub buttons to your book

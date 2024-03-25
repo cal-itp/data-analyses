@@ -5,25 +5,29 @@ stop_segments:
     stage4: "speeds_stop_segments"
     shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments"
     route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"    
-    trip_speeds_single_summary: "rollup_singleday/speeds_trip"
-    route_dir_single_summary: "rollup_singleday/speeds_route_dir"
     route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
-    route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
     segments_file: "segment_options/shape_stop_segments"
     timestamp_col: "location_timestamp_local"
-    time_min_cutoff: 10
     max_speed: 80
 rt_stop_times:
     stage1: "vp_usable"
     stage2: "nearest/nearest_vp_rt_stop_times"    
+    stage3: "rt_stop_times/stop_arrivals" 
+    stage4: "rt_stop_times/speeds"
     segments_file: "segment_options/stop_segments"
+    trip_speeds_single_summary: "rollup_singleday/speeds_trip"
+    route_dir_single_summary: "rollup_singleday/speeds_route_dir"
+    route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
+    min_trip_minutes: 10
+    max_trip_minutes: 180
+    max_speed: 80
+    min_meters_elapsed: 1609
 road_segments:
     stage1: "vp_usable"
-    stage2: "nearest_vp_roads"
-    stage3: "stop_arrivals_roads"
+    stage2: "nearest/nearest_vp_roads"
+    stage3: "road_segments/stop_arrivals"
     stage4: "speeds_road_segments"
     stage5: "avg_speeds_road_segments"
     segments_file: "road_segments"
     segment_identifier_cols: ["linearid", "mtfcc", "segment_sequence"]
     timestamp_col: "location_timestamp_local"
-    time_min_cutoff: 10
