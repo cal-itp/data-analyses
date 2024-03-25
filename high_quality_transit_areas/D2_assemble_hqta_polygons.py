@@ -3,23 +3,19 @@ Make a polygon version of HQ transit corridors for open data portal.
 
 From combine_and_visualize.ipynb
 """
-import datetime as dt
+import datetime
 import geopandas as gpd
 import intake
 import pandas as pd
 import sys
 
-from calitp_data_analysis import get_fs
 from loguru import logger
 
 import C1_prep_pairwise_intersections as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
-import utilities
 from calitp_data_analysis import utils, geography_utils
 from D1_assemble_hqta_points import (EXPORT_PATH, add_route_info)
-from update_vars import analysis_date, PROJECT_CRS
-
-fs = get_fs()
+from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS
 
 catalog = intake.open_catalog("*.yml")
 
@@ -52,29 +48,37 @@ def get_dissolved_hq_corridor_bus(
         geometry = dissolved.geometry.buffer(755),
         # overwrite hqta_type for this polygon
         hqta_type = "hq_corridor_bus",
-    )[corridor_cols]
+    )[corridor_cols].rename(
+        columns = {"feed_key": "feed_key_primary"}
+    )
     
-    feeds_df = corridors[["feed_key"]].drop_duplicates()
-    crosswalk = assemble_hqta_points.get_agency_info(feeds_df, analysis_date)
-        
-    NAMES_DICT = dict(zip(crosswalk.feed_key, crosswalk.organization_name))
-    B64_DICT = dict(zip(crosswalk.feed_key, crosswalk.base64_url))
-    ORG_DICT = dict(zip(crosswalk.feed_key, crosswalk.organization_source_record_id))  
+    crosswalk = pd.read_parquet(
+        f"{GCS_FILE_PATH}feed_key_org_crosswalk.parquet"
+    )
+    primary_agency_cols = [i for i in crosswalk.columns if "_primary" in i]
     
-    corridors = corridors.assign(
-        agency_primary = corridors.feed_key.map(NAMES_DICT),
-        hqta_details = corridors.apply(utilities.hqta_details, axis=1),
-        org_id_primary = corridors.feed_key.map(ORG_DICT),
-        base64_url_primary = corridors.feed_key.map(B64_DICT),
-    ).rename(columns = {"feed_key": "feed_key_primary"})
+    crosswalk = crosswalk[primary_agency_cols].drop_duplicates()
+    
+    corridors2 = pd.merge(
+        corridors,
+        crosswalk,
+        on = "feed_key_primary",
+        how = "inner"
+    )
+    
+    corridors2 = corridors2.assign(
+        hqta_details = corridors2.apply(
+            assemble_hqta_points.hqta_details, axis=1),
+    )
 
-    return corridors
+    return corridors2
 
 
-def filter_and_buffer(hqta_points: gpd.GeoDataFrame, 
-                      hqta_segments: gpd.GeoDataFrame, 
-                      analysis_date: str
-                     ) -> gpd.GeoDataFrame:
+def filter_and_buffer(
+    hqta_points: gpd.GeoDataFrame, 
+    hqta_segments: gpd.GeoDataFrame, 
+    analysis_date: str
+) -> gpd.GeoDataFrame:
     """
     Convert the HQTA point geom into polygon geom.
     
@@ -127,45 +131,38 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 if __name__=="__main__":    
     
-    logger.add("./logs/D2_assemble_hqta_polygons.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
-    start = dt.datetime.now()
+    start = datetime.datetime.now()
     
     hqta_points = catalog.hqta_points.read().to_crs(PROJECT_CRS)
-    bus_hq_corr = prep_clip.prep_bus_corridors().to_crs(PROJECT_CRS)
+    bus_hq_corr = prep_clip.prep_bus_corridors(
+        is_hq_corr=True
+    ).to_crs(PROJECT_CRS)
     
     # Filter and buffer for stops (805 m) and corridors (755 m)
     # and add agency_names
-    gdf = filter_and_buffer(hqta_points, bus_hq_corr, analysis_date)
-    
-    time1 = dt.datetime.now()
-    logger.info(f"filter and buffer: {time1 - start}")
-    
-    # Subset, get ready for export
-    gdf = final_processing(gdf)    
-    
+    gdf = filter_and_buffer(
+        hqta_points, bus_hq_corr, analysis_date
+    ).pipe(final_processing)
+            
     # Export to GCS
-    # Stash this date's into its own folder, to convert to geojson, geojsonl
     utils.geoparquet_gcs_export(
         gdf, 
         EXPORT_PATH, 
-        'ca_hq_transit_areas'
+        "ca_hq_transit_areas"
     )
-    
-    logger.info("export as geoparquet in date folder")
     
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(
         gdf,
-        utilities.GCS_FILE_PATH,
-        'hqta_areas'
+        GCS_FILE_PATH,
+        "hqta_areas"
     )    
-    
-    logger.info("export as geoparquet")
-        
-    end = dt.datetime.now()
-    logger.info(f"execution time: {end-start}")
+       
+    end = datetime.datetime.now()
+    logger.info(f"D2_assemble_hqta_polygons {analysis_date} "
+                f"execution time: {end - start}")

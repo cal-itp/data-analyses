@@ -7,37 +7,34 @@ Takes 1 min to run.
 - down from 30 min in v2
 - down from several hours in v1 in combine_and_visualize.ipynb
 """
-import datetime as dt
+import datetime
 import geopandas as gpd
 import pandas as pd
 import sys
 
-from dask import delayed, compute
 from loguru import logger
 
 from calitp_data_analysis import utils
-from utilities import catalog_filepath, GCS_FILE_PATH
-from update_vars import analysis_date
+from update_vars import GCS_FILE_PATH, analysis_date
 
-# Input files
-ALL_BUS = catalog_filepath("all_bus")
-
-def prep_bus_corridors() -> gpd.GeoDataFrame:
+def prep_bus_corridors(is_hq_corr: bool) -> gpd.GeoDataFrame:
     """
     Import all hqta segments with hq_transit_corr tagged.
     
     Only keep if hq_transit_corr == True
     """
-    bus_hqtc = gpd.read_parquet(ALL_BUS).query(
-        'hq_transit_corr==True'
+    bus_hqtc = gpd.read_parquet(
+        f"{GCS_FILE_PATH}all_bus.parquet",
+        filters = [[("hq_transit_corr", "==", is_hq_corr)]]
     ).reset_index(drop=True)
     
     bus_hqtc = bus_hqtc.assign(
-        hqta_type = "hqta_transit_corr",
         route_type = "3"
     )
     
     return bus_hqtc
+
+
 
 
 def sjoin_against_other_operators(
@@ -51,10 +48,11 @@ def sjoin_against_other_operators(
     
     Create a crosswalk / pairwise table showing these links.
     
-    Compile all of them, because finding intersections is computationally expensive,
+    Compile all of them, because finding intersections is 
+    computationally expensive,
     so we want to do it on fewer rows. 
     """
-    route_cols = ["hqta_segment_id", "route_direction"]
+    route_cols = ["hqta_segment_id", "segment_direction"]
     
     s1 = gpd.sjoin(
         in_group_df[route_cols + ["geometry"]], 
@@ -77,74 +75,71 @@ def sjoin_against_other_operators(
     return route_pairs   
 
 
+def pairwise_intersections(
+    corridors_gdf: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    """
+    Do pairwise comparisons of hqta segments.
+    Take all the north-south segments and compare to east-west
+    and vice versa.
+    """
+    # Route intersections across operators
+    east_west = corridors_gdf[corridors_gdf.segment_direction == "east-west"]
+    north_south = corridors_gdf[corridors_gdf.segment_direction == "north-south"]
+    
+    results = [
+        sjoin_against_other_operators(north_south, east_west),
+        sjoin_against_other_operators(east_west, north_south)
+    ]
+    
+    pairs = pd.concat(results, axis=0, ignore_index=True)
+    
+    segments_p1 = pairs.hqta_segment_id.unique()
+    segments_p2 = pairs.intersect_hqta_segment_id.unique()
+    
+    # Subset the hqta segments that do have hq_transit_corr == True 
+    # down to the ones where routes have with sjoin intersections
+    corridors2 = (
+        corridors_gdf[
+            (corridors_gdf.hqta_segment_id.isin(segments_p1)) | 
+            (corridors_gdf.hqta_segment_id.isin(segments_p2))]
+        .drop_duplicates()
+        .sort_values(
+            ["feed_key", "route_id", "hqta_segment_id"], 
+            ascending = [True, True, True])
+        .reset_index(drop=True)
+    )
+    
+    pairs.to_parquet(
+        f"{GCS_FILE_PATH}pairwise.parquet")
+    
+    utils.geoparquet_gcs_export(
+        corridors2,
+        GCS_FILE_PATH,
+        "subset_corridors"
+    )
+    
+    return
+    
+
 if __name__=="__main__":
     # Connect to dask distributed client, put here so it only runs for this script
     #from dask.distributed import Client
     #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
-    logger.add("./logs/C1_prep_pairwise_intersections.log", retention = "3 months")
+    logger.add("./logs/hqta_processing.log", retention = "3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
-    start = dt.datetime.now()
+    start = datetime.datetime.now()
 
-    corridors = prep_bus_corridors()   
-        
-    # Route intersections across operators
-    east_west_corr = corridors[corridors.route_direction == "east-west"]
-    north_south_corr = corridors[corridors.route_direction == "north-south"]
+    corridors = prep_bus_corridors(is_hq_corr=True)   
     
-    # Part 1: take east-west routes for an operator, and compare against
-    # all north-south routes for itself and other operators
-    # Part 2: take north-south routes for an operator, and compare against
-    # all east-west routes for itself and other operators
-    # Even though this necessarily would repeat results from earlier, just swapped, 
-    # like RouteA-RouteB becomes RouteB-RouteA, use this to key in easier later.
-    results = [
-        sjoin_against_other_operators(north_south_corr, east_west_corr),
-        sjoin_against_other_operators(east_west_corr, north_south_corr)
-    ]
+    pairwise_intersections(corridors)    
     
-    pairwise_intersections = pd.concat(results, axis=0, ignore_index=True)
-
-    time1 = dt.datetime.now()
-    logger.info(f"get pairwise table: {time1 - start}")
-
-    
-    routes_p1 = pairwise_intersections.hqta_segment_id.unique().tolist()
-    routes_p2 = pairwise_intersections.intersect_hqta_segment_id.unique().tolist()
-    
-    # Subset the hqta segments that do have hq_transit_corr == True 
-    # down to the ones where routes have with sjoin intersections
-    subset_corridors = (
-        corridors[
-            (corridors.hqta_segment_id.isin(routes_p1)) | 
-            (corridors.hqta_segment_id.isin(routes_p2))]
-        .drop_duplicates()
-        .reset_index(drop=True)
-    )
-    
-    subset_corridors = (subset_corridors.sort_values(
-                    ["feed_key", "route_id", "hqta_segment_id"], 
-                    ascending = [True, True, True])
-                    .reset_index(drop=True)
-    )
-
-    time2 = dt.datetime.now()
-    logger.info(f"compute for pairwise/subset_corridors: {time2 - time1}")
-    
-    pairwise_intersections.to_parquet(
-        f"{GCS_FILE_PATH}pairwise.parquet")
-    
-    utils.geoparquet_gcs_export(
-        subset_corridors,
-        GCS_FILE_PATH,
-        'subset_corridors'
-    )
-    
-    end = dt.datetime.now()
-    logger.info(f"execution time: {end-start}")
+    end = datetime.datetime.now()
+    logger.info(f"C1_prep_pairwise_intersections {analysis_date} "
+                f"execution time: {end - start}")
 
     #client.close()

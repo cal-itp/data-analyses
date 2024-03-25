@@ -1,16 +1,16 @@
 ---
 name: Bug Report - Data or Tooling
 about: Create a report to help us improve our warehouse or our analytics tooling.
-title: 'Bug: : [description]'
+title: 'Bug: [description]'
 labels: ["bug", "admin"]
 assignees: ''
 ---
 **Where did the bug occur?**
-Select from the below, and be sure to affix the appropriate label to this issue (e.g. `dataset`, `jupyterhub`, `metabase`, `analytics.calitp.org`)
+Select from the below, and be sure to affix the appropriate label to this issue (e.g. `dataset`, `jupyterhub`, `metabase`, `analysis.calitp.org`)
 - [ ] Data (the warehouse)
 - [ ] JupyterHub
 - [ ] Metabase
-- [ ] analytics.calitp.org  
+- [ ] analysis.calitp.org  
 - [ ] Other (add detail)
 
 **Describe the bug**

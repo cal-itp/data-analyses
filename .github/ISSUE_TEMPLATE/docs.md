@@ -1,7 +1,7 @@
 ---
 name: Docs - Edits or Additions
 about: For making changes or additions to the data services analytics documentation.
-title: 'Docs: : [description]'
+title: 'Docs: [description]'
 labels: 'documentation'
 assignees: ''
 ---

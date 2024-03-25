@@ -10,9 +10,46 @@ from typing import Literal, Union
 from segment_speed_utils import helpers, time_helpers
 from shared_utils import portfolio_utils, rt_utils
 from segment_speed_utils.project_vars import SEGMENT_GCS
+
+sched_rt_category_dict = {
+    "left_only": "schedule_only",
+    "both": "schedule_and_vp",
+    "right_only": "vp_only"
+}
+
+CA_AMTRAK = ["Pacific Surfliner", "San Joaquins", 
+             "Coast Starlight", "Capitol Corridor"]
+
+
+def amtrak_trips(
+    analysis_date: str,
+    inside_ca: bool = True
+) -> pd.DataFrame:
+    """
+    Return Amtrak table, either for routes primarily inside CA or outside CA.
+    """
+    
+    if inside_ca:
+        filters = [[("name", "==", "Amtrak Schedule"), 
+                    ("route_long_name", "in", CA_AMTRAK)]]
+    else:
+        filters = [[("name", "==", "Amtrak Schedule"), 
+                    ("route_long_name", "not in", CA_AMTRAK)]]
+    
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        get_pandas = True,
+        filters = filters,
+        columns = None
+    )
+       
+    return trips
+    
+
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
-    exclude_me: list = ["Amtrak Schedule", "*Flex"]
+    exclude_me: list = ["*Flex"],
+    include_amtrak_routes: list = CA_AMTRAK
 ):
     """
     Exclude certain operators by name.
@@ -26,7 +63,20 @@ def exclude_scheduled_operators(
         for i in substrings:
             trips = trips[~trips.name.str.contains(i)].reset_index(drop=True)
     
-    return trips[~trips.name.isin(exclude_me)].reset_index(drop=True)
+    trips = trips[~trips.name.isin(exclude_me)].reset_index(drop=True)
+    
+    outside_ca_amtrak = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["trip_instance_key"],
+        filters = [[("name", "==", "Amtrak Schedule"), 
+                   ("route_long_name", "not in", include_amtrak_routes)]],
+    ).trip_instance_key.unique()
+    
+    trips = trips[
+        ~trips.trip_instance_key.isin(outside_ca_amtrak)
+    ].reset_index(drop=True)
+    
+    return trips
 
 
 def get_trips_with_geom(
@@ -168,11 +218,12 @@ def aggregate_time_of_day_to_peak_offpeak(
 
         return df3
 
+    
 def get_vp_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     """
     Assign trips to time-of-day.
     """
-    ddf = dd.read_parquet(
+    df = dd.read_parquet(
         f"{SEGMENT_GCS}vp_usable_{analysis_date}",
         columns=[
             "trip_instance_key",
@@ -180,25 +231,21 @@ def get_vp_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
         ],
     )
 
-    ddf2 = (
-        ddf.groupby(["trip_instance_key"])
+    df2 = (
+        df.groupby(["trip_instance_key"])
         .agg({"location_timestamp_local": "min"})
         .reset_index()
         .rename(columns={"location_timestamp_local": "min_time"})
-    )
+    ).compute()
 
-    ddf2 = ddf2.compute()
-
-    ddf2 = ddf2.assign(
-        time_of_day=ddf2.apply(
+    df2 = df2.assign(
+        time_of_day=df2.apply(
             lambda x: rt_utils.categorize_time_of_day(x.min_time), axis=1
         )
-    )
+    )[["time_of_day","trip_instance_key"]]
     
+    return df2
 
-    ddf2 = ddf2[["time_of_day","trip_instance_key"]]
-
-    return ddf2
 
 def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
     """
@@ -220,11 +267,65 @@ def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
         time_of_day = trips.apply(
             lambda x: rt_utils.categorize_time_of_day(
                 x.trip_first_departure_datetime_pacific), axis=1), 
-        service_minutes = trips.service_hours * 60
+        scheduled_service_minutes = trips.service_hours * 60
     )
     
     return trips
 
+
+def attach_scheduled_route_info(
+    analysis_date: str
+) -> pd.DataFrame:
+    """
+    Add route id, direction id,
+    off_peak, and time_of_day columns. Do some
+    light cleaning.
+    """
+    route_info = helpers.import_scheduled_trips(
+        analysis_date,
+        columns=[
+            "gtfs_dataset_key", "trip_instance_key",
+            "route_id", "direction_id",
+        ],
+        get_pandas=True,
+    )
+    
+    sched_time_of_day = (
+        get_trip_time_buckets(analysis_date)          
+        [["trip_instance_key", "time_of_day", "scheduled_service_minutes"]]
+        .rename(columns={"time_of_day": "sched_time_of_day"})
+    )
+    
+    rt_time_of_day = (
+        get_vp_trip_time_buckets(analysis_date)
+        .rename(columns={"time_of_day": "rt_time_of_day"})
+    )
+
+    time_df = pd.merge(
+        route_info,
+        sched_time_of_day,
+        on = "trip_instance_key",
+        how = "inner"
+    )
+    
+    time_df = time_df.merge(
+        rt_time_of_day,
+        on = "trip_instance_key",
+        how = "outer",
+        indicator="sched_rt_category"
+    )
+    
+    time_df = time_df.assign(
+        route_id = time_df.route_id.fillna("Unknown"),
+        time_of_day = time_df.sched_time_of_day.fillna(
+            time_df.rt_time_of_day),
+        sched_rt_category = time_df.sched_rt_category.map(
+            sched_rt_category_dict),
+    ).drop(
+        columns = ['sched_time_of_day', 'rt_time_of_day']
+    )
+    
+    return time_df
 
 def most_recent_route_info(
     df: pd.DataFrame,
@@ -353,7 +454,42 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
     )
     
     return common_shape_geom2
+ 
     
+def longest_shape_by_route_direction(
+    analysis_date: str
+) -> gpd.GeoDataFrame:
+    """
+    """
+    routes = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["feed_key", "gtfs_dataset_key", 
+                   "route_id", "direction_id", "route_key",
+                   "shape_array_key"],
+        get_pandas = True
+    )
+    
+    routes2 = helpers.import_scheduled_shapes(
+        analysis_date,
+        columns = ["shape_array_key", "geometry"],
+        get_pandas = True
+    ).merge(
+        routes,
+        on = "shape_array_key",
+        how = "inner"
+    )
+    
+    sort_cols = ["feed_key", "route_id", "direction_id"]
+    
+    routes2 = routes2.assign(
+        route_length = routes2.geometry.length
+    ).sort_values(
+        sort_cols + ["route_length"],
+        ascending = [True for i in sort_cols] + [False]
+    ).drop_duplicates(subset=sort_cols).reset_index(drop=True)
+    
+    return routes2
+
     
 def gtfs_segments_rename_cols(
     df: pd.DataFrame, 
@@ -376,4 +512,32 @@ def gtfs_segments_rename_cols(
             "trip_id": "trip_instance_key",
             "shape_id": "shape_array_key"
         })
+    return df
+
+
+def merge_operator_identifiers(
+    df: pd.DataFrame, 
+    analysis_date_list: list
+) -> pd.DataFrame:
+    """
+    Carrying a lot of these operator identifiers is not 
+    inconsequential, esp when we need to run a week's segment speeds
+    in one go.
+    Instead, we'll just merge it back on before we export.
+    """
+    crosswalk = pd.concat([
+        helpers.import_schedule_gtfs_key_organization_crosswalk(
+            analysis_date,
+        ).drop(columns = "itp_id") 
+        for analysis_date in analysis_date_list],
+        axis=0, ignore_index=True
+    ).drop_duplicates()
+    
+    df = pd.merge(
+        df,
+        crosswalk,
+        on = "schedule_gtfs_dataset_key",
+        how = "inner"
+    )
+    
     return df

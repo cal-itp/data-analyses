@@ -13,8 +13,7 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 
-#from calitp_data_analysis import utils
-from shared_utils import utils_to_add
+from calitp_data_analysis import utils
 from shared_utils import rt_dates
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS
@@ -73,7 +72,7 @@ if __name__ == "__main__":
         
         segments = select_one_trip_per_shape(analysis_date)
         
-        utils_to_add.geoparquet_gcs_export(
+        utils.geoparquet_gcs_export(
             segments,
             SEGMENT_GCS,
             f"{SEGMENT_FILE}_{analysis_date}"

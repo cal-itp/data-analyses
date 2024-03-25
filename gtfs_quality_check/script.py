@@ -1,6 +1,46 @@
 import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
 
+from datetime import datetime, timedelta
+
+def load_download_parse(excel_file:str)-> pd.DataFrame:
+    to_keep = [
+    "dim_provider_gtfs_data___gtfs_dataset_key_→_organization_name",
+    "dim_provider_gtfs_data___gtfs_dataset_key_→_service_name",
+    "dim_provider_gtfs_data___gtfs_dataset_key_→_schedule_gtfs_dataset_name",
+    "ts",
+    "download_exception",
+    "pct_files_successfully_parsed",
+    "dim_county_geography_→_name"]
+    
+    df = to_snakecase(
+    pd.read_excel(
+        "./gtfs_schedule_download_and_parse_errors_2024-03-01T16_55_55.917295Z.xlsx"
+    ))[to_keep]
+    
+    new_cols = {
+    "dim_provider_gtfs_data___gtfs_dataset_key_→_organization_name": "organization_name",
+    "dim_provider_gtfs_data___gtfs_dataset_key_→_service_name": "service_name",
+    "dim_provider_gtfs_data___gtfs_dataset_key_→_schedule_gtfs_dataset_name": "dataset_name",
+    "dim_county_geography_→_name": "geography"}
+    
+    df = df.rename(columns=new_cols)
+    
+    # Get the current date
+    current_date = datetime.now()
+
+    # Calculate the date 7 days ago
+    seven_days_ago = current_date - timedelta(days=7)
+    
+    
+    # Filter rows to include only the last 7 days
+    df2 = df[df.ts >= seven_days_ago]
+    
+    df2 = df2.drop_duplicates(
+    subset=["download_exception", "organization_name", "service_name", "dataset_name"]).reset_index(drop=True)
+    
+    return df2
+
 def load_catastrophic_errors(excel_file: str)->pd.DataFrame:
     df = pd.read_excel(excel_file)
     df = to_snakecase(df)

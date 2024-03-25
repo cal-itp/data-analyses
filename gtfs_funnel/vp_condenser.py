@@ -1,7 +1,6 @@
 """
 Condense vp into arrays by trip-direction.
 """
-import dask.dataframe as dd
 import datetime
 import geopandas as gpd
 import pandas as pd
@@ -14,7 +13,6 @@ from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import vp_transform, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS
-
 
 def condense_vp_to_linestring(
     analysis_date: str, 
@@ -29,7 +27,7 @@ def condense_vp_to_linestring(
     USABLE_VP = dict_inputs["usable_vp_file"]
     EXPORT_FILE = dict_inputs["vp_condensed_line_file"]
     
-    vp = dd.read_parquet(
+    vp = delayed(pd.read_parquet)(
         f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
         columns = ["trip_instance_key", "x", "y", 
                    "vp_idx", "vp_primary_direction", 
@@ -37,42 +35,24 @@ def condense_vp_to_linestring(
                   ],
     )
     
-    vp_dtypes = vp.drop(columns = ["x", "y"]).dtypes.to_dict()
-
-    vp_gdf = vp.map_partitions(
-        wrangle_shapes.vp_as_gdf,
-        crs = WGS84,
-        meta = {
-            **vp_dtypes,
-            "geometry": "geometry"
-        },
-        align_dataframes = True
-    )
-
-    vp_condensed = vp_gdf.map_partitions(
-        vp_transform.condense_point_geom_to_line,
+    vp_gdf = delayed(wrangle_shapes.vp_as_gdf)(vp, crs = WGS84)
+    
+    vp_condensed = delayed(vp_transform.condense_point_geom_to_line)(
+        vp_gdf,
         group_cols = ["trip_instance_key"],
         geom_col = "geometry",
         other_cols = ["vp_idx", "location_timestamp_local", 
                       "vp_primary_direction"],
-        meta = {
-            "trip_instance_key": "object",
-            "geometry": "geometry",
-            "vp_idx": "object",
-            "location_timestamp_local": "object",
-            "vp_primary_direction": "object",
-        },
-        align_dataframes = False
-    ).compute().set_geometry("geometry").set_crs(WGS84)
+    ).set_geometry("geometry").set_crs(WGS84)
+    
+    vp_condensed = compute(vp_condensed)[0]
     
     utils.geoparquet_gcs_export(
         vp_condensed,
         SEGMENT_GCS,
         f"{EXPORT_FILE}_{analysis_date}"
     )
-    
-    del vp_condensed
-    
+        
     return 
 
 
@@ -101,8 +81,9 @@ def prepare_vp_for_all_directions(
             vp, direction) 
         for direction in wrangle_shapes.ALL_DIRECTIONS
     ]
-    
+        
     results = [compute(i)[0] for i in dfs]
+
     gdf = pd.concat(
         results, axis=0, ignore_index=True
     ).sort_values(
@@ -118,7 +99,7 @@ def prepare_vp_for_all_directions(
     )
     
     del gdf
-   
+    
     return 
 
 
@@ -135,12 +116,13 @@ if __name__ == "__main__":
     
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
-
+        
         condense_vp_to_linestring(analysis_date, CONFIG_DICT)
         
         time1 = datetime.datetime.now()
+        
         logger.info(
-            f"{analysis_date}: condense vp for trip-direction "
+            f"{analysis_date}: condense vp for trip "
             f"{time1 - start}"
         )
         

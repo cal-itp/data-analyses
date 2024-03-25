@@ -105,6 +105,8 @@ def loop_through_batches_and_download_vp(
         df.to_parquet(
             f"{SEGMENT_GCS}vp_raw_{analysis_date}_batch{i}.parquet")
         
+        del df
+        
         time1 = datetime.datetime.now()
         logger.info(f"exported batch {i} to GCS: {time1 - time0}")
  

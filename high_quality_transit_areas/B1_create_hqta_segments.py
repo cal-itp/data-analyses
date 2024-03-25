@@ -1,85 +1,27 @@
 """
 Draw bus corridors (routes -> segments) across all operators.
 
-Use difference instead of symmetric difference, and we'll
-end up with similar results, since we cut segments
-across both direction == 0 and direction == 1 now.
-
-Cannot use symmetric difference unless we downgrade pandas to 1.1.3
-https://gis.stackexchange.com/questions/414317/gpd-overlay-throws-intcastingnanerror.
-Too complicated to change between pandas versions.
-
-Takes ~5 min to run 
+Takes ~3 min to run 
+- down from 6 min in v3
 - down from 1 hr in v2 
 - down from several hours v1
-
 """
-import os
-os.environ['USE_PYGEOS'] = '0'
-import dask.dataframe as dd
-import datetime as dt
+import datetime
 import geopandas as gpd
 import pandas as pd
 import sys
 import zlib
 
 from loguru import logger
-from dask import delayed, compute
 
-import operators_for_hqta
 from calitp_data_analysis import geography_utils, utils
-from shared_utils import rt_utils, geog_utils_to_add
+from shared_utils import rt_utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
-from utilities import GCS_FILE_PATH
-from update_vars import analysis_date
+from update_vars import GCS_FILE_PATH, analysis_date, HQTA_SEGMENT_LENGTH
                         
-HQTA_SEGMENT_LENGTH = 1_250 # meters
-
-
-def pare_down_trips_by_route_direction(
-    trips_with_geom: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:   
-    """
-    Given a trips table that has shape geometry attached, 
-    keep the longest shape by route_length in each direction.
-    
-    For LA Metro, out of ~700 unique shape_ids,
-    this pares it down to ~115 route_ids.
-    Use this pared down shape_ids to get hqta_segments.
-    """
-    route_dir_cols = ["feed_key", "route_key", "route_id", "direction_id"]
-    
-    # If direction_id is missing, then later code will break, because
-    # we need to find the longest route_length
-    # Don't really care what direction is, since we will replace it with north-south
-    # Just need a value to stand-in, treat it as the same direction
-    trips_with_geom = trips_with_geom.assign(
-        route_length = trips_with_geom.geometry.length,
-        direction_id = trips_with_geom.direction_id.fillna(0).astype(int).astype(str)
-    ).sort_values(route_dir_cols + ["route_length"], 
-                  ascending = [True for i in route_dir_cols] + [False]
-                 )
-    
-    longest_shapes = trips_with_geom.assign(
-        max_route_length = (trips_with_geom
-                            .groupby(route_dir_cols,observed=True, group_keys=False)
-                            .route_length
-                            .transform("max")
-                           )
-    ).query(
-        'max_route_length == route_length'
-    ).drop_duplicates(subset = route_dir_cols) 
-    # if there are duplicates remaining, drop and keep first obs based on prior sorting
-
-    # A route is uniquely identified by route_key (feed_key + route_id)
-    # Once we keep just 1 shape for each route direction, go back to route_key
-        
-    return longest_shapes
-
 
 def difference_overlay_by_route(
-    longest_shapes: gpd.GeoDataFrame, 
-    route: str, 
+    two_directions_gdf: gpd.GeoDataFrame, 
     segment_length: int
 ) -> gpd.GeoDataFrame:
     """
@@ -92,43 +34,51 @@ def difference_overlay_by_route(
     If it is, dissolve it.
     
     Keep these portions for a route, and then cut it into segments. 
-    """
-    # Start with the longest direction (doesn't matter if it's 0 or 1)
-    one_route = (longest_shapes[longest_shapes.route_key == route]
-                 .sort_values("route_length", ascending=False)
-                 .reset_index(drop=True)
-            )
+    """   
+    gdf = two_directions_gdf.assign(
+        obs = two_directions_gdf.groupby("route_key").cumcount() + 1
+    )
     
-    first = one_route[one_route.index==0].reset_index(drop=True)
-    second = one_route[one_route.index==1].reset_index(drop=True)
+    keep_cols = ["route_key", "geometry"]
+
+    first = gdf[gdf.obs == 1][keep_cols]
+    second = gdf[gdf.obs==2][keep_cols]
+    
+    route_geom = pd.merge(
+        first,
+        second,
+        on = "route_key",
+        how = "inner",
+    )
     
     # Find the difference
     # We'll combine it with the first segment anyway
-    overlay = first.geometry.difference(second.geometry).to_frame(name="geometry")
+    route_geom = route_geom.assign(
+        geometry = route_geom.geometry_x.difference(route_geom.geometry_y)
+    ).set_geometry("geometry")    
     
     # Notice that overlay keeps a lot of short segments that are in the
     # middle of the route. Drop these. We mostly want
     # layover spots and where 1-way direction is.
-    exploded = (overlay[["geometry"]].dissolve()
+    exploded = (route_geom
+                [["route_key", "geometry"]]
+                .dissolve(by="route_key")
                 .explode(index_parts=True)
                 .reset_index()
-                .drop(columns = ["level_0", "level_1"])
+                .drop(columns = ["level_1"])
                )
-    
-    exploded2 = exploded.assign(
-        overlay_length = exploded.geometry.length,
-        route_key = route,
-    )
-    
-    CUTOFF = segment_length * 0.5
+
     # 750 m is pretty close to how long our hqta segments are,
     # which are 1,250 m. Maybe these segments are long enough to be included.
+    CUTOFF = segment_length * 0.5
     
-    exploded_long_enough = exploded2[exploded2.overlay_length > CUTOFF]   
-    
+    exploded = exploded.assign(
+        overlay_length = exploded.geometry.length,
+    ).query(f'overlay_length > {CUTOFF}')
+        
     # Now, dissolve it, so it becomes 1 row again
     # Without this initial dissolve, hqta segments will have tiny segments towards ends
-    segments_to_attach = (exploded_long_enough[["route_key", "geometry"]]
+    segments_to_attach = (exploded[["route_key", "geometry"]]
                           .dissolve(by="route_key")
                           .reset_index()
                          )
@@ -142,7 +92,7 @@ def difference_overlay_by_route(
 
 
 def select_shapes_and_segment(
-    gdf: gpd.GeoDataFrame,
+    analysis_date: str,
     segment_length: int
 ) -> gpd.GeoDataFrame: 
     """
@@ -154,32 +104,35 @@ def select_shapes_and_segment(
     
     Concatenate these 2 portions and then cut HQTA segments.
     Returns the hqta_segments for all the routes across all operators.
+    """ 
+    # Only include certain Amtrak routes
+    outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips(
+        analysis_date, inside_ca = False).shape_array_key.unique()
     
-    gpd.overlay(how = 'symmetric_difference') is causing error, 
-    either need to downgrade pandas or switch to 'difference'
-    https://gis.stackexchange.com/questions/414317/gpd-overlay-throws-intcastingnanerror
-    """            
+    gdf = gtfs_schedule_wrangling.longest_shape_by_route_direction(
+        analysis_date
+    ).query(
+        'shape_array_key not in @outside_amtrak_shapes'
+    ).drop(
+        columns = ["schedule_gtfs_dataset_key", 
+                   "shape_array_key", "route_length"]
+    ).fillna({"direction_id": 0}).astype({"direction_id": "int"})
+    
     routes_both_dir = (gdf.route_key
                        .value_counts()
                        .loc[lambda x: x > 1]
-                       .index).tolist()  
+                       .index
+                      ).tolist()  
 
     one_direction = gdf[~gdf.route_key.isin(routes_both_dir)]
     two_directions = gdf[gdf.route_key.isin(routes_both_dir)]   
     
-    two_directions_overlay = gpd.GeoDataFrame()
-    
-    two_directions_overlay_results = [
-        delayed(difference_overlay_by_route)(
-            two_directions, r, segment_length)
-        for r in routes_both_dir
-    ]
-  
-    two_direction_results = dd.from_delayed(two_directions_overlay_results).compute()
+    two_direction_results = difference_overlay_by_route(
+        two_directions, segment_length)
         
     ready_for_segmenting = pd.concat(
         [one_direction, two_direction_results], 
-        axis=0)[["route_key", "geometry"]]
+        axis=0)[["route_key", "geometry"]].dropna(subset="geometry")
     
     # Cut segments 
     ready_for_segmenting["segment_geometry"] = ready_for_segmenting.apply(
@@ -188,7 +141,7 @@ def select_shapes_and_segment(
         axis=1, 
     )
     
-    segmented = geog_utils_to_add.explode_segments(
+    segmented = geography_utils.explode_segments(
         ready_for_segmenting, 
         group_cols = ["route_key"],
         segment_col = "segment_geometry"
@@ -208,8 +161,8 @@ def select_shapes_and_segment(
     # Reindex and change column order, put geometry at the end
     cols = [c for c in hqta_segments.columns 
             if c not in route_cols and c != "geometry"]
-    hqta_segments = hqta_segments.reindex(columns = route_cols + cols + 
-                                          ["geometry"])
+    hqta_segments = hqta_segments.reindex(
+        columns = route_cols + cols + ["geometry"])
     
     # compute (hopefully unique) hash of segment id that can be used
     # across routes/operators
@@ -235,11 +188,6 @@ def find_primary_direction_across_hqta_segments(
     Since routes, depending on where you pick origin / destination,
     could have shown both north-south and east-west, doing it this way
     will be more accurate.
-    
-    dask can't do the shapely Point(x.coords) operation, 
-    so do it on here on segments, which is linestrings.
-    Grab the start / endpoint of a linestring
-    https://gis.stackexchange.com/questions/358584/how-to-extract-long-and-lat-of-start-and-end-points-to-seperate-columns-from-t
     """
     
     with_od = rt_utils.add_origin_destination(hqta_segments_gdf)
@@ -261,7 +209,8 @@ def find_primary_direction_across_hqta_segments(
     drop_cols = ["origin", "destination", "route_primary_direction"]
     
     routes_with_primary_direction = pd.merge(
-        with_direction.drop(columns = "route_direction"), 
+        with_direction.rename(
+            columns = {"route_direction": "segment_direction"}), 
         predominant_direction_by_route,
         on = "route_key",
         how = "left",
@@ -273,50 +222,28 @@ def find_primary_direction_across_hqta_segments(
     
 if __name__=="__main__":   
 
-    logger.add("./logs/B1_create_hqta_segments.log", retention="3 months")
+    logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    logger.info(f"Analysis date: {analysis_date}")
-
-    start = dt.datetime.now()
-        
-    # (1) Merge routelines with trips, find the longest shape in 
-    # each direction, and after overlay difference, cut HQTA segments
-    trips_with_geom = gtfs_schedule_wrangling.get_trips_with_geom(
-        analysis_date,
-        trip_cols = ["feed_key", "name",
-                     "route_key", "route_id", 
-                     "direction_id", "shape_array_key"]
-    ).dropna(subset="shape_array_key").reset_index(drop=True)
-
-    # Keep longest shape in each direction
-    longest_shapes = pare_down_trips_by_route_direction(trips_with_geom)
-    
-    time1 = dt.datetime.now()
-    logger.info(f"merge routes to trips: {time1 - start}")
-    
+    start = datetime.datetime.now()
+                
     # Cut into HQTA segments
-    hqta_segments = delayed(select_shapes_and_segment)(
-        longest_shapes, HQTA_SEGMENT_LENGTH)
+    hqta_segments = select_shapes_and_segment(
+        analysis_date, HQTA_SEGMENT_LENGTH)
     
     # Since route_direction at the route-level could yield both 
     # north-south and east-west 
     # for a given route, use the segments to determine the primary direction
-    hqta_segments_with_dir = delayed(find_primary_direction_across_hqta_segments)(
+    hqta_segments_with_dir = find_primary_direction_across_hqta_segments(
         hqta_segments)
-    
-    hqta_segments_with_dir = compute(hqta_segments_with_dir)[0]
-    
+        
     utils.geoparquet_gcs_export(
         hqta_segments_with_dir, 
         GCS_FILE_PATH,
         "hqta_segments"
     )
     
-    time2 = dt.datetime.now()
-    logger.info(f"cut segments: {time2 - time1}")
-    
-    end = dt.datetime.now()
-    logger.info(f"total execution time: {end - start}")
+    end = datetime.datetime.now()
+    logger.info(f"B1_create_hqta_segments execution time: {end - start}")
