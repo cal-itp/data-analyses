@@ -283,35 +283,29 @@ non_zeb_only_std = non_zeb_no_outliers.cpb.std()
 # start summary narative
 summary = f"""
 ## Summary
-This analysis examines the 'cost' of buses as it relates to grant award dollars. Specifically, transit agencies who were awarded grants to fund projects that include procuring buses and/or other transit related equipment, and how much variance there was in procuring buses. 
+This analysis examines the 'cost' of buses for transit agencies across the country. Specifically, to exammine the variation of bus cost for different bus related categories such as propulsion type and size type. 
 
 As of today, data was scraped from these sources:
 1. FTA Bus and Low- and No-Emission Grant Awards press release (federally funded, nationwide data)
 2. TIRCP project data (state-funded, California only)
-3. DGS useage report for all procurements from agencies purchasing from New Flyer and Portera.
+3. DGS useage report for all procurements from California agencies purchasing from New Flyer and Portera.
 
-Analyzing the dataset uncovered several nuances. Some projects included additional components besides bus purchases such as chargers, transit facilities, parts and staff training. Whereas other projects only purchased bus, and some did not include any bus purchases at all. The variety in these projects may contribute to high variances in “cost per bus”.
-Additionally, some projects do not accurately or describe the propulsion or bus size type. 
+Analyzing the dataset uncovered several nuances. Some projects included additional components besides bus purchases. Installing charging inffrastructure, constructing transit facilities, and other non-bus components were often wrapped into bus purchases. While there were projects that purchased buses exclusivly, some projects did not include any bus purchases at all or did not accurately or describe the propulsion or bus size type. The variety in these projects may contribute to high variances in “cost per bus”.
 
-There are numerous instances where transit agencies reported procuring “zero-emission buses” (ZEBs) but does not specify if the buses are battery electric, fuel-cell, etc. Or transit agencies state conflicting information such as procuring “hybrid electric ZEBs”. In all cases, the dataset was examined for inconsistencies and data was validated to complete the analysis.
-Datasets was filtered to only include data that specified the number of buses to purchase. The compiled data was aggregated by agencies and a 'cost per bus' metric was calculated by dividing the total funding received by the total number of buses they procured.
-Initial finding uncovered some outliers where a transit agency’s cost per bus figure exceeded 3 standard deviations away from the mean. Deeper investigations conclude that these projects also include major infrastructure replacements.
+The dataset was examined for inconsistencies and data was validated to complete the analysis. The final Dataset was filtered for projects that only procured buses.The compiled data was aggregated by agencies and a 'cost per bus' metric was calculated by dividing the total funding received by the total number of buses they procured.
+Initial finding uncovered some outliers where a transit agency’s cost per bus figure exceeded 3 standard deviations away from the mean.
 
 Overall:
-- {total_unique_projects} projects with bus purchases were analyzed.
-- {total_funding:,.2f} dollars were awarded to agencies for projects including bus purchases.
-- {total_bus_count} total buses are to be purchased.
-- The highest awarded dollars per bus for an agency was {max_bus_cost:,.2f} dollars for a {prop_type_max_cpb}, belonging too {agency_max_cpb}. 
-- The lowest awarded dollars per bus for an agency was {min_bus_cost:,.2f} dollars for a {prop_type_min_cpb}, belonging too {agency_min_cpb}.
-
-The agency with the most buses procured was {agency_with_most_bus} with {max_bus_count} buses.
+- **{total_unique_projects}** projects with bus purchases were analyzed.
+- **{total_funding:,.2f}** dollars were awarded to agencies for projects including bus purchases.
+- **{total_bus_count}** total buses are to be purchased.
 
 
-Propulsion type values varied wildly amongst the datasets. Data was validated and grouped as best as possible based on project description or other indications of specific propulsion type.
+Propulsion type values varied wildly amongst the datasets and often times did not explicilty specify the propulsion type. Data was validated and grouped as best as possible based on project description or other indications of specific propulsion type.
 The following is a summary of propulsion type metrics.
-- The most common propulsion type that was proceeded was "{prop_type_name_max_freq}".
-- The number of zero-emission buses procured (electric, battery-electric and fuel-cell electric) is {zeb_count}.
-- the number of non-zero emission buses procured (CNG, hybrids, other alternate fuels) is {non_zeb_count}.
+- The most common propulsion type that was proceeded was **"{prop_type_name_max_freq}"**.
+- The number of zero-emission buses procured (electric, battery-electric and fuel-cell electric) is **{zeb_count}**.
+- the number of non-zero emission buses procured (CNG, hybrids, other alternate fuels) is **{non_zeb_count}**.
      
 The following was discovered after removing outliers:
 - overall the average awarded dollars per bus is {cpb_mean:,.2f} dollars, with a standard deviation of {cpb_std:,.2f} dollars. 

@@ -51,6 +51,7 @@ def prepare_data() ->pd.DataFrame:
             "total_cost",
             "bus_count",
             "source",
+            "new_project_type"
         ],
         how="outer",
     )
