@@ -83,7 +83,9 @@ def new_prop_finder(description: str) -> str:
     ]
 
     cng_list = [
-        "cng"
+        "cng",
+        "compressed natural gas"
+        
     ]
 
     electric_list = [
@@ -178,6 +180,46 @@ def new_prop_finder(description: str) -> str:
     else:
         return "not specified"
 
+#project type checker
+def project_type_checker(description: str) -> str:
+    """
+    function to match keywords to project description col to identy projects that only have bus procurement.
+    used to identify projects into diffferent categories: bus only, bus + others, no bus procurement.
+    use with .assign() to get a new col.
+    """
+    bus_list =[
+        "bus"
+    ]
+    
+    exclude_list =[
+        "facility",
+        #"station",
+        "installation",
+        "construct",
+        "infrastructure",
+        "signal priority",
+        "improvements",
+        "build",
+        "chargers"
+        "charging equipment", #double check charging station rows are affected
+        "build a regional transit hub" #specific string needed for fta list
+        #"associated infrastructure" may need to look at what is associated infrastructure is for ZEB 
+        
+    ]
+    proj_description = description.lower().strip()
+
+    if any(word in proj_description for word in bus_list) and not any(
+        word in proj_description for word in exclude_list
+    ):
+        return "bus only"
+    
+    elif any(word in proj_description for word in exclude_list) and not any(
+        word in proj_description for word in bus_list
+    ):
+        return "non-bus components"
+    
+    else:
+        return "includes bus and non-bus components"
 
 # included assign columns
 def clean_dgs_columns() -> pd.DataFrame:
