@@ -459,7 +459,8 @@ def add_new_description_col(df):
     
     # df["new_description_col"] = "This project is part of the " + df["program_code_description"] + " Program, and recieved $" + df["obligations_amount_string"] + ". This project will " + df["new_project_title"] + "."
     
-    df["new_description_col"] = df["new_project_title"] + ", part of the program(s) " + df["program_code_description_for_description"] + ". (Federal Project ID: " + df["project_number"] + ")."
+    # df["new_description_col"] = df["new_project_title"] + ", part of the " + df["program_code_description_for_description"] + " program(s). (Federal Project ID: " + df["project_number"] + ")."
+    df["new_description_col"] = df["new_project_title"] + ", part of the " + df["program_code_description_for_description"] + ". (Federal Project ID: " + df["project_number"] + ")."
     
     df.drop(columns =['obligations_amount_string', 'county_name_title', 'program_code_description_for_description'], axis=1, inplace=True)
     df['implementing_agency_locode'] = df['implementing_agency_locode'].str.replace('.0', '')
