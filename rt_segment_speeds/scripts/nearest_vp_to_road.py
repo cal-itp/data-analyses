@@ -1,247 +1,273 @@
 """
 """
-import dask.dataframe as dd
 import datetime
 import geopandas as gpd
-import numpy as np
 import pandas as pd
+import shapely
 
-from segment_speed_utils import helpers, wrangle_shapes
-from segment_speed_utils.project_vars import (SEGMENT_GCS, 
-                                              CONFIG_PATH, PROJECT_CRS)
+from dask import delayed, compute
 
+from segment_speed_utils import helpers, neighbor, segment_calcs, wrangle_shapes
+from segment_speed_utils.project_vars import SEGMENT_GCS, SHARED_GCS, PROJECT_CRS
+import interpolate_stop_arrival
 
-def filter_long_sjoin_results(
-    sjoin_long: dd.DataFrame,
-    sjoin_wide: pd.DataFrame,
-) -> dd.DataFrame:
-    """
-    Long results contain all sjoins.
-    Wide is filtered down to road linearids that have at least
-    2 vp_idx for that trip_instance_key on the road.
-    """
-    keep_cols = sjoin_long.columns.tolist()
-    
-    df = dd.merge(
-        sjoin_long,
-        sjoin_wide,
-        on = ["trip_instance_key", "linearid", "mtfcc"],
-        how = "inner"
-    )[keep_cols].drop_duplicates().reset_index(drop=True)
-    
-    return df
+road_id_cols = ["linearid", "mtfcc", "primary_direction"]
+segment_identifier_cols = road_id_cols + ["segment_sequence"]
+segment_identifier_cols2 = ['linearid', 'mtfcc', 
+                            'stop_primary_direction', 'segment_sequence']
+test_shapes = [
+    'e3435a4b882913d92a12563910f7193d',
+    'dfae5639b824ed6ad87ed753575f5381',
+    '626724031caabc3abcf3f183f4c9c718',
+    'b63ae7a27ecb677ac93c0373245ea21b',
+    '85a03eed08934ed37f204e9aae6cbd36',
+    '20af512ed1ada757a3b49beb36b623ad',
+    'a1999da4d09bc81548fe3e2b0fb458b4',
+    '1e7115aaac1fcb58c6509c7a90d9741c',
+    '3d437ea82b56e9827d15527ce41c716a',
+    '40469843deb94fbf61ef5f38bb76a137',
+    '04353cab33c0b31d8e9575ace6f9f6da',
+    'f165d1399f8880fc0011eb75b740ba24',
+    'ad15c10f6bc86dd6d3c02bfe6daf7ad9',
+    '71b06c07dabcecf71ddc5a8f3638ccf1',
+    '4e2b8555bc9936d711c8748694d67a3e',
+    '2e00363dba250fae30b7c14596f18907',
+    '2fd717cc5df1495434b8170e294137a6',
+    '60057141822cc9d9ac4795a83b2f25f1',
+    '5c0a268639c22fc58c8c842741cf68e3',
+    '67bc9cc93630ea8a22783cd59d11d46b',
+    '81e5d878737a777ffea18b0c08f58118',
+    'a91351f71fc4d2c0b457e1701a3ade64',
+    '67af448db16c21d09812f58cf065aac5',
+    'bd66e7d4ffae3bc36888cfddaf5e2e44',
+    'b9b803a342d42f72bbe25042f7328385'
+]
 
-
-def merge_vp_to_crosswalk(
-    analysis_date: str, 
-) -> dd.DataFrame:
-    """
-    """
-    sjoin_long = dd.read_parquet(
-        f"{SEGMENT_GCS}vp_sjoin/vp_road_segments_{analysis_date}",
-    )
-
-    sjoin_wide = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_sjoin/vp_road_segments_wide_{analysis_date}.parquet",
-    )
-    
-    # these are the vps joined to roads that we will narrow down
-    # for interpolation
-    sjoin_vp_roads = filter_long_sjoin_results(sjoin_long, sjoin_wide)
-    
-    # Pull the vp info for ones that join to road segments
-    vp_usable = dd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
-        columns = ["trip_instance_key", "vp_idx", "x", "y"],
-    )
-    
-    vp_with_roads = dd.merge(
-        vp_usable,
-        sjoin_vp_roads,
-        on = ["trip_instance_key", "vp_idx"],
-        how = "inner"
-    )
-    
-    return vp_with_roads
-
-
-def expand_road_segments(
-    roads: pd.DataFrame, 
-    cols_to_unpack: list
+def get_shape_road_crosswalk(
+    analysis_date: str, **kwargs
 ) -> pd.DataFrame:
-    """
-    Convert roads from wide to long.
-    This set up makes roads segment endpoints look like bus stops.
-    Once we use roads full line geometry to project, we can 
-    drop it and get it in a long format.
-    """
-    roads_long = (roads.drop(columns = "geometry")
-                  .explode(cols_to_unpack)
-                  .reset_index(drop=True)
-                 )
-    
-    return roads_long
 
+    # shapes to road crosswalk
+    shape_road_crosswalk = pd.read_parquet(
+        f"{SEGMENT_GCS}roads_staging/"
+        f"shape_road_crosswalk_{analysis_date}.parquet",
+    )
+    
+    # link shapes to trip
+    shape_to_trip = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["trip_instance_key", "shape_array_key"],
+        **kwargs
+        #filters = [[("shape_array_key", "==", one_shape)]]
+    )
 
-def make_wide(vp_with_projected: pd.DataFrame):
-    
-    vp_projected_wide = (vp_with_projected
-                     .groupby(["trip_instance_key"] + road_id_cols)
-                     .agg({
-                         "vp_idx": lambda x: list(x),
-                         "shape_meters": lambda x: list(x)})
-                     .reset_index()
-                     .rename(columns = {
-                         "vp_idx": "vp_idx_arr",
-                         "shape_meters": "shape_meters_arr"
-                     })
-                    )
-    
-    #https://stackoverflow.com/questions/42099024/pandas-pivot-table-rename-columns
-    narrowed_down_roads = (vp_with_projected
-                       .pivot_table(index = ["trip_instance_key"] + road_id_cols,
-                                    aggfunc = {"shape_meters": ["min", "max"]})
-                       .pipe(lambda x: 
-                             x.set_axis(map('_'.join, x), axis=1) 
-                             # if all column names are strings
-                             # ('_'.join(map(str, c)) for c in x)
-                             # if some column names are not strings
-                            )     
-                       .reset_index()
-                    )
-    
-    vp_projected_wide2 = pd.merge(
-        vp_projected_wide,
-        narrowed_down_roads,
-        on = ["trip_instance_key"] + road_id_cols,
+    shape_road_crosswalk = shape_road_crosswalk.merge(
+        shape_to_trip,
+        on = "shape_array_key",
         how = "inner"
     )
     
-    return vp_projected_wide2
+    return shape_road_crosswalk
+
+
+def make_road_stops_long(
+    shape_road_crosswalk: pd.DataFrame
+) -> gpd.GeoDataFrame:
+    
+    road_segments = gpd.read_parquet(
+        f"{SHARED_GCS}road_segments/",
+        columns = segment_identifier_cols + ["geometry"],
+    )
+    
+    road_segments2 = pd.merge(
+        road_segments,
+        shape_road_crosswalk,
+        on = ["linearid", "mtfcc", "segment_sequence"], 
+        how = "inner"
+    )
+    
+    # Beginning of road segment (1st coord)
+    road_segments0 = road_segments2.assign(
+        geometry = road_segments2.apply(
+            lambda x: shapely.Point(x.geometry.coords[0]), 
+            axis=1),
+    ).assign(stop_type=0)
+
+    # End of road segment (last coord)
+    road_segments1 = road_segments2.assign(
+        geometry = road_segments2.apply(
+            lambda x: shapely.Point(x.geometry.coords[-1]), 
+            axis=1),
+    ).assign(stop_type=1)
+
+    # Make long, similar to how stop_times is set up
+    # For roads, each segment has beginning and end stop
+    # We want to interpolate arrival times for both 
+    # to calculate speed
+    road_segments_long = pd.concat(
+        [road_segments0, road_segments1], 
+        axis=0
+    ).sort_values(
+        ["linearid", "segment_sequence", "stop_type"]
+    ).rename(
+        columns = {"primary_direction": "stop_primary_direction"}
+    ).reset_index(drop=True)
+    
+    return road_segments_long
+
+def merge_nn_with_shape(results2):
+
+    results2 = results2.assign(
+        stop_geometry = results2.stop_geometry.to_crs(PROJECT_CRS),
+        vp_coords_trio = results2.vp_coords_trio.to_crs(PROJECT_CRS)
+    )
+    
+    shapes = helpers.import_scheduled_shapes(
+        analysis_date,
+        columns = ["shape_array_key", "geometry"],
+        crs = PROJECT_CRS
+    ).dropna(subset="geometry")
+
+    gdf = pd.merge(
+        results2,
+        shapes.rename(columns = {"geometry": "shape_geometry"}),
+        on = "shape_array_key",
+        how = "inner"
+    )
+    
+    stop_meters_series = []
+    stop_arrival_series = []
+    
+    for row in gdf.itertuples():
+
+        stop_meters, interpolated_arrival = interpolate_stop_arrival.project_points_onto_shape(
+            getattr(row, "stop_geometry"),
+            getattr(row, "vp_coords_trio"),
+            getattr(row, "shape_geometry"),
+            getattr(row, "location_timestamp_local_trio")
+        )
+
+        stop_meters_series.append(stop_meters)
+        stop_arrival_series.append(interpolated_arrival)
+
+    results2 = gdf.assign(
+        stop_meters = stop_meters_series,
+        arrival_time = stop_arrival_series,
+    )[segment_identifier_cols2 + [
+        "trip_instance_key", "shape_array_key", 
+        "stop_type",
+         "stop_meters", "arrival_time"]
+     ].sort_values(
+        segment_identifier_cols2 + ["trip_instance_key", "stop_type", ]
+    ).reset_index(drop=True)
+    
+    return results2
+
+
+def quick_calculate_speeds(results2):
+    grouped_df = results2.groupby(segment_identifier_cols2 + 
+                                   ["trip_instance_key"])
+
+    min_arrival = grouped_df.agg({"arrival_time": "min"}).reset_index()
+    max_arrival = grouped_df.agg({"arrival_time": "max"}).reset_index()
+    
+    # If min/max arrival are the same, remove
+    # The same trio of vp is attached to the road segment's
+    # beginning and end
+    min_max_arrival = pd.merge(
+        min_arrival,
+        max_arrival,
+        on = segment_identifier_cols2 + ["trip_instance_key"]
+    ).query('arrival_time_x != arrival_time_y')
+    
+    results3 = pd.merge(
+        results2,
+        min_max_arrival[segment_identifier_cols2 + ["trip_instance_key"]],
+        on = segment_identifier_cols2 + ["trip_instance_key"],
+        how = "inner"
+    )
+    
+    results3 = segment_calcs.convert_timestamp_to_seconds(
+        results3, ["arrival_time"]
+    ).sort_values(
+        segment_identifier_cols2 + ["trip_instance_key"]
+    ).reset_index(drop=True)
+    
+    trip_cols = segment_identifier_cols2 + ["trip_instance_key"]
+    
+    results3 = results3.assign(
+        subseq_arrival_time_sec = (results3.groupby(trip_cols, 
+                                             observed=True, group_keys=False)
+                                  .arrival_time_sec
+                                  .shift(-1)
+                                 ),
+        subseq_stop_meters = (results3.groupby(trip_cols, 
+                                        observed=True, group_keys=False)
+                             .stop_meters
+                             .shift(-1)
+                            )
+    )
+    
+    speed = results3.assign(
+        meters_elapsed = results3.subseq_stop_meters - results3.stop_meters, 
+        sec_elapsed = results3.subseq_arrival_time_sec - results3.arrival_time_sec,
+    ).pipe(
+        segment_calcs.derive_speed, 
+        ("stop_meters", "subseq_stop_meters"), 
+        ("arrival_time_sec", "subseq_arrival_time_sec")
+    )
+    
+    return speed
 
 
 if __name__ == "__main__":
     
-    from segment_speed_utils.project_vars import analysis_date
-    
+    #from segment_speed_utils.project_vars import analysis_date
+    from shared_utils import rt_dates
+    analysis_date = rt_dates.DATES["oct2023"]
+
     start = datetime.datetime.now()
     
-    road_id_cols = ["linearid", "mtfcc"]
-    segment_identifier_cols = road_id_cols + ["segment_sequence"]
-    
-    vp = merge_vp_to_crosswalk(analysis_date)
-    vp = vp.repartition(npartitions=150)
-    
-    subset_roads = vp.linearid.unique().compute().tolist()
-    
-    roads = gpd.read_parquet(
-        f"{SEGMENT_GCS}segments_staging/"
-        f"roads_with_cutpoints_wide_{analysis_date}.parquet",
-        filters = [[("linearid", "in", subset_roads)]]
+    shape_road_crosswalk = get_shape_road_crosswalk(
+        analysis_date, 
+        filters = [[("shape_array_key", "in", test_shapes)]]
     )
     
-    road_dtypes = vp[road_id_cols].dtypes.to_dict()
-
-    vp_projected = vp.map_partitions(
-        wrangle_shapes.project_vp_onto_segment_geometry,
-        roads,
-        grouping_cols = road_id_cols,
-        meta = {
-            "vp_idx": "int",
-            **road_dtypes,
-            "shape_meters": "float",
-        },
-        align_dataframes = False
-    ).persist()
+    road_segments_long = make_road_stops_long(shape_road_crosswalk)
     
-    vp2 = vp[["vp_idx", "trip_instance_key"] + segment_identifier_cols]
-    
-    vp_with_projected = dd.merge(
-        vp2,
-        vp_projected,
-        on = ["vp_idx"] + road_id_cols,
-        how = "inner"
-    ).compute()
-    
-    vp_with_projected.to_parquet(
-        f"{SEGMENT_GCS}projection/vp_projected_roads_{analysis_date}.parquet"
-    )
-    '''
-    vp_projected_wide2 = make_wide(vp_with_projected)
-    
-    road_cutpoints = expand_road_segments(
-        roads, 
-        ["road_meters_arr", "segment_sequence_arr", "road_direction_arr"]
-    ).rename(columns = {
-        "road_meters_arr": "road_meters",
-        "segment_sequence_arr": "segment_sequence",
-        "road_direction_arr": "primary_direction"
-    })
-
-    # Now merge road segments with each destination acting as the road's stop
-    # and merge on arrays of projected vp against that road
-    gdf = pd.merge(
-        road_cutpoints,
-        vp_projected_wide2,
-        on = road_id_cols,
-        how = "inner"
-    ).query(
-        'road_meters >= shape_meters_min & road_meters <= shape_meters_max'
-    ).drop(
-        columns = ["shape_meters_min", "shape_meters_max"]
+    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(
+        road_segments_long, 
+        analysis_date
     )
     
-    nearest_vp_idx = []
-    subseq_vp_idx = []
-
-    for row in gdf.itertuples():
-
-        this_stop_meters = getattr(row, "road_meters")
-        valid_shape_meters_array = getattr(row, "shape_meters_arr")
-        valid_vp_idx_array = np.asarray(getattr(row, "vp_idx_arr"))
-
-        if (
-            (this_stop_meters >= min(valid_shape_meters_array)) and 
-            (this_stop_meters <= max(valid_shape_meters_array))
-       ):
-        
-            idx = np.searchsorted(
-                valid_shape_meters_array,
-                this_stop_meters,
-                side="right" 
-                # want our stop_meters value to be < vp_shape_meters,
-                # side = "left" would be stop_meters <= vp_shape_meters
-            )
-
-            # For the next value, if there's nothing to index into, 
-            # just set it to the same position
-            # if we set subseq_value = getattr(row, )[idx], 
-            # we might not get a consecutive vp
-            nearest_value = valid_vp_idx_array[idx-1]
-            subseq_value = nearest_value + 1
-
-        else:
-            nearest_value = np.nan
-            subseq_value = np.nan
-            
-        nearest_vp_idx.append(nearest_value)
-        subseq_vp_idx.append(subseq_value)
-        
-    result = gdf[segment_identifier_cols + [
-        "primary_direction", "road_meters", 
-        "trip_instance_key"]]
-
-    # Now assign the nearest vp for each trip that's nearest to
-    # a given stop
-    # Need to find the one after the stop later
-    result = result.assign(
-        nearest_vp_idx = nearest_vp_idx,
-        subseq_vp_idx = subseq_vp_idx,
-    )
+    results = neighbor.add_nearest_neighbor_result(gdf, analysis_date)
+    #results = compute(results)[0]
     
-    result.to_parquet(
-        f"{SEGMENT_GCS}projection/nearest_vp_roads_{analysis_date}.parquet"
-    )
-    '''
+    #utils.geoparquet_gcs_export(
+    #    results,
+    #    SEGMENT_GCS,
+    #    f"roads_staging/nearest_{analysis_date}"
+    #)
+    
+    results2 = delayed(merge_nn_with_shape)(results)
+    #results2 = compute(results2)[0]
+    
+    #utils.geoparquet_gcs_export(
+    #    results2,
+    #    SEGMENT_GCS,
+    #    f"roads_staging/interp_{analysis_date}"
+    #)
+    
+    speeds = delayed(quick_calculate_speeds)(results2)
+    
+    time1 = datetime.datetime.now()
+    print(f"delayed dfs: {time1 - start}")
+    
+    speeds = compute(speeds)[0]
+    
+    speeds.to_parquet(
+        f"{SEGMENT_GCS}roads_staging/"
+        f"test_speeds_{analysis_date}.parquet")
+    
     end = datetime.datetime.now()
-    print(f"execution time: {end - start}")
+    print(f"test 25 shapes: {end - start}")

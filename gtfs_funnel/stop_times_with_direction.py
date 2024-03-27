@@ -22,15 +22,16 @@ def prep_scheduled_stop_times(analysis_date: str) -> gpd.GeoDataFrame:
     """
     stops = helpers.import_scheduled_stops(
         analysis_date,
-        columns = ["feed_key", "stop_id", "geometry"],
+        columns = ["feed_key", "stop_id", "stop_name", "geometry"],
         crs = PROJECT_CRS,
         get_pandas = True
     )
 
     stop_times = helpers.import_scheduled_stop_times(
         analysis_date,
-        columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"]
-    ).compute()
+        columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"],
+        get_pandas = True
+    )
 
     trips = helpers.import_scheduled_trips(
         analysis_date,
@@ -53,7 +54,7 @@ def prep_scheduled_stop_times(analysis_date: str) -> gpd.GeoDataFrame:
         stops,
         on = ["feed_key", "stop_id"],
         how = "inner"
-    ).drop(columns = ["feed_key", "trip_id"])
+    ).drop(columns = ["trip_id"])
     
     st_with_stop = gpd.GeoDataFrame(
         st_with_stop, geometry = "geometry", crs = PROJECT_CRS)
@@ -83,13 +84,15 @@ def get_projected_stop_meters(
     return gdf
     
 
-def find_prior_stop(
+def find_prior_subseq_stop(
     stop_times: gpd.GeoDataFrame,
     trip_stop_cols: list
 ) -> gpd.GeoDataFrame:
     """
     For trip-stop, find the previous stop (using stop sequence).
     Attach the previous stop's geometry.
+    This will determine the direction for the stop (it's from prior stop).
+    Add in subseq stop information too.
     """
     prior_stop = stop_times[trip_stop_cols].sort_values(
         trip_stop_cols).reset_index(drop=True)
@@ -105,6 +108,9 @@ def find_prior_stop(
         subseq_stop_id = (prior_stop.groupby("trip_instance_key")
                           .stop_id
                           .shift(-1)),
+        subseq_stop_name = (prior_stop.groupby("trip_instance_key")
+                          .stop_name
+                          .shift(-1))        
     )
     
     # Merge in prior stop geom as a separate column so we can
@@ -133,9 +139,11 @@ def find_prior_stop(
     ).astype({
         "prior_stop_sequence": "Int64",
         "subseq_stop_sequence": "Int64"
-    }).fillna({"subseq_stop_id": ""})
-    
-    
+    }).fillna({
+        "subseq_stop_id": "",
+        "subseq_stop_name": ""
+    })
+        
     # Create stop pair with underscores, since stop_id 
     # can contain hyphens
     stop_times_with_prior_geom = stop_times_with_prior_geom.assign(
@@ -143,8 +151,13 @@ def find_prior_stop(
             lambda x: 
             str(x.stop_id) + "__" + str(x.subseq_stop_id), 
             axis=1, 
-        )
-    ).drop(columns = ["subseq_stop_id"])
+        ),
+        stop_pair_name = stop_times_with_prior_geom.apply(
+            lambda x: 
+            x.stop_name + "__" + x.subseq_stop_name, 
+            axis=1, 
+        ),    
+    ).drop(columns = ["subseq_stop_id", "subseq_stop_name"])
     
     return stop_times_with_prior_geom
 
@@ -167,9 +180,10 @@ def assemble_stop_times_with_direction(
     
     scheduled_stop_times = prep_scheduled_stop_times(analysis_date)
 
-    trip_stop_cols = ["trip_instance_key", "stop_sequence", "stop_id"]
+    trip_stop_cols = ["trip_instance_key", "stop_sequence", 
+                      "stop_id", "stop_name"]
         
-    scheduled_stop_times2 = find_prior_stop(
+    scheduled_stop_times2 = find_prior_subseq_stop(
         scheduled_stop_times, trip_stop_cols
     )
     
@@ -195,11 +209,6 @@ def assemble_stop_times_with_direction(
         rt_utils.primary_cardinal_direction)(prior_geom, current_geom)
     stop_distance = prior_geom.distance(current_geom)
     
-    # Create a column with normalized direction vector
-    # Add this because some bus can travel in southeasterly direction, 
-    # but it's categorized as southbound or eastbound depending 
-    # on whether south or east value is larger.
-
     other_stops_no_geom = other_stops_no_geom.assign(
         stop_primary_direction = stop_direction,
         stop_meters = stop_distance,
@@ -224,10 +233,7 @@ def assemble_stop_times_with_direction(
     
     end = datetime.datetime.now()
     print(f"execution time: {end - start}")
-    
-    del scheduled_stop_times, scheduled_stop_times2
-    del other_stops_no_geom, scheduled_stop_times_with_direction, df
-    
+        
     return
 
 

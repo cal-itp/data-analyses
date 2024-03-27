@@ -1,6 +1,5 @@
-2023-12-11 18:49:41.963 | INFO     | __main__:<module>:178 - execution time: 0:02:12.275031
-2023-12-12 12:38:25.692 | INFO     | __main__:<module>:282 - cut local roads: 0:13:31.749643
-2023-12-12 12:38:25.740 | INFO     | __main__:<module>:285 - execution time: 0:13:31.797462
-2023-12-12 12:43:57.178 | INFO     | __main__:<module>:261 - cut primary/secondary roads: 0:03:51.547346
-2023-12-12 13:01:51.518 | INFO     | __main__:<module>:61 - concatenate road segments: 0:00:51.244157
-2023-12-12 14:35:58.485 | INFO     | __main__:<module>:62 - concatenate road segments: 0:00:45.026472
+2024-03-21 16:53:55.732 | INFO     | __main__:<module>:236 - cut primary/secondary roads: 0:00:25.924757
+2024-03-21 17:03:42.871 | INFO     | __main__:<module>:255 - cut local roads: 0:09:47.138963
+2024-03-21 17:03:42.871 | INFO     | __main__:<module>:258 - execution time: 0:10:13.064427
+2024-03-22 14:00:01.019 | INFO     | __main__:<module>:184 - execution time: 0:05:50.663597
+2024-03-22 14:19:25.092 | INFO     | __main__:<module>:196 - execution time: 0:08:45.006011
