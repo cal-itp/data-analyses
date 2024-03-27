@@ -140,6 +140,7 @@ def new_prop_finder(description: str) -> str:
         #"zero emission buses",
         #"zero emission electric",
         #"zero emission vehicles",
+        "zero-emission",
         "zero emission",
     ]
 
@@ -188,21 +189,30 @@ def project_type_checker(description: str) -> str:
     use with .assign() to get a new col.
     """
     bus_list =[
-        "bus"
+        "bus",
+        "transit vehicles",# for fta list
+        "cutaway vehicles",# for fta list
+        "zero‐emission vehicles", # for tircp list
+        "buy new replacement vehicles", # specific string for fta list
     ]
     
     exclude_list =[
         "facility",
         #"station",
         "installation",
+        "depot",
         "construct",
         "infrastructure",
         "signal priority",
         "improvements",
         "build",
-        "chargers"
-        "charging equipment", #double check charging station rows are affected
-        "build a regional transit hub" #specific string needed for fta list
+        "chargers",
+        "charging equipment",
+        "install",
+        "rail"
+        "facilities",
+        "bus washing system",
+        "build a regional transit hub" # specific string needed for fta list
         #"associated infrastructure" may need to look at what is associated infrastructure is for ZEB 
         
     ]
