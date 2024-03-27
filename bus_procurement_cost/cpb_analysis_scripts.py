@@ -371,5 +371,9 @@ conclusion = """
 Based on the findings so far, there is data to supports that bus procurement cost vary widely amongst transit agencies all over the country. 
 Non-ZEB bus procurement shows wider cost variation. Where as ZEB procurement was much tighter. ZEBs do have a higher cost per bus than non-ZEB, however this may be due to projects that include ZEBs and other bus related expenses.
 
+Lots of project included procuring buses and other components such as charging equipment/stations, new faciliites and other installation/construction activies. The majority of ZEB procurement projects also include the purchase of related charging equipment and infrastructure, indicating that transit agencies are in the early stages of adopting ZEBs and require the initial investment of charging related equipment to operate the buses. Few agencies reported procuring only ZEB buses.
+
+the majority of bus only procurement projects were for non-ZEB bus types.
+
 Futher investigation is needed to isolate projects with only busy procurement. The DGS usage report data is the most granual data and includes itemized cost for bus, options and other configurables.
 """
