@@ -3,17 +3,13 @@ Add some GTFS schedule derived metrics
 by trip (service frequency and stop spacing).
 """
 import geopandas as gpd
-import intake
 import pandas as pd
 
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
-from segment_speed_utils.project_vars import RT_SCHED_GCS, PROJECT_CRS
-
-catalog = intake.open_catalog(
-    "../_shared_utils/shared_utils/shared_data_catalog.yml")
-
+from segment_speed_utils.project_vars import SCHED_GCS, RT_SCHED_GCS
+from shared_utils.rt_utils import METERS_PER_MILE
 
 def assemble_scheduled_trip_metrics(
     analysis_date: str, 
@@ -88,7 +84,11 @@ def schedule_metrics_by_route_direction(
                   })
                  )
     
-    round_me = ["avg_stop_meters", "avg_scheduled_service_minutes"]
+    metrics_df = metrics_df.assign(
+        avg_stop_miles = metrics_df.avg_stop_meters.divide(METERS_PER_MILE).round(2)
+    ).drop(columns = ["avg_stop_meters"])
+    
+    round_me = ["avg_stop_miles", "avg_scheduled_service_minutes"]
     metrics_df[round_me] = metrics_df[round_me].round(2)
 
     common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
@@ -109,80 +109,20 @@ def schedule_metrics_by_route_direction(
     return df
     
     
-def pop_density_by_shape(shape_df: gpd.GeoDataFrame):
-    
-    shape_df = shape_df.to_crs(PROJECT_CRS)
-    shape_df = shape_df.assign(
-        geometry = shape_df.geometry.buffer(5)
-    )
-    
-    calenviroscreen_lehd = (catalog.calenviroscreen_lehd_by_tract.read()
-                            [["Tract", "pop_sq_mi", "geometry"]]
-                            .to_crs(PROJECT_CRS)
-                           )
-    
-    calenviroscreen_lehd = calenviroscreen_lehd.assign(
-        dense = calenviroscreen_lehd.apply(
-            lambda x: 1 if x.pop_sq_mi >= 10_000
-            else 0, axis=1
-        )
-    )
-    
-    group_cols = ["schedule_gtfs_dataset_key", 
-                  "route_id", "direction_id", 
-                  "common_shape_id"
-                 ]
-
-    shape_overlay = gpd.overlay(
-        shape_df[group_cols + ["geometry"]].drop_duplicates(), 
-        calenviroscreen_lehd, 
-        how = "intersection"
-    )
-    
-    shape_overlay = shape_overlay.assign(
-        length = shape_overlay.geometry.length,
-    )
-    
-    shape_grouped = (shape_overlay.groupby(group_cols + ["dense"], 
-                                          observed=True, group_keys=False)
-                 .agg({"length": "sum"})
-                 .reset_index()
-                 .rename(columns = {"length": "overlay_length"})
-                )
-    
-    shape_grouped = shape_grouped.assign(
-        length = (shape_grouped.groupby(group_cols, 
-                                        observed=True, group_keys=False)
-                  .overlay_length
-                  .transform("sum")
-                 )
-    )
-    
-    shape_grouped = shape_grouped.assign(
-        pct_dense = (shape_grouped.overlay_length
-                     .divide(shape_grouped.length)
-                     .round(3)
-                    )
-    ).query('dense == 1')[
-        group_cols + ["pct_dense"]
-    ].reset_index(drop=True)
-    
-    return shape_grouped
-    
-    
 if __name__ == "__main__":
     
     from update_vars import analysis_date_list, CONFIG_DICT
     
     TRIP_EXPORT = CONFIG_DICT["trip_metrics_file"]
     ROUTE_DIR_EXPORT = CONFIG_DICT["route_direction_metrics_file"]
+    ROUTE_TYPOLOGIES = CONFIG_DICT["route_typologies_file"]
     
     for date in analysis_date_list:
         trip_metrics = assemble_scheduled_trip_metrics(date, CONFIG_DICT)
                 
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
-        
+
         route_cols = [
             "schedule_gtfs_dataset_key", 
             "route_id", 
@@ -191,13 +131,25 @@ if __name__ == "__main__":
         
         route_dir_metrics = schedule_metrics_by_route_direction(
             trip_metrics, date, route_cols)
-
-        pop_density_df = pop_density_by_shape(route_dir_metrics)
+        
+        # Right now, this is long, and a route-direction can have 
+        # multiple typologies
+        route_typologies = pd.read_parquet(
+            f"{SCHED_GCS}{ROUTE_TYPOLOGIES}_{date}.parquet",
+            columns = route_cols + ["freq_category", "typology", "pct_typology"]
+        )
+        
+        # Select based on plurality, largest pct_typology kept
+        # In the future, we can add additional ones
+        route_typologies_plurality = route_typologies.sort_values(
+            route_cols + ["pct_typology"],
+            ascending = [True for i in route_cols] + [False]
+        ).drop_duplicates(subset=route_cols).reset_index(drop=True)
         
         route_dir_metrics2 = pd.merge(
             route_dir_metrics,
-            pop_density_df,
-            on = route_cols + ["common_shape_id"],
+            route_typologies_plurality,
+            on = route_cols,
             how = "left"
         )
             
