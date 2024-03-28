@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import shared_utils
 from calitp_data_analysis.sql import to_snakecase
-from dgs_data_cleaner import new_bus_size_finder, new_prop_finder
+from dgs_data_cleaner import new_bus_size_finder, new_prop_finder, project_type_checker
 from tircp_data_cleaner import col_row_updater
 
 gcs_path = "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/"
@@ -30,8 +30,10 @@ def col_splitter(
 def agg_just_bus(df: pd.DataFrame) -> pd.DataFrame:
     """
     filters FTA data to only show projects with bus procurement (bus count > 0).
+    then filters projects for new_project_type = bus only
+    then aggregates
     """
-    df1 = df[df["bus_count"] > 0]
+    df1 = df[(df["bus_count"] > 0) & (df["new_project_type"] == "bus only")]
 
     df2 = (
         df1.groupby(
@@ -40,6 +42,8 @@ def agg_just_bus(df: pd.DataFrame) -> pd.DataFrame:
                 "project_title",
                 "new_prop_type_finder",
                 "new_bus_size_type",
+                "description",
+                "new_project_type"
             ]
         )
         .agg(
@@ -86,6 +90,7 @@ def clean_fta_columns() -> pd.DataFrame:
     df2 = df1.assign(
         new_prop_type_finder=df1["description"].apply(new_prop_finder),
         new_bus_size_type=df1["description"].apply(new_bus_size_finder),
+        new_project_type=df1["description"].apply(project_type_checker)
     )
 
     # cleaning specific values
