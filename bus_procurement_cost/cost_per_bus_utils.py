@@ -40,6 +40,17 @@ def remove_outliers(df: pd.DataFrame, zscore_col: int) -> pd.DataFrame:
     ]
     return df1
 
+def cpb_zscore_outliers(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    function that calculated cost per bus col, z-score col, then removes outliers(remove rows with zscore >3)
+    """
+    df = overall_cpb(df)
+    df = get_zscore(df)
+    df1 = remove_outliers(df, "zscore_cost_per_bus")
+    
+    return df1
+
+
 def cpb_aggregate(df: pd.DataFrame, column: str) -> pd.DataFrame:
     """
     function to aggregate compiled data by different categories (transit agency, propulsion type, size type).
@@ -170,55 +181,58 @@ total_unique_projects = len(all_bus)
 total_bus_count = sum(all_bus.bus_count)
 total_funding = sum(all_bus.total_cost)
 
+## ALL BUS
+
 # initial df with cpb col
-all_bus_cpb = overall_cpb(all_bus)
+#all_bus_cpb = overall_cpb(all_bus)
 
 # get zscore
-cpb_zscore = get_zscore(all_bus_cpb)
+#cpb_zscore = get_zscore(all_bus_cpb)
 
 # initial df with cpb/zscore, remove outliers
-no_outliers = remove_outliers(cpb_zscore, "zscore_cost_per_bus")
+no_outliers = cpb_zscore_outliers(all_bus)
+
 
 # aggregate by transit agency
-agency_agg = cpb_aggregate(all_bus, "transit_agency")
+agency_agg = cpb_aggregate(no_outliers, "transit_agency")
 
 # aggregate by prop type
-prop_agg = cpb_aggregate(all_bus, "prop_type")
+prop_agg = cpb_aggregate(no_outliers, "prop_type")
 
 # aggregate by bus size
-size_agg = cpb_aggregate(all_bus, "bus_size_type")
+size_agg = cpb_aggregate(no_outliers, "bus_size_type")
 
-min_bus_cost = cpb_zscore.cpb.min()
-max_bus_cost = cpb_zscore.cpb.max()
-max_bus_count = cpb_zscore.bus_count.max()
+min_bus_cost = no_outliers.cpb.min()
+max_bus_cost = no_outliers.cpb.max()
+max_bus_count = no_outliers.bus_count.max()
 
 # VARIABLES
-cpb_mean = cpb_zscore.cpb.mean()
-cpb_std = cpb_zscore.cpb.std()
+cpb_mean = no_outliers.cpb.mean()
+cpb_std = no_outliers.cpb.std()
 
 # agency with highest bus count
-agency_with_most_bus = cpb_zscore.loc[
-    cpb_zscore["bus_count"].idxmax(), "transit_agency"
+agency_with_most_bus = no_outliers.loc[
+    no_outliers["bus_count"].idxmax(), "transit_agency"
 ]
 
 # propulsion type max count and name
-prop_type_name_max_freq = cpb_zscore["prop_type"].value_counts().idxmax()
-prop_type_max = cpb_zscore["prop_type"].value_counts().max()
+prop_type_name_max_freq = no_outliers["prop_type"].value_counts().idxmax()
+prop_type_max = no_outliers["prop_type"].value_counts().max()
 
 # prop type min count and anme
-prop_type_name_min_freq = cpb_zscore["prop_type"].value_counts().idxmin()
-prop_type_min = cpb_zscore["prop_type"].value_counts().min()
+prop_type_name_min_freq = no_outliers["prop_type"].value_counts().idxmin()
+prop_type_min = no_outliers["prop_type"].value_counts().min()
 
 # how many buses do they have? already answered
-agency_with_highest_funds = cpb_zscore.loc[
+agency_with_highest_funds = no_outliers.loc[
     all_bus["total_cost"].idxmax(), "transit_agency"
 ]
 
 # what is the highest amount? already answered
-agency_max_cpb = cpb_zscore.loc[cpb_zscore["cpb"].idxmax(), "transit_agency"]
-agency_min_cpb = cpb_zscore.loc[cpb_zscore["cpb"].idxmin(), "transit_agency"]
-prop_type_max_cpb = cpb_zscore.loc[cpb_zscore["cpb"].idxmax(), "prop_type"]
-prop_type_min_cpb = cpb_zscore.loc[cpb_zscore["cpb"].idxmin(), "prop_type"]
+agency_max_cpb = no_outliers.loc[no_outliers["cpb"].idxmax(), "transit_agency"]
+agency_min_cpb = no_outliers.loc[no_outliers["cpb"].idxmin(), "transit_agency"]
+prop_type_max_cpb = no_outliers.loc[no_outliers["cpb"].idxmax(), "prop_type"]
+prop_type_min_cpb = no_outliers.loc[no_outliers["cpb"].idxmin(), "prop_type"]
 
 ## ZEB ONLY VARIABLES
 
@@ -226,25 +240,25 @@ prop_type_min_cpb = cpb_zscore.loc[cpb_zscore["cpb"].idxmin(), "prop_type"]
 zeb_only = zeb_only_df(all_bus)
 
 # calc cpb
-zeb_cpb = overall_cpb(zeb_only)
+#zeb_cpb = overall_cpb(zeb_only)
 
-# get zscore
-zeb_zscore = get_zscore(zeb_cpb)
+# get cpb, zscore, remove outliers
+zeb_no_outliers = cpb_zscore_outliers(zeb_only)
 
 # remove outliers
-zeb_no_outliers = remove_outliers(zeb_zscore, "zscore_cost_per_bus")
+#zeb_no_outliers = remove_outliers(zeb_zscore, "zscore_cost_per_bus")
 
 # aggregate by transit agency
-zeb_agency_agg = cpb_aggregate(zeb_only, "transit_agency")
+zeb_agency_agg = cpb_aggregate(zeb_no_outliers, "transit_agency")
 
 # aggregate by prop type
-zeb_prop_agg = cpb_aggregate(zeb_only, "prop_type")
+zeb_prop_agg = cpb_aggregate(zeb_no_outliers, "prop_type")
 
 # aggregate by bus size
-zeb_size_agg = cpb_aggregate(zeb_only, "bus_size_type")
+zeb_size_agg = cpb_aggregate(zeb_no_outliers, "bus_size_type")
 
 # VARIABLES
-zeb_count = len(zeb_only.prop_type)
+zeb_count = len(zeb_no_outliers.prop_type)
 
 # zeb only, no outliers cpb curve
 zeb_only_mean = zeb_no_outliers.cpb.mean()
@@ -256,25 +270,25 @@ zeb_only_std = zeb_no_outliers.cpb.std()
 non_zeb_only = non_zeb_only_df(all_bus)
 
 # calc cpb
-non_zeb_cpb = overall_cpb(non_zeb_only)
+#non_zeb_cpb = overall_cpb(non_zeb_only)
 
 # get zscore
-non_zeb_zscore = get_zscore(non_zeb_cpb)
+#non_zeb_zscore = get_zscore(non_zeb_cpb)
 
-# remove outliers
-non_zeb_no_outliers = remove_outliers(non_zeb_zscore, "zscore_cost_per_bus")
+# get cpb, zscore, remove outliers
+non_zeb_no_outliers = cpb_zscore_outliers(non_zeb_only)
 
 # aggregate by transit agency
-non_zeb_agency_agg = cpb_aggregate(non_zeb_only, "transit_agency")
+non_zeb_agency_agg = cpb_aggregate(non_zeb_no_outliers, "transit_agency")
 
 # aggregate by prop type
-non_zeb_prop_agg = cpb_aggregate(non_zeb_only, "prop_type")
+non_zeb_prop_agg = cpb_aggregate(non_zeb_no_outliers, "prop_type")
 
 # aggregate by bus size
-non_zeb_size_agg = cpb_aggregate(non_zeb_only, "bus_size_type")
+non_zeb_size_agg = cpb_aggregate(non_zeb_no_outliers, "bus_size_type")
 
 # VARIABLES
-non_zeb_count = len(non_zeb_only.prop_type)
+non_zeb_count = len(non_zeb_no_outliers.prop_type)
 
 # non-zeb cpb mean and std dev
 non_zeb_only_mean = non_zeb_no_outliers.cpb.mean()
@@ -283,56 +297,57 @@ non_zeb_only_std = non_zeb_no_outliers.cpb.std()
 # start summary narative
 summary = f"""
 ## Summary
-This analysis examines the 'cost' of buses for transit agencies across the country. Specifically, to exammine the variation of bus cost for different bus related categories such as propulsion type and size type. 
+This analysis examines the cost of buses for transit agencies across the county. Specifically, to observe the variation of bus cost for propulsion type and bus sizes.
 
-As of today, data was scraped from these sources:
+Data was compiled from three data sources:
+
 1. FTA Bus and Low- and No-Emission Grant Awards press release (federally funded, nationwide data)
 2. TIRCP project data (state-funded, California only)
-3. DGS useage report for all procurements from California agencies purchasing from New Flyer and Portera.
+3. DGS usage report for all procurements from California agencies purchasing from New Flyer and Portera Inc..
 
-Analyzing the dataset uncovered several nuances. Some projects included additional components besides bus purchases. Installing charging inffrastructure, constructing transit facilities, and other non-bus components were often wrapped into bus purchases. While there were projects that purchased buses exclusivly, some projects did not include any bus purchases at all or did not accurately or describe the propulsion or bus size type. The variety in these projects may contribute to high variances in “cost per bus”.
+The compiled dataset includes 298 total transit related projects. However, the initial dataset included projects that encompassed bus procurement and other components such as charging installation and facility construction, as well as non-bus related projects (ferries, trains). The dataset was filtered to exclude projects that were not bus related, indicated 0 buses procured, and projects that contained construction/installation work. 94 projects remained that specified the number of buses to procure and explicitly described procuring buses (bus only projects).
 
-The dataset was examined for inconsistencies and data was validated to complete the analysis. The final Dataset was filtered for projects that only procured buses.The compiled data was aggregated by agencies and a 'cost per bus' metric was calculated by dividing the total funding received by the total number of buses they procured.
-Initial finding uncovered some outliers where a transit agency’s cost per bus figure exceeded 3 standard deviations away from the mean.
+The remaining bus only projects were categorized into different propulsion types and bus sizes, a “cost per bus” value was calculated, and outliers removed.
 
-Overall:
-- **{total_unique_projects}** projects with bus purchases were analyzed.
-- **{total_funding:,.2f}** dollars were awarded to agencies for projects including bus purchases.
-- **{total_bus_count}** total buses are to be purchased.
+A overall summary is provided below:
+- Total projects: **298**
+- Number of projects with mix bus procurement and other components, also non-bus projects: **204** 
+- Number of bus only projects: **{total_unique_projects}**
+- Total dollars awarded to bus only projects: **`${total_funding:,.2f}`**
+- Total number of buses: **{total_bus_count}**
+- Most common propulsion type procured for bus only projects: **{prop_type_name_max_freq}** at **{prop_type_max}** projects
+- Number of ZEB buses* procured: **{zeb_count}**
+- Number of non-ZEB buses** procured: **{non_zeb_count}**
+- Overall average cost per bus (ZEB & non-ZEB) is `${cpb_mean:,.2f}` (std `${cpb_std:,.2f}`)
+- ZEB average cost per bus is `${zeb_only_mean:,.2f}` (std `${zeb_only_std:,.2f}`)
+- Non-ZEB average cost per bus is `${non_zeb_only_mean:,.2f}` (std `${non_zeb_only_std:,.2f}`) 
+
+`*`ZEB buses include: zero-emission (not specified), electric (not specified), battery electric, fuel cell electric
+
+`**`Non-ZEB buses include: CNG, ethanol, low emission (hybrid, propane), diesel, gas.
 
 
-Propulsion type values varied wildly amongst the datasets and often times did not explicilty specify the propulsion type. Data was validated and grouped as best as possible based on project description or other indications of specific propulsion type.
-The following is a summary of propulsion type metrics.
-- The most common propulsion type that was proceeded was **"{prop_type_name_max_freq}"**.
-- The number of zero-emission buses procured (electric, battery-electric and fuel-cell electric) is **{zeb_count}**.
-- the number of non-zero emission buses procured (CNG, hybrids, other alternate fuels) is **{non_zeb_count}**.
-     
-The following was discovered after removing outliers:
-- overall the average awarded dollars per bus is {cpb_mean:,.2f} dollars, with a standard deviation of {cpb_std:,.2f} dollars. 
-- the average awarded dollars per ZEB is {zeb_only_mean:,.2f} dollars, with a standard deviation of {zeb_only_std:,.2f} dollars.
-- the average awarded dollars per non-ZEB {non_zeb_only_mean:,.2f} dollars, with a standard deviation of ${non_zeb_only_std:,.2f} dollars.
+Below are key charts that visualize more findings:
 
-Below are key charts that summarize the findings.
 
 """
 
 all_bus_desc = """
-## All buses (ZEB and non-ZEB) distribution curve.
-This chart shows the distribution of all project.
+## All buses (ZEB and non-ZEB) cost/bus distribution curve.
+This chart shows the cost per bus distribution of all bus only projects.
 """
 
 # ZEB only, cpb distribution
 zeb_desc = """
 ## ZEB only  cost/bus Distribution Chart. 
-Chart of projects with electric, battery electric, hydrogen fuel cell bus procurements
-The majority of the distribution is within +/-1 standard deviation of the mean, however the standard deviation is quite wide at ~$1,200,000.
+Chart of projects with zero-emission, electric, battery electric, hydrogen fuel cell bus procurements.
 """
 
 # non-ZEB
 non_zeb_desc = """
 ## non-ZEB cost/bus Distribution. 
 Chart of projects with non-ZEB bus procurement (hybrids, diesel, cng)
-This distrubtion is is much more spread out and with a smaller standard deviation."""
+This distrubtion is wider than the ZEB projects."""
 
 #highest cpb agency
 highest_cpb_desc = """
@@ -353,21 +368,17 @@ LA Metro plans to procure the most buses."""
 #prop_type cpb
 cpb_prop_type_desc = """
 ## Cost per bus by propulsion type. 
-The total cost per bus for ZEB categories do fall within a similar range of eachother."""
+"""
 
 #prop_type bus coutn
 bus_count_prop_type_desc = """
 ## Bus count by propulsion type. 
-The most common bus type procured were zero-emissions related."""
+"""
 
 conclusion = """
 ## Conclusion
-Based on the findings so far, there is data to supports that bus procurement cost vary widely amongst transit agencies all over the country. 
-Non-ZEB bus procurement shows wider cost variation. Where as ZEB procurement was much tighter. ZEBs do have a higher cost per bus than non-ZEB, however this may be due to projects that include ZEBs and other bus related expenses.
+Based on the findings so far in bus only projects, there is evidence that bus procurement cost vary widely amongst transit agencies all over the country. Non-ZEB bus cost variation was wide. Whereas ZEB cost variation was much tighter. However ZEBs do have a higher cost per bus than non-ZEB.
 
-Lots of project included procuring buses and other components such as charging equipment/stations, new faciliites and other installation/construction activies. The majority of ZEB procurement projects also include the purchase of related charging equipment and infrastructure, indicating that transit agencies are in the early stages of adopting ZEBs and require the initial investment of charging related equipment to operate the buses. Few agencies reported procuring only ZEB buses.
+Most of the bus only projects were for non-ZEBs. This can be explained by looking into the initial project list. Lots of projects that procured ZEBs also included the installation of chargers and related charging infrastructure. Indicating that transit agencies are still adopting and preparing for ZEBs and need to make the initial investment in the equipment.  
 
-the majority of bus only procurement projects were for non-ZEB bus types.
-
-Futher investigation is needed to isolate projects with only busy procurement. The DGS usage report data is the most granual data and includes itemized cost for bus, options and other configurables.
 """

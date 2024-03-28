@@ -192,13 +192,18 @@ def project_type_checker(description: str) -> str:
         "bus",
         "transit vehicles",# for fta list
         "cutaway vehicles",# for fta list
-        "zero‐emission vehicles", # for tircp list
+        "zero-emission vehicles", # for tircp list
+        "zero emission vehicles",
+        "zero‐emissions vans",
+        "hybrid-electric vehicles",
+        "battery-electric vehicles",
         "buy new replacement vehicles", # specific string for fta list
     ]
     
     exclude_list =[
         "facility",
         #"station",
+        "stops",
         "installation",
         "depot",
         "construct",
@@ -209,7 +214,8 @@ def project_type_checker(description: str) -> str:
         "chargers",
         "charging equipment",
         "install",
-        "rail"
+        "rail",
+        "garage",
         "facilities",
         "bus washing system",
         "build a regional transit hub" # specific string needed for fta list
@@ -228,8 +234,13 @@ def project_type_checker(description: str) -> str:
     ):
         return "non-bus components"
     
-    else:
+    elif any(word in proj_description for word in exclude_list) and any(
+        word in proj_description for word in bus_list
+    ):
         return "includes bus and non-bus components"
+    
+    else:
+        return "needs review"
 
 # included assign columns
 def clean_dgs_columns() -> pd.DataFrame:
