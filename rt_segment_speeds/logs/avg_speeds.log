@@ -49,3 +49,116 @@
 2024-03-18 17:59:29.250 | INFO     | __main__:<module>:261 - average rollups for ['2023-10-09', '2023-10-10', '2023-10-11', '2023-10-12', '2023-10-13', '2023-10-14', '2023-10-15']: 0:00:56.780709
 2024-03-18 18:00:25.018 | INFO     | __main__:multi_day_summary_averages:225 - multi day summary speed execution time: 0:00:55.767158
 2024-03-18 18:00:25.025 | INFO     | __main__:<module>:261 - average rollups for ['2023-04-10', '2023-04-11', '2023-04-12', '2023-04-13', '2023-04-14', '2023-04-15', '2023-04-16']: 0:00:55.773949
+2024-03-28 10:13:24.147 | INFO     | __main__:single_day_summary_averages:98 - trip avg 0:00:15.895769
+2024-03-28 10:13:35.130 | INFO     | __main__:single_day_summary_averages:134 - route dir avg: 0:00:10.983423
+2024-03-28 10:13:35.131 | INFO     | __main__:single_day_summary_averages:135 - single day summary speed execution time: 0:00:26.879192
+2024-03-28 10:13:35.213 | INFO     | __main__:<module>:250 - average rollups for 2024-03-13: 0:00:26.961927
+2024-03-28 11:01:28.389 | INFO     | __main__:single_day_summary_averages:104 - trip avg 0:00:15.419238
+2024-03-28 11:20:00.782 | INFO     | __main__:single_day_summary_averages:107 - trip avg 0:00:14.951981
+2024-03-28 11:20:12.263 | INFO     | __main__:single_day_summary_averages:152 - route dir avg: 0:00:11.481739
+2024-03-28 11:20:12.264 | INFO     | __main__:single_day_summary_averages:153 - single day summary speed execution time: 0:00:26.433720
+2024-03-28 11:20:12.341 | INFO     | __main__:<module>:268 - average rollups for 2024-03-13: 0:00:26.511647
+2024-03-28 11:47:11.304 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:14.902490
+2024-03-28 11:47:23.219 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.914843
+2024-03-28 11:47:23.219 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:26.817333
+2024-03-28 11:47:23.289 | INFO     | __main__:<module>:249 - average rollups for 2024-01-17: 0:00:26.888038
+2024-03-28 11:47:35.041 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.751261
+2024-03-28 11:47:44.482 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:09.441363
+2024-03-28 11:47:44.483 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:21.192624
+2024-03-28 11:47:44.563 | INFO     | __main__:<module>:249 - average rollups for 2024-02-14: 0:00:21.273305
+2024-03-28 11:47:56.328 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.764032
+2024-03-28 11:48:06.000 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:09.672607
+2024-03-28 11:48:06.001 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:21.436639
+2024-03-28 11:48:06.074 | INFO     | __main__:<module>:249 - average rollups for 2024-03-13: 0:00:21.510606
+2024-03-28 11:48:16.908 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:10.833111
+2024-03-28 11:48:28.693 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.784261
+2024-03-28 11:48:28.695 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:22.617372
+2024-03-28 11:48:28.769 | INFO     | __main__:<module>:249 - average rollups for 2023-03-15: 0:00:22.693451
+2024-03-28 11:48:39.816 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.045529
+2024-03-28 11:48:53.478 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:13.661622
+2024-03-28 11:48:53.479 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:24.707151
+2024-03-28 11:48:53.552 | INFO     | __main__:<module>:249 - average rollups for 2023-04-12: 0:00:24.781042
+2024-03-28 11:49:04.043 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:10.488963
+2024-03-28 11:49:15.680 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.637765
+2024-03-28 11:49:15.683 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:22.126728
+2024-03-28 11:49:15.767 | INFO     | __main__:<module>:249 - average rollups for 2023-05-17: 0:00:22.213022
+2024-03-28 11:49:26.740 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:10.972228
+2024-03-28 11:49:37.588 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:10.848773
+2024-03-28 11:49:37.590 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:21.821001
+2024-03-28 11:49:37.662 | INFO     | __main__:<module>:249 - average rollups for 2023-06-14: 0:00:21.894168
+2024-03-28 11:49:49.518 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.855498
+2024-03-28 11:50:01.444 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.926003
+2024-03-28 11:50:01.445 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:23.781501
+2024-03-28 11:50:01.525 | INFO     | __main__:<module>:249 - average rollups for 2023-07-12: 0:00:23.862413
+2024-03-28 11:50:13.469 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.943231
+2024-03-28 11:50:24.893 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.423866
+2024-03-28 11:50:24.894 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:23.367097
+2024-03-28 11:50:24.968 | INFO     | __main__:<module>:249 - average rollups for 2023-08-15: 0:00:23.442430
+2024-03-28 11:50:44.454 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:19.484877
+2024-03-28 11:50:58.125 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:13.671617
+2024-03-28 11:50:58.126 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:33.156494
+2024-03-28 11:50:58.208 | INFO     | __main__:<module>:249 - average rollups for 2023-09-13: 0:00:33.238785
+2024-03-28 11:51:11.475 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:13.266377
+2024-03-28 11:51:23.689 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:12.214421
+2024-03-28 11:51:23.690 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:25.480798
+2024-03-28 11:51:23.775 | INFO     | __main__:<module>:249 - average rollups for 2023-10-11: 0:00:25.566373
+2024-03-28 11:51:35.957 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:12.181884
+2024-03-28 11:51:47.437 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.479428
+2024-03-28 11:51:47.438 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:23.661312
+2024-03-28 11:51:47.522 | INFO     | __main__:<module>:249 - average rollups for 2023-11-15: 0:00:23.747128
+2024-03-28 11:51:59.412 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.889225
+2024-03-28 11:52:09.419 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:10.006192
+2024-03-28 11:52:09.421 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:21.895417
+2024-03-28 11:52:09.507 | INFO     | __main__:<module>:249 - average rollups for 2023-12-13: 0:00:21.983762
+2024-03-28 11:52:20.730 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.222569
+2024-03-28 11:52:31.952 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.221850
+2024-03-28 11:52:31.953 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:22.444419
+2024-03-28 11:52:32.034 | INFO     | __main__:<module>:249 - average rollups for 2023-10-09: 0:00:22.525867
+2024-03-28 11:52:44.109 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:12.074040
+2024-03-28 11:52:58.323 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:14.213790
+2024-03-28 11:52:58.324 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:26.287830
+2024-03-28 11:52:58.413 | INFO     | __main__:<module>:249 - average rollups for 2023-10-10: 0:00:26.378097
+2024-03-28 11:53:10.243 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.829447
+2024-03-28 11:53:22.047 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.803782
+2024-03-28 11:53:22.048 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:23.633229
+2024-03-28 11:53:22.122 | INFO     | __main__:<module>:249 - average rollups for 2023-10-12: 0:00:23.708434
+2024-03-28 11:53:33.419 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.295057
+2024-03-28 11:53:44.951 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.531922
+2024-03-28 11:53:44.953 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:22.826979
+2024-03-28 11:53:45.028 | INFO     | __main__:<module>:249 - average rollups for 2023-10-13: 0:00:22.904751
+2024-03-28 11:53:53.620 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:08.590199
+2024-03-28 11:54:02.759 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:09.139257
+2024-03-28 11:54:02.760 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:17.729456
+2024-03-28 11:54:02.815 | INFO     | __main__:<module>:249 - average rollups for 2023-10-14: 0:00:17.785608
+2024-03-28 11:54:11.567 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:08.751498
+2024-03-28 11:54:20.502 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:08.935186
+2024-03-28 11:54:20.503 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:17.686684
+2024-03-28 11:54:20.551 | INFO     | __main__:<module>:249 - average rollups for 2023-10-15: 0:00:17.735919
+2024-03-28 11:54:32.138 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.585648
+2024-03-28 11:54:43.594 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.456608
+2024-03-28 11:54:43.596 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:23.042256
+2024-03-28 11:54:43.682 | INFO     | __main__:<module>:249 - average rollups for 2023-04-10: 0:00:23.129984
+2024-03-28 11:54:55.170 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:11.486878
+2024-03-28 11:55:06.840 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.669966
+2024-03-28 11:55:06.842 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:23.156844
+2024-03-28 11:55:06.932 | INFO     | __main__:<module>:249 - average rollups for 2023-04-11: 0:00:23.248769
+2024-03-28 11:55:19.689 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:12.756737
+2024-03-28 11:55:32.723 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:13.033556
+2024-03-28 11:55:32.724 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:25.790293
+2024-03-28 11:55:32.806 | INFO     | __main__:<module>:249 - average rollups for 2023-04-13: 0:00:25.873102
+2024-03-28 11:55:44.924 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:12.117750
+2024-03-28 11:55:57.493 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:12.569181
+2024-03-28 11:55:57.494 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:24.686931
+2024-03-28 11:55:57.575 | INFO     | __main__:<module>:249 - average rollups for 2023-04-14: 0:00:24.768653
+2024-03-28 11:56:05.886 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:08.310291
+2024-03-28 11:56:15.018 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:09.132063
+2024-03-28 11:56:15.019 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:17.442354
+2024-03-28 11:56:15.072 | INFO     | __main__:<module>:249 - average rollups for 2023-04-15: 0:00:17.496268
+2024-03-28 11:56:23.494 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:08.420226
+2024-03-28 11:56:32.556 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:09.061926
+2024-03-28 11:56:32.557 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:17.482152
+2024-03-28 11:56:32.611 | INFO     | __main__:<module>:249 - average rollups for 2023-04-16: 0:00:17.537519
+2024-03-28 12:44:14.276 | INFO     | __main__:multi_day_summary_averages:221 - multi day summary speed execution time: 0:01:23.991226
+2024-03-28 12:44:14.287 | INFO     | __main__:<module>:257 - average rollups for ['2023-10-09', '2023-10-10', '2023-10-11', '2023-10-12', '2023-10-13', '2023-10-14', '2023-10-15']: 0:01:24.001296
+2024-03-28 12:45:31.904 | INFO     | __main__:multi_day_summary_averages:221 - multi day summary speed execution time: 0:01:17.616595
+2024-03-28 12:45:31.912 | INFO     | __main__:<module>:257 - average rollups for ['2023-04-10', '2023-04-11', '2023-04-12', '2023-04-13', '2023-04-14', '2023-04-15', '2023-04-16']: 0:01:17.624808
