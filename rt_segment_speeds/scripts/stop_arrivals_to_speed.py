@@ -59,7 +59,8 @@ def attach_operator_natural_identifiers(
         stop_pair = helpers.import_scheduled_stop_times(
             analysis_date,
             filters = [[("trip_instance_key", "in", trip_used_for_shape)]],
-            columns = ["shape_array_key", "stop_sequence", "stop_pair"],
+            columns = ["shape_array_key", "stop_sequence", 
+                       "stop_pair", "stop_pair_name"],
             with_direction = True,
             get_pandas = True
         )
@@ -72,7 +73,8 @@ def attach_operator_natural_identifiers(
     elif segment_type == "rt_stop_times":
         stop_pair = helpers.import_scheduled_stop_times(
             analysis_date,
-            columns = ["trip_instance_key", "stop_sequence", "stop_pair"],
+            columns = ["trip_instance_key", "stop_sequence", 
+                       "stop_pair", "stop_pair_name"],
             with_direction = True,
             get_pandas = True
         )
