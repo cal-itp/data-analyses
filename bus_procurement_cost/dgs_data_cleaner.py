@@ -79,17 +79,13 @@ def new_prop_finder(description: str) -> str:
 
     BEB_list = [
         "battery electric",
-        "BEBs paratransit buses",
-        "battery electric bus",
-        'battery electric buses',
-        'battery  electric buses',
+        "BEBs paratransit buses"
     ]
 
     cng_list = [
-        "cng buses",
-        "cng fueled",
-        "estimated cng buses",
-        "low emission cng",
+        "cng",
+        "compressed natural gas"
+        
     ]
 
     electric_list = [
@@ -100,26 +96,28 @@ def new_prop_finder(description: str) -> str:
 
     FCEB_list = [
         "fuel cell",
-        "fuel cell electric",
-        "hydrogen fuel cell",
-        "fuel cell electric bus",
-        "hydrogen electric bus",
+        "hydrogen",
+        #"fuel cell electric",
+        #"hydrogen fuel cell",
+        #"fuel cell electric bus",
+        #"hydrogen electric bus",
     ]
 
     # low emission (hybrid)
     hybrid_list = [
-        "diesel electric hybrids",
-        "diesel-electric hybrids",
-        "hybrid electric",
-        "hybrid electric buses",
-        "hybrid electrics",
+        #"diesel electric hybrids",
+        #"diesel-electric hybrids",
+        #"hybrid electric",
+        #"hybrid electric buses",
+        #"hybrid electrics",
+        "hybrids",
         "hybrid",
     ]
 
     # low emission (propane)
     propane_list = [
-        "propane buses",
-        "propaned powered vehicles",
+        #"propane buses",
+        #"propaned powered vehicles",
         "propane",
     ]
 
@@ -139,13 +137,14 @@ def new_prop_finder(description: str) -> str:
     ]
 
     zero_e_list = [
-        "zero emission buses",
-        "zero emission electric",
-        "zero emission vehicles",
+        #"zero emission buses",
+        #"zero emission electric",
+        #"zero emission vehicles",
+        "zero-emission",
         "zero emission",
     ]
 
-    item_description = description.lower().replace("-" "", " ").replace("‐", " ").strip()
+    item_description = description.lower().replace("‐", " ").strip()
 
     if any(word in item_description for word in BEB_list) and not any(
         word in item_description for word in ["diesel", "hybrid", "fuel cell"]
@@ -182,6 +181,66 @@ def new_prop_finder(description: str) -> str:
     else:
         return "not specified"
 
+#project type checker
+def project_type_checker(description: str) -> str:
+    """
+    function to match keywords to project description col to identy projects that only have bus procurement.
+    used to identify projects into diffferent categories: bus only, bus + others, no bus procurement.
+    use with .assign() to get a new col.
+    """
+    bus_list =[
+        "bus",
+        "transit vehicles",# for fta list
+        "cutaway vehicles",# for fta list
+        "zero-emission vehicles", # for tircp list
+        "zero emission vehicles",
+        "zero‐emissions vans",
+        "hybrid-electric vehicles",
+        "battery-electric vehicles",
+        "buy new replacement vehicles", # specific string for fta list
+    ]
+    
+    exclude_list =[
+        "facility",
+        #"station",
+        "stops",
+        "installation",
+        "depot",
+        "construct",
+        "infrastructure",
+        "signal priority",
+        "improvements",
+        "build",
+        "chargers",
+        "charging equipment",
+        "install",
+        "rail",
+        "garage",
+        "facilities",
+        "bus washing system",
+        "build a regional transit hub" # specific string needed for fta list
+        #"associated infrastructure" may need to look at what is associated infrastructure is for ZEB 
+        
+    ]
+    proj_description = description.lower().strip()
+
+    if any(word in proj_description for word in bus_list) and not any(
+        word in proj_description for word in exclude_list
+    ):
+        return "bus only"
+    
+    elif any(word in proj_description for word in exclude_list) and not any(
+        word in proj_description for word in bus_list
+    ):
+        return "non-bus components"
+    
+    elif any(word in proj_description for word in exclude_list) and any(
+        word in proj_description for word in bus_list
+    ):
+        return "includes bus and non-bus components"
+    
+    else:
+        return "needs review"
 
 # included assign columns
 def clean_dgs_columns() -> pd.DataFrame:

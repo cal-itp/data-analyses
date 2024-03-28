@@ -3,8 +3,8 @@ import pandas as pd
 import shared_utils
 from calitp_data_analysis.sql import to_snakecase
 
-from dgs_data_cleaner import new_prop_finder
-from dgs_data_cleaner import new_bus_size_finder
+from dgs_data_cleaner import new_prop_finder, new_bus_size_finder, project_type_checker
+
 
 def col_row_updater(df: pd.DataFrame, col1: str, val1, col2: str, new_val):
     """
@@ -92,18 +92,21 @@ def clean_tircp_columns() -> pd.DataFrame:
     # assigning new columns using imported functions.
     df4 = df3.assign(
         prop_type = df3['project_description'].apply(new_prop_finder),
-        bus_size_type = df3['project_description'].apply(new_bus_size_finder)
+        bus_size_type = df3['project_description'].apply(new_bus_size_finder),
+        new_project_type  = df3['project_description'].apply(project_type_checker)
     )
 
     return df4
 
 def agg_buses_only(df: pd.DataFrame) -> pd.DataFrame:
     """
-    filters df to only include projects with bus procurement. 
+    filters df to only include projects with bus procurement and for project type = bus only 
     does not include engineering, planning or construction only projects.
     then, aggregates the df by agency name and ppno. Agencies may have multiple projects that procure different types of buses
     """
-    df2 = df[df["bus_count"] > 0]
+    df2 = df[
+        (df["bus_count"] > 0) & (df["new_project_type"] == "bus only")
+    ]
     
     df3 = (
         df2.groupby(
@@ -112,6 +115,8 @@ def agg_buses_only(df: pd.DataFrame) -> pd.DataFrame:
                 "ppno",
                 "prop_type",
                 "bus_size_type",
+                "project_description",
+                "new_project_type"
             ]
         )
         .agg({"total_project_cost": "sum", "bus_count": "sum"})
