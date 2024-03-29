@@ -287,7 +287,7 @@ if __name__ == "__main__":
         start = datetime.datetime.now()
         
         single_day_segment_averages(analysis_date, STOP_SEG_DICT)
-        #stage_open_data_exports(analysis_date, STOP_SEG_DICT)
+        stage_open_data_exports(analysis_date, STOP_SEG_DICT)
         
         end = datetime.datetime.now()
         
