@@ -19,7 +19,7 @@ fs = gcsfs.GCSFileSystem()
 OPERATOR_COLS = ["schedule_gtfs_dataset_key", "name",
                  "organization_source_record_id", "organization_name",
                  "base64_url", "caltrans_district"]
-STOP_PAIR_COLS = ["stop_pair"] 
+STOP_PAIR_COLS = ["stop_pair", "stop_pair_name"] 
 ROUTE_DIR_COLS = ["route_id", "direction_id"]
 
 

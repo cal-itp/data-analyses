@@ -1,3 +1,6 @@
+"""
+Generate RT vs schedule metrics for trip-level.
+"""
 import dask.dataframe as dd
 import datetime
 import geopandas as gpd
@@ -215,7 +218,9 @@ def spatial_accuracy_count(analysis_date: str):
     """
     Merge vp with shape_array_key and shape_geometry
     and count how many vp per trip fall within shape.
-    """    
+    """
+    buffer_meters = 35
+    
     trip_to_shape = helpers.import_scheduled_trips(
         analysis_date,
         columns = ["trip_instance_key", "shape_array_key"],
@@ -233,11 +238,9 @@ def spatial_accuracy_count(analysis_date: str):
         
     shapes_in_vp = vp_usable.shape_array_key.unique().compute().tolist()
     
-    
-    
     shapes = buffer_shapes(
         analysis_date, 
-        buffer_meters = 35,
+        buffer_meters = buffer_meters,
         filters = [[("shape_array_key", "in", shapes_in_vp)]], 
     )        
           

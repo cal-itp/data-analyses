@@ -15,6 +15,7 @@ from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import (gtfs_schedule_wrangling, 
                                  helpers, 
+                                 metrics,
                                  segment_calcs,
                                  time_helpers, 
                                  time_series_utils
@@ -24,29 +25,7 @@ from segment_speed_utils.time_series_utils import ROUTE_DIR_COLS
 
 OPERATOR_COLS = [
     "schedule_gtfs_dataset_key", 
-]
-
-def average_summary_speed(
-    df: pd.DataFrame, 
-    group_cols: list,
-    analysis_date_list: list
-) -> pd.DataFrame:
-    avg_speed = (
-            df.groupby(group_cols,
-                       observed=True, group_keys=False)
-        .agg({
-            "sec_elapsed": "sum",
-            "meters_elapsed": "sum"
-        }).reset_index()
-    ).pipe(
-        segment_calcs.speed_from_meters_elapsed_sec_elapsed
-    ).pipe(
-        gtfs_schedule_wrangling.merge_operator_identifiers, 
-        analysis_date_list
-    ).reset_index(drop=True)
-    
-    return avg_speed
-    
+]    
 
 def single_day_summary_averages(analysis_date: str, dict_inputs: dict):
     """
@@ -87,8 +66,13 @@ def single_day_summary_averages(analysis_date: str, dict_inputs: dict):
     )
     print("concatenated files") 
     
-    trip_avg = average_summary_speed(
-        df, trip_group_cols, [analysis_date])
+    trip_avg = metrics.weighted_average_speeds_across_segments(
+        df,
+        trip_group_cols + ["peak_offpeak"],
+    ).pipe(
+        gtfs_schedule_wrangling.merge_operator_identifiers, 
+        [analysis_date]
+    ).reset_index(drop=True)
     
     trip_avg.to_parquet(
         f"{SEGMENT_GCS}{TRIP_FILE}_{analysis_date}.parquet"
@@ -102,11 +86,15 @@ def single_day_summary_averages(analysis_date: str, dict_inputs: dict):
         (trip_avg.sec_elapsed >= MIN_TRIP_SECONDS) & 
         (trip_avg.sec_elapsed <= MAX_TRIP_SECONDS)
     ]
-
-    route_dir_avg = average_summary_speed(
-        trip_avg_filtered, OPERATOR_COLS + ROUTE_DIR_COLS, 
+    
+    route_dir_avg = metrics.concatenate_peak_offpeak_allday_averages(
+        trip_avg_filtered,
+        OPERATOR_COLS + ROUTE_DIR_COLS,
+        metric_type = "summary_speeds"
+    ).pipe(
+        gtfs_schedule_wrangling.merge_operator_identifiers, 
         [analysis_date]
-    )
+    ).reset_index(drop=True)
     
     col_order = [c for c in route_dir_avg.columns]
     
@@ -176,9 +164,14 @@ def multi_day_summary_averages(analysis_date_list: list, dict_inputs: dict):
     )
     print("concatenated files") 
     
-    trip_avg = delayed(average_summary_speed)(
-        df, trip_group_cols + ["weekday_weekend"], analysis_date_list)
-    
+    trip_avg = delayed(metrics.weighted_average_speeds_across_segments)(
+        df,
+        trip_group_cols + ["peak_offpeak", "weekday_weekend"],
+    ).pipe(
+        gtfs_schedule_wrangling.merge_operator_identifiers, 
+        analysis_date_list
+    ).reset_index(drop=True)
+
     trip_avg_filtered = trip_avg[
         (trip_avg.meters_elapsed >= METERS_CUTOFF) & 
         (trip_avg.sec_elapsed >= MIN_TRIP_SECONDS) & 
@@ -187,12 +180,15 @@ def multi_day_summary_averages(analysis_date_list: list, dict_inputs: dict):
     
     time_span_str, time_span_num = time_helpers.time_span_labeling(
         analysis_date_list)
-        
-    route_dir_avg = delayed(average_summary_speed)(
-        trip_avg_filtered, 
-        OPERATOR_COLS + ROUTE_DIR_COLS + ["weekday_weekend"], 
+    
+    route_dir_avg = delayed(metrics.concatenate_peak_offpeak_allday_averages)(
+        trip_avg_filtered,
+        OPERATOR_COLS + ROUTE_DIR_COLS + ["weekday_weekend"],
+        metric_type = "summary_speeds"
+    ).pipe(
+        gtfs_schedule_wrangling.merge_operator_identifiers, 
         analysis_date_list
-    )
+    ).reset_index(drop=True)
     
     route_dir_avg = compute(route_dir_avg)[0]
     
@@ -240,6 +236,7 @@ if __name__ == "__main__":
     
     dict_inputs = helpers.get_parameters(CONFIG_PATH, "rt_stop_times")
     
+    
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
@@ -248,7 +245,6 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
-    
         
     '''
     for one_week in [rt_dates.oct_week, rt_dates.apr_week]:
