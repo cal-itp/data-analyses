@@ -137,13 +137,7 @@ def calculate_weighted_average_vp_schedule_metrics(
         ).reset_index()
         .rename(columns = {"trip_instance_key": "n_vp_trips"})
     )
-    
-    # when we aggregate by any unit above trip,
-    # summing up scheduled trip time and rt trip time is necessary,
-    # but we should still get a new average
-    
-    
-    
+        
     return df2
 
 
