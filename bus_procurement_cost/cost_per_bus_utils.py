@@ -167,7 +167,7 @@ def make_chart(y_col: str, title: str, data: pd.DataFrame, x_col: str):
     plt.ticklabel_format(style="plain", axis="y")
     plt.show()
 
-### variables
+### VARIABLES
 
 #INITIAL DF AGG VARIABLES
 
@@ -176,10 +176,54 @@ all_bus = pd.read_parquet(
     "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/cpb_analysis_data_merge.parquet"
 )
 
+# count of all projects from each source
+def all_project_counter(fta_file: str, tircp_file:str, dgs_file: str) -> int:
+    """
+    function to count all the projects from fta, tircp and dgs files.
+    use to find the total number of projects and the total number of bus only projects
+    """
+    gcs_path = "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/"
+
+    
+    all_fta = len(pd.read_parquet(f"{gcs_path}{fta_file}"))
+    all_tircp = len(pd.read_parquet(f"{gcs_path}{tircp_file}"))
+    all_dgs = len(pd.read_parquet(f"{gcs_path}{dgs_file}"))
+    
+    count_all_projects = all_fta+all_tircp+all_dgs
+    
+    return count_all_projects
+
+all_project_count = all_project_counter(
+    fta_file = "fta_all_projects_clean.parquet",
+    tircp_file = "clean_tircp_project.parquet",
+    dgs_file = "dgs_agg_clean.parquet"
+)
+
+bus_only_project_count = all_project_counter(
+    fta_file = "fta_bus_cost_clean.parquet",
+    tircp_file = "clean_tircp_project_bus_only.parquet",
+    dgs_file = "dgs_agg_clean.parquet"
+)
+
+#count of all bus only projects per dataset
+bus_only_count_fta = len(pd.read_parquet(
+    "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/fta_bus_cost_clean.parquet"))
+bus_only_count_tircp = len(pd.read_parquet(
+    "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/clean_tircp_project_bus_only.parquet"))
+bus_only_count_dgs = len(pd.read_parquet(
+    "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/dgs_agg_clean.parquet"))
+
+#count of all projects per dataset
+count_all_fta = len(pd.read_parquet("gs://calitp-analytics-data/data-analyses/bus_procurement_cost/fta_all_projects_clean.parquet"))
+count_all_tircp = len(pd.read_parquet("gs://calitp-analytics-data/data-analyses/bus_procurement_cost/clean_tircp_project.parquet"))
+count_all_dgs = len(pd.read_parquet("gs://calitp-analytics-data/data-analyses/bus_procurement_cost/dgs_agg_clean.parquet"))
+
 # Variables
-total_unique_projects = len(all_bus)
+all_bus_only_projects = len(all_bus)
 total_bus_count = sum(all_bus.bus_count)
 total_funding = sum(all_bus.total_cost)
+
+
 
 ## ALL BUS
 
@@ -205,6 +249,26 @@ size_agg = cpb_aggregate(no_outliers, "bus_size_type")
 min_bus_cost = no_outliers.cpb.min()
 max_bus_cost = no_outliers.cpb.max()
 max_bus_count = no_outliers.bus_count.max()
+
+
+#how many zeb and non-zeb bus
+zeb_list =[
+    "BEB",
+    "FCEB",
+    "electric (not specified)",
+    "zero-emission bus (not specified)",  
+]
+
+non_zeb_list =[
+    "CNG",
+    "ethanol",
+    "low emission (hybrid)",
+    "low emission (propane)",
+    "mix (zero and low emission)",
+]
+just_zeb_count = prop_agg[prop_agg["prop_type"].isin(zeb_list)]["total_bus_count"].sum()
+just_non_zeb_count = prop_agg[prop_agg["prop_type"].isin(non_zeb_list)]["total_bus_count"].sum()
+
 
 # VARIABLES
 cpb_mean = no_outliers.cpb.mean()
@@ -301,23 +365,29 @@ This analysis examines the cost of buses for transit agencies across the county.
 
 Data was compiled from three data sources:
 
-1. FTA Bus and Low- and No-Emission Grant Awards press release (federally funded, nationwide data)
-2. TIRCP project data (state-funded, California only)
-3. DGS usage report for all procurements from California agencies purchasing from New Flyer and Portera Inc..
+1. {count_all_fta} projects from FTA Bus and Low- and No-Emission Grant Awards press release (federally funded, nationwide data)
+2. {count_all_tircp} projects TIRCP project data (state-funded, California only)
+3. {count_all_dgs} projects DGS usage report for all procurements from California agencies purchasing from New Flyer and Portera Inc..
 
-The compiled dataset includes 298 total transit related projects. However, the initial dataset included projects that encompassed bus procurement and other components such as charging installation and facility construction, as well as non-bus related projects (ferries, trains). The dataset was filtered to exclude projects that were not bus related, indicated 0 buses procured, and projects that contained construction/installation work. 94 projects remained that specified the number of buses to procure and explicitly described procuring buses (bus only projects).
+The compiled dataset includes **{all_project_count}** total transit related projects. However, the initial dataset included projects that encompassed bus procurement and other components such as charging installation and facility construction, as well as non-bus related projects (ferries, trains). The dataset was filtered to exclude projects that were not bus related, indicated 0 buses procured, and projects that contained construction/installation work. **{bus_only_project_count}** projects remained that specified the number of buses to procure and explicitly described procuring buses (bus only projects). 
+
+Number of bus only contracts from each dataset 
+- FTA: **{bus_only_count_fta}**
+- TIRCP: **{bus_only_count_tircp}**
+- DGS: **{bus_only_count_dgs}**
+
 
 The remaining bus only projects were categorized into different propulsion types and bus sizes, a “cost per bus” value was calculated, and outliers removed.
 
 A overall summary is provided below:
 - Total projects: **298**
 - Number of projects with mix bus procurement and other components, also non-bus projects: **204** 
-- Number of bus only projects: **{total_unique_projects}**
+- Number of bus only projects: **{bus_only_project_count}**
 - Total dollars awarded to bus only projects: **`${total_funding:,.2f}`**
 - Total number of buses: **{total_bus_count}**
 - Most common propulsion type procured for bus only projects: **{prop_type_name_max_freq}** at **{prop_type_max}** projects
-- Number of ZEB buses* procured: **{zeb_count}**
-- Number of non-ZEB buses** procured: **{non_zeb_count}**
+- Number of ZEB buses* procured: **{just_zeb_count}**
+- Number of non-ZEB buses** procured: **{just_non_zeb_count}**
 - Overall average cost per bus (ZEB & non-ZEB) is `${cpb_mean:,.2f}` (std `${cpb_std:,.2f}`)
 - ZEB average cost per bus is `${zeb_only_mean:,.2f}` (std `${zeb_only_std:,.2f}`)
 - Non-ZEB average cost per bus is `${non_zeb_only_mean:,.2f}` (std `${non_zeb_only_std:,.2f}`) 
