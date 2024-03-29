@@ -11,6 +11,31 @@ from segment_speed_utils import gtfs_schedule_wrangling, metrics
 from segment_speed_utils.project_vars import RT_SCHED_GCS
 from segment_speed_utils.time_series_utils import ROUTE_DIR_COLS
 
+def average_rt_trip_times(
+    df: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Handle sums of service minutes and now divide
+    by number of trips, so we have normalized values
+    after aggregating to route-direction.
+    """
+    # rename columns so we know that these are summed across
+    # all trips for that route-dir
+    rename_dict = {
+        "scheduled_service_minutes": "total_scheduled_service_minutes",
+        "rt_service_minutes": "total_rt_service_minutes",
+    }
+    
+    df = df.assign(
+        rt_sched_journey_ratio = df.rt_service_minutes.divide(
+            df.scheduled_service_minutes).round(2),     
+        avg_rt_service_minutes = df.rt_service_minutes.divide(
+            df.n_vp_trips).round(2)
+    ).rename(columns = rename_dict)
+    
+    return df
+    
+
 def route_metrics(
     analysis_date: str, 
     dict_inputs: dict
@@ -33,6 +58,8 @@ def route_metrics(
         metric_type = "rt_vs_schedule"
     ).pipe(
         metrics.derive_rt_vs_schedule_metrics
+    ).pipe(
+        average_rt_trip_times
     ).pipe(
         gtfs_schedule_wrangling.merge_operator_identifiers,
         [analysis_date]

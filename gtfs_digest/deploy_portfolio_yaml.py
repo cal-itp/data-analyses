@@ -6,8 +6,8 @@ from typing import Union
 
 from segment_speed_utils.project_vars import RT_SCHED_GCS
 
-PORTFOLIO_SITE_YAML = Path("../portfolio/sites/route_speeds.yml")
-    
+PORTFOLIO_SITE_YAML = Path("../portfolio/sites/gtfs_digest.yml")
+
 def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     """
     portfolio_site_yaml: str
@@ -19,13 +19,17 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     """
     DATASET = f"digest/schedule_vp_metrics.parquet"
     
-    operators_df = pd.read_parquet(
+    df = pd.read_parquet(
         f"{RT_SCHED_GCS}{DATASET}",
         filters = [[("sched_rt_category", "==", "schedule_and_vp")]],
-        columns = ["name"]
-    ).sort_values("name").drop_duplicates()
+        columns = ["organization_name", "caltrans_district"]
+    ).dropna(
+        subset="caltrans_district"
+    ).sort_values(["caltrans_district", "organization_name"])
+    
+    districts = sorted(list(df.caltrans_district.unique()))
 
-    operators = operators_df.name.tolist()      
+    operators = df.organization_name.tolist()      
     # Eric's example
     # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
 
@@ -35,12 +39,15 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     # Loop through each district, grab the valid itp_ids
     # populate each dict key (caption, params, sections) needed to go into analyses.yml
     chapters_list = []
-    for transit_operator in operators:
+    for district in districts:
         
         chapter_dict = {}
-
-        chapter_dict['caption'] = f'{transit_operator}'
-        chapter_dict['params'] = {'name': transit_operator}
+        subset = df[df.caltrans_district == district]
+        
+        chapter_dict['caption'] = f'District {district}'
+        chapter_dict['params'] = {'district': district}
+        chapter_dict['sections'] = [{'name': name} for name in 
+                                    subset.organization_name.unique().tolist()]
         chapters_list += [chapter_dict]
 
     # Make this into a list item

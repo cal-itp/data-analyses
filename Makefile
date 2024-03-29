@@ -38,8 +38,8 @@ build_ntd_report:
 	cd ntd/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 
-build_route_speeds:
-	$(eval export site = route_speeds)
+build_gtfs_digest:
+	$(eval export site = gtfs_digest)
 	#cd rt_segment_speeds / && pip install -r requirements.txt && cd ..
 	cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
