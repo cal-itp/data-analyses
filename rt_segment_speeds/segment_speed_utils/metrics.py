@@ -19,45 +19,18 @@ def weighted_average_speeds_across_segments(
     But, we want a weighted average, using the raw deltas
     instead of mean(speed_mph), since segments can be varying lengths.
     """
-    avg_speeds_peak = (df.groupby(group_cols + ["peak_offpeak"], 
+    avg_speeds = (df.groupby(group_cols, 
                       observed=True, group_keys=False)
            .agg({
                "meters_elapsed": "sum",
                "sec_elapsed": "sum",
            }).reset_index()
-          )
-    
-    avg_speeds_peak = segment_calcs.speed_from_meters_elapsed_sec_elapsed(
-        avg_speeds_peak)
-            
-    # For all aggregations above the trip level, continue on
-    if "trip_instance_key" not in group_cols:
-        avg_speeds_allday = (df.groupby(group_cols, 
-                                        observed=True, group_keys=False)
-                             .agg({
-                                 "meters_elapsed": "sum",
-                                 "sec_elapsed": "sum",
-                             }).reset_index()
-                            )
+          ).pipe(
+        segment_calcs.speed_from_meters_elapsed_sec_elapsed
+    )
 
-        avg_speeds_allday = segment_calcs.speed_from_meters_elapsed_sec_elapsed(
-            avg_speeds_allday
-        ).assign(
-            peak_offpeak = "all_day"
-        )
+    return avg_speeds
     
-        avg_speeds = pd.concat(
-            [avg_speeds_peak, avg_speeds_allday],
-            axis=0, ignore_index = True
-        ).rename(
-            columns = {"peak_offpeak": "time_period"}
-        )
-
-        return avg_speeds
-    
-    # A trip level dataset cannot be aggregated to peak/offpeak/all_day
-    else:
-        return avg_speeds_peak
 
 
 def derive_rt_vs_schedule_metrics(df: pd.DataFrame) -> pd.DataFrame:
@@ -154,6 +127,17 @@ def concatenate_peak_offpeak_allday_averages(
             group_cols
         ).assign(peak_offpeak = "all_day")
     
+    elif metric_type == "summary_speeds":
+        avg_peak = weighted_average_speeds_across_segments(
+            df,
+            group_cols + ["peak_offpeak"]
+        )
+        
+        avg_allday = weighted_average_speeds_across_segments(
+            df,
+            group_cols
+        ).assign(peak_offpeak = "all_day")   
+    
     elif metric_type == "rt_vs_schedule":
         avg_peak = calculate_weighted_average_vp_schedule_metrics(
             df,
@@ -164,9 +148,9 @@ def concatenate_peak_offpeak_allday_averages(
             df,
             group_cols
         ).assign(peak_offpeak = "all_day")
-        
+    
     else:
-        print(f"Valid metric types: ['segment_speeds', 'rt_vs_schedule']")
+        print(f"Valid metric types: ['segment_speeds', 'summary_speeds', 'rt_vs_schedule']")
         
     # Concatenate so that every segment has 3 time periods: peak, offpeak, and all_day
     avg_metrics = pd.concat(

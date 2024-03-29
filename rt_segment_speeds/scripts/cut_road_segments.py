@@ -1,7 +1,6 @@
 """
 Cut road segments.
 """
-#import dask.dataframe as dd
 import datetime
 import geopandas as gpd
 import pandas as pd
@@ -188,7 +187,7 @@ if __name__ == '__main__':
     cut_road_segments(road_cols, ROAD_SEGMENT_METERS, "onekm")
  
     '''
-    TWO_MILES_IN_METERS = 1_609*2
+    TWO_MILES_IN_METERS = round(rt_utils.METERS_PER_MILE, 0)*2
     cut_road_segments(road_cols, TWO_MILES_IN_METERS, "twomile")
     '''
         

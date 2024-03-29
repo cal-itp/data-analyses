@@ -154,7 +154,7 @@ def single_day_segment_averages(analysis_date: str, dict_inputs: dict):
         df, 
         group_cols = OPERATOR_COLS + SHAPE_STOP_COLS + STOP_PAIR_COLS,
         analysis_date_list = [analysis_date],
-        merge_cols = OPERATOR_COLS + ["shape_array_key"] + STOP_PAIR_COLS             
+        merge_cols = OPERATOR_COLS + ["shape_array_key", "stop_pair"]             
     )
 
     utils.geoparquet_gcs_export(
@@ -170,8 +170,8 @@ def single_day_segment_averages(analysis_date: str, dict_inputs: dict):
         df, 
         group_cols =  OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
         analysis_date_list = [analysis_date],
-        merge_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS             
-    ).sort_values
+        merge_cols = OPERATOR_COLS + ROUTE_DIR_COLS + ["stop_pair"]             
+    )
     
     utils.geoparquet_gcs_export(
         route_dir_segments,
@@ -225,7 +225,7 @@ def multi_day_segment_averages(analysis_date_list: list, dict_inputs: dict):
         df, 
         OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"],
         analysis_date_list = analysis_date_list,
-        merge_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS             
+        merge_cols = OPERATOR_COLS + ROUTE_DIR_COLS + ["stop_pair"]             
     )
     
     route_dir_segments = compute(route_dir_segments)[0]

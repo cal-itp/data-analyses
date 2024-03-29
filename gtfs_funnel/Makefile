@@ -10,13 +10,17 @@ download_gtfs_data:
     
 preprocess:
 	python stop_times_with_direction.py
-	python route_typologies.py
 	python crosswalk_gtfs_dataset_key_to_organization.py    
 	python vp_keep_usable.py
 	python vp_direction.py
 	python cleanup.py
 	python vp_condenser.py
+	make route_typologies_data
     
+route_typologies_data:
+	python route_typologies.py
+	python schedule_stats_by_route_direction.py
+
 # Start compiling scripts needed when we start concatenating several days
 # Clean route names for displaying across time
 timeseries_preprocessing: 
