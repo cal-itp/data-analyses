@@ -15,7 +15,9 @@ def route_metrics(
     analysis_date: str, 
     dict_inputs: dict
 ) -> pd.DataFrame:
-  
+    """
+    Aggregate RT vs schedule metrics to route-direction.
+    """
     start = datetime.datetime.now()
     
     TRIP_EXPORT = dict_inputs["trip_metrics"]
