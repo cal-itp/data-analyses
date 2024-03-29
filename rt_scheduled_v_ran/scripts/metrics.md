@@ -1,6 +1,6 @@
 trip
 * number of vp_idx = total_vp
-* number of minutes = rt service min
+* number of minutes = rt service min (max_seconds-min_seconds / 60)
 
 trip-minute
 * number of vp_idx

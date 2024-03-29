@@ -1,4 +1,5 @@
 """
+Generate RT vs schedule metrics for route-direction-level.
 """
 import datetime
 import pandas as pd
@@ -6,9 +7,7 @@ import sys
 
 from loguru import logger
 
-from segment_speed_utils import (gtfs_schedule_wrangling, 
-                                 metrics
-                                )
+from segment_speed_utils import gtfs_schedule_wrangling, metrics
 from segment_speed_utils.project_vars import RT_SCHED_GCS
 from segment_speed_utils.time_series_utils import ROUTE_DIR_COLS
 
