@@ -7,6 +7,7 @@ def prepare_data() ->pd.DataFrame:
     standardizes columns names, then exports as parquet.
     """
     # variables for file names
+    # all bus only projects for each dataset
     fta_bus_data = "fta_bus_cost_clean.parquet"
     tircp_bus_data = "clean_tircp_project_bus_only.parquet"
     dgs_bus_data = "dgs_agg_w_options_clean.parquet"
