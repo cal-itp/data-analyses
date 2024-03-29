@@ -26,16 +26,62 @@ Identify federal awards to fund bus purchases and how much agencies pay for them
     * bus type (standard, cutaway, articulated etc)
 <br> </br>
 - Combine datasets together, aggregate up by different categories, calculate a "cost_per_bus" (cpb) column.
+    * merge datasets
+    * cpb calculated by dividing total cost by total bus count.
+<br></br>
 - Aggregate cpb by:
     * transit agency
     * propulsion type
     * bus size type
- <br></br> 
+<br></br> 
  - Visualize aggregations on charts
+     * Frequency Distribution Charts
+     * Bar charts
+     * top level totals
+<br></br> 
  - Calculate summary stats on cpb
      * calculate mean, standard deviation
      * calculate z-score. remove outliers
      * plot distribution
- <br></br>
+<br></br>
  - Other
      * review external reports/resources regarding bus procurement
+
+## Script Explanation
+
+Executing `make all_bus_scripts` will run the following scripts
+<br></br>
+- **fta_data_cleaner.py:**
+    * Reads in and cleans FTA data
+    * outputs 2 files: 
+        * cleaned, all projects: `fta_all_projects_clean.parquet`
+        * cleaned, bus only projects:`fta_bus_cost_clean.parquet`
+<br></br>        
+- **tircp_data_cleaner.py**
+    * Reads in and cleans tircp data
+    * outputs 2 files: 
+        * cleaned, all projects: `clean_tircp_project.parquet`
+        * cleaned, bus only projects:`clean_tircp_project_bus_only.parquet`
+<br></br>
+- **dgs_data_cleaner.py**
+    * Reads in and cleans DGS data
+    * outputs 2 files: 
+        * cleaned, bus only projects: `dgs_agg_clean.parquet`
+        * cleaned, bus only projects with options:`dgs_agg_w_options_clean.parquet`
+<br></br>
+- **cost_per_bus_cleaner.py**
+    * Reads in and merges all the bus only datasets
+    * updates columns names 
+<br></br>
+- **cost_per_bus_utils.py**
+    * stores variables for summary section (total projects, total buses, etc)
+    * stores chart functions to be used in notebook
+    * stores the summary and conclusion text.
+<br></br>
+- **nbconvert --to notebook**
+    * runs all cells in the `cost_per_bus_analysis.ipynb`
+    * overwrites the nb in place
+<br></br>
+- **nbconvert --to html**
+    * converts the nb to HTML
+    * hides the code cells and prompts
