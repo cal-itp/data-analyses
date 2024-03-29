@@ -35,7 +35,7 @@ def weighted_average_speeds_across_segments(
 
 def derive_rt_vs_schedule_metrics(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Add metrics and numeric rounding.
+    Add metrics comparing RT vs schedule and do some numeric rounding.
     """
     integrify = ["vp_in_shape", "total_vp"]
     df[integrify] = df[integrify].fillna(0).astype("int")
@@ -66,14 +66,52 @@ def derive_rt_vs_schedule_metrics(df: pd.DataFrame) -> pd.DataFrame:
     # Mask percents for any values above 100%
     # Scheduled service minutes can be assumed to be shorter than 
     # RT service minutes, so there can be more minutes with vp data available
+    # but vice versa can be true
     mask_me = [c for c in df.columns if 
                ("pct_sched_journey" in c) or 
                # check when this would happen in route direction aggregation
                ("pct_rt_journey" in c)]
     for c in mask_me:
-        df[c] = df[c].mask(df[c] > 1, 1)
-
+        df[c] = df[c].mask(df[c] > 1, 1)    
+    
     return df    
+
+
+def derive_trip_comparison_metrics(
+    df: pd.DataFrame,
+    early_cutoff: int,
+    late_cutoff: int
+) -> pd.DataFrame: 
+    """
+    Add RT vs schedule trip comparison metrics that are
+    more opinionated. Tweak these later based on operator feedback.
+    We'll set the number of minutes for defining a
+    trip as being early/ontime/late.
+    """
+    df = df.assign(
+        rt_sched_journey_ratio = df.rt_service_minutes.divide(
+            df.scheduled_service_minutes).round(2),   
+        rt_sched_journey_difference = (df.rt_service_minutes - 
+                                       df.scheduled_service_minutes)
+    )
+
+    df = df.assign(
+        is_early = df.apply(
+            lambda x: 
+            1 if x.rt_sched_journey_difference < early_cutoff
+            else 0, axis=1).astype(int),
+        is_ontime = df.apply(
+            lambda x: 
+            1 if (x.rt_sched_journey_difference >= early_cutoff) and 
+            (x.rt_sched_journey_difference <= late_cutoff)
+            else 0, axis=1).astype(int), 
+        is_late = df.apply(
+            lambda x: 
+            1 if x.rt_sched_journey_difference > late_cutoff
+            else 0, axis=1).astype(int),
+    )
+    
+    return df
 
 
 def calculate_weighted_average_vp_schedule_metrics(
@@ -88,6 +126,7 @@ def calculate_weighted_average_vp_schedule_metrics(
         "scheduled_service_minutes",
         "total_vp",
         "vp_in_shape",
+        "is_early", "is_ontime", "is_late"
     ]
 
     count_cols = ["trip_instance_key"]
@@ -108,7 +147,7 @@ def calculate_weighted_average_vp_schedule_metrics(
 def concatenate_peak_offpeak_allday_averages(
     df: pd.DataFrame, 
     group_cols: list,
-    metric_type: Literal["segment_speeds", "rt_vs_schedule"]
+    metric_type: Literal["segment_speeds", "rt_vs_schedule", "summary_speeds"]
 ) -> pd.DataFrame:
     """
     Calculate average speeds for all day and
