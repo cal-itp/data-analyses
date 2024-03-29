@@ -32,7 +32,6 @@ def weighted_average_speeds_across_segments(
     return avg_speeds
     
 
-
 def derive_rt_vs_schedule_metrics(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add metrics comparing RT vs schedule and do some numeric rounding.
@@ -88,9 +87,7 @@ def derive_trip_comparison_metrics(
     We'll set the number of minutes for defining a
     trip as being early/ontime/late.
     """
-    df = df.assign(
-        rt_sched_journey_ratio = df.rt_service_minutes.divide(
-            df.scheduled_service_minutes).round(2),   
+    df = df.assign(  
         rt_sched_journey_difference = (df.rt_service_minutes - 
                                        df.scheduled_service_minutes)
     )
@@ -140,6 +137,12 @@ def calculate_weighted_average_vp_schedule_metrics(
         ).reset_index()
         .rename(columns = {"trip_instance_key": "n_vp_trips"})
     )
+    
+    # when we aggregate by any unit above trip,
+    # summing up scheduled trip time and rt trip time is necessary,
+    # but we should still get a new average
+    
+    
     
     return df2
 
