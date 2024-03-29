@@ -77,3 +77,11 @@ Executing `make all_bus_scripts` will run the following scripts
     * stores variables for summary section (total projects, total buses, etc)
     * stores chart functions to be used in notebook
     * stores the summary and conclusion text.
+<br></br>
+- **nbconvert --to notebook**
+    * runs all cells in the `cost_per_bus_analysis.ipynb`
+    * overwrites the nb in place
+<br></br>
+- **nbconvert --to html**
+    * converts the nb to HTML
+    * hides the code cells and prompts
