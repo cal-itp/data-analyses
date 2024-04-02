@@ -187,7 +187,57 @@ def overlay_shapes_to_roads(
     
     return gdf3  
 
+
+def primary_secondary_typology(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Instead of leaving combinations with typology-freq_category,
+    aggregate by typology and select the top 2.
+    """     
+    df2 = (df.groupby(route_dir_cols + ["typology"])
+           .agg({"pct_typology": "sum"})
+           .reset_index()
+          )
     
+    df2 = df2.assign(
+        obs = (df2
+           .sort_values(route_dir_cols + ["pct_typology"], 
+                        ascending=[True for i in route_dir_cols] + [False])
+           .groupby(route_dir_cols)
+           .cumcount() + 1
+          )
+    )
+    
+    primary_typology = (
+        df2.loc[df2.obs==1].rename(
+            columns = {
+                "typology": "primary_typology",
+                "pct_typology": "primary_pct_typology"
+            })
+        .drop(columns = "obs")
+    )
+    
+    secondary_typology = (
+        df2.loc[df2.obs==2]
+        .rename(
+            columns = {
+                "typology": "secondary_typology",
+                "pct_typology": "secondary_pct_typology"
+            })
+        .drop(columns = "obs")
+    )
+    
+    df3 = pd.merge(
+        primary_typology,
+        secondary_typology,
+        on = route_dir_cols,
+        how = "left"
+    )
+    
+    return df3
+
+
 if __name__ == "__main__":
     
     from update_vars import CONFIG_DICT, analysis_date_list
@@ -203,15 +253,22 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         
         time0 = datetime.datetime.now()
-
+        
         gdf = delayed(overlay_shapes_to_roads)(
             roads, analysis_date, ROAD_BUFFER_METERS
         )    
         gdf = compute(gdf)[0]
-
+        
+        # Only keep significant typologies, but leave as typology-freq_category
         route_typology_df = gdf.loc[gdf.pct_typology >= TYPOLOGY_THRESHOLD]
-
+        
         route_typology_df.to_parquet(
+            f"{SCHED_GCS}{EXPORT}_long_{analysis_date}.parquet")
+        
+        # Aggregate to route-dir-typology
+        route_typology_df2 = primary_secondary_typology(route_typology_df)
+        
+        route_typology_df2.to_parquet(
             f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet")
         
         time1 = datetime.datetime.now()

@@ -24,6 +24,16 @@ TIME_OF_DAY_DICT = {
       if k not in PEAK_PERIODS}
 }
 
+DAY_TYPE_DICT = {
+    1: "Sunday",
+    2: "Monday",
+    3: "Tuesday",
+    4: "Wednesday",
+    5: "Thursday",
+    6: "Friday",
+    7: "Saturday",
+}
+
 WEEKDAY_DICT = {
     **{k: "weekday" for k in ["Monday", "Tuesday", "Wednesday",
                              "Thursday", "Friday"]},

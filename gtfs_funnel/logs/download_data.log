@@ -319,3 +319,4 @@
 2024-03-14 11:43:06.291 | INFO     | __main__:download_one_day:33 - *********** Download st data ***********
 2024-03-14 11:44:27.599 | INFO     | __main__:download_one_day:56 - execution time: 0:01:22.625555
 2024-03-19 16:50:51.742 | INFO     | __main__:download_one_year:35 - execution time: 0:00:43.062868
+2024-04-02 09:03:24.949 | INFO     | __main__:download_one_year:35 - execution time: 0:00:14.017626

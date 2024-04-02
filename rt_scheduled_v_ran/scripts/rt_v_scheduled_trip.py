@@ -11,8 +11,6 @@ from dask import delayed, compute
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from update_vars import CONFIG_DICT, analysis_date_list
-
 from segment_speed_utils.project_vars import (
     PROJECT_CRS,
     SEGMENT_GCS,
@@ -268,20 +266,15 @@ def rt_schedule_trip_metrics(
     analysis_date: str, 
     dict_inputs: dict
 ) -> pd.DataFrame:
-    
+    """
+
+    """    
     start = datetime.datetime.now()
-    print(f"Started running script at {start} for {analysis_date} metrics")
-    
-    """
-    Keep for testing temporarily
-    operator = "Bay Area 511 Muni VehiclePositions"
-    
-    gtfs_key = "7cc0cb1871dfd558f11a2885c145d144"
-    
-    vp_usable = (vp_usable.loc
-    [vp_usable.schedule_gtfs_dataset_key ==gtfs_key]
-    .reset_index(drop=True))
-    """
+
+    # number of minutes to determine trip lateness    
+    early = dict_inputs["early_trip_minutes"]
+    late = dict_inputs["late_trip_minutes"]
+    TRIP_EXPORT = dict_inputs["trip_metrics"]
     
     basic_counts_by_vp_trip(analysis_date)
     
@@ -325,6 +318,8 @@ def rt_schedule_trip_metrics(
         gtfs_schedule_wrangling.add_peak_offpeak_column
     ).pipe(
         metrics.derive_rt_vs_schedule_metrics
+    ).pipe(
+        metrics.derive_trip_comparison_metrics, early, late
     )
     
     order_first = ["schedule_gtfs_dataset_key", 
@@ -334,7 +329,6 @@ def rt_schedule_trip_metrics(
     df2 = df2.reindex(columns = order_first + other_cols)
     
     # Save
-    TRIP_EXPORT = dict_inputs["trip_metrics"]
     df2.to_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet")
 
     time3 = datetime.datetime.now()
@@ -349,7 +343,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    
+    from update_vars import CONFIG_DICT, analysis_date_list
+
     for date in analysis_date_list:
         rt_schedule_trip_metrics(date, CONFIG_DICT)
-        print('Done')

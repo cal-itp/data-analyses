@@ -46,5 +46,5 @@ if __name__=="__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    for y in [2023]:
+    for y in [2024]:
         download_one_year(y)
