@@ -96,7 +96,7 @@ if __name__ == "__main__":
     from shared_utils.rt_dates import y2023_dates, y2024_dates
     
     analysis_date_list = y2024_dates + y2023_dates 
-    '''
+    
     df = concatenate_operator_stats(analysis_date_list)
     
     df.to_parquet(
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         RT_SCHED_GCS,
         "digest/operator_routes"
     )
-    '''
+    
     operator_category_counts = operator_category_counts_by_date()
     operator_category_counts.to_parquet(
         f"{RT_SCHED_GCS}"
