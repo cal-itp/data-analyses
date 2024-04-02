@@ -1,0 +1,5 @@
+route_schedule_vp_file: "digest/schedule_vp_metrics"
+route_segment_speeds_file: "digest/segment_speeds"
+operator_profiles_file: "digest/operator_profiles"
+operator_routes_file: "digest/operator_routes"
+operator_sched_rt_file: "digest/operator_schedule_rt_category"
