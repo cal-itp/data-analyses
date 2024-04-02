@@ -1,9 +1,17 @@
+"""
+Merge datasets across dates to create time-series data
+for GTFS digest.
+Grain is operator-service_date-route-direction-time_period.
+"""
 import geopandas as gpd
 import pandas as pd
 
 from calitp_data_analysis import utils
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
-from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
+from segment_speed_utils.project_vars import (SEGMENT_GCS, 
+                                              RT_SCHED_GCS, 
+                                              SCHED_GCS)
+from extra_cleaning import operators_only_route_long_name
 
 route_time_cols = ["schedule_gtfs_dataset_key", 
                    "route_id", "direction_id", "time_period"]
@@ -118,13 +126,29 @@ def concatenate_crosswalk_organization(
 def merge_in_standardized_route_names(
     df: pd.DataFrame, 
 ) -> pd.DataFrame:
-    standardized_route_names = pd.read_parquet(
+    keep_cols = [
+        "schedule_gtfs_dataset_key", "name", 
+        "route_id", "service_date", 
+        "recent_route_id2", "recent_combined_name"]
+    
+    operators_need_cleaning = pd.read_parquet(
         f"{SCHED_GCS}standardized_route_ids.parquet",
-        columns = ["schedule_gtfs_dataset_key", "name", 
-                   "route_id", "service_date",
-                   "recent_route_id2", "recent_combined_name"],
+        filters = [[("name", "in", operators_only_route_long_name)]]
+    )
+    operators_ok = pd.read_parquet(
+        f"{SCHED_GCS}standardized_route_ids.parquet",
+        filters = [[("name", "not in", operators_only_route_long_name)]]
     )
     
+    operators_need_cleaning = operators_need_cleaning.assign(
+        recent_combined_name = operators_need_cleaning.route_long_name
+    )
+    
+    standardized_route_names = pd.concat([
+        operators_need_cleaning,
+        operators_ok
+    ], axis=0, ignore_index=True)[keep_cols]       
+        
     if "name" in df.columns:
         df = df.drop(columns = "name")
     
@@ -160,9 +184,11 @@ if __name__ == "__main__":
     
     df_avg_speeds = concatenate_speeds_by_route_direction(analysis_date_list)
                     
-    df_rt_sched = (concatenate_rt_vs_schedule_by_route_direction(analysis_date_list)
-                   .astype({"direction_id": "float"})
-                  )
+    df_rt_sched = (
+        concatenate_rt_vs_schedule_by_route_direction(
+            analysis_date_list)
+        .astype({"direction_id": "float"})
+    )
     
     df_crosswalk = concatenate_crosswalk_organization(analysis_date_list)
     
@@ -201,7 +227,7 @@ if __name__ == "__main__":
     df.to_parquet(
         f"{RT_SCHED_GCS}digest/schedule_vp_metrics.parquet"
     )
-    '''
+    
     segment_speeds = concatenate_segment_speeds_by_route_direction(
         analysis_date_list
     ).pipe(
@@ -213,4 +239,4 @@ if __name__ == "__main__":
         RT_SCHED_GCS,
         f"digest/segment_speeds"
     )
-    '''
+    
