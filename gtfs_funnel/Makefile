@@ -16,6 +16,8 @@ preprocess:
 	python cleanup.py
 	python vp_condenser.py
 	make route_typologies_data
+	#python operator_stats.py
+    
     
 route_typologies_data:
 	python route_typologies.py
@@ -25,7 +27,13 @@ route_typologies_data:
 # Clean route names for displaying across time
 timeseries_preprocessing: 
 	python clean_route_naming.py
-    
+
+
+# monthly scheduled service, download after the end of each month
+monthly_scheduled_data:
+	python download_monthly_service.py
+	python concatenate_monthly_scheduled_service.py
+
     
 funnel_gtfs_data: 
 	make download_gtfs_data && make preprocess && make timeseries_preprocessing
