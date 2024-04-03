@@ -92,10 +92,10 @@ def pare_down_vp_to_valid_trips(
     to keep the enter / exit timestamps.
     Also, exclude any bad batches of trips.
     """
-    INPUT_FILE = dict_inputs["raw_vp_file"]
-    TIMESTAMP_COL = dict_inputs["timestamp_col"]
-    TIME_CUTOFF = dict_inputs["time_min_cutoff"]
-    EXPORT_FILE = dict_inputs["usable_vp_file"]
+    INPUT_FILE = dict_inputs.speeds_tables.raw_vp_file
+    TIMESTAMP_COL = dict_inputs.speeds_tables.timestamp_col
+    TIME_CUTOFF = dict_inputs.speeds_tables.time_min_cutoff
+    EXPORT_FILE = dict_inputs.speeds_tables.usable_vp_file
 
     vp = gpd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet"

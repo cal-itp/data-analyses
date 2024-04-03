@@ -52,7 +52,9 @@ def create_gtfs_dataset_key_to_organization_crosswalk(
 
 if __name__ == "__main__":
 
-    from update_vars import analysis_date_list
+    from update_vars import analysis_date_list, CONFIG_DICT
+    
+    EXPORT = CONFIG_DICT.schedule_tables.gtfs_key_crosswalk
     
     start = datetime.datetime.now()
     
@@ -63,8 +65,7 @@ if __name__ == "__main__":
         )
         
         df.to_parquet(
-            f"{SCHED_GCS}crosswalk/"
-            f"gtfs_key_organization_{analysis_date}.parquet"
+            f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
         )
         t1 = datetime.datetime.now()
         print(f"finished {analysis_date}: {t1-t0}")

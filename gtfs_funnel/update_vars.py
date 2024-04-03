@@ -1,4 +1,4 @@
-import yaml
+from omegaconf import OmegaConf # this is yaml parser
 from pathlib import Path
 from shared_utils import rt_dates
 
@@ -10,6 +10,4 @@ analysis_date_list = [
 ] 
 
 CONFIG_PATH = Path("config.yml")
-
-with open(CONFIG_PATH) as f: 
-    CONFIG_DICT = yaml.safe_load(f)  
+CONFIG_DICT = OmegaConf.load(Path("config.yml"))

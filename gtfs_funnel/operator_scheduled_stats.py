@@ -150,9 +150,9 @@ if __name__ == "__main__":
     
     from update_vars import CONFIG_DICT, analysis_date_list
     
-    ROUTE_TYPOLOGY = CONFIG_DICT["route_typologies_file"]
-    OPERATOR_EXPORT = CONFIG_DICT["operator_scheduled_stats_file"]
-    OPERATOR_ROUTE_EXPORT = CONFIG_DICT["operator_route_file"]
+    ROUTE_TYPOLOGY = CONFIG_DICT.schedule_tables.route_typologies_file
+    OPERATOR_EXPORT = CONFIG_DICT.schedule_tables.operator_scheduled_stats_file
+    OPERATOR_ROUTE_EXPORT = CONFIG_DICT.schedule_tables.operator_route_file
     
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()

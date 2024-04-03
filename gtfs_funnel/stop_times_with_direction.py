@@ -176,7 +176,7 @@ def assemble_stop_times_with_direction(
     """
     start = datetime.datetime.now()
 
-    EXPORT_FILE = dict_inputs["stop_times_direction_file"]
+    EXPORT_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction_file
     
     scheduled_stop_times = prep_scheduled_stop_times(analysis_date)
 

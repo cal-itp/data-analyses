@@ -98,14 +98,16 @@ def nacto_stop_frequency(
     # last category is "express", which we'll have to tag on 
     # the route name side
 
-def prep_roads():
+    
+def prep_roads(dict_inputs: dict) -> gpd.GeoDataFrame:
     road_stats = pd.read_parquet(
         f"{SCHED_GCS}arrivals_by_road_segment.parquet"
     )
 
+    ROAD_SEGMENTS = dict_inputs.shared_data.road_segments_twomile
+    
     roads = gpd.read_parquet(
-        f"{SHARED_GCS}"
-        f"segmented_roads_twomile_2020.parquet",
+        f"{SHARED_GCS}{ROAD_SEGMENTS}.parquet"
         columns = road_segment_cols + ["geometry"],
     ).to_crs(PROJECT_CRS)
     
@@ -242,11 +244,11 @@ if __name__ == "__main__":
     
     from update_vars import CONFIG_DICT, analysis_date_list
     
-    EXPORT = CONFIG_DICT["route_typologies_file"]
+    EXPORT = CONFIG_DICT.schedule_tables.route_typologies_file
     
     start = datetime.datetime.now()
 
-    roads = delayed(prep_roads)()
+    roads = delayed(prep_roads)(CONFIG_DICT)
     ROAD_BUFFER_METERS = 20
     TYPOLOGY_THRESHOLD = 0.10
     

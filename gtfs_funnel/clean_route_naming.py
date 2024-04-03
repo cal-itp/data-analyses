@@ -37,8 +37,8 @@ def concatenate_routes_across_dates(analysis_date_list: list) -> pd.DataFrame:
 if __name__ == "__main__":
     
     from update_vars import CONFIG_DICT
-    CLEANED_ROUTE_NAMING = CONFIG_DICT["route_identification_file"]
-
+    CLEANED_ROUTE_NAMING = CONFIG_DICT.schedule_tables.route_identification_file
+    
     date_list = rt_dates.y2024_dates + rt_dates.y2023_dates
 
     df =  concatenate_routes_across_dates(date_list)

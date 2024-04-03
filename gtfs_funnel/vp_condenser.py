@@ -24,8 +24,8 @@ def condense_vp_to_linestring(
     We will group by trip and save out 
     the vp point geom into a shapely.LineString.
     """
-    USABLE_VP = dict_inputs["usable_vp_file"]
-    EXPORT_FILE = dict_inputs["vp_condensed_line_file"]
+    USABLE_VP = dict_inputs.speeds_tables.usable_vp_file
+    EXPORT_FILE = dict_inputs.speeds_tables.vp_condensed_line_file
     
     vp = delayed(pd.read_parquet)(
         f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
@@ -69,8 +69,8 @@ def prepare_vp_for_all_directions(
     Subset vp_idx, location_timestamp_local and coordinate arrays 
     to exclude southbound.
     """
-    INPUT_FILE = dict_inputs["vp_condensed_line_file"]
-    EXPORT_FILE = dict_inputs["vp_nearest_neighbor_file"]
+    INPUT_FILE = dict_inputs.speeds_tables.vp_condensed_line_file
+    EXPORT_FILE = dict_inputs.speeds_tables.vp_nearest_neighbor_file
     
     vp = delayed(gpd.read_parquet)(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
