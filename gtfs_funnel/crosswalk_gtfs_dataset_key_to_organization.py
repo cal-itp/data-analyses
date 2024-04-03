@@ -35,7 +35,7 @@ def create_gtfs_dataset_key_to_organization_crosswalk(
         df,
         analysis_date,
         quartet_data = "schedule",
-        dim_gtfs_dataset_cols = ["key", "base64_url"],
+        dim_gtfs_dataset_cols = ["key", "source_record_id", "base64_url"],
         dim_organization_cols = ["source_record_id", "name", 
                                  "itp_id", "caltrans_district"]
     )
