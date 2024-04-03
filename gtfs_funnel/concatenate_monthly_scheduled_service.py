@@ -13,7 +13,7 @@ from shared_utils import rt_dates
 if __name__ == "__main__":
     
     from update_vars import CONFIG_DICT
-    MONTHLY_SERVICE = CONFIG_DICT["monthly_scheduled_service_file"]
+    MONTHLY_SERVICE = CONFIG_DICT.schedule_tables.monthly_scheduled_service_file
 
     year_list = [2023, 2024]
     analysis_date_list = (rt_dates.y2024_dates + 
@@ -34,6 +34,10 @@ if __name__ == "__main__":
         day_name = df.day_type.map(time_helpers.DAY_TYPE_DICT)
     )
     
+    # Compile all the dates we have crosswalks
+    # drop duplicates and we should capture all the schedule_source_record_ids
+    # we need and attach schedule_gtfs_dataset_key and organization info
+    # use this to filter in the digest
     crosswalk = time_series_utils.concatenate_datasets_across_dates(
         SCHED_GCS,
         f"crosswalk/gtfs_key_organization",

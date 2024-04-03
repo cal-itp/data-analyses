@@ -82,13 +82,15 @@ def remove_batched_parquets(analysis_date: str):
     
 if __name__ == "__main__":
     
-    from update_vars import analysis_date_list
+    from update_vars import analysis_date_list, CONFIG_DICT
 
     LOG_FILE = "./logs/download_vp_v2.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
+    
+    RAW_VP = CONFIG_DICT.speeds_tables.raw_vp_file
     
     for analysis_date in analysis_date_list:
     
@@ -125,7 +127,7 @@ if __name__ == "__main__":
         utils.geoparquet_gcs_export(
             vp_gdf,
             SEGMENT_GCS,
-            f"vp_{analysis_date}"
+            f"{RAW_VP}_{analysis_date}"
         )
 
         remove_batched_parquets(analysis_date)

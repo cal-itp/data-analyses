@@ -19,7 +19,7 @@ def assemble_scheduled_trip_metrics(
     Get GTFS schedule trip metrics including time-of-day buckets,
     scheduled service minutes, and median stop spacing.
     """
-    STOP_TIMES_FILE = dict_inputs["stop_times_direction_file"]
+    STOP_TIMES_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction_file
     
     df = gpd.read_parquet(
         f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet"
@@ -113,9 +113,9 @@ if __name__ == "__main__":
     
     from update_vars import analysis_date_list, CONFIG_DICT
     
-    TRIP_EXPORT = CONFIG_DICT["trip_metrics_file"]
-    ROUTE_DIR_EXPORT = CONFIG_DICT["route_direction_metrics_file"]
-    ROUTE_TYPOLOGIES = CONFIG_DICT["route_typologies_file"]
+    TRIP_EXPORT = CONFIG_DICT.rt_vs_schedule_tables.trip_metrics_file
+    ROUTE_DIR_EXPORT = CONFIG_DICT.rt_vs_schedule_tables.route_direction_metrics_file
+    ROUTE_TYPOLOGIES = CONFIG_DICT.schedule_tables.route_typologies_file
     
     for date in analysis_date_list:
         trip_metrics = assemble_scheduled_trip_metrics(date, CONFIG_DICT)

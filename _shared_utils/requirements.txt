@@ -3,3 +3,4 @@ gtfs-segments==0.1.0
 pyairtable==2.2.2
 great-tables==0.4.0
 polars==0.20.16
+omegaconf==2.3.0 # better yaml configuration

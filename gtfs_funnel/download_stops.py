@@ -14,7 +14,7 @@ from download_trips import get_operators
 from calitp_data_analysis import geography_utils, utils
 from shared_utils import gtfs_utils_v2
 from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
-
+from update_vars import CONFIG_DICT
 
 def download_one_day(analysis_date: str):
     """
@@ -29,7 +29,8 @@ def download_one_day(analysis_date: str):
     
     logger.info(f"# operators to run: {len(FEEDS_TO_RUN)}")
     
-    dataset = "stops"
+    dataset = CONFIG_DICT.schedule_downloads.stops
+
     logger.info(f"*********** Download {dataset} data ***********")
 
   

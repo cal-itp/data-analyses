@@ -36,7 +36,7 @@ def attach_prior_vp_add_direction(
     save out a parquet and read it in to merge later.
     """
     time0 = datetime.datetime.now()
-    INPUT_FILE = dict_inputs["usable_vp_file"]
+    INPUT_FILE = dict_inputs.speeds_tables.usable_vp_file
 
     vp = dd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage",
@@ -136,7 +136,7 @@ def add_direction_to_usable_vp(
     Merge staged vp_usable (partitioned by gtfs_dataset_key)
     to the vp direction results.
     """
-    INPUT_FILE = dict_inputs["usable_vp_file"]
+    INPUT_FILE = dict_inputs.speeds_tables.usable_vp_file
     
     usable_vp = pd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage"
