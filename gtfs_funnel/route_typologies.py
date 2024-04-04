@@ -242,13 +242,13 @@ def primary_secondary_typology(
 
 if __name__ == "__main__":
     
-    from update_vars import CONFIG_DICT, analysis_date_list
+    from update_vars import analysis_date_list
     
-    EXPORT = CONFIG_DICT.schedule_tables.route_typologies_file
+    EXPORT = GTFS_DATA_DICT.schedule_tables.route_typologies
     
     start = datetime.datetime.now()
 
-    roads = delayed(prep_roads)(CONFIG_DICT)
+    roads = delayed(prep_roads)(GTFS_DATA_DICT)
     ROAD_BUFFER_METERS = 20
     TYPOLOGY_THRESHOLD = 0.10
     

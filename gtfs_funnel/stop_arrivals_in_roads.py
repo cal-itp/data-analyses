@@ -171,7 +171,7 @@ def corridor_frequency_for_multiple_dates(
 
 if __name__ == "__main__":
     
-    from update_vars import CONFIG_DICT
+    from update_vars import GTFS_DATA_DICT
     
     analysis_date_list = [
         rt_dates.DATES["apr2023"], rt_dates.DATES["jul2023"],
@@ -184,7 +184,7 @@ if __name__ == "__main__":
         print(f"Analysis Date: {analysis_date}")
 
         ROAD_BUFFER_METERS = 50
-        ROAD_FILE = CONFIG_DICT.shared_data.road_segments_twomile
+        ROAD_FILE = GTFS_DATA_DICT.shared_data.road_segments_twomile
 
         spatial_join_stop_arrivals_to_roads(
             ROAD_FILE, analysis_date, 

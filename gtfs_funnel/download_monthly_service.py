@@ -13,7 +13,8 @@ from loguru import logger
 from siuba import *
 
 from calitp_data_analysis.tables import tbls
-from segment_speed_utils.project_vars import SCHED_GCS
+from update_vars import GTFS_DATA_DICT
+SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
 
 def download_one_year(year: int, export_filename: str):
     """
@@ -38,15 +39,13 @@ def download_one_year(year: int, export_filename: str):
 
     
 if __name__=="__main__":
-    
-    from update_vars import analysis_date_list, CONFIG_DICT
-    
+        
     logger.add("./logs/download_data.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    EXPORT = CONFIG_DICT.schedule_tables.monthly_scheduled_service_file
+    EXPORT = GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service
 
     for y in [2024]:
         download_one_year(y, EXPORT)

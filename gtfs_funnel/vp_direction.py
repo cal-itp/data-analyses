@@ -19,8 +19,10 @@ from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
-from segment_speed_utils.project_vars import SEGMENT_GCS, PROJECT_CRS
+from segment_speed_utils.project_vars import PROJECT_CRS
 from shared_utils import rt_utils
+from update_vars import GTFS_DATA_DICT
+SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
 
 fs = gcsfs.GCSFileSystem()    
 
@@ -36,7 +38,7 @@ def attach_prior_vp_add_direction(
     save out a parquet and read it in to merge later.
     """
     time0 = datetime.datetime.now()
-    INPUT_FILE = dict_inputs.speeds_tables.usable_vp_file
+    INPUT_FILE = dict_inputs.speeds_tables.usable_vp
 
     vp = dd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage",
@@ -136,7 +138,7 @@ def add_direction_to_usable_vp(
     Merge staged vp_usable (partitioned by gtfs_dataset_key)
     to the vp direction results.
     """
-    INPUT_FILE = dict_inputs.speeds_tables.usable_vp_file
+    INPUT_FILE = dict_inputs.speeds_tables.usable_vp
     
     usable_vp = pd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage"
@@ -175,7 +177,7 @@ def add_direction_to_usable_vp(
 
 if __name__ == "__main__":
     
-    from update_vars import analysis_date_list, CONFIG_DICT
+    from update_vars import analysis_date_list
     
     LOG_FILE = "./logs/vp_preprocessing.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -187,12 +189,12 @@ if __name__ == "__main__":
     
         start = datetime.datetime.now()
 
-        attach_prior_vp_add_direction(analysis_date, CONFIG_DICT)
+        attach_prior_vp_add_direction(analysis_date, GTFS_DATA_DICT)
 
         time1 = datetime.datetime.now()
         logger.info(f"{analysis_date}: export vp direction: {time1 - start}")
 
-        add_direction_to_usable_vp(analysis_date, CONFIG_DICT)
+        add_direction_to_usable_vp(analysis_date, GTFS_DATA_DICT)
 
         end = datetime.datetime.now()
         
