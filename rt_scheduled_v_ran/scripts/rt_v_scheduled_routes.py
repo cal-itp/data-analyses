@@ -8,8 +8,8 @@ import sys
 from loguru import logger
 
 from segment_speed_utils import gtfs_schedule_wrangling, metrics
-from segment_speed_utils.project_vars import RT_SCHED_GCS
 from segment_speed_utils.time_series_utils import ROUTE_DIR_COLS
+from update_vars import RT_SCHED_GCS, GTFS_DATA_DICT
 
 def average_rt_trip_times(
     df: pd.DataFrame
@@ -45,8 +45,8 @@ def route_metrics(
     """
     start = datetime.datetime.now()
     
-    TRIP_EXPORT = dict_inputs["trip_metrics"]
-    ROUTE_EXPORT = dict_inputs["route_direction_metrics"]
+    TRIP_EXPORT = dict_inputs.vp_trip_metrics
+    ROUTE_EXPORT = dict_inputs.vp_route_direction_metrics
 
     trip_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet"
@@ -83,7 +83,9 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    from update_vars import analysis_date_list, CONFIG_DICT
+    from update_vars import analysis_date_list
+    
+    dict_inputs = GTFS_DATA_DICT.rt_vs_schedule_tables
     
     for analysis_date in analysis_date_list: 
-        route_metrics(analysis_date, CONFIG_DICT)
+        route_metrics(analysis_date, dict_inputs)
