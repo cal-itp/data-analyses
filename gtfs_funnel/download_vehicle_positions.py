@@ -18,8 +18,7 @@ from loguru import logger
 from siuba import *
 
 from shared_utils import schedule_rt_utils
-from update_vars import GTFS_DATA_DICT
-SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
 fs = gcsfs.GCSFileSystem()
 

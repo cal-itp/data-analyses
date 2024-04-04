@@ -12,8 +12,7 @@ from calitp_data_analysis import utils
 from shared_utils import rt_utils
 from segment_speed_utils import helpers, wrangle_shapes
 from segment_speed_utils.project_vars import PROJECT_CRS
-from update_vars import GTFS_DATA_DICT
-RT_SCHED_GCS = GTFS_DATA_DICT.gcs_paths.RT_SCHED_GCS
+from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
 def prep_scheduled_stop_times(analysis_date: str) -> gpd.GeoDataFrame:
     """

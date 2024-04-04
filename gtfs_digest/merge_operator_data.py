@@ -1,21 +1,26 @@
 """
+Concatenate the high-level operator stats.
+Produce a single row for each operator-date we have.
+This comprises first section of GTFS Digest.
 """
 import geopandas as gpd
 import pandas as pd
 
 from calitp_data_analysis import utils
 from segment_speed_utils import time_series_utils
-from segment_speed_utils.project_vars import SCHED_GCS, RT_SCHED_GCS
 from merge_data import merge_in_standardized_route_names
+from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
 sort_cols = ["schedule_gtfs_dataset_key", "service_date"]
 
 def concatenate_operator_stats(
     date_list: list
 ) -> pd.DataFrame:
+    FILE = GTFS_DATA_DICT.digest_tables.operator_scheduled_stats
+    
     df = time_series_utils.concatenate_datasets_across_dates(
         SCHED_GCS,
-        "operator_profiles/operator_scheduled_stats",
+        FILE,
         date_list,
         data_type = "df",
     ).sort_values(sort_cols).reset_index(drop=True)
@@ -26,9 +31,11 @@ def concatenate_operator_stats(
 def concatenate_operator_routes( 
     date_list: list
 ) -> gpd.GeoDataFrame:
+    FILE = GTFS_DATA_DICT.operator_routes.operator_routes
+
     df = time_series_utils.concatenate_datasets_across_dates(
         SCHED_GCS,
-        "operator_profiles/operator_routes",
+        FILE,
         date_list,
         data_type = "gdf",
     ).sort_values(sort_cols).reset_index(drop=True)   
@@ -46,13 +53,15 @@ def operator_category_counts_by_date() -> pd.DataFrame:
     and for schedule_and_vp, we select n_vp_trips (because not all
     scheduled trips may have vp).
     """
+    INPUT = GTFS_DATA_DICT.digest_tables.route_schedule_vp
+    
     operator_category_cols = [
         "schedule_gtfs_dataset_key", "service_date",
         "sched_rt_category"
     ]
 
     df = pd.read_parquet(
-        f"{RT_SCHED_GCS}digest/schedule_vp_metrics.parquet",
+        f"{RT_SCHED_GCS}{INPUT}.parquet",
         filters = [[("time_period", "==", "all_day")]],
         columns = operator_category_cols + ["route_id", "direction_id", 
              "n_scheduled_trips", "n_vp_trips"]
@@ -93,14 +102,18 @@ def operator_category_counts_by_date() -> pd.DataFrame:
 
 if __name__ == "__main__":
 
-    from shared_utils.rt_dates import y2023_dates, y2024_dates
+    from shared_utils import rt_dates
     
-    analysis_date_list = y2024_dates + y2023_dates 
+    analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates 
+    
+    OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
+    OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
+    SCHED_RT_CATEGORY = GTFS_DATA_DICT.digest_tables.operator_sched_rt
     
     df = concatenate_operator_stats(analysis_date_list)
     
     df.to_parquet(
-        f"{RT_SCHED_GCS}digest/operator_profiles.parquet"
+        f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
     )
     
     gdf = concatenate_operator_routes(
@@ -110,11 +123,10 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(
         gdf,
         RT_SCHED_GCS,
-        "digest/operator_routes"
+        OPERATOR_ROUTE
     )
     
     operator_category_counts = operator_category_counts_by_date()
     operator_category_counts.to_parquet(
-        f"{RT_SCHED_GCS}"
-        "digest/operator_schedule_rt_category.parquet"
+        f"{RT_SCHED_GCS}{SCHED_RT_CATEGORY}.parquet"
     )
