@@ -10,8 +10,7 @@ import sys
 from dask import delayed
 from loguru import logger
 
-from segment_speed_utils.project_vars import SHARED_GCS
-                                                 
+from update_vars import SHARED_GCS                                                 
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date
