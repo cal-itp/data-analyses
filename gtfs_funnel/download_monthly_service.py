@@ -13,8 +13,7 @@ from loguru import logger
 from siuba import *
 
 from calitp_data_analysis.tables import tbls
-from update_vars import GTFS_DATA_DICT
-SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
+from update_vars import GTFS_DATA_DICT, SCHED_GCS
 
 def download_one_year(year: int, export_filename: str):
     """

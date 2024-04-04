@@ -11,8 +11,7 @@ import sys
 from loguru import logger
 
 from shared_utils import gtfs_utils_v2
-from update_vars import GTFS_DATA_DICT
-COMPILED_CACHED_VIEWS = GTFS_DATA_DICT.gcs_paths.COMPILED_CACHED_VIEWS
+from update_vars import GTFS_DATA_DICT, COMPILED_CACHED_VIEWS
 
 def get_operators(analysis_date: str):
     """

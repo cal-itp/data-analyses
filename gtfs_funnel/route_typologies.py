@@ -26,8 +26,9 @@ import pandas as pd
 from dask import delayed, compute
 
 from segment_speed_utils import gtfs_schedule_wrangling, helpers                       
-from segment_speed_utils.project_vars import SHARED_GCS, SCHED_GCS, PROJECT_CRS   
+from segment_speed_utils.project_vars import PROJECT_CRS   
 from shared_utils import rt_dates
+from update_vars import SHARED_GCS, SCHED_GCS
 
 route_dir_cols = [
     "schedule_gtfs_dataset_key", 

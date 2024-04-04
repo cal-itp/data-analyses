@@ -21,8 +21,7 @@ from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import PROJECT_CRS
 from shared_utils import rt_utils
-from update_vars import GTFS_DATA_DICT
-SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
 fs = gcsfs.GCSFileSystem()    
 

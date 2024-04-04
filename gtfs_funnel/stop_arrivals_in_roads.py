@@ -10,8 +10,9 @@ from segment_speed_utils import (helpers,
                                  gtfs_schedule_wrangling, 
                                  time_helpers
                                 )
-from segment_speed_utils.project_vars import SHARED_GCS, SCHED_GCS, PROJECT_CRS      
+from segment_speed_utils.project_vars import PROJECT_CRS   
 from shared_utils import rt_dates
+from update_vars import SHARED_GCS, SCHED_GCS
 
 road_cols = ["linearid", "mtfcc", "fullname"]
 road_segment_cols = road_cols + ["segment_sequence"]

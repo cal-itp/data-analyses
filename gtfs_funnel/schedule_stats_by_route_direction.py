@@ -8,9 +8,8 @@ import pandas as pd
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
-from segment_speed_utils.project_vars import SCHED_GCS, RT_SCHED_GCS
 from shared_utils.rt_utils import METERS_PER_MILE
-from update_vars import GTFS_DATA_DICT
+from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
 def assemble_scheduled_trip_metrics(
     analysis_date: str, 

@@ -13,8 +13,7 @@ import sys
 from loguru import logger
 
 from segment_speed_utils import helpers
-from update_vars import GTFS_DATA_DICT
-SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
                                               
 fs = gcsfs.GCSFileSystem()
 

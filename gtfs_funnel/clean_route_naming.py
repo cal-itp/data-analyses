@@ -4,9 +4,8 @@ Create file with cleaned up route info.
 import pandas as pd
 
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
-from update_vars import GTFS_DATA_DICT
+from update_vars import GTFS_DATA_DICT, SCHED_GCS
 from shared_utils import rt_dates
-SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCED_GCS
 
 def concatenate_routes_across_dates(
     analysis_date_list: list

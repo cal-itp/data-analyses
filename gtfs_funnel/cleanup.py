@@ -4,8 +4,7 @@ Remove staged files.
 Do this in a separate script in case we don't want to run.
 """
 from segment_speed_utils import helpers
-from update_vars import GTFS_DATA_DICT
-SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
 if __name__ == "__main__":
     

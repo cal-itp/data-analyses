@@ -10,8 +10,7 @@ import pandas as pd
 from calitp_data_analysis import utils
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from shared_utils.rt_utils import METERS_PER_MILE
-from update_vars import GTFS_DATA_DICT
-SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
+from update_vars import GTFS_DATA_DICT, SCHED_GCS
 
 def schedule_stats_by_operator(
     analysis_date: str,
