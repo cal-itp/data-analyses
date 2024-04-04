@@ -13,7 +13,7 @@ import sys
 from loguru import logger
 
 from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import SEGMENT_GCS 
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
                                               
 fs = gcsfs.GCSFileSystem()
 
@@ -92,10 +92,10 @@ def pare_down_vp_to_valid_trips(
     to keep the enter / exit timestamps.
     Also, exclude any bad batches of trips.
     """
-    INPUT_FILE = dict_inputs["raw_vp_file"]
-    TIMESTAMP_COL = dict_inputs["timestamp_col"]
-    TIME_CUTOFF = dict_inputs["time_min_cutoff"]
-    EXPORT_FILE = dict_inputs["usable_vp_file"]
+    INPUT_FILE = dict_inputs.speeds_tables.raw_vp
+    TIMESTAMP_COL = dict_inputs.speeds_tables.timestamp_col
+    TIME_CUTOFF = dict_inputs.speeds_tables.time_min_cutoff
+    EXPORT_FILE = dict_inputs.speeds_tables.usable_vp
 
     vp = gpd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet"
@@ -114,9 +114,9 @@ def pare_down_vp_to_valid_trips(
         how = "inner"
     ).sort_values(
         ["gtfs_dataset_key", "trip_id", 
-         "location_timestamp_local"]
+         TIMESTAMP_COL]
     ).drop_duplicates(
-        subset=["trip_instance_key", "location_timestamp_local"]
+        subset=["trip_instance_key", TIMESTAMP_COL]
     ).reset_index(drop=True)
     
     # Let's convert to tabular now, make use of partitioning
@@ -149,7 +149,7 @@ def pare_down_vp_to_valid_trips(
     
 if __name__ == "__main__":
     
-    from update_vars import analysis_date_list, CONFIG_DICT
+    from update_vars import analysis_date_list
     
     LOG_FILE = "./logs/vp_preprocessing.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -162,7 +162,7 @@ if __name__ == "__main__":
   
         pare_down_vp_to_valid_trips(
             analysis_date,
-            CONFIG_DICT
+            GTFS_DATA_DICT
         )
         
         end = datetime.datetime.now()

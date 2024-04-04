@@ -8,21 +8,19 @@ import pandas as pd
 from pathlib import Path
 
 from calitp_data_analysis import utils
-from segment_speed_utils import helpers, time_series_utils
-from segment_speed_utils.project_vars import SEGMENT_GCS, PUBLIC_GCS
+from segment_speed_utils import time_series_utils
 from shared_utils import rt_dates
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, PUBLIC_GCS
 
 if __name__ == "__main__":
-
-    from segment_speed_utils.project_vars import CONFIG_PATH
     
     analysis_date_list = rt_dates.y2023_dates + rt_dates.y2024_dates
     
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    STOP_SEG_DICT = GTFS_DATA_DICT.stop_segments
     
     DATASETS = [
-        STOP_SEG_DICT["route_dir_single_segment"], 
-        STOP_SEG_DICT["route_dir_single_summary"]
+        STOP_SEG_DICT.route_dir_single_segment, 
+        STOP_SEG_DICT.route_dir_single_summary
     ]
     
     for d in DATASETS:

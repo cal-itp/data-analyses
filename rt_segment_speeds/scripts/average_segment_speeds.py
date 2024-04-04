@@ -19,7 +19,7 @@ from segment_speed_utils import (gtfs_schedule_wrangling,
                                  time_helpers, 
                                  time_series_utils
                                  )
-from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 from segment_speed_utils.time_series_utils import STOP_PAIR_COLS, ROUTE_DIR_COLS
 
 OPERATOR_COLS = [
@@ -280,7 +280,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    STOP_SEG_DICT = GTFS_DATA_DICT.stop_segments
     
     for analysis_date in analysis_date_list:
         

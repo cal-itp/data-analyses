@@ -1,13 +1,15 @@
-from shared_utils import rt_dates
+from shared_utils import catalog_utils, rt_dates
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-SEGMENT_GCS = f"{GCS_FILE_PATH}rt_segment_speeds/"
-RT_SCHED_GCS = f"{GCS_FILE_PATH}rt_vs_schedule/"
-SCHED_GCS = f"{GCS_FILE_PATH}gtfs_schedule/"
-PREDICTIONS_GCS = f"{GCS_FILE_PATH}rt_predictions/"
-SHARED_GCS = f"{GCS_FILE_PATH}shared_data/"
-PUBLIC_GCS = "gs://calitp-publish-data-analysis/"
+GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
+
+GCS_FILE_PATH = GTFS_DATA_DICT.gcs_paths.GCS
+COMPILED_CACHED_VIEWS = GTFS_DATA_DICT.gcs_paths.COMPILED_CACHED_VIEWS
+SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
+RT_SCHED_GCS = GTFS_DATA_DICT.gcs_paths.RT_SCHED_GCS
+SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
+PREDICTIONS_GCS = GTFS_DATA_DICT.gcs_paths.PREDICTIONS_GCS
+SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
+PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
 
 analysis_date = rt_dates.DATES["mar2024"]
 

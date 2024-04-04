@@ -12,7 +12,7 @@ from loguru import logger
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import vp_transform, wrangle_shapes
-from segment_speed_utils.project_vars import SEGMENT_GCS
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
 def condense_vp_to_linestring(
     analysis_date: str, 
@@ -24,8 +24,8 @@ def condense_vp_to_linestring(
     We will group by trip and save out 
     the vp point geom into a shapely.LineString.
     """
-    USABLE_VP = dict_inputs["usable_vp_file"]
-    EXPORT_FILE = dict_inputs["vp_condensed_line_file"]
+    USABLE_VP = dict_inputs.speeds_tables.usable_vp
+    EXPORT_FILE = dict_inputs.speeds_tables.vp_condensed_line
     
     vp = delayed(pd.read_parquet)(
         f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
@@ -69,8 +69,8 @@ def prepare_vp_for_all_directions(
     Subset vp_idx, location_timestamp_local and coordinate arrays 
     to exclude southbound.
     """
-    INPUT_FILE = dict_inputs["vp_condensed_line_file"]
-    EXPORT_FILE = dict_inputs["vp_nearest_neighbor_file"]
+    INPUT_FILE = dict_inputs.speeds_tables.vp_condensed_line
+    EXPORT_FILE = dict_inputs.speeds_tables.vp_nearest_neighbor
     
     vp = delayed(gpd.read_parquet)(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
@@ -89,23 +89,19 @@ def prepare_vp_for_all_directions(
     ).sort_values(
         ["trip_instance_key", "vp_primary_direction"]
     ).reset_index(drop=True)
-    
-    del results
-    
+        
     utils.geoparquet_gcs_export(
         gdf,
         SEGMENT_GCS,
         f"{EXPORT_FILE}_{analysis_date}"
     )
     
-    del gdf
-    
     return 
 
 
 if __name__ == "__main__":
     
-    from update_vars import analysis_date_list, CONFIG_DICT
+    from update_vars import analysis_date_list
     
     LOG_FILE = "./logs/vp_preprocessing.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -117,7 +113,7 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
-        condense_vp_to_linestring(analysis_date, CONFIG_DICT)
+        condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
         
         time1 = datetime.datetime.now()
         
@@ -126,7 +122,7 @@ if __name__ == "__main__":
             f"{time1 - start}"
         )
         
-        prepare_vp_for_all_directions(analysis_date, CONFIG_DICT)
+        prepare_vp_for_all_directions(analysis_date, GTFS_DATA_DICT)
         
         end = datetime.datetime.now()
         logger.info(

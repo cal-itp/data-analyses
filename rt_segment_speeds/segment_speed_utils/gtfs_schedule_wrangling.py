@@ -9,7 +9,7 @@ from typing import Literal, Union
 
 from segment_speed_utils import helpers, time_helpers
 from shared_utils import portfolio_utils, rt_utils
-from segment_speed_utils.project_vars import SEGMENT_GCS
+from segment_speed_utils.project_vars import SEGMENT_GCS 
 
 sched_rt_category_dict = {
     "left_only": "schedule_only",
@@ -528,7 +528,7 @@ def merge_operator_identifiers(
     crosswalk = pd.concat([
         helpers.import_schedule_gtfs_key_organization_crosswalk(
             analysis_date,
-        ).drop(columns = "itp_id") 
+        ).drop(columns = ["itp_id", "schedule_source_record_id"]) 
         for analysis_date in analysis_date_list],
         axis=0, ignore_index=True
     ).drop_duplicates()
