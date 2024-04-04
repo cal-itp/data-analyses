@@ -1,6 +1,6 @@
 #https://stackoverflow.com/questions/5484016/how-can-i-do-string-concatenation-or-string-replacement-in-yaml
 gcs_paths:
-  GCS: gs://calitp-analytics-data/data-analyses/ 
+  GCS: gs://calitp-analytics-data/data-analyses/
   COMPILED_CACHED_VIEWS: ${.GCS}rt_delay/compiled_cached_views/
   SEGMENT_GCS: ${.GCS}rt_segment_speeds/
   SCHED_GCS: ${.GCS}gtfs_schedule/
@@ -9,7 +9,7 @@ gcs_paths:
 
 schedule_downloads:
   gcs_dir: ${gcs_paths.COMPILED_CACHED_VIEWS}
-  trips: trips 
+  trips: trips
   shapes: routelines
   stops: stops
   stop_times: st
@@ -17,7 +17,7 @@ schedule_downloads:
 speeds_tables:
   gcs_dir: ${gcs_paths.SEGMENT_GCS}
   raw_vp_file: vp
-  usable_vp_file: vp_usable 
+  usable_vp_file: vp_usable
   vp_condensed_line_file: condensed/vp_condensed
   vp_nearest_neighbor_file: condensed/vp_nearest_neighbor
   timestamp_col: "location_timestamp_local"
@@ -37,7 +37,7 @@ rt_vs_schedule_tables:
   stop_times_direction_file: "stop_times_direction"
   trip_metrics_file: "schedule_trip/schedule_trip_metrics"
   route_direction_metrics_file: "schedule_route_dir/schedule_route_direction_metrics"
-  
+
 shared_data:
   gcs_dir: ${gcs_paths.SHARED_GCS}
   road_segments_twomile: segmented_roads_twomile_2020
