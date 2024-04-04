@@ -10,6 +10,7 @@ from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from segment_speed_utils.project_vars import SCHED_GCS, RT_SCHED_GCS
 from shared_utils.rt_utils import METERS_PER_MILE
+from update_vars import GTFS_DATA_DICT
 
 def assemble_scheduled_trip_metrics(
     analysis_date: str, 
@@ -19,7 +20,7 @@ def assemble_scheduled_trip_metrics(
     Get GTFS schedule trip metrics including time-of-day buckets,
     scheduled service minutes, and median stop spacing.
     """
-    STOP_TIMES_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction_file
+    STOP_TIMES_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction
     
     df = gpd.read_parquet(
         f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet"
@@ -70,7 +71,8 @@ def schedule_metrics_by_route_direction(
     service_freq_df = gtfs_schedule_wrangling.aggregate_time_of_day_to_peak_offpeak(
         df, group_cols, long_or_wide = "long")
         
-    metrics_df = (df.groupby(group_cols, observed=True, group_keys=False)
+    metrics_df = (df.groupby(group_cols, 
+                             observed=True, group_keys=False)
                   .agg({
                       "median_stop_meters": "mean", 
                       # take mean of the median stop spacing for trip
@@ -111,14 +113,14 @@ def schedule_metrics_by_route_direction(
     
 if __name__ == "__main__":
     
-    from update_vars import analysis_date_list, CONFIG_DICT
+    from update_vars import analysis_date_list
     
-    TRIP_EXPORT = CONFIG_DICT.rt_vs_schedule_tables.trip_metrics_file
-    ROUTE_DIR_EXPORT = CONFIG_DICT.rt_vs_schedule_tables.route_direction_metrics_file
-    ROUTE_TYPOLOGIES = CONFIG_DICT.schedule_tables.route_typologies_file
+    TRIP_EXPORT = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_trip_metrics
+    ROUTE_DIR_EXPORT = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_route_direction_metrics
+    ROUTE_TYPOLOGIES = GTFS_DATA_DICT.schedule_tables.route_typologies
     
     for date in analysis_date_list:
-        trip_metrics = assemble_scheduled_trip_metrics(date, CONFIG_DICT)
+        trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
                 
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")

@@ -11,8 +11,8 @@ import pandas as pd
 
 from shared_utils import schedule_rt_utils
 from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import SCHED_GCS
-
+from update_vars import GTFS_DATA_DICT
+SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
 
 def create_gtfs_dataset_key_to_organization_crosswalk(
     analysis_date: str
@@ -52,9 +52,9 @@ def create_gtfs_dataset_key_to_organization_crosswalk(
 
 if __name__ == "__main__":
 
-    from update_vars import analysis_date_list, CONFIG_DICT
+    from update_vars import analysis_date_list
     
-    EXPORT = CONFIG_DICT.schedule_tables.gtfs_key_crosswalk
+    EXPORT = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     
     start = datetime.datetime.now()
     

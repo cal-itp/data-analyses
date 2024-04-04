@@ -11,8 +11,9 @@ import pandas as pd
 from calitp_data_analysis import utils
 from shared_utils import rt_utils
 from segment_speed_utils import helpers, wrangle_shapes
-from segment_speed_utils.project_vars import RT_SCHED_GCS, PROJECT_CRS
-
+from segment_speed_utils.project_vars import PROJECT_CRS
+from update_vars import GTFS_DATA_DICT
+RT_SCHED_GCS = GTFS_DATA_DICT.gcs_paths.RT_SCHED_GCS
 
 def prep_scheduled_stop_times(analysis_date: str) -> gpd.GeoDataFrame:
     """
@@ -176,7 +177,7 @@ def assemble_stop_times_with_direction(
     """
     start = datetime.datetime.now()
 
-    EXPORT_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction_file
+    EXPORT_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction
     
     scheduled_stop_times = prep_scheduled_stop_times(analysis_date)
 
@@ -239,8 +240,8 @@ def assemble_stop_times_with_direction(
 
 if __name__ == "__main__":  
     
-    from update_vars import analysis_date_list, CONFIG_DICT
+    from update_vars import analysis_date_list
 
     for date in analysis_date_list:
         print(date)
-        assemble_stop_times_with_direction(date, CONFIG_DICT)
+        assemble_stop_times_with_direction(date, GTFS_DATA_DICT)

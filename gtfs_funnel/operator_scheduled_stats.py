@@ -9,8 +9,9 @@ import pandas as pd
 
 from calitp_data_analysis import utils
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
-from segment_speed_utils.project_vars import SCHED_GCS
 from shared_utils.rt_utils import METERS_PER_MILE
+from update_vars import GTFS_DATA_DICT
+SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
 
 def schedule_stats_by_operator(
     analysis_date: str,
@@ -116,7 +117,7 @@ def longest_shape_by_route(analysis_date: str) -> gpd.GeoDataFrame:
     return gdf
 
 
-def operator_typology_breakdown(df:pd.DataFrame) -> pd.DataFrame:
+def operator_typology_breakdown(df: pd.DataFrame) -> pd.DataFrame:
     """
     Get a count of how many routes (not route-dir) 
     have a certain primary typology.
@@ -148,11 +149,11 @@ def operator_typology_breakdown(df:pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     
-    from update_vars import CONFIG_DICT, analysis_date_list
+    from update_vars import analysis_date_list
     
-    ROUTE_TYPOLOGY = CONFIG_DICT.schedule_tables.route_typologies_file
-    OPERATOR_EXPORT = CONFIG_DICT.schedule_tables.operator_scheduled_stats_file
-    OPERATOR_ROUTE_EXPORT = CONFIG_DICT.schedule_tables.operator_route_file
+    ROUTE_TYPOLOGY = GTFS_DATA_DICT.schedule_tables.route_typologies
+    OPERATOR_EXPORT = GTFS_DATA_DICT.schedule_tables.operator_scheduled_stats
+    OPERATOR_ROUTE_EXPORT = GTFS_DATA_DICT.schedule_tables.operator_route
     
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
