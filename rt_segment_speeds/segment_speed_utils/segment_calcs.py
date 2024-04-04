@@ -6,7 +6,7 @@ import pandas as pd
 
 from typing import Union
 
-from shared_utils import rt_utils
+from shared_utils.rt_utils import MPH_PER_MPS
 
 def speed_from_meters_elapsed_sec_elapsed(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -15,7 +15,7 @@ def speed_from_meters_elapsed_sec_elapsed(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.assign(
         speed_mph = (df.meters_elapsed.divide(df.sec_elapsed) * 
-                     rt_utils.MPH_PER_MPS)
+                     MPH_PER_MPS)
     )
     return df
 

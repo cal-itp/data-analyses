@@ -10,6 +10,7 @@ gcs_paths:
   SCHED_GCS: ${.GCS}gtfs_schedule/
   RT_SCHED_GCS: ${.GCS}rt_vs_schedule/
   SHARED_GCS: ${.GCS}shared_data/
+  PREDICTIONS_GCS: ${.GCS}rt_predictions/
   PUBLIC_GCS: "gs://calitp-publish-data-analysis/"
 
 speed_vars:

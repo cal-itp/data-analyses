@@ -9,7 +9,7 @@ from typing import Literal, Union
 
 from segment_speed_utils import helpers, time_helpers
 from shared_utils import portfolio_utils, rt_utils
-from segment_speed_utils.project_vars import SEGMENT_GCS
+from segment_speed_utils.project_vars import SEGMENT_GCS 
 
 sched_rt_category_dict = {
     "left_only": "schedule_only",
