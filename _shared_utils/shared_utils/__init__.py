@@ -1,4 +1,5 @@
 from . import (
+    catalog_utils,
     dask_utils,
     gtfs_utils_v2,
     portfolio_utils,
@@ -8,6 +9,7 @@ from . import (
 )
 
 __all__ = [
+    "catalog_utils",
     "dask_utils",
     "gtfs_utils_v2",
     "portfolio_utils",
