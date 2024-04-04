@@ -16,11 +16,10 @@ from loguru import logger
 
 from calitp_data_analysis import utils
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import gtfs_schedule_wrangling, helpers
-from segment_speed_utils.project_vars import (SEGMENT_GCS, 
-                                              PROJECT_CRS, 
-                                              CONFIG_PATH
-                                             )
+from segment_speed_utils import gtfs_schedule_wrangling
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
+from segment_speed_utils.project_vars import PROJECT_CRS 
+                                             
 
 def stop_times_with_shape(
     analysis_date: str
@@ -122,7 +121,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")    
     
-    RT_DICT = helpers.get_parameters(CONFIG_PATH, "rt_stop_times")
+    RT_DICT = GTFS_DATA_DICT.rt_stop_times
     
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()

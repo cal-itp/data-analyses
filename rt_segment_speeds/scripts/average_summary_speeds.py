@@ -20,7 +20,7 @@ from segment_speed_utils import (gtfs_schedule_wrangling,
                                  time_helpers, 
                                  time_series_utils
                                  )
-from segment_speed_utils.project_vars import SEGMENT_GCS, CONFIG_PATH
+from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.time_series_utils import ROUTE_DIR_COLS
 
 OPERATOR_COLS = [
@@ -234,14 +234,13 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    dict_inputs = helpers.get_parameters(CONFIG_PATH, "rt_stop_times")
-    
+    RT_DICT = GTFS_DATA_DICT.rt_stop_times
     
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
         
-        single_day_summary_averages(analysis_date, dict_inputs)
+        single_day_summary_averages(analysis_date, RT_DICT)
         end = datetime.datetime.now()
         
         logger.info(f"average rollups for {analysis_date}: {end - start}")
@@ -250,7 +249,7 @@ if __name__ == "__main__":
     for one_week in [rt_dates.oct_week, rt_dates.apr_week]:
         start = datetime.datetime.now()
             
-        multi_day_summary_averages(one_week, dict_inputs)
+        multi_day_summary_averages(one_week, RT_DICT)
         end = datetime.datetime.now()
     
         logger.info(f"average rollups for {one_week}: {end - start}")

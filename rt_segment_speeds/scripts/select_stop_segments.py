@@ -15,8 +15,7 @@ import pandas as pd
 
 from calitp_data_analysis import utils
 from shared_utils import rt_dates
-from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import SEGMENT_GCS
+from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 
 
 def select_one_trip_per_shape(analysis_date: str):
@@ -59,11 +58,11 @@ def select_one_trip_per_shape(analysis_date: str):
 
 
 if __name__ == "__main__":
-    from segment_speed_utils.project_vars import analysis_date_list, CONFIG_PATH
+    from segment_speed_utils.project_vars import analysis_date_list
     
     # This is a different stop segments file (a subset)
     # of the RT stop times one that cuts segments for all trips
-    STOP_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "stop_segments")
+    STOP_SEG_DICT = GTFS_DATA_DICT.stop_segments
     
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()

@@ -14,10 +14,9 @@ from typing import Literal, Optional
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, neighbor
-from segment_speed_utils.project_vars import (SEGMENT_GCS,
-                                              SEGMENT_TYPES,
-                                              CONFIG_PATH)
-  
+from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
+from segment_speed_utils.project_vars import SEGMENT_TYPES
+                                              
     
 def stop_times_for_shape_segments(
     analysis_date: str,
@@ -90,14 +89,14 @@ def stop_times_for_all_trips(
 def nearest_neighbor_for_stop(
     analysis_date: str,
     segment_type: Literal[SEGMENT_TYPES],
-    config_path: Optional[Path] = CONFIG_PATH
+    config_path: Optional[Path] = GTFS_DATA_DICT
 ):
     """
     Set up nearest neighbors for RT stop times, which
     includes all trips. Use stop sequences for each trip.
     """
     
-    dict_inputs = helpers.get_parameters(config_path, segment_type)
+    dict_inputs = config_path[segment_type]
     
     start = datetime.datetime.now()
     EXPORT_FILE = f'{dict_inputs["stage2"]}'
@@ -145,11 +144,11 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO") 
     
-    from segment_speed_utils.project_vars import analysis_date_list, CONFIG_PATH
+    from segment_speed_utils.project_vars import analysis_date_list
     
     for analysis_date in analysis_date_list:
         nearest_neighbor_for_stop(
             analysis_date = analysis_date,
             segment_type = segment_type,
-            config_path = CONFIG_PATH
+            config_path = GTFS_DATA_DICT
         ) 
