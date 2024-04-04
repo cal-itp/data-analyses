@@ -7,6 +7,11 @@ gcs_paths:
   RT_SCHED_GCS: ${.GCS}rt_vs_schedule/
   SHARED_GCS: ${.GCS}shared_data/
 
+speed_vars:
+  timestamp_col: "location_timestamp_local"
+  max_speed: 80
+  time_min_cutoff: 10
+
 schedule_downloads:
   gcs_dir: ${gcs_paths.COMPILED_CACHED_VIEWS}
   trips: trips
@@ -20,8 +25,8 @@ speeds_tables:
   usable_vp_file: vp_usable
   vp_condensed_line_file: condensed/vp_condensed
   vp_nearest_neighbor_file: condensed/vp_nearest_neighbor
-  timestamp_col: "location_timestamp_local"
-  time_min_cutoff: 10
+  timestamp_col: ${speed_vars.timestamp_col}
+  time_min_cutoff: ${speed_vars.time_min_cutoff}
 
 schedule_tables:
   gcs_dir: ${gcs_paths.SCHED_GCS}
@@ -37,6 +42,52 @@ rt_vs_schedule_tables:
   stop_times_direction_file: "stop_times_direction"
   trip_metrics_file: "schedule_trip/schedule_trip_metrics"
   route_direction_metrics_file: "schedule_route_dir/schedule_route_direction_metrics"
+
+digest_tables:
+  dir: ${gcs_paths.RT_SCHED_GCS}
+  route_schedule_vp_file: "digest/schedule_vp_metrics"
+  route_segment_speeds_file: "digest/segment_speeds"
+  operator_profiles_file: "digest/operator_profiles"
+  operator_routes_file: "digest/operator_routes"
+  operator_sched_rt_file: "digest/operator_schedule_rt_category"
+
+stop_segments:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  stage1: ${speeds_tables.usable_vp_file}
+  stage2: "nearest/nearest_vp_shape_segments"
+  stage3: "stop_arrivals"
+  stage4: "speeds_stop_segments"
+  shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments"
+  route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"
+  route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
+  segments_file: "segment_options/shape_stop_segments"
+  timestamp_col: ${speed_vars.timestamp_col}
+  max_speed: ${speed_vars.max_speed}
+
+rt_stop_times:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  stage1: ${speeds_tables.usable_vp_file}
+  stage2: "nearest/nearest_vp_rt_stop_times"
+  stage3: "rt_stop_times/stop_arrivals"
+  stage4: "rt_stop_times/speeds"
+  segments_file: "segment_options/stop_segments"
+  trip_speeds_single_summary: "rollup_singleday/speeds_trip"
+  route_dir_single_summary: "rollup_singleday/speeds_route_dir"
+  route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
+  min_trip_minutes: ${speed_vars.time_min_cutoff}
+  max_trip_minutes: 180
+  max_speed: ${speed_vars.max_speed}
+  min_meters_elapsed: 1609
+
+road_segments:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  stage1: ${speeds_tables.usable_vp_file}
+  stage2: "nearest/nearest_vp_roads"
+  stage3: "road_segments/stop_arrivals"
+  stage4: "speeds_road_segments"
+  stage5: "avg_speeds_road_segments"
+  segment_identifier_cols: ["linearid", "mtfcc", "segment_sequence"]
+  timestamp_col: ${speed_vars.timestamp_col}
 
 shared_data:
   gcs_dir: ${gcs_paths.SHARED_GCS}
