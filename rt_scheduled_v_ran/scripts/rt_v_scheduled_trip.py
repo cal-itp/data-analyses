@@ -11,14 +11,11 @@ from dask import delayed, compute
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils.project_vars import (
-    PROJECT_CRS,
-    SEGMENT_GCS,
-    RT_SCHED_GCS,
-)
+from segment_speed_utils.project_vars import PROJECT_CRS
 from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
                                  metrics,
                                  segment_calcs)
+from update_vars import SEGMENT_GCS, RT_SCHED_GCS
 
 
 # UPDATE COMPLETENESS
@@ -267,14 +264,15 @@ def rt_schedule_trip_metrics(
     dict_inputs: dict
 ) -> pd.DataFrame:
     """
-
+    Broadly bin whether the trip is early / late / on-time using
+    cutoffs defined in our yaml.
     """    
     start = datetime.datetime.now()
 
     # number of minutes to determine trip lateness    
-    early = dict_inputs["early_trip_minutes"]
-    late = dict_inputs["late_trip_minutes"]
-    TRIP_EXPORT = dict_inputs["trip_metrics"]
+    early = dict_inputs.early_trip_minutes
+    late = dict_inputs.late_trip_minutes
+    TRIP_EXPORT = dict_inputs.vp_trip_metrics
     
     basic_counts_by_vp_trip(analysis_date)
     
@@ -343,7 +341,9 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    from update_vars import CONFIG_DICT, analysis_date_list
+    from update_vars import GTFS_DATA_DICT, analysis_date_list
 
+    dict_inputs = GTFS_DATA_DICT.rt_vs_schedule_tables
+    
     for date in analysis_date_list:
-        rt_schedule_trip_metrics(date, CONFIG_DICT)
+        rt_schedule_trip_metrics(date, dict_inputs)

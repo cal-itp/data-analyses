@@ -15,8 +15,8 @@ import sys
 from loguru import logger
 
 from segment_speed_utils import helpers
-from segment_speed_utils.project_vars import (SEGMENT_GCS, SHARED_GCS,
-                                              CONFIG_PATH, PROJECT_CRS)
+from update_vars import SEGMENT_GCS, SHARED_GCS, GTFS_DATA_DICT
+from segment_speed_utils.project_vars import PROJECT_CRS
 
 
 def sjoin_shapes_to_roads(
@@ -97,7 +97,8 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    ROAD_SEG_DICT = helpers.get_parameters(CONFIG_PATH, "road_segments")
+    
+    ROAD_SEG_DICT = GTFS_DATA_DICT.road_segments
 
     for analysis_date in [analysis_date]:
         logger.info(f"Analysis date: {analysis_date}")

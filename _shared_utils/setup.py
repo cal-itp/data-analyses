@@ -1,9 +1,10 @@
 from setuptools import find_packages, setup
 
+# https://stackoverflow.com/questions/52630814/how-to-include-and-access-data-files-in-python-distribution
 setup(
     name="shared_utils",
     packages=find_packages(),
-    version="2.3",
+    version="2.4",
     description="Shared utility functions for data analyses",
     author="Cal-ITP",
     license="Apache",

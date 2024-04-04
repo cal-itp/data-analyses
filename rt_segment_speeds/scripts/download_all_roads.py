@@ -4,9 +4,9 @@
 import geopandas as gpd
 from calitp_data_infra.storage import get_fs 
 from calitp_data_analysis import utils
+from update_vars import SHARED_GCS
 
 fs = get_fs()
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 
 # In terminal:
 '''
@@ -19,13 +19,13 @@ if __name__ == "__main__":
     
     utils.geojson_gcs_export(
         gdf,
-        gcs_file_path = GCS_FILE_PATH,
+        gcs_file_path = SHARED_GCS,
         file_name =  "caltrans_all_roads_lrs",
         geojson_type = "geojson",
     )
     
     utils.geoparquet_gcs_export(
         gdf,
-        GCS_FILE_PATH,
+        SHARED_GCS,
         "caltrans_all_roads_lrs"
     )

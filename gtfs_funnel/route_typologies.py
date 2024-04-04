@@ -26,8 +26,9 @@ import pandas as pd
 from dask import delayed, compute
 
 from segment_speed_utils import gtfs_schedule_wrangling, helpers                       
-from segment_speed_utils.project_vars import SHARED_GCS, SCHED_GCS, PROJECT_CRS   
+from segment_speed_utils.project_vars import PROJECT_CRS   
 from shared_utils import rt_dates
+from update_vars import SHARED_GCS, SCHED_GCS
 
 route_dir_cols = [
     "schedule_gtfs_dataset_key", 
@@ -98,14 +99,16 @@ def nacto_stop_frequency(
     # last category is "express", which we'll have to tag on 
     # the route name side
 
-def prep_roads():
+    
+def prep_roads(dict_inputs: dict) -> gpd.GeoDataFrame:
     road_stats = pd.read_parquet(
         f"{SCHED_GCS}arrivals_by_road_segment.parquet"
     )
 
+    ROAD_SEGMENTS = dict_inputs.shared_data.road_segments_twomile
+    
     roads = gpd.read_parquet(
-        f"{SHARED_GCS}"
-        f"segmented_roads_twomile_2020.parquet",
+        f"{SHARED_GCS}{ROAD_SEGMENTS}.parquet"
         columns = road_segment_cols + ["geometry"],
     ).to_crs(PROJECT_CRS)
     
@@ -240,13 +243,13 @@ def primary_secondary_typology(
 
 if __name__ == "__main__":
     
-    from update_vars import CONFIG_DICT, analysis_date_list
+    from update_vars import analysis_date_list
     
-    EXPORT = CONFIG_DICT["route_typologies_file"]
+    EXPORT = GTFS_DATA_DICT.schedule_tables.route_typologies
     
     start = datetime.datetime.now()
 
-    roads = delayed(prep_roads)()
+    roads = delayed(prep_roads)(GTFS_DATA_DICT)
     ROAD_BUFFER_METERS = 20
     TYPOLOGY_THRESHOLD = 0.10
     

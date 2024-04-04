@@ -10,13 +10,13 @@ from typing import Literal, Optional
 from nearest_vp_to_stop import nearest_neighbor_for_stop
 from interpolate_stop_arrival import interpolate_stop_arrivals
 from stop_arrivals_to_speed import calculate_speed_from_stop_arrivals
-
-from segment_speed_utils.project_vars import CONFIG_PATH, SEGMENT_TYPES
+from update_vars import GTFS_DATA_DICT
+from segment_speed_utils.project_vars import SEGMENT_TYPES
 
 def nearest_neigbor_to_speed(
     analysis_date,
     segment_type: Literal[SEGMENT_TYPES],
-    config_path: Optional[Path] = CONFIG_PATH
+    config_path: Optional[Path] = GTFS_DATA_DICT
 ):
     """
     Wrapper function calling nearest neighbor, 

@@ -21,24 +21,19 @@ import fsspec
 import geopandas as gpd
 
 from calitp_data_analysis import utils
-
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
+from update_vars import SHARED_GCS
 
 def download_ca_osm():
     file_name = "hotosm_usa_california_roads_lines_shp"
-    PATH = f"{GCS_FILE_PATH}{file_name}.zip"        
+    PATH = f"{SHARED_GCS}{file_name}.zip"        
 
     with fsspec.open(PATH) as f:       
         gdf = gpd.read_file(f)
-        
-    # Save partitioned dask gdf locally, in case it doesn't work above
-    #gddf = dg.from_geopandas(gdf, npartitions=20)
-    #gddf.to_parquet(f"{file_name}/")
 
     # Export as geoparquet
     utils.geoparquet_gcs_export(
         gdf,
-        GCS_FILE_PATH,
+        SHARED_GCS,
         file_name
     )
     
@@ -76,7 +71,7 @@ def download_census_tiger_roads(
         # Export as geoparquet
         utils.geoparquet_gcs_export(
             gdf,
-            f"{GCS_FILE_PATH}ca_roads/",
+            f"{SHARED_GCS}ca_roads/",
             file_name
         )
         
@@ -95,14 +90,14 @@ def concatenate_all_counties(
     # Set metadata for dask gdf with reading first gdf in
     first_county = county_fips_list[0]
     all_roads = dg.read_parquet(
-        f"{GCS_FILE_PATH}ca_roads/"
+        f"{SHARED_GCS}ca_roads/"
         f"tl_{year}_{state_fips}{first_county}_roads.parquet")
     
     for county_fips in county_fips_list[1:]:
         file_name = f"tl_{year}_{state_fips}{county_fips}_roads"
 
         county_gdf = dg.read_parquet(
-            f"{GCS_FILE_PATH}ca_roads/{file_name}.parquet")
+            f"{SHARED_GCS}ca_roads/{file_name}.parquet")
         
         all_roads = dd.multi.concat([all_roads, county_gdf], axis=0)
     
@@ -110,7 +105,7 @@ def concatenate_all_counties(
     
     utils.geoparquet_gcs_export(
         all_roads,
-        GCS_FILE_PATH,
+        SHARED_GCS,
         f"all_roads_{year}_state{state_fips}"
     )
 

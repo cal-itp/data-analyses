@@ -11,10 +11,10 @@ import datetime
 import gcsfs
 import geopandas as gpd
 import pandas as pd
-import yaml
 
-from typing import Literal, Union
-from segment_speed_utils.project_vars import (SEGMENT_GCS, 
+from typing import Union
+from segment_speed_utils.project_vars import (GTFS_DATA_DICT,
+                                              SEGMENT_GCS, 
                                               COMPILED_CACHED_VIEWS,
                                               RT_SCHED_GCS, 
                                               SCHED_GCS,
@@ -22,25 +22,6 @@ from segment_speed_utils.project_vars import (SEGMENT_GCS,
 from calitp_data_analysis import utils
 
 fs = gcsfs.GCSFileSystem()
-
-def get_parameters(
-    config_file: str, 
-    segment_type: Union["route_segments", "stop_segments"]
-) -> dict:
-    """
-    Parse the config.yml file to get the parameters needed
-    for working with route or stop segments.
-    These parameters will be passed through the scripts when working 
-    with vehicle position data.
-    
-    Returns a dictionary of parameters.
-    """
-    #https://aaltoscicomp.github.io/python-for-scicomp/scripts/
-    with open(config_file) as f: 
-        my_dict = yaml.safe_load(f)
-        params_dict = my_dict[segment_type]
-    
-    return params_dict
 
 
 def import_scheduled_trips(
@@ -57,7 +38,8 @@ def import_scheduled_trips(
     Get scheduled trips info (all operators) for single day, 
     and keep subset of columns.
     """
-    FILE = f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet"
+    FILE = (f"{GTFS_DATA_DICT.schedule_downloads.trips}_"
+            f"{analysis_date}.parquet")
     RENAME_DICT = {
         "gtfs_dataset_key": "schedule_gtfs_dataset_key"
     }
@@ -81,7 +63,8 @@ def import_scheduled_shapes(
     """
     Import shapes.
     """
-    FILE = f"{COMPILED_CACHED_VIEWS}routelines_{analysis_date}.parquet"
+    FILE = (f"{GTFS_DATA_DICT.schedule_downloads.shapes}_"
+            f"{analysis_date}.parquet")
     
     if get_pandas: 
         shapes = gpd.read_parquet(
@@ -109,7 +92,8 @@ def import_scheduled_stop_times(
     Get scheduled stop times.
     """
     if with_direction:
-        FILE = f"{RT_SCHED_GCS}stop_times_direction_{analysis_date}.parquet"
+        FILE = (f"{GTFS_DATA_DICT.rt_vs_schedule_tables.stop_times_direction}_"
+            f"{analysis_date}.parquet")
         
         if get_pandas:
             if columns is None or "geometry" in columns:
@@ -126,7 +110,8 @@ def import_scheduled_stop_times(
             ).to_crs(crs)
             
     else:
-        FILE = f"{COMPILED_CACHED_VIEWS}st_{analysis_date}.parquet"
+        FILE = (f"{GTFS_DATA_DICT.schedule_downloads.stop_times}_"
+            f"{analysis_date}.parquet")
         if get_pandas:
             stop_times = pd.read_parquet(
                 FILE, filters = filters, columns = columns
@@ -149,7 +134,8 @@ def import_scheduled_stops(
     """
     Get scheduled stops
     """
-    FILE = f"{COMPILED_CACHED_VIEWS}stops_{analysis_date}.parquet"
+    FILE = (f"{GTFS_DATA_DICT.schedule_downloads.stops}_"
+            f"{analysis_date}.parquet")
     
     if get_pandas:
         stops = gpd.read_parquet(
@@ -174,10 +160,8 @@ def import_schedule_gtfs_key_organization_crosswalk(
     """
     Get scheduled stops
     """
-    FILE = (
-        f"{SCHED_GCS}crosswalk/"
-        f"gtfs_key_organization_{analysis_date}.parquet"
-    )
+    FILE = (f"{GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk}_"
+            f"{analysis_date}.parquet")
     
     crosswalk = pd.read_parquet(
         FILE, filters = filters, columns = columns
@@ -191,8 +175,10 @@ def import_unique_vp_trips(analysis_date: str) -> list:
     Get the unique trip_instance_keys that are present
     on a given day in vp_usable.
     """
+    FILE = GTFS_DATA_DICT.speeds_tables.usable_vp
+    
     rt_trips = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+        f"{SEGMENT_GCS}{FILE}_{analysis_date}",
         columns = ["trip_instance_key"]
     ).trip_instance_key.unique().tolist()
     

@@ -12,6 +12,7 @@ from segment_speed_utils.project_vars import (SEGMENT_GCS,
                                               RT_SCHED_GCS, 
                                               SCHED_GCS)
 from extra_cleaning import operators_only_route_long_name
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
 
 route_time_cols = ["schedule_gtfs_dataset_key", 
                    "route_id", "direction_id", "time_period"]
@@ -25,9 +26,11 @@ def concatenate_schedule_by_route_direction(
     Concatenate schedule data that's been 
     aggregated to route-direction-time_period.
     """
+    FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.route_direction_metrics
+    
     df = time_series_utils.concatenate_datasets_across_dates(
         RT_SCHED_GCS,
-        "schedule_route_dir/schedule_route_direction_metrics",
+        FILE,
         date_list,
         data_type = "df",
         columns = route_time_cols + [
@@ -55,9 +58,11 @@ def concatenate_segment_speeds_by_route_direction(
     Concatenate segment speeds data that's been 
     aggregated to route-direction-time_period.
     """
+    FILE = GTFS_DATA_DICT.stop_segments.route_dir_single_segment
+    
     df = time_series_utils.concatenate_datasets_across_dates(
         SEGMENT_GCS,
-        "rollup_singleday/speeds_route_dir_segments",
+        FILE,
         date_list,
         data_type = "gdf",
         columns = route_time_cols + [
@@ -76,9 +81,11 @@ def concatenate_speeds_by_route_direction(
     Concatenate rt vs schedule data that's been 
     aggregated to route-direction-time_period.
     """
+    FILE = GTFS_DATA_DICT.rt_stop_times.route_dir_single_summary
+
     df = time_series_utils.concatenate_datasets_across_dates(
         SEGMENT_GCS,
-        "rollup_singleday/speeds_route_dir",
+        FILE,
         date_list,
         data_type = "df",
         columns = route_time_cols + ["speed_mph"],
@@ -90,10 +97,11 @@ def concatenate_speeds_by_route_direction(
 def concatenate_rt_vs_schedule_by_route_direction(
     date_list: list
 ) -> pd.DataFrame:
-    
+    FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.vp_route_direction_metrics
+
     df = time_series_utils.concatenate_datasets_across_dates(
         RT_SCHED_GCS,
-        "vp_route_dir/route_direction_metrics",
+        FILE,
         date_list,
         data_type = "df",
     ).sort_values(sort_cols).reset_index(drop=True)
@@ -113,9 +121,11 @@ def concatenate_rt_vs_schedule_by_route_direction(
 def concatenate_crosswalk_organization(
     date_list: list
 ) -> pd.DataFrame:
+    FILE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
+    
     df = time_series_utils.concatenate_datasets_across_dates(
         SCHED_GCS,
-        "crosswalk/gtfs_key_organization",
+        FILE,
         date_list,
         data_type = "df",
     ).drop(columns = "itp_id")
@@ -131,12 +141,14 @@ def merge_in_standardized_route_names(
         "route_id", "service_date", 
         "recent_route_id2", "recent_combined_name"]
     
+    CLEAN_ROUTES = GTFS_DATA_DICT.schedule_tables.route_identification
+    
     operators_need_cleaning = pd.read_parquet(
-        f"{SCHED_GCS}standardized_route_ids.parquet",
+        f"{SCHED_GCS}{CLEAN_ROUTES}.parquet",
         filters = [[("name", "in", operators_only_route_long_name)]]
     )
     operators_ok = pd.read_parquet(
-        f"{SCHED_GCS}standardized_route_ids.parquet",
+        f"{SCHED_GCS}{CLEAN_ROUTES}.parquet",
         filters = [[("name", "not in", operators_only_route_long_name)]]
     )
     
@@ -176,9 +188,12 @@ def merge_in_standardized_route_names(
 
 if __name__ == "__main__":
     
-    from shared_utils.rt_dates import y2023_dates, y2024_dates
+    from shared_utils import rt_dates
     
-    analysis_date_list = y2024_dates + y2023_dates 
+    analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates 
+    
+    DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
+    DIGEST_SEGMENT_SPEEDS = GTFS_DATA_DICT.digest_tables.route_segment_speeds
     
     df_sched = concatenate_schedule_by_route_direction(analysis_date_list)
     
@@ -225,7 +240,7 @@ if __name__ == "__main__":
     df[integrify] = df[integrify].astype("Int64")
     
     df.to_parquet(
-        f"{RT_SCHED_GCS}digest/schedule_vp_metrics.parquet"
+        f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
     
     segment_speeds = concatenate_segment_speeds_by_route_direction(
@@ -237,6 +252,6 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(
         segment_speeds,
         RT_SCHED_GCS,
-        f"digest/segment_speeds"
+        DIGEST_SEGMENT_SPEEDS
     )
     
