@@ -67,7 +67,7 @@ def two_vps_tag(row):
         return "51-75% of trip has 2+ pings"
     elif 0.76 <= row.pct_rt_journey_atleast2_vp < 0.99:
         return "76-99% of trip has 2+ pings"
-    elif row.pct_rt_journey_atleast2_vp == 1:
+    elif row.pct_rt_journey_atleast2_vp >= 0.99:
         return "100% of trip has 2+ pings"
     else:
         return "No Info"
@@ -99,8 +99,8 @@ def vp_per_min_tag(row):
 def add_categories(df:pd.DataFrame) -> pd.DataFrame:
     df["rt_sched_journey_ratio_cat"] = df.apply(timeliness_tags, axis=1)
     df["frequency_cat"] = df.apply(frequency_tags, axis=1)
-    df["pct_rt_journey_atleast2_vp_cat"] = df.apply(two_vps_tag, axis=1)
-    df["pct_in_shape_cat"] = df.apply(spatial_accuracy_tag, axis=1)
+    # df["pct_rt_journey_atleast2_vp_cat"] = df.apply(two_vps_tag, axis=1)
+    # df["pct_in_shape_cat"] = df.apply(spatial_accuracy_tag, axis=1)
     df["vp_per_minute_cat"] = df.apply(vp_per_min_tag, axis=1)    
     
     return df
@@ -118,13 +118,14 @@ def load_schedule_vp_metrics(name:str)->pd.DataFrame:
     for i in float_columns:
         df[i] = df[i].round(2)
     
-    # Neaten up some columns
-    """
-    df.sched_rt_category = (
-    df.sched_rt_category.str.replace("_", " ")
-    .str.title()
-    .str.replace("Vp", "VP"))
-    """
+    
+    pct_cols = df.columns[df.columns.str.contains("pct")].tolist()
+    for i in pct_cols:
+        df[i] = df[i] * 100
+        
+    # Add rulers
+    df["ruler_100_pct"] = 100
+    df["ruler_for_vp_per_min"] = 2
     return df 
 
 def route_stats(df: pd.DataFrame) -> pd.DataFrame:
