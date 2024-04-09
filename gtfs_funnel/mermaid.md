@@ -1,3 +1,6 @@
+# Mermaid Diagrams for GTFS funnel, segment speeds, RT vs schedule
+
+## GTFS Funnel
 ```mermaid
 ---
 title: GTFS Funnel (Preprocessing)
@@ -62,6 +65,74 @@ graph TB
         A --> 
             G1([crosswalk_gtfs_dataset_key_to_organization.py]):::script 
             --> G[gtfs_key_organization crosswalk]:::df;
+
+    end
+```
+
+## RT Segment Speeds
+
+```mermaid
+---
+title: RT Segment Speeds and RT Stop Times
+---
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#E5F5FA',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#000',
+      'lineColor': '#000',
+      'secondaryColor': '#EFF7EB',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+
+flowchart TB
+    subgraph segmentize
+        classDef df fill:#E5F5FA
+        classDef script fill:#EFF7EB
+        classDef segmentType fill:#FCF39C, stroke:#fff
+
+        A1([cut_stop_segments.py]):::script -- 
+            all trip stop_times --> 
+            A[stop_segments]:::df;
+        B1([select_stop_segments.py]):::script -- 
+        one trip per shape's stop_times
+        so stop_pairs are consistent 
+        across trips -->
+        B[shape_stop_segments];
+
+        
+    end
+
+    subgraph speeds_pipeline
+
+        C([nearest_vp_to_stop.py]):::script --> 
+            D([interpolate_stop_arrival.py]):::script --> 
+            E([stop_arrivals_to_speed.py]):::script; 
+
+    end
+
+    subgraph stop segment speeds
+        F(segment_type=stop_segments):::segmentType --> 
+            C;
+        E --> G([average_segment_speeds.py]):::script -->
+        H[rollup_singleday/rollup_multiday
+        speeds_route_dir_segments]:::df;
+        B --> G; 
+
+    end
+
+    subgraph RT stop_times
+        J(segment_type=rt_stop_times):::segmentType --> 
+            C;
+        E --> K([average_summary_speeds.py]):::script -->
+        L[rollup_singleday/rollup_multiday
+        speeds_route_dir];
+        M[stop_times_with_direction] --> E --> 
+        N[schedule_rt_stop_times];
 
     end
 ```
