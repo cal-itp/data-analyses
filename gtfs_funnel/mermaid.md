@@ -136,3 +136,57 @@ flowchart TB
 
     end
 ```
+
+## RT vs Schedule Metrics
+```mermaid
+---
+title: RT vs Schedule Metrics
+---
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#E5F5FA',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#000',
+      'lineColor': '#000',
+      'secondaryColor': '#EFF7EB',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+
+flowchart TB
+    subgraph schedule
+        classDef df fill:#E5F5FA
+        classDef script fill:#EFF7EB
+
+        A[trips]:::df --> 
+            E([operator_scheduled_stats.py]):::script;
+        B[shapes]:::df --> E;
+        C[stops]:::df --> E;
+        D[stop_times]:::df --> E;
+        F[gtfs_key_organization_crosswalk]:::df --> E; 
+        E --> L[schedule trip metrics]:::df -- aggregate --> 
+            M[schedule route_direction metrics]:::df;
+
+    end
+
+    subgraph NACTO route typologies
+        D -- spatial join to buffered roads --> 
+            G[road_segments]:::df --> 
+            H([route_typologies.py]):::script -->
+            J[roads with typologies]:::df -- 
+            spatial join with longest shape per route -->
+            K[route with typology]:::df -->M;  
+
+    end
+
+    subgraph vehicle positions
+
+        N[vp_usable]:::df --> 
+            O[vp trip metrics]:::df -- aggregate 
+            --> P[vp route_direction metrics]:::df;
+        
+    end
+```
