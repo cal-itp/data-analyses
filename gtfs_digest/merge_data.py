@@ -26,7 +26,7 @@ def concatenate_schedule_by_route_direction(
     Concatenate schedule data that's been 
     aggregated to route-direction-time_period.
     """
-    FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.route_direction_metrics
+    FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_route_direction_metrics
     
     df = time_series_utils.concatenate_datasets_across_dates(
         RT_SCHED_GCS,

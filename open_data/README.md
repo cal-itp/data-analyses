@@ -17,6 +17,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
    * [create_routes_data](./create_routes_data.py): functions to assemble routes that appear in `shapes`
    * [create_stops_data](./create_stops_data.py): functions to assemble stop data
 
+[![stops_routes_mermaid](https://mermaid.ink/img/pako:eNqFkM0KwjAQhF8l7Ll5gQgexKsnPQbKkmxtoPkh2SBS-u6mVbxV9zQM3wzszGCiJVAgpdSBHU-kREwUhEVGHTZ7mOLDjJhZ3E4HHUQ7zi4VIeVRGOw5YyiO-xwrU_kQZcREO8iPjsIxfStW_Q_o2XnaoaADT9mjs-3Dec1o4JE8aVBNWhqwTqxBh6WhWDlen8GA4lypg5raBnR2eM_oQQ04leaSdRzz5b3aNt7yAjdubxo?type=png)](https://mermaid.live/edit#pako:eNqFkM0KwjAQhF8l7Ll5gQgexKsnPQbKkmxtoPkh2SBS-u6mVbxV9zQM3wzszGCiJVAgpdSBHU-kREwUhEVGHTZ7mOLDjJhZ3E4HHUQ7zi4VIeVRGOw5YyiO-xwrU_kQZcREO8iPjsIxfStW_Q_o2XnaoaADT9mjs-3Dec1o4JE8aVBNWhqwTqxBh6WhWDlen8GA4lypg5raBnR2eM_oQQ04leaSdRzz5b3aNt7yAjdubxo)
 
 ## Metadata Automation Steps and References
 1. Add your dataset to `catalog.yml` and run `gcs_to_esri`.
