@@ -19,38 +19,49 @@ title: GTFS Funnel (Preprocessing)
 graph TB
     
     subgraph downloader
-        A1[download_trips.py] --> A[trips] --> 
+        classDef df fill:#E5F5FA
+        classDef script fill:#EFF7EB
+
+        A1([download_trips.py]):::script --> 
+            A[trips]:::df --> 
             helpers.import_scheduled_trips;
-        B1[download_shapes.py] --> B[shapes 
-        WGS84] --> helpers.import_scheduled_shapes;
-        C1[download_stops.py] --> C[stops 
-        WGS84] --> helpers.import_scheduled_stops;
-        D1[download_stop_times.py] --> D[stop_times] --> 
+        B1([download_shapes.py]):::script --> 
+            B[shapes<br>WGS84]:::df --> 
+            helpers.import_scheduled_shapes;
+        C1[download_stops.py]:::script --> 
+            C[stops<br>WGS84]:::df --> 
+            helpers.import_scheduled_stops;
+        D1([download_stop_times.py]):::script --> 
+            D[stop_times]:::df --> 
             D2[helpers.import_scheduled_stop_times
-            with_direction = True/False
-            ];
-        E1[download_vehicle_positions.py] --> E2[concatenate_vehicle_positions.py] 
-            --> E[vp 
-            WGS84];
+            with_direction = True/False];
+        E1([download_vehicle_positions.py]):::script --> 
+            E2([concatenate_vehicle_positions.py]):::script 
+            --> E[vp<br>WGS84]:::df;
 
     end
 
     subgraph stop_times_preprocessing
-        D --> D3[stop_times_with_direction.py] --> D2;
+        D --> 
+        D3([stop_times_with_direction.py]):::script --> 
+        D2;
 
     end
 
     subgraph vp_preprocessing
-        E --> E3[vp_keep_usable.py] --> E4[vp_direction.py] 
-        --> F[vp_usable] --> E5[cleanup.py];
-        F --> F1[vp_condenser.py] --> F2[vp_condensed
-        vp_nearest_neighbor
-        NAD83];
+        E --> E3([vp_keep_usable.py]):::script --> 
+            E4([vp_direction.py]):::script --> 
+            F[vp_usable]:::df --> 
+            E5([cleanup.py]):::script;
+        F --> F1([vp_condenser.py]):::script --> 
+            F2[vp_condensed<br>vp_nearest_neighbor<br>NAD83]:::df;
     
     end
 
     subgraph operator_crosswalk
-        A --> G[gtfs_key_organization crosswalk];
+        A --> 
+            G1([crosswalk_gtfs_dataset_key_to_organization.py]):::script 
+            --> G[gtfs_key_organization crosswalk]:::df;
 
     end
 ```
