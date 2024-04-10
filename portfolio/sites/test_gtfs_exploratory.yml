@@ -1,0 +1,16 @@
+directory: ./gtfs_digest/
+notebook: ./gtfs_digest/03_report_draft.ipynb
+parts:
+- chapters:
+  - caption: Bay Area 511 Muni Schedule
+    params:
+      name: Bay Area 511 Muni Schedule
+  - caption: Eastern Sierra Schedule
+    params:
+      name: Eastern Sierra Schedule
+  - caption: Elk Grove Schedule
+    params:
+      name: Elk Grove Schedule
+
+readme: ./gtfs_digest/README.md
+title: GTFS Exploratory
