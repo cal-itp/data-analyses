@@ -136,54 +136,37 @@ def concatenate_crosswalk_organization(
 def merge_in_standardized_route_names(
     df: pd.DataFrame, 
 ) -> pd.DataFrame:
+    
     keep_cols = [
         "schedule_gtfs_dataset_key", "name", 
         "route_id", "service_date", 
-        "recent_route_id2", "recent_combined_name"]
+    ]
     
     CLEAN_ROUTES = GTFS_DATA_DICT.schedule_tables.route_identification
     
-    operators_need_cleaning = pd.read_parquet(
-        f"{SCHED_GCS}{CLEAN_ROUTES}.parquet",
-        filters = [[("name", "in", operators_only_route_long_name)]]
-    )
-    operators_ok = pd.read_parquet(
-        f"{SCHED_GCS}{CLEAN_ROUTES}.parquet",
-        filters = [[("name", "not in", operators_only_route_long_name)]]
-    )
+    route_names_df = pd.read_parquet(f"{SCHED_GCS}{CLEAN_ROUTES}.parquet")
     
-    operators_need_cleaning = operators_need_cleaning.assign(
-        recent_combined_name = operators_need_cleaning.route_long_name
-    )
+    route_names_df = time_series_utils.clean_standardized_route_names(
+        route_names_df).drop_duplicates()
     
-    standardized_route_names = pd.concat([
-        operators_need_cleaning,
-        operators_ok
-    ], axis=0, ignore_index=True)[keep_cols]       
-        
     if "name" in df.columns:
         df = df.drop(columns = "name")
     
-    df = pd.merge(
+    # Use `route_id` to merge to standardized_route_names
+    df2 = pd.merge(
         df,
-        standardized_route_names,
+        route_names_df,
         on = ["schedule_gtfs_dataset_key", 
               "route_id", "service_date"],
         how = "left",
     )
     
-    df = df.assign(
-        recent_combined_name = df.recent_combined_name.str.replace("__", " ")
-    ).drop(
-        columns = ["route_id"]
-    ).rename(
-        columns = {
-            "recent_route_id2": "route_id",
-            "recent_combined_name": "route_combined_name"
-        }
-    )
+    # After merging, we can replace route_id with recent_route_id2 
+    drop_cols = ["route_desc", "combined_name", "route_id2"]
+    df3 = time_series_utils.parse_route_combined_name(df2).drop(
+        columns = drop_cols)
 
-    return df
+    return df3
 
 
 if __name__ == "__main__":
@@ -237,7 +220,7 @@ if __name__ == "__main__":
         "is_early", "is_ontime", "is_late"
     ]
     
-    df[integrify] = df[integrify].astype("Int64")
+    df[integrify] = df[integrify].fillna(0).astype("int")
     
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
