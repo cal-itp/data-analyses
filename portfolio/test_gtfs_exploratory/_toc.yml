@@ -1,0 +1,8 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: name_bay-area-511-muni-schedule/0__03_report_draft__name_bay-area-511-muni-schedule.ipynb
+    -   file: name_eastern-sierra-schedule/0__03_report_draft__name_eastern-sierra-schedule.ipynb
+    -   file: name_elk-grove-schedule/0__03_report_draft__name_elk-grove-schedule.ipynb
+root: README

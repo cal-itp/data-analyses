@@ -116,7 +116,6 @@ def load_schedule_vp_metrics(name:str)->pd.DataFrame:
     for i in float_columns:
         df[i] = df[i].round(2)
     
-    
     pct_cols = df.columns[df.columns.str.contains("pct")].tolist()
     for i in pct_cols:
         df[i] = df[i] * 100
