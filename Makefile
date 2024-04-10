@@ -3,9 +3,9 @@
 
 
 build_portfolio_site:
-	cd portfolio/ && pip install -r requirements.txt && cd ../
+	#cd portfolio/ && pip install -r requirements.txt && cd ../
 	#need git rm because otherwise, just local removal, but git change is untracked
-	git rm portfolio/$(site)/ -rf
+	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site) --deploy 
 	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
@@ -39,9 +39,9 @@ build_ntd_report:
 	make build_portfolio_site
 
 build_gtfs_digest:
-	$(eval export site = gtfs_digest)
+	$(eval export site = test_gtfs_exploratory)
 	#cd rt_segment_speeds / && pip install -r requirements.txt && cd ..
-	cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
+	# cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 
 add_precommit:
