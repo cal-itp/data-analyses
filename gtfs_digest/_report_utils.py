@@ -5,7 +5,7 @@ import pandas as pd
 # Charts
 from calitp_data_analysis import calitp_color_palette as cp
 import altair as alt
-alt.data_transformers.enable('default', max_rows=None)
+# alt.data_transformers.enable('default', max_rows=None)
 
 # Great Tables
 import great_tables as gt
@@ -859,7 +859,6 @@ def filtered_route(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-
     timeliness_trips_dir_0 = (
         base_facet_chart(
             timeliness_df.loc[timeliness_df.direction_id == 0],
@@ -884,7 +883,6 @@ def filtered_route(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-
     frequency = (
         heatmap(
             df_sched_vp_both,
@@ -903,6 +901,7 @@ def filtered_route(
         "Average Speed",
         "The average miles per hour the bus travels by direction and time of day.",
     )
+    
     vp_per_min = (
         base_facet_with_ruler_chart(
             all_day,
@@ -925,6 +924,7 @@ def filtered_route(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    
     sched_vp_per_min = (
         base_facet_circle(
             sched_journey_vp,
@@ -936,6 +936,7 @@ def filtered_route(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    
     spatial_accuracy = (
         base_facet_with_ruler_chart(
             all_day,
@@ -948,7 +949,6 @@ def filtered_route(
         .transform_filter(route_selector)
     )
 
-  
     text_dir0 = (
         create_text_table(route_stats_df, 0)
         .add_params(route_selector)
