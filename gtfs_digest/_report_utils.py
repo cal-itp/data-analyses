@@ -1,13 +1,23 @@
-import altair as alt
 import calitp_data_analysis.magics
 import geopandas as gpd
-import great_tables as gt
 import pandas as pd
+
+# Charts
 from calitp_data_analysis import calitp_color_palette as cp
+import altair as alt
+alt.data_transformers.enable('default', max_rows=None)
+
+# Great Tables
+import great_tables as gt
 from great_tables import md
+
+# Display
 from IPython.display import HTML, Markdown, display
+
+# Other
 from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
-from shared_utils import rt_dates, rt_utils
+from shared_utils import catalog_utils, rt_dates, rt_utils
+GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 """
 General Functions
@@ -258,29 +268,8 @@ def trips_by_gtfs(df):
         schedule_and_vp="Schedule and VP",
     )
     .fmt_integer(["schedule_only", "vp_only", "schedule_and_vp"])
-    .tab_options(container_width="100%")
+    .tab_options(container_width="75%")
     .tab_options(table_font_size="12px"))
-    
-def route_categories(df):
-    route_categories = (
-    df[df.time_period == "all_day"]
-    .groupby("sched_rt_category")
-    .agg({"route_combined_name": "nunique"})
-    .reset_index()
-    )
-    
-    route_categories = route_categories.dropna()
-    
-    display(gt.GT(data=route_categories)
-    .fmt_integer(columns=["route_combined_name"], compact=True)
-    .cols_label(route_combined_name="Total Routes", sched_rt_category="Category")
-    .tab_options(container_width="100%")
-    .tab_header(
-        title="Routes with GTFS Availability",
-        subtitle="Schedule only indicates the route(s) were found only in static, schedule data. Vehicle Positions (VP) only indicates the route(s) were found only in real-time data.",
-    )
-    .tab_options(table_font_size="12px")
-)
     
 """
 operator_schedule_rt_category
@@ -294,10 +283,9 @@ def load_operator_schedule_rt_category(schedule_gtfs_key: list) -> pd.DataFrame:
     return df
 
 """
-Scheduled_service_by_route
-Functions
+Monthly Scheduled_service_by_route
 """
-def tag_day(df: pd.DataFrame) -> pd.DataFrame:
+def tag_day(df: pd.DataFrame, col_to_change:str) -> pd.DataFrame:
     # Function to determine if a date is a weekend day or a weekday
     def which_day(date):
         if date == 1:
@@ -316,18 +304,18 @@ def tag_day(df: pd.DataFrame) -> pd.DataFrame:
             return "Sunday"
 
     # Apply the function to each value in the "service_date" column
-    df["day_type"] = df["day_type"].apply(which_day)
+    df[col_to_change] = df[col_to_change].apply(which_day)
 
     return df
 
 def load_scheduled_service(year:str, organization_name:str)->pd.DataFrame:
-    df = pd.read_parquet(
-    f"{SCHED_GCS}scheduled_service_by_route_{year}.parquet",
+    url = f"{GTFS_DATA_DICT.schedule_tables.gcs_dir}{GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service}_{year}.parquet"
+    df = pd.read_parquet(url,
     filters=[[("name", "==", organization_name)]],)
     
     df["month"] = df["month"].astype(str).str.zfill(2)
     df["full_date"] = (df.month.astype(str) + "-" + df.year.astype(str))
-    df = tag_day(df)
+    df = tag_day(df, "day_type")
     
     return df
 
@@ -335,17 +323,11 @@ def summarize_monthly(year:str, organization_name:str)->pd.DataFrame:
     df = load_scheduled_service(year, organization_name)
     df2 = (
     df.groupby(
-        [
-            "full_date",
-            "month",
-            "name",
-            "day_type",
-            "time_of_day",
-        ]
+        ['name', 'full_date','time_of_day', 'day_type']
     )
     .agg(
         {
-            "ttl_service_hours": "mean",
+            "ttl_service_hours": "max",
         }
     )
     .reset_index()
@@ -524,11 +506,6 @@ def base_facet_line(
         "time_period",
         f"{y_col}_str",
     ]
-    ruler = (
-        alt.Chart(df)
-        .mark_rule(color="red", strokeDash=[10, 7])
-        .encode(y=f"mean(speed_mph):Q")
-    )
 
     chart = (
         alt.Chart(df)
@@ -551,7 +528,7 @@ def base_facet_line(
         )
     )
 
-    chart = (chart + ruler).properties(width=250, height=300)
+    chart = chart.properties(width=250, height=300)
     chart = chart.facet(
         column=alt.Column("direction_id:N", title=labeling("direction_id")),
     ).properties(
