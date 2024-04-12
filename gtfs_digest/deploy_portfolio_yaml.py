@@ -29,7 +29,19 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     
     districts = sorted(list(df.caltrans_district.unique()))
 
-    operators = df.organization_name.tolist()      
+    operators = df.organization_name.tolist()  
+    
+    keep_me = ["City of Santa Monica", "City of Culver City",
+               "Long Beach Transit", "Southern California Regional Rail Authority",
+               "Foothill Transit",
+               "Alameda-Contra Costa Transit District",
+               "City and County of San Francisco",
+               "Sonoma-Marin Area Rail Transit District",
+               "Marin County Transit District",
+              ]
+    operators = [i for i in operators if i in keep_me]
+    districts = sorted(df[df.organization_name.isin(keep_me)].caltrans_district.unique())
+    
     # Eric's example
     # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
 
