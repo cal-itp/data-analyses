@@ -88,21 +88,29 @@ text_data_cols = [
 
 def plot_confusion_matrices(df, y_true, y_pred, title): 
     desired_order = ['No service', 'Reduced service', 'Regular service']
+    x_desired_order = ['No service', 'Reduced service', 'Regular service']
+    y_desired_order = [ 'Regular service', 'Reduced service', 'No service']
     cm = confusion_matrix(y_true=df[y_true], y_pred=df[y_pred], labels=desired_order)
     df_cm = pd.DataFrame(cm, index=desired_order, columns=desired_order)
-    # df_cm = df_cm.reindex(desired_order, axis=0)  # Rows
-    # df_cm = df_cm.reindex(desired_order, axis=1)  # Columns
+    df_cm = df_cm.reindex(y_desired_order, axis=0)  # Rows
+    df_cm = df_cm.reindex(x_desired_order, axis=1)  # Columns
+    df_cm = (df_cm/df_cm.sum().sum()).round(2)
+
     # https://stackoverflow.com/questions/64800003/seaborn-confusion-matrix-heatmap-2-color-schemes-correct-diagonal-vs-wrong-re
     vmin = np.min(cm)
     vmax = np.max(cm)
-    off_diag_mask = np.eye(*cm.shape, dtype=bool)
+    #It might have been easier to make this manually :P. Make a diagonal matrix from upper left to lower right, then flip it.
+    off_diag_mask = np.fliplr(np.eye(*cm.shape, dtype=bool, k=0))
+
+    plt.rcParams.update({'font.size': 12})
 
     plt.figure(figsize=(8, 6))
-    sns.heatmap(df_cm, annot=True,  fmt='g', mask=~off_diag_mask, cmap="Blues", vmin=0, vmax=1, cbar=False, linewidths=0.8, linecolor='k')
-    sns.heatmap(df_cm, annot=True,  fmt='g', mask=off_diag_mask, cmap="OrRd", vmin=0, vmax=1, cbar=False, linewidths=0.8, linecolor='k')
+    sns.heatmap(df_cm, annot=True,  fmt='g', mask=~off_diag_mask, cmap="Blues", vmin=0, vmax=.01, cbar=False, linewidths=0.8, linecolor='k')
+    sns.heatmap(df_cm, annot=True,  fmt='g', mask=off_diag_mask, cmap="OrRd", vmin=0, vmax=.01, cbar=False, linewidths=0.8, linecolor='k')
     plt.xlabel('Service Level on Website')
     plt.ylabel('GTFS Service Levels')
     plt.title(title)
     # plt.show()
     file = title
     plt.savefig(f"plots/{file}.png")
+    return df_cm
