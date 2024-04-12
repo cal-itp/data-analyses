@@ -28,7 +28,7 @@ from dask import delayed, compute
 from segment_speed_utils import gtfs_schedule_wrangling, helpers                       
 from segment_speed_utils.project_vars import PROJECT_CRS   
 from shared_utils import rt_dates
-from update_vars import SHARED_GCS, SCHED_GCS
+from update_vars import SHARED_GCS, SCHED_GCS, GTFS_DATA_DICT
 
 route_dir_cols = [
     "schedule_gtfs_dataset_key", 
@@ -38,6 +38,9 @@ route_dir_cols = [
 typology_cols = ["freq_category", "typology"]
 road_cols = ["linearid", "mtfcc", "fullname"]
 road_segment_cols = road_cols + ["segment_sequence"]
+
+# taggable NACTO typologies (express is not here)
+nacto_typologies = ['downtown_local', 'local', 'rapid', 'coverage']
 
 def nacto_peak_frequency_category(freq_value: float) -> str:
     """
@@ -108,7 +111,7 @@ def prep_roads(dict_inputs: dict) -> gpd.GeoDataFrame:
     ROAD_SEGMENTS = dict_inputs.shared_data.road_segments_twomile
     
     roads = gpd.read_parquet(
-        f"{SHARED_GCS}{ROAD_SEGMENTS}.parquet"
+        f"{SHARED_GCS}{ROAD_SEGMENTS}.parquet",
         columns = road_segment_cols + ["geometry"],
     ).to_crs(PROJECT_CRS)
     
@@ -212,33 +215,25 @@ def primary_secondary_typology(
           )
     )
     
-    primary_typology = (
-        df2.loc[df2.obs==1].rename(
-            columns = {
-                "typology": "primary_typology",
-                "pct_typology": "primary_pct_typology"
-            })
-        .drop(columns = "obs")
-    )
+    # Keep primary and secondary typology
+    df3 = df2.loc[df2.obs <=2].drop(
+        columns = ["pct_typology", "obs"]
+    ).reset_index(drop=True)
     
-    secondary_typology = (
-        df2.loc[df2.obs==2]
-        .rename(
-            columns = {
-                "typology": "secondary_typology",
-                "pct_typology": "secondary_pct_typology"
-            })
-        .drop(columns = "obs")
-    )
+    # Turn the typology column into a dummy variables
+    df3 = pd.get_dummies(df3, columns = ["typology"])
     
-    df3 = pd.merge(
-        primary_typology,
-        secondary_typology,
-        on = route_dir_cols,
-        how = "left"
-    )
+    # Flag both primary and secondary typology as 1
+    # so a route can have multiple dummies turned on
+    max_cols = [c for c in df3.columns if "typology_" in c]
+
+    df4 = (df3.groupby(route_dir_cols)
+           .agg({**{c: "max" for c in max_cols}})
+           .reset_index()
+           .rename(columns = {c: c.replace('typology', 'is') for c in max_cols})
+          )
     
-    return df3
+    return df4
 
 
 if __name__ == "__main__":
@@ -249,7 +244,7 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
 
-    roads = delayed(prep_roads)(GTFS_DATA_DICT)
+    #roads = delayed(prep_roads)(GTFS_DATA_DICT)
     ROAD_BUFFER_METERS = 20
     TYPOLOGY_THRESHOLD = 0.10
     
