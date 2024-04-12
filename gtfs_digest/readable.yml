@@ -1,0 +1,66 @@
+# GTFS schedule
+direction_id:
+    readable: Direction
+    caption: Something
+avg_scheduled_service_minutes: "Average Scheduled Service (trip minutes)"
+avg_stop_miles: Average Stop Distance (miles)
+ttl_service_hours: total service (hours)
+n_scheduled_trips: "# scheduled trips"
+frequency: Trips per Hour
+total_scheduled_service_minutes: "Aggregate Scheduled Service Minutes (all trips)"
+route_id: Route
+route_combined_name: Route
+
+# GTFS vehicle positions
+minutes_atleast1_vp: "# minutes with 1+ vp per minute"
+minutes_atleast2_vp: "# minutes with 2+ vp per minute"
+total_rt_service_minutes: "Aggregate Actual Service Minutes (all trips)"
+total_vp: "# vp"
+vp_in_shape: "# vp within scheduled shape"
+is_early": "# early arrival trips"
+is_ontime: "# on-time trips"
+is_late: "# late trips"
+n_vp_trips: "# trips with vp"
+vp_per_minute: "Average vp per minute"
+pct_in_shape: "% vp within scheduled shape"
+pct_rt_journey_atleast1_vp: "% actual trip minutes with 1+ vp per minute"
+pct_rt_journey_atleast2_vp: "% actual trip minutes with 2+ vp per minute"
+pct_sched_journey_atleast1_vp: "% scheduled trip minutes with 1+ vp per minute"
+pct_sched_journey_atleast2_vp: "% scheduled trip minutes with 2+ vp per minute"
+rt_sched_journey_ratio: "Actual / scheduled service ratio"
+avg_rt_service_minutes: "Average Actual Service (trip minutes)"
+speed_mph: "Speed (mph)"
+sched_rt_category: "GTFS Availability"
+       
+# Operators
+organization_source_record_id: "Organization ID"
+organization_name: Organization
+name: Transit Operator
+caltrans_district: District
+base64_url: "base64 encoded feed URL"
+operator_n_routes: "# routes"
+operator_n_trips: "# trips"
+operator_n_shapes: "# shapes"
+operator_n_stops: "# stops"
+operator_n_arrivals: "# arrivals"
+operator_route_length_miles: "service miles"
+operator_arrivals_per_stop: "avg arrivals per stop"
+n_coverage_routes: "# coverage route types" 
+n_downtown_local_routes: "# downtown local route types"
+n_local_routes: "# local route types"
+n_rapid_routes: "# rapid route types"
+
+
+# Dates / time
+time_period: Period
+service_date: Date
+time_of_day: "time of day"
+day_name: "Day of Week"
+year: Year
+month: Month
+year_month: "Month - Year"
+
+# Roads
+road_freq_category: "Road Frequency Category"
+road_typology: "Road Typology Category"
+pct_typology: "% route miles with typology"

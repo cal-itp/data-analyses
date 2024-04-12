@@ -1,0 +1,28 @@
+directory: ./gtfs_digest/
+notebook: ./gtfs_digest/typologies.ipynb
+parts:
+- chapters:
+  - caption: District 04 - Oakland
+    params:
+      district: 04 - Oakland
+    sections:
+    - name: Alameda-Contra Costa Transit District
+    - name: Central Contra Costa Transit Authority
+    - name: City and County of San Francisco
+    - name: Eastern Contra Costa Transit Authority
+    - name: Marin County Transit District
+    - name: Santa Clara Valley Transportation Authority
+    - name: Sonoma County
+  - caption: District 07 - Los Angeles
+    params:
+      district: 07 - Los Angeles
+    sections: 
+    - name: City of Culver City
+    - name: City of Los Angeles
+    - name: City of Santa Monica
+    - name: Foothill Transit
+    - name: Long Beach Transit
+    - name: Los Angeles County Metropolitan Transportation Authority
+    - name: University of California, Los Angeles
+readme: ./gtfs_digest/README.md
+title: Transit Operators and Route Typologies
