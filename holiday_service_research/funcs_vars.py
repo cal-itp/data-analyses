@@ -56,10 +56,10 @@ holidays_plus_ref = [
         'date': '2024-01-15',
     }, {
         'name': "Reference Weekday",
-        'date': '2023-12-14',
+        'date': '2023-12-15',
     }, {
         'name': "Reference Saturday",
-        'date': '2023-11-25',
+        'date': '2023-12-16',
     }, {
         'name': "Reference Sunday",
         'date': '2023-12-17',
