@@ -14,7 +14,8 @@ if __name__ == "__main__":
     
     MONTHLY_SERVICE = GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service
     CROSSWALK = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
-    
+    ROUTES = GTFS_DATA_DICT.schedule_tables.route_identification
+
     year_list = [2023, 2024]
     analysis_date_list = (rt_dates.y2024_dates + 
                           rt_dates.y2023_dates + 
@@ -47,11 +48,24 @@ if __name__ == "__main__":
             "schedule_source_record_id", 
             "schedule_gtfs_dataset_key",
             "organization_source_record_id", "organization_name", 
-        ],
+        ]
     ).drop(
         columns = "service_date"
-    ).drop_duplicates().reset_index(drop=True)
+    ).drop_duplicates().reset_index(drop=True)    
 
+    # Get standardized route names and clean up more
+    standardized_routes = pd.read_parquet(f"{SCHED_GCS}{ROUTES}.parquet")
+    
+    route_names_df = time_series_utils.clean_standardized_route_names(
+        standardized_routes).pipe(
+        time_series_utils.parse_route_combined_name
+    )[
+        ["schedule_gtfs_dataset_key",
+         "route_long_name", "route_short_name", 
+         "route_id", "route_combined_name"]
+    ].drop_duplicates()
+
+    # Merge monthly service with crosswalk to get schedule_gtfs_dataset_key
     df2 = pd.merge(
         df,
         crosswalk,
@@ -59,6 +73,15 @@ if __name__ == "__main__":
         how = "inner",
     )
     
-    df2.to_parquet(
+    # Merge in route_names so we use the standardized/cleaned up route names
+    df3 = pd.merge(
+        df2,
+        route_names_df,
+        on = ["schedule_gtfs_dataset_key", 
+              "route_long_name", "route_short_name"],
+        how = "left",   
+    )
+
+    df3.to_parquet(
         f"{SCHED_GCS}{MONTHLY_SERVICE}.parquet"
     ) 
