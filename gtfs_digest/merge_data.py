@@ -8,10 +8,6 @@ import pandas as pd
 
 from calitp_data_analysis import utils
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
-from segment_speed_utils.project_vars import (SEGMENT_GCS, 
-                                              RT_SCHED_GCS, 
-                                              SCHED_GCS)
-from extra_cleaning import operators_only_route_long_name
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
 
 route_time_cols = ["schedule_gtfs_dataset_key", 
@@ -37,16 +33,14 @@ def concatenate_schedule_by_route_direction(
             "avg_scheduled_service_minutes", 
             "avg_stop_miles",
             "n_trips", "frequency", 
-            "freq_category", "typology", "pct_typology"
+            "is_coverage", "is_downtown_local", "is_local", "is_rapid"
         ],
     ).sort_values(sort_cols).rename(
         columns = {
             # rename so we understand data source
             "n_trips": "n_scheduled_trips",
-            "freq_category": "road_freq_category",
-            "typology": "road_typology",
         }
-    ).reset_index(drop=True)
+    ).reset_index(drop=True)    
     
     return df
 
@@ -144,7 +138,13 @@ def merge_in_standardized_route_names(
     
     CLEAN_ROUTES = GTFS_DATA_DICT.schedule_tables.route_identification
     
-    route_names_df = pd.read_parquet(f"{SCHED_GCS}{CLEAN_ROUTES}.parquet")
+    route_names_df = pd.read_parquet(
+        f"{SCHED_GCS}{CLEAN_ROUTES}.parquet"
+    ).rename(columns = {
+        "is_local": "is_route_local",
+        "is_rapid": "is_route_rapid",
+        "is_express": "is_route_express"
+    })
     
     route_names_df = time_series_utils.clean_standardized_route_names(
         route_names_df).drop_duplicates()
@@ -161,13 +161,67 @@ def merge_in_standardized_route_names(
         how = "left",
     )
     
+    # primary typology
+    primary_typology_df = set_primary_typology(df2)
+    
+    df3 = pd.merge(
+        df2,
+        primary_typology_df,
+        on = route_time_cols,
+        how = "inner"
+    )
+    
     # After merging, we can replace route_id with recent_route_id2 
-    drop_cols = ["route_desc", "combined_name", "route_id2"]
-    df3 = time_series_utils.parse_route_combined_name(df2).drop(
+    drop_cols = ["route_desc", "combined_name", "route_id2"] + [ 
+        c for c in df3.columns if "is_" in c and 
+        c not in ["is_early", "is_late", "is_ontime"]
+    ] 
+    df4 = time_series_utils.parse_route_combined_name(df3).drop(
         columns = drop_cols)
 
-    return df3
+    return df4
 
+
+def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Choose a primary typology, and we'll be more generous if 
+    multiple typologies are found.
+    """
+    subset_cols = [c for c in df.columns if "is_" in c]
+    keep_cols = route_time_cols + subset_cols
+    
+    df2 = df[keep_cols]
+    
+    # If we ever see it tagged as local or rapid or express
+    # in either of the columns, we'll use it
+    df2 = df2.assign(
+        is_local = df2[["is_local", "is_route_local"]].max(axis=1),
+        is_rapid = df2[["is_rapid", "is_route_rapid"]].max(axis=1),
+    ).drop(
+        columns = ["is_route_local", "is_route_rapid"]
+    ).rename(columns = {"is_route_express": "is_express"})
+    
+    ranks = {
+        "coverage": 1,
+        "local": 2, 
+        "downtown_local": 3,
+        "express": 4,        
+        "rapid": 5,
+    }
+    
+    # Find the max "score" / typology type, and use that
+    for c in ranks.keys():
+        df2[f"{c}_score"] = df2[f"is_{c}"] * ranks[c]
+    
+    df2["max_score"] = df2[[c for c in df2.columns if "_score" in c]].max(axis=1)
+    df2["typology"] = df2.max_score.map({v: k for k, v in ranks.items()})
+    df2 = df2.assign(
+        typology = df2.typology.fillna("unknown")
+    )
+    
+    df3 = df2[route_time_cols + ["typology"]]
+    
+    return df3
 
 if __name__ == "__main__":
     
@@ -237,4 +291,5 @@ if __name__ == "__main__":
         RT_SCHED_GCS,
         DIGEST_SEGMENT_SPEEDS
     )
+    
     
