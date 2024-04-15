@@ -314,13 +314,16 @@ def load_scheduled_service(year:str, organization_name:str)->pd.DataFrame:
     filters=[[("name", "==", organization_name)]],)
     
     df["month"] = df["month"].astype(str).str.zfill(2)
-    df["full_date"] = (df.month.astype(str) + "-" + df.year.astype(str))
+    df["full_date"] = (df.year.astype(str)+ "-" + df.month.astype(str))
     df = tag_day(df, "day_type")
     
     return df
 
-def summarize_monthly(year:str, organization_name:str)->pd.DataFrame:
-    df = load_scheduled_service(year, organization_name)
+def summarize_monthly(organization_name:str)->pd.DataFrame:
+    df_2023 = load_scheduled_service("2023", organization_name)
+    df_2024 = load_scheduled_service("2024", organization_name)
+    
+    df = pd.concat([df_2023, df_2024])
     df2 = (
     df.groupby(
         ['name', 'full_date','time_of_day', 'day_type']
@@ -758,7 +761,7 @@ def single_bar_chart_dropdown(
             tooltip=df.columns.tolist(),
         )
     )
-    chart = (chart + ruler).properties(title=title, width=600, height=400)
+    chart = (chart + ruler).properties(title=title, width=500, height=300)
     chart = chart.add_params(selector).transform_filter(selector)
 
     display(chart)

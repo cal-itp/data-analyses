@@ -1,3 +1,5 @@
+# Readme
+* Decoding all the acronyms, explaining terms, explaining the purpose of this notebook.
 # Section 1: Operator Snapshot
 * Using only data from the most recent month, give viewers a quick snapshot of everything that's happening with this operator.
 * Operator A ran 100 routes. 

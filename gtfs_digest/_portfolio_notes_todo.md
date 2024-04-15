@@ -6,6 +6,7 @@ To-Do
 * Modify the `makefile`
 * Modify the dataframes to read from the data catalog instead of my own f-strings.
 * Add in the different sections.
+* Move all `read_parquet` to reference stuff grabbed from `catalog_utils.get_catalog("gtfs_analytics_data")`.
 * `Average Total Service Hours` chart 
     * Rename as `Total` because it is not the average.
     * Move the chart out of route-direction monthly overview
@@ -13,6 +14,10 @@ To-Do
 * Route-Direction Monthly Overview Section
     * Great tables: dates are a little different (minor). Move the great table to the bottom OR add another markdown line right before all the charts to instruct users to filter by route or else the charts won't make any sense.
     * Charts: 
+        * Test if making a simple chart then adding more encoding and domain ranges will work? This is for later.
+        * Make it a bit smaller.
+        * Add a function that resizes the charts instead of having the properties configured for each one? 
+        * Move dropdown to the top
         * I got the `this exceeds the max rows allowed for Altair` error for AC Transit...I turned off the warning but I am worried this will backfire in the future. Figure out a way to summarize all the info without making files unbearably large.
         * Maybe update the color palette to something more meaningful? Like red to green to for `vehicle positions per minute` so the fewer the vps, the redder? 
         * If there are no values for a certain chart,display a message instead of a blank chart.
