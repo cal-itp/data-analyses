@@ -123,7 +123,7 @@ if __name__ == "__main__":
                 
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
-
+        
         route_cols = [
             "schedule_gtfs_dataset_key", 
             "route_id", 
@@ -137,19 +137,14 @@ if __name__ == "__main__":
         # multiple typologies
         route_typologies = pd.read_parquet(
             f"{SCHED_GCS}{ROUTE_TYPOLOGIES}_{date}.parquet",
-            columns = route_cols + ["freq_category", "typology", "pct_typology"]
+            columns = route_cols + [
+                "is_coverage", "is_downtown_local", 
+                "is_local", "is_rapid"]
         )
-        
-        # Select based on plurality, largest pct_typology kept
-        # In the future, we can add additional ones
-        route_typologies_plurality = route_typologies.sort_values(
-            route_cols + ["pct_typology"],
-            ascending = [True for i in route_cols] + [False]
-        ).drop_duplicates(subset=route_cols).reset_index(drop=True)
         
         route_dir_metrics2 = pd.merge(
             route_dir_metrics,
-            route_typologies_plurality,
+            route_typologies,
             on = route_cols,
             how = "left"
         )
