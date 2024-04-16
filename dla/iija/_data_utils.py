@@ -42,23 +42,28 @@ def read_data_all():
     return proj
 
 
-def update_program_code_list():
+# def update_program_code_list():
     
-    ## read in the program codes
-    updated_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/FY21-22ProgramCodesAsOf5-25-2022.v2_expanded090823.xlsx"))
-    updated_codes = updated_codes>>select(_.iija_program_code, _.new_description)
-    original_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/Copy of lst_IIJA_Code_20230908.xlsx"))
-    original_codes = original_codes>>select(_.iija_program_code, _.description, _.program_name)
+#     ## read in the program codes
+#     updated_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/FY21-22ProgramCodesAsOf5-25-2022.v2_expanded090823.xlsx"))
+#     updated_codes = updated_codes>>select(_.iija_program_code, _.new_description)
+#     original_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/Copy of lst_IIJA_Code_20230908.xlsx"))
+#     original_codes = original_codes>>select(_.iija_program_code, _.description, _.program_name)
     
-    program_codes = pd.merge(updated_codes, original_codes, on='iija_program_code', how = 'outer', indicator=True)
-    program_codes['new_description'] = program_codes['new_description'].str.strip()
+#     program_codes = pd.merge(updated_codes, original_codes, on='iija_program_code', how = 'outer', indicator=True)
+#     program_codes['new_description'] = program_codes['new_description'].str.strip()
 
-    program_codes.new_description.fillna(program_codes['description'], inplace=True)
+#     program_codes.new_description.fillna(program_codes['description'], inplace=True)
     
-    program_codes = program_codes.drop(columns={'description' , '_merge'})
+#     program_codes = program_codes.drop(columns={'description' , '_merge'})
     
-    return program_codes 
+#     return program_codes 
 
+
+'''
+Updated version of the update_program_code_list to alter program names if needed.
+
+'''
 def update_program_code_list2():
     updated_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/FY21-22ProgramCodesAsOf5-25-2022.v2_expanded090823.xlsx"))
     updated_codes = updated_codes>>select(_.iija_program_code, _.new_description)
