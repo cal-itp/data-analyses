@@ -20,3 +20,4 @@ def labeling(word: str) -> str:
     )
 
 blue_palette = ["#B9D6DF", "#2EA8CE", "#0B405B"]
+red_green_yellow = ["#ec5d3b", "#fde18d", "#7cc665"]
