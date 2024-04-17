@@ -20,22 +20,32 @@ import _report_utils
 """
 Datasets
 """
-def load_operator_profiles(name:str, service_date:pd._libs.tslibs.timestamps.Timestamp)->pd.DataFrame:
+def load_operator_profiles(organization_name:str)->pd.DataFrame:
     op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
     op_profiles_df = pd.read_parquet(
     op_profiles_url,
-    filters=[[("organization_name", "==", name), ("service_date", "==", service_date)]],
-)
-    return op_profiles_df 
+    filters=[[("organization_name", "==", organization_name)]])
+    
+    op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date'], ascending = False).head(1)
+    return op_profiles_df1 
 
-def load_operator_map(name:str, service_date:pd._libs.tslibs.timestamps.Timestamp)->gpd.GeoDataFrame:
+def load_operator_map(name:str)->gpd.GeoDataFrame:
     op_routes_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_routes_map}.parquet"
     op_routes_gdf = gpd.read_parquet(
     op_routes_url,
-    filters=[[("name", "==", name), ("service_date", "==", service_date)]])
+    filters=[[("name", "==", name)]])
     
+    op_routes_gdf = op_routes_gdf.sort_values(by = ['service_date'], ascending = False).head(1)
     return op_routes_gdf
 
+def organization_name_crosswalk(organization_name: str) -> str:
+    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
+    og = pd.read_parquet(
+        schd_vp_url, filters=[[("organization_name", "==", organization_name)]]
+    )
+
+    name = og.name.values[0]
+    return name
 
 def tag_day(df: pd.DataFrame, col_to_change:str) -> pd.DataFrame:
     # Function to determine if a date is a weekend day or a weekday
@@ -87,7 +97,7 @@ def route_typology(df: pd.DataFrame)->pd.DataFrame:
     ]
     df = df[route_type_cols]
     df2 = df.T.reset_index()
-    df2 = df2.rename(columns={"index": "route_type", 0: "total_routes"})
+    df2.columns = ['route_type','total_routes']
     df3 = df2.loc[df2.route_type != "operator_n_routes"]
     return df3
 
@@ -204,7 +214,12 @@ def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str):
         .encode(
             x=alt.X(x_col, title=_report_utils.labeling(x_col)),
             y=alt.Y(y_col, title=_report_utils.labeling(y_col)),
-        )
+            color=alt.Color(
+               y_col,
+                scale=alt.Scale(
+                    range=cp.CALITP_SEQUENTIAL_COLORS,
+                ),
+        ))
         .properties(
             width=500,
             title={
@@ -224,15 +239,14 @@ def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str
                 color_col, scale=alt.Scale(range=_report_utils.blue_palette)
             ),
             tooltip=df.columns.tolist(),
-        )
-        .properties(
+        ).properties(
             width=250,
             height=300,
             title={
                 "text": title,
             },
-        )
-    )
+        ))
+    
 
     return chart
 
