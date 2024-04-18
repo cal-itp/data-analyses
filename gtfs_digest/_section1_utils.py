@@ -35,7 +35,7 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     op_routes_url,
     filters=[[("name", "==", name)]])
     
-    op_routes_gdf = op_routes_gdf.sort_values(by = ['service_date'], ascending = False).head(1)
+    op_routes_gdf = op_routes_gdf.sort_values(by = ['service_date'], ascending = False)
     return op_routes_gdf
 
 def organization_name_crosswalk(organization_name: str) -> str:

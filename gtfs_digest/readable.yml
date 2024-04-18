@@ -10,6 +10,7 @@ frequency: Trips per Hour
 total_scheduled_service_minutes: "Aggregate Scheduled Service Minutes (all trips)"
 route_id: Route
 route_combined_name: Route
+n_trips: "# trips"
 
 # GTFS vehicle positions
 minutes_atleast1_vp: "# minutes with 1+ vp per minute"
@@ -17,9 +18,15 @@ minutes_atleast2_vp: "# minutes with 2+ vp per minute"
 total_rt_service_minutes: "Aggregate Actual Service Minutes (all trips)"
 total_vp: "# vp"
 vp_in_shape: "# vp within scheduled shape"
-is_early": "# early arrival trips"
-is_ontime: "# on-time trips"
-is_late: "# late trips"
+is_early: 
+    readable: "# early arrival trips"
+    caption: "A trip is defined as early if it arrives 6+ minutes before the scheduled time."
+is_ontime: 
+    readable: "# on-time trips"
+    caption: "A trip is defined as on time if it arrives 5 minutes before or after the scheduled time."
+is_late: 
+    readable: "# late trips"
+    caption: "A trip is defined as late if it arrives 5 minutes after the scheduled time."
 n_vp_trips: "# trips with vp"
 vp_per_minute: "Average vp per minute"
 pct_in_shape: "% vp within scheduled shape"
@@ -33,23 +40,22 @@ speed_mph: "Speed (mph)"
 sched_rt_category: "GTFS Availability"
        
 # Operators
-organization_source_record_id: "Organization ID"
-organization_name: Organization
-name: Transit Operator
-caltrans_district: District
 base64_url: "base64 encoded feed URL"
-operator_n_routes: "# routes"
-operator_n_trips: "# trips"
-operator_n_shapes: "# shapes"
-operator_n_stops: "# stops"
-operator_n_arrivals: "# arrivals"
-operator_route_length_miles: "service miles"
-operator_arrivals_per_stop: "avg arrivals per stop"
-n_coverage_routes: "# coverage route types" 
+caltrans_district: District
+n_coverage_routes: "# coverage route types"
 n_downtown_local_routes: "# downtown local route types"
 n_local_routes: "# local route types"
 n_rapid_routes: "# rapid route types"
-
+name: Transit Operator
+operator_arrivals_per_stop: "avg arrivals per stop"
+operator_n_arrivals: "# arrivals"
+operator_n_routes: "# routes"
+operator_n_shapes: "# shapes"
+operator_n_stops: "# stops"
+operator_n_trips: "# trips"
+operator_route_length_miles: "service miles"
+organization_name: Organization
+organization_source_record_id: "Organization ID"
 
 # Dates / time
 time_period: Period
@@ -59,8 +65,30 @@ day_name: "Day of Week"
 year: Year
 month: Month
 year_month: "Month - Year"
+day_type: "day of week"
 
 # Roads
 road_freq_category: "Road Frequency Category"
 road_typology: "Road Typology Category"
 pct_typology: "% route miles with typology"
+typology: "Route typology"
+# Routes
+route_length_miles: "service miles"
+route_length: "service meters"
+
+# Speed
+p20_mph: "cutoff speed for 20th percentile"
+p50_mph: "cutoff speed for 50th percentile"
+p80_mph: "cutoff speed for 80th percentile"
+stop_pair_name: "stop pairs"
+
+# Captions for graphs
+# Section 1
+
+# Section 3
+avg_scheduled_min:
+    title: "Average Scheduled Minutes"
+    subtitle: "The average minutes a trip is scheduled to run."
+vp_per_min:
+    title: "Vehicle Positions per Minute"
+    subtitle: "Trips should have 2+ vehicle positions per minute."
