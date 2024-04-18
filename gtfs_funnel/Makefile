@@ -17,7 +17,6 @@ preprocess:
 	python vp_condenser.py
 	make route_typologies_data
 	python operator_scheduled_stats.py 
-    # need to rerun for digest...apr 2024 not run, and columns changed
     
     
 route_typologies_data:
