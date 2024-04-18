@@ -152,7 +152,7 @@ if __name__ == "__main__":
     
     ROUTE_TYPOLOGY = GTFS_DATA_DICT.schedule_tables.route_typologies
     OPERATOR_EXPORT = GTFS_DATA_DICT.schedule_tables.operator_scheduled_stats
-    OPERATOR_ROUTE_EXPORT = GTFS_DATA_DICT.schedule_tables.operator_route
+    OPERATOR_ROUTE_EXPORT = GTFS_DATA_DICT.schedule_tables.operator_routes
     
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
