@@ -8,7 +8,6 @@ import sys
 
 from dask import delayed, compute
 from loguru import logger
-from pathlib import Path
 from typing import Literal
 
 from calitp_data_analysis.geography_utils import WGS84
@@ -240,33 +239,6 @@ def multi_day_segment_averages(analysis_date_list: list, dict_inputs: dict):
     logger.info(f"multi day segment execution time: {end - start}")
     
     return    
-    
-def stage_open_data_exports(analysis_date: str, dict_inputs: dict):
-    """
-    For the datasets we publish to Geoportal, 
-    export them to a stable GCS URL so we can always 
-    read it in open_data/catalog.yml.
-    """
-    datasets = [
-        dict_inputs["route_dir_single_segment"],
-        dict_inputs["route_dir_single_summary"]
-    ]
-
-    for d in datasets:
-        gdf = gpd.read_parquet(
-            f"{SEGMENT_GCS}{d}_{analysis_date}.parquet"
-        )
-        
-        utils.geoparquet_gcs_export(
-            gdf,
-            f"{SEGMENT_GCS}export/",
-            f"{Path(d).stem}"
-        )
-        del gdf
-    
-    print(f"overwrite {datasets}")
-    
-    return
         
 
 if __name__ == "__main__":
@@ -287,7 +259,6 @@ if __name__ == "__main__":
         start = datetime.datetime.now()
         
         single_day_segment_averages(analysis_date, STOP_SEG_DICT)
-        stage_open_data_exports(analysis_date, STOP_SEG_DICT)
         
         end = datetime.datetime.now()
         

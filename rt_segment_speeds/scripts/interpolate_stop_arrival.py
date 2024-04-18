@@ -12,7 +12,7 @@ from loguru import logger
 from pathlib import Path
 from typing import Literal, Optional
 
-from segment_speed_utils import (array_utils, 
+from segment_speed_utils import (array_utils, helpers,
                                  segment_calcs, wrangle_shapes)
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import PROJECT_CRS, SEGMENT_TYPES
