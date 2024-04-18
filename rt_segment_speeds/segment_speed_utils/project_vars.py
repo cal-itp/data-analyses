@@ -11,7 +11,7 @@ PREDICTIONS_GCS = GTFS_DATA_DICT.gcs_paths.PREDICTIONS_GCS
 SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
 PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
 
-analysis_date = rt_dates.DATES["mar2024"]
+analysis_date = rt_dates.DATES["apr2024"]
 
 oct_week = rt_dates.get_week("oct2023", exclude_wed=True)
 apr_week = rt_dates.get_week("apr2023", exclude_wed=True)

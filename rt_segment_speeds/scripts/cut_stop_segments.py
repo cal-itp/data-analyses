@@ -16,7 +16,7 @@ from loguru import logger
 
 from calitp_data_analysis import utils
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import gtfs_schedule_wrangling
+from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 from segment_speed_utils.project_vars import PROJECT_CRS 
                                              
