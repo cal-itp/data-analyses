@@ -1,10 +1,26 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
 
 ### 4/17/2024 Notes
-* How is the stuff in `GTFS_DATA_DICT.digest_tables.operator_sched_rt` different than the findings in `digest_tables.route_schedule_vp`?
 * Is Section #2 supposed to be a less granular version of Section #3? 
     * Section #3 splits the route by direction and time period, but section #2 will just give you the route without these distinctions? 
-* For `operator_profiles` some organizations don't information that is most recently available. What do I do? 
+    * Example: just have one chart for speeds for both directions? 
+* For `operator_profiles` some organizations don't have any information for March. 
+    * in `04_gtfs_exploratory.ipynb` Blue Lake Rancheria's most recent information is from last September. 
+    * Some organizations don't have information at all such as Peninsula Corridor Joint Powers. 
+        * However this organization appears to have speed/trip data. 
+    * What to do? Temporary solution: try execpt
+* AC Transit & SF Muni always throws an error:
+    * "nbclient.exceptions.CellTimeoutError: A cell timed out while it was being executed, after 4 seconds.
+    The message was: Timeout waiting for IOPub output.
+    Here is a preview of the cell contents:
+    -------------------
+    section2.filtered_route(sched_vp_df)"
+    
+    * This didn't happen last time. 
+
+* Readable.yml
+    * Operators -> what does it mean when you have `organization_name:Organization`. Organization is not a string.
+    * Add captions for datasets? 
 ### 4/11/2024 Run 
 To-Do
 * YML

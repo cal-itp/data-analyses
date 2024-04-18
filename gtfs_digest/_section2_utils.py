@@ -668,7 +668,11 @@ def filtered_route(
     """
     https://stackoverflow.com/questions/58919888/multiple-selections-in-altair
     """
-    routes_list = df["route_combined_name"].unique().tolist()
+    # Filter for only schedule and vp
+    df_sched_vp_both = df[df.sched_rt_category == "schedule_and_vp"].reset_index(
+        drop=True
+    )
+    routes_list = df_sched_vp_both["route_combined_name"].unique().tolist()
 
 
     route_dropdown = alt.binding_select(
@@ -683,11 +687,6 @@ def filtered_route(
     )
 
     # Data
-    # Filter for only schedule and vp
-    df_sched_vp_both = df[df.sched_rt_category == "schedule_and_vp"].reset_index(
-        drop=True
-    )
-
     # Filter for only rows categorized as found in schedule and vp and all_day
     all_day = df_sched_vp_both.loc[
         df_sched_vp_both.time_period == "all_day"
