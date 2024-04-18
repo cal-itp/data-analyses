@@ -121,26 +121,19 @@ def operator_typology_breakdown(df: pd.DataFrame) -> pd.DataFrame:
     Get a count of how many routes (not route-dir) 
     have a certain primary typology.
     """    
-    df2 = (df
-           .groupby(
-               ["schedule_gtfs_dataset_key", "primary_typology"])
-            .agg({"route_id": "nunique"})
-            .reset_index()
-    )
+    typology_values = [
+        f"is_{i}" for i in 
+        ["downtown_local", "local", "rapid", "coverage"]
+    ]
     
-    df_wide = df2.pivot(
-        index="schedule_gtfs_dataset_key", 
-        columns = "primary_typology",
-        values="route_id"
-    ).reset_index().fillna(0)
-    
-    typology_values = ["downtown_local", "local",
-                       "rapid", "coverage"]
-    
-    df_wide[typology_values] = df_wide[typology_values].astype(int)
-    
-    rename_dict = {old_name: f"n_{old_name}_routes" 
+    df_wide = (df.groupby("schedule_gtfs_dataset_key")
+               .agg({**{c: "sum" for c in typology_values}})
+               .reset_index()
+              )
+        
+    rename_dict = {old_name: f"n_{old_name.replace('is_', '')}_routes" 
                    for old_name in typology_values}
+    
     df_wide = df_wide.rename(columns = rename_dict)
     
     return df_wide
