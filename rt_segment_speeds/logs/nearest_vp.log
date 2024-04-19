@@ -1,2 +1,5 @@
 2024-02-15 13:48:26.270 | INFO     | __main__:nearest_neighbor_shape_segments:203 - shape segments 2024-02-14: 0:10:31.474349
 2024-02-15 14:08:52.783 | INFO     | __main__:nearest_neighbor_rt_stop_times:135 - RT stop times 2024-02-14: 0:11:07.883083
+2024-04-18 13:19:11.258 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:134 - nearest neighbor for stop_segments 2024-04-17: 0:27:28.612602
+2024-04-18 15:22:16.322 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:134 - nearest neighbor for rt_stop_times 2024-04-17: 0:17:44.714181
+

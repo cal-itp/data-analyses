@@ -64,7 +64,7 @@ digest_tables:
 
 stop_segments:
   dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.usable_vp_file}
+  stage1: ${speeds_tables.usable_vp}
   stage2: "nearest/nearest_vp_shape_segments"
   stage3: "stop_arrivals"
   stage4: "speeds_stop_segments"
@@ -77,7 +77,7 @@ stop_segments:
 
 rt_stop_times:
   dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.usable_vp_file}
+  stage1: ${speeds_tables.usable_vp}
   stage2: "nearest/nearest_vp_rt_stop_times"
   stage3: "rt_stop_times/stop_arrivals"
   stage4: "rt_stop_times/speeds"
@@ -92,7 +92,7 @@ rt_stop_times:
 
 road_segments:
   dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.usable_vp_file}
+  stage1: ${speeds_tables.usable_vp}
   stage2: "nearest/nearest_vp_roads"
   stage3: "road_segments/stop_arrivals"
   stage4: "speeds_road_segments"

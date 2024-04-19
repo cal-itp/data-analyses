@@ -51,7 +51,7 @@ def attach_operator_natural_identifiers(
     if segment_type == "stop_segments":
         SEGMENT_FILE = GTFS_DATA_DICT[segment_type].segments_file
         trip_used_for_shape = pd.read_parquet(
-            f"{SEGMENT_GCS}segment_options/"
+            f"{SEGMENT_GCS}"
             f"{SEGMENT_FILE}_{analysis_date}.parquet",
             columns = ["st_trip_instance_key"]
         ).st_trip_instance_key.unique()

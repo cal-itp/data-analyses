@@ -244,7 +244,7 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
 
-    #roads = delayed(prep_roads)(GTFS_DATA_DICT)
+    roads = delayed(prep_roads)(GTFS_DATA_DICT)
     ROAD_BUFFER_METERS = 20
     TYPOLOGY_THRESHOLD = 0.10
     
