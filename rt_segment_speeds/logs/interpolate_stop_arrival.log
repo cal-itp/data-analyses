@@ -1,1 +1,5 @@
 2024-02-15 14:18:47.082 | INFO     | __main__:interpolate_stop_arrivals:110 - get stop arrivals 2024-02-14: 0:09:37.655118
+2024-04-18 14:30:37.401 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:203 - get stop arrivals 2024-04-17: 0:18:48.633416
+2024-04-18 14:36:29.213 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:214 - interpolate arrivals for stop_segments 2024-04-17:  2024-04-17: 0:24:40.445216
+2024-04-18 15:40:32.431 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:214 - interpolate arrivals for rt_stop_times 2024-04-17:  2024-04-17: 0:18:11.754862
+2024-04-18 15:42:16.358 | INFO     | 

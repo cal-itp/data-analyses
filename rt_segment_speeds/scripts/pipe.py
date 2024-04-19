@@ -4,6 +4,8 @@ nearest_vp_to_stop.py,
 interpolate_stop_arrivals.py,
 and calculate_speed_from_stop_arrivals.py
 """
+import sys
+from loguru import logger
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -24,6 +26,7 @@ def nearest_neigbor_to_speed(
     interpolation of stop arrival, deriving segment speeds 
     between stops.
     """
+    
     LOG_FILE = "../logs/nearest_vp.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
@@ -47,7 +50,7 @@ def nearest_neigbor_to_speed(
         segment_type = segment_type, 
         config_path = config_path
     )
-
+    
     LOG_FILE = "../logs/speeds_by_segment_trip.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 

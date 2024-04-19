@@ -6,7 +6,7 @@ import datetime
 import pandas as pd
 
 from segment_speed_utils import helpers, segment_calcs
-from update_vars import SEGMENT_GCS, RT_SCHED_GCS
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS
 
 def prep_scheduled_stop_times(
     analysis_date: str
