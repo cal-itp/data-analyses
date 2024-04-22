@@ -1,7 +1,10 @@
 import calitp_data_analysis.magics
 import geopandas as gpd
 import pandas as pd
-
+import yaml
+"""
+Charts
+"""
 def reverse_snakecase(df):
     """
     Clean up columns to remove underscores and spaces.
@@ -21,3 +24,16 @@ def labeling(word: str) -> str:
 
 blue_palette = ["#B9D6DF", "#2EA8CE", "#0B405B"]
 red_green_yellow = ["#ec5d3b", "#fde18d", "#7cc665"]
+
+"""
+Yaml
+"""
+with open("readable.yml") as f:
+    readable_dict = yaml.safe_load(f)
+def replace_column_names(column_name):
+    if column_name in readable_dict:
+        if 'readable' in readable_dict[column_name]:
+            return readable_dict[column_name]['readable']
+        else:
+            return readable_dict[column_name]
+    return column_name

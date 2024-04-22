@@ -18,8 +18,12 @@ from IPython.display import HTML, Markdown, display
 from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
 from shared_utils import catalog_utils, rt_dates, rt_utils
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
-
 import _report_utils
+import yaml
+
+# Readable Dictionary
+with open("readable.yml") as f:
+    readable_dict = yaml.safe_load(f)
 """
 Schedule_vp_metrics
 Functions
@@ -73,12 +77,13 @@ def add_categories(df:pd.DataFrame) -> pd.DataFrame:
 def load_schedule_vp_metrics(name:str)->pd.DataFrame:
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
-    df = pd.read_parquet(schd_vp_url, filters=[[("name", "==", name)]])
+    df = (pd.read_parquet(schd_vp_url, 
+          filters=[[("name", "==", name),
+         ("sched_rt_category", "==", "schedule_and_vp")]])
+         )
     
-    df = df[df.sched_rt_category == "schedule_and_vp"].reset_index(
-        drop=True
-    )
-    
+    # Delete duplicates
+    df = df.drop_duplicates().reset_index(drop = True)
     # Categorize
     df = add_categories(df)
     
@@ -95,12 +100,11 @@ def load_schedule_vp_metrics(name:str)->pd.DataFrame:
     df["ruler_100_pct"] = 100
     df["ruler_for_vp_per_min"] = 2
     
-    
     return df 
 
 def route_stats(df: pd.DataFrame) -> pd.DataFrame:
     most_recent_date = df.service_date.max()
-    route_merge_cols = ["route_combined_name", "direction_id"]
+    route_merge_cols = ["Route", "Direction"]
 
     all_day_stats = df[
         (df.service_date == most_recent_date) & (df.time_period == "all_day")
@@ -297,8 +301,8 @@ def grouped_bar_chart(
     ]
 
     if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
+        # text_chart = create_data_unavailable_chart()
+        return print("No chart available.")
     else:
         df = clean_data_charts(df,y_col)
         chart = (
@@ -337,8 +341,8 @@ def base_facet_line(
     df: pd.DataFrame, y_col: str, title: str, subtitle: str
 ) -> alt.Chart:
     if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
+        # text_chart = create_data_unavailable_chart()
+        return print("No chart available.")
     else:
         selection = alt.selection_point(fields=['time_period'], bind='legend')
 
@@ -409,8 +413,8 @@ def base_facet_circle(
     ]
 
     if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
+        #text_chart = create_data_unavailable_chart()
+        return print("No chart available.")
     else:
         if "pct" in y_col:
             max_y = 100
@@ -480,8 +484,8 @@ def base_facet_chart(
     ]
 
     if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
+        #text_chart = create_data_unavailable_chart()
+        return print("No chart available.")
     else:
         if "pct" in y_col:
             max_y = 100
@@ -642,26 +646,21 @@ def frequency_chart(df: pd.DataFrame):
         return text_chart
 
     else:
-        chart = (
-            alt.Chart(df, width=180, height=alt.Step(10))
-            .mark_bar()
-            .encode(
-                alt.Y(
-                    "yearmonthdate(service_date):O",
-                    title="Date",
-                    axis=alt.Axis(format="%b %Y"),
-                ),
-                alt.X("frequency:Q", title=_report_utils.labeling("frequency"), axis=None),
-                alt.Color("frequency", scale=alt.Scale(range=_report_utils.red_green_yellow)).title(
-                    _report_utils.labeling("Frequency")
-                ),
-                alt.Row("time_period:N")
-                .title(_report_utils.labeling("time_period"))
-                .header(labelAngle=0),
-                alt.Column("direction_id:N").title(_report_utils.labeling("direction_id")),
-            )
-        )
-
+        chart = (alt.Chart(df, width=180, height=alt.Step(10)).mark_bar().encode(
+        alt.Y(
+            "yearmonthdate(service_date):O",
+            title="Date",
+            axis=alt.Axis(format="%b %Y"),
+        ),
+        alt.X("frequency:Q", title=_report_utils.labeling("frequency"), axis=None),
+        alt.Color("frequency:Q", scale=alt.Scale(range=_report_utils.red_green_yellow)).title(
+            _report_utils.labeling("Frequency")
+        ),
+        alt.Row("time_period:N").title(_report_utils.labeling("time_period")).header(labelAngle=0),
+        alt.Column("direction_id:N").title(_report_utils.labeling("direction_id")),
+        tooltip=["yearmonthdate(service_date)", "frequency", "time_period", "direction_id"]
+    )
+                )
         chart = chart.properties(title="Frequency of Trips per Hour")
         return chart
 """

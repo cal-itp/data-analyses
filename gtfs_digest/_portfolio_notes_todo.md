@@ -1,5 +1,34 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
 
+### 4/22/2024
+* I updated the yaml because last week, I discovered there are multiple organization name-name combos and duplicates. This work is in `07_crosswalk.ipynb`. 
+    * The new yaml includes only one row for one organization.
+* Last week, I tried to run all the operators. However, the notebook would error out at AC Transit & SF Muni. 
+    * To test, I commented out a lot of the charts in the `section2.filtered_route(sched_vp_df)` part. 
+    * All the operators' github pages were successfully generated however this seems to hint that too many Altair charts causes things to go a bit wild. 
+    * Cut down on charts? Not sure. 
+* Comments on the new GitHub Pages
+    * Operator Overview (section 1)
+        * The Pie Chart with Total Routes by Typology doesn't match the number of unique routes. 
+            * UC Davis runs 19 unique routes but there are 20 routes in the pie chart.
+            * Double check this w/ Tiffany.
+        * <s>Double check the longest and shortest route. Some routes are VERY long.
+            * City of Eureka in D1 has a route that is almost 160 miles.
+            * Yes this is correct</s>
+        * For the "public transit provided in the following counties" style the dataframe instead of printing it. Maybe concat a bullet point to the county so it looks like a list?
+        * For the `Total Service Hours` month, I mapped 1 to be Monday, 2 to be Tuesday, etc. Double check and make sure it's correct.
+         <s>* Need to add back stop information. </s>
+   * Detailed Route-Direction Overview (section 3)
+       * <s>What's that box that prints "None"?? Why is it generated for every page??
+           * Prints "None" because I wrapped the `great_table` with `display()`</s>
+       * <s>`create_data_unavailable_chart()` doesn't work  when adding a dropdown menu to allow for route selection...only works with one route example  in `01_section3.ipynb` 
+           * Test: Gold Route in City of Eureka 
+           * Test: 6 wellness express  "Palo Verde Valley Transit Agency"/'Desert Roadrunner GMV Schedule' in d8
+           * Tried returning a `print` statement but it didn't work. </s>
+* Use the `readable.yml` 
+    * To create the charts.
+    * Rename dataframes.
+    
 ### 4/17/2024 Notes
     * Example: just have one chart for speeds for both directions? 
 * For `operator_profiles` some organizations don't have any information for March. 
