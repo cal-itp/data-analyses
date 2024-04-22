@@ -18,17 +18,52 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
+    # Load schedule_and_vp
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
-    df = pd.read_parquet(schd_vp_url, filters=[[("sched_rt_category", "==", "schedule_and_vp")]],
-                        columns = ["organization_name", "caltrans_district"]
-    ).dropna(
-        subset="caltrans_district"
-    ).sort_values(["caltrans_district", "organization_name"])
+    schd_vp_df = (pd.read_parquet(schd_vp_url, 
+                   filters=[[("sched_rt_category", "==", "schedule_and_vp")]],
+                   columns = ["organization_name", "caltrans_district",
+                                  "name", "schedule_gtfs_dataset_key"]
+    )
+                 )
     
-    districts = sorted(list(df.caltrans_district.unique()))
+    # Drop duplicated rows by Caltrans district and organization name.
+    schd_vp_df = (schd_vp_df
+                  .dropna(subset="caltrans_district")
+                  .sort_values(by=["caltrans_district", "organization_name"])
+                  .drop_duplicates()
+                 )
+    
+    # Load operator profiles
+    op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
+    op_cols = ["organization_name", "name", "service_date", "schedule_gtfs_dataset_key"]
+    op_profiles_df = pd.read_parquet(op_profiles_url)[op_cols]
+    
+    # Keep the name with the most recent service date
+    op_profiles2 = (op_profiles_df.sort_values(
+    by=["name", "service_date"],
+    ascending=[True, False])
+                   )
+    # Drop duplicated names
+    op_profiles3 = op_profiles2.drop_duplicates(subset=["name"])
+    
+    # Drop duplicated organization names 
+    op_profiles4  = (op_profiles3
+                     .drop_duplicates(subset = ['organization_name'])
+                     .reset_index(drop = True))
+    # Merge 
+    m1 = pd.merge(
+    op_profiles4,
+    schd_vp_df,
+    on=["name", "organization_name", "schedule_gtfs_dataset_key"],
+    how="inner"
+    )
+    
+    districts = sorted(list(m1.caltrans_district.unique()))
 
-    operators = df.organization_name.tolist()      
+    operators = m1.organization_name.tolist()      
+    
     # Eric's example
     # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
 
@@ -41,7 +76,7 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     for district in districts:
         
         chapter_dict = {}
-        subset = df[df.caltrans_district == district]
+        subset = m1[m1.caltrans_district == district]
         
         chapter_dict['caption'] = f'District {district}'
         chapter_dict['params'] = {'district': district}

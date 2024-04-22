@@ -14,14 +14,21 @@ from IPython.display import HTML, Markdown, display
 from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
 from shared_utils import catalog_utils, rt_dates, rt_utils
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
-
 import _report_utils
 
-"""
-Datasets
-"""
+def organization_name_crosswalk(organization_name: str) -> str:
+    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
+    og = pd.read_parquet(
+        schd_vp_url, filters=[[("organization_name", "==", organization_name)]]
+    )
+
+    name = og.name.values[0]
+    return name
+
 def load_operator_profiles(organization_name:str)->pd.DataFrame:
+
     op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
+
     op_profiles_df = pd.read_parquet(
     op_profiles_url,
     filters=[[("organization_name", "==", organization_name)]])
@@ -35,17 +42,14 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     op_routes_url,
     filters=[[("name", "==", name)]])
     
-    op_routes_gdf = op_routes_gdf.sort_values(by = ['service_date'], ascending = False)
+    # Grab max date
+    max_date = op_routes_gdf.service_date.max()
+    
+    # Filter for only the most recent rows
+    op_routes_gdf = op_routes_gdf.loc[op_routes_gdf.service_date == max_date]
+    op_routes_gdf = op_routes_gdf.drop(columns = ['service_date'])
+    
     return op_routes_gdf
-
-def organization_name_crosswalk(organization_name: str) -> str:
-    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
-    og = pd.read_parquet(
-        schd_vp_url, filters=[[("organization_name", "==", organization_name)]]
-    )
-
-    name = og.name.values[0]
-    return name
 
 def tag_day(df: pd.DataFrame, col_to_change:str) -> pd.DataFrame:
     # Function to determine if a date is a weekend day or a weekday
@@ -147,8 +151,9 @@ def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     .iloc[[0, -1]])
     
     return df
+
 """
-Charts
+Charts & Maps
 """
 def single_bar_chart_dropdown(
     df: pd.DataFrame,
@@ -251,11 +256,11 @@ def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str
     return chart
 
 def display_all_routes(gdf:gpd.GeoDataFrame):
-    display(gdf.drop(columns=["service_date"]).explore(
+    display(gdf).explore(
     "route_combined_name",
     tiles="CartoDB positron",
     width=500,
     height=300,
     style_kwds={"weight": 3},
     legend=False,
-    tooltip=["route_combined_name", "route_length_miles"]))
+    tooltip=["route_combined_name", "route_length_miles"])

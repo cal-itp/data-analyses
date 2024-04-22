@@ -1,14 +1,13 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
 
 ### 4/17/2024 Notes
-* Is Section #2 supposed to be a less granular version of Section #3? 
-    * Section #3 splits the route by direction and time period, but section #2 will just give you the route without these distinctions? 
     * Example: just have one chart for speeds for both directions? 
 * For `operator_profiles` some organizations don't have any information for March. 
     * in `04_gtfs_exploratory.ipynb` Blue Lake Rancheria's most recent information is from last September. 
     * Some organizations don't have information at all such as Peninsula Corridor Joint Powers. 
         * However this organization appears to have speed/trip data. 
-    * What to do? Temporary solution: try execpt
+    * We want only one organization to map with one name
+        * Keep only the most recent name-row for the organization_name.
 * AC Transit & SF Muni always throws an error:
     * "nbclient.exceptions.CellTimeoutError: A cell timed out while it was being executed, after 4 seconds.
     The message was: Timeout waiting for IOPub output.
@@ -17,10 +16,13 @@
     section2.filtered_route(sched_vp_df)"
     
     * This didn't happen last time. 
+    * Test what is going wrong one element at a time. 
 
 * Readable.yml
-    * Operators -> what does it mean when you have `organization_name:Organization`. Organization is not a string.
-    * Add captions for datasets? 
+    * Operators -> what does it mean when you have `organization_name:Organization`. 
+        * Organization is a string. 
+        * Other column names have "" to avoid any special symbols like () or + being read in weird. 
+
 ### 4/11/2024 Run 
 To-Do
 * YML
