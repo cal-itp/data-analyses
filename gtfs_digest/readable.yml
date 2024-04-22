@@ -8,7 +8,7 @@ ttl_service_hours: total service (hours)
 n_scheduled_trips: "# scheduled trips"
 frequency: Trips per Hour
 total_scheduled_service_minutes: "Aggregate Scheduled Service Minutes (all trips)"
-route_id: Route
+route_id: "Route ID"
 route_combined_name: Route
 n_trips: "# trips"
 
