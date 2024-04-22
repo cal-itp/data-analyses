@@ -75,6 +75,10 @@ def load_schedule_vp_metrics(name:str)->pd.DataFrame:
     
     df = pd.read_parquet(schd_vp_url, filters=[[("name", "==", name)]])
     
+    df = df[df.sched_rt_category == "schedule_and_vp"].reset_index(
+        drop=True
+    )
+    
     # Categorize
     df = add_categories(df)
     
@@ -90,6 +94,8 @@ def load_schedule_vp_metrics(name:str)->pd.DataFrame:
     # Add rulers
     df["ruler_100_pct"] = 100
     df["ruler_for_vp_per_min"] = 2
+    
+    
     return df 
 
 def route_stats(df: pd.DataFrame) -> pd.DataFrame:
@@ -668,12 +674,8 @@ def filtered_route(
     """
     https://stackoverflow.com/questions/58919888/multiple-selections-in-altair
     """
-    # Filter for only schedule and vp
-    df_sched_vp_both = df[df.sched_rt_category == "schedule_and_vp"].reset_index(
-        drop=True
-    )
-    routes_list = df_sched_vp_both["route_combined_name"].unique().tolist()
-
+    # Create drop down
+    routes_list = df["route_combined_name"].unique().tolist()
 
     route_dropdown = alt.binding_select(
         options=routes_list,
@@ -688,15 +690,15 @@ def filtered_route(
 
     # Data
     # Filter for only rows categorized as found in schedule and vp and all_day
-    all_day = df_sched_vp_both.loc[
-        df_sched_vp_both.time_period == "all_day"
+    all_day = df.loc[
+        df.time_period == "all_day"
     ].reset_index(drop=True)
 
     # Create route stats table for the text tables
     route_stats_df = route_stats(df)
 
     # Manipulate the df for some of the metrics
-    timeliness_df = timeliness_trips(df_sched_vp_both)
+    timeliness_df = timeliness_trips(df)
     rt_journey_vp = pct_vp_journey(
         all_day, "pct_rt_journey_atleast1_vp", "pct_rt_journey_atleast2_vp"
     )
@@ -746,15 +748,18 @@ def filtered_route(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-
+    
+    
     frequency = (
-        frequency_chart(df_sched_vp_both)
+        frequency_chart(df)
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    
+    """ 
     speed = (
         base_facet_line(
-            df_sched_vp_both,
+            df,
             "speed_mph",
             "Average Speed",
             "The average miles per hour the bus travels by direction and time of day.",
@@ -788,6 +793,7 @@ def filtered_route(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+   
     sched_vp_per_min = (
         base_facet_circle(
             sched_journey_vp,
@@ -821,6 +827,7 @@ def filtered_route(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    
     chart_list = [
         avg_scheduled_min,
         timeliness_trips_dir_0,
@@ -834,7 +841,14 @@ def filtered_route(
         text_dir0,
         text_dir1,
     ]
-
+    """
+    chart_list = [
+        avg_scheduled_min,
+        timeliness_trips_dir_0,
+        timeliness_trips_dir_1,
+        frequency
+    ]
+    
     chart = alt.vconcat(*chart_list).properties(
         resolve=alt.Resolve(
             scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))
