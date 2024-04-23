@@ -1,5 +1,12 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
 
+### 4/23/2024
+* Figure out Makefile situation.
+* Yaml file generation going wrong. 
+* Check the # of daily trips again in section 2. Even after dropping duplicates, it still seems crazy high.
+    * Solution: filter on `time_period == all_day`.
+* "Operator Overview":
+    * Add a sentence about the Total Scheduled Service Hours and what it means.
 ### 4/22/2024
 * I updated the yaml because last week, I discovered there are multiple organization name-name combos and duplicates. This work is in `07_crosswalk.ipynb`. 
     * The new yaml includes only one row for one organization.
@@ -89,3 +96,7 @@ To-Do
     * <s>Route Statistics for Route for Dir 0/1: Quite often nothing shows up...Figure out why?? Stuff shows up on the charts. 
         * Example route: 652 Skyline High - Elmhurst Bay Area 511 AC Transit Schedule</s>
             * <b> Note 4/17 </b>: Fixed this. The `_section2_utils.route_stats()` function needs outer merges. I also edited the `create_text_table()` function to drop duplicate rows. Without dropping duplicate rows, the text table overlays all the rows and you can't read the text. 
+
+### Parameterize notebooks
+* cd ../ && pip install -r portfolio/requirements.txt
+* python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
