@@ -37,6 +37,8 @@ common-fields:
     definition_source: "https://gtfs.org/schedule/reference/#stop_timestxt"
   - &stop_pair
     definition: A pair of stops. Identifies the current stop_id and the subsequent stop_id. The stop pair value is created internally by concatenating two stop ids with double underscores. 
+  - &stop_pair_name
+    definition: A pair of stops. Identifies the current stop_name and the subsequent stop_name. The stop pair name value is created internally by concatenating two stop name with double underscores.     
   - &shape_id
     definition: Identifies a shape
     definition_source: "https://gtfs.org/schedule/reference/#shapestxt"
@@ -133,6 +135,7 @@ tables:
     route_id: *route_id
     direction_id: *direction_id
     stop_pair: *stop_pair
+    stop_pair_name: *stop_pair_name
     p20_mph: 
       definition: |- 
         The 20th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
