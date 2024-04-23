@@ -74,11 +74,11 @@ def add_categories(df:pd.DataFrame) -> pd.DataFrame:
     
     return df
 
-def load_schedule_vp_metrics(name:str)->pd.DataFrame:
+def load_schedule_vp_metrics(organization_name:str)->pd.DataFrame:
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
     df = (pd.read_parquet(schd_vp_url, 
-          filters=[[("name", "==", name),
+          filters=[[("organization_name", "==", organization_name),
          ("sched_rt_category", "==", "schedule_and_vp")]])
          )
     
@@ -104,7 +104,7 @@ def load_schedule_vp_metrics(name:str)->pd.DataFrame:
 
 def route_stats(df: pd.DataFrame) -> pd.DataFrame:
     most_recent_date = df.service_date.max()
-    route_merge_cols = ["Route", "Direction"]
+    route_merge_cols = ["route_combined_name", "direction_id"]
 
     all_day_stats = df[
         (df.service_date == most_recent_date) & (df.time_period == "all_day")
@@ -215,6 +215,7 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
 Operator Level
 """
 def trips_by_gtfs(df):
+    df = df.loc[df.time_period == "all_day"].reset_index(drop = True)
     by_date_category = (
     pd.crosstab(
         df.service_date,
@@ -301,8 +302,8 @@ def grouped_bar_chart(
     ]
 
     if len(df) == 0:
-        # text_chart = create_data_unavailable_chart()
-        return print("No chart available.")
+        text_chart = create_data_unavailable_chart()
+        return text_chart
     else:
         df = clean_data_charts(df,y_col)
         chart = (
@@ -413,8 +414,8 @@ def base_facet_circle(
     ]
 
     if len(df) == 0:
-        #text_chart = create_data_unavailable_chart()
-        return print("No chart available.")
+        text_chart = create_data_unavailable_chart()
+        return text_chart
     else:
         if "pct" in y_col:
             max_y = 100
@@ -484,8 +485,8 @@ def base_facet_chart(
     ]
 
     if len(df) == 0:
-        #text_chart = create_data_unavailable_chart()
-        return print("No chart available.")
+        text_chart = create_data_unavailable_chart()
+        return text_chart
     else:
         if "pct" in y_col:
             max_y = 100
@@ -755,7 +756,7 @@ def filtered_route(
         .transform_filter(route_selector)
     )
     
-    """ 
+    
     speed = (
         base_facet_line(
             df,
@@ -840,14 +841,14 @@ def filtered_route(
         text_dir0,
         text_dir1,
     ]
-    """
+    """ 
     chart_list = [
         avg_scheduled_min,
         timeliness_trips_dir_0,
         timeliness_trips_dir_1,
         frequency
     ]
-    
+    """
     chart = alt.vconcat(*chart_list).properties(
         resolve=alt.Resolve(
             scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))

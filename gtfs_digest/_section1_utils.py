@@ -26,9 +26,10 @@ with open("readable.yml") as f:
 def organization_name_crosswalk(organization_name: str) -> str:
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     og = pd.read_parquet(
-        schd_vp_url, filters=[[("organization_name", "==", organization_name)]]
+        schd_vp_url, filters=[[("organization_name", "==", organization_name)]],
     )
-
+    
+    og = og.sort_values(by = ['service_date'], ascending = False)
     name = og.name.values[0]
     return name
 
@@ -133,7 +134,7 @@ def counties_served(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     predicate="intersects",
 ).drop(columns="index_right")
     
-    counties_served = counties_served[["county_name"]].drop_duplicates()
+    counties_served = counties_served[["county_name"]].drop_duplicates().reset_index(drop = True)
     counties_served['county_name'] = "-" + counties_served['county_name']
     display(
         counties_served.style.hide(axis="index")
