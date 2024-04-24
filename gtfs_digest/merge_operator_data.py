@@ -16,7 +16,7 @@ sort_cols = ["schedule_gtfs_dataset_key", "service_date"]
 def concatenate_operator_stats(
     date_list: list
 ) -> pd.DataFrame:
-    FILE = GTFS_DATA_DICT.digest_tables.operator_scheduled_stats
+    FILE = GTFS_DATA_DICT.schedule_tables.operator_scheduled_stats
     
     df = time_series_utils.concatenate_datasets_across_dates(
         SCHED_GCS,
@@ -31,7 +31,7 @@ def concatenate_operator_stats(
 def concatenate_operator_routes( 
     date_list: list
 ) -> gpd.GeoDataFrame:
-    FILE = GTFS_DATA_DICT.operator_routes.operator_routes
+    FILE = GTFS_DATA_DICT.schedule_tables.operator_routes
 
     df = time_series_utils.concatenate_datasets_across_dates(
         SCHED_GCS,
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     
     gdf = concatenate_operator_routes(
         analysis_date_list
-    ).pipe(merge_in_standardized_route_names)
+    ).pipe(merge_in_standardized_route_names, set_typology=False)
 
     utils.geoparquet_gcs_export(
         gdf,
