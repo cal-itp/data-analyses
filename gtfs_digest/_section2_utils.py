@@ -205,6 +205,8 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
 Operator Level
 """
 def trips_by_gtfs(df):
+    df = df.loc[df.time_period=="all_day"]
+    
     by_date_category = (
     pd.crosstab(
         df.service_date,
