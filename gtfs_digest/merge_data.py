@@ -129,6 +129,7 @@ def concatenate_crosswalk_organization(
 
 def merge_in_standardized_route_names(
     df: pd.DataFrame, 
+    set_typology: bool
 ) -> pd.DataFrame:
     
     keep_cols = [
@@ -159,27 +160,30 @@ def merge_in_standardized_route_names(
         on = ["schedule_gtfs_dataset_key", 
               "route_id", "service_date"],
         how = "left",
-    )
+    ).drop_duplicates()
+
+    if set_typology:
+        primary_typology_df = set_primary_typology(df2)
     
-    # primary typology
-    primary_typology_df = set_primary_typology(df2)
+        df2 = pd.merge(
+            df2,
+            primary_typology_df,
+            on = route_time_cols,
+            how = "inner"
+        )
     
-    df3 = pd.merge(
-        df2,
-        primary_typology_df,
-        on = route_time_cols,
-        how = "inner"
-    )
+    # Clean up
     
     # After merging, we can replace route_id with recent_route_id2 
     drop_cols = ["route_desc", "combined_name", "route_id2"] + [ 
-        c for c in df3.columns if "is_" in c and 
+        c for c in df2.columns if "is_" in c and 
         c not in ["is_early", "is_late", "is_ontime"]
     ] 
-    df4 = time_series_utils.parse_route_combined_name(df3).drop(
-        columns = drop_cols)
-
-    return df4
+    
+    df3 = time_series_utils.parse_route_combined_name(df2).drop(
+        columns = drop_cols).drop_duplicates().reset_index(drop=True)
+    
+    return df3
 
 
 def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
@@ -260,7 +264,8 @@ if __name__ == "__main__":
         sched_rt_category = df.sched_rt_category.map(
             gtfs_schedule_wrangling.sched_rt_category_dict)
     ).pipe(
-        merge_in_standardized_route_names
+        merge_in_standardized_route_names,
+        set_typology=True
     ).merge(
         df_crosswalk,
         on = ["schedule_gtfs_dataset_key", "name", "service_date"],
@@ -283,7 +288,8 @@ if __name__ == "__main__":
     segment_speeds = concatenate_segment_speeds_by_route_direction(
         analysis_date_list
     ).pipe(
-        merge_in_standardized_route_names
+        merge_in_standardized_route_names, 
+        set_typology=False
     ).astype({"direction_id": "int64"}) #Int64 doesn't work for gdf
     
     utils.geoparquet_gcs_export(
