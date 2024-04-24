@@ -90,6 +90,10 @@
 				<attrdef>A pair of stops. Identifies the current stop_id and the subsequent stop_id. The stop pair value is created internally by concatenating two stop ids with double underscores.</attrdef>
 			</attr>
 			<attr>
+				<attrlabl>stop_pair_name</attrlabl>
+				<attrdef>A pair of stops. Identifies the current stop_name and the subsequent stop_name. The stop pair name value is created internally by concatenating two stop name with double underscores.</attrdef>
+			</attr>
+			<attr>
 				<attrlabl>p20_mph</attrlabl>
 				<attrdef>The 20th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.</attrdef>
 			</attr>
