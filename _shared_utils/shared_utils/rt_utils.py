@@ -601,10 +601,10 @@ def arrowize_segment(line_geometry, buffer_distance: int = 20):
         end = shapely.ops.substring(end_segment, end_segment.length, end_segment.length)  # correct
         r_shift = end_segment.parallel_offset(shift_distance, "right")
         r_pt = shapely.ops.substring(r_shift, 0, 0)
-        r_pt2 = shapely.ops.substring(r_shift, r_shift.length - arrow_distance, r_shift.length - arrow_distance)
+        r_pt2 = shapely.ops.substring(r_shift, r_shift.length, r_shift.length)
         l_shift = end_segment.parallel_offset(shift_distance, "left")
         l_pt = shapely.ops.substring(l_shift, 0, 0)
-        l_pt2 = shapely.ops.substring(l_shift, arrow_distance, arrow_distance)
+        l_pt2 = shapely.ops.substring(l_shift, l_shift.length, l_shift.length)
         t1 = shapely.geometry.Polygon((l_pt2, end, l_pt))  # triangles to cut top of arrow
         t2 = shapely.geometry.Polygon((r_pt2, end, r_pt))
 
