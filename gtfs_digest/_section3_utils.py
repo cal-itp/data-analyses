@@ -41,37 +41,31 @@ def timeliness_tags(row):
         return "Late by 50%+ of the scheduled time"
     else:
         return "No Info"
-    
-def frequency_tags(row):
-    if row.frequency < 2:
-        return "<1 trip/hour"
-    elif 1 <= row.frequency < 2:
-        return "1 trip/hour"
-    elif 2 <= row.frequency < 3:
-        return "2 trips/hour"
-    elif 3 <= row.frequency:
-        return "3+ trips/hour"
-    else:
-        return "No Info"
-    
-    
+      
 def vp_per_min_tag(row):
-    if row.vp_per_minute < 1:
-        return "<1 ping/minute"
-    elif 1 <= row.vp_per_minute < 2:
-        return "<3 pings/minute"
+    if row.vp_per_minute < 2:
+        return "<2 pings/minute"
     elif 2 <= row.vp_per_minute < 3:
-        return "<3 pings/minute"
+        return "2-2.9 pings/minute"
     elif 3 <= row.vp_per_minute:
         return "3+ pings per minute (target)"
+    else:
+        return "No Info"
+
+def spatial_accuracy(row):
+    if row.pct_in_shape < 50:
+        return "<50% spatial accuracy"
+    elif .51 <= row.pct_in_shape < .76:
+        return "<75% spatial accuracy"
+    elif .76 <= row.pct_in_shape < .99:
+        return "<100% spatial accuracy"
     else:
         return "No Info"
     
 def add_categories(df:pd.DataFrame) -> pd.DataFrame:
     df["rt_sched_journey_ratio_cat"] = df.apply(timeliness_tags, axis=1)
-    df["frequency_cat"] = df.apply(frequency_tags, axis=1)
     df["vp_per_minute_cat"] = df.apply(vp_per_min_tag, axis=1)    
-    
+    df["spatial_accuracy_cat"] = df.apply(spatial_accuracy, axis=1)    
     return df
 
 def load_schedule_vp_metrics(organization_name:str)->pd.DataFrame:
@@ -100,6 +94,9 @@ def load_schedule_vp_metrics(organization_name:str)->pd.DataFrame:
     df["ruler_100_pct"] = 100
     df["ruler_for_vp_per_min"] = 2
     
+    # Add a column that flips frequency to be every X minutes instead
+    # of every hour.
+    df["frequency_in_minutes"] = 60/df.frequency
     return df 
 
 def route_stats(df: pd.DataFrame) -> pd.DataFrame:
@@ -256,20 +253,9 @@ def load_operator_schedule_rt_category(schedule_gtfs_key: list) -> pd.DataFrame:
 Charts
 """
 def create_data_unavailable_chart():
-    data = pd.DataFrame({"text": ["Chart unavailable, not enough data."]})
 
-    # Create a text chart using Altair
-    chart = (
-        alt.Chart(data)
-        .mark_text(
-            align="center",
-            baseline="middle",
-            fontSize=12,
-            text="Chart unavailable due to lack of data",
-        )
-        .properties(width=500, height=100)
-    )
-
+    chart = alt.LayerChart()
+    
     return chart
 
 def clean_data_charts(df:pd.DataFrame, y_col:str)->pd.DataFrame:
@@ -533,7 +519,7 @@ def base_facet_chart(
         return chart
     
 def base_facet_with_ruler_chart(
-    df: pd.DataFrame, y_col: str, ruler_col: str, title: str, subtitle: str
+    df: pd.DataFrame, y_col: str, ruler_col: str, title: str, subtitle: str, 
 ):
     tooltip_cols = [
         "direction_id",
@@ -552,9 +538,9 @@ def base_facet_with_ruler_chart(
         if "pct" in y_col:
             max_y = 100
         elif "per_minute" in y_col:
-            max_y = round(df[y_col].max()) + 2
+            max_y = round(df[y_col].max()) + 1
         else:
-            max_y = round(df[y_col].max(), -1) + 5
+            max_y = round(df[y_col].max(), -1)
         ruler = (
             alt.Chart(df)
             .mark_rule(color="red", strokeDash=[10, 7])
@@ -653,16 +639,16 @@ def frequency_chart(df: pd.DataFrame):
             title="Date",
             axis=alt.Axis(format="%b %Y"),
         ),
-        alt.X("frequency:Q", title=_report_utils.labeling("frequency"), axis=None),
-        alt.Color("frequency:Q", scale=alt.Scale(range=_report_utils.red_green_yellow)).title(
-            _report_utils.labeling("Frequency")
+        alt.X("frequency_in_minutes:Q", title=_report_utils.labeling("frequency_in_minutes"), axis=None),
+        alt.Color("frequency_in_minutes:Q", scale=alt.Scale(range=_report_utils.green_red_yellow)).title(
+            _report_utils.labeling("frequency_in_minutes")
         ),
         alt.Row("time_period:N").title(_report_utils.labeling("time_period")).header(labelAngle=0),
         alt.Column("direction_id:N").title(_report_utils.labeling("direction_id")),
-        tooltip=["yearmonthdate(service_date)", "frequency", "time_period", "direction_id"]
+        tooltip=["yearmonthdate(service_date)", "frequency_in_minutes", "time_period", "direction_id"]
     )
                 )
-        chart = chart.properties(title="Frequency of Trips per Hour")
+        chart = chart.properties(title="Frequency of Trips")
         return chart
 """
 Route-Direction
@@ -703,7 +689,7 @@ def filtered_route(
         all_day, "pct_rt_journey_atleast1_vp", "pct_rt_journey_atleast2_vp"
     )
     sched_journey_vp = pct_vp_journey(
-        all_day, "pct_rt_journey_atleast1_vp", "pct_rt_journey_atleast2_vp"
+        all_day, "pct_sched_journey_atleast1_vp", "pct_sched_journey_atleast2_vp"
     )
 
     # Charts
@@ -798,7 +784,7 @@ def filtered_route(
         base_facet_circle(
             sched_journey_vp,
             "value",
-            "sched_journey_vp",
+            "ruler_100_pct",
             "Percentage of Scheduled Trips with 1+ and 2+ Vehicle Positions",
             "The goal is for almost 100% of trips to have 2 or more Vehicle Positions per minute.",
         )
