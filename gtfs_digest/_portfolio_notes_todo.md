@@ -8,17 +8,29 @@
     * Figure out Makefile situation.
     * Yaml file generation going wrong. 
 * Charts 
-    * Section 1 
-        * Switch graphs in the "Operator Overview" section to the same color scheme as "Route Direction"
     * Section 3
-        * Still unable to generate a graph that says "chart unavailable" when concatting all the routes together for an operator, it seems work 
-        * Figure out how to `initialize` the first route in the route dropdown menu. The <a href = "https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/_rt_scheduled_utils.py#L396-L402">solution</a> I used last year no longer works. 
          * Vehicle Positions per Minute, % of RealTime Trips, % of Scheduled Trips, and Spatial Accuracy charts, figure out if there's a way to color the background so the bottom  red, middle is yellow, and the top is green to signify the different "zones/grades".
         * <b> Note 4/16 </b> Having a hard time getting this to work. Facet doesn't allow for layering and it seems like the background impacts the colors of the main chart, making everything hard to view.
         * Create an Altair chart with just a title/subtitle to divide out metrics about the quality of the rider's experience on a route vs the quality of the data collected about the route.
-* Check YAML script
+    * <s> Check YAML script
     * Make sure there aren't any operators that have stuff in `sched_vp` but not in `operator_profile`
-    
+    * 4/24: Done, using `07_crosswalk.ipynb`</s>
+
+### 4/25/2024 
+* Goals
+    * Finish copy on readable.yml
+    * Convert all of the charts to read from the readable.yml. 
+        * For charts in section 1, add subtitles and title.
+    * Change section3utils references back to section2.
+    * Remove the mapping for the `Total Service Hours` with the weekday column that is in the dataset. 
+    * `Vehicle Postions per Minute`: set anything above 2 as green. Right now, the color scale maps to lowest and highest value. Some routes that record 3 vps per minute now have bars that red when only 2 vps were recorded, even though 2 is good.
+        * Use categories I created so the legend is N instead of Q.
+    * Reorder charts thematically. Add a little chart in between that explains the divide.
+        * The following charts are about the quality of the  trip.
+        * The following charts about the quality of the data the trip produces.
+   * Double check that all the column names when injecting into charts/display are correct. I caught a mistake: I plugged in RT trips when I wanted to display Scheduled trips in section 3.
+   * Double check section3.add_categories() is accurate. 
+       * Switch VP in Shape to use categories instead.
 ### 4/24/2024 
 #### Questions for Tiffany
 * Operator Overview (section 1)
@@ -28,14 +40,48 @@
     * For the `Total Service Hours` month, I mapped 1 to be Monday, 2 to be Tuesday, etc. Double check and make sure it's correct.
     * Confirm about total daily trips
         * This is now only displaying "all_day" columns but some still seem very high?
-* Game Plan for Section 2? 
 * Status on route classification?
 * Status on road classification?
 * Bunching metric game plan? 
 * Incorporate agency classification into this portfolio? 
-* 
+
+#### Comments from Tiffany
+##### Done
+* formatting for numbers, include the comma (like 1,000 instead of 1000)...like {,} (https://pbpython.com/styling-pandas.html)
+    * Done, rounded up the individual numbers since I'm not sure if you can grab values off of a styled dataframe.
+* First sentence: This section presents an overview of statistics for Los Angeles County Metropolitan Transportation Authority, using data from the most * recent date of 3/2024 ...replace the 3/2024 to display March 2024 as a more readable format
+    * Done, now displays month in string
+* add a map displaying all the routes, i think a gdf.explore() would work -- although let me know if this is what's breaking the map
+* vp per minute chart probably shouldn't run up to 5. it really only hits 3 as a max...so either 3.5 or 4 for y-axis
+    * 4/24: added it back in.
+* Total Scheduled Service Hours ....not blue for time-of-day. go with categorical scale? also set the colorscale manually because no color should be repeated
+    * I think I addressed this? Confirm with Tiffany.
+    
+##### WIP
+* Fill out your readable.yml for better displaying column names and captions -- you're already working on this
+
+##### Having Issues
+* yes, leave out the chart unavailable. i've tried this: when you're concatenating altair charts but you're missing one, you'd basically do like chart2= alt.LayerChart() so that when you do
+ chart_list = [chart1, chart2, chart3]
+ chart = alt.vconcat(*chart_list)
+you're not missing any chart, but it's just an empty nothing, but there's no title, no df being read in</s>
+    * Still doesn't work once I concat the charts, I think the route dropdown is impacting this? 
+* have you tried this: https://stackoverflow.com/questions/70937066/make-dropdown-selection-responsive-for-y-axis-altair-python
+    * Having trouble getting it to work with our charts but it works in the Stack Overflow example.
+    `dropdown = alt.binding_select(
+    options=['Miles_per_Gallon', 'Displacement', 'Weight_in_lbs', 'Acceleration'],
+    name='X-axis column '
+)
+xcol_param = alt.param(
+    value='Miles_per_Gallon',
+    bind=dropdown
+)`
+#### Goals for today 
+* <s>Update frequency</s>
+* Incorporate comments from Tiffany.
+
 ### 4/23/2024
-* Check the # of daily trips again in section 3. Even after dropping duplicates, it still seems crazy high.
+* <s>Check the # of daily trips again in section 3. Even after dropping duplicates, it still seems crazy high.</s>
     * Solution: filter on `time_period == all_day`.
 * <s>"Operator Overview":
     * Add a sentence about the Total Scheduled Service Hours and what it means.</s>
@@ -44,15 +90,14 @@
     * Observations of wonky things.
     * Organization - City of Eureka, Route - AMTRS Red Route
         * Frequency of Trips Per Hour Chart: some of the charts look funky.
-        
-    * Section 3
-        * Still says "Scroll down to filter for a specific route" update it to something else since the dropdown menu is now on the right.
+        * Section 3
+        * <s>Still says "Scroll down to filter for a specific route" update it to something else since the dropdown menu is now on the right.</s>
         * `Frequency of Trips per Hour` is kidn of confusing, when it's a low number like 0.04. What does that mean? Should it be X every X hours instead? 
         * `Average Speed` charts' interactive legend doesn't work. I want people to be able to view one time period at a time because sometimes the lines overlap too closely to see anything.
         * `Vehicle Postions per Minute`: set anything above 2 as green. Right now, the color scale maps to lowest and highest value. Some routes that record 3 vps per minute now have bars that red when only 2 vps were recorded, even though 2 is good.
             * Ex: Mendocino Transity Authority 20 Willits/Ukiah 
             * Same thing with `Spatial Accuracy` Chart: anything above 95 should be green...
-    * Bring make the `explore` map maybe once all the other sections are done so we can visualize the reach of the transit agency? 
+    * <s>Bring make the `explore` map maybe once all the other sections are done so we can visualize the reach of the transit agency?</s>
 * Notes from 1:1
     * Who is the target audience?
         * Local agencies 
@@ -73,7 +118,6 @@
             * Use the readme.md as a "How to Understand" Guide? Glossary?
     * Bunching: mostly relevant to agencies with lots of riders/frequent routes. 
         * Do we run this metric for all agencies or only some? This metric wouldn't be meaningful to some agencies/routes...
-    * Route duration versus driving could be interesting too. 
     
 ### 4/22/2024
 * I updated the yaml because last week, I discovered there are multiple organization name-name combos and duplicates. This work is in `07_crosswalk.ipynb`. 
@@ -163,3 +207,4 @@ To-Do
 ### Parameterize notebooks
 * cd ../ && pip install -r portfolio/requirements.txt
 * python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
+* cd rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env

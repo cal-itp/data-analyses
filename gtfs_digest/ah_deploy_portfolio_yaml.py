@@ -23,16 +23,24 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     
     schd_vp_df = (pd.read_parquet(schd_vp_url, 
                    filters=[[("sched_rt_category", "==", "schedule_and_vp")]],
-                   columns = ["organization_name", "caltrans_district",
-                                  "name", "schedule_gtfs_dataset_key"]
-    )
+                   columns = [ "schedule_gtfs_dataset_key",
+                                "caltrans_district",
+                                "organization_name",
+                                "name",
+                                "sched_rt_category",
+                                "service_date",]
+                                 )
                  )
     
     # Drop duplicated rows by Caltrans district and organization name.
+    # Keep only the most recent row.
     schd_vp_df = (schd_vp_df
                   .dropna(subset="caltrans_district")
-                  .sort_values(by=["caltrans_district", "organization_name"])
+                  .sort_values(by=["caltrans_district", "organization_name", "service_date"],
+        ascending=[False, False, False])
+                  .drop(columns=["service_date"])
                   .drop_duplicates()
+                  .reset_index(drop = True)
                  )
     
     # Load operator profiles

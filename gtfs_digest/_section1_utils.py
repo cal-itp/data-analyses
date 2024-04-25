@@ -214,8 +214,9 @@ def single_bar_chart_dropdown(
             xOffset=f"{offset_col}:N",
             color=alt.Color(
                 f"{offset_col}:N",
+                title=_report_utils.labeling(offset_col),
                 scale=alt.Scale(
-                    range=cp.CALITP_SEQUENTIAL_COLORS,
+                    range=_report_utils.service_hour_scale,
                 ),
             ),
             tooltip=df.columns.tolist(),
@@ -235,10 +236,13 @@ def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str):
             y=alt.Y(y_col, title=_report_utils.labeling(y_col)),
             color=alt.Color(
                y_col,
+                title=_report_utils.labeling(y_col),
                 scale=alt.Scale(
-                    range=cp.CALITP_SEQUENTIAL_COLORS,
-                ),
-        ))
+                    range=_report_utils.section1,
+                )
+                legend = None,
+        ),
+        tooltip = [x_col, y_col])
         .properties(
             width=500,
             title={
@@ -255,7 +259,9 @@ def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str
         .encode(
             theta=theta_col,
             color=alt.Color(
-                color_col, scale=alt.Scale(range=_report_utils.blue_palette)
+                color_col, 
+                title=_report_utils.labeling(color_col),
+                scale=alt.Scale(range=_report_utils.section1)
             ),
             tooltip=df.columns.tolist(),
         ).properties(
@@ -266,15 +272,4 @@ def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str
             },
         ))
     
-
     return chart
-
-def display_all_routes(gdf:gpd.GeoDataFrame):
-    display(gdf).explore(
-    "Route Combined Name",
-    tiles="CartoDB positron",
-    width=500,
-    height=300,
-    style_kwds={"weight": 3},
-    legend=False,
-    tooltip=["Route Combined Name", "Route Length Miles"])
