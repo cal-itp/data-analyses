@@ -12,7 +12,7 @@ if __name__ == "__main__":
     
     for analysis_date in analysis_date_list:
         
-        INPUT_FILE = GTFS_DATA_DICT.speed_tables.usable_vp
+        INPUT_FILE = GTFS_DATA_DICT.speeds_tables.usable_vp
         
         helpers.if_exists_then_delete(
             f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage"

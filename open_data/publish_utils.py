@@ -32,7 +32,8 @@ RENAME_SPEED = {
     "avg_rt_tri": "avg_rt_trip_min",
     "caltrans_d": "district_name",
     "organization_source_record_id": "org_id",
-    "organization_name": "agency"
+    "organization_name": "agency",
+    "stop_pair_": "stop_pair_name"
 }
 
 def standardize_column_names(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
