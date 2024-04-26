@@ -22,10 +22,9 @@ from shared_utils import catalog_utils, rt_dates, rt_utils
 # Data Dictionary
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 import yaml
-
-# Readable Dictionary
 with open("readable.yml") as f:
     readable_dict = yaml.safe_load(f)
+    
 """
 Schedule_vp_metrics
 Functions
@@ -57,10 +56,12 @@ def vp_per_min_tag(row):
 def spatial_accuracy(row):
     if row.pct_in_shape < 50:
         return "<50% spatial accuracy"
-    elif .51 <= row.pct_in_shape < .76:
+    elif 51 <= row.pct_in_shape < 76:
         return "<75% spatial accuracy"
-    elif .76 <= row.pct_in_shape < .99:
-        return "<100% spatial accuracy"
+    elif 76 <= row.pct_in_shape < 99:
+        return "< 100% spatial accuracy"
+    elif row.pct_in_shape == 100:
+        return "100% spatial accuracy"
     else:
         return "No Info"
     
@@ -80,9 +81,6 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     
     # Delete duplicates
     df = df.drop_duplicates().reset_index(drop = True)
-    
-    # Categorize
-    df = add_categories(df)
     
     # Round float columns
     float_columns = df.select_dtypes(include=['float'])
@@ -164,6 +162,7 @@ def timeliness_trips(df: pd.DataFrame):
         "# Trips with VP",
     ]
     df = df.loc[df["Period"] != "All Day"]
+    df = df.loc[df["Period"] != "all_day"]
     df2 = df[to_keep]
 
     melted_df = df2.melt(
@@ -256,6 +255,22 @@ def load_operator_schedule_rt_category(schedule_gtfs_key: list) -> pd.DataFrame:
 """
 Charts
 """
+def divider_chart(df: pd.DataFrame, text):
+    df = df.head(1)
+    # Create a text chart using Altair
+    chart = (
+        alt.Chart(df)
+        .mark_text(
+            align="center",
+            baseline="middle",
+            fontSize=12,
+            text=text,
+        )
+        #.properties(width=500, height=100)
+    )
+
+    return chart
+
 def create_data_unavailable_chart():
 
     chart = alt.LayerChart()
@@ -633,7 +648,8 @@ def frequency_chart(df: pd.DataFrame):
             + " minutes"
         )
         chart = (
-            alt.Chart(df, width=180, height=alt.Step(10))
+            alt.Chart(df)
+            .properties(width=180, height=alt.Step(10))
             .mark_bar()
             .encode(
                 alt.Y(
@@ -688,7 +704,8 @@ def filtered_route_test(
         bind=route_dropdown,
     )
 
-    # Filter for only rows categorized as found in schedule and vp and all_day
+    # Filter for only all_day. Some charts, we don't need to
+    # differentiate btwn peak and offpeak.
     all_day = df.loc[df["Period"] == "All Day"].reset_index(drop=True)
 
     # Create route stats table for the text tables
@@ -717,6 +734,7 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    #display(avg_scheduled_min_graph)
     
     timeliness_trips_dir_0 = (
         (
@@ -732,7 +750,7 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    
+    #display(timeliness_trips_dir_0)
     timeliness_trips_dir_1 = (
         (
             base_facet_chart(
@@ -747,11 +765,11 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-
+    #display(timeliness_trips_dir_1)
     frequency_graph = (
         frequency_chart(df).add_params(route_selector).transform_filter(route_selector)
     )
-    
+    #display(frequency_graph)
     speed_graph = (
         base_facet_line(
             df,
@@ -762,7 +780,7 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-     
+    # display(speed_graph) 
     vp_per_min_graph = (
             (
                 base_facet_with_ruler_chart(
@@ -776,7 +794,7 @@ def filtered_route_test(
             .add_params(route_selector)
             .transform_filter(route_selector)
         )
-
+    #display(vp_per_min_graph) 
     rt_vp_per_min_graph = (
         base_facet_circle(
             rt_journey_vp,
@@ -789,6 +807,7 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    #display(rt_vp_per_min_graph) 
     sched_vp_per_min = (
         base_facet_circle(
             sched_journey_vp,
@@ -801,6 +820,7 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    #display(sched_vp_per_min) 
     spatial_accuracy = (
         base_facet_with_ruler_chart(
             all_day,
@@ -812,18 +832,20 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    
+    #display(spatial_accuracy) 
     text_dir0 = (
         (create_text_table(route_stats_df, 0))
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    #display(text_dir0) 
     text_dir1 = (
         create_text_table(route_stats_df, 1)
         .add_params(route_selector)
         .transform_filter(route_selector))
-    
-    
+    #display(text_dir1) 
+    rider = divider_chart(df, "The charts below describe the quality of riding this route.")
+    data_quality = divider_chart(df, "The charts below describe the quality of data collecting from this route.")
     chart_list = [
         avg_scheduled_min_graph,
         timeliness_trips_dir_0,
@@ -839,7 +861,6 @@ def filtered_route_test(
      
     ]
     
-    
     """ chart = alt.vconcat(*chart_list).properties(
         resolve=alt.Resolve(
             scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))
@@ -847,4 +868,5 @@ def filtered_route_test(
     )
     """
     chart = alt.vconcat(*chart_list)
+    
     return chart

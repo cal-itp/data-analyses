@@ -1,5 +1,7 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
-
+* cd ../ && pip install -r portfolio/requirements.txt
+* python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
+* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
 ### Running to-do list
 * Portfolio:
     * Use the `readable.yml` 
@@ -8,30 +10,61 @@
     * Figure out Makefile situation.
     * Yaml file generation going wrong. 
 * Charts 
-    * Section 3
+    * Section 2
          * Vehicle Positions per Minute, % of RealTime Trips, % of Scheduled Trips, and Spatial Accuracy charts, figure out if there's a way to color the background so the bottom  red, middle is yellow, and the top is green to signify the different "zones/grades".
         * <b> Note 4/16 </b> Having a hard time getting this to work. Facet doesn't allow for layering and it seems like the background impacts the colors of the main chart, making everything hard to view.
         * Create an Altair chart with just a title/subtitle to divide out metrics about the quality of the rider's experience on a route vs the quality of the data collected about the route.
     * <s> Check YAML script
     * Make sure there aren't any operators that have stuff in `sched_vp` but not in `operator_profile`
     * 4/24: Done, using `07_crosswalk.ipynb`</s>
-
+* Eric: the maps from .explore() look pretty overwhelming when an operator has many routes. 
+    * Can we modify the reports site maps to be used here too? 
+### 4/29/2024
+#### To-Do
+* Routes Pie Chart
+    * Confirm again that a route can fall into various categories.
+    * D3 UCD only runs 19 unique routes but the piechart has like 30+ routes.
+    * Same with D4 Central Contra Costa Transit Authority
+* Section 1 Total Service Hours
+    * Dates should be sorted in descending order, so the most recent date is at the top
+    * Make a new daily chart, continue automating finding the number of each type of day in a year. 
+    * Refine total hours across the month chart. 
+* Section 2
+    * Need to update `spatial_accuracy` subtitle.
+    * Continue troubleshooting the javascript message that has now appeared.
+    
 ### 4/26/2024
- * <s>Remove the mapping for the `Total Service Hours` with the weekday column that is in the dataset. 
-     * Update chart names to Eric's suggestions.</s>
-### 4/25/2024 
+#### To-do Today
+* <s>Remove the mapping for the `Total Service Hours` with the weekday column that is in the dataset. </s>
+     * Create a new chart  chart names to Eric's suggestions.
+* <s>Reorder charts thematically. Add a little chart in between that explains the divide.</s>
+* <s>Double check that all the column names when injecting into charts/display are correct. I caught a mistake: I plugged in RT trips when I wanted to display Scheduled trips in section 3.</s>
+
+#### Notes 
+* Tried making a map that is controlled with an `ipywidget` dropdown menu so users can view one map at a time. This only works in the notebook and not when uploaded onto GH pages.
+    * Go back to using .explore()
+    * I tried using altair yesterday but altair can only plot geomtype of points, not lines. 
+* `Total Service Hours` doesn't match reports...still trying to debug.
+* Section2
+    * After updating the graphs for section 2, I now get this message `Javascript Error: Unrecognized signal name: "concat_1_width"
+This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`. 
+    * I noticed I have to run the same cell twice in order to get the charts to generate `for _ in range(2):` but this is not ideal because the error is not resolved and is still displayed. 
+    * Some operators aren't even running like Emeryville:
+        `Javascript Error: Unrecognized signal name: "concat_1_width"
+This usually means there's a typo in your chart specification. See the javascript console for the full traceback.
+Javascript Error: Unrecognized signal name: "concat_3_width"
+This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`
+    * All the charts generate fine on their own, error is coming from concating them? 
+    
 * Goals
-    * <s>Finish copy on readable.yml
-    * Convert all of the charts to read from the readable.yml. 
-        * For charts in section 1, add subtitles and title.
-    * Change section3utils references back to section2.</s>
+    * <s>Finish copy on readable.yml</s>
+    *<s> Convert all of the charts to read from the readable.yml. </s>
+        <s>* For charts in section 1, add subtitles and title.</s>
+    * <s>Change section3utils references back to section2.</s>
    
-    * Reorder charts thematically. Add a little chart in between that explains the divide.
-        * The following charts are about the quality of the  trip.
-        * The following charts about the quality of the data the trip produces.
-   * Double check that all the column names when injecting into charts/display are correct. I caught a mistake: I plugged in RT trips when I wanted to display Scheduled trips in section 3.
-   * Double check section3.add_categories() is accurate. 
-       * Switch VP in Shape to use categories instead.
+  
+   * <s>Double check section3.add_categories() is accurate. 
+       * Decided to take it out since I'm not using this in any of the charts.</s>
 ### 4/24/2024 
 #### Questions for Tiffany
 * Operator Overview (section 1)
@@ -57,9 +90,7 @@
     * 4/24: added it back in.
 * Total Scheduled Service Hours ....not blue for time-of-day. go with categorical scale? also set the colorscale manually because no color should be repeated
     * I think I addressed this? Confirm with Tiffany.
-    
-##### WIP
-* Fill out your readable.yml for better displaying column names and captions -- you're already working on this
+* Fill out your readable.yml for better displaying column names and captions -- you're already working on this    
 
 ##### Having Issues
 * yes, leave out the chart unavailable. i've tried this: when you're concatenating altair charts but you're missing one, you'd basically do like chart2= alt.LayerChart() so that when you do
@@ -205,7 +236,3 @@ To-Do
         * Example route: 652 Skyline High - Elmhurst Bay Area 511 AC Transit Schedule</s>
             * <b> Note 4/17 </b>: Fixed this. The `_section2_utils.route_stats()` function needs outer merges. I also edited the `create_text_table()` function to drop duplicate rows. Without dropping duplicate rows, the text table overlays all the rows and you can't read the text. 
 
-### Parameterize notebooks
-* cd ../ && pip install -r portfolio/requirements.txt
-* python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
-* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
