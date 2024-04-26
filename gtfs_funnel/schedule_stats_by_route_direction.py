@@ -140,7 +140,7 @@ if __name__ == "__main__":
             f"{SCHED_GCS}{ROUTE_TYPOLOGIES}_{date}.parquet",
             columns = route_cols + [
                 "is_coverage", "is_downtown_local", 
-                "is_local", "is_rapid"]
+                "is_local", "is_rapid", "is_express", "is_rail"]
         )
         
         route_dir_metrics2 = pd.merge(
@@ -157,4 +157,4 @@ if __name__ == "__main__":
         )
         
         end = datetime.datetime.now()
-        print(f"schedule stats for {analysis_date}: {end - start}")
+        print(f"schedule stats for {date}: {end - start}")
