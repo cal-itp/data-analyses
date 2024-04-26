@@ -3,9 +3,10 @@ import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
 
-# Charts
+# Charts & Maps
 from calitp_data_analysis import calitp_color_palette as cp
 import altair as alt
+import ipywidgets as widgets
 
 # Display
 from IPython.display import HTML, Markdown, display
@@ -13,20 +14,38 @@ from IPython.display import HTML, Markdown, display
 # Other
 from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
 from shared_utils import catalog_utils, rt_dates, rt_utils
+import _report_utils 
+
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
-
-import _report_utils
-
+import yaml
+# Readable Dictionary
+with open("readable.yml") as f:
+    readable_dict = yaml.safe_load(f)
 """
-Datasets
+Data
 """
+def organization_name_crosswalk(organization_name: str) -> str:
+    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
+    og = pd.read_parquet(
+        schd_vp_url, filters=[[("organization_name", "==", organization_name)]],
+    )
+    
+    og = og.sort_values(by = ['service_date'], ascending = False)
+    name = og.name.values[0]
+    return name
+
 def load_operator_profiles(organization_name:str)->pd.DataFrame:
+
     op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
+
     op_profiles_df = pd.read_parquet(
     op_profiles_url,
     filters=[[("organization_name", "==", organization_name)]])
     
     op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date'], ascending = False).head(1)
+    
+    # Rename dataframe
+    op_profiles_df1.columns = op_profiles_df1.columns.map(_report_utils.replace_column_names)
     return op_profiles_df1 
 
 def load_operator_map(name:str)->gpd.GeoDataFrame:
@@ -35,50 +54,24 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     op_routes_url,
     filters=[[("name", "==", name)]])
     
-    op_routes_gdf = op_routes_gdf.sort_values(by = ['service_date'], ascending = False)
+    # Grab max date
+    max_date = op_routes_gdf.service_date.max()
+    
+    # Filter for only the most recent rows
+    op_routes_gdf = op_routes_gdf.loc[op_routes_gdf.service_date == max_date]
+    op_routes_gdf = op_routes_gdf.drop(columns = ['service_date'])
+    
+    # Rename dataframe
+    op_routes_gdf.columns = op_routes_gdf.columns.map(_report_utils.replace_column_names)
     return op_routes_gdf
 
-def organization_name_crosswalk(organization_name: str) -> str:
-    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
-    og = pd.read_parquet(
-        schd_vp_url, filters=[[("organization_name", "==", organization_name)]]
-    )
-
-    name = og.name.values[0]
-    return name
-
-def tag_day(df: pd.DataFrame, col_to_change:str) -> pd.DataFrame:
-    # Function to determine if a date is a weekend day or a weekday
-    def which_day(date):
-        if date == 1:
-            return "Monday"
-        elif date == 2:
-            return "Tuesday"
-        elif date == 3:
-            return "Wednesday"
-        elif date == 4:
-            return "Thursday"
-        elif date == 5:
-            return "Friday"
-        elif date == 6:
-            return "Saturday"
-        else:
-            return "Sunday"
-
-    # Apply the function to each value in the "service_date" column
-    df[col_to_change] = df[col_to_change].apply(which_day)
-
-    return df
-
-def load_scheduled_service(year:str, name:str)->pd.DataFrame:
-    url = f"{GTFS_DATA_DICT.schedule_tables.gcs_dir}{GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service}_{year}.parquet"
+def load_scheduled_service(name:str)->pd.DataFrame:
+    url = f"{GTFS_DATA_DICT.schedule_tables.gcs_dir}{GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service}.parquet"
     df = pd.read_parquet(url,
     filters=[[("name", "==", name)]],)
     
     df["month"] = df["month"].astype(str).str.zfill(2)
     df["full_date"] = (df.year.astype(str)+ "-" + df.month.astype(str))
-    df = tag_day(df, "day_type")
-    
     return df
 
 """
@@ -90,16 +83,13 @@ def route_typology(df: pd.DataFrame)->pd.DataFrame:
     route types in a pie chart.
     """
     route_type_cols = [
-        "operator_n_routes",
-        "n_downtown_local_routes",
-        "n_rapid_routes",
-        "n_local_routes",
+       '# Downtown Local Route Types', '# Local Route Types',
+       '# Rapid Route Types'
     ]
     df = df[route_type_cols]
     df2 = df.T.reset_index()
     df2.columns = ['route_type','total_routes']
-    df3 = df2.loc[df2.route_type != "operator_n_routes"]
-    return df3
+    return df2
 
 def get_counties():
     ca_gdf = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
@@ -119,36 +109,43 @@ def counties_served(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     predicate="intersects",
 ).drop(columns="index_right")
     
-    counties_served = counties_served[["county_name"]].drop_duplicates()
-    display(counties_served.style.hide().hide(axis="columns"))
+    counties_served = counties_served[["county_name"]].drop_duplicates().reset_index(drop = True)
+    counties_served['county_name'] = "-" + counties_served['county_name']
+    display(
+        counties_served.style.hide(axis="index")
+        .hide(axis="columns")
+        .set_properties(**{"background-color": "white"})
+        .set_table_styles([{"selector": "td, th", "props": [("text-align", "center")]}])
+    )
 
 def summarize_monthly(name:str)->pd.DataFrame:
-    df_2023 = load_scheduled_service("2023", name)
-    df_2024 = load_scheduled_service("2024", name)
+    df = load_scheduled_service(name)
     
-    df = pd.concat([df_2023, df_2024])
     df2 = (
     df.groupby(
-        ['name', 'full_date','time_of_day', 'day_type']
+        ['name', 'full_date','time_of_day', 'day_name']
     )
     .agg(
         {
-            "ttl_service_hours": "max",
+            "ttl_service_hours": "sum",
         }
     )
     .reset_index()
     )
+    
+    df2.columns = df2.columns.map(_report_utils.replace_column_names)
     return df2
 
 def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     df = (
-    gdf[["route_combined_name", "route_length_miles"]]
-    .sort_values(by=["route_length_miles"])
+    gdf[["Route", "Service Miles"]]
+    .sort_values(by=["Service Miles"])
     .iloc[[0, -1]])
     
     return df
+
 """
-Charts
+Charts & Maps
 """
 def single_bar_chart_dropdown(
     df: pd.DataFrame,
@@ -157,6 +154,7 @@ def single_bar_chart_dropdown(
     offset_col: str,
     title: str,
     dropdown_col: str,
+    subtitle:str
 ):
     dropdown_list = sorted(df[dropdown_col].unique().tolist())
 
@@ -164,12 +162,6 @@ def single_bar_chart_dropdown(
 
     selector = alt.selection_single(
         name=_report_utils.labeling(dropdown_col), fields=[dropdown_col], bind=dropdown
-    )
-
-    ruler = (
-        alt.Chart(df)
-        .mark_rule(color="red", strokeDash=[10, 7])
-        .encode(y=f"mean({y_col}):Q")
     )
 
     chart = (
@@ -195,19 +187,25 @@ def single_bar_chart_dropdown(
             xOffset=f"{offset_col}:N",
             color=alt.Color(
                 f"{offset_col}:N",
+                title=_report_utils.labeling(offset_col),
                 scale=alt.Scale(
-                    range=cp.CALITP_SEQUENTIAL_COLORS,
+                    range=_report_utils.service_hour_scale,
                 ),
             ),
             tooltip=df.columns.tolist(),
         )
     )
-    chart = (chart + ruler).properties(title=title, width=500, height=300)
+    chart = chart.properties(
+        title = {
+                "text": [title],
+                "subtitle": [subtitle],
+            }, width=500, height=300)
     chart = chart.add_params(selector).transform_filter(selector)
 
     display(chart)
     
-def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str):
+def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str,
+                    title: str, subtitle:str):
     chart = (
         alt.Chart(df)
         .mark_bar()
@@ -216,46 +214,76 @@ def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str):
             y=alt.Y(y_col, title=_report_utils.labeling(y_col)),
             color=alt.Color(
                y_col,
+                legend = None,
+                title=_report_utils.labeling(y_col),
                 scale=alt.Scale(
-                    range=cp.CALITP_SEQUENTIAL_COLORS,
-                ),
-        ))
+                    range=_report_utils.section1,
+                )
+        ),
+        tooltip = [x_col, y_col])
         .properties(
             width=500,
             title={
-                "text": title,
-            },
+                "text": [title],
+                "subtitle": [subtitle],
+            }
         )
     )
     return chart
 
-def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str):
+def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str,
+                   subtitle:str):
     chart = (
         alt.Chart(df)
         .mark_arc()
         .encode(
             theta=theta_col,
             color=alt.Color(
-                color_col, scale=alt.Scale(range=_report_utils.blue_palette)
+                color_col, 
+                title=_report_utils.labeling(color_col),
+                scale=alt.Scale(range=_report_utils.section1)
             ),
             tooltip=df.columns.tolist(),
         ).properties(
             width=250,
             height=300,
             title={
-                "text": title,
-            },
+                "text": [title],
+                "subtitle": [subtitle],
+            }
         ))
     
-
     return chart
 
-def display_all_routes(gdf:gpd.GeoDataFrame):
-    display(gdf.drop(columns=["service_date"]).explore(
-    "route_combined_name",
+"""
+Maps
+"""
+def plot_route(route):
+    filtered_gdf = gdf[gdf["Route"] == route]
+    display(filtered_gdf.explore(column="Route", cmap = "Spectral",
     tiles="CartoDB positron",
     width=500,
     height=300,
     style_kwds={"weight": 3},
     legend=False,
-    tooltip=["route_combined_name", "route_length_miles"]))
+    tooltip=["Route", "Service Miles"]))
+    
+def interactive_map(gdf:gpd.GeoDataFrame):
+    gdf = gdf[~gdf.geometry.is_empty].reset_index(drop = True)
+    gdf = gdf[gdf.geometry.notna()].reset_index(drop = True)
+    def plot_route(route):
+        filtered_gdf = gdf[gdf["Route"] == route]
+        display(filtered_gdf.explore(column="Route", cmap = "Spectral",
+        tiles="CartoDB positron",
+        width=500,
+        height=300,
+        style_kwds={"weight": 3},
+        legend=False,
+        tooltip=["Route", "Service Miles"]))
+    
+    routes = gdf["Route"].unique().tolist()
+    # Create a dropdown widget
+    route_dropdown = widgets.Dropdown(options=routes, description="Route")
+    # Create an interactive plot
+    interactive_plot = widgets.interactive(plot_route, route=route_dropdown)
+    display(widgets.VBox([interactive_plot])) 
