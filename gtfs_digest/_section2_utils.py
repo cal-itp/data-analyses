@@ -711,13 +711,13 @@ def filtered_route_test(
             color_col="Direction",
             y_col="Average Scheduled Service (trip minutes)",
             offset_col="Direction",
-            title="testing",
-            subtitle="testing",
+            title=readable_dict["avg_scheduled_min_graph"]["title"],
+            subtitle=readable_dict["avg_scheduled_min_graph"]["subtitle"],
         )
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    """
+    
     timeliness_trips_dir_0 = (
         (
             base_facet_chart(
@@ -732,6 +732,7 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    
     timeliness_trips_dir_1 = (
         (
             base_facet_chart(
@@ -833,16 +834,17 @@ def filtered_route_test(
         rt_vp_per_min_graph,
         sched_vp_per_min,
         spatial_accuracy,
+        text_dir0,
+        text_dir1
      
     ]
-    """
-    chart_list = [
-        avg_scheduled_min_graph,
-     
-    ]
-    chart = alt.vconcat(*chart_list).properties(
+    
+    
+    """ chart = alt.vconcat(*chart_list).properties(
         resolve=alt.Resolve(
             scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))
         )
     )
+    """
+    chart = alt.vconcat(*chart_list)
     return chart
