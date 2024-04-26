@@ -2,9 +2,11 @@ import calitp_data_analysis.magics
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
-# Charts
+
+# Charts & Maps
 from calitp_data_analysis import calitp_color_palette as cp
 import altair as alt
+import ipywidgets as widgets
 
 # Display
 from IPython.display import HTML, Markdown, display
@@ -13,15 +15,16 @@ from IPython.display import HTML, Markdown, display
 from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
 from shared_utils import catalog_utils, rt_dates, rt_utils
 import _report_utils 
+
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 import yaml
-
-"""
-Data
-"""
 # Readable Dictionary
 with open("readable.yml") as f:
     readable_dict = yaml.safe_load(f)
+"""
+Data
+"""
+
     
 def organization_name_crosswalk(organization_name: str) -> str:
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
@@ -106,14 +109,12 @@ def route_typology(df: pd.DataFrame)->pd.DataFrame:
     route types in a pie chart.
     """
     route_type_cols = [
-         '# downtown local route types',
-       '# local route types', 
-        '# rapid route types'
+       '# Downtown Local Route Types', '# Local Route Types',
+       '# Rapid Route Types'
     ]
     df = df[route_type_cols]
     df2 = df.T.reset_index()
     df2.columns = ['route_type','total_routes']
-    #df3 = df2.loc[df2.route_type != "operator_n_routes"]
     return df2
 
 def get_counties():
@@ -166,8 +167,8 @@ def summarize_monthly(name:str)->pd.DataFrame:
 
 def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     df = (
-    gdf[["Route", "service miles"]]
-    .sort_values(by=["service miles"])
+    gdf[["Route", "Service Miles"]]
+    .sort_values(by=["Service Miles"])
     .iloc[[0, -1]])
     
     return df
@@ -182,6 +183,7 @@ def single_bar_chart_dropdown(
     offset_col: str,
     title: str,
     dropdown_col: str,
+    subtitle:str
 ):
     dropdown_list = sorted(df[dropdown_col].unique().tolist())
 
@@ -222,12 +224,17 @@ def single_bar_chart_dropdown(
             tooltip=df.columns.tolist(),
         )
     )
-    chart = chart.properties(title=title, width=500, height=300)
+    chart = chart.properties(
+        title = {
+                "text": [title],
+                "subtitle": [subtitle],
+            }, width=500, height=300)
     chart = chart.add_params(selector).transform_filter(selector)
 
     display(chart)
     
-def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str):
+def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str,
+                    title: str, subtitle:str):
     chart = (
         alt.Chart(df)
         .mark_bar()
@@ -236,23 +243,25 @@ def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str):
             y=alt.Y(y_col, title=_report_utils.labeling(y_col)),
             color=alt.Color(
                y_col,
+                legend = None,
                 title=_report_utils.labeling(y_col),
                 scale=alt.Scale(
                     range=_report_utils.section1,
                 )
-                legend = None,
         ),
         tooltip = [x_col, y_col])
         .properties(
             width=500,
             title={
-                "text": title,
-            },
+                "text": [title],
+                "subtitle": [subtitle],
+            }
         )
     )
     return chart
 
-def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str):
+def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str,
+                   subtitle:str):
     chart = (
         alt.Chart(df)
         .mark_arc()
@@ -268,8 +277,42 @@ def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str
             width=250,
             height=300,
             title={
-                "text": title,
-            },
+                "text": [title],
+                "subtitle": [subtitle],
+            }
         ))
     
     return chart
+
+"""
+Maps
+"""
+def plot_route(route):
+    filtered_gdf = gdf[gdf["Route"] == route]
+    display(filtered_gdf.explore(column="Route", cmap = "Spectral",
+    tiles="CartoDB positron",
+    width=500,
+    height=300,
+    style_kwds={"weight": 3},
+    legend=False,
+    tooltip=["Route", "Service Miles"]))
+    
+def interactive_map(gdf:gpd.GeoDataFrame):
+    gdf = gdf[~gdf.geometry.is_empty].reset_index(drop = True)
+    gdf = gdf[gdf.geometry.notna()].reset_index(drop = True)
+    def plot_route(route):
+        filtered_gdf = gdf[gdf["Route"] == route]
+        display(filtered_gdf.explore(column="Route", cmap = "Spectral",
+        tiles="CartoDB positron",
+        width=500,
+        height=300,
+        style_kwds={"weight": 3},
+        legend=False,
+        tooltip=["Route", "Service Miles"]))
+    
+    routes = gdf["Route"].unique().tolist()
+    # Create a dropdown widget
+    route_dropdown = widgets.Dropdown(options=routes, description="Route")
+    # Create an interactive plot
+    interactive_plot = widgets.interactive(plot_route, route=route_dropdown)
+    display(widgets.VBox([interactive_plot])) 
