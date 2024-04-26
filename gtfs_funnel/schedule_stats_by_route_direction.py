@@ -2,6 +2,7 @@
 Add some GTFS schedule derived metrics
 by trip (service frequency and stop spacing).
 """
+import datetime
 import geopandas as gpd
 import pandas as pd
 
@@ -119,6 +120,8 @@ if __name__ == "__main__":
     ROUTE_TYPOLOGIES = GTFS_DATA_DICT.schedule_tables.route_typologies
     
     for date in analysis_date_list:
+        start = datetime.datetime.now()
+        
         trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
                 
         trip_metrics.to_parquet(
@@ -133,8 +136,6 @@ if __name__ == "__main__":
         route_dir_metrics = schedule_metrics_by_route_direction(
             trip_metrics, date, route_cols)
         
-        # Right now, this is long, and a route-direction can have 
-        # multiple typologies
         route_typologies = pd.read_parquet(
             f"{SCHED_GCS}{ROUTE_TYPOLOGIES}_{date}.parquet",
             columns = route_cols + [
@@ -154,3 +155,6 @@ if __name__ == "__main__":
             RT_SCHED_GCS,
             f"{ROUTE_DIR_EXPORT}_{date}"
         )
+        
+        end = datetime.datetime.now()
+        print(f"schedule stats for {analysis_date}: {end - start}")
