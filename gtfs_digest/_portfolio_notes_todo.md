@@ -17,17 +17,15 @@
     * 4/24: Done, using `07_crosswalk.ipynb`</s>
 
 ### 4/26/2024
- * Remove the mapping for the `Total Service Hours` with the weekday column that is in the dataset. 
-     * Update chart names to Eric's suggestions.
+ * <s>Remove the mapping for the `Total Service Hours` with the weekday column that is in the dataset. 
+     * Update chart names to Eric's suggestions.</s>
 ### 4/25/2024 
 * Goals
-    * Finish copy on readable.yml
+    * <s>Finish copy on readable.yml
     * Convert all of the charts to read from the readable.yml. 
         * For charts in section 1, add subtitles and title.
-    * Change section3utils references back to section2.
+    * Change section3utils references back to section2.</s>
    
-    * `Vehicle Postions per Minute`: set anything above 2 as green. Right now, the color scale maps to lowest and highest value. Some routes that record 3 vps per minute now have bars that red when only 2 vps were recorded, even though 2 is good.
-        * Use categories I created so the legend is N instead of Q.
     * Reorder charts thematically. Add a little chart in between that explains the divide.
         * The following charts are about the quality of the  trip.
         * The following charts about the quality of the data the trip produces.

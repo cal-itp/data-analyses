@@ -24,8 +24,6 @@ with open("readable.yml") as f:
 """
 Data
 """
-
-    
 def organization_name_crosswalk(organization_name: str) -> str:
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     og = pd.read_parquet(
@@ -67,37 +65,13 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     op_routes_gdf.columns = op_routes_gdf.columns.map(_report_utils.replace_column_names)
     return op_routes_gdf
 
-def tag_day(df: pd.DataFrame, col_to_change:str) -> pd.DataFrame:
-    # Function to determine if a date is a weekend day or a weekday
-    def which_day(date):
-        if date == 1:
-            return "Monday"
-        elif date == 2:
-            return "Tuesday"
-        elif date == 3:
-            return "Wednesday"
-        elif date == 4:
-            return "Thursday"
-        elif date == 5:
-            return "Friday"
-        elif date == 6:
-            return "Saturday"
-        else:
-            return "Sunday"
-
-    # Apply the function to each value in the "service_date" column
-    df[col_to_change] = df[col_to_change].apply(which_day)
-
-    return df
-
-def load_scheduled_service(year:str, name:str)->pd.DataFrame:
-    url = f"{GTFS_DATA_DICT.schedule_tables.gcs_dir}{GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service}_{year}.parquet"
+def load_scheduled_service(name:str)->pd.DataFrame:
+    url = f"{GTFS_DATA_DICT.schedule_tables.gcs_dir}{GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service}.parquet"
     df = pd.read_parquet(url,
     filters=[[("name", "==", name)]],)
     
     df["month"] = df["month"].astype(str).str.zfill(2)
     df["full_date"] = (df.year.astype(str)+ "-" + df.month.astype(str))
-    df = tag_day(df, "day_type")
     return df
 
 """
@@ -145,22 +119,19 @@ def counties_served(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     )
 
 def summarize_monthly(name:str)->pd.DataFrame:
-    df_2023 = load_scheduled_service("2023", name)
-    df_2024 = load_scheduled_service("2024", name)
+    df = load_scheduled_service(name)
     
-    df = pd.concat([df_2023, df_2024])
     df2 = (
     df.groupby(
-        ['name', 'full_date','time_of_day', 'day_type']
+        ['name', 'full_date','time_of_day', 'day_name']
     )
     .agg(
         {
-            "ttl_service_hours": "max",
+            "ttl_service_hours": "sum",
         }
     )
     .reset_index()
     )
-    
     
     df2.columns = df2.columns.map(_report_utils.replace_column_names)
     return df2
