@@ -20,3 +20,11 @@
 2024-03-14 12:16:08.742 | INFO     | __main__:<module>:202 - 2024-03-13: vp_direction script execution time: 0:07:35.556127
 2024-03-14 12:43:58.062 | INFO     | __main__:<module>:153 - 2024-03-13: condense vp for trip 0:04:45.267623
 2024-03-14 12:56:43.421 | INFO     | __main__:<module>:161 - 2024-03-13: prepare vp to use in nearest neighbor: 0:12:45.358549
+2024-04-18 11:04:43.747 | INFO     | __main__:<module>:169 - 2024-04-17: pare down vp: 0:02:22.947760
+2024-04-18 11:08:55.978 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:03:51.080485
+2024-04-18 11:13:14.285 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:04:18.306848
+2024-04-18 11:13:22.726 | INFO     | __main__:<module>:194 - 2024-04-17: export vp direction: 0:08:17.828237
+2024-04-18 11:14:49.190 | INFO     | __main__:<module>:200 - 2024-04-17: export usable vp with direction: 0:01:26.463779
+2024-04-18 11:14:49.191 | INFO     | __main__:<module>:203 - 2024-04-17: vp_direction script execution time: 0:09:44.292016
+2024-04-18 11:34:37.603 | INFO     | __main__:<module>:120 - 2024-04-17: condense vp for trip 0:06:16.809244
+2024-04-18 11:52:47.882 | INFO     | __main__:<module>:128 - 2024-04-17: prepare vp to use in nearest neighbor: 0:18:10.278588

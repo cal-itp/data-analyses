@@ -16,7 +16,7 @@ preprocess:
 	python cleanup.py
 	python vp_condenser.py
 	make route_typologies_data
-	python operator_scheduled_stats.py
+	python operator_scheduled_stats.py 
     
     
 route_typologies_data:

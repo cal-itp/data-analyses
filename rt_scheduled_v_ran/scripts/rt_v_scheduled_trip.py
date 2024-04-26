@@ -160,7 +160,7 @@ def buffer_shapes(
         crs=PROJECT_CRS,
         get_pandas=True,
         **kwargs
-    ).dropna(
+    ).pipe(helpers.remove_shapes_outside_ca).dropna(
         subset="geometry"
     ).query("shape_array_key not in @amtrak_outside_ca")
     
