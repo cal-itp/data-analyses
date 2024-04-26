@@ -19,7 +19,8 @@ def concatenate_routes_across_dates(
     df = pd.concat([
         helpers.import_scheduled_trips(
             analysis_date,
-            columns = ["gtfs_dataset_key", "name", "route_id", 
+            columns = ["gtfs_dataset_key", "name", 
+                       "route_id", 
                        "route_long_name", "route_short_name", "route_desc"],
             get_pandas = True
         ).assign(
@@ -39,36 +40,6 @@ def concatenate_routes_across_dates(
     )
     
     return df
-
-
-def tag_rapid_express_local(route_name_string: str):
-    """
-    Use the combined route_name and see if we can 
-    tag out words that indicate the route is
-    express, rapid, or local.
-    
-    NACTO typologies are based on combination of roads and
-    route characteristics.
-    But we aren't able to find out express routes based on their definition.
-    Also, a lot of rapid routes are missed.
-    """
-    route_name_string = route_name_string.lower()
-    
-    express = 0
-    rapid = 0
-    local = 0
-    
-    if "express" in route_name_string:
-        express = 1
-    if "rapid" in route_name_string:
-        rapid = 1
-    if "local" in route_name_string:
-        local = 1
-    
-    return pd.Series(
-            [express, rapid, local], 
-            index=['is_express', 'is_rapid', 'is_local']
-        )
 
 if __name__ == "__main__":
     
@@ -99,7 +70,4 @@ if __name__ == "__main__":
         route_col = "route_id2"
     )
     
-    typology_tags = df2.recent_combined_name.apply(tag_rapid_express_local)
-    df3 = pd.concat([df2, typology_tags], axis=1)
-    
-    df3.to_parquet(f"{SCHED_GCS}{CLEANED_ROUTE_NAMING}.parquet")
+    df2.to_parquet(f"{SCHED_GCS}{CLEANED_ROUTE_NAMING}.parquet")
