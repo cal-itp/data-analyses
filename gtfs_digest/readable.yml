@@ -92,7 +92,7 @@ longest_shortest_route:
     title: "Longest and Shortest Route"
     subtitle: "In Miles"
 total_scheduled_hours:
-    title: "Daily Scheduled Service Hours by Time of Day"
+    title: "Total Scheduled Service Hours by Time of Day"
     subtitle: "Time of Day: AM Peak:7-9AM, Early AM:4-6AM, Evening:8-11PM, Midday: 10AM-2PM, Owl:12-3AM,PM Peak:3-7PM"
     
 # Section 3
