@@ -16,13 +16,16 @@
     * Make sure there aren't any operators that have stuff in `sched_vp` but not in `operator_profile`
     * 4/24: Done, using `07_crosswalk.ipynb`</s>
 
+### 4/26/2024
+ * Remove the mapping for the `Total Service Hours` with the weekday column that is in the dataset. 
+     * Update chart names to Eric's suggestions.
 ### 4/25/2024 
 * Goals
     * Finish copy on readable.yml
     * Convert all of the charts to read from the readable.yml. 
         * For charts in section 1, add subtitles and title.
     * Change section3utils references back to section2.
-    * Remove the mapping for the `Total Service Hours` with the weekday column that is in the dataset. 
+   
     * `Vehicle Postions per Minute`: set anything above 2 as green. Right now, the color scale maps to lowest and highest value. Some routes that record 3 vps per minute now have bars that red when only 2 vps were recorded, even though 2 is good.
         * Use categories I created so the legend is N instead of Q.
     * Reorder charts thematically. Add a little chart in between that explains the divide.
@@ -207,4 +210,4 @@ To-Do
 ### Parameterize notebooks
 * cd ../ && pip install -r portfolio/requirements.txt
 * python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
-* cd rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
+* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
