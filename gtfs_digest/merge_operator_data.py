@@ -118,7 +118,7 @@ if __name__ == "__main__":
     
     gdf = concatenate_operator_routes(
         analysis_date_list
-    ).pipe(merge_in_standardized_route_names, set_typology=False)
+    ).pipe(merge_in_standardized_route_names)
 
     utils.geoparquet_gcs_export(
         gdf,
@@ -130,3 +130,4 @@ if __name__ == "__main__":
     operator_category_counts.to_parquet(
         f"{RT_SCHED_GCS}{SCHED_RT_CATEGORY}.parquet"
     )
+    

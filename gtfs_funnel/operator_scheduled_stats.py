@@ -11,6 +11,7 @@ from calitp_data_analysis import utils
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from shared_utils.rt_utils import METERS_PER_MILE
 from update_vars import GTFS_DATA_DICT, SCHED_GCS
+from route_typologies import route_typologies
 
 def schedule_stats_by_operator(
     analysis_date: str,
@@ -122,8 +123,7 @@ def operator_typology_breakdown(df: pd.DataFrame) -> pd.DataFrame:
     have a certain primary typology.
     """    
     typology_values = [
-        f"is_{i}" for i in 
-        ["downtown_local", "local", "rapid", "coverage"]
+        f"is_{i}" for i in route_typologies
     ]
     
     df_wide = (df.groupby("schedule_gtfs_dataset_key")
@@ -178,8 +178,21 @@ if __name__ == "__main__":
             f"{SCHED_GCS}{OPERATOR_EXPORT}_{analysis_date}.parquet"
         )
         
+        # route typology is by route-direction 
+        # aggregate this to route
+        route_typology_grouped = (
+            route_typology
+            .groupby(["schedule_gtfs_dataset_key", "route_id"])
+            .agg({**{f"is_{c}": "sum" for c in route_typologies}})
+            .reset_index()
+        )
+        
         route_gdf = longest_shape_by_route(
             analysis_date
+        ).merge(
+            route_typology_grouped,
+            on = ["schedule_gtfs_dataset_key", "route_id"],
+            how = "inner"
         ).merge(
             crosswalk,
             on = "schedule_gtfs_dataset_key",
