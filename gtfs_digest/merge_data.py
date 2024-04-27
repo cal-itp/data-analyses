@@ -33,7 +33,8 @@ def concatenate_schedule_by_route_direction(
             "avg_scheduled_service_minutes", 
             "avg_stop_miles",
             "n_trips", "frequency", 
-            "is_coverage", "is_downtown_local", "is_local", "is_rapid"
+            "is_express", "is_rapid",  "is_rail",
+            "is_coverage", "is_downtown_local", "is_local",
         ],
     ).sort_values(sort_cols).rename(
         columns = {
@@ -129,7 +130,6 @@ def concatenate_crosswalk_organization(
 
 def merge_in_standardized_route_names(
     df: pd.DataFrame, 
-    set_typology: bool
 ) -> pd.DataFrame:
     
     keep_cols = [
@@ -141,11 +141,7 @@ def merge_in_standardized_route_names(
     
     route_names_df = pd.read_parquet(
         f"{SCHED_GCS}{CLEAN_ROUTES}.parquet"
-    ).rename(columns = {
-        "is_local": "is_route_local",
-        "is_rapid": "is_route_rapid",
-        "is_express": "is_route_express"
-    })
+    )
     
     route_names_df = time_series_utils.clean_standardized_route_names(
         route_names_df).drop_duplicates()
@@ -161,24 +157,11 @@ def merge_in_standardized_route_names(
               "route_id", "service_date"],
         how = "left",
     ).drop_duplicates()
-
-    if set_typology:
-        primary_typology_df = set_primary_typology(df2)
-    
-        df2 = pd.merge(
-            df2,
-            primary_typology_df,
-            on = route_time_cols,
-            how = "inner"
-        )
     
     # Clean up
     
     # After merging, we can replace route_id with recent_route_id2 
-    drop_cols = ["route_desc", "combined_name", "route_id2"] + [ 
-        c for c in df2.columns if "is_" in c and 
-        c not in ["is_early", "is_late", "is_ontime"]
-    ] 
+    drop_cols = ["route_desc", "combined_name", "route_id2"]
     
     df3 = time_series_utils.parse_route_combined_name(df2).drop(
         columns = drop_cols).drop_duplicates().reset_index(drop=True)
@@ -191,19 +174,13 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
     Choose a primary typology, and we'll be more generous if 
     multiple typologies are found.
     """
-    subset_cols = [c for c in df.columns if "is_" in c]
+    subset_cols = [c for c in df.columns if "is_" in c and 
+                   c not in ["is_ontime", "is_early", "is_late"]]
     keep_cols = route_time_cols + subset_cols
     
-    df2 = df[keep_cols]
-    
-    # If we ever see it tagged as local or rapid or express
-    # in either of the columns, we'll use it
-    df2 = df2.assign(
-        is_local = df2[["is_local", "is_route_local"]].max(axis=1),
-        is_rapid = df2[["is_rapid", "is_route_rapid"]].max(axis=1),
-    ).drop(
-        columns = ["is_route_local", "is_route_rapid"]
-    ).rename(columns = {"is_route_express": "is_express"})
+    df2 = df[keep_cols].sort_values(
+        route_time_cols + subset_cols
+    ).drop_duplicates(subset=route_time_cols)
     
     ranks = {
         "coverage": 1,
@@ -211,6 +188,7 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
         "downtown_local": 3,
         "express": 4,        
         "rapid": 5,
+        "rail": 6,
     }
     
     # Find the max "score" / typology type, and use that
@@ -238,6 +216,15 @@ if __name__ == "__main__":
     
     df_sched = concatenate_schedule_by_route_direction(analysis_date_list)
     
+    primary_typology = set_primary_typology(df_sched)
+    
+    df_sched2 = pd.merge(
+        df_sched,
+        primary_typology,
+        on = route_time_cols,
+        how = "left"
+    )
+
     df_avg_speeds = concatenate_speeds_by_route_direction(analysis_date_list)
                     
     df_rt_sched = (
@@ -249,7 +236,7 @@ if __name__ == "__main__":
     df_crosswalk = concatenate_crosswalk_organization(analysis_date_list)
     
     df = pd.merge(
-        df_sched,
+        df_sched2,
         df_rt_sched,
         on = route_time_cols + ["service_date"],
         how = "outer",
@@ -265,7 +252,6 @@ if __name__ == "__main__":
             gtfs_schedule_wrangling.sched_rt_category_dict)
     ).pipe(
         merge_in_standardized_route_names,
-        set_typology=True
     ).merge(
         df_crosswalk,
         on = ["schedule_gtfs_dataset_key", "name", "service_date"],
@@ -289,11 +275,17 @@ if __name__ == "__main__":
         analysis_date_list
     ).pipe(
         merge_in_standardized_route_names, 
-        set_typology=False
     ).astype({"direction_id": "int64"}) #Int64 doesn't work for gdf
     
-    utils.geoparquet_gcs_export(
+    segment_speeds2 = pd.merge(
         segment_speeds,
+        primary_typology,
+        on = route_time_cols,
+        how = "left"
+    )
+    
+    utils.geoparquet_gcs_export(
+        segment_speeds2,
         RT_SCHED_GCS,
         DIGEST_SEGMENT_SPEEDS
     )

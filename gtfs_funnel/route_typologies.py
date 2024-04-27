@@ -40,8 +40,10 @@ typology_cols = ["freq_category", "typology"]
 road_cols = ["linearid", "mtfcc", "fullname"]
 road_segment_cols = road_cols + ["segment_sequence"]
 
-# taggable NACTO typologies (express is not here)
-nacto_typologies = ['downtown_local', 'local', 'rapid', 'coverage']
+route_typologies = [
+    "downtown_local", "local", "coverage",
+    "rapid", "express", "rail"
+]
 
 def categorize_routes_by_name(
     analysis_date: str
@@ -345,8 +347,7 @@ def reconcile_route_and_nacto_typologies(
     
     df2 = df.drop(columns = drop_cols)
     
-    integrify = [c for c in df2.columns if "is_" in c]
-    df2[integrify] = df2[integrify].astype(int)
+    df2[route_typologies] = df2[route_typologies].astype(int)
     
     return df2
 
