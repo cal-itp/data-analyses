@@ -46,6 +46,8 @@ n_coverage_routes: "# Coverage Route Types"
 n_downtown_local_routes: "# Downtown Local Route Types"
 n_local_routes: "# Local Route Types"
 n_rapid_routes: "# Rapid Route Types"
+n_express_routes: "# Express Route Types"
+n_rail_routes: "# Rail Route Types"
 name: Transit Operator
 operator_arrivals_per_stop: "Avg Arrivals per Stop"
 operator_n_arrivals: "# Arrivals"
@@ -87,14 +89,15 @@ stop_pair_name: "Stop Pairs"
 route_typology:
     title: "Total Routes by Typology"
     subtitle: "Typologies are based off of the National Association of City Transportation Officials' Transit Route Types guide."
-
 longest_shortest_route:
     title: "Longest and Shortest Route"
     subtitle: "In Miles"
 total_scheduled_hours:
     title: "Total Scheduled Service Hours by Time of Day"
     subtitle: "Time of Day: AM Peak:7-9AM, Early AM:4-6AM, Evening:8-11PM, Midday: 10AM-2PM, Owl:12-3AM,PM Peak:3-7PM"
-    
+daily_scheduled_hour:
+    title: "Daily Scheduled Service Hours by Time of Day"
+
 # Section 3
 avg_scheduled_min_graph:
     title: "Average Scheduled Minutes"
