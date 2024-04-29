@@ -15,10 +15,14 @@ from IPython.display import HTML, Markdown, display
 from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
 from shared_utils import catalog_utils, rt_dates, rt_utils
 import _report_utils 
+import calendar
+from datetime import datetime
+import numpy as np
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
-import yaml
+
 # Readable Dictionary
+import yaml
 with open("readable.yml") as f:
     readable_dict = yaml.safe_load(f)
 """
@@ -72,6 +76,8 @@ def load_scheduled_service(name:str)->pd.DataFrame:
     
     df["month"] = df["month"].astype(str).str.zfill(2)
     df["full_date"] = (df.year.astype(str)+ "-" + df.month.astype(str))
+    df["datetime_date"] = pd.to_datetime(df["full_date"], format="%Y-%m")
+    
     return df
 
 """
@@ -84,7 +90,8 @@ def route_typology(df: pd.DataFrame)->pd.DataFrame:
     """
     route_type_cols = [
        '# Downtown Local Route Types', '# Local Route Types',
-       '# Rapid Route Types'
+       '# Rapid Route Types',"# Express Route Types",
+         "# Rail Route Types"
     ]
     df = df[route_type_cols]
     df2 = df.T.reset_index()
@@ -118,9 +125,15 @@ def counties_served(gdf:gpd.GeoDataFrame)->pd.DataFrame:
         .set_table_styles([{"selector": "td, th", "props": [("text-align", "center")]}])
     )
 
-def summarize_monthly(name:str)->pd.DataFrame:
-    df = load_scheduled_service(name)
+def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
+    df = (
+    gdf[["Route", "Service Miles"]]
+    .sort_values(by=["Service Miles"])
+    .iloc[[0, -1]])
     
+    return df
+
+def summarize_monthly(df:pd.DataFrame)->pd.DataFrame:
     df2 = (
     df.groupby(
         ['name', 'full_date','time_of_day', 'day_name']
@@ -133,16 +146,97 @@ def summarize_monthly(name:str)->pd.DataFrame:
     .reset_index()
     )
     
-    df2.columns = df2.columns.map(_report_utils.replace_column_names)
     return df2
 
-def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
-    df = (
-    gdf[["Route", "Service Miles"]]
-    .sort_values(by=["Service Miles"])
-    .iloc[[0, -1]])
+def convert_to_timestamps(datetime_list):
+    timestamps = []
+    for dt in datetime_list:
+        timestamp = dt.astype("datetime64[s]").astype(datetime)
+        timestamps.append(timestamp)
+    return timestamps
+
+def count_days_in_months(dates: list) -> pd.DataFrame:
+    # Turn list from numpy datetime to timestamp
+    dates2 = convert_to_timestamps(dates)
+    # Initialize a dictionary to store counts for each day of the week
+    day_counts = {}
+
+    # Iterate over each date
+    for date in dates2:
+        year = date.year
+        month = date.month
+
+        # Initialize counts dictionary for the current month-year combination
+        if (year, month) not in day_counts:
+            day_counts[(year, month)] = {
+                "Monday": 0,
+                "Tuesday": 0,
+                "Wednesday": 0,
+                "Thursday": 0,
+                "Friday": 0,
+                "Saturday": 0,
+                "Sunday": 0,
+            }
+
+        # Get the calendar matrix for the current month and year
+        matrix = calendar.monthcalendar(year, month)
+
+        # Iterate over each day in the matrix
+        for week in matrix:
+            for i, day in enumerate(week):
+                # Increment the count for the corresponding day of the week
+                if day != 0:
+                    weekday = calendar.day_name[i]
+                    day_counts[(year, month)][weekday] += 1
+
+    # Convert the dictionary to a pandas DataFrame
+    df = pd.DataFrame.from_dict(day_counts, orient="index")
+    df = df.reset_index()
+    df["level_1"] = df["level_1"].astype(str).str.zfill(2)
+    df["full_date"] = df.level_0.astype(str) + "-" + df.level_1.astype(str)
+    df = df.drop(columns=["level_0", "level_1"])
     
-    return df
+    # Melt from wide to long
+    df2 = pd.melt(
+    df,
+    id_vars=["full_date"],
+    value_vars=[
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+        "full_date",
+    ])
+    
+    df2 = df2.rename(columns = {"variable":"day_name", "value":"n_days"})
+    return df2
+
+def total_monthly_service(name:str) ->pd.DataFrame:
+    
+    df = load_scheduled_service(name)
+    
+    # Grab unique dates
+    unique_dates = list(df.datetime_date.unique())
+    
+    # Find number of Monday's, Tuesday's...etc in each date
+    month_days_df = count_days_in_months(unique_dates)
+    
+    # Aggregate the original dataframe
+    agg_df = summarize_monthly(df)
+    
+    # Merge on number of day types
+    agg_df = pd.merge(agg_df, month_days_df, on =["full_date", "day_name"], how = "left")
+    
+    # Find daily service hours
+    agg_df["Daily Service Hours"] = agg_df.ttl_service_hours / agg_df.n_days
+    
+    # Rename columns
+    agg_df.columns = agg_df.columns.map(_report_utils.replace_column_names)
+    
+    return agg_df
 
 """
 Charts & Maps
@@ -156,11 +250,11 @@ def single_bar_chart_dropdown(
     dropdown_col: str,
     subtitle:str
 ):
-    dropdown_list = sorted(df[dropdown_col].unique().tolist())
-
+    dropdown_list = df[dropdown_col].unique().tolist()
+    dropdown_list.sort(reverse=True)
     dropdown = alt.binding_select(options=dropdown_list, name=_report_utils.labeling(dropdown_col))
 
-    selector = alt.selection_single(
+    selector = alt.selection_point(
         name=_report_utils.labeling(dropdown_col), fields=[dropdown_col], bind=dropdown
     )
 
@@ -241,7 +335,7 @@ def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str
             color=alt.Color(
                 color_col, 
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=_report_utils.section1)
+                scale=alt.Scale(range=_report_utils.service_hour_scale)
             ),
             tooltip=df.columns.tolist(),
         ).properties(

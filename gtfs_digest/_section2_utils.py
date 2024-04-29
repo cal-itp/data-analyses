@@ -107,7 +107,7 @@ def route_stats(df: pd.DataFrame) -> pd.DataFrame:
     most_recent_date = df["Date"].max()
     route_merge_cols = ["Route", "Direction"]
 
-    all_day_stats = df[(df["Date"] == most_recent_date) & (df["Period"] == "All Day")][
+    all_day_stats = df[(df["Date"] == most_recent_date) & (df["Period"] == "all_day")][
         route_merge_cols
         + [
             "Average Scheduled Service (trip minutes)",
@@ -117,7 +117,7 @@ def route_stats(df: pd.DataFrame) -> pd.DataFrame:
         ]
     ]
 
-    peak_stats = df[(df["Date"] == most_recent_date) & (df["Period"] == "Peak")][
+    peak_stats = df[(df["Date"] == most_recent_date) & (df["Period"] == "peak")][
         route_merge_cols + ["Speed (MPH)", "# scheduled trips", "Trips per Hour"]
     ].rename(
         columns={
@@ -127,7 +127,7 @@ def route_stats(df: pd.DataFrame) -> pd.DataFrame:
         }
     )
 
-    offpeak_stats = df[(df["Date"] == most_recent_date) & (df["Period"] == "Offpeak")][
+    offpeak_stats = df[(df["Date"] == most_recent_date) & (df["Period"] == "offpeak")][
         route_merge_cols + ["Speed (MPH)", "# scheduled trips", "Trips per Hour"]
     ].rename(
         columns={
@@ -279,7 +279,6 @@ def create_data_unavailable_chart():
 
 def clean_data_charts(df:pd.DataFrame, y_col:str)->pd.DataFrame:
     df["Period"] = df["Period"].str.replace("_", " ").str.title()
-
     df[y_col] = df[y_col].fillna(0).astype(int)
     df[f"{y_col}_str"] = df[y_col].astype(str)
     
@@ -288,7 +287,6 @@ def clean_data_charts(df:pd.DataFrame, y_col:str)->pd.DataFrame:
 def set_y_axis(df, y_col):
     if "%" in y_col:
         max_y = 100
-
     elif "VP" in y_col:
         max_y = 3
     elif "Minute" in y_col:
@@ -315,63 +313,54 @@ def grouped_bar_chart(
         y_col,
     ]
 
-    if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
-    else:
-        df = clean_data_charts(df, y_col)
-        chart = (
-            alt.Chart(df)
-            .mark_bar(size=10)
-            .encode(
-                x=alt.X(
-                    "yearmonthdate(Date):O",
-                    title=["Grouped by Direction ID", "Date"],
-                    axis=alt.Axis(labelAngle=-45, format="%b %Y"),
-                ),
-                y=alt.Y(f"{y_col}:Q", title=_report_utils.labeling(y_col)),
-                xOffset=alt.X(
-                    f"{offset_col}:N", title=_report_utils.labeling(offset_col)
-                ),
-                color=alt.Color(
-                    f"{color_col}:N",
-                    title=_report_utils.labeling(color_col),
-                    scale=alt.Scale(
-                        range=_report_utils.red_green_yellow,
-                    ),
-                ),
-                tooltip=tooltip_cols,
-            )
-        )
-        chart = (chart).properties(
-            title={
-                "text": [title],
-                "subtitle": [subtitle],
-            },
-            width=500,
-            height=300,
-        )
+    df = clean_data_charts(df, y_col)
 
-        return chart
+    chart = (
+        alt.Chart(df)
+        .mark_bar(size=10)
+        .encode(
+            x=alt.X(
+                "yearmonthdate(Date):O",
+                title=["Grouped by Direction ID", "Date"],
+                axis=alt.Axis(labelAngle=-45, format="%b %Y"),
+            ),
+            y=alt.Y(f"{y_col}:Q", title=_report_utils.labeling(y_col)),
+            xOffset=alt.X(f"{offset_col}:N", title=_report_utils.labeling(offset_col)),
+            color=alt.Color(
+                f"{color_col}:N",
+                title=_report_utils.labeling(color_col),
+                scale=alt.Scale(
+                    range=_report_utils.red_green_yellow,
+                ),
+            ),
+            tooltip=tooltip_cols,
+        )
+    )
+    chart = (chart).properties(
+        title={
+            "text": [title],
+            "subtitle": [subtitle],
+        },
+        width=500,
+        height=300,
+    )
+
+    return chart
     
 def base_facet_line(
     df: pd.DataFrame, y_col: str, title: str, subtitle: str
 ) -> alt.Chart:
-    if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
-    else:
-        max_y = set_y_axis(df, y_col)
+    max_y = set_y_axis(df, y_col)
 
-        df = clean_data_charts(df, y_col)
-        tooltip_cols = [
+    df = clean_data_charts(df, y_col)
+    tooltip_cols = [
             "Route",
             "Direction",
             "Period",
             f"{y_col}_str",
         ]
 
-        chart = (
+    chart = (
             alt.Chart(df)
             .mark_line(size=5)
             .encode(
@@ -394,8 +383,8 @@ def base_facet_line(
             )
         )
 
-        chart = chart.properties(width=250, height=300)
-        chart = chart.facet(
+    chart = chart.properties(width=250, height=300)
+    chart = chart.facet(
             column=alt.Column("Direction:N", title=_report_utils.labeling("Direction")),
         ).properties(
             title={
@@ -403,8 +392,8 @@ def base_facet_line(
                 "subtitle": [subtitle],
             }
         )
-        return chart
-    
+    return chart
+
 def base_facet_circle(
     df: pd.DataFrame,
     y_col: str,
@@ -423,19 +412,15 @@ def base_facet_circle(
         color_col,
     ]
 
-    if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
-    else:
-        max_y = set_y_axis(df, y_col)
-        df = clean_data_charts(df, y_col)
-        ruler = (
+    max_y = set_y_axis(df, y_col)
+    df = clean_data_charts(df, y_col)
+    ruler = (
             alt.Chart(df)
             .mark_rule(color="red", strokeDash=[10, 7])
             .encode(y=f"ruler_100_pct:Q")
         )
 
-        chart = (
+    chart = (
             alt.Chart(df)
             .mark_circle(size=150)
             .encode(
@@ -458,8 +443,8 @@ def base_facet_circle(
             )
         )
 
-        chart = chart + ruler
-        chart = chart.facet(
+    chart = chart + ruler
+    chart = chart.facet(
             column=alt.Column("Direction:N", title=_report_utils.labeling("Direction")),
         ).properties(
             title={
@@ -467,7 +452,7 @@ def base_facet_circle(
                 "subtitle": [subtitle],
             }
         )
-        return chart
+    return chart
     
 def base_facet_chart(
     df: pd.DataFrame,
@@ -487,48 +472,44 @@ def base_facet_chart(
         color_col,
     ]
 
-    if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
-    else:
-        max_y = set_y_axis(df, y_col)
-        df = clean_data_charts(df, y_col)
-        chart = (
-            (
-                alt.Chart(df)
-                .mark_bar(size=15, clip=True)
-                .encode(
-                    x=alt.X(
-                        "yearmonthdate(Date):O",
-                        title=["Date"],
-                        axis=alt.Axis(labelAngle=-45, format="%b %Y"),
-                    ),
-                    y=alt.Y(
-                        f"{y_col}:Q",
-                        title=_report_utils.labeling(y_col),
-                        scale=alt.Scale(domain=[0, max_y]),
-                    ),
-                    color=alt.Color(
-                        f"{color_col}:N",
-                        title=_report_utils.labeling(color_col),
-                        scale=alt.Scale(range=_report_utils.red_green_yellow),
-                    ),
-                    tooltip=tooltip_cols,
-                )
-            )
-            .facet(
-                column=alt.Column(
-                    f"{facet_col}:N",
-                )
-            )
-            .properties(
-                title={
-                    "text": title,
-                    "subtitle": subtitle,
-                }
+    max_y =set_y_axis(df, y_col)
+    df = clean_data_charts(df, y_col)
+    chart = (
+        (
+            alt.Chart(df)
+            .mark_bar(size=15, clip=True)
+            .encode(
+                x=alt.X(
+                    "yearmonthdate(Date):O",
+                    title=["Date"],
+                    axis=alt.Axis(labelAngle=-45, format="%b %Y"),
+                ),
+                y=alt.Y(
+                    f"{y_col}:Q",
+                    title=_report_utils.labeling(y_col),
+                    scale=alt.Scale(domain=[0, max_y]),
+                ),
+                color=alt.Color(
+                    f"{color_col}:N",
+                    title=_report_utils.labeling(color_col),
+                    scale=alt.Scale(range=_report_utils.red_green_yellow),
+                ),
+                tooltip=tooltip_cols,
             )
         )
-        return chart
+        .facet(
+            column=alt.Column(
+                f"{facet_col}:N",
+            )
+        )
+        .properties(
+            title={
+                "text": title,
+                "subtitle": subtitle,
+            }
+        )
+    )
+    return chart
     
 def base_facet_with_ruler_chart(
     df: pd.DataFrame,
@@ -546,17 +527,14 @@ def base_facet_with_ruler_chart(
         y_col,
     ]
 
-    if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
-    else:
-        max_y = set_y_axis(df, y_col)
-        ruler = (
+    max_y = set_y_axis(df, y_col)
+    df = clean_data_charts(df, y_col)
+    ruler = (
             alt.Chart(df)
             .mark_rule(color="red", strokeDash=[10, 7])
             .encode(y=f"mean({ruler_col}):Q")
         )
-        chart = (
+    chart = (
             alt.Chart(df)
             .mark_bar(size=15, clip=True)
             .encode(
@@ -579,26 +557,21 @@ def base_facet_with_ruler_chart(
             )
         )
 
-        chart = chart + ruler
-        chart = chart.facet(column=alt.Column("Direction:N",)).properties(
+    chart = chart + ruler
+    chart = chart.facet(column=alt.Column("Direction:N",)).properties(
             title={
                 "text": title,
                 "subtitle": [subtitle],
             }
         )
 
-        return chart
+    return chart
 
 def create_text_table(df: pd.DataFrame, direction: float):
 
     df = df.loc[df["Direction"] == direction].drop_duplicates().reset_index(drop=True)
 
-    if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
-
-    else:
-        df2 = df.melt(
+    df2 = df.melt(
             id_vars=[
                 "Route",
                 "Direction",
@@ -616,76 +589,70 @@ def create_text_table(df: pd.DataFrame, direction: float):
                 "Trips Per Hour",
             ],
         )
-        # Create a decoy column to center all the text
-        df2["Zero"] = 0
+    # Create a decoy column to center all the text
+    df2["Zero"] = 0
 
-        df2["combo_col"] = df2.variable.astype(str) + ": " + df2.value.astype(str)
-        df2.combo_col = df2.combo_col.str.replace(
+    df2["combo_col"] = df2.variable.astype(str) + ": " + df2.value.astype(str)
+    df2.combo_col = df2.combo_col.str.replace(
             "schedule_and_vp", "Schedule and Realtime Data"
         )
-        text_chart = (
+    text_chart = (
             alt.Chart(df2)
             .mark_text()
             .encode(x=alt.X("Zero:Q", axis=None), y=alt.Y("combo_col", axis=None))
         )
 
-        text_chart = text_chart.encode(text="combo_col:N").properties(
+    text_chart = text_chart.encode(text="combo_col:N").properties(
             title=f"Route Statistics for Direction {direction}",
             width=500,
             height=300,
         )
-        return text_chart
+    return text_chart
     
 def frequency_chart(df: pd.DataFrame):
-    if len(df) == 0:
-        text_chart = create_data_unavailable_chart()
-        return text_chart
-
-    else:
-        df["Frequency in Minutes"] = (
-            "A trip going this direction comes every "
-            + df.frequency_in_minutes.astype(int).astype(str)
-            + " minutes"
+    df["Frequency in Minutes"] = (
+        "A trip going this direction comes every "
+        + df.frequency_in_minutes.astype(int).astype(str)
+        + " minutes"
+    )
+    chart = (
+        alt.Chart(df)
+        .properties(width=180, height=alt.Step(10))
+        .mark_bar()
+        .encode(
+            alt.Y(
+                "yearmonthdate(Date):O",
+                title="Date",
+                axis=alt.Axis(format="%b %Y"),
+            ),
+            alt.X(
+                "frequency_in_minutes:Q",
+                title=_report_utils.labeling("frequency_in_minutes"),
+                axis=None,
+            ),
+            alt.Color(
+                "frequency_in_minutes:Q",
+                scale=alt.Scale(range=_report_utils.green_red_yellow),
+            ).title(_report_utils.labeling("frequency_in_minutes")),
+            alt.Row("Period:N")
+            .title(_report_utils.labeling("Period"))
+            .header(labelAngle=0),
+            alt.Column("Direction:N").title(_report_utils.labeling("Direction")),
+            tooltip=["Date", "Frequency in Minutes", "Period", "Direction"],
         )
-        chart = (
-            alt.Chart(df)
-            .properties(width=180, height=alt.Step(10))
-            .mark_bar()
-            .encode(
-                alt.Y(
-                    "yearmonthdate(Date):O",
-                    title="Date",
-                    axis=alt.Axis(format="%b %Y"),
-                ),
-                alt.X(
-                    "frequency_in_minutes:Q",
-                    title=_report_utils.labeling("frequency_in_minutes"),
-                    axis=None,
-                ),
-                alt.Color(
-                    "frequency_in_minutes:Q",
-                    scale=alt.Scale(range=_report_utils.green_red_yellow),
-                ).title(_report_utils.labeling("frequency_in_minutes")),
-                alt.Row("Period:N")
-                .title(_report_utils.labeling("Period"))
-                .header(labelAngle=0),
-                alt.Column("Direction:N").title(_report_utils.labeling("Direction")),
-                tooltip=["Date", "Frequency in Minutes", "Period", "Direction"],
-            )
-        )
-        chart = chart.properties(
-            title={
-                "text": readable_dict["frequency_graph"]["title"],
-                "subtitle": readable_dict["frequency_graph"]["subtitle"],
-            }
-        )
-        return chart
-    
+    )
+    chart = chart.properties(
+        title={
+            "text": readable_dict["frequency_graph"]["title"],
+            "subtitle": readable_dict["frequency_graph"]["subtitle"],
+        }
+    )
+    return chart
 """
 Route-Direction
 Section
 """
-def filtered_route_test(
+def filtered_route(
     df: pd.DataFrame,
 ) -> alt.Chart:
     """
@@ -704,9 +671,8 @@ def filtered_route_test(
         bind=route_dropdown,
     )
 
-    # Filter for only all_day. Some charts, we don't need to
-    # differentiate btwn peak and offpeak.
-    all_day = df.loc[df["Period"] == "All Day"].reset_index(drop=True)
+    # Filter for only rows categorized as found in schedule and vp and all_day
+    all_day = df.loc[df["Period"] == "all_day"].reset_index(drop=True)
 
     # Create route stats table for the text tables
     route_stats_df = route_stats(df)
@@ -715,11 +681,14 @@ def filtered_route_test(
     timeliness_df = timeliness_trips(df)
 
     rt_journey_vp = pct_vp_journey(
-        all_day, "% Actual Trip Minutes with 1+ VP per Minute",
-    "% Actual Trip Minutes with 2+ VP per Minute",
+        all_day,
+        "% Actual Trip Minutes with 1+ VP per Minute",
+        "% Actual Trip Minutes with 2+ VP per Minute",
     )
     sched_journey_vp = pct_vp_journey(
-        all_day,"% Scheduled Trip Minutes with 1+ VP per Minute", "% Scheduled Trip Minutes with 2+ VP per Minute"
+        all_day,
+        "% Scheduled Trip Minutes with 1+ VP per Minute",
+        "% Scheduled Trip Minutes with 2+ VP per Minute",
     )
 
     avg_scheduled_min_graph = (
@@ -734,8 +703,7 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    #display(avg_scheduled_min_graph)
-    
+    # display(avg_scheduled_min_graph)
     timeliness_trips_dir_0 = (
         (
             base_facet_chart(
@@ -750,7 +718,7 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    #display(timeliness_trips_dir_0)
+    # display(timeliness_trips_dir_0)
     timeliness_trips_dir_1 = (
         (
             base_facet_chart(
@@ -765,11 +733,11 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    #display(timeliness_trips_dir_1)
+    # display(timeliness_trips_dir_1)
     frequency_graph = (
         frequency_chart(df).add_params(route_selector).transform_filter(route_selector)
     )
-    #display(frequency_graph)
+    # display(frequency_graph)
     speed_graph = (
         base_facet_line(
             df,
@@ -780,21 +748,21 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    # display(speed_graph) 
+    # display(speed_graph)
     vp_per_min_graph = (
-            (
-                base_facet_with_ruler_chart(
-                    all_day,
-                    "Average VP per Minute",
-                    "ruler_for_vp_per_min",
-                    readable_dict["vp_per_min_graph"]["title"],
-                    readable_dict["vp_per_min_graph"]["subtitle"],
-                )
+        (
+            base_facet_with_ruler_chart(
+                all_day,
+                "Average VP per Minute",
+                "ruler_for_vp_per_min",
+                readable_dict["vp_per_min_graph"]["title"],
+                readable_dict["vp_per_min_graph"]["subtitle"],
             )
-            .add_params(route_selector)
-            .transform_filter(route_selector)
         )
-    #display(vp_per_min_graph) 
+        .add_params(route_selector)
+        .transform_filter(route_selector)
+    )
+    # display(vp_per_min_graph)
     rt_vp_per_min_graph = (
         base_facet_circle(
             rt_journey_vp,
@@ -807,7 +775,7 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    #display(rt_vp_per_min_graph) 
+    # display(rt_vp_per_min_graph)
     sched_vp_per_min = (
         base_facet_circle(
             sched_journey_vp,
@@ -820,32 +788,32 @@ def filtered_route_test(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    #display(sched_vp_per_min) 
+    # display(sched_vp_per_min)
     spatial_accuracy = (
         base_facet_with_ruler_chart(
             all_day,
             "% VP within Scheduled Shape",
             "ruler_100_pct",
             readable_dict["spatial_accuracy_graph"]["title"],
-            readable_dict["spatial_accuracy_graph"]["title"],
+            readable_dict["spatial_accuracy_graph"]["subtitle"],
         )
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    #display(spatial_accuracy) 
+    # display(spatial_accuracy)
     text_dir0 = (
         (create_text_table(route_stats_df, 0))
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    #display(text_dir0) 
+    # display(text_dir0)
     text_dir1 = (
         create_text_table(route_stats_df, 1)
         .add_params(route_selector)
-        .transform_filter(route_selector))
-    #display(text_dir1) 
-    rider = divider_chart(df, "The charts below describe the quality of riding this route.")
-    data_quality = divider_chart(df, "The charts below describe the quality of data collecting from this route.")
+        .transform_filter(route_selector)
+    )
+    # display(text_dir1)
+
     chart_list = [
         avg_scheduled_min_graph,
         timeliness_trips_dir_0,
@@ -857,10 +825,10 @@ def filtered_route_test(
         sched_vp_per_min,
         spatial_accuracy,
         text_dir0,
-        text_dir1
-     
+        text_dir1,
     ]
-    
+
+     
     """ chart = alt.vconcat(*chart_list).properties(
         resolve=alt.Resolve(
             scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))
@@ -868,5 +836,5 @@ def filtered_route_test(
     )
     """
     chart = alt.vconcat(*chart_list)
-    
+
     return chart

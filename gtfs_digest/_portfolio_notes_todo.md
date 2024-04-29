@@ -21,17 +21,23 @@
     * Can we modify the reports site maps to be used here too? 
 ### 4/29/2024
 #### To-Do
-* Routes Pie Chart
+*  <s>Routes Pie Chart
     * Confirm again that a route can fall into various categories.
     * D3 UCD only runs 19 unique routes but the piechart has like 30+ routes.
     * Same with D4 Central Contra Costa Transit Authority
-* Section 1 Total Service Hours
+    * Update with new cols: 'it's like downtown_local, local, coverage, rapid, express, rail'</s>
+* <s>Section 1 Total Service Hours
     * Dates should be sorted in descending order, so the most recent date is at the top
     * Make a new daily chart, continue automating finding the number of each type of day in a year. 
-    * Refine total hours across the month chart. 
+    * Refine total hours across the month chart.</s> 
 * Section 2
-    * Need to update `spatial_accuracy` subtitle.
+    * <s>Need to update `spatial_accuracy` subtitle.</s>
     * Continue troubleshooting the javascript message that has now appeared.
+        * Figured out the error was due to `def create_data_unavailable_chart():
+
+        chart = alt.LayerChart()
+    
+        return chart`
     
 ### 4/26/2024
 #### To-do Today
