@@ -104,10 +104,11 @@ def produce_ntd_monthly_ridership_by_rtpa(
     merge in crosswalk, and save individual csvs.
     """
     # Import data, make sure NTD ID is string
+    # added .rename(columns= ) to account for any column name changes
     full_upt = pd.read_excel(
         upt_url, sheet_name = "UPT", 
         dtype = {"NTD ID": "str"}
-    )
+    ).rename(columns = {"Mode/Type of Service Status": "Status"})
 
     full_upt = full_upt[full_upt.Agency.notna()].reset_index(drop=True)
     full_upt.to_parquet(
