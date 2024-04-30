@@ -19,14 +19,14 @@ speed_vars:
   time_min_cutoff: 10
 
 schedule_downloads:
-  gcs_dir: ${gcs_paths.COMPILED_CACHED_VIEWS}
+  dir: ${gcs_paths.COMPILED_CACHED_VIEWS}
   trips: trips
   shapes: routelines
   stops: stops
   stop_times: st
 
 speeds_tables:
-  gcs_dir: ${gcs_paths.SEGMENT_GCS}
+  dir: ${gcs_paths.SEGMENT_GCS}
   raw_vp: vp
   usable_vp: vp_usable
   vp_condensed_line: condensed/vp_condensed
@@ -35,7 +35,7 @@ speeds_tables:
   time_min_cutoff: ${speed_vars.time_min_cutoff}
 
 schedule_tables:
-  gcs_dir: ${gcs_paths.SCHED_GCS}
+  dir: ${gcs_paths.SCHED_GCS}
   gtfs_key_crosswalk: "crosswalk/gtfs_key_organization"
   route_identification: "standardized_route_ids"
   route_typologies: "nacto_typologies/route_typologies"
