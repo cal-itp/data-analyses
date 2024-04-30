@@ -2,6 +2,7 @@
 * cd ../ && pip install -r portfolio/requirements.txt
 * python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
 * cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
+* RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
 ### Running to-do list
 * Portfolio:
     * Use the `readable.yml` 
@@ -19,6 +20,11 @@
     * 4/24: Done, using `07_crosswalk.ipynb`</s>
 * Eric: the maps from .explore() look pretty overwhelming when an operator has many routes. 
     * Can we modify the reports site maps to be used here too? 
+### 4/30/2024
+* Update readme.
+* Rebase off of main and update the URL for service_hours
+* Add in divider charts to Section 2 that sort the charts thematically.
+
 ### 4/29/2024
 #### To-Do
 *  <s>Routes Pie Chart
