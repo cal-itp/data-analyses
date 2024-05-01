@@ -83,7 +83,25 @@ def attach_operator_natural_identifiers(
             stop_pair,
             on = ["trip_instance_key", "stop_sequence"]
         )
-    
+        
+    elif segment_type == "speedmap_segments":
+        
+        stop_pair = pd.read_parquet(
+            f"{SEGMENT_GCS}stop_time_expansion/"
+            f"speedmap_stop_times_{analysis_date}.parquet",
+            columns = ["trip_instance_key", "stop_sequence", 
+                       "stop_sequence1", 
+                       "stop_pair", 
+                       #"stop_pair_name" -- we need to add this?
+                       # or does it not matter?
+                      ]
+        )
+          
+        df_with_natural_ids = df_with_natural_ids.merge(
+            stop_pair,
+            on = ["trip_instance_key", "stop_sequence"]
+        )    
+        
     return df_with_natural_ids
 
 
