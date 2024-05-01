@@ -70,7 +70,7 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     return op_routes_gdf
 
 def load_scheduled_service(name:str)->pd.DataFrame:
-    url = f"{GTFS_DATA_DICT.schedule_tables.gcs_dir}{GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service}.parquet"
+    url = f"{GTFS_DATA_DICT.schedule_tables.dir}{GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service}.parquet"
     df = pd.read_parquet(url,
     filters=[[("name", "==", name)]],)
     

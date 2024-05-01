@@ -263,10 +263,11 @@ def divider_chart(df: pd.DataFrame, text):
         .mark_text(
             align="center",
             baseline="middle",
-            fontSize=12,
+            fontSize=14,
+            fontWeight="bold",
             text=text,
         )
-        #.properties(width=500, height=100)
+        .properties(width=500, height=100)
     )
 
     return chart
@@ -813,13 +814,17 @@ def filtered_route(
         .transform_filter(route_selector)
     )
     # display(text_dir1)
-
+    
+    ride_quality = divider_chart(df, "The charts below measure the quality of the rider experience for this route.")
+    data_quality = divider_chart(df, "The charts below describe the quality of GTFS data collected for this route.")
     chart_list = [
+        ride_quality,
         avg_scheduled_min_graph,
         timeliness_trips_dir_0,
         timeliness_trips_dir_1,
         frequency_graph,
         speed_graph,
+        data_quality,
         vp_per_min_graph,
         rt_vp_per_min_graph,
         sched_vp_per_min,
