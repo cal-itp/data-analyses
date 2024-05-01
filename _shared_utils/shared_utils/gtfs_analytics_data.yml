@@ -90,9 +90,25 @@ rt_stop_times:
   max_speed: ${speed_vars.max_speed}
   min_meters_elapsed: 1609
 
+speedmap_segments:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  stage1: ${speeds_tables.usable_vp}
+  proxy_stop_times: "stop_time_expansion/speedmap_stop_times"
+  stage2: "nearest/nearest_vp_speedmap"
+  stage3: "speedmap/stop_arrivals"
+  stage4: "speedmap/speeds"
+  segments_file: "segment_options/speedmap_segments"
+  speedmap_something_single_segment: "rollup_singleday/speeds_speedmap_segments"
+  #shape_stop_multi_segment: "rollup_multiday/speeds_route_dir"
+  min_trip_minutes: ${speed_vars.time_min_cutoff}
+  max_trip_minutes: 180
+  max_speed: ${speed_vars.max_speed}
+  min_meters_elapsed: 1609
+
 road_segments:
   dir: ${gcs_paths.SEGMENT_GCS}
   stage1: ${speeds_tables.usable_vp}
+  proxy_stop_times: "stop_time_expansion/roads_stop_times"
   stage2: "nearest/nearest_vp_roads"
   stage3: "road_segments/stop_arrivals"
   stage4: "speeds_road_segments"
