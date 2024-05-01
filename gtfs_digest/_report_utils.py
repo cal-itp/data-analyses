@@ -31,7 +31,7 @@ green_red_yellow = ["#7cc665","#fde18d", "#ec5d3b", ]
 service_hour_scale = ["#7cc665", "#fcaa5f", "#fde18d", "#ec5d3b", "#3b56a4", "#49a2b2"]
 
 # Less garish colors
-section1 = ["#e55648", "#b0dfa2", "#52acad"]
+section1 = ["#fde18d","#49a2b2"]
 """
 Yaml
 """

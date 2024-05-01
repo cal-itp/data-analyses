@@ -267,7 +267,7 @@ def divider_chart(df: pd.DataFrame, text):
             fontWeight="bold",
             text=text,
         )
-        .properties(width=500, height=100)
+        .properties(width=400, height=100)
     )
 
     return chart
@@ -331,7 +331,7 @@ def grouped_bar_chart(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
                 scale=alt.Scale(
-                    range=_report_utils.red_green_yellow,
+                    range=_report_utils.section1,
                 ),
             ),
             tooltip=tooltip_cols,
@@ -342,8 +342,8 @@ def grouped_bar_chart(
             "text": [title],
             "subtitle": [subtitle],
         },
-        width=500,
-        height=300,
+       width=400,
+        height=250,
     )
 
     return chart
@@ -363,7 +363,7 @@ def base_facet_line(
 
     chart = (
             alt.Chart(df)
-            .mark_line(size=5)
+            .mark_line(size=3)
             .encode(
                 x=alt.X(
                     "yearmonthdate(Date):O",
@@ -384,7 +384,7 @@ def base_facet_line(
             )
         )
 
-    chart = chart.properties(width=250, height=300)
+    chart = chart.properties(width=200, height=250)
     chart = chart.facet(
             column=alt.Column("Direction:N", title=_report_utils.labeling("Direction")),
         ).properties(
@@ -438,13 +438,13 @@ def base_facet_circle(
                 color=alt.Color(
                     f"{color_col}:N",
                     title=_report_utils.labeling(color_col),
-                    scale=alt.Scale(range=_report_utils.red_green_yellow),
+                    scale=alt.Scale(range=_report_utils.section1),
                 ),
                 tooltip=tooltip_cols,
             )
         )
 
-    chart = chart + ruler
+    chart = (chart + ruler).properties(width=200, height=250)
     chart = chart.facet(
             column=alt.Column("Direction:N", title=_report_utils.labeling("Direction")),
         ).properties(
@@ -478,7 +478,7 @@ def base_facet_chart(
     chart = (
         (
             alt.Chart(df)
-            .mark_bar(size=15, clip=True)
+            .mark_bar(size=7, clip=True)
             .encode(
                 x=alt.X(
                     "yearmonthdate(Date):O",
@@ -497,19 +497,19 @@ def base_facet_chart(
                 ),
                 tooltip=tooltip_cols,
             )
-        )
-        .facet(
+        ))
+    chart = chart.properties(width=200, height=250)
+    chart = chart.facet(
             column=alt.Column(
                 f"{facet_col}:N",
             )
-        )
-        .properties(
+        ).properties(
             title={
                 "text": title,
                 "subtitle": subtitle,
             }
         )
-    )
+    
     return chart
     
 def base_facet_with_ruler_chart(
@@ -537,7 +537,7 @@ def base_facet_with_ruler_chart(
         )
     chart = (
             alt.Chart(df)
-            .mark_bar(size=15, clip=True)
+            .mark_bar(size=7, clip=True)
             .encode(
                 x=alt.X(
                     "yearmonthdate(Date):O",
@@ -558,7 +558,7 @@ def base_facet_with_ruler_chart(
             )
         )
 
-    chart = chart + ruler
+    chart = (chart + ruler).properties(width=200, height=250)
     chart = chart.facet(column=alt.Column("Direction:N",)).properties(
             title={
                 "text": title,
@@ -595,8 +595,8 @@ def create_text_table(df: pd.DataFrame, direction: float):
 
     df2["combo_col"] = df2.variable.astype(str) + ": " + df2.value.astype(str)
     df2.combo_col = df2.combo_col.str.replace(
-            "schedule_and_vp", "Schedule and Realtime Data"
-        )
+            "schedule_and_vp", "Schedule and Realtime Data",
+        ).str.replace("Gtfs", "GTFS")
     text_chart = (
             alt.Chart(df2)
             .mark_text()
@@ -605,8 +605,8 @@ def create_text_table(df: pd.DataFrame, direction: float):
 
     text_chart = text_chart.encode(text="combo_col:N").properties(
             title=f"Route Statistics for Direction {direction}",
-            width=500,
-            height=300,
+            width=400,
+            height=250,
         )
     return text_chart
     
@@ -618,7 +618,7 @@ def frequency_chart(df: pd.DataFrame):
     )
     chart = (
         alt.Chart(df)
-        .properties(width=180, height=alt.Step(10))
+        .properties(width=120, height=alt.Step(10))
         .mark_bar()
         .encode(
             alt.Y(
@@ -683,13 +683,13 @@ def filtered_route(
 
     rt_journey_vp = pct_vp_journey(
         all_day,
-        "% Actual Trip Minutes with 1+ VP per Minute",
-        "% Actual Trip Minutes with 2+ VP per Minute",
+        "% Actual Trip with 1+ VP per min",
+         "% Actual Trip with 2+ VP per min"
     )
     sched_journey_vp = pct_vp_journey(
         all_day,
-        "% Scheduled Trip Minutes with 1+ VP per Minute",
-        "% Scheduled Trip Minutes with 2+ VP per Minute",
+       "% Scheduled Trip with 1+ VP per min",
+       "% Scheduled Trip with 2+ VP per min",
     )
 
     avg_scheduled_min_graph = (
