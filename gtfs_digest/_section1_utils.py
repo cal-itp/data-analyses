@@ -1,3 +1,4 @@
+# Regular
 import calitp_data_analysis.magics
 import geopandas as gpd
 import pandas as pd
@@ -6,25 +7,31 @@ from calitp_data_analysis.sql import to_snakecase
 # Charts & Maps
 from calitp_data_analysis import calitp_color_palette as cp
 import altair as alt
-import ipywidgets as widgets
-
-# Display
+import ipywidgets
 from IPython.display import HTML, Markdown, display
 
-# Other
+# Packages
 from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
 from shared_utils import catalog_utils, rt_dates, rt_utils
 import _report_utils 
+import _operators_prep as op_prep
+
+# Datetime
 import calendar
 from datetime import datetime
 import numpy as np
-
-GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 # Readable Dictionary
 import yaml
 with open("readable.yml") as f:
     readable_dict = yaml.safe_load(f)
+GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
+
+# Warehouse
+import os
+from calitp_data_analysis.sql import query_sql
+from calitp_data_analysis.tables import tbls
+from siuba import *
 """
 Data
 """
@@ -75,10 +82,97 @@ def load_scheduled_service(name:str)->pd.DataFrame:
     filters=[[("name", "==", name)]],)
     
     df["month"] = df["month"].astype(str).str.zfill(2)
-    df["full_date"] = (df.year.astype(str)+ "-" + df.month.astype(str))
-    df["datetime_date"] = pd.to_datetime(df["full_date"], format="%Y-%m")
+    df["month"] = (df.year.astype(str)+ "-" + df.month.astype(str))
+    df["datetime_date"] = pd.to_datetime(df["month"], format="%Y-%m")
     
     return df
+
+def load_ntd(year: int) -> pd.DataFrame:
+    """
+    Load NTD Data stored in our warehouse.
+    """
+    df = (
+        tbls.mart_ntd.dim_annual_ntd_agency_information()
+        >> filter(_.year == year, _.state == "CA", _._is_current == True)
+        >> select(
+            _.number_of_state_counties,
+            _.uza_name,
+            _.density,
+            _.number_of_counties_with_service,
+            _.state_admin_funds_expended,
+            _.service_area_sq_miles,
+            _.population,
+            _.service_area_pop,
+            _.subrecipient_type,
+            _.primary_uza,
+            _.reporter_type,
+            _.organization_type,
+            _.agency_name,
+            _.voms_pt,
+            _.voms_do,
+        )
+        >> collect()
+    )
+
+    cols = list(df.columns)
+    df2 = df.sort_values(by=cols, na_position="last")
+    df3 = df2.groupby("agency_name").first().reset_index()
+
+    return df3
+
+def load_mobility()->pd.DataFrame:
+    """
+    Load mobility data in our warehouse.
+    """
+    df = (
+    tbls.mart_transit_database.dim_mobility_mart_providers()
+     >> select(
+        _.agency_name,
+        _.counties_served,
+        _.hq_city,
+        _.hq_county,
+        _.is_public_entity,
+        _.is_publicly_operating,
+        _.funding_sources,
+        _.on_demand_vehicles_at_max_service,
+        _.vehicles_at_max_service
+    )
+    >> collect()
+    )
+    
+    cols = list(df.columns)
+    df2 = df.sort_values(by=cols, na_position='last')
+    df2 = df2.sort_values(by=["on_demand_vehicles_at_max_service","vehicles_at_max_service"], ascending = [False, False])
+    df3 = df2.groupby('agency_name').first().reset_index()
+    return df3
+
+def merge_ntd_mobility(year:int)->pd.DataFrame:
+    ntd = load_ntd(year)
+    mobility = load_mobility()
+    m1 = pd.merge(
+    mobility,
+    ntd,
+    how="inner",
+    on="agency_name")
+    agency_dict = {
+    "City of Fairfield, California": "City of Fairfield",
+    "Livermore / Amador Valley Transit Authority": "Livermore-Amador Valley Transit Authority",
+    "Nevada County Transit Services": "Nevada County",
+    "Omnitrans": "OmniTrans"}
+    
+    m1.agency_name = m1.agency_name.replace(agency_dict)
+    return m1
+
+def ntd_operator_info(year:int, organization_name:str)->pd.DataFrame:
+    ntd_mobility_df = merge_ntd_mobility(year)
+    op_profiles = op_prep.operators_with_rt()[['organization_name']]
+    op_profiles = op_profiles.loc[op_profiles.organization_name == organization_name].reset_index(drop = True)
+    m1 = pd.merge(op_profiles, ntd_mobility_df,
+                 how = "inner", left_on = ["organization_name"],
+                 right_on = ["agency_name"])
+    
+    m1 = m1.fillna('None')
+    return m1
 
 """
 Data Manipulation
@@ -104,6 +198,12 @@ def get_counties():
 
     return my_gdf
 
+def concat_all_columns(df):
+    # Concatenate all columns into a new column called 'all'
+    df['all'] = df.apply(lambda row: ', '.join(row.astype(str)), axis=1)
+
+    return df
+
 def counties_served(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     """
     Find which counties an operator serves.
@@ -113,17 +213,15 @@ def counties_served(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     gdf,
     ca_counties.to_crs(gdf.crs),
     how="inner",
-    predicate="intersects",
-).drop(columns="index_right")
+    predicate="intersects").drop(columns="index_right")
     
-    counties_served = counties_served[["county_name"]].drop_duplicates().reset_index(drop = True)
-    counties_served['county_name'] = "-" + counties_served['county_name']
-    display(
-        counties_served.style.hide(axis="index")
-        .hide(axis="columns")
-        .set_properties(**{"background-color": "white"})
-        .set_table_styles([{"selector": "td, th", "props": [("text-align", "center")]}])
-    )
+    counties_served = (counties_served[["county_name"]]
+                       .drop_duplicates()
+                       .sort_values(by = ["county_name"])
+                       .reset_index(drop = True)
+                      )
+    counties_served = concat_all_columns(counties_served)
+    return counties_served
 
 def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     df = (
@@ -136,7 +234,7 @@ def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
 def summarize_monthly(df:pd.DataFrame)->pd.DataFrame:
     df2 = (
     df.groupby(
-        ['name', 'full_date','time_of_day', 'day_name']
+        ['name', 'month','time_of_day', 'day_name']
     )
     .agg(
         {
@@ -193,13 +291,13 @@ def count_days_in_months(dates: list) -> pd.DataFrame:
     df = pd.DataFrame.from_dict(day_counts, orient="index")
     df = df.reset_index()
     df["level_1"] = df["level_1"].astype(str).str.zfill(2)
-    df["full_date"] = df.level_0.astype(str) + "-" + df.level_1.astype(str)
+    df["month"] = df.level_0.astype(str) + "-" + df.level_1.astype(str)
     df = df.drop(columns=["level_0", "level_1"])
     
     # Melt from wide to long
     df2 = pd.melt(
     df,
-    id_vars=["full_date"],
+    id_vars=["month"],
     value_vars=[
         "Monday",
         "Tuesday",
@@ -208,7 +306,7 @@ def count_days_in_months(dates: list) -> pd.DataFrame:
         "Friday",
         "Saturday",
         "Sunday",
-        "full_date",
+        "month",
     ])
     
     df2 = df2.rename(columns = {"variable":"day_name", "value":"n_days"})
@@ -228,7 +326,7 @@ def total_monthly_service(name:str) ->pd.DataFrame:
     agg_df = summarize_monthly(df)
     
     # Merge on number of day types
-    agg_df = pd.merge(agg_df, month_days_df, on =["full_date", "day_name"], how = "left")
+    agg_df = pd.merge(agg_df, month_days_df, on =["month", "day_name"], how = "left")
     
     # Find daily service hours
     agg_df["Daily Service Hours"] = agg_df.ttl_service_hours / agg_df.n_days
@@ -293,7 +391,7 @@ def single_bar_chart_dropdown(
         title = {
                 "text": [title],
                 "subtitle": [subtitle],
-            }, width=500, height=300)
+            }, width=400, height=250)
     chart = chart.add_params(selector).transform_filter(selector)
 
     display(chart)
@@ -316,7 +414,7 @@ def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str,
         ),
         tooltip = [x_col, y_col])
         .properties(
-            width=500,
+            width=400,
             title={
                 "text": [title],
                 "subtitle": [subtitle],
@@ -339,8 +437,8 @@ def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str
             ),
             tooltip=df.columns.tolist(),
         ).properties(
-            width=250,
-            height=300,
+            width=400,
+            height=250,
             title={
                 "text": [title],
                 "subtitle": [subtitle],
@@ -356,8 +454,8 @@ def plot_route(route):
     filtered_gdf = gdf[gdf["Route"] == route]
     display(filtered_gdf.explore(column="Route", cmap = "Spectral",
     tiles="CartoDB positron",
-    width=500,
-    height=300,
+    width=400,
+    height=250,
     style_kwds={"weight": 3},
     legend=False,
     tooltip=["Route", "Service Miles"]))
@@ -369,8 +467,8 @@ def interactive_map(gdf:gpd.GeoDataFrame):
         filtered_gdf = gdf[gdf["Route"] == route]
         display(filtered_gdf.explore(column="Route", cmap = "Spectral",
         tiles="CartoDB positron",
-        width=500,
-        height=300,
+        width=400,
+        height=250,
         style_kwds={"weight": 3},
         legend=False,
         tooltip=["Route", "Service Miles"]))

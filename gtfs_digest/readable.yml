@@ -30,10 +30,10 @@ is_late:
 n_vp_trips: "# Trips with VP"
 vp_per_minute: "Average VP per Minute"
 pct_in_shape: "% VP within Scheduled Shape"
-pct_rt_journey_atleast1_vp: "% Actual Trip Minutes with 1+ VP per Minute"
-pct_rt_journey_atleast2_vp: "% Actual Trip Minutes with 2+ VP per Minute"
-pct_sched_journey_atleast1_vp: "% Scheduled Trip Minutes with 1+ VP per Minute"
-pct_sched_journey_atleast2_vp: "% Scheduled Trip Minutes with 2+ VP per Minute"
+pct_rt_journey_atleast1_vp: "% Actual Trip with 1+ VP per min"
+pct_rt_journey_atleast2_vp: "% Actual Trip with 2+ VP per min"
+pct_sched_journey_atleast1_vp: "% Scheduled Trip with 1+ VP per min"
+pct_sched_journey_atleast2_vp: "% Scheduled Trip with 2+ VP per min"
 rt_sched_journey_ratio: "Realtime versus Scheduled Service Ratio"
 avg_rt_service_minutes: "Average Actual Service (Trip Minutes)"
 speed_mph: "Speed (MPH)"
@@ -84,6 +84,8 @@ p50_mph: "Cutoff Speed for 50th Percentile"
 p80_mph: "Cutoff Speed for 80th Percentile"
 stop_pair_name: "Stop Pairs"
 
+# NTD
+
 # Captions for graphs
 # Section 1
 route_typology:
@@ -94,7 +96,7 @@ longest_shortest_route:
     subtitle: "In Miles"
 total_scheduled_hours:
     title: "Total Scheduled Service Hours by Time of Day"
-    subtitle: "Time of Day: AM Peak:7-9AM, Early AM:4-6AM, Evening:8-11PM, Midday: 10AM-2PM, Owl:12-3AM,PM Peak:3-7PM"
+    subtitle: "Time of Day:AM Peak:7-9AM, Early AM:4-6AM, Evening:8-11PM, Midday:10AM-2PM, Owl:12-3AM,PM Peak:3-7PM"
 daily_scheduled_hour:
     title: "Daily Scheduled Service Hours by Time of Day"
 
@@ -123,4 +125,4 @@ sched_vp_per_min_graph:
     title: "Percentage of Scheduled Trips with 1+/2+ Vehicle Positions"
 spatial_accuracy_graph:
     title: "Spatial Accuracy"
-    subtitle: "The percentage of vehicle positions that fall within the scheduled route shape reflects the accuracy of the collected spatial data."
+    subtitle: "The percentage of vehicle positions that fall within the route's scheduled shape (path) reflects the accuracy of the collected spatial data."
