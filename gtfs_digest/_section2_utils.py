@@ -683,13 +683,13 @@ def filtered_route(
 
     rt_journey_vp = pct_vp_journey(
         all_day,
-        "% Actual Trip with 1+ VP per min",
-         "% Actual Trip with 2+ VP per min"
+        "% Actual Trip w/ 1+ VP per min",
+         "% Actual Trip w/ 2+ VP per min"
     )
     sched_journey_vp = pct_vp_journey(
         all_day,
-       "% Scheduled Trip with 1+ VP per min",
-       "% Scheduled Trip with 2+ VP per min",
+       "% Scheduled Trip w/ 1+ VP per min",
+       "% Scheduled Trip w/ 2+ VP per min",
     )
 
     avg_scheduled_min_graph = (

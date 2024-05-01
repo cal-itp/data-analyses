@@ -7,7 +7,7 @@ from typing import Union
 from segment_speed_utils.project_vars import RT_SCHED_GCS
 from shared_utils import catalog_utils
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
-PORTFOLIO_SITE_YAML = Path("../portfolio/sites/test_gtfs_exploratory.yml")
+PORTFOLIO_SITE_YAML = Path("../portfolio/sites/gtfs_digest.yml")
 
 def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     """
