@@ -20,11 +20,13 @@
 * <s>Add in NTD data.</s>
 * Update Readme.MD
     * Cherry pick commit.
-* Consolidate the total service hours charts with Eric's findings. 
+    * Link to Methodology
+* <b>Consolidate the total service hours charts with Eric's findings.</b>
 * <s>Address Tiffany's comments
     * can you change the thickness of the line chart, looking a bit thick, no?
     * also in the text in the beginning, it's now reading like Apr, 2024, but should read Apr 2024
     * semi-annoying that the legend label runs off the page, perhaps the chart width needs to shrink by a little. the alternative seems more cumbersome, which is to inject a list into the legend</s>
+        * Amanda: Changed the name of legend values that were running off. 
     * <s>maybe work more headers in? there's just 2 main headers, but kind of a lot of sections, like "map of routes" (this one esp gets buried) probably can be its own, "route typology"</s>
     * spacing after the map is really big - why?
         * Amanda: Think this always happens with `.explore()` but I need to talk to Eric about using something else to display the maps because operators with a lot of routes gets very overwhelming. 
@@ -33,9 +35,10 @@
     *<s> spatial accuracy - static route shape -> scheduled shape (path)
         * Amanda: Confirm with Tiffany what this means? </s>
     * <s>GTFS always spelled like that, not Gtfs (in your text box for route dropdown)</s>
-    * name of the portfolio should be GTFS Digest, not GTFS Exploratory
+    * <s><b>name of the portfolio should be GTFS Digest, not GTFS Exploratory</b></s>
     * <s>colors for the average scheduled minutes for route...yellow/red may not be the best choice here, it's not a good or bad thing to be direction 0/1. the way yellow/red are used elsewhere does seem to indicate good vs bad.</s>
     * <s>can you write the counties served as a sentence? LA Metro: Los Angeles, Ventura, Orange (alphabetized).</s>
+        
 ### 4/30/2024
 * <s>Update readme.
     * 5/1 Check with Tiffany that this is what she's looking for.</s>

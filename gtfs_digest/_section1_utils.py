@@ -161,6 +161,7 @@ def merge_ntd_mobility(year:int)->pd.DataFrame:
     "Omnitrans": "OmniTrans"}
     
     m1.agency_name = m1.agency_name.replace(agency_dict)
+    m1.agency_name = m1.agency_name.str.strip()
     return m1
 
 def ntd_operator_info(year:int, organization_name:str)->pd.DataFrame:
@@ -220,6 +221,7 @@ def counties_served(gdf:gpd.GeoDataFrame)->pd.DataFrame:
                        .sort_values(by = ["county_name"])
                        .reset_index(drop = True)
                       )
+    counties_served = counties_served.T
     counties_served = concat_all_columns(counties_served)
     return counties_served
 
