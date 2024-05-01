@@ -20,11 +20,15 @@
     * 4/24: Done, using `07_crosswalk.ipynb`</s>
 * Eric: the maps from .explore() look pretty overwhelming when an operator has many routes. 
     * Can we modify the reports site maps to be used here too? 
+    
 ### 4/30/2024
-* Update readme.
-* Rebase off of main and update the URL for service_hours
-* Add in divider charts to Section 2 that sort the charts thematically.
-
+* <s>Update readme.
+    * 5/1 Check with Tiffany that this is what she's looking for.</s>
+* <s>Rebase off of main and update the URL for service_hours</s>
+* <s>Add in divider charts to Section 2 that sort the charts thematically.</s>
+* Add in NTD data.
+* Consolidate the total service hours charts with Eric's findings. 
+* 
 ### 4/29/2024
 #### To-Do
 *  <s>Routes Pie Chart
