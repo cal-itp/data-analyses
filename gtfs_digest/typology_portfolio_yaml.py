@@ -4,7 +4,7 @@ import yaml
 from pathlib import Path
 from typing import Union
 
-from segment_speed_utils.project_vars import RT_SCHED_GCS
+from update_vars import RT_SCHED_GCS
 
 PORTFOLIO_SITE_YAML = Path("../portfolio/sites/digest_typologies.yml")
 
