@@ -1,5 +1,5 @@
 directory: ./gtfs_digest/
-notebook: ./gtfs_digest/03_report_draft.ipynb
+notebook: ./gtfs_digest/03_report.ipynb
 parts:
 - chapters:
   - caption: District 01 - Eureka
@@ -125,5 +125,5 @@ parts:
       district: 12 - Irvine
     sections:
     - organization_name: Orange County Transportation Authority
-readme: ./gtfs_digest/README.md
-title: GTFS Exploratory
+readme: ./gtfs_digest/README_pipeline.md
+title: GTFS Digest
