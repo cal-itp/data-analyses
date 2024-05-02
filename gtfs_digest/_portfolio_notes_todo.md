@@ -1,37 +1,69 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
 * cd ../ && pip install -r portfolio/requirements.txt
 * python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
+* python portfolio/portfolio.py build gtfs_digest  --deploy 
 * cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
+* RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
 ### Running to-do list
 * Portfolio:
-    * Use the `readable.yml` 
-        * To create the charts.
-        * Rename dataframes.
     * Figure out Makefile situation.
-    * Yaml file generation going wrong. 
 * Charts 
     * Section 2
          * Vehicle Positions per Minute, % of RealTime Trips, % of Scheduled Trips, and Spatial Accuracy charts, figure out if there's a way to color the background so the bottom  red, middle is yellow, and the top is green to signify the different "zones/grades".
         * <b> Note 4/16 </b> Having a hard time getting this to work. Facet doesn't allow for layering and it seems like the background impacts the colors of the main chart, making everything hard to view.
         * Create an Altair chart with just a title/subtitle to divide out metrics about the quality of the rider's experience on a route vs the quality of the data collected about the route.
     * <s> Check YAML script
-    * Make sure there aren't any operators that have stuff in `sched_vp` but not in `operator_profile`
-    * 4/24: Done, using `07_crosswalk.ipynb`</s>
+        * Make sure there aren't any operators that have stuff in `sched_vp` but not in `operator_profile`
+        * 4/24: Done, using `07_crosswalk.ipynb`</s>
 * Eric: the maps from .explore() look pretty overwhelming when an operator has many routes. 
     * Can we modify the reports site maps to be used here too? 
+### 5/1/2024
+* <s>Add in NTD data.</s>
+* Update Readme.MD
+    * Cherry pick commit.
+    * Link to Methodology
+* <b>Consolidate the total service hours charts with Eric's findings.</b>
+* <s>Address Tiffany's comments
+    * can you change the thickness of the line chart, looking a bit thick, no?
+    * also in the text in the beginning, it's now reading like Apr, 2024, but should read Apr 2024
+    * semi-annoying that the legend label runs off the page, perhaps the chart width needs to shrink by a little. the alternative seems more cumbersome, which is to inject a list into the legend</s>
+        * Amanda: Changed the name of legend values that were running off. 
+    * <s>maybe work more headers in? there's just 2 main headers, but kind of a lot of sections, like "map of routes" (this one esp gets buried) probably can be its own, "route typology"</s>
+    * spacing after the map is really big - why?
+        * Amanda: Think this always happens with `.explore()` but I need to talk to Eric about using something else to display the maps because operators with a lot of routes gets very overwhelming. 
+    * <s>in the caption, pick a consistent spacing: Early AM:time vs Early AM: time</s>
+    * <s>monthly aggregation label Full Date actually refers to  Month</s>
+    *<s> spatial accuracy - static route shape -> scheduled shape (path)
+        * Amanda: Confirm with Tiffany what this means? </s>
+    * <s>GTFS always spelled like that, not Gtfs (in your text box for route dropdown)</s>
+    * <s><b>name of the portfolio should be GTFS Digest, not GTFS Exploratory</b></s>
+    * <s>colors for the average scheduled minutes for route...yellow/red may not be the best choice here, it's not a good or bad thing to be direction 0/1. the way yellow/red are used elsewhere does seem to indicate good vs bad.</s>
+    * <s>can you write the counties served as a sentence? LA Metro: Los Angeles, Ventura, Orange (alphabetized).</s>
+        
+### 4/30/2024
+* <s>Update readme.
+    * 5/1 Check with Tiffany that this is what she's looking for.</s>
+* <s>Rebase off of main and update the URL for service_hours</s>
+* <s>Add in divider charts to Section 2 that sort the charts thematically.</s>
 ### 4/29/2024
 #### To-Do
-* Routes Pie Chart
+*  <s>Routes Pie Chart
     * Confirm again that a route can fall into various categories.
     * D3 UCD only runs 19 unique routes but the piechart has like 30+ routes.
     * Same with D4 Central Contra Costa Transit Authority
-* Section 1 Total Service Hours
+    * Update with new cols: 'it's like downtown_local, local, coverage, rapid, express, rail'</s>
+* <s>Section 1 Total Service Hours
     * Dates should be sorted in descending order, so the most recent date is at the top
     * Make a new daily chart, continue automating finding the number of each type of day in a year. 
-    * Refine total hours across the month chart. 
+    * Refine total hours across the month chart.</s> 
 * Section 2
-    * Need to update `spatial_accuracy` subtitle.
+    * <s>Need to update `spatial_accuracy` subtitle.</s>
     * Continue troubleshooting the javascript message that has now appeared.
+        * Figured out the error was due to `def create_data_unavailable_chart():
+
+        chart = alt.LayerChart()
+    
+        return chart`
     
 ### 4/26/2024
 #### To-do Today
