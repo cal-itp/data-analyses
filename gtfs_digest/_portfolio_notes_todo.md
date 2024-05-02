@@ -17,6 +17,13 @@
         * 4/24: Done, using `07_crosswalk.ipynb`</s>
 * Eric: the maps from .explore() look pretty overwhelming when an operator has many routes. 
     * Can we modify the reports site maps to be used here too? 
+    
+### 5/2/2024
+* Update Makefile stuff.
+    * https://github.com/cal-itp/data-analyses/blob/main/ntd/Makefile#L4
+* Update README with some of the methodology FAQ.
+* Officially deploy portfolio
+    * https://github.com/cal-itp/data-analyses/blob/main/Makefile#L69
 ### 5/1/2024
 * <s>Add in NTD data.</s>
 * Update Readme.MD
