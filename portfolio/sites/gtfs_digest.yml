@@ -125,5 +125,5 @@ parts:
       district: 12 - Irvine
     sections:
     - organization_name: Orange County Transportation Authority
-readme: ./gtfs_digest/README_pipeline.md
+readme: ./gtfs_digest/README.md
 title: GTFS Digest
