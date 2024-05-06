@@ -15,15 +15,32 @@
     * <s> Check YAML script
         * Make sure there aren't any operators that have stuff in `sched_vp` but not in `operator_profile`
         * 4/24: Done, using `07_crosswalk.ipynb`</s>
+
+### 5/6/2024
+* Next steps
 * Eric: the maps from .explore() look pretty overwhelming when an operator has many routes. 
     * Can we modify the reports site maps to be used here too? 
-    
-### 5/2/2024
+    * Check Total Service Hours charts.
+* Streamline code, some of the code for my charts is redundant.
+* NTD
+    * Ask people for feedback on the NTD copy.
+    * Try to connect the agencies by ntd_id instead of name? 
+    * Tiffany:
+        * Explain NTD_ID situation again? 
+    * Change NTD copy so it doesn't run off the page
+    * Alternatively, set the max width for each cell so nothing runs off?
 * Update Makefile stuff.
     * https://github.com/cal-itp/data-analyses/blob/main/ntd/Makefile#L4
-* Update README with some of the methodology FAQ.
+    * The goal is to write one line of code in the terminal and have the entire portfolio deploy each month.
+* When should this be updated every month? The beginning?
+* What will we do once we keep adding more months? Only display the last 24 months?
+* If I want to start on the bunching metric, which folder do I work out of? 
+* Share this  w/ Evan?
+
+### 5/2/2024
+* <s>Update README with some of the methodology FAQ.
 * Officially deploy portfolio
-    * https://github.com/cal-itp/data-analyses/blob/main/Makefile#L69
+    * https://github.com/cal-itp/data-analyses/blob/main/Makefile#L69</s>
 ### 5/1/2024
 * <s>Add in NTD data.</s>
 * Update Readme.MD
