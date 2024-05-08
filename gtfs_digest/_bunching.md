@@ -5,7 +5,7 @@
     * One minute came from analyzing data. 
 
 2. [Wikipedia Bus Bunching](https://en.wikipedia.org/wiki/Bus_bunching)
-    * Two or more transit behicles that were scheduled at regular intervals are bunched together.
+    * Two or more transit vehicles that were scheduled at regular intervals are bunched together.
     * Occurs because the first vehicle falls behind the schedule.
     * The first vehicle picks up passengers who are actually waiting for the second vehicle.
     * Picking up these passengers delay the first vehicle even more, allowing the second bus to catch up and decrease the interval between them.
@@ -37,7 +37,7 @@
         * Create queue jump lanes, dedicated bus lanes, and signal priority.
      * MBTA flagged routes that are high frequency
           * High frequency is defined as 15 minutes or less. 
-          * Riders can arrive at the stop without checking.]
+          * Riders can arrive at the stop without checking.
           * Route 70
               * This route is slow because it is long, not frequent enough, and there is a short distance between each stop.
           * Routes 35/36/37
@@ -93,8 +93,27 @@ the range of actual headways), divided by the average (mean) headway.
     * This is different than frequency: frequency is how many times a bus stops at a particular stop.
     * If a bus of the same route passes a stop every 20 minutes, then that bus has a 20 minute headway and a frequency of 3x per hour.
     * 
-    
+9. Transit Capacity and Quality of Service Manual, Third Edition (2013)
+    * Page 199: Average headway chart 
+        * Average headway <= 5 minutes: bus bunching more likely
+        * > 5-10 minutes: bus bunching possible
+    * Page 225: Headways of 10 minutes or less: vehicle bunching more likely to occur. 
+        * Bunching: 2+ vehicles on the same route arrive together, followed by a long waiting period for another vehicle to come. 
+        * Bunching can be measured in terms of headway adherence: how closely a vehicle actually arrives versus its scheduled headway.
+        * Headway adherence: take the standard deviation of headways divided by average/mean headway. 
+            * Difficult to explain.
+            * But it's the best way to describe bunching.
+        * Use the chart on page 226 to determine how off a headway a route is. 
+    * <i>headway- the time interval between the passing
+of the front ends of successive transit units
+(vehicles or trains) moving along the same lane or
+track (or other guideway) in the same direction,
+usually expressed in minutes; see also service
+frequency.</i>
+
+
 # What is needed
+* Which GTFS data do I need.
 * Schedule data
     * See when a bus is supposed to arrive at each stop.
     * See which routes are "high frequency"
