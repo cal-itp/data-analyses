@@ -6,11 +6,9 @@ segmentize:
 	python cut_speedmap_segments.py    
 
 prep_roads:
-# run cut_road_segments and concatenate_road_segments once
+# run cut_road_segments once
 	#python cut_road_segments.py #cut once creates files needed to run in concat_road_segments
-	#python concatenate_road_segments.py 
 	python shapes_roads_crosswalk.py     
-	#python road_cutpoints.py 
 	python sjoin_vp_to_roads.py 
     
 speeds_pipeline:
