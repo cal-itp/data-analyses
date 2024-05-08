@@ -129,6 +129,6 @@ road_segments:
   timestamp_col: ${speed_vars.timestamp_col}
 
 shared_data:
-  gcs_dir: ${gcs_paths.SHARED_GCS}
+  dir: ${gcs_paths.SHARED_GCS}
   road_segments_twomile: segmented_roads_twomile_2020
   road_segments_onekm: segmented_roads_onekm_2020
