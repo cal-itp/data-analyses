@@ -48,9 +48,10 @@ def amtrak_trips(
 
 def exclude_scheduled_operators(
     trips: pd.DataFrame, 
+    analysis_date: str,
     exclude_me: list = ["*Flex"],
     include_amtrak_routes: list = CA_AMTRAK
-):
+) -> pd.DataFrame:
     """
     Exclude certain operators by name.
     Here, we always want to exclude Amtrak Schedule because
@@ -77,45 +78,6 @@ def exclude_scheduled_operators(
     ].reset_index(drop=True)
     
     return trips
-
-
-def get_trips_with_geom(
-    analysis_date: str,
-    trip_cols: list = ["feed_key", "name", 
-                       "trip_id", "shape_array_key"],
-    exclude_me: list = ["Amtrak Schedule", "*Flex"],
-    crs: str = "EPSG:3310"
-) -> gpd.GeoDataFrame:
-    """
-    Merge trips with shapes. 
-    Also exclude Amtrak and Flex trips.
-    """
-    shapes = helpers.import_scheduled_shapes(
-        analysis_date, 
-        columns = ["shape_array_key", "geometry"],
-        get_pandas = True,
-        crs = crs
-    )
-
-    trips = helpers.import_scheduled_trips(
-        analysis_date,
-        columns = trip_cols,
-        get_pandas = True
-    )
-    
-    trips = exclude_scheduled_operators(
-        trips, 
-        exclude_me
-    )
-
-    trips_with_geom = pd.merge(
-        shapes,
-        trips,
-        on = "shape_array_key",
-        how = "inner"
-    ).drop_duplicates().reset_index(drop=True)
-    
-    return trips_with_geom
 
 
 def stop_arrivals_per_stop(
@@ -460,6 +422,8 @@ def longest_shape_by_route_direction(
     analysis_date: str
 ) -> gpd.GeoDataFrame:
     """
+    For every route-direction, keep the row with 
+    longest length (meters) for shape_array_key.
     """
     routes = helpers.import_scheduled_trips(
         analysis_date,
