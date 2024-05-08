@@ -29,49 +29,20 @@ def shape_geom_to_route_geom(
     analysis_date: str
 ) -> gpd.GeoDataFrame: 
     """
-    Merge routes and trips to get line geometry.
+    Get longest shape for route-direction and tag
+    what category it is for parallel routes.
     """
-    cols_to_keep = ["route_id", "shape_id", "geometry"]
-    operator_cols = ["feed_key", "name"]
-    
-    df = gtfs_schedule_wrangling.get_trips_with_geom(
-        analysis_date,
-        trip_cols = operator_cols + [ 
-                     "trip_id",
-                     "shape_id","shape_array_key", 
-                     "route_id", "route_type"
-                    ],
-        exclude_me = ["Amtrak Schedule", "*Flex"],
-        crs = geography_utils.CA_StatePlane
-        # make sure units are in feet
-    )
-       
-    # Merge trips with the shape's line geom, and get it to shape_id level
-    df = (df[operator_cols + cols_to_keep + ["route_type"]]
-        .drop_duplicates(subset=operator_cols + ["shape_id"])
-        .reset_index(drop=True)
-    )
-    
-    # Now, get it from shape_id level to route_id level
-    routes = create_parallel_corridors.process_transit_routes(
-        df, operator_cols = operator_cols 
-    ) 
-    
-    # Add gtfs_dataset_name back
-    feed_gtfs_data_crosswalk = helpers.import_scheduled_trips(
-        analysis_date,
-        columns = ["feed_key", "gtfs_dataset_key"],
-        get_pandas = True
+    longest_shape = gtfs_schedule_wrangling.longest_shape_by_route_direction(
+        analysis_date
     ).rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})
     
-    routes2 = pd.merge(
-        routes,
-        feed_gtfs_data_crosswalk,
-        on = "feed_key",
-        how = "inner"
+    operator_cols = ["feed_key", "gtfs_dataset_key"]
+
+    routes = create_parallel_corridors.process_transit_routes(
+        longest_shape, operator_cols = operator_cols 
     )
     
-    return routes2
+    return routes
 
     
 def aggregate_trip_service_to_route_level(
@@ -148,15 +119,16 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    route_cols = ["gtfs_dataset_key", "feed_key", "name", "route_id"]
+    route_cols_no_name = ["gtfs_dataset_key", "feed_key", "route_id"]
+    route_cols = route_cols_no_name + ["name"]
     
-    # Merge to get shape_level geometry, then pare down to route-level geometry
-    route_geom = shape_geom_to_route_geom(
+    # Get longest shape by route-direction
+    routes = shape_geom_to_route_geom(
         ANALYSIS_DATE)
-
-    # Add district
-    route_geom_with_district = add_district(route_geom, route_cols)
-
+    
+    # Add district    
+    route_geom_with_district = add_district(routes, route_cols_no_name)
+    
     # Get route-level service
     route_service = aggregate_trip_service_to_route_level(ANALYSIS_DATE, route_cols)
     
@@ -164,7 +136,7 @@ if __name__ == "__main__":
     gdf = pd.merge(
         route_geom_with_district,
         route_service,
-        on = route_cols,
+        on = route_cols_no_name,
         how = "left",
         validate = "1:1"
     )

@@ -90,7 +90,7 @@ def get_service_hours_summary_table(df: pd.DataFrame)-> pd.DataFrame:
 
 def get_delay_summary_table(df: pd.DataFrame) -> pd.DataFrame:
     # Note: merge_delay both narrows down the dataset quite a bit
-    delay_df = df[df.rt_sched_category=="rt_and_sched"]
+    delay_df = df[df.rt_sched_category=="schedule_and_vp"]
     
     delay_summary = aggregate_calculate_percent_and_average(
         delay_df,
