@@ -4,4 +4,4 @@ quarterly_performance_report:
 	python A2_generate_routes_on_shn_data.py
 	python A3_categorize_routes.py
 	python A4_add_route_speeds.py
-    
+	#cd ../ && make build_quarterly_performance_metrics -f Makefile
