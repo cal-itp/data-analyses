@@ -22,16 +22,6 @@ def labeling(word: str) -> str:
         .replace("Ttl", "Total")
     )
 
-red_green_yellow = ["#ec5d3b", "#fde18d", "#7cc665"]
-
-# Good for reversing so that red is for higher values, green for lower
-green_red_yellow = ["#7cc665","#fde18d", "#ec5d3b", ]
-
-# 6 colors: Red, orange, yellow, green, light blue, dark blue
-service_hour_scale = ["#7cc665", "#fcaa5f", "#fde18d", "#ec5d3b", "#3b56a4", "#49a2b2"]
-
-# Less garish colors
-section1 = ["#fde18d","#49a2b2"]
 """
 Yaml
 """
