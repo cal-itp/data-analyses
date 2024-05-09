@@ -22,7 +22,7 @@ catalog = intake.open_catalog("*.yml")
 def calculate_frequency(
     df: pd.DataFrame,
     group_cols: list = [
-        "schedule_gtfs_dataset_key", "day_name", 
+        "schedule_gtfs_dataset_key", "name", "day_name", 
         "departure_hour", "shape_id", "route_id"]
 ) -> pd.DataFrame:
     """
@@ -120,12 +120,13 @@ def clip_shapes(
 
 def get_shapes(selected_date: str) -> gpd.GeoDataFrame:
     """
-    Get shapes and calculate length of shape in feet.
+    Get shapes and calculate length of shape in meters.
     """
     # Add schedule gtfs_dataset_key to use instead of feed_key
     natural_ids = helpers.import_scheduled_trips(
         selected_date,
-        columns = ["gtfs_dataset_key", "shape_array_key", "shape_id"],
+        columns = ["gtfs_dataset_key", "name", 
+                   "shape_array_key", "shape_id"],
         get_pandas = True
     ).drop_duplicates()
     
@@ -174,7 +175,7 @@ def dissolve_census_tracts(
     return tracts_by_category   
 
 
-def generate_shape_categories(date_list: str):
+def generate_shape_categories(date_list: list):
     """
     Concatenate shapes file for list of dates.
     Dissolve census tracts by urban / suburban / rural.
@@ -182,11 +183,9 @@ def generate_shape_categories(date_list: str):
     based on plurality.
     """
     shapes = delayed(pd.concat)([
-        get_shapes(d).assign(
-            service_date = pd.to_datetime(d)
-        ) for d in date_list], 
+        get_shapes(d) for d in date_list], 
         axis=0, ignore_index=True
-    )
+    ).drop_duplicates(subset="shape_array_key")
     
     # Dissolve census tracts by urban / suburban / rural
     census_tracts = dissolve_census_tracts()
@@ -221,12 +220,16 @@ def generate_shape_categories(date_list: str):
 
     shapes = compute(shapes)[0]
     
+    # we grab 3 dates, just in case shape_array_keys change
+    # in this time period
+    # so we want to drop dupes and keep all possible shape_array_keys
     shapes_categorized = pd.merge(
         shapes,
         results,
         on = "shape_array_key",
         how = "left"
-    )     
+    ).drop_duplicates().reset_index(drop=True).rename(
+        columns = {"total_length": "total_length_meters"})     
     
     utils.geoparquet_gcs_export(
         shapes_categorized, 
@@ -301,7 +304,7 @@ if __name__ == "__main__":
     )
 
     shape_cols = [
-        "schedule_gtfs_dataset_key", "day_name", 
+        "schedule_gtfs_dataset_key", "name", "day_name", 
         "departure_hour", 
         "shape_id", "route_id"
     ]
@@ -310,10 +313,10 @@ if __name__ == "__main__":
         df,
         group_cols = shape_cols
     )
-
+    
     time1 = datetime.datetime.now()
     print(f"get frequency by route: {time1 - start}")
-
+    
     frequency_by_route = compute(frequency_by_route)[0]
     frequency_by_route.to_parquet(f"{DATA_PATH}shape_frequency.parquet")
     
@@ -323,6 +326,7 @@ if __name__ == "__main__":
         f"{DATA_PATH}trip_run_times_{dates['wed']}.parquet",
         columns = ["schedule_gtfs_dataset_key"]
     ).schedule_gtfs_dataset_key.unique()
+    
     
     frequency_dfs = [
         delayed(pd.read_parquet)(
@@ -338,7 +342,7 @@ if __name__ == "__main__":
     results_ddf = dd.from_delayed(expanded_dfs) 
     
     SHAPES_PROCESSED_FILE = "shapes_processed"
-
+    
     # Partitioned parquet as a release valve since we're 
     # running close to memory
     results_ddf.to_parquet(
@@ -346,19 +350,20 @@ if __name__ == "__main__":
         partition_on = "schedule_gtfs_dataset_key",
         overwrite=True
     )
-
+    
     shapes_processed = pd.read_parquet(
         f"{DATA_PATH}{SHAPES_PROCESSED_FILE}/"
     )
-
+    
     shapes_processed.to_parquet(f"{DATA_PATH}{SHAPES_PROCESSED_FILE}.parquet")
 
     helpers.if_exists_then_delete(f"{DATA_PATH}{SHAPES_PROCESSED_FILE}/")
     print("delete partitioned")
-    
+    del shapes_processed
+
     time2 = datetime.datetime.now()
     print(f"save expanded df: {time2 - time1}")
-
+    
     generate_shape_categories(all_dates)
 
     time3 = datetime.datetime.now()

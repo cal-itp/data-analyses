@@ -22,7 +22,7 @@ def calculate_trip_run_time(selected_date: str) -> pd.DataFrame:
     """
     trips = helpers.import_scheduled_trips(
         selected_date,
-        columns = ["gtfs_dataset_key", "feed_key", 
+        columns = ["gtfs_dataset_key", "name", "feed_key", 
                    "trip_instance_key", "trip_id", 
                    "shape_id",
                    "route_id",
@@ -48,8 +48,7 @@ def calculate_trip_run_time(selected_date: str) -> pd.DataFrame:
     trips3 = trips3.assign(
         departure_hour = pd.to_datetime(
             trips3.trip_first_departure_datetime_pacific).dt.hour,
-        day_name = pd.to_datetime(
-            trips3.trip_first_departure_datetime_pacific).dt.day_name(),
+        day_name = pd.to_datetime(selected_date).day_name(),
     )
     
     trips3.to_parquet(f"{DATA_PATH}trip_run_times_{selected_date}.parquet")
