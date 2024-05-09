@@ -11,16 +11,29 @@
     * Section 2
          * Vehicle Positions per Minute, % of RealTime Trips, % of Scheduled Trips, and Spatial Accuracy charts, figure out if there's a way to color the background so the bottom  red, middle is yellow, and the top is green to signify the different "zones/grades".
         * <b> Note 4/16 </b> Having a hard time getting this to work. Facet doesn't allow for layering and it seems like the background impacts the colors of the main chart, making everything hard to view.
-        * Create an Altair chart with just a title/subtitle to divide out metrics about the quality of the rider's experience on a route vs the quality of the data collected about the route.
+        <s>* Create an Altair chart with just a title/subtitle to divide out metrics about the quality of the rider's experience on a route vs the quality of the data collected about the route.</s>
     * <s> Check YAML script
         * Make sure there aren't any operators that have stuff in `sched_vp` but not in `operator_profile`
         * 4/24: Done, using `07_crosswalk.ipynb`</s>
 
+### 5/10/2024
+* How to display only the first value before filtering for charts. Right now, the charts show stuff for all months/routes and this is confusing.
+
+### 5/9/2024 To-Do
+* <s>Frequency Chart: make the colors a set range, so all routes will always be dark green if a bus going that route and direction comes by every 10 minutes, dark red if every 60 minutes.</s>
+* <s>Spatial Accuracy: Confirm with Tiffany about buffer and add the buffer into the subtitle.</s>
+
+### 5/8/2024 To-Do 
+* <s>% RT Journey Chart with VP: delete</s>
+* <s>Total Monthly Scheduled Service Chart: delete</s>
+* <s>Speed Chart: use different colors. Red, green, and yellow suggest bad, good, and ok.</s>
+
+* <s>Route Typology Chart: remove the subtitle. Add in a blurb from the methodology.md about how routes are categorized. Add a hyperlink to NACTO Route guide.</s>
 ### 5/6/2024
-* Next steps
-* Eric: the maps from .explore() look pretty overwhelming when an operator has many routes. 
+<s>* Eric: the maps from .explore() look pretty overwhelming when an operator has many routes. 
     * Can we modify the reports site maps to be used here too? 
-    * Check Total Service Hours charts.
+    * Check Total Service Hours charts.</s>
+    * 5/8: Not worth the effort and people probably won't even interact with the map to look at a singular/a few routes.
 * Streamline code, some of the code for my charts is redundant.
 * NTD
     * Ask people for feedback on the NTD copy.
@@ -33,9 +46,7 @@
     * https://github.com/cal-itp/data-analyses/blob/main/ntd/Makefile#L4
     * The goal is to write one line of code in the terminal and have the entire portfolio deploy each month.
 * When should this be updated every month? The beginning?
-* What will we do once we keep adding more months? Only display the last 24 months?
 * If I want to start on the bunching metric, which folder do I work out of? 
-* Share this  w/ Evan?
 
 ### 5/2/2024
 * <s>Update README with some of the methodology FAQ.

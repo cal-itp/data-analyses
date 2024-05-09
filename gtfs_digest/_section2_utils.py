@@ -3,7 +3,6 @@ import geopandas as gpd
 import pandas as pd
 
 # Charts
-from calitp_data_analysis import calitp_color_palette as cp
 import altair as alt
 alt.data_transformers.enable('default', max_rows=None)
 import _report_utils
@@ -24,52 +23,25 @@ GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 import yaml
 with open("readable.yml") as f:
     readable_dict = yaml.safe_load(f)
-    
+
+# Color Palette 
+with open("color_palettes.yml") as f:
+    color_dict = yaml.safe_load(f)
 """
 Schedule_vp_metrics
 Functions
 """
-def timeliness_tags(row):
-    if row.rt_sched_journey_ratio < 1:
-        return "Early"
-    elif row.rt_sched_journey_ratio < 1.1:
-        return "On Time"
-    elif 1.1 <= row.rt_sched_journey_ratio < 1.26:
-        return "Late by 1-25% of the scheduled time"
-    elif 1.26 <= row.rt_sched_journey_ratio < 1.51:
-        return "Late by 26-50% of the scheduled time"
-    elif 1.51 <= row.rt_sched_journey_ratio:
-        return "Late by 50%+ of the scheduled time"
+def cat_frequency(row):
+    if row.frequency_in_minutes <= 15:
+        return "Bus every <= 15 minutes"
+    elif 16 <= row.frequency_in_minutes <= 30:
+        return "Bus every 16-30 minutes"
+    elif 31 <= row.frequency_in_minutes <= 45:
+        return "Bus every 31-45 minutes"
+    elif 46 <= row.frequency_in_minutes <= 60:
+        return "Bus every 46-60 minutes"
     else:
-        return "No Info"
-      
-def vp_per_min_tag(row):
-    if row.vp_per_minute < 2:
-        return "<2 pings/minute"
-    elif 2 <= row.vp_per_minute < 3:
-        return "2-2.9 pings/minute"
-    elif 3 <= row.vp_per_minute:
-        return "3+ pings per minute (target)"
-    else:
-        return "No Info"
-
-def spatial_accuracy(row):
-    if row.pct_in_shape < 50:
-        return "<50% spatial accuracy"
-    elif 51 <= row.pct_in_shape < 76:
-        return "<75% spatial accuracy"
-    elif 76 <= row.pct_in_shape < 99:
-        return "< 100% spatial accuracy"
-    elif row.pct_in_shape == 100:
-        return "100% spatial accuracy"
-    else:
-        return "No Info"
-    
-def add_categories(df:pd.DataFrame) -> pd.DataFrame:
-    df["rt_sched_journey_ratio_cat"] = df.apply(timeliness_tags, axis=1)
-    df["vp_per_minute_cat"] = df.apply(vp_per_min_tag, axis=1)    
-    df["spatial_accuracy_cat"] = df.apply(spatial_accuracy, axis=1)    
-    return df
+        return "Bus every 60+ minutes"
 
 def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
@@ -98,7 +70,7 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     # Add a column that flips frequency to be every X minutes instead
     # of every hour.
     df["frequency_in_minutes"] = 60/df.frequency
-    
+    # df["frequency_in_minutes_cat"] = df.apply(cat_frequency, axis=1)    
     # Replace column names
     df.columns = df.columns.map(_report_utils.replace_column_names)
     return df 
@@ -330,13 +302,10 @@ def grouped_bar_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(
-                    range=_report_utils.section1,
+                scale=alt.Scale(range=color_dict["longest_shortest_route"]),
                 ),
-            ),
             tooltip=tooltip_cols,
-        )
-    )
+        ))
     chart = (chart).properties(
         title={
             "text": [title],
@@ -378,7 +347,7 @@ def base_facet_line(
                 color=alt.Color(
                     "Period:N",
                     title=_report_utils.labeling("Period"),
-                    scale=alt.Scale(range=_report_utils.red_green_yellow),
+                    scale=alt.Scale(range=color_dict["speed_mph_colors"]),
                 ),
                 tooltip=tooltip_cols,
             )
@@ -438,7 +407,7 @@ def base_facet_circle(
                 color=alt.Color(
                     f"{color_col}:N",
                     title=_report_utils.labeling(color_col),
-                    scale=alt.Scale(range=_report_utils.section1),
+                    scale=alt.Scale(range=color_dict["longest_shortest_route"]),
                 ),
                 tooltip=tooltip_cols,
             )
@@ -493,7 +462,7 @@ def base_facet_chart(
                 color=alt.Color(
                     f"{color_col}:N",
                     title=_report_utils.labeling(color_col),
-                    scale=alt.Scale(range=_report_utils.red_green_yellow),
+                    scale=alt.Scale(range=color_dict["red_green_yellow"]),
                 ),
                 tooltip=tooltip_cols,
             )
@@ -518,6 +487,8 @@ def base_facet_with_ruler_chart(
     ruler_col: str,
     title: str,
     subtitle: str,
+    domain_color:list,
+    range_color:list,
 ):
     tooltip_cols = [
         "Direction",
@@ -530,6 +501,12 @@ def base_facet_with_ruler_chart(
 
     max_y = set_y_axis(df, y_col)
     df = clean_data_charts(df, y_col)
+    
+    color_scale = alt.Scale(
+    domain= domain_color,
+    range = range_color
+    )
+    
     ruler = (
             alt.Chart(df)
             .mark_rule(color="red", strokeDash=[10, 7])
@@ -552,7 +529,7 @@ def base_facet_with_ruler_chart(
                 color=alt.Color(
                     f"{y_col}:Q",
                     title=_report_utils.labeling(y_col),
-                    scale=alt.Scale(range=_report_utils.red_green_yellow),
+                    scale=color_scale,
                 ),
                 tooltip=df[tooltip_cols].columns.tolist(),
             )
@@ -616,9 +593,15 @@ def frequency_chart(df: pd.DataFrame):
         + df.frequency_in_minutes.astype(int).astype(str)
         + " minutes"
     )
+    
+    color_scale = alt.Scale(
+    domain= color_dict["freq_domain"],
+    range = color_dict["freq_range"]
+    )
+    
     chart = (
         alt.Chart(df)
-        .properties(width=120, height=alt.Step(10))
+        .properties(width=180, height=alt.Step(10))
         .mark_bar()
         .encode(
             alt.Y(
@@ -633,7 +616,7 @@ def frequency_chart(df: pd.DataFrame):
             ),
             alt.Color(
                 "frequency_in_minutes:Q",
-                scale=alt.Scale(range=_report_utils.green_red_yellow),
+                scale=color_scale,
             ).title(_report_utils.labeling("frequency_in_minutes")),
             alt.Row("Period:N")
             .title(_report_utils.labeling("Period"))
@@ -681,15 +664,10 @@ def filtered_route(
     # Manipulate the df for some of the metrics
     timeliness_df = timeliness_trips(df)
 
-    rt_journey_vp = pct_vp_journey(
-        all_day,
-        "% Actual Trip w/ 1+ VP per min",
-         "% Actual Trip w/ 2+ VP per min"
-    )
     sched_journey_vp = pct_vp_journey(
         all_day,
-       "% Scheduled Trip w/ 1+ VP per min",
-       "% Scheduled Trip w/ 2+ VP per min",
+       "% Scheduled Trip w/ 1+ VP/Minute",
+      "% Scheduled Trip w/ 2+ VP/Minute",
     )
 
     avg_scheduled_min_graph = (
@@ -758,24 +736,14 @@ def filtered_route(
                 "ruler_for_vp_per_min",
                 readable_dict["vp_per_min_graph"]["title"],
                 readable_dict["vp_per_min_graph"]["subtitle"],
+                color_dict["vp_domain"],
+                color_dict["vp_range"]
             )
         )
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
-    # display(vp_per_min_graph)
-    rt_vp_per_min_graph = (
-        base_facet_circle(
-            rt_journey_vp,
-            "% of Actual Trip Minutes",
-            "Category",
-            "ruler_100_pct",
-            readable_dict["rt_vp_per_min_graph"]["title"],
-            readable_dict["rt_vp_per_min_graph"]["subtitle"],
-        )
-        .add_params(route_selector)
-        .transform_filter(route_selector)
-    )
+
     # display(rt_vp_per_min_graph)
     sched_vp_per_min = (
         base_facet_circle(
@@ -784,7 +752,7 @@ def filtered_route(
             "Category",
             "ruler_100_pct",
             readable_dict["sched_vp_per_min_graph"]["title"],
-            readable_dict["rt_vp_per_min_graph"]["subtitle"],
+            readable_dict["sched_vp_per_min_graph"]["subtitle"],
         )
         .add_params(route_selector)
         .transform_filter(route_selector)
@@ -797,6 +765,8 @@ def filtered_route(
             "ruler_100_pct",
             readable_dict["spatial_accuracy_graph"]["title"],
             readable_dict["spatial_accuracy_graph"]["subtitle"],
+            color_dict["spatial_accuracy_domain"],
+            color_dict["spatial_accuracy_range"]
         )
         .add_params(route_selector)
         .transform_filter(route_selector)
@@ -826,7 +796,6 @@ def filtered_route(
         speed_graph,
         data_quality,
         vp_per_min_graph,
-        rt_vp_per_min_graph,
         sched_vp_per_min,
         spatial_accuracy,
         text_dir0,
