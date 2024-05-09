@@ -11,7 +11,7 @@ from calitp_data_analysis.tables import tbls
 from siuba import *
 
 from calitp_data_analysis import utils, geography_utils
-from segment_speed_utils import helpers, gtfs_schedule_wrangling, sched_rt_utils
+from segment_speed_utils import helpers, gtfs_schedule_wrangling
 
 
 def calculate_trip_run_time(selected_date: str) -> pd.DataFrame:
@@ -22,7 +22,7 @@ def calculate_trip_run_time(selected_date: str) -> pd.DataFrame:
     """
     trips = helpers.import_scheduled_trips(
         selected_date,
-        columns = ["gtfs_dataset_key", "feed_key", 
+        columns = ["gtfs_dataset_key", "name", "feed_key", 
                    "trip_instance_key", "trip_id", 
                    "shape_id",
                    "route_id",
@@ -31,7 +31,7 @@ def calculate_trip_run_time(selected_date: str) -> pd.DataFrame:
         get_pandas = True
     )
     
-    time_of_day = sched_rt_utils.get_trip_time_buckets(selected_date)
+    time_of_day = gtfs_schedule_wrangling.get_trip_time_buckets(selected_date)
     
     trips2 = pd.merge(
         trips,
@@ -40,17 +40,15 @@ def calculate_trip_run_time(selected_date: str) -> pd.DataFrame:
         how = "inner"
     )
     
-    trips3 = trips2[
+    trips3 = trips2.loc[
         (trips2.trip_first_departure_datetime_pacific.notna()) & 
-        (trips2.service_minutes.notna())
-    ].reset_index(drop=True)
-    
-    
+        (trips2.scheduled_service_minutes.notna())
+    ]
+     
     trips3 = trips3.assign(
         departure_hour = pd.to_datetime(
             trips3.trip_first_departure_datetime_pacific).dt.hour,
-        day_name = pd.to_datetime(
-            trips3.trip_first_departure_datetime_pacific).dt.day_name(),
+        day_name = pd.to_datetime(selected_date).day_name(),
     )
     
     trips3.to_parquet(f"{DATA_PATH}trip_run_times_{selected_date}.parquet")
@@ -64,10 +62,11 @@ def aggregate_stop_times_add_stop_geometry(selected_date: str) -> pd.DataFrame:
     """
     stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
     
-    stop_times = helpers.import_assembled_stop_times_with_direction(
+    stop_times = helpers.import_scheduled_stop_times(
         selected_date,
         columns = stop_cols + ["stop_sequence", "geometry"],
         get_pandas = True,
+        with_direction = True,
         crs = geography_utils.WGS84
     )
     
@@ -122,12 +121,13 @@ def funding_table(is_current_status: bool):
     
 if __name__ == "__main__":
     from service_increase_vars import dates, DATA_PATH
-        
-    # (1) Get existing service 
-    for analysis_date in dates.values():
+    all_dates = list(dates.values())
+    
+    for analysis_date in all_dates:
+        # (1) Get existing service 
         calculate_trip_run_time(analysis_date)
     
-    # (2) Get daily bus stop arrivals with geometry
-    # Only do it for a weekday
-    aggregate_stop_times_add_stop_geometry(dates["wed"])
+        # (2) Get daily bus stop arrivals with geometry
+        # Only do it for a weekday
+        aggregate_stop_times_add_stop_geometry(analysis_date)
     
