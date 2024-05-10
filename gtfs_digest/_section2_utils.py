@@ -594,9 +594,12 @@ def frequency_chart(df: pd.DataFrame):
         + " minutes"
     )
     
+    # Define the fixed x-axis values
+    fixed_x_values = [0,30,60,90,120,150,180,210,240]
+    
     color_scale = alt.Scale(
-    domain= color_dict["freq_domain"],
-    range = color_dict["freq_range"]
+        domain= color_dict["freq_domain"],
+        range = color_dict["freq_range"]
     )
     
     chart = (
@@ -612,7 +615,7 @@ def frequency_chart(df: pd.DataFrame):
             alt.X(
                 "frequency_in_minutes:Q",
                 title=_report_utils.labeling("frequency_in_minutes"),
-                axis=None,
+                axis=alt.Axis(values=fixed_x_values, title="Frequency in Minutes")
             ),
             alt.Color(
                 "frequency_in_minutes:Q",
