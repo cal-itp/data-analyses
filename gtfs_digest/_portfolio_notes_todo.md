@@ -18,10 +18,16 @@
 
 ### 5/10/2024
 * How to display only the first value before filtering for charts. Right now, the charts show stuff for all months/routes and this is confusing.
+    * Still couldn't get this to work even with a very simple `cars` dataset from the Altair example. 
+    * Submitted a question onto StackOverflow for help. 
+* <s>Service Hour chart.</s>
+    * Show chart to Eric and Katrina & double check the aggregation with Tiffany before making it into functions.
+* Add back cardinal directions to `direction_id`. 
 
 ### 5/9/2024 To-Do
 * <s>Frequency Chart: make the colors a set range, so all routes will always be dark green if a bus going that route and direction comes by every 10 minutes, dark red if every 60 minutes.</s>
 * <s>Spatial Accuracy: Confirm with Tiffany about buffer and add the buffer into the subtitle.</s>
+    * The buffer is 35m.
 
 ### 5/8/2024 To-Do 
 * <s>% RT Journey Chart with VP: delete</s>
