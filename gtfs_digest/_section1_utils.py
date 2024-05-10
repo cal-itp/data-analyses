@@ -32,6 +32,10 @@ import os
 from calitp_data_analysis.sql import query_sql
 from calitp_data_analysis.tables import tbls
 from siuba import *
+
+# Color Palette 
+with open("color_palettes.yml") as f:
+    color_dict = yaml.safe_load(f)
 """
 Data
 """
@@ -383,7 +387,7 @@ def single_bar_chart_dropdown(
                 f"{offset_col}:N",
                 title=_report_utils.labeling(offset_col),
                 scale=alt.Scale(
-                    range=_report_utils.service_hour_scale,
+                    range=color_dict["full_color_scale"],
                 ),
             ),
             tooltip=df.columns.tolist(),
@@ -411,7 +415,7 @@ def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str,
                 legend = None,
                 title=_report_utils.labeling(y_col),
                 scale=alt.Scale(
-                    range=_report_utils.section1,
+                    range=color_dict["longest_shortest_route"],
                 )
         ),
         tooltip = [x_col, y_col])
@@ -435,7 +439,7 @@ def basic_pie_chart(df: pd.DataFrame, color_col: str, theta_col: str, title: str
             color=alt.Color(
                 color_col, 
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=_report_utils.service_hour_scale)
+                scale=alt.Scale(range=color_dict["full_color_scale"])
             ),
             tooltip=df.columns.tolist(),
         ).properties(

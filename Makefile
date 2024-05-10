@@ -39,8 +39,8 @@ build_ntd_report:
 	make build_portfolio_site
 
 build_gtfs_digest:
-	$(eval export site = test_gtfs_exploratory)
-	#cd rt_segment_speeds / && pip install -r requirements.txt && cd ..
+	$(eval export site = gtfs_digest)
+	#cd rt_segment_speeds / && pip install -r requirements.txt && pip install altair_transform && cd ../_shared_utils && make setup_env && cd ..
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 
