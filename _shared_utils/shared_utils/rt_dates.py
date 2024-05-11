@@ -52,7 +52,13 @@ DATES = {
     "jan2024": "2024-01-17",
     "feb2024": "2024-02-14",
     "mar2024": "2024-03-13",
+    "apr2024a": "2024-04-15",
+    "apr2024b": "2024-04-16",
     "apr2024": "2024-04-17",
+    "apr2024c": "2024-04-18",
+    "apr2024d": "2024-04-19",
+    "apr2024e": "2024-04-20",
+    "apr2024f": "2024-04-21",
 }
 
 y2023_dates = [
@@ -62,16 +68,19 @@ y2023_dates = [
 y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
 
 
-def get_week(month: Literal["apr2023", "oct2023"], exclude_wed: bool) -> list:
+valid_weeks = ["apr2023", "oct2023", "apr2024"]
+
+
+def get_week(month: Literal[[*valid_weeks]], exclude_wed: bool) -> list:
     if exclude_wed:
         return [v for k, v in DATES.items() if month in k and not k.endswith(month)]
     else:
         return [v for k, v in DATES.items() if month in k]
 
 
-apr_week = get_week(month="apr2023", exclude_wed=False)
-oct_week = get_week(month="oct2023", exclude_wed=False)
-
+apr2023_week = get_week(month="apr2023", exclude_wed=False)
+oct2023_week = get_week(month="oct2023", exclude_wed=False)
+apr2024_week = get_week(month="apr2024", exclude_wed=False)
 
 # Planning and Modal Advisory Committee (PMAC) - quarterly
 PMAC = {
