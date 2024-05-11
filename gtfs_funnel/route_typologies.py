@@ -347,7 +347,8 @@ def reconcile_route_and_nacto_typologies(
     
     df2 = df.drop(columns = drop_cols)
     
-    df2[route_typologies] = df2[route_typologies].astype(int)
+    integrify = [f"is_{c}" for c in route_typologies]
+    df2[integrify] = df2[integrify].astype(int)
     
     return df2
 

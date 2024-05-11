@@ -28,3 +28,51 @@
 2024-04-18 11:14:49.191 | INFO     | __main__:<module>:203 - 2024-04-17: vp_direction script execution time: 0:09:44.292016
 2024-04-18 11:34:37.603 | INFO     | __main__:<module>:120 - 2024-04-17: condense vp for trip 0:06:16.809244
 2024-04-18 11:52:47.882 | INFO     | __main__:<module>:128 - 2024-04-17: prepare vp to use in nearest neighbor: 0:18:10.278588
+2024-05-10 11:39:16.205 | INFO     | __main__:<module>:169 - 2024-04-15: pare down vp: 0:03:10.039984
+2024-05-10 11:42:08.765 | INFO     | __main__:<module>:169 - 2024-04-16: pare down vp: 0:02:52.502500
+2024-05-10 11:44:57.534 | INFO     | __main__:<module>:169 - 2024-04-18: pare down vp: 0:02:48.768042
+2024-05-10 11:48:07.152 | INFO     | __main__:<module>:169 - 2024-04-19: pare down vp: 0:03:09.616184
+2024-05-10 11:49:52.497 | INFO     | __main__:<module>:169 - 2024-04-20: pare down vp: 0:01:45.343855
+2024-05-10 11:51:29.019 | INFO     | __main__:<module>:169 - 2024-04-21: pare down vp: 0:01:36.520840
+2024-05-10 11:57:17.861 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:05:24.773753
+2024-05-10 12:01:43.746 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:04:25.884382
+2024-05-10 12:01:52.251 | INFO     | __main__:<module>:194 - 2024-04-15: export vp direction: 0:09:59.163358
+2024-05-10 12:03:38.669 | INFO     | __main__:<module>:200 - 2024-04-15: export usable vp with direction: 0:01:46.418428
+2024-05-10 12:03:38.672 | INFO     | __main__:<module>:203 - 2024-04-15: vp_direction script execution time: 0:11:45.581786
+2024-05-10 12:08:39.885 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:05:01.211759
+2024-05-10 12:13:45.728 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:05:05.842444
+2024-05-10 12:13:54.844 | INFO     | __main__:<module>:194 - 2024-04-16: export vp direction: 0:10:16.170847
+2024-05-10 12:15:52.988 | INFO     | __main__:<module>:200 - 2024-04-16: export usable vp with direction: 0:01:58.143219
+2024-05-10 12:15:53.006 | INFO     | __main__:<module>:203 - 2024-04-16: vp_direction script execution time: 0:12:14.314066
+2024-05-10 12:21:30.108 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:05:37.100148
+2024-05-10 12:26:09.751 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:04:39.643270
+2024-05-10 12:26:17.844 | INFO     | __main__:<module>:194 - 2024-04-18: export vp direction: 0:10:24.836501
+2024-05-10 12:27:59.237 | INFO     | __main__:<module>:200 - 2024-04-18: export usable vp with direction: 0:01:41.392283
+2024-05-10 12:27:59.254 | INFO     | __main__:<module>:203 - 2024-04-18: vp_direction script execution time: 0:12:06.228784
+2024-05-10 12:33:02.037 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:05:02.782786
+2024-05-10 12:37:37.516 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:04:35.478179
+2024-05-10 12:37:46.054 | INFO     | __main__:<module>:194 - 2024-04-19: export vp direction: 0:09:46.799415
+2024-05-10 12:39:38.466 | INFO     | __main__:<module>:200 - 2024-04-19: export usable vp with direction: 0:01:52.411853
+2024-05-10 12:39:38.469 | INFO     | __main__:<module>:203 - 2024-04-19: vp_direction script execution time: 0:11:39.211268
+2024-05-10 12:42:56.662 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:03:18.192319
+2024-05-10 12:45:52.450 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:02:55.788158
+2024-05-10 12:45:58.191 | INFO     | __main__:<module>:194 - 2024-04-20: export vp direction: 0:06:19.720963
+2024-05-10 12:47:04.445 | INFO     | __main__:<module>:200 - 2024-04-20: export usable vp with direction: 0:01:06.253707
+2024-05-10 12:47:04.447 | INFO     | __main__:<module>:203 - 2024-04-20: vp_direction script execution time: 0:07:25.974670
+2024-05-10 12:50:23.997 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:03:19.549817
+2024-05-10 12:53:04.781 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:02:40.784112
+2024-05-10 12:53:10.133 | INFO     | __main__:<module>:194 - 2024-04-21: export vp direction: 0:06:05.685282
+2024-05-10 12:54:11.508 | INFO     | __main__:<module>:200 - 2024-04-21: export usable vp with direction: 0:01:01.375528
+2024-05-10 12:54:11.510 | INFO     | __main__:<module>:203 - 2024-04-21: vp_direction script execution time: 0:07:07.060810
+2024-05-10 13:02:10.467 | INFO     | __main__:<module>:120 - 2024-04-15: condense vp for trip 0:07:04.448722
+2024-05-10 13:22:05.048 | INFO     | __main__:<module>:128 - 2024-04-15: prepare vp to use in nearest neighbor: 0:19:54.580804
+2024-05-10 13:29:03.821 | INFO     | __main__:<module>:120 - 2024-04-16: condense vp for trip 0:06:58.772493
+2024-05-10 13:48:54.484 | INFO     | __main__:<module>:128 - 2024-04-16: prepare vp to use in nearest neighbor: 0:19:50.662527
+2024-05-10 13:55:34.059 | INFO     | __main__:<module>:120 - 2024-04-18: condense vp for trip 0:06:39.571986
+2024-05-10 14:16:19.457 | INFO     | __main__:<module>:128 - 2024-04-18: prepare vp to use in nearest neighbor: 0:20:45.398029
+2024-05-10 14:23:31.810 | INFO     | __main__:<module>:120 - 2024-04-19: condense vp for trip 0:07:12.324248
+2024-05-10 14:43:01.732 | INFO     | __main__:<module>:128 - 2024-04-19: prepare vp to use in nearest neighbor: 0:19:29.922553
+2024-05-10 14:47:34.437 | INFO     | __main__:<module>:120 - 2024-04-20: condense vp for trip 0:04:32.701527
+2024-05-10 15:00:45.696 | INFO     | __main__:<module>:128 - 2024-04-20: prepare vp to use in nearest neighbor: 0:13:11.259507
+2024-05-10 15:04:47.876 | INFO     | __main__:<module>:120 - 2024-04-21: condense vp for trip 0:04:02.178762
+2024-05-10 15:17:00.643 | INFO     | __main__:<module>:128 - 2024-04-21: prepare vp to use in nearest neighbor: 0:12:12.767232
