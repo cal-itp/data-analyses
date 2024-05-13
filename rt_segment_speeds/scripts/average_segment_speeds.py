@@ -266,7 +266,7 @@ if __name__ == "__main__":
     
         
     '''
-    for one_week in [rt_dates.oct_week, rt_dates.apr_week]:
+    for one_week in [rt_dates.oct2023_week, rt_dates.apr2023_week]:
         start = datetime.datetime.now()
             
         multi_day_segment_averages(one_week, STOP_SEG_DICT)
