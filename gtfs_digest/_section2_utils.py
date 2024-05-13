@@ -15,6 +15,7 @@ from great_tables import md
 from IPython.display import HTML, Markdown, display
 
 # Other
+from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
 from shared_utils import catalog_utils, rt_dates, rt_utils
 
@@ -27,21 +28,94 @@ with open("readable.yml") as f:
 # Color Palette 
 with open("color_palettes.yml") as f:
     color_dict = yaml.safe_load(f)
+    
 """
 Schedule_vp_metrics
 Functions
 """
-def cat_frequency(row):
-    if row.frequency_in_minutes <= 15:
-        return "Bus every <= 15 minutes"
-    elif 16 <= row.frequency_in_minutes <= 30:
-        return "Bus every 16-30 minutes"
-    elif 31 <= row.frequency_in_minutes <= 45:
-        return "Bus every 31-45 minutes"
-    elif 46 <= row.frequency_in_minutes <= 60:
-        return "Bus every 46-60 minutes"
-    else:
-        return "Bus every 60+ minutes"
+def load_most_current_date() -> str:
+    # from shared_utils import rt_utils
+    dates_dictionary = rt_dates.DATES
+    date_list = list(dates_dictionary.items())
+    # Grab the last key-value pair
+    last_key, last_value = date_list[-1]
+    return last_value
+
+def merge_scheduled_stop_times(date: str,gtfs_schedule_key:str) -> pd.DataFrame:
+    stop_times_col = [
+        "feed_key",
+        "stop_id",
+        "stop_sequence",
+        "schedule_gtfs_dataset_key",
+        "trip_instance_key",
+        "shape_array_key",
+        "stop_name",
+        "prior_stop_sequence",
+        "subseq_stop_sequence",
+        "stop_pair",
+        "stop_pair_name",
+        "stop_primary_direction",
+        "stop_meters",
+    ]
+    stop_times_df = helpers.import_scheduled_stop_times(
+        date,
+        filters = [[('schedule_gtfs_dataset_key', '==', gtfs_schedule_key)]],
+        columns=stop_times_col, 
+        get_pandas=True, 
+        with_direction=True
+    )
+
+    scheduled_trips_df = helpers.import_scheduled_trips(
+        date,
+        filters = [[('gtfs_dataset_key', '==', gtfs_schedule_key)]],
+        columns=[
+            "route_id",
+            "trip_instance_key",
+            "gtfs_dataset_key",
+            "shape_array_key",
+            "direction_id",
+        ],
+    )
+
+    m1 = pd.merge(
+        scheduled_trips_df,
+        stop_times_df,
+        on=["trip_instance_key", "schedule_gtfs_dataset_key", "shape_array_key"],
+        how="inner",
+    )
+
+    return m1
+
+def find_cardinal_direction(date: str, gtfs_schedule_key:str)->pd.DataFrame:
+    
+    # Load merged scheduled stop times and trips
+    df = merge_scheduled_stop_times(date, gtfs_schedule_key)
+    
+    # Count total stops 
+    agg1 = (
+    df.groupby(
+        [
+            "route_id",
+            "schedule_gtfs_dataset_key",
+            "direction_id",
+            "stop_primary_direction",
+        ]
+    )
+    .agg({"stop_sequence": "count"})
+    .reset_index()
+    )
+    
+    # Sort and drop duplicates so that the 
+    # largest # of stops by stop_primary_direction is kept
+    agg2 = agg1.sort_values(
+    by=["route_id", "schedule_gtfs_dataset_key", "direction_id", "stop_sequence"],
+    ascending=[True, True, True, False])
+        
+    agg3 = agg2.drop_duplicates(
+        subset=["route_id", "schedule_gtfs_dataset_key", "direction_id"]
+    ).reset_index(drop=True)
+    
+    return agg3
 
 def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
@@ -70,10 +144,38 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     # Add a column that flips frequency to be every X minutes instead
     # of every hour.
     df["frequency_in_minutes"] = 60/df.frequency
-    # df["frequency_in_minutes_cat"] = df.apply(cat_frequency, axis=1)    
+    
     # Replace column names
     df.columns = df.columns.map(_report_utils.replace_column_names)
-    return df 
+    
+    # Replace 0/1 in Direction with cardinal direction
+    # First only grab the most recent date's gtfs_dataset_key
+    current_date = load_most_current_date()
+    schedule_vp_filtered = (df.loc[df.Date == current_date]).head(1)
+    target_gtfs_key = schedule_vp_filtered.schedule_gtfs_dataset_key.values[0]
+    
+    # Find cardinal direction
+    cardinal_direction_df = find_cardinal_direction(current_date, target_gtfs_key)
+    
+    # Left merge to keep  
+    m1 = pd.merge(
+    df,
+    cardinal_direction_df,
+    left_on=["schedule_gtfs_dataset_key", "Direction", "Route ID"],
+    right_on=["schedule_gtfs_dataset_key", "direction_id", "route_id"],
+    how="left")
+    
+    # Fill in unknown cardinal directions
+    m1.stop_primary_direction = m1.stop_primary_direction.fillna('Unknown')
+    
+    # Clean up
+    m1 = m1.drop(columns = ["direction_id", "route_id", "stop_sequence"])
+    m1 = m1.rename(columns = {'stop_primary_direction':'Cardinal Direction'})
+    
+    m1['temp_direction'] = m1['Direction']
+    m1['Direction'] = m1['Direction'].astype(str) + ' ' + m1['Cardinal Direction']
+    
+    return m1
 
 def route_stats(df: pd.DataFrame) -> pd.DataFrame:
     most_recent_date = df["Date"].max()
@@ -186,31 +288,6 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
 """
 Operator Level
 """
-def trips_by_gtfs(df):
-    df = df.loc[df["Period"] == "all_day"].reset_index(drop = True)
-    by_date_category = (
-    pd.crosstab(
-        df["Date"],
-        df["GTFS Availability"],
-        values=df["# scheduled trips"],
-        aggfunc="sum",
-    )
-    .reset_index()
-    .fillna(0))
-    
-    display(gt.GT(by_date_category, rowname_col="Date")
-    .tab_header(
-        title="Daily Trips by GTFS Availability",
-        subtitle="Schedule only indicates the trip(s) were found only in schedule data. Vehicle Positions (VP) only indicates the trip(s) were found only in real-time data.",
-    )
-    .cols_label(
-        schedule_only="Schedule Only",
-        vp_only="VP Only",
-        schedule_and_vp="Schedule and VP",
-    )
-    .fmt_integer(["schedule_only", "vp_only", "schedule_and_vp"])
-    .tab_options(container_width="75%")
-    .tab_options(table_font_size="12px"))
     
 """
 operator_schedule_rt_category
@@ -547,8 +624,10 @@ def base_facet_with_ruler_chart(
 
 def create_text_table(df: pd.DataFrame, direction: float):
 
-    df = df.loc[df["Direction"] == direction].drop_duplicates().reset_index(drop=True)
-
+    df = df.loc[df["temp_direction"] == direction].drop_duplicates().reset_index(drop=True)
+    
+    #cardinal_direction_title = df["Cardinal Direction"].values[0]
+    
     df2 = df.melt(
             id_vars=[
                 "Route",
@@ -579,7 +658,7 @@ def create_text_table(df: pd.DataFrame, direction: float):
             .mark_text()
             .encode(x=alt.X("Zero:Q", axis=None), y=alt.Y("combo_col", axis=None))
         )
-
+    
     text_chart = text_chart.encode(text="combo_col:N").properties(
             title=f"Route Statistics for Direction {direction}",
             width=400,
@@ -676,9 +755,9 @@ def filtered_route(
     avg_scheduled_min_graph = (
         grouped_bar_chart(
             df=all_day,
-            color_col="Direction",
+            color_col="Cardinal Direction",
             y_col="Average Scheduled Service (trip minutes)",
-            offset_col="Direction",
+            offset_col="Cardinal Direction",
             title=readable_dict["avg_scheduled_min_graph"]["title"],
             subtitle=readable_dict["avg_scheduled_min_graph"]["subtitle"],
         )
@@ -774,6 +853,7 @@ def filtered_route(
         .add_params(route_selector)
         .transform_filter(route_selector)
     )
+    """ 
     # display(spatial_accuracy)
     text_dir0 = (
         (create_text_table(route_stats_df, 0))
@@ -787,7 +867,7 @@ def filtered_route(
         .transform_filter(route_selector)
     )
     # display(text_dir1)
-    
+    """
     ride_quality = divider_chart(df, "The charts below measure the quality of the rider experience for this route.")
     data_quality = divider_chart(df, "The charts below describe the quality of GTFS data collected for this route.")
     chart_list = [
@@ -801,8 +881,6 @@ def filtered_route(
         vp_per_min_graph,
         sched_vp_per_min,
         spatial_accuracy,
-        text_dir0,
-        text_dir1,
     ]
 
      
