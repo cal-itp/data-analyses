@@ -68,6 +68,7 @@ stop_segments:
   stage2: "nearest/nearest_vp_shape_segments"
   stage3: "stop_arrivals"
   stage4: "speeds_stop_segments"
+  trip_stop_cols: ["trip_instance_key", "stop_sequence"]
   shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments"
   route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"
   route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
@@ -81,6 +82,7 @@ rt_stop_times:
   stage2: "nearest/nearest_vp_rt_stop_times"
   stage3: "rt_stop_times/stop_arrivals"
   stage4: "rt_stop_times/speeds"
+  trip_stop_cols: ["trip_instance_key", "stop_sequence"]
   segments_file: "segment_options/stop_segments"
   trip_speeds_single_summary: "rollup_singleday/speeds_trip"
   route_dir_single_summary: "rollup_singleday/speeds_route_dir"
@@ -94,9 +96,11 @@ speedmap_segments:
   dir: ${gcs_paths.SEGMENT_GCS}
   stage1: ${speeds_tables.usable_vp}
   proxy_stop_times: "stop_time_expansion/speedmap_stop_times"
-  stage2: "nearest/nearest_vp_speedmap"
-  stage3: "speedmap/stop_arrivals"
+  stage2: "nearest/nearest_vp_speedmap_proxy"
+  stage3: "speedmap/stop_arrivals_proxy"
+  stage3b: "speedmap/stop_arrivals"
   stage4: "speedmap/speeds"
+  trip_stop_cols: ["trip_instance_key", "stop_sequence", "stop_sequence1"]
   segments_file: "segment_options/speedmap_segments"
   speedmap_something_single_segment: "rollup_singleday/speeds_speedmap_segments"
   #shape_stop_multi_segment: "rollup_multiday/speeds_route_dir"
@@ -104,6 +108,7 @@ speedmap_segments:
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}
   min_meters_elapsed: 1609
+  segment_meters: 1000
 
 road_segments:
   dir: ${gcs_paths.SEGMENT_GCS}
