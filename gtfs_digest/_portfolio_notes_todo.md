@@ -7,22 +7,38 @@
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
-* Charts 
-    * Section 2
+
+### 5/16/2024
+* Rerun portfolio. 
+
+### 5/15/2024
+
+### 5/14/2024
+* Add explanations for why we chose these cutoffs in the `color_palette.yml`
+* Add back cardinal directions to `direction_id`. 
+    * I am done grabbing all the dates available, stacking them together, and aggregating for only one particular operator, let's call the dataframe `cardinal_dir_df`. 
+    * This is a big dataset, so I want to read in only the rows that are absolutely necessary. 
+    * When I merge this `cardinal_dir_df` with `sched_vp_df`, none of the routes match. I need to use [this script](https://github.com/cal-itp/data-analyses/blob/b1e5d4f870400251240eeba4a6515a0848e5d6f8/gtfs_funnel/clean_route_naming.py#L4) to clean up the names on the `cardinal_dir_df`
+* Displaying only the first route -> 
+    * Even after upgrading `altair` to the latest version of `5.3` I am still unable to accomplish this goal using the sample `cars` dataset. 
+### 5/13/2024
+* <s>For Service Hour Charts by weekday, Saturday, and Sunday.
+    * Added this to the target notebook for the GitHub site</s>
+* Didn't receive any answers to my question on  Stackoverflow yet about displaying only the first route. 
+* Add back cardinal directions to `direction_id`. 
+    * Met with Tiffany yesterday to understand how to aggregate everything properly. 
+* Section 2
          * Vehicle Positions per Minute, % of RealTime Trips, % of Scheduled Trips, and Spatial Accuracy charts, figure out if there's a way to color the background so the bottom  red, middle is yellow, and the top is green to signify the different "zones/grades".
         * <b> Note 4/16 </b> Having a hard time getting this to work. Facet doesn't allow for layering and it seems like the background impacts the colors of the main chart, making everything hard to view.
+        * <b> Note 5/13 </b>: I was able to get the background to be shaded perfectly for the `Service Hour Charts` but `faceting` charts causes this shading to become wonky. Therefore, this goal is now retired. 
         <s>* Create an Altair chart with just a title/subtitle to divide out metrics about the quality of the rider's experience on a route vs the quality of the data collected about the route.</s>
-    * <s> Check YAML script
-        * Make sure there aren't any operators that have stuff in `sched_vp` but not in `operator_profile`
-        * 4/24: Done, using `07_crosswalk.ipynb`</s>
-
 ### 5/10/2024
 * How to display only the first value before filtering for charts. Right now, the charts show stuff for all months/routes and this is confusing.
     * Still couldn't get this to work even with a very simple `cars` dataset from the Altair example. 
     * Submitted a question onto StackOverflow for help. 
 * <s>Service Hour chart.</s>
     * Show chart to Eric and Katrina & double check the aggregation with Tiffany before making it into functions.
-* Add back cardinal directions to `direction_id`. 
+
 
 ### 5/9/2024 To-Do
 * <s>Frequency Chart: make the colors a set range, so all routes will always be dark green if a bus going that route and direction comes by every 10 minutes, dark red if every 60 minutes.</s>
