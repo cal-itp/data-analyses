@@ -168,12 +168,15 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     # Fill in unknown cardinal directions
     m1.stop_primary_direction = m1.stop_primary_direction.fillna('Unknown')
     
+    # Filter out any unknown stops because these are just the first point
+    # m1 = m1.loc[m1.stop_primary_direction != 'Unknown']
+    
     # Clean up
     m1 = m1.drop(columns = ["direction_id", "route_id", "stop_sequence"])
     m1 = m1.rename(columns = {'stop_primary_direction':'Cardinal Direction'})
     
-    m1['temp_direction'] = m1['Direction']
-    m1['Direction'] = m1['Direction'].astype(str) + ' ' + m1['Cardinal Direction']
+    # m1['temp_direction'] = m1['Direction']
+    # m1['Direction'] = m1['Direction'].astype(str) + ' ' + m1['Cardinal Direction']
     
     return m1
 
@@ -755,9 +758,9 @@ def filtered_route(
     avg_scheduled_min_graph = (
         grouped_bar_chart(
             df=all_day,
-            color_col="Cardinal Direction",
+            color_col="Direction",
             y_col="Average Scheduled Service (trip minutes)",
-            offset_col="Cardinal Direction",
+            offset_col="Direction",
             title=readable_dict["avg_scheduled_min_graph"]["title"],
             subtitle=readable_dict["avg_scheduled_min_graph"]["subtitle"],
         )
