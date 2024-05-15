@@ -1,0 +1,129 @@
+directory: ./gtfs_digest/
+notebook: ./gtfs_digest/03_report.ipynb
+parts:
+- chapters:
+  - caption: District 01 - Eureka
+    params:
+      district: 01 - Eureka
+    sections:
+    - organization_name: City of Eureka
+    - organization_name: Lake Transit Authority
+    - organization_name: Mendocino Transit Authority
+    - organization_name: Redwood Coast Transit Authority
+  - caption: District 02 - Redding
+    params:
+      district: 02 - Redding
+    sections:
+    - organization_name: Shasta County
+  - caption: District 03 - Marysville
+    params:
+      district: 03 - Marysville
+    sections:
+    - organization_name: Butte County Association of Governments
+    - organization_name: City of Elk Grove
+    - organization_name: Nevada County
+    - organization_name: City of Rancho Cordova
+    - organization_name: Tahoe Transportation District
+    - organization_name: University of California, Davis
+    - organization_name: Yolo County Transportation District
+  - caption: District 04 - Oakland
+    params:
+      district: 04 - Oakland
+    sections:
+    - organization_name: Alameda-Contra Costa Transit District
+    - organization_name: Central Contra Costa Transit Authority
+    - organization_name: Emeryville Transportation Management Agency
+    - organization_name: City of Fairfield
+    - organization_name: Mountain View Transportation Management Association
+    - organization_name: Marin County Transit District
+    - organization_name: City and County of San Francisco
+    - organization_name: City of Petaluma
+    - organization_name: San Mateo County Transit District
+    - organization_name: Santa Clara Valley Transportation Authority
+    - organization_name: City of Santa Rosa
+    - organization_name: Solano County Transit
+    - organization_name: Cloverdale Transit
+    - organization_name: Eastern Contra Costa Transit Authority
+    - organization_name: Livermore-Amador Valley Transit Authority
+    - organization_name: City of Union City
+    - organization_name: Napa Valley Transportation Authority
+    - organization_name: Western Contra Costa Transit Authority
+    - organization_name: University of California, Berkeley
+    - organization_name: Presidio Trust
+  - caption: District 05 - San Luis Obispo
+    params:
+      district: 05 - San Luis Obispo
+    sections:
+    - organization_name: Monterey-Salinas Transit
+    - organization_name: Santa Barbara Metropolitan Transit District
+    - organization_name: San Luis Obispo Regional Transit Authority
+    - organization_name: Santa Cruz Metropolitan Transit District
+    - organization_name: City of Santa Maria
+    - organization_name: City of Solvang
+  - caption: District 06 - Fresno
+    params:
+      district: 06 - Fresno
+    sections:
+    - organization_name: City of Fresno
+    - organization_name: Golden Empire Transit District
+    - organization_name: Kings County Area Public Transit Agency
+    - organization_name: Madera County
+    - organization_name: City of Visalia
+  - caption: District 07 - Los Angeles
+    params:
+      district: 07 - Los Angeles
+    sections:
+    - organization_name: Antelope Valley Transit Authority
+    - organization_name: City of Redondo Beach
+    - organization_name: City of Santa Monica
+    - organization_name: University of California, Los Angeles
+    - organization_name: City of Burbank
+    - organization_name: City of Commerce
+    - organization_name: City of Culver City
+    - organization_name: City of Duarte
+    - organization_name: City of Gardena
+    - organization_name: City of Los Angeles
+    - organization_name: Los Angeles County Metropolitan Transportation Authority
+    - organization_name: City of Lawndale
+    - organization_name: Long Beach Transit
+    - organization_name: City of Norwalk
+    - organization_name: City of Pasadena
+    - organization_name: City of Santa Clarita
+    - organization_name: City of Torrance
+    - organization_name: Ventura County Transportation Commission
+    - organization_name: City of West Hollywood
+  - caption: District 08 - San Bernardino
+    params:
+      district: 08 - San Bernardino
+    sections:
+    - organization_name: City of Beaumont
+    - organization_name: Palo Verde Valley Transit Agency
+    - organization_name: OmniTrans
+    - organization_name: Riverside Transit Agency
+    - organization_name: Victor Valley Transit Authority
+  - caption: District 09 - Bishop
+    params:
+      district: 09 - Bishop
+    sections:
+    - organization_name: Eastern Sierra Transit Authority
+  - caption: District 10 - Stockton
+    params:
+      district: 10 - Stockton
+    sections:
+    - organization_name: San Joaquin Regional Transit District
+    - organization_name: Stanislaus Regional Transit Authority
+    - organization_name: City of Turlock
+    - organization_name: City of Escalon
+  - caption: District 11 - San Diego
+    params:
+      district: 11 - San Diego
+    sections:
+    - organization_name: North County Transit District
+    - organization_name: Flagship Cruises and Events Inc.
+  - caption: District 12 - Irvine
+    params:
+      district: 12 - Irvine
+    sections:
+    - organization_name: Orange County Transportation Authority
+readme: ./gtfs_digest/README.md
+title: GTFS Digest

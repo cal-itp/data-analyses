@@ -10,19 +10,20 @@ from segment_speed_utils import (helpers,
                                  gtfs_schedule_wrangling, 
                                  time_helpers
                                 )
-from segment_speed_utils.project_vars import SHARED_GCS, SCHED_GCS, PROJECT_CRS      
+from segment_speed_utils.project_vars import PROJECT_CRS   
 from shared_utils import rt_dates
+from update_vars import SHARED_GCS, SCHED_GCS
 
 road_cols = ["linearid", "mtfcc", "fullname"]
 road_segment_cols = road_cols + ["segment_sequence"]
 
-def buffer_roads(buffer_meters: int) -> gpd.GeoDataFrame:
+def buffer_roads(road_file: str, buffer_meters: int) -> gpd.GeoDataFrame:
     """
     Buffer 2 mile road segments
     """
     df = gpd.read_parquet(
         f"{SHARED_GCS}"
-        f"segmented_roads_twomile_2020.parquet",
+        f"{road_file}.parquet",
         columns = road_segment_cols + ["geometry"],
     ).to_crs(PROJECT_CRS)
     
@@ -83,10 +84,11 @@ def peak_stop_arrivals(analysis_date: str) -> gpd.GeoDataFrame:
     return stops_with_arrivals
 
 def spatial_join_stop_arrivals_to_roads(
+    road_file: str,
     analysis_date: str,
     buffer_meters: int
 ):
-    roads = buffer_roads(buffer_meters)
+    roads = buffer_roads(road_file, buffer_meters)
     arrivals = peak_stop_arrivals(analysis_date)
     
     # Spatial join - find peak arrivals in road segments
@@ -132,6 +134,7 @@ def spatial_join_stop_arrivals_to_roads(
     
     return
 
+
 def corridor_frequency_for_multiple_dates(
     analysis_date_list: list
 ) -> pd.DataFrame:
@@ -169,6 +172,8 @@ def corridor_frequency_for_multiple_dates(
 
 if __name__ == "__main__":
     
+    from update_vars import GTFS_DATA_DICT
+    
     analysis_date_list = [
         rt_dates.DATES["apr2023"], rt_dates.DATES["jul2023"],
         rt_dates.DATES["oct2023"], rt_dates.DATES["jan2024"]
@@ -180,7 +185,12 @@ if __name__ == "__main__":
         print(f"Analysis Date: {analysis_date}")
 
         ROAD_BUFFER_METERS = 50
-        spatial_join_stop_arrivals_to_roads(analysis_date, ROAD_BUFFER_METERS)
+        ROAD_FILE = GTFS_DATA_DICT.shared_data.road_segments_twomile
+
+        spatial_join_stop_arrivals_to_roads(
+            ROAD_FILE, analysis_date, 
+            ROAD_BUFFER_METERS
+        )
 
         end = datetime.datetime.now()
         print(f"attach peak stop arrivals to roads: {end - start}")

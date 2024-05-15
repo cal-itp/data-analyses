@@ -16,12 +16,12 @@ preprocess:
 	python cleanup.py
 	python vp_condenser.py
 	make route_typologies_data
-	python operator_scheduled_stats.py
+	python operator_scheduled_stats.py 
     
     
 route_typologies_data:
 	python route_typologies.py
-	#python schedule_stats_by_route_direction.py
+	python schedule_stats_by_route_direction.py
 
 # Start compiling scripts needed when we start concatenating several days
 # Clean route names for displaying across time

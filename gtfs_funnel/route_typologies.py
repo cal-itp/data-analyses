@@ -26,17 +26,102 @@ import pandas as pd
 from dask import delayed, compute
 
 from segment_speed_utils import gtfs_schedule_wrangling, helpers                       
-from segment_speed_utils.project_vars import SHARED_GCS, SCHED_GCS, PROJECT_CRS   
+from segment_speed_utils.project_vars import PROJECT_CRS   
 from shared_utils import rt_dates
+from update_vars import SHARED_GCS, SCHED_GCS, GTFS_DATA_DICT
 
 route_dir_cols = [
     "schedule_gtfs_dataset_key", 
     "route_id", "direction_id", 
     "common_shape_id", "route_name", "route_meters"
 ]
+
 typology_cols = ["freq_category", "typology"]
 road_cols = ["linearid", "mtfcc", "fullname"]
 road_segment_cols = road_cols + ["segment_sequence"]
+
+route_typologies = [
+    "downtown_local", "local", "coverage",
+    "rapid", "express", "rail"
+]
+
+def categorize_routes_by_name(
+    analysis_date: str
+) -> pd.DataFrame:
+    """
+    Look at how operator describes route (route_short_name,
+    route_long_name) and tag express / rapid / local / rail routes.
+    """
+    df = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["gtfs_dataset_key", "name", 
+                   "route_type", "route_id", 
+                   "route_long_name", "route_short_name"],
+        get_pandas = True
+    )
+    
+    # Fill in missing values
+    df = df.assign(
+        route_id = df.route_id.fillna(""),
+        route_short_name = df.route_short_name.fillna(""),
+        route_long_name = df.route_long_name.fillna(""),
+    )
+
+    df = df.assign(
+        combined_name = df.route_short_name + "__" + df.route_long_name
+    )
+    
+    typology_tags = df.apply(
+        lambda x: tag_rapid_express_rail(
+            x.combined_name, x.route_type), axis=1
+    )
+    
+    df2 = pd.concat([df, typology_tags], axis=1)
+
+    df2 = df2.assign(
+        is_local = df2.apply(
+            lambda x: 
+            1 if (x.is_express==0) and (x.is_rapid==0) and 
+            (x.is_rail==0)
+            else 0, axis=1).astype(int)
+    )
+    
+    return df2
+
+
+def tag_rapid_express_rail(
+    route_name_string: str, route_type_string: str
+) -> pd.Series:
+    """
+    Use the combined route_name and see if we can 
+    tag out words that indicate the route is
+    express, rapid, local, and rail.
+    
+    Treat rail as own category.
+    For local routes, we'll pass that through NACTO to see
+    if we can better categorize as downtown_local, local, or coverage.
+    """
+    route_name_string = route_name_string.lower()
+    
+    express = 0
+    rapid = 0
+    rail = 0
+    
+    if any(substring in route_name_string for substring in 
+           ["express", "limited"]):
+        express = 1
+    if "rapid" in route_name_string:
+        rapid = 1
+    
+    rail_types = ['0', '1', '2', '5', '6', '7', '11', '12']
+    if route_type_string in rail_types:
+        rail = 1
+    
+    return pd.Series(
+            [express, rapid, rail], 
+            index=['is_express', 'is_rapid', 'is_rail']
+        )
+
 
 def nacto_peak_frequency_category(freq_value: float) -> str:
     """
@@ -98,14 +183,16 @@ def nacto_stop_frequency(
     # last category is "express", which we'll have to tag on 
     # the route name side
 
-def prep_roads():
+    
+def prep_roads(dict_inputs: dict) -> gpd.GeoDataFrame:
     road_stats = pd.read_parquet(
         f"{SCHED_GCS}arrivals_by_road_segment.parquet"
     )
 
+    ROAD_SEGMENTS = dict_inputs.shared_data.road_segments_twomile
+    
     roads = gpd.read_parquet(
-        f"{SHARED_GCS}"
-        f"segmented_roads_twomile_2020.parquet",
+        f"{SHARED_GCS}{ROAD_SEGMENTS}.parquet",
         columns = road_segment_cols + ["geometry"],
     ).to_crs(PROJECT_CRS)
     
@@ -134,6 +221,7 @@ def overlay_shapes_to_roads(
     analysis_date: str,
     buffer_meters: int
 ) -> gpd.GeoDataFrame:
+    
     common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
         analysis_date
     ).pipe(helpers.remove_shapes_outside_ca)
@@ -209,51 +297,77 @@ def primary_secondary_typology(
           )
     )
     
-    primary_typology = (
-        df2.loc[df2.obs==1].rename(
-            columns = {
-                "typology": "primary_typology",
-                "pct_typology": "primary_pct_typology"
-            })
-        .drop(columns = "obs")
+    # Keep primary and secondary typology
+    df3 = df2.loc[df2.obs <=2].drop(
+        columns = ["pct_typology", "obs"]
+    ).reset_index(drop=True)
+    
+    # Turn the typology column into a dummy variables
+    df3 = pd.get_dummies(df3, columns = ["typology"])
+    
+    # Flag both primary and secondary typology as 1
+    # so a route can have multiple dummies turned on
+    # allow this so we can just keep one route-dir as a row
+    max_cols = [c for c in df3.columns if "typology_" in c]
+
+    df4 = (df3.groupby(route_dir_cols)
+           .agg({**{c: "max" for c in max_cols}})
+           .reset_index()
+           .rename(columns = {c: c.replace('typology', 'is_nacto') for c in max_cols})
+          )
+    
+    return df4
+
+
+def reconcile_route_and_nacto_typologies(
+    df: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Let's see if we can sort out local routes into more
+    specific NACTO local route types.
+    If it's ever flagged as downtown_local or coverage,
+    we'll use that.
+    """
+    df = df.assign(
+        is_rapid = df[["is_rapid", "is_nacto_rapid"]].max(axis=1),                              
+    ).rename(columns = {
+        "is_nacto_downtown_local": "is_downtown_local",
+        "is_nacto_coverage": "is_coverage"
+    })
+    
+    # Retain as local if coverage or downtown_local aren't true
+    df = df.assign(
+        is_local = df.apply(
+            lambda x: 1 if ((x.is_coverage==0) and (x.is_downtown_local == 0))
+            or (x.is_nacto_local==1)
+            else 0, axis=1)
     )
     
-    secondary_typology = (
-        df2.loc[df2.obs==2]
-        .rename(
-            columns = {
-                "typology": "secondary_typology",
-                "pct_typology": "secondary_pct_typology"
-            })
-        .drop(columns = "obs")
-    )
+    drop_cols = [c for c in df.columns if "is_nacto_" in c]
     
-    df3 = pd.merge(
-        primary_typology,
-        secondary_typology,
-        on = route_dir_cols,
-        how = "left"
-    )
+    df2 = df.drop(columns = drop_cols)
     
-    return df3
+    df2[route_typologies] = df2[route_typologies].astype(int)
+    
+    return df2
 
 
 if __name__ == "__main__":
     
-    from update_vars import CONFIG_DICT, analysis_date_list
+    from update_vars import analysis_date_list
     
-    EXPORT = CONFIG_DICT["route_typologies_file"]
+    EXPORT = GTFS_DATA_DICT.schedule_tables.route_typologies
     
     start = datetime.datetime.now()
 
-    roads = delayed(prep_roads)()
+    roads = delayed(prep_roads)(GTFS_DATA_DICT)
     ROAD_BUFFER_METERS = 20
     TYPOLOGY_THRESHOLD = 0.10
     
     for analysis_date in analysis_date_list:
         
         time0 = datetime.datetime.now()
-        
+             
         gdf = delayed(overlay_shapes_to_roads)(
             roads, analysis_date, ROAD_BUFFER_METERS
         )    
@@ -268,7 +382,15 @@ if __name__ == "__main__":
         # Aggregate to route-dir-typology
         route_typology_df2 = primary_secondary_typology(route_typology_df)
         
-        route_typology_df2.to_parquet(
+        route_tagged = categorize_routes_by_name(analysis_date)
+        
+        df3 = pd.merge(
+            route_tagged,
+            route_typology_df2,
+            on = ["schedule_gtfs_dataset_key", "route_id"],
+        ).pipe(reconcile_route_and_nacto_typologies)
+        
+        df3.to_parquet(
             f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet")
         
         time1 = datetime.datetime.now()

@@ -10,28 +10,24 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis import utils
-from shared_utils import rt_utils, schedule_rt_utils
+from segment_speed_utils import gtfs_schedule_wrangling
+from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from update_vars import BUS_SERVICE_GCS, ANALYSIS_DATE
-from segment_speed_utils.project_vars import SEGMENT_GCS
-
 
 def aggregate_trip_speeds_to_route(
     analysis_date: str,
     route_cols: list
-):
+) -> pd.DataFrame:
     """
     Start with trip speeds and aggregate to route-level.
-    Instead of using route_speeds (which aggregates to 
-    route-direction-time_of_day and uses source_record_id),
-    let's just use trip-level speeds.
-    
-    Also, back out the operator's median speed, and use
-    that as the target speed for a given route.
     """
+    TRIP_SPEED_FILE = GTFS_DATA_DICT.rt_stop_times.trip_speeds_single_summary
+    MAX_SPEED = GTFS_DATA_DICT.rt_stop_times.max_speed
     
     speeds = pd.read_parquet(
-        f"{SEGMENT_GCS}trip_summary/trip_speeds_{analysis_date}.parquet",
-        columns = route_cols + ["trip_instance_key", "speed_mph"]
+        f"{SEGMENT_GCS}{TRIP_SPEED_FILE}_{analysis_date}.parquet",
+        columns = route_cols + ["trip_instance_key", "speed_mph"],
+        filters = [[("speed_mph", "<=", MAX_SPEED)]]
     )
     
     speeds_by_route = (speeds.groupby(route_cols, 
@@ -42,21 +38,6 @@ def aggregate_trip_speeds_to_route(
                        }).reset_index()
                        .rename(columns = {"trip_instance_key": "n_trips"})
                       )
-    '''
-    system_median = (speeds.groupby("schedule_gtfs_dataset_key", 
-                                    observed=True, group_keys=False)
-                     .agg({"speed_mph": "median"})
-                     .reset_index()
-                     .rename(columns = {"speed_mph": "system_speed_median"})
-                    )
-    
-    speeds_by_route2 = pd.merge(
-        speeds_by_route,
-        system_median,
-        on = "schedule_gtfs_dataset_key",
-        how = "inner"
-    )
-    '''
     
     return speeds_by_route
     
@@ -126,14 +107,9 @@ if __name__=="__main__":
         indicator = True
     )
     
-    MERGE_CATEGORIES = {
-        "both": "rt_and_sched",
-        "left_only": "schedule_only",
-        "right_only": "rt_only"
-    }
-    
     final = final.assign(
-        rt_sched_category = final._merge.map(MERGE_CATEGORIES)
+        rt_sched_category = final._merge.map(
+            gtfs_schedule_wrangling.sched_rt_category_dict)
     ).drop(columns = "_merge")
     
     TARGET_SPEEDS = {

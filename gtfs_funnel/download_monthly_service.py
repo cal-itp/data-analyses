@@ -13,14 +13,14 @@ from loguru import logger
 from siuba import *
 
 from calitp_data_analysis.tables import tbls
-from segment_speed_utils.project_vars import SCHED_GCS
+from update_vars import GTFS_DATA_DICT, SCHED_GCS
 
-def download_one_year(year: int):
+def download_one_year(year: int, export_filename: str):
     """
     Download single day for trips.
     """
     start = datetime.datetime.now()
-
+        
     df = (
         tbls.mart_gtfs.fct_monthly_route_service_by_timeofday()
             >> filter(_.year == year)
@@ -28,7 +28,7 @@ def download_one_year(year: int):
         )
 
     df.to_parquet(
-        f"{SCHED_GCS}scheduled_service_by_route_{year}.parquet"
+        f"{SCHED_GCS}{export_filename}_{year}.parquet"
     ) 
     
     end = datetime.datetime.now()
@@ -38,13 +38,13 @@ def download_one_year(year: int):
 
     
 if __name__=="__main__":
-    
-    from update_vars import analysis_date_list
-    
+        
     logger.add("./logs/download_data.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
+    EXPORT = GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service
+
     for y in [2024]:
-        download_one_year(y)
+        download_one_year(y, EXPORT)

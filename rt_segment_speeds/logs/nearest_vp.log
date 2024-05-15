@@ -1,2 +1,13 @@
 2024-02-15 13:48:26.270 | INFO     | __main__:nearest_neighbor_shape_segments:203 - shape segments 2024-02-14: 0:10:31.474349
 2024-02-15 14:08:52.783 | INFO     | __main__:nearest_neighbor_rt_stop_times:135 - RT stop times 2024-02-14: 0:11:07.883083
+2024-04-18 13:19:11.258 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:134 - nearest neighbor for stop_segments 2024-04-17: 0:27:28.612602
+2024-04-18 15:22:16.322 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:134 - nearest neighbor for rt_stop_times 2024-04-17: 0:17:44.714181
+
+2024-04-30 14:01:50.581 | INFO     | __main__:nearest_neighbor_for_stop:70 - nearest neighbor for speedmap_segments 2024-03-13: 0:00:46.165342
+2024-04-30 14:02:56.694 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:203 - get stop arrivals 2024-03-13: 0:00:14.562890
+2024-04-30 14:03:10.248 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:214 - interpolate arrivals for speedmap_segments 2024-03-13:  2024-03-13: 0:00:28.116861
+2024-04-30 14:19:20.827 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:166 - speeds by segment for speedmap_segments 2024-03-13: 0:01:35.963258
+2024-05-01 15:03:52.409 | INFO     | __main__:nearest_neighbor_for_stop:194 - nearest neighbor for speedmap_segments 2024-03-13: 0:13:48.894098
+2024-05-01 15:14:58.067 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:203 - get stop arrivals 2024-03-13: 0:11:02.158132
+2024-05-01 15:28:26.797 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:214 - interpolate arrivals for speedmap_segments 2024-03-13:  2024-03-13: 0:24:30.887811
+2024-05-01 15:30:15.862 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:166 - speeds by segment for speedmap_segments 2024-03-13: 0:01:48.880249

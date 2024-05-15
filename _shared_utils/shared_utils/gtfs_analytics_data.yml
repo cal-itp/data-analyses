@@ -1,0 +1,122 @@
+# GTFS Analytics Pipeline
+# Consolidate a data catalog of several GTFS workstreams -
+# schedule, speeds, rt vs schedule, predictions, and any future work
+# Use omegaconf package to help with our string concatenation
+# https://stackoverflow.com/questions/5484016/how-can-i-do-string-concatenation-or-string-replacement-in-yaml
+gcs_paths:
+  GCS: gs://calitp-analytics-data/data-analyses/
+  COMPILED_CACHED_VIEWS: ${.GCS}rt_delay/compiled_cached_views/
+  SEGMENT_GCS: ${.GCS}rt_segment_speeds/
+  SCHED_GCS: ${.GCS}gtfs_schedule/
+  RT_SCHED_GCS: ${.GCS}rt_vs_schedule/
+  SHARED_GCS: ${.GCS}shared_data/
+  PREDICTIONS_GCS: ${.GCS}rt_predictions/
+  PUBLIC_GCS: "gs://calitp-publish-data-analysis/"
+
+speed_vars:
+  timestamp_col: "location_timestamp_local"
+  max_speed: 80
+  time_min_cutoff: 10
+
+schedule_downloads:
+  dir: ${gcs_paths.COMPILED_CACHED_VIEWS}
+  trips: trips
+  shapes: routelines
+  stops: stops
+  stop_times: st
+
+speeds_tables:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  raw_vp: vp
+  usable_vp: vp_usable
+  vp_condensed_line: condensed/vp_condensed
+  vp_nearest_neighbor: condensed/vp_nearest_neighbor
+  timestamp_col: ${speed_vars.timestamp_col}
+  time_min_cutoff: ${speed_vars.time_min_cutoff}
+
+schedule_tables:
+  dir: ${gcs_paths.SCHED_GCS}
+  gtfs_key_crosswalk: "crosswalk/gtfs_key_organization"
+  route_identification: "standardized_route_ids"
+  route_typologies: "nacto_typologies/route_typologies"
+  monthly_scheduled_service: "scheduled_service_by_route"
+  operator_scheduled_stats: "operator_profiles/operator_scheduled_stats"
+  operator_routes: "operator_profiles/operator_routes"
+
+rt_vs_schedule_tables:
+  dir: ${gcs_paths.RT_SCHED_GCS}
+  stop_times_direction: "stop_times_direction"
+  sched_trip_metrics: "schedule_trip/schedule_trip_metrics"
+  sched_route_direction_metrics: "schedule_route_dir/schedule_route_direction_metrics"
+  vp_trip_metrics: "vp_trip/trip_metrics"
+  vp_route_direction_metrics: "vp_route_dir/route_direction_metrics"
+  schedule_rt_stop_times: "schedule_rt_stop_times"
+  early_trip_minutes: -5
+  late_trip_minutes: 5
+
+digest_tables:
+  dir: ${gcs_paths.RT_SCHED_GCS}
+  route_schedule_vp: "digest/schedule_vp_metrics"
+  route_segment_speeds: "digest/segment_speeds"
+  operator_profiles: "digest/operator_profiles"
+  operator_routes_map: "digest/operator_routes"
+  operator_sched_rt: "digest/operator_schedule_rt_category"
+
+stop_segments:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  stage1: ${speeds_tables.usable_vp}
+  stage2: "nearest/nearest_vp_shape_segments"
+  stage3: "stop_arrivals"
+  stage4: "speeds_stop_segments"
+  shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments"
+  route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"
+  route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
+  segments_file: "segment_options/shape_stop_segments"
+  timestamp_col: ${speed_vars.timestamp_col}
+  max_speed: ${speed_vars.max_speed}
+
+rt_stop_times:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  stage1: ${speeds_tables.usable_vp}
+  stage2: "nearest/nearest_vp_rt_stop_times"
+  stage3: "rt_stop_times/stop_arrivals"
+  stage4: "rt_stop_times/speeds"
+  segments_file: "segment_options/stop_segments"
+  trip_speeds_single_summary: "rollup_singleday/speeds_trip"
+  route_dir_single_summary: "rollup_singleday/speeds_route_dir"
+  route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
+  min_trip_minutes: ${speed_vars.time_min_cutoff}
+  max_trip_minutes: 180
+  max_speed: ${speed_vars.max_speed}
+  min_meters_elapsed: 1609
+
+speedmap_segments:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  stage1: ${speeds_tables.usable_vp}
+  proxy_stop_times: "stop_time_expansion/speedmap_stop_times"
+  stage2: "nearest/nearest_vp_speedmap"
+  stage3: "speedmap/stop_arrivals"
+  stage4: "speedmap/speeds"
+  segments_file: "segment_options/speedmap_segments"
+  speedmap_something_single_segment: "rollup_singleday/speeds_speedmap_segments"
+  #shape_stop_multi_segment: "rollup_multiday/speeds_route_dir"
+  min_trip_minutes: ${speed_vars.time_min_cutoff}
+  max_trip_minutes: 180
+  max_speed: ${speed_vars.max_speed}
+  min_meters_elapsed: 1609
+
+road_segments:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  stage1: ${speeds_tables.usable_vp}
+  proxy_stop_times: "stop_time_expansion/roads_stop_times"
+  stage2: "nearest/nearest_vp_roads"
+  stage3: "road_segments/stop_arrivals"
+  stage4: "speeds_road_segments"
+  stage5: "avg_speeds_road_segments"
+  segment_identifier_cols: ["linearid", "mtfcc", "segment_sequence"]
+  timestamp_col: ${speed_vars.timestamp_col}
+
+shared_data:
+  gcs_dir: ${gcs_paths.SHARED_GCS}
+  road_segments_twomile: segmented_roads_twomile_2020
+  road_segments_onekm: segmented_roads_onekm_2020

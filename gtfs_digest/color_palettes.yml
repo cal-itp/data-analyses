@@ -1,0 +1,26 @@
+# https://imagecolorpicker.com/color-code/2596be
+# yellow, dark blue, teal
+speed_mph_colors: ["#fde18d","#49a2b2","#3b56a4"]
+
+red_green_yellow: ["#ec5d3b", "#fde18d", "#7cc665"]
+
+# good for reversing so that red is for higher values, green for lower
+green_red_yellow: ["#7cc665","#fde18d", "#ec5d3b"]
+
+# green, orange, yellow, red, dark blue, teal
+full_color_scale: ["#7cc665", "#fcaa5f", "#fde18d", "#ec5d3b", "#3b56a4", "#49a2b2"]
+
+# yellow and teal
+longest_shortest_route: ["#fde18d","#49a2b2"]
+
+# frequency chart
+freq_domain: [0, 15, 30, 45, 60, 120]
+freq_range: ["#7cc665", "#d2d776", "#fde18d", "#fcaa5f", "#ec5d3b", "#ec5d3b"]
+
+# vp per minute chart
+vp_domain: [0,1,2,3]
+vp_range: ["#ec5d3b","#fcaa5f","#d2d776","#7cc665"]
+
+# spatial accuracy
+spatial_accuracy_domain: [0,20, 40, 60, 80, 100]
+spatial_accuracy_range: ["#ec5d3b","#ec5d3b","#fcaa5f","#fde18d", "#d2d776","#7cc665"]

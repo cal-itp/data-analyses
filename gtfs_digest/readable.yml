@@ -1,0 +1,122 @@
+# GTFS schedule
+direction_id:
+    readable: Direction
+    caption: Something
+avg_scheduled_service_minutes: "Average Scheduled Service (trip minutes)"
+avg_stop_miles: Average Stop Distance (miles)
+ttl_service_hours: Total Service (hours)
+n_scheduled_trips: "# scheduled trips"
+frequency: Trips per Hour
+total_scheduled_service_minutes: "Aggregate Scheduled Service Minutes (all trips)"
+route_id: "Route ID"
+route_combined_name: Route
+n_trips: "# trips"
+
+# GTFS vehicle positions
+minutes_atleast1_vp: "# Minutes with 1+ VP per Minute"
+minutes_atleast2_vp: "# Minutes with 2+ VP per Minute"
+total_rt_service_minutes: "Aggregate Actual Service Minutes"
+total_vp: "# VP"
+vp_in_shape: "# VP within Scheduled Shape"
+is_early: 
+    readable: "# Early Arrival Trips"
+    caption: "A trip is defined as early if it arrives 6+ minutes before the scheduled time."
+is_ontime: 
+    readable: "# On-Time Trips"
+    caption: "A trip is defined as on time if it arrives 5 minutes before or after the scheduled time."
+is_late: 
+    readable: "# Late Trips"
+    caption: "A trip is defined as late if it arrives 5 minutes after the scheduled time."
+n_vp_trips: "# Trips with VP"
+vp_per_minute: "Average VP per Minute"
+pct_in_shape: "% VP within Scheduled Shape"
+pct_sched_journey_atleast1_vp: "% Scheduled Trip w/ 1+ VP/Minute"
+pct_sched_journey_atleast2_vp: "% Scheduled Trip w/ 2+ VP/Minute"
+rt_sched_journey_ratio: "Realtime versus Scheduled Service Ratio"
+avg_rt_service_minutes: "Average Actual Service (Trip Minutes)"
+speed_mph: "Speed (MPH)"
+sched_rt_category: "GTFS Availability"
+       
+# Operators
+base64_url: "Base64 Encoded Feed URL"
+caltrans_district: District
+n_coverage_routes: "# Coverage Route Types"
+n_downtown_local_routes: "# Downtown Local Route Types"
+n_local_routes: "# Local Route Types"
+n_rapid_routes: "# Rapid Route Types"
+n_express_routes: "# Express Route Types"
+n_rail_routes: "# Rail Route Types"
+name: Transit Operator
+operator_arrivals_per_stop: "Avg Arrivals per Stop"
+operator_n_arrivals: "# Arrivals"
+operator_n_routes: "# Routes"
+operator_n_shapes: "# Shapes"
+operator_n_stops: "# Stops"
+operator_n_trips: "# Trips"
+operator_route_length_miles: "Operator Service Miles"
+organization_name: Organization
+organization_source_record_id: "Organization ID"
+
+# Dates / time
+time_period: Period
+service_date: Date
+time_of_day: "Time of Day"
+day_name: "Day of Week"
+year: Year
+month: Month
+year_month: "Month - Year"
+day_type: "Day of Week"
+
+# Roads
+road_freq_category: "Road Frequency Category"
+road_typology: "Road Typology Category"
+pct_typology: "% route miles with typology"
+typology: "Route typology"
+# Routes
+route_length_miles: "Service Miles"
+route_length: "Service meters"
+
+# Speed
+p20_mph: "Cutoff Speed for 20th Percentile"
+p50_mph: "Cutoff Speed for 50th Percentile"
+p80_mph: "Cutoff Speed for 80th Percentile"
+stop_pair_name: "Stop Pairs"
+
+# Captions for graphs
+# Section 1
+route_typology:
+    title: "Total Routes by Typology"
+    subtitle: ""
+longest_shortest_route:
+    title: "Longest and Shortest Route"
+    subtitle: "In miles."
+total_scheduled_hours:
+    title: "Total Scheduled Service Hours by Time of Day"
+    subtitle: "Time of Day: AM Peak:7-9AM, Early AM:4-6AM, Evening:8-11PM, Midday:10AM-2PM, Owl:12-3AM, PM Peak:3-7PM"
+daily_scheduled_hour:
+    title: "Daily Scheduled Service Hours by Time of Day"
+
+# Section 2
+avg_scheduled_min_graph:
+    title: "Average Scheduled Minutes"
+    subtitle: "The average minutes a trip is scheduled to run in each direction."
+timeliness_trips_dir_0_graph:
+    title: "Breakdown of Trips by Categories for Direction 0"
+    subtitle: "Categorizing whether a trip is early, late, or ontime. A trip is on time if it arrives 5 minutes later or earlier than scheduled."
+timeliness_trips_dir_1_graph:
+    title: "Breakdown of Trips by Categories for Direction 1"
+frequency_graph:
+    title: "Frequency of Trips in Minutes"
+    subtitle: "Understanding how often a trip comes. If the bar says 120 minutes, that means a trip will pass that particular direction once every 2 hours."
+speed_graph:
+    title: "Average Speed (MPH)"
+    subtitle: "The average miles per hour the bus travels by direction and time of day."
+vp_per_min_graph:
+    title: "Vehicle Positions per Minute"
+    subtitle: "Trips should have 2+ VPs per minute. This metric reflects the accuracy of the temporal data collected."
+sched_vp_per_min_graph:
+    title: "Percentage of Scheduled Trip Journey with 1+/2+ Vehicle Positions"
+    subtitle: "The goal is for ~100% of a trip's duration to have 2 or more Vehicle Positions per minute."
+spatial_accuracy_graph:
+    title: "Spatial Accuracy"
+    subtitle: "The percentage of vehicle positions that fall within 35 meters of a route's scheduled shape (path) reflects the accuracy of the collected spatial data."

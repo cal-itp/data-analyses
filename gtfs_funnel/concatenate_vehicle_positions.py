@@ -15,7 +15,7 @@ from loguru import logger
 
 from shared_utils import schedule_rt_utils
 from calitp_data_analysis import utils
-from segment_speed_utils.project_vars import SEGMENT_GCS
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
 fs = gcsfs.GCSFileSystem()
 
@@ -90,6 +90,8 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
+    RAW_VP = GTFS_DATA_DICT.speeds_tables.raw_vp
+    
     for analysis_date in analysis_date_list:
     
         logger.info(f"Analysis date: {analysis_date}")
@@ -103,7 +105,7 @@ if __name__ == "__main__":
         logger.info(f"concat and filter batched data: {time1 - start}")
 
         concatenated_vp_df.to_parquet(
-            f"{SEGMENT_GCS}vp_{analysis_date}_concat", 
+            f"{SEGMENT_GCS}{RAW_VP}_{analysis_date}_concat", 
             partition_on = "gtfs_dataset_key")
 
         time2 = datetime.datetime.now()
@@ -115,7 +117,7 @@ if __name__ == "__main__":
         
         # Import concatenated tabular vp and make it a gdf
         vp = delayed(pd.read_parquet)(
-            f"{SEGMENT_GCS}vp_{analysis_date}_concat/"
+            f"{SEGMENT_GCS}{RAW_VP}_{analysis_date}_concat/"
         ).reset_index(drop=True)
 
         vp_gdf = delayed(vp_into_gdf)(vp)
@@ -125,7 +127,7 @@ if __name__ == "__main__":
         utils.geoparquet_gcs_export(
             vp_gdf,
             SEGMENT_GCS,
-            f"vp_{analysis_date}"
+            f"{RAW_VP}_{analysis_date}"
         )
 
         remove_batched_parquets(analysis_date)

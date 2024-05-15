@@ -4,7 +4,7 @@
 
 ## Important Definitions
 
-The [Methodology section](#methodology) explains why these definitions are needed. 
+The Methodology section explains why these definitions are needed. 
 
 **Routes on SHN**: routes where at least 20% of the bus route takes place on the SHN (within a 50 ft buffer).
 

@@ -1,7 +1,7 @@
 import pygris
 import geopandas as gpd
 from siuba import *
-from shared_utils.geography_utils import CA_NAD83Albers
+from calitp_data_analysis.geography_utils import CA_NAD83Albers
 
 GCS_PATH = 'gs://calitp-analytics-data/data-analyses/sb125/vmt_transit_sketch/'
 

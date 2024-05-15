@@ -2,14 +2,15 @@
 Add some GTFS schedule derived metrics
 by trip (service frequency and stop spacing).
 """
+import datetime
 import geopandas as gpd
 import pandas as pd
 
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
-from segment_speed_utils.project_vars import SCHED_GCS, RT_SCHED_GCS
 from shared_utils.rt_utils import METERS_PER_MILE
+from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
 def assemble_scheduled_trip_metrics(
     analysis_date: str, 
@@ -19,7 +20,7 @@ def assemble_scheduled_trip_metrics(
     Get GTFS schedule trip metrics including time-of-day buckets,
     scheduled service minutes, and median stop spacing.
     """
-    STOP_TIMES_FILE = dict_inputs["stop_times_direction_file"]
+    STOP_TIMES_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction
     
     df = gpd.read_parquet(
         f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet"
@@ -70,7 +71,8 @@ def schedule_metrics_by_route_direction(
     service_freq_df = gtfs_schedule_wrangling.aggregate_time_of_day_to_peak_offpeak(
         df, group_cols, long_or_wide = "long")
         
-    metrics_df = (df.groupby(group_cols, observed=True, group_keys=False)
+    metrics_df = (df.groupby(group_cols, 
+                             observed=True, group_keys=False)
                   .agg({
                       "median_stop_meters": "mean", 
                       # take mean of the median stop spacing for trip
@@ -111,18 +113,20 @@ def schedule_metrics_by_route_direction(
     
 if __name__ == "__main__":
     
-    from update_vars import analysis_date_list, CONFIG_DICT
+    from update_vars import analysis_date_list
     
-    TRIP_EXPORT = CONFIG_DICT["trip_metrics_file"]
-    ROUTE_DIR_EXPORT = CONFIG_DICT["route_direction_metrics_file"]
-    ROUTE_TYPOLOGIES = CONFIG_DICT["route_typologies_file"]
+    TRIP_EXPORT = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_trip_metrics
+    ROUTE_DIR_EXPORT = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_route_direction_metrics
+    ROUTE_TYPOLOGIES = GTFS_DATA_DICT.schedule_tables.route_typologies
     
     for date in analysis_date_list:
-        trip_metrics = assemble_scheduled_trip_metrics(date, CONFIG_DICT)
+        start = datetime.datetime.now()
+        
+        trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
                 
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
-
+        
         route_cols = [
             "schedule_gtfs_dataset_key", 
             "route_id", 
@@ -132,23 +136,16 @@ if __name__ == "__main__":
         route_dir_metrics = schedule_metrics_by_route_direction(
             trip_metrics, date, route_cols)
         
-        # Right now, this is long, and a route-direction can have 
-        # multiple typologies
         route_typologies = pd.read_parquet(
             f"{SCHED_GCS}{ROUTE_TYPOLOGIES}_{date}.parquet",
-            columns = route_cols + ["freq_category", "typology", "pct_typology"]
+            columns = route_cols + [
+                "is_coverage", "is_downtown_local", 
+                "is_local", "is_rapid", "is_express", "is_rail"]
         )
-        
-        # Select based on plurality, largest pct_typology kept
-        # In the future, we can add additional ones
-        route_typologies_plurality = route_typologies.sort_values(
-            route_cols + ["pct_typology"],
-            ascending = [True for i in route_cols] + [False]
-        ).drop_duplicates(subset=route_cols).reset_index(drop=True)
         
         route_dir_metrics2 = pd.merge(
             route_dir_metrics,
-            route_typologies_plurality,
+            route_typologies,
             on = route_cols,
             how = "left"
         )
@@ -158,3 +155,6 @@ if __name__ == "__main__":
             RT_SCHED_GCS,
             f"{ROUTE_DIR_EXPORT}_{date}"
         )
+        
+        end = datetime.datetime.now()
+        print(f"schedule stats for {date}: {end - start}")

@@ -38,6 +38,8 @@ We provide the HQTA Stops dataset as a convienience for certain kinds of analysi
     * If the intersection was between routes of the same operator, `hqta_details = intersection_2_bus_routes_same_operator`
 * A half-mile buffered dataset is provided for high quality transit areas. We recommend using the polygon dataset. To get the stops (points) that create these half mile polygons, we do also provide high quality transit stops.
 
+[![hqta_methodology_mermaid](https://mermaid.ink/img/pako:eNqFkk1rwzAMhv-K8Ai5NNBLGWQw6FduY7CWnQxFjZXVkNhBVthK6X9fmqxry0h3sYX0SNjvq4PKvSGVqiRJtBMrJaXwWpODBQpCAvMprBldsAIr8XUAdAbefCMUtOuaouigHYB1VlLoQoBYdlRRnEK8xUDx6Dr7jmxxW1KIf_G2VLOtkPdzX3o-9T0sJ9kkm55bL8SavuRCjcfjv8jMsyEegkrraKgWKPfO3L4jyx6XsytGiMXeIEVRxH35eLra4xhF2mlXlP4z3yELrGdPPSFsWxGT5Bly3Eiv7IY7PX-IsMOaBpA7M8LJnfOIzql_gI3YigYoNVIVcYXWtKvRmaRVZ55WaRsaKrApRav2py2KjfjV3uUqFW5opJraoNDC4gdjdU6SseL5pd-2bumO3-XAyjk?type=png)](https://mermaid.live/edit#pako:eNqFkk1rwzAMhv-K8Ai5NNBLGWQw6FduY7CWnQxFjZXVkNhBVthK6X9fmqxry0h3sYX0SNjvq4PKvSGVqiRJtBMrJaXwWpODBQpCAvMprBldsAIr8XUAdAbefCMUtOuaouigHYB1VlLoQoBYdlRRnEK8xUDx6Dr7jmxxW1KIf_G2VLOtkPdzX3o-9T0sJ9kkm55bL8SavuRCjcfjv8jMsyEegkrraKgWKPfO3L4jyx6XsytGiMXeIEVRxH35eLra4xhF2mlXlP4z3yELrGdPPSFsWxGT5Bly3Eiv7IY7PX-IsMOaBpA7M8LJnfOIzql_gI3YigYoNVIVcYXWtKvRmaRVZ55WaRsaKrApRav2py2KjfjV3uUqFW5opJraoNDC4gdjdU6SseL5pd-2bumO3-XAyjk)
+
 ## High Quality Transit Areas Relevant Statutes
 
 [PRC 21155](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21155.&lawCode=PRC)

@@ -4,16 +4,23 @@ Create file with cleaned up route info.
 import pandas as pd
 
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
-from segment_speed_utils.project_vars import SCHED_GCS
+from update_vars import GTFS_DATA_DICT, SCHED_GCS
 from shared_utils import rt_dates
 
-def concatenate_routes_across_dates(analysis_date_list: list) -> pd.DataFrame:
+def concatenate_routes_across_dates(
+    analysis_date_list: list
+) -> pd.DataFrame:
     """
+    Concatenate all the trip tables to get deduped 
+    route info.
+    Create a combined_name column that is combination of 
+    route_short_name and route_long_name.
     """
     df = pd.concat([
         helpers.import_scheduled_trips(
             analysis_date,
-            columns = ["gtfs_dataset_key", "name", "route_id", 
+            columns = ["gtfs_dataset_key", "name", 
+                       "route_id", 
                        "route_long_name", "route_short_name", "route_desc"],
             get_pandas = True
         ).assign(
@@ -36,9 +43,8 @@ def concatenate_routes_across_dates(analysis_date_list: list) -> pd.DataFrame:
 
 if __name__ == "__main__":
     
-    from update_vars import CONFIG_DICT
-    CLEANED_ROUTE_NAMING = CONFIG_DICT["route_identification_file"]
-
+    CLEANED_ROUTE_NAMING = GTFS_DATA_DICT.schedule_tables.route_identification
+    
     date_list = rt_dates.y2024_dates + rt_dates.y2023_dates
 
     df =  concatenate_routes_across_dates(date_list)

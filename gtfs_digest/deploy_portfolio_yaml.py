@@ -1,11 +1,12 @@
 import pandas as pd
 import yaml
-
+import _operators_prep as op_prep
 from pathlib import Path
 from typing import Union
 
 from segment_speed_utils.project_vars import RT_SCHED_GCS
-
+from shared_utils import catalog_utils
+GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 PORTFOLIO_SITE_YAML = Path("../portfolio/sites/gtfs_digest.yml")
 
 def overwrite_yaml(portfolio_site_yaml: Path) -> list:
@@ -17,19 +18,11 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    DATASET = f"digest/schedule_vp_metrics.parquet"
-    
-    df = pd.read_parquet(
-        f"{RT_SCHED_GCS}{DATASET}",
-        filters = [[("sched_rt_category", "==", "schedule_and_vp")]],
-        columns = ["organization_name", "caltrans_district"]
-    ).dropna(
-        subset="caltrans_district"
-    ).sort_values(["caltrans_district", "organization_name"])
-    
-    districts = sorted(list(df.caltrans_district.unique()))
+    m1 = op_prep.operators_with_rt()
+    districts = sorted(list(m1.caltrans_district.unique()))
 
-    operators = df.organization_name.tolist()      
+    operators = m1.organization_name.tolist()      
+    
     # Eric's example
     # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
 
@@ -42,11 +35,11 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
     for district in districts:
         
         chapter_dict = {}
-        subset = df[df.caltrans_district == district]
+        subset = m1[m1.caltrans_district == district]
         
         chapter_dict['caption'] = f'District {district}'
         chapter_dict['params'] = {'district': district}
-        chapter_dict['sections'] = [{'name': name} for name in 
+        chapter_dict['sections'] = [{'organization_name': name} for name in 
                                     subset.organization_name.unique().tolist()]
         chapters_list += [chapter_dict]
 

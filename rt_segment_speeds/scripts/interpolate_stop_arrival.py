@@ -12,12 +12,10 @@ from loguru import logger
 from pathlib import Path
 from typing import Literal, Optional
 
-from segment_speed_utils import (array_utils, helpers, 
+from segment_speed_utils import (array_utils, helpers,
                                  segment_calcs, wrangle_shapes)
-from segment_speed_utils.project_vars import (SEGMENT_GCS, 
-                                              PROJECT_CRS, 
-                                              CONFIG_PATH,
-                                              SEGMENT_TYPES)
+from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
+from segment_speed_utils.project_vars import PROJECT_CRS, SEGMENT_TYPES
                                              
 
 def project_points_onto_shape(
@@ -137,13 +135,13 @@ def enforce_monotonicity_and_interpolate_across_stops(
 def interpolate_stop_arrivals(
     analysis_date: str,
     segment_type: Literal[SEGMENT_TYPES],
-    config_path: Optional[Path] = CONFIG_PATH,    
+    config_path: Optional[Path] = GTFS_DATA_DICT,    
 ):
     """
     Find the interpolated stop arrival based on where 
     stop is relative to the trio of vehicle positions.
     """
-    dict_inputs = helpers.get_parameters(config_path, segment_type)
+    dict_inputs = config_path[segment_type]
 
     NEAREST_VP = f"{dict_inputs['stage2']}_{analysis_date}"
     STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
@@ -226,11 +224,11 @@ if __name__ == "__main__":
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
-    from segment_speed_utils.project_vars import analysis_date_list, CONFIG_PATH
+    from segment_speed_utils.project_vars import analysis_date_list
     
     for analysis_date in analysis_date_list:
         interpolate_stop_arrivals(
             analysis_date = analysis_date, 
             segment_type = segment_type, 
-            config_path = CONFIG_PATH
+            config_path = GTFS_DATA_DICT
         )

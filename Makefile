@@ -5,7 +5,7 @@
 build_portfolio_site:
 	cd portfolio/ && pip install -r requirements.txt && cd ../
 	#need git rm because otherwise, just local removal, but git change is untracked
-	git rm portfolio/$(site)/ -rf
+	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site) --deploy 
 	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
@@ -40,8 +40,14 @@ build_ntd_report:
 
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
+	#cd rt_segment_speeds / && pip install -r requirements.txt && pip install altair_transform && cd ../_shared_utils && make setup_env && cd ..
+	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
+	make build_portfolio_site
+
+build_typologies:
+	$(eval export site = digest_typologies)
 	#cd rt_segment_speeds / && pip install -r requirements.txt && cd ..
-	cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
+	#cd gtfs_digest/ && python typology_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 
 add_precommit:

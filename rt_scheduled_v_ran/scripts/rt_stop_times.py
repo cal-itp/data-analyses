@@ -6,7 +6,7 @@ import datetime
 import pandas as pd
 
 from segment_speed_utils import helpers, segment_calcs
-from segment_speed_utils.project_vars import SEGMENT_GCS, RT_SCHED_GCS
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS
 
 def prep_scheduled_stop_times(
     analysis_date: str
@@ -51,8 +51,10 @@ def prep_rt_stop_times(
     arrival times. Keep the first arrival time,
     the rest would violate a monotonically increasing condition.
     """
+    STOP_ARRIVALS = GTFS_DATA_DICT.rt_stop_times.stage3
+    
     df = pd.read_parquet(
-        f"{SEGMENT_GCS}rt_stop_times/stop_arrivals_{analysis_date}.parquet",
+        f"{SEGMENT_GCS}{STOP_ARRIVALS}_{analysis_date}.parquet",
         columns = ["trip_instance_key", "stop_sequence", "stop_id",
                   "arrival_time"]
     ).rename(columns = {"arrival_time": "rt_arrival"})
@@ -92,10 +94,9 @@ def assemble_scheduled_rt_stop_times(
 
 if __name__ == "__main__":
     
-    from update_vars import CONFIG_DICT
     from update_vars import analysis_date_list
     
-    EXPORT_FILE = CONFIG_DICT["schedule_rt_stop_times"]
+    EXPORT_FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.schedule_rt_stop_times
     
     for analysis_date in analysis_date_list:
         

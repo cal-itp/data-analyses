@@ -397,3 +397,7 @@
 2024-03-29 12:01:25.746 | INFO     | __main__:rt_schedule_trip_metrics:337 - Total run time for metrics on 2023-10-12: 0:01:03.980200
 2024-03-29 12:02:28.269 | INFO     | __main__:rt_schedule_trip_metrics:337 - Total run time for metrics on 2023-10-13: 0:01:02.513314
 2024-03-29 12:03:14.207 | INFO     | __main__:rt_schedule_trip_metrics:337 - Total run time for metrics on 2023-10-14: 0:00:45.927788
+2024-04-18 12:23:17.745 | INFO     | __main__:rt_schedule_trip_metrics:280 - tabular trip metrics 2024-04-17: 0:04:28.804318
+2024-04-18 13:02:41.637 | INFO     | __main__:rt_schedule_trip_metrics:280 - tabular trip metrics 2024-04-17: 0:03:45.566584
+2024-04-18 13:32:29.183 | INFO     | __main__:rt_schedule_trip_metrics:285 - spatial trip metrics 2024-04-17: 0:29:47.546487
+2024-04-18 13:33:34.374 | INFO     | __main__:rt_schedule_trip_metrics:333 - Total run time for metrics on 2024-04-17: 0:34:38.304007

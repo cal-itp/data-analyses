@@ -11,8 +11,7 @@ import sys
 from loguru import logger
 
 from shared_utils import gtfs_utils_v2
-from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
-
+from update_vars import GTFS_DATA_DICT, COMPILED_CACHED_VIEWS
 
 def get_operators(analysis_date: str):
     """
@@ -52,7 +51,8 @@ def download_one_day(analysis_date: str):
 
     logger.info(f"# operators to run: {len(FEEDS_TO_RUN)}")
 
-    dataset = "trips"
+    dataset = GTFS_DATA_DICT.schedule_downloads.trips
+
     logger.info(f"*********** Download {dataset} data ***********")
 
     keep_trip_cols = [

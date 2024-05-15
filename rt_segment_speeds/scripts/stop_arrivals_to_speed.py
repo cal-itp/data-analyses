@@ -12,9 +12,8 @@ from typing import Literal, Optional
 from segment_speed_utils import (helpers, 
                                  gtfs_schedule_wrangling, 
                                  segment_calcs)
-from segment_speed_utils.project_vars import (SEGMENT_GCS,
-                                              CONFIG_PATH,
-                                              SEGMENT_TYPES)
+from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
+from segment_speed_utils.project_vars import SEGMENT_TYPES
 
 def attach_operator_natural_identifiers(
     df: pd.DataFrame, 
@@ -50,9 +49,10 @@ def attach_operator_natural_identifiers(
     )
     
     if segment_type == "stop_segments":
+        SEGMENT_FILE = GTFS_DATA_DICT[segment_type].segments_file
         trip_used_for_shape = pd.read_parquet(
-            f"{SEGMENT_GCS}segment_options/"
-            f"shape_stop_segments_{analysis_date}.parquet",
+            f"{SEGMENT_GCS}"
+            f"{SEGMENT_FILE}_{analysis_date}.parquet",
             columns = ["st_trip_instance_key"]
         ).st_trip_instance_key.unique()
 
@@ -83,21 +83,39 @@ def attach_operator_natural_identifiers(
             stop_pair,
             on = ["trip_instance_key", "stop_sequence"]
         )
-    
+        
+    elif segment_type == "speedmap_segments":
+        
+        stop_pair = pd.read_parquet(
+            f"{SEGMENT_GCS}stop_time_expansion/"
+            f"speedmap_stop_times_{analysis_date}.parquet",
+            columns = ["trip_instance_key", "stop_sequence", 
+                       "stop_sequence1", 
+                       "stop_pair", 
+                       #"stop_pair_name" -- we need to add this?
+                       # or does it not matter?
+                      ]
+        )
+          
+        df_with_natural_ids = df_with_natural_ids.merge(
+            stop_pair,
+            on = ["trip_instance_key", "stop_sequence"]
+        )    
+        
     return df_with_natural_ids
 
 
 def calculate_speed_from_stop_arrivals(
     analysis_date: str, 
     segment_type: Literal[SEGMENT_TYPES],
-    config_path: Optional[Path] = CONFIG_PATH,
+    config_path: Optional[Path] = GTFS_DATA_DICT,
 ):
     """
     Calculate speed between the interpolated stop arrivals of 
     2 stops. Use current stop to subsequent stop, to match
     with the segments cut by gtfs_segments.create_segments
     """
-    dict_inputs = helpers.get_parameters(config_path, segment_type)
+    dict_inputs = config_path[segment_type]
 
     STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
     SPEED_FILE = f"{dict_inputs['stage4']}_{analysis_date}"
@@ -160,11 +178,11 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    from segment_speed_utils.project_vars import analysis_date_list, CONFIG_PATH
+    from segment_speed_utils.project_vars import analysis_date_list
     
     for analysis_date in analysis_date_list:
         calculate_speed_from_stop_arrivals(
             analysis_date = analysis_date, 
             segment_type = segment_type, 
-            config_path = CONFIG_PATH
+            config_path = GTFS_DATA_DICT
         )
