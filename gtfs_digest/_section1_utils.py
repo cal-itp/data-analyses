@@ -316,7 +316,8 @@ def total_service_hours(date_list: list, name: str) -> pd.DataFrame:
         )
         .reset_index()
     )
-
+    df2["weekday_service_hours"] = df2.service_hours/5
+    df2 = df2.rename(columns = {'service_hours':'weekend_service_hours'})
     return df2
 
 def total_service_hours_all_months(name: str) -> pd.DataFrame:
@@ -387,7 +388,9 @@ def create_bg_service_chart():
     
     return chart
 
-def create_service_hour_chart(df:pd.DataFrame, day_type:str):
+def create_service_hour_chart(df:pd.DataFrame,
+                              day_type:str,
+                              y_col:str):
     # Create an interactive legend
     selection = alt.selection_point(fields=['Month'], bind='legend')
     
@@ -404,7 +407,8 @@ def create_service_hour_chart(df:pd.DataFrame, day_type:str):
     .encode(
         x=alt.X("Departure Hour", 
                 title=_report_utils.labeling("Departure Hour in Military Time")),
-        y=alt.Y("Service Hours"),
+        y=alt.Y(y_col,
+               title = _report_utils.labeling(y_col)),
         color=alt.Color(
             "Month",
             scale=alt.Scale(range=color_dict["tri_color"]),  # Specify desired order
