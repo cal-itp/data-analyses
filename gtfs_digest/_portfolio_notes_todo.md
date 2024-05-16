@@ -11,10 +11,13 @@
 ### 5/16/2024
 * Rerun portfolio. 
 
+#### Meeting with Tiffany
+* Can I just use the end dataframe that is produced by `gtfs_funnel/clean_route_naming.py`?
+* 
 ### 5/15/2024
+* <s>Add explanations for why we chose these cutoffs in the `color_palette.yml`</s>
 
 ### 5/14/2024
-* Add explanations for why we chose these cutoffs in the `color_palette.yml`
 * Add back cardinal directions to `direction_id`. 
     * I am done grabbing all the dates available, stacking them together, and aggregating for only one particular operator, let's call the dataframe `cardinal_dir_df`. 
     * This is a big dataset, so I want to read in only the rows that are absolutely necessary. 
