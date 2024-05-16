@@ -2,20 +2,25 @@
 * cd ../ && pip install -r portfolio/requirements.txt
 * python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
 * python portfolio/portfolio.py build gtfs_digest  --deploy 
-* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
+* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env &&  pip install -U altair 
 * RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
 
 ### 5/16/2024
-* Rerun portfolio. 
-
-#### Meeting with Tiffany
-* Can I just use the end dataframe that is produced by `gtfs_funnel/clean_route_naming.py`?
-* 
+To-Do
+* Noticed a bug after running all of the operators...Figure out why the cardinal direction shows southbound and northbound even for the east/west directions.
+* In the future, speed up the cardinal direction work? Or it'll be added to the pipeline? Right now it takes a very long time. 
+* Table of Contents on the portfolio site: the operators are not alphabetical. 
+    * D7: LA Metro is before City of Santa Monica/City of X/City of Y
+* <s>Fix service_hours chart-> divide weekday by 5</s>
+* <s>Add in dropdown menu to show only the first route</s>
+    * Found a solution through Stackoverflow. 
 ### 5/15/2024
 * <s>Add explanations for why we chose these cutoffs in the `color_palette.yml`</s>
+* Continue cardinal directions work.
+* Rerun portfolio. 
 
 ### 5/14/2024
 * Add back cardinal directions to `direction_id`. 
