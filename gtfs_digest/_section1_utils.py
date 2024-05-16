@@ -407,7 +407,7 @@ def create_service_hour_chart(df:pd.DataFrame, day_type:str):
         y=alt.Y("Service Hours"),
         color=alt.Color(
             "Month",
-            scale=alt.Scale(range=color_dict["longest_shortest_route"]),  # Specify desired order
+            scale=alt.Scale(range=color_dict["tri_color"]),  # Specify desired order
         ),
         opacity=alt.condition(selection, alt.value(1), alt.value(0.2)),
         tooltip=list(df.columns),

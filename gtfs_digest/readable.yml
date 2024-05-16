@@ -99,11 +99,11 @@ daily_scheduled_hour:
 avg_scheduled_min_graph:
     title: "Average Scheduled Minutes"
     subtitle: "The average minutes a trip is scheduled to run in each direction."
-timeliness_trips_dir_0_graph:
-    title: "Breakdown of Trips by Categories for Direction 0"
+timeliness_trips_dir_eastwest_graph:
+    title: "Breakdown of Eastbound/Westbound Trips by Timeliness"
     subtitle: "Categorizing whether a trip is early, late, or ontime. A trip is on time if it arrives 5 minutes later or earlier than scheduled."
-timeliness_trips_dir_1_graph:
-    title: "Breakdown of Trips by Categories for Direction 1"
+timeliness_trips_dir_northsouth_graph:
+    title: "Breakdown of Northbound/Southbound Trips by Timeliness"
 frequency_graph:
     title: "Frequency of Trips in Minutes"
     subtitle: "Understanding how often a trip comes. If the bar says 120 minutes, that means a trip will pass that particular direction once every 2 hours."
