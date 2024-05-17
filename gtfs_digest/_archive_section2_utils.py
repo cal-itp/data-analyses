@@ -843,3 +843,167 @@ def filtered_route(
         )
     )
     return chart
+
+### Section 1
+def summarize_monthly(df:pd.DataFrame)->pd.DataFrame:
+    df2 = (
+    df.groupby(
+        ['name', 'month','time_of_day', 'day_name']
+    )
+    .agg(
+        {
+            "ttl_service_hours": "sum",
+        }
+    )
+    .reset_index()
+    )
+    
+    return df2
+
+def convert_to_timestamps(datetime_list):
+    timestamps = []
+    for dt in datetime_list:
+        timestamp = dt.astype("datetime64[s]").astype(datetime)
+        timestamps.append(timestamp)
+    return timestamps
+
+def count_days_in_months(dates: list) -> pd.DataFrame:
+    # Turn list from numpy datetime to timestamp
+    dates2 = convert_to_timestamps(dates)
+    # Initialize a dictionary to store counts for each day of the week
+    day_counts = {}
+
+    # Iterate over each date
+    for date in dates2:
+        year = date.year
+        month = date.month
+
+        # Initialize counts dictionary for the current month-year combination
+        if (year, month) not in day_counts:
+            day_counts[(year, month)] = {
+                "Monday": 0,
+                "Tuesday": 0,
+                "Wednesday": 0,
+                "Thursday": 0,
+                "Friday": 0,
+                "Saturday": 0,
+                "Sunday": 0,
+            }
+
+        # Get the calendar matrix for the current month and year
+        matrix = calendar.monthcalendar(year, month)
+
+        # Iterate over each day in the matrix
+        for week in matrix:
+            for i, day in enumerate(week):
+                # Increment the count for the corresponding day of the week
+                if day != 0:
+                    weekday = calendar.day_name[i]
+                    day_counts[(year, month)][weekday] += 1
+
+    # Convert the dictionary to a pandas DataFrame
+    df = pd.DataFrame.from_dict(day_counts, orient="index")
+    df = df.reset_index()
+    df["level_1"] = df["level_1"].astype(str).str.zfill(2)
+    df["month"] = df.level_0.astype(str) + "-" + df.level_1.astype(str)
+    df = df.drop(columns=["level_0", "level_1"])
+    
+    # Melt from wide to long
+    df2 = pd.melt(
+    df,
+    id_vars=["month"],
+    value_vars=[
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+        "month",
+    ])
+    
+    df2 = df2.rename(columns = {"variable":"day_name", "value":"n_days"})
+    return df2
+
+def total_monthly_service(name:str) ->pd.DataFrame:
+    
+    df = load_scheduled_service(name)
+    
+    # Grab unique dates
+    unique_dates = list(df.datetime_date.unique())
+    
+    # Find number of Monday's, Tuesday's...etc in each date
+    month_days_df = count_days_in_months(unique_dates)
+    
+    # Aggregate the original dataframe
+    agg_df = summarize_monthly(df)
+    
+    # Merge on number of day types
+    agg_df = pd.merge(agg_df, month_days_df, on =["month", "day_name"], how = "left")
+    
+    # Find daily service hours
+    agg_df["Daily Service Hours"] = agg_df.ttl_service_hours / agg_df.n_days
+    
+    # Rename columns
+    agg_df.columns = agg_df.columns.map(_report_utils.replace_column_names)
+    
+    return agg_df
+
+def single_bar_chart_dropdown(
+    df: pd.DataFrame,
+    x_col: str,
+    y_col: str,
+    offset_col: str,
+    title: str,
+    dropdown_col: str,
+    subtitle:str
+):
+    dropdown_list = df[dropdown_col].unique().tolist()
+    dropdown_list.sort(reverse=True)
+    dropdown = alt.binding_select(options=dropdown_list, name=_report_utils.labeling(dropdown_col))
+
+    selector = alt.selection_point(
+        name=_report_utils.labeling(dropdown_col), fields=[dropdown_col], bind=dropdown
+    )
+
+    chart = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=alt.X(
+                f"{x_col}:N",
+                title="Day",
+                scale=alt.Scale(
+                    domain=[
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday",
+                    ]
+                ),
+            ),
+            y=alt.Y(f"{y_col}:Q", title=_report_utils.labeling(y_col)),
+            xOffset=f"{offset_col}:N",
+            color=alt.Color(
+                f"{offset_col}:N",
+                title=_report_utils.labeling(offset_col),
+                scale=alt.Scale(
+                    range=color_dict["full_color_scale"],
+                ),
+            ),
+            tooltip=df.columns.tolist(),
+        )
+    )
+    chart = chart.properties(
+        title = {
+                "text": [title],
+                "subtitle": [subtitle],
+            }, width=400, height=250)
+    chart = chart.add_params(selector).transform_filter(selector)
+
+    display(chart)
+    

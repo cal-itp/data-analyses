@@ -64,8 +64,9 @@ time_of_day: "Time of Day"
 day_name: "Day of Week"
 year: Year
 month: Month
-year_month: "Month - Year"
-day_type: "Day of Week"
+weekend_weekday: "Weekend or Weekday"
+departure_hour: "Departure Hour"
+service_hours: "Service Hours"
 
 # Roads
 road_freq_category: "Road Frequency Category"
@@ -90,21 +91,17 @@ route_typology:
 longest_shortest_route:
     title: "Longest and Shortest Route"
     subtitle: "In miles."
-total_scheduled_hours:
-    title: "Total Scheduled Service Hours by Time of Day"
-    subtitle: "Time of Day: AM Peak:7-9AM, Early AM:4-6AM, Evening:8-11PM, Midday:10AM-2PM, Owl:12-3AM, PM Peak:3-7PM"
 daily_scheduled_hour:
-    title: "Daily Scheduled Service Hours by Time of Day"
+    title: "Daily Scheduled Service Hours"
+    subtitle: "Use the legend to highlight a particular month and hover over the line for additional information."
 
 # Section 2
 avg_scheduled_min_graph:
     title: "Average Scheduled Minutes"
     subtitle: "The average minutes a trip is scheduled to run in each direction."
-timeliness_trips_dir_0_graph:
-    title: "Breakdown of Trips by Categories for Direction 0"
+timeliness_trips_graph:
+    title: "Breakdown of Trips by Timeliness"
     subtitle: "Categorizing whether a trip is early, late, or ontime. A trip is on time if it arrives 5 minutes later or earlier than scheduled."
-timeliness_trips_dir_1_graph:
-    title: "Breakdown of Trips by Categories for Direction 1"
 frequency_graph:
     title: "Frequency of Trips in Minutes"
     subtitle: "Understanding how often a trip comes. If the bar says 120 minutes, that means a trip will pass that particular direction once every 2 hours."

@@ -1,28 +1,68 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
 * cd ../ && pip install -r portfolio/requirements.txt
-* python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
+* python portfolio/portfolio.py clean gtfs_digest_testing && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
 * python portfolio/portfolio.py build gtfs_digest  --deploy 
-* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env
+* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env &&  pip install -U altair 
 * RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
-* Charts 
-    * Section 2
+### 5/17/2024
+* State of the GTFS Digest Portfolio 
+    * All the tweaks in [Issue](https://github.com/cal-itp/data-analyses/issues/1101) except cardinal directions & mapping the routes based on the `route_colors` provided by operators have been addressed. 
+    * There is a rough estimate of the cardinal directions a route is headed.
+        * Cons:
+            * The function to grab the cardinal direction takes a long time. It will take about 2 hours for all the operators to run.
+            * The function looks across the route for all time periods, rather than looking at the direction per date. This is less accurate.
+            * Not all routes record data for both directions. There will be empty graphs for these routes. 
+        * Current tackling:
+            * `Route_id` and the associated names for routes change over time. I am still working on refining the function that attaches the most current `route_id` to the same routes across the entire time span of the dataset. 
+            * Ex: Main Street Route had the ID of 123 in April 2023 but ABC in April 2024. I have to go back and update the ID for April 2023 to be ABC. 
+            * The function is very slow. Grabbing all of the stops and finding the direction they points means the dataset is huge, especially because we need all the dates possible. I am working on using `dask deployed` to speed things up. 
+    * Service Hour Charts
+        * Finished. There are now 3 charts for daily weekday, Saturday, and Sunday total service hours across all the routes.
+        * Right now, we only have data for the entire weeks of April and October 2023. April 2024 to come.
+        * Added a new column `weekday_service_hours` to `_section1_utils.total_service_hours` that divides the sum of `service_hours` by 5 for an accurate count. Previously, this was done incorrectly. 
+
+### 5/16/2024
+To-Do
+* <s>Noticed a bug after running all of the operators...Figure out why the cardinal direction shows southbound and northbound even for the east/west directions.</s>
+* In the future, speed up the cardinal direction work? Or it'll be added to the pipeline? Right now it takes a very long time. 
+* Table of Contents on the portfolio site: the operators are not alphabetical. 
+    * D7: LA Metro is before City of Santa Monica/City of X/City of Y
+* <s>Fix service_hours chart-> divide weekday by 5</s>
+* <s>Add in dropdown menu to show only the first route</s>
+    * Found a solution through Stackoverflow. 
+### 5/15/2024
+* <s>Add explanations for why we chose these cutoffs in the `color_palette.yml`</s>
+* Continue cardinal directions work.
+* Rerun portfolio. 
+
+### 5/14/2024
+* Add back cardinal directions to `direction_id`. 
+    * I am done grabbing all the dates available, stacking them together, and aggregating for only one particular operator, let's call the dataframe `cardinal_dir_df`. 
+    * This is a big dataset, so I want to read in only the rows that are absolutely necessary. 
+    * When I merge this `cardinal_dir_df` with `sched_vp_df`, none of the routes match. I need to use [this script](https://github.com/cal-itp/data-analyses/blob/b1e5d4f870400251240eeba4a6515a0848e5d6f8/gtfs_funnel/clean_route_naming.py#L4) to clean up the names on the `cardinal_dir_df`
+* Displaying only the first route -> 
+    * Even after upgrading `altair` to the latest version of `5.3` I am still unable to accomplish this goal using the sample `cars` dataset. 
+### 5/13/2024
+* <s>For Service Hour Charts by weekday, Saturday, and Sunday.
+    * Added this to the target notebook for the GitHub site</s>
+* Didn't receive any answers to my question on  Stackoverflow yet about displaying only the first route. 
+* Add back cardinal directions to `direction_id`. 
+    * Met with Tiffany yesterday to understand how to aggregate everything properly. 
+* Section 2
          * Vehicle Positions per Minute, % of RealTime Trips, % of Scheduled Trips, and Spatial Accuracy charts, figure out if there's a way to color the background so the bottom  red, middle is yellow, and the top is green to signify the different "zones/grades".
         * <b> Note 4/16 </b> Having a hard time getting this to work. Facet doesn't allow for layering and it seems like the background impacts the colors of the main chart, making everything hard to view.
+        * <b> Note 5/13 </b>: I was able to get the background to be shaded perfectly for the `Service Hour Charts` but `faceting` charts causes this shading to become wonky. Therefore, this goal is now retired. 
         <s>* Create an Altair chart with just a title/subtitle to divide out metrics about the quality of the rider's experience on a route vs the quality of the data collected about the route.</s>
-    * <s> Check YAML script
-        * Make sure there aren't any operators that have stuff in `sched_vp` but not in `operator_profile`
-        * 4/24: Done, using `07_crosswalk.ipynb`</s>
-
 ### 5/10/2024
 * How to display only the first value before filtering for charts. Right now, the charts show stuff for all months/routes and this is confusing.
     * Still couldn't get this to work even with a very simple `cars` dataset from the Altair example. 
     * Submitted a question onto StackOverflow for help. 
 * <s>Service Hour chart.</s>
     * Show chart to Eric and Katrina & double check the aggregation with Tiffany before making it into functions.
-* Add back cardinal directions to `direction_id`. 
+
 
 ### 5/9/2024 To-Do
 * <s>Frequency Chart: make the colors a set range, so all routes will always be dark green if a bus going that route and direction comes by every 10 minutes, dark red if every 60 minutes.</s>
