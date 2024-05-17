@@ -2,6 +2,8 @@ import calitp_data_analysis.magics
 import geopandas as gpd
 import pandas as pd
 import numpy as np
+import datetime
+from dask import compute, delayed
 
 # Charts
 import altair as alt
@@ -64,8 +66,9 @@ def load_scheduled_stop_times(date: str, gtfs_schedule_key: list) -> pd.DataFram
         columns=stop_times_col,
         get_pandas=True,
         with_direction=True,
-    ).assign(service_date=pd.to_datetime(date))
-
+    )
+    
+    stop_times_df["service_date"] = date
     return stop_times_df
 
 def load_scheduled_trips(date: str, gtfs_schedule_key: list) -> pd.DataFrame:
@@ -78,41 +81,42 @@ def load_scheduled_trips(date: str, gtfs_schedule_key: list) -> pd.DataFrame:
         "route_long_name",
         "route_short_name",
         "route_desc",
-        "name",
+        "name"
     ]
 
     scheduled_trips_df = helpers.import_scheduled_trips(
         date,
         filters=[[("gtfs_dataset_key", "in", gtfs_schedule_key)]],
         columns=scheduled_col,
-    ).assign(service_date=pd.to_datetime(date))
-
+    )
+    
+    scheduled_trips_df["service_date"] = date
     return scheduled_trips_df
 
-def load_stack_all_dates(date_list: list, gtfs_schedule_keys: list) -> pd.DataFrame:
-    scheduled_stop_times_df = pd.DataFrame()
-    # list comprehension
-    # df = delayed(pd.read_parquet(one_date).assing(service_date))
-    # aggregated = common_route_dir(df) group_cols includes date
-    # pd.concat() -- can you concat delayed objects though?
+
+def find_most_common_dir(
+     scheduled_trips_df: pd.DataFrame,
+     scheduled_stop_times_df: pd.DataFrame, 
+) -> pd.DataFrame:
+    """
+    Load load_scheduled_trips() and load_scheduled_stop_times()
+    """
     
-    
-    for i in date_list:
-        df = load_scheduled_stop_times(i, gtfs_schedule_keys)
-        scheduled_stop_times_df = pd.concat([scheduled_stop_times_df, df], axis=0)
+    # Merge dfs
+    merge_cols = [
+        "trip_instance_key",
+        "schedule_gtfs_dataset_key",
+        "shape_array_key",
+        "service_date",
+    ]
 
-    scheduled_trips_df = pd.DataFrame()
-    for i in date_list:
-        df = load_scheduled_trips(i, gtfs_schedule_keys)
-        scheduled_trips_df = pd.concat([scheduled_trips_df, df], axis=0)
-    # get stop_times and trips (keep date)
-    # concatenate
-    # aggregate
+    df = delayed(pd.merge)(
+        scheduled_trips_df,
+        scheduled_stop_times_df,
+        on=merge_cols,
+        how="inner",
+    )
 
-    return scheduled_stop_times_df, scheduled_trips_df
-
-def find_most_common_dir(df: pd.DataFrame) -> pd.DataFrame:
-    # Count total stops
     agg1 = (
         df.groupby(
             [
@@ -120,6 +124,7 @@ def find_most_common_dir(df: pd.DataFrame) -> pd.DataFrame:
                 "schedule_gtfs_dataset_key",
                 "direction_id",
                 "stop_primary_direction",
+                "service_date",
             ]
         )
         .agg({"stop_sequence": "count"})
@@ -130,8 +135,12 @@ def find_most_common_dir(df: pd.DataFrame) -> pd.DataFrame:
     # Sort and drop duplicates so that the
     # largest # of stops by stop_primary_direction is at the top
     agg2 = agg1.sort_values(
-        by=["route_id", "schedule_gtfs_dataset_key", "direction_id", "total_stops"],
-        ascending=[True, True, True, False],
+        by=["route_id",
+            "schedule_gtfs_dataset_key", 
+            "direction_id",
+            "service_date",
+            "total_stops"],
+        ascending=[True, True, True, True, False],
     )
 
     # Drop duplicates so only the top stop_primary_direction is kept.
@@ -140,21 +149,51 @@ def find_most_common_dir(df: pd.DataFrame) -> pd.DataFrame:
             "route_id",
             "schedule_gtfs_dataset_key",
             "direction_id",
+            "service_date"
         ]
     ).reset_index(drop=True)
 
     agg3 = agg3.drop(columns=["total_stops"])
     return agg3
 
-def find_most_recent_route_id(df: pd.DataFrame) -> pd.DataFrame:
+
+def most_recent_route_info(
+    df: pd.DataFrame,
+    group_cols: list,
+    route_col: str
+) -> pd.DataFrame:
+    """
+    Find the most recent value across a grouping.
+    Ex: if we group by route_id, we can find the most recent 
+    value for route_long_name.
+    
+    Needs a date column to work.
+    """
+    sort_order = [True for c in group_cols]
+    
+    most_recent = (df.sort_values(group_cols + ["service_date"], 
+                                  ascending = sort_order + [False])
+                   .drop_duplicates(subset = group_cols)  
+                   .rename(columns = {route_col: f"recent_{route_col}"})
+                  )
+    
+    
+    df2 = delayed(pd.merge)(
+        df,
+        most_recent[group_cols + [f"recent_{route_col}"]],
+        on = group_cols,
+        how = "left"
+    )
+    return most_recent
+
+def find_most_recent_route_id(df):
     df = df.assign(
         route_id=df.route_id.fillna(""),
         route_short_name=df.route_short_name.fillna(""),
         route_long_name=df.route_long_name.fillna(""),
     )
-
     df = df.assign(combined_name=df.route_short_name + "__" + df.route_long_name)
-
+    
     df = df.assign(
         route_id2=df.apply(
             lambda x: gtfs_schedule_wrangling.standardize_route_id(
@@ -163,57 +202,57 @@ def find_most_recent_route_id(df: pd.DataFrame) -> pd.DataFrame:
             axis=1,
         )
     )
-
+    
     route_cols = ["schedule_gtfs_dataset_key", "name", "route_id2"]
-
-    df2 = gtfs_schedule_wrangling.most_recent_route_info(
+    
+    df2 =most_recent_route_info(
         df, group_cols=route_cols, route_col="combined_name"
     ).pipe(
-        gtfs_schedule_wrangling.most_recent_route_info,
+        most_recent_route_info,
         group_cols=["schedule_gtfs_dataset_key", "name", "recent_combined_name"],
         route_col="route_id2",
     )
     
-    sort_order = [True for c in route_cols]
-    df3 = (
-        df2.sort_values(route_cols + ["service_date"], ascending=sort_order + [False])
-        .drop_duplicates(subset=route_cols)
-        .rename(columns={"combined_name": "recent_combined_name"})
-    )
+    return df2
 
-    df3 = df3[["schedule_gtfs_dataset_key", "recent_route_id2", "route_id"]]
-    return df3
-
-def find_cardinal_direction(date_list: list, gtfs_schedule_keys: list) -> pd.DataFrame:
+def find_cardinal_direction(date:str, gtfs_schedule_keys: list) -> pd.DataFrame:
     # Grab all available dates for these dataframes
-    scheduled_stop_times_df, scheduled_trips_df = load_stack_all_dates(
-        date_list, gtfs_schedule_keys
-    )
-
-    # Merge them
-    m1 = pd.merge(
-        scheduled_trips_df,
-        scheduled_stop_times_df,
-        on=["trip_instance_key", "schedule_gtfs_dataset_key", "shape_array_key"],
-        how="inner",
-    )
-
+    # Load the 2 dataframes
+    scheduled_trips_dd = delayed(load_scheduled_trips(date, gtfs_schedule_keys))
+    scheduled_stops_dd = delayed(load_scheduled_stop_times(date, gtfs_schedule_keys))
+    
     # Find the most common direction for this Route ID
-    common_stops_df = find_most_common_dir(m1)
-
+    common_stops_dd = find_most_common_dir(scheduled_trips_dd, scheduled_stops_dd)
+    
     # Find the most recent Route ID to connect back to sched_vp_df
-    recent_ids_df = find_most_recent_route_id(scheduled_trips_df)
+    recent_ids_dd = find_most_recent_route_id(scheduled_trips_dd)
 
     # Merge this
-    m2 = pd.merge(
-        common_stops_df,
-        recent_ids_df,
-        on=["schedule_gtfs_dataset_key", "route_id"],
+    m1 = delayed(pd.merge)(
+        common_stops_dd,
+        recent_ids_dd,
+        on=["schedule_gtfs_dataset_key", "route_id", "direction_id",
+           "service_date"],
         how="inner",
     )
     
-    m2 = m2.drop(columns = ["route_id"])
-    return m2
+    m1 = m1.drop(columns = ["route_id"])
+    
+    return m1
+
+def all_dates_cardinal_dir(dates:list, gtfs_schedule_keys:list)->pd.DataFrame:
+    full_df = pd.DataFrame()
+    for date in dates:
+        df = find_cardinal_direction(date, gtfs_schedule_keys)
+        df = df.compute()
+        full_df = pd.concat([full_df, df], axis=0)
+    to_keep =  ["schedule_gtfs_dataset_key",
+        "direction_id",
+        "recent_route_id2",
+        "stop_primary_direction",
+        "service_date"]
+    full_df = full_df[to_keep]
+    return full_df
 
 def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
@@ -248,22 +287,27 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     
     # Replace 0/1 in Direction with cardinal direction
     # First only grab the most recent date's gtfs_dataset_key
+    df['temp_service_date'] = df['Date'].astype(str)
     all_dates_list = list(df.Date.unique())
     gtfs_keys = list(df.schedule_gtfs_dataset_key.unique())
     all_dates_list = [np.datetime_as_string(date, unit="D") for date in all_dates_list]
     
     # Find cardinal direction
-    cardinal_direction_df = find_cardinal_direction(all_dates_list, gtfs_keys)
-    
+    cardinal_direction_df = all_dates_cardinal_dir(all_dates_list, gtfs_keys)
+   
     # Left merge to keep  
     m1 = pd.merge(
     df,
     cardinal_direction_df,
-    left_on=["schedule_gtfs_dataset_key", "Direction", "Route ID"],
+    left_on=["schedule_gtfs_dataset_key", 
+             "Direction", 
+             "Route ID", 
+             "temp_service_date"],
     right_on=[
         "schedule_gtfs_dataset_key",
         "direction_id",
         "recent_route_id2",
+        "service_date"
     ],
     how="left"
     )
@@ -274,6 +318,7 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
              "stop_primary_direction":"Direction"}
     )
     
+    m1 = m1.drop(columns = ["temp_service_date", "recent_route_id2"])
     return m1
 
 
@@ -619,8 +664,11 @@ def base_facet_chart(
     max_y =set_y_axis(df, y_col)
     df = clean_data_charts(df, y_col)
     
-    direction = df["Direction"].values[0]
-    title = title + direction
+    try:
+        direction = df["Direction"].values[0]
+        title = title + " for " + direction
+    except:
+        pass
     
     chart = (
         (
@@ -727,8 +775,10 @@ def create_text_table(df: pd.DataFrame, direction: int):
 
     df = df.loc[df["Dir 0 1"] == direction].drop_duplicates().reset_index(drop=True)
     
-    direction_title = df["Direction"].values[0]
-   
+    try:
+        direction = df["Direction"].values[0]
+    except:
+        pass
     
     df2 = df.melt(
             id_vars=[
@@ -762,7 +812,7 @@ def create_text_table(df: pd.DataFrame, direction: int):
         )
     
     text_chart = text_chart.encode(text="combo_col:N").properties(
-            title=f"Route Statistics for {direction_title}",
+            title=f"Route Statistics for {direction}",
             width=400,
             height=250,
         )
@@ -867,34 +917,34 @@ def filtered_route(
     )
     # display(avg_scheduled_min_graph)
     timeliness_trips_dir_0 = (
-        (
-            base_facet_chart(
-                timeliness_df.loc[timeliness_df["dir_0_1"] == 0],
-                "value",
-                "variable",
-                "Period",
-                readable_dict["timeliness_trips_graph"]["title"],
-                readable_dict["timeliness_trips_graph"]["subtitle"],
+            (
+                base_facet_chart(
+                    timeliness_df.loc[timeliness_df["dir_0_1"] == 0],
+                    "value",
+                    "variable",
+                    "Period",
+                    readable_dict["timeliness_trips_graph"]["title"],
+                    readable_dict["timeliness_trips_graph"]["subtitle"],
+                )
             )
+            .add_params(xcol_param)
+            .transform_filter(xcol_param)
         )
-        .add_params(xcol_param)
-        .transform_filter(xcol_param)
-    )
-    # display(timeliness_trips_dir_0)
     timeliness_trips_dir_1 = (
-        (
-            base_facet_chart(
-                timeliness_df.loc[timeliness_df["dir_0_1"] == 1],
-                "value",
-                "variable",
-                "Period",
-                readable_dict["timeliness_trips_graph"]["title"],
-                readable_dict["timeliness_trips_graph"]["subtitle"],
+            (
+                base_facet_chart(
+                    timeliness_df.loc[timeliness_df["dir_0_1"] == 1],
+                    "value",
+                    "variable",
+                    "Period",
+                    readable_dict["timeliness_trips_graph"]["title"],
+                    readable_dict["timeliness_trips_graph"]["subtitle"],
+                )
             )
+            .add_params(xcol_param)
+            .transform_filter(xcol_param)
         )
-        .add_params(xcol_param)
-        .transform_filter(xcol_param)
-    )
+
     # display(timeliness_trips_dir_1)
     frequency_graph = (
     frequency_chart(df)
@@ -958,38 +1008,35 @@ def filtered_route(
         .transform_filter(xcol_param)
     )
     
-    # display(spatial_accuracy)
     text_dir0 = (
-        (create_text_table(route_stats_df, 0))
-        .add_params(xcol_param)
-        .transform_filter(xcol_param)
-    )
-    # display(text_dir0)
+            (create_text_table(route_stats_df, 0))
+            .add_params(xcol_param)
+            .transform_filter(xcol_param)
+        )
     text_dir1 = (
-        create_text_table(route_stats_df, 1)
-        .add_params(xcol_param)
-        .transform_filter(xcol_param)
-    )
-    # display(text_dir1)
+            create_text_table(route_stats_df, 1)
+            .add_params(xcol_param)
+            .transform_filter(xcol_param)
+        )
     
     ride_quality = divider_chart(df, "The charts below measure the quality of the rider experience for this route.")
     data_quality = divider_chart(df, "The charts below describe the quality of GTFS data collected for this route.")
+    
     chart_list = [
-        ride_quality,
-        avg_scheduled_min_graph,
-        timeliness_trips_dir_0,
-        timeliness_trips_dir_1,
-        frequency_graph,
-        speed_graph,
-        data_quality,
-        vp_per_min_graph,
-        sched_vp_per_min,
-        spatial_accuracy,
-        text_dir0,
-        text_dir1
-    ]
+    ride_quality,
+    avg_scheduled_min_graph,
+    timeliness_trips_dir_0,
+    timeliness_trips_dir_1,
+    frequency_graph,
+    speed_graph,
+    data_quality,
+    vp_per_min_graph,
+    sched_vp_per_min,
+    spatial_accuracy,
+    text_dir0,
+    text_dir1]
 
-     
+  
     """ chart = alt.vconcat(*chart_list).properties(
         resolve=alt.Resolve(
             scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))

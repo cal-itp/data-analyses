@@ -100,7 +100,7 @@ avg_scheduled_min_graph:
     title: "Average Scheduled Minutes"
     subtitle: "The average minutes a trip is scheduled to run in each direction."
 timeliness_trips_graph:
-    title: "Breakdown of Trips by Timeliness going "
+    title: "Breakdown of Trips by Timeliness"
     subtitle: "Categorizing whether a trip is early, late, or ontime. A trip is on time if it arrives 5 minutes later or earlier than scheduled."
 frequency_graph:
     title: "Frequency of Trips in Minutes"

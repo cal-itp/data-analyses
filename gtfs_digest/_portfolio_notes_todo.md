@@ -1,16 +1,34 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
 * cd ../ && pip install -r portfolio/requirements.txt
-* python portfolio/portfolio.py clean test_gtfs_exploratory && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
+* python portfolio/portfolio.py clean gtfs_digest_testing && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
 * python portfolio/portfolio.py build gtfs_digest  --deploy 
 * cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env &&  pip install -U altair 
 * RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
+### 5/17/2024
+* State of the GTFS Digest Portfolio 
+    * All the tweaks in [Issue](https://github.com/cal-itp/data-analyses/issues/1101) except cardinal directions & mapping the routes based on the `route_colors` provided by operators have been addressed. 
+    * There is a rough estimate of the cardinal directions a route is headed.
+        * Cons:
+            * The function to grab the cardinal direction takes a long time. It will take about 2 hours for all the operators to run.
+            * The function looks across the route for all time periods, rather than looking at the direction per date. This is less accurate.
+            * Not all routes record data for both directions. There will be empty graphs for these routes. 
+        * Pro:
+            * If need be, you can run the portfolio again. 
+        * Current tackling:
+            * `Route_id` and the associated names for routes change over time. I am still working on refining the function that attaches the most current `route_id` to the same routes across the entire time span of the dataset. 
+            * Ex: Main Street Route had the ID of 123 in April 2023 but ABC in April 2024. I have to go back and update the ID for April 2023 to be ABC. 
+            * The function is very slow. Grabbing all of the stops and finding the direction they points means the dataset is huge, especially because we need all the dates possible. I am working on using `dask deployed` to speed things up. 
+    * Service Hour Charts
+        * Finished. There are now 3 charts for daily weekday, Saturday, and Sunday total service hours across all the routes.
+        * Right now, we only have data for the entire weeks of April and October 2023. April 2024 to come.
+        * Added a new column `weekday_service_hours` to `_section1_utils.total_service_hours` that divides the sum of `service_hours` by 5 for an accurate count. Previously, this was done incorrectly. 
 
 ### 5/16/2024
 To-Do
-* Noticed a bug after running all of the operators...Figure out why the cardinal direction shows southbound and northbound even for the east/west directions.
+* <s>Noticed a bug after running all of the operators...Figure out why the cardinal direction shows southbound and northbound even for the east/west directions.</s>
 * In the future, speed up the cardinal direction work? Or it'll be added to the pipeline? Right now it takes a very long time. 
 * Table of Contents on the portfolio site: the operators are not alphabetical. 
     * D7: LA Metro is before City of Santa Monica/City of X/City of Y

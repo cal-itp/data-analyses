@@ -425,7 +425,6 @@ def create_service_hour_chart(df:pd.DataFrame,
     .add_params(selection)
     )
     
-    # display(main_chart)
     # Load background chart
     bg_chart = create_bg_service_chart()
     # display(bg_chart)
