@@ -102,8 +102,9 @@ speedmap_segments:
   stage4: "speedmap/speeds"
   trip_stop_cols: ["trip_instance_key", "stop_sequence", "stop_sequence1"]
   segments_file: "segment_options/speedmap_segments"
-  speedmap_something_single_segment: "rollup_singleday/speeds_speedmap_segments"
-  #shape_stop_multi_segment: "rollup_multiday/speeds_route_dir"
+  speedmap_shape_single_segment: "rollup_singleday/speeds_shape_speedmap_segments"
+  speedmap_route_dir_single_segment: "rollup_singleday/speeds_route_dir_speedmap_segments"
+  speedmap_route_dir_multi_segment: "rollup_multiday/speeds_route_dir_speedmap_segments"
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}
