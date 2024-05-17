@@ -15,8 +15,6 @@
             * The function to grab the cardinal direction takes a long time. It will take about 2 hours for all the operators to run.
             * The function looks across the route for all time periods, rather than looking at the direction per date. This is less accurate.
             * Not all routes record data for both directions. There will be empty graphs for these routes. 
-        * Pro:
-            * If need be, you can run the portfolio again. 
         * Current tackling:
             * `Route_id` and the associated names for routes change over time. I am still working on refining the function that attaches the most current `route_id` to the same routes across the entire time span of the dataset. 
             * Ex: Main Street Route had the ID of 123 in April 2023 but ABC in April 2024. I have to go back and update the ID for April 2023 to be ABC. 
