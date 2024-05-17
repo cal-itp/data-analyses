@@ -3,23 +3,12 @@ import calitp_data_analysis.magics
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
-
-# Charts & Maps
-from calitp_data_analysis import calitp_color_palette as cp
-import altair as alt
-import ipywidgets
-from IPython.display import HTML, Markdown, display
-
-# Packages
-from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
+    
+# Project Specific Packages
+from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, RT_SCHED_GCS, SCHED_GCS)
 from shared_utils import catalog_utils, rt_dates, rt_utils
 import _report_utils 
 import _operators_prep as op_prep
-
-# Datetime
-import calendar
-from datetime import datetime
-import numpy as np
 
 # Readable Dictionary
 import yaml
@@ -27,15 +16,25 @@ with open("readable.yml") as f:
     readable_dict = yaml.safe_load(f)
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
+# Charts & Maps
+from calitp_data_analysis import calitp_color_palette as cp
+import altair as alt
+import ipywidgets
+from IPython.display import HTML, Markdown, display
+with open("color_palettes.yml") as f:
+    color_dict = yaml.safe_load(f)
+
+# Datetime
+#import calendar
+#from datetime import datetime
+import numpy as np
+from segment_speed_utils import helpers, time_series_utils
+
 # Warehouse
 import os
 from calitp_data_analysis.sql import query_sql
 from calitp_data_analysis.tables import tbls
 from siuba import *
-
-# Color Palette 
-with open("color_palettes.yml") as f:
-    color_dict = yaml.safe_load(f)
 """
 Data
 """
@@ -237,171 +236,208 @@ def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     
     return df
 
-def summarize_monthly(df:pd.DataFrame)->pd.DataFrame:
+def concatenate_trips(
+    date_list: list,
+) -> pd.DataFrame:
+    """
+    Concatenate schedule data that's been
+    aggregated to route-direction-time_period for
+    multiple days.
+    """
+    FILE = GTFS_DATA_DICT.schedule_downloads.trips
+
+    df = (
+        time_series_utils.concatenate_datasets_across_dates(
+            COMPILED_CACHED_VIEWS,
+            FILE,
+            date_list,
+            data_type="df",
+            columns=[
+                "name",
+                "service_date",
+                "route_long_name",
+                "trip_first_departure_datetime_pacific",
+                "service_hours",
+            ],
+        )
+        .sort_values(["service_date"])
+        .reset_index(drop=True)
+    )
+
+    return df
+
+def get_day_type(date):
+    """
+    Function to return the day type (e.g., Monday, Tuesday, etc.) from a datetime object.
+    """
+    days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    return days_of_week[date.weekday()]
+
+def weekday_or_weekend(row):
+    """
+    Tag if a day is a weekday or Saturday/Sunday
+    """
+    if row.day_type == "Sunday":
+        return "Sunday"
+    if row.day_type == "Saturday":
+        return "Saturday"
+    else:
+        return "Weekday"
+
+def total_service_hours(date_list: list, name: str) -> pd.DataFrame:
+    """
+    Total up service hours by departure hour, 
+    month, and day type for an operator. 
+    """
+    # Combine all the days' data for a week
+    df = concatenate_trips(date_list)
+    
+     # Filter
+    df = df.loc[df.name == name].reset_index(drop=True)
+    
+    # Add day type aka Monday, Tuesday, Wednesday...
+    df['day_type'] = df['service_date'].apply(get_day_type)
+    
+    # Tag if the day is a weekday, Saturday, or Sunday
+    df["weekend_weekday"] = df.apply(weekday_or_weekend, axis=1)
+    
+    # Find the minimum departure hour
+    df["departure_hour"] = df.trip_first_departure_datetime_pacific.dt.hour
+    
+    # Delete out the specific day, leave only month & year
+    df["month"] = df.service_date.astype(str).str.slice(stop=7)
+    
     df2 = (
-    df.groupby(
-        ['name', 'month','time_of_day', 'day_name']
-    )
-    .agg(
-        {
-            "ttl_service_hours": "sum",
-        }
-    )
-    .reset_index()
-    )
-    
-    return df2
-
-def convert_to_timestamps(datetime_list):
-    timestamps = []
-    for dt in datetime_list:
-        timestamp = dt.astype("datetime64[s]").astype(datetime)
-        timestamps.append(timestamp)
-    return timestamps
-
-def count_days_in_months(dates: list) -> pd.DataFrame:
-    # Turn list from numpy datetime to timestamp
-    dates2 = convert_to_timestamps(dates)
-    # Initialize a dictionary to store counts for each day of the week
-    day_counts = {}
-
-    # Iterate over each date
-    for date in dates2:
-        year = date.year
-        month = date.month
-
-        # Initialize counts dictionary for the current month-year combination
-        if (year, month) not in day_counts:
-            day_counts[(year, month)] = {
-                "Monday": 0,
-                "Tuesday": 0,
-                "Wednesday": 0,
-                "Thursday": 0,
-                "Friday": 0,
-                "Saturday": 0,
-                "Sunday": 0,
+        df.groupby(["name", "month", "weekend_weekday", "departure_hour"])
+        .agg(
+            {
+                "service_hours": "sum",
             }
-
-        # Get the calendar matrix for the current month and year
-        matrix = calendar.monthcalendar(year, month)
-
-        # Iterate over each day in the matrix
-        for week in matrix:
-            for i, day in enumerate(week):
-                # Increment the count for the corresponding day of the week
-                if day != 0:
-                    weekday = calendar.day_name[i]
-                    day_counts[(year, month)][weekday] += 1
-
-    # Convert the dictionary to a pandas DataFrame
-    df = pd.DataFrame.from_dict(day_counts, orient="index")
-    df = df.reset_index()
-    df["level_1"] = df["level_1"].astype(str).str.zfill(2)
-    df["month"] = df.level_0.astype(str) + "-" + df.level_1.astype(str)
-    df = df.drop(columns=["level_0", "level_1"])
-    
-    # Melt from wide to long
-    df2 = pd.melt(
-    df,
-    id_vars=["month"],
-    value_vars=[
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-        "month",
-    ])
-    
-    df2 = df2.rename(columns = {"variable":"day_name", "value":"n_days"})
+        )
+        .reset_index()
+    )
+    df2["weekday_service_hours"] = df2.service_hours/5
+    df2 = df2.rename(columns = {'service_hours':'weekend_service_hours'})
     return df2
 
-def total_monthly_service(name:str) ->pd.DataFrame:
+def total_service_hours_all_months(name: str) -> pd.DataFrame:
+    """
+    Find service hours for a full week for one operator
+    and for the months we have a full week's worth of data downloaded.
+    As of 5/2024, we have April 2023 and October 2023.
+    """
+    # Grab the dataframes with a full week's worth of data. 
+    apr_week = rt_dates.get_week(month="apr2023", exclude_wed=False)
+    oct_week = rt_dates.get_week(month="oct2023", exclude_wed=False)
     
-    df = load_scheduled_service(name)
+    # Sum up total service_hours
+    apr_df = total_service_hours(apr_week, name)
+    oct_df = total_service_hours(oct_week, name)
+
+    # Combine everything
+    all_df = pd.concat([apr_df, oct_df])
     
-    # Grab unique dates
-    unique_dates = list(df.datetime_date.unique())
-    
-    # Find number of Monday's, Tuesday's...etc in each date
-    month_days_df = count_days_in_months(unique_dates)
-    
-    # Aggregate the original dataframe
-    agg_df = summarize_monthly(df)
-    
-    # Merge on number of day types
-    agg_df = pd.merge(agg_df, month_days_df, on =["month", "day_name"], how = "left")
-    
-    # Find daily service hours
-    agg_df["Daily Service Hours"] = agg_df.ttl_service_hours / agg_df.n_days
-    
-    # Rename columns
-    agg_df.columns = agg_df.columns.map(_report_utils.replace_column_names)
-    
-    return agg_df
+    # Rename the columns
+    all_df.columns = all_df.columns.map(_report_utils.replace_column_names)
+    return all_df
 
 """
 Charts & Maps
 """
-def single_bar_chart_dropdown(
-    df: pd.DataFrame,
-    x_col: str,
-    y_col: str,
-    offset_col: str,
-    title: str,
-    dropdown_col: str,
-    subtitle:str
-):
-    dropdown_list = df[dropdown_col].unique().tolist()
-    dropdown_list.sort(reverse=True)
-    dropdown = alt.binding_select(options=dropdown_list, name=_report_utils.labeling(dropdown_col))
-
-    selector = alt.selection_point(
-        name=_report_utils.labeling(dropdown_col), fields=[dropdown_col], bind=dropdown
+def create_bg_service_chart():
+    """
+    Create a shaded background for the Service Hour Chart
+    by Time Period. 
+    """
+    cutoff = pd.DataFrame(
+    {
+        "start": [0, 4, 7, 10, 15, 19],
+        "stop": [3.99, 6.99, 9.99, 14.99, 18.99, 24],
+        "time_period": [
+            "Owl:12-3:59AM",
+            "Early AM:4-6:59AM",
+            "AM Peak:7-9:59AM",
+            "Midday:10AM-2:59PM",
+            "PM Peak:3-7:59PM",
+            "Evening:8-11:59PM",
+        ],
+    }
     )
-
-    chart = (
-        alt.Chart(df)
-        .mark_bar()
-        .encode(
-            x=alt.X(
-                f"{x_col}:N",
-                title="Day",
-                scale=alt.Scale(
-                    domain=[
-                        "Monday",
-                        "Tuesday",
-                        "Wednesday",
-                        "Thursday",
-                        "Friday",
-                        "Saturday",
-                        "Sunday",
-                    ]
-                ),
-            ),
-            y=alt.Y(f"{y_col}:Q", title=_report_utils.labeling(y_col)),
-            xOffset=f"{offset_col}:N",
-            color=alt.Color(
-                f"{offset_col}:N",
-                title=_report_utils.labeling(offset_col),
-                scale=alt.Scale(
-                    range=color_dict["full_color_scale"],
-                ),
-            ),
-            tooltip=df.columns.tolist(),
-        )
-    )
-    chart = chart.properties(
-        title = {
-                "text": [title],
-                "subtitle": [subtitle],
-            }, width=400, height=250)
-    chart = chart.add_params(selector).transform_filter(selector)
-
-    display(chart)
     
+    # Sort legend by time, 12am starting first. 
+    chart = alt.Chart(cutoff.reset_index()).mark_rect(opacity=0.15).encode(
+    x="start",
+    x2="stop",
+    y=alt.value(0),  # pixels from top
+    y2=alt.value(250),  # pixels from top
+    color=alt.Color(
+        "time_period:N",
+        sort = (
+            [
+                "Owl:12-3:59AM",
+                "Early AM:4-6:59AM",
+                "AM Peak:7-9:59AM",
+                "Midday:10AM-2:59PM",
+                "PM Peak:3-7:59PM",
+                "Evening:8-11:59PM",
+            ]
+        ),
+        title=_report_utils.labeling("time_period"),
+        scale=alt.Scale(range=color_dict["full_color_scale"]),
+    ))
+    
+    return chart
+
+def create_service_hour_chart(df:pd.DataFrame,
+                              day_type:str,
+                              y_col:str):
+    # Create an interactive legend
+    selection = alt.selection_point(fields=['Month'], bind='legend')
+    
+    # Create the main line chart
+    df = df.loc[df["Weekend or Weekday"] == day_type].reset_index(drop = True)
+    
+    # Create a new title that incorporates day type
+    title = readable_dict["daily_scheduled_hour"]["title"]
+    title = title + ' for ' + day_type
+
+    main_chart = (
+    alt.Chart(df)
+    .mark_line(size=3)
+    .encode(
+        x=alt.X("Departure Hour", 
+                title=_report_utils.labeling("Departure Hour in Military Time")),
+        y=alt.Y(y_col,
+               title = _report_utils.labeling(y_col)),
+        color=alt.Color(
+            "Month",
+            scale=alt.Scale(range=color_dict["tri_color"]),  # Specify desired order
+        ),
+        opacity=alt.condition(selection, alt.value(1), alt.value(0.2)),
+        tooltip=list(df.columns),
+    )
+    .properties(
+        width=400,
+        height=250,
+        title={"text": title, 
+               "subtitle": readable_dict["daily_scheduled_hour"]["subtitle"]},
+    )
+    .add_params(selection)
+    )
+    
+    # Load background chart
+    bg_chart = create_bg_service_chart()
+    # display(bg_chart)
+    
+    # Combine
+    final_chart = (main_chart + bg_chart).properties(
+    resolve=alt.Resolve(
+        scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))
+    )
+    )
+    
+    return final_chart
+
 def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str,
                     title: str, subtitle:str):
     chart = (
