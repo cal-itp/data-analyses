@@ -9,12 +9,12 @@ download_gtfs_data:
 
     
 preprocess:
-	#python stop_times_with_direction.py
-	#python crosswalk_gtfs_dataset_key_to_organization.py    
-	#python vp_keep_usable.py
-	#python vp_direction.py
-	#python cleanup.py
-	#python vp_condenser.py
+	python stop_times_with_direction.py
+	python crosswalk_gtfs_dataset_key_to_organization.py    
+	python vp_keep_usable.py
+	python vp_direction.py
+	python cleanup.py
+	python vp_condenser.py
 	make route_typologies_data
 	python operator_scheduled_stats.py 
     
