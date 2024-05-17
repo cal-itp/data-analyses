@@ -13,11 +13,11 @@ PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
 
 analysis_date = rt_dates.DATES["apr2024"]
 
-oct_week = rt_dates.get_week("oct2023", exclude_wed=True)
-apr_week = rt_dates.get_week("apr2023", exclude_wed=True)
-analysis_date_list  = [analysis_date]
+oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
+apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
+apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
+analysis_date_list  = apr2024_week
 
 PROJECT_CRS = "EPSG:3310"
-CONFIG_PATH = "./config.yml"
 ROAD_SEGMENT_METERS = 1_000
 SEGMENT_TYPES = ["stop_segments", "rt_stop_times"]

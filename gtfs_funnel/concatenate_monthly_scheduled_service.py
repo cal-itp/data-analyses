@@ -30,8 +30,10 @@ if __name__ == "__main__":
     year_list = [2023, 2024]
     analysis_date_list = (rt_dates.y2024_dates + 
                           rt_dates.y2023_dates + 
-                          rt_dates.oct_week + 
-                          rt_dates.apr_week)
+                          rt_dates.oct2023_week + 
+                          rt_dates.apr2023_week + 
+                          rt_dates.apr2024_week
+                         )
     
     df = pd.concat(
         [pd.read_parquet(
@@ -40,7 +42,7 @@ if __name__ == "__main__":
         axis=0, ignore_index=True
     ).rename(columns = {
         "source_record_id": "schedule_source_record_id"
-    })
+    }).drop_duplicates().reset_index(drop=True)
 
     df = df.assign(
         day_name = df.day_type.map(time_helpers.DAY_TYPE_DICT)
@@ -72,10 +74,10 @@ if __name__ == "__main__":
     standardized_routes = pd.read_parquet(f"{SCHED_GCS}{ROUTES}.parquet")
     
     route_names_df = time_series_utils.clean_standardized_route_names(
-        standardized_routes).pipe(
+        standardized_routes
+    ).pipe(
         time_series_utils.parse_route_combined_name
-    )[
-        ["schedule_gtfs_dataset_key",
+    )[["schedule_gtfs_dataset_key",
          "route_long_name", "route_short_name", 
          "route_id", "route_combined_name"]
     ].drop_duplicates()

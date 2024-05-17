@@ -246,7 +246,7 @@ if __name__ == "__main__":
         logger.info(f"average rollups for {analysis_date}: {end - start}")
         
     '''
-    for one_week in [rt_dates.oct_week, rt_dates.apr_week]:
+    for one_week in [rt_dates.oct2023_week, rt_dates.apr2023_week]:
         start = datetime.datetime.now()
             
         multi_day_summary_averages(one_week, RT_DICT)

@@ -21,6 +21,9 @@ rt_stop_times_pipeline:
 	python pipeline_rt_stop_times.py
 	python average_summary_speeds.py  
 
+all_speeds_pipeline:
+	make speeds_pipeline && make rt_stop_times_pipeline
+
 download_roads:
 	#pip install esridump
 	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson
