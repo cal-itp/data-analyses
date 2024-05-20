@@ -17,16 +17,16 @@ def check_defined_elsewhere(row, df):
     row['service_any_feed'] = is_defined
     return row
 
-target_date = conveyal_vars.target_date
+TARGET_DATE = conveyal_vars.TARGET_DATE
 
 def get_feeds_check_service():
-    feeds_on_target = gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(selected_date=target_date)
+    feeds_on_target = gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(selected_date=TARGET_DATE)
     # default will use mtc subfeeds (prev Conveyal behavior), can spec customer facing if we wanna switch
 
     operator_feeds = feeds_on_target.feed_key
     trips = (
         tbls.mart_gtfs.fct_scheduled_trips()
-        >> filter(_.feed_key.isin(operator_feeds), _.service_date == target_date)
+        >> filter(_.feed_key.isin(operator_feeds), _.service_date == TARGET_DATE)
         >> group_by(_.feed_key)
         >> count(_.feed_key)
         # >> collect()
@@ -38,7 +38,7 @@ def get_feeds_check_service():
     
 def attach_transit_services(feeds_on_target: pd.DataFrame):
 
-    target_dt = dt.datetime.combine(target_date, dt.time(0))
+    target_dt = dt.datetime.combine(TARGET_DATE, dt.time(0))
 
     services = (tbls.mart_transit_database.dim_gtfs_service_data()
         >> filter(_._valid_from <= target_dt, _._valid_to > target_dt)
@@ -65,5 +65,5 @@ if __name__ == '__main__':
     feeds_on_target = get_feeds_check_service()
     feeds_on_target = attach_transit_services(feeds_on_target)
     report_undefined(feeds_on_target)
-    feeds_on_target.to_parquet(f'{conveyal_vars.gcs_path}feeds_{target_date.isoformat()}.parquet')
+    feeds_on_target.to_parquet(f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE.isoformat()}.parquet')
     

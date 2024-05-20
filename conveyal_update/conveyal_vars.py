@@ -1,8 +1,8 @@
 import datetime as dt
 
-gcs_path = 'gs://calitp-analytics-data/data-analyses/conveyal_update/'
-target_date = dt.date(2023, 10, 18) #  '2023-10-18' is most recent in Conveyal for the main 4 regions
-osm_file = 'us-west-latest.osm.pbf'
+GCS_PATH = 'gs://calitp-analytics-data/data-analyses/conveyal_update/'
+TARGET_DATE = dt.date(2023, 10, 18) #  '2023-10-18' is most recent in Conveyal for the main 4 regions
+OSM_FILE = 'us-west-latest.osm.pbf'
 #  http://download.geofabrik.de/north-america/us-west-latest.osm.pbf
 #  first download with wget...
 

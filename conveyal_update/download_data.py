@@ -12,9 +12,9 @@ import conveyal_vars
 import shutil
 
 regions = conveyal_vars.conveyal_regions
-target_date = conveyal_vars.target_date
+TARGET_DATE = conveyal_vars.TARGET_DATE
 
-regions_and_feeds = pd.read_parquet(f'{conveyal_vars.gcs_path}regions_feeds_{target_date.isoformat()}.parquet')
+regions_and_feeds = pd.read_parquet(f'{conveyal_vars.GCS_PATH}regions_feeds_{TARGET_DATE.isoformat()}.parquet')
 
 def download_feed(row):
     # need wildcard for file too -- not all are gtfs.zip!
@@ -46,6 +46,6 @@ if __name__ == '__main__':
     
     for region in tqdm(regions.keys()):
         download_region(regions_and_feeds, region)
-    shutil.make_archive(f'feeds_{target_date}', 'zip', f'./feeds_{target_date}/')
-    fs.put(f'feeds_{target_date}.zip', f'{conveyal_vars.gcs_path}feeds_{target_date}.zip')
+    shutil.make_archive(f'feeds_{TARGET_DATE}', 'zip', f'./feeds_{TARGET_DATE}/')
+    fs.put(f'feeds_{TARGET_DATE}.zip', f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE}.zip')
     generate_script(regions)
