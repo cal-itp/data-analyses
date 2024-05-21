@@ -259,7 +259,7 @@ if __name__ == "__main__":
                level="INFO")
     
     segment_type = "stop_segments"
-    '''
+    
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
@@ -272,14 +272,14 @@ if __name__ == "__main__":
     
         
     '''
-    for one_week in [
-        rt_dates.apr2024_week
-        #rt_dates.oct2023_week, rt_dates.apr2023_week
-    ]:
+    weeks_available = [
+        rt_dates.apr2024_week, rt_dates.oct2023_week, rt_dates.apr2023_week
+    ]
+    for one_week in weeks_available:
         start = datetime.datetime.now()
             
         multi_day_segment_averages(one_week, segment_type)
         end = datetime.datetime.now()
     
         logger.info(f"average rollups for {one_week}: {end - start}")
-    
+    '''
