@@ -86,6 +86,37 @@ def stop_times_for_all_trips(
     return stop_times
 
 
+def stop_times_for_speedmaps(
+    analysis_date: str
+) -> gpd.GeoDataFrame:
+    """
+    This is the proxy stop times table for speedmaps that should 
+    be concatenated with stop times for all trips.
+    Filter for proxy_stop==1 (these are the extra "stops" we generate
+    at the 1,000th meter).
+    For segments that are shorter than 1,000m, stop to stop is fine.
+    We will do nearest neighbors for these additional proxy stops and
+    concatenate against results for all trips.
+    """
+    stop_time_col_order = [
+        'trip_instance_key', 'shape_array_key',
+        'stop_sequence', 'stop_sequence1', 
+        'stop_id', 'stop_pair',
+        'stop_primary_direction', 'geometry'
+    ] 
+    
+    STOP_TIMES_FILE = GTFS_DATA_DICT.speedmap_segments.proxy_stop_times
+
+    stop_times = gpd.read_parquet(
+        f"{SEGMENT_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet",
+        filters = [[("proxy_stop", "==", 1)]]
+    )
+    
+    stop_times = stop_times.reindex(columns = stop_time_col_order)
+    
+    return stop_times
+    
+
 def nearest_neighbor_for_stop(
     analysis_date: str,
     segment_type: Literal[SEGMENT_TYPES],
@@ -109,14 +140,17 @@ def nearest_neighbor_for_stop(
     
     if segment_type == "stop_segments":
         stop_times = stop_times_for_shape_segments(analysis_date, dict_inputs)
-    
+        stop_times = stop_times.reindex(columns = stop_time_col_order)
+
     elif segment_type == "rt_stop_times":
         stop_times = stop_times_for_all_trips(analysis_date)
+        stop_times = stop_times.reindex(columns = stop_time_col_order)
+    
+    elif segment_type == "speedmap_segments":
+        stop_times = stop_times_for_speedmaps(analysis_date)
     
     else:
         print(f"{segment_type} is not valid")
-    
-    stop_times = stop_times.reindex(columns = stop_time_col_order)
     
     gdf = neighbor.merge_stop_vp_for_nearest_neighbor(
         stop_times, analysis_date)
@@ -135,6 +169,7 @@ def nearest_neighbor_for_stop(
                 f"{analysis_date}: {end - start}")
     
     return
+    
     
 if __name__ == "__main__":
         

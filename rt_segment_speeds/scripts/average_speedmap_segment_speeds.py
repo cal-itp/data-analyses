@@ -12,7 +12,6 @@ from average_segment_speeds import single_day_segment_averages, multi_day_segmen
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date_list
-    from shared_utils import rt_dates
     
     LOG_FILE = "../logs/avg_speeds.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -21,8 +20,8 @@ if __name__ == "__main__":
                level="INFO")
     
     segment_type = "speedmap_segments"
-    ''
-    for analysis_date in [rt_dates.DATES["mar2024"]]:
+    
+    for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
         
@@ -33,7 +32,9 @@ if __name__ == "__main__":
         logger.info(f"average rollups for {analysis_date}: {end - start}")
     
     '''
-    for one_week in [rt_dates.oct2023_week, rt_dates.apr2023_week]:
+    from segment_speed_utils.project_vars import weeks_available
+    
+    for one_week in weeks_available:
         start = datetime.datetime.now()
             
         multi_day_segment_averages(one_week, segment_type)

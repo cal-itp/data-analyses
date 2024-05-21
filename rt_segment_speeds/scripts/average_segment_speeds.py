@@ -272,9 +272,8 @@ if __name__ == "__main__":
     
         
     '''
-    weeks_available = [
-        rt_dates.apr2024_week, rt_dates.oct2023_week, rt_dates.apr2023_week
-    ]
+    from segment_speed_utils.project_vars import weeks_available
+
     for one_week in weeks_available:
         start = datetime.datetime.now()
             

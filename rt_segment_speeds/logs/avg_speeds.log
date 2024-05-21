@@ -193,3 +193,7 @@
 2024-05-21 11:29:07.851 | INFO     | __main__:<module>:33 - average rollups for 2024-03-13: 0:07:57.395592
 2024-05-21 12:13:34.779 | INFO     | __main__:multi_day_segment_averages:245 - multi day segment execution time: 0:06:59.274745
 2024-05-21 12:13:34.895 | INFO     | __main__:<module>:284 - average rollups for ['2024-04-15', '2024-04-16', '2024-04-17', '2024-04-18', '2024-04-19', '2024-04-20', '2024-04-21']: 0:06:59.393625
+2024-05-21 16:00:22.518 | INFO     | average_segment_speeds:single_day_segment_averages:164 - shape seg avg 0:05:40.365765
+2024-05-21 16:04:17.914 | INFO     | average_segment_speeds:single_day_segment_averages:180 - route dir seg avg 0:03:55.396303
+2024-05-21 16:04:17.915 | INFO     | average_segment_speeds:single_day_segment_averages:181 - single day segment execution time: 0:09:35.762068
+2024-05-21 16:04:18.254 | INFO     | __main__:<module>:32 - average rollups for 2024-04-17: 0:09:36.105755
