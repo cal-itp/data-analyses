@@ -198,8 +198,8 @@ def multi_day_segment_averages(
     MAX_SPEED = dict_inputs["max_speed"]
     
     # These are the grouping columns (list) to use for the shape and route-dir aggregation
-    STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]
-    
+    SHAPE_STOP_COLS = [*dict_inputs["shape_stop_cols"]]
+    STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]    
     ROUTE_SEG_FILE = dict_inputs["route_dir_multi_segment"]
         
     start = datetime.datetime.now()
@@ -259,7 +259,7 @@ if __name__ == "__main__":
                level="INFO")
     
     segment_type = "stop_segments"
-
+    '''
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
@@ -272,11 +272,14 @@ if __name__ == "__main__":
     
         
     '''
-    for one_week in [rt_dates.oct2023_week, rt_dates.apr2023_week]:
+    for one_week in [
+        rt_dates.apr2024_week
+        #rt_dates.oct2023_week, rt_dates.apr2023_week
+    ]:
         start = datetime.datetime.now()
             
         multi_day_segment_averages(one_week, segment_type)
         end = datetime.datetime.now()
     
         logger.info(f"average rollups for {one_week}: {end - start}")
-    '''
+    

@@ -1,5 +1,5 @@
 """
-Quick aggregation for segment speed averages.
+Quick aggregation for speedmap segment speed averages.
 """
 import datetime
 import pandas as pd
@@ -21,7 +21,7 @@ if __name__ == "__main__":
                level="INFO")
     
     segment_type = "speedmap_segments"
-    
+    ''
     for analysis_date in [rt_dates.DATES["mar2024"]]:
         
         start = datetime.datetime.now()
