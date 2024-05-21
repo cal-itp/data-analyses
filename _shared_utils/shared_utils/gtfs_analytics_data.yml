@@ -69,6 +69,8 @@ stop_segments:
   stage3: "stop_arrivals"
   stage4: "speeds_stop_segments"
   trip_stop_cols: ["trip_instance_key", "stop_sequence"]
+  shape_stop_cols: ["shape_array_key", "shape_id", "stop_sequence"]
+  stop_pair_cols: ["stop_pair", "stop_pair_name"]
   shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments"
   route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"
   route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
@@ -83,6 +85,8 @@ rt_stop_times:
   stage3: "rt_stop_times/stop_arrivals"
   stage4: "rt_stop_times/speeds"
   trip_stop_cols: ["trip_instance_key", "stop_sequence"]
+  shape_stop_cols: ["shape_array_key", "shape_id", "stop_sequence"]
+  stop_pair_cols: ["stop_pair", "stop_pair_name"]
   segments_file: "segment_options/stop_segments"
   trip_speeds_single_summary: "rollup_singleday/speeds_trip"
   route_dir_single_summary: "rollup_singleday/speeds_route_dir"
@@ -101,10 +105,12 @@ speedmap_segments:
   stage3b: "speedmap/stop_arrivals"
   stage4: "speedmap/speeds"
   trip_stop_cols: ["trip_instance_key", "stop_sequence", "stop_sequence1"]
+  shape_stop_cols: ["shape_array_key", "shape_id"]
+  stop_pair_cols: ["stop_pair", "stop_pair_name", "segment_id"]
   segments_file: "segment_options/speedmap_segments"
-  speedmap_shape_single_segment: "rollup_singleday/speeds_shape_speedmap_segments"
-  speedmap_route_dir_single_segment: "rollup_singleday/speeds_route_dir_speedmap_segments"
-  speedmap_route_dir_multi_segment: "rollup_multiday/speeds_route_dir_speedmap_segments"
+  shape_stop_single_segment: "rollup_singleday/speeds_shape_speedmap_segments"
+  route_dir_single_segment: "rollup_singleday/speeds_route_dir_speedmap_segments"
+  route_dir_multi_segment: "rollup_multiday/speeds_route_dir_speedmap_segments"
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}

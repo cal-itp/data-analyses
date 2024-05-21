@@ -137,15 +137,11 @@ if __name__ == "__main__":
             segment_type = segment_type, 
             config_path = GTFS_DATA_DICT
         )
-          
-        t1 = datetime.datetime.now()
+                  
         concatenate_speedmap_proxy_arrivals_with_remaining(
             analysis_date,
             config_path = GTFS_DATA_DICT
         )
-        
-        t2 = datetime.datetime.now()
-        print(f"get full speedmap stop arrivals {analysis_date}: {t2 - t1}")
         
         stop_arrivals_to_speed.calculate_speed_from_stop_arrivals(
             analysis_date = analysis_date, 

@@ -93,7 +93,8 @@ def attach_operator_natural_identifiers(
         
         stop_pair = pd.read_parquet(
             f"{SEGMENT_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet",
-            columns = trip_stop_cols + ["segment_id", "stop_pair_name", "stop_pair"]
+            columns = trip_stop_cols + [
+                "segment_id", "stop_pair_name", "stop_pair"]
         )
           
         df_with_natural_ids = gtfs_schedule_wrangling.fill_missing_stop_sequence1(
