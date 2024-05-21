@@ -176,10 +176,9 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO") 
     
-    #from segment_speed_utils.project_vars import analysis_date_list
-    from shared_utils import rt_dates
+    from segment_speed_utils.project_vars import analysis_date_list
     
-    for analysis_date in [rt_dates.DATES["mar2024"]]:
+    for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
         SEGMENT_LENGTH = GTFS_DATA_DICT.speedmap_segments.segment_meters
