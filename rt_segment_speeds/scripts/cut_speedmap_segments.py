@@ -41,7 +41,7 @@ def cut_longer_segments(
     trip_stop_cols = ["trip_instance_key", "stop_sequence"]
 
     gdf2 = gdf2.assign(
-        segment_sequence2 = gdf2.groupby(trip_stop_cols).cumcount()
+        segment_sequence2 = gdf2.groupby(trip_stop_cols).cumcount() + 1
     )
     
     # Amend segment_id which has suffix "-1"
@@ -95,6 +95,8 @@ def get_proxy_stops(
         "stop_pair",
         "geometry"
     ]
+    
+    trip_stop_cols = ["trip_instance_key", "stop_sequence"]
 
     proxy_stops = longer_segments.assign(
         geometry = longer_segments.apply(
@@ -105,7 +107,14 @@ def get_proxy_stops(
 
     # stop_primary_direction can be populated when it's appended
     # with the stop_times, and we can sort by trip-stop_sequence1
-    # and pd.ffill (forward fill)
+    # and pd.ffill (forward fill)    
+    ALL_SEGMENTS_FILE = GTFS_DATA_DICT.rt_stop_times.segments_file
+    
+    all_segments = pd.read_parquet(
+        f"{SEGMENT_GCS}{ALL_SEGMENTS_FILE}_{analysis_date}.parquet",
+        columns = trip_stop_cols + ["segment_id"],
+    )
+    
     stop_times = helpers.import_scheduled_stop_times(
         analysis_date,
         columns = keep_cols + [
@@ -114,16 +123,18 @@ def get_proxy_stops(
         with_direction = True,
         get_pandas = True,
         crs = geography_utils.WGS84,
+    ).merge(
+        all_segments.rename(columns = {"segment_id": "segment_id_orig"}),
+        on = trip_stop_cols,
+        how = "inner"
     )
-    
-    trip_stop_cols = ["trip_instance_key", "stop_sequence"]
     
     gdf = pd.concat(
         [stop_times.assign(proxy_stop=0), 
          proxy_stops.assign(proxy_stop=1)], 
         axis=0, ignore_index=True
     ).sort_values(
-        trip_stop_cols
+        trip_stop_cols + ["proxy_stop"]
     ).reset_index(drop=True)
     
     # Fill in the missing info from proxy stops that would have come from stop_times
@@ -140,16 +151,19 @@ def get_proxy_stops(
                           .stop_pair_name
                           .ffill()
                          ),
+        # Only fill in segment_id if it's missing
+        # otherwise, we want to favor the new segment_id that has suffixes -2, -3, etc
+        segment_id = gdf.segment_id.fillna(gdf.segment_id_orig)
     ).pipe(gtfs_schedule_wrangling.fill_missing_stop_sequence1)
     
     # After filling in stop_primary_direction, we need a drop_duplicates
     # and keep the row where proxy_stop==1 wherever there are dupes
     gdf = gdf.sort_values(
-        trip_stop_cols + ["proxy_stop"], 
-        ascending = [True for i in trip_stop_cols] + [False]
+        trip_stop_cols + ["stop_sequence1", "proxy_stop"], 
+        ascending = [True for i in trip_stop_cols] + [True, False]
     ).drop_duplicates(
-        subset=trip_stop_cols
-    ).reset_index(drop=True)
+        subset=trip_stop_cols + ["stop_sequence1"]
+    ).reset_index(drop=True).drop(columns = ["segment_id_orig"])
     
     return gdf
 
@@ -189,7 +203,7 @@ if __name__ == "__main__":
         )
 
         time1 = datetime.datetime.now()
-        logger.info(f"cut longer segments: {time1 - start}")
+        print(f"cut longer segments: {time1 - start}")
               
         speedmap_segments = pd.concat([
             stop_segments.loc[stop_segments.segment_length < SEGMENT_LENGTH],
@@ -213,14 +227,14 @@ if __name__ == "__main__":
         )
          
         time2 = datetime.datetime.now()
-        logger.info(f"concatenate segments and export: {time2 - time1}")
+        print(f"concatenate segments and export: {time2 - time1}")
 
         del stop_segments, speedmap_segments
         
         speedmap_stops = get_proxy_stops(longer_segments, analysis_date)
         end = datetime.datetime.now()
         
-        logger.info(f"concatenate and export new stop times: {end - time2}")
+        print(f"concatenate and export new stop times: {end - time2}")
         
         utils.geoparquet_gcs_export(
             speedmap_stops,
@@ -228,5 +242,5 @@ if __name__ == "__main__":
             f"{SPEEDMAP_STOP_TIMES}_{analysis_date}"
         )
           
-        logger.info(f"execution time: {end - start}")
+        logger.info(f"speedmap segments and proxy_stop_times: {end - start}")
         
