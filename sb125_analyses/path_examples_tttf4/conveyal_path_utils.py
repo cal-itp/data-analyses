@@ -63,9 +63,9 @@ def get_warehouse_data(path_df):
     get relevant data from warehouse for all trips in Conveyal path output
     '''
     analysis_date = path_df.date.iloc[0]
-    all_feed_keys = list(df.feed_keys.explode().unique())
-    all_route_ids = list(df.routes.explode().unique())
-    all_stops = list(df.boardStops.explode().unique()) + list(df.alightStops.explode().unique())
+    all_feed_keys = list(path_df.feed_keys.explode().unique())
+    all_route_ids = list(path_df.routes.explode().unique())
+    all_stops = list(path_df.boardStops.explode().unique()) + list(path_df.alightStops.explode().unique())
 
     warehouse_data = {}
     warehouse_data['shapes'] = shared_utils.gtfs_utils_v2.get_shapes(selected_date=analysis_date, operator_feeds=all_feed_keys,
@@ -73,8 +73,9 @@ def get_warehouse_data(path_df):
     warehouse_data['shapes'] = warehouse_data['shapes'].to_crs(geography_utils.CA_NAD83Albers)
     warehouse_data['trips'] = shared_utils.gtfs_utils_v2.get_trips(selected_date=analysis_date,
                                                                    operator_feeds=all_feed_keys,
-                                                                   trip_cols = ['feed_key', 'trip_id', 'route_id',
-                                                                                'shape_id', 'trip_first_departure_ts']
+                                                                   trip_cols = ['feed_key', 'name', 'trip_id', 'route_id',
+                                                                                'route_short_name', 'route_long_name', 'shape_id',
+                                                                                'trip_first_departure_ts']
                                                                   )
     warehouse_data['trips'] = warehouse_data['trips'] >> filter(_.route_id.isin(all_route_ids))
     warehouse_data['st'] = shared_utils.gtfs_utils_v2.get_stop_times(selected_date=analysis_date, operator_feeds=all_feed_keys, trip_df=warehouse_data['trips'])
@@ -99,7 +100,8 @@ def shape_segments_from_row(row, warehouse_data):
         trip_with_pair = trip_with_pair >> select(_.feed_key, _.trip_id, _.stop_id, _.stop_sequence)
         trip_with_pair = trip_with_pair >> inner_join(_, warehouse_data['stops'] >> select(_.feed_key, _.stop_id, _.geometry),
                                                       on = ['feed_key', 'stop_id'])
-        trip_with_pair = trip_with_pair >> inner_join(_, warehouse_data['trips'] >> select(_.feed_key, _.trip_id, _.shape_id),
+        trip_with_pair = trip_with_pair >> inner_join(_, warehouse_data['trips'] >> select(_.feed_key, _.name, _.trip_id, _.shape_id,
+                                                                                           _.route_short_name, _.route_long_name),
                                                       on = ['feed_key', 'trip_id'])
         paired_shape = warehouse_data['shapes'] >> filter(_.feed_key == trip_with_pair.feed_key.iloc[0], _.shape_id == trip_with_pair.shape_id.iloc[0])
             
@@ -126,20 +128,25 @@ def shape_segments_from_row(row, warehouse_data):
         trip_with_pair = trip_with_pair >> distinct(_.shape_id, _keep_all=True)
         trip_with_pair['stop_pair'] = [stop_pair]
         trip_with_pair['trip_group_id'] = row.trip_group_id
-        trip_with_pair['nIterations'] = row.nIterations
-        trip_with_pair['totalTime'] = row.totalTime
+        trip_with_pair['availability_pct'] = row.nIterations / row.total_iterations #  more human-friendly name
+        trip_with_pair['total_time'] = row.totalTime
         trip_with_pair['xfer_count'] = len(stop_pairs) - 1
         trip_with_seg = gpd.GeoDataFrame(trip_with_pair, geometry='segment_geom', crs=geography_utils.CA_NAD83Albers)
         row_shape_segments += [trip_with_seg]
-    return pd.concat(row_shape_segments)
+        
+        spatial_routes = pd.concat(row_shape_segments)
+        spatial_routes['route_name'] = spatial_routes.route_short_name.fillna(spatial_routes.route_long_name)
+        
+    return spatial_routes
 
-def compile_all_spatial_routes(df):
+def compile_all_spatial_routes(df, warehouse_data, verbose=False):
     spatial_routes = []
     for _ix, row in df.iterrows():
         try:
             spatial_routes += [shape_segments_from_row(row, warehouse_data)]
         except:
-            print(f'failed for row {row}')
+            if verbose:
+                print(f'failed for row {row}')
     spatial_routes = pd.concat(spatial_routes)
     return spatial_routes
 
