@@ -159,19 +159,19 @@ def add_origin_destination(
     if isinstance(gdf, dg.GeoDataFrame):
         gdf = gdf.assign(
             origin=gdf.geometry.apply(
-                lambda x: shapely.geometry.Point(x.coords[0]),
+                lambda x: shapely.get_point(x, 0),
                 meta=("origin", "geometry"),
             ),
             destination=gdf.geometry.apply(
-                lambda x: shapely.geometry.Point(x.coords[-1]),
+                lambda x: shapely.get_point(x, -1),
                 meta=("destination", "geometry"),
             ),
         )
 
     elif isinstance(gdf, gpd.GeoDataFrame):
         gdf = gdf.assign(
-            origin=gdf.geometry.apply(lambda x: shapely.geometry.Point(x.coords[0])),
-            destination=gdf.geometry.apply(lambda x: shapely.geometry.Point(x.coords[-1])),
+            origin=gdf.geometry.apply(lambda x: shapely.get_point(x, 0)),
+            destination=gdf.geometry.apply(lambda x: shapely.get_point(x, -1)),
         )
 
     return gdf

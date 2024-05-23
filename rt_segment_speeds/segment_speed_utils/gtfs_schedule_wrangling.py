@@ -505,3 +505,17 @@ def merge_operator_identifiers(
     )
     
     return df
+
+
+def fill_missing_stop_sequence1(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Once we introduce speedmap segments, there is a stop_sequence1 
+    column added.
+    If we don't populate this, our merges downstream could fail
+    because it could be missing in one df
+    and hold stop_sequence in another df.
+    """
+    df = df.assign(
+        stop_sequence1 = df.stop_sequence1.fillna(df.stop_sequence)
+    )
+    return df
