@@ -95,13 +95,17 @@ def shape_segments_from_row(row, warehouse_data):
         first_filter = warehouse_data['st'] >> filter(_.stop_id.isin(stop_pair))
         # display(first_filter)
         good_trips = first_filter >> count(_.trip_id) >> filter(_.n > 1)
-        assert good_trips.shape[0] > 0
-        trip_with_pair = first_filter >> filter(_.trip_id == good_trips.trip_id.iloc[0]) >> arrange(_.stop_sequence)
+        #  TODO count frequency using departure sec?
+        better_trips = good_trips >> filter(_.n == _.n.max())
+        # display(good_trips)
+        assert better_trips.shape[0] > 0
+        trip_with_pair = first_filter >> filter(_.trip_id == better_trips.trip_id.iloc[0]) >> arrange(_.stop_sequence)
         trip_with_pair = trip_with_pair >> select(_.feed_key, _.trip_id, _.stop_id, _.stop_sequence)
         trip_with_pair = trip_with_pair >> inner_join(_, warehouse_data['stops'] >> select(_.feed_key, _.stop_id, _.geometry),
                                                       on = ['feed_key', 'stop_id'])
-        trip_with_pair = trip_with_pair >> inner_join(_, warehouse_data['trips'] >> select(_.feed_key, _.name, _.trip_id, _.shape_id,
-                                                                                           _.route_short_name, _.route_long_name),
+        trip_with_pair = trip_with_pair >> inner_join(_,
+                                                      warehouse_data['trips'] >> select(_.feed_key, _.name, _.trip_id, _.shape_id,
+                                                                            _.route_short_name, _.route_long_name, _.route_id),
                                                       on = ['feed_key', 'trip_id'])
         paired_shape = warehouse_data['shapes'] >> filter(_.feed_key == trip_with_pair.feed_key.iloc[0], _.shape_id == trip_with_pair.shape_id.iloc[0])
             
@@ -110,6 +114,8 @@ def shape_segments_from_row(row, warehouse_data):
             trip_with_pair = trip_with_pair >> distinct(_.stop_id, _keep_all=True)
         stop0 =  (trip_with_pair >> filter(_.stop_sequence == _.stop_sequence.min())).geometry.iloc[0]
         stop1 =  (trip_with_pair >> filter(_.stop_sequence == _.stop_sequence.max())).geometry.iloc[0]
+        # display(trip_with_pair)
+        # print(stop0, stop1)
         if paired_shape.empty:
             print('warning, trip has no shape')
             trip_with_pair = trip_with_pair >> distinct(_.stop_id, _keep_all=True)
@@ -128,7 +134,8 @@ def shape_segments_from_row(row, warehouse_data):
         trip_with_pair = trip_with_pair >> distinct(_.shape_id, _keep_all=True)
         trip_with_pair['stop_pair'] = [stop_pair]
         trip_with_pair['trip_group_id'] = row.trip_group_id
-        trip_with_pair['availability_pct'] = row.nIterations / row.total_iterations #  more human-friendly name
+        trip_with_pair['optimal_pct'] = row.nIterations / row.total_iterations #  more human-friendly name
+        # percentige of time in analysis window that this route was optimal
         trip_with_pair['total_time'] = row.totalTime
         trip_with_pair['xfer_count'] = len(stop_pairs) - 1
         trip_with_seg = gpd.GeoDataFrame(trip_with_pair, geometry='segment_geom', crs=geography_utils.CA_NAD83Albers)
