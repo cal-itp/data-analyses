@@ -82,7 +82,8 @@ def stop_and_arrival_time_arrays_by_trip(
 
 
 def enforce_monotonicity_and_interpolate_across_stops(
-    df: pd.DataFrame
+    df: pd.DataFrame,
+    trip_stop_cols: list
 ) -> pd.DataFrame:
     """
     Do a check to make sure stop arrivals are all monotonically increasing.
@@ -124,10 +125,8 @@ def enforce_monotonicity_and_interpolate_across_stops(
     ).drop(
         columns = drop_me
     ).sort_values(
-        ["trip_instance_key", "stop_sequence"]
+        trip_stop_cols
     ).reset_index(drop=True)
-         
-    del no_fix, fix1, df
         
     return fixed_df
  
@@ -145,6 +144,8 @@ def interpolate_stop_arrivals(
 
     NEAREST_VP = f"{dict_inputs['stage2']}_{analysis_date}"
     STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
+    
+    trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
     
     start = datetime.datetime.now()
     
@@ -192,17 +193,17 @@ def interpolate_stop_arrivals(
     results = gdf.assign(
         stop_meters = stop_meters_series,
         arrival_time = stop_arrival_series,
-    )[["trip_instance_key", "shape_array_key",
-         "stop_sequence", "stop_id", 
+    )[trip_stop_cols + ["shape_array_key", "stop_id", 
          "stop_meters", "arrival_time"]
      ].sort_values(
-        ["trip_instance_key", "stop_sequence"]
+        trip_stop_cols
     ).reset_index(drop=True)
     
     time1 = datetime.datetime.now()
     logger.info(f"get stop arrivals {analysis_date}: {time1 - start}")
     
-    results = enforce_monotonicity_and_interpolate_across_stops(results)
+    results = enforce_monotonicity_and_interpolate_across_stops(
+        results, trip_stop_cols)
         
     results.to_parquet(
         f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}.parquet"

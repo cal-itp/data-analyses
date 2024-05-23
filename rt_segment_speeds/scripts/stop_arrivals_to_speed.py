@@ -18,7 +18,7 @@ from segment_speed_utils.project_vars import SEGMENT_TYPES
 def attach_operator_natural_identifiers(
     df: pd.DataFrame, 
     analysis_date: str,
-    segment_type: Literal["stop_segments", "rt_stop_times"]
+    segment_type: Literal[SEGMENT_TYPES]
 ) -> pd.DataFrame:
     """
     For each gtfs_dataset_key-shape_array_key combination,
@@ -65,44 +65,47 @@ def attach_operator_natural_identifiers(
             get_pandas = True
         )
         
-        df_with_natural_ids = df_with_natural_ids.merge(
+        df_with_natural_ids2 = df_with_natural_ids.merge(
             stop_pair,
             on = ["shape_array_key", "stop_sequence"]
         )
     
     elif segment_type == "rt_stop_times":
+        
+        trip_stop_cols = [*GTFS_DATA_DICT[segment_type]["trip_stop_cols"]]
+        
         stop_pair = helpers.import_scheduled_stop_times(
             analysis_date,
-            columns = ["trip_instance_key", "stop_sequence", 
-                       "stop_pair", "stop_pair_name"],
+            columns = trip_stop_cols + ["stop_pair", "stop_pair_name"],
             with_direction = True,
             get_pandas = True
         )
         
-        df_with_natural_ids = df_with_natural_ids.merge(
+        df_with_natural_ids2 = df_with_natural_ids.merge(
             stop_pair,
-            on = ["trip_instance_key", "stop_sequence"]
+            on = trip_stop_cols
         )
         
     elif segment_type == "speedmap_segments":
         
+        trip_stop_cols = [*GTFS_DATA_DICT[segment_type]["trip_stop_cols"]]
+        STOP_TIMES_FILE = GTFS_DATA_DICT[segment_type].proxy_stop_times
+        
         stop_pair = pd.read_parquet(
-            f"{SEGMENT_GCS}stop_time_expansion/"
-            f"speedmap_stop_times_{analysis_date}.parquet",
-            columns = ["trip_instance_key", "stop_sequence", 
-                       "stop_sequence1", 
-                       "stop_pair", 
-                       #"stop_pair_name" -- we need to add this?
-                       # or does it not matter?
-                      ]
+            f"{SEGMENT_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet",
+            columns = trip_stop_cols + [
+                "segment_id", "stop_pair_name", "stop_pair"]
         )
           
-        df_with_natural_ids = df_with_natural_ids.merge(
+        df_with_natural_ids = gtfs_schedule_wrangling.fill_missing_stop_sequence1(
+            df_with_natural_ids)
+        
+        df_with_natural_ids2 = df_with_natural_ids.merge(
             stop_pair,
-            on = ["trip_instance_key", "stop_sequence"]
+            on = trip_stop_cols
         )    
         
-    return df_with_natural_ids
+    return df_with_natural_ids2
 
 
 def calculate_speed_from_stop_arrivals(
@@ -117,7 +120,15 @@ def calculate_speed_from_stop_arrivals(
     """
     dict_inputs = config_path[segment_type]
 
-    STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
+    trip_cols = ["trip_instance_key"]
+    trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+
+    # speedmap segments shoulse the full concatenated one
+    if segment_type == "speedmap_segments":
+        STOP_ARRIVALS_FILE = f"{dict_inputs['stage3b']}_{analysis_date}"        
+    else:
+        STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
+
     SPEED_FILE = f"{dict_inputs['stage4']}_{analysis_date}"
     
     start = datetime.datetime.now()
@@ -125,9 +136,6 @@ def calculate_speed_from_stop_arrivals(
     df = pd.read_parquet(
         f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}.parquet"
     )
-    
-    trip_cols = ["trip_instance_key"]
-    trip_stop_cols = trip_cols + ["stop_sequence"]
 
     df = segment_calcs.convert_timestamp_to_seconds(
         df, ["arrival_time"]
