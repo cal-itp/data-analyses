@@ -44,12 +44,6 @@ build_gtfs_digest:
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 
-build_typologies:
-	$(eval export site = digest_typologies)
-	#cd rt_segment_speeds / && pip install -r requirements.txt && cd ..
-	#cd gtfs_digest/ && python typology_portfolio_yaml.py && cd ..   
-	make build_portfolio_site
-
 add_precommit:
 	pip install pre-commit
 	pre-commit install 
