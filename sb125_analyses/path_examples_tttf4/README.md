@@ -1,10 +1,23 @@
-# Conveyal Transit Paths
+# What might accessibility and travel times look like for several illustrative trip examples around the state?
 
-* GH Issue: https://github.com/cal-itp/data-analyses/issues/1098
+Proof of concept examples for Transit Transformation Task Force.
 
-## Conveyal SOP
+## Napa
 
-* prepare a csv with lat, lon, and od column with 0 for origin and 1 for destination
-    * allow freeform, use od col as id in upload
-* run Conveyal Analysis: 8-10am, standard transit parameters, add JSON feed_id param
-* run Regional Analysis: 120min max time, 5, 50, 95 %ile, get paths and travel times
+Napa High School to Vallejo Ferry Terminal
+
+## Sacramento
+
+P St/22nd St to 5248 Rose St
+
+## Clovis
+
+9248 N Laureen Ave to Clovis Community Hospital
+
+## LA
+
+Slauson/5th to Burbank Town Center Mall
+
+## Vallejo
+
+Vallejo Ferry Terminal to Solano Community College Vallejo

@@ -1,0 +1,13 @@
+title: SB125 Route Illustrations
+directory: ./sb125_analyses/path_examples_tttf4/
+readme: ./sb125_analyses/path_examples_tttf4/README.md
+notebook: ./sb125_analyses/path_examples_tttf4/path_examples.ipynb
+parts:
+   - caption: SB125 Route Illustrations
+   - chapters:
+     - params:
+         region: la
+         region: sac
+         region: solano
+         region: clovis
+         region: napa
