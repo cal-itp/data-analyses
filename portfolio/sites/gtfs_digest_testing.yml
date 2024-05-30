@@ -1,0 +1,37 @@
+directory: ./gtfs_digest/
+notebook: ./gtfs_digest/03_report.ipynb
+parts:
+- chapters:
+  - caption: District 01 - Eureka
+    params:
+      district: 01 - Eureka
+    sections:
+    - organization_name: City of Eureka
+    - organization_name: Lake Transit Authority
+  - caption: District 02 - Redding
+    params:
+      district: 02 - Redding
+    sections:
+    - organization_name: Shasta County
+  - caption: District 03 - Marysville
+    params:
+      district: 03 - Marysville
+    sections:
+    - organization_name: University of California, Davis
+    - organization_name: Yolo County Transportation District
+  - caption: District 04 - Oakland
+    params:
+      district: 04 - Oakland
+    sections:
+    - organization_name: Alameda-Contra Costa Transit District
+    - organization_name: City and County of San Francisco
+  
+  - caption: District 07 - Los Angeles
+    params:
+      district: 07 - Los Angeles
+    sections:
+    - organization_name: Los Angeles County Metropolitan Transportation Authority
+    - organization_name: City of Lawndale
+    - organization_name: Long Beach Transit
+readme: ./gtfs_digest/README.md
+title: GTFS Digest TESTING

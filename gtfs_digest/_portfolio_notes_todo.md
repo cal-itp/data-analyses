@@ -2,11 +2,19 @@
 * cd ../ && pip install -r portfolio/requirements.txt
 * python portfolio/portfolio.py clean gtfs_digest_testing && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
 * python portfolio/portfolio.py build gtfs_digest  --deploy 
-* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env &&  pip install -U altair 
+* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env &&  pip install -U altair && cd ../gtfs_digest
 * RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
+### 5/30/2024
+* Update the methodology.
+* Figure out how to add in the cardinal directions back to frequency/text tables as some of the routes switch directions. 
+
+### 5/29/2024
+* [Netlify test link I created 5/17.](https://gtfs-digest-testing--cal-itp-data-analyses.netlify.app/district_07-los-angeles/0__03_report__district_07-los-angeles__organization_name_los-angeles-county-metropolitan-transportation-authority)
+* <i>in another version of the methodology , can you collect all the common "definitions" a user might have and define them explicitly?
+time_of_day, peak/offpeak/all-day, maybe when you do cardinal direction, just rough description of how you arrived at that, etc etc (edited)</i>. [Slack Thread](https://cal-itp.slack.com/archives/C02KH3DGZL7/p1717016681667919)
 ### 5/17/2024
 * State of the GTFS Digest Portfolio 
     * All the tweaks in [Issue](https://github.com/cal-itp/data-analyses/issues/1101) except cardinal directions & mapping the routes based on the `route_colors` provided by operators have been addressed. 
