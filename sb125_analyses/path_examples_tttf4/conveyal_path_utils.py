@@ -85,7 +85,7 @@ def get_warehouse_data(path_df):
     
     return warehouse_data
 
-def shape_segments_from_row(row, warehouse_data):
+def shape_segments_from_row(row, warehouse_data, verbose):
 
     stop_pairs = list(zip(row.boardStops, row.alightStops))
     
@@ -110,14 +110,16 @@ def shape_segments_from_row(row, warehouse_data):
         paired_shape = warehouse_data['shapes'] >> filter(_.feed_key == trip_with_pair.feed_key.iloc[0], _.shape_id == trip_with_pair.shape_id.iloc[0])
             
         if not trip_with_pair.stop_id.is_unique:
-            print('warning, trip has duplicate stops at a single stop')
+            if verbose:
+                print('warning, trip has duplicate stops at a single stop')
             trip_with_pair = trip_with_pair >> distinct(_.stop_id, _keep_all=True)
         stop0 =  (trip_with_pair >> filter(_.stop_sequence == _.stop_sequence.min())).geometry.iloc[0]
         stop1 =  (trip_with_pair >> filter(_.stop_sequence == _.stop_sequence.max())).geometry.iloc[0]
         # display(trip_with_pair)
         # print(stop0, stop1)
         if paired_shape.empty:
-            print('warning, trip has no shape')
+            if verbose:
+                print('warning, trip has no shape')
             trip_with_pair = trip_with_pair >> distinct(_.stop_id, _keep_all=True)
             paired_segment = LineString([stop0, stop1])
         # stop0_proj = shape_geom.project(stop0)
@@ -150,7 +152,7 @@ def compile_all_spatial_routes(df, warehouse_data, verbose=False):
     spatial_routes = []
     for _ix, row in df.iterrows():
         try:
-            spatial_routes += [shape_segments_from_row(row, warehouse_data)]
+            spatial_routes += [shape_segments_from_row(row, warehouse_data, verbose)]
         except:
             if verbose:
                 print(f'failed for row {row}')
