@@ -213,6 +213,8 @@ def find_most_recent_route_id(df):
         route_col="route_id2",
     )
     
+    to_keep_cols = ["schedule_gtfs_dataset_key", "route_id","service_date", "recent_route_id2"]
+    df2 = df2[to_keep_cols]
     return df2
 
 def find_cardinal_direction(date:str, gtfs_schedule_keys: list) -> pd.DataFrame:
@@ -231,8 +233,7 @@ def find_cardinal_direction(date:str, gtfs_schedule_keys: list) -> pd.DataFrame:
     m1 = delayed(pd.merge)(
         common_stops_dd,
         recent_ids_dd,
-        on=["schedule_gtfs_dataset_key", "route_id", "direction_id",
-           "service_date"],
+        on=["schedule_gtfs_dataset_key", "route_id", "service_date"],
         how="inner",
     )
     
@@ -645,6 +646,7 @@ def base_facet_circle(
     
 def base_facet_chart(
     df: pd.DataFrame,
+    direction_to_filter: int,
     y_col: str,
     color_col: str,
     facet_col: str,
@@ -661,50 +663,44 @@ def base_facet_chart(
         color_col,
     ]
 
-    max_y =set_y_axis(df, y_col)
-    df = clean_data_charts(df, y_col)
-    
     try:
-        direction = df["Direction"].values[0]
-        title = title + " for " + direction
+        title = title + " for Direction " + str(direction_to_filter)
     except:
         pass
-    
+
+    max_y = set_y_axis(df, y_col)
+    df = clean_data_charts(df, y_col)
+
     chart = (
-        (
-            alt.Chart(df)
-            .mark_bar(size=7, clip=True)
-            .encode(
-                x=alt.X(
-                    "yearmonthdate(Date):O",
-                    title=["Date"],
-                    axis=alt.Axis(labelAngle=-45, format="%b %Y"),
-                ),
-                y=alt.Y(
-                    f"{y_col}:Q",
-                    title=_report_utils.labeling(y_col),
-                    scale=alt.Scale(domain=[0, max_y]),
-                ),
-                color=alt.Color(
-                    f"{color_col}:N",
-                    title=_report_utils.labeling(color_col),
-                    scale=alt.Scale(range=color_dict["red_green_yellow"]),
-                ),
-                tooltip=tooltip_cols,
-            )
-        ))
-    chart = chart.properties(width=200, height=250)
-    chart = chart.facet(
-            column=alt.Column(
-                f"{facet_col}:N",
-            )
-        ).properties(
-            title={
-                "text": title,
-                "subtitle": subtitle,
-            }
+        alt.Chart(df)
+        .mark_bar(size=7, clip=True)
+        .encode(
+            x=alt.X(
+                "yearmonthdate(Date):O",
+                title=["Date"],
+                axis=alt.Axis(labelAngle=-45, format="%b %Y"),
+            ),
+            y=alt.Y(
+                f"{y_col}:Q",
+                title=_report_utils.labeling(y_col),
+                scale=alt.Scale(domain=[0, max_y]),
+            ),
+            color=alt.Color(
+                f"{color_col}:N",
+                title=_report_utils.labeling(color_col),
+                scale=alt.Scale(range=color_dict["red_green_yellow"]),
+            ),
+            tooltip=tooltip_cols,
         )
-    
+    )
+    chart = chart.properties(width=200, height=250)
+    chart = chart.facet(column=alt.Column(f"{facet_col}:N",)).properties(
+        title={
+            "text": title,
+            "subtitle": subtitle,
+        }
+    )
+
     return chart
     
 def base_facet_with_ruler_chart(
@@ -775,11 +771,6 @@ def create_text_table(df: pd.DataFrame, direction: int):
 
     df = df.loc[df["Dir 0 1"] == direction].drop_duplicates().reset_index(drop=True)
     
-    try:
-        direction = df["Direction"].values[0]
-    except:
-        pass
-    
     df2 = df.melt(
             id_vars=[
                 "Route",
@@ -812,7 +803,7 @@ def create_text_table(df: pd.DataFrame, direction: int):
         )
     
     text_chart = text_chart.encode(text="combo_col:N").properties(
-            title=f"Route Statistics for {direction}",
+            title=f"Route Statistics for Direction {direction}",
             width=400,
             height=250,
         )
@@ -863,6 +854,57 @@ def frequency_chart(df: pd.DataFrame):
         title={
             "text": readable_dict["frequency_graph"]["title"],
             "subtitle": readable_dict["frequency_graph"]["subtitle"],
+        }
+    )
+    return chart
+
+def frequency_chart2(
+    df: pd.DataFrame, direction_id: int, title: str, subtitle: str
+):
+    df["Frequency in Minutes"] = (
+        "A trip going this direction comes every "
+        + df.frequency_in_minutes.astype(int).astype(str)
+        + " minutes"
+    )
+    df = clean_data_charts(df, "frequency_in_minutes")
+    df = df.loc[df.dir_0_1 == direction_id].reset_index(drop=True)
+
+    fixed_x_values = [0, 30, 60, 90, 120, 150, 180, 210, 240]
+
+    color_scale = alt.Scale(
+        domain=color_dict["freq_domain"], range=color_dict["freq_range"]
+    )
+
+    chart = (
+        alt.Chart(df)
+        .mark_bar(size=7, clip=True)
+        .encode(
+            y=alt.Y(
+                "yearmonthdate(Date):O",
+                title=["Date"],
+                axis=alt.Axis(format="%b %Y"),
+            ),
+            x=alt.X(
+                "frequency_in_minutes:Q",
+                title=_report_utils.labeling("frequency_in_minutes"),
+                scale=alt.Scale(domain=[0, 240]),
+            ),
+            color=alt.Color(
+                "frequency_in_minutes:Q",
+                scale=color_scale,
+                title=_report_utils.labeling("frequency_in_minutes"),
+            ),
+            tooltip=["Date", "Route", "Frequency in Minutes", "Period", "Direction"],
+        )
+    )
+
+    chart = chart.properties(width=120, height=100)
+
+    title = title + " for Direction " + str(direction_id)
+    chart = chart.facet(column=alt.Column("Period:N")).properties(
+        title={
+            "text": title,
+            "subtitle": subtitle,
         }
     )
     return chart
@@ -920,6 +962,7 @@ def filtered_route(
             (
                 base_facet_chart(
                     timeliness_df.loc[timeliness_df["dir_0_1"] == 0],
+                    0,
                     "value",
                     "variable",
                     "Period",
@@ -934,6 +977,7 @@ def filtered_route(
             (
                 base_facet_chart(
                     timeliness_df.loc[timeliness_df["dir_0_1"] == 1],
+                    1,
                     "value",
                     "variable",
                     "Period",
@@ -946,12 +990,23 @@ def filtered_route(
         )
 
     # display(timeliness_trips_dir_1)
-    frequency_graph = (
-    frequency_chart(df)
+    frequency_graph_dir_0 = (
+    frequency_chart2(df, 
+                     0,
+                     readable_dict["frequency_graph"]["title"],
+                     readable_dict["frequency_graph"]["subtitle"],)
     .add_params(xcol_param)
     .transform_filter(xcol_param)
     )
     
+    frequency_graph_dir_1 = (
+    frequency_chart2(df, 
+                     1,
+                     readable_dict["frequency_graph"]["title"],
+                     readable_dict["frequency_graph"]["subtitle"],)
+    .add_params(xcol_param)
+    .transform_filter(xcol_param)
+    )
     # display(frequency_graph)
     speed_graph = (
         base_facet_line(
@@ -1027,7 +1082,8 @@ def filtered_route(
     avg_scheduled_min_graph,
     timeliness_trips_dir_0,
     timeliness_trips_dir_1,
-    frequency_graph,
+    frequency_graph_dir_0,
+    frequency_graph_dir_1,
     speed_graph,
     data_quality,
     vp_per_min_graph,

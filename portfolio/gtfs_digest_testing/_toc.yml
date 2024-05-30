@@ -1,0 +1,20 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: district_01-eureka.md
+        sections:
+        -   glob: district_01-eureka/*
+    -   file: district_02-redding.md
+        sections:
+        -   glob: district_02-redding/*
+    -   file: district_03-marysville.md
+        sections:
+        -   glob: district_03-marysville/*
+    -   file: district_04-oakland.md
+        sections:
+        -   glob: district_04-oakland/*
+    -   file: district_07-los-angeles.md
+        sections:
+        -   glob: district_07-los-angeles/*
+root: README
