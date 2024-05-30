@@ -464,12 +464,6 @@ def divider_chart(df: pd.DataFrame, text):
 
     return chart
 
-def create_data_unavailable_chart():
-
-    chart = alt.LayerChart()
-    
-    return chart
-
 def clean_data_charts(df:pd.DataFrame, y_col:str)->pd.DataFrame:
     df["Period"] = df["Period"].str.replace("_", " ").str.title()
     df[y_col] = df[y_col].fillna(0).astype(int)
