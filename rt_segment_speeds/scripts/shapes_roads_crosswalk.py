@@ -20,9 +20,11 @@ def create_shapes_to_roads_crosswalk(
     analysis_date: str, 
     road_segments_path: str,
 ) -> pd.DataFrame:
-        
-    keep_road_cols = GTFS_DATA_DICT.road_segments.segment_identifier_cols
-    keep_road_cols = list(keep_road_cols)
+    """
+    Spatial join road segments with shapes
+    to pare down the road segments we're interested in.
+    """
+    keep_road_cols = [*GTFS_DATA_DICT.road_segments.segment_identifier_cols]
     
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
@@ -82,5 +84,6 @@ if __name__ == "__main__":
         )
         
         end = datetime.datetime.now()
-        logger.info(f"create shape to road crosswalk: {analysis_date}: {end - start}")
+        logger.info(
+            f"create shape to road crosswalk: {analysis_date}: {end - start}")
 
