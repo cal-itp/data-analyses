@@ -9,7 +9,7 @@ prep_roads:
 # run cut_road_segments once
 	#python cut_road_segments.py #cut once creates files needed to run in concat_road_segments
 	python shapes_roads_crosswalk.py     
-	python sjoin_vp_to_roads.py 
+	python proxy_road_stop_times.py    
     
 speeds_pipeline:
 	make segmentize
