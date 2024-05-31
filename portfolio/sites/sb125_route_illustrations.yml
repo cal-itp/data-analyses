@@ -7,7 +7,19 @@ parts:
    - chapters:
      - params:
          region: la
+     - params:
          region: sac
+     - params:
          region: solano
+     - params:
          region: clovis
+     - params:
          region: napa
+   # - caption: SB125 Route Illustrations
+   # - chapters:
+   #   - params:
+   #       region: la
+   #       region: sac
+   #       region: solano
+   #       region: clovis
+   #       region: napa
