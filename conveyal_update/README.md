@@ -17,3 +17,5 @@
 
 * `make stage_conveyal_update` to run all scripts
 * using generated `crop_filter_osm.sh` or other means, [update Conveyal network bundle](https://docs.conveyal.com/prepare-inputs#creating-a-network-bundle) for each region with cropped and filtered OSM data and feeds.
+* after updating network bundle, use bundles.json (linked in `dev_conveyal_ids.ipynb`) and that notebook to match Conveyal feed ids with our warehouse.
+    * exports both all-region and region-specific parquets to GCS at: `gs://calitp-analytics-data/data-analyses/conveyal_update/`, these can be used to join Conveyal feedIds with our warehouse identifiers
