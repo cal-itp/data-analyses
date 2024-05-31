@@ -12,8 +12,8 @@ import shapely
 import conveyal_vars
 
 regions = conveyal_vars.conveyal_regions
-target_date = conveyal_vars.target_date
-feeds_on_target = pd.read_parquet(f'{conveyal_vars.gcs_path}feeds_{target_date.isoformat()}.parquet')
+TARGET_DATE = conveyal_vars.TARGET_DATE
+feeds_on_target = pd.read_parquet(f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE.isoformat()}.parquet')
 
 def create_region_gdf():
     # https://shapely.readthedocs.io/en/stable/reference/shapely.box.html#shapely.box
@@ -27,7 +27,7 @@ def create_region_gdf():
     return region_gdf
 
 def join_stops_regions(region_gdf: gpd.GeoDataFrame, feeds_on_target: pd.DataFrame):
-    all_stops = gtfs_utils_v2.get_stops(selected_date=target_date, operator_feeds=feeds_on_target.feed_key).to_crs(geography_utils.CA_NAD83Albers)
+    all_stops = gtfs_utils_v2.get_stops(selected_date=TARGET_DATE, operator_feeds=feeds_on_target.feed_key).to_crs(geography_utils.CA_NAD83Albers)
     region_join = gpd.sjoin(region_gdf, all_stops)
     regions_and_feeds = region_join >> distinct(_.region, _.feed_key)
     return regions_and_feeds
@@ -38,4 +38,4 @@ if __name__ == '__main__':
     regions_and_feeds = join_stops_regions(region_gdf, feeds_on_target)
     regions_and_feeds = regions_and_feeds >> inner_join(_, feeds_on_target >> select(_.feed_key, _.gtfs_dataset_name, _.base64_url,
                                                                                 _.date), on = 'feed_key')
-    regions_and_feeds.to_parquet(f'{conveyal_vars.gcs_path}regions_feeds_{target_date.isoformat()}.parquet')
+    regions_and_feeds.to_parquet(f'{conveyal_vars.GCS_PATH}regions_feeds_{TARGET_DATE.isoformat()}.parquet')
