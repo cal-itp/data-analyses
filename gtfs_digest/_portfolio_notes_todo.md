@@ -24,16 +24,18 @@ time_of_day, peak/offpeak/all-day, maybe when you do cardinal direction, just ro
     * Spatial Accuracy: We draw a buffer of 35 meters around the scheduled shape and this buffered shape against the vehicle positions of a bus. Calculating the percentage of vehicle positions that fall in a reasonable distance of the scheduled route gauges the accuracy of GTFS data's geographic component. 
     * Frequency of Trips: Taking the total trips makes by the time period (peak and offpeak) and dividing by how many hours are associated with the time period. For example, there are 100 trips in a day. The peak time period is considered 7-9:59AM and 3-7:59PM, a total of about 8 hours. If 40 of those trips are scheduled during these peak periods, then we would divide 40 by 8. A bus heading one particular direction passes by five times per hour, so a bus comes by about every 12 minutes.
     * Trip: A public transit route goes two directions. A trip is when the route goes one particular direction. For example, the first trip of Route A goes Eastbound and the second trip of Route A goes Westbound. 
+    
 ### 5/30/2024
-* Update the methodology.
-* Figure out how to add in the cardinal directions back to frequency/text tables as some of the routes switch directions. 
-* Rerun all the operators.
-* Add back operators even if they don't have VP positions such as BART.
-* Double check NTD stuff. 
-* Adding more information in the tooltip in the Map of Routes? 
-* Take out the subtitle for the following graphs since it looks repetitive and cluttered. 
-    * `Frequency of Trips in Minutes` 
-    * `Daily Scheduled Service Hours` charts following Weekday 
+* <s>Rerun all the operators.</s>
+* Ideas on next steps (in order of priority)
+    * Update the methodology.
+    * Add back operators even if they don't have VP positions such as BART.
+    * Figure out how to add in the cardinal directions back to frequency/text tables as some of the routes switch directions. 
+    * Double check NTD stuff. 
+    * Adding more information in the tooltip in the Map of Routes? 
+    * Take out the subtitle for the following graphs since it looks repetitive and cluttered. 
+        * `Frequency of Trips in Minutes` 
+        * `Daily Scheduled Service Hours` charts following Weekday 
 ### 5/29/2024
 * [Netlify test link I created 5/17.](https://gtfs-digest-testing--cal-itp-data-analyses.netlify.app/district_07-los-angeles/0__03_report__district_07-los-angeles__organization_name_los-angeles-county-metropolitan-transportation-authority)
 
