@@ -124,11 +124,13 @@ road_segments:
   stage2: "nearest/nearest_vp_roads"
   stage3: "road_segments/stop_arrivals"
   stage4: "speeds_road_segments"
-  stage5: "avg_speeds_road_segments"
-  segment_identifier_cols: ["linearid", "mtfcc", "segment_sequence"]
+  road_cols: ["linearid", "mtfcc"]
+  road_segment_cols: ["linearid", "mtfcc", "segment_sequence"]
+  trip_stop_cols: ["trip_instance_key", "linaerid", "mtfcc", "segment_sequence"]
+  #stop_pair_cols: ["stop_pair", "stop_pair_name", "segment_id"]
   timestamp_col: ${speed_vars.timestamp_col}
 
 shared_data:
-  gcs_dir: ${gcs_paths.SHARED_GCS}
+  dir: ${gcs_paths.SHARED_GCS}
   road_segments_twomile: segmented_roads_twomile_2020
   road_segments_onekm: segmented_roads_onekm_2020

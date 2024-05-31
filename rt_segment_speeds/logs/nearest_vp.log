@@ -18,3 +18,15 @@
 2024-05-11 00:12:24.095 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:134 - nearest neighbor for rt_stop_times 2024-04-21: 0:09:13.296264
 2024-05-13 15:24:49.124 | INFO     | __main__:nearest_neighbor_for_stop:60 - nearest neighbor for speedmap_segments 2024-03-13: 0:00:55.660701
 2024-05-21 13:44:09.683 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:168 - nearest neighbor for speedmap_segments 2024-04-17: 0:02:32.212179
+2024-05-31 11:56:54.690 | INFO     | __main__:nearest_neighbor_for_road:245 - persist stop_times dfs: 0:00:54.885361
+2024-05-31 12:13:28.257 | INFO     | __main__:nearest_neighbor_for_road:278 - chunks: 0:16:33.567053
+2024-05-31 12:16:30.388 | INFO     | __main__:nearest_neighbor_for_road:245 - persist stop_times dfs: 0:00:59.454781
+2024-05-31 12:32:34.125 | INFO     | __main__:nearest_neighbor_for_road:278 - chunks: 0:16:03.736445
+2024-05-31 12:32:44.367 | INFO     | __main__:nearest_neighbor_for_road:293 - export batch 2: 0:00:10.241972
+2024-05-31 12:33:46.943 | INFO     | __main__:nearest_neighbor_for_road:245 - persist stop_times dfs: 0:01:02.575517
+2024-05-31 12:56:05.072 | INFO     | __main__:nearest_neighbor_for_road:278 - chunks: 0:22:18.129294
+2024-05-31 12:56:21.747 | INFO     | __main__:nearest_neighbor_for_road:293 - export batch 3: 0:00:16.675071
+2024-05-31 12:58:32.964 | INFO     | __main__:nearest_neighbor_for_road:245 - persist stop_times dfs: 0:02:11.215730
+2024-05-31 13:33:13.385 | INFO     | __main__:nearest_neighbor_for_road:278 - chunks: 0:34:40.421169
+2024-05-31 13:33:37.735 | INFO     | __main__:nearest_neighbor_for_road:293 - export batch 4: 0:00:24.349737
+2024-05-31 13:45:33.723 | INFO     | __main__:nearest_neighbor_for_road:245 - persist stop_times dfs: 0:02:12.458067

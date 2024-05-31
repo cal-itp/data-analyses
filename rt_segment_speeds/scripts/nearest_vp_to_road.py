@@ -11,94 +11,14 @@ from segment_speed_utils import helpers, neighbor, segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS, SHARED_GCS, PROJECT_CRS
 import interpolate_stop_arrival
 
-road_id_cols = ["linearid", "mtfcc", "primary_direction"]
-segment_identifier_cols = road_id_cols + ["segment_sequence"]
-segment_identifier_cols2 = ['linearid', 'mtfcc', 
-                            'stop_primary_direction', 'segment_sequence']
-test_shapes = [
-    'e3435a4b882913d92a12563910f7193d',
-    'dfae5639b824ed6ad87ed753575f5381',
-    '626724031caabc3abcf3f183f4c9c718',
-    'b63ae7a27ecb677ac93c0373245ea21b',
-    '85a03eed08934ed37f204e9aae6cbd36',
-    '20af512ed1ada757a3b49beb36b623ad',
-    'a1999da4d09bc81548fe3e2b0fb458b4',
-    '1e7115aaac1fcb58c6509c7a90d9741c',
-    '3d437ea82b56e9827d15527ce41c716a',
-    '40469843deb94fbf61ef5f38bb76a137',
-    '04353cab33c0b31d8e9575ace6f9f6da',
-    'f165d1399f8880fc0011eb75b740ba24',
-    'ad15c10f6bc86dd6d3c02bfe6daf7ad9',
-    '71b06c07dabcecf71ddc5a8f3638ccf1',
-    '4e2b8555bc9936d711c8748694d67a3e',
-    '2e00363dba250fae30b7c14596f18907',
-    '2fd717cc5df1495434b8170e294137a6',
-    '60057141822cc9d9ac4795a83b2f25f1',
-    '5c0a268639c22fc58c8c842741cf68e3',
-    '67bc9cc93630ea8a22783cd59d11d46b',
-    '81e5d878737a777ffea18b0c08f58118',
-    'a91351f71fc4d2c0b457e1701a3ade64',
-    '67af448db16c21d09812f58cf065aac5',
-    'bd66e7d4ffae3bc36888cfddaf5e2e44',
-    'b9b803a342d42f72bbe25042f7328385'
-]
 
-def get_shape_road_crosswalk(
-    analysis_date: str, **kwargs
-) -> pd.DataFrame:
-
-    # shapes to road crosswalk
-    shape_road_crosswalk = pd.read_parquet(
-        f"{SEGMENT_GCS}roads_staging/"
-        f"shape_road_crosswalk_{analysis_date}.parquet",
-    )
-    
-    # link shapes to trip
-    shape_to_trip = helpers.import_scheduled_trips(
-        analysis_date,
-        columns = ["trip_instance_key", "shape_array_key"],
-        **kwargs
-        #filters = [[("shape_array_key", "==", one_shape)]]
-    )
-
-    shape_road_crosswalk = shape_road_crosswalk.merge(
-        shape_to_trip,
-        on = "shape_array_key",
-        how = "inner"
-    )
-    
-    return shape_road_crosswalk
 
 
 def make_road_stops_long(
     shape_road_crosswalk: pd.DataFrame
 ) -> gpd.GeoDataFrame:
     
-    road_segments = gpd.read_parquet(
-        f"{SHARED_GCS}road_segments/",
-        columns = segment_identifier_cols + ["geometry"],
-    )
-    
-    road_segments2 = pd.merge(
-        road_segments,
-        shape_road_crosswalk,
-        on = ["linearid", "mtfcc", "segment_sequence"], 
-        how = "inner"
-    )
-    
-    # Beginning of road segment (1st coord)
-    road_segments0 = road_segments2.assign(
-        geometry = road_segments2.apply(
-            lambda x: shapely.Point(x.geometry.coords[0]), 
-            axis=1),
-    ).assign(stop_type=0)
 
-    # End of road segment (last coord)
-    road_segments1 = road_segments2.assign(
-        geometry = road_segments2.apply(
-            lambda x: shapely.Point(x.geometry.coords[-1]), 
-            axis=1),
-    ).assign(stop_type=1)
 
     # Make long, similar to how stop_times is set up
     # For roads, each segment has beginning and end stop
