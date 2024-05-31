@@ -80,6 +80,28 @@ def get_dummies_by_agency(df, col):
     
     return df
 
+def get_agencies_occurances(df):
+    
+    ##get list of columns that have agency names
+    columns_to_keep = list(df.columns.values)
+    
+    ## remove columns that are not agency names
+    unwanted_cols = {'transit_agency', 'unique_agencies', 'primary_mode', 'transit_submode', 'n', 'agency_count', 'n_modes_taken' }
+    columns_to_keep = [e for e in columns_to_keep if e not in unwanted_cols]
+    
+    df_agencies = df.loc[:, columns_to_keep]
+    
+    ## transpose the df again
+    df_agencies = pd.DataFrame(df_agencies).transpose().reset_index().rename(columns={'index':'agency'})
+    
+    ##sum up the number of trips by agency
+    df_agencies['n_trips'] = df_agencies[list(df_agencies.columns)].sum(axis=1)
+    
+    ## filter df to only have two cols
+    df_agencies = df_agencies>>select(_.agency, _.n_trips)
+    
+    return df_agencies
+
 """
 Streetlight Analysis Utils
 """
