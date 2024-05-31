@@ -5,8 +5,6 @@ to which road segments.
 We want to filter out vp when it's not traveling on 
 a scheduled shape.
 """
-import dask.dataframe as dd
-import dask_geopandas as dg
 import datetime
 import geopandas as gpd
 import pandas as pd
@@ -18,34 +16,15 @@ from segment_speed_utils import helpers
 from update_vars import SEGMENT_GCS, SHARED_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import PROJECT_CRS
 
-
-def sjoin_shapes_to_roads(
-    roads: gpd.GeoDataFrame,
-    shapes: gpd.GeoDataFrame
+def create_shapes_to_roads_crosswalk(
+    analysis_date: str, 
+    road_segments_path: str,
 ) -> pd.DataFrame:
-    
-    keep_cols = ["shape_array_key", "linearid", 
-       "mtfcc", "segment_sequence"]
-    
-    shapes = shapes.assign(
-        geometry = shapes.geometry.buffer(25)
-    )
-    
-    shapes_to_roads = gpd.sjoin(
-        shapes,
-        roads,
-        how = "inner",
-        predicate = "intersects"
-    )[keep_cols].drop_duplicates()
-    
-    return shapes_to_roads
-
-    
-def create_shapes_to_roads_crosswalk(analysis_date: str, dict_inputs: dict):
-    
-    start = datetime.datetime.now()
-    
-    keep_road_cols = dict_inputs["segment_identifier_cols"]
+    """
+    Spatial join road segments with shapes
+    to pare down the road segments we're interested in.
+    """
+    keep_road_cols = [*GTFS_DATA_DICT.road_segments.segment_identifier_cols]
     
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
@@ -54,36 +33,32 @@ def create_shapes_to_roads_crosswalk(analysis_date: str, dict_inputs: dict):
         crs = PROJECT_CRS
     ).pipe(
         helpers.remove_shapes_outside_ca
-    ).drop(columns = "index_right")
+    )
+    
+    shapes = shapes.assign(
+        geometry = shapes.geometry.buffer(25)
+    )
                 
-    road_segments = dg.read_parquet(
-        f"{SHARED_GCS}road_segments/",
+    road_segments = gpd.read_parquet(
+        f"{SHARED_GCS}{road_segments_path}.parquet",
         columns = keep_road_cols + ["geometry"]
-    ).repartition(npartitions=10)
-        
-    keep_shape_cols = ["shape_array_key"]
-    
-    shape_cols_dtypes = shapes[keep_shape_cols].dtypes.to_dict()
-    road_cols_dtypes = road_segments[keep_road_cols].dtypes.to_dict()
-    
-    sjoin_results = road_segments.map_partitions(
-        sjoin_shapes_to_roads,
+    ).to_crs(PROJECT_CRS)
+            
+    shapes_to_roads = gpd.sjoin(
         shapes,
-        meta = {
-            **shape_cols_dtypes,
-            **road_cols_dtypes,
-        },
-        align_dataframes = False
+        road_segments,
+        how = "inner",
+        predicate = "intersects"
+    )[
+        ["shape_array_key"] + keep_road_cols
+    ].drop_duplicates().reset_index(drop=True)
+    
+    shapes_to_roads.to_parquet(
+        f"{SEGMENT_GCS}roads_staging/"
+        f"shape_road_crosswalk_{analysis_date}.parquet"
     )
     
-    results = sjoin_results.compute()
-    results.to_parquet(
-        f"{SEGMENT_GCS}roads_staging/shape_road_crosswalk_{analysis_date}.parquet"
-    )
-    
-    end = datetime.datetime.now()
-    logger.info(f"execution time: {end - start}")
-
+    return
 
     
 if __name__ == "__main__":
@@ -97,14 +72,18 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
+    ROAD_SEGMENTS = GTFS_DATA_DICT.shared_data.road_segments_onekm
     
-    ROAD_SEG_DICT = GTFS_DATA_DICT.road_segments
-
     for analysis_date in [analysis_date]:
-        logger.info(f"Analysis date: {analysis_date}")
+        
+        start = datetime.datetime.now()
+        
         create_shapes_to_roads_crosswalk(
             analysis_date, 
-            ROAD_SEG_DICT
+            ROAD_SEGMENTS
         )
-    
+        
+        end = datetime.datetime.now()
+        logger.info(
+            f"create shape to road crosswalk: {analysis_date}: {end - start}")
 

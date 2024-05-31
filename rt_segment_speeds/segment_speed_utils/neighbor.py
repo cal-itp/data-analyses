@@ -105,14 +105,16 @@ def add_trio(
     
 def merge_stop_vp_for_nearest_neighbor(
     stop_times: gpd.GeoDataFrame,
-    analysis_date: str
+    analysis_date: str,
+    **kwargs
 ) -> gpd.GeoDataFrame:
     
     vp_condensed = gpd.read_parquet(
         f"{SEGMENT_GCS}condensed/"
         f"vp_nearest_neighbor_{analysis_date}.parquet",
+        **kwargs
     ).drop(columns = "location_timestamp_local").to_crs(WGS84)
-        
+
     gdf = pd.merge(
         stop_times.rename(
             columns = {
@@ -132,7 +134,8 @@ def merge_stop_vp_for_nearest_neighbor(
 
 def add_nearest_neighbor_result(
     gdf: gpd.GeoDataFrame, 
-    analysis_date: str
+    analysis_date: str,
+    **kwargs
 ) -> pd.DataFrame:
     """
     Add the nearest vp_idx. Also add and trio of be the boundary
@@ -145,6 +148,7 @@ def add_nearest_neighbor_result(
         columns = ["trip_instance_key", "vp_idx", 
                    "location_timestamp_local", 
                    "geometry"],
+        **kwargs
     ).rename(columns = {
         "vp_idx": "trip_vp_idx",
         "geometry": "trip_geometry"
