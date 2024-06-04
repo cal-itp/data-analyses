@@ -30,12 +30,15 @@ def read_conveyal_path_df(path):
         return df
 
     df = pd.read_csv(path)
-    df.index.rename('trip_group_id', inplace=True)
-    df.reset_index(inplace=True)
     df['total_iterations'] = (df >> filter(_.origin == 0, _.destination == 0)).nIterations.iloc[0]
     df = (df >> filter(_.origin == 0, _.destination == 1)
              >> select(-_.group)
          )
+    df.reset_index(drop=True, inplace=True)
+    df.index.rename('trip_group_id', inplace=True)
+    #  won't be in Conveyal order but maps will be less confusing
+    #  can hash other cols if need to match Conveyal trip-level unique id
+    df.reset_index(drop=False, inplace=True)
     df = unpack_conveyal_path_df(df)
     return df
 
