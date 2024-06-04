@@ -9,7 +9,7 @@ import datetime as dt
 from calitp_data_analysis.tables import tbls
 from shared_utils import rt_dates, rt_utils
 
-ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['nov2023'])
+ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['apr2024'])
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 
 def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
@@ -31,16 +31,18 @@ def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
               _.vehicle_positions_gtfs_dataset_key != None)
     >> inner_join(_, dim_orgs, on = {'organization_source_record_id': 'source_record_id'})
     >> select(_.organization_itp_id, _.organization_name, _.organization_source_record_id,
-             _.caltrans_district, _._is_current, _.vehicle_positions_gtfs_dataset_key)
+             _.caltrans_district, _._is_current, _.vehicle_positions_gtfs_dataset_key,
+			 _.schedule_gtfs_dataset_key)
     >> collect()
     )
-    print(orgs_with_vp >> filter(_.caltrans_district.isna()))
+    assert (orgs_with_vp >> filter(_.caltrans_district.isna())).empty
     orgs_with_vp = orgs_with_vp >> filter(-_.caltrans_district.isna())
     assert not orgs_with_vp.isnull().values.any()
     orgs_with_vp['analysis_date'] = analysis_date
     orgs_with_vp = orgs_with_vp >> distinct(_.organization_name,
                     _.organization_itp_id, _.organization_source_record_id,
-                    _.caltrans_district, _._is_current, _.analysis_date
+                    _.caltrans_district, _._is_current, _.analysis_date,
+											_.schedule_gtfs_dataset_key
                                            )
     return orgs_with_vp
 
