@@ -40,7 +40,7 @@ build_ntd_report:
 
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
-	#cd rt_segment_speeds / && pip install -r requirements.txt && pip install altair_transform && cd ../_shared_utils && make setup_env && cd ..
+	#cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env &&  pip install -U altair
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 
