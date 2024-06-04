@@ -7,27 +7,13 @@
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
-### Definitions
-* <i>in another version of the methodology , can you collect all the common "definitions" a user might have and define them explicitly?
-time_of_day, peak/offpeak/all-day, maybe when you do cardinal direction, just rough description of how you arrived at that, etc etc (edited)</i>. [Slack Thread](https://cal-itp.slack.com/archives/C02KH3DGZL7/p1717016681667919)
-    * Average Scheduled Minutes: The time an operator schedules for a trip to run from start to end. 
-    * Scheduled Service Hours: The total hours of public transit service an operator is scheduled to provide. 
-    * Timeliness: Subtracting the actual duration of a trip by its scheduled duration, we can categorize if a trip is early, late, or on time. A trip is considered on time if it arrives 5 minutes later or earlier than the scheduled times.  
-    * All Day: All the trips run in a full 24 hour day. 
-    * Peak: Any trips that run during the 2 peak periods. The first peak period is the AM Peak, defined as 7-9:59AM and the second is the PM peak, defined as 3-7:59PM.  
-    * Offpeak: Any trips that do not run during the peak periods between 7-9:59AM and 3-7:59PM.
-    * Cardinal direction: A trip can either head towards the Eastbound, Westbound, Southbound, or Northbound. This is determined by subtracting the GPS coordinates of the bus's next stop with the previous stop, then using this distance to determine the cardinal direction. [Function here](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py#L116-L148). As each origin-destination pair might point to a different cardinal direction in the same trip depending on what the GPS picked up, we find the most common cardinal direction and use that value as the official cardinal direction. 
-    * Vehicle Positions: The coordinates of a bus's location collected by a GPS for GTFS data. Ideally, a vehicle position should be captured at least twice per minute because this reflects a higher density of data collection.
-    * Average Stop Distance: The average distance <b>(what unit)</b> in between public transit stops along a route. 
-    * Scheduled Shape (Path): Operators provide geographic data of where a route is scheduled to travel. 
-    * Spatial Accuracy: We draw a buffer of 35 meters around the scheduled shape.We use this buffered shape to calculate the percentage of vehicle positions that fall in a reasonable distance of the scheduled route. This allows us to gauge the accuracy of the geographic component of the collected GTFS data. 
-    * Frequency of Trips: Taking the total trips by the time period (peak and offpeak) and dividing by how many hours are associated with the time period. For example, there are 100 trips in a day for a route. The peak time period is considered 7-9:59AM and 3-7:59PM, a total of about 8 hours. If 40 of those trips are scheduled during these peak periods, then we would divide 40 by 8. A bus heading one particular direction passes by five times per hour, so a bus comes by about every 12 minutes.
-    * Trip: A public transit route goes two directions. A trip is when the route goes one particular direction. For example, one trip of Route A goes Eastbound and the other trip of Route A goes Westbound. 
-    * Average Speed 
 
 ### 6/4/2024
 * Finish up writing the common definitions that will be added in the `methodology.md`.
-* Work on adding cardinal direction work into the pipeline per [this GH issue](https://github.com/cal-itp/data-analyses/pull/1124).
+* Rerun all of the districts for schedule+GTFS and schedule only operators for TTTF #4.
+* Brainstorm on adding cardinal direction work into the pipeline per [this GH issue](https://github.com/cal-itp/data-analyses/pull/1124).
+    * 
+
 ### 6/3/2024
 * <s>Add back operators even if they don't have VP positions such as BART.</s>
     * Updates made in `gtfs_digest/_operators_prep`
