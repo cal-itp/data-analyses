@@ -12,11 +12,11 @@
 
 # This color palette is good for categorizing nominal values.
 # The colors do not represent "good" or "bad", they merely differentiate the values.
-tri_color: ["#fde18d","#49a2b2","#3b56a4", "#fcaa5f"]
+four_color: ["#fde18d","#49a2b2","#3b56a4", "#fcaa5f"]
 
 # This color palette is good for categorizing nominal values.
 # The colors do not represent "good" or "bad", they merely differentiate the values.
-four_color: ["#fde18d","#49a2b2","#3b56a4"]
+tri_color: ["#fde18d","#49a2b2","#3b56a4"]
 
 # This palette goes from red, yellow, to green.
 # High values are shown in green, medium in yellow, and low in red. 

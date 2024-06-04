@@ -516,7 +516,7 @@ def grouped_bar_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=color_dict["tri_color"]),
+                scale=alt.Scale(range=color_dict["four_color"]),
                 ),
             tooltip=tooltip_cols,
         ))
@@ -976,7 +976,7 @@ def filtered_route(
                     "variable",
                     "Period",
                     readable_dict["timeliness_trips_graph"]["title"],
-                    readable_dict["timeliness_trips_graph"]["subtitle"],
+                    "",
                 )
             )
             .add_params(xcol_param)
@@ -997,7 +997,7 @@ def filtered_route(
     frequency_chart2(df, 
                      1,
                      readable_dict["frequency_graph"]["title"],
-                     readable_dict["frequency_graph"]["subtitle"],)
+                     "",)
     .add_params(xcol_param)
     .transform_filter(xcol_param)
     )
