@@ -10,32 +10,49 @@
 ### Definitions
 * <i>in another version of the methodology , can you collect all the common "definitions" a user might have and define them explicitly?
 time_of_day, peak/offpeak/all-day, maybe when you do cardinal direction, just rough description of how you arrived at that, etc etc (edited)</i>. [Slack Thread](https://cal-itp.slack.com/archives/C02KH3DGZL7/p1717016681667919)
-    * Stop Arrival: When a bus arrives at a bus stop to pick up and unload passengers. 
-    * Average Scheduled Minutes: The minutes an operator schedules for a trip to run from start to end. This is not realtime data. 
-    * Scheduled Service Hours: The total hours of public transit service an operator schedules to run. This is not realtime data. 
-    * Timeliness: Subtracting the actual start and end time of a trip by its scheduled duration, we can categorize if a trip is early, late, or on time. A trip is considered on time if it arrives 5 minutes later or earlier than the scheduled times.  
+    * Average Scheduled Minutes: The time an operator schedules for a trip to run from start to end. 
+    * Scheduled Service Hours: The total hours of public transit service an operator is scheduled to provide. 
+    * Timeliness: Subtracting the actual duration of a trip by its scheduled duration, we can categorize if a trip is early, late, or on time. A trip is considered on time if it arrives 5 minutes later or earlier than the scheduled times.  
     * All Day: All the trips run in a full 24 hour day. 
-    * Peak: Any trips that run during the AM Peak, defined as 7-9:59AM or the PM peak, defined as 3-7:59PM.  
-    * Offpeak: Any trips that do not run during the AM and PM peak hours of 7-9:59AM or 3-7:59PM.
-    * Cardinal direction: A trip can either head towards the Eastbound, Westbound, Southbound, or Northbound. This is determined by subtracting the GPS coordinates of the bus's next stop with the previous stop, then using this distance to determine the cardinal direction. [Function here](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py#L116-L148). As each origin-destination pair might point to a different cardinal direction in the same trip depending on what the GPS picked up, we find the most common cardinal direction. 
-    * Vehicle Positions: The GPS coordinate of a bus's location collected by GTFS data. Ideally, a vehicle position should be captured at least twice per minute because this reflects a higher density of data collection.
-    * Average Stop Distance: The average distance (what unit) in between public transit stops along the route. 
-    * Scheduled Shape (Path): Operators provide a geographic data of where a route is scheduled to travel. 
-    * Spatial Accuracy: We draw a buffer of 35 meters around the scheduled shape and this buffered shape against the vehicle positions of a bus. Calculating the percentage of vehicle positions that fall in a reasonable distance of the scheduled route gauges the accuracy of GTFS data's geographic component. 
-    * Frequency of Trips: Taking the total trips makes by the time period (peak and offpeak) and dividing by how many hours are associated with the time period. For example, there are 100 trips in a day. The peak time period is considered 7-9:59AM and 3-7:59PM, a total of about 8 hours. If 40 of those trips are scheduled during these peak periods, then we would divide 40 by 8. A bus heading one particular direction passes by five times per hour, so a bus comes by about every 12 minutes.
-    * Trip: A public transit route goes two directions. A trip is when the route goes one particular direction. For example, the first trip of Route A goes Eastbound and the second trip of Route A goes Westbound. 
-    
+    * Peak: Any trips that run during the 2 peak periods. The first peak period is the AM Peak, defined as 7-9:59AM and the second is the PM peak, defined as 3-7:59PM.  
+    * Offpeak: Any trips that do not run during the peak periods between 7-9:59AM and 3-7:59PM.
+    * Cardinal direction: A trip can either head towards the Eastbound, Westbound, Southbound, or Northbound. This is determined by subtracting the GPS coordinates of the bus's next stop with the previous stop, then using this distance to determine the cardinal direction. [Function here](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py#L116-L148). As each origin-destination pair might point to a different cardinal direction in the same trip depending on what the GPS picked up, we find the most common cardinal direction and use that value as the official cardinal direction. 
+    * Vehicle Positions: The coordinates of a bus's location collected by a GPS for GTFS data. Ideally, a vehicle position should be captured at least twice per minute because this reflects a higher density of data collection.
+    * Average Stop Distance: The average distance <b>(what unit)</b> in between public transit stops along a route. 
+    * Scheduled Shape (Path): Operators provide geographic data of where a route is scheduled to travel. 
+    * Spatial Accuracy: We draw a buffer of 35 meters around the scheduled shape.We use this buffered shape to calculate the percentage of vehicle positions that fall in a reasonable distance of the scheduled route. This allows us to gauge the accuracy of the geographic component of the collected GTFS data. 
+    * Frequency of Trips: Taking the total trips by the time period (peak and offpeak) and dividing by how many hours are associated with the time period. For example, there are 100 trips in a day for a route. The peak time period is considered 7-9:59AM and 3-7:59PM, a total of about 8 hours. If 40 of those trips are scheduled during these peak periods, then we would divide 40 by 8. A bus heading one particular direction passes by five times per hour, so a bus comes by about every 12 minutes.
+    * Trip: A public transit route goes two directions. A trip is when the route goes one particular direction. For example, one trip of Route A goes Eastbound and the other trip of Route A goes Westbound. 
+    * Average Speed 
+
+### 6/4/2024
+* Finish up writing the common definitions that will be added in the `methodology.md`.
+* Work on adding cardinal direction work into the pipeline per [this GH issue](https://github.com/cal-itp/data-analyses/pull/1124).
+### 6/3/2024
+* <s>Add back operators even if they don't have VP positions such as BART.</s>
+    * Updates made in `gtfs_digest/_operators_prep`
+    * Deployed the portfolio with only  D4 operators as a test [here](https://gtfs-digest-testing--cal-itp-data-analyses.netlify.app/district_04-oakland/0__03_report__district_04-oakland__organization_name_stanford-university).
+    * After deploying the D4 subset, I rearranged the organization names in the Table of Content to be alphabetical. 
+    * Bugs in the portfolio
+        <s> * The `try except` clause i put behind <i>Detailed Route Overview</i> doesn't show anything even for operators that have GTFS data. 
+            * For operators without RT data,  the area under <i>Detailed Route Overview</i> displays nothing when it's supposed to display the message I set.</s>
+            * Fixed: have to wrap `display` around the function that makes all the charts. 
+        * BART runs 12 lines according to the `operator_profile` but the map only displays one route.
+            * Same thing with Emeryville Transportation Management, runs 2 routes but only 1 route is on the map.
+        * City of Rio Vista's Route Typology Pie Chart isn't showing up
+            * Was missing the new category '# Coverage Route Types'
+        * <s>The 'longest vs shortest' route charts aren't appearing even in the actual portfolio.</s>
+            * Fixed: I was using a color_palette reference that was renamed awhile back.
 ### 5/30/2024
 * <s>Rerun all the operators.</s>
 * Ideas on next steps (in order of priority)
     * Update the methodology.
-    * Add back operators even if they don't have VP positions such as BART.
+    * <s>Add back operators even if they don't have VP positions such as BART.</s>
     * Figure out how to add in the cardinal directions back to frequency/text tables as some of the routes switch directions. 
     * Double check NTD stuff. 
-    * Adding more information in the tooltip in the Map of Routes? 
-    * Take out the subtitle for the following graphs since it looks repetitive and cluttered. 
+    * <s>Take out the subtitle for the following graphs since it looks repetitive and cluttered. 
         * `Frequency of Trips in Minutes` 
-        * `Daily Scheduled Service Hours` charts following Weekday 
+        * `Daily Scheduled Service Hours` charts following Weekday</s>
 ### 5/29/2024
 * [Netlify test link I created 5/17.](https://gtfs-digest-testing--cal-itp-data-analyses.netlify.app/district_07-los-angeles/0__03_report__district_07-los-angeles__organization_name_los-angeles-county-metropolitan-transportation-authority)
 

@@ -68,11 +68,14 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     op_routes_url,
     filters=[[("name", "==", name)]])
     
-    # Grab max date
-    max_date = op_routes_gdf.service_date.max()
+    #max_date = op_routes_gdf.service_date.max()
+    # op_routes_gdf = op_routes_gdf.loc[op_routes_gdf.service_date == max_date]
     
-    # Filter for only the most recent rows
-    op_routes_gdf = op_routes_gdf.loc[op_routes_gdf.service_date == max_date]
+    # Find the most recent available geography for each route
+    op_routes_gdf = op_routes_gdf.sort_values(by = ["service_date"], ascending = False)
+    op_routes_gdf = op_routes_gdf.drop_duplicates(
+    subset=["route_long_name", "route_short_name", "route_combined_name"]
+    )
     op_routes_gdf = op_routes_gdf.drop(columns = ['service_date'])
     
     # Rename dataframe
@@ -187,9 +190,9 @@ def route_typology(df: pd.DataFrame)->pd.DataFrame:
     route types in a pie chart.
     """
     route_type_cols = [
-       '# Downtown Local Route Types', '# Local Route Types',
-       '# Rapid Route Types',"# Express Route Types",
-         "# Rail Route Types"
+       '# Downtown Local Route Types',
+       '# Local Route Types', '# Coverage Route Types', '# Rapid Route Types',
+       '# Express Route Types', '# Rail Route Types'
     ]
     df = df[route_type_cols]
     df2 = df.T.reset_index()
@@ -390,7 +393,8 @@ def create_bg_service_chart():
 
 def create_service_hour_chart(df:pd.DataFrame,
                               day_type:str,
-                              y_col:str):
+                              y_col:str,
+                              subtitle:str):
     # Create an interactive legend
     selection = alt.selection_point(fields=['Month'], bind='legend')
     
@@ -420,7 +424,7 @@ def create_service_hour_chart(df:pd.DataFrame,
         width=400,
         height=250,
         title={"text": title, 
-               "subtitle": readable_dict["daily_scheduled_hour"]["subtitle"]},
+               "subtitle": subtitle},
     )
     .add_params(selection)
     )
@@ -451,7 +455,7 @@ def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str,
                 legend = None,
                 title=_report_utils.labeling(y_col),
                 scale=alt.Scale(
-                    range=color_dict["longest_shortest_route"],
+                    range=color_dict["tri_color"],
                 )
         ),
         tooltip = [x_col, y_col])

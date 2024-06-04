@@ -2,36 +2,41 @@ directory: ./gtfs_digest/
 notebook: ./gtfs_digest/03_report.ipynb
 parts:
 - chapters:
-  - caption: District 01 - Eureka
-    params:
-      district: 01 - Eureka
-    sections:
-    - organization_name: City of Eureka
-    - organization_name: Lake Transit Authority
-  - caption: District 02 - Redding
-    params:
-      district: 02 - Redding
-    sections:
-    - organization_name: Shasta County
-  - caption: District 03 - Marysville
-    params:
-      district: 03 - Marysville
-    sections:
-    - organization_name: University of California, Davis
-    - organization_name: Yolo County Transportation District
   - caption: District 04 - Oakland
     params:
       district: 04 - Oakland
     sections:
-    - organization_name: Alameda-Contra Costa Transit District
+    - organization_name: Stanford University
+    - organization_name: Presidio Trust
+    - organization_name: University of California, Berkeley
+    - organization_name: Western Contra Costa Transit Authority
+    - organization_name: Napa Valley Transportation Authority
+    - organization_name: City of Vacaville
+    - organization_name: City of Union City
+    - organization_name: Livermore-Amador Valley Transit Authority
+    - organization_name: Eastern Contra Costa Transit Authority
+    - organization_name: City of South San Francisco
+    - organization_name: Sonoma-Marin Area Rail Transit District
+    - organization_name: Cloverdale Transit
+    - organization_name: Solano County Transit
+    - organization_name: City of Santa Rosa
+    - organization_name: Santa Clara Valley Transportation Authority
+    - organization_name: San Mateo County Transit District
+    - organization_name: San Francisco International Airport
+    - organization_name: City of Rio Vista
+    - organization_name: City of Petaluma
     - organization_name: City and County of San Francisco
-  
-  - caption: District 07 - Los Angeles
-    params:
-      district: 07 - Los Angeles
-    sections:
-    - organization_name: Los Angeles County Metropolitan Transportation Authority
-    - organization_name: City of Lawndale
-    - organization_name: Long Beach Transit
+    - organization_name: Mission Bay Transportation Management Agency
+    - organization_name: Marin County Transit District
+    - organization_name: Mountain View Transportation Management Association
+    - organization_name: City of Fairfield
+    - organization_name: Emeryville Transportation Management Agency
+    - organization_name: Central Contra Costa Transit Authority
+    - organization_name: City of Menlo Park
+    - organization_name: Capitol Corridor Joint Powers Authority
+    - organization_name: Peninsula Corridor Joint Powers Board
+    - organization_name: San Francisco Bay Area Rapid Transit District
+    - organization_name: Alameda-Contra Costa Transit District
+
 readme: ./gtfs_digest/README.md
-title: GTFS Digest TESTING
+title: GTFS Digest
