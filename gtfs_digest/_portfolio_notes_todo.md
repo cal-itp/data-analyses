@@ -4,15 +4,15 @@
 * python portfolio/portfolio.py build gtfs_digest  --deploy 
 * cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env &&  pip install -U altair && cd ../gtfs_digest
 * RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
+
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
 
 ### 6/4/2024
 * Finish up writing the common definitions that will be added in the `methodology.md`.
-* Rerun all of the districts for schedule+GTFS and schedule only operators for TTTF #4.
+* <s>Rerun all of the districts for schedule+GTFS and schedule only operators for TTTF #4.</s>
 * Brainstorm on adding cardinal direction work into the pipeline per [this GH issue](https://github.com/cal-itp/data-analyses/pull/1124).
-    * 
 
 ### 6/3/2024
 * <s>Add back operators even if they don't have VP positions such as BART.</s>
