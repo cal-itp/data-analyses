@@ -54,10 +54,10 @@ RESOLVERS = [
 def slugify_params(params: Dict) -> str:
     return "__".join(f"{k}_{slugify(str(v))}" for k, v in params.items())
 
-
 def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
     assert old_path.suffix == ".ipynb"
-    return Path(str(i) + "__" + old_path.stem + "__" + slugify_params(params) + old_path.suffix)
+
+    return Path(str(i).zfill(2) + "__" + old_path.stem + "__" + slugify_params(params) + old_path.suffix)
 
 
 class Chapter(BaseModel):
@@ -94,6 +94,7 @@ class Chapter(BaseModel):
                 f.write(f"# {self.caption}")
 
             for i, section in enumerate(self.sections):
+                two_digit_i = str(i).format(width=2)
                 params = {**self.resolved_params, **section}
                 notebook = section.get('notebook') or self.resolved_notebook
 
@@ -103,7 +104,7 @@ class Chapter(BaseModel):
                 if isinstance(notebook, str):
                     notebook = Path(notebook)
 
-                parameterized_path = self.path / Path(parameterize_filename(i, notebook, params))
+                parameterized_path = self.path / Path(parameterize_filename(two_digit_i, notebook, params))
 
                 typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
 
@@ -137,7 +138,7 @@ class Chapter(BaseModel):
             if isinstance(notebook, str):
                 notebook = Path(notebook)
 
-            parameterized_path = self.path / Path(parameterize_filename(0, notebook, self.resolved_params))
+            parameterized_path = self.path / Path(parameterize_filename('00', notebook, self.resolved_params))
 
             typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
 
@@ -177,7 +178,7 @@ class Chapter(BaseModel):
 
         folder = f"{self.slug}/" if self.slug else ""
         return {
-            "file": f"{folder}{parameterize_filename(0, self.resolved_notebook, self.resolved_params)}",
+            "file": f"{folder}{parameterize_filename('00', self.resolved_notebook, self.resolved_params)}",
         }
 
 
