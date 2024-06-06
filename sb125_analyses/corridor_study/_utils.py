@@ -35,6 +35,10 @@ def get_tranist_agency_counts(df, primary_mode_col, transit_mode_col, transit_ag
     modes = (df
              >>filter(_[primary_mode_col] =="public_transit")
              >>count(_[transit_mode_col])>>arrange(-_.n))
+    
+    modes[transit_mode_col] = modes[transit_mode_col].astype(str)
+    # modes[transit_agency_col] = modes[transit_agency_col].astype(str)
+    
     modes['n_modes_taken'] = modes[transit_mode_col].apply(lambda x: len(x.split()))
 
     return agencies, modes
