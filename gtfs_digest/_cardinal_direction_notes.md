@@ -12,8 +12,6 @@ most upstream step (somewhere in gtfs_funnel)
 data processing (situate your steps somewhere, either in gtfs_funnel, but it may be elsewhere, and you'd want to slightly programmatically rename the file, maybe just +_test so you can grab the newly processed data easily through each stage)
   * What does "upstream step" mean?
   * What's the difference between all your work in `data-analyses/gtfs_funnel` and `gtfs_funnel/merge_data.py`. 
-  * What file do you use to run everything to make the `operator_profiles` and `operator_routes_map`?
-  * So I have situated my step, but what am I supposed to programatically rename?
 > every output needs a new suffix while you're testing. and then you point your input to that.
 otherwise, you'd have to run all the dates (with schedule data, that's not a big deal, but 2 min here and there over 30-40 dates does add up).
 stop_times -> aggregate to route_dir -> schedule_data_for_date1 (AH note: this is how the dataset is constructed for one date)
@@ -27,16 +25,16 @@ stop_times -> aggregate to route_dir -> schedule_data_for_date1_test
 time-series = schedule_data_for_date1_test , schedule_data_for_date2_test, schedule_data_for_date3_test
 digest can pull from a test file with just 3 dates to see if it has everything.
 once you're happy with it, you have to run all the scripts that are affected schedule_stats_by_route_direction, anything downstream that uses that intermediate output, all the way through to digest for all the dates in rt_dates.y2023_dates and rt_dates.y2024_dates
-
 * Where do I find `aggregate to route_dir`? 
-* What does `digest` mean? 
 * `Test file`: is this like saving the outputs into GCS like 'may_2024_test.parquet'?
+* How do I know which scripts are affected by `schedule_stats_by_route_direction`?
 
 > yes, but before the meeting, can you go through and identify in a notebook or text file what you think is the "batch" from upstream to downstream?
 script 1, input file is data1, output file is data2
 script 2, input file is data2, output is data3
 and so forth, until you reach the digest, wherever you think the end script is
 * What is the "batch"?
+* What do you mean by "reach the digest?"
 * [Run everything using this Makefile](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_funnel/Makefile)
 * [schedule_stats_by_route_direction.py](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_funnel/schedule_stats_by_route_direction.py#L15)
     * `assemble_scheduled_trip_metrics` 
@@ -56,4 +54,45 @@ and so forth, until you reach the digest, wherever you think the end script is
     * [Here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_funnel/schedule_stats_by_route_direction.py#L118C19-L120) add `test` behind the name and [here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_funnel/schedule_stats_by_route_direction.py#L122) change the `analysis_date_list` to only a few dates.
     * [Here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_digest/merge_data.py#L25) add _test 
     * [Edit here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_digest/merge_data.py#L212) so I only run a few dates.
-    
+* [Only run above here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_digest/merge_data.py#L270-L272)
+* Once I'm happy with this, there's a GCS Public Bucket. That's the very, very late step.
+    * After I deploy everything. 
+* 
+#### Terms
+* Batch
+* Upstream: the least processed
+    * Warehouse: could be unzipped files.
+    * For me, it's something downloaded from the mart.
+    * WE process these unprocessed files with scripts. 
+    * Called by helper functions.
+* Downstream: the most final product.
+    * The most downstream is the digest. 
+    * Whatever is done in the GTFS Digest. 
+* Digest
+    * 
+* Funnel 
+    * When Tiffany is downloading stuff.
+    * Funneling the least processed tables through various scripts to trasnform.
+    * There are 5 tables that are transformed repeatedly into different products. 
+    * Everything that is in `gtfs_funnel`.
+    * 3 big workstreams: 
+        * RT Segment Speeds
+        * Schedule
+        * RT vs Schedule. 
+        * Schedule is also processed in GTFS Funnel. 
+    * Schedule data informs a lot of the interpreation of the vehicle positions
+        * We don't know anything about vehicle positions, what route, shape, direction it is. This data is all found in Schedule data that we connect with GTFS Key.
+        * Trips is the main table of the Schedule universe. 
+* Helper functions just pull dataframes that are downloaded.
+* Downloading happens in another step.
+* Tiffany runs the MAKEFILE in gtfs_funnel.
+* Then Tiffany goes to various other folders and runs everything (HQTA, RT Segment Speeds, etc)
+* Everything at the end goes into the GTFS Digest.
+* GTFS Digest is trying to represent everything through the grain of route-direction.
+* Every month Tiffany runs one day.
+* Batch: a combination of various scripts that are run together.
+* Look at the MAKEFILE and compare it to Mermaid. 
+* Digest: simply a compilation by dates, collects the columns TIffany wants
+    * Select the columns they want.
+* Not all the scripts in the Makefile need to be matched.
+*
