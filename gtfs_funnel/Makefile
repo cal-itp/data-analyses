@@ -1,5 +1,5 @@
 download_gtfs_data:
-# make sure to update update_vars.py for dates to download
+# make sure to update gtfs_funnel/update_vars.py for dates to download
 	python download_trips.py
 	python download_stops.py
 	python download_shapes.py
@@ -47,11 +47,11 @@ funnel_gtfs_single_day:
 
 all:
 	make funnel_gtfs_single_day
-    # update update_vars.py        
+    # update open_data/update_vars.py        
 	cd ../open_data/ && make create_gtfs_schedule_geospatial_open_data -f Makefile
-    # update update_vars.py    
+    # update high_quality_transit_areas/update_vars.py    
 	cd ../high_quality_transit_areas/ && make hqta_data -f Makefile    
-    # update segment_speed_utils.project_vars.py
+    # update rt_segment_speeds/segment_speed_utils/project_vars.py
 	cd rt_segment_speeds/scripts/ && make all_speeds_pipeline -f Makefile && cd ../../
-    # update update_vars.py
-cd rt_scheduled_v_ran/scripts/ && make full_pipeline -f Makefile
+    # update rt_scheduled_v_ran/scripts/update_vars.py
+	cd rt_scheduled_v_ran/scripts/ && make full_pipeline -f Makefile
