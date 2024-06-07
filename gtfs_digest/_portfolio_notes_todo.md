@@ -9,10 +9,22 @@
 * Portfolio:
     * Figure out Makefile situation.
 
+    
+### 6/6/2024
+* Troubleshooting the # of unique routes an operator runs. BART seems really high, which is the impetus for this investigation. 
+    * Work is in `18_operator_profiles.ipynb`.
+    * BART splits the route into essentially 2 because it uses one Route ID when the train goes North and another Route ID when the train goes South.
+    * Also took a look at San Francisco Muni: we identify 68 unique routes and their website lists about 70. 
+    * IDEA: add verbiage that says "approximately":
+    <i>Route Typologies The following data presents an overview of GTFS statistics using data from the most recent date of April 2024. City and County of San Francisco ran <b>approximately</b> 68 unique routes.</i>
+* Continue working on adding Cardinal Direction to the pipeline.
+* Second draft of common definitions added into `methodology.md`.
+### 6/5/2024
+* Was working on adding Cardinal Dir to the Pipeline.
+
 ### 6/4/2024
 * Finish up writing the common definitions that will be added in the `methodology.md`.
 * <s>Rerun all of the districts for schedule+GTFS and schedule only operators for TTTF #4.</s>
-* Brainstorm on adding cardinal direction work into the pipeline per [this GH issue](https://github.com/cal-itp/data-analyses/pull/1124).
 
 ### 6/3/2024
 * <s>Add back operators even if they don't have VP positions such as BART.</s>
