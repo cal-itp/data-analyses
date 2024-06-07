@@ -95,4 +95,4 @@ and so forth, until you reach the digest, wherever you think the end script is
 * Digest: simply a compilation by dates, collects the columns TIffany wants
     * Select the columns they want.
 * Not all the scripts in the Makefile need to be matched.
-*
+* I can duplicate the files. 
