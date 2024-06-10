@@ -54,7 +54,7 @@ and so forth, until you reach the digest, wherever you think the end script is
     * [Here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_funnel/schedule_stats_by_route_direction.py#L118C19-L120) add `test` behind the name and [here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_funnel/schedule_stats_by_route_direction.py#L122) change the `analysis_date_list` to only a few dates.
     * [Here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_digest/merge_data.py#L25) add _test 
     * [Edit here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_digest/merge_data.py#L212) so I only run a few dates.
-* [Only run above here](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_digest/merge_data.py#L270-L272)
+* [Only run above here](https://github.com/cal-itp/data-analyses/blob/main/gtfs_digest/merge_data.py#L208-L268)
 * Once I'm happy with this, there's a GCS Public Bucket. That's the very, very late step.
     * After I deploy everything. 
 * 

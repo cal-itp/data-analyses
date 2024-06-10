@@ -35,6 +35,7 @@ def concatenate_schedule_by_route_direction(
             "n_trips", "frequency", 
             "is_express", "is_rapid",  "is_rail",
             "is_coverage", "is_downtown_local", "is_local",
+            "stop_primary_direction"
         ],
     ).sort_values(sort_cols).rename(
         columns = {
@@ -210,7 +211,6 @@ if __name__ == "__main__":
     from shared_utils import rt_dates
     
     analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates 
-    
     DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
     DIGEST_SEGMENT_SPEEDS = GTFS_DATA_DICT.digest_tables.route_segment_speeds
     
@@ -224,7 +224,8 @@ if __name__ == "__main__":
         on = route_time_cols,
         how = "left"
     )
-
+    
+    
     df_avg_speeds = concatenate_speeds_by_route_direction(analysis_date_list)
                     
     df_rt_sched = (
@@ -246,7 +247,6 @@ if __name__ == "__main__":
         on = route_time_cols + ["service_date"],
         how = "outer",
     )
-    
     df = df.assign(
         sched_rt_category = df.sched_rt_category.map(
             gtfs_schedule_wrangling.sched_rt_category_dict)
@@ -289,5 +289,3 @@ if __name__ == "__main__":
         RT_SCHED_GCS,
         DIGEST_SEGMENT_SPEEDS
     )
-    
-    

@@ -161,7 +161,8 @@ def assemble_scheduled_trip_metrics(
 def schedule_metrics_by_route_direction(
     df: pd.DataFrame,
     analysis_date: str,
-    group_cols: list
+    group_cols: list,
+    merge_cols:list
 ) -> pd.DataFrame:
     """
     Aggregate trip-level metrics to route-direction, and 
@@ -200,7 +201,7 @@ def schedule_metrics_by_route_direction(
     df = pd.merge(
         common_shape,
         metrics_df,
-        on = group_cols,
+        on = merge_cols,
         how = "inner"
     ).merge(
         service_freq_df,
@@ -228,19 +229,27 @@ if __name__ == "__main__":
         # AH CHANGE THIS LATER
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}_AH_TESTING.parquet")
+        print("done with Trips")
         
-        route_cols = [
+        route_group_cols = [
             "schedule_gtfs_dataset_key", 
             "route_id", 
-            "direction_id"
+            "direction_id",
+            "stop_primary_direction"
+        ]
+        
+        route_merge_cols = [
+            "schedule_gtfs_dataset_key", 
+            "route_id", 
+            "direction_id",
         ]
         
         route_dir_metrics = schedule_metrics_by_route_direction(
-            trip_metrics, date, route_cols)
+            trip_metrics, date, route_group_cols, route_merge_cols)
         
         route_typologies = pd.read_parquet(
             f"{SCHED_GCS}{ROUTE_TYPOLOGIES}_{date}.parquet",
-            columns = route_cols + [
+            columns = route_merge_cols + [
                 "is_coverage", "is_downtown_local", 
                 "is_local", "is_rapid", "is_express", "is_rail"]
         )
@@ -248,7 +257,7 @@ if __name__ == "__main__":
         route_dir_metrics2 = pd.merge(
             route_dir_metrics,
             route_typologies,
-            on = route_cols,
+            on = route_merge_cols,
             how = "left"
         )
         
@@ -256,7 +265,7 @@ if __name__ == "__main__":
         utils.geoparquet_gcs_export(
             route_dir_metrics2,
             RT_SCHED_GCS,
-            f"{ROUTE_DIR_EXPORT}_{date}_AH_TESTING"
+            f"{ROUTE_DIR_EXPORT}_AH_TESTING_{date}"
         )
         
         end = datetime.datetime.now()
