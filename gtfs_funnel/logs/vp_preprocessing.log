@@ -76,3 +76,18 @@
 2024-05-10 15:00:45.696 | INFO     | __main__:<module>:128 - 2024-04-20: prepare vp to use in nearest neighbor: 0:13:11.259507
 2024-05-10 15:04:47.876 | INFO     | __main__:<module>:120 - 2024-04-21: condense vp for trip 0:04:02.178762
 2024-05-10 15:17:00.643 | INFO     | __main__:<module>:128 - 2024-04-21: prepare vp to use in nearest neighbor: 0:12:12.767232
+2024-06-07 14:51:09.324 | INFO     | __main__:<module>:169 - 2024-05-26: pare down vp: 0:01:28.183520
+2024-06-07 14:54:20.634 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:02:50.046689
+2024-06-07 14:57:04.266 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:02:43.632097
+2024-06-07 14:57:12.192 | INFO     | __main__:<module>:194 - 2024-05-26: export vp direction: 0:05:41.604548
+2024-06-07 14:58:16.583 | INFO     | __main__:<module>:200 - 2024-05-26: export usable vp with direction: 0:01:04.391368
+2024-06-07 14:58:16.584 | INFO     | __main__:<module>:203 - 2024-05-26: vp_direction script execution time: 0:06:45.995916
+2024-06-07 15:03:07.783 | INFO     | __main__:<module>:120 - 2024-05-26: condense vp for trip 0:04:08.705407
+2024-06-07 15:14:10.950 | INFO     | __main__:<module>:169 - 2024-05-26: pare down vp: 0:01:28.443382
+2024-06-07 15:17:31.831 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:02:59.577822
+2024-06-07 15:20:25.193 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:02:53.361218
+2024-06-07 15:20:30.232 | INFO     | __main__:<module>:194 - 2024-05-26: export vp direction: 0:05:57.978238
+2024-06-07 15:21:31.463 | INFO     | __main__:<module>:200 - 2024-05-26: export usable vp with direction: 0:01:01.230975
+2024-06-07 15:21:31.463 | INFO     | __main__:<module>:203 - 2024-05-26: vp_direction script execution time: 0:06:59.209213
+2024-06-07 15:26:35.339 | INFO     | __main__:<module>:120 - 2024-05-26: condense vp for trip 0:04:19.568954
+2024-06-07 15:39:05.313 | INFO     | __main__:<module>:128 - 2024-05-26: prepare vp to use in nearest neighbor: 0:12:29.973212

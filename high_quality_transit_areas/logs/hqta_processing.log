@@ -94,3 +94,11 @@
 2024-04-18 12:11:31.609 | INFO     | __main__:<module>:163 - C3_create_bus_hqta_types 2024-04-17 execution time: 0:00:37.330690
 2024-04-18 12:12:28.853 | INFO     | __main__:<module>:296 - D1_assemble_hqta_points 2024-04-17 execution time: 0:00:31.955298
 2024-04-18 12:13:36.294 | INFO     | __main__:<module>:167 - D2_assemble_hqta_polygons 2024-04-17 execution time: 0:00:40.596021
+2024-06-07 15:55:59.608 | INFO     | __main__:<module>:354 - A1_rail_ferry_brt_stops 2024-05-26 execution time: 0:00:43.845652
+2024-06-07 16:00:03.975 | INFO     | __main__:<module>:249 - B1_create_hqta_segments execution time: 0:03:43.783595
+2024-06-07 16:01:02.185 | INFO     | __main__:<module>:256 - B2_sjoin_stops_to_segments 2024-05-26 execution time: 0:00:34.801918
+2024-06-07 16:01:29.932 | INFO     | __main__:<module>:142 - C1_prep_pairwise_intersections 2024-05-26 execution time: 0:00:05.850319
+2024-06-07 16:02:05.231 | INFO     | __main__:<module>:125 - C2_find_intersections 2024-05-26 execution time: 0:00:14.305249
+2024-06-07 16:02:42.337 | INFO     | __main__:<module>:163 - C3_create_bus_hqta_types 2024-05-26 execution time: 0:00:16.144903
+2024-06-07 16:03:25.052 | INFO     | __main__:<module>:296 - D1_assemble_hqta_points 2024-05-26 execution time: 0:00:20.105690
+2024-06-07 16:04:04.859 | INFO     | __main__:<module>:167 - D2_assemble_hqta_polygons 2024-05-26 execution time: 0:00:16.899794
