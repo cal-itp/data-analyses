@@ -18,3 +18,7 @@
 2024-05-13 11:39:43.900 | INFO     | __main__:<module>:230 - concatenate and export new stop times: 0:00:38.493496
 2024-05-13 11:39:51.057 | INFO     | __main__:<module>:238 - execution time: 0:02:32.491097
 2024-05-21 13:41:13.169 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times: 0:04:46.993725
+2024-06-07 16:21:55.286 | INFO     | __main__:<module>:155 - cut segments 2024-05-26: 0:13:53.869121
+2024-06-07 16:25:57.183 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times: 0:02:42.978174
+2024-06-10 09:04:56.462 | INFO     | __main__:<module>:155 - cut segments 2024-05-26: 0:12:48.133753
+2024-06-10 09:08:42.077 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times: 0:02:22.440443
