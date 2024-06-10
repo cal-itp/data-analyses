@@ -6,7 +6,8 @@ all_dates = (rt_dates.y2024_dates + rt_dates.y2023_dates +
             )
 
 apr_week = rt_dates.get_week("apr2024", exclude_wed=True)
-analysis_date_list = apr_week
+may_date = [rt_dates.DATES["may2024"]] 
+analysis_date_list = may_date
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
