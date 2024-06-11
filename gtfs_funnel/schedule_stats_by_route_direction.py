@@ -49,6 +49,7 @@ def find_most_common_dir(
     # Fill in missing direction id with 0, per our usual practice.
     df1.direction_id = df1.direction_id.fillna(0)
     
+     
     agg1 = (
         df1.groupby(
             [
@@ -62,6 +63,9 @@ def find_most_common_dir(
         .reset_index()
         .rename(columns={"stop_sequence": "total_stops"})
     )
+    
+   # Delete out unknowns
+    agg1 = agg1.loc[agg1.stop_primary_direction != "Unknown"]
 
     # Sort and drop duplicates so that the
     # largest # of stops by stop_primary_direction is at the top
