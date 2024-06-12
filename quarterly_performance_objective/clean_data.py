@@ -1,3 +1,9 @@
+"""
+Set up route df for service hours and speeds.
+Routes are categorized as on_shn,
+parallel/intersecting, or other.
+"""
+import datetime
 import geopandas as gpd
 import pandas as pd
 
@@ -117,11 +123,16 @@ def process_df(analysis_date: str) -> gpd.GeoDataFrame:
 
 
 if __name__ == "__main__":
-    
+        
+    start = datetime.datetime.now()
+
     gdf = process_df(ANALYSIS_DATE)
-    
+
     utils.geoparquet_gcs_export(
         gdf,
         BUS_SERVICE_GCS,
         f"routes_categorized_with_speed_{ANALYSIS_DATE}"
     )
+
+    end = datetime.datetime.now()
+    print(f"quarterly route df for {ANALYSIS_DATE}: {end - start}")
