@@ -33,7 +33,7 @@ def process_transit_routes(analysis_date: str) -> gpd.GeoDataFrame:
     
     # Get this to same CRS as highways
     gdf = gdf.assign(
-        route_feet = gdf.geometry.to_crs(geography_utils.CA_StatePlane).length
+        route_length_feet = gdf.geometry.to_crs(geography_utils.CA_StatePlane).length
     ).drop(columns = "route_length").to_crs(geography_utils.CA_StatePlane)
     
     
@@ -120,7 +120,7 @@ def overlay_transit_to_highways(
     # Using new geometry column, calculate what % that intersection 
     # is of the route and hwy
     gdf = gdf.assign(
-        pct_route = (gdf.geometry.length / gdf.route_feet).round(3),
+        pct_route = (gdf.geometry.length / gdf.route_length_feet).round(3),
         Route = gdf.Route.astype(int),
     )
     
@@ -141,7 +141,9 @@ def overlay_transit_to_highways(
     return gdf3
 
 
-def routes_by_on_shn_parallel_categories(analysis_date: str) -> gpd.GeoDataFrame:
+def routes_by_on_shn_parallel_categories(
+    analysis_date: str
+) -> gpd.GeoDataFrame:
     """
     Categorize routes into on_shn / parallel / other.
     Only unique routes are kept (route_key).
@@ -186,7 +188,9 @@ def routes_by_on_shn_parallel_categories(analysis_date: str) -> gpd.GeoDataFrame
     keep_cols = [
         "feed_key", "schedule_gtfs_dataset_key",
         "route_id", "route_key",
-        "total_routes", "category"
+        "total_routes", "category",
+        "geometry",
+        "route_length_feet"
     ]
     
     df2 = df.assign(
