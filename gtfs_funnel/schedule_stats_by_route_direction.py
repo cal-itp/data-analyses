@@ -49,7 +49,6 @@ def find_most_common_dir(
     # Fill in missing direction id with 0, per our usual practice.
     df1.direction_id = df1.direction_id.fillna(0)
     
-     
     agg1 = (
         df1.groupby(
             [
@@ -229,17 +228,17 @@ if __name__ == "__main__":
         start = datetime.datetime.now()
         
         trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
+        trip_metrics = trip_metrics.rename(columns = {"stop_primary_direction":"route_primary_direction"})
         
         # AH CHANGE THIS LATER
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}_AH_TESTING.parquet")
-        print("done with Trips")
         
         route_group_cols = [
             "schedule_gtfs_dataset_key", 
             "route_id", 
             "direction_id",
-            "stop_primary_direction"
+            "route_primary_direction"
         ]
         
         route_merge_cols = [

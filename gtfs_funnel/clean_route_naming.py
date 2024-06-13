@@ -45,7 +45,11 @@ if __name__ == "__main__":
     
     CLEANED_ROUTE_NAMING = GTFS_DATA_DICT.schedule_tables.route_identification
     
-    date_list = rt_dates.y2024_dates + rt_dates.y2023_dates
+    oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
+    apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
+    apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
+    
+    date_list = rt_dates.y2024_dates + rt_dates.y2023_dates + oct2023_week + apr2023_week + apr2024_week
 
     df =  concatenate_routes_across_dates(date_list)
     
