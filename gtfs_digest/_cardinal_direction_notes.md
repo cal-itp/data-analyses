@@ -4,6 +4,43 @@
 * [This creates the dataframe that forms the basis of GTFS Digest](https://github.com/cal-itp/data-analyses/blob/main/gtfs_digest/merge_data.py)
 * [Mermaid 1](https://mermaid.live/view#pako:eNqNVttu2zgQ_RWCi8BZwAosqWpsPRRI6sh96AKLNFgEKxsFLY5sohKpklS2bpB_X1KUY_rW1A-2zDlz5sxwONQzLgQFnOIgCOZcM11BimYP2Rd0w0m10axQ6G_WQMU4oJkkjKs577AXF89zjhDjTKeoe0RooNdQwyBFgyVRMBj6q_8QyciyAjV4hRtTI1lN5OajqIS0fn_cJVmS3Wxdd4gH-KF3qNFodAy5FZKCPAeyGZyzKSgEp_s6suz67tbDaJCa7UHKshw484v9MV8vFxdzPudlJf4r1kRq9PneAYqKKDWFEkkoNCpZVaV9pgf2gsmigi2i03CCIeoB2SQb3UU2pIWodrmSpFkjxfjKkFCycYZtDgjd5KpYA20rWKAg-IBuwlyKVkNAmeVlgi88sINEuWhAEi3kvu3KGuNcadEsthLs5zZ_gjWzWTRCMcupXLDbMFewqoFrpBoAqnY-ByKCHrfPG_Ys5DJXa9JAYEOjHuqR2eWv2-XFn2ma9lX1uUhH9jEkOXky2a3gbU2WtiFMLgxjtws77AmVy8ucVBXSkjXnhN4_dFqRZjX4Qn22Za9zmftopO1R-j0hhSmXTa0mOw0eLvxWnwld9KGLgxKhN_ftK6OethOa6KXpO0JP1CREZ_XQXg89u2X2jJsxQ4Nal0XxqkbB9xZ48Ua9nDTT0G1tp8mbyS5852hve9TB_vTUfimm1uFJof3zOP3VeZw6SOSOnPsTH9D4DeXL69FbBcDp0dSwTqZkkoHyhWYnFHnWjjgL81pwvQ4DM3NCJ-3etJ0mdqpS9hNc8RAn5zq9J4ocUeQT-fHuHSw-FLWvftdMlJioZnyhjvZkU85OzbeZm2-zMLcH2ApBZLWSsLJ8Wji6TsssPvaKjmr2-wTdSl9Or8NcWVxFPr0qRo0U5iqAo8RObXBH4Wf-eHAbPPbd59Xh0Rn27gAvAkJ4iGuQNWHUvER09_ocd_f9HKfmkUJJ2krPsbkcDZS0WnzZ8AKnWrYwxCbcao3TklTK_Gsbu11TRozeegsBykzYv9xbSveyMsQN4Th9xj9wGkTx5CpJkjhOkvej8WiSDPEGp-G75CpKovA6CZPrSTKJXob4pxCGdHQ1GU_exeNkEsfj6_ejeNzR_dsZOx0v_wPlerTj)
 * [Mermaid 2](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_funnel/mermaid.md)
+
+### 6/12/2024
+* [Issue 1135](https://github.com/cal-itp/data-analyses/issues/1135)
+* Notebook: `gtfs_digest/17_cardinal_dir_pipeline`.
+* I have edited `gtfs_funnel/schedule_stats_by_route_direction` and tested the dates April 15 and 16, 2024.
+    * This is a different branch than the one I used to run the open_data/HQTA/etc stuff.
+    * I saved out all my results with AH Testing
+* I broke apart `gtfs_digest/merge_data`.
+    * I used `concatenate_schedule_by_route_direction` to stack 4/15 and 4/16 together.
+    * The dataframe from `concatenate_speeds_by_route_direction` and `concatenate_rt_vs_schedule_by_route_direction` and `concatenate_speeds_by_route_direction` don't have `stop_primary_direction`. Is that ok?
+        * Yes that's ok. Cardinal_direction is derived from `schedule_only`.
+        * Any row that is only found in `vehicle_positions` won't have cardinal directions.
+    * Having issues with `merge_in_standardized_route_names` because the test dates I chose  don't have corresponding service_dates in the standardized routes dataframe. I think this should be ok.
+        * Go to `gtfs_funnel/clean_route_naming` and update the `analysis_date` list.
+        * The dataframe with standardized route names should have all dates to correspond. 
+* I deleted out unknowns, so every row has an actual direction.
+<s>* Now what? 
+    * I think I'm done with the second checkbox in Issue #1135.
+    * I am not sure if I should run it on a few dates without my `testing` string attached? Then proceed to backfilling all the dates?
+    * " if digest needs to create new datasets in a different grain, do so"? I don't think I need a new dataset in a different grain? How would I know for certain?</s>
+    * Amanda: discovered that there are many nans after doing `.value_counts(dropna=False`). Need to go back and fix this.
+        * Don't replace missing data until the very last step. 
+        * Figure out what's going on and why there are so many unpopulated rows, especially the rows that don't have `sched_only`, `sched_vp`, and `vp_only` values. 
+        * Rename `stop_primary_direction` to `route_primary_direction`
+        * Once I'm done: go into `gtfs_funnel/MakeFile` and write. Run this part of the Makefile to make changes to all of the files for all of the dates. Then go to `gtfs_digest/merge_data`. Delete the lines below after I'm done.
+        `cardinal_dir_changes: 
+         --- python schedule_stats_by_route
+         --- python clean_route_naming`
+<s>* Makefile and installing requirements for gtfs digest?
+    * Find those versions and pin it down. 
+    * Maybe it should be moved to _shared_utils/requirements
+    * Amanda: done with this, found the latest version of `altair` and `altair_transform` that I download and update.</s>
+* Tiffany ran May later because LA Metro was missing.
+    * June's data will be run tomorrow.
+    * Data for the most current month is run on the 2nd Thursday of each month. 
+    * There are certain areas  of the `gtfs_funnel/MAKE_FILE` when you can actually open up a notebook and work. VP stuff gets close to the limit, but schedule takes a lot less memory.
+    
 ### 6/7/2024
 * I have added my work into the right file and it runs pretty fast. However, now that I'm done with this step I have no idea what to do. 
 * Questions for Tiffany about adding Cardinal Direction into the pipeline

@@ -35,7 +35,6 @@ def concatenate_schedule_by_route_direction(
             "n_trips", "frequency", 
             "is_express", "is_rapid",  "is_rail",
             "is_coverage", "is_downtown_local", "is_local",
-            "stop_primary_direction"
         ],
     ).sort_values(sort_cols).rename(
         columns = {
