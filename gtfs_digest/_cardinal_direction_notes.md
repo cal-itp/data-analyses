@@ -26,8 +26,8 @@
     * " if digest needs to create new datasets in a different grain, do so"? I don't think I need a new dataset in a different grain? How would I know for certain?</s>
     * Amanda: discovered that there are many nans after doing `.value_counts(dropna=False`). Need to go back and fix this.
         * Don't replace missing data until the very last step. 
-        * Figure out what's going on and why there are so many unpopulated rows, especially the rows that don't have `sched_only`, `sched_vp`, and `vp_only` values. 
-        * Rename `stop_primary_direction` to `route_primary_direction`
+        <s>* Figure out what's going on and why there are so many unpopulated rows, especially the rows that don't have `sched_only`, `sched_vp`, and `vp_only` values in `sched_rt_category`.</s> Note: this was due to the `merge_standardized_name`, now that all the test dates are also in that file, the `sched_rt_category` column looks accurate.
+        * <s>Rename `stop_primary_direction` to `route_primary_direction`</s> Done. 
         * Once I'm done: go into `gtfs_funnel/MakeFile` and write. Run this part of the Makefile to make changes to all of the files for all of the dates. Then go to `gtfs_digest/merge_data`. Delete the lines below after I'm done.
         `cardinal_dir_changes: 
          --- python schedule_stats_by_route

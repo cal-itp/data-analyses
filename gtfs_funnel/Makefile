@@ -34,11 +34,10 @@ monthly_scheduled_data:
 	python download_monthly_service.py
 	python concatenate_monthly_scheduled_service.py
 
-    
 funnel_gtfs_data: 
 	make download_gtfs_data && make preprocess && make timeseries_preprocessing
 	make monthly_scheduled_data
     # update segment_speed_utils.project_vars.py
 	cd rt_segment_speeds/scripts/ && make all_speeds_pipeline -f Makefile && cd ../../
     # update update_vars.py
-cd rt_scheduled_v_ran/scripts/ && make full_pipeline -f Makefile
+	cd rt_scheduled_v_ran/scripts/ && make full_pipeline -f Makefile
