@@ -223,16 +223,14 @@ if __name__ == "__main__":
     ROUTE_DIR_EXPORT = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_route_direction_metrics
     ROUTE_TYPOLOGIES = GTFS_DATA_DICT.schedule_tables.route_typologies
     
-    # AH CHANGE THIS LATER
-    for date in analysis_date_list[0:3]:
+    for date in analysis_date_list:
         start = datetime.datetime.now()
         
         trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
         trip_metrics = trip_metrics.rename(columns = {"stop_primary_direction":"route_primary_direction"})
         
-        # AH CHANGE THIS LATER
         trip_metrics.to_parquet(
-            f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}_AH_TESTING.parquet")
+            f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
         
         route_group_cols = [
             "schedule_gtfs_dataset_key", 
@@ -264,11 +262,10 @@ if __name__ == "__main__":
             how = "left"
         )
         
-        # AH CHANGE THIS LATER
         utils.geoparquet_gcs_export(
             route_dir_metrics2,
             RT_SCHED_GCS,
-            f"{ROUTE_DIR_EXPORT}_AH_TESTING_{date}"
+            f"{ROUTE_DIR_EXPORT}_{date}"
         )
         
         end = datetime.datetime.now()
