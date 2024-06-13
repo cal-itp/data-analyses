@@ -54,6 +54,7 @@
 2024-06-10 09:59:27.350 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:203 - get stop arrivals 2024-05-26: 0:00:59.531471
 2024-06-10 10:00:03.629 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:215 - interpolate arrivals for speedmap_segments 2024-05-26:  2024-05-26: 0:01:35.810567
 2024-06-10 10:01:27.191 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:174 - speeds by segment for speedmap_segments 2024-05-26: 0:01:15.588158
+<<<<<<< HEAD
 2024-06-13 14:37:31.710 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:168 - nearest neighbor for stop_segments 2024-05-22: 0:12:45.733268
 2024-06-13 14:46:25.431 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:203 - get stop arrivals 2024-05-22: 0:08:49.812904
 2024-06-13 14:51:21.130 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:215 - interpolate arrivals for stop_segments 2024-05-22:  2024-05-22: 0:13:45.512628
@@ -90,3 +91,7 @@
 2024-06-13 17:36:06.737 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:215 - interpolate arrivals for speedmap_segments 2024-06-12:  2024-06-12: 0:02:47.680208
 2024-06-13 17:38:19.617 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:174 - speeds by segment for speedmap_segments 2024-06-12: 0:02:03.262084
 2024-06-13 17:38:19.617 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:174 - speeds by segment for speedmap_segments 2024-06-12: 0:02:03.262084
+2024-06-13 08:44:54.443 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:168 - nearest neighbor for speedmap_segments 2023-11-15: 0:02:58.415526
+2024-06-13 08:46:59.731 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:203 - get stop arrivals 2023-11-15: 0:02:04.434805
+2024-06-13 08:48:59.278 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:215 - interpolate arrivals for speedmap_segments 2023-11-15:  2023-11-15: 0:04:03.982445
+2024-06-13 08:51:59.429 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:174 - speeds by segment for speedmap_segments 2023-11-15: 0:02:44.265009
