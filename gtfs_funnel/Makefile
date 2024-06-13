@@ -35,7 +35,6 @@ timeseries_preprocessing:
 monthly_scheduled_data:
 	python download_monthly_service.py
 	python concatenate_monthly_scheduled_service.py
-
     
 funnel_gtfs_single_day: 
 	make download_gtfs_data 
