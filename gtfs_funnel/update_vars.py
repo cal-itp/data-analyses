@@ -4,8 +4,6 @@ all_dates = (rt_dates.y2024_dates + rt_dates.y2023_dates +
              rt_dates.oct2023_week + rt_dates.apr2023_week + 
              rt_dates.apr2024_week
             )
-
-apr_week = rt_dates.get_week("apr2024", exclude_wed=True)
 may_date = [rt_dates.DATES["may2024"]] 
 analysis_date_list = may_date
 

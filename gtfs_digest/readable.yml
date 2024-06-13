@@ -1,7 +1,8 @@
 # GTFS schedule
 direction_id:
-    readable: Direction
+    readable: dir_0_1
     caption: Something
+route_primary_direction: Direction
 avg_scheduled_service_minutes: "Average Scheduled Service (trip minutes)"
 avg_stop_miles: Average Stop Distance (miles)
 ttl_service_hours: Total Service (hours)
