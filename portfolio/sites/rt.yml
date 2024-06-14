@@ -82,24 +82,22 @@ parts:
           district: 07 - Los Angeles
         sections:
           - itp_id: 16
-          - itp_id: 24
           - itp_id: 45
           - itp_id: 54
           - itp_id: 75
           - itp_id: 87
           - itp_id: 97
-          - itp_id: 164
+          - itp_id: 118
           - itp_id: 183
           - itp_id: 210
           - itp_id: 228
           - itp_id: 231
           - itp_id: 243
           - itp_id: 260
+          - itp_id: 295
           - itp_id: 300
           - itp_id: 308
           - itp_id: 337
-          - itp_id: 339
-          - itp_id: 367
           - itp_id: 112
           - itp_id: 123
           - itp_id: 170
@@ -109,7 +107,6 @@ parts:
         params:
           district: 08 - San Bernardino
         sections:
-          - itp_id: 30
           - itp_id: 34
           - itp_id: 232
           - itp_id: 238
@@ -126,9 +123,7 @@ parts:
         sections:
           - itp_id: 107
           - itp_id: 349
-          - itp_id: 10
           - itp_id: 284
-          - itp_id: 484
       - caption: District 11 - San Diego
         params:
           district: 11 - San Diego
