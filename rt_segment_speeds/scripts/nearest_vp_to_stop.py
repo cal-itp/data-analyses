@@ -172,12 +172,6 @@ def nearest_neighbor_for_stop(
     
     
 if __name__ == "__main__":
-        
-    LOG_FILE = "../logs/nearest_vp.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO") 
     
     from segment_speed_utils.project_vars import analysis_date_list
     

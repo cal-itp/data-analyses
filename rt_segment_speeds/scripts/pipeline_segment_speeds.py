@@ -33,6 +33,8 @@ if __name__ == "__main__":
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
         )    
+        
+        logger.remove()
     
         LOG_FILE = "../logs/interpolate_stop_arrival.log"
         logger.add(LOG_FILE, retention="3 months")
@@ -45,6 +47,8 @@ if __name__ == "__main__":
             segment_type = segment_type, 
             config_path = GTFS_DATA_DICT
         )
+
+        logger.remove()
     
         LOG_FILE = "../logs/speeds_by_segment_trip.log"
         logger.add(LOG_FILE, retention="3 months")
@@ -58,4 +62,5 @@ if __name__ == "__main__":
             config_path = GTFS_DATA_DICT
         )  
 
+        logger.remove()
        
