@@ -15,6 +15,16 @@ route_time_cols = ["schedule_gtfs_dataset_key",
 
 sort_cols = route_time_cols + ["service_date"]
 
+route_time_with_cardinal_dir_cols = [
+    "schedule_gtfs_dataset_key",
+    "route_id",
+    "direction_id",
+    "time_period",
+    "route_primary_direction",
+]
+
+sort_cols_with_cardinal_dir_cols = route_time_with_cardinal_dir_cols + ["service_date"]
+
 def concatenate_schedule_by_route_direction(
     date_list: list
 ) -> pd.DataFrame:
@@ -29,7 +39,7 @@ def concatenate_schedule_by_route_direction(
         FILE,
         date_list,
         data_type = "df",
-        columns = route_time_cols + [
+        columns = route_time_with_cardinal_dir_cols + [
             "avg_scheduled_service_minutes", 
             "avg_stop_miles",
             "n_trips", "frequency", 
@@ -209,6 +219,10 @@ if __name__ == "__main__":
     
     from shared_utils import rt_dates
     
+    #analysis_date_list = (rt_dates.y2024_dates + rt_dates.y2023_dates + 
+    #         rt_dates.oct2023_week + rt_dates.apr2023_week + 
+    #         rt_dates.apr2024_week
+     #       )
     analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates 
     
     DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
@@ -266,28 +280,29 @@ if __name__ == "__main__":
     ]
     
     df[integrify] = df[integrify].fillna(0).astype("int")
-    
+
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
-    
+    print("Saved Digest RT")
+  
     segment_speeds = concatenate_segment_speeds_by_route_direction(
         analysis_date_list
     ).pipe(
         merge_in_standardized_route_names, 
     ).astype({"direction_id": "int64"}) #Int64 doesn't work for gdf
-    
+   
     segment_speeds2 = pd.merge(
         segment_speeds,
         primary_typology,
         on = route_time_cols,
         how = "left"
     )
-    
+
     utils.geoparquet_gcs_export(
         segment_speeds2,
         RT_SCHED_GCS,
         DIGEST_SEGMENT_SPEEDS
     )
-    
-    
+
+  
