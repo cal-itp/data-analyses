@@ -140,16 +140,26 @@ def import_scheduled_stops(
     FILE = f"{COMPILED_CACHED_VIEWS}{TABLE}_{analysis_date}.parquet"
     
     if get_pandas:
-        stops = gpd.read_parquet(
-            FILE, filters = filters, columns = columns
-        )
+        if columns is None or "geometry" in columns:
+            stops = gpd.read_parquet(
+                FILE, filters = filters, columns = columns
+            ).to_crs(crs)
+
+        else:
+            stops = pd.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
     
     else:
-        stops = dg.read_parquet(
-            FILE, filters = filters, columns = columns
-        )
-    
-    stops = stops.to_crs(crs)
+        if columns is None or "geometry" in columns:
+            stops = dg.read_parquet(
+                FILE, filters = filters, columns = columns
+            ).to_crs(crs)
+
+        else:
+            stops = dd.read_parquet(
+                FILE, filters = filters, columns = columns
+            )
     
     return stops.drop_duplicates().reset_index(drop=True)
 

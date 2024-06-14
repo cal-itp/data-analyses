@@ -84,6 +84,8 @@ if __name__ == "__main__":
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
         )    
+        
+        logger.remove()
     
         LOG_FILE = "../logs/interpolate_stop_arrival.log"
         logger.add(LOG_FILE, retention="3 months")
@@ -96,6 +98,8 @@ if __name__ == "__main__":
             segment_type = segment_type, 
             config_path = GTFS_DATA_DICT
         )
+        
+        logger.remove()
         
         t0 = datetime.datetime.now()
         concatenate_speedmap_proxy_arrivals_with_remaining(
@@ -117,3 +121,5 @@ if __name__ == "__main__":
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
         )
+        
+        logger.remove()
