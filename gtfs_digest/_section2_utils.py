@@ -285,42 +285,8 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     
     # Replace column names
     df.columns = df.columns.map(_report_utils.replace_column_names)
-    
-    # Replace 0/1 in Direction with cardinal direction
-    # First only grab the most recent date's gtfs_dataset_key
-    df['temp_service_date'] = df['Date'].astype(str)
-    all_dates_list = list(df.Date.unique())
-    gtfs_keys = list(df.schedule_gtfs_dataset_key.unique())
-    all_dates_list = [np.datetime_as_string(date, unit="D") for date in all_dates_list]
-    
-    # Find cardinal direction
-    cardinal_direction_df = all_dates_cardinal_dir(all_dates_list, gtfs_keys)
-   
-    # Left merge to keep  
-    m1 = pd.merge(
-    df,
-    cardinal_direction_df,
-    left_on=["schedule_gtfs_dataset_key", 
-             "Direction", 
-             "Route ID", 
-             "temp_service_date"],
-    right_on=[
-        "schedule_gtfs_dataset_key",
-        "direction_id",
-        "recent_route_id2",
-        "service_date"
-    ],
-    how="left"
-    )
-    
-    # Clean up
-    m1 = m1.rename(
-    columns={"Direction":"dir_0_1",
-             "stop_primary_direction":"Direction"}
-    )
-    
-    m1 = m1.drop(columns = ["temp_service_date", "recent_route_id2"])
-    return m1
+
+    return df
 
 
 def route_stats(df: pd.DataFrame) -> pd.DataFrame:
