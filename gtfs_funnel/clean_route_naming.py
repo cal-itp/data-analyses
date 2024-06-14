@@ -4,8 +4,7 @@ Create file with cleaned up route info.
 import pandas as pd
 
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
-from update_vars import GTFS_DATA_DICT, SCHED_GCS
-from shared_utils import rt_dates
+from update_vars import GTFS_DATA_DICT, SCHED_GCS, all_dates
 
 def concatenate_routes_across_dates(
     analysis_date_list: list
@@ -45,13 +44,7 @@ if __name__ == "__main__":
     
     CLEANED_ROUTE_NAMING = GTFS_DATA_DICT.schedule_tables.route_identification
     
-    oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
-    apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
-    apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
-    
-    date_list = rt_dates.y2024_dates + rt_dates.y2023_dates + oct2023_week + apr2023_week + apr2024_week
-
-    df =  concatenate_routes_across_dates(date_list)
+    df =  concatenate_routes_across_dates(all_dates)
     
     df = df.assign(
         route_id2 = df.apply(

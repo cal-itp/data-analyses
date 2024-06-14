@@ -220,11 +220,6 @@ def interpolate_stop_arrivals(
 
 if __name__ == "__main__":
         
-    LOG_FILE = "../logs/interpolate_stop_arrival.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
     from segment_speed_utils.project_vars import analysis_date_list
     
     for analysis_date in analysis_date_list:
