@@ -1,3 +1,5 @@
+#script with shared functions used throughout the bus cost analysis.
+
 import pandas as pd
 
 GCS_PATH = "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/"
