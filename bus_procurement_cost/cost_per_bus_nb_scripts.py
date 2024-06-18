@@ -170,10 +170,11 @@ def make_chart(y_col: str, title: str, data: pd.DataFrame, x_col: str):
 ### VARIABLES
 
 #INITIAL DF AGG VARIABLES
+gcs_path = "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/old/"
 
 # initial, overall df
 all_bus = pd.read_parquet(
-    "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/cpb_analysis_data_merge.parquet"
+    "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/old/cpb_analysis_data_merge.parquet"
 )
 
 # count of all projects from each source
@@ -182,7 +183,7 @@ def all_project_counter(fta_file: str, tircp_file:str, dgs_file: str) -> int:
     function to count all the projects from fta, tircp and dgs files.
     use to find the total number of projects and the total number of bus only projects
     """
-    gcs_path = "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/"
+    gcs_path = "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/old/"
 
     
     all_fta = len(pd.read_parquet(f"{gcs_path}{fta_file}"))
@@ -207,16 +208,16 @@ bus_only_project_count = all_project_counter(
 
 #count of all bus only projects per dataset
 bus_only_count_fta = len(pd.read_parquet(
-    "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/fta_bus_cost_clean.parquet"))
+    f"{gcs_path}fta_bus_cost_clean.parquet"))
 bus_only_count_tircp = len(pd.read_parquet(
-    "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/clean_tircp_project_bus_only.parquet"))
+    f"{gcs_path}clean_tircp_project_bus_only.parquet"))
 bus_only_count_dgs = len(pd.read_parquet(
-    "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/dgs_agg_clean.parquet"))
+    f"{gcs_path}dgs_agg_clean.parquet"))
 
 #count of all projects per dataset
-count_all_fta = len(pd.read_parquet("gs://calitp-analytics-data/data-analyses/bus_procurement_cost/fta_all_projects_clean.parquet"))
-count_all_tircp = len(pd.read_parquet("gs://calitp-analytics-data/data-analyses/bus_procurement_cost/clean_tircp_project.parquet"))
-count_all_dgs = len(pd.read_parquet("gs://calitp-analytics-data/data-analyses/bus_procurement_cost/dgs_agg_clean.parquet"))
+count_all_fta = len(pd.read_parquet(f"{gcs_path}fta_all_projects_clean.parquet"))
+count_all_tircp = len(pd.read_parquet(f"{gcs_path}clean_tircp_project.parquet"))
+count_all_dgs = len(pd.read_parquet(f"{gcs_path}dgs_agg_clean.parquet"))
 
 # Variables
 all_bus_only_projects = len(all_bus)
