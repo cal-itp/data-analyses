@@ -1,0 +1,171 @@
+---
+title: Quarterly Performance Metrics
+execute:
+  echo: false
+format:
+  html:
+    mainfont: sans-serif
+    monofont: sans-serif
+    anchor-sections: true
+    toc: true
+    toc-title: Contents
+    toc-depth: 3
+    code-links:
+     - text: Analysis Products
+       icon: bar-chart-fill
+       href: https://analysis.calitp.org     
+     - text: Reach Out!
+       icon: envelope
+       href: mailto:hello@calitp.org
+jupyter: python3
+---
+
+
+```{python}
+import altair as alt
+import geopandas as gpd
+import pandas as pd
+import polars as pl
+
+from great_tables import GT, _data_color, loc, md, nanoplot_options, style
+
+from update_vars import BUS_SERVICE_GCS
+```
+
+```{python}
+operator_df = gpd.read_parquet(
+    f"{BUS_SERVICE_GCS}"
+    "quarterly_metrics/operator_time_series.parquet"
+)
+
+statewide_df = pd.read_parquet(
+    f"{BUS_SERVICE_GCS}"
+    "quarterly_metrics/statewide_time_series.parquet"
+)
+```
+
+```{python}
+def category_wrangling(
+    df: pd.DataFrame, 
+    col: str = "category", 
+    sort_key: list = ["on_shn", "parallel", "other", "shn_subtotal", "total"]
+) -> pd.DataFrame:
+    """
+    Custom sort order for categorical variable
+    https://stackoverflow.com/questions/23482668/sorting-by-a-custom-list-in-pandas
+    """
+    category_values = {
+        "on_shn": "On SHN", 
+        "parallel": "Intersects SHN",
+        "other": "Other",
+        "shn_subtotal": "On or Intersects SHN",
+        "total": "Total"
+    }
+    
+    df = df.sort_values(
+        col, key=lambda c: c.map(lambda e: sort_key.index(e))
+    ) 
+    
+    df = df.assign(
+        category = df.category.map(category_values)
+    )
+    
+    return df
+
+def get_hex(color_name: str) -> str:
+    """
+    Since some of the color names don't pull the hex code, 
+    we'll grab it here.
+    https://github.com/posit-dev/great-tables/blob/main/great_tables/_data_color/constants.py
+    """
+    return _data_color.constants.COLOR_NAME_TO_HEX[color_name]
+```
+
+```{python}
+current_quarter = "2024-Q2"
+
+current_statewide = statewide_df.loc[
+    statewide_df.year_quarter==current_quarter
+]
+```
+
+```{python}
+(GT(pl.from_pandas(current_statewide.pipe(category_wrangling)))
+.fmt_number(
+    columns = [
+        "daily_service_hours", 
+        "service_hours_per_route", 
+        "speed_mph"], decimals=1
+).fmt_integer(
+    columns = ["daily_routes", "daily_vp_routes"]
+ ).cols_label(
+     category = "Category",
+     year_quarter = "Quarter",
+     daily_service_hours = "Daily Service Hours",
+     service_hours_per_route = "Service Hours per Route",
+     speed_mph = "Average Speed",
+     daily_routes = "# Routes",
+     daily_vp_routes = "# Routes with Speed"
+ ).tab_header(
+     title = "Service Hours and Speed",
+     subtitle = f"{current_quarter}"
+ ).tab_spanner(
+    label="Service", 
+    columns=["daily_service_hours", 
+             "service_hours_per_route", "daily_routes"]
+).tab_spanner(
+    label="Speed",
+    columns = ["speed_mph", "daily_vp_routes"]
+).tab_options(
+    container_width = "100%",
+    table_background_color="white",
+    table_body_hlines_style="none",
+    table_body_vlines_style="none",
+    heading_background_color="white",
+    column_labels_background_color="white",
+    row_group_background_color="white",
+    stub_background_color="white",
+    source_notes_background_color="white",
+    table_font_size="14px",
+    heading_align="center"
+).cols_hide(
+    ["year_quarter", "service_hours", "n_routes", 
+    "n_dates", "n_vp_routes"]
+).tab_style(
+    style=style.text(weight="bold"),
+    locations=loc.body(rows=pl.col("category") == "Total")
+).tab_style(
+    style=style.text(
+        weight="bold", style="italic", color=get_hex("gray30")),
+    locations=loc.body(rows=pl.col("category") == "On or Intersects SHN"),
+).cols_align(align="center")
+ .cols_align(align="left", columns="category")
+)
+```
+
+```{python}
+(alt.Chart(operator_df.drop(columns = "geometry"))
+ .mark_bar()
+ .encode(
+     x="year_quarter:O",
+     y="sum(service_hours_per_route):Q",
+     column = "category",
+     tooltip=["year_quarter", "service_hours_per_route", 
+              "category", "service_hours"]
+ ).interactive()
+)
+```
+
+```{python}
+(alt.Chart(statewide_df)
+ .mark_bar()
+ .encode(
+     x="year_quarter:O",
+     y="service_hours_per_route:Q",
+     column = "category",
+     tooltip = ["year_quarter", "service_hours_per_route", "category"]
+ ).interactive()
+)
+```
+
+
