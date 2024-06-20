@@ -12,81 +12,6 @@ from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from shared_utils.rt_utils import METERS_PER_MILE
 from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
-def find_most_common_dir(
-    stop_times_gdf: gpd.GeoDataFrame,
-    trips_to_route_df: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    Instead of only having direction_id as 0/1, add back the
-    cardinal directions. 
-    """
-    stop_times_col = [
-        "feed_key",
-        "stop_id",
-        "stop_sequence",
-        "schedule_gtfs_dataset_key",
-        "trip_instance_key",
-        "shape_array_key",
-        "stop_name",
-        "prior_stop_sequence",
-        "subseq_stop_sequence",
-        "stop_pair",
-        "stop_pair_name",
-        "stop_primary_direction",
-        "stop_meters",
-    ]
-    
-    # Keep only a subset
-    stop_times_gdf2 = stop_times_gdf[stop_times_col]
-
-    # Merge dfs
-    merge_cols = ["trip_instance_key", 
-                  "schedule_gtfs_dataset_key", 
-                  "shape_array_key"]
-
-    df1 = pd.merge(stop_times_gdf2, trips_to_route_df, on=merge_cols, how="inner")
-    
-    # Fill in missing direction id with 0, per our usual practice.
-    df1.direction_id = df1.direction_id.fillna(0)
-    
-    agg1 = (
-        df1.groupby(
-            [
-                "route_id",
-                "schedule_gtfs_dataset_key",
-                "direction_id",
-                "stop_primary_direction",
-            ]
-        )
-        .agg({"stop_sequence": "count"})
-        .reset_index()
-        .rename(columns={"stop_sequence": "total_stops"})
-    )
-    
-   # Delete out unknowns
-    agg1 = agg1.loc[agg1.stop_primary_direction != "Unknown"]
-
-    # Sort and drop duplicates so that the
-    # largest # of stops by stop_primary_direction is at the top
-    agg2 = agg1.sort_values(
-        by=["route_id", 
-            "schedule_gtfs_dataset_key",
-            "direction_id",
-            "total_stops"],
-        ascending=[True, True, True, False],
-    )
-
-    # Drop duplicates so only the top stop_primary_direction is kept.
-    agg3 = agg2.drop_duplicates(
-    subset=[
-        "route_id",
-        "schedule_gtfs_dataset_key",
-        "direction_id",
-    ]).reset_index(drop=True)
-    
-    agg3 = agg3.drop(columns=["total_stops"])
-    return agg3
-
 def assemble_scheduled_trip_metrics(
     analysis_date: str, 
     dict_inputs: dict
@@ -102,21 +27,11 @@ def assemble_scheduled_trip_metrics(
         f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet"
     )
     
-    scheduled_col = [
-    "route_id",
-    "trip_instance_key",
-    "gtfs_dataset_key",
-    "shape_array_key",
-    "direction_id",
-    "route_long_name",
-    "route_short_name",
-    "route_desc",
-    "name"
-    ]
+    trips_cols = ["trip_instance_key", "route_id", "direction_id"]
     
     trips_to_route = helpers.import_scheduled_trips(
         analysis_date,
-        columns = scheduled_col,
+        columns = trips_cols,
         get_pandas = True
     )
     
@@ -129,8 +44,6 @@ def assemble_scheduled_trip_metrics(
     
     grouped_df = df.groupby(trip_cols, observed=True, group_keys=False)
     
-    trips_to_route_cols_subset = ["trip_instance_key", "route_id", "direction_id"]
-    
     # Get median / mean stop meters for the trip
     # Attach time-of-day and route_id and direction_id
     # Merge using a subset
@@ -141,24 +54,15 @@ def assemble_scheduled_trip_metrics(
         on = "trip_instance_key",
         how = "left"
     ).merge(
-        trips_to_route[trips_to_route_cols_subset],
+        trips_to_route,
         on = "trip_instance_key",
         how = "inner"
     )
     
-    median_stop_meters_df.direction_id = median_stop_meters_df.direction_id.fillna(0)
-    
-    # Get cardinal direction
-    cardinal_direction_df = find_most_common_dir(df,trips_to_route)
-    
-    # Merge everything together
-    m1 = pd.merge(
-    median_stop_meters_df,
-    cardinal_direction_df,
-    on=["schedule_gtfs_dataset_key", "route_id", "direction_id"],
-    how="inner")
-    
-    return m1
+    display(median_stop_meters_df.info())
+    #median_stop_meters_df.direction_id = median_stop_meters_df.direction_id.fillna(0)
+   
+    return median_stop_meters_df
     
     
 def schedule_metrics_by_route_direction(
@@ -261,6 +165,8 @@ if __name__ == "__main__":
             on = route_merge_cols,
             how = "left"
         )
+        
+        # ADD Cardinal direction here 
         
         utils.geoparquet_gcs_export(
             route_dir_metrics2,
