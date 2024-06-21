@@ -10,11 +10,9 @@ import pandas as pd
 from segment_speed_utils import (helpers, gtfs_schedule_wrangling,
                                  parallel_corridors)
 from calitp_data_analysis import geography_utils, utils
-from update_vars import (
-    GTFS_DATA_DICT, SEGMENT_GCS,
-    BUS_SERVICE_GCS, ANALYSIS_DATE
-)
-
+from shared_utils import rt_dates
+from update_vars import (GTFS_DATA_DICT, SEGMENT_GCS,
+                         BUS_SERVICE_GCS)
 
 def aggregate_to_route_service_hours(analysis_date: str) -> pd.DataFrame:
     """
@@ -69,6 +67,9 @@ def get_route_summary_speed(analysis_date: str) -> pd.DataFrame:
 
 def process_df(analysis_date: str) -> gpd.GeoDataFrame:
     """
+    Tag routes by on_shn / parallel / other, 
+    and attach average route_speeds, caltrans_district.
+    Get route-level df for an analysis date to use in report.
     """
     # Get gdf of unique routes tagging them by on_shn/parallel/other
     df = parallel_corridors.routes_by_on_shn_parallel_categories(analysis_date)
@@ -76,8 +77,8 @@ def process_df(analysis_date: str) -> gpd.GeoDataFrame:
     # Get df of route service hours
     route_service_hours = aggregate_to_route_service_hours(analysis_date)
 
-    # Get crosswalk linking schedule_gtfs_dataset_key to the organization_name (which we use for portfolio)
-    # and caltrans_district
+    # Get crosswalk linking schedule_gtfs_dataset_key to the organization_name 
+    # (which we use for portfolio) and caltrans_district
     crosswalk = helpers.import_schedule_gtfs_key_organization_crosswalk(
         analysis_date,
         columns = ["schedule_gtfs_dataset_key", "organization_name", 
@@ -87,6 +88,7 @@ def process_df(analysis_date: str) -> gpd.GeoDataFrame:
     # Get route summary speeds
     route_speeds = get_route_summary_speed(analysis_date)
 
+    # Merge route categories with route service hours
     df2 = pd.merge(
         df,
         route_service_hours,
@@ -94,6 +96,7 @@ def process_df(analysis_date: str) -> gpd.GeoDataFrame:
         how = "inner"
     )
     
+    # Merge in crosswalk for caltrans_district
     df3 = pd.merge(
         df2, 
         crosswalk,
@@ -108,6 +111,7 @@ def process_df(analysis_date: str) -> gpd.GeoDataFrame:
             geography_utils.FEET_PER_MI)
     ).drop(columns = "route_length_feet")
     
+    # Merge in route average speeds (left merge because not every operator has RT)
     df4 = pd.merge(
         df3,
         route_speeds,
@@ -124,15 +128,20 @@ def process_df(analysis_date: str) -> gpd.GeoDataFrame:
 
 if __name__ == "__main__":
         
-    start = datetime.datetime.now()
+    analysis_date_list = [rt_dates.DATES["jun2024"]]
+    
+    for d in analysis_date_list:
+        start = datetime.datetime.now()
 
-    gdf = process_df(ANALYSIS_DATE)
+        gdf = process_df(d)
 
-    utils.geoparquet_gcs_export(
-        gdf,
-        BUS_SERVICE_GCS,
-        f"routes_categorized_with_speed_{ANALYSIS_DATE}"
-    )
+        utils.geoparquet_gcs_export(
+            gdf,
+            BUS_SERVICE_GCS,
+            f"routes_categorized_with_speed_{d}"
+        )
+        
+        del gdf
 
-    end = datetime.datetime.now()
-    print(f"quarterly route df for {ANALYSIS_DATE}: {end - start}")
+        end = datetime.datetime.now()
+        print(f"quarterly route df for {d}: {end - start}")
