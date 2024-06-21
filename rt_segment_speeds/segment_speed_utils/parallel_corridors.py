@@ -10,11 +10,16 @@ Transit Routes: Need a shapes level table with route info.
 Usually, this can be achieved by merging `trips` and `shapes`.
 """
 import geopandas as gpd
+import gcsfs
 import pandas as pd
 
 from calitp_data_analysis import geography_utils, utils
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from shared_utils import catalog_utils
+
+BUS_SERVICE_GCS = "gs://calitp-analytics-data/data-analyses/bus_service_increase/"
+fs = gcsfs.GCSFileSystem()
+hwy_group_cols = ["Route", "County", "District", "RouteType"]
 
 def process_transit_routes(analysis_date: str) -> gpd.GeoDataFrame:
     """
@@ -22,7 +27,9 @@ def process_transit_routes(analysis_date: str) -> gpd.GeoDataFrame:
     to overlay with SHN.
     Also count how many routes there are for each operator.
     """
-    longest_shape = gtfs_schedule_wrangling.longest_shape_by_route_direction(analysis_date)
+    longest_shape = gtfs_schedule_wrangling.longest_shape_by_route_direction(
+        analysis_date
+    ).pipe(helpers.remove_shapes_outside_ca)
     
     gdf = longest_shape.assign(
         total_routes = longest_shape.groupby("feed_key").route_key.transform("nunique")
@@ -58,7 +65,8 @@ def process_highways(
     direction_cols = ["NB", "SB", "EB", "WB"]
 
     df = (gpd.read_parquet(SHN_FILE)
-          .to_crs(geography_utils.CA_StatePlane))
+          .to_crs(geography_utils.CA_StatePlane)
+         )
     
     # Get dummies for direction
     # Can make data wide instead of long
@@ -97,14 +105,17 @@ def overlay_transit_to_highways(
     
     Returns: geopandas.GeoDataFrame, with geometry column reflecting
     the areas of intersection.
-    """
-    hwy_group_cols = ["Route", "County", "District", "RouteType"]
-    
+    """    
     # Can pass a different buffer zone to determine parallel corridors
-    highways = process_highways(
-        group_cols = hwy_group_cols, 
-        buffer_feet = hwy_buffer_feet
-    )
+    HWY_FILE = f"{BUS_SERVICE_GCS}highways_buffer{hwy_buffer_feet}.parquet"
+    
+    if fs.exists(HWY_FILE):
+        highways = gpd.read_parquet(HWY_FILE)
+    else:
+        highways = process_highways(
+            group_cols = hwy_group_cols, 
+            buffer_feet = hwy_buffer_feet
+        )
     transit_routes = process_transit_routes(analysis_date)
     
     # Overlay
@@ -198,3 +209,36 @@ def routes_by_on_shn_parallel_categories(
     )[keep_cols]
 
     return df2
+
+
+if __name__ == "__main__":
+        
+    SHN_HWY_BUFFER_FEET = 50 
+    PARALLEL_HWY_BUFFER_FEET = int(geography_utils.FEET_PER_MI * 0.5)    
+    
+    highways_shn_buffer = process_highways(
+        group_cols = hwy_group_cols, 
+        buffer_feet = SHN_HWY_BUFFER_FEET
+    )
+    
+    utils.geoparquet_gcs_export(
+        highways_shn_buffer,
+        BUS_SERVICE_GCS,
+        f"highways_buffer{SHN_HWY_BUFFER_FEET}"
+    )
+    
+    print(f"exported highways_buffer{SHN_HWY_BUFFER_FEET}")
+    del highways_shn_buffer
+    
+    highways_parallel_buffer = process_highways(
+        group_cols = hwy_group_cols, 
+        buffer_feet = PARALLEL_HWY_BUFFER_FEET
+    )
+    
+    utils.geoparquet_gcs_export(
+        highways_parallel_buffer,
+        BUS_SERVICE_GCS,
+        f"highways_buffer{PARALLEL_HWY_BUFFER_FEET}"
+    )
+    
+    print(f"exported highways_buffer{PARALLEL_HWY_BUFFER_FEET}")
