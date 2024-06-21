@@ -234,10 +234,31 @@ for i in sorted(district_df.caltrans_district.unique()):
     display(table)
 ```
 
-## Operator Breakdown
+## Operator Breakdown 
+
+Only the SHN subtotal (on SHN and parallel) is shown for each operator.
 
 ```{python}
-plot_table(operator_df)
+
+def operator_table_specs(table):
+    table2 = (table
+              .cols_hide("caltrans_district")
+              .tab_style(
+                style=style.text(
+                    weight="normal", style="normal", color=get_hex("black")),
+                locations=loc.body(
+                    rows=pl.col("category") == "On or Intersects SHN"),
+        )
+    )         
+    
+    return table2
+
+table = plot_table(
+    operator_df[operator_df.category=="On or Intersects SHN"]
+)
+
+table = operator_table_specs(table)
+display(table)
 ```
 
 
