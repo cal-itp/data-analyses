@@ -6,7 +6,7 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 
-from calitp_data_analysis import utils
+#from calitp_data_analysis import utils
 from segment_speed_utils import time_series_utils
 from shared_utils import rt_dates
 from update_vars import BUS_SERVICE_GCS
@@ -16,12 +16,10 @@ operator_cols = [
     "organization_name", "caltrans_district"
 ]
 
+district_cols = ["caltrans_district"]
+
 category_cols = ["category", "year_quarter"]
 
-subtotal_categories_dict = {
-    "shn_subtotal": ["on_shn", "parallel"],
-    "total": ["on_shn", "parallel", "other"]
-}
 
 def assemble_time_series(
     date_list: list
@@ -158,125 +156,75 @@ def get_dissolved_geometry(
     ].dissolve(by=group_cols).reset_index()
     
     return route_geom
-    
 
-def get_subtotals(
-    df: pd.DataFrame, 
+
+def assemble_aggregated_df_with_subtotals(
+    df: gpd.GeoDataFrame,
     group_cols: list
-) -> dict:
-    """
-    Add a row that captures the SHN subtotals
-    and the total across all categories.
-    """
-    results = {}
-    
-    for grp, category_list in subtotal_categories_dict.items():
-        subset_df = df.loc[df.category.isin(category_list)].assign(
-            category = grp
-        )
-                
-        results[grp] = aggregated_metrics(
-            subset_df, 
-            group_cols
-        )
-        
-    return results
-
-
-def assemble_operator_df(
-    df: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
-    """
-    Operator df with service hours and speed metrics.
-    Also add subtotals for on_shn + parallel 
-    and operator totals.
-    """
-    group_cols = operator_cols + category_cols
-    
-    by_category = aggregated_metrics(
-        df, group_cols
-    )
-    
-    subtotal_dfs = get_subtotals(
-        df, group_cols
-    )
-    
-    operator_geom = get_dissolved_geometry(
-        df, group_cols
-    )
-    
-    by_category_gdf = pd.merge(
-        operator_geom,
-        by_category,
-        on = group_cols,
-        how = "inner"
-    )
-    
-    final_df = pd.concat([
-        by_category_gdf, 
-        subtotal_dfs["shn_subtotal"],
-        subtotal_dfs["total"]], 
-        axis=0, ignore_index=True
-    )
-    
-    return final_df
-
-
-def assemble_statewide_df(
-    df: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
     """
     Statewide (aggregate across operators) df with service hours and 
     speed metrics.
     Also add subtotals for on_shn + parallel 
     and statewide totals.
-    """
-    group_cols = category_cols
-    
+    """    
     by_category = aggregated_metrics(
         df, group_cols
     )
     
-    subtotal_dfs = get_subtotals(
-        df, group_cols
+    shn_categories = ["on_shn", "parallel"]
+    
+    shn_subtotal_df = aggregated_metrics(
+        df[df.category.isin(shn_categories)].assign(
+            category = "shn_subtotal"), 
+        group_cols
     )
+    
+    total_df = aggregated_metrics(
+        df.assign(
+            category = "total"
+        ), 
+        group_cols
+    )    
     
     final_df = pd.concat([
         by_category, 
-        subtotal_dfs["shn_subtotal"],
-        subtotal_dfs["total"]], 
+        shn_subtotal_df,
+        total_df], 
         axis=0, ignore_index=True
     )
     
     return final_df
 
 
-def category_wrangling(
-    df: pd.DataFrame, 
-    col: str = "category", 
-    sort_key: list = ["on_shn", "parallel", "other", "shn_subtotal", "total"]
+def add_time_series_list_columns(
+    df: pd.DataFrame,
+    group_cols: list,
+    time_series_cols: list,
 ) -> pd.DataFrame:
     """
-    Custom sort order for categorical variable
-    https://stackoverflow.com/questions/23482668/sorting-by-a-custom-list-in-pandas
-    """
-    category_values = {
-        "on_shn": "On SHN", 
-        "parallel": "Intersects SHN",
-        "other": "Other",
-        "shn_subtotal": "On or Intersects SHN",
-        "total": "Total"
-    }
+    """    
+    group_cols2 = [c for c in group_cols if c != "year_quarter"]
     
-    df = df.sort_values(
-        col, key=lambda c: c.map(lambda e: sort_key.index(e))
-    ) 
-    
-    df = df.assign(
-        category = df.category.map(category_values)
+    list_aggregation = (df.sort_values("year_quarter")
+           .groupby(group_cols2)
+           .agg({
+               **{c: lambda x: list(x) 
+                  for c in time_series_cols}
+           }).reset_index()
+           .rename(columns = {
+               **{c: f"{c}_ts" for c in time_series_cols}
+           })
     )
     
-    return df
+    df2 = pd.merge(
+        df,
+        list_aggregation,
+        on = group_cols2,
+        how = "inner"
+    )
+    
+    return df2
     
 if __name__ == "__main__":
     
@@ -286,17 +234,46 @@ if __name__ == "__main__":
     
     df = assemble_time_series(all_dates)
     
-    operator_df = assemble_operator_df(df)
-
-    utils.geoparquet_gcs_export(
-        operator_df,
-        BUS_SERVICE_GCS,
-        "quarterly_metrics/operator_time_series"
+    time_series_cols = ["service_hours_per_route", "speed_mph"]
+    
+    operator_df = assemble_aggregated_df_with_subtotals(
+        df, operator_cols + category_cols)
+    
+    operator_df2 = add_time_series_list_columns(
+        operator_df, 
+        operator_cols + category_cols,
+        time_series_cols
     )
     
-    statewide_df = assemble_statewide_df(df)
-
-    statewide_df.to_parquet(
+    operator_df2.to_parquet(
+        f"{BUS_SERVICE_GCS}"
+        "quarterly_metrics/operator_time_series.parquet"
+    )
+    
+    district_df = assemble_aggregated_df_with_subtotals(
+        df, district_cols + category_cols)
+    
+    district_df2 = add_time_series_list_columns(
+        district_df, 
+        district_cols + category_cols,
+        time_series_cols
+    )
+    
+    district_df2.to_parquet(
+        f"{BUS_SERVICE_GCS}"
+        "quarterly_metrics/district_time_series.parquet"
+    )
+    
+    statewide_df = assemble_aggregated_df_with_subtotals(
+        df, category_cols)
+    
+    statewide_df2 = add_time_series_list_columns(
+        statewide_df, 
+        category_cols,
+        time_series_cols
+    )
+    
+    statewide_df2.to_parquet(
         f"{BUS_SERVICE_GCS}"
         "quarterly_metrics/statewide_time_series.parquet"
     )
