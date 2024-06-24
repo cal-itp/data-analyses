@@ -132,9 +132,42 @@ def aggregated_metrics(
         {"n_vp_routes": "int"}
     )
     
-    return df2
+    # Add a change from prior quarter column
+    df3 = change_from_prior(
+        df2, group_cols, 
+        time_col = "year_quarter", 
+        change_cols = ["service_hours_per_route", "speed_mph"]
+    )
+    
+    return df3
 
 
+def change_from_prior(
+    df: pd.DataFrame,
+    group_cols: list,
+    time_col: str = "year_quarter",
+    change_cols: list = []
+) -> pd.DataFrame:
+    """
+    Add change (absolute change) and percent change
+    for some metrics.
+    """
+    group_cols2 = [i for i in group_cols if i != time_col]
+    
+    for c in change_cols:
+        df[f"prior_{c}"] = (df.sort_values(group_cols)
+                            .groupby(group_cols2, 
+                                     observed=True, group_keys=False)
+                            [c]
+                            .apply(lambda x: x.shift(1))
+                           )
+        
+        df[f"change_{c}"] = round(df[c] - df[f"prior_{c}"], 2)
+        df[f"pct_change_{c}"] = round(df[f"change_{c}"] / df[c] * 100, 1)
+    
+    return df
+        
+    
 def get_dissolved_geometry(
     df: pd.DataFrame, 
     group_cols: list
@@ -181,9 +214,7 @@ def assemble_aggregated_df_with_subtotals(
     )
     
     total_df = aggregated_metrics(
-        df.assign(
-            category = "total"
-        ), 
+        df.assign(category = "total"), 
         group_cols
     )    
     
@@ -203,6 +234,9 @@ def add_time_series_list_columns(
     time_series_cols: list,
 ) -> pd.DataFrame:
     """
+    Add a column that creates columns that are lists holding
+    time-series values for speed_mph or service_hours.
+    This populates great_tables nanoplots.
     """    
     group_cols2 = [c for c in group_cols if c != "year_quarter"]
     
