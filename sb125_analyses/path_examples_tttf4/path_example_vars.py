@@ -1,0 +1,1 @@
+GCS_PATH = "gs://calitp-analytics-data/data-analyses/sb125/route_illustrations/"
