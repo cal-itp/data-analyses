@@ -21,7 +21,6 @@ jupyter: python3
 ---
 
 ```{python}
-import altair as alt
 import geopandas as gpd
 import pandas as pd
 import polars as pl
@@ -92,16 +91,16 @@ statewide_df = pd.read_parquet(
 
 ```{python}
 def shared_nano_options(
-    point_stroke_color: str,
-    line_stroke_color: str,
-    point_fill_color: str,
-    area_fill_color: str
+    point_stroke_color: str = "black",
+    line_stroke_color: str = "black",
+    point_fill_color: str = "white",
+    area_fill_color: str = "white"
 ):
     nano_options = nanoplot_options(
         data_point_radius=6,
         data_point_stroke_color=get_hex(point_stroke_color),
         data_point_fill_color=get_hex(point_fill_color),
-        data_point_stroke_width=3,
+        data_point_stroke_width=4,
         data_line_type="curved",
         data_line_stroke_color=get_hex(line_stroke_color),
         data_line_stroke_width=8,
@@ -115,63 +114,11 @@ def shared_nano_options(
     )
     
     return nano_options
-```
 
-```{python}
-def plot_table(df: pd.DataFrame): 
-    
-    MIN_SPEED, MAX_SPEED = df.speed_mph.min(), df.speed_mph.max()
-    MIN_SERVICE, MAX_SERVICE = df.service_hours_per_route.min(), df.service_hours_per_route.max()
-    
-    table = (
-        GT(pl.from_pandas(df))
-        .fmt_nanoplot(
-            columns="speed_mph_ts",
-            plot_type="line",
-            expand_y=[round(MIN_SPEED, 0), round(MAX_SPEED, 0)],
-            options=shared_nano_options(
-                point_stroke_color = "black",
-                line_stroke_color = "green",
-                point_fill_color = "white",
-                area_fill_color = "seagreen2")
-        ).fmt_nanoplot(
-            columns="service_hours_per_route_ts",
-            plot_type="line",
-            expand_y=[round(MIN_SERVICE, 0), round(MAX_SERVICE, 0)],
-            options=shared_nano_options(
-                point_stroke_color = "black", 
-                line_stroke_color = "steelblue1",
-                point_fill_color = "white",
-                area_fill_color = "lightskyblue2", 
-            )
-        ).fmt_number(
-            columns = [
-                "daily_service_hours", 
-                "service_hours_per_route", 
-                "speed_mph"], decimals=1
-        ).fmt_integer(
-            columns = ["daily_routes", "daily_vp_routes"]
-         ).cols_label(
-            category = "Category",
-            daily_service_hours = "Daily Service Hours",
-            service_hours_per_route = "Service Hours per Route",
-            speed_mph = "Average Speed",
-            daily_routes = "# Routes",
-            daily_vp_routes = "# Routes",
-            service_hours_per_route_ts = "Service Hours per Route (time-series)",
-            speed_mph_ts = "Speed (time-series)",
-         ).tab_header(
-             title = "Service Hours and Speed",
-             subtitle = f"{current_quarter}"
-         ).tab_spanner(
-            label="Service", 
-            columns=["daily_service_hours", 
-                     "service_hours_per_route", "daily_routes", 
-                     "service_hours_per_route_ts"]
-        ).tab_spanner(
-            label="Speed (mph)",
-            columns = ["speed_mph", "daily_vp_routes", "speed_mph_ts"]
-        ).tab_options(
+
+def table_settings(table):
+    table2 = (
+        table.tab_options(
             container_width = "100%",
             table_background_color="white",
             table_body_hlines_style="none",
@@ -183,13 +130,92 @@ def plot_table(df: pd.DataFrame):
             source_notes_background_color="white",
             table_font_size="14px",
             heading_align="center"
+        )
+    )
+    
+    return table2
+```
+
+```{python}
+def plot_table(df: pd.DataFrame): 
+    
+    service_col = "service_hours_per_route"
+    speed_col = "speed_mph"
+    
+    MIN_SPEED, MAX_SPEED = df[speed_col].min(), df[speed_col].max()
+    MIN_SERVICE, MAX_SERVICE = df[service_col].min(), df[service_col].max()
+    
+    exclude_me = [
+        "year_quarter", "service_hours", "n_routes", 
+        "n_dates", "n_vp_routes", 
+    ] + [i for i in df.columns if "prior_" in i or 
+        "pct_change" in i]
+    
+    table = (
+        GT(pl.from_pandas(df))
+        .fmt_nanoplot(
+            columns=f"{speed_col}_ts",
+            plot_type="line",
+            expand_y=[round(MIN_SPEED, 0), round(MAX_SPEED, 0)],
+            options=shared_nano_options(
+                point_stroke_color = "black",
+                line_stroke_color = "green",
+                point_fill_color = "white",
+                area_fill_color = "seagreen2")
+        ).fmt_nanoplot(
+            columns=f"{service_col}_ts",
+            plot_type="line",
+            expand_y=[round(MIN_SERVICE, 0), round(MAX_SERVICE, 0)],
+            options=shared_nano_options(
+                point_stroke_color = "black", 
+                line_stroke_color = "steelblue1",
+                point_fill_color = "white",
+                area_fill_color = "lightskyblue2", 
+            )
+        ).fmt_number(
+            columns = [
+                "daily_service_hours", service_col, speed_col,
+                f"change_{service_col}", f"change_{speed_col}"
+            ], decimals=1
+        ).fmt_integer(
+            columns = ["daily_routes", "daily_vp_routes"]
+         ).cols_label(
+            category = "Category",
+            daily_service_hours = "Daily Service Hours",
+            service_hours_per_route = "Service Hours per Route",
+            speed_mph = "Average Speed",
+            daily_routes = "# Routes",
+            daily_vp_routes = "# Routes",
+            service_hours_per_route_ts = "Time-series",
+            speed_mph_ts = "Time-series",
+            change_service_hours_per_route = "Change from Prior",
+            change_speed_mph = "Change from Prior",
+            pct_change_service_hours_per_route = "% Change",
+            pct_change_speed_mph = "% Change"
+         ).tab_header(
+             title = "Service Hours and Speed",
+             subtitle = f"{current_quarter}"
+         ).tab_spanner(
+            label="Service", 
+            columns=["daily_service_hours", 
+                     service_col, "daily_routes", 
+                     f"change_{service_col}", f"pct_change_{service_col}",
+                     f"{service_col}_ts", 
+                    ]
+        ).tab_spanner(
+            label="Speed (mph)",
+            columns = [speed_col, 
+                       "daily_vp_routes",
+                       f"change_{speed_col}", f"pct_change_{speed_col}",
+                       f"{speed_col}_ts"]
         ).cols_hide(
-            ["year_quarter", "service_hours", "n_routes", 
-            "n_dates", "n_vp_routes"]
+            exclude_me
         ).sub_missing(
-            columns = ["speed_mph", "speed_mph_ts", "daily_vp_routes"],
+            columns = [speed_col, f"{speed_col}_ts", "daily_vp_routes", f"change_{speed_col}"],
             missing_text = ""
-        ).tab_style(
+        )
+        # start styling the subtotals / totals
+        .tab_style(
             style=style.text(weight="bold"),
             locations=loc.body(rows=pl.col("category") == "Total")
         ).tab_style(
@@ -199,8 +225,29 @@ def plot_table(df: pd.DataFrame):
                 rows=pl.col("category") == "On or Intersects SHN"),
         ).cols_align(align="center")
          .cols_align(align="left", columns="category")
-        
+        # flag whether change from prior is positive of negative
+        # https://posit-dev.github.io/great-tables/get-started/basic-styling.html
+        #.tab_style(
+        #    style=style.fill(color="#d8ffd8"), # super pale green
+        #    locations=loc.body(
+        #        columns=f"change_{speed_col}",
+        #        rows=pl.col(f"change_{speed_col}") > 0
+        #    )
+        #)
+        .data_color(
+            palette = [get_hex("indianred1"), get_hex("whitesmoke"), get_hex("mediumspringgreen")],
+            #domain = [-2, 2], 
+            na_color="white",
+            columns = f"change_{service_col}"
+        ).data_color(
+            palette = [get_hex("indianred1"), get_hex("whitesmoke"), get_hex("mediumspringgreen")],
+            #domain = [-2, 2], 
+            na_color="white",
+            columns = f"change_{speed_col}"
+        )
     )
+    
+    table = table_settings(table)
     
     return table
 ```
@@ -208,19 +255,45 @@ def plot_table(df: pd.DataFrame):
 ## Statewide Metrics
 
 ```{python}
-plot_table(statewide_df)
+def statewide_table_specs(table): 
+    table2 = (table
+      # add dotted line separating subtotals from categories
+        # https://posit-dev.github.io/great-tables/reference/GT.html#great_tables.GT.tab_style
+        .tab_style(
+            style=style.borders(sides=["top", "bottom"], weight='2px', color="black"),
+            locations=loc.body(rows=[3, 4])
+        )
+    )
+    
+    return table2
+    
+table = plot_table(statewide_df)
+statewide_table_specs(table)
 ```
 
 ## District Breakdown
 
 ```{python}
 def district_table_specs(table, one_district, one_quarter):
+    service_col = "service_hours_per_route"
+    speed_col = "speed_mph"
+    
     table2 = (table
               .cols_hide("caltrans_district")
               .tab_header(
                  title = f"District {one_district}",
                  subtitle = f"Service Hours and Speed  {one_quarter}")
-             )
+             ).data_color(
+            palette = [get_hex("indianred1"), get_hex("whitesmoke"), get_hex("mediumspringgreen")],
+            #domain = [-10, 10], 
+            na_color="white",
+            columns = f"change_{service_col}"
+        ).data_color(
+            palette = [get_hex("indianred1"), get_hex("whitesmoke"), get_hex("mediumspringgreen")],
+            #domain = [-4, 4], 
+            na_color="white",
+            columns = f"change_{speed_col}"
+        )
     
     return table2
     
@@ -239,25 +312,37 @@ for i in sorted(district_df.caltrans_district.unique()):
 Only the SHN subtotal (on SHN and parallel) is shown for each operator.
 
 ```{python}
-
-def operator_table_specs(table):
-    table2 = (table
-              .cols_hide("caltrans_district")
-              .tab_style(
-                style=style.text(
-                    weight="normal", style="normal", color=get_hex("black")),
-                locations=loc.body(
-                    rows=pl.col("category") == "On or Intersects SHN"),
-        )
+def operator_table_specs(table, one_quarter):
+    table2 = (
+        table
+          .cols_hide(["category"])
+          .tab_style(
+            style=style.text(
+                weight="normal", style="normal", color=get_hex("black")),
+            locations=loc.body(
+                rows=pl.col("category") == "On or Intersects SHN"),
+        ).cols_label(
+            organization_name="Organization Name",
+            name="Transit Operator",
+            caltrans_district="District",
+        ).tab_header(
+            title = f"Service Hours and Speed by Operator  {one_quarter}",
+            subtitle = f"Only On or Intersects SHN Shown"
+          )
     )         
     
     return table2
 
 table = plot_table(
-    operator_df[operator_df.category=="On or Intersects SHN"]
+    operator_df[
+        operator_df.category=="On or Intersects SHN"
+    ].sort_values(
+        ["change_service_hours_per_route", "caltrans_district", "name"], 
+        ascending=[False, True, True]
+    ).reset_index(drop=True)
 )
 
-table = operator_table_specs(table)
+table = operator_table_specs(table, current_quarter)
 display(table)
 ```
 
