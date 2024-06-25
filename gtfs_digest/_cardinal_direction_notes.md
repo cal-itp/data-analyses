@@ -7,14 +7,16 @@
 
 ### 6/19/2024
 [PR 1145](https://github.com/cal-itp/data-analyses/pull/1145)
-* Rerun the files for May and June once Cardinal Direction stuff is updated. 
+* <s>Rerun the files for May and June.</s>
+    * AH: Done on 6/20 but with the old code, not incorporating the comments from the PR above.
 * Address comments left by Tiffany.
     * <s>Change grouping columns.</s> AH: done. 
-    * Streamline counting stop directions:
-        * Make it into its own function. Don't stick it on. 
-        * Use it directly in `schedule_metrics_by_route_direction()`.
-    * Checkout what happens if there are nulls in `cardinal_direction_df` and how `nans` that are filled in can prevent some merges.
-    * 
+    * <s>Streamline counting stop directions:
+        * Make it into its own function. Don't stick it on. </s> AH: Done on 6/20
+        * <s>Use it directly in `schedule_metrics_by_route_direction()`.</s> AH: Done on 6/25`
+    * <s>Switch out the columns in `gtfs_digest/merge_data`</s> AH: Done on 6/20.
+    *  <b>What if there are nulls in cardinal_direction_df? would this NaN filled in prevent some merges? </b>
+        * I still need assistance with this. It seems like filling in the direction_id leads to a few more rows being added to the dataframe produced by `schedule_metrics_by_route_direction()`.
 ### 6/12/2024
 * [Issue 1135](https://github.com/cal-itp/data-analyses/issues/1135)
 * Notebook: `gtfs_digest/17_cardinal_dir_pipeline`.
