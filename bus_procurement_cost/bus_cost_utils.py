@@ -1,6 +1,7 @@
 #script with shared functions used throughout the bus cost analysis.
 
 import pandas as pd
+from IPython.display import Markdown, display
 
 GCS_PATH = "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/"
 
@@ -243,8 +244,7 @@ def bus_min_max_summary(data:pd.DataFrame, col1:str, col_list=["transit_agency",
     
     """
     
-    return display(
-        Markdown(f"**Max {col1}**"),
+    return display(Markdown(f"**Max {col1}**"),
         data[data[col1] == data[col1].max()][col_list],
         Markdown(f"**Min {col1}**"),
         data[data[col1] == data[col1].min()][col_list]
