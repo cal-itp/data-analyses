@@ -1,16 +1,17 @@
 import pandas as pd
-from fta_data_cleaner import gcs_path
+from bus_cost_utils import *
+from scipy.stats import zscore
 
-def prepare_data() ->pd.DataFrame:
+
+
+def prepare_all_data() ->pd.DataFrame:
     """
     primary function to read-in, merge data across FTA, TIRCP and DGS data.
     standardizes columns names, then exports as parquet.
     """
     # variables for file names
-    # all bus only projects for each dataset
-    fta_bus_data = "fta_bus_cost_clean.parquet"
-    tircp_bus_data = "clean_tircp_project_bus_only.parquet"
-    dgs_bus_data = "dgs_agg_w_options_clean.parquet"
+
+
     
     # dictionary to update columns names 
     col_dict = {
@@ -28,9 +29,10 @@ def prepare_data() ->pd.DataFrame:
     }
 
     # reading in data
-    fta = pd.read_parquet(f"{gcs_path}{fta_bus_data}")
-    tircp = pd.read_parquet(f"{gcs_path}{tircp_bus_data}")
-    dgs = pd.read_parquet(f"{gcs_path}{dgs_bus_data}")
+    # bus only projects for each datase
+    fta = pd.read_parquet(f"{GCS_PATH}clean_fta_bus_only.parquet")
+    tircp = pd.read_parquet(f"{GCS_PATH}clean_tircp_bus_only_clean.parquet")
+    dgs = pd.read_parquet(f"{GCS_PATH}clean_dgs_bus_only_w_options.parquet")
     
     # adding new column to identify source
     fta["source"] = "fta"
@@ -71,13 +73,29 @@ def prepare_data() ->pd.DataFrame:
         ],
         how="outer",
     )
+    #normalizing data with cost per bus
+    #calculating cost per bus here
+    merge2["cost_per_bus"] = (merge2["total_cost"] / merge2["bus_count"]).astype("int64")
     
+    #calculating zscore on cost per bus
+    merge2["zscore_cost_per_bus"] = zscore(merge2["cost_per_bus"])
+   
+    #flag any outliers
+    merge2["is_cpb_outlier?"] = merge2["zscore_cost_per_bus"].apply(outlier_flag)
     return merge2
+
+
+
 
 if __name__ == "__main__":
     
     # initial df
-    df1 = prepare_data()
+    df1 = prepare_all_data()
+    #remove outliers based on cost per bus zscore
+    df2 = df1[df1["is_cpb_outlier?"]==False]
     
     # export to gcs
-    df1.to_parquet(f'{gcs_path}cpb_analysis_data_merge.parquet')
+    #full data, with outliers
+    df1.to_parquet(f'{GCS_PATH}cleaned_cpb_analysis_data_merge.parquet')
+    # no outliers
+    df2.to_parquet(f'{GCS_PATH}cleaned_no_outliers_cpb_analysis_data_merge.parquet')

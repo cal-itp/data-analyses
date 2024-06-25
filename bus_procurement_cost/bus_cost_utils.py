@@ -233,3 +233,26 @@ def col_row_updater(df: pd.DataFrame, col1: str, val1, col2: str, new_val):
     df.loc[df[col1] == val1, col2] = new_val
     
     return
+
+def bus_min_max_summary(data:pd.DataFrame, col1:str, col_list=["transit_agency",
+                                                     "total_agg_cost",
+                                                     "total_bus_count",
+                                                     "new_cost_per_bus"]):
+    """
+    function to display min/max of specific column in aggregated bus df.
+    
+    """
+    
+    return display(
+        Markdown(f"**Max {col1}**"),
+        data[data[col1] == data[col1].max()][col_list],
+        Markdown(f"**Min {col1}**"),
+        data[data[col1] == data[col1].min()][col_list]
+                  )
+
+def outlier_flag(col):
+    """
+    function to flag outlier rows. use with .apply()
+    """
+    
+    return col <= -3 or col >= 3
