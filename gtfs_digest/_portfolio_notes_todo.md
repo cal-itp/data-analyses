@@ -1,14 +1,15 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
-* cd ../ && pip install -r portfolio/requirements.txt
 * python portfolio/portfolio.py clean gtfs_digest_testing && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
 * python portfolio/portfolio.py build gtfs_digest  --deploy 
-* cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env &&  pip install -U altair && cd ../gtfs_digest
+* cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ../gtfs_digest
 * RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
 
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
-
+    
+### 6/25/2024
+* Working on cardinal direction stuff. 
     
 ### 6/6/2024
 * Troubleshooting the # of unique routes an operator runs. BART seems really high, which is the impetus for this investigation. 

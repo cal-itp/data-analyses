@@ -11,18 +11,12 @@ from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
 
 route_time_cols = ["schedule_gtfs_dataset_key", 
-                   "route_id", "direction_id", "time_period"]
+                   "route_id", 
+                   "direction_id", 
+                   "time_period"]
 
 sort_cols = route_time_cols + ["service_date"]
-
-route_time_with_cardinal_dir_cols = [
-    "schedule_gtfs_dataset_key",
-    "route_id",
-    "direction_id",
-    "time_period",
-    "route_primary_direction",
-]
-
+route_time_with_cardinal_dir_cols = route_time_cols + ["route_primary_direction"]
 sort_cols_with_cardinal_dir_cols = route_time_with_cardinal_dir_cols + ["service_date"]
 
 def concatenate_schedule_by_route_direction(
