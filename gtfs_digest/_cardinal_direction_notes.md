@@ -5,6 +5,18 @@
 * [Mermaid 1](https://mermaid.live/view#pako:eNqNVttu2zgQ_RWCi8BZwAosqWpsPRRI6sh96AKLNFgEKxsFLY5sohKpklS2bpB_X1KUY_rW1A-2zDlz5sxwONQzLgQFnOIgCOZcM11BimYP2Rd0w0m10axQ6G_WQMU4oJkkjKs577AXF89zjhDjTKeoe0RooNdQwyBFgyVRMBj6q_8QyciyAjV4hRtTI1lN5OajqIS0fn_cJVmS3Wxdd4gH-KF3qNFodAy5FZKCPAeyGZyzKSgEp_s6suz67tbDaJCa7UHKshw484v9MV8vFxdzPudlJf4r1kRq9PneAYqKKDWFEkkoNCpZVaV9pgf2gsmigi2i03CCIeoB2SQb3UU2pIWodrmSpFkjxfjKkFCycYZtDgjd5KpYA20rWKAg-IBuwlyKVkNAmeVlgi88sINEuWhAEi3kvu3KGuNcadEsthLs5zZ_gjWzWTRCMcupXLDbMFewqoFrpBoAqnY-ByKCHrfPG_Ys5DJXa9JAYEOjHuqR2eWv2-XFn2ma9lX1uUhH9jEkOXky2a3gbU2WtiFMLgxjtws77AmVy8ucVBXSkjXnhN4_dFqRZjX4Qn22Za9zmftopO1R-j0hhSmXTa0mOw0eLvxWnwld9KGLgxKhN_ftK6OethOa6KXpO0JP1CREZ_XQXg89u2X2jJsxQ4Nal0XxqkbB9xZ48Ua9nDTT0G1tp8mbyS5852hve9TB_vTUfimm1uFJof3zOP3VeZw6SOSOnPsTH9D4DeXL69FbBcDp0dSwTqZkkoHyhWYnFHnWjjgL81pwvQ4DM3NCJ-3etJ0mdqpS9hNc8RAn5zq9J4ocUeQT-fHuHSw-FLWvftdMlJioZnyhjvZkU85OzbeZm2-zMLcH2ApBZLWSsLJ8Wji6TsssPvaKjmr2-wTdSl9Or8NcWVxFPr0qRo0U5iqAo8RObXBH4Wf-eHAbPPbd59Xh0Rn27gAvAkJ4iGuQNWHUvER09_ocd_f9HKfmkUJJ2krPsbkcDZS0WnzZ8AKnWrYwxCbcao3TklTK_Gsbu11TRozeegsBykzYv9xbSveyMsQN4Th9xj9wGkTx5CpJkjhOkvej8WiSDPEGp-G75CpKovA6CZPrSTKJXob4pxCGdHQ1GU_exeNkEsfj6_ejeNzR_dsZOx0v_wPlerTj)
 * [Mermaid 2](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_funnel/mermaid.md)
 
+### 6/19/2024
+[PR 1145](https://github.com/cal-itp/data-analyses/pull/1145)
+* <s>Rerun the files for May and June.</s>
+    * AH: Done on 6/20 but with the old code, not incorporating the comments from the PR above.
+* Address comments left by Tiffany.
+    * <s>Change grouping columns.</s> AH: done. 
+    * <s>Streamline counting stop directions:
+        * Make it into its own function. Don't stick it on. </s> AH: Done on 6/20
+        * <s>Use it directly in `schedule_metrics_by_route_direction()`.</s> AH: Done on 6/25`
+    * <s>Switch out the columns in `gtfs_digest/merge_data`</s> AH: Done on 6/20.
+    *  <b>What if there are nulls in cardinal_direction_df? would this NaN filled in prevent some merges? </b>
+        * I still need assistance with this. It seems like filling in the direction_id leads to a few more rows being added to the dataframe produced by `schedule_metrics_by_route_direction()`.
 ### 6/12/2024
 * [Issue 1135](https://github.com/cal-itp/data-analyses/issues/1135)
 * Notebook: `gtfs_digest/17_cardinal_dir_pipeline`.
