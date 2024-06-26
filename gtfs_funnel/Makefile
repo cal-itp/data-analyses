@@ -43,6 +43,9 @@ funnel_gtfs_single_day:
 	make preprocess_schedule_only 
 	make timeseries_preprocessing
 
+cardinal_direction_temp:
+	python schedule_stats_by_route_direction.py 
+	python clean_route_naming.py
 
 all:
 	make funnel_gtfs_single_day
