@@ -14618,36 +14618,65 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<h1 id="Bus-Procurement-Cost-Analysis">Bus Procurement Cost Analysis<a class="anchor-link" href="#Bus-Procurement-Cost-Analysis">&#182;</a></h1><h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>This analysis examines the cost of buses for transit agencies across the county. Specifically, to observe the variation of bus cost for propulsion type and bus sizes.</p>
+<h1 id="Bus-Procurement-Cost-Analysis">Bus Procurement Cost Analysis<a class="anchor-link" href="#Bus-Procurement-Cost-Analysis">&#182;</a></h1><h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>This analysis examines the cost of buses for transit agencies across the county. Specifically, to observe the variation of bus cost for propulsion type.</p>
 <p>Data was compiled from three data sources:</p>
 <ol>
 <li>FTA Bus and Low- and No-Emission Grant Awards press release (federally funded, nationwide data)</li>
-<li>TIRCP project data (state-funded, California only)</li>
+<li>TIRCP project data (state-funded, California only data)</li>
 <li>DGS usage report for all procurements from California agencies purchasing from New Flyer and Portera Inc.. </li>
 </ol>
-<p>The initial dataset contained close to 300 projects, but was paired down due to projects including components other than buses. Examples include: projects that constructed new facilities, trainings or other non-bus related items like trains and sea farries were excluded.
-The resulting dataset only contained projects that were solely used to procure buses.</p>
-<p>88 projects were determined to contain solely bus purchases. 
-These projects were aggregated against propulsion type and bus size type, and categorized by ZEB and non-ZEB.</p>
-<p>Breakdown of each data souce:
-| source      |   bus_count |   total_cost |   cost_per_bus |
-|:------------|------------:|-------------:|---------------:|
-| dgs         |         236 |    250112853 |        1059800 |
-| fta         |         883 |    391257025 |         443099 |
-| tircp       |         233 |    187250513 |         803650 |
-| Grand Total |        1352 |    828620391 |         612884 |</p>
-<p><strong>ZEB buses include:</strong></p>
+<p>The initial dataset included nearly 300 projects. It was reduced to 88 projects after applying criteria to exclude non-bus related work. 
+Projects involving the construction of new facilities, training programs, or the procurement of non-bus items such as trains and ferries were excluded. 
+The final dataset comprised only projects focused on bus procurement.</p>
+<p>These projects were aggregated against propulsion type and bus size type, and categorized by ZEB and non-ZEB.</p>
+<p>Breakdown of each data souce showing the total buses and cost for each source:</p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>source</th>
+      <th>bus_count</th>
+      <th>total_cost</th>
+      <th>cost_per_bus</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>dgs</td>
+      <td>236.0</td>
+      <td>250112853</td>
+      <td>1059800</td>
+    </tr>
+    <tr>
+      <td>fta</td>
+      <td>883.0</td>
+      <td>391257025</td>
+      <td>443099</td>
+    </tr>
+    <tr>
+      <td>tircp</td>
+      <td>233.0</td>
+      <td>187250513</td>
+      <td>803650</td>
+    </tr>
+    <tr>
+      <td>Grand Total</td>
+      <td>1352.0</td>
+      <td>828620391</td>
+      <td>612884</td>
+    </tr>
+  </tbody>
+</table><p><strong>ZEB projects are categorized into the following propulsion types:</strong></p>
 <ul>
 <li>zero-emission (not specified) </li>
 <li>electric (not specified)</li>
 <li>battery electric </li>
 <li>fuel cell electric</li>
 </ul>
-<p><strong>Non-ZEB buses include:</strong></p>
+<p><strong>Non-ZEB projects include the following propulsion types:</strong></p>
 <ul>
-<li>CNG </li>
+<li>compressed natural gass (CNG) </li>
 <li>ethanol </li>
-<li>ow emission (hybrid, propane) </li>
+<li>low-emission (hybrid, propane) </li>
 <li>diesel </li>
 <li>gas</li>
 </ul>
@@ -14661,6 +14690,17 @@ These projects were aggregated against propulsion type and bus size type, and ca
 
 </div>
 
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<hr>
+
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell  jp-mod-noInput ">
 
 <div class="jp-Cell-outputWrapper">
@@ -14756,7 +14796,7 @@ These projects were aggregated against propulsion type and bus size type, and ca
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<p><strong>Non-ZEB Cost Summary</strong></p>
+<p><strong>Non-ZEB Cost Summary</strong> *</p>
 
 </div>
 
@@ -14845,7 +14885,7 @@ These projects were aggregated against propulsion type and bus size type, and ca
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<p>The remaining buses did not specify a propulsion type</p>
+<p>*The remaining buses did not specify a propulsion type</p>
 
 </div>
 
@@ -14874,7 +14914,7 @@ These projects were aggregated against propulsion type and bus size type, and ca
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<h2 id="Which-Agneices-had-the-highest-and-lowest-ZEB-cost-per-bus?">Which Agneices had the highest and lowest ZEB cost per bus?<a class="anchor-link" href="#Which-Agneices-had-the-highest-and-lowest-ZEB-cost-per-bus?">&#182;</a></h2>
+<h2 id="Which-agencies-had-the-highest-and-lowest-ZEB-cost-per-bus?">Which agencies had the highest and lowest ZEB cost per bus?<a class="anchor-link" href="#Which-agencies-had-the-highest-and-lowest-ZEB-cost-per-bus?">&#182;</a></h2>
 </div>
 
 </div>
@@ -15008,7 +15048,7 @@ These projects were aggregated against propulsion type and bus size type, and ca
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<h2 id="Which-Agencies-procured-the-most-and-least-amount-of-ZEBs?">Which Agencies procured the most and least amount of ZEBs?<a class="anchor-link" href="#Which-Agencies-procured-the-most-and-least-amount-of-ZEBs?">&#182;</a></h2>
+<h2 id="Which-agencies-procured-the-most-and-least-amount-of-ZEBs?">Which agencies procured the most and least amount of ZEBs?<a class="anchor-link" href="#Which-agencies-procured-the-most-and-least-amount-of-ZEBs?">&#182;</a></h2>
 </div>
 
 </div>
@@ -15150,7 +15190,7 @@ These projects were aggregated against propulsion type and bus size type, and ca
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<h2 id="Which-Agencies-had-the-most-and-least-total-ZEB-cost?">Which Agencies had the most and least total ZEB cost?<a class="anchor-link" href="#Which-Agencies-had-the-most-and-least-total-ZEB-cost?">&#182;</a></h2>
+<h2 id="Which-agencies-had-the-most-and-least-total-ZEB-cost?">Which agencies had the most and least total ZEB cost?<a class="anchor-link" href="#Which-agencies-had-the-most-and-least-total-ZEB-cost?">&#182;</a></h2>
 </div>
 
 </div>
@@ -15323,7 +15363,7 @@ class="
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<h2 id="Which-is-the-Cost-per-bus-compared-against-all-propulsion-types?">Which is the Cost per bus compared against all propulsion types?<a class="anchor-link" href="#Which-is-the-Cost-per-bus-compared-against-all-propulsion-types?">&#182;</a></h2>
+<h2 id="Which-is-the-cost-per-bus-compared-against-all-propulsion-types?">Which is the cost per bus compared against all propulsion types?<a class="anchor-link" href="#Which-is-the-cost-per-bus-compared-against-all-propulsion-types?">&#182;</a></h2>
 </div>
 
 </div>
@@ -15685,7 +15725,7 @@ class="
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<h2 id="What-is-the-breakdown-of-Propulsion-Type-and-Bus-Size-Category?">What is the breakdown of Propulsion Type and Bus Size Category?<a class="anchor-link" href="#What-is-the-breakdown-of-Propulsion-Type-and-Bus-Size-Category?">&#182;</a></h2>
+<h2 id="What-is-the-breakdown-of-ZEB-Propulsion-Type-and-Bus-Size-Category?">What is the breakdown of ZEB Propulsion Type and Bus Size Category?<a class="anchor-link" href="#What-is-the-breakdown-of-ZEB-Propulsion-Type-and-Bus-Size-Category?">&#182;</a></h2>
 </div>
 
 </div>
@@ -15740,25 +15780,6 @@ class="
       <td>983264</td>
     </tr>
     <tr>
-      <th rowspan="3" valign="top">CNG</th>
-      <th>cutaway</th>
-      <td>3.0</td>
-      <td>1162000</td>
-      <td>387333</td>
-    </tr>
-    <tr>
-      <th>not specified</th>
-      <td>209.0</td>
-      <td>171977140</td>
-      <td>822857</td>
-    </tr>
-    <tr>
-      <th>standard/conventional (30ft-45ft)</th>
-      <td>40.0</td>
-      <td>2900000</td>
-      <td>72500</td>
-    </tr>
-    <tr>
       <th rowspan="2" valign="top">FCEB</th>
       <th>not specified</th>
       <td>29.0</td>
@@ -15785,65 +15806,11 @@ class="
       <td>1146666</td>
     </tr>
     <tr>
-      <th>ethanol</th>
-      <th>not specified</th>
-      <td>9.0</td>
-      <td>1006750</td>
-      <td>111861</td>
-    </tr>
-    <tr>
-      <th>low emission (hybrid)</th>
-      <th>not specified</th>
-      <td>145.0</td>
-      <td>91824361</td>
-      <td>633271</td>
-    </tr>
-    <tr>
-      <th>low emission (propane)</th>
-      <th>not specified</th>
-      <td>44.0</td>
-      <td>8403969</td>
-      <td>190999</td>
-    </tr>
-    <tr>
-      <th>mix (zero and low emission)</th>
-      <th>not specified</th>
-      <td>125.0</td>
-      <td>36775430</td>
-      <td>294203</td>
-    </tr>
-    <tr>
-      <th rowspan="3" valign="top">not specified</th>
-      <th>cutaway</th>
-      <td>149.0</td>
-      <td>15532500</td>
-      <td>104244</td>
-    </tr>
-    <tr>
-      <th>not specified</th>
-      <td>162.0</td>
-      <td>16503904</td>
-      <td>101875</td>
-    </tr>
-    <tr>
-      <th>over-the-road</th>
-      <td>14.0</td>
-      <td>9516000</td>
-      <td>679714</td>
-    </tr>
-    <tr>
       <th>zero-emission bus (not specified)</th>
       <th>not specified</th>
       <td>143.0</td>
       <td>128156513</td>
       <td>896199</td>
-    </tr>
-    <tr>
-      <th>Grand Total</th>
-      <th></th>
-      <td>1352.0</td>
-      <td>828620391</td>
-      <td>612884</td>
     </tr>
   </tbody>
 </table>
