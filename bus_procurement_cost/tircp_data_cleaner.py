@@ -126,4 +126,4 @@ if __name__ == "__main__":
     
     # export both df's as parquets to GCS
     df1.to_parquet(f'{GCS_PATH}clean_tircp_all_project.parquet')
-    df2.to_parquet(f'{GCS_PATH}clean_tircp_bus_only_clean.parquet')
+    df2.to_parquet(f'{GCS_PATH}clean_tircp_bus_only.parquet')
