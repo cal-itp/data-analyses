@@ -40,7 +40,7 @@ def concatenate_schedule_by_route_direction(
             "is_express", "is_rapid",  "is_rail",
             "is_coverage", "is_downtown_local", "is_local",
         ],
-    ).sort_values(sort_cols).rename(
+    ).sort_values(sort_cols_with_cardinal_dir_cols).rename(
         columns = {
             # rename so we understand data source
             "n_trips": "n_scheduled_trips",
@@ -217,7 +217,8 @@ if __name__ == "__main__":
     #         rt_dates.oct2023_week + rt_dates.apr2023_week + 
     #         rt_dates.apr2024_week
      #       )
-    analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates 
+    #analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates 
+    analysis_date_list = rt_dates.apr2024_week
     
     DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
     DIGEST_SEGMENT_SPEEDS = GTFS_DATA_DICT.digest_tables.route_segment_speeds
@@ -276,10 +277,10 @@ if __name__ == "__main__":
     df[integrify] = df[integrify].fillna(0).astype("int")
 
     df.to_parquet(
-        f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
+        f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}_AH_testing.parquet"
     )
     print("Saved Digest RT")
-  
+    """ 
     segment_speeds = concatenate_segment_speeds_by_route_direction(
         analysis_date_list
     ).pipe(
@@ -298,5 +299,5 @@ if __name__ == "__main__":
         RT_SCHED_GCS,
         DIGEST_SEGMENT_SPEEDS
     )
-
+   """ 
   
