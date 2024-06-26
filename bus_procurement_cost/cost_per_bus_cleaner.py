@@ -31,7 +31,7 @@ def prepare_all_data() ->pd.DataFrame:
     # reading in data
     # bus only projects for each datase
     fta = pd.read_parquet(f"{GCS_PATH}clean_fta_bus_only.parquet")
-    tircp = pd.read_parquet(f"{GCS_PATH}clean_tircp_bus_only_clean.parquet")
+    tircp = pd.read_parquet(f"{GCS_PATH}clean_tircp_bus_only.parquet")
     dgs = pd.read_parquet(f"{GCS_PATH}clean_dgs_bus_only_w_options.parquet")
     
     # adding new column to identify source
