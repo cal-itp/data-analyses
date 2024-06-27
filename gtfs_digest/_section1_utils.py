@@ -332,6 +332,7 @@ def total_service_hours_all_months(name: str) -> pd.DataFrame:
     # Grab the dataframes with a full week's worth of data. 
     apr_week = rt_dates.get_week(month="apr2023", exclude_wed=False)
     oct_week = rt_dates.get_week(month="oct2023", exclude_wed=False)
+    # need to add april 2024 here 
     
     # Sum up total service_hours
     apr_df = total_service_hours(apr_week, name)

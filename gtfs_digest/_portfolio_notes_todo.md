@@ -8,9 +8,11 @@
 * Portfolio:
     * Figure out Makefile situation.
     
-### 6/25/2024
+### 6/26/2024 Refactor Summer goals
 * Working on cardinal direction stuff. 
-    
+* Then incorporate NTD data into the actual pipeline of `operator_profiles`.
+* Publish `total_service_hours` by weekday, Saturday, and Sunday onto GCS. This is its own dataset.
+
 ### 6/6/2024
 * Troubleshooting the # of unique routes an operator runs. BART seems really high, which is the impetus for this investigation. 
     * Work is in `18_operator_profiles.ipynb`.

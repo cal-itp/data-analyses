@@ -213,12 +213,8 @@ if __name__ == "__main__":
     
     from shared_utils import rt_dates
     
-    #analysis_date_list = (rt_dates.y2024_dates + rt_dates.y2023_dates + 
-    #         rt_dates.oct2023_week + rt_dates.apr2023_week + 
-    #         rt_dates.apr2024_week
-     #       )
-    #analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates 
-    analysis_date_list = rt_dates.apr2024_week
+    analysis_date_list = (rt_dates.y2024_dates + rt_dates.y2023_dates
+            )
     
     DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
     DIGEST_SEGMENT_SPEEDS = GTFS_DATA_DICT.digest_tables.route_segment_speeds
@@ -277,7 +273,7 @@ if __name__ == "__main__":
     df[integrify] = df[integrify].fillna(0).astype("int")
 
     df.to_parquet(
-        f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}_AH_testing.parquet"
+        f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
     print("Saved Digest RT")
     """ 
