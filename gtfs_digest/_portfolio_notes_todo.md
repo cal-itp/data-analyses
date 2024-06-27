@@ -12,7 +12,9 @@
 * Working on cardinal direction stuff. 
 * Then incorporate NTD data into the actual pipeline of `operator_profiles`.
 * Publish `total_service_hours` by weekday, Saturday, and Sunday onto GCS. This is its own dataset.
-
+* Update colors to be color blind friendly?
+    * [This article](https://medium.com/swlh/how-i-designed-a-colorblind-friendly-palette-8a91a49f1220) has some nice palettes [1](https://miro.medium.com/v2/resize:fit:640/format:webp/1*hWdA4lnxgt8Iclg87jFwig.png) and [2](https://miro.medium.com/v2/resize:fit:640/format:webp/1*FTn-we6PFb-BoyWkRQ_sYQ.png).
+    * [This one too on page 2](https://www.nceas.ucsb.edu/sites/default/files/2022-06/Colorblind%20Safe%20Color%20Schemes.pdf)
 ### 6/6/2024
 * Troubleshooting the # of unique routes an operator runs. BART seems really high, which is the impetus for this investigation. 
     * Work is in `18_operator_profiles.ipynb`.

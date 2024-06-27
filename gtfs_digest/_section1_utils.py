@@ -33,6 +33,7 @@ import os
 from calitp_data_analysis.sql import query_sql
 from calitp_data_analysis.tables import tbls
 from siuba import *
+
 """
 Data
 """
@@ -130,7 +131,7 @@ def load_mobility()->pd.DataFrame:
     >> collect()
     )
     
-    df2 = df2.sort_values(by=["on_demand_vehicles_at_max_service","vehicles_at_max_service"], ascending = [False, False])
+    df2 = df.sort_values(by=["on_demand_vehicles_at_max_service","vehicles_at_max_service"], ascending = [False, False])
     df3 = df2.groupby('agency_name').first().reset_index()
     return df3
 
@@ -150,6 +151,7 @@ def merge_ntd_mobility(year:int)->pd.DataFrame:
     
     m1.agency_name = m1.agency_name.replace(agency_dict)
     m1.agency_name = m1.agency_name.str.strip()
+    m1 = m1.drop_duplicates(subset = ["agency_name"]).reset_index(drop = True)
     return m1
 
 def ntd_operator_info(year:int, organization_name:str)->pd.DataFrame:
