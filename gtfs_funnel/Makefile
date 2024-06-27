@@ -30,7 +30,6 @@ route_typologies_data:
 timeseries_preprocessing: 
 	python clean_route_naming.py
 
-
 # monthly scheduled service, download after the end of each month
 monthly_scheduled_data:
 	python download_monthly_service.py
