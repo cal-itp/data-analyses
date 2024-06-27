@@ -25,8 +25,6 @@ with open("color_palettes.yml") as f:
     color_dict = yaml.safe_load(f)
 
 # Datetime
-#import calendar
-#from datetime import datetime
 import numpy as np
 from segment_speed_utils import helpers, time_series_utils
 
@@ -68,9 +66,6 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     op_routes_url,
     filters=[[("name", "==", name)]])
     
-    #max_date = op_routes_gdf.service_date.max()
-    # op_routes_gdf = op_routes_gdf.loc[op_routes_gdf.service_date == max_date]
-    
     # Find the most recent available geography for each route
     op_routes_gdf = op_routes_gdf.sort_values(by = ["service_date"], ascending = False)
     op_routes_gdf = op_routes_gdf.drop_duplicates(
@@ -81,17 +76,6 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     # Rename dataframe
     op_routes_gdf.columns = op_routes_gdf.columns.map(_report_utils.replace_column_names)
     return op_routes_gdf
-
-def load_scheduled_service(name:str)->pd.DataFrame:
-    url = f"{GTFS_DATA_DICT.schedule_tables.dir}{GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service}.parquet"
-    df = pd.read_parquet(url,
-    filters=[[("name", "==", name)]],)
-    
-    df["month"] = df["month"].astype(str).str.zfill(2)
-    df["month"] = (df.year.astype(str)+ "-" + df.month.astype(str))
-    df["datetime_date"] = pd.to_datetime(df["month"], format="%Y-%m")
-    
-    return df
 
 def load_ntd(year: int) -> pd.DataFrame:
     """
@@ -146,8 +130,6 @@ def load_mobility()->pd.DataFrame:
     >> collect()
     )
     
-    cols = list(df.columns)
-    df2 = df.sort_values(by=cols, na_position='last')
     df2 = df2.sort_values(by=["on_demand_vehicles_at_max_service","vehicles_at_max_service"], ascending = [False, False])
     df3 = df2.groupby('agency_name').first().reset_index()
     return df3
@@ -330,16 +312,18 @@ def total_service_hours_all_months(name: str) -> pd.DataFrame:
     As of 5/2024, we have April 2023 and October 2023.
     """
     # Grab the dataframes with a full week's worth of data. 
-    apr_week = rt_dates.get_week(month="apr2023", exclude_wed=False)
-    oct_week = rt_dates.get_week(month="oct2023", exclude_wed=False)
+    apr_23week = rt_dates.get_week(month="apr2023", exclude_wed=False)
+    oct_23week = rt_dates.get_week(month="oct2023", exclude_wed=False)
+    apr_24week = rt_dates.get_week(month="apr2024", exclude_wed=False)
     # need to add april 2024 here 
     
     # Sum up total service_hours
-    apr_df = total_service_hours(apr_week, name)
-    oct_df = total_service_hours(oct_week, name)
-
+    apr_23df = total_service_hours(apr_23week, name)
+    oct_23df = total_service_hours(oct_23week, name)
+    apr_24df = total_service_hours(apr_24week, name)
+    
     # Combine everything
-    all_df = pd.concat([apr_df, oct_df])
+    all_df = pd.concat([apr_23df, oct_23df, apr_24df])
     
     # Rename the columns
     all_df.columns = all_df.columns.map(_report_utils.replace_column_names)
