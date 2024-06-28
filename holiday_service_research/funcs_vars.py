@@ -142,6 +142,7 @@ def plot_confusion_matrices(df, y_true, y_pred, title):
 excel_col_order = ['Name', 'Notes', 'gtfs_dataset_name',
 'Total VOMS (NTD) (from Provider)',
 'sum_unlinked_passenger_trips_upt',
+'Holiday Website Status',
 'ntd_id_2022',
 'Customer Facing',
 "name",
