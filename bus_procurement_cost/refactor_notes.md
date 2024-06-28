@@ -29,3 +29,24 @@ Clear code can be read like a story. Each sentence can be developed with functio
    * Do you want to drop them? Do you want to keep them and add a column called `outlier`? How have you been using it in your summary statement?
 5. Other cleaning, maybe agency names, etc etc 
 6. Save out my cleaned df, and I will use this for all my charts, captions, paragraphs, etc.
+
+---
+
+## 6/24/24: Response to refactor notes and code review doc
+
+Came back to this project with fresh-eyes after a couple of months and started to see where a lot of improvements can be made. Got a lot more comfortable descriibing what I wanted to do and coming up with code/functions in a more readable way.
+
+It was easier to identify that I had a lot of circular dependencies amongst my cleaner scripts that would reference eachothers functions. I moved all the common functions to a new `bus_cost_utils` file to serve as an importable module for the other scripts.
+
+Next, realized that I had a lot of variables for my f-string in the final `cost_per_bus_analysis` notebook. These variables resulted in a lot of redundent steps like reading in the same data multiple times and sometimes resulted in multiple variables producing the same results multiple times, making navigating the file very difficult. 
+
+Taking a step back, I realized that a simpler, "stripped down" notebook will be easier to understand. Settled on replacing the variables with tables or pivot-tables and focusing on ZEB related metrics. This approach helped cut down the amount of variables needed and consolidate down the information since tables/pivot-tables can help answer multiple quesions at the same time.
+
+## Overall steps taken this round of refactor
+* created `bus_cost_utils` module to move all the common functions and variables.
+* adjusted cleaner scripts to reference moduel.
+* gave cleaned datasets consistent naming convention (raw, cleaned, bus only) and identical column names to merge on.
+* final, merged dataset contains columnsfor z-score and an outlier flag. 1 set was saved with outliers, another saved with out outliers.
+* used the merged dataset without outliers for the final analysis notebook to create all pivot tables, charts and variables.
+* deleted old, initial exploratory notebooks.
+* reorganized GCS folder by moving old initial exports to an `/old` folder.
