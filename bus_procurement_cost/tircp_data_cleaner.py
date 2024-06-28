@@ -2,28 +2,18 @@ import numpy as np
 import pandas as pd
 import shared_utils
 from calitp_data_analysis.sql import to_snakecase
-
-from dgs_data_cleaner import new_prop_finder, new_bus_size_finder, project_type_checker
-
-
-def col_row_updater(df: pd.DataFrame, col1: str, val1, col2: str, new_val):
-    """
-    function used to update values at specificed columns and row value.
-    """
-    df.loc[df[col1] == val1, col2] = new_val
-    
-    return
+from bus_cost_utils import *
 
 def clean_tircp_columns() -> pd.DataFrame:
     """
     main function that reads in and cleans TIRCP data.
     """
-    from fta_data_cleaner import gcs_path
-    file_name = "TIRCP Tracking Sheets 2_1-10-2024.xlsx"
+    
+    file_name = "raw_TIRCP Tracking Sheets 2_1-10-2024.xlsx"
     tircp_name = "Project Tracking"
 
     # read in data
-    df = pd.read_excel(f"{gcs_path}{file_name}", sheet_name=tircp_name)
+    df = pd.read_excel(f"{GCS_PATH}{file_name}", sheet_name=tircp_name)
 
     # keep specific columns
     keep_col = [
@@ -93,12 +83,12 @@ def clean_tircp_columns() -> pd.DataFrame:
     df4 = df3.assign(
         prop_type = df3['project_description'].apply(new_prop_finder),
         bus_size_type = df3['project_description'].apply(new_bus_size_finder),
-        new_project_type  = df3['project_description'].apply(project_type_checker)
+        new_project_type  = df3['project_description'].apply(project_type_finder)
     )
 
     return df4
 
-def agg_buses_only(df: pd.DataFrame) -> pd.DataFrame:
+def tircp_agg_bus_only(df: pd.DataFrame) -> pd.DataFrame:
     """
     filters df to only include projects with bus procurement and for project type = bus only 
     does not include engineering, planning or construction only projects.
@@ -126,14 +116,14 @@ def agg_buses_only(df: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     
-    from fta_data_cleaner import gcs_path
+    
     
     # initial df
     df1 = clean_tircp_columns()
     
     # aggregate 
-    df2 = agg_buses_only(df1)
+    df2 = tircp_agg_bus_only(df1)
     
     # export both df's as parquets to GCS
-    df1.to_parquet(f'{gcs_path}clean_tircp_project.parquet')
-    df2.to_parquet(f'{gcs_path}clean_tircp_project_bus_only.parquet')
+    df1.to_parquet(f'{GCS_PATH}clean_tircp_all_project.parquet')
+    df2.to_parquet(f'{GCS_PATH}clean_tircp_bus_only.parquet')

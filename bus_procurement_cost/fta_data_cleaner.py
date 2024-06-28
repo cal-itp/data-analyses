@@ -2,10 +2,7 @@ import numpy as np
 import pandas as pd
 import shared_utils
 from calitp_data_analysis.sql import to_snakecase
-from dgs_data_cleaner import new_bus_size_finder, new_prop_finder, project_type_checker
-from tircp_data_cleaner import col_row_updater
-
-gcs_path = "gs://calitp-analytics-data/data-analyses/bus_procurement_cost/"
+from bus_cost_utils import *
 
 def col_splitter(
     df: pd.DataFrame, 
@@ -26,8 +23,7 @@ def col_splitter(
 
     return df
 
-
-def agg_just_bus(df: pd.DataFrame) -> pd.DataFrame:
+def fta_agg_bus_only(df: pd.DataFrame) -> pd.DataFrame:
     """
     filters FTA data to only show projects with bus procurement (bus count > 0).
     then filters projects for new_project_type = bus only
@@ -57,17 +53,16 @@ def agg_just_bus(df: pd.DataFrame) -> pd.DataFrame:
 
     return df2
 
-
 def clean_fta_columns() -> pd.DataFrame:
     """
     Main function to clean FTA data. Reads in data, changes datatypes, change specific values.
     """
     # params
     
-    file = "data-analyses_bus_procurement_cost_fta_press_release_data_csv.csv"
+    file = "raw_data-analyses_bus_procurement_cost_fta_press_release_data_csv.csv"
 
     # read in data
-    df = pd.read_csv(f"{gcs_path}{file}")
+    df = pd.read_csv(f"{GCS_PATH}{file}")
 
     # snakecase df
     df = to_snakecase(df)
@@ -83,14 +78,14 @@ def clean_fta_columns() -> pd.DataFrame:
     # rename initial propulsion type col to propulsion category
     df = df.rename(columns={"propulsion_type": "prosulsion_category"})
 
-    # splittign `approx_#_of_buses col to get bus count
+    # splitting `approx_#_of_buses` col to get bus count
     df1 = col_splitter(df, "approx_#_of_buses", "bus_count", "extract_prop_type", "(")
 
     # assign new columns via new_prop_finder and new_bus_size_finder
     df2 = df1.assign(
         new_prop_type_finder=df1["description"].apply(new_prop_finder),
         new_bus_size_type=df1["description"].apply(new_bus_size_finder),
-        new_project_type=df1["description"].apply(project_type_checker)
+        new_project_type=df1["description"].apply(project_type_finder)
     )
 
     # cleaning specific values
@@ -115,15 +110,14 @@ def clean_fta_columns() -> pd.DataFrame:
 
     return df2
 
-
 if __name__ == "__main__":
 
     # initial df (all projects)
     all_projects = clean_fta_columns()
 
     # projects with bus count > 0 only.
-    just_bus = agg_just_bus(all_projects)
+    just_bus = fta_agg_bus_only(all_projects)
 
     # export both DFs
-    all_projects.to_parquet(f"{gcs_path}fta_all_projects_clean.parquet")
-    just_bus.to_parquet(f"{gcs_path}fta_bus_cost_clean.parquet")
+    all_projects.to_parquet(f"{GCS_PATH}clean_fta_all_projects.parquet")
+    just_bus.to_parquet(f"{GCS_PATH}clean_fta_bus_only.parquet")
