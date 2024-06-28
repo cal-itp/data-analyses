@@ -7,10 +7,11 @@
 * (upcoming )Washington and/or Georgia Contract list (via Rebel)
 
 ## GH issue
-Research Request - Bus Procurement Costs & Awards #897
+* [Research Request - Bus Procurement Costs & Awards #897](https://github.com/cal-itp/data-analyses/issues/897)
+* [Research Task - Refactor: Bus Procurement Cost #1142](https://github.com/cal-itp/data-analyses/issues/1142)
   
 ## Research Question
-Identify federal awards to fund bus purchases and how much agencies pay for them.
+Analyze bus procurement projects to see how much transit agencies pay for them.
 
 ## Methodology
 - Examine each dataset to:
@@ -49,39 +50,51 @@ Identify federal awards to fund bus purchases and how much agencies pay for them
 
 ## Script Explanation
 
+- **bus_cost_utils.py**
+    * contains all the shared functions and variable used throughout the cleaner scripts
+<br></br>   
+
 Executing `make all_bus_scripts` will run the following scripts
 <br></br>
+
 - **fta_data_cleaner.py:**
     * Reads in and cleans FTA data
     * outputs 2 files: 
-        * cleaned, all projects: `fta_all_projects_clean.parquet`
-        * cleaned, bus only projects:`fta_bus_cost_clean.parquet`
+        * cleaned, all projects: `clean_fta_all_projects.parquet`
+        * cleaned, bus only projects:`clean_fta_bus_only.parquet`
 <br></br>        
+
 - **tircp_data_cleaner.py**
     * Reads in and cleans tircp data
     * outputs 2 files: 
-        * cleaned, all projects: `clean_tircp_project.parquet`
-        * cleaned, bus only projects:`clean_tircp_project_bus_only.parquet`
+        * cleaned, all projects: `clean_tircp_all_project.parquet`
+        * cleaned, bus only projects:`clean_tircp_bus_only.parquet`
 <br></br>
+
 - **dgs_data_cleaner.py**
     * Reads in and cleans DGS data
     * outputs 2 files: 
-        * cleaned, bus only projects: `dgs_agg_clean.parquet`
-        * cleaned, bus only projects with options:`dgs_agg_w_options_clean.parquet`
+        * cleaned, bus only projects: `clean_dgs_all_projects.parquet`
+        * cleaned, bus only projects with options:`clean_dgs_bus_only_w_options.parquet`
 <br></br>
+
 - **cost_per_bus_cleaner.py**
     * Reads in and merges all the bus only datasets
-    * updates columns names 
+    * updates columns names
+    * calculates `cost_per_bus`, z-score and idetifies outliers.
+    * outputs 2 files:
+        * cleaned projects: `cleaned_cpb_analysis_data_merge.parquet`
+        * cleaned, removed outliers: `cleaned_no_outliers_cpb_analysis_data_merge.parquet`
 <br></br>
-- **cost_per_bus_utils.py**
-    * stores variables for summary section (total projects, total buses, etc)
-    * stores chart functions to be used in notebook
-    * stores the summary and conclusion text.
-<br></br>
+
 - **nbconvert --to notebook**
     * runs all cells in the `cost_per_bus_analysis.ipynb`
     * overwrites the nb in place
 <br></br>
+
 - **nbconvert --to html**
     * converts the nb to HTML
     * hides the code cells and prompts
+<br></br>
+
+output files are saved to GCS at: `calitp-analytics-data/data-analyses/bus_procurement_cost`
