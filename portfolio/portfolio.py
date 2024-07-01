@@ -310,6 +310,7 @@ def index(
     prod: bool = False,
 ) -> None:
     sites = []
+    Path("/portfolio/index").mkdir(parents=True, exist_ok=True)
     for site in os.listdir("./portfolio/sites/"):
         with open(f"./portfolio/sites/{site}") as f:
             name = site.replace(".yml", "")
