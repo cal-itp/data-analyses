@@ -16,6 +16,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
+#Function to fetch feeds, trips, stoptimes and stops_geo data from warehouse v2
 def get_feeds_trips_stops_data(selected_agencies, selected_date):
     
     trip_cols = ["name", "gtfs_dataset_key", "feed_key", "trip_id", "route_id", "route_type"]
@@ -64,6 +65,7 @@ def get_feeds_trips_stops_data(selected_agencies, selected_date):
     return feed_data, trips_data, stoptimes_data, stop_locations_gdf
 
 
+#Function to analyze data
 def analyze_dataset(df):
     # Number of rows and columns
     num_rows, num_cols = df.shape 
@@ -93,7 +95,7 @@ def analyze_dataset(df):
     display(df.head(3))
     print()
 
-#Function to merge stops and trips and aggregate by route type and stop id
+#Function to merge stops and trips and aggregate by route type, stop id, feed_key and agencies_name
 def merge_and_aggregate_stops_and_trips(stoptimes_data, trips_data, agg_prefix=''):
     on_cols = ["trip_id", "feed_key"]
     how = 'left'
@@ -121,7 +123,7 @@ def merge_stoptimes(stoptimes_weekday, stoptimes_sat, stoptimes_sun, merge_cols,
     merged_df=merged_df[final_cols]
     return merged_df
 
-
+#Function to plot trips per stops and routes per stop
 import matplotlib.pyplot as plt
 def plot_histogram(data, column, title):
     data.pivot(columns='feed_key', values=column).plot.hist(grid=True, bins=100, rwidth=0.9, log=True,
