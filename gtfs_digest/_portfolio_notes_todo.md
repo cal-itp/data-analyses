@@ -21,6 +21,9 @@
     * I reran everything for all the dates.
     * How do I publish this to public GCS?
     * All the charts run properly after my change (tested only on a few operators)
+    * Filling in nan with direction_id. 
+        * I was merging the work from `gtfs_digest/merge_data` incorrectly with the stuff from `schedule_stats_by_route_direction`
+        * However, when you say all rows should merge, that's not true since since some rows are found in schedule data only and some are RT data only?
     * How do I add supporting diagrams/docs? 
 ### 6/26/2024 Refactor Summer goals
 * Working on cardinal direction stuff. 

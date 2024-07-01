@@ -219,8 +219,10 @@ if __name__ == "__main__":
     DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
     DIGEST_SEGMENT_SPEEDS = GTFS_DATA_DICT.digest_tables.route_segment_speeds
     
+    # Get cardinal direction for each route
     df_sched = concatenate_schedule_by_route_direction(analysis_date_list)
     
+    # Get primary route type
     primary_typology = set_primary_typology(df_sched)
     
     df_sched2 = pd.merge(

@@ -797,7 +797,6 @@ def filtered_route(
     text_dir0,
     text_dir1]
 
-    """
     chart = alt.vconcat(*chart_list)
 
     return chart

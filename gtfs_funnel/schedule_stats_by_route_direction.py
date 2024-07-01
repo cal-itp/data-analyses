@@ -48,7 +48,7 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
     stop_times_with_trip = pd.merge(stop_times_gdf, trips_df, on = merge_cols)
     
     # Fill in missing direction id with 0, per our usual practice.
-    stop_times_with_trip.direction_id = stop_times_with_trip.direction_id.fillna(0)
+    # stop_times_with_trip.direction_id = stop_times_with_trip.direction_id.fillna(0)
     
     main_cols = [
         "route_id",
@@ -128,8 +128,7 @@ def assemble_scheduled_trip_metrics(
         how = "inner"
     )
     
-    # display(median_stop_meters_df.info())
-    median_stop_meters_df.direction_id = median_stop_meters_df.direction_id.fillna(0)
+    #median_stop_meters_df.direction_id = median_stop_meters_df.direction_id.fillna(0)
    
     return median_stop_meters_df
     
@@ -199,12 +198,10 @@ if __name__ == "__main__":
         
         # Find metrics on the trip grain
         trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
-
-        
+ 
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
         
-       
         route_group_merge_cols = [
             "schedule_gtfs_dataset_key", 
             "route_id", 
