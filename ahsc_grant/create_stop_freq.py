@@ -126,12 +126,12 @@ def merge_stoptimes(stoptimes_weekday, stoptimes_sat, stoptimes_sun, merge_cols,
 #Function to plot trips per stops and routes per stop
 import matplotlib.pyplot as plt
 def plot_histogram(data, column, title):
-    data.pivot(columns='feed_key', values=column).plot.hist(grid=True, bins=100, rwidth=0.9, log=True,
+    data.pivot(columns='name', values=column).plot.hist(grid=True, bins=100, rwidth=0.9, log=True,
                                                              title=title)
     plt.xlabel('Trips per Stop')
     plt.ylabel('Number of Stops')
     plt.show()
 
+if __name__ == "__main__":
 
-
-    
+    #  add all from notebook except checks/illustrations...
