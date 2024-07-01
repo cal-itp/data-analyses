@@ -7,7 +7,21 @@
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
-    
+### 7/1/2024 Questions 
+[Issue 1159](https://github.com/cal-itp/data-analyses/issues/1159)
+* I added a new script with `ntd` stuff called `ntd_annual_database_agency` to be incorporated into `gtfs_funnel/operator_scheduled_stats`.
+    * I plan to load this line around lines 158-175.
+    * Why do you like to read in parquets instead of just running a funciton and returning a dataframe? 
+    * Do I rerun the `preprocess_schedule_only` part in the `MAKEFILE` again?
+    * How do I publish this to our public GCS?
+* Monthly Service Hours by weekday/weekend
+    * How do I add a new dataset to GCS? 
+    * Where do I run it? Within `gtfs_funnel`? 
+* Cardinal Direction [Issue 1135](https://github.com/cal-itp/data-analyses/issues/1135)
+    * I reran everything for all the dates.
+    * How do I publish this to public GCS?
+    * All the charts run properly after my change (tested only on a few operators)
+    * How do I add supporting diagrams/docs? 
 ### 6/26/2024 Refactor Summer goals
 * Working on cardinal direction stuff. 
 * Then incorporate NTD data into the actual pipeline of `operator_profiles`.
