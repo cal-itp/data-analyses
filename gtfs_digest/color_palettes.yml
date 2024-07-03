@@ -11,17 +11,12 @@
 #dd217d: magenta
 #ccbb44: olive green
 
-# This color palette is good for categorizing nominal values.
-# The colors do not represent "good" or "bad", they merely differentiate the values.
-four_color: ["#5b8efd","#765fec","#ccbb44", "#fcb40e"]
 
 # This color palette is good for categorizing nominal values.
 # The colors do not represent "good" or "bad", they merely differentiate the values.
-tri_color: ["#765fec","#fcb40e","#dd217d"]
-
-# This color palette is good for categorizing nominal values.
-# The colors do not represent "good" or "bad", they merely differentiate the values.
+tri_color: ["#ccbb44","#fcb40e","#dd217d"]
 full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44"]
+two_colors: ["#dd217d","#fcb40e"]
 
 # Frequency of Trips in Minutes Chart
 # Headways of 0-15 are green, 30-60 are yellow, and 60+ are red.
