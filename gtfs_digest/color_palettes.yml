@@ -2,6 +2,45 @@
 # and an explanation (if available) regarding why certain colors were chosen.
 
 # https://imagecolorpicker.com/color-code/2596be
+
+# Colorblind-friendly palette
+#5b8efd: blue
+#765fec: purple
+#fcb40e: yellow
+#fc5c04: orange
+#dd217d: magenta
+#ccbb44: olive green
+
+# This color palette is good for categorizing nominal values.
+# The colors do not represent "good" or "bad", they merely differentiate the values.
+four_color: ["#5b8efd","#765fec","#ccbb44", "#fcb40e"]
+
+# This color palette is good for categorizing nominal values.
+# The colors do not represent "good" or "bad", they merely differentiate the values.
+tri_color: ["#765fec","#fcb40e","#dd217d"]
+
+# This color palette is good for categorizing nominal values.
+# The colors do not represent "good" or "bad", they merely differentiate the values.
+full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44"]
+
+# Frequency of Trips in Minutes Chart
+# Headways of 0-15 are green, 30-60 are yellow, and 60+ are red.
+freq_domain: [0, 15, 30, 45, 60, 120, 180, 240]
+freq_range: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d","#dd217d","#dd217d"]
+
+# Vehicle Positions per Minute Chart.
+# This scale goes from red, yellow, to green.
+# 0-1.9 are red, 2-3 are yellow, and the ideal number (3) is green. 
+vp_domain: [0,1,2,3]
+vp_range: ["#dd217d","#fc5c04","#fcb40e","#ccbb44"]
+
+# Spatial Accuracy and Percentage of Scheduled Trip Journey with 1+/2+ Vehicle Positions Charts
+# This scale goes from red, yellow, to green.
+# Low numbers are red, medium numbers are yellow, and the ideal number (in the ballpark of 100%) is dark green. 
+spatial_accuracy_domain: [0,20, 40, 60, 80, 100]
+spatial_accuracy_range: ["#dd217d","#fc5c04","#ff9c42","#fcb40e", "#e9d868","#ccbb44"]
+
+# Original, non colorblind-friendly palette
 #ec5d3b: red
 #fcaa5f: ochre
 #fde18d: yellow
@@ -10,39 +49,6 @@
 #49a2b2: teal
 #3b56a4: dark  blue
 
-# This color palette is good for categorizing nominal values.
-# The colors do not represent "good" or "bad", they merely differentiate the values.
-four_color: ["#fde18d","#49a2b2","#3b56a4", "#fcaa5f"]
-
-# This color palette is good for categorizing nominal values.
-# The colors do not represent "good" or "bad", they merely differentiate the values.
-tri_color: ["#fde18d","#49a2b2","#3b56a4"]
-
 # This palette goes from red, yellow, to green.
 # High values are shown in green, medium in yellow, and low in red. 
 red_green_yellow: ["#ec5d3b", "#fde18d", "#7cc665"]
-
-# This palettes goes from green, yellow, red. 
-# High values are shown in red, medium in yellow, and low in green. 
-green_red_yellow: ["#7cc665","#fde18d", "#ec5d3b"]
-
-# This color palette is good for categorizing nominal values.
-# The colors do not represent "good" or "bad", they merely differentiate the values.
-full_color_scale: ["#7cc665", "#fcaa5f", "#fde18d", "#ec5d3b", "#3b56a4", "#49a2b2"]
-
-# Frequency of Trips in Minutes Chart
-# Headways of 0-15 are green, 30-60 are yellow, and 60+ are red.
-freq_domain: [0, 15, 30, 45, 60, 120]
-freq_range: ["#7cc665", "#d2d776", "#fde18d", "#fcaa5f", "#ec5d3b", "#ec5d3b"]
-
-# Vehicle Positions per Minute Chart.
-# This scale goes from red, yellow, to green.
-# 0-1.9 are red, 2-3 are yellow, and the ideal number (3) is green. 
-vp_domain: [0,1,2,3]
-vp_range: ["#ec5d3b","#fcaa5f","#d2d776","#7cc665"]
-
-# Spatial Accuracy and Percentage of Scheduled Trip Journey with 1+/2+ Vehicle Positions Charts
-# This scale goes from red, yellow, to green.
-# Low numbers are red, medium numbers are yellow, and the ideal number (in the ballpark of 100%) is dark green. 
-spatial_accuracy_domain: [0,20, 40, 60, 80, 100]
-spatial_accuracy_range: ["#ec5d3b","#ec5d3b","#fcaa5f","#fde18d", "#d2d776","#7cc665"]

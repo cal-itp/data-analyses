@@ -279,7 +279,7 @@ def grouped_bar_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=color_dict["four_color"]),
+                scale=alt.Scale(range=color_dict["tri_color"]),
                 ),
             tooltip=tooltip_cols,
         ))
@@ -445,7 +445,7 @@ def base_facet_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=color_dict["red_green_yellow"]),
+                scale=alt.Scale(range=color_dict["tri_color"]),
             ),
             tooltip=tooltip_cols,
         )
