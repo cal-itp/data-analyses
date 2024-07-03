@@ -9,6 +9,15 @@
     * Figure out Makefile situation.
 ### 7/1/2024 Questions 
 [Issue 1159](https://github.com/cal-itp/data-analyses/issues/1159)
+* Cardinal Direction [Issue 1135](https://github.com/cal-itp/data-analyses/issues/1135)
+    * I reran everything for all the dates.
+    * How do I publish this to public GCS?
+    * All the charts run properly after my change (tested only on a few operators)
+    * Filling in nan with direction_id. 
+        * I was merging the work from `gtfs_digest/merge_data` incorrectly with the stuff from `schedule_stats_by_route_direction`
+        * However, when you say all rows should merge, that's not true since since some rows are found in schedule data only and some are RT data only? 
+        * Also in `gtfs_funnel/schedule_stats_by_route_direction.py` a lot of rows simply are `nan` for `direction_id` at the `trips` grain. Shouldn't it be filled with 0? 
+    * How do I add supporting diagrams/docs? 
 * I added a new script with `ntd` stuff called `ntd_annual_database_agency` to be incorporated into `gtfs_funnel/operator_scheduled_stats`.
     * I plan to load this line around lines 158-175.
     * Why do you like to read in parquets instead of just running a funciton and returning a dataframe? 
@@ -17,14 +26,31 @@
 * Monthly Service Hours by weekday/weekend
     * How do I add a new dataset to GCS? 
     * Where do I run it? Within `gtfs_funnel`? 
-* Cardinal Direction [Issue 1135](https://github.com/cal-itp/data-analyses/issues/1135)
-    * I reran everything for all the dates.
-    * How do I publish this to public GCS?
-    * All the charts run properly after my change (tested only on a few operators)
-    * Filling in nan with direction_id. 
-        * I was merging the work from `gtfs_digest/merge_data` incorrectly with the stuff from `schedule_stats_by_route_direction`
-        * However, when you say all rows should merge, that's not true since since some rows are found in schedule data only and some are RT data only?
-    * How do I add supporting diagrams/docs? 
+
+**Notes**
+* <s>Cardinal Direction
+    * There's no stipulation that nan values in `direction_id` need to be filled.
+    * Some routes only run one way, that's why `direction_id` is only populated once. 
+    * By filling in `direction_id` in some places and not others, this causes everything to be disjointed. When merging the `sched_vs_rt` and `cardinal_direction` dataframes together, this will impact the merges.
+    * Action: Delete all lines that fill na for `direction_id`. Rerun `gtfs_funnel/Makefile/cardinal_dir_temp` first and then `gtfs_digest/merge_data`</s>
+    * Left to do:
+        * Upload the new dataset to the public GCS folder.
+        * Once all the NTD/Monthly Service stuff is done: rerun the portfolio.
+        * Create supporting diagrams/text.
+* NTD
+    * Actions:
+        * Use `dim_annual_ntd_agency_service` instead of the table I currently use.
+            * Amanda: `dim_annual_ntd_agency_service` doesn't contain the columns such as the UZA/reporter type/etc that I need for the portfolio.Clarified w/ Vivek: this table is ok to use. NTD is just behind.
+        * Add this to `crosswalk_gtfs_dataset_key_to_organization` instead of `operator_profiles` because the `crosswalk` file already contains NTD ID. 
+        * Delete out `ntd_annual_database_agency` stuff and just add it directly into the crosswalk file.
+        * Read in crosswalk file when I load in `gtfs_digest/_section2_utils/operator_profiles`
+* Monthly Services
+    * This is a new area in the mermaid diagram in `gtfs_funnel`.
+    * Because there isn't a broad use for it and it's portfolio specific, just leave it in the `gtfs_digest` funnel but upload it to GCS.
+    
+* How to upload stuff to the public GCS folder.
+    * `gtfs_digest/publish_public_data`.
+    * Remove `monthly_scheduled_service` and replace it with my dataframe from above.
 ### 6/26/2024 Refactor Summer goals
 * Working on cardinal direction stuff. 
 * Then incorporate NTD data into the actual pipeline of `operator_profiles`.
