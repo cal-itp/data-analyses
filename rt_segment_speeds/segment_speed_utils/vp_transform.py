@@ -84,8 +84,8 @@ def combine_valid_vp_for_direction(
         vp_idx_arr = np.asarray(getattr(row, "vp_idx"))
         coords_arr = np.array(getattr(row, "geometry").coords)
 
-        timestamp_arr = np.asarray(
-            getattr(row, "location_timestamp_local"))
+        #timestamp_arr = np.asarray(
+        #    getattr(row, "location_timestamp_local"))
         
         vp_linestring = coords_arr[valid_indices]
 
@@ -99,16 +99,18 @@ def combine_valid_vp_for_direction(
         
         coords_series.append(valid_vp_line)
         vp_idx_series.append(vp_idx_arr[valid_indices])
-        timestamp_series.append(timestamp_arr[valid_indices])
+        #timestamp_series.append(timestamp_arr[valid_indices])
     
     
     vp_condensed = vp_condensed.assign(
         vp_primary_direction = direction,
         geometry = coords_series,
         vp_idx = vp_idx_series,
-        location_timestamp_local = timestamp_series,
+        #location_timestamp_local = timestamp_series,
     )[["trip_instance_key", "vp_primary_direction", 
-       "geometry", "vp_idx", "location_timestamp_local"]].reset_index(drop=True)
+       "geometry", "vp_idx", 
+       #"location_timestamp_local"
+      ]].reset_index(drop=True)
     
     gdf = gpd.GeoDataFrame(
         vp_condensed, 
