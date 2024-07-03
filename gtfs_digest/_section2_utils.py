@@ -279,7 +279,7 @@ def grouped_bar_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=color_dict["tri_color"]),
+                scale=alt.Scale(range=color_dict["two_colors"]),
                 ),
             tooltip=tooltip_cols,
         ))

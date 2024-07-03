@@ -30,7 +30,6 @@ def grab_filepaths(
     
     return [f"{GCS}{f}.parquet" for f in filepaths]
     
-
 def export_parquet_as_csv_or_geojson(
     filename: str,
     filetype: Literal["df", "gdf"],
@@ -58,8 +57,6 @@ def export_parquet_as_csv_or_geojson(
         
     return
         
-        
-
 if __name__ == "__main__":
     
     digest_gdf_keys = [
@@ -68,13 +65,13 @@ if __name__ == "__main__":
     
     digest_df_keys = [
         "route_schedule_vp", 
-        "operator_profiles",  
-        "operator_sched_rt"
+        "operator_profile_portfolio_view",  
+        "operator_sched_rt",
+        "scheduled_service_hours",
     ]  
     
     df_filepaths = (
-        grab_filepaths("digest_tables", digest_df_keys) + 
-        grab_filepaths("schedule_tables", ["monthly_scheduled_service"])
+        grab_filepaths("digest_tables", digest_df_keys)
     )
     
     gdf_filepaths = grab_filepaths("digest_tables", digest_gdf_keys)

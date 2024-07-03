@@ -10,13 +10,17 @@
 
 ### 7/4/2024
 * Upload datasets to the public GCS.
+    * Add a new script for running all the operators and saving that file to the public GCS. Currently, my functions run on operator level.
+    * Add this to the make file.
 * Rerun the entire portfolio?
 
 ### 7/3/2024 Goals
-* Switch color palette to colorblind friendly one.
+* <s>Switch color palette to colorblind friendly one.</s>
+
 * Switch NTD info to crosswalk. Read in crosswalk file when I load in `gtfs_digest/_section2_utils/operator_profiles`.
     * Question: Do I need to upload this specific operator_profile view with all the NTD stuff to the public GCS?
-* Move Monthly Services data to its own file in `gtfs_digest`
+* <s>Move Monthly Services data to its own file in `gtfs_digest`</s>
+
 * Rerun a subset of operators for the GTFS Digest test site. 
 ### 7/2/2024 Notes 
 * <s>Cardinal Direction
