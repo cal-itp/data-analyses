@@ -1,12 +1,16 @@
+import datetime
 import pandas as pd
 import numpy as np
 from segment_speed_utils import helpers, time_series_utils
 from shared_utils import catalog_utils, rt_dates
+
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, RT_SCHED_GCS, SCHED_GCS)
 
-import _report_utils 
-
+"""
+Datasets that are relevant to
+GTFS Digest Portfolio work only.
+"""
 def concatenate_trips(
     date_list: list,
 ) -> pd.DataFrame:
@@ -55,7 +59,7 @@ def weekday_or_weekend(row):
     else:
         return "Weekday"
 
-def total_service_hours(date_list: list, name: str) -> pd.DataFrame:
+def total_service_hours(date_list: list) -> pd.DataFrame:
     """
     Total up service hours by departure hour, 
     month, and day type for an operator. 
@@ -64,7 +68,7 @@ def total_service_hours(date_list: list, name: str) -> pd.DataFrame:
     df = concatenate_trips(date_list)
     
      # Filter
-    df = df.loc[df.name == name].reset_index(drop=True)
+    # df = df.loc[df.name == name].reset_index(drop=True)
     
     # Add day type aka Monday, Tuesday, Wednesday...
     df['day_type'] = df['service_date'].apply(get_day_type)
@@ -91,7 +95,7 @@ def total_service_hours(date_list: list, name: str) -> pd.DataFrame:
     df2 = df2.rename(columns = {'service_hours':'weekend_service_hours'})
     return df2
 
-def total_service_hours_all_months(name: str) -> pd.DataFrame:
+def total_service_hours_all_months() -> pd.DataFrame:
     """
     Find service hours for a full week for one operator
     and for the months we have a full week's worth of data downloaded.
@@ -103,19 +107,14 @@ def total_service_hours_all_months(name: str) -> pd.DataFrame:
     apr_24week = rt_dates.get_week(month="apr2024", exclude_wed=False)
     
     # Sum up total service_hours
-    apr_23df = total_service_hours(apr_23week, name)
-    oct_23df = total_service_hours(oct_23week, name)
-    apr_24df = total_service_hours(apr_24week, name)
+    apr_23df = total_service_hours(apr_23week)
+    oct_23df = total_service_hours(oct_23week)
+    apr_24df = total_service_hours(apr_24week)
     
     # Combine everything
     all_df = pd.concat([apr_23df, oct_23df, apr_24df])
+   
     
-    # Save out to GCS
-    file = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.scheduled_service_hours}.parquet"
-    all_df.to_parquet(file)
-    
-    # Rename the columns
-    all_df.columns = all_df.columns.map(_report_utils.replace_column_names)
     return all_df
 
 def load_operator_profiles()->pd.DataFrame:
@@ -142,24 +141,34 @@ def load_operator_profiles()->pd.DataFrame:
     ntd_df = helpers.import_schedule_gtfs_key_organization_crosswalk(most_recent_date)[
     ntd_cols]
     
-    if gcs_or_portfolio = "portfolio"
-        op_profiles_df = pd.read_parquet(
-        op_profiles_url,
-        filters=[[("organization_name", "==", organization_name)]])
+    op_profiles_df = pd.read_parquet(op_profiles_url)
     
-        # Keep only the most recent row
-        op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date'], ascending = False).head(1)
+    # Keep only the most recent row
+    op_profiles_df1 = (op_profiles_df
+                       .sort_values(by = ['service_date'], ascending = False)
+                       .drop_duplicates(subset = ["schedule_gtfs_dataset_key",
+                                                  "name"])
+                      ).reset_index(drop = True)
     
-       # Try to merge
-        op_profiles_df1 = pd.merge(op_profiles_df1, ntd_df, on = ["schedule_gtfs_dataset_key"], how = "left")
+    # Merge
+    op_profiles_df1 = pd.merge(op_profiles_df1, ntd_df, on = ["schedule_gtfs_dataset_key"], how = "left")
     
-    else:
-        
+    return op_profiles_df1
+
+if __name__ == "__main__":
+    
     # Save to GCS
-    file = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profile_portfolio_view}.parquet"
-    op_profiles_df1.to_parquet(file)
+    OP_PROFILE_EXPORT = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profile_portfolio_view}.parquet"
+    SERVICE_EXPORT = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.scheduled_service_hours}.parquet"
+    start = datetime.datetime.now()
     
-    # Rename dataframe
-    op_profiles_df1.columns = op_profiles_df1.columns.map(_report_utils.replace_column_names)
+    # Save operator profiles with NTD
+    operator_profiles = load_operator_profiles()
+    operator_profiles.to_parquet(OP_PROFILE_EXPORT)
     
-    return op_profiles_df1 
+    # Save service hours
+    service_hours = total_service_hours_all_months()
+    service_hours.to_parquet(SERVICE_EXPORT) 
+    
+    end = datetime.datetime.now()
+    print(f"GTFS Digest Datasets: {end - start}")

@@ -69,6 +69,31 @@ def get_counties():
 
     return my_gdf
 
+def load_operator_ntd_profile(organization_name:str)->pd.DataFrame:
+
+    op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profile_portfolio_view}.parquet"
+
+    op_profiles_df = pd.read_parquet(
+    op_profiles_url,
+    filters=[[("organization_name", "==", organization_name)]])
+    
+    op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date'], ascending = False).head(1)
+    
+    # Rename dataframe
+    op_profiles_df1.columns = op_profiles_df1.columns.map(_report_utils.replace_column_names)
+    return op_profiles_df1
+
+def load_operator_service_hours(name:str)->pd.DataFrame:
+
+    url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profile_portfolio_view}.parquet"
+
+    df = pd.read_parquet(url,
+    filters=[[(("name", "==", name))]])
+    
+    # Rename dataframe
+    df.columns = df.columns.map(_report_utils.replace_column_names)
+    return df
+
 """
 Data Manipulation
 Change dataframes from long to wide

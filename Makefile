@@ -40,10 +40,16 @@ build_ntd_report:
 
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
-	#cd data-analyses/rt_segment_speeds && pip install altair_transform && pip install -r requirements.txt && cd ../_shared_utils && make setup_env &&  pip install -U altair
+	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 
+build_gtfs_digest_testing:
+	$(eval export site = gtfs_digest_testing)
+	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
+	cd gtfs_digest && python _gtfs_digest_dataset.py && cd ../portfolio
+	make build_portfolio_site
+    
 add_precommit:
 	pip install pre-commit
 	pre-commit install 
