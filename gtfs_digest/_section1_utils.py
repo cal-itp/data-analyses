@@ -52,7 +52,7 @@ def organization_name_crosswalk(organization_name: str) -> str:
 
 def load_operator_profiles(organization_name:str)->pd.DataFrame:
     """
-    Load operator_profiel dataset for one operator
+    Load operator profile dataset for one operator
     """
     op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
 
@@ -63,6 +63,27 @@ def load_operator_profiles(organization_name:str)->pd.DataFrame:
     # Keep only the most recent row
     op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date'], ascending = False).head(1)
     
+    ntd_cols = [
+        "schedule_gtfs_dataset_key",
+        "counties_served",
+        "service_area_sq_miles",
+        "hq_city",
+        "uza_name",
+        "service_area_pop",
+        "organization_type",
+        "primary_uza",
+        "reporter_type"
+    ]
+    
+    # Load NTD through the crosswalk for the most recent date
+    most_recent_date = rt_dates.y2024_dates[-1]
+    
+    ntd_df = helpers.import_schedule_gtfs_key_organization_crosswalk(most_recent_date)[
+    ntd_cols]
+    
+    # Try to merge
+    op_profiles_df1 = pd.merge(op_profiles_df1, ntd_df, on = ["schedule_gtfs_dataset_key"], how = "left")
+        
     # Rename dataframe
     op_profiles_df1.columns = op_profiles_df1.columns.map(_report_utils.replace_column_names)
     
@@ -218,7 +239,7 @@ def create_service_hour_chart(df:pd.DataFrame,
                title = _report_utils.labeling(y_col)),
         color=alt.Color(
             "Month",
-            scale=alt.Scale(range=color_dict["tri_color"]),  # Specify desired order
+            scale=alt.Scale(range=color_dict["four_color"]),  # Specify desired order
         ),
         opacity=alt.condition(selection, alt.value(1), alt.value(0.2)),
         tooltip=list(df.columns),
@@ -314,82 +335,6 @@ def plot_route(route):
 """
 Stuff to delete after incorporating into the pipeline 
 """
-def load_ntd(year: int) -> pd.DataFrame:
-    """
-    Load NTD Data stored in our warehouse.
-    """
-    df = (
-        tbls.mart_ntd.dim_annual_ntd_agency_information()
-        >> filter(_.year == year, _.state == "CA", _._is_current == True)
-        >> select(
-            _.number_of_state_counties,
-            _.uza_name,
-            _.density,
-            _.number_of_counties_with_service,
-            _.state_admin_funds_expended,
-            _.service_area_sq_miles,
-            _.population,
-            _.service_area_pop,
-            _.subrecipient_type,
-            _.primary_uza,
-            _.reporter_type,
-            _.organization_type,
-            _.agency_name,
-            _.voms_pt,
-            _.voms_do,
-        )
-        >> collect()
-    )
-
-    cols = list(df.columns)
-    df2 = df.sort_values(by=cols, na_position="last")
-    df3 = df2.groupby("agency_name").first().reset_index()
-
-    return df3
-
-def load_mobility()->pd.DataFrame:
-    """
-    Load mobility data in our warehouse.
-    """
-    df = (
-    tbls.mart_transit_database.dim_mobility_mart_providers()
-     >> select(
-        _.agency_name,
-        _.counties_served,
-        _.hq_city,
-        _.hq_county,
-        _.is_public_entity,
-        _.is_publicly_operating,
-        _.funding_sources,
-        _.on_demand_vehicles_at_max_service,
-        _.vehicles_at_max_service
-    )
-    >> collect()
-    )
-    
-    df2 = df.sort_values(by=["on_demand_vehicles_at_max_service","vehicles_at_max_service"], ascending = [False, False])
-    df3 = df2.groupby('agency_name').first().reset_index()
-    return df3
-
-def merge_ntd_mobility(year:int)->pd.DataFrame:
-    ntd = load_ntd(year)
-    mobility = load_mobility()
-    m1 = pd.merge(
-    mobility,
-    ntd,
-    how="inner",
-    on="agency_name")
-    agency_dict = {
-    "City of Fairfield, California": "City of Fairfield",
-    "Livermore / Amador Valley Transit Authority": "Livermore-Amador Valley Transit Authority",
-    "Nevada County Transit Services": "Nevada County",
-    "Omnitrans": "OmniTrans"}
-    
-    m1.agency_name = m1.agency_name.replace(agency_dict)
-    m1.agency_name = m1.agency_name.str.strip()
-    m1 = m1.drop_duplicates(subset = ["agency_name"]).reset_index(drop = True)
-    return m1
-
 def ntd_operator_info(year:int, organization_name:str)->pd.DataFrame:
     ntd_mobility_df = merge_ntd_mobility(year)
     op_profiles = op_prep.operators_with_rt()[['organization_name']]
@@ -400,6 +345,7 @@ def ntd_operator_info(year:int, organization_name:str)->pd.DataFrame:
     
     m1 = m1.fillna('None')
     return m1
+
 def concatenate_trips(
     date_list: list,
 ) -> pd.DataFrame:

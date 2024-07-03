@@ -130,26 +130,24 @@ def merge_ntd_mobility(year:int)->pd.DataFrame:
     m1.agency_name = m1.agency_name.replace(agency_dict)
     m1.agency_name = m1.agency_name.str.strip()
     m1 = m1.drop_duplicates(subset = ["agency_name"]).reset_index(drop = True)
-    
-    # SHOULD THE RESULTS BE SAVED OUT TO GCS?
+    m1 = m1.drop(columns = ["agency_name"])
     return m1
 
 if __name__ == "__main__":
 
-    from update_vars import analysis_date_list
+    from update_vars import analysis_date_list, ntd_latest_year
     
     EXPORT = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
-    year = 2022
     start = datetime.datetime.now()
     
-    # CHANGE THIS LATER
     for analysis_date in analysis_date_list:
         t0 = datetime.datetime.now()
         df = create_gtfs_dataset_key_to_organization_crosswalk(
             analysis_date
         )
         
-        ntd_df = merge_ntd_mobility(2022)
+        # Add NTD
+        ntd_df = merge_ntd_mobility(ntd_latest_year)
         
         crosswalk_df = pd.merge(df,
         ntd_df,
@@ -157,9 +155,11 @@ if __name__ == "__main__":
         right_on = ["ntd_id"],
         how = "left")
         
-        # CHANGE THIS LATER
+        # Drop ntd_id from ntd_df to avoid confusion
+        crosswalk_df = crosswalk_df.drop(columns = ["ntd_id"])
+        
         crosswalk_df.to_parquet(
-            f"{SCHED_GCS}{EXPORT}_{analysis_date}_AH_TESTING.parquet"
+            f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
         )
         t1 = datetime.datetime.now()
         print(f"finished {analysis_date}: {t1-t0}")

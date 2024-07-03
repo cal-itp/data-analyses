@@ -7,27 +7,18 @@
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
-### 7/1/2024 Questions 
-[Issue 1159](https://github.com/cal-itp/data-analyses/issues/1159)
-* Cardinal Direction [Issue 1135](https://github.com/cal-itp/data-analyses/issues/1135)
-    * I reran everything for all the dates.
-    * How do I publish this to public GCS?
-    * All the charts run properly after my change (tested only on a few operators)
-    * Filling in nan with direction_id. 
-        * I was merging the work from `gtfs_digest/merge_data` incorrectly with the stuff from `schedule_stats_by_route_direction`
-        * However, when you say all rows should merge, that's not true since since some rows are found in schedule data only and some are RT data only? 
-        * Also in `gtfs_funnel/schedule_stats_by_route_direction.py` a lot of rows simply are `nan` for `direction_id` at the `trips` grain. Shouldn't it be filled with 0? 
-    * How do I add supporting diagrams/docs? 
-* I added a new script with `ntd` stuff called `ntd_annual_database_agency` to be incorporated into `gtfs_funnel/operator_scheduled_stats`.
-    * I plan to load this line around lines 158-175.
-    * Why do you like to read in parquets instead of just running a funciton and returning a dataframe? 
-    * Do I rerun the `preprocess_schedule_only` part in the `MAKEFILE` again?
-    * How do I publish this to our public GCS?
-* Monthly Service Hours by weekday/weekend
-    * How do I add a new dataset to GCS? 
-    * Where do I run it? Within `gtfs_funnel`? 
 
-**Notes**
+### 7/4/2024
+* Upload datasets to the public GCS.
+* Rerun the entire portfolio?
+
+### 7/3/2024 Goals
+* Switch color palette to colorblind friendly one.
+* Switch NTD info to crosswalk. Read in crosswalk file when I load in `gtfs_digest/_section2_utils/operator_profiles`.
+    * Question: Do I need to upload this specific operator_profile view with all the NTD stuff to the public GCS?
+* Move Monthly Services data to its own file in `gtfs_digest`
+* Rerun a subset of operators for the GTFS Digest test site. 
+### 7/2/2024 Notes 
 * <s>Cardinal Direction
     * There's no stipulation that nan values in `direction_id` need to be filled.
     * Some routes only run one way, that's why `direction_id` is only populated once. 
@@ -51,6 +42,27 @@
 * How to upload stuff to the public GCS folder.
     * `gtfs_digest/publish_public_data`.
     * Remove `monthly_scheduled_service` and replace it with my dataframe from above.
+### 7/1/2024 Questions 
+[Issue 1159](https://github.com/cal-itp/data-analyses/issues/1159)
+* Cardinal Direction [Issue 1135](https://github.com/cal-itp/data-analyses/issues/1135)
+    * I reran everything for all the dates.
+    * How do I publish this to public GCS?
+    * All the charts run properly after my change (tested only on a few operators)
+    * Filling in nan with direction_id. 
+        * I was merging the work from `gtfs_digest/merge_data` incorrectly with the stuff from `schedule_stats_by_route_direction`
+        * However, when you say all rows should merge, that's not true since since some rows are found in schedule data only and some are RT data only? 
+        * Also in `gtfs_funnel/schedule_stats_by_route_direction.py` a lot of rows simply are `nan` for `direction_id` at the `trips` grain. Shouldn't it be filled with 0? 
+    * How do I add supporting diagrams/docs? 
+* I added a new script with `ntd` stuff called `ntd_annual_database_agency` to be incorporated into `gtfs_funnel/operator_scheduled_stats`.
+    * I plan to load this line around lines 158-175.
+    * Why do you like to read in parquets instead of just running a funciton and returning a dataframe? 
+    * Do I rerun the `preprocess_schedule_only` part in the `MAKEFILE` again?
+    * How do I publish this to our public GCS?
+* Monthly Service Hours by weekday/weekend
+    * How do I add a new dataset to GCS? 
+    * Where do I run it? Within `gtfs_funnel`? 
+
+
 ### 6/26/2024 Refactor Summer goals
 * Working on cardinal direction stuff. 
 * Then incorporate NTD data into the actual pipeline of `operator_profiles`.
