@@ -123,6 +123,8 @@ def load_operator_profiles()->pd.DataFrame:
     """
     op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
     
+    op_profiles_df = pd.read_parquet(op_profiles_url)
+    
     ntd_cols = [
         "schedule_gtfs_dataset_key",
         "counties_served",
@@ -135,25 +137,37 @@ def load_operator_profiles()->pd.DataFrame:
         "reporter_type"
     ]
     
-    # Load NTD through the crosswalk for the most recent date
-    most_recent_date = rt_dates.y2024_dates[-1]
+    all_dates = (rt_dates.y2024_dates + rt_dates.y2023_dates + 
+             rt_dates.oct2023_week + rt_dates.apr2023_week + 
+             rt_dates.apr2024_week
+            )
     
-    ntd_df = helpers.import_schedule_gtfs_key_organization_crosswalk(most_recent_date)[
-    ntd_cols]
-    
-    op_profiles_df = pd.read_parquet(op_profiles_url)
-    
-    # Keep only the most recent row
-    op_profiles_df1 = (op_profiles_df
-                       .sort_values(by = ['service_date'], ascending = False)
-                       .drop_duplicates(subset = ["schedule_gtfs_dataset_key",
-                                                  "name"])
-                      ).reset_index(drop = True)
+    # Add NTD data.
+    CROSSWALK = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
+    crosswalk_df = (
+        time_series_utils.concatenate_datasets_across_dates(
+            SCHED_GCS,
+            CROSSWALK,
+            all_dates,
+            data_type="df",
+            columns=ntd_cols
+        )
+        .sort_values(["service_date"])
+        .reset_index(drop=True)
+    )
     
     # Merge
-    op_profiles_df1 = pd.merge(op_profiles_df1, ntd_df, on = ["schedule_gtfs_dataset_key"], how = "left")
+    merge_cols = ["schedule_gtfs_dataset_key", "service_date"]
+    op_profiles_df1 = pd.merge(op_profiles_df, 
+                               crosswalk_df, 
+                               on = merge_cols, 
+                               how = "left")
     
-    return op_profiles_df1
+    # Drop duplicates created after merging
+    op_profiles_df2 = (op_profiles_df1
+                       .drop_duplicates(subset = list(op_profiles_df1.columns))
+                       .reset_index(drop = True))
+    return op_profiles_df2
 
 if __name__ == "__main__":
     

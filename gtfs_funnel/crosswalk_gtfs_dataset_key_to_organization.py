@@ -57,6 +57,7 @@ def create_gtfs_dataset_key_to_organization_crosswalk(
 def load_ntd(year: int) -> pd.DataFrame:
     """
     Load NTD Data stored in our warehouse.
+    Select certain columns.
     """
     df = (
         tbls.mart_ntd.dim_annual_ntd_agency_information()
@@ -146,7 +147,8 @@ if __name__ == "__main__":
             analysis_date
         )
         
-        # Add NTD
+        # Add some NTD data: if I want to delete this, simply take out
+        # ntd_df and the crosswalk_df merge.
         ntd_df = merge_ntd_mobility(ntd_latest_year)
         
         crosswalk_df = pd.merge(df,
@@ -156,7 +158,7 @@ if __name__ == "__main__":
         how = "left")
         
         # Drop ntd_id from ntd_df to avoid confusion
-        crosswalk_df = crosswalk_df.drop(columns = ["ntd_id"])
+        crosswalk_df = crosswalk_df.drop(columns = ["ntd_id", "agency_name"])
         
         crosswalk_df.to_parquet(
             f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"

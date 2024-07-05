@@ -77,6 +77,7 @@ def load_operator_ntd_profile(organization_name:str)->pd.DataFrame:
     op_profiles_url,
     filters=[[("organization_name", "==", organization_name)]])
     
+    # Keep only the most recent row
     op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date'], ascending = False).head(1)
     
     # Rename dataframe
@@ -85,7 +86,7 @@ def load_operator_ntd_profile(organization_name:str)->pd.DataFrame:
 
 def load_operator_service_hours(name:str)->pd.DataFrame:
 
-    url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profile_portfolio_view}.parquet"
+    url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.scheduled_service_hours}.parquet"
 
     df = pd.read_parquet(url,
     filters=[[(("name", "==", name))]])
