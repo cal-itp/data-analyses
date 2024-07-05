@@ -30,7 +30,6 @@ route_typologies_data:
 timeseries_preprocessing: 
 	python clean_route_naming.py
 
-
 # monthly scheduled service, download after the end of each month
 monthly_scheduled_data:
 	python download_monthly_service.py
@@ -43,6 +42,9 @@ funnel_gtfs_single_day:
 	make preprocess_schedule_only 
 	make timeseries_preprocessing
 
+cardinal_direction_temp:
+	python schedule_stats_by_route_direction.py 
+	python clean_route_naming.py
 
 all:
 	make funnel_gtfs_single_day

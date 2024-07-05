@@ -33,12 +33,15 @@ with open("color_palettes.yml") as f:
     color_dict = yaml.safe_load(f)
     
 """
-Schedule_vp_metrics
-Functions
+Data
 """
 def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
+    """
+    Load schedule versus vehicle positions file.
+    """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
+    # Keep only rows that are found in both schedule and real time data
     df = (pd.read_parquet(schd_vp_url, 
           filters=[[("organization_name", "==", organization),
          ("sched_rt_category", "==", "schedule_and_vp")]])
@@ -69,8 +72,14 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
 
     return df
 
-
+"""
+Data Manipulation
+"""
 def route_stats(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Find overall statistics for a route.
+    This dataframe backs the last two text table charts.
+    """
     most_recent_date = df["Date"].max()
     route_merge_cols = ["Route", "Direction", "dir_0_1"]
 
@@ -110,13 +119,18 @@ def route_stats(df: pd.DataFrame) -> pd.DataFrame:
         .sort_values(["Route", "Direction"])
         .reset_index(drop=True)
     )
-
+    
+    # Fill nans
     numeric_cols = table_df.select_dtypes(include="number").columns
     table_df[numeric_cols] = table_df[numeric_cols].fillna(0)
     table_df.columns = table_df.columns.str.title().str.replace("_", " ")
     return table_df
 
 def timeliness_trips(df: pd.DataFrame):
+    """
+    Pivot datafarme for the charts that illustrate
+    how timely a route's trips are. 
+    """
     to_keep = [
         "Date",
         "Organization",
@@ -150,6 +164,10 @@ def timeliness_trips(df: pd.DataFrame):
     return melted_df
 
 def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
+    """
+    Find the % of a journey that recorded 2+ vehicle positions per
+    minute.
+    """
     to_keep = [
         "Date",
         "Organization",
@@ -180,21 +198,12 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
     return df3
 
 """
-Operator Level
-"""
-def load_operator_schedule_rt_category(schedule_gtfs_key: list) -> pd.DataFrame:
-    df = pd.read_parquet(
-        f"{RT_SCHED_GCS}digest/operator_schedule_rt_category.parquet",
-        filters=[[("schedule_gtfs_dataset_key", "in", schedule_gtfs_key)]],
-    )
-    df.n_trips = df.n_trips.astype(int).fillna(0)
-    return df
-
-
-"""
 Charts
 """
 def divider_chart(df: pd.DataFrame, text):
+    """
+    This chart creates only a title.
+    """
     df = df.head(1)
     # Create a text chart using Altair
     chart = (
@@ -212,6 +221,9 @@ def divider_chart(df: pd.DataFrame, text):
     return chart
 
 def clean_data_charts(df:pd.DataFrame, y_col:str)->pd.DataFrame:
+    """
+    Do some basic cleaning to the datafarmes.
+    """
     df["Period"] = df["Period"].str.replace("_", " ").str.title()
     df[y_col] = df[y_col].fillna(0).astype(int)
     df[f"{y_col}_str"] = df[y_col].astype(str)
@@ -219,6 +231,10 @@ def clean_data_charts(df:pd.DataFrame, y_col:str)->pd.DataFrame:
     return df
 
 def set_y_axis(df, y_col):
+    """
+    Set y_axis automatically depending on the
+    column used to generate the y_axis.
+    """
     if "%" in y_col:
         max_y = 100
     elif "VP" in y_col:
@@ -263,7 +279,7 @@ def grouped_bar_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=color_dict["four_color"]),
+                scale=alt.Scale(range=color_dict["two_colors"]),
                 ),
             tooltip=tooltip_cols,
         ))
@@ -429,7 +445,7 @@ def base_facet_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=color_dict["red_green_yellow"]),
+                scale=alt.Scale(range=color_dict["tri_color"]),
             ),
             tooltip=tooltip_cols,
         )
@@ -549,57 +565,8 @@ def create_text_table(df: pd.DataFrame, direction: int):
             height=250,
         )
     return text_chart
-    
-def frequency_chart(df: pd.DataFrame):
-    df["Frequency in Minutes"] = (
-        "A trip going this direction comes every "
-        + df.frequency_in_minutes.astype(int).astype(str)
-        + " minutes"
-    )
-    
-    # Define the fixed x-axis values
-    fixed_x_values = [0,30,60,90,120,150,180,210,240]
-    
-    color_scale = alt.Scale(
-        domain= color_dict["freq_domain"],
-        range = color_dict["freq_range"]
-    )
-    
-    chart = (
-        alt.Chart(df)
-        .properties(width=180, height=alt.Step(10))
-        .mark_bar()
-        .encode(
-            alt.Y(
-                "yearmonthdate(Date):O",
-                title="Date",
-                axis=alt.Axis(format="%b %Y"),
-            ),
-            alt.X(
-                "frequency_in_minutes:Q",
-                title=_report_utils.labeling("frequency_in_minutes"),
-                axis=alt.Axis(values=fixed_x_values, title="Frequency in Minutes")
-            ),
-            alt.Color(
-                "frequency_in_minutes:Q",
-                scale=color_scale,
-            ).title(_report_utils.labeling("frequency_in_minutes")),
-            alt.Row("Period:N")
-            .title(_report_utils.labeling("Period"))
-            .header(labelAngle=0),
-            alt.Column("Direction:N").title(_report_utils.labeling("Direction")),
-            tooltip=["Date", "Route", "Frequency in Minutes", "Period", "Direction",],
-        )
-    )
-    chart = chart.properties(
-        title={
-            "text": readable_dict["frequency_graph"]["title"],
-            "subtitle": readable_dict["frequency_graph"]["subtitle"],
-        }
-    )
-    return chart
 
-def frequency_chart2(
+def frequency_chart(
     df: pd.DataFrame, direction_id: int, title: str, subtitle: str
 ):
     df["Frequency in Minutes"] = (
@@ -618,7 +585,7 @@ def frequency_chart2(
 
     chart = (
         alt.Chart(df)
-        .mark_bar(size=7, clip=True)
+        .mark_bar(size=3, clip=True)
         .encode(
             y=alt.Y(
                 "yearmonthdate(Date):O",
@@ -649,6 +616,7 @@ def frequency_chart2(
         }
     )
     return chart
+
 """
 Route-Direction
 Section
@@ -698,7 +666,6 @@ def filtered_route(
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    # display(avg_scheduled_min_graph)
     timeliness_trips_dir_0 = (
             (
                 base_facet_chart(
@@ -730,9 +697,8 @@ def filtered_route(
             .transform_filter(xcol_param)
         )
 
-    # display(timeliness_trips_dir_1)
     frequency_graph_dir_0 = (
-    frequency_chart2(df, 
+    frequency_chart(df, 
                      0,
                      readable_dict["frequency_graph"]["title"],
                      readable_dict["frequency_graph"]["subtitle"],)
@@ -741,14 +707,14 @@ def filtered_route(
     )
     
     frequency_graph_dir_1 = (
-    frequency_chart2(df, 
+    frequency_chart(df, 
                      1,
                      readable_dict["frequency_graph"]["title"],
                      "",)
     .add_params(xcol_param)
     .transform_filter(xcol_param)
     )
-    # display(frequency_graph)
+    
     speed_graph = (
         base_facet_line(
             df,
@@ -759,7 +725,6 @@ def filtered_route(
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    # display(speed_graph)
     vp_per_min_graph = (
         (
             base_facet_with_ruler_chart(
@@ -776,7 +741,6 @@ def filtered_route(
         .transform_filter(xcol_param)
     )
 
-    # display(rt_vp_per_min_graph)
     sched_vp_per_min = (
         base_facet_circle(
             sched_journey_vp,
@@ -789,7 +753,6 @@ def filtered_route(
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    # display(sched_vp_per_min)
     spatial_accuracy = (
         base_facet_with_ruler_chart(
             all_day,
@@ -815,6 +778,7 @@ def filtered_route(
             .transform_filter(xcol_param)
         )
     
+    # Separate out the charts themetically.
     ride_quality = divider_chart(df, "The charts below measure the quality of the rider experience for this route.")
     data_quality = divider_chart(df, "The charts below describe the quality of GTFS data collected for this route.")
     
@@ -833,13 +797,6 @@ def filtered_route(
     text_dir0,
     text_dir1]
 
-  
-    """ chart = alt.vconcat(*chart_list).properties(
-        resolve=alt.Resolve(
-            scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))
-        )
-    )
-    """
     chart = alt.vconcat(*chart_list)
 
     return chart

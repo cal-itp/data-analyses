@@ -19,20 +19,20 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
     STOP_TIMES_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction
     
     stop_times_gdf = pd.read_parquet(
-    f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet",
-    filters=[[("stop_primary_direction", "!=", "Unknown")]
+        f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet",
+        filters=[[("stop_primary_direction", "!=", "Unknown")]
     ])
     
     trip_scheduled_col = [
-    "route_id",
-    "trip_instance_key",
-    "gtfs_dataset_key",
-    "shape_array_key",
-    "direction_id",
-    "route_long_name",
-    "route_short_name",
-    "route_desc",
-    "name"
+        "route_id",
+        "trip_instance_key",
+        "gtfs_dataset_key",
+        "shape_array_key",
+        "direction_id",
+        "route_long_name",
+        "route_short_name",
+        "route_desc",
+        "name"
     ]
         
     trips_df = helpers.import_scheduled_trips(analysis_date, 
@@ -46,9 +46,6 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
                   "shape_array_key"]
     
     stop_times_with_trip = pd.merge(stop_times_gdf, trips_df, on = merge_cols)
-    
-    # Fill in missing direction id with 0, per our usual practice.
-    stop_times_with_trip.direction_id = stop_times_with_trip.direction_id.fillna(0)
     
     main_cols = [
         "route_id",
@@ -73,9 +70,12 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
     )
     
     # Drop duplicates so only the top stop_primary_direction is kept.
-    agg3 = agg2.drop_duplicates(subset= main_cols).reset_index(drop=True)
+    agg3 = (agg2.drop_duplicates(subset= main_cols)
+            .reset_index(drop=True)
+            .drop(columns=["total_stops"])
+           )
     
-    agg3 = agg3.drop(columns=["total_stops"])
+    agg3 = agg3.rename(columns = {"stop_primary_direction":"route_primary_direction"})
     return agg3
 
 def assemble_scheduled_trip_metrics(
@@ -124,10 +124,7 @@ def assemble_scheduled_trip_metrics(
         on = "trip_instance_key",
         how = "inner"
     )
-    
-    # display(median_stop_meters_df.info())
-    median_stop_meters_df.direction_id = median_stop_meters_df.direction_id.fillna(0)
-   
+
     return median_stop_meters_df
     
     
@@ -196,12 +193,10 @@ if __name__ == "__main__":
         
         # Find metrics on the trip grain
         trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
-        trip_metrics = trip_metrics.rename(columns = {"stop_primary_direction":"route_primary_direction"})
-        
+ 
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
         
-       
         route_group_merge_cols = [
             "schedule_gtfs_dataset_key", 
             "route_id", 
