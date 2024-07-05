@@ -7,10 +7,73 @@
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
+
+### 7/5/2024
+* <s>Fix `operator_profiles` so all the dates & operators are included.</s>
+* <s>Upload datasets to the public GCS.
+    * Add this to the make file.
+    * Make sure datasets have a CSV and parquet version.</s>
+* Rerun a subset of operator...Didn't work on 7/3.
+
+### 7/3/2024 Goals
+* <s>Switch color palette to colorblind friendly one.</s>
+* <s>Switch NTD info to crosswalk. Read in crosswalk file when I load in `gtfs_digest/_section2_utils/operator_profiles`.</s>
+    * Question: Do I need to upload this specific operator_profile view with all the NTD stuff to the public GCS?
+* <s>Move Monthly Services data to its own file in `gtfs_digest`</s>
+* <b>Rerun a subset of operators for the GTFS Digest test site. AH: this isn't working, posted on data_office_hours</b>
+
+### 7/2/2024 Notes 
+* <s>Cardinal Direction
+    * There's no stipulation that nan values in `direction_id` need to be filled.
+    * Some routes only run one way, that's why `direction_id` is only populated once. 
+    * By filling in `direction_id` in some places and not others, this causes everything to be disjointed. When merging the `sched_vs_rt` and `cardinal_direction` dataframes together, this will impact the merges.
+    * Action: Delete all lines that fill na for `direction_id`. Rerun `gtfs_funnel/Makefile/cardinal_dir_temp` first and then `gtfs_digest/merge_data`</s>
+    * Left to do:
+        * Upload the new dataset to the public GCS folder.
+        * Once all the NTD/Monthly Service stuff is done: rerun the portfolio.
+        * Create supporting diagrams/text.
+* NTD
+    * Actions:
+        * Use `dim_annual_ntd_agency_service` instead of the table I currently use.
+            * Amanda: `dim_annual_ntd_agency_service` doesn't contain the columns such as the UZA/reporter type/etc that I need for the portfolio.Clarified w/ Vivek: this table is ok to use. NTD is just behind.
+        * Add this to `crosswalk_gtfs_dataset_key_to_organization` instead of `operator_profiles` because the `crosswalk` file already contains NTD ID. 
+        * Delete out `ntd_annual_database_agency` stuff and just add it directly into the crosswalk file.
+        * Read in crosswalk file when I load in `gtfs_digest/_section2_utils/operator_profiles`
+* Monthly Services
+    * This is a new area in the mermaid diagram in `gtfs_funnel`.
+    * Because there isn't a broad use for it and it's portfolio specific, just leave it in the `gtfs_digest` funnel but upload it to GCS.
     
-### 6/25/2024
+* How to upload stuff to the public GCS folder.
+    * `gtfs_digest/publish_public_data`.
+    * Remove `monthly_scheduled_service` and replace it with my dataframe from above.
+### 7/1/2024 Questions 
+[Issue 1159](https://github.com/cal-itp/data-analyses/issues/1159)
+* Cardinal Direction [Issue 1135](https://github.com/cal-itp/data-analyses/issues/1135)
+    * I reran everything for all the dates.
+    * How do I publish this to public GCS?
+    * All the charts run properly after my change (tested only on a few operators)
+    * Filling in nan with direction_id. 
+        * I was merging the work from `gtfs_digest/merge_data` incorrectly with the stuff from `schedule_stats_by_route_direction`
+        * However, when you say all rows should merge, that's not true since since some rows are found in schedule data only and some are RT data only? 
+        * Also in `gtfs_funnel/schedule_stats_by_route_direction.py` a lot of rows simply are `nan` for `direction_id` at the `trips` grain. Shouldn't it be filled with 0? 
+    * How do I add supporting diagrams/docs? 
+* I added a new script with `ntd` stuff called `ntd_annual_database_agency` to be incorporated into `gtfs_funnel/operator_scheduled_stats`.
+    * I plan to load this line around lines 158-175.
+    * Why do you like to read in parquets instead of just running a funciton and returning a dataframe? 
+    * Do I rerun the `preprocess_schedule_only` part in the `MAKEFILE` again?
+    * How do I publish this to our public GCS?
+* Monthly Service Hours by weekday/weekend
+    * How do I add a new dataset to GCS? 
+    * Where do I run it? Within `gtfs_funnel`? 
+
+
+### 6/26/2024 Refactor Summer goals
 * Working on cardinal direction stuff. 
-    
+* Then incorporate NTD data into the actual pipeline of `operator_profiles`.
+* Publish `total_service_hours` by weekday, Saturday, and Sunday onto GCS. This is its own dataset.
+* Update colors to be color blind friendly?
+    * [This article](https://medium.com/swlh/how-i-designed-a-colorblind-friendly-palette-8a91a49f1220) has some nice palettes [1](https://miro.medium.com/v2/resize:fit:640/format:webp/1*hWdA4lnxgt8Iclg87jFwig.png) and [2](https://miro.medium.com/v2/resize:fit:640/format:webp/1*FTn-we6PFb-BoyWkRQ_sYQ.png).
+    * [This one too on page 2](https://www.nceas.ucsb.edu/sites/default/files/2022-06/Colorblind%20Safe%20Color%20Schemes.pdf)
 ### 6/6/2024
 * Troubleshooting the # of unique routes an operator runs. BART seems really high, which is the impetus for this investigation. 
     * Work is in `18_operator_profiles.ipynb`.

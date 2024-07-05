@@ -2,16 +2,10 @@ import calitp_data_analysis.magics
 import geopandas as gpd
 import pandas as pd
 import yaml
-"""
-Charts
-"""
-def reverse_snakecase(df):
-    """
-    Clean up columns to remove underscores and spaces.
-    """
-    df.columns = df.columns.str.replace("_", " ").str.strip().str.title()
-    return df
 
+"""
+Functions that are used across _section_1_utils and _section_2_utils.
+"""
 def labeling(word: str) -> str:
     return (
         word.replace("_", " ")
@@ -22,9 +16,6 @@ def labeling(word: str) -> str:
         .replace("Ttl", "Total")
     )
 
-"""
-Yaml
-"""
 with open("readable.yml") as f:
     readable_dict = yaml.safe_load(f)
     

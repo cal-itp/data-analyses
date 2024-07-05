@@ -4,6 +4,14 @@
 * [This creates the dataframe that forms the basis of GTFS Digest](https://github.com/cal-itp/data-analyses/blob/main/gtfs_digest/merge_data.py)
 * [Mermaid 1](https://mermaid.live/view#pako:eNqNVttu2zgQ_RWCi8BZwAosqWpsPRRI6sh96AKLNFgEKxsFLY5sohKpklS2bpB_X1KUY_rW1A-2zDlz5sxwONQzLgQFnOIgCOZcM11BimYP2Rd0w0m10axQ6G_WQMU4oJkkjKs577AXF89zjhDjTKeoe0RooNdQwyBFgyVRMBj6q_8QyciyAjV4hRtTI1lN5OajqIS0fn_cJVmS3Wxdd4gH-KF3qNFodAy5FZKCPAeyGZyzKSgEp_s6suz67tbDaJCa7UHKshw484v9MV8vFxdzPudlJf4r1kRq9PneAYqKKDWFEkkoNCpZVaV9pgf2gsmigi2i03CCIeoB2SQb3UU2pIWodrmSpFkjxfjKkFCycYZtDgjd5KpYA20rWKAg-IBuwlyKVkNAmeVlgi88sINEuWhAEi3kvu3KGuNcadEsthLs5zZ_gjWzWTRCMcupXLDbMFewqoFrpBoAqnY-ByKCHrfPG_Ys5DJXa9JAYEOjHuqR2eWv2-XFn2ma9lX1uUhH9jEkOXky2a3gbU2WtiFMLgxjtws77AmVy8ucVBXSkjXnhN4_dFqRZjX4Qn22Za9zmftopO1R-j0hhSmXTa0mOw0eLvxWnwld9KGLgxKhN_ftK6OethOa6KXpO0JP1CREZ_XQXg89u2X2jJsxQ4Nal0XxqkbB9xZ48Ua9nDTT0G1tp8mbyS5852hve9TB_vTUfimm1uFJof3zOP3VeZw6SOSOnPsTH9D4DeXL69FbBcDp0dSwTqZkkoHyhWYnFHnWjjgL81pwvQ4DM3NCJ-3etJ0mdqpS9hNc8RAn5zq9J4ocUeQT-fHuHSw-FLWvftdMlJioZnyhjvZkU85OzbeZm2-zMLcH2ApBZLWSsLJ8Wji6TsssPvaKjmr2-wTdSl9Or8NcWVxFPr0qRo0U5iqAo8RObXBH4Wf-eHAbPPbd59Xh0Rn27gAvAkJ4iGuQNWHUvER09_ocd_f9HKfmkUJJ2krPsbkcDZS0WnzZ8AKnWrYwxCbcao3TklTK_Gsbu11TRozeegsBykzYv9xbSveyMsQN4Th9xj9wGkTx5CpJkjhOkvej8WiSDPEGp-G75CpKovA6CZPrSTKJXob4pxCGdHQ1GU_exeNkEsfj6_ejeNzR_dsZOx0v_wPlerTj)
 * [Mermaid 2](https://github.com/cal-itp/data-analyses/blob/ah_gtfs_portfolio/gtfs_funnel/mermaid.md)
+* `MAKEFILE` temporary code for running cardinal direction stuff
+cardinal_direction_temp:
+	python schedule_stats_by_route_direction.py 
+	python clean_route_naming.py
+    
+### 6/26/2024
+* Address comments on [PR #1156](https://github.com/cal-itp/data-analyses/pull/1156).
+* Rerun file for all the dates.
 
 ### 6/19/2024
 [PR 1145](https://github.com/cal-itp/data-analyses/pull/1145)
