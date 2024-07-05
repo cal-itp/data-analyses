@@ -14,6 +14,7 @@
     * Add this to the make file.
     * Make sure datasets have a CSV and parquet version.</s>
 * Rerun a subset of operator...Didn't work on 7/3.
+* Update `README` with new template created as part of summer refactor 2024. 
 
 ### 7/3/2024 Goals
 * <s>Switch color palette to colorblind friendly one.</s>
