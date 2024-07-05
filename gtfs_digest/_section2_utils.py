@@ -585,7 +585,7 @@ def frequency_chart(
 
     chart = (
         alt.Chart(df)
-        .mark_bar(size=7, clip=True)
+        .mark_bar(size=3, clip=True)
         .encode(
             y=alt.Y(
                 "yearmonthdate(Date):O",
