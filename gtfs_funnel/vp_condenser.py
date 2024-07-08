@@ -32,19 +32,17 @@ def condense_vp_to_linestring(
         columns = ["trip_instance_key", "x", "y", 
                    "vp_idx", "vp_primary_direction", 
                    "location_timestamp_local", 
-                   "dwell_time_sec"
+                   "moving_timestamp_local",
                   ],
-    )
-    
-    vp_gdf = delayed(wrangle_shapes.vp_as_gdf)(vp, crs = WGS84)
-    
+    ).pipe(wrangle_shapes.vp_as_gdf, crs = WGS84)
+        
     vp_condensed = delayed(vp_transform.condense_point_geom_to_line)(
-        vp_gdf,
+        vp,
         group_cols = ["trip_instance_key"],
         geom_col = "geometry",
         other_cols = ["vp_idx", "location_timestamp_local", 
+                      "moving_timestamp_local",
                       "vp_primary_direction",
-                      "dwell_time_sec"
                      ],
     ).set_geometry("geometry").set_crs(WGS84)
     
@@ -117,7 +115,7 @@ if __name__ == "__main__":
     for analysis_date in [rt_dates.DATES["apr2024"]]:#analysis_date_list:
         start = datetime.datetime.now()
         
-        condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
+        #condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
         
         time1 = datetime.datetime.now()
         
