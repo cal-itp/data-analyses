@@ -18,7 +18,7 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
     """
     STOP_TIMES_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction
     
-    stop_times_gdf = pd.read_parquet(
+    stop_times_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet",
         filters=[[("stop_primary_direction", "!=", "Unknown")]
     ])
@@ -45,7 +45,7 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
                   "schedule_gtfs_dataset_key", 
                   "shape_array_key"]
     
-    stop_times_with_trip = pd.merge(stop_times_gdf, trips_df, on = merge_cols)
+    stop_times_with_trip = pd.merge(stop_times_df, trips_df, on = merge_cols)
     
     main_cols = [
         "route_id",
