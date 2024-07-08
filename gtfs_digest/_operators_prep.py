@@ -28,6 +28,9 @@ def operator_profiles()->pd.DataFrame:
     return op_profiles4
 
 def operators_with_rt()->pd.DataFrame:
+    """
+    Operators who have schedule and realtime data.
+    """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
     schd_vp_df = (pd.read_parquet(schd_vp_url, 
@@ -64,6 +67,10 @@ def operators_with_rt()->pd.DataFrame:
     return final
 
 def operators_schd_only_rt()->pd.DataFrame:
+    """
+    Operators who have schedule only OR have 
+    both schedule and realtime data.
+    """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
     schd_vp_df = (pd.read_parquet(schd_vp_url, 

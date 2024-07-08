@@ -3,14 +3,18 @@
 * python portfolio/portfolio.py build gtfs_digest  --deploy 
 * cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ../gtfs_digest
 * RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
-
+* `import sys sys.path.append("../gtfs_funnel") import crosswalk_gtfs_dataset_key_to_organization`
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
 
 ### 7/8/2024
 * Rerun a subset of operator...Didn't work on 7/3.
-* Update `README` with new template created as part of summer refactor 2024. 
+* Finish updating `README` with new template created as part of summer refactor 2024. 
+* Update `methodology.md`
+* Take a look at cardinal direction work again: I noticed one route has four different directions and this shouldn't be happening.
+* Understand how `publish_public_data.py` works.
+
 ### 7/5/2024
 * <s>Fix `operator_profiles` so all the dates and operators are included.</s>
 * <s>Upload datasets to the public GCS.
