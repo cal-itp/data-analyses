@@ -8,8 +8,11 @@
 * Portfolio:
     * Figure out Makefile situation.
 
+### 7/8/2024
+* Rerun a subset of operator...Didn't work on 7/3.
+* Update `README` with new template created as part of summer refactor 2024. 
 ### 7/5/2024
-* <s>Fix `operator_profiles` so all the dates & operators are included.</s>
+* <s>Fix `operator_profiles` so all the dates and operators are included.</s>
 * <s>Upload datasets to the public GCS.
     * Add this to the make file.
     * Make sure datasets have a CSV and parquet version.</s>
