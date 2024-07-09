@@ -56,7 +56,7 @@ Official definitions of GTFS Schedule Data terms can be found [here](https://gtf
 * <b>Offpeak</b>: Summing all the trips that do not run during the AM or PM peak.
 * <b>PM Peak</b>: Defined as 3-7:59PM, when there is an anticipated surge of riders.
 * <b>Peak</b>: Summing all the of trips that run during the two peak AM and PM periods.
-* <b>Route-Direction Frequency</b>: Taking the total trips for a route going one direction by the time period and dividing this total by how many hours are associated with the time period. This is comparable to headway. For example, Route A runs 6 trips per hour going Southbound during the AM Peak. The frequency for this route-direction combination during the AM Peak would be 10 minutes.
+* <b>Route-Direction Frequency</b>: Taking the total trips for a route going one direction by the time period and dividing this total by how many hours are associated with the time period. For example, Route A runs 6 trips per hour going Southbound during the AM Peak. The frequency for this route-direction combination during the AM Peak would be 10 minutes.
 * <b>Route-Direction</b>: A route travels two different directions. We analyze and present realtime data for a route and its two distinct directions.
 * <b>Scheduled Service Hours</b>: The total number in hours of public transit service an operator is scheduled to provide. Due to the size of the data, we download a full week's worth of data twice a year in April and October for this metric.
 * <b>Scheduled Shape (Path)</b>: Operators provide geographic data of where a route is scheduled to travel.
