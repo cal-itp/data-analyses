@@ -17,6 +17,7 @@
 tri_color: ["#ccbb44","#5b8efd","#dd217d"]
 full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44"]
 two_colors: ["#dd217d","#fcb40e"]
+four_colors: ["#dd217d","#fcb40e","#ccbb44","#5b8efd"]
 
 # Frequency of Trips in Minutes Chart
 # Headways of 0-15 are green, 30-60 are yellow, and 60+ are red.
