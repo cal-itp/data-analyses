@@ -53,7 +53,7 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     # Find the most recent geography for each route.
     op_routes_gdf = op_routes_gdf.sort_values(by = ["service_date"], ascending = False)
     
-    # Drop any duplicates.
+    # Keep only the most recent row.
     op_routes_gdf = op_routes_gdf.drop_duplicates(
     subset=["route_long_name", 
             "route_short_name", 
