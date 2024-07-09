@@ -117,3 +117,6 @@ sched_vp_per_min_graph:
 spatial_accuracy_graph:
     title: "Spatial Accuracy"
     subtitle: "The percentage of vehicle positions that fall within 35 meters of a route's scheduled shape (path) reflects the accuracy of the collected spatial data."
+text_graph:
+    title: "Route Statistics for Direction "
+    subtitle: "Data taken from the most recent date."
