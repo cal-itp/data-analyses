@@ -164,7 +164,6 @@ final_cols = ["name","feed_key","location_type","route_type","stop_name","stop_i
     
 stoptimes_all = merge_stoptimes(*stops_all, merge_cols=merge_cols, final_cols=final_cols)
 stoptimes_all_gdf = gpd.GeoDataFrame(stoptimes_all, geometry='geometry')
-
 filtered_stoptimes_all_gdf = stoptimes_all_gdf[stoptimes_all_gdf['route_type'] == '3']
     
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/ahsc_grant'
