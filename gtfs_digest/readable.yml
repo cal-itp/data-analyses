@@ -120,3 +120,7 @@ spatial_accuracy_graph:
 text_graph:
     title: "Route Statistics for Direction "
     subtitle: "Data taken from the most recent date."
+ride_quality_graph:
+    title: "The charts below measure the quality of the rider experience for this route."
+data_quality_graph:
+    title: "The charts below describe the quality of GTFS data collected for this route."

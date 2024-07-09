@@ -630,8 +630,6 @@ def frequency_chart(
     df = clean_data_charts(df, "frequency_in_minutes")
     
     # Create color scale
-    # fixed_x_values = [0, 30, 60, 90, 120, 150, 180, 210, 240]
-
     color_scale = alt.Scale(
         domain=color_dict["freq_domain"], range=color_dict["freq_range"]
     )
@@ -840,8 +838,8 @@ def filtered_route(
         )
     
     # Separate out the charts themetically.
-    ride_quality = divider_chart(df, "The charts below measure the quality of the rider experience for this route.")
-    data_quality = divider_chart(df, "The charts below describe the quality of GTFS data collected for this route.")
+    ride_quality = divider_chart(df, readable_dict["ride_quality_graph"]["title"])
+    data_quality = divider_chart(df, readable_dict["data_quality_graph"]["title"])
     
     # Combine all the charts
     chart_list = [
