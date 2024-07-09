@@ -132,6 +132,43 @@ def plot_histogram(data, column, title):
     plt.ylabel('Number of Stops')
     plt.show()
 
-if __name__ == "__main__":
 
-    #  add all from notebook except checks/illustrations...
+analysis_dt = dt.date(2022,6,1)
+analysis_sat = dt.date(2022,6,4)
+analysis_sun = dt.date(2022,6,5)
+    
+dates_labelled = {'weekday': analysis_dt, 'saturday': analysis_sat, 'sunday': analysis_sun}
+selected_agencies = ['LA Metro', 'Salinas', 'SBMTD']
+     
+warehouse_data_by_date = {}
+for daytype in dates_labelled.keys():
+    print(daytype)
+    analysis_dt = dates_labelled[daytype]
+    # tuple ordered: feed_data, trips_data, stoptimes_data, stop_locations_gdf
+    warehouse_data_by_date[daytype] = get_feeds_trips_stops_data(selected_agencies, analysis_dt)
+        
+    stops_all = []
+
+for daytype in dates_labelled.keys():
+    print(daytype)
+    analysis_dt = dates_labelled[daytype]
+    trips = warehouse_data_by_date[daytype][1]
+    st = warehouse_data_by_date[daytype][2]
+    stops = warehouse_data_by_date[daytype][3]
+    st_merged = merge_and_aggregate_stops_and_trips(trips, st, agg_prefix=daytype)
+    stop_merged = merge_stops(st_merged, stops, ["stop_id", "feed_key"])
+    stops_all.append(stop_merged)
+        
+merge_cols = ["name","route_type", "stop_id","geometry", "stop_code", "stop_name", "location_type"]
+final_cols = ["name","feed_key","location_type","route_type","stop_name","stop_id","stop_code","geometry","n_trips_weekday","n_trips_saturday","n_trips_sunday","n_routes_weekday","n_routes_saturday","n_routes_sunday", "stop_desc"]
+    
+stoptimes_all = merge_stoptimes(*stops_all, merge_cols=merge_cols, final_cols=final_cols)
+stoptimes_all_gdf = gpd.GeoDataFrame(stoptimes_all, geometry='geometry')
+
+filtered_stoptimes_all_gdf = stoptimes_all_gdf[stoptimes_all_gdf['route_type'] == '3']
+    
+GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/ahsc_grant'
+filtered_stoptimes_all_gdf.to_parquet(f"{GCS_FILE_PATH}/tbl1_trips_perstop_07_08_2024.parquet")
+    
+
+    
