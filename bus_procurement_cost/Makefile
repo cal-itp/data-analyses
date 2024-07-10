@@ -11,5 +11,5 @@ all_bus_scripts:
 	#convert NB to HTML then to PDF
 	jupyter nbconvert --to html --no-input --no-prompt _05_cost_per_bus_analysis.ipynb
 	pip install WeasyPrint
-	weasyprint _05_cost_per_bus_analysis.html cost_per_bus_analysis_weasyprint.pdf
+	weasyprint _05_cost_per_bus_analysis.html cost_per_bus_analysis.pdf
     
