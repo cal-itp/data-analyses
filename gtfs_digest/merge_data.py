@@ -209,6 +209,55 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
     
     return df3
 
+def top_cardinal_direction(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Some routes don't change their geographies over time,
+    but their cardinal direction changes. This function finds
+    the most common direction across all the dates for a route-
+    direction_id and keeps only that value.
+    """
+    # Count the # of  times a route_primary_direction appears
+    # across all dates.
+    agg1 = (
+        df.groupby(
+            [
+                "organization_name",
+                "route_combined_name",
+                "direction_id",
+                "route_primary_direction",
+            ]
+        )
+        .agg({"service_date": "nunique"})
+        .reset_index()
+        .sort_values(
+            by=[
+                "organization_name",
+                "route_combined_name",
+                "direction_id",
+                "service_date",
+            ],
+            ascending=[True, True, True, False],
+        )
+    )
+
+    # Keep only the most common route_primary_direction
+    # for direction_id 0 and 1. Drop service-date since it's
+    # no logner needed.
+    agg2 = (
+        agg1.drop_duplicates(
+            subset=["organization_name", "route_combined_name", "direction_id"]
+        ).reset_index(drop=True)
+    ).drop(columns=["service_date"])
+
+    # Left merge to the original dataframe
+    m1 = pd.merge(
+        df.drop(columns=["route_primary_direction"]),
+        agg2,
+        on=["organization_name", "route_combined_name", "direction_id"],
+        how="left",
+    )
+    return m1
+
 if __name__ == "__main__":
     
     from shared_utils import rt_dates
@@ -265,6 +314,9 @@ if __name__ == "__main__":
         how = "left"
     )
     
+    # Find the most common cardinal direction
+    df = top_cardinal_direction(df)
+    
     integrify = [
         "n_scheduled_trips", "n_vp_trips",
         "minutes_atleast1_vp", "minutes_atleast2_vp",
@@ -273,7 +325,7 @@ if __name__ == "__main__":
     ]
     
     df[integrify] = df[integrify].fillna(0).astype("int")
-
+    
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
