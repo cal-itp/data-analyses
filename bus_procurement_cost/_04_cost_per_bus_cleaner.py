@@ -1,5 +1,5 @@
 import pandas as pd
-from _bus_cost_utils import GCS_PATH, outlier_flag
+from _bus_cost_utils import GCS_PATH, new_outlier_flag_v2
 from scipy.stats import zscore
 
 
@@ -81,7 +81,7 @@ def prepare_all_data() ->pd.DataFrame:
     merge2["zscore_cost_per_bus"] = zscore(merge2["cost_per_bus"])
    
     #flag any outliers
-    merge2["is_cpb_outlier?"] = merge2["zscore_cost_per_bus"].apply(outlier_flag)
+    merge2["is_cpb_outlier?"] = new_outlier_flag_v2(merge2,'zscore_cost_per_bus')
     return merge2
 
 
