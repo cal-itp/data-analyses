@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import shared_utils
 from calitp_data_analysis.sql import to_snakecase
-from bus_cost_utils import *
+from _bus_cost_utils import GCS_PATH, new_prop_finder, new_bus_size_finder, project_type_finder, col_row_updater
 
 def clean_tircp_columns() -> pd.DataFrame:
     """
