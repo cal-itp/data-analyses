@@ -315,6 +315,7 @@ def index(
             name = site.replace(".yml", "")
             site_output_dir = PORTFOLIO_DIR / Path(name)
             sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
+            
     Path("./portfolio/index").mkdir(parents=True, exist_ok=True)
     for template in ["index.html", "_redirects"]:
         fname = f"./portfolio/index/{template}"
