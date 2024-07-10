@@ -1,4 +1,4 @@
-# Gneral Transit Feed Specification (GTFS) Digest
+# General Transit Feed Specification (GTFS) Digest
 The goal of this website is to give you an overview of transit operators that produce GTFS schedules and/or real-time data. We use data from the National Transit Database, National Association of City Transportation Officials, and GTFS feeds to deliver key insights. You can find details such as the types of routes and the total scheduled hours of public transit service for which an operator runs.
 
 For operators who produce real-time data, we also calculate additional performance metrics for all of their routes. Examples include displaying the number of on-time, early, and late trips, the average speed, and the headway for a route.
@@ -32,6 +32,6 @@ To download all of the processed data that powers this portfolio, please navigat
 ## Who We Are
 This website was created by the [California Department of Transportation](https://dot.ca.gov/)'s Division of Data and Digital Services. We are a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. For more of our work, visit our [portfolio](https://analysis.calitp.org/).
 
-<img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/CT_logo_Wht_outline.gif" alt="Alt text" width="200" height="100">
+<img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/CT_logo_Wht_outline.gif" alt="Alt text" width="100" height="100">
 
 <br>Caltrans®, the California Department of Transportation® and the Caltrans logo are registered service marks of the California Department of Transportation and may not be copied, distributed, displayed, reproduced or transmitted in any form without prior written permission from the California Department of Transportation.
