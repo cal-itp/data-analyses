@@ -27,6 +27,8 @@ def import_csv_export_parquet(file_name: Union[str, Path]):
         [f"LANE_{i}_TRUCK_FLOW" for i in range(1, 7)]  
     )
     
+    # Certain columns seemed to want float because there were NaNs
+    # while using Dask. Let's just set it to Int64
     df = pd.read_csv(
         file_name, index_col=0,
         dtype={
@@ -35,6 +37,7 @@ def import_csv_export_parquet(file_name: Union[str, Path]):
         }
     )
     
+    # This seems to be the only datetime column
     df = df.assign(
         TIME_ID = pd.to_datetime(df.TIME_ID)
     )
@@ -57,7 +60,7 @@ def concatenate_files_in_folder(file_name_pattern: str):
     
     file_name = file_name_pattern.replace("_*_", "_")
     
-    # :oop through files to import/export
+    # Loop through files to import/export
     dfs = [
         delayed(import_csv_export_parquet)(f) 
         for f in files
