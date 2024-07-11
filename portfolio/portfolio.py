@@ -310,13 +310,13 @@ def index(
     prod: bool = False,
 ) -> None:
     sites = []
-    Path("/portfolio/index").mkdir(parents=True, exist_ok=True)
     for site in os.listdir("./portfolio/sites/"):
         with open(f"./portfolio/sites/{site}") as f:
             name = site.replace(".yml", "")
             site_output_dir = PORTFOLIO_DIR / Path(name)
             sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
-
+            
+    Path("./portfolio/index").mkdir(parents=True, exist_ok=True)
     for template in ["index.html", "_redirects"]:
         fname = f"./portfolio/index/{template}"
         with open(fname, "w") as f:
