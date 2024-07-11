@@ -1,5 +1,6 @@
 directory: ./gtfs_digest/
-notebook: ./gtfs_digest/03_report.ipynb
+notebook: ./gtfs_digest/_report.ipynb
+
 parts:
 - chapters:
   - caption: District 04 - Oakland
@@ -11,17 +12,12 @@ parts:
     - organization_name: Central Contra Costa Transit Authority
     - organization_name: City and County of San Francisco
     - organization_name: City of Fairfield
-    - organization_name: City of Menlo Park
-    - organization_name: City of Petaluma
-    - organization_name: City of Rio Vista
-    - organization_name: City of Santa Rosa
-    - organization_name: City of South San Francisco
-    - organization_name: City of Union City
-    - organization_name: City of Vacaville
     - organization_name: Marin County Transit District
     - organization_name: Napa Valley Transportation Authority
-    - organization_name: Peninsula Corridor Joint Powers Board
     - organization_name: Presidio Trust
-    - organization_name: San Francisco Bay Area Rapid Transit District
+    - organization_name: San Mateo County Transit District
+
 readme: ./gtfs_digest/README.md
-title: GTFS Digest TEST
+title: GTFS Digest testing
+
+
