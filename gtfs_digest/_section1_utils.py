@@ -1,9 +1,7 @@
 # Regular
-import calitp_data_analysis.magics
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.sql import to_snakecase
-import numpy as np
 
 # Project Specific Packages
 from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, RT_SCHED_GCS, SCHED_GCS)
@@ -19,7 +17,6 @@ with open("readable.yml") as f:
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 # Charts & Maps
-from calitp_data_analysis import calitp_color_palette as cp
 import altair as alt
 import ipywidgets
 from IPython.display import HTML, Markdown, display
@@ -31,14 +28,15 @@ Data
 """
 def organization_name_crosswalk(organization_name: str) -> str:
     """
-    Used to match organization_name field with name.
+    Crosswalk organization_name field with name.
     """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
+    
     df = pd.read_parquet(
         schd_vp_url, filters=[[("organization_name", "==", organization_name)]],
     )
     
-    # Get most recent name
+    # Get most recent name.
     df = df.sort_values(by = ['service_date'], ascending = False)
     name = df.name.values[0]
     return name
@@ -52,18 +50,27 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     op_routes_url,
     filters=[[("name", "==", name)]])
     
-    # Find the most recent available geography for each route
+    # Find the most recent geography for each route.
     op_routes_gdf = op_routes_gdf.sort_values(by = ["service_date"], ascending = False)
+    
+    # Keep only the most recent row.
     op_routes_gdf = op_routes_gdf.drop_duplicates(
-    subset=["route_long_name", "route_short_name", "route_combined_name"]
+    subset=["route_long_name", 
+            "route_short_name", 
+            "route_combined_name"]
     )
+    
+    # Drop service_dates
     op_routes_gdf = op_routes_gdf.drop(columns = ['service_date'])
     
-    # Rename dataframe
+    # Rename dataframe.
     op_routes_gdf.columns = op_routes_gdf.columns.map(_report_utils.replace_column_names)
     return op_routes_gdf
 
-def get_counties():
+def get_counties()->gpd.GeoDataFrame:
+    """
+    Load a geodataframe of the California counties.
+    """
     ca_gdf = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
     my_gdf = to_snakecase(gpd.read_file(f"{ca_gdf}"))[["county_name", "geometry"]]
 
@@ -85,7 +92,10 @@ def load_operator_ntd_profile(organization_name:str)->pd.DataFrame:
     return op_profiles_df1
 
 def load_operator_service_hours(name:str)->pd.DataFrame:
-
+    """
+    Load dataframe with the total scheduled service hours 
+    a transit operator.
+    """
     url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.scheduled_service_hours}.parquet"
 
     df = pd.read_parquet(url,
@@ -101,21 +111,30 @@ Change dataframes from long to wide
 """
 def route_typology(df: pd.DataFrame)->pd.DataFrame:
     """
-    Transform dataframe to display
+    Reshape dataframe to display
     route types in a pie chart.
     """
     route_type_cols = [
        '# Downtown Local Route Types',
-       '# Local Route Types', '# Coverage Route Types', '# Rapid Route Types',
-       '# Express Route Types', '# Rail Route Types'
+       '# Local Route Types', 
+       '# Coverage Route Types', 
+       '# Rapid Route Types',
+       '# Express Route Types', 
+       '# Rail Route Types'
     ]
-    df = df[route_type_cols]
-    df2 = df.T.reset_index()
+    
+    # Subset & transform.
+    df2 = df[route_type_cols].T.reset_index()
+    
+    # Rename the columns.
     df2.columns = ['route_type','total_routes']
+    
     return df2
 
-def concat_all_columns(df):
-    # Concatenate all columns into a new column called 'all'
+def concat_all_columns(df: pd.DataFrame)->pd.DataFrame:
+    """ 
+    Concatenate all columns into a new column called 'all'
+    """
     df['all'] = df.apply(lambda row: ', '.join(row.astype(str)), axis=1)
 
     return df
@@ -124,23 +143,35 @@ def counties_served(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     """
     Find which counties an operator serves.
     """
+    # Grab counties.
     ca_counties = get_counties()
+    
+    # Do an sjoin, keeping the counties the 
+    # operator's routes touch.
     counties_served = gpd.sjoin(
     gdf,
     ca_counties.to_crs(gdf.crs),
     how="inner",
     predicate="intersects").drop(columns="index_right")
     
+    # Grab only the counties and sort alphabetically.
     counties_served = (counties_served[["county_name"]]
                        .drop_duplicates()
                        .sort_values(by = ["county_name"])
                        .reset_index(drop = True)
                       )
+    
+    # Reshape the dataframe for displaying.
     counties_served = counties_served.T
     counties_served = concat_all_columns(counties_served)
+    
     return counties_served
 
 def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
+    """
+    Find the longest and shortest route by miles 
+    for each operator.
+    """
     df = (
     gdf[["Route", "Service Miles"]]
     .sort_values(by=["Service Miles"])
@@ -151,10 +182,10 @@ def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
 """
 Charts & Maps
 """
-def create_bg_service_chart():
+def create_bg_service_chart()->alt.Chart:
     """
     Create a shaded background for the Service Hour Chart
-    by time period. 
+    to differentiate between time periods.
     """
     cutoff = pd.DataFrame(
     {
@@ -175,8 +206,8 @@ def create_bg_service_chart():
     chart = alt.Chart(cutoff.reset_index()).mark_rect(opacity=0.15).encode(
     x="start",
     x2="stop",
-    y=alt.value(0),  # pixels from top
-    y2=alt.value(250),  # pixels from top
+    y=alt.value(0),  
+    y2=alt.value(250),  
     color=alt.Color(
         "time_period:N",
         sort = (
@@ -198,15 +229,14 @@ def create_bg_service_chart():
 def create_service_hour_chart(df:pd.DataFrame,
                               day_type:str,
                               y_col:str,
-                              subtitle:str):
-    # Create an interactive legend so you can view
-    # lines by year 
+                              subtitle:str)->alt.Chart:
+    # Create an interactive legend so you can view one time period at a time.
     selection = alt.selection_point(fields=['Month'], bind='legend')
     
-    # Create the main line chart
+    # Create the main line chart.
     df = df.loc[df["Weekend or Weekday"] == day_type].reset_index(drop = True)
     
-    # Create a new title that incorporates day type
+    # Create a new title that incorporates day type.
     title = readable_dict["daily_scheduled_hour"]["title"]
     title = title + ' for ' + day_type
 
@@ -220,7 +250,7 @@ def create_service_hour_chart(df:pd.DataFrame,
                title = _report_utils.labeling(y_col)),
         color=alt.Color(
             "Month",
-            scale=alt.Scale(range=color_dict["full_color_scale"]),  # Specify desired order
+            scale=alt.Scale(range=color_dict["full_color_scale"]),
         ),
         opacity=alt.condition(selection, alt.value(1), alt.value(0.2)),
         tooltip=list(df.columns),
@@ -234,10 +264,10 @@ def create_service_hour_chart(df:pd.DataFrame,
     .add_params(selection)
     )
     
-    # Load background chart
+    # Load background chart.
     bg_chart = create_bg_service_chart()
     
-    # Combine
+    # Combine.
     final_chart = (main_chart + bg_chart).properties(
     resolve=alt.Resolve(
         scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))
@@ -246,8 +276,11 @@ def create_service_hour_chart(df:pd.DataFrame,
     
     return final_chart
 
-def basic_bar_chart(df: pd.DataFrame, x_col: str, y_col: str,
-                    title: str, subtitle:str):
+def basic_bar_chart(df: pd.DataFrame, 
+                    x_col: str, 
+                    y_col: str,
+                    title: str, 
+                    subtitle:str)->alt.Chart:
     chart = (
         alt.Chart(df)
         .mark_bar()
@@ -277,7 +310,7 @@ def basic_pie_chart(df: pd.DataFrame,
                     color_col: str, 
                     theta_col: str, 
                     title: str,
-                    subtitle:str):
+                    subtitle:str)->alt.Chart:
     chart = (
         alt.Chart(df)
         .mark_arc()
@@ -299,16 +332,3 @@ def basic_pie_chart(df: pd.DataFrame,
         ))
     
     return chart
-
-"""
-Maps
-"""
-def plot_route(route):
-    filtered_gdf = gdf[gdf["Route"] == route]
-    display(filtered_gdf.explore(column="Route", cmap = "Spectral",
-    tiles="CartoDB positron",
-    width=400,
-    height=250,
-    style_kwds={"weight": 3},
-    legend=False,
-    tooltip=["Route", "Service Miles"]))

@@ -54,6 +54,7 @@
     * [Full report](https://static1.squarespace.com/static/533b9a24e4b01d79d0ae4376/t/6617ec40675223398aac12bf/1712843871514/TransitMatters-Bus-Bunching-Reports-Oct-2023)
         * Looks like it was made in Python.
         * Bunching is defined as <25% of the scheduled headway.
+            * Does this mean: if two buses heading the same route and direction are supposed to be 10 minutes apart, instead they are actually about 3 minutes apart?
 
 5. [Deriving Transit Performance Metrics from GTFS Data
 Project Abstract](https://www.morgan.edu/national-transportation-center/the-smarter-center-(2023-2029)/research/deriving-transit-performance-metrics-from-gtfs-data)
@@ -113,12 +114,13 @@ frequency.</i>
 
 
 # What is needed
-* Which GTFS data do I need.
-* Schedule data
-    * See when a bus is supposed to arrive at each stop.
-    * See which routes are "high frequency"
-        * What does "high frequency" even means across California/or only across operators?
-* Realtime data: 
-    * See when a bus going on in the same route/direction actually arrives at the stop.
-    * Determine what is considered bunching? Is it when 2+ buses arrive within 1 minute of each other? 2 minutes? 
-    * Is this going to be at the stop level? Or just overall determining the % of time buses that come within 2 minutes of each other? 
+* Which GTFS datasets do I need.
+* Identify which routes are high frequency
+    * We can see from `sched_vs_vp` data which routes are high frequency.
+    * Only analyze these routes. 
+* How do we track the buses that are going that same route and direction are stopping within a short time span between each other?
+ 
+* See when a bus going on in the same route/direction actually arrives at the stop.
+* Determine what is considered bunching? Is it when 2+ buses arrive within 1 minute of each other? 2 minutes? 
+* Split bunching by weekday, Saturday, and Sunday? Or overall?
+* 

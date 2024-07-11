@@ -265,6 +265,9 @@ if __name__ == "__main__":
         how = "left"
     )
     
+    # Find the most common cardinal direction
+    df = gtfs_schedule_wrangling.top_cardinal_direction(df)
+    
     integrify = [
         "n_scheduled_trips", "n_vp_trips",
         "minutes_atleast1_vp", "minutes_atleast2_vp",
@@ -273,7 +276,7 @@ if __name__ == "__main__":
     ]
     
     df[integrify] = df[integrify].fillna(0).astype("int")
-
+    
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )

@@ -45,7 +45,13 @@ def get_day_type(date):
     """
     Function to return the day type (e.g., Monday, Tuesday, etc.) from a datetime object.
     """
-    days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    days_of_week = ["Monday", 
+                    "Tuesday", 
+                    "Wednesday", 
+                    "Thursday", 
+                    "Friday", 
+                    "Saturday", 
+                    "Sunday"]
     return days_of_week[date.weekday()]
 
 def weekday_or_weekend(row):
@@ -64,26 +70,27 @@ def total_service_hours(date_list: list) -> pd.DataFrame:
     Total up service hours by departure hour, 
     month, and day type for an operator. 
     """
-    # Combine all the days' data for a week
+    # Combine all the days' data for a week.
     df = concatenate_trips(date_list)
     
-     # Filter
-    # df = df.loc[df.name == name].reset_index(drop=True)
-    
-    # Add day type aka Monday, Tuesday, Wednesday...
+    # Find day type aka Monday, Tuesday, Wednesday based on service date.
     df['day_type'] = df['service_date'].apply(get_day_type)
     
-    # Tag if the day is a weekday, Saturday, or Sunday
+    # Tag if the day is a weekday, Saturday, or Sunday.
     df["weekend_weekday"] = df.apply(weekday_or_weekend, axis=1)
     
-    # Find the minimum departure hour
+    # Find the minimum departure hour.
     df["departure_hour"] = df.trip_first_departure_datetime_pacific.dt.hour
     
-    # Delete out the specific day, leave only month & year
+    # Delete out the specific day, leave only month & year.
     df["month"] = df.service_date.astype(str).str.slice(stop=7)
     
+    # Total up service hours by weekday, Sunday, and Saturday.
     df2 = (
-        df.groupby(["name", "month", "weekend_weekday", "departure_hour"])
+        df.groupby(["name", 
+                    "month", 
+                    "weekend_weekday", 
+                    "departure_hour"])
         .agg(
             {
                 "service_hours": "sum",
@@ -91,7 +98,11 @@ def total_service_hours(date_list: list) -> pd.DataFrame:
         )
         .reset_index()
     )
+    
+    # For weekday hours, divide by 5.
     df2["weekday_service_hours"] = df2.service_hours/5
+    
+    # Rename projects.
     df2 = df2.rename(columns = {'service_hours':'weekend_service_hours'})
     return df2
 
@@ -114,7 +125,6 @@ def total_service_hours_all_months() -> pd.DataFrame:
     # Combine everything
     all_df = pd.concat([apr_23df, oct_23df, apr_24df])
    
-    
     return all_df
 
 def load_operator_profiles()->pd.DataFrame:
@@ -171,16 +181,16 @@ def load_operator_profiles()->pd.DataFrame:
 
 if __name__ == "__main__":
     
-    # Save to GCS
+    # Save to GCS.
     OP_PROFILE_EXPORT = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profile_portfolio_view}.parquet"
     SERVICE_EXPORT = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.scheduled_service_hours}.parquet"
     start = datetime.datetime.now()
     
-    # Save operator profiles with NTD
+    # Save operator profiles with NTD.
     operator_profiles = load_operator_profiles()
     operator_profiles.to_parquet(OP_PROFILE_EXPORT)
     
-    # Save service hours
+    # Save service hours.
     service_hours = total_service_hours_all_months()
     service_hours.to_parquet(SERVICE_EXPORT) 
     

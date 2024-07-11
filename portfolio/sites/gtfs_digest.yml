@@ -21,7 +21,7 @@ parts:
     - organization_name: Plumas Transit Systems
     - organization_name: Shasta County
     - organization_name: Siskiyou County
-    - organization_name: Susanville Indian Rancheria
+    - organization_name: Tehama County
     - organization_name: Trinity County
   - caption: District 03 - Marysville
     params:
@@ -142,6 +142,7 @@ parts:
     - organization_name: City of Maywood
     - organization_name: City of Monterey Park
     - organization_name: City of Norwalk
+    - organization_name: City of Ojai
     - organization_name: City of Pasadena
     - organization_name: City of Redondo Beach
     - organization_name: City of Rosemead
@@ -158,7 +159,6 @@ parts:
     - organization_name: Los Angeles World Airports
     - organization_name: Palos Verdes Peninsula Transit Authority
     - organization_name: University of California, Los Angeles
-    - organization_name: Ventura County Transportation Commission
   - caption: District 08 - San Bernardino
     params:
       district: 08 - San Bernardino
@@ -201,9 +201,9 @@ parts:
     params:
       district: 11 - San Diego
     sections:
-    - organization_name: Flagship Cruises and Events Inc.
     - organization_name: Imperial County Transportation Commission
     - organization_name: North County Transit District
+    - organization_name: San Diego Metropolitan Transit System
     - organization_name: Yuma County Intergovernmental Public Transportation Authority
   - caption: District 12 - Irvine
     params:
@@ -211,5 +211,6 @@ parts:
     sections:
     - organization_name: City of Laguna Beach
     - organization_name: Orange County Transportation Authority
+    - organization_name: University of California, Irvine
 readme: ./gtfs_digest/README.md
 title: GTFS Digest

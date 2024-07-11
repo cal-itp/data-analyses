@@ -1,18 +1,12 @@
 import calitp_data_analysis.magics
 import geopandas as gpd
 import pandas as pd
-import numpy as np
 import datetime
-from dask import compute, delayed
 
 # Charts
 import altair as alt
 alt.data_transformers.enable('default', max_rows=None)
 import _report_utils
-
-# Great Tables
-import great_tables as gt
-from great_tables import md
 
 # Display
 from IPython.display import HTML, Markdown, display
@@ -37,7 +31,7 @@ Data
 """
 def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     """
-    Load schedule versus vehicle positions file.
+    Load schedule versus realtime file.
     """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
@@ -55,11 +49,12 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     for i in float_columns:
         df[i] = df[i].round(2)
     
+    # Multiply percent columns to 100% 
     pct_cols = df.columns[df.columns.str.contains("pct")].tolist()
     for i in pct_cols:
         df[i] = df[i] * 100
         
-    # Add rulers
+    # Add column to create rulers for the charts
     df["ruler_100_pct"] = 100
     df["ruler_for_vp_per_min"] = 2
     
@@ -82,7 +77,9 @@ def route_stats(df: pd.DataFrame) -> pd.DataFrame:
     """
     most_recent_date = df["Date"].max()
     route_merge_cols = ["Route", "Direction", "dir_0_1"]
-
+    
+    # Filter out for the most recent date. 
+    # Create 3 separate dataframes for all day, peak, and offpeak.
     all_day_stats = df[(df["Date"] == most_recent_date) & (df["Period"] == "all_day")][
         route_merge_cols
         + [
@@ -123,12 +120,14 @@ def route_stats(df: pd.DataFrame) -> pd.DataFrame:
     # Fill nans
     numeric_cols = table_df.select_dtypes(include="number").columns
     table_df[numeric_cols] = table_df[numeric_cols].fillna(0)
+    
+    # Clean up column names
     table_df.columns = table_df.columns.str.title().str.replace("_", " ")
     return table_df
 
 def timeliness_trips(df: pd.DataFrame):
     """
-    Pivot datafarme for the charts that illustrate
+    Reshape dataframe for the charts that illustrate
     how timely a route's trips are. 
     """
     to_keep = [
@@ -142,7 +141,10 @@ def timeliness_trips(df: pd.DataFrame):
         "# Late Trips",
         "dir_0_1",
     ]
-    df = df.loc[df["Period"] != "All Day"]
+    
+    # Filter out any values that don't equal to all day. 
+    # Keeping all day values will double count the trips.
+    df = df.loc[(df["Period"] != "All Day")]
     df = df.loc[df["Period"] != "all_day"]
     df2 = df[to_keep]
 
@@ -165,8 +167,8 @@ def timeliness_trips(df: pd.DataFrame):
 
 def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
     """
-    Find the % of a journey that recorded 2+ vehicle positions per
-    minute.
+    Reshape the data for the charts that display the % of 
+    a journey that recorded 2+ vehicle positions/minute.
     """
     to_keep = [
         "Date",
@@ -202,7 +204,8 @@ Charts
 """
 def divider_chart(df: pd.DataFrame, text):
     """
-    This chart creates only a title.
+    This chart creates only one line of text.
+    I use this to divide charts thematically.
     """
     df = df.head(1)
     # Create a text chart using Altair
@@ -252,17 +255,17 @@ def grouped_bar_chart(
     offset_col: str,
     title: str,
     subtitle: str,
-):
+)-> alt.Chart:
     tooltip_cols = [
         "Period",
         "Route",
-        "Organization",
         "Date",
         "Direction",
         color_col,
         y_col,
     ]
-
+    
+    # Clean dataframe
     df = clean_data_charts(df, y_col)
 
     chart = (
@@ -279,7 +282,7 @@ def grouped_bar_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=color_dict["two_colors"]),
+                scale=alt.Scale(range=color_dict["four_colors"]),
                 ),
             tooltip=tooltip_cols,
         ))
@@ -295,14 +298,22 @@ def grouped_bar_chart(
     return chart
     
 def base_facet_line(
-    df: pd.DataFrame, y_col: str, title: str, subtitle: str
+    df: pd.DataFrame, 
+    y_col: str, 
+    title: str, 
+    subtitle: str
 ) -> alt.Chart:
+    
+    # Set y-axis
     max_y = set_y_axis(df, y_col)
-
+    
+    # Clean dataframe
     df = clean_data_charts(df, y_col)
+    
     tooltip_cols = [
-            "Route",
             "Period",
+            "Route",
+            "Date",
             f"{y_col}_str",
             "Direction",
         ]
@@ -358,9 +369,14 @@ def base_facet_circle(
         f"{y_col}_str",
         color_col,
     ]
-
+    
+    # Set y-axis
     max_y = set_y_axis(df, y_col)
+    
+    # Clean dataframe
     df = clean_data_charts(df, y_col)
+    
+    # Create the ruler for the bar chart
     ruler = (
             alt.Chart(df)
             .mark_rule(color="red", strokeDash=[10, 7])
@@ -389,7 +405,7 @@ def base_facet_circle(
                 tooltip=tooltip_cols,
             )
         )
-
+    # Add ruler plus main chart
     chart = (chart + ruler).properties(width=200, height=250)
     chart = chart.facet(
             column=alt.Column("Direction:N", title=_report_utils.labeling("Direction")),
@@ -409,23 +425,26 @@ def base_facet_chart(
     facet_col: str,
     title: str,
     subtitle: str,
-):
+)-> alt.Chart:
     tooltip_cols = [
         "Period",
         "Route",
-        "Organization",
         "Date",
         "Direction",
         y_col,
         color_col,
     ]
-
+    
+    # Create a title.
     try:
         title = title + " for Direction " + str(direction_to_filter)
     except:
         pass
-
+    
+    # Set y-axis
     max_y = set_y_axis(df, y_col)
+    
+    # Clean dataframe
     df = clean_data_charts(df, y_col)
 
     chart = (
@@ -451,6 +470,8 @@ def base_facet_chart(
         )
     )
     chart = chart.properties(width=200, height=250)
+    
+    # Facet the chart
     chart = chart.facet(column=alt.Column(f"{facet_col}:N",)).properties(
         title={
             "text": title,
@@ -468,29 +489,34 @@ def base_facet_with_ruler_chart(
     subtitle: str,
     domain_color:list,
     range_color:list,
-):
+) -> alt.Chart:
     tooltip_cols = [
         "Period",
         "Route",
-        "Organization",
         "Date",
         "Direction",
         y_col,
     ]
-
+    
+    # Set y-axis
     max_y = set_y_axis(df, y_col)
+    
+    # Clean dataframe
     df = clean_data_charts(df, y_col)
     
+    # Create color scale
     color_scale = alt.Scale(
     domain= domain_color,
     range = range_color
     )
     
+    # Create ruler
     ruler = (
             alt.Chart(df)
             .mark_rule(color="red", strokeDash=[10, 7])
             .encode(y=f"mean({ruler_col}):Q")
         )
+    
     chart = (
             alt.Chart(df)
             .mark_bar(size=7, clip=True)
@@ -524,10 +550,15 @@ def base_facet_with_ruler_chart(
 
     return chart
 
-def create_text_table(df: pd.DataFrame, direction: int):
-
+def create_text_table(df: pd.DataFrame, 
+                      direction: int,
+                      title:str,
+                      subtitle:str)->alt.Chart:
+    
+    # Filter dataframe for direction
     df = df.loc[df["Dir 0 1"] == direction].drop_duplicates().reset_index(drop=True)
     
+    # Reshape dataframe before plotting
     df2 = df.melt(
             id_vars=[
                 "Route",
@@ -546,39 +577,59 @@ def create_text_table(df: pd.DataFrame, direction: int):
                 "Trips Per Hour",
             ],
         )
-    # Create a decoy column to center all the text
+    # Create a decoy column so all the text will be centered.
     df2["Zero"] = 0
-
+    
+    # Combine columns so the column title and variable will be aligned.
+    # Ex: "Trips Per Hour: 0.56". This column is what will show up on the
+    # graphs.
     df2["combo_col"] = df2.variable.astype(str) + ": " + df2.value.astype(str)
+    
+    # Clean up 
     df2.combo_col = df2.combo_col.str.replace(
             "schedule_and_vp", "Schedule and Realtime Data",
         ).str.replace("Gtfs", "GTFS")
+    
+    # Create the charts
     text_chart = (
             alt.Chart(df2)
             .mark_text()
-            .encode(x=alt.X("Zero:Q", axis=None), y=alt.Y("combo_col", axis=None))
+            .encode(x=alt.X("Zero:Q", axis=None),
+                    y=alt.Y("combo_col", axis=None))
         )
     
-    text_chart = text_chart.encode(text="combo_col:N").properties(
-            title=f"Route Statistics for Direction {direction}",
+    
+    text_chart = (text_chart.encode(text="combo_col:N")
+            .properties(
+            title = 
+                {"text":f"{title}{direction}",
+                  "subtitle":subtitle},
             width=400,
             height=250,
-        )
+        ))
     return text_chart
 
 def frequency_chart(
-    df: pd.DataFrame, direction_id: int, title: str, subtitle: str
-):
+    df: pd.DataFrame, 
+    direction_id: int, 
+    title: str, 
+    subtitle: str
+)->alt.Chart:
+    
+     # Filter the only one direction
+    df = df.loc[df.dir_0_1 == direction_id].reset_index(drop=True)
+
+    # Create a new column
     df["Frequency in Minutes"] = (
         "A trip going this direction comes every "
         + df.frequency_in_minutes.astype(int).astype(str)
         + " minutes"
     )
+    
+    # Clean the dataframe
     df = clean_data_charts(df, "frequency_in_minutes")
-    df = df.loc[df.dir_0_1 == direction_id].reset_index(drop=True)
-
-    fixed_x_values = [0, 30, 60, 90, 120, 150, 180, 210, 240]
-
+    
+    # Create color scale
     color_scale = alt.Scale(
         domain=color_dict["freq_domain"], range=color_dict["freq_range"]
     )
@@ -625,7 +676,11 @@ def filtered_route(
     df: pd.DataFrame,
 ) -> alt.Chart:
     """
-    https://stackoverflow.com/questions/58919888/multiple-selections-in-altair
+    This combines all the charts together, controlled by a single
+    dropdown.
+    
+    Resources:
+        https://stackoverflow.com/questions/58919888/multiple-selections-in-altair
     """
     # Create dropdown
     routes_list = df["Route"].unique().tolist()
@@ -639,21 +694,19 @@ def filtered_route(
     fields=["Route"], value=routes_list[0], bind=route_dropdown
     )
 
-    # Filter for only rows categorized as found in schedule and vp and all_day
+    # Filter for only rows that are "all day" statistics
     all_day = df.loc[df["Period"] == "all_day"].reset_index(drop=True)
-
-    # Create route stats table for the text tables
-    route_stats_df = route_stats(df)
 
     # Manipulate the df for some of the metrics
     timeliness_df = timeliness_trips(df)
-
     sched_journey_vp = pct_vp_journey(
         all_day,
        "% Scheduled Trip w/ 1+ VP/Minute",
       "% Scheduled Trip w/ 2+ VP/Minute",
     )
-
+    route_stats_df = route_stats(df)
+    
+    # Create the charts
     avg_scheduled_min_graph = (
         grouped_bar_chart(
             df=all_day,
@@ -768,20 +821,27 @@ def filtered_route(
     )
     
     text_dir0 = (
-            (create_text_table(route_stats_df, 0))
+            (create_text_table(route_stats_df, 
+                               0,  
+                               readable_dict["text_graph"]["title"],
+                               readable_dict["text_graph"]["subtitle"]))
             .add_params(xcol_param)
             .transform_filter(xcol_param)
         )
     text_dir1 = (
-            create_text_table(route_stats_df, 1)
+            create_text_table(route_stats_df,
+                              1, 
+                             readable_dict["text_graph"]["title"],
+                             "")
             .add_params(xcol_param)
             .transform_filter(xcol_param)
         )
     
     # Separate out the charts themetically.
-    ride_quality = divider_chart(df, "The charts below measure the quality of the rider experience for this route.")
-    data_quality = divider_chart(df, "The charts below describe the quality of GTFS data collected for this route.")
+    ride_quality = divider_chart(df, readable_dict["ride_quality_graph"]["title"])
+    data_quality = divider_chart(df, readable_dict["data_quality_graph"]["title"])
     
+    # Combine all the charts
     chart_list = [
     ride_quality,
     avg_scheduled_min_graph,

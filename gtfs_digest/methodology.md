@@ -46,24 +46,24 @@ At this point, a route can be categorized with several typologies (held in dummy
 * More about our pipeline can be found in this [diagram](https://github.com/cal-itp/data-analyses/tree/main/gtfs_funnel/README.md).
 
 ## Common Definitions
-Official definitions of GTFS Schedule Data terms can be found [here](https://gtfs.org/schedule/reference/) and definitions of GTFS Realtime Data are located [here](https://gtfs.org/realtime/reference/).
-* All Day: All of the trips that ran in a full 24 hour day. 
-* AM Peak: Defined as 7-9:59AM when there is an anticipated surge of riders.
-* Average Scheduled Minutes: The time an operator schedules for a trip to arrive from its origin to its destination. 
-* Cardinal Direction: Looking at the GPS coordinates of a trip, we determine which direction (Eastbound, Westbound, Northbound, or Southbound) the majority of the stops are heading towards. 
-* Direction ID: Per GTFS.org/schedule, <i>indicates the direction of travel for a trip.</i>. 
-* Journey: used interchangeably with <i>trip</i> (see below).
-* Offpeak: Summing all the trips that do not run during the AM or PM peak.
-* PM Peak: Defined as 3-7:59PM when there is an anticipated surge of riders.
-* Peak: Summing all the of trips that run during the two peak periods. 
-* Route-Direction Frequency: Taking the total trips for a route going one direction by the time period and dividing by how many hours are associated with the time period. For example, there are 100 trips in a day for  Route B. The peak time period is considered 7-9:59AM and 3-7:59PM, a total of about 8 hours. If 40 of those trips are scheduled during these peak periods, we divide 40 by 8. A bus heading on that direction of Route B passes by five times per hour, so the trip frequency during Peak periods is every 12 minutes. 
-* Route-Direction: A route travels two different directions. We analyze and present realtime data for by a route and its two distinct directions. You will see that many of the charts are split between Cardinal Direction or Direction ID (0/1). Occasionally, a route will have missing values for its directions and we fill the missing values in with 0. 
-* Scheduled Service Hours: The total number of hours of public transit service an operator is scheduled to provide. We split this data on a weekday, Saturday, and Sunday level. Sunday service often coincides with holiday service.
-* Scheduled Shape (Path): Operators provide geographic data of where a route is scheduled to travel.
-* Spatial Accuracy: We draw a buffer of 35 meters around the scheduled shape (path). We use this buffered shape to calculate the percentage of vehicle positions that fall in a reasonable distance of the scheduled route. This allows us to gauge the accuracy of the geographic component of the collected GTFS data. 
-* Timeliness: Subtracting the actual duration of a trip by its scheduled duration, we can categorize if a trip is early, late, or on time. A trip is considered on time if it arrives 5 minutes later or earlier than the scheduled time.  
-* Trip: A trip in <b>this context</b> is one instance of a route traveling in one particular direction from a set origin to a set destination, at a set time. For example, one trip of Route A goes Eastbound and the other trip of Route A goes Westbound. Route A is scheduled to go Eastbound every 30 minutes during the AM Peak, so Trip 1 leaves at 7AM and the last trip, Trip 6 leaves at 9:30AM. This definition of trip differs from GTFS.org's since every trip in reality is different and do not serve the same stops every time.
-* Vehicle Positions: The coordinates of a bus's location collected by a GPS for GTFS data. Ideally, a vehicle position should be captured at least twice per minute because this reflects a higher density of data collection.
+Official definitions of GTFS Schedule Data terms can be found [here](https://gtfs.org/schedule/reference/) and definitions of GTFS Realtime Data are located [here](https://gtfs.org/realtime/reference/).<br>
+* <b>All Day</b>: All of the trips that ran in a full 24 hour day.
+* <b>AM Peak</b>: Defined as 7-9:59AM, when there is an anticipated surge of riders.
+* <b>Average Scheduled Minutes</b>: The time an operator schedules for a trip to arrive from its origin to its destination.
+* <b>Cardinal Direction</b>: Looking at the GPS coordinates of a trip, we determine which direction (Eastbound, Westbound, Northbound, or Southbound) the majority of the stops are heading towards.
+* <b>Direction ID</b>: Per [gtfs.org](https://gtfs.org/schedule/reference/), this <i>indicates the direction of travel for a trip.</i>.
+* <b>Journey</b>: Used interchangeably with <i>trip</i> in this analysis (see below).
+* <b>Offpeak</b>: Summing all the trips that do not run during the AM or PM peak.
+* <b>PM Peak</b>: Defined as 3-7:59PM, when there is an anticipated surge of riders.
+* <b>Peak</b>: Summing all the of trips that run during the two peak AM and PM periods.
+* <b>Route-Direction Frequency</b>: Taking the total trips for a route going one direction by the time period and dividing this total by how many hours are associated with the time period. For example, Route A runs 6 trips per hour going Southbound during the AM Peak. The frequency for this route-direction combination during the AM Peak would be 10 minutes.
+* <b>Route-Direction</b>: A route travels two different directions. We analyze and present realtime data for a route and its two distinct directions.
+* <b>Scheduled Service Hours</b>: The total number in hours of public transit service an operator is scheduled to provide. Due to the size of the data, we download a full week's worth of data twice a year in April and October for this metric.
+* <b>Scheduled Shape (Path)</b>: Operators provide geographic data of where a route is scheduled to travel.
+* <b>Spatial Accuracy</b>: We draw a buffer of 35 meters around the scheduled shape (path). We use this buffered shape to calculate the percentage of vehicle positions that fall in a reasonable distance of the scheduled route to understand the accuracy of the spatial data that is gathered.
+* <b>Timeliness</b>: Subtracting the actual duration of a trip by its scheduled duration, we can categorize if a trip is early, late, or on-time. A trip is considered on-time if it arrives at its final destination within 5 minutes of its scheduled arrival time.
+* <b>Trip</b>: A trip in <b>this context</b> is one instance of a route traveling in one particular direction from a set origin to a set destination, at a set time.
+* <b>Vehicle Positions</b>: The coordinates of a bus's location collected by a GPS for GTFS data. The ideal benchmark is for a trip to collect 2 or more vehicle positions per minute across its total duration.
 
 ## Common Questions
 
