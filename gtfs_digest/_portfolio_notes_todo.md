@@ -1,19 +1,36 @@
 ## Notes for my reference for testing the [portfolio](https://test-gtfs-exploratory--cal-itp-data-analyses.netlify.app/readme)
 * python portfolio/portfolio.py clean gtfs_digest_testing && python portfolio/portfolio.py build test_gtfs_exploratory  --deploy 
-* python portfolio/portfolio.py build gtfs_digest  --deploy 
 * cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ../gtfs_digest
 * RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
-
+* `import sys sys.path.append("../gtfs_funnel") import crosswalk_gtfs_dataset_key_to_organization`
 ### Running to-do list
 * Portfolio:
     * Figure out Makefile situation.
 
+### 7/9/2024
+* Understand how `publish_public_data.py` works.
+* Transit brunching research.
+* Still trying to work through why the notebook won't parameterize any longer. :(
+
+### 7/8/2024
+* Rerun a subset of operator...Didn't work on 7/3.
+* <s>Finish updating `README` with new template created as part of summer refactor 2024. </s>
+    * <s>Update `methodology.md`</s>
+    * <b>To-do: ask somebody to look it over.</b>
+* Take a look at cardinal direction work again: I noticed one route has four different directions and this shouldn't be happening.
+    * Went back to the original code using City of Fairfield's Cordelia Library Route as my test.
+    * It's no mistake: the route does change direction in May 2023. 
+    * Unsure how to proceed: 
+        * It is confusing to the viewers to have a direction switch, however it's accurate. 
+        * I could also replace the direction across time with the two most common combinations, but this wouldn't be accurate. 
+
 ### 7/5/2024
-* <s>Fix `operator_profiles` so all the dates & operators are included.</s>
+* <s>Fix `operator_profiles` so all the dates and operators are included.</s>
 * <s>Upload datasets to the public GCS.
     * Add this to the make file.
     * Make sure datasets have a CSV and parquet version.</s>
 * Rerun a subset of operator...Didn't work on 7/3.
+* Update `README` with new template created as part of summer refactor 2024. 
 
 ### 7/3/2024 Goals
 * <s>Switch color palette to colorblind friendly one.</s>
