@@ -1,11 +1,13 @@
 import datetime
 import pandas as pd
 import numpy as np
-from segment_speed_utils import helpers, time_series_utils
+from segment_speed_utils import helpers, time_series_utils, gtfs_schedule_wrangling
+from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, RT_SCHED_GCS, SCHED_GCS)
+
 from shared_utils import catalog_utils, rt_dates
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
-from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, RT_SCHED_GCS, SCHED_GCS)
+
 
 """
 Datasets that are relevant to
@@ -77,7 +79,9 @@ def total_service_hours(date_list: list) -> pd.DataFrame:
     df['day_type'] = df['service_date'].apply(get_day_type)
     
     # Tag if the day is a weekday, Saturday, or Sunday.
-    df["weekend_weekday"] = df.apply(weekday_or_weekend, axis=1)
+    df["weekday_weekend"] = df.apply(weekday_or_weekend, axis=1)
+    
+    # df = gtfs_schedule_wrangling.add_weekday_weekend_column(df)
     
     # Find the minimum departure hour.
     df["departure_hour"] = df.trip_first_departure_datetime_pacific.dt.hour
@@ -89,7 +93,7 @@ def total_service_hours(date_list: list) -> pd.DataFrame:
     df2 = (
         df.groupby(["name", 
                     "month", 
-                    "weekend_weekday", 
+                    "weekday_weekend", 
                     "departure_hour"])
         .agg(
             {
