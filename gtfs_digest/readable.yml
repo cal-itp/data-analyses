@@ -64,7 +64,7 @@ time_of_day: "Time of Day"
 day_name: "Day of Week"
 year: Year
 month: Month
-weekend_weekday: "Weekend or Weekday"
+weekday_weekend: "Weekend or Weekday"
 departure_hour: "Departure Hour"
 service_hours: "Service Hours"
 
