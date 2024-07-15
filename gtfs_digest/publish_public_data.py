@@ -65,7 +65,7 @@ if __name__ == "__main__":
     
     digest_df_keys = [
         "route_schedule_vp", 
-        "operator_profile_portfolio_view",  
+        "operator_profiles",  
         "operator_sched_rt",
         "scheduled_service_hours",
     ]  

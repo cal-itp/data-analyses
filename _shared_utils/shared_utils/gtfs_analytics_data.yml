@@ -62,7 +62,6 @@ digest_tables:
   operator_routes_map: "digest/operator_routes"
   operator_sched_rt: "digest/operator_schedule_rt_category"
   scheduled_service_hours: "digest/total_scheduled_service_hours"
-  operator_profile_portfolio_view: "digest/operator_profile_portfolio_view"
 
 stop_segments:
   dir: ${gcs_paths.SEGMENT_GCS}
