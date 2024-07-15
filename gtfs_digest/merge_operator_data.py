@@ -109,10 +109,49 @@ if __name__ == "__main__":
     OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
     SCHED_RT_CATEGORY = GTFS_DATA_DICT.digest_tables.operator_sched_rt
+    CROSSWALK = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     
+    # Concat operator profiles
     df = concatenate_operator_stats(analysis_date_list)
     
-    df.to_parquet(
+    ntd_cols = [
+        "schedule_gtfs_dataset_key",
+        "counties_served",
+        "service_area_sq_miles",
+        "hq_city",
+        "uza_name",
+        "service_area_pop",
+        "organization_type",
+        "primary_uza",
+        "reporter_type"
+    ]
+    
+    # Merge in NTD data. 
+    crosswalk_df = (
+        time_series_utils.concatenate_datasets_across_dates(
+            SCHED_GCS,
+            CROSSWALK,
+            analysis_date_list,
+            data_type="df",
+            columns=ntd_cols
+        )
+        .sort_values(["service_date"])
+        .reset_index(drop=True)
+    )
+    
+    # Merge
+    merge_cols = ["schedule_gtfs_dataset_key", "service_date"]
+    op_profiles_df1 = pd.merge(df, 
+                               crosswalk_df, 
+                               on = merge_cols, 
+                               how = "left")
+    
+    # Drop duplicates created after merging
+    op_profiles_df2 = (op_profiles_df1
+                       .drop_duplicates(subset = list(op_profiles_df1.columns))
+                       .reset_index(drop = True))
+
+    op_profiles_df2.to_parquet(
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
     )
     
