@@ -230,6 +230,7 @@ def create_service_hour_chart(df:pd.DataFrame,
                               day_type:str,
                               y_col:str,
                               subtitle:str)->alt.Chart:
+    
     # Create an interactive legend so you can view one time period at a time.
     selection = alt.selection_point(fields=['Month'], bind='legend')
     
@@ -239,7 +240,12 @@ def create_service_hour_chart(df:pd.DataFrame,
     # Create a new title that incorporates day type.
     title = readable_dict["daily_scheduled_hour"]["title"]
     title = title + ' for ' + day_type
-
+    
+    tooltip_cols = ["Weekend or Weekday",
+                 "Month",
+                 "Departure Hour"] 
+    
+    tooltip_cols.append(y_col)
     main_chart = (
     alt.Chart(df)
     .mark_line(size=3)
@@ -253,7 +259,7 @@ def create_service_hour_chart(df:pd.DataFrame,
             scale=alt.Scale(range=color_dict["full_color_scale"]),
         ),
         opacity=alt.condition(selection, alt.value(1), alt.value(0.2)),
-        tooltip=list(df.columns),
+        tooltip= tooltip_cols
     )
     .properties(
         width=400,
