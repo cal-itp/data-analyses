@@ -66,8 +66,8 @@ year: Year
 month: Month
 weekday_weekend: "Weekend or Weekday"
 departure_hour: "Departure Hour"
-service_hours: "Service Hours"
-
+weekend_service_hours: "Service Hours"
+weekday_service_hours: "Weekday Service Hours"
 # Roads
 road_freq_category: "Road Frequency Category"
 road_typology: "Road Typology Category"
