@@ -9,7 +9,9 @@ GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 """
 Finding the total number of scheduled service hours for 
-an operator across its routes. 
+an operator across its routes for a full week. The data is
+downloaded every 1/2 a year. 
+
 Grain is operator-service_date-route
 """
 def concatenate_trips(
