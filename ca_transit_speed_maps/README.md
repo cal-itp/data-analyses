@@ -15,7 +15,9 @@ This site is updated at least quarterly.
 Select source code can be found at:
 
 [https://github.com/cal-itp/data-analyses/tree/main/ca_transit_speed_maps](https://github.com/cal-itp/data-analyses/tree/main/ca_transit_speed_maps)
+
 [https://github.com/cal-itp/data-analyses/tree/main/rt_delay/rt_analysis](https://github.com/cal-itp/data-analyses/tree/main/rt_delay/rt_analysis)
+
 [https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py)
 
 
@@ -35,7 +37,7 @@ We use the ratio between 80th and 20th percentile speeds in a segment to measure
 
 ## Frequently Asked Questions
 
-Are colorblind-safe speed maps available?
+Are colorblind safe speed maps available?
 
 _Yes, by following the "Open Colorblind Safe Map in New Tab" links displayed before each speed map. Variation maps already use a colorblind safe scheme._
     
@@ -48,7 +50,7 @@ Each map includes a link to download its geospatial data in a gzip-compressed Ge
 
 The Cal-ITP team is working to share broader speed and delay data using the California Open Data Portal.
 
-### Questions or Feedback? Please email hello@calitp.org
+Questions or feedback? Please email hello@calitp.org
 
 ## Who We Are
 
