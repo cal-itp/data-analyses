@@ -535,7 +535,7 @@ class RtFilterMapper:
         g.get_root().html.add_child(folium.Element(title_html)) # might still want a util for this...
         return g
     
-    def map_gz_export(self, map_type: str='_20p_speeds'):
+    def map_gz_export(self, map_type: str='_20p_speeds', access_cmap=False):
         '''
         Test exporting speed data to gcs bucket for iframe render
         Will always put state highway network in state['layers'][0] 
@@ -553,14 +553,20 @@ class RtFilterMapper:
                 
             gdf = self.detailed_map_view.copy()
             gdf['organization_name'] = self.organization_name
-            cmap = self.speed_map_params[1]
+            if access_cmap:
+                cmap = ACCESS_ZERO_THIRTY_COLORSCALE
+                filename = f'{self.calitp_itp_id}_{self.filter_period}_speeds_color_access'
+                legend_url = ACCESS_SPEEDMAP_LEGEND_URL
+            else:
+                cmap = self.speed_map_params[1]
+                filename = f'{self.calitp_itp_id}_{self.filter_period}_speeds'
+                legend_url = SPEEDMAP_LEGEND_URL
             
-            filename = f'{self.calitp_itp_id}_{self.filter_period}_speeds'
             title = f"{self.organization_name} {self.display_date} {self.filter_period.replace('_', ' ')}"
             
             export_result = set_state_export(gdf, subfolder = subfolder, filename = filename,
                                 map_type = 'speedmap', map_title = title, cmap = cmap,
-                                color_col = 'p20_mph', legend_url = SPEEDMAP_LEGEND_URL,
+                                color_col = 'p20_mph', legend_url = legend_url,
                                 existing_state = self.spa_map_state
                                             )
             self.spa_map_state = export_result['state_dict']
@@ -596,9 +602,9 @@ class RtFilterMapper:
             self.spa_map_url = export_result['spa_link']
             return
         
-    def render_spa_link(self):
+    def render_spa_link(self, text='Full Map'):
         
-        display(Markdown(f'<a href="{self.spa_map_url}" target="_blank">Open Full Map in New Tab</a>'))
+        display(Markdown(f'<a href="{self.spa_map_url}" target="_blank">Open {text} in New Tab</a>'))
         return
     
     def display_spa_map(self, width: int=1000, height: int=650):

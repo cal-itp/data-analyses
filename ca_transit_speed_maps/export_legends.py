@@ -1,8 +1,8 @@
-import os
-os.environ['USE_PYGEOS'] = '0'
-
 from shared_utils.rt_utils import *
 from calitp_data_analysis import get_fs
+
+#  utility script for saving branca colormaps as static svg files for the map app to pick up and display
+#  could be moved to shared_utils or as part of future map app refactor efforts?
 
 def add_lines_header(svg):
 
@@ -34,21 +34,19 @@ def add_inner_labels_caption(svg, labels, spacing, caption):
     
     return export_svg
 
-# export speed legend
-speeds_legend = add_lines_header(ZERO_THIRTY_COLORSCALE._repr_html_())
-speeds_legend = add_inner_labels_caption(speeds_legend, [6, 12, 18, 24], 100, ZERO_THIRTY_COLORSCALE.caption)
+def export_legend(cmap:branca.colormap.StepColormap, filename):
+    
+    legend = add_lines_header(cmap._repr_html_())
+    legend = add_inner_labels_caption(legend, [6, 12, 18, 24], 100, cmap.caption)
 
-fs = get_fs()
-path =  f'calitp-map-tiles/speeds_legend.svg'
-with fs.open(path, 'w') as writer:  # write out to public-facing GCS?
-    writer.write(speeds_legend)
-print(f'speed legend written to {path}')
+    path =  f'calitp-map-tiles/{filename}'
+    with fs.open(path, 'w') as writer:  # write out to public-facing GCS?
+        writer.write(legend)
+    print(f'legend written to {path}')
 
-# export variance legend
-variance_legend = add_lines_header(VARIANCE_FIXED_COLORSCALE._repr_html_())
-variance_legend = add_inner_labels_caption(variance_legend, VARIANCE_RANGE[1:-1], 100, VARIANCE_FIXED_COLORSCALE.caption)
-
-path =  f'calitp-map-tiles/variance_legend.svg'
-with fs.open(path, 'w') as writer:  # write out to public-facing GCS?
-    writer.write(variance_legend)
-print(f'variance legend written to {path}')
+if __name__ == "__main__":
+    
+    fs = get_fs()
+    export_legend(ZERO_THIRTY_COLORSCALE, 'speeds_legend.svg')
+    export_legend(VARIANCE_FIXED_COLORSCALE, 'variance_legend.svg')
+    export_legend(ACCESS_ZERO_THIRTY_COLORSCALE, 'speeds_legend_color_access.svg')
