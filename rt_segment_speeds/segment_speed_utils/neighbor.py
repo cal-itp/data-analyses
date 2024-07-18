@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import shapely
 
-from scipy.spatial import cKDTree
+from scipy.spatial import KDTree
 
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import gtfs_schedule_wrangling, wrangle_shapes     
@@ -12,7 +12,11 @@ from segment_speed_utils.project_vars import SEGMENT_GCS
 geo_const_meters = 6_371_000 * np.pi / 180
 geo_const_miles = 3_959_000 * np.pi / 180
 
-def nearest_snap(line: shapely.LineString, point: shapely.Point) -> int:
+def nearest_snap(
+    line: shapely.LineString, 
+    point: shapely.Point,
+    k_neighbors: int = 1
+) -> np.ndarray:
     """
     Based off of this function,
     but we want to return the index value, rather than the point.
@@ -20,17 +24,15 @@ def nearest_snap(line: shapely.LineString, point: shapely.Point) -> int:
     """
     line = np.asarray(line.coords)
     point = np.asarray(point.coords)
-    tree = cKDTree(line)
+    tree = KDTree(line)
     
-    # np_dist is array of distances of result
+    # np_dist is array of distances of result (let's not return it)
     # np_inds is array of indices of result
-    # to get approx distance in meters: geo_const * np_dist
     _, np_inds = tree.query(
-        point, workers=-1, k=1, 
-        #distance_upper_bound = geo_const_miles * 5 # upper bound of 5 miles
+        point, workers=-1, k=k_neighbors, 
     )
-    # We're looking for 1 nearest neighbor, so return 1st element in array
-    return np_inds[0]
+    
+    return np_inds.squeeze()
     
 
 def add_nearest_vp_idx(
@@ -200,4 +202,43 @@ def add_nearest_neighbor_result(
         vp_coords_trio = gpd.GeoSeries(coords_trio_series, crs = WGS84)
     ).drop(columns = drop_cols)
         
+    return gdf2
+
+def add_nearest_neighbor_result_array(
+    gdf: gpd.GeoDataFrame, 
+    analysis_date: str,
+    **kwargs
+) -> pd.DataFrame:
+    """
+    Add the nearest k_neighbors result.
+    """
+    N_NEAREST_POINTS = 10
+    
+    nearest_vp_arr_series = []
+    
+    for row in gdf.itertuples():
+        vp_coords_line = getattr(row, "vp_geometry")
+        stop_geometry = getattr(row, "stop_geometry")
+        vp_idx_arr = getattr(row, "vp_idx")
+        
+        np_inds = nearest_snap(
+            vp_coords_line, stop_geometry, N_NEAREST_POINTS
+        )
+        
+        # nearest neighbor returns self.N 
+        # if there are no nearest neighbor results found
+        # if we want 10 nearest neighbors and 8th, 9th, 10th are all
+        # the same result, the 8th will have a result, then 9th and 10th will
+        # return the length of the array (which is out-of-bounds)
+        
+        np_inds2 = np_inds[np_inds < vp_idx_arr.size]
+        
+        nearest_vp_arr = vp_idx_arr[np_inds2]
+        
+        nearest_vp_arr_series.append(nearest_vp_arr)
+    
+    gdf2 = gdf.assign(
+        nearest_vp_arr = nearest_vp_arr_series
+    ).drop(columns = ["vp_idx", "vp_geometry"])
+    
     return gdf2
