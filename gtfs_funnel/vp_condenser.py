@@ -112,10 +112,10 @@ if __name__ == "__main__":
     
     from shared_utils import rt_dates
     
-    for analysis_date in [rt_dates.DATES["apr2024"]]:#analysis_date_list:
+    for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
-        #condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
+        condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
         
         time1 = datetime.datetime.now()
         
