@@ -34,10 +34,11 @@ def add_inner_labels_caption(svg, labels, spacing, caption):
     
     return export_svg
 
-def export_legend(cmap:branca.colormap.StepColormap, filename):
+def export_legend(cmap:branca.colormap.StepColormap, filename:str, inner_labels:list=[]):
     
+    assert len(inner_labels) in [0, 4], 'currently must supply 4 or 0 inner labels for spacing, outer labels are provided by default'
     legend = add_lines_header(cmap._repr_html_())
-    legend = add_inner_labels_caption(legend, [6, 12, 18, 24], 100, cmap.caption)
+    legend = add_inner_labels_caption(legend, inner_labels, 100, cmap.caption)
 
     path =  f'calitp-map-tiles/{filename}'
     with fs.open(path, 'w') as writer:  # write out to public-facing GCS?
@@ -47,6 +48,6 @@ def export_legend(cmap:branca.colormap.StepColormap, filename):
 if __name__ == "__main__":
     
     fs = get_fs()
-    export_legend(ZERO_THIRTY_COLORSCALE, 'speeds_legend.svg')
-    export_legend(VARIANCE_FIXED_COLORSCALE, 'variance_legend.svg')
-    export_legend(ACCESS_ZERO_THIRTY_COLORSCALE, 'speeds_legend_color_access.svg')
+    export_legend(cmap=ZERO_THIRTY_COLORSCALE, filename='speeds_legend.svg', inner_labels=[6, 12, 18, 24])
+    export_legend(cmap=VARIANCE_FIXED_COLORSCALE, filename='variance_legend.svg', inner_labels=VARIANCE_RANGE[1:-1])
+    export_legend(cmap=ACCESS_ZERO_THIRTY_COLORSCALE, filename='speeds_legend_color_access.svg', inner_labels=[6, 12, 18, 24])
