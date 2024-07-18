@@ -183,45 +183,47 @@ def add_dwell_time(
     
 if __name__ == "__main__":
     
+    from update_vars import analysis_date_list
+
     LOG_FILE = "./logs/vp_preprocessing.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
+        
+    for analysis_date in analysis_date_list:
+        start = datetime.datetime.now()
     
-    analysis_date = "2024-04-17"
-    
-    start = datetime.datetime.now()
-    
-    vp = delayed(import_vp)(analysis_date)
-    
-    vp_grouped = delayed(split_into_moving_and_dwelling)(vp)
-    
-    vp_with_dwell = delayed(add_dwell_time)(vp_grouped)
-    
-    vp_with_dwell = compute(vp_with_dwell)[0]
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"compute dwell df: {time1 - start}")
-    
-    vp_usable = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
-    )
-    
-    vp_usable_with_dwell = pd.merge(
-        vp_usable,
-        vp_with_dwell,
-        on = ["trip_instance_key", "vp_idx", "location_timestamp_local"],
-        how = "inner"
-    )
-    
-    helpers.if_exists_then_delete(f"{SEGMENT_GCS}vp_usable_with_dwell_{analysis_date}")
-    
-    vp_usable_with_dwell.to_parquet(
-        f"{SEGMENT_GCS}vp_usable_with_dwell_{analysis_date}",
-        partition_cols = "gtfs_dataset_key",
-    )
-    
-    end = datetime.datetime.now()
-    logger.info(f"merge with original and export: {end - time1}")
-    logger.info(f"vp with dwell time: {end - start}")
+        vp = delayed(import_vp)(analysis_date)
+
+        vp_grouped = delayed(split_into_moving_and_dwelling)(vp)
+
+        vp_with_dwell = delayed(add_dwell_time)(vp_grouped)
+
+        vp_with_dwell = compute(vp_with_dwell)[0]
+
+        time1 = datetime.datetime.now()
+        logger.info(f"compute dwell df: {time1 - start}")
+
+        vp_usable = pd.read_parquet(
+            f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+        )
+
+        vp_usable_with_dwell = pd.merge(
+            vp_usable,
+            vp_with_dwell,
+            on = ["trip_instance_key", "vp_idx", "location_timestamp_local"],
+            how = "inner"
+        )
+
+        helpers.if_exists_then_delete(
+            f"{SEGMENT_GCS}vp_usable_with_dwell_{analysis_date}")
+
+        vp_usable_with_dwell.to_parquet(
+            f"{SEGMENT_GCS}vp_usable_with_dwell_{analysis_date}",
+            partition_cols = "gtfs_dataset_key",
+        )
+
+        end = datetime.datetime.now()
+        logger.info(f"merge with original and export: {end - time1}")
+        logger.info(f"vp with dwell time: {end - start}")
