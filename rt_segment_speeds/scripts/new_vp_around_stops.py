@@ -1,16 +1,98 @@
 """
 """
+import dask.dataframe as dd
+import dask_geopandas as dg
 import datetime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import shapely
 
+from dask import delayed, compute
+
 from calitp_data_analysis import utils
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import helpers, wrangle_shapes
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT, PROJECT_CRS
 from shared_utils import rt_dates
+
+
+def get_projected_results(gdf):
+    gdf = gdf.assign(
+        stop_meters = gdf.shape_geometry.project(gdf.stop_geometry),
+        shape_meters = gdf.shape_geometry.project(gdf.vp_geometry)
+    )
+
+    gdf2 = gdf.assign(
+        stop_vp_distance_meters = (gdf.stop_meters - 
+                                   gdf.shape_meters).round(2)
+    ).drop(columns = ["shape_geometry", "vp_geometry", "stop_geometry"])
+    
+    return gdf2
+
+def reordered_function(    
+    analysis_date: str, 
+    dict_inputs: dict
+):
+    USABLE_VP = dict_inputs["stage1"]
+    NEAREST_VP = dict_inputs["stage2"]
+    
+    trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+    # This is our base vp file would be the nearest 10 vp for each stop,
+    # and we'll merge in vp geometry, shape to narrow this down
+    
+    vp_nearest = delayed(gpd.read_parquet)(
+        f"{SEGMENT_GCS}{NEAREST_VP}_{analysis_date}.parquet",
+        columns = trip_stop_cols + [
+            "shape_array_key", "stop_geometry",
+            "nearest_vp_arr"],
+    ).explode(
+        "nearest_vp_arr"
+    ).drop_duplicates().reset_index(
+        drop=True
+    ).rename(
+        columns = {"nearest_vp_arr": "vp_idx"}
+    ).astype({"vp_idx": "int"})
+    
+
+    #subset_vp = vp_nearest.vp_idx.unique().compute().tolist()
+    #subset_shapes = vp_nearest.shape_array_key.unique().compute().tolist()
+    
+    vp_with_dwell = delayed(pd.read_parquet)(
+        f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
+        #filters = [[("vp_idx", "in", subset_vp)]],
+        columns = ["vp_idx", "x", "y", 
+                   "location_timestamp_local", 
+                   "moving_timestamp_local"]
+    ).pipe(wrangle_shapes.vp_as_gdf, crs = PROJECT_CRS)
+    
+    shapes = delayed(helpers.import_scheduled_shapes)(
+        analysis_date,
+        columns = ["shape_array_key", "geometry"],
+        #filters = [[("shape_array_key", "in", subset_shapes)]],
+        crs = PROJECT_CRS,
+        get_pandas = True
+    )
+    
+    print("finished imports")
+    
+    # Merge all together
+    gdf = delayed(pd.merge)(
+        vp_nearest,
+        vp_with_dwell.rename(columns = {"geometry": "vp_geometry"}),
+        on = "vp_idx",
+        how = "inner"
+    ).merge(
+        shapes.rename(columns = {"geometry": "shape_geometry"}),
+        on = "shape_array_key",
+        how = "inner"
+    )
+    
+    print("assembled dataset")
+    
+    gdf2 = get_projected_results(gdf)
+    
+    return gdf2
 
 
 def merge_nearest_vp_with_shape(
@@ -20,9 +102,8 @@ def merge_nearest_vp_with_shape(
     
     INPUT_FILE = dict_inputs["stage2"]
     
-    vp = gpd.read_parquet(
-        f"{SEGMENT_GCS}nearest/"
-        f"{INPUT_FILE}_{analysis_date}.parquet",
+    vp = dg.read_parquet(
+        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
     )
     
     shapes = helpers.import_scheduled_shapes(
@@ -79,12 +160,12 @@ def explode_vp_and_project_onto_shape(
         shape_meters = gdf.shape_geometry.project(gdf.vp_geometry)
     )
     
-    gdf = gdf.assign(
+    gdf2 = gdf.assign(
         stop_vp_distance_meters = (gdf.stop_meters - 
                                    gdf.shape_meters).round(2)
     )
     
-    return gdf
+    return gdf2
 
 
 def find_two_closest_vp(gdf: gpd.GeoDataFrame, group_cols: list):
@@ -146,10 +227,7 @@ def consolidate_surrounding_vp(
             )
     )
     
-    if "stop_meters" not in group_cols:
-        group_cols = group_cols + ["stop_meters"]
-    
-    group_cols2 = group_cols + ["stop_geometry"]
+    group_cols2 = group_cols + ["stop_meters"]
     prefix_cols = ["vp_idx", "shape_meters"]
     timestamp_cols = ["location_timestamp_local", "moving_timestamp_local"]
     
@@ -190,36 +268,84 @@ def pare_down_nearest_neighbor(
 ):
     dict_inputs = config_path[segment_type]
 
-    EXPORT_FILE = f'{dict_inputs["stage2b"]_{analysis_date}'
+    EXPORT_FILE = dict_inputs["stage2b"]
     trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
     
     if segment_type == "speedmap_segments":
         trip_stop_cols = trip_stop_cols + [
             "shape_array_key", "stop_pair", "stop_meters"]
     
-    gdf = merge_nearest_vp_with_shape(analysis_date, dict_inputs)
+    gdf = delayed(merge_nearest_vp_with_shape)(analysis_date, dict_inputs)
 
-    gdf2 = explode_vp_and_project_onto_shape(gdf, analysis_date, dict_inputs)    
+    gdf2 = delayed(explode_vp_and_project_onto_shape)(
+        gdf, analysis_date, dict_inputs)    
 
-    gdf3 = find_two_closest_vp(gdf2, trip_stop_cols).sort_values(
+    gdf3 = delayed(find_two_closest_vp)(gdf2, trip_stop_cols).sort_values(
         trip_stop_cols + ["vp_idx"]
     ).reset_index(drop=True)
 
-    gdf4 = consolidate_surrounding_vp(gdf3, trip_stop_cols)
+    gdf4 = delayed(consolidate_surrounding_vp)(gdf3, trip_stop_cols)
 
+    gdf4 = compute(gdf4)[0]
+    
     utils.geoparquet_gcs_export(
         gdf4,
         SEGMENT_GCS,
-        EXPORT_FILE
+        f"{EXPORT_FILE}_{analysis_date}"
     )
+    
+    
+def pare_down_reordered(
+    analysis_date: str, 
+    segment_type,
+    config_path = GTFS_DATA_DICT
+):
+    dict_inputs = config_path[segment_type]
+
+    EXPORT_FILE = dict_inputs["stage2b"]
+    trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+    
+    start = datetime.datetime.now()
+    
+    gdf = reordered_function(analysis_date, dict_inputs)   
+
+    time1 = datetime.datetime.now()
+    print(f"reordered function with persist: {time1 - start}")
+    
+    
+    gdf2 = delayed(find_two_closest_vp)(gdf, trip_stop_cols).sort_values(
+        trip_stop_cols + ["vp_idx"]
+    ).reset_index(drop=True)
+    print("two closest")
+    
+    gdf2 = gdf2.persist()
+    time2 = datetime.datetime.now()
+    print(f"2 points persist: {time2 - time1}")
+
+    gdf3 = delayed(consolidate_surrounding_vp)(gdf2, trip_stop_cols)
+    print("consolidated")
+    
+    gdf3 = compute(gdf3)[0]
+    
+    gdf3.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet",
+    )
+    end = datetime.datetime.now()
+    print(f"execution time: {end - start}")
+    #utils.geoparquet_gcs_export(
+    #    gdf3,
+    #    SEGMENT_GCS,
+    #    f"{EXPORT_FILE}_{analysis_date}"
+    #) 
+
         
 if __name__ == "__main__":
     
-    for analysis_date in analysis_date_list:
+    for analysis_date in [rt_dates.DATES["jul2024"]]:
     
         start = datetime.datetime.now()
         
-        pare_down_nearest_neighbor(analysis_date)
+        pare_down_reordered(analysis_date, segment_type="stop_segments")
 
         end = datetime.datetime.now()
         print(f"narrow down to 2 nearest vp (all): {end - start}")
