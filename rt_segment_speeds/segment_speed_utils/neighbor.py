@@ -7,7 +7,7 @@ from scipy.spatial import KDTree
 
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils import gtfs_schedule_wrangling, wrangle_shapes     
-from segment_speed_utils.project_vars import SEGMENT_GCS
+from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT
 
 geo_const_meters = 6_371_000 * np.pi / 180
 geo_const_miles = 3_959_000 * np.pi / 180
@@ -110,12 +110,15 @@ def merge_stop_vp_for_nearest_neighbor(
     analysis_date: str,
     **kwargs
 ) -> gpd.GeoDataFrame:
+    VP_NN = GTFS_DATA_DICT.speeds_tables.vp_nearest_neighbor
     
     vp_condensed = gpd.read_parquet(
-        f"{SEGMENT_GCS}condensed/"
-        f"vp_nearest_neighbor_{analysis_date}.parquet",
+        f"{SEGMENT_GCS}{VP_NN}_{analysis_date}.parquet",
+        columns = ["trip_instance_key", 
+                   "vp_idx", "vp_primary_direction", 
+                   "geometry"],
         **kwargs
-    ).drop(columns = "location_timestamp_local").to_crs(WGS84)
+    ).to_crs(WGS84)
 
     gdf = pd.merge(
         stop_times.rename(
