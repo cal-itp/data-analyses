@@ -10,6 +10,7 @@ from loguru import logger
 
 from segment_speed_utils import helpers, segment_calcs
 from segment_speed_utils.project_vars import SEGMENT_GCS
+from update_vars import GTFS_DATA_DICT
 
 def import_vp(analysis_date: str) -> pd.DataFrame:
     """
@@ -17,8 +18,9 @@ def import_vp(analysis_date: str) -> pd.DataFrame:
     we need to check whether bus is dwelling
     at a location.
     """
+    USABLE_VP = GTFS_DATA_DICT.speeds_tables.usable_vp
     vp = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+        f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
         columns = [
             "trip_instance_key", "vp_idx", 
             "location_timestamp_local", "vp_primary_direction"
@@ -192,6 +194,10 @@ if __name__ == "__main__":
                level="INFO")
         
     for analysis_date in analysis_date_list:
+        
+        INPUT_FILE = GTFS_DATA_DICT.speeds_tables.usable_vp
+        EXPORT_FILE = GTFS_DATA_DICT.speeds_tables.vp_dwell
+        
         start = datetime.datetime.now()
     
         vp = delayed(import_vp)(analysis_date)
@@ -206,7 +212,7 @@ if __name__ == "__main__":
         logger.info(f"compute dwell df: {time1 - start}")
 
         vp_usable = pd.read_parquet(
-            f"{SEGMENT_GCS}vp_usable_{analysis_date}",
+            f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}",
         )
 
         vp_usable_with_dwell = pd.merge(
@@ -217,13 +223,13 @@ if __name__ == "__main__":
         )
 
         helpers.if_exists_then_delete(
-            f"{SEGMENT_GCS}vp_usable_with_dwell_{analysis_date}")
+            f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}")
 
         vp_usable_with_dwell.to_parquet(
-            f"{SEGMENT_GCS}vp_usable_with_dwell_{analysis_date}",
+            f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
             partition_cols = "gtfs_dataset_key",
         )
 
         end = datetime.datetime.now()
         logger.info(f"merge with original and export: {end - time1}")
-        logger.info(f"vp with dwell time: {end - start}")
+        logger.info(f"vp with dwell time {analysis_date}: {end - start}")

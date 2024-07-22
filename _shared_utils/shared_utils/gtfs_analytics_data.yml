@@ -30,9 +30,9 @@ speeds_tables:
   dir: ${gcs_paths.SEGMENT_GCS}
   raw_vp: vp
   usable_vp: vp_usable
-  vp_dwell: vp_usable_with_dwell
+  vp_dwell: vp_usable_dwell
   vp_condensed_line: condensed/vp_condensed
-  vp_nearest_neighbor: condensed/vp_nearest_neighbor
+  vp_nearest_neighbor: condensed/vp_nearest_neighbor_dwell
   timestamp_col: ${speed_vars.timestamp_col}
   time_min_cutoff: ${speed_vars.time_min_cutoff}
 

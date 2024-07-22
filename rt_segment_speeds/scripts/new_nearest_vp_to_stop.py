@@ -126,11 +126,12 @@ def nearest_neighbor_for_stop(
     Set up nearest neighbors for RT stop times, which
     includes all trips. Use stop sequences for each trip.
     """
-    
+    start = datetime.datetime.now()
+
     dict_inputs = config_path[segment_type]
     
-    start = datetime.datetime.now()
-    EXPORT_FILE = f'{dict_inputs["stage2a"]}_{analysis_date}'
+    EXPORT_FILE = f'{dict_inputs["stage2"]}_{analysis_date}'
+    trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
     
     stop_time_col_order = [
         'trip_instance_key', 'shape_array_key',
@@ -157,8 +158,16 @@ def nearest_neighbor_for_stop(
         
     results = neighbor.add_nearest_neighbor_result_array(gdf, analysis_date)
     
+    # Keep columns from results that are consistent across segment types 
+    # use trip_stop_cols as a way to uniquely key into a row 
+    keep_cols = trip_stop_cols + [
+        "shape_array_key",
+        "stop_geometry",
+        "nearest_vp_arr"
+    ]
+    
     utils.geoparquet_gcs_export(
-        results,
+        results[keep_cols],
         SEGMENT_GCS,
         EXPORT_FILE,
     )
