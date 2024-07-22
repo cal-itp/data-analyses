@@ -307,11 +307,9 @@ def filter_to_nearest_two_vp(
 
 if __name__ == "__main__":
     
-    from shared_utils import rt_dates
-    analysis_date = rt_dates.DATES["jul2024"]
-    #from segment_speed_utils.project_vars import analysis_date_list
+    from segment_speed_utils.project_vars import analysis_date_list
     
-    for analysis_date in [analysis_date]:
+    for analysis_date in analysis_date_list:
         filter_to_nearest_two_vp(
             analysis_date = analysis_date,
             segment_type = segment_type,
