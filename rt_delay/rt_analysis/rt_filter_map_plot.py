@@ -828,6 +828,8 @@ class RtFilterMapper:
 def from_gcs(itp_id, analysis_date, pbar = None):
     ''' Generates RtFilterMapper from cached artifacts in GCS. Generate using rt_parser.OperatorDayAnalysis.export_views_gcs()
     '''
+    if type(analysis_date) == str:
+        analysis_date = dt.date.fromisoformat(analysis_date)
     date_iso = analysis_date.isoformat()
     
     # if analysis_date <= warehouse_cutoff_date:
