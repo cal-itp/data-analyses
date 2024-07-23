@@ -71,10 +71,10 @@ def calculate_avg_speeds(
     )
                         
     df2 = df2.assign(
-        p50_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, 0.5), axis=1),
+        p50_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, q=50), axis=1),
         n_trips = df2.apply(lambda x: len(x.speed_mph_list), axis=1).astype("int16"),
-        p20_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, 0.2), axis=1),
-        p80_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, 0.8), axis=1),
+        p20_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, q=20), axis=1),
+        p80_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, q=80), axis=1),
     )
     
     stats = df2.drop(columns = "speed_mph_list")
