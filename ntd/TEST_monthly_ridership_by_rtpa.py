@@ -28,7 +28,7 @@ RTPA_URL = ("https://services3.arcgis.com/bWPjFyq029ChCGur/arcgis/rest/services/
       )
 
 #gpd.read_file(RTPA_URL).RTPA.drop_duplicates().to_csv("rtpa.csv")
-def add_change_columns(
+def OLD_add_change_columns(
     df: pd.DataFrame,
     year: int,
     month: int
@@ -43,7 +43,7 @@ def add_change_columns(
     
     return df
 
-def add_change_columns_v2(
+def add_change_columns(
     df: pd.DataFrame
 ) -> pd.DataFrame:
     """
@@ -65,11 +65,11 @@ def add_change_columns_v2(
 
     df["change_1yr"] = (df["upt"] - df["previous_y_m_upt"])
     
-    df = get_percent_change_v2(df)
+    df = get_percent_change(df)
     
     return df
 
-def get_percent_change(
+def OLD_get_percent_change(
     df: pd.DataFrame, 
     current_col: str, 
     prior_col: str
@@ -83,7 +83,7 @@ def get_percent_change(
     
     return df
 
-def get_percent_change_v2(
+def get_percent_change(
     df: pd.DataFrame, 
 ) -> pd.DataFrame:
     """
@@ -99,7 +99,7 @@ def get_percent_change_v2(
     
     return df
 
-def save_rtpa_outputs(
+def OLD_save_rtpa_outputs(
     df: pd.DataFrame, year: int, month: str,
     upload_to_public: bool = False
 ):
@@ -139,7 +139,7 @@ def save_rtpa_outputs(
     
     return
 
-def save_rtpa_outputs_v2(
+def save_rtpa_outputs(
     df: pd.DataFrame, 
     year: int, 
     month: str,
@@ -180,7 +180,7 @@ def save_rtpa_outputs_v2(
     
     return
 
-def produce_ntd_monthly_ridership_by_rtpa(
+def OLD_produce_ntd_monthly_ridership_by_rtpa(
     upt_url: str,
     year: int,
     month: str
@@ -240,7 +240,7 @@ def produce_ntd_monthly_ridership_by_rtpa(
     
     return df
 
-def produce_ntd_monthly_ridership_by_rtpa_v2(
+def produce_ntd_monthly_ridership_by_rtpa(
     #df: pd.DataFrame,
     year: int,
     month: int
@@ -250,7 +250,7 @@ def produce_ntd_monthly_ridership_by_rtpa_v2(
     """
     full_upt = (tbls.mart_ntd.dim_monthly_ntd_ridership_with_adjustments() >> collect()).rename(columns = {"mode_type_of_service_status": "Status"})
     
-    #updating month & year to int is already in add_change_columns_v2. keeping here for now.
+    #updating month & year to int is already in updated add_change_columns. keeping here for now.
     #full_upt[["period_year","period_month"]] = full_upt[["period_year","period_month"]].astype(int)
     
     full_upt = full_upt[full_upt.agency.notna()].reset_index(drop=True)
@@ -285,7 +285,7 @@ def produce_ntd_monthly_ridership_by_rtpa_v2(
     if len(df[df._merge=="left_only"]) > 0:
         raise ValueError("There are unmerged rows to crosswalk")
     
-    df = add_change_columns_v2(df)
+    df = add_change_columns(df)
     
     df = df.assign(
         Mode_full = df["mode"].map(NTD_MODES),
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     # Define variables we'll probably change later
     from update_vars import YEAR, MONTH, MONTH_CREATED, FULL_URL
     
-    df = produce_ntd_monthly_ridership_by_rtpa_v2(YEAR, MONTH)
+    df = produce_ntd_monthly_ridership_by_rtpa(YEAR, MONTH)
     print(df.columns)
     df.to_parquet(f"{GCS_FILE_PATH}ca_monthly_ridership_{YEAR}_{MONTH}.parquet")
     
@@ -315,6 +315,6 @@ if __name__ == "__main__":
         f"{GCS_FILE_PATH}ca_monthly_ridership_{YEAR}_{MONTH}.parquet"
     )
     # upload_to_public = False for testing, change back to True later.
-    save_rtpa_outputs_v2(df, YEAR, MONTH, upload_to_public = False)
+    save_rtpa_outputs(df, YEAR, MONTH, upload_to_public = False)
     remove_local_outputs(YEAR, MONTH)
 
