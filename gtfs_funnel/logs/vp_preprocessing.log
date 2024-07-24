@@ -118,3 +118,74 @@
 2024-07-18 11:47:28.029 | INFO     | __main__:<module>:229 - vp with dwell time: 0:06:02.468350
 2024-07-18 11:58:30.756 | INFO     | __main__:<module>:122 - 2024-07-17: condense vp for trip 0:05:09.315355
 2024-07-18 12:09:35.734 | INFO     | __main__:<module>:130 - 2024-07-17: prepare vp to use in nearest neighbor: 0:11:04.978176
+2024-07-23 14:48:27.402 | INFO     | __main__:<module>:122 - 2024-01-17: condense vp for trip 0:06:05.092191
+2024-07-23 15:00:26.262 | INFO     | __main__:<module>:130 - 2024-01-17: prepare vp to use in nearest neighbor: 0:11:58.860722
+2024-07-23 15:05:41.473 | INFO     | __main__:<module>:122 - 2024-02-14: condense vp for trip 0:05:15.210218
+2024-07-23 15:17:36.457 | INFO     | __main__:<module>:130 - 2024-02-14: prepare vp to use in nearest neighbor: 0:11:54.983919
+2024-07-23 15:23:06.113 | INFO     | __main__:<module>:122 - 2024-03-13: condense vp for trip 0:05:29.654701
+2024-07-23 15:34:38.238 | INFO     | __main__:<module>:130 - 2024-03-13: prepare vp to use in nearest neighbor: 0:11:32.125212
+2024-07-23 15:39:53.521 | INFO     | __main__:<module>:122 - 2024-04-17: condense vp for trip 0:05:15.282582
+2024-07-23 15:51:44.084 | INFO     | __main__:<module>:130 - 2024-04-17: prepare vp to use in nearest neighbor: 0:11:50.563316
+2024-07-23 15:56:46.911 | INFO     | __main__:<module>:122 - 2024-05-22: condense vp for trip 0:05:02.825650
+2024-07-23 16:08:25.676 | INFO     | __main__:<module>:130 - 2024-05-22: prepare vp to use in nearest neighbor: 0:11:38.765007
+2024-07-23 16:13:28.231 | INFO     | __main__:<module>:122 - 2024-06-12: condense vp for trip 0:05:02.554569
+2024-07-23 16:25:02.467 | INFO     | __main__:<module>:130 - 2024-06-12: prepare vp to use in nearest neighbor: 0:11:34.235426
+2024-07-23 16:30:04.483 | INFO     | __main__:<module>:122 - 2024-07-17: condense vp for trip 0:05:02.015676
+2024-07-23 16:41:20.494 | INFO     | __main__:<module>:130 - 2024-07-17: prepare vp to use in nearest neighbor: 0:11:16.011081
+2024-07-23 16:46:09.557 | INFO     | __main__:<module>:122 - 2023-03-15: condense vp for trip 0:04:49.061863
+2024-07-23 16:56:43.663 | INFO     | __main__:<module>:130 - 2023-03-15: prepare vp to use in nearest neighbor: 0:10:34.105873
+2024-07-23 17:01:47.695 | INFO     | __main__:<module>:122 - 2023-04-12: condense vp for trip 0:05:04.031226
+2024-07-23 17:12:21.556 | INFO     | __main__:<module>:130 - 2023-04-12: prepare vp to use in nearest neighbor: 0:10:33.860535
+2024-07-23 17:17:23.754 | INFO     | __main__:<module>:122 - 2023-05-17: condense vp for trip 0:05:02.197636
+2024-07-23 17:28:20.676 | INFO     | __main__:<module>:130 - 2023-05-17: prepare vp to use in nearest neighbor: 0:10:56.921373
+2024-07-23 17:33:13.945 | INFO     | __main__:<module>:122 - 2023-06-14: condense vp for trip 0:04:53.268169
+2024-07-23 17:44:06.741 | INFO     | __main__:<module>:130 - 2023-06-14: prepare vp to use in nearest neighbor: 0:10:52.796461
+2024-07-23 17:49:16.376 | INFO     | __main__:<module>:122 - 2023-07-12: condense vp for trip 0:05:09.633437
+2024-07-23 18:00:41.532 | INFO     | __main__:<module>:130 - 2023-07-12: prepare vp to use in nearest neighbor: 0:11:25.156417
+2024-07-23 18:05:51.934 | INFO     | __main__:<module>:122 - 2023-08-15: condense vp for trip 0:05:10.400527
+2024-07-23 18:16:53.660 | INFO     | __main__:<module>:130 - 2023-08-15: prepare vp to use in nearest neighbor: 0:11:01.725344
+2024-07-23 18:22:35.833 | INFO     | __main__:<module>:122 - 2023-09-13: condense vp for trip 0:05:42.170671
+2024-07-23 18:34:01.160 | INFO     | __main__:<module>:130 - 2023-09-13: prepare vp to use in nearest neighbor: 0:11:25.326852
+2024-07-23 18:39:29.907 | INFO     | __main__:<module>:122 - 2023-10-11: condense vp for trip 0:05:28.746149
+2024-07-23 18:51:09.056 | INFO     | __main__:<module>:130 - 2023-10-11: prepare vp to use in nearest neighbor: 0:11:39.149385
+2024-07-23 18:56:34.764 | INFO     | __main__:<module>:122 - 2023-11-15: condense vp for trip 0:05:25.707268
+2024-07-23 19:08:28.452 | INFO     | __main__:<module>:130 - 2023-11-15: prepare vp to use in nearest neighbor: 0:11:53.688355
+2024-07-23 19:13:52.865 | INFO     | __main__:<module>:122 - 2023-12-13: condense vp for trip 0:05:24.411596
+2024-07-23 19:25:19.390 | INFO     | __main__:<module>:130 - 2023-12-13: prepare vp to use in nearest neighbor: 0:11:26.525509
+2024-07-23 19:30:27.182 | INFO     | __main__:<module>:122 - 2023-10-09: condense vp for trip 0:05:07.790657
+2024-07-23 19:41:36.529 | INFO     | __main__:<module>:130 - 2023-10-09: prepare vp to use in nearest neighbor: 0:11:09.347168
+2024-07-23 19:46:58.383 | INFO     | __main__:<module>:122 - 2023-10-10: condense vp for trip 0:05:21.853522
+2024-07-23 19:58:28.585 | INFO     | __main__:<module>:130 - 2023-10-10: prepare vp to use in nearest neighbor: 0:11:30.201620
+
+2024-07-23 21:03:55.746 | INFO     | __main__:<module>:120 - 2023-10-12: condense vp for trip 0:05:33.750363
+2024-07-23 21:15:25.064 | INFO     | __main__:<module>:128 - 2023-10-12: prepare vp to use in nearest neighbor: 0:11:29.317703
+2024-07-23 21:21:44.793 | INFO     | __main__:<module>:120 - 2023-10-13: condense vp for trip 0:06:19.728172
+2024-07-23 21:33:21.956 | INFO     | __main__:<module>:128 - 2023-10-13: prepare vp to use in nearest neighbor: 0:11:37.162870
+2024-07-23 21:36:48.172 | INFO     | __main__:<module>:120 - 2023-10-14: condense vp for trip 0:03:26.214882
+2024-07-23 21:44:01.464 | INFO     | __main__:<module>:128 - 2023-10-14: prepare vp to use in nearest neighbor: 0:07:13.292618
+2024-07-23 21:46:58.105 | INFO     | __main__:<module>:120 - 2023-10-15: condense vp for trip 0:02:56.639660
+2024-07-23 21:53:18.038 | INFO     | __main__:<module>:128 - 2023-10-15: prepare vp to use in nearest neighbor: 0:06:19.933192
+2024-07-23 21:58:15.889 | INFO     | __main__:<module>:120 - 2023-04-10: condense vp for trip 0:04:57.850016
+2024-07-23 22:08:49.024 | INFO     | __main__:<module>:128 - 2023-04-10: prepare vp to use in nearest neighbor: 0:10:33.135375
+2024-07-23 22:13:57.604 | INFO     | __main__:<module>:120 - 2023-04-11: condense vp for trip 0:05:08.578910
+2024-07-23 22:24:28.719 | INFO     | __main__:<module>:128 - 2023-04-11: prepare vp to use in nearest neighbor: 0:10:31.114343
+2024-07-23 22:29:22.956 | INFO     | __main__:<module>:120 - 2023-04-13: condense vp for trip 0:04:54.237041
+2024-07-23 22:40:02.379 | INFO     | __main__:<module>:128 - 2023-04-13: prepare vp to use in nearest neighbor: 0:10:39.422284
+2024-07-23 22:44:56.068 | INFO     | __main__:<module>:120 - 2023-04-14: condense vp for trip 0:04:53.688314
+2024-07-23 22:54:59.291 | INFO     | __main__:<module>:128 - 2023-04-14: prepare vp to use in nearest neighbor: 0:10:03.222815
+2024-07-23 22:58:13.564 | INFO     | __main__:<module>:120 - 2023-04-15: condense vp for trip 0:03:14.272370
+2024-07-23 23:04:59.329 | INFO     | __main__:<module>:128 - 2023-04-15: prepare vp to use in nearest neighbor: 0:06:45.764939
+2024-07-23 23:07:52.950 | INFO     | __main__:<module>:120 - 2023-04-16: condense vp for trip 0:02:53.620007
+2024-07-23 23:13:57.222 | INFO     | __main__:<module>:128 - 2023-04-16: prepare vp to use in nearest neighbor: 0:06:04.271985
+2024-07-23 23:19:04.761 | INFO     | __main__:<module>:120 - 2024-04-15: condense vp for trip 0:05:07.538490
+2024-07-23 23:30:39.408 | INFO     | __main__:<module>:128 - 2024-04-15: prepare vp to use in nearest neighbor: 0:11:34.646680
+2024-07-23 23:35:51.550 | INFO     | __main__:<module>:120 - 2024-04-16: condense vp for trip 0:05:12.141903
+2024-07-23 23:47:33.266 | INFO     | __main__:<module>:128 - 2024-04-16: prepare vp to use in nearest neighbor: 0:11:41.715530
+2024-07-23 23:52:44.053 | INFO     | __main__:<module>:120 - 2024-04-18: condense vp for trip 0:05:10.785847
+2024-07-24 00:04:31.438 | INFO     | __main__:<module>:128 - 2024-04-18: prepare vp to use in nearest neighbor: 0:11:47.385670
+2024-07-24 00:09:33.931 | INFO     | __main__:<module>:120 - 2024-04-19: condense vp for trip 0:05:02.491412
+2024-07-24 00:21:08.015 | INFO     | __main__:<module>:128 - 2024-04-19: prepare vp to use in nearest neighbor: 0:11:34.084562
+2024-07-24 00:24:28.798 | INFO     | __main__:<module>:120 - 2024-04-20: condense vp for trip 0:03:20.781637
+2024-07-24 00:31:52.364 | INFO     | __main__:<module>:128 - 2024-04-20: prepare vp to use in nearest neighbor: 0:07:23.566487
+2024-07-24 00:34:47.831 | INFO     | __main__:<module>:120 - 2024-04-21: condense vp for trip 0:02:55.465950
+2024-07-24 00:41:22.729 | INFO     | __main__:<module>:128 - 2024-04-21: prepare vp to use in nearest neighbor: 0:06:34.897838

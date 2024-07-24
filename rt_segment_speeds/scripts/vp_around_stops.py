@@ -28,7 +28,7 @@ def stops_projected_against_shape(
         f"{SEGMENT_GCS}{input_file}_{analysis_date}.parquet",
         columns = trip_stop_cols + [
             "shape_array_key", "stop_geometry"],
-    )
+    ).to_crs(PROJECT_CRS)
     
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
@@ -191,58 +191,6 @@ def find_two_closest_vp(
     # sort by timestamp, and set the order to be 0, 1    
     
     return df2
-
-
-def consolidate_surrounding_vp(
-    df: pd.DataFrame, 
-    group_cols: list
-) -> pd.DataFrame:
-    """
-    Can this move to interpolate step?
-    This reshapes the df to wide so that each stop position has
-    a prior and subseq timestamp.
-    """
-    df = df.assign(
-        obs = (df.sort_values(group_cols + ["vp_idx"])
-               .groupby(group_cols, 
-                        observed=True, group_keys=False, dropna=False)
-               .cumcount()
-            )
-    )
-    
-    group_cols2 = group_cols + ["stop_meters"]
-    prefix_cols = ["vp_idx", "shape_meters"]
-    timestamp_cols = ["location_timestamp_local", "moving_timestamp_local"]
-    
-    vp_before_stop = df.loc[df.obs==0][group_cols2 + prefix_cols + timestamp_cols]
-    vp_after_stop = df.loc[df.obs==1][group_cols2 + prefix_cols + timestamp_cols]
-    
-    # For the vp before the stop occurs, we want the maximum timestamp
-    # of the last position
-    # We want to keep the moving_timestamp (which is after it's dwelled)
-    vp_before_stop = vp_before_stop.assign(
-        prior_vp_timestamp_local = vp_before_stop.moving_timestamp_local,
-    ).rename(
-        columns = {**{i: f"prior_{i}" for i in prefix_cols}}
-    ).drop(columns = timestamp_cols)
-    
-    # For the vp after the stop occurs, we want the minimum timestamp
-    # of that next position
-    # Keep location_timetamp (before it dwells)
-    vp_after_stop = vp_after_stop.assign(
-        subseq_vp_timestamp_local = vp_after_stop.location_timestamp_local,
-    ).rename(
-        columns = {**{i: f"subseq_{i}" for i in prefix_cols}}
-    ).drop(columns = timestamp_cols)
-    
-    df_wide = pd.merge(
-        vp_before_stop,
-        vp_after_stop,
-        on = group_cols2,
-        how = "inner"
-    )
-
-    return df_wide
 
 
 def filter_to_nearest_two_vp(
