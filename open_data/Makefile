@@ -2,7 +2,6 @@ create_gtfs_schedule_geospatial_open_data:
 # make sure to update update_vars.py
 	python create_routes_data.py
 	python create_stops_data.py
-	#python link_operator_to_county_district.py
     
 
 compile_open_data_portal:

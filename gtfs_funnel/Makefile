@@ -15,6 +15,7 @@ preprocess_vp:
 	python vp_keep_usable.py
 	python vp_direction.py
 	python cleanup.py
+	python vp_dwell_time.py    
 	python vp_condenser.py
 
 preprocess_schedule_only:
@@ -41,6 +42,7 @@ funnel_gtfs_single_day:
 	make preprocess_vp
 	make preprocess_schedule_only 
 	make timeseries_preprocessing
+	make monthly_scheduled_data    
 
 cardinal_direction_temp:
 	python schedule_stats_by_route_direction.py 

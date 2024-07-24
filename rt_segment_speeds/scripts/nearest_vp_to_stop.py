@@ -16,8 +16,8 @@ from calitp_data_analysis import utils
 from segment_speed_utils import helpers, neighbor
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import SEGMENT_TYPES
-                                              
-    
+
+
 def stop_times_for_shape_segments(
     analysis_date: str,
     dict_inputs: dict
@@ -115,7 +115,7 @@ def stop_times_for_speedmaps(
     stop_times = stop_times.reindex(columns = stop_time_col_order)
     
     return stop_times
-    
+
 
 def nearest_neighbor_for_stop(
     analysis_date: str,
@@ -126,11 +126,12 @@ def nearest_neighbor_for_stop(
     Set up nearest neighbors for RT stop times, which
     includes all trips. Use stop sequences for each trip.
     """
-    
+    start = datetime.datetime.now()
+
     dict_inputs = config_path[segment_type]
     
-    start = datetime.datetime.now()
-    EXPORT_FILE = f'{dict_inputs["stage2"]}'
+    EXPORT_FILE = f'{dict_inputs["stage2"]}_{analysis_date}'
+    trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
     
     stop_time_col_order = [
         'trip_instance_key', 'shape_array_key',
@@ -155,22 +156,29 @@ def nearest_neighbor_for_stop(
     gdf = neighbor.merge_stop_vp_for_nearest_neighbor(
         stop_times, analysis_date)
         
-    results = neighbor.add_nearest_neighbor_result(gdf, analysis_date)
+    results = neighbor.add_nearest_neighbor_result_array(gdf, analysis_date)
+    
+    # Keep columns from results that are consistent across segment types 
+    # use trip_stop_cols as a way to uniquely key into a row 
+    keep_cols = trip_stop_cols + [
+        "shape_array_key",
+        "stop_geometry",
+        "nearest_vp_arr"
+    ]
     
     utils.geoparquet_gcs_export(
-        results,
+        results[keep_cols],
         SEGMENT_GCS,
-        f"{EXPORT_FILE}_{analysis_date}",
+        EXPORT_FILE,
     )
-    
     
     end = datetime.datetime.now()
     logger.info(f"nearest neighbor for {segment_type} "
                 f"{analysis_date}: {end - start}")
     
     return
-    
-    
+
+
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date_list
