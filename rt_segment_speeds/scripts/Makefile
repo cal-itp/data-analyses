@@ -33,3 +33,8 @@ download_roads:
 	#pip install esridump
 	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson
 	python download_all_roads.py
+
+backfill:
+	#python pipeline_segment_speeds.py
+	python pipeline_rt_stop_times.py
+	python pipeline_speedmap.py

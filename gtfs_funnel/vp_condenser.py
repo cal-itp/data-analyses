@@ -24,8 +24,8 @@ def condense_vp_to_linestring(
     We will group by trip and save out 
     the vp point geom into a shapely.LineString.
     """
-    USABLE_VP = dict_inputs.speeds_tables.usable_vp + "_with_dwell"
-    EXPORT_FILE = dict_inputs.speeds_tables.vp_condensed_line + "_dwell"
+    USABLE_VP = dict_inputs.speeds_tables.vp_dwell
+    EXPORT_FILE = dict_inputs.speeds_tables.vp_condensed_line
     
     vp = delayed(pd.read_parquet)(
         f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
@@ -70,8 +70,8 @@ def prepare_vp_for_all_directions(
     Subset vp_idx, location_timestamp_local and coordinate arrays 
     to exclude southbound.
     """
-    INPUT_FILE = dict_inputs.speeds_tables.vp_condensed_line + "_dwell"
-    EXPORT_FILE = dict_inputs.speeds_tables.vp_nearest_neighbor + "_dwell"
+    INPUT_FILE = dict_inputs.speeds_tables.vp_condensed_line
+    EXPORT_FILE = dict_inputs.speeds_tables.vp_nearest_neighbor
     
     vp = delayed(gpd.read_parquet)(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
@@ -109,13 +109,11 @@ if __name__ == "__main__":
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
-    
-    from shared_utils import rt_dates
-    
-    for analysis_date in [rt_dates.DATES["apr2024"]]:#analysis_date_list:
+        
+    for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
-        #condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
+        condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
         
         time1 = datetime.datetime.now()
         

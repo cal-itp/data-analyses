@@ -8,6 +8,7 @@ import sys
 from loguru import logger
 
 from nearest_vp_to_stop import nearest_neighbor_for_stop
+from vp_around_stops import filter_to_nearest_two_vp
 from interpolate_stop_arrival import interpolate_stop_arrivals
 from stop_arrivals_to_speed import calculate_speed_from_stop_arrivals
 from update_vars import GTFS_DATA_DICT
@@ -27,15 +28,22 @@ if __name__ == "__main__":
         logger.add(sys.stderr, 
                    format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                    level="INFO")
-    
+        
         nearest_neighbor_for_stop(
             analysis_date = analysis_date,
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
         )    
+                
+        filter_to_nearest_two_vp(
+            analysis_date = analysis_date,
+            segment_type = segment_type,
+            config_path = GTFS_DATA_DICT
+        )
         
         logger.remove()
-    
+        
+        
         LOG_FILE = "../logs/interpolate_stop_arrival.log"
         logger.add(LOG_FILE, retention="3 months")
         logger.add(sys.stderr, 
@@ -49,7 +57,7 @@ if __name__ == "__main__":
         )
 
         logger.remove()
-    
+        
         LOG_FILE = "../logs/speeds_by_segment_trip.log"
         logger.add(LOG_FILE, retention="3 months")
         logger.add(sys.stderr, 
@@ -63,4 +71,4 @@ if __name__ == "__main__":
         )  
 
         logger.remove()
-       
+        
