@@ -12,7 +12,7 @@ prep_roads:
 	python proxy_road_stop_times.py    
     
 speeds_pipeline:
-	make segmentize
+	#make segmentize
 	python pipeline_segment_speeds.py
 	python average_segment_speeds.py  
 
@@ -28,13 +28,9 @@ all_speeds_pipeline:
 	make speeds_pipeline
 	make rt_stop_times_pipeline
 	make speedmaps_pipeline
+	#python publish_open_data.py  
     
 download_roads:
 	#pip install esridump
 	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson
 	python download_all_roads.py
-
-backfill:
-	#python pipeline_segment_speeds.py
-	python pipeline_rt_stop_times.py
-	python pipeline_speedmap.py
