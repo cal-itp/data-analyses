@@ -231,7 +231,6 @@ def filter_to_nearest_two_vp(
         how = "inner"
     )
     
-    
     # Calculate the distance between the stop and vp position
     # This is used to find the minimum positive and minimum negative
     # distance (get at vp before and after stop)
@@ -247,6 +246,8 @@ def filter_to_nearest_two_vp(
     gdf2.to_parquet(
         f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet",
     )
+    
+    del stop_meters_df, vp_meters_df, gdf, gdf2
     
     end = datetime.datetime.now()
     logger.info(f"nearest 2 vp for {segment_type} "
