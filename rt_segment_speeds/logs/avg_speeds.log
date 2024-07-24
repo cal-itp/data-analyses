@@ -250,3 +250,11 @@
 2024-06-13 09:02:21.542 | INFO     | average_segment_speeds:single_day_segment_averages:180 - route dir seg avg 0:04:19.178266
 2024-06-13 09:02:21.543 | INFO     | average_segment_speeds:single_day_segment_averages:181 - single day segment execution time: 0:09:57.494736
 2024-06-13 09:02:22.066 | INFO     | __main__:<module>:32 - average rollups for 2023-11-15: 0:09:58.021704
+2024-07-24 13:21:34.085 | INFO     | __main__:single_day_summary_averages:82 - trip avg 0:00:14.032283
+2024-07-24 13:21:45.196 | INFO     | __main__:single_day_summary_averages:122 - route dir avg: 0:00:11.110996
+2024-07-24 13:21:45.196 | INFO     | __main__:single_day_summary_averages:123 - single day summary speed execution time: 0:00:25.143279
+2024-07-24 13:21:45.259 | INFO     | __main__:<module>:246 - average rollups for 2024-07-17: 0:00:25.212744
+2024-07-24 13:26:52.393 | INFO     | average_segment_speeds:single_day_segment_averages:169 - shape seg avg 0:04:45.919302
+2024-07-24 13:30:12.442 | INFO     | average_segment_speeds:single_day_segment_averages:185 - route dir seg avg 0:03:20.048078
+2024-07-24 13:30:12.442 | INFO     | average_segment_speeds:single_day_segment_averages:186 - single day segment execution time: 0:08:05.967380
+2024-07-24 13:30:12.730 | INFO     | __main__:<module>:32 - average rollups for 2024-07-17: 0:08:06.262111

@@ -17,7 +17,7 @@ def stage_open_data_exports(analysis_date: str):
     read it in open_data/catalog.yml.
     """
     datasets = [
-        GTFS_DATA_DICT.stop_segments.route_dir_single_segment,
+        GTFS_DATA_DICT.speedmap_segments.route_dir_single_segment,
         GTFS_DATA_DICT.rt_stop_times.route_dir_single_summary
     ]
 

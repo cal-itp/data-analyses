@@ -207,7 +207,7 @@ def filter_to_nearest_two_vp(
     start = datetime.datetime.now()
     
     stop_meters_df = delayed(stops_projected_against_shape)(
-        INPUT_FILE, analysis_date, trip_stop_cols)
+        INPUT_FILE, analysis_date, trip_stop_cols).persist()
     
     vp_nearest = delayed(explode_vp_nearest)(
         INPUT_FILE, analysis_date, trip_stop_cols)
@@ -218,7 +218,7 @@ def filter_to_nearest_two_vp(
         USABLE_VP_FILE,
         analysis_date, 
         filters = [[("vp_idx", "in", subset_vp)]]
-    )
+    ).persist()
     
     gdf = delayed(pd.merge)(
         vp_nearest,
