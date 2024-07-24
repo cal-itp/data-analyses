@@ -157,7 +157,7 @@ def nearest_neighbor_for_stop(
         stop_times, analysis_date)
         
     results = neighbor.add_nearest_neighbor_result_array(gdf, analysis_date)
-    
+        
     # Keep columns from results that are consistent across segment types 
     # use trip_stop_cols as a way to uniquely key into a row 
     keep_cols = trip_stop_cols + [
@@ -176,6 +176,7 @@ def nearest_neighbor_for_stop(
     logger.info(f"nearest neighbor for {segment_type} "
                 f"{analysis_date}: {end - start}")
     
+    del gdf, results
     return
 
 
