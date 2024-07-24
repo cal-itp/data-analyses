@@ -96,3 +96,5 @@
 2024-06-13 08:48:59.278 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:215 - interpolate arrivals for speedmap_segments 2023-11-15:  2023-11-15: 0:04:03.982445
 2024-06-13 08:51:59.429 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:174 - speeds by segment for speedmap_segments 2023-11-15: 0:02:44.265009
 2024-07-22 13:50:47.883 | INFO     | new_vp_around_stops2:filter_to_nearest_two_vp:304 - nearest 2 vp for stop_segments 2024-07-17: 0:09:15.107865
+2024-07-22 15:17:29.929 | INFO     | new_interpolate_stop_arrival:interpolate_stop_arrivals:94 - interpolate arrivals for stop_segments 2024-07-17:  2024-07-17: 0:00:41.138249
+2024-07-24 10:20:14.684 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:176 - nearest neighbor for rt_stop_times 2024-07-17: 0:11:48.903359
