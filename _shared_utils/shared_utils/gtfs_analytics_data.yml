@@ -32,7 +32,7 @@ speeds_tables:
   usable_vp: vp_usable
   vp_dwell: vp_usable_dwell
   vp_condensed_line: condensed/vp_condensed
-  vp_nearest_neighbor: condensed/vp_nearest_neighbor_dwell
+  vp_nearest_neighbor: condensed/vp_nearest_neighbor
   timestamp_col: ${speed_vars.timestamp_col}
   time_min_cutoff: ${speed_vars.time_min_cutoff}
 

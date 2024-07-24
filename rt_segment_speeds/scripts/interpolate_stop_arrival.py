@@ -1,44 +1,118 @@
-"""
-Interpolate stop arrival.
-"""
 import datetime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import shapely
 import sys
 
 from loguru import logger
 from pathlib import Path
 from typing import Literal, Optional
 
-from segment_speed_utils import (array_utils, helpers,
+from segment_speed_utils import (array_utils, helpers, 
                                  segment_calcs, wrangle_shapes)
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import PROJECT_CRS, SEGMENT_TYPES
-                                             
+from shared_utils import rt_dates
+import vp_around_stops as nvp
 
-def project_points_onto_shape(
-    stop_geometry: shapely.Point,
-    vp_coords_trio: shapely.LineString,
-    shape_geometry: shapely.LineString,
-    timestamp_arr: np.ndarray,
-) -> tuple[float]:
+
+def consolidate_surrounding_vp(
+    df: pd.DataFrame, 
+    group_cols: list
+) -> pd.DataFrame:
     """
-    Project the points in the vp trio against the shape geometry
-    and the stop position onto the shape geometry.
-    Use np.interp to find interpolated arrival time
+    This reshapes the df to wide so that each stop position has
+    a prior and subseq timestamp (now called vp_timestamp_local).
     """
-    stop_position = vp_coords_trio.project(stop_geometry)
-    stop_meters = shape_geometry.project(stop_geometry)
+    df = df.assign(
+        obs = (df.sort_values(group_cols + ["vp_idx"])
+               .groupby(group_cols, 
+                        observed=True, group_keys=False, dropna=False)
+               .cumcount()
+            )
+    )
     
-    points = [shapely.Point(p) for p in vp_coords_trio.coords]
-    projected_points = np.asarray([vp_coords_trio.project(p) for p in points])
+    group_cols2 = group_cols + ["stop_meters"]
+    prefix_cols = ["vp_idx", "shape_meters"]
+    timestamp_cols = ["location_timestamp_local", "moving_timestamp_local"]
+    
+    vp_before_stop = df.loc[df.obs==0][group_cols2 + prefix_cols + timestamp_cols]
+    vp_after_stop = df.loc[df.obs==1][group_cols2 + prefix_cols + timestamp_cols]
+    
+    # For the vp before the stop occurs, we want the maximum timestamp
+    # of the last position
+    # We want to keep the moving_timestamp (which is after it's dwelled)
+    vp_before_stop = vp_before_stop.assign(
+        prior_vp_timestamp_local = vp_before_stop.moving_timestamp_local,
+    ).rename(
+        columns = {**{i: f"prior_{i}" for i in prefix_cols}}
+    ).drop(columns = timestamp_cols)
+    
+    # For the vp after the stop occurs, we want the minimum timestamp
+    # of that next position
+    # Keep location_timetamp (before it dwells)
+    vp_after_stop = vp_after_stop.assign(
+        subseq_vp_timestamp_local = vp_after_stop.location_timestamp_local,
+    ).rename(
+        columns = {**{i: f"subseq_{i}" for i in prefix_cols}}
+    ).drop(columns = timestamp_cols)
+    
+    df_wide = pd.merge(
+        vp_before_stop,
+        vp_after_stop,
+        on = group_cols2,
+        how = "inner"
+    )
 
-    interpolated_arrival = wrangle_shapes.interpolate_stop_arrival_time(
-        stop_position, projected_points, timestamp_arr)
+    return df_wide
+
+
+def add_arrival_time(
+    input_file: str,
+    analysis_date: str,
+    group_cols: list
+) -> pd.DataFrame:    
+    """
+    Take the 2 nearest vp and transfrom df so that every stop
+    position has a prior and subseq vp_idx and timestamps.
+    This makes it easy to set up our interpolation of arrival time.
+    Arrival time should be between moving_timestamp of prior
+    and location_timestamp of subseq.
+    """
+    df = pd.read_parquet(
+        f"{SEGMENT_GCS}{input_file}_{analysis_date}.parquet"
+    ).pipe(consolidate_surrounding_vp, group_cols)
+    
+    arrival_time_series = []
+    
+    for row in df.itertuples():
         
-    return stop_meters, interpolated_arrival
+        stop_position = getattr(row, "stop_meters")
+        
+        projected_points = np.asarray([
+            getattr(row, "prior_shape_meters"), 
+            getattr(row, "subseq_shape_meters")
+        ])
+        
+        timestamp_arr = np.asarray([
+            getattr(row, "prior_vp_timestamp_local"),
+            getattr(row, "subseq_vp_timestamp_local"),
+        ])
+        
+        
+        interpolated_arrival = wrangle_shapes.interpolate_stop_arrival_time(
+            stop_position, projected_points, timestamp_arr)
+        
+        arrival_time_series.append(interpolated_arrival)
+        
+    df["arrival_time"] = arrival_time_series
+    
+    drop_cols = [i for i in df.columns if 
+                 ("prior_" in i) or ("subseq_" in i)]
+    
+    df2 = df.drop(columns = drop_cols)
+    
+    return df2
 
 
 def stop_and_arrival_time_arrays_by_trip(
@@ -129,97 +203,41 @@ def enforce_monotonicity_and_interpolate_across_stops(
     ).reset_index(drop=True)
         
     return fixed_df
- 
+
 
 def interpolate_stop_arrivals(
     analysis_date: str,
     segment_type: Literal[SEGMENT_TYPES],
-    config_path: Optional[Path] = GTFS_DATA_DICT,    
+    config_path: Optional[Path] = GTFS_DATA_DICT
 ):
-    """
-    Find the interpolated stop arrival based on where 
-    stop is relative to the trio of vehicle positions.
-    """
     dict_inputs = config_path[segment_type]
-
-    NEAREST_VP = f"{dict_inputs['stage2']}_{analysis_date}"
-    STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
-    
     trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
-    
+    INPUT_FILE = dict_inputs["stage2b"]
+    STOP_ARRIVALS_FILE = dict_inputs["stage3"]
+
     start = datetime.datetime.now()
     
-    # Import nearest vp file, set to EPSG:3310 
-    # to merge against scheduled shapes
-    df = gpd.read_parquet(
-        f"{SEGMENT_GCS}{NEAREST_VP}.parquet",
-    )
-
-    df = df.assign(
-        stop_geometry = df.stop_geometry.to_crs(PROJECT_CRS),
-        vp_coords_trio = df.vp_coords_trio.to_crs(PROJECT_CRS)
-    )
-
-    shapes = helpers.import_scheduled_shapes(
+    df = add_arrival_time(
+        INPUT_FILE, 
         analysis_date,
-        columns = ["shape_array_key", "geometry"],
-        crs = PROJECT_CRS
-    ).dropna(subset="geometry")
-
-    gdf = pd.merge(
-        df,
-        shapes.rename(columns = {"geometry": "shape_geometry"}),
-        on = "shape_array_key",
-        how = "inner"
+        trip_stop_cols + ["shape_array_key"]   
     )
-
-    del df, shapes
-
-    stop_meters_series = []
-    stop_arrival_series = []
-    
-    for row in gdf.itertuples():
-        
-        stop_meters, interpolated_arrival = project_points_onto_shape(
-            getattr(row, "stop_geometry"),
-            getattr(row, "vp_coords_trio"),
-            getattr(row, "shape_geometry"),
-            getattr(row, "location_timestamp_local_trio")
-        )
-        
-        stop_meters_series.append(stop_meters)
-        stop_arrival_series.append(interpolated_arrival)
-
-    results = gdf.assign(
-        stop_meters = stop_meters_series,
-        arrival_time = stop_arrival_series,
-    )[trip_stop_cols + ["shape_array_key", "stop_id", 
-         "stop_meters", "arrival_time"]
-     ].sort_values(
-        trip_stop_cols
-    ).reset_index(drop=True)
-    
-    time1 = datetime.datetime.now()
-    logger.info(f"get stop arrivals {analysis_date}: {time1 - start}")
     
     results = enforce_monotonicity_and_interpolate_across_stops(
-        results, trip_stop_cols)
+        df, trip_stop_cols)
+    
         
     results.to_parquet(
-        f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}.parquet"
+        f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}_{analysis_date}.parquet"
     )
-    
-    del gdf, results
     
     end = datetime.datetime.now()
     logger.info(f"interpolate arrivals for {segment_type} "
-                f"{analysis_date}:  {analysis_date}: {end - start}")    
-    
-    return
+                f"{analysis_date}:  {analysis_date}: {end - start}") 
 
 
 if __name__ == "__main__":
-        
+    
     from segment_speed_utils.project_vars import analysis_date_list
     
     for analysis_date in analysis_date_list:
