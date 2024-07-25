@@ -250,9 +250,17 @@ def col_row_updater(df: pd.DataFrame, col1: str, val1, col2: str, new_val):
 #        data[data[col1] == data[col1].min()][col_list]
 #                  )
 
-def outlier_flag(col):
-    """
-    function to flag outlier rows. use with .apply()
-    """
+#def outlier_flag(col):
+#    """
+#    function to flag outlier rows. use with .apply()
+#    """
     
-    return col <= -3 or col >= 3
+#    return col <= -3 or col >= 3
+
+def new_outlier_flag_v2(df:pd.DataFrame, col: str) -> pd.DataFrame:
+    """
+    function to flag outliers based on a given column.
+    applies lambda function to each row in df to check if column value has an absolute value of > 3.
+    no `axis = 1` because this operates on a single series
+    """
+    return df[col].apply(lambda x: True if abs(x) > 3 else False)

@@ -17,6 +17,7 @@ speed_vars:
   timestamp_col: "location_timestamp_local"
   max_speed: 80
   time_min_cutoff: 10
+  timestamp_cols: ["location_timestamp_local", "moving_timestamp_local"]
 
 schedule_downloads:
   dir: ${gcs_paths.COMPILED_CACHED_VIEWS}
@@ -29,6 +30,7 @@ speeds_tables:
   dir: ${gcs_paths.SEGMENT_GCS}
   raw_vp: vp
   usable_vp: vp_usable
+  vp_dwell: vp_usable_dwell
   vp_condensed_line: condensed/vp_condensed
   vp_nearest_neighbor: condensed/vp_nearest_neighbor
   timestamp_col: ${speed_vars.timestamp_col}
@@ -65,8 +67,9 @@ digest_tables:
 
 stop_segments:
   dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.usable_vp}
+  stage1: ${speeds_tables.vp_dwell}
   stage2: "nearest/nearest_vp_shape_segments"
+  stage2b: "nearest/nearest2_vp_shape_segments"
   stage3: "stop_arrivals"
   stage4: "speeds_stop_segments"
   trip_stop_cols: ["trip_instance_key", "stop_sequence"]
@@ -76,13 +79,13 @@ stop_segments:
   route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"
   route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
   segments_file: "segment_options/shape_stop_segments"
-  timestamp_col: ${speed_vars.timestamp_col}
   max_speed: ${speed_vars.max_speed}
 
 rt_stop_times:
   dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.usable_vp}
+  stage1: ${speeds_tables.vp_dwell}
   stage2: "nearest/nearest_vp_rt_stop_times"
+  stage2b: "nearest/nearest2_vp_rt_stop_times"
   stage3: "rt_stop_times/stop_arrivals"
   stage4: "rt_stop_times/speeds"
   trip_stop_cols: ["trip_instance_key", "stop_sequence"]
@@ -99,9 +102,10 @@ rt_stop_times:
 
 speedmap_segments:
   dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.usable_vp}
+  stage1: ${speeds_tables.vp_dwell}
   proxy_stop_times: "stop_time_expansion/speedmap_stop_times"
   stage2: "nearest/nearest_vp_speedmap_proxy"
+  stage2b: "nearest/nearest2_vp_speedmap_proxy"
   stage3: "speedmap/stop_arrivals_proxy"
   stage3b: "speedmap/stop_arrivals"
   stage4: "speedmap/speeds"
@@ -120,7 +124,7 @@ speedmap_segments:
 
 road_segments:
   dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.usable_vp}
+  stage1: ${speeds_tables.vp_dwell}
   proxy_stop_times: "stop_time_expansion/roads_stop_times"
   stage2: "nearest/nearest_vp_roads"
   stage3: "road_segments/stop_arrivals"

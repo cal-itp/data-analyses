@@ -39,12 +39,16 @@ V2_SUBFOLDER = "v2_cached_views/"
 SPA_MAP_SITE = "https://embeddable-maps.calitp.org/"
 SPA_MAP_BUCKET = "calitp-map-tiles/"
 SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/speeds_legend.svg"
+VARIANCE_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg"
+ACCESS_SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/speeds_legend_color_access.svg"
 
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 METERS_PER_MILE = 1609.34
 # Colorscale
 ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
 ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
+ACCESS_ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdBu_10.scale(vmin=0, vmax=30)
+ACCESS_ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 VARIANCE_COLORS = branca.colormap.step.Blues_06.colors[1:]  # actual breaks will vary
 VARIANCE_RANGE = np.arange(1, 2.8, 0.3)
 VARIANCE_FIXED_COLORSCALE = branca.colormap.StepColormap(

@@ -481,7 +481,8 @@ def gtfs_segments_rename_cols(
 
 def merge_operator_identifiers(
     df: pd.DataFrame, 
-    analysis_date_list: list
+    analysis_date_list: list,
+    **kwargs
 ) -> pd.DataFrame:
     """
     Carrying a lot of these operator identifiers is not 
@@ -492,8 +493,8 @@ def merge_operator_identifiers(
     crosswalk = pd.concat([
         helpers.import_schedule_gtfs_key_organization_crosswalk(
             analysis_date,
-        ).drop(columns = ["itp_id", "schedule_source_record_id"]) 
-        for analysis_date in analysis_date_list],
+            **kwargs
+        ) for analysis_date in analysis_date_list],
         axis=0, ignore_index=True
     ).drop_duplicates()
     

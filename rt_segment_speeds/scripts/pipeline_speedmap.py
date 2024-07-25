@@ -14,6 +14,7 @@ from typing import Optional
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 
 from nearest_vp_to_stop import nearest_neighbor_for_stop
+from vp_around_stops import filter_to_nearest_two_vp
 from interpolate_stop_arrival import interpolate_stop_arrivals
 from stop_arrivals_to_speed import calculate_speed_from_stop_arrivals
 
@@ -84,6 +85,12 @@ if __name__ == "__main__":
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
         )    
+                
+        filter_to_nearest_two_vp(
+            analysis_date = analysis_date,
+            segment_type = segment_type,
+            config_path = GTFS_DATA_DICT
+        )
         
         logger.remove()
     

@@ -137,10 +137,11 @@ def get_agency_info(df: pd.DataFrame, date: str) -> pd.DataFrame:
     and we can use that to join to our saved crosswalk.
     """
     crosswalk = helpers.import_schedule_gtfs_key_organization_crosswalk(
-        date
-    ).drop(
-        columns = ["itp_id", "caltrans_district", 
-                   "schedule_source_record_id"]
+        date,
+        columns = [
+            "schedule_gtfs_dataset_key",
+            "organization_name", "organization_source_record_id", 
+            "base64_url"]
     ).rename(columns = {
         "organization_name": "agency",
         "organization_source_record_id": "org_id"

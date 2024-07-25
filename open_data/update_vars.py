@@ -1,7 +1,7 @@
 from pathlib import Path
 from shared_utils import rt_dates
 
-analysis_date = rt_dates.DATES["jun2024"]
+analysis_date = rt_dates.DATES["jul2024"]
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
 COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
@@ -16,8 +16,8 @@ META_JSON = Path("metadata.json")
 DATA_DICT_YML = Path("data_dictionary.yml")
 
 RUN_ME = [
-    #"ca_hq_transit_areas", 
-    #"ca_hq_transit_stops",
+    "ca_hq_transit_areas", 
+    "ca_hq_transit_stops",
     "ca_transit_routes", 
     "ca_transit_stops",
     "speeds_by_stop_segments", 
