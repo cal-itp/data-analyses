@@ -84,8 +84,7 @@ def load_ntd(year: int) -> pd.DataFrame:
         >> collect()
     )
 
-    cols = list(df.columns)
-    df2 = df.sort_values(by=cols, na_position="last")
+    df2 = df.sort_values(by=df.columns.tolist(), na_position="last")
     df3 = df2.groupby("agency_name").first().reset_index()
 
     return df3
@@ -110,28 +109,42 @@ def load_mobility()->pd.DataFrame:
     >> collect()
     )
     
-    df2 = df.sort_values(by=["on_demand_vehicles_at_max_service","vehicles_at_max_service"], ascending = [False, False])
+    df2 = df.sort_values(
+        by=["on_demand_vehicles_at_max_service","vehicles_at_max_service"], 
+        ascending = [False, False]
+    )
+    
     df3 = df2.groupby('agency_name').first().reset_index()
+    
     return df3
 
 def merge_ntd_mobility(year:int)->pd.DataFrame:
     ntd = load_ntd(year)
     mobility = load_mobility()
-    m1 = pd.merge(
-    mobility,
-    ntd,
-    how="inner",
-    on="agency_name")
-    agency_dict = {
-    "City of Fairfield, California": "City of Fairfield",
-    "Livermore / Amador Valley Transit Authority": "Livermore-Amador Valley Transit Authority",
-    "Nevada County Transit Services": "Nevada County",
-    "Omnitrans": "OmniTrans"}
     
-    m1.agency_name = m1.agency_name.replace(agency_dict)
-    m1.agency_name = m1.agency_name.str.strip()
-    m1 = m1.drop_duplicates(subset = ["agency_name"]).reset_index(drop = True)
-    m1 = m1.drop(columns = ["agency_name"])
+    m1 = pd.merge(
+        mobility,
+        ntd,
+        how="inner",
+        on="agency_name"
+    )
+    
+    agency_dict = {
+        "City of Fairfield, California": "City of Fairfield",
+        "Livermore / Amador Valley Transit Authority": "Livermore-Amador Valley Transit Authority",
+        "Nevada County Transit Services": "Nevada County",
+        "Omnitrans": "OmniTrans"
+    }
+    
+    m1 = m1.assign(
+        agency_name = m1.agency_name.map(agency_dict).str.strip()
+    ).drop_duplicates(
+        subset="agency_name"
+    ).reset_index(
+        drop=True
+    ).drop(columns = "agency_name")
+    
+
     return m1
 
 if __name__ == "__main__":
@@ -151,15 +164,16 @@ if __name__ == "__main__":
         # ntd_df and the crosswalk_df merge.
         ntd_df = merge_ntd_mobility(ntd_latest_year)
         
-        crosswalk_df = pd.merge(df,
-        ntd_df,
-        left_on = ["ntd_id_2022"],
-        right_on = ["ntd_id"],
-        how = "left")
-        
+        crosswalk_df = pd.merge(
+            df,
+            ntd_df.rename(columns = {"ntd_id": "ntd_id_2022"}),
+            on = ["ntd_id_2022"],
+            how = "left"
+        )
+
         # Drop ntd_id from ntd_df to avoid confusion
+
         crosswalk_df = crosswalk_df.drop(columns = ["ntd_id"])
-        
         crosswalk_df.to_parquet(
             f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
         )

@@ -57,28 +57,28 @@ Analyze bus procurement projects to see how much transit agencies pay for them.
 Executing `make all_bus_scripts` will run the following scripts
 <br></br>
 
-- **fta_data_cleaner.py:**
+- **_01_fta_data_cleaner.py:**
     * Reads in and cleans FTA data
     * outputs 2 files: 
         * cleaned, all projects: `clean_fta_all_projects.parquet`
         * cleaned, bus only projects:`clean_fta_bus_only.parquet`
 <br></br>        
 
-- **tircp_data_cleaner.py**
+- **_02_tircp_data_cleaner.py**
     * Reads in and cleans tircp data
     * outputs 2 files: 
         * cleaned, all projects: `clean_tircp_all_project.parquet`
         * cleaned, bus only projects:`clean_tircp_bus_only.parquet`
 <br></br>
 
-- **dgs_data_cleaner.py**
+- **_03_dgs_data_cleaner.py**
     * Reads in and cleans DGS data
     * outputs 2 files: 
         * cleaned, bus only projects: `clean_dgs_all_projects.parquet`
         * cleaned, bus only projects with options:`clean_dgs_bus_only_w_options.parquet`
 <br></br>
 
-- **cost_per_bus_cleaner.py**
+- **_04_cost_per_bus_cleaner.py**
     * Reads in and merges all the bus only datasets
     * updates columns names
     * calculates `cost_per_bus`, z-score and idetifies outliers.
@@ -97,4 +97,9 @@ Executing `make all_bus_scripts` will run the following scripts
     * hides the code cells and prompts
 <br></br>
 
-output files are saved to GCS at: `calitp-analytics-data/data-analyses/bus_procurement_cost`
+- **weasyprint ...html ...pdf
+    * convers the HTML files to PDF, perserving the same style fonts, tables and charts.
+
+Output data files are saved to GCS at: `calitp-analytics-data/data-analyses/bus_procurement_cost`
+
+Final deliverable: `cost_per_bus_analysis.pdf`

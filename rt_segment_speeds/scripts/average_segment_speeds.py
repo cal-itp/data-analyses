@@ -80,7 +80,12 @@ def segment_averaging_with_geometry(
         group_cols,
         metric_type = "segment_speeds"
     ).pipe(
-        gtfs_schedule_wrangling.merge_operator_identifiers, analysis_date_list
+        gtfs_schedule_wrangling.merge_operator_identifiers, analysis_date_list,
+        columns = [
+            "schedule_gtfs_dataset_key", "name",
+            "caltrans_district",
+            "organization_source_record_id", "organization_name",
+            "base64_url"]
     )
     
     col_order = [c for c in avg_speeds.columns]
@@ -165,7 +170,7 @@ def single_day_segment_averages(
     
     route_dir_segments = segment_averaging_with_geometry(
         df, 
-        group_cols =  OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
+        group_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
         analysis_date_list = [analysis_date],
         segment_type = segment_type
     )

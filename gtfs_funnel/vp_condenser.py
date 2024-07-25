@@ -24,25 +24,26 @@ def condense_vp_to_linestring(
     We will group by trip and save out 
     the vp point geom into a shapely.LineString.
     """
-    USABLE_VP = dict_inputs.speeds_tables.usable_vp
+    USABLE_VP = dict_inputs.speeds_tables.vp_dwell
     EXPORT_FILE = dict_inputs.speeds_tables.vp_condensed_line
     
     vp = delayed(pd.read_parquet)(
         f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
         columns = ["trip_instance_key", "x", "y", 
                    "vp_idx", "vp_primary_direction", 
-                   "location_timestamp_local"
+                   "location_timestamp_local", 
+                   "moving_timestamp_local",
                   ],
-    )
-    
-    vp_gdf = delayed(wrangle_shapes.vp_as_gdf)(vp, crs = WGS84)
-    
+    ).pipe(wrangle_shapes.vp_as_gdf, crs = WGS84)
+        
     vp_condensed = delayed(vp_transform.condense_point_geom_to_line)(
-        vp_gdf,
+        vp,
         group_cols = ["trip_instance_key"],
         geom_col = "geometry",
         other_cols = ["vp_idx", "location_timestamp_local", 
-                      "vp_primary_direction"],
+                      "moving_timestamp_local",
+                      "vp_primary_direction",
+                     ],
     ).set_geometry("geometry").set_crs(WGS84)
     
     vp_condensed = compute(vp_condensed)[0]
@@ -108,8 +109,7 @@ if __name__ == "__main__":
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
-    
-    
+        
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
