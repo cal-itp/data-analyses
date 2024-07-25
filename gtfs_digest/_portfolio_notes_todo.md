@@ -7,11 +7,56 @@
 * Portfolio:
     * Figure out Makefile situation.
 
+### 7/16/2024
+* Figure out how to update the mermaid diagram/supporting docs. 
+* If you can sketch out, on paper or somewhere, what grains went into the digest, and what exactly the datasets are supporting the digest notebook, your mermaid diagram is simply the mermaid code of bringing your sketch to life. So i'd start with the conceptual motivation of "if i stumbled upon the digest and looked at the charts, what do i need to understand the various grains for the datasets? did 1 dataset support it? multiple?"
+Another way to think about this is, if you used words to say, here's chart 1, it uses a dataset that is X grain. Here's chart 2, it uses Y grain. Here's chart 3, it also uses Y grain. Here's chart 4, it uses Z grain. How does someone connect the dots from a report they see to the (many) slices of data you used?
+    * Chart 1: Total Routes by Typology
+        * Schedule 
+        * `gtfs_funnel/operator_scheduled_stats.py`
+        * Operator-Month
+        * NACTO
+        * Why is there no arrow connecting NACTO  to `operator_profiles` in the mermaid [diagram](https://mermaid.live/edit#pako:eNqFVG1vmzAQ_iuWpyidlEQhIU1KpUlNm2zqlnZao30YVMiBA7yCjWzTllb57zNQCqjNyofg-J7n7rkX7hl73Ads4eFw6DBFVQwW-rVF9xLdeBH4WQxoA0pQTzqsxPR6zw5DiDKqLFQeEeqrCBLoW6i_IxL6g_btbyIo2cUg-69wbUoFTYjIz3nMRcH7tJqtZ-uzmtogtvCoGtR4PH4LWXLhgzgEiimDQzYJHmd-V8d6PV8tWxgFQtEOJAiCfmXeFy_9s-_1HOawIOYPXkSEQttlBZDZLhQkjZB8KWbtFiEvJlJeQID8AAU0jq2XEryDkJ6gqapRpcAiXI07s3V_UnlrWZb2NRx-QY2teFZHNk9BEMWFW-vwXamIkqM0v_2seVWE04a3tGVEUmg7XbXM57ZUPD1kvSitrqLJQQdrO1SBdO8gd7kICaNPRFHOXE9wKR9IfNfhtRJalVc_7DoRVOSOkmpEX0mIhKGAkCh4px6bhix4psD1qQCvCN_1c1oXGZhfH18benV2vr2u-EjlqR6OkIJs1aBQIVOdFYnRX04ZUhztsiAAAb7mEV--I-2rXVhcCWECTB1u6bcju5LehO62suB0KZd2FfSBqqiluClZF96RXnJizkKQCpWDgfRAvWT_JtL3SlsnUt6ksjlF6H-VvYeIero3KZe0aIpsz_qVfZ-6mSwWysHiXGvMh2PRpRROfha0jwaiJrTk11d4gBMQCaG-XqflpnNwuQEdbOmjDwHJYuVgvS40lGSK3-TMw5YSGQywDhxG2ApILPW_LPW1yAtKdEmSGgI-1Z_wptrX5doe4JQwbD3jR2wNF5PR9GQ6OTGn88X0ZGKYA5xja3o8MszZwjw2TWM2XpjGfoCfONdOjdHE0OtwbMynU40252bp7k9pLHXs_wGgMdVb)? 
+    * Chart 2: Longest and Shortest Route
+        * Scheduled data.
+        * Operator-route for the latest date.
+    * Map 3: Same as above.
+    * Charts 4-6:
+        * Grain: Scheduled trips -> operator level -> summing up all  service hours for a week in either April or October -> differentiate by Sat/Sun/Weekday and by hour.
+    * Rest of the charts
+        * Combining scheduled with realtime data
+        * Grain: operator-route-single service day 
+### 7/15/2024
+* <s>`Merge_operator_data.py`
+    * Added `digest.tables/operator_profiles` and `scheduled_service_hours` here.</s>
+    * Or should `scheduled_service_hours` go somewhere in `gtfs_funnel`? I am not sure since we discussed there isn't a usage for this dataset outside of the portfolio.
+
+Slack messages
+* so i guess i can ask you where the datasets published are living in gtfs_analytics_data.yml? 95% of datasets that have been processed / saved out should make its way there + the Mermaid diagrams + Makefile should reflect that. i notice a lot more datasets being published for digest, so what do the 2 operator profiles mean? when do i choose one over the other? is one outdated?
+    * Deleted out the `operator_profile_portfolio_view.`
+    * Now I only have `digest.tables/operator_profiles` which incorporates the NTD data. 
+* the makefile's purpose would be, if i'm in this folder, what scripts do i have to run and in what order? to make it obvious to include the ones you added, you want to add it in, otherwise it'll get mistaken for random script, not relevant to the product
+* the overarching principle for mermaid diagrams / how&what scripts are used would be the grain of the dataset.
+* essentially, the scripts and the mermaid diagram and gtfs_analytics_data.yml catalog all should reflect each other, and you might find that setting up the diagrams mean you edit how scripts are constructed.
+as is, catalog shows groupings of certain datasets, and digest is one of those. all the datasets under that header would be exactly what is saved to the GCS/gtfs_digest/ and published to the public GCS. if anything is in the catalog and not being updated in GCS, you can drop all those references in the code and delete those files in the bucket.
+    * Double check I'm publishing `operator_profies` with NTD stuff and `scheduled_service_hours` to  gcs_paths.RT_SCHED_GCS/digest (which is [here](https://console.cloud.google.com/storage/browser/calitp-analytics-data/data-analyses/rt_vs_schedule/digest?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&project=cal-itp-data-infra)) and the public GCS [here](https://console.cloud.google.com/storage/browser/calitp-publish-data-analysis/gtfs_digest?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22)))
+* ^ following that principle, operator_profiles and operator_profile_portfolio_view basically differ only on yes NTD or no NTD columns. the grain is operator. a row is operator. columns are operator characteristics (regardless of NTD or GTFS) and should be in the same table. pick a name and delete the other reference in both GCS buckets and the catalog and only use that name in the scripts. you should feel free to delete or rename the datasets and scripts I put, and aim to reconcile everything / think about it as one digest pipeline, rather than appending side datasets to what i've created (causes more confusion)
+expanding on digest related datasets, there should only be 1 final dataset per grain, and that 1 final dataset can be derived from multiple sources. if there's a new grain you're adding ([define your grain for stop_times scheduled service hours]), that is the part that you want to add onto the mermaid diagrams / situate it some place
+    * My grain for `"digest/total_scheduled_service_hours"` is operator-one week all scheduled service hours across all routes. 
+* my hint for you related to setting up mermaid diagram / catalog for success is: identify the number of datasets for digest and what grains they are. see if you can match what grains are produced in merge_data.py and what grains are produced in merge_operator_data.py , and see how your stuff fits into that. then consider where your new grain lives, and whether it can sit by itself in a merge_* script. (right now, _gtfs_digest_specific_datasets.py convolutes several grains, and if you can tease it apart, the diagram will be easier to develop, and the catalog will naturally reflect that)
+    1. digest_tables.operator_routes_map
+        * Grain: operator-route geography
+    2. counties
+        * Grain: get county geographies 
+    3. digest_tables.operator_profiles
+        * Grain: operator and its characteristics (also draws data from NTD)
+    4. digest_tables.scheduled_service_hours
+        * Grain: operator and all the scheduled service hours for one week across all routes.
+    5. digest_tables.route_schedule_vp
+        * Grain: operator-route for each service_date downloaded for each month.
+
 ### 7/9/2024
 * Understand how `publish_public_data.py` works.
-* Transit brunching research.
-* Still trying to work through why the notebook won't parameterize any longer. :(
-
 ### 7/8/2024
 * Rerun a subset of operator...Didn't work on 7/3.
 * <s>Finish updating `README` with new template created as part of summer refactor 2024. </s>

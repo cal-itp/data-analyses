@@ -114,13 +114,17 @@ frequency.</i>
 
 
 # What is needed
-* Which GTFS datasets do I need.
-* Identify which routes are high frequency
-    * We can see from `sched_vs_vp` data which routes are high frequency.
-    * Only analyze these routes. 
-* How do we track the buses that are going that same route and direction are stopping within a short time span between each other?
- 
-* See when a bus going on in the same route/direction actually arrives at the stop.
-* Determine what is considered bunching? Is it when 2+ buses arrive within 1 minute of each other? 2 minutes? 
+* Schedule data: Identify which routes are scheduled at a high frequency
+    * What does "high frequency" even mean? 
+    * Should high frequency be determined on the operator level? Or statewide level? 
+    * Do we have schedule data on the stop level? 
+* Look at stop level realtime data. 
+    * Look at how often bunching occurs at a particular stop for buses going the same route-direction
+    * How do we measure how much headway is actually spaced between buses going the same route and direction versus the scheduled headway?
+* Determine what is considered bunching? Is it when 2+ buses are a distance within 1 minute of each other? 2 minutes?
+    * This idea comes from [MBTA](https://static1.squarespace.com/static/533b9a24e4b01d79d0ae4376/t/645e82de1f570b31497c44dc/1683915486889/TransitMatters-Headwaymanagement.pd)
+    * How did MBTA come up with 1-2 minutes as their "guideline"?
+    * This will be compared against the route itself? Or against the entire operator? Or the entire state?
+* [This resource](https://aetransport.org/public/downloads/Bv7HG/4816-57cd5cc05c897.pdf) used standard deviation pages 3-4. 
 * Split bunching by weekday, Saturday, and Sunday? Or overall?
 * 
