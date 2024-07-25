@@ -61,8 +61,11 @@
 2024-06-13 17:36:06.737 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:215 - interpolate arrivals for speedmap_segments 2024-06-12:  2024-06-12: 0:02:47.680208
 2024-06-13 08:46:59.731 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:203 - get stop arrivals 2023-11-15: 0:02:04.434805
 2024-06-13 08:48:59.278 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:215 - interpolate arrivals for speedmap_segments 2023-11-15:  2023-11-15: 0:04:03.982445
-2024-07-22 15:17:29.929 | INFO     | new_interpolate_stop_arrival:interpolate_stop_arrivals:94 - interpolate arrivals for stop_segments 2024-07-17:  2024-07-17: 0:00:41.138249
-2024-07-22 15:27:17.558 | INFO     | new_interpolate_stop_arrival:interpolate_stop_arrivals:94 - interpolate arrivals for stop_segments 2024-07-17:  2024-07-17: 0:00:42.069011
 2024-07-24 09:18:19.609 | INFO     | new_interpolate_stop_arrival:interpolate_stop_arrivals:185 - interpolate arrivals for stop_segments 2024-07-17:  2024-07-17: 0:12:59.830006
 2024-07-24 12:26:42.691 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:235 - interpolate arrivals for rt_stop_times 2024-07-17:  2024-07-17: 0:13:12.551725
 2024-07-24 13:16:24.188 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:235 - interpolate arrivals for speedmap_segments 2024-07-17:  2024-07-17: 0:01:27.283834
+2024-07-24 15:06:16.204 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:235 - interpolate arrivals for stop_segments 2024-01-17:  2024-01-17: 0:13:15.928406
+2024-07-24 19:52:09.517 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:235 - interpolate arrivals for stop_segments 2024-03-13:  2024-03-13: 0:13:07.769823
+2024-07-25 10:27:25.444 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:235 - interpolate arrivals for speedmap_segments 2024-01-17:  2024-01-17: 0:06:04.573649
+2024-07-25 13:09:33.835 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:272 - interpolate arrivals for stop_segments 2024-05-22:  2024-05-22: 0:14:05.595103
+2024-07-25 13:45:42.271 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:272 - interpolate arrivals for stop_segments 2024-06-12:  2024-06-12: 0:12:48.380165
