@@ -8,6 +8,7 @@ import pandas as pd
 import sys
 
 from loguru import logger
+from memory_profiler import profile
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -61,6 +62,8 @@ def stop_times_for_shape_segments(
     ).drop(
         columns = "st_trip_instance_key"
     ).drop_duplicates().reset_index(drop=True)
+    
+    del stops_to_use, shape_stop_combinations, subset_trips, rt_trips
     
     return stop_times
 
@@ -116,7 +119,7 @@ def stop_times_for_speedmaps(
     
     return stop_times
 
-
+@profile
 def nearest_neighbor_for_stop(
     analysis_date: str,
     segment_type: Literal[SEGMENT_TYPES],
@@ -157,7 +160,9 @@ def nearest_neighbor_for_stop(
         stop_times, analysis_date)
         
     results = neighbor.add_nearest_neighbor_result_array(gdf, analysis_date)
-        
+      
+    del gdf, stop_times
+    
     # Keep columns from results that are consistent across segment types 
     # use trip_stop_cols as a way to uniquely key into a row 
     keep_cols = trip_stop_cols + [
@@ -176,8 +181,8 @@ def nearest_neighbor_for_stop(
     logger.info(f"nearest neighbor for {segment_type} "
                 f"{analysis_date}: {end - start}")
     
-    del gdf, results
-    return
+    del results
+    sys.exit(0)
 
 
 if __name__ == "__main__":

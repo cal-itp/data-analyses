@@ -6,6 +6,7 @@ import pandas as pd
 import sys
 
 from loguru import logger
+from memory_profiler import profile
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -107,7 +108,7 @@ def attach_operator_natural_identifiers(
         
     return df_with_natural_ids2
 
-
+@profile
 def calculate_speed_from_stop_arrivals(
     analysis_date: str, 
     segment_type: Literal[SEGMENT_TYPES],
@@ -181,7 +182,7 @@ def calculate_speed_from_stop_arrivals(
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date_list
-    
+    segment_type = "stop_segments"
     for analysis_date in analysis_date_list:
         calculate_speed_from_stop_arrivals(
             analysis_date = analysis_date, 
