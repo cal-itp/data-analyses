@@ -158,7 +158,7 @@ if __name__ == "__main__":
         how = "left")
         
         # Drop ntd_id from ntd_df to avoid confusion
-        crosswalk_df = crosswalk_df.drop(columns = ["ntd_id", "agency_name"])
+        crosswalk_df = crosswalk_df.drop(columns = ["ntd_id"])
         
         crosswalk_df.to_parquet(
             f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
