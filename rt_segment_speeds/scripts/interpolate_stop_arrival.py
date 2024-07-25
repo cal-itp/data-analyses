@@ -4,7 +4,9 @@ import numpy as np
 import pandas as pd
 import sys
 
+from dask import delayed, compute
 from loguru import logger
+from memory_profiler import profile
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -13,12 +15,25 @@ from segment_speed_utils import (array_utils, helpers,
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import PROJECT_CRS, SEGMENT_TYPES
 from shared_utils import rt_dates
-import vp_around_stops as nvp
+
+def get_vp_timestamps(
+    input_file: str,
+    analysis_date: str, 
+    **kwargs
+) -> pd.DataFrame:
+        
+    vp = pd.read_parquet(
+        f"{SEGMENT_GCS}{input_file}_{analysis_date}",
+        columns = ["vp_idx", "location_timestamp_local", "moving_timestamp_local"],
+        **kwargs
+    )
+        
+    return vp 
 
 
 def consolidate_surrounding_vp(
     df: pd.DataFrame, 
-    group_cols: list
+    group_cols: list,
 ) -> pd.DataFrame:
     """
     This reshapes the df to wide so that each stop position has
@@ -68,7 +83,8 @@ def consolidate_surrounding_vp(
 
 
 def add_arrival_time(
-    input_file: str,
+    nearest_vp_input_file: str,
+    vp_timestamp_file: str,
     analysis_date: str,
     group_cols: list
 ) -> pd.DataFrame:    
@@ -79,10 +95,25 @@ def add_arrival_time(
     Arrival time should be between moving_timestamp of prior
     and location_timestamp of subseq.
     """
-    df = pd.read_parquet(
-        f"{SEGMENT_GCS}{input_file}_{analysis_date}.parquet"
-    ).pipe(consolidate_surrounding_vp, group_cols)
+    vp_filtered = pd.read_parquet(
+        f"{SEGMENT_GCS}{nearest_vp_input_file}_{analysis_date}.parquet"
+    )
     
+    subset_vp = vp_filtered.vp_idx.unique()
+    
+    vp_timestamps = get_vp_timestamps(
+        vp_timestamp_file, 
+        analysis_date, 
+        filters = [[("vp_idx", "in", subset_vp)]]
+    )
+    
+    df = pd.merge(
+        vp_filtered,
+        vp_timestamps,
+        on = "vp_idx",
+        how = "inner"
+    ).pipe(consolidate_surrounding_vp, group_cols)
+        
     arrival_time_series = []
     
     for row in df.itertuples():
@@ -112,11 +143,14 @@ def add_arrival_time(
     
     df2 = df.drop(columns = drop_cols)
     
+    del df, arrival_time_series
+    
     return df2
 
 
 def stop_and_arrival_time_arrays_by_trip(
     df: pd.DataFrame, 
+    trip_stop_cols: list
 ) -> pd.DataFrame:
     """
     For stops that violated the monotonically increasing condition,
@@ -125,8 +159,8 @@ def stop_and_arrival_time_arrays_by_trip(
     """
     # Add columns with the trip's stop_meters and arrival_times
     # for only correctly interpolated values
-    df_arrays = (df[df.arrival_time.notna()]
-           .groupby("trip_instance_key")
+    df_arrays = (df[df.arrival_time.notna()].sort_values(trip_stop_cols)
+           .groupby("trip_instance_key", group_keys=False)
            .agg({
                "stop_meters": lambda x: list(x),
                "arrival_time": lambda x: list(x)
@@ -187,7 +221,7 @@ def enforce_monotonicity_and_interpolate_across_stops(
     
     no_fix = df[~df.trip_instance_key.isin(trips_with_one_false)]
     fix1 = df[df.trip_instance_key.isin(trips_with_one_false)]
-    fix1 = stop_and_arrival_time_arrays_by_trip(fix1)
+    fix1 = stop_and_arrival_time_arrays_by_trip(fix1, trip_stop_cols)
     
     drop_me = [
         "arrival_time_sec",
@@ -204,7 +238,7 @@ def enforce_monotonicity_and_interpolate_across_stops(
         
     return fixed_df
 
-
+@profile
 def interpolate_stop_arrivals(
     analysis_date: str,
     segment_type: Literal[SEGMENT_TYPES],
@@ -212,34 +246,39 @@ def interpolate_stop_arrivals(
 ):
     dict_inputs = config_path[segment_type]
     trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+    USABLE_VP_FILE = dict_inputs["stage1"]
     INPUT_FILE = dict_inputs["stage2b"]
     STOP_ARRIVALS_FILE = dict_inputs["stage3"]
 
     start = datetime.datetime.now()
     
-    df = add_arrival_time(
+    df = delayed(add_arrival_time)(
         INPUT_FILE, 
+        USABLE_VP_FILE,
         analysis_date,
         trip_stop_cols + ["shape_array_key"]   
     )
     
-    results = enforce_monotonicity_and_interpolate_across_stops(
+    results = delayed(enforce_monotonicity_and_interpolate_across_stops)(
         df, trip_stop_cols)
     
+    results = compute(results)[0]
         
     results.to_parquet(
         f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}_{analysis_date}.parquet"
     )
-    
+        
     end = datetime.datetime.now()
     logger.info(f"interpolate arrivals for {segment_type} "
                 f"{analysis_date}:  {analysis_date}: {end - start}") 
+        
+    return
 
 
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date_list
-    
+    segment_type = "stop_segments"
     for analysis_date in analysis_date_list:
         interpolate_stop_arrivals(
             analysis_date = analysis_date, 
