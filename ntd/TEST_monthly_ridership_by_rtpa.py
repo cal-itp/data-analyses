@@ -28,24 +28,9 @@ RTPA_URL = ("https://services3.arcgis.com/bWPjFyq029ChCGur/arcgis/rest/services/
       )
 
 #gpd.read_file(RTPA_URL).RTPA.drop_duplicates().to_csv("rtpa.csv")
-def OLD_add_change_columns(
-    df: pd.DataFrame,
-    year: int,
-    month: int
-) -> pd.DataFrame:
-    """
-    """    
-    ntd_month_col = f"{month}/{year}"
-    prior_year_col = f"{month}/{int(year)-1}"
-        
-    df[f"change_1yr_{ntd_month_col}"] = df[ntd_month_col] - df[prior_year_col]
-    df = get_percent_change(df, ntd_month_col, prior_year_col)
-    
-    return df
 
 def add_change_columns(
-    df: pd.DataFrame
-) -> pd.DataFrame:
+    df: pd.DataFrame) -> pd.DataFrame:
     """
     This function works with the warehouse `dim_monthly_ntd_ridership_with_adjustments` long data format.
     Sorts the df by ntd id, mode, tos, period month and period year. then adds 2 new columns, 1. previous year/month UPT and 2. UPT change 1yr.
@@ -69,26 +54,12 @@ def add_change_columns(
     
     return df
 
-def OLD_get_percent_change(
-    df: pd.DataFrame, 
-    current_col: str, 
-    prior_col: str
-) -> pd.DataFrame:
-    
-    df[f"pct_change_1yr_{current_col}"] = (
-        (df[current_col] - df[prior_col])
-        .divide(df[current_col])
-        .round(4)
-    )
-    
-    return df
 
 def get_percent_change(
     df: pd.DataFrame, 
 ) -> pd.DataFrame:
     """
     updated to work with the warehouse `dim_monthly_ntd_ridership_with_adjustments` long data format. 
-    
     
     """
     df["pct_change_1yr"] = (
@@ -99,45 +70,6 @@ def get_percent_change(
     
     return df
 
-def OLD_save_rtpa_outputs(
-    df: pd.DataFrame, year: int, month: str,
-    upload_to_public: bool = False
-):
-    """
-    Export a csv for each RTPA into a folder.
-    Zip that folder. 
-    Upload zipped file to GCS.
-    """
-    for i in df.RTPA.unique():
-        # Filename should be snakecase
-        rtpa_snakecase = i.replace(' ', '_').lower()
-
-        (df[df.RTPA == i]
-         .sort_values("NTD ID")
-         .drop(columns = "_merge")
-         .to_csv(
-            f"./{year}_{month}/{rtpa_snakecase}.csv",
-            index = False)
-        )
-       
-    # Zip this folder, and save zipped output to GCS
-    shutil.make_archive(f"./{year}_{month}", "zip", f"{year}_{month}")
-    print("Zipped folder")
-    
-    fs.upload(
-        f"./{year}_{month}.zip", 
-        f"{GCS_FILE_PATH}{year}_{month}.zip"
-    )
-    
-    if upload_to_public:
-        fs.upload(
-            f"./{year}_{month}.zip",
-            f"{PUBLIC_GCS}ntd_monthly_ridership/{year}_{month}.zip"
-        )
-    
-    print("Uploaded to GCS")
-    
-    return
 
 def save_rtpa_outputs(
     df: pd.DataFrame, 
@@ -146,21 +78,49 @@ def save_rtpa_outputs(
     upload_to_public: bool = False
 ):
     """
-    Export a csv for each RTPA into a folder.
+    Export an excel for each RTPA, adds a READ ME tab, then writes into a folder.
     Zip that folder. 
     Upload zipped file to GCS.
     """
+    col_dict ={
+    'Uace Cd': "UACE Code",
+    'Dt': "Date",
+    'Ntd Id': "NTD ID",
+    'Tos': "Type of Service",
+    'Legacy Ntd Id': "Legacy NTD ID",
+    'Upt': "UPT",
+    'Vrm': "VRM",
+    'Vrh': "VRH",
+    'Voms': "VOMS",
+    'Rtpa': "RTPA",
+    'Previous Y M Upt': "Previous Year/Month UPT",
+    'Change 1Yr': "Change in 1 Year UPT",
+    'Pct Change 1Yr': "Percent Change in 1 Year UPT",
+    'Tos Full': "Type of Service Full Name"
+}
+    
     for i in df["RTPA"].unique():
         # Filename should be snakecase
         rtpa_snakecase = i.replace(' ', '_').lower()
 
         (df[df["RTPA"] == i]
          .sort_values("ntd_id")
-         .drop(columns = "_merge")
-         .to_csv(
-            f"./{year}_{month}/{rtpa_snakecase}.csv",
+         #got error from excel not recognizing timezone, made list to include dropping "ts" column
+         .drop(columns = ["_merge","ts"])
+         #cleaning column names
+         .rename(columns=lambda x: x.replace("_"," ").title().strip())
+         #rename columns
+         .rename(columns=col_dict)
+         #updated to `to_excel`, added sheet_name 
+         .to_excel(
+            f"./{year}_{month}/{rtpa_snakecase}.xlsx", sheet_name = "RTPA Ridership Data",
             index = False)
+         
         )
+        #insertng readme cover sheet, 
+        cover_sheet = pd.read_excel("./cover_sheet_template.xlsx", index_col = "NTD Monthly Ridership by RTPA")
+        with pd.ExcelWriter(f"./{year}_{month}/{rtpa_snakecase}.xlsx", mode ="a") as writer:
+            cover_sheet.to_excel(writer, sheet_name = "READ ME")
         
     shutil.make_archive(f"./{year}_{month}", "zip", f"{year}_{month}")
     print("Zipped folder")
@@ -180,78 +140,18 @@ def save_rtpa_outputs(
     
     return
 
-def OLD_produce_ntd_monthly_ridership_by_rtpa(
-    upt_url: str,
-    year: int,
-    month: str
-) -> pd.DataFrame:
-    """
-    Import NTD data from url, filter to CA, 
-    merge in crosswalk, and save individual csvs.
-    """
-    # Import data, make sure NTD ID is string
-    # added .rename(columns= ) to account for any column name changes
-    full_upt = pd.read_excel(
-        upt_url, sheet_name = "UPT", 
-        dtype = {"NTD ID": "str"}
-    ).rename(columns = {"Mode/Type of Service Status": "Status"})
-
-    full_upt = full_upt[full_upt.Agency.notna()].reset_index(drop=True)
-    full_upt.to_parquet(
-        f"{GCS_FILE_PATH}ntd_monthly_ridership_{year}_{month}.parquet"
-    )
-    
-    # Filter to CA
-    ca = full_upt[(full_upt["UZA Name"].str.contains(", CA")) & 
-            (full_upt.Agency.notna())].reset_index(drop=True)
-    
-    crosswalk = pd.read_csv(
-        f"{GCS_FILE_PATH}ntd_id_rtpa_crosswalk.csv", 
-        dtype = {"NTD ID": "str"}
-    )
-    
-    df = pd.merge(
-        ca,
-        # Merging on too many columns can create problems 
-        # because csvs and dtypes aren't stable / consistent 
-        # for NTD ID, Legacy NTD ID, and UZA
-        crosswalk[["NTD ID", "RTPA"]],
-        on = "NTD ID",
-        how = "left",
-        indicator = True
-    )
-    
-    print(df._merge.value_counts())
-    
-    # Good, everything merged, as we want
-    if len(df[df._merge=="left_only"]) > 0:
-        raise ValueError("There are unmerged rows to crosswalk")
-        
-    # Add new columns    
-    reversed_months = {v:k for k, v in MONTH_DICT.items()}
-    
-    for m in range(1, reversed_months[month] + 1):
-        df = add_change_columns(df, year, m)
-    
-    df = df.assign(
-        Mode_full = df.Mode.map(NTD_MODES),
-        TOS_full = df.TOS.map(NTD_TOS)
-    )
-    
-    return df
 
 def produce_ntd_monthly_ridership_by_rtpa(
-    #df: pd.DataFrame,
     year: int,
     month: int
 ) -> pd.DataFrame:
     """
     This function works with the warehouse `dim_monthly_ntd_ridership_with_adjustments` long data format.
+    Import NTD data from warehouse, filter to CA, 
+    merge in crosswalk, checks for unmerged rows, then creates new columns for full Mode and TOS name.
+    
     """
     full_upt = (tbls.mart_ntd.dim_monthly_ntd_ridership_with_adjustments() >> collect()).rename(columns = {"mode_type_of_service_status": "Status"})
-    
-    #updating month & year to int is already in updated add_change_columns. keeping here for now.
-    #full_upt[["period_year","period_month"]] = full_upt[["period_year","period_month"]].astype(int)
     
     full_upt = full_upt[full_upt.agency.notna()].reset_index(drop=True)
     
@@ -274,7 +174,6 @@ def produce_ntd_monthly_ridership_by_rtpa(
         # because csvs and dtypes aren't stable / consistent 
         # for NTD ID, Legacy NTD ID, and UZA
         crosswalk[["ntd_id", "RTPA"]],
-        #change on = value to ntd_id
         on = "ntd_id",
         how = "left",
         indicator = True
@@ -294,7 +193,11 @@ def produce_ntd_monthly_ridership_by_rtpa(
     
     return df
 
-def remove_local_outputs(year: int, month: str):
+
+def remove_local_outputs(
+    year: int, 
+    month: str
+):
     shutil.rmtree(f"{year}_{month}/")
     os.remove(f"{year}_{month}.zip")
 
@@ -302,13 +205,13 @@ def remove_local_outputs(year: int, month: str):
 if __name__ == "__main__":
     
     # Define variables we'll probably change later
-    from update_vars import YEAR, MONTH, MONTH_CREATED, FULL_URL
+    from update_vars import YEAR, MONTH
     
     df = produce_ntd_monthly_ridership_by_rtpa(YEAR, MONTH)
     print(df.columns)
     df.to_parquet(f"{GCS_FILE_PATH}ca_monthly_ridership_{YEAR}_{MONTH}.parquet")
     
-    # For each RTPA, we'll produce a single csv and save it to a local folder
+    # For each RTPA, we'll produce a single excel and save it to a local folder
     os.makedirs(f"./{YEAR}_{MONTH}/")
     
     df = pd.read_parquet(
