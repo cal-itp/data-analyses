@@ -3,6 +3,8 @@
     * Haynes defines this as a bus going the same route and direction within 60 seconds of each other.
     * Saw that 15% of the time, buses were within 120 seconds of each other. 5% of the time they were within 60 seconds.
     * One minute came from analyzing data. 
+    * This has clear instructions.
+    * 
 
 2. [Wikipedia Bus Bunching](https://en.wikipedia.org/wiki/Bus_bunching)
     * Two or more transit vehicles that were scheduled at regular intervals are bunched together.
@@ -94,16 +96,33 @@ the range of actual headways), divided by the average (mean) headway.
     * This is different than frequency: frequency is how many times a bus stops at a particular stop.
     * If a bus of the same route passes a stop every 20 minutes, then that bus has a 20 minute headway and a frequency of 3x per hour.
     * 
-9. Transit Capacity and Quality of Service Manual, Third Edition (2013)
+9. [Transit Capacity and Quality of Service Manual, Third Edition (2013)](https://nap.nationalacademies.org/read/24766/chapter/1)
+    * Chapter 15
+    * Bunching is about comfort and convenience: it's a metric that reflects the reliability of the bus.
+    * Page 198
+        * An average headway between 5-10 minutes is considered frequent.
+        
     * Page 199: Average headway chart 
-        * Average headway <= 5 minutes: bus bunching more likely
-        * > 5-10 minutes: bus bunching possible
-    * Page 225: Headways of 10 minutes or less: vehicle bunching more likely to occur. 
+        * Existing service frequency is determined using agency's timetable (scheduled) data. 
+    * Page 200
+        * Hours of service is also interesting (I know it's not related to bunching but it could be something to explore on a route basis.)
+    * Page 222
+        * Headway adherence: the eveness of the interval between transit time.
+        * Derived from measured bus departure times, a task that is simplified using archived AVL data (is this GTFS?)
+        * Headway adherence: coefficient of variation of headways (the standard deviation of headways divided by the mean headway).
+    * Page 224
+        * Headways of 10 minutes or less: vehicle bunching more likely to occur. 
         * Bunching: 2+ vehicles on the same route arrive together, followed by a long waiting period for another vehicle to come. 
-        * Bunching can be measured in terms of headway adherence: how closely a vehicle actually arrives versus its scheduled headway.
+        * Headway adherence can also be thoguht of the regularity of vehicle arrivals with respect to the scheduled headway.
         * Headway adherence: take the standard deviation of headways divided by average/mean headway. 
-            * Difficult to explain.
-            * But it's the best way to describe bunching.
+            * standard deviation: represents the range of actual headways
+        Headway adhernce in this paper is calculated as the coefficient of variation of headways Cvh.
+        * Cvh: a statisical measure, stakeholders might not understand. 
+        
+   * Page 225
+       * There's a chart that matches Cvh values with passenger and operator persective. 
+       * What's the difference between "off headway" vs. "bunching?" They seem similar.
+   * Page 226
         * Use the chart on page 226 to determine how off a headway a route is. 
     * <i>headway- the time interval between the passing
 of the front ends of successive transit units
@@ -114,17 +133,20 @@ frequency.</i>
 
 
 # What is needed
-* Schedule data: Identify which routes are scheduled at a high frequency
+* Schedule data for routes: Identify which routes are scheduled at a high frequency
     * What does "high frequency" even mean? 
-    * Should high frequency be determined on the operator level? Or statewide level? 
-    * Do we have schedule data on the stop level? 
+        * A bus going the same route/dir connection is scheduled for every 10 minutes according to the Transit Capacity Manual?
+
+* Schedule data for stops
+    * We need to know the times the bus is scheduled to stop at each stop, to compare it with when it actually stopped
 * Look at stop level realtime data. 
+    * Forgot where to find this.
     * Look at how often bunching occurs at a particular stop for buses going the same route-direction
-    * How do we measure how much headway is actually spaced between buses going the same route and direction versus the scheduled headway?
+    * How do we find out how much headway is actually spaced between buses going the same route and direction versus the scheduled headway?
+
 * Determine what is considered bunching? Is it when 2+ buses are a distance within 1 minute of each other? 2 minutes?
     * This idea comes from [MBTA](https://static1.squarespace.com/static/533b9a24e4b01d79d0ae4376/t/645e82de1f570b31497c44dc/1683915486889/TransitMatters-Headwaymanagement.pd)
     * How did MBTA come up with 1-2 minutes as their "guideline"?
     * This will be compared against the route itself? Or against the entire operator? Or the entire state?
 * [This resource](https://aetransport.org/public/downloads/Bv7HG/4816-57cd5cc05c897.pdf) used standard deviation pages 3-4. 
 * Split bunching by weekday, Saturday, and Sunday? Or overall?
-* 
