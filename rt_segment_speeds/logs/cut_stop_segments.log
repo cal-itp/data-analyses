@@ -36,3 +36,25 @@
 2024-07-25 10:01:54.634 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times: 0:04:46.432162
 2024-07-25 10:06:30.811 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times: 0:04:21.740846
 2024-07-25 10:10:34.147 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times: 0:03:52.303707
+2024-07-27 09:24:23.426 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-03-15: 0:05:09.092853
+2024-07-27 09:29:44.453 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-04-12: 0:05:05.012724
+2024-07-27 09:35:01.446 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-05-17: 0:05:01.846284
+2024-07-27 09:39:51.289 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-06-14: 0:04:34.535276
+2024-07-27 09:45:10.739 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-07-12: 0:05:03.716733
+2024-07-27 09:50:59.741 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-08-15: 0:05:31.761923
+2024-07-27 09:56:38.682 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-09-13: 0:05:23.356769
+2024-07-27 10:02:35.543 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-10-11: 0:05:38.963176
+2024-07-27 10:08:33.961 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-11-15: 0:05:40.656420
+2024-07-27 10:15:05.945 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-12-13: 0:06:10.009743
+2024-07-29 15:55:06.676 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2024-04-15: 0:04:37.679035
+2024-07-29 16:00:07.149 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2024-04-16: 0:04:45.672775
+2024-07-29 16:04:40.683 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2024-04-18: 0:04:19.890220
+2024-07-29 16:09:03.642 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2024-04-19: 0:04:10.200020
+2024-07-29 16:11:39.940 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2024-04-20: 0:02:27.901059
+2024-07-29 16:14:12.351 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2024-04-21: 0:02:23.496424
+2024-07-30 11:00:14.319 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-10-09: 0:04:29.369560
+2024-07-30 11:05:03.464 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-10-10: 0:04:34.953201
+2024-07-30 11:09:26.497 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-10-12: 0:04:10.612992
+2024-07-30 11:15:24.285 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-10-13: 0:05:43.198954
+2024-07-30 11:19:04.176 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-10-14: 0:03:27.409722
+2024-07-30 11:22:24.831 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2023-10-15: 0:03:08.504329
