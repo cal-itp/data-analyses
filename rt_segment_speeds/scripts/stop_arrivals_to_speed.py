@@ -6,7 +6,6 @@ import pandas as pd
 import sys
 
 from loguru import logger
-from memory_profiler import profile
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -108,7 +107,7 @@ def attach_operator_natural_identifiers(
         
     return df_with_natural_ids2
 
-@profile
+
 def calculate_speed_from_stop_arrivals(
     analysis_date: str, 
     segment_type: Literal[SEGMENT_TYPES],
@@ -171,6 +170,8 @@ def calculate_speed_from_stop_arrivals(
     speed.to_parquet(
         f"{SEGMENT_GCS}{SPEED_FILE}.parquet")
     
+    del speed, df
+    
     end = datetime.datetime.now()
     logger.info(f"speeds by segment for {segment_type} "
                 f"{analysis_date}: {end - start}")
@@ -178,14 +179,20 @@ def calculate_speed_from_stop_arrivals(
     
     return
 
-
+'''
 if __name__ == "__main__":
-    
+   
     from segment_speed_utils.project_vars import analysis_date_list
-    segment_type = "stop_segments"
-    for analysis_date in analysis_date_list:
-        calculate_speed_from_stop_arrivals(
+
+    from dask import delayed, compute
+    
+    delayed_dfs = [    
+        delayed(calculate_speed_from_stop_arrivals)(
             analysis_date = analysis_date, 
             segment_type = segment_type, 
             config_path = GTFS_DATA_DICT
-        )
+        ) for analysis_date in analysis_date_list
+    ]
+    
+    [compute(i)[0] for i in delayed_dfs]
+'''

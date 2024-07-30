@@ -11,7 +11,6 @@ import sys
 
 from dask import delayed, compute
 from loguru import logger
-from memory_profiler import profile
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -178,28 +177,8 @@ def find_two_closest_vp(
     )
     
     return two_vp
-    '''
+
     
-    df2 = pd.merge(
-        df,
-        two_vp,
-        on = group_cols + ["stop_vp_distance_meters"],
-        how = "inner"
-    )
-    
-    del df, min_pos_distance, min_neg_distance
-    
-    # since shape_meters actually might be decreasing as time progresses,
-    # (bus moving back towards origin of shape)
-    # we don't actually know that the smaller shape_meters is the first timestamp
-    # nor the larger shape_meters is the second timestamp.
-    # all we know is that stop_meters (stop) falls between these 2 shape_meters.
-    # sort by timestamp, and set the order to be 0, 1    
-    
-    return df2
-    '''
-    
-@profile
 def filter_to_nearest_two_vp(
     analysis_date: str,
     segment_type: Literal[SEGMENT_TYPES],
@@ -257,6 +236,8 @@ def filter_to_nearest_two_vp(
     )
     
     gdf2 = compute(gdf2)[0]
+    
+    del gdf, gdf_filtered, vp_nearest, stop_meters_df, vp_meters_df
         
     gdf2.to_parquet(
         f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet",
@@ -266,17 +247,22 @@ def filter_to_nearest_two_vp(
     logger.info(f"nearest 2 vp for {segment_type} "
                 f"{analysis_date}: {end - start}")
     
+    del gdf2
     
     return
     
-
+'''
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date_list
-        
-    for analysis_date in analysis_date_list:
-        filter_to_nearest_two_vp(
+    
+    delayed_dfs = [
+        delayed(filter_to_nearest_two_vp)(
             analysis_date = analysis_date,
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
-        ) 
+        ) for analysis_date in analysis_date_list
+    ]
+
+    [compute(i)[0] for i in delayed_dfs]
+'''
