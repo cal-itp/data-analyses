@@ -1,0 +1,203 @@
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   206    312.0 MiB    312.0 MiB           1   @profile
+   207                                         def filter_to_nearest_two_vp(
+   208                                             analysis_date: str,
+   209                                             segment_type: Literal[SEGMENT_TYPES],
+   210                                             config_path: Optional[Path] = GTFS_DATA_DICT
+   211                                         ):
+   212    312.0 MiB      0.0 MiB           1       dict_inputs = config_path[segment_type]
+   213    312.0 MiB      0.0 MiB           1       trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+   214    312.0 MiB      0.0 MiB           1       USABLE_VP_FILE = dict_inputs["stage1"]
+   215    312.0 MiB      0.0 MiB           1       INPUT_FILE = dict_inputs["stage2"]
+   216    312.0 MiB      0.0 MiB           1       EXPORT_FILE = dict_inputs["stage2b"]
+   217                                         
+   218    312.0 MiB      0.0 MiB           1       start = datetime.datetime.now()
+   219                                             
+   220    312.1 MiB      0.1 MiB           2       stop_meters_df = delayed(stops_projected_against_shape)(
+   221    312.0 MiB      0.0 MiB           1           INPUT_FILE, analysis_date, trip_stop_cols)
+   222                                             
+   223    312.1 MiB      0.0 MiB           2       vp_nearest = delayed(explode_vp_nearest)(
+   224    312.1 MiB      0.0 MiB           1           INPUT_FILE, analysis_date, trip_stop_cols)
+   225                                         
+   226    312.1 MiB      0.0 MiB           1       subset_vp = vp_nearest.vp_idx.unique()
+   227                                                 
+   228    312.1 MiB      0.0 MiB           2       vp_meters_df = delayed(get_vp_projected_against_shape)(
+   229    312.1 MiB      0.0 MiB           1           USABLE_VP_FILE,
+   230    312.1 MiB      0.0 MiB           1           analysis_date, 
+   231    312.1 MiB      0.0 MiB           1           filters = [[("vp_idx", "in", subset_vp)]]
+   232                                             )
+   233                                             
+   234    312.1 MiB      0.0 MiB           3       gdf = delayed(pd.merge)(
+   235    312.1 MiB      0.0 MiB           1           vp_nearest,
+   236    312.1 MiB      0.0 MiB           1           stop_meters_df,
+   237    312.1 MiB      0.0 MiB           1           on = trip_stop_cols,
+   238    312.1 MiB      0.0 MiB           1           how = "inner"
+   239                                             ).merge(
+   240    312.1 MiB      0.0 MiB           1           vp_meters_df,
+   241    312.1 MiB      0.0 MiB           1           on = "vp_idx",
+   242    312.1 MiB      0.0 MiB           1           how = "inner"
+   243                                             )
+   244                                             
+   245                                             # Calculate the distance between the stop and vp position
+   246                                             # This is used to find the minimum positive and minimum negative
+   247                                             # distance (get at vp before and after stop)
+   248    312.1 MiB      0.0 MiB           2       gdf = gdf.assign(
+   249    312.1 MiB      0.0 MiB           1           stop_meters = gdf.stop_meters.round(3),
+   250    312.1 MiB      0.0 MiB           1           shape_meters = gdf.shape_meters.round(3),
+   251    312.1 MiB      0.0 MiB           1           stop_vp_distance_meters = (gdf.stop_meters - gdf.shape_meters).round(2)
+   252                                             )
+   253                                             
+   254    312.1 MiB      0.0 MiB           1       gdf2 = delayed(find_two_closest_vp)(gdf, trip_stop_cols)
+   255   2321.5 MiB   2009.4 MiB           1       gdf2 = compute(gdf2)[0]
+   256                                             
+   257   2321.5 MiB      0.0 MiB           1       del subset_vp, vp_nearest, stop_meters_df, vp_meters_df, gdf
+   258                                             
+   259   2753.4 MiB    431.9 MiB           2       gdf2.to_parquet(
+   260   2321.5 MiB      0.0 MiB           1           f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet",
+   261                                             )
+   262                                             
+   263   2568.7 MiB   -184.7 MiB           1       del gdf2
+   264                                             
+   265   2568.7 MiB      0.0 MiB           1       end = datetime.datetime.now()
+   266   2568.7 MiB      0.0 MiB           3       logger.info(f"nearest 2 vp for {segment_type} "
+   267   2568.7 MiB      0.0 MiB           2                   f"{analysis_date}: {end - start}")
+   268                                             
+   269   2568.7 MiB      0.0 MiB           1       return
+   
+## second date in loop   
+   Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   206   2568.7 MiB   2568.7 MiB           1   @profile
+   207                                         def filter_to_nearest_two_vp(
+   208                                             analysis_date: str,
+   209                                             segment_type: Literal[SEGMENT_TYPES],
+   210                                             config_path: Optional[Path] = GTFS_DATA_DICT
+   211                                         ):
+   212   2568.7 MiB      0.0 MiB           1       dict_inputs = config_path[segment_type]
+   213   2568.7 MiB      0.0 MiB           1       trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+   214   2568.7 MiB      0.0 MiB           1       USABLE_VP_FILE = dict_inputs["stage1"]
+   215   2568.7 MiB      0.0 MiB           1       INPUT_FILE = dict_inputs["stage2"]
+   216   2568.7 MiB      0.0 MiB           1       EXPORT_FILE = dict_inputs["stage2b"]
+   217                                         
+   218   2568.7 MiB      0.0 MiB           1       start = datetime.datetime.now()
+   219                                             
+   220   2568.7 MiB      0.0 MiB           2       stop_meters_df = delayed(stops_projected_against_shape)(
+   221   2568.7 MiB      0.0 MiB           1           INPUT_FILE, analysis_date, trip_stop_cols)
+   222                                             
+   223   2568.7 MiB      0.0 MiB           2       vp_nearest = delayed(explode_vp_nearest)(
+   224   2568.7 MiB      0.0 MiB           1           INPUT_FILE, analysis_date, trip_stop_cols)
+   225                                         
+   226   2568.7 MiB      0.0 MiB           1       subset_vp = vp_nearest.vp_idx.unique()
+   227                                                 
+   228   2568.7 MiB      0.0 MiB           2       vp_meters_df = delayed(get_vp_projected_against_shape)(
+   229   2568.7 MiB      0.0 MiB           1           USABLE_VP_FILE,
+   230   2568.7 MiB      0.0 MiB           1           analysis_date, 
+   231   2568.7 MiB      0.0 MiB           1           filters = [[("vp_idx", "in", subset_vp)]]
+   232                                             )
+   233                                             
+   234   2568.7 MiB      0.0 MiB           3       gdf = delayed(pd.merge)(
+   235   2568.7 MiB      0.0 MiB           1           vp_nearest,
+   236   2568.7 MiB      0.0 MiB           1           stop_meters_df,
+   237   2568.7 MiB      0.0 MiB           1           on = trip_stop_cols,
+   238   2568.7 MiB      0.0 MiB           1           how = "inner"
+   239                                             ).merge(
+   240   2568.7 MiB      0.0 MiB           1           vp_meters_df,
+   241   2568.7 MiB      0.0 MiB           1           on = "vp_idx",
+   242   2568.7 MiB      0.0 MiB           1           how = "inner"
+   243                                             )
+   244                                             
+   245                                             # Calculate the distance between the stop and vp position
+   246                                             # This is used to find the minimum positive and minimum negative
+   247                                             # distance (get at vp before and after stop)
+   248   2568.7 MiB      0.0 MiB           2       gdf = gdf.assign(
+   249   2568.7 MiB      0.0 MiB           1           stop_meters = gdf.stop_meters.round(3),
+   250   2568.7 MiB      0.0 MiB           1           shape_meters = gdf.shape_meters.round(3),
+   251   2568.7 MiB      0.0 MiB           1           stop_vp_distance_meters = (gdf.stop_meters - gdf.shape_meters).round(2)
+   252                                             )
+   253                                             
+   254   2568.7 MiB      0.0 MiB           1       gdf2 = delayed(find_two_closest_vp)(gdf, trip_stop_cols)
+   255   3068.6 MiB    499.9 MiB           1       gdf2 = compute(gdf2)[0]
+   256                                             
+   257   3068.6 MiB      0.0 MiB           1       del subset_vp, vp_nearest, stop_meters_df, vp_meters_df, gdf
+   258                                             
+   259   3480.6 MiB    412.0 MiB           2       gdf2.to_parquet(
+   260   3068.6 MiB      0.0 MiB           1           f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet",
+   261                                             )
+   262                                             
+   263   3261.2 MiB   -219.4 MiB           1       del gdf2
+   264                                             
+   265   3261.2 MiB      0.0 MiB           1       end = datetime.datetime.now()
+   266   3261.2 MiB      0.0 MiB           3       logger.info(f"nearest 2 vp for {segment_type} "
+   267   3261.2 MiB      0.0 MiB           2                   f"{analysis_date}: {end - start}")
+   268                                             
+   269   3261.2 MiB      0.0 MiB           1       return
+   
+   
+## this is after running nearest_vp_to_stop
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   206   1485.6 MiB   1485.6 MiB           1   @profile
+   207                                         def filter_to_nearest_two_vp(
+   208                                             analysis_date: str,
+   209                                             segment_type: Literal[SEGMENT_TYPES],
+   210                                             config_path: Optional[Path] = GTFS_DATA_DICT
+   211                                         ):
+   212   1485.6 MiB      0.0 MiB           1       dict_inputs = config_path[segment_type]
+   213   1485.6 MiB      0.0 MiB           1       trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+   214   1485.6 MiB      0.0 MiB           1       USABLE_VP_FILE = dict_inputs["stage1"]
+   215   1485.6 MiB      0.0 MiB           1       INPUT_FILE = dict_inputs["stage2"]
+   216   1485.6 MiB      0.0 MiB           1       EXPORT_FILE = dict_inputs["stage2b"]
+   217                                         
+   218   1485.6 MiB      0.0 MiB           1       start = datetime.datetime.now()
+   219                                             
+   220   1485.7 MiB      0.1 MiB           2       stop_meters_df = delayed(stops_projected_against_shape)(
+   221   1485.6 MiB      0.0 MiB           1           INPUT_FILE, analysis_date, trip_stop_cols)
+   222                                             
+   223   1485.7 MiB      0.0 MiB           2       vp_nearest = delayed(explode_vp_nearest)(
+   224   1485.7 MiB      0.0 MiB           1           INPUT_FILE, analysis_date, trip_stop_cols)
+   225                                         
+   226   1485.7 MiB      0.0 MiB           1       subset_vp = vp_nearest.vp_idx.unique()
+   227                                                 
+   228   1485.7 MiB      0.0 MiB           2       vp_meters_df = delayed(get_vp_projected_against_shape)(
+   229   1485.7 MiB      0.0 MiB           1           USABLE_VP_FILE,
+   230   1485.7 MiB      0.0 MiB           1           analysis_date, 
+   231   1485.7 MiB      0.0 MiB           1           filters = [[("vp_idx", "in", subset_vp)]]
+   232                                             )
+   233                                             
+   234   1485.7 MiB      0.0 MiB           3       gdf = delayed(pd.merge)(
+   235   1485.7 MiB      0.0 MiB           1           vp_nearest,
+   236   1485.7 MiB      0.0 MiB           1           stop_meters_df,
+   237   1485.7 MiB      0.0 MiB           1           on = trip_stop_cols,
+   238   1485.7 MiB      0.0 MiB           1           how = "inner"
+   239                                             ).merge(
+   240   1485.7 MiB      0.0 MiB           1           vp_meters_df,
+   241   1485.7 MiB      0.0 MiB           1           on = "vp_idx",
+   242   1485.7 MiB      0.0 MiB           1           how = "inner"
+   243                                             )
+   244                                             
+   245                                             # Calculate the distance between the stop and vp position
+   246                                             # This is used to find the minimum positive and minimum negative
+   247                                             # distance (get at vp before and after stop)
+   248   1485.7 MiB      0.0 MiB           2       gdf = gdf.assign(
+   249   1485.7 MiB      0.0 MiB           1           stop_meters = gdf.stop_meters.round(3),
+   250   1485.7 MiB      0.0 MiB           1           shape_meters = gdf.shape_meters.round(3),
+   251   1485.7 MiB      0.0 MiB           1           stop_vp_distance_meters = (gdf.stop_meters - gdf.shape_meters).round(2)
+   252                                             )
+   253                                             
+   254   1485.7 MiB      0.0 MiB           1       gdf2 = delayed(find_two_closest_vp)(gdf, trip_stop_cols)
+   255   2492.7 MiB   1007.0 MiB           1       gdf2 = compute(gdf2)[0]
+   256                                             
+   257   2492.7 MiB      0.0 MiB           1       del subset_vp, vp_nearest, stop_meters_df, vp_meters_df, gdf
+   258                                             
+   259   2565.7 MiB     73.1 MiB           2       gdf2.to_parquet(
+   260   2492.7 MiB      0.0 MiB           1           f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet",
+   261                                             )
+   262                                             
+   263   2561.5 MiB     -4.2 MiB           1       del gdf2
+   264                                             
+   265   2561.5 MiB      0.0 MiB           1       end = datetime.datetime.now()
+   266   2561.5 MiB      0.0 MiB           3       logger.info(f"nearest 2 vp for {segment_type} "
+   267   2561.5 MiB      0.0 MiB           2                   f"{analysis_date}: {end - start}")
+   268                                             
+   269   2561.5 MiB      0.0 MiB           1       return

@@ -1,0 +1,235 @@
+2024-07-25 11:15:41.427 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:235 - interpolate arrivals for stop_segments 2024-04-17:  2024-04-17: 0:44:52.267225
+2024-07-25 at 11:15:41 | INFO | interpolate arrivals for stop_segments 2024-04-17:  2024-04-17: 0:44:52.267225
+Filename: /home/jovyan/data-analyses/rt_segment_speeds/scripts/interpolate_stop_arrival.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   206    311.7 MiB    311.7 MiB           1   @profile
+   207                                         def interpolate_stop_arrivals(
+   208                                             analysis_date: str,
+   209                                             segment_type: Literal[SEGMENT_TYPES],
+   210                                             config_path: Optional[Path] = GTFS_DATA_DICT
+   211                                         ):
+   212    311.7 MiB      0.0 MiB           1       dict_inputs = config_path[segment_type]
+   213    311.7 MiB      0.0 MiB           1       trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+   214    311.7 MiB      0.0 MiB           1       INPUT_FILE = dict_inputs["stage2b"]
+   215    311.7 MiB      0.0 MiB           1       STOP_ARRIVALS_FILE = dict_inputs["stage3"]
+   216                                         
+   217    311.7 MiB      0.0 MiB           1       start = datetime.datetime.now()
+   218                                             
+   219    867.0 MiB    555.3 MiB           2       df = add_arrival_time(
+   220    311.7 MiB      0.0 MiB           1           INPUT_FILE, 
+   221    311.7 MiB      0.0 MiB           1           analysis_date,
+   222    311.7 MiB      0.0 MiB           1           trip_stop_cols + ["shape_array_key"]   
+   223                                             )
+   224                                             
+   225   1314.0 MiB    447.0 MiB           2       results = enforce_monotonicity_and_interpolate_across_stops(
+   226    867.0 MiB      0.0 MiB           1           df, trip_stop_cols)
+   227                                                 
+   228   1530.5 MiB    216.5 MiB           2       results.to_parquet(
+   229   1314.0 MiB      0.0 MiB           1           f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}_{analysis_date}.parquet"
+   230                                             )
+   231                                             
+   232   1171.5 MiB   -359.0 MiB           1       del results, df
+   233                                             
+   234   1171.5 MiB      0.0 MiB           1       end = datetime.datetime.now()
+   235   1171.5 MiB      0.0 MiB           4       logger.info(f"interpolate arrivals for {segment_type} "
+   236   1171.5 MiB      0.0 MiB           3                   f"{analysis_date}:  {analysis_date}: {end - start}") 
+   237                                             
+   238   1171.5 MiB      0.0 MiB           1       return
+
+
+2024-07-25 at 11:18:32 | INFO | speeds by segment for stop_segments 2024-04-17: 0:02:50.738942
+Filename: /home/jovyan/data-analyses/rt_segment_speeds/scripts/stop_arrivals_to_speed.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   111   1171.5 MiB   1171.5 MiB           1   @profile
+   112                                         def calculate_speed_from_stop_arrivals(
+   113                                             analysis_date: str, 
+   114                                             segment_type: Literal[SEGMENT_TYPES],
+   115                                             config_path: Optional[Path] = GTFS_DATA_DICT,
+   116                                         ):
+   117                                             """
+   118                                             Calculate speed between the interpolated stop arrivals of 
+   119                                             2 stops. Use current stop to subsequent stop, to match
+   120                                             with the segments cut by gtfs_segments.create_segments
+   121                                             """
+   122   1171.5 MiB      0.0 MiB           1       dict_inputs = config_path[segment_type]
+   123                                         
+   124   1171.5 MiB      0.0 MiB           1       trip_cols = ["trip_instance_key"]
+   125   1171.5 MiB      0.0 MiB           1       trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+   126                                         
+   127                                             # speedmap segments shoulse the full concatenated one
+   128   1171.5 MiB      0.0 MiB           1       if segment_type == "speedmap_segments":
+   129                                                 STOP_ARRIVALS_FILE = f"{dict_inputs['stage3b']}_{analysis_date}"        
+   130                                             else:
+   131   1171.5 MiB      0.0 MiB           1           STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
+   132                                         
+   133   1171.5 MiB      0.0 MiB           1       SPEED_FILE = f"{dict_inputs['stage4']}_{analysis_date}"
+   134                                             
+   135   1171.5 MiB      0.0 MiB           1       start = datetime.datetime.now()
+   136                                             
+   137   1399.6 MiB    228.1 MiB           2       df = pd.read_parquet(
+   138   1171.5 MiB      0.0 MiB           1           f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}.parquet"
+   139                                             )
+   140                                         
+   141   1399.6 MiB   -484.4 MiB           4       df = segment_calcs.convert_timestamp_to_seconds(
+   142   1399.6 MiB      0.0 MiB           1           df, ["arrival_time"]
+   143   1239.7 MiB   -460.2 MiB           2       ).sort_values(trip_stop_cols).reset_index(drop=True)
+   144                                             
+   145   1077.4 MiB   -322.1 MiB           2       df = df.assign(
+   146   1055.7 MiB     -0.1 MiB           3           subseq_arrival_time_sec = (df.groupby(trip_cols, 
+   147   1055.7 MiB      0.0 MiB           1                                                observed=True, group_keys=False)
+   148                                                                           .arrival_time_sec
+   149   1055.7 MiB      0.0 MiB           1                                     .shift(-1)
+   150                                                                          ),
+   151   1055.6 MiB    -43.7 MiB           3           subseq_stop_meters = (df.groupby(trip_cols, 
+   152   1055.6 MiB      0.0 MiB           1                                           observed=True, group_keys=False)
+   153                                                                      .stop_meters
+   154   1055.6 MiB      0.0 MiB           1                                .shift(-1)
+   155                                                                     )
+   156                                             )
+   157                                         
+   158   2252.9 MiB   1175.5 MiB           4       speed = df.assign(
+   159   1077.4 MiB      0.0 MiB           1           meters_elapsed = df.subseq_stop_meters - df.stop_meters, 
+   160   1077.4 MiB      0.0 MiB           1           sec_elapsed = df.subseq_arrival_time_sec - df.arrival_time_sec,
+   161                                             ).pipe(
+   162   1164.7 MiB      0.0 MiB           1           segment_calcs.derive_speed, 
+   163   1164.7 MiB      0.0 MiB           1           ("stop_meters", "subseq_stop_meters"), 
+   164   1164.7 MiB      0.0 MiB           1           ("arrival_time_sec", "subseq_arrival_time_sec")
+   165                                             ).pipe(
+   166   1339.1 MiB      0.0 MiB           1           attach_operator_natural_identifiers, 
+   167   1339.1 MiB      0.0 MiB           1           analysis_date, 
+   168   1339.1 MiB      0.0 MiB           1           segment_type
+   169                                             )
+   170                                                 
+   171   2808.4 MiB    555.5 MiB           2       speed.to_parquet(
+   172   2252.9 MiB      0.0 MiB           1           f"{SEGMENT_GCS}{SPEED_FILE}.parquet")
+   173                                             
+   174   2808.4 MiB      0.0 MiB           1       end = datetime.datetime.now()
+   175   2808.4 MiB      0.0 MiB           3       logger.info(f"speeds by segment for {segment_type} "
+   176   2808.4 MiB      0.0 MiB           2                   f"{analysis_date}: {end - start}")
+   177                                             
+   178                                             
+   179   2808.4 MiB      0.0 MiB           1       return
+   
+   
+## another example
+
+2024-07-25 at 13:45:42 | INFO | interpolate arrivals for stop_segments 2024-06-12:  2024-06-12: 0:12:48.380165
+Filename: /home/jovyan/data-analyses/rt_segment_speeds/scripts/interpolate_stop_arrival.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   241   2605.8 MiB   2605.8 MiB           1   @profile
+   242                                         def interpolate_stop_arrivals(
+   243                                             analysis_date: str,
+   244                                             segment_type: Literal[SEGMENT_TYPES],
+   245                                             config_path: Optional[Path] = GTFS_DATA_DICT
+   246                                         ):
+   247   2605.8 MiB      0.0 MiB           1       dict_inputs = config_path[segment_type]
+   248   2605.8 MiB      0.0 MiB           1       trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+   249   2605.8 MiB      0.0 MiB           1       USABLE_VP_FILE = dict_inputs["stage1"]
+   250   2605.8 MiB      0.0 MiB           1       INPUT_FILE = dict_inputs["stage2b"]
+   251   2605.8 MiB      0.0 MiB           1       STOP_ARRIVALS_FILE = dict_inputs["stage3"]
+   252                                         
+   253   2605.8 MiB      0.0 MiB           1       start = datetime.datetime.now()
+   254                                             
+   255   2605.8 MiB      0.0 MiB           2       df = delayed(add_arrival_time)(
+   256   2605.8 MiB      0.0 MiB           1           INPUT_FILE, 
+   257   2605.8 MiB      0.0 MiB           1           USABLE_VP_FILE,
+   258   2605.8 MiB      0.0 MiB           1           analysis_date,
+   259   2605.8 MiB      0.0 MiB           1           trip_stop_cols + ["shape_array_key"]   
+   260                                             )
+   261                                             
+   262   2605.8 MiB      0.0 MiB           2       results = delayed(enforce_monotonicity_and_interpolate_across_stops)(
+   263   2605.8 MiB      0.0 MiB           1           df, trip_stop_cols)
+   264                                             
+   265   2122.0 MiB   -483.8 MiB           1       results = compute(results)[0]
+   266                                                 
+   267   2295.0 MiB    173.0 MiB           2       results.to_parquet(
+   268   2122.0 MiB      0.0 MiB           1           f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}_{analysis_date}.parquet"
+   269                                             )
+   270                                                 
+   271   2295.0 MiB      0.0 MiB           1       end = datetime.datetime.now()
+   272   2295.0 MiB      0.0 MiB           4       logger.info(f"interpolate arrivals for {segment_type} "
+   273   2295.0 MiB      0.0 MiB           3                   f"{analysis_date}:  {analysis_date}: {end - start}") 
+   274                                                 
+   275   2295.0 MiB      0.0 MiB           1       return
+
+   
+2024-07-25 at 13:48:13 | INFO | speeds by segment for stop_segments 2024-06-12: 0:02:31.544118
+Filename: /home/jovyan/data-analyses/rt_segment_speeds/scripts/stop_arrivals_to_speed.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   111   2191.7 MiB   2191.7 MiB           1   @profile
+   112                                         def calculate_speed_from_stop_arrivals(
+   113                                             analysis_date: str, 
+   114                                             segment_type: Literal[SEGMENT_TYPES],
+   115                                             config_path: Optional[Path] = GTFS_DATA_DICT,
+   116                                         ):
+   117                                             """
+   118                                             Calculate speed between the interpolated stop arrivals of 
+   119                                             2 stops. Use current stop to subsequent stop, to match
+   120                                             with the segments cut by gtfs_segments.create_segments
+   121                                             """
+   122   2191.7 MiB      0.0 MiB           1       dict_inputs = config_path[segment_type]
+   123                                         
+   124   2191.7 MiB      0.0 MiB           1       trip_cols = ["trip_instance_key"]
+   125   2191.7 MiB      0.0 MiB           1       trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+   126                                         
+   127                                             # speedmap segments shoulse the full concatenated one
+   128   2191.7 MiB      0.0 MiB           1       if segment_type == "speedmap_segments":
+   129                                                 STOP_ARRIVALS_FILE = f"{dict_inputs['stage3b']}_{analysis_date}"        
+   130                                             else:
+   131   2191.7 MiB      0.0 MiB           1           STOP_ARRIVALS_FILE = f"{dict_inputs['stage3']}_{analysis_date}"
+   132                                         
+   133   2191.7 MiB      0.0 MiB           1       SPEED_FILE = f"{dict_inputs['stage4']}_{analysis_date}"
+   134                                             
+   135   2191.7 MiB      0.0 MiB           1       start = datetime.datetime.now()
+   136                                             
+   137   2336.1 MiB    144.4 MiB           2       df = pd.read_parquet(
+   138   2191.7 MiB      0.0 MiB           1           f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}.parquet"
+   139                                             )
+   140                                         
+   141   2336.1 MiB   -146.7 MiB           4       df = segment_calcs.convert_timestamp_to_seconds(
+   142   2336.1 MiB      0.0 MiB           1           df, ["arrival_time"]
+   143   2330.5 MiB    -64.5 MiB           2       ).sort_values(trip_stop_cols).reset_index(drop=True)
+   144                                             
+   145   2289.1 MiB    -58.8 MiB           2       df = df.assign(
+   146   2242.8 MiB     -0.1 MiB           3           subseq_arrival_time_sec = (df.groupby(trip_cols, 
+   147   2242.8 MiB      0.0 MiB           1                                                observed=True, group_keys=False)
+   148                                                                           .arrival_time_sec
+   149   2242.8 MiB      0.0 MiB           1                                     .shift(-1)
+   150                                                                          ),
+   151   2254.5 MiB     11.8 MiB           3           subseq_stop_meters = (df.groupby(trip_cols, 
+   152   2242.7 MiB      0.0 MiB           1                                           observed=True, group_keys=False)
+   153                                                                      .stop_meters
+   154   2242.7 MiB      0.0 MiB           1                                .shift(-1)
+   155                                                                     )
+   156                                             )
+   157                                         
+   158   3186.1 MiB    897.0 MiB           4       speed = df.assign(
+   159   2289.1 MiB      0.0 MiB           1           meters_elapsed = df.subseq_stop_meters - df.stop_meters, 
+   160   2289.1 MiB      0.0 MiB           1           sec_elapsed = df.subseq_arrival_time_sec - df.arrival_time_sec,
+   161                                             ).pipe(
+   162   2409.5 MiB      0.0 MiB           1           segment_calcs.derive_speed, 
+   163   2409.5 MiB      0.0 MiB           1           ("stop_meters", "subseq_stop_meters"), 
+   164   2409.5 MiB      0.0 MiB           1           ("arrival_time_sec", "subseq_arrival_time_sec")
+   165                                             ).pipe(
+   166   2478.4 MiB      0.0 MiB           1           attach_operator_natural_identifiers, 
+   167   2478.4 MiB      0.0 MiB           1           analysis_date, 
+   168   2478.4 MiB      0.0 MiB           1           segment_type
+   169                                             )
+   170                                                 
+   171   3501.6 MiB    315.5 MiB           2       speed.to_parquet(
+   172   3186.1 MiB      0.0 MiB           1           f"{SEGMENT_GCS}{SPEED_FILE}.parquet")
+   173                                             
+   174   3501.6 MiB      0.0 MiB           1       end = datetime.datetime.now()
+   175   3501.6 MiB      0.0 MiB           3       logger.info(f"speeds by segment for {segment_type} "
+   176   3501.6 MiB      0.0 MiB           2                   f"{analysis_date}: {end - start}")
+   177                                             
+   178                                             
+   179   3501.6 MiB      0.0 MiB           1       return
