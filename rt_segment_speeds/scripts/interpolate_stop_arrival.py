@@ -1,3 +1,5 @@
+"""
+"""
 import datetime
 import geopandas as gpd
 import numpy as np
@@ -6,7 +8,6 @@ import sys
 
 from dask import delayed, compute
 from loguru import logger
-from memory_profiler import profile
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -24,7 +25,8 @@ def get_vp_timestamps(
         
     vp = pd.read_parquet(
         f"{SEGMENT_GCS}{input_file}_{analysis_date}",
-        columns = ["vp_idx", "location_timestamp_local", "moving_timestamp_local"],
+        columns = ["vp_idx", "location_timestamp_local", 
+                   "moving_timestamp_local"],
         **kwargs
     )
         
@@ -50,7 +52,12 @@ def consolidate_surrounding_vp(
     group_cols2 = group_cols + ["stop_meters"]
     prefix_cols = ["vp_idx", "shape_meters"]
     timestamp_cols = ["location_timestamp_local", "moving_timestamp_local"]
-    
+    # since shape_meters actually might be decreasing as time progresses,
+    # (bus moving back towards origin of shape)
+    # we don't actually know that the smaller shape_meters is the first timestamp
+    # nor the larger shape_meters is the second timestamp.
+    # all we know is that stop_meters (stop) falls between these 2 shape_meters.
+    # sort by timestamp, and set the order to be 0, 1    
     vp_before_stop = df.loc[df.obs==0][group_cols2 + prefix_cols + timestamp_cols]
     vp_after_stop = df.loc[df.obs==1][group_cols2 + prefix_cols + timestamp_cols]
     
@@ -238,11 +245,11 @@ def enforce_monotonicity_and_interpolate_across_stops(
         
     return fixed_df
 
-@profile
+
 def interpolate_stop_arrivals(
     analysis_date: str,
     segment_type: Literal[SEGMENT_TYPES],
-    config_path: Optional[Path] = GTFS_DATA_DICT
+    config_path: Optional = GTFS_DATA_DICT
 ):
     dict_inputs = config_path[segment_type]
     trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
@@ -272,16 +279,22 @@ def interpolate_stop_arrivals(
     logger.info(f"interpolate arrivals for {segment_type} "
                 f"{analysis_date}:  {analysis_date}: {end - start}") 
         
+    del results, df
+    
     return
 
-
+'''
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date_list
-    segment_type = "stop_segments"
-    for analysis_date in analysis_date_list:
-        interpolate_stop_arrivals(
+        
+    delayed_dfs = [
+        delayed(interpolate_stop_arrivals)(
             analysis_date = analysis_date, 
             segment_type = segment_type, 
             config_path = GTFS_DATA_DICT
-        )
+        ) for analysis_date in analysis_date_list
+    ]
+    
+    [compute(i)[0] for i in delayed_dfs]
+'''
