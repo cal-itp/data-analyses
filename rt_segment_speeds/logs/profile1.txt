@@ -1,0 +1,66 @@
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+   122    311.5 MiB    311.5 MiB           1   @profile
+   123                                         def nearest_neighbor_for_stop(
+   124                                             analysis_date: str,
+   125                                             segment_type: Literal[SEGMENT_TYPES],
+   126                                             config_path: Optional[Path] = GTFS_DATA_DICT
+   127                                         ):
+   128                                             """
+   129                                             Set up nearest neighbors for RT stop times, which
+   130                                             includes all trips. Use stop sequences for each trip.
+   131                                             """
+   132    311.7 MiB      0.2 MiB           1       start = datetime.datetime.now()
+   133                                         
+   134    311.7 MiB      0.0 MiB           1       dict_inputs = config_path[segment_type]
+   135                                             
+   136    311.7 MiB      0.0 MiB           1       EXPORT_FILE = f'{dict_inputs["stage2"]}_{analysis_date}'
+   137    311.7 MiB      0.0 MiB           1       trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
+   138                                             
+   139    311.7 MiB      0.0 MiB           1       stop_time_col_order = [
+   140                                                 'trip_instance_key', 'shape_array_key',
+   141                                                 'stop_sequence', 'stop_id', 'stop_pair',
+   142                                                 'stop_primary_direction', 'geometry'
+   143                                             ] 
+   144                                             
+   145    311.7 MiB      0.0 MiB           1       if segment_type == "stop_segments":
+   146                                                 stop_times = stop_times_for_shape_segments(analysis_date, dict_inputs)
+   147                                                 stop_times = stop_times.reindex(columns = stop_time_col_order)
+   148                                         
+   149    311.7 MiB      0.0 MiB           1       elif segment_type == "rt_stop_times":
+   150                                                 stop_times = stop_times_for_all_trips(analysis_date)
+   151                                                 stop_times = stop_times.reindex(columns = stop_time_col_order)
+   152                                             
+   153    311.7 MiB      0.0 MiB           1       elif segment_type == "speedmap_segments":
+   154    638.8 MiB    327.1 MiB           1           stop_times = stop_times_for_speedmaps(analysis_date)
+   155                                             
+   156                                             else:
+   157                                                 print(f"{segment_type} is not valid")
+   158                                             
+   159   2730.2 MiB   2091.4 MiB           2       gdf = neighbor.merge_stop_vp_for_nearest_neighbor(
+   160    638.8 MiB      0.0 MiB           1           stop_times, analysis_date)
+   161                                                 
+   162   2008.1 MiB   -722.1 MiB           1       results = neighbor.add_nearest_neighbor_result_array(gdf, analysis_date)
+   163                                               
+   164   1965.8 MiB    -42.3 MiB           1       del gdf, stop_times
+   165                                             
+   166                                             # Keep columns from results that are consistent across segment types 
+   167                                             # use trip_stop_cols as a way to uniquely key into a row 
+   168   1965.8 MiB      0.0 MiB           1       keep_cols = trip_stop_cols + [
+   169                                                 "shape_array_key",
+   170                                                 "stop_geometry",
+   171                                                 "nearest_vp_arr"
+   172                                             ]
+   173                                             
+   174   1965.8 MiB   -249.9 MiB           2       utils.geoparquet_gcs_export(
+   175   1965.8 MiB      0.0 MiB           1           results[keep_cols],
+   176   1965.8 MiB      0.0 MiB           1           SEGMENT_GCS,
+   177   1965.8 MiB      0.0 MiB           1           EXPORT_FILE,
+   178                                             )
+   179                                             
+   180   1715.9 MiB   -249.9 MiB           1       end = datetime.datetime.now()
+   181   1715.9 MiB      0.0 MiB           3       logger.info(f"nearest neighbor for {segment_type} "
+   182   1715.9 MiB      0.0 MiB           2                   f"{analysis_date}: {end - start}")
+   183                                             
+   184   1485.6 MiB   -230.3 MiB           1       del results
+   185   1485.6 MiB      0.0 MiB           1       return

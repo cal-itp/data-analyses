@@ -241,5 +241,6 @@ if __name__ == "__main__":
             f"{SPEEDMAP_STOP_TIMES}_{analysis_date}"
         )
           
-        logger.info(f"speedmap segments and proxy_stop_times: {end - start}")
+        logger.info(f"speedmap segments and proxy_stop_times {analysis_date}: "
+                    f"{end - start}")
         
