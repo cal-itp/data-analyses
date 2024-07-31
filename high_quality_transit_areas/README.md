@@ -33,7 +33,7 @@ We provide the HQTA Stops dataset as a convienience for certain kinds of analysi
 * `hqta_type = hq_corridor_bus`
     * `hqta_details` is `corridor_frequent_stop` if the stop has at least 4 peak trips, `corridor_other_stop` otherwise.
 * `hqta_type = major_stop_bus`
-    * Major stop bus is designation of stops appearing at the intersection of 2 frequent corridors. In our analysis, corridors have an operator and route associated to track it.
+    * Major stop bus is designation of stops appearing within 50 meters of the intersection of 2 frequent corridors. In our analysis, corridors have an operator and route associated to track it.
     * If the intersection was between 2 different operators (different agency names), `hqta_details = intersection_2_bus_routes_different_operators`.
     * If the intersection was between routes of the same operator, `hqta_details = intersection_2_bus_routes_same_operator`
 * A half-mile buffered dataset is provided for high quality transit areas. We recommend using the polygon dataset. To get the stops (points) that create these half mile polygons, we do also provide high quality transit stops.
