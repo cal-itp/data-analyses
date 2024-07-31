@@ -120,7 +120,7 @@ def single_day_summary_averages(analysis_date: str, dict_inputs: dict):
     
     time2 = datetime.datetime.now()
     logger.info(f"route dir avg: {time2 - time1}")
-    logger.info(f"single day summary speed execution time: {time2 - start}")
+    logger.info(f"single day summary speed {analysis_date} execution time: {time2 - start}")
     
     return
 
@@ -218,7 +218,7 @@ def multi_day_summary_averages(analysis_date_list: list, dict_inputs: dict):
     )
     
     end = datetime.datetime.now()
-    logger.info(f"multi day summary speed execution time: {end - start}")
+    logger.info(f"multi day summary speed {analysis_date_list} execution time: {end - start}")
     
     return
 
@@ -237,20 +237,15 @@ if __name__ == "__main__":
     RT_DICT = GTFS_DATA_DICT.rt_stop_times
     
     for analysis_date in analysis_date_list:
-        
-        start = datetime.datetime.now()
-        
+              
         single_day_summary_averages(analysis_date, RT_DICT)
-        end = datetime.datetime.now()
         
-        logger.info(f"average rollups for {analysis_date}: {end - start}")
         
     '''
-    for one_week in [rt_dates.oct2023_week, rt_dates.apr2023_week]:
-        start = datetime.datetime.now()
+    from segment_speed_utils.project_vars import weeks_available
+
+    for one_week in weeks_available:
             
         multi_day_summary_averages(one_week, RT_DICT)
-        end = datetime.datetime.now()
-    
-        logger.info(f"average rollups for {one_week}: {end - start}")
     '''
+    

@@ -22,24 +22,12 @@ if __name__ == "__main__":
     segment_type = "speedmap_segments"
     
     for analysis_date in analysis_date_list:
-        
-        start = datetime.datetime.now()
-        
+                
         single_day_segment_averages(analysis_date, segment_type)
-        
-        end = datetime.datetime.now()
-        
-        logger.info(f"average rollups for {analysis_date}: {end - start}")
     
     '''
     from segment_speed_utils.project_vars import weeks_available
-    
     for one_week in weeks_available:
-        start = datetime.datetime.now()
-            
+        
         multi_day_segment_averages(one_week, segment_type)
-        end = datetime.datetime.now()
-    
-        logger.info(f"average rollups for {one_week}: {end - start}")
     '''
-    

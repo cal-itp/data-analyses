@@ -42,6 +42,7 @@ if __name__ == "__main__":
     
     del delayed_dfs
     
+    
     delayed_dfs = [
         delayed(filter_to_nearest_two_vp)(
             analysis_date = analysis_date,
@@ -55,8 +56,7 @@ if __name__ == "__main__":
     del delayed_dfs
 
     logger.remove()
-
-
+    
     LOG_FILE = "../logs/interpolate_stop_arrival.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
