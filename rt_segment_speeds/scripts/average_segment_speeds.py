@@ -183,7 +183,7 @@ def single_day_segment_averages(
         
     time2 = datetime.datetime.now()
     logger.info(f"route dir seg avg {time2 - time1}")
-    logger.info(f"single day segment execution time: {time2 - start}")
+    logger.info(f"single day segment {analysis_date} execution time: {time2 - start}")
     
     return    
 
@@ -247,7 +247,7 @@ def multi_day_segment_averages(
     )
         
     end = datetime.datetime.now()
-    logger.info(f"multi day segment execution time: {end - start}")
+    logger.info(f"multi day segment {analysis_date_list} execution time: {end - start}")
     
     return    
         
@@ -266,24 +266,13 @@ if __name__ == "__main__":
     segment_type = "stop_segments"
     
     for analysis_date in analysis_date_list:
-        
-        start = datetime.datetime.now()
-        
+
         single_day_segment_averages(analysis_date, segment_type)
-        
-        end = datetime.datetime.now()
-        
-        logger.info(f"average rollups for {analysis_date}: {end - start}")
     
-        
     '''
     from segment_speed_utils.project_vars import weeks_available
-
-    for one_week in weeks_available:
-        start = datetime.datetime.now()
-            
-        multi_day_segment_averages(one_week, segment_type)
-        end = datetime.datetime.now()
     
-        logger.info(f"average rollups for {one_week}: {end - start}")
+    for one_week in weeks_available:
+        
+        multi_day_segment_averages(one_week, segment_type)
     '''

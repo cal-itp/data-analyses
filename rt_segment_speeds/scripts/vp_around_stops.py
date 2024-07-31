@@ -1,4 +1,8 @@
 """
+Filter the nearest 10 neighbors down to the 
+nearest 2 neighbors for each stop position.
+Attach the projected stop position against shape,
+projected vp position against shape, and timestamps.
 """
 import datetime
 import geopandas as gpd
@@ -47,6 +51,8 @@ def stops_projected_against_shape(
     gdf = gdf.assign(
         stop_meters = gdf.shape_geometry.project(gdf.stop_geometry),
     )[trip_stop_cols + ["stop_meters"]]
+    
+    del shapes, stop_position
     
     return gdf
 
@@ -107,9 +113,7 @@ def get_vp_projected_against_shape(
     # and turn those into vp geometry
     vp = pd.read_parquet(
         f"{SEGMENT_GCS}{input_file}_{analysis_date}",
-        columns = ["trip_instance_key", "vp_idx", "x", "y",  
-               "location_timestamp_local", 
-               "moving_timestamp_local"],
+        columns = ["trip_instance_key", "vp_idx", "x", "y"],
         **kwargs
     ).pipe(wrangle_shapes.vp_as_gdf, crs = PROJECT_CRS)
     
@@ -126,16 +130,12 @@ def get_vp_projected_against_shape(
         how = "inner"
     ).set_geometry("vp_geometry")
 
-    keep_cols = [
-        "vp_idx", 
-        "location_timestamp_local", "moving_timestamp_local", 
-        "shape_meters"
-    ]
+    del trips_to_shapes, shapes, vp
     
     gdf = gdf.assign(
         shape_meters = gdf.shape_geometry.project(gdf.vp_geometry),
-    )[keep_cols]
-        
+    )[["vp_idx", "shape_meters"]]
+            
     return gdf
 
 
@@ -176,23 +176,9 @@ def find_two_closest_vp(
         axis=0, ignore_index=True
     )
     
-    df2 = pd.merge(
-        df,
-        two_vp,
-        on = group_cols + ["stop_vp_distance_meters"],
-        how = "inner"
-    )
-    
-    # since shape_meters actually might be decreasing as time progresses,
-    # (bus moving back towards origin of shape)
-    # we don't actually know that the smaller shape_meters is the first timestamp
-    # nor the larger shape_meters is the second timestamp.
-    # all we know is that stop_meters (stop) falls between these 2 shape_meters.
-    # sort by timestamp, and set the order to be 0, 1    
-    
-    return df2
+    return two_vp
 
-
+    
 def filter_to_nearest_two_vp(
     analysis_date: str,
     segment_type: Literal[SEGMENT_TYPES],
@@ -231,7 +217,6 @@ def filter_to_nearest_two_vp(
         how = "inner"
     )
     
-    
     # Calculate the distance between the stop and vp position
     # This is used to find the minimum positive and minimum negative
     # distance (get at vp before and after stop)
@@ -241,25 +226,43 @@ def filter_to_nearest_two_vp(
         stop_vp_distance_meters = (gdf.stop_meters - gdf.shape_meters).round(2)
     )
     
-    gdf2 = delayed(find_two_closest_vp)(gdf, trip_stop_cols)
+    gdf_filtered = delayed(find_two_closest_vp)(gdf, trip_stop_cols)
+    
+    gdf2 = delayed(pd.merge)(
+        gdf,
+        gdf_filtered,
+        on = trip_stop_cols + ["stop_vp_distance_meters"],
+        how = "inner"
+    )
+    
     gdf2 = compute(gdf2)[0]
     
+    del gdf, gdf_filtered, vp_nearest, stop_meters_df, vp_meters_df
+        
     gdf2.to_parquet(
         f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet",
     )
-    
+        
     end = datetime.datetime.now()
     logger.info(f"nearest 2 vp for {segment_type} "
                 f"{analysis_date}: {end - start}")
     
-
+    del gdf2
+    
+    return
+    
+'''
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date_list
     
-    for analysis_date in analysis_date_list:
-        filter_to_nearest_two_vp(
+    delayed_dfs = [
+        delayed(filter_to_nearest_two_vp)(
             analysis_date = analysis_date,
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
-        ) 
+        ) for analysis_date in analysis_date_list
+    ]
+
+    [compute(i)[0] for i in delayed_dfs]
+'''

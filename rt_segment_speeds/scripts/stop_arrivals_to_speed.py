@@ -170,6 +170,8 @@ def calculate_speed_from_stop_arrivals(
     speed.to_parquet(
         f"{SEGMENT_GCS}{SPEED_FILE}.parquet")
     
+    del speed, df
+    
     end = datetime.datetime.now()
     logger.info(f"speeds by segment for {segment_type} "
                 f"{analysis_date}: {end - start}")
@@ -177,14 +179,20 @@ def calculate_speed_from_stop_arrivals(
     
     return
 
-
+'''
 if __name__ == "__main__":
-    
+   
     from segment_speed_utils.project_vars import analysis_date_list
+
+    from dask import delayed, compute
     
-    for analysis_date in analysis_date_list:
-        calculate_speed_from_stop_arrivals(
+    delayed_dfs = [    
+        delayed(calculate_speed_from_stop_arrivals)(
             analysis_date = analysis_date, 
             segment_type = segment_type, 
             config_path = GTFS_DATA_DICT
-        )
+        ) for analysis_date in analysis_date_list
+    ]
+    
+    [compute(i)[0] for i in delayed_dfs]
+'''

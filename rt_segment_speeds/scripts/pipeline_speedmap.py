@@ -7,8 +7,8 @@ import datetime
 import pandas as pd
 import sys
 
+from dask import delayed, compute
 from loguru import logger
-from pathlib import Path
 from typing import Optional
 
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
@@ -18,12 +18,10 @@ from vp_around_stops import filter_to_nearest_two_vp
 from interpolate_stop_arrival import interpolate_stop_arrivals
 from stop_arrivals_to_speed import calculate_speed_from_stop_arrivals
 
-segment_type = "speedmap_segments"
-
 
 def concatenate_speedmap_proxy_arrivals_with_remaining(
     analysis_date: str,
-    config_path: Optional[Path] = GTFS_DATA_DICT
+    config_path: Optional = GTFS_DATA_DICT
 ):
     """
     Nearest vp and interpolation was done just for extra
@@ -63,70 +61,94 @@ def concatenate_speedmap_proxy_arrivals_with_remaining(
         f"{SEGMENT_GCS}{SPEEDMAP_STOP_ARRIVALS}_{analysis_date}.parquet"
     )
     
+    del df, proxy_arrivals, other_arrivals
+    
     return
     
 
 if __name__ == "__main__":
         
     from segment_speed_utils.project_vars import analysis_date_list
+   
+    segment_type = "speedmap_segments"
+    print(f"segment_type: {segment_type}")    
     
-    print(f"segment_type: {segment_type}")
+    LOG_FILE = "../logs/nearest_vp.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
     
-    for analysis_date in analysis_date_list:      
-                        
-        LOG_FILE = "../logs/nearest_vp.log"
-        logger.add(LOG_FILE, retention="3 months")
-        logger.add(sys.stderr, 
-                   format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-                   level="INFO")
-    
-        nearest_neighbor_for_stop(
+    delayed_dfs = [
+        delayed(nearest_neighbor_for_stop)(
             analysis_date = analysis_date,
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
-        )    
-                
-        filter_to_nearest_two_vp(
-            analysis_date = analysis_date,
-            segment_type = segment_type,
-            config_path = GTFS_DATA_DICT
-        )
-        
-        logger.remove()
-    
-        LOG_FILE = "../logs/interpolate_stop_arrival.log"
-        logger.add(LOG_FILE, retention="3 months")
-        logger.add(sys.stderr, 
-                   format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-                   level="INFO")
+        ) for analysis_date in analysis_date_list
+    ]
 
-        interpolate_stop_arrivals(
+    [compute(i)[0] for i in delayed_dfs]
+  
+
+    delayed_dfs = [
+        delayed(filter_to_nearest_two_vp)(
+            analysis_date = analysis_date,
+            segment_type = segment_type,
+            config_path = GTFS_DATA_DICT
+        ) for analysis_date in analysis_date_list
+    ]
+    
+    [compute(i)[0] for i in delayed_dfs]
+
+    logger.remove()
+
+
+    LOG_FILE = "../logs/interpolate_stop_arrival.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+
+    delayed_dfs = [
+        delayed(interpolate_stop_arrivals)(
             analysis_date = analysis_date, 
             segment_type = segment_type, 
             config_path = GTFS_DATA_DICT
-        )
+        ) for analysis_date in analysis_date_list
+    ]
+    
+    [compute(i)[0] for i in delayed_dfs]
+
+    logger.remove()
+    
         
-        logger.remove()
-        
-        t0 = datetime.datetime.now()
-        concatenate_speedmap_proxy_arrivals_with_remaining(
+    t0 = datetime.datetime.now()
+    delayed_dfs = [
+        delayed(concatenate_speedmap_proxy_arrivals_with_remaining)(
             analysis_date,
             config_path = GTFS_DATA_DICT
-        )
-        
-        t1 = datetime.datetime.now()
-        print(f"concatenate proxy arrivals with rt_stop_times: {t1 - t0}")
-        
-        LOG_FILE = "../logs/speeds_by_segment_trip.log"
-        logger.add(LOG_FILE, retention="3 months")
-        logger.add(sys.stderr, 
-                   format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-                   level="INFO")
+        ) for analysis_date in analysis_date_list
+    ]
+    
+    [compute(i)[0] for i in delayed_dfs]
 
-        calculate_speed_from_stop_arrivals(
+    t1 = datetime.datetime.now()
+    print(f"concatenate proxy arrivals with rt_stop_times: {t1 - t0}")
+        
+    LOG_FILE = "../logs/speeds_by_segment_trip.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+
+    delayed_dfs = [
+        delayed(calculate_speed_from_stop_arrivals)(
             analysis_date = analysis_date, 
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
-        )
-        
-        logger.remove()
+        ) for analysis_date in analysis_date_list
+    ]
+
+    [compute(i)[0] for i in delayed_dfs]
+    
+    logger.remove()

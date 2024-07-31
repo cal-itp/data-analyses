@@ -44,7 +44,8 @@ def prep_scheduled_stop_times(
 
 
 def prep_rt_stop_times(
-    analysis_date: str
+    analysis_date: str,
+    trip_stop_cols: list
 ) -> pd.DataFrame: 
     """
     For RT stop arrivals, drop duplicates based on interpolated
@@ -55,12 +56,11 @@ def prep_rt_stop_times(
     
     df = pd.read_parquet(
         f"{SEGMENT_GCS}{STOP_ARRIVALS}_{analysis_date}.parquet",
-        columns = ["trip_instance_key", "stop_sequence", "stop_id",
-                  "arrival_time"]
+        columns = trip_stop_cols + ["arrival_time"]
     ).rename(columns = {"arrival_time": "rt_arrival"})
 
     df2 = df.sort_values(
-        ["trip_instance_key", "stop_sequence"]
+        trip_stop_cols
     ).drop_duplicates(
         subset=["trip_instance_key", "rt_arrival"]
     ).reset_index(drop=True)
@@ -73,19 +73,20 @@ def prep_rt_stop_times(
 
 
 def assemble_scheduled_rt_stop_times(
-    analysis_date: str
+    analysis_date: str,
+    trip_stop_cols: list
 ) -> pd.DataFrame: 
     """
     Merge scheduled and rt stop times so we can compare
     scheduled arrival (seconds) and RT arrival (seconds).
     """
     sched_stop_times = prep_scheduled_stop_times(analysis_date)
-    rt_stop_times = prep_rt_stop_times(analysis_date)
+    rt_stop_times = prep_rt_stop_times(analysis_date, trip_stop_cols)
     
     df = pd.merge(
         sched_stop_times,
         rt_stop_times,
-        on = ["trip_instance_key", "stop_sequence", "stop_id"],
+        on = trip_stop_cols,
         how = "inner"
     )
     
@@ -97,12 +98,13 @@ if __name__ == "__main__":
     from update_vars import analysis_date_list
     
     EXPORT_FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.schedule_rt_stop_times
+    trip_stop_cols = [*GTFS_DATA_DICT.rt_stop_times.trip_stop_cols]
     
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
         
-        df = assemble_scheduled_rt_stop_times(analysis_date)
+        df = assemble_scheduled_rt_stop_times(analysis_date, trip_stop_cols)
         
         df.to_parquet(f"{RT_SCHED_GCS}{EXPORT_FILE}_{analysis_date}.parquet")
         

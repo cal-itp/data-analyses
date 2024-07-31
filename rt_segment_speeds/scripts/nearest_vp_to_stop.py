@@ -62,6 +62,8 @@ def stop_times_for_shape_segments(
         columns = "st_trip_instance_key"
     ).drop_duplicates().reset_index(drop=True)
     
+    del stops_to_use, shape_stop_combinations, subset_trips, rt_trips
+    
     return stop_times
 
 
@@ -157,7 +159,7 @@ def nearest_neighbor_for_stop(
         stop_times, analysis_date)
         
     results = neighbor.add_nearest_neighbor_result_array(gdf, analysis_date)
-    
+          
     # Keep columns from results that are consistent across segment types 
     # use trip_stop_cols as a way to uniquely key into a row 
     keep_cols = trip_stop_cols + [
@@ -176,16 +178,23 @@ def nearest_neighbor_for_stop(
     logger.info(f"nearest neighbor for {segment_type} "
                 f"{analysis_date}: {end - start}")
     
+    del gdf, stop_times, results
+
     return
 
-
+'''
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date_list
+    from dask import delayed, compute
     
-    for analysis_date in analysis_date_list:
-        nearest_neighbor_for_stop(
+    delayed_dfs = [
+        delayed(nearest_neighbor_for_stop)(
             analysis_date = analysis_date,
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
-        ) 
+        ) for analysis_date in analysis_date_list
+    ]
+
+    [compute(i)[0] for i in delayed_dfs]
+'''
