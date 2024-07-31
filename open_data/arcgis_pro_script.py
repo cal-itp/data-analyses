@@ -147,29 +147,6 @@ def rename_columns_with_dict(this_feature_class, rename_dict: dict):
     return
 
 
-def import_fgdc_metadata_and_sync(one_feature_class):
-    """
-    Export XML as FGDC format, 
-    that's the only one that keeps field names and definitions
-    available.
-    Do this separately becuase it operates on the feature class name, 
-    and the xml file sits outside of a file gdb.
-    """
-    this_feature_class = feature_class_in_gdb_path(
-        staging_location, 
-        one_feature_class
-    )
-    
-    # Open the staging dataset's metadata
-    source_metadata = md.Metadata(this_feature_class)  
-    
-    # Synchronize it with the field info populated from the FGDC template 
-    source_metadata.importMetadata(f"{one_feature_class}_fgdc.xml")
-    source_metadata.save()
-    
-    return
-
-
 def update_feature_class_with_json(one_feature_class, meta_json_dict: dict):
     """
     Update a single feature class.
@@ -194,10 +171,6 @@ def update_feature_class_with_json(one_feature_class, meta_json_dict: dict):
     check_fields = arcpy.ListFields(this_feature_class)
     for field in check_fields:
         print(field.name)
-    
-    # Sync with FGDC metadata 
-    # (this is on the one_feature_class, which sits outside of staging/)
-    #import_fgdc_metadata_and_sync(one_feature_class)
     
     # Now update the rest of the metadata elements
     update_metadata_class(this_feature_class, subset_meta_dict)

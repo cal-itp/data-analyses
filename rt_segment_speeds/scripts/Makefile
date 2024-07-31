@@ -28,7 +28,7 @@ all_speeds_pipeline:
 	make speeds_pipeline
 	make rt_stop_times_pipeline
 	make speedmaps_pipeline
-	#python publish_open_data.py  
+	python publish_open_data.py  
     
 download_roads:
 	#pip install esridump
