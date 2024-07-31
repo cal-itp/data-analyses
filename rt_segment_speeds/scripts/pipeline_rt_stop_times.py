@@ -44,7 +44,7 @@ if __name__ == "__main__":
             analysis_date = analysis_date,
             segment_type = segment_type,
             config_path = GTFS_DATA_DICT
-        ) for analysis_date in analysis_date_list[1:]
+        ) for analysis_date in analysis_date_list
     ]
     
     [compute(i)[0] for i in delayed_dfs]
