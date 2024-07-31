@@ -26,6 +26,13 @@ OPERATOR_COLS = [
     "schedule_gtfs_dataset_key", 
 ]
 
+CROSSWALK_COLS = [
+    "schedule_gtfs_dataset_key", "name",
+    "caltrans_district",
+    "organization_source_record_id", "organization_name",
+    "base64_url"
+]
+
 def import_segments(
     analysis_date_list: list,
     segment_type: Literal[SEGMENT_TYPES],
@@ -80,12 +87,9 @@ def segment_averaging_with_geometry(
         group_cols,
         metric_type = "segment_speeds"
     ).pipe(
-        gtfs_schedule_wrangling.merge_operator_identifiers, analysis_date_list,
-        columns = [
-            "schedule_gtfs_dataset_key", "name",
-            "caltrans_district",
-            "organization_source_record_id", "organization_name",
-            "base64_url"]
+        gtfs_schedule_wrangling.merge_operator_identifiers, 
+        analysis_date_list,
+        columns = CROSSWALK_COLS
     )
     
     col_order = [c for c in avg_speeds.columns]
