@@ -27,6 +27,13 @@ OPERATOR_COLS = [
     "schedule_gtfs_dataset_key", 
 ]    
 
+CROSSWALK_COLS = [
+    "schedule_gtfs_dataset_key", "name",
+    "caltrans_district",
+    "organization_source_record_id", "organization_name",
+    "base64_url"
+]
+
 def single_day_summary_averages(analysis_date: str, dict_inputs: dict):
     """
     Main function for calculating average speeds.
@@ -71,7 +78,8 @@ def single_day_summary_averages(analysis_date: str, dict_inputs: dict):
         trip_group_cols + ["peak_offpeak"],
     ).pipe(
         gtfs_schedule_wrangling.merge_operator_identifiers, 
-        [analysis_date]
+        [analysis_date],
+        columns = CROSSWALK_COLS
     ).reset_index(drop=True)
     
     trip_avg.to_parquet(
@@ -93,7 +101,9 @@ def single_day_summary_averages(analysis_date: str, dict_inputs: dict):
         metric_type = "summary_speeds"
     ).pipe(
         gtfs_schedule_wrangling.merge_operator_identifiers, 
-        [analysis_date]
+        [analysis_date],
+        columns = CROSSWALK_COLS
+
     ).reset_index(drop=True)
     
     col_order = [c for c in route_dir_avg.columns]
@@ -109,7 +119,7 @@ def single_day_summary_averages(analysis_date: str, dict_inputs: dict):
     ).reset_index(drop=True).reindex(
         columns = col_order + ["route_name", "geometry"]
     )
-    
+        
     utils.geoparquet_gcs_export(
         route_dir_avg,
         SEGMENT_GCS,
@@ -169,7 +179,8 @@ def multi_day_summary_averages(analysis_date_list: list, dict_inputs: dict):
         trip_group_cols + ["peak_offpeak", "weekday_weekend"],
     ).pipe(
         gtfs_schedule_wrangling.merge_operator_identifiers, 
-        analysis_date_list
+        analysis_date_list,
+        columns = CROSSWALK_COLS
     ).reset_index(drop=True)
 
     trip_avg_filtered = trip_avg[
@@ -187,7 +198,13 @@ def multi_day_summary_averages(analysis_date_list: list, dict_inputs: dict):
         metric_type = "summary_speeds"
     ).pipe(
         gtfs_schedule_wrangling.merge_operator_identifiers, 
-        analysis_date_list
+        analysis_date_list,
+        columns = [
+            "schedule_gtfs_dataset_key", "name",
+            "caltrans_district",
+            "organization_source_record_id", "organization_name",
+            "base64_url"]
+        
     ).reset_index(drop=True)
     
     route_dir_avg = compute(route_dir_avg)[0]
