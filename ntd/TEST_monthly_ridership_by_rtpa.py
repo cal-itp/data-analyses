@@ -15,7 +15,11 @@ from calitp_data_analysis.tables import tbls
 from siuba import _, collect, count, filter, show_query
 from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils.project_vars import PUBLIC_GCS
-from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS
+#from shared_utils.rt_dates import MONTH_DICT
+from update_vars import NTD_MODES, NTD_TOS
+
+#Temp file path for testing
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/csuyat_folder/"
 
 fs = gcsfs.GCSFileSystem()
 
@@ -24,6 +28,7 @@ RTPA_URL = ("https://services3.arcgis.com/bWPjFyq029ChCGur/arcgis/rest/services/
       )
 
 #gpd.read_file(RTPA_URL).RTPA.drop_duplicates().to_csv("rtpa.csv")
+
 def add_change_columns(
     df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -64,6 +69,7 @@ def get_percent_change(
     )
     
     return df
+
 
 def save_rtpa_outputs(
     df: pd.DataFrame, 
@@ -194,8 +200,8 @@ def remove_local_outputs(
 ):
     shutil.rmtree(f"{year}_{month}/")
     os.remove(f"{year}_{month}.zip")
-    
-    
+
+
 if __name__ == "__main__":
     
     # Define variables we'll probably change later
@@ -211,6 +217,7 @@ if __name__ == "__main__":
     df = pd.read_parquet(
         f"{GCS_FILE_PATH}ca_monthly_ridership_{YEAR}_{MONTH}.parquet"
     )
-    save_rtpa_outputs(df, YEAR, MONTH, upload_to_public = True)
+    # upload_to_public = False for testing, change back to True later.
+    save_rtpa_outputs(df, YEAR, MONTH, upload_to_public = False)
     remove_local_outputs(YEAR, MONTH)
-    
+
