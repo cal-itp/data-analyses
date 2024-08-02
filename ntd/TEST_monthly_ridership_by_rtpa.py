@@ -71,6 +71,32 @@ def get_percent_change(
     return df
 
 
+def sum_by_group(
+    df: pd.DataFrame,
+    group_cols: list) -> pd.DataFrame:
+    """
+    since data is now long to begin with, this replaces old sum_by_group, make_long and assemble_long_df functions.
+    """
+    grouped_df = df.groupby(group_cols+
+                             ['period_year',
+                             'period_month',
+                             'period_year_month']
+                           ).agg({
+        "upt":"sum",
+        "previous_y_m_upt":"sum",
+        "change_1yr":"sum"
+    }
+    ).reset_index()
+    
+    #get %change back
+    grouped_df = get_percent_change(grouped_df)
+    
+    #decimal to whole number
+    grouped_df["pct_change_1yr"] = grouped_df["pct_change_1yr"]*100
+    
+    return grouped_df
+
+
 def save_rtpa_outputs(
     df: pd.DataFrame, 
     year: int, 
@@ -119,8 +145,20 @@ def save_rtpa_outputs(
         )
         #insertng readme cover sheet, 
         cover_sheet = pd.read_excel("./cover_sheet_template.xlsx", index_col = "NTD Monthly Ridership by RTPA")
+        
+        agency_cols = ["ntd_id", "agency", "RTPA"]
+        mode_cols = ["mode", "RTPA"]
+        tos_cols = ["tos", "RTPA"]
+
+        by_agency_long = sum_by_group(df, agency_cols)
+        by_mode_long = sum_by_group(df, mode_cols)
+        by_tos_long = sum_by_group(df, tos_cols)
+        
         with pd.ExcelWriter(f"./{year}_{month}/{rtpa_snakecase}.xlsx", mode ="a") as writer:
             cover_sheet.to_excel(writer, sheet_name = "READ ME")
+            by_agency_long.to_excel(writer, sheet_name = "Aggregated by Agency")
+            by_mode_long.to_excel(writer, sheet_name = "Aggregated by Mode")
+            by_tos_long.to_excel(writer, sheet_name = "Aggregated by TOS")
         
     shutil.make_archive(f"./{year}_{month}", "zip", f"{year}_{month}")
     print("Zipped folder")
