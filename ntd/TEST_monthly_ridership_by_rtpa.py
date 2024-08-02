@@ -96,6 +96,7 @@ def sum_by_group(
     
     return grouped_df
 
+
 def save_rtpa_outputs(
     df: pd.DataFrame, 
     year: int, 
@@ -146,8 +147,8 @@ def save_rtpa_outputs(
         cover_sheet = pd.read_excel("./cover_sheet_template.xlsx", index_col = "NTD Monthly Ridership by RTPA")
         
         agency_cols = ["ntd_id", "agency", "RTPA"]
-        mode_cols = ["Mode", "RTPA"]
-        tos_cols = ["TOS", "RTPA"]
+        mode_cols = ["mode", "RTPA"]
+        tos_cols = ["tos", "RTPA"]
 
         by_agency_long = sum_by_group(df, agency_cols)
         by_mode_long = sum_by_group(df, mode_cols)
@@ -157,7 +158,7 @@ def save_rtpa_outputs(
             cover_sheet.to_excel(writer, sheet_name = "READ ME")
             by_agency_long.to_excel(writer, sheet_name = "Aggregated by Agency")
             by_mode_long.to_excel(writer, sheet_name = "Aggregated by Mode")
-            by_tos_long.to_excel(writer, sheet_name = "Aggregated by Agency")
+            by_tos_long.to_excel(writer, sheet_name = "Aggregated by TOS")
         
     shutil.make_archive(f"./{year}_{month}", "zip", f"{year}_{month}")
     print("Zipped folder")
