@@ -281,13 +281,14 @@ if __name__ == "__main__":
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
     print("Saved Digest RT")
-
+    
+    """
     segment_speeds = concatenate_segment_speeds_by_route_direction(
         analysis_date_list
     ).pipe(
         merge_in_standardized_route_names, 
     ).astype({"direction_id": "int64"}) #Int64 doesn't work for gdf
-    """
+    
     segment_speeds2 = pd.merge(
         segment_speeds,
         primary_typology,
