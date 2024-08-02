@@ -1,4 +1,4 @@
-import calitp_data_analysis.magics
+##import calitp_data_analysis.magics
 import geopandas as gpd
 import pandas as pd
 import datetime
