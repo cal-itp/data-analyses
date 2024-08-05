@@ -14,7 +14,9 @@ def new_prop_finder(description: str) -> str:
 
     BEB_list = [
         "battery electric",
+        "battery-electric",
         "BEBs paratransit buses"
+        
     ]
 
     cng_list = [
