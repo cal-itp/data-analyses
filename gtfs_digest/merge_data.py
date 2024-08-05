@@ -122,12 +122,23 @@ def concatenate_crosswalk_organization(
 ) -> pd.DataFrame:
     FILE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     
+    crosswalk_cols = [
+    "schedule_gtfs_dataset_key",
+    "name",
+    "schedule_source_record_id",
+    "base64_url",
+    "organization_source_record_id",
+    "organization_name",
+    "caltrans_district"
+    ]
+    
     df = time_series_utils.concatenate_datasets_across_dates(
         SCHED_GCS,
         FILE,
         date_list,
         data_type = "df",
-    ).drop(columns = "itp_id")
+        columns = crosswalk_cols
+    )
     
     return df
 

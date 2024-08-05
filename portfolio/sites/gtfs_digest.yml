@@ -59,7 +59,6 @@ parts:
     - organization_name: City of South San Francisco
     - organization_name: City of Union City
     - organization_name: City of Vacaville
-    - organization_name: Cloverdale Transit
     - organization_name: Eastern Contra Costa Transit Authority
     - organization_name: Emeryville Transportation Management Agency
     - organization_name: Livermore-Amador Valley Transit Authority
@@ -74,6 +73,7 @@ parts:
     - organization_name: San Mateo County Transit District
     - organization_name: Santa Clara Valley Transportation Authority
     - organization_name: Solano County Transit
+    - organization_name: Sonoma County
     - organization_name: Sonoma-Marin Area Rail Transit District
     - organization_name: Stanford University
     - organization_name: University of California, Berkeley
