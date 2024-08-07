@@ -136,11 +136,16 @@ def plot_confusion_matrices(df, y_true, y_pred, title):
     plt.ylabel('GTFS Service Levels (% of agencies)', fontweight='bold')
     plt.title(title, fontweight='bold')
     file = title
-    plt.savefig(f"plots/{file}.png")
+    plt.savefig(f"{file}.png")
     # return cm, df_cm
 
 excel_col_order = ['Name', 'Notes', 'gtfs_dataset_name',
-'Total VOMS (NTD) (from Provider)', 'Customer Facing',"name",
+'Total VOMS (NTD) (from Provider)',
+'sum_unlinked_passenger_trips_upt',
+'Holiday Website Status',
+'ntd_id_2022',
+'Customer Facing',
+"name",
 "Reference Saturday",
 "Reference Sunday",
 "Reference Weekday",
