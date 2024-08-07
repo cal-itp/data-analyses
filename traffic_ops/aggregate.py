@@ -13,47 +13,9 @@ from typing import Literal
 
 import utils
 from utils import RAW_GCS, PROCESSED_GCS
+from crosswalks import station_id_cols
 
 fs = gcsfs.GCSFileSystem()
-
-
-station_id_cols = [
-    'station_id',
-    'freeway_id',
-    'freeway_dir',
-    'city_id',
-    'county_id',
-    'district_id',
-    'station_type',
-    'param_set', 
-    #'length',
-    #'abs_postmile', 
-    #'physical_lanes'
-]
-
-def create_station_crosswalk(df: dd.DataFrame) -> pd.DataFrame:
-    """
-    Put in a set of columns that identify the 
-    station + freeway + postmile position.
-    Create a uuid that we can use to get back all 
-    the columns we may want later.
-    """
-    crosswalk = df[
-        station_id_cols
-    ].drop_duplicates().reset_index(drop=True)
-    
-    
-    crosswalk = crosswalk.compute()
-    
-    crosswalk["station_uuid"] = crosswalk.apply(
-        lambda _: str(uuid.uuid4()), axis=1, 
-    )
-      
-    crosswalk.to_parquet(
-        f"{PROCESSED_GCS}station_crosswalk.parquet"
-    )
-    
-    return
 
 
 def read_filepart_merge_crosswalk(
