@@ -36,3 +36,9 @@ Gather a list of typical questions that are asked around this dataset. Let's see
    * express lanes pick up 18.5 - 47.5 (look along this length), how many ppl do you move, vehicles you move, speed at which you move them, across congested vs non-congested time (peak vs offpeak)
    * 4 GP lanes move Y1 ppl vs 2 HOT lanes move Y2 ppl
    * 10 has 1 lane on some part, 2 lanes on other parts
+   
+## References
+* [detector status report](https://github.com/cagov/caldata-mdsa-caltrans-pems/issues/269)
+* [high flows GH issue](https://github.com/cagov/caldata-mdsa-caltrans-pems/issues/278)
+* [dbt models sources.yml](https://github.com/cagov/caldata-mdsa-caltrans-pems/blob/main/transform/models/_sources.yml)
+* [grains naming conventions](https://github.com/cagov/caldata-mdsa-caltrans-pems/issues/241)
