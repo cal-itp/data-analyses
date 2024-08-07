@@ -12,11 +12,7 @@ from pathlib import Path
 from typing import Union
 
 from calitp_data_analysis.sql import to_snakecase
-
-GCS_FILE_PATH = (
-    "gs://calitp-analytics-data/data-analyses/"
-    "traffic_ops_raw_data/hov_pems/"
-)
+from utils import RAW_GCS
 
 fs = gcsfs.GCSFileSystem()
 
@@ -45,7 +41,7 @@ def import_csv_export_parquet(file_name: Union[str, Path]):
     ).pipe(to_snakecase)
         
     df.to_parquet(
-        f"{GCS_FILE_PATH}staging/{Path(file_name).stem}.parquet"
+        f"{RAW_GCS}staging/{Path(file_name).stem}.parquet"
     )
     
     return
@@ -57,7 +53,7 @@ def concatenate_files_in_folder(file_name_pattern: str):
     parquets, then concatenate together into a
     partitioned parquet.
     """
-    files = fs.glob(f"{GCS_FILE_PATH}{file_name_pattern}.csv")
+    files = fs.glob(f"{RAW_GCS}{file_name_pattern}.csv")
     files = [f"gs://{f}" for f in files]
     
     file_name = file_name_pattern.replace("_*_", "_")
@@ -74,7 +70,7 @@ def concatenate_files_in_folder(file_name_pattern: str):
     # Read in all the parquets in staging/ and 
     # repartition to go from 100+ -> fewer partitions
     df = dd.read_parquet(
-        f"{GCS_FILE_PATH}staging/{Path(file_name_pattern).stem}.parquet",
+        f"{RAW_GCS}staging/{Path(file_name_pattern).stem}.parquet",
         dtype = {"time_id": "datetime64"}
     )
     
@@ -84,7 +80,7 @@ def concatenate_files_in_folder(file_name_pattern: str):
         df = df.repartition(npartitions=25)
     
     df.to_parquet(
-        f"{GCS_FILE_PATH}{Path(file_name).stem}", 
+        f"{RAW_GCS}{Path(file_name).stem}", 
         engine="pyarrow"
     )
     
@@ -108,6 +104,6 @@ if __name__ == "__main__":
         print(f"save {f} as parquet: {end - start}")
     
     # Delete staging folder
-    fs.rm(f"{GCS_FILE_PATH}staging/", recursive=True)
+    fs.rm(f"{RAW_GCS}staging/", recursive=True)
     
     
