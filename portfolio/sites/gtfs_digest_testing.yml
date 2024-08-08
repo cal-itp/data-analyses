@@ -1,6 +1,5 @@
 directory: ./gtfs_digest/
-notebook: ./gtfs_digest/_report.ipynb
-
+notebook: ./gtfs_digest/03_report.ipynb
 parts:
 - chapters:
   - caption: District 04 - Oakland
@@ -9,15 +8,22 @@ parts:
     sections:
     - organization_name: Alameda-Contra Costa Transit District
     - organization_name: Capitol Corridor Joint Powers Authority
-    - organization_name: Central Contra Costa Transit Authority
     - organization_name: City and County of San Francisco
     - organization_name: City of Fairfield
+    - organization_name: City of Menlo Park
+    - organization_name: City of South San Francisco
+    - organization_name: City of Union City
+    - organization_name: City of Vacaville
+    - organization_name: Emeryville Transportation Management Agency
+    - organization_name: Livermore-Amador Valley Transit Authority
     - organization_name: Marin County Transit District
     - organization_name: Napa Valley Transportation Authority
+    - organization_name: Peninsula Corridor Joint Powers Board
     - organization_name: Presidio Trust
-    - organization_name: San Mateo County Transit District
+    - organization_name: San Francisco Bay Area Rapid Transit District
+    - organization_name: Stanford University
+    - organization_name: University of California, Berkeley
+    - organization_name: Western Contra Costa Transit Authority
 
 readme: ./gtfs_digest/README.md
-title: GTFS Digest testing
-
-
+title: GTFS Digest
