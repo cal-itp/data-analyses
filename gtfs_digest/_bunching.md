@@ -30,6 +30,7 @@
         * The problem increasingly worsens.
     * Bunching leads to: some people don't have to wait very long for a bus, but most have to wait a long time and get on a crowded bus.
     * Bunching is defined as buses that run within two minutes or less of each other.
+        * AH: <b>How did they decide 2 minutes as the "threshold?"</b>
     * MBTA lists the exact stops in which the bus bunches and the % of the time it bunches.
     * Headway requires GPS/AVL (automatic vehicle location) data.
         * Operators need to be trained on how to manage headway.

@@ -52,6 +52,14 @@ def route_metrics(
         f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet"
     )
     
+    crosswalk_cols = [
+    "schedule_gtfs_dataset_key",
+    "name",
+    "schedule_source_record_id",
+    "base64_url",
+    "organization_source_record_id",
+    "organization_name",
+    "caltrans_district",]
     route_df = metrics.concatenate_peak_offpeak_allday_averages(
         trip_df,
         group_cols = ["schedule_gtfs_dataset_key"] + ROUTE_DIR_COLS,
@@ -60,10 +68,12 @@ def route_metrics(
         metrics.derive_rt_vs_schedule_metrics
     ).pipe(
         average_rt_trip_times
-    ).pipe(
-        gtfs_schedule_wrangling.merge_operator_identifiers,
-        [analysis_date]
     )
+    
+    route_df = gtfs_schedule_wrangling.merge_operator_identifiers(
+        route_df,
+        [analysis_date],
+        columns = crosswalk_cols)
     
     # Save
     route_df.to_parquet(
