@@ -17,7 +17,6 @@ from crosswalks import station_id_cols
 
 fs = gcsfs.GCSFileSystem()
 
-
 def read_filepart_merge_crosswalk(
     filename: str,
     filepart: str, 
@@ -154,6 +153,60 @@ def compute_and_export(
     )
     
     return
+
+
+def import_detector_status(
+    filename: str = "hov_portion_detector_status_time_window",
+) -> pd.DataFrame:
+    """
+    Import detector partitioned df,
+    parse time_id, and merge in crosswalk to get station_uuid.
+    """
+    df = pd.read_parquet(
+        f"{RAW_GCS}{filename}/",
+        columns = ["time_id", "station_id", "all_samples"],
+    ).pipe(
+        utils.parse_for_time_components
+    ).pipe(
+        utils.add_peak_offpeak_column, "hour"
+    )
+    
+    # Merge in station_uuid
+    crosswalk = pd.read_parquet(
+        f"{PROCESSED_GCS}station_crosswalk.parquet",
+        columns = ["station_id", "station_uuid"]
+    )
+    
+    df2 = pd.merge(
+        df,
+        crosswalk,
+        on = "station_id",
+        how = "inner"
+    ).drop(columns = "station_id")
+    
+    return df2
+
+
+def aggregate_detector_samples(
+    df: pd.DataFrame,
+    group_cols: list
+) -> pd.DataFrame:
+    """
+    Right now, only all_samples is a column that's understood
+    all_samples = diag_samples, so we'll keep just one column.
+    
+    We want to know other metrics like:
+    status (0/1) - which one is good and which one is bad?
+    suspected_err (integers, 0-9 inclusive)
+    certain errors like high_flow, zero_occ, etc, but not sure how to interpret
+    """
+    df2 = (df.groupby(group_cols, group_keys=False)
+           .agg({
+               "all_samples": "sum",
+           }).reset_index()
+    )
+    
+    return df2
     
     
 if __name__ == "__main__":
@@ -171,7 +224,7 @@ if __name__ == "__main__":
     station_cols = ["station_uuid"]
     weekday_hour_cols = ["year", "month", "weekday", "hour"]
     weekday_peak_cols = ["year", "month", "weekday", "peak_offpeak"]
-
+    
     for metric in metric_list:
         
         time0 = datetime.datetime.now()
@@ -208,6 +261,27 @@ if __name__ == "__main__":
         time2 = datetime.datetime.now()
         print(f"{metric} peak/offpeak aggregation: {time2 - time1}")
         print(f"{metric} aggregation: {time2 - time0}")
+    
+    
+    detector_df = import_detector_status()
+    
+    detector_station_hour = aggregate_detector_samples(
+        detector_df, 
+        station_cols + weekday_hour_cols
+    )
+    
+    detector_station_hour.to_parquet(
+        f"{PROCESSED_GCS}station_weekday_hour_detectors.parquet"
+    )
+    
+    detector_station_weekday = aggregate_detector_samples(
+        detector_df,
+        station_cols + weekday_peak_cols
+    )
+    
+    detector_station_weekday.to_parquet(
+        f"{PROCESSED_GCS}station_weekday_peak_detectors.parquet"
+    )
     
     end = datetime.datetime.now()
     print(f"execution time: {end - start}")
