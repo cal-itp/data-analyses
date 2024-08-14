@@ -13,6 +13,10 @@ def parse_for_time_components(
     df: pd.DataFrame,
     time_col: str = "time_id"
 ) -> pd.DataFrame:
+    """
+    Parse the time_id column into several components:
+    year, month, weekday (as integer), and hour.
+    """
     
     df2 = df.assign(
         year = pd.to_datetime(df[time_col]).dt.year,
@@ -29,7 +33,9 @@ def add_peak_offpeak_column(
     df: pd.DataFrame,
     hour_col: str = "hour"
 ) -> pd.DataFrame:
-    
+    """
+    Categorize hour into peak / offpeak.
+    """
     hours_in_day = range(0, 24)
     
     peak_offpeak_dict = {
@@ -44,4 +50,21 @@ def add_peak_offpeak_column(
     
     return df
     
+def add_weekday_weekend_column(
+    df: pd.DataFrame,
+    weekday_col: str = "weekday"
+) -> pd.DataFrame:
+    """
+    Categorize day of week into daytype (weekday or weekend).
+    """
     
+    weekday_weekend_dict = {
+        **{k: "weekday" for k in [0, 1, 2, 3, 4]},
+        **{k: "weekend" for k in [5, 6]},
+    }
+    
+    df = df.assign(
+        daytype = df[weekday_col].map(weekday_weekend_dict)
+    )
+    
+    return df
