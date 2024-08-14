@@ -32,3 +32,18 @@ def write_to_public_gcs(
     os.remove(local_filename)
 
     return
+
+
+def if_exists_then_delete(filepath: str):
+    """
+    Check if file exists in GCS and delete.
+    For partitioned parquets, which are saved as folders, we need
+    to use recursive=True.
+    """
+    if fs.exists(filepath):
+        if fs.isdir(filepath):
+            fs.rm(filepath, recursive=True)
+        else:
+            fs.rm(filepath)
+
+    return

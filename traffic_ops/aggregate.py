@@ -14,6 +14,7 @@ from typing import Literal
 import utils
 from utils import RAW_GCS, PROCESSED_GCS
 from crosswalks import station_id_cols
+from shared_utils import publish_utils
 
 fs = gcsfs.GCSFileSystem()
 
@@ -51,37 +52,24 @@ def aggregate_metric(
     group_cols: list, 
     metric_name: Literal["flow", "truck_flow", "occ", "obs", "speed"] 
 ) -> pd.DataFrame:
-    
+    """
+    Aggregate metric (mean preferred for now) 
+    against a list of grouping columns.
+    """
     metric_cols = [c for c in df.columns if metric_name in c]
-    
-    if metric_name == "speed":
-        metric_agg = "mean"
-    else:
-        metric_agg = "sum"
-    
-    if metric_name in ["occ", "speed", "obs_speed"]:
-        metric_dtypes = {c: "Float64" for c in metric_cols}
-    
-    else:
-        metric_dtypes = {c: "Int64" for c in metric_cols}
-    
+        
     df2 = (
         df
         .groupby(group_cols, 
                  group_keys=False)
         .agg(
-            {**{c: metric_agg for c in metric_cols}}
+            {**{c: "mean" for c in metric_cols}}
         ).reset_index()
         .astype({
-            **metric_dtypes,
-            "year": "int16",
-            "month": "int8",
-            "weekday": "int8",
+            # since everything is mean, use floats, but allow NaNs
+            {c: "Float64" for c in metric_cols}
         })
     )
-    
-    if "hour" in df2.columns:
-        df2 = df2.astype({"hour": "int8"})
     
     return df2
 
@@ -102,6 +90,9 @@ def metric_prep(metric: str) -> list:
         engine="pyarrow"
     ).columns.tolist()
     
+    # When we are interested in 1 particular metric, 
+    # we should look for columns that contain a keyword
+    # but remove confounding ones (metric = flow; remove obs_flow, truck_flow)
     exclude_dict = {
         "flow": ["obs", "truck"],
         "occ": ["avg_occ"],
@@ -117,6 +108,9 @@ def metric_prep(metric: str) -> list:
         any(word in c for word in exclude_dict[metric])
     ]
 
+    # Create list of delayed dfs where we read in 1 partition 
+    # and subset the columns
+    # Note: dd.read_parquet() has dtype errors 
     import_dfs = [
         delayed(read_filepart_merge_crosswalk)(
             filename, 
@@ -125,11 +119,18 @@ def metric_prep(metric: str) -> list:
         ) for part_i in list_of_files
     ]               
 
+    # Add additional time columns we want 
     time_dfs = [
         delayed(utils.parse_for_time_components)(i) for i in import_dfs
     ]
     
-    time_dfs = [delayed(utils.add_peak_offpeak_column)(i, "hour") for i in time_dfs]
+    time_dfs = [delayed(utils.add_peak_offpeak_column)(i, "hour") 
+                for i in time_dfs]
+        
+    time_dfs = [
+        delayed(utils.add_weekday_weekend_column)(i, "weekday") 
+        for i in time_dfs
+    ] 
         
     return time_dfs
 
@@ -146,12 +147,50 @@ def compute_and_export(
     """
     metric_dfs = [compute(i)[0] for i in metric_dfs]
     results = pd.concat(metric_dfs, axis=0, ignore_index=True)
+    
+    for c in ["hour", "month", "weekday"]:
+        if c in results.columns:
+            results = results.astype({c: "int8"})
+    if "year" in results.columns:
+        results = results.astype({"year": "int16"})
 
     results.to_parquet(
         f"{PROCESSED_GCS}{export_filename}_{metric}.parquet",
         **kwargs
     )
     
+    return
+
+def process_one_metric(
+    metric_name: Literal["flow", "truck_flow", "occ", "obs", "speed"],
+    group_cols: list,
+    export_filename: str
+):
+    """
+    Prep and aggregate one metric and save out at particular grain.
+    """
+    time0 = datetime.datetime.now()
+    
+    time_dfs = metric_prep(metric_name)
+        
+    aggregated_dfs = [
+        delayed(aggregate_metric)(i, group_cols, metric_name)
+        for i in time_dfs
+    ] 
+        
+    publish_utils.if_exists_then_delete(
+        f"{PROCESSED_GCS}{export_filename}_{metric_name}.parquet"
+    )       
+    
+    compute_and_export(
+        metric_name, 
+        aggregated_dfs, 
+        export_filename,
+    )
+    
+    time1 = datetime.datetime.now()
+    print(f"{metric_name} exported {export_filename}: {time1 - time0}")
+   
     return
 
 
@@ -169,6 +208,8 @@ def import_detector_status(
         utils.parse_for_time_components
     ).pipe(
         utils.add_peak_offpeak_column, "hour"
+    ).pipe(
+        utils.add_weekday_weekend_column, "weekday"
     )
     
     # Merge in station_uuid
@@ -215,73 +256,37 @@ if __name__ == "__main__":
     
     metric_list = [
         "flow", "truck_flow", "obs_flow",
-        "occ", 
-        "speed", "obs_speed", # mean
-        "pts_obs",
+        "occ", "speed", "obs_speed", "pts_obs",
     ] 
 
     
     station_cols = ["station_uuid"]
-    weekday_hour_cols = ["year", "month", "weekday", "hour"]
-    weekday_peak_cols = ["year", "month", "weekday", "peak_offpeak"]
     
+    GRAINS = {
+        "station_weekday_hour": station_cols + ["year", "month", "weekday", "hour"],
+        "station_weekday_peak": station_cols + ["year", "month", "weekday", "peak_offpeak"],
+        "station_daytype_hour": station_cols + ["hour", "daytype"]
+    }
+        
     for metric in metric_list:
-        
-        time0 = datetime.datetime.now()
-        
-        time_dfs = metric_prep(metric)
-        
-        hour_dfs = [
-            delayed(aggregate_metric)(i, station_cols + weekday_hour_cols, metric)
-            for i in time_dfs
-        ]
-        
-        compute_and_export(
-            metric, 
-            hour_dfs, 
-            "station_weekday_hour",
-            partition_cols = ["weekday", "hour"]
-        )
-        
-        time1 = datetime.datetime.now()
-        print(f"{metric} hourly aggregation: {time1 - time0}")
-    
-        peak_dfs = [
-            delayed(aggregate_metric)(i, station_cols + weekday_peak_cols, metric)
-            for i in time_dfs
-        ]
                 
-        compute_and_export(
-            metric,
-            peak_dfs,
-            "station_weekday_peak",
-            partition_cols = ["weekday", "peak_offpeak"]
-        )
+        for export_filename, grain_cols in GRAINS.items():
+            
+            process_one_metric(metric, grain_cols, export_filename)
 
-        time2 = datetime.datetime.now()
-        print(f"{metric} peak/offpeak aggregation: {time2 - time1}")
-        print(f"{metric} aggregation: {time2 - time0}")
-    
     
     detector_df = import_detector_status()
     
-    detector_station_hour = aggregate_detector_samples(
-        detector_df, 
-        station_cols + weekday_hour_cols
-    )
-    
-    detector_station_hour.to_parquet(
-        f"{PROCESSED_GCS}station_weekday_hour_detectors.parquet"
-    )
-    
-    detector_station_weekday = aggregate_detector_samples(
-        detector_df,
-        station_cols + weekday_peak_cols
-    )
-    
-    detector_station_weekday.to_parquet(
-        f"{PROCESSED_GCS}station_weekday_peak_detectors.parquet"
-    )
+    for export_filename, grain_cols in GRAINS.items():
+
+        agg_df = aggregate_detector_samples(
+            detector_df, 
+            grain_cols
+        )
+
+        agg_df.to_parquet(
+            f"{PROCESSED_GCS}{export_filename}_detectors.parquet"
+        )
     
     end = datetime.datetime.now()
     print(f"execution time: {end - start}")
