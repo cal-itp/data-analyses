@@ -62,6 +62,7 @@ DATES = {
     "may2024": "2024-05-22",
     "jun2024": "2024-06-12",
     "jul2024": "2024-07-17",
+    "aug2024": "2024-08-14",
 }
 
 y2023_dates = [
@@ -84,23 +85,6 @@ def get_week(month: Literal[[*valid_weeks]], exclude_wed: bool) -> list:
 apr2023_week = get_week(month="apr2023", exclude_wed=False)
 oct2023_week = get_week(month="oct2023", exclude_wed=False)
 apr2024_week = get_week(month="apr2024", exclude_wed=False)
-
-# Planning and Modal Advisory Committee (PMAC) - quarterly
-"""
-old dates, but no v2 speeds
-    #"Q1_2022": "2022-02-08",
-    #"Q2_2022": "2022-05-04",
-    #"Q3_2022": "2022-08-17",
-    #"Q4_2022": "2022-10-12",
-"""
-PMAC = {
-    "Q1_2023": DATES["feb2023"],
-    "Q2_2023": DATES["may2023"],
-    "Q3_2023": DATES["aug2023"],
-    "Q4_2023": DATES["nov2023"],
-    "Q1_2024": DATES["feb2024"],
-    "Q2_2024": DATES["may2024"],
-}
 
 MONTH_DICT = {
     1: "January",
