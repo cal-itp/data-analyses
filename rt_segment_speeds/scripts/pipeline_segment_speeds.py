@@ -17,9 +17,7 @@ from update_vars import GTFS_DATA_DICT
 
 if __name__ == "__main__":
     
-    from segment_speed_utils.project_vars import analysis_date_list
-    from shared_utils import rt_dates
-    
+    from segment_speed_utils.project_vars import analysis_date_list    
 
     segment_type = "stop_segments"
     print(f"segment_type: {segment_type}")
