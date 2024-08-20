@@ -41,6 +41,22 @@ file_list = [
 
 file_list.sort()
 
+col_names = [
+    "rtpa",
+    "implementing agenc-y/-ies",
+    "project",
+    "fund source",
+    "capital_FY23-24",
+    "capital_FY24-25",
+    "capital_FY25-26",
+    "capital_FY26-27",
+    "operating_FY23-24",
+    "operating_FY24-25",
+    "operating_FY25-26",
+    "operating_FY26-27",
+    "total",
+]
+
 
 def clean_fund_request(file: str) -> pd.DataFrame:
     """
@@ -173,6 +189,61 @@ def clean_plumas():
     return
 
 
+def clean_lassen():
+    lassen = pd.read_excel(
+        f"{GCS_PATH}lassen_fund_request.xlsx",
+        sheet_name="D.2. Detailed Fund Request",
+        skiprows=6,
+        header=0,
+        skipfooter=12,
+    ).drop(columns=["Unnamed: 0", "Project Type", "Operator"])
+
+    # can work with this. may be able to remove the top rows then use cleaner loop
+    lassen.columns = col_names
+    lassen_cleaned = lassen.drop(columns="total")
+    
+    return lassen_cleaned
+
+
+def clean_butte():
+    butte = pd.read_excel(
+        f"{GCS_PATH}butte_fund_request.xlsx",
+        skiprows=2,
+        header=0,
+        skipfooter=17,
+    )
+
+    butte_cleaned = butte.copy()
+
+    butte_cleaned[["RTPA", "Implementing Agenc-y/-ies", "Project"]] = butte_cleaned[
+        ["RTPA", "Implementing Agenc-y/-ies", "Project"]
+    ].ffill()
+
+    butte_cleaned.insert(6, "operations FY25-26", 0)
+    butte_cleaned.insert(7, "operations FY26-27", 0)
+    butte_cleaned.columns = [
+        "rtpa",
+        "implementing agenc-y/-ies",
+        "project",
+        "fund source",
+        "operating_FY23-24",
+        "operating_FY24-25",
+        "operating_FY25-26",
+        "operating_FY26-27",
+        "capital_FY23-24",
+        "capital_FY24-25",
+        "capital_FY25-26",
+        "capital_FY26-27",
+        "total",
+    ]
+    butte_cleaned = butte_cleaned.drop(columns="total")
+
+    return butte_cleaned
+
+
+
+
+
 
 if __name__ = "__main__":
     
@@ -180,6 +251,7 @@ if __name__ = "__main__":
     
     cleaned_fund_request = cleaner_loop(good_list)
     
+    #these functions clean the DFs in the cleaned_fund_request dict
     clean_humboldt()
     
     clean_amador()
@@ -195,3 +267,8 @@ if __name__ = "__main__":
     clean_nevada()
     
     clean_plumas()
+    
+    #these functions clean the problem data sets
+    lassen_cleaned = clean_lassen()
+    
+    butte_cleaned = clean_butte()
