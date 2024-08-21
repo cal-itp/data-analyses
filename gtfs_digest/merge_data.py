@@ -293,7 +293,6 @@ if __name__ == "__main__":
     )
     print("Saved Digest RT")
     
-    """
     segment_speeds = concatenate_segment_speeds_by_route_direction(
         analysis_date_list
     ).pipe(
@@ -312,4 +311,4 @@ if __name__ == "__main__":
         RT_SCHED_GCS,
         DIGEST_SEGMENT_SPEEDS
     )
-    """
+    
