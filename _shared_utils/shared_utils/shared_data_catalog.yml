@@ -59,3 +59,9 @@ sources:
     args:
       # source: bus_service_increase/bus_service_utils/generate_calenviroscreen_lehd_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen_lehd_by_tract.parquet
+  state_highway_network_postmiles:
+    driver: geojson
+    description: Caltrans State Highway Network postmiles (every 0.1 mile)
+    args:
+       # source: https://gisdata-caltrans.opendata.arcgis.com/datasets/c22341fec9c74c6b9488ee4da23dd967_0/about
+      urlpath: https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/SHN_Postmiles_Tenth/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
