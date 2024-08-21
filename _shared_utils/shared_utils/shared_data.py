@@ -4,6 +4,7 @@ One-off functions, run once, save datasets for shared use.
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis import geography_utils, utils
+from calitp_data_analysis.sql import to_snakecase
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 
@@ -47,20 +48,21 @@ def make_county_centroids():
     ca_row2 = pd.DataFrame.from_dict(ca_row, orient="index").T
     gdf2 = gdf.append(ca_row2).reset_index(drop=True)
 
-    print("County centroids dataset created")
-
     # Save as parquet, because lat/lon held in list, not point geometry anymore
     gdf2.to_parquet(f"{GCS_FILE_PATH}ca_county_centroids.parquet")
 
     print("County centroids exported to GCS")
+
+    return
 
 
 def make_clean_state_highway_network():
     """
     Create State Highway Network dataset.
     """
-    HIGHWAY_URL = "https://opendata.arcgis.com/datasets/" "77f2d7ba94e040a78bfbe36feb6279da_0.geojson"
-    gdf = gpd.read_file(HIGHWAY_URL)
+    URL = "https://opendata.arcgis.com/datasets/" "77f2d7ba94e040a78bfbe36feb6279da_0.geojson"
+
+    gdf = gpd.read_file(URL)
 
     keep_cols = ["Route", "County", "District", "RouteType", "Direction", "geometry"]
 
@@ -78,8 +80,25 @@ def make_clean_state_highway_network():
     utils.geoparquet_gcs_export(gdf2, GCS_FILE_PATH, "state_highway_network")
 
 
-# Run functions to create these datasets...store in GCS
-if __name__ == "__main__":
-    make_county_centroids()
+def export_shn_postmiles():
+    """
+    Create State Highway Network postmiles dataset.
+    These are points....maybe we can somehow create line segments?
+    """
+    URL = (
+        "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/"
+        "CHhighway/SHN_Postmiles_Tenth/"
+        "FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson"
+    )
+    gdf = gpd.read_file(URL).drop(columns="OBJECTID").pipe(to_snakecase)
 
-    make_clean_state_highway_network()
+    utils.geoparquet_gcs_export(gdf, GCS_FILE_PATH, "state_highway_network_postmiles")
+
+
+if __name__ == "__main__":
+    # Run functions to create these datasets...store in GCS
+    # make_county_centroids()
+
+    # make_clean_state_highway_network()
+
+    export_shn_postmiles()
