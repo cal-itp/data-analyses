@@ -12,9 +12,9 @@ station_id_cols = [
     'district_id',
     'station_type',
     'param_set', 
-    #'length',
-    #'abs_postmile', 
-    #'physical_lanes'
+    'length',
+    'abs_postmile', 
+    'physical_lanes'
 ]
 
 def create_station_crosswalk(filename: str = "hov_portion") -> pd.DataFrame:
@@ -25,7 +25,7 @@ def create_station_crosswalk(filename: str = "hov_portion") -> pd.DataFrame:
     the columns we may want later.
     """
     df = pd.read_parquet(
-        f"{RAW_GCS}{filename}",
+        f"{RAW_GCS}{filename}/",
         columns = station_id_cols
     ).drop_duplicates().reset_index(drop=True)
       
@@ -44,7 +44,7 @@ def create_station_detector_crosswalk(
     filename: str = "hov_portion_detector_status_time_window"
 ):
     df = pd.read_parquet(
-        f"{RAW_GCS}{filename}",
+        f"{RAW_GCS}{filename}/",
         columns = ["station_id", "detector_id"]
     ).drop_duplicates().reset_index(drop=True)
     
