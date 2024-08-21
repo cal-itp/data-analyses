@@ -52,6 +52,7 @@ def prepare_all_data() ->pd.DataFrame:
             "prop_type",
             "bus_size_type",
             "total_cost",
+            "project_description",
             "bus_count",
             "source",
             "new_project_type"
