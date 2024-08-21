@@ -71,12 +71,8 @@ def clean_fta_columns() -> tuple:
 
     # cleaning fy23 data
     fy_23_data = fy_23_data.assign(
-        extracted_prop_type=fy_23_data["project_description"].apply(
-            _bus_cost_utils.new_prop_finder
-        ),
-        extracted_bus_size=fy_23_data["project_description"].apply(
-            _bus_cost_utils.new_bus_size_finder
-        ),
+        extracted_prop_type=fy_23_data["project_description"].apply(new_prop_finder),
+        extracted_bus_size=fy_23_data["project_description"].apply(new_bus_size_finder),
         fy="fy23",
     )
 
@@ -107,7 +103,7 @@ def clean_fta_columns() -> tuple:
     fy_23_all_projects = fy_23_data[col_list_23]
     
     # cleaning the "not specified" rows
-    _bus_cost_utils.col_row_updater(
+    col_row_updater(
         fy_23_bus,
         "project_title",
         "VA Rural Transit Asset Management and Equity Program",
@@ -117,8 +113,8 @@ def clean_fta_columns() -> tuple:
     
     #cleaning fy24 data
     fy_24_data = fy_24_data.assign(
-        extracted_prop_type=fy_24_data["project_description"].apply(_bus_cost_utils.new_prop_finder),
-        extracted_bus_size=fy_24_data["project_description"].apply(_bus_cost_utils.new_bus_size_finder),
+        extracted_prop_type=fy_24_data["project_description"].apply(new_prop_finder),
+        extracted_bus_size=fy_24_data["project_description"].apply(new_bus_size_finder),
         fy="fy24",
     )
     
@@ -147,9 +143,9 @@ def clean_fta_columns() -> tuple:
 
     fy_24_all_projects = fy_24_data[col_list_24]
     
-    _bus_cost_utils.col_row_updater(fy_24_bus, "funding_amount", "2894131.0", "extracted_prop_type", "BEB")
-    _bus_cost_utils.col_row_updater(fy_24_bus, "funding_amount", "14415095.0", "extracted_prop_type", "BEB")
-    _bus_cost_utils.col_row_updater(fy_24_bus, "funding_amount", "18112632.0", "extracted_prop_type", "BEB")
+    col_row_updater(fy_24_bus, "funding_amount", "2894131.0", "extracted_prop_type", "BEB")
+    col_row_updater(fy_24_bus, "funding_amount", "14415095.0", "extracted_prop_type", "BEB")
+    col_row_updater(fy_24_bus, "funding_amount", "18112632.0", "extracted_prop_type", "BEB")
     
     #cleaning before merging
     col_dict = {
