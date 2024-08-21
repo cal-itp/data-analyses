@@ -3,6 +3,10 @@ import pandas as pd
 import shared_utils
 from calitp_data_analysis.sql import to_snakecase
 from _bus_cost_utils import GCS_PATH, new_prop_finder, new_bus_size_finder, project_type_finder, col_row_updater
+import geopandas as gpd
+
+
+
 
 def col_splitter(
     df: pd.DataFrame, 
@@ -34,17 +38,17 @@ def fta_agg_bus_only(df: pd.DataFrame) -> pd.DataFrame:
     df2 = (
         df1.groupby(
             [
-                "project_sponsor",
+                "transit_agency",
                 "project_title",
-                "new_prop_type_finder",
-                "new_bus_size_type",
-                "description",
+                "prop_type",
+                "bus_size_type",
+                "project_description",
                 "new_project_type"
             ]
         )
         .agg(
             {
-                "funding": "sum",
+                "total_cost": "sum",
                 "bus_count": "sum",
             }
         )
@@ -53,70 +57,130 @@ def fta_agg_bus_only(df: pd.DataFrame) -> pd.DataFrame:
 
     return df2
 
-def clean_fta_columns() -> pd.DataFrame:
+def clean_fta_columns() -> tuple:
     """
-    Main function to clean FTA data. Reads in data, changes datatypes, change specific values.
+    Updated to read in FTA REST server data. Now reads in fiscal year 23 and 24 data.
+    Read in data, renames columns, update specific values.
     """
-    # params
+    fy24 = "https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/FY2024_Bus_Awards_/FeatureServer/0/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryPolygon&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&relationParam=&returnGeodetic=false&outFields=*&returnGeometry=true&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&defaultSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnTrueCurves=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pgeojson&token="
+
+    fy23 = "https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/2023_06_12_Awards/FeatureServer/0/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&relationParam=&returnGeodetic=false&outFields=*&returnGeometry=true&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&defaultSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnTrueCurves=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pgeojson&token="
+
+    fy_24_data = to_snakecase(gpd.read_file(fy24))
+    fy_23_data = to_snakecase(gpd.read_file(fy23))
+
+    # cleaning fy23 data
+    fy_23_data = fy_23_data.assign(
+        extracted_prop_type=fy_23_data["project_description"].apply(
+            _bus_cost_utils.new_prop_finder
+        ),
+        extracted_bus_size=fy_23_data["project_description"].apply(
+            _bus_cost_utils.new_bus_size_finder
+        ),
+        fy="fy23",
+    )
+
+    fy_23_data["total_bus_count"] = fy_23_data[
+        ["traditional_buses", "low_emission_buses", "zero_emission_buses"]
+    ].sum(axis=1)
+    fy_23_data["funding"] = (
+        fy_23_data["funding"].str.replace("$", "").str.replace(",", "").astype("int64")
+    )
+    fy_23_data["zero_emission_buses"] = fy_23_data["zero_emission_buses"].astype(
+        "int64"
+    )
+
+    col_list_23 = [
+        "project_sponsor",
+        "project_title",
+        "project_description",
+        "project_type",
+        "funding",
+        "total_bus_count",
+        "extracted_prop_type",
+        "extracted_bus_size",
+        #"fy23"
+    ]
+
+    fy_23_bus = fy_23_data[(fy_23_data["project_type"] == "Bus")][col_list_23]
+
+    fy_23_all_projects = fy_23_data[col_list_23]
     
-    file = "raw_data-analyses_bus_procurement_cost_fta_press_release_data_csv.csv"
-
-    # read in data
-    df = pd.read_csv(f"{GCS_PATH}{file}")
-
-    # snakecase df
-    df = to_snakecase(df)
-
-    # clean funding values
-    df["funding"] = (
-        df["funding"]
-        .str.replace("$", "")
-        .str.replace(",", "")
-        .str.strip()
+    # cleaning the "not specified" rows
+    _bus_cost_utils.col_row_updater(
+        fy_23_bus,
+        "project_title",
+        "VA Rural Transit Asset Management and Equity Program",
+        "extracted_prop_type",
+        "mix (low emission)",
     )
-
-    # rename initial propulsion type col to propulsion category
-    df = df.rename(columns={"propulsion_type": "prosulsion_category"})
-
-    # splitting `approx_#_of_buses` col to get bus count
-    df1 = col_splitter(df, "approx_#_of_buses", "bus_count", "extract_prop_type", "(")
-
-    # assign new columns via new_prop_finder and new_bus_size_finder
-    df2 = df1.assign(
-        new_prop_type_finder=df1["description"].apply(new_prop_finder),
-        new_bus_size_type=df1["description"].apply(new_bus_size_finder),
-        new_project_type=df1["description"].apply(project_type_finder)
+    
+    #cleaning fy24 data
+    fy_24_data = fy_24_data.assign(
+        extracted_prop_type=fy_24_data["project_description"].apply(_bus_cost_utils.new_prop_finder),
+        extracted_bus_size=fy_24_data["project_description"].apply(_bus_cost_utils.new_bus_size_finder),
+        fy="fy24",
     )
+    
+    col_list_24 = [
+        "agency_name",
+        "project_title",
+        "project_description",
+        "project_type",
+        "funding_amount",
+        "number_of_buses_",
+        "extracted_prop_type",
+        "extracted_bus_size",
+        #"fy24"
+    ]
 
-    # cleaning specific values
-    col_row_updater(df2, "funding", "7443765", "bus_count", 56)
-    col_row_updater(df2, "funding", "17532900", "bus_count", 12)
-    col_row_updater(df2, "funding", "40402548", "new_prop_type_finder", "CNG")
-    col_row_updater(df2, "funding", "30890413", "new_prop_type_finder", "mix (zero and low emission)")
-    col_row_updater(df2, "funding", "29331665", "new_prop_type_finder", "mix (zero and low emission)")
-    col_row_updater(df2, "funding", "7598425", "new_prop_type_finder", "mix (zero and low emission)")
-    col_row_updater(df2, "funding", "7443765", "new_prop_type_finder", "mix (zero and low emission)")
-    col_row_updater(df2, "funding", "3303600", "new_prop_type_finder", "mix (diesel and gas)")
-    col_row_updater(df2, "funding", "2063160", "new_prop_type_finder", "low emission (hybrid)")
-    col_row_updater(df2, "funding", "1760000", "new_prop_type_finder", "low emission (propane)")
-    col_row_updater(df2, "funding", "1006750", "new_prop_type_finder", "ethanol")
-    col_row_updater(df2, "funding", "723171", "new_prop_type_finder", "low emission (propane)")
-    col_row_updater(df2, "funding", "23280546", "new_prop_type_finder", "BEB")
+    project_val = ["Vehicle ", "Vehicle"]
 
-    # update data types
-    update_cols = ["funding", "bus_count"]
+    prop_vals = [
+        "Battery electric",
+        "Hydrogen fuel cell",
+        "Battery electric | Hydrogen fuel cell",
+        "Battery electric ",
+    ]
 
-    df2[update_cols] = df2[update_cols].astype("int64")
+    fy_24_bus = fy_24_data[col_list_24][(fy_24_data["project_type"].isin(project_val))]
 
-    return df2
+    fy_24_all_projects = fy_24_data[col_list_24]
+    
+    _bus_cost_utils.col_row_updater(fy_24_bus, "funding_amount", "2894131.0", "extracted_prop_type", "BEB")
+    _bus_cost_utils.col_row_updater(fy_24_bus, "funding_amount", "14415095.0", "extracted_prop_type", "BEB")
+    _bus_cost_utils.col_row_updater(fy_24_bus, "funding_amount", "18112632.0", "extracted_prop_type", "BEB")
+    
+    #cleaning before merging
+    col_dict = {
+        "project_sponsor": "transit_agency",
+        "agency_name": "transit_agency",
+        "project_type": "new_project_type",
+        "funding": "total_cost",
+        "funding_amount": "total_cost",
+        "total_bus_count": "bus_count",
+        "number_of_buses_": "bus_count",
+        "extracted_prop_type": "prop_type",
+        "extracted_bus_size": "bus_size_type",
+    }
+    
+    fy_23_bus = fy_23_bus.rename(columns=col_dict)
+    
+    fy_24_bus = fy_24_bus.rename(columns=col_dict)
+    
+    # merge
+    fta_all_projects_merge = pd.merge(fy_23_all_projects, fy_24_all_projects, how="outer")
+    fta_bus_merge = pd.merge(fy_23_bus, fy_24_bus, how="outer")
+    
+    return fta_all_projects_merge, fta_bus_merge
 
 if __name__ == "__main__":
 
-    # initial df (all projects)
-    all_projects = clean_fta_columns()
+    # initial dfs
+    all_projects, just_bus = clean_fta_columns()
 
     # projects with bus count > 0 only.
-    just_bus = fta_agg_bus_only(all_projects)
+    #just_bus = fta_agg_bus_only(just_bus)
 
     # export both DFs
     all_projects.to_parquet(f"{GCS_PATH}clean_fta_all_projects.parquet")
