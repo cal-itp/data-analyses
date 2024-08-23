@@ -4,15 +4,22 @@ os.environ['USE_PYGEOS'] = '0'
 
 from siuba import *
 import pandas as pd
+import geopandas as gpd
 import datetime as dt
 
 from calitp_data_analysis.tables import tbls
 from shared_utils import rt_dates, rt_utils
 
+from segment_speed_utils.project_vars import (
+    COMPILED_CACHED_VIEWS,
+    PROJECT_CRS,
+    SEGMENT_GCS,
+)
+
 ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['apr2024'])
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 
-def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
+def build_speedmaps_index(analysis_date: dt.date, how: str = 'new') -> pd.DataFrame:
     '''
     An index table for tracking down a given org's schedule/rt feeds.
     Note that in limited cases, multiple orgs may share the same datasets
@@ -44,7 +51,12 @@ def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
                     _.caltrans_district, _._is_current, _.analysis_date,
 											_.schedule_gtfs_dataset_key
                                            )
-    return orgs_with_vp
+    if how == 'new':
+        speedmap_segs = gpd.read_parquet(f'{SEGMENT_GCS}rollup_singleday/speeds_shape_speedmap_segments_{analysis_date}.parquet') #  aggregated
+        new_ix = orgs_with_vp >> filter(_.schedule_gtfs_dataset_key.isin(speedmap_segs.schedule_gtfs_dataset_key.unique()))
+        return new_ix
+    else:
+        return orgs_with_vp
 
 if __name__ == "__main__":
     
