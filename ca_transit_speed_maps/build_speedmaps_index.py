@@ -16,7 +16,7 @@ from segment_speed_utils.project_vars import (
     SEGMENT_GCS,
 )
 
-ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['apr2024'])
+ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['aug2024'])
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 
 def build_speedmaps_index(analysis_date: dt.date, how: str = 'new') -> pd.DataFrame:
@@ -53,7 +53,8 @@ def build_speedmaps_index(analysis_date: dt.date, how: str = 'new') -> pd.DataFr
                                            )
     if how == 'new':
         speedmap_segs = gpd.read_parquet(f'{SEGMENT_GCS}rollup_singleday/speeds_shape_speedmap_segments_{analysis_date}.parquet') #  aggregated
-        new_ix = orgs_with_vp >> filter(_.schedule_gtfs_dataset_key.isin(speedmap_segs.schedule_gtfs_dataset_key.unique()))
+        new_ix = (orgs_with_vp >> filter(_.schedule_gtfs_dataset_key.isin(speedmap_segs.schedule_gtfs_dataset_key.unique()))).copy()
+        new_ix['status'] = 'speedmap_segs_available'
         return new_ix
     else:
         return orgs_with_vp
@@ -62,5 +63,5 @@ if __name__ == "__main__":
     
     print(f'analysis date from shared_utils/rt_dates: {ANALYSIS_DATE}')
     speedmaps_index = build_speedmaps_index(ANALYSIS_DATE)
-    speedmaps_index_joined = rt_utils.check_intermediate_data(speedmaps_index)
-    speedmaps_index_joined.to_parquet(PROGRESS_PATH)
+    # speedmaps_index = rt_utils.check_intermediate_data(speedmaps_index)
+    speedmaps_index.to_parquet(PROGRESS_PATH)
