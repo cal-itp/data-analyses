@@ -160,7 +160,7 @@ for daytype in dates_labelled.keys():
     stops_all.append(stop_merged)
         
 merge_cols = ["name","route_type", "stop_id","geometry", "stop_code", "stop_name", "location_type"]
-final_cols = ["name","feed_key","location_type","route_type","stop_name","stop_id","stop_code","geometry","n_trips_weekday","n_trips_saturday","n_trips_sunday","n_routes_weekday","n_routes_saturday","n_routes_sunday", "stop_desc"]
+final_cols = ["name","location_type","route_type","stop_name","stop_id","stop_code","geometry","n_trips_weekday","n_trips_saturday","n_trips_sunday","n_routes_weekday","n_routes_saturday","n_routes_sunday", "stop_desc"]
     
 stoptimes_all = merge_stoptimes(*stops_all, merge_cols=merge_cols, final_cols=final_cols)
 stoptimes_all_gdf = gpd.GeoDataFrame(stoptimes_all, geometry='geometry')
