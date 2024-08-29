@@ -128,17 +128,8 @@ def merge_ntd_mobility(year:int)->pd.DataFrame:
         how="inner",
         on="agency_name"
     )
-    
-    agency_dict = {
-        "City of Fairfield, California": "City of Fairfield",
-        "Livermore / Amador Valley Transit Authority": "Livermore-Amador Valley Transit Authority",
-        "Nevada County Transit Services": "Nevada County",
-        "Omnitrans": "OmniTrans"
-    }
-    
-    m1 = m1.assign(
-        agency_name = m1.agency_name.map(agency_dict).str.strip()
-    ).drop_duplicates(
+
+    m1 = m1.drop_duplicates(
         subset="agency_name"
     ).reset_index(
         drop=True
