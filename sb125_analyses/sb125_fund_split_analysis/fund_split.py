@@ -660,7 +660,7 @@ if __name__ = "__main__":
     all_fund_requests = concat_everything()
     
     # SAVING TO GCS!
-all_fund_requests.to_parquet(f"{GCS_PATH}all_fund_requests_concat.parquet")
+    all_fund_requests.to_parquet(f"{GCS_PATH}all_fund_requests_concat.parquet")
 
     #melt all fund requests
     all_melt = fund_request_melt(all_fund_requests)
