@@ -409,6 +409,214 @@ def clean_ventura():
     return ventura_big_merge
 
 
+def get_kern_data(head_count: int, foot_count: int, agency: str, proj_title: str):
+
+    kern_cols = {
+        "Unnamed: 0": "fund source",
+        "Unnamed: 1": "capital_FY23-24",
+        "Unnamed: 2": "operating_FY23-24",
+        "Unnamed: 3": "capital_FY24-25",
+        "Unnamed: 4": "operating_FY24-25",
+        "Unnamed: 5": "capital_FY25-26",
+        "Unnamed: 6": "operating_FY25-26",
+        "Unnamed: 7": "capital_FY26-27",
+        "Unnamed: 8": "operating_FY26-27",
+    }
+    df = (
+        pd.read_excel(
+            f"{GCS_PATH}kern_fund_request.xlsx",
+            header=head_count,
+            skipfooter=foot_count,
+        )
+        .rename(columns=kern_cols)
+        .assign(implementing_agency=agency, rtpa="Kern COG", project=proj_title)
+    )
+    return df
+
+
+def clean_kern():
+    
+    col_order = [
+        "rtpa",
+        "implementing agenc-y/-ies",
+        "project",
+        "fund source",
+        "capital_FY23-24",
+        "capital_FY24-25",
+        "capital_FY25-26",
+        "capital_FY26-27",
+        "operating_FY23-24",
+        "operating_FY24-25",
+        "operating_FY25-26",
+        "operating_FY26-27",
+    ]
+    
+    kern_cols = {
+        "Unnamed: 0": "fund source",
+        "Unnamed: 1": "capital_FY23-24",
+        "Unnamed: 2": "operating_FY23-24",
+        "Unnamed: 3": "capital_FY24-25",
+        "Unnamed: 4": "operating_FY24-25",
+        "Unnamed: 5": "capital_FY25-26",
+        "Unnamed: 6": "operating_FY25-26",
+        "Unnamed: 7": "capital_FY26-27",
+        "Unnamed: 8": "operating_FY26-27",
+    }
+
+    arvin = get_kern_data(
+        3,
+        43,
+        "arvin",
+        "Purcahse and install EV mirco-grid Purcahse and install EV mirco-grid",
+    )
+
+    california_city = get_kern_data(
+        7,
+        39,
+        "california city",
+        "Purchase and construct transit building to house EV vans and solar charging stations",
+    )
+
+    delano = get_kern_data(11, 35, "delano", "Construct transit Facility")
+
+    get = get_kern_data(
+        15,
+        31,
+        "get",
+        "Golden Empire Transit Free or near free transit fares Back up hydrogent fuel plant",
+    )
+
+    kern_transit = get_kern_data(
+        19,
+        27,
+        "kern transit",
+        "Transition to Zero-Emission Vehicles and supporting infrastructure",
+    )
+
+    mcfarland = get_kern_data(
+        23,
+        23,
+        "mcfarland",
+        "Design and construct a transit station providing a transit office , waitning area, restrooms and EV charging stations",
+    )
+
+    ridgecrest = get_kern_data(
+        27,
+        19,
+        "ridgecrest",
+        "Replacement of Cutaway Buses with Electric Vans and Construction of Bus Stop at North Norma Street and West Felspar Avenue",
+    )
+
+    shafter = get_kern_data(
+        31, 15, "shafter", "bus storage, new transit vehicles, free ridership fare program"
+    )
+
+    taft = get_kern_data(
+        35,
+        11,
+        "taft",
+        "convert the City’s gasoline powered fleet of on-demand transit vehicles to plug-in electric vans compatible with the solar-powered charging infrastructure being completed now.",
+    )
+
+    tehahapi = get_kern_data(
+        39,
+        9,
+        "tehahapi",
+        "Improvements to Downtown Transit Center and Installation of EV Charging Infrastructure",
+    )
+
+    wasco = get_kern_data(
+        43, 
+        3, 
+        "wasco", "New Transit Operating and Maintenance Facility"
+    )
+
+    kern_concat = pd.concat(
+        [
+            wasco,
+            tehahapi,
+            taft,
+            shafter,
+            ridgecrest,
+            mcfarland,
+            kern_transit,
+            get,
+            arvin,
+            california_city,
+            delano,
+        ],
+        ignore_index=True,
+    )
+
+    kern_clean = kern_concat[kern_concat["fund source"].isin(["TIRCP", "ZETCP"])].rename(
+        columns={"implementing_agency": "implementing agenc-y/-ies"}
+    )
+
+    kern_clean = kern_clean[col_order]
+    
+    return kern_clean
+
+
+def concat_everything():
+    all_fund_requests = pd.concat(cleaned_fund_request.values(), ignore_index=True)
+    
+    all_fund_requests = pd.concat(
+    [
+        all_fund_requests,
+        santa_cruz_cleaned,
+        orange_cleaned,
+        butte_cleaned,
+        lassen_cleaned,
+        ventura_big_merge,
+        kern_clean,
+    ],
+    ignore_index=True,
+    )
+    
+    all_fund_requests["fund source"] = all_fund_requests["fund source"].astype(str)
+    
+    return all_fund_requests
+
+
+def fund_request_melt(df):
+    id_vars = [
+        "rtpa",
+        "implementing agenc-y/-ies",
+        "project",
+        "fund source",
+    ]
+    val_vars = [
+        "capital_FY23-24",
+        "capital_FY24-25",
+        "capital_FY25-26",
+        "capital_FY26-27",
+        "operating_FY23-24",
+        "operating_FY24-25",
+        "operating_FY25-26",
+        "operating_FY26-27",
+    ]
+
+    melt = df.melt(
+        id_vars=id_vars,
+        value_vars=val_vars,
+        var_name="capital/operation fy",
+        value_name="fund amount",
+        ignore_index=True,
+    )
+    
+    # splitting the cap/operations columns
+
+    melt[["project type", "fiscal year"]] = melt["capital/operation fy"].str.split(
+        "_FY", expand=True
+    )
+
+    melt["fund amount"] = melt["fund amount"].fillna(0).astype("int64")
+    melt["fund source"] = melt["fund source"].astype("str")
+    
+    return melt
+
+
+
 if __name__ = "__main__":
     
     good_list, review_list = fund_request_checker_v3(file_list)
@@ -445,4 +653,17 @@ if __name__ = "__main__":
     
     ventura_cleaned = clean_ventura()
     
+    kern_cleaned = clean_kern()
     
+    # concat all values (DFs) from cleaned_fund_request dict to be a single DF and concat the rest of the DFs
+    
+    all_fund_requests = concat_everything()
+    
+    # SAVING TO GCS!
+all_fund_requests.to_parquet(f"{GCS_PATH}all_fund_requests_concat.parquet")
+
+    #melt all fund requests
+    all_melt = fund_request_melt(all_fund_requests)
+    
+    #saving to gcs
+    all_melt.to_parquet(f"{GCS_PATH}all_fund_requests_melt.parquet")
