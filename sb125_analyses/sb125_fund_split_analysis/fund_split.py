@@ -241,8 +241,172 @@ def clean_butte():
     return butte_cleaned
 
 
+def clean_mtc():
+    mtc = pd.read_excel(
+        f"{GCS_PATH}mtc_fund_request.xlsx", skiprows=2, header=0, skipfooter=21
+    ).drop(columns=["Unnamed: 13", "Unnamed: 14", "Unnamed: 15"])
+
+    mtc_cleaned = mtc.copy()
+    mtc_cleaned.columns = col_names
+    mtc_cleaned = mtc_cleaned.drop(columns="total")
+    
+    return mtc_cleaned
 
 
+def clean_orange():
+    orange = pd.read_excel(
+        f"{GCS_PATH}orange_fund_request.xlsx", skiprows=3, header=0, skipfooter=1
+    )
+
+    orange_cleaned = orange.copy()
+
+    orange_cleaned.rename(columns={"Unnamed: 0": "RTPA"}, inplace=True)
+    orange_cleaned["RTPA"] = "OCTA"
+    orange_cleaned = orange_cleaned.drop(
+        columns=["FY27-28", "FY28-29", "FY27-28.1", "FY28-29.1"]
+    )
+
+    orange_cleaned.columns = col_names
+    orange_cleaned = orange_cleaned.drop(columns="total")
+    
+    return orange_cleaned
+
+
+def clean_santa_cruz():
+    santa_cruz = pd.read_excel(
+        f"{GCS_PATH}santa_cruz_fund_request.xlsx", skiprows=4, header=0, skipfooter=5
+    ).iloc[:, 0:13]
+
+    santa_cruz_cleaned = santa_cruz.copy()
+
+    santa_cruz_cleaned.columns = col_names
+    santa_cruz_cleaned.drop(columns="total", inplace=True)
+    
+    return santa_cruz_cleaned
+
+
+def clean_ventura():
+    #clean TIRCP sections
+    ventura_tircp_capital = pd.read_excel(
+    f"{GCS_PATH}ventura_fund_request.xlsx",
+    sheet_name="Project Breakdown",
+    skiprows=2,
+    header=0,
+    skipfooter=40,
+    )
+    
+    ventura_tircp_operating = pd.read_excel(
+        f"{GCS_PATH}ventura_fund_request.xlsx",
+        sheet_name="Project Breakdown",
+        skiprows=51,
+        header=0,
+        skipfooter=1,
+    )
+    
+    ventura_tircp_merge = ventura_tircp_capital.merge(
+        ventura_tircp_operating,
+        how="outer",
+        on=["Implementing Agenc-y/-ies", "Project Category", "Project"],
+        suffixes=["_capital", "_operating"],
+    ).drop(
+        columns=[
+            "Year Requested",
+            "Unnamed: 8_capital",
+            "Unnamed: 8_operating",
+            "Project Category",
+        ]
+    )
+    
+    #merging TIRCP sections
+    ventura_tircp_merge["rtpa"] = "VCTC"
+    ventura_tircp_merge["Fund Source"] = "TIRCP"
+
+    ventura_col_dict = {
+        "Implementing Agenc-y/-ies": "implementing agenc-y/-ies",
+        "Project": "project",
+        "Fund Source": "fund source",
+        "FY23-24_capital": "capital_FY23-24",
+        "FY24-25_capital": "capital_FY24-25",
+        "FY25-26_capital": "capital_FY25-26",
+        "FY26-27_capital": "capital_FY26-27",
+        "FY23-24_operating": "operating_FY23-24",
+        "FY24-25_operating": "operating_FY24-25",
+        "FY25-26_operating": "operating_FY25-26",
+        "FY26-27_operating": "operating_FY26-27",
+    }
+
+    col_order = [
+        "rtpa",
+        "implementing agenc-y/-ies",
+        "project",
+        "fund source",
+        "capital_FY23-24",
+        "capital_FY24-25",
+        "capital_FY25-26",
+        "capital_FY26-27",
+        "operating_FY23-24",
+        "operating_FY24-25",
+        "operating_FY25-26",
+        "operating_FY26-27",
+    ]
+
+    ventura_tircp_merge.rename(columns=ventura_col_dict, inplace=True)
+
+    ventura_tircp_merge = ventura_tircp_merge[col_order]
+    
+    # clean zetcp sections
+    ventura_zetcp_capital = pd.read_excel(
+        f"{GCS_PATH}ventura_fund_request.xlsx",
+        sheet_name="Project Breakdown",
+        skiprows=32,
+        header=0,
+        skipfooter=21,
+    ).drop(columns=["Unnamed: 7", "Unnamed: 8"])
+    fund_dict = {
+        "GGRF Y1": "ZETCP (GGRF)",
+        "GGRF Y2": "ZETCP (GGRF)",
+        "GGRF Y3": "ZETCP (GGRF)",
+        "GGRF Y4": "ZETCP (GGRF)",
+        "PTA": "ZETCP (PTA)",
+    }
+
+    ven_col = {
+        "Implementing Agenc-y/-ies": "implementing agenc-y/-ies",
+        "Project": "project",
+        "Fund Source": "fund source",
+        "FY23-24": "capital_FY23-24",
+        "FY24-25": "capital_FY24-25",
+        "FY25-26": "capital_FY25-26",
+        "FY26-27": "capital_FY26-27",
+    }
+
+    ventura_zetcp_capital["Fund Source"] = ventura_zetcp_capital["Fund Source"].replace(
+        fund_dict
+    )
+
+    ventura_zetcp_capital["rtpa"] = "VCTC"
+
+    ventura_zetcp_capital.rename(columns=ven_col, inplace=True)
+
+    ventura_zetcp_capital = ventura_zetcp_capital[col_order[0:8]]
+    
+    #final merge
+    ventura_big_merge = ventura_tircp_merge.merge(
+        ventura_zetcp_capital,
+        how="outer",
+        on=[
+            "implementing agenc-y/-ies",
+            "project",
+            "fund source",
+            "capital_FY23-24",
+            "capital_FY24-25",
+            "capital_FY25-26",
+            "capital_FY26-27",
+            "rtpa",
+        ],
+        suffixes=("_zetcp_cap", "_tircp"),
+    )
+    return ventura_big_merge
 
 
 if __name__ = "__main__":
@@ -251,7 +415,7 @@ if __name__ = "__main__":
     
     cleaned_fund_request = cleaner_loop(good_list)
     
-    #these functions clean the DFs in the cleaned_fund_request dict
+    #these functions clean specific DFs in the cleaned_fund_request dict
     clean_humboldt()
     
     clean_amador()
@@ -272,3 +436,13 @@ if __name__ = "__main__":
     lassen_cleaned = clean_lassen()
     
     butte_cleaned = clean_butte()
+    
+    mtc_cleaned = clean_mtc()
+    
+    orange_cleaned = clean_orange()
+    
+    santa_cruz_cleaned = clean_santa_cruz()
+    
+    ventura_cleaned = clean_ventura()
+    
+    
