@@ -567,8 +567,8 @@ def concat_everything():
         orange_cleaned,
         butte_cleaned,
         lassen_cleaned,
-        ventura_big_merge,
-        kern_clean,
+        ventura_cleaned,
+        kern_cleaned,
     ],
     ignore_index=True,
     )
@@ -617,13 +617,13 @@ def fund_request_melt(df):
 
 
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     
     good_list, review_list = fund_request_checker_v3(file_list)
     
     cleaned_fund_request = cleaner_loop(good_list)
     
-    #these functions clean specific DFs in the cleaned_fund_request dict
+    #these functions clean specific values (DFs) in the cleaned_fund_request dict
     clean_humboldt()
     
     clean_amador()
