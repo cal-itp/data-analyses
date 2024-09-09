@@ -3,6 +3,7 @@ One-off functions, run once, save datasets for shared use.
 """
 import geopandas as gpd
 import pandas as pd
+from arcgis_query import query_arcgis_feature_server
 from calitp_data_analysis import geography_utils, utils
 from calitp_data_analysis.sql import to_snakecase
 
@@ -85,20 +86,19 @@ def export_shn_postmiles():
     Create State Highway Network postmiles dataset.
     These are points....maybe we can somehow create line segments?
     """
-    URL = (
-        "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/"
-        "CHhighway/SHN_Postmiles_Tenth/"
-        "FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson"
-    )
-    gdf = gpd.read_file(URL).drop(columns="OBJECTID").pipe(to_snakecase)
+    URL = "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/" "CHhighway/SHN_Postmiles_Tenth/" "FeatureServer/0/"
 
-    utils.geoparquet_gcs_export(gdf, GCS_FILE_PATH, "state_highway_network_postmiles")
+    gdf = query_arcgis_feature_server(URL)
+
+    gdf2 = to_snakecase(gdf).drop(columns="objectid")
+
+    utils.geoparquet_gcs_export(gdf2, GCS_FILE_PATH, "state_highway_network_postmiles")
+
+    return
 
 
 if __name__ == "__main__":
     # Run functions to create these datasets...store in GCS
-    # make_county_centroids()
-
-    # make_clean_state_highway_network()
-
+    make_county_centroids()
+    make_clean_state_highway_network()
     export_shn_postmiles()
