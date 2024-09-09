@@ -1,4 +1,5 @@
 from . import (
+    arcgis_query,
     catalog_utils,
     dask_utils,
     gtfs_utils_v2,
@@ -10,6 +11,7 @@ from . import (
 )
 
 __all__ = [
+    "arcgis_query",
     "catalog_utils",
     "dask_utils",
     "gtfs_utils_v2",
