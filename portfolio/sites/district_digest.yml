@@ -1,0 +1,13 @@
+title: District GTFS Digest 
+directory: ./gtfs_digest/
+readme: ./gtfs_digest/README.md
+notebook: ./gtfs_digest/district_report.ipynb
+parts:
+- caption: Introduction
+- chapters:
+  - caption: 
+    params:
+      district: "01 - Eureka"
+  - caption: 
+    params:
+      district: "07 - Los Angeles"

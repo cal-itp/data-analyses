@@ -1,0 +1,7 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: district_01-eureka/00__district_report__district_01-eureka.ipynb
+    -   file: district_07-los-angeles/00__district_report__district_07-los-angeles.ipynb
+root: README
