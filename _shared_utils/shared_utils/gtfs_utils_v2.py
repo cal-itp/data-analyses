@@ -505,7 +505,7 @@ def get_stop_times(
     return stop_times
 
 
-def filter_to_public_schedule_feeds() -> list:
+def filter_to_public_schedule_gtfs_dataset_keys() -> list:
     """
     Return a list of schedule_gtfs_dataset_keys that have
     private_dataset == None.
