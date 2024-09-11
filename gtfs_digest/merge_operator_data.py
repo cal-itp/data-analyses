@@ -8,7 +8,8 @@ import pandas as pd
 
 from calitp_data_analysis import utils
 from segment_speed_utils import time_series_utils
-from merge_data import merge_in_standardized_route_names, exclude_private_datasets
+from shared_utils import publish_utils
+from merge_data import merge_in_standardized_route_names
 from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
 sort_cols = ["schedule_gtfs_dataset_key", "service_date"]
@@ -154,7 +155,7 @@ if __name__ == "__main__":
     # Drop duplicates created after merging
     op_profiles_df2 = (op_profiles_df1
                        .pipe(
-                           exclude_private_datasets, 
+                           publish_utils.exclude_private_datasets, 
                            col = "schedule_gtfs_dataset_key", 
                            public_gtfs_dataset_keys = public_feeds
                        ).drop_duplicates(subset = list(op_profiles_df1.columns))
@@ -169,7 +170,7 @@ if __name__ == "__main__":
     ).pipe(
         merge_in_standardized_route_names
     ).pipe(
-        exclude_private_datasets, 
+        publish_utils.exclude_private_datasets, 
         col = "schedule_gtfs_dataset_key", 
         public_gtfs_dataset_keys = public_feeds
     )
@@ -181,7 +182,7 @@ if __name__ == "__main__":
     )
     
     operator_category_counts = operator_category_counts_by_date().pipe(
-        exclude_private_datasets, 
+        publish_utils.exclude_private_datasets, 
         col = "schedule_gtfs_dataset_key", 
         public_gtfs_dataset_keys = public_feeds    
     )

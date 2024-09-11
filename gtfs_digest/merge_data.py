@@ -8,7 +8,7 @@ import pandas as pd
 
 from calitp_data_analysis import utils
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
-from shared_utils import gtfs_utils_v2
+from shared_utils import gtfs_utils_v2, publish_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
 
 route_time_cols = ["schedule_gtfs_dataset_key", 
@@ -222,19 +222,6 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
     return df3
 
 
-def exclude_private_datasets(
-    df: pd.DataFrame, 
-    col: str = "schedule_gtfs_dataset_key",
-    public_gtfs_dataset_keys: list = [],
-) -> pd.DataFrame:
-    """
-    Filter out private datasets.
-    """
-    return df[
-        df[col].isin(public_gtfs_dataset_keys)
-    ].reset_index(drop=True)
-
-
 if __name__ == "__main__":
     
     from shared_utils import rt_dates
@@ -298,7 +285,8 @@ if __name__ == "__main__":
         gtfs_schedule_wrangling.top_cardinal_direction
     ).pipe(
         # Drop any private datasets before exporting
-        exclude_private_datasets, public_gtfs_dataset_keys= public_feeds
+        publish_utils.exclude_private_datasets, 
+        public_gtfs_dataset_keys= public_feeds
     )
      
     integrify = [
@@ -326,7 +314,9 @@ if __name__ == "__main__":
         primary_typology,
         on = route_time_cols,
         how = "left"
-    ).pipe(exclude_private_datasets, public_gtfs_dataset_keys= public_feeds)
+    ).pipe(
+        publish_utils.exclude_private_datasets, 
+        public_gtfs_dataset_keys= public_feeds)
 
     utils.geoparquet_gcs_export(
         segment_speeds2,
