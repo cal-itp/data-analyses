@@ -3,7 +3,7 @@
 
 
 build_portfolio_site:
-	cd portfolio/ && pip install -r requirements.txt && cd ../
+	#cd portfolio/ && pip install -r requirements.txt && cd ../
 	#need git rm because otherwise, just local removal, but git change is untracked
 	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
@@ -45,8 +45,8 @@ build_gtfs_digest:
 	cd gtfs_digest/ && python deploy_portfolio_yaml.py
 	make build_portfolio_site
 
-build_gtfs_digest_testing:
-	$(eval export site = gtfs_digest_testing)
+build_district_digest:
+	$(eval export site = district_digest)
 	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	#cd gtfs_digest/ && make assemble_data && cd ..   
 	make build_portfolio_site
