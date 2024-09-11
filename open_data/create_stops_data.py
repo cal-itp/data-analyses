@@ -2,10 +2,6 @@
 Create stops file with identifiers including
 route_id, route_name, agency_id, agency_name.
 """
-import os
-os.environ['USE_PYGEOS'] = '0'
-
-import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
 
@@ -13,7 +9,7 @@ from datetime import datetime
 
 import prep_traffic_ops
 from calitp_data_analysis import utils, geography_utils
-from shared_utils import schedule_rt_utils
+from shared_utils import gtfs_utils_v2, schedule_rt_utils
 from segment_speed_utils import helpers
 from update_vars import analysis_date, TRAFFIC_OPS_GCS
 
@@ -21,7 +17,7 @@ from update_vars import analysis_date, TRAFFIC_OPS_GCS
 def attach_route_info_to_stops(
     stops: gpd.GeoDataFrame, 
     trips: pd.DataFrame, 
-    stop_times: dd.DataFrame
+    stop_times: pd.DataFrame
 ) -> gpd.GeoDataFrame:
     """
     Attach all the various route information (route_id, route_type)
@@ -35,7 +31,7 @@ def attach_route_info_to_stops(
                 ]
     
     stops_with_route_info = (
-        dd.merge(
+        pd.merge(
             stop_times,
             trips[trip_cols], 
             on = ["feed_key", "trip_id"]
@@ -43,9 +39,9 @@ def attach_route_info_to_stops(
                                   "route_id", "route_type"])
         .drop(columns = "trip_id")
         .reset_index(drop=True)
-    ).compute()
+    )
     
-    stops_with_geom = dd.merge(
+    stops_with_geom = pd.merge(
         stops,
         stops_with_route_info,
         on = ["feed_key", "stop_id"],
@@ -69,6 +65,8 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Suppress certain columns used in our internal modeling for export.
     """
+    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
+    
     # Change column order
     route_cols = [
         'organization_source_record_id', 'organization_name',
@@ -78,9 +76,10 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     col_order = route_cols + stop_cols + agency_ids + ['geometry']
     
-    df2 = (df[col_order]
+    df2 = (df[df.schedule_gtfs_dataset_key.isin(public_feeds)][col_order]
            .reindex(columns = col_order)
            .rename(columns = prep_traffic_ops.RENAME_COLS)
+           .reset_index(drop=True)
     )
     
     return df2
@@ -105,7 +104,8 @@ def create_stops_file_for_export(date: str) -> gpd.GeoDataFrame:
     
     stop_times = helpers.import_scheduled_stop_times(
         date,
-        columns = prep_traffic_ops.keep_stop_time_cols
+        columns = prep_traffic_ops.keep_stop_time_cols,
+        get_panda = True
     )
         
     stops_assembled = attach_route_info_to_stops(stops, trips, stop_times)
