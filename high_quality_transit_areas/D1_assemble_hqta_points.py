@@ -20,6 +20,7 @@ from loguru import logger
 from A1_rail_ferry_brt_stops import clip_to_ca, get_rail_ferry_brt_extract
 from calitp_data_analysis import geography_utils, utils
 from segment_speed_utils import helpers
+from shared_utils import gtfs_utils_v2
 from update_vars import analysis_date, GCS_FILE_PATH, PROJECT_CRS
 
 catalog = intake.open_catalog("*.yml")
@@ -147,7 +148,7 @@ def get_agency_info(df: pd.DataFrame, date: str) -> pd.DataFrame:
         "organization_source_record_id": "org_id"
     })[["schedule_gtfs_dataset_key", 
      "agency", "org_id", "base64_url"]]
-        
+
     return crosswalk
     
 
@@ -211,6 +212,13 @@ def add_agency_names_hqta_details(
 
 
 def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Final steps for getting dataset ready for Geoportal.
+    Subset to columns, drop duplicates, sort for readability,
+    always project into WGS84.
+    """
+    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
+    
     keep_cols = [
         "agency_primary", 
         "hqta_type", "stop_id", "route_id",
@@ -222,12 +230,14 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "geometry"
     ]
     
-    gdf2 = (gdf.reindex(columns = keep_cols)
-            .drop_duplicates(
-                subset=["agency_primary", "hqta_type", "stop_id", "route_id"])
-            .sort_values(["agency_primary", "hqta_type", "stop_id"])
-            .reset_index(drop=True)
-            .to_crs(geography_utils.WGS84)
+    gdf2 = (
+        gdf[gdf.schedule_gtfs_dataset_key.isin(public_feeds)]
+        .reindex(columns = keep_cols)
+        .drop_duplicates(
+            subset=["agency_primary", "hqta_type", "stop_id", "route_id"])
+        .sort_values(["agency_primary", "hqta_type", "stop_id"])
+        .reset_index(drop=True)
+        .to_crs(geography_utils.WGS84)
     )
     
     return gdf2

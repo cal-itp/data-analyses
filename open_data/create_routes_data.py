@@ -2,9 +2,6 @@
 Create routes file with identifiers including
 route_id, route_name, operator name.
 """
-import os
-os.environ['USE_PYGEOS'] = '0'
-
 import geopandas as gpd
 import pandas as pd
 
@@ -12,7 +9,7 @@ from datetime import datetime
 
 import prep_traffic_ops
 from calitp_data_analysis import utils, geography_utils
-from shared_utils import portfolio_utils
+from shared_utils import gtfs_utils_v2, portfolio_utils
 from segment_speed_utils import helpers
 from update_vars import analysis_date, TRAFFIC_OPS_GCS
 
@@ -90,6 +87,8 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Suppress certain columns used in our internal modeling for export.
     """
+    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
+    
     # Change column order
     route_cols = [
         'organization_source_record_id', 'organization_name',
@@ -98,9 +97,10 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     agency_ids = ['base64_url']
     
     col_order = route_cols + shape_cols + agency_ids + ['geometry']
-    df2 = (df[col_order]
+    df2 = (df[df.schedule_gtfs_dataset_key.isin(public_feeds)][col_order]
            .reindex(columns = col_order)
            .rename(columns = prep_traffic_ops.RENAME_COLS)
+           .reset_index(drop=True)
     )
     
     return df2
