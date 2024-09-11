@@ -8,7 +8,7 @@ import pandas as pd
 
 from calitp_data_analysis import utils
 from segment_speed_utils import time_series_utils
-from merge_data import merge_in_standardized_route_names
+from merge_data import merge_in_standardized_route_names, exclude_private_datasets
 from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
 sort_cols = ["schedule_gtfs_dataset_key", "service_date"]
@@ -100,6 +100,7 @@ def operator_category_counts_by_date() -> pd.DataFrame:
     
     return operator_category_counts
 
+
 if __name__ == "__main__":
 
     from shared_utils import rt_dates
@@ -110,6 +111,8 @@ if __name__ == "__main__":
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
     SCHED_RT_CATEGORY = GTFS_DATA_DICT.digest_tables.operator_sched_rt
     CROSSWALK = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
+    
+    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
     
     # Concat operator profiles
     df = concatenate_operator_stats(analysis_date_list)
@@ -141,14 +144,20 @@ if __name__ == "__main__":
     
     # Merge
     merge_cols = ["schedule_gtfs_dataset_key", "service_date"]
-    op_profiles_df1 = pd.merge(df, 
-                               crosswalk_df, 
-                               on = merge_cols, 
-                               how = "left")
+    op_profiles_df1 = pd.merge(
+        df, 
+        crosswalk_df, 
+        on = merge_cols, 
+        how = "left"
+    )
     
     # Drop duplicates created after merging
     op_profiles_df2 = (op_profiles_df1
-                       .drop_duplicates(subset = list(op_profiles_df1.columns))
+                       .pipe(
+                           exclude_private_datasets, 
+                           col = "schedule_gtfs_dataset_key", 
+                           public_gtfs_dataset_keys = public_feeds
+                       ).drop_duplicates(subset = list(op_profiles_df1.columns))
                        .reset_index(drop = True))
 
     op_profiles_df2.to_parquet(
@@ -157,7 +166,13 @@ if __name__ == "__main__":
     
     gdf = concatenate_operator_routes(
         analysis_date_list
-    ).pipe(merge_in_standardized_route_names)
+    ).pipe(
+        merge_in_standardized_route_names
+    ).pipe(
+        exclude_private_datasets, 
+        col = "schedule_gtfs_dataset_key", 
+        public_gtfs_dataset_keys = public_feeds
+    )
 
     utils.geoparquet_gcs_export(
         gdf,
@@ -165,7 +180,12 @@ if __name__ == "__main__":
         OPERATOR_ROUTE
     )
     
-    operator_category_counts = operator_category_counts_by_date()
+    operator_category_counts = operator_category_counts_by_date().pipe(
+        exclude_private_datasets, 
+        col = "schedule_gtfs_dataset_key", 
+        public_gtfs_dataset_keys = public_feeds    
+    )
+    
     operator_category_counts.to_parquet(
         f"{RT_SCHED_GCS}{SCHED_RT_CATEGORY}.parquet"
     )

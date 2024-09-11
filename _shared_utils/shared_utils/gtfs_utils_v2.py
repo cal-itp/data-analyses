@@ -505,18 +505,21 @@ def get_stop_times(
     return stop_times
 
 
-def filter_to_public_schedule_gtfs_dataset_keys() -> list:
+def filter_to_public_schedule_gtfs_dataset_keys(get_df: bool = False) -> list:
     """
     Return a list of schedule_gtfs_dataset_keys that have
     private_dataset == None.
     private_dataset holds values:True or None, no False.
     """
     dim_gtfs_datasets = schedule_rt_utils.filter_dim_gtfs_datasets(
-        keep_cols=["key", "private_dataset"],
+        keep_cols=["key", "name", "private_dataset"],
         custom_filtering={
             "type": ["schedule"],
         },
         get_df=True,
     ) >> filter(_.private_dataset != True)
 
-    return dim_gtfs_datasets.gtfs_dataset_key.unique().tolist()
+    if get_df:
+        return dim_gtfs_datasets
+    else:
+        return dim_gtfs_datasets.gtfs_dataset_key.unique().tolist()

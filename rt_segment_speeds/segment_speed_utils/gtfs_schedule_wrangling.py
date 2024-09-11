@@ -109,9 +109,13 @@ def add_peak_offpeak_column(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
-def add_weekday_weekend_column(df: pd.DataFrame) -> pd.DataFrame:
+def add_weekday_weekend_column(df: pd.DataFrame, category_dict: dict = time_helpers.WEEKDAY_DICT) -> pd.DataFrame:
+    """
+    Add a single weekday_weekend column based on a service date's day_name.
+    day_name gives values like Monday, Tuesday, etc.
+    """
     df = df.assign(
-        weekday_weekend = df.service_date.dt.day_name().map(time_helpers.WEEKDAY_DICT)
+        weekday_weekend = df.service_date.dt.day_name().map(category_dict)
     )
     
     return df
