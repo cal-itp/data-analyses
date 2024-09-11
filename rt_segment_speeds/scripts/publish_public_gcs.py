@@ -8,7 +8,7 @@ import pandas as pd
 from pathlib import Path
 
 from calitp_data_analysis import utils
-from shared_utils import rt_dates
+from shared_utils import rt_dates, gtfs_utils_v2
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, PUBLIC_GCS
 
 if __name__ == "__main__":
@@ -19,11 +19,16 @@ if __name__ == "__main__":
         GTFS_DATA_DICT.speedmap_segments.route_dir_single_segment,
     ]
     
+    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
+    
     for d in datasets:
         
         start = datetime.datetime.now()
 
-        df = gpd.read_parquet(f"{SEGMENT_GCS}{d}_{analysis_date}.parquet")
+        df = gpd.read_parquet(
+            f"{SEGMENT_GCS}{d}_{analysis_date}.parquet",
+            filters = [[("schedule_gtfs_dataset_key", "in", public_feeds)]]
+        )
                 
         utils.geoparquet_gcs_export(
             df,

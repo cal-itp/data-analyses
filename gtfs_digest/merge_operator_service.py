@@ -7,12 +7,11 @@ Grain is operator-service_date-route
 """
 import pandas as pd
 
-from merge_data import exclude_private_datasets
 from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
                                  time_series_utils) 
 from segment_speed_utils.project_vars import (
     COMPILED_CACHED_VIEWS, weeks_available)
-from shared_utils import gtfs_utils_v2, rt_dates
+from shared_utils import gtfs_utils_v2, publish_utils, rt_dates
 from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
 
@@ -103,14 +102,16 @@ def total_service_hours_all_months(week_list: list[list]) -> pd.DataFrame:
     and for the months we have a full week's worth of data downloaded.
     As of 5/2024, we have April 2023, October 2023, and April 2024.
     """   
-    public_datasets = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys(get_df=True)
+    public_datasets = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys(
+        get_df=True
+    )
     public_feeds = public_datasets.gtfs_dataset_name.unique().tolist()
     
     # Combine everything
     all_df = pd.concat(
         [total_service_hours(one_week) for one_week in week_list]
     ).pipe(
-        exclude_private_datasets, 
+        publish_utils.exclude_private_datasets, 
         col = "name", 
         public_gtfs_dataset_keys = public_feeds
     )
