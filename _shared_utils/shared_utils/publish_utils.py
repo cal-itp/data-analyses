@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Union
 
 import gcsfs
+import pandas as pd
 
 fs = gcsfs.GCSFileSystem()
 PUBLIC_BUCKET = "gs://calitp-publish-data-analysis/"
@@ -47,3 +48,14 @@ def if_exists_then_delete(filepath: str):
             fs.rm(filepath)
 
     return
+
+
+def exclude_private_datasets(
+    df: pd.DataFrame,
+    col: str = "schedule_gtfs_dataset_key",
+    public_gtfs_dataset_keys: list = [],
+) -> pd.DataFrame:
+    """
+    Filter out private datasets.
+    """
+    return df[df[col].isin(public_gtfs_dataset_keys)].reset_index(drop=True)
