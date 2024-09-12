@@ -3,9 +3,9 @@ One-off functions, run once, save datasets for shared use.
 """
 import geopandas as gpd
 import pandas as pd
-from arcgis_query import query_arcgis_feature_server
 from calitp_data_analysis import geography_utils, utils
 from calitp_data_analysis.sql import to_snakecase
+from shared_utils.arcgis_query import query_arcgis_feature_server
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 
