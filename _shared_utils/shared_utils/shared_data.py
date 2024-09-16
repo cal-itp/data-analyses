@@ -128,7 +128,7 @@ def draw_line_between_points(gdf: gpd.GeoDataFrame, group_cols: list) -> gpd.Geo
     return gdf
 
 
-def create_postmile_segments(group_cols: list = ["route", "direction"]) -> gpd.GeoDataFrame:
+def create_postmile_segments(group_cols: list) -> gpd.GeoDataFrame:
     """
     Take the SHN postmiles gdf, group by highway / odometer
     and convert the points into lines.
@@ -160,6 +160,10 @@ def create_postmile_segments(group_cols: list = ["route", "direction"]) -> gpd.G
 
 if __name__ == "__main__":
     # Run functions to create these datasets...store in GCS
+
     make_county_centroids()
+
     make_clean_state_highway_network()
     export_shn_postmiles()
+
+    create_postmile_segments(["route", "direction"])
