@@ -59,3 +59,16 @@ sources:
     args:
       # source: bus_service_increase/bus_service_utils/generate_calenviroscreen_lehd_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen_lehd_by_tract.parquet
+  state_highway_network_postmiles:
+    driver: geoparquet
+    description: Caltrans State Highway Network postmiles (every 0.1 mile) with postmiles as point geometry.
+    args:
+       # source: https://gisdata-caltrans.opendata.arcgis.com/datasets/c22341fec9c74c6b9488ee4da23dd967_0/about
+       # hitting url directly would limit us to 2,000 rows
+      urlpath: gs://calitp-analytics-data/data-analyses/shared_data/state_highway_network_postmiles.parquet
+  state_highway_network_postmile_segments:
+    driver: geoparquet
+    description: Caltrans State Highway Network postmile segments (postmiles converted to line segments)
+    args:
+       # source: shared_utils/shared_data.py
+      urlpath: gs://calitp-analytics-data/data-analyses/shared_data/state_highway_network_postmile_segments.parquet
