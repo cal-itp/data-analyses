@@ -24,7 +24,7 @@ def read_filepart_merge_crosswalk(
     **kwargs
 ) -> pd.DataFrame:
     """
-    Import onen partition and merge in crosswalk
+    Import one partition and merge in crosswalk
     """
     filepart_name = Path(filepart).name
     
@@ -65,10 +65,10 @@ def aggregate_metric(
         .agg(
             {**{c: "mean" for c in metric_cols}}
         ).reset_index()
-        .astype({
+        .astype(
             # since everything is mean, use floats, but allow NaNs
-            {c: "Float64" for c in metric_cols}
-        })
+            {**{c: "Float64" for c in metric_cols}}
+        )
     )
     
     return df2

@@ -42,3 +42,7 @@ Gather a list of typical questions that are asked around this dataset. Let's see
 * [high flows GH issue](https://github.com/cagov/caldata-mdsa-caltrans-pems/issues/278)
 * [dbt models sources.yml](https://github.com/cagov/caldata-mdsa-caltrans-pems/blob/main/transform/models/_sources.yml)
 * [grains naming conventions](https://github.com/cagov/caldata-mdsa-caltrans-pems/issues/241)
+
+## References
+* SHN Postmiles ESRI [layer](https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/SHN_Postmiles_Tenth/FeatureServer/0)
+* SHN postmiles [metadata](https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/SHN_Postmiles_Tenth/FeatureServer/0/metadata)
