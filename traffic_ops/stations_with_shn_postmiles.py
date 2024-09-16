@@ -1,6 +1,8 @@
 import geopandas as gpd
 import pandas as pd
 
+from typing import Literal
+
 from calitp_data_analysis import utils
 from utils import PROCESSED_GCS
 from shared_utils.shared_data import GCS_FILE_PATH as SHARED_GCS
@@ -8,6 +10,8 @@ from shared_utils.shared_data import GCS_FILE_PATH as SHARED_GCS
 def postmiles_to_pems_format(
     gdf: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
+    """
+    """
     rename_dict = {
         "route": "freeway_id"
     }
@@ -23,7 +27,10 @@ def postmiles_to_pems_format(
     return gdf
  
     
-def clean_postmiles(gdf: gpd.GeoDataFrame):
+def clean_postmiles(
+    dataset_name: Literal["points", "segments"],
+    crs: str = "EPSG:4326"
+) -> gpd.GeoDataFrame:
     """
     Clean SHN postmiles dataset.
     Be explicit about columns we don't want to keep
@@ -34,20 +41,36 @@ def clean_postmiles(gdf: gpd.GeoDataFrame):
     Also, postmiles will contain information about where the postmile
     is located, offset, etc, which we probably don't need either
     """
-    drop_cols = [
-        "district", "county",
-        "direction",
-        #route+suffix, sometimes it's 5
-        # sometimes it's 5S. either way, we have freeway_direction
-        "routes", "rtesuffix",
-        "pmrouteid", 
-        "pm", "pmc",
-        "pminterval",
-        "pmprefix", "pmsuffix",
-        "aligncode", "pmoffset",
-    ]
+    if dataset_name=="points":
+        FILE = "state_highway_network_postmiles"
+    elif dataset_name=="segments":
+        FILE = "state_highway_network_postmile_segments"
+    else:
+        raise ValueError(f"dataset_name must be: 'points' or 'segments'")
     
-    gdf = postmiles_to_pems_format(gdf).drop(columns = drop_cols)
+    gdf = gpd.read_parquet(
+        f"{SHARED_GCS}{FILE}.parquet"
+    ).to_crs(crs).pipe(postmiles_to_pems_format)
+    
+    if dataset_name=="points":
+    
+        drop_cols = [
+            "district", "county",
+            "direction",
+            #route+suffix, sometimes it's 5
+            # sometimes it's 5S. either way, we have freeway_direction
+            "routes", "rtesuffix",
+            "pmrouteid", 
+            "pm", "pmc",
+            "pminterval",
+            "pmprefix", "pmsuffix",
+            "aligncode", "pmoffset",
+        ]
+    
+        gdf = gdf.drop(columns = drop_cols)
+    
+    elif dataset_name=="segments":
+        gdf = gdf.drop(columns = ["direction", "abs_pm"])
     
     return gdf
 
@@ -70,12 +93,11 @@ def clean_station_freeway_info(df: pd.DataFrame) -> pd.DataFrame:
 
 def merge_stations_to_shn_postmiles(
     station_crosswalk: pd.DataFrame,
-    postmiles: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
     merge_cols = ["freeway_id", "freeway_direction", "abs_pm"]
 
     station2 = clean_station_freeway_info(station_crosswalk)
-    postmiles2 = clean_postmiles(postmiles)
+    postmiles2 = clean_postmiles(dataset_name="points")
     
     m1 = pd.merge(
         station2,
@@ -117,17 +139,12 @@ def merge_stations_to_shn_postmiles(
 
 if __name__ == "__main__":
     
-    postmiles = gpd.read_parquet(
-        f"{SHARED_GCS}state_highway_network_postmiles.parquet"
-    )
-
     station_crosswalk = pd.read_parquet(
         f"{PROCESSED_GCS}station_crosswalk.parquet",
     ) 
     
     final = merge_stations_to_shn_postmiles(
         station_crosswalk, 
-        postmiles
     )
     
     print(f"# stations in final gdf: {final.station_uuid.nunique()}")
