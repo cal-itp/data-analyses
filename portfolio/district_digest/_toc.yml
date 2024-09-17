@@ -1,0 +1,17 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: district_01-eureka/00__district_report__district_01-eureka.ipynb
+    -   file: district_02-redding/00__district_report__district_02-redding.ipynb
+    -   file: district_03-marysville/00__district_report__district_03-marysville.ipynb
+    -   file: district_04-oakland/00__district_report__district_04-oakland.ipynb
+    -   file: district_05-san-luis-obispo/00__district_report__district_05-san-luis-obispo.ipynb
+    -   file: district_06-fresno/00__district_report__district_06-fresno.ipynb
+    -   file: district_07-los-angeles/00__district_report__district_07-los-angeles.ipynb
+    -   file: district_08-san-bernardino/00__district_report__district_08-san-bernardino.ipynb
+    -   file: district_09-bishop/00__district_report__district_09-bishop.ipynb
+    -   file: district_10-stockton/00__district_report__district_10-stockton.ipynb
+    -   file: district_11-san-diego/00__district_report__district_11-san-diego.ipynb
+    -   file: district_12-irvine/00__district_report__district_12-irvine.ipynb
+root: README
