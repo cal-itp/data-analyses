@@ -10,4 +10,34 @@ parts:
       district: "01 - Eureka"
   - caption: 
     params:
+      district: "02 - Redding"
+  - caption: 
+    params:
+      district: "03 - Marysville"
+  - caption: 
+    params:
+      district: "04 - Oakland"
+  - caption: 
+    params:
+      district: "05 - San Luis Obispo"
+  - caption: 
+    params:
+      district: "06 - Fresno"
+  - caption: 
+    params:
       district: "07 - Los Angeles"
+  - caption: 
+    params:
+      district: "08 - San Bernardino"
+  - caption: 
+    params:
+      district: "09 - Bishop"
+  - caption: 
+    params:
+      district: "10 - Stockton"
+  - caption: 
+    params:
+      district: "11 - San Diego"
+  - caption: 
+    params:
+      district: "12 - Irvine"
