@@ -8,7 +8,7 @@ import pandas as pd
 
 from calitp_data_analysis import utils
 from segment_speed_utils import time_series_utils
-from shared_utils import publish_utils
+from shared_utils import gtfs_utils_v2, publish_utils
 from merge_data import merge_in_standardized_route_names
 from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
@@ -120,6 +120,7 @@ if __name__ == "__main__":
     
     ntd_cols = [
         "schedule_gtfs_dataset_key",
+        "caltrans_district",
         "counties_served",
         "service_area_sq_miles",
         "hq_city",
@@ -153,13 +154,14 @@ if __name__ == "__main__":
     )
     
     # Drop duplicates created after merging
-    op_profiles_df2 = (op_profiles_df1
-                       .pipe(
-                           publish_utils.exclude_private_datasets, 
-                           col = "schedule_gtfs_dataset_key", 
-                           public_gtfs_dataset_keys = public_feeds
-                       ).drop_duplicates(subset = list(op_profiles_df1.columns))
-                       .reset_index(drop = True))
+    op_profiles_df2 = (
+        op_profiles_df1
+        .pipe(
+            publish_utils.exclude_private_datasets, 
+            col = "schedule_gtfs_dataset_key", 
+            public_gtfs_dataset_keys = public_feeds
+        ).drop_duplicates(subset = list(op_profiles_df1.columns))
+    .reset_index(drop = True))
 
     op_profiles_df2.to_parquet(
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
