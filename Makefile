@@ -1,19 +1,21 @@
 # Run this in data-analyses
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 
-
 build_portfolio_site:
 	#cd portfolio/ && pip install -r requirements.txt && cd ../
 	#need git rm because otherwise, just local removal, but git change is untracked
 	git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site) --deploy 
-	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
-	git add portfolio/$(site)/*.ipynb 
-	git add portfolio/sites/$(site).yml 
+	make git_check 
 	#make production_portfolio
 
-
+git_check:
+	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
+	git add portfolio/$(site)/*.ipynb # this one is most common, where operators nested under district
+	#git add portfolio/$(site)/district_*/*.ipynb # this one less common, but it's district pages only
+	git add portfolio/sites/$(site).yml 
+    
 build_competitive_corridors:
 	$(eval export site = competitive_corridors)
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
@@ -54,7 +56,8 @@ build_gtfs_digest_testing:
 build_district_digest:
 	$(eval export site = district_digest)
 	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	make build_portfolio_site    
+	make build_portfolio_site 
+	git add portfolio/$(site)/district_*/*.ipynb 
     
 add_precommit:
 	pip install pre-commit
