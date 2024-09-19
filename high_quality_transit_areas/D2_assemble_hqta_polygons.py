@@ -14,8 +14,7 @@ from loguru import logger
 import C1_prep_pairwise_intersections as prep_clip
 import D1_assemble_hqta_points as assemble_hqta_points
 from calitp_data_analysis import utils, geography_utils
-from D1_assemble_hqta_points import (EXPORT_PATH, add_route_info)
-from shared_utils import gtfs_utils_v2
+from D1_assemble_hqta_points import EXPORT_PATH, add_route_info
 from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS
 
 catalog = intake.open_catalog("*.yml")
@@ -108,9 +107,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Drop extra columns, get sorting done.
     Used to drop bad stops, but these all look ok.
-    """
-    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
-    
+    """    
     keep_cols = [
         "agency_primary", "agency_secondary",
         "hqta_type", "hqta_details", "route_id", 
@@ -121,7 +118,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     # Drop bad stops, subset columns
     gdf2 = (
-        gdf[gdf.schedule_gtfs_dataset_key.isin(public_feeds)][keep_cols]
+        gdf[keep_cols]
             .drop_duplicates()
             .sort_values(["hqta_type", "agency_primary", 
                           "agency_secondary",

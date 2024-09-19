@@ -105,7 +105,7 @@ def create_stops_file_for_export(date: str) -> gpd.GeoDataFrame:
     stop_times = helpers.import_scheduled_stop_times(
         date,
         columns = prep_traffic_ops.keep_stop_time_cols,
-        get_panda = True
+        get_pandas = True
     )
         
     stops_assembled = attach_route_info_to_stops(stops, trips, stop_times)
