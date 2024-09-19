@@ -30,7 +30,8 @@ route_typologies_data:
 # Clean route names for displaying across time
 timeseries_preprocessing: 
 	python clean_route_naming.py
-
+	python track_publish_dates.py
+    
 # monthly scheduled service, download after the end of each month
 monthly_scheduled_data:
 	python download_monthly_service.py

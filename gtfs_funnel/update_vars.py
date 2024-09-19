@@ -22,3 +22,5 @@ SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
 SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
 
 ntd_latest_year = 2022
+
+PUBLISHED_OPERATORS_YAML = "published_operators.yml"
