@@ -251,7 +251,7 @@ def attach_scheduled_route_info(
         analysis_date,
         columns=[
             "gtfs_dataset_key", "trip_instance_key",
-            "route_id", "direction_id",
+            "route_id", "direction_id", "route_short_name"
         ],
         get_pandas=True,
     )
