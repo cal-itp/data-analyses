@@ -17,8 +17,7 @@ import sys
 from loguru import logger
 
 import _utils
-import C1_prep_pairwise_intersections as prep_clip
-
+from prep_pairwise_intersections import prep_bus_corridors
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers
 from update_vars import (GCS_FILE_PATH, analysis_date, 
@@ -93,7 +92,7 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
     They may also be stops that don't meet the HQ corridor threshold, but
     are stops that physically reside in the corridor.
     """
-    bus_corridors = (prep_clip.prep_bus_corridors(is_hq_corr = True)
+    bus_corridors = (prep_bus_corridors(is_hq_corr = True)
                      [["hqta_segment_id", "geometry"]]
                     )
     
