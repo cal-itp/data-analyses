@@ -12,7 +12,6 @@ Takes 1.5 min to run.
 import datetime
 import geopandas as gpd
 import intake
-import os
 import pandas as pd
 import sys
 
@@ -39,10 +38,10 @@ def attach_geometry_to_pairs(
         
     }
     
-    col_order = ["feed_key"] + segment_cols + list(rename_cols.values())
+    col_order = ["schedule_gtfs_dataset_key"] + segment_cols + list(rename_cols.values())
     
     pairs_with_geom1 = pd.merge(
-        corridors[["feed_key"] + segment_cols],
+        corridors[["schedule_gtfs_dataset_key"] + segment_cols],
         intersecting_pairs, 
         on = "hqta_segment_id",
         how = "inner"
@@ -57,7 +56,7 @@ def attach_geometry_to_pairs(
     )
 
     gdf = (pairs_with_geom2.reindex(columns = col_order)
-           .sort_values(["feed_key", "hqta_segment_id", 
+           .sort_values(["schedule_gtfs_dataset_key", "hqta_segment_id", 
                          "intersect_hqta_segment_id"])
            .reset_index(drop=True)
           )
@@ -90,7 +89,7 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Concatenate and add this column to pairs_table, join by index 
     gdf = pd.concat([
         results_df,
-        pairs_table[["feed_key", "hqta_segment_id"]], 
+        pairs_table[["schedule_gtfs_dataset_key", "hqta_segment_id"]], 
     ], axis=1)
     
     return gdf    
@@ -122,7 +121,9 @@ if __name__ == "__main__":
     )
  
     end = datetime.datetime.now()
-    logger.info(f"C2_find_intersections {analysis_date} "
-                f"execution time: {end - start}")
+    logger.info(
+        f"C2_find_intersections {analysis_date} "
+        f"execution time: {end - start}"
+    )
     
     #client.close()

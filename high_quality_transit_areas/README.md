@@ -80,22 +80,20 @@ If not, within the `gtfs_funnel` directory, run `make download_gtfs_data` in the
 
 In terminal: `make hqta_data` to run through entire workflow.
 
-1. [Compile rail, ferry, brt data](./A1_rail_ferry_brt_stops.py)
-    * Sanity check: [check 1: downloads](./check1_downloads.ipynb)
-1. [Draw bus corridors, from routes to HQTA segments](./B1_create_hqta_segments.py)
+1. [Compile rail, ferry, brt data](./rail_ferry_brt_stops.py)
+1. [Draw bus corridors, from routes to HQTA segments](./create_hqta_segments.py)
     * Across all operators, find the longest shapes in each direction. Use a symmetric difference to grab the components that make up the route network.
     * Cut route into HQTA segments. Every segment is 1,250 m. 
     * Add in route direction.
-1. [Combine operator HQTA areas across operators](./B2_sjoin_stops_to_segments.py)
+1. [Combine operator HQTA areas across operators](./sjoin_stops_to_segments.py)
     * Attach number of stop arrivals that occur in the AM and PM and find the max
     * Do spatial join of stops to HQTA segments. Where multiple stops are present, keep the stop with the highest number of trips.
-1. [Use pairwise table to store which segments intersect](./C1_prep_pairwise_intersections.py) 
+1. [Use pairwise table to store which segments intersect](./prep_pairwise_intersections.py) 
     * Find which routes actually do intersect, and store that in a pairwise table.
-1. [Find where corridors intersect](./C2_get_intersections.py)
-1. [Create datasets for each of the hqta types](./C3_create_bus_hqta_types.py)
+1. [Find where corridors intersect](./get_intersections.py)
+1. [Create datasets for each of the hqta types](./create_bus_hqta_types.py)
     * `major_stop_bus`: the bus stop within the above intersection does not necessarily have the highest trip count
     * `hq_corridor_bus`: stops along the HQ transit corr (may not be highest trip count)
-    * Sanity check: [check 2: hq corridors](./check2_hq_corridors.ipynb)
-1. [Compile and export HQTA areas as points](./D1_assemble_hqta_points.py)
-    * Sanity check: [check 3: hqta points](./check3_hqta_points.ipynb)
-1. [Compile and export HQTA areas as polygons](./D2_assemble_hqta_polygons.py)
+1. [Compile and export HQTA areas as points](./assemble_hqta_points.py)
+    * Sanity check: [check 3: hqta points](./check_hqta_points.ipynb)
+1. [Compile and export HQTA areas as polygons](./assemble_hqta_polygons.py)
