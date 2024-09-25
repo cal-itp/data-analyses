@@ -110,7 +110,7 @@ speedmap_segments:
   stage3b: "speedmap/stop_arrivals"
   stage4: "speedmap/speeds"
   trip_stop_cols: ["trip_instance_key", "stop_sequence", "stop_sequence1"]
-  shape_stop_cols: ["shape_array_key", "shape_id", "route_id", "route_short_name"]
+  shape_stop_cols: ["shape_array_key", "shape_id", "route_short_name"] #  route_id already added via segment_speed_utils.time_series_utils ROUTE_DIR_COLS
   stop_pair_cols: ["stop_pair", "stop_pair_name", "segment_id"]
   segments_file: "segment_options/speedmap_segments"
   shape_stop_single_segment: "rollup_singleday/speeds_shape_speedmap_segments"
