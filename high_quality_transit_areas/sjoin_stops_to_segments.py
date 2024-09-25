@@ -7,7 +7,6 @@ Takes <1 min to run.
 """
 import datetime
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 import sys
 
@@ -15,36 +14,49 @@ from loguru import logger
 
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
-from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS
+from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS
 
-def max_trips_by_group(df: pd.DataFrame, 
-                       group_cols: list,
-                       max_col: str = "n_trips"
-                      ) -> pd.DataFrame:
+def max_trips_by_group(
+    df: pd.DataFrame, 
+    group_cols: list,
+    max_col: str = "n_trips"
+) -> pd.DataFrame:
     """
     Find the max trips, by stop_id or by hqta_segment_id.
     Put in a list of group_cols to find the max.
     Can also subset for AM or PM by df[df.departure_hour < 12]
     """
     df2 = (df.groupby(group_cols)
-           .agg({max_col: np.max})
+           .agg({max_col: "max"})
            .reset_index()
           )
     
     return df2 
 
 
-def stop_times_aggregation_max_by_stop(stop_times: pd.DataFrame) -> pd.DataFrame:
+def stop_times_aggregation_max_by_stop(
+    stop_times: pd.DataFrame, 
+    analysis_date: str
+) -> pd.DataFrame:
     """
     Take the stop_times table 
     and group by stop_id-departure hour
     and count how many trips occur.
     """
-    stop_cols = ["feed_key", "stop_id"]
+    stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
 
+    gtfs_key = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["feed_key", "gtfs_dataset_key"],
+        get_pandas = True
+    )
+    
     stop_times = stop_times.assign(
         departure_hour = pd.to_datetime(
             stop_times.departure_sec, unit="s").dt.hour
+    ).merge(
+        gtfs_key,
+        on = "feed_key"
     )
             
     # Aggregate how many trips are made at that stop by departure hour
@@ -124,7 +136,7 @@ def hqta_segment_keep_one_stop(
     
     Returns gdf where each segment only appears once.
     """
-    stop_cols = ["feed_key", "stop_id"]
+    stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
     
     segment_to_stop_times = pd.merge(
         hqta_segments, 
@@ -168,7 +180,7 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     hqta_segments: gpd.GeoDataFrame, 
     stops: gpd.GeoDataFrame,
     stop_times: pd.DataFrame,
-    buffer_size: int = 50,
+    buffer_size: int,
     hq_transit_threshold: int = 4,
 ) -> gpd.GeoDataFrame:
     """
@@ -200,7 +212,6 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
                                (x.pm_max_trips >= hq_transit_threshold))
             else False, axis=1)
     ).drop(columns = drop_cols)
-    
 
     return segment_hq_corr
 
@@ -221,8 +232,8 @@ if __name__ == "__main__":
     # takes 1 min
     max_arrivals_by_stop = helpers.import_scheduled_stop_times(
         analysis_date,
-        get_pandas = True
-    ).pipe(stop_times_aggregation_max_by_stop)
+        get_pandas = True,
+    ).pipe(stop_times_aggregation_max_by_stop, analysis_date)
     
     max_arrivals_by_stop.to_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
@@ -242,7 +253,7 @@ if __name__ == "__main__":
         hqta_segments, 
         stops,
         max_arrivals_by_stop,
-        buffer_size = 50, #50meters
+        buffer_size = SEGMENT_BUFFER_METERS, #50meters
         hq_transit_threshold = 4
     )
         
@@ -253,7 +264,8 @@ if __name__ == "__main__":
     )
     
     end = datetime.datetime.now()
-    logger.info(f"B2_sjoin_stops_to_segments {analysis_date} "
-                f"execution time: {end - start}")
+    logger.info(
+        f"B2_sjoin_stops_to_segments {analysis_date} "
+        f"execution time: {end - start}")
     
     #client.close()

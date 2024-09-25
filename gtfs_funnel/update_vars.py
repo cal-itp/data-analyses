@@ -11,7 +11,7 @@ all_dates = (
 )
 
 
-analysis_date_list = [rt_dates.DATES["aug2024"]]
+analysis_date_list = [rt_dates.DATES["sep2024"]]
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
@@ -22,3 +22,5 @@ SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
 SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
 
 ntd_latest_year = 2022
+
+PUBLISHED_OPERATORS_YAML = "published_operators.yml"
