@@ -199,6 +199,41 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
     )
     return df3
 
+def aggregate_by_agency(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Aggregate some of the metrics to be for all the routes
+    across the agency.
+    """
+    # Filter to all day to avoid double counting
+    df = df.loc[df["Period"] == "all_day"].reset_index(drop=True)
+    
+    # Aggregate by totals by date 
+    agg1 = (
+        df.groupby(["Date"])
+        .agg(
+            {
+                "# VP": "sum",
+                "# VP within Scheduled Shape": "sum",
+                "Aggregate Actual Service Minutes": "sum",
+                "ruler_100_pct":"max",
+                "ruler_for_vp_per_min":"max"
+            }
+        )
+        .reset_index()
+    )
+
+    # Find metrics
+    agg1["VP per Minute (All Routes)"] = (
+        (agg1["# VP"] / agg1[ "Aggregate Actual Service Minutes"])
+    ).round(2)
+    agg1["Spatial Accuracy (All Routes)"] = ((
+        agg1["# VP within Scheduled Shape"] / agg1["# VP"]
+    )  * 100).round(2)
+
+    # Sort the data
+    agg1 = agg1.sort_values(by=["Date"]).reset_index(drop=True)
+
+    return agg1
 """
 Charts
 """
@@ -668,6 +703,105 @@ def frequency_chart(
     )
     return chart
 
+def simple_bar_chart(
+    df: pd.DataFrame,
+    y_col: str,
+    ruler_col: str,
+    title: str,
+    subtitle: str,
+    domain_color:list,
+    range_color:list,
+) -> alt.Chart:
+    tooltip_cols = [
+        "Date",
+        y_col,
+    ]
+    
+    # Set y-axis
+    max_y = set_y_axis(df, y_col)
+    
+    # Create color scale
+    color_scale = alt.Scale(
+    domain= domain_color,
+    range = range_color
+    )
+    
+    # Create ruler
+    ruler = (
+            alt.Chart(df)
+            .mark_rule(color="red", strokeDash=[10, 7])
+            .encode(y=f"mean({ruler_col}):Q")
+        )
+    
+    chart = (
+            alt.Chart(df)
+            .mark_bar(size=7, clip=True)
+            .encode(
+                x=alt.X(
+                    "yearmonthdate(Date):O",
+                    title=["Date"],
+                    axis=alt.Axis(labelAngle=-45, format="%b %Y"),
+                ),
+                y=alt.Y(
+                    f"{y_col}:Q",
+                    title=_report_utils.labeling(y_col),
+                    scale=alt.Scale(domain=[0, max_y]),
+                ),
+                color=alt.Color(
+                    f"{y_col}:Q",
+                    title=_report_utils.labeling(y_col),
+                    scale=color_scale,
+                ),
+                tooltip=df[tooltip_cols].columns.tolist(),
+            )
+        )
+
+    chart = (chart + ruler).properties(width=400, height=250,
+                                       title={
+                "text": title,
+                "subtitle": [subtitle],
+            }
+        )
+
+    return chart
+
+"""
+Agency Overview Section
+"""
+def agency_overview(df:pd.DataFrame)->alt.Chart:
+    agg1 = aggregate_by_agency(df)
+    
+    agency_spatial_chart = (
+        simple_bar_chart(
+            agg1,
+            "Spatial Accuracy (All Routes)",
+            "ruler_100_pct",
+            readable_dict["agency_spatial_accuracy"]["title"],
+            readable_dict["spatial_accuracy_graph"]["subtitle"],
+            color_dict["spatial_accuracy_domain"],
+            color_dict["spatial_accuracy_range"]
+        )
+    )
+    
+    agency_vp_chart = (
+        (
+            simple_bar_chart(
+                agg1,
+                "VP per Minute (All Routes)",
+                "ruler_for_vp_per_min",
+                readable_dict["agency_vp_per_min_graph"]["title"],
+                readable_dict["vp_per_min_graph"]["subtitle"],
+                color_dict["vp_domain"],
+                color_dict["vp_range"]
+            )
+        )
+    )
+    
+    chart_list = [agency_spatial_chart, agency_vp_chart]
+    chart = alt.vconcat(*chart_list).resolve_scale(
+    color='independent')
+
+    return chart
 """
 Route-Direction
 Section
