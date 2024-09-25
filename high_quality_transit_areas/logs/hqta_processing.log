@@ -142,3 +142,18 @@
 2024-09-19 09:32:36.082 | INFO     | __main__:<module>:163 - C3_create_bus_hqta_types 2024-09-18 execution time: 0:00:37.486499
 2024-09-19 09:33:22.863 | INFO     | __main__:<module>:307 - D1_assemble_hqta_points 2024-09-18 execution time: 0:00:27.668799
 2024-09-19 09:36:35.489 | INFO     | __main__:<module>:167 - D2_assemble_hqta_polygons 2024-09-18 execution time: 0:00:26.678607
+2024-09-19 14:07:11.844 | INFO     | __main__:<module>:269 - A1_rail_ferry_brt_stops 2024-09-18 execution time: 0:00:16.390254
+2024-09-19 14:10:48.407 | INFO     | __main__:<module>:276 - A1_rail_ferry_brt_stops 2024-09-18 execution time: 0:00:17.570946
+2024-09-19 14:51:15.926 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:04:11.305371
+2024-09-19 14:55:50.079 | INFO     | __main__:<module>:268 - B2_sjoin_stops_to_segments 2024-09-18 execution time: 0:00:50.195775
+2024-09-19 14:56:18.048 | INFO     | __main__:<module>:140 - C1_prep_pairwise_intersections 2024-09-18 execution time: 0:00:09.222281
+2024-09-19 14:57:06.861 | INFO     | __main__:<module>:124 - C2_find_intersections 2024-09-18 execution time: 0:00:32.170864
+2024-09-19 15:04:46.269 | INFO     | __main__:<module>:176 - C3_create_bus_hqta_types 2024-09-18 execution time: 0:00:28.423966
+2024-09-25 10:10:35.837 | INFO     | __main__:<module>:275 - A1_rail_ferry_brt_stops 2024-09-18 execution time: 0:00:16.979217
+2024-09-25 10:18:42.737 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:07:48.832296
+2024-09-25 10:20:17.796 | INFO     | __main__:<module>:267 - B2_sjoin_stops_to_segments 2024-09-18 execution time: 0:01:12.987290
+2024-09-25 10:20:52.130 | INFO     | __main__:<module>:140 - C1_prep_pairwise_intersections 2024-09-18 execution time: 0:00:10.962771
+2024-09-25 10:22:04.117 | INFO     | __main__:<module>:124 - C2_find_intersections 2024-09-18 execution time: 0:00:49.634882
+2024-09-25 10:25:48.480 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2024-09-18 execution time: 0:00:26.100650
+2024-09-25 10:27:51.226 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2024-09-18 execution time: 0:00:18.606053
+2024-09-25 10:30:59.443 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2024-09-18 execution time: 0:00:30.215506

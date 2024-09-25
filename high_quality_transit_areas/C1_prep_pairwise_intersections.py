@@ -35,8 +35,6 @@ def prep_bus_corridors(is_hq_corr: bool) -> gpd.GeoDataFrame:
     return bus_hqtc
 
 
-
-
 def sjoin_against_other_operators(
     in_group_df: gpd.GeoDataFrame, 
     out_group_df: gpd.GeoDataFrame
@@ -105,7 +103,7 @@ def pairwise_intersections(
             (corridors_gdf.hqta_segment_id.isin(segments_p2))]
         .drop_duplicates()
         .sort_values(
-            ["feed_key", "route_id", "hqta_segment_id"], 
+            ["schedule_gtfs_dataset_key", "route_id", "hqta_segment_id"], 
             ascending = [True, True, True])
         .reset_index(drop=True)
     )
@@ -139,7 +137,9 @@ if __name__=="__main__":
     pairwise_intersections(corridors)    
     
     end = datetime.datetime.now()
-    logger.info(f"C1_prep_pairwise_intersections {analysis_date} "
-                f"execution time: {end - start}")
+    logger.info(
+        f"C1_prep_pairwise_intersections {analysis_date} "
+        f"execution time: {end - start}"
+    )
 
     #client.close()

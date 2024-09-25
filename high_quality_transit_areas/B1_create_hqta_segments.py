@@ -114,8 +114,7 @@ def select_shapes_and_segment(
     ).query(
         'shape_array_key not in @outside_amtrak_shapes'
     ).drop(
-        columns = ["schedule_gtfs_dataset_key", 
-                   "shape_array_key", "route_length"]
+        columns = ["feed_key", "shape_array_key", "route_length"]
     ).fillna({"direction_id": 0}).astype({"direction_id": "int"})
     
     routes_both_dir = (gdf.route_key
@@ -147,7 +146,7 @@ def select_shapes_and_segment(
         segment_col = "segment_geometry"
     )
     
-    route_cols = ["feed_key", "route_id", "route_key"]
+    route_cols = ["schedule_gtfs_dataset_key", "route_id", "route_key"]
 
     # Attach other route info
     hqta_segments = pd.merge(
