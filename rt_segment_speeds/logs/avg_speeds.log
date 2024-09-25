@@ -446,3 +446,9 @@
 2024-08-15 12:49:58.589 | INFO     | average_segment_speeds:single_day_segment_averages:173 - shape seg avg 0:05:18.197146
 2024-08-15 12:53:37.977 | INFO     | average_segment_speeds:single_day_segment_averages:189 - route dir seg avg 0:03:39.388630
 2024-08-15 12:53:37.978 | INFO     | average_segment_speeds:single_day_segment_averages:190 - single day segment 2024-08-14 execution time: 0:08:57.585776
+2024-09-25 10:19:34.374 | INFO     | average_segment_speeds:single_day_segment_averages:173 - shape seg avg 0:08:10.566861
+2024-09-25 10:24:06.679 | INFO     | average_segment_speeds:single_day_segment_averages:189 - route dir seg avg 0:04:32.304885
+2024-09-25 10:24:06.680 | INFO     | average_segment_speeds:single_day_segment_averages:190 - single day segment 2024-08-14 execution time: 0:12:42.871746
+2024-09-25 10:49:33.278 | INFO     | average_segment_speeds:single_day_segment_averages:177 - shape seg avg 0:04:58.619496
+2024-09-25 10:53:01.510 | INFO     | average_segment_speeds:single_day_segment_averages:193 - route dir seg avg 0:03:28.232105
+2024-09-25 10:53:01.535 | INFO     | average_segment_speeds:single_day_segment_averages:194 - single day segment 2024-08-14 execution time: 0:08:26.851601
