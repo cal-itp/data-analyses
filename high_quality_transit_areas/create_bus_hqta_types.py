@@ -16,14 +16,13 @@ import sys
 
 from loguru import logger
 
-import C1_prep_pairwise_intersections as prep_clip
-
+import _utils
+from prep_pairwise_intersections import prep_bus_corridors
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers
 from update_vars import (GCS_FILE_PATH, analysis_date, 
-                         PROJECT_CRS, BUFFER_METERS
+                         PROJECT_CRS, SEGMENT_BUFFER_METERS
                         )
-
 
 def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame: 
     """
@@ -55,28 +54,29 @@ def create_major_stop_bus(
     """
     # Narrow down all stops to only include stops from operators
     # that also have some bus corridor intersection result
-    included_operators = bus_intersections.feed_key.unique()
-    major_stops = all_stops[all_stops.feed_key.isin(included_operators)]
+    included_operators = bus_intersections.schedule_gtfs_dataset_key.unique()
+    major_stops = all_stops[
+        all_stops.schedule_gtfs_dataset_key.isin(included_operators)
+    ]
     
     major_bus_stops_in_intersections = (
         gpd.sjoin(
             major_stops,
-            bus_intersections[["feed_key", "geometry"]],
+            bus_intersections[["schedule_gtfs_dataset_key", "geometry"]],
             how = "inner",
-            predicate = "within"
-        ).drop(columns = "index_right")
-        .drop_duplicates(
-            subset=["feed_key_left", "stop_id", "feed_key_right"])
+            predicate = "within",
+            lsuffix="primary", rsuffix="secondary"
+        ).drop_duplicates(
+            subset=[
+                "schedule_gtfs_dataset_key_primary", "stop_id", 
+                "schedule_gtfs_dataset_key_secondary"])
     ).reset_index(drop=True)
     
     stops_in_intersection = (
         major_bus_stops_in_intersections.assign(
             hqta_type = "major_stop_bus",
-            ).rename(columns = 
-                     {"feed_key_left": "feed_key_primary", 
-                      "feed_key_right": "feed_key_secondary",
-                     })
-          [["feed_key_primary", "feed_key_secondary", 
+        )[["schedule_gtfs_dataset_key_primary", 
+            "schedule_gtfs_dataset_key_secondary", 
             "stop_id", "geometry", "hqta_type"]]
     )
     
@@ -92,27 +92,28 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
     They may also be stops that don't meet the HQ corridor threshold, but
     are stops that physically reside in the corridor.
     """
-    bus_corridors = (prep_clip.prep_bus_corridors(is_hq_corr = True)
+    bus_corridors = (prep_bus_corridors(is_hq_corr = True)
                      [["hqta_segment_id", "geometry"]]
                     )
     
-    stop_cols = ["feed_key", "stop_id"]
+    stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
     
-    stops_in_hq_corr = (gpd.sjoin(
-                            all_stops, 
-                            bus_corridors[["geometry"]],
-                            how = "inner", 
-                            predicate = "intersects"
-                        ).drop(columns = "index_right")
-                        .drop_duplicates(subset=stop_cols)
-                        .reset_index(drop=True)
-                       )
+    stops_in_hq_corr = (
+        gpd.sjoin(
+            all_stops, 
+            bus_corridors[["geometry"]],
+            how = "inner", 
+            predicate = "intersects"
+        ).drop_duplicates(subset=stop_cols)
+        .reset_index(drop=True)
+    )
     
-    stops_in_hq_corr2 = (stops_in_hq_corr.assign(
-                            hqta_type = "hq_corridor_bus",
-                        )[stop_cols + ["hqta_type", "geometry"]]
-                         .rename(columns = {"feed_key": "feed_key_primary"})
-                        )
+    stops_in_hq_corr2 = (
+        stops_in_hq_corr.assign(
+            hqta_type = "hq_corridor_bus",
+        )[stop_cols + ["hqta_type", "geometry"]]
+        .pipe(_utils.primary_rename)
+    )
     
     return stops_in_hq_corr2
 
@@ -131,14 +132,24 @@ if __name__ == "__main__":
     
     # Start with the gdf of all the hqta_segments
     # that have a sjoin with an orthogonal route
-    bus_intersections = buffer_around_intersections(BUFFER_METERS)
+    bus_intersections = buffer_around_intersections(SEGMENT_BUFFER_METERS)
 
     # Grab point geom with all stops
+    gtfs_keys = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["feed_key", "gtfs_dataset_key"],
+        get_pandas=True
+    )
+    
     all_stops = helpers.import_scheduled_stops(
         analysis_date,
         get_pandas = True,
+        columns = ["feed_key", "stop_id", "geometry"],
         crs = PROJECT_CRS
-    )
+    ).merge(
+        gtfs_keys,
+        on = "feed_key",
+    ).drop(columns = "feed_key")
         
     # Create hqta_type == major_stop_bus
     major_stop_bus = create_major_stop_bus(all_stops, bus_intersections)
@@ -160,7 +171,9 @@ if __name__ == "__main__":
     )
     
     end = datetime.datetime.now()
-    logger.info(f"C3_create_bus_hqta_types {analysis_date} "
-                f"execution time: {end - start}")
+    logger.info(
+        f"C3_create_bus_hqta_types {analysis_date} "
+        f"execution time: {end - start}"
+    )
     
     #client.close()
