@@ -11,72 +11,85 @@ import sys
 
 from loguru import logger
 
-import C1_prep_pairwise_intersections as prep_clip
-import D1_assemble_hqta_points as assemble_hqta_points
+import _utils
+from C1_prep_pairwise_intersections import prep_bus_corridors
+from D1_assemble_hqta_points import get_agency_crosswalk
 from calitp_data_analysis import utils, geography_utils
-from D1_assemble_hqta_points import EXPORT_PATH, add_route_info
-from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS
+from update_vars import (GCS_FILE_PATH, analysis_date, PROJECT_CRS, EXPORT_PATH,
+                         HALF_MILE_BUFFER_METERS, CORRIDOR_BUFFER_METERS
+                        )
 
 catalog = intake.open_catalog("*.yml")
 
-def get_dissolved_hq_corridor_bus(
-    gdf: gpd.GeoDataFrame, 
-    analysis_date: str
+def buffer_hq_corridor_bus(
+    analysis_date: str,
+    buffer_meters: int,
 ) -> gpd.GeoDataFrame:
     """
-    Take each segment, then dissolve by operator,
-    and use this dissolved polygon in hqta_polygons.
+    Buffer hq bus corridors.
     
-    Draw a buffer around this.
+    Start with bus corridors, filter to those that are high quality,
+    and do a dissolve.
+    After the dissolve, buffer by an additional amount to 
+    get the full 0.5 mile buffer.
     """
-    # Can keep route_id in dissolve, but route_id is not kept in final 
-    # export, so there would be multiple rows for multiple route_ids, 
-    # and no way to distinguish between them
-    keep_cols = ['feed_key', 'hq_transit_corr', 'route_id']
+    gdf = prep_bus_corridors(
+        is_hq_corr=True
+    ).to_crs(PROJECT_CRS)
+    
+    keep_cols = ['schedule_gtfs_dataset_key', 'route_id']
     
     dissolved = (gdf[keep_cols + ["geometry"]]
                  .dissolve(by=keep_cols)
                  .reset_index()
                 )
     
-    # For hq_corridor_bus, we have feed_key again, and need to 
-    # add agency_name, or else this category will have missing name values
-    corridor_cols = [
-        "feed_key", "hqta_type", "route_id", "geometry"
-    ]
+    # Bus corridors are already buffered 50 meters, 
+    # so will buffer 705 meters to get 0.5 mile radius
     corridors = dissolved.assign(
-        geometry = dissolved.geometry.buffer(755),
+        geometry = dissolved.geometry.buffer(buffer_meters),
         # overwrite hqta_type for this polygon
         hqta_type = "hq_corridor_bus",
-    )[corridor_cols].rename(
-        columns = {"feed_key": "feed_key_primary"}
-    )
+    ).pipe(_utils.primary_rename)
     
-    crosswalk = pd.read_parquet(
-        f"{GCS_FILE_PATH}feed_key_org_crosswalk.parquet"
-    )
-    primary_agency_cols = [i for i in crosswalk.columns if "_primary" in i]
+    agency_info = get_agency_crosswalk(analysis_date)
     
-    crosswalk = crosswalk[primary_agency_cols].drop_duplicates()
-    
+    # Make sure gtfs_dataset_name and organization columns are added
     corridors2 = pd.merge(
         corridors,
-        crosswalk,
-        on = "feed_key_primary",
+        agency_info.add_suffix("_primary"),
+        on = "schedule_gtfs_dataset_key_primary",
         how = "inner"
     )
     
     corridors2 = corridors2.assign(
-        hqta_details = corridors2.apply(
-            assemble_hqta_points.hqta_details, axis=1),
+        hqta_details = "stop_along_hq_bus_corridor_single_operator"
     )
-
+    
     return corridors2
 
 
-def filter_and_buffer(
-    hqta_points: gpd.GeoDataFrame, 
-    hqta_segments: gpd.GeoDataFrame, 
+def buffer_major_transit_stops(
+    buffer_meters: int
+) -> gpd.GeoDataFrame:
+    """
+    Buffer major transit stops. 
+    Start with hqta points and filter out the hq_corridor_bus types.
+    """
+    hqta_points = catalog.hqta_points.read().to_crs(PROJECT_CRS)
+
+    stops = hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
+    
+    # General buffer distance: 1/2mi ~= 805 meters
+    # stops are already buffered 
+    stops = stops.assign(
+        geometry = stops.geometry.buffer(buffer_meters)
+    )
+
+    return stops
+
+
+def combine_corridors_and_stops(
     analysis_date: str
 ) -> gpd.GeoDataFrame:
     """
@@ -85,19 +98,18 @@ def filter_and_buffer(
     Buffers are already drawn for corridors and stops, so 
     draw new buffers, and address each hqta_type separately.
     """
-    stops = hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
+    corridors = buffer_hq_corridor_bus(
+        analysis_date,
+        buffer_meters = CORRIDOR_BUFFER_METERS,
+    )
     
-    corridors = get_dissolved_hq_corridor_bus(hqta_segments, analysis_date)
-    
-    # General buffer distance: 1/2mi ~= 805 meters
-    # Bus corridors are already buffered 100 meters, so will buffer 705 meters
-    stops = stops.assign(
-        geometry = stops.geometry.buffer(705)
+    major_transit_stops = buffer_major_transit_stops(
+        buffer_meters = HALF_MILE_BUFFER_METERS
     )
     
     hqta_polygons = pd.concat([
         corridors, 
-        stops
+        major_transit_stops
     ], axis=0).to_crs(geography_utils.WGS84)
     
     return hqta_polygons
@@ -106,7 +118,6 @@ def filter_and_buffer(
 def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Drop extra columns, get sorting done.
-    Used to drop bad stops, but these all look ok.
     """    
     keep_cols = [
         "agency_primary", "agency_secondary",
@@ -116,7 +127,6 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "geometry"
     ]
     
-    # Drop bad stops, subset columns
     gdf2 = (
         gdf[keep_cols]
             .drop_duplicates()
@@ -138,17 +148,8 @@ if __name__=="__main__":
     
     start = datetime.datetime.now()
     
-    hqta_points = catalog.hqta_points.read().to_crs(PROJECT_CRS)
-    bus_hq_corr = prep_clip.prep_bus_corridors(
-        is_hq_corr=True
-    ).to_crs(PROJECT_CRS)
-    
-    # Filter and buffer for stops (805 m) and corridors (755 m)
-    # and add agency_names
-    gdf = filter_and_buffer(
-        hqta_points, bus_hq_corr, analysis_date
-    ).pipe(final_processing)
-            
+    gdf = combine_corridors_and_stops(analysis_date).pipe(final_processing)
+       
     # Export to GCS
     utils.geoparquet_gcs_export(
         gdf, 
@@ -164,5 +165,8 @@ if __name__=="__main__":
     )    
        
     end = datetime.datetime.now()
-    logger.info(f"D2_assemble_hqta_polygons {analysis_date} "
-                f"execution time: {end - start}")
+    logger.info(
+        f"D2_assemble_hqta_polygons {analysis_date} "
+        f"execution time: {end - start}"
+    )
+    

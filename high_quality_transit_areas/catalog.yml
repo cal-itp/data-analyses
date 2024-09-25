@@ -15,9 +15,15 @@ sources:
           urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/ca_boundary.parquet
     ## INTERMEDIATE DATA
     # Source: A1_rail_ferry_brt_stops.py
+    stops_info_crosswalk:
+        driver: geoparquet
+        description: Assembled stop gdf with route info from trips table.
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/stops_to_route.parquet
+    # Source: A1_rail_ferry_brt_stops.py
     rail_brt_ferry_initial:
         driver: geoparquet
-        description: Rail / BRT / Ferry points created in A2_combine_stops.py
+        description: All the major transit stops (Rail / BRT / Ferry).
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/rail_brt_ferry.parquet
     # Source: B1_create_hqta_segments.py
@@ -35,7 +41,7 @@ sources:
     # Source: C1_prep_pairwise_intersections.py
     pairwise_intersections:
         driver: parquet
-        description: Use dask_geopandas.sjoin to find which hqta segments do intersect at some point. Created in C1_prep_pairwise_intersections.py. 
+        description: Use spatial join to find which hqta segments do intersect at some point. Created in C1_prep_pairwise_intersections.py. 
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/pairwise.parquet   
     # Source: C1_prep_pairwise_intersections.py

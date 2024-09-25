@@ -13,6 +13,7 @@ import sys
 
 from loguru import logger
 
+import _utils
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
@@ -219,19 +220,16 @@ def compile_rail_ferry_brt_stops(
     )
     
     keep_cols = [
-        "schedule_gtfs_dataset_key", "feed_key", 
+        "schedule_gtfs_dataset_key", 
         "stop_id", "stop_name",
         "route_id", "route_type",
         "hqta_type", "geometry"
     ]
     
     df2 = (df[keep_cols]
-           .sort_values(["feed_key", "stop_id"]).reset_index(drop=True)
-           .rename(columns = {
-               "feed_key": "feed_key_primary",
-               "schedule_gtfs_dataset_key": "schedule_gtfs_dataset_key_primary"
-           })
-    )
+           .sort_values(["schedule_gtfs_dataset_key", "stop_id"]).reset_index(drop=True)
+           .pipe(_utils.primary_rename)
+          )
 
     return df2 
 
@@ -250,6 +248,13 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     stops_route_gdf = assemble_stops(analysis_date)
+    
+    # let's save this to use as a crosswalk to fill in info
+    utils.geoparquet_gcs_export(
+        stops_route_gdf,
+        GCS_FILE_PATH,
+        "stops_to_route"
+    )
     
     rail_stops = grab_rail_stops(stops_route_gdf)
     ferry_stops = grab_ferry_stops(stops_route_gdf)
