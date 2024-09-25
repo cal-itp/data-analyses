@@ -12,8 +12,8 @@ import sys
 from loguru import logger
 
 import _utils
-from C1_prep_pairwise_intersections import prep_bus_corridors
-from D1_assemble_hqta_points import get_agency_crosswalk
+from prep_pairwise_intersections import prep_bus_corridors
+from assemble_hqta_points import get_agency_crosswalk
 from calitp_data_analysis import utils, geography_utils
 from update_vars import (GCS_FILE_PATH, analysis_date, PROJECT_CRS, EXPORT_PATH,
                          HALF_MILE_BUFFER_METERS, CORRIDOR_BUFFER_METERS
