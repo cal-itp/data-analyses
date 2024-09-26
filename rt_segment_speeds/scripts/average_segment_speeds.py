@@ -136,6 +136,14 @@ def single_day_segment_averages(
     ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
         
     start = datetime.datetime.now()
+    columns = (OPERATOR_COLS + SHAPE_STOP_COLS + 
+                   STOP_PAIR_COLS + ROUTE_DIR_COLS + [
+                       "trip_instance_key", "speed_mph", 
+                       "meters_elapsed", "sec_elapsed", 
+                       "time_of_day"])
+    #  https://stackoverflow.com/questions/7961363/removing-duplicates-in-lists
+    #  route_id will be in both shape stop and route dir; this method maintains list order
+    columns = list(dict.fromkeys(columns))
     
     df = time_series_utils.concatenate_datasets_across_dates(
         SEGMENT_GCS,
@@ -143,11 +151,7 @@ def single_day_segment_averages(
         [analysis_date],
         data_type  = "df",
         get_pandas = True,
-        columns = (OPERATOR_COLS + SHAPE_STOP_COLS + 
-                   STOP_PAIR_COLS + ROUTE_DIR_COLS + [
-                       "trip_instance_key", "speed_mph", 
-                       "meters_elapsed", "sec_elapsed", 
-                       "time_of_day"]),
+        columns = columns,
         filters = [[("speed_mph", "<=", MAX_SPEED)]]
     ).pipe(
         gtfs_schedule_wrangling.add_peak_offpeak_column

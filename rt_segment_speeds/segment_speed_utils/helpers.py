@@ -30,7 +30,8 @@ def import_scheduled_trips(
     columns: list = [
         "gtfs_dataset_key", "name", "trip_id", 
         "shape_id", "shape_array_key", 
-        "route_id", "route_key", "direction_id"
+        "route_id", "route_key", "direction_id",
+        "route_short_name"
     ],
     get_pandas: bool = True
 ) -> Union[pd.DataFrame, dd.DataFrame]:
