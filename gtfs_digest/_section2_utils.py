@@ -201,7 +201,7 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
 
 def aggregate_by_agency(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Aggregate some of the metrics to be for all the routes
+    Aggregate some of the metrics for all the routes
     across the agency.
     """
     # Filter to all day to avoid double counting
@@ -766,11 +766,11 @@ def simple_bar_chart(
     return chart
 
 """
-Agency Overview Section
+Agency Metrics Overview Section
 """
 def agency_overview(df:pd.DataFrame)->alt.Chart:
     agg1 = aggregate_by_agency(df)
-    
+    # display(agg1.head())
     agency_spatial_chart = (
         simple_bar_chart(
             agg1,
