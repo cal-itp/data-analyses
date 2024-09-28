@@ -18,7 +18,7 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
                 name given to this analysis 
                 'parallel_corridors', 'rt', 'dla'
     """
-    m1 = op_prep.operators_schd_only_rt()
+    m1 = op_prep.operators_schd_vp_rt()
     districts = sorted(list(m1.caltrans_district.unique()))
 
     operators = m1.organization_name.tolist()      

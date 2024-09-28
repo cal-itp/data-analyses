@@ -124,3 +124,7 @@ ride_quality_graph:
     title: "The charts below measure the quality of the rider experience for this route."
 data_quality_graph:
     title: "The charts below describe the quality of GTFS data collected for this route."
+agency_spatial_accuracy:
+    title: "Spatial Accuracy (All Routes)"
+agency_vp_per_min_graph:
+    title: "Vehicle Positions per Minute (All Routes)"

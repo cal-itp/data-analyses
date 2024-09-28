@@ -27,46 +27,8 @@ def operator_profiles()->pd.DataFrame:
                          .reset_index(drop = True))
     return op_profiles4
 
-def operators_with_rt()->pd.DataFrame:
-    """
-    Operators who have schedule and realtime data.
-    """
-    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
-    
-    schd_vp_df = (pd.read_parquet(schd_vp_url, 
-                       filters=[[("sched_rt_category", "==", "schedule_and_vp")]],
-                       columns = [ "schedule_gtfs_dataset_key",
-                                    "caltrans_district",
-                                    "organization_name",
-                                    "name",
-                                    "sched_rt_category",
-                                    "service_date",]
-                                     )
-                     )
 
-    # Drop duplicated rows by Caltrans district and organization name.
-    # Keep only the most recent row.
-    schd_vp_df = (schd_vp_df
-                      .dropna(subset="caltrans_district")
-                      .sort_values(by=["caltrans_district", "organization_name", "service_date"],
-            ascending=[False, False, False])
-                      .drop(columns=["service_date"])
-                      .drop_duplicates()
-                      .reset_index(drop = True)
-                     )
-
-    op_profile = operator_profiles()
-    
-    # Merge 
-    final = pd.merge(
-        op_profile,
-        schd_vp_df,
-        on=["name", "organization_name", "schedule_gtfs_dataset_key"],
-        how="inner"
-        )
-    return final
-
-def operators_schd_only_rt()->pd.DataFrame:
+def operators_schd_vp_rt()->pd.DataFrame:
     """
     Operators who have schedule only OR have 
     both schedule and realtime data.
@@ -92,9 +54,8 @@ def operators_schd_only_rt()->pd.DataFrame:
             "caltrans_district",
             "organization_name",
             "service_date",
-            "sched_rt_category",
         ],
-        ascending=[True, True, False, False],
+        ascending=[True, True, False],
     )
     .drop_duplicates(
         subset=[
