@@ -21,7 +21,8 @@ preprocess_vp:
 preprocess_schedule_only:
 	make route_typologies_data
 	python operator_scheduled_stats.py 
-     
+	python schedule_stats_by_stop.py 
+    
 route_typologies_data:
 	python route_typologies.py
 	python schedule_stats_by_route_direction.py
