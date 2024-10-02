@@ -1,8 +1,0 @@
-format: jb-book
-parts:
--   caption: null
-    chapters:
-    -   file: district_04-oakland.md
-        sections:
-        -   glob: district_04-oakland/*
-root: README
