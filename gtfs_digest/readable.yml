@@ -64,10 +64,11 @@ time_of_day: "Time of Day"
 day_name: "Day of Week"
 year: Year
 month: Month
+month_year: Month
 weekday_weekend: "Weekend or Weekday"
 departure_hour: "Departure Hour"
-weekend_service_hours: "Service Hours"
-weekday_service_hours: "Weekday Service Hours"
+service_hours: "Weekend Service Hours"
+daily_service_hours: "Weekday Service Hours"
 # Roads
 road_freq_category: "Road Frequency Category"
 road_typology: "Road Typology Category"
