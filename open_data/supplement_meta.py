@@ -9,7 +9,7 @@ from pathlib import Path
 
 from calitp_data_analysis import utils
 from update_vars import analysis_date, ESRI_BASE_URL
-from publish_utils import RENAME_HQTA, RENAME_SPEED
+from open_data_utils import RENAME_HQTA, RENAME_SPEED, RENAME_GTFS
 
 def get_esri_url(name: str)-> str:
     return f"{ESRI_BASE_URL}{name}/FeatureServer"
@@ -46,11 +46,13 @@ supplement_me = {
         "methodology": TRAFFIC_OPS_METHODOLOGY,
         "data_dict_url": get_esri_url("CA_Transit_Routes"),
         "revision_date": analysis_date,
+        "rename_cols": RENAME_GTFS
     },
     "ca_transit_stops": {
         "methodology": TRAFFIC_OPS_METHODOLOGY,
         "data_dict_url": get_esri_url("CA_Transit_Stops"),
         "revision_date": analysis_date,
+        "rename_cols": RENAME_GTFS
     },
     "speeds_by_stop_segments": {
         "methodology": SEGMENT_METHODOLOGY,
