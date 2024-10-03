@@ -7,7 +7,7 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 
-import prep_traffic_ops
+import open_data_utils
 from calitp_data_analysis import utils
 from shared_utils import publish_utils
 from update_vars import (analysis_date, 
@@ -32,7 +32,7 @@ def create_stops_file_for_export(
         f"{RT_SCHED_GCS}{STOP_FILE}_{date}.parquet"
     )
     
-    stops2 = prep_traffic_ops.standardize_operator_info_for_exports(stops, date)
+    stops2 = open_data_utils.standardize_operator_info_for_exports(stops, date)
 
     time1 = datetime.datetime.now()
     print(f"get stops for date: {time1 - time0}")
@@ -71,7 +71,7 @@ def patch_previous_dates(
             date = one_date, 
             crosswalk_col = "schedule_gtfs_dataset_key",
             data_type = "gdf"
-        ).pipe(prep_traffic_ops.standardize_operator_info_for_exports, one_date)
+        ).pipe(open_data_utils.standardize_operator_info_for_exports, one_date)
         
         partial_dfs.append(df_to_add)
 
@@ -104,7 +104,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     df2 = (df[col_order]
            .reindex(columns = col_order)
-           .rename(columns = prep_traffic_ops.RENAME_COLS)
+           .rename(columns = open_data_utils.RENAME_COLS)
            .reset_index(drop=True)
     )
     
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
     stops = create_stops_file_for_export(analysis_date)  
     
-    prep_traffic_ops.export_to_subfolder(
+    open_data_utils.export_to_subfolder(
         "ca_transit_stops", analysis_date
     )
     
