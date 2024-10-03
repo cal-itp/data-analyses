@@ -7,7 +7,7 @@ from loguru import logger
 from pathlib import Path
 from typing import Union
 
-import publish_utils
+import open_data_utils
 from update_vars import analysis_date
 
 catalog = intake.open_catalog("catalog.yml")
@@ -55,12 +55,12 @@ def new_columns_for_data_dict(
         # Columns in our dataset
         FILE = catalog[t].urlpath
         gdf = gpd.read_parquet(FILE).pipe(
-            publish_utils.standardize_column_names
+            open_data_utils.standardize_column_names
         ).pipe(
-            publish_utils.remove_internal_keys)
+            open_data_utils.remove_internal_keys)
         
         if "hq_" in t:
-            gdf = gdf.rename(columns = publish_utils.RENAME_HQTA)
+            gdf = gdf.rename(columns = open_data_utils.RENAME_HQTA)
         elif "speed" in t:
             gdf = gdf.rename(columns = publish_utils.RENAME_SPEED)
         
