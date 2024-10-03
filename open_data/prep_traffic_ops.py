@@ -7,58 +7,40 @@ import intake
 import pandas as pd
 
 from calitp_data_analysis import utils, geography_utils
-from shared_utils import schedule_rt_utils
-from update_vars import TRAFFIC_OPS_GCS, analysis_date
+from shared_utils import gtfs_utils_v2, schedule_rt_utils
+from update_vars import TRAFFIC_OPS_GCS, analysis_date, GTFS_DATA_DICT, SCHED_GCS
 
 catalog = intake.open_catalog(
     "../_shared_utils/shared_utils/shared_data_catalog.yml")
-
-keep_trip_cols = [
-    "feed_key", "name", 
-    "trip_id", 
-    "route_id", "route_type", 
-    "shape_id", "shape_array_key",
-    "route_long_name", "route_short_name", "route_desc"
-]
-
-keep_shape_cols = [
-    "shape_array_key",
-    "n_trips", "geometry"
-]
-  
-keep_stop_cols = [
-    "feed_key",
-    "stop_id", "stop_name", 
-    "geometry"
-] 
-
-keep_stop_time_cols = [
-    "feed_key", "trip_id", "stop_id"
-]    
     
-
+    
 def standardize_operator_info_for_exports(
     df: pd.DataFrame, 
     date: str
 ) -> pd.DataFrame:
-    
-    crosswalk = schedule_rt_utils.sample_schedule_feed_key_to_organization_crosswalk(
-        df, 
-        date,
-        quartet_data = "schedule", 
-        dim_gtfs_dataset_cols = [
-            "key", "regional_feed_type",
-            "base64_url"],
-        dim_organization_cols = [
-            "source_record_id", "name", "caltrans_district"]
+    """
+    Use our crosswalk file created in gtfs_funnel
+    and add in the organization columns we want to 
+    publish on.
+    """
+    CROSSWALK_FILE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
+
+    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
+
+    crosswalk = pd.read_parquet(
+        f"{SCHED_GCS}{CROSSWALK_FILE}_{date}.parquet",
+        columns = [
+            "schedule_gtfs_dataset_key", "name", "base64_url", 
+            "organization_source_record_id", "organization_name"
+        ],
+        filters = [[("schedule_gtfs_dataset_key", "in", public_feeds)]]
     )
     
     df2 = pd.merge(
         df,
         crosswalk,
-        on = "feed_key",
-        how = "inner",
-        validate = "m:1"
+        on = "schedule_gtfs_dataset_key",
+        how = "inner"
     )
         
     return df2
@@ -157,4 +139,5 @@ RENAME_COLS = {
     "organization_name": "agency",
     "organization_source_record_id": "org_id",
     "route_name_used": "route_name",
+    "route_types_served": "routetypes"
 }
