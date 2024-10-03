@@ -1,12 +1,16 @@
 import os
 from pathlib import Path
-from typing import Union
+from typing import Literal, Union
 
 import gcsfs
+import geopandas as gpd
 import pandas as pd
+from shared_utils import catalog_utils
 
 fs = gcsfs.GCSFileSystem()
+SCHED_GCS = "gs://calitp-analytics-data/data-analyses/gtfs_schedule/"
 PUBLIC_BUCKET = "gs://calitp-publish-data-analysis/"
+GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 
 def write_to_public_gcs(
@@ -59,3 +63,29 @@ def exclude_private_datasets(
     Filter out private datasets.
     """
     return df[df[col].isin(public_gtfs_dataset_keys)].reset_index(drop=True)
+
+
+def subset_table_from_previous_date(
+    gcs_bucket: str,
+    filename: Union[str, Path],
+    operator_and_dates_dict: dict,
+    date: str,
+    crosswalk_col: str = "schedule_gtfs_dataset_key",
+    data_type: Literal["df", "gdf"] = "df",
+) -> pd.DataFrame:
+    CROSSWALK_FILE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
+
+    crosswalk = pd.read_parquet(f"{SCHED_GCS}{CROSSWALK_FILE}_{date}.parquet", columns=["name", crosswalk_col])
+
+    subset_keys = crosswalk[crosswalk.name.isin(operator_and_dates_dict[date])][crosswalk_col].unique()
+
+    if data_type == "df":
+        past_df = pd.read_parquet(
+            f"{gcs_bucket}{filename}_{date}.parquet", filters=[[(crosswalk_col, "in", subset_keys)]]
+        )
+    else:
+        past_df = gpd.read_parquet(
+            f"{gcs_bucket}{filename}_{date}.parquet", filters=[[(crosswalk_col, "in", subset_keys)]]
+        )
+
+    return past_df
