@@ -123,12 +123,35 @@ tables:
   - dataset_name: ca_transit_stops
     agency: *agency
     org_id: *org_id    
-    route_id: *route_id
-    route_type: *route_type
     stop_id: *stop_id
     stop_name: *stop_name
     base64_url: *base64_url
-    
+    n_trips: 
+      definition: |- 
+        "# of daily trips (unique trip_ids) this stop serves"
+      definition_source: |-
+        "https://gtfs.org/schedule/reference/#stop_timestxt"
+    n_routes: 
+      definition: |-
+        "# of unique route_ids this stop serves"
+      definition_source: |-
+        "https://gtfs.org/schedule/reference/#tripstxt"
+    routetypes: 
+      definition: |-
+        "# of unique route types served"
+      definition_source: |-
+        "https://gtfs.org/schedule/reference/#routestxt"
+    n_arrivals: 
+      definition: |-
+        "# daily arrivals (across routes) this stop serves"
+      definition_source: |-
+        "https://gtfs.org/schedule/reference/#stop_timestxt"
+    n_hours_in_service: 
+      definition: |-
+        "# hours this stop has scheduled service (unique departure hours)" 
+      definition_source: |-
+        "https://gtfs.org/schedule/reference/#stop_timestxt"
+
   - dataset_name: speeds_by_stop_segments
     agency: *agency
     org_id: *org_id    
