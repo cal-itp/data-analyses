@@ -25,8 +25,7 @@ def stats_for_stop(
         df
         .groupby(group_cols, group_keys=False)
         .agg({
-            "trip_id": "nunique", 
-            "route_id": "nunique",
+            "route_id": lambda x: list(sorted(set(x))),
             "route_type": lambda x: list(sorted(set(x))),
             "departure_sec": "count",
             "departure_hour": "nunique"
@@ -34,17 +33,21 @@ def stats_for_stop(
         .rename(columns = {
             "departure_sec": "n_arrivals",
             "departure_hour": "n_hours_in_service",
-            "trip_id": "n_trips",
-            "route_id": "n_routes",
+            "route_id": "route_ids_served",
             "route_type": "route_types_served"
         })
+    )
+    
+    df2 = df2.assign(
+        n_routes = df2.apply(lambda x: len(x.route_ids_served), axis=1)
     )
     
     # Instead of producing list, we want to show values like 0, 3 instead of [0, 3]
     # portal users can see combinations more quickly
     # and access particular rows using str.contains
     df2 = df2.assign(
-        route_types_served = df2.route_types_served.str.join(", ")
+        route_types_served = df2.route_types_served.str.join(", "),
+        route_ids_served = df2.route_ids_served.str.join(", "),
     )
     
     return df2
