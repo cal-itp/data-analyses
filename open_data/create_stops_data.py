@@ -117,8 +117,10 @@ if __name__ == "__main__":
 
     stops = create_stops_file_for_export(analysis_date)  
     
-    open_data_utils.export_to_subfolder(
-        "ca_transit_stops", analysis_date
+    utils.geoparquet_gcs_export(
+        stops,
+        TRAFFIC_OPS_GCS,
+        f"export/ca_transit_stops_{analysis_date}"
     )
     
     published_stops = patch_previous_dates(
