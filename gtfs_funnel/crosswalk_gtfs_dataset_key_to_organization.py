@@ -7,16 +7,16 @@ without our keys to easily go back to our workflow whenever we get
 feedback we get from users, but this is very redundant.
 """
 import datetime
+import os
 import pandas as pd
+
+from calitp_data_analysis.tables import tbls
+from siuba import *
 
 from shared_utils import schedule_rt_utils
 from segment_speed_utils import helpers
 from update_vars import GTFS_DATA_DICT, SCHED_GCS
 
-import os
-from calitp_data_analysis.sql import query_sql
-from calitp_data_analysis.tables import tbls
-from siuba import *
 
 def create_gtfs_dataset_key_to_organization_crosswalk(
     analysis_date: str
@@ -86,27 +86,27 @@ def load_ntd(year: int) -> pd.DataFrame:
 
     df2 = df.sort_values(by=df.columns.tolist(), na_position="last")
     df3 = df2.groupby("agency_name").first().reset_index()
-
+    
     return df3
 
-def load_mobility()->pd.DataFrame:
+def load_mobility(
+    cols: list = [
+        "agency_name", "counties_served",
+        "hq_city", "hq_county",
+        "is_public_entity", "is_publicly_operating",
+        "funding_sources",
+        "on_demand_vehicles_at_max_service",
+        "vehicles_at_max_service"
+    ]
+) -> pd.DataFrame:
     """
-    Load mobility data in our warehouse.
+    Load mobility data (dim_mobility_mart_providers) 
+    from our warehouse.
     """
     df = (
-    tbls.mart_transit_database.dim_mobility_mart_providers()
-     >> select(
-        _.agency_name,
-        _.counties_served,
-        _.hq_city,
-        _.hq_county,
-        _.is_public_entity,
-        _.is_publicly_operating,
-        _.funding_sources,
-        _.on_demand_vehicles_at_max_service,
-        _.vehicles_at_max_service
-    )
-    >> collect()
+        tbls.mart_transit_database.dim_mobility_mart_providers()
+        >> select(*cols)
+        >> collect()
     )
     
     df2 = df.sort_values(
@@ -119,6 +119,11 @@ def load_mobility()->pd.DataFrame:
     return df3
 
 def merge_ntd_mobility(year:int)->pd.DataFrame:
+    """
+    Merge NTD (dim_annual_ntd_agency_information) with 
+    mobility providers (dim_mobility_mart_providers)
+    and dedupe and keep 1 row per agency.
+    """
     ntd = load_ntd(year)
     mobility = load_mobility()
     
@@ -135,6 +140,15 @@ def merge_ntd_mobility(year:int)->pd.DataFrame:
         drop=True
     ).drop(columns = "agency_name")
     
+    # Wherever possible, allow nullable integers. These columns are integers, but can be
+    # missing if we don't find corresponding NTD info
+    integrify_cols = [
+        "number_of_state_counties", "number_of_counties_with_service", 
+        "service_area_sq_miles", "service_area_pop",
+        "on_demand_vehicles_at_max_service", "vehicles_at_max_service",
+        "voms_pt", "voms_do", "year",
+    ]
+    m1[integrify_cols] = m1[integrify_cols].astype("Int64")
 
     return m1
 
