@@ -35,9 +35,11 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
         "name"
     ]
         
-    trips_df = helpers.import_scheduled_trips(analysis_date, 
-                                             columns = trip_scheduled_col,
-                                             get_pandas = True)
+    trips_df = helpers.import_scheduled_trips(
+        analysis_date, 
+        columns = trip_scheduled_col,
+        get_pandas = True
+    )
 
     
     # Merge dfs
@@ -73,9 +75,9 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
     agg3 = (agg2.drop_duplicates(subset= main_cols)
             .reset_index(drop=True)
             .drop(columns=["total_stops"])
+            .rename(columns = {"stop_primary_direction": "route_primary_direction"})
            )
     
-    agg3 = agg3.rename(columns = {"stop_primary_direction":"route_primary_direction"})
     return agg3
 
 def assemble_scheduled_trip_metrics(
