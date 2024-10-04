@@ -6,42 +6,43 @@ Grain is operator-service_date-route-direction-time_period.
 import geopandas as gpd
 import pandas as pd
 
-from calitp_data_analysis import utils
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
 from shared_utils import gtfs_utils_v2, publish_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
 
-route_time_cols = ["schedule_gtfs_dataset_key", 
-                   "route_id", 
-                   "direction_id", 
-                   "time_period"]
+route_time_cols = [
+    "schedule_gtfs_dataset_key", 
+    "route_id", "direction_id", 
+     "time_period"
+]
 
 sort_cols = route_time_cols + ["service_date"]
-route_time_with_cardinal_dir_cols = route_time_cols + ["route_primary_direction"]
-sort_cols_with_cardinal_dir_cols = route_time_with_cardinal_dir_cols + ["service_date"]
 
 def concatenate_schedule_by_route_direction(
     date_list: list
 ) -> pd.DataFrame:
     """
-    Concatenate schedule data that's been 
-    aggregated to route-direction-time_period.
+    Concatenate schedule metrics (from gtfs_funnel)
+    for route-direction-time_period grain
+    for all the dates we have.
     """
     FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_route_direction_metrics
+    
+    route_time_dir_cols = route_time_cols + ["route_primary_direction"]
     
     df = time_series_utils.concatenate_datasets_across_dates(
         RT_SCHED_GCS,
         FILE,
         date_list,
         data_type = "df",
-        columns = route_time_with_cardinal_dir_cols + [
+        columns = route_time_dir_cols + [
             "avg_scheduled_service_minutes", 
             "avg_stop_miles",
             "n_trips", "frequency", 
             "is_express", "is_rapid",  "is_rail",
             "is_coverage", "is_downtown_local", "is_local",
         ],
-    ).sort_values(sort_cols_with_cardinal_dir_cols).rename(
+    ).sort_values(route_time_dir_cols + ["service_date"]).rename(
         columns = {
             # rename so we understand data source
             "n_trips": "n_scheduled_trips",
@@ -51,35 +52,13 @@ def concatenate_schedule_by_route_direction(
     return df
 
 
-def concatenate_segment_speeds_by_route_direction(
-    date_list: list
-) -> gpd.GeoDataFrame:
-    """
-    Concatenate segment speeds data that's been 
-    aggregated to route-direction-time_period.
-    """
-    FILE = GTFS_DATA_DICT.stop_segments.route_dir_single_segment
-    
-    df = time_series_utils.concatenate_datasets_across_dates(
-        SEGMENT_GCS,
-        FILE,
-        date_list,
-        data_type = "gdf",
-        columns = route_time_cols + [
-            "stop_pair", "stop_pair_name",
-            "p20_mph", "p50_mph", 
-            "p80_mph", "geometry"],
-    ).sort_values(sort_cols).reset_index(drop=True)
-    
-    return df
-
-
 def concatenate_speeds_by_route_direction(
     date_list: list
 ) -> pd.DataFrame: 
     """
-    Concatenate rt vs schedule data that's been 
-    aggregated to route-direction-time_period.
+    Concatenate summary speeds (from rt_segment_speeds) 
+    for route-direction-time_period grain 
+    for all the dates we have.
     """
     FILE = GTFS_DATA_DICT.rt_stop_times.route_dir_single_summary
 
@@ -97,6 +76,11 @@ def concatenate_speeds_by_route_direction(
 def concatenate_rt_vs_schedule_by_route_direction(
     date_list: list
 ) -> pd.DataFrame:
+    """
+    Concatenate the RT metrics (from rt_vs_schedule) 
+    for route-direction_time_period grain 
+    for all the dates we have.
+    """
     FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.vp_route_direction_metrics
 
     df = time_series_utils.concatenate_datasets_across_dates(
@@ -121,16 +105,24 @@ def concatenate_rt_vs_schedule_by_route_direction(
 def concatenate_crosswalk_organization(
     date_list: list
 ) -> pd.DataFrame:
+    """
+    Concatenate the crosswalk (from gtfs_funnel) 
+    that connects gtfs_dataset_key to organization
+    and other organization-related columns (NTD, etc)
+    for all the dates we have.
+    
+    This is operator grain.
+    """
     FILE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     
     crosswalk_cols = [
-    "schedule_gtfs_dataset_key",
-    "name",
-    "schedule_source_record_id",
-    "base64_url",
-    "organization_source_record_id",
-    "organization_name",
-    "caltrans_district"
+        "schedule_gtfs_dataset_key",
+        "name",
+        "schedule_source_record_id",
+        "base64_url",
+        "organization_source_record_id",
+        "organization_name",
+        "caltrans_district"
     ]
     
     df = time_series_utils.concatenate_datasets_across_dates(
@@ -147,7 +139,10 @@ def concatenate_crosswalk_organization(
 def merge_in_standardized_route_names(
     df: pd.DataFrame, 
 ) -> pd.DataFrame:
-    
+    """
+    Use the clean route names file that standardizes route names once.
+    and re-parse it for parts to the name.
+    """
     keep_cols = [
         "schedule_gtfs_dataset_key", "name", 
         "route_id", "service_date", 
@@ -213,54 +208,38 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
     
     df2["max_score"] = df2[[c for c in df2.columns if "_score" in c]].max(axis=1)
     df2["typology"] = df2.max_score.map({v: k for k, v in ranks.items()})
+    
     df2 = df2.assign(
         typology = df2.typology.fillna("unknown")
-    )
+    )[route_time_cols + ["typology"]]
     
-    df3 = df2[route_time_cols + ["typology"]]
     
-    return df3
+    return df2
 
 
-if __name__ == "__main__":
-    
-    from shared_utils import rt_dates
-    
-    analysis_date_list = (
-        rt_dates.y2024_dates + rt_dates.y2023_dates
-    )
-    
-    DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
-    DIGEST_SEGMENT_SPEEDS = GTFS_DATA_DICT.digest_tables.route_segment_speeds
-    
-    # These are public schedule_gtfs_dataset_keys
-    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
-    
-    # Get cardinal direction for each route
-    df_sched = concatenate_schedule_by_route_direction(analysis_date_list)
-    
+def merge_data_sources_by_route_direction(
+    df_schedule: pd.DataFrame,
+    df_rt_sched: pd.DataFrame,
+    df_avg_speeds: pd.DataFrame,
+    df_crosswalk: pd.DataFrame
+):
+    """
+    Merge schedule, rt_vs_schedule, and speeds data, 
+    which are all at route-direction-time_period-date grain.
+    This merged dataset will be used in GTFS digest visualizations.
+    """
     # Get primary route type
-    primary_typology = set_primary_typology(df_sched)
+    primary_typology = set_primary_typology(df_schedule)
     
-    df_sched2 = pd.merge(
-        df_sched,
+    df_schedule2 = pd.merge(
+        df_schedule,
         primary_typology,
         on = route_time_cols,
         how = "left"
     )
-
-    df_avg_speeds = concatenate_speeds_by_route_direction(analysis_date_list)
-                    
-    df_rt_sched = (
-        concatenate_rt_vs_schedule_by_route_direction(
-            analysis_date_list)
-        .astype({"direction_id": "float"})
-    )
-    
-    df_crosswalk = concatenate_crosswalk_organization(analysis_date_list)
     
     df = pd.merge(
-        df_sched2,
+        df_schedule2,
         df_rt_sched,
         on = route_time_cols + ["service_date"],
         how = "outer",
@@ -283,10 +262,6 @@ if __name__ == "__main__":
     ).pipe(
         # Find the most common cardinal direction
         gtfs_schedule_wrangling.top_cardinal_direction
-    ).pipe(
-        # Drop any private datasets before exporting
-        publish_utils.exclude_private_datasets, 
-        public_gtfs_dataset_keys= public_feeds
     )
      
     integrify = [
@@ -297,30 +272,63 @@ if __name__ == "__main__":
     ]
     
     df[integrify] = df[integrify].fillna(0).astype("int")
+   
+    return df
+
+
+if __name__ == "__main__":
     
+    from shared_utils import rt_dates
+    
+    analysis_date_list = (
+        rt_dates.y2024_dates + rt_dates.y2023_dates
+    )
+    
+    DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
+    DIGEST_SEGMENT_SPEEDS = GTFS_DATA_DICT.digest_tables.route_segment_speeds
+    
+    # These are public schedule_gtfs_dataset_keys
+    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
+    
+    # Get cardinal direction for each route
+    df_sched = concatenate_schedule_by_route_direction(analysis_date_list).pipe(
+        # Drop any private datasets before exporting
+        publish_utils.exclude_private_datasets, 
+        public_gtfs_dataset_keys = public_feeds
+    )
+    
+    df_avg_speeds = concatenate_speeds_by_route_direction(
+        analysis_date_list
+    ).pipe(
+        publish_utils.exclude_private_datasets, 
+        public_gtfs_dataset_keys = public_feeds
+    )
+                    
+    df_rt_sched = (
+        concatenate_rt_vs_schedule_by_route_direction(
+            analysis_date_list
+        ).pipe(
+            publish_utils.exclude_private_datasets, 
+            public_gtfs_dataset_keys = public_feeds
+        ).astype({"direction_id": "float"})
+    )
+    
+    df_crosswalk = concatenate_crosswalk_organization(
+        analysis_date_list
+    ).pipe(
+        publish_utils.exclude_private_datasets, 
+        public_gtfs_dataset_keys = public_feeds
+    )
+    
+    df = merge_data_sources_by_route_direction(
+        df_sched,
+        df_rt_sched,
+        df_avg_speeds,
+        df_crosswalk
+    )
+
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
     print("Saved Digest RT")
-    
-    segment_speeds = concatenate_segment_speeds_by_route_direction(
-        analysis_date_list
-    ).pipe(
-        merge_in_standardized_route_names, 
-    ).astype({"direction_id": "int64"}) #Int64 doesn't work for gdf
-    
-    segment_speeds2 = pd.merge(
-        segment_speeds,
-        primary_typology,
-        on = route_time_cols,
-        how = "left"
-    ).pipe(
-        publish_utils.exclude_private_datasets, 
-        public_gtfs_dataset_keys= public_feeds)
-
-    utils.geoparquet_gcs_export(
-        segment_speeds2,
-        RT_SCHED_GCS,
-        DIGEST_SEGMENT_SPEEDS
-    )
     
