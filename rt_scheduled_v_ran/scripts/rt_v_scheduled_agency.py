@@ -44,7 +44,7 @@ def agency_metrics(analysis_date: str, dict_inputs: dict) -> pd.DataFrame:
     # Cleanrt_V
     agg1 = agg1.drop(columns=sum_cols)
     
-    # Save
+    # Save: take out test later
     agg1.to_parquet(f"{RT_SCHED_GCS}{AGENCY_EXPORT}_TEST_{analysis_date}.parquet")
 
     end = datetime.datetime.now()
