@@ -96,7 +96,8 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     stop_cols = [
         'stop_id', 'stop_name', 
         # add GTFS stop-related metrics
-        'n_trips', 'n_routes', 'route_types_served', 'n_arrivals', 'n_hours_in_service',
+        'n_routes', 'route_ids_served', 'route_types_served', 
+        'n_arrivals', 'n_hours_in_service',
     ]
     agency_ids = ['base64_url']
     
@@ -112,21 +113,21 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 if __name__ == "__main__":
-    
+        
     time0 = datetime.datetime.now()
 
     stops = create_stops_file_for_export(analysis_date)  
-    
-    utils.geoparquet_gcs_export(
-        stops,
-        TRAFFIC_OPS_GCS,
-        f"export/ca_transit_stops_{analysis_date}"
-    )
-    
+
     published_stops = patch_previous_dates(
         stops, 
         analysis_date,
-    ).pipe(finalize_export_df)
+    ).pipe(finalize_export_df)    
+
+    utils.geoparquet_gcs_export(
+        published_stops,
+        TRAFFIC_OPS_GCS,
+        f"export/ca_transit_stops_{analysis_date}"
+    )
     
     utils.geoparquet_gcs_export(
         published_stops, 

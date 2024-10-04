@@ -155,7 +155,7 @@ RENAME_COLS = {
     "organization_name": "agency",
     "organization_source_record_id": "org_id",
     "route_name_used": "route_name",
-    "route_types_served": "routetypes"
+    "route_types_served": "routetypes",
 }
 
 # Rename columns when shapefile truncates
@@ -185,5 +185,6 @@ RENAME_SPEED = {
 }
 
 RENAME_GTFS = {
-    "n_hours_in": "n_hours_in_service"
+    "n_hours_in": "n_hours_in_service",
+    "route_ids_": "route_ids_served"
 }

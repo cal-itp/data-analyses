@@ -126,11 +126,6 @@ tables:
     stop_id: *stop_id
     stop_name: *stop_name
     base64_url: *base64_url
-    n_trips: 
-      definition: |- 
-        "# of daily trips (unique trip_ids) this stop serves"
-      definition_source: |-
-        "https://gtfs.org/schedule/reference/#stop_timestxt"
     n_routes: 
       definition: |-
         "# of unique route_ids this stop serves"
@@ -138,7 +133,12 @@ tables:
         "https://gtfs.org/schedule/reference/#tripstxt"
     routetypes: 
       definition: |-
-        "# of unique route types served"
+        "List of unique route types served at the stop. A value of 3 indicates a route_type==3."
+      definition_source: |-
+        "https://gtfs.org/schedule/reference/#routestxt"
+    route_ids_served: 
+      definition: |-
+        "List of unique route_ids served at the stop. A value of 1 indicates route_id==1."
       definition_source: |-
         "https://gtfs.org/schedule/reference/#routestxt"
     n_arrivals: 
