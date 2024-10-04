@@ -8,8 +8,9 @@ import pandas as pd
 import yaml
 
 import open_data_utils
-from calitp_data_analysis import utils, geography_utils
-from shared_utils import gtfs_utils_v2, portfolio_utils, publish_utils
+from calitp_data_analysis.geography_utils import WGS84
+from calitp_data_analysis import utils
+from shared_utils import portfolio_utils, publish_utils
 from segment_speed_utils import helpers
 from update_vars import analysis_date, TRAFFIC_OPS_GCS
 
@@ -37,7 +38,7 @@ def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
         date,
         columns = ["shape_array_key", "n_trips", "geometry"],
         get_pandas = True,
-        crs = geography_utils.WGS84
+        crs = WGS84
     ).dropna(subset="shape_array_key")
     
     df = pd.merge(
@@ -50,12 +51,14 @@ def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
     drop_cols = ["route_short_name", "route_long_name", "route_desc"]
     route_shape_cols = ["schedule_gtfs_dataset_key", "route_id", "shape_id"]
     
-    routes_assembled = (portfolio_utils.add_route_name(df)
-                        .drop(columns = drop_cols)
-                        .sort_values(route_shape_cols)
-                        .drop_duplicates(subset=route_shape_cols)
-                        .reset_index(drop=True)
-                      )    
+    routes_assembled = (
+        portfolio_utils.add_route_name(df)
+        .drop(columns = drop_cols)
+        .sort_values(route_shape_cols)
+        .drop_duplicates(subset=route_shape_cols)
+        .reset_index(drop=True)
+    )
+    
     routes_assembled2 = open_data_utils.standardize_operator_info_for_exports(
         routes_assembled, 
         date
@@ -114,11 +117,10 @@ def patch_previous_dates(
     
     partial_dfs = []
 
-
     for one_date, operator_list in patch_operators_dict.items():
         df_to_add = publish_utils.subset_table_from_previous_date(
             gcs_bucket = TRAFFIC_OPS_GCS,
-            filename = f"export/ca_transit_routes",
+            filename = f"ca_transit_routes",
             operator_and_dates_dict = patch_operators_dict,
             date = one_date, 
             crosswalk_col = "schedule_gtfs_dataset_key",
@@ -137,13 +139,10 @@ def patch_previous_dates(
     return published_routes
     
 
-
 def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Suppress certain columns used in our internal modeling for export.
     """
-    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
-    
     # Change column order
     route_cols = [
         'organization_source_record_id', 'organization_name',
@@ -152,7 +151,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     agency_ids = ['base64_url']
     
     col_order = route_cols + shape_cols + agency_ids + ['geometry']
-    df2 = (df[df.schedule_gtfs_dataset_key.isin(public_feeds)][col_order]
+    df2 = (df[col_order]
            .reindex(columns = col_order)
            .rename(columns = open_data_utils.RENAME_COLS)
            .reset_index(drop=True)
@@ -162,16 +161,23 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 if __name__ == "__main__":
+    
     time0 = datetime.datetime.now()
     
     # Make an operator-feed level file (this is published)    
     routes = create_routes_file_for_export(analysis_date)  
     
+    # Export into GCS (outside export/)
+    # create_routes is different than create_stops, which already has
+    # a table created in gtfs_funnel that we can use to patch in previous dates
+    # here, we have to create those for each date, then save a copy
+    # the export/ folder contains the patched versions of the routes
     utils.geoparquet_gcs_export(
         routes,
         TRAFFIC_OPS_GCS,
-        f"export/ca_transit_routes_{analysis_date}"
+        f"ca_transit_routes_{analysis_date}"
     )
+    
     
     published_routes = patch_previous_dates(
         routes, 
