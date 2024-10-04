@@ -18,9 +18,9 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import helpers, segment_calcs, wrangle_shapes
+from segment_speed_utils import segment_calcs, wrangle_shapes
 from segment_speed_utils.project_vars import PROJECT_CRS
-from shared_utils import rt_utils
+from shared_utils import publish_utils, rt_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
 fs = gcsfs.GCSFileSystem()    
@@ -162,7 +162,7 @@ def add_direction_to_usable_vp(
     
     export_path = f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}"
     
-    helpers.if_exists_then_delete(export_path)
+    publish_utils.if_exists_then_delete(export_path)
     
     vp_with_dir.to_parquet(
         export_path,
