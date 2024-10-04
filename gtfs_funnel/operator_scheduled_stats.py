@@ -39,41 +39,41 @@ def schedule_stats_by_operator(
     nunique_cols = [
         "route_id", "trip_instance_key", "shape_array_key"
     ]
-    trip_stats = (trips
-                  .groupby(group_cols, 
-                           observed=True, group_keys=False)
-                  .agg({
-                      **{c: "nunique" for c in nunique_cols}
-                  }).reset_index()
-                  .rename(columns = {
-                      "route_id": "operator_n_routes",
-                      "trip_instance_key": "operator_n_trips",
-                      "shape_array_key": "operator_n_shapes",
-                  })
-                 )
+    trip_stats = (
+        trips
+        .groupby(group_cols, observed=True, group_keys=False)
+        .agg({
+            **{c: "nunique" for c in nunique_cols}
+        }).reset_index()
+        .rename(columns = {
+            "route_id": "operator_n_routes",
+            "trip_instance_key": "operator_n_trips",
+            "shape_array_key": "operator_n_shapes",
+        })
+    )
     
-    stop_time_stats = (stop_times
-                       .groupby(group_cols, 
-                                observed=True, group_keys=False)
-                       .agg({
-                           "stop_id": "nunique",
-                           "trip_instance_key": "count"
-                       }).reset_index()
-                       .rename(columns = {
-                           "stop_id": "operator_n_stops",
-                           "trip_instance_key": "operator_n_arrivals"
-                       })
+    stop_time_stats = (
+        stop_times
+        .groupby(group_cols, observed=True, group_keys=False)
+        .agg({
+            "stop_id": "nunique",
+            "trip_instance_key": "count"
+        }).reset_index()
+        .rename(columns = {
+            "stop_id": "operator_n_stops",
+            "trip_instance_key": "operator_n_arrivals"
+       })
     )
     
     longest_shape = longest_shape_by_route(analysis_date)
-    shape_stats = (longest_shape
-                   .groupby(group_cols, 
-                            observed=True, group_keys=False)
-                   .agg({"route_length_miles": "sum"})
-                   .reset_index()
-                   .rename(columns = {
-                       "route_length_miles": "operator_route_length_miles"})
-                  )
+    shape_stats = (
+        longest_shape
+        .groupby(group_cols, observed=True, group_keys=False)
+        .agg({"route_length_miles": "sum"})
+        .reset_index()
+        .rename(columns = {
+            "route_length_miles": "operator_route_length_miles"})
+    )
     
     df = pd.merge(
         trip_stats,

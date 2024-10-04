@@ -151,19 +151,16 @@ def get_organization_id(
         sorting = [True for c in merge_cols]
         keep_cols = ["organization_source_record_id"]
 
-        # Eventually, we need to move to 1 organization name, so there's
-        # no fanout when we merge it on
-        # Until then, handle it by dropping duplicates and pick 1 name
-        dim_provider_gtfs_data2 = (
-            dim_provider_gtfs_data2.sort_values(
-                merge_cols + ["_valid_to", "_valid_from"], ascending=sorting + [False, False]
-            )
-            .drop_duplicates(merge_cols)
-            .reset_index(drop=True)[merge_cols + keep_cols]
-        )
+        # We allow fanout when merging a feed to multiple organization names,
+        # but we should handle it by selectig a preferred
+        # rather than alphabetical.
+        # (organization names Foothill Transit and City of Duarte)
+        dim_provider_gtfs_data2 = dim_provider_gtfs_data2.sort_values(
+            merge_cols + ["_valid_to", "_valid_from"], ascending=sorting + [False, False]
+        ).reset_index(drop=True)[merge_cols + keep_cols]
 
         df2 = pd.merge(df, dim_provider_gtfs_data2, on=merge_cols, how="inner")
-        # return dim_provider_gtfs_data2
+
         return df2
 
 
