@@ -12,7 +12,7 @@ import sys
 
 from loguru import logger
 
-from segment_speed_utils import helpers
+from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
                                               
 fs = gcsfs.GCSFileSystem()
@@ -132,7 +132,7 @@ def pare_down_vp_to_valid_trips(
     # https://stackoverflow.com/questions/69092126/is-it-possible-to-change-the-output-filenames-when-saving-as-partitioned-parquet
     export_path = f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}_stage"
     
-    helpers.if_exists_then_delete(export_path)
+    publish_utils.if_exists_then_delete(export_path)
     
     usable_vp.to_parquet(
         export_path,

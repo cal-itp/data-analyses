@@ -12,7 +12,7 @@ from dask import delayed, compute
 
 from calitp_data_analysis import geography_utils, utils
 from segment_speed_utils import helpers
-from shared_utils import portfolio_utils
+from shared_utils import portfolio_utils, publish_utils
 
 catalog = intake.open_catalog("*.yml")
 
@@ -357,7 +357,8 @@ if __name__ == "__main__":
     
     shapes_processed.to_parquet(f"{DATA_PATH}{SHAPES_PROCESSED_FILE}.parquet")
 
-    helpers.if_exists_then_delete(f"{DATA_PATH}{SHAPES_PROCESSED_FILE}/")
+    publish_utils.if_exists_then_delete(
+        f"{DATA_PATH}{SHAPES_PROCESSED_FILE}/")
     print("delete partitioned")
     del shapes_processed
 

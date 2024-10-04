@@ -8,7 +8,6 @@ and can be modularized in the future.
 import dask.dataframe as dd
 import dask_geopandas as dg
 import datetime
-import gcsfs
 import geopandas as gpd
 import pandas as pd
 
@@ -20,8 +19,6 @@ from segment_speed_utils.project_vars import (GTFS_DATA_DICT,
                                               SCHED_GCS,
                                               PROJECT_CRS)
 from calitp_data_analysis import utils
-
-fs = gcsfs.GCSFileSystem()
 
 
 def import_scheduled_trips(
@@ -267,18 +264,3 @@ def remove_shapes_outside_ca(
         ).drop(columns = "index_right")
     
     return shapes_within_ca
-
-
-def if_exists_then_delete(filepath: str):
-    """
-    Check if file exists in GCS and delete.
-    For partitioned parquets, which are saved as folders, we need
-    to use recursive=True.
-    """
-    if fs.exists(filepath):
-        if fs.isdir(filepath):
-            fs.rm(filepath, recursive=True)
-        else:
-            fs.rm(filepath)
-    
-    return
