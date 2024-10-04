@@ -6,7 +6,7 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
-from calitp_data_analysis import utils, geography_utils
+from calitp_data_analysis import geography_utils
 from shared_utils import gtfs_utils_v2, schedule_rt_utils
 from update_vars import TRAFFIC_OPS_GCS, analysis_date, GTFS_DATA_DICT, SCHED_GCS
 
@@ -114,25 +114,6 @@ def clip_to_usa(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         
     return gdf2
     
-    
-def export_to_subfolder(file_name: str, date: str):
-    """
-    We always overwrite the same geoparquets each month, and point our
-    shared_utils/shared_data_catalog.yml to the latest file.
-    
-    But, save historical exports just in case.
-    """
-    file_name_sanitized = utils.sanitize_file_path(file_name)
-    
-    gdf = gpd.read_parquet(
-        f"{TRAFFIC_OPS_GCS}{file_name_sanitized}.parquet")
-        
-    utils.geoparquet_gcs_export(
-        gdf, 
-        f"{TRAFFIC_OPS_GCS}export/", 
-        f"{file_name_sanitized}_{date}"
-    )
-        
 
 STANDARDIZED_COLUMNS_DICT = {
     "caltrans_district": "district_name",
