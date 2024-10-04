@@ -62,6 +62,7 @@ digest_tables:
   dir: ${gcs_paths.RT_SCHED_GCS}
   route_schedule_vp: "digest/schedule_vp_metrics"
   route_segment_speeds: "digest/segment_speeds"
+  route_segment_geometry: "digest/segment_speeds_geom"
   operator_profiles: "digest/operator_profiles"
   operator_routes_map: "digest/operator_routes"
   operator_sched_rt: "digest/operator_schedule_rt_category"
