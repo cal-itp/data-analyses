@@ -8,8 +8,9 @@ import sys
 from dask import delayed, compute
 from loguru import logger
 
-from segment_speed_utils import helpers, segment_calcs
+from segment_speed_utils import segment_calcs
 from segment_speed_utils.project_vars import SEGMENT_GCS
+from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT
 
 def import_vp(analysis_date: str) -> pd.DataFrame:
@@ -222,7 +223,7 @@ if __name__ == "__main__":
             how = "inner"
         )
 
-        helpers.if_exists_then_delete(
+        publish_utils.if_exists_then_delete(
             f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}")
 
         vp_usable_with_dwell.to_parquet(
