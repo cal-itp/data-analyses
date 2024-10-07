@@ -56,6 +56,8 @@ operator_n_trips: "# Trips"
 operator_route_length_miles: "Operator Service Miles"
 organization_name: Organization
 organization_source_record_id: "Organization ID"
+vp_per_min_agency: "VP per Minute (All Routes)"
+spatial_accuracy_agency: "Spatial Accuracy (All Routes)"
 
 # Dates / time
 time_period: Period

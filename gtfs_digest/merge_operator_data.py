@@ -101,6 +101,24 @@ def operator_category_counts_by_date() -> pd.DataFrame:
     
     return operator_category_counts
 
+def concatenate_operator_level_metrics(
+    date_list: list
+) -> pd.DataFrame:
+    """
+    Get spatial accuracy and VP per Minute metrics on the
+    operator-service_date grain.
+    """
+    FILE = f"{GTFS_DATA_DICT.rt_vs_schedule_tables.vp_operator_metrics}"
+    
+    df = time_series_utils.concatenate_datasets_across_dates(
+        RT_SCHED_GCS,
+        FILE,
+        date_list,
+        data_type = "df",
+    ).sort_values(sort_cols).reset_index(drop=True)
+    
+    return df
+
 
 if __name__ == "__main__":
 
@@ -110,10 +128,17 @@ if __name__ == "__main__":
     
     OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
+    OPERATOR_METRICS = GTFS_DATA_DICT.digest_tables.operator_metrics
     SCHED_RT_CATEGORY = GTFS_DATA_DICT.digest_tables.operator_sched_rt
     CROSSWALK = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
+    
+    # Concat operator metrics.
+    operator_metrics = concatenate_operator_level_metrics(analysis_date_list)
+    operator_metrics.to_parquet(
+        f"{RT_SCHED_GCS}{OPERATOR_METRICS}.parquet"
+    )
     
     # Concat operator profiles
     df = concatenate_operator_stats(analysis_date_list)
@@ -192,4 +217,5 @@ if __name__ == "__main__":
     operator_category_counts.to_parquet(
         f"{RT_SCHED_GCS}{SCHED_RT_CATEGORY}.parquet"
     )
+    
     
