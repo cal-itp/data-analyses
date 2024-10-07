@@ -66,6 +66,7 @@ digest_tables:
   operator_profiles: "digest/operator_profiles"
   operator_routes_map: "digest/operator_routes"
   operator_sched_rt: "digest/operator_schedule_rt_category"
+  operator_metrics: "digest/operator_metrics"
   scheduled_service_hours: "digest/total_scheduled_service_hours"
 
 stop_segments:
