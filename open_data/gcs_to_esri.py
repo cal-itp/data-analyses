@@ -12,8 +12,9 @@ import sys
 
 from loguru import logger
 
-import publish_utils
-from calitp_data_analysis import utils, geography_utils
+import open_data_utils
+from calitp_data_analysis.geography_utils import WGS84
+from calitp_data_analysis import utils
 from update_vars import analysis_date, RUN_ME
 
 catalog = intake.open_catalog("./catalog.yml")
@@ -52,9 +53,12 @@ if __name__=="__main__":
                level="INFO")
         
     for d in RUN_ME :
-        gdf = catalog[d].read().to_crs(geography_utils.WGS84)
-        gdf = publish_utils.standardize_column_names(gdf).pipe(
-            publish_utils.remove_internal_keys)
+        gdf = catalog[d].read().to_crs(WGS84).pipe(
+            open_data_utils.standardize_column_names
+        ).pipe(
+            open_data_utils.remove_internal_keys
+        )
+        
 
         logger.info(f"********* {d} *************")
         print_info(gdf)

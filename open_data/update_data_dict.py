@@ -62,8 +62,8 @@ def new_columns_for_data_dict(
         if "hq_" in t:
             gdf = gdf.rename(columns = open_data_utils.RENAME_HQTA)
         elif "speed" in t:
-            gdf = gdf.rename(columns = publish_utils.RENAME_SPEED)
-        
+            gdf = gdf.rename(columns = open_data_utils.RENAME_SPEED)
+            
         col_list = gdf.columns.tolist()
                 
         # Columns included in data dictionary

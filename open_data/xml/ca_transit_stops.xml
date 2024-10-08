@@ -20,7 +20,7 @@
 	</ns0:hierarchyLevelName>
 	<ns0:contact ns1:nilReason="missing"></ns0:contact>
 	<ns0:dateStamp>
-		<ns1:Date>2024-08-15</ns1:Date>
+		<ns1:Date>2024-10-08</ns1:Date>
 	</ns0:dateStamp>
 	<ns0:metadataStandardName>
 		<ns1:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</ns1:CharacterString>
@@ -85,7 +85,7 @@
 					<ns0:date>
 						<ns0:CI_Date>
 							<ns0:date>
-								<ns1:Date>2024-08-14</ns1:Date>
+								<ns1:Date>2024-09-18</ns1:Date>
 							</ns0:date>
 							<ns0:dateType>
 								<ns0:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="ISOTC211/19115">
@@ -143,7 +143,7 @@
 				</ns0:CI_Citation>
 			</ns0:citation>
 			<ns0:abstract>
-				<ns1:CharacterString>Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates route information to stops.</ns1:CharacterString>
+				<ns1:CharacterString>Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates aggregated stop times and route information aggregated for each stops.</ns1:CharacterString>
 			</ns0:abstract>
 			<ns0:purpose>
 				<ns1:CharacterString>Provide all CA transit stops and routes (geospatial) from all transit operators.</ns1:CharacterString>
