@@ -14,7 +14,7 @@ from loguru import logger
 
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
-from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS
+from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD
 
 def max_trips_by_group(
     df: pd.DataFrame, 
@@ -132,7 +132,7 @@ def hqta_segment_keep_one_stop(
 ) -> gpd.GeoDataFrame:
     """
     Since multiple stops can fall into the same segment, 
-    keep the stop wiht the highest trips (sum across AM and PM).
+    keep the stop with the highest trips (sum across AM and PM).
     
     Returns gdf where each segment only appears once.
     """
@@ -181,14 +181,17 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     stops: gpd.GeoDataFrame,
     stop_times: pd.DataFrame,
     buffer_size: int,
-    hq_transit_threshold: int = 4,
+    hq_transit_threshold: int = HQ_TRANSIT_THRESHOLD,
+    ms_transit_threshold: int = MS_TRANSIT_THRESHOLD,
 ) -> gpd.GeoDataFrame:
     """
     Take HQTA segments, draw a buffer around the linestrings.
     Spatial join the stops (points) to segments (now polygons).
     If there are multiple stops in a segment, keep the stop
     with more trips.
-    Tag the segment as hq_transit_corr (boolean)
+    Tag the segment as hq_transit_corr and/or ms_precursor (boolean)
+    Since frequency thresholds for hq corrs and major stops have diverged,
+    need to track both categories
     """
     # Draw 50 m buffer to capture stops around hqta segments
     hqta_segments2 = hqta_segments.assign(
@@ -210,6 +213,10 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
         hq_transit_corr = segment_to_stop_unique.apply(
             lambda x: True if (x.am_max_trips >= hq_transit_threshold and 
                                (x.pm_max_trips >= hq_transit_threshold))
+            else False, axis=1)
+        ms_precursor = segment_to_stop_unique.apply(
+            lambda x: True if (x.am_max_trips >= ms_transit_threshold and 
+                               (x.pm_max_trips >= ms_transit_threshold))
             else False, axis=1)
     ).drop(columns = drop_cols)
 
@@ -254,7 +261,8 @@ if __name__ == "__main__":
         stops,
         max_arrivals_by_stop,
         buffer_size = SEGMENT_BUFFER_METERS, #50meters
-        hq_transit_threshold = 4
+        hq_transit_threshold = HQ_TRANSIT_THRESHOLD,
+        ms_transit_threshold = MS_TRANSIT_THRESHOLD
     )
         
     utils.geoparquet_gcs_export(
