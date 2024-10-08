@@ -1,13 +1,16 @@
 from pathlib import Path
-from shared_utils import rt_dates
+from shared_utils import catalog_utils, rt_dates
 
 analysis_date = rt_dates.DATES["sep2024"]
 
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/"
-COMPILED_CACHED_VIEWS = f"{GCS_FILE_PATH}rt_delay/compiled_cached_views/"
-TRAFFIC_OPS_GCS = f"{GCS_FILE_PATH}traffic_ops/"
-HQTA_GCS = f"{GCS_FILE_PATH}high_quality_transit_areas/"
-SEGMENT_GCS = f"{GCS_FILE_PATH}rt_segment_speeds/"
+GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
+
+COMPILED_CACHED_VIEWS = GTFS_DATA_DICT.gcs_paths.COMPILED_CACHED_VIEWS
+SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
+RT_SCHED_GCS = GTFS_DATA_DICT.gcs_paths.RT_SCHED_GCS
+SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
+TRAFFIC_OPS_GCS = f"{GTFS_DATA_DICT.gcs_paths.GCS}traffic_ops/"
+HQTA_GCS = f"{GTFS_DATA_DICT.gcs_paths.GCS}high_quality_transit_areas/"
 
 ESRI_BASE_URL = "https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/"
 XML_FOLDER = Path("xml")
