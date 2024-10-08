@@ -105,7 +105,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     df2 = (df[col_order]
            .reindex(columns = col_order)
-           .rename(columns = open_data_utils.RENAME_COLS)
+           .rename(columns = open_data_utils.STANDARDIZED_COLUMNS_DICT)
            .reset_index(drop=True)
     )
     
