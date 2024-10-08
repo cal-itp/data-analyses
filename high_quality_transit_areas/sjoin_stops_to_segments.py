@@ -204,19 +204,17 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     segment_to_stop_unique = hqta_segment_keep_one_stop(
         segment_to_stop, stop_times)
 
-    # Identify hq transit corridor
-    # Tag segment as being hq_transit_corr if it has at least 4 trips in AM and PM 
-    # (before 12pm, after 12pm, whatever is max in each period)
+    # Identify hq transit corridor or major stop precursor
     drop_cols = ["n_trips"]
 
     segment_hq_corr = segment_to_stop_unique.assign(
         hq_transit_corr = segment_to_stop_unique.apply(
-            lambda x: True if (x.am_max_trips >= hq_transit_threshold and 
-                               (x.pm_max_trips >= hq_transit_threshold))
+            lambda x: True if (x.am_max_trips_hr >= hq_transit_threshold and 
+                               (x.pm_max_trips_hr >= hq_transit_threshold))
             else False, axis=1)
         ms_precursor = segment_to_stop_unique.apply(
-            lambda x: True if (x.am_max_trips >= ms_transit_threshold and 
-                               (x.pm_max_trips >= ms_transit_threshold))
+            lambda x: True if (x.am_max_trips_hr >= ms_transit_threshold and 
+                               (x.pm_max_trips_hr >= ms_transit_threshold))
             else False, axis=1)
     ).drop(columns = drop_cols)
 

@@ -17,15 +17,15 @@ from loguru import logger
 from calitp_data_analysis import utils
 from update_vars import GCS_FILE_PATH, analysis_date
 
-def prep_bus_corridors(is_hq_corr: bool) -> gpd.GeoDataFrame:
+def prep_bus_corridors(is_ms_precursor: bool) -> gpd.GeoDataFrame:
     """
-    Import all hqta segments with hq_transit_corr tagged.
+    Import all hqta segments with ms_precursor tagged.
     
-    Only keep if hq_transit_corr == True
+    Only keep if ms_precursor == True
     """
     bus_hqtc = gpd.read_parquet(
         f"{GCS_FILE_PATH}all_bus.parquet",
-        filters = [[("hq_transit_corr", "==", is_hq_corr)]]
+        filters = [[("ms_precursor", "==", is_ms_precursor)]]
     ).reset_index(drop=True)
     
     bus_hqtc = bus_hqtc.assign(
@@ -132,7 +132,7 @@ if __name__=="__main__":
     
     start = datetime.datetime.now()
 
-    corridors = prep_bus_corridors(is_hq_corr=True)   
+    corridors = prep_bus_corridors(is_ms_precursor=True)   
     
     pairwise_intersections(corridors)    
     
