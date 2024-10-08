@@ -120,7 +120,12 @@ STANDARDIZED_COLUMNS_DICT = {
     "organization_source_record_id": "org_id",
     "organization_name": "agency",
     "agency_name_primary": "agency_primary",
-    "agency_name_secondary": "agency_secondary"
+    "agency_name_secondary": "agency_secondary",
+    "route_name_used": "route_name",
+    "route_types_served": "routetypes",
+    "n_hours_in": "n_hours_in_service",
+    "route_ids_": "route_ids_served"
+
 }
 
 
@@ -150,14 +155,6 @@ def remove_internal_keys(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df.drop(columns = internal_cols)
 
 
-# Define column names, must fit ESRI 10 character limits
-RENAME_COLS = {
-    "organization_name": "agency",
-    "organization_source_record_id": "org_id",
-    "route_name_used": "route_name",
-    "route_types_served": "routetypes",
-}
-
 # Rename columns when shapefile truncates
 RENAME_HQTA = {
     "agency_pri": "agency_primary",
@@ -182,9 +179,4 @@ RENAME_SPEED = {
     "organization_source_record_id": "org_id",
     "organization_name": "agency",
     "stop_pair_": "stop_pair_name"
-}
-
-RENAME_GTFS = {
-    "n_hours_in": "n_hours_in_service",
-    "route_ids_": "route_ids_served"
 }
