@@ -14,6 +14,7 @@ from typing import Union
 
 from update_vars import DEFAULT_XML_TEMPLATE, XML_FOLDER, META_JSON
 
+
 # This prefix keeps coming up, but xmltodict has trouble processing or replacing it
 x = "ns0:"
 main = f"{x}MD_Metadata"
@@ -296,3 +297,17 @@ def update_dataset_metadata_xml(
     with open(OUTPUT_FOLDER.joinpath(f"{dataset_name}.xml"), 'w') as f:
         f.write(new_xml)
     print("Save over existing XML")
+
+    
+if __name__=="__main__":
+    
+    from update_vars import RUN_ME
+    assert str(Path.cwd()).endswith("open_data"), "this script must be run from open_data directory!"
+    
+    for i in RUN_ME:
+        print(i)
+        print("-------------------------------------------")
+        update_dataset_metadata_xml(
+            i, 
+            metadata_path = META_JSON,
+        )

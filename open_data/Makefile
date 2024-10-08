@@ -11,5 +11,5 @@ compile_open_data_portal:
 	#python arcgis_script_pro.py #(in ESRI!)
 	python update_data_dict.py # check if columns are missing in data_dictionary yml 
 	python update_fields_fgdc.py # populate fields with data dictionary yml values, run if update_data_dict had changes to incorporate 
-	python open_data.py # go back into ESRI and update xml
+	python metadata_update_pro.py # go back into ESRI and update xml
 	python cleanup.py  # run after ESRI work done 

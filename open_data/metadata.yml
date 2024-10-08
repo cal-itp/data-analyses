@@ -28,7 +28,7 @@ common-fields:
   - &traffic_ops_purpose |-
       Provide all CA transit stops and routes (geospatial) from all transit operators.
   - &traffic_ops_description |-
-      Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates route information to stops.
+      Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates aggregated stop times and route information aggregated for each stops.
   - &speeds_readme |-
       https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/README.md
   - &speeds_keywords |-

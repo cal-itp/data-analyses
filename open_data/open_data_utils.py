@@ -6,59 +6,41 @@ import geopandas as gpd
 import intake
 import pandas as pd
 
-from calitp_data_analysis import utils, geography_utils
-from shared_utils import schedule_rt_utils
-from update_vars import TRAFFIC_OPS_GCS, analysis_date
+from calitp_data_analysis import geography_utils
+from shared_utils import gtfs_utils_v2, schedule_rt_utils
+from update_vars import TRAFFIC_OPS_GCS, analysis_date, GTFS_DATA_DICT, SCHED_GCS
 
 catalog = intake.open_catalog(
     "../_shared_utils/shared_utils/shared_data_catalog.yml")
-
-keep_trip_cols = [
-    "feed_key", "name", 
-    "trip_id", 
-    "route_id", "route_type", 
-    "shape_id", "shape_array_key",
-    "route_long_name", "route_short_name", "route_desc"
-]
-
-keep_shape_cols = [
-    "shape_array_key",
-    "n_trips", "geometry"
-]
-  
-keep_stop_cols = [
-    "feed_key",
-    "stop_id", "stop_name", 
-    "geometry"
-] 
-
-keep_stop_time_cols = [
-    "feed_key", "trip_id", "stop_id"
-]    
     
-
+    
 def standardize_operator_info_for_exports(
     df: pd.DataFrame, 
     date: str
 ) -> pd.DataFrame:
-    
-    crosswalk = schedule_rt_utils.sample_schedule_feed_key_to_organization_crosswalk(
-        df, 
-        date,
-        quartet_data = "schedule", 
-        dim_gtfs_dataset_cols = [
-            "key", "regional_feed_type",
-            "base64_url"],
-        dim_organization_cols = [
-            "source_record_id", "name", "caltrans_district"]
+    """
+    Use our crosswalk file created in gtfs_funnel
+    and add in the organization columns we want to 
+    publish on.
+    """
+    CROSSWALK_FILE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
+
+    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
+
+    crosswalk = pd.read_parquet(
+        f"{SCHED_GCS}{CROSSWALK_FILE}_{date}.parquet",
+        columns = [
+            "schedule_gtfs_dataset_key", "name", "base64_url", 
+            "organization_source_record_id", "organization_name"
+        ],
+        filters = [[("schedule_gtfs_dataset_key", "in", public_feeds)]]
     )
     
     df2 = pd.merge(
         df,
         crosswalk,
-        on = "feed_key",
-        how = "inner",
-        validate = "m:1"
+        on = "schedule_gtfs_dataset_key",
+        how = "inner"
     )
         
     return df2
@@ -132,29 +114,69 @@ def clip_to_usa(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         
     return gdf2
     
-    
-def export_to_subfolder(file_name: str, date: str):
-    """
-    We always overwrite the same geoparquets each month, and point our
-    shared_utils/shared_data_catalog.yml to the latest file.
-    
-    But, save historical exports just in case.
-    """
-    file_name_sanitized = utils.sanitize_file_path(file_name)
-    
-    gdf = gpd.read_parquet(
-        f"{TRAFFIC_OPS_GCS}{file_name_sanitized}.parquet")
-        
-    utils.geoparquet_gcs_export(
-        gdf, 
-        f"{TRAFFIC_OPS_GCS}export/", 
-        f"{file_name_sanitized}_{date}"
-    )
-        
-        
-# Define column names, must fit ESRI 10 character limits
-RENAME_COLS = {
-    "organization_name": "agency",
+
+STANDARDIZED_COLUMNS_DICT = {
+    "caltrans_district": "district_name",
     "organization_source_record_id": "org_id",
+    "organization_name": "agency",
+    "agency_name_primary": "agency_primary",
+    "agency_name_secondary": "agency_secondary",
     "route_name_used": "route_name",
+    "route_types_served": "routetypes",
+    "n_hours_in": "n_hours_in_service",
+    "route_ids_": "route_ids_served"
+
+}
+
+
+def standardize_column_names(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Standardize how agency is referred to.
+    """
+    return df.rename(columns = STANDARDIZED_COLUMNS_DICT)
+
+
+def remove_internal_keys(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Remove columns used in our internal data modeling.
+    Leave only natural identifiers (route_id, shape_id).
+    Remove shape_array_key, gtfs_dataset_key, etc.
+    """
+    exclude_list = [
+        "sec_elapsed", "meters_elapsed", 
+        "name", "schedule_gtfs_dataset_key"
+    ]
+    cols = [c for c in df.columns]
+    
+    internal_cols = [c for c in cols if "_key" in c or c in exclude_list] 
+    
+    print(f"drop: {internal_cols}")
+    
+    return df.drop(columns = internal_cols)
+
+
+# Rename columns when shapefile truncates
+RENAME_HQTA = {
+    "agency_pri": "agency_primary",
+    "agency_sec": "agency_secondary",
+    "hqta_detai": "hqta_details",
+    "base64_url": "base64_url_primary",
+    "base64_u_1": "base64_url_secondary",  
+    "org_id_pri": "org_id_primary",
+    "org_id_sec": "org_id_secondary",
+}
+
+RENAME_SPEED = {
+    "stop_seque": "stop_sequence",
+    "time_of_da": "time_of_day",
+    "time_perio": "time_period",
+    "district_n": "district_name",
+    "direction_": "direction_id",
+    "common_sha": "common_shape_id",
+    "avg_sched_": "avg_sched_trip_min", 
+    "avg_rt_tri": "avg_rt_trip_min",
+    "caltrans_d": "district_name",
+    "organization_source_record_id": "org_id",
+    "organization_name": "agency",
+    "stop_pair_": "stop_pair_name"
 }
