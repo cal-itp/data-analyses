@@ -14,7 +14,7 @@ from loguru import logger
 
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
-from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD
+from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD
 
 def max_trips_by_group(
     df: pd.DataFrame, 
@@ -31,32 +31,60 @@ def max_trips_by_group(
            .reset_index()
           )
     
-    return df2 
+    return df2
+
+def prep_stop_times(
+    stop_times: pd.DataFrame,
+    am_peak: tuple = AM_PEAK,
+    pm_peak: tuple = PM_PEAK
+) -> pd.DataFrame:
+    """
+    Add fixed peak period information to stop_times for next calculations.
+    """
+    am_peak_hrs = list(range(am_peak[0].hour, am_peak[1].hour))
+    pm_peak_hrs = list(range(pm_peak[0].hour, pm_peak[1].hour))
+    both_peaks_hrs = am_peak_hrs + pm_peak_hrs
+    peaks_dict = {key: 'am_peak' for key in am_peak_hrs} | {key: 'pm_peak' for key in pm_peak_hrs}
+
+    #  happens in st agg...
+    stop_times = stop_times.assign(
+            departure_hour = pd.to_datetime(
+                stop_times.departure_sec, unit="s").dt.hour
+        )
+
+    stop_times = stop_times[stop_times['arrival_hour'].isin(both_peaks_hrs)]
+    stop_times['peak'] = stop_times['arrival_hour'].map(peaks_dict)
+    
+    return stop_times
 
 
 def stop_times_aggregation_max_by_stop(
     stop_times: pd.DataFrame, 
-    analysis_date: str
+    analysis_date: str,
+    single_route_dir: bool = False,
 ) -> pd.DataFrame:
     """
     Take the stop_times table 
     and group by stop_id-departure hour
     and count how many trips occur.
     """
+    
     stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
+    trips_per_hour_cols = ["peak"]
+    
+    if single_route_dir:
+        trips_per_hour_cols += ["route_id", "direction_id"]
 
-    gtfs_key = helpers.import_scheduled_trips(
+    trips = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["feed_key", "gtfs_dataset_key"],
+        columns = ["feed_key", "gtfs_dataset_key", "trip_id",
+                   "route_id", "direction_id"],
         get_pandas = True
     )
     
-    stop_times = stop_times.assign(
-        departure_hour = pd.to_datetime(
-            stop_times.departure_sec, unit="s").dt.hour
-    ).merge(
-        gtfs_key,
-        on = "feed_key"
+    stop_times = stop_times.merge(
+        trips,
+        on = ["feed_key", "trip_id"]
     )
             
     # Aggregate how many trips are made at that stop by departure hour
@@ -66,15 +94,15 @@ def stop_times_aggregation_max_by_stop(
         count_col = "trip_id"
     ).rename(columns = {"n_arrivals": "n_trips"})
     
-    # Subset to departure hour before or after 12pm
-    am_trips = max_trips_by_group(
-        trips_per_hour[trips_per_hour.departure_hour < 12], 
+    # Count based on fixed peak periods, take average in each
+    am_trips = sjoin_stops_to_segments.max_trips_by_group(
+        trips_per_hour[trips_per_hour.peak == 'am_peak'], 
         group_cols = stop_cols,
         max_col = "n_trips"
     ).rename(columns = {"n_trips": "am_max_trips"})
     
-    pm_trips = max_trips_by_group(
-        trips_per_hour[trips_per_hour.departure_hour >= 12], 
+    pm_trips = sjoin_stops_to_segments.max_trips_by_group(
+        trips_per_hour[trips_per_hour.peak == 'pm_peak'], 
         group_cols = stop_cols,
         max_col = "n_trips"
     ).rename(columns = {"n_trips": "pm_max_trips"})
@@ -85,10 +113,10 @@ def stop_times_aggregation_max_by_stop(
         on = stop_cols,
         how = "left"
     )
-    
+    #  divide by length of peak to get trips/hr, keep n_trips a raw sum
     max_trips_by_stop = max_trips_by_stop.assign(
-        am_max_trips = max_trips_by_stop.am_max_trips.fillna(0).astype(int),
-        pm_max_trips = max_trips_by_stop.pm_max_trips.fillna(0).astype(int),
+        am_max_trips_hr = (max_trips_by_stop.am_max_trips.fillna(0) / len(am_peak_hrs)).astype(int),
+        pm_max_trips_hr = (max_trips_by_stop.pm_max_trips.fillna(0) / len(pm_peak_hrs)).astype(int),
         n_trips = (max_trips_by_stop.am_max_trips.fillna(0) + 
                    max_trips_by_stop.pm_max_trips.fillna(0))
     )
@@ -238,7 +266,7 @@ if __name__ == "__main__":
     max_arrivals_by_stop = helpers.import_scheduled_stop_times(
         analysis_date,
         get_pandas = True,
-    ).pipe(stop_times_aggregation_max_by_stop, analysis_date)
+    ).pipe(prep_stop_times).pipe(stop_times_aggregation_max_by_stop, analysis_date)
     
     max_arrivals_by_stop.to_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
