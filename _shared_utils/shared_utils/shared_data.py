@@ -9,6 +9,7 @@ from calitp_data_analysis.sql import to_snakecase
 from shared_utils.arcgis_query import query_arcgis_feature_server
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
+COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
 
 
 def make_county_centroids():
@@ -158,12 +159,93 @@ def create_postmile_segments(group_cols: list) -> gpd.GeoDataFrame:
     return
 
 
+def export_combined_legislative_districts() -> gpd.GeoDataFrame:
+    """
+    Create a combined assembly district and senate districts
+    gdf.
+    """
+    BASE_URL = "https://services3.arcgis.com/fdvHcZVgB2QSRNkL/" "arcgis/rest/services/Legislative/FeatureServer/"
+    SUFFIX = "query?outFields=*&where=1%3D1&f=geojson"
+
+    ASSEMBLY_DISTRICTS = f"{BASE_URL}0/{SUFFIX}"
+    SENATE_DISTRICTS = f"{BASE_URL}1/{SUFFIX}"
+
+    ad = gpd.read_file(ASSEMBLY_DISTRICTS)
+    sd = gpd.read_file(SENATE_DISTRICTS)
+
+    gdf = pd.concat(
+        [
+            ad[["AssemblyDistrictLabel", "geometry"]].rename(columns={"AssemblyDistrictLabel": "legislative_district"}),
+            sd[["SenateDistrictLabel", "geometry"]].rename(columns={"SenateDistrictLabel": "legislative_district"}),
+        ],
+        axis=0,
+        ignore_index=True,
+    )
+
+    utils.geoparquet_gcs_export(gdf, GCS_FILE_PATH, "legislative_districts")
+    return
+
+
+def sjoin_shapes_legislative_districts(analysis_date: str) -> pd.DataFrame:
+    """
+    Grab shapes for a single day and do a spatial join
+    with legislative district.
+    Keep 1 row for every operator-legislative_district combination.
+    """
+    operator_cols = ["name"]
+    # keeping gtfs_dataset_key gets us duplicate rows by name,
+    # and by the time we're filtering in GTFS digest, we already have name attached
+
+    operator_shapes = pd.read_parquet(
+        f"{COMPILED_CACHED_GCS}trips_{analysis_date}.parquet", columns=operator_cols + ["shape_array_key"]
+    ).drop_duplicates()
+
+    shapes = gpd.read_parquet(
+        f"{COMPILED_CACHED_GCS}routelines_{analysis_date}.parquet", columns=["shape_array_key", "geometry"]
+    )
+
+    legislative_districts = gpd.read_parquet(f"{GCS_FILE_PATH}legislative_districts.parquet")
+
+    gdf = pd.merge(shapes, operator_shapes, on="shape_array_key", how="inner").drop(columns="shape_array_key")
+
+    crosswalk = gpd.sjoin(gdf, legislative_districts, how="inner", predicate="intersects")[
+        operator_cols + ["legislative_district"]
+    ].drop_duplicates()
+
+    return crosswalk
+
+
+def make_transit_operators_to_legislative_district_crosswalk(date_list: list) -> pd.DataFrame:
+    """
+    Put all the dates we have from Mar 2023 - Sep 2024
+    and get a main crosswalk for operators to legislative districts.
+    Over time, we can rerun this and update our crosswalk.
+    """
+    gdf = (
+        pd.concat([sjoin_shapes_legislative_districts(d) for d in date_list], axis=0, ignore_index=True)
+        .drop_duplicates()
+        .sort_values(["name", "legislative_district"])
+        .reset_index(drop=True)
+    )
+
+    gdf.to_parquet(f"{GCS_FILE_PATH}" "crosswalk_transit_operators_legislative_districts.parquet")
+
+    return
+
+
 if __name__ == "__main__":
     # Run functions to create these datasets...store in GCS
+    from shared_utils import rt_dates
 
+    # CA counties
     make_county_centroids()
 
+    # State Highway Network
     make_clean_state_highway_network()
     export_shn_postmiles()
-
     create_postmile_segments(["route", "direction"])
+
+    # Legislative Districts
+    export_combined_legislative_districts()
+
+    make_transit_operators_to_legislative_district_crosswalk(rt_dates.y2024_dates + rt_dates.y2023_dates)
