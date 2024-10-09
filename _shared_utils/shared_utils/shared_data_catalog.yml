@@ -72,3 +72,13 @@ sources:
     args:
        # source: shared_utils/shared_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/shared_data/state_highway_network_postmile_segments.parquet
+  assembly_districts:
+    driver: geojson
+    description: California assembly district polygons
+    args:
+      urlpath: https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/Legislative/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
+  senate_districts:
+    driver: geojson
+    description: California senate district polygons
+    args:
+      urlpath: https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/Legislative/FeatureServer/1/query?outFields=*&where=1%3D1&f=geojson
