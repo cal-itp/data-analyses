@@ -16,6 +16,11 @@ from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD
 
+am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
+pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
+both_peaks_hrs = am_peak_hrs + pm_peak_hrs
+peaks_dict = {key: 'am_peak' for key in am_peak_hrs} | {key: 'pm_peak' for key in pm_peak_hrs}
+
 def max_trips_by_group(
     df: pd.DataFrame, 
     group_cols: list,
@@ -41,12 +46,7 @@ def prep_stop_times(
     """
     Add fixed peak period information to stop_times for next calculations.
     """
-    am_peak_hrs = list(range(am_peak[0].hour, am_peak[1].hour))
-    pm_peak_hrs = list(range(pm_peak[0].hour, pm_peak[1].hour))
-    both_peaks_hrs = am_peak_hrs + pm_peak_hrs
-    peaks_dict = {key: 'am_peak' for key in am_peak_hrs} | {key: 'pm_peak' for key in pm_peak_hrs}
 
-    #  happens in st agg...
     stop_times = stop_times.assign(
             departure_hour = pd.to_datetime(
                 stop_times.departure_sec, unit="s").dt.hour
@@ -90,18 +90,18 @@ def stop_times_aggregation_max_by_stop(
     # Aggregate how many trips are made at that stop by departure hour
     trips_per_hour = gtfs_schedule_wrangling.stop_arrivals_per_stop(
         stop_times,
-        group_cols = stop_cols + ["departure_hour"],
+        group_cols = stop_cols + trips_per_hour_cols,
         count_col = "trip_id"
     ).rename(columns = {"n_arrivals": "n_trips"})
     
     # Count based on fixed peak periods, take average in each
-    am_trips = sjoin_stops_to_segments.max_trips_by_group(
+    am_trips = max_trips_by_group(
         trips_per_hour[trips_per_hour.peak == 'am_peak'], 
         group_cols = stop_cols,
         max_col = "n_trips"
     ).rename(columns = {"n_trips": "am_max_trips"})
     
-    pm_trips = sjoin_stops_to_segments.max_trips_by_group(
+    pm_trips = max_trips_by_group(
         trips_per_hour[trips_per_hour.peak == 'pm_peak'], 
         group_cols = stop_cols,
         max_col = "n_trips"
@@ -239,7 +239,7 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
         hq_transit_corr = segment_to_stop_unique.apply(
             lambda x: True if (x.am_max_trips_hr >= hq_transit_threshold and 
                                (x.pm_max_trips_hr >= hq_transit_threshold))
-            else False, axis=1)
+            else False, axis=1),
         ms_precursor = segment_to_stop_unique.apply(
             lambda x: True if (x.am_max_trips_hr >= ms_transit_threshold and 
                                (x.pm_max_trips_hr >= ms_transit_threshold))
