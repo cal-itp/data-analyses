@@ -1,0 +1,246 @@
+directory: ./gtfs_digest/
+notebook: ./gtfs_digest/legislative_district_report.ipynb
+parts:
+- chapters:
+  - params:
+      district: SD 01
+  - params:
+      district: SD 02
+  - params:
+      district: SD 03
+  - params:
+      district: SD 04
+  - params:
+      district: SD 05
+  - params:
+      district: SD 06
+  - params:
+      district: SD 07
+  - params:
+      district: SD 08
+  - params:
+      district: SD 09
+  - params:
+      district: SD 10
+  - params:
+      district: SD 11
+  - params:
+      district: SD 12
+  - params:
+      district: SD 13
+  - params:
+      district: SD 14
+  - params:
+      district: SD 15
+  - params:
+      district: SD 16
+  - params:
+      district: SD 17
+  - params:
+      district: SD 18
+  - params:
+      district: SD 19
+  - params:
+      district: SD 20
+  - params:
+      district: SD 21
+  - params:
+      district: SD 22
+  - params:
+      district: SD 23
+  - params:
+      district: SD 24
+  - params:
+      district: SD 25
+  - params:
+      district: SD 26
+  - params:
+      district: SD 27
+  - params:
+      district: SD 28
+  - params:
+      district: SD 29
+  - params:
+      district: SD 30
+  - params:
+      district: SD 31
+  - params:
+      district: SD 32
+  - params:
+      district: SD 33
+  - params:
+      district: SD 34
+  - params:
+      district: SD 35
+  - params:
+      district: SD 36
+  - params:
+      district: SD 37
+  - params:
+      district: SD 38
+  - params:
+      district: SD 39
+  - params:
+      district: SD 40
+  - params:
+      district: AD 01
+  - params:
+      district: AD 02
+  - params:
+      district: AD 03
+  - params:
+      district: AD 04
+  - params:
+      district: AD 05
+  - params:
+      district: AD 06
+  - params:
+      district: AD 07
+  - params:
+      district: AD 08
+  - params:
+      district: AD 09
+  - params:
+      district: AD 10
+  - params:
+      district: AD 11
+  - params:
+      district: AD 12
+  - params:
+      district: AD 13
+  - params:
+      district: AD 14
+  - params:
+      district: AD 15
+  - params:
+      district: AD 16
+  - params:
+      district: AD 17
+  - params:
+      district: AD 18
+  - params:
+      district: AD 19
+  - params:
+      district: AD 20
+  - params:
+      district: AD 21
+  - params:
+      district: AD 22
+  - params:
+      district: AD 23
+  - params:
+      district: AD 24
+  - params:
+      district: AD 25
+  - params:
+      district: AD 26
+  - params:
+      district: AD 27
+  - params:
+      district: AD 28
+  - params:
+      district: AD 29
+  - params:
+      district: AD 30
+  - params:
+      district: AD 31
+  - params:
+      district: AD 32
+  - params:
+      district: AD 33
+  - params:
+      district: AD 34
+  - params:
+      district: AD 35
+  - params:
+      district: AD 36
+  - params:
+      district: AD 37
+  - params:
+      district: AD 38
+  - params:
+      district: AD 39
+  - params:
+      district: AD 40
+  - params:
+      district: AD 41
+  - params:
+      district: AD 42
+  - params:
+      district: AD 43
+  - params:
+      district: AD 44
+  - params:
+      district: AD 45
+  - params:
+      district: AD 46
+  - params:
+      district: AD 47
+  - params:
+      district: AD 48
+  - params:
+      district: AD 49
+  - params:
+      district: AD 50
+  - params:
+      district: AD 51
+  - params:
+      district: AD 52
+  - params:
+      district: AD 53
+  - params:
+      district: AD 54
+  - params:
+      district: AD 55
+  - params:
+      district: AD 56
+  - params:
+      district: AD 57
+  - params:
+      district: AD 58
+  - params:
+      district: AD 59
+  - params:
+      district: AD 60
+  - params:
+      district: AD 61
+  - params:
+      district: AD 62
+  - params:
+      district: AD 63
+  - params:
+      district: AD 64
+  - params:
+      district: AD 65
+  - params:
+      district: AD 66
+  - params:
+      district: AD 67
+  - params:
+      district: AD 68
+  - params:
+      district: AD 69
+  - params:
+      district: AD 70
+  - params:
+      district: AD 71
+  - params:
+      district: AD 72
+  - params:
+      district: AD 73
+  - params:
+      district: AD 74
+  - params:
+      district: AD 75
+  - params:
+      district: AD 76
+  - params:
+      district: AD 77
+  - params:
+      district: AD 78
+  - params:
+      district: AD 79
+  - params:
+      district: AD 80
+readme: ./gtfs_digest/README.md
+title: Legislative District GTFS Digest
