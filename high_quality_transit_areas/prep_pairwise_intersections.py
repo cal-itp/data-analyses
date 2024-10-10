@@ -35,7 +35,7 @@ def prep_bus_corridors(is_ms_precursor: bool = False, is_hq_corr: bool = False) 
         filters = [[("hq_transit_corr", "==", is_hq_corr)]]
     ).reset_index(drop=True)
         
-    hqtc_or_ms_pre = hqtc_or_ms.assign(
+    hqtc_or_ms_pre = hqtc_or_ms_pre.assign(
         route_type = "3"
     )
     
