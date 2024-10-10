@@ -1,0 +1,10 @@
+directory: ./my_folder/
+notebook: ./my_folder/report.ipynb
+parts:
+- chapters:
+  - params:
+      my_chapter_name: SD 01
+  - params:
+      my_chapter_name: SD 02
+readme: ./my_folder/README.md
+title: My Analysis Title
