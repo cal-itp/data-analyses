@@ -2,9 +2,9 @@ format: jb-book
 parts:
 -   caption: null
     chapters:
-    -   file: region_la/0__path_examples__region_la.ipynb
-    -   file: region_sac/0__path_examples__region_sac.ipynb
-    -   file: region_solano/0__path_examples__region_solano.ipynb
-    -   file: region_clovis/0__path_examples__region_clovis.ipynb
-    -   file: region_napa/0__path_examples__region_napa.ipynb
+    -   file: region_la/00__path_examples__region_la.ipynb
+    -   file: region_sac/00__path_examples__region_sac.ipynb
+    -   file: region_solano/00__path_examples__region_solano.ipynb
+    -   file: region_clovis/00__path_examples__region_clovis.ipynb
+    -   file: region_napa/00__path_examples__region_napa.ipynb
 root: README

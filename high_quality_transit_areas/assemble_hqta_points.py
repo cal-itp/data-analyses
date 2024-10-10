@@ -36,7 +36,7 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     major_stop_bus = catalog.major_stop_bus.read().to_crs(crs)
     stops_in_corridor = catalog.stops_in_hq_corr.read().to_crs(crs)
     
-    trip_count_cols = ["am_max_trips", "pm_max_trips"]
+    trip_count_cols = ["am_max_trips_hr", "pm_max_trips_hr"]
 
     max_arrivals = pd.read_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet", 

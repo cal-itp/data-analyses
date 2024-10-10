@@ -17,22 +17,29 @@ from loguru import logger
 from calitp_data_analysis import utils
 from update_vars import GCS_FILE_PATH, analysis_date
 
-def prep_bus_corridors(is_hq_corr: bool) -> gpd.GeoDataFrame:
+def prep_bus_corridors(is_ms_precursor: bool = False, is_hq_corr: bool = False) -> gpd.GeoDataFrame:
     """
-    Import all hqta segments with hq_transit_corr tagged.
-    
-    Only keep if hq_transit_corr == True
+    Import all hqta segments with ms_precursor or is_hq_corr tagged.
+    Since these definitions have diverged, may be called to return either.
+    Only keep if ms_precursor or hq_transit_corr == True
     """
-    bus_hqtc = gpd.read_parquet(
+    assert is_ms_precursor or is_hq_corr, 'must select exactly one category of segment'
+    if is_ms_precursor:
+        hqtc_or_ms_pre = gpd.read_parquet(
+            f"{GCS_FILE_PATH}all_bus.parquet",
+            filters = [[("ms_precursor", "==", is_ms_precursor)]]
+        ).reset_index(drop=True)
+    elif is_hq_corr:
+        hqtc_or_ms_pre = gpd.read_parquet(
         f"{GCS_FILE_PATH}all_bus.parquet",
         filters = [[("hq_transit_corr", "==", is_hq_corr)]]
     ).reset_index(drop=True)
-    
-    bus_hqtc = bus_hqtc.assign(
+        
+    hqtc_or_ms_pre = hqtc_or_ms_pre.assign(
         route_type = "3"
     )
     
-    return bus_hqtc
+    return hqtc_or_ms_pre
 
 
 def sjoin_against_other_operators(
@@ -132,7 +139,7 @@ if __name__=="__main__":
     
     start = datetime.datetime.now()
 
-    corridors = prep_bus_corridors(is_hq_corr=True)   
+    corridors = prep_bus_corridors(is_ms_precursor=True)   
     
     pairwise_intersections(corridors)    
     
