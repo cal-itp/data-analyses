@@ -1,0 +1,12 @@
+directory: ./my_folder/
+notebook: ./my_folder/my_report.ipynb
+parts:
+- chapters:
+  - caption: 04 - Oakland
+    params:
+      my_chapter_name: 04 - Oakland
+    sections:
+    - my_organization_name: Alameda-Contra Costa Transit District
+    - my_organization_name: Capitol Corridor Joint Powers Authority
+readme: ./my_folder/README.md
+title: My Analysis Title
