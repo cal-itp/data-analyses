@@ -41,3 +41,8 @@
 2024-10-09 11:03:32.388 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:04:32.849858
 2024-10-09 11:04:45.205 | INFO     | __main__:<module>:301 - B2_sjoin_stops_to_segments 2024-09-18 execution time: 0:00:53.314014
 2024-10-09 11:05:12.682 | INFO     | __main__:<module>:140 - C1_prep_pairwise_intersections 2024-09-18 execution time: 0:00:08.100040
+2024-10-10 09:43:19.078 | INFO     | __main__:<module>:275 - A1_rail_ferry_brt_stops 2024-09-18 execution time: 0:00:28.597295
+2024-10-10 09:48:33.530 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:04:48.617534
+2024-10-10 09:49:52.721 | INFO     | __main__:<module>:301 - B2_sjoin_stops_to_segments 2024-09-18 execution time: 0:00:59.880352
+2024-10-10 09:50:22.959 | INFO     | __main__:<module>:140 - C1_prep_pairwise_intersections 2024-09-18 execution time: 0:00:09.107672
+2024-10-10 09:51:12.460 | INFO     | __main__:<module>:124 - C2_find_intersections 2024-09-18 execution time: 0:00:29.617306
