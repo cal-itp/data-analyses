@@ -2,19 +2,20 @@
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 
 build_portfolio_site:
-	#cd portfolio/ && pip install -r requirements.txt && cd ../
+	cd portfolio/ && pip install -r requirements.txt && cd ../
 	#need git rm because otherwise, just local removal, but git change is untracked
-	git rm portfolio/$(site)/ -rf
-	python portfolio/portfolio.py clean $(site)
+	#git rm portfolio/$(site)/ -rf
+	#python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site) --deploy 
-	make git_check 
+	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
+	git add portfolio/sites/$(site).yml     
 	#make production_portfolio
 
-git_check:
-	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
+git_check_sections:
 	git add portfolio/$(site)/*.ipynb # this one is most common, where operators nested under district
-	#git add portfolio/$(site)/district_*/*.ipynb # this one less common, but it's district pages only
-	git add portfolio/sites/$(site).yml 
+
+git_check_no_sections:
+	git add portfolio/$(site)/district_*/*.ipynb # this one less common, but it's district pages only
     
 build_competitive_corridors:
 	$(eval export site = competitive_corridors)
@@ -46,6 +47,8 @@ build_gtfs_digest:
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && make assemble_data && cd ..   
 	cd gtfs_digest/ && python deploy_portfolio_yaml.py
 	make build_portfolio_site
+	make git_check_sections
+    
 
 build_gtfs_digest_testing:
 	$(eval export site = gtfs_digest_testing)
@@ -57,7 +60,14 @@ build_district_digest:
 	$(eval export site = district_digest)
 	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	make build_portfolio_site 
-	git add portfolio/$(site)/district_*/*.ipynb 
+	make git_check_no_sections
+    
+build_legislative_district_digest:
+	$(eval export site = legislative_district_digest)
+	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
+	make build_portfolio_site 
+	make git_check_no_sections
+    
     
 add_precommit:
 	pip install pre-commit
