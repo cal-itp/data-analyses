@@ -46,3 +46,6 @@
 2024-10-10 09:49:52.721 | INFO     | __main__:<module>:301 - B2_sjoin_stops_to_segments 2024-09-18 execution time: 0:00:59.880352
 2024-10-10 09:50:22.959 | INFO     | __main__:<module>:140 - C1_prep_pairwise_intersections 2024-09-18 execution time: 0:00:09.107672
 2024-10-10 09:51:12.460 | INFO     | __main__:<module>:124 - C2_find_intersections 2024-09-18 execution time: 0:00:29.617306
+2024-10-10 10:02:25.556 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2024-09-18 execution time: 0:00:30.074431
+2024-10-10 10:03:17.217 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2024-09-18 execution time: 0:00:21.338133
+2024-10-10 10:04:22.212 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2024-09-18 execution time: 0:00:27.841877
