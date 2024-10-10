@@ -21,7 +21,8 @@ from prep_pairwise_intersections import prep_bus_corridors
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers
 from update_vars import (GCS_FILE_PATH, analysis_date, 
-                         PROJECT_CRS, SEGMENT_BUFFER_METERS
+                         PROJECT_CRS, SEGMENT_BUFFER_METERS,
+                         INTERSECTION_BUFFER_METERS
                         )
 
 def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame: 
@@ -132,7 +133,7 @@ if __name__ == "__main__":
     
     # Start with the gdf of all the hqta_segments
     # that have a sjoin with an orthogonal route
-    bus_intersections = buffer_around_intersections(SEGMENT_BUFFER_METERS)
+    bus_intersections = buffer_around_intersections(INTERSECTION_BUFFER_METERS)
 
     # Grab point geom with all stops
     gtfs_keys = helpers.import_scheduled_trips(
