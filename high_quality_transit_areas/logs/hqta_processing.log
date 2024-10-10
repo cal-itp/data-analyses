@@ -37,3 +37,7 @@
 2024-09-25 10:25:48.480 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2024-09-18 execution time: 0:00:26.100650
 2024-09-25 10:27:51.226 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2024-09-18 execution time: 0:00:18.606053
 2024-09-25 10:30:59.443 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2024-09-18 execution time: 0:00:30.215506
+2024-10-09 10:58:41.588 | INFO     | __main__:<module>:275 - A1_rail_ferry_brt_stops 2024-09-18 execution time: 0:00:19.051895
+2024-10-09 11:03:32.388 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:04:32.849858
+2024-10-09 11:04:45.205 | INFO     | __main__:<module>:301 - B2_sjoin_stops_to_segments 2024-09-18 execution time: 0:00:53.314014
+2024-10-09 11:05:12.682 | INFO     | __main__:<module>:140 - C1_prep_pairwise_intersections 2024-09-18 execution time: 0:00:08.100040

@@ -8,6 +8,7 @@ GCS_FILE_PATH = ("gs://calitp-analytics-data/data-analyses/"
 PROJECT_CRS = "EPSG:3310"
 HQTA_SEGMENT_LENGTH = 1_250 # meters
 SEGMENT_BUFFER_METERS = 50 # buffer around segment to sjoin to stops
+INTERSECTION_BUFFER_METERS = 152 # ~ 500ft
 HALF_MILE_BUFFER_METERS = 805 # half mile ~ 805 meters
 CORRIDOR_BUFFER_METERS = HALF_MILE_BUFFER_METERS - SEGMENT_BUFFER_METERS # 755 meters
 EXPORT_PATH = f"{GCS_FILE_PATH}export/{analysis_date}/"
