@@ -67,6 +67,24 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
 
     return df
 
+def load_operator_metrics(organization_name:str)->pd.DataFrame:
+    """
+    Load dataframe with the total scheduled service hours 
+    a transit operator.
+    """
+    url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_metrics}.parquet"
+
+    df = pd.read_parquet(url,
+    filters=[[(("organization_name", "==", organization_name))]])
+    
+    # Rename dataframe
+    df.columns = df.columns.map(_report_utils.replace_column_names)
+    
+    df["ruler_100_pct"] = 100
+    
+    df["ruler_for_vp_per_min"] = 2
+    return df
+
 """
 Data Manipulation
 """
@@ -199,41 +217,6 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
     )
     return df3
 
-def aggregate_by_agency(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Aggregate some of the metrics for all the routes
-    across the agency.
-    """
-    # Filter to all day to avoid double counting
-    df = df.loc[df["Period"] == "all_day"].reset_index(drop=True)
-    
-    # Aggregate by totals by date 
-    agg1 = (
-        df.groupby(["Date"])
-        .agg(
-            {
-                "# VP": "sum",
-                "# VP within Scheduled Shape": "sum",
-                "Aggregate Actual Service Minutes": "sum",
-                "ruler_100_pct":"max",
-                "ruler_for_vp_per_min":"max"
-            }
-        )
-        .reset_index()
-    )
-
-    # Find metrics
-    agg1["VP per Minute (All Routes)"] = (
-        (agg1["# VP"] / agg1[ "Aggregate Actual Service Minutes"])
-    ).round(2)
-    agg1["Spatial Accuracy (All Routes)"] = ((
-        agg1["# VP within Scheduled Shape"] / agg1["# VP"]
-    )  * 100).round(2)
-
-    # Sort the data
-    agg1 = agg1.sort_values(by=["Date"]).reset_index(drop=True)
-
-    return agg1
 """
 Charts
 """
@@ -769,11 +752,9 @@ def simple_bar_chart(
 Agency Metrics Overview Section
 """
 def agency_overview(df:pd.DataFrame)->alt.Chart:
-    agg1 = aggregate_by_agency(df)
-    # display(agg1.head())
     agency_spatial_chart = (
         simple_bar_chart(
-            agg1,
+            df,
             "Spatial Accuracy (All Routes)",
             "ruler_100_pct",
             readable_dict["agency_spatial_accuracy"]["title"],
@@ -786,7 +767,7 @@ def agency_overview(df:pd.DataFrame)->alt.Chart:
     agency_vp_chart = (
         (
             simple_bar_chart(
-                agg1,
+                df,
                 "VP per Minute (All Routes)",
                 "ruler_for_vp_per_min",
                 readable_dict["agency_vp_per_min_graph"]["title"],
