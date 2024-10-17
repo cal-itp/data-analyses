@@ -15,15 +15,24 @@ from shared_utils import rt_dates
 def operator_metrics(analysis_date: str, dict_inputs: dict) -> pd.DataFrame:
     start = datetime.datetime.now()
 
-    ROUTE_EXPORT = dict_inputs.vp_route_direction_metrics
+    TRIP_EXPORT = dict_inputs.vp_trip_metrics
     OP_EXPORT = dict_inputs.vp_operator_metrics
 
     # Read in dataframe.
-    df = pd.read_parquet(f"{RT_SCHED_GCS}{ROUTE_EXPORT}_{analysis_date}.parquet")
-
-    # Keep only all_day.
-    df = df.loc[df["time_period"] == "all_day"].reset_index(drop=True)
-
+    df = pd.read_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet")
+    
+    # Merge in identifiers
+    crosswalk_cols = [
+    "schedule_gtfs_dataset_key",
+    "name",
+    "organization_name",
+    "caltrans_district",]
+    
+    df2 = gtfs_schedule_wrangling.merge_operator_identifiers(
+        df,
+        [analysis_date],
+        columns = crosswalk_cols)
+    
     # Aggregate
     groupby_cols = [
         "caltrans_district",
@@ -31,16 +40,16 @@ def operator_metrics(analysis_date: str, dict_inputs: dict) -> pd.DataFrame:
         "schedule_gtfs_dataset_key",
     ]
 
-    sum_cols = ["total_vp", "vp_in_shape", "total_rt_service_minutes"]
-    agg1 = df.groupby(groupby_cols).agg({**{e: "sum" for e in sum_cols}}).reset_index()
+    sum_cols = ["total_vp", "vp_in_shape", "rt_service_minutes"]
+    agg1 = df2.groupby(groupby_cols).agg({**{e: "sum" for e in sum_cols}}).reset_index()
 
-    agg1["vp_per_min_agency"] = ((agg1.total_vp / agg1.total_rt_service_minutes)).round(2)
+    agg1["vp_per_min_agency"] = ((agg1.total_vp / agg1.rt_service_minutes)).round(2)
     agg1["spatial_accuracy_agency"] = ((agg1.vp_in_shape / agg1.total_vp) * 100).round(2)
     
     # Clean
     agg1 = agg1.drop(columns=sum_cols)
     
-    # Save: take out test later
+    # Save
     agg1.to_parquet(f"{RT_SCHED_GCS}{OP_EXPORT}_{analysis_date}.parquet")
 
     end = datetime.datetime.now()
