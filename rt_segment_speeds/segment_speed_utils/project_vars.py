@@ -11,11 +11,12 @@ PREDICTIONS_GCS = GTFS_DATA_DICT.gcs_paths.PREDICTIONS_GCS
 SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
 PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
 
-analysis_date = rt_dates.DATES["sep2024"]
+analysis_date = rt_dates.DATES["oct2024"]
 
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
 apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
 apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
+oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 
 all_dates = (
     rt_dates.y2024_dates + rt_dates.y2023_dates + 
@@ -23,8 +24,8 @@ all_dates = (
 )
 
 weeks_available = [
-    rt_dates.apr2024_week, rt_dates.oct2023_week,
-    rt_dates.apr2023_week
+    rt_dates.oct2024_week, rt_dates.apr2024_week, 
+    rt_dates.oct2023_week, rt_dates.apr2023_week, 
 ]
 
 
