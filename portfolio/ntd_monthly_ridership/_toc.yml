@@ -4,6 +4,7 @@ parts:
     chapters:
     -   file: rtpa_alpine-county-transportation-commission/00__monthly_ridership_report__rtpa_alpine-county-transportation-commission.ipynb
     -   file: rtpa_butte-county-association-of-governments/00__monthly_ridership_report__rtpa_butte-county-association-of-governments.ipynb
+    -   file: rtpa_el-dorado-county-transportation-commission/00__monthly_ridership_report__rtpa_el-dorado-county-transportation-commission.ipynb
     -   file: rtpa_fresno-county-council-of-governments/00__monthly_ridership_report__rtpa_fresno-county-council-of-governments.ipynb
     -   file: rtpa_imperial-county-transportation-commission/00__monthly_ridership_report__rtpa_imperial-county-transportation-commission.ipynb
     -   file: rtpa_kern-council-of-governments/00__monthly_ridership_report__rtpa_kern-council-of-governments.ipynb
@@ -12,6 +13,7 @@ parts:
     -   file: rtpa_merced-county-association-of-governments/00__monthly_ridership_report__rtpa_merced-county-association-of-governments.ipynb
     -   file: rtpa_metropolitan-transportation-commission/00__monthly_ridership_report__rtpa_metropolitan-transportation-commission.ipynb
     -   file: rtpa_orange-county-transportation-authority/00__monthly_ridership_report__rtpa_orange-county-transportation-authority.ipynb
+    -   file: rtpa_placer-county-transportation-planning-agency/00__monthly_ridership_report__rtpa_placer-county-transportation-planning-agency.ipynb
     -   file: rtpa_riverside-county-transportation-commission/00__monthly_ridership_report__rtpa_riverside-county-transportation-commission.ipynb
     -   file: rtpa_sacramento-area-council-of-governments/00__monthly_ridership_report__rtpa_sacramento-area-council-of-governments.ipynb
     -   file: rtpa_san-bernardino-county-transportation-authority/00__monthly_ridership_report__rtpa_san-bernardino-county-transportation-authority.ipynb
