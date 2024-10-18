@@ -4,9 +4,10 @@ from pathlib import Path
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
 apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
 apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
+oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 
-# analysis_date_list = [rt_dates.DATES["sep2024"]]
-analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates 
+#analysis_date_list = [rt_dates.DATES["oct2024"]]
+analysis_date_list = [rt_dates.DATES[f"oct2024{i}"] for i in ["a", "b"]]
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 

@@ -455,3 +455,27 @@
 2024-09-19 12:42:38.061 | INFO     | average_segment_speeds:single_day_segment_averages:173 - shape seg avg 0:05:30.126380
 2024-09-19 12:46:50.506 | INFO     | average_segment_speeds:single_day_segment_averages:189 - route dir seg avg 0:04:12.445389
 2024-09-19 12:46:50.507 | INFO     | average_segment_speeds:single_day_segment_averages:190 - single day segment 2024-09-18 execution time: 0:09:42.571769
+2024-10-17 18:17:38.147 | INFO     | __main__:single_day_summary_averages:90 - trip avg 0:00:18.002158
+2024-10-17 18:17:51.697 | INFO     | __main__:single_day_summary_averages:132 - route dir avg: 0:00:13.550000
+2024-10-17 18:17:51.698 | INFO     | __main__:single_day_summary_averages:133 - single day summary speed 2024-10-16 execution time: 0:00:31.552158
+2024-10-17 18:36:28.002 | INFO     | average_segment_speeds:single_day_segment_averages:177 - shape seg avg 0:06:04.775175
+2024-10-17 18:40:42.231 | INFO     | average_segment_speeds:single_day_segment_averages:193 - route dir seg avg 0:04:14.229086
+2024-10-17 18:40:42.232 | INFO     | average_segment_speeds:single_day_segment_averages:194 - single day segment 2024-10-16 execution time: 0:10:19.004261
+2024-10-18 00:34:00.973 | INFO     | __main__:single_day_segment_averages:177 - shape seg avg 0:04:53.730922
+2024-10-18 00:37:30.933 | INFO     | __main__:single_day_segment_averages:193 - route dir seg avg 0:03:29.959724
+2024-10-18 00:37:30.935 | INFO     | __main__:single_day_segment_averages:194 - single day segment 2024-10-14 execution time: 0:08:23.690646
+2024-10-18 00:42:04.604 | INFO     | __main__:single_day_segment_averages:177 - shape seg avg 0:04:33.336592
+2024-10-18 00:45:18.448 | INFO     | __main__:single_day_segment_averages:193 - route dir seg avg 0:03:13.843336
+2024-10-18 00:45:18.448 | INFO     | __main__:single_day_segment_averages:194 - single day segment 2024-10-15 execution time: 0:07:47.179928
+2024-10-18 09:24:57.077 | INFO     | __main__:single_day_summary_averages:90 - trip avg 0:00:17.634204
+2024-10-18 09:25:10.181 | INFO     | __main__:single_day_summary_averages:132 - route dir avg: 0:00:13.104249
+2024-10-18 09:25:10.183 | INFO     | __main__:single_day_summary_averages:133 - single day summary speed 2024-10-14 execution time: 0:00:30.738453
+2024-10-18 09:25:25.944 | INFO     | __main__:single_day_summary_averages:90 - trip avg 0:00:15.625256
+2024-10-18 09:25:38.786 | INFO     | __main__:single_day_summary_averages:132 - route dir avg: 0:00:12.841694
+2024-10-18 09:25:38.787 | INFO     | __main__:single_day_summary_averages:133 - single day summary speed 2024-10-15 execution time: 0:00:28.466950
+2024-10-18 09:53:22.768 | INFO     | average_segment_speeds:single_day_segment_averages:177 - shape seg avg 0:06:01.586897
+2024-10-18 09:57:18.027 | INFO     | average_segment_speeds:single_day_segment_averages:193 - route dir seg avg 0:03:55.259299
+2024-10-18 09:57:18.027 | INFO     | average_segment_speeds:single_day_segment_averages:194 - single day segment 2024-10-14 execution time: 0:09:56.846196
+2024-10-18 10:02:43.872 | INFO     | average_segment_speeds:single_day_segment_averages:177 - shape seg avg 0:05:25.476441
+2024-10-18 10:06:42.688 | INFO     | average_segment_speeds:single_day_segment_averages:193 - route dir seg avg 0:03:58.815162
+2024-10-18 10:06:42.688 | INFO     | average_segment_speeds:single_day_segment_averages:194 - single day segment 2024-10-15 execution time: 0:09:24.291603
