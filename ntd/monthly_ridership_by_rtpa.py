@@ -197,9 +197,9 @@ def produce_ntd_monthly_ridership_by_rtpa(
     
     crosswalk = pd.read_csv(
         f"gs://calitp-analytics-data/data-analyses/ntd/ntd_id_rtpa_crosswalk.csv", 
-        dtype = {"NTD ID": "str"}
+        dtype = {"ntd_id": "str"}
     #have to rename NTD ID col to match the dim table
-    ).rename(columns={"NTD ID": "ntd_id"})
+    )#.rename(columns={"NTD ID": "ntd_id"})
     
     df = pd.merge(
         ca,
