@@ -213,6 +213,7 @@ for f in in_features:
 
 
 ### (4) UPDATE XML METADATA SEPARATELY IN PYTHON OUTSIDE OF ARCGIS IN JUPYTERHUB
+# Run `python metadata_update_pro.py`
 
 ## Import FGDC metadata for each dataset manually
 # The button to Metadata > Import > type of metadata set to FGDC does something different than the `metadata.importMetadata` feature, which doesn't do it. Manually doing the import for the fgdb metadata works for each dataset only.
