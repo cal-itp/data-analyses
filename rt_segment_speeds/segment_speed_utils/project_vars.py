@@ -20,7 +20,7 @@ oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 
 all_dates = (
     rt_dates.y2024_dates + rt_dates.y2023_dates + 
-    apr2024_week + oct2023_week + apr2023_week
+    oct2024_week + apr2024_week + oct2023_week + apr2023_week
 )
 
 weeks_available = [
@@ -29,7 +29,8 @@ weeks_available = [
 ]
 
 
-analysis_date_list = [analysis_date]
+#analysis_date_list = [analysis_date]
+analysis_date_list = [rt_dates.DATES[f"oct2024{i}"] for i in ["a", "b"]]
                      
 
 PROJECT_CRS = "EPSG:3310"
