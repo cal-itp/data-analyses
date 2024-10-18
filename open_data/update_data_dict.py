@@ -1,3 +1,13 @@
+"""
+Go through each dataset we publish from catalog.yml. 
+Compare it to data_dictionary.yml to double
+check that all the columns have an entry.
+
+This script is useful when we make adjustments
+to datasets we want to publish, and we 
+need to add a corresponding entry to data_dictionary.yml, 
+which is used to update column definitions in ESRI.
+"""
 import geopandas as gpd
 import intake
 import sys
@@ -21,6 +31,7 @@ def unpack_list_of_tables_as_dict(list_of_dict: list) -> dict:
     dict_of_tables = {d["dataset_name"]: d for d in list_of_dict}
     
     return dict_of_tables
+
 
 def new_columns_for_data_dict(
     open_data_catalog: Union[str, Path] = Path("catalog.yml"),
