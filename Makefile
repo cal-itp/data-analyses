@@ -5,7 +5,7 @@ build_portfolio_site:
 	cd portfolio/ && pip install -r requirements.txt && cd ../
 	#need git rm because otherwise, just local removal, but git change is untracked
 	#git rm portfolio/$(site)/ -rf
-	#python portfolio/portfolio.py clean $(site)
+	python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site) --deploy 
 	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
 	git add portfolio/sites/$(site).yml     

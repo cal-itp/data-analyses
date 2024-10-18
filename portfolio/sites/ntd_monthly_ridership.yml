@@ -8,6 +8,8 @@ parts:
   - params:
       rtpa: Butte County Association of Governments
   - params:
+      rtpa: El Dorado County Transportation Commission
+  - params:
       rtpa: Fresno County Council of Governments
   - params:
       rtpa: Imperial County Transportation Commission
@@ -23,6 +25,8 @@ parts:
       rtpa: Metropolitan Transportation Commission
   - params:
       rtpa: Orange County Transportation Authority
+  - params:
+      rtpa: Placer County Transportation Planning Agency
   - params:
       rtpa: Riverside County Transportation Commission
   - params:
