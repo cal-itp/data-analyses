@@ -11,32 +11,59 @@ These datasets are updated **monthly**. We usually use a Wednesday in the middle
 
 ## Understanding the Open Data
 
-Per statute, High Quality Transit Areas are defined as the _areas surrounding_ high quality transit corridors and major transit stops. Therefore, if you're looking for our most authoratative data on where HQTAs are within California, please start with the HQTA Areas (polygon) dataset.
+### Frequency Standards have Diverged
 
-Major transit stop is a more restrictive definition that high quality transit corridor. A high quality corridor only requires that there be service in that corridor meeting the frequency standard. It need not be one route alone meeting the frequency standard – therefore we cut corridors into segments and make the high quality corridor determination based on the stop with the most trips in that segment (even if those trips are on different routes). It is possible and valid for a high quality corridor to contain no major transit stops at all.
+Assembly Bill 2553(2024) is changing the definition of a bus major transit stop to be the intersection of two corridors with a service interval (headway) of every 20 minutes (3 trips/hr), instead of every 15 minutes (4 trips/hr). Although the bill formally takes effect January 1, 2025, our dataset now incorporates this change.
 
-On the other hand, major transit stops exist at the intersection of two high-quality transit corridors as described above, and also at any rail station, most ferry terminals, and select BRT stations.
+This means that there are now two frequency standards captured by this dataset:
 
-Using the HQTA Areas dataset, it's possible to determine if an area qualifies because it is a high quality corridor, major transit stop, or both. This is useful for certain kinds of analyses, since some statutes and programs only reference major transit stops and don't include high quality corridors.
+* 4 trips/hr (15min headway) for high quality transit corridors, as well as bus rapid transit major stops (along with other requirements for BRT)
+* 3 trips/hr (20min headway) for bus corridors intersecting to form a bus major stop
+
+With this change, bus major stops are no longer a subset of high quality transit corridors, since the intersection of two corridors with frequencies of 3 trips/hr now creates a major stop despite neither being a high quality transit corridor.
+
+For more details, see [links](#High-Quality-Transit-Areas-Relevant-Statutes) to each statute below.
+
+### How We Count Frequencies
+
+* The AM peak period is defined as 6:00 AM - 8:59 AM. The PM peak period is defined as 3:00 PM - 6:59 PM.
+    * Average hourly frequencies are calculated for each stop per peak period.
+* Corridors are cut for each operator-route-direction every 1,250 meters.
+   * Stops have a 50 meter buffer drawn around them and are spatially joined to corridors.
+   * For each 1,250 meter corridor segment, the highest frequency stop is counted (if there are multiple stops).
+* We count _all_ trips at the highest frequency stop in each corridor segment, even if they're marketed as different "routes".
+    * For example, if Route A serves the stop twice an hour, and Route B twice an hour, we consider the stop frequency to be 4 trips/hour, qualifying it as a high quality transit corridor and potentially a major bus stop (if an intersecting corridor is present)
+    
+### Why Not one "Route" at a Time?
+
+![Long Beach Transit map as of October 2024, focusing on the area south of Willow St and east from Magnolia Ave to Lakewood Bl](img/lbt_map_2024.png)
+
+There is not a consistent practice as to what constitutes one "route" in the transit industry. A single "route" can have some trips that deviate from the usual routing without changing the route name or number, or have some trips only serve part of the route (shortlining). Multiple "routes" can combine to serve the same corridor and stops for many miles. The latter practice, often called interlining, is especially common, as is having local and rapid routes that take the same path but with different stop spacing.
+
+In the above example, Atlantic Ave is served by only Route 61, while Pacific Coast Highway is served by Routes 171, 172, and 173. Those routes combine to equal a higher frequency for riders travelling along PCH than along Atlantic, yet if we only considered one "route" at a time we would categorize Atlantic as a high quality corridor and not PCH (nor Anaheim and 7th, which function the same). We believe this would inaccurately reflect the transit rider experience.
+
+By considering each corridor segment seperately, our methodology is sensitive to where "routes" combine to offer high frequencies, as well as to where they diverge (or where a single route shortlines) and no longer meet the relevant frequency standard.
+
+### HQTA Areas is the Primary Dataset
+
+Per statute, High Quality Transit Areas are defined as the _half-mile surrounding_ high quality transit corridors and major transit stops. Our HQTA Areas (polygon) dataset already incorporates this half-mile buffer.
+
+Using the HQTA Areas dataset, it's possible to determine if an area qualifies because it is a high quality transit corridor, major transit stop, or both. This is useful for certain kinds of analyses, since some statutes and programs only reference major transit stops and don't include high quality transit corridors.
 
 We provide the HQTA Stops dataset as a convienience for certain kinds of analysis where it would be helpful to know actual stop locations. Note that the `hq_corridor_bus` type includes all stops in a high quality corridor. Since we make the high quality corridor determination at the corridor segment level and only then find the stops within that corridor, not every `hq_corridor_stop` is guaranteed to have frequent service (though they could all have frequent service, and at least one stop every 1,250 meters will have frequent service).
 
 ### Additional Details
-* The AM peak period is defined as 12:00 AM - 11:59 AM. The PM peak period is defined as 12:00 PM - 11:59 PM.
-    * Frequencies are calculated for each stop per hour. The highest frequency in the period before noon is counted for AM peak frequency; the highest frequency in the period after noon is counted for PM peak frequency.
-* Corridors are cut for each operator-route-direction every 1,250 meters.
-   * Stops have a 50 meter buffer drawn around them and are spatially joined to corridors.
-   * For each 1,250 meter corridor, the highest frequency is counted (if there are multiple stops).
-*  `peak_trips`: the number of trips per hour are calculated separately for the AM peak and PM peak. This column should be interpreted as: *at least x trips per hour in the peak period*. 
-    * If these values differ, the *lesser* value is reported. 
-    * Ex: 5 AM peak trips, 4 PM peak trips would show a value of `peak_trips = 4`.
+
 * `hqta_type = hq_corridor_bus`
     * `hqta_details` is `corridor_frequent_stop` if the stop has at least 4 peak trips, `corridor_other_stop` otherwise.
 * `hqta_type = major_stop_bus`
-    * Major stop bus is designation of stops appearing within 50 meters of the intersection of 2 frequent corridors. In our analysis, corridors have an operator and route associated to track it.
+    * Major stop bus is designation of stops appearing within 500 feet of the intersection of 2 "major stop precursor corridors" with frequencies of at least 3 trips/hr. In our analysis, corridors have an operator and route associated to track it. All stops within 500 feet of the intersection are collectively considered the "major transit stop", and the half-mile major transit stop buffer extends from each stop and is dissolved into a single polygon.
     * If the intersection was between 2 different operators (different agency names), `hqta_details = intersection_2_bus_routes_different_operators`.
     * If the intersection was between routes of the same operator, `hqta_details = intersection_2_bus_routes_same_operator`
 * A half-mile buffered dataset is provided for high quality transit areas. We recommend using the polygon dataset. To get the stops (points) that create these half mile polygons, we do also provide high quality transit stops.
+*  `peak_trips`: This column should be interpreted as: *at least x trips per hour in the peak period*. 
+    * If AM and PM values differ, the *lesser* value is reported. 
+    * Ex: 5 AM peak trips, 4 PM peak trips would show a value of `peak_trips = 4`.
 
 [![hqta_methodology_mermaid](https://mermaid.ink/img/pako:eNqFkk1rwzAMhv-K8Ai5NNBLGWQw6FduY7CWnQxFjZXVkNhBVthK6X9fmqxry0h3sYX0SNjvq4PKvSGVqiRJtBMrJaXwWpODBQpCAvMprBldsAIr8XUAdAbefCMUtOuaouigHYB1VlLoQoBYdlRRnEK8xUDx6Dr7jmxxW1KIf_G2VLOtkPdzX3o-9T0sJ9kkm55bL8SavuRCjcfjv8jMsyEegkrraKgWKPfO3L4jyx6XsytGiMXeIEVRxH35eLra4xhF2mlXlP4z3yELrGdPPSFsWxGT5Bly3Eiv7IY7PX-IsMOaBpA7M8LJnfOIzql_gI3YigYoNVIVcYXWtKvRmaRVZ55WaRsaKrApRav2py2KjfjV3uUqFW5opJraoNDC4gdjdU6SseL5pd-2bumO3-XAyjk?type=png)](https://mermaid.live/edit#pako:eNqFkk1rwzAMhv-K8Ai5NNBLGWQw6FduY7CWnQxFjZXVkNhBVthK6X9fmqxry0h3sYX0SNjvq4PKvSGVqiRJtBMrJaXwWpODBQpCAvMprBldsAIr8XUAdAbefCMUtOuaouigHYB1VlLoQoBYdlRRnEK8xUDx6Dr7jmxxW1KIf_G2VLOtkPdzX3o-9T0sJ9kkm55bL8SavuRCjcfjv8jMsyEegkrraKgWKPfO3L4jyx6XsytGiMXeIEVRxH35eLra4xhF2mlXlP4z3yELrGdPPSFsWxGT5Bly3Eiv7IY7PX-IsMOaBpA7M8LJnfOIzql_gI3YigYoNVIVcYXWtKvRmaRVZ55WaRsaKrApRav2py2KjfjV3uUqFW5opJraoNDC4gdjdU6SseL5pd-2bumO3-XAyjk)
 
@@ -45,13 +72,13 @@ We provide the HQTA Stops dataset as a convienience for certain kinds of analysi
 [PRC 21155](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21155.&lawCode=PRC)
 * Major transit stop definition: _A major transit stop is as defined in Section 21064.3, except that, for purposes of this section, it also includes major transit stops that are included in the applicable regional transportation plan_
 * High-quality transit corridor definition: _For purposes of this section, a high-quality transit corridor means a corridor with fixed route bus service with service intervals no longer than 15 minutes during peak commute hours._
-    * Statute does not define "peak commute hours", given that peaks may vary locally we look for any hour in the morning plus any hour in the afternoon/evening.
+    * Statute does not define "peak commute hours", however we've started using fixed peak periods to align our methodology with other stateholders.
 
 [PRC 21064.3](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21064.3.&lawCode=PRC)
 * _Major transit stop means a site containing any of the following:
 (a) An existing rail or bus rapid transit station.
 (b) A ferry terminal served by either a bus or rail transit service.
-(c) The intersection of two or more major bus routes with a frequency of service interval of 15 minutes or less during the morning and afternoon peak commute periods._
+(c) The intersection of two or more major bus routes with a frequency of service interval of ~15~ 20 minutes or less during the morning and afternoon peak commute periods._
     * "Intersection" may not be sufficiently well-defined for this analysis
 
 [PRC 21060.2](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PRC&sectionNum=21060.2.&highlight=true&keyword=bus%20rapid%20transit)
