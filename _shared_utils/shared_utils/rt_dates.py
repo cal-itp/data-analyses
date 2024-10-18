@@ -64,6 +64,13 @@ DATES = {
     "jul2024": "2024-07-17",
     "aug2024": "2024-08-14",
     "sep2024": "2024-09-18",
+    "oct2024a": "2024-10-14",
+    "oct2024b": "2024-10-15",
+    "oct2024": "2024-10-16",
+    "oct2024c": "2024-10-17",
+    "oct2024d": "2024-10-18",
+    "oct2024e": "2024-10-19",
+    "oct2024f": "2024-10-20",
 }
 
 y2023_dates = [
@@ -73,7 +80,7 @@ y2023_dates = [
 y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
 
 
-valid_weeks = ["apr2023", "oct2023", "apr2024"]
+valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
 
 
 def get_week(month: Literal[[*valid_weeks]], exclude_wed: bool) -> list:
@@ -86,6 +93,7 @@ def get_week(month: Literal[[*valid_weeks]], exclude_wed: bool) -> list:
 apr2023_week = get_week(month="apr2023", exclude_wed=False)
 oct2023_week = get_week(month="oct2023", exclude_wed=False)
 apr2024_week = get_week(month="apr2024", exclude_wed=False)
+oct2024_week = get_week(month="oct2024", exclude_wed=False)
 
 MONTH_DICT = {
     1: "January",
