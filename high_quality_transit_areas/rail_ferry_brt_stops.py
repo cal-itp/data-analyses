@@ -147,8 +147,10 @@ def grab_ferry_stops(
     """
     Grab all the ferry stops.
     """    
-    # only stops without bus service
-    angel_and_alcatraz = ['2483552', '2483550', '43002']         
+    # only stops without bus or rail service
+    angel_and_alcatraz = ['2483552', '2483550', '43002', 'AIF']
+    havasu = ['havasuLanding', 'londonBridge'] #  also one of these is in AZ
+    no_bus_or_rail = angel_and_alcatraz + havasu
     
     return gdf[
         (gdf.route_type.isin(route_types)) & 
