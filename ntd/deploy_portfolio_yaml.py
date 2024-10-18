@@ -25,7 +25,7 @@ def overwrite_yaml(portfolio_site_yaml: Path) -> list:
                 'parallel_corridors', 'rt', 'dla'
     """
     df = pd.read_parquet(
-        f"{GCS_FILE_PATH}ca_monthly_ridership_2023_October.parquet",
+        f"{GCS_FILE_PATH}ntd_id_rtpa_crosswalk.parquet",
         columns = ["RTPA"]
     ).drop_duplicates()
 
