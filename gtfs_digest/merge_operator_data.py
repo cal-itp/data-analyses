@@ -128,7 +128,6 @@ if __name__ == "__main__":
     
     OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
-    OPERATOR_METRICS = GTFS_DATA_DICT.digest_tables.operator_metrics
     SCHED_RT_CATEGORY = GTFS_DATA_DICT.digest_tables.operator_sched_rt
     CROSSWALK = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     
@@ -136,9 +135,9 @@ if __name__ == "__main__":
     
     # Concat operator metrics.
     operator_metrics = concatenate_operator_level_metrics(analysis_date_list)
-    operator_metrics.to_parquet(
-        f"{RT_SCHED_GCS}{OPERATOR_METRICS}.parquet"
-    )
+    #operator_metrics.to_parquet(
+    #    f"{RT_SCHED_GCS}{OPERATOR_METRICS}.parquet"
+    #)
     
     # Concat operator profiles
     df = concatenate_operator_stats(analysis_date_list)
