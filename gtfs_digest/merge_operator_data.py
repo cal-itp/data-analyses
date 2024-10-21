@@ -135,12 +135,19 @@ if __name__ == "__main__":
     
     # Concat operator metrics.
     operator_metrics = concatenate_operator_level_metrics(analysis_date_list)
-    #operator_metrics.to_parquet(
-    #    f"{RT_SCHED_GCS}{OPERATOR_METRICS}.parquet"
-    #)
     
     # Concat operator profiles
-    df = concatenate_operator_stats(analysis_date_list)
+    operator_profiles_df = concatenate_operator_stats(analysis_date_list)
+    
+    merge_cols = ["organization_name",
+              "schedule_gtfs_dataset_key",
+             "service_date",]
+    
+    # Merge the two together
+    operator_profiles_df1 = pd.merge(operator_profiles_df, 
+                                  operator_metrics,
+                                  on = merge_cols, 
+                                  how = "outer")
     
     ntd_cols = [
         "schedule_gtfs_dataset_key",
@@ -169,26 +176,26 @@ if __name__ == "__main__":
     )
     
     # Merge
-    merge_cols = ["schedule_gtfs_dataset_key", "service_date"]
-    op_profiles_df1 = pd.merge(
-        df, 
+    merge_cols.remove("organization_name")
+    op_profiles_df2 = pd.merge(
+        operator_profiles_df1, 
         crosswalk_df, 
         on = merge_cols, 
         how = "left"
     )
     
     # Drop duplicates created after merging
-    op_profiles_df2 = (
-        op_profiles_df1
+    op_profiles_df3 = (
+        op_profiles_df2
         .pipe(
             publish_utils.exclude_private_datasets, 
             col = "schedule_gtfs_dataset_key", 
             public_gtfs_dataset_keys = public_feeds
-        ).drop_duplicates(subset = list(op_profiles_df1.columns))
+        ).drop_duplicates(subset = list(op_profiles_df2.columns))
     .reset_index(drop = True))
 
-    op_profiles_df2.to_parquet(
-        f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
+    op_profiles_df3.to_parquet(
+        f"{RT_SCHED_GCS}{OPERATOR_PROFILE}_AH_TESTING.parquet"
     )
     
     gdf = concatenate_operator_routes(
