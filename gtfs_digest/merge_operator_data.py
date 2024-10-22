@@ -148,7 +148,6 @@ if __name__ == "__main__":
                                   operator_metrics,
                                   on = merge_cols, 
                                   how = "outer")
-    
     ntd_cols = [
         "schedule_gtfs_dataset_key",
         "caltrans_district",
