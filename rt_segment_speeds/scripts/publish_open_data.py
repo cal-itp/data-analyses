@@ -44,7 +44,7 @@ def stage_open_data_exports(analysis_date: str):
 
 if __name__ == "__main__":
     
-    from segment_speed_utils.project_vars import analysis_date_list    
+    from segment_speed_utils.project_vars import analysis_date_list 
     
     for analysis_date in analysis_date_list:
                 
