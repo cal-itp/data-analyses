@@ -23,13 +23,14 @@ rt_stop_times_pipeline:
 speedmaps_pipeline:
 	python pipeline_speedmap.py
 	python average_speedmap_segment_speeds.py  
-    
+  
 all_speeds_pipeline:
 	make speeds_pipeline
 	make rt_stop_times_pipeline
 	make speedmaps_pipeline
 	python publish_open_data.py  
-    
+	#python publish_public_gcs.py #rarely used
+
 download_roads:
 	#pip install esridump
 	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson

@@ -22,6 +22,7 @@ preprocess_schedule_only:
 	make route_typologies_data
 	python operator_scheduled_stats.py 
 	python schedule_stats_by_stop.py 
+	#python track_publish_dates.py
     
 route_typologies_data:
 	python route_typologies.py
@@ -31,7 +32,6 @@ route_typologies_data:
 # Clean route names for displaying across time
 timeseries_preprocessing: 
 	python clean_route_naming.py
-	python track_publish_dates.py
     
 # monthly scheduled service, download after the end of each month
 monthly_scheduled_data:
@@ -44,15 +44,15 @@ funnel_gtfs_single_day:
 	make preprocess_vp
 	make preprocess_schedule_only 
 	make timeseries_preprocessing
-	make monthly_scheduled_data    
+	#make monthly_scheduled_data    
 
 all:
 	make funnel_gtfs_single_day
     # update open_data/update_vars.py        
-	cd ../open_data/ && make create_gtfs_schedule_geospatial_open_data -f Makefile
+	#cd ../open_data/ && make create_gtfs_schedule_geospatial_open_data -f Makefile
     # update high_quality_transit_areas/update_vars.py    
-	cd ../high_quality_transit_areas/ && make hqta_data -f Makefile    
+	#cd ../high_quality_transit_areas/ && make hqta_data -f Makefile    
     # update rt_segment_speeds/segment_speed_utils/project_vars.py
-	cd rt_segment_speeds/scripts/ && make all_speeds_pipeline -f Makefile && cd ../../
+	cd ../rt_segment_speeds/scripts/ && make all_speeds_pipeline -f Makefile && cd ../../
     # update rt_scheduled_v_ran/scripts/update_vars.py
-	cd rt_scheduled_v_ran/scripts/ && make full_pipeline -f Makefile
+	cd ../rt_scheduled_v_ran/scripts/ && make full_pipeline -f Makefile
