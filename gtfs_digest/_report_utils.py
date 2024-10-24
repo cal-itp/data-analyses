@@ -25,20 +25,27 @@ with open("readable.yml") as f:
     
 def replace_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Replace columnn names with a more readable name 
-    found in readable_dict.yml.
-    """
-    def replace_single_column(column_name: str):
-        if column_name in readable_dict:
-            if 'readable' in readable_dict[column_name]:
-                return readable_dict[column_name]['readable']
-            else:
-                return readable_dict[column_name]
-        return column_name
+    Replace column names with more readable names found in readable_dict.yml.
     
-    df = df.rename(columns = {
-        **{c: replace_single_column(c) for c in df.columns}
-    })
+    Args:
+    df (pd.DataFrame): Input DataFrame.
+    
+    Returns:
+    pd.DataFrame: DataFrame with replaced column names.
+    """
+    # Input validation
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input 'df' must be a pandas DataFrame")
+    
+    def replace_single_column(column_name: str) -> str:
+        value = readable_dict.get(column_name)
+        if isinstance(value, dict):
+            return value.get('readable', column_name)
+        else:
+            return value or column_name
+    
+    # Rename columns using dictionary comprehension
+    df = df.rename(columns={c: replace_single_column(c) for c in df.columns})
     
     return df
 
