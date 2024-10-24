@@ -64,7 +64,7 @@ def load_operator_map(name:str)->gpd.GeoDataFrame:
     op_routes_gdf = op_routes_gdf.drop(columns = ['service_date'])
     
     # Rename dataframe.
-    op_routes_gdf.columns = op_routes_gdf.columns.map(_report_utils.replace_column_names)
+    op_routes_gdf = _report_utils.replace_column_names(op_routes_gdf)
     return op_routes_gdf
 
 def get_counties()->gpd.GeoDataFrame:
@@ -78,8 +78,9 @@ def get_counties()->gpd.GeoDataFrame:
 
 def load_operator_ntd_profile(organization_name:str)->pd.DataFrame:
 
-    op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
-
+    # op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
+    # TEMPORARY
+    op_profiles_url = "gs://calitp-analytics-data/data-analyses/rt_vs_schedule/digest/operator_profiles_AH_TESTING_.parquet"
     op_profiles_df = pd.read_parquet(
     op_profiles_url,
     filters=[[("organization_name", "==", organization_name)]])
@@ -88,7 +89,7 @@ def load_operator_ntd_profile(organization_name:str)->pd.DataFrame:
     op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date'], ascending = False).head(1)
     
     # Rename dataframe
-    op_profiles_df1.columns = op_profiles_df1.columns.map(_report_utils.replace_column_names)
+    op_profiles_df1 = _report_utils.replace_column_names(op_profiles_df1)
     return op_profiles_df1
 
 def load_operator_service_hours(name:str)->pd.DataFrame:
@@ -102,7 +103,7 @@ def load_operator_service_hours(name:str)->pd.DataFrame:
     filters=[[(("name", "==", name))]])
     
     # Rename dataframe
-    df.columns = df.columns.map(_report_utils.replace_column_names)
+    df = _report_utils.replace_column_names(df)
     return df
 
 def load_operator_metrics(name:str)->pd.DataFrame:
@@ -116,7 +117,7 @@ def load_operator_metrics(name:str)->pd.DataFrame:
     filters=[[(("name", "==", name))]])
     
     # Rename dataframe
-    df.columns = df.columns.map(_report_utils.replace_column_names)
+    df = _report_utils.replace_column_names(df)
     return df
 """
 Data Manipulation
