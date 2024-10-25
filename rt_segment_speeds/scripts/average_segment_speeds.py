@@ -137,7 +137,7 @@ def segment_averages(
         gtfs_schedule_wrangling.merge_operator_identifiers, 
         analysis_date_list,
         columns = CROSSWALK_COLS
-    ).persist()
+    )
 
     if len(analysis_date_list) > 1:
         # If a week (date list) is put in, use Wednesday for segment geometry
@@ -166,7 +166,10 @@ def segment_averages(
     )
         
     end = datetime.datetime.now()
-    logger.info(f"segment speed averaging for {analysis_date_list} execution time: {end - start}")
+    logger.info(
+        f"{segment_type} segment averaging for {analysis_date_list} "
+        f"execution time: {end - start}"
+    )
     
     return    
         

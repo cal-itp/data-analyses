@@ -151,7 +151,11 @@ def summary_average_speeds(
     
     
     end = datetime.datetime.now()
-    logger.info(f"summary speed averaging for {analysis_date_list} execution time: {end - start}")
+    
+    logger.info(
+        f"{segment_type} summary speed averaging for {analysis_date_list} "
+        f"execution time: {end - start}"
+    )
     
     return
 
