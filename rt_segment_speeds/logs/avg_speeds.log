@@ -524,3 +524,6 @@
 2024-10-25 12:03:33.918 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:15.263512
 2024-10-25 12:03:46.569 | INFO     | __main__:summary_average_speeds:154 - summary speed averaging for ['2024-10-16'] execution time: 0:00:27.913940
 2024-10-25 12:06:25.916 | INFO     | __main__:summary_average_speeds:154 - summary speed averaging for ['2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20'] execution time: 0:01:55.082631
+2024-10-25 12:52:26.403 | INFO     | average_segment_speeds:segment_averages:169 - speedmap_segments segment averaging for ['2024-10-16'] execution time: 0:05:57.735912
+2024-10-25 12:57:18.229 | INFO     | average_segment_speeds:segment_averages:169 - speedmap_segments segment averaging for ['2024-10-16'] execution time: 0:04:51.480238
+2024-10-25 13:16:11.221 | INFO     | average_segment_speeds:segment_averages:169 - speedmap_segments segment averaging for ['2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20'] execution time: 0:09:08.182403
