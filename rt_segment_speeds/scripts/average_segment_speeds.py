@@ -19,7 +19,6 @@ from segment_speed_utils import (gtfs_schedule_wrangling,
                                  time_series_utils
                                  )
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
-from segment_speed_utils.time_series_utils import ROUTE_DIR_COLS
 from segment_speed_utils.project_vars import SEGMENT_TYPES
 
 OPERATOR_COLS = [
@@ -33,229 +32,141 @@ CROSSWALK_COLS = [
     "base64_url"
 ]
 
-def import_segments(
+def concatenate_trip_segment_speeds(
     analysis_date_list: list,
     segment_type: Literal[SEGMENT_TYPES],
-    get_pandas: bool
+    **kwargs
+) -> pd.DataFrame:
+    """
+    Concatenate segment speeds at trip grain for
+    as many dates to average over.
+    
+    Add the columns we need for peak/offpeak 
+    and weekday/weekend that will support
+    peak/offpeak segment weighted averages.
+    """
+    dict_inputs = GTFS_DATA_DICT[segment_type]
+    
+    SHAPE_STOP_COLS = [*dict_inputs["shape_stop_cols"]]
+    ROUTE_DIR_COLS = [*dict_inputs["route_dir_cols"]]
+    STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]
+    
+    SPEED_FILE = dict_inputs["stage4"]
+    MAX_SPEED = dict_inputs["max_speed"]
+    
+    df = time_series_utils.concatenate_datasets_across_dates(
+        SEGMENT_GCS, 
+        SPEED_FILE,
+        analysis_date_list,
+        data_type  = "df",
+        columns = helpers.unique_list(
+            OPERATOR_COLS + SHAPE_STOP_COLS + 
+            ROUTE_DIR_COLS + STOP_PAIR_COLS + [
+                "trip_instance_key", "speed_mph", 
+                "meters_elapsed", "sec_elapsed", 
+                "time_of_day"]),
+        filters = [[("speed_mph", "<=", MAX_SPEED)]],
+        **kwargs
+    ).pipe(
+        gtfs_schedule_wrangling.add_peak_offpeak_column
+    ).pipe(
+        gtfs_schedule_wrangling.add_weekday_weekend_column
+    )
+    print("concatenated files") 
+    
+    return df
+
+
+def merge_in_segment_geometry(
+    speeds_by_segment: pd.DataFrame,
+    analysis_date: str,
+    segment_type: Literal[SEGMENT_TYPES],
 ) -> gpd.GeoDataFrame:
     """
-    Import the segments to merge.
-    For stop_segments, import only 1 trip per shape for segments, and merge
-    on shape_array_key and stop_pair.
-    For rt_stop_times, import all trips with their segments, and merge on 
-    trip_instance_key and stop_pair.
+    Import the segments to merge and attach it to the average speeds.
+    For a week's worth of data, we'll just use Wed segments.
     """
     SEGMENT_FILE = GTFS_DATA_DICT[segment_type].segments_file
 
-    dfs = [
-        delayed(gpd.read_parquet)(
-            f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
-        ).to_crs(WGS84) for analysis_date in analysis_date_list
-    ]
+    segment_geom = gpd.read_parquet(
+        f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
+    ).to_crs(WGS84)
     
-    gdf = delayed(pd.concat)(
-        dfs, axis=0, ignore_index=True
-    )
-    
-    if get_pandas:
-        gdf = compute(gdf)[0]
-    
-    return gdf
-
-
-def segment_averaging_with_geometry(
-    gdf: gpd.GeoDataFrame,
-    group_cols: list, 
-    analysis_date_list: list,
-    segment_type: Literal[SEGMENT_TYPES]
-) -> gpd.GeoDataFrame:
-    """
-    Calculate average speeds for segment.
-    Input a list of group_cols to do the averaging over.
-    Attach segment geometry.
-    For a week's worth of data, we'll just use Wed segments.
-    merge_cols refers to the list of columns to merge in segment geometry,
-    which may slightly differ from the group_cols.
-    """
-    if len(analysis_date_list) > 1:
-        analysis_date = analysis_date_list[2]
-    else:
-        analysis_date = analysis_date_list[0]
-        
-    avg_speeds = metrics.concatenate_peak_offpeak_allday_averages(
-        gdf, 
-        group_cols,
-        metric_type = "segment_speeds"
-    ).pipe(
-        gtfs_schedule_wrangling.merge_operator_identifiers, 
-        analysis_date_list,
-        columns = CROSSWALK_COLS
-    )
-    
-    col_order = [c for c in avg_speeds.columns]
-    
-    segment_geom = import_segments(
-        [analysis_date], segment_type, get_pandas=True
-    )
+    col_order = [c for c in speeds_by_segment.columns]
     
     # The merge columns list should be all the columns that are in common
     # between averaged speeds and segment gdf
     segment_file_cols = segment_geom.columns.tolist()
     merge_cols = list(set(col_order).intersection(segment_file_cols))
     
-    avg_speeds_with_geom = pd.merge(
+    gdf = pd.merge(
         segment_geom[merge_cols + ["geometry"]].drop_duplicates(),
-        avg_speeds,
+        speeds_by_segment,
         on = merge_cols, 
     ).reset_index(drop=True).reindex(
         columns = col_order + ["geometry"]
     )
     
-    return avg_speeds_with_geom
+    return gdf
 
 
-def single_day_segment_averages(
-    analysis_date: str, 
-    segment_type: Literal[SEGMENT_TYPES]
-):
-    """
-    Main function for calculating average speeds.
-    Start from single day segment-trip speeds and 
-    aggregate by peak_offpeak, weekday_weekend.
-    """    
-    dict_inputs = GTFS_DATA_DICT[segment_type]
-    
-    SPEED_FILE = dict_inputs["stage4"]
-    MAX_SPEED = dict_inputs["max_speed"]
- 
-    # These are the grouping columns (list) to use for the shape and route-dir aggregation
-    SHAPE_STOP_COLS = [*dict_inputs["shape_stop_cols"]]
-    STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]
-
-    SHAPE_SEG_FILE = dict_inputs["shape_stop_single_segment"]
-    ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
-        
-    start = datetime.datetime.now()
-    columns = (OPERATOR_COLS + SHAPE_STOP_COLS + 
-                   STOP_PAIR_COLS + ROUTE_DIR_COLS + [
-                       "trip_instance_key", "speed_mph", 
-                       "meters_elapsed", "sec_elapsed", 
-                       "time_of_day"])
-    #  https://stackoverflow.com/questions/7961363/removing-duplicates-in-lists
-    #  route_id will be in both shape stop and route dir; this method maintains list order
-    columns = list(dict.fromkeys(columns))
-    
-    df = time_series_utils.concatenate_datasets_across_dates(
-        SEGMENT_GCS,
-        SPEED_FILE,
-        [analysis_date],
-        data_type  = "df",
-        get_pandas = True,
-        columns = columns,
-        filters = [[("speed_mph", "<=", MAX_SPEED)]]
-    ).pipe(
-        gtfs_schedule_wrangling.add_peak_offpeak_column
-    ).pipe(
-        gtfs_schedule_wrangling.add_weekday_weekend_column
-    )
-    print("concatenated files") 
-        
-    shape_stop_segments = segment_averaging_with_geometry(
-        df, 
-        group_cols = OPERATOR_COLS + SHAPE_STOP_COLS + STOP_PAIR_COLS,
-        analysis_date_list = [analysis_date],
-        segment_type = segment_type
-    )
-
-    utils.geoparquet_gcs_export(
-        shape_stop_segments,
-        SEGMENT_GCS,
-        f"{SHAPE_SEG_FILE}_{analysis_date}"
-    )
-        
-    time1 = datetime.datetime.now()
-    logger.info(f"shape seg avg {time1 - start}")
-    
-    route_dir_segments = segment_averaging_with_geometry(
-        df, 
-        group_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
-        analysis_date_list = [analysis_date],
-        segment_type = segment_type
-    )
-    
-    utils.geoparquet_gcs_export(
-        route_dir_segments,
-        SEGMENT_GCS,
-        f"{ROUTE_SEG_FILE}_{analysis_date}"
-    )
-        
-    time2 = datetime.datetime.now()
-    logger.info(f"route dir seg avg {time2 - time1}")
-    logger.info(f"single day segment {analysis_date} execution time: {time2 - start}")
-    
-    return    
-
-
-def multi_day_segment_averages(
+def segment_averages(
     analysis_date_list: list, 
-    segment_type: Literal[SEGMENT_TYPES]
+    segment_type: Literal[SEGMENT_TYPES],
+    group_cols: list,
+    export_file: str
 ):
     """
     Main function for calculating average speeds.
     Start from single day segment-trip speeds and 
     aggregate by peak_offpeak, weekday_weekend.
     """   
-    dict_inputs = GTFS_DATA_DICT[segment_type]
-
-    SPEED_FILE = dict_inputs["stage4"]
-    MAX_SPEED = dict_inputs["max_speed"]
-    
-    # These are the grouping columns (list) to use for the shape and route-dir aggregation
-    SHAPE_STOP_COLS = [*dict_inputs["shape_stop_cols"]]
-    STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]    
-    ROUTE_SEG_FILE = dict_inputs["route_dir_multi_segment"]
-        
     start = datetime.datetime.now()
     
-    df = time_series_utils.concatenate_datasets_across_dates(
-        SEGMENT_GCS,
-        SPEED_FILE,
+    df = concatenate_trip_segment_speeds(
         analysis_date_list,
-        data_type  = "df",
-        get_pandas = False,
-        columns = (OPERATOR_COLS + SHAPE_STOP_COLS + 
-                   STOP_PAIR_COLS + ROUTE_DIR_COLS + [
-                   "trip_instance_key", "speed_mph", 
-                   "meters_elapsed", "sec_elapsed", 
-                   "time_of_day"]),
-        filters = [[("speed_mph", "<=", MAX_SPEED)]]
-    ).pipe(
-        gtfs_schedule_wrangling.add_peak_offpeak_column
-    ).pipe(
-        gtfs_schedule_wrangling.add_weekday_weekend_column
-    )
-    print("concatenated files") 
-
-    time_span_str, time_span_num = time_helpers.time_span_labeling(
-        analysis_date_list)
-
-    route_dir_segments = delayed(segment_averaging_with_geometry)(
-        df, 
-        OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"],
-        analysis_date_list = analysis_date_list,
-        segment_type = segment_type
+        segment_type,
+        get_pandas = False
     )
     
-    route_dir_segments = compute(route_dir_segments)[0]
+    avg_speeds = delayed(metrics.concatenate_peak_offpeak_allday_averages)(
+        df, 
+        group_cols,
+        metric_type = "segment_speeds"
+    ).pipe(
+        gtfs_schedule_wrangling.merge_operator_identifiers, 
+        analysis_date_list,
+        columns = CROSSWALK_COLS
+    ).persist()
+
+    if len(analysis_date_list) > 1:
+        # If a week (date list) is put in, use Wednesday for segment geometry
+        time_span_str, _ = time_helpers.time_span_labeling(
+            analysis_date_list)
+        
+        analysis_date = analysis_date_list[2]
+    
+    else:
+        # If a single day is put in, use that date for segment geometry
+        analysis_date = analysis_date_list[0]
+        time_span_str = analysis_date
+      
+    avg_speeds_by_segment = delayed(merge_in_segment_geometry)(
+        avg_speeds,
+        analysis_date, 
+        segment_type
+    )
+        
+    avg_speeds_by_segment = compute(avg_speeds_by_segment)[0]
     
     utils.geoparquet_gcs_export(
-        route_dir_segments,
+        avg_speeds_by_segment,
         SEGMENT_GCS,
-        f"{ROUTE_SEG_FILE}_{time_span_str}"
+        f"{export_file}_{time_span_str}"
     )
         
     end = datetime.datetime.now()
-    logger.info(f"multi day segment {analysis_date_list} execution time: {end - start}")
+    logger.info(f"segment speed averaging for {analysis_date_list} execution time: {end - start}")
     
     return    
         
@@ -273,14 +184,32 @@ if __name__ == "__main__":
     
     segment_type = "stop_segments"
     
+    dict_inputs = GTFS_DATA_DICT[segment_type]
+    ROUTE_DIR_COLS = [*dict_inputs["route_dir_cols"]]
+    STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]
+    
+    ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
+
     for analysis_date in analysis_date_list:
 
-        single_day_segment_averages(analysis_date, segment_type)
+        segment_averages(
+            [analysis_date], 
+            segment_type, 
+            group_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
+            export_file = ROUTE_SEG_FILE
+        )
     
     '''
     from segment_speed_utils.project_vars import weeks_available
     
-    for one_week in weeks_available:
+    ROUTE_SEG_FILE = dict_inputs["route_dir_multi_segment"]
+
+    for one_week in weeks_available[:1]:
         
-        multi_day_segment_averages(one_week, segment_type)
-    '''
+        segment_averages(
+            one_week, 
+            segment_type,
+            group_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"],
+            export_file = ROUTE_SEG_FILE
+        )
+    '''       
