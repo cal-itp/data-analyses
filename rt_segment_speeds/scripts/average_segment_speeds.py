@@ -96,8 +96,8 @@ def merge_in_segment_geometry(
     
     # The merge columns list should be all the columns that are in common
     # between averaged speeds and segment gdf
-    segment_file_cols = segment_geom.columns.tolist()
-    merge_cols = list(set(col_order).intersection(segment_file_cols))
+    geom_file_cols = segment_geom.columns.tolist()
+    merge_cols = list(set(col_order).intersection(geom_file_cols))
     
     gdf = pd.merge(
         segment_geom[merge_cols + ["geometry"]].drop_duplicates(),
@@ -151,16 +151,16 @@ def segment_averages(
         analysis_date = analysis_date_list[0]
         time_span_str = analysis_date
       
-    avg_speeds_by_segment = delayed(merge_in_segment_geometry)(
+    avg_speeds_with_geom = delayed(merge_in_segment_geometry)(
         avg_speeds,
         analysis_date, 
         segment_type
     )
         
-    avg_speeds_by_segment = compute(avg_speeds_by_segment)[0]
+    avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]
     
     utils.geoparquet_gcs_export(
-        avg_speeds_by_segment,
+        avg_speeds_with_geom,
         SEGMENT_GCS,
         f"{export_file}_{time_span_str}"
     )
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     
     ROUTE_SEG_FILE = dict_inputs["route_dir_multi_segment"]
 
-    for one_week in weeks_available[:1]:
+    for one_week in weeks_available:
         
         segment_averages(
             one_week, 
