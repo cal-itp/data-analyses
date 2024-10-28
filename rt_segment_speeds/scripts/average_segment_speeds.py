@@ -15,6 +15,7 @@ from calitp_data_analysis import utils
 from segment_speed_utils import (gtfs_schedule_wrangling, 
                                  helpers, 
                                  metrics,
+                                 segment_calcs,
                                  time_helpers, 
                                  time_series_utils
                                  )
@@ -114,7 +115,8 @@ def segment_averages(
     analysis_date_list: list, 
     segment_type: Literal[SEGMENT_TYPES],
     group_cols: list,
-    export_file: str
+    export_file: str,
+    weighted_averages: bool = True
 ):
     """
     Main function for calculating average speeds.
@@ -129,15 +131,26 @@ def segment_averages(
         get_pandas = False
     )
     
-    avg_speeds = delayed(metrics.concatenate_peak_offpeak_allday_averages)(
-        df, 
-        group_cols,
-        metric_type = "segment_speeds"
-    ).pipe(
-        gtfs_schedule_wrangling.merge_operator_identifiers, 
-        analysis_date_list,
-        columns = CROSSWALK_COLS
-    )
+    if weighted_averages:
+        avg_speeds = delayed(metrics.concatenate_peak_offpeak_allday_averages)(
+            df, 
+            group_cols,
+            metric_type = "segment_speeds"
+        ).pipe(
+            gtfs_schedule_wrangling.merge_operator_identifiers, 
+            analysis_date_list,
+            columns = CROSSWALK_COLS
+        )
+    
+    else:
+        avg_speeds = delayed(segment_calcs.calculate_avg_speeds)(
+            df, 
+            group_cols
+        ).pipe(
+            gtfs_schedule_wrangling.merge_operator_identifiers,
+            analysis_date_list,
+            columns = CROSSWALK_COLS
+        )
 
     if len(analysis_date_list) > 1:
         # If a week (date list) is put in, use Wednesday for segment geometry
@@ -176,8 +189,7 @@ def segment_averages(
 
 if __name__ == "__main__":
     
-    from segment_speed_utils.project_vars import analysis_date_list
-    from shared_utils import rt_dates
+    from segment_speed_utils.project_vars import analysis_date_list, oct2024_week
     
     LOG_FILE = "../logs/avg_speeds.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -191,6 +203,7 @@ if __name__ == "__main__":
     ROUTE_DIR_COLS = [*dict_inputs["route_dir_cols"]]
     STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]
     
+    TIME_OF_DAY_FILE = dict_inputs["shape_stop_single_segment"] + "_test"
     ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
 
     for analysis_date in analysis_date_list:
@@ -199,9 +212,19 @@ if __name__ == "__main__":
             [analysis_date], 
             segment_type, 
             group_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
-            export_file = ROUTE_SEG_FILE
+            export_file = ROUTE_SEG_FILE,
+            weighted_averages = True
         )
-    
+        
+        segment_averages(
+            [analysis_date], 
+            segment_type, 
+            group_cols = (OPERATOR_COLS + ROUTE_DIR_COLS + 
+                          STOP_PAIR_COLS + ["time_of_day"]),
+            export_file = TIME_OF_DAY_FILE,
+            weighted_averages = False
+        )
+        
     '''
     from segment_speed_utils.project_vars import weeks_available
     
