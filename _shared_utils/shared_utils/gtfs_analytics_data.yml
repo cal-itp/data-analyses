@@ -81,7 +81,7 @@ stop_segments:
   shape_stop_cols: ["shape_array_key", "shape_id", "stop_sequence"]
   stop_pair_cols: ["stop_pair", "stop_pair_name"]
   route_dir_cols: ["route_id", "direction_id"]
-  #shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments" -- stop after Oct 2024
+  shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments" #-- stop after Oct 2024
   route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"
   route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
   segments_file: "segment_options/shape_stop_segments"
