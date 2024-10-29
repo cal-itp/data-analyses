@@ -264,3 +264,15 @@ def remove_shapes_outside_ca(
         ).drop(columns = "index_right")
     
     return shapes_within_ca
+
+
+def unique_list(my_list: list) -> list:
+    """
+    We try various groupings for segment averaging,
+    and sometimes the same column will appear multiple times.
+    
+    https://stackoverflow.com/questions/7961363/removing-duplicates-in-lists
+    # Ex: route_id will be in both shape stop and route dir; 
+    this method maintains list order
+    """
+    return list(dict.fromkeys(my_list))

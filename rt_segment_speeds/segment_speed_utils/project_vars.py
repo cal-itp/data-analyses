@@ -29,8 +29,7 @@ weeks_available = [
 ]
 
 
-#analysis_date_list = [analysis_date]
-analysis_date_list = [rt_dates.DATES[f"oct2024{i}"] for i in ["a", "b"]]
+analysis_date_list = [analysis_date]
                      
 
 PROJECT_CRS = "EPSG:3310"
