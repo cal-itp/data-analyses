@@ -25,8 +25,7 @@ def operator_metrics(analysis_date: str, dict_inputs: dict) -> pd.DataFrame:
     crosswalk_cols = [
     "schedule_gtfs_dataset_key",
     "name",
-    "organization_name",
-    "caltrans_district",]
+    "organization_name",]
     
     df2 = gtfs_schedule_wrangling.merge_operator_identifiers(
         df,
@@ -35,7 +34,6 @@ def operator_metrics(analysis_date: str, dict_inputs: dict) -> pd.DataFrame:
     
     # Aggregate
     groupby_cols = [
-        "caltrans_district",
         "organization_name",
         "schedule_gtfs_dataset_key",
     ]

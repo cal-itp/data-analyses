@@ -63,7 +63,7 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     df["frequency_in_minutes"] = 60/df.frequency
     
     # Replace column names
-    df.columns = df.columns.map(_report_utils.replace_column_names)
+    df = _report_utils.replace_column_names(df)
 
     return df
 
@@ -72,17 +72,18 @@ def load_operator_metrics(organization_name:str)->pd.DataFrame:
     Load dataframe with the total scheduled service hours 
     a transit operator.
     """
-    url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_metrics}.parquet"
-
+    # url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_metrics}.parquet"
+    url = "gs://calitp-analytics-data/data-analyses/rt_vs_schedule/digest/operator_profiles_AH_TESTING_.parquet"
     df = pd.read_parquet(url,
     filters=[[(("organization_name", "==", organization_name))]])
     
     # Rename dataframe
-    df.columns = df.columns.map(_report_utils.replace_column_names)
+    df = _report_utils.replace_column_names(df)
     
+    # Add ruler marks
     df["ruler_100_pct"] = 100
-    
     df["ruler_for_vp_per_min"] = 2
+    
     return df
 
 """

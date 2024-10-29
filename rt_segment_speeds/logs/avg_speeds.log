@@ -479,3 +479,58 @@
 2024-10-18 10:02:43.872 | INFO     | average_segment_speeds:single_day_segment_averages:177 - shape seg avg 0:05:25.476441
 2024-10-18 10:06:42.688 | INFO     | average_segment_speeds:single_day_segment_averages:193 - route dir seg avg 0:03:58.815162
 2024-10-18 10:06:42.688 | INFO     | average_segment_speeds:single_day_segment_averages:194 - single day segment 2024-10-15 execution time: 0:09:24.291603
+2024-10-22 17:56:22.475 | INFO     | __main__:single_day_segment_averages:177 - shape seg avg 0:04:52.014585
+2024-10-22 17:59:43.551 | INFO     | __main__:single_day_segment_averages:193 - route dir seg avg 0:03:21.075960
+2024-10-22 17:59:43.552 | INFO     | __main__:single_day_segment_averages:194 - single day segment 2024-10-17 execution time: 0:08:13.090545
+2024-10-22 18:04:30.277 | INFO     | __main__:single_day_segment_averages:177 - shape seg avg 0:04:46.424659
+2024-10-22 18:07:54.968 | INFO     | __main__:single_day_segment_averages:193 - route dir seg avg 0:03:24.690917
+2024-10-22 18:07:54.968 | INFO     | __main__:single_day_segment_averages:194 - single day segment 2024-10-18 execution time: 0:08:11.115576
+2024-10-22 18:11:16.594 | INFO     | __main__:single_day_segment_averages:177 - shape seg avg 0:03:21.298649
+2024-10-22 18:13:49.337 | INFO     | __main__:single_day_segment_averages:193 - route dir seg avg 0:02:32.742968
+2024-10-22 18:13:49.337 | INFO     | __main__:single_day_segment_averages:194 - single day segment 2024-10-19 execution time: 0:05:54.041617
+2024-10-22 18:17:17.754 | INFO     | __main__:single_day_segment_averages:177 - shape seg avg 0:03:28.170350
+2024-10-22 18:19:45.604 | INFO     | __main__:single_day_segment_averages:193 - route dir seg avg 0:02:27.850132
+2024-10-22 18:19:45.605 | INFO     | __main__:single_day_segment_averages:194 - single day segment 2024-10-20 execution time: 0:05:56.020482
+2024-10-22 20:36:24.387 | INFO     | __main__:single_day_summary_averages:90 - trip avg 0:00:16.260477
+2024-10-22 20:36:37.721 | INFO     | __main__:single_day_summary_averages:132 - route dir avg: 0:00:13.333626
+2024-10-22 20:36:37.723 | INFO     | __main__:single_day_summary_averages:133 - single day summary speed 2024-10-17 execution time: 0:00:29.594103
+2024-10-22 20:36:52.314 | INFO     | __main__:single_day_summary_averages:90 - trip avg 0:00:14.503367
+2024-10-22 20:37:04.849 | INFO     | __main__:single_day_summary_averages:132 - route dir avg: 0:00:12.534573
+2024-10-22 20:37:04.850 | INFO     | __main__:single_day_summary_averages:133 - single day summary speed 2024-10-18 execution time: 0:00:27.037940
+2024-10-22 20:37:14.841 | INFO     | __main__:single_day_summary_averages:90 - trip avg 0:00:09.914674
+2024-10-22 20:37:24.046 | INFO     | __main__:single_day_summary_averages:132 - route dir avg: 0:00:09.204885
+2024-10-22 20:37:24.047 | INFO     | __main__:single_day_summary_averages:133 - single day summary speed 2024-10-19 execution time: 0:00:19.119559
+2024-10-22 20:37:34.129 | INFO     | __main__:single_day_summary_averages:90 - trip avg 0:00:10.032315
+2024-10-22 20:37:43.520 | INFO     | __main__:single_day_summary_averages:132 - route dir avg: 0:00:09.390045
+2024-10-22 20:37:43.520 | INFO     | __main__:single_day_summary_averages:133 - single day summary speed 2024-10-20 execution time: 0:00:19.422360
+2024-10-22 21:19:35.340 | INFO     | average_segment_speeds:single_day_segment_averages:177 - shape seg avg 0:06:07.525971
+2024-10-22 21:23:59.951 | INFO     | average_segment_speeds:single_day_segment_averages:193 - route dir seg avg 0:04:24.611365
+2024-10-22 21:23:59.952 | INFO     | average_segment_speeds:single_day_segment_averages:194 - single day segment 2024-10-17 execution time: 0:10:32.137336
+2024-10-22 21:29:53.182 | INFO     | average_segment_speeds:single_day_segment_averages:177 - shape seg avg 0:05:52.675186
+2024-10-22 21:34:08.405 | INFO     | average_segment_speeds:single_day_segment_averages:193 - route dir seg avg 0:04:15.222213
+2024-10-22 21:34:08.406 | INFO     | average_segment_speeds:single_day_segment_averages:194 - single day segment 2024-10-18 execution time: 0:10:07.897399
+2024-10-22 21:38:12.041 | INFO     | average_segment_speeds:single_day_segment_averages:177 - shape seg avg 0:04:03.219742
+2024-10-22 21:41:20.420 | INFO     | average_segment_speeds:single_day_segment_averages:193 - route dir seg avg 0:03:08.379069
+2024-10-22 21:41:20.421 | INFO     | average_segment_speeds:single_day_segment_averages:194 - single day segment 2024-10-19 execution time: 0:07:11.598811
+2024-10-22 21:45:01.829 | INFO     | average_segment_speeds:single_day_segment_averages:177 - shape seg avg 0:03:41.130808
+2024-10-22 21:47:50.277 | INFO     | average_segment_speeds:single_day_segment_averages:193 - route dir seg avg 0:02:48.447615
+2024-10-22 21:47:50.277 | INFO     | average_segment_speeds:single_day_segment_averages:194 - single day segment 2024-10-20 execution time: 0:06:29.578423
+2024-10-23 10:59:19.182 | INFO     | __main__:multi_day_summary_averages:238 - multi day summary speed ['2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20'] execution time: 0:01:22.942788
+2024-10-23 11:08:26.734 | INFO     | __main__:multi_day_segment_averages:258 - multi day segment ['2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20'] execution time: 0:07:11.157851
+2024-10-23 11:31:26.653 | INFO     | average_segment_speeds:multi_day_segment_averages:257 - multi day segment ['2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20'] execution time: 0:09:00.289570
+2024-10-25 10:32:19.827 | INFO     | __main__:single_day_segment_averages:186 - single day segment 2024-10-16 execution time: 0:03:41.907953
+2024-10-25 11:16:58.463 | INFO     | __main__:segment_averages:169 - segment speed averaging for ['2024-10-16'] execution time: 0:04:11.264225
+2024-10-25 11:25:19.667 | INFO     | __main__:segment_averages:169 - segment speed averaging for ['2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20'] execution time: 0:07:12.533597
+2024-10-25 12:03:33.918 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:15.263512
+2024-10-25 12:03:46.569 | INFO     | __main__:summary_average_speeds:154 - summary speed averaging for ['2024-10-16'] execution time: 0:00:27.913940
+2024-10-25 12:06:25.916 | INFO     | __main__:summary_average_speeds:154 - summary speed averaging for ['2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20'] execution time: 0:01:55.082631
+2024-10-25 12:52:26.403 | INFO     | average_segment_speeds:segment_averages:169 - speedmap_segments segment averaging for ['2024-10-16'] execution time: 0:05:57.735912
+2024-10-25 12:57:18.229 | INFO     | average_segment_speeds:segment_averages:169 - speedmap_segments segment averaging for ['2024-10-16'] execution time: 0:04:51.480238
+2024-10-25 13:16:11.221 | INFO     | average_segment_speeds:segment_averages:169 - speedmap_segments segment averaging for ['2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20'] execution time: 0:09:08.182403
+2024-10-28 09:52:30.939 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-16'] execution time: 0:04:41.036914
+2024-10-28 10:12:36.654 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-14'] execution time: 0:04:30.593328
+2024-10-28 10:16:48.758 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-15'] execution time: 0:04:11.920050
+2024-10-28 10:21:05.581 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-17'] execution time: 0:04:16.731009
+2024-10-28 10:25:32.613 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-18'] execution time: 0:04:26.943776
+2024-10-28 10:28:46.725 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-19'] execution time: 0:03:14.004012
+2024-10-28 10:31:47.037 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-20'] execution time: 0:03:00.245588
