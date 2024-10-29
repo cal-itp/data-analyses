@@ -59,7 +59,8 @@ def report_undefined(feeds_on_target: pd.DataFrame):
     else:
         print(undefined.columns)
         print('these feeds have no service defined on target date, nor are their services captured in other feeds:')
-        print(undefined >> select(_.gtfs_dataset_name, _.service_any_feed))
+        #  gtfs_dataset_name no longer present, this whole script should probably be updated/replaced
+        # print(undefined >> select(_.gtfs_dataset_name, _.service_any_feed))
         print(f'saving detailed csv to {fname}')
         undefined.to_csv(fname)
     return
