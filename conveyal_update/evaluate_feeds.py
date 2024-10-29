@@ -54,16 +54,21 @@ def attach_transit_services(feeds_on_target: pd.DataFrame):
 def report_undefined(feeds_on_target: pd.DataFrame):
     fname = 'no_apparent_service.csv'
     undefined = feeds_on_target.apply(check_defined_elsewhere, axis=1, args=[feeds_on_target]) >> filter(-_.service_any_feed)
-    print('these feeds have no service defined on target date, nor are their services captured in other feeds:')
-    print(undefined >> select(_.gtfs_dataset_name, _.service_any_feed))
-    print(f'saving detailed csv to {fname}')
-    undefined.to_csv(fname)
+    if undefined.empty:
+        print('no undefined service feeds')
+    else:
+        print(undefined.columns)
+        print('these feeds have no service defined on target date, nor are their services captured in other feeds:')
+        print(undefined >> select(_.gtfs_dataset_name, _.service_any_feed))
+        print(f'saving detailed csv to {fname}')
+        undefined.to_csv(fname)
     return
 
 if __name__ == '__main__':
     
     feeds_on_target = get_feeds_check_service()
     feeds_on_target = attach_transit_services(feeds_on_target)
+    print(f'feeds on target date shape: {feeds_on_target.shape}')
     report_undefined(feeds_on_target)
     feeds_on_target.to_parquet(f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE.isoformat()}.parquet')
     
