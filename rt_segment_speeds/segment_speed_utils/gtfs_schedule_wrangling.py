@@ -18,7 +18,9 @@ sched_rt_category_dict = {
 }
 
 CA_AMTRAK = ["Pacific Surfliner", "San Joaquins", 
-             "Coast Starlight", "Capitol Corridor"]
+             "Coast Starlight", "Capitol Corridor",
+            "Southwest Chief", "Sunset Limited",
+            "California Zephyr"]
 
 
 def amtrak_trips(
