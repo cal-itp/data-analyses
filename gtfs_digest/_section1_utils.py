@@ -106,19 +106,6 @@ def load_operator_service_hours(name:str)->pd.DataFrame:
     df = _report_utils.replace_column_names(df)
     return df
 
-def load_operator_metrics(name:str)->pd.DataFrame:
-    """
-    Load dataframe with the total scheduled service hours 
-    a transit operator.
-    """
-    url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.scheduled_service_hours}.parquet"
-
-    df = pd.read_parquet(url,
-    filters=[[(("name", "==", name))]])
-    
-    # Rename dataframe
-    df = _report_utils.replace_column_names(df)
-    return df
 """
 Data Manipulation
 Change dataframes from long to wide
