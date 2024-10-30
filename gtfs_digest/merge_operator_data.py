@@ -14,7 +14,7 @@ from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
 sort_cols = ["schedule_gtfs_dataset_key", "service_date"]
 
-def concatenate_operator_stats(
+def concatenate_rt_vs_schedule_operator_metrics(
     date_list: list
 ) -> pd.DataFrame:
     FILE = GTFS_DATA_DICT.schedule_tables.operator_scheduled_stats
@@ -27,7 +27,6 @@ def concatenate_operator_stats(
     ).sort_values(sort_cols).reset_index(drop=True)
     
     return df
-
 
 def concatenate_operator_routes( 
     date_list: list
@@ -43,6 +42,58 @@ def concatenate_operator_routes(
     
     return df
 
+def concatenate_crosswalks(
+    date_list: list
+) -> pd.DataFrame:
+    """
+    Get crosswalk and selected NTD columns for certain dates.
+    """
+    FILE = f"{GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk}"
+    
+    ntd_cols = [
+        "schedule_gtfs_dataset_key",
+        "caltrans_district",
+        "counties_served",
+        "service_area_sq_miles",
+        "hq_city",
+        "uza_name",
+        "service_area_pop",
+        "organization_type",
+        "primary_uza",
+        "reporter_type"
+    ]
+        
+    df = (
+        time_series_utils.concatenate_datasets_across_dates(
+            SCHED_GCS,
+            FILE,
+            analysis_date_list,
+            data_type="df",
+            columns=ntd_cols
+        )
+        .sort_values(["service_date"])
+        .reset_index(drop=True)
+    )
+    
+    return df
+
+def concatenate_schedule_operator_metrics(
+    date_list: list
+) -> pd.DataFrame:
+    """
+    Get spatial accuracy and vehicle positions per minute metrics on the
+    operator-service_date grain for certain dates.
+    """
+    FILE = f"{GTFS_DATA_DICT.rt_vs_schedule_tables.vp_operator_metrics}"
+    
+    df = time_series_utils.concatenate_datasets_across_dates(
+        RT_SCHED_GCS,
+        FILE,
+        date_list,
+        data_type = "df",
+    ).sort_values(sort_cols).reset_index(drop=True)
+    
+    return df
 
 def operator_category_counts_by_date() -> pd.DataFrame:
     """
@@ -101,25 +152,6 @@ def operator_category_counts_by_date() -> pd.DataFrame:
     
     return operator_category_counts
 
-def concatenate_operator_level_metrics(
-    date_list: list
-) -> pd.DataFrame:
-    """
-    Get spatial accuracy and VP per Minute metrics on the
-    operator-service_date grain.
-    """
-    FILE = f"{GTFS_DATA_DICT.rt_vs_schedule_tables.vp_operator_metrics}"
-    
-    df = time_series_utils.concatenate_datasets_across_dates(
-        RT_SCHED_GCS,
-        FILE,
-        date_list,
-        data_type = "df",
-    ).sort_values(sort_cols).reset_index(drop=True)
-    
-    return df
-
-
 if __name__ == "__main__":
 
     from shared_utils import rt_dates
@@ -129,53 +161,29 @@ if __name__ == "__main__":
     OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
     SCHED_RT_CATEGORY = GTFS_DATA_DICT.digest_tables.operator_sched_rt
-    CROSSWALK = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
     
     # Concat operator metrics.
-    operator_metrics = concatenate_operator_level_metrics(analysis_date_list)
+    op_sched_metrics = concatenate_schedule_operator_metrics(analysis_date_list)
     
     # Concat operator profiles
-    operator_profiles_df = concatenate_operator_stats(analysis_date_list)
+    op_rt_sched_metrics = concatenate_rt_vs_schedule_operator_metrics(analysis_date_list)
     
-    merge_cols = ["organization_name",
-              "schedule_gtfs_dataset_key",
-             "service_date",]
+    merge_cols = ["schedule_gtfs_dataset_key",
+             "service_date"]
     
     # Merge the two together
-    operator_profiles_df1 = pd.merge(operator_profiles_df, 
-                                  operator_metrics,
+    operator_profiles_df1 = pd.merge(op_sched_metrics, 
+                                  op_rt_sched_metrics,
                                   on = merge_cols, 
                                   how = "outer")
-    ntd_cols = [
-        "schedule_gtfs_dataset_key",
-        "caltrans_district",
-        "counties_served",
-        "service_area_sq_miles",
-        "hq_city",
-        "uza_name",
-        "service_area_pop",
-        "organization_type",
-        "primary_uza",
-        "reporter_type"
-    ]
+ 
+    
+    # Concat NTD/crosswalk
+    crosswalk_df = concatenate_crosswalks(analysis_date_list)
     
     # Merge in NTD data. 
-    crosswalk_df = (
-        time_series_utils.concatenate_datasets_across_dates(
-            SCHED_GCS,
-            CROSSWALK,
-            analysis_date_list,
-            data_type="df",
-            columns=ntd_cols
-        )
-        .sort_values(["service_date"])
-        .reset_index(drop=True)
-    )
-    
-    # Merge
-    merge_cols.remove("organization_name")
     op_profiles_df2 = pd.merge(
         operator_profiles_df1, 
         crosswalk_df, 
@@ -197,6 +205,7 @@ if __name__ == "__main__":
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
     )
     
+    # Load in scheduled routes.
     gdf = concatenate_operator_routes(
         analysis_date_list
     ).pipe(
@@ -213,6 +222,7 @@ if __name__ == "__main__":
         OPERATOR_ROUTE
     )
     
+    # Load in dataset that displays how many trips were schedule vs realtime only.
     operator_category_counts = operator_category_counts_by_date().pipe(
         publish_utils.exclude_private_datasets, 
         col = "schedule_gtfs_dataset_key", 
