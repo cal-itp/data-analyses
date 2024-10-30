@@ -6,7 +6,6 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 
-from great_tables import GT, loc, style
 
 def labeling(word: str) -> str:
     """
@@ -108,29 +107,3 @@ def transpose_summary_stats(
         }).T.reset_index().rename(columns = {0: "value"})
     
     return subset_df2
-
-
-def great_table_formatting(my_table: GT) -> GT:
-    """
-    """
-    my_table = (
-        my_table
-        .opt_align_table_header(align="center")
-        .tab_style(
-            style=style.text(size="14px"),
-            locations=loc.body())
-        .tab_options(
-            container_width = "100%",
-            table_background_color="white",
-            table_body_hlines_style="none",
-            table_body_vlines_style="none",
-            heading_background_color="white",
-            column_labels_background_color="white",
-            row_group_background_color="white",
-            stub_background_color="white",
-            source_notes_background_color="white"
-         )
-    )
-    
-    return my_table
-
