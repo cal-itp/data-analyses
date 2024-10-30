@@ -165,7 +165,7 @@ def create_district_summary(df: pd.DataFrame, caltrans_district: int):
     # Create narrative
     display(
         Markdown(
-            f"""The median score for projects in District 3 is <b>{median_score}</b><br> 
+            f"""The median score for projects in District {caltrans_district} is <b>{median_score}</b><br> 
         The total number of projects is <b>{total_projects}</b><br>
         The most expensive project costs <b>{max_project}</b>
         """
