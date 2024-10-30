@@ -47,6 +47,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
    * There are steps to create FGDC templates for each datasets to store field information.
    * This only needs to be done once when a new dataset is created. 
 1. In terminal: `python cleanup.py` to clean up old XML files and remove zipped shapefiles.
+   * The YAML and XML files created/have changes get checked into GitHub.
 
 ### Metadata
 * [Metadata](./metadata.yml)
