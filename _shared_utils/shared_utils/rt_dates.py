@@ -71,6 +71,7 @@ DATES = {
     "oct2024d": "2024-10-18",
     "oct2024e": "2024-10-19",
     "oct2024f": "2024-10-20",
+    "oct2024g": "2024-10-21",  # additional one-off to capture Amtrak in HQTA
 }
 
 y2023_dates = [

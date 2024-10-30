@@ -12,7 +12,7 @@ all_dates = (
 )
 
 
-analysis_date_list = [rt_dates.DATES["oct2024"]]
+analysis_date_list = [rt_dates.DATES["oct2024g"]]
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
