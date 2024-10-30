@@ -194,7 +194,7 @@ if __name__ == "__main__":
     .reset_index(drop = True))
 
     op_profiles_df3.to_parquet(
-        f"{RT_SCHED_GCS}{OPERATOR_PROFILE}_AH_TESTING.parquet"
+        f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
     )
     
     gdf = concatenate_operator_routes(
