@@ -12,7 +12,8 @@ compile_open_data_portal:
 	python update_fields_fgdc.py # populate fields with data dictionary yml values, run if update_data_dict had changes to incorporate 
 	# Download the zipped shapefiles and metadata.yml and move to local ESRI directory    
 	#python arcgis_script_pro.py #(in ESRI!)
-	python metadata_update_pro.py # go back into ESRI and update xml
+	# Bring the ESRI rewritten XML files into Hub and drop into xml/ and allow overwrite(s)
+	python metadata_update_pro.py # (in Hub)
 	# Download the overwritten XML files in xml/run_in_esri/ and move to local ESRI directory.   
 	#python arcgis_script_pro.py #(in ESRI!)
 	python cleanup.py  # run after ESRI work done 
