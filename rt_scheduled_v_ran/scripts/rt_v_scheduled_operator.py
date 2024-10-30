@@ -20,26 +20,14 @@ def operator_metrics(analysis_date: str, dict_inputs: dict) -> pd.DataFrame:
 
     # Read in dataframe.
     df = pd.read_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet")
-    
-    # Merge in identifiers
-    crosswalk_cols = [
-    "schedule_gtfs_dataset_key",
-    "name",
-    "organization_name",]
-    
-    df2 = gtfs_schedule_wrangling.merge_operator_identifiers(
-        df,
-        [analysis_date],
-        columns = crosswalk_cols)
-    
+  
     # Aggregate
     groupby_cols = [
-        "organization_name",
         "schedule_gtfs_dataset_key",
     ]
 
     sum_cols = ["total_vp", "vp_in_shape", "rt_service_minutes"]
-    agg1 = df2.groupby(groupby_cols).agg({**{e: "sum" for e in sum_cols}}).reset_index()
+    agg1 = df.groupby(groupby_cols).agg({**{e: "sum" for e in sum_cols}}).reset_index()
 
     agg1["vp_per_min_agency"] = ((agg1.total_vp / agg1.rt_service_minutes)).round(2)
     agg1["spatial_accuracy_agency"] = ((agg1.vp_in_shape / agg1.total_vp) * 100).round(2)
