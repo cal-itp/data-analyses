@@ -52,6 +52,18 @@ def create_gtfs_dataset_key_to_organization_crosswalk(
         how = "inner"
     )
     
+    # Fill this in manually.
+    df_with_org.loc[
+    (df_with_org.organization_name == "City of Banning"), "caltrans_district"
+] = "08 - San Bernardino"
+    
+    df_with_org.loc[
+    (
+        df_with_org.organization_name
+        == "Dumbarton Bridge Regional Operations Consortium"
+    ),
+    "caltrans_district",
+] = "04 - Oakland"
     return df_with_org
 
 def load_ntd(year: int) -> pd.DataFrame:
