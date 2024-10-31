@@ -68,11 +68,24 @@ build_legislative_district_digest:
 	make git_check_no_sections
     
     
+build_starterkit_ha:
+	$(eval export site = ha_starterkit_district)
+	pip install -r portfolio/requirements.txt
+	make build_portfolio_site 
+	git add portfolio/$(site)/district_*/ portfolio/$(site)/*.yml portfolio/$(site)/*.md
+	python portfolio/portfolio.py index --deploy --prod
+    
+build_starterkit_LASTNAME:
+	$(eval export site = YOUR_SITE_NAME)
+	pip install -r portfolio/requirements.txt
+	make build_portfolio_site 
+	git add portfolio/$(site)/district_*/ portfolio/$(site)/*.yml portfolio/$(site)/*.md
+	python portfolio/portfolio.py index --deploy --prod
+    
 add_precommit:
 	pip install pre-commit
 	pre-commit install 
 	#pre-commit run --all-files 
-
 
 # Add to _.bash_profile outside of data-analyses
 #alias go='cd ~/data-analyses/portfolio && pip install -r requirements.txt && cd #../_shared_utils && make setup_env && cd ..'
