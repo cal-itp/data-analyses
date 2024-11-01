@@ -81,7 +81,12 @@ build_starterkit_LASTNAME:
 	make build_portfolio_site 
 	git add portfolio/$(site)/district_*/ portfolio/$(site)/*.yml portfolio/$(site)/*.md
 	python portfolio/portfolio.py index --deploy --prod
-    
+
+build_fund_split:
+	$(eval export site = sb125_fund_split_analysis)
+	pip install -r portfolio/requirements.txt
+	make build_portfolio_site
+
 add_precommit:
 	pip install pre-commit
 	pre-commit install 
