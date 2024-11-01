@@ -122,6 +122,17 @@ def add_weekday_weekend_column(df: pd.DataFrame, category_dict: dict = time_help
     
     return df
     
+def count_trips_by_group(df: pd.DataFrame, group_cols: list):
+    """
+    Given a df with trip_instance_key and an arbitrary list of 
+    group_cols, return trip counts by group.
+    """
+    assert "trip_instance_key" in df.columns
+    df = (df.groupby(group_cols)
+               .agg({"trip_instance_key": "count"})
+               .reset_index()
+              )
+    return df
     
 def aggregate_time_of_day_to_peak_offpeak(
     df: pd.DataFrame,
@@ -141,17 +152,8 @@ def aggregate_time_of_day_to_peak_offpeak(
     
     df = add_peak_offpeak_column(df)
     
-    all_day = (df.groupby(group_cols)
-               .agg({"trip_instance_key": "count"})
-               .reset_index()
-               .assign(time_period = "all_day")
-              )
-    
-    peak_offpeak = (df.groupby(group_cols + ["peak_offpeak"])
-                    .agg({"trip_instance_key": "count"})
-                    .reset_index()
-                    .rename(columns = {"peak_offpeak": "time_period"})
-                   )
+    all_day = count_trips_by_group(df, group_cols).assign(time_period = "all_day")
+    peak_offpeak = count_trips_by_group(df, group_cols + ["peak_offpeak"]).rename({"peak_offpeak":"time_period"})
     
     df2 = pd.concat(
         [all_day, peak_offpeak], 

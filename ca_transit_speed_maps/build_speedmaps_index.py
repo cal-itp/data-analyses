@@ -16,7 +16,7 @@ from segment_speed_utils.project_vars import (
     SEGMENT_GCS,
 )
 
-ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['aug2024'])
+ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['oct2024'])
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 
 def build_speedmaps_index(analysis_date: dt.date, how: str = 'new') -> pd.DataFrame:
@@ -62,6 +62,6 @@ def build_speedmaps_index(analysis_date: dt.date, how: str = 'new') -> pd.DataFr
 if __name__ == "__main__":
     
     print(f'analysis date from shared_utils/rt_dates: {ANALYSIS_DATE}')
-    speedmaps_index = build_speedmaps_index(ANALYSIS_DATE, how = 'old')
+    speedmaps_index = build_speedmaps_index(ANALYSIS_DATE, how = 'new')
     # speedmaps_index = rt_utils.check_intermediate_data(speedmaps_index)
     speedmaps_index.to_parquet(PROGRESS_PATH)

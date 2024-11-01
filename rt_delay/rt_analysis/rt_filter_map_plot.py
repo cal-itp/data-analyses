@@ -310,7 +310,7 @@ class RtFilterMapper:
         return
     
     def segment_speed_map(self, segments: str='stops', how: str='low_speeds',
-                          colorscale = ZERO_THIRTY_COLORSCALE, size: list=[900, 550],
+                          colorscale = ACCESS_ZERO_THIRTY_COLORSCALE, size: list=[900, 550],
                          no_title = False, corridor = False, shn = False,
                          no_render = False):
         ''' Generate a map of segment speeds aggregated across all trips for each shape, either as medians
