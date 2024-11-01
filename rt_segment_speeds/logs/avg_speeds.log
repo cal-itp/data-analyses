@@ -534,3 +534,6 @@
 2024-10-28 10:25:32.613 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-18'] execution time: 0:04:26.943776
 2024-10-28 10:28:46.725 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-19'] execution time: 0:03:14.004012
 2024-10-28 10:31:47.037 | INFO     | __main__:segment_averages:182 - stop_segments segment averaging for ['2024-10-20'] execution time: 0:03:00.245588
+2024-11-01 09:18:04.863 | INFO     | average_segment_speeds:segment_averages_detail:239 - speedmap_segments detailed segment averaging for ['2024-10-16'] execution time: 0:06:29.243269
+2024-11-01 09:23:55.409 | INFO     | average_segment_speeds:segment_averages:182 - speedmap_segments segment averaging for ['2024-10-16'] execution time: 0:05:50.230382
+2024-11-01 09:28:10.012 | INFO     | average_segment_speeds:segment_averages:182 - speedmap_segments segment averaging for ['2024-10-16'] execution time: 0:04:14.446376

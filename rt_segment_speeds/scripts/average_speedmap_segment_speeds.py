@@ -8,7 +8,7 @@ import sys
 from loguru import logger
 
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
-from average_segment_speeds import segment_averages, OPERATOR_COLS
+from average_segment_speeds import segment_averages_detail, segment_averages, OPERATOR_COLS
 
 if __name__ == "__main__":
     
@@ -29,10 +29,18 @@ if __name__ == "__main__":
     STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]
     
     SHAPE_SEG_FILE = dict_inputs["shape_stop_single_segment"]
+    SHAPE_SEG_DETAIL_FILE = dict_inputs["shape_stop_single_segment_detail"]
     ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
     
     for analysis_date in analysis_date_list:
                 
+        segment_averages_detail(
+            [analysis_date], 
+            segment_type, 
+            group_cols = OPERATOR_COLS + SHAPE_STOP_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
+            export_file = SHAPE_SEG_DETAIL_FILE
+        )
+        
         segment_averages(
             [analysis_date], 
             segment_type, 

@@ -122,6 +122,7 @@ speedmap_segments:
   route_dir_cols: ["route_id", "route_short_name"]
   segments_file: "segment_options/speedmap_segments"
   shape_stop_single_segment: "rollup_singleday/speeds_shape_speedmap_segments"
+  shape_stop_single_segment_detail: "rollup_singleday/speeds_shape_speedmap_segments_detail"
   route_dir_single_segment: "rollup_singleday/speeds_route_dir_speedmap_segments"
   route_dir_multi_segment: "rollup_multiday/speeds_route_dir_speedmap_segments"
   min_trip_minutes: ${speed_vars.time_min_cutoff}
