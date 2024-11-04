@@ -561,7 +561,7 @@ def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
     else:
         return "Evening"
 
-def time_of_day_durations():
+def time_of_day_durations() -> pd.Series:
     """
     Get duration in hours of each time of day classification.
     """

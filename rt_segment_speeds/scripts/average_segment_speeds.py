@@ -228,6 +228,12 @@ def segment_averages_detail(
     )
         
     avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]
+    #  is this the best spot to add scheduled frequency?
+    sched_trips_hr = gtfs_schedule_wrangling.get_sched_trips_hr(analysis_date)
+    sched_trips_hr = sched_trips_hr.rename(columns={'n_trips': 'n_trips_sch', 'trips_hr': 'trips_hr_sch'})
+    sched_trips_hr_cols = ['route_id', 'shape_id',
+                      'time_of_day', 'schedule_gtfs_dataset_key']
+    avg_speeds_with_geom = pd.merge(avg_speeds_with_geom, sched_trips_hr, on=sched_trips_hr_cols)
     
     utils.geoparquet_gcs_export(
         avg_speeds_with_geom,
