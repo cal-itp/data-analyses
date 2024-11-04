@@ -515,6 +515,27 @@ def merge_operator_identifiers(
     
     return df
 
+def get_sched_trips_hr(analysis_date: str) -> pd.DataFrame:
+    """
+    For speedmaps (and other analyses), it's helpful to have scheduled
+    frequency available. Currently only supports detailed time of day.
+    """
+    keep_trip_cols = ['trip_instance_key', 'gtfs_dataset_key', 'route_id',
+                      'shape_id']
+    trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols)
+    trips = trips.rename(
+        columns={'gtfs_dataset_key': 'schedule_gtfs_dataset_key'})
+    time_buckets = get_trip_time_buckets(analysis_date)
+    trips = pd.merge(trips, time_buckets, on='trip_instance_key', how='inner')
+    schedule_trip_counts = count_trips_by_group(trips,
+                                    ['route_id', 'shape_id',
+                                    'time_of_day', 'schedule_gtfs_dataset_key']
+                            )
+    durations = rt_utils.time_of_day_durations()
+    schedule_trip_counts['trips_hr'] = schedule_trip_counts.apply(
+                                        lambda x: x.n_trips / durations[x.time_of_day], axis=1)
+    return schedule_trip_counts
+    
 
 def fill_missing_stop_sequence1(df: pd.DataFrame) -> pd.DataFrame:
     """
