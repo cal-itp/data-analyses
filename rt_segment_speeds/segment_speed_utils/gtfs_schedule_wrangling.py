@@ -521,7 +521,7 @@ def get_sched_trips_hr(analysis_date: str) -> pd.DataFrame:
     frequency available. Currently only supports detailed time of day.
     """
     keep_trip_cols = ['trip_instance_key', 'gtfs_dataset_key', 'route_id',
-                      'shape_id']
+                      'shape_id', 'route_short_name']
     trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols)
     trips = trips.rename(
         columns={'gtfs_dataset_key': 'schedule_gtfs_dataset_key'})

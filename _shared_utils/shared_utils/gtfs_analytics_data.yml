@@ -119,7 +119,7 @@ speedmap_segments:
   trip_stop_cols: ["trip_instance_key", "stop_sequence", "stop_sequence1"]
   shape_stop_cols: ["shape_array_key", "shape_id"]
   stop_pair_cols: ["stop_pair", "stop_pair_name", "segment_id"]
-  route_dir_cols: ["route_id", "route_short_name"]
+  route_dir_cols: ["route_id", "direction_id"]
   segments_file: "segment_options/speedmap_segments"
   shape_stop_single_segment: "rollup_singleday/speeds_shape_speedmap_segments"
   shape_stop_single_segment_detail: "rollup_singleday/speeds_shape_speedmap_segments_detail"
