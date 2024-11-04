@@ -515,13 +515,38 @@ def merge_operator_identifiers(
     
     return df
 
+def merge_route_identifiers(
+    df: pd.DataFrame,
+    analysis_date: str,
+) -> pd.DataFrame:
+    """
+    Merge in route_short_name given df with route_id,
+    schedule_gtfs_dataset_key.
+    Can't group by route_short_name or route_long_name in pipeline since either can
+    be nan per GTFS spec; grouping will result in those being dropped which is
+    undesireable. 
+    """
+    keep_trip_cols = ['gtfs_dataset_key', 'route_id', 'route_short_name']
+    trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols)
+    trips = trips.rename(
+        columns={'gtfs_dataset_key': 'schedule_gtfs_dataset_key'})
+    routes = trips.drop_duplicates()
+    df = pd.merge(
+        df,
+        routes,
+        on = ["schedule_gtfs_dataset_key", "route_id"],
+        how = "inner"
+    )
+    
+    return df
+
 def get_sched_trips_hr(analysis_date: str) -> pd.DataFrame:
     """
     For speedmaps (and other analyses), it's helpful to have scheduled
     frequency available. Currently only supports detailed time of day.
     """
     keep_trip_cols = ['trip_instance_key', 'gtfs_dataset_key', 'route_id',
-                      'shape_id', 'route_short_name']
+                      'shape_id']
     trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols)
     trips = trips.rename(
         columns={'gtfs_dataset_key': 'schedule_gtfs_dataset_key'})
