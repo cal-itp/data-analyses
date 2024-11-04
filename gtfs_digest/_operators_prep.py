@@ -66,22 +66,7 @@ def operators_schd_vp_rt()->pd.DataFrame:
     .reset_index(drop=True)
     )
     
-    schd_vp_df3 = (
-    schd_vp_df2.sort_values(
-        by=["caltrans_district", "name", "service_date"], ascending=[True, False, False]
-    )
-    .drop_duplicates(subset=["caltrans_district", "name"])
-    .reset_index(drop=True)
-    )
-    
-    schd_vp_df3 = schd_vp_df3[["caltrans_district","organization_name"]]
-    
-    op_profile = operator_profiles()
-    
-    # Merge 
-    final = pd.merge(
-    schd_vp_df3, op_profile, on=["organization_name"],
-        how="left")
+    final = schd_vp_df2[["caltrans_district","organization_name"]]
     
     final = (final
              .sort_values(by = ["caltrans_district","organization_name"])
