@@ -37,6 +37,7 @@ def build_speedmaps_index(analysis_date: dt.date, how: str = 'new') -> pd.DataFr
               _.public_customer_facing_or_regional_subfeed_fixed_route,
               _.vehicle_positions_gtfs_dataset_key != None)
     >> inner_join(_, dim_orgs, on = {'organization_source_record_id': 'source_record_id'})
+    #  TODO replace deprecated caltrans_district with via dim_county_geography
     >> select(_.organization_itp_id, _.organization_name, _.organization_source_record_id,
              _.caltrans_district, _._is_current, _.vehicle_positions_gtfs_dataset_key,
 			 _.schedule_gtfs_dataset_key)
