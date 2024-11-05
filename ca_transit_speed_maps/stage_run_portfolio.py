@@ -23,9 +23,8 @@ from build_speedmaps_index import ANALYSIS_DATE
 def make_rt_site_yml(speedmaps_index_joined,
                        rt_site_path = '../portfolio/sites/rt.yml'):
         
-    # make sure intermediate data is ran or at least attempted
-    assert speedmaps_index_joined.status.isin(['map_confirmed',
-                        'parser_failed', 'map_failed']).all(), 'must run prior scripts first, see Makefile'
+    # make sure index is generated
+    assert speedmaps_index_joined.status.isin(['speedmap_segs_available']).all(), 'must run prior scripts first, see Makefile'
     
     with open(rt_site_path) as rt_site:
         rt_site_data = yaml.load(rt_site, yaml.Loader)
@@ -37,8 +36,7 @@ def make_rt_site_yml(speedmaps_index_joined,
             continue
         chapter_dict = {}
         filtered = (speedmaps_index_joined
-                    >> filter(_.caltrans_district == district,
-                             -_.status.isin(['parser_failed', 'map_failed']))
+                    >> filter(_.caltrans_district == district)
                     >> arrange(_.organization_name)
                    )
         chapter_dict['caption'] = f'District {district}'

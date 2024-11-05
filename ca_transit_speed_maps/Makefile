@@ -1,3 +1,7 @@
+generate_speedmaps_quickly:
+    python build_speedmaps_index.py
+    python stage_run_portfolio.py
+    
 generate_speedmaps_slowly:
 	python build_speedmaps_index.py
 	python check_stage_intermediate.py
