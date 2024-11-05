@@ -58,14 +58,14 @@ build_gtfs_digest_testing:
 build_district_digest:
 	$(eval export site = district_digest)
 	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	cd gtfs_digest/ && python deploy_district_yaml.py && cd ..  
+	cd gtfs_digest/ && python deploy_district_yaml.py district && cd .. 
 	make build_portfolio_site 
 	make git_check_no_sections
     
 build_legislative_district_digest:
 	$(eval export site = legislative_district_digest)
 	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	cd gtfs_digest/ && python deploy_district_yaml.py && cd ..  
+	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd .. 
 	make build_portfolio_site 
 	make git_check_no_sections
     
