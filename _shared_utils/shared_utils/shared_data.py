@@ -67,6 +67,11 @@ def make_clean_state_highway_network():
 
     gdf = gpd.read_file(URL)
 
+    # Save a raw, undissolved version
+    utils.geoparquet_gcs_export(
+        gdf.drop(columns=["Shape_Length", "OBJECTID"]).pipe(to_snakecase), GCS_FILE_PATH, "state_highway_network_raw"
+    )
+
     keep_cols = ["Route", "County", "District", "RouteType", "Direction", "geometry"]
 
     gdf = gdf[keep_cols]
