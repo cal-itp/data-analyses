@@ -58,12 +58,14 @@ build_gtfs_digest_testing:
 build_district_digest:
 	$(eval export site = district_digest)
 	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
+	cd gtfs_digest/ && python deploy_district_yaml.py district && cd .. 
 	make build_portfolio_site 
 	make git_check_no_sections
     
 build_legislative_district_digest:
 	$(eval export site = legislative_district_digest)
 	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
+	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd .. 
 	make build_portfolio_site 
 	make git_check_no_sections
     
@@ -72,15 +74,15 @@ build_starterkit_ha:
 	$(eval export site = ha_starterkit_district)
 	pip install -r portfolio/requirements.txt
 	make build_portfolio_site 
-	git add portfolio/$(site)/district_*/ portfolio/$(site)/*.yml portfolio/$(site)/*.md
-	python portfolio/portfolio.py index --deploy --prod
+	make git_check_no_sections
+	make production_portfolio
     
 build_starterkit_LASTNAME:
 	$(eval export site = YOUR_SITE_NAME)
 	pip install -r portfolio/requirements.txt
 	make build_portfolio_site 
-	git add portfolio/$(site)/district_*/ portfolio/$(site)/*.yml portfolio/$(site)/*.md
-	python portfolio/portfolio.py index --deploy --prod
+	make git_check_no_sections
+	make production_portfolio
 
 build_fund_split:
 	$(eval export site = sb125_fund_split_analysis)
