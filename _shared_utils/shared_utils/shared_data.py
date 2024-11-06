@@ -2,11 +2,11 @@
 One-off functions, run once, save datasets for shared use.
 """
 import geopandas as gpd
+import numpy as np
 import pandas as pd
-import shapely
 from calitp_data_analysis import geography_utils, utils
 from calitp_data_analysis.sql import to_snakecase
-from shared_utils.arcgis_query import query_arcgis_feature_server
+from shared_utils import arcgis_query, geo_utils
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
@@ -95,7 +95,7 @@ def export_shn_postmiles():
     """
     URL = "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/" "CHhighway/SHN_Postmiles_Tenth/" "FeatureServer/0/"
 
-    gdf = query_arcgis_feature_server(URL)
+    gdf = arcgis_query.query_arcgis_feature_server(URL)
 
     gdf2 = to_snakecase(gdf).drop(columns="objectid")
 
@@ -104,7 +104,7 @@ def export_shn_postmiles():
     return
 
 
-def draw_line_between_points(gdf: gpd.GeoDataFrame, group_cols: list) -> gpd.GeoDataFrame:
+def segment_highway_lines_by_postmile(gdf: gpd.GeoDataFrame, group_cols: list) -> gpd.GeoDataFrame:
     """
     Use the current postmile as the
     starting geometry / segment beginning
@@ -113,53 +113,75 @@ def draw_line_between_points(gdf: gpd.GeoDataFrame, group_cols: list) -> gpd.Geo
 
     Segment goes from current to next postmile.
     """
-    # Grab the subsequent point geometry
-    # We can drop whenever the last point is missing within
-    # a group. If we have 3 points, we can draw 2 lines.
-    gdf = gdf.assign(end_geometry=(gdf.groupby(group_cols, group_keys=False).geometry.shift(-1))).dropna(
-        subset="end_geometry"
-    )
+    # For this postmile, snap it to the highway line and find the nearest index
+    # for a linestring with 10 points, an index value of 2 means it's the 3rd coordinate
+    nearest_idx_series = np.vectorize(geo_utils.nearest_snap)(gdf.line_geometry, gdf.geometry, 1)
 
-    # Construct linestring with 2 point coordinates
-    gdf = (
-        gdf.assign(
-            line_geometry=gdf.apply(lambda x: shapely.LineString([x.geometry, x.end_geometry]), axis=1).set_crs(
-                geography_utils.WGS84
-            )
-        )
-        .drop(columns=["geometry", "end_geometry"])
-        .rename(columns={"line_geometry": "geometry"})
-    )
+    gdf["idx"] = nearest_idx_series
 
-    return gdf
+    # The segment will be index into the nearest point for a postmile
+    # until the index of the subsequent postmile
+    # Ex: idx=1 and subseq_idx=5 means we want to grab hwy_coords[1:6] as our segment
+    gdf = gdf.assign(
+        subseq_idx=(gdf.sort_values(group_cols + ["odometer"]).groupby(group_cols).idx.shift(-1).astype("Int64")),
+        eodometer=(gdf.sort_values(group_cols + ["odometer"]).groupby(group_cols).odometer.shift(-1)),
+    ).rename(columns={"odometer": "bodometer"})
+    # follow the convention of b for begin odometer and e for end odometer
+
+    # Drop NaNs because for 3 points, we can draw 2 segments
+    gdf2 = gdf.dropna(subset="subseq_idx").reset_index(drop=True)
+
+    segment_geom = np.vectorize(geo_utils.segmentize_by_indices)(gdf2.line_geometry, gdf2.idx, gdf2.subseq_idx)
+
+    gdf3 = gdf2.assign(
+        geometry=gpd.GeoSeries(segment_geom).set_crs(geography_utils.WGS84),
+    ).drop(columns=["line_geometry", "idx", "subseq_idx"])
+
+    return gdf3
 
 
-def create_postmile_segments(group_cols: list) -> gpd.GeoDataFrame:
+def create_postmile_segments(
+    group_cols: list = ["county", "routetype", "route", "direction", "routes", "pmrouteid"]
+) -> gpd.GeoDataFrame:
     """
     Take the SHN postmiles gdf, group by highway / odometer
     and convert the points into lines.
     We'll lose the last postmile for each highway-direction.
     Segment goes from current postmile point to subseq postmile point.
     """
-    gdf = gpd.read_parquet(
-        f"{GCS_FILE_PATH}state_highway_network_postmiles.parquet",
-        columns=["route", "direction", "odometer", "geometry"],
+    # We need multilinestrings to become linestrings (use gdf.explode)
+    # and the columns we select do uniquely tag lines (multilinestrings are 1 item)
+    hwy_lines = gpd.read_parquet(
+        f"{GCS_FILE_PATH}state_highway_network_raw.parquet",
+        columns=group_cols + ["bodometer", "eodometer", "geometry"],
+    ).explode("geometry")
+
+    hwy_postmiles = gpd.read_parquet(
+        f"{GCS_FILE_PATH}state_highway_network_postmiles.parquet", columns=group_cols + ["odometer", "geometry"]
     )
 
-    # If there are duplicates with highway-direction and odometer
-    # (where pm or other column differs slightly),
-    # we'll drop and cut as long of a segment we can
-    # There may be differences in postmile (relative to county start)
-    # and odometer (relative to line's origin).
-    gdf2 = (
-        gdf.sort_values(group_cols + ["odometer"])
-        .drop_duplicates(subset=group_cols + ["odometer"])
+    # Merge hwy points with the lines we want to cut segments from
+    gdf = (
+        pd.merge(hwy_postmiles, hwy_lines.rename(columns={"geometry": "line_geometry"}), on=group_cols, how="inner")
+        .query(
+            # make sure that the postmile point falls between
+            # the beginning and ending odometer
+            # once we check this, we don't need b/e odometer.
+            "odometer >= bodometer & odometer <= eodometer"
+        )
+        .sort_values(group_cols + ["odometer"])
         .reset_index(drop=True)
+        .drop(columns=["bodometer", "eodometer"])
     )
 
-    gdf3 = draw_line_between_points(gdf2, group_cols)
+    gdf2 = segment_highway_lines_by_postmile(gdf, group_cols)
 
-    utils.geoparquet_gcs_export(gdf3, GCS_FILE_PATH, "state_highway_network_postmile_segments")
+    # TODO: there are rows with empty geometry because their indexed value is the same for current and subseq
+    # so no line was drawn
+    # check if it's ok for these to exist
+    # gdf2[gdf2.geometry.is_empty] shows about 57k rows that didn't get cut
+
+    utils.geoparquet_gcs_export(gdf2, GCS_FILE_PATH, "state_highway_network_postmile_segments")
 
     return
 
@@ -248,7 +270,7 @@ if __name__ == "__main__":
     # State Highway Network
     make_clean_state_highway_network()
     export_shn_postmiles()
-    create_postmile_segments(["route", "direction"])
+    create_postmile_segments(["district", "county", "routetype", "route", "direction", "routes", "pmrouteid"])
 
     # Legislative Districts
     export_combined_legislative_districts()
