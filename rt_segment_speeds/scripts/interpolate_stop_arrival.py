@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Literal, Optional
 
 from segment_speed_utils import (array_utils, helpers, 
-                                 segment_calcs, wrangle_shapes)
+                                 segment_calcs)
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import PROJECT_CRS, SEGMENT_TYPES
 from shared_utils import rt_dates
@@ -138,7 +138,7 @@ def add_arrival_time(
         ])
         
         
-        interpolated_arrival = wrangle_shapes.interpolate_stop_arrival_time(
+        interpolated_arrival = segment_calcs.interpolate_stop_arrival_time(
             stop_position, projected_points, timestamp_arr)
         
         arrival_time_series.append(interpolated_arrival)
@@ -187,7 +187,7 @@ def stop_and_arrival_time_arrays_by_trip(
     # Use correct values to fill in the missing arrival times
     df2 = df2.assign(
         arrival_time = df2.apply(
-            lambda x: wrangle_shapes.interpolate_stop_arrival_time(
+            lambda x: segment_calcs.interpolate_stop_arrival_time(
                 x.stop_meters, x.stop_meters_arr, x.arrival_time_arr
             ), axis=1
         )

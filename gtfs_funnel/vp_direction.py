@@ -18,7 +18,7 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import segment_calcs, wrangle_shapes
+from segment_speed_utils import segment_calcs
 from segment_speed_utils.project_vars import PROJECT_CRS
 from shared_utils import publish_utils, rt_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS

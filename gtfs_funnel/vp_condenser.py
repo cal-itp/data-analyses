@@ -11,7 +11,8 @@ from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
-from segment_speed_utils import vp_transform, wrangle_shapes
+from segment_speed_utils import vp_transform
+from shared_utils import geo_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
 def condense_vp_to_linestring(
@@ -34,7 +35,7 @@ def condense_vp_to_linestring(
                    "location_timestamp_local", 
                    "moving_timestamp_local",
                   ],
-    ).pipe(wrangle_shapes.vp_as_gdf, crs = WGS84)
+    ).pipe(geo_utils.vp_as_gdf, crs = WGS84)
         
     vp_condensed = delayed(vp_transform.condense_point_geom_to_line)(
         vp,
@@ -80,7 +81,7 @@ def prepare_vp_for_all_directions(
     dfs = [
         delayed(vp_transform.combine_valid_vp_for_direction)(
             vp, direction) 
-        for direction in wrangle_shapes.ALL_DIRECTIONS
+        for direction in vp_transform.ALL_DIRECTIONS
     ]
         
     results = [compute(i)[0] for i in dfs]
