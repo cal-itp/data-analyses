@@ -14,7 +14,8 @@ from loguru import logger
 from pathlib import Path
 from typing import Literal, Optional
 
-from segment_speed_utils import helpers, wrangle_shapes
+from segment_speed_utils import helpers
+from shared_utils import geo_utils
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import SEGMENT_TYPES, PROJECT_CRS
 
@@ -115,7 +116,7 @@ def get_vp_projected_against_shape(
         f"{SEGMENT_GCS}{input_file}_{analysis_date}",
         columns = ["trip_instance_key", "vp_idx", "x", "y"],
         **kwargs
-    ).pipe(wrangle_shapes.vp_as_gdf, crs = PROJECT_CRS)
+    ).pipe(geo_utils.vp_as_gdf, crs = PROJECT_CRS)
     
     # Merge all together so we can project vp point goem
     # against shape line geom

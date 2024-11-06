@@ -7,7 +7,7 @@ import shapely
 
 from dask import delayed, compute
 
-from segment_speed_utils import helpers, neighbor, segment_calcs, wrangle_shapes
+from segment_speed_utils import helpers, neighbor, segment_calcs
 from segment_speed_utils.project_vars import SEGMENT_GCS, SHARED_GCS, PROJECT_CRS
 import interpolate_stop_arrival
 
