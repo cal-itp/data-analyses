@@ -6,41 +6,11 @@ import numpy as np
 import pandas as pd
 import shapely
 
-from scipy.spatial import KDTree
-
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import gtfs_schedule_wrangling, wrangle_shapes     
+from segment_speed_utils import gtfs_schedule_wrangling     
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT
+from shared_utils import geo_utils
 
-# Could we use distance to filter for nearest neighbor?
-# It can make the length of results more unpredictable...maybe we stick to 
-# k_neighbors and keep the nearest k, so that we can at least be 
-# more consistent with the arrays returned
-geo_const_meters = 6_371_000 * np.pi / 180
-geo_const_miles = 3_959_000 * np.pi / 180
-
-def nearest_snap(
-    line: shapely.LineString, 
-    point: shapely.Point,
-    k_neighbors: int = 1
-) -> np.ndarray:
-    """
-    Based off of this function,
-    but we want to return the index value, rather than the point.
-    https://github.com/UTEL-UIUC/gtfs_segments/blob/main/gtfs_segments/geom_utils.py
-    """
-    line = np.asarray(line.coords)
-    point = np.asarray(point.coords)
-    tree = KDTree(line)
-    
-    # np_dist is array of distances of result (let's not return it)
-    # np_inds is array of indices of result
-    _, np_inds = tree.query(
-        point, workers=-1, k=k_neighbors, 
-    )
-    
-    return np_inds.squeeze()
-    
 
 def add_nearest_vp_idx(
     vp_linestring: shapely.LineString, 
@@ -51,7 +21,7 @@ def add_nearest_vp_idx(
     Index into where the nearest vp is to the stop,
     and return that vp_idx value from the vp_idx array.
     """
-    idx = nearest_snap(vp_linestring, stop, k_neighbors=1)
+    idx = geo_utils.nearest_snap(vp_linestring, stop, k_neighbors=1)
     
     return vp_idx_arr[idx]
 
@@ -105,7 +75,7 @@ def add_nearest_neighbor_result_array(
         stop_geometry = getattr(row, "stop_geometry")
         vp_idx_arr = getattr(row, "vp_idx")
         
-        np_inds = nearest_snap(
+        np_inds = geo_utils.nearest_snap(
             vp_coords_line, stop_geometry, N_NEAREST_POINTS
         )
         
