@@ -6,8 +6,8 @@ Attach organization_source_record_id and
 schedule_gtfs_dataset_key.
 """
 import pandas as pd
-from segment_speed_utils import helpers, time_helpers, time_series_utils
-from shared_utils import rt_dates
+from segment_speed_utils import helpers, time_series_utils
+from shared_utils import rt_dates, time_helpers
 from update_vars import GTFS_DATA_DICT, SCHED_GCS
 
 def parse_service_date(df: pd.DataFrame) -> pd.DataFrame:

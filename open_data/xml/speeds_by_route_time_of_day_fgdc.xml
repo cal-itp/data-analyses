@@ -96,7 +96,7 @@
   offpeak - offpeak hours are 12am-6:59am inclusive, 10am-2:59pm inclusive, and 8pm-11:59pm inclusive.
   peak - peak hours are 7am-9:59am inclusive and 3pm-7:59pm inclusive.
   all_day </attrdef>
-				<attrdefs>https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/segment_speed_utils/time_helpers.py</attrdefs>
+				<attrdefs>https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/time_helpers.py</attrdefs>
 			</attr>
 			<attr>
 				<attrlabl>speed_mph</attrlabl>
