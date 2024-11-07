@@ -1,14 +1,14 @@
 """
 All kinds of GTFS schedule table wrangling.
 """
+import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
-import dask.dataframe as dd
 
 from typing import Literal, Union
 
-from segment_speed_utils import helpers, time_helpers
-from shared_utils import portfolio_utils, rt_utils
+from segment_speed_utils import helpers
+from shared_utils import portfolio_utils, rt_utils, time_helpers
 from segment_speed_utils.project_vars import SEGMENT_GCS 
 
 sched_rt_category_dict = {

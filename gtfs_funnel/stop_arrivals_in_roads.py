@@ -8,10 +8,9 @@ import pandas as pd
 
 from segment_speed_utils import (helpers, 
                                  gtfs_schedule_wrangling, 
-                                 time_helpers
                                 )
 from segment_speed_utils.project_vars import PROJECT_CRS   
-from shared_utils import rt_dates
+from shared_utils import rt_dates, time_helpers
 from update_vars import SHARED_GCS, SCHED_GCS
 
 road_cols = ["linearid", "mtfcc", "fullname"]

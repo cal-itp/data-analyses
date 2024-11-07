@@ -134,3 +134,19 @@ def get_usable_vp_bounds_by_trip(df: dd.DataFrame) -> pd.DataFrame:
     ).reset_index(drop=True).compute()
     
     return df2
+
+
+def interpolate_stop_arrival_time(
+    stop_position: float, 
+    shape_meters_arr: np.ndarray,
+    timestamp_arr: np.ndarray
+) -> float:
+    """
+    Interpolate the arrival time given the stop meters position.
+    Cast datetimes into floats and cast back as datetime.
+    """
+    timestamp_arr = np.asarray(timestamp_arr).astype("datetime64[s]").astype("float64")
+
+    return np.interp(
+        stop_position, np.asarray(shape_meters_arr), timestamp_arr
+    ).astype("datetime64[s]")
