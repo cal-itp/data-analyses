@@ -10,7 +10,6 @@ from . import (
     time_helpers,
     time_series_utils,
     vp_transform,
-    wrangle_shapes,
 )
 
 __all__ = [
@@ -25,5 +24,4 @@ __all__ = [
     "time_helpers",
     "time_series_utils",
     "vp_transform",
-    "wrangle_shapes",
 ]
