@@ -13,6 +13,14 @@ from shared_utils import gtfs_utils_v2
 from siuba import *
 
 PACIFIC_TIMEZONE = "US/Pacific"
+RENAME_DISTRICT_DICT = {
+    "Marysville / Sacramento": "Marysville",  # D3
+    "Bay Area / Oakland": "Oakland",  # D4
+    "San Luis Obispo / Santa Barbara": "San Luis Obispo",  # D5
+    "Fresno / Bakersfield": "Fresno",  # D6
+    "San Bernardino / Riverside": "San Bernardino",  # D8
+    "Orange County": "Irvine",  # D12
+}
 
 
 def localize_timestamp_col(df: dd.DataFrame, timestamp_col: Union[str, list]) -> dd.DataFrame:
@@ -84,7 +92,10 @@ def filter_dim_gtfs_datasets(
     custom_filtering: dict = None,
     get_df: bool = True,
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
-    """ """
+    """
+    Filter mart_transit_database.dim_gtfs_dataset table
+    and keep only the valid rows that passed data quality checks.
+    """
     if "key" not in keep_cols:
         raise KeyError("Include key in keep_cols list")
 
@@ -164,9 +175,73 @@ def get_organization_id(
         return df2
 
 
+def filter_dim_county_geography(
+    date: str,
+    keep_cols: list[str] = ["caltrans_district"],
+) -> pd.DataFrame:
+    """
+    Merge mart_transit_database.dim_county_geography with
+    mart_transit_database.bridge_organizations_x_headquarters_county_geography.
+    Both tables are at organization-county-feed_period grain.
+
+    dim_county_geography holds additional geography columns like
+    MSA, FIPS, etc.
+
+    Use this merge to get caltrans_district.
+    Organizations belong to county, and counties are assigned to districts.
+    """
+    bridge_orgs_county_geog = (
+        tbls.mart_transit_database.bridge_organizations_x_headquarters_county_geography()
+        >> gtfs_utils_v2.subset_cols([_.organization_name, _.county_geography_key, _._valid_from, _._valid_to])
+        >> collect()
+    )
+
+    keep_cols2 = list(set(keep_cols + ["county_geography_key", "caltrans_district_name"]))
+
+    dim_county_geography = (
+        tbls.mart_transit_database.dim_county_geography()
+        >> rename(county_geography_key=_.key)
+        >> gtfs_utils_v2.subset_cols(keep_cols2)
+        >> collect()
+    )
+
+    # Several caltrans_district values in mart_transit_database
+    # now contain slashes.
+    # Use dict to standardize these against how previous versions were
+    dim_county_geography = dim_county_geography.assign(
+        caltrans_district_name=dim_county_geography.apply(
+            lambda x: RENAME_DISTRICT_DICT[x.caltrans_district_name]
+            if x.caltrans_district_name in RENAME_DISTRICT_DICT.keys()
+            else x.caltrans_district_name,
+            axis=1,
+        )
+    )
+
+    bridge_orgs_county_geog = localize_timestamp_col(bridge_orgs_county_geog, ["_valid_from", "_valid_to"])
+
+    bridge_orgs_county_geog2 = bridge_orgs_county_geog >> filter(
+        _._valid_from_local <= pd.to_datetime(date), _._valid_to_local >= pd.to_datetime(date)
+    )
+
+    # Merge organization-county with caltrans_district info
+    # it appears to be a 1:1 merge. checked whether organization can belong to multiple districts,
+    # and that doesn't appear to happen
+    df = pd.merge(bridge_orgs_county_geog2, dim_county_geography, on="county_geography_key", how="inner")
+
+    df2 = (
+        df.assign(caltrans_district=df.caltrans_district.astype(str).str.zfill(2) + " - " + df.caltrans_district_name)[
+            ["organization_name"] + keep_cols
+        ]
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+
+    return df2
+
+
 def filter_dim_organizations(
     date: str,
-    keep_cols: list[str] = ["source_record_id", "caltrans_district"],
+    keep_cols: list[str] = ["source_record_id"],
     custom_filtering: dict = None,
     get_df: bool = True,
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
@@ -201,7 +276,8 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
         "base64_url",
         "uri",
     ],
-    dim_organization_cols: list[str] = ["source_record_id", "name", "caltrans_district"],
+    dim_organization_cols: list[str] = ["source_record_id", "name"],
+    dim_county_geography_cols: list[str] = ["caltrans_district"],
 ) -> pd.DataFrame:
     """
     Get crosswalk from gtfs_dataset_key to certain quartet data identifiers
@@ -243,11 +319,17 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
 
     feeds_with_org_id = get_organization_id(feeds_with_quartet_info, date, merge_cols=merge_cols)
 
-    # (4) Merge in dim_orgs to get caltrans_district
+    # (4) Merge in dim_orgs to get organization info - everything except caltrans_district is found here
     ORG_RENAME_DICT = {"source_record_id": "organization_source_record_id", "name": "organization_name"}
     orgs = filter_dim_organizations(date, keep_cols=dim_organization_cols, get_df=True).rename(columns=ORG_RENAME_DICT)
 
-    feeds_with_district = pd.merge(feeds_with_org_id, orgs, on="organization_source_record_id")
+    feeds_with_org_info = pd.merge(feeds_with_org_id, orgs, on="organization_source_record_id")
+
+    # (5) Merge in dim_county_geography to get caltrans_district
+    # https://github.com/cal-itp/data-analyses/issues/1282
+    district = filter_dim_county_geography(date, dim_county_geography_cols)
+
+    feeds_with_district = pd.merge(feeds_with_org_info, district, on="organization_name")
 
     return feeds_with_district
 

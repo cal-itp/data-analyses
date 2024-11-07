@@ -14,8 +14,8 @@ from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import (gtfs_schedule_wrangling, 
                                  metrics,
-                                 time_helpers, 
                                  )
+from shared_utils import time_helpers
 from segment_speed_utils.project_vars import SEGMENT_TYPES
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from average_segment_speeds import (OPERATOR_COLS, CROSSWALK_COLS, 

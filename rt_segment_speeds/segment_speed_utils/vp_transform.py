@@ -4,7 +4,16 @@ import pandas as pd
 import shapely
 
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import wrangle_shapes
+
+ALL_DIRECTIONS = ["Northbound", "Southbound", "Eastbound", "Westbound"]
+
+OPPOSITE_DIRECTIONS = {
+    "Northbound": "Southbound",
+    "Southbound": "Northbound",
+    "Eastbound": "Westbound",
+    "Westbound": "Eastbound",
+    "Unknown": "",
+}
 
 def condense_point_geom_to_line(
     df: pd.DataFrame, 
@@ -67,7 +76,7 @@ def combine_valid_vp_for_direction(
     direction: str
 ) -> gpd.GeoDataFrame:
     
-    opposite_direction = wrangle_shapes.OPPOSITE_DIRECTIONS[direction]
+    opposite_direction = OPPOSITE_DIRECTIONS[direction]
     
     coords_series = []
     vp_idx_series = []

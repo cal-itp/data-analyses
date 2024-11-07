@@ -2,7 +2,6 @@
 Create a schedule stop_times table with direction of travel
 between stops.
 """
-import dask.dataframe as dd
 import datetime
 import geopandas as gpd
 import numpy as np
@@ -10,7 +9,7 @@ import pandas as pd
 
 from calitp_data_analysis import utils
 from shared_utils import rt_utils
-from segment_speed_utils import helpers, wrangle_shapes
+from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import PROJECT_CRS
 from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 

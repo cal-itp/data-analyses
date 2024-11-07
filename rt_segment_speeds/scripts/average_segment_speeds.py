@@ -16,11 +16,12 @@ from segment_speed_utils import (gtfs_schedule_wrangling,
                                  helpers, 
                                  metrics,
                                  segment_calcs,
-                                 time_helpers, 
                                  time_series_utils
                                  )
+from shared_utils import time_helpers
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 from segment_speed_utils.project_vars import SEGMENT_TYPES
+
 
 OPERATOR_COLS = [
     "schedule_gtfs_dataset_key", 
