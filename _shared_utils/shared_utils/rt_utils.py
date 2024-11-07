@@ -45,8 +45,8 @@ ACCESS_SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/sp
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 METERS_PER_MILE = 1609.34
 # Colorscale
-ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
-ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
+# ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
+# ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 ACCESS_ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdBu_10.scale(vmin=0, vmax=30)
 ACCESS_ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 VARIANCE_COLORS = branca.colormap.step.Blues_06.colors[1:]  # actual breaks will vary
@@ -560,6 +560,13 @@ def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
         return "PM Peak"
     else:
         return "Evening"
+
+
+def time_of_day_durations() -> pd.Series:
+    """
+    Get duration in hours of each time of day classification.
+    """
+    return pd.Series([categorize_time_of_day(x) for x in range(25)]).value_counts()
 
 
 @jit(nopython=True)  # numba gives huge speedup here (~60x)

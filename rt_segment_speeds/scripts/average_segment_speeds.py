@@ -186,7 +186,70 @@ def segment_averages(
     )
     
     return    
+
+def segment_averages_detail(
+    analysis_date_list: list, 
+    segment_type: Literal[SEGMENT_TYPES],
+    group_cols: list,
+    export_file: str,
+    weighted_averages: bool = True
+):
+    """
+    Experimental function for calculating average speeds.
+    Start from single day segment-trip speeds and 
+    aggregate by all times of day.
+    """   
+    start = datetime.datetime.now()
+    assert len(analysis_date_list) == 1, 'detailed calculation only avail for single day'
+    
+    df = concatenate_trip_segment_speeds(
+        analysis_date_list,
+        segment_type,
+        get_pandas = False
+    )
+    
+    if weighted_averages:
+        avg_speeds = delayed(segment_calcs.calculate_avg_speeds)(
+            df, 
+            group_cols + ["time_of_day"],
+        ).pipe(
+            gtfs_schedule_wrangling.merge_operator_identifiers, 
+            analysis_date_list,
+            columns = CROSSWALK_COLS
+        )
+    
+    # If a single day is put in, use that date for segment geometry
+    analysis_date = analysis_date_list[0]
+    time_span_str = analysis_date
+      
+    avg_speeds_with_geom = delayed(merge_in_segment_geometry)(
+        avg_speeds,
+        analysis_date, 
+        segment_type
+    )
         
+    avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]
+    #  is this the best spot to add scheduled frequency and route_short_name?
+    sched_trips_hr = gtfs_schedule_wrangling.get_sched_trips_hr(analysis_date)
+    sched_trips_hr = sched_trips_hr.rename(columns={'n_trips': 'n_trips_sch', 'trips_hr': 'trips_hr_sch'})
+    sched_trips_hr_cols = ['route_id', 'shape_id',
+                      'time_of_day', 'schedule_gtfs_dataset_key']
+    avg_speeds_with_geom = pd.merge(avg_speeds_with_geom, sched_trips_hr, on=sched_trips_hr_cols)
+    avg_speeds_with_geom = gtfs_schedule_wrangling.merge_route_identifiers(avg_speeds_with_geom, analysis_date)
+    
+    utils.geoparquet_gcs_export(
+        avg_speeds_with_geom,
+        SEGMENT_GCS,
+        f"{export_file}_{time_span_str}"
+    )
+        
+    end = datetime.datetime.now()
+    logger.info(
+        f"{segment_type} detailed segment averaging for {analysis_date_list} "
+        f"execution time: {end - start}"
+    )
+    
+    return
 
 if __name__ == "__main__":
     

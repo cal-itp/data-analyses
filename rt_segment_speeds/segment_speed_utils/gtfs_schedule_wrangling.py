@@ -122,6 +122,18 @@ def add_weekday_weekend_column(df: pd.DataFrame, category_dict: dict = time_help
     
     return df
     
+def count_trips_by_group(df: pd.DataFrame, group_cols: list):
+    """
+    Given a df with trip_instance_key and an arbitrary list of 
+    group_cols, return trip counts by group.
+    """
+    assert "trip_instance_key" in df.columns
+    df = (df.groupby(group_cols)
+               .agg({"trip_instance_key": "count"})
+               .reset_index()
+      )
+    df = df.rename(columns = {"trip_instance_key": "n_trips"})
+    return df
     
 def aggregate_time_of_day_to_peak_offpeak(
     df: pd.DataFrame,
@@ -141,23 +153,13 @@ def aggregate_time_of_day_to_peak_offpeak(
     
     df = add_peak_offpeak_column(df)
     
-    all_day = (df.groupby(group_cols)
-               .agg({"trip_instance_key": "count"})
-               .reset_index()
-               .assign(time_period = "all_day")
-              )
-    
-    peak_offpeak = (df.groupby(group_cols + ["peak_offpeak"])
-                    .agg({"trip_instance_key": "count"})
-                    .reset_index()
-                    .rename(columns = {"peak_offpeak": "time_period"})
-                   )
+    all_day = count_trips_by_group(df, group_cols).assign(time_period = "all_day")
+    peak_offpeak = count_trips_by_group(df, group_cols + ["peak_offpeak"]).rename({"peak_offpeak":"time_period"})
     
     df2 = pd.concat(
         [all_day, peak_offpeak], 
         axis=0, ignore_index = True
-    ).rename(columns = {"trip_instance_key": "n_trips"})
-
+    )
     
     # Add service frequency (trips per hour)
     # there are different number of hours in peak and offpeak periods
@@ -513,6 +515,52 @@ def merge_operator_identifiers(
     
     return df
 
+def merge_route_identifiers(
+    df: pd.DataFrame,
+    analysis_date: str,
+) -> pd.DataFrame:
+    """
+    Merge in route_short_name given df with route_id,
+    schedule_gtfs_dataset_key.
+    Can't group by route_short_name or route_long_name in pipeline since either can
+    be nan per GTFS spec; grouping will result in those being dropped which is
+    undesireable. 
+    """
+    keep_trip_cols = ['gtfs_dataset_key', 'route_id', 'route_short_name']
+    trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols)
+    trips = trips.rename(
+        columns={'gtfs_dataset_key': 'schedule_gtfs_dataset_key'})
+    routes = trips.drop_duplicates()
+    df = pd.merge(
+        df,
+        routes,
+        on = ["schedule_gtfs_dataset_key", "route_id"],
+        how = "inner"
+    )
+    
+    return df
+
+def get_sched_trips_hr(analysis_date: str) -> pd.DataFrame:
+    """
+    For speedmaps (and other analyses), it's helpful to have scheduled
+    frequency available. Currently only supports detailed time of day.
+    """
+    keep_trip_cols = ['trip_instance_key', 'gtfs_dataset_key', 'route_id',
+                      'shape_id']
+    trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols)
+    trips = trips.rename(
+        columns={'gtfs_dataset_key': 'schedule_gtfs_dataset_key'})
+    time_buckets = get_trip_time_buckets(analysis_date)
+    trips = pd.merge(trips, time_buckets, on='trip_instance_key', how='inner')
+    schedule_trip_counts = count_trips_by_group(trips,
+                                    ['route_id', 'shape_id',
+                                    'time_of_day', 'schedule_gtfs_dataset_key']
+                            )
+    durations = rt_utils.time_of_day_durations()
+    schedule_trip_counts['trips_hr'] = schedule_trip_counts.apply(
+                                        lambda x: x.n_trips / durations[x.time_of_day], axis=1)
+    return schedule_trip_counts
+    
 
 def fill_missing_stop_sequence1(df: pd.DataFrame) -> pd.DataFrame:
     """
