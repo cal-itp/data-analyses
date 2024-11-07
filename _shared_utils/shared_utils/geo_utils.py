@@ -145,3 +145,33 @@ def segmentize_by_indices(line_geometry: shapely.LineString, start_idx: int, end
         return shapely.LineString()
     else:
         return shapely.LineString([shapely.Point(i) for i in subset_coords])
+
+
+def draw_line_between_points(gdf: gpd.GeoDataFrame, group_cols: list) -> gpd.GeoDataFrame:
+    """
+    Use the current postmile as the
+    starting geometry / segment beginning
+    and the subsequent postmile (based on odometer)
+    as the ending geometry / segment end.
+
+    Segment goes from current to next postmile.
+    """
+    # Grab the subsequent point geometry
+    # We can drop whenever the last point is missing within
+    # a group. If we have 3 points, we can draw 2 lines.
+    gdf = gdf.assign(end_geometry=(gdf.groupby(group_cols, group_keys=False).geometry.shift(-1))).dropna(
+        subset="end_geometry"
+    )
+
+    # Construct linestring with 2 point coordinates
+    gdf = (
+        gdf.assign(
+            line_geometry=gdf.apply(lambda x: shapely.LineString([x.geometry, x.end_geometry]), axis=1).set_crs(
+                geography_utils.WGS84
+            )
+        )
+        .drop(columns=["geometry", "end_geometry"])
+        .rename(columns={"line_geometry": "geometry"})
+    )
+
+    return gdf
