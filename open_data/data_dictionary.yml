@@ -60,7 +60,7 @@ common-fields:
         offpeak - offpeak hours are 12am-6:59am inclusive, 10am-2:59pm inclusive, and 8pm-11:59pm inclusive.
         peak - peak hours are 7am-9:59am inclusive and 3pm-7:59pm inclusive.
         all_day 
-    definition_source: "https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/segment_speed_utils/time_helpers.py"  
+    definition_source: "https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/time_helpers.py"  
   - &hqta_type
     definition: |-
       Indicates the type of High Quality Transit Area as defined in the Public Resources Code that a stop is and/or falls within. Valid options are: hq_corridor_bus (PRC 21155), major_stop_bus (PRC 21064.3), major_stop_rail (PRC 21064.3), major_stop_ferry (PRC 21064.3), major_stop_brt (PRC 21064.3, 21060.2)
