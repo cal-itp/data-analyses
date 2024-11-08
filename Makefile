@@ -75,14 +75,12 @@ build_starterkit_ha:
 	pip install -r portfolio/requirements.txt
 	make build_portfolio_site 
 	make git_check_no_sections
-	make production_portfolio
     
 build_starterkit_LASTNAME:
 	$(eval export site = YOUR_SITE_NAME)
 	pip install -r portfolio/requirements.txt
 	make build_portfolio_site 
 	make git_check_no_sections
-	make production_portfolio
 
 build_fund_split:
 	$(eval export site = sb125_fund_split_analysis)
