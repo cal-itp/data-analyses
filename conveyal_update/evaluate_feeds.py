@@ -21,6 +21,7 @@ TARGET_DATE = conveyal_vars.TARGET_DATE
 
 def get_feeds_check_service():
     feeds_on_target = gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(selected_date=TARGET_DATE)
+    feeds_on_target = feeds_on_target.rename(columns={'name':'gtfs_dataset_name'})
     # default will use mtc subfeeds (prev Conveyal behavior), can spec customer facing if we wanna switch
 
     operator_feeds = feeds_on_target.feed_key
@@ -38,7 +39,7 @@ def get_feeds_check_service():
     
 def attach_transit_services(feeds_on_target: pd.DataFrame):
 
-    target_dt = dt.datetime.combine(TARGET_DATE, dt.time(0))
+    target_dt = dt.datetime.combine(dt.date.fromisoformat(TARGET_DATE), dt.time(0))
 
     services = (tbls.mart_transit_database.dim_gtfs_service_data()
         >> filter(_._valid_from <= target_dt, _._valid_to > target_dt)
@@ -60,7 +61,7 @@ def report_undefined(feeds_on_target: pd.DataFrame):
         print(undefined.columns)
         print('these feeds have no service defined on target date, nor are their services captured in other feeds:')
         #  gtfs_dataset_name no longer present, this whole script should probably be updated/replaced
-        # print(undefined >> select(_.gtfs_dataset_name, _.service_any_feed))
+        print(undefined >> select(_.gtfs_dataset_name, _.service_any_feed))
         print(f'saving detailed csv to {fname}')
         undefined.to_csv(fname)
     return
@@ -71,5 +72,5 @@ if __name__ == '__main__':
     feeds_on_target = attach_transit_services(feeds_on_target)
     print(f'feeds on target date shape: {feeds_on_target.shape}')
     report_undefined(feeds_on_target)
-    feeds_on_target.to_parquet(f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE.isoformat()}.parquet')
+    feeds_on_target.to_parquet(f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE}.parquet')
     
