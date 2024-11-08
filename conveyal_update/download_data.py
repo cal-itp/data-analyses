@@ -14,7 +14,7 @@ import shutil
 regions = conveyal_vars.conveyal_regions
 TARGET_DATE = conveyal_vars.TARGET_DATE
 
-regions_and_feeds = pd.read_parquet(f'{conveyal_vars.GCS_PATH}regions_feeds_{TARGET_DATE.isoformat()}.parquet')
+regions_and_feeds = pd.read_parquet(f'{conveyal_vars.GCS_PATH}regions_feeds_{TARGET_DATE}.parquet')
 
 def download_feed(row):
     # need wildcard for file too -- not all are gtfs.zip!
