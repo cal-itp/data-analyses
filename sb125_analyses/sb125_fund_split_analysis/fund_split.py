@@ -569,6 +569,7 @@ def concat_everything():
         lassen_cleaned,
         ventura_cleaned,
         kern_cleaned,
+        mtc_cleaned
     ],
     ignore_index=True,
     )
@@ -618,11 +619,12 @@ def fund_request_melt(df):
 
 
 if __name__ == "__main__":
-    
+    print("running fund_request_checker_v3()")
     good_list, review_list = fund_request_checker_v3(file_list)
     
     cleaned_fund_request = cleaner_loop(good_list)
     
+    print("running individual cleaning scripts")
     #these functions clean specific values (DFs) in the cleaned_fund_request dict
     clean_humboldt()
     
@@ -657,8 +659,10 @@ if __name__ == "__main__":
     
     # concat all values (DFs) from cleaned_fund_request dict to be a single DF and concat the rest of the DFs
     
+    print("running concat_everything")
     all_fund_requests = concat_everything()
     
+    print("saving data as .parquet and .csv to GCS")
     # SAVING TO GCS!
     all_fund_requests.to_parquet(f"{GCS_PATH}all_fund_requests_concat.parquet")
 
@@ -667,3 +671,8 @@ if __name__ == "__main__":
     
     #saving to gcs
     all_melt.to_parquet(f"{GCS_PATH}all_fund_requests_melt.parquet")
+    
+    # saving all_melt to csv
+    all_melt.to_csv(f"{GCS_PATH}all_fund_requests_melt.csv", index=False)
+    
+    print("end of script")
