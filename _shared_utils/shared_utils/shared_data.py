@@ -7,7 +7,7 @@ import pandas as pd
 import shapely
 from calitp_data_analysis import geography_utils, utils
 from calitp_data_analysis.sql import to_snakecase
-from shared_utils import arcgis_query, geo_utils
+from shared_utils import arcgis_query
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
@@ -145,7 +145,7 @@ def get_segment_geom(
     return segment_geom
 
 
-def segment_highway_lines_by_postmile2(gdf: gpd.GeoDataFrame):
+def segment_highway_lines_by_postmile(gdf: gpd.GeoDataFrame):
     """
     Use the current postmile as the
     starting geometry / segment beginning
@@ -173,42 +173,6 @@ def segment_highway_lines_by_postmile2(gdf: gpd.GeoDataFrame):
     )
 
     return gdf2
-
-
-def segment_highway_lines_by_postmile(gdf: gpd.GeoDataFrame, group_cols: list) -> gpd.GeoDataFrame:
-    """
-    Use the current postmile as the
-    starting geometry / segment beginning
-    and the subsequent postmile (based on odometer)
-    as the ending geometry / segment end.
-
-    Segment goes from current to next postmile.
-    """
-    # For this postmile, snap it to the highway line and find the nearest index
-    # for a linestring with 10 points, an index value of 2 means it's the 3rd coordinate
-    nearest_idx_series = np.vectorize(geo_utils.nearest_snap)(gdf.line_geometry, gdf.geometry, 1)
-
-    gdf["idx"] = nearest_idx_series
-
-    # The segment will be index into the nearest point for a postmile
-    # until the index of the subsequent postmile
-    # Ex: idx=1 and subseq_idx=5 means we want to grab hwy_coords[1:6] as our segment
-    gdf = gdf.assign(
-        subseq_idx=(gdf.sort_values(group_cols + ["odometer"]).groupby(group_cols).idx.shift(-1).astype("Int64")),
-        eodometer=(gdf.sort_values(group_cols + ["odometer"]).groupby(group_cols).odometer.shift(-1)),
-    ).rename(columns={"odometer": "bodometer"})
-    # follow the convention of b for begin odometer and e for end odometer
-
-    # Drop NaNs because for 3 points, we can draw 2 segments
-    gdf2 = gdf.dropna(subset="subseq_idx").reset_index(drop=True)
-
-    segment_geom = np.vectorize(geo_utils.segmentize_by_indices)(gdf2.line_geometry, gdf2.idx, gdf2.subseq_idx)
-
-    gdf3 = gdf2.assign(
-        geometry=gpd.GeoSeries(segment_geom).set_crs(geography_utils.WGS84),
-    ).drop(columns=["line_geometry", "idx", "subseq_idx"])
-
-    return gdf3
 
 
 def round_odometer_values(df: pd.DataFrame, cols: list = ["odometer"], num_decimals: int = 3) -> pd.DataFrame:
@@ -292,7 +256,7 @@ def create_postmile_segments(
         .reset_index(drop=True)
     )
 
-    gdf2 = segment_highway_lines_by_postmile2(gdf).to_crs(geography_utils.WGS84)
+    gdf2 = segment_highway_lines_by_postmile(gdf).to_crs(geography_utils.WGS84)
 
     utils.geoparquet_gcs_export(gdf2, GCS_FILE_PATH, "state_highway_network_postmile_segments")
 
