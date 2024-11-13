@@ -14,7 +14,7 @@ def reverse_snakecase(df:pd.DataFrame)->pd.DataFrame:
                   .str.replace("Vmt", "VMT")
                   .str.replace("Zev", "ZEV")
                   .str.replace("Lu", "Landuse")
-                  .str.replace("Ct", "CalTrans")
+                  .str.replace("Ct", "Caltrans")
                  )
     return df
 
@@ -71,7 +71,7 @@ def wide_to_long(df:pd.DataFrame)->pd.DataFrame:
     """
     df2 = pd.melt(
     df,
-    id_vars=["CalTrans District","Project Name"],
+    id_vars=["Caltrans District","Project Name"],
     value_vars=[
         "Accessibility Score",
         "DAC Accessibility Score",
@@ -147,7 +147,7 @@ def create_district_summary(df: pd.DataFrame, caltrans_district: int):
     """
     Create a summary of CSIS metrics for one Caltrans District.
     """
-    filtered_df = df.loc[df["CalTrans District"] == caltrans_district].reset_index(
+    filtered_df = df.loc[df["Caltrans District"] == caltrans_district].reset_index(
         drop=True
     )
     # Finding the values referenced in the narrative
