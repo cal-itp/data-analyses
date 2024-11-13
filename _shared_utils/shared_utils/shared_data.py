@@ -4,6 +4,7 @@ One-off functions, run once, save datasets for shared use.
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import shapely
 from calitp_data_analysis import geography_utils, utils
 from calitp_data_analysis.sql import to_snakecase
 from shared_utils import arcgis_query, geo_utils
@@ -104,6 +105,76 @@ def export_shn_postmiles():
     return
 
 
+def scaled_proportion(x: float, odometer_min: float, odometer_max: float) -> float:
+    """
+    Scale highway postmile start and end to 0-1.
+    Ex: if a highway line has odometer value of 0 - 1_000,
+    and the postmile segment we want to cut is 400-600, we need to know
+    proportionally which subset of coords to take.
+    Use this along with shapely.project to find out the distance
+    each coord is from the origin.
+    """
+    return (x - odometer_min) / (odometer_max - odometer_min)
+
+
+def get_segment_geom(
+    shn_line_geom: shapely.LineString, projected_coords: list, start_dist: float, end_dist: float
+) -> shapely.LineString:
+    """
+    Unpack SHN linestring coordinates as distances from origin
+    of linestring, and find where postmiles start/end.
+    The segment we're interested in is this line:
+    (postmile start point, coordinates on SHN line in between, and postmile end point).
+    """
+    # Turn list into array so we can subset it
+    projected_coords = np.asarray(projected_coords)
+
+    # The postmile's bodometer is start_dist; postmile's eodometer is end_dist
+    # Convert these to point geometries (these are our vertices)
+    start_geom = shn_line_geom.interpolate(start_dist, normalized=True)
+    end_geom = shn_line_geom.interpolate(end_dist, normalized=True)
+
+    # Valid indices are all the coords in the SHN line that are between the 2 postmiles
+    valid_indices = ((projected_coords >= start_dist) & (projected_coords <= end_dist)).nonzero()[0]
+    valid_coords = list(np.asarray([shapely.Point(p) for p in shn_line_geom.coords])[valid_indices])
+
+    # Create our segment based on our postmile start/end points + all the coordinates in between
+    # found on the SHN linestring
+    segment_geom = shapely.LineString([start_geom, *valid_coords, end_geom])
+
+    return segment_geom
+
+
+def segment_highway_lines_by_postmile2(gdf: gpd.GeoDataFrame):
+    """
+    Use the current postmile as the
+    starting geometry / segment beginning
+    and the subsequent postmile (based on odometer)
+    as the ending geometry / segment end.
+
+    Segment goes from current to next postmile.
+    """
+    # Take the postmile's bodometer/eodometer and
+    # find the scaled version relative to the highway's bodometer/eodometer.
+    # hwy_bodometer/eodometer usually are floats like [3.5, 4.8], and we want to know
+    # proportionally where a value like 4.2 will fall on a scale of 0-1
+    start_dist = np.vectorize(scaled_proportion)(gdf.bodometer, gdf.hwy_bodometer, gdf.hwy_eodometer)
+    end_dist = np.vectorize(scaled_proportion)(gdf.eodometer, gdf.hwy_bodometer, gdf.hwy_eodometer)
+
+    segment_geom = np.vectorize(get_segment_geom)(gdf.line_geometry, gdf.projected_coords, start_dist, end_dist)
+
+    drop_cols = ["projected_coords", "hwy_bodometer", "hwy_eodometer", "line_geometry"]
+
+    # Assign segment geometry and overwrite the postmile geometry column
+    gdf2 = (
+        gdf.assign(geometry=gpd.GeoSeries(segment_geom, crs=geography_utils.CA_NAD83Albers))
+        .drop(columns=drop_cols)
+        .set_geometry("geometry")
+    )
+
+    return gdf2
+
+
 def segment_highway_lines_by_postmile(gdf: gpd.GeoDataFrame, group_cols: list) -> gpd.GeoDataFrame:
     """
     Use the current postmile as the
@@ -140,6 +211,17 @@ def segment_highway_lines_by_postmile(gdf: gpd.GeoDataFrame, group_cols: list) -
     return gdf3
 
 
+def round_odometer_values(df: pd.DataFrame, cols: list = ["odometer"], num_decimals: int = 3) -> pd.DataFrame:
+    """
+    Round odometer columns, which can be named
+    odometer, bodometer (begin odometer), eodometer (end odometer)
+    to 3 decimal places.
+    """
+    df[cols] = df[cols].round(num_decimals)
+
+    return df
+
+
 def create_postmile_segments(
     group_cols: list = ["county", "routetype", "route", "direction", "routes", "pmrouteid"]
 ) -> gpd.GeoDataFrame:
@@ -151,35 +233,66 @@ def create_postmile_segments(
     """
     # We need multilinestrings to become linestrings (use gdf.explode)
     # and the columns we select do uniquely tag lines (multilinestrings are 1 item)
-    hwy_lines = gpd.read_parquet(
-        f"{GCS_FILE_PATH}state_highway_network_raw.parquet",
-        columns=group_cols + ["bodometer", "eodometer", "geometry"],
-    ).explode("geometry")
+    hwy_lines = (
+        gpd.read_parquet(
+            f"{GCS_FILE_PATH}state_highway_network_raw.parquet",
+            columns=group_cols + ["bodometer", "eodometer", "geometry"],
+        )
+        .explode("geometry")
+        .reset_index(drop=True)
+        .pipe(round_odometer_values, ["bodometer", "eodometer"], num_decimals=3)
+        .to_crs(geography_utils.CA_NAD83Albers)
+    )
 
-    hwy_postmiles = gpd.read_parquet(
-        f"{GCS_FILE_PATH}state_highway_network_postmiles.parquet", columns=group_cols + ["odometer", "geometry"]
+    # Have a list accompany the geometry
+    # linestring has many coords, shapely.project each point and calculate distance from origin
+    # and normalize it all between 0-1
+    hwy_lines = hwy_lines.assign(
+        projected_coords=hwy_lines.apply(
+            lambda x: [x.geometry.project(shapely.Point(p), normalized=True) for p in x.geometry.coords], axis=1
+        )
+    )
+
+    hwy_postmiles = (
+        gpd.read_parquet(
+            f"{GCS_FILE_PATH}state_highway_network_postmiles.parquet", columns=group_cols + ["odometer", "geometry"]
+        )
+        .pipe(round_odometer_values, ["odometer"], num_decimals=3)
+        .to_crs(geography_utils.CA_NAD83Albers)
+    )
+    # Round to 3 digits for odometer. When there are more decimal places, it makes our cutoffs iffy
+    # when we use this condition below: odometer >= bodometer & odometer <= eodometer
+
+    # follow the convention of b for begin odometer and e for end odometer
+    hwy_postmiles = (
+        hwy_postmiles.assign(
+            eodometer=(hwy_postmiles.sort_values(group_cols + ["odometer"]).groupby(group_cols).odometer.shift(-1)),
+        )
+        .rename(columns={"odometer": "bodometer"})
+        .dropna(subset="eodometer")
+        .reset_index(drop=True)
     )
 
     # Merge hwy points with the lines we want to cut segments from
     gdf = (
-        pd.merge(hwy_postmiles, hwy_lines.rename(columns={"geometry": "line_geometry"}), on=group_cols, how="inner")
+        pd.merge(
+            hwy_postmiles,
+            hwy_lines.rename(
+                columns={"bodometer": "hwy_bodometer", "eodometer": "hwy_eodometer", "geometry": "line_geometry"}
+            ),
+            on=group_cols,
+            how="inner",
+        )
         .query(
             # make sure that the postmile point falls between
             # the beginning and ending odometer
-            # once we check this, we don't need b/e odometer.
-            "odometer >= bodometer & odometer <= eodometer"
+            "bodometer >= hwy_bodometer & eodometer <= hwy_eodometer"
         )
-        .sort_values(group_cols + ["odometer"])
+        .sort_values(group_cols + ["bodometer"])
         .reset_index(drop=True)
-        .drop(columns=["bodometer", "eodometer"])
     )
 
-    gdf2 = segment_highway_lines_by_postmile(gdf, group_cols)
-
-    # TODO: there are rows with empty geometry because their indexed value is the same for current and subseq
-    # so no line was drawn
-    # check if it's ok for these to exist
-    # gdf2[gdf2.geometry.is_empty] shows about 57k rows that didn't get cut
+    gdf2 = segment_highway_lines_by_postmile2(gdf).to_crs(geography_utils.WGS84)
 
     utils.geoparquet_gcs_export(gdf2, GCS_FILE_PATH, "state_highway_network_postmile_segments")
 
@@ -270,6 +383,8 @@ if __name__ == "__main__":
     # State Highway Network
     make_clean_state_highway_network()
     export_shn_postmiles()
+
+    # This takes 24 min to run, so if there's a way to optimize in the future, we should
     create_postmile_segments(["district", "county", "routetype", "route", "direction", "routes", "pmrouteid"])
 
     # Legislative Districts
