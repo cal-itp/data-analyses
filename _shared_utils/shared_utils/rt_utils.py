@@ -853,7 +853,9 @@ def set_state_export(
     bucket: str = SPA_MAP_BUCKET,
     subfolder: str = "testing/",
     filename: str = "test2",
-    map_type: Literal["speedmap", "speed_variation", "hqta_areas", "hqta_stops", "state_highway_network"] = None,
+    map_type: Literal["speedmap", "speed_variation",
+                      "new_speedmap", "new_speed_variation"
+                      "hqta_areas", "hqta_stops", "state_highway_network"] = None,
     map_title: str = "Map",
     cmap: branca.colormap.ColorMap = None,
     color_col: str = None,
