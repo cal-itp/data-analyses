@@ -42,7 +42,7 @@ def make_rt_site_yml(speedmaps_index_joined,
         chapter_dict['caption'] = f'District {district}'
         chapter_dict['params'] = {'district': district}
         chapter_dict['sections'] = \
-            [{'itp_id': itp_id} for itp_id in filtered.organization_itp_id.to_list()]
+            [{'organization_source_record_id': organization_source_record_id} for organization_source_record_id in filtered.organization_source_record_id.to_list()]
         chapters_list += [chapter_dict]   
         
     parts_list = [{'chapters': chapters_list}]
