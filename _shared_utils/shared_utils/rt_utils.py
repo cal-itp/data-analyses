@@ -890,7 +890,7 @@ def set_state_export(
     ]
     if map_type:
         this_layer[0]["type"] = map_type
-    if map_type == "speedmap":
+    if map_type in ["new_speedmap", "speedmap"]:
         this_layer[0]["properties"]["tooltip_speed_key"] = "p20_mph"
     spa_map_state["layers"] += this_layer
     if manual_centroid:
