@@ -828,7 +828,8 @@ def get_operators(analysis_date, operator_list, verbose=False):
 
 
 def spa_map_export_link(
-    gdf: gpd.GeoDataFrame, path: str, state: dict, site: str = SPA_MAP_SITE, cache_seconds: int = 3600
+    gdf: gpd.GeoDataFrame, path: str, state: dict,
+    site: str = SPA_MAP_SITE, cache_seconds: int = 3600, verbose: bool = False
 ):
     """
     Called via set_state_export. Handles stream writing of gzipped geojson to GCS bucket,
@@ -837,7 +838,8 @@ def spa_map_export_link(
     assert cache_seconds in range(3601), "cache must be 0-3600 seconds"
     geojson_str = gdf.to_json()
     geojson_bytes = geojson_str.encode("utf-8")
-    print(f"writing to {path}")
+    if verbose:
+        print(f"writing to {path}")
     with fs.open(path, "wb") as writer:  # write out to public-facing GCS?
         with gzip.GzipFile(fileobj=writer, mode="w") as gz:
             gz.write(geojson_bytes)
