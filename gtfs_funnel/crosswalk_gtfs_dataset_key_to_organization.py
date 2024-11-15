@@ -40,9 +40,8 @@ def create_gtfs_dataset_key_to_organization_crosswalk(
         analysis_date,
         quartet_data = "schedule",
         dim_gtfs_dataset_cols = ["key", "source_record_id", "base64_url"],
-        dim_organization_cols = ["source_record_id", "name", 
-                                 "itp_id", "caltrans_district",
-                                  "ntd_id_2022"]
+        dim_organization_cols = ["source_record_id", "name", "ntd_id_2022"]
+        dim_county_geography_cols= ["caltrans_district"], # this is where caltrans_district appears by default
     )
 
     df_with_org = pd.merge(
