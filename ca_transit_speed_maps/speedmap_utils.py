@@ -5,20 +5,11 @@ import geopandas as gpd
 import update_vars_index
 from shared_utils import rt_utils
 from calitp_data_analysis.geography_utils import CA_NAD83Albers
+import datetime as dt
+import altair as alt
+from IPython.display import display, Markdown, IFrame
 
 catalog = shared_utils.catalog_utils.get_catalog('gtfs_analytics_data')
-
-#def read_detail_segments(itp_id: int) -> gpd.GeoDataFrame:
-#    '''
-#    Read detailed speedmap segments (all times of day including interpolated segs)
-#    for a given itp_id (legacy compatability, may switch to an alternate identifer...)
-#    '''
-#    speedmap_index = pd.read_parquet(f'_rt_progress_{analysis_date}.parquet') >> filter(_.organization_itp_id == itp_id)
-#    path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{analysis_date}.parquet'
-#    speedmap_segs = gpd.read_parquet(path) #  aggregated
-#    speedmap_segs = speedmap_segs >> filter(_.schedule_gtfs_dataset_key == speedmap_index.schedule_gtfs_dataset_key.iloc[0])
-#    
-#    return speedmap_segs
 
 def prepare_segment_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
@@ -64,9 +55,8 @@ def map_shn(district_gdf: gpd.GeoDataFrame):
     spa_map_state = export_result['state_dict']
     return spa_map_state
 
-#from shared_utils.rt_utils import ACCESS_ZERO_THIRTY_COLORSCALE, , , 
-def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFrame, time_of_day: str,
-                    map_type: str):
+def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFrame, analysis_date: dt.date,
+                    time_of_day: str, map_type: str):
     '''
     Always add State Highway Network first.
     '''
@@ -74,18 +64,55 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
     gdf = gdf >> filter(_.time_of_day == time_of_day)
     color_col = {'new_speedmap': 'p20_mph', 'new_speed_variation': 'fast_slow_ratio'}[map_type]
     shn_state = map_shn(district_gdf)
-    filename = f"{speedmap_segs.organization_source_record_id.iloc[0]}_{map_type}"
+    display_date = analysis_date.strftime('%B %d %Y (%A)')
+    filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_{map_type}"
+    title = f"{speedmap_segs.organization_name.iloc[0]} {display_date} {time_of_day}"
     
     if map_type == 'new_speedmap':
         cmap = rt_utils.ACCESS_ZERO_THIRTY_COLORSCALE
         legend_url = rt_utils.ACCESS_SPEEDMAP_LEGEND_URL
-    elif map_type == 'new_speed_variation'
+    elif map_type == 'new_speed_variation':
         cmap = rt_utils.VARIANCE_FIXED_COLORSCALE
         legend_url = rt_utils.VARIANCE_LEGEND_URL
         
-    speedmap_state = rt_utils.set_state_export(
+    export_result = rt_utils.set_state_export(
         period_test, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename=filename,
         map_type=map_type,
         color_col=color_col, cmap=cmap, legend_url=legend_url,
-        cache_seconds=0, map_title=f'Speedmap Segs {time_of_day} {analysis_date}',
+        map_title=title,
         existing_state = shn_state)
+    
+    spa_link = export_result['spa_link'] 
+    return spa_link
+
+def chart_speeds_by_time_period(speedmap_segs: gpd.GeoDataFrame) -> None:
+    cmap = rt_utils.ACCESS_ZERO_THIRTY_COLORSCALE
+    domain = cmap.index
+    range_ = [cmap.rgb_hex_str(i) for i in cmap.index]
+    df = speedmap_segs[['time_of_day', 'p50_mph', 'p20_mph', 'p80_mph']]
+    df = df >> group_by(_.time_of_day) >> summarize(p50_mph = _.p50_mph.quantile(.5),
+                                                   p20_mph = _.p20_mph.quantile(.5),
+                                                   p80_mph = _.p80_mph.quantile(.5),)
+    df['p50 - p20'] = -(df['p50_mph'] - df['p20_mph'])
+    df['p80 - p50'] = df['p80_mph'] - df['p50_mph']
+    error_bars = alt.Chart(df).mark_errorbar(thickness=5, color='gray', opacity=.6).encode(
+        y = alt.Y("p50_mph:Q", title='Segment Speed (mph): 20, 50, 80%ile'),
+        yError=("p50 - p20:Q"),
+        yError2=("p80 - p50:Q"),
+        x = alt.X("time_of_day:N", sort=['Early AM', 'AM Peak', 'Midday', 'PM Peak', 'Evening', 'Owl']),
+        tooltip=[alt.Tooltip('p20_mph:Q', title="p20 mph"), alt.Tooltip('p50_mph:Q', title="p50 mph"),
+                alt.Tooltip('p80_mph:Q', title="p80 mph")]
+    ).properties(width=400)
+    points = alt.Chart(df).mark_point(filled=True, size = 300, opacity = 1).encode(
+        alt.Y("p50_mph:Q"),
+        alt.X("time_of_day:N", sort=['Early AM', 'AM Peak', 'Midday', 'PM Peak', 'Evening', 'Owl'],
+             title='Time of Day'),
+        color=alt.Color('p50_mph', title='Median Segment Speed (mph)').scale(domain=domain, range = range_),
+        tooltip=[alt.Tooltip('p50_mph:Q', title="p50 mph")],
+    )
+    chart = error_bars + points
+    chart = chart.configure(axis = alt.AxisConfig(labelFontSize=14, titleFontSize=18),
+                           legend = alt.LegendConfig(titleFontSize=14, labelFontSize=14, titleLimit=250,
+                                                     titleOrient='left', labelOffset=100))
+    display(chart)
+    return
