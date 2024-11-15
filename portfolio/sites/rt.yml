@@ -6,140 +6,150 @@ parts:
         params:
           district: 01 - Eureka
         sections:
-          - itp_id: 18
-          - itp_id: 108
-          - itp_id: 135
-          - itp_id: 159
-          - itp_id: 198
-          - itp_id: 261
+          - organization_source_record_id: recaaoqEDvwhcmIVT
+          - organization_source_record_id: recynxkqEoo9dJEvw
+          - organization_source_record_id: recaa3naoNR4a5RsJ
+          - organization_source_record_id: recPwXKbGLL4aIqXV
+          - organization_source_record_id: recpWBEjXzLHqCjhE
+          - organization_source_record_id: recOnKhqF25crJt4q
       - caption: District 02 - Redding
         params:
           district: 02 - Redding
         sections:
-          - itp_id: 259
-          - itp_id: 334
+          - organization_source_record_id: recI1fuNpr306H0hw
+          - organization_source_record_id: recx4ZG2lvZb7kGAL
+          - organization_source_record_id: recKN0Q28cOQdsy5L
+          - organization_source_record_id: recEtov4XTJZDjtuj
       - caption: District 03 - Marysville
         params:
           district: 03 - Marysville
         sections:
-          - itp_id: 48
-          - itp_id: 105
-          - itp_id: 489
-          - itp_id: 221
-          - itp_id: 273
-          - itp_id: 331
-          - itp_id: 351
-          - itp_id: 372
+          - organization_source_record_id: recf7l9tozKXOmqqZ
+          - organization_source_record_id: recaJnArpFEk5QooE
+          - organization_source_record_id: rec43oyrfhtPDdRHj
+          - organization_source_record_id: reczUcQgqgtMpkpKC
+          - organization_source_record_id: recX9lccSE1jmjsmG
+          - organization_source_record_id: rec3u4aMplqObcoTR
+          - organization_source_record_id: recS1JKEz73Hev8pJ
+          - organization_source_record_id: recH2FdHvrL7nIpHA
       - caption: District 04 - Oakland
         params:
           district: 04 - Oakland
         sections:
-          - itp_id: 4
-          - itp_id: 56
-          - itp_id: 61
-          - itp_id: 282
-          - itp_id: 110
-          - itp_id: 247
-          - itp_id: 301
-          - itp_id: 350
-          - itp_id: 70
-          - itp_id: 336
-          - itp_id: 127
-          - itp_id: 167
-          - itp_id: 194
-          - itp_id: 218
-          - itp_id: 246
-          - itp_id: 257
-          - itp_id: 280
-          - itp_id: 290
-          - itp_id: 294
-          - itp_id: 310
-          - itp_id: 381
-          - itp_id: 314
-          - itp_id: 315
-          - itp_id: 33
-          - itp_id: 368
+          - organization_source_record_id: recOZgevYf7Jimm9L
+          - organization_source_record_id: recvEBkSBc7UxlarC
+          - organization_source_record_id: recjnaKVDEgulsko3
+          - organization_source_record_id: rechaapWbeffO33OX
+          - organization_source_record_id: recot6qBamlOoLcrM
+          - organization_source_record_id: recUbGDXhPdx3494b
+          - organization_source_record_id: recsNvWvLQwGsoxlE
+          - organization_source_record_id: recmB4uxrVLRXYF3L
+          - organization_source_record_id: recRM3c9Zfaft4V2B
+          - organization_source_record_id: recn8zTmGbYZv1qxV
+          - organization_source_record_id: recEEJVeGrHGoTwgj
+          - organization_source_record_id: rec75nESVRqpwNiLv
+          - organization_source_record_id: recoX7qMhlPrgfuz3
+          - organization_source_record_id: recANs4M9yDhvDyob
+          - organization_source_record_id: recNOb7pqBRlQVG5e
+          - organization_source_record_id: recIeP8mUucOsbvbz
+          - organization_source_record_id: rec9RGrya9SjWYp2p
+          - organization_source_record_id: rec2ErIfztLMJ4rgG
+          - organization_source_record_id: recsBfXgev9ICDCY1
+          - organization_source_record_id: recmatCuQAUrNcs8j
+          - organization_source_record_id: recw3mRsmKDTNnVlT
+          - organization_source_record_id: recC5CT95EufmQCXr
+          - organization_source_record_id: reclLbvvKE1V4zsZg
+          - organization_source_record_id: rec7ShjfgRPLU0yjY
+          - organization_source_record_id: recDupUxInMUgxeiz
+          - organization_source_record_id: recUmm4gcNXaqrwpn
+          - organization_source_record_id: recD9x7GHPrN46v6m
+          - organization_source_record_id: recIKnsnTdKQ0vsiv
       - caption: District 05 - San Luis Obispo
         params:
           district: 05 - San Luis Obispo
         sections:
-          - itp_id: 287
-          - itp_id: 298
-          - itp_id: 208
-          - itp_id: 289
-          - itp_id: 293
-          - itp_id: 296
+          - organization_source_record_id: recMM99msxjmc6PPv
+          - organization_source_record_id: rec9zGMJgNnes75K1
+          - organization_source_record_id: reckp33bhAuZlmO1M
+          - organization_source_record_id: receZJ9sEnP9vy3g0
+          - organization_source_record_id: reciakGBN1DP9dK9N
+          - organization_source_record_id: recswCrw6a6htmXJ4
+          - organization_source_record_id: recDFXyxaWQpiY4mw
       - caption: District 06 - Fresno
         params:
           district: 06 - Fresno
         sections:
-          - itp_id: 116
-          - itp_id: 361
-          - itp_id: 126
-          - itp_id: 146
-          - itp_id: 148
-          - itp_id: 474
+          - organization_source_record_id: rec0bKUhHAajTNIlf
+          - organization_source_record_id: rec6gNibVKjDVy4aX
+          - organization_source_record_id: recIh3vq8jwuuJlvL
+          - organization_source_record_id: reczIiFqdL5AXTpm1
+          - organization_source_record_id: rec5MLJKrAgeM8f6H
+          - organization_source_record_id: recWLwvtjXhiVWjKt
       - caption: District 07 - Los Angeles
         params:
           district: 07 - Los Angeles
         sections:
-          - itp_id: 16
-          - itp_id: 45
-          - itp_id: 54
-          - itp_id: 75
-          - itp_id: 87
-          - itp_id: 183
-          - itp_id: 210
-          - itp_id: 228
-          - itp_id: 231
-          - itp_id: 243
-          - itp_id: 260
-          - itp_id: 295
-          - itp_id: 308
-          - itp_id: 337
-          - itp_id: 339
-          - itp_id: 123
-          - itp_id: 170
-          - itp_id: 182
-          - itp_id: 165
-          - itp_id: 380
+          - organization_source_record_id: recxsWR0KRrQTdjmg
+          - organization_source_record_id: rec6z2ivjTxc8Sag3
+          - organization_source_record_id: recD4Vzt0EDC3VY7I
+          - organization_source_record_id: recd0hxcumVMausDU
+          - organization_source_record_id: rec5ome04BbA9uf4y
+          - organization_source_record_id: recj8LXdeSurpSRNU
+          - organization_source_record_id: rec4pgjrmdhCh4z01
+          - organization_source_record_id: recojKzQsBzE1hjVu
+          - organization_source_record_id: recPkUZgzjCjk5GrV
+          - organization_source_record_id: reckQmUdXUzHFmlVf
+          - organization_source_record_id: reczF5Y8R9CUJmfSy
+          - organization_source_record_id: rec8zhnCPETu6qEiH
+          - organization_source_record_id: recImm5SmW2zq9rMT
+          - organization_source_record_id: rec1ErIn9gG1Isk5W
+          - organization_source_record_id: recPJULRJk1Yn824N
+          - organization_source_record_id: recvzE9NXgGMmqcTH
+          - organization_source_record_id: rec2LbE0IBKBAkvQr
+          - organization_source_record_id: recS7GnKTcQVX20HE
+          - organization_source_record_id: rec00qSzZL8KqiXAo
+          - organization_source_record_id: recPnGkwdpnr8jmHB
+          - organization_source_record_id: recPnGkwdpnr8jmHB
+          - organization_source_record_id: recBW9vkDYWIKPIu4
+          - organization_source_record_id: rec7EN71rsZxDFxZd
       - caption: District 08 - San Bernardino
         params:
           district: 08 - San Bernardino
         sections:
-          - itp_id: 214
-          - itp_id: 232
-          - itp_id: 238
-          - itp_id: 269
-          - itp_id: 327
-          - itp_id: 360
+          - organization_source_record_id: recuGkFhN2WXGK67H
+          - organization_source_record_id: reciWrBgYsAIm9eKK
+          - organization_source_record_id: recHbquam1bWEwC3P
+          - organization_source_record_id: recG5aXxDPI645S86
+          - organization_source_record_id: recGcv4NidDjwVSiN
+          - organization_source_record_id: recYgajd92VLqio1p
+          - organization_source_record_id: recJcXMNC5MUm2uDe
       - caption: District 09 - Bishop
         params:
           district: 09 - Bishop
         sections:
-          - itp_id: 99
+          - organization_source_record_id: recRajLNJI206nnAr
       - caption: District 10 - Stockton
         params:
           district: 10 - Stockton
         sections:
-          - itp_id: 107
-          - itp_id: 349
-          - itp_id: 10
-          - itp_id: 284
-          - itp_id: 484
-          - itp_id: 482
+          - organization_source_record_id: recNeVOEwWUtYe8xm
+          - organization_source_record_id: recmQVsPDG6sLtD6j
+          - organization_source_record_id: recpgYVeU3VePMeWx
+          - organization_source_record_id: recZgWVXkpix390of
+          - organization_source_record_id: recSiaaMmBXW7fUZS
+          - organization_source_record_id: reclbzT9trIiGwjBB
       - caption: District 11 - San Diego
         params:
           district: 11 - San Diego
         sections:
-          - itp_id: 226
-          - itp_id: 277
-          - itp_id: 278
+          - organization_source_record_id: rech5YtfjpQvVIBAF
+          - organization_source_record_id: recRBcrX4ZvTyvSnm
+          - organization_source_record_id: recfbLFdDnCxgIfAB
+          - organization_source_record_id: recZALk4vysuoTVjF
       - caption: District 12 - Irvine
         params:
           district: 12 - Irvine
         sections:
-          - itp_id: 14
-          - itp_id: 235
+          - organization_source_record_id: recfma7GNR5lQTTTg
 readme: ./ca_transit_speed_maps/README.md
 title: California Transit Speed Maps
