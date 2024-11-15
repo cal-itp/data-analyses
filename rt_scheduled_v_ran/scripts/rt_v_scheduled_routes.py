@@ -8,8 +8,8 @@ import sys
 from loguru import logger
 
 from segment_speed_utils import gtfs_schedule_wrangling, metrics
-from segment_speed_utils.time_series_utils import ROUTE_DIR_COLS
 from update_vars import RT_SCHED_GCS, GTFS_DATA_DICT
+ROUTE_DIR_COLS = GTFS_DATA_DICT["stop_segments"]["route_dir_cols"]
 
 def average_rt_trip_times(
     df: pd.DataFrame
