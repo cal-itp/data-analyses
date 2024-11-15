@@ -60,7 +60,7 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     
     # Add a column that flips frequency to be every X minutes instead
     # of every hour.
-    df["frequency_in_minutes"] = 60/df.frequency
+    df["headway_in_minutes"] = 60/df.frequency
     
     # Replace column names
     df = _report_utils.replace_column_names(df)
@@ -639,14 +639,14 @@ def frequency_chart(
     df = df.loc[df.dir_0_1 == direction_id].reset_index(drop=True)
 
     # Create a new column
-    df["Frequency in Minutes"] = (
+    df["Headway in Minutes"] = (
         "A trip going this direction comes every "
-        + df.frequency_in_minutes.astype(int).astype(str)
+        + df.headway_in_minutes.astype(int).astype(str)
         + " minutes"
     )
     
     # Clean the dataframe
-    df = clean_data_charts(df, "frequency_in_minutes")
+    df = clean_data_charts(df, "headway_in_minutes")
     
     # Create color scale
     color_scale = alt.Scale(
@@ -663,16 +663,16 @@ def frequency_chart(
                 axis=alt.Axis(format="%b %Y"),
             ),
             x=alt.X(
-                "frequency_in_minutes:Q",
-                title=_report_utils.labeling("frequency_in_minutes"),
+                "headway_in_minutes:Q",
+                title=_report_utils.labeling("headway_in_minutes"),
                 scale=alt.Scale(domain=[0, 240]),
             ),
             color=alt.Color(
-                "frequency_in_minutes:Q",
+                "headway_in_minutes:Q",
                 scale=color_scale,
-                title=_report_utils.labeling("frequency_in_minutes"),
+                title=_report_utils.labeling("headway_in_minutes"),
             ),
-            tooltip=["Date", "Route", "Frequency in Minutes", "Period", "Direction"],
+            tooltip=["Date", "Route", "Headway in Minutes", "Period", "Direction"],
         )
     )
 
