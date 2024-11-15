@@ -3,13 +3,21 @@ from siuba import *
 import numpy as np
 import geopandas as gpd
 import update_vars_index
-from shared_utils import rt_utils
+from shared_utils import rt_utils, catalog_utils
 from calitp_data_analysis.geography_utils import CA_NAD83Albers
 import datetime as dt
 import altair as alt
 from IPython.display import display, Markdown, IFrame
+catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 
-catalog = shared_utils.catalog_utils.get_catalog('gtfs_analytics_data')
+def read_segments_shn(organization_source_record_id: str) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
+    path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
+    speedmap_segs = gpd.read_parquet(path, filters=[['organization_source_record_id', '==', organization_source_record_id]]) #  aggregated
+    speedmap_segs = prepare_segment_gdf(speedmap_segs)
+    shn = gpd.read_parquet(rt_utils.SHN_PATH)
+    this_shn = shn >> filter(_.District.isin([int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]))
+    
+    return (speedmap_segs, this_shn)
 
 def prepare_segment_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
@@ -50,7 +58,7 @@ def map_shn(district_gdf: gpd.GeoDataFrame):
     filename = f'{dist}_SHN'
     title = f"D{dist} State Highway Network"
     
-    export_result = set_state_export(district_gdf, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename = filename,
+    export_result = rt_utils.set_state_export(district_gdf, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename = filename,
                         map_type = 'state_highway_network', map_title = title)
     spa_map_state = export_result['state_dict']
     return spa_map_state
@@ -61,7 +69,7 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
     Always add State Highway Network first.
     '''
     time_of_day_lower = time_of_day.lower().replace(' ', '_')
-    gdf = gdf >> filter(_.time_of_day == time_of_day)
+    speedmap_segs = speedmap_segs >> filter(_.time_of_day == time_of_day)
     color_col = {'new_speedmap': 'p20_mph', 'new_speed_variation': 'fast_slow_ratio'}[map_type]
     shn_state = map_shn(district_gdf)
     display_date = analysis_date.strftime('%B %d %Y (%A)')
@@ -76,7 +84,7 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
         legend_url = rt_utils.VARIANCE_LEGEND_URL
         
     export_result = rt_utils.set_state_export(
-        period_test, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename=filename,
+        speedmap_segs, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename=filename,
         map_type=map_type,
         color_col=color_col, cmap=cmap, legend_url=legend_url,
         map_title=title,
