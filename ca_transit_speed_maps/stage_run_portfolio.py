@@ -74,5 +74,5 @@ if __name__ == "__main__":
 
     speedmaps_index_joined = pd.read_parquet(PROGRESS_PATH)
     make_rt_site_yml(speedmaps_index_joined)
-    #stage_portfolio()
-    #deploy_portfolio()
+    stage_portfolio()
+    deploy_portfolio()

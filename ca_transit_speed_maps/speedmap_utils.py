@@ -11,6 +11,9 @@ from IPython.display import display, Markdown, IFrame
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 
 def read_segments_shn(organization_source_record_id: str) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
+    '''
+    Get filtered detailed speedmap segments for an organization, and relevant district SHN.
+    '''
     path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
     speedmap_segs = gpd.read_parquet(path, filters=[['organization_source_record_id', '==', organization_source_record_id]]) #  aggregated
     speedmap_segs = prepare_segment_gdf(speedmap_segs)
@@ -45,7 +48,6 @@ def render_spa_link(spa_map_url: str, text='Full Map') -> None:
 def display_spa_map(spa_map_url: str, width: int=1000, height: int=650) -> None:
     '''
     Display map from external simple web app in the notebook/JupyterBook context via an IFrame.
-    Will show most recent map set using self.map_gz_export
     Width/height defaults are current best option for JupyterBook, don't change for portfolio use
     width, height: int (pixels)
     '''
@@ -94,6 +96,10 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
     return spa_link
 
 def chart_speeds_by_time_period(speedmap_segs: gpd.GeoDataFrame) -> None:
+    '''
+    Use Altair to chart p20,p50,p80 speeds by time of day.
+    Match speedmap colorscale.
+    '''
     cmap = rt_utils.ACCESS_ZERO_THIRTY_COLORSCALE
     domain = cmap.index
     range_ = [cmap.rgb_hex_str(i) for i in cmap.index]
