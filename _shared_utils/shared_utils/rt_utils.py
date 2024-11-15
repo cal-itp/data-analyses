@@ -828,7 +828,12 @@ def get_operators(analysis_date, operator_list, verbose=False):
 
 
 def spa_map_export_link(
-    gdf: gpd.GeoDataFrame, path: str, state: dict, site: str = SPA_MAP_SITE, cache_seconds: int = 3600
+    gdf: gpd.GeoDataFrame,
+    path: str,
+    state: dict,
+    site: str = SPA_MAP_SITE,
+    cache_seconds: int = 3600,
+    verbose: bool = False,
 ):
     """
     Called via set_state_export. Handles stream writing of gzipped geojson to GCS bucket,
@@ -837,7 +842,8 @@ def spa_map_export_link(
     assert cache_seconds in range(3601), "cache must be 0-3600 seconds"
     geojson_str = gdf.to_json()
     geojson_bytes = geojson_str.encode("utf-8")
-    print(f"writing to {path}")
+    if verbose:
+        print(f"writing to {path}")
     with fs.open(path, "wb") as writer:  # write out to public-facing GCS?
         with gzip.GzipFile(fileobj=writer, mode="w") as gz:
             gz.write(geojson_bytes)
@@ -853,7 +859,14 @@ def set_state_export(
     bucket: str = SPA_MAP_BUCKET,
     subfolder: str = "testing/",
     filename: str = "test2",
-    map_type: Literal["speedmap", "speed_variation", "hqta_areas", "hqta_stops", "state_highway_network"] = None,
+    map_type: Literal[
+        "speedmap",
+        "speed_variation",
+        "new_speedmap",
+        "new_speed_variation" "hqta_areas",
+        "hqta_stops",
+        "state_highway_network",
+    ] = None,
     map_title: str = "Map",
     cmap: branca.colormap.ColorMap = None,
     color_col: str = None,
@@ -890,7 +903,7 @@ def set_state_export(
     ]
     if map_type:
         this_layer[0]["type"] = map_type
-    if map_type == "speedmap":
+    if map_type in ["new_speedmap", "speedmap"]:
         this_layer[0]["properties"]["tooltip_speed_key"] = "p20_mph"
     spa_map_state["layers"] += this_layer
     if manual_centroid:

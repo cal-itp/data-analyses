@@ -18,7 +18,7 @@ import os
 
 import pyaml
 import yaml
-from build_speedmaps_index import ANALYSIS_DATE
+from update_vars_index import ANALYSIS_DATE, PROGRESS_PATH
 
 def make_rt_site_yml(speedmaps_index_joined,
                        rt_site_path = '../portfolio/sites/rt.yml'):
@@ -42,7 +42,7 @@ def make_rt_site_yml(speedmaps_index_joined,
         chapter_dict['caption'] = f'District {district}'
         chapter_dict['params'] = {'district': district}
         chapter_dict['sections'] = \
-            [{'itp_id': itp_id} for itp_id in filtered.organization_itp_id.to_list()]
+            [{'organization_source_record_id': organization_source_record_id} for organization_source_record_id in filtered.organization_source_record_id.to_list()]
         chapters_list += [chapter_dict]   
         
     parts_list = [{'chapters': chapters_list}]
@@ -72,8 +72,7 @@ def deploy_portfolio():
 
 if __name__ == "__main__":
 
-    speedmaps_index_joined = rt_utils.check_intermediate_data(
-        analysis_date = ANALYSIS_DATE)
+    speedmaps_index_joined = pd.read_parquet(PROGRESS_PATH)
     make_rt_site_yml(speedmaps_index_joined)
     stage_portfolio()
     deploy_portfolio()
