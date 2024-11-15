@@ -21,25 +21,30 @@ Select source code can be found at:
 [https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py)
 
 
-## Definitions
+## Time Period Definitions
 
-* AM Peak: 0600-0900
-* Midday: 1000-1400
-* PM Peak: 1500-1900
+* AM Peak: 07:00-10:00
+* Midday: 10:00-15:00
+* PM Peak: 15:00-20:00
+* Evening: 20:00-24:00
+* Owl: 00:00-04:00
+* Early AM: 04:00-07:00
 
 ## Methodology
 
-Segment speed is estimated using the time and distance between vehicle positions reports, with distance being measured linearly along the corresponding transit route. These maps show speeds along segments, which are calculated by interpolating the two nearest position reports for each trip in order to estimate speed along each segment, then taking the 20th percentile of speeds for that segment in each period (morning peak, afternoon peak, and midday). This site shows data for a specific day, usually a Wednesday (and not a holiday or other date we believe could be atypical).
+Segment speed is estimated using the time and distance between vehicle positions reports, with distance being measured linearly along the corresponding transit route. These maps show speeds along segments, which are calculated by interpolating the two nearest position reports for each trip in order to estimate speed along each segment, then taking the 20th percentile of speeds for that segment in each time period. This site shows data for a specific day, usually a Wednesday (and not a holiday or other date we believe could be atypical).
 
 Generally, segments are constructed from one stop to the next, however, if the distance between stops is large we add interpolated segments every kilometer to provide additional resolution for rural and express services.
 
 We use the ratio between 80th and 20th percentile speeds in a segment to measure speed variation.
 
-## Frequently Asked Questions
+## What's New?
 
-Are colorblind safe speed maps available?
+We're aligining with segment speeds published via the [open data portal!](https://gis.data.ca.gov/datasets/4937eeb59fdb4e56ae75e64688c7f2c0_0/explore)
 
-_Yes, by following the "Open Colorblind Safe Map in New Tab" links displayed before each speed map. Variation maps already use a colorblind safe scheme._
+While the datasets don't fully match just yet, this site is now based on the same underlying data. This should help us update it more often, enhance accuracy for complex route shapes, and include as many transit operators as possible.
+
+The site also includes a more informative speed and variation by time of day chart at the bottom of the page.
     
 ## Data Sources
 Archived GTFS-Realtime Vehicle Positions data, plus corresponding GTFS Schedule data.
@@ -48,7 +53,7 @@ Each map includes a link to download its geospatial data in a gzip-compressed Ge
 
 ## Ongoing Work
 
-The Cal-ITP team is working to share broader speed and delay data using the California Open Data Portal.
+The Cal-ITP team is working to transition the site to a rolling average of recent dates, instead of a single day.
 
 Questions or feedback? Please email hello@calitp.org
 
