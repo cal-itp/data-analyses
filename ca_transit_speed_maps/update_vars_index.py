@@ -40,6 +40,6 @@ def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
 if __name__ == "__main__":
     
     print(f'analysis date from shared_utils/rt_dates: {ANALYSIS_DATE}')
-    speedmaps_index = build_speedmaps_index(ANALYSIS_DATE, how = 'new')
+    speedmaps_index = build_speedmaps_index(ANALYSIS_DATE)
     # speedmaps_index = rt_utils.check_intermediate_data(speedmaps_index)
     speedmaps_index.to_parquet(PROGRESS_PATH)
