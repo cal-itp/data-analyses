@@ -73,6 +73,8 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
     '''
     time_of_day_lower = time_of_day.lower().replace(' ', '_')
     speedmap_segs = speedmap_segs >> filter(_.time_of_day == time_of_day)
+    if speedmap_segs.empty:
+        return None
     color_col = {'new_speedmap': 'p20_mph', 'new_speed_variation': 'fast_slow_ratio'}[map_type]
     shn_state = map_shn(district_gdf)
     display_date = analysis_date.strftime('%B %d %Y (%A)')
