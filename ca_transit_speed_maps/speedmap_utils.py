@@ -14,9 +14,8 @@ def read_segments_shn(organization_source_record_id: str) -> (gpd.GeoDataFrame, 
     '''
     Get filtered detailed speedmap segments for an organization, and relevant district SHN.
     '''
-    # path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
-    path = f'{catalog.stop_segments.dir}{catalog.stop_segments.route_dir_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
-    
+    path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
+    # path = f'{catalog.stop_segments.dir}{catalog.stop_segments.route_dir_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
     speedmap_segs = gpd.read_parquet(path, filters=[['organization_source_record_id', '==', organization_source_record_id]]) #  aggregated
     assert (speedmap_segs >> select(-_.route_short_name)).isna().any().any() == False, 'no cols besides route_short_name should be nan'x
     speedmap_segs = prepare_segment_gdf(speedmap_segs)
