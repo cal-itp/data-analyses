@@ -269,6 +269,7 @@ if __name__ == "__main__":
     
     TIME_OF_DAY_FILE = dict_inputs["shape_stop_single_segment"] + "_test"
     ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
+    ROUTE_SEG_DETAIL_FILE = dict_inputs["route_dir_single_segment_detail"]
 
     for analysis_date in analysis_date_list:
 
@@ -277,6 +278,14 @@ if __name__ == "__main__":
             segment_type, 
             group_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
             export_file = ROUTE_SEG_FILE,
+            weighted_averages = True
+        )
+
+        segment_averages(
+            [analysis_date], 
+            segment_type, 
+            group_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS,
+            export_file = ROUTE_SEG_DETAIL_FILE,
             weighted_averages = True
         )
         
