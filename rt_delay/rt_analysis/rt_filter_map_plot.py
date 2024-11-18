@@ -720,7 +720,7 @@ class RtFilterMapper:
             selector = select(_.geometry, _.total_speed_delay, _.total_schedule_delay)
         else:
             selector = select(_.geometry, _.total_speed_delay)
-        gdf = (self.corridor >> selector).iloc[:1,:]
+        gdf = (self.corridor >> selector).dissolve()
         m = pd.concat([mappable_stops, gdf]).explore(tiles = "CartoDB positron")
         return m
     
@@ -814,8 +814,9 @@ class RtFilterMapper:
                               >> mutate(new_avg_trips_hr = ((_.n_trips + _.trips_added) / _.span_hours) / 2)
                               # create avg per direction by div 2
                           )
-        both_metrics_df['length_miles'] = (self.corridor.distance_meters / METERS_PER_MILE).iloc[0]
-        both_metrics_df['distance_meters'] = self.corridor.distance_meters
+        if 'distance_meters' in self.corridor.columns:
+            both_metrics_df['length_miles'] = (self.corridor.distance_meters / METERS_PER_MILE).iloc[0]
+            both_metrics_df['distance_meters'] = self.corridor.distance_meters
         both_metrics_df['target_mph'] = self.transit_priority_target_mph
         # both_metrics_df.length_miles = both_metrics_df.length_miles.fillna(value=gdf.length_miles.iloc[0])
         gdf = gpd.GeoDataFrame(both_metrics_df, geometry=self.corridor.geometry, crs=self.corridor.crs)
