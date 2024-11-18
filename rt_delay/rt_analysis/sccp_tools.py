@@ -24,9 +24,9 @@ def sccp_average_metrics(itp_id: int, date_range: np.arange, corridor: gpd.GeoDa
             rt_day.add_corridor(corridor)
             if filter_dict:
                 rt_day.set_filter(**filter_dict)
-            metrics = rt_day.corridor_metrics()
-            schedule_metrics += [metrics['schedule_metric_minutes']]
-            speed_metrics += [metrics['speed_metric_minutes']]
+            metrics = rt_day.corridor_metrics(sccp=True)
+            schedule_metrics += [metrics['schedule_delay_minutes'].sum()]
+            speed_metrics += [metrics['speed_delay_minutes'].sum()]
             print(f'complete for date: {date}')
         except Exception as e:
             print(f'failed for date: {date}')
