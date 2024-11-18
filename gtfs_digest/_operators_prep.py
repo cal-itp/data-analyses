@@ -7,27 +7,6 @@ GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 with open("readable.yml") as f:
     readable_dict = yaml.safe_load(f)
     
-def operator_profiles()->pd.DataFrame:
-    # Load operator profiles
-    op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
-    op_cols = ["organization_name", "name", "service_date", "schedule_gtfs_dataset_key"]
-    op_profiles_df = pd.read_parquet(op_profiles_url)[op_cols]
-
-    # Keep the name with the most recent service date
-    op_profiles2 = (op_profiles_df.sort_values(
-        by=["name", "service_date"],
-        ascending=[True, False])
-                       )
-    # Drop duplicated names
-    op_profiles3 = op_profiles2.drop_duplicates(subset=["name"])
-
-    # Drop duplicated organization names 
-    op_profiles4  = (op_profiles3
-                         .drop_duplicates(subset = ['organization_name'])
-                         .reset_index(drop = True))
-    return op_profiles4
-
-
 def operators_schd_vp_rt()->pd.DataFrame:
     """
     Operators who have schedule only OR have 
@@ -66,23 +45,8 @@ def operators_schd_vp_rt()->pd.DataFrame:
     .reset_index(drop=True)
     )
     
-    schd_vp_df3 = (
-    schd_vp_df2.sort_values(
-        by=["caltrans_district", "name", "service_date"], ascending=[True, False, False]
-    )
-    .drop_duplicates(subset=["caltrans_district", "name"])
-    .reset_index(drop=True)
-    )
     
-    schd_vp_df3 = schd_vp_df3[["caltrans_district","organization_name"]]
-    
-    op_profile = operator_profiles()
-    
-    # Merge 
-    final = pd.merge(
-    schd_vp_df3, op_profile, on=["organization_name"],
-        how="left")
-    
+    final = schd_vp_df2[["caltrans_district","organization_name"]]
     final = (final
              .sort_values(by = ["caltrans_district","organization_name"])
              .reset_index(drop = True)
