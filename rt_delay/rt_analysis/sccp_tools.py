@@ -19,7 +19,6 @@ def sccp_average_metrics(itp_id: int, date_range: np.arange, corridor: gpd.GeoDa
     schedule_metrics = []
     speed_metrics = []
     for date in date_range:
-        date = date.astype(dt.date)
         try:
             rt_day = rt_filter_map_plot.from_gcs(itp_id, date)
             rt_day.add_corridor(corridor)
