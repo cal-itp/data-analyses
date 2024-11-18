@@ -15,14 +15,14 @@ This folder includes the data exploration, cleaning and script for the IIJA prog
 
 4. In the `Check Data` section, run the cells to ensure the dataframe has no empty first rows
 
-5. In the `Run Script` section, run the `_script_utils.get_clean_data()` function to get the final cleaned data. 
+5. In the `Run Script` section, run the `_script_utils.run_script(*,*,'agg')` function to get the final cleaned data. 
 
-    Alternatively, If you want to get the data aggregated to the program level, use this kwarg in the fucntion 
-    <blockquote>_script_utils.get_clean_data(df, full_or_agg = 'agg')</blockquote>
+    The format preferred by stakeholders is for the data to be aggregated to the program level, use this kwarg in the fucntion 
+    <blockquote>_script_utils.run_script(*,*,df_agg_level = 'agg')</blockquote>
     Or, If you want the full dataframe where each row is a project phase, use this kwarg in the fucntion
-    <blockquote>_script_utils.get_clean_data(df, full_or_agg = 'full')</blockquote>
+    <blockquote>_script_utils.run_script(*,*,df_agg_level = 'full')</blockquote>
 
-6. In the `Export Data` section, Use the current date `(MM/DD/YYYY)` to rename the file in function. Then, run the `_script_utils.export_to_gcs()` function to export the data to GCS.  
+6. In the `Export Data` section, Use the current date `(MMDDYYYY)`, (or `(MMDDYYYY_agg)` if the df_agg_level was set to `agg`), to set the filename suffix. Then, run the `_script_utils.export_to_gcs()` function to export the data to GCS.  
     The data can be found in the same file path stated in the previous steps, with the file name `FMIS_Projects_Universe_IIJA_Reporting_*.csv`
 
 **Note:** In the aggregated data, a project can have more than one row, if the project is funded with more than one IIJA program. 
