@@ -135,7 +135,8 @@ def create_portfolio_yaml_chapters_with_sections(
                 "caption": {chapter_info["name"]: f"{one_chapter_value}"},
                 "params": {chapter_info["name"]: one_chapter_value},
                 "sections": [
-                    {section_info["name"]: one_section_value} for one_section_value in df[section_col].unique().tolist()
+                    {section_info["name"]: one_section_value}
+                    for one_section_value in df[df[chapter_col] == one_chapter_value][section_col].unique().tolist()
                 ],
             }
         }
