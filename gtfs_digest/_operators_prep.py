@@ -1,11 +1,7 @@
 from shared_utils import catalog_utils
 import pandas as pd
-import yaml
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
-# Readable Dictionary
-with open("readable.yml") as f:
-    readable_dict = yaml.safe_load(f)
     
 def operators_schd_vp_rt()->pd.DataFrame:
     """
