@@ -47,8 +47,4 @@ def operators_schd_vp_rt()->pd.DataFrame:
     
     
     final = schd_vp_df2[["caltrans_district","organization_name"]]
-    final = (final
-             .sort_values(by = ["caltrans_district","organization_name"])
-             .reset_index(drop = True)
-            )
     return final
