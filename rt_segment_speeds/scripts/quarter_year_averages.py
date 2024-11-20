@@ -58,57 +58,6 @@ def segment_speeds_one_day(
     return df
 
 
-def segment_geom_time_series(
-    segment_type: str,
-    analysis_date_list: list
-):
-    """
-    One challenge with pulling segment geometry 
-    over a longer period is that we can get duplicates.
-    Segment geom uses schedule_gtfs_dataset_key,
-    which over a long enough period, can also change.
-    
-    We should come up with a way to get rid of dupes,
-    while also coming up with a way to merge this back onto
-    segment speed averages.
-    """
-    speed_file = GTFS_DATA_DICT[segment_type]["route_dir_single_segment"]
-    segment_file = GTFS_DATA_DICT[segment_type]["segments_file"]
-    
-    operator_df = time_series_utils.concatenate_datasets_across_dates(
-        SEGMENT_GCS,
-        speed_file,
-        analysis_date_list,
-        data_type = "df",
-        columns = ["schedule_gtfs_dataset_key", "name", "organization_name"],
-        get_pandas = True
-    ).drop_duplicates()    
-    
-    segment_gdf = time_series_utils.concatenate_datasets_across_dates(
-        SEGMENT_GCS,
-        segment_file,
-        analysis_date_list,
-        data_type = "gdf",
-        get_pandas = False
-    )      
-    
-    gdf = delayed(pd.merge)(
-        segment_gdf,
-        operator_df,
-        on = ["schedule_gtfs_dataset_key", "service_date"],
-        how = "inner"
-    ).sort_values(
-        by=["name", "service_date"], ascending=[True, False]
-    ).drop(
-        columns = ["schedule_gtfs_dataset_key", "service_date"]
-    ).drop_duplicates().reset_index(drop=True) 
-    # this is dropping dupes with gtfs_dataset_name and organization_name
-    
-    gdf = compute(gdf)[0]
-    
-    return gdf
-    
-
 def get_aggregation(df: pd.DataFrame, group_cols: list):
     """
     Aggregating across days, take the (mean)p20/p50/p80 speed
