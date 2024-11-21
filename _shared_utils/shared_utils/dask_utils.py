@@ -106,3 +106,44 @@ def concatenate_list_of_files(
     full_df = pd.concat(results, axis=0).reset_index(drop=True)
 
     return full_df
+
+
+def func(
+    path: str,
+    one_date: str,
+    data_type: Literal["df", "gdf"] = "df",
+    **kwargs,
+):
+    """
+    Set up function with little modifications based on
+    the dask docs. Modifications are that we want to read in
+    pandas or geopandas df for a single date.
+
+    https://docs.dask.org/en/latest/generated/dask.dataframe.from_map.html
+    https://blog.dask.org/2023/04/12/from-map
+    """
+    if data_type == "gdf":
+        df = gpd.read_parquet(
+            f"{path}_{one_date}.parquet",
+            **kwargs,
+        ).drop_duplicates()
+
+    else:
+        df = pd.read_parquet(
+            f"{path}_{one_date}.parquet",
+            **kwargs,
+        ).drop_duplicates()
+
+    return df
+
+
+def get_ddf(paths, date_list, data_type, **kwargs):
+    """
+    Set up function with little modifications based on
+    the dask docs. Modifications are that we want to read in
+    a list of dates.
+
+    https://docs.dask.org/en/latest/generated/dask.dataframe.from_map.html
+    https://blog.dask.org/2023/04/12/from-map
+    """
+    return dd.from_map(func, paths, date_list, data_type=data_type, **kwargs).drop_duplicates()
