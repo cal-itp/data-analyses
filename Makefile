@@ -18,7 +18,7 @@ git_check_no_sections:
 	git add portfolio/$(site)/district_*/*.ipynb # this one less common, but it's district pages only
 
 remove_portfolio_site:
-	#git rm portfolio/$(site)/ -rf
+	git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
 
 build_competitive_corridors:
@@ -28,8 +28,8 @@ build_competitive_corridors:
 	make build_portfolio_site
     #--config=./portfolio/test-analyses.yml
 
-remove_quarterly_performance_metrics:
-	$(eval export site = quarterly_performance_metrics) 
+remove_ahsc:
+	$(eval export site = ahsc) 
 	make remove_portfolio_site
 
     
