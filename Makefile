@@ -18,9 +18,8 @@ git_check_no_sections:
 	git add portfolio/$(site)/district_*/*.ipynb # this one less common, but it's district pages only
 
 remove_portfolio_site:
-	git rm portfolio/$(site)/ -rf
-	#python portfolio/portfolio.py clean $(site) # might need to run this when you've deployed the portfolio before and you have extra folders like the _html/
-	git rm portfolio/portfolio.py clean $(site)
+	#git rm portfolio/$(site)/ -rf
+	python portfolio/portfolio.py clean $(site)
 
 build_competitive_corridors:
 	$(eval export site = competitive_corridors)
@@ -29,19 +28,8 @@ build_competitive_corridors:
 	make build_portfolio_site
     #--config=./portfolio/test-analyses.yml
 
-build_dla_reports:
-	$(eval export site = dla)
-	cd dla/ && pip install -r requirements.txt && cd ..
-	make build_portfolio_site
-	git add portfolio/dla/district_*/ 
-    
-build_quarterly_performance_metrics:
-	$(eval export site = quarterly_performance_metrics)
-	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	make build_portfolio_site
-
-remove_dla:
-	$(eval export site = dla) 
+remove_quarterly_performance_metrics:
+	$(eval export site = quarterly_performance_metrics) 
 	make remove_portfolio_site
 
     
@@ -57,13 +45,6 @@ build_gtfs_digest:
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && make assemble_data && cd ..   
 	make build_portfolio_site
 	make git_check_sections
-    
-
-build_gtfs_digest_testing:
-	$(eval export site = gtfs_digest_testing)
-	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	#cd gtfs_digest/ && make assemble_data && cd ..   
-	make build_portfolio_site
 
 build_district_digest:
 	$(eval export site = district_digest)
