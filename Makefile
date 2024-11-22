@@ -18,8 +18,10 @@ git_check_no_sections:
 	git add portfolio/$(site)/district_*/*.ipynb # this one less common, but it's district pages only
 
 remove_portfolio_site:
-	git rm portfolio/$(site)/ -rf
-	python portfolio/portfolio.py clean $(site)
+	#python portfolio/portfolio.py clean $(site)
+	git rm portfolio/sites/$(site).yml
+	#git rm portfolio/$(site)/ -rf
+
 
 build_competitive_corridors:
 	$(eval export site = competitive_corridors)
