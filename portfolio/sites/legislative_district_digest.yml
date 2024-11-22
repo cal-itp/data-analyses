@@ -1,87 +1,8 @@
 directory: ./gtfs_digest/
 notebook: ./gtfs_digest/legislative_district_report.ipynb
 parts:
+- caption: Introduction
 - chapters:
-  - params:
-      district: SD 01
-  - params:
-      district: SD 02
-  - params:
-      district: SD 03
-  - params:
-      district: SD 04
-  - params:
-      district: SD 05
-  - params:
-      district: SD 06
-  - params:
-      district: SD 07
-  - params:
-      district: SD 08
-  - params:
-      district: SD 09
-  - params:
-      district: SD 10
-  - params:
-      district: SD 11
-  - params:
-      district: SD 12
-  - params:
-      district: SD 13
-  - params:
-      district: SD 14
-  - params:
-      district: SD 15
-  - params:
-      district: SD 16
-  - params:
-      district: SD 17
-  - params:
-      district: SD 18
-  - params:
-      district: SD 19
-  - params:
-      district: SD 20
-  - params:
-      district: SD 21
-  - params:
-      district: SD 22
-  - params:
-      district: SD 23
-  - params:
-      district: SD 24
-  - params:
-      district: SD 25
-  - params:
-      district: SD 26
-  - params:
-      district: SD 27
-  - params:
-      district: SD 28
-  - params:
-      district: SD 29
-  - params:
-      district: SD 30
-  - params:
-      district: SD 31
-  - params:
-      district: SD 32
-  - params:
-      district: SD 33
-  - params:
-      district: SD 34
-  - params:
-      district: SD 35
-  - params:
-      district: SD 36
-  - params:
-      district: SD 37
-  - params:
-      district: SD 38
-  - params:
-      district: SD 39
-  - params:
-      district: SD 40
   - params:
       district: AD 01
   - params:
@@ -242,5 +163,85 @@ parts:
       district: AD 79
   - params:
       district: AD 80
+  - params:
+      district: SD 01
+  - params:
+      district: SD 02
+  - params:
+      district: SD 03
+  - params:
+      district: SD 04
+  - params:
+      district: SD 05
+  - params:
+      district: SD 06
+  - params:
+      district: SD 07
+  - params:
+      district: SD 08
+  - params:
+      district: SD 09
+  - params:
+      district: SD 10
+  - params:
+      district: SD 11
+  - params:
+      district: SD 12
+  - params:
+      district: SD 13
+  - params:
+      district: SD 14
+  - params:
+      district: SD 15
+  - params:
+      district: SD 16
+  - params:
+      district: SD 17
+  - params:
+      district: SD 18
+  - params:
+      district: SD 19
+  - params:
+      district: SD 20
+  - params:
+      district: SD 21
+  - params:
+      district: SD 22
+  - params:
+      district: SD 23
+  - params:
+      district: SD 24
+  - params:
+      district: SD 25
+  - params:
+      district: SD 26
+  - params:
+      district: SD 27
+  - params:
+      district: SD 28
+  - params:
+      district: SD 29
+  - params:
+      district: SD 30
+  - params:
+      district: SD 31
+  - params:
+      district: SD 32
+  - params:
+      district: SD 33
+  - params:
+      district: SD 34
+  - params:
+      district: SD 35
+  - params:
+      district: SD 36
+  - params:
+      district: SD 37
+  - params:
+      district: SD 38
+  - params:
+      district: SD 39
+  - params:
+      district: SD 40
 readme: ./gtfs_digest/README.md
 title: Legislative District GTFS Digest

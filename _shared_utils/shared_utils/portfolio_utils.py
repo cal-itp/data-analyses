@@ -58,7 +58,7 @@ def create_portfolio_yaml_chapters_no_sections(portfolio_site_yaml: Path, chapte
     with open(portfolio_site_yaml) as f:
         site_yaml_dict = yaml.load(f, yaml.Loader)
 
-    chapters_list = [{**{"params": {chapter_name: one_chapter_value}}} for one_chapter_value in chapter_values]
+    chapters_list = [{**{"params": {chapter_name: str(one_chapter_value)}}} for one_chapter_value in chapter_values]
 
     # Make this into a list item
     parts_list = [{"caption": "Introduction"}, {"chapters": chapters_list}]
@@ -129,13 +129,16 @@ def create_portfolio_yaml_chapters_with_sections(
 
     # Loop through each chapter (district), grab the sections (operators)
     section_col = section_info["column"]
+    caption_prefix = chapter_info["caption_prefix"]
+    caption_suffix = chapter_info["caption_suffix"]
+
     chapters_list = [
         {
             **{
-                "caption": {chapter_info["name"]: f"{one_chapter_value}"},
-                "params": {chapter_info["name"]: one_chapter_value},
+                "caption": {chapter_info["name"]: f"{caption_prefix}{one_chapter_value}{caption_suffix}"},
+                "params": {chapter_info["name"]: str(one_chapter_value)},
                 "sections": [
-                    {section_info["name"]: one_section_value}
+                    {section_info["name"]: str(one_section_value)}
                     for one_section_value in df[df[chapter_col] == one_chapter_value][section_col].unique().tolist()
                 ],
             }
