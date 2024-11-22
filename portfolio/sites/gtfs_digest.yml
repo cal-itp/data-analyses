@@ -3,7 +3,7 @@ notebook: ./gtfs_digest/03_report.ipynb
 parts:
 - chapters:
   - caption:
-      district: 01 - Eureka
+      district: District 01 - Eureka
     params:
       district: 01 - Eureka
     sections:
@@ -17,7 +17,7 @@ parts:
     - organization_name: POINT
     - organization_name: Redwood Coast Transit Authority
   - caption:
-      district: 02 - Redding
+      district: District 02 - Redding
     params:
       district: 02 - Redding
     sections:
@@ -31,7 +31,7 @@ parts:
     - organization_name: Tehama County
     - organization_name: Trinity County
   - caption:
-      district: 03 - Marysville
+      district: District 03 - Marysville
     params:
       district: 03 - Marysville
     sections:
@@ -54,7 +54,7 @@ parts:
     - organization_name: Yolo County Transportation District
     - organization_name: Yuba-Sutter Transit Authority
   - caption:
-      district: 04 - Oakland
+      district: District 04 - Oakland
     params:
       district: 04 - Oakland
     sections:
@@ -93,7 +93,7 @@ parts:
     - organization_name: University of California, Berkeley
     - organization_name: Western Contra Costa Transit Authority
   - caption:
-      district: 05 - San Luis Obispo
+      district: District 05 - San Luis Obispo
     params:
       district: 05 - San Luis Obispo
     sections:
@@ -110,7 +110,7 @@ parts:
     - organization_name: Santa Cruz Metropolitan Transit District
     - organization_name: University of California, Santa Cruz
   - caption:
-      district: 06 - Fresno
+      district: District 06 - Fresno
     params:
       district: 06 - Fresno
     sections:
@@ -127,7 +127,7 @@ parts:
     - organization_name: Madera County
     - organization_name: Tulare County Regional Transit Agency
   - caption:
-      district: 07 - Los Angeles
+      district: District 07 - Los Angeles
     params:
       district: 07 - Los Angeles
     sections:
@@ -186,7 +186,7 @@ parts:
     - organization_name: University of California, Los Angeles
     - organization_name: Ventura County Transportation Commission
   - caption:
-      district: 08 - San Bernardino
+      district: District 08 - San Bernardino
     params:
       district: 08 - San Bernardino
     sections:
@@ -202,13 +202,13 @@ parts:
     - organization_name: Riverside Transit Agency
     - organization_name: Victor Valley Transit Authority
   - caption:
-      district: 09 - Bishop
+      district: District 09 - Bishop
     params:
       district: 09 - Bishop
     sections:
     - organization_name: Eastern Sierra Transit Authority
   - caption:
-      district: 10 - Stockton
+      district: District 10 - Stockton
     params:
       district: 10 - Stockton
     sections:
@@ -229,7 +229,7 @@ parts:
     - organization_name: Yosemite Area Regional Transportation System
     - organization_name: Yosemite National Park
   - caption:
-      district: 11 - San Diego
+      district: District 11 - San Diego
     params:
       district: 11 - San Diego
     sections:
@@ -240,7 +240,7 @@ parts:
     - organization_name: San Diego Metropolitan Transit System
     - organization_name: Yuma County Intergovernmental Public Transportation Authority
   - caption:
-      district: 12 - Irvine
+      district: District 12 - Irvine
     params:
       district: 12 - Irvine
     sections:
