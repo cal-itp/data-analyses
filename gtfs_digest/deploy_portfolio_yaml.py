@@ -10,24 +10,20 @@ from _operators_prep import operators_schd_vp_rt
 
 SITE_YML = "../portfolio/sites/gtfs_digest.yml"
 
-df = operators_schd_vp_rt()
+if __name__ == "__main__":
+    df = operators_schd_vp_rt()
 
-portfolio_utils.create_portfolio_yaml_chapters_with_sections(
-    SITE_YML,
-    df,
-    chapter_info = {
-        "column": "caltrans_district",
-        "name": "district",
-        "caption_prefix": "District ",
-        "caption_suffix": "",
-    },
-    section_info = {
-        "column": "organization_name",
-        "name": "organization_name",
-    },
-)
-
-with open(SITE_YML) as f:
-    site_yaml = yaml.safe_load(f)
-      
-site_yaml
+    portfolio_utils.create_portfolio_yaml_chapters_with_sections(
+        SITE_YML,
+        df,
+        chapter_info = {
+            "column": "caltrans_district",
+            "name": "district",
+            "caption_prefix": "District ",
+            "caption_suffix": "",
+        },
+        section_info = {
+            "column": "organization_name",
+            "name": "organization_name",
+        },
+    )
