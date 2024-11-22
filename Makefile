@@ -7,7 +7,7 @@ build_portfolio_site:
 	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site) --deploy 
-	git add portfolio/$(site)/*.yml portfolio/$(site)/*.md  
+	python portfolio/portfolio.py clean $(site)
 	git add portfolio/sites/$(site).yml     
 	#make production_portfolio
 
@@ -16,7 +16,12 @@ git_check_sections:
 
 git_check_no_sections:
 	git add portfolio/$(site)/district_*/*.ipynb # this one less common, but it's district pages only
-    
+
+remove_portfolio_site:
+	git rm portfolio/$(site)/ -rf
+	#python portfolio/portfolio.py clean $(site) # might need to run this when you've deployed the portfolio before and you have extra folders like the _html/
+	git rm portfolio/portfolio.py clean $(site)
+
 build_competitive_corridors:
 	$(eval export site = competitive_corridors)
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
@@ -34,6 +39,11 @@ build_quarterly_performance_metrics:
 	$(eval export site = quarterly_performance_metrics)
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	make build_portfolio_site
+
+remove_dla:
+	$(eval export site = dla) 
+	make remove_portfolio_site
+
     
 build_ntd_report:
 	$(eval export site = ntd_monthly_ridership)
