@@ -41,14 +41,11 @@ def overwrite_yaml(
             f"{RT_SCHED_GCS}{OPERATOR_FILE}.parquet",
             columns = ["caltrans_district"]
         ).dropna(subset="caltrans_district").drop_duplicates()
-        
-        chapter_values_orig = sorted(list(df.caltrans_district))
-        chapter_values = [f"District {i}" for i in chapter_values_orig]
-        
+                
         portfolio_utils.create_portfolio_yaml_chapters_no_sections(
             DISTRICT_SITE, 
             chapter_name = "district",
-            chapter_values = chapter_values
+            chapter_values = sorted(list(df.caltrans_district))
         )  
          
     elif name == "legislative_district":
