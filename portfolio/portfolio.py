@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import humanize
 import papermill as pm
@@ -61,7 +61,7 @@ def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
 
 
 class Chapter(BaseModel):
-    caption: Optional[str]
+    caption: Optional[Any]
     notebook: Optional[Path] = None
     params: Dict = {}
     sections: List[Dict] = []
@@ -183,7 +183,7 @@ class Chapter(BaseModel):
 
 
 class Part(BaseModel):
-    caption: Optional[str] = None
+    caption: Optional[Any] = None
     notebook: Optional[Path] = None
     params: Dict = {}
     chapters: List[Chapter] = []
@@ -433,7 +433,6 @@ def build(
     if errors:
         typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
         sys.exit(1)
-
-       
+        
 if __name__ == "__main__":
     app()

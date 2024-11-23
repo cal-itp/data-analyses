@@ -4,28 +4,28 @@ parts:
 - caption: Introduction
 - chapters:
   - params:
-      district: "1"
+      district: 1
   - params:
-      district: "2"
+      district: 2
   - params:
-      district: "3"
+      district: 3
   - params:
-      district: "4"
+      district: 4
   - params:
-      district: "5"
+      district: 5
   - params:
-      district: "6"
+      district: 6
   - params:
-      district: "7"
+      district: 7
   - params:
-      district: "8"
+      district: 8
   - params:
-      district: "9"
+      district: 9
   - params:
-      district: "10"
+      district: 10
   - params:
-      district: "11"
+      district: 11
   - params:
-      district: "12"
+      district: 12
 readme: ./ha_portfolio/README.md
 title: Testing a Portfolio
