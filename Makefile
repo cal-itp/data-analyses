@@ -7,7 +7,6 @@ build_portfolio_site:
 	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site) --deploy 
-	python portfolio/portfolio.py clean $(site)
 	git add portfolio/sites/$(site).yml     
 	#make production_portfolio
 
@@ -36,21 +35,21 @@ build_ntd_report:
 
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
-	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
+	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && make assemble_data && cd ..   
 	make build_portfolio_site
 	make git_check_sections
 
 build_district_digest:
 	$(eval export site = district_digest)
-	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	cd gtfs_digest/ && python deploy_district_yaml.py district && cd .. 
+	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
+	#cd gtfs_digest/ && python deploy_district_yaml.py district && cd .. 
 	make build_portfolio_site 
 	make git_check_no_sections
     
 build_legislative_district_digest:
 	$(eval export site = legislative_district_digest)
-	#cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
+	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd .. 
 	make build_portfolio_site 
 	make git_check_no_sections
