@@ -137,3 +137,6 @@ dmypy.json
 
 # Macos
 .DS_Store
+
+# Local Netlify folder
+.netlify
