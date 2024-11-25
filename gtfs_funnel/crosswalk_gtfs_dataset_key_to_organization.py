@@ -40,9 +40,8 @@ def create_gtfs_dataset_key_to_organization_crosswalk(
         analysis_date,
         quartet_data = "schedule",
         dim_gtfs_dataset_cols = ["key", "source_record_id", "base64_url"],
-        dim_organization_cols = ["source_record_id", "name", 
-                                 "itp_id", "caltrans_district",
-                                  "ntd_id_2022"]
+        dim_organization_cols = ["source_record_id", "name", "ntd_id_2022"],
+        dim_county_geography_cols= ["caltrans_district"], # this is where caltrans_district appears by default
     )
 
     df_with_org = pd.merge(
@@ -51,19 +50,7 @@ def create_gtfs_dataset_key_to_organization_crosswalk(
         on = "schedule_gtfs_dataset_key",
         how = "inner"
     )
-    
-    # Fill this in manually.
-    df_with_org.loc[
-    (df_with_org.organization_name == "City of Banning"), "caltrans_district"
-] = "08 - San Bernardino"
-    
-    df_with_org.loc[
-    (
-        df_with_org.organization_name
-        == "Dumbarton Bridge Regional Operations Consortium"
-    ),
-    "caltrans_district",
-] = "04 - Oakland"
+
     return df_with_org
 
 def load_ntd(year: int) -> pd.DataFrame:

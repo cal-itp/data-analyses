@@ -3,14 +3,16 @@
 Document links, justification, for why datasets need to be made public. Submit this information every time a ticket is open to update the existing layers.
 
 ## Intranet Links
-1. [Geospatial open data request](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNUo1NjRNRFpIOVRBMVFFTFJDM1JKNkY0SC4u)
+1. [Geospatial open data request (routine updates)](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNUo1NjRNRFpIOVRBMVFFTFJDM1JKNkY0SC4u)
+
     * District: `Sacramento HQ`
     * Division / Program: `Rail and Mass Transportation`
     * Update or New: `Update existing service`
     * Enterprise Geodatabase Name: `HQ`
     * Feature Class Name: `HQ.ca_hq_transit_stops, HQ.ca_hq_transit_areas, HQ.ca_transit_stops, HQ.ca_transit_routes, HQ.speeds_by_stop_segments, HQ.speeds_by_route_time_of_day`
+        * Can provide a list of multiple feature classes to update in a single ticket, and use the same for "Name of updated service"
     
-1. [Open support ticket for GIS](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNkI2T0hGWElZMUcwTDRUOUNCU0VWMTUxWi4u)
+1. [Open support ticket for GIS (if you notice an issue)](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNkI2T0hGWElZMUcwTDRUOUNCU0VWMTUxWi4u)
 
 ## Intake Justification
 ### High Quality Transit Areas

@@ -288,3 +288,14 @@
 2024-10-22 12:45:21.414 | INFO     | __main__:<module>:128 - 2024-10-19: prepare vp to use in nearest neighbor: 0:07:48.962111
 2024-10-22 12:48:42.893 | INFO     | __main__:<module>:120 - 2024-10-20: condense vp for trip 0:03:21.478021
 2024-10-22 12:55:43.439 | INFO     | __main__:<module>:128 - 2024-10-20: prepare vp to use in nearest neighbor: 0:07:00.545450
+2024-11-15 10:49:47.825 | INFO     | __main__:<module>:169 - 2024-11-13: pare down vp: 0:02:17.184060
+2024-11-15 10:54:47.871 | INFO     | __main__:attach_prior_vp_add_direction:90 - persist vp gddf: 0:04:43.482836
+2024-11-15 10:58:58.894 | INFO     | __main__:attach_prior_vp_add_direction:122 - np vectorize arrays for direction: 0:04:11.022869
+2024-11-15 10:59:06.660 | INFO     | __main__:<module>:194 - 2024-11-13: export vp direction: 0:09:02.271419
+2024-11-15 11:00:32.166 | INFO     | __main__:<module>:200 - 2024-11-13: export usable vp with direction: 0:01:25.506546
+2024-11-15 11:00:32.167 | INFO     | __main__:<module>:203 - 2024-11-13: vp_direction script execution time: 0:10:27.777965
+2024-11-15 11:05:58.601 | INFO     | __main__:<module>:213 - compute dwell df: 0:04:50.016006
+2024-11-15 11:07:16.369 | INFO     | __main__:<module>:235 - merge with original and export: 0:01:17.768135
+2024-11-15 11:07:16.370 | INFO     | __main__:<module>:236 - vp with dwell time 2024-11-13: 0:06:07.784141
+2024-11-15 11:13:16.502 | INFO     | __main__:<module>:121 - 2024-11-13: condense vp for trip 0:05:43.170466
+2024-11-15 11:25:18.878 | INFO     | __main__:<module>:129 - 2024-11-13: prepare vp to use in nearest neighbor: 0:12:02.376671

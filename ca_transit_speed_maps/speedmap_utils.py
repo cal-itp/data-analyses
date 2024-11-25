@@ -15,7 +15,9 @@ def read_segments_shn(organization_source_record_id: str) -> (gpd.GeoDataFrame, 
     Get filtered detailed speedmap segments for an organization, and relevant district SHN.
     '''
     path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
+    # path = f'{catalog.stop_segments.dir}{catalog.stop_segments.route_dir_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
     speedmap_segs = gpd.read_parquet(path, filters=[['organization_source_record_id', '==', organization_source_record_id]]) #  aggregated
+    assert (speedmap_segs >> select(-_.route_short_name)).isna().any().any() == False, 'no cols besides route_short_name should be nan'x
     speedmap_segs = prepare_segment_gdf(speedmap_segs)
     shn = gpd.read_parquet(rt_utils.SHN_PATH)
     this_shn = shn >> filter(_.District.isin([int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]))
@@ -72,6 +74,8 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
     '''
     time_of_day_lower = time_of_day.lower().replace(' ', '_')
     speedmap_segs = speedmap_segs >> filter(_.time_of_day == time_of_day)
+    if speedmap_segs.empty:
+        return None
     color_col = {'new_speedmap': 'p20_mph', 'new_speed_variation': 'fast_slow_ratio'}[map_type]
     shn_state = map_shn(district_gdf)
     display_date = analysis_date.strftime('%B %d %Y (%A)')
