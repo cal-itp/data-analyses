@@ -84,6 +84,7 @@ stop_segments:
   segment_cols: ["schedule_gtfs_dataset_key", "route_id", "direction_id", "stop_pair", "geometry"]
   shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments" #-- stop after Oct 2024
   route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"
+  route_dir_single_segment_detail: "rollup_singleday/speeds_route_dir_segments_detail" # interim for speedmaps
   route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
   segments_file: "segment_options/shape_stop_segments"
   max_speed: ${speed_vars.max_speed}

@@ -33,9 +33,10 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
    * Check the log results, which tells you if there are columns missing from `data_dictionary.yml`. These columns and their descriptions need to be added. Every column in the ESRI layer must have a definition, and where there's an external data dictionary website to cite, provide a definition source. 
 1. In terminal: `python update_fields_fgdc.py`. This populates fields with `data_dictionary.yml` values.
     * Only run if `update_data_dict` had changes to incorporate 
-1. Run [arcgis_pro_script](./arcgis_pro_script.py) to create XML files.
-    * Open a notebook in Hub and find the `ARCGIS_PATH`
+1. Run [arcgis_pro_script](./arcgis_pro_script.py) to create XML files. Often it's easier to run via the [notebook](./arcgis_pro_notebook_sample), but the script exists for better version control and to track feature changes.
+    * Open a notebook in Hub and find the `ARCGIS_PATH` (your preferred local path for ArcGIS work)
     * Hardcode that path for `arcpy.env.workspace = ARCGIS_PATH`
+    * Download `metadata.json` and place in your local path.
     * The exported XML metadata will be in file gdb directory.
     * Upload the XML metadata into Hub in `open_data/xml/`.
 1. If there are new datasets added, open `update_vars.py` and modify the script.
@@ -43,7 +44,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
     * Change into the `open_data` directory: `cd open_data/`.
     * The overwritten XML is stored in `open_data/xml/run_in_esri/`.
     * Download the overwritten XML files locally to run in ArcGIS.
-1. Run [arcgis_pro_script](./arcgis_pro_script.py) after import the updated XML metadata for each feature class.
+1. Run [arcgis_pro_script](./arcgis_pro_script.py) after importing the updated XML metadata for each feature class.
    * There are steps to create FGDC templates for each datasets to store field information.
    * This only needs to be done once when a new dataset is created. 
 1. In terminal: `python cleanup.py` to clean up old XML files and remove zipped shapefiles.

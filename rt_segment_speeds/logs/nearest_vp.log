@@ -246,3 +246,9 @@
 2024-10-22 20:53:22.413 | INFO     | vp_around_stops:filter_to_nearest_two_vp:247 - nearest 2 vp for speedmap_segments 2024-10-18: 0:03:23.070112
 2024-10-22 20:55:37.844 | INFO     | vp_around_stops:filter_to_nearest_two_vp:247 - nearest 2 vp for speedmap_segments 2024-10-19: 0:02:15.416186
 2024-10-22 20:57:31.364 | INFO     | vp_around_stops:filter_to_nearest_two_vp:247 - nearest 2 vp for speedmap_segments 2024-10-20: 0:01:53.510151
+2024-11-15 12:19:02.768 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:178 - nearest neighbor for stop_segments 2024-11-13: 0:13:06.834666
+2024-11-15 12:29:39.239 | INFO     | vp_around_stops:filter_to_nearest_two_vp:248 - nearest 2 vp for stop_segments 2024-11-13: 0:10:34.299696
+2024-11-15 13:08:13.917 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:178 - nearest neighbor for rt_stop_times 2024-11-13: 0:12:35.631290
+2024-11-15 13:18:56.444 | INFO     | vp_around_stops:filter_to_nearest_two_vp:248 - nearest 2 vp for rt_stop_times 2024-11-13: 0:10:40.446083
+2024-11-15 13:40:07.685 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:178 - nearest neighbor for speedmap_segments 2024-11-13: 0:02:36.767174
+2024-11-15 13:43:45.362 | INFO     | vp_around_stops:filter_to_nearest_two_vp:248 - nearest 2 vp for speedmap_segments 2024-11-13: 0:03:37.215365
