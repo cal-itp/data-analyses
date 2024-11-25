@@ -2,46 +2,6 @@ format: jb-book
 parts:
 -   caption: null
     chapters:
-    -   file: district_sd-01/00__legislative_district_report__district_sd-01.ipynb
-    -   file: district_sd-02/00__legislative_district_report__district_sd-02.ipynb
-    -   file: district_sd-03/00__legislative_district_report__district_sd-03.ipynb
-    -   file: district_sd-04/00__legislative_district_report__district_sd-04.ipynb
-    -   file: district_sd-05/00__legislative_district_report__district_sd-05.ipynb
-    -   file: district_sd-06/00__legislative_district_report__district_sd-06.ipynb
-    -   file: district_sd-07/00__legislative_district_report__district_sd-07.ipynb
-    -   file: district_sd-08/00__legislative_district_report__district_sd-08.ipynb
-    -   file: district_sd-09/00__legislative_district_report__district_sd-09.ipynb
-    -   file: district_sd-10/00__legislative_district_report__district_sd-10.ipynb
-    -   file: district_sd-11/00__legislative_district_report__district_sd-11.ipynb
-    -   file: district_sd-12/00__legislative_district_report__district_sd-12.ipynb
-    -   file: district_sd-13/00__legislative_district_report__district_sd-13.ipynb
-    -   file: district_sd-14/00__legislative_district_report__district_sd-14.ipynb
-    -   file: district_sd-15/00__legislative_district_report__district_sd-15.ipynb
-    -   file: district_sd-16/00__legislative_district_report__district_sd-16.ipynb
-    -   file: district_sd-17/00__legislative_district_report__district_sd-17.ipynb
-    -   file: district_sd-18/00__legislative_district_report__district_sd-18.ipynb
-    -   file: district_sd-19/00__legislative_district_report__district_sd-19.ipynb
-    -   file: district_sd-20/00__legislative_district_report__district_sd-20.ipynb
-    -   file: district_sd-21/00__legislative_district_report__district_sd-21.ipynb
-    -   file: district_sd-22/00__legislative_district_report__district_sd-22.ipynb
-    -   file: district_sd-23/00__legislative_district_report__district_sd-23.ipynb
-    -   file: district_sd-24/00__legislative_district_report__district_sd-24.ipynb
-    -   file: district_sd-25/00__legislative_district_report__district_sd-25.ipynb
-    -   file: district_sd-26/00__legislative_district_report__district_sd-26.ipynb
-    -   file: district_sd-27/00__legislative_district_report__district_sd-27.ipynb
-    -   file: district_sd-28/00__legislative_district_report__district_sd-28.ipynb
-    -   file: district_sd-29/00__legislative_district_report__district_sd-29.ipynb
-    -   file: district_sd-30/00__legislative_district_report__district_sd-30.ipynb
-    -   file: district_sd-31/00__legislative_district_report__district_sd-31.ipynb
-    -   file: district_sd-32/00__legislative_district_report__district_sd-32.ipynb
-    -   file: district_sd-33/00__legislative_district_report__district_sd-33.ipynb
-    -   file: district_sd-34/00__legislative_district_report__district_sd-34.ipynb
-    -   file: district_sd-35/00__legislative_district_report__district_sd-35.ipynb
-    -   file: district_sd-36/00__legislative_district_report__district_sd-36.ipynb
-    -   file: district_sd-37/00__legislative_district_report__district_sd-37.ipynb
-    -   file: district_sd-38/00__legislative_district_report__district_sd-38.ipynb
-    -   file: district_sd-39/00__legislative_district_report__district_sd-39.ipynb
-    -   file: district_sd-40/00__legislative_district_report__district_sd-40.ipynb
     -   file: district_ad-01/00__legislative_district_report__district_ad-01.ipynb
     -   file: district_ad-02/00__legislative_district_report__district_ad-02.ipynb
     -   file: district_ad-03/00__legislative_district_report__district_ad-03.ipynb
@@ -122,4 +82,44 @@ parts:
     -   file: district_ad-78/00__legislative_district_report__district_ad-78.ipynb
     -   file: district_ad-79/00__legislative_district_report__district_ad-79.ipynb
     -   file: district_ad-80/00__legislative_district_report__district_ad-80.ipynb
+    -   file: district_sd-01/00__legislative_district_report__district_sd-01.ipynb
+    -   file: district_sd-02/00__legislative_district_report__district_sd-02.ipynb
+    -   file: district_sd-03/00__legislative_district_report__district_sd-03.ipynb
+    -   file: district_sd-04/00__legislative_district_report__district_sd-04.ipynb
+    -   file: district_sd-05/00__legislative_district_report__district_sd-05.ipynb
+    -   file: district_sd-06/00__legislative_district_report__district_sd-06.ipynb
+    -   file: district_sd-07/00__legislative_district_report__district_sd-07.ipynb
+    -   file: district_sd-08/00__legislative_district_report__district_sd-08.ipynb
+    -   file: district_sd-09/00__legislative_district_report__district_sd-09.ipynb
+    -   file: district_sd-10/00__legislative_district_report__district_sd-10.ipynb
+    -   file: district_sd-11/00__legislative_district_report__district_sd-11.ipynb
+    -   file: district_sd-12/00__legislative_district_report__district_sd-12.ipynb
+    -   file: district_sd-13/00__legislative_district_report__district_sd-13.ipynb
+    -   file: district_sd-14/00__legislative_district_report__district_sd-14.ipynb
+    -   file: district_sd-15/00__legislative_district_report__district_sd-15.ipynb
+    -   file: district_sd-16/00__legislative_district_report__district_sd-16.ipynb
+    -   file: district_sd-17/00__legislative_district_report__district_sd-17.ipynb
+    -   file: district_sd-18/00__legislative_district_report__district_sd-18.ipynb
+    -   file: district_sd-19/00__legislative_district_report__district_sd-19.ipynb
+    -   file: district_sd-20/00__legislative_district_report__district_sd-20.ipynb
+    -   file: district_sd-21/00__legislative_district_report__district_sd-21.ipynb
+    -   file: district_sd-22/00__legislative_district_report__district_sd-22.ipynb
+    -   file: district_sd-23/00__legislative_district_report__district_sd-23.ipynb
+    -   file: district_sd-24/00__legislative_district_report__district_sd-24.ipynb
+    -   file: district_sd-25/00__legislative_district_report__district_sd-25.ipynb
+    -   file: district_sd-26/00__legislative_district_report__district_sd-26.ipynb
+    -   file: district_sd-27/00__legislative_district_report__district_sd-27.ipynb
+    -   file: district_sd-28/00__legislative_district_report__district_sd-28.ipynb
+    -   file: district_sd-29/00__legislative_district_report__district_sd-29.ipynb
+    -   file: district_sd-30/00__legislative_district_report__district_sd-30.ipynb
+    -   file: district_sd-31/00__legislative_district_report__district_sd-31.ipynb
+    -   file: district_sd-32/00__legislative_district_report__district_sd-32.ipynb
+    -   file: district_sd-33/00__legislative_district_report__district_sd-33.ipynb
+    -   file: district_sd-34/00__legislative_district_report__district_sd-34.ipynb
+    -   file: district_sd-35/00__legislative_district_report__district_sd-35.ipynb
+    -   file: district_sd-36/00__legislative_district_report__district_sd-36.ipynb
+    -   file: district_sd-37/00__legislative_district_report__district_sd-37.ipynb
+    -   file: district_sd-38/00__legislative_district_report__district_sd-38.ipynb
+    -   file: district_sd-39/00__legislative_district_report__district_sd-39.ipynb
+    -   file: district_sd-40/00__legislative_district_report__district_sd-40.ipynb
 root: README
