@@ -64,6 +64,7 @@ parts:
     - organization_name: City and County of San Francisco
     - organization_name: City of Fairfield
     - organization_name: City of Menlo Park
+    - organization_name: City of Mountain View
     - organization_name: City of Petaluma
     - organization_name: City of Rio Vista
     - organization_name: City of Santa Rosa
@@ -178,6 +179,7 @@ parts:
     - organization_name: FlixBus
     - organization_name: Foothill Transit
     - organization_name: Gold Coast Transit District
+    - organization_name: Greyhound
     - organization_name: Long Beach Transit
     - organization_name: Los Angeles County
     - organization_name: Los Angeles County Metropolitan Transportation Authority

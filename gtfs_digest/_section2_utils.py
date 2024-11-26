@@ -289,7 +289,7 @@ def grouped_bar_chart(
 
     chart = (
         alt.Chart(df)
-        .mark_bar(size=10)
+        .mark_bar(size=8)
         .encode(
             x=alt.X(
                 "yearmonthdate(Date):O",
