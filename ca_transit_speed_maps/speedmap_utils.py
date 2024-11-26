@@ -17,7 +17,7 @@ def read_segments_shn(organization_source_record_id: str) -> (gpd.GeoDataFrame, 
     path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
     # path = f'{catalog.stop_segments.dir}{catalog.stop_segments.route_dir_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
     speedmap_segs = gpd.read_parquet(path, filters=[['organization_source_record_id', '==', organization_source_record_id]]) #  aggregated
-    assert (speedmap_segs >> select(-_.route_short_name)).isna().any().any() == False, 'no cols besides route_short_name should be nan'x
+    assert (speedmap_segs >> select(-_.route_short_name)).isna().any().any() == False, 'no cols besides route_short_name should be nan'
     speedmap_segs = prepare_segment_gdf(speedmap_segs)
     shn = gpd.read_parquet(rt_utils.SHN_PATH)
     this_shn = shn >> filter(_.District.isin([int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]))
