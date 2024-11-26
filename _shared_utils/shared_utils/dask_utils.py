@@ -11,6 +11,7 @@ import pandas as pd
 from calitp_data_analysis import utils
 from dask import compute, delayed
 from dask.delayed import Delayed  # type hint
+from shared_utils import time_helpers
 
 fs = gcsfs.GCSFileSystem()
 
@@ -108,10 +109,11 @@ def concatenate_list_of_files(
     return full_df
 
 
-def func(
+def import_df_func(
     path: str,
     one_date: str,
     data_type: Literal["df", "gdf"] = "df",
+    add_date: bool = False,
     **kwargs,
 ):
     """
@@ -134,10 +136,13 @@ def func(
             **kwargs,
         ).drop_duplicates()
 
+    if add_date:
+        df = time_helpers.add_service_date(df, one_date)
+
     return df
 
 
-def get_ddf(paths, date_list, data_type, **kwargs):
+def get_ddf(paths, date_list, data_type, get_pandas: bool = False, **kwargs):
     """
     Set up function with little modifications based on
     the dask docs. Modifications are that we want to read in
@@ -146,4 +151,9 @@ def get_ddf(paths, date_list, data_type, **kwargs):
     https://docs.dask.org/en/latest/generated/dask.dataframe.from_map.html
     https://blog.dask.org/2023/04/12/from-map
     """
-    return dd.from_map(func, paths, date_list, data_type=data_type, **kwargs).drop_duplicates()
+    ddf = dd.from_map(import_df_func, paths, date_list, data_type=data_type, **kwargs).drop_duplicates()
+
+    if get_pandas:
+        ddf = ddf.compute()
+
+    return ddf

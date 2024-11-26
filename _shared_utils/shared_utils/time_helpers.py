@@ -92,5 +92,11 @@ def add_quarter(df: pd.DataFrame, date_col: str = "service_date") -> pd.DataFram
     Parse a date column for the year, quarter it is in.
     Pipe this function when we want to use dask_utils.
     """
-    df = df.assign(year=df[date_col].dt.year, quarter=df[date_col].dt.quarter)
+    df = df.assign(
+        year=df[date_col].dt.year,
+        quarter=df[date_col].dt.quarter,
+    )
+
+    df = df.assign(year_quarter=df.year.astype(str) + "_Q" + df.quarter.astype(str))
+
     return df
