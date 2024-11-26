@@ -13,8 +13,8 @@ This tool currently does not support the addition of new routes or routing chang
 The GTFS Schedule serves as an input to our statistical model, which includes key information such as timetable and frequency by time of day and day of week, as well as the spatial locations of transit routes. Cal-ITP collects GTFS Schedule data from the feeds of over 180 transit agencies, using information from the `stops`, `routes`, `trips`, and `stop_times` tables. For each representative weekday (Wednesday), Saturday, and Sunday, all trips—regardless of route—that stop at a given stop are counted. This measure of service is used to model ridership patterns, with the data also capturing the number of routes that stop at each location.
 
 
-
 **Ridership Data for Model Training**
+
 The model relies on a limited amount of stop-level ridership data, which is essential for its development. Currently, it uses data from three transit agencies:
 
 * LA Metro (March 2022)
@@ -27,6 +27,7 @@ Cal-ITP is actively seeking to add stop-level ridership data from other agencies
 
 
 **Ridership Data for Prediction Calibration**
+
 Because the predicted annual ridership values from the statistical model are based on ridership data from medium-to-large agencies, this estimate uses NTD ridership data to “rescale” the stop-level estimates. This analysis gets the sum of unlinked passenger trips (UPT) on any bus modality from October 2021 to September 2022 for each California agency that reports to NTD. The rescaling process is described below.
 
 
@@ -47,6 +48,7 @@ This statistical model also controls for job density, which is derived from the 
 ### <ins>Methodology</ins>
 
 **Statistical Modeling**
+
 In order to estimate the effect of bus service on bus ridership at each stop, this analysis employs the following log-linear OLS regression model on the training data: *ln⁡(annual boardings)= β0 + β1(n daily trips) + β2(n daily routes) + β3(population density)+ β4(job density)+ β5(pct noncitizens) + β6(pct youth) + β7(pct seniors) + β8(pct workers w/o car) + β9(pct poverty) + e* . Versions of this model are generated for weekday, Saturday, and Sunday ridership and corresponding service. In all three models, one additional daily trip corresponds to a roughly 2% increase in ridership at a given bus stop.
 
 For each bus agency for which Cal-ITP collects GTFS-Schedule data, trips and routes per stop are aggregated and joined with ACS and job density variables as described above. Multiplying coefficients (β) by their respective factors and exponentiating the result creates the initial stop-level ridership estimate. Each agency’s stop-level ridership is summed to estimate system-level ridership for weekdays, Saturday, and Sunday. 
@@ -64,7 +66,7 @@ This stop-level dataset is expanded by the number of routes that go by a given s
 
 **Why isn't my agency listed in the dashboard?** Applicant agencies must meet the following conditions to use this (optional) annual ridership estimate tool:
 * Must provide GTFS Schedule data to Caltrans (Cal-ITP)
-* Must provide fixed-route bus service If you don't see your agency here but meet both of these requirements, please email hello@calitp.org.
+* Must provide fixed-route bus service If you don't see your agency in the dashboard but meet both of these requirements, please email hello@calitp.org.
 
 **How do I estimate future years of ridership?** This tool requires annual ridership increase estimates be tied to specific increases in service. For example, if your agency expects to add 1 additional trip on weekdays in year 1, and 1 additional trip on Saturday/Sunday in year f, please plug in the estimated additional trips for year f and report those numbers. If you have previously estimated future increases with different assumptions, please email hello@calitp.org with technical questions.
 
@@ -72,8 +74,8 @@ This stop-level dataset is expanded by the number of routes that go by a given s
 
 
 
-
 ### Who We Are
+
 This website was created by the [California Department of Transportation](https://dot.ca.gov/)'s Division of Data and Digital Services. We are a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. For more of our work, visit our [portfolio](https://analysis.calitp.org/).
 
 <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/CT_logo_Wht_outline.gif" alt="Alt text" width="129" height="100">
