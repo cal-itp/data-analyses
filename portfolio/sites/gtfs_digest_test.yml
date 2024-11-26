@@ -1,0 +1,32 @@
+directory: ./gtfs_digest/
+notebook: ./gtfs_digest/03_report.ipynb
+parts:
+- chapters:
+  - caption: District 01 - Eureka
+    params:
+      district: 01 - Eureka
+    sections:
+        - organization_name: Blue Lake Rancheria
+        - organization_name: City of Arcata
+        - organization_name: City of Eureka
+        - organization_name: Curry Public Transit
+        - organization_name: Humboldt Transit Authority
+        - organization_name: Lake Transit Authority
+        - organization_name: Mendocino Transit Authority
+        - organization_name: POINT
+        - organization_name: Redwood Coast Transit Authority
+  - caption: District 02 - Redding
+    params:
+      district: 02 - Redding
+    sections:
+        - organization_name: Lassen Transit Service Agency
+        - organization_name: Modoc Transportation Agency
+        - organization_name: Plumas Transit Systems
+        - organization_name: Redding Area Bus Authority
+        - organization_name: Shasta County
+        - organization_name: Siskiyou County
+        - organization_name: Susanville Indian Rancheria
+        - organization_name: Tehama County
+        - organization_name: Trinity County
+readme: ./gtfs_digest/README.md
+title: GTFS Digest

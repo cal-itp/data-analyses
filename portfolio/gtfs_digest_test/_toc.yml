@@ -1,0 +1,11 @@
+format: jb-book
+parts:
+-   caption: null
+    chapters:
+    -   file: district_01-eureka.md
+        sections:
+        -   glob: district_01-eureka/*
+    -   file: district_02-redding.md
+        sections:
+        -   glob: district_02-redding/*
+root: README
