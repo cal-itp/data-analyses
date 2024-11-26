@@ -1,0 +1,7 @@
+title: AHSC Ridership Prediction Dashboard
+directory: ./ahsc_grant/
+readme: ./README.md
+parts:
+  - caption: Trip Analysis by Stop
+    chapters:
+          - notebook: ./ahsc_grant/empty_nb.ipynb
