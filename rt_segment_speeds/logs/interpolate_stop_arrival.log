@@ -124,3 +124,12 @@
 2024-11-15 12:44:55.085 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for stop_segments 2024-11-13:  2024-11-13: 0:15:15.789486
 2024-11-15 13:34:38.198 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for rt_stop_times 2024-11-13:  2024-11-13: 0:15:41.682831
 2024-11-15 13:46:49.459 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for speedmap_segments 2024-11-13:  2024-11-13: 0:03:04.062272
+2024-11-25 15:08:19.483 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for stop_segments 2024-02-14:  2024-02-14: 0:14:15.053152
+2024-11-25 15:54:03.502 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for rt_stop_times 2024-02-14:  2024-02-14: 0:14:19.447104
+2024-11-25 16:04:58.835 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for speedmap_segments 2024-02-14:  2024-02-14: 0:02:41.448366
+2024-11-25 17:31:02.567 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for stop_segments 2024-04-17:  2024-04-17: 0:15:55.554641
+2024-11-25 18:18:13.220 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for rt_stop_times 2024-04-17:  2024-04-17: 0:14:30.258514
+2024-11-25 18:30:15.050 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for speedmap_segments 2024-04-17:  2024-04-17: 0:02:50.595931
+2024-11-25 20:11:30.072 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for stop_segments 2024-07-17:  2024-07-17: 0:14:23.629904
+2024-11-25 20:55:50.314 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for rt_stop_times 2024-07-17:  2024-07-17: 0:13:51.485049
+2024-11-25 21:06:50.404 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:279 - interpolate arrivals for speedmap_segments 2024-07-17:  2024-07-17: 0:02:33.588358
