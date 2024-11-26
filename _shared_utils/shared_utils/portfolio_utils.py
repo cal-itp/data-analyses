@@ -135,7 +135,7 @@ def create_portfolio_yaml_chapters_with_sections(
     chapters_list = [
         {
             **{
-                "caption": {chapter_info["name"]: f"{caption_prefix}{one_chapter_value}{caption_suffix}"},
+                "caption": f"{caption_prefix}{one_chapter_value}{caption_suffix}",
                 "params": {chapter_info["name"]: str(one_chapter_value)},
                 "sections": [
                     {section_info["name"]: str(one_section_value)}

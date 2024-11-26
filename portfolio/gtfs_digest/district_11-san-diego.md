@@ -1,1 +1,1 @@
-# {'district': 'District 11 - San Diego'}
+# District 11 - San Diego

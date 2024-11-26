@@ -1,1 +1,1 @@
-# {'district': 'District 08 - San Bernardino'}
+# District 08 - San Bernardino

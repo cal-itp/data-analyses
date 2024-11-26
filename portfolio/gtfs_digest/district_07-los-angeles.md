@@ -1,1 +1,1 @@
-# {'district': 'District 07 - Los Angeles'}
+# District 07 - Los Angeles

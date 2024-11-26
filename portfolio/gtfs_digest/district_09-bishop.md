@@ -1,1 +1,1 @@
-# {'district': 'District 09 - Bishop'}
+# District 09 - Bishop
