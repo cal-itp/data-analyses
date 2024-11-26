@@ -2,8 +2,7 @@ directory: ./gtfs_digest/
 notebook: ./gtfs_digest/03_report.ipynb
 parts:
 - chapters:
-  - caption:
-      district: District 01 - Eureka
+  - caption: District 01 - Eureka
     params:
       district: 01 - Eureka
     sections:
@@ -16,8 +15,7 @@ parts:
     - organization_name: Mendocino Transit Authority
     - organization_name: POINT
     - organization_name: Redwood Coast Transit Authority
-  - caption:
-      district: District 02 - Redding
+  - caption: District 02 - Redding
     params:
       district: 02 - Redding
     sections:
@@ -30,8 +28,7 @@ parts:
     - organization_name: Susanville Indian Rancheria
     - organization_name: Tehama County
     - organization_name: Trinity County
-  - caption:
-      district: District 03 - Marysville
+  - caption: District 03 - Marysville
     params:
       district: 03 - Marysville
     sections:
@@ -53,8 +50,7 @@ parts:
     - organization_name: University of California, Davis
     - organization_name: Yolo County Transportation District
     - organization_name: Yuba-Sutter Transit Authority
-  - caption:
-      district: District 04 - Oakland
+  - caption: District 04 - Oakland
     params:
       district: 04 - Oakland
     sections:
@@ -64,6 +60,7 @@ parts:
     - organization_name: City and County of San Francisco
     - organization_name: City of Fairfield
     - organization_name: City of Menlo Park
+    - organization_name: City of Mountain View
     - organization_name: City of Petaluma
     - organization_name: City of Rio Vista
     - organization_name: City of Santa Rosa
@@ -92,8 +89,7 @@ parts:
     - organization_name: Stanford University
     - organization_name: University of California, Berkeley
     - organization_name: Western Contra Costa Transit Authority
-  - caption:
-      district: District 05 - San Luis Obispo
+  - caption: District 05 - San Luis Obispo
     params:
       district: 05 - San Luis Obispo
     sections:
@@ -109,8 +105,7 @@ parts:
     - organization_name: Santa Barbara Metropolitan Transit District
     - organization_name: Santa Cruz Metropolitan Transit District
     - organization_name: University of California, Santa Cruz
-  - caption:
-      district: District 06 - Fresno
+  - caption: District 06 - Fresno
     params:
       district: 06 - Fresno
     sections:
@@ -126,8 +121,7 @@ parts:
     - organization_name: Kings County Area Public Transit Agency
     - organization_name: Madera County
     - organization_name: Tulare County Regional Transit Agency
-  - caption:
-      district: District 07 - Los Angeles
+  - caption: District 07 - Los Angeles
     params:
       district: 07 - Los Angeles
     sections:
@@ -178,6 +172,7 @@ parts:
     - organization_name: FlixBus
     - organization_name: Foothill Transit
     - organization_name: Gold Coast Transit District
+    - organization_name: Greyhound
     - organization_name: Long Beach Transit
     - organization_name: Los Angeles County
     - organization_name: Los Angeles County Metropolitan Transportation Authority
@@ -185,8 +180,7 @@ parts:
     - organization_name: Palos Verdes Peninsula Transit Authority
     - organization_name: University of California, Los Angeles
     - organization_name: Ventura County Transportation Commission
-  - caption:
-      district: District 08 - San Bernardino
+  - caption: District 08 - San Bernardino
     params:
       district: 08 - San Bernardino
     sections:
@@ -201,14 +195,12 @@ parts:
     - organization_name: Palo Verde Valley Transit Agency
     - organization_name: Riverside Transit Agency
     - organization_name: Victor Valley Transit Authority
-  - caption:
-      district: District 09 - Bishop
+  - caption: District 09 - Bishop
     params:
       district: 09 - Bishop
     sections:
     - organization_name: Eastern Sierra Transit Authority
-  - caption:
-      district: District 10 - Stockton
+  - caption: District 10 - Stockton
     params:
       district: 10 - Stockton
     sections:
@@ -228,8 +220,7 @@ parts:
     - organization_name: Tuolumne County Transit Agency
     - organization_name: Yosemite Area Regional Transportation System
     - organization_name: Yosemite National Park
-  - caption:
-      district: District 11 - San Diego
+  - caption: District 11 - San Diego
     params:
       district: 11 - San Diego
     sections:
@@ -239,8 +230,7 @@ parts:
     - organization_name: San Diego International Airport
     - organization_name: San Diego Metropolitan Transit System
     - organization_name: Yuma County Intergovernmental Public Transportation Authority
-  - caption:
-      district: District 12 - Irvine
+  - caption: District 12 - Irvine
     params:
       district: 12 - Irvine
     sections:
