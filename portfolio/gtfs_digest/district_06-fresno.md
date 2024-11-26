@@ -1,1 +1,1 @@
-# {'district': 'District 06 - Fresno'}
+# District 06 - Fresno

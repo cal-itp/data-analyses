@@ -1,1 +1,1 @@
-# {'district': 'District 02 - Redding'}
+# District 02 - Redding

@@ -1,1 +1,1 @@
-# {'district': 'District 10 - Stockton'}
+# District 10 - Stockton

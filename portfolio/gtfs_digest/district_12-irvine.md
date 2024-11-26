@@ -1,1 +1,1 @@
-# {'district': 'District 12 - Irvine'}
+# District 12 - Irvine
