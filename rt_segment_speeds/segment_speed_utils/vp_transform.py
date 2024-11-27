@@ -86,8 +86,7 @@ def combine_valid_vp_for_direction(
     for row in vp_condensed.itertuples():
         vp_dir_arr = np.asarray(getattr(row, "vp_primary_direction"))
 
-        # These are the valid index values where opposite direction 
-        # is excluded
+
         valid_indices = (vp_dir_arr != opposite_direction).nonzero()
         
         # Subset all the other arrays to these indices
