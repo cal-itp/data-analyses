@@ -31,10 +31,9 @@ def concatenate_datasets_across_dates(
         paths, 
         date_list, 
         data_type = data_type,
+        get_pandas=get_pandas,
         **kwargs
     )  
-    if get_pandas:
-        df = df.compute()
     
     return df
 
