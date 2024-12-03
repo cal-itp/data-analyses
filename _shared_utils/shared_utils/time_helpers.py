@@ -76,3 +76,27 @@ def add_time_span_columns(df: pd.DataFrame, time_span_num: str) -> pd.DataFrame:
     )
 
     return df
+
+
+def add_service_date(df: pd.DataFrame, date: str) -> pd.DataFrame:
+    """
+    Add a service date column for GTFS data.
+    Pipe this function when we want to use dask_utils.
+    """
+    df = df.assign(service_date=pd.to_datetime(date))
+    return df
+
+
+def add_quarter(df: pd.DataFrame, date_col: str = "service_date") -> pd.DataFrame:
+    """
+    Parse a date column for the year, quarter it is in.
+    Pipe this function when we want to use dask_utils.
+    """
+    df = df.assign(
+        year=df[date_col].dt.year,
+        quarter=df[date_col].dt.quarter,
+    )
+
+    df = df.assign(year_quarter=df.year.astype(str) + "_Q" + df.quarter.astype(str))
+
+    return df

@@ -11,6 +11,7 @@ import pandas as pd
 from calitp_data_analysis import utils
 from dask import compute, delayed
 from dask.delayed import Delayed  # type hint
+from shared_utils import time_helpers
 
 fs = gcsfs.GCSFileSystem()
 
@@ -106,3 +107,53 @@ def concatenate_list_of_files(
     full_df = pd.concat(results, axis=0).reset_index(drop=True)
 
     return full_df
+
+
+def import_df_func(
+    path: str,
+    one_date: str,
+    data_type: Literal["df", "gdf"] = "df",
+    add_date: bool = False,
+    **kwargs,
+):
+    """
+    Set up function with little modifications based on
+    the dask docs. Modifications are that we want to read in
+    pandas or geopandas df for a single date.
+
+    https://docs.dask.org/en/latest/generated/dask.dataframe.from_map.html
+    https://blog.dask.org/2023/04/12/from-map
+    """
+    if data_type == "gdf":
+        df = gpd.read_parquet(
+            f"{path}_{one_date}.parquet",
+            **kwargs,
+        ).drop_duplicates()
+
+    else:
+        df = pd.read_parquet(
+            f"{path}_{one_date}.parquet",
+            **kwargs,
+        ).drop_duplicates()
+
+    if add_date:
+        df = time_helpers.add_service_date(df, one_date)
+
+    return df
+
+
+def get_ddf(paths, date_list, data_type, get_pandas: bool = False, **kwargs):
+    """
+    Set up function with little modifications based on
+    the dask docs. Modifications are that we want to read in
+    a list of dates.
+
+    https://docs.dask.org/en/latest/generated/dask.dataframe.from_map.html
+    https://blog.dask.org/2023/04/12/from-map
+    """
+    ddf = dd.from_map(import_df_func, paths, date_list, data_type=data_type, **kwargs).drop_duplicates()
+
+    if get_pandas:
+        ddf = ddf.compute()
+
+    return ddf
