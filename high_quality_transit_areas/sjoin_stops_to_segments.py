@@ -8,6 +8,7 @@ Takes <1 min to run.
 import datetime
 import geopandas as gpd
 import pandas as pd
+import numpy as np
 import sys
 
 from loguru import logger
@@ -32,7 +33,8 @@ def max_trips_by_group(
     Can also subset for AM or PM by df[df.departure_hour < 12]
     """
     df2 = (df.groupby(group_cols)
-           .agg({max_col: "max"})
+           .agg({max_col: "max",
+                'route_dir': np.unique})
            .reset_index()
           )
     
@@ -86,26 +88,30 @@ def stop_times_aggregation_max_by_stop(
         trips,
         on = ["feed_key", "trip_id"]
     )
-            
+    stop_times.direction_id = stop_times.direction_id.fillna(0).astype('int64').astype(str)
+    stop_times['route_dir'] = stop_times[['route_id', 'direction_id']].agg('_'.join, axis=1)  
     # Aggregate how many trips are made at that stop by departure hour
-    trips_per_hour = gtfs_schedule_wrangling.stop_arrivals_per_stop(
+    trips_per_peak_period = gtfs_schedule_wrangling.stop_arrivals_per_stop(
         stop_times,
         group_cols = stop_cols + trips_per_hour_cols,
         count_col = "trip_id"
     ).rename(columns = {"n_arrivals": "n_trips"})
     
-    # Count based on fixed peak periods, take average in each
-    am_trips = max_trips_by_group(
-        trips_per_hour[trips_per_hour.peak == 'am_peak'], 
-        group_cols = stop_cols,
-        max_col = "n_trips"
-    ).rename(columns = {"n_trips": "am_max_trips"})
+    am_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'am_peak']).rename(columns = {"n_trips": "am_max_trips"})
+    pm_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'pm_peak']).rename(columns = {"n_trips": "pm_max_trips"})
+      #  this actually doesn't do anything really! (since we're averaging across the whole peak)
+#     # Count based on fixed peak periods, take average in each
+#     am_trips = max_trips_by_group(
+#         trips_per_peak_period[trips_per_peak_period.peak == 'am_peak'], 
+#         group_cols = stop_cols,
+#         max_col = "n_trips"
+#     ).rename(columns = {"n_trips": "am_max_trips"})
     
-    pm_trips = max_trips_by_group(
-        trips_per_hour[trips_per_hour.peak == 'pm_peak'], 
-        group_cols = stop_cols,
-        max_col = "n_trips"
-    ).rename(columns = {"n_trips": "pm_max_trips"})
+#     pm_trips = max_trips_by_group(
+#         trips_per_peak_period[trips_per_peak_period.peak == 'pm_peak'], 
+#         group_cols = stop_cols,
+#         max_col = "n_trips"
+#     ).rename(columns = {"n_trips": "pm_max_trips"})
     
     max_trips_by_stop = pd.merge(
         am_trips, 
