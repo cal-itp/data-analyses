@@ -31,6 +31,7 @@ def make_rt_site_yml(speedmaps_index_joined,
     
     chapters_list = []
     speedmaps_index_joined = speedmaps_index_joined >> arrange(_.caltrans_district)
+    speedmaps_index_joined = speedmaps_index_joined >> distinct(_.caltrans_district, _.organization_name, _.organization_source_record_id)
     for district in speedmaps_index_joined.caltrans_district.unique():
         if type(district) == type(None):
             continue
