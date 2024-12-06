@@ -74,7 +74,10 @@ def cut_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
     # so let's partition it with a lot of npartitions
     ddf = ddf.repartition(npartitions=150).persist()
         
-    renamed_ddf = ddf.rename(columns = {"stop_id": "stop_id1"})
+    renamed_ddf = ddf.rename(columns = {
+        "stop_id": "stop_id1",
+        "arrival_time": "arrival_time1"
+    })
     orig_dtypes = renamed_ddf.dtypes.to_dict()
 
     segments = ddf.map_partitions(
@@ -85,15 +88,19 @@ def cut_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
             "stop_id2": "str", 
             "end": "geometry",
             "snap_end_id": "int", 
+            "arrival_time2": "int",
             "segment_id": "str"
         },
         align_dataframes = False
     )
-
+    
     # We don't need several of these columns, esp 3 geometry columns
     segments = (segments.drop(
-        columns = ["start", "end", 
-                   "snap_start_id", "snap_end_id"]
+        columns = [
+            "start", "end", 
+            "snap_start_id", "snap_end_id",
+            "arrival_time1", "arrival_time2"
+        ]
     ).pipe(
         gtfs_schedule_wrangling.gtfs_segments_rename_cols,
         natural_identifier = False
