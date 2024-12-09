@@ -1,6 +1,8 @@
 """
 Geospatial utility functions
 """
+from typing import Union
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -17,13 +19,16 @@ geo_const_meters = 6_371_000 * np.pi / 180
 geo_const_miles = 3_959_000 * np.pi / 180
 
 
-def nearest_snap(line: shapely.LineString, point: shapely.Point, k_neighbors: int = 1) -> np.ndarray:
+def nearest_snap(line: Union[shapely.LineString, np.ndarray], point: shapely.Point, k_neighbors: int = 1) -> np.ndarray:
     """
     Based off of this function,
     but we want to return the index value, rather than the point.
     https://github.com/UTEL-UIUC/gtfs_segments/blob/main/gtfs_segments/geom_utils.py
     """
-    line = np.asarray(line.coords)
+    if isinstance(line, shapely.LineString):
+        line = np.asarray(line.coords)
+    elif isinstance(line, np.ndarray):
+        line = line
     point = np.asarray(point.coords)
     tree = KDTree(line)
 
