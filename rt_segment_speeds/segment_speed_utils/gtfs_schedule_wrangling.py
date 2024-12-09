@@ -548,8 +548,7 @@ def get_sched_trips_hr(analysis_date: str) -> pd.DataFrame:
     keep_trip_cols = ['trip_instance_key', 'gtfs_dataset_key', 'route_id',
                       'shape_id']
     trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols)
-    trips = trips.rename(
-        columns={'gtfs_dataset_key': 'schedule_gtfs_dataset_key'})
+    
     time_buckets = get_trip_time_buckets(analysis_date)
     trips = pd.merge(trips, time_buckets, on='trip_instance_key', how='inner')
     schedule_trip_counts = count_trips_by_group(trips,
