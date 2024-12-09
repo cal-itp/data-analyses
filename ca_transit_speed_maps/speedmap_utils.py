@@ -79,7 +79,7 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
     color_col = {'new_speedmap': 'p20_mph', 'new_speed_variation': 'fast_slow_ratio'}[map_type]
     shn_state = map_shn(district_gdf)
     display_date = analysis_date.strftime('%B %d %Y (%A)')
-    filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_{map_type}"
+    filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_{map_type}_{time_of_day}"
     title = f"{speedmap_segs.organization_name.iloc[0]} {display_date} {time_of_day}"
     
     if map_type == 'new_speedmap':
