@@ -1,7 +1,7 @@
 -e .
 altair==5.3.0
 altair-transform==0.2.0
-gtfs-segments==0.1.0
+gtfs-segments==2.1.7
 pyairtable==2.2.2
 great_tables==0.14.0
 omegaconf==2.3.0 # better yaml configuration
