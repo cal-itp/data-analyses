@@ -20,7 +20,7 @@ def keep_long_shape_ids(routelines: dg.GeoDataFrame | gpd.GeoDataFrame,
     Filter down routelines file to just routes that are pretty long
     with shape_id.
     """
-    routelines = routelines.to_crs(geography_utils.CA_StatePlane)
+    routelines = routelines.to_crs(geography_utils.CA_NAD83Albers_ft)
     
     routelines = routelines.assign(
         route_mi = routelines.geometry.length.divide(
@@ -115,7 +115,7 @@ def buffer_around_origin_destination(gdf: gpd.GeoDataFrame,
     geom_cols = list(gdf.select_dtypes("geometry").columns)
     
     for c in geom_cols:
-        gdf[c] = gdf[c].to_crs(geography_utils.CA_StatePlane)
+        gdf[c] = gdf[c].to_crs(geography_utils.CA_NAD83Albers_ft)
     
     gdf = gdf.assign(
         origin_buffer = gdf.origin.buffer(buffer_feet),
