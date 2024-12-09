@@ -134,7 +134,7 @@ def get_shapes(selected_date: str) -> gpd.GeoDataFrame:
         selected_date,
         columns = ["shape_array_key", "geometry"],
         get_pandas = True,
-        crs = geography_utils.CA_NAD83Albers
+        crs = geography_utils.CA_NAD83Albers_m
     ).pipe(
         helpers.remove_shapes_outside_ca
     ).merge(
@@ -151,7 +151,7 @@ def get_shapes(selected_date: str) -> gpd.GeoDataFrame:
      
     
 def dissolve_census_tracts(
-    crs: str = geography_utils.CA_NAD83Albers
+    crs: str = geography_utils.CA_NAD83Albers_m
 ) -> gpd.GeoDataFrame:
     census_tracts = (
         catalog.calenviroscreen_lehd_by_tract.read()
