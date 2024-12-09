@@ -40,8 +40,8 @@ def process_transit_routes(analysis_date: str) -> gpd.GeoDataFrame:
     
     # Get this to same CRS as highways
     gdf = gdf.assign(
-        route_length_feet = gdf.geometry.to_crs(geography_utils.CA_StatePlane).length
-    ).drop(columns = "route_length").to_crs(geography_utils.CA_StatePlane)
+        route_length_feet = gdf.geometry.to_crs(geography_utils.CA_NAD83Albers_ft).length
+    ).drop(columns = "route_length").to_crs(geography_utils.CA_NAD83Albers_ft)
     
     
     return gdf
@@ -65,7 +65,7 @@ def process_highways(
     direction_cols = ["NB", "SB", "EB", "WB"]
 
     df = (gpd.read_parquet(SHN_FILE)
-          .to_crs(geography_utils.CA_StatePlane)
+          .to_crs(geography_utils.CA_NAD83Albers_ft)
          )
     
     # Get dummies for direction
