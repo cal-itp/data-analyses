@@ -402,7 +402,7 @@ def get_vehicle_positions(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
         vp_all = gpd.read_parquet(f"{VP_FILE_PATH}vp_{date_str}.parquet")
         org_vp = vp_all >> filter(_.gtfs_dataset_key.isin(ix_df.vehicle_positions_gtfs_dataset_key))
         org_vp = org_vp >> select(-_.location_timestamp, -_.service_date, -_.activity_date)
-        org_vp = org_vp.to_crs(geography_utils.CA_NAD83Albers)
+        org_vp = org_vp.to_crs(geography_utils.CA_NAD83Albers_m)
         utils.geoparquet_gcs_export(org_vp, GCS_FILE_PATH + V2_SUBFOLDER, filename)
 
     return org_vp
@@ -459,7 +459,9 @@ def get_stops(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
         org_stops = gpd.read_parquet(path)
     else:
         feed_key_list = list(ix_df.feed_key.unique())
-        org_stops = gtfs_utils_v2.get_stops(service_date, feed_key_list, stop_cols, crs=geography_utils.CA_NAD83Albers)
+        org_stops = gtfs_utils_v2.get_stops(
+            service_date, feed_key_list, stop_cols, crs=geography_utils.CA_NAD83Albers_m
+        )
         utils.geoparquet_gcs_export(org_stops, GCS_FILE_PATH + V2_SUBFOLDER, filename)
 
     return org_stops
@@ -478,7 +480,7 @@ def get_shapes(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     else:
         feed_key_list = list(ix_df.feed_key.unique())
         org_shapes = gtfs_utils_v2.get_shapes(
-            service_date, feed_key_list, crs=geography_utils.CA_NAD83Albers, shape_cols=shape_cols
+            service_date, feed_key_list, crs=geography_utils.CA_NAD83Albers_m, shape_cols=shape_cols
         )
         # invalid geos are nones in new df...
         org_shapes = org_shapes.dropna(subset=["geometry"])
