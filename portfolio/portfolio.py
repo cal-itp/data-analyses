@@ -231,7 +231,7 @@ class Site(BaseModel):
 
     @validator('readme', pre=True, always=True)
     def default_readme(cls, v, *, values, **kwargs):
-        if "./" in v: 
+        if "./" in v:
             return Path(v)
         else:
             return (values['directory'] / Path("README.md")) or (values['directory'] / Path(v))
@@ -282,24 +282,24 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             # hide input (i.e. code) for all cells
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
-                                
+
                 # Consider importing this name from calitp.magics
                 if '%%capture_parameters' in cell.source:
                     params = {**params, **json.loads(cell.outputs[0]['text'])}
-                        
+
                 if "%%capture" in cell.source:
                     cell.outputs = []
-                    
+
                 if no_stderr:
                     cell.outputs = [output for output in cell.outputs if 'name' not in output.keys() or output['name'] != 'stderr']
-                
-                # right side widget to add "tags" (it reverts to "tags": ["tags"]), 
-                if cell.metadata.get("tags"): 
+
+                # right side widget to add "tags" (it reverts to "tags": ["tags"]),
+                if cell.metadata.get("tags"):
                     #"%%full_width" in cell.source doesn't pick up
-                    # when Jupyterbook builds, it says 
+                    # when Jupyterbook builds, it says
                     # UsageError: Line magic function `%%full_width` not found.
                     cell.metadata.tags.append("full-width")
-                    
+
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
 papermill_engines.register_entry_points()
 
@@ -316,7 +316,7 @@ def index(
             name = site.replace(".yml", "")
             site_output_dir = PORTFOLIO_DIR / Path(name)
             sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
-            
+
     Path("./portfolio/index").mkdir(parents=True, exist_ok=True)
     for template in ["index.html", "_redirects"]:
         fname = f"./portfolio/index/{template}"
@@ -437,6 +437,6 @@ def build(
     if errors:
         typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
         sys.exit(1)
-        
+
 if __name__ == "__main__":
     app()
