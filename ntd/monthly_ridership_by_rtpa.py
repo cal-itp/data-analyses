@@ -126,8 +126,11 @@ def save_rtpa_outputs(
 
         (df[df["RTPA"] == i]
          .sort_values("ntd_id")
-         #got error from excel not recognizing timezone, made list to include dropping "ts" column
-         .drop(columns = ["_merge","ts"])
+         #got error from excel not recognizing timezone, made list to include dropping "execution_ts" column
+         .drop(columns = [
+             "_merge",
+             "execution_ts"
+         ])
          #cleaning column names
          .rename(columns=lambda x: x.replace("_"," ").title().strip())
          #rename columns
@@ -184,7 +187,11 @@ def produce_ntd_monthly_ridership_by_rtpa(
     merge in crosswalk, checks for unmerged rows, then creates new columns for full Mode and TOS name.
     
     """
-    full_upt = (tbls.mart_ntd.dim_monthly_ntd_ridership_with_adjustments() >> collect()).rename(columns = {"mode_type_of_service_status": "Status"})
+    full_upt = (tbls.mart_ntd.dim_monthly_ridership_with_adjustments() >> collect()).rename(
+        columns = {
+            "mode_type_of_service_status": "Status",
+            "primary_uza_name":"uza_name"
+        })
     
     full_upt = full_upt[full_upt.agency.notna()].reset_index(drop=True)
     

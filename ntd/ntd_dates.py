@@ -25,7 +25,8 @@ def get_public_filename(monthyear_string: str) -> str:
 
 DATES = {
     # key is month of NTD data
-    # value is the month_updated in the url we're downloading from
+    # value is the month_updated in the url we're downloading from (2 months ahead from key)
+    # ex oct data is reported in december, so (oct20XX:"20XX-12")
     "oct2023": "2023-12",
     "nov2023": "2024-01",
     "dec2023": "2024-02",
@@ -36,6 +37,7 @@ DATES = {
     "may2024": "2024-07",
     "jun2024": "2024-08",
     "jul2024": "2024-09",
-    "aug2024": "2024-08",
-    "sep2024": "2024-09"
+    "aug2024": "2024-10",
+    "sep2024": "2024-11",
+    "oct2024": "2024-12"
 }
