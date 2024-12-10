@@ -1,0 +1,7 @@
+title: AHSC Ridership Prediction Dashboard
+directory: ./ahsc_grant/
+readme: ./ahsc_grant/README.md
+parts:
+- caption: AHSC Ridership Prediction Dashboard
+- chapters:
+    - notebook: ./ahsc_grant/empty_nb.ipynb
