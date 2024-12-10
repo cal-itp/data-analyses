@@ -26,6 +26,7 @@ assert os.getcwd().endswith("data-analyses"), "this script must be run from the 
 GOOGLE_ANALYTICS_TAG_ID = "G-JCX3Z8JZJC"
 PORTFOLIO_DIR = Path("./portfolio/")
 SITES_DIR = PORTFOLIO_DIR / Path("sites")
+GCS_BUCKET = os.getenv("GCS_BUCKET", "calitp-data-analyses-portfolio")
 
 SiteChoices = enum.Enum('SiteChoices', {
     f.replace(".yml", ""): f.replace(".yml", "")
@@ -34,10 +35,10 @@ SiteChoices = enum.Enum('SiteChoices', {
 
 DEPLOY_OPTION = typer.Option(
     False,
-    help="Actually deploy this component to netlify.",
+    help="Actually deploy this component to the static web server.",
 )
 
-app = typer.Typer(help="CLI to tie together papermill, jupyter book, and netlify")
+app = typer.Typer(help="CLI to tie together papermill, jupyter book, and the static web server")
 
 env = Environment(loader=FileSystemLoader("./portfolio/templates/"), autoescape=select_autoescape())
 
@@ -225,7 +226,7 @@ class Site(BaseModel):
 
     @validator("name")
     def convert_to_underscores(cls, v):
-        # netlify converts stuff to underscores so we should do it too
+        # some web servers (such as netlify) convert stuff to underscores so we should do it too
         return v.replace("_", "-")
 
     @validator('readme', pre=True, always=True)
@@ -324,10 +325,12 @@ def index(
             f.write(env.get_template(template).render(sites=sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
 
     args = [
-        "netlify",
-        "deploy",
-        "--site=cal-itp-data-analyses",
-        "--dir=portfolio/index",
+        "gcloud",
+        "storage",
+        "cp",
+        "--recursive",
+        str(PORTFOLIO_DIR / "index"),
+        f"gs://{GCS_BUCKET}",
     ]
 
     if alias:
@@ -421,11 +424,12 @@ def build(
             assert int(ans) == len(errors)
 
         args = [
-            "netlify",
-            "deploy",
-            "--site=cal-itp-data-analyses",
-            f"--dir=portfolio/{site_yml_name}/_build/html/",
-            f"--alias={site.name}",
+            "gcloud",
+            "storage",
+            "cp",
+            "--recursive",
+            str(site_output_dir / "_build/html"),
+            f"gs://{GCS_BUCKET}/{site.name}",
         ]
         typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
         subprocess.run(args).check_returncode()
