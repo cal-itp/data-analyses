@@ -2,7 +2,7 @@
 
 The goal of this tool is to provide predictions to estimate increases in annual bus ridership that correspond to planned increases in scheduled bus services. We use General Transit Feed Specification (GTFS) schedule data, American Community Survey (ACS) data and Ridership data from selected agencies to feed our statistical model. The dashboard summarizes the additional annual riders across each stop that a route goes by. This tool is available to assist mainly AHSC, CARB grant applicants along with other agencies. 
 
-This tool currently does not support the addition of new routes or routing changes, but it will continue to evolve as more data becomes available. Feedback is always welcome to help improve its functionality. If you have additional questions, email hello@calitp.org.
+This tool was developed in Fall 2022 for AHSC Round 7 and has not yet been updated. It currently does not support the addition of new routes or routing changes, but it will continue to evolve as more data becomes available. Feedback is always welcome to help improve its functionality. If you have additional questions, email hello@calitp.org.
 
 
 ## Definitions and Methodology
