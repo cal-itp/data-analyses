@@ -22,23 +22,23 @@ pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
 both_peaks_hrs = am_peak_hrs + pm_peak_hrs
 peaks_dict = {key: 'am_peak' for key in am_peak_hrs} | {key: 'pm_peak' for key in pm_peak_hrs}
 
-def max_trips_by_group(
-    df: pd.DataFrame, 
-    group_cols: list,
-    max_col: str = "n_trips"
-) -> pd.DataFrame:
-    """
-    Find the max trips, by stop_id or by hqta_segment_id.
-    Put in a list of group_cols to find the max.
-    Can also subset for AM or PM by df[df.departure_hour < 12]
-    """
-    df2 = (df.groupby(group_cols)
-           .agg({max_col: "max",
-                'route_dir': np.unique})
-           .reset_index()
-          )
+# def max_trips_by_group(
+#     df: pd.DataFrame, 
+#     group_cols: list,
+#     max_col: str = "n_trips"
+# ) -> pd.DataFrame:
+#     """
+#     Find the max trips, by stop_id or by hqta_segment_id.
+#     Put in a list of group_cols to find the max.
+#     Can also subset for AM or PM by df[df.departure_hour < 12]
+#     """
+#     df2 = (df.groupby(group_cols)
+#            .agg({max_col: "max",
+#                 'route_dir': np.unique})
+#            .reset_index()
+#           )
     
-    return df2
+#     return df2
 
 def prep_stop_times(
     stop_times: pd.DataFrame,
@@ -267,15 +267,18 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
-    # takes 1 min
-    max_arrivals_by_stop = helpers.import_scheduled_stop_times(
-        analysis_date,
-        get_pandas = True,
-    ).pipe(prep_stop_times).pipe(stop_times_aggregation_max_by_stop, analysis_date)
+#  shift to new script which will add collinearity checks
+#     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
+#     # takes 1 min
+#     max_arrivals_by_stop = helpers.import_scheduled_stop_times(
+#         analysis_date,
+#         get_pandas = True,
+#     ).pipe(prep_stop_times).pipe(stop_times_aggregation_max_by_stop, analysis_date)
     
-    max_arrivals_by_stop.to_parquet(
-        f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
+#     max_arrivals_by_stop.to_parquet(
+#         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
+    
+# new step 1!
     
     ## (2) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
