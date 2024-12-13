@@ -98,19 +98,6 @@ def stop_times_aggregation_max_by_stop(
     
     am_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'am_peak']).rename(columns = {"n_trips": "am_max_trips"})
     pm_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'pm_peak']).rename(columns = {"n_trips": "pm_max_trips"})
-      #  this actually doesn't do anything really! (since we're averaging across the whole peak)
-#     # Count based on fixed peak periods, take average in each
-#     am_trips = max_trips_by_group(
-#         trips_per_peak_period[trips_per_peak_period.peak == 'am_peak'], 
-#         group_cols = stop_cols,
-#         max_col = "n_trips"
-#     ).rename(columns = {"n_trips": "am_max_trips"})
-    
-#     pm_trips = max_trips_by_group(
-#         trips_per_peak_period[trips_per_peak_period.peak == 'pm_peak'], 
-#         group_cols = stop_cols,
-#         max_col = "n_trips"
-#     ).rename(columns = {"n_trips": "pm_max_trips"})
     
     max_trips_by_stop = pd.merge(
         am_trips, 
@@ -226,7 +213,11 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     Since frequency thresholds for hq corrs and major stops have diverged,
     need to track both categories
     """
-    # Draw 50 m buffer to capture stops around hqta segments
+    # Only keep segments for routes that have at least one stop meeting frequency threshold
+    # About 50x smaller, so should both slash false positives and enhance speed
+    st_copy = stop_times.copy().drop_duplicates(subset=['schedule_gtfs_dataset_key', 'route_id'])
+    hqta_segments = hqta_segments.merge(, st_copy[['schedule_gtfs_dataset_key', 'route_id']], on=['schedule_gtfs_dataset_key', 'route_id'])
+    # Draw buffer to capture stops around hqta segments
     hqta_segments2 = hqta_segments.assign(
         geometry = hqta_segments.geometry.buffer(buffer_size)
     )

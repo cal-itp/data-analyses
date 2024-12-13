@@ -77,3 +77,9 @@
 2024-12-13 11:31:22.746 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2024-10-21 execution time: 0:00:20.396299
 2024-12-13 11:32:02.933 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2024-10-21 execution time: 0:00:21.877206
 2024-12-13 11:32:39.694 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2024-10-21 execution time: 0:00:18.424974
+2024-12-13 11:55:48.649 | INFO     | __main__:<module>:309 - B2_sjoin_stops_to_segments 2024-10-21 execution time: 0:00:44.101742
+2024-12-13 11:56:12.576 | INFO     | __main__:<module>:147 - C1_prep_pairwise_intersections 2024-10-21 execution time: 0:00:06.184147
+2024-12-13 11:56:47.404 | INFO     | __main__:<module>:124 - C2_find_intersections 2024-10-21 execution time: 0:00:17.150945
+2024-12-13 11:57:23.415 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2024-10-21 execution time: 0:00:18.277817
+2024-12-13 11:58:00.304 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2024-10-21 execution time: 0:00:19.643261
+2024-12-13 11:58:35.391 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2024-10-21 execution time: 0:00:17.158636
