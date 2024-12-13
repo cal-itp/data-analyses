@@ -49,6 +49,10 @@ def prep_stop_times(
 
     stop_times = stop_times[stop_times['arrival_hour'].isin(both_peaks_hrs)]
     stop_times['peak'] = stop_times['arrival_hour'].map(peaks_dict)
+    #  don't count the same trip serving the same stop multiple times -- i.e. trips that start and end at a transit center
+    #  the second arrival isn't useful, since the trip ends there: https://www.turlocktransit.com/route6.html
+    #  ideally we would filter stop_times on pickup_type and drop_off_type, but those aren't always used
+    stop_times = stop_times.drop_duplicates(subset=['schedule_gtfs_dataset_key', 'trip_id', 'stop_id'])
     
     return stop_times
 
