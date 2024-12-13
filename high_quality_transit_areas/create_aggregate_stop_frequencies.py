@@ -23,7 +23,7 @@ def add_route_dir(
                "route_id", "direction_id", "route_type"],
     get_pandas = True
     )
-    trips = trips[trips['route_type'].isin('3', '11')] #  bus only
+    trips = trips[trips['route_type'].isin(['3', '11'])] #  bus only
     
 
     stop_times = stop_times.merge(
