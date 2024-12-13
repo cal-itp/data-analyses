@@ -9,6 +9,7 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 import numpy as np
+import shapely
 import sys
 
 from loguru import logger
@@ -195,6 +196,28 @@ def hqta_segment_keep_one_stop(
     
     return segment_to_stop_gdf
 
+def find_inconclusive_directions(hqta_segments: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    '''
+    Where individual segments loop tightly, segment_direction becomes arbitrary.
+    Find these cases and mark segment_direction as "inconclusive"
+    OK to keep in possible HQ corridors, but shouldn't be used for bus intersection major stops
+    '''
+    circuitousness_ratio_threshold = 3
+    
+    hqta_segments['length'] = hqta_segments.geometry.apply(lambda x: x.length)
+    hqta_segments['start'] = hqta_segments.geometry.apply(lambda x: shapely.Point(x.coords[0]))
+    hqta_segments['end'] = hqta_segments.geometry.apply(lambda x: shapely.Point(x.coords[-1]))
+    hqta_segments['st_end_dist'] = hqta_segments.apply(lambda x: shapely.distance(x.start, x.end),axis=1)
+    hqta_segments['circuitousness_ratio'] = ((hqta_segments.length / hqta_segments.st_end_dist)
+                                             .replace(np.inf, 10)
+                                             .clip(upper=5))
+    hqta_segments.segment_direction = hqta_segments.apply(
+        lambda x: x.segment_direction if x.circuitousness_ratio < circuitousness_ratio_threshold else 'inconclusive', axis=1)
+    calculation_cols = ['length', 'start', 'end',
+                       'st_end_dist', 'circuitousness_ratio']
+    hqta_segments = hqta_segments.drop(columns=calculation_cols)
+    return hqta_segments
+
 
 def sjoin_stops_and_stop_times_to_hqta_segments(
     hqta_segments: gpd.GeoDataFrame, 
@@ -216,7 +239,10 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     # Only keep segments for routes that have at least one stop meeting frequency threshold
     # About 50x smaller, so should both slash false positives and enhance speed
     st_copy = stop_times.copy().drop_duplicates(subset=['schedule_gtfs_dataset_key', 'route_id'])
-    hqta_segments = hqta_segments.merge(, st_copy[['schedule_gtfs_dataset_key', 'route_id']], on=['schedule_gtfs_dataset_key', 'route_id'])
+    hqta_segments = (hqta_segments.merge(st_copy[['schedule_gtfs_dataset_key', 'route_id']], on=['schedule_gtfs_dataset_key', 'route_id']))
+    stop_times = stop_times.drop(columns=['route_id']).drop_duplicates() # prefer route_id from segments in future steps
+    # Identify ambiguous direction segments to exclude from intersection steps
+    hqta_segments = find_inconclusive_directions(hqta_segments)
     # Draw buffer to capture stops around hqta segments
     hqta_segments2 = hqta_segments.assign(
         geometry = hqta_segments.geometry.buffer(buffer_size)
