@@ -20,9 +20,11 @@ def add_route_dir(
     trips = helpers.import_scheduled_trips(
     analysis_date,
     columns = ["feed_key", "gtfs_dataset_key", "trip_id",
-               "route_id", "direction_id"],
+               "route_id", "direction_id", "route_type"],
     get_pandas = True
     )
+    trips = trips[trips['route_type'].isin('3', '11')] #  bus only
+    
 
     stop_times = stop_times.merge(
         trips,
