@@ -74,6 +74,7 @@ stop_segments:
   stage1: ${speeds_tables.vp_dwell}
   stage2: "nearest/nearest_vp_shape_segments"
   stage2b: "nearest/nearest2_vp_shape_segments"
+  stage2c: "nearest/wide_nearest2_vp_shape_segments"
   stage3: "stop_arrivals"
   stage4: "speeds_stop_segments"
   trip_stop_cols: ["trip_instance_key", "stop_sequence"]
