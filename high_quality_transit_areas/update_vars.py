@@ -17,5 +17,10 @@ AM_PEAK = (dt.time(hour=6), dt.time(hour=9)) #  time range to calculate average 
 PM_PEAK = (dt.time(hour=15), dt.time(hour=19))
 HQ_TRANSIT_THRESHOLD = 4  #  trips per hour, from statute, see README.md
 MS_TRANSIT_THRESHOLD = 3  #  different statutory threshold as of October 2024
-CORR_SINGLE_ROUTE = False #  only consider frequency from a single route at each stop (not recommended, see README)
-BUS_MS_SINGLE_ROUTE = False #  only consider frequency from a single route at each stop (not recommended, see README)
+# CORR_SINGLE_ROUTE = False #  only consider frequency from a single route at each stop (not recommended, see README)
+# BUS_MS_SINGLE_ROUTE = False #  only consider frequency from a single route at each stop (not recommended, see README)
+
+SHARED_STOP_THRESHOLD = 8 #  current rec
+#  Yolobus. Separate route_id, but same route in a CW and CCW loop, drop per rule to not compare same rt with itself
+KEYS_TO_DROP = ['3c62ad6ee589d56eca915ce291a5df0a__42A_0__42B_0',
+               '3c62ad6ee589d56eca915ce291a5df0a__42B_0__42A_0']

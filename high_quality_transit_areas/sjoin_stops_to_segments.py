@@ -324,7 +324,7 @@ if __name__ == "__main__":
     
     end = datetime.datetime.now()
     logger.info(
-        f"B2_sjoin_stops_to_segments {analysis_date} "
+        f"B3_sjoin_stops_to_segments {analysis_date} "
         f"execution time: {end - start}")
     
     #client.close()
