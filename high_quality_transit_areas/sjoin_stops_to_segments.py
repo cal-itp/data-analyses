@@ -22,23 +22,23 @@ pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
 both_peaks_hrs = am_peak_hrs + pm_peak_hrs
 peaks_dict = {key: 'am_peak' for key in am_peak_hrs} | {key: 'pm_peak' for key in pm_peak_hrs}
 
-# def max_trips_by_group(
-#     df: pd.DataFrame, 
-#     group_cols: list,
-#     max_col: str = "n_trips"
-# ) -> pd.DataFrame:
-#     """
-#     Find the max trips, by stop_id or by hqta_segment_id.
-#     Put in a list of group_cols to find the max.
-#     Can also subset for AM or PM by df[df.departure_hour < 12]
-#     """
-#     df2 = (df.groupby(group_cols)
-#            .agg({max_col: "max",
-#                 'route_dir': np.unique})
-#            .reset_index()
-#           )
+def max_trips_by_group(
+    df: pd.DataFrame, 
+    group_cols: list,
+    max_col: str = "n_trips"
+) -> pd.DataFrame:
+    """
+    Find the max trips, by stop_id or by hqta_segment_id.
+    Put in a list of group_cols to find the max.
+    Can also subset for AM or PM by df[df.departure_hour < 12]
+    """
+    df2 = (df.groupby(group_cols)
+           .agg({max_col: "max",
+                'route_dir': np.unique})
+           .reset_index()
+          )
     
-#     return df2
+    return df2
 
 def prep_stop_times(
     stop_times: pd.DataFrame,
@@ -189,7 +189,7 @@ def hqta_segment_keep_one_stop(
     # Merge in and keep max trips observation
     # Since there might be duplicates still, where multiple stops all 
     # share 2 trips for that segment, do a drop duplicates at the end 
-    max_trip_cols = ["hqta_segment_id", "am_max_trips", "pm_max_trips"]
+    max_trip_cols = ["hqta_segment_id", "am_max_trips_hr", "pm_max_trips_hr"]
     
     segment_to_stop_unique = pd.merge(
         segment_to_stop_times,
