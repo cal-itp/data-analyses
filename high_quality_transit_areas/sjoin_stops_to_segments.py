@@ -33,8 +33,7 @@ def max_trips_by_group(
     Can also subset for AM or PM by df[df.departure_hour < 12]
     """
     df2 = (df.groupby(group_cols)
-           .agg({max_col: "max",
-                'route_dir': np.unique})
+           .agg({max_col: "max"})
            .reset_index()
           )
     
