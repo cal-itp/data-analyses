@@ -79,13 +79,15 @@ def stop_times_aggregation_max_by_stop(
     
     am_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'am_peak']
                 .rename(columns = {"n_trips": "am_max_trips"})
-                .drop(columns="peak")
+                .drop(columns=["peak"])
                )
     pm_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'pm_peak']
                 .rename(columns = {"n_trips": "pm_max_trips"})
                 .drop(columns=["peak", "route_dir"])
                )
-    
+    if single_route_dir:
+        am_trips = am_trips.drop(columns=['route_id', 'direction_id'])
+        pm_trips = pm_trips.drop(columns=['route_id', 'direction_id'])
     max_trips_by_stop = pd.merge(
         am_trips, 
         pm_trips,
