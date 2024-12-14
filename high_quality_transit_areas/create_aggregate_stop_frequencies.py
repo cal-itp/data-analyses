@@ -21,7 +21,10 @@ def add_route_dir(
     stop_times: pd.DataFrame,
     analysis_date: str
 )-> pd.DataFrame:
-    
+    """
+    add route and direction to stop times,
+    also filter to bus and trolleybus only
+    """
     trips = helpers.import_scheduled_trips(
     analysis_date,
     columns = ["feed_key", "gtfs_dataset_key", "trip_id",
@@ -70,8 +73,10 @@ def get_explode_multiroute_only(
 ) -> pd.DataFrame:
     '''
     Shrink the problem space for the compute-intensive collinearity screen.
-    First, get stops with any chance of qualifying as a major stop/hq corr for
-    both single and multi-route aggregations.
+    First, get stops with any chance of qualifying as either a major stop/hq corr for
+    multi-route aggregations, and stops that already may qualify as an hq corr for single-route.
+    Be more selective for single route, since some stops may meet the lower frequency as single,
+    but if they could meet the higher as multi we want to check collinearity for those.
     Then get stops that appear in multi-route qualifiers only, these will go to
     further processing.
     '''
@@ -88,11 +93,13 @@ def get_explode_multiroute_only(
     print(f'{multi_only_explode.stop_id.nunique()} stops may qualify with multi-route aggregation')
     return multi_only_explode
 
-def accumulate_share_count(route_dir_exploded: pd.DataFrame):
+def accumulate_share_count(route_dir_exploded: pd.DataFrame) -> None:
     '''
     For use via pd.DataFrame.groupby.apply
     Accumulate the number of times each route_dir shares stops with
     each other in a dictionary (share_counts)
+    Note impure function -- initialize share_counts = {} before calling
+    Could be rewritten with iterrows if desired
     '''
     global share_counts
     rt_dir = route_dir_exploded.route_dir.to_numpy()
@@ -166,13 +173,16 @@ def check_stop(this_stop_route_dirs, qualify_pairs):
         this_stop_route_dirs.pop(-1)
         return check_stop(this_stop_route_dirs, qualify_pairs)
     
-def filter_qualifying_stops(one_stop_df, qualify_pairs):
-
-    one_stop_df = (one_stop_df >> group_by(_.route_dir)
+def filter_qualifying_stops(one_stop_st: pd.DataFrame, qualify_pairs: list) -> pd.DataFrame:
+    """
+    Given stop_times for a single stop, and list of route_dir pairs that can be aggregated,
+    filter this stop's stop_times to routes that can be aggregated 
+    """
+    one_stop_st = (one_stop_st >> group_by(_.route_dir)
                 >> mutate(route_dir_count = _.shape[0]) >> ungroup()
                 >> arrange(-_.route_dir_count)
                )
-    this_stop_route_dirs = (one_stop_df >> distinct(_.route_dir, _.route_dir_count)).route_dir.to_numpy() #  preserves sort order
+    this_stop_route_dirs = (one_stop_st >> distinct(_.route_dir, _.route_dir_count)).route_dir.to_numpy() #  preserves sort order
     aggregation_ok_route_dirs = check_stop(this_stop_route_dirs, qualify_pairs)
     return one_stop_df >> filter(_.route_dir.isin(aggregation_ok_route_dirs))
 
@@ -184,7 +194,7 @@ def collinear_filter_feed(
     frequency_thresholds: tuple
 ) -> pd.DataFrame:
     '''
-    
+    Apply collinearity filtering steps to one feed.
     '''
     
     st_could_qual, qualify_pairs = feed_level_filter(gtfs_dataset_key, multi_only_explode, qualify_dict, st_prepped, frequency_thresholds)
