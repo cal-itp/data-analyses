@@ -7,7 +7,7 @@ import pandas as pd
 import shapely
 
 from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import gtfs_schedule_wrangling, vp_transform     
+from segment_speed_utils import gtfs_schedule_wrangling, helpers, vp_transform     
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT, PROJECT_CRS
 from shared_utils import geo_utils
 
@@ -69,7 +69,7 @@ def new_merge_stop_vp_for_nearest_neighbor(
                    "vp_idx", "vp_primary_direction", 
                    "geometry"],
         **kwargs
-    ).to_crs(WGS84)
+    )
 
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
@@ -228,28 +228,32 @@ def filter_to_nearest2_vp(
     # Project these vp coords to shape geometry and see how far it is
     # from the stop's position on the shape
     nearest_vp_projected = np.asarray(
-        [shape_geometry.project(shapely.Point(i)) - stop_meters 
+        [shape_geometry.project(shapely.Point(i)) 
          for i in nearest_vp]
     )
 
     # Negative values are before the stop
     # Positive values are vp after the stop
-    before_indices = np.where(nearest_vp_projected < 0)[0]
-    after_indices = np.where(nearest_vp_projected > 0)[0]
+    before_indices = np.where(nearest_vp_projected - stop_meters < 0)[0]
+    after_indices = np.where(nearest_vp_projected - stop_meters > 0)[0]
     
     # Grab the closest vp before a stop (-1 means array was empty)
     if before_indices.size > 0:
-        before = nearest_vp_idx[before_indices][-1] 
+        before_idx = nearest_vp_idx[before_indices][-1] 
+        before_vp_meters = nearest_vp_projected[before_indices][-1]
     else:
-        before = -1
+        before_idx = -1
+        before_vp_meters = 0
         
     # Grab the closest vp after a stop (-1 means array was empty)
     if after_indices.size > 0:
-        after = nearest_vp_idx[after_indices][0]
+        after_idx = nearest_vp_idx[after_indices][0]
+        after_vp_meters = nearest_vp_projected[after_indices][0]
     else:
-        after = -1
+        after_idx = -1
+        after_vp_meters = 0
     
-    return before, after
+    return before_idx, after_idx, before_vp_meters, after_vp_meters
 
 
 def new_subset_arrays_to_valid_directions(
@@ -287,8 +291,8 @@ def new_subset_arrays_to_valid_directions(
         stop_geometry, 
         valid_vp_idx_arr,
     )
-    
-    before_vp, after_vp = filter_to_nearest2_vp(
+ 
+    before_vp, after_vp, before_meters, after_meters = filter_to_nearest2_vp(
         valid_vp_coords_line,
         shape_geometry,
         valid_vp_idx_arr,
@@ -296,4 +300,4 @@ def new_subset_arrays_to_valid_directions(
         nearest_indices,
     )
     
-    return before_vp, after_vp
+    return before_vp, after_vp, before_meters, after_meters
