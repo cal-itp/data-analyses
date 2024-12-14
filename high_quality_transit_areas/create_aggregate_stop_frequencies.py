@@ -3,6 +3,10 @@ from siuba import *
 import numpy as np
 import itertools
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
+from loguru import logger
+import sys
+import datetime
+
 
 from update_vars import (analysis_date, AM_PEAK, PM_PEAK, EXPORT_PATH, GCS_FILE_PATH, PROJECT_CRS,
 SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD, SHARED_STOP_THRESHOLD,
@@ -72,9 +76,9 @@ def get_explode_multiroute_only(
     further processing.
     '''
     #  note this is max -- still evaluate stops meeting the lower threshold as single-route in case they meet the higher threshold as multi
-    single_qual = single_route_aggregation >> filter(_.am_max_trips_hr >= max(frequency_thresholds), _.pm_max_trips_hr >= max(frequency_thresholds))
+    single_qual_max = single_route_aggregation >> filter(_.am_max_trips_hr >= max(frequency_thresholds), _.pm_max_trips_hr >= max(frequency_thresholds))
     multi_qual = multi_route_aggregation >> filter(_.am_max_trips_hr >= min(frequency_thresholds), _.pm_max_trips_hr >= min(frequency_thresholds))
-    multi_only = multi_qual >> anti_join(_, single_qual, on=['schedule_gtfs_dataset_key', 'stop_id'])
+    multi_only = multi_qual >> anti_join(_, single_qual_max, on=['schedule_gtfs_dataset_key', 'stop_id'])
     #  only consider route_dir that run at least hourly when doing multi-route aggregation, should reduce edge cases
     single_hourly = single_route_aggregation >> filter(_.am_max_trips_hr >= 1, _.pm_max_trips_hr >= 1)
     single_hourly = single_hourly.explode('route_dir')[['route_dir', 'schedule_gtfs_dataset_key', 'stop_id']]
@@ -183,18 +187,18 @@ def collinear_filter_feed(
     
     '''
     
-    st_could_qual, qualify_pairs = feed_level_filter(gtfs_dataset_key, multi_only_explode, qualify, st_prepped, frequency_thresholds)
+    st_could_qual, qualify_pairs = feed_level_filter(gtfs_dataset_key, multi_only_explode, qualify_dict, st_prepped, frequency_thresholds)
     st_qual_filter_1 = st_could_qual.groupby('stop_id').apply(filter_qualifying_stops, qualify_pairs=qualify_pairs)
     st_qual_filter_1 = st_qual_filter_1.reset_index(drop=True)
     if st_qual_filter_1.empty: return
-    trips_per_peak_qual_1 = create_aggregate_stop_frequencies.stop_times_aggregation_max_by_stop(st_qual_filter_1, analysis_date, single_route_dir=False)
+    trips_per_peak_qual_1 = stop_times_aggregation_max_by_stop(st_qual_filter_1, analysis_date, single_route_dir=False)
     trips_per_peak_qual_1 = trips_per_peak_qual_1 >> filter(_.am_max_trips_hr >= min(frequency_thresholds), _.pm_max_trips_hr >= min(frequency_thresholds))
     short_routes = trips_per_peak_qual_1.explode('route_dir') >> count(_.route_dir) >> filter(_.n < SHARED_STOP_THRESHOLD)
-    print('short routes, all_short stops:')
-    display(short_routes)
+    # print('short routes, all_short stops:')
+    # display(short_routes)
     trips_per_peak_qual_1['all_short'] = trips_per_peak_qual_1.route_dir.map(
         lambda x: np.array([True if y in list(short_routes.route_dir) else False for y in x]).all())
-    display(trips_per_peak_qual_1 >> filter(_.all_short)) #  stops where _every_ shared route has less than SHARED_STOP_THRESHOLD frequent stops (even after aggregation)
+    # display(trips_per_peak_qual_1 >> filter(_.all_short)) #  stops where _every_ shared route has less than SHARED_STOP_THRESHOLD frequent stops (even after aggregation)
     trips_per_peak_qual_2 = trips_per_peak_qual_1 >> filter(-_.all_short) >> select(-_.all_short)
     
     return trips_per_peak_qual_2
@@ -204,6 +208,7 @@ def filter_all_prepare_export(
     multi_only_explode: pd.DataFrame,
     qualify_dict: dict,
     st_prepped: pd.DataFrame,
+    max_arrivals_by_stop_single: pd.DataFrame,
     frequency_thresholds: tuple
 ):
     #  %%time 90 seconds (on default user) is not too bad! 
@@ -212,8 +217,10 @@ def filter_all_prepare_export(
         df = collinear_filter_feed(gtfs_dataset_key, multi_only_explode, qualify_dict,
                                    st_prepped, frequency_thresholds)
         all_collinear = pd.concat([df, all_collinear])
-        
-    single_only_export = single_qual >> anti_join(_, all_collinear, on = ['schedule_gtfs_dataset_key', 'stop_id'])
+    #  use min here in order to ensure we include stops that meet the lower threshold as single route
+    single_qual_min = max_arrivals_by_stop_single >> filter(_.am_max_trips_hr >= min((HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD)),
+                                     _.pm_max_trips_hr >= min((HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD)))
+    single_only_export = single_qual_min >> anti_join(_, all_collinear, on = ['schedule_gtfs_dataset_key', 'stop_id'])
     combined_export = pd.concat([single_only_export, all_collinear])
     combined_export = combined_export.explode('route_dir')
     combined_export['route_id'] = combined_export['route_dir'].str[:-2]
@@ -292,7 +299,7 @@ if __name__ == "__main__":
     st_prepped = helpers.import_scheduled_stop_times(
         analysis_date,
         get_pandas = True,
-    ).pipe(prep_stop_times)
+    ).pipe(add_route_dir, analysis_date).pipe(prep_stop_times)
     
     max_arrivals_by_stop_single = st_prepped.pipe(stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=True)
     max_arrivals_by_stop_multi = st_prepped.pipe(stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=False)
@@ -302,10 +309,10 @@ if __name__ == "__main__":
     multi_only_explode.groupby(['schedule_gtfs_dataset_key', 'stop_id']).apply(accumulate_share_count)
     qualify_dict = {key: share_counts[key] for key in share_counts.keys() if share_counts[key] >= SHARED_STOP_THRESHOLD}
     for key in KEYS_TO_DROP: qualify_dict.pop(key) #  will error if key not present, check if situation still present and update key if needed
-    feeds_to_filter = np.unique([key.split('__')[0] for key in qualify.keys()])
-
+    feeds_to_filter = np.unique([key.split('__')[0] for key in qualify_dict.keys()])
+    
     combined_export = filter_all_prepare_export(feeds_to_filter, multi_only_explode, qualify_dict,
-                                               st_prepped, (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD))
+                                st_prepped, max_arrivals_by_stop_single, (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD))
     combined_export.to_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
     
     end = datetime.datetime.now()
