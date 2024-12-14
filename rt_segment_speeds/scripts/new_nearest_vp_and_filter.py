@@ -1,5 +1,3 @@
-import dask_geopandas as dg
-import dask.dataframe as dd
 import datetime
 import geopandas as gpd
 import numpy as np
@@ -36,7 +34,6 @@ def stop_times_for_shape_segments(
                    "stop_id1", "stop_pair",
                    "st_trip_instance_key"],
         filters = [[
-            #("schedule_gtfs_dataset_key", "==", "7cc0cb1871dfd558f11a2885c145d144"),
             ("trip_instance_key", "in", rt_trips)
         ]]
     ).rename(columns = {"stop_id1": "stop_id"})
@@ -67,7 +64,7 @@ def stop_times_for_shape_segments(
 
 def new_nearest_neighbor_for_stop(
     analysis_date: str,
-    segment_type = segment_type,
+    segment_type: str,
     config_path = GTFS_DATA_DICT
 ):
     """
@@ -85,7 +82,7 @@ def new_nearest_neighbor_for_stop(
     
     gdf = neighbor.new_merge_stop_vp_for_nearest_neighbor(stop_times, analysis_date)
     
-    vp_before, vp_after = np.vectorize(
+    vp_before, vp_after, vp_before_m, vp_after_m = np.vectorize(
         neighbor.new_subset_arrays_to_valid_directions
     )(
         gdf.vp_primary_direction, 
@@ -100,8 +97,12 @@ def new_nearest_neighbor_for_stop(
     gdf2 = gdf.assign(
         before_vp_idx = vp_before,
         after_vp_idx = vp_after,
+        before_vp_meters = vp_before_m, 
+        after_vp_meters = vp_after_m
     )[trip_stop_cols + [
-        "shape_array_key", "stop_meters", "before_vp_idx", "after_vp_idx"]
+        "shape_array_key", "stop_meters", 
+        "before_vp_idx", "after_vp_idx",
+        "before_vp_meters", "after_vp_meters"]
     ]
         
     del gdf, stop_times
@@ -115,11 +116,20 @@ def new_nearest_neighbor_for_stop(
     return 
 
     
-'''
+
 if __name__ == "__main__":
     
-    from segment_speed_utils.project_vars import analysis_date_list
+    #from segment_speed_utils.project_vars import analysis_date_list
+    
     from dask import delayed, compute
+    LOG_FILE = "../logs/test.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    analysis_date_list = [rt_dates.DATES["sep2024"]]
+    segment_type = "stop_segments"
     
     delayed_dfs = [
         delayed(new_nearest_neighbor_for_stop)(
@@ -130,4 +140,3 @@ if __name__ == "__main__":
     ]
 
     [compute(i)[0] for i in delayed_dfs]
-'''
