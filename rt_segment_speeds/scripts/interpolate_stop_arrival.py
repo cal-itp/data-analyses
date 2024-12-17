@@ -1,4 +1,10 @@
 """
+Interpolate stop arrival 
+based on where the nearest 2 vp are 
+when stop position is between the 2 vp.
+
+Stop and vp geometries should be projected along the shape geometry,
+Use `stop_meters`, `prior_vp_meters`, `subseq_vp_meters`.
 """
 import datetime
 import geopandas as gpd
@@ -33,62 +39,6 @@ def get_vp_timestamps(
     return vp 
 
 
-def consolidate_surrounding_vp(
-    df: pd.DataFrame, 
-    group_cols: list,
-) -> pd.DataFrame:
-    """
-    This reshapes the df to wide so that each stop position has
-    a prior and subseq timestamp (now called vp_timestamp_local).
-    """
-    df = df.assign(
-        obs = (df.sort_values(group_cols + ["vp_idx"])
-               .groupby(group_cols, 
-                        observed=True, group_keys=False, dropna=False)
-               .cumcount()
-            )
-    )
-    
-    group_cols2 = group_cols + ["stop_meters"]
-    prefix_cols = ["vp_idx", "shape_meters"]
-    timestamp_cols = ["location_timestamp_local", "moving_timestamp_local"]
-    # since shape_meters actually might be decreasing as time progresses,
-    # (bus moving back towards origin of shape)
-    # we don't actually know that the smaller shape_meters is the first timestamp
-    # nor the larger shape_meters is the second timestamp.
-    # all we know is that stop_meters (stop) falls between these 2 shape_meters.
-    # sort by timestamp, and set the order to be 0, 1    
-    vp_before_stop = df.loc[df.obs==0][group_cols2 + prefix_cols + timestamp_cols]
-    vp_after_stop = df.loc[df.obs==1][group_cols2 + prefix_cols + timestamp_cols]
-    
-    # For the vp before the stop occurs, we want the maximum timestamp
-    # of the last position
-    # We want to keep the moving_timestamp (which is after it's dwelled)
-    vp_before_stop = vp_before_stop.assign(
-        prior_vp_timestamp_local = vp_before_stop.moving_timestamp_local,
-    ).rename(
-        columns = {**{i: f"prior_{i}" for i in prefix_cols}}
-    ).drop(columns = timestamp_cols)
-    
-    # For the vp after the stop occurs, we want the minimum timestamp
-    # of that next position
-    # Keep location_timetamp (before it dwells)
-    vp_after_stop = vp_after_stop.assign(
-        subseq_vp_timestamp_local = vp_after_stop.location_timestamp_local,
-    ).rename(
-        columns = {**{i: f"subseq_{i}" for i in prefix_cols}}
-    ).drop(columns = timestamp_cols)
-    
-    df_wide = pd.merge(
-        vp_before_stop,
-        vp_after_stop,
-        on = group_cols2,
-        how = "inner"
-    )
-
-    return df_wide
-
-
 def add_arrival_time(
     nearest_vp_input_file: str,
     vp_timestamp_file: str,
@@ -106,7 +56,11 @@ def add_arrival_time(
         f"{SEGMENT_GCS}{nearest_vp_input_file}_{analysis_date}.parquet"
     )
     
-    subset_vp = vp_filtered.vp_idx.unique()
+    subset_vp = np.unique(
+        np.concatenate(
+        (vp_filtered.prior_vp_idx.unique(), 
+         vp_filtered.subseq_vp_idx.unique())
+    )).tolist()
     
     vp_timestamps = get_vp_timestamps(
         vp_timestamp_file, 
@@ -116,10 +70,14 @@ def add_arrival_time(
     
     df = pd.merge(
         vp_filtered,
-        vp_timestamps,
-        on = "vp_idx",
+        vp_timestamps.add_prefix("prior_"),
+        on = "prior_vp_idx",
         how = "inner"
-    ).pipe(consolidate_surrounding_vp, group_cols)
+    ).merge(
+        vp_timestamps.add_prefix("subseq_"),
+        on = "subseq_vp_idx",
+        how = "inner"
+    )
         
     arrival_time_series = []
     
@@ -128,13 +86,13 @@ def add_arrival_time(
         stop_position = getattr(row, "stop_meters")
         
         projected_points = np.asarray([
-            getattr(row, "prior_shape_meters"), 
-            getattr(row, "subseq_shape_meters")
+            getattr(row, "prior_vp_meters"), 
+            getattr(row, "subseq_vp_meters")
         ])
         
         timestamp_arr = np.asarray([
-            getattr(row, "prior_vp_timestamp_local"),
-            getattr(row, "subseq_vp_timestamp_local"),
+            getattr(row, "prior_moving_timestamp_local"),
+            getattr(row, "subseq_location_timestamp_local"),
         ])
         
         
@@ -215,12 +173,13 @@ def enforce_monotonicity_and_interpolate_across_stops(
     )
     
     # Subset to trips that have at least 1 obs that violates monotonicity
-    trips_with_one_false = (df.groupby("trip_instance_key")
-                        .agg({"arrival_time_sec_monotonic": "min"})
-                        .reset_index()
-                        .query('arrival_time_sec_monotonic==0')
-                        .trip_instance_key
-                        )
+    trips_with_one_false = (
+        df.groupby("trip_instance_key")
+        .agg({"arrival_time_sec_monotonic": "min"})
+        .reset_index()
+        .query('arrival_time_sec_monotonic==0')
+        .trip_instance_key
+    )
     
     # Set arrival times to NaT if it's not monotonically increasing
     mask = df.arrival_time_sec_monotonic == False 
@@ -254,7 +213,7 @@ def interpolate_stop_arrivals(
     dict_inputs = config_path[segment_type]
     trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
     USABLE_VP_FILE = dict_inputs["stage1"]
-    INPUT_FILE = dict_inputs["stage2b"]
+    INPUT_FILE = dict_inputs["stage2c"]
     STOP_ARRIVALS_FILE = dict_inputs["stage3"]
 
     start = datetime.datetime.now()
