@@ -4,6 +4,7 @@ All kinds of GTFS schedule table wrangling.
 import dask.dataframe as dd
 import geopandas as gpd
 import pandas as pd
+import numpy as np
 
 from typing import Literal, Union
 
@@ -85,16 +86,21 @@ def exclude_scheduled_operators(
 def stop_arrivals_per_stop(
     stop_times: pd.DataFrame,
     group_cols: list,
-    count_col: str = "trip_id"
+    count_col: str = "trip_id",
+    route_dir_array: bool = False,
 ) -> pd.DataFrame:
     """
     Aggregate stop_times by list of grouping columns 
     and count number of stop arrivals.
     """
+    if route_dir_array:
+        agg_dict = {count_col: 'count', 'route_dir': np.unique}
+    else:
+        agg_dict = {count_col: 'count'}
     arrivals_by_stop = (stop_times
                         .groupby(group_cols, 
                                  observed=True, group_keys=False)
-                        .agg({count_col: 'count'})
+                        .agg(agg_dict)
                         .reset_index()
                         .rename(columns = {count_col: "n_arrivals"})          
                      )    
