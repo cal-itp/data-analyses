@@ -82,7 +82,7 @@ def new_nearest_neighbor_for_stop(
     
     gdf = neighbor.new_merge_stop_vp_for_nearest_neighbor(stop_times, analysis_date)
     
-    vp_before, vp_after, vp_before_m, vp_after_m = np.vectorize(
+    vp_before, vp_after, vp_before_meters, vp_after_meters = np.vectorize(
         neighbor.new_subset_arrays_to_valid_directions
     )(
         gdf.vp_primary_direction, 
@@ -95,14 +95,14 @@ def new_nearest_neighbor_for_stop(
     )
 
     gdf2 = gdf.assign(
-        before_vp_idx = vp_before,
-        after_vp_idx = vp_after,
-        before_vp_meters = vp_before_m, 
-        after_vp_meters = vp_after_m
+        prior_vp_idx = vp_before,
+        subseq_vp_idx = vp_after,
+        prior_vp_meters = vp_before_meters, 
+        subseq_vp_meters = vp_after_meters
     )[trip_stop_cols + [
         "shape_array_key", "stop_meters", 
-        "before_vp_idx", "after_vp_idx",
-        "before_vp_meters", "after_vp_meters"]
+        "prior_vp_idx", "subseq_vp_idx",
+        "prior_vp_meters", "subseq_vp_meters"]
     ]
         
     del gdf, stop_times
