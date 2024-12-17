@@ -8,6 +8,8 @@ Takes <1 min to run.
 import datetime
 import geopandas as gpd
 import pandas as pd
+import numpy as np
+import shapely
 import sys
 
 from loguru import logger
@@ -86,26 +88,17 @@ def stop_times_aggregation_max_by_stop(
         trips,
         on = ["feed_key", "trip_id"]
     )
-            
+    stop_times.direction_id = stop_times.direction_id.fillna(0).astype('int64').astype(str)
+    stop_times['route_dir'] = stop_times[['route_id', 'direction_id']].agg('_'.join, axis=1)  
     # Aggregate how many trips are made at that stop by departure hour
-    trips_per_hour = gtfs_schedule_wrangling.stop_arrivals_per_stop(
+    trips_per_peak_period = gtfs_schedule_wrangling.stop_arrivals_per_stop(
         stop_times,
         group_cols = stop_cols + trips_per_hour_cols,
         count_col = "trip_id"
     ).rename(columns = {"n_arrivals": "n_trips"})
     
-    # Count based on fixed peak periods, take average in each
-    am_trips = max_trips_by_group(
-        trips_per_hour[trips_per_hour.peak == 'am_peak'], 
-        group_cols = stop_cols,
-        max_col = "n_trips"
-    ).rename(columns = {"n_trips": "am_max_trips"})
-    
-    pm_trips = max_trips_by_group(
-        trips_per_hour[trips_per_hour.peak == 'pm_peak'], 
-        group_cols = stop_cols,
-        max_col = "n_trips"
-    ).rename(columns = {"n_trips": "pm_max_trips"})
+    am_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'am_peak']).rename(columns = {"n_trips": "am_max_trips"})
+    pm_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'pm_peak']).rename(columns = {"n_trips": "pm_max_trips"})
     
     max_trips_by_stop = pd.merge(
         am_trips, 
@@ -183,7 +176,7 @@ def hqta_segment_keep_one_stop(
     # Merge in and keep max trips observation
     # Since there might be duplicates still, where multiple stops all 
     # share 2 trips for that segment, do a drop duplicates at the end 
-    max_trip_cols = ["hqta_segment_id", "am_max_trips", "pm_max_trips"]
+    max_trip_cols = ["hqta_segment_id", "am_max_trips_hr", "pm_max_trips_hr"]
     
     segment_to_stop_unique = pd.merge(
         segment_to_stop_times,
@@ -203,6 +196,28 @@ def hqta_segment_keep_one_stop(
     
     return segment_to_stop_gdf
 
+def find_inconclusive_directions(hqta_segments: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    '''
+    Where individual segments loop tightly, segment_direction becomes arbitrary.
+    Find these cases and mark segment_direction as "inconclusive"
+    OK to keep in possible HQ corridors, but shouldn't be used for bus intersection major stops
+    '''
+    circuitousness_ratio_threshold = 3
+    
+    hqta_segments['length'] = hqta_segments.geometry.apply(lambda x: x.length)
+    hqta_segments['start'] = hqta_segments.geometry.apply(lambda x: shapely.Point(x.coords[0]))
+    hqta_segments['end'] = hqta_segments.geometry.apply(lambda x: shapely.Point(x.coords[-1]))
+    hqta_segments['st_end_dist'] = hqta_segments.apply(lambda x: shapely.distance(x.start, x.end),axis=1)
+    hqta_segments['circuitousness_ratio'] = ((hqta_segments.length / hqta_segments.st_end_dist)
+                                             .replace(np.inf, 10)
+                                             .clip(upper=5))
+    hqta_segments.segment_direction = hqta_segments.apply(
+        lambda x: x.segment_direction if x.circuitousness_ratio < circuitousness_ratio_threshold else 'inconclusive', axis=1)
+    calculation_cols = ['length', 'start', 'end',
+                       'st_end_dist', 'circuitousness_ratio']
+    hqta_segments = hqta_segments.drop(columns=calculation_cols)
+    return hqta_segments
+
 
 def sjoin_stops_and_stop_times_to_hqta_segments(
     hqta_segments: gpd.GeoDataFrame, 
@@ -221,7 +236,14 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     Since frequency thresholds for hq corrs and major stops have diverged,
     need to track both categories
     """
-    # Draw 50 m buffer to capture stops around hqta segments
+    # Only keep segments for routes that have at least one stop meeting frequency threshold
+    # About 50x smaller, so should both slash false positives and enhance speed
+    st_copy = stop_times.copy().drop_duplicates(subset=['schedule_gtfs_dataset_key', 'route_id'])
+    hqta_segments = (hqta_segments.merge(st_copy[['schedule_gtfs_dataset_key', 'route_id']], on=['schedule_gtfs_dataset_key', 'route_id']))
+    stop_times = stop_times.drop(columns=['route_id']).drop_duplicates() # prefer route_id from segments in future steps
+    # Identify ambiguous direction segments to exclude from intersection steps
+    hqta_segments = find_inconclusive_directions(hqta_segments)
+    # Draw buffer to capture stops around hqta segments
     hqta_segments2 = hqta_segments.assign(
         geometry = hqta_segments.geometry.buffer(buffer_size)
     )
@@ -261,15 +283,18 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
-    # takes 1 min
-    max_arrivals_by_stop = helpers.import_scheduled_stop_times(
-        analysis_date,
-        get_pandas = True,
-    ).pipe(prep_stop_times).pipe(stop_times_aggregation_max_by_stop, analysis_date)
+#  shift to new script which will add collinearity checks
+#     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
+#     # takes 1 min
+#     max_arrivals_by_stop = helpers.import_scheduled_stop_times(
+#         analysis_date,
+#         get_pandas = True,
+#     ).pipe(prep_stop_times).pipe(stop_times_aggregation_max_by_stop, analysis_date)
     
-    max_arrivals_by_stop.to_parquet(
-        f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
+#     max_arrivals_by_stop.to_parquet(
+#         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
+    
+# new step 1!
     
     ## (2) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
@@ -299,7 +324,7 @@ if __name__ == "__main__":
     
     end = datetime.datetime.now()
     logger.info(
-        f"B2_sjoin_stops_to_segments {analysis_date} "
+        f"B3_sjoin_stops_to_segments {analysis_date} "
         f"execution time: {end - start}")
     
     #client.close()
