@@ -31,18 +31,23 @@ def standardize_operator_info_for_exports(
         f"{SCHED_GCS}{CROSSWALK_FILE}_{date}.parquet",
         columns = [
             "schedule_gtfs_dataset_key", "name", "base64_url", 
-            "organization_source_record_id", "organization_name"
+            "organization_source_record_id", "organization_name",
+            "caltrans_district",
         ],
         filters = [[("schedule_gtfs_dataset_key", "in", public_feeds)]]
     )
     
+    # Checked whether we need a left merge to keep stops outside of CA
+    # that may not have caltrans_district
+    # and inner merge is fine. All operators are assigned a caltrans_district
+    # so Amtrak / FlixBus stops have values populated
     df2 = pd.merge(
         df,
         crosswalk,
         on = "schedule_gtfs_dataset_key",
         how = "inner"
     )
-        
+    
     return df2
     
     
