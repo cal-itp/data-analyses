@@ -57,6 +57,6 @@ Export stop-level frequencies that are a composite of single-route results, and 
 
 ## `sjoin_stops_to_segments.py`
 
-* Formerly, this evaluates segments from all routes against all stops. Since it is a spatial join, this meant that infrequent routes running perpendicular to frequent routes often grabbed the cross street stop from the frequent route, creating an erroneous, isolated frequent segment and often an erroneous major transit stop.
+* Formerly, this evaluated segments from all routes against all stops. Since it is a spatial join, this meant that infrequent routes running perpendicular to frequent routes often grabbed the cross street stop from the frequent route, creating an erroneous, isolated frequent segment and often an erroneous major transit stop.
 * Now, we first filter segments to only segments from routes with at least one stop-level frequency meeting the standard. This screens out entirely infrequent routes and vastly reduces the risk of false positives.
 * We have also reduced the segment to stop buffer (`SEGMENT_BUFFER_METERS`) to the extent possible.
