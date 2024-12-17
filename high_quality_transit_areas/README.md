@@ -31,8 +31,11 @@ For more details, see [links](#High-Quality-Transit-Areas-Relevant-Statutes) to 
 * Corridors are cut for each operator-route-direction every 1,250 meters.
    * Stops have a 50 meter buffer drawn around them and are spatially joined to corridors.
    * For each 1,250 meter corridor segment, the highest frequency stop is counted (if there are multiple stops).
-* We count _all_ trips at the highest frequency stop in each corridor segment, even if they're marketed as different "routes".
-    * For example, if Route A serves the stop twice an hour, and Route B twice an hour, we consider the stop frequency to be 4 trips/hour, qualifying it as a high quality transit corridor and potentially a major bus stop (if an intersecting corridor is present)
+* We count trips at the highest frequency stop in each corridor segment. Where routes providing similar service share a stop, we combine their trips for frequency calculation. However, we don't combine trips across routes where those routes do not provide similar service. We currently do this by counting the number of stops that different routes share in a given direction.
+    * For example, suppose that Route A and Route B share many stops in the same direction. They may be two routes coming together to provide combined service on a corridor while branching elsewhere, or a local and rapid route on the same corridor.
+    * In that case if Route A serves the stop twice an hour, and Route B twice an hour, we consider the stop frequency to be 4 trips/hour, qualifying it as a high quality transit corridor and potentially a major bus stop (if an intersecting corridor is present)
+    * If, however, Route A and Route B only shared one or two stops, for example starting together at a transit center but going off in different directions, we would not combine them for stop frequency calculations.
+    * See [technical_notes.md](technical_notes.md) for additional details.
     
 ### Why Not one "Route" at a Time?
 

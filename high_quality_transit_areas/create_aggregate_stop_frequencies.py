@@ -10,7 +10,7 @@ import datetime
 
 from update_vars import (analysis_date, AM_PEAK, PM_PEAK, EXPORT_PATH, GCS_FILE_PATH, PROJECT_CRS,
 SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD, SHARED_STOP_THRESHOLD,
-KEYS_TO_DROP)
+ROUTE_COLLINEARITY_KEYS_TO_DROP)
 
 am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
 pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
@@ -90,7 +90,7 @@ def get_explode_multiroute_only(
     multi_only_explode = (multi_only[['schedule_gtfs_dataset_key', 'stop_id', 'route_dir']].explode('route_dir'))
     multi_only_explode = multi_only_explode.merge(single_hourly, on = ['route_dir', 'schedule_gtfs_dataset_key', 'stop_id'])
     multi_only_explode = multi_only_explode.sort_values(['schedule_gtfs_dataset_key','stop_id', 'route_dir']) #  sorting crucial for next step
-    print(f'{multi_only_explode.stop_id.nunique()} stops may qualify with multi-route aggregation')
+    # print(f'{multi_only_explode.stop_id.nunique()} stops may qualify with multi-route aggregation')
     return multi_only_explode
 
 def accumulate_share_count(route_dir_exploded: pd.DataFrame) -> None:
@@ -138,9 +138,9 @@ def feed_level_filter(
     st_prepped = st_prepped >> filter(_.schedule_gtfs_dataset_key == gtfs_dataset_key,
                                       _.stop_id.isin(stops_to_eval.stop_id),
                                      )
-    print(f'{st_prepped.shape}')
+    # print(f'{st_prepped.shape}')
     st_to_eval = st_prepped >> filter(_.route_dir.isin(any_appearance))
-    print(f'{st_to_eval.shape}')
+    # print(f'{st_to_eval.shape}')
     #  cut down problem space by checking if stops still could qual after filtering for any appearance
     min_rows = min(frequency_thresholds) * len(both_peaks_hrs)
     st_could_qual = (st_to_eval >> group_by(_.stop_id)
@@ -148,7 +148,7 @@ def feed_level_filter(
      >> ungroup()
      >> filter(_.could_qualify)
     )
-    print(f'{st_could_qual.shape}')
+    # print(f'{st_could_qual.shape}')
     return st_could_qual, qualify_pairs
 
 def check_stop(this_stop_route_dirs, qualify_pairs):
@@ -221,6 +221,9 @@ def filter_all_prepare_export(
     max_arrivals_by_stop_single: pd.DataFrame,
     frequency_thresholds: tuple
 ):
+    '''
+    Apply collinearity 
+    '''
     #  %%time 90 seconds (on default user) is not too bad! 
     all_collinear = pd.DataFrame()
     for gtfs_dataset_key in feeds_to_filter:
@@ -318,7 +321,8 @@ if __name__ == "__main__":
     share_counts = {}
     multi_only_explode.groupby(['schedule_gtfs_dataset_key', 'stop_id']).apply(accumulate_share_count)
     qualify_dict = {key: share_counts[key] for key in share_counts.keys() if share_counts[key] >= SHARED_STOP_THRESHOLD}
-    for key in KEYS_TO_DROP: qualify_dict.pop(key) #  will error if key not present, check if situation still present and update key if needed
+    #  will error if key not present, check if situation still present and update key if needed
+    for key in ROUTE_COLLINEARITY_KEYS_TO_DROP: qualify_dict.pop(key)
     feeds_to_filter = np.unique([key.split('__')[0] for key in qualify_dict.keys()])
     
     combined_export = filter_all_prepare_export(feeds_to_filter, multi_only_explode, qualify_dict,
