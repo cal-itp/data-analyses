@@ -7,7 +7,7 @@ apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
 oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 
 
-analysis_date_list = [rt_dates.DATES["nov2024"]]
+analysis_date_list = [rt_dates.DATES["dec2024"]]
 # analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
