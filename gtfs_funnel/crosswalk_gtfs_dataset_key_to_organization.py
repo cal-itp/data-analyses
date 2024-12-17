@@ -59,7 +59,7 @@ def load_ntd(year: int) -> pd.DataFrame:
     Select certain columns.
     """
     df = (
-        tbls.mart_ntd.dim_annual_ntd_agency_information()
+        tbls.mart_ntd.dim_annual_agency_information()
         >> filter(_.year == year, _.state == "CA", _._is_current == True)
         >> select(
             _.number_of_state_counties,
