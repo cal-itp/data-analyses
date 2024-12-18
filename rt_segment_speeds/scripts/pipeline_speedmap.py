@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     logger.remove()
 
-
+    
     LOG_FILE = "../logs/interpolate_stop_arrival.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     logger.remove()
     
-        
+    
     t0 = datetime.datetime.now()
     delayed_dfs = [
         delayed(concatenate_speedmap_proxy_arrivals_with_remaining)(
@@ -140,3 +140,4 @@ if __name__ == "__main__":
     [compute(i)[0] for i in delayed_dfs]
     
     logger.remove()
+    
