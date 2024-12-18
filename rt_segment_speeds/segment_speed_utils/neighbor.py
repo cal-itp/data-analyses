@@ -179,7 +179,7 @@ def two_nearest_neighbor_near_stop(
     )
  
     before_vp, after_vp, before_meters, after_meters = filter_to_nearest2_vp(
-        valid_vp_idx_array[nearest_indices], # subset of coords in nn
+        valid_vp_coords_array[nearest_indices], # subset of coords in nn
         shape_geometry,
         valid_vp_idx_array[nearest_indices], # subset of vp_idx in nn
         stop_meters,
