@@ -4,6 +4,7 @@ using scipy KDTree.
 """
 import datetime
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import sys
 
@@ -158,7 +159,7 @@ def nearest_neighbor_for_stop(
     gdf = neighbor.merge_stop_vp_for_nearest_neighbor(stop_times, analysis_date)
     
     vp_before, vp_after, vp_before_meters, vp_after_meters = np.vectorize(
-        neighbor.subset_arrays_to_valid_directions
+        neighbor.two_nearest_neighbor_near_stop
     )(
         gdf.vp_primary_direction, 
         gdf.vp_geometry, 
