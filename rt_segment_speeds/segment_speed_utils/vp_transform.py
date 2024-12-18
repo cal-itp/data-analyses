@@ -54,18 +54,3 @@ def condense_point_geom_to_line(
           )
     
     return df3
-
-
-def sort_by_vp_idx_order(
-    vp_idx_array: np.ndarray, 
-    geometry_array: np.ndarray,
-    timestamp_array: np.ndarray,
-) -> tuple[np.ndarray]:    
-    
-    sort_order = np.argsort(vp_idx_array, axis=0)
-    
-    vp_sorted = np.take_along_axis(vp_idx_array, sort_order, axis=0)
-    geom_sorted = np.take_along_axis(geometry_array, sort_order, axis=0)
-    timestamp_sorted = np.take_along_axis(timestamp_array, sort_order, axis=0)
-    
-    return vp_sorted, geom_sorted, timestamp_sorted
