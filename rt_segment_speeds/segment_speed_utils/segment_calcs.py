@@ -1,3 +1,6 @@
+"""
+Functions related to calculating segment speeds.
+"""
 import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
@@ -150,3 +153,29 @@ def interpolate_stop_arrival_time(
     return np.interp(
         stop_position, np.asarray(shape_meters_arr), timestamp_arr
     ).astype("datetime64[s]")
+
+
+def rolling_window_make_array(
+    df: pd.DataFrame, 
+    window: int, 
+    rolling_col: str
+) -> pd.DataFrame:
+    """
+    Interpolated stop arrival times are checked
+    to see if they are monotonically increasing.
+    If it isn't, it gets recalculated based on 
+    stop_meters (the stop's position) relative to
+    other stop arrival times.
+    
+    https://stackoverflow.com/questions/47482009/pandas-rolling-window-to-return-an-array
+    """
+    df[f"rolling_{rolling_col}"] = [
+        np.asarray(window) for window in 
+        df.groupby("trip_instance_key")[rolling_col].rolling(
+            window = window, center=True)
+    ]
+    
+    is_monotonic_series = np.vectorize(monotonic_check)(df[f"rolling_{rolling_col}"])
+    df[f"{rolling_col}_monotonic"] = is_monotonic_series
+    
+    return df
