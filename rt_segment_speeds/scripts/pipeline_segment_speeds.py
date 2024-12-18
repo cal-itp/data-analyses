@@ -17,7 +17,7 @@ from update_vars import GTFS_DATA_DICT
 if __name__ == "__main__":
     
     from segment_speed_utils.project_vars import analysis_date_list    
-
+    
     segment_type = "stop_segments"
     print(f"segment_type: {segment_type}")
     
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     logger.remove()
 
-
+    
     LOG_FILE = "../logs/speeds_by_segment_trip.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
@@ -77,3 +77,4 @@ if __name__ == "__main__":
     [compute(i)[0] for i in delayed_dfs]
 
     logger.remove()
+    
