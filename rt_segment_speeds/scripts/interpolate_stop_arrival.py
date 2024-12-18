@@ -17,8 +17,7 @@ from loguru import logger
 from pathlib import Path
 from typing import Literal, Optional
 
-from segment_speed_utils import (array_utils, helpers, 
-                                 segment_calcs)
+from segment_speed_utils import helpers, segment_calcs
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import PROJECT_CRS, SEGMENT_TYPES
 from shared_utils import rt_dates
@@ -166,7 +165,7 @@ def enforce_monotonicity_and_interpolate_across_stops(
     df = segment_calcs.convert_timestamp_to_seconds(
         df, ["arrival_time"])
 
-    df = array_utils.rolling_window_make_array(
+    df = segment_calcs.rolling_window_make_array(
         df, 
         window = 3, rolling_col = "arrival_time_sec"
     )

@@ -15,7 +15,7 @@ def merge_stop_vp_for_nearest_neighbor(
     stop_times: gpd.GeoDataFrame,
     analysis_date: str,
     **kwargs
-):
+) -> gpd.GeoDataFrame:
     """
     Merge stop times file with vp.
     vp gdf has been condensed so that all the vp coords
@@ -64,7 +64,7 @@ def merge_stop_vp_for_nearest_neighbor(
 
 
 def find_nearest_points(
-    vp_coords_line: np.ndarray, 
+    vp_coords_array: np.ndarray, 
     target_stop: shapely.Point, 
     vp_idx_array: np.ndarray,
 ) -> np.ndarray:
@@ -79,7 +79,7 @@ def find_nearest_points(
     (ex: nearest 5 vp to each stop).
     """
     indices = geo_utils.nearest_snap(
-        vp_coords_line, 
+        vp_coords_array, 
         target_stop, 
         k_neighbors = 5
     )
@@ -89,17 +89,17 @@ def find_nearest_points(
     # if we want 10 nearest neighbors and 8th, 9th, 10th are all
     # the same result, the 8th will have a result, then 9th and 10th will
     # return the length of the array (which is out-of-bounds)
+    # using vp_coords_array keeps too many points (is this because coords can be dupes?)
     indices2 = indices[indices < vp_idx_array.size]
     
     return indices2
 
 
 def filter_to_nearest2_vp(
-    vp_coords_line: np.ndarray,
+    nearest_vp_coords_array: np.ndarray,
     shape_geometry: shapely.LineString,
-    vp_idx_array: np.ndarray,
+    nearest_vp_idx_array: np.ndarray,
     stop_meters: float,
-    indices_of_nearest: np.ndarray,
 ) -> tuple[np.ndarray]:
     """
     Take the indices that are the nearest.
@@ -109,16 +109,11 @@ def filter_to_nearest2_vp(
     Filter down to the nearest 2 vp before and after a stop.
     If there isn't one before or after, a value of -1 is returned.
     """
-    # Subset the array of vp coords and vp_idx_array with 
-    # the indices that show the nearest k neighbors.
-    nearest_vp = vp_coords_line[indices_of_nearest]
-    nearest_vp_idx = vp_idx_array[indices_of_nearest]
-    
     # Project these vp coords to shape geometry and see how far it is
     # from the stop's position on the shape
     nearest_vp_projected = np.asarray(
         [shape_geometry.project(shapely.Point(i)) 
-         for i in nearest_vp]
+         for i in nearest_vp_coords_array]
     )
 
     # Negative values are before the stop
@@ -126,26 +121,28 @@ def filter_to_nearest2_vp(
     before_indices = np.where(nearest_vp_projected - stop_meters < 0)[0]
     after_indices = np.where(nearest_vp_projected - stop_meters > 0)[0]
     
+    # Set missing values when we're not able to find a nearest neighbor result
+    # use -1 as vp_idx (since this is not present in vp_usable)
+    # and zeroes for meters
+    before_idx = -1
+    after_idx = -1
+    before_vp_meters = 0
+    after_vp_meters = 0
+    
     # Grab the closest vp before a stop (-1 means array was empty)
     if before_indices.size > 0:
-        before_idx = nearest_vp_idx[before_indices][-1] 
+        before_idx = nearest_vp_idx_array[before_indices][-1] 
         before_vp_meters = nearest_vp_projected[before_indices][-1]
-    else:
-        before_idx = -1
-        before_vp_meters = 0
-        
+   
     # Grab the closest vp after a stop (-1 means array was empty)
     if after_indices.size > 0:
-        after_idx = nearest_vp_idx[after_indices][0]
+        after_idx = nearest_vp_idx_array[after_indices][0]
         after_vp_meters = nearest_vp_projected[after_indices][0]
-    else:
-        after_idx = -1
-        after_vp_meters = 0
     
     return before_idx, after_idx, before_vp_meters, after_vp_meters
 
 
-def subset_arrays_to_valid_directions(
+def two_nearest_neighbor_near_stop(
     vp_direction_array: np.ndarray,
     vp_geometry: shapely.LineString,
     vp_idx_array: np.ndarray,
@@ -170,23 +167,22 @@ def subset_arrays_to_valid_directions(
     valid_indices = (vp_direction_array != opposite_direction).nonzero()   
 
     # These are vp coords where index values of opposite direction is excluded
-    valid_vp_coords_line = np.array(vp_geometry.coords)[valid_indices]
+    valid_vp_coords_array = np.array(vp_geometry.coords)[valid_indices]
     
     # These are the subset of vp_idx values where opposite direction is excluded
-    valid_vp_idx_arr = np.asarray(vp_idx_array)[valid_indices]  
+    valid_vp_idx_array = np.asarray(vp_idx_array)[valid_indices]  
     
     nearest_indices = find_nearest_points(
-        valid_vp_coords_line, 
+        valid_vp_coords_array, 
         stop_geometry, 
-        valid_vp_idx_arr,
+        valid_vp_idx_array,
     )
  
     before_vp, after_vp, before_meters, after_meters = filter_to_nearest2_vp(
-        valid_vp_coords_line,
+        valid_vp_idx_array[nearest_indices], # subset of coords in nn
         shape_geometry,
-        valid_vp_idx_arr,
+        valid_vp_idx_array[nearest_indices], # subset of vp_idx in nn
         stop_meters,
-        nearest_indices,
     )
     
     return before_vp, after_vp, before_meters, after_meters
