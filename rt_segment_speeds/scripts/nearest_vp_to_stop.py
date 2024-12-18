@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Literal, Optional
 
 from calitp_data_analysis.geography_utils import WGS84
-from calitp_data_analysis import utils
 from segment_speed_utils import helpers, neighbor
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import SEGMENT_TYPES
@@ -155,31 +154,40 @@ def nearest_neighbor_for_stop(
     else:
         print(f"{segment_type} is not valid")
     
-    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(
-        stop_times, analysis_date)
-        
-    results = neighbor.add_nearest_neighbor_result_array(gdf, analysis_date)
-          
-    # Keep columns from results that are consistent across segment types 
-    # use trip_stop_cols as a way to uniquely key into a row 
-    keep_cols = trip_stop_cols + [
-        "shape_array_key",
-        "stop_geometry",
-        "nearest_vp_arr"
-    ]
     
-    utils.geoparquet_gcs_export(
-        results[keep_cols],
-        SEGMENT_GCS,
-        EXPORT_FILE,
+    gdf = neighbor.merge_stop_vp_for_nearest_neighbor(stop_times, analysis_date)
+    
+    vp_before, vp_after, vp_before_meters, vp_after_meters = np.vectorize(
+        neighbor.subset_arrays_to_valid_directions
+    )(
+        gdf.vp_primary_direction, 
+        gdf.vp_geometry, 
+        gdf.vp_idx,
+        gdf.stop_geometry,
+        gdf.stop_primary_direction,
+        gdf.shape_geometry,
+        gdf.stop_meters
     )
+
+    gdf2 = gdf.assign(
+        prior_vp_idx = vp_before,
+        subseq_vp_idx = vp_after,
+        prior_vp_meters = vp_before_meters, 
+        subseq_vp_meters = vp_after_meters
+    )[trip_stop_cols + [
+        "shape_array_key", "stop_meters", 
+        "prior_vp_idx", "subseq_vp_idx",
+        "prior_vp_meters", "subseq_vp_meters"]
+    ]
+        
+    del gdf, stop_times
+    
+    gdf2.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}.parquet")
     
     end = datetime.datetime.now()
     logger.info(f"nearest neighbor for {segment_type} "
-                f"{analysis_date}: {end - start}")
-    
-    del gdf, stop_times, results
-
+                f"{analysis_date}: {end - start}")   
+          
     return
 
 '''
