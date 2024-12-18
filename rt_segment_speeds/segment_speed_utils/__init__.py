@@ -1,5 +1,4 @@
 from . import (
-    array_utils,
     gtfs_schedule_wrangling,
     helpers,
     metrics,
@@ -12,7 +11,6 @@ from . import (
 )
 
 __all__ = [
-    "array_utils",
     "gtfs_schedule_wrangling",
     "helpers",
     "metrics",
