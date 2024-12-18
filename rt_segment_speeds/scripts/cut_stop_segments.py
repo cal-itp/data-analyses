@@ -64,6 +64,12 @@ def stop_times_with_shape(
         subset="geometry"
     ).reset_index(drop=True).set_geometry("geometry")
     
+    # Add a dummy arrival_time that is needed in gtfs_segments that is not NaT
+    # or else it'll throw error in gtfs_segments.create_segments. Use zero instead.
+    df = df.assign(
+        arrival_time = 0
+    )
+    
     return df
 
 
