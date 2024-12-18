@@ -213,7 +213,7 @@ def interpolate_stop_arrivals(
     dict_inputs = config_path[segment_type]
     trip_stop_cols = [*dict_inputs["trip_stop_cols"]]
     USABLE_VP_FILE = dict_inputs["stage1"]
-    INPUT_FILE = dict_inputs["stage2c"]
+    INPUT_FILE = dict_inputs["stage2"]
     STOP_ARRIVALS_FILE = dict_inputs["stage3"]
 
     start = datetime.datetime.now()
