@@ -146,3 +146,4 @@
 2024-11-25 20:57:30.167 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:176 - speeds by segment for rt_stop_times 2024-07-17: 0:01:39.810442
 2024-11-25 21:08:39.293 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:176 - speeds by segment for speedmap_segments 2024-07-17: 0:01:39.807326
 2024-12-17 17:45:32.983 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:176 - speeds by segment for stop_segments 2024-12-11: 0:01:45.602657
+2024-12-18 10:54:39.517 | INFO     | stop_arrivals_to_speed:calculate_speed_from_stop_arrivals:176 - speeds by segment for stop_segments 2024-12-11: 0:01:44.792095

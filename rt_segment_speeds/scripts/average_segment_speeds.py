@@ -267,7 +267,7 @@ if __name__ == "__main__":
     ROUTE_DIR_COLS = [*dict_inputs["route_dir_cols"]]
     STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]
     
-    TIME_OF_DAY_FILE = dict_inputs["shape_stop_single_segment"] + "_test"
+    TIME_OF_DAY_FILE = dict_inputs["shape_stop_single_segment"]
     ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
 
     for analysis_date in analysis_date_list:
