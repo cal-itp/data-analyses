@@ -29,7 +29,7 @@
 <body style>
     <h1>Cal-ITP Data Analysis Portfolio</h1>
     {% for site in sites -%}
-    <p><a href="/{{ site.name }}/">{{ site.title }}</a></p>
+    <p><a href="{{ site.name }}/index.html">{{ site.title }}</a></p>
     {% endfor %}
 
     <p>Source code can be found <a href="https://github.com/cal-itp/data-analyses/">on GitHub.</a></p>

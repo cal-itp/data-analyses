@@ -26,7 +26,8 @@ assert os.getcwd().endswith("data-analyses"), "this script must be run from the 
 GOOGLE_ANALYTICS_TAG_ID = "G-JCX3Z8JZJC"
 PORTFOLIO_DIR = Path("./portfolio/")
 SITES_DIR = PORTFOLIO_DIR / Path("sites")
-GCS_BUCKET = os.getenv("GCS_BUCKET", "calitp-data-analyses-portfolio")
+PROD_GCS_BUCKET = os.getenv("GCS_BUCKET", "calitp-data-analyses-portfolio")
+DRAFT_GCS_BUCKET = os.getenv("GCS_BUCKET", "calitp-data-analyses-portfolio-draft")
 
 SiteChoices = enum.Enum('SiteChoices', {
     f.replace(".yml", ""): f.replace(".yml", "")
@@ -324,24 +325,26 @@ def index(
             typer.echo(f"writing out to {fname}")
             f.write(env.get_template(template).render(sites=sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
 
+    bucket_path = PROD_GCS_BUCKET if prod else DRAFT_GCS_BUCKET
+
+    if alias:
+        bucket_path += f"/{alias}"
+
     args = [
         "gcloud",
         "storage",
         "cp",
         "--recursive",
-        str(PORTFOLIO_DIR / "index"),
-        f"gs://{GCS_BUCKET}",
+        str(PORTFOLIO_DIR / "index" / "*"),
+        f"gs://{bucket_path}",
     ]
-
-    if alias:
-        args.append(f"--alias={alias}")
-
-    if prod:
-        args.append("--prod")
 
     if deploy:
         typer.secho(f"deploying with args {args}", fg=typer.colors.GREEN)
         subprocess.run(args).check_returncode()
+
+        https_root = f"https://storage.googleapis.com/{bucket_path}"
+        typer.secho(f"deployed {'to production' if prod else 'as a draft'}: {https_root}/index.html", fg=typer.colors.GREEN)
 
 
 @app.command()
@@ -359,6 +362,7 @@ def build(
     site: SiteChoices,
     continue_on_error: bool = False,
     deploy: bool = DEPLOY_OPTION,
+    prod: bool = False,
     execute_papermill: bool = typer.Option(
         True,
         help="If false, will skip calls to papermill.",
@@ -423,16 +427,21 @@ def build(
             ans = input(f"{len(errors)} encountered during papermill; enter that number to continue: ")
             assert int(ans) == len(errors)
 
+        bucket_path = PROD_GCS_BUCKET if prod else DRAFT_GCS_BUCKET
+
         args = [
             "gcloud",
             "storage",
             "cp",
             "--recursive",
             str(site_output_dir / "_build/html"),
-            f"gs://{GCS_BUCKET}/{site.name}",
+            f"gs://{bucket_path}/{site.name}",
         ]
         typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
         subprocess.run(args).check_returncode()
+
+        https_root = f"https://storage.googleapis.com/{bucket_path}"
+        typer.secho(f"Deployed {'to production' if prod else 'as a draft'}: {https_root}/{site.name}/index.html", fg=typer.colors.GREEN)
 
     if errors:
         typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
