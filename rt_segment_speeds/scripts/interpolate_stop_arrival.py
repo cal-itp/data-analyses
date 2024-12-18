@@ -95,7 +95,6 @@ def add_arrival_time(
             getattr(row, "subseq_location_timestamp_local"),
         ])
         
-        
         interpolated_arrival = segment_calcs.interpolate_stop_arrival_time(
             stop_position, projected_points, timestamp_arr)
         
