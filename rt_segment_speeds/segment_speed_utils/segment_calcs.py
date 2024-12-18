@@ -7,6 +7,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+from numba import jit
 from typing import Union
 
 from shared_utils.rt_utils import MPH_PER_MPS
@@ -155,6 +156,19 @@ def interpolate_stop_arrival_time(
     ).astype("datetime64[s]")
 
 
+@jit(nopython=True)
+def monotonic_check(arr: np.ndarray) -> bool:
+    """
+    For an array, check if it's monotonically increasing. 
+    https://stackoverflow.com/questions/4983258/check-list-monotonicity
+    """
+    diff_arr = np.diff(arr)
+    
+    if np.all(diff_arr > 0):
+        return True
+    else:
+        return False
+    
 def rolling_window_make_array(
     df: pd.DataFrame, 
     window: int, 
