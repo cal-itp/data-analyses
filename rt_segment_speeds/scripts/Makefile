@@ -12,8 +12,8 @@ prep_roads:
 	python proxy_road_stop_times.py    
     
 speeds_pipeline:
-#	make segmentize
-#	python pipeline_segment_speeds.py
+	make segmentize
+	python pipeline_segment_speeds.py
 	python average_segment_speeds.py  
 
 rt_stop_times_pipeline:
