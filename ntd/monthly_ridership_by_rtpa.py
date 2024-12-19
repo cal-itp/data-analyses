@@ -99,7 +99,7 @@ def save_rtpa_outputs(
     upload_to_public: bool = False
 ):
     """
-    Export an excel for each RTPA, adds new tabs for: READ ME & agg by agency, tos and mode. then writes into a folder.
+    Export an excel for each RTPA, adds a READ ME tab, then writes into a folder.
     Zip that folder. 
     Upload zipped file to GCS.
     """
@@ -119,46 +119,50 @@ def save_rtpa_outputs(
     'Pct Change 1Yr': "Percent Change in 1 Year UPT",
     'Tos Full': "Type of Service Full Name"
 }
+    print("creating individual RTPA excel files")
     
     for i in df["RTPA"].unique():
+        
+        print(f"creating excel file for: {i}")
+        
         # Filename should be snakecase
         rtpa_snakecase = i.replace(' ', '_').lower()
+        
+        #insertng readme cover sheet, 
+        cover_sheet = pd.read_excel("./cover_sheet_template.xlsx", index_col = "**NTD Monthly Ridership by RTPA**")
+        cover_sheet.to_excel(
+            f"./{year}_{month}/{rtpa_snakecase}.xlsx", sheet_name = "README")
 
-        (df[df["RTPA"] == i]
+        rtpa_data =(df[df["RTPA"] == i]
          .sort_values("ntd_id")
          #got error from excel not recognizing timezone, made list to include dropping "execution_ts" column
-         .drop(columns = [
-             "_merge",
-             "execution_ts"
-         ])
+         .drop(columns = ["_merge","execution_ts"])
          #cleaning column names
          .rename(columns=lambda x: x.replace("_"," ").title().strip())
          #rename columns
          .rename(columns=col_dict)
-         #updated to `to_excel`, added sheet_name 
-         .to_excel(
-            f"./{year}_{month}/{rtpa_snakecase}.xlsx", sheet_name = "RTPA Ridership Data",
-            index = False)
-         
-        )
-        #insertng readme cover sheet, 
-        cover_sheet = pd.read_excel("./cover_sheet_template.xlsx", index_col = "NTD Monthly Ridership by RTPA")
-        
+                   )
+        #column lists for aggregations
         agency_cols = ["ntd_id", "agency", "RTPA"]
         mode_cols = ["mode", "RTPA"]
         tos_cols = ["tos", "RTPA"]
 
-        by_agency_long = sum_by_group(df, agency_cols)
-        by_mode_long = sum_by_group(df, mode_cols)
-        by_tos_long = sum_by_group(df, tos_cols)
+        # Creating aggregations
+        by_agency_long = sum_by_group((df[df["RTPA"] == i]), agency_cols)                                 
+        by_mode_long = sum_by_group((df[df["RTPA"] == i]), mode_cols)
+        by_tos_long = sum_by_group((df[df["RTPA"] == i]), tos_cols)
         
+        #writing pages to excel fil
         with pd.ExcelWriter(f"./{year}_{month}/{rtpa_snakecase}.xlsx", mode ="a") as writer:
-            cover_sheet.to_excel(writer, sheet_name = "READ ME")
-            by_agency_long.to_excel(writer, sheet_name = "Aggregated by Agency")
-            by_mode_long.to_excel(writer, sheet_name = "Aggregated by Mode")
-            by_tos_long.to_excel(writer, sheet_name = "Aggregated by TOS")
-        
+            rtpa_data.to_excel(writer, sheet_name = "RTPA Ridership Data", index=False)
+            by_agency_long.to_excel(writer, sheet_name = "Aggregated by Agency", index=False)
+            by_mode_long.to_excel(writer, sheet_name = "Aggregated by Mode", index=False)
+            by_tos_long.to_excel(writer, sheet_name = "Aggregated by TOS", index=False)
+    
+    print("zipping all excel files")
+    
     shutil.make_archive(f"./{year}_{month}", "zip", f"{year}_{month}")
+    
     print("Zipped folder")
     
     fs.upload(
