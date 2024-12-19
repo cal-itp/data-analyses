@@ -55,13 +55,7 @@ def concatenate_trip_segment_speeds(
     
     SPEED_FILE = dict_inputs["stage4"]
     MAX_SPEED = dict_inputs["max_speed"]
-    cols = helpers.unique_list(
-            OPERATOR_COLS + SHAPE_STOP_COLS + 
-            ROUTE_DIR_COLS + STOP_PAIR_COLS + [
-                "trip_instance_key", "speed_mph", 
-                "meters_elapsed", "sec_elapsed", 
-                "time_of_day"])
-    print(cols)
+
     df = time_series_utils.concatenate_datasets_across_dates(
         SEGMENT_GCS, 
         SPEED_FILE,
@@ -72,16 +66,16 @@ def concatenate_trip_segment_speeds(
             ROUTE_DIR_COLS + STOP_PAIR_COLS + [
                 "trip_instance_key", "speed_mph", 
                 "meters_elapsed", "sec_elapsed", 
-                "time_of_day", "service_date"]),
+                "time_of_day", "arrival_time"]),
         filters = [[("speed_mph", "<=", MAX_SPEED)]],
         **kwargs
     ).pipe(
         gtfs_schedule_wrangling.add_peak_offpeak_column
     )
-    print(df.columns)
-    df = df.pipe(
+    df = df.rename(columns={'arrival_time':'service_date'}
+    ).pipe(
         gtfs_schedule_wrangling.add_weekday_weekend_column
-    )
+    ) #  drop service_date?
     print("concatenated files") 
     
     return df
