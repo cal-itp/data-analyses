@@ -18,7 +18,7 @@ from segment_speed_utils.project_vars import (
 
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 
-ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['nov2024'])
+ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['dec2024'])
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 GEOJSON_SUBFOLDER = f'segment_speeds_{ANALYSIS_DATE}/'
 
