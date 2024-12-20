@@ -55,7 +55,7 @@ def concatenate_trip_segment_speeds(
     
     SPEED_FILE = dict_inputs["stage4"]
     MAX_SPEED = dict_inputs["max_speed"]
-    
+
     df = time_series_utils.concatenate_datasets_across_dates(
         SEGMENT_GCS, 
         SPEED_FILE,
@@ -66,14 +66,16 @@ def concatenate_trip_segment_speeds(
             ROUTE_DIR_COLS + STOP_PAIR_COLS + [
                 "trip_instance_key", "speed_mph", 
                 "meters_elapsed", "sec_elapsed", 
-                "time_of_day"]),
+                "time_of_day", "arrival_time"]),
         filters = [[("speed_mph", "<=", MAX_SPEED)]],
         **kwargs
     ).pipe(
         gtfs_schedule_wrangling.add_peak_offpeak_column
+    )
+    df = df.rename(columns={'arrival_time':'service_date'}
     ).pipe(
         gtfs_schedule_wrangling.add_weekday_weekend_column
-    )
+    ) #  drop service_date?
     print("concatenated files") 
     
     return df
@@ -267,7 +269,7 @@ if __name__ == "__main__":
     ROUTE_DIR_COLS = [*dict_inputs["route_dir_cols"]]
     STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]
     
-    TIME_OF_DAY_FILE = dict_inputs["shape_stop_single_segment"] + "_test"
+#    TIME_OF_DAY_FILE = dict_inputs["shape_stop_single_segment"] + "_test"
     ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
 
     for analysis_date in analysis_date_list:
@@ -280,14 +282,14 @@ if __name__ == "__main__":
             weighted_averages = True
         )
         
-        segment_averages(
-            [analysis_date], 
-            segment_type, 
-            group_cols = (OPERATOR_COLS + ROUTE_DIR_COLS + 
-                          STOP_PAIR_COLS + ["time_of_day"]),
-            export_file = TIME_OF_DAY_FILE,
-            weighted_averages = False
-        )
+#        segment_averages(
+#            [analysis_date], 
+#            segment_type, 
+#            group_cols = (OPERATOR_COLS + ROUTE_DIR_COLS + 
+#                          STOP_PAIR_COLS + ["time_of_day"]),
+#            export_file = TIME_OF_DAY_FILE,
+#            weighted_averages = False
+#        )
         
     '''
     from segment_speed_utils.project_vars import weeks_available

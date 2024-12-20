@@ -59,11 +59,11 @@ def load_ntd(year: int) -> pd.DataFrame:
     Select certain columns.
     """
     df = (
-        tbls.mart_ntd.dim_annual_ntd_agency_information()
+        tbls.mart_ntd.dim_annual_agency_information()
         >> filter(_.year == year, _.state == "CA", _._is_current == True)
         >> select(
             _.number_of_state_counties,
-            _.uza_name,
+            _.primary_uza_name,
             _.density,
             _.number_of_counties_with_service,
             _.state_admin_funds_expended,
@@ -71,7 +71,7 @@ def load_ntd(year: int) -> pd.DataFrame:
             _.population,
             _.service_area_pop,
             _.subrecipient_type,
-            _.primary_uza,
+            _.primary_uza_code,
             _.reporter_type,
             _.organization_type,
             _.agency_name,

@@ -184,7 +184,7 @@ def filter_qualifying_stops(one_stop_st: pd.DataFrame, qualify_pairs: list) -> p
                )
     this_stop_route_dirs = (one_stop_st >> distinct(_.route_dir, _.route_dir_count)).route_dir.to_numpy() #  preserves sort order
     aggregation_ok_route_dirs = check_stop(this_stop_route_dirs, qualify_pairs)
-    return one_stop_df >> filter(_.route_dir.isin(aggregation_ok_route_dirs))
+    return one_stop_st >> filter(_.route_dir.isin(aggregation_ok_route_dirs))
 
 def collinear_filter_feed(
     gtfs_dataset_key: str,
