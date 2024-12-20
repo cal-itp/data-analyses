@@ -49,7 +49,10 @@ def sjoin_against_other_operators(
     """
     Spatial join of the in group vs the out group. 
     This could be the operator vs other operators, 
-    or a route vs other routes.
+    or a route vs other routes. This is currently
+    east-west vs north-south segments, which requires
+    the additional step of excluding intersections
+    resulting from the same route changing direction.
     
     Create a crosswalk / pairwise table showing these links.
     
@@ -57,7 +60,7 @@ def sjoin_against_other_operators(
     computationally expensive,
     so we want to do it on fewer rows. 
     """
-    route_cols = ["hqta_segment_id", "segment_direction"]
+    route_cols = ["hqta_segment_id", "segment_direction", "route_key"]
     
     s1 = gpd.sjoin(
         in_group_df[route_cols + ["geometry"]], 
@@ -65,6 +68,8 @@ def sjoin_against_other_operators(
         how = "inner",
         predicate = "intersects"
     ).drop(columns = ["index_right", "geometry"])
+    
+    s1 = s1[s1["route_key_left"] != s1["route_key_right"]]
             
     route_pairs = (
         s1.rename(
