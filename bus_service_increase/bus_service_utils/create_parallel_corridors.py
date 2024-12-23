@@ -31,8 +31,8 @@ def process_transit_routes(
     ## Clean transit routes
     df = df.assign(
         route_length = df.to_crs(
-            geography_utils.CA_StatePlane).geometry.length
-    ).to_crs(geography_utils.CA_StatePlane)
+            geography_utils.CA_NAD83Albers_ft).geometry.length
+    ).to_crs(geography_utils.CA_NAD83Albers_ft)
     
     # Get it down to route_id and pick longest shape
     df2 = (df.sort_values(operator_cols + ["route_id", "route_length"], 
@@ -63,7 +63,7 @@ def prep_highway_directions_for_dissolve(
     '''
     df = (gpd.read_parquet("gs://calitp-analytics-data/data-analyses/"
                            "shared_data/state_highway_network.parquet")
-          .to_crs(geography_utils.CA_StatePlane))
+          .to_crs(geography_utils.CA_NAD83Albers_ft))
     
     # Get dummies for direction
     # Can make data wide instead of long
