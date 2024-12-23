@@ -12,8 +12,7 @@ from loguru import logger
 from pathlib import Path
 from typing import Literal, Optional
 
-from calitp_data_analysis.geography_utils import WGS84
-from segment_speed_utils import helpers, neighbor
+from segment_speed_utils import helpers, neighbor, vp_transform
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import SEGMENT_TYPES
 
@@ -82,7 +81,6 @@ def stop_times_for_all_trips(
                    "geometry"],
         with_direction = True,
         get_pandas = True,
-        crs = WGS84
     )
     
     return stop_times
@@ -157,7 +155,10 @@ def nearest_neighbor_for_stop(
     
     
     gdf = neighbor.merge_stop_vp_for_nearest_neighbor(stop_times, analysis_date)
-    
+    gdf = gdf.assign(
+        opposite_direction = gdf.stop_primary_direction.map(vp_transform.OPPOSITE_DIRECTIONS)
+    )
+
     vp_before, vp_after, vp_before_meters, vp_after_meters = np.vectorize(
         neighbor.two_nearest_neighbor_near_stop
     )(
@@ -165,31 +166,30 @@ def nearest_neighbor_for_stop(
         gdf.vp_geometry, 
         gdf.vp_idx,
         gdf.stop_geometry,
-        gdf.stop_primary_direction,
+        gdf.opposite_direction,
         gdf.shape_geometry,
         gdf.stop_meters
     )
 
-    gdf2 = gdf.assign(
+    gdf = gdf[trip_stop_cols + ["shape_array_key"]]
+    
+    gdf = gdf.assign(
         prior_vp_idx = vp_before,
         subseq_vp_idx = vp_after,
         prior_vp_meters = vp_before_meters, 
         subseq_vp_meters = vp_after_meters
-    )[trip_stop_cols + [
-        "shape_array_key", "stop_meters", 
-        "prior_vp_idx", "subseq_vp_idx",
-        "prior_vp_meters", "subseq_vp_meters"]
-    ]
+    )
         
-    del gdf, stop_times
+    del stop_times
     
-    gdf2.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}.parquet")
+    gdf.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}.parquet")
     
     end = datetime.datetime.now()
     logger.info(f"nearest neighbor for {segment_type} "
                 f"{analysis_date}: {end - start}")   
           
     return
+
 
 '''
 if __name__ == "__main__":
